@@ -146,6 +146,7 @@ document_tests! {
     controls_tree_view => "/Controls/TreeView.xaml";
     controls_tree_view_item => "/Controls/TreeViewItem.xaml";
     controls_winui_controls => "/Controls/WinUIControls.xaml";
+    controls_info_badge => "/Controls/InfoBadge.xaml";
     // B5: navigation, pages, tabs and command bar
     controls_carousel => "/Controls/Carousel.xaml";
     controls_carousel_page => "/Controls/CarouselPage.xaml";

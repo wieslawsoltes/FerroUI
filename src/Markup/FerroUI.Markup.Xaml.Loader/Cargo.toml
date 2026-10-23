@@ -17,6 +17,15 @@ autoexamples = false
 [lib]
 path = "lib.rs"
 
+[[test]]
+name = "winui_migration"
+path = "tests/winui_migration.rs"
+
+[[test]]
+name = "winui_compiled"
+path = "tests/winui_compiled.rs"
+required-features = ["emitter"]
+
 [features]
 default = ["runtime"]
 # The run-time back end: the run-time type system, the AST interpreter (`ferroui_markup_xaml_loader::runtime`)
@@ -47,12 +56,16 @@ ferroui-markup-xaml = { workspace = true, optional = true }
 # writes and reads. The file and its model are owned by the crate the framework crates export their
 # type models with, which links nothing of the framework. Only with the `compiler` feature.
 ferroui-build-scan = { workspace = true, optional = true }
+# The opt-in WinUI migration pass validates XML and retains original source ranges.
+roxmltree = { workspace = true }
 
 [dev-dependencies]
 # The unit tests of the emitter of Rust source run with the crate's own tests (`rust_emitter` is built
 # for them with the `runtime` feature), which needs the accessor table of the base crate.
 ferroui-base = { workspace = true, features = ["compiler-metadata"] }
 ferroui-build-scan = { workspace = true }
+# Focused generated-code tests exercise the same native controls as the runtime backend.
+ferroui-controls = { workspace = true, features = ["testing"] }
 
 # The group of the crate in the table of the README (docs/release.md).
 [package.metadata.release]

@@ -27,4 +27,16 @@ impl RangeValuePatternIdentifiers {
         static PROPERTY: AutomationProperty = AutomationProperty::new();
         &PROPERTY
     }
+
+    /// Identifies the `IRangeValueProvider::small_change` automation property.
+    pub fn small_change_property() -> &'static AutomationProperty {
+        static PROPERTY: AutomationProperty = AutomationProperty::new();
+        &PROPERTY
+    }
+
+    /// Identifies the `IRangeValueProvider::large_change` automation property.
+    pub fn large_change_property() -> &'static AutomationProperty {
+        static PROPERTY: AutomationProperty = AutomationProperty::new();
+        &PROPERTY
+    }
 }

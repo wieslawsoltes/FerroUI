@@ -62,6 +62,9 @@ jobs:
       # FerroUI.Base and FerroUI.Controls (docs/declarative-ui.md, section 4).
       - name: Generated view builders are up to date
         run: python3 scripts/generate_view_builders.py --check
+      # Windows project-path casing must retain every theme item on Linux as well.
+      - name: WinUI theme scanner regressions
+        run: python3 -m unittest discover -s scripts/winui-theme -p 'test_*.py' -v
       # Thread-local variables are declared with ferroui_base::ferro_thread_local!, which on Android
       # is a slot of one table per thread: a thread_local! there takes one of the 128 keys of the C
       # library (docs/porting/android-platform.md, section 5.1). The allow-list is in the script.

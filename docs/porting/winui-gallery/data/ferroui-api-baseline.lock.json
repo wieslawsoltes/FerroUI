@@ -1,0 +1,10 @@
+{
+  "commit": "86b6b4ab41669bf830fba681504a4ee94752a4e6",
+  "repository": "https://github.com/wieslawsoltes/FerroUI",
+  "schema_version": 1,
+  "scope": "Source-declaration compatibility only. Reviewed WinUI handmaps and behavioral evidence remain independent.",
+  "snapshot": "ferroui-api-baseline.json",
+  "snapshot_sha256": "a01f2712b732d6e2f321e67b6f20d419be3db3b02e75c61dfcfdb182fe5204f3",
+  "src_tree": "9f15137e5ce93d8b9b72f6c1520e4de2aad3a31e",
+  "tree": "9fbb4576a0a60ca81a18606195f165d47b12be8b"
+}

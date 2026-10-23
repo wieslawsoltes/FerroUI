@@ -1,0 +1,19 @@
+{
+  "repositories": {
+    "gallery": {
+      "commit": "14061eeac21c38ae99f302edf3d9136d4f652c4c",
+      "url": "https://github.com/microsoft/WinUI-Gallery"
+    },
+    "winui": {
+      "commit": "a71c42bd3e352060e5f5ecf3b5e1a98f8a745809",
+      "url": "https://github.com/microsoft/microsoft-ui-xaml"
+    }
+  },
+  "schema_version": 1,
+  "snapshots": {
+    "gallery-pages.json": "6996ccad0da8c32a97c037e39ceda496b298ff56f951fee6e88ffdda287293da",
+    "gallery-usage.json": "b437882849a034518396d2d79397c6ceb648c1bfd32479295e2cc5f9dca5f057",
+    "source-files.json": "487b6c404c861cf2bd1bbcc97c02555281e7706a0d68e92cf1ec2b02b803bbc4",
+    "upstream-api.json": "18174690ec96912a937edd09c4df5a4bbf0c76d91485aab21141451277ac18ab"
+  }
+}

@@ -1,0 +1,19 @@
+<!-- Adapted from the pinned Microsoft WinUI Gallery; see ../NOTICE.md. -->
+<StackPanel xmlns="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Spacing="12">
+  <TextBlock Text="Color Contrast Checker" FontSize="22"/>
+  <Grid ColumnDefinitions="*,*" ColumnSpacing="16">
+    <StackPanel Spacing="6">
+      <TextBlock Text="Text color (#RRGGBB)"/>
+      <TextBox x:Name="TextColor" Text="#000000" AutomationProperties.Name="Text color in RGB hexadecimal"/>
+    </StackPanel>
+    <StackPanel Grid.Column="1" Spacing="6">
+      <TextBlock Text="Background color (#RRGGBB)"/>
+      <TextBox x:Name="BackgroundColor" Text="#FFFFFF" AutomationProperties.Name="Background color in RGB hexadecimal"/>
+    </StackPanel>
+  </Grid>
+  <TextBlock x:Name="ContrastRatio" Text="21.00:1" FontSize="24"/>
+  <TextBlock x:Name="ContrastChecks" TextWrapping="Wrap"/>
+  <Border x:Name="ContrastPreview" Background="White" Padding="20" CornerRadius="6">
+    <TextBlock x:Name="ContrastText" Foreground="Black" Text="The quick brown fox jumped over the lazy fox." FontSize="18" TextWrapping="Wrap"/>
+  </Border>
+</StackPanel>

@@ -46,8 +46,17 @@ import os
 import re
 import sys
 
+import rust_paths
+
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 OUTPUT = os.path.join(ROOT, "src", "FerroUI.View", "generated", "builders.rs")
+
+# These contracts have an established type with the same simple name. The
+# synthetic model name is internal; generated signatures use the actual public
+# Rust path. Only the declaring module and imports of that path are qualified.
+SCOPED_PATHS = {
+    "ferroui_controls::navigation::NavigationEventArgs": "FrameNavigationEventArgs",
+}
 
 # The crates whose classes get builders: (source directory, crate name in paths).
 CRATES = [
@@ -203,12 +212,59 @@ def read_paths(model, directory, crate):
         if path.startswith("ferro_rust_paths"):
             continue
         name = path.split("::")[-1]
-        model.add_path(name, f"{crate}::{path}")
+        public_path = f"{crate}::{path}"
+        model.add_path(SCOPED_PATHS.get(public_path, name), public_path)
+
+
+def qualify_scoped_names(text, crate, relative_path):
+    """Keep same-name contracts separate using their declaration/import scope."""
+    module = relative_path.replace(os.sep, "/").removesuffix(".rs").split("/")
+    if module[-1] in ("lib", "mod"):
+        module.pop()
+    aliases = {}
+    for public_path, alias in SCOPED_PATHS.items():
+        segments = public_path.split("::")
+        if segments[:-1] == [crate] + module:
+            aliases[segments[-1]] = alias
+
+    for statement in rust_paths.top_level_statements(rust_paths.strip_comments(text)):
+        _, statement = rust_paths.split_attributes(statement)
+        imported = re.match(r"(?:pub(?:\([^)]*\))?\s+)?use\s+(.+);$", statement, re.S)
+        if not imported:
+            continue
+        for segments, local in rust_paths.parse_use_tree(imported.group(1)):
+            if not segments:
+                continue
+            if segments[0] == "crate":
+                segments = [crate] + segments[1:]
+            elif segments[0] in ("self", "super"):
+                current = [crate] + module
+                while segments and segments[0] in ("self", "super"):
+                    if segments.pop(0) == "super":
+                        current.pop()
+                segments = current + segments
+            imported_path = "::".join(segments)
+            if local == "*":
+                for public_path, alias in SCOPED_PATHS.items():
+                    if public_path.rsplit("::", 1)[0] == imported_path:
+                        aliases[public_path.rsplit("::", 1)[1]] = alias
+            elif imported_path in SCOPED_PATHS:
+                aliases[local] = SCOPED_PATHS[imported_path]
+
+    for public_path, alias in SCOPED_PATHS.items():
+        paths = [public_path]
+        if public_path.startswith(crate + "::"):
+            paths.append("crate::" + public_path[len(crate) + 2:])
+        for path in paths:
+            text = re.sub(r"\b" + re.escape(path) + r"\b", alias, text)
+    return re.sub(r"\b[A-Z]\w*\b", lambda match: aliases.get(match.group(0), match.group(0)), text)
 
 
 def read_classes(model, directory, crate):
     for path in rust_files(os.path.join(ROOT, directory)):
         text = strip_comments(read(path))
+        relative_path = os.path.relpath(path, os.path.join(ROOT, directory))
+        text = qualify_scoped_names(text, crate, relative_path)
         for match in re.finditer(r"ferro_class!\s*[({]\s*([A-Z]\w*)\s*:\s*([A-Z]\w*)", text):
             model.bases[match.group(1)] = match.group(2)
             model.crate_of[match.group(1)] = crate
@@ -350,7 +406,8 @@ def generate(model, crates=None, title="FerroUI.Base and FerroUI.Controls", atta
             function = ident(snake(name))
             if function not in used_functions:
                 used_functions.add(function)
-                functions.append(f"pub use {path};\n")
+                alias = f" as {name}" if path.split("::")[-1] != name else ""
+                functions.append(f"pub use {path}{alias};\n")
                 functions.append(f"impl ViewClass for {path} {{\n    fn create() -> ferroui_base::Ref<Self> {{\n        <{path}>::new()\n    }}\n}}\n")
                 functions.append(f"/// Starts an element of [`{name}`]({path}).\npub fn {function}() -> El<{path}> {{\n    El::new()\n}}\n")
         inherited = set(names_of(model.bases[name])) if model.bases.get(name) else set()

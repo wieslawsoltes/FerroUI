@@ -1,5 +1,15 @@
 //! Primitive controls: the building blocks of the control set.
 
+mod info_badge_template_settings;
+mod info_bar_panel;
+mod info_bar_template_settings;
+mod progress_ring_template_settings;
+
+pub use info_badge_template_settings::InfoBadgeTemplateSettings;
+pub use info_bar_panel::InfoBarPanel;
+pub use info_bar_template_settings::InfoBarTemplateSettings;
+pub use progress_ring_template_settings::ProgressRingTemplateSettings;
+
 mod headered_content_control;
 mod i_scroll_snap_points_info;
 pub mod popup_positioning;

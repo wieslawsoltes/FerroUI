@@ -1298,8 +1298,10 @@ version = "0.4.0"
 dependencies = [
  "ferroui-base",
  "ferroui-build-scan",
+ "ferroui-controls",
  "ferroui-markup",
  "ferroui-markup-xaml",
+ "roxmltree 0.20.0",
  "xamlx",
 ]
 
@@ -5549,6 +5551,22 @@ dependencies = [
  "sample-support",
  "sample-testing",
  "windows-sys 0.61.2",
+]
+
+[[package]]
+name = "winui-gallery"
+version = "0.4.0"
+dependencies = [
+ "ferroui-base",
+ "ferroui-controls",
+ "ferroui-controls-color-picker",
+ "ferroui-desktop",
+ "ferroui-harfbuzz",
+ "ferroui-headless",
+ "ferroui-markup-xaml",
+ "ferroui-markup-xaml-loader",
+ "ferroui-skia",
+ "ferroui-themes-winui",
 ]
 
 [[package]]

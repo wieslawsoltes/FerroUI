@@ -22,7 +22,9 @@ colour provider of the theme; a key is not defined twice in the same scope; ever
 the Fluent theme has its default control themes in the port or is pending in a batch.
 
 It also counts the deviations of docs/porting/winui-theme/DEVIATIONS.md (the table rows of each
-`## <control>` section) and the items each waiver covers.
+`## <control>` section) and the items each waiver covers. Additive native controls are
+documented separately from the key inventory, using `native_additions` in controls.json;
+their implementation notes do not promote missing source resource declarations to ported.
 
 Writes docs/porting/winui-theme/TRACKING.md, docs/porting/winui-theme/tracking.json and
 docs/porting/winui-theme/PROGRESS.md, the mapping tables of docs/porting/winui-theme.md (between
@@ -38,12 +40,14 @@ unresolved references or duplicate keys.
 """
 
 import argparse
+import hashlib
 import json
 import os
 import re
 import subprocess
 import sys
 from collections import Counter, defaultdict
+from pathlib import Path
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import winui_sources as w  # noqa: E402
@@ -255,6 +259,10 @@ def evaluate(root):
         "waivers": waiver_counts,
         "deviations": {section: len(ids) for section, ids in deviations.items()},
         "winui_targets": controls["winui"],
+        "native_additions": [dict(entry, theme_document_sha256={
+            path: hashlib.sha256(Path(REPOSITORY, w.PORT_CRATE, path).read_bytes()).hexdigest()
+            for path in entry["theme_documents"]
+        }) for entry in controls.get("native_additions", [])],
     }
 
 
@@ -262,6 +270,8 @@ def summary_row(name, counts):
     total = sum(counts.values())
     done = counts.get("ported", 0) + counts.get("waived", 0)
     percent = f"{100 * done / total:.0f}%" if total else "-"
+    if total and done < total and percent == "100%":
+        percent = f"{100 * done / total:.1f}%"
     return f"| {name} | {total} | {counts.get('ported', 0)} | {counts.get('waived', 0)} | {counts.get('pending', 0)} | {percent} |"
 
 
@@ -293,6 +303,33 @@ def render_tracking(data):
     lines.append("")
     lines.append(f"Unresolved resource references in the port: {len(data['unresolved_references'])}. Keys defined twice in one scope: {len(data['duplicate_keys'])}.")
     lines.append("")
+
+    additions = data.get("native_additions", [])
+    if additions:
+        lines += ["## Additive WinUI controls", ""]
+        lines.append(
+            "These controls use the ordinary `FerroUI.Controls` namespace and preserve existing "
+            "Avalonia-compatible control identities. Their native implementation is recorded separately "
+            "from the Fluent control-document count and the source resource-key inventory. A matching key "
+            "does not establish complete behavioral, platform accessibility or visual parity; resource "
+            "lookups alone do not count as source dictionary definitions."
+        )
+        lines.append("")
+        for entry in additions:
+            lines += [f"### `{entry['control']}`", ""]
+            lines.append(
+                f"Implementation: [`{entry['implementation']}`](../../../{entry['implementation']}); "
+                f"control-source pin `{entry['source_commit']}`."
+            )
+            lines.append("")
+            if entry["theme_documents"]:
+                lines.append("Theme documents: " + ", ".join(
+                    f"[`{document}`](../../../src/FerroUI.Themes.WinUI/{document}) "
+                    f"(SHA-256 `{entry['theme_document_sha256'][document]}`)"
+                    for document in entry["theme_documents"]
+                ) + ".")
+                lines.append("")
+            lines += [entry["coverage"], "", "Remaining: " + entry["remaining"], ""]
 
     lines += ["## FerroUI controls by batch", ""]
     for batch, title in data["batches"].items():

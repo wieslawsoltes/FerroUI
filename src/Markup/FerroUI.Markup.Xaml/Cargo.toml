@@ -25,6 +25,10 @@ autoexamples = false
 [lib]
 path = "lib.rs"
 
+[[test]]
+name = "winui_bindings"
+path = "tests/winui_bindings.rs"
+
 [features]
 # The performance counters of the base crate, which the counting site of this crate (dynamic
 # resource expressions) counts into.

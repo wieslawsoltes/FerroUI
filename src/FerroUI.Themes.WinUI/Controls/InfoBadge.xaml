@@ -1,0 +1,103 @@
+<!--
+  Adapted from controls/dev/InfoBadge/InfoBadge_themeresources.xaml at
+  microsoft-ui-xaml a71c42bd3e352060e5f5ecf3b5e1a98f8a745809.
+  Integrated with the native WinUI theme's shared resources, which retain the
+  microsoft-ui-xaml baseline commit 7e4b0c2096be402f51cc8f7d203ebf67cff183d0.
+  Copyright (c) Microsoft Corporation. Licensed under the MIT License; see NOTICE.md.
+
+  These ControlThemes target the native FerroUI.Controls.InfoBadge. Their
+  names preserve the WinUI Style resource keys; migration explicitly changes
+  Style to Theme. The native control supplies the replaceable default template
+  and display-kind behavior. Existing controls/themes keep their identities.
+-->
+<ResourceDictionary xmlns="https://github.com/ferroui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    x:ClassModifier="internal">
+  <ResourceDictionary.ThemeDictionaries>
+    <ResourceDictionary x:Key="Default">
+      <StaticResource x:Key="InfoBadgeForeground" ResourceKey="TextOnAccentFillColorPrimaryBrush" />
+      <StaticResource x:Key="InfoBadgeBackground" ResourceKey="AccentFillColorDefaultBrush" />
+      <x:Double x:Key="InfoBadgeIconHeight">8</x:Double>
+    </ResourceDictionary>
+    <ResourceDictionary x:Key="Light">
+      <StaticResource x:Key="InfoBadgeForeground" ResourceKey="TextOnAccentFillColorPrimaryBrush" />
+      <StaticResource x:Key="InfoBadgeBackground" ResourceKey="AccentFillColorDefaultBrush" />
+      <x:Double x:Key="InfoBadgeIconHeight">9</x:Double>
+    </ResourceDictionary>
+    <!-- The typed native key equals WinUITheme.HighContrast, without a
+         dependency on the optional theme crate when this dictionary is reused. -->
+    <ResourceDictionary x:Key="{x:Static InfoBadge.HighContrastThemeVariant}">
+      <StaticResource x:Key="InfoBadgeForeground" ResourceKey="SystemControlHighlightAltChromeWhiteBrush" />
+      <StaticResource x:Key="InfoBadgeBackground" ResourceKey="SystemControlHighlightAccentBrush" />
+      <x:Double x:Key="InfoBadgeIconHeight">9</x:Double>
+    </ResourceDictionary>
+  </ResourceDictionary.ThemeDictionaries>
+  <x:Double x:Key="InfoBadgeMinHeight">4</x:Double>
+  <x:Double x:Key="InfoBadgeMinWidth">4</x:Double>
+  <x:Double x:Key="InfoBadgeMaxHeight">16</x:Double>
+  <x:Double x:Key="InfoBadgeValueFontSize">11</x:Double>
+  <x:Double x:Key="InfoBadgeIconWidth">12</x:Double>
+  <Thickness x:Key="InfoBadgePadding">0</Thickness>
+  <Thickness x:Key="IconInfoBadgeFontIconMargin">4,0,4,2</Thickness>
+  <Thickness x:Key="ValueInfoBadgeTextMargin">4,0,4,2</Thickness>
+  <Thickness x:Key="IconInfoBadgeIconMargin">4</Thickness>
+
+  <ControlTheme x:Key="DefaultInfoBadgeStyle" TargetType="InfoBadge">
+    <Setter Property="MinHeight" Value="{DynamicResource InfoBadgeMinHeight}" />
+    <Setter Property="MinWidth" Value="{DynamicResource InfoBadgeMinWidth}" />
+    <Setter Property="MaxHeight" Value="{DynamicResource InfoBadgeMaxHeight}" />
+    <Setter Property="Background" Value="{DynamicResource InfoBadgeBackground}" />
+    <Setter Property="Foreground" Value="{DynamicResource InfoBadgeForeground}" />
+    <Setter Property="Padding" Value="{DynamicResource InfoBadgePadding}" />
+    <Setter Property="Focusable" Value="False" />
+  </ControlTheme>
+  <ControlTheme x:Key="{x:Type InfoBadge}" TargetType="InfoBadge" BasedOn="{StaticResource DefaultInfoBadgeStyle}" />
+
+  <ControlTheme x:Key="AttentionDotInfoBadgeStyle" TargetType="InfoBadge" BasedOn="{StaticResource DefaultInfoBadgeStyle}">
+    <Setter Property="Background" Value="{DynamicResource SystemFillColorAttentionBrush}" />
+  </ControlTheme>
+  <ControlTheme x:Key="AttentionValueInfoBadgeStyle" TargetType="InfoBadge" BasedOn="{StaticResource AttentionDotInfoBadgeStyle}" />
+  <ControlTheme x:Key="AttentionIconInfoBadgeStyle" TargetType="InfoBadge" BasedOn="{StaticResource AttentionDotInfoBadgeStyle}">
+    <Setter Property="Padding" Value="0,4,0,2" />
+    <Setter Property="IconSource">
+      <FontIconSource Glyph="&#xEA38;" />
+    </Setter>
+  </ControlTheme>
+  <ControlTheme x:Key="InformationalDotInfoBadgeStyle" TargetType="InfoBadge" BasedOn="{StaticResource DefaultInfoBadgeStyle}">
+    <Setter Property="Background" Value="{DynamicResource SystemFillColorSolidNeutralBrush}" />
+  </ControlTheme>
+  <ControlTheme x:Key="InformationalValueInfoBadgeStyle" TargetType="InfoBadge" BasedOn="{StaticResource InformationalDotInfoBadgeStyle}" />
+  <ControlTheme x:Key="InformationalIconInfoBadgeStyle" TargetType="InfoBadge" BasedOn="{StaticResource InformationalDotInfoBadgeStyle}">
+    <Setter Property="Padding" Value="0,4,0,2" />
+    <Setter Property="IconSource">
+      <FontIconSource Glyph="&#xF13F;" />
+    </Setter>
+  </ControlTheme>
+  <ControlTheme x:Key="SuccessDotInfoBadgeStyle" TargetType="InfoBadge" BasedOn="{StaticResource DefaultInfoBadgeStyle}">
+    <Setter Property="Background" Value="{DynamicResource SystemFillColorSuccessBrush}" />
+  </ControlTheme>
+  <ControlTheme x:Key="SuccessValueInfoBadgeStyle" TargetType="InfoBadge" BasedOn="{StaticResource SuccessDotInfoBadgeStyle}" />
+  <ControlTheme x:Key="SuccessIconInfoBadgeStyle" TargetType="InfoBadge" BasedOn="{StaticResource SuccessDotInfoBadgeStyle}">
+    <Setter Property="IconSource">
+      <SymbolIconSource Symbol="Accept" />
+    </Setter>
+  </ControlTheme>
+  <ControlTheme x:Key="CautionDotInfoBadgeStyle" TargetType="InfoBadge" BasedOn="{StaticResource DefaultInfoBadgeStyle}">
+    <Setter Property="Background" Value="{DynamicResource SystemFillColorCautionBrush}" />
+  </ControlTheme>
+  <ControlTheme x:Key="CautionValueInfoBadgeStyle" TargetType="InfoBadge" BasedOn="{StaticResource CautionDotInfoBadgeStyle}" />
+  <ControlTheme x:Key="CautionIconInfoBadgeStyle" TargetType="InfoBadge" BasedOn="{StaticResource CautionDotInfoBadgeStyle}">
+    <Setter Property="IconSource">
+      <SymbolIconSource Symbol="Important" />
+    </Setter>
+  </ControlTheme>
+  <ControlTheme x:Key="CriticalDotInfoBadgeStyle" TargetType="InfoBadge" BasedOn="{StaticResource DefaultInfoBadgeStyle}">
+    <Setter Property="Background" Value="{DynamicResource SystemFillColorCriticalBrush}" />
+  </ControlTheme>
+  <ControlTheme x:Key="CriticalValueInfoBadgeStyle" TargetType="InfoBadge" BasedOn="{StaticResource CriticalDotInfoBadgeStyle}" />
+  <ControlTheme x:Key="CriticalIconInfoBadgeStyle" TargetType="InfoBadge" BasedOn="{StaticResource CriticalDotInfoBadgeStyle}">
+    <Setter Property="IconSource">
+      <SymbolIconSource Symbol="Cancel" />
+    </Setter>
+  </ControlTheme>
+</ResourceDictionary>

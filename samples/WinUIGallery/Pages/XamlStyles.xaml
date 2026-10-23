@@ -1,0 +1,19 @@
+<!-- Adapted from the pinned Microsoft WinUI Gallery; see ../NOTICE.md. -->
+<StackPanel xmlns="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Spacing="12">
+  <StackPanel>
+    <StackPanel.Resources>
+      <ControlTheme x:Key="AccentButton" TargetType="Button">
+        <Setter Property="Background" Value="#0078D4"/>
+        <Setter Property="Foreground" Value="White"/>
+        <Setter Property="Template">
+          <ControlTemplate>
+            <Border Background="{TemplateBinding Background}" Padding="18,10" CornerRadius="6">
+              <ContentPresenter Content="{TemplateBinding Content}"/>
+            </Border>
+          </ControlTemplate>
+        </Setter>
+      </ControlTheme>
+    </StackPanel.Resources>
+    <Button Content="An explicitly themed Button" Theme="{StaticResource AccentButton}"/>
+  </StackPanel>
+</StackPanel>

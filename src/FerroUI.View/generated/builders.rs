@@ -49,6 +49,19 @@ pub fn auto_complete_box() -> El<ferroui_controls::AutoCompleteBox> {
     El::new()
 }
 
+pub use ferroui_controls::AutoSuggestBox;
+
+impl ViewClass for ferroui_controls::AutoSuggestBox {
+    fn create() -> ferroui_base::Ref<Self> {
+        <ferroui_controls::AutoSuggestBox>::new()
+    }
+}
+
+/// Starts an element of [`AutoSuggestBox`](ferroui_controls::AutoSuggestBox).
+pub fn auto_suggest_box() -> El<ferroui_controls::AutoSuggestBox> {
+    El::new()
+}
+
 pub use ferroui_controls::Border;
 
 impl ViewClass for ferroui_controls::Border {
@@ -530,6 +543,45 @@ pub fn flyout_presenter() -> El<ferroui_controls::FlyoutPresenter> {
     El::new()
 }
 
+pub use ferroui_controls::FontIcon;
+
+impl ViewClass for ferroui_controls::FontIcon {
+    fn create() -> ferroui_base::Ref<Self> {
+        <ferroui_controls::FontIcon>::new()
+    }
+}
+
+/// Starts an element of [`FontIcon`](ferroui_controls::FontIcon).
+pub fn font_icon() -> El<ferroui_controls::FontIcon> {
+    El::new()
+}
+
+pub use ferroui_controls::Frame;
+
+impl ViewClass for ferroui_controls::Frame {
+    fn create() -> ferroui_base::Ref<Self> {
+        <ferroui_controls::Frame>::new()
+    }
+}
+
+/// Starts an element of [`Frame`](ferroui_controls::Frame).
+pub fn frame() -> El<ferroui_controls::Frame> {
+    El::new()
+}
+
+pub use ferroui_controls::FramePage;
+
+impl ViewClass for ferroui_controls::FramePage {
+    fn create() -> ferroui_base::Ref<Self> {
+        <ferroui_controls::FramePage>::new()
+    }
+}
+
+/// Starts an element of [`FramePage`](ferroui_controls::FramePage).
+pub fn frame_page() -> El<ferroui_controls::FramePage> {
+    El::new()
+}
+
 pub use ferroui_controls::Grid;
 
 impl ViewClass for ferroui_controls::Grid {
@@ -631,6 +683,45 @@ impl ViewClass for ferroui_controls::Image {
 
 /// Starts an element of [`Image`](ferroui_controls::Image).
 pub fn image() -> El<ferroui_controls::Image> {
+    El::new()
+}
+
+pub use ferroui_controls::InfoBadge;
+
+impl ViewClass for ferroui_controls::InfoBadge {
+    fn create() -> ferroui_base::Ref<Self> {
+        <ferroui_controls::InfoBadge>::new()
+    }
+}
+
+/// Starts an element of [`InfoBadge`](ferroui_controls::InfoBadge).
+pub fn info_badge() -> El<ferroui_controls::InfoBadge> {
+    El::new()
+}
+
+pub use ferroui_controls::InfoBar;
+
+impl ViewClass for ferroui_controls::InfoBar {
+    fn create() -> ferroui_base::Ref<Self> {
+        <ferroui_controls::InfoBar>::new()
+    }
+}
+
+/// Starts an element of [`InfoBar`](ferroui_controls::InfoBar).
+pub fn info_bar() -> El<ferroui_controls::InfoBar> {
+    El::new()
+}
+
+pub use ferroui_controls::InfoBarPanel;
+
+impl ViewClass for ferroui_controls::InfoBarPanel {
+    fn create() -> ferroui_base::Ref<Self> {
+        <ferroui_controls::InfoBarPanel>::new()
+    }
+}
+
+/// Starts an element of [`InfoBarPanel`](ferroui_controls::InfoBarPanel).
+pub fn info_bar_panel() -> El<ferroui_controls::InfoBarPanel> {
     El::new()
 }
 
@@ -842,6 +933,58 @@ pub fn navigation_page() -> El<ferroui_controls::NavigationPage> {
     El::new()
 }
 
+pub use ferroui_controls::NavigationView;
+
+impl ViewClass for ferroui_controls::NavigationView {
+    fn create() -> ferroui_base::Ref<Self> {
+        <ferroui_controls::NavigationView>::new()
+    }
+}
+
+/// Starts an element of [`NavigationView`](ferroui_controls::NavigationView).
+pub fn navigation_view() -> El<ferroui_controls::NavigationView> {
+    El::new()
+}
+
+pub use ferroui_controls::NavigationViewItem;
+
+impl ViewClass for ferroui_controls::NavigationViewItem {
+    fn create() -> ferroui_base::Ref<Self> {
+        <ferroui_controls::NavigationViewItem>::new()
+    }
+}
+
+/// Starts an element of [`NavigationViewItem`](ferroui_controls::NavigationViewItem).
+pub fn navigation_view_item() -> El<ferroui_controls::NavigationViewItem> {
+    El::new()
+}
+
+pub use ferroui_controls::NavigationViewItemHeader;
+
+impl ViewClass for ferroui_controls::NavigationViewItemHeader {
+    fn create() -> ferroui_base::Ref<Self> {
+        <ferroui_controls::NavigationViewItemHeader>::new()
+    }
+}
+
+/// Starts an element of [`NavigationViewItemHeader`](ferroui_controls::NavigationViewItemHeader).
+pub fn navigation_view_item_header() -> El<ferroui_controls::NavigationViewItemHeader> {
+    El::new()
+}
+
+pub use ferroui_controls::NavigationViewItemSeparator;
+
+impl ViewClass for ferroui_controls::NavigationViewItemSeparator {
+    fn create() -> ferroui_base::Ref<Self> {
+        <ferroui_controls::NavigationViewItemSeparator>::new()
+    }
+}
+
+/// Starts an element of [`NavigationViewItemSeparator`](ferroui_controls::NavigationViewItemSeparator).
+pub fn navigation_view_item_separator() -> El<ferroui_controls::NavigationViewItemSeparator> {
+    El::new()
+}
+
 pub use ferroui_controls::NotificationCard;
 
 impl ViewClass for ferroui_controls::NotificationCard {
@@ -852,6 +995,19 @@ impl ViewClass for ferroui_controls::NotificationCard {
 
 /// Starts an element of [`NotificationCard`](ferroui_controls::NotificationCard).
 pub fn notification_card() -> El<ferroui_controls::NotificationCard> {
+    El::new()
+}
+
+pub use ferroui_controls::NumberBox;
+
+impl ViewClass for ferroui_controls::NumberBox {
+    fn create() -> ferroui_base::Ref<Self> {
+        <ferroui_controls::NumberBox>::new()
+    }
+}
+
+/// Starts an element of [`NumberBox`](ferroui_controls::NumberBox).
+pub fn number_box() -> El<ferroui_controls::NumberBox> {
     El::new()
 }
 
@@ -998,6 +1154,19 @@ pub fn progress_bar() -> El<ferroui_controls::ProgressBar> {
     El::new()
 }
 
+pub use ferroui_controls::ProgressRing;
+
+impl ViewClass for ferroui_controls::ProgressRing {
+    fn create() -> ferroui_base::Ref<Self> {
+        <ferroui_controls::ProgressRing>::new()
+    }
+}
+
+/// Starts an element of [`ProgressRing`](ferroui_controls::ProgressRing).
+pub fn progress_ring() -> El<ferroui_controls::ProgressRing> {
+    El::new()
+}
+
 pub use ferroui_controls::RadioButton;
 
 impl ViewClass for ferroui_controls::RadioButton {
@@ -1008,6 +1177,32 @@ impl ViewClass for ferroui_controls::RadioButton {
 
 /// Starts an element of [`RadioButton`](ferroui_controls::RadioButton).
 pub fn radio_button() -> El<ferroui_controls::RadioButton> {
+    El::new()
+}
+
+pub use ferroui_controls::RadioButtons;
+
+impl ViewClass for ferroui_controls::RadioButtons {
+    fn create() -> ferroui_base::Ref<Self> {
+        <ferroui_controls::RadioButtons>::new()
+    }
+}
+
+/// Starts an element of [`RadioButtons`](ferroui_controls::RadioButtons).
+pub fn radio_buttons() -> El<ferroui_controls::RadioButtons> {
+    El::new()
+}
+
+pub use ferroui_controls::RatingControl;
+
+impl ViewClass for ferroui_controls::RatingControl {
+    fn create() -> ferroui_base::Ref<Self> {
+        <ferroui_controls::RatingControl>::new()
+    }
+}
+
+/// Starts an element of [`RatingControl`](ferroui_controls::RatingControl).
+pub fn rating_control() -> El<ferroui_controls::RatingControl> {
     El::new()
 }
 
@@ -1229,6 +1424,19 @@ impl ViewClass for ferroui_controls::StackPanel {
 
 /// Starts an element of [`StackPanel`](ferroui_controls::StackPanel).
 pub fn stack_panel() -> El<ferroui_controls::StackPanel> {
+    El::new()
+}
+
+pub use ferroui_controls::SymbolIcon;
+
+impl ViewClass for ferroui_controls::SymbolIcon {
+    fn create() -> ferroui_base::Ref<Self> {
+        <ferroui_controls::SymbolIcon>::new()
+    }
+}
+
+/// Starts an element of [`SymbolIcon`](ferroui_controls::SymbolIcon).
+pub fn symbol_icon() -> El<ferroui_controls::SymbolIcon> {
     El::new()
 }
 
@@ -1977,6 +2185,50 @@ pub trait AutoCompleteBoxProps: ElementBuilder {
     }
 }
 impl<T: ObjectType + Upcast<ferroui_controls::AutoCompleteBox>> AutoCompleteBoxProps for El<T> {}
+
+/// The properties and routed events of [`AutoSuggestBox`](ferroui_controls::AutoSuggestBox).
+pub trait AutoSuggestBoxProps: ElementBuilder {
+    /// Sets [`AutoSuggestBox::text_property`](ferroui_controls::AutoSuggestBox::text_property).
+    fn text<M>(self, value: impl IntoProp<String, M>) -> Self {
+        self.prop(<ferroui_controls::AutoSuggestBox>::text_property(), value)
+    }
+
+    /// Sets [`AutoSuggestBox::text_member_path_property`](ferroui_controls::AutoSuggestBox::text_member_path_property).
+    fn text_member_path<M>(self, value: impl IntoProp<String, M>) -> Self {
+        self.prop(<ferroui_controls::AutoSuggestBox>::text_member_path_property(), value)
+    }
+
+    /// Sets [`AutoSuggestBox::placeholder_text_property`](ferroui_controls::AutoSuggestBox::placeholder_text_property).
+    fn placeholder_text<M>(self, value: impl IntoProp<String, M>) -> Self {
+        self.prop(<ferroui_controls::AutoSuggestBox>::placeholder_text_property(), value)
+    }
+
+    /// Sets [`AutoSuggestBox::update_text_on_select_property`](ferroui_controls::AutoSuggestBox::update_text_on_select_property).
+    fn update_text_on_select<M>(self, value: impl IntoProp<bool, M>) -> Self {
+        self.prop(<ferroui_controls::AutoSuggestBox>::update_text_on_select_property(), value)
+    }
+
+    /// Sets [`AutoSuggestBox::is_suggestion_list_open_property`](ferroui_controls::AutoSuggestBox::is_suggestion_list_open_property).
+    fn is_suggestion_list_open<M>(self, value: impl IntoProp<bool, M>) -> Self {
+        self.prop(<ferroui_controls::AutoSuggestBox>::is_suggestion_list_open_property(), value)
+    }
+
+    /// Sets [`AutoSuggestBox::max_suggestion_list_height_property`](ferroui_controls::AutoSuggestBox::max_suggestion_list_height_property).
+    fn max_suggestion_list_height<M>(self, value: impl IntoProp<f64, M>) -> Self {
+        self.prop(<ferroui_controls::AutoSuggestBox>::max_suggestion_list_height_property(), value)
+    }
+
+    /// Sets [`AutoSuggestBox::query_icon_property`](ferroui_controls::AutoSuggestBox::query_icon_property).
+    fn query_icon<M>(self, value: impl IntoProp<Option<ferroui_base::Ref<ferroui_controls::IconElement>>, M>) -> Self {
+        self.prop(<ferroui_controls::AutoSuggestBox>::query_icon_property(), value)
+    }
+
+    /// Sets [`AutoSuggestBox::description_property`](ferroui_controls::AutoSuggestBox::description_property).
+    fn description<M>(self, value: impl IntoProp<Option<ferroui_base::BoxedValue>, M>) -> Self {
+        self.prop(<ferroui_controls::AutoSuggestBox>::description_property(), value)
+    }
+}
+impl<T: ObjectType + Upcast<ferroui_controls::AutoSuggestBox>> AutoSuggestBoxProps for El<T> {}
 
 /// The properties and routed events of [`BezierSegment`](ferroui_base::media::BezierSegment).
 pub trait BezierSegmentProps: ElementBuilder {
@@ -3563,6 +3815,77 @@ pub trait FlyoutBaseProps: ElementBuilder {
 }
 impl<T: ObjectType + Upcast<ferroui_controls::primitives::FlyoutBase>> FlyoutBaseProps for El<T> {}
 
+/// The properties and routed events of [`FontIcon`](ferroui_controls::FontIcon).
+pub trait FontIconProps: ElementBuilder {
+    /// Sets [`FontIcon::glyph_property`](ferroui_controls::FontIcon::glyph_property).
+    fn glyph<M>(self, value: impl IntoProp<String, M>) -> Self {
+        self.prop(<ferroui_controls::FontIcon>::glyph_property(), value)
+    }
+
+    /// Sets [`FontIcon::mirrored_when_right_to_left_property`](ferroui_controls::FontIcon::mirrored_when_right_to_left_property).
+    fn mirrored_when_right_to_left<M>(self, value: impl IntoProp<bool, M>) -> Self {
+        self.prop(<ferroui_controls::FontIcon>::mirrored_when_right_to_left_property(), value)
+    }
+}
+impl<T: ObjectType + Upcast<ferroui_controls::FontIcon>> FontIconProps for El<T> {}
+
+/// The properties and routed events of [`FontIconSource`](ferroui_controls::FontIconSource).
+pub trait FontIconSourceProps: ElementBuilder {
+    /// Sets [`FontIconSource::glyph_property`](ferroui_controls::FontIconSource::glyph_property).
+    fn glyph<M>(self, value: impl IntoProp<String, M>) -> Self {
+        self.prop(<ferroui_controls::FontIconSource>::glyph_property(), value)
+    }
+
+    /// Sets [`FontIconSource::font_family_property`](ferroui_controls::FontIconSource::font_family_property).
+    fn font_family<M>(self, value: impl IntoProp<ferroui_base::media::FontFamily, M>) -> Self {
+        self.prop(<ferroui_controls::FontIconSource>::font_family_property(), value)
+    }
+
+    /// Sets [`FontIconSource::font_size_property`](ferroui_controls::FontIconSource::font_size_property).
+    fn font_size<M>(self, value: impl IntoProp<f64, M>) -> Self {
+        self.prop(<ferroui_controls::FontIconSource>::font_size_property(), value)
+    }
+
+    /// Sets [`FontIconSource::font_style_property`](ferroui_controls::FontIconSource::font_style_property).
+    fn font_style<M>(self, value: impl IntoProp<ferroui_base::media::FontStyle, M>) -> Self {
+        self.prop(<ferroui_controls::FontIconSource>::font_style_property(), value)
+    }
+
+    /// Sets [`FontIconSource::font_weight_property`](ferroui_controls::FontIconSource::font_weight_property).
+    fn font_weight<M>(self, value: impl IntoProp<ferroui_base::media::FontWeight, M>) -> Self {
+        self.prop(<ferroui_controls::FontIconSource>::font_weight_property(), value)
+    }
+
+    /// Sets [`FontIconSource::mirrored_when_right_to_left_property`](ferroui_controls::FontIconSource::mirrored_when_right_to_left_property).
+    fn mirrored_when_right_to_left<M>(self, value: impl IntoProp<bool, M>) -> Self {
+        self.prop(<ferroui_controls::FontIconSource>::mirrored_when_right_to_left_property(), value)
+    }
+}
+impl<T: ObjectType + Upcast<ferroui_controls::FontIconSource>> FontIconSourceProps for El<T> {}
+
+/// The properties and routed events of [`Frame`](ferroui_controls::Frame).
+pub trait FrameProps: ElementBuilder {
+    /// Sets [`Frame::cache_size_property`](ferroui_controls::Frame::cache_size_property).
+    fn cache_size<M>(self, value: impl IntoProp<i32, M>) -> Self {
+        self.prop(<ferroui_controls::Frame>::cache_size_property(), value)
+    }
+
+    /// Sets [`Frame::is_navigation_stack_enabled_property`](ferroui_controls::Frame::is_navigation_stack_enabled_property).
+    fn is_navigation_stack_enabled<M>(self, value: impl IntoProp<bool, M>) -> Self {
+        self.prop(<ferroui_controls::Frame>::is_navigation_stack_enabled_property(), value)
+    }
+}
+impl<T: ObjectType + Upcast<ferroui_controls::Frame>> FrameProps for El<T> {}
+
+/// The properties and routed events of [`FramePage`](ferroui_controls::FramePage).
+pub trait FramePageProps: ElementBuilder {
+    /// Sets [`FramePage::navigation_cache_mode_property`](ferroui_controls::FramePage::navigation_cache_mode_property).
+    fn navigation_cache_mode<M>(self, value: impl IntoProp<ferroui_controls::navigation::NavigationCacheMode, M>) -> Self {
+        self.prop(<ferroui_controls::FramePage>::navigation_cache_mode_property(), value)
+    }
+}
+impl<T: ObjectType + Upcast<ferroui_controls::FramePage>> FramePageProps for El<T> {}
+
 /// The properties and routed events of [`Geometry`](ferroui_base::media::Geometry).
 pub trait GeometryProps: ElementBuilder {
     /// Sets [`Geometry::transform_property`](ferroui_base::media::Geometry::transform_property).
@@ -3771,6 +4094,15 @@ pub trait HyperlinkButtonProps: ElementBuilder {
 }
 impl<T: ObjectType + Upcast<ferroui_controls::HyperlinkButton>> HyperlinkButtonProps for El<T> {}
 
+/// The properties and routed events of [`IconSource`](ferroui_controls::IconSource).
+pub trait IconSourceProps: ElementBuilder {
+    /// Sets [`IconSource::foreground_property`](ferroui_controls::IconSource::foreground_property).
+    fn foreground<M>(self, value: impl IntoProp<Option<std::rc::Rc<dyn ferroui_base::media::IBrush>>, M>) -> Self {
+        self.prop(<ferroui_controls::IconSource>::foreground_property(), value)
+    }
+}
+impl<T: ObjectType + Upcast<ferroui_controls::IconSource>> IconSourceProps for El<T> {}
+
 /// The properties and routed events of [`Image`](ferroui_controls::Image).
 pub trait ImageProps: ElementBuilder {
     /// Sets [`Image::source_property`](ferroui_controls::Image::source_property).
@@ -3817,6 +4149,126 @@ pub trait ImageDrawingProps: ElementBuilder {
     }
 }
 impl<T: ObjectType + Upcast<ferroui_base::media::ImageDrawing>> ImageDrawingProps for El<T> {}
+
+/// The properties and routed events of [`InfoBadge`](ferroui_controls::InfoBadge).
+pub trait InfoBadgeProps: ElementBuilder {
+    /// Sets [`InfoBadge::value_property`](ferroui_controls::InfoBadge::value_property).
+    fn value<M>(self, value: impl IntoProp<i32, M>) -> Self {
+        self.prop(<ferroui_controls::InfoBadge>::value_property(), value)
+    }
+
+    /// Sets [`InfoBadge::icon_source_property`](ferroui_controls::InfoBadge::icon_source_property).
+    fn icon_source<M>(self, value: impl IntoProp<Option<ferroui_base::Ref<ferroui_controls::IconSource>>, M>) -> Self {
+        self.prop(<ferroui_controls::InfoBadge>::icon_source_property(), value)
+    }
+}
+impl<T: ObjectType + Upcast<ferroui_controls::InfoBadge>> InfoBadgeProps for El<T> {}
+
+/// The properties and routed events of [`InfoBadgeTemplateSettings`](ferroui_controls::InfoBadgeTemplateSettings).
+pub trait InfoBadgeTemplateSettingsProps: ElementBuilder {
+    /// Sets [`InfoBadgeTemplateSettings::info_badge_corner_radius_property`](ferroui_controls::InfoBadgeTemplateSettings::info_badge_corner_radius_property).
+    fn info_badge_corner_radius<M>(self, value: impl IntoProp<ferroui_base::CornerRadius, M>) -> Self {
+        self.prop(<ferroui_controls::InfoBadgeTemplateSettings>::info_badge_corner_radius_property(), value)
+    }
+
+    /// Sets [`InfoBadgeTemplateSettings::icon_element_property`](ferroui_controls::InfoBadgeTemplateSettings::icon_element_property).
+    fn icon_element<M>(self, value: impl IntoProp<Option<ferroui_base::Ref<ferroui_controls::IconElement>>, M>) -> Self {
+        self.prop(<ferroui_controls::InfoBadgeTemplateSettings>::icon_element_property(), value)
+    }
+}
+impl<T: ObjectType + Upcast<ferroui_controls::InfoBadgeTemplateSettings>> InfoBadgeTemplateSettingsProps for El<T> {}
+
+/// The properties and routed events of [`InfoBar`](ferroui_controls::InfoBar).
+pub trait InfoBarProps: ElementBuilder {
+    /// Sets [`InfoBar::is_open_property`](ferroui_controls::InfoBar::is_open_property).
+    fn is_open<M>(self, value: impl IntoProp<bool, M>) -> Self {
+        self.prop(<ferroui_controls::InfoBar>::is_open_property(), value)
+    }
+
+    /// Sets [`InfoBar::title_property`](ferroui_controls::InfoBar::title_property).
+    fn title<M>(self, value: impl IntoProp<String, M>) -> Self {
+        self.prop(<ferroui_controls::InfoBar>::title_property(), value)
+    }
+
+    /// Sets [`InfoBar::message_property`](ferroui_controls::InfoBar::message_property).
+    fn message<M>(self, value: impl IntoProp<String, M>) -> Self {
+        self.prop(<ferroui_controls::InfoBar>::message_property(), value)
+    }
+
+    /// Sets [`InfoBar::severity_property`](ferroui_controls::InfoBar::severity_property).
+    fn severity<M>(self, value: impl IntoProp<ferroui_controls::InfoBarSeverity, M>) -> Self {
+        self.prop(<ferroui_controls::InfoBar>::severity_property(), value)
+    }
+
+    /// Sets [`InfoBar::icon_source_property`](ferroui_controls::InfoBar::icon_source_property).
+    fn icon_source<M>(self, value: impl IntoProp<Option<ferroui_base::Ref<ferroui_controls::IconSource>>, M>) -> Self {
+        self.prop(<ferroui_controls::InfoBar>::icon_source_property(), value)
+    }
+
+    /// Sets [`InfoBar::is_icon_visible_property`](ferroui_controls::InfoBar::is_icon_visible_property).
+    fn is_icon_visible<M>(self, value: impl IntoProp<bool, M>) -> Self {
+        self.prop(<ferroui_controls::InfoBar>::is_icon_visible_property(), value)
+    }
+
+    /// Sets [`InfoBar::is_closable_property`](ferroui_controls::InfoBar::is_closable_property).
+    fn is_closable<M>(self, value: impl IntoProp<bool, M>) -> Self {
+        self.prop(<ferroui_controls::InfoBar>::is_closable_property(), value)
+    }
+
+    /// Sets [`InfoBar::close_button_style_property`](ferroui_controls::InfoBar::close_button_style_property).
+    fn close_button_style<M>(self, value: impl IntoProp<Option<ferroui_base::Ref<ferroui_base::styling::ControlTheme>>, M>) -> Self {
+        self.prop(<ferroui_controls::InfoBar>::close_button_style_property(), value)
+    }
+
+    /// Sets [`InfoBar::close_button_command_property`](ferroui_controls::InfoBar::close_button_command_property).
+    fn close_button_command<M>(self, value: impl IntoProp<Option<std::rc::Rc<dyn ferroui_base::input::ICommand>>, M>) -> Self {
+        self.prop(<ferroui_controls::InfoBar>::close_button_command_property(), value)
+    }
+
+    /// Sets [`InfoBar::close_button_command_parameter_property`](ferroui_controls::InfoBar::close_button_command_parameter_property).
+    fn close_button_command_parameter<M>(self, value: impl IntoProp<Option<ferroui_base::BoxedValue>, M>) -> Self {
+        self.prop(<ferroui_controls::InfoBar>::close_button_command_parameter_property(), value)
+    }
+
+    /// Sets [`InfoBar::action_button_property`](ferroui_controls::InfoBar::action_button_property).
+    fn action_button<M>(self, value: impl IntoProp<Option<ferroui_base::Ref<ferroui_controls::Button>>, M>) -> Self {
+        self.prop(<ferroui_controls::InfoBar>::action_button_property(), value)
+    }
+}
+impl<T: ObjectType + Upcast<ferroui_controls::InfoBar>> InfoBarProps for El<T> {}
+
+/// The properties and routed events of [`InfoBarPanel`](ferroui_controls::InfoBarPanel).
+pub trait InfoBarPanelProps: ElementBuilder {
+    /// Sets [`InfoBarPanel::horizontal_orientation_padding_property`](ferroui_controls::InfoBarPanel::horizontal_orientation_padding_property).
+    fn horizontal_orientation_padding<M>(self, value: impl IntoProp<ferroui_base::Thickness, M>) -> Self {
+        self.prop(<ferroui_controls::InfoBarPanel>::horizontal_orientation_padding_property(), value)
+    }
+
+    /// Sets [`InfoBarPanel::vertical_orientation_padding_property`](ferroui_controls::InfoBarPanel::vertical_orientation_padding_property).
+    fn vertical_orientation_padding<M>(self, value: impl IntoProp<ferroui_base::Thickness, M>) -> Self {
+        self.prop(<ferroui_controls::InfoBarPanel>::vertical_orientation_padding_property(), value)
+    }
+
+    /// Sets [`InfoBarPanel::horizontal_orientation_margin_property`](ferroui_controls::InfoBarPanel::horizontal_orientation_margin_property).
+    fn horizontal_orientation_margin<M>(self, value: impl IntoProp<ferroui_base::Thickness, M>) -> Self {
+        self.prop(<ferroui_controls::InfoBarPanel>::horizontal_orientation_margin_property(), value)
+    }
+
+    /// Sets [`InfoBarPanel::vertical_orientation_margin_property`](ferroui_controls::InfoBarPanel::vertical_orientation_margin_property).
+    fn vertical_orientation_margin<M>(self, value: impl IntoProp<ferroui_base::Thickness, M>) -> Self {
+        self.prop(<ferroui_controls::InfoBarPanel>::vertical_orientation_margin_property(), value)
+    }
+}
+impl<T: ObjectType + Upcast<ferroui_controls::InfoBarPanel>> InfoBarPanelProps for El<T> {}
+
+/// The properties and routed events of [`InfoBarTemplateSettings`](ferroui_controls::InfoBarTemplateSettings).
+pub trait InfoBarTemplateSettingsProps: ElementBuilder {
+    /// Sets [`InfoBarTemplateSettings::icon_element_property`](ferroui_controls::InfoBarTemplateSettings::icon_element_property).
+    fn icon_element<M>(self, value: impl IntoProp<Option<ferroui_base::Ref<ferroui_controls::IconElement>>, M>) -> Self {
+        self.prop(<ferroui_controls::InfoBarTemplateSettings>::icon_element_property(), value)
+    }
+}
+impl<T: ObjectType + Upcast<ferroui_controls::InfoBarTemplateSettings>> InfoBarTemplateSettingsProps for El<T> {}
 
 /// The properties and routed events of [`Inline`](ferroui_controls::documents::Inline).
 pub trait InlineProps: ElementBuilder {
@@ -4532,6 +4984,193 @@ pub trait NavigationPageProps: ElementBuilder {
 }
 impl<T: ObjectType + Upcast<ferroui_controls::NavigationPage>> NavigationPageProps for El<T> {}
 
+/// The properties and routed events of [`NavigationView`](ferroui_controls::NavigationView).
+pub trait NavigationViewProps: ElementBuilder {
+    /// Sets [`NavigationView::is_pane_open_property`](ferroui_controls::NavigationView::is_pane_open_property).
+    fn is_pane_open<M>(self, value: impl IntoProp<bool, M>) -> Self {
+        self.prop(<ferroui_controls::NavigationView>::is_pane_open_property(), value)
+    }
+
+    /// Sets [`NavigationView::compact_mode_threshold_width_property`](ferroui_controls::NavigationView::compact_mode_threshold_width_property).
+    fn compact_mode_threshold_width<M>(self, value: impl IntoProp<f64, M>) -> Self {
+        self.prop(<ferroui_controls::NavigationView>::compact_mode_threshold_width_property(), value)
+    }
+
+    /// Sets [`NavigationView::expanded_mode_threshold_width_property`](ferroui_controls::NavigationView::expanded_mode_threshold_width_property).
+    fn expanded_mode_threshold_width<M>(self, value: impl IntoProp<f64, M>) -> Self {
+        self.prop(<ferroui_controls::NavigationView>::expanded_mode_threshold_width_property(), value)
+    }
+
+    /// Sets [`NavigationView::is_settings_visible_property`](ferroui_controls::NavigationView::is_settings_visible_property).
+    fn is_settings_visible<M>(self, value: impl IntoProp<bool, M>) -> Self {
+        self.prop(<ferroui_controls::NavigationView>::is_settings_visible_property(), value)
+    }
+
+    /// Sets [`NavigationView::is_pane_toggle_button_visible_property`](ferroui_controls::NavigationView::is_pane_toggle_button_visible_property).
+    fn is_pane_toggle_button_visible<M>(self, value: impl IntoProp<bool, M>) -> Self {
+        self.prop(<ferroui_controls::NavigationView>::is_pane_toggle_button_visible_property(), value)
+    }
+
+    /// Sets [`NavigationView::always_show_header_property`](ferroui_controls::NavigationView::always_show_header_property).
+    fn always_show_header<M>(self, value: impl IntoProp<bool, M>) -> Self {
+        self.prop(<ferroui_controls::NavigationView>::always_show_header_property(), value)
+    }
+
+    /// Sets [`NavigationView::compact_pane_length_property`](ferroui_controls::NavigationView::compact_pane_length_property).
+    fn compact_pane_length<M>(self, value: impl IntoProp<f64, M>) -> Self {
+        self.prop(<ferroui_controls::NavigationView>::compact_pane_length_property(), value)
+    }
+
+    /// Sets [`NavigationView::open_pane_length_property`](ferroui_controls::NavigationView::open_pane_length_property).
+    fn open_pane_length<M>(self, value: impl IntoProp<f64, M>) -> Self {
+        self.prop(<ferroui_controls::NavigationView>::open_pane_length_property(), value)
+    }
+
+    /// Sets [`NavigationView::is_pane_visible_property`](ferroui_controls::NavigationView::is_pane_visible_property).
+    fn is_pane_visible<M>(self, value: impl IntoProp<bool, M>) -> Self {
+        self.prop(<ferroui_controls::NavigationView>::is_pane_visible_property(), value)
+    }
+
+    /// Sets [`NavigationView::is_back_enabled_property`](ferroui_controls::NavigationView::is_back_enabled_property).
+    fn is_back_enabled<M>(self, value: impl IntoProp<bool, M>) -> Self {
+        self.prop(<ferroui_controls::NavigationView>::is_back_enabled_property(), value)
+    }
+
+    /// Sets [`NavigationView::is_back_button_visible_property`](ferroui_controls::NavigationView::is_back_button_visible_property).
+    fn is_back_button_visible<M>(self, value: impl IntoProp<ferroui_controls::NavigationViewBackButtonVisible, M>) -> Self {
+        self.prop(<ferroui_controls::NavigationView>::is_back_button_visible_property(), value)
+    }
+
+    /// Sets [`NavigationView::pane_display_mode_property`](ferroui_controls::NavigationView::pane_display_mode_property).
+    fn pane_display_mode<M>(self, value: impl IntoProp<ferroui_controls::NavigationViewPaneDisplayMode, M>) -> Self {
+        self.prop(<ferroui_controls::NavigationView>::pane_display_mode_property(), value)
+    }
+
+    /// Sets [`NavigationView::selection_follows_focus_property`](ferroui_controls::NavigationView::selection_follows_focus_property).
+    fn selection_follows_focus<M>(self, value: impl IntoProp<ferroui_controls::NavigationViewSelectionFollowsFocus, M>) -> Self {
+        self.prop(<ferroui_controls::NavigationView>::selection_follows_focus_property(), value)
+    }
+
+    /// Sets [`NavigationView::pane_title_property`](ferroui_controls::NavigationView::pane_title_property).
+    fn pane_title<M>(self, value: impl IntoProp<String, M>) -> Self {
+        self.prop(<ferroui_controls::NavigationView>::pane_title_property(), value)
+    }
+
+    /// Sets [`NavigationView::header_property`](ferroui_controls::NavigationView::header_property).
+    fn header<M>(self, value: impl IntoProp<Option<ferroui_base::BoxedValue>, M>) -> Self {
+        self.prop(<ferroui_controls::NavigationView>::header_property(), value)
+    }
+
+    /// Sets [`NavigationView::header_template_property`](ferroui_controls::NavigationView::header_template_property).
+    fn header_template<M>(self, value: impl IntoProp<Option<std::rc::Rc<dyn ferroui_controls::templates::IDataTemplate>>, M>) -> Self {
+        self.prop(<ferroui_controls::NavigationView>::header_template_property(), value)
+    }
+
+    /// Sets [`NavigationView::selected_item_property`](ferroui_controls::NavigationView::selected_item_property).
+    fn selected_item<M>(self, value: impl IntoProp<Option<ferroui_base::BoxedValue>, M>) -> Self {
+        self.prop(<ferroui_controls::NavigationView>::selected_item_property(), value)
+    }
+
+    /// Sets [`NavigationView::pane_header_property`](ferroui_controls::NavigationView::pane_header_property).
+    fn pane_header<M>(self, value: impl IntoProp<Option<ferroui_base::Ref<ferroui_controls::Control>>, M>) -> Self {
+        self.prop(<ferroui_controls::NavigationView>::pane_header_property(), value)
+    }
+
+    /// Sets [`NavigationView::pane_footer_property`](ferroui_controls::NavigationView::pane_footer_property).
+    fn pane_footer<M>(self, value: impl IntoProp<Option<ferroui_base::Ref<ferroui_controls::Control>>, M>) -> Self {
+        self.prop(<ferroui_controls::NavigationView>::pane_footer_property(), value)
+    }
+
+    /// Sets [`NavigationView::pane_custom_content_property`](ferroui_controls::NavigationView::pane_custom_content_property).
+    fn pane_custom_content<M>(self, value: impl IntoProp<Option<ferroui_base::Ref<ferroui_controls::Control>>, M>) -> Self {
+        self.prop(<ferroui_controls::NavigationView>::pane_custom_content_property(), value)
+    }
+
+    /// Sets [`NavigationView::content_overlay_property`](ferroui_controls::NavigationView::content_overlay_property).
+    fn content_overlay<M>(self, value: impl IntoProp<Option<ferroui_base::Ref<ferroui_controls::Control>>, M>) -> Self {
+        self.prop(<ferroui_controls::NavigationView>::content_overlay_property(), value)
+    }
+
+    /// Sets [`NavigationView::auto_suggest_box_property`](ferroui_controls::NavigationView::auto_suggest_box_property).
+    fn auto_suggest_box<M>(self, value: impl IntoProp<Option<ferroui_base::Ref<ferroui_controls::AutoSuggestBox>>, M>) -> Self {
+        self.prop(<ferroui_controls::NavigationView>::auto_suggest_box_property(), value)
+    }
+
+    /// Sets [`NavigationView::menu_items_source_property`](ferroui_controls::NavigationView::menu_items_source_property).
+    fn menu_items_source<M>(self, value: impl IntoProp<Option<ferroui_controls::ItemsSource>, M>) -> Self {
+        self.prop(<ferroui_controls::NavigationView>::menu_items_source_property(), value)
+    }
+
+    /// Sets [`NavigationView::footer_menu_items_source_property`](ferroui_controls::NavigationView::footer_menu_items_source_property).
+    fn footer_menu_items_source<M>(self, value: impl IntoProp<Option<ferroui_controls::ItemsSource>, M>) -> Self {
+        self.prop(<ferroui_controls::NavigationView>::footer_menu_items_source_property(), value)
+    }
+
+    /// Sets [`NavigationView::menu_item_template_property`](ferroui_controls::NavigationView::menu_item_template_property).
+    fn menu_item_template<M>(self, value: impl IntoProp<Option<std::rc::Rc<dyn ferroui_controls::templates::IDataTemplate>>, M>) -> Self {
+        self.prop(<ferroui_controls::NavigationView>::menu_item_template_property(), value)
+    }
+
+    /// Sets [`NavigationView::pane_toggle_button_style_property`](ferroui_controls::NavigationView::pane_toggle_button_style_property).
+    fn pane_toggle_button_style<M>(self, value: impl IntoProp<Option<ferroui_base::Ref<ferroui_base::styling::ControlTheme>>, M>) -> Self {
+        self.prop(<ferroui_controls::NavigationView>::pane_toggle_button_style_property(), value)
+    }
+
+    /// Sets [`NavigationView::menu_item_container_style_property`](ferroui_controls::NavigationView::menu_item_container_style_property).
+    fn menu_item_container_style<M>(self, value: impl IntoProp<Option<ferroui_base::Ref<ferroui_base::styling::ControlTheme>>, M>) -> Self {
+        self.prop(<ferroui_controls::NavigationView>::menu_item_container_style_property(), value)
+    }
+}
+impl<T: ObjectType + Upcast<ferroui_controls::NavigationView>> NavigationViewProps for El<T> {}
+
+/// The properties and routed events of [`NavigationViewItem`](ferroui_controls::NavigationViewItem).
+pub trait NavigationViewItemProps: ElementBuilder {
+    /// Sets [`NavigationViewItem::icon_property`](ferroui_controls::NavigationViewItem::icon_property).
+    fn icon<M>(self, value: impl IntoProp<Option<ferroui_base::Ref<ferroui_controls::IconElement>>, M>) -> Self {
+        self.prop(<ferroui_controls::NavigationViewItem>::icon_property(), value)
+    }
+
+    /// Sets [`NavigationViewItem::info_badge_property`](ferroui_controls::NavigationViewItem::info_badge_property).
+    fn info_badge<M>(self, value: impl IntoProp<Option<ferroui_base::Ref<ferroui_controls::InfoBadge>>, M>) -> Self {
+        self.prop(<ferroui_controls::NavigationViewItem>::info_badge_property(), value)
+    }
+
+    /// Sets [`NavigationViewItem::selects_on_invoked_property`](ferroui_controls::NavigationViewItem::selects_on_invoked_property).
+    fn selects_on_invoked<M>(self, value: impl IntoProp<bool, M>) -> Self {
+        self.prop(<ferroui_controls::NavigationViewItem>::selects_on_invoked_property(), value)
+    }
+
+    /// Sets [`NavigationViewItem::is_expanded_property`](ferroui_controls::NavigationViewItem::is_expanded_property).
+    fn is_expanded<M>(self, value: impl IntoProp<bool, M>) -> Self {
+        self.prop(<ferroui_controls::NavigationViewItem>::is_expanded_property(), value)
+    }
+
+    /// Sets [`NavigationViewItem::has_unrealized_children_property`](ferroui_controls::NavigationViewItem::has_unrealized_children_property).
+    fn has_unrealized_children<M>(self, value: impl IntoProp<bool, M>) -> Self {
+        self.prop(<ferroui_controls::NavigationViewItem>::has_unrealized_children_property(), value)
+    }
+
+    /// Sets [`NavigationViewItem::is_child_selected_property`](ferroui_controls::NavigationViewItem::is_child_selected_property).
+    fn is_child_selected<M>(self, value: impl IntoProp<bool, M>) -> Self {
+        self.prop(<ferroui_controls::NavigationViewItem>::is_child_selected_property(), value)
+    }
+
+    /// Sets [`NavigationViewItem::menu_items_source_property`](ferroui_controls::NavigationViewItem::menu_items_source_property).
+    fn menu_items_source<M>(self, value: impl IntoProp<Option<ferroui_controls::ItemsSource>, M>) -> Self {
+        self.prop(<ferroui_controls::NavigationViewItem>::menu_items_source_property(), value)
+    }
+}
+impl<T: ObjectType + Upcast<ferroui_controls::NavigationViewItem>> NavigationViewItemProps for El<T> {}
+
+/// The properties and routed events of [`NavigationViewItemBase`](ferroui_controls::NavigationViewItemBase).
+pub trait NavigationViewItemBaseProps: ElementBuilder {
+    /// Sets [`NavigationViewItemBase::is_selected_property`](ferroui_controls::NavigationViewItemBase::is_selected_property).
+    fn is_selected<M>(self, value: impl IntoProp<bool, M>) -> Self {
+        self.prop(<ferroui_controls::NavigationViewItemBase>::is_selected_property(), value)
+    }
+}
+impl<T: ObjectType + Upcast<ferroui_controls::NavigationViewItemBase>> NavigationViewItemBaseProps for El<T> {}
+
 /// The properties and routed events of [`NotificationCard`](ferroui_controls::NotificationCard).
 pub trait NotificationCardProps: ElementBuilder {
     /// Sets [`NotificationCard::is_closed_property`](ferroui_controls::NotificationCard::is_closed_property).
@@ -4555,6 +5194,85 @@ pub trait NotificationCardProps: ElementBuilder {
     }
 }
 impl<T: ObjectType + Upcast<ferroui_controls::NotificationCard>> NotificationCardProps for El<T> {}
+
+/// The properties and routed events of [`NumberBox`](ferroui_controls::NumberBox).
+pub trait NumberBoxProps: ElementBuilder {
+    /// Sets [`NumberBox::minimum_property`](ferroui_controls::NumberBox::minimum_property).
+    fn minimum<M>(self, value: impl IntoProp<f64, M>) -> Self {
+        self.prop(<ferroui_controls::NumberBox>::minimum_property(), value)
+    }
+
+    /// Sets [`NumberBox::maximum_property`](ferroui_controls::NumberBox::maximum_property).
+    fn maximum<M>(self, value: impl IntoProp<f64, M>) -> Self {
+        self.prop(<ferroui_controls::NumberBox>::maximum_property(), value)
+    }
+
+    /// Sets [`NumberBox::value_property`](ferroui_controls::NumberBox::value_property).
+    fn value<M>(self, value: impl IntoProp<f64, M>) -> Self {
+        self.prop(<ferroui_controls::NumberBox>::value_property(), value)
+    }
+
+    /// Sets [`NumberBox::small_change_property`](ferroui_controls::NumberBox::small_change_property).
+    fn small_change<M>(self, value: impl IntoProp<f64, M>) -> Self {
+        self.prop(<ferroui_controls::NumberBox>::small_change_property(), value)
+    }
+
+    /// Sets [`NumberBox::large_change_property`](ferroui_controls::NumberBox::large_change_property).
+    fn large_change<M>(self, value: impl IntoProp<f64, M>) -> Self {
+        self.prop(<ferroui_controls::NumberBox>::large_change_property(), value)
+    }
+
+    /// Sets [`NumberBox::text_property`](ferroui_controls::NumberBox::text_property).
+    fn text<M>(self, value: impl IntoProp<String, M>) -> Self {
+        self.prop(<ferroui_controls::NumberBox>::text_property(), value)
+    }
+
+    /// Sets [`NumberBox::header_property`](ferroui_controls::NumberBox::header_property).
+    fn header<M>(self, value: impl IntoProp<Option<ferroui_base::BoxedValue>, M>) -> Self {
+        self.prop(<ferroui_controls::NumberBox>::header_property(), value)
+    }
+
+    /// Sets [`NumberBox::header_template_property`](ferroui_controls::NumberBox::header_template_property).
+    fn header_template<M>(self, value: impl IntoProp<Option<std::rc::Rc<dyn ferroui_controls::templates::IDataTemplate>>, M>) -> Self {
+        self.prop(<ferroui_controls::NumberBox>::header_template_property(), value)
+    }
+
+    /// Sets [`NumberBox::description_property`](ferroui_controls::NumberBox::description_property).
+    fn description<M>(self, value: impl IntoProp<Option<ferroui_base::BoxedValue>, M>) -> Self {
+        self.prop(<ferroui_controls::NumberBox>::description_property(), value)
+    }
+
+    /// Sets [`NumberBox::placeholder_text_property`](ferroui_controls::NumberBox::placeholder_text_property).
+    fn placeholder_text<M>(self, value: impl IntoProp<String, M>) -> Self {
+        self.prop(<ferroui_controls::NumberBox>::placeholder_text_property(), value)
+    }
+
+    /// Sets [`NumberBox::text_alignment_property`](ferroui_controls::NumberBox::text_alignment_property).
+    fn text_alignment<M>(self, value: impl IntoProp<ferroui_base::media::TextAlignment, M>) -> Self {
+        self.prop(<ferroui_controls::NumberBox>::text_alignment_property(), value)
+    }
+
+    /// Sets [`NumberBox::validation_mode_property`](ferroui_controls::NumberBox::validation_mode_property).
+    fn validation_mode<M>(self, value: impl IntoProp<ferroui_controls::NumberBoxValidationMode, M>) -> Self {
+        self.prop(<ferroui_controls::NumberBox>::validation_mode_property(), value)
+    }
+
+    /// Sets [`NumberBox::spin_button_placement_mode_property`](ferroui_controls::NumberBox::spin_button_placement_mode_property).
+    fn spin_button_placement_mode<M>(self, value: impl IntoProp<ferroui_controls::NumberBoxSpinButtonPlacementMode, M>) -> Self {
+        self.prop(<ferroui_controls::NumberBox>::spin_button_placement_mode_property(), value)
+    }
+
+    /// Sets [`NumberBox::is_wrap_enabled_property`](ferroui_controls::NumberBox::is_wrap_enabled_property).
+    fn is_wrap_enabled<M>(self, value: impl IntoProp<bool, M>) -> Self {
+        self.prop(<ferroui_controls::NumberBox>::is_wrap_enabled_property(), value)
+    }
+
+    /// Sets [`NumberBox::accepts_expression_property`](ferroui_controls::NumberBox::accepts_expression_property).
+    fn accepts_expression<M>(self, value: impl IntoProp<bool, M>) -> Self {
+        self.prop(<ferroui_controls::NumberBox>::accepts_expression_property(), value)
+    }
+}
+impl<T: ObjectType + Upcast<ferroui_controls::NumberBox>> NumberBoxProps for El<T> {}
 
 /// The properties and routed events of [`NumericUpDown`](ferroui_controls::NumericUpDown).
 pub trait NumericUpDownProps: ElementBuilder {
@@ -4791,6 +5509,15 @@ pub trait PathIconProps: ElementBuilder {
     }
 }
 impl<T: ObjectType + Upcast<ferroui_controls::PathIcon>> PathIconProps for El<T> {}
+
+/// The properties and routed events of [`PathIconSource`](ferroui_controls::PathIconSource).
+pub trait PathIconSourceProps: ElementBuilder {
+    /// Sets [`PathIconSource::data_property`](ferroui_controls::PathIconSource::data_property).
+    fn data<M>(self, value: impl IntoProp<Option<ferroui_base::Ref<ferroui_base::media::Geometry>>, M>) -> Self {
+        self.prop(<ferroui_controls::PathIconSource>::data_property(), value)
+    }
+}
+impl<T: ObjectType + Upcast<ferroui_controls::PathIconSource>> PathIconSourceProps for El<T> {}
 
 /// The properties and routed events of [`PathSegment`](ferroui_base::media::PathSegment).
 pub trait PathSegmentProps: ElementBuilder {
@@ -5154,6 +5881,35 @@ pub trait ProgressBarTemplateSettingsProps: ElementBuilder {
 }
 impl<T: ObjectType + Upcast<ferroui_controls::ProgressBarTemplateSettings>> ProgressBarTemplateSettingsProps for El<T> {}
 
+/// The properties and routed events of [`ProgressRing`](ferroui_controls::ProgressRing).
+pub trait ProgressRingProps: ElementBuilder {
+    /// Sets [`ProgressRing::is_active_property`](ferroui_controls::ProgressRing::is_active_property).
+    fn is_active<M>(self, value: impl IntoProp<bool, M>) -> Self {
+        self.prop(<ferroui_controls::ProgressRing>::is_active_property(), value)
+    }
+
+    /// Sets [`ProgressRing::is_indeterminate_property`](ferroui_controls::ProgressRing::is_indeterminate_property).
+    fn is_indeterminate<M>(self, value: impl IntoProp<bool, M>) -> Self {
+        self.prop(<ferroui_controls::ProgressRing>::is_indeterminate_property(), value)
+    }
+
+    /// Sets [`ProgressRing::value_property`](ferroui_controls::ProgressRing::value_property).
+    fn value<M>(self, value: impl IntoProp<f64, M>) -> Self {
+        self.prop(<ferroui_controls::ProgressRing>::value_property(), value)
+    }
+
+    /// Sets [`ProgressRing::minimum_property`](ferroui_controls::ProgressRing::minimum_property).
+    fn minimum<M>(self, value: impl IntoProp<f64, M>) -> Self {
+        self.prop(<ferroui_controls::ProgressRing>::minimum_property(), value)
+    }
+
+    /// Sets [`ProgressRing::maximum_property`](ferroui_controls::ProgressRing::maximum_property).
+    fn maximum<M>(self, value: impl IntoProp<f64, M>) -> Self {
+        self.prop(<ferroui_controls::ProgressRing>::maximum_property(), value)
+    }
+}
+impl<T: ObjectType + Upcast<ferroui_controls::ProgressRing>> ProgressRingProps for El<T> {}
+
 /// The properties and routed events of [`PullGestureRecognizer`](ferroui_base::input::gesture_recognizers::PullGestureRecognizer).
 pub trait PullGestureRecognizerProps: ElementBuilder {
     /// Sets [`PullGestureRecognizer::pull_direction_property`](ferroui_base::input::gesture_recognizers::PullGestureRecognizer::pull_direction_property).
@@ -5210,6 +5966,15 @@ pub trait RadioButtonProps: ElementBuilder {
 }
 impl<T: ObjectType + Upcast<ferroui_controls::RadioButton>> RadioButtonProps for El<T> {}
 
+/// The properties and routed events of [`RadioButtons`](ferroui_controls::RadioButtons).
+pub trait RadioButtonsProps: ElementBuilder {
+    /// Sets [`RadioButtons::max_columns_property`](ferroui_controls::RadioButtons::max_columns_property).
+    fn max_columns<M>(self, value: impl IntoProp<i32, M>) -> Self {
+        self.prop(<ferroui_controls::RadioButtons>::max_columns_property(), value)
+    }
+}
+impl<T: ObjectType + Upcast<ferroui_controls::RadioButtons>> RadioButtonsProps for El<T> {}
+
 /// The properties and routed events of [`RangeBase`](ferroui_controls::primitives::RangeBase).
 pub trait RangeBaseProps: ElementBuilder {
     /// Sets [`RangeBase::minimum_property`](ferroui_controls::primitives::RangeBase::minimum_property).
@@ -5243,6 +6008,118 @@ pub trait RangeBaseProps: ElementBuilder {
     }
 }
 impl<T: ObjectType + Upcast<ferroui_controls::primitives::RangeBase>> RangeBaseProps for El<T> {}
+
+/// The properties and routed events of [`RatingControl`](ferroui_controls::RatingControl).
+pub trait RatingControlProps: ElementBuilder {
+    /// Sets [`RatingControl::caption_property`](ferroui_controls::RatingControl::caption_property).
+    fn caption<M>(self, value: impl IntoProp<String, M>) -> Self {
+        self.prop(<ferroui_controls::RatingControl>::caption_property(), value)
+    }
+
+    /// Sets [`RatingControl::initial_set_value_property`](ferroui_controls::RatingControl::initial_set_value_property).
+    fn initial_set_value<M>(self, value: impl IntoProp<i32, M>) -> Self {
+        self.prop(<ferroui_controls::RatingControl>::initial_set_value_property(), value)
+    }
+
+    /// Sets [`RatingControl::is_clear_enabled_property`](ferroui_controls::RatingControl::is_clear_enabled_property).
+    fn is_clear_enabled<M>(self, value: impl IntoProp<bool, M>) -> Self {
+        self.prop(<ferroui_controls::RatingControl>::is_clear_enabled_property(), value)
+    }
+
+    /// Sets [`RatingControl::is_read_only_property`](ferroui_controls::RatingControl::is_read_only_property).
+    fn is_read_only<M>(self, value: impl IntoProp<bool, M>) -> Self {
+        self.prop(<ferroui_controls::RatingControl>::is_read_only_property(), value)
+    }
+
+    /// Sets [`RatingControl::max_rating_property`](ferroui_controls::RatingControl::max_rating_property).
+    fn max_rating<M>(self, value: impl IntoProp<i32, M>) -> Self {
+        self.prop(<ferroui_controls::RatingControl>::max_rating_property(), value)
+    }
+
+    /// Sets [`RatingControl::placeholder_value_property`](ferroui_controls::RatingControl::placeholder_value_property).
+    fn placeholder_value<M>(self, value: impl IntoProp<f64, M>) -> Self {
+        self.prop(<ferroui_controls::RatingControl>::placeholder_value_property(), value)
+    }
+
+    /// Sets [`RatingControl::item_info_property`](ferroui_controls::RatingControl::item_info_property).
+    fn item_info<M>(self, value: impl IntoProp<Option<ferroui_base::Ref<ferroui_controls::RatingItemInfo>>, M>) -> Self {
+        self.prop(<ferroui_controls::RatingControl>::item_info_property(), value)
+    }
+
+    /// Sets [`RatingControl::value_property`](ferroui_controls::RatingControl::value_property).
+    fn value<M>(self, value: impl IntoProp<f64, M>) -> Self {
+        self.prop(<ferroui_controls::RatingControl>::value_property(), value)
+    }
+}
+impl<T: ObjectType + Upcast<ferroui_controls::RatingControl>> RatingControlProps for El<T> {}
+
+/// The properties and routed events of [`RatingItemFontInfo`](ferroui_controls::RatingItemFontInfo).
+pub trait RatingItemFontInfoProps: ElementBuilder {
+    /// Sets [`RatingItemFontInfo::glyph_property`](ferroui_controls::RatingItemFontInfo::glyph_property).
+    fn glyph<M>(self, value: impl IntoProp<String, M>) -> Self {
+        self.prop(<ferroui_controls::RatingItemFontInfo>::glyph_property(), value)
+    }
+
+    /// Sets [`RatingItemFontInfo::disabled_glyph_property`](ferroui_controls::RatingItemFontInfo::disabled_glyph_property).
+    fn disabled_glyph<M>(self, value: impl IntoProp<String, M>) -> Self {
+        self.prop(<ferroui_controls::RatingItemFontInfo>::disabled_glyph_property(), value)
+    }
+
+    /// Sets [`RatingItemFontInfo::pointer_over_glyph_property`](ferroui_controls::RatingItemFontInfo::pointer_over_glyph_property).
+    fn pointer_over_glyph<M>(self, value: impl IntoProp<String, M>) -> Self {
+        self.prop(<ferroui_controls::RatingItemFontInfo>::pointer_over_glyph_property(), value)
+    }
+
+    /// Sets [`RatingItemFontInfo::pointer_over_placeholder_glyph_property`](ferroui_controls::RatingItemFontInfo::pointer_over_placeholder_glyph_property).
+    fn pointer_over_placeholder_glyph<M>(self, value: impl IntoProp<String, M>) -> Self {
+        self.prop(<ferroui_controls::RatingItemFontInfo>::pointer_over_placeholder_glyph_property(), value)
+    }
+
+    /// Sets [`RatingItemFontInfo::placeholder_glyph_property`](ferroui_controls::RatingItemFontInfo::placeholder_glyph_property).
+    fn placeholder_glyph<M>(self, value: impl IntoProp<String, M>) -> Self {
+        self.prop(<ferroui_controls::RatingItemFontInfo>::placeholder_glyph_property(), value)
+    }
+
+    /// Sets [`RatingItemFontInfo::unset_glyph_property`](ferroui_controls::RatingItemFontInfo::unset_glyph_property).
+    fn unset_glyph<M>(self, value: impl IntoProp<String, M>) -> Self {
+        self.prop(<ferroui_controls::RatingItemFontInfo>::unset_glyph_property(), value)
+    }
+}
+impl<T: ObjectType + Upcast<ferroui_controls::RatingItemFontInfo>> RatingItemFontInfoProps for El<T> {}
+
+/// The properties and routed events of [`RatingItemImageInfo`](ferroui_controls::RatingItemImageInfo).
+pub trait RatingItemImageInfoProps: ElementBuilder {
+    /// Sets [`RatingItemImageInfo::image_property`](ferroui_controls::RatingItemImageInfo::image_property).
+    fn image<M>(self, value: impl IntoProp<Option<std::rc::Rc<dyn ferroui_base::media::IImage>>, M>) -> Self {
+        self.prop(<ferroui_controls::RatingItemImageInfo>::image_property(), value)
+    }
+
+    /// Sets [`RatingItemImageInfo::disabled_image_property`](ferroui_controls::RatingItemImageInfo::disabled_image_property).
+    fn disabled_image<M>(self, value: impl IntoProp<Option<std::rc::Rc<dyn ferroui_base::media::IImage>>, M>) -> Self {
+        self.prop(<ferroui_controls::RatingItemImageInfo>::disabled_image_property(), value)
+    }
+
+    /// Sets [`RatingItemImageInfo::pointer_over_image_property`](ferroui_controls::RatingItemImageInfo::pointer_over_image_property).
+    fn pointer_over_image<M>(self, value: impl IntoProp<Option<std::rc::Rc<dyn ferroui_base::media::IImage>>, M>) -> Self {
+        self.prop(<ferroui_controls::RatingItemImageInfo>::pointer_over_image_property(), value)
+    }
+
+    /// Sets [`RatingItemImageInfo::pointer_over_placeholder_image_property`](ferroui_controls::RatingItemImageInfo::pointer_over_placeholder_image_property).
+    fn pointer_over_placeholder_image<M>(self, value: impl IntoProp<Option<std::rc::Rc<dyn ferroui_base::media::IImage>>, M>) -> Self {
+        self.prop(<ferroui_controls::RatingItemImageInfo>::pointer_over_placeholder_image_property(), value)
+    }
+
+    /// Sets [`RatingItemImageInfo::placeholder_image_property`](ferroui_controls::RatingItemImageInfo::placeholder_image_property).
+    fn placeholder_image<M>(self, value: impl IntoProp<Option<std::rc::Rc<dyn ferroui_base::media::IImage>>, M>) -> Self {
+        self.prop(<ferroui_controls::RatingItemImageInfo>::placeholder_image_property(), value)
+    }
+
+    /// Sets [`RatingItemImageInfo::unset_image_property`](ferroui_controls::RatingItemImageInfo::unset_image_property).
+    fn unset_image<M>(self, value: impl IntoProp<Option<std::rc::Rc<dyn ferroui_base::media::IImage>>, M>) -> Self {
+        self.prop(<ferroui_controls::RatingItemImageInfo>::unset_image_property(), value)
+    }
+}
+impl<T: ObjectType + Upcast<ferroui_controls::RatingItemImageInfo>> RatingItemImageInfoProps for El<T> {}
 
 /// The properties and routed events of [`Rectangle`](ferroui_controls::shapes::Rectangle).
 pub trait RectangleProps: ElementBuilder {
@@ -6171,6 +7048,24 @@ pub trait SwipeGestureRecognizerProps: ElementBuilder {
     }
 }
 impl<T: ObjectType + Upcast<ferroui_base::input::gesture_recognizers::SwipeGestureRecognizer>> SwipeGestureRecognizerProps for El<T> {}
+
+/// The properties and routed events of [`SymbolIcon`](ferroui_controls::SymbolIcon).
+pub trait SymbolIconProps: ElementBuilder {
+    /// Sets [`SymbolIcon::symbol_property`](ferroui_controls::SymbolIcon::symbol_property).
+    fn symbol<M>(self, value: impl IntoProp<ferroui_controls::Symbol, M>) -> Self {
+        self.prop(<ferroui_controls::SymbolIcon>::symbol_property(), value)
+    }
+}
+impl<T: ObjectType + Upcast<ferroui_controls::SymbolIcon>> SymbolIconProps for El<T> {}
+
+/// The properties and routed events of [`SymbolIconSource`](ferroui_controls::SymbolIconSource).
+pub trait SymbolIconSourceProps: ElementBuilder {
+    /// Sets [`SymbolIconSource::symbol_property`](ferroui_controls::SymbolIconSource::symbol_property).
+    fn symbol<M>(self, value: impl IntoProp<ferroui_controls::Symbol, M>) -> Self {
+        self.prop(<ferroui_controls::SymbolIconSource>::symbol_property(), value)
+    }
+}
+impl<T: ObjectType + Upcast<ferroui_controls::SymbolIconSource>> SymbolIconSourceProps for El<T> {}
 
 /// The properties and routed events of [`TabControl`](ferroui_controls::TabControl).
 pub trait TabControlProps: ElementBuilder {
@@ -7980,6 +8875,16 @@ pub trait AttachedProps: ElementBuilder {
     /// Sets the attached [`HotKeyManager::hot_key_property`](ferroui_controls::HotKeyManager::hot_key_property).
     fn hot_key_manager_hot_key<M>(self, value: impl IntoProp<Option<ferroui_base::input::KeyGesture>, M>) -> Self {
         self.prop(<ferroui_controls::HotKeyManager>::hot_key_property(), value)
+    }
+
+    /// Sets the attached [`InfoBarPanel::horizontal_orientation_margin_property`](ferroui_controls::InfoBarPanel::horizontal_orientation_margin_property).
+    fn info_bar_panel_horizontal_orientation_margin<M>(self, value: impl IntoProp<ferroui_base::Thickness, M>) -> Self {
+        self.prop(<ferroui_controls::InfoBarPanel>::horizontal_orientation_margin_property(), value)
+    }
+
+    /// Sets the attached [`InfoBarPanel::vertical_orientation_margin_property`](ferroui_controls::InfoBarPanel::vertical_orientation_margin_property).
+    fn info_bar_panel_vertical_orientation_margin<M>(self, value: impl IntoProp<ferroui_base::Thickness, M>) -> Self {
+        self.prop(<ferroui_controls::InfoBarPanel>::vertical_orientation_margin_property(), value)
     }
 
     /// Sets the attached [`Inline::text_decorations_property`](ferroui_controls::documents::Inline::text_decorations_property).

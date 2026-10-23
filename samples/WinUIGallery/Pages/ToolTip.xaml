@@ -1,0 +1,4 @@
+<!-- Adapted from the pinned Microsoft WinUI Gallery; see ../NOTICE.md. -->
+<StackPanel xmlns="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Spacing="12">
+  <Button Content="Show a simple ToolTip." ToolTip.Tip="Simple ToolTip"/><TextBlock Text="This text also has a tool tip" ToolTip.Tip="More information about this text"/>
+</StackPanel>

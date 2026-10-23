@@ -1,0 +1,456 @@
+{
+  "command": "CARGO_BUILD_JOBS=1 CARGO_INCREMENTAL=0 CARGO_PROFILE_DEV_DEBUG=0 CARGO_PROFILE_TEST_DEBUG=0 cargo test --locked --offline -p ferroui-controls --features testing,ferroui-base/compiler-metadata,ferroui-base/markup-functions --test winui_navigation\nCARGO_BUILD_JOBS=1 CARGO_INCREMENTAL=0 CARGO_PROFILE_DEV_DEBUG=0 CARGO_PROFILE_TEST_DEBUG=0 cargo test --locked --offline -p ferroui-controls --features testing,ferroui-base/compiler-metadata,ferroui-base/markup-functions --test winui_number_box\nCARGO_BUILD_JOBS=1 CARGO_INCREMENTAL=0 CARGO_PROFILE_DEV_DEBUG=0 CARGO_PROFILE_TEST_DEBUG=0 cargo test --locked --offline -p ferroui-controls --features testing,ferroui-base/compiler-metadata,ferroui-base/markup-functions --test winui_icons\nCARGO_BUILD_JOBS=1 CARGO_INCREMENTAL=0 CARGO_PROFILE_DEV_DEBUG=0 CARGO_PROFILE_TEST_DEBUG=0 cargo test --locked --offline -p ferroui-controls --features testing,ferroui-base/compiler-metadata,ferroui-base/markup-functions --test winui_radio_buttons\nCARGO_BUILD_JOBS=1 CARGO_INCREMENTAL=0 CARGO_PROFILE_DEV_DEBUG=0 CARGO_PROFILE_TEST_DEBUG=0 cargo test --locked --offline -p ferroui-controls --features testing,ferroui-base/compiler-metadata,ferroui-base/markup-functions --test winui_auto_suggest_box\nCARGO_BUILD_JOBS=1 CARGO_INCREMENTAL=0 CARGO_PROFILE_DEV_DEBUG=0 CARGO_PROFILE_TEST_DEBUG=0 cargo test --locked --offline -p ferroui-controls --features testing,ferroui-base/compiler-metadata,ferroui-base/markup-functions --test winui_icon_sources\nCARGO_BUILD_JOBS=1 CARGO_INCREMENTAL=0 CARGO_PROFILE_DEV_DEBUG=0 CARGO_PROFILE_TEST_DEBUG=0 cargo test --locked --offline -p ferroui-controls --features testing,ferroui-base/compiler-metadata,ferroui-base/markup-functions --test winui_info_bar\nCARGO_BUILD_JOBS=1 CARGO_INCREMENTAL=0 CARGO_PROFILE_DEV_DEBUG=0 CARGO_PROFILE_TEST_DEBUG=0 cargo test --locked --offline -p ferroui-controls --features testing,ferroui-base/compiler-metadata,ferroui-base/markup-functions --test winui_info_badge\nCARGO_BUILD_JOBS=1 CARGO_INCREMENTAL=0 CARGO_PROFILE_DEV_DEBUG=0 CARGO_PROFILE_TEST_DEBUG=0 cargo test --locked --offline -p ferroui-controls --features testing,ferroui-base/compiler-metadata,ferroui-base/markup-functions --test winui_progress_ring\nCARGO_BUILD_JOBS=1 CARGO_INCREMENTAL=0 CARGO_PROFILE_DEV_DEBUG=0 CARGO_PROFILE_TEST_DEBUG=0 cargo test --locked --offline -p ferroui-controls --features testing,ferroui-base/compiler-metadata,ferroui-base/markup-functions --test winui_rating_control\nCARGO_BUILD_JOBS=1 CARGO_INCREMENTAL=0 CARGO_PROFILE_DEV_DEBUG=0 CARGO_PROFILE_TEST_DEBUG=0 cargo test --locked --offline -p ferroui-controls --features testing,ferroui-base/compiler-metadata,ferroui-base/markup-functions --test winui_navigation_view\nCARGO_BUILD_JOBS=1 CARGO_INCREMENTAL=0 CARGO_PROFILE_DEV_DEBUG=0 CARGO_PROFILE_TEST_DEBUG=0 cargo test --locked --offline -p ferroui-controls --features testing,ferroui-base/compiler-metadata,ferroui-base/markup-functions --test winui_navigation_items",
+  "commands": [
+    [
+      "cargo",
+      "test",
+      "--locked",
+      "--offline",
+      "-p",
+      "ferroui-controls",
+      "--features",
+      "testing,ferroui-base/compiler-metadata,ferroui-base/markup-functions",
+      "--test",
+      "winui_navigation"
+    ],
+    [
+      "cargo",
+      "test",
+      "--locked",
+      "--offline",
+      "-p",
+      "ferroui-controls",
+      "--features",
+      "testing,ferroui-base/compiler-metadata,ferroui-base/markup-functions",
+      "--test",
+      "winui_number_box"
+    ],
+    [
+      "cargo",
+      "test",
+      "--locked",
+      "--offline",
+      "-p",
+      "ferroui-controls",
+      "--features",
+      "testing,ferroui-base/compiler-metadata,ferroui-base/markup-functions",
+      "--test",
+      "winui_icons"
+    ],
+    [
+      "cargo",
+      "test",
+      "--locked",
+      "--offline",
+      "-p",
+      "ferroui-controls",
+      "--features",
+      "testing,ferroui-base/compiler-metadata,ferroui-base/markup-functions",
+      "--test",
+      "winui_radio_buttons"
+    ],
+    [
+      "cargo",
+      "test",
+      "--locked",
+      "--offline",
+      "-p",
+      "ferroui-controls",
+      "--features",
+      "testing,ferroui-base/compiler-metadata,ferroui-base/markup-functions",
+      "--test",
+      "winui_auto_suggest_box"
+    ],
+    [
+      "cargo",
+      "test",
+      "--locked",
+      "--offline",
+      "-p",
+      "ferroui-controls",
+      "--features",
+      "testing,ferroui-base/compiler-metadata,ferroui-base/markup-functions",
+      "--test",
+      "winui_icon_sources"
+    ],
+    [
+      "cargo",
+      "test",
+      "--locked",
+      "--offline",
+      "-p",
+      "ferroui-controls",
+      "--features",
+      "testing,ferroui-base/compiler-metadata,ferroui-base/markup-functions",
+      "--test",
+      "winui_info_bar"
+    ],
+    [
+      "cargo",
+      "test",
+      "--locked",
+      "--offline",
+      "-p",
+      "ferroui-controls",
+      "--features",
+      "testing,ferroui-base/compiler-metadata,ferroui-base/markup-functions",
+      "--test",
+      "winui_info_badge"
+    ],
+    [
+      "cargo",
+      "test",
+      "--locked",
+      "--offline",
+      "-p",
+      "ferroui-controls",
+      "--features",
+      "testing,ferroui-base/compiler-metadata,ferroui-base/markup-functions",
+      "--test",
+      "winui_progress_ring"
+    ],
+    [
+      "cargo",
+      "test",
+      "--locked",
+      "--offline",
+      "-p",
+      "ferroui-controls",
+      "--features",
+      "testing,ferroui-base/compiler-metadata,ferroui-base/markup-functions",
+      "--test",
+      "winui_rating_control"
+    ],
+    [
+      "cargo",
+      "test",
+      "--locked",
+      "--offline",
+      "-p",
+      "ferroui-controls",
+      "--features",
+      "testing,ferroui-base/compiler-metadata,ferroui-base/markup-functions",
+      "--test",
+      "winui_navigation_view"
+    ],
+    [
+      "cargo",
+      "test",
+      "--locked",
+      "--offline",
+      "-p",
+      "ferroui-controls",
+      "--features",
+      "testing,ferroui-base/compiler-metadata,ferroui-base/markup-functions",
+      "--test",
+      "winui_navigation_items"
+    ]
+  ],
+  "passed_tests": [
+    "auto_layout_preserves_exact_threshold_edges_and_user_forced_close",
+    "automation_has_selection_and_conditional_expansion_without_an_invoke_pattern",
+    "automation_respects_nonselecting_items_and_disabled_input",
+    "bubbling_child_keyboard_events_do_not_change_the_ancestors_expansion",
+    "clearing_a_badge_removes_its_visual_and_keeps_the_item_available",
+    "clearing_an_attached_template_disconnects_retained_parts_and_restores_native_content",
+    "closed_left_and_minimal_panes_propagate_native_item_context_and_expansion_memory",
+    "collapsed_children_do_not_consume_layout_and_expanding_restores_them",
+    "compact_context_restores_expansion_and_public_expand_ignores_leaf_items",
+    "cyclic_item_hierarchies_are_rejected_before_visuals_or_context_recursion",
+    "data_templates_can_generate_headings_separators_and_items_with_original_models",
+    "defaults_and_read_only_properties_preserve_source_inheritance_and_per_instance_collections",
+    "disabled_and_nonselecting_items_preserve_selection_and_programmatic_suppression_invokes",
+    "escape_close_is_cancellable_but_explicit_close_keeps_its_source_semantics",
+    "expansion_direction_skips_nonfocusable_children_in_ltr_and_rtl",
+    "expansion_events_support_lazy_children_and_footer_settings_selection",
+    "explicit_and_data_children_are_live_and_existing_data_containers_survive_edits",
+    "explicit_modes_drive_native_split_geometry_and_top_reparenting",
+    "focus_following_raises_invocation_once_and_keyboard_navigation_moves_native_focus",
+    "focus_following_reaches_popup_hierarchy_without_invoking_ancestors",
+    "focus_subscriptions_preserve_redirects_and_detach_after_retemplate_removal_and_drop",
+    "footer_source_switching_and_typed_header_template_update_native_parts",
+    "header_and_separator_are_native_nonfocusable_items_with_replaceable_templates",
+    "icon_content_and_badge_are_real_live_native_children_and_can_be_replaced",
+    "invocation_precedes_selected_flags_and_selection_changed_and_repeat_is_not_a_change",
+    "invocation_redirected_by_application_commits_only_the_final_selection",
+    "keyboard_expansion_mirrors_rtl_and_does_not_expand_leaf_items",
+    "live_header_content_search_overlay_and_pane_visibility_use_actual_presenters",
+    "menu_items_remain_writable_while_source_is_active_and_return_when_source_is_cleared",
+    "mode_and_pane_events_expose_exact_values_and_source_enum_numbers",
+    "native_style_adaptations_preserve_local_priority_and_clear_their_own_values",
+    "navigation_defaults_and_read_only_collections_are_instance_owned",
+    "nested_automation_selection_invokes_and_finds_its_container_after_popup_reparenting",
+    "nested_control_items_preserve_live_inherited_application_data_context",
+    "nested_selection_updates_ancestor_state_and_clears_after_child_removal",
+    "owned_automation_expansion_obeys_active_empty_source_precedence",
+    "pane_lengths_coerce_negative_values_without_changing_existing_split_view_defaults",
+    "pane_opening_reentrancy_does_not_raise_a_stale_opened_event",
+    "pending_selection_completes_once_for_the_current_model_with_or_without_a_container",
+    "popup_directional_keys_follow_vertical_tree_and_top_roots_follow_flow_direction",
+    "queued_selection_completion_does_not_keep_navigation_alive",
+    "reentrant_menu_template_changes_rebuild_generated_containers_with_the_new_factory",
+    "replacing_a_source_detaches_its_listener_and_observes_the_replacement",
+    "replacing_template_disconnects_old_buttons_and_preserves_selected_containers",
+    "retained_external_sources_and_old_template_parts_do_not_keep_the_item_alive",
+    "retained_owned_expansion_provider_rechecks_children_after_removal",
+    "retemplating_custom_presenters_clears_null_data_factories_before_content",
+    "retemplating_detaches_old_buttons_and_releases_old_visual_ownership",
+    "selected_item_state_is_stable_when_disposed_listeners_and_removed_items_are_retained",
+    "selection_indicator_uses_own_selection_or_a_hidden_selected_child",
+    "selection_peer_reports_native_container_and_does_not_keep_control_alive",
+    "source_change_notifications_allow_reentrant_collection_mutation",
+    "source_collections_remain_live_and_preserve_model_and_container_identities",
+    "toggle_force_close_mode_reset_and_pane_visibility_follow_source_transitions",
+    "unrealized_children_expose_a_chevron_and_support_lazy_population"
+  ],
+  "platform": "Linux x86_64; rustc 1.99.0 (b940084d7 2026-09-28)",
+  "result": "passed",
+  "result_log_sha256": "52fc6ba8e9b658544d90d1c372f95b49eebc9f122971b0946b34fa5eaf05c291",
+  "result_logs": [
+    {
+      "command": [
+        "cargo",
+        "test",
+        "--locked",
+        "--offline",
+        "-p",
+        "ferroui-controls",
+        "--features",
+        "testing,ferroui-base/compiler-metadata,ferroui-base/markup-functions",
+        "--test",
+        "winui_navigation"
+      ],
+      "log_sha256": "fa328a2caa646a516c11f97b040c5ee1fbdaef82e03e8aa43e69ce7b83ebde64",
+      "result_lines": [
+        "test result: ok. 17 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.03s"
+      ],
+      "step": "native-winui_navigation"
+    },
+    {
+      "command": [
+        "cargo",
+        "test",
+        "--locked",
+        "--offline",
+        "-p",
+        "ferroui-controls",
+        "--features",
+        "testing,ferroui-base/compiler-metadata,ferroui-base/markup-functions",
+        "--test",
+        "winui_number_box"
+      ],
+      "log_sha256": "740b9a63df7ef9d0d245749cc19da9e803fa845437b3a27983d41b0f9a2ba696",
+      "result_lines": [
+        "test result: ok. 14 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.02s"
+      ],
+      "step": "native-winui_number_box"
+    },
+    {
+      "command": [
+        "cargo",
+        "test",
+        "--locked",
+        "--offline",
+        "-p",
+        "ferroui-controls",
+        "--features",
+        "testing,ferroui-base/compiler-metadata,ferroui-base/markup-functions",
+        "--test",
+        "winui_icons"
+      ],
+      "log_sha256": "460917a7ec3b10ca1fc273175ce33cf1aa19e86318ee61880c00b970b7396e6e",
+      "result_lines": [
+        "test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.05s"
+      ],
+      "step": "native-winui_icons"
+    },
+    {
+      "command": [
+        "cargo",
+        "test",
+        "--locked",
+        "--offline",
+        "-p",
+        "ferroui-controls",
+        "--features",
+        "testing,ferroui-base/compiler-metadata,ferroui-base/markup-functions",
+        "--test",
+        "winui_radio_buttons"
+      ],
+      "log_sha256": "e588023c6ea096d1e94464bc721cd1ab390f3c12b3090c9520d5ef5e31975b99",
+      "result_lines": [
+        "test result: ok. 9 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.06s"
+      ],
+      "step": "native-winui_radio_buttons"
+    },
+    {
+      "command": [
+        "cargo",
+        "test",
+        "--locked",
+        "--offline",
+        "-p",
+        "ferroui-controls",
+        "--features",
+        "testing,ferroui-base/compiler-metadata,ferroui-base/markup-functions",
+        "--test",
+        "winui_auto_suggest_box"
+      ],
+      "log_sha256": "ef3ed1d7fad6d77ea5d60934d73175b8aa66b7b0da96fa924e23134d75be2f95",
+      "result_lines": [
+        "test result: ok. 13 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.03s"
+      ],
+      "step": "native-winui_auto_suggest_box"
+    },
+    {
+      "command": [
+        "cargo",
+        "test",
+        "--locked",
+        "--offline",
+        "-p",
+        "ferroui-controls",
+        "--features",
+        "testing,ferroui-base/compiler-metadata,ferroui-base/markup-functions",
+        "--test",
+        "winui_icon_sources"
+      ],
+      "log_sha256": "7fffadec3b7cee7f8ea9690653a88d2d7f55aaf615ea2d7bc72fd43c8cb54d14",
+      "result_lines": [
+        "test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.03s"
+      ],
+      "step": "native-winui_icon_sources"
+    },
+    {
+      "command": [
+        "cargo",
+        "test",
+        "--locked",
+        "--offline",
+        "-p",
+        "ferroui-controls",
+        "--features",
+        "testing,ferroui-base/compiler-metadata,ferroui-base/markup-functions",
+        "--test",
+        "winui_info_bar"
+      ],
+      "log_sha256": "b7230b4d0585e57da44952c909541eccc53541f764df7969d1b2cb5bff0a81a4",
+      "result_lines": [
+        "test result: ok. 10 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.06s"
+      ],
+      "step": "native-winui_info_bar"
+    },
+    {
+      "command": [
+        "cargo",
+        "test",
+        "--locked",
+        "--offline",
+        "-p",
+        "ferroui-controls",
+        "--features",
+        "testing,ferroui-base/compiler-metadata,ferroui-base/markup-functions",
+        "--test",
+        "winui_info_badge"
+      ],
+      "log_sha256": "00fcf4cf5b43a5662e26ba49ea0bd2abc4e7ee76f06ce29fbdb8ded73cbe7616",
+      "result_lines": [
+        "test result: ok. 13 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.06s"
+      ],
+      "step": "native-winui_info_badge"
+    },
+    {
+      "command": [
+        "cargo",
+        "test",
+        "--locked",
+        "--offline",
+        "-p",
+        "ferroui-controls",
+        "--features",
+        "testing,ferroui-base/compiler-metadata,ferroui-base/markup-functions",
+        "--test",
+        "winui_progress_ring"
+      ],
+      "log_sha256": "983854042a5bef2e2efba4298d1d9bcfddd532fb764c18f35c74ded7a7938009",
+      "result_lines": [
+        "test result: ok. 16 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.06s"
+      ],
+      "step": "native-winui_progress_ring"
+    },
+    {
+      "command": [
+        "cargo",
+        "test",
+        "--locked",
+        "--offline",
+        "-p",
+        "ferroui-controls",
+        "--features",
+        "testing,ferroui-base/compiler-metadata,ferroui-base/markup-functions",
+        "--test",
+        "winui_rating_control"
+      ],
+      "log_sha256": "10a337d3a1e37f242fc88d5eed46f20d7d608568cd62cbe47f5a9ca413b3586b",
+      "result_lines": [
+        "test result: ok. 21 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.08s"
+      ],
+      "step": "native-winui_rating_control"
+    },
+    {
+      "command": [
+        "cargo",
+        "test",
+        "--locked",
+        "--offline",
+        "-p",
+        "ferroui-controls",
+        "--features",
+        "testing,ferroui-base/compiler-metadata,ferroui-base/markup-functions",
+        "--test",
+        "winui_navigation_view"
+      ],
+      "log_sha256": "40210d79e64a751d0f5e5c91a7bab7b27a0b697154523883047e4e45d023c7b9",
+      "result_lines": [
+        "test result: ok. 32 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.18s"
+      ],
+      "step": "native-winui_navigation_view"
+    },
+    {
+      "command": [
+        "cargo",
+        "test",
+        "--locked",
+        "--offline",
+        "-p",
+        "ferroui-controls",
+        "--features",
+        "testing,ferroui-base/compiler-metadata,ferroui-base/markup-functions",
+        "--test",
+        "winui_navigation_items"
+      ],
+      "log_sha256": "4ad0132f228bb5f5098e097ecc7817a86e254714a2c974876e4f80ac4698bf1a",
+      "result_lines": [
+        "test result: ok. 23 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.10s"
+      ],
+      "step": "native-winui_navigation_items"
+    }
+  ],
+  "schema_version": 1,
+  "scope": "55 focused NavigationView and item tests plus all 127 earlier WinUI control tests: 182 passed across 12 serialized targets. Every source hash was checked before and after each target. Tests exercise native property, collection, selection, focus, keyboard, dispatcher, layout, popup, template and automation services. This records bounded partial behavior; top overflow/redistribution, public template settings/presenters, selectors, OS title-bar/acrylic/transition behavior, raw gamepad/shoulder input, localization and Windows visual/accessibility acceptance remain unverified.",
+  "source_commit": "9ce7530c2e4cde9d2d04870dda1d9c0afdef5baa",
+  "source_sha256": {
+    "src/FerroUI.Controls/tests/winui_navigation_items.rs": "973505c13af20aa6e67a39d054c5292c31b7c06bac945b1258414ddd5eb41ecb",
+    "src/FerroUI.Controls/tests/winui_navigation_view.rs": "f457ef8ab720f4f07eae7e8249981cba7698a506005c9433d9d2bf0e5c5f8835",
+    "src/FerroUI.Controls/winui/navigation_view.rs": "ed6d4326785c402e8cdc16eead091da0812dc83c2c921bc2f5cb082ceec94dd9",
+    "src/FerroUI.Controls/winui/navigation_view_automation_peer.rs": "285b435445cca2aad1d2818ba8e6564f8c6102718641456c764c0359ac361753",
+    "src/FerroUI.Controls/winui/navigation_view_events.rs": "e981f0b7abf2793d25282844924b81a3e3e658ef7754269fe8bd5de38ef7a0df",
+    "src/FerroUI.Controls/winui/navigation_view_item.rs": "6c27f26ef05dd01636d6c2653b796c32b5b654ed349349d8848d647e748f2b29",
+    "src/FerroUI.Controls/winui/navigation_view_item_automation_peer.rs": "42423e7e02ceca7a1789cc1afb2bef23ed217d6d3c57bf11bc6aa9a6bbb2dbef"
+  },
+  "test_targets": {
+    "winui_navigation_items": 23,
+    "winui_navigation_view": 32
+  },
+  "total_native_test_count": 182
+}

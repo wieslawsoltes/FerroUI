@@ -1,0 +1,197 @@
+name: WinUI and Gallery parity
+
+on:
+  pull_request:
+    paths:
+      - 'src/**'
+      - 'samples/WinUIGallery/**'
+      - 'tests/FerroUI.Markup.Xaml.UnitTests/**'
+      - 'scripts/winui-gallery/**'
+      - 'scripts/port-status/rustscan.py'
+      - 'scripts/generate_view_builders.py'
+      - 'scripts/generate_markup_types.py'
+      - 'scripts/rust_paths.py'
+      - 'docs/porting/winui-gallery/**'
+      - 'Cargo.toml'
+      - 'Cargo.lock'
+      - '.github/workflows/winui-gallery.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'src/**'
+      - 'samples/WinUIGallery/**'
+      - 'tests/FerroUI.Markup.Xaml.UnitTests/**'
+      - 'scripts/winui-gallery/**'
+      - 'scripts/port-status/rustscan.py'
+      - 'scripts/generate_view_builders.py'
+      - 'scripts/generate_markup_types.py'
+      - 'scripts/rust_paths.py'
+      - 'docs/porting/winui-gallery/**'
+      - 'Cargo.toml'
+      - 'Cargo.lock'
+      - '.github/workflows/winui-gallery.yml'
+  workflow_dispatch:
+    inputs:
+      require_complete:
+        description: 'Require every public API contract and Gallery example to have current execution evidence'
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+concurrency:
+  group: winui-gallery-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  comparison:
+    name: Pinned source comparison and port evidence
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - name: Scanner, glyph and namespace regression tests
+        run: python3 -m unittest discover -s scripts/winui-gallery -p 'test_*.py'
+      - name: Exact offline comparison
+        run: python3 scripts/winui-gallery/scan.py --check
+      - name: Preserve the existing FerroUI declared API surface
+        run: python3 scripts/winui-gallery/existing_api.py --check
+      - name: Exact inherited WinUI event targets
+        run: python3 scripts/winui-gallery/event_targets.py --check
+      - name: Complete Symbol enum and glyph map
+        run: python3 scripts/winui-gallery/symbol_map.py --check
+      - name: Declarative builders expose native controls and preserve existing APIs
+        run: python3 scripts/generate_view_builders.py --check
+      - name: Native public Rust path registries are current
+        run: python3 scripts/generate_markup_types.py --target rust-paths --check
+      - name: Publish measured state in the run summary
+        run: cat docs/porting/winui-gallery/data/REPORT.md >> "$GITHUB_STEP_SUMMARY"
+      # A fresh map is not a complete port. This separately named acceptance
+      # gate remains opt-in while the report explicitly records partial work.
+      - name: Require complete recorded API/page evidence
+        if: github.event_name == 'workflow_dispatch' && inputs.require_complete
+        run: python3 scripts/winui-gallery/scan.py --check --require-complete
+
+  contracts:
+    name: Native control, XAML and Gallery contracts
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    env:
+      CARGO_INCREMENTAL: 0
+      CARGO_PROFILE_DEV_DEBUG: 0
+      CARGO_PROFILE_TEST_DEBUG: 0
+      CARGO_BUILD_JOBS: 2
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: dtolnay/rust-toolchain@89b12181fb390509a0842a86cc55eeb8eb928c1d # stable
+      - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2
+      - name: Native control behaviors derived from WinUI contracts
+        run: >-
+          cargo test --locked -p ferroui-controls --features testing
+          --test winui_navigation --test winui_number_box --test winui_icons
+          --test winui_radio_buttons --test winui_auto_suggest_box
+          --test winui_icon_sources --test winui_info_bar
+          --test winui_info_badge --test winui_progress_ring --test winui_rating_control
+          --test winui_navigation_view --test winui_navigation_items
+      - name: Local values and animation precedence
+        run: >-
+          cargo test --locked -p ferroui-base --features testing
+          --lib ferro_object_tests_get_value
+      - name: WinUI binding initialization, tracking and source lifetime
+        run: cargo test --locked -p ferroui-markup-xaml --test winui_bindings
+      - name: XAML migration and runtime diagnostics
+        run: cargo test --locked -p ferroui-markup-xaml-loader --test winui_migration
+      - name: Compiled and interpreted WinUI binding agreement
+        run: cargo test --locked -p ferroui-markup-xaml-loader --features emitter --test winui_compiled
+      - name: Deferred resource error isolation
+        run: 'cargo test --locked -p ferroui-markup-xaml --lib xaml_error_scope::'
+      - name: WinUI theme contracts and exact generated reference
+        run: cargo test --locked -p ferroui-themes-winui --lib
+      - name: Existing themes preserve native control template fallback
+        run: >-
+          cargo test --locked -p ferroui-themes-fluent -p ferroui-themes-simple
+          --lib tests::control_theme_tests::should_define_control_theme_for_built_in_templated_controls
+          -- --exact
+      - name: Registered public Rust paths and generated accessors
+        run: cargo test --locked -p ferroui-markup-xaml-tests --lib emitter::rust_paths_tests
+      - name: Gallery controls, interactions and original source catalog
+        run: cargo test --locked -p winui-gallery --lib
+      - name: Declarative API compilation
+        run: cargo check --locked -p ferroui-view
+
+  rendering:
+    name: Native Gallery rendering
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    env:
+      CARGO_INCREMENTAL: 0
+      CARGO_PROFILE_DEV_DEBUG: 0
+      CARGO_BUILD_JOBS: 2
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: dtolnay/rust-toolchain@89b12181fb390509a0842a86cc55eeb8eb928c1d # stable
+      - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2
+      - name: Native font dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends libfontconfig1-dev libfreetype6-dev fonts-dejavu-core pkg-config
+      - name: Render every catalog page with Skia and HarfBuzz
+        run: >-
+          cargo run --locked -p winui-gallery --features capture
+          --bin winui-gallery-capture -- --all --output-dir=gallery-captures/light
+      - name: Render representative controls in the dark theme
+        run: >-
+          cargo run --locked -p winui-gallery --features capture
+          --bin winui-gallery-capture -- --pages=NumberBox,RadioButton,AutoSuggestBox,InfoBar,InfoBadge,ProgressRing,RatingControl,CompactSizing,NavigationView,ColorPicker,ConnectedAnimation,Image,FlipView
+          --dark --query=Button --output-dir=gallery-captures/dark
+      - name: Render all eight NavigationView compositions in both themes
+        run: |
+          for theme in light dark; do
+            theme_args=()
+            if [ "$theme" = dark ]; then
+              theme_args=(--dark)
+            fi
+            for control in nvSample5 nvSample6 nvSample2 nvSample7 nvSample4 nvSample9 nvSample8 nvSample; do
+              cargo run --locked -p winui-gallery --features capture --bin winui-gallery-capture -- \
+                --pages=NavigationView --control="$control" "${theme_args[@]}" \
+                --output-dir="gallery-captures/$theme"
+            done
+          done
+      - name: Render every new native reuse composition in both themes
+        run: |
+          for theme in light dark; do
+            theme_args=()
+            if [ "$theme" = dark ]; then
+              theme_args=(--dark)
+            fi
+            for entry in \
+              ColorPicker:ColorPickerExample1 \
+              ConnectedAnimation:ConnectedCollectionFrame \
+              ConnectedAnimation:ConnectedCardFrame \
+              ConnectedAnimation:ConnectedContentFrame \
+              ConnectedAnimation:ConnectedRepeaterFrame \
+              Image:ImageExample1 Image:ImageExample2 Image:ImageExample3 \
+              Image:ImageExample4 Image:ImageExample5 Image:ImageExample6 \
+              FlipView:FlipViewExample1 FlipView:FlipViewExample2 FlipView:FlipViewExample3; do
+              cargo run --locked -p winui-gallery --features capture --bin winui-gallery-capture -- \
+                --pages="${entry%%:*}" --control="${entry#*:}" "${theme_args[@]}" \
+                --output-dir="gallery-captures/$theme"
+            done
+          done
+      - name: Decode original connected-animation images and preserve selected-image data
+        run: >-
+          cargo test --locked -p winui-gallery --features capture --lib
+          connected_capture_decodes_original_landscapes_and_propagates_the_selected_bitmap
+      - name: ColorView tab icons follow native WinUI theme changes
+        run: >-
+          cargo test --locked -p winui-gallery --features capture --lib
+          color_picker_samples_tests::themed::color_picker_tab_icons_follow_winui_theme_changes
+          -- --exact
+      - name: Upload native rendering artifacts
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: winui-gallery-rendering
+          path: gallery-captures/
+          if-no-files-found: warn

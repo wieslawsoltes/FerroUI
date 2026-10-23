@@ -7,6 +7,7 @@
 ferroui_base::ferro_rust_paths! {
     classes: [
         crate::diagnostics::XamlSourceInfo,
+        crate::winui::WinUIBindings,
     ],
     types: [
         crate::FerroXamlLoader,
@@ -40,6 +41,10 @@ ferroui_base::ferro_rust_paths! {
         crate::templates::TemplateContent,
         crate::templates::TreeDataTemplate,
         crate::templates::WindowDrawnDecorationsTemplate,
+        crate::winui::WinUIBindExtension,
+        crate::winui::WinUIBinding,
+        crate::winui::WinUIBindingScope,
+        crate::winui::WinUIBindings,
         crate::xaml_il::runtime::DeferredContent,
         crate::xaml_il::runtime::DeferredContentBuilder,
         crate::xaml_il::runtime::FerroXamlIlXmlNamespaceInfo,

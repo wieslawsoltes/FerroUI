@@ -499,6 +499,19 @@ impl FerroObject {
         self.values.get_base_value(property)
     }
 
+    /// Checks whether a styled property's current non-animation value has
+    /// local-value priority, including when an animation hides that value.
+    ///
+    /// Style, template, inherited and default values do not count. This
+    /// reports a value in the store, not the mere attachment of a binding
+    /// before that binding supplies a local value or fallback. A local value
+    /// equal to the property's default still counts as a local value.
+    pub fn has_local_value<T: PropertyValue>(&self, property: &'static StyledProperty<T>) -> bool {
+        self.values
+            .get_effective_value(property)
+            .is_some_and(|value| value.base_priority() == BindingPriority::LocalValue)
+    }
+
     /// Checks whether a property is animating.
     pub fn is_animating(&self, property: &FerroProperty) -> bool {
         self.values.is_animating(property)

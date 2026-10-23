@@ -92,18 +92,43 @@ def parse(path):
 # --- the source documents -------------------------------------------------------------------------
 
 
+def resolve_source_path(path):
+    """Resolve Windows project-path casing on a case-sensitive filesystem.
+
+    The pinned project imports InkToolbar/InkToolbar.vcxitems, while git stores
+    InkToolBar/InkToolBar.vcxitems. Keep the project's spelling in inventory IDs
+    and waivers; resolve only the physical path used for reading.
+    """
+    if os.path.exists(path):
+        return path
+    parent, name = os.path.split(path)
+    if not name or not parent:
+        return path
+    parent = resolve_source_path(parent)
+    if os.path.isdir(parent):
+        matches = [entry for entry in os.listdir(parent) if entry.casefold() == name.casefold()]
+        if len(matches) > 1:
+            raise ValueError(f"ambiguous Windows source path: {path}")
+        if matches:
+            return os.path.join(parent, matches[0])
+    return os.path.join(parent, name)
+
+
 def _pages(root):
     """The shared pages of the controls library: (type, priority, path), in import order."""
     imports = os.path.join(root, "controls/ProjectImports.targets")
-    text = open(imports, encoding="utf-8-sig").read()
+    with open(imports, encoding="utf-8-sig") as file:
+        text = file.read()
     items = re.findall(r'Import Project="\$\(MSBuildThisFileDirectory\)([^"]+\.vcxitems)"', text)
     pages = []
     for item in items:
         item_path = os.path.join(root, "controls", item.replace("\\", "/"))
-        if not os.path.isfile(item_path):
+        physical_path = resolve_source_path(item_path)
+        if not os.path.isfile(physical_path):
             continue
         directory = os.path.dirname(item_path)
-        body = open(item_path, encoding="utf-8-sig", errors="replace").read()
+        with open(physical_path, encoding="utf-8-sig", errors="replace") as file:
+            body = file.read()
         for match in re.finditer(r'<Page\s+(?:Condition="([^"]*)"\s+)?Include="([^"]+)"\s*>(.*?)</Page>', body, re.S):
             condition, include, metadata = match.groups()
             if condition and "!= 'true'" not in condition:
@@ -178,7 +203,7 @@ def element_key(element):
 def document_items(root, path):
     """The keyed entries of a resource dictionary document: those of the dictionary and those of
     its theme dictionaries."""
-    tree = parse(os.path.join(root, path))
+    tree = parse(resolve_source_path(os.path.join(root, path)))
     items = []
     for child in tree:
         if not isinstance(child.tag, str):

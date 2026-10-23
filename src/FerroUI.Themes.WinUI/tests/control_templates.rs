@@ -29,10 +29,16 @@ use ferroui_controls::{Application, Border, Control, Window};
 use std::cell::RefCell;
 use std::rc::Rc;
 
-/// The class of the controls or the dialogs assembly named `name`.
+/// A class in the controls/dialogs assemblies. A qualified identity resolves
+/// same-name types explicitly; a bare name must identify exactly one type.
 fn control_type(name: &str) -> &'static TypeInfo {
+    let qualified = name.rsplit_once('.');
     let mut found = TypeInfo::registered_types().into_iter().filter(|type_| {
-        type_.name() == name
+        let identity_matches = match qualified {
+            Some((namespace, short_name)) => type_.namespace() == namespace && type_.name() == short_name,
+            None => type_.name() == name,
+        };
+        identity_matches
             && (type_.module_path().starts_with("ferroui_controls") || type_.module_path().starts_with("ferroui_dialogs"))
     });
     let type_ = found.next().unwrap_or_else(|| panic!("{name} is not a class of the controls or the dialogs assembly"));
@@ -127,7 +133,10 @@ fn check_control(name: &str) {
 
     // The template of the theme has been applied (for ScrollBar, the template of the nested style
     // of its orientation).
-    if setter("Template").is_some() || name == "ScrollBar" {
+    if setter("Template").is_some()
+        || name == "ScrollBar"
+        || super::control_theme_tests::uses_native_default_template(type_)
+    {
         let templated = templated.as_ref().unwrap_or_else(|| panic!("{name} has a template but is not templated"));
         assert!(templated.template().is_some(), "{name}: no template");
         assert_eq!(1, control.visual_children_count(), "{name}: the template was not applied");
@@ -198,6 +207,7 @@ macro_rules! control_tests {
 }
 
 control_tests! {
+    info_badge => "InfoBadge";
     auto_complete_box => "AutoCompleteBox";
     button => "Button";
     calendar => "Calendar";
@@ -622,20 +632,31 @@ fn every_themed_control_has_a_test() {
     let theme = create_attached_theme();
     // Top levels, layers and window decorations are created by the framework, not put in a window
     // as content.
-    let not_content =
-        ["Window", "EmbeddableControlRoot", "PopupRoot", "OverlayPopupHost", "AdornerLayer", "WindowDrawnDecorations"];
-    let mut themed: Vec<&str> = enumerate_resources(&theme.as_style())
+    let not_content: Vec<_> =
+        ["Window", "EmbeddableControlRoot", "PopupRoot", "OverlayPopupHost", "AdornerLayer", "WindowDrawnDecorations"]
+            .iter()
+            .map(|name| control_type(name))
+            .collect();
+    let themed: Vec<_> = enumerate_resources(&theme.as_style())
         .into_iter()
         .filter(|entry| entry.control_theme().is_some())
-        .filter_map(|entry| entry.type_key().map(|type_| type_.name()))
-        .filter(|name| !not_content.contains(name))
+        .filter_map(|entry| entry.type_key())
+        .filter(|type_| !not_content.iter().any(|excluded| std::ptr::eq(*excluded, *type_)))
         .collect();
-    themed.sort_unstable();
-    for name in &themed {
-        assert!(TESTED.contains(name), "{name} has a control theme but no test");
+    let tested: Vec<_> = TESTED.iter().map(|name| control_type(name)).collect();
+    for type_ in &themed {
+        assert!(
+            tested.iter().any(|tested| std::ptr::eq(*tested, *type_)),
+            "{} has a control theme but no test",
+            type_.full_name()
+        );
     }
-    for name in TESTED {
-        assert!(themed.contains(name), "{name} has a test but no control theme");
+    for type_ in &tested {
+        assert!(
+            themed.iter().any(|themed| std::ptr::eq(*themed, *type_)),
+            "{} has a test but no control theme",
+            type_.full_name()
+        );
     }
 }
 

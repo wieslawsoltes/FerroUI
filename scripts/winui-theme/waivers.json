@@ -19,7 +19,7 @@
     {
       "document": "controls/dev/CommonStyles/Deprecated_themeresources.xaml",
       "key": "re:MUX_NavigationViewItemPresenterStyle.*WithRevealFocus",
-      "reason": "Reveal focus variants of the NavigationView item presenter: deprecated (Reveal focus), and FerroUI has no NavigationView."
+      "reason": "Reveal-focus variants of NavigationViewItemPresenter are deprecated in WinUI 3. FerroUI implements neither Reveal focus lighting nor the public source presenter/TemplateSettings; native NavigationView controls do not make these legacy styles available."
     },
     {
       "document": "*",
@@ -80,26 +80,6 @@
       "document": "controls/dev/CommonStyles/RichEditBox_themeresources.xaml",
       "key": "*",
       "reason": "RichEditBox: no FerroUI control (no rich text editing)."
-    },
-    {
-      "document": "controls/dev/RatingControl/RatingControl.xaml",
-      "key": "*",
-      "reason": "RatingControl: no FerroUI control."
-    },
-    {
-      "document": "controls/dev/RatingControl/RatingControl_themeresources.xaml",
-      "key": "*",
-      "reason": "RatingControl: no FerroUI control."
-    },
-    {
-      "document": "controls/dev/InfoBadge/InfoBadge.xaml",
-      "key": "*",
-      "reason": "InfoBadge: no FerroUI control."
-    },
-    {
-      "document": "controls/dev/InfoBadge/InfoBadge_themeresources.xaml",
-      "key": "*",
-      "reason": "InfoBadge: no FerroUI control."
     },
     {
       "document": "controls/dev/PersonPicture/PersonPicture.xaml",
@@ -217,31 +197,6 @@
       "reason": "TextCommandBarFlyout (the default context and selection flyouts of WinUI's text controls): no FerroUI control; the text boxes of the port get a menu flyout of the same commands, built with the MenuFlyout batch."
     },
     {
-      "document": "controls/dev/RadioButtons/RadioButtons.xaml",
-      "key": "*",
-      "reason": "RadioButtons (the group control): no FerroUI control; FerroUI groups radio buttons by GroupName."
-    },
-    {
-      "document": "controls/dev/RadioButtons/RadioButtons_themeresources.xaml",
-      "key": "*",
-      "reason": "RadioButtons (the group control): no FerroUI control; FerroUI groups radio buttons by GroupName."
-    },
-    {
-      "document": "dxaml/xcp/dxaml/themes/generic.xaml",
-      "key": "RadioButtonsItemStyle",
-      "reason": "RadioButtons (the group control): no FerroUI control."
-    },
-    {
-      "document": "controls/dev/ProgressRing/ProgressRing.xaml",
-      "key": "*",
-      "reason": "ProgressRing: no FerroUI control (its animation is an animated visual, a Lottie composition)."
-    },
-    {
-      "document": "controls/dev/ProgressRing/ProgressRing_themeresources.xaml",
-      "key": "*",
-      "reason": "ProgressRing: no FerroUI control (its animation is an animated visual, a Lottie composition)."
-    },
-    {
       "document": "controls/dev/ImageIcon/ImageIcon.xaml",
       "key": "*",
       "reason": "ImageIcon: no FerroUI control."
@@ -282,14 +237,19 @@
       "reason": "The implicit style of ContentPresenter (HorizontalAlignment Left, VerticalAlignment Top): FerroUI's ContentPresenter is not a templated control and has no default control theme; a style of every ContentPresenter would be a global style, which the theme does not have. The templates of the port set the alignments of their presenters, as the templates of WinUI bind them."
     },
     {
-      "document": "controls/dev/NavigationView/NavigationView.xaml",
-      "key": "re:\\{NavigationView(Item|ItemHeader|ItemSeparator)?\\}",
-      "reason": "NavigationView: no FerroUI control (batch B5). DrawerPage, TabbedPage and the tabs of TabControl at the left and the right are built from its panes and items (Controls/DrawerPage.xaml, Controls/TabbedPage.xaml, Controls/TabItem.xaml); the styles of NavigationView itself, its items, item headers and separators have no control to style."
+      "document": "controls/dev/NavigationView/NavigationView_themeresources.xaml",
+      "key": "re:MUX_NavigationViewItemPresenterStyleWhenOn(LeftPane|TopPane|TopPaneOverflow)",
+      "reason": "The public NavigationViewItemPresenter and its TemplateSettings are not implemented. Native NavigationViewItem uses its own replaceable metadata template; existing DrawerPage/TabItem/TabbedPage adaptations do not supply these three source presenter styles."
     },
     {
       "document": "controls/dev/NavigationView/NavigationView_themeresources.xaml",
-      "key": "re:MUX_NavigationViewItemPresenterStyleWhenOn(LeftPane|TopPane|TopPaneOverflow)|MUX_NavigationViewSettingsItemStyleWhenOnTopPane|NavigationViewOverflowButton(No)?(Label)?StyleWhenPaneOnTop|NavigationViewPaneSearchButtonStyle",
-      "reason": "NavigationView: no FerroUI control (batch B5). The item presenter styles of the left and the top pane are written into the tab themes built from them (Controls/TabItem.xaml for the tabs at the left and the right, TabbedPageTabItemTheme of Controls/TabbedPage.xaml for the top pane); the settings item, the overflow button of the top pane and the search button of the pane have no counterpart in FerroUI's pages."
+      "key": "re:NavigationViewOverflowButton(NoLabel)?StyleWhenPaneOnTop",
+      "reason": "The native NavigationView top pane uses horizontal layout without source overflow redistribution, an overflow button/flyout, or OverflowLabelMode. These two source overflow-button styles have no implemented feature to style."
+    },
+    {
+      "document": "controls/dev/NavigationView/NavigationView_themeresources.xaml",
+      "key": "NavigationViewPaneSearchButtonStyle",
+      "reason": "The native NavigationView hosts AutoSuggestBox directly; the source compact PaneAutoSuggestButton affordance and its transition back to the search box are not implemented. The separate source pane-search button style therefore remains waived."
     },
     {
       "document": "controls/dev/CommonStyles/MenuFlyout_themeresources.xaml",

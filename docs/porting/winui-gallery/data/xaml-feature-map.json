@@ -1,0 +1,4040 @@
+{
+  "features": [
+    {
+      "behavior": "unverified",
+      "disposition": "unreviewed",
+      "documents": 2,
+      "feature": "design:DesignHeight",
+      "implementation": [],
+      "notes": null,
+      "occurrences": 2,
+      "tests": [],
+      "uses": [
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Controls/ControlExample.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/SampleSupport/SamplePages/TabContentSampleControl.xaml"
+        }
+      ]
+    },
+    {
+      "behavior": "unverified",
+      "disposition": "unreviewed",
+      "documents": 2,
+      "feature": "design:DesignWidth",
+      "implementation": [],
+      "notes": null,
+      "occurrences": 2,
+      "tests": [],
+      "uses": [
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Controls/ControlExample.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/SampleSupport/SamplePages/TabContentSampleControl.xaml"
+        }
+      ]
+    },
+    {
+      "behavior": "unverified",
+      "disposition": "unreviewed",
+      "documents": 1,
+      "feature": "design:ExtensionType",
+      "implementation": [],
+      "notes": null,
+      "occurrences": 1,
+      "tests": [],
+      "uses": [
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Pages/SearchResultsPage.xaml"
+        }
+      ]
+    },
+    {
+      "behavior": "unverified",
+      "disposition": "unreviewed",
+      "documents": 1,
+      "feature": "design:Source",
+      "implementation": [],
+      "notes": null,
+      "occurrences": 1,
+      "tests": [],
+      "uses": [
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Samples/SemanticZoom/SemanticZoomPage.xaml"
+        }
+      ]
+    },
+    {
+      "behavior": "unverified",
+      "disposition": "implemented-subset",
+      "documents": 16,
+      "feature": "markup:Binding",
+      "implementation": [
+        "src/Markup/FerroUI.Markup.Xaml.Loader/winui/migration.rs"
+      ],
+      "notes": "Missing Mode becomes explicit OneWay. Existing binding engine handles the resulting markup; Mode=Default requires explicit review.",
+      "occurrences": 44,
+      "tests": [
+        {
+          "name": "implicit_winui_binding_modes_are_one_way_even_for_two_way_target_properties",
+          "path": "src/Markup/FerroUI.Markup.Xaml.Loader/tests/winui_migration.rs"
+        },
+        {
+          "name": "object_element_binding_defaults_and_explicit_modes_are_preserved",
+          "path": "src/Markup/FerroUI.Markup.Xaml.Loader/tests/winui_migration.rs"
+        }
+      ],
+      "uses": [
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Controls/ColorSelector.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Controls/HomePage/Tile.xaml"
+        },
+        {
+          "occurrences": 2,
+          "path": "WinUIGallery/Controls/InlineColorPicker.xaml"
+        },
+        {
+          "occurrences": 4,
+          "path": "WinUIGallery/SampleSupport/SamplePages/CardPage.xaml"
+        },
+        {
+          "occurrences": 3,
+          "path": "WinUIGallery/SampleSupport/SamplePages/ItemsRepeaterCollectionPage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/SampleSupport/SamplePages/TabContentSampleControl.xaml"
+        },
+        {
+          "occurrences": 3,
+          "path": "WinUIGallery/Samples/Binding/BindingPage.xaml"
+        },
+        {
+          "occurrences": 2,
+          "path": "WinUIGallery/Samples/NavigationView/NavigationViewPage.xaml"
+        },
+        {
+          "occurrences": 2,
+          "path": "WinUIGallery/Samples/ParallaxView/ParallaxViewPage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Samples/ProgressBar/ProgressBarPage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Samples/SemanticZoom/SemanticZoomPage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Samples/SwipeControl/SwipeControlPage.xaml"
+        },
+        {
+          "occurrences": 16,
+          "path": "WinUIGallery/Samples/TableView/TableViewPage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Samples/Templates/TemplatesPage.xaml"
+        },
+        {
+          "occurrences": 4,
+          "path": "WinUIGallery/Samples/TitleBar/TitleBarPage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Styles/ItemTemplates.xaml"
+        }
+      ]
+    },
+    {
+      "behavior": "unverified",
+      "disposition": "unreviewed",
+      "documents": 93,
+      "feature": "markup:StaticResource",
+      "implementation": [],
+      "notes": null,
+      "occurrences": 510,
+      "tests": [],
+      "uses": [
+        {
+          "occurrences": 6,
+          "path": "WinUIGallery/Controls/ControlExample.xaml"
+        },
+        {
+          "occurrences": 2,
+          "path": "WinUIGallery/Controls/CopyButton.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Controls/DesignGuidance/ColorPageExample.xaml"
+        },
+        {
+          "occurrences": 22,
+          "path": "WinUIGallery/Controls/DesignGuidance/ColorSections/BackgroundSection.xaml"
+        },
+        {
+          "occurrences": 15,
+          "path": "WinUIGallery/Controls/DesignGuidance/ColorSections/FillSection.xaml"
+        },
+        {
+          "occurrences": 9,
+          "path": "WinUIGallery/Controls/DesignGuidance/ColorSections/HighContrastSection.xaml"
+        },
+        {
+          "occurrences": 6,
+          "path": "WinUIGallery/Controls/DesignGuidance/ColorSections/SignalSection.xaml"
+        },
+        {
+          "occurrences": 14,
+          "path": "WinUIGallery/Controls/DesignGuidance/ColorSections/StrokeSection.xaml"
+        },
+        {
+          "occurrences": 5,
+          "path": "WinUIGallery/Controls/DesignGuidance/ColorSections/TextSection.xaml"
+        },
+        {
+          "occurrences": 4,
+          "path": "WinUIGallery/Controls/DesignGuidance/ColorTile.xaml"
+        },
+        {
+          "occurrences": 3,
+          "path": "WinUIGallery/Controls/DesignGuidance/TypographyControl.xaml"
+        },
+        {
+          "occurrences": 3,
+          "path": "WinUIGallery/Controls/HomePage/HomePageHeader.xaml"
+        },
+        {
+          "occurrences": 3,
+          "path": "WinUIGallery/Controls/HomePage/Tile.xaml"
+        },
+        {
+          "occurrences": 3,
+          "path": "WinUIGallery/Controls/HorizontalScrollContainer.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Controls/OpacityMaskView.xaml"
+        },
+        {
+          "occurrences": 15,
+          "path": "WinUIGallery/Controls/PageHeader.xaml"
+        },
+        {
+          "occurrences": 12,
+          "path": "WinUIGallery/MainWindow.xaml"
+        },
+        {
+          "occurrences": 6,
+          "path": "WinUIGallery/Pages/AllControlsPage.xaml"
+        },
+        {
+          "occurrences": 17,
+          "path": "WinUIGallery/Pages/HomePage.xaml"
+        },
+        {
+          "occurrences": 2,
+          "path": "WinUIGallery/Pages/ItemPage.xaml"
+        },
+        {
+          "occurrences": 7,
+          "path": "WinUIGallery/Pages/SearchResultsPage.xaml"
+        },
+        {
+          "occurrences": 5,
+          "path": "WinUIGallery/Pages/SectionPage.xaml"
+        },
+        {
+          "occurrences": 6,
+          "path": "WinUIGallery/Pages/SettingsPage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/SampleSupport/SamplePages/CardPage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/SampleSupport/SamplePages/ModalWindow.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/SampleSupport/SamplePages/SampleBuiltInSystemBackdropsWindow.xaml"
+        },
+        {
+          "occurrences": 5,
+          "path": "WinUIGallery/SampleSupport/SamplePages/SamplePage1.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/SampleSupport/SamplePages/SamplePage2.xaml"
+        },
+        {
+          "occurrences": 5,
+          "path": "WinUIGallery/SampleSupport/SamplePages/SamplePage3.xaml"
+        },
+        {
+          "occurrences": 6,
+          "path": "WinUIGallery/SampleSupport/SamplePages/SamplePage4.xaml"
+        },
+        {
+          "occurrences": 3,
+          "path": "WinUIGallery/SampleSupport/SamplePages/SamplePage5.xaml"
+        },
+        {
+          "occurrences": 2,
+          "path": "WinUIGallery/SampleSupport/SamplePages/SamplePage6.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/SampleSupport/SamplePages/SamplePage7.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/SampleSupport/SamplePages/SampleSettingsPage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/SampleSupport/SamplePages/SampleSystemBackdropsWindow.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/SampleSupport/SamplePages/TitleBarDragRegionsWindow.xaml"
+        },
+        {
+          "occurrences": 2,
+          "path": "WinUIGallery/Samples/AccessibilityColorContrast/AccessibilityColorContrastPage.xaml"
+        },
+        {
+          "occurrences": 2,
+          "path": "WinUIGallery/Samples/AccessibilityKeyboard/AccessibilityKeyboardPage.xaml"
+        },
+        {
+          "occurrences": 11,
+          "path": "WinUIGallery/Samples/AccessibilityScreenReader/AccessibilityScreenReaderPage.xaml"
+        },
+        {
+          "occurrences": 2,
+          "path": "WinUIGallery/Samples/Acrylic/AcrylicPage.xaml"
+        },
+        {
+          "occurrences": 2,
+          "path": "WinUIGallery/Samples/AppWindow/AppWindowPage.xaml"
+        },
+        {
+          "occurrences": 2,
+          "path": "WinUIGallery/Samples/AutoSuggestBox/AutoSuggestBoxPage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Samples/Binding/BindingPage.xaml"
+        },
+        {
+          "occurrences": 2,
+          "path": "WinUIGallery/Samples/Button/ButtonPage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Samples/Chart/ChartPage.xaml"
+        },
+        {
+          "occurrences": 2,
+          "path": "WinUIGallery/Samples/ComboBox/ComboBoxPage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Samples/CommandBar/CommandBarPage.xaml"
+        },
+        {
+          "occurrences": 2,
+          "path": "WinUIGallery/Samples/ContentDialog/ContentDialogPage.xaml"
+        },
+        {
+          "occurrences": 7,
+          "path": "WinUIGallery/Samples/ContentIsland/ContentIslandPage.xaml"
+        },
+        {
+          "occurrences": 3,
+          "path": "WinUIGallery/Samples/CustomUserControls/CustomUserControlsPage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Samples/CustomXamlConditionals/CustomXamlConditionalsPage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Samples/DatePicker/DatePickerPage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Samples/FlipView/FlipViewPage.xaml"
+        },
+        {
+          "occurrences": 13,
+          "path": "WinUIGallery/Samples/Geometry/GeometryPage.xaml"
+        },
+        {
+          "occurrences": 10,
+          "path": "WinUIGallery/Samples/GridView/GridViewPage.xaml"
+        },
+        {
+          "occurrences": 27,
+          "path": "WinUIGallery/Samples/Iconography/IconographyPage.xaml"
+        },
+        {
+          "occurrences": 4,
+          "path": "WinUIGallery/Samples/InfoBadge/InfoBadgePage.xaml"
+        },
+        {
+          "occurrences": 18,
+          "path": "WinUIGallery/Samples/ItemsRepeater/ItemsRepeaterPage.xaml"
+        },
+        {
+          "occurrences": 8,
+          "path": "WinUIGallery/Samples/ItemsView/ItemsViewPage.xaml"
+        },
+        {
+          "occurrences": 2,
+          "path": "WinUIGallery/Samples/JumpList/JumpListPage.xaml"
+        },
+        {
+          "occurrences": 11,
+          "path": "WinUIGallery/Samples/LayoutPanel/LayoutPanelPage.xaml"
+        },
+        {
+          "occurrences": 9,
+          "path": "WinUIGallery/Samples/ListView/ListViewPage.xaml"
+        },
+        {
+          "occurrences": 2,
+          "path": "WinUIGallery/Samples/MenuFlyout/MenuFlyoutPage.xaml"
+        },
+        {
+          "occurrences": 3,
+          "path": "WinUIGallery/Samples/NavigationView/NavigationViewPage.xaml"
+        },
+        {
+          "occurrences": 4,
+          "path": "WinUIGallery/Samples/PagerControl/PagerControlPage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Samples/PasswordBox/PasswordBoxPage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Samples/Popup/PopupPage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Samples/RichEditBox/RichEditBoxPage.xaml"
+        },
+        {
+          "occurrences": 2,
+          "path": "WinUIGallery/Samples/ScratchPad/ScratchPadPage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Samples/SelectorBar/SelectorBarPage.xaml"
+        },
+        {
+          "occurrences": 7,
+          "path": "WinUIGallery/Samples/SemanticZoom/SemanticZoomPage.xaml"
+        },
+        {
+          "occurrences": 35,
+          "path": "WinUIGallery/Samples/Spacing/SpacingPage.xaml"
+        },
+        {
+          "occurrences": 7,
+          "path": "WinUIGallery/Samples/SplitButton/SplitButtonPage.xaml"
+        },
+        {
+          "occurrences": 6,
+          "path": "WinUIGallery/Samples/SplitView/SplitViewPage.xaml"
+        },
+        {
+          "occurrences": 2,
+          "path": "WinUIGallery/Samples/StandardUICommand/StandardUICommandPage.xaml"
+        },
+        {
+          "occurrences": 14,
+          "path": "WinUIGallery/Samples/SwipeControl/SwipeControlPage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Samples/TableView/TableViewPage.xaml"
+        },
+        {
+          "occurrences": 2,
+          "path": "WinUIGallery/Samples/Templates/TemplatesPage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Samples/TextBlock/TextBlockPage.xaml"
+        },
+        {
+          "occurrences": 3,
+          "path": "WinUIGallery/Samples/TitleBar/TitleBarPage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Samples/ToggleSplitButton/ToggleSplitButtonPage.xaml"
+        },
+        {
+          "occurrences": 3,
+          "path": "WinUIGallery/Samples/TreeView/TreeViewPage.xaml"
+        },
+        {
+          "occurrences": 13,
+          "path": "WinUIGallery/Samples/Typography/TypographyPage.xaml"
+        },
+        {
+          "occurrences": 18,
+          "path": "WinUIGallery/Samples/WrapPanel/WrapPanelPage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Samples/XamlCompInterop/XamlCompInteropPage.xaml"
+        },
+        {
+          "occurrences": 18,
+          "path": "WinUIGallery/Samples/XamlResources/XamlResourcesPage.xaml"
+        },
+        {
+          "occurrences": 3,
+          "path": "WinUIGallery/Samples/XamlStyles/XamlStylesPage.xaml"
+        },
+        {
+          "occurrences": 2,
+          "path": "WinUIGallery/Samples/XamlUICommand/XamlUICommandPage.xaml"
+        },
+        {
+          "occurrences": 3,
+          "path": "WinUIGallery/Styles/Grid.xaml"
+        },
+        {
+          "occurrences": 5,
+          "path": "WinUIGallery/Styles/GridViewItem.xaml"
+        },
+        {
+          "occurrences": 5,
+          "path": "WinUIGallery/Styles/ItemTemplates.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Styles/SelectorBar.xaml"
+        },
+        {
+          "occurrences": 3,
+          "path": "WinUIGallery/Styles/TextBlock.xaml"
+        }
+      ]
+    },
+    {
+      "behavior": "unverified",
+      "disposition": "unreviewed",
+      "documents": 5,
+      "feature": "markup:TemplateBinding",
+      "implementation": [],
+      "notes": null,
+      "occurrences": 60,
+      "tests": [],
+      "uses": [
+        {
+          "occurrences": 16,
+          "path": "WinUIGallery/Controls/CopyButton.xaml"
+        },
+        {
+          "occurrences": 11,
+          "path": "WinUIGallery/Controls/HorizontalScrollContainer.xaml"
+        },
+        {
+          "occurrences": 5,
+          "path": "WinUIGallery/Controls/OpacityMaskView.xaml"
+        },
+        {
+          "occurrences": 5,
+          "path": "WinUIGallery/Samples/Templates/TemplatesPage.xaml"
+        },
+        {
+          "occurrences": 23,
+          "path": "WinUIGallery/Styles/SelectorBar.xaml"
+        }
+      ]
+    },
+    {
+      "behavior": "unverified",
+      "disposition": "implemented-subset",
+      "documents": 88,
+      "feature": "markup:ThemeResource",
+      "implementation": [
+        "src/Markup/FerroUI.Markup.Xaml.Loader/winui/migration.rs"
+      ],
+      "notes": "Explicit for_winui_theme policy maps to live DynamicResource lookup. Ported dictionaries and theme scopes must be supplied; this is not proof of all WinUI theme semantics.",
+      "occurrences": 728,
+      "tests": [
+        {
+          "name": "theme_resources_require_explicit_policy_and_nested_lookups_are_recorded",
+          "path": "src/Markup/FerroUI.Markup.Xaml.Loader/tests/winui_migration.rs"
+        }
+      ],
+      "uses": [
+        {
+          "occurrences": 3,
+          "path": "WinUIGallery/App.xaml"
+        },
+        {
+          "occurrences": 16,
+          "path": "WinUIGallery/Controls/ControlExample.xaml"
+        },
+        {
+          "occurrences": 18,
+          "path": "WinUIGallery/Controls/CopyButton.xaml"
+        },
+        {
+          "occurrences": 4,
+          "path": "WinUIGallery/Controls/DesignGuidance/ColorPageExample.xaml"
+        },
+        {
+          "occurrences": 62,
+          "path": "WinUIGallery/Controls/DesignGuidance/ColorSections/BackgroundSection.xaml"
+        },
+        {
+          "occurrences": 52,
+          "path": "WinUIGallery/Controls/DesignGuidance/ColorSections/FillSection.xaml"
+        },
+        {
+          "occurrences": 20,
+          "path": "WinUIGallery/Controls/DesignGuidance/ColorSections/SignalSection.xaml"
+        },
+        {
+          "occurrences": 41,
+          "path": "WinUIGallery/Controls/DesignGuidance/ColorSections/StrokeSection.xaml"
+        },
+        {
+          "occurrences": 28,
+          "path": "WinUIGallery/Controls/DesignGuidance/ColorSections/TextSection.xaml"
+        },
+        {
+          "occurrences": 2,
+          "path": "WinUIGallery/Controls/DesignGuidance/ColorTile.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Controls/DesignGuidance/TypographyControl.xaml"
+        },
+        {
+          "occurrences": 8,
+          "path": "WinUIGallery/Controls/HomePage/HomePageHeader.xaml"
+        },
+        {
+          "occurrences": 17,
+          "path": "WinUIGallery/Controls/HomePage/Tile.xaml"
+        },
+        {
+          "occurrences": 17,
+          "path": "WinUIGallery/Controls/HorizontalScrollContainer.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Controls/InlineColorPicker.xaml"
+        },
+        {
+          "occurrences": 9,
+          "path": "WinUIGallery/Controls/PageHeader.xaml"
+        },
+        {
+          "occurrences": 2,
+          "path": "WinUIGallery/Controls/SampleCodePresenter.xaml"
+        },
+        {
+          "occurrences": 2,
+          "path": "WinUIGallery/MainWindow.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Pages/HomePage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Pages/ItemPage.xaml"
+        },
+        {
+          "occurrences": 4,
+          "path": "WinUIGallery/Pages/SearchResultsPage.xaml"
+        },
+        {
+          "occurrences": 2,
+          "path": "WinUIGallery/Pages/SettingsPage.xaml"
+        },
+        {
+          "occurrences": 8,
+          "path": "WinUIGallery/SampleSupport/SamplePages/CardPage.xaml"
+        },
+        {
+          "occurrences": 6,
+          "path": "WinUIGallery/SampleSupport/SamplePages/CollectionPage.xaml"
+        },
+        {
+          "occurrences": 6,
+          "path": "WinUIGallery/SampleSupport/SamplePages/DetailedInfoPage.xaml"
+        },
+        {
+          "occurrences": 3,
+          "path": "WinUIGallery/SampleSupport/SamplePages/ItemsRepeaterCollectionPage.xaml"
+        },
+        {
+          "occurrences": 2,
+          "path": "WinUIGallery/SampleSupport/SamplePages/ModalWindow.xaml"
+        },
+        {
+          "occurrences": 2,
+          "path": "WinUIGallery/SampleSupport/SamplePages/SamplePage1.xaml"
+        },
+        {
+          "occurrences": 2,
+          "path": "WinUIGallery/SampleSupport/SamplePages/SamplePage2.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/SampleSupport/SamplePages/SamplePage7.xaml"
+        },
+        {
+          "occurrences": 2,
+          "path": "WinUIGallery/SampleSupport/SamplePages/SampleWindow1.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/SampleSupport/SamplePages/SampleWindow2.xaml"
+        },
+        {
+          "occurrences": 2,
+          "path": "WinUIGallery/SampleSupport/SamplePages/SampleWindow3.xaml"
+        },
+        {
+          "occurrences": 2,
+          "path": "WinUIGallery/SampleSupport/SamplePages/SampleWindow4.xaml"
+        },
+        {
+          "occurrences": 3,
+          "path": "WinUIGallery/SampleSupport/SamplePages/SampleWindow6.xaml"
+        },
+        {
+          "occurrences": 3,
+          "path": "WinUIGallery/SampleSupport/SamplePages/TabContentSampleControl.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/SampleSupport/SamplePages/TabViewWindowingSamplePage.xaml"
+        },
+        {
+          "occurrences": 6,
+          "path": "WinUIGallery/SampleSupport/SamplePages/TitleBarDragRegionsWindow.xaml"
+        },
+        {
+          "occurrences": 11,
+          "path": "WinUIGallery/Samples/AccessibilityColorContrast/AccessibilityColorContrastPage.xaml"
+        },
+        {
+          "occurrences": 14,
+          "path": "WinUIGallery/Samples/AccessibilityKeyboard/AccessibilityKeyboardPage.xaml"
+        },
+        {
+          "occurrences": 21,
+          "path": "WinUIGallery/Samples/AccessibilityScreenReader/AccessibilityScreenReaderPage.xaml"
+        },
+        {
+          "occurrences": 3,
+          "path": "WinUIGallery/Samples/Acrylic/AcrylicPage.xaml"
+        },
+        {
+          "occurrences": 2,
+          "path": "WinUIGallery/Samples/AnimatedVisualPlayer/AnimatedVisualPlayerPage.xaml"
+        },
+        {
+          "occurrences": 5,
+          "path": "WinUIGallery/Samples/Binding/BindingPage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Samples/Clipboard/ClipboardPage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Samples/ColorPicker/ColorPickerPage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Samples/ConnectedAnimation/ConnectedAnimationPage.xaml"
+        },
+        {
+          "occurrences": 2,
+          "path": "WinUIGallery/Samples/ContentIsland/ContentIslandPage.xaml"
+        },
+        {
+          "occurrences": 5,
+          "path": "WinUIGallery/Samples/EasingFunction/EasingFunctionPage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Samples/Flyout/FlyoutPage.xaml"
+        },
+        {
+          "occurrences": 8,
+          "path": "WinUIGallery/Samples/Geometry/GeometryPage.xaml"
+        },
+        {
+          "occurrences": 14,
+          "path": "WinUIGallery/Samples/GridView/GridViewPage.xaml"
+        },
+        {
+          "occurrences": 5,
+          "path": "WinUIGallery/Samples/IconElement/IconElementPage.xaml"
+        },
+        {
+          "occurrences": 21,
+          "path": "WinUIGallery/Samples/Iconography/IconographyPage.xaml"
+        },
+        {
+          "occurrences": 6,
+          "path": "WinUIGallery/Samples/ImplicitTransition/ImplicitTransitionPage.xaml"
+        },
+        {
+          "occurrences": 5,
+          "path": "WinUIGallery/Samples/InkCanvas/InkCanvasPage.xaml"
+        },
+        {
+          "occurrences": 18,
+          "path": "WinUIGallery/Samples/ItemsRepeater/ItemsRepeaterPage.xaml"
+        },
+        {
+          "occurrences": 18,
+          "path": "WinUIGallery/Samples/ItemsView/ItemsViewPage.xaml"
+        },
+        {
+          "occurrences": 12,
+          "path": "WinUIGallery/Samples/LayoutPanel/LayoutPanelPage.xaml"
+        },
+        {
+          "occurrences": 28,
+          "path": "WinUIGallery/Samples/ListView/ListViewPage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Samples/NavigationView/NavigationViewPage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Samples/ParallaxView/ParallaxViewPage.xaml"
+        },
+        {
+          "occurrences": 2,
+          "path": "WinUIGallery/Samples/Popup/PopupPage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Samples/ProgressBar/ProgressBarPage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Samples/PullToRefresh/PullToRefreshPage.xaml"
+        },
+        {
+          "occurrences": 3,
+          "path": "WinUIGallery/Samples/RichEditBox/RichEditBoxPage.xaml"
+        },
+        {
+          "occurrences": 4,
+          "path": "WinUIGallery/Samples/ScratchPad/ScratchPadPage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Samples/SemanticZoom/SemanticZoomPage.xaml"
+        },
+        {
+          "occurrences": 2,
+          "path": "WinUIGallery/Samples/Sound/SoundPage.xaml"
+        },
+        {
+          "occurrences": 5,
+          "path": "WinUIGallery/Samples/Spacing/SpacingPage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Samples/SplitView/SplitViewPage.xaml"
+        },
+        {
+          "occurrences": 2,
+          "path": "WinUIGallery/Samples/StoragePickers/StoragePickersPage.xaml"
+        },
+        {
+          "occurrences": 11,
+          "path": "WinUIGallery/Samples/SwipeControl/SwipeControlPage.xaml"
+        },
+        {
+          "occurrences": 4,
+          "path": "WinUIGallery/Samples/TabView/TabViewPage.xaml"
+        },
+        {
+          "occurrences": 8,
+          "path": "WinUIGallery/Samples/TableView/TableViewPage.xaml"
+        },
+        {
+          "occurrences": 3,
+          "path": "WinUIGallery/Samples/Templates/TemplatesPage.xaml"
+        },
+        {
+          "occurrences": 2,
+          "path": "WinUIGallery/Samples/ThemeShadow/ThemeShadowPage.xaml"
+        },
+        {
+          "occurrences": 2,
+          "path": "WinUIGallery/Samples/ThemeTransition/ThemeTransitionPage.xaml"
+        },
+        {
+          "occurrences": 2,
+          "path": "WinUIGallery/Samples/TitleBar/TitleBarPage.xaml"
+        },
+        {
+          "occurrences": 4,
+          "path": "WinUIGallery/Samples/TreeView/TreeViewPage.xaml"
+        },
+        {
+          "occurrences": 10,
+          "path": "WinUIGallery/Samples/Typography/TypographyPage.xaml"
+        },
+        {
+          "occurrences": 37,
+          "path": "WinUIGallery/Samples/WrapPanel/WrapPanelPage.xaml"
+        },
+        {
+          "occurrences": 9,
+          "path": "WinUIGallery/Samples/XamlCompInterop/XamlCompInteropPage.xaml"
+        },
+        {
+          "occurrences": 6,
+          "path": "WinUIGallery/Samples/XamlResources/XamlResourcesPage.xaml"
+        },
+        {
+          "occurrences": 2,
+          "path": "WinUIGallery/Samples/XamlStyles/XamlStylesPage.xaml"
+        },
+        {
+          "occurrences": 3,
+          "path": "WinUIGallery/Styles/Grid.xaml"
+        },
+        {
+          "occurrences": 5,
+          "path": "WinUIGallery/Styles/ItemTemplates.xaml"
+        },
+        {
+          "occurrences": 33,
+          "path": "WinUIGallery/Styles/SelectorBar.xaml"
+        }
+      ]
+    },
+    {
+      "behavior": "unverified",
+      "disposition": "unreviewed",
+      "documents": 1,
+      "feature": "markup:d:DesignData",
+      "implementation": [],
+      "notes": null,
+      "occurrences": 1,
+      "tests": [],
+      "uses": [
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Samples/SemanticZoom/SemanticZoomPage.xaml"
+        }
+      ]
+    },
+    {
+      "behavior": "unverified",
+      "disposition": "implemented-subset",
+      "documents": 106,
+      "feature": "markup:x:Bind",
+      "implementation": [
+        "src/Markup/FerroUI.Markup.Xaml.Loader/winui/migration.rs",
+        "src/Markup/FerroUI.Markup.Xaml/winui/binding.rs",
+        "src/Markup/FerroUI.Markup.Xaml/winui/bindings.rs",
+        "src/Markup/FerroUI.Markup.Xaml/winui/path_node.rs"
+      ],
+      "notes": "Rejected by default. Explicit PropertyPathsWithExplicitLifecycle policy preserves typed root/named-element sources, typed template item scopes, OneTime default, OneWay/TwoWay tracking, TextBox LostFocus writeback and explicit Initialize/Update/StopTracking lifecycle. Functions, events, casts, indexers, phased and deferred loading remain diagnosed. This is not complete compiled-binding parity.",
+      "occurrences": 776,
+      "tests": [
+        {
+          "name": "xbind_reports_root_source_semantics_even_with_an_alternative_xaml_prefix",
+          "path": "src/Markup/FerroUI.Markup.Xaml.Loader/tests/winui_migration.rs"
+        },
+        {
+          "name": "property_path_xbind_is_a_separate_extension_with_original_location_and_explicit_scope",
+          "path": "src/Markup/FerroUI.Markup.Xaml.Loader/tests/winui_migration.rs"
+        },
+        {
+          "name": "migrated_xbind_stays_dormant_until_the_host_initializes_the_document",
+          "path": "src/Markup/FerroUI.Markup.Xaml.Loader/tests/winui_migration.rs"
+        },
+        {
+          "name": "migrated_template_xbind_uses_each_deferred_instance_and_typed_item",
+          "path": "src/Markup/FerroUI.Markup.Xaml.Loader/tests/winui_migration.rs"
+        },
+        {
+          "name": "property_path_policy_still_rejects_functions_events_casts_indexers_and_unknown_parameters",
+          "path": "src/Markup/FerroUI.Markup.Xaml.Loader/tests/winui_migration.rs"
+        }
+      ],
+      "uses": [
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Controls/ColorSelector.xaml"
+        },
+        {
+          "occurrences": 18,
+          "path": "WinUIGallery/Controls/ControlExample.xaml"
+        },
+        {
+          "occurrences": 6,
+          "path": "WinUIGallery/Controls/DesignGuidance/ColorPageExample.xaml"
+        },
+        {
+          "occurrences": 10,
+          "path": "WinUIGallery/Controls/DesignGuidance/ColorTile.xaml"
+        },
+        {
+          "occurrences": 6,
+          "path": "WinUIGallery/Controls/DesignGuidance/TypographyControl.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Controls/HomePage/HomePageHeader.xaml"
+        },
+        {
+          "occurrences": 4,
+          "path": "WinUIGallery/Controls/HomePage/Tile.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Controls/HorizontalScrollContainer.xaml"
+        },
+        {
+          "occurrences": 2,
+          "path": "WinUIGallery/Controls/InlineColorPicker.xaml"
+        },
+        {
+          "occurrences": 24,
+          "path": "WinUIGallery/Controls/PageHeader.xaml"
+        },
+        {
+          "occurrences": 6,
+          "path": "WinUIGallery/Controls/SampleCodePresenter.xaml"
+        },
+        {
+          "occurrences": 3,
+          "path": "WinUIGallery/MainWindow.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Pages/AllControlsPage.xaml"
+        },
+        {
+          "occurrences": 4,
+          "path": "WinUIGallery/Pages/HomePage.xaml"
+        },
+        {
+          "occurrences": 5,
+          "path": "WinUIGallery/Pages/ItemPage.xaml"
+        },
+        {
+          "occurrences": 2,
+          "path": "WinUIGallery/Pages/SearchResultsPage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Pages/SectionPage.xaml"
+        },
+        {
+          "occurrences": 2,
+          "path": "WinUIGallery/Pages/SettingsPage.xaml"
+        },
+        {
+          "occurrences": 6,
+          "path": "WinUIGallery/SampleSupport/SamplePages/CollectionPage.xaml"
+        },
+        {
+          "occurrences": 5,
+          "path": "WinUIGallery/SampleSupport/SamplePages/DetailedInfoPage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/SampleSupport/SamplePages/SampleBuiltInSystemBackdropsWindow.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/SampleSupport/SamplePages/SampleSystemBackdropsWindow.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/SampleSupport/SamplePages/TabContentSampleControl.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/SampleSupport/SamplePages/TitleBarWindow.xaml"
+        },
+        {
+          "occurrences": 7,
+          "path": "WinUIGallery/Samples/AccessibilityColorContrast/AccessibilityColorContrastPage.xaml"
+        },
+        {
+          "occurrences": 4,
+          "path": "WinUIGallery/Samples/AccessibilityScreenReader/AccessibilityScreenReaderPage.xaml"
+        },
+        {
+          "occurrences": 8,
+          "path": "WinUIGallery/Samples/Acrylic/AcrylicPage.xaml"
+        },
+        {
+          "occurrences": 2,
+          "path": "WinUIGallery/Samples/AnimatedIcon/AnimatedIconPage.xaml"
+        },
+        {
+          "occurrences": 2,
+          "path": "WinUIGallery/Samples/AnnotatedScrollBar/AnnotatedScrollBarPage.xaml"
+        },
+        {
+          "occurrences": 3,
+          "path": "WinUIGallery/Samples/AppNotification/AppNotificationPage.xaml"
+        },
+        {
+          "occurrences": 16,
+          "path": "WinUIGallery/Samples/AppWindow/AppWindowPage.xaml"
+        },
+        {
+          "occurrences": 17,
+          "path": "WinUIGallery/Samples/AppWindowTitleBar/AppWindowTitleBarPage.xaml"
+        },
+        {
+          "occurrences": 4,
+          "path": "WinUIGallery/Samples/BadgeNotificationManager/BadgeNotificationManagerPage.xaml"
+        },
+        {
+          "occurrences": 12,
+          "path": "WinUIGallery/Samples/Binding/BindingPage.xaml"
+        },
+        {
+          "occurrences": 3,
+          "path": "WinUIGallery/Samples/Border/BorderPage.xaml"
+        },
+        {
+          "occurrences": 4,
+          "path": "WinUIGallery/Samples/BreadcrumbBar/BreadcrumbBarPage.xaml"
+        },
+        {
+          "occurrences": 2,
+          "path": "WinUIGallery/Samples/Button/ButtonPage.xaml"
+        },
+        {
+          "occurrences": 10,
+          "path": "WinUIGallery/Samples/CalendarView/CalendarViewPage.xaml"
+        },
+        {
+          "occurrences": 6,
+          "path": "WinUIGallery/Samples/Canvas/CanvasPage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Samples/CaptureElementPreview/CaptureElementPreviewPage.xaml"
+        },
+        {
+          "occurrences": 62,
+          "path": "WinUIGallery/Samples/Chart/ChartPage.xaml"
+        },
+        {
+          "occurrences": 18,
+          "path": "WinUIGallery/Samples/ColorPicker/ColorPickerPage.xaml"
+        },
+        {
+          "occurrences": 5,
+          "path": "WinUIGallery/Samples/ComboBox/ComboBoxPage.xaml"
+        },
+        {
+          "occurrences": 3,
+          "path": "WinUIGallery/Samples/CommandBar/CommandBarPage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Samples/CustomUserControls/CustomUserControlsPage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Samples/CustomUserControls/TemperatureConverterControl.xaml"
+        },
+        {
+          "occurrences": 7,
+          "path": "WinUIGallery/Samples/EasingFunction/EasingFunctionPage.xaml"
+        },
+        {
+          "occurrences": 3,
+          "path": "WinUIGallery/Samples/Expander/ExpanderPage.xaml"
+        },
+        {
+          "occurrences": 3,
+          "path": "WinUIGallery/Samples/FlipView/FlipViewPage.xaml"
+        },
+        {
+          "occurrences": 3,
+          "path": "WinUIGallery/Samples/Geometry/GeometryPage.xaml"
+        },
+        {
+          "occurrences": 8,
+          "path": "WinUIGallery/Samples/Grid/GridPage.xaml"
+        },
+        {
+          "occurrences": 29,
+          "path": "WinUIGallery/Samples/GridView/GridViewPage.xaml"
+        },
+        {
+          "occurrences": 2,
+          "path": "WinUIGallery/Samples/HyperlinkButton/HyperlinkButtonPage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Samples/IconElement/IconElementPage.xaml"
+        },
+        {
+          "occurrences": 18,
+          "path": "WinUIGallery/Samples/Iconography/IconographyPage.xaml"
+        },
+        {
+          "occurrences": 3,
+          "path": "WinUIGallery/Samples/Image/ImagePage.xaml"
+        },
+        {
+          "occurrences": 3,
+          "path": "WinUIGallery/Samples/InfoBadge/InfoBadgePage.xaml"
+        },
+        {
+          "occurrences": 11,
+          "path": "WinUIGallery/Samples/InfoBar/InfoBarPage.xaml"
+        },
+        {
+          "occurrences": 11,
+          "path": "WinUIGallery/Samples/InkCanvas/InkCanvasPage.xaml"
+        },
+        {
+          "occurrences": 28,
+          "path": "WinUIGallery/Samples/ItemsRepeater/ItemsRepeaterPage.xaml"
+        },
+        {
+          "occurrences": 16,
+          "path": "WinUIGallery/Samples/ItemsView/ItemsViewPage.xaml"
+        },
+        {
+          "occurrences": 27,
+          "path": "WinUIGallery/Samples/Line/LinePage.xaml"
+        },
+        {
+          "occurrences": 25,
+          "path": "WinUIGallery/Samples/ListView/ListViewPage.xaml"
+        },
+        {
+          "occurrences": 2,
+          "path": "WinUIGallery/Samples/MenuFlyout/MenuFlyoutPage.xaml"
+        },
+        {
+          "occurrences": 18,
+          "path": "WinUIGallery/Samples/NavigationView/NavigationViewPage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Samples/NumberBox/NumberBoxPage.xaml"
+        },
+        {
+          "occurrences": 2,
+          "path": "WinUIGallery/Samples/ParallaxView/ParallaxViewPage.xaml"
+        },
+        {
+          "occurrences": 3,
+          "path": "WinUIGallery/Samples/PersonPicture/PersonPicturePage.xaml"
+        },
+        {
+          "occurrences": 8,
+          "path": "WinUIGallery/Samples/PipsPager/PipsPagerPage.xaml"
+        },
+        {
+          "occurrences": 6,
+          "path": "WinUIGallery/Samples/Popup/PopupPage.xaml"
+        },
+        {
+          "occurrences": 5,
+          "path": "WinUIGallery/Samples/ProgressBar/ProgressBarPage.xaml"
+        },
+        {
+          "occurrences": 3,
+          "path": "WinUIGallery/Samples/ProgressRing/ProgressRingPage.xaml"
+        },
+        {
+          "occurrences": 8,
+          "path": "WinUIGallery/Samples/RadialGradientBrush/RadialGradientBrushPage.xaml"
+        },
+        {
+          "occurrences": 2,
+          "path": "WinUIGallery/Samples/RadioButton/RadioButtonPage.xaml"
+        },
+        {
+          "occurrences": 8,
+          "path": "WinUIGallery/Samples/RatingControl/RatingControlPage.xaml"
+        },
+        {
+          "occurrences": 2,
+          "path": "WinUIGallery/Samples/RepeatButton/RepeatButtonPage.xaml"
+        },
+        {
+          "occurrences": 3,
+          "path": "WinUIGallery/Samples/RichEditBox/RichEditBoxPage.xaml"
+        },
+        {
+          "occurrences": 2,
+          "path": "WinUIGallery/Samples/RichTextBlock/RichTextBlockPage.xaml"
+        },
+        {
+          "occurrences": 5,
+          "path": "WinUIGallery/Samples/ScrollView/ScrollViewPage.xaml"
+        },
+        {
+          "occurrences": 7,
+          "path": "WinUIGallery/Samples/ScrollViewer/ScrollViewerPage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Samples/SelectorBar/SelectorBarPage.xaml"
+        },
+        {
+          "occurrences": 7,
+          "path": "WinUIGallery/Samples/SemanticZoom/SemanticZoomPage.xaml"
+        },
+        {
+          "occurrences": 22,
+          "path": "WinUIGallery/Samples/Shape/ShapePage.xaml"
+        },
+        {
+          "occurrences": 14,
+          "path": "WinUIGallery/Samples/Slider/SliderPage.xaml"
+        },
+        {
+          "occurrences": 15,
+          "path": "WinUIGallery/Samples/SplitView/SplitViewPage.xaml"
+        },
+        {
+          "occurrences": 3,
+          "path": "WinUIGallery/Samples/StackPanel/StackPanelPage.xaml"
+        },
+        {
+          "occurrences": 6,
+          "path": "WinUIGallery/Samples/StandardUICommand/StandardUICommandPage.xaml"
+        },
+        {
+          "occurrences": 27,
+          "path": "WinUIGallery/Samples/StoragePickers/StoragePickersPage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Samples/SystemBackdropElement/SystemBackdropElementPage.xaml"
+        },
+        {
+          "occurrences": 18,
+          "path": "WinUIGallery/Samples/TabView/TabViewPage.xaml"
+        },
+        {
+          "occurrences": 20,
+          "path": "WinUIGallery/Samples/TableView/TableViewPage.xaml"
+        },
+        {
+          "occurrences": 2,
+          "path": "WinUIGallery/Samples/TeachingTip/TeachingTipPage.xaml"
+        },
+        {
+          "occurrences": 2,
+          "path": "WinUIGallery/Samples/TextBlock/TextBlockPage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Samples/ThemeShadow/ThemeShadowPage.xaml"
+        },
+        {
+          "occurrences": 2,
+          "path": "WinUIGallery/Samples/TimePicker/TimePickerPage.xaml"
+        },
+        {
+          "occurrences": 4,
+          "path": "WinUIGallery/Samples/TitleBar/TitleBarPage.xaml"
+        },
+        {
+          "occurrences": 2,
+          "path": "WinUIGallery/Samples/ToggleButton/ToggleButtonPage.xaml"
+        },
+        {
+          "occurrences": 3,
+          "path": "WinUIGallery/Samples/ToggleSwitch/ToggleSwitchPage.xaml"
+        },
+        {
+          "occurrences": 9,
+          "path": "WinUIGallery/Samples/TreeView/TreeViewPage.xaml"
+        },
+        {
+          "occurrences": 5,
+          "path": "WinUIGallery/Samples/Typography/TypographyPage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Samples/VariableSizedWrapGrid/VariableSizedWrapGridPage.xaml"
+        },
+        {
+          "occurrences": 5,
+          "path": "WinUIGallery/Samples/Viewbox/ViewboxPage.xaml"
+        },
+        {
+          "occurrences": 6,
+          "path": "WinUIGallery/Samples/Windowing/WindowingPage.xaml"
+        },
+        {
+          "occurrences": 6,
+          "path": "WinUIGallery/Samples/WrapPanel/WrapPanelPage.xaml"
+        },
+        {
+          "occurrences": 2,
+          "path": "WinUIGallery/Samples/XamlCompInterop/XamlCompInteropPage.xaml"
+        },
+        {
+          "occurrences": 6,
+          "path": "WinUIGallery/Styles/ItemTemplates.xaml"
+        }
+      ]
+    },
+    {
+      "behavior": "unverified",
+      "disposition": "unreviewed",
+      "documents": 162,
+      "feature": "mc:Ignorable",
+      "implementation": [],
+      "notes": null,
+      "occurrences": 162,
+      "tests": [],
+      "uses": [
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Controls/ColorSelector.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Controls/ControlExample.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Controls/DesignGuidance/ColorPageExample.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Controls/DesignGuidance/ColorSections/BackgroundSection.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Controls/DesignGuidance/ColorSections/FillSection.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Controls/DesignGuidance/ColorSections/HighContrastSection.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Controls/DesignGuidance/ColorSections/SignalSection.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Controls/DesignGuidance/ColorSections/StrokeSection.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Controls/DesignGuidance/ColorSections/TextSection.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Controls/DesignGuidance/ColorTile.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Controls/DesignGuidance/TypographyControl.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Controls/HomePage/HomePageHeader.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Controls/HomePage/Tile.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Controls/HorizontalScrollContainer.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Controls/InlineColorPicker.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Controls/PageHeader.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Controls/SampleCodePresenter.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Controls/SampleThemeListener.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/MainWindow.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Pages/ItemPage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Pages/SearchResultsPage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/SampleSupport/SamplePages/AppWindowTitleBarExtendWindow.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/SampleSupport/SamplePages/AppWindowTitleBarThemeWindow.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/SampleSupport/SamplePages/AppWindowTitleBarWindow.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/SampleSupport/SamplePages/CardPage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/SampleSupport/SamplePages/CollectionPage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/SampleSupport/SamplePages/DetailedInfoPage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/SampleSupport/SamplePages/ItemsRepeaterCollectionPage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/SampleSupport/SamplePages/ModalWindow.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/SampleSupport/SamplePages/SampleBuiltInSystemBackdropsWindow.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/SampleSupport/SamplePages/SampleCompactSizingPage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/SampleSupport/SamplePages/SamplePage1.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/SampleSupport/SamplePages/SamplePage2.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/SampleSupport/SamplePages/SamplePage3.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/SampleSupport/SamplePages/SamplePage4.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/SampleSupport/SamplePages/SamplePage5.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/SampleSupport/SamplePages/SamplePage6.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/SampleSupport/SamplePages/SamplePage7.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/SampleSupport/SamplePages/SampleSettingsPage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/SampleSupport/SamplePages/SampleStandardSizingPage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/SampleSupport/SamplePages/SampleSystemBackdropsWindow.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/SampleSupport/SamplePages/SampleWindow1.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/SampleSupport/SamplePages/SampleWindow2.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/SampleSupport/SamplePages/SampleWindow3.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/SampleSupport/SamplePages/SampleWindow4.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/SampleSupport/SamplePages/SampleWindow6.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/SampleSupport/SamplePages/SampleWindow7.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/SampleSupport/SamplePages/TabContentSampleControl.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/SampleSupport/SamplePages/TabViewWindowingSamplePage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/SampleSupport/SamplePages/TitleBarDragRegionsWindow.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/SampleSupport/SamplePages/TitleBarWindow.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Samples/AccessibilityColorContrast/AccessibilityColorContrastPage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Samples/AccessibilityKeyboard/AccessibilityKeyboardPage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Samples/AccessibilityScreenReader/AccessibilityScreenReaderPage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Samples/Acrylic/AcrylicPage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Samples/AnimatedIcon/AnimatedIconPage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Samples/AnimatedVisualPlayer/AnimatedVisualPlayerPage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Samples/AppBarButton/AppBarButtonPage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Samples/AppBarToggleButton/AppBarToggleButtonPage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Samples/AppNotification/AppNotificationPage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Samples/AppWindow/AppWindowPage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Samples/AppWindowTitleBar/AppWindowTitleBarPage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Samples/AutoSuggestBox/AutoSuggestBoxPage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Samples/BadgeNotificationManager/BadgeNotificationManagerPage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Samples/Binding/BindingPage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Samples/Border/BorderPage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Samples/BreadcrumbBar/BreadcrumbBarPage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Samples/Button/ButtonPage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Samples/CalendarView/CalendarViewPage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Samples/Canvas/CanvasPage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Samples/CaptureElementPreview/CaptureElementPreviewPage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Samples/CheckBox/CheckBoxPage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Samples/Clipboard/ClipboardPage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Samples/Color/ColorPage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Samples/ColorPicker/ColorPickerPage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Samples/ComboBox/ComboBoxPage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Samples/CommandBar/CommandBarPage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Samples/CommandBarFlyout/CommandBarFlyoutPage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Samples/CompactSizing/CompactSizingPage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Samples/ConnectedAnimation/ConnectedAnimationPage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Samples/ContentDialog/ContentDialogPage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Samples/ContentIsland/ContentIslandPage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Samples/CustomUserControls/CustomUserControlsPage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Samples/CustomUserControls/TemperatureConverterControl.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Samples/CustomXamlConditionals/CustomXamlConditionalsPage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Samples/DatePicker/DatePickerPage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Samples/DropDownButton/DropDownButtonPage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Samples/EasingFunction/EasingFunctionPage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Samples/Expander/ExpanderPage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Samples/Flyout/FlyoutPage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Samples/Geometry/GeometryPage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Samples/Grid/GridPage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Samples/HyperlinkButton/HyperlinkButtonPage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Samples/IconElement/IconElementPage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Samples/Iconography/IconographyPage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Samples/Image/ImagePage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Samples/ImplicitTransition/ImplicitTransitionPage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Samples/InfoBadge/InfoBadgePage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Samples/InfoBar/InfoBarPage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Samples/InkCanvas/InkCanvasPage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Samples/ItemsRepeater/ItemsRepeaterPage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Samples/JumpList/JumpListPage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Samples/LayoutPanel/LayoutPanelPage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Samples/Line/LinePage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Samples/MapControl/MapControlPage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Samples/MediaPlayerElement/MediaPlayerElementPage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Samples/MenuBar/MenuBarPage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Samples/MenuFlyout/MenuFlyoutPage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Samples/NavigationView/NavigationViewPage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Samples/NumberBox/NumberBoxPage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Samples/PageTransition/PageTransitionPage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Samples/PasswordBox/PasswordBoxPage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Samples/PersonPicture/PersonPicturePage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Samples/PipsPager/PipsPagerPage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Samples/Pivot/PivotPage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Samples/Popup/PopupPage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Samples/ProgressBar/ProgressBarPage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Samples/ProgressRing/ProgressRingPage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Samples/PullToRefresh/PullToRefreshPage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Samples/RadioButton/RadioButtonPage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Samples/RatingControl/RatingControlPage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Samples/RelativePanel/RelativePanelPage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Samples/RepeatButton/RepeatButtonPage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Samples/RichEditBox/RichEditBoxPage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Samples/RichTextBlock/RichTextBlockPage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Samples/ScratchPad/ScratchPadPage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Samples/SelectorBar/SelectorBarPage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Samples/SemanticZoom/SemanticZoomPage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Samples/Shape/ShapePage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Samples/Slider/SliderPage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Samples/Sound/SoundPage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Samples/Spacing/SpacingPage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Samples/SplitButton/SplitButtonPage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Samples/StackPanel/StackPanelPage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Samples/StandardUICommand/StandardUICommandPage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Samples/StoragePickers/StoragePickersPage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Samples/SwipeControl/SwipeControlPage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Samples/SystemBackdropElement/SystemBackdropElementPage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Samples/SystemBackdrops/SystemBackdropsPage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Samples/TabView/TabViewPage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Samples/TeachingTip/TeachingTipPage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Samples/Templates/TemplatesPage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Samples/TextBlock/TextBlockPage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Samples/TextBox/TextBoxPage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Samples/ThemeShadow/ThemeShadowPage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Samples/ThemeTransition/ThemeTransitionPage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Samples/TimePicker/TimePickerPage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Samples/TitleBar/TitleBarPage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Samples/ToggleButton/ToggleButtonPage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Samples/ToggleSplitButton/ToggleSplitButtonPage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Samples/ToggleSwitch/ToggleSwitchPage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Samples/ToolTip/ToolTipPage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Samples/TreeView/TreeViewPage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Samples/Typography/TypographyPage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Samples/VariableSizedWrapGrid/VariableSizedWrapGridPage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Samples/Viewbox/ViewboxPage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Samples/WebView2/WebView2Page.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Samples/WrapPanel/WrapPanelPage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Samples/XamlCompInterop/XamlCompInteropPage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Samples/XamlResources/XamlResourcesPage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Samples/XamlStyles/XamlStylesPage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Samples/XamlUICommand/XamlUICommandPage.xaml"
+        }
+      ]
+    },
+    {
+      "behavior": "unverified",
+      "disposition": "implemented-subset",
+      "documents": 186,
+      "feature": "x:Class",
+      "implementation": [
+        "src/Markup/FerroUI.Markup.Xaml.Loader/winui/migration.rs"
+      ],
+      "notes": "Application namespace mappings rewrite class identity explicitly. C# code-behind still requires a Rust port.",
+      "occurrences": 186,
+      "tests": [
+        {
+          "name": "custom_namespace_maps_update_class_identity_without_rewriting_user_text",
+          "path": "src/Markup/FerroUI.Markup.Xaml.Loader/tests/winui_migration.rs"
+        }
+      ],
+      "uses": [
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/App.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Controls/ColorSelector.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Controls/ControlExample.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Controls/DesignGuidance/ColorPageExample.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Controls/DesignGuidance/ColorSections/BackgroundSection.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Controls/DesignGuidance/ColorSections/FillSection.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Controls/DesignGuidance/ColorSections/HighContrastSection.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Controls/DesignGuidance/ColorSections/SignalSection.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Controls/DesignGuidance/ColorSections/StrokeSection.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Controls/DesignGuidance/ColorSections/TextSection.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Controls/DesignGuidance/ColorTile.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Controls/DesignGuidance/TypographyControl.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Controls/HomePage/HomePageHeader.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Controls/HomePage/Tile.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Controls/HorizontalScrollContainer.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Controls/InlineColorPicker.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Controls/PageHeader.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Controls/SampleCodePresenter.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Controls/SampleThemeListener.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/MainWindow.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Pages/AllControlsPage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Pages/HomePage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Pages/ItemPage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Pages/SearchResultsPage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Pages/SectionPage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Pages/SettingsPage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/SampleSupport/SamplePages/AppWindowTitleBarExtendWindow.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/SampleSupport/SamplePages/AppWindowTitleBarThemeWindow.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/SampleSupport/SamplePages/AppWindowTitleBarWindow.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/SampleSupport/SamplePages/CardPage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/SampleSupport/SamplePages/CollectionPage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/SampleSupport/SamplePages/DetailedInfoPage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/SampleSupport/SamplePages/ItemsRepeaterCollectionPage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/SampleSupport/SamplePages/ModalWindow.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/SampleSupport/SamplePages/SampleBuiltInSystemBackdropsWindow.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/SampleSupport/SamplePages/SampleCompactSizingPage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/SampleSupport/SamplePages/SamplePage1.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/SampleSupport/SamplePages/SamplePage2.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/SampleSupport/SamplePages/SamplePage3.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/SampleSupport/SamplePages/SamplePage4.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/SampleSupport/SamplePages/SamplePage5.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/SampleSupport/SamplePages/SamplePage6.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/SampleSupport/SamplePages/SamplePage7.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/SampleSupport/SamplePages/SampleSettingsPage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/SampleSupport/SamplePages/SampleStandardSizingPage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/SampleSupport/SamplePages/SampleSystemBackdropsWindow.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/SampleSupport/SamplePages/SampleWindow1.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/SampleSupport/SamplePages/SampleWindow2.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/SampleSupport/SamplePages/SampleWindow3.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/SampleSupport/SamplePages/SampleWindow4.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/SampleSupport/SamplePages/SampleWindow6.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/SampleSupport/SamplePages/SampleWindow7.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/SampleSupport/SamplePages/TabContentSampleControl.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/SampleSupport/SamplePages/TabViewWindowingSamplePage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/SampleSupport/SamplePages/TitleBarDragRegionsWindow.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/SampleSupport/SamplePages/TitleBarWindow.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Samples/AccessibilityColorContrast/AccessibilityColorContrastPage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Samples/AccessibilityKeyboard/AccessibilityKeyboardPage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Samples/AccessibilityScreenReader/AccessibilityScreenReaderPage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Samples/Acrylic/AcrylicPage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Samples/AnimatedIcon/AnimatedIconPage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Samples/AnimatedVisualPlayer/AnimatedVisualPlayerPage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Samples/AnnotatedScrollBar/AnnotatedScrollBarPage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Samples/AppBarButton/AppBarButtonPage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Samples/AppBarSeparator/AppBarSeparatorPage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Samples/AppBarToggleButton/AppBarToggleButtonPage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Samples/AppNotification/AppNotificationPage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Samples/AppWindow/AppWindowPage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Samples/AppWindowTitleBar/AppWindowTitleBarPage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Samples/AutoSuggestBox/AutoSuggestBoxPage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Samples/BadgeNotificationManager/BadgeNotificationManagerPage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Samples/Binding/BindingPage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Samples/Border/BorderPage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Samples/BreadcrumbBar/BreadcrumbBarPage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Samples/Button/ButtonPage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Samples/CalendarDatePicker/CalendarDatePickerPage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Samples/CalendarView/CalendarViewPage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Samples/Canvas/CanvasPage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Samples/CaptureElementPreview/CaptureElementPreviewPage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Samples/Chart/ChartPage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Samples/CheckBox/CheckBoxPage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Samples/Clipboard/ClipboardPage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Samples/Color/ColorPage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Samples/ColorPicker/ColorPickerPage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Samples/ComboBox/ComboBoxPage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Samples/CommandBar/CommandBarPage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Samples/CommandBarFlyout/CommandBarFlyoutPage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Samples/CompactSizing/CompactSizingPage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Samples/ConnectedAnimation/ConnectedAnimationPage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Samples/ContentDialog/ContentDialogContent.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Samples/ContentDialog/ContentDialogExample.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Samples/ContentDialog/ContentDialogPage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Samples/ContentIsland/ContentIslandPage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Samples/CustomUserControls/CustomUserControlsPage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Samples/CustomUserControls/TemperatureConverterControl.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Samples/CustomXamlConditionals/CustomXamlConditionalsPage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Samples/DatePicker/DatePickerPage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Samples/DropDownButton/DropDownButtonPage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Samples/EasingFunction/EasingFunctionPage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Samples/Expander/ExpanderPage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Samples/FlipView/FlipViewPage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Samples/Flyout/FlyoutPage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Samples/Geometry/GeometryPage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Samples/Grid/GridPage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Samples/GridView/GridViewPage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Samples/HyperlinkButton/HyperlinkButtonPage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Samples/IconElement/IconElementPage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Samples/Iconography/IconographyPage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Samples/Image/ImagePage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Samples/ImplicitTransition/ImplicitTransitionPage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Samples/InfoBadge/InfoBadgePage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Samples/InfoBar/InfoBarPage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Samples/InkCanvas/InkCanvasPage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Samples/ItemsRepeater/ItemsRepeaterPage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Samples/ItemsView/ItemsViewPage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Samples/JumpList/JumpListPage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Samples/LayoutPanel/LayoutPanelPage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Samples/Line/LinePage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Samples/ListView/ListViewPage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Samples/MapControl/MapControlPage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Samples/MediaPlayerElement/MediaPlayerElementPage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Samples/MenuBar/MenuBarPage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Samples/MenuFlyout/MenuFlyoutPage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Samples/NavigationView/NavigationViewPage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Samples/NumberBox/NumberBoxPage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Samples/PageTransition/PageTransitionPage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Samples/PagerControl/PagerControlPage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Samples/ParallaxView/ParallaxViewPage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Samples/PasswordBox/PasswordBoxPage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Samples/PersonPicture/PersonPicturePage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Samples/PipsPager/PipsPagerPage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Samples/Pivot/PivotPage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Samples/Popup/PopupPage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Samples/ProgressBar/ProgressBarPage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Samples/ProgressRing/ProgressRingPage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Samples/PullToRefresh/PullToRefreshPage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Samples/RadialGradientBrush/RadialGradientBrushPage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Samples/RadioButton/RadioButtonPage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Samples/RatingControl/RatingControlPage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Samples/RelativePanel/RelativePanelPage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Samples/RepeatButton/RepeatButtonPage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Samples/RichEditBox/RichEditBoxPage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Samples/RichTextBlock/RichTextBlockPage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Samples/ScratchPad/ScratchPadPage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Samples/ScrollView/ScrollViewPage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Samples/ScrollViewer/ScrollViewerPage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Samples/SelectorBar/SelectorBarPage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Samples/SemanticZoom/SemanticZoomPage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Samples/Shape/ShapePage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Samples/Slider/SliderPage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Samples/Sound/SoundPage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Samples/Spacing/SpacingPage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Samples/SplitButton/SplitButtonPage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Samples/SplitView/SplitViewPage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Samples/StackPanel/StackPanelPage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Samples/StandardUICommand/StandardUICommandPage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Samples/StoragePickers/StoragePickersPage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Samples/SwipeControl/SwipeControlPage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Samples/SystemBackdropElement/SystemBackdropElementPage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Samples/SystemBackdrops/SystemBackdropsPage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Samples/TabView/TabViewPage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Samples/TableView/TableViewPage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Samples/TeachingTip/TeachingTipPage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Samples/Templates/TemplatesPage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Samples/TextBlock/TextBlockPage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Samples/TextBox/TextBoxPage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Samples/ThemeShadow/ThemeShadowPage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Samples/ThemeTransition/ThemeTransitionPage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Samples/TimePicker/TimePickerPage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Samples/TitleBar/TitleBarPage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Samples/ToggleButton/ToggleButtonPage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Samples/ToggleSplitButton/ToggleSplitButtonPage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Samples/ToggleSwitch/ToggleSwitchPage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Samples/ToolTip/ToolTipPage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Samples/TreeView/TreeViewPage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Samples/Typography/TypographyPage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Samples/VariableSizedWrapGrid/VariableSizedWrapGridPage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Samples/Viewbox/ViewboxPage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Samples/WebView2/WebView2Page.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Samples/Windowing/WindowingPage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Samples/WrapPanel/WrapPanelPage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Samples/XamlCompInterop/XamlCompInteropPage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Samples/XamlResources/XamlResourcesPage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Samples/XamlStyles/XamlStylesPage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Samples/XamlUICommand/XamlUICommandPage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Styles/ItemTemplates.xaml"
+        }
+      ]
+    },
+    {
+      "behavior": "unverified",
+      "disposition": "implemented-subset",
+      "documents": 28,
+      "feature": "x:DataType",
+      "implementation": [
+        "src/Markup/FerroUI.Markup.Xaml.Loader/winui/migration.rs"
+      ],
+      "notes": "Type references follow explicit alias mappings. In the opt-in property-path x:Bind policy, each template instance validates its source item against its resolved native data type. Other compiled/deferred expression contracts remain unsupported.",
+      "occurrences": 64,
+      "tests": [
+        {
+          "name": "aliases_resolve_type_references_in_templates_directives_and_type_extensions",
+          "path": "src/Markup/FerroUI.Markup.Xaml.Loader/tests/winui_migration.rs"
+        }
+      ],
+      "uses": [
+        {
+          "occurrences": 2,
+          "path": "WinUIGallery/Controls/PageHeader.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/MainWindow.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/SampleSupport/SamplePages/CollectionPage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Samples/AccessibilityScreenReader/AccessibilityScreenReaderPage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Samples/Acrylic/AcrylicPage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Samples/AnnotatedScrollBar/AnnotatedScrollBarPage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Samples/Binding/BindingPage.xaml"
+        },
+        {
+          "occurrences": 2,
+          "path": "WinUIGallery/Samples/BreadcrumbBar/BreadcrumbBarPage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Samples/CalendarView/CalendarViewPage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Samples/ComboBox/ComboBoxPage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Samples/EasingFunction/EasingFunctionPage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Samples/FlipView/FlipViewPage.xaml"
+        },
+        {
+          "occurrences": 5,
+          "path": "WinUIGallery/Samples/GridView/GridViewPage.xaml"
+        },
+        {
+          "occurrences": 2,
+          "path": "WinUIGallery/Samples/Iconography/IconographyPage.xaml"
+        },
+        {
+          "occurrences": 11,
+          "path": "WinUIGallery/Samples/ItemsRepeater/ItemsRepeaterPage.xaml"
+        },
+        {
+          "occurrences": 4,
+          "path": "WinUIGallery/Samples/ItemsView/ItemsViewPage.xaml"
+        },
+        {
+          "occurrences": 9,
+          "path": "WinUIGallery/Samples/ListView/ListViewPage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Samples/NavigationView/NavigationViewPage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Samples/ParallaxView/ParallaxViewPage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Samples/PipsPager/PipsPagerPage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Samples/SelectorBar/SelectorBarPage.xaml"
+        },
+        {
+          "occurrences": 3,
+          "path": "WinUIGallery/Samples/SemanticZoom/SemanticZoomPage.xaml"
+        },
+        {
+          "occurrences": 2,
+          "path": "WinUIGallery/Samples/SplitView/SplitViewPage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Samples/StandardUICommand/StandardUICommandPage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Samples/TabView/TabViewPage.xaml"
+        },
+        {
+          "occurrences": 4,
+          "path": "WinUIGallery/Samples/TableView/TableViewPage.xaml"
+        },
+        {
+          "occurrences": 3,
+          "path": "WinUIGallery/Samples/TreeView/TreeViewPage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Styles/ItemTemplates.xaml"
+        }
+      ]
+    },
+    {
+      "behavior": "unverified",
+      "disposition": "unreviewed",
+      "documents": 1,
+      "feature": "x:DefaultBindMode",
+      "implementation": [],
+      "notes": null,
+      "occurrences": 1,
+      "tests": [],
+      "uses": [
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Controls/ControlExample.xaml"
+        }
+      ]
+    },
+    {
+      "behavior": "unverified",
+      "disposition": "unreviewed",
+      "documents": 2,
+      "feature": "x:FieldModifier",
+      "implementation": [],
+      "notes": null,
+      "occurrences": 2,
+      "tests": [],
+      "uses": [
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Controls/ControlExample.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/MainWindow.xaml"
+        }
+      ]
+    },
+    {
+      "behavior": "unverified",
+      "disposition": "unreviewed",
+      "documents": 64,
+      "feature": "x:Key",
+      "implementation": [],
+      "notes": null,
+      "occurrences": 313,
+      "tests": [],
+      "uses": [
+        {
+          "occurrences": 25,
+          "path": "WinUIGallery/App.xaml"
+        },
+        {
+          "occurrences": 9,
+          "path": "WinUIGallery/Controls/ControlExample.xaml"
+        },
+        {
+          "occurrences": 10,
+          "path": "WinUIGallery/Controls/CopyButton.xaml"
+        },
+        {
+          "occurrences": 2,
+          "path": "WinUIGallery/Controls/DesignGuidance/ColorTile.xaml"
+        },
+        {
+          "occurrences": 17,
+          "path": "WinUIGallery/Controls/HomePage/HomePageHeader.xaml"
+        },
+        {
+          "occurrences": 15,
+          "path": "WinUIGallery/Controls/HomePage/Tile.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Controls/HorizontalScrollContainer.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Controls/OpacityMaskView.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Controls/PageHeader.xaml"
+        },
+        {
+          "occurrences": 3,
+          "path": "WinUIGallery/MainWindow.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Pages/AllControlsPage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Pages/HomePage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Pages/ItemPage.xaml"
+        },
+        {
+          "occurrences": 5,
+          "path": "WinUIGallery/Pages/SearchResultsPage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Pages/SectionPage.xaml"
+        },
+        {
+          "occurrences": 2,
+          "path": "WinUIGallery/Pages/SettingsPage.xaml"
+        },
+        {
+          "occurrences": 2,
+          "path": "WinUIGallery/SampleSupport/SamplePages/SampleCompactSizingPage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/SampleSupport/SamplePages/SamplePage1.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/SampleSupport/SamplePages/SamplePage2.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/SampleSupport/SamplePages/SamplePage3.xaml"
+        },
+        {
+          "occurrences": 2,
+          "path": "WinUIGallery/SampleSupport/SamplePages/SamplePage4.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/SampleSupport/SamplePages/SamplePage5.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/SampleSupport/SamplePages/SamplePage6.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/SampleSupport/SamplePages/SamplePage7.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/SampleSupport/SamplePages/TitleBarDragRegionsWindow.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/SampleSupport/SamplePages/TitleBarWindow.xaml"
+        },
+        {
+          "occurrences": 2,
+          "path": "WinUIGallery/Samples/AccessibilityColorContrast/AccessibilityColorContrastPage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Samples/AccessibilityKeyboard/AccessibilityKeyboardPage.xaml"
+        },
+        {
+          "occurrences": 2,
+          "path": "WinUIGallery/Samples/AccessibilityScreenReader/AccessibilityScreenReaderPage.xaml"
+        },
+        {
+          "occurrences": 4,
+          "path": "WinUIGallery/Samples/Acrylic/AcrylicPage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Samples/Color/ColorPage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Samples/CommandBar/CommandBarPage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Samples/ContentIsland/ContentIslandPage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Samples/CustomXamlConditionals/CustomXamlConditionalsPage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Samples/Flyout/FlyoutPage.xaml"
+        },
+        {
+          "occurrences": 4,
+          "path": "WinUIGallery/Samples/Geometry/GeometryPage.xaml"
+        },
+        {
+          "occurrences": 6,
+          "path": "WinUIGallery/Samples/GridView/GridViewPage.xaml"
+        },
+        {
+          "occurrences": 7,
+          "path": "WinUIGallery/Samples/Iconography/IconographyPage.xaml"
+        },
+        {
+          "occurrences": 14,
+          "path": "WinUIGallery/Samples/ItemsRepeater/ItemsRepeaterPage.xaml"
+        },
+        {
+          "occurrences": 5,
+          "path": "WinUIGallery/Samples/ItemsView/ItemsViewPage.xaml"
+        },
+        {
+          "occurrences": 4,
+          "path": "WinUIGallery/Samples/ListView/ListViewPage.xaml"
+        },
+        {
+          "occurrences": 9,
+          "path": "WinUIGallery/Samples/NavigationView/NavigationViewPage.xaml"
+        },
+        {
+          "occurrences": 4,
+          "path": "WinUIGallery/Samples/RichEditBox/RichEditBoxPage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Samples/SelectorBar/SelectorBarPage.xaml"
+        },
+        {
+          "occurrences": 3,
+          "path": "WinUIGallery/Samples/SemanticZoom/SemanticZoomPage.xaml"
+        },
+        {
+          "occurrences": 9,
+          "path": "WinUIGallery/Samples/Spacing/SpacingPage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Samples/SplitButton/SplitButtonPage.xaml"
+        },
+        {
+          "occurrences": 2,
+          "path": "WinUIGallery/Samples/SplitView/SplitViewPage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Samples/StandardUICommand/StandardUICommandPage.xaml"
+        },
+        {
+          "occurrences": 14,
+          "path": "WinUIGallery/Samples/SwipeControl/SwipeControlPage.xaml"
+        },
+        {
+          "occurrences": 4,
+          "path": "WinUIGallery/Samples/TabView/TabViewPage.xaml"
+        },
+        {
+          "occurrences": 4,
+          "path": "WinUIGallery/Samples/Templates/TemplatesPage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Samples/TextBlock/TextBlockPage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Samples/TitleBar/TitleBarPage.xaml"
+        },
+        {
+          "occurrences": 3,
+          "path": "WinUIGallery/Samples/TreeView/TreeViewPage.xaml"
+        },
+        {
+          "occurrences": 4,
+          "path": "WinUIGallery/Samples/Typography/TypographyPage.xaml"
+        },
+        {
+          "occurrences": 15,
+          "path": "WinUIGallery/Samples/XamlResources/XamlResourcesPage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Samples/XamlStyles/XamlStylesPage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Samples/XamlUICommand/XamlUICommandPage.xaml"
+        },
+        {
+          "occurrences": 3,
+          "path": "WinUIGallery/Styles/Grid.xaml"
+        },
+        {
+          "occurrences": 5,
+          "path": "WinUIGallery/Styles/GridViewItem.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Styles/ItemTemplates.xaml"
+        },
+        {
+          "occurrences": 62,
+          "path": "WinUIGallery/Styles/SelectorBar.xaml"
+        },
+        {
+          "occurrences": 3,
+          "path": "WinUIGallery/Styles/TextBlock.xaml"
+        }
+      ]
+    },
+    {
+      "behavior": "unverified",
+      "disposition": "rejected",
+      "documents": 1,
+      "feature": "x:Load",
+      "implementation": [
+        "src/Markup/FerroUI.Markup.Xaml.Loader/winui/migration.rs"
+      ],
+      "notes": "Deferred creation and named-element lifetime require implementation; the migration pass reports the directive.",
+      "occurrences": 2,
+      "tests": [
+        {
+          "name": "unknown_state_lifecycle_and_localization_contracts_are_not_discarded",
+          "path": "src/Markup/FerroUI.Markup.Xaml.Loader/tests/winui_migration.rs"
+        }
+      ],
+      "uses": [
+        {
+          "occurrences": 2,
+          "path": "WinUIGallery/Samples/Iconography/IconographyPage.xaml"
+        }
+      ]
+    },
+    {
+      "behavior": "unverified",
+      "disposition": "shared-syntax-candidate",
+      "documents": 164,
+      "feature": "x:Name",
+      "implementation": [
+        "src/Markup/FerroUI.Markup.Xaml.Loader/winui/migration.rs"
+      ],
+      "notes": "Namescope spelling is preserved; named field/code-behind creation remains owned by the normal XAML compiler.",
+      "occurrences": 1400,
+      "tests": [
+        {
+          "name": "event_handlers_and_entity_spelling_stay_exactly_as_authored",
+          "path": "src/Markup/FerroUI.Markup.Xaml.Loader/tests/winui_migration.rs"
+        }
+      ],
+      "uses": [
+        {
+          "occurrences": 3,
+          "path": "WinUIGallery/Controls/ColorSelector.xaml"
+        },
+        {
+          "occurrences": 19,
+          "path": "WinUIGallery/Controls/ControlExample.xaml"
+        },
+        {
+          "occurrences": 11,
+          "path": "WinUIGallery/Controls/CopyButton.xaml"
+        },
+        {
+          "occurrences": 4,
+          "path": "WinUIGallery/Controls/DesignGuidance/ColorTile.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Controls/DesignGuidance/TypographyControl.xaml"
+        },
+        {
+          "occurrences": 6,
+          "path": "WinUIGallery/Controls/HomePage/HomePageHeader.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Controls/HomePage/Tile.xaml"
+        },
+        {
+          "occurrences": 10,
+          "path": "WinUIGallery/Controls/HorizontalScrollContainer.xaml"
+        },
+        {
+          "occurrences": 4,
+          "path": "WinUIGallery/Controls/InlineColorPicker.xaml"
+        },
+        {
+          "occurrences": 3,
+          "path": "WinUIGallery/Controls/OpacityMaskView.xaml"
+        },
+        {
+          "occurrences": 17,
+          "path": "WinUIGallery/Controls/PageHeader.xaml"
+        },
+        {
+          "occurrences": 8,
+          "path": "WinUIGallery/Controls/SampleCodePresenter.xaml"
+        },
+        {
+          "occurrences": 38,
+          "path": "WinUIGallery/MainWindow.xaml"
+        },
+        {
+          "occurrences": 6,
+          "path": "WinUIGallery/Pages/AllControlsPage.xaml"
+        },
+        {
+          "occurrences": 15,
+          "path": "WinUIGallery/Pages/HomePage.xaml"
+        },
+        {
+          "occurrences": 13,
+          "path": "WinUIGallery/Pages/ItemPage.xaml"
+        },
+        {
+          "occurrences": 11,
+          "path": "WinUIGallery/Pages/SearchResultsPage.xaml"
+        },
+        {
+          "occurrences": 6,
+          "path": "WinUIGallery/Pages/SectionPage.xaml"
+        },
+        {
+          "occurrences": 12,
+          "path": "WinUIGallery/Pages/SettingsPage.xaml"
+        },
+        {
+          "occurrences": 7,
+          "path": "WinUIGallery/SampleSupport/SamplePages/CardPage.xaml"
+        },
+        {
+          "occurrences": 2,
+          "path": "WinUIGallery/SampleSupport/SamplePages/CollectionPage.xaml"
+        },
+        {
+          "occurrences": 6,
+          "path": "WinUIGallery/SampleSupport/SamplePages/DetailedInfoPage.xaml"
+        },
+        {
+          "occurrences": 3,
+          "path": "WinUIGallery/SampleSupport/SamplePages/ItemsRepeaterCollectionPage.xaml"
+        },
+        {
+          "occurrences": 5,
+          "path": "WinUIGallery/SampleSupport/SamplePages/SampleBuiltInSystemBackdropsWindow.xaml"
+        },
+        {
+          "occurrences": 6,
+          "path": "WinUIGallery/SampleSupport/SamplePages/SampleCompactSizingPage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/SampleSupport/SamplePages/SamplePage1.xaml"
+        },
+        {
+          "occurrences": 2,
+          "path": "WinUIGallery/SampleSupport/SamplePages/SamplePage2.xaml"
+        },
+        {
+          "occurrences": 2,
+          "path": "WinUIGallery/SampleSupport/SamplePages/SamplePage7.xaml"
+        },
+        {
+          "occurrences": 7,
+          "path": "WinUIGallery/SampleSupport/SamplePages/SampleStandardSizingPage.xaml"
+        },
+        {
+          "occurrences": 5,
+          "path": "WinUIGallery/SampleSupport/SamplePages/SampleSystemBackdropsWindow.xaml"
+        },
+        {
+          "occurrences": 3,
+          "path": "WinUIGallery/SampleSupport/SamplePages/SampleWindow1.xaml"
+        },
+        {
+          "occurrences": 4,
+          "path": "WinUIGallery/SampleSupport/SamplePages/SampleWindow3.xaml"
+        },
+        {
+          "occurrences": 3,
+          "path": "WinUIGallery/SampleSupport/SamplePages/SampleWindow4.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/SampleSupport/SamplePages/SampleWindow6.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/SampleSupport/SamplePages/TabContentSampleControl.xaml"
+        },
+        {
+          "occurrences": 3,
+          "path": "WinUIGallery/SampleSupport/SamplePages/TabViewWindowingSamplePage.xaml"
+        },
+        {
+          "occurrences": 5,
+          "path": "WinUIGallery/SampleSupport/SamplePages/TitleBarDragRegionsWindow.xaml"
+        },
+        {
+          "occurrences": 3,
+          "path": "WinUIGallery/SampleSupport/SamplePages/TitleBarWindow.xaml"
+        },
+        {
+          "occurrences": 12,
+          "path": "WinUIGallery/Samples/AccessibilityColorContrast/AccessibilityColorContrastPage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Samples/AccessibilityKeyboard/AccessibilityKeyboardPage.xaml"
+        },
+        {
+          "occurrences": 3,
+          "path": "WinUIGallery/Samples/AccessibilityScreenReader/AccessibilityScreenReaderPage.xaml"
+        },
+        {
+          "occurrences": 15,
+          "path": "WinUIGallery/Samples/Acrylic/AcrylicPage.xaml"
+        },
+        {
+          "occurrences": 5,
+          "path": "WinUIGallery/Samples/AnimatedIcon/AnimatedIconPage.xaml"
+        },
+        {
+          "occurrences": 6,
+          "path": "WinUIGallery/Samples/AnimatedVisualPlayer/AnimatedVisualPlayerPage.xaml"
+        },
+        {
+          "occurrences": 4,
+          "path": "WinUIGallery/Samples/AnnotatedScrollBar/AnnotatedScrollBarPage.xaml"
+        },
+        {
+          "occurrences": 16,
+          "path": "WinUIGallery/Samples/AppBarButton/AppBarButtonPage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Samples/AppBarSeparator/AppBarSeparatorPage.xaml"
+        },
+        {
+          "occurrences": 12,
+          "path": "WinUIGallery/Samples/AppBarToggleButton/AppBarToggleButtonPage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Samples/AppNotification/AppNotificationPage.xaml"
+        },
+        {
+          "occurrences": 17,
+          "path": "WinUIGallery/Samples/AppWindow/AppWindowPage.xaml"
+        },
+        {
+          "occurrences": 18,
+          "path": "WinUIGallery/Samples/AppWindowTitleBar/AppWindowTitleBarPage.xaml"
+        },
+        {
+          "occurrences": 10,
+          "path": "WinUIGallery/Samples/AutoSuggestBox/AutoSuggestBoxPage.xaml"
+        },
+        {
+          "occurrences": 2,
+          "path": "WinUIGallery/Samples/BadgeNotificationManager/BadgeNotificationManagerPage.xaml"
+        },
+        {
+          "occurrences": 8,
+          "path": "WinUIGallery/Samples/Binding/BindingPage.xaml"
+        },
+        {
+          "occurrences": 3,
+          "path": "WinUIGallery/Samples/Border/BorderPage.xaml"
+        },
+        {
+          "occurrences": 5,
+          "path": "WinUIGallery/Samples/BreadcrumbBar/BreadcrumbBarPage.xaml"
+        },
+        {
+          "occurrences": 7,
+          "path": "WinUIGallery/Samples/Button/ButtonPage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Samples/CalendarDatePicker/CalendarDatePickerPage.xaml"
+        },
+        {
+          "occurrences": 7,
+          "path": "WinUIGallery/Samples/CalendarView/CalendarViewPage.xaml"
+        },
+        {
+          "occurrences": 5,
+          "path": "WinUIGallery/Samples/Canvas/CanvasPage.xaml"
+        },
+        {
+          "occurrences": 9,
+          "path": "WinUIGallery/Samples/CaptureElementPreview/CaptureElementPreviewPage.xaml"
+        },
+        {
+          "occurrences": 49,
+          "path": "WinUIGallery/Samples/Chart/ChartPage.xaml"
+        },
+        {
+          "occurrences": 9,
+          "path": "WinUIGallery/Samples/CheckBox/CheckBoxPage.xaml"
+        },
+        {
+          "occurrences": 25,
+          "path": "WinUIGallery/Samples/Clipboard/ClipboardPage.xaml"
+        },
+        {
+          "occurrences": 3,
+          "path": "WinUIGallery/Samples/Color/ColorPage.xaml"
+        },
+        {
+          "occurrences": 11,
+          "path": "WinUIGallery/Samples/ColorPicker/ColorPickerPage.xaml"
+        },
+        {
+          "occurrences": 6,
+          "path": "WinUIGallery/Samples/ComboBox/ComboBoxPage.xaml"
+        },
+        {
+          "occurrences": 7,
+          "path": "WinUIGallery/Samples/CommandBar/CommandBarPage.xaml"
+        },
+        {
+          "occurrences": 4,
+          "path": "WinUIGallery/Samples/CommandBarFlyout/CommandBarFlyoutPage.xaml"
+        },
+        {
+          "occurrences": 3,
+          "path": "WinUIGallery/Samples/CompactSizing/CompactSizingPage.xaml"
+        },
+        {
+          "occurrences": 6,
+          "path": "WinUIGallery/Samples/ConnectedAnimation/ConnectedAnimationPage.xaml"
+        },
+        {
+          "occurrences": 6,
+          "path": "WinUIGallery/Samples/ContentDialog/ContentDialogPage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Samples/ContentIsland/ContentIslandPage.xaml"
+        },
+        {
+          "occurrences": 2,
+          "path": "WinUIGallery/Samples/CustomUserControls/CounterControl.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Samples/CustomUserControls/CustomUserControlsPage.xaml"
+        },
+        {
+          "occurrences": 2,
+          "path": "WinUIGallery/Samples/CustomUserControls/TemperatureConverterControl.xaml"
+        },
+        {
+          "occurrences": 2,
+          "path": "WinUIGallery/Samples/CustomUserControls/ValidatedPasswordBox.xaml"
+        },
+        {
+          "occurrences": 4,
+          "path": "WinUIGallery/Samples/DatePicker/DatePickerPage.xaml"
+        },
+        {
+          "occurrences": 2,
+          "path": "WinUIGallery/Samples/DropDownButton/DropDownButtonPage.xaml"
+        },
+        {
+          "occurrences": 19,
+          "path": "WinUIGallery/Samples/EasingFunction/EasingFunctionPage.xaml"
+        },
+        {
+          "occurrences": 3,
+          "path": "WinUIGallery/Samples/Expander/ExpanderPage.xaml"
+        },
+        {
+          "occurrences": 4,
+          "path": "WinUIGallery/Samples/FlipView/FlipViewPage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Samples/Flyout/FlyoutPage.xaml"
+        },
+        {
+          "occurrences": 10,
+          "path": "WinUIGallery/Samples/Geometry/GeometryPage.xaml"
+        },
+        {
+          "occurrences": 7,
+          "path": "WinUIGallery/Samples/Grid/GridPage.xaml"
+        },
+        {
+          "occurrences": 19,
+          "path": "WinUIGallery/Samples/GridView/GridViewPage.xaml"
+        },
+        {
+          "occurrences": 4,
+          "path": "WinUIGallery/Samples/HyperlinkButton/HyperlinkButtonPage.xaml"
+        },
+        {
+          "occurrences": 13,
+          "path": "WinUIGallery/Samples/IconElement/IconElementPage.xaml"
+        },
+        {
+          "occurrences": 12,
+          "path": "WinUIGallery/Samples/Iconography/IconographyPage.xaml"
+        },
+        {
+          "occurrences": 13,
+          "path": "WinUIGallery/Samples/Image/ImagePage.xaml"
+        },
+        {
+          "occurrences": 27,
+          "path": "WinUIGallery/Samples/ImplicitTransition/ImplicitTransitionPage.xaml"
+        },
+        {
+          "occurrences": 17,
+          "path": "WinUIGallery/Samples/InfoBadge/InfoBadgePage.xaml"
+        },
+        {
+          "occurrences": 16,
+          "path": "WinUIGallery/Samples/InfoBar/InfoBarPage.xaml"
+        },
+        {
+          "occurrences": 25,
+          "path": "WinUIGallery/Samples/InkCanvas/InkCanvasPage.xaml"
+        },
+        {
+          "occurrences": 31,
+          "path": "WinUIGallery/Samples/ItemsRepeater/ItemsRepeaterPage.xaml"
+        },
+        {
+          "occurrences": 24,
+          "path": "WinUIGallery/Samples/ItemsView/ItemsViewPage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Samples/LayoutPanel/LayoutPanelPage.xaml"
+        },
+        {
+          "occurrences": 15,
+          "path": "WinUIGallery/Samples/Line/LinePage.xaml"
+        },
+        {
+          "occurrences": 23,
+          "path": "WinUIGallery/Samples/ListView/ListViewPage.xaml"
+        },
+        {
+          "occurrences": 2,
+          "path": "WinUIGallery/Samples/MapControl/MapControlPage.xaml"
+        },
+        {
+          "occurrences": 5,
+          "path": "WinUIGallery/Samples/MediaPlayerElement/MediaPlayerElementPage.xaml"
+        },
+        {
+          "occurrences": 41,
+          "path": "WinUIGallery/Samples/MenuBar/MenuBarPage.xaml"
+        },
+        {
+          "occurrences": 19,
+          "path": "WinUIGallery/Samples/MenuFlyout/MenuFlyoutPage.xaml"
+        },
+        {
+          "occurrences": 41,
+          "path": "WinUIGallery/Samples/NavigationView/NavigationViewPage.xaml"
+        },
+        {
+          "occurrences": 3,
+          "path": "WinUIGallery/Samples/NumberBox/NumberBoxPage.xaml"
+        },
+        {
+          "occurrences": 12,
+          "path": "WinUIGallery/Samples/PageTransition/PageTransitionPage.xaml"
+        },
+        {
+          "occurrences": 5,
+          "path": "WinUIGallery/Samples/ParallaxView/ParallaxViewPage.xaml"
+        },
+        {
+          "occurrences": 3,
+          "path": "WinUIGallery/Samples/PasswordBox/PasswordBoxPage.xaml"
+        },
+        {
+          "occurrences": 5,
+          "path": "WinUIGallery/Samples/PersonPicture/PersonPicturePage.xaml"
+        },
+        {
+          "occurrences": 9,
+          "path": "WinUIGallery/Samples/PipsPager/PipsPagerPage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Samples/Pivot/PivotPage.xaml"
+        },
+        {
+          "occurrences": 5,
+          "path": "WinUIGallery/Samples/Popup/PopupPage.xaml"
+        },
+        {
+          "occurrences": 9,
+          "path": "WinUIGallery/Samples/ProgressBar/ProgressBarPage.xaml"
+        },
+        {
+          "occurrences": 9,
+          "path": "WinUIGallery/Samples/ProgressRing/ProgressRingPage.xaml"
+        },
+        {
+          "occurrences": 5,
+          "path": "WinUIGallery/Samples/PullToRefresh/PullToRefreshPage.xaml"
+        },
+        {
+          "occurrences": 10,
+          "path": "WinUIGallery/Samples/RadialGradientBrush/RadialGradientBrushPage.xaml"
+        },
+        {
+          "occurrences": 4,
+          "path": "WinUIGallery/Samples/RadioButton/RadioButtonPage.xaml"
+        },
+        {
+          "occurrences": 8,
+          "path": "WinUIGallery/Samples/RatingControl/RatingControlPage.xaml"
+        },
+        {
+          "occurrences": 4,
+          "path": "WinUIGallery/Samples/RelativePanel/RelativePanelPage.xaml"
+        },
+        {
+          "occurrences": 3,
+          "path": "WinUIGallery/Samples/RepeatButton/RepeatButtonPage.xaml"
+        },
+        {
+          "occurrences": 12,
+          "path": "WinUIGallery/Samples/RichEditBox/RichEditBoxPage.xaml"
+        },
+        {
+          "occurrences": 6,
+          "path": "WinUIGallery/Samples/RichTextBlock/RichTextBlockPage.xaml"
+        },
+        {
+          "occurrences": 4,
+          "path": "WinUIGallery/Samples/ScratchPad/ScratchPadPage.xaml"
+        },
+        {
+          "occurrences": 16,
+          "path": "WinUIGallery/Samples/ScrollView/ScrollViewPage.xaml"
+        },
+        {
+          "occurrences": 8,
+          "path": "WinUIGallery/Samples/ScrollViewer/ScrollViewerPage.xaml"
+        },
+        {
+          "occurrences": 19,
+          "path": "WinUIGallery/Samples/SelectorBar/SelectorBarPage.xaml"
+        },
+        {
+          "occurrences": 3,
+          "path": "WinUIGallery/Samples/SemanticZoom/SemanticZoomPage.xaml"
+        },
+        {
+          "occurrences": 13,
+          "path": "WinUIGallery/Samples/Shape/ShapePage.xaml"
+        },
+        {
+          "occurrences": 18,
+          "path": "WinUIGallery/Samples/Slider/SliderPage.xaml"
+        },
+        {
+          "occurrences": 5,
+          "path": "WinUIGallery/Samples/Sound/SoundPage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Samples/Spacing/SpacingPage.xaml"
+        },
+        {
+          "occurrences": 6,
+          "path": "WinUIGallery/Samples/SplitButton/SplitButtonPage.xaml"
+        },
+        {
+          "occurrences": 16,
+          "path": "WinUIGallery/Samples/SplitView/SplitViewPage.xaml"
+        },
+        {
+          "occurrences": 5,
+          "path": "WinUIGallery/Samples/StackPanel/StackPanelPage.xaml"
+        },
+        {
+          "occurrences": 9,
+          "path": "WinUIGallery/Samples/StandardUICommand/StandardUICommandPage.xaml"
+        },
+        {
+          "occurrences": 34,
+          "path": "WinUIGallery/Samples/StoragePickers/StoragePickersPage.xaml"
+        },
+        {
+          "occurrences": 6,
+          "path": "WinUIGallery/Samples/SwipeControl/SwipeControlPage.xaml"
+        },
+        {
+          "occurrences": 4,
+          "path": "WinUIGallery/Samples/SystemBackdropElement/SystemBackdropElementPage.xaml"
+        },
+        {
+          "occurrences": 7,
+          "path": "WinUIGallery/Samples/TabView/TabViewPage.xaml"
+        },
+        {
+          "occurrences": 19,
+          "path": "WinUIGallery/Samples/TableView/TableViewPage.xaml"
+        },
+        {
+          "occurrences": 5,
+          "path": "WinUIGallery/Samples/TeachingTip/TeachingTipPage.xaml"
+        },
+        {
+          "occurrences": 4,
+          "path": "WinUIGallery/Samples/Templates/TemplatesPage.xaml"
+        },
+        {
+          "occurrences": 6,
+          "path": "WinUIGallery/Samples/TextBlock/TextBlockPage.xaml"
+        },
+        {
+          "occurrences": 4,
+          "path": "WinUIGallery/Samples/TextBox/TextBoxPage.xaml"
+        },
+        {
+          "occurrences": 6,
+          "path": "WinUIGallery/Samples/ThemeShadow/ThemeShadowPage.xaml"
+        },
+        {
+          "occurrences": 7,
+          "path": "WinUIGallery/Samples/ThemeTransition/ThemeTransitionPage.xaml"
+        },
+        {
+          "occurrences": 3,
+          "path": "WinUIGallery/Samples/TimePicker/TimePickerPage.xaml"
+        },
+        {
+          "occurrences": 5,
+          "path": "WinUIGallery/Samples/TitleBar/TitleBarPage.xaml"
+        },
+        {
+          "occurrences": 3,
+          "path": "WinUIGallery/Samples/ToggleButton/ToggleButtonPage.xaml"
+        },
+        {
+          "occurrences": 4,
+          "path": "WinUIGallery/Samples/ToggleSplitButton/ToggleSplitButtonPage.xaml"
+        },
+        {
+          "occurrences": 2,
+          "path": "WinUIGallery/Samples/ToggleSwitch/ToggleSwitchPage.xaml"
+        },
+        {
+          "occurrences": 2,
+          "path": "WinUIGallery/Samples/ToolTip/ToolTipPage.xaml"
+        },
+        {
+          "occurrences": 4,
+          "path": "WinUIGallery/Samples/TreeView/TreeViewPage.xaml"
+        },
+        {
+          "occurrences": 12,
+          "path": "WinUIGallery/Samples/Typography/TypographyPage.xaml"
+        },
+        {
+          "occurrences": 3,
+          "path": "WinUIGallery/Samples/VariableSizedWrapGrid/VariableSizedWrapGridPage.xaml"
+        },
+        {
+          "occurrences": 3,
+          "path": "WinUIGallery/Samples/Viewbox/ViewboxPage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Samples/WebView2/WebView2Page.xaml"
+        },
+        {
+          "occurrences": 9,
+          "path": "WinUIGallery/Samples/Windowing/WindowingPage.xaml"
+        },
+        {
+          "occurrences": 8,
+          "path": "WinUIGallery/Samples/WrapPanel/WrapPanelPage.xaml"
+        },
+        {
+          "occurrences": 13,
+          "path": "WinUIGallery/Samples/XamlCompInterop/XamlCompInteropPage.xaml"
+        },
+        {
+          "occurrences": 4,
+          "path": "WinUIGallery/Samples/XamlResources/XamlResourcesPage.xaml"
+        },
+        {
+          "occurrences": 4,
+          "path": "WinUIGallery/Samples/XamlUICommand/XamlUICommandPage.xaml"
+        },
+        {
+          "occurrences": 7,
+          "path": "WinUIGallery/Styles/ItemTemplates.xaml"
+        },
+        {
+          "occurrences": 15,
+          "path": "WinUIGallery/Styles/SelectorBar.xaml"
+        }
+      ]
+    },
+    {
+      "behavior": "unverified",
+      "disposition": "rejected",
+      "documents": 1,
+      "feature": "x:Phase",
+      "implementation": [
+        "src/Markup/FerroUI.Markup.Xaml.Loader/winui/migration.rs"
+      ],
+      "notes": "Phased rendering lifecycle is not implemented by renaming this directive.",
+      "occurrences": 5,
+      "tests": [],
+      "uses": [
+        {
+          "occurrences": 5,
+          "path": "WinUIGallery/Samples/ListView/ListViewPage.xaml"
+        }
+      ]
+    },
+    {
+      "behavior": "unverified",
+      "disposition": "unreviewed",
+      "documents": 6,
+      "feature": "xml:space",
+      "implementation": [],
+      "notes": null,
+      "occurrences": 8,
+      "tests": [],
+      "uses": [
+        {
+          "occurrences": 3,
+          "path": "WinUIGallery/Samples/Binding/BindingPage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Samples/Chart/ChartPage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Samples/CommandBar/CommandBarPage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Samples/MapControl/MapControlPage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Samples/RichEditBox/RichEditBoxPage.xaml"
+        },
+        {
+          "occurrences": 1,
+          "path": "WinUIGallery/Samples/TableView/TableViewPage.xaml"
+        }
+      ]
+    }
+  ],
+  "meaning": "Audited syntax adaptations and explicit rejections, separate from behavior.",
+  "schema_version": 1
+}

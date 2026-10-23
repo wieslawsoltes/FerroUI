@@ -9,6 +9,74 @@
     "B5": "Navigation, pages, tabs and command bar",
     "B6": "Window decorations, notifications, tables and dialogs"
   },
+  "native_additions": [
+    {
+      "control": "FerroUI.Controls.RadioButtons",
+      "source_commit": "a71c42bd3e352060e5f5ecf3b5e1a98f8a745809",
+      "implementation": "src/FerroUI.Controls/radio_buttons.rs",
+      "theme_documents": [],
+      "coverage": "The ordinary FerroUI control namespace provides a native RadioButtons group with selection, items and column layout. Its replaceable metadata template uses native RadioButton controls and their existing themes.",
+      "remaining": "The original RadioButtons implicit style, item style and scoped resource declarations remain pending. The former no-control waivers no longer apply. The native group implementation does not certify source template parts, all resource metrics, HighContrast or pixel parity."
+    },
+    {
+      "control": "FerroUI.Controls.InfoBadge",
+      "source_commit": "a71c42bd3e352060e5f5ecf3b5e1a98f8a745809",
+      "implementation": "src/FerroUI.Controls/info_badge.rs",
+      "theme_documents": [
+        "Controls/InfoBadge.xaml"
+      ],
+      "coverage": "The ordinary FerroUI control namespace provides InfoBadge. WinUIControls.xaml merges its dictionary, which supplies the implicit theme, DefaultInfoBadgeStyle, and all five severity families with dot/value/icon themes. Migration changes Style to Theme. The native replaceable template handles value, icon and dot presentation; colors use Default, Light and HighContrast dictionaries. The native NavigationViewItem can host this badge and the Gallery includes the original navigation-badge composition; exact source navigation visuals remain separate.",
+      "remaining": "The scanner counts resource declarations in their original theme scope. Shared dimensions and margins are supplied at dictionary root, so their upstream variant-scoped entries remain pending in this strict inventory. Matching resource keys does not establish complete upstream VisualState, icon-source, source-specific NavigationView badge visuals, platform accessibility or pixel parity. The native implementation is pinned separately from this theme reference."
+    },
+    {
+      "control": "FerroUI.Controls.ProgressRing",
+      "source_commit": "a71c42bd3e352060e5f5ecf3b5e1a98f8a745809",
+      "implementation": "src/FerroUI.Controls/progress_ring.rs",
+      "theme_documents": [],
+      "coverage": "The ordinary FerroUI control namespace provides a native ProgressRing with a replaceable Arc template and framework-clock animation. Explicit Foreground/Background values take precedence; the control resolves ProgressRingForegroundThemeBrush and ProgressRingBackgroundThemeBrush from the active theme, with accent and native color fallbacks. These lookups support application-provided resources; they do not define the missing source dictionaries.",
+      "remaining": "The original implicit style and seven source resource entries remain pending. The default Arc template computes stroke width and does not consume ProgressRingStrokeThickness. Exact Lottie geometry, determinate endpoint trim keyframes, AnimatedVisualPlayer and custom DeterminateSource/IndeterminateSource remain unported; native shape motion is an adaptation, not pixel parity. HighContrast source brush declarations are not supplied by this addition."
+    },
+    {
+      "control": "FerroUI.Controls.RatingControl",
+      "source_commit": "a71c42bd3e352060e5f5ecf3b5e1a98f8a745809",
+      "implementation": "src/FerroUI.Controls/rating_control.rs",
+      "theme_documents": [],
+      "coverage": "The ordinary FerroUI control namespace provides a native RatingControl with replaceable foreground/background item panels and a caption. Independent glyph/image visuals, fractional clips and native transforms render the rating, placeholder and pointer preview. The control resolves RatingControl state-brush keys, RatingControlFontSizeForRendering and RatingControlItemSpacing, including zero spacing, with native fallbacks.",
+      "remaining": "The original implicit style and 34 source resource entries remain pending. Resource lookup does not supply the scoped source dictionaries, four WinUI item DataTemplates or MUX_RatingControlDefaultFontInfo. RatingControlCaptionTopMargin and text-scale-dependent glyph sizing are not projected. Composition-expression animation timing, installed glyph fonts, HighContrast appearance, custom WinUI templates, platform accessibility and pixel parity require separate implementation or acceptance."
+    },
+    {
+      "control": "FerroUI.Controls.NavigationView",
+      "source_commit": "a71c42bd3e352060e5f5ecf3b5e1a98f8a745809",
+      "implementation": "src/FerroUI.Controls/navigation_view.rs",
+      "theme_documents": [],
+      "coverage": "The ordinary FerroUI control namespace provides a native ContentControl with a replaceable metadata template built from SplitView, panels, presenters and buttons. It supplies menu/footer sources, selection and settings, hierarchy, native focus/input and adaptive pane modes. Existing NavigationView resource declarations remain available to the theme; resource lookup and a Rust metadata template do not supply the source implicit style.",
+      "remaining": "The source {NavigationView} style is pending. NavigationViewTemplateSettings, the original VisualState/animation/acrylic/title-bar contracts, top overflow redistribution and the compact PaneAutoSuggestButton contract remain absent or unverified. The corresponding overflow and pane-search styles retain explicit feature waivers. Source template-part compatibility, HighContrast appearance, platform accessibility and pixel parity require separate implementation or acceptance."
+    },
+    {
+      "control": "FerroUI.Controls.NavigationViewItem",
+      "source_commit": "a71c42bd3e352060e5f5ecf3b5e1a98f8a745809",
+      "implementation": "src/FerroUI.Controls/navigation_view_item.rs",
+      "theme_documents": [],
+      "coverage": "The additive native item supplies replaceable content/icon/badge presenters, a row button, expansion affordance, child host, selection indicator and native child popup. It resolves selected source brush keys with native fallbacks. These native parts preserve the item behavior without declaring a source ControlTheme or a NavigationViewItemPresenter implementation.",
+      "remaining": "The source {NavigationViewItem} and MUX_NavigationViewSettingsItemStyleWhenOnTopPane styles are pending. Public NavigationViewItemPresenter and its TemplateSettings remain absent, so the three MUX presenter styles retain explicit waivers; deprecated Reveal-focus variants remain waived separately. Original WinUI visual states, resource-driven metrics and motion, HighContrast, platform accessibility and pixel parity remain separate."
+    },
+    {
+      "control": "FerroUI.Controls.NavigationViewItemHeader",
+      "source_commit": "a71c42bd3e352060e5f5ecf3b5e1a98f8a745809",
+      "implementation": "src/FerroUI.Controls/navigation_view_item.rs",
+      "theme_documents": [],
+      "coverage": "The additive native nonfocusable header has a replaceable ContentPresenter template and follows the parent hierarchy and closed-compact context. The existing NavigationViewItemHeaderTextStyle key remains part of the theme inventory; the native metadata template is a separate implementation.",
+      "remaining": "The source {NavigationViewItemHeader} implicit style is pending. Declaring an available header control or reusing the text-style resource does not establish the original header template, all source metrics, visual states, HighContrast or pixel parity."
+    },
+    {
+      "control": "FerroUI.Controls.NavigationViewItemSeparator",
+      "source_commit": "a71c42bd3e352060e5f5ecf3b5e1a98f8a745809",
+      "implementation": "src/FerroUI.Controls/navigation_view_item.rs",
+      "theme_documents": [],
+      "coverage": "The additive native nonfocusable separator uses a replaceable Border template, changes orientation for top navigation, and resolves the NavigationViewItemSeparatorForeground or TopNavigationViewItemSeparatorForeground brush. Existing source resource definitions and the native brush consumer are tracked separately.",
+      "remaining": "The source {NavigationViewItemSeparator} implicit style is pending. The native line and metadata template do not supply the original style declarations, resource-driven metrics, state transitions, HighContrast acceptance or pixel parity."
+    }
+  ],
   "document_batches": {
     "comment": "The batch of the styles of a source document (a prefix of its path, or path#key for one style), before the batch of their target type: the keyed styles of the documents of a control belong to the batch of that control.",
     "controls/dev/NavigationView/": "B5",
@@ -24,6 +92,7 @@
     "controls/dev/SplitButton/": "B2",
     "controls/dev/DropDownButton/": "B2",
     "controls/dev/AutoSuggestBox/": "B3",
+    "controls/dev/RadioButtons/": "B3",
     "controls/dev/ComboBox/": "B3",
     "controls/dev/CommonStyles/MenuFlyout_themeresources.xaml": "B3",
     "controls/dev/CommonStyles/ListViewItem_themeresources.xaml": "B3",
@@ -147,6 +216,7 @@
     "FlipViewItem": {"ferroui": "Carousel", "batch": "B5", "note": "the items of a Carousel are its content presenters"},
     "FlyoutPresenter": {"ferroui": "FlyoutPresenter", "batch": "B3"},
     "HyperlinkButton": {"ferroui": "HyperlinkButton", "batch": "F"},
+    "InfoBadge": {"ferroui": "InfoBadge", "batch": "B6", "note": "Additive FerroUI.Controls.InfoBadge; native control API and InfoBadge.xaml ControlThemes. Resource key coverage is separate from exact visual parity."},
     "InfoBar": {"ferroui": "NotificationCard", "batch": "B6"},
     "ListBox": {"ferroui": "ListBox", "batch": "B3"},
     "ListBoxItem": {"ferroui": "ListBoxItem", "batch": "B3"},
@@ -159,17 +229,20 @@
     "MenuFlyoutPresenter": {"ferroui": "MenuFlyoutPresenter", "batch": "B3"},
     "MenuFlyoutSeparator": {"ferroui": "Separator", "batch": "B1"},
     "MenuFlyoutSubItem": {"ferroui": "MenuItem", "batch": "B3"},
-    "NavigationViewItem": {"ferroui": null, "batch": "B5", "note": "keyed styles only; NavigationView has no FerroUI control"},
-    "NavigationViewItemPresenter": {"ferroui": null, "batch": "B5", "note": "NavigationView has no FerroUI control"},
-    "NavigationView": {"ferroui": null, "batch": "B5", "note": "no FerroUI control; DrawerPage is built from its pane"},
-    "NavigationViewItemHeader": {"ferroui": null, "batch": "B5"},
-    "NavigationViewItemSeparator": {"ferroui": null, "batch": "B5"},
+    "NavigationViewItem": {"ferroui": "NavigationViewItem", "batch": "B5", "note": "Additive FerroUI.Controls.NavigationViewItem; native content/icon/badge/hierarchy parts. The original implicit and top settings-item styles remain pending."},
+    "NavigationViewItemPresenter": {"ferroui": null, "batch": "B5", "note": "No public native NavigationViewItemPresenter or its TemplateSettings. The native NavigationViewItem row parts do not implement that source class; its presenter styles remain waived."},
+    "NavigationView": {"ferroui": "NavigationView", "batch": "B5", "note": "Additive FerroUI.Controls.NavigationView; replaceable native metadata template and resource lookup. The original implicit style remains pending; DrawerPage keeps its separate existing page contract."},
+    "NavigationViewItemHeader": {"ferroui": "NavigationViewItemHeader", "batch": "B5", "note": "Additive FerroUI.Controls.NavigationViewItemHeader; native nonfocusable heading. The original implicit style remains pending."},
+    "NavigationViewItemSeparator": {"ferroui": "NavigationViewItemSeparator", "batch": "B5", "note": "Additive FerroUI.Controls.NavigationViewItemSeparator; native nonfocusable line and orientation. The original implicit style remains pending."},
     "NumberBox": {"ferroui": "NumericUpDown", "batch": "B2"},
     "PasswordBox": {"ferroui": "TextBox", "batch": "B3", "note": "FerroUI's TextBox with a PasswordChar; ported as the keyed DefaultPasswordBoxStyle"},
     "PipsPager": {"ferroui": "PipsPager", "batch": "B2"},
     "ProgressBar": {"ferroui": "ProgressBar", "batch": "B1"},
+    "ProgressRing": {"ferroui": "ProgressRing", "batch": "B1", "note": "Additive FerroUI.Controls.ProgressRing; native Arc template and brush lookup. Source style/resource declarations and exact Lottie/stroke visuals remain pending."},
     "RadioButton": {"ferroui": "RadioButton", "batch": "F"},
     "RadioMenuFlyoutItem": {"ferroui": "MenuItem", "batch": "B3"},
+    "RadioButtons": {"ferroui": "RadioButtons", "batch": "B3", "note": "Native FerroUI.Controls.RadioButtons; replaceable metadata template and native RadioButton items. Original group/item styles and scoped resource declarations remain pending."},
+    "RatingControl": {"ferroui": "RatingControl", "batch": "B2", "note": "Additive FerroUI.Controls.RatingControl; native glyph/image template, clipping and resource lookup. Original styles, item DataTemplates and exact source visuals remain pending."},
     "Rectangle": {"ferroui": null, "batch": "B3", "note": "keyed styles of template parts (ComboBoxItemPill, SelectorBarItemPill)"},
     "RefreshContainer": {"ferroui": "RefreshContainer", "batch": "B2"},
     "RefreshVisualizer": {"ferroui": "RefreshVisualizer", "batch": "B2"},

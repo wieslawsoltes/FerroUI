@@ -51,6 +51,59 @@ use crate::ferro_xaml_il_runtime_compiler::FerroXamlIlRuntimeCompiler;
 pub struct FerroRuntimeXamlLoader;
 
 impl FerroRuntimeXamlLoader {
+    /// Loads an explicitly opted-in WinUI document after the shared migration pass. Unresolved
+    /// semantics fail with their original-source diagnostic codes/locations. The normal
+    /// compiler then checks real registered types and members; migration never hides a loader
+    /// error. Referenced asset documents must be migrated separately by their owning project.
+    /// Use `winui::migrate_winui_xaml` directly to inspect adaptation evidence or to feed the
+    /// exact same document into the build-time compiler.
+    pub fn load_winui(
+        xaml: &str,
+        local_assembly: Option<&'static MarkupAssembly>,
+        root_instance: Option<BoxedValue>,
+        uri: Option<Uri>,
+        design_mode: bool,
+        options: &crate::winui::WinUIXamlOptions,
+    ) -> Result<BoxedValue, XamlLoadException> {
+        let migrated = crate::winui::migrate_winui_xaml(xaml, options)
+            .and_then(crate::winui::WinUIXamlMigration::into_xaml)
+            .map_err(|error| XamlLoadException::with_inner(error.to_string(), error))?;
+        // A fresh-root preview can convert a typed, deferred XAML resource error to Result.
+        // Loading an existing instance remains outside this boundary: it can be partly
+        // populated when a callback fails, and this method does not promise rollback.
+        if root_instance.is_none() {
+            ferroui_markup_xaml::xaml_error_scope::with_xaml_errors(|| {
+                Self::load(&migrated, local_assembly, None, uri, design_mode)
+            })
+        } else {
+            Self::load(&migrated, local_assembly, root_instance, uri, design_mode)
+        }
+    }
+
+    /// Opt-in WinUI counterpart of `parse`; ordinary `parse` keeps its existing dialect.
+    pub fn parse_winui(
+        xaml: &str,
+        local_assembly: Option<&'static MarkupAssembly>,
+        options: &crate::winui::WinUIXamlOptions,
+    ) -> Result<BoxedValue, XamlLoadException> {
+        Self::load_winui(xaml, local_assembly, None, None, false, options)
+    }
+
+    /// Opt-in WinUI counterpart of `parse_as`, with the same checked handle conversion.
+    pub fn parse_winui_as<T: Clone + 'static>(
+        xaml: &str,
+        local_assembly: Option<&'static MarkupAssembly>,
+        options: &crate::winui::WinUIXamlOptions,
+    ) -> Result<T, XamlLoadException> {
+        let loaded = Self::parse_winui(xaml, local_assembly, options)?;
+        let type_name = loaded.type_name();
+        from_markup_value::<T>(&Some(loaded)).ok_or_else(|| {
+            XamlLoadException::with_message(format!(
+                "Unable to cast object of type '{type_name}' to type '{}'.", std::any::type_name::<T>()
+            ))
+        })
+    }
+
     /// Loads XAML from a string.
     ///
     /// * `local_assembly`: the default assembly for `clr-namespace:`.

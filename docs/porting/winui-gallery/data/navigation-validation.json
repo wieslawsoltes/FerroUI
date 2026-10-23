@@ -1,0 +1,1380 @@
+{
+  "schema_version": 1,
+  "kind": "navigation-integration-validation",
+  "recorded_utc": "2026-10-22T17:21:25.878484+00:00",
+  "status": "measured-local-checkpoint-passed",
+  "parity_status": "partial",
+  "scope": "Measured NavigationView integration results at the separately identified local source checkpoints below. Counts are parsed from successful saved logs, not from test declarations. This record does not promote API or Gallery page status and does not certify original WinUI resource templates, full Gallery parity, upstream pixels, Windows UIA, OS integration, or a later GitHub Actions head.",
+  "legacy_record": {
+    "path": "docs/porting/winui-gallery/data/integration-validation.json",
+    "sha256": "91ec436b7805c6834eadc8ed0fa5f94aa4b0e4c00700c333b42fdb244b19cb47",
+    "disposition": "Unchanged historical record. Its earlier GitHub Actions successes are not attributed to this NavigationView checkpoint."
+  },
+  "source_checkpoints": {
+    "frozen-native-and-consumers": {
+      "native_source_commit": "9ce7530c2e4cde9d2d04870dda1d9c0afdef5baa",
+      "native_source_sha256": {
+        "src/FerroUI.Controls/tests/winui_navigation_items.rs": "973505c13af20aa6e67a39d054c5292c31b7c06bac945b1258414ddd5eb41ecb",
+        "src/FerroUI.Controls/tests/winui_navigation_view.rs": "f457ef8ab720f4f07eae7e8249981cba7698a506005c9433d9d2bf0e5c5f8835",
+        "src/FerroUI.Controls/winui/navigation_view.rs": "ed6d4326785c402e8cdc16eead091da0812dc83c2c921bc2f5cb082ceec94dd9",
+        "src/FerroUI.Controls/winui/navigation_view_automation_peer.rs": "285b435445cca2aad1d2818ba8e6564f8c6102718641456c764c0359ac361753",
+        "src/FerroUI.Controls/winui/navigation_view_events.rs": "e981f0b7abf2793d25282844924b81a3e3e658ef7754269fe8bd5de38ef7a0df",
+        "src/FerroUI.Controls/winui/navigation_view_item.rs": "6c27f26ef05dd01636d6c2653b796c32b5b654ed349349d8848d647e748f2b29",
+        "src/FerroUI.Controls/winui/navigation_view_item_automation_peer.rs": "42423e7e02ceca7a1789cc1afb2bef23ed217d6d3c57bf11bc6aa9a6bbb2dbef"
+      },
+      "execution_record": {
+        "path": "docs/porting/winui-gallery/data/executions/native-controls-004.json",
+        "sha256": "2d1bae45bc73218b0787734830e1ff496696157d8331fb57a6a9bc29211a62a0"
+      },
+      "results_source": {
+        "path": "/tmp/ferroui-navigation-frozen-results.json",
+        "sha256": "f842b09649568ceac4855bec4547a42c54d26fc9a38012b2f7d64bc3c72bbe04"
+      },
+      "source_manifest": {
+        "path": "/tmp/ferroui-navigation-frozen-sources.json",
+        "sha256": "7dcde928fe69a1d46ebb8476c6f9e681c8098dde6cb9436646b14cb4e128921d"
+      },
+      "runner_source": {
+        "path": "/tmp/ferroui-navigation-final-native.py",
+        "sha256": "b11fcfb8568d7ba783eb6c572411409090e5d18ae48bcaf55626842f921ec4de"
+      },
+      "freeze_verification": "The runner took these seven file hashes before starting and compared the same files after every one of the 15 sequential native test, compiled/interpreted XAML, Gallery and capture-build commands. All comparisons passed. Their hashes also match the workspace when this record was assembled.",
+      "hash_scope_boundary": "The before/after freeze covers only the listed five native implementation files and two native test files. It is not an execution-time hash snapshot of all dependencies, Gallery sources, XAML fixtures, or the capture program. The native commit identifies that native implementation checkpoint; it is not asserted as the complete checkout of all 15 executions."
+    },
+    "earlier-local-integration": {
+      "source_commit": null,
+      "source_sha256_at_execution": null,
+      "results_source": {
+        "path": "/tmp/ferroui-navigation-final-results.json",
+        "sha256": "da2c848363d6d16b98e7fa14b151c8452318aa0e95d24557e7eda1ba0137b169"
+      },
+      "boundary": "These paths, theme, Fluent/Simple fallback and ferroui-view checks were executed earlier during the NavigationView integration work. Their exact commands, exits and log hashes are preserved. The saved result manifest does not record an execution commit or source hash snapshot, so these results are not retroactively assigned to the final native checkpoint. Current relevant-file stability does not establish a missing execution-time snapshot."
+    },
+    "earlier-local-migration": {
+      "source_commit": null,
+      "source_sha256_at_execution": null,
+      "results_source": {
+        "path": "/tmp/ferroui-navigation-xaml-results.json",
+        "sha256": "837c779eac0dbe1df97594e6a5202891eca96c7818043a09fb9c90aceb4df52f"
+      },
+      "boundary": "The saved manifest proves fixture regeneration and 44 migration tests with exact commands, exits and log hashes. It did not record a source commit or source hashes at execution. The final frozen compiled/interpreted tests provide a separate later integration result, not a reconstructed execution snapshot of this earlier migration run."
+    },
+    "source-gates-after-frozen-execution": {
+      "manifest": {
+        "path": "/tmp/ferroui-navigation-source-gates.json",
+        "sha256": "bc356bb9d1f63d82ef4a989d9d3bd2583c060ad7f643d153e5944f597a5a30e7"
+      },
+      "source_pins": {
+        "gallery": {
+          "commit": "14061eeac21c38ae99f302edf3d9136d4f652c4c",
+          "url": "https://github.com/microsoft/WinUI-Gallery"
+        },
+        "winui": {
+          "commit": "a71c42bd3e352060e5f5ecf3b5e1a98f8a745809",
+          "url": "https://github.com/microsoft/microsoft-ui-xaml"
+        }
+      },
+      "protected_sha256": {
+        "ferroui-api-baseline.json": "a01f2712b732d6e2f321e67b6f20d419be3db3b02e75c61dfcfdb182fe5204f3",
+        "ferroui-api-baseline.lock.json": "8269a8bbaed88feccb948212b2d14f349bb940560dfab24834e8e862a2aa51a8",
+        "gallery-pages.json": "6996ccad0da8c32a97c037e39ceda496b298ff56f951fee6e88ffdda287293da",
+        "gallery-usage.json": "b437882849a034518396d2d79397c6ceb648c1bfd32479295e2cc5f9dca5f057",
+        "source-files.json": "487b6c404c861cf2bd1bbcc97c02555281e7706a0d68e92cf1ec2b02b803bbc4",
+        "sources.lock.json": "5e6209229d7ea18420f16dd46e15828360dc966faac2ed0d4fc13615c54d5470",
+        "symbol-glyphs.tsv": "a0d03f5e304f23c3ceac02ef90971e21a806b83af64d242c91c37396ecfdb5c7",
+        "symbol-sources.lock.json": "6b86dd7cd49d0c5840dfd785a5cf2f777561ea6e6a411863f6fbff8482fd763e",
+        "upstream-api.json": "18174690ec96912a937edd09c4df5a4bbf0c76d91485aab21141451277ac18ab"
+      },
+      "generated_sha256": {
+        "REPORT.md": "b0fd86207720ac87ff9a3b31785d54a33961ec907be00d4f1e983d84e020aeaf",
+        "api-map.json": "be0cce3c6e13e4ba820426193cec09551923612c85e1afa13b4c851d31b77ec4",
+        "gallery-page-map.json": "4781d9123cff714e6319627307f5e7b6ac66a68d7e7f87b526d7de8aadc72cba",
+        "gallery-xaml-map.json": "3ee6d21acb2efff85919cadb5292b06fe9a9f29e2917be170a2c4e06b6b5fc90",
+        "summary.json": "30364508a36bd2bb85a106832394ca0a57ec618d70aebce7107d46e1e3cc3384",
+        "xaml-feature-map.json": "052322b29fccdbbc89500742d870891e63e6bfb5b0472c22a8e57d593267120c"
+      },
+      "source_snapshots_and_baseline_unchanged": true,
+      "boundary": "Regeneration and the exact scan check ran after native-controls-004 was refreshed for all 55 NavigationView tests. The source-gates manifest retains command timestamps, attempts, actual exits and log hashes. The scanner validates source-hashed behavioral evidence; source candidates and declarations are not treated as behavioral parity."
+    },
+    "theme-source-path-regressions": {
+      "results_source": {
+        "path": "/tmp/ferroui-navigation-theme-path-tests.json",
+        "sha256": "0c5811c912b073a88ac9ffa13741b0961e8542f79d4403320a259dd9ddaeadeb"
+      },
+      "source_sha256": {
+        "scripts/winui-theme/test_winui_sources.py": "1b63167467e9a5f902f3c13c781f55f494435e1a5c3436f03523d36891dbb1ac",
+        "scripts/winui-theme/winui_sources.py": "b81511d544ac31fb9847c18771e48e296a55250c1ed61a4cdc4e22d27c1f6443",
+        "scripts/winui-theme/waivers.json": "cca56ceb1447e22e9ebadbe9f60c638cc754507414d7e571b9b8fb11189fde3d"
+      },
+      "source_unchanged_through_execution": true,
+      "boundary": "This small Python suite was rerun while assembling this record because the earlier summary-only log did not preserve command or test names. The three listed test, scanner and waiver-input files were hashed before and after this dedicated execution; its exact command, test names, exit and log hash are preserved. This does not assert source theme or visual parity."
+    },
+    "capture-publication": {
+      "published_commit": "8365ed0b33252c5169f48d56f0a9f3d511e53908",
+      "published_tree": "36214dd475e6535b2150a3119909001545bfa58d",
+      "capture_manifest": {
+        "path": "docs/porting/winui-gallery/captures/navigation-capture-manifest.json",
+        "sha256": "e5236447ecbdbb407709126259f6476ba0f36c2fb3ed79311fec301866f8c74a"
+      },
+      "source_publication_checkpoints": {
+        "capture": "8365ed0b33252c5169f48d56f0a9f3d511e53908",
+        "capture_tree": "36214dd475e6535b2150a3119909001545bfa58d",
+        "binding": "Commit and tree supplied by the publishing owner. The current capture.rs and executed binary digests were independently verified against the execution record. The capture commit identifies the matching source; it is not an embedded binary build identifier.",
+        "native_controls": "9ce7530c2e4cde9d2d04870dda1d9c0afdef5baa",
+        "xaml": "fb2fee44afa4325c7097f60b4e3d0af745977e44",
+        "gallery": "31eba1b629159c55a168ecdcad01e39df40a1eb5",
+        "parity": "fdb10276cf93bdfaef9974cf1db7e230a72866d6"
+      },
+      "executed_capture_source": {
+        "path": "samples/WinUIGallery/capture.rs",
+        "bytes": 10114,
+        "sha256": "84850a2a81e1ff170145eb4e20d7056a9b24dd3eab4ce3751f06c37df5f69c67",
+        "matches_execution_record": true
+      },
+      "executed_binary": {
+        "path": "/workspace/scratch/c954c87d1598/FerroUI/target/debug/winui-gallery-capture",
+        "bytes": 282717608,
+        "sha256": "d1f58b1456b2a77c48be5db8fbd0e474b9b9bb8b2c839ea23395c78da9885950",
+        "matches_execution_record": true
+      },
+      "boundary": "The separately published capture source and workflow identify the rendering tooling. The capture manifest records the executed source/binary and image evidence; a successful capture build or image validation is not Windows or source-pixel parity acceptance."
+    }
+  },
+  "local_execution": {
+    "platform": "Linux x86_64; rustc 1.99.0 (b940084d7 2026-09-28)",
+    "reported_host_paths": {
+      "rust_toolchain_cache": "/tmp/ferroui-c954c87d1598-rustup",
+      "cargo_cache": "/tmp/ferroui-c954c87d1598-cargo",
+      "provenance": "Host paths reported by the root agent for this workspace; these are not reconstructed execution-time environment snapshots for the commands below."
+    },
+    "native_environment_from_execution_record": {
+      "CARGO_BUILD_JOBS": "1",
+      "CARGO_INCREMENTAL": "0",
+      "CARGO_PROFILE_DEV_DEBUG": "0",
+      "CARGO_PROFILE_TEST_DEBUG": "0"
+    },
+    "native_environment_boundary": "These values are explicitly preserved by native-controls-004; the older manifests do not independently serialize their process environments.",
+    "frozen_steps": [
+      {
+        "step": "native-winui_navigation",
+        "command": [
+          "cargo",
+          "test",
+          "--locked",
+          "--offline",
+          "-p",
+          "ferroui-controls",
+          "--features",
+          "testing,ferroui-base/compiler-metadata,ferroui-base/markup-functions",
+          "--test",
+          "winui_navigation"
+        ],
+        "exit_code": 0,
+        "seconds": 89.94,
+        "log": "/tmp/ferroui-navigation-frozen-native-winui_navigation.log",
+        "log_sha256": "fa328a2caa646a516c11f97b040c5ee1fbdaef82e03e8aa43e69ce7b83ebde64",
+        "result_lines": [
+          "test result: ok. 17 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.03s"
+        ],
+        "source_checkpoint": "frozen-native-and-consumers",
+        "test_counts": {
+          "passed": 17,
+          "failed": 0,
+          "ignored": 0,
+          "measured": 0,
+          "filtered_out": 0
+        }
+      },
+      {
+        "step": "native-winui_number_box",
+        "command": [
+          "cargo",
+          "test",
+          "--locked",
+          "--offline",
+          "-p",
+          "ferroui-controls",
+          "--features",
+          "testing,ferroui-base/compiler-metadata,ferroui-base/markup-functions",
+          "--test",
+          "winui_number_box"
+        ],
+        "exit_code": 0,
+        "seconds": 2.09,
+        "log": "/tmp/ferroui-navigation-frozen-native-winui_number_box.log",
+        "log_sha256": "740b9a63df7ef9d0d245749cc19da9e803fa845437b3a27983d41b0f9a2ba696",
+        "result_lines": [
+          "test result: ok. 14 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.02s"
+        ],
+        "source_checkpoint": "frozen-native-and-consumers",
+        "test_counts": {
+          "passed": 14,
+          "failed": 0,
+          "ignored": 0,
+          "measured": 0,
+          "filtered_out": 0
+        }
+      },
+      {
+        "step": "native-winui_icons",
+        "command": [
+          "cargo",
+          "test",
+          "--locked",
+          "--offline",
+          "-p",
+          "ferroui-controls",
+          "--features",
+          "testing,ferroui-base/compiler-metadata,ferroui-base/markup-functions",
+          "--test",
+          "winui_icons"
+        ],
+        "exit_code": 0,
+        "seconds": 1.84,
+        "log": "/tmp/ferroui-navigation-frozen-native-winui_icons.log",
+        "log_sha256": "460917a7ec3b10ca1fc273175ce33cf1aa19e86318ee61880c00b970b7396e6e",
+        "result_lines": [
+          "test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.05s"
+        ],
+        "source_checkpoint": "frozen-native-and-consumers",
+        "test_counts": {
+          "passed": 7,
+          "failed": 0,
+          "ignored": 0,
+          "measured": 0,
+          "filtered_out": 0
+        }
+      },
+      {
+        "step": "native-winui_radio_buttons",
+        "command": [
+          "cargo",
+          "test",
+          "--locked",
+          "--offline",
+          "-p",
+          "ferroui-controls",
+          "--features",
+          "testing,ferroui-base/compiler-metadata,ferroui-base/markup-functions",
+          "--test",
+          "winui_radio_buttons"
+        ],
+        "exit_code": 0,
+        "seconds": 2.32,
+        "log": "/tmp/ferroui-navigation-frozen-native-winui_radio_buttons.log",
+        "log_sha256": "e588023c6ea096d1e94464bc721cd1ab390f3c12b3090c9520d5ef5e31975b99",
+        "result_lines": [
+          "test result: ok. 9 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.06s"
+        ],
+        "source_checkpoint": "frozen-native-and-consumers",
+        "test_counts": {
+          "passed": 9,
+          "failed": 0,
+          "ignored": 0,
+          "measured": 0,
+          "filtered_out": 0
+        }
+      },
+      {
+        "step": "native-winui_auto_suggest_box",
+        "command": [
+          "cargo",
+          "test",
+          "--locked",
+          "--offline",
+          "-p",
+          "ferroui-controls",
+          "--features",
+          "testing,ferroui-base/compiler-metadata,ferroui-base/markup-functions",
+          "--test",
+          "winui_auto_suggest_box"
+        ],
+        "exit_code": 0,
+        "seconds": 2.25,
+        "log": "/tmp/ferroui-navigation-frozen-native-winui_auto_suggest_box.log",
+        "log_sha256": "ef3ed1d7fad6d77ea5d60934d73175b8aa66b7b0da96fa924e23134d75be2f95",
+        "result_lines": [
+          "test result: ok. 13 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.03s"
+        ],
+        "source_checkpoint": "frozen-native-and-consumers",
+        "test_counts": {
+          "passed": 13,
+          "failed": 0,
+          "ignored": 0,
+          "measured": 0,
+          "filtered_out": 0
+        }
+      },
+      {
+        "step": "native-winui_icon_sources",
+        "command": [
+          "cargo",
+          "test",
+          "--locked",
+          "--offline",
+          "-p",
+          "ferroui-controls",
+          "--features",
+          "testing,ferroui-base/compiler-metadata,ferroui-base/markup-functions",
+          "--test",
+          "winui_icon_sources"
+        ],
+        "exit_code": 0,
+        "seconds": 1.91,
+        "log": "/tmp/ferroui-navigation-frozen-native-winui_icon_sources.log",
+        "log_sha256": "7fffadec3b7cee7f8ea9690653a88d2d7f55aaf615ea2d7bc72fd43c8cb54d14",
+        "result_lines": [
+          "test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.03s"
+        ],
+        "source_checkpoint": "frozen-native-and-consumers",
+        "test_counts": {
+          "passed": 7,
+          "failed": 0,
+          "ignored": 0,
+          "measured": 0,
+          "filtered_out": 0
+        }
+      },
+      {
+        "step": "native-winui_info_bar",
+        "command": [
+          "cargo",
+          "test",
+          "--locked",
+          "--offline",
+          "-p",
+          "ferroui-controls",
+          "--features",
+          "testing,ferroui-base/compiler-metadata,ferroui-base/markup-functions",
+          "--test",
+          "winui_info_bar"
+        ],
+        "exit_code": 0,
+        "seconds": 2.68,
+        "log": "/tmp/ferroui-navigation-frozen-native-winui_info_bar.log",
+        "log_sha256": "b7230b4d0585e57da44952c909541eccc53541f764df7969d1b2cb5bff0a81a4",
+        "result_lines": [
+          "test result: ok. 10 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.06s"
+        ],
+        "source_checkpoint": "frozen-native-and-consumers",
+        "test_counts": {
+          "passed": 10,
+          "failed": 0,
+          "ignored": 0,
+          "measured": 0,
+          "filtered_out": 0
+        }
+      },
+      {
+        "step": "native-winui_info_badge",
+        "command": [
+          "cargo",
+          "test",
+          "--locked",
+          "--offline",
+          "-p",
+          "ferroui-controls",
+          "--features",
+          "testing,ferroui-base/compiler-metadata,ferroui-base/markup-functions",
+          "--test",
+          "winui_info_badge"
+        ],
+        "exit_code": 0,
+        "seconds": 2.27,
+        "log": "/tmp/ferroui-navigation-frozen-native-winui_info_badge.log",
+        "log_sha256": "00fcf4cf5b43a5662e26ba49ea0bd2abc4e7ee76f06ce29fbdb8ded73cbe7616",
+        "result_lines": [
+          "test result: ok. 13 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.06s"
+        ],
+        "source_checkpoint": "frozen-native-and-consumers",
+        "test_counts": {
+          "passed": 13,
+          "failed": 0,
+          "ignored": 0,
+          "measured": 0,
+          "filtered_out": 0
+        }
+      },
+      {
+        "step": "native-winui_progress_ring",
+        "command": [
+          "cargo",
+          "test",
+          "--locked",
+          "--offline",
+          "-p",
+          "ferroui-controls",
+          "--features",
+          "testing,ferroui-base/compiler-metadata,ferroui-base/markup-functions",
+          "--test",
+          "winui_progress_ring"
+        ],
+        "exit_code": 0,
+        "seconds": 1.85,
+        "log": "/tmp/ferroui-navigation-frozen-native-winui_progress_ring.log",
+        "log_sha256": "983854042a5bef2e2efba4298d1d9bcfddd532fb764c18f35c74ded7a7938009",
+        "result_lines": [
+          "test result: ok. 16 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.06s"
+        ],
+        "source_checkpoint": "frozen-native-and-consumers",
+        "test_counts": {
+          "passed": 16,
+          "failed": 0,
+          "ignored": 0,
+          "measured": 0,
+          "filtered_out": 0
+        }
+      },
+      {
+        "step": "native-winui_rating_control",
+        "command": [
+          "cargo",
+          "test",
+          "--locked",
+          "--offline",
+          "-p",
+          "ferroui-controls",
+          "--features",
+          "testing,ferroui-base/compiler-metadata,ferroui-base/markup-functions",
+          "--test",
+          "winui_rating_control"
+        ],
+        "exit_code": 0,
+        "seconds": 2.17,
+        "log": "/tmp/ferroui-navigation-frozen-native-winui_rating_control.log",
+        "log_sha256": "10a337d3a1e37f242fc88d5eed46f20d7d608568cd62cbe47f5a9ca413b3586b",
+        "result_lines": [
+          "test result: ok. 21 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.08s"
+        ],
+        "source_checkpoint": "frozen-native-and-consumers",
+        "test_counts": {
+          "passed": 21,
+          "failed": 0,
+          "ignored": 0,
+          "measured": 0,
+          "filtered_out": 0
+        }
+      },
+      {
+        "step": "native-winui_navigation_view",
+        "command": [
+          "cargo",
+          "test",
+          "--locked",
+          "--offline",
+          "-p",
+          "ferroui-controls",
+          "--features",
+          "testing,ferroui-base/compiler-metadata,ferroui-base/markup-functions",
+          "--test",
+          "winui_navigation_view"
+        ],
+        "exit_code": 0,
+        "seconds": 2.53,
+        "log": "/tmp/ferroui-navigation-frozen-native-winui_navigation_view.log",
+        "log_sha256": "40210d79e64a751d0f5e5c91a7bab7b27a0b697154523883047e4e45d023c7b9",
+        "result_lines": [
+          "test result: ok. 32 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.18s"
+        ],
+        "source_checkpoint": "frozen-native-and-consumers",
+        "test_counts": {
+          "passed": 32,
+          "failed": 0,
+          "ignored": 0,
+          "measured": 0,
+          "filtered_out": 0
+        }
+      },
+      {
+        "step": "native-winui_navigation_items",
+        "command": [
+          "cargo",
+          "test",
+          "--locked",
+          "--offline",
+          "-p",
+          "ferroui-controls",
+          "--features",
+          "testing,ferroui-base/compiler-metadata,ferroui-base/markup-functions",
+          "--test",
+          "winui_navigation_items"
+        ],
+        "exit_code": 0,
+        "seconds": 2.05,
+        "log": "/tmp/ferroui-navigation-frozen-native-winui_navigation_items.log",
+        "log_sha256": "4ad0132f228bb5f5098e097ecc7817a86e254714a2c974876e4f80ac4698bf1a",
+        "result_lines": [
+          "test result: ok. 23 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.10s"
+        ],
+        "source_checkpoint": "frozen-native-and-consumers",
+        "test_counts": {
+          "passed": 23,
+          "failed": 0,
+          "ignored": 0,
+          "measured": 0,
+          "filtered_out": 0
+        }
+      },
+      {
+        "step": "compiled",
+        "command": [
+          "cargo",
+          "test",
+          "--locked",
+          "--offline",
+          "-p",
+          "ferroui-markup-xaml-loader",
+          "--features",
+          "emitter",
+          "--test",
+          "winui_compiled"
+        ],
+        "exit_code": 0,
+        "seconds": 23.34,
+        "log": "/tmp/ferroui-navigation-frozen-compiled.log",
+        "log_sha256": "b724a0f627341f3ef19eab86f5266ebc1543c6be23df34de9fb543331b72f196",
+        "result_lines": [
+          "test result: ok. 7 passed; 0 failed; 1 ignored; 0 measured; 0 filtered out; finished in 0.06s"
+        ],
+        "source_checkpoint": "frozen-native-and-consumers",
+        "test_counts": {
+          "passed": 7,
+          "failed": 0,
+          "ignored": 1,
+          "measured": 0,
+          "filtered_out": 0
+        }
+      },
+      {
+        "step": "gallery",
+        "command": [
+          "cargo",
+          "test",
+          "--locked",
+          "--offline",
+          "-p",
+          "winui-gallery",
+          "--features",
+          "ferroui-base/compiler-metadata,ferroui-base/markup-functions",
+          "--lib"
+        ],
+        "exit_code": 0,
+        "seconds": 13.59,
+        "log": "/tmp/ferroui-navigation-frozen-gallery.log",
+        "log_sha256": "f9f91f21cbfc96da884fa632ddc000d11f5e761bcf456e64c69bfdaaedeaccb9",
+        "result_lines": [
+          "test result: ok. 54 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.90s"
+        ],
+        "source_checkpoint": "frozen-native-and-consumers",
+        "test_counts": {
+          "passed": 54,
+          "failed": 0,
+          "ignored": 0,
+          "measured": 0,
+          "filtered_out": 0
+        }
+      },
+      {
+        "step": "capture-build",
+        "command": [
+          "cargo",
+          "build",
+          "--locked",
+          "--offline",
+          "-p",
+          "winui-gallery",
+          "--features",
+          "capture",
+          "--bin",
+          "winui-gallery-capture"
+        ],
+        "exit_code": 0,
+        "seconds": 409.03,
+        "log": "/tmp/ferroui-navigation-frozen-capture-build.log",
+        "log_sha256": "cc400b6c12d0a4b471a13a4a8eeefeb47af5c86d6f0b2e7c8ee946c6acee0e66",
+        "result_lines": [],
+        "source_checkpoint": "frozen-native-and-consumers"
+      }
+    ],
+    "earlier_successful_integration_steps": [
+      {
+        "step": "paths-regenerate",
+        "command": [
+          "cargo",
+          "test",
+          "--locked",
+          "--offline",
+          "-p",
+          "ferroui-markup-xaml-tests",
+          "--lib",
+          "emitter::rust_paths_tests::regenerate_rust_paths_check",
+          "--",
+          "--ignored",
+          "--exact"
+        ],
+        "exit_code": 0,
+        "seconds": 80.18,
+        "log": "/tmp/ferroui-navigation-final-paths-regenerate.log",
+        "log_sha256": "b8c1ff4b55d4c2c3b42a8e5d5a8f168e056f996f0f9f195f3fc864ea1e0e7331",
+        "result_lines": [
+          "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 614 filtered out; finished in 0.48s"
+        ],
+        "source_checkpoint": "earlier-local-integration",
+        "test_counts": {
+          "passed": 1,
+          "failed": 0,
+          "ignored": 0,
+          "measured": 0,
+          "filtered_out": 614
+        }
+      },
+      {
+        "step": "paths",
+        "command": [
+          "cargo",
+          "test",
+          "--locked",
+          "--offline",
+          "-p",
+          "ferroui-markup-xaml-tests",
+          "--lib",
+          "emitter::rust_paths_tests"
+        ],
+        "exit_code": 0,
+        "seconds": 25.15,
+        "log": "/tmp/ferroui-navigation-final-paths.log",
+        "log_sha256": "05642b3801c9988c44e6b952ff8a105a4ffaf7704aef844675163ce14ea5ef47",
+        "result_lines": [
+          "test result: ok. 3 passed; 0 failed; 1 ignored; 0 measured; 611 filtered out; finished in 0.44s"
+        ],
+        "source_checkpoint": "earlier-local-integration",
+        "test_counts": {
+          "passed": 3,
+          "failed": 0,
+          "ignored": 1,
+          "measured": 0,
+          "filtered_out": 611
+        }
+      },
+      {
+        "step": "theme",
+        "command": [
+          "cargo",
+          "test",
+          "--locked",
+          "--offline",
+          "-p",
+          "ferroui-themes-winui",
+          "--lib"
+        ],
+        "exit_code": 0,
+        "seconds": 73.91,
+        "log": "/tmp/ferroui-navigation-final-theme.log",
+        "log_sha256": "05f3993a188abf6c3e81e58fc30cf2eb17fd2d086cc4b45290f2eca595c3cf8e",
+        "result_lines": [
+          "test result: ok. 294 passed; 0 failed; 2 ignored; 0 measured; 0 filtered out; finished in 14.39s"
+        ],
+        "source_checkpoint": "earlier-local-integration",
+        "test_counts": {
+          "passed": 294,
+          "failed": 0,
+          "ignored": 2,
+          "measured": 0,
+          "filtered_out": 0
+        }
+      },
+      {
+        "step": "existing-themes",
+        "command": [
+          "cargo",
+          "test",
+          "--locked",
+          "--offline",
+          "-p",
+          "ferroui-themes-fluent",
+          "-p",
+          "ferroui-themes-simple",
+          "--lib",
+          "tests::control_theme_tests::should_define_control_theme_for_built_in_templated_controls",
+          "--",
+          "--exact"
+        ],
+        "exit_code": 0,
+        "seconds": 405.65,
+        "log": "/tmp/ferroui-navigation-final-existing-themes.log",
+        "log_sha256": "e1754d7634d9059f4d5cf19f158b550a98a0d36b753627ea4d76620448eefc01",
+        "result_lines": [
+          "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 203 filtered out; finished in 0.31s",
+          "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 207 filtered out; finished in 0.15s"
+        ],
+        "source_checkpoint": "earlier-local-integration",
+        "test_counts": {
+          "passed": 2,
+          "failed": 0,
+          "ignored": 0,
+          "measured": 0,
+          "filtered_out": 410
+        }
+      },
+      {
+        "step": "view",
+        "command": [
+          "cargo",
+          "check",
+          "--locked",
+          "--offline",
+          "-p",
+          "ferroui-view"
+        ],
+        "exit_code": 0,
+        "seconds": 85.46,
+        "log": "/tmp/ferroui-navigation-final-view.log",
+        "log_sha256": "e51fa1c10369594b342c7b71bc9e77c633280af5a2a3c69c62a1163e3bd96afb",
+        "result_lines": [],
+        "source_checkpoint": "earlier-local-integration"
+      }
+    ],
+    "earlier_migration_steps": [
+      {
+        "step": "fixture-regenerate",
+        "command": [
+          "cargo",
+          "test",
+          "--locked",
+          "--offline",
+          "-p",
+          "ferroui-markup-xaml-loader",
+          "--features",
+          "emitter",
+          "--test",
+          "winui_compiled",
+          "regenerate_winui_binding_fixture",
+          "--",
+          "--ignored",
+          "--exact"
+        ],
+        "exit_code": 0,
+        "seconds": 133.92,
+        "log": "/tmp/ferroui-navigation-fixture-regenerate.log",
+        "log_sha256": "4a51bd8cd616e398f7001ea4690968202cd5bd6e728aaeb3b3e89342b0a9c0df",
+        "source_checkpoint": "earlier-local-migration",
+        "result_lines": [
+          "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 6 filtered out; finished in 0.07s"
+        ],
+        "test_counts": {
+          "passed": 1,
+          "failed": 0,
+          "ignored": 0,
+          "measured": 0,
+          "filtered_out": 6
+        }
+      },
+      {
+        "step": "migration",
+        "command": [
+          "cargo",
+          "test",
+          "--locked",
+          "--offline",
+          "-p",
+          "ferroui-markup-xaml-loader",
+          "--features",
+          "emitter",
+          "--test",
+          "winui_migration"
+        ],
+        "exit_code": 0,
+        "seconds": 2.96,
+        "log": "/tmp/ferroui-navigation-migration.log",
+        "log_sha256": "e5018a870117f0b97a63db0cf12f76fdb9c09018e5e6c9b58eae8e635afd0d3b",
+        "source_checkpoint": "earlier-local-migration",
+        "result_lines": [
+          "test result: ok. 44 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.05s"
+        ],
+        "test_counts": {
+          "passed": 44,
+          "failed": 0,
+          "ignored": 0,
+          "measured": 0,
+          "filtered_out": 0
+        }
+      }
+    ],
+    "theme_path_regression_step": {
+      "command": [
+        "python3",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "scripts/winui-theme",
+        "-p",
+        "test_winui_sources.py",
+        "-v"
+      ],
+      "cwd": "/workspace/scratch/c954c87d1598/FerroUI",
+      "started_utc": "2026-10-22T17:20:10.196598+00:00",
+      "duration_seconds": 0.068,
+      "exit_code": 0,
+      "log": "/tmp/ferroui-navigation-theme-path-tests.log",
+      "log_sha256": "546e0c6b0724c5ef555568f863a7d4649f9f40cbc81453682909b73fd7244e18",
+      "source_sha256": {
+        "scripts/winui-theme/test_winui_sources.py": "1b63167467e9a5f902f3c13c781f55f494435e1a5c3436f03523d36891dbb1ac",
+        "scripts/winui-theme/winui_sources.py": "b81511d544ac31fb9847c18771e48e296a55250c1ed61a4cdc4e22d27c1f6443",
+        "scripts/winui-theme/waivers.json": "cca56ceb1447e22e9ebadbe9f60c638cc754507414d7e571b9b8fb11189fde3d"
+      },
+      "source_unchanged_through_execution": true,
+      "passed_test_names": [
+        "test_ambiguous_case_fallback_is_rejected",
+        "test_mixed_case_project_and_page_keep_inventory_and_waiver_identity"
+      ],
+      "test_counts": {
+        "passed": 2,
+        "failed": 0,
+        "ignored": 0
+      },
+      "source_checkpoint": "theme-source-path-regressions"
+    },
+    "native_aggregate_log": {
+      "path": "/tmp/ferroui-navigation-frozen-native-combined.log",
+      "sha256": "52fc6ba8e9b658544d90d1c372f95b49eebc9f122971b0946b34fa5eaf05c291"
+    },
+    "summary": {
+      "native_tests": {
+        "passed": 182,
+        "failed": 0,
+        "ignored": 0,
+        "measured": 0,
+        "filtered_out": 0
+      },
+      "navigation_tests": {
+        "passed": 55,
+        "parent": 32,
+        "items": 23
+      },
+      "earlier_native_tests_in_same_frozen_run": 127,
+      "compiled_interpreted_tests": {
+        "passed": 7,
+        "failed": 0,
+        "ignored": 1,
+        "measured": 0,
+        "filtered_out": 0
+      },
+      "gallery_tests": {
+        "passed": 54,
+        "failed": 0,
+        "ignored": 0,
+        "measured": 0,
+        "filtered_out": 0
+      },
+      "migration_tests": {
+        "passed": 44,
+        "failed": 0,
+        "ignored": 0,
+        "measured": 0,
+        "filtered_out": 0
+      },
+      "winui_theme_tests": {
+        "passed": 294,
+        "failed": 0,
+        "ignored": 2,
+        "measured": 0,
+        "filtered_out": 0
+      },
+      "rust_paths_tests": {
+        "passed": 3,
+        "failed": 0,
+        "ignored": 1,
+        "measured": 0,
+        "filtered_out": 611
+      },
+      "fluent_simple_metadata_template_fallback_tests": {
+        "passed": 2,
+        "failed": 0,
+        "ignored": 0,
+        "measured": 0,
+        "filtered_out": 410
+      },
+      "source_scanner_regression_tests_passed": 44,
+      "theme_source_path_regression_tests": {
+        "passed": 2,
+        "failed": 0,
+        "ignored": 0
+      },
+      "ferroui_view_check_exit_code": 0,
+      "capture_build_exit_code": 0,
+      "boundary": "Categories describe different suites and source checkpoints. Regeneration helpers and repeated Gallery runs are not added to a single inflated test total."
+    }
+  },
+  "superseded_local_attempts": [
+    {
+      "step": "gallery",
+      "command": [
+        "cargo",
+        "test",
+        "--locked",
+        "--offline",
+        "-p",
+        "winui-gallery",
+        "--features",
+        "ferroui-base/compiler-metadata,ferroui-base/markup-functions",
+        "--lib"
+      ],
+      "exit_code": 0,
+      "seconds": 12.61,
+      "log": "/tmp/ferroui-navigation-final-gallery.log",
+      "log_sha256": "3996df787644f72ac531073695e92229f9c93857d49d0cd3ea7f7b4db2819677",
+      "result_lines": [
+        "test result: ok. 54 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.65s"
+      ],
+      "source_checkpoint": "earlier-local-integration",
+      "test_counts": {
+        "passed": 54,
+        "failed": 0,
+        "ignored": 0,
+        "measured": 0,
+        "filtered_out": 0
+      },
+      "disposition": "Earlier successful 54-test Gallery run; superseded for current integration reporting by frozen-native-and-consumers/gallery and not counted twice."
+    },
+    {
+      "step": "capture-build",
+      "command": [
+        "cargo",
+        "build",
+        "--locked",
+        "--offline",
+        "-p",
+        "winui-gallery",
+        "--features",
+        "capture",
+        "--bin",
+        "winui-gallery-capture"
+      ],
+      "exit_code": 101,
+      "seconds": 173.81,
+      "log": "/tmp/ferroui-navigation-final-capture-build.log",
+      "log_sha256": "26d675c42f7ce26a4a8633fbf3d3a070d947b8243986f55c1efa419a3b03a398",
+      "result_lines": [],
+      "source_checkpoint": "earlier-local-integration",
+      "disposition": "Superseded by the frozen capture-build command with exit 0.",
+      "failure_boundary": "The saved compiler log reports that the rustc process for serde_core could not be executed (No such file or directory, os error 2). This failed attempt is not recorded as a passing build."
+    }
+  ],
+  "source_comparison": {
+    "steps": [
+      {
+        "argv": [
+          "python3",
+          "scripts/winui-gallery/scan.py"
+        ],
+        "attempt": 2,
+        "command": "python3 scripts/winui-gallery/scan.py",
+        "cwd": "/workspace/scratch/c954c87d1598/FerroUI",
+        "duration_seconds": 14.759,
+        "exit_code": 0,
+        "expected_exit_code": 0,
+        "id": "scan_regenerate",
+        "log_path": "/tmp/ferroui-navigation-source-gates-scan_regenerate-attempt-2.log",
+        "log_sha256": "b965a2ba2553bba6c9bc44dee788be607b364d30230b0c516308602fb2259016",
+        "started_utc": "2026-10-22T16:57:46.408257+00:00"
+      },
+      {
+        "argv": [
+          "python3",
+          "-m",
+          "unittest",
+          "discover",
+          "-s",
+          "scripts/winui-gallery",
+          "-p",
+          "test_*.py",
+          "-v"
+        ],
+        "attempt": 1,
+        "command": "python3 -m unittest discover -s scripts/winui-gallery -p 'test_*.py' -v",
+        "cwd": "/workspace/scratch/c954c87d1598/FerroUI",
+        "duration_seconds": 0.552,
+        "exit_code": 0,
+        "expected_exit_code": 0,
+        "id": "regressions",
+        "log_path": "/tmp/ferroui-navigation-source-gates-regressions.log",
+        "log_sha256": "9b4cde2d4b71cf5df6a01a18b6d323eea6ef208f7b0ad8a8af19eb8d2da2015e",
+        "started_utc": "2026-10-22T16:34:47.985769+00:00"
+      },
+      {
+        "argv": [
+          "python3",
+          "scripts/winui-gallery/scan.py",
+          "--check"
+        ],
+        "attempt": 1,
+        "command": "python3 scripts/winui-gallery/scan.py --check",
+        "cwd": "/workspace/scratch/c954c87d1598/FerroUI",
+        "duration_seconds": 16.176,
+        "exit_code": 0,
+        "expected_exit_code": 0,
+        "id": "scan_check",
+        "log_path": "/tmp/ferroui-navigation-source-gates-scan_check.log",
+        "log_sha256": "b965a2ba2553bba6c9bc44dee788be607b364d30230b0c516308602fb2259016",
+        "started_utc": "2026-10-22T16:59:27.702953+00:00"
+      },
+      {
+        "argv": [
+          "python3",
+          "scripts/winui-gallery/existing_api.py",
+          "--check"
+        ],
+        "attempt": 1,
+        "command": "python3 scripts/winui-gallery/existing_api.py --check",
+        "cwd": "/workspace/scratch/c954c87d1598/FerroUI",
+        "duration_seconds": 17.048,
+        "exit_code": 0,
+        "expected_exit_code": 0,
+        "id": "existing_api",
+        "log_path": "/tmp/ferroui-navigation-source-gates-existing_api.log",
+        "log_sha256": "52a936f0554de47a8b41deaeef892857c82ace7d42bcdcbd2ee2841013c116d4",
+        "started_utc": "2026-10-22T16:34:48.016174+00:00"
+      },
+      {
+        "argv": [
+          "python3",
+          "scripts/winui-gallery/event_targets.py",
+          "--check"
+        ],
+        "attempt": 1,
+        "command": "python3 scripts/winui-gallery/event_targets.py --check",
+        "cwd": "/workspace/scratch/c954c87d1598/FerroUI",
+        "duration_seconds": 0.12,
+        "exit_code": 0,
+        "expected_exit_code": 0,
+        "id": "event_targets",
+        "log_path": "/tmp/ferroui-navigation-source-gates-event_targets.log",
+        "log_sha256": "f696a65c3a461ecfcf42800b9606488256cc8920b6c3fea4a9e92b13e08fddc3",
+        "started_utc": "2026-10-22T16:34:48+00:00"
+      },
+      {
+        "argv": [
+          "python3",
+          "scripts/winui-gallery/symbol_map.py",
+          "--check"
+        ],
+        "attempt": 1,
+        "command": "python3 scripts/winui-gallery/symbol_map.py --check",
+        "cwd": "/workspace/scratch/c954c87d1598/FerroUI",
+        "duration_seconds": 0.046,
+        "exit_code": 0,
+        "expected_exit_code": 0,
+        "id": "symbol_map",
+        "log_path": "/tmp/ferroui-navigation-source-gates-symbol_map.log",
+        "log_sha256": "89efe558f986f11bfe1c45978238f0dedf57b7861e5f10063ba68ebfe61a73d4",
+        "started_utc": "2026-10-22T16:34:48.004749+00:00"
+      },
+      {
+        "argv": [
+          "python3",
+          "scripts/generate_view_builders.py",
+          "--check"
+        ],
+        "attempt": 1,
+        "command": "python3 scripts/generate_view_builders.py --check",
+        "cwd": "/workspace/scratch/c954c87d1598/FerroUI",
+        "duration_seconds": 2.022,
+        "exit_code": 0,
+        "expected_exit_code": 0,
+        "id": "builders",
+        "log_path": "/tmp/ferroui-navigation-source-gates-builders.log",
+        "log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "started_utc": "2026-10-22T16:34:48.025136+00:00"
+      },
+      {
+        "argv": [
+          "python3",
+          "samples/WinUIGallery/generate_catalog.py",
+          "../upstream-gallery",
+          "--check"
+        ],
+        "attempt": 1,
+        "command": "python3 samples/WinUIGallery/generate_catalog.py ../upstream-gallery --check",
+        "cwd": "/workspace/scratch/c954c87d1598/FerroUI",
+        "duration_seconds": 0.399,
+        "exit_code": 0,
+        "expected_exit_code": 0,
+        "id": "catalog",
+        "log_path": "/tmp/ferroui-navigation-source-gates-catalog.log",
+        "log_sha256": "a9fba315383afe23dd5fd462bb773ca14bf73231870de312477ece4088a47cfe",
+        "started_utc": "2026-10-22T16:36:46.911342+00:00"
+      },
+      {
+        "argv": [
+          "python3",
+          "samples/WinUIGallery/generate_assets.py",
+          "../upstream-gallery",
+          "--check"
+        ],
+        "attempt": 1,
+        "command": "python3 samples/WinUIGallery/generate_assets.py ../upstream-gallery --check",
+        "cwd": "/workspace/scratch/c954c87d1598/FerroUI",
+        "duration_seconds": 0.396,
+        "exit_code": 0,
+        "expected_exit_code": 0,
+        "id": "assets",
+        "log_path": "/tmp/ferroui-navigation-source-gates-assets.log",
+        "log_sha256": "38c488df7e820d3167ab3a750184476dd64761e131954033152a3cb4dde26f6d",
+        "started_utc": "2026-10-22T16:36:46.915110+00:00"
+      },
+      {
+        "argv": [
+          "python3",
+          "scripts/winui-gallery/scan.py",
+          "--check",
+          "--require-complete"
+        ],
+        "attempt": 1,
+        "command": "python3 scripts/winui-gallery/scan.py --check --require-complete",
+        "cwd": "/workspace/scratch/c954c87d1598/FerroUI",
+        "duration_seconds": 16.362,
+        "exit_code": 2,
+        "expected_exit_code": 2,
+        "id": "strict_completeness",
+        "log_path": "/tmp/ferroui-navigation-source-gates-strict_completeness.log",
+        "log_sha256": "5e30119c2fe8dc06da524e40bf5e35a7691aabb264021132e1178adafb1cb165",
+        "started_utc": "2026-10-22T16:59:27.702375+00:00"
+      }
+    ],
+    "unexpected_failures": [],
+    "baseline_preserved": {
+      "types": 3170,
+      "declared_member_names": 28435,
+      "registrations": 458
+    },
+    "additional_types": 203,
+    "event_map": {
+      "public_types": 1509,
+      "direct_events": 375
+    },
+    "symbol_values_glyphs_markup_names_and_iteration_entries": 197,
+    "catalog": {
+      "pages": 126,
+      "examples": 350,
+      "original_auto_suggest_box_cat_names": 97
+    },
+    "original_png_assets": 108,
+    "upstream": {
+      "enum_values_behavior": {
+        "partial": 21,
+        "unverified": 1188,
+        "verified": 197
+      },
+      "member_candidates": {
+        "missing-source-candidate": 5932,
+        "source-candidate": 1534
+      },
+      "members_behavior": {
+        "partial": 264,
+        "unverified": 7000,
+        "verified": 202
+      },
+      "members_public_source": 7466,
+      "non_enum_members_behavior": {
+        "partial": 243,
+        "unverified": 5812,
+        "verified": 5
+      },
+      "type_candidates": {
+        "missing-source-candidate": 1231,
+        "source-candidate": 314
+      },
+      "types_behavior": {
+        "partial": 54,
+        "unverified": 1490,
+        "verified": 1
+      },
+      "types_private_source": 198,
+      "types_public_source": 1545,
+      "verified_enum_values_by_type": [
+        {
+          "count": 197,
+          "type": "Microsoft.UI.Xaml.Controls.Symbol"
+        }
+      ],
+      "verified_types": [
+        {
+          "id": "Microsoft.UI.Xaml.Controls.Symbol",
+          "kind": "enum",
+          "public_members": 197
+        }
+      ]
+    },
+    "gallery": {
+      "catalog_examples": 350,
+      "code_files": 242,
+      "csharp_member_accesses_requiring_semantic_binding": 8738,
+      "markup_examples": 355,
+      "page_statuses": {
+        "partial": 72,
+        "pending": 54,
+        "ported": 0,
+        "verified": 0
+      },
+      "pages": 126,
+      "snippet_files": 355,
+      "unlisted_control_info_ids": [],
+      "xaml_files": 194
+    },
+    "strict_completeness": {
+      "actual_exit_code": 2,
+      "expected_exit_code": 2,
+      "types_without_complete_behavioral_evidence": 1544,
+      "members_without_complete_behavioral_evidence": 7264,
+      "pages_without_complete_behavioral_evidence": 126,
+      "interpretation": "Expected rejection of a full-parity claim. Partial contracts and passing focused tests do not satisfy complete API or page parity."
+    }
+  },
+  "rendering": {
+    "capture_build_step": "local_execution.frozen_steps/capture-build",
+    "capture_source_checkpoint": "capture-publication",
+    "capture_manifest": {
+      "path": "docs/porting/winui-gallery/captures/navigation-capture-manifest.json",
+      "sha256": "e5236447ecbdbb407709126259f6476ba0f36c2fb3ed79311fec301866f8c74a"
+    },
+    "manifest_status": "recorded",
+    "validation_summary": {
+      "images": {
+        "count": 151,
+        "distinct_png_sha256": 150,
+        "distinct_raw_rgba_sha256": 150,
+        "opaque_count": 151,
+        "nonblank_count": 151,
+        "dimensions": [
+          {
+            "width": 1280,
+            "height": 900,
+            "count": 151
+          }
+        ],
+        "png_bytes": 18425417
+      },
+      "by_scope": {
+        "default_pages_dark": {
+          "count": 9,
+          "distinct_png_sha256": 9,
+          "distinct_raw_rgba_sha256": 9,
+          "opaque_count": 9,
+          "nonblank_count": 9,
+          "dimensions": [
+            {
+              "width": 1280,
+              "height": 900,
+              "count": 9
+            }
+          ],
+          "png_bytes": 1209051
+        },
+        "default_pages_light": {
+          "count": 126,
+          "distinct_png_sha256": 126,
+          "distinct_raw_rgba_sha256": 126,
+          "opaque_count": 126,
+          "nonblank_count": 126,
+          "dimensions": [
+            {
+              "width": 1280,
+              "height": 900,
+              "count": 126
+            }
+          ],
+          "png_bytes": 15224778
+        },
+        "navigation_named_dark": {
+          "count": 8,
+          "distinct_png_sha256": 8,
+          "distinct_raw_rgba_sha256": 8,
+          "opaque_count": 8,
+          "nonblank_count": 8,
+          "dimensions": [
+            {
+              "width": 1280,
+              "height": 900,
+              "count": 8
+            }
+          ],
+          "png_bytes": 992998
+        },
+        "navigation_named_light": {
+          "count": 8,
+          "distinct_png_sha256": 8,
+          "distinct_raw_rgba_sha256": 8,
+          "opaque_count": 8,
+          "nonblank_count": 8,
+          "dimensions": [
+            {
+              "width": 1280,
+              "height": 900,
+              "count": 8
+            }
+          ],
+          "png_bytes": 998590
+        }
+      },
+      "retained": {
+        "count": 18,
+        "distinct_png_sha256": 18,
+        "distinct_raw_rgba_sha256": 18,
+        "opaque_count": 18,
+        "nonblank_count": 18,
+        "dimensions": [
+          {
+            "width": 1280,
+            "height": 900,
+            "count": 18
+          }
+        ],
+        "png_bytes": 2219341
+      },
+      "successful_commands": 18,
+      "named_targets_with_entire_rectangles_visible": 16,
+      "directly_reviewed_frame_count": 18,
+      "cross_scope_duplicate_groups": [
+        {
+          "frame_ids": [
+            "light/NavigationView--nvSample4.png",
+            "light/NavigationView.png"
+          ],
+          "png_sha256": "8e6d753b54dfdf48cc71fdd91680762e62ab4f9ad7e54dd857529540c20ee4b6",
+          "raw_rgba_sha256": "7684e387e4dc22c0e6adbfc44a72eb190ce80db19812fd73e339f37b27d4781f",
+          "note": "The default light NavigationView page viewport equals the named data-binding viewport in this execution. They are counted as two output files and one distinct image."
+        }
+      ]
+    },
+    "review_resolution": "The apparent missing Settings row in the API sample was resolved by reopening the complete light/dark images: Settings is visible near y=879. No source fix or additional test execution was required for that mistaken initial observation.",
+    "boundaries": [
+      "PNG decode, dimensions, opacity, nonblank pixels and native target visibility are rendering integrity checks, not upstream pixel parity.",
+      "Named --control captures are viewport images; inner ScrollViewer content can extend beyond the captured viewport.",
+      "Known unavailable Segoe icon glyphs on the Linux host remain a visual environment limitation.",
+      "No Windows visual or accessibility acceptance, animation acceptance, or complete page certification is claimed."
+    ]
+  },
+  "github_actions": {
+    "status": "no-new-head-run-recorded",
+    "runs": [],
+    "observation": "Root reported no new-head GitHub Actions run at the capture publication checkpoint. This local record does not import earlier-head CI success or claim success for later publication heads.",
+    "published_capture_head_at_observation": "8365ed0b33252c5169f48d56f0a9f3d511e53908"
+  },
+  "remaining_parity_boundaries": [
+    "All 18 NavigationView-family type contracts and 92 member evidence entries remain partial.",
+    "All eight original NavigationView examples and InfoBadge example four remain partial source adaptations; no Gallery page is promoted to ported or verified.",
+    "Original WinUI resource templates, top overflow and redistribution, public presenters/TemplateSettings and unsupported selectors remain incomplete.",
+    "OS title-bar integration, acrylic/composition transitions, raw gamepad or shoulder input, localization and Windows UIA acceptance remain unverified.",
+    "Native metadata templates and passing native layout tests do not establish source resource/style parity; the five reopened NavigationView theme definitions remain pending."
+  ],
+  "publication_finalization": {
+    "capture_manifest_reference_pending": false,
+    "publication_revision": "The repository commit containing this record supplies its publication revision; a self-referential commit hash is not embedded.",
+    "required_for_additional_claims": [
+      "Preserve the pinned capture manifest hash; later changes to that manifest require an explicit refreshed reference.",
+      "Record any later published checkpoint or CI execution by its exact head and observed run result; do not replace local counts with inferred remote success.",
+      "Preserve the explicit missing execution-time source snapshots for the earlier theme, paths and migration runs."
+    ]
+  }
+}

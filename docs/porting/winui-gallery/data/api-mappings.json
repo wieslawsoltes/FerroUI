@@ -1,0 +1,819 @@
+{
+  "schema_version": 1,
+  "types": {
+    "Microsoft.UI.Xaml.Automation.Peers.AutoSuggestBoxAutomationPeer": {
+      "kind": "implemented-subset",
+      "members": {},
+      "notes": "Native Group role and Invoke provider. Platform-specific Windows notification sequences and inherited WinUI automation guarantees remain unverified.",
+      "target": "FerroUI.Automation.Peers.AutoSuggestBoxAutomationPeer"
+    },
+    "Microsoft.UI.Xaml.Automation.Peers.InfoBarAutomationPeer": {
+      "kind": "implemented-subset",
+      "members": {},
+      "notes": "Native StatusBar role, class name, title/message fallback name, name-change notification and native live-region metadata. Windows notification announcements and platform UIA event sequences remain unsupported/unverified.",
+      "target": "FerroUI.Automation.Peers.InfoBarAutomationPeer"
+    },
+    "Microsoft.UI.Xaml.Automation.Peers.NavigationViewAutomationPeer": {
+      "kind": "implemented-subset",
+      "members": {},
+      "notes": "Native single-selection provider exposes the currently selected item peer and weak owner lifetime. Windows UIA tree metadata, localization, screen-reader behavior and pixel comparisons remain unverified.",
+      "target": "FerroUI.Automation.Peers.NavigationViewAutomationPeer"
+    },
+    "Microsoft.UI.Xaml.Automation.Peers.NavigationViewItemAutomationPeer": {
+      "kind": "implemented-subset",
+      "members": {},
+      "notes": "Native SelectionItem and conditional ExpandCollapse providers, no Invoke pattern, with disabled/nonselecting restrictions. Group positions, hierarchy levels, localization and OS UIA event sequences remain unverified.",
+      "target": "FerroUI.Automation.Peers.NavigationViewItemAutomationPeer"
+    },
+    "Microsoft.UI.Xaml.Automation.Peers.NumberBoxAutomationPeer": {
+      "kind": "implemented-subset",
+      "members": {},
+      "notes": "Native automation-provider composition. Platform-specific Windows notification sequences remain separate validation.",
+      "target": "FerroUI.Automation.Peers.NumberBoxAutomationPeer"
+    },
+    "Microsoft.UI.Xaml.Automation.Peers.ProgressRingAutomationPeer": {
+      "kind": "implemented-subset",
+      "members": {},
+      "notes": "Native owner constructor, ProgressBar role, busy-state naming and determinate-only RangeValue provider. The provider uses native automation interfaces; Windows UIA notification sequences and localization integration remain unverified.",
+      "overloads": {
+        "ProgressRingAutomationPeer(MU_XC_NAMESPACE.ProgressRing owner)": "new"
+      },
+      "target": "FerroUI.Automation.Peers.ProgressRingAutomationPeer"
+    },
+    "Microsoft.UI.Xaml.Automation.Peers.RadioButtonsAutomationPeer": {
+      "kind": "implemented-subset",
+      "members": {},
+      "notes": "Native automation-provider composition. Platform-specific Windows notification sequences remain separate validation.",
+      "target": "FerroUI.Automation.Peers.RadioButtonsAutomationPeer"
+    },
+    "Microsoft.UI.Xaml.Automation.Peers.RatingControlAutomationPeer": {
+      "kind": "implemented-subset",
+      "members": {},
+      "notes": "Native owner constructor, Slider role and Value/RangeValue providers with effective-value notifications. English rating descriptions and invariant numeric parsing are native adaptations; Windows globalization, translated automation resources and platform UIA event sequences remain unsupported/unverified.",
+      "overloads": {
+        "RatingControlAutomationPeer(MU_XC_NAMESPACE.RatingControl owner)": "new"
+      },
+      "target": "FerroUI.Automation.Peers.RatingControlAutomationPeer"
+    },
+    "Microsoft.UI.Xaml.Controls.AutoSuggestBox": {
+      "kind": "implemented-subset",
+      "members": {},
+      "notes": "Native Items/ItemsSource and Header/HeaderTemplate adapters; Text, PlaceholderText, TextMemberPath, UpdateTextOnSelect, MaxSuggestionListHeight, QueryIcon and Description. Native 150 ms coalesced reasoned TextChanged with weak CheckCurrent; suggestion choice and separate query identity; keyboard restore, retemplate cleanup and native Group/Invoke automation. No implicit filtering. TextBoxStyle/arbitrary WinUI Style, HeaderPlacement, LightDismissOverlayMode, AutoMaximizeSuggestionArea, SIP/IME occlusion/overlay, gamepad, above-popup reversed-vector behavior and typed WinUI inheritance guarantees remain unsupported/unverified.",
+      "target": "FerroUI.Controls.AutoSuggestBox"
+    },
+    "Microsoft.UI.Xaml.Controls.AutoSuggestBoxQuerySubmittedEventArgs": {
+      "kind": "implemented-subset",
+      "members": {},
+      "notes": "Native query text and chosen-suggestion identity; selecting a suggestion is distinct from submitting a query.",
+      "target": "FerroUI.Controls.AutoSuggestBoxQuerySubmittedEventArgs"
+    },
+    "Microsoft.UI.Xaml.Controls.AutoSuggestBoxSuggestionChosenEventArgs": {
+      "kind": "implemented-subset",
+      "members": {},
+      "notes": "Actual selected-item identity from the native suggestion list, exposed through typed native event arguments.",
+      "target": "FerroUI.Controls.AutoSuggestBoxSuggestionChosenEventArgs"
+    },
+    "Microsoft.UI.Xaml.Controls.AutoSuggestBoxTextChangedEventArgs": {
+      "kind": "implemented-subset",
+      "members": {},
+      "notes": "Native reasoned text-change args, including weak owner/version CheckCurrent. Native event adapters are separate from WinRT handles.",
+      "target": "FerroUI.Controls.AutoSuggestBoxTextChangedEventArgs"
+    },
+    "Microsoft.UI.Xaml.Controls.AutoSuggestionBoxTextChangeReason": {
+      "kind": "implemented-subset",
+      "members": {},
+      "notes": "Pinned UserInput, ProgrammaticChange and SuggestionChosen reasons accompany the native text-change contract.",
+      "target": "FerroUI.Controls.AutoSuggestionBoxTextChangeReason"
+    },
+    "Microsoft.UI.Xaml.Controls.ColorPicker": {
+      "kind": "candidate-requiring-adapter",
+      "members": {
+        "IsColorSliderVisible": "is_color_spectrum_slider_visible",
+        "IsColorSliderVisibleProperty": "is_color_spectrum_slider_visible_property",
+        "IsColorChannelTextInputVisible": "is_component_text_input_visible",
+        "IsColorChannelTextInputVisibleProperty": "is_component_text_input_visible_property"
+      },
+      "notes": "WinUI's inline ColorPicker maps to the existing native ColorView, preserving FerroUI ColorPicker's dropdown contract. More, independent alpha editors, hex presentation and alpha-disable semantics require an explicit composition; the Gallery implements those separately. Native ColorView coerces opacity when alpha editing is disabled, while the source picker preserves Color.A. This declaration mapping does not certify equal defaults, layout, input, accessibility or behavior.",
+      "target": "FerroUI.Controls.ColorView"
+    },
+    "Microsoft.UI.Xaml.Controls.ContentPresenter": {
+      "kind": "shared-core-adaptation",
+      "members": {},
+      "notes": "Reuse content presentation; WinUI template and alignment semantics require review.",
+      "target": "FerroUI.Controls.Presenters.ContentPresenter"
+    },
+    "Microsoft.UI.Xaml.Controls.FlipView": {
+      "kind": "candidate-requiring-adapter",
+      "members": {},
+      "notes": "Existing native Carousel provides the single-selected-item host. The Gallery composes PipsPager navigation and axis-specific PageSlide transitions explicitly. WinUI flip-button chrome, containers, input/focus/RTL behavior, animation timing and full FlipView API remain unverified; this is a reviewed adaptation candidate, not a built-in XAML alias.",
+      "target": "FerroUI.Controls.Carousel"
+    },
+    "Microsoft.UI.Xaml.Controls.FontIcon": {
+      "kind": "implemented-subset",
+      "members": {},
+      "notes": "Native TextBlock font glyph rendering, live typography/foreground and opt-in RTL mirroring. Default Segoe Fluent Icons/20; host must supply licensed font. IsTextScaleFactorEnabled is unsupported; native text-property inheritance differs from some Windows formatting rules.",
+      "target": "FerroUI.Controls.FontIcon"
+    },
+    "Microsoft.UI.Xaml.Controls.FontIconSource": {
+      "kind": "implemented-subset",
+      "members": {},
+      "notes": "Native FontIcon creation and live glyph, typography, mirroring and foreground propagation. IsTextScaleFactorEnabled and Windows font availability/global text-scale integration remain unsupported.",
+      "target": "FerroUI.Controls.FontIconSource"
+    },
+    "Microsoft.UI.Xaml.Controls.Frame": {
+      "kind": "implemented-subset",
+      "members": {},
+      "notes": "Native FramePage factory, navigation history, cancellation, failure events, cache and option contracts. Native TypeInfo and typed factory/error adapters replace CLR type activation. Frame navigation arguments use FerroUI.Navigation to preserve the existing native NavigationEventArgs contract. Persistent navigation-state serialization and transition parity remain unsupported.",
+      "target": "FerroUI.Controls.Frame"
+    },
+    "Microsoft.UI.Xaml.Controls.IconSource": {
+      "kind": "implemented-subset",
+      "members": {},
+      "notes": "Abstract native source contract; each CreateIconElement call creates an independent element. Live property propagation uses weak element references and does not retain discarded elements. Initial unset Foreground preserves native inheritance; later explicit source changes override mapped element properties.",
+      "target": "FerroUI.Controls.IconSource"
+    },
+    "Microsoft.UI.Xaml.Controls.InfoBadge": {
+      "kind": "implemented-subset",
+      "members": {
+        "IconSource": "icon_source",
+        "IconSourceProperty": "icon_source_property",
+        "TemplateSettings": "template_settings",
+        "TemplateSettingsProperty": "template_settings_property",
+        "Value": "value",
+        "ValueProperty": "value_property"
+      },
+      "notes": "Native dot, icon and numeric presentation with the -1/nonnegative value domain, live IconSource, stable TemplateSettings and content-driven square sizing/corner-radius calculation. Rust numeric assignment uses set_numeric_value to preserve inherited set_value(property, value); markup and builders use ValueProperty. WinUI style/VSM execution, localized numeric formatting and pixel/theme equivalence remain unverified.",
+      "target": "FerroUI.Controls.InfoBadge"
+    },
+    "Microsoft.UI.Xaml.Controls.InfoBadgeTemplateSettings": {
+      "kind": "implemented-subset",
+      "members": {
+        "IconElement": "icon_element",
+        "IconElementProperty": "icon_element_property",
+        "InfoBadgeCornerRadius": "info_badge_corner_radius",
+        "InfoBadgeCornerRadiusProperty": "info_badge_corner_radius_property"
+      },
+      "notes": "Stable per-control native property object with the current IconElement and computed InfoBadgeCornerRadius. Both settings remain writable through native properties; WinRT object identity and dependency-property implementation are adapted to FerroUI.",
+      "target": "FerroUI.Controls.Primitives.InfoBadgeTemplateSettings"
+    },
+    "Microsoft.UI.Xaml.Controls.InfoBar": {
+      "kind": "implemented-subset",
+      "members": {},
+      "notes": "Native inline message with cancellable IsOpen lifecycle, reasons, close-button commands, title/message/action/content/template, live IconSource and native template settings. CloseButtonStyle is an explicit native ControlTheme adaptation. Native live-region metadata is provided; Windows RaiseNotificationEvent announcements, arbitrary WinUI Style/VSM execution and pixel/theme equivalence are not certified.",
+      "target": "FerroUI.Controls.InfoBar"
+    },
+    "Microsoft.UI.Xaml.Controls.InfoBarCloseReason": {
+      "kind": "implemented-subset",
+      "members": {},
+      "notes": "Pinned CloseButton=0 and Programmatic=1 values accompany the native InfoBar close lifecycle.",
+      "target": "FerroUI.Controls.InfoBarCloseReason"
+    },
+    "Microsoft.UI.Xaml.Controls.InfoBarClosedEventArgs": {
+      "kind": "implemented-subset",
+      "members": {},
+      "notes": "Read-only close reason; the native handler list supports explicit subscription disposal.",
+      "target": "FerroUI.Controls.InfoBarClosedEventArgs"
+    },
+    "Microsoft.UI.Xaml.Controls.InfoBarClosingEventArgs": {
+      "kind": "implemented-subset",
+      "members": {},
+      "notes": "Reason is read-only; Cancel is shared by event-argument clones, including metadata delegates. Typed Rust event subscriptions replace WinRT event tokens.",
+      "target": "FerroUI.Controls.InfoBarClosingEventArgs"
+    },
+    "Microsoft.UI.Xaml.Controls.InfoBarOpenedEventArgs": {
+      "kind": "implemented-subset",
+      "members": {},
+      "notes": "Native event args for the pinned upstream preview Opened event; preview status is retained in inventory.",
+      "target": "FerroUI.Controls.InfoBarOpenedEventArgs"
+    },
+    "Microsoft.UI.Xaml.Controls.InfoBarSeverity": {
+      "kind": "implemented-subset",
+      "members": {},
+      "notes": "Pinned Informational/Success/Warning/Error values drive native severity glyphs/resources and live-region metadata.",
+      "target": "FerroUI.Controls.InfoBarSeverity"
+    },
+    "Microsoft.UI.Xaml.Controls.InfoBarTemplateSettings": {
+      "kind": "implemented-subset",
+      "members": {},
+      "notes": "Stable native object with the actual current IconElement. IconSource replacement updates the setting and native Viewbox; the public setting remains a live property.",
+      "target": "FerroUI.Controls.Primitives.InfoBarTemplateSettings"
+    },
+    "Microsoft.UI.Xaml.Controls.ListView": {
+      "kind": "candidate-requiring-adapter",
+      "members": {},
+      "notes": "Selection modes, containers, item-click behavior and incremental data loading are not implied by this candidate.",
+      "target": "FerroUI.Controls.ListBox"
+    },
+    "Microsoft.UI.Xaml.Controls.ListViewItem": {
+      "kind": "candidate-requiring-adapter",
+      "members": {},
+      "notes": "Container behavior and presentation require explicit tests.",
+      "target": "FerroUI.Controls.ListBoxItem"
+    },
+    "Microsoft.UI.Xaml.Controls.NavigationView": {
+      "kind": "implemented-subset",
+      "members": {
+        "AlwaysShowHeader": "always_show_header",
+        "AlwaysShowHeaderProperty": "always_show_header_property",
+        "AutoSuggestBox": "auto_suggest_box",
+        "AutoSuggestBoxProperty": "auto_suggest_box_property",
+        "BackRequested": "back_requested",
+        "Collapse": "collapse",
+        "Collapsed": "collapsed",
+        "CompactModeThresholdWidth": "compact_mode_threshold_width",
+        "CompactModeThresholdWidthProperty": "compact_mode_threshold_width_property",
+        "CompactPaneLength": "compact_pane_length",
+        "CompactPaneLengthProperty": "compact_pane_length_property",
+        "ContainerFromMenuItem": "container_from_menu_item",
+        "ContentOverlay": "content_overlay",
+        "ContentOverlayProperty": "content_overlay_property",
+        "DisplayMode": "display_mode",
+        "DisplayModeChanged": "display_mode_changed",
+        "DisplayModeProperty": "display_mode_property",
+        "Expand": "expand",
+        "ExpandedModeThresholdWidth": "expanded_mode_threshold_width",
+        "ExpandedModeThresholdWidthProperty": "expanded_mode_threshold_width_property",
+        "Expanding": "expanding",
+        "FooterMenuItems": "footer_menu_items",
+        "FooterMenuItemsProperty": "footer_menu_items_property",
+        "FooterMenuItemsSource": "footer_menu_items_source",
+        "FooterMenuItemsSourceProperty": "footer_menu_items_source_property",
+        "Header": "header",
+        "HeaderProperty": "header_property",
+        "HeaderTemplate": "header_template",
+        "HeaderTemplateProperty": "header_template_property",
+        "IsBackButtonVisible": "is_back_button_visible",
+        "IsBackButtonVisibleProperty": "is_back_button_visible_property",
+        "IsBackEnabled": "is_back_enabled",
+        "IsBackEnabledProperty": "is_back_enabled_property",
+        "IsPaneOpen": "is_pane_open",
+        "IsPaneOpenProperty": "is_pane_open_property",
+        "IsPaneToggleButtonVisible": "is_pane_toggle_button_visible",
+        "IsPaneToggleButtonVisibleProperty": "is_pane_toggle_button_visible_property",
+        "IsPaneVisible": "is_pane_visible",
+        "IsPaneVisibleProperty": "is_pane_visible_property",
+        "IsSettingsVisible": "is_settings_visible",
+        "IsSettingsVisibleProperty": "is_settings_visible_property",
+        "ItemInvoked": "item_invoked",
+        "MenuItemContainerStyle": "menu_item_container_style",
+        "MenuItemContainerStyleProperty": "menu_item_container_style_property",
+        "MenuItemFromContainer": "menu_item_from_container",
+        "MenuItemTemplate": "menu_item_template",
+        "MenuItemTemplateProperty": "menu_item_template_property",
+        "MenuItems": "menu_items",
+        "MenuItemsProperty": "menu_items_property",
+        "MenuItemsSource": "menu_items_source",
+        "MenuItemsSourceProperty": "menu_items_source_property",
+        "OpenPaneLength": "open_pane_length",
+        "OpenPaneLengthProperty": "open_pane_length_property",
+        "PaneClosed": "pane_closed",
+        "PaneClosing": "pane_closing",
+        "PaneCustomContent": "pane_custom_content",
+        "PaneCustomContentProperty": "pane_custom_content_property",
+        "PaneDisplayMode": "pane_display_mode",
+        "PaneDisplayModeProperty": "pane_display_mode_property",
+        "PaneFooter": "pane_footer",
+        "PaneFooterProperty": "pane_footer_property",
+        "PaneHeader": "pane_header",
+        "PaneHeaderProperty": "pane_header_property",
+        "PaneOpened": "pane_opened",
+        "PaneOpening": "pane_opening",
+        "PaneTitle": "pane_title",
+        "PaneTitleProperty": "pane_title_property",
+        "PaneToggleButtonStyle": "pane_toggle_button_style",
+        "PaneToggleButtonStyleProperty": "pane_toggle_button_style_property",
+        "SelectedItem": "selected_item",
+        "SelectedItemProperty": "selected_item_property",
+        "SelectionChanged": "selection_changed",
+        "SelectionFollowsFocus": "selection_follows_focus",
+        "SelectionFollowsFocusProperty": "selection_follows_focus_property",
+        "SettingsItem": "settings_item",
+        "SettingsItemProperty": "settings_item_property"
+      },
+      "notes": "Native ContentControl using existing SplitView, panels, presenters, popup and input services. Live menu/footer sources and templates retain model identity; selection, invocation, settings, hierarchy, adaptive modes, pane lifetime and back requests are explicit contracts. Header/MenuItemTemplate use native IDataTemplate; style properties use audited ControlTheme values. Top uses a horizontal layout without overflow redistribution. TemplateSettings, public NavigationViewItemPresenter, template/style selectors, title-bar auto padding, overflow/shoulder properties, recommended transition arguments, WinUI VSM/acrylic/motion, raw gamepad and Windows visual/accessibility acceptance remain absent or unverified.",
+      "target": "FerroUI.Controls.NavigationView"
+    },
+    "Microsoft.UI.Xaml.Controls.NavigationViewBackButtonVisible": {
+      "kind": "implemented-subset",
+      "members": {
+        "Auto": "Auto",
+        "Collapsed": "Collapsed",
+        "Visible": "Visible"
+      },
+      "notes": "Pinned Collapsed=0, Visible=1, Auto=2 values; source visibility is projected through native buttons and host-independent mode rules.",
+      "target": "FerroUI.Controls.NavigationViewBackButtonVisible"
+    },
+    "Microsoft.UI.Xaml.Controls.NavigationViewBackRequestedEventArgs": {
+      "kind": "implemented-subset",
+      "members": {},
+      "notes": "Native typed payload for an actual back request. Applications decide how to navigate a Frame; WinRT identity/event tokens are not projected.",
+      "target": "FerroUI.Controls.NavigationViewBackRequestedEventArgs"
+    },
+    "Microsoft.UI.Xaml.Controls.NavigationViewDisplayMode": {
+      "kind": "implemented-subset",
+      "members": {
+        "Compact": "Compact",
+        "Expanded": "Expanded",
+        "Minimal": "Minimal"
+      },
+      "notes": "Pinned Minimal=0, Compact=1, Expanded=2 values; actual width/mode produces the read-only native DisplayMode. Broader layout/host acceptance is separately partial.",
+      "target": "FerroUI.Controls.NavigationViewDisplayMode"
+    },
+    "Microsoft.UI.Xaml.Controls.NavigationViewDisplayModeChangedEventArgs": {
+      "kind": "implemented-subset",
+      "members": {
+        "DisplayMode": "display_mode"
+      },
+      "notes": "Read-only native DisplayMode payload raised from actual adaptive mode changes; no WinRT identity claim.",
+      "target": "FerroUI.Controls.NavigationViewDisplayModeChangedEventArgs"
+    },
+    "Microsoft.UI.Xaml.Controls.NavigationViewItem": {
+      "kind": "implemented-subset",
+      "members": {
+        "CompactPaneLength": "compact_pane_length",
+        "CompactPaneLengthProperty": "compact_pane_length_property",
+        "HasUnrealizedChildren": "has_unrealized_children",
+        "HasUnrealizedChildrenProperty": "has_unrealized_children_property",
+        "Icon": "icon",
+        "IconProperty": "icon_property",
+        "InfoBadge": "info_badge",
+        "InfoBadgeProperty": "info_badge_property",
+        "IsChildSelected": "is_child_selected",
+        "IsChildSelectedProperty": "is_child_selected_property",
+        "IsExpanded": "is_expanded",
+        "IsExpandedProperty": "is_expanded_property",
+        "MenuItems": "menu_items",
+        "MenuItemsProperty": "menu_items_property",
+        "MenuItemsSource": "menu_items_source",
+        "MenuItemsSourceProperty": "menu_items_source_property",
+        "SelectsOnInvoked": "selects_on_invoked",
+        "SelectsOnInvokedProperty": "selects_on_invoked_property"
+      },
+      "notes": "Native hierarchical content item with Icon/InfoBadge presenters, independent live child collections/sources, selected/child-selected state, lazy expansion, keyboard input and conditional selection/expansion automation. CompactPaneLength is read-only and owner-managed. Native inline/popup templates adapt the source without implementing public NavigationViewItemPresenter/TemplateSettings, original animations, sound, OS localization or full Windows UIA/pixel semantics.",
+      "target": "FerroUI.Controls.NavigationViewItem"
+    },
+    "Microsoft.UI.Xaml.Controls.NavigationViewItemBase": {
+      "kind": "implemented-subset",
+      "members": {
+        "IsSelected": "is_selected",
+        "IsSelectedProperty": "is_selected_property"
+      },
+      "notes": "Native ContentControl base with IsSelected; no public zero-argument constructor is projected. Existing ContentControl behavior remains unchanged.",
+      "target": "FerroUI.Controls.NavigationViewItemBase"
+    },
+    "Microsoft.UI.Xaml.Controls.NavigationViewItemCollapsedEventArgs": {
+      "kind": "implemented-subset",
+      "members": {
+        "CollapsedItem": "collapsed_item",
+        "CollapsedItemContainer": "collapsed_item_container"
+      },
+      "notes": "Original model and native collapsed container from the actual item collapse event.",
+      "target": "FerroUI.Controls.NavigationViewItemCollapsedEventArgs"
+    },
+    "Microsoft.UI.Xaml.Controls.NavigationViewItemExpandingEventArgs": {
+      "kind": "implemented-subset",
+      "members": {
+        "ExpandingItem": "expanding_item",
+        "ExpandingItemContainer": "expanding_item_container"
+      },
+      "notes": "Original model and native expanding container from the actual item expansion event; supports application lazy population.",
+      "target": "FerroUI.Controls.NavigationViewItemExpandingEventArgs"
+    },
+    "Microsoft.UI.Xaml.Controls.NavigationViewItemHeader": {
+      "kind": "implemented-subset",
+      "members": {},
+      "notes": "Native nonfocusable heading inheriting NavigationViewItemBase; live content and replaceable native template. Exact WinUI resource/state/visual equivalence is not claimed.",
+      "target": "FerroUI.Controls.NavigationViewItemHeader"
+    },
+    "Microsoft.UI.Xaml.Controls.NavigationViewItemInvokedEventArgs": {
+      "kind": "implemented-subset",
+      "members": {
+        "InvokedItem": "invoked_item",
+        "InvokedItemContainer": "invoked_item_container",
+        "IsSettingsInvoked": "is_settings_invoked"
+      },
+      "notes": "Invoked container content, native container and Settings flag, plus source constructor defaults; native event identity is retained across clones. RecommendedNavigationTransitionInfo is absent.",
+      "target": "FerroUI.Controls.NavigationViewItemInvokedEventArgs"
+    },
+    "Microsoft.UI.Xaml.Controls.NavigationViewItemSeparator": {
+      "kind": "implemented-subset",
+      "members": {},
+      "notes": "Native nonfocusable separator inheriting NavigationViewItemBase; replaceable native template and owner-directed orientation. Exact WinUI resource/state/visual equivalence is not claimed.",
+      "target": "FerroUI.Controls.NavigationViewItemSeparator"
+    },
+    "Microsoft.UI.Xaml.Controls.NavigationViewPaneClosingEventArgs": {
+      "kind": "implemented-subset",
+      "members": {
+        "Cancel": "cancel"
+      },
+      "notes": "Shared native Cancel state used for light dismissal; explicit/adaptive property closure is a forced transition as in the pinned source. Typed disposable handlers replace WinRT event tokens.",
+      "target": "FerroUI.Controls.NavigationViewPaneClosingEventArgs"
+    },
+    "Microsoft.UI.Xaml.Controls.NavigationViewPaneDisplayMode": {
+      "kind": "implemented-subset",
+      "members": {
+        "Auto": "Auto",
+        "Left": "Left",
+        "LeftCompact": "LeftCompact",
+        "LeftMinimal": "LeftMinimal",
+        "Top": "Top"
+      },
+      "notes": "Pinned Auto=0, Left=1, Top=2, LeftCompact=3, LeftMinimal=4 values mapped to real native layout. Top overflow remains absent.",
+      "target": "FerroUI.Controls.NavigationViewPaneDisplayMode"
+    },
+    "Microsoft.UI.Xaml.Controls.NavigationViewSelectionChangedEventArgs": {
+      "kind": "implemented-subset",
+      "members": {
+        "IsSettingsSelected": "is_settings_selected",
+        "SelectedItem": "selected_item",
+        "SelectedItemContainer": "selected_item_container"
+      },
+      "notes": "Original selected model, native realized item container and Settings flag; native event identity is retained across clones. RecommendedNavigationTransitionInfo is absent.",
+      "target": "FerroUI.Controls.NavigationViewSelectionChangedEventArgs"
+    },
+    "Microsoft.UI.Xaml.Controls.NavigationViewSelectionFollowsFocus": {
+      "kind": "implemented-subset",
+      "members": {
+        "Disabled": "Disabled",
+        "Enabled": "Enabled"
+      },
+      "notes": "Pinned Disabled=0 and Enabled=1 values with native focus following; raw gamepad/shoulder input remains absent.",
+      "target": "FerroUI.Controls.NavigationViewSelectionFollowsFocus"
+    },
+    "Microsoft.UI.Xaml.Controls.NumberBox": {
+      "kind": "implemented-subset",
+      "members": {},
+      "notes": "Double/NaN numeric domain, parser, validation, native editors/spinners and range automation are implemented as an ordinary native control. NumberFormatter requires the explicit native formatter/parser adapter; Windows globalization and full styling contracts are not certified.",
+      "target": "FerroUI.Controls.NumberBox"
+    },
+    "Microsoft.UI.Xaml.Controls.NumberBoxSpinButtonPlacementMode": {
+      "kind": "implemented-subset",
+      "members": {},
+      "notes": "Native enum accompanies NumberBox; member-level evidence is tracked separately.",
+      "target": "FerroUI.Controls.NumberBoxSpinButtonPlacementMode"
+    },
+    "Microsoft.UI.Xaml.Controls.NumberBoxValidationMode": {
+      "kind": "implemented-subset",
+      "members": {},
+      "notes": "Native enum accompanies NumberBox; member-level evidence is tracked separately.",
+      "target": "FerroUI.Controls.NumberBoxValidationMode"
+    },
+    "Microsoft.UI.Xaml.Controls.Page": {
+      "kind": "implemented-subset",
+      "members": {},
+      "notes": "Native FramePage with weak Frame ownership, NavigationCacheMode and navigation lifecycle hooks. The explicit type mapping preserves the existing FerroUI.Controls.Page hierarchy, its asynchronous navigation contracts and ContentPage behavior. Windows-specific inherited contracts remain unverified.",
+      "target": "FerroUI.Controls.FramePage"
+    },
+    "Microsoft.UI.Xaml.Controls.PathIconSource": {
+      "kind": "implemented-subset",
+      "members": {},
+      "notes": "Native PathIcon creation with shared Geometry identity and live Data/Foreground propagation. Geometry parsing/rendering use existing framework APIs and theme.",
+      "target": "FerroUI.Controls.PathIconSource"
+    },
+    "Microsoft.UI.Xaml.Controls.Primitives.InfoBarPanel": {
+      "kind": "implemented-subset",
+      "members": {},
+      "notes": "Pinned responsive measure/arrange algorithm expressed through native Panel, styled paddings and attached child margins. Width, child count, parent minimum height and measured text decide orientation. Existing theme panel identity remains unchanged.",
+      "target": "FerroUI.Controls.Primitives.InfoBarPanel"
+    },
+    "Microsoft.UI.Xaml.Controls.ProgressRing": {
+      "kind": "implemented-subset",
+      "members": {
+        "IsActive": "is_active",
+        "IsActiveProperty": "is_active_property",
+        "IsIndeterminate": "is_indeterminate",
+        "IsIndeterminateProperty": "is_indeterminate_property",
+        "Maximum": "maximum",
+        "MaximumProperty": "maximum_property",
+        "Minimum": "minimum",
+        "MinimumProperty": "minimum_property",
+        "TemplateSettings": "template_settings",
+        "Value": "value",
+        "ValueProperty": "value_property"
+      },
+      "notes": "Native range, active/indeterminate state, arc rendering, frame-clock animation and live template settings. Rust numeric assignment uses set_range_value to preserve inherited set_value(property, value); markup and builders use ValueProperty. DeterminateSource and IndeterminateSource, their dependency properties and the custom IAnimatedVisualSource/Lottie model remain deliberately unmapped. Exact WinUI animation, theme and pixel equivalence are unverified.",
+      "target": "FerroUI.Controls.ProgressRing"
+    },
+    "Microsoft.UI.Xaml.Controls.ProgressRingTemplateSettings": {
+      "kind": "implemented-subset",
+      "members": {
+        "EllipseDiameter": "ellipse_diameter",
+        "EllipseOffset": "ellipse_offset",
+        "MaxSideLength": "max_side_length"
+      },
+      "notes": "Stable per-control native read-only layout settings using the pinned width-dependent diameter, offset and maximum-side formulas. Native direct properties expose live changes; no upstream constructor or additional dependency-property members are inferred.",
+      "target": "FerroUI.Controls.Primitives.ProgressRingTemplateSettings"
+    },
+    "Microsoft.UI.Xaml.Controls.RadioButtons": {
+      "kind": "implemented-subset",
+      "members": {},
+      "notes": "Native RadioButton containers and HeaderedSelectingItemsControl support item/header templates, selection, keyboard focus and constrained column-major MaxColumns layout. Native ItemsSource/inline collection rules and invalid-index normalization differ; element factories, template selectors, gamepad escape and exact Windows UIA/theme behavior are not certified.",
+      "target": "FerroUI.Controls.RadioButtons"
+    },
+    "Microsoft.UI.Xaml.Controls.RatingControl": {
+      "kind": "implemented-subset",
+      "members": {
+        "Caption": "caption",
+        "CaptionProperty": "caption_property",
+        "InitialSetValue": "initial_set_value",
+        "InitialSetValueProperty": "initial_set_value_property",
+        "IsClearEnabled": "is_clear_enabled",
+        "IsClearEnabledProperty": "is_clear_enabled_property",
+        "IsReadOnly": "is_read_only",
+        "IsReadOnlyProperty": "is_read_only_property",
+        "ItemInfo": "item_info",
+        "ItemInfoProperty": "item_info_property",
+        "MaxRating": "max_rating",
+        "MaxRatingProperty": "max_rating_property",
+        "PlaceholderValue": "placeholder_value",
+        "PlaceholderValueProperty": "placeholder_value_property",
+        "Value": "value",
+        "ValueChanged": "value_changed",
+        "ValueProperty": "value_property"
+      },
+      "notes": "Native rating domain/coercion, placeholder fractions, caption, item descriptors, clearing, read-only state, pointer capture, RTL keyboard input and normalized gamepad focus engagement. Native layered glyph/image visuals provide fractional clipping and pointer scaling; ValueChanged is reserved for user interaction. Rust numeric assignment uses set_rating_value to preserve inherited set_value(property, value); markup and builders use ValueProperty. Platform gamepad button mapping, sounds, Windows globalization/text-scale integration, exact visuals and platform UIA sequences remain unsupported/unverified.",
+      "target": "FerroUI.Controls.RatingControl"
+    },
+    "Microsoft.UI.Xaml.Controls.RatingItemFontInfo": {
+      "kind": "implemented-subset",
+      "members": {
+        "DisabledGlyph": "disabled_glyph",
+        "DisabledGlyphProperty": "disabled_glyph_property",
+        "Glyph": "glyph",
+        "GlyphProperty": "glyph_property",
+        "PlaceholderGlyph": "placeholder_glyph",
+        "PlaceholderGlyphProperty": "placeholder_glyph_property",
+        "PointerOverGlyph": "pointer_over_glyph",
+        "PointerOverGlyphProperty": "pointer_over_glyph_property",
+        "PointerOverPlaceholderGlyph": "pointer_over_placeholder_glyph",
+        "PointerOverPlaceholderGlyphProperty": "pointer_over_placeholder_glyph_property",
+        "UnsetGlyph": "unset_glyph",
+        "UnsetGlyphProperty": "unset_glyph_property"
+      },
+      "notes": "Six native string properties supply RatingControl glyph states with live updates and the pinned empty-value fallback chain. Rendering uses native TextBlock and the control font family; the host must supply the requested font, and Windows text metrics are unverified.",
+      "target": "FerroUI.Controls.RatingItemFontInfo"
+    },
+    "Microsoft.UI.Xaml.Controls.RatingItemImageInfo": {
+      "kind": "implemented-subset",
+      "members": {
+        "DisabledImage": "disabled_image",
+        "DisabledImageProperty": "disabled_image_property",
+        "Image": "image",
+        "ImageProperty": "image_property",
+        "PlaceholderImage": "placeholder_image",
+        "PlaceholderImageProperty": "placeholder_image_property",
+        "PointerOverImage": "pointer_over_image",
+        "PointerOverImageProperty": "pointer_over_image_property",
+        "PointerOverPlaceholderImage": "pointer_over_placeholder_image",
+        "PointerOverPlaceholderImageProperty": "pointer_over_placeholder_image_property",
+        "UnsetImage": "unset_image",
+        "UnsetImageProperty": "unset_image_property"
+      },
+      "notes": "Six live image-state properties use native Option<Rc<dyn IImage>> values in place of WinUI ImageSource. Native Image rendering applies the pinned absent-value fallback chain and per-item fractional clipping; Windows image-source activation, decoding and pixel equivalence remain separate concerns.",
+      "target": "FerroUI.Controls.RatingItemImageInfo"
+    },
+    "Microsoft.UI.Xaml.Controls.RatingItemInfo": {
+      "kind": "implemented-subset",
+      "members": {},
+      "notes": "Native constructible FerroObject base for RatingItemFontInfo and RatingItemImageInfo. This supplies the ItemInfo descriptor hierarchy; inherited WinRT/dependency-object guarantees are not inferred from the constructor mapping.",
+      "target": "FerroUI.Controls.RatingItemInfo"
+    },
+    "Microsoft.UI.Xaml.Controls.Symbol": {
+      "kind": "implemented-subset",
+      "members": {},
+      "notes": "All 197 pinned public enum values, XAML enum names and modern rendered glyph conversions. Exact values are checked offline and through native text drawing with deterministic test fonts.",
+      "target": "FerroUI.Controls.Symbol"
+    },
+    "Microsoft.UI.Xaml.Controls.SymbolIcon": {
+      "kind": "implemented-subset",
+      "members": {},
+      "notes": "Native icon text rendering with all 197 exact pinned public Symbol values mapped through WinUI icon.cpp modern glyph conversion. Default Emoji; licensed font must be supplied by host. Windows visual/font availability parity is not certified.",
+      "overloads": {
+        "public SymbolIcon(Microsoft.UI.Xaml.Controls.Symbol symbol)": "with_symbol"
+      },
+      "target": "FerroUI.Controls.SymbolIcon"
+    },
+    "Microsoft.UI.Xaml.Controls.SymbolIconSource": {
+      "kind": "implemented-subset",
+      "members": {},
+      "notes": "Native SymbolIcon creation with all 197 pinned public values and mapped glyphs. Sources update existing elements; installed font availability remains a host requirement.",
+      "target": "FerroUI.Controls.SymbolIconSource"
+    },
+    "Microsoft.UI.Xaml.Controls.TabView": {
+      "kind": "candidate-requiring-adapter",
+      "members": {
+        "TabItems": "items"
+      },
+      "notes": "Closing, adding, dragging, tear-out and WinUI tab sizing are additional contracts.",
+      "target": "FerroUI.Controls.TabControl"
+    },
+    "Microsoft.UI.Xaml.Controls.ToggleSwitch": {
+      "kind": "reviewed-syntax-adaptation",
+      "members": {
+        "IsOn": "is_checked"
+      },
+      "notes": "WinUI XAML IsOn maps to the existing IsChecked property; event contracts and logical behavior still require conformance evidence.",
+      "target": "FerroUI.Controls.ToggleSwitch"
+    },
+    "Microsoft.UI.Xaml.DataTemplate": {
+      "kind": "shared-core-adaptation",
+      "members": {},
+      "notes": "Reuse the native template service; WinUI x:Bind and template directives remain separate compatibility work.",
+      "target": "FerroUI.Markup.Xaml.Templates.DataTemplate"
+    },
+    "Microsoft.UI.Xaml.DependencyObject": {
+      "kind": "shared-core-adaptation",
+      "members": {},
+      "notes": "Reuse the existing object and property system. WinUI dependency-property precedence and callbacks require explicit semantic review.",
+      "target": "FerroUI.FerroObject"
+    },
+    "Microsoft.UI.Xaml.FrameworkElement": {
+      "kind": "shared-core-adaptation",
+      "members": {
+        "FindName": "find_control"
+      },
+      "notes": "Layout, resources and inherited data context share the existing framework. WinUI defaults and XAML member spellings remain adapter contracts.",
+      "target": "FerroUI.Controls.Control"
+    },
+    "Microsoft.UI.Xaml.Navigation.FrameNavigationOptions": {
+      "kind": "implemented-subset",
+      "members": {},
+      "notes": "Native navigation contract; TypeInfo, native page references and typed result/error adapters replace WinRT/CLR handles.",
+      "target": "FerroUI.Navigation.FrameNavigationOptions"
+    },
+    "Microsoft.UI.Xaml.Navigation.NavigatingCancelEventArgs": {
+      "kind": "implemented-subset",
+      "members": {},
+      "notes": "Native navigation contract; TypeInfo, native page references and typed result/error adapters replace WinRT/CLR handles.",
+      "target": "FerroUI.Navigation.NavigatingCancelEventArgs"
+    },
+    "Microsoft.UI.Xaml.Navigation.NavigationCacheMode": {
+      "kind": "implemented-subset",
+      "members": {},
+      "notes": "Native navigation contract; TypeInfo, native page references and typed result/error adapters replace WinRT/CLR handles.",
+      "target": "FerroUI.Navigation.NavigationCacheMode"
+    },
+    "Microsoft.UI.Xaml.Navigation.NavigationEventArgs": {
+      "kind": "implemented-subset",
+      "members": {},
+      "notes": "Native navigation contract; TypeInfo, native page references and typed result/error adapters replace WinRT/CLR handles.",
+      "target": "FerroUI.Navigation.NavigationEventArgs"
+    },
+    "Microsoft.UI.Xaml.Navigation.NavigationFailedEventArgs": {
+      "kind": "implemented-subset",
+      "members": {},
+      "notes": "Native navigation contract; TypeInfo, native page references and typed result/error adapters replace WinRT/CLR handles.",
+      "target": "FerroUI.Navigation.NavigationFailedEventArgs"
+    },
+    "Microsoft.UI.Xaml.Navigation.NavigationMode": {
+      "kind": "implemented-subset",
+      "members": {},
+      "notes": "Native navigation contract; TypeInfo, native page references and typed result/error adapters replace WinRT/CLR handles.",
+      "target": "FerroUI.Navigation.NavigationMode"
+    },
+    "Microsoft.UI.Xaml.Navigation.PageStackEntry": {
+      "kind": "implemented-subset",
+      "members": {},
+      "notes": "Native navigation contract; TypeInfo, native page references and typed result/error adapters replace WinRT/CLR handles.",
+      "target": "FerroUI.Navigation.PageStackEntry"
+    },
+    "Microsoft.UI.Xaml.StaticResource": {
+      "kind": "shared-core-adaptation",
+      "members": {},
+      "notes": "Reuse the native static-resource markup extension; cross-dictionary lookup and missing-key behavior require conformance evidence.",
+      "target": "FerroUI.Markup.Xaml.MarkupExtensions.StaticResourceExtension"
+    },
+    "Microsoft.UI.Xaml.UIElement": {
+      "kind": "shared-core-adaptation",
+      "members": {
+        "Visibility": "is_visible"
+      },
+      "notes": "Reuse routing, focus and pointer ownership. The inheritance trees and event argument shapes differ.",
+      "target": "FerroUI.Input.InputElement"
+    }
+  },
+  "xaml_features": {
+    "markup:Binding": {
+      "disposition": "implemented-subset",
+      "implementation": [
+        "src/Markup/FerroUI.Markup.Xaml.Loader/winui/migration.rs"
+      ],
+      "notes": "Missing Mode becomes explicit OneWay. Existing binding engine handles the resulting markup; Mode=Default requires explicit review.",
+      "tests": [
+        {
+          "name": "implicit_winui_binding_modes_are_one_way_even_for_two_way_target_properties",
+          "path": "src/Markup/FerroUI.Markup.Xaml.Loader/tests/winui_migration.rs"
+        },
+        {
+          "name": "object_element_binding_defaults_and_explicit_modes_are_preserved",
+          "path": "src/Markup/FerroUI.Markup.Xaml.Loader/tests/winui_migration.rs"
+        }
+      ]
+    },
+    "markup:ThemeResource": {
+      "disposition": "implemented-subset",
+      "implementation": [
+        "src/Markup/FerroUI.Markup.Xaml.Loader/winui/migration.rs"
+      ],
+      "notes": "Explicit for_winui_theme policy maps to live DynamicResource lookup. Ported dictionaries and theme scopes must be supplied; this is not proof of all WinUI theme semantics.",
+      "tests": [
+        {
+          "name": "theme_resources_require_explicit_policy_and_nested_lookups_are_recorded",
+          "path": "src/Markup/FerroUI.Markup.Xaml.Loader/tests/winui_migration.rs"
+        }
+      ]
+    },
+    "markup:x:Bind": {
+      "disposition": "implemented-subset",
+      "implementation": [
+        "src/Markup/FerroUI.Markup.Xaml.Loader/winui/migration.rs",
+        "src/Markup/FerroUI.Markup.Xaml/winui/binding.rs",
+        "src/Markup/FerroUI.Markup.Xaml/winui/bindings.rs",
+        "src/Markup/FerroUI.Markup.Xaml/winui/path_node.rs"
+      ],
+      "notes": "Rejected by default. Explicit PropertyPathsWithExplicitLifecycle policy preserves typed root/named-element sources, typed template item scopes, OneTime default, OneWay/TwoWay tracking, TextBox LostFocus writeback and explicit Initialize/Update/StopTracking lifecycle. Functions, events, casts, indexers, phased and deferred loading remain diagnosed. This is not complete compiled-binding parity.",
+      "tests": [
+        {
+          "name": "xbind_reports_root_source_semantics_even_with_an_alternative_xaml_prefix",
+          "path": "src/Markup/FerroUI.Markup.Xaml.Loader/tests/winui_migration.rs"
+        },
+        {
+          "name": "property_path_xbind_is_a_separate_extension_with_original_location_and_explicit_scope",
+          "path": "src/Markup/FerroUI.Markup.Xaml.Loader/tests/winui_migration.rs"
+        },
+        {
+          "name": "migrated_xbind_stays_dormant_until_the_host_initializes_the_document",
+          "path": "src/Markup/FerroUI.Markup.Xaml.Loader/tests/winui_migration.rs"
+        },
+        {
+          "name": "migrated_template_xbind_uses_each_deferred_instance_and_typed_item",
+          "path": "src/Markup/FerroUI.Markup.Xaml.Loader/tests/winui_migration.rs"
+        },
+        {
+          "name": "property_path_policy_still_rejects_functions_events_casts_indexers_and_unknown_parameters",
+          "path": "src/Markup/FerroUI.Markup.Xaml.Loader/tests/winui_migration.rs"
+        }
+      ]
+    },
+    "x:Class": {
+      "disposition": "implemented-subset",
+      "implementation": [
+        "src/Markup/FerroUI.Markup.Xaml.Loader/winui/migration.rs"
+      ],
+      "notes": "Application namespace mappings rewrite class identity explicitly. C# code-behind still requires a Rust port.",
+      "tests": [
+        {
+          "name": "custom_namespace_maps_update_class_identity_without_rewriting_user_text",
+          "path": "src/Markup/FerroUI.Markup.Xaml.Loader/tests/winui_migration.rs"
+        }
+      ]
+    },
+    "x:DataType": {
+      "disposition": "implemented-subset",
+      "implementation": [
+        "src/Markup/FerroUI.Markup.Xaml.Loader/winui/migration.rs"
+      ],
+      "notes": "Type references follow explicit alias mappings. In the opt-in property-path x:Bind policy, each template instance validates its source item against its resolved native data type. Other compiled/deferred expression contracts remain unsupported.",
+      "tests": [
+        {
+          "name": "aliases_resolve_type_references_in_templates_directives_and_type_extensions",
+          "path": "src/Markup/FerroUI.Markup.Xaml.Loader/tests/winui_migration.rs"
+        }
+      ]
+    },
+    "x:Load": {
+      "disposition": "rejected",
+      "implementation": [
+        "src/Markup/FerroUI.Markup.Xaml.Loader/winui/migration.rs"
+      ],
+      "notes": "Deferred creation and named-element lifetime require implementation; the migration pass reports the directive.",
+      "tests": [
+        {
+          "name": "unknown_state_lifecycle_and_localization_contracts_are_not_discarded",
+          "path": "src/Markup/FerroUI.Markup.Xaml.Loader/tests/winui_migration.rs"
+        }
+      ]
+    },
+    "x:Name": {
+      "disposition": "shared-syntax-candidate",
+      "implementation": [
+        "src/Markup/FerroUI.Markup.Xaml.Loader/winui/migration.rs"
+      ],
+      "notes": "Namescope spelling is preserved; named field/code-behind creation remains owned by the normal XAML compiler.",
+      "tests": [
+        {
+          "name": "event_handlers_and_entity_spelling_stay_exactly_as_authored",
+          "path": "src/Markup/FerroUI.Markup.Xaml.Loader/tests/winui_migration.rs"
+        }
+      ]
+    },
+    "x:Phase": {
+      "disposition": "rejected",
+      "implementation": [
+        "src/Markup/FerroUI.Markup.Xaml.Loader/winui/migration.rs"
+      ],
+      "notes": "Phased rendering lifecycle is not implemented by renaming this directive.",
+      "tests": []
+    }
+  }
+}

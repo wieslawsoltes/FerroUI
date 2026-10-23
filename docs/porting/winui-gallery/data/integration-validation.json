@@ -1,0 +1,641 @@
+{
+  "schema_version": 1,
+  "kind": "integration-validation",
+  "scope": "Measured integration checks only; no API/page status promotion, full-page certification, upstream pixel parity or platform UIA acceptance.",
+  "source": {
+    "pr_head": "83623379d8aeaa5a87d0417e7ce0823fc6fe9722",
+    "workspace_version": "0.4.0",
+    "merged_main": "cfa62aeb80f5d28990f3d4e4b9e5d1ad9d7fb640",
+    "prior_branch_checkpoint": "8d6c895e92ec69dcdb375abd5a30d57439ac4932",
+    "ci_merge_checkout": "864083407f12acf9cb845c72b0c7337c52b6141d",
+    "file_sha256": {
+      "Cargo.toml": "92cfa7d9bb38c50924a78410241820d39caa52a54b8a943c976f94cc3bb6513a",
+      "Cargo.lock": "be1a2f04863a943e498550dbb0b0d47e5b6385a4293f4b6d141d2aeb6d3fd38e",
+      "samples/WinUIGallery/Cargo.toml": "52ba757c4988a29c65a598df7155b6a9e9f246e561bc83ee7a17f078e55d8095",
+      ".github/workflows/winui-gallery.yml": "301ef1bd4f0e29fd29b57cf7cc151783729080724c40db365e47f0273a005710"
+    }
+  },
+  "lockfile_resolution": {
+    "cause": "Main advanced the workspace to 0.4.0 while the automatic merge retained winui-gallery 0.4.0-preview.1 in Cargo.lock. Locked native and rendering commands stopped before compilation.",
+    "fix": "Merge main cfa62aeb and align the Gallery lock entry with the inherited workspace version 0.4.0.",
+    "metadata_command": [
+      "cargo",
+      "metadata",
+      "--locked",
+      "--offline"
+    ],
+    "metadata_result": "passed"
+  },
+  "github_actions": {
+    "workflow_name": "WinUI and Gallery parity",
+    "initial_run": {
+      "run_id": 39771098146,
+      "url": "https://github.com/wieslawsoltes/FerroUI/actions/runs/39771098146",
+      "merge_checkout_prefix": "bf6e",
+      "conclusion": "failure",
+      "jobs": [
+        {
+          "name": "Pinned source comparison and port evidence",
+          "conclusion": "success"
+        },
+        {
+          "name": "Native control, XAML and Gallery contracts",
+          "job_id": 119798544574,
+          "url": "https://github.com/wieslawsoltes/FerroUI/actions/runs/39771098146/job/119798544574",
+          "conclusion": "failure",
+          "failed_phase": "locked dependency resolution before compilation"
+        },
+        {
+          "name": "Native Gallery rendering",
+          "conclusion": "failure",
+          "failed_phase": "locked dependency resolution before compilation"
+        }
+      ]
+    },
+    "replacement_run": {
+      "run_id": 39771549215,
+      "url": "https://github.com/wieslawsoltes/FerroUI/actions/runs/39771549215",
+      "conclusion": "success",
+      "jobs": [
+        {
+          "name": "Pinned source comparison and port evidence",
+          "job_id": 119800059449,
+          "url": "https://github.com/wieslawsoltes/FerroUI/actions/runs/39771549215/job/119800059449",
+          "conclusion": "success"
+        },
+        {
+          "name": "Native control, XAML and Gallery contracts",
+          "job_id": 119800059388,
+          "url": "https://github.com/wieslawsoltes/FerroUI/actions/runs/39771549215/job/119800059388",
+          "conclusion": "success"
+        },
+        {
+          "name": "Native Gallery rendering",
+          "job_id": 119800058965,
+          "url": "https://github.com/wieslawsoltes/FerroUI/actions/runs/39771549215/job/119800058965",
+          "conclusion": "success"
+        }
+      ]
+    },
+    "contracts": {
+      "rustc": "1.99.1 (58cf8f9c3 2026-10-13)",
+      "platform": "Linux x86_64",
+      "environment": {
+        "CARGO_BUILD_JOBS": "2",
+        "CARGO_INCREMENTAL": "0",
+        "CARGO_PROFILE_DEV_DEBUG": "0",
+        "CARGO_PROFILE_TEST_DEBUG": "0"
+      },
+      "log": "/tmp/ferroui-ci-contracts-83623379.log",
+      "log_sha256": "0fae86265d9a85985d21962cf87d117e878961367ec1e5fb7eb7a47aa3b59bc1",
+      "steps": [
+        {
+          "command": [
+            "cargo",
+            "test",
+            "--locked",
+            "-p",
+            "ferroui-controls",
+            "--features",
+            "testing",
+            "--test",
+            "winui_navigation",
+            "--test",
+            "winui_number_box",
+            "--test",
+            "winui_icons",
+            "--test",
+            "winui_radio_buttons",
+            "--test",
+            "winui_auto_suggest_box",
+            "--test",
+            "winui_icon_sources",
+            "--test",
+            "winui_info_bar",
+            "--test",
+            "winui_info_badge",
+            "--test",
+            "winui_progress_ring",
+            "--test",
+            "winui_rating_control"
+          ],
+          "exit_code": 0,
+          "result_lines": [
+            "test result: ok. 13 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.05s",
+            "test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.04s",
+            "test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.06s",
+            "test result: ok. 13 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.07s",
+            "test result: ok. 10 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.07s",
+            "test result: ok. 17 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.03s",
+            "test result: ok. 14 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.02s",
+            "test result: ok. 16 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.08s",
+            "test result: ok. 9 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.06s",
+            "test result: ok. 21 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.11s"
+          ],
+          "step": "native",
+          "test_counts": {
+            "passed": 127,
+            "failed": 0,
+            "ignored": 0,
+            "measured": 0,
+            "filtered_out": 0
+          }
+        },
+        {
+          "command": [
+            "cargo",
+            "test",
+            "--locked",
+            "-p",
+            "ferroui-base",
+            "--features",
+            "testing",
+            "--lib",
+            "ferro_object_tests_get_value"
+          ],
+          "exit_code": 0,
+          "result_lines": [
+            "test result: ok. 13 passed; 0 failed; 0 ignored; 0 measured; 4370 filtered out; finished in 0.00s"
+          ],
+          "step": "base-ci",
+          "test_counts": {
+            "passed": 13,
+            "failed": 0,
+            "ignored": 0,
+            "measured": 0,
+            "filtered_out": 4370
+          }
+        },
+        {
+          "command": [
+            "cargo",
+            "test",
+            "--locked",
+            "-p",
+            "ferroui-markup-xaml",
+            "--test",
+            "winui_bindings"
+          ],
+          "exit_code": 0,
+          "result_lines": [
+            "test result: ok. 13 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.04s"
+          ],
+          "step": "bindings",
+          "test_counts": {
+            "passed": 13,
+            "failed": 0,
+            "ignored": 0,
+            "measured": 0,
+            "filtered_out": 0
+          }
+        },
+        {
+          "command": [
+            "cargo",
+            "test",
+            "--locked",
+            "-p",
+            "ferroui-markup-xaml-loader",
+            "--test",
+            "winui_migration"
+          ],
+          "exit_code": 0,
+          "result_lines": [
+            "test result: ok. 41 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.06s"
+          ],
+          "step": "migration",
+          "test_counts": {
+            "passed": 41,
+            "failed": 0,
+            "ignored": 0,
+            "measured": 0,
+            "filtered_out": 0
+          }
+        },
+        {
+          "command": [
+            "cargo",
+            "test",
+            "--locked",
+            "-p",
+            "ferroui-markup-xaml-loader",
+            "--features",
+            "emitter",
+            "--test",
+            "winui_compiled"
+          ],
+          "exit_code": 0,
+          "result_lines": [
+            "test result: ok. 5 passed; 0 failed; 1 ignored; 0 measured; 0 filtered out; finished in 0.06s"
+          ],
+          "step": "compiled",
+          "test_counts": {
+            "passed": 5,
+            "failed": 0,
+            "ignored": 1,
+            "measured": 0,
+            "filtered_out": 0
+          }
+        },
+        {
+          "command": [
+            "cargo",
+            "test",
+            "--locked",
+            "-p",
+            "ferroui-markup-xaml",
+            "--lib",
+            "xaml_error_scope::"
+          ],
+          "exit_code": 0,
+          "result_lines": [
+            "test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 196 filtered out; finished in 0.00s"
+          ],
+          "step": "resources",
+          "test_counts": {
+            "passed": 3,
+            "failed": 0,
+            "ignored": 0,
+            "measured": 0,
+            "filtered_out": 196
+          }
+        },
+        {
+          "command": [
+            "cargo",
+            "test",
+            "--locked",
+            "-p",
+            "ferroui-themes-winui",
+            "--lib"
+          ],
+          "exit_code": 0,
+          "result_lines": [
+            "test result: ok. 294 passed; 0 failed; 2 ignored; 0 measured; 0 filtered out; finished in 31.07s"
+          ],
+          "step": "theme",
+          "test_counts": {
+            "passed": 294,
+            "failed": 0,
+            "ignored": 2,
+            "measured": 0,
+            "filtered_out": 0
+          }
+        },
+        {
+          "command": [
+            "cargo",
+            "test",
+            "--locked",
+            "-p",
+            "winui-gallery",
+            "--lib"
+          ],
+          "exit_code": 0,
+          "result_lines": [
+            "test result: ok. 42 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.73s"
+          ],
+          "step": "gallery",
+          "test_counts": {
+            "passed": 42,
+            "failed": 0,
+            "ignored": 0,
+            "measured": 0,
+            "filtered_out": 0
+          }
+        },
+        {
+          "command": [
+            "cargo",
+            "check",
+            "--locked",
+            "-p",
+            "ferroui-view"
+          ],
+          "exit_code": 0,
+          "step": "view"
+        }
+      ]
+    }
+  },
+  "local": {
+    "rustc": "1.99.0 (b940084d7 2026-09-28)",
+    "platform": "Linux x86_64",
+    "environment": {
+      "CARGO_BUILD_JOBS": "1",
+      "CARGO_INCREMENTAL": "0",
+      "CARGO_PROFILE_DEV_DEBUG": "0",
+      "CARGO_PROFILE_TEST_DEBUG": "0"
+    },
+    "results_source": "/tmp/ferroui-integration-results.json",
+    "results_source_sha256": "de896a0a0e5ece9b712fca1cc00ba5cfc0f8b08c42269e8a4801ccb3adebcc77",
+    "steps": [
+      {
+        "step": "native",
+        "exit_code": 0,
+        "log": "/tmp/ferroui-integration-native.log",
+        "log_sha256": "807b25b608787d14f6df4790c565eccba577b4f44062c8197af92924e5c34c02",
+        "results": [
+          "test result: ok. 13 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.05s",
+          "test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.04s",
+          "test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.11s",
+          "test result: ok. 13 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.09s",
+          "test result: ok. 10 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.10s",
+          "test result: ok. 17 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.03s",
+          "test result: ok. 14 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.02s",
+          "test result: ok. 16 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.08s",
+          "test result: ok. 9 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.05s",
+          "test result: ok. 21 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.06s"
+        ],
+        "command": [
+          "cargo",
+          "test",
+          "--locked",
+          "--offline",
+          "-p",
+          "ferroui-controls",
+          "--features",
+          "testing",
+          "--test",
+          "winui_navigation",
+          "--test",
+          "winui_number_box",
+          "--test",
+          "winui_icons",
+          "--test",
+          "winui_radio_buttons",
+          "--test",
+          "winui_auto_suggest_box",
+          "--test",
+          "winui_icon_sources",
+          "--test",
+          "winui_info_bar",
+          "--test",
+          "winui_info_badge",
+          "--test",
+          "winui_progress_ring",
+          "--test",
+          "winui_rating_control"
+        ],
+        "test_counts": {
+          "passed": 127,
+          "failed": 0,
+          "ignored": 0,
+          "measured": 0,
+          "filtered_out": 0
+        }
+      },
+      {
+        "step": "base-ci",
+        "exit_code": 0,
+        "log": "/tmp/ferroui-integration-base-ci.log",
+        "log_sha256": "98e9c55a617baa389dd18e1bfa20a8f176a03bde108c71483f2eb408448d5464",
+        "results": [
+          "test result: ok. 13 passed; 0 failed; 0 ignored; 0 measured; 4370 filtered out; finished in 0.01s"
+        ],
+        "command": [
+          "cargo",
+          "test",
+          "--locked",
+          "--offline",
+          "-p",
+          "ferroui-base",
+          "--features",
+          "testing",
+          "--lib",
+          "ferro_object_tests_get_value"
+        ],
+        "test_counts": {
+          "passed": 13,
+          "failed": 0,
+          "ignored": 0,
+          "measured": 0,
+          "filtered_out": 4370
+        }
+      },
+      {
+        "step": "base-full",
+        "exit_code": 0,
+        "log": "/tmp/ferroui-integration-base-full.log",
+        "log_sha256": "70b72831bcfcff3a5212bdce321e466cd07d76e75dccef4297a31acbd851ddda",
+        "results": [
+          "test result: ok. 4383 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.99s"
+        ],
+        "command": [
+          "cargo",
+          "test",
+          "--locked",
+          "--offline",
+          "-p",
+          "ferroui-base",
+          "--features",
+          "testing",
+          "--lib"
+        ],
+        "test_counts": {
+          "passed": 4383,
+          "failed": 0,
+          "ignored": 0,
+          "measured": 0,
+          "filtered_out": 0
+        }
+      },
+      {
+        "step": "bindings",
+        "exit_code": 0,
+        "log": "/tmp/ferroui-integration-bindings.log",
+        "log_sha256": "0324e87b70f9523c3eb8cda282ab5d8af1bfe6c2ec391c91cad83b35a654b36f",
+        "results": [
+          "test result: ok. 13 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.03s"
+        ],
+        "command": [
+          "cargo",
+          "test",
+          "--locked",
+          "--offline",
+          "-p",
+          "ferroui-markup-xaml",
+          "--test",
+          "winui_bindings"
+        ],
+        "test_counts": {
+          "passed": 13,
+          "failed": 0,
+          "ignored": 0,
+          "measured": 0,
+          "filtered_out": 0
+        }
+      },
+      {
+        "step": "desktop",
+        "exit_code": 0,
+        "log": "/tmp/ferroui-integration-desktop.log",
+        "log_sha256": "5f555fd55819887216016f6aa48e26bc58e6dcbb78a03def5bf111924525b1cb",
+        "results": [],
+        "command": [
+          "cargo",
+          "check",
+          "--locked",
+          "--offline",
+          "-p",
+          "winui-gallery",
+          "--features",
+          "desktop"
+        ]
+      }
+    ],
+    "pending_checks": [],
+    "note": "The native, Base and binding reruns used a fresh Cargo target. Remaining duplicate local contract suites were stopped after the complete CI contract job passed; their outcomes are recorded under GitHub Actions, not as local execution."
+  },
+  "source_comparison": {
+    "scanner_regression_tests_passed": 44,
+    "local_theme_path_case_tests_passed": 2,
+    "baseline_preserved": {
+      "namespaced_types": 3170,
+      "declared_member_names": 28435,
+      "registrations": 458
+    },
+    "additional_types": {
+      "total": 181,
+      "compatibility_branch": 82,
+      "merged_main": 99
+    }
+  },
+  "rendering": {
+    "rustc": "1.99.1 (58cf8f9c3 2026-10-13)",
+    "run_id": 39771549215,
+    "job_id": 119800058965,
+    "artifact_id": 12423085701,
+    "artifact_name": "winui-gallery-rendering",
+    "artifact_sha256": "104bf7614011e6980da2e98e738b63b89e089d9a30bb65e8f90bd087b9f3264c",
+    "artifact_bytes": 15282419,
+    "decoded_job_log": "/tmp/ferroui-ci-rendering-83623379.log",
+    "decoded_job_log_sha256": "7f74a1d8156ddd59766b260a849588b6b6925d57a5213644be45bcecb3d58e9f",
+    "validation_report": "/tmp/ferroui-ci-rendering-83623379-validation.json",
+    "validation_report_sha256": "6b5b98b2dec62f3240ba5bc90f28f2d74b2ad7895f445e3e5c8875516872ae5a",
+    "commands": [
+      [
+        "cargo",
+        "run",
+        "--locked",
+        "-p",
+        "winui-gallery",
+        "--features",
+        "capture",
+        "--bin",
+        "winui-gallery-capture",
+        "--",
+        "--all",
+        "--output-dir=gallery-captures/light"
+      ],
+      [
+        "cargo",
+        "run",
+        "--locked",
+        "-p",
+        "winui-gallery",
+        "--features",
+        "capture",
+        "--bin",
+        "winui-gallery-capture",
+        "--",
+        "--pages=NumberBox,RadioButton,AutoSuggestBox,InfoBar,InfoBadge,ProgressRing,RatingControl,CompactSizing",
+        "--dark",
+        "--query=Button",
+        "--output-dir=gallery-captures/dark"
+      ]
+    ],
+    "summary": {
+      "light": {
+        "frames": 126,
+        "distinct_png_hashes": 126,
+        "distinct_pixel_hashes": 126,
+        "all_1280x900": true,
+        "all_nonblank": true,
+        "all_opaque": true,
+        "log_ids_match": true
+      },
+      "dark": {
+        "frames": 8,
+        "distinct_png_hashes": 8,
+        "distinct_pixel_hashes": 8,
+        "all_1280x900": true,
+        "all_nonblank": true,
+        "all_opaque": true,
+        "log_ids_match": true
+      }
+    },
+    "reviewed_frames": [
+      {
+        "theme": "light",
+        "page_id": "InfoBadge",
+        "png_sha256": "0b4b09d2c18f2fe83f3609e1c4143225bbc1776c7e3b5aea9f57e522d1362d22",
+        "pixel_sha256": "07e7e04694c7b6a4253a31f4ed12bdd976b2b0d7e05f38d59426e7601084b659"
+      },
+      {
+        "theme": "light",
+        "page_id": "ProgressRing",
+        "png_sha256": "3adf38aa1961550a910c21655a0c36fd75f07600a2ec18cab2b12b4a5133307c",
+        "pixel_sha256": "d39875b3bea28333f47b73c09772f6348e2f919bfe3fdfffafca06fa60547ac0"
+      },
+      {
+        "theme": "light",
+        "page_id": "RatingControl",
+        "png_sha256": "5084fdce44c1cb9ed3367545389843bf9ab31823592770b57202188da9111c59",
+        "pixel_sha256": "a3f5a75e6de69f263b7cc8200120a5b3c0577307ae3834c279f11d2b37cc1cea"
+      },
+      {
+        "theme": "light",
+        "page_id": "CompactSizing",
+        "png_sha256": "5e19ba3f771e2d77152414b30a79ea8af65893b8150ca3fbe21eb5bdd7ccc5ec",
+        "pixel_sha256": "099d64c6183b9b53553fdc5562ad4366657ed6f461d3a796804e57eab8bdabcd"
+      },
+      {
+        "theme": "dark",
+        "page_id": "InfoBadge",
+        "png_sha256": "d515f3d3f207d5d77fad94498a92f60c97f681f8e48f92f759db9b4060e77e90",
+        "pixel_sha256": "fb6a24a811e3694a42229081218e26120b5d9a5ed6f9dcfb4406b9e6a332f4de"
+      },
+      {
+        "theme": "dark",
+        "page_id": "ProgressRing",
+        "png_sha256": "b41bdd0c50ba73fe6f18b004d895cb54389c596da19a761f30c74c5423354705",
+        "pixel_sha256": "d2d7ec38f65581c49b311b87415c0437a2b11b8f328cbd5724788d13c2d6dace"
+      },
+      {
+        "theme": "dark",
+        "page_id": "RatingControl",
+        "png_sha256": "ffd42ba03be96b9a72a404d57b8317c03d6ae6f1a3f0a6e5b02207d16ef1d934",
+        "pixel_sha256": "08dccea0fd3acafc621abb092cd02c833cc6a8b1d111cee8a80e4022ea3f12f5"
+      },
+      {
+        "theme": "dark",
+        "page_id": "CompactSizing",
+        "png_sha256": "025405e151d17339c6f2e92b009d72a17082bb8c5617af2218e1bf92de9d52b0",
+        "pixel_sha256": "052ebff76374250a6020abc05d3d0d464426df0ec9fdc72dd3e9828df25c488a"
+      }
+    ],
+    "review_observations": [
+      "InfoBadge, ProgressRing, RatingControl and CompactSizing were visually reviewed in both themes.",
+      "Rating stars and some icons show missing Segoe glyph boxes on this Linux host.",
+      "CompactSizing shows its initial Standard form; the screenshots do not exercise compact switching or field retention.",
+      "Static ProgressRing frames do not establish motion."
+    ]
+  },
+  "prior_evidence_unchanged": {
+    "native_execution_records": [
+      "docs/porting/winui-gallery/data/executions/native-controls-001.json",
+      "docs/porting/winui-gallery/data/executions/native-controls-002.json",
+      "docs/porting/winui-gallery/data/executions/native-controls-003.json"
+    ],
+    "retained_capture_source": "3c7ceb81dcc4948f374c05c4757c6cb72ed5de5d",
+    "capture_manifest": "docs/porting/winui-gallery/captures/capture-manifest.json",
+    "capture_manifest_sha256": "76dd5cff492d7a6ae943f16d7e2a60864cef0c4c0db731d8b53f17c7dbcb96f0",
+    "capture_scope": {
+      "dedicated_light_frames": 4,
+      "light_sweep_frames": 126,
+      "dark_sweep_frames": 9
+    },
+    "older_retained_frame_checkpoint": "d008845"
+  }
+}

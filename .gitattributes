@@ -1,2 +1,20 @@
 # Auto detect text files and perform LF normalization
 * text=auto
+
+# Deterministic reference inventories and reports; reviewed maps/evidence stay visible.
+docs/porting/winui-gallery/data/upstream-api.json linguist-generated=true
+docs/porting/winui-gallery/data/source-files.json linguist-generated=true
+docs/porting/winui-gallery/data/gallery-pages.json linguist-generated=true
+docs/porting/winui-gallery/data/gallery-usage.json linguist-generated=true
+docs/porting/winui-gallery/data/api-map.json linguist-generated=true
+docs/porting/winui-gallery/data/gallery-page-map.json linguist-generated=true
+docs/porting/winui-gallery/data/gallery-xaml-map.json linguist-generated=true
+docs/porting/winui-gallery/data/xaml-feature-map.json linguist-generated=true
+docs/porting/winui-gallery/data/summary.json linguist-generated=true
+docs/porting/winui-gallery/data/ferroui-api-baseline.json linguist-generated=true
+docs/porting/winui-gallery/data/REPORT.md linguist-generated=true
+samples/WinUIGallery/catalog_data.rs linguist-generated=true
+samples/WinUIGallery/cat_data.rs linguist-generated=true
+samples/WinUIGallery/assets_data.rs linguist-generated=true
+src/Markup/FerroUI.Markup.Xaml.Loader/winui/event_targets.rs linguist-generated=true
+src/Markup/FerroUI.Markup.Xaml.Loader/tests/fixtures/winui_bindings.generated.rs linguist-generated=true

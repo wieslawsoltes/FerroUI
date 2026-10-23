@@ -1,0 +1,9 @@
+<Grid xmlns="https://github.com/ferroui"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      RowDefinitions="Auto,*">
+  <TextBlock x:Name="CollectionImageErrors" TextWrapping="Wrap" MaxLines="3"
+             Margin="0,0,0,12" IsVisible="False" />
+  <ScrollViewer x:Name="CollectionScroll" Grid.Row="1">
+    <StackPanel x:Name="CollectionItems" Spacing="12" />
+  </ScrollViewer>
+</Grid>

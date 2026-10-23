@@ -22,6 +22,28 @@ use ferroui_controls::{ContentControl, Control, NativeMenuBar, TopLevel, UserCon
 use ferroui_markup_xaml::markup_extensions::DynamicResourceExtension;
 use std::rc::Rc;
 
+/// These controls supply audited, style-replaceable templates in property metadata.
+/// Keep the list explicit: inheriting ContentControl's fallback must not hide a missing theme.
+pub(super) fn uses_native_default_template(control: &TypeInfo) -> bool {
+    [
+        ferroui_controls::AutoSuggestBox::TYPE,
+        ferroui_controls::FontIcon::TYPE,
+        ferroui_controls::InfoBadge::TYPE,
+        ferroui_controls::InfoBar::TYPE,
+        ferroui_controls::NavigationView::TYPE,
+        ferroui_controls::NavigationViewItem::TYPE,
+        ferroui_controls::NavigationViewItemHeader::TYPE,
+        ferroui_controls::NavigationViewItemSeparator::TYPE,
+        ferroui_controls::NumberBox::TYPE,
+        ferroui_controls::ProgressRing::TYPE,
+        ferroui_controls::RadioButtons::TYPE,
+        ferroui_controls::RatingControl::TYPE,
+        ferroui_controls::SymbolIcon::TYPE,
+    ]
+    .iter()
+    .any(|candidate| std::ptr::eq(*candidate, control))
+}
+
 fn default_control_themes(theme: &Ref<crate::FluentTheme>) -> Vec<(ResourceKey, Ref<ControlTheme>)> {
     enumerate_resources(&theme.as_style())
         .into_iter()
@@ -98,10 +120,33 @@ fn should_define_control_theme_for_built_in_templated_controls() {
         .collect();
 
     assert!(templated_controls.len() > 1);
-    // Every templated control has a control theme, except the ones whose document is left out of
-    // the theme for now (`Controls/excluded.txt`); a control with a theme is not in that list.
+    // Every ordinary templated control has a control theme, except the ones whose document is
+    // left out for now (`Controls/excluded.txt`); a control with a theme is not in that list.
+    // The audited controls below supply native templates in property metadata. Verify that
+    // the fallback builds a visual and can still be replaced by the application theme.
     for control in &templated_controls {
         let themed = default_control_themes.iter().any(|themed| std::ptr::eq(*themed, *control));
+        if !themed && uses_native_default_template(control) {
+            assert!(
+                TemplatedControl::template_property().get_default_value(control).is_some(),
+                "{} has neither a control theme nor a metadata template",
+                control.full_name()
+            );
+            let instance = control.create_instance().expect("a default constructor");
+            let templated = instance.cast::<TemplatedControl>().expect("a templated control");
+            assert!(
+                !templated.has_local_value(TemplatedControl::template_property()),
+                "{} fallback template must remain replaceable through styles",
+                control.full_name()
+            );
+            templated.apply_template();
+            assert!(
+                templated.visual_children_count() > 0,
+                "{} metadata template did not build a native visual",
+                control.full_name()
+            );
+            continue;
+        }
         let excluded = crate::assets::is_excluded(&format!("/Controls/{}.xaml", control.name()));
         assert_eq!(!excluded, themed, "{}", control.name());
     }

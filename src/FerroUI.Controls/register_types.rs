@@ -45,6 +45,7 @@ const NAMESPACES: &[(&str, &str)] = &[
     ("ferroui_controls::metadata", "FerroUI.Controls.Metadata"),
     ("ferroui_controls::mixins", "FerroUI.Controls.Mixins"),
     ("ferroui_controls::notifications", "FerroUI.Controls.Notifications"),
+    ("ferroui_controls::navigation", "FerroUI.Navigation"),
     ("ferroui_controls::numeric_up_down", "FerroUI.Controls"),
     ("ferroui_controls::calendar", "FerroUI.Controls"),
     ("ferroui_controls::calendar::calendar_blackout_dates_collection", "FerroUI.Controls.Primitives"),
@@ -121,10 +122,51 @@ pub fn register_types() {
         crate::rust_paths::register_rust_paths();
         MarkupAssembly::register(&ASSEMBLY);
         crate::markup_types::register();
+        crate::navigation::register_markup_types();
+        crate::navigation_view_events::register_markup_types();
+        crate::auto_suggest_box::register_markup_types();
+        crate::info_bar::register_markup();
     });
 }
 
 const TYPES: &[&TypeInfo] = types![
+    // Native frame navigation and additional controls.
+    crate::AutoSuggestBox,
+    crate::automation::peers::AutoSuggestBoxAutomationPeer,
+    crate::FramePage,
+    crate::Frame,
+    crate::NavigationView,
+    crate::automation::peers::NavigationViewAutomationPeer,
+    crate::NavigationViewItemBase,
+    crate::NavigationViewItem,
+    crate::NavigationViewItemHeader,
+    crate::NavigationViewItemSeparator,
+    crate::automation::peers::NavigationViewItemAutomationPeer,
+    crate::navigation::PageStackEntry,
+    crate::NumberBox,
+    crate::automation::peers::NumberBoxAutomationPeer,
+    crate::FontIcon,
+    crate::SymbolIcon,
+    crate::RadioButtons,
+    crate::automation::peers::RadioButtonsAutomationPeer,
+    crate::IconSource,
+    crate::FontIconSource,
+    crate::SymbolIconSource,
+    crate::PathIconSource,
+    crate::InfoBar,
+    crate::primitives::InfoBarPanel,
+    crate::primitives::InfoBarTemplateSettings,
+    crate::automation::peers::InfoBarAutomationPeer,
+    crate::InfoBadge,
+    crate::primitives::InfoBadgeTemplateSettings,
+    crate::ProgressRing,
+    crate::primitives::ProgressRingTemplateSettings,
+    crate::automation::peers::ProgressRingAutomationPeer,
+    crate::RatingControl,
+    crate::automation::peers::RatingControlAutomationPeer,
+    crate::RatingItemInfo,
+    crate::RatingItemFontInfo,
+    crate::RatingItemImageInfo,
     // FerroUI
     crate::application::Application,
     // FerroUI.Animation

@@ -1,0 +1,1536 @@
+{
+  "actual_checkout": "37ea12521e7b3559917be812cc47ef7ec51b8f79",
+  "actual_tree": "0d7846902cb409d3e2469588d28f52924e894f88",
+  "artifact": {
+    "bytes": 26085388,
+    "created_at": "2026-10-23T11:47:41Z",
+    "expires_at": "2027-01-21T11:39:03Z",
+    "id": 12499710835,
+    "name": "winui-gallery-rendering",
+    "sha256": "195bd6fe80d3ce4060875c36283e109a7892864b839116915d396be367b6c3d1",
+    "url": "https://github.com/wieslawsoltes/FerroUI/actions/runs/39947560966/artifacts/12499710835"
+  },
+  "category_counts": {
+    "all_catalog_light": 126,
+    "navigation_named": 16,
+    "new_composition_named": 28,
+    "representative_dark": 13
+  },
+  "dark_count": 35,
+  "dimensions": [
+    1280,
+    900
+  ],
+  "expected_paths_exact_match": true,
+  "expected_source_sha256": {
+    ".github/workflows/winui-gallery.yml": "6fa0e62cab0d133e755bf0299033f1d6634630bd92567114fdcc4e1ffe8c0c8a",
+    "samples/WinUIGallery/catalog_data.rs": "451aa227d421cab6eae1a76573ed5c32a8ac55bed6965041bbdffaa850d26416"
+  },
+  "files": [
+    {
+      "bytes": 144651,
+      "height": 900,
+      "mode": "RGB",
+      "path": "dark/AutoSuggestBox.png",
+      "sha256": "7c1a8f46eae3b38c286acfac6ba5fba3dc368317eefaa1fcee2905f980d781bc",
+      "width": 1280
+    },
+    {
+      "bytes": 118084,
+      "height": 900,
+      "mode": "RGB",
+      "path": "dark/ColorPicker--ColorPickerExample1.png",
+      "sha256": "8178043cdf0fe849aeed862bb60f3490ce22f8eabececd6d051b6db443b48e97",
+      "width": 1280
+    },
+    {
+      "bytes": 117352,
+      "height": 900,
+      "mode": "RGB",
+      "path": "dark/ColorPicker.png",
+      "sha256": "51359bb5e11688082c96e4dfb589175738b593b78163436586aad064def7d869",
+      "width": 1280
+    },
+    {
+      "bytes": 126008,
+      "height": 900,
+      "mode": "RGB",
+      "path": "dark/CompactSizing.png",
+      "sha256": "3dc97b483527c50e5fc59ac16f2121f7b0c8db1e375e8f592143e0e6fa79c1cb",
+      "width": 1280
+    },
+    {
+      "bytes": 517759,
+      "height": 900,
+      "mode": "RGB",
+      "path": "dark/ConnectedAnimation--ConnectedCardFrame.png",
+      "sha256": "3239e6d32fbb17e98b9d0138fa5b8eb7825418bcfb703269024d46606ae07f24",
+      "width": 1280
+    },
+    {
+      "bytes": 390448,
+      "height": 900,
+      "mode": "RGB",
+      "path": "dark/ConnectedAnimation--ConnectedCollectionFrame.png",
+      "sha256": "b2728f70e4b649b00f3083d801a268b5dc51b73d990b8a40724d6751e943ca9a",
+      "width": 1280
+    },
+    {
+      "bytes": 106044,
+      "height": 900,
+      "mode": "RGB",
+      "path": "dark/ConnectedAnimation--ConnectedContentFrame.png",
+      "sha256": "015b18596b99be60c602dfa65f473417a9d13a8a017ec85111c19fb357415086",
+      "width": 1280
+    },
+    {
+      "bytes": 501821,
+      "height": 900,
+      "mode": "RGB",
+      "path": "dark/ConnectedAnimation--ConnectedRepeaterFrame.png",
+      "sha256": "fa20466b64eaa7d1ad1774de28f29efc59c59cd9c546ed3434b70b777e96c971",
+      "width": 1280
+    },
+    {
+      "bytes": 517288,
+      "height": 900,
+      "mode": "RGB",
+      "path": "dark/ConnectedAnimation.png",
+      "sha256": "a3ec6a7b810383a58b1cbec5b0909669e2bce15a8210d9f0a69cf57479cf2fd5",
+      "width": 1280
+    },
+    {
+      "bytes": 338952,
+      "height": 900,
+      "mode": "RGB",
+      "path": "dark/FlipView--FlipViewExample1.png",
+      "sha256": "fb3e4f4d8d1aa5f7c5ec87804995fec9794323bcd868c5ead005c6c3549e488b",
+      "width": 1280
+    },
+    {
+      "bytes": 335763,
+      "height": 900,
+      "mode": "RGB",
+      "path": "dark/FlipView--FlipViewExample2.png",
+      "sha256": "3c02cd4b82da3096779622a42ed85014af7fbff504e47cd1324b570f89c6dd80",
+      "width": 1280
+    },
+    {
+      "bytes": 454626,
+      "height": 900,
+      "mode": "RGB",
+      "path": "dark/FlipView--FlipViewExample3.png",
+      "sha256": "4eb0649773fa481eda07a850684779f45d27b2b10ae6c6ee28c8b2eca1860c55",
+      "width": 1280
+    },
+    {
+      "bytes": 356582,
+      "height": 900,
+      "mode": "RGB",
+      "path": "dark/FlipView.png",
+      "sha256": "e05af6dcc8e556a154dcde96c780ebbf7f5837c884192d967235c2f0d57c9023",
+      "width": 1280
+    },
+    {
+      "bytes": 167970,
+      "height": 900,
+      "mode": "RGB",
+      "path": "dark/Image--ImageExample1.png",
+      "sha256": "cffa7da4368c1f49e05eb9eea50d542a1e8982c4494ac49d7a08c18ef10276b4",
+      "width": 1280
+    },
+    {
+      "bytes": 167970,
+      "height": 900,
+      "mode": "RGB",
+      "path": "dark/Image--ImageExample2.png",
+      "sha256": "cffa7da4368c1f49e05eb9eea50d542a1e8982c4494ac49d7a08c18ef10276b4",
+      "width": 1280
+    },
+    {
+      "bytes": 165471,
+      "height": 900,
+      "mode": "RGB",
+      "path": "dark/Image--ImageExample3.png",
+      "sha256": "cf96540428f22c7bcfc1dfe6cae0958637290f666d55f41159e6b29f0ced2424",
+      "width": 1280
+    },
+    {
+      "bytes": 117786,
+      "height": 900,
+      "mode": "RGB",
+      "path": "dark/Image--ImageExample4.png",
+      "sha256": "af0cd1fc2ee8665ab26d2d61a088a66ccf85c7ae621aacade4439456f23fd4ef",
+      "width": 1280
+    },
+    {
+      "bytes": 98655,
+      "height": 900,
+      "mode": "RGB",
+      "path": "dark/Image--ImageExample5.png",
+      "sha256": "6fe0aeb78e8008373e2c4a008ecf9d04243fecf19c873c5ad96840ac20c7fad2",
+      "width": 1280
+    },
+    {
+      "bytes": 130135,
+      "height": 900,
+      "mode": "RGB",
+      "path": "dark/Image--ImageExample6.png",
+      "sha256": "8f5baf9672eda9e778165f4c40378353f029e5283c208a8dbd83b18baee13d60",
+      "width": 1280
+    },
+    {
+      "bytes": 102115,
+      "height": 900,
+      "mode": "RGB",
+      "path": "dark/Image.png",
+      "sha256": "b47cc0ee8858bf62403d03a9b230e41d826c399ba9c4c00083b339bd804ad55f",
+      "width": 1280
+    },
+    {
+      "bytes": 115269,
+      "height": 900,
+      "mode": "RGB",
+      "path": "dark/InfoBadge.png",
+      "sha256": "254e52ae7146f8864d34201628fc08ec4ef8ccce8c4603fa2dbfb13d8df0eeeb",
+      "width": 1280
+    },
+    {
+      "bytes": 154954,
+      "height": 900,
+      "mode": "RGB",
+      "path": "dark/InfoBar.png",
+      "sha256": "be7cc836e15727a2a9bd673c4e1c3eca2bc8c70ed29e63aa4eea0b1154a27391",
+      "width": 1280
+    },
+    {
+      "bytes": 119170,
+      "height": 900,
+      "mode": "RGB",
+      "path": "dark/NavigationView--nvSample.png",
+      "sha256": "09cdf6a6903249c96d7841be18b8d7df0ea2b027e198549bbaf1c9339737e29b",
+      "width": 1280
+    },
+    {
+      "bytes": 110489,
+      "height": 900,
+      "mode": "RGB",
+      "path": "dark/NavigationView--nvSample2.png",
+      "sha256": "8d6b9b49be11e781cf9efdea6c4382f9a785e806e68273cf563a0d5edada526e",
+      "width": 1280
+    },
+    {
+      "bytes": 159808,
+      "height": 900,
+      "mode": "RGB",
+      "path": "dark/NavigationView--nvSample4.png",
+      "sha256": "b239c3cd3414c732cb8303b78b7d7310feef40880a3b92ba67146442ecc01a1b",
+      "width": 1280
+    },
+    {
+      "bytes": 110647,
+      "height": 900,
+      "mode": "RGB",
+      "path": "dark/NavigationView--nvSample5.png",
+      "sha256": "b3f09cff036b1ba0f0b995ab04410beef7a1f9da753efe2ed8d6d060b31b39d3",
+      "width": 1280
+    },
+    {
+      "bytes": 94935,
+      "height": 900,
+      "mode": "RGB",
+      "path": "dark/NavigationView--nvSample6.png",
+      "sha256": "b54b41cfd29a0af23b312c7bc43200dbef6097200e0e1eb4d140755b94a307f4",
+      "width": 1280
+    },
+    {
+      "bytes": 117571,
+      "height": 900,
+      "mode": "RGB",
+      "path": "dark/NavigationView--nvSample7.png",
+      "sha256": "954b9fe21f4d54fb4b8968867bd0b3c12d2064308a7337184e9b31d3c6bcd3e7",
+      "width": 1280
+    },
+    {
+      "bytes": 145901,
+      "height": 900,
+      "mode": "RGB",
+      "path": "dark/NavigationView--nvSample8.png",
+      "sha256": "194491a6bdf2154639e2e3413739f6917f27b2542ad3bc1035b95345d2a50e13",
+      "width": 1280
+    },
+    {
+      "bytes": 134477,
+      "height": 900,
+      "mode": "RGB",
+      "path": "dark/NavigationView--nvSample9.png",
+      "sha256": "8e34a7fd0999c71e958d7ef2b86fea6e642ccac325956a70db3cffbe16edac33",
+      "width": 1280
+    },
+    {
+      "bytes": 155069,
+      "height": 900,
+      "mode": "RGB",
+      "path": "dark/NavigationView.png",
+      "sha256": "d72b02ceb9ecaabecc2a875eeaf9fad7cbdd8b40b0b4338253155b16a4c48456",
+      "width": 1280
+    },
+    {
+      "bytes": 127047,
+      "height": 900,
+      "mode": "RGB",
+      "path": "dark/NumberBox.png",
+      "sha256": "64753fc64a31b16bc714bef029db57dd9ca46825501f3fee352b4176e0280bcf",
+      "width": 1280
+    },
+    {
+      "bytes": 134315,
+      "height": 900,
+      "mode": "RGB",
+      "path": "dark/ProgressRing.png",
+      "sha256": "754141f282d9e342cd758c47d43eab646aa7567a1a3855703807e2da7732f37a",
+      "width": 1280
+    },
+    {
+      "bytes": 118463,
+      "height": 900,
+      "mode": "RGB",
+      "path": "dark/RadioButton.png",
+      "sha256": "d6620cfd15afe8b59dd0cd1370bcade78d0c3cf25c021fc2c62e83329a8c66a1",
+      "width": 1280
+    },
+    {
+      "bytes": 132116,
+      "height": 900,
+      "mode": "RGB",
+      "path": "dark/RatingControl.png",
+      "sha256": "904526ad2261958e8ac969cdfb679ed987172f31642c918bfe56bee21a6fe101",
+      "width": 1280
+    },
+    {
+      "bytes": 131453,
+      "height": 900,
+      "mode": "RGB",
+      "path": "light/AccessibilityColorContrast.png",
+      "sha256": "ab0ff27366d4e371c1dd6ca5f120defcf16c77bf5aaa60a7e3bddca2a6735ce1",
+      "width": 1280
+    },
+    {
+      "bytes": 129919,
+      "height": 900,
+      "mode": "RGB",
+      "path": "light/AccessibilityKeyboard.png",
+      "sha256": "fc3627b935c320aa60d48c83905236746e60b04481c063d022eff436f8e83373",
+      "width": 1280
+    },
+    {
+      "bytes": 126357,
+      "height": 900,
+      "mode": "RGB",
+      "path": "light/AccessibilityScreenReader.png",
+      "sha256": "577d8d1c5d31c9fe056bfac1a869dad2797320d07cf8bf237d34ebc51416af45",
+      "width": 1280
+    },
+    {
+      "bytes": 125956,
+      "height": 900,
+      "mode": "RGB",
+      "path": "light/Acrylic.png",
+      "sha256": "c64098285abced5e88b09eb2a234e98c1265f3c2228a1133fb5e2aac99cbf6ef",
+      "width": 1280
+    },
+    {
+      "bytes": 127636,
+      "height": 900,
+      "mode": "RGB",
+      "path": "light/AnimatedIcon.png",
+      "sha256": "cf4e8237671b8dd8456b425a13639f81a1282480fe4de4e446ba28bdd9923857",
+      "width": 1280
+    },
+    {
+      "bytes": 106350,
+      "height": 900,
+      "mode": "RGB",
+      "path": "light/AnimatedVisualPlayer.png",
+      "sha256": "39bd9aaecd4435c20fee9c6bc9f6a90cd768389f2c05992c16b41444955b5a84",
+      "width": 1280
+    },
+    {
+      "bytes": 109880,
+      "height": 900,
+      "mode": "RGB",
+      "path": "light/AnnotatedScrollBar.png",
+      "sha256": "5c8001370c72a39659d966ea82aa57ce317757ca3e25509c2644e4f34f74a174",
+      "width": 1280
+    },
+    {
+      "bytes": 117282,
+      "height": 900,
+      "mode": "RGB",
+      "path": "light/AppBarButton.png",
+      "sha256": "75fd4f01a25bab11804c894693ef94008150375836240eaadafceef9e6d3848c",
+      "width": 1280
+    },
+    {
+      "bytes": 116732,
+      "height": 900,
+      "mode": "RGB",
+      "path": "light/AppBarSeparator.png",
+      "sha256": "dd8f536a2f894806ee38e30893011d7dd0446cf333e5b60c0d49c389c0aa0a4a",
+      "width": 1280
+    },
+    {
+      "bytes": 126069,
+      "height": 900,
+      "mode": "RGB",
+      "path": "light/AppBarToggleButton.png",
+      "sha256": "49bb217c582854f86a556b288668b480602c475b1d3ff350041844049de5f7ed",
+      "width": 1280
+    },
+    {
+      "bytes": 126152,
+      "height": 900,
+      "mode": "RGB",
+      "path": "light/AppNotification.png",
+      "sha256": "0c398b3e3393c22c0b827477c227792c2a36651a962ec4c8ec0b2659f218756c",
+      "width": 1280
+    },
+    {
+      "bytes": 132413,
+      "height": 900,
+      "mode": "RGB",
+      "path": "light/AppWindow.png",
+      "sha256": "56b138ec83d2693e02f68eda35c74224d8a075289c91835f23765cc6866f44bb",
+      "width": 1280
+    },
+    {
+      "bytes": 118924,
+      "height": 900,
+      "mode": "RGB",
+      "path": "light/AppWindowTitleBar.png",
+      "sha256": "44955290df9ba056a3c451ddeeaf817ab53324f9b94089b2f5f7e35e17f340ed",
+      "width": 1280
+    },
+    {
+      "bytes": 140276,
+      "height": 900,
+      "mode": "RGB",
+      "path": "light/AutoSuggestBox.png",
+      "sha256": "4f646a1da885d0bf009728063b15e6d0daf5a6bedec701c2235692a534abe92b",
+      "width": 1280
+    },
+    {
+      "bytes": 110078,
+      "height": 900,
+      "mode": "RGB",
+      "path": "light/BadgeNotificationManager.png",
+      "sha256": "2954f242cb55b07faffed94de8b6a7aab379fcb7e3466144b5f29ab3456cb072",
+      "width": 1280
+    },
+    {
+      "bytes": 123360,
+      "height": 900,
+      "mode": "RGB",
+      "path": "light/Binding.png",
+      "sha256": "41e507b54f472e87f269453b9fb49cb7e55d6b2080a973d00caec58f7b11d6b1",
+      "width": 1280
+    },
+    {
+      "bytes": 109664,
+      "height": 900,
+      "mode": "RGB",
+      "path": "light/Border.png",
+      "sha256": "0150a02d178a38940cfc0fbd1e43ad8b49226880c99bb12637f1d43ac1e0f66a",
+      "width": 1280
+    },
+    {
+      "bytes": 129745,
+      "height": 900,
+      "mode": "RGB",
+      "path": "light/BreadcrumbBar.png",
+      "sha256": "e4d62e51322709013930e9de0701393f39e41040933a5acb14fc74d9e84424da",
+      "width": 1280
+    },
+    {
+      "bytes": 127960,
+      "height": 900,
+      "mode": "RGB",
+      "path": "light/Button.png",
+      "sha256": "98cbafcab83c767b1764c31b6a005812d4714e6cc741720182e3c51af7a296a9",
+      "width": 1280
+    },
+    {
+      "bytes": 117635,
+      "height": 900,
+      "mode": "RGB",
+      "path": "light/CalendarDatePicker.png",
+      "sha256": "bbec71908bab5a38c343926027fff21355d05f7898504ac64d24ab31f8182fdb",
+      "width": 1280
+    },
+    {
+      "bytes": 116764,
+      "height": 900,
+      "mode": "RGB",
+      "path": "light/CalendarView.png",
+      "sha256": "89ef090f7da20223e279dd04e68295c8661159a4fee9ed3cbcde678ad4a2d272",
+      "width": 1280
+    },
+    {
+      "bytes": 108790,
+      "height": 900,
+      "mode": "RGB",
+      "path": "light/Canvas.png",
+      "sha256": "d5e2aa4b0c6d0f38583ea8589ba0a67d1cd409852cd6c33ff495781be56402f5",
+      "width": 1280
+    },
+    {
+      "bytes": 105978,
+      "height": 900,
+      "mode": "RGB",
+      "path": "light/CaptureElementPreview.png",
+      "sha256": "c620ad75db31d9780781cf01a4b495fa230dccd3329520f344596b3b4c676e4a",
+      "width": 1280
+    },
+    {
+      "bytes": 124759,
+      "height": 900,
+      "mode": "RGB",
+      "path": "light/Chart.png",
+      "sha256": "cd704c4157541234fce6a811ba68537d98aec785db8ec2e27a26627892433a3c",
+      "width": 1280
+    },
+    {
+      "bytes": 118669,
+      "height": 900,
+      "mode": "RGB",
+      "path": "light/CheckBox.png",
+      "sha256": "b608919ebed0236218d642a97c5eaa8c75aacef207a369e83912933390f2a7b7",
+      "width": 1280
+    },
+    {
+      "bytes": 131546,
+      "height": 900,
+      "mode": "RGB",
+      "path": "light/Clipboard.png",
+      "sha256": "691cff68f1319d1c0ed13155189e24a1cf5e320a0c6fc1095bdc2b57b122e377",
+      "width": 1280
+    },
+    {
+      "bytes": 111829,
+      "height": 900,
+      "mode": "RGB",
+      "path": "light/Color.png",
+      "sha256": "135119f564e624d68121b0ac2c21f2e8f0f9ebb3d8366d96703cbe5fc410751b",
+      "width": 1280
+    },
+    {
+      "bytes": 117955,
+      "height": 900,
+      "mode": "RGB",
+      "path": "light/ColorPicker--ColorPickerExample1.png",
+      "sha256": "a497c26064798f62d508fbc292f53fb5cd531f495bafbdb9b134646b2d2a5486",
+      "width": 1280
+    },
+    {
+      "bytes": 136532,
+      "height": 900,
+      "mode": "RGB",
+      "path": "light/ColorPicker.png",
+      "sha256": "b130062ecb436acf742806d34a8007c6b0b631c9cfac9eb0c2e60e731f5f6553",
+      "width": 1280
+    },
+    {
+      "bytes": 122604,
+      "height": 900,
+      "mode": "RGB",
+      "path": "light/ComboBox.png",
+      "sha256": "3f137c5ef418ae5a4077534063f3fb6a4ada458ecd96f57be313837fbf6f811d",
+      "width": 1280
+    },
+    {
+      "bytes": 126585,
+      "height": 900,
+      "mode": "RGB",
+      "path": "light/CommandBar.png",
+      "sha256": "28b9a5bbf9adef3f5c856af52dc0022daebc60c6322d7c5c828629e7e35ed4fb",
+      "width": 1280
+    },
+    {
+      "bytes": 110077,
+      "height": 900,
+      "mode": "RGB",
+      "path": "light/CommandBarFlyout.png",
+      "sha256": "72bdb9d457c606ce7b68735d88c313b598123eef7c93b55195c4fb9680488474",
+      "width": 1280
+    },
+    {
+      "bytes": 126447,
+      "height": 900,
+      "mode": "RGB",
+      "path": "light/CompactSizing.png",
+      "sha256": "c216ce776249ca0a8cb8e81b6e682422f5d6e757efd3408797d51a6fb4b2848c",
+      "width": 1280
+    },
+    {
+      "bytes": 517970,
+      "height": 900,
+      "mode": "RGB",
+      "path": "light/ConnectedAnimation--ConnectedCardFrame.png",
+      "sha256": "d9ce8f1ce706151837f2d47e96bae73731e3acfa01355d41cf2a24dd4d5747e5",
+      "width": 1280
+    },
+    {
+      "bytes": 392599,
+      "height": 900,
+      "mode": "RGB",
+      "path": "light/ConnectedAnimation--ConnectedCollectionFrame.png",
+      "sha256": "13df91bd2af4574176ef15e9c7a5da1a923d1eca4bd910791c4d3a2e2880fa6c",
+      "width": 1280
+    },
+    {
+      "bytes": 106257,
+      "height": 900,
+      "mode": "RGB",
+      "path": "light/ConnectedAnimation--ConnectedContentFrame.png",
+      "sha256": "404b6099d9547968ee10ea5622ff2d593d8d5631cf48fc103601a3f7f9934105",
+      "width": 1280
+    },
+    {
+      "bytes": 501535,
+      "height": 900,
+      "mode": "RGB",
+      "path": "light/ConnectedAnimation--ConnectedRepeaterFrame.png",
+      "sha256": "87a58919c421cb318d7bcf9b45ec323ab32857ce69e4ef034b51aba10b2d1cae",
+      "width": 1280
+    },
+    {
+      "bytes": 518018,
+      "height": 900,
+      "mode": "RGB",
+      "path": "light/ConnectedAnimation.png",
+      "sha256": "7ad6e32dadadfbe934282bc1c05abd96d905d7ad2d69377cae48e251e56dd923",
+      "width": 1280
+    },
+    {
+      "bytes": 125592,
+      "height": 900,
+      "mode": "RGB",
+      "path": "light/ContentDialog.png",
+      "sha256": "07450a3ce4b9dba8ef847fcb8c8aff4c1516ff30a58901a8855df2ca74ef2ccb",
+      "width": 1280
+    },
+    {
+      "bytes": 91870,
+      "height": 900,
+      "mode": "RGB",
+      "path": "light/ContentIsland.png",
+      "sha256": "3b2d9bed7e21ed26fcbca8aafb03e03fa9fb6bd4956047c0c7c7b84618900f99",
+      "width": 1280
+    },
+    {
+      "bytes": 131089,
+      "height": 900,
+      "mode": "RGB",
+      "path": "light/CustomUserControls.png",
+      "sha256": "b7eba03fb607b321986d21e6e8fa654e84c988e65ec1af78fb2522a72291e5c5",
+      "width": 1280
+    },
+    {
+      "bytes": 129925,
+      "height": 900,
+      "mode": "RGB",
+      "path": "light/CustomXamlConditionals.png",
+      "sha256": "150d51847ecc31b7df5fe996cbf17ecc9547db0bcd685c6a544e36f19c8365ae",
+      "width": 1280
+    },
+    {
+      "bytes": 120888,
+      "height": 900,
+      "mode": "RGB",
+      "path": "light/DatePicker.png",
+      "sha256": "77fce83395201c2d7acf3cf6d4ae75c6430b2c3088622d87d46b500bddd0176e",
+      "width": 1280
+    },
+    {
+      "bytes": 129465,
+      "height": 900,
+      "mode": "RGB",
+      "path": "light/DropDownButton.png",
+      "sha256": "6a648d04f8fea028b8d438be506d479f5020c5bdba9da035adf3ae957147dbdf",
+      "width": 1280
+    },
+    {
+      "bytes": 130921,
+      "height": 900,
+      "mode": "RGB",
+      "path": "light/EasingFunction.png",
+      "sha256": "076ea34460ddca652d08d314f565f1ed7d19e06032b4b6b2e6d0e9df367f62e7",
+      "width": 1280
+    },
+    {
+      "bytes": 120778,
+      "height": 900,
+      "mode": "RGB",
+      "path": "light/Expander.png",
+      "sha256": "8bb78c1d8b7d26e3957b3277aa64b40dacba154e3419a9fccfd8248a920dae24",
+      "width": 1280
+    },
+    {
+      "bytes": 338741,
+      "height": 900,
+      "mode": "RGB",
+      "path": "light/FlipView--FlipViewExample1.png",
+      "sha256": "4357bcfb26bda68778977ba80e76955b34184664056ccdcafec553923de8ce21",
+      "width": 1280
+    },
+    {
+      "bytes": 336033,
+      "height": 900,
+      "mode": "RGB",
+      "path": "light/FlipView--FlipViewExample2.png",
+      "sha256": "aa4889cd96a4dbc326bd9a7c507863b6651ce07f403d843d368d00f4d837cc2c",
+      "width": 1280
+    },
+    {
+      "bytes": 454365,
+      "height": 900,
+      "mode": "RGB",
+      "path": "light/FlipView--FlipViewExample3.png",
+      "sha256": "4ac6c110eceac90e8afee62009176dd9c7e841b32d858703b8c77282c2746f11",
+      "width": 1280
+    },
+    {
+      "bytes": 338709,
+      "height": 900,
+      "mode": "RGB",
+      "path": "light/FlipView.png",
+      "sha256": "ccf3ec29730686b2827265ce26b711e0e08f7f630c2413f07d651f957f9eefc3",
+      "width": 1280
+    },
+    {
+      "bytes": 106525,
+      "height": 900,
+      "mode": "RGB",
+      "path": "light/Flyout.png",
+      "sha256": "2b6e0148317356e8ef5aa891750442158fcae40b8d518a18f5e29ca5b9f99238",
+      "width": 1280
+    },
+    {
+      "bytes": 115539,
+      "height": 900,
+      "mode": "RGB",
+      "path": "light/Geometry.png",
+      "sha256": "4c34329e3a6960f4ed26cf3e58ed7212cc6018c59cd26fb806ef7ba4eb223d51",
+      "width": 1280
+    },
+    {
+      "bytes": 105130,
+      "height": 900,
+      "mode": "RGB",
+      "path": "light/Grid.png",
+      "sha256": "551a026fb24f0c1efc5a271067d58eb0ceeb543cfc306f6860a90a86f3d7d2ff",
+      "width": 1280
+    },
+    {
+      "bytes": 131012,
+      "height": 900,
+      "mode": "RGB",
+      "path": "light/GridView.png",
+      "sha256": "0913a30ce86cf3448df853db83646880b1a473262fe9d70158faf61a16d0ba9c",
+      "width": 1280
+    },
+    {
+      "bytes": 131840,
+      "height": 900,
+      "mode": "RGB",
+      "path": "light/HyperlinkButton.png",
+      "sha256": "f1bb814c75fe82c0dd60553e9e0e19255bfe0d72e0cf507beda2084a7bf1bdd3",
+      "width": 1280
+    },
+    {
+      "bytes": 131723,
+      "height": 900,
+      "mode": "RGB",
+      "path": "light/IconElement.png",
+      "sha256": "e10e9d3399f1d6a2cf856d41670d7c00401cc2600c76031b05f40a28942c5b59",
+      "width": 1280
+    },
+    {
+      "bytes": 98527,
+      "height": 900,
+      "mode": "RGB",
+      "path": "light/Iconography.png",
+      "sha256": "8c8c68ac5b98d1e6c03e6031b98061ad43a1d647e81eb5c89cbb9c16dc0f91cd",
+      "width": 1280
+    },
+    {
+      "bytes": 167713,
+      "height": 900,
+      "mode": "RGB",
+      "path": "light/Image--ImageExample1.png",
+      "sha256": "59d959ba16185d319a55c7df29cff492c798955461974568ea205f69ba1da453",
+      "width": 1280
+    },
+    {
+      "bytes": 167713,
+      "height": 900,
+      "mode": "RGB",
+      "path": "light/Image--ImageExample2.png",
+      "sha256": "59d959ba16185d319a55c7df29cff492c798955461974568ea205f69ba1da453",
+      "width": 1280
+    },
+    {
+      "bytes": 164854,
+      "height": 900,
+      "mode": "RGB",
+      "path": "light/Image--ImageExample3.png",
+      "sha256": "7f5ac24e917862d1b026ac931f87aa6ac28ade6c0675a3c5fab8ec7f350e8203",
+      "width": 1280
+    },
+    {
+      "bytes": 117713,
+      "height": 900,
+      "mode": "RGB",
+      "path": "light/Image--ImageExample4.png",
+      "sha256": "b1a238162a603ea5f9fd2d8f8ed4f8cd81d267798972aff327bc31006795f1e0",
+      "width": 1280
+    },
+    {
+      "bytes": 98773,
+      "height": 900,
+      "mode": "RGB",
+      "path": "light/Image--ImageExample5.png",
+      "sha256": "bd50d2e16b9780386a3ad74a0b6df2b72b595afad102703b0046ea0269ce6dfe",
+      "width": 1280
+    },
+    {
+      "bytes": 129829,
+      "height": 900,
+      "mode": "RGB",
+      "path": "light/Image--ImageExample6.png",
+      "sha256": "962cfcc29fb6b0d03dcdc65139d11e193310accdb18898981defa368024db17e",
+      "width": 1280
+    },
+    {
+      "bytes": 167674,
+      "height": 900,
+      "mode": "RGB",
+      "path": "light/Image.png",
+      "sha256": "0071ac1b9eb376a06d852ca9781a0753fe5ec63b4810c802bdb1435db7e431cd",
+      "width": 1280
+    },
+    {
+      "bytes": 131120,
+      "height": 900,
+      "mode": "RGB",
+      "path": "light/ImplicitTransition.png",
+      "sha256": "ae5941f4075d77b7dacac8280b61a644c4fe6966ea5af0d30f1f281fdd634536",
+      "width": 1280
+    },
+    {
+      "bytes": 112484,
+      "height": 900,
+      "mode": "RGB",
+      "path": "light/InfoBadge.png",
+      "sha256": "31029bde4d3cecea401be7dc343981f2896c82cf14a83354a9cfd767fdb99ed7",
+      "width": 1280
+    },
+    {
+      "bytes": 153376,
+      "height": 900,
+      "mode": "RGB",
+      "path": "light/InfoBar.png",
+      "sha256": "59c8da968cea4d5524f23fc7870d1b5f2e2f7b6be938b878f888d7ed87321a18",
+      "width": 1280
+    },
+    {
+      "bytes": 126130,
+      "height": 900,
+      "mode": "RGB",
+      "path": "light/InkCanvas.png",
+      "sha256": "03dd1af811d8547bea7f714a3bf7991f2f6d01f287380816c6479957aeca7ed3",
+      "width": 1280
+    },
+    {
+      "bytes": 135340,
+      "height": 900,
+      "mode": "RGB",
+      "path": "light/ItemsRepeater.png",
+      "sha256": "10a84954e76cbcaefbaa556ae882c9d1aab44bdcc3cf9cce8609a57b5446a121",
+      "width": 1280
+    },
+    {
+      "bytes": 130469,
+      "height": 900,
+      "mode": "RGB",
+      "path": "light/ItemsView.png",
+      "sha256": "9df7545ffaad49f0f0194ef8eec08de2aac290f1362d54e8cf1ce6a4248ef288",
+      "width": 1280
+    },
+    {
+      "bytes": 97731,
+      "height": 900,
+      "mode": "RGB",
+      "path": "light/JumpList.png",
+      "sha256": "439d69904406ebed75a1775d95b7a4cdb448f732ca5a959c213b180ae92b266c",
+      "width": 1280
+    },
+    {
+      "bytes": 102952,
+      "height": 900,
+      "mode": "RGB",
+      "path": "light/LayoutPanel.png",
+      "sha256": "d043b93c7dc2147f94425978325fc3e1a6f643bb5a7fdab356eef540987e018e",
+      "width": 1280
+    },
+    {
+      "bytes": 105872,
+      "height": 900,
+      "mode": "RGB",
+      "path": "light/Line.png",
+      "sha256": "053612a863bf195ed21578c43c32e91639d46cf79ce8a5831d606bce33e21b9d",
+      "width": 1280
+    },
+    {
+      "bytes": 104616,
+      "height": 900,
+      "mode": "RGB",
+      "path": "light/ListView.png",
+      "sha256": "82a393e586fc6a307a8612dcb3780fb66bdf370d9d09e7590c564f894bac957f",
+      "width": 1280
+    },
+    {
+      "bytes": 95895,
+      "height": 900,
+      "mode": "RGB",
+      "path": "light/MapControl.png",
+      "sha256": "ea79a41445fba4bd9cdfbe6b5d82f0f6f9e64ba59d70118749101ad889f4225c",
+      "width": 1280
+    },
+    {
+      "bytes": 120251,
+      "height": 900,
+      "mode": "RGB",
+      "path": "light/MediaPlayerElement.png",
+      "sha256": "719d2b8ecdb6be0c8c4172bf15a4201f90da6d02c849a586667ca71e0de4fc32",
+      "width": 1280
+    },
+    {
+      "bytes": 124515,
+      "height": 900,
+      "mode": "RGB",
+      "path": "light/MenuBar.png",
+      "sha256": "854dbcc288b5b934e82f5c6909680bf076869890d5f1bbc77695802610f24398",
+      "width": 1280
+    },
+    {
+      "bytes": 126084,
+      "height": 900,
+      "mode": "RGB",
+      "path": "light/MenuFlyout.png",
+      "sha256": "3128d81d918e7640d42c8af2ebe75575941ec4e5e57e618274974c2aa663cef3",
+      "width": 1280
+    },
+    {
+      "bytes": 119040,
+      "height": 900,
+      "mode": "RGB",
+      "path": "light/NavigationView--nvSample.png",
+      "sha256": "e7658d8d944ec857e23b84b5f657e133e52fe9233de6d652a222f0f385e3c512",
+      "width": 1280
+    },
+    {
+      "bytes": 111983,
+      "height": 900,
+      "mode": "RGB",
+      "path": "light/NavigationView--nvSample2.png",
+      "sha256": "e1e5bd6429a71cc389737536cefbd76a83f86be8ab92b94ec13877deb7e4972d",
+      "width": 1280
+    },
+    {
+      "bytes": 161549,
+      "height": 900,
+      "mode": "RGB",
+      "path": "light/NavigationView--nvSample4.png",
+      "sha256": "8e6d753b54dfdf48cc71fdd91680762e62ab4f9ad7e54dd857529540c20ee4b6",
+      "width": 1280
+    },
+    {
+      "bytes": 111107,
+      "height": 900,
+      "mode": "RGB",
+      "path": "light/NavigationView--nvSample5.png",
+      "sha256": "bd1bb9a75526c18377294e11ad57d31b2b3d523dcde5c455556f1ccdbb6d7e39",
+      "width": 1280
+    },
+    {
+      "bytes": 95598,
+      "height": 900,
+      "mode": "RGB",
+      "path": "light/NavigationView--nvSample6.png",
+      "sha256": "6eafb0514cd14736472f8c9211074ddb4dd4662e82204c82f77076bb711f8b87",
+      "width": 1280
+    },
+    {
+      "bytes": 117942,
+      "height": 900,
+      "mode": "RGB",
+      "path": "light/NavigationView--nvSample7.png",
+      "sha256": "8f3d2de603fe970f6760be237ecf52dc92235f54c6ce2e098906ee0b10ef20ff",
+      "width": 1280
+    },
+    {
+      "bytes": 146455,
+      "height": 900,
+      "mode": "RGB",
+      "path": "light/NavigationView--nvSample8.png",
+      "sha256": "0a6517a1010aa605d03482e21fed5e7ddd76eb7f1a7a681eeb6ef49a184af3c4",
+      "width": 1280
+    },
+    {
+      "bytes": 134916,
+      "height": 900,
+      "mode": "RGB",
+      "path": "light/NavigationView--nvSample9.png",
+      "sha256": "9b00e17dfc7de96dbfaf3d3d8977cd91a4b74db677a0f9af4a9db10951c9d012",
+      "width": 1280
+    },
+    {
+      "bytes": 161549,
+      "height": 900,
+      "mode": "RGB",
+      "path": "light/NavigationView.png",
+      "sha256": "8e6d753b54dfdf48cc71fdd91680762e62ab4f9ad7e54dd857529540c20ee4b6",
+      "width": 1280
+    },
+    {
+      "bytes": 127204,
+      "height": 900,
+      "mode": "RGB",
+      "path": "light/NumberBox.png",
+      "sha256": "719d6945035b34f144690c40f38a92232cc8fac62434767ed567afbae794d8ce",
+      "width": 1280
+    },
+    {
+      "bytes": 134990,
+      "height": 900,
+      "mode": "RGB",
+      "path": "light/PageTransition.png",
+      "sha256": "d8823f3b928602ebadbf1b60d28f4eb939c4b90d8be2841b53923c11c2f6c8ea",
+      "width": 1280
+    },
+    {
+      "bytes": 128143,
+      "height": 900,
+      "mode": "RGB",
+      "path": "light/PagerControl.png",
+      "sha256": "ce0b6dd12c96556215597d6cad703cb4b19db22972d5278e67ed030aa420e661",
+      "width": 1280
+    },
+    {
+      "bytes": 119225,
+      "height": 900,
+      "mode": "RGB",
+      "path": "light/ParallaxView.png",
+      "sha256": "5f0c45a3fd7dd2608d0e634e9b4465f341a23abf60ab0ce8e6797f06ae284d73",
+      "width": 1280
+    },
+    {
+      "bytes": 132098,
+      "height": 900,
+      "mode": "RGB",
+      "path": "light/PasswordBox.png",
+      "sha256": "a6b812c6f5bda4d61c16483f5f82569134d4b91981831acf6493782c1533affb",
+      "width": 1280
+    },
+    {
+      "bytes": 96220,
+      "height": 900,
+      "mode": "RGB",
+      "path": "light/PersonPicture.png",
+      "sha256": "b20ce4edd32d1b218d4fc056fabc895b223e25f0e3c46facf907d79d37cf456b",
+      "width": 1280
+    },
+    {
+      "bytes": 113819,
+      "height": 900,
+      "mode": "RGB",
+      "path": "light/PipsPager.png",
+      "sha256": "121df5f466890523d4ec3fbf0fca0e5ede7f50990da243b714b3c3efa9accc2d",
+      "width": 1280
+    },
+    {
+      "bytes": 111557,
+      "height": 900,
+      "mode": "RGB",
+      "path": "light/Pivot.png",
+      "sha256": "b105d40a5b9c7a7be27b34cf2d2ed64171132e5ed2ace0429caa88d119dc8860",
+      "width": 1280
+    },
+    {
+      "bytes": 122362,
+      "height": 900,
+      "mode": "RGB",
+      "path": "light/Popup.png",
+      "sha256": "60aa3e576797c6b3f2c461b9ce768629fc550dca82b92188277a8ff517014c87",
+      "width": 1280
+    },
+    {
+      "bytes": 122863,
+      "height": 900,
+      "mode": "RGB",
+      "path": "light/ProgressBar.png",
+      "sha256": "f89beb25aa8e683e4ef18cb4f7c401851406f617e0707a0e12d7e9146da505d3",
+      "width": 1280
+    },
+    {
+      "bytes": 133716,
+      "height": 900,
+      "mode": "RGB",
+      "path": "light/ProgressRing.png",
+      "sha256": "72c64383a13a96111e2d49c1bf218df1e8f293b7d51f8c3ab31615173aec83a8",
+      "width": 1280
+    },
+    {
+      "bytes": 118712,
+      "height": 900,
+      "mode": "RGB",
+      "path": "light/PullToRefresh.png",
+      "sha256": "a510161ada824f205aabe0d268c69023942390c39d7fb110990a6921d1eda2ab",
+      "width": 1280
+    },
+    {
+      "bytes": 135377,
+      "height": 900,
+      "mode": "RGB",
+      "path": "light/RadialGradientBrush.png",
+      "sha256": "411ab6fae674e2ce7a6d2ea7ed33d9e9837da1020c3fd4de45c2c30a78ec6d7f",
+      "width": 1280
+    },
+    {
+      "bytes": 119946,
+      "height": 900,
+      "mode": "RGB",
+      "path": "light/RadioButton.png",
+      "sha256": "dafe29a7f1d38013b27f475cb2a7cd9ec144ed5e8c1a295f1c574e3854ec0121",
+      "width": 1280
+    },
+    {
+      "bytes": 134323,
+      "height": 900,
+      "mode": "RGB",
+      "path": "light/RatingControl.png",
+      "sha256": "4ee9c5021b97a800e3a0d4fbfefb73173132e4cc8837918a5027c9c8233785a5",
+      "width": 1280
+    },
+    {
+      "bytes": 107376,
+      "height": 900,
+      "mode": "RGB",
+      "path": "light/RelativePanel.png",
+      "sha256": "38b9fed8845bc6a53d67502cba56299871ee8b6968dbdc0c87abcb926696d038",
+      "width": 1280
+    },
+    {
+      "bytes": 119298,
+      "height": 900,
+      "mode": "RGB",
+      "path": "light/RepeatButton.png",
+      "sha256": "da6020f53651a28931afa5ccb80e8a8ea84d291b100910b0ceae71479bb8ce77",
+      "width": 1280
+    },
+    {
+      "bytes": 132972,
+      "height": 900,
+      "mode": "RGB",
+      "path": "light/RichEditBox.png",
+      "sha256": "601d669dd6a88929eb40ab55e8fc80ebd498c682a298800e57f0f34e0d849a4e",
+      "width": 1280
+    },
+    {
+      "bytes": 129055,
+      "height": 900,
+      "mode": "RGB",
+      "path": "light/RichTextBlock.png",
+      "sha256": "5db5a0bb84a5e99c1ef37f442feae8e00696d3dc243e8ac9a01fece50bb0468c",
+      "width": 1280
+    },
+    {
+      "bytes": 109598,
+      "height": 900,
+      "mode": "RGB",
+      "path": "light/ScratchPad.png",
+      "sha256": "891961c9ac248c6d4ad87ffb01f74fd04d3aaed902afe46fbe0a4f887d6352f2",
+      "width": 1280
+    },
+    {
+      "bytes": 126642,
+      "height": 900,
+      "mode": "RGB",
+      "path": "light/ScrollView.png",
+      "sha256": "b8fe9e4c6cb1ca2aa1d0fa84db6d3b7f38a70fcab787cc945ededeb6618d876e",
+      "width": 1280
+    },
+    {
+      "bytes": 112602,
+      "height": 900,
+      "mode": "RGB",
+      "path": "light/ScrollViewer.png",
+      "sha256": "9363850bbd2407addc6bdef898f7e652ca9bafbb8a1e343dd6d6920671c6953c",
+      "width": 1280
+    },
+    {
+      "bytes": 133583,
+      "height": 900,
+      "mode": "RGB",
+      "path": "light/SelectorBar.png",
+      "sha256": "8d28d7267a120ad7f3d38b2b64e4f6b400c6b08c8a496111ce26363858c6de2a",
+      "width": 1280
+    },
+    {
+      "bytes": 102563,
+      "height": 900,
+      "mode": "RGB",
+      "path": "light/SemanticZoom.png",
+      "sha256": "cde15082417efbaa70bf2100ed38eebfc707af39dc067bda4068070f68569b60",
+      "width": 1280
+    },
+    {
+      "bytes": 113641,
+      "height": 900,
+      "mode": "RGB",
+      "path": "light/Shape.png",
+      "sha256": "28e66b5eb2c156924fc4e1f6a23f9c1527e64ea23385da78a96d1a6c3f7f58bd",
+      "width": 1280
+    },
+    {
+      "bytes": 122834,
+      "height": 900,
+      "mode": "RGB",
+      "path": "light/Slider.png",
+      "sha256": "149fc1313ca1a5015799e5728a9aedfe8e625ef01067e680ddd2d7cef849f8c2",
+      "width": 1280
+    },
+    {
+      "bytes": 103093,
+      "height": 900,
+      "mode": "RGB",
+      "path": "light/Sound.png",
+      "sha256": "0ecc6b041c0c3c125290301a05155fe42b3053d95c5907ecc01ab6cf30c7914d",
+      "width": 1280
+    },
+    {
+      "bytes": 101631,
+      "height": 900,
+      "mode": "RGB",
+      "path": "light/Spacing.png",
+      "sha256": "71f8a20d6b4f8b6640815af9e8b28f5da93b7ea95f124fa0976f2486bd86230f",
+      "width": 1280
+    },
+    {
+      "bytes": 127590,
+      "height": 900,
+      "mode": "RGB",
+      "path": "light/SplitButton.png",
+      "sha256": "cf09d829daee7e28535e13a9cc2bcfc56197347e84c24f3c4b8fea7b13fc7a40",
+      "width": 1280
+    },
+    {
+      "bytes": 108272,
+      "height": 900,
+      "mode": "RGB",
+      "path": "light/SplitView.png",
+      "sha256": "4eee760f30a6ee9966af34b84afd3584640718e1a5a834f6012b5696eb0e9334",
+      "width": 1280
+    },
+    {
+      "bytes": 108641,
+      "height": 900,
+      "mode": "RGB",
+      "path": "light/StackPanel.png",
+      "sha256": "26b2f2716ce9c30fabaa2525b7d41d6fd7736d3927512e7c68d9928cf9f16cac",
+      "width": 1280
+    },
+    {
+      "bytes": 115655,
+      "height": 900,
+      "mode": "RGB",
+      "path": "light/StandardUICommand.png",
+      "sha256": "5ccc7163b5fbdfcda251efa203064e8de2b0423b1038f262aca447ea4cd30297",
+      "width": 1280
+    },
+    {
+      "bytes": 125334,
+      "height": 900,
+      "mode": "RGB",
+      "path": "light/StoragePickers.png",
+      "sha256": "74e474e20a044c60be384a319877b00edbfcd73b8ca27c0e0ffc7d34a36f5e6a",
+      "width": 1280
+    },
+    {
+      "bytes": 128524,
+      "height": 900,
+      "mode": "RGB",
+      "path": "light/SwipeControl.png",
+      "sha256": "51a8849352d004a0931fd53bfcc990fe4d2b221801fb1cbd643803318a71b389",
+      "width": 1280
+    },
+    {
+      "bytes": 95894,
+      "height": 900,
+      "mode": "RGB",
+      "path": "light/SystemBackdropElement.png",
+      "sha256": "72fdde7099ac0d25cd3e52083035f45dfc81be604ebcf1395678615c856bb9e3",
+      "width": 1280
+    },
+    {
+      "bytes": 132455,
+      "height": 900,
+      "mode": "RGB",
+      "path": "light/SystemBackdrops.png",
+      "sha256": "a41620ca2aa3f42f68f34e43905e82d9356599d7624cf0d36e5b295ca98d24c7",
+      "width": 1280
+    },
+    {
+      "bytes": 117536,
+      "height": 900,
+      "mode": "RGB",
+      "path": "light/TabView.png",
+      "sha256": "696e5893157ca66095dfe6638ccfb5921b1f6d7d4c90e416c9e0ddf818cb854f",
+      "width": 1280
+    },
+    {
+      "bytes": 129045,
+      "height": 900,
+      "mode": "RGB",
+      "path": "light/TableView.png",
+      "sha256": "155945fb3796dc5f00161f4d823e16e2ad73d8caf2d3a92c7ba19dd768afbb45",
+      "width": 1280
+    },
+    {
+      "bytes": 132753,
+      "height": 900,
+      "mode": "RGB",
+      "path": "light/TeachingTip.png",
+      "sha256": "03ae267fe3b3de6c4f6bd4f12b6ac1e5c06821c23f2069759c3c33d6a9ff1ded",
+      "width": 1280
+    },
+    {
+      "bytes": 130653,
+      "height": 900,
+      "mode": "RGB",
+      "path": "light/Templates.png",
+      "sha256": "42e793789a7afed952d0bae2abbdc1f9df21b5123f40964e71d879b6118b1d39",
+      "width": 1280
+    },
+    {
+      "bytes": 128612,
+      "height": 900,
+      "mode": "RGB",
+      "path": "light/TextBlock.png",
+      "sha256": "b27e018239b5f71a6b2d70d1adf42cf153cd243da019a02ba4ec95e49385182c",
+      "width": 1280
+    },
+    {
+      "bytes": 111991,
+      "height": 900,
+      "mode": "RGB",
+      "path": "light/TextBox.png",
+      "sha256": "782e4b87f8785c92fda54d2ca74cc395f69ce5b93c701ee9085123d5495a9abe",
+      "width": 1280
+    },
+    {
+      "bytes": 109531,
+      "height": 900,
+      "mode": "RGB",
+      "path": "light/ThemeShadow.png",
+      "sha256": "b58ecf0a73048f799486555c0efcf147f9f8a906c56d2fe68caebfb7a38b92fd",
+      "width": 1280
+    },
+    {
+      "bytes": 135766,
+      "height": 900,
+      "mode": "RGB",
+      "path": "light/ThemeTransition.png",
+      "sha256": "521704ec56c3685ccc17ec3481200cac76b87734cedcbd0e774eead257c333f7",
+      "width": 1280
+    },
+    {
+      "bytes": 123308,
+      "height": 900,
+      "mode": "RGB",
+      "path": "light/TimePicker.png",
+      "sha256": "ae17cae81de1bb38aecdfb446f4f8199e4de4f68167642a9827f7bcf5a8a9c2a",
+      "width": 1280
+    },
+    {
+      "bytes": 123752,
+      "height": 900,
+      "mode": "RGB",
+      "path": "light/TitleBar.png",
+      "sha256": "55de0506f74243cf5f610de2391e5af98a1feb75dfd40df8a92600f09139174b",
+      "width": 1280
+    },
+    {
+      "bytes": 120111,
+      "height": 900,
+      "mode": "RGB",
+      "path": "light/ToggleButton.png",
+      "sha256": "42588218599288a508b4289cbed8ac302478e5607b8d2515014d765e8787c373",
+      "width": 1280
+    },
+    {
+      "bytes": 121096,
+      "height": 900,
+      "mode": "RGB",
+      "path": "light/ToggleSplitButton.png",
+      "sha256": "4ab34b51e410f6868c63f7af8467abe08b4f2fbe47503bacad6ded6d6d5b8a3f",
+      "width": 1280
+    },
+    {
+      "bytes": 123857,
+      "height": 900,
+      "mode": "RGB",
+      "path": "light/ToggleSwitch.png",
+      "sha256": "bb2678fea17158cc9cdccc779b004f6e28a6f2bfce33438ab4f60de4d01fe81d",
+      "width": 1280
+    },
+    {
+      "bytes": 121557,
+      "height": 900,
+      "mode": "RGB",
+      "path": "light/ToolTip.png",
+      "sha256": "8c47efaf4c1d8fa58487047701b8ea61d487f958cc963f69420a90a1fafcbe64",
+      "width": 1280
+    },
+    {
+      "bytes": 127014,
+      "height": 900,
+      "mode": "RGB",
+      "path": "light/TreeView.png",
+      "sha256": "347361dc6725c24608681f87c49fd4dec7e1c1c55daead00d077b6e8bed27c5c",
+      "width": 1280
+    },
+    {
+      "bytes": 119439,
+      "height": 900,
+      "mode": "RGB",
+      "path": "light/Typography.png",
+      "sha256": "53635fc452474ecac853d913ad31bbd04630ca83f6f7eb1dfcd331e9b0091ead",
+      "width": 1280
+    },
+    {
+      "bytes": 107835,
+      "height": 900,
+      "mode": "RGB",
+      "path": "light/VariableSizedWrapGrid.png",
+      "sha256": "b792d571c3cb931b93a4933509e79d4a21c570e29d393809433c1205a1e4aa82",
+      "width": 1280
+    },
+    {
+      "bytes": 108599,
+      "height": 900,
+      "mode": "RGB",
+      "path": "light/Viewbox.png",
+      "sha256": "b480d1af44441e9b97bc3b546fa99be12bf18ef3caa2af0fba266a00c6849d47",
+      "width": 1280
+    },
+    {
+      "bytes": 97325,
+      "height": 900,
+      "mode": "RGB",
+      "path": "light/WebView2.png",
+      "sha256": "749dddc7204a57cf193d2ac2cf8f0bcdab45a64ba9734cd1b3a0182ed132bda8",
+      "width": 1280
+    },
+    {
+      "bytes": 115648,
+      "height": 900,
+      "mode": "RGB",
+      "path": "light/Windowing.png",
+      "sha256": "5b63146e50ed2c4fee4ccdbd2bddc447777c844674eba981cb20b7efdc486298",
+      "width": 1280
+    },
+    {
+      "bytes": 135028,
+      "height": 900,
+      "mode": "RGB",
+      "path": "light/WrapPanel.png",
+      "sha256": "00e987ba53ccaaec01edc9511b1d6f2ebce4018937f030dff5e5e1b70cf9e581",
+      "width": 1280
+    },
+    {
+      "bytes": 137232,
+      "height": 900,
+      "mode": "RGB",
+      "path": "light/XamlCompInterop.png",
+      "sha256": "af5a7f8a822d956df04fe5a4c5a47f50ab6e5dd9fc5f21f2c84083de90ad4cdb",
+      "width": 1280
+    },
+    {
+      "bytes": 136599,
+      "height": 900,
+      "mode": "RGB",
+      "path": "light/XamlResources.png",
+      "sha256": "901880cedb1d3bc64f4af6f9036098da7df99749b7174806a8d215c077aff734",
+      "width": 1280
+    },
+    {
+      "bytes": 130754,
+      "height": 900,
+      "mode": "RGB",
+      "path": "light/XamlStyles.png",
+      "sha256": "8889c433b2e9af7a2afa5b1ea3c8043cf6aeca3ce6731f35a60ec6901592a409",
+      "width": 1280
+    },
+    {
+      "bytes": 111259,
+      "height": 900,
+      "mode": "RGB",
+      "path": "light/XamlUICommand.png",
+      "sha256": "9217afaa565c5db883e049b8d1dd89ce5b83f07c8eb72abef07faca1caedfbc6",
+      "width": 1280
+    }
+  ],
+  "head_sha": "fe3d523e18b6aeac4ad56cfe2a96e303380087b9",
+  "light_count": 148,
+  "limitations": [
+    "This execution and its images apply only to head fe3d523e18b6aeac4ad56cfe2a96e303380087b9, actual checkout 37ea12521e7b3559917be812cc47ef7ec51b8f79 and tree 0d7846902cb409d3e2469588d28f52924e894f88.",
+    "Subsequent collection, ColorView tab and Gallery scrolling corrections are outside the tested tree and require a later execution and visual review.",
+    "The PNGs are headless rendering smoke captures, including pending or diagnostic Gallery compositions; they do not establish upstream pixel parity, complete page behavior or a fully ported catalog.",
+    "The capture-only test establishes real JPEG decoding and selected-bitmap propagation; it does not establish native-host connected animation, input or accessibility parity.",
+    "SVG rendering and GIF playback remain pending; the corresponding captures include an explicit SVG diagnostic and static GIF previews.",
+    "No API, page or source-example parity classification is promoted by this record."
+  ],
+  "log_output_paths_exact_match": true,
+  "png_count": 183,
+  "png_integrity_check": "all 183 PNG files verified",
+  "run_id": 39947560966,
+  "run_url": "https://github.com/wieslawsoltes/FerroUI/actions/runs/39947560966",
+  "schema_version": 1,
+  "scope": "Manifest of the downloaded, digest-verified GitHub artifact; binary PNGs and the ZIP are retained as the workflow artifact rather than checked into this repository.",
+  "visual_review": {
+    "findings": [
+      {
+        "accepted_in_this_run": false,
+        "area": "ConnectedAnimation",
+        "finding": "Collection alignment and text ellipsis require correction.",
+        "status": "follow-up-correction-in-progress"
+      },
+      {
+        "accepted_in_this_run": false,
+        "area": "ColorPicker",
+        "finding": "Dark ColorView tab contrast requires correction.",
+        "status": "follow-up-correction-in-progress"
+      },
+      {
+        "accepted_in_this_run": false,
+        "area": "Gallery navigation",
+        "finding": "Outer Gallery scroll retention requires correction.",
+        "status": "follow-up-correction-in-progress"
+      }
+    ],
+    "result": "follow-up-corrections-required"
+  },
+  "zip_crc_check": "passed"
+}

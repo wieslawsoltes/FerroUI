@@ -26185,7 +26185,7 @@
    "kind": "Style",
    "target_type": "NavigationViewItemPresenter",
    "status": "waived",
-   "reason": "Reveal focus variants of the NavigationView item presenter: deprecated (Reveal focus), and FerroUI has no NavigationView.",
+   "reason": "Reveal-focus variants of NavigationViewItemPresenter are deprecated in WinUI 3. FerroUI implements neither Reveal focus lighting nor the public source presenter/TemplateSettings; native NavigationView controls do not make these legacy styles available.",
    "batch": null
   },
   {
@@ -26195,7 +26195,7 @@
    "kind": "Style",
    "target_type": "NavigationViewItemPresenter",
    "status": "waived",
-   "reason": "Reveal focus variants of the NavigationView item presenter: deprecated (Reveal focus), and FerroUI has no NavigationView.",
+   "reason": "Reveal-focus variants of NavigationViewItemPresenter are deprecated in WinUI 3. FerroUI implements neither Reveal focus lighting nor the public source presenter/TemplateSettings; native NavigationView controls do not make these legacy styles available.",
    "batch": null
   },
   {
@@ -52644,8 +52644,8 @@
    "key": "{InfoBadge}",
    "kind": "Style",
    "target_type": "InfoBadge",
-   "status": "waived",
-   "reason": "InfoBadge: no FerroUI control.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -52654,8 +52654,8 @@
    "key": "AttentionDotInfoBadgeStyle",
    "kind": "Style",
    "target_type": "InfoBadge",
-   "status": "waived",
-   "reason": "InfoBadge: no FerroUI control.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -52664,8 +52664,8 @@
    "key": "AttentionIconInfoBadgeStyle",
    "kind": "Style",
    "target_type": "InfoBadge",
-   "status": "waived",
-   "reason": "InfoBadge: no FerroUI control.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -52674,8 +52674,8 @@
    "key": "AttentionValueInfoBadgeStyle",
    "kind": "Style",
    "target_type": "InfoBadge",
-   "status": "waived",
-   "reason": "InfoBadge: no FerroUI control.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -52684,8 +52684,8 @@
    "key": "CautionDotInfoBadgeStyle",
    "kind": "Style",
    "target_type": "InfoBadge",
-   "status": "waived",
-   "reason": "InfoBadge: no FerroUI control.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -52694,8 +52694,8 @@
    "key": "CautionIconInfoBadgeStyle",
    "kind": "Style",
    "target_type": "InfoBadge",
-   "status": "waived",
-   "reason": "InfoBadge: no FerroUI control.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -52704,8 +52704,8 @@
    "key": "CautionValueInfoBadgeStyle",
    "kind": "Style",
    "target_type": "InfoBadge",
-   "status": "waived",
-   "reason": "InfoBadge: no FerroUI control.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -52714,8 +52714,8 @@
    "key": "CriticalDotInfoBadgeStyle",
    "kind": "Style",
    "target_type": "InfoBadge",
-   "status": "waived",
-   "reason": "InfoBadge: no FerroUI control.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -52724,8 +52724,8 @@
    "key": "CriticalIconInfoBadgeStyle",
    "kind": "Style",
    "target_type": "InfoBadge",
-   "status": "waived",
-   "reason": "InfoBadge: no FerroUI control.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -52734,8 +52734,8 @@
    "key": "CriticalValueInfoBadgeStyle",
    "kind": "Style",
    "target_type": "InfoBadge",
-   "status": "waived",
-   "reason": "InfoBadge: no FerroUI control.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -52744,8 +52744,8 @@
    "key": "DefaultInfoBadgeStyle",
    "kind": "Style",
    "target_type": "InfoBadge",
-   "status": "waived",
-   "reason": "InfoBadge: no FerroUI control.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -52754,8 +52754,8 @@
    "key": "InformationalDotInfoBadgeStyle",
    "kind": "Style",
    "target_type": "InfoBadge",
-   "status": "waived",
-   "reason": "InfoBadge: no FerroUI control.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -52764,8 +52764,8 @@
    "key": "InformationalIconInfoBadgeStyle",
    "kind": "Style",
    "target_type": "InfoBadge",
-   "status": "waived",
-   "reason": "InfoBadge: no FerroUI control.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -52774,8 +52774,8 @@
    "key": "InformationalValueInfoBadgeStyle",
    "kind": "Style",
    "target_type": "InfoBadge",
-   "status": "waived",
-   "reason": "InfoBadge: no FerroUI control.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -52784,8 +52784,8 @@
    "key": "SuccessDotInfoBadgeStyle",
    "kind": "Style",
    "target_type": "InfoBadge",
-   "status": "waived",
-   "reason": "InfoBadge: no FerroUI control.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -52794,8 +52794,8 @@
    "key": "SuccessIconInfoBadgeStyle",
    "kind": "Style",
    "target_type": "InfoBadge",
-   "status": "waived",
-   "reason": "InfoBadge: no FerroUI control.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -52804,8 +52804,8 @@
    "key": "SuccessValueInfoBadgeStyle",
    "kind": "Style",
    "target_type": "InfoBadge",
-   "status": "waived",
-   "reason": "InfoBadge: no FerroUI control.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -52814,9 +52814,9 @@
    "key": "IconInfoBadgeFontIconMargin",
    "kind": "Thickness",
    "target_type": "",
-   "status": "waived",
-   "reason": "InfoBadge: no FerroUI control.",
-   "batch": null
+   "status": "pending",
+   "reason": null,
+   "batch": "resources"
   },
   {
    "document": "controls/dev/InfoBadge/InfoBadge_themeresources.xaml",
@@ -52824,9 +52824,9 @@
    "key": "IconInfoBadgeIconMargin",
    "kind": "Thickness",
    "target_type": "",
-   "status": "waived",
-   "reason": "InfoBadge: no FerroUI control.",
-   "batch": null
+   "status": "pending",
+   "reason": null,
+   "batch": "resources"
   },
   {
    "document": "controls/dev/InfoBadge/InfoBadge_themeresources.xaml",
@@ -52834,8 +52834,8 @@
    "key": "InfoBadgeBackground",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "InfoBadge: no FerroUI control.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -52844,8 +52844,8 @@
    "key": "InfoBadgeForeground",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "InfoBadge: no FerroUI control.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -52854,8 +52854,8 @@
    "key": "InfoBadgeIconHeight",
    "kind": "x:Double",
    "target_type": "",
-   "status": "waived",
-   "reason": "InfoBadge: no FerroUI control.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -52864,9 +52864,9 @@
    "key": "InfoBadgeIconWidth",
    "kind": "x:Double",
    "target_type": "",
-   "status": "waived",
-   "reason": "InfoBadge: no FerroUI control.",
-   "batch": null
+   "status": "pending",
+   "reason": null,
+   "batch": "resources"
   },
   {
    "document": "controls/dev/InfoBadge/InfoBadge_themeresources.xaml",
@@ -52874,9 +52874,9 @@
    "key": "InfoBadgeMaxHeight",
    "kind": "x:Double",
    "target_type": "",
-   "status": "waived",
-   "reason": "InfoBadge: no FerroUI control.",
-   "batch": null
+   "status": "pending",
+   "reason": null,
+   "batch": "resources"
   },
   {
    "document": "controls/dev/InfoBadge/InfoBadge_themeresources.xaml",
@@ -52884,9 +52884,9 @@
    "key": "InfoBadgeMinHeight",
    "kind": "x:Double",
    "target_type": "",
-   "status": "waived",
-   "reason": "InfoBadge: no FerroUI control.",
-   "batch": null
+   "status": "pending",
+   "reason": null,
+   "batch": "resources"
   },
   {
    "document": "controls/dev/InfoBadge/InfoBadge_themeresources.xaml",
@@ -52894,9 +52894,9 @@
    "key": "InfoBadgeMinWidth",
    "kind": "x:Double",
    "target_type": "",
-   "status": "waived",
-   "reason": "InfoBadge: no FerroUI control.",
-   "batch": null
+   "status": "pending",
+   "reason": null,
+   "batch": "resources"
   },
   {
    "document": "controls/dev/InfoBadge/InfoBadge_themeresources.xaml",
@@ -52904,9 +52904,9 @@
    "key": "InfoBadgePadding",
    "kind": "Thickness",
    "target_type": "",
-   "status": "waived",
-   "reason": "InfoBadge: no FerroUI control.",
-   "batch": null
+   "status": "pending",
+   "reason": null,
+   "batch": "resources"
   },
   {
    "document": "controls/dev/InfoBadge/InfoBadge_themeresources.xaml",
@@ -52914,9 +52914,9 @@
    "key": "InfoBadgeValueFontSize",
    "kind": "x:Double",
    "target_type": "",
-   "status": "waived",
-   "reason": "InfoBadge: no FerroUI control.",
-   "batch": null
+   "status": "pending",
+   "reason": null,
+   "batch": "resources"
   },
   {
    "document": "controls/dev/InfoBadge/InfoBadge_themeresources.xaml",
@@ -52924,9 +52924,9 @@
    "key": "ValueInfoBadgeTextMargin",
    "kind": "Thickness",
    "target_type": "",
-   "status": "waived",
-   "reason": "InfoBadge: no FerroUI control.",
-   "batch": null
+   "status": "pending",
+   "reason": null,
+   "batch": "resources"
   },
   {
    "document": "controls/dev/InfoBadge/InfoBadge_themeresources.xaml",
@@ -52934,9 +52934,9 @@
    "key": "IconInfoBadgeFontIconMargin",
    "kind": "Thickness",
    "target_type": "",
-   "status": "waived",
-   "reason": "InfoBadge: no FerroUI control.",
-   "batch": null
+   "status": "pending",
+   "reason": null,
+   "batch": "resources"
   },
   {
    "document": "controls/dev/InfoBadge/InfoBadge_themeresources.xaml",
@@ -52944,9 +52944,9 @@
    "key": "IconInfoBadgeIconMargin",
    "kind": "Thickness",
    "target_type": "",
-   "status": "waived",
-   "reason": "InfoBadge: no FerroUI control.",
-   "batch": null
+   "status": "pending",
+   "reason": null,
+   "batch": "resources"
   },
   {
    "document": "controls/dev/InfoBadge/InfoBadge_themeresources.xaml",
@@ -52954,8 +52954,8 @@
    "key": "InfoBadgeBackground",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "InfoBadge: no FerroUI control.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -52964,8 +52964,8 @@
    "key": "InfoBadgeForeground",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "InfoBadge: no FerroUI control.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -52974,8 +52974,8 @@
    "key": "InfoBadgeIconHeight",
    "kind": "x:Double",
    "target_type": "",
-   "status": "waived",
-   "reason": "InfoBadge: no FerroUI control.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -52984,9 +52984,9 @@
    "key": "InfoBadgeIconWidth",
    "kind": "x:Double",
    "target_type": "",
-   "status": "waived",
-   "reason": "InfoBadge: no FerroUI control.",
-   "batch": null
+   "status": "pending",
+   "reason": null,
+   "batch": "resources"
   },
   {
    "document": "controls/dev/InfoBadge/InfoBadge_themeresources.xaml",
@@ -52994,9 +52994,9 @@
    "key": "InfoBadgeMaxHeight",
    "kind": "x:Double",
    "target_type": "",
-   "status": "waived",
-   "reason": "InfoBadge: no FerroUI control.",
-   "batch": null
+   "status": "pending",
+   "reason": null,
+   "batch": "resources"
   },
   {
    "document": "controls/dev/InfoBadge/InfoBadge_themeresources.xaml",
@@ -53004,9 +53004,9 @@
    "key": "InfoBadgeMinHeight",
    "kind": "x:Double",
    "target_type": "",
-   "status": "waived",
-   "reason": "InfoBadge: no FerroUI control.",
-   "batch": null
+   "status": "pending",
+   "reason": null,
+   "batch": "resources"
   },
   {
    "document": "controls/dev/InfoBadge/InfoBadge_themeresources.xaml",
@@ -53014,9 +53014,9 @@
    "key": "InfoBadgeMinWidth",
    "kind": "x:Double",
    "target_type": "",
-   "status": "waived",
-   "reason": "InfoBadge: no FerroUI control.",
-   "batch": null
+   "status": "pending",
+   "reason": null,
+   "batch": "resources"
   },
   {
    "document": "controls/dev/InfoBadge/InfoBadge_themeresources.xaml",
@@ -53024,9 +53024,9 @@
    "key": "InfoBadgePadding",
    "kind": "Thickness",
    "target_type": "",
-   "status": "waived",
-   "reason": "InfoBadge: no FerroUI control.",
-   "batch": null
+   "status": "pending",
+   "reason": null,
+   "batch": "resources"
   },
   {
    "document": "controls/dev/InfoBadge/InfoBadge_themeresources.xaml",
@@ -53034,9 +53034,9 @@
    "key": "InfoBadgeValueFontSize",
    "kind": "x:Double",
    "target_type": "",
-   "status": "waived",
-   "reason": "InfoBadge: no FerroUI control.",
-   "batch": null
+   "status": "pending",
+   "reason": null,
+   "batch": "resources"
   },
   {
    "document": "controls/dev/InfoBadge/InfoBadge_themeresources.xaml",
@@ -53044,9 +53044,9 @@
    "key": "ValueInfoBadgeTextMargin",
    "kind": "Thickness",
    "target_type": "",
-   "status": "waived",
-   "reason": "InfoBadge: no FerroUI control.",
-   "batch": null
+   "status": "pending",
+   "reason": null,
+   "batch": "resources"
   },
   {
    "document": "controls/dev/InfoBadge/InfoBadge_themeresources.xaml",
@@ -53054,9 +53054,9 @@
    "key": "IconInfoBadgeFontIconMargin",
    "kind": "Thickness",
    "target_type": "",
-   "status": "waived",
-   "reason": "InfoBadge: no FerroUI control.",
-   "batch": null
+   "status": "pending",
+   "reason": null,
+   "batch": "resources"
   },
   {
    "document": "controls/dev/InfoBadge/InfoBadge_themeresources.xaml",
@@ -53064,9 +53064,9 @@
    "key": "IconInfoBadgeIconMargin",
    "kind": "Thickness",
    "target_type": "",
-   "status": "waived",
-   "reason": "InfoBadge: no FerroUI control.",
-   "batch": null
+   "status": "pending",
+   "reason": null,
+   "batch": "resources"
   },
   {
    "document": "controls/dev/InfoBadge/InfoBadge_themeresources.xaml",
@@ -53074,8 +53074,8 @@
    "key": "InfoBadgeBackground",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "InfoBadge: no FerroUI control.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -53084,8 +53084,8 @@
    "key": "InfoBadgeForeground",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "InfoBadge: no FerroUI control.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -53094,8 +53094,8 @@
    "key": "InfoBadgeIconHeight",
    "kind": "x:Double",
    "target_type": "",
-   "status": "waived",
-   "reason": "InfoBadge: no FerroUI control.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -53104,9 +53104,9 @@
    "key": "InfoBadgeIconWidth",
    "kind": "x:Double",
    "target_type": "",
-   "status": "waived",
-   "reason": "InfoBadge: no FerroUI control.",
-   "batch": null
+   "status": "pending",
+   "reason": null,
+   "batch": "resources"
   },
   {
    "document": "controls/dev/InfoBadge/InfoBadge_themeresources.xaml",
@@ -53114,9 +53114,9 @@
    "key": "InfoBadgeMaxHeight",
    "kind": "x:Double",
    "target_type": "",
-   "status": "waived",
-   "reason": "InfoBadge: no FerroUI control.",
-   "batch": null
+   "status": "pending",
+   "reason": null,
+   "batch": "resources"
   },
   {
    "document": "controls/dev/InfoBadge/InfoBadge_themeresources.xaml",
@@ -53124,9 +53124,9 @@
    "key": "InfoBadgeMinHeight",
    "kind": "x:Double",
    "target_type": "",
-   "status": "waived",
-   "reason": "InfoBadge: no FerroUI control.",
-   "batch": null
+   "status": "pending",
+   "reason": null,
+   "batch": "resources"
   },
   {
    "document": "controls/dev/InfoBadge/InfoBadge_themeresources.xaml",
@@ -53134,9 +53134,9 @@
    "key": "InfoBadgeMinWidth",
    "kind": "x:Double",
    "target_type": "",
-   "status": "waived",
-   "reason": "InfoBadge: no FerroUI control.",
-   "batch": null
+   "status": "pending",
+   "reason": null,
+   "batch": "resources"
   },
   {
    "document": "controls/dev/InfoBadge/InfoBadge_themeresources.xaml",
@@ -53144,9 +53144,9 @@
    "key": "InfoBadgePadding",
    "kind": "Thickness",
    "target_type": "",
-   "status": "waived",
-   "reason": "InfoBadge: no FerroUI control.",
-   "batch": null
+   "status": "pending",
+   "reason": null,
+   "batch": "resources"
   },
   {
    "document": "controls/dev/InfoBadge/InfoBadge_themeresources.xaml",
@@ -53154,9 +53154,9 @@
    "key": "InfoBadgeValueFontSize",
    "kind": "x:Double",
    "target_type": "",
-   "status": "waived",
-   "reason": "InfoBadge: no FerroUI control.",
-   "batch": null
+   "status": "pending",
+   "reason": null,
+   "batch": "resources"
   },
   {
    "document": "controls/dev/InfoBadge/InfoBadge_themeresources.xaml",
@@ -53164,9 +53164,9 @@
    "key": "ValueInfoBadgeTextMargin",
    "kind": "Thickness",
    "target_type": "",
-   "status": "waived",
-   "reason": "InfoBadge: no FerroUI control.",
-   "batch": null
+   "status": "pending",
+   "reason": null,
+   "batch": "resources"
   },
   {
    "document": "controls/dev/InfoBar/InfoBar.xaml",
@@ -64044,9 +64044,9 @@
    "key": "{NavigationViewItemHeader}",
    "kind": "Style",
    "target_type": "NavigationViewItemHeader",
-   "status": "waived",
-   "reason": "NavigationView: no FerroUI control (batch B5). DrawerPage, TabbedPage and the tabs of TabControl at the left and the right are built from its panes and items (Controls/DrawerPage.xaml, Controls/TabbedPage.xaml, Controls/TabItem.xaml); the styles of NavigationView itself, its items, item headers and separators have no control to style.",
-   "batch": null
+   "status": "pending",
+   "reason": null,
+   "batch": "B5"
   },
   {
    "document": "controls/dev/NavigationView/NavigationView.xaml",
@@ -64054,9 +64054,9 @@
    "key": "{NavigationViewItemSeparator}",
    "kind": "Style",
    "target_type": "NavigationViewItemSeparator",
-   "status": "waived",
-   "reason": "NavigationView: no FerroUI control (batch B5). DrawerPage, TabbedPage and the tabs of TabControl at the left and the right are built from its panes and items (Controls/DrawerPage.xaml, Controls/TabbedPage.xaml, Controls/TabItem.xaml); the styles of NavigationView itself, its items, item headers and separators have no control to style.",
-   "batch": null
+   "status": "pending",
+   "reason": null,
+   "batch": "B5"
   },
   {
    "document": "controls/dev/NavigationView/NavigationView.xaml",
@@ -64064,9 +64064,9 @@
    "key": "{NavigationViewItem}",
    "kind": "Style",
    "target_type": "NavigationViewItem",
-   "status": "waived",
-   "reason": "NavigationView: no FerroUI control (batch B5). DrawerPage, TabbedPage and the tabs of TabControl at the left and the right are built from its panes and items (Controls/DrawerPage.xaml, Controls/TabbedPage.xaml, Controls/TabItem.xaml); the styles of NavigationView itself, its items, item headers and separators have no control to style.",
-   "batch": null
+   "status": "pending",
+   "reason": null,
+   "batch": "B5"
   },
   {
    "document": "controls/dev/NavigationView/NavigationView.xaml",
@@ -64074,9 +64074,9 @@
    "key": "{NavigationView}",
    "kind": "Style",
    "target_type": "NavigationView",
-   "status": "waived",
-   "reason": "NavigationView: no FerroUI control (batch B5). DrawerPage, TabbedPage and the tabs of TabControl at the left and the right are built from its panes and items (Controls/DrawerPage.xaml, Controls/TabbedPage.xaml, Controls/TabItem.xaml); the styles of NavigationView itself, its items, item headers and separators have no control to style.",
-   "batch": null
+   "status": "pending",
+   "reason": null,
+   "batch": "B5"
   },
   {
    "document": "controls/dev/NavigationView/NavigationView_themeresources.xaml",
@@ -64085,7 +64085,7 @@
    "kind": "Style",
    "target_type": "NavigationViewItemPresenter",
    "status": "waived",
-   "reason": "NavigationView: no FerroUI control (batch B5). The item presenter styles of the left and the top pane are written into the tab themes built from them (Controls/TabItem.xaml for the tabs at the left and the right, TabbedPageTabItemTheme of Controls/TabbedPage.xaml for the top pane); the settings item, the overflow button of the top pane and the search button of the pane have no counterpart in FerroUI's pages.",
+   "reason": "The public NavigationViewItemPresenter and its TemplateSettings are not implemented. Native NavigationViewItem uses its own replaceable metadata template; existing DrawerPage/TabItem/TabbedPage adaptations do not supply these three source presenter styles.",
    "batch": null
   },
   {
@@ -64095,7 +64095,7 @@
    "kind": "Style",
    "target_type": "NavigationViewItemPresenter",
    "status": "waived",
-   "reason": "NavigationView: no FerroUI control (batch B5). The item presenter styles of the left and the top pane are written into the tab themes built from them (Controls/TabItem.xaml for the tabs at the left and the right, TabbedPageTabItemTheme of Controls/TabbedPage.xaml for the top pane); the settings item, the overflow button of the top pane and the search button of the pane have no counterpart in FerroUI's pages.",
+   "reason": "The public NavigationViewItemPresenter and its TemplateSettings are not implemented. Native NavigationViewItem uses its own replaceable metadata template; existing DrawerPage/TabItem/TabbedPage adaptations do not supply these three source presenter styles.",
    "batch": null
   },
   {
@@ -64105,7 +64105,7 @@
    "kind": "Style",
    "target_type": "NavigationViewItemPresenter",
    "status": "waived",
-   "reason": "NavigationView: no FerroUI control (batch B5). The item presenter styles of the left and the top pane are written into the tab themes built from them (Controls/TabItem.xaml for the tabs at the left and the right, TabbedPageTabItemTheme of Controls/TabbedPage.xaml for the top pane); the settings item, the overflow button of the top pane and the search button of the pane have no counterpart in FerroUI's pages.",
+   "reason": "The public NavigationViewItemPresenter and its TemplateSettings are not implemented. Native NavigationViewItem uses its own replaceable metadata template; existing DrawerPage/TabItem/TabbedPage adaptations do not supply these three source presenter styles.",
    "batch": null
   },
   {
@@ -64114,9 +64114,9 @@
    "key": "MUX_NavigationViewSettingsItemStyleWhenOnTopPane",
    "kind": "Style",
    "target_type": "NavigationViewItem",
-   "status": "waived",
-   "reason": "NavigationView: no FerroUI control (batch B5). The item presenter styles of the left and the top pane are written into the tab themes built from them (Controls/TabItem.xaml for the tabs at the left and the right, TabbedPageTabItemTheme of Controls/TabbedPage.xaml for the top pane); the settings item, the overflow button of the top pane and the search button of the pane have no counterpart in FerroUI's pages.",
-   "batch": null
+   "status": "pending",
+   "reason": null,
+   "batch": "B5"
   },
   {
    "document": "controls/dev/NavigationView/NavigationView_themeresources.xaml",
@@ -64445,7 +64445,7 @@
    "kind": "Style",
    "target_type": "Button",
    "status": "waived",
-   "reason": "NavigationView: no FerroUI control (batch B5). The item presenter styles of the left and the top pane are written into the tab themes built from them (Controls/TabItem.xaml for the tabs at the left and the right, TabbedPageTabItemTheme of Controls/TabbedPage.xaml for the top pane); the settings item, the overflow button of the top pane and the search button of the pane have no counterpart in FerroUI's pages.",
+   "reason": "The native NavigationView top pane uses horizontal layout without source overflow redistribution, an overflow button/flyout, or OverflowLabelMode. These two source overflow-button styles have no implemented feature to style.",
    "batch": null
   },
   {
@@ -64455,7 +64455,7 @@
    "kind": "Style",
    "target_type": "Button",
    "status": "waived",
-   "reason": "NavigationView: no FerroUI control (batch B5). The item presenter styles of the left and the top pane are written into the tab themes built from them (Controls/TabItem.xaml for the tabs at the left and the right, TabbedPageTabItemTheme of Controls/TabbedPage.xaml for the top pane); the settings item, the overflow button of the top pane and the search button of the pane have no counterpart in FerroUI's pages.",
+   "reason": "The native NavigationView top pane uses horizontal layout without source overflow redistribution, an overflow button/flyout, or OverflowLabelMode. These two source overflow-button styles have no implemented feature to style.",
    "batch": null
   },
   {
@@ -64485,7 +64485,7 @@
    "kind": "Style",
    "target_type": "Button",
    "status": "waived",
-   "reason": "NavigationView: no FerroUI control (batch B5). The item presenter styles of the left and the top pane are written into the tab themes built from them (Controls/TabItem.xaml for the tabs at the left and the right, TabbedPageTabItemTheme of Controls/TabbedPage.xaml for the top pane); the settings item, the overflow button of the top pane and the search button of the pane have no counterpart in FerroUI's pages.",
+   "reason": "The native NavigationView hosts AutoSuggestBox directly; the source compact PaneAutoSuggestButton affordance and its transition back to the search box are not implemented. The separate source pane-search button style therefore remains waived.",
    "batch": null
   },
   {
@@ -68954,9 +68954,9 @@
    "key": "{ProgressRing}",
    "kind": "Style",
    "target_type": "ProgressRing",
-   "status": "waived",
-   "reason": "ProgressRing: no FerroUI control (its animation is an animated visual, a Lottie composition).",
-   "batch": null
+   "status": "pending",
+   "reason": null,
+   "batch": "B1"
   },
   {
    "document": "controls/dev/ProgressRing/ProgressRing_themeresources.xaml",
@@ -68964,9 +68964,9 @@
    "key": "ProgressRingStrokeThickness",
    "kind": "x:Double",
    "target_type": "",
-   "status": "waived",
-   "reason": "ProgressRing: no FerroUI control (its animation is an animated visual, a Lottie composition).",
-   "batch": null
+   "status": "pending",
+   "reason": null,
+   "batch": "resources"
   },
   {
    "document": "controls/dev/ProgressRing/ProgressRing_themeresources.xaml",
@@ -68974,9 +68974,9 @@
    "key": "ProgressRingBackgroundThemeBrush",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "ProgressRing: no FerroUI control (its animation is an animated visual, a Lottie composition).",
-   "batch": null
+   "status": "pending",
+   "reason": null,
+   "batch": "resources"
   },
   {
    "document": "controls/dev/ProgressRing/ProgressRing_themeresources.xaml",
@@ -68984,9 +68984,9 @@
    "key": "ProgressRingForegroundThemeBrush",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "ProgressRing: no FerroUI control (its animation is an animated visual, a Lottie composition).",
-   "batch": null
+   "status": "pending",
+   "reason": null,
+   "batch": "resources"
   },
   {
    "document": "controls/dev/ProgressRing/ProgressRing_themeresources.xaml",
@@ -68994,9 +68994,9 @@
    "key": "ProgressRingBackgroundThemeBrush",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "ProgressRing: no FerroUI control (its animation is an animated visual, a Lottie composition).",
-   "batch": null
+   "status": "pending",
+   "reason": null,
+   "batch": "resources"
   },
   {
    "document": "controls/dev/ProgressRing/ProgressRing_themeresources.xaml",
@@ -69004,9 +69004,9 @@
    "key": "ProgressRingForegroundThemeBrush",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "ProgressRing: no FerroUI control (its animation is an animated visual, a Lottie composition).",
-   "batch": null
+   "status": "pending",
+   "reason": null,
+   "batch": "resources"
   },
   {
    "document": "controls/dev/ProgressRing/ProgressRing_themeresources.xaml",
@@ -69014,9 +69014,9 @@
    "key": "ProgressRingBackgroundThemeBrush",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "ProgressRing: no FerroUI control (its animation is an animated visual, a Lottie composition).",
-   "batch": null
+   "status": "pending",
+   "reason": null,
+   "batch": "resources"
   },
   {
    "document": "controls/dev/ProgressRing/ProgressRing_themeresources.xaml",
@@ -69024,9 +69024,9 @@
    "key": "ProgressRingForegroundThemeBrush",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "ProgressRing: no FerroUI control (its animation is an animated visual, a Lottie composition).",
-   "batch": null
+   "status": "pending",
+   "reason": null,
+   "batch": "resources"
   },
   {
    "document": "controls/dev/PullToRefresh/RefreshContainer/RefreshContainer.xaml",
@@ -69184,9 +69184,9 @@
    "key": "DefaultRadioButtonsStyle",
    "kind": "Style",
    "target_type": "RadioButtons",
-   "status": "waived",
-   "reason": "RadioButtons (the group control): no FerroUI control; FerroUI groups radio buttons by GroupName.",
-   "batch": null
+   "status": "pending",
+   "reason": null,
+   "batch": "B3"
   },
   {
    "document": "controls/dev/RadioButtons/RadioButtons.xaml",
@@ -69194,9 +69194,9 @@
    "key": "{RadioButtons}",
    "kind": "Style",
    "target_type": "RadioButtons",
-   "status": "waived",
-   "reason": "RadioButtons (the group control): no FerroUI control; FerroUI groups radio buttons by GroupName.",
-   "batch": null
+   "status": "pending",
+   "reason": null,
+   "batch": "B3"
   },
   {
    "document": "controls/dev/RadioButtons/RadioButtons_themeresources.xaml",
@@ -69204,9 +69204,9 @@
    "key": "RadioButtonsColumnSpacing",
    "kind": "x:Double",
    "target_type": "",
-   "status": "waived",
-   "reason": "RadioButtons (the group control): no FerroUI control; FerroUI groups radio buttons by GroupName.",
-   "batch": null
+   "status": "pending",
+   "reason": null,
+   "batch": "resources"
   },
   {
    "document": "controls/dev/RadioButtons/RadioButtons_themeresources.xaml",
@@ -69214,9 +69214,9 @@
    "key": "RadioButtonsRowSpacing",
    "kind": "x:Double",
    "target_type": "",
-   "status": "waived",
-   "reason": "RadioButtons (the group control): no FerroUI control; FerroUI groups radio buttons by GroupName.",
-   "batch": null
+   "status": "pending",
+   "reason": null,
+   "batch": "resources"
   },
   {
    "document": "controls/dev/RadioButtons/RadioButtons_themeresources.xaml",
@@ -69224,9 +69224,9 @@
    "key": "RadioButtonsTopHeaderMargin",
    "kind": "Thickness",
    "target_type": "",
-   "status": "waived",
-   "reason": "RadioButtons (the group control): no FerroUI control; FerroUI groups radio buttons by GroupName.",
-   "batch": null
+   "status": "pending",
+   "reason": null,
+   "batch": "resources"
   },
   {
    "document": "controls/dev/RadioButtons/RadioButtons_themeresources.xaml",
@@ -69234,9 +69234,9 @@
    "key": "RadioButtonsHeaderForeground",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "RadioButtons (the group control): no FerroUI control; FerroUI groups radio buttons by GroupName.",
-   "batch": null
+   "status": "pending",
+   "reason": null,
+   "batch": "resources"
   },
   {
    "document": "controls/dev/RadioButtons/RadioButtons_themeresources.xaml",
@@ -69244,9 +69244,9 @@
    "key": "RadioButtonsHeaderForegroundDisabled",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "RadioButtons (the group control): no FerroUI control; FerroUI groups radio buttons by GroupName.",
-   "batch": null
+   "status": "pending",
+   "reason": null,
+   "batch": "resources"
   },
   {
    "document": "controls/dev/RadioButtons/RadioButtons_themeresources.xaml",
@@ -69254,9 +69254,9 @@
    "key": "RadioButtonsHeaderForeground",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "RadioButtons (the group control): no FerroUI control; FerroUI groups radio buttons by GroupName.",
-   "batch": null
+   "status": "pending",
+   "reason": null,
+   "batch": "resources"
   },
   {
    "document": "controls/dev/RadioButtons/RadioButtons_themeresources.xaml",
@@ -69264,9 +69264,9 @@
    "key": "RadioButtonsHeaderForegroundDisabled",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "RadioButtons (the group control): no FerroUI control; FerroUI groups radio buttons by GroupName.",
-   "batch": null
+   "status": "pending",
+   "reason": null,
+   "batch": "resources"
   },
   {
    "document": "controls/dev/RadioButtons/RadioButtons_themeresources.xaml",
@@ -69274,9 +69274,9 @@
    "key": "RadioButtonsHeaderForeground",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "RadioButtons (the group control): no FerroUI control; FerroUI groups radio buttons by GroupName.",
-   "batch": null
+   "status": "pending",
+   "reason": null,
+   "batch": "resources"
   },
   {
    "document": "controls/dev/RadioButtons/RadioButtons_themeresources.xaml",
@@ -69284,9 +69284,9 @@
    "key": "RadioButtonsHeaderForegroundDisabled",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "RadioButtons (the group control): no FerroUI control; FerroUI groups radio buttons by GroupName.",
-   "batch": null
+   "status": "pending",
+   "reason": null,
+   "batch": "resources"
   },
   {
    "document": "controls/dev/RadioMenuFlyoutItem/RadioMenuFlyoutItem_themeresources.xaml",
@@ -69324,9 +69324,9 @@
    "key": "{RatingControl}",
    "kind": "Style",
    "target_type": "RatingControl",
-   "status": "waived",
-   "reason": "RatingControl: no FerroUI control.",
-   "batch": null
+   "status": "pending",
+   "reason": null,
+   "batch": "B2"
   },
   {
    "document": "controls/dev/RatingControl/RatingControl_themeresources.xaml",
@@ -69334,9 +69334,9 @@
    "key": "BackgroundGlyphDefaultTemplate",
    "kind": "DataTemplate",
    "target_type": "",
-   "status": "waived",
-   "reason": "RatingControl: no FerroUI control.",
-   "batch": null
+   "status": "pending",
+   "reason": null,
+   "batch": "resources"
   },
   {
    "document": "controls/dev/RatingControl/RatingControl_themeresources.xaml",
@@ -69344,9 +69344,9 @@
    "key": "BackgroundImageDefaultTemplate",
    "kind": "DataTemplate",
    "target_type": "",
-   "status": "waived",
-   "reason": "RatingControl: no FerroUI control.",
-   "batch": null
+   "status": "pending",
+   "reason": null,
+   "batch": "resources"
   },
   {
    "document": "controls/dev/RatingControl/RatingControl_themeresources.xaml",
@@ -69354,9 +69354,9 @@
    "key": "ForegroundGlyphDefaultTemplate",
    "kind": "DataTemplate",
    "target_type": "",
-   "status": "waived",
-   "reason": "RatingControl: no FerroUI control.",
-   "batch": null
+   "status": "pending",
+   "reason": null,
+   "batch": "resources"
   },
   {
    "document": "controls/dev/RatingControl/RatingControl_themeresources.xaml",
@@ -69364,9 +69364,9 @@
    "key": "ForegroundImageDefaultTemplate",
    "kind": "DataTemplate",
    "target_type": "",
-   "status": "waived",
-   "reason": "RatingControl: no FerroUI control.",
-   "batch": null
+   "status": "pending",
+   "reason": null,
+   "batch": "resources"
   },
   {
    "document": "controls/dev/RatingControl/RatingControl_themeresources.xaml",
@@ -69374,9 +69374,9 @@
    "key": "RatingControlCaptionTopMargin",
    "kind": "x:Double",
    "target_type": "",
-   "status": "waived",
-   "reason": "RatingControl: no FerroUI control.",
-   "batch": null
+   "status": "pending",
+   "reason": null,
+   "batch": "resources"
   },
   {
    "document": "controls/dev/RatingControl/RatingControl_themeresources.xaml",
@@ -69384,9 +69384,9 @@
    "key": "RatingControlFontSizeForRendering",
    "kind": "x:Double",
    "target_type": "",
-   "status": "waived",
-   "reason": "RatingControl: no FerroUI control.",
-   "batch": null
+   "status": "pending",
+   "reason": null,
+   "batch": "resources"
   },
   {
    "document": "controls/dev/RatingControl/RatingControl_themeresources.xaml",
@@ -69394,9 +69394,9 @@
    "key": "RatingControlItemSpacing",
    "kind": "x:Double",
    "target_type": "",
-   "status": "waived",
-   "reason": "RatingControl: no FerroUI control.",
-   "batch": null
+   "status": "pending",
+   "reason": null,
+   "batch": "resources"
   },
   {
    "document": "controls/dev/RatingControl/RatingControl_themeresources.xaml",
@@ -69404,9 +69404,9 @@
    "key": "MUX_RatingControlDefaultFontInfo",
    "kind": "RatingItemFontInfo",
    "target_type": "",
-   "status": "waived",
-   "reason": "RatingControl: no FerroUI control.",
-   "batch": null
+   "status": "pending",
+   "reason": null,
+   "batch": "resources"
   },
   {
    "document": "controls/dev/RatingControl/RatingControl_themeresources.xaml",
@@ -69414,9 +69414,9 @@
    "key": "RatingControlCaptionForeground",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "RatingControl: no FerroUI control.",
-   "batch": null
+   "status": "pending",
+   "reason": null,
+   "batch": "resources"
   },
   {
    "document": "controls/dev/RatingControl/RatingControl_themeresources.xaml",
@@ -69424,9 +69424,9 @@
    "key": "RatingControlDisabledSelectedForeground",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "RatingControl: no FerroUI control.",
-   "batch": null
+   "status": "pending",
+   "reason": null,
+   "batch": "resources"
   },
   {
    "document": "controls/dev/RatingControl/RatingControl_themeresources.xaml",
@@ -69434,9 +69434,9 @@
    "key": "RatingControlPlaceholderForeground",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "RatingControl: no FerroUI control.",
-   "batch": null
+   "status": "pending",
+   "reason": null,
+   "batch": "resources"
   },
   {
    "document": "controls/dev/RatingControl/RatingControl_themeresources.xaml",
@@ -69444,9 +69444,9 @@
    "key": "RatingControlPointerOverPlaceholderForeground",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "RatingControl: no FerroUI control.",
-   "batch": null
+   "status": "pending",
+   "reason": null,
+   "batch": "resources"
   },
   {
    "document": "controls/dev/RatingControl/RatingControl_themeresources.xaml",
@@ -69454,9 +69454,9 @@
    "key": "RatingControlPointerOverSelectedForeground",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "RatingControl: no FerroUI control.",
-   "batch": null
+   "status": "pending",
+   "reason": null,
+   "batch": "resources"
   },
   {
    "document": "controls/dev/RatingControl/RatingControl_themeresources.xaml",
@@ -69464,9 +69464,9 @@
    "key": "RatingControlPointerOverUnselectedForeground",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "RatingControl: no FerroUI control.",
-   "batch": null
+   "status": "pending",
+   "reason": null,
+   "batch": "resources"
   },
   {
    "document": "controls/dev/RatingControl/RatingControl_themeresources.xaml",
@@ -69474,9 +69474,9 @@
    "key": "RatingControlSelectedForeground",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "RatingControl: no FerroUI control.",
-   "batch": null
+   "status": "pending",
+   "reason": null,
+   "batch": "resources"
   },
   {
    "document": "controls/dev/RatingControl/RatingControl_themeresources.xaml",
@@ -69484,9 +69484,9 @@
    "key": "RatingControlUnselectedForeground",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "RatingControl: no FerroUI control.",
-   "batch": null
+   "status": "pending",
+   "reason": null,
+   "batch": "resources"
   },
   {
    "document": "controls/dev/RatingControl/RatingControl_themeresources.xaml",
@@ -69494,9 +69494,9 @@
    "key": "MUX_RatingControlDefaultFontInfo",
    "kind": "RatingItemFontInfo",
    "target_type": "",
-   "status": "waived",
-   "reason": "RatingControl: no FerroUI control.",
-   "batch": null
+   "status": "pending",
+   "reason": null,
+   "batch": "resources"
   },
   {
    "document": "controls/dev/RatingControl/RatingControl_themeresources.xaml",
@@ -69504,9 +69504,9 @@
    "key": "RatingControlCaptionForeground",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "RatingControl: no FerroUI control.",
-   "batch": null
+   "status": "pending",
+   "reason": null,
+   "batch": "resources"
   },
   {
    "document": "controls/dev/RatingControl/RatingControl_themeresources.xaml",
@@ -69514,9 +69514,9 @@
    "key": "RatingControlDisabledSelectedForeground",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "RatingControl: no FerroUI control.",
-   "batch": null
+   "status": "pending",
+   "reason": null,
+   "batch": "resources"
   },
   {
    "document": "controls/dev/RatingControl/RatingControl_themeresources.xaml",
@@ -69524,9 +69524,9 @@
    "key": "RatingControlPlaceholderForeground",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "RatingControl: no FerroUI control.",
-   "batch": null
+   "status": "pending",
+   "reason": null,
+   "batch": "resources"
   },
   {
    "document": "controls/dev/RatingControl/RatingControl_themeresources.xaml",
@@ -69534,9 +69534,9 @@
    "key": "RatingControlPointerOverPlaceholderForeground",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "RatingControl: no FerroUI control.",
-   "batch": null
+   "status": "pending",
+   "reason": null,
+   "batch": "resources"
   },
   {
    "document": "controls/dev/RatingControl/RatingControl_themeresources.xaml",
@@ -69544,9 +69544,9 @@
    "key": "RatingControlPointerOverSelectedForeground",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "RatingControl: no FerroUI control.",
-   "batch": null
+   "status": "pending",
+   "reason": null,
+   "batch": "resources"
   },
   {
    "document": "controls/dev/RatingControl/RatingControl_themeresources.xaml",
@@ -69554,9 +69554,9 @@
    "key": "RatingControlPointerOverUnselectedForeground",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "RatingControl: no FerroUI control.",
-   "batch": null
+   "status": "pending",
+   "reason": null,
+   "batch": "resources"
   },
   {
    "document": "controls/dev/RatingControl/RatingControl_themeresources.xaml",
@@ -69564,9 +69564,9 @@
    "key": "RatingControlSelectedForeground",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "RatingControl: no FerroUI control.",
-   "batch": null
+   "status": "pending",
+   "reason": null,
+   "batch": "resources"
   },
   {
    "document": "controls/dev/RatingControl/RatingControl_themeresources.xaml",
@@ -69574,9 +69574,9 @@
    "key": "RatingControlUnselectedForeground",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "RatingControl: no FerroUI control.",
-   "batch": null
+   "status": "pending",
+   "reason": null,
+   "batch": "resources"
   },
   {
    "document": "controls/dev/RatingControl/RatingControl_themeresources.xaml",
@@ -69584,9 +69584,9 @@
    "key": "MUX_RatingControlDefaultFontInfo",
    "kind": "RatingItemFontInfo",
    "target_type": "",
-   "status": "waived",
-   "reason": "RatingControl: no FerroUI control.",
-   "batch": null
+   "status": "pending",
+   "reason": null,
+   "batch": "resources"
   },
   {
    "document": "controls/dev/RatingControl/RatingControl_themeresources.xaml",
@@ -69594,9 +69594,9 @@
    "key": "RatingControlCaptionForeground",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "RatingControl: no FerroUI control.",
-   "batch": null
+   "status": "pending",
+   "reason": null,
+   "batch": "resources"
   },
   {
    "document": "controls/dev/RatingControl/RatingControl_themeresources.xaml",
@@ -69604,9 +69604,9 @@
    "key": "RatingControlDisabledSelectedForeground",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "RatingControl: no FerroUI control.",
-   "batch": null
+   "status": "pending",
+   "reason": null,
+   "batch": "resources"
   },
   {
    "document": "controls/dev/RatingControl/RatingControl_themeresources.xaml",
@@ -69614,9 +69614,9 @@
    "key": "RatingControlPlaceholderForeground",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "RatingControl: no FerroUI control.",
-   "batch": null
+   "status": "pending",
+   "reason": null,
+   "batch": "resources"
   },
   {
    "document": "controls/dev/RatingControl/RatingControl_themeresources.xaml",
@@ -69624,9 +69624,9 @@
    "key": "RatingControlPointerOverPlaceholderForeground",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "RatingControl: no FerroUI control.",
-   "batch": null
+   "status": "pending",
+   "reason": null,
+   "batch": "resources"
   },
   {
    "document": "controls/dev/RatingControl/RatingControl_themeresources.xaml",
@@ -69634,9 +69634,9 @@
    "key": "RatingControlPointerOverSelectedForeground",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "RatingControl: no FerroUI control.",
-   "batch": null
+   "status": "pending",
+   "reason": null,
+   "batch": "resources"
   },
   {
    "document": "controls/dev/RatingControl/RatingControl_themeresources.xaml",
@@ -69644,9 +69644,9 @@
    "key": "RatingControlPointerOverUnselectedForeground",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "RatingControl: no FerroUI control.",
-   "batch": null
+   "status": "pending",
+   "reason": null,
+   "batch": "resources"
   },
   {
    "document": "controls/dev/RatingControl/RatingControl_themeresources.xaml",
@@ -69654,9 +69654,9 @@
    "key": "RatingControlSelectedForeground",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "RatingControl: no FerroUI control.",
-   "batch": null
+   "status": "pending",
+   "reason": null,
+   "batch": "resources"
   },
   {
    "document": "controls/dev/RatingControl/RatingControl_themeresources.xaml",
@@ -69664,9 +69664,9 @@
    "key": "RatingControlUnselectedForeground",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "RatingControl: no FerroUI control.",
-   "batch": null
+   "status": "pending",
+   "reason": null,
+   "batch": "resources"
   },
   {
    "document": "controls/dev/ScrollView/ScrollView.xaml",
@@ -77944,9 +77944,9 @@
    "key": "RadioButtonsItemStyle",
    "kind": "Style",
    "target_type": "ListViewItem",
-   "status": "waived",
-   "reason": "RadioButtons (the group control): no FerroUI control.",
-   "batch": null
+   "status": "pending",
+   "reason": null,
+   "batch": "B3"
   },
   {
    "document": "dxaml/xcp/dxaml/themes/generic.xaml",
@@ -90086,6 +90086,7 @@
   "Controls/GroupBox.xaml",
   "Controls/HeaderedContentControl.xaml",
   "Controls/HyperlinkButton.xaml",
+  "Controls/InfoBadge.xaml",
   "Controls/ItemsControl.xaml",
   "Controls/Label.xaml",
   "Controls/ListBox.xaml",
@@ -90376,7 +90377,7 @@
    "winui": "CommandBar: DefaultCommandBarStyle, DefaultCommandBarOverflowPresenterStyle (CommandBar_themeresources.xaml); AppBarButton: DefaultAppBarButtonStyle, AppBarButtonOverflowStyle; AppBarToggleButton: DefaultAppBarToggleButtonStyle, AppBarToggleButtonOverflowStyle; AppBarSeparator: DefaultAppBarSeparatorStyle.",
    "status": "ported",
    "deviations": 20,
-   "date": "2026-10-17"
+   "date": "2026-10-22"
   },
   {
    "document": "ContentPage.xaml",
@@ -91118,7 +91119,7 @@
    "document": "controls/dev/CommonStyles/Deprecated_themeresources.xaml",
    "key": "re:MUX_NavigationViewItemPresenterStyle.*WithRevealFocus",
    "variant": null,
-   "reason": "Reveal focus variants of the NavigationView item presenter: deprecated (Reveal focus), and FerroUI has no NavigationView.",
+   "reason": "Reveal-focus variants of NavigationViewItemPresenter are deprecated in WinUI 3. FerroUI implements neither Reveal focus lighting nor the public source presenter/TemplateSettings; native NavigationView controls do not make these legacy styles available.",
    "items": 2
   },
   {
@@ -91204,34 +91205,6 @@
    "variant": null,
    "reason": "RichEditBox: no FerroUI control (no rich text editing).",
    "items": 3
-  },
-  {
-   "document": "controls/dev/RatingControl/RatingControl.xaml",
-   "key": "*",
-   "variant": null,
-   "reason": "RatingControl: no FerroUI control.",
-   "items": 1
-  },
-  {
-   "document": "controls/dev/RatingControl/RatingControl_themeresources.xaml",
-   "key": "*",
-   "variant": null,
-   "reason": "RatingControl: no FerroUI control.",
-   "items": 34
-  },
-  {
-   "document": "controls/dev/InfoBadge/InfoBadge.xaml",
-   "key": "*",
-   "variant": null,
-   "reason": "InfoBadge: no FerroUI control.",
-   "items": 1
-  },
-  {
-   "document": "controls/dev/InfoBadge/InfoBadge_themeresources.xaml",
-   "key": "*",
-   "variant": null,
-   "reason": "InfoBadge: no FerroUI control.",
-   "items": 52
   },
   {
    "document": "controls/dev/PersonPicture/PersonPicture.xaml",
@@ -91395,41 +91368,6 @@
    "items": 2
   },
   {
-   "document": "controls/dev/RadioButtons/RadioButtons.xaml",
-   "key": "*",
-   "variant": null,
-   "reason": "RadioButtons (the group control): no FerroUI control; FerroUI groups radio buttons by GroupName.",
-   "items": 2
-  },
-  {
-   "document": "controls/dev/RadioButtons/RadioButtons_themeresources.xaml",
-   "key": "*",
-   "variant": null,
-   "reason": "RadioButtons (the group control): no FerroUI control; FerroUI groups radio buttons by GroupName.",
-   "items": 9
-  },
-  {
-   "document": "dxaml/xcp/dxaml/themes/generic.xaml",
-   "key": "RadioButtonsItemStyle",
-   "variant": null,
-   "reason": "RadioButtons (the group control): no FerroUI control.",
-   "items": 1
-  },
-  {
-   "document": "controls/dev/ProgressRing/ProgressRing.xaml",
-   "key": "*",
-   "variant": null,
-   "reason": "ProgressRing: no FerroUI control (its animation is an animated visual, a Lottie composition).",
-   "items": 1
-  },
-  {
-   "document": "controls/dev/ProgressRing/ProgressRing_themeresources.xaml",
-   "key": "*",
-   "variant": null,
-   "reason": "ProgressRing: no FerroUI control (its animation is an animated visual, a Lottie composition).",
-   "items": 7
-  },
-  {
    "document": "controls/dev/ImageIcon/ImageIcon.xaml",
    "key": "*",
    "variant": null,
@@ -91486,18 +91424,25 @@
    "items": 1
   },
   {
-   "document": "controls/dev/NavigationView/NavigationView.xaml",
-   "key": "re:\\{NavigationView(Item|ItemHeader|ItemSeparator)?\\}",
+   "document": "controls/dev/NavigationView/NavigationView_themeresources.xaml",
+   "key": "re:MUX_NavigationViewItemPresenterStyleWhenOn(LeftPane|TopPane|TopPaneOverflow)",
    "variant": null,
-   "reason": "NavigationView: no FerroUI control (batch B5). DrawerPage, TabbedPage and the tabs of TabControl at the left and the right are built from its panes and items (Controls/DrawerPage.xaml, Controls/TabbedPage.xaml, Controls/TabItem.xaml); the styles of NavigationView itself, its items, item headers and separators have no control to style.",
-   "items": 4
+   "reason": "The public NavigationViewItemPresenter and its TemplateSettings are not implemented. Native NavigationViewItem uses its own replaceable metadata template; existing DrawerPage/TabItem/TabbedPage adaptations do not supply these three source presenter styles.",
+   "items": 3
   },
   {
    "document": "controls/dev/NavigationView/NavigationView_themeresources.xaml",
-   "key": "re:MUX_NavigationViewItemPresenterStyleWhenOn(LeftPane|TopPane|TopPaneOverflow)|MUX_NavigationViewSettingsItemStyleWhenOnTopPane|NavigationViewOverflowButton(No)?(Label)?StyleWhenPaneOnTop|NavigationViewPaneSearchButtonStyle",
+   "key": "re:NavigationViewOverflowButton(NoLabel)?StyleWhenPaneOnTop",
    "variant": null,
-   "reason": "NavigationView: no FerroUI control (batch B5). The item presenter styles of the left and the top pane are written into the tab themes built from them (Controls/TabItem.xaml for the tabs at the left and the right, TabbedPageTabItemTheme of Controls/TabbedPage.xaml for the top pane); the settings item, the overflow button of the top pane and the search button of the pane have no counterpart in FerroUI's pages.",
-   "items": 7
+   "reason": "The native NavigationView top pane uses horizontal layout without source overflow redistribution, an overflow button/flyout, or OverflowLabelMode. These two source overflow-button styles have no implemented feature to style.",
+   "items": 2
+  },
+  {
+   "document": "controls/dev/NavigationView/NavigationView_themeresources.xaml",
+   "key": "NavigationViewPaneSearchButtonStyle",
+   "variant": null,
+   "reason": "The native NavigationView hosts AutoSuggestBox directly; the source compact PaneAutoSuggestButton affordance and its transition back to the search box are not implemented. The separate source pane-search button style therefore remains waived.",
+   "items": 1
   },
   {
    "document": "controls/dev/CommonStyles/MenuFlyout_themeresources.xaml",
@@ -91604,7 +91549,11 @@
   "RefreshVisualizer": 3,
   "Slider": 12,
   "SplitButton": 15,
-  "ToggleSwitch": 11
+  "ToggleSwitch": 11,
+  "InfoBadge": 2,
+  "NavigationView": 5,
+  "ProgressRing": 3,
+  "RatingControl": 2
  },
  "winui_targets": {
   "AppBarButton": {
@@ -91712,6 +91661,11 @@
    "ferroui": "HyperlinkButton",
    "batch": "F"
   },
+  "InfoBadge": {
+   "ferroui": "InfoBadge",
+   "batch": "B6",
+   "note": "Additive FerroUI.Controls.InfoBadge; native control API and InfoBadge.xaml ControlThemes. Resource key coverage is separate from exact visual parity."
+  },
   "InfoBar": {
    "ferroui": "NotificationCard",
    "batch": "B6"
@@ -91765,27 +91719,29 @@
    "batch": "B3"
   },
   "NavigationViewItem": {
-   "ferroui": null,
+   "ferroui": "NavigationViewItem",
    "batch": "B5",
-   "note": "keyed styles only; NavigationView has no FerroUI control"
+   "note": "Additive FerroUI.Controls.NavigationViewItem; native content/icon/badge/hierarchy parts. The original implicit and top settings-item styles remain pending."
   },
   "NavigationViewItemPresenter": {
    "ferroui": null,
    "batch": "B5",
-   "note": "NavigationView has no FerroUI control"
+   "note": "No public native NavigationViewItemPresenter or its TemplateSettings. The native NavigationViewItem row parts do not implement that source class; its presenter styles remain waived."
   },
   "NavigationView": {
-   "ferroui": null,
+   "ferroui": "NavigationView",
    "batch": "B5",
-   "note": "no FerroUI control; DrawerPage is built from its pane"
+   "note": "Additive FerroUI.Controls.NavigationView; replaceable native metadata template and resource lookup. The original implicit style remains pending; DrawerPage keeps its separate existing page contract."
   },
   "NavigationViewItemHeader": {
-   "ferroui": null,
-   "batch": "B5"
+   "ferroui": "NavigationViewItemHeader",
+   "batch": "B5",
+   "note": "Additive FerroUI.Controls.NavigationViewItemHeader; native nonfocusable heading. The original implicit style remains pending."
   },
   "NavigationViewItemSeparator": {
-   "ferroui": null,
-   "batch": "B5"
+   "ferroui": "NavigationViewItemSeparator",
+   "batch": "B5",
+   "note": "Additive FerroUI.Controls.NavigationViewItemSeparator; native nonfocusable line and orientation. The original implicit style remains pending."
   },
   "NumberBox": {
    "ferroui": "NumericUpDown",
@@ -91804,6 +91760,11 @@
    "ferroui": "ProgressBar",
    "batch": "B1"
   },
+  "ProgressRing": {
+   "ferroui": "ProgressRing",
+   "batch": "B1",
+   "note": "Additive FerroUI.Controls.ProgressRing; native Arc template and brush lookup. Source style/resource declarations and exact Lottie/stroke visuals remain pending."
+  },
   "RadioButton": {
    "ferroui": "RadioButton",
    "batch": "F"
@@ -91811,6 +91772,16 @@
   "RadioMenuFlyoutItem": {
    "ferroui": "MenuItem",
    "batch": "B3"
+  },
+  "RadioButtons": {
+   "ferroui": "RadioButtons",
+   "batch": "B3",
+   "note": "Native FerroUI.Controls.RadioButtons; replaceable metadata template and native RadioButton items. Original group/item styles and scoped resource declarations remain pending."
+  },
+  "RatingControl": {
+   "ferroui": "RatingControl",
+   "batch": "B2",
+   "note": "Additive FerroUI.Controls.RatingControl; native glyph/image template, clipping and resource lookup. Original styles, item DataTemplates and exact source visuals remain pending."
   },
   "Rectangle": {
    "ferroui": null,
@@ -91935,5 +91906,83 @@
    "batch": "B3",
    "note": "ColorPickerBorderStyle (waived with ColorPicker)"
   }
- }
+ },
+ "native_additions": [
+  {
+   "control": "FerroUI.Controls.RadioButtons",
+   "source_commit": "a71c42bd3e352060e5f5ecf3b5e1a98f8a745809",
+   "implementation": "src/FerroUI.Controls/radio_buttons.rs",
+   "theme_documents": [],
+   "coverage": "The ordinary FerroUI control namespace provides a native RadioButtons group with selection, items and column layout. Its replaceable metadata template uses native RadioButton controls and their existing themes.",
+   "remaining": "The original RadioButtons implicit style, item style and scoped resource declarations remain pending. The former no-control waivers no longer apply. The native group implementation does not certify source template parts, all resource metrics, HighContrast or pixel parity.",
+   "theme_document_sha256": {}
+  },
+  {
+   "control": "FerroUI.Controls.InfoBadge",
+   "source_commit": "a71c42bd3e352060e5f5ecf3b5e1a98f8a745809",
+   "implementation": "src/FerroUI.Controls/info_badge.rs",
+   "theme_documents": [
+    "Controls/InfoBadge.xaml"
+   ],
+   "coverage": "The ordinary FerroUI control namespace provides InfoBadge. WinUIControls.xaml merges its dictionary, which supplies the implicit theme, DefaultInfoBadgeStyle, and all five severity families with dot/value/icon themes. Migration changes Style to Theme. The native replaceable template handles value, icon and dot presentation; colors use Default, Light and HighContrast dictionaries. The native NavigationViewItem can host this badge and the Gallery includes the original navigation-badge composition; exact source navigation visuals remain separate.",
+   "remaining": "The scanner counts resource declarations in their original theme scope. Shared dimensions and margins are supplied at dictionary root, so their upstream variant-scoped entries remain pending in this strict inventory. Matching resource keys does not establish complete upstream VisualState, icon-source, source-specific NavigationView badge visuals, platform accessibility or pixel parity. The native implementation is pinned separately from this theme reference.",
+   "theme_document_sha256": {
+    "Controls/InfoBadge.xaml": "18bd2e166c47b063cd2cdc07c2450dd01776822ec6f8d2887e74da1a8e2cbe46"
+   }
+  },
+  {
+   "control": "FerroUI.Controls.ProgressRing",
+   "source_commit": "a71c42bd3e352060e5f5ecf3b5e1a98f8a745809",
+   "implementation": "src/FerroUI.Controls/progress_ring.rs",
+   "theme_documents": [],
+   "coverage": "The ordinary FerroUI control namespace provides a native ProgressRing with a replaceable Arc template and framework-clock animation. Explicit Foreground/Background values take precedence; the control resolves ProgressRingForegroundThemeBrush and ProgressRingBackgroundThemeBrush from the active theme, with accent and native color fallbacks. These lookups support application-provided resources; they do not define the missing source dictionaries.",
+   "remaining": "The original implicit style and seven source resource entries remain pending. The default Arc template computes stroke width and does not consume ProgressRingStrokeThickness. Exact Lottie geometry, determinate endpoint trim keyframes, AnimatedVisualPlayer and custom DeterminateSource/IndeterminateSource remain unported; native shape motion is an adaptation, not pixel parity. HighContrast source brush declarations are not supplied by this addition.",
+   "theme_document_sha256": {}
+  },
+  {
+   "control": "FerroUI.Controls.RatingControl",
+   "source_commit": "a71c42bd3e352060e5f5ecf3b5e1a98f8a745809",
+   "implementation": "src/FerroUI.Controls/rating_control.rs",
+   "theme_documents": [],
+   "coverage": "The ordinary FerroUI control namespace provides a native RatingControl with replaceable foreground/background item panels and a caption. Independent glyph/image visuals, fractional clips and native transforms render the rating, placeholder and pointer preview. The control resolves RatingControl state-brush keys, RatingControlFontSizeForRendering and RatingControlItemSpacing, including zero spacing, with native fallbacks.",
+   "remaining": "The original implicit style and 34 source resource entries remain pending. Resource lookup does not supply the scoped source dictionaries, four WinUI item DataTemplates or MUX_RatingControlDefaultFontInfo. RatingControlCaptionTopMargin and text-scale-dependent glyph sizing are not projected. Composition-expression animation timing, installed glyph fonts, HighContrast appearance, custom WinUI templates, platform accessibility and pixel parity require separate implementation or acceptance.",
+   "theme_document_sha256": {}
+  },
+  {
+   "control": "FerroUI.Controls.NavigationView",
+   "source_commit": "a71c42bd3e352060e5f5ecf3b5e1a98f8a745809",
+   "implementation": "src/FerroUI.Controls/navigation_view.rs",
+   "theme_documents": [],
+   "coverage": "The ordinary FerroUI control namespace provides a native ContentControl with a replaceable metadata template built from SplitView, panels, presenters and buttons. It supplies menu/footer sources, selection and settings, hierarchy, native focus/input and adaptive pane modes. Existing NavigationView resource declarations remain available to the theme; resource lookup and a Rust metadata template do not supply the source implicit style.",
+   "remaining": "The source {NavigationView} style is pending. NavigationViewTemplateSettings, the original VisualState/animation/acrylic/title-bar contracts, top overflow redistribution and the compact PaneAutoSuggestButton contract remain absent or unverified. The corresponding overflow and pane-search styles retain explicit feature waivers. Source template-part compatibility, HighContrast appearance, platform accessibility and pixel parity require separate implementation or acceptance.",
+   "theme_document_sha256": {}
+  },
+  {
+   "control": "FerroUI.Controls.NavigationViewItem",
+   "source_commit": "a71c42bd3e352060e5f5ecf3b5e1a98f8a745809",
+   "implementation": "src/FerroUI.Controls/navigation_view_item.rs",
+   "theme_documents": [],
+   "coverage": "The additive native item supplies replaceable content/icon/badge presenters, a row button, expansion affordance, child host, selection indicator and native child popup. It resolves selected source brush keys with native fallbacks. These native parts preserve the item behavior without declaring a source ControlTheme or a NavigationViewItemPresenter implementation.",
+   "remaining": "The source {NavigationViewItem} and MUX_NavigationViewSettingsItemStyleWhenOnTopPane styles are pending. Public NavigationViewItemPresenter and its TemplateSettings remain absent, so the three MUX presenter styles retain explicit waivers; deprecated Reveal-focus variants remain waived separately. Original WinUI visual states, resource-driven metrics and motion, HighContrast, platform accessibility and pixel parity remain separate.",
+   "theme_document_sha256": {}
+  },
+  {
+   "control": "FerroUI.Controls.NavigationViewItemHeader",
+   "source_commit": "a71c42bd3e352060e5f5ecf3b5e1a98f8a745809",
+   "implementation": "src/FerroUI.Controls/navigation_view_item.rs",
+   "theme_documents": [],
+   "coverage": "The additive native nonfocusable header has a replaceable ContentPresenter template and follows the parent hierarchy and closed-compact context. The existing NavigationViewItemHeaderTextStyle key remains part of the theme inventory; the native metadata template is a separate implementation.",
+   "remaining": "The source {NavigationViewItemHeader} implicit style is pending. Declaring an available header control or reusing the text-style resource does not establish the original header template, all source metrics, visual states, HighContrast or pixel parity.",
+   "theme_document_sha256": {}
+  },
+  {
+   "control": "FerroUI.Controls.NavigationViewItemSeparator",
+   "source_commit": "a71c42bd3e352060e5f5ecf3b5e1a98f8a745809",
+   "implementation": "src/FerroUI.Controls/navigation_view_item.rs",
+   "theme_documents": [],
+   "coverage": "The additive native nonfocusable separator uses a replaceable Border template, changes orientation for top navigation, and resolves the NavigationViewItemSeparatorForeground or TopNavigationViewItemSeparatorForeground brush. Existing source resource definitions and the native brush consumer are tracked separately.",
+   "remaining": "The source {NavigationViewItemSeparator} implicit style is pending. The native line and metadata template do not supply the original style declarations, resource-driven metrics, state transitions, HighContrast acceptance or pixel parity.",
+   "theme_document_sha256": {}
+  }
+ ]
 }

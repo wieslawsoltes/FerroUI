@@ -24,6 +24,7 @@ use crate::xaml_il::runtime::{
 };
 use crate::xamlx_runtime::{IXamlParentStackProviderV1, IXamlXmlNamespaceInfoProviderV1, XamlXmlNamespaceInfoV1};
 use crate::{FerroXamlLoader, IProvideValueTarget, IRootObjectProvider, IUriContext, IXamlTypeResolver, MarkupExtension};
+use crate::winui::WinUIBindings;
 use ferroui_base::data::core::{ValueType, ValueTypes};
 use ferroui_base::controls::{IDeferredContent, IResourceProvider, IThemeVariantProvider, ResourceHostRef};
 use ferroui_base::data::converters::IValueConverter;
@@ -60,6 +61,7 @@ const NAMESPACES: &[(&str, &str)] = &[
     ("ferroui_markup_xaml::parsers", "FerroUI.Markup.Xaml.Parsers"),
     ("ferroui_markup_xaml::styling", "FerroUI.Markup.Xaml.Styling"),
     ("ferroui_markup_xaml::templates", "FerroUI.Markup.Xaml.Templates"),
+    ("ferroui_markup_xaml::winui", "FerroUI.Markup.Xaml.WinUI"),
     ("ferroui_markup_xaml::xaml_il::runtime", "FerroUI.Markup.Xaml.XamlIl.Runtime"),
     ("ferroui_markup_xaml::xamlx_runtime", "XamlX.Runtime"),
 ];
@@ -79,7 +81,7 @@ pub static ASSEMBLY: MarkupAssembly = MarkupAssembly {
 };
 
 /// The types of this crate that own registered properties.
-const TYPES: &[&TypeInfo] = &[<XamlSourceInfo as StaticType>::TYPE];
+const TYPES: &[&TypeInfo] = &[<XamlSourceInfo as StaticType>::TYPE, <WinUIBindings as StaticType>::TYPE];
 
 macro_rules! markup_types {
     ($($type_:ty),* $(,)?) => {
@@ -162,6 +164,7 @@ pub fn register_types() {
         TypeInfo::register_all(TYPES);
         crate::rust_paths::register_rust_paths();
         MarkupType::register_all(MARKUP_TYPES);
+        crate::winui::register_markup_types();
         // An instantiation of a contract of the base crate, not a type of the namespaces of
         // this crate: `IAddChild<On>`.
         MarkupType::register(<AddChildOfOn as MarkupTyped>::MARKUP);

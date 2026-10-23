@@ -164,6 +164,8 @@ impl AutomationNode {
                 (RangeValuePatternIdentifiers::is_read_only_property(), UiaPropertyId::RangeValueIsReadOnly),
                 (RangeValuePatternIdentifiers::maximum_property(), UiaPropertyId::RangeValueMaximum),
                 (RangeValuePatternIdentifiers::minimum_property(), UiaPropertyId::RangeValueMinimum),
+                (RangeValuePatternIdentifiers::small_change_property(), UiaPropertyId::RangeValueSmallChange),
+                (RangeValuePatternIdentifiers::large_change_property(), UiaPropertyId::RangeValueLargeChange),
                 (RangeValuePatternIdentifiers::value_property(), UiaPropertyId::RangeValueValue),
                 (ScrollPatternIdentifiers::horizontally_scrollable_property(), UiaPropertyId::ScrollHorizontallyScrollable),
                 (ScrollPatternIdentifiers::horizontal_scroll_percent_property(), UiaPropertyId::ScrollHorizontalScrollPercent),
