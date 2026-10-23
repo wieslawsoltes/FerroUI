@@ -1,6 +1,3 @@
-Warning: truncated output (original token count: 3868)
-Total output lines: 231
-
 # LiveCharts2 port
 
 This is the work record for the native Rust port of LiveCharts2 to FerroUI. The
@@ -84,7 +81,39 @@ Each row names a complete upstream responsibility. The source/member/test maps
 remain the authoritative implementation status; this table is the review
 checklist and does not mark a feature complete.
 
-| Family | Required behav…868 tokens truncated…a/livecharts2/mapping.json) | Hand-reviewed source/member/test mappings; all other records default to pending |
+| Family | Required behavior |
+| --- | --- |
+| Cartesian engine | Draw margin and layout negotiation; multiple axes; updates; visibility; chart/series lifecycle; clipping; scaling and rendering order |
+| Axes | Linear, labels/category, date/time and duration formatting; inversion; limits; ticks and subseparators; sections; zero line; visible bounds and shared axes |
+| Line and step line | Null gaps, interpolation, smoothing, geometry markers, fill, error visuals, data labels, hover and transitions |
+| Bars | Rows and columns, grouping, stacking and stack groups, positive/negative values, maximum width, baseline/pivot, spacing, tooltips and labels |
+| Range series | Range columns/rows, range bands, time-valued dimensions, automatic bounds and tooltip anchors |
+| Scatter and heat | Point dimensions/weights, heat interpolation and stops, cell sizing, bounds, hover and legend |
+| Financial and box | OHLC/candlesticks, open/close/high/low conventions, box quartiles and whiskers, negative or reversed axes and transitions |
+| Pie and gauges | Donut radius, angle origin/extent, radial alignment, push-out, labels, hit sectors, multiple concentric series and gauge composition |
+| Polar | Angle/radius axes, scaler, inversion, labels, closed lines, null points and radial layout |
+| Geographic | GeoJSON import, map/layer/land identity, projections, longitude seams, heat colors, map hover, pan/zoom/rotation and clipping |
+| Sankey | Data validation, directed graph, layout, node/link measures, ribbons, arc/chord layout, labels, colors and interaction |
+| Treemap | Hierarchical values, layout, padding, sorting, node identity, labels, interaction and updates |
+| Motion | Easing, keyframes, property transitions, interruption, nullable values, paint references, color/gradient/effect transitions, removal and frame scheduling |
+| Visual elements | Labels, geometry, lines, needles, angular ticks, relative/stack/table layouts, measurement and interaction events |
+| Themes and states | Palette, chart/axis/series rules, post rules, per-element state setters, conditional styling and light/dark transitions |
+| Data services | Generic mappings, default observable model types, stable chart entities, bounds/minimum delta, observers, deep changes, series source and cleanup |
+| Interaction | Pointer events and capture, nearest-point strategies, hover enter/leave, legends/tooltips, pan/zoom policies, programmatic interaction and coordinate conversion |
+| Native controls | Styling, binding, XAML, measurement, invalidation, attach/detach, accessibility, templates and host integration |
+
+## Inventory and evidence
+
+The tracking files serve different purposes:
+
+| File | Meaning |
+| --- | --- |
+| [inventory.json](data/livecharts2/inventory.json) | Complete tracked source, test and sample file paths; byte counts; SHA-256 hashes; text line counts |
+| [upstream-api.json](data/livecharts2/upstream-api.json) | Roslyn syntax extraction of source types and nonprivate members, including signatures, modifiers, attributes and line locations |
+| [source-map.json](data/livecharts2/source-map.json) | A disposition and Rust path list for every source/build/resource file |
+| [api-map.json](data/livecharts2/api-map.json) | An independent disposition for every extracted nonprivate source member |
+| [test-map.json](data/livecharts2/test-map.json) | Every discovered test declaration, including parameter attributes, profile availability and reviewed Rust counterparts |
+| [mapping.json](data/livecharts2/mapping.json) | Hand-reviewed source/member/test mappings; all other records default to pending |
 | [summary.json](data/livecharts2/summary.json) | Counts by disposition and test suite, calculated from those records |
 
 Roslyn extraction reuses FerroUI's existing

@@ -1,0 +1,6288 @@
+{
+  "schema": 1,
+  "commit": "8537b90ffb100a947cd0b1f6be49f896ae6050eb",
+  "files": [
+    {
+      "source": "build/NativeSharedLinks.Build.props",
+      "family": "Resources and build configuration",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "build/RenderSettings.Build.props",
+      "family": "Resources and build configuration",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "build/SharedLinks.Build.props",
+      "family": "Resources and build configuration",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "build/UITestsLinks.Build.props",
+      "family": "Resources and build configuration",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "build/WinUISharedLinks.Build.props",
+      "family": "Resources and build configuration",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "build/XamlSharedLinks.Build.props",
+      "family": "Resources and build configuration",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "generators/LiveChartsGenerators/Definitions/BindablePropertyInitializer.cs",
+      "family": "Source generation and build metadata",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "generators/LiveChartsGenerators/Definitions/MotionProperty.cs",
+      "family": "Source generation and build metadata",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "generators/LiveChartsGenerators/Definitions/XamlObject.cs",
+      "family": "Source generation and build metadata",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "generators/LiveChartsGenerators/Definitions/XamlProperty.cs",
+      "family": "Source generation and build metadata",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "generators/LiveChartsGenerators/Frameworks/AvaloniaTemplate.cs",
+      "family": "Source generation and build metadata",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "generators/LiveChartsGenerators/Frameworks/BlazorTempalte.cs",
+      "family": "Source generation and build metadata",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "generators/LiveChartsGenerators/Frameworks/FrameworkTemplate.cs",
+      "family": "Source generation and build metadata",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "generators/LiveChartsGenerators/Frameworks/Maui.cs",
+      "family": "Source generation and build metadata",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "generators/LiveChartsGenerators/Frameworks/WPFTemplate.cs",
+      "family": "Source generation and build metadata",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "generators/LiveChartsGenerators/Frameworks/WinUITemplate.cs",
+      "family": "Source generation and build metadata",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "generators/LiveChartsGenerators/Frameworks/WinformsTemplate.cs",
+      "family": "Source generation and build metadata",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "generators/LiveChartsGenerators/LiveChartsGenerators.csproj",
+      "family": "Source generation and build metadata",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "generators/LiveChartsGenerators/Properties/launchSettings.json",
+      "family": "Source generation and build metadata",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "generators/LiveChartsGenerators/Templates/MotionPropertyTemplates.cs",
+      "family": "Source generation and build metadata",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "generators/LiveChartsGenerators/Templates/UIPropertyTempaltes.cs",
+      "family": "Source generation and build metadata",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "generators/LiveChartsGenerators/Templates/XamlObjectTempaltes.cs",
+      "family": "Source generation and build metadata",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "generators/LiveChartsGenerators/XamlFriendlyObjectsGenerator.cs",
+      "family": "Source generation and build metadata",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/LiveChartsCore/AssemblyInfo.cs",
+      "family": "Chart engines, axes and series",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/LiveChartsCore/AxisMeasureContext.cs",
+      "family": "Chart engines, axes and series",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/LiveChartsCore/BarLayout.cs",
+      "family": "Chart engines, axes and series",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/LiveChartsCore/BarMeasureContext.cs",
+      "family": "Chart engines, axes and series",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/LiveChartsCore/BarMeasureHelper.cs",
+      "family": "Chart engines, axes and series",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/LiveChartsCore/BarSeries.cs",
+      "family": "Chart engines, axes and series",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/LiveChartsCore/BoxLayout.cs",
+      "family": "Chart engines, axes and series",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/LiveChartsCore/BoxMeasureContext.cs",
+      "family": "Chart engines, axes and series",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/LiveChartsCore/BoxMeasureHelper.cs",
+      "family": "Chart engines, axes and series",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/LiveChartsCore/CartesianChartEngine.cs",
+      "family": "Chart engines, axes and series",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/LiveChartsCore/CartesianSeries.cs",
+      "family": "Chart engines, axes and series",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/LiveChartsCore/Chart.cs",
+      "family": "Chart engines, axes and series",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/LiveChartsCore/ConditionalDraw/ConditinalExtensions.cs",
+      "family": "Visual states and conditional styling",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/LiveChartsCore/CoreAxis.cs",
+      "family": "Chart engines, axes and series",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/LiveChartsCore/CoreBoxSeries.cs",
+      "family": "Chart engines, axes and series",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/LiveChartsCore/CoreColumnSeries.cs",
+      "family": "Chart engines, axes and series",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/LiveChartsCore/CoreFinancialSeries.cs",
+      "family": "Chart engines, axes and series",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/LiveChartsCore/CoreHeatLandSeries.cs",
+      "family": "Chart engines, axes and series",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/LiveChartsCore/CoreHeatSeries.cs",
+      "family": "Chart engines, axes and series",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/LiveChartsCore/CoreLineSeries.cs",
+      "family": "Chart engines, axes and series",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/LiveChartsCore/CorePieSeries.cs",
+      "family": "Chart engines, axes and series",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/LiveChartsCore/CorePolarAxis.cs",
+      "family": "Chart engines, axes and series",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/LiveChartsCore/CorePolarLineSeries.cs",
+      "family": "Chart engines, axes and series",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/LiveChartsCore/CoreRangeColumnSeries.cs",
+      "family": "Chart engines, axes and series",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/LiveChartsCore/CoreRangeLineSeries.cs",
+      "family": "Chart engines, axes and series",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/LiveChartsCore/CoreRangeRowSeries.cs",
+      "family": "Chart engines, axes and series",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/LiveChartsCore/CoreRowSeries.cs",
+      "family": "Chart engines, axes and series",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/LiveChartsCore/CoreSankeySeries.cs",
+      "family": "Chart engines, axes and series",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/LiveChartsCore/CoreScatterSeries.cs",
+      "family": "Chart engines, axes and series",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/LiveChartsCore/CoreSection.cs",
+      "family": "Chart engines, axes and series",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/LiveChartsCore/CoreStackedAreaSeries.cs",
+      "family": "Chart engines, axes and series",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/LiveChartsCore/CoreStackedColumnSeries.cs",
+      "family": "Chart engines, axes and series",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/LiveChartsCore/CoreStackedRowSeries.cs",
+      "family": "Chart engines, axes and series",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/LiveChartsCore/CoreStackedStepAreaSeries.cs",
+      "family": "Chart engines, axes and series",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/LiveChartsCore/CoreStepLineSeries.cs",
+      "family": "Chart engines, axes and series",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/LiveChartsCore/CoreTreemapSeries.cs",
+      "family": "Chart engines, axes and series",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/LiveChartsCore/Defaults/BoxValue.cs",
+      "family": "Observable data models",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/LiveChartsCore/Defaults/ChartCoordinate.cs",
+      "family": "Observable data models",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/LiveChartsCore/Defaults/DateTimePoint.cs",
+      "family": "Observable data models",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/LiveChartsCore/Defaults/ErrorDateTimePoint.cs",
+      "family": "Observable data models",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/LiveChartsCore/Defaults/ErrorPoint.cs",
+      "family": "Observable data models",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/LiveChartsCore/Defaults/ErrorValue.cs",
+      "family": "Observable data models",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/LiveChartsCore/Defaults/FinancialPoint.cs",
+      "family": "Observable data models",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/LiveChartsCore/Defaults/FinancialPointI.cs",
+      "family": "Observable data models",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/LiveChartsCore/Defaults/MappedChartEntity.cs",
+      "family": "Observable data models",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/LiveChartsCore/Defaults/ObservablePoint.cs",
+      "family": "Observable data models",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/LiveChartsCore/Defaults/ObservablePolarPoint.cs",
+      "family": "Observable data models",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/LiveChartsCore/Defaults/ObservableValue.cs",
+      "family": "Observable data models",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/LiveChartsCore/Defaults/RangeValue.cs",
+      "family": "Observable data models",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/LiveChartsCore/Defaults/SankeyLink.cs",
+      "family": "Observable data models",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/LiveChartsCore/Defaults/SankeyNode.cs",
+      "family": "Observable data models",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/LiveChartsCore/Defaults/TimeSpanPoint.cs",
+      "family": "Observable data models",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/LiveChartsCore/Defaults/TreemapNode.cs",
+      "family": "Observable data models",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/LiveChartsCore/Defaults/WeightedPoint.cs",
+      "family": "Observable data models",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/LiveChartsCore/DrawMarginFrame.cs",
+      "family": "Chart engines, axes and series",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/LiveChartsCore/Drawing/Align.cs",
+      "family": "Drawing abstractions and geometry",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/LiveChartsCore/Drawing/Animatable.cs",
+      "family": "Drawing abstractions and geometry",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/LiveChartsCore/Drawing/Animation.cs",
+      "family": "Drawing abstractions and geometry",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/LiveChartsCore/Drawing/BaseArcGeometry.cs",
+      "family": "Drawing abstractions and geometry",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/LiveChartsCore/Drawing/BaseBoxGeometry.cs",
+      "family": "Drawing abstractions and geometry",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/LiveChartsCore/Drawing/BaseCandlestickGeometry.cs",
+      "family": "Drawing abstractions and geometry",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/LiveChartsCore/Drawing/BaseDoughnutGeometry.cs",
+      "family": "Drawing abstractions and geometry",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/LiveChartsCore/Drawing/BaseLabelGeometry.cs",
+      "family": "Drawing abstractions and geometry",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/LiveChartsCore/Drawing/BaseLineGeometry.cs",
+      "family": "Drawing abstractions and geometry",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/LiveChartsCore/Drawing/BaseNeedleGeometry.cs",
+      "family": "Drawing abstractions and geometry",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/LiveChartsCore/Drawing/BaseRoundedRectangleGeometry.cs",
+      "family": "Drawing abstractions and geometry",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/LiveChartsCore/Drawing/BaseSankeyArcSegmentGeometry.cs",
+      "family": "Drawing abstractions and geometry",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/LiveChartsCore/Drawing/BaseSankeyChordRibbonGeometry.cs",
+      "family": "Drawing abstractions and geometry",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/LiveChartsCore/Drawing/BaseSankeyRibbonGeometry.cs",
+      "family": "Drawing abstractions and geometry",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/LiveChartsCore/Drawing/BaseVectorGeometry.cs",
+      "family": "Drawing abstractions and geometry",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/LiveChartsCore/Drawing/BoundedDrawnGeometry.cs",
+      "family": "Drawing abstractions and geometry",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/LiveChartsCore/Drawing/ContainerOrientation.cs",
+      "family": "Drawing abstractions and geometry",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/LiveChartsCore/Drawing/DrawingContext.cs",
+      "family": "Drawing abstractions and geometry",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/LiveChartsCore/Drawing/DrawnGeometry.cs",
+      "family": "Drawing abstractions and geometry",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/LiveChartsCore/Drawing/DropShadow.cs",
+      "family": "Drawing abstractions and geometry",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/LiveChartsCore/Drawing/IBandVectorGeometry.cs",
+      "family": "Drawing abstractions and geometry",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/LiveChartsCore/Drawing/IColoredGeometry.cs",
+      "family": "Drawing abstractions and geometry",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/LiveChartsCore/Drawing/IDrawnElement.cs",
+      "family": "Drawing abstractions and geometry",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/LiveChartsCore/Drawing/IVariableSvgPath.cs",
+      "family": "Drawing abstractions and geometry",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/LiveChartsCore/Drawing/KeyFrame.cs",
+      "family": "Drawing abstractions and geometry",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/LiveChartsCore/Drawing/Layouts/BaseContainer.cs",
+      "family": "Drawing abstractions and geometry",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/LiveChartsCore/Drawing/Layouts/CoreAbsoluteLayout.cs",
+      "family": "Drawing abstractions and geometry",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/LiveChartsCore/Drawing/Layouts/CoreStackLayout.cs",
+      "family": "Drawing abstractions and geometry",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/LiveChartsCore/Drawing/Layouts/CoreTableLayout.cs",
+      "family": "Drawing abstractions and geometry",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/LiveChartsCore/Drawing/Layouts/Layout.cs",
+      "family": "Drawing abstractions and geometry",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/LiveChartsCore/Drawing/LvcColor.cs",
+      "family": "Drawing abstractions and geometry",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/LiveChartsCore/Drawing/LvcPoint.cs",
+      "family": "Drawing abstractions and geometry",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/LiveChartsCore/Drawing/LvcPointD.cs",
+      "family": "Drawing abstractions and geometry",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/LiveChartsCore/Drawing/LvcRectangle.cs",
+      "family": "Drawing abstractions and geometry",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/LiveChartsCore/Drawing/LvcSize.cs",
+      "family": "Drawing abstractions and geometry",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/LiveChartsCore/Drawing/Padding.cs",
+      "family": "Drawing abstractions and geometry",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/LiveChartsCore/Drawing/SVGPoints.cs",
+      "family": "Drawing abstractions and geometry",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/LiveChartsCore/Drawing/Segments/CubicBezierSegment.cs",
+      "family": "Drawing abstractions and geometry",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/LiveChartsCore/Drawing/Segments/CubicSegmentVisualPoint.cs",
+      "family": "Drawing abstractions and geometry",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/LiveChartsCore/Drawing/Segments/ErrorVisual.cs",
+      "family": "Drawing abstractions and geometry",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/LiveChartsCore/Drawing/Segments/RangeCubicSegmentVisualPoint.cs",
+      "family": "Drawing abstractions and geometry",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/LiveChartsCore/Drawing/Segments/Segment.cs",
+      "family": "Drawing abstractions and geometry",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/LiveChartsCore/Drawing/Segments/SegmentVisualPoint.cs",
+      "family": "Drawing abstractions and geometry",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/LiveChartsCore/Drawing/VectorClosingMethod.cs",
+      "family": "Drawing abstractions and geometry",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/LiveChartsCore/Easing/BackEasingFunction.cs",
+      "family": "Easing functions",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/LiveChartsCore/Easing/BounceEasingFunction.cs",
+      "family": "Easing functions",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/LiveChartsCore/Easing/CircleEasingFunction.cs",
+      "family": "Easing functions",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/LiveChartsCore/Easing/CubicBezierEasingFunction.cs",
+      "family": "Easing functions",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/LiveChartsCore/Easing/CubicEasingFunction.cs",
+      "family": "Easing functions",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/LiveChartsCore/Easing/ElasticEasingFunction.cs",
+      "family": "Easing functions",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/LiveChartsCore/Easing/ExponentialEasingFunction.cs",
+      "family": "Easing functions",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/LiveChartsCore/Easing/PolinominalEasingFunction.cs",
+      "family": "Easing functions",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/LiveChartsCore/EasingFunctions.cs",
+      "family": "Chart engines, axes and series",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/LiveChartsCore/FinancialLayout.cs",
+      "family": "Chart engines, axes and series",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/LiveChartsCore/FinancialMeasureContext.cs",
+      "family": "Chart engines, axes and series",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/LiveChartsCore/Generators/BaseChartPointState.cs",
+      "family": "Source generation and build metadata",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/LiveChartsCore/Generators/BaseSet.cs",
+      "family": "Source generation and build metadata",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/LiveChartsCore/Generators/BaseSharedAxesPair.cs",
+      "family": "Source generation and build metadata",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/LiveChartsCore/Generators/CommandParameters.cs",
+      "family": "Source generation and build metadata",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/LiveChartsCore/Generators/IXamlWrapper.cs",
+      "family": "Source generation and build metadata",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/LiveChartsCore/Generators/MotionPropertyAttribute.cs",
+      "family": "Source generation and build metadata",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/LiveChartsCore/Generators/StatePropertyAttribute.cs",
+      "family": "Source generation and build metadata",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/LiveChartsCore/Generators/UIProperty.cs",
+      "family": "Source generation and build metadata",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/LiveChartsCore/Generators/XamlClassAttribute.cs",
+      "family": "Source generation and build metadata",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/LiveChartsCore/Generators/XamlGeneration.cs",
+      "family": "Source generation and build metadata",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/LiveChartsCore/Geo/ControlCoordinatesProjector.cs",
+      "family": "Geography and map data",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/LiveChartsCore/Geo/DrawnMap.cs",
+      "family": "Geography and map data",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/LiveChartsCore/Geo/GeoJsonFeature.cs",
+      "family": "Geography and map data",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/LiveChartsCore/Geo/GeoJsonFile.cs",
+      "family": "Geography and map data",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/LiveChartsCore/Geo/GeoJsonFileSourceGenerationContext.cs",
+      "family": "Geography and map data",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/LiveChartsCore/Geo/GeoTooltipPoint.cs",
+      "family": "Geography and map data",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/LiveChartsCore/Geo/GeoVisualElement.cs",
+      "family": "Geography and map data",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/LiveChartsCore/Geo/IGeoMapTooltip.cs",
+      "family": "Geography and map data",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/LiveChartsCore/Geo/IGeoMapView.cs",
+      "family": "Geography and map data",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/LiveChartsCore/Geo/IGeoSeries.cs",
+      "family": "Geography and map data",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/LiveChartsCore/Geo/IHeatLandShape.cs",
+      "family": "Geography and map data",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/LiveChartsCore/Geo/IMapFactory.cs",
+      "family": "Geography and map data",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/LiveChartsCore/Geo/IWeigthedMapLand.cs",
+      "family": "Geography and map data",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/LiveChartsCore/Geo/LandData.cs",
+      "family": "Geography and map data",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/LiveChartsCore/Geo/LandDefinition.cs",
+      "family": "Geography and map data",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/LiveChartsCore/Geo/MapContext.cs",
+      "family": "Geography and map data",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/LiveChartsCore/Geo/MapInteractionMode.cs",
+      "family": "Geography and map data",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/LiveChartsCore/Geo/MapLayer.cs",
+      "family": "Geography and map data",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/LiveChartsCore/Geo/MapProjection.cs",
+      "family": "Geography and map data",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/LiveChartsCore/Geo/MapProjector.cs",
+      "family": "Geography and map data",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/LiveChartsCore/Geo/MapShapeContext.cs",
+      "family": "Geography and map data",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/LiveChartsCore/Geo/Maps.cs",
+      "family": "Geography and map data",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/LiveChartsCore/Geo/MercatorProjector.cs",
+      "family": "Geography and map data",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/LiveChartsCore/Geo/MultiPoligonGeometry.cs",
+      "family": "Geography and map data",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/LiveChartsCore/Geo/OrthographicProjector.cs",
+      "family": "Geography and map data",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/LiveChartsCore/Geo/RotationTracker.cs",
+      "family": "Geography and map data",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/LiveChartsCore/Geo/ZoomOnPointerView.cs",
+      "family": "Geography and map data",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/LiveChartsCore/Geo/world.geojson",
+      "family": "Resources and build configuration",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/LiveChartsCore/GeoMapChart.cs",
+      "family": "Chart engines, axes and series",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/LiveChartsCore/HeatFunctions.cs",
+      "family": "Chart engines, axes and series",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/LiveChartsCore/HeatLayout.cs",
+      "family": "Chart engines, axes and series",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/LiveChartsCore/HeatMeasureContext.cs",
+      "family": "Chart engines, axes and series",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/LiveChartsCore/HorizontalBarSeries.cs",
+      "family": "Chart engines, axes and series",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/LiveChartsCore/IInternalCartesianAxis.cs",
+      "family": "Chart engines, axes and series",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/LiveChartsCore/IInternalSeries.cs",
+      "family": "Chart engines, axes and series",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/LiveChartsCore/ISeries.cs",
+      "family": "Chart engines, axes and series",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/LiveChartsCore/Kernel/ActionDebouncer.cs",
+      "family": "Kernel, data, interaction and observers",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/LiveChartsCore/Kernel/ActionThrottler.cs",
+      "family": "Kernel, data, interaction and observers",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/LiveChartsCore/Kernel/ChartElement.cs",
+      "family": "Kernel, data, interaction and observers",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/LiveChartsCore/Kernel/ChartEntityMetaData.cs",
+      "family": "Kernel, data, interaction and observers",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/LiveChartsCore/Kernel/ChartPoint.cs",
+      "family": "Kernel, data, interaction and observers",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/LiveChartsCore/Kernel/ChartPointCleanupContext.cs",
+      "family": "Kernel, data, interaction and observers",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/LiveChartsCore/Kernel/ChartPointContext.cs",
+      "family": "Kernel, data, interaction and observers",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/LiveChartsCore/Kernel/ChartUpdateParams.cs",
+      "family": "Kernel, data, interaction and observers",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/LiveChartsCore/Kernel/Coordinate.cs",
+      "family": "Kernel, data, interaction and observers",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/LiveChartsCore/Kernel/Drawing/AnnularSectorHoverArea.cs",
+      "family": "Kernel, data, interaction and observers",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/LiveChartsCore/Kernel/Drawing/BezierData.cs",
+      "family": "Kernel, data, interaction and observers",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/LiveChartsCore/Kernel/Drawing/HoverArea.cs",
+      "family": "Kernel, data, interaction and observers",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/LiveChartsCore/Kernel/Drawing/LineSplineMath.cs",
+      "family": "Kernel, data, interaction and observers",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/LiveChartsCore/Kernel/Drawing/RectangleHoverArea.cs",
+      "family": "Kernel, data, interaction and observers",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/LiveChartsCore/Kernel/Drawing/SemicircleHoverArea.cs",
+      "family": "Kernel, data, interaction and observers",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/LiveChartsCore/Kernel/Error.cs",
+      "family": "Kernel, data, interaction and observers",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/LiveChartsCore/Kernel/Events/ChartCommandArgs.cs",
+      "family": "Kernel, data, interaction and observers",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/LiveChartsCore/Kernel/Events/ChartEventHandler.cs",
+      "family": "Kernel, data, interaction and observers",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/LiveChartsCore/Kernel/Events/ChartPointHandler.cs",
+      "family": "Kernel, data, interaction and observers",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/LiveChartsCore/Kernel/Events/ChartPointHoverHandler.cs",
+      "family": "Kernel, data, interaction and observers",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/LiveChartsCore/Kernel/Events/ChartPointsHandler.cs",
+      "family": "Kernel, data, interaction and observers",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/LiveChartsCore/Kernel/Events/EventExtensions.cs",
+      "family": "Kernel, data, interaction and observers",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/LiveChartsCore/Kernel/Events/HoverCommandArgs.cs",
+      "family": "Kernel, data, interaction and observers",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/LiveChartsCore/Kernel/Events/PointerCommandArgs.cs",
+      "family": "Kernel, data, interaction and observers",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/LiveChartsCore/Kernel/Events/VisualElementEventArgs.cs",
+      "family": "Kernel, data, interaction and observers",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/LiveChartsCore/Kernel/Events/VisualElementHandler.cs",
+      "family": "Kernel, data, interaction and observers",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/LiveChartsCore/Kernel/Events/VisualElementsEventArgs.cs",
+      "family": "Kernel, data, interaction and observers",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/LiveChartsCore/Kernel/Events/VisualElementsHandler.cs",
+      "family": "Kernel, data, interaction and observers",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/LiveChartsCore/Kernel/Extensions.cs",
+      "family": "Kernel, data, interaction and observers",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/LiveChartsCore/Kernel/GestureHelpers.cs",
+      "family": "Kernel, data, interaction and observers",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/LiveChartsCore/Kernel/Helpers/AxisVisualSeprator.cs",
+      "family": "Kernel, data, interaction and observers",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/LiveChartsCore/Kernel/Helpers/IVisualSeparator.cs",
+      "family": "Kernel, data, interaction and observers",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/LiveChartsCore/Kernel/Helpers/RadialAxisVisualSeparator.cs",
+      "family": "Kernel, data, interaction and observers",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/LiveChartsCore/Kernel/IChartElement.cs",
+      "family": "Kernel, data, interaction and observers",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/LiveChartsCore/Kernel/IChartEntity.cs",
+      "family": "Kernel, data, interaction and observers",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/LiveChartsCore/Kernel/LiveChartsSettings.cs",
+      "family": "Kernel, data, interaction and observers",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/LiveChartsCore/Kernel/Observers/ChartObserver.cs",
+      "family": "Kernel, data, interaction and observers",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/LiveChartsCore/Kernel/Observers/CollectionDeepObserver.cs",
+      "family": "Kernel, data, interaction and observers",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/LiveChartsCore/Kernel/Observers/IObserver.cs",
+      "family": "Kernel, data, interaction and observers",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/LiveChartsCore/Kernel/Observers/PropertyChangeObserver.cs",
+      "family": "Kernel, data, interaction and observers",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/LiveChartsCore/Kernel/Observers/SeriesSourceObserver.cs",
+      "family": "Kernel, data, interaction and observers",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/LiveChartsCore/Kernel/Providers/ChartEngine.cs",
+      "family": "Kernel, data, interaction and observers",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/LiveChartsCore/Kernel/Providers/DataFactory.cs",
+      "family": "Kernel, data, interaction and observers",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/LiveChartsCore/Kernel/Providers/ISeriesRenderOverride.cs",
+      "family": "Kernel, data, interaction and observers",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/LiveChartsCore/Kernel/RenderingSettings.cs",
+      "family": "Kernel, data, interaction and observers",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/LiveChartsCore/Kernel/SeriesContext.cs",
+      "family": "Kernel, data, interaction and observers",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/LiveChartsCore/Kernel/SeriesProperties.cs",
+      "family": "Kernel, data, interaction and observers",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/LiveChartsCore/Kernel/Sketches/ChartKind.cs",
+      "family": "Kernel, data, interaction and observers",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/LiveChartsCore/Kernel/Sketches/IAxisRenderer.cs",
+      "family": "Kernel, data, interaction and observers",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/LiveChartsCore/Kernel/Sketches/IBarSeries.cs",
+      "family": "Kernel, data, interaction and observers",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/LiveChartsCore/Kernel/Sketches/IBoxSeries.cs",
+      "family": "Kernel, data, interaction and observers",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/LiveChartsCore/Kernel/Sketches/ICartesianAxis.cs",
+      "family": "Kernel, data, interaction and observers",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/LiveChartsCore/Kernel/Sketches/ICartesianChartView.cs",
+      "family": "Kernel, data, interaction and observers",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/LiveChartsCore/Kernel/Sketches/ICartesianSeries.cs",
+      "family": "Kernel, data, interaction and observers",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/LiveChartsCore/Kernel/Sketches/IChartLegend.cs",
+      "family": "Kernel, data, interaction and observers",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/LiveChartsCore/Kernel/Sketches/IChartSeries.cs",
+      "family": "Kernel, data, interaction and observers",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/LiveChartsCore/Kernel/Sketches/IChartTooltip.cs",
+      "family": "Kernel, data, interaction and observers",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/LiveChartsCore/Kernel/Sketches/IChartView.cs",
+      "family": "Kernel, data, interaction and observers",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/LiveChartsCore/Kernel/Sketches/IDrawnView.cs",
+      "family": "Kernel, data, interaction and observers",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/LiveChartsCore/Kernel/Sketches/IErrorSeries.cs",
+      "family": "Kernel, data, interaction and observers",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/LiveChartsCore/Kernel/Sketches/IFinancialSeries.cs",
+      "family": "Kernel, data, interaction and observers",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/LiveChartsCore/Kernel/Sketches/IHeatLegendSource.cs",
+      "family": "Kernel, data, interaction and observers",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/LiveChartsCore/Kernel/Sketches/IHeatSeries.cs",
+      "family": "Kernel, data, interaction and observers",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/LiveChartsCore/Kernel/Sketches/ILineSeries.cs",
+      "family": "Kernel, data, interaction and observers",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/LiveChartsCore/Kernel/Sketches/IPieChartView.cs",
+      "family": "Kernel, data, interaction and observers",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/LiveChartsCore/Kernel/Sketches/IPieSeries.cs",
+      "family": "Kernel, data, interaction and observers",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/LiveChartsCore/Kernel/Sketches/IPlane.cs",
+      "family": "Kernel, data, interaction and observers",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/LiveChartsCore/Kernel/Sketches/IPolarAxis.cs",
+      "family": "Kernel, data, interaction and observers",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/LiveChartsCore/Kernel/Sketches/IPolarChartView.cs",
+      "family": "Kernel, data, interaction and observers",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/LiveChartsCore/Kernel/Sketches/IPolarLineSeries.cs",
+      "family": "Kernel, data, interaction and observers",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/LiveChartsCore/Kernel/Sketches/IPolarSeries.cs",
+      "family": "Kernel, data, interaction and observers",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/LiveChartsCore/Kernel/Sketches/ISankeyChartView.cs",
+      "family": "Kernel, data, interaction and observers",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/LiveChartsCore/Kernel/Sketches/ISankeySeries.cs",
+      "family": "Kernel, data, interaction and observers",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/LiveChartsCore/Kernel/Sketches/IScalerProvider.cs",
+      "family": "Kernel, data, interaction and observers",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/LiveChartsCore/Kernel/Sketches/IScatterSeries.cs",
+      "family": "Kernel, data, interaction and observers",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/LiveChartsCore/Kernel/Sketches/IStackedBarSeries.cs",
+      "family": "Kernel, data, interaction and observers",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/LiveChartsCore/Kernel/Sketches/IStepLineSeries.cs",
+      "family": "Kernel, data, interaction and observers",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/LiveChartsCore/Kernel/Sketches/IStrokedAndFilled.cs",
+      "family": "Kernel, data, interaction and observers",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/LiveChartsCore/Kernel/Sketches/ITreemapChartView.cs",
+      "family": "Kernel, data, interaction and observers",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/LiveChartsCore/Kernel/Sketches/ITreemapSeries.cs",
+      "family": "Kernel, data, interaction and observers",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/LiveChartsCore/Kernel/StackedTotal.cs",
+      "family": "Kernel, data, interaction and observers",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/LiveChartsCore/Kernel/StackedValue.cs",
+      "family": "Kernel, data, interaction and observers",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/LiveChartsCore/Kernel/Stacker.cs",
+      "family": "Kernel, data, interaction and observers",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/LiveChartsCore/Kernel/TooltipPlacementContext.cs",
+      "family": "Kernel, data, interaction and observers",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/LiveChartsCore/Labelers.cs",
+      "family": "Chart engines, axes and series",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/LiveChartsCore/LineMeasureContext.cs",
+      "family": "Chart engines, axes and series",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/LiveChartsCore/LiveCharts.cs",
+      "family": "Chart engines, axes and series",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/LiveChartsCore/LiveChartsCore.csproj",
+      "family": "Resources and build configuration",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/LiveChartsCore/Measure/AxisLimit.cs",
+      "family": "Measurement, scales and policies",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/LiveChartsCore/Measure/AxisOrientation.cs",
+      "family": "Measurement, scales and policies",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/LiveChartsCore/Measure/AxisPosition.cs",
+      "family": "Measurement, scales and policies",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/LiveChartsCore/Measure/AxisTick.cs",
+      "family": "Measurement, scales and policies",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/LiveChartsCore/Measure/Bounds.cs",
+      "family": "Measurement, scales and policies",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/LiveChartsCore/Measure/ClipMode.cs",
+      "family": "Measurement, scales and policies",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/LiveChartsCore/Measure/DataLabelsPosition.cs",
+      "family": "Measurement, scales and policies",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/LiveChartsCore/Measure/DimensionalBounds.cs",
+      "family": "Measurement, scales and policies",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/LiveChartsCore/Measure/FindPointFor.cs",
+      "family": "Measurement, scales and policies",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/LiveChartsCore/Measure/FindingStrategy.cs",
+      "family": "Measurement, scales and policies",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/LiveChartsCore/Measure/LegendOrientation.cs",
+      "family": "Measurement, scales and policies",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/LiveChartsCore/Measure/LegendPosition.cs",
+      "family": "Measurement, scales and policies",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/LiveChartsCore/Measure/Margin.cs",
+      "family": "Measurement, scales and policies",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/LiveChartsCore/Measure/MeasureUnit.cs",
+      "family": "Measurement, scales and policies",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/LiveChartsCore/Measure/PolarAxisOrientation.cs",
+      "family": "Measurement, scales and policies",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/LiveChartsCore/Measure/PolarLabelsPosition.cs",
+      "family": "Measurement, scales and policies",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/LiveChartsCore/Measure/PolarScaler.cs",
+      "family": "Measurement, scales and policies",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/LiveChartsCore/Measure/PopUpPlacement.cs",
+      "family": "Measurement, scales and policies",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/LiveChartsCore/Measure/RadialAlignment.cs",
+      "family": "Measurement, scales and policies",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/LiveChartsCore/Measure/Scaler.cs",
+      "family": "Measurement, scales and policies",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/LiveChartsCore/Measure/SeriesBounds.cs",
+      "family": "Measurement, scales and policies",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/LiveChartsCore/Measure/StackPosition.cs",
+      "family": "Measurement, scales and policies",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/LiveChartsCore/Measure/ToolTipMetaData.cs",
+      "family": "Measurement, scales and policies",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/LiveChartsCore/Measure/TooltipFindingStrategy.cs",
+      "family": "Measurement, scales and policies",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/LiveChartsCore/Measure/TooltipPosition.cs",
+      "family": "Measurement, scales and policies",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/LiveChartsCore/Measure/VectorManager.cs",
+      "family": "Measurement, scales and policies",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/LiveChartsCore/Measure/ZoomAndPanMode.cs",
+      "family": "Measurement, scales and policies",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/LiveChartsCore/Measure/ZoomDirection.cs",
+      "family": "Measurement, scales and policies",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/LiveChartsCore/Motion/AsyncLoopTicker.cs",
+      "family": "Motion and frame scheduling",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/LiveChartsCore/Motion/ByReferenceMotionProperty.cs",
+      "family": "Motion and frame scheduling",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/LiveChartsCore/Motion/CanvasRenderSettings.cs",
+      "family": "Motion and frame scheduling",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/LiveChartsCore/Motion/CanvasZone.cs",
+      "family": "Motion and frame scheduling",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/LiveChartsCore/Motion/ColorMotionProperty.cs",
+      "family": "Motion and frame scheduling",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/LiveChartsCore/Motion/CoreMotionCanvas.cs",
+      "family": "Motion and frame scheduling",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/LiveChartsCore/Motion/DoubleMotionProperty.cs",
+      "family": "Motion and frame scheduling",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/LiveChartsCore/Motion/DropShadowMotionProperty.cs",
+      "family": "Motion and frame scheduling",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/LiveChartsCore/Motion/FloatArrayMotionProperty.cs",
+      "family": "Motion and frame scheduling",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/LiveChartsCore/Motion/FloatMotionProperty.cs",
+      "family": "Motion and frame scheduling",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/LiveChartsCore/Motion/IFrameTicker.cs",
+      "family": "Motion and frame scheduling",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/LiveChartsCore/Motion/IMotionProperty.cs",
+      "family": "Motion and frame scheduling",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/LiveChartsCore/Motion/IRenderMode.cs",
+      "family": "Motion and frame scheduling",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/LiveChartsCore/Motion/MotionCanvasComposer.cs",
+      "family": "Motion and frame scheduling",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/LiveChartsCore/Motion/MotionProperty.cs",
+      "family": "Motion and frame scheduling",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/LiveChartsCore/Motion/NullableDoubleMotionProperty.cs",
+      "family": "Motion and frame scheduling",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/LiveChartsCore/Motion/PaddingMotionProperty.cs",
+      "family": "Motion and frame scheduling",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/LiveChartsCore/Motion/PointMotionProperty.cs",
+      "family": "Motion and frame scheduling",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/LiveChartsCore/Motion/PropertyDefinition.cs",
+      "family": "Motion and frame scheduling",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/LiveChartsCore/Motion/SizeMotionProperty.cs",
+      "family": "Motion and frame scheduling",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/LiveChartsCore/Painting/DrawnTask.cs",
+      "family": "Painting",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/LiveChartsCore/Painting/MeasureTask.cs",
+      "family": "Painting",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/LiveChartsCore/Painting/Paint.cs",
+      "family": "Painting",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/LiveChartsCore/Painting/PaintConstants.cs",
+      "family": "Painting",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/LiveChartsCore/Painting/PaintStyle.cs",
+      "family": "Painting",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/LiveChartsCore/PieChartEngine.cs",
+      "family": "Chart engines, axes and series",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/LiveChartsCore/PieLayout.cs",
+      "family": "Chart engines, axes and series",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/LiveChartsCore/PieMeasureContext.cs",
+      "family": "Chart engines, axes and series",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/LiveChartsCore/PolarChartEngine.cs",
+      "family": "Chart engines, axes and series",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/LiveChartsCore/PolarLineMeasureContext.cs",
+      "family": "Chart engines, axes and series",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/LiveChartsCore/RangeLineMeasureContext.cs",
+      "family": "Chart engines, axes and series",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/LiveChartsCore/SankeyChartEngine.cs",
+      "family": "Chart engines, axes and series",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/LiveChartsCore/SankeyLayout.cs",
+      "family": "Chart engines, axes and series",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/LiveChartsCore/SankeyMeasureContext.cs",
+      "family": "Chart engines, axes and series",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/LiveChartsCore/ScatterLayout.cs",
+      "family": "Chart engines, axes and series",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/LiveChartsCore/ScatterMeasureContext.cs",
+      "family": "Chart engines, axes and series",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/LiveChartsCore/Series.cs",
+      "family": "Chart engines, axes and series",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/LiveChartsCore/SharedAxes.cs",
+      "family": "Chart engines, axes and series",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/LiveChartsCore/StepLineMeasureContext.cs",
+      "family": "Chart engines, axes and series",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/LiveChartsCore/StrokeAndFillCartesianSeries.cs",
+      "family": "Chart engines, axes and series",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/LiveChartsCore/Themes/ColorPalletes.cs",
+      "family": "Themes and palettes",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/LiveChartsCore/Themes/LiveChartsStylerExtensions.cs",
+      "family": "Themes and palettes",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/LiveChartsCore/Themes/LvcThemeKind.cs",
+      "family": "Themes and palettes",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/LiveChartsCore/Themes/Theme.cs",
+      "family": "Themes and palettes",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/LiveChartsCore/TreemapChartEngine.cs",
+      "family": "Chart engines, axes and series",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/LiveChartsCore/TreemapLayout.cs",
+      "family": "Chart engines, axes and series",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/LiveChartsCore/TreemapMeasureContext.cs",
+      "family": "Chart engines, axes and series",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/LiveChartsCore/VerticalBarSeries.cs",
+      "family": "Chart engines, axes and series",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/LiveChartsCore/VisualElements/BaseAngularTicksVisual.cs",
+      "family": "Visual annotations and layouts",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/LiveChartsCore/VisualElements/BaseGeometryVisual.cs",
+      "family": "Visual annotations and layouts",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/LiveChartsCore/VisualElements/BaseLabelVisual.cs",
+      "family": "Visual annotations and layouts",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/LiveChartsCore/VisualElements/BaseNeedleVisual.cs",
+      "family": "Visual annotations and layouts",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/LiveChartsCore/VisualElements/GeometryVisual.cs",
+      "family": "Visual annotations and layouts",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/LiveChartsCore/VisualElements/IInteractable.cs",
+      "family": "Visual annotations and layouts",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/LiveChartsCore/VisualElements/IInternalInteractable.cs",
+      "family": "Visual annotations and layouts",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/LiveChartsCore/VisualElements/LineVisual.cs",
+      "family": "Visual annotations and layouts",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/LiveChartsCore/VisualElements/RelativePanel.cs",
+      "family": "Visual annotations and layouts",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/LiveChartsCore/VisualElements/StackPanel.cs",
+      "family": "Visual annotations and layouts",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/LiveChartsCore/VisualElements/TableLayout.cs",
+      "family": "Visual annotations and layouts",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/LiveChartsCore/VisualElements/VariableGeometryVisual.cs",
+      "family": "Visual annotations and layouts",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/LiveChartsCore/VisualElements/Visual.cs",
+      "family": "Visual annotations and layouts",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/LiveChartsCore/VisualElements/VisualElement.cs",
+      "family": "Visual annotations and layouts",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/LiveChartsCore/VisualStates/DrawnPropertySetter.cs",
+      "family": "Visual states and conditional styling",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/LiveChartsCore/VisualStates/IStateBehavior.cs",
+      "family": "Visual states and conditional styling",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/LiveChartsCore/VisualStates/SetterExtensions.cs",
+      "family": "Visual states and conditional styling",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/LiveChartsCore/VisualStates/StateBehavior.cs",
+      "family": "Visual states and conditional styling",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/LiveChartsCore/VisualStates/VisualStatesDictionary.cs",
+      "family": "Visual states and conditional styling",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/_Shared.Native/Events/EventArgs.cs",
+      "family": "Native host services",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/_Shared.Native/Events/Handler.cs",
+      "family": "Native host services",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/_Shared.Native/Events/PinchEventArgs.cs",
+      "family": "Native host services",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/_Shared.Native/Events/PinchHandler.cs",
+      "family": "Native host services",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/_Shared.Native/Events/PressedEventArgs.cs",
+      "family": "Native host services",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/_Shared.Native/Events/PressedHandler.cs",
+      "family": "Native host services",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/_Shared.Native/Events/ScreenEventArgs.cs",
+      "family": "Native host services",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/_Shared.Native/Events/ScreenHandler.cs",
+      "family": "Native host services",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/_Shared.Native/Events/ScrollEventArgs.cs",
+      "family": "Native host services",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/_Shared.Native/Events/ScrollHandler.cs",
+      "family": "Native host services",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/_Shared.Native/Platforms/Android/NativeTicker.cs",
+      "family": "Native host services",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/_Shared.Native/Platforms/Android/PointerController.cs",
+      "family": "Native host services",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/_Shared.Native/Platforms/INativePointerController.cs",
+      "family": "Native host services",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/_Shared.Native/Platforms/Mac/NativeTicker.cs",
+      "family": "Native host services",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/_Shared.Native/Platforms/Mac/PointerController.cs",
+      "family": "Native host services",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/_Shared.Native/Platforms/NativeHelpers.cs",
+      "family": "Native host services",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/_Shared.Native/Platforms/NoOS/NativeTicker.cs",
+      "family": "Native host services",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/_Shared.Native/Platforms/NoOS/PointerController.cs",
+      "family": "Native host services",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/_Shared.Native/Platforms/UnoSkiaRenderer/NativeTicker.cs",
+      "family": "Native host services",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/_Shared.Native/Platforms/UnoSkiaRenderer/PointerController.cs",
+      "family": "Native host services",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/_Shared.Native/Platforms/WinUI/NativeTicker.cs",
+      "family": "Native host services",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/_Shared.Native/Platforms/WinUI/PointerController.cs",
+      "family": "Native host services",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/_Shared.Native/PointerController.cs",
+      "family": "Native host services",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/_Shared.Native/_Shared.Native.projitems",
+      "family": "Resources and build configuration",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/_Shared.Native/_Shared.Native.shproj",
+      "family": "Resources and build configuration",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/skiasharp/LiveChartsCore.SkiaSharp.Avalonia/CartesianChart.cs",
+      "family": "UI controls and platform adapters",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/skiasharp/LiveChartsCore.SkiaSharp.Avalonia/GeoMap.cs",
+      "family": "UI controls and platform adapters",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/skiasharp/LiveChartsCore.SkiaSharp.Avalonia/LiveChartsCore.SkiaSharpView.Avalonia.csproj",
+      "family": "Resources and build configuration",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/skiasharp/LiveChartsCore.SkiaSharp.Avalonia/MotionCanvas.cs",
+      "family": "UI controls and platform adapters",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/skiasharp/LiveChartsCore.SkiaSharp.Avalonia/PieChart.cs",
+      "family": "UI controls and platform adapters",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/skiasharp/LiveChartsCore.SkiaSharp.Avalonia/PolarChart.cs",
+      "family": "UI controls and platform adapters",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/skiasharp/LiveChartsCore.SkiaSharp.Avalonia/SankeyChart.cs",
+      "family": "UI controls and platform adapters",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/skiasharp/LiveChartsCore.SkiaSharp.Avalonia/SourceGenCartesianChart.avalonia.cs",
+      "family": "UI controls and platform adapters",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/skiasharp/LiveChartsCore.SkiaSharp.Avalonia/SourceGenChart.cs",
+      "family": "UI controls and platform adapters",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/skiasharp/LiveChartsCore.SkiaSharp.Avalonia/SourceGenDrawnView.avalonia.cs",
+      "family": "UI controls and platform adapters",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/skiasharp/LiveChartsCore.SkiaSharp.Avalonia/SourceGenMapChart.avalonia.cs",
+      "family": "UI controls and platform adapters",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/skiasharp/LiveChartsCore.SkiaSharp.Avalonia/SourceGenPieChart.avalonia.cs",
+      "family": "UI controls and platform adapters",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/skiasharp/LiveChartsCore.SkiaSharp.Avalonia/SourceGenPolarChart.avalonia.cs",
+      "family": "UI controls and platform adapters",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/skiasharp/LiveChartsCore.SkiaSharp.Avalonia/TreemapChart.cs",
+      "family": "UI controls and platform adapters",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/skiasharp/LiveChartsCore.SkiaSharp.Avalonia/XamlSeries.cs",
+      "family": "UI controls and platform adapters",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/skiasharp/LiveChartsCore.SkiaSharp.Avalonia/images/icon.png",
+      "family": "Resources and build configuration",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/skiasharp/LiveChartsCore.SkiaSharp.WPF/AssemblyInfo.cs",
+      "family": "UI controls and platform adapters",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/skiasharp/LiveChartsCore.SkiaSharp.WPF/CartesianChart.cs",
+      "family": "UI controls and platform adapters",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/skiasharp/LiveChartsCore.SkiaSharp.WPF/GeoMap.cs",
+      "family": "UI controls and platform adapters",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/skiasharp/LiveChartsCore.SkiaSharp.WPF/LiveChartsCore.SkiaSharpView.WPF.csproj",
+      "family": "Resources and build configuration",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/skiasharp/LiveChartsCore.SkiaSharp.WPF/MotionCanvas.cs",
+      "family": "UI controls and platform adapters",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/skiasharp/LiveChartsCore.SkiaSharp.WPF/PieChart.cs",
+      "family": "UI controls and platform adapters",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/skiasharp/LiveChartsCore.SkiaSharp.WPF/PolarChart.cs",
+      "family": "UI controls and platform adapters",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/skiasharp/LiveChartsCore.SkiaSharp.WPF/Rendering/CPURenderMode.cs",
+      "family": "UI controls and platform adapters",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/skiasharp/LiveChartsCore.SkiaSharp.WPF/Rendering/CompositionTargetTicker.cs",
+      "family": "UI controls and platform adapters",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/skiasharp/LiveChartsCore.SkiaSharp.WPF/Rendering/GPURenderMode.cs",
+      "family": "UI controls and platform adapters",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/skiasharp/LiveChartsCore.SkiaSharp.WPF/ResolutionHelper.cs",
+      "family": "UI controls and platform adapters",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/skiasharp/LiveChartsCore.SkiaSharp.WPF/SankeyChart.cs",
+      "family": "UI controls and platform adapters",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/skiasharp/LiveChartsCore.SkiaSharp.WPF/SourceGenCartesianChart.wpf.cs",
+      "family": "UI controls and platform adapters",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/skiasharp/LiveChartsCore.SkiaSharp.WPF/SourceGenChart.cs",
+      "family": "UI controls and platform adapters",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/skiasharp/LiveChartsCore.SkiaSharp.WPF/SourceGenDrawnView.wpf.cs",
+      "family": "UI controls and platform adapters",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/skiasharp/LiveChartsCore.SkiaSharp.WPF/SourceGenMapChart.wpf.cs",
+      "family": "UI controls and platform adapters",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/skiasharp/LiveChartsCore.SkiaSharp.WPF/SourceGenPieChart.wpf.cs",
+      "family": "UI controls and platform adapters",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/skiasharp/LiveChartsCore.SkiaSharp.WPF/SourceGenPolarChart.wpf.cs",
+      "family": "UI controls and platform adapters",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/skiasharp/LiveChartsCore.SkiaSharp.WPF/Themes/Generic.xaml",
+      "family": "Resources and build configuration",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/skiasharp/LiveChartsCore.SkiaSharp.WPF/TreemapChart.cs",
+      "family": "UI controls and platform adapters",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/skiasharp/LiveChartsCore.SkiaSharp.WPF/XamlSeries.cs",
+      "family": "UI controls and platform adapters",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/skiasharp/LiveChartsCore.SkiaSharp.WPF/images/icon.png",
+      "family": "Resources and build configuration",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/skiasharp/LiveChartsCore.SkiaSharp.WinForms/AssemblyInfo.cs",
+      "family": "UI controls and platform adapters",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/skiasharp/LiveChartsCore.SkiaSharp.WinForms/CartesianChart.cs",
+      "family": "UI controls and platform adapters",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/skiasharp/LiveChartsCore.SkiaSharp.WinForms/CartesianChart.resx",
+      "family": "Resources and build configuration",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/skiasharp/LiveChartsCore.SkiaSharp.WinForms/GeoMap.Designer.cs",
+      "family": "UI controls and platform adapters",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/skiasharp/LiveChartsCore.SkiaSharp.WinForms/GeoMap.cs",
+      "family": "UI controls and platform adapters",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/skiasharp/LiveChartsCore.SkiaSharp.WinForms/GeoMap.resx",
+      "family": "Resources and build configuration",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/skiasharp/LiveChartsCore.SkiaSharp.WinForms/LiveChartsCore.SkiaSharpView.WinForms.csproj",
+      "family": "Resources and build configuration",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/skiasharp/LiveChartsCore.SkiaSharp.WinForms/MotionCanvas.Designer.cs",
+      "family": "UI controls and platform adapters",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/skiasharp/LiveChartsCore.SkiaSharp.WinForms/MotionCanvas.cs",
+      "family": "UI controls and platform adapters",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/skiasharp/LiveChartsCore.SkiaSharp.WinForms/MotionCanvas.resx",
+      "family": "Resources and build configuration",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/skiasharp/LiveChartsCore.SkiaSharp.WinForms/PieChart.cs",
+      "family": "UI controls and platform adapters",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/skiasharp/LiveChartsCore.SkiaSharp.WinForms/PolarChart.cs",
+      "family": "UI controls and platform adapters",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/skiasharp/LiveChartsCore.SkiaSharp.WinForms/PolarChart.resx",
+      "family": "Resources and build configuration",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/skiasharp/LiveChartsCore.SkiaSharp.WinForms/Rendering/ApplicationIdleTicker.cs",
+      "family": "UI controls and platform adapters",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/skiasharp/LiveChartsCore.SkiaSharp.WinForms/SankeyChart.cs",
+      "family": "UI controls and platform adapters",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/skiasharp/LiveChartsCore.SkiaSharp.WinForms/SourceGenCartesianChart.winforms.cs",
+      "family": "UI controls and platform adapters",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/skiasharp/LiveChartsCore.SkiaSharp.WinForms/SourceGenCartesianChart.winforms.resx",
+      "family": "Resources and build configuration",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/skiasharp/LiveChartsCore.SkiaSharp.WinForms/SourceGenChart.cs",
+      "family": "UI controls and platform adapters",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/skiasharp/LiveChartsCore.SkiaSharp.WinForms/SourceGenChart.resx",
+      "family": "Resources and build configuration",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/skiasharp/LiveChartsCore.SkiaSharp.WinForms/SourceGenDrawnView.winforms.cs",
+      "family": "UI controls and platform adapters",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/skiasharp/LiveChartsCore.SkiaSharp.WinForms/SourceGenMapChart.winforms.cs",
+      "family": "UI controls and platform adapters",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/skiasharp/LiveChartsCore.SkiaSharp.WinForms/SourceGenMapChart.winforms.resx",
+      "family": "Resources and build configuration",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/skiasharp/LiveChartsCore.SkiaSharp.WinForms/SourceGenPieChart.winforms.cs",
+      "family": "UI controls and platform adapters",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/skiasharp/LiveChartsCore.SkiaSharp.WinForms/SourceGenPolarChart.winforms.cs",
+      "family": "UI controls and platform adapters",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/skiasharp/LiveChartsCore.SkiaSharp.WinForms/SourceGenPolarChart.winforms.resx",
+      "family": "Resources and build configuration",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/skiasharp/LiveChartsCore.SkiaSharp.WinForms/TreemapChart.cs",
+      "family": "UI controls and platform adapters",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/skiasharp/LiveChartsCore.SkiaSharp.WinForms/images/icon.png",
+      "family": "Resources and build configuration",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/skiasharp/LiveChartsCore.SkiaSharp/AssemblyInfo.cs",
+      "family": "Drawing backend and concrete series",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/skiasharp/LiveChartsCore.SkiaSharp/Axis.cs",
+      "family": "Drawing backend and concrete series",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/skiasharp/LiveChartsCore.SkiaSharp/BoxSeries.cs",
+      "family": "Drawing backend and concrete series",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/skiasharp/LiveChartsCore.SkiaSharp/CandlesticksSeries.cs",
+      "family": "Drawing backend and concrete series",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/skiasharp/LiveChartsCore.SkiaSharp/ColumnSeries.cs",
+      "family": "Drawing backend and concrete series",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/skiasharp/LiveChartsCore.SkiaSharp/DateTimeAxis.cs",
+      "family": "Drawing backend and concrete series",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/skiasharp/LiveChartsCore.SkiaSharp/DrawMarginFrame.cs",
+      "family": "Drawing backend and concrete series",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/skiasharp/LiveChartsCore.SkiaSharp/Drawing/DrawingTextExtensions.cs",
+      "family": "Drawing backend and concrete series",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/skiasharp/LiveChartsCore.SkiaSharp/Drawing/Geometries/ArcGeometry.cs",
+      "family": "Drawing backend and concrete series",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/skiasharp/LiveChartsCore.SkiaSharp/Drawing/Geometries/BaseSVGPathGeometry.cs",
+      "family": "Drawing backend and concrete series",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/skiasharp/LiveChartsCore.SkiaSharp/Drawing/Geometries/BoxGeometry.cs",
+      "family": "Drawing backend and concrete series",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/skiasharp/LiveChartsCore.SkiaSharp/Drawing/Geometries/CandlestickGeometry.cs",
+      "family": "Drawing backend and concrete series",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/skiasharp/LiveChartsCore.SkiaSharp/Drawing/Geometries/CircleGeometry.cs",
+      "family": "Drawing backend and concrete series",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/skiasharp/LiveChartsCore.SkiaSharp/Drawing/Geometries/ColoredRectangleGeometry.cs",
+      "family": "Drawing backend and concrete series",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/skiasharp/LiveChartsCore.SkiaSharp/Drawing/Geometries/ColoredRoundedRectangleGeometry.cs",
+      "family": "Drawing backend and concrete series",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/skiasharp/LiveChartsCore.SkiaSharp/Drawing/Geometries/CrossGeometry.cs",
+      "family": "Drawing backend and concrete series",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/skiasharp/LiveChartsCore.SkiaSharp/Drawing/Geometries/CubicBezierAreaGeometry.cs",
+      "family": "Drawing backend and concrete series",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/skiasharp/LiveChartsCore.SkiaSharp/Drawing/Geometries/CubicBezierBandGeometry.cs",
+      "family": "Drawing backend and concrete series",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/skiasharp/LiveChartsCore.SkiaSharp/Drawing/Geometries/DiamondGeometry.cs",
+      "family": "Drawing backend and concrete series",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/skiasharp/LiveChartsCore.SkiaSharp/Drawing/Geometries/DoughnutGeometry.cs",
+      "family": "Drawing backend and concrete series",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/skiasharp/LiveChartsCore.SkiaSharp/Drawing/Geometries/HeartGeometry.cs",
+      "family": "Drawing backend and concrete series",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/skiasharp/LiveChartsCore.SkiaSharp/Drawing/Geometries/HeatLand.cs",
+      "family": "Drawing backend and concrete series",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/skiasharp/LiveChartsCore.SkiaSharp/Drawing/Geometries/LabelGeometry.cs",
+      "family": "Drawing backend and concrete series",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/skiasharp/LiveChartsCore.SkiaSharp/Drawing/Geometries/LandAreaGeometry.cs",
+      "family": "Drawing backend and concrete series",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/skiasharp/LiveChartsCore.SkiaSharp/Drawing/Geometries/LineGeometry.cs",
+      "family": "Drawing backend and concrete series",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/skiasharp/LiveChartsCore.SkiaSharp/Drawing/Geometries/MapViewportTransform.cs",
+      "family": "Drawing backend and concrete series",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/skiasharp/LiveChartsCore.SkiaSharp/Drawing/Geometries/NeedleGeometry.cs",
+      "family": "Drawing backend and concrete series",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/skiasharp/LiveChartsCore.SkiaSharp/Drawing/Geometries/OhlcGeometry.cs",
+      "family": "Drawing backend and concrete series",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/skiasharp/LiveChartsCore.SkiaSharp/Drawing/Geometries/OvalGeometry.cs",
+      "family": "Drawing backend and concrete series",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/skiasharp/LiveChartsCore.SkiaSharp/Drawing/Geometries/PopUpGeometry.cs",
+      "family": "Drawing backend and concrete series",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/skiasharp/LiveChartsCore.SkiaSharp/Drawing/Geometries/RectangleGeometry.cs",
+      "family": "Drawing backend and concrete series",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/skiasharp/LiveChartsCore.SkiaSharp/Drawing/Geometries/RoundedRectangleGeometry.cs",
+      "family": "Drawing backend and concrete series",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/skiasharp/LiveChartsCore.SkiaSharp/Drawing/Geometries/SVGPathGeometry.cs",
+      "family": "Drawing backend and concrete series",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/skiasharp/LiveChartsCore.SkiaSharp/Drawing/Geometries/SankeyArcSegmentGeometry.cs",
+      "family": "Drawing backend and concrete series",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/skiasharp/LiveChartsCore.SkiaSharp/Drawing/Geometries/SankeyChordRibbonGeometry.cs",
+      "family": "Drawing backend and concrete series",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/skiasharp/LiveChartsCore.SkiaSharp/Drawing/Geometries/SankeyRibbonGeometry.cs",
+      "family": "Drawing backend and concrete series",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/skiasharp/LiveChartsCore.SkiaSharp/Drawing/Geometries/SizedGeometry.cs",
+      "family": "Drawing backend and concrete series",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/skiasharp/LiveChartsCore.SkiaSharp/Drawing/Geometries/StarGeometry.cs",
+      "family": "Drawing backend and concrete series",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/skiasharp/LiveChartsCore.SkiaSharp/Drawing/Geometries/StepLineAreaGeometry.cs",
+      "family": "Drawing backend and concrete series",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/skiasharp/LiveChartsCore.SkiaSharp/Drawing/Geometries/Svg.cs",
+      "family": "Drawing backend and concrete series",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/skiasharp/LiveChartsCore.SkiaSharp/Drawing/Geometries/VariableSVGPathGeometry.cs",
+      "family": "Drawing backend and concrete series",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/skiasharp/LiveChartsCore.SkiaSharp/Drawing/Geometries/VectorGeometry.cs",
+      "family": "Drawing backend and concrete series",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/skiasharp/LiveChartsCore.SkiaSharp/Drawing/Layouts/AbsoluteLayout.cs",
+      "family": "Drawing backend and concrete series",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/skiasharp/LiveChartsCore.SkiaSharp/Drawing/Layouts/Container.cs",
+      "family": "Drawing backend and concrete series",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/skiasharp/LiveChartsCore.SkiaSharp/Drawing/Layouts/StackLayout.cs",
+      "family": "Drawing backend and concrete series",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/skiasharp/LiveChartsCore.SkiaSharp/Drawing/Layouts/TableLayout.cs",
+      "family": "Drawing backend and concrete series",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/skiasharp/LiveChartsCore.SkiaSharp/Drawing/RenderScale.cs",
+      "family": "Drawing backend and concrete series",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/skiasharp/LiveChartsCore.SkiaSharp/Drawing/SkiaSharpDrawingContext.cs",
+      "family": "Drawing backend and concrete series",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/skiasharp/LiveChartsCore.SkiaSharp/Extensions/BaseGaugeItem.cs",
+      "family": "Drawing backend and concrete series",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/skiasharp/LiveChartsCore.SkiaSharp/Extensions/GaugeGenerator.cs",
+      "family": "Drawing backend and concrete series",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/skiasharp/LiveChartsCore.SkiaSharp/Extensions/GaugeItem.cs",
+      "family": "Drawing backend and concrete series",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/skiasharp/LiveChartsCore.SkiaSharp/Extensions/GaugeOptions.cs",
+      "family": "Drawing backend and concrete series",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/skiasharp/LiveChartsCore.SkiaSharp/Extensions/PieChartExtensions.cs",
+      "family": "Drawing backend and concrete series",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/skiasharp/LiveChartsCore.SkiaSharp/HeatLandSeries.cs",
+      "family": "Drawing backend and concrete series",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/skiasharp/LiveChartsCore.SkiaSharp/HeatSeries.cs",
+      "family": "Drawing backend and concrete series",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/skiasharp/LiveChartsCore.SkiaSharp/LineSeries.cs",
+      "family": "Drawing backend and concrete series",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/skiasharp/LiveChartsCore.SkiaSharp/LiveChartsCore.SkiaSharpView.csproj",
+      "family": "Resources and build configuration",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/skiasharp/LiveChartsCore.SkiaSharp/LiveChartsSkiaSharp.cs",
+      "family": "Drawing backend and concrete series",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/skiasharp/LiveChartsCore.SkiaSharp/LogaritmicAxis.cs",
+      "family": "Drawing backend and concrete series",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/skiasharp/LiveChartsCore.SkiaSharp/MapFactory.cs",
+      "family": "Drawing backend and concrete series",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/skiasharp/LiveChartsCore.SkiaSharp/Motion/ImageFilterMotionProperty.cs",
+      "family": "Drawing backend and concrete series",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/skiasharp/LiveChartsCore.SkiaSharp/Motion/PathEffectMotionProperty.cs",
+      "family": "Drawing backend and concrete series",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/skiasharp/LiveChartsCore.SkiaSharp/Motion/SKColorArrayMotionProperty.cs",
+      "family": "Drawing backend and concrete series",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/skiasharp/LiveChartsCore.SkiaSharp/Motion/SKColorMotionProperty.cs",
+      "family": "Drawing backend and concrete series",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/skiasharp/LiveChartsCore.SkiaSharp/Motion/SKMatrixMotionProperty.cs",
+      "family": "Drawing backend and concrete series",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/skiasharp/LiveChartsCore.SkiaSharp/Motion/SKPointMotionProperty.cs",
+      "family": "Drawing backend and concrete series",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/skiasharp/LiveChartsCore.SkiaSharp/OhlcSeries.cs",
+      "family": "Drawing backend and concrete series",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/skiasharp/LiveChartsCore.SkiaSharp/Painting/Effects/DashEffect.cs",
+      "family": "Drawing backend and concrete series",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/skiasharp/LiveChartsCore.SkiaSharp/Painting/Effects/PathEffect.cs",
+      "family": "Drawing backend and concrete series",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/skiasharp/LiveChartsCore.SkiaSharp/Painting/ImageFilters/Blur.cs",
+      "family": "Drawing backend and concrete series",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/skiasharp/LiveChartsCore.SkiaSharp/Painting/ImageFilters/DropShadow.cs",
+      "family": "Drawing backend and concrete series",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/skiasharp/LiveChartsCore.SkiaSharp/Painting/ImageFilters/ImageFilter.cs",
+      "family": "Drawing backend and concrete series",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/skiasharp/LiveChartsCore.SkiaSharp/Painting/ImageFilters/ImageFiltersMergeOperation.cs",
+      "family": "Drawing backend and concrete series",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/skiasharp/LiveChartsCore.SkiaSharp/Painting/LinearGradientPaint.cs",
+      "family": "Drawing backend and concrete series",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/skiasharp/LiveChartsCore.SkiaSharp/Painting/RadialGradientPaint.cs",
+      "family": "Drawing backend and concrete series",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/skiasharp/LiveChartsCore.SkiaSharp/Painting/SkiaPaint.cs",
+      "family": "Drawing backend and concrete series",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/skiasharp/LiveChartsCore.SkiaSharp/Painting/SolidColorPaint.cs",
+      "family": "Drawing backend and concrete series",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/skiasharp/LiveChartsCore.SkiaSharp/PieSeries.cs",
+      "family": "Drawing backend and concrete series",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/skiasharp/LiveChartsCore.SkiaSharp/PolarAxis.cs",
+      "family": "Drawing backend and concrete series",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/skiasharp/LiveChartsCore.SkiaSharp/PolarLineSeries.cs",
+      "family": "Drawing backend and concrete series",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/skiasharp/LiveChartsCore.SkiaSharp/RangeColumnSeries.cs",
+      "family": "Drawing backend and concrete series",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/skiasharp/LiveChartsCore.SkiaSharp/RangeLineSeries.cs",
+      "family": "Drawing backend and concrete series",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/skiasharp/LiveChartsCore.SkiaSharp/RangeRowSeries.cs",
+      "family": "Drawing backend and concrete series",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/skiasharp/LiveChartsCore.SkiaSharp/RectangularSection.cs",
+      "family": "Drawing backend and concrete series",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/skiasharp/LiveChartsCore.SkiaSharp/RowSeries.cs",
+      "family": "Drawing backend and concrete series",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/skiasharp/LiveChartsCore.SkiaSharp/SKCharts/InMemorySkiaSharpChart.cs",
+      "family": "Drawing backend and concrete series",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/skiasharp/LiveChartsCore.SkiaSharp/SKCharts/LiveChartsGeneratedCode/SourceGenSKCartesianChart.cs",
+      "family": "Drawing backend and concrete series",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/skiasharp/LiveChartsCore.SkiaSharp/SKCharts/LiveChartsGeneratedCode/SourceGenSKChart.cs",
+      "family": "Drawing backend and concrete series",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/skiasharp/LiveChartsCore.SkiaSharp/SKCharts/LiveChartsGeneratedCode/SourceGenSKMapChart.cs",
+      "family": "Drawing backend and concrete series",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/skiasharp/LiveChartsCore.SkiaSharp/SKCharts/LiveChartsGeneratedCode/SourceGenSKPieChart.cs",
+      "family": "Drawing backend and concrete series",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/skiasharp/LiveChartsCore.SkiaSharp/SKCharts/LiveChartsGeneratedCode/SourceGenSKPolarChart.cs",
+      "family": "Drawing backend and concrete series",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/skiasharp/LiveChartsCore.SkiaSharp/SKCharts/LiveChartsGeneratedCode/SourceGenSKSankeyChart.cs",
+      "family": "Drawing backend and concrete series",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/skiasharp/LiveChartsCore.SkiaSharp/SKCharts/LiveChartsGeneratedCode/SourceGenSKTreemapChart.cs",
+      "family": "Drawing backend and concrete series",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/skiasharp/LiveChartsCore.SkiaSharp/SKCharts/SKCartesianChart.cs",
+      "family": "Drawing backend and concrete series",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/skiasharp/LiveChartsCore.SkiaSharp/SKCharts/SKDefaultGeoTooltip.cs",
+      "family": "Drawing backend and concrete series",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/skiasharp/LiveChartsCore.SkiaSharp/SKCharts/SKDefaultLegend.cs",
+      "family": "Drawing backend and concrete series",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/skiasharp/LiveChartsCore.SkiaSharp/SKCharts/SKDefaultTooltip.cs",
+      "family": "Drawing backend and concrete series",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/skiasharp/LiveChartsCore.SkiaSharp/SKCharts/SKGeoMap.cs",
+      "family": "Drawing backend and concrete series",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/skiasharp/LiveChartsCore.SkiaSharp/SKCharts/SKHeatLegend.cs",
+      "family": "Drawing backend and concrete series",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/skiasharp/LiveChartsCore.SkiaSharp/SKCharts/SKPieChart.cs",
+      "family": "Drawing backend and concrete series",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/skiasharp/LiveChartsCore.SkiaSharp/SKCharts/SKPolarChart.cs",
+      "family": "Drawing backend and concrete series",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/skiasharp/LiveChartsCore.SkiaSharp/SKCharts/SKSankeyChart.cs",
+      "family": "Drawing backend and concrete series",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/skiasharp/LiveChartsCore.SkiaSharp/SKCharts/SKTreemapChart.cs",
+      "family": "Drawing backend and concrete series",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/skiasharp/LiveChartsCore.SkiaSharp/SankeySeries.cs",
+      "family": "Drawing backend and concrete series",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/skiasharp/LiveChartsCore.SkiaSharp/ScatterSeries.cs",
+      "family": "Drawing backend and concrete series",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/skiasharp/LiveChartsCore.SkiaSharp/SkiaSharpProvider.cs",
+      "family": "Drawing backend and concrete series",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/skiasharp/LiveChartsCore.SkiaSharp/StackedAreaSeries.cs",
+      "family": "Drawing backend and concrete series",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/skiasharp/LiveChartsCore.SkiaSharp/StackedColumnSeries.cs",
+      "family": "Drawing backend and concrete series",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/skiasharp/LiveChartsCore.SkiaSharp/StackedRowSeries.cs",
+      "family": "Drawing backend and concrete series",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/skiasharp/LiveChartsCore.SkiaSharp/StackedStepAreaSeries.cs",
+      "family": "Drawing backend and concrete series",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/skiasharp/LiveChartsCore.SkiaSharp/StepLineSeries.cs",
+      "family": "Drawing backend and concrete series",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/skiasharp/LiveChartsCore.SkiaSharp/TextSettings.cs",
+      "family": "Drawing backend and concrete series",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/skiasharp/LiveChartsCore.SkiaSharp/ThemesExtensions.cs",
+      "family": "Drawing backend and concrete series",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/skiasharp/LiveChartsCore.SkiaSharp/TimeSpanAxis.cs",
+      "family": "Drawing backend and concrete series",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/skiasharp/LiveChartsCore.SkiaSharp/TreemapSeries.cs",
+      "family": "Drawing backend and concrete series",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/skiasharp/LiveChartsCore.SkiaSharp/TypeConverters/HexToLvcColorArrayTypeConverter.cs",
+      "family": "Drawing backend and concrete series",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/skiasharp/LiveChartsCore.SkiaSharp/TypeConverters/HexToLvcColorTypeConverter.cs",
+      "family": "Drawing backend and concrete series",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/skiasharp/LiveChartsCore.SkiaSharp/TypeConverters/HexToPaintTypeConverter.cs",
+      "family": "Drawing backend and concrete series",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/skiasharp/LiveChartsCore.SkiaSharp/TypeConverters/MarginTypeConverter.cs",
+      "family": "Drawing backend and concrete series",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/skiasharp/LiveChartsCore.SkiaSharp/TypeConverters/PaddingTypeConverter.cs",
+      "family": "Drawing backend and concrete series",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/skiasharp/LiveChartsCore.SkiaSharp/TypeConverters/PointDTypeConverter.cs",
+      "family": "Drawing backend and concrete series",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/skiasharp/LiveChartsCore.SkiaSharp/TypeConverters/PointTypeConverter.cs",
+      "family": "Drawing backend and concrete series",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/skiasharp/LiveChartsCore.SkiaSharp/TypeConverters/StringArrayTypeConverter.cs",
+      "family": "Drawing backend and concrete series",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/skiasharp/LiveChartsCore.SkiaSharp/TypeConverters/StringToDoubleArrayTypeConverter.cs",
+      "family": "Drawing backend and concrete series",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/skiasharp/LiveChartsCore.SkiaSharp/TypeConverters/ValuesTypeConverter.cs",
+      "family": "Drawing backend and concrete series",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/skiasharp/LiveChartsCore.SkiaSharp/VisualElements/AngularTicksVisual.cs",
+      "family": "Drawing backend and concrete series",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/skiasharp/LiveChartsCore.SkiaSharp/VisualElements/DrawnLabelVisual.cs",
+      "family": "Drawing backend and concrete series",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/skiasharp/LiveChartsCore.SkiaSharp/VisualElements/GeometryVisual.cs",
+      "family": "Drawing backend and concrete series",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/skiasharp/LiveChartsCore.SkiaSharp/VisualElements/LabelVisual.cs",
+      "family": "Drawing backend and concrete series",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/skiasharp/LiveChartsCore.SkiaSharp/VisualElements/NeedleVisual.cs",
+      "family": "Drawing backend and concrete series",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/skiasharp/LiveChartsCore.SkiaSharp/VisualElements/SVGVisual.cs",
+      "family": "Drawing backend and concrete series",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/skiasharp/LiveChartsCore.SkiaSharpView.Blazor/CartesianChart.cs",
+      "family": "UI controls and platform adapters",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/skiasharp/LiveChartsCore.SkiaSharpView.Blazor/GeoMap.cs",
+      "family": "UI controls and platform adapters",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/skiasharp/LiveChartsCore.SkiaSharpView.Blazor/JsInterop/DomJsInterop.cs",
+      "family": "UI controls and platform adapters",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/skiasharp/LiveChartsCore.SkiaSharpView.Blazor/JsInterop/Models/DOMRect.cs",
+      "family": "UI controls and platform adapters",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/skiasharp/LiveChartsCore.SkiaSharpView.Blazor/LiveChartsCore.SkiaSharpView.Blazor.csproj",
+      "family": "Resources and build configuration",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/skiasharp/LiveChartsCore.SkiaSharpView.Blazor/MotionCanvas.razor",
+      "family": "Resources and build configuration",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/skiasharp/LiveChartsCore.SkiaSharpView.Blazor/MotionCanvas.razor.cs",
+      "family": "UI controls and platform adapters",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/skiasharp/LiveChartsCore.SkiaSharpView.Blazor/MotionCanvas.razor.css",
+      "family": "Resources and build configuration",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/skiasharp/LiveChartsCore.SkiaSharpView.Blazor/PieChart.cs",
+      "family": "UI controls and platform adapters",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/skiasharp/LiveChartsCore.SkiaSharpView.Blazor/PolarChart.cs",
+      "family": "UI controls and platform adapters",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/skiasharp/LiveChartsCore.SkiaSharpView.Blazor/SankeyChart.cs",
+      "family": "UI controls and platform adapters",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/skiasharp/LiveChartsCore.SkiaSharpView.Blazor/SourceGenCartesianChart.blazor.cs",
+      "family": "UI controls and platform adapters",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/skiasharp/LiveChartsCore.SkiaSharpView.Blazor/SourceGenChart.cs",
+      "family": "UI controls and platform adapters",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/skiasharp/LiveChartsCore.SkiaSharpView.Blazor/SourceGenDrawnView.blazor.cs",
+      "family": "UI controls and platform adapters",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/skiasharp/LiveChartsCore.SkiaSharpView.Blazor/SourceGenMapChart.blazor.cs",
+      "family": "UI controls and platform adapters",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/skiasharp/LiveChartsCore.SkiaSharpView.Blazor/SourceGenPieChart.blazor.cs",
+      "family": "UI controls and platform adapters",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/skiasharp/LiveChartsCore.SkiaSharpView.Blazor/SourceGenPolarChart.blazor.cs",
+      "family": "UI controls and platform adapters",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/skiasharp/LiveChartsCore.SkiaSharpView.Blazor/TreemapChart.cs",
+      "family": "UI controls and platform adapters",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/skiasharp/LiveChartsCore.SkiaSharpView.Blazor/_Imports.razor",
+      "family": "Resources and build configuration",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/skiasharp/LiveChartsCore.SkiaSharpView.Blazor/build/LiveChartsCore.SkiaSharpView.Blazor.targets",
+      "family": "Resources and build configuration",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/skiasharp/LiveChartsCore.SkiaSharpView.Blazor/images/icon.png",
+      "family": "Resources and build configuration",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/skiasharp/LiveChartsCore.SkiaSharpView.Blazor/readme.md",
+      "family": "Resources and build configuration",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/skiasharp/LiveChartsCore.SkiaSharpView.Blazor/tsconfig.json",
+      "family": "Resources and build configuration",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/skiasharp/LiveChartsCore.SkiaSharpView.Blazor/wwwroot/domInterop.js",
+      "family": "Resources and build configuration",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/skiasharp/LiveChartsCore.SkiaSharpView.Blazor/wwwroot/domInterop.js.map",
+      "family": "Resources and build configuration",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/skiasharp/LiveChartsCore.SkiaSharpView.Blazor/wwwroot/domInterop.ts",
+      "family": "Resources and build configuration",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/skiasharp/LiveChartsCore.SkiaSharpView.Eto/CartesianChart.cs",
+      "family": "UI controls and platform adapters",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/skiasharp/LiveChartsCore.SkiaSharpView.Eto/GeoMap.cs",
+      "family": "UI controls and platform adapters",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/skiasharp/LiveChartsCore.SkiaSharpView.Eto/LiveChartsCore.SkiaSharpView.Eto.csproj",
+      "family": "Resources and build configuration",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/skiasharp/LiveChartsCore.SkiaSharpView.Eto/MotionCanvas.cs",
+      "family": "UI controls and platform adapters",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/skiasharp/LiveChartsCore.SkiaSharpView.Eto/PieChart.cs",
+      "family": "UI controls and platform adapters",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/skiasharp/LiveChartsCore.SkiaSharpView.Eto/PolarChart.cs",
+      "family": "UI controls and platform adapters",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/skiasharp/LiveChartsCore.SkiaSharpView.Eto/SankeyChart.cs",
+      "family": "UI controls and platform adapters",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/skiasharp/LiveChartsCore.SkiaSharpView.Eto/SourceGenCartesianChart.eto.cs",
+      "family": "UI controls and platform adapters",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/skiasharp/LiveChartsCore.SkiaSharpView.Eto/SourceGenChart.cs",
+      "family": "UI controls and platform adapters",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/skiasharp/LiveChartsCore.SkiaSharpView.Eto/SourceGenDrawnView.eto.cs",
+      "family": "UI controls and platform adapters",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/skiasharp/LiveChartsCore.SkiaSharpView.Eto/SourceGenMapChart.eto.cs",
+      "family": "UI controls and platform adapters",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/skiasharp/LiveChartsCore.SkiaSharpView.Eto/SourceGenPieChart.eto.cs",
+      "family": "UI controls and platform adapters",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/skiasharp/LiveChartsCore.SkiaSharpView.Eto/SourceGenPolarChart.eto.cs",
+      "family": "UI controls and platform adapters",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/skiasharp/LiveChartsCore.SkiaSharpView.Eto/TreemapChart.cs",
+      "family": "UI controls and platform adapters",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/skiasharp/LiveChartsCore.SkiaSharpView.Eto/images/icon.png",
+      "family": "Resources and build configuration",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/skiasharp/LiveChartsCore.SkiaSharpView.Maui/AssemblyInfo.cs",
+      "family": "UI controls and platform adapters",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/skiasharp/LiveChartsCore.SkiaSharpView.Maui/CartesianChart.cs",
+      "family": "UI controls and platform adapters",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/skiasharp/LiveChartsCore.SkiaSharpView.Maui/ChartView.cs",
+      "family": "UI controls and platform adapters",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/skiasharp/LiveChartsCore.SkiaSharpView.Maui/GeoMap.cs",
+      "family": "UI controls and platform adapters",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/skiasharp/LiveChartsCore.SkiaSharpView.Maui/Handlers/ChartViewHandler.cs",
+      "family": "UI controls and platform adapters",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/skiasharp/LiveChartsCore.SkiaSharpView.Maui/Handlers/EmptyContentView.cs",
+      "family": "UI controls and platform adapters",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/skiasharp/LiveChartsCore.SkiaSharpView.Maui/Handlers/EmptyViewHandler.cs",
+      "family": "UI controls and platform adapters",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/skiasharp/LiveChartsCore.SkiaSharpView.Maui/LiveChartsCore.SkiaSharpView.Maui.csproj",
+      "family": "Resources and build configuration",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/skiasharp/LiveChartsCore.SkiaSharpView.Maui/LiveChartsCoreMauiAppBuilderExtensions.cs",
+      "family": "UI controls and platform adapters",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/skiasharp/LiveChartsCore.SkiaSharpView.Maui/MotionCanvas.cs",
+      "family": "UI controls and platform adapters",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/skiasharp/LiveChartsCore.SkiaSharpView.Maui/PieChart.cs",
+      "family": "UI controls and platform adapters",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/skiasharp/LiveChartsCore.SkiaSharpView.Maui/PolarChart.cs",
+      "family": "UI controls and platform adapters",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/skiasharp/LiveChartsCore.SkiaSharpView.Maui/Rendering/CPURenderMode.cs",
+      "family": "UI controls and platform adapters",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/skiasharp/LiveChartsCore.SkiaSharpView.Maui/Rendering/GPURenderMode.cs",
+      "family": "UI controls and platform adapters",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/skiasharp/LiveChartsCore.SkiaSharpView.Maui/SankeyChart.cs",
+      "family": "UI controls and platform adapters",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/skiasharp/LiveChartsCore.SkiaSharpView.Maui/SourceGenCartesianChart.maui.cs",
+      "family": "UI controls and platform adapters",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/skiasharp/LiveChartsCore.SkiaSharpView.Maui/SourceGenChart.cs",
+      "family": "UI controls and platform adapters",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/skiasharp/LiveChartsCore.SkiaSharpView.Maui/SourceGenDrawnView.maui.cs",
+      "family": "UI controls and platform adapters",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/skiasharp/LiveChartsCore.SkiaSharpView.Maui/SourceGenMapChart.maui.cs",
+      "family": "UI controls and platform adapters",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/skiasharp/LiveChartsCore.SkiaSharpView.Maui/SourceGenPieChart.maui.cs",
+      "family": "UI controls and platform adapters",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/skiasharp/LiveChartsCore.SkiaSharpView.Maui/SourceGenPolarChart.maui.cs",
+      "family": "UI controls and platform adapters",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/skiasharp/LiveChartsCore.SkiaSharpView.Maui/TreemapChart.cs",
+      "family": "UI controls and platform adapters",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/skiasharp/LiveChartsCore.SkiaSharpView.Maui/XamlSeries.cs",
+      "family": "UI controls and platform adapters",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/skiasharp/LiveChartsCore.SkiaSharpView.Maui/images/icon.png",
+      "family": "Resources and build configuration",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/skiasharp/LiveChartsCore.SkiaSharpView.Uno.WinUI/LiveChartsCore.SkiaSharpView.Uno.WinUI.csproj",
+      "family": "Resources and build configuration",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/skiasharp/LiveChartsCore.SkiaSharpView.Uno.WinUI/Rendering/SkiaRenderMode.cs",
+      "family": "UI controls and platform adapters",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/skiasharp/LiveChartsCore.SkiaSharpView.Uno.WinUI/images/icon.png",
+      "family": "Resources and build configuration",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/skiasharp/LiveChartsCore.SkiaSharpView.WinUI/LiveChartsCore.SkiaSharpView.WinUI.csproj",
+      "family": "Resources and build configuration",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/skiasharp/LiveChartsCore.SkiaSharpView.WinUI/Themes/Generic.xaml",
+      "family": "Resources and build configuration",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/skiasharp/LiveChartsCore.SkiaSharpView.WinUI/images/icon.png",
+      "family": "Resources and build configuration",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/skiasharp/_Shared.WinUI/CartesianChart.cs",
+      "family": "UI controls and platform adapters",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/skiasharp/_Shared.WinUI/GeoMap.cs",
+      "family": "UI controls and platform adapters",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/skiasharp/_Shared.WinUI/MotionCanvas.cs",
+      "family": "UI controls and platform adapters",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/skiasharp/_Shared.WinUI/PieChart.cs",
+      "family": "UI controls and platform adapters",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/skiasharp/_Shared.WinUI/PolarChart.cs",
+      "family": "UI controls and platform adapters",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/skiasharp/_Shared.WinUI/Rendering/CPURenderMode.cs",
+      "family": "UI controls and platform adapters",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/skiasharp/_Shared.WinUI/Rendering/GPURenderMode.cs",
+      "family": "UI controls and platform adapters",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/skiasharp/_Shared.WinUI/SankeyChart.cs",
+      "family": "UI controls and platform adapters",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/skiasharp/_Shared.WinUI/SourceGenCartesianChart.winui.cs",
+      "family": "UI controls and platform adapters",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/skiasharp/_Shared.WinUI/SourceGenChart.cs",
+      "family": "UI controls and platform adapters",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/skiasharp/_Shared.WinUI/SourceGenDrawnView.winui.cs",
+      "family": "UI controls and platform adapters",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/skiasharp/_Shared.WinUI/SourceGenMapChart.winui.cs",
+      "family": "UI controls and platform adapters",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/skiasharp/_Shared.WinUI/SourceGenPieChart.winui.cs",
+      "family": "UI controls and platform adapters",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/skiasharp/_Shared.WinUI/SourceGenPolarChart.winui.cs",
+      "family": "UI controls and platform adapters",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/skiasharp/_Shared.WinUI/SourceGenSankeyChart.winui.cs",
+      "family": "UI controls and platform adapters",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/skiasharp/_Shared.WinUI/SourceGenTreemapChart.winui.cs",
+      "family": "UI controls and platform adapters",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/skiasharp/_Shared.WinUI/TreemapChart.cs",
+      "family": "UI controls and platform adapters",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/skiasharp/_Shared.WinUI/XamlSeries.cs",
+      "family": "UI controls and platform adapters",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/skiasharp/_Shared.WinUI/_Shared.WinUI.projitems",
+      "family": "Resources and build configuration",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/skiasharp/_Shared.WinUI/_Shared.WinUI.shproj",
+      "family": "Resources and build configuration",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/skiasharp/_Shared.Xaml/CartesianAxes.cs",
+      "family": "UI controls and platform adapters",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/skiasharp/_Shared.Xaml/MarkupExtensions.cs",
+      "family": "UI controls and platform adapters",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/skiasharp/_Shared.Xaml/Others.cs",
+      "family": "UI controls and platform adapters",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/skiasharp/_Shared.Xaml/PolarAxes.cs",
+      "family": "UI controls and platform adapters",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/skiasharp/_Shared.Xaml/Series.cs",
+      "family": "UI controls and platform adapters",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/skiasharp/_Shared.Xaml/_Shared.Xaml.projitems",
+      "family": "Resources and build configuration",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/skiasharp/_Shared.Xaml/_Shared.Xaml.shproj",
+      "family": "Resources and build configuration",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/skiasharp/_Shared/SourceGenCartesianChart.sgp.cs",
+      "family": "UI controls and platform adapters",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/skiasharp/_Shared/SourceGenCartesianChart.shared.cs",
+      "family": "UI controls and platform adapters",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/skiasharp/_Shared/SourceGenChart.sgp.cs",
+      "family": "UI controls and platform adapters",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/skiasharp/_Shared/SourceGenChart.shared.cs",
+      "family": "UI controls and platform adapters",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/skiasharp/_Shared/SourceGenDrawnView.shared.cs",
+      "family": "UI controls and platform adapters",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/skiasharp/_Shared/SourceGenMapChart.sgp.cs",
+      "family": "UI controls and platform adapters",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/skiasharp/_Shared/SourceGenMapChart.shared.cs",
+      "family": "UI controls and platform adapters",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/skiasharp/_Shared/SourceGenPieChart.sgp.cs",
+      "family": "UI controls and platform adapters",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/skiasharp/_Shared/SourceGenPieChart.shared.cs",
+      "family": "UI controls and platform adapters",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/skiasharp/_Shared/SourceGenPolarChart.sgp.cs",
+      "family": "UI controls and platform adapters",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/skiasharp/_Shared/SourceGenPolarChart.shared.cs",
+      "family": "UI controls and platform adapters",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/skiasharp/_Shared/SourceGenSankeyChart.sgp.cs",
+      "family": "UI controls and platform adapters",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/skiasharp/_Shared/SourceGenSankeyChart.shared.cs",
+      "family": "UI controls and platform adapters",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/skiasharp/_Shared/SourceGenTreemapChart.sgp.cs",
+      "family": "UI controls and platform adapters",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/skiasharp/_Shared/SourceGenTreemapChart.shared.cs",
+      "family": "UI controls and platform adapters",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/skiasharp/_Shared/_Shared.projitems",
+      "family": "Resources and build configuration",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    },
+    {
+      "source": "src/skiasharp/_Shared/_Shared.shproj",
+      "family": "Resources and build configuration",
+      "status": "pending",
+      "rust": [],
+      "remaining": [
+        "No reviewed Rust equivalent is recorded."
+      ]
+    }
+  ]
+}

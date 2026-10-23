@@ -1,0 +1,18 @@
+{
+  "common": ["NET", "NET5_0_OR_GREATER", "NET6_0_OR_GREATER", "NET8_0", "NET8_0_OR_GREATER", "NETCOREAPP"],
+  "profiles": {
+    "image": ["SKIA_IMAGE_LVC"],
+    "avalonia": ["AVALONIA_LVC", "XAML_LVC", "AVALONIA_UI_TESTING", "XAML_UI_TESTING"],
+    "wpf": ["WPF_LVC", "XAML_LVC", "WPF_UI_TESTING", "XAML_UI_TESTING", "DESKTOP", "WINDOWS", "TEST_HA_VIEWS"],
+    "winui": ["WINUI_LVC", "XAML_LVC", "WINUI_UI_TESTING", "XAML_UI_TESTING", "HAS_OS_LVC", "WINDOWS"],
+    "uno-skia": ["UNO_LVC", "LVC_UNO_SKIA", "XAML_LVC", "UNO_UI_TESTING", "XAML_UI_TESTING"],
+    "uno-native": ["UNO_LVC", "WINUI_LVC", "HAS_UNO_WINUI", "HAS_OS_LVC", "XAML_LVC", "UNO_UI_TESTING", "XAML_UI_TESTING", "WINDOWS"],
+    "maui-android": ["MAUI_LVC", "MAUI_UI_TESTING", "ANDROID", "HAS_OS_LVC"],
+    "maui-ios": ["MAUI_LVC", "MAUI_UI_TESTING", "IOS", "HAS_OS_LVC"],
+    "maui-mac": ["MAUI_LVC", "MAUI_UI_TESTING", "MACCATALYST", "HAS_OS_LVC"],
+    "blazor": ["BLAZOR_LVC", "BLAZOR_UI_TESTING"],
+    "winforms": ["WINFORMS_UI_TESTING", "DESKTOP", "WINDOWS"],
+    "eto": ["ETO_UI_TESTING", "DESKTOP"],
+    "legacy-debug": ["NET462", "STRONG_NAMED_ASSEMBLIES", "DEBUG", "DEBUG_CODE_GENERATION", "SKIA_IMAGE_LVC"]
+  }
+}

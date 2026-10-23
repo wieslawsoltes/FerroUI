@@ -1,0 +1,29 @@
+{
+  "schema": 1,
+  "commit": "8537b90ffb100a947cd0b1f6be49f896ae6050eb",
+  "source_files": 698,
+  "source_csharp_files": 644,
+  "source_csharp_lines": 79040,
+  "source_types": 1024,
+  "source_members": 4859,
+  "source_status": {
+    "pending": 698
+  },
+  "member_status": {
+    "pending": 4859
+  },
+  "test_declarations": 1066,
+  "test_status": {
+    "pending": 1066
+  },
+  "test_declarations_by_suite": {
+    "ConsoleTests": 33,
+    "CoreTests": 826,
+    "GeneratorTests": 3,
+    "SharedUITests": 32,
+    "SnapshotTests": 172
+  },
+  "sample_files": 2028,
+  "sample_csharp_files": 1133,
+  "interpretation": "Counts are source/API/test declarations, not executed tests or behavioral equivalence. Parameterized methods count once; their attributes are retained. A file adaptation never certifies every member."
+}

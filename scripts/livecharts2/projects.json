@@ -1,0 +1,23 @@
+{
+  "preprocessorSymbols": ["NET", "NET8_0", "NET8_0_OR_GREATER", "NETCOREAPP", "AVALONIA_LVC"],
+  "excludeDirs": ["bin", "obj"],
+  "excludeFiles": [],
+  "projects": [
+    {"name": "LiveChartsCore", "path": "src/LiveChartsCore", "detail": "full", "scope": "in"},
+    {"name": "NativeServices", "path": "src/_Shared.Native", "detail": "full", "scope": "in"},
+    {"name": "SharedControls", "path": "src/skiasharp/_Shared", "detail": "full", "scope": "in"},
+    {"name": "SharedWinUIControls", "path": "src/skiasharp/_Shared.WinUI", "detail": "full", "scope": "in"},
+    {"name": "SharedXamlTypes", "path": "src/skiasharp/_Shared.Xaml", "detail": "full", "scope": "in"},
+    {"name": "SkiaSharpRenderer", "path": "src/skiasharp/LiveChartsCore.SkiaSharp", "detail": "full", "scope": "in"},
+    {"name": "ReferenceAvaloniaControls", "path": "src/skiasharp/LiveChartsCore.SkiaSharp.Avalonia", "detail": "full", "scope": "in"},
+    {"name": "OtherSkiaSharpHosts", "path": "src/skiasharp/LiveChartsCore.SkiaSharp.WPF", "detail": "full", "scope": "in"},
+    {"name": "WinFormsHosts", "path": "src/skiasharp/LiveChartsCore.SkiaSharp.WinForms", "detail": "full", "scope": "in"},
+    {"name": "BlazorHosts", "path": "src/skiasharp/LiveChartsCore.SkiaSharpView.Blazor", "detail": "full", "scope": "in"},
+    {"name": "EtoHosts", "path": "src/skiasharp/LiveChartsCore.SkiaSharpView.Eto", "detail": "full", "scope": "in"},
+    {"name": "MauiHosts", "path": "src/skiasharp/LiveChartsCore.SkiaSharpView.Maui", "detail": "full", "scope": "in"},
+    {"name": "UnoHosts", "path": "src/skiasharp/LiveChartsCore.SkiaSharpView.Uno.WinUI", "detail": "full", "scope": "in"},
+    {"name": "WinUIHosts", "path": "src/skiasharp/LiveChartsCore.SkiaSharpView.WinUI", "detail": "full", "scope": "in"},
+    {"name": "Generators", "path": "generators/LiveChartsGenerators", "detail": "full", "scope": "in"},
+    {"name": "Tests", "path": "tests", "detail": "full", "scope": "in"}
+  ]
+}

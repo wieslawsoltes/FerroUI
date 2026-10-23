@@ -1,0 +1,6 @@
+{
+  "schema": 1,
+  "description": "Reviewed exceptions to the default pending disposition. Every source is retained in the generated source map. A matching name or a file's existence is not evidence of behavioral equivalence.",
+  "files": {},
+  "tests": {}
+}
