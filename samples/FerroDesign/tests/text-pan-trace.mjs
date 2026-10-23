@@ -8,7 +8,7 @@ import { analyzeTextPanTrace, textPanTraceLogSummary } from "./text-pan-trace-an
 
 export const TEXT_PAN_TRACE_LIMITS = Object.freeze({ samples: 6, cohortMs: 60000,
     cleanupMs: 20000, teardownCommandMs: 3000, failureSnapshotMs: 1000, errorRecords: 8,
-    ownedShutdownMs: 9000,
+    ownedShutdownMs: 12000,
     bufferKiB: 8192, streamBytes: 24 * 1024 * 1024, chunkBytes: 64 * 1024 });
 export const TEXT_PAN_TRACE_CATEGORIES = Object.freeze([
     "toplevel", "devtools.timeline", "blink.user_timing", "input", "latencyInfo", "cc", "gpu", "viz",
@@ -40,7 +40,7 @@ export function createTextPanBrowserOwner(server, commandMs = TEXT_PAN_TRACE_LIM
     const child = server.process();
     assert.ok(child && Number.isSafeInteger(child.pid) && child.pid > 0, "Tracing must own its launched Chromium process");
     assert.ok(Number.isFinite(commandMs) && commandMs > 0);
-    let shutdown, processExit, resolveExit;
+    let client, shutdown, processExit, resolveExit;
     const exited = new Promise(resolve => { resolveExit = resolve; });
     const observeExit = (code, signal) => {
         processExit ??= { observed: true, code: code ?? null, signal: signal ?? null };
@@ -52,13 +52,38 @@ export function createTextPanBrowserOwner(server, commandMs = TEXT_PAN_TRACE_LIM
     };
     child.once("exit", observeExit);
     hasExited();
+    const attachClient = browser => {
+        assert.ok(!shutdown, "Cannot attach a browser client after owned shutdown starts");
+        assert.ok(!client, "An owned browser has exactly one connected benchmark client");
+        assert.ok(browser && typeof browser.close === "function" && typeof browser.isConnected === "function",
+            "An owned browser client requires public close/isConnected APIs");
+        client = browser;
+    };
     const close = reason => shutdown ??= (async () => {
-        const result = { reason, processId: child.pid, status: "closing", gracefulCloseCompleted: false,
+        const result = { reason, processId: child.pid, status: "closing",
+            clientDisconnectAttempted: false, clientDisconnectCompleted: false, clientDisconnected: null,
+            gracefulCloseCompleted: false,
             forcedKillAttempted: false, directKillAttempted: false, processExit: null, errors: [] };
         try {
+            // The connected Browser and its BrowserServer have separate public
+            // lifetimes. Dispose the WebSocket client before closing Chromium;
+            // context.close() alone leaves that client transport connected.
+            // https://playwright.dev/docs/api/class-browser#browser-close
+            // Failure here must not strand the separately owned process.
+            if (client) {
+                if (client.isConnected()) {
+                    result.clientDisconnectAttempted = true;
+                    try {
+                        await bounded(() => client.close({ reason }), performance.now() + commandMs, "disconnect owned trace browser client");
+                        if (client.isConnected()) throw new Error("Owned browser client remained connected after close resolved");
+                        result.clientDisconnectCompleted = true;
+                    } catch (error) { result.errors.push(message(error)); }
+                }
+                result.clientDisconnected = !client.isConnected();
+            }
             if (!hasExited()) {
                 try {
-                    await bounded(() => server.close(), performance.now() + commandMs, "close owned trace browser");
+                    await bounded(() => Promise.all([server.close(), exited]), performance.now() + commandMs, "close owned trace browser");
                     result.gracefulCloseCompleted = true;
                 } catch (error) { result.errors.push(message(error)); }
             }
@@ -80,12 +105,16 @@ export function createTextPanBrowserOwner(server, commandMs = TEXT_PAN_TRACE_LIM
                     await bounded(() => exited, performance.now() + commandMs, "observe owned browser process exit");
                 } catch (error) { result.errors.push(message(error)); }
             }
+            if (client) result.clientDisconnected = !client.isConnected();
             result.processExit = hasExited() ? processExit : { observed: false, code: null, signal: null };
-            result.status = !result.processExit.observed ? "unconfirmed" : result.errors.length || result.forcedKillAttempted ? "forced" : "closed";
+            const abnormalExit = result.processExit.observed && (result.processExit.code !== 0 || result.processExit.signal !== null);
+            result.status = !result.processExit.observed ? "unconfirmed"
+                : result.forcedKillAttempted || result.directKillAttempted ? "forced"
+                : result.errors.length || result.clientDisconnected === false || abnormalExit ? "failed" : "closed";
             return result;
         } finally { child.off("exit", observeExit); }
     })();
-    return { processId: child.pid, get shutdownStarted() { return Boolean(shutdown); }, close };
+    return { processId: child.pid, get shutdownStarted() { return Boolean(shutdown); }, attachClient, close };
 }
 
 async function saveStream(session, stream, output, filename, until) {

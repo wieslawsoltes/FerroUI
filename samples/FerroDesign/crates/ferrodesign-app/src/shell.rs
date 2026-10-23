@@ -724,6 +724,7 @@ impl EditorShell {
             "ConstraintLeft", "ConstraintRight", "ConstraintTop", "ConstraintBottom", "ConstraintCenterX", "ConstraintCenterY",
             "PageStylesButton", "PageVariablesButton", "PageComponentsButton",
             "EditLayoutButton",
+            "PaddingField", "GapField", "CrossGapField",
             "AddPageButton",
             "EditVectorButton",
             "DoneVectorButton",
@@ -739,13 +740,13 @@ impl EditorShell {
             "InlineTextBox",
             "EditPaintsButton",
             "EffectButton", "AddEffectButton", "CompositingButton",
-            "ExportSvgButton", "ExportPngButton",
+            "ExportSvgButton", "ExportPngButton", "ExportXamlButton",
             "CropImageButton", "CropDoneButton", "BlendModeChoice",
             "RichTextButton",
             "EditComponentsButton",
             "EditInteractionsButton",
             "ModalBackdrop",
-            "ModalPanel", "ModalHeader", "CloseModalButton",
+            "ModalPanel", "ModalHeader", "ModalTitle", "ModalDescription", "CloseModalButton",
             "ModalContent",
             "ModalViewport",
             "ModalActions",
@@ -766,7 +767,7 @@ impl EditorShell {
                 if let Some(control) = visual.cast::<Control>() {
                     if let Some(name) = control
                         .name()
-                        .filter(|name| ["Paint", "Effect", "Interaction", "RichText", "Paragraph", "StrokeWidth", "StrokeProfile", "Variable", "Component", "Compositing", "Crop", "Layout", "Action", "SelectLayer", "SelectSame", "Affine", "FramePreset", "Style"]
+                        .filter(|name| ["Paint", "Effect", "Interaction", "RichText", "Paragraph", "StrokeWidth", "StrokeProfile", "Variable", "Guide", "Component", "Compositing", "Crop", "Layout", "Action", "SelectLayer", "SelectSame", "Affine", "FramePreset", "Style"]
                             .iter().any(|prefix| name.starts_with(prefix)))
                     {
                         chrome.insert(name, native_bounds(&control));

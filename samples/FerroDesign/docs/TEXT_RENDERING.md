@@ -60,10 +60,24 @@ APIs and connect over WebSocket. The ordinary trace-off path retains
 `chromium.launch()`. Reports record this transport and trace configuration,
 and comparative deltas require matching configurations. Trace-enabled dispatch
 measurements are therefore not transport-identical to the historical runs.
-The owner bounds graceful shutdown, force-kill and direct owned-child fallback
-to three seconds each, observes process exit, and shares one shutdown result
-with the outer finalizer. A fatal or unconfirmed shutdown stops later modes,
-persists the failure report and exits unsuccessfully.
+The owner first disconnects its connected `Browser`, then closes its
+`BrowserServer`. These are separate public lifetimes: closing the explicitly
+created contexts does not dispose the connected client. Playwright documents
+[connected Browser.close](https://playwright.dev/docs/api/class-browser#browser-close)
+as clearing its contexts and disconnecting from the browser server; the server
+then owns process termination. The owner bounds client disconnection, graceful
+process shutdown, force-kill and direct owned-child fallback to three seconds
+each, observes process exit, and shares one shutdown result with the outer
+finalizer. Every attempted phase remains recorded. A client timeout does not
+prevent cleanup of its process and does not become a success merely because
+that process subsequently exits.
+
+A successful graceful-close promise must also have an observed normal process
+exit. Disconnection alone, a resolved kill request without exit, or a previously
+crashed process cannot report `closed`. Reports distinguish clean closure,
+failed cleanup, forced termination and unconfirmed termination. Every result
+other than `closed` fails benchmark finalization; fatal cleanup stops later
+modes and persists its report before exit.
 
 User Timing marks bracket pointer capture/bubble, observed native frame and
 presentation, and two subsequent animation callbacks. The analyzer aligns the
@@ -79,10 +93,20 @@ incomplete input remain explicit in the diagnostic. Raw traces and detailed
 observations stay in the normal browser report directory; the CI log contains
 only a bounded derived summary. Nine pure analysis regressions cover nested
 intervals, clock alignment, incompatible origins, missing/duplicate markers,
-asynchronous input, event limits and log bounds. Four mock-only teardown tests
-cover one-shot ownership, stalled graceful/force cleanup, exact-child fallback
-and failure to confirm exit, for thirteen tests total. They launch no browser
-or subprocess and do not establish actual Chromium trace capture.
+asynchronous input, event limits and log bounds. Eleven mock-only teardown tests
+cover one-shot ownership, client-before-server disposal, stalled or falsely
+successful client close, stalled graceful/force cleanup, exact-child fallback,
+delayed and absent process exit, crashes and ownership changes, for twenty
+tests total. They launch no browser or subprocess and do not establish actual
+Chromium trace capture or resolution of a previous browser shutdown failure.
+
+The exact-source [5cb7e884 browser evidence](../../../docs/ferrodesign-evidence/2026-10-22-5cb7e884-browser/README.md)
+records completed ordinary and six-sample trace cohorts in both modes. Its final
+server close exceeded three seconds and required a confirmed `SIGKILL`; the
+benchmark step therefore failed despite those completed measurements. That log
+does not establish why Chromium did not close promptly. Disposing the connected
+client corrects the observed ownership omission; an actual run of the new source
+must establish whether finalization completes normally.
 
 This instrumentation can help locate recorded work around the high WebGL2
 input tail. Recorded browser/compositor/GPU activity is not proof of scheduling

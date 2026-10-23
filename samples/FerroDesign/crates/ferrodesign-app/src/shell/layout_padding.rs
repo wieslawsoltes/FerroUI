@@ -1,6 +1,5 @@
 //! Four native drafts share one validated padding commit and one discard.
 use super::*;
-use ferroui_base::interactivity::RoutingStrategies;
 
 const NAMES: [&str; 4] = [
     "LayoutPaddingTop",
@@ -157,6 +156,21 @@ impl EditorShell {
             shell.sync_document_draft_dirty();
         });
 
+        let weak_shell = Rc::downgrade(self);
+        let inputs = weak_fields.clone();
+        let previous = committed.clone();
+        let discard: Rc<dyn Fn()> = Rc::new(move || {
+            let Some(shell) = weak_shell.upgrade() else { return; };
+            let _updating = UpdatingLayout(&shell.updating, shell.updating.replace(true));
+            // Read accepted strings before raising any text notification.
+            let values = previous.each_ref().map(|value| value.borrow().clone());
+            for (field, value) in inputs.iter().zip(values.iter()) {
+                if let Some(field) = field.upgrade() {
+                    field.set_text(Some(value));
+                    field.set_border_brush(Some(icons::brush("#E5E5E5")));
+                }
+            }
+        });
         for (field, value) in fields.iter().zip(committed.iter()) {
             let blur = commit.clone();
             field.add_handler(InputElement::lost_focus_event(), move |_, _| blur());
@@ -172,43 +186,8 @@ impl EditorShell {
                     event.set_handled(true);
                 }
             });
-            // Install the group discard before the generic single-field
-            // binding; one Escape cannot leave half of an atomic edit pending.
-            let weak_shell = Rc::downgrade(self);
-            let weak_field = field.downgrade();
-            let inputs = weak_fields.clone();
-            let previous = committed.clone();
-            let weak_error = error.downgrade();
-            field.add_handler_with(
-                InputElement::key_down_event(),
-                move |_, event| {
-                    let (Some(shell), Some(field)) = (weak_shell.upgrade(), weak_field.upgrade())
-                    else {
-                        return;
-                    };
-                    if event.key != Key::Escape || field.is_composing_text() {
-                        return;
-                    }
-                    {
-                        let _updating =
-                            UpdatingLayout(&shell.updating, shell.updating.replace(true));
-                        for (field, value) in inputs.iter().zip(previous.iter()) {
-                            if let Some(field) = field.upgrade() {
-                                let value = value.borrow().clone();
-                                field.set_text(Some(&value));
-                            }
-                        }
-                    }
-                    if let Some(error) = weak_error.upgrade() {
-                        error.set_is_visible(false);
-                    }
-                    shell.sync_document_draft_dirty();
-                    event.set_handled(true);
-                },
-                RoutingStrategies::TUNNEL,
-                false,
-            );
-            self.bind_inspector_draft(field, value.clone(), commit.clone(), Some(error));
+            self.bind_inspector_draft_with_discard(field, value.clone(), commit.clone(),
+                Some(error), Some(discard.clone()));
         }
         let weak_shell = Rc::downgrade(self);
         let weak_link = link.downgrade();

@@ -211,3 +211,123 @@ test("a kill request without an actual exit is never reported as stopped", { tim
     assert.equal(await owner.close("outer finalizer"), result);
     assert.equal(child.listenerCount("exit"), 0);
 });
+
+test("owned shutdown disconnects the connected Browser before closing its BrowserServer", { timeout: 1000 }, async () => {
+    const child = fakeChild(), operations = [];
+    let connected = true;
+    const owner = createTextPanBrowserOwner({ process: () => child,
+        close: async () => {
+            operations.push("server close");
+            assert.equal(connected, false, "The connected client has a lifetime independent from the process owner");
+            exitChild(child, 0, null);
+        },
+        kill: async () => { assert.fail("Successful client/server teardown must not request a kill"); },
+    }, 10);
+    owner.attachClient({ isConnected: () => connected, close: async ({ reason }) => {
+        operations.push("client disconnect");
+        assert.equal(reason, "benchmark finished");
+        connected = false;
+    } });
+    const first = owner.close("benchmark finished");
+    assert.equal(owner.close("outer finalizer"), first);
+    const result = await first;
+    assert.deepEqual(operations, ["client disconnect", "server close"]);
+    assert.equal(result.status, "closed");
+    assert.equal(result.clientDisconnectAttempted, true);
+    assert.equal(result.clientDisconnectCompleted, true);
+    assert.equal(result.clientDisconnected, true);
+    assert.deepEqual(result.errors, []);
+    assert.equal(child.listenerCount("exit"), 0);
+});
+
+test("a stalled client disconnect still closes the owned process and remains a failed shutdown", { timeout: 1000 }, async () => {
+    const child = fakeChild();
+    let connected = true, closes = 0;
+    const owner = createTextPanBrowserOwner({ process: () => child,
+        close: async () => { closes++; connected = false; exitChild(child, 0, null); },
+        kill: async () => { assert.fail("The process already exited normally"); },
+    }, 5);
+    owner.attachClient({ isConnected: () => connected, close: pending });
+    const result = await owner.close("stalled client");
+    assert.equal(closes, 1);
+    assert.equal(result.status, "failed");
+    assert.equal(result.clientDisconnectAttempted, true);
+    assert.equal(result.clientDisconnectCompleted, false);
+    assert.equal(result.clientDisconnected, true);
+    assert.equal(result.gracefulCloseCompleted, true);
+    assert.equal(result.forcedKillAttempted, false);
+    assert.deepEqual(result.processExit, { observed: true, code: 0, signal: null });
+    assert.match(result.errors[0], /disconnect owned trace browser client/);
+});
+
+test("resolved client close cannot claim successful disposal while the client stays connected", { timeout: 1000 }, async () => {
+    const child = fakeChild();
+    const owner = createTextPanBrowserOwner({ process: () => child,
+        close: async () => { exitChild(child, 0, null); }, kill: pending,
+    }, 5);
+    owner.attachClient({ isConnected: () => true, close: async () => {} });
+    const result = await owner.close("misreported client");
+    assert.equal(result.status, "failed");
+    assert.equal(result.clientDisconnectCompleted, false);
+    assert.equal(result.clientDisconnected, false);
+    assert.equal(result.processExit.observed, true);
+    assert.match(result.errors[0], /remained connected after close resolved/);
+});
+
+test("a disconnected client and completed server close still require actual process-exit evidence", { timeout: 1000 }, async () => {
+    const child = fakeChild();
+    child.kill = () => true;
+    const owner = createTextPanBrowserOwner({ process: () => child,
+        close: async () => {}, kill: async () => {},
+    }, 5);
+    owner.attachClient({ isConnected: () => false, close: async () => { assert.fail("Already disconnected"); } });
+    const result = await owner.close("missing process exit");
+    assert.equal(result.status, "unconfirmed");
+    assert.equal(result.clientDisconnectAttempted, false);
+    assert.equal(result.clientDisconnected, true);
+    assert.equal(result.gracefulCloseCompleted, false);
+    assert.equal(result.forcedKillAttempted, true);
+    assert.equal(result.directKillAttempted, true);
+    assert.equal(result.processExit.observed, false);
+    assert.equal(result.errors.length, 3);
+});
+
+test("normal process exit can arrive after the graceful close promise without requiring a kill", { timeout: 1000 }, async () => {
+    const child = fakeChild();
+    const owner = createTextPanBrowserOwner({ process: () => child,
+        close: async () => { setImmediate(() => exitChild(child, 0, null)); },
+        kill: async () => { assert.fail("Wait for process exit within the same bounded close phase"); },
+    }, 100);
+    const result = await owner.close("delayed process event");
+    assert.equal(result.status, "closed");
+    assert.equal(result.gracefulCloseCompleted, true);
+    assert.equal(result.forcedKillAttempted, false);
+    assert.deepEqual(result.processExit, { observed: true, code: 0, signal: null });
+});
+
+test("an already crashed owned process cannot be reported as a clean shutdown", { timeout: 1000 }, async () => {
+    for (const [code, signal] of [[1, null], [null, "SIGSEGV"]]) {
+        const child = fakeChild();
+        child.exitCode = code; child.signalCode = signal;
+        const owner = createTextPanBrowserOwner({ process: () => child,
+            close: async () => { assert.fail("The owned process has already exited"); }, kill: pending,
+        }, 5);
+        const result = await owner.close("already crashed");
+        assert.equal(result.status, "failed");
+        assert.equal(result.gracefulCloseCompleted, false);
+        assert.equal(result.forcedKillAttempted, false);
+        assert.deepEqual(result.processExit, { observed: true, code, signal });
+    }
+});
+
+test("client ownership is unique and cannot change after shutdown starts", { timeout: 1000 }, async () => {
+    const child = fakeChild(), client = { isConnected: () => false, close: async () => {} };
+    const owner = createTextPanBrowserOwner({ process: () => child,
+        close: async () => { exitChild(child, 0, null); }, kill: pending,
+    }, 5);
+    owner.attachClient(client);
+    assert.throws(() => owner.attachClient(client), /exactly one connected benchmark client/);
+    const result = owner.close("finished");
+    assert.throws(() => owner.attachClient(client), /after owned shutdown starts/);
+    assert.equal((await result).status, "closed");
+});

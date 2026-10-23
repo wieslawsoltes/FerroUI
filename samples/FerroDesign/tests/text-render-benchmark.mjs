@@ -149,6 +149,7 @@ try {
         const ownedServer = await chromium.launchServer({ ...launchOptions, host: "127.0.0.1" });
         browserOwner = createTextPanBrowserOwner(ownedServer);
         browser = await chromium.connect(ownedServer.wsEndpoint(), { timeout: 30000 });
+        browserOwner.attachClient(browser);
     } else browser = await chromium.launch(launchOptions);
     report.browser = browser.version();
     benchmarkRuns: for (const build of builds) for (const mode of ["Software2D", "WebGL2"]) {

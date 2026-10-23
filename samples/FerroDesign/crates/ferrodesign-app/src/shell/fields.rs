@@ -57,6 +57,20 @@ impl EditorShell {
         commit: Rc<dyn Fn()>,
         error: Option<&Ref<TextBlock>>,
     ) {
+        self.bind_inspector_draft_with_discard(field, committed, commit, error, None);
+    }
+
+    /// A coordinated editor owns one discard action even when it contains
+    /// several native fields. Installing one Escape handler avoids depending
+    /// on the routed-event ordering of competing group/single-field handlers.
+    pub(super) fn bind_inspector_draft_with_discard(
+        self: &Rc<Self>,
+        field: &Ref<TextBox>,
+        committed: Rc<RefCell<String>>,
+        commit: Rc<dyn Fn()>,
+        error: Option<&Ref<TextBlock>>,
+        discard: Option<Rc<dyn Fn()>>,
+    ) {
         let confirmed = committed.borrow().clone();
         let draft = Rc::new(InspectorDraft {
             field: field.downgrade(),
@@ -112,8 +126,12 @@ impl EditorShell {
                 if event.key != Key::Escape || field.is_composing_text() {
                     return;
                 }
-                let value = canceled.committed.borrow().clone();
-                field.set_text(Some(&value));
+                if let Some(discard) = &discard {
+                    discard();
+                } else {
+                    let value = canceled.committed.borrow().clone();
+                    field.set_text(Some(&value));
+                }
                 field.set_border_brush(Some(icons::brush("#E5E5E5")));
                 if let Some(error) = error.as_ref().and_then(WeakRef::upgrade) {
                     error.set_is_visible(false);
