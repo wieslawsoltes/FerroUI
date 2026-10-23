@@ -85,3 +85,38 @@ test("inline evidence retains native pointer facts and excludes document and typ
     assert.equal(result.chrome.InlineTextBox.typography, undefined);
     assert.equal(result.document, undefined);
 });
+
+test("keyboard evidence retains the actual shortcut without changing its default", async () => {
+    await startInputObservation(page, ["keydown"]);
+    const event = new Event("keydown", { cancelable: true });
+    Object.assign(event, { key: "v", code: "KeyV", ctrlKey: true, metaKey: false,
+        altKey: false, shiftKey: false, isComposing: false });
+    document.dispatchEvent(event);
+    const observation = await stopInputObservation(page);
+    assert.equal(event.defaultPrevented, false);
+    assert.deepEqual(observation.events.map(({ key, code, ctrlKey, metaKey, defaultPrevented }) =>
+        ({ key, code, ctrlKey, metaKey, defaultPrevented })), Array(2).fill({
+        key: "v", code: "KeyV", ctrlKey: true, metaKey: false, defaultPrevented: false,
+    }));
+});
+
+test("text and paste evidence preserve Unicode and newlines without dispatching input", async () => {
+    await startInputObservation(page, ["input", "paste"]);
+    const payload = "A🦀\n";
+    const input = new Event("input", { cancelable: true });
+    Object.assign(input, { inputType: "insertText", data: payload, isComposing: false });
+    document.dispatchEvent(input);
+    const paste = new Event("paste", { cancelable: true });
+    Object.assign(paste, { clipboardData: { getData(type) {
+        assert.equal(type, "text/plain"); return payload;
+    } } });
+    document.dispatchEvent(paste);
+    const observation = await stopInputObservation(page);
+    assert.equal(input.defaultPrevented, false);
+    assert.equal(paste.defaultPrevented, false);
+    assert.ok(observation.events.filter(event => event.type === "input").every(event =>
+        event.inputType === "insertText" && event.data === payload && event.isComposing === false));
+    assert.ok(observation.events.filter(event => event.type === "paste").every(event =>
+        event.clipboardText === payload));
+    assert.equal(observation.events.length, 4);
+});

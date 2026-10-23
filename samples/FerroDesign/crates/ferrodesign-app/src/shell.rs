@@ -673,7 +673,11 @@ impl EditorShell {
                 "visible":control.is_effectively_visible(),
                 "enabled":control.is_effectively_enabled(),
                 "measureValid":control.is_measure_valid(),"arrangeValid":control.is_arrange_valid(),
-                "focused":control.is_focused(),"focusWithin":control.is_keyboard_focus_within()});
+                "focused":control.is_focused(),"focusWithin":control.is_keyboard_focus_within(),
+                "pointerOver":control.is_pointer_over()});
+            if let Some(button) = control.downcast_ref::<Button>() {
+                state["pressed"] = json!(button.is_pressed());
+            }
             if let Some(field) = control.downcast_ref::<TextBox>() {
                 state["text"] = json!(field.text());
                 state["composing"] = json!(field.is_composing_text());

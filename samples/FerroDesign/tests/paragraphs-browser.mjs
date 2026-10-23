@@ -1,5 +1,7 @@
 import assert from "node:assert/strict";
-import { readFile } from "node:fs/promises";
+import { readFile, writeFile } from "node:fs/promises";
+import { inlineInputState, startInputObservation, stopInputObservation } from "./input-observations.mjs";
+import { captureWithinDeadline } from "./isolated-scenario.mjs";
 import { resolve } from "node:path";
 import { PNG } from "pngjs";
 
@@ -301,8 +303,56 @@ export async function paragraphRegressions(page, reference, check, helpers, outp
     await enterInline();
     await page.keyboard.press("Control+Home");
     assert.equal((await typography("InlineTextBox")).caretIndex, 0);
-    await page.keyboard.insertText(repeatedUnit);
-    await assertRich(insertedRich, repeatedDepth, "Repeated paragraph insertion at native caret zero");
+    // CDP insertText targets the bridge's single-line DOM input; use the
+    // actual multiline clipboard path here. Native paste applies the complete
+    // text/plain payload as one edit, preserving the one-undo contract below.
+    await page.context().grantPermissions(["clipboard-read", "clipboard-write"], {
+        origin: new URL(page.url()).origin,
+    });
+    const clipboard = await page.evaluate(async value => {
+        await navigator.clipboard.writeText(value);
+        const items = await navigator.clipboard.read();
+        return Promise.all(items.map(async item => ({
+            types: [...item.types],
+            text: item.types.includes("text/plain") ? await (await item.getType("text/plain")).text() : null,
+        })));
+    }, repeatedUnit);
+    assert.deepEqual(clipboard.filter(item => item.types.includes("text/plain")).map(item => item.text),
+        [repeatedUnit], "The actual clipboard preserves the complete non-BMP paragraph and newline");
+    const beforePaste = await state(page);
+    await startInputObservation(page, ["keydown", "keyup", "paste", "beforeinput", "input"]);
+    let pasteError;
+    try {
+        await page.keyboard.press("Control+v");
+        await assertRich(insertedRich, repeatedDepth, "Repeated paragraph paste at native caret zero");
+    } catch (error) {
+        pasteError = error;
+    }
+    try {
+        const evidence = await captureWithinDeadline(async () => {
+            const input = await stopInputObservation(page);
+            const after = await state(page);
+            const evidence = {
+                path: "trusted Ctrl+V through the native TextBox and browser Clipboard API",
+                expectedClipboardText: repeatedUnit, clipboard,
+                before: inlineInputState(beforePaste), after: inlineInputState(after),
+                actualText: after.chrome.InlineTextBox.text, input,
+            };
+            await writeFile(resolve(output, mode + "-native-paragraph-paste-input.json"), JSON.stringify(evidence, null, 2));
+            return evidence;
+        });
+        assert.equal(evidence.input.droppedEvents, 0, "Native paste input evidence is complete");
+        const pasteKeys = evidence.input.events.filter(event => event.phase === "capture" &&
+            event.type === "keydown" && event.code === "KeyV" && event.ctrlKey);
+        assert.equal(pasteKeys.length, 1, "One actual paste shortcut initiates the entire paragraph insertion");
+        assert.equal(pasteKeys[0].trusted, true);
+        // Chrome's async Clipboard API route handles the key before its DOM
+        // default, so a synthetic paste/InputEvent is neither needed nor sent.
+    } catch (error) {
+        if (!pasteError) pasteError = error;
+        else console.error(mode + ": paragraph paste evidence failed after the primary error: " + String(error));
+    }
+    if (pasteError) throw pasteError;
     await nativeHistory("Control+z", originalRich, repeatedDepth, "Native insertion undo");
     await nativeHistory("Control+Shift+z", insertedRich, repeatedDepth, "Native insertion redo");
     const insertedDocument = await documentState(page);
@@ -310,7 +360,7 @@ export async function paragraphRegressions(page, reference, check, helpers, outp
     await page.waitForFunction(() => JSON.parse(globalThis.ferroDesign.ferroDesignState()).editingText === null,
         undefined, { timeout: 10000 });
     await history(repeatedDocument, insertedDocument, repeatedDepth, "Repeated paragraph edit session");
-    check("A real native insertion at the start of identical Unicode paragraphs inherits the first paragraph only; native Ctrl+Z/Ctrl+Shift+Z restore exact character and paragraph ranges and actual line indentation, while the complete session remains one document history step");
+    check("A real native clipboard paste at the start of identical Unicode paragraphs inherits the first paragraph only; native Ctrl+Z/Ctrl+Shift+Z restore exact character and paragraph ranges and actual line indentation, while the complete session remains one document history step");
 
     await importFixture(page, repeatedFixture);
     repeatedDepth = (await state(page)).historyLength;

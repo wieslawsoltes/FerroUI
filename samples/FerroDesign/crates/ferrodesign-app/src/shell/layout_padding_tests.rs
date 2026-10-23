@@ -170,6 +170,10 @@ fn native_padding_diagnostics_publish_real_fields_and_export_controls() {
     assert_eq!(state["chrome"]["PaddingField"]["text"], "10");
     assert_eq!(state["chrome"]["LayoutPaddingTop"]["text"], "10");
     assert_eq!(state["chrome"]["LayoutPaddingLinked"]["checked"], true);
+    assert_eq!(state["chrome"]["LayoutPaddingTop"]["pointerOver"], false);
+    assert_eq!(state["chrome"]["CloseModalButton"]["pointerOver"], false);
+    assert_eq!(state["chrome"]["CloseModalButton"]["pressed"], false);
+    assert!(state["chrome"]["LayoutPaddingTop"].get("pressed").is_none());
     assert!(state["chrome"]["ModalTitle"]["text"].as_str().unwrap().contains("Layout padding"));
     for name in ["ExportXamlButton", "VariablesRailButton", "PresentButton", "GapField", "CrossGapField",
         "DesignTab", "PrototypeTab", "InspectTab", "PrototypeInspector", "InspectInspector",

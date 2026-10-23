@@ -2,8 +2,9 @@ import assert from "node:assert/strict";
 import { readFile, writeFile } from "node:fs/promises";
 import { resolve } from "node:path";
 import { PNG } from "pngjs";
-import { startInputObservation, stopInputObservation } from "./input-observations.mjs";
+import { readInputObservation, startInputObservation, stopInputObservation } from "./input-observations.mjs";
 import { angularInsertionFromPointerInput, angularPaintFromPointerInput } from "./gradient-input.mjs";
+import { captureWithinDeadline } from "./isolated-scenario.mjs";
 
 // Fixtures are imported once. All subsequent edits use native controls and
 // trusted browser input; gradientEdit supplies read-only handle coordinates.
@@ -21,6 +22,133 @@ export async function gradientHandleRegressions(page, reference, check, helpers,
     const published = async (before, label) => {
         await waitForNativeFrame(page, before.renderedFrames, label);
         await waitForNativeScene(page, before.sceneFrames, label);
+    };
+    const entryInputs = [];
+    const entryState = (view, name) => ({
+        renderedFrames: view.renderedFrames, sceneFrames: view.sceneFrames,
+        documentRevision: view.documentRevision, historyLength: view.historyLength,
+        canUndo: view.canUndo, canRedo: view.canRedo, selection: view.selection,
+        gradientEdit: view.gradientEdit,
+        chrome: Object.fromEntries([name, "ModalViewport", "ModalBackdrop", "CanvasHost"]
+            .map(key => [key, view.chrome[key] ?? null])),
+        focusedControls: Object.keys(view.chrome).filter(key => view.chrome[key].focused),
+    });
+    const enterGradient = async (fill, before) => {
+        const name = "PaintCanvasGradient" + fill, bounds = before.chrome[name];
+        const input = { name, fill, before: { native: entryState(before, name) }, stage: "before" };
+        const documentBefore = await documentState(page);
+        entryInputs.push(input);
+        let entryError;
+        try {
+            assert.equal(typeof bounds?.pointerOver, "boolean", "Gradient entry requires native pointerOver diagnostics from the current runtime");
+            assert.equal(typeof bounds?.pressed, "boolean", "Gradient entry requires native Button pressed diagnostics from the current runtime");
+            assert.equal(bounds.pressed, false, "The gradient entry button starts released");
+            input.requested = { x: bounds.x + bounds.width / 2, y: bounds.y + bounds.height / 2 };
+            await startInputObservation(page,
+                ["pointermove", "pointerdown", "pointerup", "pointercancel", "mousedown", "mouseup", "click"], 64);
+            input.before.observation = await readInputObservation(page);
+            input.stage = "hover";
+            // A completed scene can belong to an earlier layout batch. Native
+            // hover establishes that the compositor now hits this actual button.
+            await page.mouse.move(input.requested.x, input.requested.y);
+            await wait((view, _document, target) => {
+                const button = view.chrome[target.name];
+                return button?.visible && button.enabled && button.measureValid && button.arrangeValid &&
+                    button.pointerOver && !button.pressed &&
+                    ["x", "y", "width", "height"].every(key => button[key] === target.bounds[key]);
+            }, { name, bounds });
+            input.hover = { native: entryState(await state(page), name), observation: await readInputObservation(page) };
+            input.stage = "down";
+            let pressError;
+            try {
+                await page.mouse.down();
+                await wait((view, _document, name) => view.chrome[name]?.pressed === true, name);
+            } catch (error) {
+                pressError = error;
+                input.pressError = error?.stack || String(error);
+            } finally {
+                // Capture the held state on both success and failure, before
+                // the release changes the native pressed/capture diagnostics.
+                input.down = {};
+                try {
+                    await captureWithinDeadline(async () => {
+                        input.down.observation = await readInputObservation(page);
+                        input.down.native = entryState(await state(page), name);
+                        if (!pressError) {
+                            assert.equal(input.down.native.chrome[name].pressed, true, "The intended native button owns the held press");
+                            assert.equal(input.down.native.chrome.ModalBackdrop.visible, true, "The release-mode button stays in its modal while held");
+                            assert.equal(input.down.native.gradientEdit.node, null, "Holding the button cannot activate gradient editing before release");
+                        }
+                    }, 5000);
+                } catch (error) {
+                    input.down.captureError = error?.stack || String(error);
+                    pressError ??= error;
+                }
+                // Release exactly once even if native press readiness fails.
+                // Preserve the press failure if releasing also fails.
+                try { await page.mouse.up(); }
+                catch (error) {
+                    input.releaseError = error?.stack || String(error);
+                    pressError ??= error;
+                }
+            }
+            if (pressError) throw pressError;
+            input.stage = "entry";
+            await wait((view, _document, fill) => view.gradientEdit.node === 2 && view.gradientEdit.fill === fill &&
+                !view.gradientEdit.active && !view.chrome.ModalBackdrop.visible && view.chrome.CanvasHost.focusWithin, fill);
+            await published(before, "Enter native canvas gradient editor");
+            const after = await state(page);
+            assert.deepEqual(await documentState(page), documentBefore, "Entering native gradient editing cannot change the document");
+            for (const key of ["documentRevision", "historyLength", "canUndo", "canRedo"]) {
+                assert.equal(after[key], before[key], "Gradient entry preserves " + key);
+            }
+            assert.deepEqual(after.selection, before.selection, "Gradient entry preserves the selected layer");
+            input.stage = "complete";
+        } catch (error) {
+            entryError = error;
+            input.entryError = error?.stack || String(error);
+        } finally {
+            try {
+                await captureWithinDeadline(async () => {
+                    const observation = await stopInputObservation(page);
+                    input.after = { observation };
+                    input.after.native = entryState(await state(page), name);
+                    if (!entryError) {
+                        assert.equal(observation.droppedEvents, 0, "Gradient entry input evidence must be complete");
+                        const events = observation.events.filter(event => event.phase === "capture");
+                        const downs = events.filter(event => event.type === "pointerdown");
+                        const ups = events.filter(event => event.type === "pointerup");
+                        const moves = events.filter(event => event.type === "pointermove");
+                        assert.equal(downs.length, 1, "Gradient entry has exactly one actual pointer press");
+                        assert.equal(ups.length, 1, "Gradient entry has exactly one actual pointer release");
+                        assert.equal(events.filter(event => event.type === "pointercancel").length, 0);
+                        assert.ok(moves.length > 0, "Native hover follows an actual delivered pointer move");
+                        const down = downs[0], up = ups[0], move = moves.at(-1);
+                        assert.ok([move, down, up].every(event => event.trusted && event.pointerType === "mouse"));
+                        assert.equal(down.button, 0); assert.equal(down.buttons, 1);
+                        assert.equal(up.button, 0); assert.equal(up.buttons, 0);
+                        assert.equal(down.pointerId, up.pointerId);
+                        assert.ok(events.indexOf(move) < events.indexOf(down) && events.indexOf(down) < events.indexOf(up));
+                        assert.ok(down.x >= bounds.x && down.x <= bounds.x + bounds.width &&
+                            down.y >= bounds.y && down.y <= bounds.y + bounds.height,
+                        "The delivered press remains inside the measured native button");
+                        assert.equal(down.x, move.x); assert.equal(down.y, move.y);
+                        assert.equal(up.x, down.x); assert.equal(up.y, down.y);
+                    }
+                }, 5000);
+            } catch (error) {
+                input.captureError = error?.stack || String(error);
+                entryError ??= error;
+            }
+            try {
+                await captureWithinDeadline(() => writeFile(resolve(output, mode + "-gradient-entry-input.json"),
+                    JSON.stringify(entryInputs, null, 2)), 5000);
+            } catch (error) {
+                input.writeError = error?.stack || String(error);
+                entryError ??= error;
+            }
+        }
+        if (entryError) throw entryError;
     };
     const angularInputs = [];
     const saveAngularInputs = () => writeFile(resolve(output, mode + "-angular-gradient-input.json"), JSON.stringify(angularInputs, null, 2));
@@ -145,10 +273,7 @@ export async function gradientHandleRegressions(page, reference, check, helpers,
         await waitForNativeScene(page, beforeDialog.sceneFrames, "Open native gradient paint card");
         await revealPaintCard("PaintCanvasGradient" + fill);
         const beforeEntry = await state(page);
-        await clickNative(page, "PaintCanvasGradient" + fill, "ModalViewport");
-        await wait((view, _document, fill) => view.gradientEdit.node === 2 && view.gradientEdit.fill === fill &&
-            !view.gradientEdit.active && !view.chrome.ModalBackdrop.visible && view.chrome.CanvasHost.focusWithin, fill);
-        await published(beforeEntry, "Enter native canvas gradient editor");
+        await enterGradient(fill, beforeEntry);
     };
     const handle = async (kind, stop = null) => {
         const view = await state(page);

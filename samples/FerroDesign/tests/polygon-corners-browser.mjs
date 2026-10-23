@@ -57,13 +57,59 @@ export async function polygonCornerRegressions(page, reference, check, helpers, 
         star_inner_radius: 0.45, corner_radius: 0, corner_radii: null, corner_smoothing: 0,
         fills: [fill], strokes: [], effects: [], ...properties,
     });
+    const inspectorTab = async (tab, panel, hidden) => {
+        const before = await state(page);
+        await clickNative(page, tab);
+        await page.waitForFunction(({ panel, hidden }) => {
+            const chrome = JSON.parse(globalThis.ferroDesign.ferroDesignState()).chrome;
+            const bounds = chrome[panel];
+            return bounds?.visible === true && bounds.measureValid === true && bounds.arrangeValid === true &&
+                bounds.width > 0 && bounds.height > 0 &&
+                [bounds.x, bounds.y, bounds.width, bounds.height].every(Number.isFinite) &&
+                chrome[hidden]?.visible === false;
+        }, { panel, hidden }, { timeout: 10000 });
+        if (before.chrome[panel]?.visible !== true) {
+            // Inspector changes need the committed native hit-test scene;
+            // they need not redraw the retained canvas artwork.
+            await waitForNativeScene(page, before.sceneFrames, tab + " inspector activation");
+        }
+        const view = await state(page);
+        assert.equal(view.chrome[panel].visible, true, panel + " must be visible after the native tab click");
+        assert.equal(view.chrome[hidden].visible, false, hidden + " must be hidden after the native tab click");
+    };
     const download = async (button, name, suffix) => {
-        const [item] = await Promise.all([page.waitForEvent("download", { timeout: 60000 }),
-            clickNative(page, button, "InspectorViewport")]);
-        assert.equal(await item.failure(), null);
-        const path = resolve(output, mode + "-polygon-corners-" + name + "." + suffix);
-        await item.saveAs(path);
-        return readFile(path);
+        const inspect = button === "ExportXamlButton";
+        let primaryError;
+        try {
+            if (inspect) await inspectorTab("InspectTab", "InspectInspector", "DesignInspector");
+            const [item] = await Promise.all([page.waitForEvent("download", { timeout: 60000 }),
+                clickNative(page, button, "InspectorViewport")]);
+            assert.equal(await item.failure(), null);
+            const path = resolve(output, mode + "-polygon-corners-" + name + "." + suffix);
+            await item.saveAs(path);
+            return await readFile(path);
+        } catch (error) {
+            primaryError = error;
+            throw error;
+        } finally {
+            if (inspect) {
+                try {
+                    await inspectorTab("DesignTab", "DesignInspector", "InspectInspector");
+                } catch (restoreError) {
+                    if (!primaryError) throw restoreError;
+                    // Keep the export error and its stack first if restoring
+                    // the actual Design tab also failed. The scenario stays
+                    // failed, and its normal session boundary reloads next.
+                    try {
+                        primaryError.stack = (primaryError.stack || String(primaryError)) +
+                            "\nRestoring the native Design inspector also failed:\n" +
+                            (restoreError.stack || String(restoreError));
+                    } catch {
+                        // Diagnostic annotation cannot replace the primary failure.
+                    }
+                }
+            }
+        }
     };
 
     await importFixture(page, isolatedDocument(reference, [primitive(2, { name: "Rounded triangle" })], "Polygon radius authoring"));
