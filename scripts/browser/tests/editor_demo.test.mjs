@@ -36,10 +36,24 @@ async function clickElement(page, predicate) {
 }
 const toolbar = (page, name) => clickElement(page, `e => e.name === ${JSON.stringify(name)}`);
 const focusEditor = (page) => clickElement(page, "e => e.type.endsWith('TextArea')");
+async function commitComposition(page, text) {
+    const before = (await state(page)).text;
+    // The browser platform receives composition events from its hidden native
+    // input element. CDP's insertText commits a composition but does not start
+    // one: begin it explicitly to exercise the IME client and preedit rendering.
+    const start = await page.send("Input.imeSetComposition", {
+        text, selectionStart: text.length, selectionEnd: text.length,
+    });
+    assert(!start.error, `could not start IME composition: ${JSON.stringify(start)}`);
+    await settle(page);
+    assert((await state(page)).text === before, "IME preedit changed the document before commit");
+    const commit = await page.send("Input.insertText", { text });
+    assert(!commit.error, `could not commit IME composition: ${JSON.stringify(commit)}`);
+}
 async function replaceDocument(page, text) {
     await focusEditor(page);
     await page.press("a", ["ctrl"]);
-    if (text.length) await page.send("Input.insertText", { text });
+    if (text.length) await commitComposition(page, text);
     else await page.press("Backspace");
     await waitState(page, `s => s.text === ${JSON.stringify(text)}`);
 }
@@ -63,14 +77,18 @@ for (const mode of ["Software2D", "WebGL2"]) {
             assert(colors.size > 30, `editor canvas is blank or unpainted: ${colors.size} colors`);
 
             // UTF-16 supplementary and combining sequences travel through the
-            // platform text-input service into the real document and undo stack.
-            const unicode = "// 😀 e\u0301\nlet browser_smoke = 42;";
+            // real browser IME composition/commit path and the native undo stack.
+            const unicode = "// 😀 e\u0301";
             await replaceDocument(page, unicode);
             assert((await state(page)).caret === unicode.length, "caret did not count UTF-16 units");
             await page.press("z", ["ctrl"]);
             await waitState(page, `s => s.text === ${JSON.stringify(initial.text)}`);
             await page.press("y", ["ctrl"]);
             await waitState(page, `s => s.text === ${JSON.stringify(unicode)}`);
+            await page.press("Enter");
+            await page.type("let browser_smoke = 42;");
+            const clipboardText = `${unicode}\nlet browser_smoke = 42;`;
+            await waitState(page, `s => s.text === ${JSON.stringify(clipboardText)}`);
 
             // Native rich copy/cut/paste uses the browser Clipboard API. Read
             // both formats back independently of the editor's own export code.
@@ -79,7 +97,7 @@ for (const mode of ["Software2D", "WebGL2"]) {
             await page.setPermission("clipboard-write", "granted");
             await page.press("a", ["ctrl"]);
             await page.press("c", ["ctrl"]);
-            await page.waitFor(`navigator.clipboard.readText().then(text => text === ${JSON.stringify(unicode)})`, 15_000);
+            await page.waitFor(`navigator.clipboard.readText().then(text => text === ${JSON.stringify(clipboardText)})`, 15_000);
             const richCopy = await page.evaluate(`navigator.clipboard.read().then(async items => {
                 const item = items.find(item => item.types.includes('text/html'));
                 return item ? (await item.getType('text/html')).text() : null;
@@ -88,7 +106,7 @@ for (const mode of ["Software2D", "WebGL2"]) {
             await page.press("x", ["ctrl"]);
             await waitState(page, "s => s.text === ''");
             await page.press("v", ["ctrl"]);
-            await waitState(page, `s => s.text === ${JSON.stringify(unicode)}`);
+            await waitState(page, `s => s.text === ${JSON.stringify(clipboardText)}`);
 
             // Completion keeps editor focus; Tab commits the actual native popup.
             await replaceDocument(page, "pri");
@@ -101,11 +119,11 @@ for (const mode of ["Software2D", "WebGL2"]) {
             await replaceDocument(page, "");
             await toolbar(page, "Snippet");
             await waitState(page, "s => s.selectedText === 'name'");
-            await page.send("Input.insertText", { text: "browser_name" });
+            await page.type("browser_name");
             await waitState(page, "s => (s.text.match(/browser_name/g) ?? []).length === 2");
             await page.press("Tab");
             await waitState(page, "s => s.selectedText === 'value'");
-            await page.send("Input.insertText", { text: "123" });
+            await page.type("123");
             await page.press("Tab");
             await waitState(page, "s => s.text.includes('browser_name = 123;') && s.selectedText === ''");
 
@@ -113,7 +131,7 @@ for (const mode of ["Software2D", "WebGL2"]) {
             await toolbar(page, "RustLanguage");
             await toolbar(page, "Find");
             await waitState(page, "s => s.searchOpen && s.focus.endsWith('TextBox')");
-            await page.send("Input.insertText", { text: "FerroUI" });
+            await page.type("FerroUI");
             await waitState(page, "s => s.searchPattern === 'FerroUI'");
             await page.press("Enter");
             await page.press("Escape");
@@ -121,7 +139,7 @@ for (const mode of ["Software2D", "WebGL2"]) {
 
             await toolbar(page, "Replace");
             await clickElement(page, "e => e.placeholder === 'Replace'");
-            await page.send("Input.insertText", { text: "BrowserEdit" });
+            await page.type("BrowserEdit");
             await clickElement(page, "e => e.type.endsWith('Button') && e.text === 'Replace all'");
             await waitState(page, "s => s.text.includes('BrowserEdit') && !s.text.includes('FerroUI')");
             await page.press("Escape");

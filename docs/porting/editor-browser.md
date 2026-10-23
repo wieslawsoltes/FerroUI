@@ -71,8 +71,10 @@ protocol harness as the existing browser platform tests. It runs once with
 input; the diagnostic exports cannot change editor content.
 
 The checks require a rendered, nonblank canvas; native Noto Mono family resolution; cached native visual lines;
-successful Rust grammar tokenization; supplementary-character and combining
-sequence text input with UTF-16 caret positions; undo and redo; plain-text and HTML
+successful Rust grammar tokenization; real browser IME composition and commit of
+supplementary-character and combining sequences, unchanged document during
+preedit and UTF-16 caret positions; ordinary keyboard text and newline input;
+undo and redo; plain-text and HTML
 clipboard publication, cut and paste with browser permissions; native completion
 accepted with Tab; linked snippet updates and field navigation; native search
 popup input, replace-all and dismissal; folding and unfolding; wrapping; theme switching;
@@ -95,3 +97,11 @@ screen-reader text ranges, or arbitrary user-provided generators and embedded
 controls. These remain explicit integration tests for the broader full-port
 goal. The sample remains a small editor demonstration and does not claim IDE or
 language-server functionality.
+
+The browser platform currently forwards ordinary text through key events and
+IME text through composition events. Its `beforeinput` callback only adjusts
+selection; an isolated `insertText` event without either a key or an active
+composition is not a covered input path. The acceptance test starts a real CDP
+IME composition before committing it, and uses real key events for ordinary
+typing. Emoji-picker and other composition-free text insertion need separate
+browser-platform coverage.
