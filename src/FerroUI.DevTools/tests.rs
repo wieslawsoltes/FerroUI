@@ -78,8 +78,9 @@ fn trees_selectors_and_stale_ids() {
     let messages = session
         .handle(&json!({"id":2,"method":"DOM.getAttributes","params":{"nodeId":id}}).to_string());
     assert_eq!(messages[0]["error"]["code"], -32000);
+    // The ID belongs to the control in the shared inspector: attached again, it is the same.
     panel.children().add(button);
-    assert_ne!(find(&mut session, "#clickMe"), id);
+    assert_eq!(find(&mut session, "#clickMe"), id);
 }
 
 #[test]

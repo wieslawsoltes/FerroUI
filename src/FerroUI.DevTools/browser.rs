@@ -1,13 +1,13 @@
-use crate::log::LogCapture;
 use crate::protocol::{response, string, CdpSession, Error, Result};
+use ferroui_base::logging::LogEventLevel;
 use ferroui_base::reactive::IDisposable;
 use ferroui_base::{Ref, WeakRef};
 use ferroui_controls::{Application, TopLevel, Window};
+use ferroui_inspect::{LogCapture, LogEntry, LogGuard};
 use serde_json::{json, Value};
 use std::cell::Cell;
 use std::collections::{BTreeMap, HashSet};
 use std::rc::Rc;
-use std::sync::Arc;
 
 struct Target {
     root: WeakRef<TopLevel>,
@@ -38,7 +38,8 @@ pub struct Browser {
     next_target: u64,
     next_connection: u64,
     next_session: u64,
-    logs: Arc<LogCapture>,
+    /// The log capture shared with the other servers of the process.
+    _logs: LogGuard,
 }
 impl Default for Browser {
     fn default() -> Self {
@@ -53,7 +54,7 @@ impl Browser {
             next_target: 1,
             next_connection: 1,
             next_session: 1,
-            logs: LogCapture::install(),
+            _logs: LogCapture::install(),
         }
     }
     /// Explicit registration also supports custom lifetimes. The registry retains only a weak root.
@@ -395,7 +396,11 @@ impl Browser {
             for event in s.poll() {
                 c.events.push(with_session(event, session));
             }
-            for entry in self.logs.since(&mut s.log_cursor) {
+            for entry in LogCapture::since(&mut s.log_cursor)
+                .iter()
+                .filter(|e| e.level >= LogEventLevel::Information)
+                .map(log_entry)
+            {
                 if s.enabled.contains("Log") {
                     c.events.push(with_session(
                         json!({"method":"Log.entryAdded","params":{"entry":entry}}),
@@ -412,10 +417,14 @@ impl Browser {
         events
     }
 }
-impl Drop for Browser {
-    fn drop(&mut self) {
-        LogCapture::uninstall(&self.logs);
-    }
+/// A `Log.LogEntry` of CDP.
+fn log_entry(entry: &LogEntry) -> Value {
+    let level = match entry.level {
+        LogEventLevel::Warning => "warning",
+        LogEventLevel::Error | LogEventLevel::Fatal => "error",
+        _ => "info",
+    };
+    json!({"source":"other","level":level,"text":format!("[{}] {}",entry.area,entry.message()),"timestamp":entry.timestamp})
 }
 fn with_session(mut value: Value, session: &str) -> Value {
     if !session.is_empty() {

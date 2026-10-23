@@ -117,6 +117,23 @@ pub trait IAnimatedServerObject: IServerObject + IServerAnimatedPropertyHost {
 
     /// The object as the base contract (an explicit upcast).
     fn as_server_object_dyn(&self) -> &dyn IServerObject;
+
+    /// Reads a property of the object as a variant. The default reads the field through
+    /// [`CompositionProperty::get_variant`]; an object with dynamic properties (a property set)
+    /// reads its own storage.
+    fn read_property_variant(&self, property: &'static CompositionProperty) -> ExpressionVariant {
+        property.get_variant().map(|get| get(self.as_server_object_dyn())).unwrap_or_default()
+    }
+
+    /// Writes a variant into a property of the object without notification (what an animation
+    /// does with the value it evaluated). The default writes the field through
+    /// [`CompositionProperty::set_variant`]; an object with dynamic properties writes its own
+    /// storage.
+    fn write_property_variant(&self, property: &'static CompositionProperty, value: ExpressionVariant) {
+        if let Some(set) = property.set_variant() {
+            set(self.as_server_object_dyn(), value);
+        }
+    }
 }
 
 /// An animatable server object as an expression reads it: the target of an
@@ -239,8 +256,7 @@ impl ServerObject {
                 let Some(owner) = self.owner.upgrade() else { return ExpressionVariant::default() };
                 owner
                     .get_composition_property(name)
-                    .and_then(|property| property.get_variant())
-                    .map(|get| get(owner.as_server_object_dyn()))
+                    .map(|property| owner.read_property_variant(property))
                     .unwrap_or_default()
             }
             Some(animations) => animations.get_property_for_animation(name),

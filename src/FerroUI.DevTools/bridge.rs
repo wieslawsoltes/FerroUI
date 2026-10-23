@@ -28,11 +28,13 @@ impl BrowserBridge {
         let connection = browser.connect(None).expect("browser connection");
         let browser = Rc::new(RefCell::new(browser));
         let dispatch = browser.clone();
+        // A panic in a command (in the application's handlers of the input, for example) answers
+        // that command with an error; it does not reach the closure, which would abort the module.
         let handle = Closure::wrap_aborting(Box::new(move |message: String| {
-            serde_json::to_string(&dispatch.borrow_mut().handle(connection, &message)).unwrap()
+            guarded(|| dispatch.borrow_mut().handle(connection, &message))
         }) as Box<dyn FnMut(String) -> String>);
         let poll = Closure::wrap_aborting(Box::new(move || {
-            serde_json::to_string(&browser.borrow_mut().poll(connection)).unwrap()
+            guarded(|| browser.borrow_mut().poll(connection))
         }) as Box<dyn FnMut() -> String>);
         let cleanup = install(handle.as_ref(), poll.as_ref());
         Self {
@@ -41,6 +43,14 @@ impl BrowserBridge {
             _poll: poll,
         }
     }
+}
+fn guarded(f: impl FnOnce() -> Vec<serde_json::Value>) -> String {
+    let messages = std::panic::catch_unwind(std::panic::AssertUnwindSafe(f)).unwrap_or_else(|_| {
+        vec![
+            serde_json::json!({"id":null,"error":{"code":-32603,"message":"The command panicked"}}),
+        ]
+    });
+    serde_json::to_string(&messages).unwrap_or_else(|_| "[]".into())
 }
 impl Drop for BrowserBridge {
     fn drop(&mut self) {

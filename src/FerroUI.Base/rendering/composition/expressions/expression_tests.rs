@@ -8,6 +8,7 @@ use std::collections::{HashMap, HashSet};
 use super::*;
 use crate::media::Color;
 use crate::numerics::{Matrix3x2, Matrix4x4, Quaternion, Vector2, Vector3, Vector4};
+use crate::rendering::composition::animations;
 use crate::{Matrix, RelativePoint, RelativeScalar, RelativeUnit, Vector, Vector3D};
 
 use ExpressionVariant as V;
@@ -604,9 +605,7 @@ fn unknown_functions_and_signatures_are_invalid() {
     assert_eq!(eval("Abs(1, 2)"), V::Invalid);
     assert_eq!(eval("Abs(true)"), V::Invalid);
     assert_eq!(eval("Abs(unknown)"), V::Invalid);
-    // Function names are case-sensitive.
-    assert_eq!(eval("abs(1)"), V::Invalid);
-    assert_eq!(eval("vector2(1, 2)"), V::Invalid);
+    assert_eq!(eval("Matrix3x2.Unknown(1)"), V::Invalid);
 }
 
 #[test]
@@ -724,14 +723,15 @@ fn matrix_functions() {
         eval("Matrix3x2.CreateFromTranslation(Vector2(2, 3))"),
         Matrix3x2::create_translation(Vector2::new(2.0, 3.0)).into()
     );
-    // As in the reference implementation, `CreateTranslation` creates a scale.
+    // `CreateTranslation` is `CreateFromTranslation` (the reference
+    // implementation creates a scale here).
     assert_eq!(
         eval("Matrix3x2.CreateTranslation(Vector2(2, 3))"),
-        Matrix3x2::create_scale(Vector2::new(2.0, 3.0)).into()
+        Matrix3x2::new(1.0, 0.0, 0.0, 1.0, 2.0, 3.0).into()
     );
     assert_eq!(
         eval("Matrix4x4.CreateTranslation(Vector3(2, 3, 4))"),
-        Matrix4x4::create_scale(Vector3::new(2.0, 3.0, 4.0)).into()
+        Matrix4x4::new(1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 2.0, 3.0, 4.0, 1.0).into()
     );
     assert_eq!(
         eval("Matrix3x2.CreateRotation(1)"),
@@ -741,15 +741,21 @@ fn matrix_functions() {
         eval("Matrix3x2.CreateSkew(0.5, 0.25, Vector2(3, 4))"),
         Matrix3x2::create_skew_at(0.5, 0.25, Vector2::new(3.0, 4.0)).into()
     );
-    // As in the reference implementation, the sixth component repeats the fifth.
+    // Each component is its own argument (the reference implementation
+    // repeats the fifth argument in the later components).
     assert_eq!(
         eval("Matrix3x2(1, 2, 3, 4, 5, 6)"),
-        Matrix3x2::new(1.0, 2.0, 3.0, 4.0, 5.0, 5.0).into()
+        Matrix3x2::new(1.0, 2.0, 3.0, 4.0, 5.0, 6.0).into()
     );
     assert_eq!(
         eval("Matrix4x4(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16)"),
-        Matrix4x4::new(1.0, 2.0, 3.0, 4.0, 5.0, 5.0, 5.0, 5.0, 5.0, 5.0, 5.0, 5.0, 5.0, 5.0, 5.0, 5.0).into()
+        Matrix4x4::new(
+            1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0, 12.0, 13.0, 14.0, 15.0, 16.0
+        )
+        .into()
     );
+    assert_eq!(eval_double("Matrix3x2(1, 2, 3, 4, 5, 6).M32"), 6.0);
+    assert_eq!(eval_double("Matrix4x4(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16).M44"), 16.0);
     assert_eq!(
         eval("Matrix4x4(Matrix3x2.CreateFromTranslation(Vector2(2, 3)))"),
         Matrix4x4::create_translation(Vector3::new(2.0, 3.0, 0.0)).into()
@@ -862,12 +868,424 @@ fn relative_functions() {
 }
 
 // ---------------------------------------------------------------------------
+// WinUI functions and overloads (tests of this port)
+// ---------------------------------------------------------------------------
+
+fn m3x2(m11: f32, m12: f32, m21: f32, m22: f32, m31: f32, m32: f32) -> ExpressionVariant {
+    Matrix3x2::new(m11, m12, m21, m22, m31, m32).into()
+}
+
+fn m4x4_rows(rows: [[f32; 4]; 4]) -> ExpressionVariant {
+    let [r1, r2, r3, r4] = rows;
+    Matrix4x4::new(
+        r1[0], r1[1], r1[2], r1[3], r2[0], r2[1], r2[2], r2[3], r3[0], r3[1], r3[2], r3[3], r4[0], r4[1], r4[2], r4[3],
+    )
+    .into()
+}
+
+#[test]
+fn function_names_are_case_insensitive() {
+    assert_eq!(eval_double("abs(-1)"), 1.0);
+    assert_eq!(eval_double("ABS(-1)"), 1.0);
+    assert_eq!(eval_double("lerp(0, 10, 0.5)"), 5.0);
+    assert_eq!(eval_double("LERP(0, 10, 0.5)"), 5.0);
+    assert_eq!(eval("vector2(1, 2)"), Vector::new(1.0, 2.0).into());
+    assert_eq!(eval("VECTOR3(1, 2, 3)"), Vector3D::new(1.0, 2.0, 3.0).into());
+    // The reference writes both `ASin` and `Asin`.
+    assert_eq!(eval_double("Asin(1)"), eval_double("ASin(1)"));
+    assert_eq!(eval_double("acos(1)"), 0.0);
+    assert_eq!(
+        eval("matrix3x2.createscale(vector2(2, 3))"),
+        m3x2(2.0, 0.0, 0.0, 3.0, 0.0, 0.0)
+    );
+    assert_eq!(
+        eval("QUATERNION.CreateFromAxisAngle(Vector3(0, 0, 1), 1)"),
+        Quaternion::create_from_axis_angle(Vector3::UNIT_Z, 1.0).into()
+    );
+    assert_eq!(eval("colorhsl(0, 1, 0.5)"), Color::from_argb(255, 255, 0, 0).into());
+    assert_eq!(eval("relativeunit.relative()"), RelativeUnit::Relative.into());
+}
+
+#[test]
+fn winui_functions_that_differ_from_the_reference() {
+    assert_eq!(eval_double("abs(1)"), 1.0);
+    assert_eq!(
+        eval("Matrix3x2.CreateTranslation(Vector2(2, 3))"),
+        m3x2(1.0, 0.0, 0.0, 1.0, 2.0, 3.0)
+    );
+    assert_eq!(
+        eval("Matrix4x4.CreateTranslation(Vector3(2, 3, 4))"),
+        m4x4_rows([[1.0, 0.0, 0.0, 0.0], [0.0, 1.0, 0.0, 0.0], [0.0, 0.0, 1.0, 0.0], [2.0, 3.0, 4.0, 1.0]])
+    );
+    assert_eq!(eval("Matrix3x2(1, 2, 3, 4, 5, 6)"), m3x2(1.0, 2.0, 3.0, 4.0, 5.0, 6.0));
+    assert_eq!(
+        eval("Matrix4x4(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16)"),
+        m4x4_rows([
+            [1.0, 2.0, 3.0, 4.0],
+            [5.0, 6.0, 7.0, 8.0],
+            [9.0, 10.0, 11.0, 12.0],
+            [13.0, 14.0, 15.0, 16.0]
+        ])
+    );
+}
+
+#[test]
+fn color_hsl_takes_the_hue_in_radians() {
+    // Red, green-blue (cyan) and blue at full saturation and half lightness.
+    assert_eq!(eval("ColorHsl(0, 1, 0.5)"), Color::from_argb(255, 255, 0, 0).into());
+    assert_eq!(eval("ColorHsl(Pi, 1, 0.5)"), Color::from_argb(255, 0, 255, 255).into());
+    assert_eq!(eval("ColorHsl(ToRadians(240), 1, 0.5)"), Color::from_argb(255, 0, 0, 255).into());
+    // A hue past a full turn wraps around.
+    assert_eq!(eval("ColorHsl(2 * Pi + Pi, 1, 0.5)"), Color::from_argb(255, 0, 255, 255).into());
+    // No saturation: a grey of the lightness (0.5 * 255 = 127.5, rounded to even).
+    assert_eq!(eval("ColorHsl(1, 0, 0.5)"), Color::from_argb(255, 128, 128, 128).into());
+    // Saturation and lightness are clamped to 0..1.
+    assert_eq!(eval("ColorHsl(0, 5, 2)"), Color::from_argb(255, 255, 255, 255).into());
+    assert_eq!(eval("ColorHsl(0, -1, -1)"), Color::from_argb(255, 0, 0, 0).into());
+    assert_eq!(eval_double("ColorHsl(0, 1, 0.5).A"), 255.0);
+    assert_eq!(eval("ColorHsl(0, 1)"), V::Invalid);
+}
+
+#[test]
+fn color_lerp_hsl_interpolates_in_the_hsl_space() {
+    let red = "ColorRGB(255, 255, 0, 0)";
+    let blue = "ColorRGB(255, 0, 0, 255)";
+    let lerp = |a: &str, b: &str, p: &str| eval(&format!("ColorLerpHSL({a}, {b}, {p})"));
+    // The ends are the arguments, the first at progress 0 (as `ColorLerp`).
+    assert_eq!(lerp(red, blue, "0"), Color::from_argb(255, 255, 0, 0).into());
+    assert_eq!(lerp(red, blue, "1"), Color::from_argb(255, 0, 0, 255).into());
+    // Red (0 degrees) to blue (240 degrees) the short way: magenta (300) halfway,
+    // where the RGB interpolation gives a dark purple.
+    assert_eq!(lerp(red, blue, "0.5"), Color::from_argb(255, 255, 0, 255).into());
+    assert_eq!(
+        eval(&format!("ColorLerpRGB({red}, {blue}, 0.5)")),
+        Color::from_argb(255, 127, 0, 127).into()
+    );
+    // Black has no hue: it takes red's, then saturation 0.5 and lightness 0.25
+    // give (0.375, 0.125, 0.125) * 255 = (95.625, 31.875, 31.875).
+    assert_eq!(
+        lerp("ColorRGB(255, 0, 0, 0)", red, "0.5"),
+        Color::from_argb(255, 96, 32, 32).into()
+    );
+    // Alpha is interpolated linearly (127.5, rounded to even).
+    assert_eq!(
+        lerp("ColorRGB(0, 255, 0, 0)", red, "0.5"),
+        Color::from_argb(128, 255, 0, 0).into()
+    );
+    // The names the WinUI expression builder writes.
+    assert_eq!(
+        eval(&format!("colorhsllerp({red}, {blue}, 0.5)")),
+        Color::from_argb(255, 255, 0, 255).into()
+    );
+    assert_eq!(
+        eval(&format!("ColorRgbLerp({red}, {blue}, 0.5)")),
+        Color::from_argb(255, 127, 0, 127).into()
+    );
+}
+
+#[test]
+fn scalar_overloads_of_vector_functions() {
+    assert_eq!(eval_double("Length(-3)"), 3.0);
+    assert_eq!(eval_double("LengthSquared(-3)"), 9.0);
+    assert_eq!(eval_double("Distance(1, 4)"), 3.0);
+    assert_eq!(eval_double("Distance(4, 1)"), 3.0);
+    assert_eq!(eval_double("DistanceSquared(1, 4)"), 9.0);
+    assert_eq!(eval_double("Scale(2, 3)"), 6.0);
+}
+
+#[test]
+fn mod_of_vectors_is_per_component() {
+    assert_eq!(eval("Mod(Vector2(7, -7), Vector2(3, 3))"), Vector::new(1.0, -1.0).into());
+    assert_eq!(
+        eval("Mod(Vector3(7.5, 8, 9), Vector3(2, 3, 4))"),
+        Vector3D::new(1.5, 2.0, 1.0).into()
+    );
+    assert_eq!(
+        eval("Mod(Vector4(7, 8, 9, 10), Vector4(4, 4, 4, 4))"),
+        Vector4::new(3.0, 0.0, 1.0, 2.0).into()
+    );
+    assert_eq!(eval("Mod(Vector2(7, 7), 3)"), V::Invalid);
+}
+
+#[test]
+fn transform_of_a_vector4() {
+    assert_eq!(
+        eval("Transform(Vector4(1, 1, 1, 1), Matrix4x4.CreateFromTranslation(Vector3(2, 3, 4)))"),
+        Vector4::new(3.0, 4.0, 5.0, 1.0).into()
+    );
+    // A direction (w = 0) is not translated, but is scaled.
+    assert_eq!(
+        eval("Transform(Vector4(1, 1, 1, 0), Matrix4x4.CreateScale(Vector3(2, 3, 4)) * Matrix4x4.CreateTranslation(Vector3(5, 5, 5)))"),
+        Vector4::new(2.0, 3.0, 4.0, 0.0).into()
+    );
+}
+
+#[test]
+fn lerp_of_matrices() {
+    assert_eq!(
+        eval("Lerp(Matrix3x2.CreateScale(Vector2(2, 4)), Matrix3x2.CreateTranslation(Vector2(10, 20)), 0.5)"),
+        m3x2(1.5, 0.0, 0.0, 2.5, 5.0, 10.0)
+    );
+    assert_eq!(
+        eval("Lerp(Matrix4x4.CreateScale(Vector3(2, 2, 2)), Matrix4x4.CreateTranslation(Vector3(4, 6, 8)), 0.25)"),
+        m4x4_rows([[1.75, 0.0, 0.0, 0.0], [0.0, 1.75, 0.0, 0.0], [0.0, 0.0, 1.75, 0.0], [1.0, 1.5, 2.0, 1.0]])
+    );
+}
+
+#[test]
+fn matrix3x2_factories_follow_the_reference_formulas() {
+    // [scale.X, 0, 0, scale.Y, 0, 0]
+    assert_eq!(eval("Matrix3x2.CreateFromScale(Vector2(2, 3))"), m3x2(2.0, 0.0, 0.0, 3.0, 0.0, 0.0));
+    assert_eq!(eval("Matrix3x2.CreateScale(Vector2(2, 3))"), m3x2(2.0, 0.0, 0.0, 3.0, 0.0, 0.0));
+    // [1, 0, 0, 1, translation.X, translation.Y]
+    assert_eq!(
+        eval("Matrix3x2.CreateFromTranslation(Vector2(2, 3))"),
+        m3x2(1.0, 0.0, 0.0, 1.0, 2.0, 3.0)
+    );
+    // [cos, sin, -sin, cos, 0, 0]
+    assert_eq!(eval("Matrix3x2.CreateRotation(ToRadians(90))"), m3x2(0.0, 1.0, -1.0, 0.0, 0.0, 0.0));
+    let (s, c) = 0.5f32.sin_cos();
+    assert_eq!(eval("Matrix3x2.CreateRotation(0.5)"), m3x2(c, s, -s, c, 0.0, 0.0));
+    // [1, tan(y), tan(x), 1, -center.Y * tan(x), -center.X * tan(y)]
+    let (tan_x, tan_y) = (0.5f32.tan(), 0.25f32.tan());
+    assert_eq!(
+        eval("Matrix3x2.CreateSkew(0.5, 0.25, Vector2(3, 4))"),
+        m3x2(1.0, tan_y, tan_x, 1.0, -4.0 * tan_x, -3.0 * tan_y)
+    );
+
+    // The overloads of System.Numerics.
+    assert_eq!(eval("Matrix3x2.CreateScale(2)"), m3x2(2.0, 0.0, 0.0, 2.0, 0.0, 0.0));
+    assert_eq!(eval("Matrix3x2.CreateScale(2, 3)"), m3x2(2.0, 0.0, 0.0, 3.0, 0.0, 0.0));
+    // About a center: the center stays in place, (1 - scale) * center.
+    assert_eq!(
+        eval("Matrix3x2.CreateScale(Vector2(2, 3), Vector2(10, 10))"),
+        m3x2(2.0, 0.0, 0.0, 3.0, -10.0, -20.0)
+    );
+    assert_eq!(eval("Matrix3x2.CreateTranslation(2, 3)"), m3x2(1.0, 0.0, 0.0, 1.0, 2.0, 3.0));
+    // A quarter turn about (1, 2): (center.X + center.Y, center.Y - center.X).
+    assert_eq!(
+        eval("Matrix3x2.CreateRotation(ToRadians(90), Vector2(1, 2))"),
+        m3x2(0.0, 1.0, -1.0, 0.0, 3.0, 1.0)
+    );
+    assert_eq!(eval("Matrix3x2.CreateSkew(0.5, 0.25)"), m3x2(1.0, tan_y, tan_x, 1.0, 0.0, 0.0));
+    assert_eq!(
+        eval_double("Transform(Vector2(1, 1), Matrix3x2.CreateRotation(ToRadians(90), Vector2(1, 2))).Y"),
+        2.0
+    );
+}
+
+#[test]
+fn matrix4x4_factories_follow_the_reference_formulas() {
+    let scale = m4x4_rows([[2.0, 0.0, 0.0, 0.0], [0.0, 3.0, 0.0, 0.0], [0.0, 0.0, 4.0, 0.0], [0.0, 0.0, 0.0, 1.0]]);
+    assert_eq!(eval("Matrix4x4.CreateFromScale(Vector3(2, 3, 4))"), scale);
+    assert_eq!(eval("Matrix4x4.CreateScale(Vector3(2, 3, 4))"), scale);
+    assert_eq!(eval("Matrix4x4.CreateScale(2, 3, 4)"), scale);
+    let translation =
+        m4x4_rows([[1.0, 0.0, 0.0, 0.0], [0.0, 1.0, 0.0, 0.0], [0.0, 0.0, 1.0, 0.0], [2.0, 3.0, 4.0, 1.0]]);
+    assert_eq!(eval("Matrix4x4.CreateFromTranslation(Vector3(2, 3, 4))"), translation);
+    assert_eq!(eval("Matrix4x4.CreateTranslation(Vector3(2, 3, 4))"), translation);
+    assert_eq!(eval("Matrix4x4.CreateTranslation(2, 3, 4)"), translation);
+    assert_eq!(
+        eval("Matrix4x4.CreateScale(2)"),
+        m4x4_rows([[2.0, 0.0, 0.0, 0.0], [0.0, 2.0, 0.0, 0.0], [0.0, 0.0, 2.0, 0.0], [0.0, 0.0, 0.0, 1.0]])
+    );
+    assert_eq!(
+        eval("Matrix4x4.CreateScale(Vector3(2, 3, 4), Vector3(1, 1, 1))"),
+        m4x4_rows([[2.0, 0.0, 0.0, 0.0], [0.0, 3.0, 0.0, 0.0], [0.0, 0.0, 4.0, 0.0], [-1.0, -2.0, -3.0, 1.0]])
+    );
+
+    let (s, c) = (0.5f32.sin(), 0.5f32.cos());
+    assert_eq!(
+        eval("Matrix4x4.CreateRotationX(0.5)"),
+        m4x4_rows([[1.0, 0.0, 0.0, 0.0], [0.0, c, s, 0.0], [0.0, -s, c, 0.0], [0.0, 0.0, 0.0, 1.0]])
+    );
+    assert_eq!(
+        eval("Matrix4x4.CreateRotationY(0.5)"),
+        m4x4_rows([[c, 0.0, -s, 0.0], [0.0, 1.0, 0.0, 0.0], [s, 0.0, c, 0.0], [0.0, 0.0, 0.0, 1.0]])
+    );
+    assert_eq!(
+        eval("Matrix4x4.CreateRotationZ(0.5)"),
+        m4x4_rows([[c, s, 0.0, 0.0], [-s, c, 0.0, 0.0], [0.0, 0.0, 1.0, 0.0], [0.0, 0.0, 0.0, 1.0]])
+    );
+    // About a center (1, 2, 3): the translation row keeps the center in place.
+    let (cx, cy, cz) = (1.0f32, 2.0f32, 3.0f32);
+    assert_eq!(
+        eval("Matrix4x4.CreateRotationX(0.5, Vector3(1, 2, 3))"),
+        m4x4_rows([
+            [1.0, 0.0, 0.0, 0.0],
+            [0.0, c, s, 0.0],
+            [0.0, -s, c, 0.0],
+            [0.0, cy * (1.0 - c) + cz * s, cz * (1.0 - c) - cy * s, 1.0]
+        ])
+    );
+    assert_eq!(
+        eval("Matrix4x4.CreateRotationY(0.5, Vector3(1, 2, 3))"),
+        m4x4_rows([
+            [c, 0.0, -s, 0.0],
+            [0.0, 1.0, 0.0, 0.0],
+            [s, 0.0, c, 0.0],
+            [cx * (1.0 - c) - cz * s, 0.0, cz * (1.0 - c) + cx * s, 1.0]
+        ])
+    );
+    assert_eq!(
+        eval("Matrix4x4.CreateRotationZ(0.5, Vector3(1, 2, 3))"),
+        m4x4_rows([
+            [c, s, 0.0, 0.0],
+            [-s, c, 0.0, 0.0],
+            [0.0, 0.0, 1.0, 0.0],
+            [cx * (1.0 - c) + cy * s, cy * (1.0 - c) - cx * s, 0.0, 1.0]
+        ])
+    );
+    // A rotation about the Z axis by an axis and an angle is `CreateRotationZ`.
+    let axis_angle = eval("Matrix4x4.CreateFromAxisAngle(Vector3(0, 0, 1), 0.5)");
+    let rotation_z = eval("Matrix4x4.CreateRotationZ(0.5)");
+    for member in ["M11", "M12", "M21", "M22", "M33", "M44"] {
+        let (V::Double(a), V::Double(b)) = (axis_angle.get_property(member), rotation_z.get_property(member)) else {
+            panic!("{member} is not a scalar");
+        };
+        assert!((a - b).abs() < 1e-6, "{member}: {a} != {b}");
+    }
+}
+
+// ---------------------------------------------------------------------------
+// Animation parameters and initial values (tests of this port)
+// ---------------------------------------------------------------------------
+
+#[test]
+fn boolean_parameters_drive_conditionals() {
+    let fixture = crate::rendering::composition::test_compositor::TestCompositor::new();
+    let compositor = &fixture.compositor;
+    let animation = compositor.create_expression_animation_with("flag ? 1 : 2");
+    let expression = Expression::parse("flag ? 1 : 2").unwrap();
+
+    animation.set_boolean_parameter("flag", true);
+    let snapshot = animation.create_snapshot();
+    assert_eq!(snapshot.get_parameter("flag"), V::Boolean(true));
+    let ctx = ExpressionEvaluationContext {
+        parameters: Some(&*snapshot),
+        ..context()
+    };
+    assert_eq!(expression.evaluate(&ctx), d(1.0));
+
+    // A value parameter is copied: the next snapshot sees the new value.
+    animation.set_boolean_parameter("flag", false);
+    assert_eq!(snapshot.get_parameter("flag"), V::Boolean(true));
+    let snapshot = animation.create_snapshot();
+    let ctx = ExpressionEvaluationContext {
+        parameters: Some(&*snapshot),
+        ..context()
+    };
+    assert_eq!(expression.evaluate(&ctx), d(2.0));
+
+    animation.clear_parameter("flag");
+    assert_eq!(animation.create_snapshot().get_parameter("flag"), V::Invalid);
+}
+
+#[test]
+fn expression_reference_parameters_are_read_like_reference_parameters() {
+    let fixture = crate::rendering::composition::test_compositor::TestCompositor::new();
+    let compositor = &fixture.compositor;
+    let visual = compositor.create_solid_color_visual();
+    visual.set_offset(Vector3D::new(7.0, 0.0, 0.0));
+    let animation = compositor.create_expression_animation_with("v.Offset.X * 2");
+    animation.set_expression_reference_parameter("v", (*visual).clone());
+    // A value parameter of the same key is replaced by the reference.
+    animation.set_scalar_parameter("w", 1.0);
+    animation.set_expression_reference_parameter("w", (*visual).clone());
+    fixture.run_jobs();
+
+    let snapshot = animation.create_snapshot();
+    snapshot.resolve(compositor.server());
+    assert!(snapshot.get_object_parameter("v").is_some());
+    assert!(snapshot.get_object_parameter("w").is_some());
+    let ctx = ExpressionEvaluationContext {
+        parameters: Some(&*snapshot),
+        ..context()
+    };
+    assert_eq!(Expression::parse("v.Offset.X * 2").unwrap().evaluate(&ctx), d(14.0));
+    assert_eq!(Expression::parse("w.Offset.X").unwrap().evaluate(&ctx), d(7.0));
+}
+
+#[test]
+fn initial_value_expressions_are_a_map_of_expressions() {
+    let fixture = crate::rendering::composition::test_compositor::TestCompositor::new();
+    let animation = fixture.compositor.create_expression_animation_with("this.CurrentValue");
+    let initial_values = animation.initial_value_expressions();
+    assert_eq!(initial_values.size(), 0);
+
+    assert!(!initial_values.insert("Offset", "this.StartingValue + Vector3(10, 0, 0)"));
+    // Inserting a property again replaces its expression.
+    assert!(initial_values.insert("Offset", "this.StartingValue + Vector3(0, 5, 0)"));
+    assert!(!initial_values.insert("Opacity", "half * 2"));
+    assert!(!initial_values.insert("Missing", "unknown + 1"));
+    assert_eq!(initial_values.size(), 3);
+    assert!(initial_values.has_key("Offset"));
+    assert!(!initial_values.has_key("Scale"));
+    assert_eq!(
+        initial_values.lookup("Offset").as_deref(),
+        Some("this.StartingValue + Vector3(0, 5, 0)")
+    );
+    assert_eq!(initial_values.lookup("Scale"), None);
+    assert_eq!(
+        initial_values.get_view(),
+        vec![
+            ("Missing".to_owned(), "unknown + 1".to_owned()),
+            ("Offset".to_owned(), "this.StartingValue + Vector3(0, 5, 0)".to_owned()),
+            ("Opacity".to_owned(), "half * 2".to_owned()),
+        ]
+    );
+
+    // Evaluated against the target and the parameters of the animation, with
+    // `this.StartingValue` the value the property has.
+    let parsed = initial_values.parse_all().unwrap();
+    let target = TestObject::default()
+        .with("Offset", Vector3D::new(1.0, 2.0, 3.0))
+        .with("Opacity", 0.25);
+    let mut parameters = TestParameters::default();
+    parameters.values.insert("half", d(0.5));
+    let values = animations::InitialValueExpressionCollection::evaluate_parsed(
+        &parsed,
+        &target,
+        Some(&parameters),
+        BuiltInExpressionFfi::instance(),
+    );
+    // The expression that does not evaluate leaves its property alone.
+    assert_eq!(
+        values,
+        vec![
+            ("Offset".to_owned(), V::Vector3D(Vector3D::new(1.0, 7.0, 3.0))),
+            ("Opacity".to_owned(), d(1.0)),
+        ]
+    );
+
+    // An expression that cannot be parsed fails the parse.
+    assert!(!initial_values.insert("Bad", "1 +"));
+    let error = initial_values.parse_all().unwrap_err();
+    assert_eq!(error.message(), "Unexpected token");
+
+    assert!(initial_values.remove("Bad"));
+    assert!(!initial_values.remove("Bad"));
+    assert_eq!(initial_values.size(), 3);
+    initial_values.clear();
+    assert_eq!(initial_values.size(), 0);
+    assert!(initial_values.parse_all().unwrap().is_empty());
+}
+
+// ---------------------------------------------------------------------------
 // Differential test against the reference implementation
 // ---------------------------------------------------------------------------
 
 /// `expression => printed tree => result`, or `expression => ERR message
 /// @position => `, as produced by the reference implementation for each
 /// expression (evaluated with only the built-in functions in the context).
+///
+/// The lines where WinUI differs from the reference implementation, and the
+/// port follows WinUI, are left out: a function name in another case
+/// (`abs(1)`, invalid in the reference), `Matrix3x2.CreateTranslation` and
+/// `Matrix4x4.CreateTranslation` (a scale in the reference), and the
+/// `Matrix3x2` and `Matrix4x4` constructors (the fifth argument repeated in
+/// the later components in the reference). `winui_functions_that_differ_from_the_reference`
+/// checks those.
 const REFERENCE_OUTPUT: &str = r#"
 Vector3(0.5+(4.0-0.5)* -2, 1, 0).X => (Vector3( ((0.5+((4-0.5)*-2))), (1), (0) )).X => -6.5
 a > 1 ? 2 : 3 => (({a}>1)) ? (2) : (3) => 3
@@ -958,7 +1376,6 @@ Lerp(1.5, 4, 0.3) => Lerp( (1.5), (4), (0.3) ) => 2.25
 SmoothStep(0, 10, 2.5) => SmoothStep( (0), (10), (2.5) ) => 0.15625
 SmoothStep(Vector2(0, 0), Vector2(1, 10), Vector2(0.5, 2.5)) => SmoothStep( (Vector2( (0), (0) )), (Vector2( (1), (10) )), (Vector2( (0.5), (2.5) )) ) => 0.5, 0.15625
 SmoothStep(Vector4(0, 0, 0, 0), Vector4(1, 10, 1, 1), Vector4(0.5, 2.5, 2, -1)) => SmoothStep( (Vector4( (0), (0), (0), (0) )), (Vector4( (1), (10), (1), (1) )), (Vector4( (0.5), (2.5), (2), (-1) )) ) => <0.5, 0.15625, 1, 0>
-abs(1) => abs( (1) ) => Invalid
 Abs(true) => Abs( ([True]) ) => Invalid
 Abs(Vector2(-1, 2)) => Abs( (Vector2( (-1), (2) )) ) => 1, 2
 Abs(Vector4(-1, 2, -3, 4)) => Abs( (Vector4( (-1), (2), (-3), (4) )) ) => <1, 2, 3, 4>
@@ -975,16 +1392,12 @@ Normalize(Vector3(1, 2, 3)) => Normalize( (Vector3( (1), (2), (3) )) ) => Vector
 Normalize(Vector4(1, 2, 3, 4)) => Normalize( (Vector4( (1), (2), (3), (4) )) ) => <0.18257418, 0.36514837, 0.5477225, 0.73029673>
 Normalize(Quaternion(1, 2, 3, 4)) => Normalize( (Quaternion( (1), (2), (3), (4) )) ) => {X:0.18257418 Y:0.36514837 Z:0.5477225 W:0.73029673}
 Scale(Vector3(1, 2, 3), 2) => Scale( (Vector3( (1), (2), (3) )), (2) ) => Vector3D { X = 2, Y = 4, Z = 6, Length = 7.483314773547883 }
-Matrix3x2.CreateTranslation(Vector2(2, 3)) => Matrix3x2.CreateTranslation( (Vector2( (2), (3) )) ) => { {M11:2 M12:0} {M21:0 M22:3} {M31:0 M32:0} }
 Matrix3x2.CreateFromTranslation(Vector2(2, 3)) => Matrix3x2.CreateFromTranslation( (Vector2( (2), (3) )) ) => { {M11:1 M12:0} {M21:0 M22:1} {M31:2 M32:3} }
 Matrix3x2.CreateRotation(1) => Matrix3x2.CreateRotation( (1) ) => { {M11:0.5403023 M12:0.84147096} {M21:-0.84147096 M22:0.5403023} {M31:0 M32:0} }
 Matrix3x2.CreateRotation(ToRadians(90)) => Matrix3x2.CreateRotation( (ToRadians( (90) )) ) => { {M11:0 M12:1} {M21:-1 M22:0} {M31:0 M32:0} }
 Matrix3x2.CreateSkew(0.5, 0.25, Vector2(3, 4)) => Matrix3x2.CreateSkew( (0.5), (0.25), (Vector2( (3), (4) )) ) => { {M11:1 M12:0.25534192} {M21:0.5463025 M22:1} {M31:-2.18521 M32:-0.7660258} }
-Matrix3x2(1, 2, 3, 4, 5, 6) => Matrix3x2( (1), (2), (3), (4), (5), (6) ) => { {M11:1 M12:2} {M21:3 M22:4} {M31:5 M32:5} }
-Matrix4x4(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16) => Matrix4x4( (1), (2), (3), (4), (5), (6), (7), (8), (9), (10), (11), (12), (13), (14), (15), (16) ) => { {M11:1 M12:2 M13:3 M14:4} {M21:5 M22:5 M23:5 M24:5} {M31:5 M32:5 M33:5 M34:5} {M41:5 M42:5 M43:5 M44:5} }
 Matrix4x4(Matrix3x2.CreateFromTranslation(Vector2(2, 3))) => Matrix4x4( (Matrix3x2.CreateFromTranslation( (Vector2( (2), (3) )) )) ) => { {M11:1 M12:0 M13:0 M14:0} {M21:0 M22:1 M23:0 M24:0} {M31:0 M32:0 M33:1 M34:0} {M41:2 M42:3 M43:0 M44:1} }
 Matrix4x4.CreateFromAxisAngle(Vector3(0, 0, 1), 1) => Matrix4x4.CreateFromAxisAngle( (Vector3( (0), (0), (1) )), (1) ) => { {M11:0.5403023 M12:0.841471 M13:0 M14:0} {M21:-0.841471 M22:0.5403023 M23:0 M24:0} {M31:0 M32:0 M33:1 M34:0} {M41:0 M42:0 M43:0 M44:1} }
-Matrix4x4.CreateTranslation(Vector3(2, 3, 4)) => Matrix4x4.CreateTranslation( (Vector3( (2), (3), (4) )) ) => { {M11:2 M12:0 M13:0 M14:0} {M21:0 M22:3 M23:0 M24:0} {M31:0 M32:0 M33:4 M34:0} {M41:0 M42:0 M43:0 M44:1} }
 Matrix4x4.CreateFromTranslation(Vector3(2, 3, 4)) => Matrix4x4.CreateFromTranslation( (Vector3( (2), (3), (4) )) ) => { {M11:1 M12:0 M13:0 M14:0} {M21:0 M22:1 M23:0 M24:0} {M31:0 M32:0 M33:1 M34:0} {M41:2 M42:3 M43:4 M44:1} }
 Inverse(Matrix3x2.CreateScale(Vector2(2, 4))) => Inverse( (Matrix3x2.CreateScale( (Vector2( (2), (4) )) )) ) => { {M11:0.5 M12:-0} {M21:-0 M22:0.25} {M31:0 M32:0} }
 Inverse(Scale(Matrix3x2.CreateRotation(1), 0)) => Inverse( (Scale( (Matrix3x2.CreateRotation( (1) )), (0) )) ) => { {M11:NaN M12:NaN} {M21:NaN M22:NaN} {M31:NaN M32:NaN} }
@@ -1036,7 +1449,7 @@ fn matches_the_output_of_the_reference_implementation() {
         assert_eq!(actual_result, result, "{expression}");
         count += 1;
     }
-    assert_eq!(count, 141);
+    assert_eq!(count, 136);
 }
 
 // ---------------------------------------------------------------------------
@@ -1167,8 +1580,10 @@ fn variant_addition_and_subtraction() {
         assert_eq!(v - v, V::Invalid);
     }
     assert_eq!(d(1.0) + v2(1.0, 2.0), V::Invalid);
-    assert_eq!(v2(1.0, 2.0) + vd(1.0, 2.0), V::Invalid);
-    assert_eq!(v3(1.0, 2.0, 3.0) - v3d(1.0, 2.0, 3.0), V::Invalid);
+    // Not from upstream: the single- and double-precision forms of a vector combine, in the
+    // double-precision form (`mixed_precision_vectors_combine`).
+    assert_eq!(v2(1.0, 2.0) + vd(1.0, 2.0), vd(2.0, 4.0));
+    assert_eq!(v3(1.0, 2.0, 3.0) - v3d(1.0, 2.0, 3.0), v3d(0.0, 0.0, 0.0));
 }
 
 #[test]
@@ -1242,7 +1657,8 @@ fn variant_multiplication() {
     assert_eq!(d(2.0) * vd(1.0, 2.0), V::Invalid);
     assert_eq!(d(2.0) * v3(1.0, 2.0, 3.0), V::Invalid);
     assert_eq!(d(2.0) * V::from(Quaternion::IDENTITY), V::Invalid);
-    assert_eq!(v2(1.0, 2.0) * vd(1.0, 2.0), V::Invalid);
+    // Not from upstream: the single- and double-precision forms of a vector combine.
+    assert_eq!(v2(1.0, 2.0) * vd(1.0, 2.0), vd(1.0, 4.0));
     assert_eq!(V::Invalid * d(1.0), V::Invalid);
     assert_eq!(d(1.0) * V::Invalid, V::Invalid);
     assert_eq!(V::Boolean(true) * V::Boolean(true), V::Invalid);
@@ -1306,11 +1722,15 @@ fn variant_comparisons() {
         };
         assert_eq!(v.not_equals_to(v), expected_not, "{v:?}");
     }
-    // Values of different types are not comparable.
+    // Values of different types are not comparable, except the single- and double-precision
+    // forms of a vector (not from upstream).
     let all = samples();
+    let same_vector = |a: &ExpressionVariant, b: &ExpressionVariant| {
+        matches!((a, b), (V::Vector2(_), V::Vector(_)) | (V::Vector(_), V::Vector2(_)) | (V::Vector3(_), V::Vector3D(_)) | (V::Vector3D(_), V::Vector3(_)))
+    };
     for (i, a) in all.iter().enumerate() {
         for (j, b) in all.iter().enumerate() {
-            if i != j {
+            if i != j && !same_vector(a, b) {
                 assert_eq!(a.equals_to(*b), V::Invalid);
                 assert_eq!(a.not_equals_to(*b), V::Invalid);
             }
@@ -1551,4 +1971,21 @@ fn variant_to_string() {
     assert_eq!(V::from(REL).to_string(), "Relative");
     assert_eq!(V::from(ABS).to_string(), "Absolute");
     assert_eq!(V::Invalid.to_string(), "Invalid");
+}
+
+/// Not from upstream: the single- and double-precision forms of a vector combine.
+#[test]
+fn mixed_precision_vectors_combine() {
+    use crate::numerics::{Vector2, Vector3};
+    use crate::{Vector, Vector3D};
+    let a = ExpressionVariant::create(Vector3::new(1.0, 2.0, 3.0));
+    let b = ExpressionVariant::create(Vector3D::new(10.0, 20.0, 30.0));
+    assert_eq!(a + b, ExpressionVariant::create(Vector3D::new(11.0, 22.0, 33.0)));
+    assert_eq!(b - a, ExpressionVariant::create(Vector3D::new(9.0, 18.0, 27.0)));
+    assert_eq!(a * b, ExpressionVariant::create(Vector3D::new(10.0, 40.0, 90.0)));
+    assert_eq!(b / a, ExpressionVariant::create(Vector3D::new(10.0, 10.0, 10.0)));
+    assert_eq!(a.equals_to(ExpressionVariant::create(Vector3D::new(1.0, 2.0, 3.0))), ExpressionVariant::Boolean(true));
+    let c = ExpressionVariant::create(Vector2::new(1.0, 2.0));
+    let d = ExpressionVariant::create(Vector::new(3.0, 4.0));
+    assert_eq!(c + d, ExpressionVariant::create(Vector::new(4.0, 6.0)));
 }

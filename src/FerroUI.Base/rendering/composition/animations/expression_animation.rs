@@ -82,6 +82,10 @@ impl ICompositionAnimation for ExpressionAnimation {
         self.base.target()
     }
 
+    fn composition_animation(&self) -> Option<&super::CompositionAnimation> {
+        Some(&self.base)
+    }
+
     fn create_instance(
         &self,
         target_object: ServerObjectId,
@@ -89,8 +93,15 @@ impl ICompositionAnimation for ExpressionAnimation {
     ) -> super::AnimationInstanceFactory {
         let expression = self.parsed_expression();
         let parameters = self.create_snapshot_source();
+        let initial_values = match self.initial_value_expressions().parse_all() {
+            Ok(initial_values) => initial_values,
+            Err(error) => panic!("{error}"),
+        };
         super::AnimationInstanceFactory::new(move || {
-            ExpressionAnimationInstance::new(expression, target_object, final_value, Rc::new(parameters.build()))
+            let instance =
+                ExpressionAnimationInstance::new(expression, target_object, final_value, Rc::new(parameters.build()));
+            instance.set_initial_value_expressions(initial_values);
+            instance
         })
     }
 }

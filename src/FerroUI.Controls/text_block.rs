@@ -14,7 +14,7 @@ use ferroui_base::media::{
     TextDecorationCollection, TextLineBounds, TextTrimming, TextWrapping, Typeface,
 };
 use ferroui_base::reactive::IDisposable;
-use ferroui_base::utilities::{ReadOnlyMemory, ValueSpan};
+use ferroui_base::utilities::{MathUtilities, ReadOnlyMemory, ValueSpan};
 use ferroui_base::{
     ferro_class, ferro_property, instantiate, AttachedProperty, DirectProperty, FerroObject, FerroObjectImpl, FerroObjectImplExt,
     FerroProperty, FerroPropertyChangedEventArgs, Point, Rect, Ref, Size, StyledElementImpl, StyledProperty,
@@ -156,7 +156,11 @@ impl LayoutableImpl for TextBlock {
 
         if this.constraint.get() != deflated_size {
             // Reset the text layout when the constraint is not matching.
-            this.dispose_text_layout();
+            // Deviation (DEVIATIONS.md, Text block): unless the layout is the
+            // one the new constraint would create (`keeps_text_layout_for`).
+            if !this.keeps_text_layout_for(deflated_size) {
+                this.dispose_text_layout();
+            }
             this.constraint.set(deflated_size);
 
             // Force arrange so text will be properly aligned.
@@ -201,10 +205,13 @@ impl LayoutableImpl for TextBlock {
         // for the very same constraint and alignment (and has not been
         // invalidated since) is that layout already, so it is kept: nothing
         // is laid out again when the arranged size is the measured one.
-        if this.constraint.get() != available_size
-            || this.layout_text_alignment.get() != this.resolve_text_alignment(this.text_alignment())
-        {
+        if this.layout_text_alignment.get() != this.resolve_text_alignment(this.text_alignment()) {
             this.dispose_text_layout();
+            this.constraint.set(available_size);
+        } else if this.constraint.get() != available_size {
+            if !this.keeps_text_layout_for(available_size) {
+                this.dispose_text_layout();
+            }
             this.constraint.set(available_size);
         }
 
@@ -1029,6 +1036,48 @@ impl TextBlock {
     #[allow(dead_code)] // read by the tests
     pub(crate) fn has_text_layout(&self) -> bool {
         self.text_layout.borrow().is_some()
+    }
+
+    /// Whether the current text layout is the one a layout created for
+    /// `constraint` would be, so a new constraint need not dispose it.
+    ///
+    /// A FerroUI addition (DEVIATIONS.md, Text block). The lines of a left
+    /// aligned layout that neither wraps nor trims do not depend on its width:
+    /// a line is the whole paragraph and starts at zero. Its height decides
+    /// which lines are kept (a line that ends below the maximum height is
+    /// dropped), so the layout is kept for a height between its own and the
+    /// one it was created for, or for any height it fits when it was created
+    /// without a maximum height.
+    fn keeps_text_layout_for(&self, constraint: Size) -> bool {
+        let Some(text_layout) = self.text_layout.borrow().clone() else {
+            return false;
+        };
+
+        let created_for = self.constraint.get();
+
+        if self.has_complex_content()
+            || self.text_wrapping() != TextWrapping::NoWrap
+            || !Rc::ptr_eq(&self.text_trimming(), &<dyn TextTrimming>::none())
+            || self.layout_text_alignment.get() != TextAlignment::Left
+            || created_for.width.is_nan()
+            || created_for.height.is_nan()
+            || MathUtilities::is_zero(created_for.width)
+            || MathUtilities::is_zero(created_for.height)
+            || MathUtilities::is_zero(constraint.width)
+            || MathUtilities::is_zero(constraint.height)
+            || constraint.width.is_nan()
+            || constraint.height.is_nan()
+        {
+            return false;
+        }
+
+        let height = text_layout.height();
+
+        if MathUtilities::greater_than(height, constraint.height) {
+            return false;
+        }
+
+        created_for.height == f64::INFINITY || constraint.height <= created_for.height
     }
 
     fn dispose_text_layout(&self) {

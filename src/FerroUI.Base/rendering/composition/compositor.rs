@@ -86,6 +86,9 @@ pub struct Compositor {
     dispatcher: Arc<Dispatcher>,
     after_commit: HandlerList<dyn Fn()>,
     default_easing: Rc<dyn IEasing>,
+    /// The open scoped batches and the batch of the current frame (WinUI
+    /// `CompositionScopedBatch` and `CompositionCommitBatch`).
+    animation_batches: super::composition_batch::CompositorBatches,
 }
 
 /// The render loop task of a compositor. The loop may tick on any thread;
@@ -415,6 +418,7 @@ impl Compositor {
             dispatcher,
             after_commit: HandlerList::new(),
             default_easing: Rc::new(SplineEasing::with_key_spline(KeySpline::with_points(0.25, 0.1, 0.25, 1.0))),
+            animation_batches: super::composition_batch::CompositorBatches::new(),
         });
         COMPOSITORS.with(|compositors| {
             let mut compositors = compositors.borrow_mut();
@@ -428,6 +432,11 @@ impl Compositor {
     /// The easing of the key frames that are inserted without one.
     pub(crate) fn default_easing(&self) -> Rc<dyn IEasing> {
         self.default_easing.clone()
+    }
+
+    /// The open scoped batches and the batch of the current frame.
+    pub(crate) fn animation_batches(&self) -> &super::composition_batch::CompositorBatches {
+        &self.animation_batches
     }
 
     /// The render loop the server compositor is driven by.
@@ -705,6 +714,9 @@ impl Compositor {
             }
         });
         *self.next_commit.borrow_mut() = None;
+        // The animations started in the frame are on their way: the commit
+        // batch of the frame is ended.
+        self.animation_batches.on_commit();
 
         commit
     }

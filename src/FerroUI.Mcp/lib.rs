@@ -1,20 +1,21 @@
 //! Opt-in Model Context Protocol server for FerroUI. Call [`serve`] on the UI thread after
 //! application setup and keep the returned handle alive until shutdown. No server starts merely
 //! by linking the crate. Property writes and input are independently disabled by default.
+//!
+//! The tools run on the shared inspector of the UI thread (`ferroui_inspect::Inspector::shared`),
+//! the one the Chrome DevTools Protocol endpoint uses too: node IDs are the same for both, and a
+//! custom lifetime registers its top levels there (`register_root`).
 mod protocol;
 mod transport;
 use ferroui_base::threading::{Dispatcher, DispatcherPriority};
+use ferroui_inspect::LogCapture;
 pub use ferroui_inspect::Permissions;
-use ferroui_inspect::{Inspector, LogCapture};
 use serde_json::Value;
 use std::{
-    cell::RefCell,
-    collections::HashMap,
     io,
     net::{IpAddr, Ipv4Addr, SocketAddr},
-    rc::Rc,
     sync::{
-        atomic::{AtomicBool, AtomicU64, Ordering},
+        atomic::{AtomicBool, Ordering},
         mpsc, Arc,
     },
     time::{Duration, Instant},
@@ -29,7 +30,8 @@ pub enum Transport {
 pub struct Options {
     pub transport: Transport,
     pub permissions: Permissions,
-    /// Tee the application's diagnostic log into a bounded ring while the server is alive.
+    /// Tee the application's diagnostic log into the bounded ring of `ferroui-inspect`, shared
+    /// with the other servers of the process, while the server is alive.
     pub capture_logs: bool,
     /// Previously reserved protocol output; otherwise stdio reserves stdout when serve is called.
     pub stdio_output: Option<std::fs::File>,
@@ -47,8 +49,6 @@ impl Default for Options {
         }
     }
 }
-ferroui_base::ferro_thread_local! { static INSPECTORS: RefCell<HashMap<u64,Rc<RefCell<Inspector>>>> = RefCell::new(HashMap::new()); }
-static NEXT_ID: AtomicU64 = AtomicU64::new(1);
 static STDIO_STARTED: AtomicBool = AtomicBool::new(false);
 
 /// Dropping this handle stops accepting requests and invalidates queued work. A stdio reader
@@ -68,31 +68,12 @@ impl ServerHandle {
 impl Drop for ServerHandle {
     fn drop(&mut self) {
         self.client.stop.store(true, Ordering::Release);
-        let id = self.client.id;
-        if self.client.dispatcher.check_access() {
-            INSPECTORS.with(|s| s.borrow_mut().remove(&id));
-        } else {
-            self.client.dispatcher.post(
-                move || {
-                    INSPECTORS.with(|s| s.borrow_mut().remove(&id));
-                },
-                DispatcherPriority::NORMAL,
-            );
-        }
         self.log_guard.take();
     }
 }
 
 /// Start the server on the UI thread. The returned handle is the lifetime of the service.
 pub fn serve(options: Options) -> io::Result<ServerHandle> {
-    serve_with_inspector(options, None)
-}
-
-/// Supply a core with explicitly registered roots for a custom application lifetime.
-pub fn serve_with_inspector(
-    options: Options,
-    inspector: Option<Inspector>,
-) -> io::Result<ServerHandle> {
     let dispatcher = Dispatcher::ui_thread();
     dispatcher.verify_access();
     if options.dispatch_timeout.is_zero() {
@@ -101,12 +82,22 @@ pub fn serve_with_inspector(
             "dispatch_timeout must be positive",
         ));
     }
-    if matches!(options.transport, Transport::Stdio) && STDIO_STARTED.swap(true, Ordering::AcqRel) {
+    let stdio = matches!(options.transport, Transport::Stdio);
+    if stdio && STDIO_STARTED.swap(true, Ordering::AcqRel) {
         return Err(io::Error::new(
             io::ErrorKind::AlreadyExists,
             "Only one stdio server may start per process",
         ));
     }
+    // A server that fails to start leaves stdio free for another attempt.
+    let result = start(options, dispatcher);
+    if stdio && result.is_err() {
+        STDIO_STARTED.store(false, Ordering::Release);
+    }
+    result
+}
+
+fn start(options: Options, dispatcher: Arc<Dispatcher>) -> io::Result<ServerHandle> {
     let (http, address, token) = match &options.transport {
         Transport::Http(address) => {
             if !address.ip().is_loopback() {
@@ -124,25 +115,6 @@ pub fn serve_with_inspector(
         }
         Transport::Stdio => (None, None, None),
     };
-    let id = NEXT_ID.fetch_add(1, Ordering::Relaxed);
-    let mut inspector = inspector.unwrap_or_else(|| Inspector::new(options.permissions));
-    inspector.permissions = options.permissions;
-    let logs = inspector.logs.clone();
-    let log_guard = options.capture_logs.then(|| logs.install());
-    INSPECTORS.with(|s| s.borrow_mut().insert(id, Rc::new(RefCell::new(inspector))));
-    let client = Client {
-        id,
-        dispatcher,
-        timeout: options.dispatch_timeout,
-        stop: Arc::new(AtomicBool::new(false)),
-        logs,
-    };
-    let handle = ServerHandle {
-        client: client.clone(),
-        log_guard,
-        address,
-        token: token.clone(),
-    };
     let stdio_output = if http.is_none() {
         Some(match options.stdio_output {
             Some(file) => file,
@@ -150,6 +122,19 @@ pub fn serve_with_inspector(
         })
     } else {
         None
+    };
+    let log_guard = options.capture_logs.then(LogCapture::install);
+    let client = Client {
+        dispatcher,
+        permissions: options.permissions,
+        timeout: options.dispatch_timeout,
+        stop: Arc::new(AtomicBool::new(false)),
+    };
+    let handle = ServerHandle {
+        client: client.clone(),
+        log_guard,
+        address,
+        token: token.clone(),
     };
     let task = move || {
         let stop = client.stop.clone();
@@ -171,11 +156,10 @@ pub fn serve_with_inspector(
 
 #[derive(Clone)]
 pub(crate) struct Client {
-    id: u64,
     dispatcher: Arc<Dispatcher>,
+    permissions: Permissions,
     timeout: Duration,
     stop: Arc<AtomicBool>,
-    logs: LogCapture,
 }
 impl Client {
     fn call(&self, name: &str, args: Value, cancel: &Arc<AtomicBool>) -> Result<Value, String> {
@@ -187,7 +171,7 @@ impl Client {
                 return Err("Request cancelled or server stopped".into());
             }
             let (tx, rx) = mpsc::sync_channel(1);
-            let id = self.id;
+            let permissions = self.permissions;
             let tool = name.to_owned();
             let args = args.clone();
             let cancelled = cancel.clone();
@@ -203,11 +187,7 @@ impl Client {
                         return;
                     }
                     let result = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
-                        let inspector = INSPECTORS
-                            .with(|s| s.borrow().get(&id).cloned())
-                            .ok_or("Inspector is stopped".to_owned())?;
-                        let result = inspector.borrow_mut().execute(&tool, &args);
-                        result
+                        ferroui_inspect::execute(&tool, &args, permissions)
                     }))
                     .unwrap_or_else(|_| Err("UI operation panicked".into()));
                     let _ = tx.send(result);

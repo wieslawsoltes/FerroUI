@@ -1,7 +1,9 @@
+use super::connected_animation_flight::{ConnectedAnimationComponent, ConnectedAnimationFlight, FlightEnd};
 use super::{
     BasicConnectedAnimationConfiguration, ConnectedAnimationConfiguration, ConnectedAnimationService,
     DirectConnectedAnimationConfiguration, GravityConnectedAnimationConfiguration,
 };
+use ferroui_base::rendering::composition::animations::ICompositionAnimation;
 use crate::presenters::ContentPresenter;
 use crate::primitives::{OverlayLayer, TemplatedControl};
 use crate::{Border, Canvas, ControlImpl, Panel, TopLevel};
@@ -112,6 +114,12 @@ pub struct ConnectedAnimation {
 
     configuration: RefCell<Option<Rc<dyn ConnectedAnimationConfiguration>>>,
     completed: HandlerList<CompletedHandler>,
+
+    /// The composition engine of WinUI, when the source is in a window rendered by a
+    /// compositor; the flight over the overlay layer above is the fallback otherwise.
+    flight: RefCell<Option<Rc<ConnectedAnimationFlight>>>,
+    /// `IsScaleAnimationEnabled` while there is no flight.
+    is_scale_animation_enabled: Cell<bool>,
 }
 
 /// Animations compare by reference.
@@ -145,6 +153,8 @@ impl ConnectedAnimation {
             active_overlay_layer: RefCell::new(None),
             configuration: RefCell::new(None),
             completed: HandlerList::new(),
+            flight: RefCell::new(None),
+            is_scale_animation_enabled: Cell::new(true),
         });
 
         let top_level = source.find_ancestor_of_type::<TopLevel>(false);
@@ -159,6 +169,22 @@ impl ConnectedAnimation {
 
                 animation.capture_snapshot(source, &top_level);
             }
+        }
+
+        // The composition engine of WinUI takes over when the source is rendered by a
+        // compositor: it puts the image of the source in the connected animation layer of the
+        // window and times out itself (2 s, WinUI's `s_timeout`).
+        let snapshot = animation.source_snapshot.borrow().clone();
+        if let Some(flight) = ConnectedAnimationFlight::prepare(service, source, snapshot) {
+            let weak = animation.this.clone();
+            flight.set_on_finished(Box::new(move |end| {
+                if let Some(animation) = weak.upgrade() {
+                    animation.on_flight_finished(end);
+                }
+            }));
+            service.add_flight(&flight);
+            *animation.flight.borrow_mut() = Some(flight);
+            return animation;
         }
 
         // Auto-dispose after 3 s if not consumed (matches UWP behaviour).
@@ -240,12 +266,86 @@ impl ConnectedAnimation {
             return false;
         }
 
+        let flight = self.flight.borrow().clone();
+        if let Some(flight) = flight {
+            // `TryStartWithCoordinatedElementsImpl`: the animation, then the coordinated
+            // entrances.
+            if !flight.try_start(destination, self.configuration()) {
+                return false;
+            }
+            self.is_consumed.set(true);
+            for element in coordinated_elements {
+                if let Some(coordinated) = flight.animate_coordinated_entrance(element) {
+                    self.service.add_flight(&coordinated);
+                }
+            }
+            return true;
+        }
+
         self.is_consumed.set(true);
         self.cancel_timeout();
 
         let this = self.this.upgrade().expect("the animation is alive while it is used");
         let _ = crate::page::start_async(this.run_animation_async(destination.to_ref(), coordinated_elements.to_vec()));
         true
+    }
+
+    /// `Cancel`: stops the animation and shows the source and destination elements in their
+    /// places. As in WinUI no `Completed` is raised; the animation cannot be started any more.
+    pub fn cancel(&self) {
+        if let Some(flight) = self.flight.borrow_mut().take() {
+            flight.cancel();
+        }
+        self.disposed.set(true);
+        self.cancel_timeout();
+        self.service.remove_animation(&self.key);
+    }
+
+    /// `IsScaleAnimationEnabled`: whether the animation scales the image from the size of the
+    /// source to that of the destination (`true`, the default), or keeps the sizes and shows
+    /// the parts of the elements their clips leave visible.
+    pub fn is_scale_animation_enabled(&self) -> bool {
+        match &*self.flight.borrow() {
+            Some(flight) => flight.is_scale_animation_enabled(),
+            None => self.is_scale_animation_enabled.get(),
+        }
+    }
+
+    pub fn set_is_scale_animation_enabled(&self, value: bool) {
+        self.is_scale_animation_enabled.set(value);
+        if let Some(flight) = &*self.flight.borrow() {
+            flight.set_is_scale_animation_enabled(value);
+        }
+    }
+
+    /// `SetAnimationComponent`: replaces the animation of one part of the flight. The animation
+    /// receives the scalar parameters `StartingValue` and `FinalValue`, and is started on the
+    /// component (for `OffsetX`, `Offset.X` of the flight). `None` restores the default.
+    pub fn set_animation_component(
+        &self,
+        component: ConnectedAnimationComponent,
+        animation: Option<Rc<dyn ICompositionAnimation>>,
+    ) {
+        if let Some(flight) = &*self.flight.borrow() {
+            flight.set_animation_component(component, animation);
+        }
+    }
+
+    /// The end of the flight of the composition engine.
+    fn on_flight_finished(&self, end: FlightEnd) {
+        self.flight.borrow_mut().take();
+        match end {
+            FlightEnd::Completed => {
+                self.disposed.set(true);
+                self.on_animation_complete();
+            }
+            FlightEnd::Cancelled => {
+                self.disposed.set(true);
+                self.service.remove_animation(&self.key);
+                self.raise_completed(true);
+            }
+            FlightEnd::Expired => self.dispose(),
+        }
     }
 
     // Exposed to the crate so tests can verify the disposal state.
@@ -264,6 +364,14 @@ impl ConnectedAnimation {
 
         self.cancel_timeout();
         self.service.remove_animation(&self.key);
+        let flight_was_in_flight = match self.flight.borrow_mut().take() {
+            Some(flight) => {
+                let in_flight = flight.is_in_flight();
+                flight.cancel();
+                in_flight
+            }
+            None => false,
+        };
         let animation_cts = self.animation_cts.borrow_mut().take();
         if let Some(animation_cts) = animation_cts {
             animation_cts.cancel();
@@ -274,7 +382,7 @@ impl ConnectedAnimation {
         }
 
         let active_destination = self.active_destination.borrow_mut().take();
-        let was_mid_flight = active_destination.is_some();
+        let was_mid_flight = active_destination.is_some() || flight_was_in_flight;
 
         if let Some(active_destination) = active_destination {
             active_destination.set_opacity(self.active_dest_original_opacity.get());

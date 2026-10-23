@@ -27,7 +27,7 @@ impl ICompositionHitTester for PointCompositionHitTester {
     }
 
     fn clipped_bounds_match(visual: &CompositionVisual, input: &Point) -> bool {
-        let size = visual.size();
+        let size = visual.effective_size();
         input.x >= 0.0 && input.y >= 0.0 && input.x <= size.x && input.y <= size.y
     }
 

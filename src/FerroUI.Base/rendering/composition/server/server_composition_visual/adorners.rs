@@ -74,17 +74,11 @@ impl ServerCompositionVisual {
                 // Don't render, something is broken
                 None => self.own_transform.set(Some(Matrix::new_3x3(0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0))),
             }
+        } else if self.parent_for_transform().is_some() {
+            // The WinUI `ParentForTransform` (not from upstream).
+            self.update_parent_for_transform();
         } else {
-            self.own_transform.set(MatrixUtils::compute_transform(
-                self.size(),
-                self.anchor_point(),
-                self.center_point(),
-                self.transform_matrix(),
-                self.scale(),
-                self.rotation_angle(),
-                self.orientation(),
-                self.offset() + self.translation(),
-            ));
+            self.own_transform.set(self.compute_own_transform_from_properties(self.transform_matrix()));
         }
 
         self.propagate_flags(true, true, false);

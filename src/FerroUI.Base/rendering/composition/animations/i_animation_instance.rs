@@ -32,6 +32,34 @@ pub trait IAnimationInstance: IServerClockItem + 'static {
     fn deactivate(&self);
 
     fn invalidate(&self);
+
+    /// The value the animated property is set to when the animation is
+    /// stopped by `StopAnimation` (its stop behavior), given the current
+    /// value of the property; `None` leaves the current value.
+    fn value_on_stop(&self, _current_value: ExpressionVariant) -> Option<ExpressionVariant> {
+        None
+    }
+
+    /// Tells the batches the animation belongs to that it is over (it is
+    /// stopped, replaced or its target is disposed). Releasing again does
+    /// nothing; an animation that belongs to no batch does nothing.
+    fn release_completion(&self) {}
+
+    /// Puts the instance under the control of an
+    /// [`AnimationController`](super::AnimationController), named by the id of
+    /// the controller's property set: from now on the controller pauses,
+    /// resumes, scrubs and speeds up the animation; if the progress of the
+    /// controller was assigned, the animation moves there at its next
+    /// evaluation. An instance that cannot be controlled (an expression
+    /// animation) ignores it.
+    fn attach_controller(&self, _controller: ServerObjectId) {}
+
+    /// The instance as an animation of components of its property
+    /// (`Offset.X`), if it is one: such animations of one property are
+    /// merged on the server.
+    fn as_subchannel(&self) -> Option<&super::SubchannelAnimationInstance> {
+        None
+    }
 }
 
 /// An animation instance on its way to the server.

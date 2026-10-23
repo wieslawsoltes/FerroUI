@@ -161,3 +161,18 @@ fn lazy_singletons_survive_rebuilds_and_dispose_with_the_resolver() {
     r.dispose().unwrap();
     assert_eq!(disposed.get(), 1);
 }
+#[test]
+fn updating_with_the_current_provider_keeps_it() {
+    let mut s = ServiceCollection::new();
+    s.add_singleton_instance(Rc::new(3usize));
+    let r = MicrosoftDependencyResolver::new(s);
+    let current = r.service_provider().unwrap();
+    r.update_provider(current.clone()).unwrap();
+    assert!(!current.is_disposed());
+    assert_eq!(
+        *ReadonlyDependencyResolverExt::get_service::<usize>(&r).unwrap(),
+        3
+    );
+    r.dispose().unwrap();
+    assert!(current.is_disposed());
+}

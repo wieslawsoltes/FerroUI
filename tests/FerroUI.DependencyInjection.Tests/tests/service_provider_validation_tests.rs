@@ -227,3 +227,36 @@ fn self_dependency_in_enumerable_is_a_cycle() {
         matches!(s.build_service_provider(options()),Err(ServiceError::Validation(v)) if matches!(&v[0],ServiceError::CircularDependency(_)))
     );
 }
+#[test]
+fn validation_of_meeting_branches_is_linear() {
+    // Two services per layer, each depending on both of the next layer: 2^40 paths, 80 services.
+    let layers = 40;
+    let key = |side: &str, layer: usize| Some(ServiceKey::from(format!("{side}{layer}")));
+    let mut s = ServiceCollection::new();
+    for layer in 0..=layers {
+        for side in ["a", "b"] {
+            let dependencies = if layer < layers {
+                vec![
+                    Dependency::keyed::<usize>(key("a", layer + 1)),
+                    Dependency::keyed::<usize>(key("b", layer + 1)),
+                ]
+            } else {
+                vec![]
+            };
+            s.add(
+                ServiceDescriptor::keyed::<usize, _>(
+                    ServiceLifetime::Transient,
+                    key(side, layer),
+                    |_, _| Ok(Rc::new(0)),
+                )
+                .with_dependencies(dependencies),
+            );
+        }
+    }
+    let started = std::time::Instant::now();
+    let provider = s.build_service_provider(options()).unwrap();
+    provider
+        .get_required_keyed_service::<usize>(key("a", 0).as_ref())
+        .unwrap();
+    assert!(started.elapsed() < std::time::Duration::from_secs(5));
+}

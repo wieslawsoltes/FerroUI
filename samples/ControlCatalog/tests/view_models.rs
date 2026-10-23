@@ -82,8 +82,9 @@ fn the_view_model_lists_every_upstream_page_as_available_or_unavailable() {
 
     assert_eq!(11, view_model.home_sections().len());
     let available: usize = view_model.home_sections().iter().map(|s| s.items().map_or(0, |items| items.len())).sum();
-    // The upstream list has 74 entries, and the port adds the page TreeDataGrid.
-    assert_eq!(75, available + view_model.unavailable_pages().len());
+    // The upstream list has 74 entries, and the port adds the pages TreeDataGrid and
+    // Composition (WinUI).
+    assert_eq!(76, available + view_model.unavailable_pages().len());
     for page in view_model.unavailable_pages() {
         assert!(!page.reason.is_empty(), "{} has no reason", page.document);
     }

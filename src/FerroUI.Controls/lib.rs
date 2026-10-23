@@ -7,6 +7,7 @@ pub mod automation;
 pub mod chrome;
 pub mod diagnostics;
 pub mod embedding;
+pub mod hosting;
 pub mod converters;
 pub mod metadata;
 pub mod notifications;

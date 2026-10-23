@@ -116,6 +116,13 @@ pub(super) fn page_sections() -> (Vec<Rc<HomeSection>>, Vec<UnavailablePage>) {
             s.add("/Pages/AcrylicPage.xaml", "Acrylic", Icons::BLUR, "Translucent acrylic window materials");
             s.add("/Pages/BitmapCachePage.xaml", "BitmapCache", Icons::LIGHTNING, "Cache visuals as bitmaps for performance");
             s.add("/Pages/CompositionPage.xaml", "Composition", Icons::LAYERS, "Composition-layer animations and effects");
+            // Not from upstream: the page of the WinUI composition API.
+            s.add_page(
+                || crate::pages::winui_composition_page().upcast(),
+                "Composition (WinUI)",
+                Icons::LAYERS,
+                "Connected animations and ElementCompositionPreview",
+            );
             s.add("/Pages/CustomDrawing.xaml", "Custom Drawing", Icons::BRUSH, "Render custom geometry in code");
             s.add("/Pages/ImagePage.xaml", "Image", Icons::IMAGE, "Display bitmaps with different stretch modes");
             s.add("/Pages/OpenGlPage.xaml", "OpenGL", Icons::CUBE_3D, "Embed custom OpenGL rendering");

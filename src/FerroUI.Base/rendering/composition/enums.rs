@@ -1,3 +1,5 @@
+use super::transport::{BatchValue, BatchValueReader};
+use crate::media::imaging::BitmapInterpolationMode;
 use bitflags::bitflags;
 
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq, Hash)]
@@ -96,12 +98,119 @@ bitflags! {
     }
 }
 
+/// How the content of a composition surface brush fills the area of the
+/// brush (WinUI `CompositionStretch`).
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq, Hash)]
 #[repr(i32)]
 pub enum CompositionStretch {
+    /// The content keeps its natural size.
     #[default]
     None = 0,
+    /// The content is scaled to the area, without keeping its aspect ratio.
     Fill = 1,
+    /// The content is scaled to fit inside the area, keeping its aspect ratio.
+    Uniform = 2,
+    /// The content is scaled to cover the area, keeping its aspect ratio; the
+    /// part outside the area is clipped.
+    UniformToFill = 3,
+}
+
+/// How a bitmap is resampled when a composition surface brush scales it
+/// (WinUI `CompositionBitmapInterpolationMode`).
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq, Hash)]
+#[repr(i32)]
+pub enum CompositionBitmapInterpolationMode {
+    /// The nearest pixel.
+    NearestNeighbor = 0,
+    /// Linear interpolation (the WinUI default).
+    #[default]
+    Linear = 1,
+    MagLinearMinLinearMipLinear = 2,
+    MagLinearMinLinearMipNearest = 3,
+    MagLinearMinNearestMipLinear = 4,
+    MagLinearMinNearestMipNearest = 5,
+    MagNearestMinLinearMipLinear = 6,
+    MagNearestMinLinearMipNearest = 7,
+    MagNearestMinNearestMipLinear = 8,
+    MagNearestMinNearestMipNearest = 9,
+}
+
+impl CompositionBitmapInterpolationMode {
+    const ALL: [CompositionBitmapInterpolationMode; 10] = [
+        Self::NearestNeighbor,
+        Self::Linear,
+        Self::MagLinearMinLinearMipLinear,
+        Self::MagLinearMinLinearMipNearest,
+        Self::MagLinearMinNearestMipLinear,
+        Self::MagLinearMinNearestMipNearest,
+        Self::MagNearestMinLinearMipLinear,
+        Self::MagNearestMinLinearMipNearest,
+        Self::MagNearestMinNearestMipLinear,
+        Self::MagNearestMinNearestMipNearest,
+    ];
+
+    /// The interpolation mode of the drawing context that comes closest.
+    ///
+    /// Deviation (winui-composition.md): the drawing contexts have one
+    /// quality setting, not separate minification, magnification and mip
+    /// filters. Nearest magnification maps to no interpolation, a linear
+    /// filter with linear mip filtering to the medium quality (mipmaps),
+    /// every other linear filter to the low quality (bilinear).
+    pub fn to_bitmap_interpolation_mode(self) -> BitmapInterpolationMode {
+        match self {
+            Self::NearestNeighbor
+            | Self::MagNearestMinLinearMipLinear
+            | Self::MagNearestMinLinearMipNearest
+            | Self::MagNearestMinNearestMipLinear
+            | Self::MagNearestMinNearestMipNearest => BitmapInterpolationMode::None,
+            Self::MagLinearMinLinearMipLinear => BitmapInterpolationMode::MediumQuality,
+            Self::Linear
+            | Self::MagLinearMinLinearMipNearest
+            | Self::MagLinearMinNearestMipLinear
+            | Self::MagLinearMinNearestMipNearest => BitmapInterpolationMode::LowQuality,
+        }
+    }
+}
+
+/// What a drop shadow is cast from (WinUI
+/// `CompositionDropShadowSourcePolicy`).
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq, Hash)]
+#[repr(i32)]
+pub enum CompositionDropShadowSourcePolicy {
+    /// The shadow uses the mask, or the shape of the visual when there is
+    /// none.
+    #[default]
+    Default = 0,
+    /// The shadow uses the alpha of the content of the visual.
+    InheritFromVisualContent = 1,
+}
+
+impl BatchValue for CompositionBitmapInterpolationMode {
+    fn write_to(&self, out: &mut Vec<u8>) {
+        (*self as i32).write_to(out);
+    }
+
+    fn read_from(input: &mut BatchValueReader<'_>) -> Self {
+        let value = i32::read_from(input);
+        match Self::ALL.iter().find(|mode| **mode as i32 == value) {
+            Some(mode) => *mode,
+            None => panic!("the batch value stream holds {value}, which is not a CompositionBitmapInterpolationMode"),
+        }
+    }
+}
+
+impl BatchValue for CompositionDropShadowSourcePolicy {
+    fn write_to(&self, out: &mut Vec<u8>) {
+        (*self as i32).write_to(out);
+    }
+
+    fn read_from(input: &mut BatchValueReader<'_>) -> Self {
+        match i32::read_from(input) {
+            0 => Self::Default,
+            1 => Self::InheritFromVisualContent,
+            value => panic!("the batch value stream holds {value}, which is not a CompositionDropShadowSourcePolicy"),
+        }
+    }
 }
 
 #[cfg(test)]
@@ -117,5 +226,35 @@ mod tests {
         assert_eq!(CompositionTileMode::TILE.bits(), 3);
         assert_eq!(CompositionTileMode::FLIP.bits(), 12);
         assert_eq!(CompositionStretch::Fill as i32, 1);
+    }
+
+    #[test]
+    fn winui_values() {
+        assert_eq!(CompositionStretch::Uniform as i32, 2);
+        assert_eq!(CompositionStretch::UniformToFill as i32, 3);
+        assert_eq!(CompositionBitmapInterpolationMode::default(), CompositionBitmapInterpolationMode::Linear);
+        assert_eq!(CompositionBitmapInterpolationMode::MagNearestMinNearestMipNearest as i32, 9);
+        assert_eq!(CompositionDropShadowSourcePolicy::InheritFromVisualContent as i32, 1);
+    }
+
+    #[test]
+    fn enums_cross_a_batch() {
+        use crate::rendering::composition::transport::{BatchValue, BatchValueReader};
+
+        let mut out = Vec::new();
+        CompositionBitmapInterpolationMode::MagLinearMinNearestMipLinear.write_to(&mut out);
+        CompositionDropShadowSourcePolicy::InheritFromVisualContent.write_to(&mut out);
+        CompositionStretch::UniformToFill.write_to(&mut out);
+        let mut offset = 0;
+        let mut input = BatchValueReader::new(&out, &mut offset);
+        assert_eq!(
+            CompositionBitmapInterpolationMode::MagLinearMinNearestMipLinear,
+            CompositionBitmapInterpolationMode::read_from(&mut input)
+        );
+        assert_eq!(
+            CompositionDropShadowSourcePolicy::InheritFromVisualContent,
+            CompositionDropShadowSourcePolicy::read_from(&mut input)
+        );
+        assert_eq!(CompositionStretch::UniformToFill, CompositionStretch::read_from(&mut input));
     }
 }

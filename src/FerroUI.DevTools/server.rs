@@ -1,13 +1,12 @@
 use crate::Browser;
-use ferroui_base::reactive::IDisposable;
 use ferroui_base::threading::{Dispatcher, DispatcherPriority, DispatcherTimer};
 use serde_json::{json, Value};
 use std::cell::RefCell;
 use std::collections::HashMap;
 use std::io::{self, Cursor, Read, Write};
 use std::net::{Ipv4Addr, Shutdown, SocketAddr, TcpListener, TcpStream};
-use std::rc::Rc;
-use std::sync::atomic::{AtomicBool, Ordering};
+use std::rc::{Rc, Weak};
+use std::sync::atomic::{AtomicBool, AtomicU64, Ordering};
 use std::sync::{mpsc, Arc, Mutex};
 use std::thread::{self, JoinHandle};
 use std::time::{Duration, Instant};
@@ -29,22 +28,24 @@ struct Request {
     reply: mpsc::SyncSender<Value>,
     deadline: Instant,
 }
+/// Hands a request to the UI thread; `false` when it cannot be queued.
+type Submit = Arc<dyn Fn(Request) -> bool + Send + Sync>;
 #[derive(Clone)]
 struct Transport {
-    sender: mpsc::SyncSender<Request>,
+    submit: Submit,
     stop: Arc<AtomicBool>,
 }
 impl Transport {
     fn request(&self, operation: Operation) -> io::Result<Value> {
         let (reply, receiver) = mpsc::sync_channel(1);
         let deadline = Instant::now() + REQUEST_TIMEOUT;
-        self.sender
-            .try_send(Request {
-                operation,
-                reply,
-                deadline,
-            })
-            .map_err(|_| io::Error::other("UI request queue is full or closed"))?;
+        if !(self.submit)(Request {
+            operation,
+            reply,
+            deadline,
+        }) {
+            return Err(io::Error::other("UI dispatcher unavailable"));
+        }
         loop {
             if self.stop.load(Ordering::Relaxed) || Instant::now() >= deadline {
                 return Err(io::Error::new(
@@ -61,12 +62,58 @@ impl Transport {
     }
 }
 
+ferroui_base::ferro_thread_local! {
+    /// The browsers of the servers of this UI thread, by server.
+    static BROWSERS: RefCell<HashMap<u64, Weak<RefCell<Browser>>>> = RefCell::new(HashMap::new());
+}
+static NEXT_SERVER: AtomicU64 = AtomicU64::new(1);
+
+/// Runs a request on the UI thread, where the transport posted it. A command that runs a nested
+/// dispatcher frame (a modal drag loop, a synchronous wait) still holds the browser: a request
+/// that arrives inside it waits for a timer tick and tries again.
+fn run(server: u64, port: u16, request: Request) {
+    if Instant::now() >= request.deadline {
+        return;
+    }
+    let Some(browser) = BROWSERS.with(|b| b.borrow().get(&server).and_then(Weak::upgrade)) else {
+        return;
+    };
+    let Ok(mut browser) = browser.try_borrow_mut() else {
+        let request = RefCell::new(Some(request));
+        DispatcherTimer::run_once(
+            move || {
+                if let Some(request) = request.borrow_mut().take() {
+                    run(server, port, request);
+                }
+            },
+            Duration::from_millis(10),
+            DispatcherPriority::BACKGROUND,
+        );
+        return;
+    };
+    let value = match request.operation {
+        Operation::List => browser.discovery(port),
+        Operation::Connect(target) => match browser.connect(target.as_deref()) {
+            Ok(id) => json!({"connection":id}),
+            Err(e) => json!({"error":e}),
+        },
+        Operation::Message(id, message) => json!(browser.handle(id, &message)),
+        Operation::Poll(id) => json!(browser.poll(id)),
+        Operation::Disconnect(id) => {
+            browser.disconnect(id);
+            Value::Null
+        }
+    };
+    let _ = request.reply.send(value);
+}
+
 /// An explicitly started localhost listener. Keep the handle on the UI thread for the lifetime
 /// of the endpoint. Dropping it stops the listener, closes clients and removes highlights/logging.
+/// The UI thread does work only for the requests of clients: each is posted to its dispatcher.
 pub struct DevToolsServer {
+    id: u64,
     address: SocketAddr,
     browser: Rc<RefCell<Browser>>,
-    timer: Rc<dyn IDisposable>,
     stop: Arc<AtomicBool>,
     sockets: Arc<Mutex<HashMap<u64, TcpStream>>>,
     worker: Option<JoinHandle<()>>,
@@ -78,51 +125,24 @@ impl DevToolsServer {
         Self::with_browser(port, Browser::new())
     }
     pub fn with_browser(port: u16, browser: Browser) -> io::Result<Self> {
-        Dispatcher::ui_thread().verify_access();
+        let dispatcher = Dispatcher::ui_thread();
+        dispatcher.verify_access();
         let listener = TcpListener::bind((Ipv4Addr::LOCALHOST, port))?;
         listener.set_nonblocking(true)?;
         let address = listener.local_addr()?;
         let browser = Rc::new(RefCell::new(browser));
-        let weak = Rc::downgrade(&browser);
-        let (sender, receiver) = mpsc::sync_channel::<Request>(128);
-        let timer = DispatcherTimer::run(
-            move || {
-                let Some(browser) = weak.upgrade() else {
-                    return false;
-                };
-                // A command that runs a nested dispatcher frame (a modal drag loop, a synchronous
-                // wait) lets this timer tick again inside it: the requests then stay queued.
-                let Ok(mut browser) = browser.try_borrow_mut() else {
-                    return true;
-                };
-                // Bound work per tick so requests cannot starve layout and input.
-                for request in receiver.try_iter().take(32) {
-                    if Instant::now() >= request.deadline {
-                        continue;
-                    }
-                    let value = match request.operation {
-                        Operation::List => browser.discovery(address.port()),
-                        Operation::Connect(target) => match browser.connect(target.as_deref()) {
-                            Ok(id) => json!({"connection":id}),
-                            Err(e) => json!({"error":e}),
-                        },
-                        Operation::Message(id, message) => json!(browser.handle(id, &message)),
-                        Operation::Poll(id) => json!(browser.poll(id)),
-                        Operation::Disconnect(id) => {
-                            browser.disconnect(id);
-                            Value::Null
-                        }
-                    };
-                    let _ = request.reply.send(value);
-                }
-                true
-            },
-            Duration::from_millis(10),
-            DispatcherPriority::BACKGROUND,
-        );
+        let id = NEXT_SERVER.fetch_add(1, Ordering::Relaxed);
+        BROWSERS.with(|b| b.borrow_mut().insert(id, Rc::downgrade(&browser)));
         let stop = Arc::new(AtomicBool::new(false));
+        let port = address.port();
         let transport = Transport {
-            sender,
+            submit: Arc::new(move |request| {
+                dispatcher.post(
+                    move || run(id, port, request),
+                    DispatcherPriority::BACKGROUND,
+                );
+                true
+            }),
             stop: stop.clone(),
         };
         let sockets = Arc::new(Mutex::new(HashMap::new()));
@@ -173,9 +193,9 @@ impl DevToolsServer {
                 }
             })?;
         Ok(Self {
+            id,
             address,
             browser,
-            timer,
             stop,
             sockets,
             worker: Some(worker),
@@ -192,7 +212,7 @@ impl DevToolsServer {
 impl Drop for DevToolsServer {
     fn drop(&mut self) {
         self.stop.store(true, Ordering::Relaxed);
-        self.timer.dispose();
+        BROWSERS.with(|b| b.borrow_mut().remove(&self.id));
         for socket in self.sockets.lock().unwrap().values() {
             let _ = socket.shutdown(Shutdown::Both);
         }
@@ -323,9 +343,14 @@ fn serve(mut stream: TcpStream, port: u16, transport: &Transport) -> io::Result<
         result
     } else {
         match path {
-            "/json" | "/json/" | "/json/list" => {
-                http(&mut stream, 200, transport.request(Operation::List)?)
-            }
+            "/json" | "/json/" | "/json/list" => match transport.request(Operation::List) {
+                Ok(list) => http(&mut stream, 200, list),
+                Err(_) => http(
+                    &mut stream,
+                    503,
+                    json!({"error":"The UI thread did not answer"}),
+                ),
+            },
             "/json/version" => http(&mut stream, 200, Browser::version(port)),
             "/json/protocol" => http(
                 &mut stream,
@@ -345,6 +370,7 @@ fn http(stream: &mut TcpStream, status: u16, body: Value) -> io::Result<()> {
         404 => "Not Found",
         405 => "Method Not Allowed",
         431 => "Request Header Fields Too Large",
+        503 => "Service Unavailable",
         _ => "Error",
     };
     let body = body.to_string();
@@ -413,7 +439,7 @@ mod tests {
         let (sender, receiver) = mpsc::sync_channel(128);
         let stop = Arc::new(AtomicBool::new(false));
         let transport = Transport {
-            sender,
+            submit: Arc::new(move |request| sender.try_send(request).is_ok()),
             stop: stop.clone(),
         };
         let worker = thread::spawn(move || {

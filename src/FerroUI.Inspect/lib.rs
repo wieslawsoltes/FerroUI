@@ -1,5 +1,10 @@
-//! Transport-independent inspection of live FerroUI objects. All Inspector methods run on the
-//! UI thread. IDs are weak, stable for an object's lifetime, and never reused within a session.
+//! Transport-independent inspection of live FerroUI objects, shared by the MCP server
+//! (`ferroui-mcp`, the JSON tools of [`execute`]) and the Chrome DevTools Protocol endpoint
+//! (`ferroui-devtools`, the per-window [`target::Target`]). Both use one [`Inspector`] per UI
+//! thread ([`Inspector::shared`]): one ID space, one set of roots and the same primitives for
+//! properties, styles, selectors, layout boxes, screenshots and highlights. All methods run on the
+//! UI thread. IDs are weak, stable for an object's lifetime, never reused, and start at 2 (0 and 1
+//! are left to protocols, such as CDP's document node).
 mod frames;
 mod input;
 mod logs;
@@ -12,18 +17,22 @@ use ferroui_base::data::{BindingOperations, BindingPriority};
 use ferroui_base::diagnostics::FerroObjectDiagnosticExtensions;
 use ferroui_base::layout::Layoutable;
 use ferroui_base::media::imaging::{PngBitmapEncoderOptions, RenderTargetBitmap};
-use ferroui_base::styling::StyleBase;
+use ferroui_base::media::{Colors, SolidColorBrush};
+use ferroui_base::reactive::{Disposable, IDisposable};
+use ferroui_base::styling::{ControlTheme, Selector, Style};
 use ferroui_base::threading::Dispatcher;
 use ferroui_base::{
     BoxedValue, FerroObject, FerroProperty, FerroPropertyRegistry, PixelSize, Rect, Ref,
-    StyledElement, TypeInfo, Vector, Visual, WeakRef,
+    StyledElement, Thickness, TypeInfo, Vector, Visual, WeakRef,
 };
 use ferroui_controls::automation::peers::{AutomationPeer, ControlAutomationPeer};
-use ferroui_controls::{Application, Control, TopLevel};
-use ferroui_markup::markup::parsers::SelectorParser;
-pub use logs::{LogCapture, LogGuard};
+use ferroui_controls::primitives::{AdornerLayer, TemplatedControl};
+use ferroui_controls::{Application, Border, Control, TopLevel};
+use ferroui_markup::markup::parsers::{SelectorGrammar, SelectorParser, SelectorSyntax};
+pub use logs::{LogCapture, LogEntry, LogGuard};
 pub use schema::{tools, validate};
 use serde_json::{json, Value};
+use std::cell::RefCell;
 use std::collections::{HashMap, HashSet};
 use std::rc::Rc;
 
@@ -35,29 +44,124 @@ pub struct Permissions {
 }
 
 pub type InspectResult = Result<Value, String>;
+pub type NodeId = u64;
+
+/// The tree that children are read from.
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
+pub enum TreeKind {
+    #[default]
+    Visual,
+    Logical,
+    Automation,
+}
+impl TreeKind {
+    fn parse(name: &str) -> Self {
+        match name {
+            "logical" => Self::Logical,
+            "automation" => Self::Automation,
+            _ => Self::Visual,
+        }
+    }
+}
+
+/// A registered or attached property of an object, its effective value and where it comes from.
+#[derive(Clone)]
+pub struct PropertyInfo {
+    pub property: &'static FerroProperty,
+    /// `Owner.Name` for an attached property.
+    pub name: String,
+    pub value: BoxedValue,
+    /// `None` for a direct property, which has no priority.
+    pub priority: Option<BindingPriority>,
+    pub read_only: bool,
+    pub has_binding: bool,
+    pub overridden_current_value: bool,
+}
+impl PropertyInfo {
+    pub fn priority_name(&self) -> String {
+        self.priority
+            .map_or_else(|| "Direct".into(), |priority| format!("{priority:?}"))
+    }
+    pub fn is_local(&self) -> bool {
+        self.priority == Some(BindingPriority::LocalValue)
+    }
+}
+
+/// A frame of the value store that applies to an object: a style, a control theme, a template or
+/// the local values.
+#[derive(Clone)]
+pub struct StyleFrame {
+    pub kind: String,
+    /// The selector of a style, or `Theme <type>` of a control theme.
+    pub selector: Option<String>,
+    pub active: bool,
+    pub priority: String,
+    pub setters: Vec<(String, Option<BoxedValue>)>,
+}
+
+/// The layout boxes of a visual, in the coordinates of another one.
+#[derive(Clone, Debug)]
+pub struct BoxModel {
+    pub content: Rect,
+    pub padding: Rect,
+    pub border: Rect,
+    pub margin: Rect,
+}
+
+pub struct Png {
+    pub data: Vec<u8>,
+    pub width: f64,
+    pub height: f64,
+}
+
+/// A highlight adorner of [`Inspector::highlight`]; dropping it removes the adorner.
+pub struct Highlight(Rc<dyn IDisposable>);
+impl Drop for Highlight {
+    fn drop(&mut self) {
+        self.0.dispose();
+    }
+}
+
+ferroui_base::ferro_thread_local! {
+    static SHARED: RefCell<Option<Rc<RefCell<Inspector>>>> = const { RefCell::new(None) };
+}
 
 pub struct Inspector {
-    next_id: u64,
-    nodes: HashMap<u64, WeakRef<FerroObject>>,
-    addresses: HashMap<usize, u64>,
+    next_id: NodeId,
+    nodes: HashMap<NodeId, WeakRef<FerroObject>>,
+    addresses: HashMap<usize, NodeId>,
     roots: Vec<WeakRef<TopLevel>>,
-    frames: HashMap<u64, frames::FrameStats>,
-    pub permissions: Permissions,
-    pub logs: LogCapture,
+    frames: HashMap<NodeId, frames::FrameStats>,
+    overlays: Vec<WeakRef<Visual>>,
+}
+
+impl Default for Inspector {
+    fn default() -> Self {
+        Self::new()
+    }
 }
 
 impl Inspector {
-    pub fn new(permissions: Permissions) -> Self {
+    pub fn new() -> Self {
         Dispatcher::ui_thread().verify_access();
         Self {
-            next_id: 1,
+            next_id: 2,
             nodes: HashMap::new(),
             addresses: HashMap::new(),
             roots: Vec::new(),
             frames: HashMap::new(),
-            permissions,
-            logs: LogCapture::default(),
+            overlays: Vec::new(),
         }
+    }
+
+    /// The inspector of this UI thread, shared by every server that runs on it.
+    pub fn shared() -> Rc<RefCell<Inspector>> {
+        SHARED.with(|shared| {
+            shared
+                .borrow_mut()
+                .get_or_insert_with(|| Rc::new(RefCell::new(Inspector::new())))
+                .clone()
+        })
     }
 
     /// Add a top level for a custom lifetime or tests. Desktop windows are discovered automatically.
@@ -67,7 +171,7 @@ impl Inspector {
         }
     }
 
-    pub fn node_id(&mut self, object: &FerroObject) -> u64 {
+    pub fn node_id(&mut self, object: &FerroObject) -> NodeId {
         let address = object as *const FerroObject as usize;
         if let Some(id) = self.addresses.get(&address) {
             if self
@@ -86,16 +190,22 @@ impl Inspector {
         id
     }
 
-    pub fn resolve(&self, id: u64) -> Result<Ref<FerroObject>, String> {
+    pub fn resolve(&self, id: NodeId) -> Result<Ref<FerroObject>, String> {
         self.nodes
             .get(&id)
             .and_then(WeakRef::upgrade)
             .ok_or_else(|| format!("Unknown or expired node_id: {id}"))
     }
 
-    fn windows(&mut self) -> Vec<Ref<TopLevel>> {
+    fn prune(&mut self) {
         self.nodes.retain(|_, weak| weak.upgrade().is_some());
         self.addresses.retain(|_, id| self.nodes.contains_key(id));
+        self.overlays.retain(|weak| weak.upgrade().is_some());
+    }
+
+    /// The open top levels: the registered roots and the windows of the desktop lifetime.
+    pub fn windows(&mut self) -> Vec<Ref<TopLevel>> {
+        self.prune();
         self.roots.retain(|weak| weak.upgrade().is_some());
         let mut roots: Vec<_> = self
             .roots
@@ -136,7 +246,8 @@ impl Inspector {
         self.resolve(args["node_id"].as_u64().ok_or("node_id required")?)
     }
 
-    fn visual_object(object: &Ref<FerroObject>) -> Ref<FerroObject> {
+    /// The control that owns an automation peer, or the object itself.
+    pub fn visual_object(object: &Ref<FerroObject>) -> Ref<FerroObject> {
         object
             .cast::<ControlAutomationPeer>()
             .and_then(|p| p.try_owner())
@@ -144,12 +255,21 @@ impl Inspector {
             .unwrap_or_else(|| object.clone())
     }
 
-    fn children(object: &Ref<FerroObject>, tree: &str) -> Vec<Ref<FerroObject>> {
-        match tree {
-            "automation" => Self::peer(object)
+    /// Whether the object is a highlight adorner of this inspector, which trees leave out.
+    pub fn is_overlay(&self, object: &FerroObject) -> bool {
+        self.overlays
+            .iter()
+            .filter_map(WeakRef::upgrade)
+            .any(|overlay| overlay.upcast::<FerroObject>() == object.to_ref())
+    }
+
+    /// The children of the object in the tree, without highlight adorners.
+    pub fn children(&self, object: &Ref<FerroObject>, tree: TreeKind) -> Vec<Ref<FerroObject>> {
+        let children: Vec<Ref<FerroObject>> = match tree {
+            TreeKind::Automation => Self::peer(object)
                 .map(|p| p.get_children().iter().cloned().map(Ref::upcast).collect())
                 .unwrap_or_default(),
-            "logical" => object
+            TreeKind::Logical => object
                 .cast::<StyledElement>()
                 .map(|o| {
                     o.logical_children()
@@ -159,7 +279,7 @@ impl Inspector {
                         .collect()
                 })
                 .unwrap_or_default(),
-            _ => object
+            TreeKind::Visual => object
                 .cast::<Visual>()
                 .map(|o| {
                     o.visual_children()
@@ -169,10 +289,17 @@ impl Inspector {
                         .collect()
                 })
                 .unwrap_or_default(),
+        };
+        if self.overlays.is_empty() {
+            return children;
         }
+        children
+            .into_iter()
+            .filter(|child| !self.is_overlay(child))
+            .collect()
     }
 
-    fn peer(object: &Ref<FerroObject>) -> Result<Ref<AutomationPeer>, String> {
+    pub fn peer(object: &Ref<FerroObject>) -> Result<Ref<AutomationPeer>, String> {
         object
             .cast::<AutomationPeer>()
             .or_else(|| {
@@ -181,6 +308,239 @@ impl Inspector {
                     .map(|c| ControlAutomationPeer::create_peer_for_element(&c))
             })
             .ok_or("Node has no automation peer".into())
+    }
+
+    fn registered(object: &FerroObject) -> Vec<&'static FerroProperty> {
+        let registry = FerroPropertyRegistry::instance();
+        let mut result = registry.get_registered_for(object).to_vec();
+        result.extend(
+            registry
+                .get_registered_attached(object.get_type())
+                .iter()
+                .copied(),
+        );
+        result.sort_by_key(|p| property_name(p));
+        result.dedup_by_key(|p| *p as *const FerroProperty);
+        result
+    }
+
+    /// A registered or attached (`Owner.Name`) property of the object.
+    pub fn property(object: &FerroObject, name: &str) -> Result<&'static FerroProperty, String> {
+        Self::registered(object)
+            .into_iter()
+            .find(|p| property_name(p) == name)
+            .ok_or_else(|| format!("Unknown property: {name}"))
+    }
+
+    /// The registered and attached properties of the object, sorted by name.
+    pub fn properties(object: &FerroObject) -> Vec<PropertyInfo> {
+        Self::registered(object)
+            .into_iter()
+            .map(|p| {
+                let diagnostic = object.get_diagnostic(p);
+                PropertyInfo {
+                    property: p,
+                    name: property_name(p),
+                    value: diagnostic.value().clone(),
+                    priority: (!p.is_direct()).then(|| diagnostic.priority()),
+                    read_only: p.is_read_only(),
+                    has_binding: BindingOperations::get_binding_expression_base(object, p)
+                        .is_some(),
+                    overridden_current_value: diagnostic.is_overridden_current_value(),
+                }
+            })
+            .collect()
+    }
+
+    /// Sets a local value: `None` sets null, text is converted with the framework's converters.
+    /// Read-only properties, values that do not convert and values that fail validation are
+    /// refused before the object is changed.
+    pub fn set_property(
+        object: &FerroObject,
+        name: &str,
+        value: Option<BoxedValue>,
+    ) -> Result<&'static FerroProperty, String> {
+        let property = Self::property(object, name)?;
+        if property.is_read_only() {
+            return Err(format!("{name} is read-only"));
+        }
+        let converted = ValueTypes::try_convert(
+            value.as_ref(),
+            ValueType::new(property.property_type(), property.property_type_name()),
+        )
+        .flatten()
+        .ok_or_else(|| format!("Cannot convert the value to the type of {name}"))?;
+        if !property.is_valid_value(converted.as_any()) {
+            return Err(format!("Validation of {name} rejected the value"));
+        }
+        object.set_value_untyped(property, converted.as_any(), BindingPriority::LocalValue);
+        Ok(property)
+    }
+
+    pub fn clear_property(
+        object: &FerroObject,
+        name: &str,
+    ) -> Result<&'static FerroProperty, String> {
+        let property = Self::property(object, name)?;
+        if property.is_read_only() {
+            return Err(format!("{name} is read-only"));
+        }
+        object.clear_value_untyped(property);
+        Ok(property)
+    }
+
+    /// The frames of the value store that apply to the object, active or not.
+    pub fn styles(object: &FerroObject) -> Vec<StyleFrame> {
+        object
+            .get_value_store_diagnostic()
+            .applied_frames()
+            .iter()
+            .map(|frame| {
+                let source = frame.source().and_then(|s| ValueTypes::as_object(&*s));
+                let selector = source
+                    .as_ref()
+                    .and_then(|s| s.cast::<Style>())
+                    .and_then(|s| s.selector())
+                    .map(|s| s.to_string_with_owner(None))
+                    .or_else(|| {
+                        source.and_then(|s| s.cast::<ControlTheme>()).map(|t| {
+                            format!(
+                                "Theme {}",
+                                t.target_type().map(TypeInfo::name).unwrap_or_default()
+                            )
+                        })
+                    });
+                StyleFrame {
+                    kind: format!("{:?}", frame.type_()),
+                    selector,
+                    active: frame.is_active(),
+                    priority: format!("{:?}", frame.priority()),
+                    setters: frame
+                        .values()
+                        .into_iter()
+                        .map(|v| (property_name(v.property), v.value))
+                        .collect(),
+                }
+            })
+            .collect()
+    }
+
+    /// Parses a selector of the framework's syntax. Type names resolve among the known types and
+    /// the types of the live nodes. Forms that the selector constructors or the matcher do not
+    /// accept outside a style (nesting, a dangling combinator) are refused here.
+    pub fn parse_selector(&self, text: &str) -> Result<Option<Selector>, String> {
+        if text.trim().is_empty() || text.len() > 4096 {
+            return Err("Selector must contain 1..4096 bytes".into());
+        }
+        let mut nesting = 0usize;
+        for character in text.chars() {
+            if character == '(' {
+                nesting += 1;
+            }
+            if nesting > 32 {
+                return Err("Selector nesting is too deep".into());
+            }
+            if character == ')' {
+                nesting = nesting.saturating_sub(1);
+            }
+        }
+        validate_selector(&SelectorGrammar::parse(text).map_err(|e| e.to_string())?)?;
+        let mut live: HashMap<String, &'static TypeInfo> = HashMap::new();
+        for object in self.nodes.values().filter_map(WeakRef::upgrade) {
+            let mut type_ = Some(object.get_type());
+            while let Some(t) = type_ {
+                live.insert(t.name().into(), t);
+                type_ = t.base_type();
+            }
+        }
+        SelectorParser::new(move |namespace, name| {
+            if namespace.is_empty() {
+                TypeInfo::find_by_name(name).or_else(|| live.get(name).copied())
+            } else {
+                TypeInfo::find(namespace, name)
+            }
+        })
+        .parse(text)
+        .map_err(|e| e.to_string())
+    }
+
+    /// The content, padding, border and margin boxes of the visual, in the coordinates of
+    /// `relative_to`.
+    pub fn box_model(visual: &Ref<Visual>, relative_to: &Ref<Visual>) -> Result<BoxModel, String> {
+        let transform = visual
+            .transform_to_visual(relative_to)
+            .ok_or("Node has no transform to the root")?;
+        let border = Rect::from_size(visual.bounds().size());
+        let margin = visual.get_value(Layoutable::margin_property());
+        let padding = visual.get_value(TemplatedControl::padding_property());
+        let border_thickness = visual
+            .cast::<Border>()
+            .map(|b| b.border_thickness())
+            .or_else(|| {
+                visual
+                    .cast::<TemplatedControl>()
+                    .map(|c| c.border_thickness())
+            })
+            .unwrap_or_default();
+        let padding_rect = border.deflate_thickness(border_thickness);
+        Ok(BoxModel {
+            content: padding_rect
+                .deflate_thickness(padding)
+                .transform_to_aabb(transform),
+            padding: padding_rect.transform_to_aabb(transform),
+            border: border.transform_to_aabb(transform),
+            margin: border
+                .inflate_thickness(margin)
+                .transform_to_aabb(transform),
+        })
+    }
+
+    /// A PNG of the visual at the scale (0.1 to 4), at most 16 megapixels.
+    pub fn screenshot(visual: &Ref<Visual>, scale: f64) -> Result<Png, String> {
+        let size = visual.bounds().size();
+        let width = (size.width * scale).ceil();
+        let height = (size.height * scale).ceil();
+        if !width.is_finite()
+            || !height.is_finite()
+            || width < 1.0
+            || height < 1.0
+            || width * height > 16_000_000.0
+        {
+            return Err("Screenshot size is empty or exceeds 16 megapixels".into());
+        }
+        let bitmap = RenderTargetBitmap::with_dpi(
+            PixelSize::new(width as i32, height as i32),
+            Vector::new(96.0 * scale, 96.0 * scale),
+        );
+        bitmap.render(visual);
+        let mut data = Vec::new();
+        let result = bitmap.save(&mut data, &PngBitmapEncoderOptions::DEFAULT.into());
+        bitmap.dispose();
+        result.map_err(|e| e.to_string())?;
+        Ok(Png {
+            data,
+            width,
+            height,
+        })
+    }
+
+    /// Outlines the visual on its adorner layer until the returned guard is dropped. The adorner
+    /// is left out of the trees of every client of this inspector.
+    pub fn highlight(&mut self, visual: &Ref<Visual>) -> Result<Highlight, String> {
+        let layer = AdornerLayer::get_adorner_layer(visual).ok_or("Node has no adorner layer")?;
+        let border = Border::new();
+        border.set_is_hit_test_visible(false);
+        border.set_border_thickness(Thickness::uniform(2.0));
+        border.set_border_brush(Some(
+            SolidColorBrush::with_color(Colors::DODGER_BLUE).into(),
+        ));
+        AdornerLayer::set_adorned_element(&border, visual.clone());
+        self.overlays
+            .push(border.clone().upcast::<Visual>().downgrade());
+        layer.children().add(border.clone());
+        Ok(Highlight(Disposable::create(move || {
+            layer.children().remove(&border);
+        })))
     }
 
     fn describe(&mut self, object: &Ref<FerroObject>, properties: Option<&Value>) -> Value {
@@ -212,7 +572,7 @@ impl Inspector {
             result["enabled"] = json!(peer.is_enabled());
         }
         if let Some(properties) = properties {
-            result["properties"] = Self::properties(&visual_object, Some(properties));
+            result["properties"] = properties_json(&visual_object, Some(properties));
         }
         result
     }
@@ -220,12 +580,12 @@ impl Inspector {
     fn tree(
         &mut self,
         object: Ref<FerroObject>,
-        tree: &str,
+        tree: TreeKind,
         depth: u64,
         properties: Option<&Value>,
-        visited: &mut HashSet<u64>,
+        visited: &mut HashSet<NodeId>,
     ) -> Value {
-        let object = if tree == "automation" {
+        let object = if tree == TreeKind::Automation {
             Self::peer(&object).map(Ref::upcast).unwrap_or(object)
         } else {
             object
@@ -235,7 +595,7 @@ impl Inspector {
             return json!({"node_id":id,"truncated":true});
         }
         let mut result = self.describe(&object, properties);
-        let children = Self::children(&object, tree);
+        let children = self.children(&object, tree);
         result["child_count"] = json!(children.len());
         if depth > 0 {
             let mut snapshots = Vec::new();
@@ -253,49 +613,13 @@ impl Inspector {
         result
     }
 
-    fn registered(object: &FerroObject) -> Vec<&'static FerroProperty> {
-        let registry = FerroPropertyRegistry::instance();
-        let mut result = registry.get_registered_for(object).to_vec();
-        result.extend(
-            registry
-                .get_registered_attached(object.get_type())
-                .iter()
-                .copied(),
-        );
-        result.sort_by_key(|p| property_name(p));
-        result.dedup_by_key(|p| *p as *const FerroProperty);
-        result
-    }
-
-    fn property(object: &FerroObject, name: &str) -> Result<&'static FerroProperty, String> {
-        Self::registered(object)
-            .into_iter()
-            .find(|p| property_name(p) == name)
-            .ok_or_else(|| format!("Unknown property: {name}"))
-    }
-
-    fn properties(object: &FerroObject, filter: Option<&Value>) -> Value {
-        Value::Array(Self::registered(object).into_iter().filter(|p| filter.and_then(Value::as_array).is_none_or(|names| names.iter().any(|n| n == &property_name(p)))).map(|p| {
-            let diag = object.get_diagnostic(p);
-            json!({"name":property_name(p),"type":p.property_type_name(),"value":boxed(Some(diag.value().clone())),"read_only":p.is_read_only(),"priority":if p.is_direct() {"Direct".into()} else {format!("{:?}",diag.priority())},"binding":BindingOperations::get_binding_expression_base(object,p).is_some(),"overridden_current_value":diag.is_overridden_current_value()})
-        }).collect())
-    }
-
-    fn find(&mut self, args: &Value) -> Result<Vec<Ref<FerroObject>>, String> {
+    /// The matches of the filters of `find_elements`, and whether the search stopped at the node
+    /// limit before it covered the tree.
+    fn find(&mut self, args: &Value) -> Result<(Vec<Ref<FerroObject>>, bool), String> {
         let selector = args["selector"]
             .as_str()
-            .map(|s| {
-                SelectorParser::new(|ns, name| {
-                    if ns.is_empty() {
-                        TypeInfo::find_by_name(name)
-                    } else {
-                        TypeInfo::find(ns, name)
-                    }
-                })
-                .parse(s)
-            })
-            .transpose()
-            .map_err(|e| e.to_string())?
+            .map(|s| self.parse_selector(s))
+            .transpose()?
             .flatten();
         let mut stack = self.roots(args)?;
         stack.reverse();
@@ -307,10 +631,10 @@ impl Inspector {
                 continue;
             }
             if visited.len() > 10000 {
-                return Err("Search exceeded 10000 nodes; scope it with node_id".into());
+                return Ok((found, true));
             }
-            let mut children = Self::children(&object, "visual");
-            children.extend(Self::children(&object, "logical"));
+            let mut children = self.children(&object, TreeKind::Visual);
+            children.extend(self.children(&object, TreeKind::Logical));
             stack.extend(children.into_iter().rev());
             let target = Self::visual_object(&object);
             if args["type"]
@@ -356,30 +680,45 @@ impl Inspector {
                 break;
             }
         }
-        Ok(found)
+        Ok((found, false))
     }
 
-    /// Execute a single UI-thread operation. `wait_for` is a nonblocking condition probe;
-    /// the transport polls it until `matched` or its deadline, leaving the UI free to render.
-    pub fn execute(&mut self, name: &str, args: &Value) -> InspectResult {
+    /// Execute a single UI-thread operation of the MCP tools. `wait_for` is a nonblocking
+    /// condition probe; the transport polls it until `matched` or its deadline, leaving the UI
+    /// free to render. Input tools are run by [`execute`] instead, which does not hold the shared
+    /// inspector while the application handles the input.
+    pub fn execute(&mut self, name: &str, args: &Value, permissions: Permissions) -> InspectResult {
         Dispatcher::ui_thread().verify_access();
         validate(name, args)?;
-        std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
-            self.execute_inner(name, args)
-        }))
-        .unwrap_or_else(|error| {
-            let message = error
-                .downcast_ref::<String>()
-                .map(String::as_str)
-                .or_else(|| error.downcast_ref::<&str>().copied())
-                .unwrap_or("UI operation panicked");
-            Err(message.to_owned())
+        catch(|| {
+            if is_input(name) {
+                let object = self.prepare_input(args, permissions)?;
+                input::execute(name, &object, args, permissions)?;
+                return Ok(json!({"ok":true}));
+            }
+            self.execute_inner(name, args, permissions)
         })
     }
 
-    fn execute_inner(&mut self, name: &str, args: &Value) -> InspectResult {
-        self.nodes.retain(|_, weak| weak.upgrade().is_some());
-        self.addresses.retain(|_, id| self.nodes.contains_key(id));
+    fn prepare_input(
+        &mut self,
+        args: &Value,
+        permissions: Permissions,
+    ) -> Result<Ref<FerroObject>, String> {
+        if !permissions.allow_input {
+            return Err("Input is disabled".into());
+        }
+        self.prune();
+        self.object(args)
+    }
+
+    fn execute_inner(
+        &mut self,
+        name: &str,
+        args: &Value,
+        permissions: Permissions,
+    ) -> InspectResult {
+        self.prune();
         match name {
             "list_windows" => {
                 let roots = self.windows();
@@ -393,13 +732,14 @@ impl Inspector {
             "get_tree" => {
                 let roots = self.roots(args)?;
                 let mut visited = HashSet::new();
+                let tree = TreeKind::parse(args["tree"].as_str().unwrap_or("visual"));
                 Ok(Value::Array(
                     roots
                         .into_iter()
                         .map(|root| {
                             self.tree(
                                 root,
-                                args["tree"].as_str().unwrap_or("visual"),
+                                tree,
                                 args["depth"].as_u64().unwrap_or(8),
                                 args.get("properties"),
                                 &mut visited,
@@ -409,26 +749,27 @@ impl Inspector {
                 ))
             }
             "find_elements" => {
-                let found = self.find(args)?;
+                // Past the node limit the matches found so far are the result; none is an error.
+                let (found, truncated) = self.find(args)?;
+                if truncated && found.is_empty() {
+                    return Err("Search exceeded 10000 nodes; scope it with node_id".into());
+                }
                 Ok(Value::Array(
                     found.iter().map(|o| self.describe(o, None)).collect(),
                 ))
             }
-            "get_properties" => Ok(Self::properties(
+            "get_properties" => Ok(properties_json(
                 &Self::visual_object(&self.object(args)?),
                 args.get("properties"),
             )),
             "set_property" => {
-                if !self.permissions.allow_property_writes {
+                if !permissions.allow_property_writes {
                     return Err("Property writes are disabled".into());
                 }
                 let object = Self::visual_object(&self.object(args)?);
-                let property = Self::property(&object, args["property"].as_str().unwrap())?;
-                if property.is_read_only() {
-                    return Err("Property is read-only".into());
-                }
-                if args["clear"].as_bool().unwrap_or(false) {
-                    object.clear_value_untyped(property);
+                let name = args["property"].as_str().unwrap();
+                let property = if args["clear"].as_bool().unwrap_or(false) {
+                    Self::clear_property(&object, name)?
                 } else {
                     let value = args
                         .get("value")
@@ -444,33 +785,23 @@ impl Inspector {
                             )
                         }
                     };
-                    let converted = ValueTypes::try_convert(
-                        source.as_ref(),
-                        ValueType::new(property.property_type(), property.property_type_name()),
-                    )
-                    .flatten()
-                    .ok_or("Cannot convert value to property type")?;
-                    if !property.is_valid_value(converted.as_any()) {
-                        return Err("Property validation rejected value".into());
-                    }
-                    object.set_value_untyped(
-                        property,
-                        converted.as_any(),
-                        BindingPriority::LocalValue,
-                    );
-                }
-                Ok(Self::properties(
+                    Self::set_property(&object, name, source)?
+                };
+                Ok(properties_json(
                     &object,
                     Some(&json!([property_name(property)])),
                 ))
             }
             "get_styles" => {
                 let object = Self::visual_object(&self.object(args)?);
-                Ok(Value::Array(object.get_value_store_diagnostic().applied_frames().iter().map(|frame| {
-                    let source = frame.source();
-                    let selector = source.as_ref().and_then(|s|s.downcast_ref::<Ref<StyleBase>>()).and_then(|s|s.cast::<ferroui_base::styling::Style>()).and_then(|s|s.selector()).map(|s|s.to_string_with_owner(None));
-                    json!({"kind":format!("{:?}",frame.type_()),"selector":selector,"active":frame.is_active(),"priority":format!("{:?}",frame.priority()),"setters":frame.values().into_iter().map(|v|json!({"property":property_name(v.property),"value":boxed(v.value)})).collect::<Vec<_>>()})
-                }).collect()))
+                Ok(Value::Array(
+                    Self::styles(&object)
+                        .into_iter()
+                        .map(|frame| {
+                            json!({"kind":frame.kind,"selector":frame.selector,"active":frame.active,"priority":frame.priority,"setters":frame.setters.into_iter().map(|(property,value)|json!({"property":property,"value":boxed(value)})).collect::<Vec<_>>()})
+                        })
+                        .collect(),
+                ))
             }
             "get_resources" => {
                 let object = Self::visual_object(&self.object(args)?)
@@ -482,17 +813,13 @@ impl Inspector {
                         .map(|k| ResourceKey::from(k.as_str().unwrap()))
                         .collect()
                 } else {
-                    object.resources().keys()
+                    // Listing the local keys leaves an element without resources as it is.
+                    object
+                        .resources_if_created()
+                        .map(|resources| resources.keys())
+                        .unwrap_or_default()
                 };
                 Ok(Value::Array(keys.into_iter().map(|key| { let value = host.try_find_resource(&key,object.actual_theme_variant().as_ref()); json!({"key":key.as_str().map(str::to_owned).unwrap_or_else(||format!("{key:?}")),"found":value.is_some(),"value":boxed(value.flatten())}) }).collect()))
-            }
-            "click" | "type_text" | "press_key" | "scroll" | "invoke_pattern" => {
-                if !self.permissions.allow_input {
-                    return Err("Input is disabled".into());
-                }
-                let object = self.object(args)?;
-                input::execute(name, &object, args, self.permissions)?;
-                Ok(json!({"ok":true}))
             }
             "screenshot" => {
                 let object = self
@@ -503,33 +830,16 @@ impl Inspector {
                 let visual = Self::visual_object(&object)
                     .cast::<Visual>()
                     .ok_or("Node is not visual")?;
-                let scale = args["scale"].as_f64().unwrap_or(1.0);
-                let size = visual.bounds().size();
-                let width = (size.width * scale).ceil();
-                let height = (size.height * scale).ceil();
-                if !width.is_finite()
-                    || !height.is_finite()
-                    || width < 1.0
-                    || height < 1.0
-                    || width * height > 16_000_000.0
-                {
-                    return Err("Screenshot size is empty or exceeds 16 megapixels".into());
-                }
-                let bitmap = RenderTargetBitmap::with_dpi(
-                    PixelSize::new(width as i32, height as i32),
-                    Vector::new(96.0 * scale, 96.0 * scale),
-                );
-                bitmap.render(&visual);
-                let mut png = Vec::new();
-                let result = bitmap.save(&mut png, &PngBitmapEncoderOptions::DEFAULT.into());
-                bitmap.dispose();
-                result.map_err(|e| e.to_string())?;
+                let png = Self::screenshot(&visual, args["scale"].as_f64().unwrap_or(1.0))?;
                 Ok(
-                    json!({"mimeType":"image/png","data":base64::engine::general_purpose::STANDARD.encode(png),"width":width,"height":height}),
+                    json!({"mimeType":"image/png","data":base64::engine::general_purpose::STANDARD.encode(png.data),"width":png.width,"height":png.height}),
                 )
             }
             "wait_for" => {
-                let found = self.find(args)?;
+                let (found, truncated) = self.find(args)?;
+                if truncated && found.is_empty() {
+                    return Err("Search exceeded 10000 nodes; scope it with node_id".into());
+                }
                 let condition = args["condition"].as_str().unwrap_or("exists");
                 if condition == "property_equals"
                     && (args["property"].as_str().is_none() || args.get("value").is_none())
@@ -555,7 +865,7 @@ impl Inspector {
                     json!({"matched":matched,"node_ids":found.iter().map(|o|self.node_id(o)).collect::<Vec<_>>()}),
                 )
             }
-            "get_logs" => Ok(self.logs.snapshot(args["after"].as_u64().unwrap_or(0))),
+            "get_logs" => Ok(LogCapture::snapshot(args["after"].as_u64().unwrap_or(0))),
             "get_frame_stats" => {
                 let windows = self.windows();
                 Ok(Value::Array(
@@ -563,14 +873,12 @@ impl Inspector {
                         .iter()
                         .map(|w| {
                             let t = w.renderer_diagnostics().last_layout_pass_timing();
-                            {
-                                let id = self.node_id(w);
-                                let mut stats = self.frames[&id].snapshot();
-                                stats["node_id"] = json!(id);
-                                stats["layout_pass_count"] = json!(t.pass_counter);
-                                stats["layout_ms"] = json!(t.elapsed.as_secs_f64() * 1000.0);
-                                stats
-                            }
+                            let id = self.node_id(w);
+                            let mut stats = self.frames[&id].snapshot();
+                            stats["node_id"] = json!(id);
+                            stats["layout_pass_count"] = json!(t.pass_counter);
+                            stats["layout_ms"] = json!(t.elapsed.as_secs_f64() * 1000.0);
+                            stats
                         })
                         .collect(),
                 ))
@@ -580,13 +888,83 @@ impl Inspector {
     }
 }
 
-fn property_name(p: &FerroProperty) -> String {
+/// Executes an MCP tool on the shared inspector of this thread ([`Inspector::shared`]). The
+/// inspector is held only while it reads or changes the objects: an input tool resolves its node,
+/// releases the inspector and then delivers the input, so that the handlers of the application,
+/// which may run a nested dispatcher frame, can reach the inspector again (through another
+/// server, for example).
+pub fn execute(name: &str, args: &Value, permissions: Permissions) -> InspectResult {
+    Dispatcher::ui_thread().verify_access();
+    validate(name, args)?;
+    let shared = Inspector::shared();
+    if is_input(name) {
+        let object = {
+            let mut inspector = shared
+                .try_borrow_mut()
+                .map_err(|_| "The inspector is busy".to_owned())?;
+            inspector.prepare_input(args, permissions)?
+        };
+        return catch(|| {
+            input::execute(name, &object, args, permissions)?;
+            Ok(json!({"ok":true}))
+        });
+    }
+    let mut inspector = shared
+        .try_borrow_mut()
+        .map_err(|_| "The inspector is busy".to_owned())?;
+    catch(|| inspector.execute_inner(name, args, permissions))
+}
+
+fn is_input(name: &str) -> bool {
+    matches!(
+        name,
+        "click" | "type_text" | "press_key" | "scroll" | "invoke_pattern"
+    )
+}
+
+fn catch(f: impl FnOnce() -> InspectResult) -> InspectResult {
+    std::panic::catch_unwind(std::panic::AssertUnwindSafe(f)).unwrap_or_else(|error| {
+        let message = error
+            .downcast_ref::<String>()
+            .map(String::as_str)
+            .or_else(|| error.downcast_ref::<&str>().copied())
+            .unwrap_or("UI operation panicked");
+        Err(message.to_owned())
+    })
+}
+
+fn properties_json(object: &FerroObject, filter: Option<&Value>) -> Value {
+    let names = filter.and_then(Value::as_array);
+    Value::Array(
+        Inspector::properties(object)
+            .into_iter()
+            .filter(|p| names.is_none_or(|names| names.iter().any(|n| n == &p.name)))
+            .map(|p| {
+                json!({"name":p.name,"type":p.property.property_type_name(),"value":boxed(Some(p.value.clone())),"read_only":p.read_only,"priority":p.priority_name(),"binding":p.has_binding,"overridden_current_value":p.overridden_current_value})
+            })
+            .collect(),
+    )
+}
+
+/// The name of the property as the tools and selectors use it: `Owner.Name` when attached.
+pub fn property_name(p: &FerroProperty) -> String {
     if p.is_attached() {
         format!("{}.{}", p.owner_type().name(), p.name())
     } else {
         p.name().to_owned()
     }
 }
+
+/// The text of a value as the framework displays it.
+pub fn display_value(value: Option<&BoxedValue>) -> String {
+    value
+        .cloned()
+        .and_then(ValueTypes::normalize)
+        .as_ref()
+        .map(|v| ValueTypes::to_display_string(Some(v)))
+        .unwrap_or_default()
+}
+
 fn rect(r: Rect) -> Value {
     json!({"x":r.x,"y":r.y,"width":r.width,"height":r.height})
 }
@@ -613,6 +991,37 @@ fn boxed(value: Option<BoxedValue>) -> Value {
     ValueTypes::try_to_string(&*value)
         .map(Value::String)
         .unwrap_or_else(|| json!({"opaque":true}))
+}
+
+// Style-only nesting and incomplete combinators panic in the framework's selector constructors
+// or matcher. Validate the public grammar before constructing a selector from a remote request.
+fn validate_selector(syntax: &[SelectorSyntax]) -> Result<(), String> {
+    let mut term = false;
+    for item in syntax {
+        match item {
+            SelectorSyntax::Nesting => {
+                return Err("Style nesting selectors have no parent style in a query".into())
+            }
+            SelectorSyntax::Child
+            | SelectorSyntax::Descendant
+            | SelectorSyntax::Template
+            | SelectorSyntax::Comma => {
+                if !term {
+                    return Err("Selector combinator requires a preceding selector".into());
+                }
+                term = false;
+            }
+            SelectorSyntax::Not { argument } => {
+                validate_selector(argument)?;
+                term = true;
+            }
+            _ => term = true,
+        }
+    }
+    if !term {
+        return Err("Selector requires a final selector term".into());
+    }
+    Ok(())
 }
 
 #[cfg(test)]

@@ -31,7 +31,20 @@ fn run(f: impl FnOnce() + Send + 'static) {
         .unwrap();
     session.dispose();
 }
-fn fixture() -> (Ref<Window>, Ref<Button>, Ref<TextBox>, Inspector) {
+/// An inspector with the permissions of a server, which the tests change.
+struct Tester {
+    inspector: Inspector,
+    permissions: Permissions,
+}
+impl Tester {
+    fn node_id(&mut self, object: &FerroObject) -> u64 {
+        self.inspector.node_id(object)
+    }
+    fn execute(&mut self, name: &str, args: &Value) -> InspectResult {
+        self.inspector.execute(name, args, self.permissions)
+    }
+}
+fn fixture() -> (Ref<Window>, Ref<Button>, Ref<TextBox>, Tester) {
     let window = Window::new();
     window.set_width(320.0);
     window.set_height(200.0);
@@ -46,17 +59,21 @@ fn fixture() -> (Ref<Window>, Ref<Button>, Ref<TextBox>, Inspector) {
     window.set_content(Some(Control::boxed(panel)));
     window.show();
     window.capture_rendered_frame();
-    let mut inspector = Inspector::new(Permissions {
-        allow_input: true,
-        allow_property_writes: true,
-    });
+    let mut inspector = Inspector::new();
     inspector.register_root(&window);
-    (window, button, text, inspector)
+    let tester = Tester {
+        inspector,
+        permissions: Permissions {
+            allow_input: true,
+            allow_property_writes: true,
+        },
+    };
+    (window, button, text, tester)
 }
 #[test]
 fn stable_weak_ids_do_not_keep_controls_alive() {
     run(|| {
-        let mut inspector = Inspector::new(Permissions::default());
+        let mut inspector = Inspector::new();
         let node = Border::new();
         let weak = node.downgrade();
         let id = inspector.node_id(&node);
@@ -281,4 +298,49 @@ fn schemas_reject_invalid_input_before_mutating() {
     assert!(validate("get_tree", &json!({"depth":100})).is_err());
     assert!(validate("screenshot", &json!({"scale":0})).is_err());
     assert!(validate("unknown", &json!({})).is_err());
+}
+#[test]
+fn one_inspector_serves_the_tools_and_the_targets() {
+    run(|| {
+        let (window, button, _, _) = fixture();
+        let shared = Inspector::shared();
+        shared.borrow_mut().register_root(&window);
+        let all = Permissions {
+            allow_input: true,
+            allow_property_writes: true,
+        };
+        let id = shared.borrow_mut().node_id(&button);
+        let mut view = target::Target::new(&window.clone().upcast());
+        assert_eq!(view.query(None, "#Action").unwrap(), vec![id]);
+        let found = execute("find_elements", &json!({"name":"Action"}), all).unwrap();
+        assert_eq!(found[0]["node_id"], id);
+        // A highlight is left out of the trees of both. (The first highlight creates the adorner
+        // layer of the window, which stays: compare with the highlight shown and hidden.)
+        let count = |tree: &Value| -> usize {
+            fn walk(node: &Value) -> usize {
+                1 + node["children"]
+                    .as_array()
+                    .map_or(0, |c| c.iter().map(walk).sum())
+            }
+            tree.as_array().unwrap().iter().map(walk).sum()
+        };
+        view.highlight(id).unwrap();
+        let shown = (
+            view.snapshot().unwrap().len(),
+            count(&execute("get_tree", &json!({"depth":64}), all).unwrap()),
+        );
+        view.hide_highlight();
+        let hidden = (
+            view.snapshot().unwrap().len(),
+            count(&execute("get_tree", &json!({"depth":64}), all).unwrap()),
+        );
+        assert_eq!(shown, hidden);
+        // Listing the resources of an element does not give it a dictionary.
+        assert!(button.resources_if_created().is_none());
+        execute("get_resources", &json!({"node_id":id}), all).unwrap();
+        assert!(button.resources_if_created().is_none());
+        // Malformed selectors are refused before the framework parses them.
+        assert!(execute("find_elements", &json!({"selector":"> Button"}), all).is_err());
+        window.close();
+    });
 }

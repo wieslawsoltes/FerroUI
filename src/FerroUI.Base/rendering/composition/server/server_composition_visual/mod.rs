@@ -9,6 +9,7 @@
 
 mod act;
 mod adorners;
+mod composition_clip;
 mod computed_properties;
 mod dirty_inputs;
 mod readback;
@@ -16,6 +17,7 @@ mod render;
 mod server_composition_visual_cache;
 mod update;
 mod walker;
+mod winui_members;
 
 pub use readback::{ReadbackData, VisualReadback};
 pub use server_composition_visual_cache::ServerCompositionVisualCache;
@@ -86,6 +88,27 @@ pub trait IServerVisualContent: 'static {
 
     /// A render resource the content depends on changed.
     fn dependency_queued_invalidate(&self, _visual: &ServerCompositionVisual) {}
+
+    /// Called by the render walk after the children of the visual were
+    /// rendered, before the opacity mask, effect, clips and transform of the
+    /// visual are popped: what `render_core` pushed for the children is
+    /// popped here (not from upstream; the layer of a layer visual).
+    fn render_after_children(&self, _visual: &ServerCompositionVisual, _context: &mut ServerVisualRenderContext<'_>) {}
+
+    /// What the content adds around the bounds of the subtree, like the
+    /// output padding of an effect (not from upstream; the shadow of a layer
+    /// visual). `None` for nothing.
+    fn sub_tree_bounds_padding(&self, _visual: &ServerCompositionVisual) -> Option<crate::Thickness> {
+        None
+    }
+
+    /// Whether the bounds of the own content depend on other visuals and are
+    /// computed again when the update pass of the target reaches the visual
+    /// (not from upstream; a redirect visual covers the bounds of its source
+    /// as that pass leaves them).
+    fn has_update_pass_content_bounds(&self) -> bool {
+        false
+    }
 
     /// The generated property block of the given type, if the class has
     /// one of its own.
@@ -295,16 +318,21 @@ impl ServerCompositionVisual {
         self.props.base().clip_to_bounds()
     }
 
+    /// The offset of the visual, with its WinUI `RelativeOffsetAdjustment`
+    /// applied (the part of the size of the parent it adds).
     pub fn offset(&self) -> Vector3D {
-        self.props.base().offset()
+        self.effective_offset()
     }
 
     pub fn translation(&self) -> Vector3D {
         self.props.base().translation()
     }
 
+    /// The size of the visual, with its WinUI `RelativeSizeAdjustment`
+    /// applied (the part of the size of the parent it adds): what is
+    /// rendered and clipped.
     pub fn size(&self) -> Vector {
-        self.props.base().size()
+        self.effective_size()
     }
 
     pub fn anchor_point(&self) -> Vector {
@@ -422,6 +450,22 @@ impl ServerCompositionVisualHooks for ServerCompositionVisual {
         }
     }
 
+    fn on_composition_clip_changing(&self) {
+        self.observe_composition_clip(false);
+    }
+
+    fn on_composition_clip_changed(&self) {
+        self.observe_composition_clip(true);
+    }
+
+    fn on_parent_for_transform_changing(&self) {
+        self.on_parent_for_transform_changing_core();
+    }
+
+    fn on_parent_for_transform_changed(&self) {
+        self.on_parent_for_transform_changed_core();
+    }
+
     fn on_cache_mode_changed(&self) {
         let cache_mode = self.cache_mode();
         *self.cache.borrow_mut() =
@@ -486,7 +530,13 @@ impl IExpressionObject for ServerCompositionVisual {
 }
 
 impl IServerRenderResourceObserver for ServerCompositionVisual {
-    fn dependency_queued_invalidate(&self, _sender: &dyn IServerRenderResource) {
+    fn dependency_queued_invalidate(&self, sender: &dyn IServerRenderResource) {
+        // The WinUI clip object is observed by the visual itself; every
+        // other render resource by its content.
+        if self.is_composition_clip(sender) {
+            self.composition_clip_changed();
+            return;
+        }
         self.content.dependency_queued_invalidate(self);
     }
 }
@@ -511,6 +561,8 @@ impl IServerObject for ServerCompositionVisual {
         if let (Some(cache_mode), Some(this)) = (self.cache_mode(), self.rc()) {
             cache_mode.unsubscribe(&this);
         }
+        self.observe_composition_clip(false);
+        self.winui_members_dispose();
         // Deviation (DEVIATIONS.md, Server composition visuals): an adorner
         // is subscribed to the transforms of the visual it adorns; upstream's
         // delegate keeps the adorner with the adorned visual until the
@@ -535,6 +587,7 @@ impl IServerObject for ServerCompositionVisual {
         ServerCompositionVisualProps::id_of_parent_property().set_field(self, None);
         ServerCompositionVisualProps::id_of_adorned_visual_property().set_field(self, None);
         ServerCompositionVisualProps::id_of_cache_mode_property().set_field(self, None);
+        ServerCompositionVisualProps::id_of_composition_clip_property().set_field(self, None);
     }
 
     fn get_props(&self, type_id: TypeId) -> Option<&dyn Any> {

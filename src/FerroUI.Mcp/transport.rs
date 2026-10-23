@@ -35,7 +35,7 @@ fn spawn_request(
         return;
     }
     std::thread::spawn(move || {
-        if let Some(response) = session.handle(&client, message) {
+        if let Some(response) = session.handle_message(&client, message) {
             let mut output = writer.lock().unwrap();
             let _ = writeln!(output, "{response}");
             let _ = output.flush();
@@ -53,7 +53,7 @@ pub fn stdio(client: Client, protocol_output: std::fs::File) -> io::Result<()> {
     std::thread::spawn(move || {
         let mut cursor = 0;
         while !logger_client.stop.load(Ordering::Acquire) {
-            for message in logger_session.logs(&logger_client, &mut cursor) {
+            for message in logger_session.logs(&mut cursor) {
                 let mut out = logger_output.lock().unwrap();
                 let _ = writeln!(out, "{message}");
                 let _ = out.flush();
@@ -77,8 +77,13 @@ pub fn stdio(client: Client, protocol_output: std::fs::File) -> io::Result<()> {
                 "MCP message exceeds 1 MiB",
             ));
         }
+        if bytes.iter().all(u8::is_ascii_whitespace) {
+            continue;
+        }
         match serde_json::from_slice::<Value>(&bytes) {
-            Ok(message) if message.get("id").is_none() => {
+            // Notifications are handled in order on this thread; requests and batches, which may
+            // run tools, on workers.
+            Ok(message) if message.is_object() && message.get("id").is_none() => {
                 if let Some(response) = session.handle(&client, message) {
                     let mut out = output.lock().unwrap();
                     writeln!(out, "{response}")?;
@@ -396,7 +401,7 @@ fn handle_http(mut stream: TcpStream, request: Request, client: &Client, session
             respond(&mut stream, 409, String::new());
             return;
         }
-        let _ = stream_logs(stream, client, &session);
+        let _ = stream_logs(stream, client, &session, sessions, session_id.as_deref());
         session.stream_open.store(false, Ordering::Release);
         return;
     }
@@ -457,7 +462,7 @@ fn handle_http(mut stream: TcpStream, request: Request, client: &Client, session
             &response.to_string(),
         );
     } else if let Some(session) = session {
-        match session.handle(client, message) {
+        match session.handle_message(client, message) {
             Some(response) => respond(&mut stream, 200, response.to_string()),
             None => respond(&mut stream, 202, String::new()),
         }
@@ -466,12 +471,24 @@ fn handle_http(mut stream: TcpStream, request: Request, client: &Client, session
     }
 }
 // Every event is written as its own chunk and flushed, so that small notifications arrive at once.
-fn stream_logs(mut stream: TcpStream, client: &Client, session: &Session) -> io::Result<()> {
+// An open stream is activity of its session, which does not expire while it is open.
+fn stream_logs(
+    mut stream: TcpStream,
+    client: &Client,
+    session: &Session,
+    sessions: &Sessions,
+    id: Option<&str>,
+) -> io::Result<()> {
     stream.write_all(b"HTTP/1.1 200 OK\r\nContent-Type: text/event-stream\r\nCache-Control: no-cache\r\nConnection: close\r\nTransfer-Encoding: chunked\r\n\r\n")?;
     stream.flush()?;
     let mut cursor = 0;
     while !client.stop.load(Ordering::Acquire) && !session.is_closed() {
-        let messages = session.logs(client, &mut cursor);
+        if let Some(id) = id {
+            if let Some((_, used)) = sessions.lock().unwrap().get_mut(id) {
+                *used = Instant::now();
+            }
+        }
+        let messages = session.logs(&mut cursor);
         let text = if messages.is_empty() {
             ": keepalive\n\n".into()
         } else {

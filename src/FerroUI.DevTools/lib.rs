@@ -4,7 +4,6 @@ mod input;
 mod protocol;
 pub use protocol::CdpSession;
 mod browser;
-mod log;
 pub use browser::Browser;
 #[cfg(all(feature = "server", not(target_arch = "wasm32")))]
 mod server;

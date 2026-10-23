@@ -423,3 +423,208 @@ fn mutually_referencing_animations_do_not_keep_their_objects_alive() {
         ExpressionVariant::default()
     );
 }
+
+/// Renders frames for `duration` of the server clock.
+fn run_for(fixture: &Fixture, duration: Duration) {
+    let server = fixture.compositor.server();
+    let started = server.server_now();
+    while server.server_now() < started + duration {
+        fixture.render_loop.tick();
+    }
+}
+
+/// A scalar animation to `value` over `duration`, with a linear easing.
+fn scalar_animation(fixture: &Fixture, value: f32, duration: Duration) -> Rc<ScalarKeyFrameAnimation> {
+    let animation = fixture.compositor.create_scalar_key_frame_animation();
+    animation.insert_key_frame_with_easing(1.0, value, Rc::new(LinearEasing::new()));
+    animation.set_duration(duration);
+    animation
+}
+
+/// Not from upstream: `KeyFrameCount`.
+#[test]
+fn key_frame_count_counts_value_and_expression_key_frames() {
+    let fixture = Fixture::new();
+    let animation = fixture.compositor.create_scalar_key_frame_animation();
+    assert_eq!(animation.key_frame_count(), 0);
+    animation.insert_key_frame(0.0, 1.0);
+    animation.insert_expression_key_frame(0.5, "this.StartingValue * 2", None);
+    animation.insert_key_frame(1.0, 3.0);
+    assert_eq!(animation.key_frame_count(), 3);
+}
+
+/// Not from upstream: the stop behavior of a key frame animation is applied
+/// by `StopAnimation` (upstream stores it and does not apply it).
+fn stop_behavior_check(behavior: AnimationStopBehavior) {
+    let fixture = Fixture::new();
+    let visual = fixture.compositor.create_solid_color_visual();
+    visual.set_opacity(0.1);
+    fixture.run_jobs();
+    let server = fixture.server(&visual);
+    server.activate();
+
+    let animation = fixture.compositor.create_scalar_key_frame_animation();
+    animation.insert_key_frame_with_easing(0.5, 0.4, Rc::new(LinearEasing::new()));
+    animation.insert_key_frame_with_easing(1.0, 0.8, Rc::new(LinearEasing::new()));
+    animation.set_duration(Duration::from_secs(30));
+    animation.set_stop_behavior(behavior);
+    visual.start_animation("Opacity", &*animation);
+    fixture.run_jobs();
+    run_for(&fixture, Duration::from_millis(30));
+    visual.stop_animation("Opacity");
+    fixture.run_jobs();
+    let stopped = server.opacity();
+    match behavior {
+        AnimationStopBehavior::LeaveCurrentValue => assert!(stopped > 0.1 && stopped < 0.4, "{stopped}"),
+        AnimationStopBehavior::SetToInitialValue => assert_eq!(stopped, 0.1),
+        AnimationStopBehavior::SetToFinalValue => assert_eq!(stopped, 0.8),
+    }
+    // The animation is gone: the value stays.
+    run_for(&fixture, Duration::from_millis(30));
+    assert_eq!(server.opacity(), stopped);
+    assert!(!fixture.compositor.server().animations().need_next_tick());
+}
+
+theory!(stop_behavior_check:
+    stop_behavior_leave_current_value(AnimationStopBehavior::LeaveCurrentValue);
+    stop_behavior_set_to_initial_value(AnimationStopBehavior::SetToInitialValue);
+    stop_behavior_set_to_final_value(AnimationStopBehavior::SetToFinalValue));
+
+/// Not from upstream: an animation that is replaced leaves the value where
+/// it was, whatever its stop behavior; the new animation starts there.
+#[test]
+fn replaced_animation_does_not_apply_its_stop_behavior() {
+    let fixture = Fixture::new();
+    let visual = fixture.compositor.create_solid_color_visual();
+    visual.set_opacity(0.1);
+    fixture.run_jobs();
+    let server = fixture.server(&visual);
+    server.activate();
+
+    let first = scalar_animation(&fixture, 0.9, Duration::from_secs(30));
+    first.set_stop_behavior(AnimationStopBehavior::SetToFinalValue);
+    visual.start_animation("Opacity", &*first);
+    fixture.run_jobs();
+    run_for(&fixture, Duration::from_millis(30));
+
+    let second = scalar_animation(&fixture, 0.5, Duration::from_secs(30));
+    visual.start_animation("Opacity", &*second);
+    fixture.run_jobs();
+    let value = server.opacity();
+    assert!(value > 0.1 && value < 0.5, "{value}");
+}
+
+/// Not from upstream: a sub-channel target animates one component and
+/// leaves the others alone.
+#[test]
+fn subchannel_animation_animates_one_component() {
+    let fixture = Fixture::new();
+    let visual = fixture.compositor.create_solid_color_visual();
+    visual.set_offset(Vector3D::new(1.0, 2.0, 3.0));
+    fixture.run_jobs();
+    let server = fixture.server(&visual);
+    server.activate();
+
+    let animation = scalar_animation(&fixture, 10.0, Duration::from_millis(50));
+    visual.start_animation("Offset.X", &*animation);
+    fixture.run_jobs();
+    run_for(&fixture, Duration::from_millis(150));
+    assert_eq!(server.offset(), Vector3D::new(10.0, 2.0, 3.0));
+
+    // Components are case-insensitive; two components take a Vector2.
+    let pair = fixture.compositor.create_vector2_key_frame_animation();
+    pair.insert_key_frame_with_easing(1.0, crate::numerics::Vector2::new(5.0, 6.0), Rc::new(LinearEasing::new()));
+    pair.set_duration(Duration::from_millis(50));
+    visual.start_animation("Offset.zy", &*pair);
+    fixture.run_jobs();
+    run_for(&fixture, Duration::from_millis(150));
+    assert_eq!(server.offset(), Vector3D::new(10.0, 6.0, 5.0));
+}
+
+/// Not from upstream: sub-channels of one property started in one frame,
+/// and in different frames, run together.
+#[test]
+fn subchannel_animations_of_one_property_run_together() {
+    let fixture = Fixture::new();
+    let visual = fixture.compositor.create_solid_color_visual();
+    visual.set_offset(Vector3D::new(1.0, 2.0, 3.0));
+    fixture.run_jobs();
+    let server = fixture.server(&visual);
+    server.activate();
+
+    // One frame.
+    visual.start_animation("Offset.X", &*scalar_animation(&fixture, 10.0, Duration::from_millis(50)));
+    visual.start_animation("Offset.Y", &*scalar_animation(&fixture, 20.0, Duration::from_millis(80)));
+    assert_eq!(visual.object().pending_animations().count(), 1);
+    fixture.run_jobs();
+    run_for(&fixture, Duration::from_millis(200));
+    assert_eq!(server.offset(), Vector3D::new(10.0, 20.0, 3.0));
+
+    // Two frames: the second joins the animation that runs on the server.
+    visual.start_animation("Offset.X", &*scalar_animation(&fixture, 30.0, Duration::from_millis(100)));
+    fixture.run_jobs();
+    visual.start_animation("Offset.Z", &*scalar_animation(&fixture, 40.0, Duration::from_millis(50)));
+    fixture.run_jobs();
+    run_for(&fixture, Duration::from_millis(250));
+    assert_eq!(server.offset(), Vector3D::new(30.0, 20.0, 40.0));
+
+    // An animation of the whole property replaces the sub-channels.
+    let whole = fixture.compositor.create_vector3d_key_frame_animation();
+    whole.insert_key_frame_with_easing(1.0, Vector3D::new(0.0, 0.0, 0.0), Rc::new(LinearEasing::new()));
+    whole.set_duration(Duration::from_millis(50));
+    visual.start_animation("Offset", &*whole);
+    fixture.run_jobs();
+    run_for(&fixture, Duration::from_millis(150));
+    assert_eq!(server.offset(), Vector3D::new(0.0, 0.0, 0.0));
+}
+
+/// Not from upstream: `StopAnimation` of a sub-channel stops that
+/// sub-channel only and applies its stop behavior.
+#[test]
+fn stop_animation_of_a_subchannel() {
+    let fixture = Fixture::new();
+    let visual = fixture.compositor.create_solid_color_visual();
+    visual.set_offset(Vector3D::new(1.0, 2.0, 3.0));
+    fixture.run_jobs();
+    let server = fixture.server(&visual);
+    server.activate();
+
+    let x = scalar_animation(&fixture, 10.0, Duration::from_secs(30));
+    x.set_stop_behavior(AnimationStopBehavior::SetToFinalValue);
+    let y = scalar_animation(&fixture, 20.0, Duration::from_millis(100));
+    visual.start_animation("Offset.X", &*x);
+    visual.start_animation("Offset.Y", &*y);
+    fixture.run_jobs();
+    run_for(&fixture, Duration::from_millis(20));
+
+    visual.stop_animation("Offset.X");
+    fixture.run_jobs();
+    assert_eq!(server.offset().x, 10.0);
+    run_for(&fixture, Duration::from_millis(250));
+    assert_eq!(server.offset(), Vector3D::new(10.0, 20.0, 3.0));
+
+    // Stopping the last sub-channel removes the animation of the property.
+    visual.stop_animation("Offset.Y");
+    fixture.run_jobs();
+    assert!(!fixture.compositor.server().animations().need_next_tick());
+    visual.set_offset(Vector3D::new(7.0, 8.0, 9.0));
+    fixture.run_jobs();
+    assert_eq!(server.offset(), Vector3D::new(7.0, 8.0, 9.0));
+}
+
+/// Not from upstream: a sub-channel target with components that are not
+/// X, Y, Z or W is rejected.
+#[test]
+fn invalid_subchannel_target_panics() {
+    let fixture = Fixture::new();
+    let visual = fixture.compositor.create_solid_color_visual();
+    let animation = scalar_animation(&fixture, 1.0, Duration::from_millis(50));
+    let result = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
+        visual.start_animation("Offset.Q", &*animation)
+    }));
+    assert!(result.is_err());
+    let result = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
+        visual.start_animation("Unknown.X", &*animation)
+    }));
+    assert!(result.is_err());
+}

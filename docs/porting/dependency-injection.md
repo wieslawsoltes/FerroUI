@@ -160,7 +160,11 @@ ferroui_reactiveui::IWantsToRegisterStuff::register(&ferroui_reactiveui::Registr
 
 The adapter implements Splat's `IDependencyResolver`. Contracts become string keys. Registration
 mutations dispose the previous built provider and lazily rebuild from the collection, as upstream
-does. `from_provider` / `update_provider` select immutable mode. Finish application registration
+does. `from_provider` / `update_provider` select immutable mode; `update_provider` disposes the
+current provider only when another one replaces it (upstream disposes it even when it is handed
+back). Lazy singletons keep their value across rebuilds and are disposed once, with the adapter.
+Validation remembers the subtrees it has found valid, so a graph whose branches meet again is
+checked once per service. Finish application registration
 before resolving owned async-only services; synchronous mutation cannot dispose such a provider.
 Null-returning Splat factories resolve to None and are omitted from enumerations, matching the
 existing Rust Splat convention. Registration callbacks are unsupported by the upstream Microsoft

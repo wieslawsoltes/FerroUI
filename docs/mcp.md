@@ -73,10 +73,12 @@ This is available in release builds only when the application includes the depen
 the call; there is no automatic release listener or debug listener. The catalog requires both
 `--features mcp` and a transport switch.
 
-Desktop lifetime windows are discovered on every request. For a custom lifetime, construct an
-`Inspector`, call `register_root(&top_level)`, and pass it to `serve_with_inspector`. The inspector
-holds only weak object/root references. IDs remain stable within a server lifetime, are never
-reused, and return a tool error after the object is destroyed. Automation trees retain separate
+Desktop lifetime windows are discovered on every request. For a custom lifetime, register each
+top level with the shared inspector of the UI thread:
+`ferroui_inspect::Inspector::shared().borrow_mut().register_root(&top_level)`. The MCP server and
+the [Chrome DevTools Protocol endpoint](devtools-cdp.md) use that one inspector, so a node has the
+same ID in both. The inspector holds only weak object/root references. IDs remain stable for the
+life of the object, are never reused, and return a tool error after the object is destroyed. Automation trees retain separate
 peer IDs, including peers without visual owners. Property and input tools map a control peer to
 its owner. A nonvisual peer still supports its automation patterns.
 
@@ -139,15 +141,18 @@ latency. Layout counts/timing come from the renderer's existing diagnostics.
 
 `ferroui://tree` and `ferroui://logs` are JSON resources that can be re-read. Use
 `logging/setLevel` to receive `notifications/message` on stdio or an HTTP GET SSE stream. The log
-sink forwards to the previous application sink and restores it when the server handle is dropped;
-thread-local log sinks still take precedence. Messages preserve templates and values separately.
-The ring is bounded, so a slow reader can miss older entries.
+capture is one per process, shared with the CDP endpoint: the first server installs a tee of the
+framework's log sink, which forwards to the previous sink, and the last one to stop restores it;
+thread-local log sinks still take precedence. Events from Information up are captured, and from
+Verbose up once a client sets the level `debug`. Messages preserve templates and values
+separately. The ring keeps 1024 entries, so a slow reader can miss older ones.
 
 ## Protocol and execution
 
 The implementation uses a small JSON-RPC adapter rather than an async MCP SDK: UI objects are
 thread-affine and the dispatcher already owns scheduling. The protocol version is `2025-11-25`,
-with `2025-06-18` and `2025-03-26` accepted. Send `initialize`, then
+with `2025-06-18` and `2025-03-26` accepted; a session of `2025-03-26` also takes JSON-RPC batches
+(arrays), which the later versions removed. Send `initialize`, then
 `notifications/initialized`, before tool/resource requests. HTTP initialization returns
 `Mcp-Session-Id`; include it and `MCP-Protocol-Version` on subsequent POST/GET/DELETE requests.
 Sessions expire after 30 minutes without HTTP activity. Each HTTP connection carries one request
@@ -156,16 +161,21 @@ stalls for 10 seconds is closed. DELETE ends a session. GET streams log
 notifications; POST returns JSON responses or 202 for accepted notifications. The service does
 not advertise resource subscriptions, resumable SSE, prompts, sampling, or tasks.
 
-Requests marshal JSON to the UI dispatcher, never moving UI references between threads.
+Invalid tool arguments are a tool result with `isError: true`, which the model can correct; an
+unknown tool is a protocol error (`-32602`). Requests marshal JSON to the UI dispatcher, never
+moving UI references between threads. Input tools release the shared inspector before the
+application handles the input.
 `wait_for` polls on the transport worker so input, timers, layout and rendering can continue.
-`notifications/cancelled` cancels waits and queued operations. Dispatcher queue timeouts invalidate
+`notifications/cancelled` cancels waits and queued operations, also when it arrives before its
+request has reached a worker. Dispatcher queue timeouts invalidate
 unstarted callbacks; an action that has already begun cannot be rolled back. The core's
-`Inspector::execute("wait_for", ...)` is a single nonblocking probe; a future bridge can schedule
+`ferroui_inspect::execute("wait_for", ...)` is a single nonblocking probe; a future bridge can schedule
 its own polling with the same semantics.
 
-Limits: 1 MiB incoming messages, 16 transport workers, 64 HTTP sessions, 10,000 traversed nodes,
-64 tree levels, 60-second condition waits, and 16-megapixel screenshots at scales 0.1–4. These
-limits and argument schemas are checked before mutation. Prefer a scoped node ID for large trees.
+Limits: 1 MiB incoming messages, 16 transport workers, 64 HTTP sessions, 10,000 traversed nodes
+(a search that reaches the limit returns the matches it found, and an error if none), 64 tree
+levels, 60-second condition waits, and 16-megapixel screenshots at scales 0.1–4. These limits and
+argument schemas are checked before mutation. Prefer a scoped node ID for large trees.
 
 ## Browser bridge assessment
 

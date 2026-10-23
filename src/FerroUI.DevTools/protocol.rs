@@ -6,7 +6,8 @@ use ferroui_base::reactive::{Disposable, IDisposable};
 use ferroui_base::{Point, Rect, Ref, StyledElement};
 use ferroui_controls::automation::peers::{AutomationPeer, ControlAutomationPeer};
 use ferroui_controls::{Control, TopLevel};
-use ferroui_inspect::target::{Inspector, Node, NodeId, TreeKind};
+use ferroui_inspect::target::{Node, Target};
+use ferroui_inspect::{NodeId, TreeKind};
 use serde_json::{json, Value};
 use std::cell::RefCell;
 use std::collections::{HashMap, HashSet};
@@ -114,7 +115,7 @@ fn dom_node(id: NodeId, nodes: &HashMap<NodeId, &Node>, depth: i64) -> Value {
 /// A transport-independent CDP connection to a single top-level. All calls run on its UI thread.
 /// `handle` returns the response followed by any events; call `poll` for asynchronous events.
 pub struct CdpSession {
-    pub(crate) inspector: Inspector,
+    pub(crate) inspector: Target,
     input: Input,
     pub(crate) enabled: HashSet<String>,
     target_id: String,
@@ -127,7 +128,7 @@ pub struct CdpSession {
 impl CdpSession {
     pub fn new(root: &Ref<TopLevel>, target_id: impl Into<String>) -> Self {
         Self {
-            inspector: Inspector::new(root),
+            inspector: Target::new(root),
             input: Input::default(),
             enabled: HashSet::new(),
             target_id: target_id.into(),
@@ -292,12 +293,12 @@ impl CdpSession {
             "CSS.getComputedStyleForNode" => Ok(json!({"computedStyle":self.inspector.properties(node_id(p)?)?.iter().map(|p|json!({"name":p.name,"value":p.value})).collect::<Vec<_>>()})),
             "CSS.getInlineStylesForNode" => {
                 let id = node_id(p)?;
-                Ok(json!({"inlineStyle":style(self.inspector.properties(id)?.into_iter().filter(|p|p.priority=="LocalValue").map(|p|json!({"name":p.name,"value":p.value})).collect())}))
+                Ok(json!({"inlineStyle":style(self.inspector.properties(id)?.into_iter().filter(|p|p.local).map(|p|json!({"name":p.name,"value":p.value})).collect())}))
             }
             "CSS.getMatchedStylesForNode" => {
                 let id = node_id(p)?;
                 let rules: Vec<_> = self.inspector.matched_styles(id)?.into_iter().map(|s| json!({"rule":{"selectorList":{"selectors":[{"text":s.selector}],"text":s.selector},"origin":"regular","style":style(s.properties.into_iter().map(|(name,value)|json!({"name":name,"value":value})).collect())},"matchingSelectors":[0]})).collect();
-                Ok(json!({"matchedCSSRules":rules,"inherited":[],"pseudoElements":[],"inlineStyle":style(self.inspector.properties(id)?.into_iter().filter(|p|p.priority=="LocalValue").map(|p|json!({"name":p.name,"value":p.value})).collect())}))
+                Ok(json!({"matchedCSSRules":rules,"inherited":[],"pseudoElements":[],"inlineStyle":style(self.inspector.properties(id)?.into_iter().filter(|p|p.local).map(|p|json!({"name":p.name,"value":p.value})).collect())}))
             }
             "Overlay.highlightNode" => { self.inspector.highlight(node_id(p)?)?; Ok(json!({})) }
             "Overlay.hideHighlight" => { self.inspector.hide_highlight(); Ok(json!({})) }
@@ -307,7 +308,7 @@ impl CdpSession {
                 Ok(json!({"data":base64::engine::general_purpose::STANDARD.encode(self.inspector.screenshot()?)}))
             }
             "Page.getLayoutMetrics" => {
-                let bounds = Rect::from_size(self.inspector.root()?.bounds().size());
+                let bounds = self.inspector.bounds()?;
                 let layout = json!({"pageX":0,"pageY":0,"clientWidth":bounds.width,"clientHeight":bounds.height});
                 let visual = json!({"offsetX":0,"offsetY":0,"pageX":0,"pageY":0,"clientWidth":bounds.width,"clientHeight":bounds.height,"scale":1,"zoom":1});
                 Ok(json!({"layoutViewport":layout,"visualViewport":visual,"contentSize":rect(bounds),"cssLayoutViewport":layout,"cssVisualViewport":visual,"cssContentSize":rect(bounds)}))

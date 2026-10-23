@@ -89,16 +89,13 @@ impl IServerVisualContent for ServerCompositionSurfaceVisual {
         _current_transformed_clip: LtrbRect,
     ) {
         let Some(surface) = self.surface() else { return };
-        let Some(bmp) = surface.bitmap() else { return };
 
         //TODO: add a way to always render the whole bitmap instead of just assuming 96 DPI
+        // The WinUI port draws through the surface, so a surface visual also
+        // shows the surfaces whose content is not a bitmap (a visual
+        // surface); for a bitmap surface the default draw is the one above.
         let size = visual.size();
-        context.canvas().draw_bitmap(
-            &*bmp,
-            1.0,
-            Rect::from_size(bmp.pixel_size().to_size(1.0)),
-            Rect::from_size(Size::new(size.x, size.y)),
-        );
+        surface.draw(context.canvas(), Rect::from_size(Size::new(size.x, size.y)), 1.0);
     }
 
     fn on_attached_to_root(&self, visual: &ServerCompositionVisual, _target: &Rc<ServerCompositionTarget>) {

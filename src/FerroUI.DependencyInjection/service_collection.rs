@@ -42,6 +42,8 @@ impl ServiceCollection {
     pub fn make_read_only(&mut self) {
         self.read_only = true;
     }
+    // Deviation (DEVIATIONS.md, Dependency injection): upstream throws InvalidOperationException
+    // for a change of a read-only collection; a programming error panics here.
     fn ensure_mutable(&self) {
         assert!(!self.read_only, "The service collection is read-only");
     }

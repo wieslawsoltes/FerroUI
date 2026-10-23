@@ -30,12 +30,15 @@ server.register(&top_level);
 // Keep `server` alive while the application's dispatcher is running.
 ```
 
-The transport threads exchange bounded JSON requests with a dispatcher timer. Framework
-objects, tree walking, input, highlighting and rendering stay on the UI thread. Requests that
-wait longer than five seconds expire before execution. Node handles are weak; removed controls
-are rejected and IDs are never assigned to a different control. Each client session has its own
-tree mode, domain subscriptions and highlight. Framework logs are forwarded to the previous
-log sink and held in a bounded buffer of 512 entries.
+The transport threads post each JSON request to the UI dispatcher; the UI thread does no work
+while no client sends one. Framework objects, tree walking, input, highlighting and rendering
+stay on the UI thread. Requests that wait longer than five seconds expire before execution. The
+endpoint is built on the shared inspector of `ferroui-inspect`, which the MCP server uses too:
+node IDs are the same in both, weak, and never assigned to a different control. A control that is
+removed from the window is rejected until it is attached again, when it has its old ID. Each
+client session has its own tree mode, domain subscriptions and highlight, and the highlights of
+all sessions are left out of every tree. Framework logs from Information up are forwarded to the
+previous log sink and held in the bounded ring of 1024 entries that the MCP server shares.
 
 ## Chrome DevTools
 

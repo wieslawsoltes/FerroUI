@@ -99,7 +99,10 @@ impl MicrosoftDependencyResolver {
     pub fn update_provider(&self, provider: ServiceProvider) -> ServiceResult<()> {
         self.ensure_active();
         let previous = self.provider.borrow().clone();
-        if let Some(previous) = previous {
+        // Deviation (DEVIATIONS.md, Dependency injection): upstream's UpdateContainer disposes
+        // the current provider even when it is the one passed in, which leaves the resolver with
+        // a disposed provider; the port keeps it.
+        if let Some(previous) = previous.filter(|previous| !previous.same_as(&provider)) {
             previous.dispose()?;
         }
         *self.provider.borrow_mut() = Some(provider);
@@ -149,6 +152,9 @@ impl MicrosoftDependencyResolver {
         self.services.borrow_mut().add(descriptor);
     }
 }
+// Deviation (DEVIATIONS.md, Dependency injection): upstream throws from GetService and
+// GetServices when the provider cannot resolve; the resolver trait returns an Option, so the
+// error panics.
 impl IReadonlyDependencyResolver for MicrosoftDependencyResolver {
     fn get_service_erased(
         &self,

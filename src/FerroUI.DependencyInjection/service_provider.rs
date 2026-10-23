@@ -160,6 +160,8 @@ struct ScopeState {
     cache: RefCell<HashMap<CacheKey, ErasedService>>,
     disposables: RefCell<Vec<Captured>>,
 }
+/// How many validated resolutions a provider remembers before it starts again.
+const MAX_VALIDATED: usize = 4096;
 struct Root {
     descriptors: Vec<ServiceDescriptor>,
     lookup: HashMap<ServiceIdentifier, Vec<usize>>,
@@ -291,6 +293,7 @@ impl ServiceProvider {
             scope,
         };
         if options.validate_on_build {
+            let mut done = HashSet::new();
             let errors: Vec<_> = provider
                 .root
                 .descriptors
@@ -298,7 +301,14 @@ impl ServiceProvider {
                 .enumerate()
                 .filter_map(|(i, d)| {
                     provider
-                        .validate(i, &d.identifier.service_key, &mut Vec::new(), false, false)
+                        .validate(
+                            i,
+                            &d.identifier.service_key,
+                            &mut Vec::new(),
+                            &mut done,
+                            false,
+                            false,
+                        )
                         .err()
                 })
                 .collect();
@@ -314,6 +324,10 @@ impl ServiceProvider {
         } else {
             Ok(())
         }
+    }
+    /// Whether both handles are the same provider or scope.
+    pub fn same_as(&self, other: &ServiceProvider) -> bool {
+        Rc::ptr_eq(&self.root, &other.root) && Rc::ptr_eq(&self.scope, &other.scope)
     }
     pub fn is_disposed(&self) -> bool {
         self.ensure_active().is_err()
@@ -455,11 +469,16 @@ impl ServiceProvider {
         }
         Ok(Vec::new())
     }
+    /// Checks the dependencies below a registration: scoped services reached from a singleton or
+    /// the root, missing services and cycles. `done` holds the subtrees already found valid in
+    /// this pass, with the two flags they were checked under, so that a graph whose branches meet
+    /// again (diamonds) is checked in linear time rather than once per path.
     fn validate(
         &self,
         index: usize,
         key: &Option<ServiceKey>,
         path: &mut Vec<CacheKey>,
+        done: &mut HashSet<(CacheKey, bool, bool)>,
         singleton: bool,
         root_resolution: bool,
     ) -> ServiceResult<()> {
@@ -480,6 +499,10 @@ impl ServiceProvider {
             index,
             key: key.clone(),
         };
+        // A subtree found valid has no cycle, so it cannot lead back to the current path either.
+        if done.contains(&(cache_key.clone(), singleton, root_resolution)) {
+            return Ok(());
+        }
         if path.contains(&cache_key) {
             let mut ids: Vec<_> = path
                 .iter()
@@ -491,6 +514,7 @@ impl ServiceProvider {
             ids.push(id);
             return Err(ServiceError::CircularDependency(ids));
         }
+        let memo = (cache_key.clone(), singleton, root_resolution);
         path.push(cache_key);
         let singleton = singleton || d.lifetime == ServiceLifetime::Singleton;
         for dependency in &d.dependencies {
@@ -524,10 +548,18 @@ impl ServiceProvider {
                 return Err(ServiceError::MissingService(id));
             }
             for child in matches {
-                self.validate(child.index, &child.key, path, singleton, root_resolution)?;
+                self.validate(
+                    child.index,
+                    &child.key,
+                    path,
+                    done,
+                    singleton,
+                    root_resolution,
+                )?;
             }
         }
         path.pop();
+        done.insert(memo);
         Ok(())
     }
     fn enumerable_override(&self, id: &ServiceIdentifier) -> Option<CacheKey> {
@@ -564,10 +596,17 @@ impl ServiceProvider {
                 key.index,
                 &key.key,
                 &mut Vec::new(),
+                &mut HashSet::new(),
                 false,
                 validation_key.1,
             )?;
-            self.root.validated.borrow_mut().insert(validation_key);
+            // The set is a cache: keys of catch-all registrations come from callers and are not
+            // bounded, so it starts again past a size.
+            let mut validated = self.root.validated.borrow_mut();
+            if validated.len() >= MAX_VALIDATED {
+                validated.clear();
+            }
+            validated.insert(validation_key);
         }
         if d.lifetime != ServiceLifetime::Transient {
             if let Some(value) = provider.scope.cache.borrow().get(&key) {
@@ -726,6 +765,8 @@ impl IServiceScopeFactory for ServiceProvider {
         self.create_scope()
     }
 }
+// Deviation (DEVIATIONS.md, Dependency injection): upstream's Dispose throws when a service has
+// only asynchronous disposal; the trait method has no result, so it panics with that error.
 impl IDisposable for ServiceProvider {
     fn dispose(&self) {
         self.dispose().unwrap_or_else(|e| panic!("{e}"));

@@ -1,8 +1,10 @@
-use super::{IAnimationInstance, PropertySetSnapshot};
-use crate::rendering::composition::expressions::{ExpressionKeywords, IExpressionObject};
+use super::{IAnimationInstance, InitialValueExpressionCollection, PropertySetSnapshot};
+use crate::rendering::composition::expressions::{
+    BuiltInExpressionFfi, Expression, ExpressionKeywords, ExpressionObjectKey, ExpressionVariant, IExpressionObject,
+};
 use crate::rendering::composition::server::{
-    CompositionProperty, IAnimatedServerObject, IServerClockItem, ServerCompositor, ServerExpressionObject,
-    ServerObjectAnimations, ServerObjectId,
+    CompositionProperty, IAnimatedServerObject, IServerAnimatedPropertyHost, IServerClockItem, ServerCompositor,
+    ServerExpressionObject, ServerObjectAnimations, ServerObjectId,
 };
 use std::cell::{Cell, RefCell};
 use std::collections::HashSet;
@@ -170,6 +172,77 @@ impl AnimationInstanceBase {
 
     pub fn on_tick(&self) {
         self.invalidate()
+    }
+
+    /// Applies the initial value expressions of the animation
+    /// (`CompositionAnimation.InitialValueExpressions`) as it starts: each
+    /// expression is evaluated against the target and the parameters, and the
+    /// named property of the target is set to the result. Returns the value
+    /// the animated `property` starts from: `starting_value`, or the initial
+    /// value of the property when an expression names it.
+    ///
+    /// Called by the instance when it is initialized, after
+    /// [`resolve`](Self::resolve); the expressions read the animated
+    /// property as `starting_value` (the instance is not initialized yet, so
+    /// it cannot be evaluated).
+    pub fn apply_initial_values(
+        &self,
+        expressions: &[(String, Expression)],
+        property: &'static CompositionProperty,
+        starting_value: ExpressionVariant,
+    ) -> ExpressionVariant {
+        if expressions.is_empty() {
+            return starting_value;
+        }
+        let Some(target) = self.target() else { return starting_value };
+        let reader = StartingTarget {
+            target: ServerExpressionObject(target.clone()),
+            property_name: property.name(),
+            starting_value,
+        };
+        let values = InitialValueExpressionCollection::evaluate_parsed(
+            expressions,
+            &reader,
+            Some(&**self.parameters()),
+            BuiltInExpressionFfi::instance(),
+        );
+        let mut starting = starting_value;
+        for (name, value) in values {
+            let Some(initial) = target.get_composition_property(&name) else { continue };
+            target.write_property_variant(initial, value);
+            target.notify_animated_value_changed(initial);
+            if let Some(animations) = target.server_object().animations() {
+                animations.on_set_direct_value(initial);
+            }
+            if initial.id() == property.id() {
+                // Read back: the value in the type of the property.
+                starting = target.read_property_variant(initial);
+            }
+        }
+        starting
+    }
+}
+
+/// The target of a starting animation as its initial value expressions read
+/// it: the animated property is the value it has before the animation
+/// starts.
+struct StartingTarget {
+    target: ServerExpressionObject,
+    property_name: &'static str,
+    starting_value: ExpressionVariant,
+}
+
+impl IExpressionObject for StartingTarget {
+    fn get_property(&self, name: &str) -> ExpressionVariant {
+        if name == self.property_name {
+            self.starting_value
+        } else {
+            self.target.get_property(name)
+        }
+    }
+
+    fn key(&self) -> ExpressionObjectKey {
+        self.target.key()
     }
 }
 

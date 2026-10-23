@@ -1,5 +1,6 @@
 use super::*;
 use crate::protocol::Session;
+use ferroui_inspect::LogCapture;
 use serde_json::json;
 use std::{
     io::{Read, Write},
@@ -100,7 +101,7 @@ fn http_authentication_origin_sessions_and_protocol() {
         404
     );
     // A real SSE client must receive small messages immediately, not after a chunk buffer fills.
-    let capture = server.client.logs.install();
+    let capture = LogCapture::install();
     request(
         address,
         "POST",
@@ -292,7 +293,7 @@ fn protocol_validation_resources_and_notifications() {
             .len(),
         2
     );
-    assert_eq!(session.handle(&server.client,json!({"jsonrpc":"2.0","id":4,"method":"tools/call","params":{"name":"screenshot","arguments":{"scale":999}}})).unwrap()["error"]["code"],-32602);
+    assert_eq!(session.handle(&server.client,json!({"jsonrpc":"2.0","id":4,"method":"tools/call","params":{"name":"screenshot","arguments":{"scale":999}}})).unwrap()["result"]["isError"],true);
     assert_eq!(
         session
             .handle(
@@ -302,4 +303,87 @@ fn protocol_validation_resources_and_notifications() {
             .unwrap()["error"]["code"],
         -32601
     );
+}
+#[test]
+fn argument_errors_are_tool_results_and_unknown_tools_are_protocol_errors() {
+    let _scope = Dispatcher::unit_test_scope();
+    let server = serve(options()).unwrap();
+    let session = initialized(&server.client, protocol::VERSION);
+    let invalid = session
+        .handle(&server.client, json!({"jsonrpc":"2.0","id":1,"method":"tools/call","params":{"name":"screenshot","arguments":{"scale":999}}}))
+        .unwrap();
+    assert_eq!(invalid["result"]["isError"], true);
+    let unknown = session
+        .handle(
+            &server.client,
+            json!({"jsonrpc":"2.0","id":2,"method":"tools/call","params":{"name":"missing"}}),
+        )
+        .unwrap();
+    assert_eq!(unknown["error"]["code"], -32602);
+    let named = session
+        .handle(
+            &server.client,
+            json!({"jsonrpc":"2.0","id":3,"method":"notifications/initialized"}),
+        )
+        .unwrap();
+    assert_eq!(named["error"]["code"], -32600);
+}
+#[test]
+fn batches_only_for_the_version_that_has_them() {
+    let _scope = Dispatcher::unit_test_scope();
+    let server = serve(options()).unwrap();
+    let batch = json!([{"jsonrpc":"2.0","id":1,"method":"ping"},{"jsonrpc":"2.0","method":"notifications/initialized"},{"jsonrpc":"2.0","id":2,"method":"ping"}]);
+    let current = initialized(&server.client, protocol::VERSION);
+    assert_eq!(
+        current
+            .handle_message(&server.client, batch.clone())
+            .unwrap()["error"]["code"],
+        -32600
+    );
+    let old = initialized(&server.client, protocol::BATCH_VERSION);
+    let responses = old.handle_message(&server.client, batch).unwrap();
+    assert_eq!(responses.as_array().unwrap().len(), 2);
+    assert_eq!(responses[1]["id"], 2);
+    assert!(old
+        .handle_message(
+            &server.client,
+            json!([{"jsonrpc":"2.0","method":"notifications/initialized"}])
+        )
+        .is_none());
+    assert_eq!(
+        old.handle_message(&server.client, json!([])).unwrap()["error"]["code"],
+        -32600
+    );
+}
+#[test]
+fn a_cancellation_that_arrives_first_cancels_its_request() {
+    let _scope = Dispatcher::unit_test_scope();
+    let server = serve(options()).unwrap();
+    let session = initialized(&server.client, protocol::VERSION);
+    assert!(session
+        .handle(
+            &server.client,
+            json!({"jsonrpc":"2.0","method":"notifications/cancelled","params":{"requestId":7}})
+        )
+        .is_none());
+    let response = session
+        .handle(&server.client, json!({"jsonrpc":"2.0","id":7,"method":"tools/call","params":{"name":"wait_for","arguments":{"name":"missing","timeout_ms":5000}}}))
+        .unwrap();
+    assert_eq!(response["result"]["isError"], true);
+    assert!(response["result"]["content"][0]["text"]
+        .as_str()
+        .unwrap()
+        .contains("cancelled"));
+}
+fn initialized(client: &Client, version: &str) -> Session {
+    let session = Session::default();
+    session.handle(
+        client,
+        json!({"jsonrpc":"2.0","id":0,"method":"initialize","params":{"protocolVersion":version}}),
+    );
+    session.handle(
+        client,
+        json!({"jsonrpc":"2.0","method":"notifications/initialized"}),
+    );
+    session
 }
