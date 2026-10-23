@@ -114,6 +114,9 @@ including the retained control code points at bytes `81`, `8D`, `8F`, `90` and
 encoding and encoded byte offset. Offsets are relative to the supplied logical
 stream start and include any consumed BOM. A strict error consumes the offending
 maximal subpart; a caller that deliberately recovers may continue after it.
+This policy is an explicit Rust extension, rather than a claim to reproduce
+the recovery state of .NET's `DecoderFallbackException` or arbitrary custom
+`Encoding` fallback objects.
 
 The UTF-16 buffer reader and UTF-8 `Read` adapter preserve completed output when
 an error follows it. They return that output's count, report the error on the
@@ -123,6 +126,35 @@ partway through a scalar retains its incomplete bytes for a later retry.
 `Interrupted` reads are retried automatically; other IO errors retain their
 ordinary kind and propagate to the caller. Errors during initial detection
 prevent construction of a reader.
+
+Complete-result helpers such as `read_line` and `read_to_end` return an error
+without their locally accumulated text when a read fails. They do not rewind
+consumed input. In particular, a failure while checking for LF after CR occurs
+after the line and CR have been consumed; retrying starts at the following unit.
+All mutable reader operations require Rust's exclusive `&mut self` borrow.
+They introduce no editor callbacks, interior shared borrow or reentrant read
+API.
+
+### Reference runtime audit
+
+The source targets .NET 8 and .NET 10. In addition to reading the corresponding
+[`StreamReader` implementation](https://github.com/dotnet/runtime/blob/v10.0.13/src/libraries/System.Private.CoreLib/src/System/IO/StreamReader.cs),
+the exact pinned `FileReader.cs` was compiled against the already available
+.NET 10.0.13 runtime for a focused manual audit. Nine malformed-input cases
+confirmed the selected UTF-8 maximal-subpart results, separate replacements for
+a UTF-16 high surrogate followed by an odd byte, one replacement for a truncated
+UTF-32 word, and ASCII's `?` replacement. Three CR/LF inputs with an injected IO
+failure confirmed the line retry contract above. This is a focused runtime
+comparison, not an exhaustive .NET codec conformance claim.
+
+The audit also exercised all five BOMs with source read limits of one, two,
+three, four and 64 bytes. The reference `StreamReader` can misdetect UTF-16/32
+BOMs on fragmented reads: for example, a UTF-32 LE mark delivered two or three
+bytes at a time selects UTF-16 LE. The Rust detector deliberately accumulates
+up to four initial bytes, so its result is independent of those short-read
+boundaries. Together with UTF-32 classification, this is an explicit correction
+to reference behavior. Ordinary complete marks retain their source selection
+and stripping semantics.
 
 ## Rust IO and document interoperability
 
@@ -188,12 +220,12 @@ The focused regression suite covers:
 - strict error offsets, partial-output reporting, retry after an IO failure
   inside a scalar and repeated `BufRead::fill_buf` calls;
 - UTF-16 peek/line operations, partial-surrogate projection, borrowed-stream
-  ownership and seekable position validation;
+  ownership, seekable position validation and CR/LF retries after IO failure;
 - real local-file path helpers, standard IO errors and streaming through a
   `Box<dyn Read>` into `DocumentTextWriter` with one caller-owned undo group.
 
-The focused run passed **14 tests**, with no failures or ignored tests. It
-compiled the current 337-test Core suite and selected only the file-reader
+The focused run passed **15 tests**, with no failures or ignored tests. It
+compiled the current 338-test Core suite and selected only the file-reader
 regressions; the combined Core/native gate is tracked separately by the main
 port report. Reproduce the focused run with:
 

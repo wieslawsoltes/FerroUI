@@ -50,6 +50,32 @@ impl Read for ChunkedRead {
     }
 }
 
+#[test]
+fn line_reads_preserve_cr_lf_error_consumption_on_retry() {
+    for (text, first_line, after_retry) in [
+        ("ab\r\nx", None, Some("")),
+        ("ab\nx", Some("ab"), Some("x")),
+        ("ab\r", None, None),
+    ] {
+        let mut source = ChunkedRead::new(text.as_bytes(), 1);
+        source.fail_at = Some(3);
+        let mut reader =
+            FileTextReader::new(source, TextEncoding::Utf8, DecodingErrorPolicy::Replace);
+        if let Some(line) = first_line {
+            assert_eq!(reader.read_line().unwrap().as_deref(), Some(line));
+        }
+        assert_eq!(
+            reader.read_line().unwrap_err().kind(),
+            ErrorKind::WouldBlock
+        );
+        assert_eq!(reader.read_line().unwrap().as_deref(), after_retry);
+        if text == "ab\r\nx" {
+            assert_eq!(reader.read_line().unwrap().as_deref(), Some("x"));
+        }
+        assert!(reader.read_line().unwrap().is_none());
+    }
+}
+
 fn encoded(text: &str, encoding: TextEncoding, bom: bool) -> Vec<u8> {
     let mut bytes = if bom {
         encoding.byte_order_mark().to_vec()
