@@ -6,7 +6,7 @@
 use super::{
     composition_transform, impl_server_render_resource, paint_composition_brush, platform_geometry_of,
     CompositionProperty, IAnimatedServerObject, IServerObject, IServerRenderResource, IServerRenderResourceObserver,
-    ServerCompositionSurfaceBrush, ServerCompositor, ServerRenderResource,
+    ServerCompositor, ServerRenderResource,
 };
 use crate::media::immutable::{ImmutableDashStyle, ImmutablePen, ImmutableSolidColorBrush};
 use crate::media::{IBrush, IDashStyle, IImmutableBrush, IPen, PenLineCap, PenLineJoin};
@@ -323,8 +323,11 @@ server_shape!(
 
 /// Whether `brush` (a server-side composition brush) is a surface brush,
 /// which is painted, not handed to the drawing context.
+/// Whether the brush is painted by the compositor rather than the drawing
+/// context: a surface brush, and the effect, backdrop, nine-grid, mask and
+/// XAML brushes (winui-materials.md).
 fn is_surface_brush(brush: &Rc<dyn IServerObject>) -> bool {
-    brush.as_any().is::<ServerCompositionSurfaceBrush>()
+    crate::rendering::composition::drawing::is_painted_composition_brush(&**brush)
 }
 
 impl ServerCompositionSpriteShape {

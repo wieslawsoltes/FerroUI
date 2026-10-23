@@ -1722,6 +1722,12 @@ impl IDrawingContextImpl for DrawingContextImpl {
         Some(self)
     }
 
+    fn as_drawing_context_impl_with_layer_effects(
+        &mut self,
+    ) -> Option<&mut dyn ferroui_base::platform::IDrawingContextImplWithLayerEffects> {
+        Some(self)
+    }
+
     fn get_feature(&mut self, feature_type: TypeId) -> Option<Rc<dyn Any>> {
         if feature_type == TypeId::of::<dyn ISkiaApiLeaseFeature>() {
             let surface = self.surface.clone()?;
@@ -1797,6 +1803,49 @@ impl IDrawingContextImplWithEffects for DrawingContextImpl {
     }
 }
 
+/// The layers of the effects of WinUI's composition: a save layer whose
+/// paint has the blend mode, or a colour filter of the matrix.
+impl ferroui_base::platform::IDrawingContextImplWithLayerEffects for DrawingContextImpl {
+    fn push_blend_layer(&mut self, bounds: Rect, mode: ferroui_base::media::imaging::BitmapBlendingMode) {
+        self.check_lease();
+        let mut paint = SkPaintCache::get();
+        paint.set_blend_mode(crate::skia_sharp_extensions::to_sk_blend_mode(mode));
+        let bounds = to_sk_rect(bounds);
+        self.canvas.get().save_layer(&SaveLayerRec::default().bounds(&bounds).paint(&paint));
+        SkPaintCache::return_reset(paint);
+    }
+
+    fn pop_blend_layer(&mut self) {
+        self.check_lease();
+        self.restore_canvas();
+    }
+
+    fn push_color_matrix_layer(
+        &mut self,
+        bounds: Rect,
+        matrix: &ferroui_base::media::ColorMatrix,
+        alpha_mode: ferroui_base::media::ColorMatrixAlphaMode,
+    ) {
+        self.check_lease();
+        let mut paint = SkPaintCache::get();
+        paint.set_color_filter(color_matrix_filter(matrix, alpha_mode));
+        let bounds = to_sk_rect(bounds);
+        let canvas = self.canvas.get();
+        canvas.save();
+        // A colour matrix can make transparent pixels visible: nothing
+        // outside the bounds is kept.
+        canvas.clip_rect(bounds, sk::ClipOp::Intersect, false);
+        canvas.save_layer(&SaveLayerRec::default().bounds(&bounds).paint(&paint));
+        SkPaintCache::return_reset(paint);
+    }
+
+    fn pop_color_matrix_layer(&mut self) {
+        self.check_lease();
+        self.restore_canvas();
+        self.restore_canvas();
+    }
+}
+
 impl IDrawingContextWithAcrylicLikeSupport for DrawingContextImpl {
     fn draw_rectangle_with_material(&mut self, material: &dyn IExperimentalAcrylicMaterial, rect: RoundedRect) {
         if rect.rect.height <= 0.0 || rect.rect.width <= 0.0 {
@@ -1819,6 +1868,41 @@ impl IDrawingContextWithAcrylicLikeSupport for DrawingContextImpl {
 
         self.release_fill(fill);
     }
+}
+
+/// The colour filter of a colour matrix. Skia's matrix filter works on
+/// unpremultiplied colours, as the straight alpha mode does; the
+/// premultiplied mode is a runtime colour filter, whose input is
+/// premultiplied.
+fn color_matrix_filter(
+    matrix: &ferroui_base::media::ColorMatrix,
+    alpha_mode: ferroui_base::media::ColorMatrixAlphaMode,
+) -> sk::ColorFilter {
+    use ferroui_base::media::ColorMatrixAlphaMode;
+    if alpha_mode == ColorMatrixAlphaMode::Straight {
+        return sk::color_filters::matrix_row_major(&matrix.to_row_major_4x5(), None);
+    }
+    ferroui_base::ferro_thread_local! {
+        static PREMULTIPLIED_MATRIX: Option<sk::RuntimeEffect> = sk::RuntimeEffect::make_for_color_filter(
+            "uniform float4 r0; uniform float4 r1; uniform float4 r2; uniform float4 r3; uniform float4 r4;\n\
+             half4 main(half4 c) {\n\
+                 float4 o = clamp(float4(c.r) * r0 + float4(c.g) * r1 + float4(c.b) * r2 + float4(c.a) * r3 + r4, 0.0, 1.0);\n\
+                 return half4(min(o.rgb, float3(o.a)), o.a);\n\
+             }",
+            None,
+        )
+        .ok();
+    }
+    let mut uniforms = Vec::with_capacity(80);
+    for row in matrix.rows {
+        for value in row {
+            uniforms.extend_from_slice(&value.to_ne_bytes());
+        }
+    }
+    PREMULTIPLIED_MATRIX
+        .with(|effect| effect.as_ref().and_then(|effect| effect.make_color_filter(sk::Data::new_copy(&uniforms), None)))
+        // Without runtime effects the matrix is applied to straight colours.
+        .unwrap_or_else(|| sk::color_filters::matrix_row_major(&matrix.to_row_major_4x5(), None))
 }
 
 fn reset_paint(mut paint: sk::Paint) -> sk::Paint {

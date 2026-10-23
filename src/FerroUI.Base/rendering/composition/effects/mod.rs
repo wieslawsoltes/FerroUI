@@ -5,9 +5,12 @@
 //!
 //! The descriptions are the effects the drawing contexts of FerroUI can
 //! express: a Gaussian blur (the blur effect of the drawing context), an
-//! opacity, a cross-fade of two sources, a source-over composite and a
-//! colour fill. A graph with another effect (a saturation) or mode loads
-//! with the status `Other`, and its brushes draw nothing.
+//! opacity, a cross-fade of two sources, composites in every mode but
+//! `MaskInvert`, a colour fill, blends, colour matrices (saturation, tint,
+//! invert, grayscale, luminance to alpha), an arithmetic composite with a
+//! colour, an alpha mask, a border that tiles a surface and scene lighting
+//! (winui-materials.md). A graph with another effect or mode loads with the
+//! status `Other`, and its brushes draw nothing.
 
 mod composition_effect_factory;
 mod effect_graph;
@@ -18,10 +21,12 @@ pub use composition_effect_factory::{
 };
 pub use effect_graph::blur_amount_to_radius;
 pub(crate) use effect_graph::{
-    EffectColor, EffectGraph, EffectNode, EffectNodeKind, EffectPropertyValue, EffectScalar,
+    EffectColor, EffectGraph, EffectMatrix, EffectNode, EffectNodeKind, EffectPropertyValue, EffectScalar,
 };
 pub use graphics_effects::{
-    CanvasComposite, ColorSourceEffect, CompositeEffect, CompositionEffectSourceParameter, CrossFadeEffect,
-    EffectBorderMode, EffectOptimization, GaussianBlurEffect, GraphicsEffect, GraphicsEffectSource, OpacityEffect,
-    SaturationEffect,
+    AlphaMaskEffect, ArithmeticCompositeEffect, BlendEffect, BlendEffectMode, BorderEffect, CanvasComposite,
+    CanvasEdgeBehavior, ColorMatrixEffect, ColorSourceEffect, CompositeEffect, CompositionEffectSourceParameter,
+    CrossFadeEffect, EffectBorderMode, EffectOptimization, GaussianBlurEffect, GraphicsEffect, GraphicsEffectSource,
+    GrayscaleEffect, InvertEffect, LuminanceToAlphaEffect, OpacityEffect, SaturationEffect, SceneLightingEffect,
+    TintEffect,
 };

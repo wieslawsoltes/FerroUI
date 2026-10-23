@@ -358,10 +358,18 @@ impl RenderDataStream {
                 TAG_BITMAP => RenderDataResource::Bitmap(value(reader)),
                 TAG_CUSTOM => RenderDataResource::CustomDrawOperation(value(reader)),
                 TAG_EFFECT => RenderDataResource::Effect(value(reader)),
-                TAG_SERVER_BRUSH => match server_object(reader, resolve).as_brush() {
-                    Some(brush) => RenderDataResource::Brush(brush),
-                    None => panic!("the server object referenced by render data is not a brush"),
-                },
+                TAG_SERVER_BRUSH => {
+                    let object = server_object(reader, resolve);
+                    match object.clone().as_brush() {
+                        Some(brush) => RenderDataResource::Brush(brush),
+                        // A composition brush the compositor paints itself
+                        // (winui-materials.md).
+                        None => match super::composition_painted_brush::painted_brush_of(&object) {
+                            Some(brush) => RenderDataResource::Brush(brush),
+                            None => panic!("the server object referenced by render data is not a brush"),
+                        },
+                    }
+                }
                 TAG_SERVER_PEN => match server_object(reader, resolve).as_pen() {
                     Some(pen) => RenderDataResource::Pen(pen),
                     None => panic!("the server object referenced by render data is not a pen"),

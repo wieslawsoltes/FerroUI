@@ -4,7 +4,7 @@
 
 use super::composition_brush::{CompositionBrush, CompositionBrushKind};
 use super::server_composition_effect_brush::EffectBrushChanges;
-use super::{ServerCompositionBackdropBrush, ServerCompositionEffectBrush};
+use super::{ServerCompositionBackdropBrush, ServerCompositionEffectBrush, ServerCompositionHostBackdropBrush};
 use crate::rendering::composition::effects::{EffectGraph, EffectPropertyValue};
 use crate::rendering::composition::generated::CompositionBrushProps;
 use crate::rendering::composition::transport::{BatchStreamWriter, IRegisterForSerialization};
@@ -185,9 +185,9 @@ impl CompositionEffectBrush {
 /// [`Compositor::create_backdrop_brush`]; usually the source of an effect
 /// brush (a blurred backdrop).
 ///
-/// Deviation (winui-composition.md): the drawing contexts cannot read back
-/// what was drawn under a rectangle, so the brush draws nothing, alone and
-/// as a source of an effect.
+/// The compositor draws again what was drawn under the visual: the tree of
+/// the window from its root up to the visual, cut to the area of the brush
+/// (winui-materials.md, the backdrop).
 #[derive(Clone)]
 pub struct CompositionBackdropBrush(Rc<CompositionBrush>);
 
@@ -213,5 +213,42 @@ impl CompositionBackdropBrush {
     /// The handle of `brush` as a backdrop brush, if it is one.
     pub fn from_brush(brush: &Rc<CompositionBrush>) -> Option<CompositionBackdropBrush> {
         matches!(brush.kind, CompositionBrushKind::Backdrop(_)).then(|| CompositionBackdropBrush(brush.clone()))
+    }
+}
+
+/// A brush that shows what is behind the window (WinUI
+/// `Microsoft.UI.Composition.CompositionHostBackdropBrush`), made by
+/// [`Compositor::create_host_backdrop_brush`].
+///
+/// In a window the platform composes over the desktop (a transparency level
+/// other than none) the area of the brush is made transparent, so what is
+/// behind the window shows; the platform blurs it when the window has the
+/// blur or acrylic level. In an opaque window the brush paints nothing
+/// (winui-materials.md).
+#[derive(Clone)]
+pub struct CompositionHostBackdropBrush(Rc<CompositionBrush>);
+
+impl Deref for CompositionHostBackdropBrush {
+    type Target = Rc<CompositionBrush>;
+
+    fn deref(&self) -> &Rc<CompositionBrush> {
+        &self.0
+    }
+}
+
+impl CompositionHostBackdropBrush {
+    pub(crate) fn new(compositor: &Rc<Compositor>) -> CompositionHostBackdropBrush {
+        let brush = CompositionBrush::create(
+            compositor,
+            CompositionBrushKind::HostBackdrop(CompositionBrushProps::new()),
+            |c| ServerCompositionHostBackdropBrush::new(c),
+        );
+        brush.initialize_defaults();
+        CompositionHostBackdropBrush(brush)
+    }
+
+    /// The handle of `brush` as a host backdrop brush, if it is one.
+    pub fn from_brush(brush: &Rc<CompositionBrush>) -> Option<CompositionHostBackdropBrush> {
+        matches!(brush.kind, CompositionBrushKind::HostBackdrop(_)).then(|| CompositionHostBackdropBrush(brush.clone()))
     }
 }

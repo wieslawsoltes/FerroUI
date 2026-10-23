@@ -3,10 +3,11 @@
 //! share with their server side.
 
 use super::{
-    CanvasComposite, CompositionEffectFactoryError, CompositionEffectFactoryLoadStatus, GraphicsEffect,
-    GraphicsEffectSource,
+    BlendEffectMode, CanvasComposite, CanvasEdgeBehavior, CompositionEffectFactoryError,
+    CompositionEffectFactoryLoadStatus, EffectBorderMode, GraphicsEffect, GraphicsEffectSource,
 };
-use crate::media::Color;
+use crate::media::imaging::BitmapBlendingMode;
+use crate::media::{Color, ColorMatrix, ColorMatrixAlphaMode};
 
 /// The most effects (and source parameters) a graph may have; a larger
 /// graph is `EffectTooComplex`.
@@ -49,18 +50,64 @@ pub(crate) struct EffectColor {
     pub(crate) value: Color,
 }
 
+impl EffectColor {
+    fn new(value: Color) -> Self {
+        Self { key: None, value }
+    }
+}
+
+/// The matrix of a colour matrix node: a fixed matrix, or one made from an
+/// animatable member.
+#[derive(Clone, Debug, PartialEq)]
+pub(crate) enum EffectMatrix {
+    Fixed(ColorMatrix),
+    /// `ColorMatrix::saturation` of the member.
+    Saturation(EffectScalar),
+    /// `ColorMatrix::tint` of the member.
+    Tint(EffectColor),
+}
+
 /// What a node of a loaded graph does.
 #[derive(Clone, Debug, PartialEq)]
 pub(crate) enum EffectNodeKind {
     /// A source parameter: the brush bound to the name, or the composed
     /// layer of a layer visual.
     Parameter(String),
-    GaussianBlur { amount: EffectScalar, source: Box<EffectNode> },
+    GaussianBlur {
+        amount: EffectScalar,
+        /// The `Hard` border mode: the blur reads the source beyond the area
+        /// of the brush, so its edges do not fade.
+        hard: bool,
+        source: Box<EffectNode>,
+    },
     Opacity { opacity: EffectScalar, source: Box<EffectNode> },
     CrossFade { weight: EffectScalar, source1: Box<EffectNode>, source2: Box<EffectNode> },
-    /// The sources drawn over each other (source-over).
-    Composite(Vec<EffectNode>),
+    /// The sources composed onto each other with a mode, the first at the
+    /// bottom.
+    Composite { mode: BitmapBlendingMode, sources: Vec<EffectNode> },
     ColorSource(EffectColor),
+    /// The foreground mixed into the background.
+    Blend { mode: BitmapBlendingMode, background: Box<EffectNode>, foreground: Box<EffectNode> },
+    /// The source through a colour matrix.
+    ColorMatrix { matrix: EffectMatrix, alpha_mode: ColorMatrixAlphaMode, source: Box<EffectNode> },
+    /// The source multiplied by the alpha of the mask.
+    AlphaMask { source: Box<EffectNode>, mask: Box<EffectNode> },
+    /// The source, tiled when it is a surface brush and `tile` is set.
+    Border { tile: bool, source: Box<EffectNode> },
+    /// `multiply * s1 * s2 + source1 * s1 + source2 * s2 + offset` where
+    /// one of the sources is a colour source (`color`): a colour matrix of
+    /// the other (`image`).
+    ArithmeticWithColor {
+        multiply: EffectScalar,
+        source1: EffectScalar,
+        source2: EffectScalar,
+        offset: EffectScalar,
+        image_is_source1: bool,
+        image: Box<EffectNode>,
+        color: Box<EffectNode>,
+    },
+    /// The lighting of the lights that reach the painted visual.
+    SceneLighting { ambient: EffectScalar, diffuse: EffectScalar, specular: EffectScalar, shine: EffectScalar },
 }
 
 /// A node of a loaded graph: an effect with its name, or a source
@@ -76,10 +123,41 @@ impl EffectNode {
     /// The inputs of the node, in order.
     pub(crate) fn sources(&self) -> Vec<&EffectNode> {
         match &self.kind {
-            EffectNodeKind::Parameter(_) | EffectNodeKind::ColorSource(_) => Vec::new(),
-            EffectNodeKind::GaussianBlur { source, .. } | EffectNodeKind::Opacity { source, .. } => vec![&**source],
+            EffectNodeKind::Parameter(_) | EffectNodeKind::ColorSource(_) | EffectNodeKind::SceneLighting { .. } => {
+                Vec::new()
+            }
+            EffectNodeKind::GaussianBlur { source, .. }
+            | EffectNodeKind::Opacity { source, .. }
+            | EffectNodeKind::ColorMatrix { source, .. }
+            | EffectNodeKind::Border { source, .. } => vec![&**source],
             EffectNodeKind::CrossFade { source1, source2, .. } => vec![&**source1, &**source2],
-            EffectNodeKind::Composite(sources) => sources.iter().collect(),
+            EffectNodeKind::Composite { sources, .. } => sources.iter().collect(),
+            EffectNodeKind::Blend { background, foreground, .. } => vec![&**background, &**foreground],
+            EffectNodeKind::AlphaMask { source, mask } => vec![&**source, &**mask],
+            EffectNodeKind::ArithmeticWithColor { image, color, image_is_source1, .. } => {
+                if *image_is_source1 {
+                    vec![&**image, &**color]
+                } else {
+                    vec![&**color, &**image]
+                }
+            }
+        }
+    }
+
+    fn sources_mut(&mut self) -> Vec<&mut EffectNode> {
+        match &mut self.kind {
+            EffectNodeKind::Parameter(_) | EffectNodeKind::ColorSource(_) | EffectNodeKind::SceneLighting { .. } => {
+                Vec::new()
+            }
+            EffectNodeKind::GaussianBlur { source, .. }
+            | EffectNodeKind::Opacity { source, .. }
+            | EffectNodeKind::ColorMatrix { source, .. }
+            | EffectNodeKind::Border { source, .. } => vec![&mut **source],
+            EffectNodeKind::CrossFade { source1, source2, .. } => vec![&mut **source1, &mut **source2],
+            EffectNodeKind::Composite { sources, .. } => sources.iter_mut().collect(),
+            EffectNodeKind::Blend { background, foreground, .. } => vec![&mut **background, &mut **foreground],
+            EffectNodeKind::AlphaMask { source, mask } => vec![&mut **source, &mut **mask],
+            EffectNodeKind::ArithmeticWithColor { image, color, .. } => vec![&mut **image, &mut **color],
         }
     }
 
@@ -89,49 +167,66 @@ impl EffectNode {
         let mut found = false;
         if self.name == effect && !self.name.is_empty() {
             let is = |name: &str| property.eq_ignore_ascii_case(name);
+            let key = Some(key.to_owned());
             match &mut self.kind {
-                EffectNodeKind::GaussianBlur { amount, .. } if is("BlurAmount") => amount.key = Some(key.to_owned()),
-                EffectNodeKind::Opacity { opacity, .. } if is("Opacity") => opacity.key = Some(key.to_owned()),
-                EffectNodeKind::CrossFade { weight, .. } if is("Weight") || is("CrossFade") => {
-                    weight.key = Some(key.to_owned())
+                EffectNodeKind::GaussianBlur { amount, .. } if is("BlurAmount") => amount.key = key,
+                EffectNodeKind::Opacity { opacity, .. } if is("Opacity") => opacity.key = key,
+                EffectNodeKind::CrossFade { weight, .. } if is("Weight") || is("CrossFade") => weight.key = key,
+                EffectNodeKind::ColorSource(color) if is("Color") => color.key = key,
+                EffectNodeKind::ColorMatrix { matrix: EffectMatrix::Saturation(saturation), .. }
+                    if is("Saturation") =>
+                {
+                    saturation.key = key
                 }
-                EffectNodeKind::ColorSource(color) if is("Color") => color.key = Some(key.to_owned()),
+                EffectNodeKind::ColorMatrix { matrix: EffectMatrix::Tint(color), .. } if is("Color") => {
+                    color.key = key
+                }
+                EffectNodeKind::ArithmeticWithColor { multiply, .. } if is("MultiplyAmount") => multiply.key = key,
+                EffectNodeKind::ArithmeticWithColor { source1, .. } if is("Source1Amount") => source1.key = key,
+                EffectNodeKind::ArithmeticWithColor { source2, .. } if is("Source2Amount") => source2.key = key,
+                EffectNodeKind::ArithmeticWithColor { offset, .. } if is("Offset") => offset.key = key,
+                EffectNodeKind::SceneLighting { ambient, .. } if is("AmbientAmount") => ambient.key = key,
+                EffectNodeKind::SceneLighting { diffuse, .. } if is("DiffuseAmount") => diffuse.key = key,
+                EffectNodeKind::SceneLighting { specular, .. } if is("SpecularAmount") => specular.key = key,
+                EffectNodeKind::SceneLighting { shine, .. } if is("SpecularShine") => shine.key = key,
                 // A member that exists but is not animatable, or no member of
                 // that name.
                 _ => return Err(()),
             }
             found = true;
         }
-        match &mut self.kind {
-            EffectNodeKind::Parameter(_) | EffectNodeKind::ColorSource(_) => {}
-            EffectNodeKind::GaussianBlur { source, .. } | EffectNodeKind::Opacity { source, .. } => {
-                found |= source.bind_animatable(effect, property, key)?;
-            }
-            EffectNodeKind::CrossFade { source1, source2, .. } => {
-                found |= source1.bind_animatable(effect, property, key)?;
-                found |= source2.bind_animatable(effect, property, key)?;
-            }
-            EffectNodeKind::Composite(sources) => {
-                for source in sources {
-                    found |= source.bind_animatable(effect, property, key)?;
-                }
-            }
+        for source in self.sources_mut() {
+            found |= source.bind_animatable(effect, property, key)?;
         }
         Ok(found)
     }
 
     /// The initial value of the animatable property bound to `key`.
     fn animatable_value(&self, key: &str) -> Option<EffectPropertyValue> {
+        let scalar = |value: &EffectScalar| {
+            (value.key.as_deref() == Some(key)).then_some(EffectPropertyValue::Scalar(value.value))
+        };
+        let color =
+            |value: &EffectColor| (value.key.as_deref() == Some(key)).then_some(EffectPropertyValue::Color(value.value));
         let own = match &self.kind {
             EffectNodeKind::GaussianBlur { amount: value, .. }
             | EffectNodeKind::Opacity { opacity: value, .. }
-            | EffectNodeKind::CrossFade { weight: value, .. } => {
-                (value.key.as_deref() == Some(key)).then_some(EffectPropertyValue::Scalar(value.value))
+            | EffectNodeKind::CrossFade { weight: value, .. } => scalar(value),
+            EffectNodeKind::ColorSource(value) => color(value),
+            EffectNodeKind::ColorMatrix { matrix: EffectMatrix::Saturation(value), .. } => scalar(value),
+            EffectNodeKind::ColorMatrix { matrix: EffectMatrix::Tint(value), .. } => color(value),
+            EffectNodeKind::ArithmeticWithColor { multiply, source1, source2, offset, .. } => {
+                scalar(multiply).or_else(|| scalar(source1)).or_else(|| scalar(source2)).or_else(|| scalar(offset))
             }
-            EffectNodeKind::ColorSource(color) => {
-                (color.key.as_deref() == Some(key)).then_some(EffectPropertyValue::Color(color.value))
+            EffectNodeKind::SceneLighting { ambient, diffuse, specular, shine } => {
+                scalar(ambient).or_else(|| scalar(diffuse)).or_else(|| scalar(specular)).or_else(|| scalar(shine))
             }
-            EffectNodeKind::Parameter(_) | EffectNodeKind::Composite(_) => None,
+            EffectNodeKind::Parameter(_)
+            | EffectNodeKind::Composite { .. }
+            | EffectNodeKind::Blend { .. }
+            | EffectNodeKind::ColorMatrix { matrix: EffectMatrix::Fixed(_), .. }
+            | EffectNodeKind::AlphaMask { .. }
+            | EffectNodeKind::Border { .. } => None,
         };
         own.or_else(|| self.sources().into_iter().find_map(|source| source.animatable_value(key)))
     }
@@ -247,6 +342,10 @@ fn too_complex() -> LoadError {
     (CompositionEffectFactoryLoadStatus::EffectTooComplex, CompositionEffectFactoryError::EffectTooComplex)
 }
 
+fn not_supported(effect: &GraphicsEffect) -> LoadError {
+    (CompositionEffectFactoryLoadStatus::Other, CompositionEffectFactoryError::EffectTypeNotSupported(effect.type_name()))
+}
+
 fn build_source(source: &Option<GraphicsEffectSource>, owner: &GraphicsEffect, depth: usize, count: &mut usize) -> Result<EffectNode, LoadError> {
     match source {
         None => Err((
@@ -264,49 +363,253 @@ fn build_source(source: &Option<GraphicsEffectSource>, owner: &GraphicsEffect, d
     }
 }
 
+/// The blend mode of the drawing contexts for a composite mode; `None` for
+/// `MaskInvert`, which has none.
+pub(crate) fn composite_blending_mode(mode: CanvasComposite) -> Option<BitmapBlendingMode> {
+    Some(match mode {
+        CanvasComposite::SourceOver => BitmapBlendingMode::SourceOver,
+        CanvasComposite::DestinationOver => BitmapBlendingMode::DestinationOver,
+        CanvasComposite::SourceIn => BitmapBlendingMode::SourceIn,
+        CanvasComposite::DestinationIn => BitmapBlendingMode::DestinationIn,
+        CanvasComposite::SourceOut => BitmapBlendingMode::SourceOut,
+        CanvasComposite::DestinationOut => BitmapBlendingMode::DestinationOut,
+        CanvasComposite::SourceAtop => BitmapBlendingMode::SourceAtop,
+        CanvasComposite::DestinationAtop => BitmapBlendingMode::DestinationAtop,
+        CanvasComposite::Xor => BitmapBlendingMode::Xor,
+        CanvasComposite::Add => BitmapBlendingMode::Plus,
+        CanvasComposite::Copy | CanvasComposite::BoundedCopy => BitmapBlendingMode::Source,
+        CanvasComposite::MaskInvert => return None,
+    })
+}
+
+/// The blend mode of the drawing contexts for a blend effect mode; `None`
+/// for the modes they do not have.
+pub(crate) fn blend_blending_mode(mode: BlendEffectMode) -> Option<BitmapBlendingMode> {
+    Some(match mode {
+        BlendEffectMode::Multiply => BitmapBlendingMode::Multiply,
+        BlendEffectMode::Screen => BitmapBlendingMode::Screen,
+        BlendEffectMode::Darken => BitmapBlendingMode::Darken,
+        BlendEffectMode::Lighten => BitmapBlendingMode::Lighten,
+        BlendEffectMode::ColorBurn => BitmapBlendingMode::ColorBurn,
+        BlendEffectMode::ColorDodge => BitmapBlendingMode::ColorDodge,
+        BlendEffectMode::LinearDodge => BitmapBlendingMode::Plus,
+        BlendEffectMode::Overlay => BitmapBlendingMode::Overlay,
+        BlendEffectMode::SoftLight => BitmapBlendingMode::SoftLight,
+        BlendEffectMode::HardLight => BitmapBlendingMode::HardLight,
+        BlendEffectMode::Difference => BitmapBlendingMode::Difference,
+        BlendEffectMode::Exclusion => BitmapBlendingMode::Exclusion,
+        BlendEffectMode::Hue => BitmapBlendingMode::Hue,
+        BlendEffectMode::Saturation => BitmapBlendingMode::Saturation,
+        BlendEffectMode::Color => BitmapBlendingMode::Color,
+        BlendEffectMode::Luminosity => BitmapBlendingMode::Luminosity,
+        BlendEffectMode::Dissolve
+        | BlendEffectMode::LinearBurn
+        | BlendEffectMode::DarkerColor
+        | BlendEffectMode::LighterColor
+        | BlendEffectMode::VividLight
+        | BlendEffectMode::LinearLight
+        | BlendEffectMode::PinLight
+        | BlendEffectMode::HardMix
+        | BlendEffectMode::Subtract
+        | BlendEffectMode::Division => return None,
+    })
+}
+
+/// The colour source an input is, if it is one: its loaded node.
+fn color_source_of(source: &Option<GraphicsEffectSource>) -> Option<&GraphicsEffect> {
+    match source {
+        Some(GraphicsEffectSource::Effect(effect)) if matches!(**effect, GraphicsEffect::ColorSource(_)) => Some(effect),
+        _ => None,
+    }
+}
+
 fn build_node(effect: &GraphicsEffect, depth: usize, count: &mut usize) -> Result<EffectNode, LoadError> {
     *count += 1;
     if depth > MAX_EFFECT_DEPTH || *count > MAX_EFFECT_NODES {
         return Err(too_complex());
     }
+    let boxed = |source: &Option<GraphicsEffectSource>, count: &mut usize| -> Result<Box<EffectNode>, LoadError> {
+        Ok(Box::new(build_source(source, effect, depth, count)?))
+    };
+    let matrix_of = |matrix: EffectMatrix, alpha_mode, source: &Option<GraphicsEffectSource>, count: &mut usize| {
+        Ok::<_, LoadError>(EffectNodeKind::ColorMatrix { matrix, alpha_mode, source: boxed(source, count)? })
+    };
     let kind = match effect {
         GraphicsEffect::GaussianBlur(blur) => EffectNodeKind::GaussianBlur {
             amount: EffectScalar::new(blur.blur_amount),
-            source: Box::new(build_source(&blur.source, effect, depth, count)?),
+            hard: blur.border_mode == EffectBorderMode::Hard,
+            source: boxed(&blur.source, count)?,
         },
-        GraphicsEffect::Opacity(opacity) => EffectNodeKind::Opacity {
-            opacity: EffectScalar::new(opacity.opacity),
-            source: Box::new(build_source(&opacity.source, effect, depth, count)?),
-        },
+        GraphicsEffect::Opacity(opacity) => {
+            EffectNodeKind::Opacity { opacity: EffectScalar::new(opacity.opacity), source: boxed(&opacity.source, count)? }
+        }
         GraphicsEffect::CrossFade(cross_fade) => EffectNodeKind::CrossFade {
             weight: EffectScalar::new(cross_fade.weight),
-            source1: Box::new(build_source(&cross_fade.source1, effect, depth, count)?),
-            source2: Box::new(build_source(&cross_fade.source2, effect, depth, count)?),
+            source1: boxed(&cross_fade.source1, count)?,
+            source2: boxed(&cross_fade.source2, count)?,
         },
         GraphicsEffect::Composite(composite) => {
-            if composite.mode != CanvasComposite::SourceOver {
+            let Some(mode) = composite_blending_mode(composite.mode) else {
                 return Err((
                     CompositionEffectFactoryLoadStatus::Other,
                     CompositionEffectFactoryError::CompositeModeNotSupported(composite.mode),
                 ));
-            }
+            };
             let mut sources = Vec::with_capacity(composite.sources.len());
             for source in &composite.sources {
                 sources.push(build_source(&Some(source.clone()), effect, depth, count)?);
             }
-            EffectNodeKind::Composite(sources)
+            EffectNodeKind::Composite { mode, sources }
         }
-        GraphicsEffect::ColorSource(color) => {
-            EffectNodeKind::ColorSource(EffectColor { key: None, value: color.color })
+        GraphicsEffect::ColorSource(color) => EffectNodeKind::ColorSource(EffectColor::new(color.color)),
+        GraphicsEffect::Saturation(saturation) => matrix_of(
+            EffectMatrix::Saturation(EffectScalar::new(saturation.saturation)),
+            ColorMatrixAlphaMode::Straight,
+            &saturation.source,
+            count,
+        )?,
+        GraphicsEffect::Blend(blend) => {
+            let Some(mode) = blend_blending_mode(blend.mode) else {
+                return Err((
+                    CompositionEffectFactoryLoadStatus::Other,
+                    CompositionEffectFactoryError::BlendModeNotSupported(blend.mode),
+                ));
+            };
+            EffectNodeKind::Blend {
+                mode,
+                background: boxed(&blend.background, count)?,
+                foreground: boxed(&blend.foreground, count)?,
+            }
         }
-        // Deviation (winui-composition.md): the drawing contexts have no
-        // colour matrix.
-        GraphicsEffect::Saturation(_) => {
-            return Err((
-                CompositionEffectFactoryLoadStatus::Other,
-                CompositionEffectFactoryError::EffectTypeNotSupported(effect.type_name()),
-            ))
+        GraphicsEffect::ColorMatrix(matrix) => {
+            matrix_of(EffectMatrix::Fixed(matrix.color_matrix), matrix.alpha_mode, &matrix.source, count)?
         }
+        GraphicsEffect::Tint(tint) => matrix_of(
+            EffectMatrix::Tint(EffectColor::new(tint.color)),
+            ColorMatrixAlphaMode::Straight,
+            &tint.source,
+            count,
+        )?,
+        GraphicsEffect::Invert(invert) => {
+            matrix_of(EffectMatrix::Fixed(ColorMatrix::invert()), ColorMatrixAlphaMode::Straight, &invert.source, count)?
+        }
+        GraphicsEffect::Grayscale(grayscale) => matrix_of(
+            EffectMatrix::Fixed(ColorMatrix::grayscale()),
+            ColorMatrixAlphaMode::Straight,
+            &grayscale.source,
+            count,
+        )?,
+        GraphicsEffect::LuminanceToAlpha(luminance) => matrix_of(
+            EffectMatrix::Fixed(ColorMatrix::luminance_to_alpha()),
+            ColorMatrixAlphaMode::Straight,
+            &luminance.source,
+            count,
+        )?,
+        GraphicsEffect::ArithmeticComposite(arithmetic) => {
+            // Drawn as a colour matrix of the image source when the other
+            // source is a colour.
+            let (image_is_source1, image, color) = match (color_source_of(&arithmetic.source1), color_source_of(&arithmetic.source2)) {
+                (_, Some(_)) => (true, &arithmetic.source1, &arithmetic.source2),
+                (Some(_), None) => (false, &arithmetic.source2, &arithmetic.source1),
+                (None, None) => return Err(not_supported(effect)),
+            };
+            EffectNodeKind::ArithmeticWithColor {
+                multiply: EffectScalar::new(arithmetic.multiply_amount),
+                source1: EffectScalar::new(arithmetic.source1_amount),
+                source2: EffectScalar::new(arithmetic.source2_amount),
+                offset: EffectScalar::new(arithmetic.offset),
+                image_is_source1,
+                image: boxed(image, count)?,
+                color: boxed(color, count)?,
+            }
+        }
+        GraphicsEffect::AlphaMask(mask) => {
+            EffectNodeKind::AlphaMask { source: boxed(&mask.source, count)?, mask: boxed(&mask.alpha_mask, count)? }
+        }
+        GraphicsEffect::Border(border) => EffectNodeKind::Border {
+            tile: border.extend_x != CanvasEdgeBehavior::Clamp || border.extend_y != CanvasEdgeBehavior::Clamp,
+            source: boxed(&border.source, count)?,
+        },
+        GraphicsEffect::SceneLighting(lighting) => EffectNodeKind::SceneLighting {
+            ambient: EffectScalar::new(lighting.ambient_amount),
+            diffuse: EffectScalar::new(lighting.diffuse_amount),
+            specular: EffectScalar::new(lighting.specular_amount),
+            shine: EffectScalar::new(lighting.specular_shine),
+        },
     };
     Ok(EffectNode { name: effect.name().to_owned(), kind })
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::media::Colors;
+    use crate::rendering::composition::effects::{
+        ArithmeticCompositeEffect, BlendEffect, ColorSourceEffect, CompositionEffectSourceParameter, SaturationEffect,
+        SceneLightingEffect,
+    };
+
+    fn parameter(name: &str) -> Option<GraphicsEffectSource> {
+        Some(CompositionEffectSourceParameter::new(name).into())
+    }
+
+    #[test]
+    fn saturation_loads_as_an_animatable_colour_matrix() {
+        let effect: GraphicsEffect =
+            SaturationEffect { name: "Saturation".into(), saturation: 0.25, source: parameter("source") }.into();
+        let graph = EffectGraph::load(&effect, &["Saturation.Saturation"]).expect("loads");
+        assert_eq!(graph.animatable, vec![("Saturation.Saturation".to_owned(), EffectPropertyValue::Scalar(0.25))]);
+        assert!(matches!(graph.root.unwrap().kind, EffectNodeKind::ColorMatrix { matrix: EffectMatrix::Saturation(_), .. }));
+    }
+
+    #[test]
+    fn blend_modes_without_a_counterpart_do_not_load() {
+        let effect: GraphicsEffect = BlendEffect {
+            mode: BlendEffectMode::Dissolve,
+            background: parameter("a"),
+            foreground: parameter("b"),
+            ..Default::default()
+        }
+        .into();
+        let error = EffectGraph::load(&effect, &[]).unwrap_err();
+        assert_eq!(error.1, CompositionEffectFactoryError::BlendModeNotSupported(BlendEffectMode::Dissolve));
+        let effect: GraphicsEffect = BlendEffect {
+            mode: BlendEffectMode::Luminosity,
+            background: parameter("a"),
+            foreground: parameter("b"),
+            ..Default::default()
+        }
+        .into();
+        let graph = EffectGraph::load(&effect, &[]).expect("loads");
+        assert!(matches!(
+            graph.root.unwrap().kind,
+            EffectNodeKind::Blend { mode: BitmapBlendingMode::Luminosity, .. }
+        ));
+    }
+
+    #[test]
+    fn arithmetic_composite_needs_a_colour_on_one_side() {
+        let both_images: GraphicsEffect =
+            ArithmeticCompositeEffect { source1: parameter("a"), source2: parameter("b"), ..Default::default() }.into();
+        assert!(EffectGraph::load(&both_images, &[]).is_err());
+
+        let with_color: GraphicsEffect = ArithmeticCompositeEffect {
+            name: "Arithmetic".into(),
+            source1: parameter("a"),
+            source2: Some(ColorSourceEffect { name: "Base".into(), color: Colors::RED }.into()),
+            ..Default::default()
+        }
+        .into();
+        let graph = EffectGraph::load(&with_color, &["Base.Color", "Arithmetic.Offset"]).expect("loads");
+        assert_eq!(graph.parameters, vec!["a".to_owned()]);
+        assert_eq!(graph.animatable.len(), 2);
+    }
+
+    #[test]
+    fn scene_lighting_amounts_are_animatable() {
+        let effect: GraphicsEffect = SceneLightingEffect { name: "Light".into(), ..Default::default() }.into();
+        let graph = EffectGraph::load(&effect, &["Light.DiffuseAmount"]).expect("loads");
+        assert_eq!(graph.animatable, vec![("Light.DiffuseAmount".to_owned(), EffectPropertyValue::Scalar(1.0))]);
+        assert!(graph.layer_path.is_none());
+    }
 }

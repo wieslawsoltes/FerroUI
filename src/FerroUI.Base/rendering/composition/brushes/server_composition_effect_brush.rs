@@ -2,12 +2,13 @@
 //! the drawing of an effect graph over its sources, as a brush and as the
 //! effect of a layer visual.
 
-use super::paint_composition_brush;
+use super::{paint_composition_brush, ServerCompositionSurfaceBrush};
 use crate::media::immutable::ImmutableSolidColorBrush;
-use crate::media::{BoxShadows, Color, EffectExtensions, IEffect, ImmutableBlurEffect};
+use crate::media::imaging::BitmapBlendingMode;
+use crate::media::{BoxShadows, Color, ColorMatrix, ColorMatrixAlphaMode, EffectExtensions, IEffect, ImmutableBlurEffect};
 use crate::platform::IDrawingContextImpl;
 use crate::rendering::composition::effects::{
-    blur_amount_to_radius, EffectColor, EffectGraph, EffectNode, EffectNodeKind, EffectScalar,
+    blur_amount_to_radius, EffectColor, EffectGraph, EffectMatrix, EffectNode, EffectNodeKind, EffectScalar,
 };
 use crate::rendering::composition::generated::{ServerCompositionBrushHooks, ServerCompositionBrushProps};
 use crate::rendering::composition::server::{
@@ -247,6 +248,105 @@ impl ServerCompositionEffectBrush {
         }
     }
 
+    /// The reach of a blur of `radius` beyond its area: how far a blur that
+    /// reads its source beyond the area (the `Hard` border mode) reads it.
+    fn blur_reach(radius: f64) -> f64 {
+        if radius <= 0.0 {
+            return 0.0;
+        }
+        let blur = ImmutableBlurEffect::new(radius);
+        let padding = EffectExtensions::get_effect_output_padding(Some(&blur as &dyn IEffect));
+        padding.left.max(padding.top).max(padding.right).max(padding.bottom)
+    }
+
+    /// The current matrix of a colour matrix node.
+    fn matrix(&self, matrix: &EffectMatrix) -> ColorMatrix {
+        match matrix {
+            EffectMatrix::Fixed(matrix) => *matrix,
+            EffectMatrix::Saturation(saturation) => ColorMatrix::saturation(self.scalar(saturation) as f32),
+            EffectMatrix::Tint(color) => {
+                let color = self.color(color);
+                ColorMatrix::tint([color.r, color.g, color.b, color.a].map(|channel| channel as f32 / 255.0))
+            }
+        }
+    }
+
+    /// The colour of a colour source node (premultiplied channels, 0 to 1).
+    fn node_color(&self, node: &EffectNode) -> [f32; 4] {
+        let EffectNodeKind::ColorSource(color) = &node.kind else { return [0.0; 4] };
+        let color = self.color(color);
+        let alpha = color.a as f32 / 255.0;
+        [color.r as f32 / 255.0 * alpha, color.g as f32 / 255.0 * alpha, color.b as f32 / 255.0 * alpha, alpha]
+    }
+
+    /// The colour matrix (on premultiplied colours) an arithmetic composite
+    /// of an image and a colour is: `image * (k1 c + k_image) + (k_color c + k4)`.
+    fn arithmetic_matrix(
+        &self,
+        multiply: &EffectScalar,
+        source1: &EffectScalar,
+        source2: &EffectScalar,
+        offset: &EffectScalar,
+        image_is_source1: bool,
+        color: &EffectNode,
+    ) -> ColorMatrix {
+        let c = self.node_color(color);
+        let k1 = self.scalar(multiply) as f32;
+        let (k_image, k_color) = if image_is_source1 {
+            (self.scalar(source1) as f32, self.scalar(source2) as f32)
+        } else {
+            (self.scalar(source2) as f32, self.scalar(source1) as f32)
+        };
+        let k4 = self.scalar(offset) as f32;
+        ColorMatrix::scale_and_offset(c.map(|c| k1 * c + k_image), c.map(|c| k_color * c + k4))
+    }
+
+    /// Pushes a blend layer when the canvas has them; returns whether it did.
+    fn push_blend(canvas: &mut dyn IDrawingContextImpl, rect: Rect, mode: BitmapBlendingMode) -> bool {
+        match canvas.as_drawing_context_impl_with_layer_effects() {
+            Some(layers) => {
+                layers.push_blend_layer(rect, mode);
+                true
+            }
+            // Deviation (winui-materials.md): without the layers of the
+            // drawing context the foreground is drawn source-over.
+            None => false,
+        }
+    }
+
+    fn pop_blend(canvas: &mut dyn IDrawingContextImpl, pushed: bool) {
+        if pushed {
+            if let Some(layers) = canvas.as_drawing_context_impl_with_layer_effects() {
+                layers.pop_blend_layer();
+            }
+        }
+    }
+
+    /// Pushes a colour matrix layer when the canvas has them and the matrix
+    /// changes something; returns whether it did.
+    fn push_matrix(canvas: &mut dyn IDrawingContextImpl, rect: Rect, matrix: &ColorMatrix, alpha_mode: ColorMatrixAlphaMode) -> bool {
+        if matrix.is_identity() {
+            return false;
+        }
+        match canvas.as_drawing_context_impl_with_layer_effects() {
+            Some(layers) => {
+                layers.push_color_matrix_layer(rect, matrix, alpha_mode);
+                true
+            }
+            // Deviation (winui-materials.md): without the layers of the
+            // drawing context the source is drawn unchanged.
+            None => false,
+        }
+    }
+
+    fn pop_matrix(canvas: &mut dyn IDrawingContextImpl, pushed: bool) {
+        if pushed {
+            if let Some(layers) = canvas.as_drawing_context_impl_with_layer_effects() {
+                layers.pop_color_matrix_layer();
+            }
+        }
+    }
+
     /// Paints `node` over `rect`.
     fn paint_node(&self, node: &EffectNode, canvas: &mut dyn IDrawingContextImpl, rect: Rect) {
         match &node.kind {
@@ -255,10 +355,24 @@ impl ServerCompositionEffectBrush {
                     paint_composition_brush(canvas, &source, rect);
                 }
             }
-            EffectNodeKind::GaussianBlur { amount, source } => {
-                let pushed = Self::push_blur(canvas, rect, self.blur_radius(amount));
-                self.paint_node(source, canvas, rect);
-                Self::pop_blur(canvas, pushed);
+            EffectNodeKind::GaussianBlur { amount, hard, source } => {
+                let radius = self.blur_radius(amount);
+                if *hard && Self::blur_is_pushed(canvas, radius) {
+                    // The `Hard` border mode: the blur reads its source beyond
+                    // the area, so its edges do not fade; its output is cut
+                    // to the area.
+                    let reach = Self::blur_reach(radius);
+                    let wide = rect.inflate(reach);
+                    canvas.push_clip(rect);
+                    let pushed = Self::push_blur(canvas, wide, radius);
+                    self.paint_node(source, canvas, wide);
+                    Self::pop_blur(canvas, pushed);
+                    canvas.pop_clip();
+                } else {
+                    let pushed = Self::push_blur(canvas, rect, radius);
+                    self.paint_node(source, canvas, rect);
+                    Self::pop_blur(canvas, pushed);
+                }
             }
             EffectNodeKind::Opacity { opacity, source } => {
                 self.paint_node_with_opacity(source, canvas, rect, self.unit(opacity));
@@ -270,10 +384,22 @@ impl ServerCompositionEffectBrush {
                 self.paint_node_with_opacity(source1, canvas, rect, 1.0 - weight);
                 self.paint_node_with_opacity(source2, canvas, rect, weight);
             }
-            EffectNodeKind::Composite(sources) => {
-                for source in sources {
-                    self.paint_node(source, canvas, rect);
+            EffectNodeKind::Composite { mode, sources } => {
+                if *mode == BitmapBlendingMode::SourceOver {
+                    for source in sources {
+                        self.paint_node(source, canvas, rect);
+                    }
+                    return;
                 }
+                // Each source composed onto what the sources before it made,
+                // in a layer of their own.
+                canvas.push_layer(rect);
+                for (index, source) in sources.iter().enumerate() {
+                    let pushed = index > 0 && Self::push_blend(canvas, rect, *mode);
+                    self.paint_node(source, canvas, rect);
+                    Self::pop_blend(canvas, pushed);
+                }
+                canvas.pop_layer();
             }
             EffectNodeKind::ColorSource(color) => {
                 let color = self.color(color);
@@ -281,6 +407,56 @@ impl ServerCompositionEffectBrush {
                     let brush = ImmutableSolidColorBrush::new(color);
                     canvas.draw_rectangle(Some(&brush), None, RoundedRect::from_rect(rect), &BoxShadows::default());
                 }
+            }
+            EffectNodeKind::Blend { mode, background, foreground } => {
+                // The background and the foreground mixed in a layer of their
+                // own, which is drawn source-over.
+                canvas.push_layer(rect);
+                self.paint_node(background, canvas, rect);
+                let pushed = Self::push_blend(canvas, rect, *mode);
+                self.paint_node(foreground, canvas, rect);
+                Self::pop_blend(canvas, pushed);
+                canvas.pop_layer();
+            }
+            EffectNodeKind::ColorMatrix { matrix, alpha_mode, source } => {
+                let matrix = self.matrix(matrix);
+                let pushed = Self::push_matrix(canvas, rect, &matrix, *alpha_mode);
+                self.paint_node(source, canvas, rect);
+                Self::pop_matrix(canvas, pushed);
+            }
+            EffectNodeKind::AlphaMask { source, mask } => {
+                canvas.push_layer(rect);
+                self.paint_node(source, canvas, rect);
+                let pushed = Self::push_blend(canvas, rect, BitmapBlendingMode::DestinationIn);
+                if pushed {
+                    self.paint_node(mask, canvas, rect);
+                }
+                Self::pop_blend(canvas, pushed);
+                canvas.pop_layer();
+            }
+            EffectNodeKind::Border { tile, source } => {
+                let surface = match &source.kind {
+                    EffectNodeKind::Parameter(name) if *tile => self.source(name),
+                    _ => None,
+                };
+                match surface.as_ref().and_then(|surface| surface.as_any().downcast_ref::<ServerCompositionSurfaceBrush>()) {
+                    Some(surface) => surface.paint_tiled(canvas, rect),
+                    None => self.paint_node(source, canvas, rect),
+                }
+            }
+            EffectNodeKind::ArithmeticWithColor { multiply, source1, source2, offset, image_is_source1, image, color } => {
+                let matrix = self.arithmetic_matrix(multiply, source1, source2, offset, *image_is_source1, color);
+                let pushed = Self::push_matrix(canvas, rect, &matrix, ColorMatrixAlphaMode::Premultiplied);
+                self.paint_node(image, canvas, rect);
+                Self::pop_matrix(canvas, pushed);
+            }
+            EffectNodeKind::SceneLighting { ambient, diffuse, .. } => {
+                crate::rendering::composition::server::paint_scene_lighting(
+                    canvas,
+                    rect,
+                    self.scalar(ambient),
+                    self.scalar(diffuse),
+                );
             }
         }
     }
@@ -319,9 +495,11 @@ impl ServerCompositionEffectBrush {
             // are drawn here by the render walk.
             return;
         };
+        let before = phase == LayerPhase::Before;
+        let has_layers = canvas.as_drawing_context_impl_with_layer_effects().is_some();
         match &node.kind {
-            EffectNodeKind::Parameter(_) | EffectNodeKind::ColorSource(_) => {}
-            EffectNodeKind::GaussianBlur { amount, source } => {
+            EffectNodeKind::Parameter(_) | EffectNodeKind::ColorSource(_) | EffectNodeKind::SceneLighting { .. } => {}
+            EffectNodeKind::GaussianBlur { amount, source, .. } => {
                 let radius = self.blur_radius(amount);
                 match phase {
                     LayerPhase::Before => {
@@ -353,22 +531,114 @@ impl ServerCompositionEffectBrush {
                     self.wrap_layer_in_opacity(source2, rest, canvas, rect, phase, weight);
                 }
             }
-            EffectNodeKind::Composite(sources) => {
+            EffectNodeKind::Composite { mode, sources } => {
                 let Some(layer) = sources.get(index) else { return };
-                match phase {
-                    LayerPhase::Before => {
-                        for source in &sources[..index] {
-                            self.paint_node(source, canvas, rect);
-                        }
-                        self.paint_around_layer(layer, rest, canvas, rect, phase);
+                let blended = *mode != BitmapBlendingMode::SourceOver && has_layers;
+                if before {
+                    if blended {
+                        canvas.push_layer(rect);
                     }
-                    LayerPhase::After => {
-                        self.paint_around_layer(layer, rest, canvas, rect, phase);
-                        for source in &sources[index + 1..] {
-                            self.paint_node(source, canvas, rect);
-                        }
+                    for (position, source) in sources[..index].iter().enumerate() {
+                        let pushed = blended && position > 0 && Self::push_blend(canvas, rect, *mode);
+                        self.paint_node(source, canvas, rect);
+                        Self::pop_blend(canvas, pushed);
+                    }
+                    if blended && index > 0 {
+                        Self::push_blend(canvas, rect, *mode);
+                    }
+                    self.paint_around_layer(layer, rest, canvas, rect, phase);
+                } else {
+                    self.paint_around_layer(layer, rest, canvas, rect, phase);
+                    Self::pop_blend(canvas, blended && index > 0);
+                    for source in &sources[index + 1..] {
+                        let pushed = blended && Self::push_blend(canvas, rect, *mode);
+                        self.paint_node(source, canvas, rect);
+                        Self::pop_blend(canvas, pushed);
+                    }
+                    if blended {
+                        canvas.pop_layer();
                     }
                 }
+            }
+            EffectNodeKind::Blend { mode, background, foreground } => {
+                if index == 0 {
+                    // The layer is the background.
+                    if before {
+                        canvas.push_layer(rect);
+                        self.paint_around_layer(background, rest, canvas, rect, phase);
+                    } else {
+                        self.paint_around_layer(background, rest, canvas, rect, phase);
+                        let pushed = Self::push_blend(canvas, rect, *mode);
+                        self.paint_node(foreground, canvas, rect);
+                        Self::pop_blend(canvas, pushed);
+                        canvas.pop_layer();
+                    }
+                } else if before {
+                    // The layer is the foreground.
+                    canvas.push_layer(rect);
+                    self.paint_node(background, canvas, rect);
+                    Self::push_blend(canvas, rect, *mode);
+                    self.paint_around_layer(foreground, rest, canvas, rect, phase);
+                } else {
+                    self.paint_around_layer(foreground, rest, canvas, rect, phase);
+                    Self::pop_blend(canvas, has_layers);
+                    canvas.pop_layer();
+                }
+            }
+            EffectNodeKind::ColorMatrix { matrix, alpha_mode, source } => {
+                let matrix = self.matrix(matrix);
+                if before {
+                    Self::push_matrix(canvas, rect, &matrix, *alpha_mode);
+                    self.paint_around_layer(source, rest, canvas, rect, phase);
+                } else {
+                    self.paint_around_layer(source, rest, canvas, rect, phase);
+                    Self::pop_matrix(canvas, has_layers && !matrix.is_identity());
+                }
+            }
+            EffectNodeKind::ArithmeticWithColor { multiply, source1, source2, offset, image_is_source1, image, color } => {
+                let image_index = if *image_is_source1 { 0 } else { 1 };
+                if index != image_index {
+                    // The layer is the colour: not an image.
+                    return;
+                }
+                let matrix = self.arithmetic_matrix(multiply, source1, source2, offset, *image_is_source1, color);
+                if before {
+                    Self::push_matrix(canvas, rect, &matrix, ColorMatrixAlphaMode::Premultiplied);
+                    self.paint_around_layer(image, rest, canvas, rect, phase);
+                } else {
+                    self.paint_around_layer(image, rest, canvas, rect, phase);
+                    Self::pop_matrix(canvas, has_layers && !matrix.is_identity());
+                }
+            }
+            EffectNodeKind::AlphaMask { source, mask } => {
+                if index == 0 {
+                    // The layer is the source.
+                    if before {
+                        canvas.push_layer(rect);
+                        self.paint_around_layer(source, rest, canvas, rect, phase);
+                    } else {
+                        self.paint_around_layer(source, rest, canvas, rect, phase);
+                        let pushed = Self::push_blend(canvas, rect, BitmapBlendingMode::DestinationIn);
+                        if pushed {
+                            self.paint_node(mask, canvas, rect);
+                        }
+                        Self::pop_blend(canvas, pushed);
+                        canvas.pop_layer();
+                    }
+                } else if before {
+                    // The layer is the mask.
+                    canvas.push_layer(rect);
+                    self.paint_node(source, canvas, rect);
+                    Self::push_blend(canvas, rect, BitmapBlendingMode::DestinationIn);
+                    self.paint_around_layer(mask, rest, canvas, rect, phase);
+                } else {
+                    self.paint_around_layer(mask, rest, canvas, rect, phase);
+                    Self::pop_blend(canvas, has_layers);
+                    canvas.pop_layer();
+                }
+            }
+            EffectNodeKind::Border { source, .. } => {
+                self.paint_around_layer(source, rest, canvas, rect, phase);
             }
         }
     }
@@ -519,8 +789,9 @@ impl IServerObject for ServerCompositionEffectBrush {
 
 /// The server-side counterpart of a
 /// [`CompositionBackdropBrush`](super::CompositionBackdropBrush): it paints
-/// nothing, as the drawing contexts cannot read back what is behind a
-/// visual.
+/// what was drawn under the visual that paints it, drawn again by the
+/// compositor ([`draw_backdrop`](crate::rendering::composition::server::draw_backdrop),
+/// winui-materials.md).
 pub struct ServerCompositionBackdropBrush {
     base: ServerRenderResource,
     props: ServerCompositionBrushProps,
@@ -546,10 +817,21 @@ impl ServerCompositionBackdropBrush {
         &self.props
     }
 
-    /// Paints nothing.
-    //
-    // Deviation (winui-composition.md): no backdrop can be read back.
-    pub fn paint(&self, _canvas: &mut dyn IDrawingContextImpl, _rect: Rect) {}
+    /// Paints the backdrop of the visual being drawn over `rect`, with the
+    /// opacity of the brush.
+    pub fn paint(&self, canvas: &mut dyn IDrawingContextImpl, rect: Rect) {
+        let opacity = self.props.opacity();
+        if opacity <= 0.0 {
+            return;
+        }
+        if opacity < 1.0 {
+            canvas.push_opacity(opacity, Some(rect));
+        }
+        crate::rendering::composition::server::draw_backdrop(canvas, rect);
+        if opacity < 1.0 {
+            canvas.pop_opacity();
+        }
+    }
 }
 
 impl_server_render_resource!(
@@ -561,6 +843,98 @@ impl_server_render_resource!(
 impl ServerCompositionBrushHooks for ServerCompositionBackdropBrush {}
 
 impl IServerObject for ServerCompositionBackdropBrush {
+    fn deserialize_changes_core(&self, reader: &mut BatchStreamReader<'_>, committed_at: Duration) {
+        self.props.deserialize_changes_core(self, reader, committed_at);
+    }
+
+    fn values_invalidated(&self) {
+        self.base.core().invalidated(self);
+    }
+
+    fn dispose(&self) {
+        self.base.core().dispose();
+    }
+
+    fn as_render_resource(self: Rc<Self>) -> Option<Rc<dyn IServerRenderResource>> {
+        Some(self)
+    }
+
+    fn as_animated(self: Rc<Self>) -> Option<Rc<dyn IAnimatedServerObject>> {
+        Some(self)
+    }
+
+    fn get_props(&self, type_id: TypeId) -> Option<&dyn Any> {
+        self.props.find_props(type_id)
+    }
+
+    fn as_any(&self) -> &dyn Any {
+        self
+    }
+
+    fn into_any_rc(self: Rc<Self>) -> Rc<dyn Any> {
+        self
+    }
+}
+
+/// The server-side counterpart of a
+/// [`CompositionHostBackdropBrush`](super::CompositionHostBackdropBrush):
+/// what is behind the window. Over a window that the platform composes over
+/// what is behind it (a transparency level other than none), the area of
+/// the brush is made transparent, so that shows through; over an opaque
+/// window the brush paints nothing.
+pub struct ServerCompositionHostBackdropBrush {
+    base: ServerRenderResource,
+    props: ServerCompositionBrushProps,
+}
+
+impl ServerCompositionHostBackdropBrush {
+    /// Creates the brush, active.
+    pub fn new(compositor: &Rc<ServerCompositor>) -> Rc<ServerCompositionHostBackdropBrush> {
+        let brush = Rc::new_cyclic(|this: &Weak<ServerCompositionHostBackdropBrush>| ServerCompositionHostBackdropBrush {
+            base: ServerRenderResource::new(
+                compositor,
+                this.clone() as Weak<dyn IAnimatedServerObject>,
+                this.clone() as Weak<dyn IServerRenderResource>,
+            ),
+            props: ServerCompositionBrushProps::new(),
+        });
+        brush.base.object().activate();
+        brush
+    }
+
+    /// The properties of the generated `ServerCompositionBrush`.
+    pub fn brush_props(&self) -> &ServerCompositionBrushProps {
+        &self.props
+    }
+
+    /// Makes `rect` transparent in a transparent window.
+    pub fn paint(&self, canvas: &mut dyn IDrawingContextImpl, rect: Rect) {
+        let transparent = crate::rendering::composition::server::painting_visual()
+            .and_then(|visual| visual.root())
+            .is_some_and(|target| target.transparency_level() != crate::rendering::composition::CompositionTransparencyLevel::None);
+        if !transparent || self.props.opacity() <= 0.0 {
+            return;
+        }
+        canvas.push_clip(rect);
+        if let Some(layers) = canvas.as_drawing_context_impl_with_layer_effects() {
+            // A layer composed with `Source`: what it holds (nothing)
+            // replaces what is under it.
+            layers.push_blend_layer(rect, BitmapBlendingMode::Source);
+            layers.pop_blend_layer();
+        }
+        canvas.pop_clip();
+    }
+}
+
+impl_server_render_resource!(
+    ServerCompositionHostBackdropBrush,
+    base,
+    composition_property: ServerCompositionBrushProps::get_composition_property
+);
+
+impl ServerCompositionBrushHooks for ServerCompositionHostBackdropBrush {}
+
+impl IServerObject for ServerCompositionHostBackdropBrush {
     fn deserialize_changes_core(&self, reader: &mut BatchStreamReader<'_>, committed_at: Duration) {
         self.props.deserialize_changes_core(self, reader, committed_at);
     }

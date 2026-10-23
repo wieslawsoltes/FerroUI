@@ -61,6 +61,10 @@ pub struct ServerCompositionTarget {
     frame_times: RefCell<Option<Vec<std::time::Duration>>>,
     /// Whether the render that is running drew a frame.
     drew_frame: Cell<bool>,
+    /// The backdrops drawn in the frames so far (winui-materials.md): the
+    /// visual that painted each and its area in device pixels. A dirty
+    /// rectangle that touches one makes all of it dirty.
+    backdrop_regions: RefCell<Vec<(Weak<ServerCompositionVisual>, LtrbRect)>>,
 }
 
 impl ServerCompositionTarget {
@@ -121,8 +125,48 @@ impl ServerCompositionTarget {
                     std::env::var("FERROUI_FRAME_TIMES").is_ok_and(|value| value == "1").then(Vec::new),
                 ),
                 drew_frame: Cell::new(false),
+                backdrop_regions: RefCell::new(Vec::new()),
             }
         })
+    }
+
+    /// Makes dirty the whole of every backdrop a dirty rectangle touches,
+    /// until no more is added: a blurred backdrop drawn in part would mix the
+    /// new pixels with the old ones (winui-materials.md, the backdrop).
+    fn expand_dirty_rects_over_backdrops(&self) {
+        let mut regions = self.backdrop_regions.borrow_mut();
+        regions.retain(|(visual, _)| visual.upgrade().is_some_and(|visual| visual.root().is_some()));
+        if regions.is_empty() || self.dirty_rects.is_empty() {
+            return;
+        }
+        let mut added = vec![false; regions.len()];
+        loop {
+            let mut changed = false;
+            for (index, (_, region)) in regions.iter().enumerate() {
+                if !added[index] && self.dirty_rects.intersects(*region) {
+                    self.dirty_rects.add_rect(*region);
+                    added[index] = true;
+                    changed = true;
+                }
+            }
+            if !changed {
+                break;
+            }
+        }
+    }
+
+    /// Keeps the backdrops drawn in the frame that just ended, replacing the
+    /// areas of the visuals that drew again.
+    fn record_backdrop_regions(&self) {
+        let drawn = super::take_backdrop_regions();
+        if drawn.is_empty() {
+            return;
+        }
+        let mut regions = self.backdrop_regions.borrow_mut();
+        for (visual, region) in drawn {
+            regions.retain(|(existing, _)| !existing.ptr_eq(&visual));
+            regions.push((visual, region));
+        }
     }
 
     pub fn compositor(&self) -> Option<Rc<ServerCompositor>> {
@@ -376,7 +420,9 @@ impl ServerCompositionTarget {
                 self.dirty_rects.add_rect(render_bounds);
             }
 
+            self.expand_dirty_rects_over_backdrops();
             if !self.dirty_rects.is_empty() {
+                super::take_backdrop_regions();
                 self.dirty_rects.finalize_frame(render_bounds);
                 let layer = self.layer.borrow().clone();
                 match layer {
@@ -402,6 +448,7 @@ impl ServerCompositionTarget {
                         self.overlays.draw(self, &mut *render_target_context, false);
                     }
                 }
+                self.record_backdrop_regions();
             }
 
             self.rendered_visuals.set(0);

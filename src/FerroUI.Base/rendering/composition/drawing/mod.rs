@@ -1,6 +1,7 @@
 //! Render data: the recorded form of what a visual draws, its resources,
 //! and the operations on it (replay, bounds, hit testing).
 
+mod composition_painted_brush;
 mod composition_render_data;
 mod composition_render_data_scene_brush_content;
 mod compositor_resource_helpers;
@@ -22,6 +23,10 @@ mod server_composition_render_data;
 mod server_composition_simple_pen;
 mod server_resource_helper_extensions;
 
+pub use composition_painted_brush::CompositionPaintedBrush;
+pub(crate) use composition_painted_brush::{
+    draw_with_painted_brushes, is_painted_composition_brush, PaintedShape,
+};
 pub use composition_render_data::CompositionRenderData;
 pub use composition_render_data_scene_brush_content::{
     CompositionRenderDataSceneBrushContent, CompositionRenderDataSceneBrushContentProperties,

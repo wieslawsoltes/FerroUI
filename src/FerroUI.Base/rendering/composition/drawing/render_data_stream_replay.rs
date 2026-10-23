@@ -1,4 +1,4 @@
-use super::{IRenderDataVisitor, RenderDataStream};
+use super::{draw_with_painted_brushes, IRenderDataVisitor, PaintedShape, RenderDataStream};
 use crate::media::{BoxShadows, IBrush, IPen, ImmediateDrawingContext, RenderOptions, TextOptions};
 use crate::platform::{IDrawingContextImpl, IGeometryImpl, IGlyphRunImpl};
 use crate::rendering::scene_graph::ICustomDrawOperation;
@@ -50,7 +50,9 @@ impl IRenderDataVisitor for ReplayVisitor<'_> {
     }
 
     fn on_draw_line(&mut self, server_pen: Option<&dyn IPen>, _client_pen: Option<&dyn IPen>, p1: Point, p2: Point) {
-        self.context.draw_line(server_pen, p1, p2);
+        if !draw_with_painted_brushes(self.context, None, server_pen, PaintedShape::Line(p1, p2), None) {
+            self.context.draw_line(server_pen, p1, p2);
+        }
     }
 
     fn on_draw_rectangle(
@@ -61,7 +63,10 @@ impl IRenderDataVisitor for ReplayVisitor<'_> {
         rect: RoundedRect,
         box_shadows: &BoxShadows,
     ) {
-        self.context.draw_rectangle(server_brush, server_pen, rect, box_shadows);
+        // A brush the compositor paints itself (winui-materials.md).
+        if !draw_with_painted_brushes(self.context, server_brush, server_pen, PaintedShape::Rectangle(rect), Some(box_shadows)) {
+            self.context.draw_rectangle(server_brush, server_pen, rect, box_shadows);
+        }
     }
 
     fn on_draw_ellipse(
@@ -71,7 +76,9 @@ impl IRenderDataVisitor for ReplayVisitor<'_> {
         _client_pen: Option<&dyn IPen>,
         rect: Rect,
     ) {
-        self.context.draw_ellipse(server_brush, server_pen, rect);
+        if !draw_with_painted_brushes(self.context, server_brush, server_pen, PaintedShape::Ellipse(rect), None) {
+            self.context.draw_ellipse(server_brush, server_pen, rect);
+        }
     }
 
     fn on_draw_geometry(
@@ -82,13 +89,17 @@ impl IRenderDataVisitor for ReplayVisitor<'_> {
         geometry: Option<&Arc<dyn IGeometryImpl>>,
     ) {
         if let Some(geometry) = geometry {
-            self.context.draw_geometry(server_brush, server_pen, &**geometry);
+            if !draw_with_painted_brushes(self.context, server_brush, server_pen, PaintedShape::Geometry(&**geometry), None) {
+                self.context.draw_geometry(server_brush, server_pen, &**geometry);
+            }
         }
     }
 
     fn on_draw_glyph_run(&mut self, server_brush: Option<&dyn IBrush>, glyph_run: Option<&std::sync::Arc<dyn IGlyphRunImpl>>) {
         if let Some(glyph_run) = glyph_run {
-            self.context.draw_glyph_run(server_brush, &**glyph_run);
+            if !draw_with_painted_brushes(self.context, server_brush, None, PaintedShape::GlyphRun(&**glyph_run), None) {
+                self.context.draw_glyph_run(server_brush, &**glyph_run);
+            }
         }
     }
 

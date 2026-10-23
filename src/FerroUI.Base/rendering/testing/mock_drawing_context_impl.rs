@@ -85,6 +85,11 @@ pub struct MockDrawingContextImpl {
     /// Whether the context reports acrylic support
     /// (`DrawRectangleWithMaterial <tint> <rect>`). Off by default.
     pub supports_acrylic: bool,
+    /// Whether the context reports blend and colour matrix layers
+    /// (`PushBlendLayer <bounds> <mode>` / `PopBlendLayer`,
+    /// `PushColorMatrixLayer <bounds>` / `PopColorMatrixLayer`). Off by
+    /// default.
+    pub supports_layer_effects: bool,
     /// Whether pushed render options are recorded with their values
     /// (`PushRenderOptions <text> <interpolation> <edge> <blending>
     /// <full opacity>`) rather than as `PushRenderOptions`. Off by default.
@@ -100,6 +105,7 @@ impl MockDrawingContextImpl {
             supports_effects: false,
             log_effects: false,
             supports_acrylic: false,
+            supports_layer_effects: false,
             log_render_options: false,
         }
     }
@@ -279,6 +285,16 @@ impl IDrawingContextImpl for MockDrawingContextImpl {
         }
     }
 
+    fn as_drawing_context_impl_with_layer_effects(
+        &mut self,
+    ) -> Option<&mut dyn crate::platform::IDrawingContextImplWithLayerEffects> {
+        if self.supports_layer_effects {
+            Some(self)
+        } else {
+            None
+        }
+    }
+
     fn as_drawing_context_with_acrylic_like_support(
         &mut self,
     ) -> Option<&mut dyn IDrawingContextWithAcrylicLikeSupport> {
@@ -313,6 +329,29 @@ impl IDrawingContextImplWithEffects for MockDrawingContextImpl {
 
     fn pop_effect(&mut self) {
         self.log.push("PopEffect");
+    }
+}
+
+impl crate::platform::IDrawingContextImplWithLayerEffects for MockDrawingContextImpl {
+    fn push_blend_layer(&mut self, bounds: Rect, mode: crate::media::imaging::BitmapBlendingMode) {
+        self.log.push(format!("PushBlendLayer {bounds} {mode:?}"));
+    }
+
+    fn pop_blend_layer(&mut self) {
+        self.log.push("PopBlendLayer");
+    }
+
+    fn push_color_matrix_layer(
+        &mut self,
+        bounds: Rect,
+        _matrix: &crate::media::ColorMatrix,
+        alpha_mode: crate::media::ColorMatrixAlphaMode,
+    ) {
+        self.log.push(format!("PushColorMatrixLayer {bounds} {alpha_mode:?}"));
+    }
+
+    fn pop_color_matrix_layer(&mut self) {
+        self.log.push("PopColorMatrixLayer");
     }
 }
 

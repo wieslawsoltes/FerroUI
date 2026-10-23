@@ -363,6 +363,15 @@ impl IDrawingContextImpl for CompositorDrawingContextProxy {
         Some(self)
     }
 
+    fn as_drawing_context_impl_with_layer_effects(
+        &mut self,
+    ) -> Option<&mut dyn crate::platform::IDrawingContextImplWithLayerEffects> {
+        match self.inner.as_drawing_context_impl_with_layer_effects() {
+            Some(_) => Some(self),
+            None => None,
+        }
+    }
+
     fn as_drawing_context_impl_with_fragments(&mut self) -> Option<&mut dyn IDrawingContextImplWithFragments> {
         match self.inner.as_drawing_context_impl_with_fragments() {
             Some(_) => Some(self),
@@ -392,6 +401,45 @@ impl IDrawingContextWithAcrylicLikeSupport for CompositorDrawingContextProxy {
                 rect,
                 &BoxShadows::default(),
             ),
+        }
+    }
+}
+
+impl crate::platform::IDrawingContextImplWithLayerEffects for CompositorDrawingContextProxy {
+    fn push_blend_layer(&mut self, bounds: Rect, mode: crate::media::imaging::BitmapBlendingMode) {
+        self.flush();
+        match self.inner.as_drawing_context_impl_with_layer_effects() {
+            Some(layers) => layers.push_blend_layer(bounds, mode),
+            None => self.inner.push_layer(bounds),
+        }
+    }
+
+    fn pop_blend_layer(&mut self) {
+        self.flush();
+        match self.inner.as_drawing_context_impl_with_layer_effects() {
+            Some(layers) => layers.pop_blend_layer(),
+            None => self.inner.pop_layer(),
+        }
+    }
+
+    fn push_color_matrix_layer(
+        &mut self,
+        bounds: Rect,
+        matrix: &crate::media::ColorMatrix,
+        alpha_mode: crate::media::ColorMatrixAlphaMode,
+    ) {
+        self.flush();
+        match self.inner.as_drawing_context_impl_with_layer_effects() {
+            Some(layers) => layers.push_color_matrix_layer(bounds, matrix, alpha_mode),
+            None => self.inner.push_layer(bounds),
+        }
+    }
+
+    fn pop_color_matrix_layer(&mut self) {
+        self.flush();
+        match self.inner.as_drawing_context_impl_with_layer_effects() {
+            Some(layers) => layers.pop_color_matrix_layer(),
+            None => self.inner.pop_layer(),
         }
     }
 }
