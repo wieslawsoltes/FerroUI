@@ -1,0 +1,100 @@
+{
+  "repository": "wieslawsoltes/FerroUI",
+  "source_commit": "c549f6bcafe614a6373c743f5efbf2a3cb0eccd2",
+  "source_tree": "8c5bbcc8ed5e5a61d287708cf4e2c0e7c912259d",
+  "run_id": 39952473917,
+  "job_id": 120415321864,
+  "job_url": "https://github.com/wieslawsoltes/FerroUI/actions/runs/39952473917/job/120415321864",
+  "conclusion": "success",
+  "build_started_at": "2026-10-23T12:34:06Z",
+  "build_completed_at": "2026-10-23T12:44:16Z",
+  "build_seconds": 610,
+  "artifact_id": 12502207600,
+  "archive_sha256": "551d16171234356d004490971b6f2909c938aa04efd89aa2c227ec4add6849ab",
+  "archive_bytes": 12636471,
+  "wasm": {
+    "path": "ferrodesign_app.wasm",
+    "bytes": 53785830,
+    "sha256": "64bd8f8b2dd9f3bc951776c9db7e3cb4bfc973ad754230219606d514bebc4115"
+  },
+  "payload_files": 17,
+  "manifest_files": 1,
+  "active_vello_no_skia": true,
+  "static_module_closure_checked": 7,
+  "dynamic_storage_explicitly_checked": true,
+  "copied_source_files_compared_to_c549": {
+    "app.css": {
+      "source_path": "samples/FerroDesign/web/app.css",
+      "bytes": 1698,
+      "sha256": "bc13442e4a8b8d92c33428c53a65ebcd0e22423d623c1418bc137a0a23b9453b"
+    },
+    "document-store.js": {
+      "source_path": "samples/FerroDesign/web/document-store.js",
+      "bytes": 15559,
+      "sha256": "6e6cca56c8af8567bd8b1f183eceed55815b2ec63e3ea222d45be93f25b4f012"
+    },
+    "favicon.svg": {
+      "source_path": "samples/FerroDesign/web/favicon.svg",
+      "bytes": 222,
+      "sha256": "883347dbc8832de4f398160d8fff0f69e8ef4ca831ffca045d670a3228ed08a7"
+    },
+    "index.html": {
+      "source_path": "samples/FerroDesign/web/index.html",
+      "bytes": 1189,
+      "sha256": "5655bc554cb0568f2eadb3fe81085103c270821dac6c9e9443219d3541a5531d"
+    },
+    "main.js": {
+      "source_path": "samples/FerroDesign/web/main.js",
+      "bytes": 2720,
+      "sha256": "8f81710a5fe670e9fe5438e1c2cd8feec6d1c05dfbbf8ad21be1aaa1d4f638ea"
+    },
+    "Cargo.lock": {
+      "source_path": "samples/FerroDesign/Cargo.lock",
+      "bytes": 80615,
+      "sha256": "1e11d66cfe586f859f3f7027d83b1f596a401184feb81e08fdf2f658ca5b87a9"
+    },
+    "ferroui-loader.js": {
+      "source_path": "scripts/browser/threads/ferroui-loader.js",
+      "bytes": 16165,
+      "sha256": "817aa151802ca2aa17c25861fac1271538edeaac4161b198e461d2e306fe5db6"
+    }
+  },
+  "source_timestamp_cache": [
+    {
+      "already_equal": 0,
+      "bytes_hashed": 231553026,
+      "manifest": "/home/runner/work/FerroUI/FerroUI/samples/FerroDesign/target/.ferrodesign-source-mtimes-v1.json",
+      "operation": "restore",
+      "recorded": 0,
+      "restored": 10459,
+      "schema_version": 1,
+      "skip_reasons": {
+        "content_mismatch": 9
+      },
+      "skipped": 9,
+      "status": "restored",
+      "tracked_files": 10469
+    },
+    {
+      "already_equal": 0,
+      "bytes_hashed": 231553248,
+      "manifest": "/home/runner/work/FerroUI/FerroUI/samples/FerroDesign/target/.ferrodesign-source-mtimes-v1.json",
+      "operation": "snapshot",
+      "recorded": 10469,
+      "restored": 0,
+      "schema_version": 1,
+      "skip_reasons": {},
+      "skipped": 0,
+      "status": "snapshotted",
+      "tracked_files": 10469
+    }
+  ],
+  "decoded_log": {
+    "file": "browser-build.log.gz",
+    "raw_bytes": 104702,
+    "raw_sha256": "bc7338de24a8346af2f3327e4a5c017405539870a3d5d8afe541a593fad907ae",
+    "gzip_bytes": 23165,
+    "gzip_sha256": "d4524e6782ee58ffcf296116731f9c4542583083cf2f483a473d709c199aad8a"
+  },
+  "scope": "Exact-source build and offline delivery verification. Real browser benchmark and selected interactions are recorded separately."
+}

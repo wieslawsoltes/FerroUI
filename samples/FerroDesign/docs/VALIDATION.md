@@ -2,6 +2,63 @@
 
 This file distinguishes implemented paths, completed checks and measurements. Each observation belongs to its stated source, runtime and run; older successful runs do not validate later changes. The branch incorporates FerroUI `934b9ce1` / `0.4.0` and uses Vello for every application target through public FerroUI APIs. [PR #254](https://github.com/wieslawsoltes/FerroUI/pull/254) collects the complete source and current review status. Current continuation evidence is recorded first; earlier checkpoints remain below with their original scope.
 
+## Current native checks and verified browser delivery (2026-10-23)
+
+The exact `c549f6bc` native feedback job
+[120410483091](https://github.com/wieslawsoltes/FerroUI/actions/runs/39952473854/job/120410483091)
+**passed all eight test invocations**, including **239/239 application tests in
+43.60 s** and **7/7 GPU fragment tests in 9.09 s**. The GPU invocation sets
+`FERROUI_VELLO_REQUIRE_GPU=1`, so an absent or non-compute adapter fails rather
+than skips that gate. The other passing filters covered **8** unhinted glyph,
+**17** Base paragraph, **8** line-bounds, **16** Controls paragraph, **174**
+TextBox and **5** rich-history cases. No invocation had a failed or ignored
+test; overlapping filters are not additive. These times exclude compilation.
+The new native hover/pressed diagnostic regression passed. The core tree is
+identical to the earlier `1c7151f5` tree that passed 533 tests, but this native
+job did not rerun core tests. [Exact source, counts and decoded log](../../../docs/ferrodesign-evidence/2026-10-23-ferroui-040/native-c549/README.md)
+retain those boundaries.
+
+The separate `1c7151f5`
+[browser build job 120403095053](https://github.com/wieslawsoltes/FerroUI/actions/runs/39950194298/job/120403095053)
+completed its build step in **28 min 17 s**. Its verified distribution contains
+a **53,785,479-byte `ferrodesign_app.wasm`**, **16 payload files plus one
+provenance manifest**, and the active Vello/no-Skia dependency graph. Archive
+SHA-256/size, ZIP CRCs and paths, exact source/tree/toolchain, every payload
+hash/size and the complete file set were checked. Seven JavaScript modules were
+parsed, including inline snippets and the dynamically loaded `storage.js`;
+relative host resources and the actual referenced WASM filename resolve.
+[Build and delivery evidence](../../../docs/ferrodesign-evidence/2026-10-23-ferroui-040/browser-build-1c/README.md)
+does not claim application execution. No editor or performance run was made
+against that `1c` binary.
+
+The later exact `c549f6bc`
+[build job 120415321864](https://github.com/wieslawsoltes/FerroUI/actions/runs/39952473917/job/120415321864)
+also passed. Its build step took **10 min 10 s**, and verification checked the
+**53,785,830-byte WASM**, **17 payload files plus the provenance manifest**,
+archive and payload integrity, pinned source/tree/toolchain, active
+Vello/no-Skia graph and seven-module closure including dynamic storage. The
+five copied web files, lockfile and loader match exact `c549` Git objects,
+including the relative favicon link and SVG bytes. Its independent workflow
+restored **10,459 matching source timestamps**, skipped **nine changed files**
+and rebuilt the application. [Current browser-build evidence](../../../docs/ferrodesign-evidence/2026-10-23-ferroui-040/browser-build-c549/README.md)
+records these actual observations. **Selected editor interactions on that
+runtime remain pending**; build delivery and runtime execution retain separate
+gates.
+
+The full browser workflow at `c7dbf26f` now prepends the independent browser-build cache
+prefix, with the root `Cargo.lock` included in the hash, to its existing
+fallback keys. The cache paths, pinned tools and browser profile match. Its
+source snapshot and target-cache save now run together after build/artifact
+publication and before Chromium and long interactions; subsequent steps do not
+invoke Cargo. Existing noncancelled-job and successful restore/probe guards
+still permit safe completed partial-build caching. Browser assertions and the
+120-minute job limit are unchanged. This configures cache reuse and protects a
+completed build from a later interaction timeout; **no subsequent full-workflow
+cache hit or duration improvement is claimed**. The recorded `1c` build itself
+had no timestamp manifest to restore, then snapshotted 10,468 tracked files.
+The later `c549` independent build's verified reuse above does not exercise
+this new full-workflow cache prefix or early-save ordering.
+
 ## Completed feature-runtime browser run and input corrections (2026-10-23)
 
 The verified `08e29e4f` distribution completed a selected 12-scenario run with

@@ -1,0 +1,96 @@
+{
+  "verified": true,
+  "runtime_directory": "/tmp/ferrodesign-e99-browser-c549",
+  "local_html_references": [
+    "./favicon.svg",
+    "./app.css",
+    "./main.js"
+  ],
+  "relative_favicon_required": true,
+  "static_modules": [
+    "document-store.js",
+    "ferrodesign-app.js",
+    "ferroui-loader.js",
+    "ferroui.js",
+    "main.js",
+    "snippets/ferrodesign-app-f10485043b6c20d9/inline0.js",
+    "storage.js"
+  ],
+  "static_import_edges": [
+    {
+      "from": "ferrodesign-app.js",
+      "to": "ferroui.js"
+    },
+    {
+      "from": "ferrodesign-app.js",
+      "to": "snippets/ferrodesign-app-f10485043b6c20d9/inline0.js"
+    },
+    {
+      "from": "main.js",
+      "to": "ferroui.js"
+    },
+    {
+      "from": "main.js",
+      "to": "ferroui-loader.js"
+    },
+    {
+      "from": "main.js",
+      "to": "document-store.js"
+    }
+  ],
+  "dynamic_storage_explicitly_checked": true,
+  "referenced_wasm": "ferrodesign_app.wasm",
+  "required_files": [
+    {
+      "path": "index.html",
+      "bytes": 1189,
+      "sha256": "5655bc554cb0568f2eadb3fe81085103c270821dac6c9e9443219d3541a5531d"
+    },
+    {
+      "path": "app.css",
+      "bytes": 1698,
+      "sha256": "bc13442e4a8b8d92c33428c53a65ebcd0e22423d623c1418bc137a0a23b9453b"
+    },
+    {
+      "path": "main.js",
+      "bytes": 2720,
+      "sha256": "8f81710a5fe670e9fe5438e1c2cd8feec6d1c05dfbbf8ad21be1aaa1d4f638ea"
+    },
+    {
+      "path": "document-store.js",
+      "bytes": 15559,
+      "sha256": "6e6cca56c8af8567bd8b1f183eceed55815b2ec63e3ea222d45be93f25b4f012"
+    },
+    {
+      "path": "ferroui-loader.js",
+      "bytes": 16165,
+      "sha256": "817aa151802ca2aa17c25861fac1271538edeaac4161b198e461d2e306fe5db6"
+    },
+    {
+      "path": "ferroui.js",
+      "bytes": 35910,
+      "sha256": "40f2c812b4ee1c8fa3ebbc1e0ff453256cc08f8a73fa5bbc01b96ab9bd2e2a20"
+    },
+    {
+      "path": "ferrodesign-app.js",
+      "bytes": 208809,
+      "sha256": "caca67e45b86dc2480dff4ded0fa4d554d0c7850234ebf001cfbc7e47f30e7a0"
+    },
+    {
+      "path": "ferrodesign_app.wasm",
+      "bytes": 53785830,
+      "sha256": "64bd8f8b2dd9f3bc951776c9db7e3cb4bfc973ad754230219606d514bebc4115"
+    },
+    {
+      "path": "storage.js",
+      "bytes": 27573,
+      "sha256": "a0c9d1ba7aef2a9e7cba10a79d61a99ba61db9faaa9290224ab07d39112d61fb"
+    },
+    {
+      "path": "favicon.svg",
+      "bytes": 222,
+      "sha256": "883347dbc8832de4f398160d8fff0f69e8ef4ca831ffca045d670a3228ed08a7"
+    }
+  ],
+  "scope": "Read-only resource existence, syntax and static/dynamic dependency closure; no application execution."
+}

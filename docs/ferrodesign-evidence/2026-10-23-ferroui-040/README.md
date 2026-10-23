@@ -34,8 +34,59 @@ at `2d6284d9` **passed**: **239/239 application tests in 26.03 s**, all
 framework filters (**8 unhinted / 17 Base paragraph / 8 line-bounds / 16 Controls
 paragraph / 174 TextBox / 5 rich-history**), and **7/7 mandatory GPU fragment
 tests in 7.14 s**. None failed or was ignored; overlapping framework counts are
-not additive. Actual browser execution and the later hover/pressed diagnostic
-checkpoint retain separate gates.
+not additive. This run precedes the later hover/pressed diagnostic checkpoint.
+
+The subsequent exact `c549f6bc`
+[native job 120410483091](https://github.com/wieslawsoltes/FerroUI/actions/runs/39952473854/job/120410483091)
+also **passed completely**: **239/239 application tests in 43.60 s**, all six
+other framework filters, and **7/7 mandatory GPU fragment tests in 9.09 s** with
+`FERROUI_VELLO_REQUIRE_GPU=1`. All eight invocations had zero failed and zero
+ignored tests. The native projection regression includes the new hover/pressed
+fields. Its core source tree is identical to the recorded 533-test `1c` tree;
+this native job did not rerun core tests. [Native evidence](native-c549/README.md)
+preserves exact source/tree, outcomes and the complete decoded log.
+
+The `1c7151f5`
+[browser build job 120403095053](https://github.com/wieslawsoltes/FerroUI/actions/runs/39950194298/job/120403095053)
+completed the real WebAssembly build step in **28 min 17 s**. The downloaded
+artifact contains a verified **53,785,479-byte WASM** and **16 payload files
+plus its provenance manifest**. Archive digest/size, ZIP CRCs and entry paths,
+every payload hash/size, exact source/toolchain, Vello/no-Skia graph and local
+resource/module closure passed verification. Seven modules were parsed,
+including generated inline snippets and an explicit check of dynamic
+`storage.js`. [Browser-build evidence](browser-build-1c/README.md) preserves the
+manifest and complete build log. No editor interaction or performance run was
+made against this `1c` binary.
+
+The exact `c549f6bc`
+[build job 120415321864](https://github.com/wieslawsoltes/FerroUI/actions/runs/39952473917/job/120415321864)
+then passed with a **10 min 10 s** build step. Its delivered **53,785,830-byte
+WASM**, **17 payload files plus manifest**, source/toolchain identity and
+complete archive/resource/module closure were verified. The copied web host,
+relative favicon link and SVG bytes match exact `c549` source. The independent
+workflow restored **10,459 matching source timestamps** and skipped **nine
+changed files**, then rebuilt the application. [Current build evidence](browser-build-c549/README.md)
+preserves the exact observations. **Selected editor interactions on this
+runtime remain pending**; build success is separate from runtime validation.
+
+The full browser workflow at `c7dbf26f` now searches the independent browser-build cache
+prefix, including the root lockfile hash, before its older fallback prefixes.
+It also saves the target and its verified source-timestamp snapshot together
+after build/artifact publication, before lengthy browser checks. The existing
+cancellation/probe guards and safe partial-build behavior remain intact; no
+later browser step runs Cargo. Assertions and the 120-minute job limit are
+unchanged. This is a configured cache path and preservation change, with no
+subsequent full-workflow cache hit or measured speedup claimed. The recorded
+`1c` build had no source-timestamp manifest to restore and then snapshotted
+10,468 tracked files. The later `c549` reuse was observed in the independent
+workflow, not through this newly configured full-workflow cache bridge.
+
+[The current source-delivery audit](source-delivery-c549/README.md) verifies the
+tracked framework dependencies, embedded fonts, source links and all five
+active Vello/no-Skia graphs. It records exact `c549` build-input equivalence to
+the documentation checkpoint used for the initial audit. No independently
+downloaded source archive was built for that audit.
+
 The verified `08e29e4f` runtime uses the preceding framework and does not
 establish a pass for this merge.
 The sample's [validation record](../../../samples/FerroDesign/docs/VALIDATION.md)

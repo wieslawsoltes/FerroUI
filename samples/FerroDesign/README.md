@@ -19,7 +19,7 @@ cd FerroUI/samples/FerroDesign
 
 The implementation began from upstream commit `325b3ce4b0fcf154eba79cbd92262536daf77e71` and incorporates upstream `934b9ce16e2ada890ee31534f1a98808f483a14f` (FerroUI 0.4.0), including its Vello performance improvements. The branch contains the complete application, independent browser backend selection, native text-input fixes, public isolated compositing and editable geometry/text-outline APIs. [PR #254](https://github.com/wieslawsoltes/FerroUI/pull/254) collects the branch changes.
 
-The [source-delivery audit at `b83deee6`](docs/evidence/2026-10-22-f2bb1d61/source-delivery-audit.json) found the required framework path dependencies and assets in the tracked repository, with no submodules, LFS pointers or build-script dependence on FerroUI's `.git` directory. Extract the complete repository, including its root `.cargo` configuration. This was a source-tree audit, not a build from an independently downloaded ZIP; toolchain and third-party dependency downloads are still required.
+The [current source-delivery audit for `c549f6bc`](../../docs/ferrodesign-evidence/2026-10-23-ferroui-040/source-delivery-c549/README.md) verified the required tracked framework path dependencies and assets, six embedded Inter fonts, 116 internal symlinks, no submodules or LFS pointers, and all five active Vello/no-Skia graphs. Inspected build logic does not depend on FerroUI's `.git` directory. Extract the complete repository, including its root `.cargo` configuration. This was source inspection and offline graph validation, not a build from an independently downloaded ZIP; toolchain and third-party dependency downloads are still required.
 
 ## Build and run in a browser
 
@@ -171,14 +171,20 @@ describe the inherited text-bounds and native GPU fragment corrections.
 
 The 23 October continuation has completed native and core checks for the new
 radial/angular gradient handles, spacing-variable controls and prototype reflow.
-**The production checkpoint `1637a093` passed 533 core and 239 native application
-tests in CI.** A current-source complete browser pass and matched Figma visual
-parity are not yet established.
+**Checkpoint `c549f6bc` passed 239 native application tests in 43.60 s and all
+seven required GPU fragment tests in 9.09 s.** Its core source is identical to
+the integrated `1c7151f5` tree that passed 533 core tests; the native job did not
+rerun that suite. Both the `1c7151f5` and `c549f6bc` browser builds and delivered
+files are verified. Selected editor interactions on `c549f6bc` remain pending,
+and matched Figma visual parity is not established.
 
 | Gate | Exact source and completed result |
 | --- | --- |
+| Current native application and framework | [`c549f6bc`, job 120410483091](https://github.com/wieslawsoltes/FerroUI/actions/runs/39952473854/job/120410483091): **239/239 app tests**, **43.60 s**, and all configured framework filters passed, including the new native hover/pressed projection. Mandatory GPU fragments: **7/7**, **9.09 s**, with `FERROUI_VELLO_REQUIRE_GPU=1`; no failed or ignored tests. [Exact native evidence](../../docs/ferrodesign-evidence/2026-10-23-ferroui-040/native-c549/README.md) |
+| Current browser build and delivery | [`c549f6bc`, job 120415321864](https://github.com/wieslawsoltes/FerroUI/actions/runs/39952473917/job/120415321864): build step **10 min 10 s**; verified **53,785,830-byte WASM**, **17 payload files plus the provenance manifest**, Vello/no-Skia graph, local resource/module closure and exact-source relative favicon. [Artifact and cache evidence](../../docs/ferrodesign-evidence/2026-10-23-ferroui-040/browser-build-c549/README.md); runtime checks remain separately labeled |
 | Integrated core | [`1c7151f5`, run 39950194410](https://github.com/wieslawsoltes/FerroUI/actions/runs/39950194410): **533 passed**, **2.41 s**, with the FerroUI 0.4.0 lockfile |
 | Integrated generated references | [`1c7151f5`, run 39950194402](https://github.com/wieslawsoltes/FerroUI/actions/runs/39950194402): all generators and drift checks passed; **five generated files match their committed SHA-256 hashes**, with an empty patch |
+| Integrated browser build and delivery | [`1c7151f5`, job 120403095053](https://github.com/wieslawsoltes/FerroUI/actions/runs/39950194298/job/120403095053): build step **28 min 17 s**; verified **53,785,479-byte WASM**, **16 payload files plus the provenance manifest**, Vello/no-Skia graph and local module/resource closure. [Archive, payload hashes and scope](../../docs/ferrodesign-evidence/2026-10-23-ferroui-040/browser-build-1c/README.md). No editor or benchmark was executed against this runtime |
 | Integrated native application and framework | [`2d6284d9`, run 39950436412](https://github.com/wieslawsoltes/FerroUI/actions/runs/39950436412): **239/239 app tests**, **26.03 s**, and all configured framework filters passed. Mandatory native GPU fragments: **7/7**, **7.14 s**; no skipped adapter fallback |
 | Feature browser execution | Verified `08e29e4f` WASM with frozen `0f073278` harness: **9/12 Software2D and 8/12 WebGL2 scenarios passed**, **88 / 68 completed check groups**. Both modes failed overall. All five spacing-variable checks passed in both modes; all 17 gradient checks passed in Software2D. [Exact results and failures](../../docs/ferrodesign-evidence/2026-10-23-continuation/browser-runtime08-harness0f/README.md) |
 | Current browser helper checks | Published `c549f6bc` source tree: **46/46 local cases passed** across coverage, pointer expectations, passive input evidence, isolated scenarios and trace/process ownership. Separate from actual editor execution |
@@ -237,6 +243,20 @@ It uses the same locked build, Vello/no-Skia graph, host checks and static impor
 validation, and includes the exact commit/tree, tool versions and SHA-256 of
 each payload in `ferrodesign-provenance.json`. This build-only feedback does not
 replace persistence, interaction, pixel or benchmark validation.
+
+The independent `c549f6bc` build restored **10,459 matching source timestamps**
+and skipped **nine changed files**, then rebuilt the application. Its recorded
+10 min 10 s build is evidence of reuse in that independent workflow, not a
+controlled speedup or a measurement of the full workflow's new cache path.
+
+The full browser workflow at `c7dbf26f` now also searches the independent build's cache
+prefix, including the root `Cargo.lock` hash, while retaining its older
+fallbacks. It snapshots verified source timestamps and saves them with the
+Cargo target immediately after build/artifact publication, before Chromium
+installation and long interactions. Existing cancellation/probe guards,
+partial-build caching, assertions and the 120-minute limit remain unchanged.
+These are configured reuse and preservation paths; a subsequent full-workflow
+cache hit or reduced build time has not yet been observed.
 
 ## Rendering performance
 
