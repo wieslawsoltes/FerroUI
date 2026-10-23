@@ -1,6 +1,6 @@
 # Editor demo
 
-A desktop FerroUI application whose main view is loaded from `MainView.xaml`
+A FerroUI application whose main view is loaded from `MainView.xaml`
 through the runtime XAML loader. It uses the Fluent theme and the public
 `ferroui-edit` API. The Rust and C# examples use the bundled TextMate grammars
 and Light+/Dark+ themes.
@@ -67,3 +67,37 @@ can be used with the desktop backend for a visible integration check.
 The default headless renderer records layout and control behavior; it does not
 produce a pixel-accurate editor screenshot. Use the desktop backend for visual
 inspection and screenshot capture.
+
+## Browser application
+
+`samples/EditorDemo.Browser` hosts this exact view through FerroUI's browser
+single-view application lifetime. It uses native FerroUI controls, text layout,
+input, popup, clipboard and rendering services. TextMate's bundled Oniguruma
+WebAssembly scanner initializes before the view creates its grammars.
+
+```sh
+scripts/browser/setup.sh
+source .tools/env.sh
+scripts/build-browser.sh editor-demo-browser
+node scripts/browser/serve.mjs target/browser/editor-demo-browser
+```
+
+Open the printed address. `?RenderingMode=Software2D` selects the raster canvas;
+`?RenderingMode=WebGL2` selects the WebGL canvas; `?ThemeVariant=dark` starts with
+the dark editor theme. Every required script, grammar, theme, font and scanner
+is in the built site or embedded application module; there is no CDN dependency.
+
+The linked browser acceptance checks drive real pointer, keyboard and text-input
+events, inspect native control geometry and read back canvas pixels:
+
+```sh
+node scripts/browser/tests/editor_demo.test.mjs \
+  --screenshot target/browser/screenshots/editor-demo.png
+```
+
+They cover both canvas modes, scanner-backed language highlighting, UTF-16 text
+input, undo/redo, plain-text/HTML clipboard transfer, completion, linked snippets,
+search/replace, folding, wrapping, theme
+and language switching, resize and console errors. See
+[browser integration](../../docs/porting/editor-browser.md) for the startup and
+validation contracts and the remaining platform checks.

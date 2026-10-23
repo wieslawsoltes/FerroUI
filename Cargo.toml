@@ -115,6 +115,7 @@ members = [
     "samples/ReactiveUIExample",
     "samples/TextTestApp",
     "samples/EditorDemo",
+    "samples/EditorDemo.Browser",
     "samples/Sandbox",
     "samples/AppWithoutLifetime",
     "samples/IntegrationTestApp",

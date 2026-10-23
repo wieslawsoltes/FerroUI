@@ -7,7 +7,9 @@ on:
       - 'src/FerroUI.TextMate/**'
       - 'src/FerroUI.Base/**'
       - 'samples/EditorDemo/**'
+      - 'samples/EditorDemo.Browser/**'
       - 'scripts/edit-port/**'
+      - 'scripts/browser/tests/editor_demo.test.mjs'
       - 'docs/porting/data/editor-*.json'
       - 'Cargo.toml'
       - 'Cargo.lock'
@@ -76,3 +78,26 @@ jobs:
             target/wasm32-unknown-unknown/debug/examples/textmate_browser_conformance.wasm
           node src/FerroUI.TextMate/tests/oracle/check-wasm.mjs \
             /tmp/editor-wasm/textmate_browser_conformance.js
+
+  browser:
+    name: Linked browser editor (Emscripten, real input and rendering)
+    runs-on: ubuntu-latest
+    timeout-minutes: 150
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: ./.github/actions/browser-toolchain
+        with:
+          cache-key: editor-browser
+      - name: Link and package the actual editor application
+        run: scripts/build-browser.sh editor-demo-browser
+      - name: Browser editing, popup, scanner and rendering conformance
+        run: >-
+          node scripts/browser/tests/editor_demo.test.mjs
+          --screenshot target/browser/screenshots/editor-demo.png
+      - name: Keep the editor screenshot
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: editor-browser-screenshot
+          path: target/browser/screenshots/editor-demo.png
+          if-no-files-found: ignore
