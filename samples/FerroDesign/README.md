@@ -256,7 +256,35 @@ On a bare Linux validation host, use `npx playwright install --with-deps chromiu
 
 Both Chromium suites accept `FERRODESIGN_CHROMIUM=/absolute/path/to/chrome` to use an existing executable. Without this variable, they use Playwright's installed Chromium. The editor suite also exercises native local-style definition editing and text/Boolean flattening, including rejected conversions and exact undo/redo.
 
-The GitHub Actions workflow `.github/workflows/ferrodesign.yml` has independent native and browser jobs. The native job runs locked core tests, paired release benchmarks, focused native TextBox preedit tests, public compositing/geometry/text-outline tests, native compilation and the complete native application suite. The browser job builds the real WebAssembly application and runs persistence and editor interaction validation. A separate `.github/workflows/ferrodesign-native.yml` supplies focused glyph/paragraph/TextBox/history feedback and the complete application tests. Its application gate can run after an earlier framework-test failure, but that failure still fails the job. The suites include native pixels, cache/bounds checks, gesture ownership and authoring/parser regressions, with new corner, width, guide-binding and paragraph scenarios. Build and validation artifacts are attached to workflow runs. [Validation and measurements](docs/VALIDATION.md) records completed executions separately from this configured coverage.
+The GitHub Actions workflow `.github/workflows/ferrodesign.yml` keeps native
+validation independent of browser progress. The native job runs locked core
+tests, paired release benchmarks, focused native TextBox preedit tests, public
+compositing/geometry/text-outline tests, native compilation and the complete
+application suite. A separate `.github/workflows/ferrodesign-native.yml`
+supplies focused glyph/paragraph/TextBox/history feedback and application
+tests; a failed framework stage still fails that job even when its later
+application tests pass.
+
+Browser CI builds one real Vello WebAssembly distribution and hashes every
+payload alongside its source, tree and harness identity. Eight jobs consume
+that same distribution: four contiguous scenario groups in each of Software2D
+and WebGL2. Each runs the original common gates and unchanged selected
+scenario assertions, with a 60-minute limit and `fail-fast: false`. A separate
+job runs the original IndexedDB transaction/reload checks and the text-pan
+benchmark with 36 normal and six separate trace samples per mode.
+
+The always-run aggregate requires all **76 scenario/mode pairs**, successful
+job and process outcomes, exact report scopes and matching source/harness/
+distribution hashes. Missing, failed or incomplete evidence fails the gate.
+Per-group reports, screenshots and traces remain separate artifacts. A later
+rerun may reuse a successful sibling's proof only for the identical build;
+build and execution attempt numbers remain recorded. The partition contract
+and its negative cases can be checked without a browser using
+`python3 scripts/test_browser_ci.py` from this sample directory.
+
+This configured coverage spans independent sessions. The earlier sequential
+timeout remains a separate performance finding. [Validation and measurements](docs/VALIDATION.md)
+records completed executions and their exact source boundaries.
 
 The independent `.github/workflows/ferrodesign-browser-build.yml` publishes a
 reviewable browser distribution without waiting for an older complete suite.

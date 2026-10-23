@@ -1,0 +1,36 @@
+{
+  "schema_version": 1,
+  "modes": ["Software2D", "WebGL2"],
+  "groups": [
+    {
+      "name": "geometry-paint",
+      "scenarios": [
+        "vector-network", "native-authoring", "corners", "polygon-corners",
+        "corner-radius-handles", "width-profiles", "width-handles", "gradient-handles"
+      ]
+    },
+    {
+      "name": "text-effects",
+      "scenarios": [
+        "paragraphs", "typography", "components", "image-crop",
+        "compositing", "svg-compositing", "masks", "effects"
+      ]
+    },
+    {
+      "name": "layout-selection",
+      "scenarios": [
+        "inspector-lifecycle", "floating-panels", "page-inspector", "auto-layout",
+        "layout-padding", "layout-variables", "layout-drag", "layout-transfer",
+        "selection", "matching"
+      ]
+    },
+    {
+      "name": "styles-prototype",
+      "scenarios": [
+        "geometry-authoring", "flatten", "local-styles", "angular-paints",
+        "grid-styles", "guide-bindings", "region-paints", "network-bucket",
+        "compact-autosave", "prototype-input", "prototype-motion", "bounded-history"
+      ]
+    }
+  ]
+}

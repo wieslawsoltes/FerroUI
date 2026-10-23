@@ -42,6 +42,48 @@ second-entry caret failure without changing its expected index or injecting
 a caret. Node syntax parsing and all seven passive-observer helper tests
 passed locally with explicit test-case reporting; editor replay is separate.
 
+## Partitioned browser CI contract (2026-10-23)
+
+The full workflow now builds one shared distribution and partitions the
+original browser harness across eight independent jobs. This addresses the
+observed sequential c7 timeout while retaining all registered scenarios and
+their existing assertions. Each group runs in both Software2D and WebGL2,
+including the harness's ordinary common gates. Matrix jobs use
+`fail-fast: false` and a 60-minute cap.
+
+| Group | Contiguous scenarios | Count per mode |
+| --- | --- | ---: |
+| Geometry and paint | Vector network through gradient handles | 8 |
+| Text and effects | Paragraphs through effects | 8 |
+| Layout and selection | Inspector lifecycle through matching | 10 |
+| Styles and prototypes | Geometry authoring through bounded history | 12 |
+
+The registered scenario names are checked against the actual literal calls
+in `tests/browser.mjs` before compilation. An added, missing, duplicated or
+dynamic registration requires an explicit partition update. The distribution
+manifest hashes the payloads and records the exact source/tree/harness/run.
+Each consumer verifies those identities before and after its original process.
+
+The always-run aggregate requires **all 76 unique scenario/mode pairs**, eight
+separate scenario artifacts, all selected entries actually run and passed,
+the exact assigned scopes and successful job/process outcomes. It independently
+rechecks raw reports and hashes; a timeout without a final report fails. The
+separate data job retains the five original IndexedDB checks and the two-mode
+benchmark's **36 normal plus six separate trace observations per mode**,
+including trace integrity and confirmed browser shutdown. A rerun can retain
+successful sibling proofs only for the identical build and valid recorded
+attempts. Rebuilding the manifest invalidates the old proofs.
+
+All **36 Python standard-library contract tests passed locally**, covering
+missing/failed/incomplete reports, misleading passed flags, wrong assignments,
+source and payload mismatches, process exits, trace integrity and reruns. YAML
+and shell parsing and two independent source reviews passed. The validators
+also accepted the original retained c549 benchmark and c7 persistence report;
+those compatibility reads are not new browser executions. The native job,
+scenario behavior and browser thresholds are unchanged. This configuration
+does not claim a completed current-source workflow or a performance speedup;
+the prior sequential timeout remains recorded below.
+
 ## Completed c549 browser runs and subsequent corrections (2026-10-23)
 
 The exact `c549f6bc` runtime and frozen harness completed the four selected

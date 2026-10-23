@@ -9,9 +9,9 @@ permissions:
   contents: read
 
 concurrency:
-  group: ferrodesign-v3-${{ github.ref }}
-  # The v3 group lets the previous combined-job baseline finish independently.
-  # Keep both running validation jobs when later development commits arrive.
+  group: ferrodesign-v4-${{ github.ref }}
+  # Let earlier sequential v3 runs finish independently of this partitioned
+  # format; later commits do not cancel any in-progress validation evidence.
   cancel-in-progress: false
 
 jobs:
@@ -208,11 +208,15 @@ jobs:
             samples/FerroDesign/target
           key: ${{ steps.build-cache.outputs.cache-primary-key }}
 
-  browser-validation:
-    name: Browser validation
+  browser-build:
+    name: Build shared browser distribution
     runs-on: ubuntu-24.04
-    # Build the actual WebAssembly app without waiting for native pixel tests.
+    # Compile once. All eight scenario jobs and the data gates consume these
+    # exact manifest-verified bytes, independently of native pixel progress.
     timeout-minutes: 120
+    outputs:
+      matrix: ${{ steps.partition.outputs.matrix }}
+      manifest_sha256: ${{ steps.distribution.outputs.manifest_sha256 }}
     env:
       CARGO_BUILD_JOBS: 1
       CARGO_TERM_COLOR: always
@@ -229,6 +233,12 @@ jobs:
       - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
         with:
           node-version: 22
+
+      - name: Test strict CI coverage and derive every scenario partition
+        id: partition
+        run: |
+          python3 scripts/test_browser_ci.py
+          python3 scripts/browser_ci.py plan --github-output "$GITHUB_OUTPUT"
 
       - name: Restore pinned toolchain
         id: tools
@@ -290,18 +300,24 @@ jobs:
           source "$RUNNER_TEMP/ferrodesign-tools/env.sh"
           scripts/build-browser.sh 2>&1 | tee browser-report/build.log
 
+      - name: Record exact source, harness and distribution provenance
+        id: distribution
+        run: |
+          python3 scripts/browser_ci.py seal --dist dist --output browser-report/provenance.json --github-output "$GITHUB_OUTPUT"
+
       - name: Upload complete browser build
-        if: ${{ !cancelled() && steps.browser-build.outcome == 'success' }}
+        if: ${{ !cancelled() && steps.distribution.outcome == 'success' }}
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: FerroDesign-browser-${{ github.sha }}
           path: samples/FerroDesign/dist
           if-no-files-found: error
+          overwrite: true
           retention-days: 30
 
-      # Browser validation below uses the assembled distribution and runs no
-      # Cargo commands. Preserve the target and its verified source timestamps
-      # together before lengthy interactions can exhaust the job's time budget.
+      # No later step mutates Cargo inputs or target. Save verified timestamps
+      # beside the target immediately after publishing the build. These guards
+      # also preserve a partial target when compilation fails after cache tests.
       - name: Snapshot source timestamps with the partial build
         id: source-mtimes-snapshot
         if: ${{ !cancelled() && steps.source-mtimes-restore.outcome == 'success' && steps.source-mtimes-cargo.outcome == 'success' }}
@@ -319,45 +335,17 @@ jobs:
             samples/FerroDesign/target
           key: ${{ steps.build-cache.outputs.cache-primary-key }}
 
-      - name: Install Chromium for browser validation
-        id: chromium
-        if: ${{ !cancelled() && steps.browser-build.outcome == 'success' }}
-        run: |
-          npm ci --no-audit --no-fund
-          npx playwright install --with-deps chromium
-
-      - name: Validate browser persistence and IndexedDB transactions
-        if: ${{ !cancelled() && steps.chromium.outcome == 'success' }}
-        run: |
-          set -o pipefail
-          node tests/document-store-browser.mjs 2>&1 | tee browser-report/indexeddb-tests.log
-
-      - name: Validate pixels, pointer editing, keyboard history and serialization
-        if: ${{ !cancelled() && steps.chromium.outcome == 'success' }}
-        run: |
-          set -o pipefail
-          npm run test:browser 2>&1 | tee browser-report/browser-tests.log
-
-      - name: Measure native text panning in both browser surfaces
-        if: ${{ !cancelled() && steps.chromium.outcome == 'success' }}
-        env:
-          FERRODESIGN_REPORT: browser-report/text-render-benchmark
-          FERRODESIGN_BENCHMARK_LABEL: ${{ github.sha }}
-          FERRODESIGN_TRACE_TEXT_PAN: '1'
-        run: |
-          set -o pipefail
-          node tests/text-render-benchmark.mjs 2>&1 | tee browser-report/text-render-benchmark.log
-
-      - name: Upload validation screenshots, traces, reports and lockfiles
+      - name: Upload build logs, provenance and lockfiles
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
-          name: FerroDesign-validation-${{ github.sha }}
+          name: FerroDesign-browser-build-validation-${{ github.sha }}
           path: |
             samples/FerroDesign/browser-report
             samples/FerroDesign/Cargo.lock
             samples/FerroDesign/package-lock.json
           if-no-files-found: warn
+          overwrite: true
           retention-days: 30
 
       - name: Cache pinned toolchain
@@ -370,3 +358,141 @@ jobs:
             ${{ runner.temp }}/ferrodesign-tools/bin
             ${{ runner.temp }}/ferrodesign-tools/emsdk
           key: ${{ steps.tools.outputs.cache-primary-key }}
+
+  browser-scenarios:
+    name: Browser ${{ matrix.group }} / ${{ matrix.mode }}
+    needs: browser-build
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJSON(needs.browser-build.outputs.matrix) }}
+    env:
+      FERRODESIGN_MANIFEST_SHA256: ${{ needs.browser-build.outputs.manifest_sha256 }}
+      FERRODESIGN_CI_GROUP: ${{ matrix.group }}
+      FERRODESIGN_CI_MODE: ${{ matrix.mode }}
+    defaults:
+      run:
+        shell: bash
+        working-directory: samples/FerroDesign
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          ref: ${{ github.sha }}
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: 22
+      - name: Download the single shared distribution
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+        with:
+          name: FerroDesign-browser-${{ github.sha }}
+          path: samples/FerroDesign/dist
+      - name: Verify every distribution byte and source/harness identity
+        run: python3 scripts/browser_ci.py verify --dist dist --manifest-sha256 "$FERRODESIGN_MANIFEST_SHA256"
+      - name: Install pinned browser dependencies and Chromium
+        run: |
+          npm ci --no-audit --no-fund
+          npx playwright install --with-deps chromium
+      - name: Run assigned scenarios with all ordinary common gates
+        run: |
+          python3 scripts/browser_ci.py run --kind scenario --group "$FERRODESIGN_CI_GROUP" --mode "$FERRODESIGN_CI_MODE" --dist dist --manifest-sha256 "$FERRODESIGN_MANIFEST_SHA256" --output browser-shard-report
+      - name: Preserve original report, screenshots, trace and process outcome
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: FerroDesign-browser-evidence-${{ matrix.group }}-${{ matrix.mode }}-${{ github.sha }}
+          path: samples/FerroDesign/browser-shard-report
+          if-no-files-found: warn
+          overwrite: true
+          retention-days: 30
+
+  browser-data:
+    name: Browser persistence and strict traced text benchmark
+    needs: browser-build
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    env:
+      FERRODESIGN_MANIFEST_SHA256: ${{ needs.browser-build.outputs.manifest_sha256 }}
+    defaults:
+      run:
+        shell: bash
+        working-directory: samples/FerroDesign
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          ref: ${{ github.sha }}
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: 22
+      - name: Download the single shared distribution
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+        with:
+          name: FerroDesign-browser-${{ github.sha }}
+          path: samples/FerroDesign/dist
+      - name: Verify every distribution byte and source/harness identity
+        run: python3 scripts/browser_ci.py verify --dist dist --manifest-sha256 "$FERRODESIGN_MANIFEST_SHA256"
+      - name: Install pinned browser dependencies and Chromium
+        id: chromium
+        run: |
+          npm ci --no-audit --no-fund
+          npx playwright install --with-deps chromium
+      - name: Validate the existing real IndexedDB transaction and reload gates
+        run: |
+          python3 scripts/browser_ci.py run --kind persistence --dist dist --manifest-sha256 "$FERRODESIGN_MANIFEST_SHA256" --output browser-data-report/persistence
+      - name: Require 36 normal and six separate trace motions in each surface
+        if: ${{ !cancelled() && steps.chromium.outcome == 'success' }}
+        run: |
+          python3 scripts/browser_ci.py run --kind benchmark --dist dist --manifest-sha256 "$FERRODESIGN_MANIFEST_SHA256" --output browser-data-report/benchmark
+      - name: Preserve persistence, original timing reports, traces and process outcomes
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: FerroDesign-browser-evidence-data-${{ github.sha }}
+          path: samples/FerroDesign/browser-data-report
+          if-no-files-found: warn
+          overwrite: true
+          retention-days: 30
+
+  browser-coverage:
+    name: Require complete browser coverage and shared provenance
+    if: always()
+    needs: [browser-build, browser-scenarios, browser-data]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    env:
+      FERRODESIGN_MANIFEST_SHA256: ${{ needs.browser-build.outputs.manifest_sha256 }}
+      FERRODESIGN_CI_NEEDS: ${{ toJSON(needs) }}
+    defaults:
+      run:
+        shell: bash
+        working-directory: samples/FerroDesign
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          ref: ${{ github.sha }}
+      - name: Download the build whose identity every report must match
+        if: always()
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+        with:
+          name: FerroDesign-browser-${{ github.sha }}
+          path: samples/FerroDesign/dist
+      - name: Download separate evidence without merging or overwriting shards
+        if: always()
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+        with:
+          pattern: FerroDesign-browser-evidence-*-${{ github.sha }}
+          path: samples/FerroDesign/browser-ci-artifacts
+          merge-multiple: false
+      - name: Reject missing, failed, incomplete or mismatched coverage
+        if: always()
+        run: |
+          python3 scripts/browser_ci.py aggregate --dist dist --manifest-sha256 "$FERRODESIGN_MANIFEST_SHA256" --artifacts browser-ci-artifacts --output browser-coverage-report/summary.json
+      - name: Preserve aggregate outcome including failures
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: FerroDesign-browser-coverage-${{ github.sha }}
+          path: samples/FerroDesign/browser-coverage-report
+          if-no-files-found: error
+          overwrite: true
+          retention-days: 30
