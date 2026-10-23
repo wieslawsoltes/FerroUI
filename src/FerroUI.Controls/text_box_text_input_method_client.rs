@@ -373,6 +373,26 @@ impl TextBoxTextInputMethodClient {
         self.pending_preedit.get()
     }
 
+    /// Give first-clause caret synchronization the new text before the
+    /// parent's ordinary property notification reaches template bindings.
+    /// Other Text/Caret changes retain their existing preedit-clearing order.
+    pub(crate) fn synchronize_preparing_presenter_text(&self, parent: &TextBox) -> bool {
+        let preparation = self.preparing_preedit.borrow().as_ref()
+            .filter(|value| !value.restoring).map(|value| value.generation);
+        let Some(preparation) = preparation else { return true; };
+        let parent = parent.to_ref();
+        let Some(presenter) = self.presenter() else { return false; };
+        if !self.owns_preedit_preparation(preparation, &parent, &presenter) {
+            return false;
+        }
+        let text_generation = parent.text_change_generation();
+        presenter.set_current_value(TextPresenter::text_property(), parent.text());
+        // The public presenter property can synchronously cancel, replace
+        // the input owner, or mutate Text. Do not continue the old coercion.
+        self.owns_preedit_preparation(preparation, &parent, &presenter)
+            && parent.text_change_generation() == text_generation
+    }
+
     /// Style ranges still refer to confirmed text while the native TextBox has
     /// provisionally deleted the selection. Do not remap a collection that the
     /// application has already replaced in response to that temporary change.

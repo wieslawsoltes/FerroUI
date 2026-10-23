@@ -207,11 +207,43 @@ export async function paragraphRegressions(page, reference, check, helpers, outp
         await waitForNativeFrame(page, before.renderedFrames, "Native paragraph inline entry");
         await waitForNativeScene(page, before.sceneFrames, "Native paragraph inline entry");
     };
+    const splitInputs = [];
     const splitFirst = async () => {
-        await page.keyboard.press("Control+Home");
-        await page.keyboard.press("ArrowRight");
-        await page.keyboard.press("ArrowRight");
-        assert.equal((await typography("InlineTextBox")).caretIndex, 3);
+        const beforeNavigation = await state(page);
+        const input = { entry: splitInputs.length + 1, expectedCaretIndex: 3,
+            keys: ["Control+Home", "ArrowRight", "ArrowRight"],
+            before: inlineInputState(beforeNavigation),
+            beforeTypography: beforeNavigation.chrome.InlineTextBox.typography };
+        splitInputs.push(input);
+        await startInputObservation(page, ["keydown", "keyup"]);
+        let navigationError;
+        try {
+            // Keep the actual input sequence and the immediate native caret
+            // assertion. Passive evidence distinguishes delivery from layout
+            // when the second entry after cancellation fails this check.
+            await page.keyboard.press("Control+Home");
+            await page.keyboard.press("ArrowRight");
+            await page.keyboard.press("ArrowRight");
+            input.typography = await typography("InlineTextBox");
+            assert.equal(input.typography.caretIndex, 3);
+        } catch (error) {
+            input.navigationError = error?.stack || String(error);
+            navigationError = error;
+        }
+        try {
+            await captureWithinDeadline(async () => {
+                input.observation = await stopInputObservation(page);
+                const after = await state(page);
+                input.after = inlineInputState(after);
+                input.actualText = after.chrome.InlineTextBox.text;
+                await writeFile(resolve(output, mode + "-native-paragraph-split-input.json"),
+                    JSON.stringify(splitInputs, null, 2));
+            }, 5000);
+        } catch (error) {
+            input.captureError = error?.stack || String(error);
+            navigationError ??= error;
+        }
+        if (navigationError) throw navigationError;
         await page.keyboard.press("Enter");
         await waitDocument(doc => doc.nodes[2].text === "A🦀\n first\nשלום second\nLast");
         const split = await documentState(page);

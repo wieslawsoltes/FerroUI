@@ -3032,7 +3032,7 @@ fn first_preedit_respects_reentrant_detach_before_publication() {
 fn first_preedit_respects_reentrant_template_replacement_before_publication() {
     let _scope = test_scope();
     let target = templated_text_box(Some("a🦀z"));
-    let _root = host_in_root(&target);
+    let root = host_in_root(&target);
     let previous = target.find_descendant_of_type::<TextPresenter>(false).unwrap();
     target.set_selection_start(1);
     target.set_selection_end(3);
@@ -3048,13 +3048,17 @@ fn first_preedit_respects_reentrant_template_replacement_before_publication() {
         }
     });
     client.set_preedit_text_with_cursor(Some("obsolete"), Some(4));
-    let current = target.find_descendant_of_type::<TextPresenter>(false).unwrap();
-    assert!(replaced.get() && current != previous);
     assert_eq!(target.text().as_deref(), Some("a🦀z"));
     assert_eq!((target.selection_start(), target.selection_end()), (1, 3));
     assert!(!target.is_composing_text());
     assert_eq!(previous.preedit_text(), None);
+    // Applying the outer template immediately installs the named native
+    // owner. Its nested ScrollViewer content joins the visual tree in layout.
+    let current = client.text_view_visual().unwrap().cast::<TextPresenter>().unwrap();
+    assert!(replaced.get() && current != previous);
     assert_eq!(current.preedit_text(), None);
+    root.execute_initial_layout_pass();
+    assert_eq!(target.find_descendant_of_type::<TextPresenter>(false).as_ref(), Some(&current));
     client.set_preedit_text_with_cursor(Some("fresh"), Some(2));
     assert_eq!(target.text().as_deref(), Some("az"));
     assert_eq!(current.preedit_text().as_deref(), Some("fresh"));
@@ -3362,12 +3366,101 @@ fn first_preedit_accepts_native_caret_coercion_and_reversed_selection() {
         client.set_preedit_text_with_cursor(Some("first"), Some(2));
         assert_eq!(target.text().as_deref(), Some(provisional));
         assert_eq!((target.caret_index(), target.selection_start(), target.selection_end()), (insertion, insertion, insertion));
-        assert_eq!(presenter.preedit_text().as_deref(), Some("first"));
+        assert_eq!(presenter.preedit_text().as_deref(), Some("first"), "{text:?}, caret {caret}, range {start}..{end}");
         assert_eq!(presenter.preedit_text_cursor_position(), Some(2));
         client.set_preedit_text(None);
         assert_eq!(target.text().as_deref(), Some(text));
         assert_eq!((target.caret_index(), target.selection_start(), target.selection_end()), (caret, start, end));
         assert!(!target.can_undo() && !target.can_redo());
+    }
+}
+
+#[test]
+fn first_preedit_text_synchronization_respects_reentrant_owner_changes() {
+    let _scope = test_scope();
+    for mutation in ["cancel", "host_text", "host_selection", "template", "newer_clause"] {
+        let target = templated_text_box(Some("a🦀z"));
+        let root = host_in_root(&target);
+        target.set_selection_start(1);
+        target.set_selection_end(3);
+        let presenter = target.find_descendant_of_type::<TextPresenter>(false).unwrap();
+        let client = get_input_method_client(&target);
+        let callback_client = client.clone();
+        let observed = Rc::new(Cell::new(false));
+        let handled = observed.clone();
+        let weak = target.downgrade();
+        let subscription = presenter.property_changed(move |e| {
+            if e.property() != TextPresenter::text_property().as_property()
+                || e.get_new_value::<Option<String>>().as_deref() != Some("az") || handled.replace(true) {
+                return;
+            }
+            let target = weak.upgrade().unwrap();
+            assert_eq!(target.text().as_deref(), Some("az"));
+            assert!(target.is_composing_text());
+            match mutation {
+                "cancel" => callback_client.set_preedit_text(None),
+                "host_text" => {
+                    target.set_text(Some("host replacement"));
+                    target.set_caret_index(6);
+                    target.set_selection_start(2);
+                    target.set_selection_end(6);
+                }
+                "host_selection" => target.set_caret_index(2),
+                "template" => {
+                    target.set_template(create_themed_template());
+                    target.apply_template();
+                }
+                "newer_clause" => callback_client.set_preedit_text_with_cursor(Some("newer"), Some(2)),
+                _ => unreachable!(),
+            }
+        });
+        client.set_preedit_text_with_cursor(Some("obsolete"), Some(4));
+        assert!(observed.get(), "{mutation}");
+        let current = client.text_view_visual().unwrap().cast::<TextPresenter>().unwrap();
+        match mutation {
+            "host_text" => {
+                assert_eq!(target.text().as_deref(), Some("host replacement"));
+                assert_eq!((target.caret_index(), target.selection_start(), target.selection_end()), (6, 2, 6));
+                assert_eq!(current.preedit_text(), None);
+                client.set_preedit_text(Some("later clause"));
+                client.set_preedit_text(None);
+                assert_eq!(target.text().as_deref(), Some("host replacement"));
+                assert_eq!((target.caret_index(), target.selection_start(), target.selection_end()), (6, 2, 6));
+            }
+            "host_selection" => {
+                assert_eq!(target.text().as_deref(), Some("az"));
+                assert_eq!((target.caret_index(), target.selection_start(), target.selection_end()), (2, 2, 2));
+                assert_eq!(current.preedit_text(), None);
+                client.set_preedit_text(Some("later clause"));
+                assert_eq!(target.text().as_deref(), Some("az"));
+                client.set_preedit_text(None);
+                assert_eq!(target.text().as_deref(), Some("a🦀z"));
+                assert_eq!((target.caret_index(), target.selection_start(), target.selection_end()), (2, 2, 2));
+            }
+            "newer_clause" => {
+                assert_eq!(target.text().as_deref(), Some("az"));
+                assert_eq!(current.preedit_text().as_deref(), Some("newer"));
+                assert_eq!(current.preedit_text_cursor_position(), Some(2));
+                client.set_preedit_text(None);
+                assert_eq!(target.text().as_deref(), Some("a🦀z"));
+                assert_eq!((target.caret_index(), target.selection_start(), target.selection_end()), (0, 1, 3));
+            }
+            "cancel" | "template" => {
+                assert_eq!(target.text().as_deref(), Some("a🦀z"));
+                assert_eq!((target.caret_index(), target.selection_start(), target.selection_end()), (0, 1, 3));
+                assert_eq!(current.preedit_text(), None);
+                assert_eq!(current.preedit_text_cursor_position(), None);
+                if mutation == "template" {
+                    assert!(current != presenter);
+                    root.execute_initial_layout_pass();
+                    assert_eq!(target.find_descendant_of_type::<TextPresenter>(false).as_ref(), Some(&current));
+                }
+            }
+            _ => unreachable!(),
+        }
+        assert!(!target.is_composing_text(), "{mutation}");
+        assert!(!target.can_undo() && !target.can_redo(), "{mutation}");
+        subscription.dispose();
     }
 }
 

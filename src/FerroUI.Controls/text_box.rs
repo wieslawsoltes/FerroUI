@@ -216,6 +216,13 @@ impl FerroObjectImpl for TextBox {
                 this.snapshot_undo_redo(true);
             }
 
+            // During first-clause preparation, caret coercion and host
+            // TextChanging handlers must see the provisional presenter text.
+            // Otherwise a TwoWay caret binding can snap a valid new position
+            // against an obsolete Unicode cluster and write it back here.
+            if !this.im_client.synchronize_preparing_presenter_text(this) {
+                return;
+            }
             this.coerce_value(Self::caret_index_property().as_property());
             this.coerce_value(Self::selection_start_property().as_property());
             this.coerce_value(Self::selection_end_property().as_property());
