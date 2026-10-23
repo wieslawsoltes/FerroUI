@@ -244,7 +244,8 @@ when that boundary alternative is added.
 Executable patterns now apply the source's default explicit-capture policy,
 including scoped `n` options and capture-reference remapping. Non-span rules
 match inside actual span-bounded regions, retaining the source's per-region
-match cache and zero-length-match errors. The dedicated
+match cache and zero-length-match errors. Span-only state scans skip ordinary
+rules; colored sections are produced lazily for requested lines. The dedicated
 [XSHD runtime audit](editor-xshd-runtime.md) maps these changes and records the
 remaining regex-engine differences.
 
@@ -478,11 +479,10 @@ parity or operating-system clipboard/input-method behavior.
   remain separate presentation work. Localization and public strategy injection
   are potential extensions; the pinned panel has no localization class or
   public strategy setter.
-- Structured snippet nodes support text, replacement fields, bound fields,
-  selected text, containers and a final caret. Numeric snippet notation rejects
-  variables, nested defaults, choices and transformations explicitly. Custom
-  active-element implementations and every upstream snippet lifecycle event
-  are not exposed.
+- Structured snippet nodes expose extensible insertion contexts, active-element
+  traits, transformed bound fields, lifecycle events and undo ownership; see
+  [editor-snippets.md](editor-snippets.md). Native field background and outline
+  rendering remains presentation work.
 - Typed XSHD loading, visitors, serialization and archived v1 conversion have
   regression coverage. The pinned upstream loader has XSD validation commented
   out; the Rust parser/compiler likewise validates supported structure and
@@ -498,9 +498,10 @@ parity or operating-system clipboard/input-method behavior.
 - The document highlighter uses stable live-line identities and a lazy dirty
   index instead of compressed state lists. Tracker registration initializes
   live-line metadata in O(total lines) if it has not already been built;
-  highlighted results remain lazy. State-only updates use full line evaluation
-  rather than a separate optimized scanner. These choices have regression
-  coverage, but no benchmark-equivalence claim. Trait composition replaces
+  highlighted results remain lazy. State-only updates use a separate span scan,
+  and cached state is distinguished from optional colored sections. These
+  choices have regression coverage, but no benchmark-equivalence claim.
+  Trait composition replaces
   protected virtual subclass hooks. Notifications include the actual last
   line when its incoming state changes, correcting a stricter condition in the
   pinned concrete source to follow the interface's inclusive contract.

@@ -13,12 +13,14 @@ All Rust paths in this table are relative to `src/FerroUI.Edit.Core/`.
 
 | Upstream source/member | Rust implementation | Audited contract |
 | --- | --- | --- |
-| [`Highlighting/Xshd/XmlHighlightingDefinition.cs`, `CreateRegex`](https://github.com/AvaloniaUI/AvaloniaEdit/blob/7277e36366d754219d7ede16b6613786b32caf4c/AvaloniaEdit/Highlighting/Xshd/XmlHighlightingDefinition.cs) | `highlighting/xshd/compiler.rs::compile_regex`, `highlighting/xshd/regex_compat.rs::explicit_capture` | Default explicit captures; inherited case setting; per-expression whitespace mode; source-positioned compilation failures |
+| [`Highlighting/Xshd/XmlHighlightingDefinition.cs`, `CreateRegex`](https://github.com/AvaloniaUI/AvaloniaEdit/blob/7277e36366d754219d7ede16b6613786b32caf4c/src/AvaloniaEdit/Highlighting/Xshd/XmlHighlightingDefinition.cs) | `highlighting/xshd/compiler.rs::compile_regex`, `highlighting/xshd/regex_compat.rs::explicit_capture` | Default explicit captures; inherited case setting; per-expression whitespace mode; source-positioned compilation failures |
 | Same file, `VisitRule`, `VisitSpan`, `VisitKeywords` | Same compiler entry point for rules, begin/end expressions and generated keyword patterns | Capture policy applies consistently; the editable tree retains original pattern text |
-| [`Highlighting/HighlightingEngine.cs`, `HighlightNonSpans`](https://github.com/AvaloniaUI/AvaloniaEdit/blob/7277e36366d754219d7ede16b6613786b32caf4c/AvaloniaEdit/Highlighting/HighlightingEngine.cs) | `highlighting/highlighting_engine.rs::highlight_non_spans` | Bounded matches, source-order ties, per-region match caching, zero-length rule failure |
+| [`Highlighting/HighlightingEngine.cs`, `HighlightNonSpans`](https://github.com/AvaloniaUI/AvaloniaEdit/blob/7277e36366d754219d7ede16b6613786b32caf4c/src/AvaloniaEdit/Highlighting/HighlightingEngine.cs) | `highlighting/highlighting_engine.rs::highlight_non_spans` | Bounded matches, source-order ties, per-region match caching, zero-length rule failure |
 | Same file, `HighlightLineInternal` | `highlighting/highlighting_engine.rs::highlight_line` | Span boundaries select each rule region; span state remains separate from non-span rule matching |
-| [`Highlighting/Xshd/HighlightingLoader.cs`, `GetValidatingReader`](https://github.com/AvaloniaUI/AvaloniaEdit/blob/7277e36366d754219d7ede16b6613786b32caf4c/AvaloniaEdit/Highlighting/Xshd/HighlightingLoader.cs) and [`V2Loader.cs`, `LoadDefinition`](https://github.com/AvaloniaUI/AvaloniaEdit/blob/7277e36366d754219d7ede16b6613786b32caf4c/AvaloniaEdit/Highlighting/Xshd/V2Loader.cs) | `highlighting/xshd/loader.rs` | The pinned active loader does not install an XSD validator; Rust validates supported structure and values directly |
-| [`Highlighting/HighlightingColor.cs`](https://github.com/AvaloniaUI/AvaloniaEdit/blob/7277e36366d754219d7ede16b6613786b32caf4c/AvaloniaEdit/Highlighting/HighlightingColor.cs) and `XmlHighlightingDefinition.VisitColor` | `highlighting/highlighting_definition.rs::HighlightingColor`, `highlighting/xshd/compiler.rs::runtime_color` | Existing optional runtime font and brush values, style overlay and independently clearable decorations |
+| Same file, `ScanLine` | `highlighting/highlighting_engine.rs::scan_line` | Span state transitions without rule evaluation, color-section construction or a UTF-16 offset table |
+| [`Highlighting/DocumentHighlighter.cs`, `HighlightLine`, `HighlightUpTo`, `UpdateHighlightingState`](https://github.com/AvaloniaUI/AvaloniaEdit/blob/7277e36366d754219d7ede16b6613786b32caf4c/src/AvaloniaEdit/Highlighting/DocumentHighlighter.cs) | `highlighting/document_highlighter.rs` | Preceding and state-only lines use span scans; the requested line evaluates its ordinary rules |
+| [`Highlighting/Xshd/HighlightingLoader.cs`, `GetValidatingReader`](https://github.com/AvaloniaUI/AvaloniaEdit/blob/7277e36366d754219d7ede16b6613786b32caf4c/src/AvaloniaEdit/Highlighting/Xshd/HighlightingLoader.cs) and [`V2Loader.cs`, `LoadDefinition`](https://github.com/AvaloniaUI/AvaloniaEdit/blob/7277e36366d754219d7ede16b6613786b32caf4c/src/AvaloniaEdit/Highlighting/Xshd/V2Loader.cs) | `highlighting/xshd/loader.rs` | The pinned active loader does not install an XSD validator; Rust validates supported structure and values directly |
+| [`Highlighting/HighlightingColor.cs`](https://github.com/AvaloniaUI/AvaloniaEdit/blob/7277e36366d754219d7ede16b6613786b32caf4c/src/AvaloniaEdit/Highlighting/HighlightingColor.cs) and `XmlHighlightingDefinition.VisitColor` | `highlighting/highlighting_definition.rs::HighlightingColor`, `highlighting/xshd/compiler.rs::runtime_color` | Existing optional runtime font and brush values, style overlay and independently clearable decorations |
 
 The wider syntax-tree, visitor, serialization, import and legacy-format mapping
 is in [editor-services.md](editor-services.md). Native font, brush, rich-text and
@@ -87,6 +89,28 @@ empty region does not evaluate rules, matching upstream's early return.
 Zero-width span transitions still use the existing cycle and operation guards;
 they are not categorically forbidden.
 
+## Span-only state updates and lazy formatting
+
+`HighlightingEngine::scan_line` shares the span transition loop with full
+highlighting, but skips ordinary rules, color overlays and UTF-16 section-offset
+construction. It retains nested/multiline span transitions and their existing
+cycle and operation guards.
+
+`DocumentHighlighter::update_highlighting_state` uses this scanner. A request
+to highlight a later line also scans uncached predecessors without evaluating
+their ordinary rules, as upstream `HighlightLine` does through `HighlightUpTo`.
+Consequently, a zero-width rule on an earlier line cannot prevent highlighting
+a later line; requesting the malformed line itself still returns the rule
+error.
+
+Cache entries distinguish a computed end state from optional colored sections.
+A state-only entry is upgraded when that line's formatting is requested; it is
+never mistaken for a highlighted line with no colors. Re-scanning an edited
+line invalidates its old formatting even if its ending span state is unchanged.
+State convergence, stable live-line identities, callbacks and document/cache
+generation guards remain in use. A failed formatting request leaves successfully
+computed span states usable.
+
 ## Runtime style and schema findings
 
 The style audit found the runtime fields already present: foreground,
@@ -120,9 +144,14 @@ escapes/classes/comments, unsupported capture diagnostics, preserved editable
 patterns, active loader validation, bounded suffixes, both lookaround edges,
 UTF-16 offsets, cached failures/future matches and zero-length rule errors.
 
-The highlighting filter passed **90 tests**, including compilation/execution
-and syntax-tree round trips of all **21 bundled definitions**. The unfiltered
-Core command passed **318 tests**:
+The initial highlighting filter passed **90 tests**, including
+compilation/execution and syntax-tree round trips of all **21 bundled
+definitions**, and the unfiltered Core command passed **318 tests**.
+The span-only follow-up adds three focused tests for scanner state, skipped
+malformed rules, lazy formatting and stale-section invalidation. It also checks
+the recursive-span guard through the scanner. The follow-up passed **93
+highlighting tests** and **321 unfiltered Core tests**. The command used for the
+full Core regression gate is:
 
 ```sh
 cargo test -p ferroui-edit-core --lib --offline
@@ -149,9 +178,6 @@ engine or a native rendering test.
   backend-specific extensions and adversarial-pattern performance still need
   wider differential coverage. Backtracking, compilation and line-operation
   budgets deliberately produce recoverable Rust errors.
-- State-only document-highlighter updates still evaluate complete lines rather
-  than using upstream's separate span-only scanner. They can therefore report
-  a malformed rule that the upstream state-only pass would not evaluate.
 
 The fixed capture defaults and bounded-region behavior are specific parity
 improvements. They do not close the remaining regex-engine or native visual

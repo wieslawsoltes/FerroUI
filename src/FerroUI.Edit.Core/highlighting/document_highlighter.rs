@@ -1,6 +1,6 @@
 use super::{
-    HighlightedLine, HighlightingColor, HighlightingEngine, HighlightingError, HighlightingState,
-    HighlightingStateChangedEventArgs, IHighlighter,
+    HighlightedLine, HighlightedSection, HighlightingColor, HighlightingEngine, HighlightingError,
+    HighlightingState, HighlightingStateChangedEventArgs, IHighlighter,
 };
 use crate::document::{
     DocumentChangeEventArgs, DocumentSubscription, ILineTracker, LiveDocumentLine, TextDocument,
@@ -18,11 +18,18 @@ fn line_identity(line: &LiveDocumentLine) -> usize {
     Rc::as_ptr(&line.inner) as usize
 }
 
+struct CachedLine {
+    end_state: HighlightingState,
+    // A state-only scan does not imply that the line has no colored sections.
+    // Formatting stays lazy until that specific line is requested.
+    sections: Option<Vec<HighlightedSection>>,
+}
+
 #[derive(Default)]
 struct HighlightCache {
     // Sections are relative to their line start, so an earlier edit does not
     // require rewriting the offsets of every later cached section.
-    lines: HashMap<usize, HighlightedLine>,
+    lines: HashMap<usize, CachedLine>,
     frontier: Option<LiveDocumentLine>,
     dirty: HashMap<usize, LiveDocumentLine>,
     dirty_order: Option<BTreeSet<usize>>,
@@ -76,12 +83,7 @@ impl HighlightCache {
         (next <= target).then_some(next)
     }
 
-    fn store(
-        &mut self,
-        line: &LiveDocumentLine,
-        number: usize,
-        highlighted: HighlightedLine,
-    ) -> bool {
+    fn store(&mut self, line: &LiveDocumentLine, number: usize, highlighted: CachedLine) -> bool {
         let key = line_identity(line);
         let changed = self
             .lines
@@ -225,20 +227,26 @@ impl DocumentHighlighter {
     pub fn highlight_line(&self, line_number: usize) -> Result<HighlightedLine, HighlightingError> {
         self.validate_line(line_number, false)?;
         let _operation = self.begin_operation()?;
-        self.highlight_up_to(line_number)?;
+        self.highlight_up_to(line_number, true)?;
         let line = self
             .document
             .get_live_line_by_number(line_number)
             .map_err(document_error)?;
-        let mut highlighted = self
-            .tracker
-            .cache
-            .borrow()
-            .lines
-            .get(&line_identity(&line))
-            .cloned()
-            .ok_or(HighlightingError::HighlightingInterrupted)?;
-        highlighted.line_number = line_number;
+        let mut highlighted = {
+            let cache = self.tracker.cache.borrow();
+            let cached = cache
+                .lines
+                .get(&line_identity(&line))
+                .ok_or(HighlightingError::HighlightingInterrupted)?;
+            HighlightedLine {
+                line_number,
+                sections: cached
+                    .sections
+                    .clone()
+                    .ok_or(HighlightingError::HighlightingInterrupted)?,
+                end_state: cached.end_state.clone(),
+            }
+        };
         let offset = line.offset().map_err(document_error)?;
         for section in &mut highlighted.sections {
             section.offset += offset;
@@ -313,7 +321,7 @@ impl DocumentHighlighter {
     pub fn update_highlighting_state(&self, line_number: usize) -> Result<(), HighlightingError> {
         self.validate_line(line_number, true)?;
         let _operation = self.begin_operation()?;
-        self.highlight_up_to(line_number)
+        self.highlight_up_to(line_number, false)
     }
 
     pub fn highlighting_state_changed(
@@ -387,54 +395,91 @@ impl DocumentHighlighter {
         }
     }
 
-    fn highlight_up_to(&self, target: usize) -> Result<(), HighlightingError> {
+    fn highlight_up_to(
+        &self,
+        target: usize,
+        highlight_target: bool,
+    ) -> Result<(), HighlightingError> {
         let version = self.document.version();
         let generation = self.tracker.cache.borrow().generation;
         loop {
             let next = self.tracker.cache.borrow_mut().next_invalid(target);
             let Some(number) = next else { break };
+            self.process_line(number, highlight_target && number == target)?;
+            if self.document.version() != version
+                || self.tracker.cache.borrow().generation != generation
+            {
+                return Err(HighlightingError::HighlightingInterrupted);
+            }
+        }
+        if highlight_target {
             let line = self
                 .document
-                .get_live_line_by_number(number)
+                .get_live_line_by_number(target)
                 .map_err(document_error)?;
-            let initial = if number == 1 {
-                self.initial_span_stack()
-            } else {
-                let previous = line
-                    .previous_line()
-                    .ok_or(HighlightingError::HighlightingInterrupted)?;
-                self.tracker
-                    .cache
-                    .borrow()
-                    .lines
-                    .get(&line_identity(&previous))
-                    .map(|line| line.end_state.clone())
-                    .ok_or(HighlightingError::HighlightingInterrupted)?
-            };
-            let position = line.snapshot().map_err(document_error)?;
-            let text = self
-                .document
-                .get_text(position.offset, position.length)
-                .map_err(document_error)?;
-            #[cfg(test)]
-            {
-                self.tracker.cache.borrow_mut().scanned_lines += 1;
-            }
-            let highlighted = self.engine.highlight_line(&text, number, 0, &initial)?;
-            let changed = self
+            let needs_sections = self
                 .tracker
                 .cache
-                .borrow_mut()
-                .store(&line, number, highlighted);
-            if changed && number < self.document.line_count() {
-                self.raise_state_changed(number + 1, number + 1);
-                self.check_available()?;
+                .borrow()
+                .lines
+                .get(&line_identity(&line))
+                .is_none_or(|line| line.sections.is_none());
+            if needs_sections {
+                self.process_line(target, true)?;
                 if self.document.version() != version
                     || self.tracker.cache.borrow().generation != generation
                 {
                     return Err(HighlightingError::HighlightingInterrupted);
                 }
             }
+        }
+        Ok(())
+    }
+
+    fn process_line(&self, number: usize, highlight: bool) -> Result<(), HighlightingError> {
+        let line = self
+            .document
+            .get_live_line_by_number(number)
+            .map_err(document_error)?;
+        let initial = if number == 1 {
+            self.initial_span_stack()
+        } else {
+            let previous = line
+                .previous_line()
+                .ok_or(HighlightingError::HighlightingInterrupted)?;
+            self.tracker
+                .cache
+                .borrow()
+                .lines
+                .get(&line_identity(&previous))
+                .map(|line| line.end_state.clone())
+                .ok_or(HighlightingError::HighlightingInterrupted)?
+        };
+        let position = line.snapshot().map_err(document_error)?;
+        let text = self
+            .document
+            .get_text(position.offset, position.length)
+            .map_err(document_error)?;
+        #[cfg(test)]
+        {
+            self.tracker.cache.borrow_mut().scanned_lines += 1;
+        }
+        let cached = if highlight {
+            let highlighted = self.engine.highlight_line(&text, number, 0, &initial)?;
+            CachedLine {
+                end_state: highlighted.end_state,
+                sections: Some(highlighted.sections),
+            }
+        } else {
+            CachedLine {
+                end_state: self.engine.scan_line(&text, &initial)?,
+                sections: None,
+            }
+        };
+        let changed = self.tracker.cache.borrow_mut().store(&line, number, cached);
+        if changed && number < self.document.line_count() {
+            self.raise_state_changed(number + 1, number + 1);
+            self.check_available()?;
         }
         Ok(())
     }
@@ -541,6 +586,64 @@ mod tests {
 
     fn scanned(highlighter: &DocumentHighlighter) -> usize {
         highlighter.tracker.cache.borrow().scanned_lines
+    }
+
+    #[test]
+    fn state_only_updates_and_preceding_lines_skip_invalid_ordinary_rules() {
+        let definition = Rc::new(HighlightingDefinition::load(
+            r#"<SyntaxDefinition><RuleSet><Rule foreground="Red">(?=!)</Rule><Rule foreground="Blue">let</Rule><Span begin="\[" end="\]" foreground="Green" multiline="true"/></RuleSet></SyntaxDefinition>"#,
+        ).unwrap());
+        let document = TextDocument::from_text("!bad\n[body\n]\nlet");
+        let highlighter = DocumentHighlighter::new(
+            document.clone(),
+            HighlightingEngine::new(definition.clone()),
+        );
+        // A direct request also scans its uncached predecessors without
+        // evaluating their ordinary rules.
+        let fresh = DocumentHighlighter::new(document, HighlightingEngine::new(definition));
+        assert_eq!(fresh.highlight_line(4).unwrap().sections.len(), 1);
+        highlighter.update_highlighting_state(3).unwrap();
+        assert_eq!(
+            highlighter.get_span_stack(1).unwrap(),
+            HighlightingState::default()
+        );
+        assert_eq!(
+            highlighter.get_active_colors(2).unwrap()[0]
+                .foreground
+                .as_deref(),
+            Some("Green")
+        );
+        assert_eq!(
+            highlighter.get_span_stack(3).unwrap(),
+            HighlightingState::default()
+        );
+        let line = highlighter.highlight_line(4).unwrap();
+        assert_eq!(line.sections.len(), 1);
+        assert_eq!(line.sections[0].color.foreground.as_deref(), Some("Blue"));
+        // A state-only entry must be upgraded when its own colors are requested.
+        let line = highlighter.highlight_line(2).unwrap();
+        assert_eq!(line.sections.len(), 1);
+        assert_eq!(line.sections[0].color.foreground.as_deref(), Some("Green"));
+        assert!(matches!(
+            highlighter.highlight_line(1),
+            Err(HighlightingError::InvalidDefinition(message)) if message.contains("0 characters")
+        ));
+        // A failed formatting request does not poison valid cached span state.
+        highlighter.update_highlighting_state(4).unwrap();
+        assert_eq!(highlighter.highlight_line(4).unwrap().sections.len(), 1);
+    }
+
+    #[test]
+    fn state_only_recomputation_discards_stale_formatting_when_state_is_equal() {
+        let document = TextDocument::from_text("let a\nlet b");
+        let highlighter = DocumentHighlighter::new(document.clone(), engine());
+        assert_eq!(highlighter.highlight_line(1).unwrap().sections.len(), 1);
+        highlighter.highlight_line(2).unwrap();
+        document.replace(0, 3, "new").unwrap();
+        highlighter.update_highlighting_state(2).unwrap();
+        assert!(highlighter.highlight_line(1).unwrap().sections.is_empty());
+        assert_eq!(highlighter.highlight_line(2).unwrap().sections.len(), 1);
+        assert_matches_fresh(&highlighter);
     }
 
     #[test]
@@ -669,9 +772,11 @@ mod tests {
         let count = observations.clone();
         highlighter.highlighting_state_changed(move |event| {
             let highlighter = weak.upgrade().unwrap();
-            assert!(highlighter
-                .get_span_stack(event.from_line_number - 1)
-                .is_ok());
+            assert!(
+                highlighter
+                    .get_span_stack(event.from_line_number - 1)
+                    .is_ok()
+            );
             assert!(matches!(
                 highlighter.highlight_line(1),
                 Err(HighlightingError::ReentrantOperation)

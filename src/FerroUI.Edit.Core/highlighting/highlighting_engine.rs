@@ -69,6 +69,28 @@ impl HighlightingEngine {
         offset: usize,
         initial: &HighlightingState,
     ) -> Result<HighlightedLine, HighlightingError> {
+        self.process_line(text, line_number, offset, initial, true)
+    }
+
+    /// Advances only the span stack. Ordinary rules are not evaluated, and no
+    /// color sections or UTF-16 position table are allocated for the line.
+    pub fn scan_line(
+        &self,
+        text: &str,
+        initial: &HighlightingState,
+    ) -> Result<HighlightingState, HighlightingError> {
+        self.process_line(text, 0, 0, initial, false)
+            .map(|line| line.end_state)
+    }
+
+    fn process_line(
+        &self,
+        text: &str,
+        line_number: usize,
+        offset: usize,
+        initial: &HighlightingState,
+        highlight: bool,
+    ) -> Result<HighlightedLine, HighlightingError> {
         let mut state = initial.clone();
         for frame in &state.stack {
             self.span(*frame)?;
@@ -76,13 +98,16 @@ impl HighlightingEngine {
         let mut sections = Vec::new();
         let mut position = 0;
         let mut iterations = 0;
-        let mut utf16 = Vec::with_capacity(text.chars().count() + 1);
-        let mut units = 0;
-        for (byte, ch) in text.char_indices() {
-            utf16.push((byte, units));
-            units += ch.len_utf16();
+        let mut utf16 = Vec::new();
+        if highlight {
+            utf16.reserve(text.chars().count() + 1);
+            let mut units = 0;
+            for (byte, ch) in text.char_indices() {
+                utf16.push((byte, units));
+                units += ch.len_utf16();
+            }
+            utf16.push((text.len(), units));
         }
-        utf16.push((text.len(), units));
         let mut visited = HashSet::new();
         while position <= text.len() {
             iterations += 1;
@@ -97,7 +122,11 @@ impl HighlightingEngine {
                 ));
             }
             let current = state.stack.last().map(|f| self.span(*f)).transpose()?;
-            let ambient = self.ambient(&state)?;
+            let ambient = if highlight {
+                self.ambient(&state)?
+            } else {
+                None
+            };
             let mut candidate = if let Some(span) = current {
                 span.end_expression
                     .find_from_pos(text, position)
@@ -116,26 +145,28 @@ impl HighlightingEngine {
                 self.find_candidates(text, position, ruleset, &mut scanned, &mut candidate)?;
             }
             let boundary = candidate.as_ref().map_or(text.len(), |c| c.start());
-            if let Some(ruleset) = ruleset {
-                self.highlight_non_spans(
-                    text,
-                    position..boundary,
-                    ruleset,
-                    &utf16,
-                    offset,
-                    ambient.clone(),
-                    &mut sections,
-                    &mut iterations,
-                )?;
-            } else {
-                self.push(
-                    &mut sections,
-                    &utf16,
-                    position,
-                    boundary,
-                    offset,
-                    ambient.clone(),
-                );
+            if highlight {
+                if let Some(ruleset) = ruleset {
+                    self.highlight_non_spans(
+                        text,
+                        position..boundary,
+                        ruleset,
+                        &utf16,
+                        offset,
+                        ambient.clone(),
+                        &mut sections,
+                        &mut iterations,
+                    )?;
+                } else {
+                    self.push(
+                        &mut sections,
+                        &utf16,
+                        position,
+                        boundary,
+                        offset,
+                        ambient.clone(),
+                    );
+                }
             }
             let Some(candidate) = candidate else {
                 break;
@@ -143,24 +174,28 @@ impl HighlightingEngine {
             let end = candidate.end();
             match candidate {
                 Candidate::End(start, end) => {
-                    let span = current.expect("end candidate requires open span");
-                    self.push(
-                        &mut sections,
-                        &utf16,
-                        start,
-                        end,
-                        offset,
-                        overlay(ambient, span.end_color.as_ref()),
-                    );
+                    if highlight {
+                        let span = current.expect("end candidate requires open span");
+                        self.push(
+                            &mut sections,
+                            &utf16,
+                            start,
+                            end,
+                            offset,
+                            overlay(ambient, span.end_color.as_ref()),
+                        );
+                    }
                     state.stack.pop();
                 }
                 Candidate::Span(set, index, start, end) => {
-                    let span = self.span((set, index))?;
-                    let color = overlay(
-                        overlay(ambient, span.span_color.as_ref()),
-                        span.start_color.as_ref(),
-                    );
-                    self.push(&mut sections, &utf16, start, end, offset, color);
+                    if highlight {
+                        let span = self.span((set, index))?;
+                        let color = overlay(
+                            overlay(ambient, span.span_color.as_ref()),
+                            span.start_color.as_ref(),
+                        );
+                        self.push(&mut sections, &utf16, start, end, offset, color);
+                    }
                     state.stack.push((set, index));
                 }
             }
@@ -409,6 +444,11 @@ mod tests {
                 .highlight_line("x", 1, 0, &HighlightingState::default())
                 .is_err()
         );
+        assert!(
+            engine
+                .scan_line("x", &HighlightingState::default())
+                .is_err()
+        );
     }
     #[test]
     fn greedy_rule_cannot_consume_span_boundaries() {
@@ -509,5 +549,27 @@ mod tests {
                     .is_empty()
             );
         }
+    }
+
+    #[test]
+    fn span_scans_skip_ordinary_rules_and_retain_multiline_state() {
+        let definition = Rc::new(HighlightingDefinition::load(
+            r#"<SyntaxDefinition><RuleSet><Rule foreground="Red">(?=!)</Rule><Span begin="\[" end="\]" foreground="Green" multiline="true"/></RuleSet></SyntaxDefinition>"#,
+        ).unwrap());
+        let engine = HighlightingEngine::new(definition);
+        let state = engine
+            .scan_line("! [body", &HighlightingState::default())
+            .unwrap();
+        let colors = engine.get_color_stack(&state).unwrap();
+        assert_eq!(colors.len(), 1);
+        assert_eq!(colors[0].foreground.as_deref(), Some("Green"));
+        assert_eq!(
+            engine.scan_line("end] !", &state).unwrap(),
+            HighlightingState::default()
+        );
+        assert!(matches!(
+            engine.highlight_line("! [body", 1, 0, &HighlightingState::default()),
+            Err(HighlightingError::InvalidDefinition(message)) if message.contains("0 characters")
+        ));
     }
 }
