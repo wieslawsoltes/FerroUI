@@ -121,8 +121,14 @@ uses trusted pointer/keyboard input and checks reflow, exact history,
 mode activation, literal ownership and persisted JSON. Its fifth check starts
 presentation with the native Play button, clicks a frame's SetVariable action,
 and checks independently calculated old/new child positions in actual browser
-pixels. Exports, a save during playback, history and Escape restoration must
-retain the complete authored document.
+pixels. The production public Save command must finish a real download containing
+the complete authored document while the preview's geometry, camera and history
+remain unchanged. The saved preview is checked again in actual pixels. This
+tests the native serialization boundary; it does not claim a Ctrl+S shortcut in
+presentation, where keyboard chords belong to prototype interactions. A separate
+durable flush/load checks that stored authored content remains isolated from
+preview values; a clean flush may perform no new autosave serialization. Exports,
+history and Escape restoration must also retain the complete authored document.
 
 `prototype_layout_variables_tests.rs` additionally exercises actual SetVariable
 actions through the player: nested Hug dimensions and sibling positions, aliases

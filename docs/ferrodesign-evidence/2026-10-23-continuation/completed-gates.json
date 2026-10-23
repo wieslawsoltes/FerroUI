@@ -119,8 +119,8 @@
     }
   ],
   "latest_production_sha": "1637a093723a4f899b7f4e371fd53f0b91914a98",
-  "latest_production_status": "533 core and239 native application tests passed in CI; browser build/interaction validation remains separate.",
-  "browser_status": "3be WebAssembly build still running; no new runtime artifact available. Focused old-b7 runtime replays are separate evidence, not current feature browser proof.",
+  "latest_production_status": "533 core and 239 native application tests passed in CI; browser build/interaction validation remains separate.",
+  "browser_status": "This record covers completed core/native/helper gates. Exact-runtime browser outcomes and their limits are recorded separately in the continuation README and browser-harness evidence.",
   "local_core": {
     "source_sha": "1637a093723a4f899b7f4e371fd53f0b91914a98",
     "source_tree": "30d4ef3b1db917318a11163e7d92aa493b3d0203",
@@ -135,10 +135,34 @@
     "note": "Executed before publication; the locally tested commit and published commit have the identical verified Git tree."
   },
   "local_pure_js": {
+    "source_sha": "08e29e4f530c0ae65f6e2ac072f381605e23ed0c",
+    "command": "node --test --test-isolation=none --test-reporter=spec tests/alpha-coverage.test.mjs tests/input-observations.test.mjs tests/corner-radius-input.test.mjs tests/gradient-input.test.mjs tests/text-pan-trace-analysis.test.mjs",
+    "node": "v24.19.0",
+    "passed": 39,
+    "failed": 0,
+    "skipped": 0,
+    "log_sha256": "2934ee7f656136c23800218debbe128ced52d6c48426c44944e8b280d2750440",
+    "log_bytes": 4063,
+    "scope": "All executed helper modules match 08e29e4f. Coverage arithmetic, trace analysis/process ownership, passive observations, radius and angular input oracles; not editor browser execution.",
+    "log_file": "08e29e4f-browser-helper-tests.log"
+  },
+  "local_pure_js_previous": {
     "source_sha": "1637a093723a4f899b7f4e371fd53f0b91914a98",
     "command": "node --test --test-isolation=none --test-reporter=spec tests/alpha-coverage.test.mjs tests/text-pan-trace-analysis.test.mjs tests/input-observations.test.mjs tests/corner-radius-input.test.mjs",
     "passed": 34,
     "failed": 0,
     "scope": "Coverage arithmetic, trace analysis/process ownership, passive observations and radius input oracle; not editor browser execution."
+  },
+  "local_native_performance": {
+    "source_sha": "08e29e4f530c0ae65f6e2ac072f381605e23ed0c",
+    "core_tree": "3c91aeeed4ff3d22eff9eae1f63fd6aef1cd3f24",
+    "core_matches_production_sha": "1637a093723a4f899b7f4e371fd53f0b91914a98",
+    "nodes": 10000,
+    "equivalence_assertions": "passed",
+    "exit_code": 0,
+    "result_file": "performance/native-engine-10000.json",
+    "provenance_file": "performance/provenance.json",
+    "result_sha256": "b8b1f859e1a0896776ff3cbc5378f12fbc450365f8d98e832ceacf9b4a5455df",
+    "scope": "Native CPU engine on shared host. Browser events, control layout, artwork rendering and presentation are excluded."
   }
 }

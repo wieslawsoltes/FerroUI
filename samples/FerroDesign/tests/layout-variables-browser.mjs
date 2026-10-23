@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { readFile } from "node:fs/promises";
 import { resolve } from "node:path";
 import { PNG } from "pngjs";
 
@@ -158,13 +159,40 @@ export async function layoutVariableRegressions(page, reference, check, helpers,
     assert.deepEqual(pixel(afterPixels, reflowed, 92.5, 85), [255, 0, 0, 255], "Spacing reflow paints the child at the independently calculated new position");
     assert.deepEqual(await documentState(page), authored, "Prototype exports keep authored spacing and variable definitions");
     assert.equal(reflowed.historyLength, editing.historyLength);
-    await flushStorage(page);
+    // A clean durable flush can be a no-op. Exercise the actual production
+    // Save command and finished download to test serialization during preview.
+    // Presentation owns keyboard chords, so this is public Save command
+    // coverage, not a claim that the Ctrl+S shortcut runs during playback.
+    const [download, saved] = await Promise.all([
+        page.waitForEvent("download", { timeout: 30000 }),
+        page.evaluate(() => globalThis.ferroDesign.ferroDesignCommand("save")),
+    ]);
+    assert.equal(saved, true, "The public native Save command accepts an active presentation");
+    assert.equal(await download.failure(), null);
+    assert.equal(download.suggestedFilename(), "FerroDesign.ferrodesign");
+    const savedPath = resolve(output, mode + "-prototype-spacing-save.ferrodesign");
+    await download.saveAs(savedPath);
+    assert.deepEqual(JSON.parse(await readFile(savedPath, "utf8")), authored,
+        "The completed native Save download contains exact authored variables, layout and document state");
+    const afterSave = await state(page);
+    for (const key of ["presentation", "prototypeAnimation", "prototypeOverlays", "prototypeScrollOffsets",
+        "selection", "pan", "zoom", "historyLength", "canUndo", "canRedo"]) {
+        assert.deepEqual(afterSave[key], reflowed[key], "Native Save preserves transient " + key);
+    }
+    const savedPixels = await sample("saved");
+    assert.deepEqual(pixel(savedPixels, afterSave, 76.25, 68.75), [255, 255, 255, 255],
+        "Native Save keeps the preview's old child position cleared");
+    assert.deepEqual(pixel(savedPixels, afterSave, 92.5, 85), [255, 0, 0, 255],
+        "Native Save keeps the independently verified reflowed child visible");
+    assert.deepEqual(await documentState(page), authored);
+    const storage = await flushStorage(page);
+    assert.equal(storage.saved, true); assert.equal(storage.dirty, false);
     assert.deepEqual(await page.evaluate(async () => JSON.parse((await globalThis.ferroDesignStorage.backend.load()).text)), authored,
-        "Saving during the prototype preserves the complete authored document");
+        "Durable storage stays isolated from transient prototype spacing");
     await page.keyboard.press("Escape");
     await wait(view => view.presentation === null);
     assert.deepEqual(await documentState(page), authored, "Leaving the prototype restores authored layout and variables");
     assert.deepEqual((await state(page)).selection, editing.selection);
     assert.equal((await state(page)).historyLength, editing.historyLength);
-    check("A real prototype click reflows spacing into independently checked native pixels while exports, durable saves, exit and history preserve the authored design");
+    check("A real prototype click reflows spacing into independently checked pixels; the public native Save download, durable isolation, exit and history preserve the authored design and live preview");
 }

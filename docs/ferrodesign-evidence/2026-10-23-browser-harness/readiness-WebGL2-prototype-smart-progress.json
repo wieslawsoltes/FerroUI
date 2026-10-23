@@ -1,0 +1,82 @@
+{
+  "sourcePixel": {
+    "x": 562,
+    "y": 420,
+    "rgba": [
+      255,
+      0,
+      0,
+      255
+    ]
+  },
+  "sourceFrames": {
+    "renderedFrames": 3,
+    "sceneFrames": 4
+  },
+  "durationMs": 2000,
+  "midpointRange": [
+    0.2,
+    0.8
+  ],
+  "midpointTimeoutMs": 10000,
+  "status": "passed",
+  "observation": {
+    "clock": "page performance milliseconds",
+    "polling": "raf",
+    "startedAtMs": 6141.200000000186,
+    "limit": 240,
+    "samples": [
+      {
+        "observedAtMs": 6149.700000000186,
+        "renderedFrames": 3,
+        "sceneFrames": 4,
+        "presentation": 20,
+        "progress": 0,
+        "animatedNodes": 1
+      },
+      {
+        "observedAtMs": 6151.700000000186,
+        "renderedFrames": 3,
+        "sceneFrames": 4,
+        "presentation": 20,
+        "progress": 0,
+        "animatedNodes": 1
+      },
+      {
+        "observedAtMs": 6170.700000000186,
+        "renderedFrames": 4,
+        "sceneFrames": 4,
+        "presentation": 20,
+        "progress": 0,
+        "animatedNodes": 1
+      },
+      {
+        "observedAtMs": 6188.200000000186,
+        "renderedFrames": 5,
+        "sceneFrames": 5,
+        "presentation": 20,
+        "progress": 0.0095,
+        "animatedNodes": 1
+      },
+      {
+        "observedAtMs": 6701.5,
+        "renderedFrames": 6,
+        "sceneFrames": 5,
+        "presentation": 20,
+        "progress": 0.018,
+        "animatedNodes": 1
+      },
+      {
+        "observedAtMs": 6706.9000000003725,
+        "renderedFrames": 7,
+        "sceneFrames": 5,
+        "presentation": 20,
+        "progress": 0.275,
+        "animatedNodes": 1
+      }
+    ],
+    "droppedSamples": 0,
+    "lastDroppedSample": null,
+    "endedAtMs": 9152.200000000186
+  }
+}

@@ -36,6 +36,7 @@ import { compactAutosaveRegressions } from "./serialization-browser.mjs";
 import { boundedHistoryRegressions } from "./history-browser.mjs";
 import { networkBucketRegressions } from "./network-bucket-browser.mjs";
 import { captureWithinDeadline, runIsolatedScenario } from "./isolated-scenario.mjs";
+import { inlineInputState, startInputObservation, stopInputObservation } from "./input-observations.mjs";
 import assert from "node:assert/strict";
 import { createHash } from "node:crypto";
 import { createServer } from "node:http";
@@ -578,14 +579,67 @@ async function nativeEditingRegressions(page, canvas, reference, result, check, 
     check("Enter while the Pen pointer is held finalizes the gesture and ignores later handle movement until release");
 
     await importFixture(page, fixture);
-    const openTextEditor = async () => {
-        // Start each double-click sequence at a distinct pointer position.
-        // Fast commit/undo/reopen cycles otherwise accumulate native clicks 3/4.
+    result.nativeTextEntryInput = [];
+    const openTextEditor = async (method = "selection-enter") => {
+        // A distinct blank click resets native multi-click counting. The first
+        // entry must exercise a real double-click; repeated lifecycle/IME setup
+        // uses the public selection + Enter path, whose meaning is independent
+        // of elapsed time between separate browser automation commands.
         await clickWorld(page, 40, 260);
-        await clickWorld(page, 420, 88, { clickCount: 2, delay: 80 });
-        await page.waitForFunction(() => JSON.parse(globalThis.ferroDesign.ferroDesignState()).editingText === 3);
+        const before = await state(page), input = { method, before: inlineInputState(before) };
+        const pointerCount = method === "double-click" ? 2 : 1;
+        await startInputObservation(page);
+        let entryError;
+        try {
+            await clickWorld(page, 420, 88, method === "double-click" ? { clickCount: 2, delay: 80 } : undefined);
+            const selected = await state(page);
+            input.nativePresses = selected.pointerPresses.entries.filter(press => press.serial > before.pointerPresses.serial);
+            input.afterPointer = inlineInputState(selected);
+            assert.equal(input.nativePresses.length, pointerCount, "Every text-entry press must reach the native canvas");
+            assert.deepEqual(input.nativePresses.map(press => press.clickCount), method === "double-click" ? [1, 2] : [1],
+                "Text entry must retain actual native single/double-click classification");
+            if (method === "selection-enter") {
+                assert.deepEqual(selected.selection, [3], "The real pointer selects the text layer before native Enter");
+                assert.equal(selected.editingText, null, "A single selection click must not already enter text editing");
+                assert.equal(selected.chrome.CanvasHost.focusWithin, true, "The native canvas owns keyboard focus before Enter");
+                await page.keyboard.press("Enter");
+            }
+            await page.waitForFunction(() => JSON.parse(globalThis.ferroDesign.ferroDesignState()).editingText === 3);
+        } catch (error) {
+            entryError = error;
+            input.entryError = error?.stack || String(error);
+        } finally {
+            // These passive listeners only record browser input. Native state
+            // is read after the action, outside the double-click time window.
+            result.nativeTextEntryInput.push(input);
+            try {
+                await captureWithinDeadline(async () => {
+                    input.observation = await stopInputObservation(page);
+                    input.after = inlineInputState(await state(page));
+                    input.nativePresses ??= input.after.pointerPresses.entries.filter(press => press.serial > before.pointerPresses.serial);
+                    const downs = input.observation.events.filter(event => event.type === "pointerdown" && event.phase === "capture");
+                    const intervals = (entries, timestamp) => entries.slice(1).map((entry, index) => timestamp(entry) - timestamp(entries[index]));
+                    input.domPressIntervalsMs = intervals(downs, event => event.eventTimeMs);
+                    input.observedPressIntervalsMs = intervals(downs, event => event.observedAtMs);
+                    input.nativePressIntervalsMs = intervals(input.nativePresses, press => press.timestamp);
+                    input.domDeliveryAgesMs = downs.map(event => event.observedAtMs - event.eventTimeMs);
+                    await writeFile(resolve(output, mode + "-native-text-entry-input.json"), JSON.stringify(result.nativeTextEntryInput, null, 2));
+                }, 5000);
+            } catch (captureError) {
+                input.captureError = captureError?.stack || String(captureError);
+                // A failed diagnostic must preserve the actual input failure;
+                // if input passed, missing evidence still fails this run.
+                entryError ??= captureError;
+            }
+        }
+        if (entryError) throw entryError;
+        assert.equal(input.observation.droppedEvents, 0, "Text-entry pointer evidence must be complete");
+        const downs = input.observation.events.filter(event => event.type === "pointerdown" && event.phase === "capture");
+        assert.equal(downs.length, pointerCount, "Text entry must retain every actual browser pointer press");
+        assert.ok(downs.every(event => event.trusted && event.pointerType === "mouse" && event.buttons === 1),
+            "Text entry uses trusted primary mouse input");
     };
-    await openTextEditor();
+    await openTextEditor("double-click");
     const inline = (await state(page)).chrome.InlineTextBox;
     assert.ok(inline?.visible && inline.width > 0 && inline.height > 0, "Double-click must open an arranged native FerroUI TextBox");
     const editedText = "FerroUI · café Ω 🚀\nEditable text";

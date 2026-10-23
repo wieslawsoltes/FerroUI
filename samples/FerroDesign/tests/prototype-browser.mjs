@@ -1,10 +1,13 @@
 import assert from "node:assert/strict";
+import { writeFile } from "node:fs/promises";
 import { resolve } from "node:path";
+import { PNG } from "pngjs";
 
 // The main browser gate supplies its real native-input and document helpers.
 // This module never launches a browser or advances a fabricated animation clock.
 export async function prototypeMotionRegressions(page, reference, check, helpers, output, mode) {
-    const { fixtureNode, isolatedDocument, importFixture, documentState, state, moveWorld, frames } = helpers;
+    const { fixtureNode, isolatedDocument, importFixture, documentState, state, moveWorld, frames,
+        waitForNativeFrame } = helpers;
     const instant = { kind: "instant", duration_ms: 0, easing: "linear" };
     const rule = (trigger, action, transition = instant) => ({ trigger, action, transition, delay_ms: 0, key: null });
     const waitStopped = () => page.waitForFunction(() => {
@@ -38,23 +41,91 @@ export async function prototypeMotionRegressions(page, reference, check, helpers
     motion.pages[0].prototype_start = 10;
     await importFixture(page, motion);
     const authored = await documentState(page);
+    const editing = await state(page);
     await present();
+    await waitForNativeFrame(page, editing.renderedFrames, "Render the source prototype frame");
+    // A model update and two DOM rAFs do not establish compositor readiness.
+    // The b7 WebGL2 trace still showed the previous document at the timed click.
+    // Require the actual red source pixels before starting the unchanged 2s
+    // animation. This static readback is outside the midpoint timing window.
+    const sourceView = await state(page);
+    const sourcePixels = PNG.sync.read(await page.screenshot({
+        path: resolve(output, mode + "-prototype-smart-source.png"), scale: "css",
+    }));
+    const sx = Math.floor(sourceView.chrome.CanvasHost.x + sourceView.pan.x + 100 * sourceView.zoom);
+    const sy = Math.floor(sourceView.chrome.CanvasHost.y + sourceView.pan.y + 90 * sourceView.zoom);
+    const viewport = page.viewportSize();
+    assert.equal(sourcePixels.width, viewport.width);
+    assert.equal(sourcePixels.height, viewport.height);
+    assert.ok(sx >= 0 && sy >= 0 && sx < sourcePixels.width && sy < sourcePixels.height,
+        "The source prototype pixel must lie on the actual native canvas");
+    const sourcePixel = [...sourcePixels.data.subarray((sy * sourcePixels.width + sx) * 4,
+        (sy * sourcePixels.width + sx) * 4 + 4)];
+    assert.deepEqual(sourcePixel, [255, 0, 0, 255], "The compositor must paint the red source button before timed native input");
     const initial = await state(page);
+    assert.equal(initial.presentation, 10);
+    assert.equal(initial.prototypeAnimation, null);
+    assert.deepEqual(initial.pan, sourceView.pan);
+    assert.equal(initial.zoom, sourceView.zoom);
+    for (const key of ["x", "y", "width", "height", "visible"]) {
+        assert.equal(initial.chrome.CanvasHost[key], sourceView.chrome.CanvasHost[key]);
+    }
+    assert.deepEqual(await documentState(page), authored);
     const point = await moveWorld(page, 100, 90);
-    await page.mouse.click(point.x, point.y);
-    const midHandle = await page.waitForFunction(() => {
-        const state = JSON.parse(globalThis.ferroDesign.ferroDesignState());
-        const animation = state.prototypeAnimation;
-        return animation && animation.progress > 0.2 && animation.progress < 0.8 ? state : false;
-    }, undefined, { polling: "raf", timeout: 10000 });
-    const mid = await midHandle.jsonValue();
-    const layer = mid.prototypeAnimation.layers.find((node) => node.name === "Animated button");
-    assert.ok(layer && layer.x > 40 && layer.x < 140, "The rendered scene must contain an interpolated layer position");
-    assert.ok(layer.width > 120 && layer.width < 140, "Smart animate must interpolate size");
-    assert.ok(layer.fill.r > 0 && layer.fill.r < 255 && layer.fill.b > 0 && layer.fill.b < 255, "Smart animate must interpolate native solid brush colors");
-    assert.ok(mid.renderedFrames > initial.renderedFrames, "The native clock must drive visible render frames");
-    assert.equal(mid.prototypeAnimation.animatedNodes, 1);
-    await page.screenshot({ path: resolve(output, mode + "-prototype-smart-midpoint.png") });
+    await page.evaluate(() => {
+        if (globalThis.__ferroDesignMotionObservation) throw new Error("A prototype motion observation is already active");
+        globalThis.__ferroDesignMotionObservation = {
+            clock: "page performance milliseconds", polling: "raf", startedAtMs: performance.now(),
+            limit: 240, samples: [], droppedSamples: 0, lastDroppedSample: null,
+        };
+    });
+    let midpointError;
+    try {
+        await page.mouse.click(point.x, point.y);
+        const midHandle = await page.waitForFunction(() => {
+            const state = JSON.parse(globalThis.ferroDesign.ferroDesignState());
+            const animation = state.prototypeAnimation;
+            // Piggyback on the gate's existing real-rAF read, without another
+            // model poller, fabricated clock, retry, or animation-duration change.
+            const observation = globalThis.__ferroDesignMotionObservation;
+            const sample = { observedAtMs: performance.now(), renderedFrames: state.renderedFrames,
+                sceneFrames: state.sceneFrames, presentation: state.presentation,
+                progress: animation?.progress ?? null, animatedNodes: animation?.animatedNodes ?? null };
+            if (observation.samples.length < observation.limit) observation.samples.push(sample);
+            else { observation.droppedSamples++; observation.lastDroppedSample = sample; }
+            return animation && animation.progress > 0.2 && animation.progress < 0.8 ? state : false;
+        }, undefined, { polling: "raf", timeout: 10000 });
+        const mid = await midHandle.jsonValue();
+        const layer = mid.prototypeAnimation.layers.find((node) => node.name === "Animated button");
+        assert.ok(layer && layer.x > 40 && layer.x < 140, "The rendered scene must contain an interpolated layer position");
+        assert.ok(layer.width > 120 && layer.width < 140, "Smart animate must interpolate size");
+        assert.ok(layer.fill.r > 0 && layer.fill.r < 255 && layer.fill.b > 0 && layer.fill.b < 255, "Smart animate must interpolate native solid brush colors");
+        assert.ok(mid.renderedFrames > initial.renderedFrames, "The native clock must drive visible render frames");
+        assert.equal(mid.prototypeAnimation.animatedNodes, 1);
+        await page.screenshot({ path: resolve(output, mode + "-prototype-smart-midpoint.png") });
+    } catch (error) {
+        midpointError = error;
+        throw error;
+    } finally {
+        let timer;
+        const diagnostic = { sourcePixel: { x: sx, y: sy, rgba: sourcePixel },
+            sourceFrames: { renderedFrames: initial.renderedFrames, sceneFrames: initial.sceneFrames },
+            durationMs: 2000, midpointRange: [0.2, 0.8], midpointTimeoutMs: 10000,
+            status: midpointError ? "failed" : "passed" };
+        try {
+            diagnostic.observation = await Promise.race([
+                page.evaluate(() => {
+                    const observation = globalThis.__ferroDesignMotionObservation;
+                    delete globalThis.__ferroDesignMotionObservation;
+                    return observation ? { ...observation, endedAtMs: performance.now() } : null;
+                }),
+                new Promise((_, reject) => { timer = setTimeout(() => reject(new Error("Prototype motion diagnostics did not respond within 5 seconds")), 5000); }),
+            ]);
+        } catch (error) { diagnostic.observationError = error.stack || String(error); }
+        finally { clearTimeout(timer); }
+        if (midpointError) diagnostic.error = midpointError.stack || String(midpointError);
+        await writeFile(resolve(output, mode + "-prototype-smart-progress.json"), JSON.stringify(diagnostic, null, 2));
+    }
     await waitStopped();
     assert.equal((await state(page)).presentation, 20);
     assert.deepEqual(await documentState(page), authored);

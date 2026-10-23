@@ -11,6 +11,7 @@ complete Figma compatibility or matched Figma visual parity.
 | [`3be16cb7`](https://github.com/wieslawsoltes/FerroUI/commit/3be16cb735c9636673fc43e95692503f7cac0144) | Coordinated padding Escape discard, missing read-only native control diagnostics, and explicit connected-browser/process shutdown ownership |
 | [`dfab0ed9`](https://github.com/wieslawsoltes/FerroUI/commit/dfab0ed9a0146a892b40d2db0590b0193c80f672) | Native radial/angular gradient handles and six typed auto-layout spacing bindings, with exact transaction/override ownership |
 | [`1637a093`](https://github.com/wieslawsoltes/FerroUI/commit/1637a093723a4f899b7f4e371fd53f0b91914a98) | Atomic prototype spacing reflow/rollback, browser input/coverage/crop corrections, and early browser artifact publication with verified source timestamp reuse |
+| [`08e29e4f`](https://github.com/wieslawsoltes/FerroUI/commit/08e29e4f530c0ae65f6e2ac072f381605e23ed0c) | Independent browser-build feedback and passive angular-input expectations; the production core/application source is unchanged from `1637a093` |
 
 All application rendering continues through public FerroUI APIs and Vello.
 The active target dependency checks reject Skia. Browser Canvas2D SVG decoding
@@ -33,6 +34,7 @@ were inspected; the excerpts do not pretend to contain the entire logs.
 | `1637a093` | [Native feedback](https://github.com/wieslawsoltes/FerroUI/actions/runs/39944253747/job/120382892411) | **239/239 application**, **43.57 s**, including clipped selection/radius-control priority and Present button diagnostics; same five framework filters passed |
 | `1637a093` | Local locked core suite, Rust 1.99.0 | **533/533**, **5.91 s**, including all five new prototype-spacing cases |
 | `1637a093` | Local pure JavaScript suites | **34/34** coverage arithmetic, input observations/radius oracle, trace analysis and browser/process ownership cases |
+| `08e29e4f` | Local pure JavaScript suites | **39/39**, including five additional angular-input cases for inverse-affine movement, seam accumulation and stop interpolation |
 
 The local core execution preceded connector publication. The local commit and
 published commit have the same verified Git tree,
@@ -85,6 +87,50 @@ The recovered failures drove specific corrections:
 
 Those changes remain subject to real editor execution. Old-runtime replays and
 isolated decoder checks are not substituted for a current-source browser pass.
+
+The later [prototype-motion investigation](../2026-10-23-browser-harness/prototype-motion.md)
+preserves the original failing CI trace and exact b7-runtime replay scope. The
+corrected harness requires actual source-frame pixels before timed input and
+records bounded progress samples from the existing rAF wait. The original
+2,000 ms duration, `(0.2, 0.8)` midpoint range and 10-second timeout remain
+unchanged. The focused WebGL2 replay passed all three motion checks; an isolated
+Software2D module replay also passed, while its normal shared-gate run remained
+blocked in text-entry preparation. Those are separate, explicitly scoped results.
+
+The [native text-entry evidence](../2026-10-23-browser-harness/native-text-entry.md)
+records a requested double-click whose native press timestamps were 636 ms
+apart, beyond the existing 500 ms window. The unchanged timestamp path preserves
+DOM event age; the historical trace does not contain the DOM timestamps. The
+common harness keeps its first real double-click assertion and records passive
+input evidence. Later text/IME setup selects the actual text layer and uses the
+public native Enter command, preserving all text, composition and history gates.
+The focused b7-runtime WebGL2 replay passed **26/26** checks: 16 common gates,
+seven radius checks and three responsive/persistence gates. Its first native
+double-click was 183 ms apart, compared with 182.9 ms in the passive DOM record;
+all five later native Enter reopens passed. It does not validate the new
+application features or replace a complete two-mode browser suite.
+
+## Current native document-engine measurement
+
+The existing release benchmark ran at `08e29e4f` with **10,000 nodes**, Rust
+1.99.0, locked/offline dependencies and one build job. Its core tree is identical
+to `1637a093`; source files were unchanged during execution. All paired document,
+history, component-ID and serialization equivalence assertions passed.
+The [complete result and provenance](performance/README.md) retain the workload,
+sample counts and original measurements.
+
+| Operation | Scoped path p95 | Whole-document reference p95 |
+| --- | ---: | ---: |
+| Nudge | 0.1250 ms | 34.9949 ms |
+| Undo | 0.0878 ms | 16.7329 ms |
+| Redo | 0.0813 ms | 8.6996 ms |
+| Gesture update | 0.0023 ms | 11.7940 ms |
+
+The dense row layout containing 9,999 text children measured 14.50 ms at its
+five-sample maximum/p95. Compact serialization of the 12,802,055-byte document
+measured 69.06 ms at its five-sample maximum/p95. These are native CPU-engine
+measurements on a shared host. They exclude browser input, native-control
+layout, artwork rendering and presentation, and establish no frame-rate claim.
 
 ## Build cache and performance boundary
 

@@ -21,7 +21,8 @@ records exact source IDs, CI links, decoded-log hashes and selected result lines
 | Radial/angular and spacing-variable core | `dfab0ed9`, [core run 39942848092](https://github.com/wieslawsoltes/FerroUI/actions/runs/39942848092/job/120378251111): **528/528 passed**, **1.72 s** |
 | Radial/angular and native variable controls | `dfab0ed9`, [native feedback run 39942848091](https://github.com/wieslawsoltes/FerroUI/actions/runs/39942848091/job/120381540661): **238/238 app passed**, **28.42 s**. The **8 Vello / 15 Base / 16 Controls paragraph / 174 TextBox / 5 rich-history** filters also passed; these overlapping counts are not additive |
 | Prototype spacing reflow and rollback | Published tree of `1637a093`: **533 core passed locally**, **5.91 s**, including five new nested-layout, alias, rollback, transient and unrelated-action cases. The tested/published Git trees were verified identical |
-| Pure browser helpers | `1637a093`: **34/34 passed locally**, covering fixed-scale coverage math, passive pointer/radius expectations and bounded trace/browser-process ownership. These are not editor browser results |
+| Pure browser helpers | `08e29e4f`: **39/39 passed locally**, covering fixed-scale coverage math, passive pointer/radius/angular expectations and bounded trace/browser-process ownership. These are not editor browser results |
+| Native document engine | `08e29e4f`, with the same core tree as `1637a093`: **10,000-node release benchmark passed all equivalence assertions**. Scoped nudge/undo/redo p95 **0.1250 / 0.0878 / 0.0813 ms**; dense 9,999-text-child layout maximum/p95 **14.50 ms** over five samples. [Full results and provenance](../../../docs/ferrodesign-evidence/2026-10-23-continuation/performance/README.md). Shared-host CPU-engine measurement; no browser/FPS claim |
 | Recovered full browser baseline | `b7b0b885`, [run 39869066118](https://github.com/wieslawsoltes/FerroUI/actions/runs/39869066118): actual WASM and IndexedDB passed; editor **failed**, with **161 Software2D / 155 WebGL2 completed checks**, **28/37 / 27/37 passed scenarios**. The [complete scenario outcome projection](../../../docs/ferrodesign-evidence/2026-10-23-continuation/b7-browser-outcome.json) preserves its failures |
 | Independent corner reference | [16×/32× Chromium strip experiment](../../../docs/ferrodesign-evidence/2026-10-23-browser-harness/README.md): **1.96875** maximum reference difference, **0** native pixels over 12 alpha units. Original limits remain **4** and **48** respectively. The editor was not loaded during this isolated numerical reference check |
 
@@ -40,6 +41,20 @@ retain strict numeric/history checks and explicit native pixel assertions.
 The 8×/16× corner reference failed its own convergence gate; the fixed 16×/32×
 reference increases numerical precision with bounded strips. Earlier failing
 results remain below rather than being relabeled as successful runs.
+
+The subsequent [motion readiness correction](../../../docs/ferrodesign-evidence/2026-10-23-browser-harness/prototype-motion.md)
+requires an actual painted source frame before starting the unchanged 2-second
+animation. A focused b7-runtime WebGL2 replay passed all three motion checks;
+the normal Software2D run remained blocked in common text-entry setup, while
+an isolated motion-module replay passed. These older-runtime results do not
+validate the new gradient or spacing application code. The
+[text-entry correction](../../../docs/ferrodesign-evidence/2026-10-23-browser-harness/native-text-entry.md)
+keeps a mandatory real double-click and uses actual selection plus native Enter
+for later composition setup, recording passive DOM/native timestamps. It does
+not change platform click timing or the text/history/IME assertions.
+The focused b7-runtime WebGL2 common/radius replay passed **26/26** checks,
+including the retained double-click and five native Enter reopens. The actual
+new production build still needs its separate browser feature execution.
 
 The `dfab0ed9` native cache restore verified 9,846 unchanged sources and skipped
 20 changed inputs. Application compilation then took 41.49 s. This is observed
