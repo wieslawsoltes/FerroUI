@@ -82,7 +82,7 @@ jobs:
             /tmp/editor-wasm/textmate_browser_conformance.js
 
   browser:
-    name: Linked browser editor (Emscripten, real input and rendering)
+    name: Linked browser editor (Emscripten build and package)
     runs-on: ubuntu-latest
     timeout-minutes: 150
     steps:
@@ -92,6 +92,30 @@ jobs:
           cache-key: editor-browser
       - name: Link and package the actual editor application
         run: scripts/build-browser.sh editor-demo-browser
+      # Keep compilation independent of acceptance so its successful dependency
+      # cache is saved even when a later browser interaction finds a regression.
+      - name: Keep the linked editor site
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: editor-browser-site
+          path: target/browser/editor-demo-browser
+          if-no-files-found: error
+          retention-days: 1
+
+  browser-conformance:
+    name: Browser editor conformance (real input and rendering)
+    needs: browser
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: 24
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+        with:
+          name: editor-browser-site
+          path: target/browser/editor-demo-browser
       - name: Browser editing, popup, scanner and rendering conformance
         run: >-
           node scripts/browser/tests/editor_demo.test.mjs

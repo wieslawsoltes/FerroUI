@@ -56,14 +56,22 @@ is not inferred from loader compatibility.
 
 ## Browser acceptance gate
 
-`.github/workflows/editor.yml` has a separate linked-application browser job in
-addition to the framework-independent `wasm32-unknown-unknown` tokenizer oracle.
-It builds the actual editor site and runs:
+`.github/workflows/editor.yml` builds the linked browser application separately
+from the framework-independent `wasm32-unknown-unknown` tokenizer oracle. The
+`browser` job links and packages the actual editor site, then uploads that exact
+site as a one-day artifact. The `browser-conformance` job downloads it and runs:
 
 ```sh
 node scripts/browser/tests/editor_demo.test.mjs \
   --screenshot target/browser/screenshots/editor-demo.png
 ```
+
+This separation lets a successful build save the normal Rust dependency cache
+even if an acceptance test fails. It also lets a failed acceptance job be rerun
+against the same compiled site while the artifact is retained. Both jobs must
+pass: a successful build does not satisfy the real-input gate. The workflow
+keeps an active run until completion while newer pending checkpoints coalesce,
+so frequent port commits do not repeatedly cancel a long link.
 
 The test harness opens the site in headless Chromium using the same DevTools
 protocol harness as the existing browser platform tests. It runs once with
@@ -87,6 +95,29 @@ gate does not by itself establish that it has passed. The source/asset inventory
 and official tokenizer oracle remain independent gates. A browser build check
 without linking, page startup and real input is not counted as application
 validation.
+
+## Recorded hosted validation
+
+The first completed linked run,
+[39943161916](https://github.com/wieslawsoltes/FerroUI/actions/runs/39943161916)
+at commit `31b7179f6860f54e37e0ba88b58e1d9eaf5f2544` on 2026-10-23,
+established these results:
+
+| Gate | Observed result |
+| --- | --- |
+| Native editor and TextMate tests | Passed. |
+| `wasm32-unknown-unknown` control check, production scanner packaging and real Rust/Wasm tokenizer oracle | Passed. |
+| Production Emscripten compile, link and site packaging | Passed; the optimized browser build took 19 minutes 14 seconds on the hosted runner. |
+| Software2D and WebGL2 startup | Both reached rendered native frames, a nonblank canvas, Noto Mono family resolution, cached visual lines and real Rust grammar tokens without an initial editor or grammar error. |
+| Full input and interaction suite | Failed at the first Unicode replacement because the original test sent a composition-free CDP `Input.insertText`. Later input, clipboard and popup assertions were not reached. |
+
+The test now starts CDP IME composition before committing Unicode input and
+uses real key events for ordinary typing. That correction must pass a later
+complete run before full browser input conformance is claimed. The screenshot
+artifact from the recorded run shows the native toolbar, editor text, syntax
+colors, line numbers and status bar; it does not establish the unexecuted input
+checks. No local link or browser interaction pass is inferred from this hosted
+result.
 
 ## Remaining platform verification
 
