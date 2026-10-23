@@ -1288,3 +1288,18 @@ helper and passed 3,240 cases. The native extractor passed 50 cases. New Windows
 execution of the 490-selection and 90-endpoint matrices remains pending; existing
 measured JSON is immutable. No full native source-file completion or external
 WinUI/LineServices/pixel equivalence is claimed.
+
+## 2026-10-23 — Restore the X11 IBus portal smoke contract
+
+The rich-text conformance workflow at published head `e5a0778a` completed on
+Linux, Windows x64 and Windows ARM64. The broader CI run `39865036853` failed
+only the X11 input-method smoke step: its independent portal double rejected
+`org.freedesktop.DBus.Properties.Set(ContentType)` with `UnknownProperty` and
+retired the input context before key handling. The production proxy and the
+FreeDesktop unit-test service already use the correct write-only `(uu)` property.
+
+The X11 example's portal service now accepts the same property. Its existing
+real-window smoke exercises ordered input-scope precedence, a live scope change,
+and return to the legacy content hint after clearing the scope, before checking
+consumed and forwarded keys. Validation of this correction is recorded separately
+from the successful earlier dedicated workflow and the failed broader run.
