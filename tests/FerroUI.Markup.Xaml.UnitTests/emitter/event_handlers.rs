@@ -34,7 +34,7 @@ use ferroui_build::type_system::{ModelEmitTypes, ModelTypeSystem};
 use ferroui_controls::primitives::{PopupFlyoutBase, TemplatedControl};
 use ferroui_controls::{
     Button, ContextMenuEventArgs, Control, RichEditBox, RichEditBoxSelectionChangingEventArgs, RichEditBoxTextChangingEventArgs,
-    RichEditCompositionEventArgs, ToolTip,
+    RichEditCompositionEventArgs, RichTextBlock, ToolTip,
 };
 use ferroui_markup_xaml::RuntimeXamlLoaderConfiguration;
 use ferroui_markup_xaml_loader::rust_emitter::{
@@ -387,6 +387,46 @@ fn rich_context_menu_event_calls_the_method_with_live_arguments() {
         after_owner.set_routed_event(Some(RichEditBox::context_menu_opening_event()));
         editor.raise_event(&after_owner);
         assert!(!after_owner.handled(), "a handler whose owner expired does nothing");
+    }
+}
+
+/// Runtime and compiled read-only handlers receive the live typed payload;
+/// configured invocations preserve the same cancellation in the input route.
+#[test]
+fn rich_readonly_context_menu_event_calls_the_method_with_live_arguments() {
+    let _base = xaml_test_base();
+    let _text = TextTestScope::new();
+    let (compiled, loaded) = populated(
+        "rich_readonly_context_menu_event",
+        MyHost::new,
+        generated_handlers::rich_readonly_context_menu_event::populate,
+    );
+    for host in [compiled, loaded] {
+        let display = host.get_control::<RichTextBlock>("display");
+        let args = ContextMenuEventArgs::new(12.5, -4.25);
+        args.set_routed_event(Some(RichTextBlock::context_menu_opening_event()));
+        display.raise_event(&args);
+        assert_eq!(host.context_menu_positions(), [Point::new(12.5, -4.25)]);
+        assert!(args.handled());
+
+        let unconfigured = ContextRequestedEventArgs::new();
+        display.raise_event(&unconfigured);
+        assert!(!unconfigured.handled());
+        assert_eq!(host.context_menu_positions().len(), 1);
+        display.set_context_flyout(ferroui_controls::Flyout::new());
+        let request = ContextRequestedEventArgs::new();
+        display.raise_event(&request);
+        assert!(request.handled());
+        assert_eq!(host.context_menu_positions().len(), 2);
+        assert!(!display.context_flyout().unwrap().is_open());
+
+        let weak = host.downgrade();
+        drop(host);
+        assert!(weak.upgrade().is_none(), "the handler has a weak code-behind owner");
+        let after_owner = ContextMenuEventArgs::new(4.0, 9.0);
+        after_owner.set_routed_event(Some(RichTextBlock::context_menu_opening_event()));
+        display.raise_event(&after_owner);
+        assert!(!after_owner.handled());
     }
 }
 

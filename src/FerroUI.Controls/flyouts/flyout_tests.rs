@@ -991,3 +991,6 @@ flyout_tests! {
     is_open_set_true_after_target_detached_reverts_to_false,
     is_open_set_true_cancelled_opening_reverts_to_false,
 }
+
+#[path = "popup_flyout_request_tests.rs"]
+mod request_ownership_tests;

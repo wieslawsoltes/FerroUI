@@ -49,7 +49,10 @@ pub struct Popup {
     base: Control,
     dependency_resolver: RefCell<Option<Rc<dyn IFerroDependencyResolver>>>,
     is_open_requested: Cell<bool>,
-    ignore_is_open_changed: Cell<bool>,
+    lifecycle_generation: Cell<u64>,
+    parent_assignment_generation: Cell<u64>,
+    closing_request: Cell<Option<u64>>,
+    ignore_is_open_changed: Cell<Option<bool>>,
     is_using_overlay_layer: Cell<bool>,
     open_state: RefCell<Option<Rc<PopupOpenState>>>,
     popup_host_changed_handler: HandlerList<dyn Fn(Option<&Rc<dyn IPopupHost>>)>,
@@ -80,6 +83,7 @@ impl ControlImpl for Popup {
 impl FerroObjectImpl for Popup {
     fn on_property_changed(this: &Self, change: &FerroPropertyChangedEventArgs<'_>) {
         Self::parent_on_property_changed(this, change);
+        let generation = this.lifecycle_generation.get();
         let Some(open_state) = this.open_state() else { return };
 
         let property = change.property();
@@ -118,6 +122,9 @@ impl FerroObjectImpl for Popup {
                 }
             }
 
+            if !this.owns_open_state(generation, &open_state) {
+                return;
+            }
             this.update_host_position(&open_state.popup_host, &open_state.placement_target());
         } else if property == Self::topmost_property().as_property() {
             open_state.popup_host.set_topmost(change.get_new_value::<bool>());
@@ -154,11 +161,40 @@ impl LayoutableImpl for Popup {
 /// Resets the flag that makes the popup ignore changes of `IsOpen`.
 struct IgnoreIsOpenScope<'a> {
     owner: &'a Popup,
+    previous: Option<bool>,
 }
 
 impl Drop for IgnoreIsOpenScope<'_> {
     fn drop(&mut self) {
-        self.owner.ignore_is_open_changed.set(false);
+        self.owner.ignore_is_open_changed.set(self.previous);
+    }
+}
+
+/// Host setup invokes layout and platform callbacks before the new state can
+/// be published. Abandon only this host if one of them replaces the request.
+struct PendingPopupHost {
+    cleanup: Rc<dyn IDisposable>,
+    committed: bool,
+}
+
+struct PopupClosingRequest<'a> {
+    owner: &'a Popup,
+    generation: u64,
+}
+
+impl Drop for PopupClosingRequest<'_> {
+    fn drop(&mut self) {
+        if self.owner.closing_request.get() == Some(self.generation) {
+            self.owner.closing_request.set(None);
+        }
+    }
+}
+
+impl Drop for PendingPopupHost {
+    fn drop(&mut self) {
+        if !self.committed {
+            self.cleanup.dispose();
+        }
     }
 }
 
@@ -329,7 +365,10 @@ impl Popup {
             base: Control::construct(),
             dependency_resolver: RefCell::new(None),
             is_open_requested: Cell::new(false),
-            ignore_is_open_changed: Cell::new(false),
+            lifecycle_generation: Cell::new(0),
+            parent_assignment_generation: Cell::new(0),
+            closing_request: Cell::new(None),
+            ignore_is_open_changed: Cell::new(None),
             is_using_overlay_layer: Cell::new(false),
             open_state: RefCell::new(None),
             popup_host_changed_handler: HandlerList::new(),
@@ -642,8 +681,17 @@ impl Popup {
     pub fn open(&self) {
         // Popup is currently open
         if self.open_state.borrow().is_some() {
+            // Open during Closing cancels the older close. An ordinary no-op
+            // Open during initial host publication must let that publication
+            // finish its Opened and host notifications.
+            if self.closing_request.get() == Some(self.lifecycle_generation.get()) {
+                self.next_lifecycle_request();
+            }
+            let _ignore = self.begin_ignoring_is_open(true);
+            self.set_current_value(Self::is_open_property(), true);
             return;
         }
+        let generation = self.next_lifecycle_request();
 
         let Some(placement_target) =
             self.placement_target().or_else(|| self.find_logical_ancestor_of_type::<Control>(false))
@@ -668,11 +716,42 @@ impl Popup {
         );
         let handler_cleanup = Rc::new(CompositeDisposable::with_capacity(7));
 
+        let cleanup_popup = Disposable::create({
+            let popup_host = popup_host.clone();
+            let handler_cleanup = handler_cleanup.clone();
+            move || {
+                handler_cleanup.dispose();
+                popup_host.set_child(None);
+                popup_host.hide();
+                popup_host.as_control().set_parent(None);
+                popup_host.dispose();
+            }
+        });
+        let mut pending_host = PendingPopupHost { cleanup: cleanup_popup.clone(), committed: false };
+        if !self.is_current_lifecycle_request(generation) {
+            return;
+        }
+
         self.update_host_sizing(&popup_host, Some(top_level.clone()), &placement_target);
+        if !self.is_current_lifecycle_request(generation) {
+            return;
+        }
         popup_host.set_topmost(self.topmost());
+        if !self.is_current_lifecycle_request(generation) {
+            return;
+        }
         popup_host.set_is_hit_test_visible(self.is_hit_test_visible());
+        if !self.is_current_lifecycle_request(generation) {
+            return;
+        }
         popup_host.set_child(self.child());
+        if !self.is_current_lifecycle_request(generation) {
+            return;
+        }
         popup_host.as_control().set_parent(this.clone());
+        if !self.is_current_lifecycle_request(generation) {
+            return;
+        }
 
         if self.inherits_transform() {
             let weak = weak.clone();
@@ -684,6 +763,9 @@ impl Popup {
         } else {
             popup_host.set_transform(None);
         }
+        if !self.is_current_lifecycle_request(generation) {
+            return;
+        }
 
         if let Some(top_level_popup) = popup_host.as_popup_root() {
             handler_cleanup.add(top_level_popup.bind_typed_value(
@@ -692,8 +774,14 @@ impl Popup {
                 BindingPriority::LocalValue,
             ));
         }
+        if !self.is_current_lifecycle_request(generation) {
+            return;
+        }
 
         self.update_host_position(&popup_host, &placement_target);
+        if !self.is_current_lifecycle_request(generation) {
+            return;
+        }
 
         let template_applied_subscription = popup_host.template_applied(Rc::new({
             let weak = weak.clone();
@@ -704,6 +792,9 @@ impl Popup {
             }
         }));
         handler_cleanup.add(template_applied_subscription.clone());
+        if !self.is_current_lifecycle_request(generation) {
+            return;
+        }
 
         handler_cleanup.add(placement_target.detached_from_visual_tree({
             let weak = weak.clone();
@@ -715,6 +806,9 @@ impl Popup {
         }));
 
         self.subscribe_to_top_level(&top_level, &placement_target, &handler_cleanup);
+        if !self.is_current_lifecycle_request(generation) {
+            return;
+        }
 
         // Deviation (DEVIATIONS.md, Popup): see
         // `subscribe_placement_target_transforms`.
@@ -722,7 +816,12 @@ impl Popup {
             let weak = weak.clone();
             handler_cleanup.add(Disposable::create(move || {
                 if let Some(this) = weak.upgrade() {
-                    this.unsubscribe_placement_target_transforms();
+                    // Close retires its state before disposal. A callback can
+                    // already have installed a different host and transform
+                    // subscriptions, which this cleanup does not own.
+                    if this.open_state().is_none() {
+                        this.unsubscribe_placement_target_transforms();
+                    }
                 }
             }));
         }
@@ -737,20 +836,6 @@ impl Popup {
                 },
             ))));
         }
-
-        let cleanup_popup = Disposable::create({
-            let popup_host = popup_host.clone();
-            let handler_cleanup = handler_cleanup.clone();
-            move || {
-                handler_cleanup.dispose();
-
-                popup_host.set_child(None);
-                popup_host.hide();
-
-                popup_host.as_control().set_parent(None);
-                popup_host.dispose();
-            }
-        });
 
         if self.is_light_dismiss_enabled() {
             let dismiss_layer = LightDismissOverlayLayer::get_light_dismiss_overlay_layer(&placement_target);
@@ -774,6 +859,9 @@ impl Popup {
                 }));
             }
         }
+        if !self.is_current_lifecycle_request(generation) {
+            return;
+        }
 
         let parent_popup = find_parent_popup(&placement_target);
         let open_state = Rc::new(PopupOpenState::new(
@@ -784,10 +872,14 @@ impl Popup {
             parent_popup.as_ref(),
             template_applied_subscription,
         ));
-        *self.open_state.borrow_mut() = Some(open_state);
+        *self.open_state.borrow_mut() = Some(open_state.clone());
+        pending_host.committed = true;
 
         if self.placement() != PlacementMode::Pointer {
             self.subscribe_placement_target_transforms();
+        }
+        if !self.owns_open_state(generation, &open_state) {
+            return;
         }
 
         if let Some(parent_popup) = parent_popup {
@@ -797,26 +889,47 @@ impl Popup {
         }
 
         window_manager_add_shadow_hint_changed(&popup_host, self.window_manager_add_shadow_hint());
+        if !self.owns_open_state(generation, &open_state) {
+            return;
+        }
 
         popup_host.show();
+        if !self.owns_open_state(generation, &open_state) {
+            return;
+        }
         self.set_is_using_overlay_layer(popup_host.as_overlay_popup_host().is_some());
+        if !self.owns_open_state(generation, &open_state) {
+            return;
+        }
 
         if self.takes_focus_from_native_control() {
             popup_host.take_focus();
         }
+        if !self.owns_open_state(generation, &open_state) {
+            return;
+        }
 
         {
-            let _ignore = self.begin_ignoring_is_open();
+            let _ignore = self.begin_ignoring_is_open(true);
             self.set_current_value(Self::is_open_property(), true);
+        }
+        if !self.owns_open_state(generation, &open_state) {
+            return;
         }
 
         for (_, handler) in self.opened.snapshot().iter() {
             handler();
+            if !self.owns_open_state(generation, &open_state) {
+                return;
+            }
         }
 
         let host = self.host();
         for (_, handler) in self.popup_host_changed_handler.snapshot().iter() {
             handler(host.as_ref());
+            if !self.owns_open_state(generation, &open_state) {
+                return;
+            }
         }
     }
 
@@ -949,15 +1062,36 @@ impl Popup {
     /// Helper method to set popup's styling and templated parent (internal
     /// upstream).
     pub fn set_popup_parent(&self, new_parent: Option<&Ref<Control>>) {
+        // Logical detachment can close this popup without replacing this parent
+        // assignment. Track assignments separately from open/close requests.
+        let generation = self.parent_assignment_generation.get().wrapping_add(1);
+        self.parent_assignment_generation.set(generation);
+        let placement_target = self.placement_target();
         let new_parent_element: Option<Ref<StyledElement>> = new_parent.map(|parent| parent.clone().upcast());
         if self.parent().is_some() && self.parent() != new_parent_element {
             self.set_parent(None);
+            // Parent notification and logical detachment can synchronously
+            // open a new session. Do not clear its parent a second time.
+            if self.parent_assignment_generation.get() != generation
+                || self.parent().is_some()
+                || self.placement_target() != placement_target
+            {
+                return;
+            }
         }
 
         if self.parent().is_none() || self.placement_target().as_ref() != new_parent {
-            self.set_parent(Nullable(new_parent_element));
-            self.set_templated_parent(Nullable(new_parent.and_then(|parent| parent.templated_parent())));
+            self.set_parent(Nullable(new_parent_element.clone()));
         }
+        if self.parent_assignment_generation.get() != generation
+            || self.parent() != new_parent_element
+            || self.placement_target() != placement_target
+        {
+            return;
+        }
+        // A nested assignment to the same parent still owns completion of
+        // its templated parent, even when its parent write was a no-op.
+        self.set_templated_parent(Nullable(new_parent.and_then(|parent| parent.templated_parent())));
     }
 
     fn update_host_position(&self, popup_host: &Rc<dyn IPopupHost>, placement_target: &Ref<Control>) {
@@ -1027,13 +1161,20 @@ impl Popup {
     /// root differs from the last one (`docs/porting/decisions/
     /// popup-opened-while-its-target-moves.md`).
     fn subscribe_placement_target_transforms(&self) {
-        self.unsubscribe_placement_target_transforms();
+        let generation = self.lifecycle_generation.get();
         let Some(open_state) = self.open_state() else { return };
         let placement_target = open_state.placement_target();
-        self.last_placement_target_rect.set(placement_target_rect_in_root(&placement_target));
+        let is_current = || {
+            self.owns_open_state(generation, &open_state)
+                && open_state.placement_target() == placement_target
+        };
+        let rect = placement_target_rect_in_root(&placement_target);
+        if !is_current() {
+            return;
+        }
 
         let mut subscriptions = Vec::new();
-        let mut visual = Some(placement_target.upcast::<Visual>());
+        let mut visual = Some(placement_target.clone().upcast::<Visual>());
         while let Some(current) = visual {
             let weak = self.to_ref().downgrade();
             subscriptions.push(current.property_changed(move |e| {
@@ -1053,8 +1194,20 @@ impl Popup {
             }
 
             visual = current.get_visual_parent();
+            if !is_current() {
+                for subscription in subscriptions {
+                    subscription.dispose();
+                }
+                return;
+            }
         }
-        *self.placement_target_transform_subscriptions.borrow_mut() = subscriptions;
+        // Publish only after all virtual transform reads. A nested request may
+        // already have subscribed its own target while this one was suspended.
+        let previous = self.placement_target_transform_subscriptions.replace(subscriptions);
+        self.last_placement_target_rect.set(rect);
+        for subscription in previous {
+            subscription.dispose();
+        }
     }
 
     fn unsubscribe_placement_target_transforms(&self) {
@@ -1070,8 +1223,14 @@ impl Popup {
         }
         if e.property() == Visual::render_transform_property().as_property() {
             // A mutable transform of the chain may have been replaced.
+            let generation = self.lifecycle_generation.get();
+            let Some(open_state) = self.open_state() else { return };
+            let target = open_state.placement_target();
             let last = self.last_placement_target_rect.get();
             self.subscribe_placement_target_transforms();
+            if !self.owns_open_state(generation, &open_state) || open_state.placement_target() != target {
+                return;
+            }
             self.last_placement_target_rect.set(last);
             self.enqueue_for_placement_target_move();
         } else if e.property() == Visual::render_transform_origin_property().as_property() {
@@ -1090,9 +1249,13 @@ impl Popup {
 
     fn placement_target_moved(&self) {
         self.queued_for_placement_target_move.set(false);
+        let generation = self.lifecycle_generation.get();
         let Some(open_state) = self.open_state() else { return };
         let placement_target = open_state.placement_target();
         let rect = placement_target_rect_in_root(&placement_target);
+        if !self.owns_open_state(generation, &open_state) || open_state.placement_target() != placement_target {
+            return;
+        }
         if rect == self.last_placement_target_rect.get() {
             return;
         }
@@ -1108,12 +1271,15 @@ impl Popup {
 
     /// Called when the `IsOpen` property changes.
     fn is_open_changed(&self, e: &FerroPropertyChangedEventArgs<'_>) {
-        if !self.ignore_is_open_changed.get() {
-            if e.get_new_value::<bool>() {
-                self.open();
-            } else {
-                self.close();
-            }
+        let value = e.get_new_value::<bool>();
+        if self.ignore_is_open_changed.get() == Some(value) {
+            self.ignore_is_open_changed.set(None);
+            return;
+        }
+        if value {
+            self.open();
+        } else {
+            self.close();
         }
     }
 
@@ -1134,17 +1300,28 @@ impl Popup {
     }
 
     fn close_core(&self) {
+        let generation = self.next_lifecycle_request();
+        self.closing_request.set(Some(generation));
+        let _closing = PopupClosingRequest { owner: self, generation };
         let closing_args = CancelEventArgs::new();
         for (_, handler) in self.closing.snapshot().iter() {
             handler(&closing_args);
+            if !self.is_current_lifecycle_request(generation) {
+                return;
+            }
         }
         if closing_args.cancel() {
+            let value = self.open_state().is_some() || self.is_open_requested.get();
+            let _ignore = self.begin_ignoring_is_open(value);
+            self.set_current_value(Self::is_open_property(), value);
             return;
         }
 
         self.is_open_requested.set(false);
-        let Some(open_state) = self.open_state() else {
-            let _ignore = self.begin_ignoring_is_open();
+        // Retire exactly this state before disposal invokes application code.
+        // A nested Open owns a new state, which the old close cannot clear.
+        let Some(open_state) = self.open_state.take() else {
+            let _ignore = self.begin_ignoring_is_open(false);
             self.set_current_value(Self::is_open_property(), false);
             return;
         };
@@ -1157,19 +1334,30 @@ impl Popup {
         }
 
         open_state.dispose();
-        *self.open_state.borrow_mut() = None;
+        if !self.is_current_lifecycle_request(generation) {
+            return;
+        }
 
         for (_, handler) in self.popup_host_changed_handler.snapshot().iter() {
             handler(None);
+            if !self.is_current_lifecycle_request(generation) {
+                return;
+            }
         }
 
         {
-            let _ignore = self.begin_ignoring_is_open();
+            let _ignore = self.begin_ignoring_is_open(false);
             self.set_current_value(Self::is_open_property(), false);
+        }
+        if !self.is_current_lifecycle_request(generation) {
+            return;
         }
 
         for (_, handler) in self.closed.snapshot().iter() {
             handler();
+            if !self.is_current_lifecycle_request(generation) {
+                return;
+            }
         }
     }
 
@@ -1339,9 +1527,24 @@ impl Popup {
         self.handle_position_change();
     }
 
-    fn begin_ignoring_is_open(&self) -> IgnoreIsOpenScope<'_> {
-        self.ignore_is_open_changed.set(true);
-        IgnoreIsOpenScope { owner: self }
+    fn next_lifecycle_request(&self) -> u64 {
+        let generation = self.lifecycle_generation.get().wrapping_add(1);
+        self.lifecycle_generation.set(generation);
+        generation
+    }
+
+    fn is_current_lifecycle_request(&self, generation: u64) -> bool {
+        self.lifecycle_generation.get() == generation
+    }
+
+    fn owns_open_state(&self, generation: u64, state: &Rc<PopupOpenState>) -> bool {
+        self.is_current_lifecycle_request(generation)
+            && self.open_state.borrow().as_ref().is_some_and(|current| Rc::ptr_eq(current, state))
+    }
+
+    fn begin_ignoring_is_open(&self, value: bool) -> IgnoreIsOpenScope<'_> {
+        let previous = self.ignore_is_open_changed.replace(Some(value));
+        IgnoreIsOpenScope { owner: self, previous }
     }
 
     /// The popup as a popup host provider (the diagnostics contract it

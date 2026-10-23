@@ -19,14 +19,73 @@ use ferroui_base::reactive::{AnonymousObserver, Disposable, IDisposable};
 use ferroui_base::utilities::{CancelEventArgs, HandlerList};
 use ferroui_base::{
     ferro_class, ferro_property, FerroObjectImpl, FerroProperty, FerroPropertyChangedEventArgs,
-    Nullable, PixelRect, Rect, Ref, Size, StyledProperty, Thickness, VisualTreeAttachmentEventArgs, WeakRef,
+    Nullable, PixelRect, Rect, Ref, Size, StyledProperty, Thickness, Visual, WeakRef,
 };
 use std::cell::{Cell, OnceCell, RefCell};
 use std::rc::Rc;
 
-/// The handlers attached to the target of an open flyout: the subscription
-/// to its detachment from the visual tree and the key up handler.
-type TargetHandlers = (Rc<dyn IDisposable>, RoutedEventHandlerToken);
+/// Registrations belong to the captured target, even when a callback changes
+/// the public Target property before the old request returns.
+struct TargetHandlers {
+    owner: WeakRef<Control>,
+    generation: u64,
+    detached: Rc<dyn IDisposable>,
+    key_up: RoutedEventHandlerToken,
+}
+
+/// A closing call temporarily owns the old registrations. Keeping them local
+/// allows a canceled underlying Popup close to restore the existing session,
+/// while a nested new flyout request installs and keeps its own registrations.
+struct FlyoutSessionHandlers {
+    target: Option<TargetHandlers>,
+    transient: Option<Rc<dyn IDisposable>>,
+}
+
+impl Drop for FlyoutSessionHandlers {
+    fn drop(&mut self) {
+        if let Some(transient) = self.transient.take() {
+            transient.dispose();
+        }
+    }
+}
+
+impl Drop for TargetHandlers {
+    fn drop(&mut self) {
+        self.detached.dispose();
+        if let Some(owner) = self.owner.upgrade() {
+            owner.remove_handler(InputElement::key_up_event(), self.key_up);
+        }
+    }
+}
+
+/// A request cannot survive a detach/reattach to the same root. Observing the
+/// attachment before invoking application code also covers a pending Opening.
+struct TargetLifetime {
+    target: Ref<Control>,
+    root: Option<Ref<Visual>>,
+    detached: Rc<Cell<bool>>,
+    subscription: Rc<dyn IDisposable>,
+}
+
+impl TargetLifetime {
+    fn new(target: Ref<Control>) -> Self {
+        let root = target.visual_root();
+        let detached = Rc::new(Cell::new(false));
+        let observed = detached.clone();
+        let subscription = target.detached_from_visual_tree(move |_| observed.set(true));
+        Self { target, root, detached, subscription }
+    }
+
+    fn is_current(&self) -> bool {
+        !self.detached.get() && self.target.visual_root() == self.root
+    }
+}
+
+impl Drop for TargetLifetime {
+    fn drop(&mut self) {
+        self.subscription.dispose();
+    }
+}
 
 /// The base class of flyouts that are shown in a [`Popup`].
 ///
@@ -40,7 +99,10 @@ pub struct PopupFlyoutBase {
     transient_disposable: RefCell<Option<Rc<dyn IDisposable>>>,
     popup_host_changed_handler: HandlerList<dyn Fn(Option<&Rc<dyn IPopupHost>>)>,
     is_open: Cell<bool>,
-    ignore_is_open_changed: Cell<bool>,
+    request_generation: Cell<u64>,
+    /// Ignore only the matching internal publication, once. A property handler
+    /// can synchronously make a different application request.
+    ignore_is_open_changed: Cell<Option<bool>>,
     /// The flyout does not own its placement targets: an owner (a button)
     /// holds the flyout, so the reference back is weak.
     last_placement_target: RefCell<Option<WeakRef<Control>>>,
@@ -88,44 +150,73 @@ impl FlyoutBaseImpl for PopupFlyoutBase {
 
 impl PopupFlyoutBaseImpl for PopupFlyoutBase {
     fn hide_core(this: &Self, can_cancel: bool) -> bool {
-        if !this.is_open.get() {
+        // Hide also retires an Opening that has not published IsOpen yet.
+        let generation = this.next_request();
+        let was_open = this.is_open.get();
+        if !was_open && this.target().is_none() {
             return false;
         }
 
-        if can_cancel && this.cancel_closing() {
-            return false;
+        if was_open && can_cancel {
+            let canceled = this.cancel_closing();
+            if canceled || !this.is_current_request(generation) {
+                return false;
+            }
         }
 
+        // Take the old registrations before any callback can open a new
+        // session. Their cleanup uses their actual owner, never current Target.
+        let mut handlers = FlyoutSessionHandlers {
+            target: this.target_handlers.take(),
+            transient: this.transient_disposable.take(),
+        };
         this.is_open.set(false);
-        {
-            let _ignore = this.begin_ignoring_is_open();
-            this.set_current_value(FlyoutBase::is_open_property(), false);
-        }
         let popup = this.popup();
+        // Retire the real host before publishing the flyout's false value.
+        // Its property handler may reopen at another target, which needs a new
+        // Popup session rather than the old target's detached subscription.
         popup.set_is_open(false);
-
-        popup.set_placement_target(None);
-        popup.set_popup_parent(None);
-
-        // Ensure this isn't active
-        let transient_disposable = this.transient_disposable.take();
-        if let Some(transient_disposable) = transient_disposable {
-            transient_disposable.dispose();
+        if !this.is_current_request(generation) {
+            return false;
         }
+        if popup.is_open() {
+            // An application handler can cancel the real Popup close or call
+            // Popup::open during Closing. Its accepted host keeps the existing
+            // flyout session, including detachment and transient dismissal.
+            let previous = this.target_handlers.replace(handlers.target.take());
+            drop(previous);
+            let previous = this.transient_disposable.replace(handlers.transient.take());
+            if let Some(previous) = previous {
+                previous.dispose();
+            }
+            this.is_open.set(true);
+            this.synchronize_is_open();
+            return false;
+        }
+        drop(handlers);
         this.enlarged_popup_rect.set(None);
         this.enlarge_popup_rect_screen_pixel_rect.set(None);
-
-        let target_handlers = this.target_handlers.take();
-        if let (Some(target), Some((detached, key_up))) = (this.target(), target_handlers) {
-            detached.dispose();
-            target.remove_handler(InputElement::key_up_event(), key_up);
+        this.synchronize_is_open();
+        if !this.is_current_request(generation) {
+            return false;
+        }
+        popup.set_placement_target(None);
+        if !this.is_current_request(generation) {
+            return false;
+        }
+        popup.set_popup_parent(None);
+        if !this.is_current_request(generation) {
+            return false;
         }
 
-        this.on_closed();
-
+        if was_open {
+            this.on_closed();
+            if !this.is_current_request(generation) {
+                return false;
+            }
+        }
         this.set_target(None);
-
-        true
+        was_open && this.is_current_request(generation)
     }
 
     fn show_at_core(this: &Self, placement_target: &Control, show_at_pointer: bool) -> bool {
@@ -160,63 +251,121 @@ impl PopupFlyoutBase {
         show_at_pointer: bool,
         placement_rect: Option<Rect>,
     ) -> bool {
-        let placement_target = placement_target.to_ref();
-
+        // Once callback-bearing setup starts, a newer request consumes the
+        // old routed invocation even though its writes must stop. Keep the
+        // ordinary same-target/no-rectangle no-op and Opening cancellation
+        // unhandled, as before; do not infer this outcome from current IsOpen.
+        let lifetime = TargetLifetime::new(placement_target.to_ref());
+        let placement_target = &lifetime.target;
+        let mut generation = this.next_request();
         *this.last_placement_target.borrow_mut() = Some(placement_target.downgrade());
 
         if this.is_open.get() {
-            if this.target().as_ref() == Some(&placement_target) {
+            if this.target().as_ref() == Some(placement_target) {
                 if placement_rect.is_some() {
-                    this.position_popup(false, placement_rect);
+                    this.position_popup(generation, &lifetime, false, placement_rect);
                     return true;
                 }
                 return false;
             } else {
-                // Close before opening a new one
+                // Preserve the virtual close extension point. Its default
+                // implementation advances the request once. Only that owned
+                // close may hand the ticket back; a callback's newer request
+                // must win, including a show made by a Closed handler.
+                let close_generation = generation.wrapping_add(1);
                 let _ = this.hide_core(false);
+                if !this.is_current_request(close_generation) {
+                    return true;
+                }
+                if this.is_open.get() || this.target().is_some() || this.popup().is_open() {
+                    return false;
+                }
+                generation = close_generation;
             }
         }
 
+        if !this.accepts_show(generation, &lifetime) {
+            return true;
+        }
         let popup = this.popup();
-        this.set_target(&placement_target);
-        popup.set_placement_target(&placement_target);
-        popup.set_popup_parent(Some(&placement_target));
+        this.set_target(placement_target);
+        if !this.accepts_show(generation, &lifetime) {
+            return true;
+        }
+        popup.set_placement_target(placement_target);
+        if !this.accepts_show(generation, &lifetime) {
+            return true;
+        }
+        popup.set_popup_parent(Some(placement_target));
+        if !this.accepts_show(generation, &lifetime) {
+            return true;
+        }
 
         if popup.child().is_none() {
-            popup.set_child(this.create_presenter());
+            let presenter = this.create_presenter();
+            if !this.accepts_show(generation, &lifetime) {
+                return true;
+            }
+            popup.set_child(presenter);
+            if !this.accepts_show(generation, &lifetime) {
+                return true;
+            }
         }
 
         popup.set_overlay_dismiss_event_pass_through(this.overlay_dismiss_event_pass_through());
+        if !this.accepts_show(generation, &lifetime) {
+            return true;
+        }
         popup.set_overlay_input_pass_through_element(this.overlay_input_pass_through_element());
+        if !this.accepts_show(generation, &lifetime) {
+            return true;
+        }
 
-        if this.cancel_opening() {
+        let canceled = this.cancel_opening();
+        if !this.accepts_show(generation, &lifetime) {
+            return true;
+        }
+        if canceled {
+            this.hide_core(false);
             return false;
         }
-
-        this.position_popup(show_at_pointer, placement_rect);
-        this.is_open.set(true);
-        {
-            let _ignore = this.begin_ignoring_is_open();
-            this.set_current_value(FlyoutBase::is_open_property(), true);
+        if !this.position_popup(generation, &lifetime, show_at_pointer, placement_rect) {
+            return true;
         }
-        popup.set_is_open(true);
-        this.on_opened();
 
-        let weak = this.to_ref().downgrade();
-        let detached = placement_target.detached_from_visual_tree({
-            let weak = weak.clone();
-            move |e| {
-                if let Some(this) = weak.upgrade() {
-                    this.placement_target_detached_from_visual_tree(e);
+        // Registration precedes property and Opened callbacks: a canceled Hide
+        // in one of those callbacks keeps a fully owned open session.
+        this.install_target_handlers(placement_target, generation);
+        if this.show_mode() == FlyoutShowMode::TransientWithDismissOnPointerMoveAway {
+            if let Some(input_manager) = InputManager::instance() {
+                let weak = this.to_ref().downgrade();
+                let subscription = input_manager.process().subscribe(Rc::new(AnonymousObserver::new(
+                    move |e: Rc<dyn IRawInputEventArgs>| {
+                        if let Some(this) = weak.upgrade().filter(|this| this.owns_target_handlers(generation)) {
+                            this.handle_transient_dismiss(&*e);
+                        }
+                    },
+                )));
+                if !this.accepts_show(generation, &lifetime) {
+                    subscription.dispose();
+                    return true;
                 }
+                *this.transient_disposable.borrow_mut() = Some(subscription);
             }
-        });
-        let key_up = placement_target.add_handler(InputElement::key_up_event(), move |_, e: &KeyEventArgs| {
-            if let Some(this) = weak.upgrade() {
-                this.on_placement_target_or_popup_key_up(e);
-            }
-        });
-        *this.target_handlers.borrow_mut() = Some((detached, key_up));
+        }
+        this.is_open.set(true);
+        popup.set_is_open(true);
+        if !this.accepts_show(generation, &lifetime) {
+            return true;
+        }
+        this.synchronize_is_open();
+        if !this.accepts_show(generation, &lifetime) {
+            return true;
+        }
+        this.on_opened();
+        if !this.accepts_show(generation, &lifetime) {
+            return true;
+        }
 
         match this.show_mode() {
             FlyoutShowMode::Standard => {
@@ -227,28 +376,19 @@ impl PopupFlyoutBase {
                     } else {
                         let next_focus =
                             KeyboardNavigationHandler::get_next(&child.upcast(), NavigationDirection::Next);
+                        if !this.accepts_show(generation, &lifetime) {
+                            return true;
+                        }
                         if let Some(next_focus) = next_focus {
                             next_focus.focus();
                         }
                     }
                 }
             }
-            FlyoutShowMode::TransientWithDismissOnPointerMoveAway => {
-                if let Some(input_manager) = InputManager::instance() {
-                    let weak = this.to_ref().downgrade();
-                    let subscription = input_manager.process().subscribe(Rc::new(AnonymousObserver::new(
-                        move |e: Rc<dyn IRawInputEventArgs>| {
-                            if let Some(this) = weak.upgrade() {
-                                this.handle_transient_dismiss(&*e);
-                            }
-                        },
-                    )));
-                    *this.transient_disposable.borrow_mut() = Some(subscription);
-                }
-            }
-            FlyoutShowMode::Transient => {}
+            FlyoutShowMode::TransientWithDismissOnPointerMoveAway | FlyoutShowMode::Transient => {}
         }
 
+        this.accepts_show(generation, &lifetime);
         true
     }
 }
@@ -256,11 +396,12 @@ impl PopupFlyoutBase {
 /// Resets the flag that makes the flyout ignore changes of `IsOpen`.
 struct IgnoreIsOpenScope<'a> {
     owner: &'a PopupFlyoutBase,
+    previous: Option<bool>,
 }
 
 impl Drop for IgnoreIsOpenScope<'_> {
     fn drop(&mut self) {
-        self.owner.ignore_is_open_changed.set(false);
+        self.owner.ignore_is_open_changed.set(self.previous);
     }
 }
 
@@ -354,7 +495,8 @@ impl PopupFlyoutBase {
             transient_disposable: RefCell::new(None),
             popup_host_changed_handler: HandlerList::new(),
             is_open: Cell::new(false),
-            ignore_is_open_changed: Cell::new(false),
+            request_generation: Cell::new(0),
+            ignore_is_open_changed: Cell::new(None),
             last_placement_target: RefCell::new(None),
             target_handlers: RefCell::new(None),
             closing: HandlerList::new(),
@@ -520,9 +662,63 @@ impl PopupFlyoutBase {
         self.show_at_core(placement_target, show_at_pointer);
     }
 
-    fn placement_target_detached_from_visual_tree(&self, _e: &VisualTreeAttachmentEventArgs) {
-        let _ = self.hide_core(false);
-        *self.last_placement_target.borrow_mut() = None;
+    fn next_request(&self) -> u64 {
+        let generation = self.request_generation.get().wrapping_add(1);
+        self.request_generation.set(generation);
+        generation
+    }
+
+    fn is_current_request(&self, generation: u64) -> bool {
+        self.request_generation.get() == generation
+    }
+
+    fn accepts_show(&self, generation: u64, lifetime: &TargetLifetime) -> bool {
+        if !self.is_current_request(generation) {
+            return false;
+        }
+        if lifetime.is_current() {
+            return true;
+        }
+        self.clear_last_placement_target(&lifetime.target);
+        self.hide_core(false);
+        false
+    }
+
+    fn clear_last_placement_target(&self, target: &Ref<Control>) {
+        let is_target = self.last_placement_target.borrow().as_ref().and_then(WeakRef::upgrade).as_ref() == Some(target);
+        if is_target {
+            self.last_placement_target.borrow_mut().take();
+        }
+    }
+
+    fn owns_target_handlers(&self, generation: u64) -> bool {
+        self.target_handlers.borrow().as_ref().is_some_and(|handlers| handlers.generation == generation)
+    }
+
+    fn install_target_handlers(&self, target: &Ref<Control>, generation: u64) {
+        let weak = self.to_ref().downgrade();
+        let owner = target.downgrade();
+        let detached = target.detached_from_visual_tree({
+            let weak = weak.clone();
+            let owner = owner.clone();
+            move |_| {
+                if let Some(this) = weak.upgrade().filter(|this| this.owns_target_handlers(generation)) {
+                    if let Some(owner) = owner.upgrade() {
+                        // Clear before Hide: Closed may synchronously show at a
+                        // different target, whose reopen target must survive.
+                        this.clear_last_placement_target(&owner);
+                    }
+                    this.hide_core(false);
+                }
+            }
+        });
+        let key_up = target.add_handler(InputElement::key_up_event(), move |_, e: &KeyEventArgs| {
+            if let Some(this) = weak.upgrade().filter(|this| this.owns_target_handlers(generation)) {
+                this.on_placement_target_or_popup_key_up(e);
+            }
+        });
+        let old = self.target_handlers.replace(Some(TargetHandlers { owner, generation, detached, key_up }));
+        drop(old);
     }
 
     fn handle_transient_dismiss(&self, args: &dyn IRawInputEventArgs) {
@@ -618,15 +814,19 @@ impl PopupFlyoutBase {
     }
 
     fn on_popup_opened(&self) {
+        let generation = self.request_generation.get();
         self.is_open.set(true);
-        {
-            let _ignore = self.begin_ignoring_is_open();
-            self.set_current_value(FlyoutBase::is_open_property(), true);
+        self.synchronize_is_open();
+        if !self.is_current_request(generation) {
+            return;
         }
 
         let host = self.popup().host();
         for (_, handler) in self.popup_host_changed_handler.snapshot().iter() {
             handler(host.as_ref());
+            if !self.is_current_request(generation) {
+                return;
+            }
         }
     }
 
@@ -637,10 +837,26 @@ impl PopupFlyoutBase {
     }
 
     fn on_popup_closed(&self) {
-        self.hide_core(false);
+        // An owned close has already retired its session. Do not manufacture
+        // another close ticket and prevent a retargeting show from continuing.
+        let mut generation = self.request_generation.get();
+        if self.is_open.get() {
+            self.hide_core(false);
+            generation = generation.wrapping_add(1);
+        }
+        if !self.is_current_request(generation) || self.is_open.get() {
+            return;
+        }
+        self.synchronize_is_open();
+        if !self.is_current_request(generation) {
+            return;
+        }
 
         for (_, handler) in self.popup_host_changed_handler.snapshot().iter() {
             handler(None);
+            if !self.is_current_request(generation) {
+                return;
+            }
         }
     }
 
@@ -651,7 +867,7 @@ impl PopupFlyoutBase {
         }
 
         let this: Ref<FlyoutBase> = self.to_ref().upcast();
-        if self.target().and_then(|target| target.context_flyout()) != Some(this) {
+        if self.target().and_then(|target| Self::effective_context_flyout(&target)) != Some(this) {
             return;
         }
 
@@ -665,34 +881,45 @@ impl PopupFlyoutBase {
     }
 
     fn is_open_changed(&self, e: &FerroPropertyChangedEventArgs<'_>) {
-        if self.ignore_is_open_changed.get() {
+        let value = e.get_new_value::<bool>();
+        if self.ignore_is_open_changed.get() == Some(value) {
+            self.ignore_is_open_changed.set(None);
             return;
         }
 
-        if e.get_new_value::<bool>() {
+        if value {
             let last_placement_target = self.last_placement_target.borrow().as_ref().and_then(WeakRef::upgrade);
             if let Some(last_placement_target) = last_placement_target {
-                if self.show_at_core(&last_placement_target, false) {
-                    return;
-                }
+                self.show_at_core(&last_placement_target, false);
+            } else {
+                self.next_request();
             }
-
-            // No target, or opening was cancelled: revert so IsOpen stays honest
-            let _ignore = self.begin_ignoring_is_open();
-            self.set_current_value(FlyoutBase::is_open_property(), false);
-        } else if !self.hide_core(true) {
-            // Closing was cancelled: revert so IsOpen stays honest
-            let _ignore = self.begin_ignoring_is_open();
-            self.set_current_value(FlyoutBase::is_open_property(), true);
+        } else {
+            self.hide_core(true);
         }
+        // Cancellation and reentrant requests may both change the outcome.
+        // Publish the accepted state instead of inverting the original input.
+        self.synchronize_is_open();
     }
 
-    fn begin_ignoring_is_open(&self) -> IgnoreIsOpenScope<'_> {
-        self.ignore_is_open_changed.set(true);
-        IgnoreIsOpenScope { owner: self }
+    fn synchronize_is_open(&self) {
+        let value = self.is_open.get();
+        let _ignore = self.begin_ignoring_is_open(value);
+        self.set_current_value(FlyoutBase::is_open_property(), value);
     }
 
-    fn position_popup(&self, show_at_pointer: bool, placement_rect: Option<Rect>) {
+    fn begin_ignoring_is_open(&self, value: bool) -> IgnoreIsOpenScope<'_> {
+        let previous = self.ignore_is_open_changed.replace(Some(value));
+        IgnoreIsOpenScope { owner: self, previous }
+    }
+
+    fn position_popup(
+        &self,
+        generation: u64,
+        lifetime: &TargetLifetime,
+        show_at_pointer: bool,
+        placement_rect: Option<Rect>,
+    ) -> bool {
         let popup = self.popup();
 
         // The child of the popup can't be missing here, it was set in
@@ -702,25 +929,53 @@ impl PopupFlyoutBase {
             // Popup may not have been shown yet. Measure content
             let child: &Layoutable = &child;
             LayoutHelper::measure_child(Some(child), Size::INFINITY, Thickness::default());
+            if !self.accepts_show(generation, lifetime) {
+                return false;
+            }
         }
 
         popup.set_vertical_offset(self.vertical_offset());
+        if !self.accepts_show(generation, lifetime) {
+            return false;
+        }
         popup.set_horizontal_offset(self.horizontal_offset());
+        if !self.accepts_show(generation, lifetime) {
+            return false;
+        }
         popup.set_placement_anchor(self.placement_anchor());
+        if !self.accepts_show(generation, lifetime) {
+            return false;
+        }
         popup.set_placement_gravity(self.placement_gravity());
+        if !self.accepts_show(generation, lifetime) {
+            return false;
+        }
         popup.set_custom_popup_placement_callback(self.custom_popup_placement_callback());
+        if !self.accepts_show(generation, lifetime) {
+            return false;
+        }
         // Every opening supplies its own rectangle, including None, so a
         // later ordinary request cannot reuse a previous text-context anchor.
         popup.set_placement_rect(placement_rect);
+        if !self.accepts_show(generation, lifetime) {
+            return false;
+        }
         if placement_rect.is_some() {
             popup.set_placement(PlacementMode::BottomEdgeAlignedLeft);
+            if !self.accepts_show(generation, lifetime) {
+                return false;
+            }
             popup.set_placement_constraint_adjustment(self.placement_constraint_adjustment());
         } else if show_at_pointer {
             popup.set_placement(PlacementMode::Pointer);
         } else {
             popup.set_placement(self.placement());
+            if !self.accepts_show(generation, lifetime) {
+                return false;
+            }
             popup.set_placement_constraint_adjustment(self.placement_constraint_adjustment());
         }
+        self.accepts_show(generation, lifetime)
     }
 
     fn on_context_flyout_property_changed(c: &Control, args: &FerroPropertyChangedEventArgs<'_>) {
@@ -741,12 +996,12 @@ impl PopupFlyoutBase {
         }
     }
 
-    fn on_control_context_canceled(sender: &Interactive, e: &RoutedEventArgs) {
+    pub(crate) fn on_control_context_canceled(sender: &Interactive, e: &RoutedEventArgs) {
         if e.handled() {
             return;
         }
         let Some(control) = sender.downcast_ref::<Control>() else { return };
-        let Some(flyout) = control.context_flyout() else { return };
+        let Some(flyout) = Self::effective_context_flyout(control) else { return };
 
         if flyout.is_open() {
             flyout.hide();
@@ -758,7 +1013,7 @@ impl PopupFlyoutBase {
             return;
         }
         let Some(control) = sender.downcast_ref::<Control>() else { return };
-        let Some(flyout) = control.context_flyout() else { return };
+        let Some(flyout) = Self::context_flyout_for_request(control) else { return };
 
         if control.context_menu().is_some() {
             if let Some(logger) = Logger::try_get(LogEventLevel::Verbose, "FlyoutBase") {
@@ -769,7 +1024,29 @@ impl PopupFlyoutBase {
         }
 
         if let Some(popup_flyout) = flyout.cast::<PopupFlyoutBase>() {
-            let handled = if let Some(rect) = e.try_get_placement_rect(control) {
+            let root = control.visual_root();
+            let lifetime = TargetLifetime::new(control.to_ref());
+            let popup_generation = popup_flyout.request_generation.get();
+            let rich_request = control.downcast_ref::<crate::RichTextBlock>()
+                .map(|view| (view, view.context_menu_request_generation()));
+            // Converting an explicit anchor reads virtual ITransform values.
+            // A nested rich request or a replacement menu owns the new intent;
+            // the old request must not reposition its accepted popup afterward.
+            let placement_rect = e.try_get_placement_rect(control);
+            if e.handled()
+                || root != control.visual_root()
+                || !lifetime.is_current()
+                || !popup_flyout.is_current_request(popup_generation)
+                || rich_request.is_some_and(|(view, generation)| {
+                    generation != view.context_menu_request_generation()
+                })
+                || control.context_menu().is_some()
+                || Self::context_flyout_for_request(control) != Some(flyout.clone())
+            {
+                e.set_handled(true);
+                return;
+            }
+            let handled = if let Some(rect) = placement_rect {
                 popup_flyout.show_at_rect_core(control, rect)
             } else {
                 let triggered_by_pointer_input = e.try_get_position(None).is_some();
@@ -788,6 +1065,25 @@ impl PopupFlyoutBase {
                 control.perform_feedback(FeedbackAction::hold());
             }
         }
+    }
+
+    /// Resolves the internal overflow fallback without writing the local
+    /// ContextFlyout property or changing the requesting placement target.
+    pub(crate) fn effective_context_flyout(control: &Control) -> Option<Ref<FlyoutBase>> {
+        control.context_flyout().or_else(|| {
+            control
+                .downcast_ref::<crate::RichTextBlockOverflow>()
+                .and_then(|overflow| overflow.inherited_context_flyout())
+        })
+    }
+
+    pub(crate) fn context_flyout_for_request(control: &Control) -> Option<Ref<FlyoutBase>> {
+        if control.downcast_ref::<crate::RichTextBlockOverflow>()
+            .is_some_and(|overflow| !overflow.context_flyout_is_enabled())
+        {
+            return None;
+        }
+        Self::effective_context_flyout(control)
     }
 
     fn cancel_closing(&self) -> bool {

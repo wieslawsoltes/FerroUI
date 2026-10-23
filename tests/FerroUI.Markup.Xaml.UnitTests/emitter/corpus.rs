@@ -358,6 +358,14 @@ pub const CLASS_DOCUMENTS: &[ClassDocument] = &[
         class: "FerroUI.Markup.Xaml.UnitTests.Xaml.MyHost",
         xaml: "<Panel xmlns='https://github.com/ferroui' xmlns:x='http://schemas.microsoft.com/winfx/2006/xaml' x:Class='FerroUI.Markup.Xaml.UnitTests.Xaml.MyHost'><RichEditBox Name='editor' ContextMenuOpening='OnContextMenuOpening'/></Panel>",
     },
+    // Read-only rich text reuses the same typed arguments while its distinct
+    // routed event belongs to RichTextBlock's public metadata.
+    ClassDocument {
+        module: "rich_readonly_context_menu_event",
+        name: "Handlers/RichReadonlyContextMenuEvent.xaml",
+        class: "FerroUI.Markup.Xaml.UnitTests.Xaml.MyHost",
+        xaml: "<Panel xmlns='https://github.com/ferroui' xmlns:x='http://schemas.microsoft.com/winfx/2006/xaml' x:Class='FerroUI.Markup.Xaml.UnitTests.Xaml.MyHost'><RichTextBlock Name='display' ContextMenuOpening='OnContextMenuOpening'/></Panel>",
+    },
     // The rich editor's existing custom argument types must also remain
     // assignable to a code-behind method accepting routed-event arguments.
     ClassDocument {

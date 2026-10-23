@@ -592,15 +592,43 @@ impl ContextMenu {
     }
 
     pub(crate) fn control_context_requested(sender: &Interactive, e: &ContextRequestedEventArgs) {
+        if e.handled() {
+            return;
+        }
         let Some(control) = sender.downcast_ref::<Control>() else { return };
         let Some(context_menu) = control.context_menu() else { return };
+        let root = control.visual_root();
+        let rich_request = control.downcast_ref::<crate::RichTextBlock>()
+            .map(|view| (view, view.context_menu_request_generation()));
+        let is_current_request = || {
+            root == control.visual_root()
+                && rich_request.is_none_or(|(view, generation)| {
+                    generation == view.context_menu_request_generation()
+                })
+                && control.context_menu() == Some(context_menu.clone())
+        };
 
-        if !e.handled() && !context_menu.cancel_opening() {
+        if !context_menu.cancel_opening() {
+            if e.handled() || !is_current_request() {
+                e.set_handled(true);
+                return;
+            }
             let requested_by_pointer = e.try_get_position(None).is_some();
             let control = control.to_ref();
             let placement_target =
                 e.source().and_then(|source| source.cast::<Control>()).unwrap_or_else(|| control.clone());
+            let placement_root = placement_target.visual_root();
             let placement_rect = e.try_get_placement_rect(&placement_target);
+            // Anchor conversion reads application-supplied ITransform values.
+            // Keep a newer rich request or detached target from being replaced
+            // by this older invocation after its typed opening event returned.
+            if e.handled()
+                || !is_current_request()
+                || placement_root != placement_target.visual_root()
+            {
+                e.set_handled(true);
+                return;
+            }
             context_menu.open_core(
                 &control,
                 &placement_target,

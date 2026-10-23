@@ -32,11 +32,14 @@ use ferroui_base::{
     ferro_class, instantiate, DirectProperty, ElementRef, FerroObject, FerroObjectImpl,
     FerroObjectImplExt, FerroProperty, FerroPropertyChangedEventArgs, IntoRef, Point, Rect, Ref,
     Size, StyledElementImpl, StyledProperty, StyledPropertyMetadata, StyledPropertyOptions,
-    Thickness, Vector, Visual, VisualImpl, WeakRef,
+    Thickness, Vector, Visual, VisualImpl, VisualImplExt, WeakRef,
 };
 use std::cell::{Cell, RefCell};
 use std::ops::Range;
 use std::rc::Rc;
+
+#[path = "rich_text_context_menu.rs"]
+mod context_menu;
 
 /// An atomic selection change. Anchor and active end retain selection direction.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
@@ -66,6 +69,8 @@ pub struct RichTextBlock {
     navigation_x: Cell<Option<f64>>,
     selection_changed: HandlerList<dyn Fn(&RichTextSelectionChangedEventArgs)>,
     dragging: Cell<bool>,
+    context_menu_request_generation: Cell<u64>,
+    context_menu_key_request: RefCell<Option<context_menu::ContextMenuKeyRequest>>,
     hovered_link: RefCell<Option<WeakRef<Hyperlink>>>,
     pressed_link: RefCell<Option<WeakRef<Hyperlink>>>,
     focused_link: RefCell<Option<WeakRef<Hyperlink>>>,
@@ -133,6 +138,7 @@ ferroui_base::ferro_class_info!(RichTextBlock {
             fn Copy() => RichTextBlock::copy,
         ],
         fields: [
+            ContextMenuOpeningEvent: RoutedEvent<crate::ContextMenuEventArgs> => || *RichTextBlock::context_menu_opening_event(),
             SelectionChangedEvent: RoutedEvent<RoutedEventArgs> => || RichTextBlock::selection_changed_event().clone(),
             IsTextTrimmedChangedEvent: RoutedEvent<RoutedEventArgs> => || RichTextBlock::is_text_trimmed_changed_event().clone(),
         ],
@@ -212,6 +218,16 @@ impl ControlImpl for RichTextBlock {
 }
 
 impl VisualImpl for RichTextBlock {
+    fn on_attached_to_visual_tree(this: &Self, event: &ferroui_base::VisualTreeAttachmentEventArgs) {
+        this.invalidate_context_menu_request();
+        Self::parent_on_attached_to_visual_tree(this, event);
+    }
+
+    fn on_detached_from_visual_tree(this: &Self, event: &ferroui_base::VisualTreeAttachmentEventArgs) {
+        this.invalidate_context_menu_request();
+        Self::parent_on_detached_from_visual_tree(this, event);
+    }
+
     fn render(this: &Self, context: &mut DrawingContext) {
         if let Some(background) = this.background() {
             context.fill_rectangle(&background, this.text_background_bounds(), 0.0);
@@ -747,6 +763,9 @@ impl InputElementImpl for RichTextBlock {
     }
 
     fn on_key_up(this: &Self, e: &KeyEventArgs) {
+        if this.try_handle_context_menu_key_up(e) {
+            return;
+        }
         Self::parent_on_key_up(this, e);
         let link = this
             .focused_link
@@ -873,6 +892,16 @@ impl RichTextBlock {
 
     fn static_constructor() {
         InputElement::focusable_property().override_default_value::<RichTextBlock>(true);
+        InputElement::context_requested_event().add_class_handler_with::<RichTextBlock>(
+            Self::on_context_requested,
+            RoutingStrategies::BUBBLE,
+            false,
+        );
+        InputElement::context_canceled_event().add_class_handler_with::<RichTextBlock>(
+            Self::on_context_canceled,
+            RoutingStrategies::BUBBLE,
+            false,
+        );
         // Trimmed line boxes deliberately exclude some glyph ink, just as the
         // shared TextBlock formatter does. Overflow uses the document owner's
         // bounds policy even when it is not in the owner's logical tree.
@@ -911,6 +940,8 @@ impl RichTextBlock {
             navigation_x: Cell::new(None),
             selection_changed: HandlerList::new(),
             dragging: Cell::new(false),
+            context_menu_request_generation: Cell::new(0),
+            context_menu_key_request: RefCell::new(None),
             hovered_link: RefCell::new(None),
             pressed_link: RefCell::new(None),
             focused_link: RefCell::new(None),
