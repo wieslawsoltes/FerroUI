@@ -302,18 +302,6 @@ impl EditorShell {
                     row.children().add(field);
                 }
                 content.children().add(row);
-                let editable = self.paint_region.get().is_none()
-                    && self.canvas.can_edit_linear_gradient(index);
-                content.children().add(self.paint_button(
-                    "Edit on canvas", &format!("PaintCanvasGradient{index}"), editable, move |shell| {
-                        shell.finish_inline_text(true);
-                        shell.close_modal();
-                        shell.canvas.edit_linear_gradient(index);
-                    }));
-                if !editable {
-                    content.children().add(paint_text(
-                        "Canvas handles support one visible, unlocked rectangle, ellipse or box container with 2–256 stops.", true));
-                }
             }
             Paint::RadialGradient {
                 center,
@@ -386,6 +374,19 @@ impl EditorShell {
                     },
                 ));
                 self.paint_crop_controls(&content, index, fill);
+            }
+        }
+        if matches!(fill.paint, Paint::LinearGradient { .. } | Paint::RadialGradient { .. } | Paint::AngularGradient { .. }) {
+            let editable = self.paint_region.get().is_none() && self.canvas.can_edit_linear_gradient(index);
+            content.children().add(self.paint_button(
+                "Edit on canvas", &format!("PaintCanvasGradient{index}"), editable, move |shell| {
+                    shell.finish_inline_text(true);
+                    shell.close_modal();
+                    shell.canvas.edit_linear_gradient(index);
+                }));
+            if !editable {
+                content.children().add(paint_text(
+                    "Canvas handles support one visible, unlocked rectangle, ellipse or box container with 2–256 stops.", true));
             }
         }
         card

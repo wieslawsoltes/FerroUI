@@ -38,9 +38,13 @@ export async function gradientHandleRegressions(page, reference, check, helpers,
     const paint = document => structuredClone(document.nodes[2].fills[fillIndex].paint);
     const assertPaint = (actual, expected) => {
         const normalized = structuredClone(expected);
-        for (const endpoint of ["start", "end"]) for (const coordinate of ["x", "y"]) {
+        for (const endpoint of ["start", "end", "center"].filter(key => key in expected)) for (const coordinate of ["x", "y"]) {
             near(actual[endpoint][coordinate], expected[endpoint][coordinate], endpoint + "." + coordinate);
             normalized[endpoint][coordinate] = actual[endpoint][coordinate];
+        }
+        for (const scalar of ["radius", "angle"].filter(key => key in expected)) {
+            near(actual[scalar], expected[scalar], scalar);
+            normalized[scalar] = actual[scalar];
         }
         assert.equal(actual.stops.length, expected.stops.length, "Stop count");
         for (let index = 0; index < expected.stops.length; index++) {
@@ -61,8 +65,10 @@ export async function gradientHandleRegressions(page, reference, check, helpers,
     };
     const waitPaint = expected => wait((_view, document, args) => {
         const actual = document.nodes[2].fills[args.fill].paint;
-        return ["start", "end"].every(endpoint => ["x", "y"].every(coordinate =>
-            Math.abs(actual[endpoint][coordinate] - args.paint[endpoint][coordinate]) < 1e-6)) &&
+        return actual.type === args.paint.type &&
+            ["start", "end", "center"].filter(key => key in args.paint).every(endpoint => ["x", "y"].every(coordinate =>
+                Math.abs(actual[endpoint][coordinate] - args.paint[endpoint][coordinate]) < 1e-6)) &&
+            ["radius", "angle"].filter(key => key in args.paint).every(key => Math.abs(actual[key] - args.paint[key]) < 1e-6) &&
             actual.stops.length === args.paint.stops.length && actual.stops.every((stop, index) =>
                 Math.abs(stop.offset - args.paint.stops[index].offset) < 1e-6 &&
                 JSON.stringify(stop.color) === JSON.stringify(args.paint.stops[index].color));
@@ -520,4 +526,154 @@ export async function gradientHandleRegressions(page, reference, check, helpers,
     assert.equal((await state(page)).invalidNodes, 0);
     assert.equal((await state(page)).unsupportedEffects, 0);
     check("Deleting below two stops produces a fresh native error while preserving exact redo; Enter exits the editor and native PNG pixels verify the edited gradient without adorners or unsupported rendering effects");
+
+    // Native radial and angular paints reuse the same transaction/lifecycle
+    // entry, but their geometric parameters and stop mappings remain distinct.
+    const polarFixture = (kind, affine = true) => isolatedDocument(reference, [fixtureNode(reference, 2, {
+        kind: "rectangle", name: "Native " + kind + " gradient handles", x: affine ? 240 : 80, y: affine ? 130 : 80,
+        width: 240, height: 160, rotation: affine ? 17 : 0, flip_x: affine,
+        affine_transform: affine ? { a: 1.1, b: 0.15, c: 0.2, d: 0.9, e: 3, f: -5 } : null,
+        corner_radius: 0, corner_radii: null, corner_smoothing: 0,
+        fills: [{ paint: { type: kind + "_gradient", center: { x: 0.5, y: 0.5 },
+            ...(kind === "radial" ? { radius: 0.5 } : { angle: 359 }),
+            stops: [{ offset: 0, color: red }, { offset: 0.5, color: { r: 0, g: 255, b: 0, a: 192 } },
+                { offset: 0.5, color: { ...blue, a: 128 } }, { offset: 1, color: blue }] }, opacity: 1, visible: true }],
+    })], "Native " + kind + " authoring");
+    await load(polarFixture("radial"), 0);
+    assert.equal((await state(page)).gradientEdit.gradientKind, "radial");
+    before = await documentState(page); depth = (await state(page)).historyLength;
+    expected = paint(before); expected.radius = 0.625;
+    await drag(await handle("end"), localDelta(before.nodes[2], 30, 0), expected);
+    after = await documentState(page); assertChange(before, after, expected);
+    await history(before, after, depth, "Affine native radial radius");
+    before = after; depth = (await state(page)).historyLength;
+    expected = paint(before); expected.center.x += 12 / 240; expected.center.y -= 8 / 160;
+    await drag(await handle("start"), localDelta(before.nodes[2], 12, -8), expected);
+    after = await documentState(page); assertChange(before, after, expected);
+    await history(before, after, depth, "Affine native radial center");
+    check("Native radial paint-card entry exposes the actual ellipse and center/radius controls; reflected and sheared pointer motion edits the shared relative radius and center with exact undo/redo and unchanged stops");
+
+    view = await state(page); await page.keyboard.press("Control+z");
+    await published(view, "Prepare radial redo preservation");
+    before = await documentState(page); const radialRedo = await state(page);
+    item = await handle("end");
+    try {
+        held = true; await press(item);
+        expected = paint(before); expected.radius += 0.05;
+        await move(item, localDelta(before.nodes[2], 12, 0), expected);
+        await move(item, { x: 0, y: 0 }, paint(before));
+        assert.deepEqual(await documentState(page), before);
+        assert.equal((await state(page)).canRedo, true);
+        await release("Radial exact drag-back"); held = false;
+    } finally { if (held) await page.mouse.up(); }
+    assert.deepEqual(await documentState(page), before);
+    assert.equal((await state(page)).historyLength, radialRedo.historyLength);
+    view = await state(page); await page.keyboard.press("Control+Shift+z");
+    await published(view, "Execute radial redo after drag-back");
+    assert.deepEqual(await documentState(page), after);
+    await captureNativeScreenshot(mode + "-gradient-handles-radial", { controls: ["CanvasHost"] });
+    check("Radial handle drag-back restores the exact document during capture, leaves redo executable, and paints a real native ellipse adorner without adding history");
+
+    await load(polarFixture("angular"), 0);
+    assert.equal((await state(page)).gradientEdit.gradientKind, "angular");
+    const angularFirst = await handle("stop", 0), angularLast = await handle("stop", 3);
+    near(angularFirst.world.x, angularLast.world.x, "Angular seam stop x");
+    near(angularFirst.world.y, angularLast.world.y, "Angular seam stop y");
+    assert.ok(Math.hypot(angularFirst.markerScreen.x - angularLast.markerScreen.x,
+        angularFirst.markerScreen.y - angularLast.markerScreen.y) > 14, "Stops 0 and 1 stay separately selectable on the conic seam");
+    const ring = (await state(page)).gradientEdit.ring;
+    assert.ok(ring.length >= 33 && ring.length <= 513, "Native editing ring is bounded");
+    before = await documentState(page); depth = (await state(page)).historyLength;
+    const angularDelta = (node, angle, degrees, radius = Math.min(node.width, node.height) / 2) => {
+        const a = angle * Math.PI / 180, b = (angle + degrees) * Math.PI / 180;
+        return localDelta(node, (Math.sin(b) - Math.sin(a)) * radius, (-Math.cos(b) + Math.cos(a)) * radius);
+    };
+    item = await handle("end");
+    try {
+        held = true; await press(item);
+        for (const degrees of [15, 30, 45]) {
+            expected = paint(before); expected.angle += degrees;
+            await move(item, angularDelta(before.nodes[2], paint(before).angle, degrees), expected);
+        }
+        await release("Angular seam rotation"); held = false;
+    } finally { if (held) await page.mouse.up(); }
+    after = await documentState(page); assertChange(before, after, expected);
+    await history(before, after, depth, "Native angular sweep rotation");
+    check("Angular gradient handles preserve native local-pixel angles on a nonsquare affine box; a real sweep-handle drag crosses 360 degrees continuously while distinct seam stops retain their source order");
+
+    before = after; depth = (await state(page)).historyLength;
+    item = await handle("stop", 2);
+    expected = paint(before); expected.stops[2].offset = 0.625;
+    await drag(item, angularDelta(before.nodes[2], paint(before).angle + 180, 45), expected);
+    after = await documentState(page); assertChange(before, after, expected);
+    await history(before, after, depth, "Native conic color-stop rotation");
+    check("Dragging a tied conic color stop uses the inverse layer transform and local sweep angle, preserving every other stop, RGBA color and authored gradient parameter with exact history");
+
+    // A real native ring double-click inserts an interpolated stop; the spoke
+    // is a center-translation target, not a fake linear stop axis.
+    before = await documentState(page); depth = (await state(page)).historyLength;
+    const angle = (paint(before).angle + 90) * Math.PI / 180;
+    const angularInsertion = world(before.nodes[2], before.nodes[2].width * paint(before).center.x + Math.sin(angle) * 80,
+        before.nodes[2].height * paint(before).center.y - Math.cos(angle) * 80);
+    await clickWorld(page, angularInsertion.x, angularInsertion.y, { clickCount: 2, delay: 80 });
+    expected = paint(before); expected.stops.push({ offset: 0.25, color: { r: 128, g: 128, b: 0, a: 224 } });
+    await waitPaint(expected);
+    await wait(view => view.gradientEdit.selected?.kind === "stop" && view.gradientEdit.selected.stop === 4 && !view.gradientEdit.active);
+    after = await documentState(page); assertChange(before, after, expected);
+    await history(before, after, depth, "Native angular ring insertion");
+    await captureNativeScreenshot(mode + "-gradient-handles-angular", { controls: ["CanvasHost"] });
+    check("Double-clicking the native conic ring appends a correctly interpolated RGBA stop without changing existing indices, and undo/redo preserves the complete angular paint");
+
+    // An untransformed opaque radial fixture gives independent native artwork
+    // samples at known normalized radii, with the adorner still active.
+    const radialPixels = polarFixture("radial", false);
+    radialPixels.nodes[2].fills[0].paint.stops = [{ offset: 0, color: red }, { offset: 1, color: blue }];
+    await load(radialPixels, 0);
+    before = await documentState(page); expected = paint(before); expected.radius = 0.75;
+    await drag(await handle("end"), { x: 60, y: 0 }, expected);
+    const radialArtwork = await documentState(page);
+    const [radialDownload] = await Promise.all([page.waitForEvent("download", { timeout: 60000 }),
+        clickNative(page, "ExportPngButton", "InspectorViewport")]);
+    assert.equal(await radialDownload.failure(), null);
+    const radialPath = resolve(output, mode + "-radial-gradient-handles-artwork.png");
+    await radialDownload.saveAs(radialPath);
+    const radialPng = PNG.sync.read(await readFile(radialPath));
+    assert.deepEqual([radialPng.width, radialPng.height], [240, 160]);
+    const radialPixel = (x, y) => [...radialPng.data.subarray((y * radialPng.width + x) * 4, (y * radialPng.width + x) * 4 + 4)];
+    const radialCenter = radialPixel(120, 80), radialHorizontal = radialPixel(210, 80), radialVertical = radialPixel(120, 140);
+    assert.ok(radialCenter[0] > 250 && radialCenter[2] < 5 && radialCenter[3] === 255, "Native radial center: " + radialCenter);
+    for (const sample of [radialHorizontal, radialVertical]) {
+        assert.ok(Math.abs(sample[0] - sample[2]) < 5 && sample[1] === 0 && sample[3] === 255,
+            "Equal normalized X/Y radii produce the same native midpoint: " + sample);
+    }
+    assert.deepEqual(await documentState(page), radialArtwork);
+    assert.equal((await state(page)).invalidNodes, 0);
+    check("Native PNG pixels independently confirm the edited radial brush's equal relative radii on a nonsquare rectangle, with no exported handle adorners or changes from export");
+
+    const angularPixels = polarFixture("angular", false);
+    angularPixels.nodes[2].fills[0].paint.angle = 0;
+    angularPixels.nodes[2].fills[0].paint.stops = [{ offset: 0, color: red }, { offset: 1, color: blue }];
+    await load(angularPixels, 0);
+    before = await documentState(page); expected = paint(before); expected.angle = 90;
+    await drag(await handle("end"), { x: 80, y: 80 }, expected);
+    const angularArtwork = await documentState(page);
+    const [angularDownload] = await Promise.all([page.waitForEvent("download", { timeout: 60000 }),
+        clickNative(page, "ExportPngButton", "InspectorViewport")]);
+    assert.equal(await angularDownload.failure(), null);
+    const angularPath = resolve(output, mode + "-angular-gradient-handles-artwork.png");
+    await angularDownload.saveAs(angularPath);
+    const angularPng = PNG.sync.read(await readFile(angularPath));
+    assert.deepEqual([angularPng.width, angularPng.height], [240, 160]);
+    const angularPixel = (x, y) => [...angularPng.data.subarray((y * angularPng.width + x) * 4, (y * angularPng.width + x) * 4 + 4)];
+    const angularStart = angularPixel(200, 80), angularQuarter = angularPixel(120, 140), angularHalf = angularPixel(40, 80);
+    assert.ok(angularStart[0] > 250 && angularStart[2] < 5 && angularStart[3] === 255,
+        "Rotated native conic start faces right: " + angularStart);
+    assert.ok(Math.abs(angularQuarter[0] - 191) < 4 && Math.abs(angularQuarter[2] - 64) < 4 && angularQuarter[1] === 0 && angularQuarter[3] === 255,
+        "Native conic quarter-turn below center: " + angularQuarter);
+    assert.ok(Math.abs(angularHalf[0] - angularHalf[2]) < 4 && angularHalf[1] === 0 && angularHalf[3] === 255,
+        "Native conic half-turn left of center: " + angularHalf);
+    assert.deepEqual(await documentState(page), angularArtwork);
+    assert.equal((await state(page)).invalidNodes, 0);
+    check("Native conic PNG samples prove a real canvas sweep-handle rotation changes the exported start ray and quarter/half-turn colors while preserving document state and excluding adorners");
+
 }

@@ -186,15 +186,34 @@ fn native_gradient_stop_markers_preserve_translucent_rgba_over_white_and_reuse_b
     let scope = backend();
     let (canvas, id) = fixture();
     let colors = [
-        Color { r: 43, g: 97, b: 211, a: 0 },
-        Color { r: 37, g: 151, b: 219, a: 113 },
-        Color { r: 203, g: 67, b: 131, a: 179 },
+        Color {
+            r: 43,
+            g: 97,
+            b: 211,
+            a: 0,
+        },
+        Color {
+            r: 37,
+            g: 151,
+            b: 219,
+            a: 113,
+        },
+        Color {
+            r: 203,
+            g: 67,
+            b: 131,
+            a: 179,
+        },
     ];
     let mut gradient = value(&canvas, id);
     for (stop, color) in gradient.stops.iter_mut().zip(colors) {
         stop.color = color;
     }
-    assert!(canvas.editor.borrow_mut().set_linear_gradient(id, 1, gradient).unwrap());
+    assert!(canvas
+        .editor
+        .borrow_mut()
+        .set_linear_gradient(id, 1, gradient)
+        .unwrap());
     let before = json(&canvas);
     let token = canvas.editor.borrow().render_change_token();
     let history = canvas.editor.borrow().history_len();
@@ -214,19 +233,26 @@ fn native_gradient_stop_markers_preserve_translucent_rgba_over_white_and_reuse_b
         }
     }
     for (index, color) in colors.into_iter().enumerate() {
-        let center = plan.handles.iter().find(|handle| handle.part == Part::Stop(index)).unwrap().marker;
+        let center = plan
+            .handles
+            .iter()
+            .find(|handle| handle.part == Part::Stop(index))
+            .unwrap()
+            .marker;
         // The full-coverage center is authored stop color over the opaque white
         // marker disc. Fill-stack opacity does not change this color swatch.
         let alpha = u32::from(color.a);
-        let expected = [color.r, color.g, color.b].map(|channel| {
-            ((u32::from(channel) * alpha + 255 * (255 - alpha) + 127) / 255) as u8
-        });
+        let expected = [color.r, color.g, color.b]
+            .map(|channel| ((u32::from(channel) * alpha + 255 * (255 - alpha) + 127) / 255) as u8);
         for (dx, dy) in [(0, 0), (-1, 0), (0, -1), (-1, -1)] {
             let x = center.x.round() as i32 + dx;
             let y = center.y.round() as i32 + dy;
             let offset = (y as usize * 260 + x as usize) * 4;
             let actual = &pixels[offset..offset + 4];
-            assert_eq!(actual[3], 255, "Stop {index} retains its opaque white backing");
+            assert_eq!(
+                actual[3], 255,
+                "Stop {index} retains its opaque white backing"
+            );
             for channel in 0..3 {
                 assert!(actual[channel].abs_diff(expected[channel]) <= 2,
                     "Stop {index}, channel {channel}: rendered {actual:?}, expected RGB {expected:?} from RGBA {color:?}");
@@ -235,7 +261,10 @@ fn native_gradient_stop_markers_preserve_translucent_rgba_over_white_and_reuse_b
     }
     let repeated = prepared(&canvas, id);
     for (original, retained) in plan.stop_brushes.iter().zip(&repeated.stop_brushes) {
-        assert!(Rc::ptr_eq(original, retained), "Unchanged overlays retain their typed stop brushes");
+        assert!(
+            Rc::ptr_eq(original, retained),
+            "Unchanged overlays retain their typed stop brushes"
+        );
     }
     assert_eq!(canvas.linear_gradient.borrow().preparations, preparations);
     assert_eq!(json(&canvas), before);
@@ -668,5 +697,293 @@ fn gradient_lifecycle_finish_is_once_and_stale_selection_viewport_or_editor_cann
         assert_eq!(canvas.editor.borrow().history_len(), 0);
         assert!(!canvas.editor.borrow().has_active_transaction());
     }
+    scope.dispose();
+}
+
+fn native_kind_fixture(
+    geometry: CanvasGradientGeometry,
+    affine: bool,
+) -> (Ref<DesignCanvas>, NodeId) {
+    let (canvas, id) = fixture();
+    {
+        let mut editor = canvas.editor.borrow_mut();
+        let node = editor.document.nodes.get_mut(&id).unwrap();
+        let stops = LinearGradientEdit::from_node(node, 1).unwrap().stops;
+        node.fills[1].paint = CanvasGradientEdit { geometry, stops }.paint();
+        if affine {
+            node.set_local_transform(core::Transform {
+                a: -1.1,
+                b: 0.2,
+                c: 0.4,
+                d: 0.9,
+                e: 300.0,
+                f: 40.0,
+            });
+        }
+        editor.refresh();
+    }
+    canvas.reconcile_linear_gradient();
+    assert!(canvas.can_edit_linear_gradient(1));
+    assert!(canvas.edit_linear_gradient(1));
+    (canvas, id)
+}
+
+fn generic_value(canvas: &DesignCanvas, id: NodeId) -> CanvasGradientEdit {
+    CanvasGradientEdit::from_node(&canvas.editor.borrow().document.nodes[&id], 1).unwrap()
+}
+
+#[test]
+fn native_radial_handles_follow_relative_brush_ellipse_under_affine_transforms_and_history() {
+    let scope = backend();
+    let (canvas, id) = native_kind_fixture(
+        CanvasGradientGeometry::Radial {
+            center: Point::new(0.4, 0.6),
+            radius: 0.35,
+        },
+        true,
+    );
+    let plan = prepared(&canvas, id);
+    assert_eq!(canvas.linear_gradient_state()["gradientKind"], "radial");
+    assert!((33..=513).contains(&plan.ring.len()));
+    let before = json(&canvas);
+    let original = generic_value(&canvas, id);
+    let start = press(&canvas, id, Part::End);
+    let local_delta = Point::new(10.0, 36.0);
+    canvas.linear_gradient_move(start + plan.transform.apply_vector(local_delta));
+    let changed = generic_value(&canvas, id);
+    let CanvasGradientGeometry::Radial { center, radius } = changed.geometry else {
+        panic!()
+    };
+    assert_eq!(center, Point::new(0.4, 0.6));
+    near(radius, 0.5); // hypot(0.35 + 10/200, 36/120)
+    assert_eq!(changed.stops, original.stops);
+    assert!(canvas.finish_linear_gradient_edit());
+    assert_eq!(canvas.editor.borrow().history_len(), 1);
+    let after = json(&canvas);
+    assert!(canvas.editor.borrow_mut().undo());
+    assert_eq!(json(&canvas), before);
+    canvas.reconcile_linear_gradient();
+    assert!(canvas.editor.borrow_mut().redo());
+    assert_eq!(json(&canvas), after);
+    canvas.reconcile_linear_gradient();
+    let start = press(&canvas, id, Part::Start);
+    canvas.linear_gradient_move(start + plan.transform.apply_vector(Point::new(-10.0, 15.0)));
+    let CanvasGradientGeometry::Radial { center, radius } = generic_value(&canvas, id).geometry
+    else {
+        panic!()
+    };
+    near(center.x, 0.35);
+    near(center.y, 0.725);
+    near(radius, 0.5);
+    canvas.finish_linear_gradient_edit();
+    assert_eq!(canvas.editor.borrow().history_len(), 2);
+    assert!(canvas.editor.borrow_mut().undo());
+    assert_eq!(json(&canvas), after);
+    scope.dispose();
+}
+
+#[test]
+fn native_angular_ring_preserves_local_angles_and_keeps_seam_stop_markers_selectable() {
+    let scope = backend();
+    let (canvas, id) = native_kind_fixture(
+        CanvasGradientGeometry::Angular {
+            center: Point::new(0.4, 0.6),
+            angle: 25.0,
+        },
+        true,
+    );
+    let plan = prepared(&canvas, id);
+    assert_eq!(canvas.linear_gradient_state()["gradientKind"], "angular");
+    let center = plan.value.local_endpoints(plan.bounds)[0];
+    for handle in &plan.handles {
+        if !matches!(handle.part, Part::Start) {
+            near(handle.local.distance(center), 60.0);
+        }
+    }
+    let first = marker(&canvas, id, Part::Stop(0));
+    let last = marker(&canvas, id, Part::Stop(3));
+    assert!(
+        plan.viewport
+            .world_to_screen(first)
+            .distance(plan.viewport.world_to_screen(last))
+            > HIT_RADIUS * 2.0
+    );
+    let tied_first = marker(&canvas, id, Part::Stop(1));
+    let tied_second = marker(&canvas, id, Part::Stop(2));
+    assert!(
+        plan.viewport
+            .world_to_screen(tied_first)
+            .distance(plan.viewport.world_to_screen(tied_second))
+            > HIT_RADIUS * 2.0
+    );
+    let before = json(&canvas);
+    let preparations = canvas.linear_gradient.borrow().preparations;
+    for _ in 0..100 {
+        canvas.linear_gradient_move(last);
+    }
+    assert_eq!(canvas.linear_gradient.borrow().preparations, preparations);
+    assert_eq!(canvas.linear_gradient.borrow().hover, Some(Part::Stop(3)));
+    assert_eq!(json(&canvas), before);
+    assert_eq!(canvas.editor.borrow().history_len(), 0);
+    scope.dispose();
+}
+
+#[test]
+fn native_angular_rotation_drag_back_cancel_and_once_only_lifecycle_preserve_exact_redo() {
+    let scope = backend();
+    let (canvas, id) = native_kind_fixture(
+        CanvasGradientGeometry::Angular {
+            center: Point::new(0.4, 0.6),
+            angle: 359.0,
+        },
+        true,
+    );
+    make_redo(&canvas, id);
+    let before = json(&canvas);
+    let plan = prepared(&canvas, id);
+    let axis = plan.value.local_endpoints(plan.bounds);
+    let ray = axis[1] - axis[0];
+    let rotate = |point: Point, degrees: f64| {
+        let (sin, cos) = degrees.to_radians().sin_cos();
+        Point::new(point.x * cos - point.y * sin, point.x * sin + point.y * cos)
+    };
+    let start = press(&canvas, id, Part::End);
+    for step in 1..=12 {
+        canvas.linear_gradient_move(
+            start
+                + plan
+                    .transform
+                    .apply_vector(rotate(ray, step as f64 * 15.0) - ray),
+        );
+    }
+    let CanvasGradientGeometry::Angular { angle, .. } = generic_value(&canvas, id).geometry else {
+        panic!()
+    };
+    near(angle, 539.0);
+    assert_eq!(canvas.editor.borrow().history_len(), 0);
+    canvas.linear_gradient_move(start);
+    assert_eq!(json(&canvas), before);
+    assert!(canvas.editor.borrow().can_redo());
+    assert!(canvas.finish_linear_gradient_edit());
+    assert_eq!(canvas.editor.borrow().history_len(), 0);
+    let start = press(&canvas, id, Part::End);
+    canvas.linear_gradient_move(start + plan.transform.apply_vector(rotate(ray, 30.0) - ray));
+    canvas.linear_gradient_key(Key::Escape, KeyModifiers::empty());
+    assert_eq!(json(&canvas), before);
+    assert!(canvas.editor.borrow().can_redo());
+    let start = press(&canvas, id, Part::End);
+    canvas.linear_gradient_move(start + plan.transform.apply_vector(rotate(ray, 45.0) - ray));
+    let changed = json(&canvas);
+    assert!(canvas.finish_linear_gradient_edit());
+    assert!(!canvas.finish_linear_gradient_edit());
+    canvas.linear_gradient_move(start + plan.transform.apply_vector(rotate(ray, 75.0) - ray));
+    assert_eq!(json(&canvas), changed);
+    assert_eq!(canvas.editor.borrow().history_len(), 1);
+    assert!(canvas.editor.borrow_mut().undo());
+    assert_eq!(json(&canvas), before);
+    assert!(canvas.editor.borrow_mut().redo());
+    assert_eq!(json(&canvas), changed);
+    scope.dispose();
+}
+
+#[test]
+fn native_angular_stop_drag_crosses_seam_clamps_without_reordering_and_retains_real_capture_cancel()
+{
+    let scope = backend();
+    let (canvas, id) = native_kind_fixture(
+        CanvasGradientGeometry::Angular {
+            center: Point::new(0.5, 0.5),
+            angle: 12.0,
+        },
+        true,
+    );
+    {
+        let mut editor = canvas.editor.borrow_mut();
+        let node = editor.document.nodes.get_mut(&id).unwrap();
+        let core::Paint::AngularGradient { stops, .. } = &mut node.fills[1].paint else {
+            panic!()
+        };
+        stops[2].offset = 0.95;
+        editor.refresh();
+    }
+    make_redo(&canvas, id);
+    let before = json(&canvas);
+    let original = generic_value(&canvas, id);
+    let plan = prepared(&canvas, id);
+    let center = original.local_endpoints(plan.bounds)[0];
+    let ray = original.local_stop(plan.bounds, 0.95) - center;
+    let start = press(&canvas, id, Part::Stop(2));
+    for degrees in [9.0_f64, 18.0, 27.0, 36.0] {
+        let (sin, cos) = degrees.to_radians().sin_cos();
+        let next = Point::new(ray.x * cos - ray.y * sin, ray.x * sin + ray.y * cos);
+        canvas.linear_gradient_move(start + plan.transform.apply_vector(next - ray));
+    }
+    let changed = generic_value(&canvas, id);
+    assert_eq!(changed.stops[2].offset, 1.0);
+    assert_eq!(changed.stops[2].color, original.stops[2].color);
+    for index in [0, 1, 3] {
+        assert_eq!(changed.stops[index], original.stops[index]);
+    }
+    assert_eq!(changed.geometry, original.geometry);
+    let pointer = Pointer::new(Pointer::get_next_free_id(), PointerType::Touch, true);
+    let event = PointerCaptureLostEventArgs::new(canvas.clone(), pointer);
+    <DesignCanvas as InputElementImpl>::on_pointer_capture_lost(&canvas, &event);
+    assert_eq!(json(&canvas), before);
+    assert!(canvas.editor.borrow().can_redo());
+    assert!(!canvas.linear_gradient_active());
+    canvas.linear_gradient_move(start + Point::new(20.0, 0.0));
+    assert!(!canvas.finish_linear_gradient_edit());
+    assert_eq!(json(&canvas), before);
+    assert!(canvas.editor.borrow_mut().redo());
+    assert_eq!(
+        canvas.editor.borrow().document.nodes[&id].name,
+        "Previous edit"
+    );
+    scope.dispose();
+}
+
+#[test]
+fn native_angular_ring_insertion_keyboard_and_delete_retain_stops_and_native_ring_pixels() {
+    let scope = backend();
+    let (canvas, id) = native_kind_fixture(
+        CanvasGradientGeometry::Angular {
+            center: Point::new(0.5, 0.5),
+            angle: 0.0,
+        },
+        false,
+    );
+    let plan = prepared(&canvas, id);
+    let original = generic_value(&canvas, id);
+    let before = json(&canvas);
+    let insertion = plan.transform.apply(original.local_stop(plan.bounds, 0.25));
+    assert!(canvas.linear_gradient_press(insertion, 2));
+    let added = generic_value(&canvas, id);
+    assert_eq!(added.stops.len(), 5);
+    near(added.stops[4].offset, 0.25);
+    assert_eq!(&added.stops[..4], &original.stops);
+    assert_eq!(added.stops[4].color, Color::rgb(128, 0, 0));
+    assert!(canvas.finish_linear_gradient_edit());
+    assert_eq!(canvas.editor.borrow().history_len(), 1);
+    canvas.linear_gradient_key(Key::Right, KeyModifiers::ALT);
+    near(generic_value(&canvas, id).stops[4].offset, 0.251);
+    canvas.linear_gradient_key(Key::Delete, KeyModifiers::empty());
+    assert_eq!(generic_value(&canvas, id), original);
+    for _ in 0..3 {
+        assert!(canvas.editor.borrow_mut().undo());
+    }
+    assert_eq!(json(&canvas), before);
+    canvas.reconcile_linear_gradient();
+    let bitmap = RenderTargetBitmap::new(PixelSize::new(280, 220));
+    {
+        let mut context = bitmap.create_drawing_context();
+        assert!(canvas.render_linear_gradient(&mut context, &canvas.editor.borrow(), id));
+    }
+    let mut pixels = vec![0; 280 * 220 * 4];
+    bitmap.copy_pixels(PixelRect::new(0, 0, 280, 220), &mut pixels, 280 * 4);
+    // The right-hand ring point has no endpoint or stop in the original
+    // fixture, proving the new native adorner contour itself draws pixels.
+    assert!(pixels[(90 * 280 + 180) * 4 + 3] > 30);
+    assert_eq!(pixels[(10 * 280 + 10) * 4 + 3], 0);
+    bitmap.dispose();
     scope.dispose();
 }

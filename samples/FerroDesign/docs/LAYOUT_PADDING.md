@@ -25,7 +25,7 @@ Escape in a padding field discards all four pending padding drafts and restores 
 
 `Editor::set_layout_padding(parent, Padding)` validates all four sides, rejects an active edit transaction and a locked frame or locked ancestor, and requires an existing auto-layout frame. It constructs and validates a candidate document, runs the existing complete layout arrangement, validates the result, and commits it in one history step. Invalid input or a rejected arrangement leaves the live document, selection, history and redo unchanged.
 
-Reflow uses the existing row, column, wrapping, grid-track and nested Hug/Fill layout engine. Other layout settings and child placement metadata are preserved. Changes to a component instance's padding record the existing `layout` override, which protects that layout from subsequent component synchronization. Padding has no new serialization schema or renderer implementation.
+Reflow uses the existing row, column, wrapping, grid-track and nested Hug/Fill layout engine. Other layout settings and child placement metadata are preserved. Changes to a component instance's padding record the existing `layout` override, which protects that layout from subsequent component synchronization. Padding has no new serialization schema or renderer implementation. Each side and both gaps can bind Number variables through the native variables dialog; changed numeric sides detach only their own bindings. See [spacing variables](LAYOUT_VARIABLES.md).
 
 An equal numeric padding value returns before arrangement or transaction creation. It therefore preserves redo, render tokens, instance metadata and even unsettled imported geometry. A different value may move children, resize Hug ancestors and move their siblings; undo and redo restore that complete document change.
 
@@ -37,4 +37,8 @@ The source includes eight core padding regressions in [`layout_padding_tests.rs`
 
 All eight core padding tests passed at source `7f81367248e26dfb2d07cfa73619646fa4de6ad1`, within the 511-test core suite. The [preserved core evidence](../../../docs/ferrodesign-evidence/2026-10-22-7f813672-core/) records that checkpoint. The five native UI tests and six browser checks remain authored coverage awaiting execution; this document does not claim an application or browser pass for them. Consult [VALIDATION.md](VALIDATION.md) for later results tied to a specific source checkpoint.
 
-This is four-side numeric padding authoring; it does not add on-canvas padding handles, padding variables, per-side component override keys, or a measured Figma visual-parity guarantee. Linked mode belongs to the current dialog and is not saved in the document.
+This is four-side numeric padding authoring; it does not add on-canvas padding handles, per-side component override keys, or a measured Figma visual-parity guarantee. Independent side and gap variables are implemented separately in [spacing bindings](LAYOUT_VARIABLES.md). Linked mode belongs to the current dialog and is not saved in the document.
+
+## Coordinated discard
+
+The native draft binding accepts one optional group-discard action. All four padding fields use it, so one Escape restores every accepted string without competing single-field and group key handlers. The existing regression that enters an invalid top value and a valid right value, rejects Enter/linking, and then discards both fields remains enforced. Runtime results for this correction are recorded in [VALIDATION.md](VALIDATION.md).

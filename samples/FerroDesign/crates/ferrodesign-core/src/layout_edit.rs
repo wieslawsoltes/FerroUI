@@ -37,7 +37,9 @@ impl Editor {
         if layout.padding == padding { return Ok(LayoutResult::default()); }
         let mut candidate = self.document.clone();
         let node = candidate.nodes.get_mut(&parent).unwrap();
+        let bindings = crate::layout_variables::LayoutBindingSnapshot::capture(node);
         node.layout.as_mut().unwrap().padding = padding;
+        bindings.detach_changed(node);
         if node.component_source.is_some() { node.overridden_properties.insert("layout".into()); }
         candidate.validate_layout_node_settings(parent)?;
         self.commit_layout_candidate("Edit layout padding", candidate)

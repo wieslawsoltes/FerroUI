@@ -15,6 +15,7 @@ mod image_info;
 mod layout;
 mod layout_guides;
 mod layout_edit;
+mod layout_variables;
 mod layout_drag;
 mod model;
 mod prototype;
@@ -47,6 +48,8 @@ pub use image_edit::*;
 pub use image_info::*;
 pub use layout::*;
 pub use layout_guides::*;
+pub use layout_variables::{LayoutVariableField, parse_layout_variable_binding,
+    validate_layout_variable_target, validate_layout_variable};
 pub use layout_drag::*;
 pub use model::*;
 pub use prototype::*;

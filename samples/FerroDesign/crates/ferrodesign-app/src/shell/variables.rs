@@ -4,10 +4,13 @@ use ferrodesign_core::{VariableEdit, VariableId, VariableKind, VariableValue};
 
 const PAGE_SIZE: usize = 12;
 const KINDS: [VariableKind; 4] = [VariableKind::Color, VariableKind::Number, VariableKind::String, VariableKind::Boolean];
-const BINDINGS: [(&str, &str); 9] = [
+const BINDINGS: [(&str, &str); 15] = [
     ("fill", "Fill"), ("stroke", "Stroke"), ("width", "Width"), ("height", "Height"),
     ("opacity", "Opacity"), ("corner_radius", "Corner radius"), ("font_size", "Font size"),
     ("text", "Text content"), ("visible", "Visibility"),
+    ("layout.padding.top", "Top padding"), ("layout.padding.right", "Right padding"),
+    ("layout.padding.bottom", "Bottom padding"), ("layout.padding.left", "Left padding"),
+    ("layout.gap", "Layout gap"), ("layout.cross_gap", "Layout cross gap"),
 ];
 
 #[derive(Clone, Default)]
@@ -411,7 +414,7 @@ impl EditorShell {
             }).take(12).collect::<Vec<_>>().join("\n")
         };
         if !binding_summary.is_empty() { host.children().add(variable_text(&binding_summary, true)); }
-        host.children().add(variable_text("Unbind and Delete preserve the currently resolved layer appearance. Stroke bindings create a 1 px stroke when needed.", true));
+        host.children().add(variable_text("Unbind and Delete preserve the currently resolved layer appearance. Padding and gap bindings need auto layout and nonnegative numbers in every mode. Stroke bindings create a 1 px stroke when needed.", true));
     }
 
     fn commit_variable_edit(self: &Rc<Self>, edit: VariableEdit, error: &TextBlock) -> Option<core::VariableEditResult> {

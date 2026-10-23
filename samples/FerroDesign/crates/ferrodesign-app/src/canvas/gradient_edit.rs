@@ -1,7 +1,9 @@
-//! Native linear-gradient handles. Paint coordinates stay relative to their
+//! Native linear, radial and angular gradient handles. Paint coordinates stay relative to their
 //! exact native brush box; markers and hit tolerances use screen pixels.
 use super::*;
-use ferrodesign_core::{LinearGradientEdit, MAX_GRADIENT_COORDINATE};
+#[cfg(test)]
+use ferrodesign_core::LinearGradientEdit;
+use ferrodesign_core::{CanvasGradientEdit, CanvasGradientGeometry};
 use ferroui_base::media::{immutable::ImmutableSolidColorBrush, IBrush};
 
 const HIT_RADIUS: f64 = 7.0;
@@ -43,11 +45,12 @@ struct PreparedGradient {
     transform: core::Transform,
     viewport: Viewport,
     bounds: Rect,
-    value: LinearGradientEdit,
+    value: CanvasGradientEdit,
     axis: [Point; 2],
     screen_axis: [Point; 2],
     handles: Vec<Handle>,
     stop_brushes: Vec<Rc<dyn IBrush>>,
+    ring: Vec<Point>,
 }
 
 struct GradientGesture {
@@ -57,12 +60,16 @@ struct GradientGesture {
     previous_selection: Option<Part>,
     inverse: core::Transform,
     start: Point,
-    original: LinearGradientEdit,
-    value: LinearGradientEdit,
+    original: CanvasGradientEdit,
+    value: CanvasGradientEdit,
     inserted: bool,
+    inserted_offset: Option<f64>,
+    angular_base: Option<Point>,
     transaction: core::EditorTransactionToken,
     token: core::EditorRenderToken,
     changed: bool,
+    angular_previous: Option<Point>,
+    angular_change: f64,
 }
 
 impl GradientGesture {
@@ -81,7 +88,26 @@ impl GradientGesture {
             && editor.active_page == self.page
             && validate_target(editor, self.prepared.node, self.prepared.fill).is_ok_and(
                 |(transform, bounds)| {
-                    transform == self.prepared.transform && bounds == self.prepared.bounds
+                    transform == self.prepared.transform
+                        && bounds == self.prepared.bounds
+                        && matches!(
+                            (
+                                &self.original.geometry,
+                                &editor.document.nodes[&self.prepared.node].fills
+                                    [self.prepared.fill]
+                                    .paint
+                            ),
+                            (
+                                CanvasGradientGeometry::Linear { .. },
+                                core::Paint::LinearGradient { .. }
+                            ) | (
+                                CanvasGradientGeometry::Radial { .. },
+                                core::Paint::RadialGradient { .. }
+                            ) | (
+                                CanvasGradientGeometry::Angular { .. },
+                                core::Paint::AngularGradient { .. }
+                            )
+                        )
                 },
             )
     }
@@ -127,9 +153,16 @@ fn validate_target(
         .ok_or("The selected fill no longer exists.")?;
     if !fill.visible
         || fill.opacity <= 0.0
-        || !matches!(fill.paint, core::Paint::LinearGradient { .. })
+        || !matches!(
+            fill.paint,
+            core::Paint::LinearGradient { .. }
+                | core::Paint::RadialGradient { .. }
+                | core::Paint::AngularGradient { .. }
+        )
     {
-        return Err("Choose an enabled linear-gradient fill to edit on canvas.".into());
+        return Err(
+            "Choose an enabled linear, radial or angular gradient fill to edit on canvas.".into(),
+        );
     }
     let transform = editor
         .document
@@ -161,7 +194,7 @@ fn validate_target(
 }
 
 fn prepare_handles(
-    value: &LinearGradientEdit,
+    value: &CanvasGradientEdit,
     bounds: Rect,
     transform: core::Transform,
     viewport: Viewport,
@@ -227,8 +260,12 @@ fn prepare_handles(
         let magnitude = STOP_OFFSET + (lane / 2) as f64 * (HIT_RADIUS * 2.0 + 2.0);
         offsets[index] = magnitude * if lane % 2 == 0 { 1.0 } else { -1.0 };
     }
+    let mut angular_markers = MarkerBuckets::default();
+    for handle in &handles {
+        angular_markers.insert(handle.marker);
+    }
     for (index, stop) in value.stops.iter().enumerate() {
-        let point = local[0] + (local[1] - local[0]) * stop.offset;
+        let point = value.local_stop(bounds, stop.offset);
         let world = transform.apply(point);
         let screen = viewport.world_to_screen(world);
         handles.push(Handle {
@@ -236,7 +273,18 @@ fn prepare_handles(
             local: point,
             world,
             screen,
-            marker: screen + normal * offsets[index],
+            marker: if value.is_angular() {
+                // Stop 0 and stop 1 coincide on a sweep seam. Keep every source
+                // entry independently selectable without modifying its offset.
+                // Bounded spatial buckets avoid all-pairs scans on tied stops.
+                angular_marker(
+                    screen,
+                    viewport.world_to_screen(axis[0]),
+                    &mut angular_markers,
+                )
+            } else {
+                screen + normal * offsets[index]
+            },
         });
     }
     if handles
@@ -246,6 +294,97 @@ fn prepare_handles(
         return Err("The gradient handles are outside representable canvas coordinates.".into());
     }
     Ok((axis, screen, handles))
+}
+
+// This grid is only a bounded authoring aid. It stores at most 258 markers and
+// never changes authored stops, their colors, or their stable source indices.
+#[derive(Default)]
+struct MarkerBuckets(std::collections::BTreeMap<(i64, i64), Vec<Point>>);
+impl MarkerBuckets {
+    fn cell(point: Point) -> (i64, i64) {
+        let size = HIT_RADIUS * 2.0 + 2.0;
+        (
+            (point.x / size).floor() as i64,
+            (point.y / size).floor() as i64,
+        )
+    }
+    fn insert(&mut self, point: Point) {
+        self.0.entry(Self::cell(point)).or_default().push(point);
+    }
+    fn clear_at(&self, point: Point) -> bool {
+        let (x, y) = Self::cell(point);
+        (-1_i64..=1).all(|dx| {
+            (-1_i64..=1).all(|dy| {
+                self.0
+                    .get(&(x.saturating_add(dx), y.saturating_add(dy)))
+                    .is_none_or(|items| {
+                        items
+                            .iter()
+                            .all(|other| point.distance(*other) > HIT_RADIUS * 2.0 + 1.0)
+                    })
+            })
+        })
+    }
+}
+fn angular_marker(screen: Point, center: Point, occupied: &mut MarkerBuckets) -> Point {
+    let delta = screen - center;
+    let length = delta.x.hypot(delta.y);
+    let direction = if length > 0.0 {
+        delta * (1.0 / length)
+    } else {
+        Point::new(1.0, 0.0)
+    };
+    let mut marker = screen + direction * STOP_OFFSET;
+    for lane in 0..=core::MAX_CANVAS_GRADIENT_STOPS * 2 + 4 {
+        marker = screen + direction * (STOP_OFFSET + lane as f64 * (HIT_RADIUS * 2.0 + 2.0));
+        if occupied.clear_at(marker) {
+            break;
+        }
+    }
+    occupied.insert(marker);
+    marker
+}
+
+fn prepare_ring(
+    value: &CanvasGradientEdit,
+    bounds: Rect,
+    transform: core::Transform,
+    viewport: Viewport,
+) -> Vec<Point> {
+    if matches!(value.geometry, CanvasGradientGeometry::Linear { .. }) {
+        return Vec::new();
+    }
+    let center = viewport.world_to_screen(transform.apply(value.local_endpoints(bounds)[0]));
+    let extent = [0.0, 0.25]
+        .into_iter()
+        .filter_map(|fraction| value.local_ring(bounds, fraction))
+        .map(|point| {
+            viewport
+                .world_to_screen(transform.apply(point))
+                .distance(center)
+        })
+        .fold(0.0_f64, f64::max);
+    // Chord error below roughly 0.25 pixels for ordinary views, with a hard
+    // cap for extreme authored coordinates/zoom. Artwork stays native curves.
+    let segments = ((std::f64::consts::TAU * (extent / 2.0).sqrt()).ceil() as usize).clamp(32, 512);
+    (0..=segments)
+        .filter_map(|index| value.local_ring(bounds, index as f64 / segments as f64))
+        .map(|point| viewport.world_to_screen(transform.apply(point)))
+        .collect()
+}
+
+fn angular_vector(value: &CanvasGradientEdit, bounds: Rect, part: Part) -> Option<Point> {
+    if !value.is_angular() {
+        return None;
+    }
+    let axis = value.local_endpoints(bounds);
+    match part {
+        Part::End => Some(axis[1] - axis[0]),
+        Part::Stop(index) => {
+            Some(value.local_stop(bounds, value.stops.get(index)?.offset) - axis[0])
+        }
+        _ => None,
+    }
 }
 
 impl DesignCanvas {
@@ -281,7 +420,7 @@ impl DesignCanvas {
                 return Ok(Rc::clone(cache));
             }
         }
-        let value = LinearGradientEdit::from_node(&editor.document.nodes[&id], fill)
+        let value = CanvasGradientEdit::from_node(&editor.document.nodes[&id], fill)
             .map_err(|error| error.to_string())?;
         let (axis, screen_axis, handles) = prepare_handles(&value, bounds, transform, viewport)?;
         // Core colors serialize translucent values as RGBA, whereas FerroUI's
@@ -297,6 +436,10 @@ impl DesignCanvas {
                 ))
             })
             .collect();
+        let ring = prepare_ring(&value, bounds, transform, viewport);
+        if ring.iter().copied().any(|point| !finite(point)) {
+            return Err("The gradient ring is outside representable canvas coordinates.".into());
+        }
         let result = Rc::new(PreparedGradient {
             node: id,
             fill,
@@ -309,6 +452,7 @@ impl DesignCanvas {
             screen_axis,
             handles,
             stop_brushes,
+            ring,
         });
         state.cache = Some(Rc::clone(&result));
         #[cfg(test)]
@@ -331,7 +475,7 @@ impl DesignCanvas {
                 .selection
                 .first()
                 .copied()
-                .ok_or_else(|| "Select a layer with a linear-gradient fill.".to_string())
+                .ok_or_else(|| "Select a layer with a gradient fill.".to_string())
                 .and_then(|id| self.prepared_gradient(&editor, id, fill).map(|_| id))
         };
         let id = match result {
@@ -395,8 +539,12 @@ impl DesignCanvas {
                     pointer,
                     prepared.screen_axis[0],
                     prepared.screen_axis[1],
-                ) <= HIT_RADIUS)
-                    .then_some(Part::Axis)
+                ) <= HIT_RADIUS
+                    || (prepared.value.is_angular()
+                        && prepared.ring.windows(2).any(|edge| {
+                            core::distance_to_segment(pointer, edge[0], edge[1]) <= HIT_RADIUS
+                        })))
+                .then_some(Part::Axis)
             })
     }
 
@@ -433,10 +581,33 @@ impl DesignCanvas {
         let mut value = prepared.value.clone();
         let mut inserted = false;
         if part == Part::Axis && clicks >= 2 {
-            let Some(offset) = core::gradient_offset_delta(
-                world - prepared.axis[0],
-                prepared.axis[1] - prepared.axis[0],
-            ) else {
+            if prepared.value.is_angular() {
+                let pointer = prepared.viewport.world_to_screen(world);
+                if !prepared
+                    .ring
+                    .windows(2)
+                    .any(|edge| core::distance_to_segment(pointer, edge[0], edge[1]) <= HIT_RADIUS)
+                {
+                    return true;
+                }
+            }
+            let offset =
+                if let CanvasGradientGeometry::Angular { angle, .. } = prepared.value.geometry {
+                    let local = prepared.transform.inverse().unwrap().apply(world);
+                    let center = prepared.value.local_endpoints(prepared.bounds)[0];
+                    let direction = local - center;
+                    (direction.x.hypot(direction.y) > 1e-12).then(|| {
+                        (direction.x.atan2(-direction.y).to_degrees() - angle.rem_euclid(360.0))
+                            .rem_euclid(360.0)
+                            / 360.0
+                    })
+                } else {
+                    core::gradient_offset_delta(
+                        world - prepared.axis[0],
+                        prepared.axis[1] - prepared.axis[0],
+                    )
+                };
+            let Some(offset) = offset else {
                 self.emit(CanvasEvent::Notice(
                     "Separate the gradient endpoints before adding a stop.".into(),
                 ));
@@ -459,7 +630,20 @@ impl DesignCanvas {
         let previous_selection = self.linear_gradient.borrow().selected;
         let mut editor = self.editor.borrow_mut();
         editor.begin_node_transaction(&[id], "Edit gradient on canvas");
+        let angular_previous = angular_vector(&value, prepared.bounds, part);
         let gesture = GradientGesture {
+            angular_previous,
+            angular_base: angular_previous,
+            inserted_offset: if inserted {
+                if let Part::Stop(index) = part {
+                    Some(value.stops[index].offset)
+                } else {
+                    None
+                }
+            } else {
+                None
+            },
+            angular_change: 0.0,
             original: prepared.value.clone(),
             value,
             page: editor.active_page,
@@ -511,7 +695,7 @@ impl DesignCanvas {
                     gesture.changed = false;
                 }
             } else {
-                match editor.set_linear_gradient(
+                match editor.set_canvas_gradient(
                     gesture.prepared.node,
                     gesture.prepared.fill,
                     gesture.value.clone(),
@@ -561,55 +745,89 @@ impl DesignCanvas {
             } else {
                 gesture.original.clone()
             };
-            match gesture.part {
-                Part::Start | Part::End => {
-                    let original = if gesture.part == Part::Start {
-                        gesture.original.start
-                    } else {
-                        gesture.original.end
-                    };
-                    let target = if near_original {
-                        original
-                    } else {
-                        Point::new(
-                            (original.x + delta.x)
-                                .clamp(-MAX_GRADIENT_COORDINATE, MAX_GRADIENT_COORDINATE),
-                            (original.y + delta.y)
-                                .clamp(-MAX_GRADIENT_COORDINATE, MAX_GRADIENT_COORDINATE),
-                        )
-                    };
-                    if gesture.part == Part::Start {
-                        value.start = target;
-                    } else {
-                        value.end = target;
-                    }
+            if let Some(base) = gesture.angular_base {
+                // The logical direction, not the displaced screen marker,
+                // follows pointer displacement. Accumulating shortest deltas
+                // handles the 0/360 seam without jumping to the opposite end.
+                let next = base + local_delta;
+                if near_original {
+                    gesture.angular_change = 0.0;
+                    gesture.angular_previous = Some(base);
+                } else if let Some(change) = gesture
+                    .angular_previous
+                    .and_then(|previous| core::gradient_angle_delta(previous, next))
+                {
+                    gesture.angular_change += change;
+                    gesture.angular_previous = Some(next);
                 }
-                Part::Axis => {
-                    if !near_original {
-                        if let Some(moved) = gesture.original.translated(delta) {
-                            value = moved;
+                match gesture.part {
+                    Part::End => {
+                        if let CanvasGradientGeometry::Angular { angle, .. } = &mut value.geometry {
+                            let CanvasGradientGeometry::Angular {
+                                angle: original, ..
+                            } = gesture.original.geometry
+                            else {
+                                unreachable!()
+                            };
+                            *angle = if near_original {
+                                original
+                            } else {
+                                (original + gesture.angular_change.to_degrees())
+                                    .clamp(-360_000.0, 360_000.0)
+                            };
                         }
                     }
-                }
-                Part::Stop(index) => {
-                    let original = if gesture.inserted {
-                        core::gradient_offset_delta(
-                            gesture.start - gesture.prepared.axis[0],
-                            gesture.prepared.axis[1] - gesture.prepared.axis[0],
-                        )
-                        .unwrap_or(gesture.value.stops[index].offset)
-                    } else {
-                        gesture.original.stops[index].offset
-                    };
-                    if let Some(change) = core::gradient_offset_delta(
-                        world_delta,
-                        gesture.prepared.axis[1] - gesture.prepared.axis[0],
-                    ) {
+                    Part::Stop(index) => {
+                        let original = if gesture.inserted {
+                            // Insertion's base value is retained in the gesture
+                            // separately from its changing preview.
+                            gesture.inserted_offset.unwrap()
+                        } else {
+                            gesture.original.stops[index].offset
+                        };
                         value.stops[index].offset = if near_original {
                             original
                         } else {
-                            (original + change).clamp(0.0, 1.0)
+                            (original + gesture.angular_change / std::f64::consts::TAU)
+                                .clamp(0.0, 1.0)
                         };
+                    }
+                    _ => {}
+                }
+            } else {
+                match gesture.part {
+                    Part::Start | Part::End => {
+                        if !near_original {
+                            if let Some(moved) = gesture.original.moved_endpoint(
+                                gesture.part == Part::End,
+                                local_delta,
+                                bounds,
+                            ) {
+                                value = moved;
+                            }
+                        }
+                    }
+                    Part::Axis => {
+                        if !near_original {
+                            if let Some(moved) = gesture.original.translated(delta) {
+                                value = moved;
+                            }
+                        }
+                    }
+                    Part::Stop(index) => {
+                        let original = gesture
+                            .inserted_offset
+                            .unwrap_or_else(|| gesture.original.stops[index].offset);
+                        if let Some(change) = core::gradient_offset_delta(
+                            world_delta,
+                            gesture.prepared.axis[1] - gesture.prepared.axis[0],
+                        ) {
+                            value.stops[index].offset = if near_original {
+                                original
+                            } else {
+                                (original + change).clamp(0.0, 1.0)
+                            };
+                        }
                     }
                 }
             }
@@ -839,23 +1057,17 @@ impl DesignCanvas {
                     if let Some(moved) = value.translated(delta) {
                         value = moved;
                     }
-                } else {
-                    let point = if part == Part::Start {
-                        &mut value.start
-                    } else {
-                        &mut value.end
-                    };
-                    point.x = (point.x + delta.x)
-                        .clamp(-MAX_GRADIENT_COORDINATE, MAX_GRADIENT_COORDINATE);
-                    point.y = (point.y + delta.y)
-                        .clamp(-MAX_GRADIENT_COORDINATE, MAX_GRADIENT_COORDINATE);
+                } else if let Some(moved) =
+                    value.moved_endpoint(part == Part::End, local, prepared.bounds)
+                {
+                    value = moved;
                 }
             }
         }
         let result = self
             .editor
             .borrow_mut()
-            .set_linear_gradient(id, fill, value);
+            .set_canvas_gradient(id, fill, value);
         match result {
             Ok(changed) => {
                 if deleted {
@@ -893,6 +1105,8 @@ impl DesignCanvas {
                 "markerWorld": point(prepared.viewport.screen_to_world(handle.marker)), "offset": offset })
         }).collect());
         serde_json::json!({ "node": target.map(|target| target.0), "fill": target.map(|target| target.1),
+            "gradientKind": prepared.as_ref().map(|prepared| prepared.value.kind()),
+            "ring": prepared.as_ref().map(|prepared| prepared.ring.iter().copied().map(point).collect::<Vec<_>>()),
             "active": active, "selected": selected.map(Part::json), "hover": hover.map(Part::json), "handles": handles,
             "axis": prepared.as_ref().map(|prepared| serde_json::json!({ "start": point(prepared.axis[0]), "end": point(prepared.axis[1]) })) })
     }
@@ -914,11 +1128,12 @@ impl DesignCanvas {
         };
         let state = self.linear_gradient.borrow();
         let ink = pen(0xFF0D99FF, 1.0);
+        let outline = pen(0xFFFFFFFF, 3.0);
         let highlight = pen(0xFF0D99FF, 2.0);
         let white = brush("#FFFFFF");
         let blue = brush("#0D99FF");
         context.draw_line(
-            &pen(0xFFFFFFFF, 3.0),
+            &outline,
             ui(prepared.screen_axis[0]),
             ui(prepared.screen_axis[1]),
         );
@@ -927,6 +1142,12 @@ impl DesignCanvas {
             ui(prepared.screen_axis[0]),
             ui(prepared.screen_axis[1]),
         );
+        for edge in prepared.ring.windows(2) {
+            context.draw_line(&outline, ui(edge[0]), ui(edge[1]));
+        }
+        for edge in prepared.ring.windows(2) {
+            context.draw_line(&ink, ui(edge[0]), ui(edge[1]));
+        }
         for handle in &prepared.handles {
             let selected = state.selected == Some(handle.part) || state.hover == Some(handle.part);
             context.draw_line(&ink, ui(handle.screen), ui(handle.marker));

@@ -164,6 +164,87 @@ impl Drop for Fixture {
 }
 
 #[test]
+fn native_padding_diagnostics_publish_real_fields_and_export_controls() {
+    let fixture = Fixture::new(core::Padding::all(10.0), false, false);
+    let state: serde_json::Value = serde_json::from_str(&fixture.shell.state_json()).unwrap();
+    assert_eq!(state["chrome"]["PaddingField"]["text"], "10");
+    assert_eq!(state["chrome"]["LayoutPaddingTop"]["text"], "10");
+    assert_eq!(state["chrome"]["LayoutPaddingLinked"]["checked"], true);
+    assert!(state["chrome"]["ModalTitle"]["text"].as_str().unwrap().contains("Layout padding"));
+    for name in ["ExportXamlButton", "VariablesRailButton", "GapField", "CrossGapField"] {
+        assert!(state["chrome"][name].is_object(), "Missing native control diagnostic {name}");
+    }
+}
+
+#[test]
+fn native_variable_binding_controls_reflow_padding_and_unbind_exactly_once() {
+    let fixture = Fixture::new(core::Padding::all(10.0), false, false);
+    fixture.shell.close_modal();
+    let variable = fixture.shell.editor.borrow_mut().edit_variables(core::VariableEdit::Upsert {
+        id: None, name: "Responsive spacing".into(), collection: "Spacing".into(), mode: "Default".into(),
+        value: core::VariableValue::Number(24.25), replace_all_modes: false,
+    }).unwrap().variable.unwrap();
+    fixture.shell.refresh();
+    let before = fixture.json(); let depth = fixture.shell.editor.borrow().history_len();
+    let button = fixture.shell.button("VariablesRailButton");
+    button.raise_event(&RoutedEventArgs::with_event(Button::click_event()));
+    Dispatcher::ui_thread().run_jobs(None);
+    let choice = fixture.control::<ComboBox>("VariableBindingProperty");
+    assert_eq!(choice.item_count(), 15);
+    choice.set_selected_index(12); // Top, Right, Bottom, Left follow the nine original bindings.
+    fixture.control::<Button>("VariableBind").raise_event(&RoutedEventArgs::with_event(Button::click_event()));
+    fixture.stop_save_timer(); Dispatcher::ui_thread().run_jobs(None);
+    let after = fixture.json();
+    assert_eq!(fixture.padding().left, 24.25);
+    assert_eq!(fixture.shell.editor.borrow().document.nodes[&fixture.id].variable_bindings["layout.padding.left"], variable);
+    assert_eq!(fixture.shell.editor.borrow().history_len(), depth + 1);
+    fixture.shell.close_modal();
+    assert!(fixture.shell.editor.borrow_mut().undo()); assert_eq!(fixture.json(), before);
+    assert!(fixture.shell.editor.borrow_mut().redo()); assert_eq!(fixture.json(), after);
+    fixture.shell.refresh();
+    fixture.shell.button("VariablesRailButton").raise_event(&RoutedEventArgs::with_event(Button::click_event()));
+    Dispatcher::ui_thread().run_jobs(None);
+    fixture.control::<ComboBox>("VariableBindingProperty").set_selected_index(12);
+    fixture.control::<Button>("VariableUnbind").raise_event(&RoutedEventArgs::with_event(Button::click_event()));
+    fixture.stop_save_timer(); Dispatcher::ui_thread().run_jobs(None);
+    assert_eq!(fixture.padding().left, 24.25);
+    assert!(!fixture.shell.editor.borrow().document.nodes[&fixture.id].variable_bindings.contains_key("layout.padding.left"));
+    assert_eq!(fixture.shell.editor.borrow().history_len(), depth + 2);
+}
+
+#[test]
+fn native_fractional_padding_edit_relinquishes_only_the_changed_side_variable() {
+    let fixture = Fixture::new(core::Padding::all(10.0), false, false);
+    fixture.shell.close_modal();
+    let variable = {
+        let mut editor = fixture.shell.editor.borrow_mut();
+        let variable = editor.edit_variables(core::VariableEdit::Upsert {
+            id: None, name: "Spacing".into(), collection: "Spacing".into(), mode: "Default".into(),
+            value: core::VariableValue::Number(10.0), replace_all_modes: false,
+        }).unwrap().variable.unwrap();
+        for property in ["layout.padding.top", "layout.padding.left", "layout.gap"] {
+            editor.edit_variables(core::VariableEdit::Bind { nodes: vec![fixture.id], property: property.into(), variable: Some(variable) }).unwrap();
+        }
+        variable
+    };
+    fixture.shell.refresh(); fixture.open(); fixture.set_linked(false);
+    let before = fixture.json(); let depth = fixture.shell.editor.borrow().history_len();
+    fixture.submit(3, "31.25");
+    assert_eq!(fixture.padding().left, 31.25);
+    {
+        let editor = fixture.shell.editor.borrow();
+        let node = &editor.document.nodes[&fixture.id];
+        assert!(!node.variable_bindings.contains_key("layout.padding.left"));
+        assert_eq!(node.variable_bindings["layout.padding.top"], variable);
+        assert_eq!(node.variable_bindings["layout.gap"], variable);
+        assert_eq!(editor.history_len(), depth + 1);
+    }
+    let after = fixture.json(); fixture.shell.close_modal();
+    assert!(fixture.shell.editor.borrow_mut().undo()); assert_eq!(fixture.json(), before);
+    assert!(fixture.shell.editor.borrow_mut().redo()); assert_eq!(fixture.json(), after);
+}
+
+#[test]
 fn native_empty_layout_exposes_padding_and_link_mode_never_equalizes_on_open_or_toggle() {
     let initial = core::Padding {
         top: 10.5,

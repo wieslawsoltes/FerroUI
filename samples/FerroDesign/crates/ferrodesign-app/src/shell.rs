@@ -722,7 +722,7 @@ impl EditorShell {
             "SelectMatchingButton",
             "XField", "YField", "RotationField", "AffineButton", "FramePresetsButton", "PageFramePresetsButton",
             "ConstraintLeft", "ConstraintRight", "ConstraintTop", "ConstraintBottom", "ConstraintCenterX", "ConstraintCenterY",
-            "PageStylesButton", "PageVariablesButton", "PageComponentsButton",
+            "PageStylesButton", "PageVariablesButton", "PageComponentsButton", "VariablesRailButton",
             "EditLayoutButton",
             "PaddingField", "GapField", "CrossGapField",
             "AddPageButton",

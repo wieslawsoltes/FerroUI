@@ -37,7 +37,8 @@ pub fn variable_binding_kind(property: &str) -> Option<VariableKind> {
         "width" | "height" | "opacity" | "corner_radius" | "font_size" => Some(VariableKind::Number),
         "text" => Some(VariableKind::String),
         "visible" => Some(VariableKind::Boolean),
-        _ => crate::parse_layout_guide_binding(property).map(|(_, field)| field.kind()),
+        _ => crate::parse_layout_variable_binding(property).map(|_| VariableKind::Number)
+            .or_else(|| crate::parse_layout_guide_binding(property).map(|(_, field)| field.kind())),
     }
 }
 
@@ -184,6 +185,12 @@ impl Document {
                         crate::validate_layout_guide_variable(node, property, value).map_err(VariableEditError)?;
                     }
                 }
+                if crate::parse_layout_variable_binding(property).is_some() {
+                    for mode in &modes {
+                        let value = self.resolve_variable(id, mode).ok_or_else(|| error("The layout variable no longer resolves."))?;
+                        crate::validate_layout_variable(node, property, value).map_err(VariableEditError)?;
+                    }
+                }
             }
             for interaction in &node.interactions {
                 if let crate::PrototypeAction::SetVariable { variable, value } = &interaction.action {
@@ -207,11 +214,16 @@ impl Editor {
     /// A rejected edit leaves metadata, bound nodes, allocation and history
     /// untouched. Bound layout/text changes join the same undo transaction.
     pub fn edit_variables(&mut self, edit: VariableEdit) -> Result<VariableEditResult, VariableEditError> {
+        if self.has_active_transaction() {
+            return Err(error("Finish the current edit before changing variables."));
+        }
         let mut candidate = self.document.clone();
         let (label, variable) = apply_edit(&mut candidate, edit)?;
         candidate.validate_variables()?;
+        if candidate == self.document { return Ok(VariableEditResult { changed: false, variable }); }
         candidate.apply_variables();
-        candidate.layout_all();
+        let layout = candidate.layout_all();
+        if !layout.errors.is_empty() { return Err(error(layout.errors.join("\n"))); }
         candidate.validate().map_err(|error| VariableEditError(error.to_string()))?;
         let changed = candidate != self.document;
         if changed { self.transact(label, move |document| *document = candidate); }
@@ -324,16 +336,27 @@ fn apply_edit(document: &mut Document, edit: VariableEdit) -> Result<(&'static s
                 if crate::parse_layout_guide_binding(&property).is_some() {
                     crate::validate_layout_guide_binding_target(node, &property).map_err(VariableEditError)?;
                 }
+                if crate::parse_layout_variable_binding(&property).is_some() {
+                    crate::validate_layout_variable_target(node, &property).map_err(VariableEditError)?;
+                }
+            }
+            if nodes.iter().all(|id| document.nodes[id].variable_bindings.get(&property).copied() == variable) {
+                return Ok(("Edit variable binding", variable));
             }
             // Unbinding freezes the currently resolved appearance.
             document.apply_variables();
             for id in nodes.into_iter().collect::<BTreeSet<_>>() {
                 let node = document.nodes.get_mut(&id).unwrap();
+                let layout_binding_changed = crate::parse_layout_variable_binding(&property).is_some()
+                    && node.variable_bindings.get(&property).copied() != variable;
                 if let Some(variable) = variable {
                     crate::style_edit::detach_style_for_variable(node, &property);
                     if property == "stroke" && node.strokes.is_empty() { node.strokes.push(Stroke::new(Color::BLACK, 1.0)); }
                     node.variable_bindings.insert(property.clone(), variable);
                 } else { node.variable_bindings.remove(&property); }
+                if layout_binding_changed && node.component_source.is_some() {
+                    node.overridden_properties.insert("layout".into());
+                }
             }
             Ok(("Edit variable binding", variable))
         }

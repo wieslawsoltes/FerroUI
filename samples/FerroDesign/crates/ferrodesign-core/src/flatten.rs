@@ -261,6 +261,7 @@ impl Editor {
         // Font/text bindings no longer describe vector artwork. Geometry and
         // paint/effect bindings retain their meaning for in-place conversion.
         crate::remove_layout_guide_bindings(&mut result);
+        crate::layout_variables::remove_layout_variable_bindings(&mut result);
         result.variable_bindings.retain(|property, _| {
             !matches!(
                 property.as_str(),

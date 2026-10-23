@@ -418,7 +418,10 @@ fn preserve_overrides(node: &mut Node, old: &Node) {
             "name" => node.name = old.name.clone(),
             "path" => { node.path = old.path.clone(); node.vector_network = old.vector_network.clone(); }
             "component_id" => node.component_id = old.component_id,
-            "layout" => node.layout = old.layout.clone(),
+            "layout" => {
+                node.layout = old.layout.clone();
+                crate::layout_variables::copy_layout_variable_bindings(old, node);
+            }
             "layout_child" => node.layout_child = old.layout_child,
             "constraints" => node.constraints = old.constraints,
             _ => {}

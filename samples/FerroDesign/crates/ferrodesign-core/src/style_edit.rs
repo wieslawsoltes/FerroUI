@@ -708,6 +708,7 @@ fn apply_definition(node: &mut Node, style: &Style, explicit: bool) {
 pub(crate) struct StyleBindingSnapshot<'a> {
     previous: Option<&'a Node>,
     values: Vec<(LocalStyleKind, StyleId, StyleValue)>,
+    layout_bindings: crate::layout_variables::LayoutBindingSnapshot,
 }
 impl<'a> StyleBindingSnapshot<'a> {
     pub(crate) fn capture(node: &Node, previous: Option<&'a Node>) -> Self {
@@ -729,6 +730,7 @@ impl<'a> StyleBindingSnapshot<'a> {
             return Self {
                 previous: Some(previous),
                 values: Vec::new(),
+                layout_bindings: crate::layout_variables::LayoutBindingSnapshot::capture(node),
             };
         }
         let mut values = Vec::new();
@@ -749,11 +751,13 @@ impl<'a> StyleBindingSnapshot<'a> {
         Self {
             previous: None,
             values,
+            layout_bindings: crate::layout_variables::LayoutBindingSnapshot::capture(node),
         }
     }
     pub(crate) fn detach_changed(self, node: &mut Node) {
+        self.layout_bindings.detach_changed(node);
         if let Some(previous) = self.previous {
-            detach_changed_style_bindings(previous, node);
+            detach_changed_style_values(previous, node);
             return;
         }
         for (kind, id, value) in self.values {
@@ -768,6 +772,11 @@ impl<'a> StyleBindingSnapshot<'a> {
 /// `before` may be the editor's render snapshot or the source of a candidate
 /// edit. Only changes to a bound style's effective fields detach that binding.
 pub(crate) fn detach_changed_style_bindings(before: &Node, node: &mut Node) {
+    crate::layout_variables::LayoutBindingSnapshot::capture(before).detach_changed(node);
+    detach_changed_style_values(before, node);
+}
+
+fn detach_changed_style_values(before: &Node, node: &mut Node) {
     for kind in [
         LocalStyleKind::Fill,
         LocalStyleKind::Text,

@@ -17,6 +17,7 @@ import { maskAuthoringRegressions } from "./masks-browser.mjs";
 import { pageInspectorRegressions } from "./page-inspector-browser.mjs";
 import { layoutAuthoringRegressions } from "./layout-browser.mjs";
 import { layoutPaddingRegressions } from "./layout-padding-browser.mjs";
+import { layoutVariableRegressions } from "./layout-variables-browser.mjs";
 import { layoutDragRegressions } from "./layout-drag-browser.mjs";
 import { effectAuthoringRegressions } from "./effects-browser.mjs";
 import { inspectorLifecycleRegressions } from "./inspector-lifecycle-browser.mjs";
@@ -1081,6 +1082,8 @@ try {
             await scenario("auto-layout", () => layoutAuthoringRegressions(page, svgDocument, check,
                 nativeHelpers, output, mode));
             await scenario("layout-padding", () => layoutPaddingRegressions(page, svgDocument, check,
+                { ...nativeHelpers, flushStorage }, output, mode));
+            await scenario("layout-variables", () => layoutVariableRegressions(page, svgDocument, check,
                 { ...nativeHelpers, flushStorage }, output, mode));
             await scenario("layout-drag", () => layoutDragRegressions(page, svgDocument, check,
                 nativeHelpers, output, mode));
