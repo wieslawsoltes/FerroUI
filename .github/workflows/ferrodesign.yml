@@ -250,6 +250,7 @@ jobs:
             samples/FerroDesign/target
           key: ferrodesign-build-${{ runner.os }}-v3-browser-${{ hashFiles('samples/FerroDesign/**/Cargo.toml', 'samples/FerroDesign/Cargo.lock') }}-${{ github.sha }}
           restore-keys: |
+            ferrodesign-browser-build-${{ runner.os }}-${{ hashFiles('samples/FerroDesign/**/Cargo.toml', 'samples/FerroDesign/Cargo.lock', 'Cargo.lock') }}-
             ferrodesign-build-${{ runner.os }}-v3-browser-${{ hashFiles('samples/FerroDesign/**/Cargo.toml', 'samples/FerroDesign/Cargo.lock') }}-
             ferrodesign-build-${{ runner.os }}-v2-${{ hashFiles('samples/FerroDesign/**/Cargo.toml', 'samples/FerroDesign/Cargo.lock') }}-
 
@@ -297,6 +298,26 @@ jobs:
           if-no-files-found: error
           retention-days: 30
 
+      # Browser validation below uses the assembled distribution and runs no
+      # Cargo commands. Preserve the target and its verified source timestamps
+      # together before lengthy interactions can exhaust the job's time budget.
+      - name: Snapshot source timestamps with the partial build
+        id: source-mtimes-snapshot
+        if: ${{ !cancelled() && steps.source-mtimes-restore.outcome == 'success' && steps.source-mtimes-cargo.outcome == 'success' }}
+        run: |
+          set -o pipefail
+          python3 scripts/source_mtime_cache.py snapshot --repo "$GITHUB_WORKSPACE" --target-dir "$CARGO_TARGET_DIR" | tee browser-report/source-mtime-snapshot.json
+
+      - name: Cache partial build for subsequent fixes
+        if: ${{ !cancelled() && steps.source-mtimes-snapshot.outcome == 'success' && steps.build-cache.outputs.cache-hit != 'true' }}
+        uses: actions/cache/save@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
+        with:
+          path: |
+            ${{ runner.temp }}/ferrodesign-tools/cargo/registry
+            ${{ runner.temp }}/ferrodesign-tools/cargo/git
+            samples/FerroDesign/target
+          key: ${{ steps.build-cache.outputs.cache-primary-key }}
+
       - name: Install Chromium for browser validation
         id: chromium
         if: ${{ !cancelled() && steps.browser-build.outcome == 'success' }}
@@ -326,13 +347,6 @@ jobs:
           set -o pipefail
           node tests/text-render-benchmark.mjs 2>&1 | tee browser-report/text-render-benchmark.log
 
-      - name: Snapshot source timestamps with the partial build
-        id: source-mtimes-snapshot
-        if: ${{ !cancelled() && steps.source-mtimes-restore.outcome == 'success' && steps.source-mtimes-cargo.outcome == 'success' }}
-        run: |
-          set -o pipefail
-          python3 scripts/source_mtime_cache.py snapshot --repo "$GITHUB_WORKSPACE" --target-dir "$CARGO_TARGET_DIR" | tee browser-report/source-mtime-snapshot.json
-
       - name: Upload validation screenshots, traces, reports and lockfiles
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
@@ -355,13 +369,3 @@ jobs:
             ${{ runner.temp }}/ferrodesign-tools/bin
             ${{ runner.temp }}/ferrodesign-tools/emsdk
           key: ${{ steps.tools.outputs.cache-primary-key }}
-
-      - name: Cache partial build for subsequent fixes
-        if: ${{ !cancelled() && steps.source-mtimes-snapshot.outcome == 'success' && steps.build-cache.outputs.cache-hit != 'true' }}
-        uses: actions/cache/save@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
-        with:
-          path: |
-            ${{ runner.temp }}/ferrodesign-tools/cargo/registry
-            ${{ runner.temp }}/ferrodesign-tools/cargo/git
-            samples/FerroDesign/target
-          key: ${{ steps.build-cache.outputs.cache-primary-key }}
