@@ -28,6 +28,7 @@ pub struct ServerXamlCompositionBrush {
     fallback_color: Cell<Color>,
     composition_brush: RefCell<Option<Rc<dyn IServerObject>>>,
     light_target_ids: RefCell<Arc<[String]>>,
+    needs_transparent_window: Cell<bool>,
     /// Set while the brush paints: a composition brush that paints this one
     /// is not painted inside itself.
     painting: Cell<bool>,
@@ -42,6 +43,7 @@ impl ServerXamlCompositionBrush {
             fallback_color: Cell::new(Color::default()),
             composition_brush: RefCell::new(None),
             light_target_ids: RefCell::new(Arc::from(Vec::<String>::new())),
+            needs_transparent_window: Cell::new(false),
             painting: Cell::new(false),
         })
     }
@@ -84,7 +86,15 @@ impl ServerXamlCompositionBrush {
         if opacity < 1.0 {
             canvas.push_opacity(opacity, Some(rect));
         }
-        match self.composition_brush() {
+        // A brush that shows what is behind the window, in a window the
+        // platform shows nothing behind: the fallback colour.
+        let window_is_opaque = self.needs_transparent_window.get()
+            && crate::rendering::composition::server::painting_visual()
+                .and_then(|visual| visual.root())
+                .is_none_or(|target| {
+                    target.transparency_level() == crate::rendering::composition::CompositionTransparencyLevel::None
+                });
+        match self.composition_brush().filter(|_| !window_is_opaque) {
             Some(brush) => {
                 let ids = self.light_target_ids();
                 with_brush_light_ids(ids, || paint_composition_brush(canvas, &brush, rect));
@@ -124,6 +134,7 @@ impl IServerObject for ServerXamlCompositionBrush {
         self.props.deserialize_changes_core(self, reader, committed_at);
         let Some(changes) = reader.read_value::<XamlBrushChanges>() else { return };
         self.fallback_color.set(changes.fallback_color);
+        self.needs_transparent_window.set(changes.needs_transparent_window);
         *self.light_target_ids.borrow_mut() = Arc::from(changes.light_target_ids);
         let compositor = self.base.compositor();
         let brush = changes.composition_brush.and_then(|id| compositor.as_ref().and_then(|compositor| compositor.get_object(id)));

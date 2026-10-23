@@ -28,6 +28,8 @@ struct PolicyState {
     next_token: u64,
     settings_subscription: Option<Rc<dyn IDisposable>>,
     noise: Vec<(Weak<Compositor>, CompositionSurfaceBrush)>,
+    window_active: bool,
+    activation_listeners: Vec<(u64, Rc<dyn Fn(bool)>)>,
 }
 
 impl PolicyState {
@@ -43,6 +45,8 @@ impl PolicyState {
             next_token: 0,
             settings_subscription: None,
             noise: Vec::new(),
+            window_active: true,
+            activation_listeners: Vec::new(),
         }
     }
 
@@ -179,6 +183,46 @@ impl MaterialPolicy {
     pub fn platform_settings() -> PlatformMaterialSettings {
         Self::ensure_initialized();
         POLICY.with(|state| state.borrow().settings.unwrap_or_default())
+    }
+
+    /// Whether a window of the application is active: the acrylic of the
+    /// host backdrop falls back to its colour while none is (WinUI's
+    /// `AcrylicBrush` follows the activation of its window). `true` until a
+    /// window says otherwise.
+    pub fn is_window_active() -> bool {
+        POLICY.with(|state| state.borrow().window_active)
+    }
+
+    /// Records whether a window of the application is active, and tells the
+    /// listeners when it changed (the windows of `ferroui-controls` call it).
+    pub fn set_window_active(active: bool) {
+        let listeners = POLICY.with(|state| {
+            let mut state = state.borrow_mut();
+            if state.window_active == active {
+                return Vec::new();
+            }
+            state.window_active = active;
+            state.activation_listeners.iter().map(|(_, handler)| handler.clone()).collect::<Vec<_>>()
+        });
+        for handler in listeners {
+            handler(active);
+        }
+    }
+
+    /// `handler` is called whenever [`is_window_active`](Self::is_window_active)
+    /// changes. Disposing the returned handle unsubscribes.
+    pub fn window_activation_changed(handler: impl Fn(bool) + 'static) -> Rc<dyn IDisposable> {
+        let handler: Rc<dyn Fn(bool)> = Rc::new(handler);
+        let token = POLICY.with(|state| {
+            let mut state = state.borrow_mut();
+            let token = state.next_token;
+            state.next_token += 1;
+            state.activation_listeners.push((token, handler));
+            token
+        });
+        Disposable::create(move || {
+            let _ = POLICY.try_with(|state| state.borrow_mut().activation_listeners.retain(|(existing, _)| *existing != token));
+        })
     }
 
     /// The noise brush the materials share on `compositor` (WinUI's

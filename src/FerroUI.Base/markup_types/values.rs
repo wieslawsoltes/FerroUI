@@ -670,6 +670,7 @@ pub(super) const TYPES: &[&MarkupType] = &[
     <crate::rendering::composition::system_backdrops::SystemBackdropTheme as MarkupTyped>::MARKUP,
     <crate::rendering::composition::system_backdrops::MicaKind as MarkupTyped>::MARKUP,
     <crate::rendering::composition::system_backdrops::DesktopAcrylicKind as MarkupTyped>::MARKUP,
+    <crate::media::AcrylicBackgroundSource as MarkupTyped>::MARKUP,
 ];
 
 /// Registers the nullable forms of the value types with the untyped value
@@ -714,6 +715,7 @@ pub(super) fn register_value_types() {
     ValueTypes::register_nullable::<crate::rendering::composition::system_backdrops::SystemBackdropTheme>();
     ValueTypes::register_nullable::<crate::rendering::composition::system_backdrops::MicaKind>();
     ValueTypes::register_nullable::<crate::rendering::composition::system_backdrops::DesktopAcrylicKind>();
+    ValueTypes::register_nullable::<crate::media::AcrylicBackgroundSource>();
 
     // The text of a value (its `ToString()` in the managed original, what a string format
     // or a binding to text shows): the value types that define one.

@@ -18,6 +18,7 @@ pub(crate) struct XamlBrushChanges {
     pub(crate) fallback_color: Color,
     pub(crate) composition_brush: Option<crate::rendering::composition::server::ServerObjectId>,
     pub(crate) light_target_ids: Vec<String>,
+    pub(crate) needs_transparent_window: bool,
 }
 
 #[derive(Default)]
@@ -29,6 +30,10 @@ struct XamlBrushState {
     /// The ids of the XAML lights that target the brush
     /// (`XamlLight.AddTargetBrush`).
     light_target_ids: Vec<String>,
+    /// Whether the composition brush shows what is behind the window (a
+    /// host backdrop): where the window is opaque the fallback colour is
+    /// painted instead.
+    needs_transparent_window: bool,
 }
 
 /// A brush that paints an area with a composition brush (WinUI
@@ -104,6 +109,7 @@ impl BrushImpl for XamlCompositionBrushBase {
             fallback_color: this.fallback_color(),
             composition_brush,
             light_target_ids: state.light_target_ids.clone(),
+            needs_transparent_window: state.needs_transparent_window,
         }));
     }
 }
@@ -161,6 +167,22 @@ impl XamlCompositionBrushBase {
             }
             state.composition_brush = brush;
         }
+        self.register_for_serialization();
+        self.raise_invalidated();
+    }
+
+    /// Whether the composition brush shows what is behind the window (a host
+    /// backdrop): where the window of the element is opaque, the platform
+    /// shows nothing behind it, and the fallback colour is painted instead.
+    pub fn needs_transparent_window(&self) -> bool {
+        self.state.borrow().needs_transparent_window
+    }
+
+    pub fn set_needs_transparent_window(&self, value: bool) {
+        if self.state.borrow().needs_transparent_window == value {
+            return;
+        }
+        self.state.borrow_mut().needs_transparent_window = value;
         self.register_for_serialization();
         self.raise_invalidated();
     }

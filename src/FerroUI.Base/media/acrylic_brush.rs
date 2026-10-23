@@ -150,6 +150,20 @@ fn parameter(name: &str) -> Option<GraphicsEffectSource> {
     Some(CompositionEffectSourceParameter::new(name).into())
 }
 
+/// What an acrylic brush blurs (WinUI 2 `AcrylicBackgroundSource`, the
+/// `BackgroundSource` of `AcrylicBrush`; WinUI 3 has the backdrop only).
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq, Hash)]
+#[repr(i32)]
+pub enum AcrylicBackgroundSource {
+    /// What is behind the window, blurred by the platform (window acrylic).
+    HostBackdrop = 0,
+    /// What the window draws behind the element (in-app acrylic).
+    #[default]
+    Backdrop = 1,
+}
+
+crate::ferro_markup_enum!(AcrylicBackgroundSource { HostBackdrop, Backdrop }, { namespace: "FerroUI.Media" });
+
 /// The effect of WinUI's acrylic ("shadow-friendly luminosity-based
 /// recipe"): an opaque tint with noise, or the backdrop over the opaque
 /// fallback colour, blurred by 30 (with hard edges), its luminosity taken
@@ -163,11 +177,47 @@ pub fn acrylic_effect(
     luminosity_color: Color,
     fallback_color: Color,
 ) -> (GraphicsEffect, Vec<&'static str>) {
+    acrylic_effect_with_source(
+        should_brush_be_opaque,
+        use_cross_fade,
+        AcrylicBackgroundSource::Backdrop,
+        tint_color,
+        luminosity_color,
+        fallback_color,
+    )
+}
+
+/// [`acrylic_effect`] for a background source. The host backdrop (WinUI 2's
+/// window acrylic) is blurred by the platform behind the window, so it is
+/// not blurred again; the compositor cannot read it, so the luminosity and
+/// the tint are composed over it source-over (winui-materials.md,
+/// deviations), the host backdrop brush first, so that it shows through the
+/// window where the brush paints.
+pub fn acrylic_effect_with_source(
+    should_brush_be_opaque: bool,
+    use_cross_fade: bool,
+    source: AcrylicBackgroundSource,
+    tint_color: Color,
+    luminosity_color: Color,
+    fallback_color: Color,
+) -> (GraphicsEffect, Vec<&'static str>) {
     let tint: GraphicsEffect = ColorSourceEffect { name: "TintColor".into(), color: tint_color }.into();
     let mut animatable = vec![TINT_COLOR_COLOR];
 
     let tint_output: GraphicsEffect = if should_brush_be_opaque {
         tint
+    } else if source == AcrylicBackgroundSource::HostBackdrop {
+        animatable.push(LUMINOSITY_COLOR_COLOR);
+        CompositeEffect {
+            name: String::new(),
+            mode: CanvasComposite::SourceOver,
+            sources: vec![
+                CompositionEffectSourceParameter::new("Backdrop").into(),
+                ColorSourceEffect { name: "LuminosityColor".into(), color: luminosity_color }.into(),
+                tint.into(),
+            ],
+        }
+        .into()
     } else {
         // The backdrop over the opaque fallback colour, so that the blur
         // does not blur with transparency.
@@ -251,24 +301,34 @@ pub fn acrylic_effect(
 crate::ferro_thread_local! {
     /// The effect factories of acrylic per compositor and form (WinUI's
     /// `MaterialHelper` cache), keyed by opaque and cross-fade.
-    static FACTORIES: RefCell<Vec<(Weak<Compositor>, bool, bool, Rc<CompositionEffectFactory>)>> = const { RefCell::new(Vec::new()) };
+    static FACTORIES: RefCell<Vec<(Weak<Compositor>, bool, bool, AcrylicBackgroundSource, Rc<CompositionEffectFactory>)>> = const { RefCell::new(Vec::new()) };
 }
 
-fn factory(compositor: &Rc<Compositor>, opaque: bool, cross_fade: bool, tint: Color, luminosity: Color, fallback: Color) -> Rc<CompositionEffectFactory> {
+fn factory(
+    compositor: &Rc<Compositor>,
+    opaque: bool,
+    cross_fade: bool,
+    source: AcrylicBackgroundSource,
+    tint: Color,
+    luminosity: Color,
+    fallback: Color,
+) -> Rc<CompositionEffectFactory> {
     let cached = FACTORIES.with(|factories| {
         let mut factories = factories.borrow_mut();
         factories.retain(|(owner, ..)| owner.strong_count() > 0);
         factories
             .iter()
-            .find(|(owner, o, c, _)| *o == opaque && *c == cross_fade && owner.upgrade().is_some_and(|owner| Rc::ptr_eq(&owner, compositor)))
+            .find(|(owner, o, c, s, _)| {
+                *o == opaque && *c == cross_fade && *s == source && owner.upgrade().is_some_and(|owner| Rc::ptr_eq(&owner, compositor))
+            })
             .map(|(.., factory)| factory.clone())
     });
     if let Some(cached) = cached {
         return cached;
     }
-    let (effect, animatable) = acrylic_effect(opaque, cross_fade, tint, luminosity, fallback);
+    let (effect, animatable) = acrylic_effect_with_source(opaque, cross_fade, source, tint, luminosity, fallback);
     let factory = compositor.create_effect_factory_with_properties(effect, &animatable);
-    FACTORIES.with(|factories| factories.borrow_mut().push((Rc::downgrade(compositor), opaque, cross_fade, factory.clone())));
+    FACTORIES.with(|factories| factories.borrow_mut().push((Rc::downgrade(compositor), opaque, cross_fade, source, factory.clone())));
     factory
 }
 
@@ -281,11 +341,14 @@ struct AcrylicState {
     brush: Option<Rc<CompositionBrush>>,
     is_using_acrylic: bool,
     is_using_opaque: bool,
+    /// The background source the brush was created for.
+    is_using_host_backdrop: bool,
     is_disabled_by_policy: bool,
     /// The cross-fade between the material and the fallback colour that is
     /// running, and the subscription to its end.
     waiting_for_fallback: Option<(Rc<CompositionScopedBatch>, Rc<dyn IDisposable>)>,
     policy_subscription: Option<Rc<dyn IDisposable>>,
+    activation_subscription: Option<Rc<dyn IDisposable>>,
 }
 
 /// A brush that paints the acrylic material of WinUI (WinUI
@@ -297,7 +360,11 @@ struct AcrylicState {
 /// The brush falls back to its [`fallback_color`](XamlCompositionBrushBase::fallback_color)
 /// when [`always_use_fallback`](Self::always_use_fallback) is set or the
 /// [`MaterialPolicy`] disables materials (energy saver, transparency effects
-/// off), cross-fading over 167 ms. Changes of the tint animate over
+/// off), cross-fading over 167 ms. With the [`background_source`](Self::background_source)
+/// `HostBackdrop` (WinUI 2's window acrylic) it shows what is behind the
+/// window, and also falls back while no window of the application is
+/// active; in a window the platform shows nothing behind (an opaque
+/// window) it paints its fallback colour. Changes of the tint animate over
 /// [`tint_transition_duration`](Self::tint_transition_duration).
 #[repr(C)]
 pub struct AcrylicBrush {
@@ -323,7 +390,9 @@ impl FerroObjectImpl for AcrylicBrush {
             || property == Self::tint_luminosity_opacity_property().as_property()
         {
             this.on_tint_changed(property == Self::tint_luminosity_opacity_property().as_property());
-        } else if property == Self::always_use_fallback_property().as_property() {
+        } else if property == Self::always_use_fallback_property().as_property()
+            || property == Self::background_source_property().as_property()
+        {
             this.update_acrylic_brush();
         } else if property == XamlCompositionBrushBase::fallback_color_property().as_property() {
             this.on_fallback_color_changed();
@@ -345,17 +414,26 @@ impl XamlCompositionBrushBaseImpl for AcrylicBrush {
             }
         });
         this.state.borrow_mut().policy_subscription = Some(subscription);
+        let weak = this.to_ref().downgrade();
+        let activation = MaterialPolicy::window_activation_changed(move |_| {
+            if let Some(this) = weak.upgrade() {
+                if this.background_source() == AcrylicBackgroundSource::HostBackdrop {
+                    this.update_acrylic_brush();
+                }
+            }
+        });
+        this.state.borrow_mut().activation_subscription = Some(activation);
         this.update_acrylic_brush();
     }
 
     fn on_disconnected(this: &Self) {
         this.cancel_fallback_animation_complete_wait();
-        let (subscription, brush) = {
+        let (subscriptions, brush) = {
             let mut state = this.state.borrow_mut();
             state.is_using_acrylic = false;
-            (state.policy_subscription.take(), state.brush.take())
+            ([state.policy_subscription.take(), state.activation_subscription.take()], state.brush.take())
         };
-        if let Some(subscription) = subscription {
+        for subscription in subscriptions.into_iter().flatten() {
             subscription.dispose();
         }
         if let Some(brush) = brush {
@@ -400,6 +478,14 @@ crate::ferro_properties! { impl AcrylicBrush {
         /// the tint or of the fallback colour animates.
         pub fn tint_transition_duration_property() -> StyledProperty<Duration> {
             FerroProperty::register::<AcrylicBrush, _>("TintTransitionDuration", Duration::from_millis(500))
+        }
+    );
+
+    ferro_property!(
+        /// `BackgroundSource` (WinUI 2; default `Backdrop`): what the brush
+        /// blurs.
+        pub fn background_source_property() -> StyledProperty<AcrylicBackgroundSource> {
+            FerroProperty::register::<AcrylicBrush, _>("BackgroundSource", AcrylicBackgroundSource::Backdrop)
         }
     );
 
@@ -451,6 +537,14 @@ impl AcrylicBrush {
 
     pub fn set_tint_transition_duration(&self, value: Duration) {
         self.set_value(Self::tint_transition_duration_property(), value)
+    }
+
+    pub fn background_source(&self) -> AcrylicBackgroundSource {
+        self.get_value(Self::background_source_property())
+    }
+
+    pub fn set_background_source(&self, value: AcrylicBackgroundSource) {
+        self.set_value(Self::background_source_property(), value)
     }
 
     pub fn always_use_fallback(&self) -> bool {
@@ -537,13 +631,18 @@ impl AcrylicBrush {
         if !self.is_connected() {
             return;
         }
-        let is_using_acrylic = !(self.state.borrow().is_disabled_by_policy || self.always_use_fallback());
+        let use_host_backdrop = self.background_source() == AcrylicBackgroundSource::HostBackdrop;
+        let is_using_acrylic = !(self.state.borrow().is_disabled_by_policy
+            || self.always_use_fallback()
+            || (use_host_backdrop && !MaterialPolicy::is_window_active()));
         let should_use_opaque = self.effective_tint_color().a == 255;
-        let (has_brush, using_opaque, currently_acrylic) = {
+        let (has_brush, using_opaque, currently_acrylic, using_host_backdrop) = {
             let state = self.state.borrow();
-            (state.brush.is_some(), state.is_using_opaque, state.is_using_acrylic)
+            (state.brush.is_some(), state.is_using_opaque, state.is_using_acrylic, state.is_using_host_backdrop)
         };
-        if !has_brush || using_opaque != should_use_opaque {
+        self.set_needs_transparent_window(use_host_backdrop);
+        if !has_brush || using_opaque != should_use_opaque || using_host_backdrop != use_host_backdrop {
+            self.state.borrow_mut().is_using_host_backdrop = use_host_backdrop;
             self.state.borrow_mut().is_using_acrylic = is_using_acrylic;
             self.create_acrylic_brush(false, false);
             return;
@@ -599,16 +698,25 @@ impl AcrylicBrush {
             let luminosity = self.effective_luminosity_color();
             let opaque = tint.a == 255;
             self.state.borrow_mut().is_using_opaque = opaque;
-            let effect_brush = factory(&compositor, opaque, use_cross_fade, tint, luminosity, fallback).create_brush();
+            let host = self.background_source() == AcrylicBackgroundSource::HostBackdrop;
+            let source = if host { AcrylicBackgroundSource::HostBackdrop } else { AcrylicBackgroundSource::Backdrop };
+            let effect_brush = factory(&compositor, opaque, use_cross_fade, source, tint, luminosity, fallback).create_brush();
             effect_brush.set_source_parameter("Noise", Some((*MaterialPolicy::noise_brush(&compositor)).clone()));
             if !opaque {
-                effect_brush.set_source_parameter("Backdrop", Some((*compositor.create_backdrop_brush()).clone()));
+                let backdrop: Rc<CompositionBrush> = if host {
+                    (*compositor.create_host_backdrop_brush()).clone()
+                } else {
+                    (*compositor.create_backdrop_brush()).clone()
+                };
+                effect_brush.set_source_parameter("Backdrop", Some(backdrop));
             }
             let properties = effect_brush.properties();
             properties.insert_color(TINT_COLOR_COLOR, tint);
             if !opaque {
                 properties.insert_color(LUMINOSITY_COLOR_COLOR, luminosity);
-                properties.insert_color(OPAQUE_FALLBACK_COLOR_COLOR, Color { a: 255, ..fallback });
+                if !host {
+                    properties.insert_color(OPAQUE_FALLBACK_COLOR_COLOR, Color { a: 255, ..fallback });
+                }
             }
             if use_cross_fade {
                 properties.insert_color(FALLBACK_COLOR_COLOR, fallback);

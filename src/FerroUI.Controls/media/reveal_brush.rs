@@ -228,6 +228,30 @@ pub(crate) fn on_top_level_created(top_level: &TopLevel) {
     if CONNECTED_BRUSHES.with(Cell::get) > 0 {
         attach_lights_to_element(top_level);
     }
+    track_window_activation(top_level);
+}
+
+/// Tells the material policy whether a window of the application is active
+/// (the host backdrop acrylic falls back while none is): each window's
+/// activation and deactivation. A deactivation is reported once the windows
+/// have settled, so that moving the activation from one window of the
+/// application to another does not count as none being active.
+fn track_window_activation(top_level: &TopLevel) {
+    let Some(window) = top_level.to_ref().cast::<crate::WindowBase>() else { return };
+    let _ = window.activated(|| ferroui_base::media::MaterialPolicy::set_window_active(true));
+    let _ = window.deactivated(|| {
+        let _ = ferroui_base::threading::Dispatcher::ui_thread().invoke_async_local_with_priority(
+            || {
+                let any_active = TOP_LEVELS.with(|top_levels| {
+                    top_levels.borrow().iter().filter_map(WeakRef::upgrade).any(|top_level| {
+                        top_level.cast::<crate::WindowBase>().is_some_and(|window| window.is_active())
+                    })
+                });
+                ferroui_base::media::MaterialPolicy::set_window_active(any_active);
+            },
+            ferroui_base::threading::DispatcherPriority::BACKGROUND,
+        );
+    });
 }
 
 /// `AttachLightsToElement`: two border lights (normal and wide) for each
@@ -299,7 +323,21 @@ struct RevealState {
     border_light_id: Option<&'static str>,
     has_base_color: bool,
     is_disabled_by_policy: bool,
+    /// Whether the platform asks for high contrast: Reveal falls back to its
+    /// colour (WinUI's high contrast theme has no Reveal).
+    is_high_contrast: bool,
     policy_subscription: Option<Rc<dyn IDisposable>>,
+    contrast_subscription: Option<Rc<dyn IDisposable>>,
+}
+
+/// Whether the platform asks for high contrast.
+fn platform_is_high_contrast() -> bool {
+    use ferroui_base::LocatorExtensions;
+    ferroui_base::FerroLocator::current()
+        .get_service::<dyn ferroui_base::platform::IPlatformSettings>()
+        .is_some_and(|settings| {
+            settings.get_color_values().contrast_preference() == ferroui_base::platform::ColorContrastPreference::High
+        })
 }
 
 /// The base of the Reveal brushes (WinUI `Microsoft.UI.Xaml.Media.RevealBrush`):
@@ -358,6 +396,27 @@ impl XamlCompositionBrushBaseImpl for RevealBrush {
             }
         });
         this.state.borrow_mut().policy_subscription = Some(subscription);
+        this.state.borrow_mut().is_high_contrast = platform_is_high_contrast();
+        let settings = {
+            use ferroui_base::LocatorExtensions;
+            ferroui_base::FerroLocator::current().get_service::<dyn ferroui_base::platform::IPlatformSettings>()
+        };
+        if let Some(settings) = settings {
+            let weak = this.to_ref().downgrade();
+            let contrast = settings.color_values_changed(Rc::new(move |values| {
+                let Some(this) = weak.upgrade() else { return };
+                let high = values.contrast_preference() == ferroui_base::platform::ColorContrastPreference::High;
+                if this.state.borrow().is_high_contrast == high {
+                    return;
+                }
+                this.state.borrow_mut().is_high_contrast = high;
+                if this.state.borrow().is_connected {
+                    this.update_light_targets(true);
+                    this.update_reveal_brush();
+                }
+            }));
+            this.state.borrow_mut().contrast_subscription = Some(contrast);
+        }
         this.update_light_targets(true);
         this.update_reveal_brush();
     }
@@ -365,16 +424,16 @@ impl XamlCompositionBrushBaseImpl for RevealBrush {
     fn on_disconnected(this: &Self) {
         this.state.borrow_mut().is_connected = false;
         this.update_light_targets(true);
-        let (brush, subscription) = {
+        let (brush, subscriptions) = {
             let mut state = this.state.borrow_mut();
-            (state.brush.take(), state.policy_subscription.take())
+            (state.brush.take(), [state.policy_subscription.take(), state.contrast_subscription.take()])
         };
         if let Some(brush) = brush {
             brush.object().dispose();
         }
         this.set_composition_brush(None);
         on_reveal_brush_disconnected();
-        if let Some(subscription) = subscription {
+        for subscription in subscriptions.into_iter().flatten() {
             subscription.dispose();
         }
     }
@@ -504,9 +563,11 @@ impl RevealBrush {
     ///
     /// Deviation (winui-materials.md): WinUI 3 always draws the fallback
     /// colour (its policy callback passes `true`); FerroUI draws Reveal
-    /// unless the policy disables materials.
+    /// unless the policy disables materials (energy saver, transparency
+    /// effects off) or the platform asks for high contrast.
     pub fn is_in_fallback_mode(&self) -> bool {
-        self.state.borrow().is_disabled_by_policy || self.always_use_fallback()
+        let state = self.state.borrow();
+        state.is_disabled_by_policy || state.is_high_contrast || self.always_use_fallback()
     }
 
     fn border_light_id(&self) -> &'static str {

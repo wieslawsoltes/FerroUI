@@ -224,25 +224,21 @@ fn composite_modes_compose_in_a_layer() {
     let blue = position_starting(&entries, "DrawRectangle Blue");
     assert!(red < xor && xor < blue, "{entries:?}");
 
+    // `MaskInvert` and the blend modes without a blend layer load, and are
+    // drawn from the pixels of their sources.
     let invert = s.compositor.create_effect_factory(CompositeEffect {
         mode: CanvasComposite::MaskInvert,
         sources: vec![CompositionEffectSourceParameter::new("a").into()],
         ..Default::default()
     });
-    assert_eq!(
-        Some(&CompositionEffectFactoryError::CompositeModeNotSupported(CanvasComposite::MaskInvert)),
-        invert.extended_error()
-    );
+    assert_eq!(CompositionEffectFactoryLoadStatus::Success, invert.load_status());
     let dissolve = s.compositor.create_effect_factory(BlendEffect {
         mode: BlendEffectMode::Dissolve,
         background: parameter("a"),
         foreground: parameter("b"),
         ..Default::default()
     });
-    assert_eq!(
-        Some(&CompositionEffectFactoryError::BlendModeNotSupported(BlendEffectMode::Dissolve)),
-        dissolve.extended_error()
-    );
+    assert_eq!(CompositionEffectFactoryLoadStatus::Success, dissolve.load_status());
 }
 
 #[test]
@@ -284,7 +280,7 @@ fn scene_lighting_draws_the_light_of_the_lights_that_target_the_visual() {
     light.targets().add((*sprite).clone());
     show(&s, &sprite);
     let entries = render_with_layers(&s, &sprite);
-    position_starting(&entries, "DrawBitmap 1 0, 0, 25, 13 0, 0, 100, 50");
+    position_starting(&entries, "DrawBitmap 1 0, 0, 50, 25 0, 0, 100, 50");
     assert!(crate::rendering::composition::server::SCENE_LIGHTING_DISTANCE_UNIT > 1.0);
 }
 
@@ -642,4 +638,53 @@ fn desktop_acrylic_without_platform_support_falls_back_and_over_a_blur_draws_its
     assert_eq!(SystemBackdropState::Active, over_blur.state());
     let brush = blur.brush.borrow().clone().expect("the tint over the blur");
     assert!(CompositionEffectBrush::from_brush(&brush).is_some());
+}
+
+#[test]
+fn host_backdrop_acrylic_shows_what_is_behind_the_window_and_falls_back_while_inactive() {
+    let s = CompositorCanvas::new();
+    let brush = AcrylicBrush::new();
+    brush.set_background_source(crate::media::AcrylicBackgroundSource::HostBackdrop);
+    brush.set_tint_color(Color::from_rgb(0x2c, 0x2c, 0x2c));
+    brush.set_tint_opacity(0.5);
+    brush.set_fallback_color(Colors::GREEN);
+    let element = TestBorder::new();
+    element.set_bounds(crate::Rect::new(0.0, 0.0, 100.0, 50.0));
+    element.set_background(Some(brush.clone().into()));
+    s.canvas.add(&element);
+    s.run_jobs();
+    assert!(brush.is_using_acrylic_brush());
+    assert!(brush.needs_transparent_window());
+    let effect = CompositionEffectBrush::from_brush(&brush.composition_brush().expect("the material")).expect("an effect");
+    let backdrop = effect.get_source_parameter("Backdrop").expect("a backdrop");
+    assert!(crate::rendering::composition::CompositionHostBackdropBrush::from_brush(&backdrop).is_some());
+
+    // The window of the fixture is opaque: the platform shows nothing behind
+    // it, so the brush paints its fallback colour.
+    let log = DrawingLog::new();
+    let mut context = MockDrawingContextImpl::new(log.clone());
+    context.supports_layer_effects = true;
+    s.server_object(element.composition_visual().unwrap().server()).render(
+        &mut context,
+        LtrbRect::INFINITE,
+        None,
+        true,
+        false,
+        false,
+    );
+    let entries = log.entries();
+    assert!(entries.iter().any(|e| e.starts_with("DrawRectangle Green")), "{entries:?}");
+
+    // No active window: the fallback colour, cross-faded.
+    MaterialPolicy::set_window_active(false);
+    assert!(!brush.is_using_acrylic_brush());
+    MaterialPolicy::set_window_active(true);
+    assert!(brush.is_using_acrylic_brush());
+
+    // Back to the backdrop of the window: the in-app recipe.
+    brush.set_background_source(crate::media::AcrylicBackgroundSource::Backdrop);
+    assert!(!brush.needs_transparent_window());
+    let effect = CompositionEffectBrush::from_brush(&brush.composition_brush().unwrap()).unwrap();
+    let backdrop = effect.get_source_parameter("Backdrop").expect("a backdrop");
+    assert!(crate::rendering::composition::CompositionHostBackdropBrush::from_brush(&backdrop).is_none());
 }
