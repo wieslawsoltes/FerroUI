@@ -31,7 +31,10 @@
     ThemeShadowWrapper around the border of the popup (a border of its own: a border whose
     background is sized to the inner edge of its border draws no box shadow), with the margin
     ThemeShadowFlyoutMargin as the room for it in the popup
-    (Resources/ThemeShadows.xaml; DEVIATIONS.md, G-24).
+    (Resources/ThemeShadows.xaml; DEVIATIONS.md, G-24). The background of the popup is
+    AcrylicBackgroundFillColorDefaultBrush, the acrylic brush of the flyouts, where the presenter
+    draws its system backdrop MenuFlyoutSystemBackdrop (desktop acrylic; a border has no system
+    backdrop; docs/porting/winui-materials.md).
   - States: PointerOver is the :selected state of FerroUI's menus (the item under the pointer or
     reached with the keyboard), Selected (the flyout is open) is :open, Pressed is :pressed. As
     MenuBarItem::UpdateVisualStates, pressed comes before pointer over and pointer over before
@@ -118,7 +121,7 @@
                     BoxShadow="{DynamicResource ThemeShadowFlyoutBoxShadow}"
                     Margin="{StaticResource ThemeShadowFlyoutMargin}"
                     CornerRadius="{DynamicResource OverlayCornerRadius}">
-              <Border Background="{DynamicResource MenuFlyoutPresenterBackground}"
+              <Border Background="{DynamicResource AcrylicBackgroundFillColorDefaultBrush}"
                       BorderBrush="{DynamicResource MenuFlyoutPresenterBorderBrush}"
                       BorderThickness="{DynamicResource MenuFlyoutPresenterBorderThemeThickness}"
                       CornerRadius="{DynamicResource OverlayCornerRadius}"

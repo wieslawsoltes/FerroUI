@@ -23,8 +23,14 @@ The rules:
   `Light`); `Dark` is merged into `Default` as the build of WinUI does; `HighContrast` is keyed
   by the variant of the theme class, `{x:Static winui:WinUITheme.HighContrast}`;
 * `{ThemeResource X}` becomes `{DynamicResource X}`; `{StaticResource X}` is kept;
-* `AcrylicBrush` becomes a `SolidColorBrush` of its `FallbackColor` (what WinUI draws when
-  acrylic is not available);
+* `AcrylicBrush` is FerroUI's `AcrylicBrush` (docs/porting/winui-materials.md) with the tint,
+  the tint opacity, the luminosity opacity and the fallback colour; `DesktopAcrylicBackdrop` is
+  FerroUI's `DesktopAcrylicBackdrop`;
+* the Reveal brushes of `RevealBrush_themeresources.xaml`, which WinUI 3 writes as solid colour
+  brushes (Reveal is deprecated there), are `RevealBackgroundBrush` and `RevealBorderBrush` of
+  their Reveal colour (`System{X}Color` becomes `SystemReveal{X}Color` when the document defines
+  it), with the solid colour as the fallback colour and the theme of their dictionary as the
+  target theme; the high contrast brushes stay solid colour brushes;
 * `LinearGradientBrush`: `MappingMode="Absolute"` keeps the points (absolute points are the
   default of FerroUI's `RelativePoint`), relative points become percentages, and a
   `RelativeTransform` becomes `Transform` with a `TransformOrigin` of its centre;
@@ -232,6 +238,42 @@ CORNER_FILTERS = {
 CORNER_VALUES = {"TopLeftValue": "TopLeft", "BottomRightValue": "BottomRight"}
 
 
+REVEAL_DOCUMENT = "controls/dev/Materials/Reveal/RevealBrush_themeresources.xaml"
+# The checkout of microsoft-ui-xaml the conversion reads (set by `convert`).
+REFERENCE_ROOT = [None]
+# The target theme of the Reveal brushes of each theme dictionary.
+REVEAL_THEMES = {"Default": "Dark", "Light": "Light"}
+REVEAL_KEY = re.compile(r"SystemControl\w*Reveal\w*(Background|Border)Brush")
+
+
+def reveal_colors(variant):
+    """The keys of the Reveal colours the Reveal document defines in a theme dictionary."""
+    root = REFERENCE_ROOT[0]
+    keys = set()
+    for other in w.document_items(root, REVEAL_DOCUMENT):
+        if other.variant == variant and other.kind == "Color" and other.key.startswith("SystemReveal"):
+            keys.add(other.key)
+    return keys
+
+
+def reveal_brush(item):
+    """A Reveal brush of the Reveal document for its solid colour brush, or `None` for a key that
+    is not a Reveal brush."""
+    match = REVEAL_KEY.fullmatch(item.key)
+    if match is None:
+        return None
+    element = item.element
+    attributes(element, {"Color"})
+    fallback = element.get("Color", "Transparent")
+    color = fallback
+    named = re.fullmatch(r"\{(StaticResource|ThemeResource)\s+System(\w+)Color\s*\}", fallback.strip())
+    if named and f"SystemReveal{named.group(2)}Color" in reveal_colors(item.variant):
+        color = "{" + named.group(1) + " SystemReveal" + named.group(2) + "Color}"
+    kind = "RevealBackgroundBrush" if match.group(1) == "Background" else "RevealBorderBrush"
+    pairs = [("TargetTheme", REVEAL_THEMES[item.variant]), ("Color", convert_value(color)), ("FallbackColor", convert_value(fallback))]
+    return f"<{kind}{key_attribute(item.key)}{format_attributes(pairs)} />"
+
+
 def convert_item(item, indent):
     """The lines of one item and the XML namespaces they need."""
     element = item.element
@@ -255,21 +297,21 @@ def convert_item(item, indent):
     if kind == "StaticResource":
         pairs = attributes(element, {"ResourceKey"})
         return [f"{indent}<StaticResource{key}{format_attributes(pairs)} />"], set()
+    if kind == "SolidColorBrush" and item.document == REVEAL_DOCUMENT and item.variant in REVEAL_THEMES:
+        reveal = reveal_brush(item)
+        if reveal is not None:
+            return [f"{indent}{reveal}"], set()
     if kind == "SolidColorBrush":
         pairs = attributes(element, {"Color", "Opacity"})
         if text.strip():
             return [f"{indent}<SolidColorBrush{key}{format_attributes(pairs)}>{escape(text.strip())}</SolidColorBrush>"], set()
         return [f"{indent}<SolidColorBrush{key}{format_attributes(pairs)} />"], set()
     if kind == "AcrylicBrush":
-        attributes(element, {"TintColor", "TintOpacity", "TintLuminosityOpacity", "FallbackColor", "BackgroundSource", "AlwaysUseFallback"})
-        fallback = element.get("FallbackColor")
-        if fallback is not None:
-            pairs = [("Color", convert_value(fallback))]
-        else:
-            pairs = [("Color", convert_value(element.get("TintColor", "Transparent")))]
-            if element.get("TintOpacity") is not None:
-                pairs.append(("Opacity", element.get("TintOpacity")))
-        return [f"{indent}<SolidColorBrush{key}{format_attributes(pairs)} />"], set()
+        pairs = attributes(element, {"TintColor", "TintOpacity", "TintLuminosityOpacity", "FallbackColor", "AlwaysUseFallback"})
+        return [f"{indent}<AcrylicBrush{key}{format_attributes(pairs)} />"], set()
+    if kind == "DesktopAcrylicBackdrop":
+        attributes(element, set())
+        return [f"{indent}<DesktopAcrylicBackdrop{key} />"], set()
     if kind == "LinearGradientBrush":
         return convert_linear_gradient(item, indent)
     if kind == "CornerRadiusFilterConverter":
@@ -379,6 +421,7 @@ def render(sources, items, note=None):
 
 
 def convert(root):
+    REFERENCE_ROOT[0] = root
     theme = w.merge(root)
     waivers = w.load_waivers()
     effective_ids = {id(item) for item in theme.effective.values()}

@@ -268,4 +268,5 @@
   <Thickness x:Key="MenuFlyoutItemThemePaddingNarrow">11,4,11,5</Thickness>
   <x:Double x:Key="SplitMenuFlyoutItemSeparatorHeight">18</x:Double>
   <x:Double x:Key="SplitMenuFlyoutItemChevronButtonWidth">38</x:Double>
+  <StaticResource x:Key="MenuFlyoutSystemBackdrop" ResourceKey="AcrylicBackgroundFillColorDefaultBackdrop" />
 </ResourceDictionary>
