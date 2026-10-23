@@ -6463,6 +6463,11 @@ pub trait TextBlockProps: ElementBuilder {
         self.prop(<ferroui_controls::TextBlock>::baseline_offset_property(), value)
     }
 
+    /// Sets [`TextBlock::text_line_bounds_property`](ferroui_controls::TextBlock::text_line_bounds_property).
+    fn text_line_bounds<M>(self, value: impl IntoProp<ferroui_base::media::TextLineBounds, M>) -> Self {
+        self.prop(<ferroui_controls::TextBlock>::text_line_bounds_property(), value)
+    }
+
     /// Sets [`TextBlock::layout_rounding_placement_property`](ferroui_controls::TextBlock::layout_rounding_placement_property).
     fn layout_rounding_placement<M>(self, value: impl IntoProp<ferroui_controls::TextLayoutRoundingPlacement, M>) -> Self {
         self.prop(<ferroui_controls::TextBlock>::layout_rounding_placement_property(), value)
@@ -8255,6 +8260,11 @@ pub trait AttachedProps: ElementBuilder {
     /// Sets the attached [`TextBlock::baseline_offset_property`](ferroui_controls::TextBlock::baseline_offset_property).
     fn text_block_baseline_offset<M>(self, value: impl IntoProp<f64, M>) -> Self {
         self.prop(<ferroui_controls::TextBlock>::baseline_offset_property(), value)
+    }
+
+    /// Sets the attached [`TextBlock::text_line_bounds_property`](ferroui_controls::TextBlock::text_line_bounds_property).
+    fn text_block_text_line_bounds<M>(self, value: impl IntoProp<ferroui_base::media::TextLineBounds, M>) -> Self {
+        self.prop(<ferroui_controls::TextBlock>::text_line_bounds_property(), value)
     }
 
     /// Sets the attached [`TextBlock::layout_rounding_placement_property`](ferroui_controls::TextBlock::layout_rounding_placement_property).

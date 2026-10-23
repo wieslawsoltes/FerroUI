@@ -130,6 +130,11 @@ impl CompositorTestServices {
         self.services.compositor()
     }
 
+    /// The window of the fixture.
+    pub(crate) fn top_level(&self) -> &Ref<EmbeddableControlRoot> {
+        &self.top_level
+    }
+
     pub(crate) fn set_content(&self, content: &Control) {
         self.top_level.set_content(Some(Control::boxed(content.to_ref())));
     }

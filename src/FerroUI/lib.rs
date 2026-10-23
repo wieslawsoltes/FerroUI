@@ -229,3 +229,7 @@ pub mod prelude {
     #[cfg(feature = "winui-theme")]
     pub use ferroui_themes_winui::WinUITheme;
 }
+
+/// Chrome DevTools Protocol inspection and automation.
+#[cfg(feature = "devtools")]
+pub use ferroui_devtools as devtools;

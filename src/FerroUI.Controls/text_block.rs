@@ -11,14 +11,14 @@ use ferroui_base::media::text_formatting::{
 };
 use ferroui_base::media::{
     DrawingContext, FlowDirection, FontFamily, FontFeatureCollection, FontStretch, FontStyle, FontWeight, IBrush, TextAlignment,
-    TextDecorationCollection, TextTrimming, TextWrapping, Typeface,
+    TextDecorationCollection, TextLineBounds, TextTrimming, TextWrapping, Typeface,
 };
 use ferroui_base::reactive::IDisposable;
-use ferroui_base::utilities::{ReadOnlyMemory, ValueSpan};
+use ferroui_base::utilities::{MathUtilities, ReadOnlyMemory, ValueSpan};
 use ferroui_base::{
-    ferro_class, ferro_property, instantiate, AttachedProperty, DirectProperty, FerroObjectImpl, FerroObjectImplExt,
+    ferro_class, ferro_property, instantiate, AttachedProperty, DirectProperty, FerroObject, FerroObjectImpl, FerroObjectImplExt,
     FerroProperty, FerroPropertyChangedEventArgs, Point, Rect, Ref, Size, StyledElementImpl, StyledProperty,
-    StyledPropertyOptions, Thickness, Visual, VisualImpl, VisualImplExt, VisualTreeAttachmentEventArgs, WeakRef,
+    StyledPropertyMetadata, StyledPropertyOptions, Thickness, Visual, VisualImpl, VisualImplExt, VisualTreeAttachmentEventArgs, WeakRef,
 };
 use std::cell::{Cell, OnceCell, RefCell};
 use std::rc::Rc;
@@ -98,6 +98,10 @@ ferroui_base::ferro_overrides! { impl FerroObjectImpl for TextBlock {
             | "MaxLines" => {
                 this.invalidate_text_layout_keep_cache();
             }
+            "TextLineBounds" => {
+                this.coerce_value(Visual::clip_to_bounds_property().as_property());
+                this.invalidate_text_layout_keep_cache();
+            }
             // A FerroUI addition: where the text goes in the height layout rounding adds. It
             // moves the text and the embedded controls, not the size.
             "LayoutRoundingPlacement" => {
@@ -152,7 +156,11 @@ impl LayoutableImpl for TextBlock {
 
         if this.constraint.get() != deflated_size {
             // Reset the text layout when the constraint is not matching.
-            this.dispose_text_layout();
+            // Deviation (DEVIATIONS.md, Text block): unless the layout is the
+            // one the new constraint would create (`keeps_text_layout_for`).
+            if !this.keeps_text_layout_for(deflated_size) {
+                this.dispose_text_layout();
+            }
             this.constraint.set(deflated_size);
 
             // Force arrange so text will be properly aligned.
@@ -197,10 +205,13 @@ impl LayoutableImpl for TextBlock {
         // for the very same constraint and alignment (and has not been
         // invalidated since) is that layout already, so it is kept: nothing
         // is laid out again when the arranged size is the measured one.
-        if this.constraint.get() != available_size
-            || this.layout_text_alignment.get() != this.resolve_text_alignment(this.text_alignment())
-        {
+        if this.layout_text_alignment.get() != this.resolve_text_alignment(this.text_alignment()) {
             this.dispose_text_layout();
+            this.constraint.set(available_size);
+        } else if this.constraint.get() != available_size {
+            if !this.keeps_text_layout_for(available_size) {
+                this.dispose_text_layout();
+            }
             this.constraint.set(available_size);
         }
 
@@ -312,6 +323,7 @@ impl TextBlockImpl for TextBlock {
             this.letter_spacing(),
         );
         paragraph_properties.set_line_spacing(this.line_spacing());
+        paragraph_properties.set_text_line_bounds(this.text_line_bounds());
 
         let text_source: Rc<dyn ITextSource> = if this.has_complex_content() {
             this.ensure_text_runs();
@@ -423,6 +435,19 @@ ferroui_base::ferro_properties! { impl TextBlock {
             FerroProperty::register_attached_with::<TextBlock, Control, _>(
                 "BaselineOffset",
                 StyledPropertyOptions::new(0.0).inherits(true),
+            )
+        }
+    );
+
+    ferro_property!(
+        /// Defines the `TextLineBounds` attached property: how the box of each line is bounded
+        /// above and below (a FerroUI addition after WinUI's `TextBlock.TextLineBounds`,
+        /// DEVIATIONS.md, Text block). Inherited, as the other attached text properties, so that
+        /// a content presenter sets it for the text of its content.
+        pub fn text_line_bounds_property() -> AttachedProperty<TextLineBounds> {
+            FerroProperty::register_attached_with::<TextBlock, Control, _>(
+                "TextLineBounds",
+                StyledPropertyOptions::new(TextLineBounds::Full).inherits(true),
             )
         }
     );
@@ -542,7 +567,14 @@ ferroui_base::ferro_properties! { impl TextBlock {
 
 impl TextBlock {
     fn static_constructor() {
-        Visual::clip_to_bounds_property().override_default_value::<TextBlock>(true);
+        // A FerroUI addition (DEVIATIONS.md, Text block): a text block clips to its bounds, as
+        // the reference's, unless its lines are trimmed (`TextLineBounds`), whose ink is outside
+        // their boxes by design and which WinUI draws whole.
+        Visual::clip_to_bounds_property().override_metadata::<TextBlock>(
+            StyledPropertyMetadata::new(Some(true)).with_coerce(|object: &FerroObject, clip: bool| {
+                clip && object.get_value(Self::text_line_bounds_property()) == TextLineBounds::Full
+            }),
+        );
 
         Visual::affects_render::<TextBlock>(&[
             Self::background_property().as_property(),
@@ -839,6 +871,27 @@ impl TextBlock {
         control.set_value(Self::baseline_offset_property(), value)
     }
 
+    /// How the box of each line is bounded: by the ascent and the descent of the font (the
+    /// default), or trimmed to the cap height above the baseline, to the baseline below it, or
+    /// both. A FerroUI addition after WinUI's `TextLineBounds`.
+    pub fn text_line_bounds(&self) -> TextLineBounds {
+        self.get_value(Self::text_line_bounds_property())
+    }
+
+    pub fn set_text_line_bounds(&self, value: TextLineBounds) {
+        self.set_value(Self::text_line_bounds_property(), value)
+    }
+
+    /// Reads the attached `TextLineBounds` property from the given control.
+    pub fn get_text_line_bounds(control: &Control) -> TextLineBounds {
+        control.get_value(Self::text_line_bounds_property())
+    }
+
+    /// Writes the attached `TextLineBounds` property to the given control.
+    pub fn set_text_line_bounds_on(control: &Control, value: TextLineBounds) {
+        control.set_value(Self::text_line_bounds_property(), value)
+    }
+
     /// Where the text block puts the height layout rounding adds to it: below its text (the
     /// default, as the reference) or above it (as WinUI). A FerroUI addition.
     pub fn layout_rounding_placement(&self) -> TextLayoutRoundingPlacement {
@@ -983,6 +1036,48 @@ impl TextBlock {
     #[allow(dead_code)] // read by the tests
     pub(crate) fn has_text_layout(&self) -> bool {
         self.text_layout.borrow().is_some()
+    }
+
+    /// Whether the current text layout is the one a layout created for
+    /// `constraint` would be, so a new constraint need not dispose it.
+    ///
+    /// A FerroUI addition (DEVIATIONS.md, Text block). The lines of a left
+    /// aligned layout that neither wraps nor trims do not depend on its width:
+    /// a line is the whole paragraph and starts at zero. Its height decides
+    /// which lines are kept (a line that ends below the maximum height is
+    /// dropped), so the layout is kept for a height between its own and the
+    /// one it was created for, or for any height it fits when it was created
+    /// without a maximum height.
+    fn keeps_text_layout_for(&self, constraint: Size) -> bool {
+        let Some(text_layout) = self.text_layout.borrow().clone() else {
+            return false;
+        };
+
+        let created_for = self.constraint.get();
+
+        if self.has_complex_content()
+            || self.text_wrapping() != TextWrapping::NoWrap
+            || !Rc::ptr_eq(&self.text_trimming(), &<dyn TextTrimming>::none())
+            || self.layout_text_alignment.get() != TextAlignment::Left
+            || created_for.width.is_nan()
+            || created_for.height.is_nan()
+            || MathUtilities::is_zero(created_for.width)
+            || MathUtilities::is_zero(created_for.height)
+            || MathUtilities::is_zero(constraint.width)
+            || MathUtilities::is_zero(constraint.height)
+            || constraint.width.is_nan()
+            || constraint.height.is_nan()
+        {
+            return false;
+        }
+
+        let height = text_layout.height();
+
+        if MathUtilities::greater_than(height, constraint.height) {
+            return false;
+        }
+
+        created_for.height == f64::INFINITY || constraint.height <= created_for.height
     }
 
     fn dispose_text_layout(&self) {

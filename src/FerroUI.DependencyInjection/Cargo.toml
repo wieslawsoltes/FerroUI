@@ -1,0 +1,27 @@
+[package]
+name = "ferroui-dependency-injection"
+description = "Microsoft.Extensions.DependencyInjection for Rust: thread-local services, scopes, keyed resolution and constructor factories, independent of the user interface"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+homepage.workspace = true
+readme.workspace = true
+keywords.workspace = true
+categories.workspace = true
+autotests = false
+
+[lib]
+path = "lib.rs"
+
+[features]
+default = []
+splat = ["dep:ferroui-splat"]
+
+[dependencies]
+ferroui-system = { workspace = true }
+ferroui-splat = { workspace = true, optional = true }
+
+[package.metadata.release]
+group = "core"

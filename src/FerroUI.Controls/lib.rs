@@ -7,6 +7,7 @@ pub mod automation;
 pub mod chrome;
 pub mod diagnostics;
 pub mod embedding;
+pub mod hosting;
 pub mod converters;
 pub mod metadata;
 pub mod notifications;
@@ -437,6 +438,8 @@ mod selectable_text_block_tests;
 mod text_block_tests;
 #[cfg(test)]
 mod text_layout_rounding_placement_tests;
+#[cfg(test)]
+mod text_line_bounds_tests;
 #[cfg(test)]
 mod label_text_tests;
 #[cfg(test)]

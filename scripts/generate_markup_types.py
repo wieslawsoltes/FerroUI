@@ -219,7 +219,7 @@ use ferroui_base::input::*;
 use ferroui_base::interactivity::*;
 use ferroui_base::media::{
     FontFamily, FontFeatureCollection, FontStretch, FontStyle, FontWeight, IBrush, TextAlignment, TextDecorationCollection,
-    TextTrimming, TextWrapping,
+    TextLineBounds, TextTrimming, TextWrapping,
 };
 use ferroui_base::metadata::{into_markup_value, MarkupDelegate, MarkupType};
 use ferroui_base::styling::*;

@@ -34,6 +34,10 @@ treedatagrid = ["dep:ferroui-controls-treedatagrid", "dep:ferroui-treedatagrid-c
 dialogs = ["dep:ferroui-dialogs"]
 # The developer tools (F12 on a window or an application in debug builds).
 diagnostics = ["dep:ferroui-diagnostics"]
+# Localhost CDP inspection and automation; no listener starts until explicitly requested.
+# The endpoint on native targets, the JavaScript bridge in the browser (each feature is gated to
+# its target inside the crate).
+devtools = ["dep:ferroui-devtools", "ferroui-devtools/browser"]
 # The reactive foundation (docs/mvvm.md): Rx, DynamicData, and ReactiveUI with its integration
 # with the controls and Splat.
 reactive = ["dep:ferroui-system", "dep:ferroui-reactive"]
@@ -69,6 +73,7 @@ ferroui-controls-treedatagrid = { workspace = true, optional = true }
 ferroui-treedatagrid-core = { workspace = true, optional = true }
 ferroui-dialogs = { workspace = true, optional = true }
 ferroui-diagnostics = { workspace = true, optional = true }
+ferroui-devtools = { workspace = true, optional = true, features = ["server"] }
 ferroui-system = { workspace = true, optional = true }
 ferroui-reactive = { workspace = true, optional = true }
 ferroui-dynamic-data = { workspace = true, optional = true }

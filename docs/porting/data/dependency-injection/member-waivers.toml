@@ -1,0 +1,146 @@
+# Only CLR-specific mechanisms are waived. Rust-equivalent operations use aliases.
+[[waive]]
+type = "Microsoft.Extensions.DependencyInjection.FromKeyedServicesAttribute"
+reason = "keyed(T,key) and inherited(T) macro parameters write Dependency metadata and lookup code instead of CLR attributes"
+
+[[waive]]
+type = "Microsoft.Extensions.DependencyInjection.ServiceKeyAttribute"
+reason = "key() macro parameter injects the current service key without a CLR attribute"
+
+[[alias]]
+type = "Microsoft.Extensions.DependencyInjection.KeyedService"
+member = "AnyKey"
+rust = ["ANY"]
+reason = "ServiceKey::ANY"
+
+[[alias]]
+type = "Microsoft.Extensions.DependencyInjection.AsyncServiceScope"
+member = ".ctor"
+rust = ["new"]
+reason = "AsyncServiceScope::new wraps an arbitrary IServiceScope"
+
+[[alias]]
+type = "Microsoft.Extensions.DependencyInjection.ServiceCollection"
+member = "Count"
+rust = ["len"]
+reason = "Rust collection naming"
+
+[[alias]]
+type = "Microsoft.Extensions.DependencyInjection.ServiceCollection"
+member = "this[]"
+rust = ["index", "index_mut"]
+reason = "Index/IndexMut implementations"
+
+[[alias]]
+type = "Microsoft.Extensions.DependencyInjection.ServiceCollection"
+member = "GetEnumerator"
+rust = ["iter"]
+reason = "Rust iterator (also IntoIterator for &ServiceCollection)"
+
+[[alias]]
+type = "Microsoft.Extensions.DependencyInjection.ServiceDescriptor"
+member = "KeyedImplementationType"
+rust = ["implementation_type"]
+reason = "one metadata accessor for both keyed and unkeyed descriptors"
+
+[[alias]]
+type = "Microsoft.Extensions.DependencyInjection.ServiceDescriptor"
+member = "KeyedImplementationInstance"
+rust = ["implementation_instance"]
+reason = "one metadata accessor for both keyed and unkeyed descriptors"
+
+[[alias]]
+type = "Microsoft.Extensions.DependencyInjection.ServiceDescriptor"
+member = "KeyedImplementationFactory"
+rust = ["implementation_factory"]
+reason = "one factory signature accepts the optional key"
+
+[[alias]]
+type = "Microsoft.Extensions.DependencyInjection.ServiceDescriptor"
+member = "ToString"
+rust = ["fmt"]
+reason = "Display and Debug"
+
+[[alias]]
+type = "Microsoft.Extensions.DependencyInjection.ServiceDescriptor"
+member = "Transient"
+rust = ["new"]
+reason = "typed factory constructor takes an explicit ServiceLifetime; instance uses instance().with_key()"
+
+[[alias]]
+type = "Microsoft.Extensions.DependencyInjection.ServiceDescriptor"
+member = "KeyedTransient"
+rust = ["keyed"]
+reason = "typed factory constructor takes an explicit ServiceLifetime; instance uses instance().with_key()"
+
+[[alias]]
+type = "Microsoft.Extensions.DependencyInjection.ServiceDescriptor"
+member = "Scoped"
+rust = ["new"]
+reason = "typed factory constructor takes an explicit ServiceLifetime; instance uses instance().with_key()"
+
+[[alias]]
+type = "Microsoft.Extensions.DependencyInjection.ServiceDescriptor"
+member = "KeyedScoped"
+rust = ["keyed"]
+reason = "typed factory constructor takes an explicit ServiceLifetime; instance uses instance().with_key()"
+
+[[alias]]
+type = "Microsoft.Extensions.DependencyInjection.ServiceDescriptor"
+member = "Singleton"
+rust = ["new"]
+reason = "typed factory constructor takes an explicit ServiceLifetime; instance uses instance().with_key()"
+
+[[alias]]
+type = "Microsoft.Extensions.DependencyInjection.ServiceDescriptor"
+member = "KeyedSingleton"
+rust = ["keyed"]
+reason = "typed factory constructor takes an explicit ServiceLifetime; instance uses instance().with_key()"
+
+[[alias]]
+type = "Microsoft.Extensions.DependencyInjection.ServiceDescriptor"
+member = "Describe"
+rust = ["new"]
+reason = "typed factory constructor takes an explicit ServiceLifetime; instance uses instance().with_key()"
+
+[[alias]]
+type = "Microsoft.Extensions.DependencyInjection.ServiceDescriptor"
+member = "DescribeKeyed"
+rust = ["keyed"]
+reason = "typed factory constructor takes an explicit ServiceLifetime; instance uses instance().with_key()"
+
+[[alias]]
+type = "Microsoft.Extensions.DependencyInjection.Extensions.ServiceCollectionDescriptorExtensions"
+member = "TryAddTransient"
+rust = ["try_add"]
+reason = "TryAdd takes a typed descriptor with the requested lifetime and optional key"
+
+[[alias]]
+type = "Microsoft.Extensions.DependencyInjection.Extensions.ServiceCollectionDescriptorExtensions"
+member = "TryAddKeyedTransient"
+rust = ["try_add"]
+reason = "TryAdd takes a typed descriptor with the requested lifetime and optional key"
+
+[[alias]]
+type = "Microsoft.Extensions.DependencyInjection.Extensions.ServiceCollectionDescriptorExtensions"
+member = "TryAddScoped"
+rust = ["try_add"]
+reason = "TryAdd takes a typed descriptor with the requested lifetime and optional key"
+
+[[alias]]
+type = "Microsoft.Extensions.DependencyInjection.Extensions.ServiceCollectionDescriptorExtensions"
+member = "TryAddKeyedScoped"
+rust = ["try_add"]
+reason = "TryAdd takes a typed descriptor with the requested lifetime and optional key"
+
+[[alias]]
+type = "Microsoft.Extensions.DependencyInjection.Extensions.ServiceCollectionDescriptorExtensions"
+member = "TryAddSingleton"
+rust = ["try_add"]
+reason = "TryAdd takes a typed descriptor with the requested lifetime and optional key"
+
+[[alias]]
+type = "Microsoft.Extensions.DependencyInjection.Extensions.ServiceCollectionDescriptorExtensions"
+member = "TryAddKeyedSingleton"
+rust = ["try_add"]
+reason = "TryAdd takes a typed descriptor with the requested lifetime and optional key"

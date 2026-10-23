@@ -180,6 +180,9 @@ impl_server_property_value!(
     crate::rendering::RendererDebugOverlays,
     crate::rendering::LayoutPassTiming,
     crate::rendering::composition::CompositionTransparencyLevel,
+    crate::rendering::composition::CompositionStretch,
+    crate::rendering::composition::CompositionBitmapInterpolationMode,
+    crate::rendering::composition::CompositionDropShadowSourcePolicy,
 );
 
 impl ServerPropertyValue for f32 {

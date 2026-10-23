@@ -11,7 +11,7 @@ use crate::ferro_markup_type;
 use crate::input::{Cursor, Key, KeyGesture, KeyModifiers, StandardCursorType};
 use crate::media::{
     BoxShadow, BoxShadows, Color, FontFamily, FontFeature, FontFeatureCollection, FontWeight, HslColor, HsvColor,
-    TextDecorationCollection, TextDecorations,
+    TextDecorationCollection, TextDecorations, TextLineBounds,
 };
 use crate::metadata::{MarkupType, MarkupTyped};
 use crate::styling::ThemeVariant;
@@ -666,6 +666,7 @@ pub(super) const TYPES: &[&MarkupType] = &[
     <Decimal as MarkupTyped>::MARKUP,
     <NumberStyles as MarkupTyped>::MARKUP,
     <Uri as MarkupTyped>::MARKUP,
+    <TextLineBounds as MarkupTyped>::MARKUP,
 ];
 
 /// Registers the nullable forms of the value types with the untyped value
@@ -706,6 +707,7 @@ pub(super) fn register_value_types() {
     ValueTypes::register_nullable::<Uri>();
     ValueTypes::register_nullable::<CultureInfo>();
     ValueTypes::register_nullable::<Rc<Cursor>>();
+    ValueTypes::register_nullable::<TextLineBounds>();
 
     // The text of a value (its `ToString()` in the managed original, what a string format
     // or a binding to text shows): the value types that define one.
@@ -745,4 +747,7 @@ pub(super) fn register_value_types() {
     ValueTypes::register_display::<Uri>();
     ValueTypes::register_display::<CultureInfo>();
     ValueTypes::register_display::<Rc<Cursor>>();
+    // The text of a text trimming is the name it parses from (`CharacterEllipsis`, `None`, ...),
+    // as the `ToString()` of the trimmings of the managed original.
+    ValueTypes::register_display::<Rc<dyn crate::media::TextTrimming>>();
 }

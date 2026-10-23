@@ -1,0 +1,287 @@
+{
+ "upstreamCommit": "6aa72daa24f66c01c3d7b6a32519e9d21396deec",
+ "inScope": {
+  "files": [
+   49,
+   49,
+   0
+  ],
+  "types": [
+   27,
+   29,
+   2
+  ],
+  "members": [
+   218,
+   222,
+   4
+  ]
+ },
+ "allProjects": {
+  "membersPresent": 218,
+  "members": 222,
+  "membersNotApplicable": 0,
+  "membersOutOfScope": 0
+ },
+ "projects": [
+  {
+   "name": "Microsoft.Extensions.DependencyInjection.Abstractions",
+   "path": "src/libraries/Microsoft.Extensions.DependencyInjection.Abstractions/src",
+   "rust": "src/FerroUI.DependencyInjection",
+   "scope": "in",
+   "detail": "full",
+   "files": [
+    24,
+    24,
+    0
+   ],
+   "types": [
+    23,
+    25,
+    2
+   ],
+   "members": [
+    204,
+    208,
+    4
+   ],
+   "interfaces": [
+    8,
+    8
+   ],
+   "propertyRegistrations": [
+    0,
+    0
+   ],
+   "routedEvents": [
+    0,
+    0
+   ],
+   "notApplicableFiles": 2,
+   "matchKinds": {
+    "alias const": 1,
+    "alias fn": 80,
+    "fn": 92,
+    "overload fn": 21,
+    "trait": 4,
+    "variant": 6
+   },
+   "presentFiles": {
+    "ActivatorUtilities.cs": [
+     "activator_utilities.rs"
+    ],
+    "AsyncServiceScope.cs": [
+     "service_provider.rs"
+    ],
+    "Extensions/ServiceCollectionDescriptorExtensions.Keyed.cs": [
+     "service_collection.rs"
+    ],
+    "Extensions/ServiceCollectionDescriptorExtensions.cs": [
+     "service_collection.rs"
+    ],
+    "FromKeyedServicesAttribute.cs": [
+     "activator_utilities.rs"
+    ],
+    "IKeyedServiceProvider.cs": [
+     "service_provider.rs",
+     "service_type.rs"
+    ],
+    "IServiceCollection.cs": [
+     "service_collection.rs"
+    ],
+    "IServiceProviderFactory.cs": [
+     "default_service_provider_factory.rs"
+    ],
+    "IServiceProviderIsKeyedService.cs": [
+     "service_type.rs"
+    ],
+    "IServiceProviderIsService.cs": [
+     "service_type.rs"
+    ],
+    "IServiceScope.cs": [
+     "service_provider.rs"
+    ],
+    "IServiceScopeFactory.cs": [
+     "service_provider.rs"
+    ],
+    "ISupportRequiredService.cs": [
+     "service_provider.rs"
+    ],
+    "ObjectFactory.cs": [
+     "activator_utilities.rs"
+    ],
+    "ObjectFactoryT.cs": [
+     "activator_utilities.rs"
+    ],
+    "ServiceCollection.cs": [
+     "service_collection.rs"
+    ],
+    "ServiceCollectionServiceExtensions.Keyed.cs": [
+     "service_collection.rs"
+    ],
+    "ServiceCollectionServiceExtensions.cs": [
+     "service_collection.rs"
+    ],
+    "ServiceDescriptor.cs": [
+     "service_descriptor.rs"
+    ],
+    "ServiceKeyAttribute.cs": [
+     "activator_utilities.rs"
+    ],
+    "ServiceKeyLookupMode.cs": [
+     "service_descriptor.rs"
+    ],
+    "ServiceLifetime.cs": [
+     "service_type.rs"
+    ],
+    "ServiceProviderKeyedServiceExtensions.cs": [
+     "service_provider.rs"
+    ],
+    "ServiceProviderServiceExtensions.cs": [
+     "service_provider.rs"
+    ]
+   },
+   "rustOnly": [
+    "splat.rs"
+   ]
+  },
+  {
+   "name": "Microsoft.Extensions.DependencyInjection",
+   "path": "src/libraries/Microsoft.Extensions.DependencyInjection/src",
+   "rust": "src/FerroUI.DependencyInjection",
+   "scope": "in",
+   "detail": "full",
+   "files": [
+    25,
+    25,
+    0
+   ],
+   "types": [
+    4,
+    4,
+    0
+   ],
+   "members": [
+    14,
+    14,
+    0
+   ],
+   "interfaces": [
+    0,
+    0
+   ],
+   "propertyRegistrations": [
+    0,
+    0
+   ],
+   "routedEvents": [
+    0,
+    0
+   ],
+   "notApplicableFiles": 13,
+   "matchKinds": {
+    "field": 2,
+    "fn": 11,
+    "trait": 1
+   },
+   "presentFiles": {
+    "DefaultServiceProviderFactory.cs": [
+     "default_service_provider_factory.rs"
+    ],
+    "ServiceCollectionContainerBuilderExtensions.cs": [
+     "service_collection.rs"
+    ],
+    "ServiceLookup/CallSiteChain.cs": [
+     "service_provider.rs"
+    ],
+    "ServiceLookup/CallSiteFactory.cs": [
+     "service_provider.rs"
+    ],
+    "ServiceLookup/CallSiteKind.cs": [
+     "service_provider.rs",
+     "service_descriptor.rs"
+    ],
+    "ServiceLookup/CallSiteResultCacheLocation.cs": [
+     "service_provider.rs",
+     "service_descriptor.rs"
+    ],
+    "ServiceLookup/CallSiteRuntimeResolver.cs": [
+     "service_provider.rs"
+    ],
+    "ServiceLookup/CallSiteValidator.cs": [
+     "service_provider.rs"
+    ],
+    "ServiceLookup/CallSiteVisitor.cs": [
+     "service_provider.rs",
+     "service_descriptor.rs"
+    ],
+    "ServiceLookup/ConstantCallSite.cs": [
+     "service_provider.rs",
+     "service_descriptor.rs"
+    ],
+    "ServiceLookup/ConstructorCallSite.cs": [
+     "service_provider.rs",
+     "service_descriptor.rs"
+    ],
+    "ServiceLookup/FactoryCallSite.cs": [
+     "service_provider.rs",
+     "service_descriptor.rs"
+    ],
+    "ServiceLookup/IEnumerableCallSite.cs": [
+     "service_provider.rs",
+     "service_descriptor.rs"
+    ],
+    "ServiceLookup/ResultCache.cs": [
+     "service_provider.rs",
+     "service_descriptor.rs"
+    ],
+    "ServiceLookup/RuntimeServiceProviderEngine.cs": [
+     "service_provider.rs",
+     "service_descriptor.rs"
+    ],
+    "ServiceLookup/ServiceCacheKey.cs": [
+     "service_provider.rs",
+     "service_descriptor.rs"
+    ],
+    "ServiceLookup/ServiceCallSite.cs": [
+     "service_provider.rs",
+     "service_descriptor.rs"
+    ],
+    "ServiceLookup/ServiceDescriptorExtensions.cs": [
+     "service_provider.rs",
+     "service_descriptor.rs"
+    ],
+    "ServiceLookup/ServiceIdentifier.cs": [
+     "service_type.rs"
+    ],
+    "ServiceLookup/ServiceProviderCallSite.cs": [
+     "service_provider.rs",
+     "service_descriptor.rs"
+    ],
+    "ServiceLookup/ServiceProviderEngine.cs": [
+     "service_provider.rs",
+     "service_descriptor.rs"
+    ],
+    "ServiceLookup/ServiceProviderEngineScope.cs": [
+     "service_provider.rs"
+    ],
+    "ServiceLookup/ThrowHelper.cs": [
+     "service_provider.rs",
+     "service_descriptor.rs"
+    ],
+    "ServiceProvider.cs": [
+     "service_provider.rs"
+    ],
+    "ServiceProviderOptions.cs": [
+     "service_provider.rs"
+    ]
+   },
+   "rustOnly": [
+    "activator_utilities.rs",
+    "splat.rs"
+   ]
+  }
+ ],
+ "unusedPathOverrides": [],
+ "unusedWaivers": []
+}

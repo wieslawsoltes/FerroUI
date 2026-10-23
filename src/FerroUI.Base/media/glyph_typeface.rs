@@ -171,6 +171,8 @@ impl GlyphTypeface {
 
         let design_em_height = Self::get_font_design_em_height(head_table.as_ref());
 
+        let cap_height = Self::get_cap_height(os2_table.as_ref(), &cmap_table, glyf_table.as_ref(), ascent, design_em_height);
+
         let metrics = FontMetrics {
             design_em_height,
             ascent,
@@ -181,6 +183,7 @@ impl GlyphTypeface {
             strikethrough_position: os2_table.as_ref().map_or(0, |os2| -(os2.strikeout_position as i32)),
             strikethrough_thickness: os2_table.as_ref().map_or(0, |os2| os2.strikeout_size as i32),
             is_fixed_pitch,
+            cap_height,
         };
 
         let font_weight = Self::get_font_weight(os2_table.as_ref(), head_table.as_ref());
@@ -556,6 +559,36 @@ impl GlyphTypeface {
         match &self.vm_table {
             Some(vm_table) => vm_table.try_get_advances(glyph_indices, advances).unwrap_or(false),
             None => false,
+        }
+    }
+
+    /// The height of the capital letters above the baseline in design units, for
+    /// `FontMetrics::cap_height` (a FerroUI addition, docs/porting/DEVIATIONS.md, Fonts): the
+    /// `sCapHeight` of the OS/2 table (version 2 and later), else the top of the outline of
+    /// "H", else seven tenths of the ascent, which is what the cap height is to the ascent in
+    /// the common fonts of the platforms.
+    fn get_cap_height(
+        os2_table: Option<&OS2Table>,
+        cmap_table: &CharacterToGlyphMap,
+        glyf_table: Option<&GlyfTable>,
+        ascent: i32,
+        design_em_height: u16,
+    ) -> i32 {
+        if let Some(os2) = os2_table {
+            if os2.version >= 2 && os2.cap_height > 0 {
+                return os2.cap_height as i32;
+            }
+        }
+
+        let outline_top = cmap_table
+            .try_get_glyph('H' as i32)
+            .and_then(|glyph| glyf_table.and_then(|table| table.try_get_glyph_bounds(glyph as i32)))
+            .map(|(_, _, _, y_max)| y_max as i32);
+
+        match outline_top {
+            Some(top) if top > 0 => top,
+            _ if ascent < 0 => (-ascent as f64 * 0.7).round() as i32,
+            _ => (design_em_height as f64 * 0.7).round() as i32,
         }
     }
 

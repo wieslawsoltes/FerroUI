@@ -247,8 +247,9 @@ them.
 Setters of properties FerroUI does not have are left out and listed in the header comment of the
 document (`UseSystemFocusVisuals` and `FocusVisualMargin` are section 4.6;
 `HorizontalScrollMode`, `ZoomMode`, `IsTextScaleFactorEnabled`, `LineStackingStrategy`,
-`TextLineBounds`, `OpticalMarginAlignment`, `AutomationProperties.AccessibilityView`,
-`ContentTransitions` have no counterpart).
+`OpticalMarginAlignment`, `AutomationProperties.AccessibilityView`, `ContentTransitions` have no
+counterpart). `TextLineBounds` is kept: it is FerroUI's `TextBlock.TextLineBounds`, an addition
+after WinUI's (docs/porting/DEVIATIONS.md, Text block).
 
 ### 4.3 Resource references
 

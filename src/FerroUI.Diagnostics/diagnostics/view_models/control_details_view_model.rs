@@ -857,16 +857,10 @@ fn group_index(group: &str) -> i32 {
     }
 }
 
-/// `PropertyComparer.Compare`: by group, then by name (ordinal).
-fn property_comparer(x: &PropertyViewModelRef, y: &PropertyViewModelRef) -> Ordering {
-    let group_x = group_index(&x.group());
-    let group_y = group_index(&y.group());
-
-    if group_x != group_y {
-        group_x.cmp(&group_y)
-    } else {
-        x.name().cmp(&y.name())
-    }
+/// `PropertyComparer.Compare` as a sort key: by the index of the group, then by the name
+/// (ordinal).
+fn property_sort_key(property: &PropertyViewModelRef) -> (i32, String) {
+    (group_index(&property.group()), property.name())
 }
 
 /// A row of the property grid: a group of properties, or a property of a group.
@@ -1282,7 +1276,9 @@ impl PropertiesView {
 
         let mut properties: Vec<PropertyViewModelRef> =
             self.properties.iter().filter(|property| (self.filter)(*property)).cloned().collect();
-        properties.sort_by(property_comparer);
+        // `PropertyComparer`, with the keys of each property read once (a stable sort, as
+        // `sort_by`): the group and the name are new strings at every read.
+        properties.sort_by_cached_key(property_sort_key);
 
         let mut groups: Vec<(String, Vec<Rc<PropertiesViewItem>>)> = Vec::new();
         for property in properties {

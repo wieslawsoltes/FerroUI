@@ -9,6 +9,7 @@ use ferroui_base::data::core::ValueTypes;
 use ferroui_base::input::{InputElementImpl, PointerPressedEventArgs, TappedEventArgs};
 use ferroui_base::interactivity::{IRoutedEventArgs, InteractiveImpl};
 use ferroui_base::layout::LayoutableImpl;
+use ferroui_base::StyledElementImplExt;
 use ferroui_base::{
     ferro_class, ferro_class_info, ferro_impl_classes, instantiate, BoxedValue, FerroObjectImpl, Ref,
     StyledElementImpl, VisualImpl,
@@ -28,7 +29,6 @@ pub struct ControlDetailsView {
 ferro_class!(ControlDetailsView: UserControl);
 ferro_impl_classes!(
     ControlDetailsView: FerroObjectImpl,
-    StyledElementImpl,
     VisualImpl,
     LayoutableImpl,
     InteractiveImpl,
@@ -37,6 +37,19 @@ ferro_impl_classes!(
     TemplatedControlImpl,
     ContentControlImpl
 );
+impl StyledElementImpl for ControlDetailsView {
+    fn on_data_context_changed(this: &Self) {
+        Self::parent_on_data_context_changed(this);
+
+        // Deviation (DEVIATIONS.md, Developer tools): the view is reused for the details of the next
+        // selected control (the view locator recycles it); its property grid starts at the top, as
+        // the new view of upstream does.
+        if let Some(scroll) = this.find_control::<TreeDataGrid>("DataGrid").and_then(|grid| grid.scroll()) {
+            scroll.set_offset(ferroui_base::Vector::default());
+        }
+    }
+}
+
 ferro_class_info!(ControlDetailsView {
     new: ControlDetailsView::new,
     markup: {

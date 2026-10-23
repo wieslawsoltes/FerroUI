@@ -5,6 +5,7 @@ members = [
     "src/FerroUI.Reactive",
     "src/FerroUI.Reactive.Testing",
     "src/FerroUI.Splat",
+    "src/FerroUI.DependencyInjection",
     "src/FerroUI.DynamicData",
     "src/FerroUI.ReactiveUI",
     "src/FerroUI.ReactiveUI.Testing",
@@ -19,6 +20,9 @@ members = [
     "src/FerroUI.Controls.ColorPicker",
     "src/TreeDataGrid/FerroUI.TreeDataGrid.Core",
     "src/TreeDataGrid/FerroUI.Controls.TreeDataGrid",
+    "src/StaticViewLocator/FerroUI.StaticViewLocator",
+    "src/StaticViewLocator/FerroUI.StaticViewLocator.Macros",
+    "src/StaticViewLocator/FerroUI.StaticViewLocator.Build",
     "src/Markup/FerroUI.Markup",
     "src/Markup/FerroUI.Markup.Xaml",
     "src/Markup/FerroUI.Markup.Xaml.Loader",
@@ -43,6 +47,9 @@ members = [
     "src/FerroUI.Fonts.Inter",
     "src/FerroUI.Dialogs",
     "src/FerroUI.Diagnostics",
+    "src/FerroUI.Inspect",
+    "src/FerroUI.DevTools",
+    "src/FerroUI.Mcp",
     "src/FerroUI.Themes.Simple",
     "src/FerroUI.Themes.Fluent",
     "src/FerroUI.Themes.WinUI",
@@ -58,6 +65,7 @@ members = [
     "tests/FerroUI.Markup.Xaml.UnitTests",
     "tests/FerroUI.Reactive.Tests",
     "tests/FerroUI.Splat.Tests",
+    "tests/FerroUI.DependencyInjection.Tests",
     "tests/FerroUI.DynamicData.Tests",
     "tests/FerroUI.ReactiveUI.Tests",
     "tests/FerroUI.ReactiveUI.Testing.Tests",
@@ -71,6 +79,7 @@ members = [
     "tests/FerroUI.IntegrationTests.Appium",
     "tests/FerroUI.IntegrationTests.Win32",
     "tests/FerroUI.DesignerSupport.Tests",
+    "tests/FerroUI.StaticViewLocator.Tests",
     "samples/SevenGuis/Model",
     "samples/SevenGuis/Builders/Counter",
     "samples/SevenGuis/Macros/Counter",
@@ -113,6 +122,7 @@ members = [
     "samples/TreeDataGridDemo",
     "samples/ReactiveDemo",
     "samples/ReactiveUIExample",
+    "samples/StaticViewLocatorDemo",
     "samples/TextTestApp",
     "samples/EditorDemo",
     "samples/EditorDemo.Browser",
@@ -150,9 +160,13 @@ categories = ["gui"]
 # that the crates of a release are only ever resolved together (docs/release.md, "Version scheme").
 # `scripts/release/set-version.sh <version>` writes the version above and these keys.
 [workspace.dependencies]
+ferroui-inspect = { version = "=0.4.0", path = "src/FerroUI.Inspect" }
+ferroui-devtools = { version = "=0.4.0", path = "src/FerroUI.DevTools", default-features = false }
+ferroui-mcp = { version = "=0.4.0", path = "src/FerroUI.Mcp" }
 ferroui-system = { version = "=0.4.0", path = "src/FerroUI.System" }
 ferroui-reactive = { version = "=0.4.0", path = "src/FerroUI.Reactive" }
 ferroui-reactive-testing = { version = "=0.4.0", path = "src/FerroUI.Reactive.Testing" }
+ferroui-dependency-injection = { version = "=0.4.0", path = "src/FerroUI.DependencyInjection" }
 ferroui-splat = { version = "=0.4.0", path = "src/FerroUI.Splat" }
 ferroui-dynamic-data = { version = "=0.4.0", path = "src/FerroUI.DynamicData" }
 ferroui-reactiveui = { version = "=0.4.0", path = "src/FerroUI.ReactiveUI" }
@@ -168,6 +182,9 @@ ferroui-view-macros = { version = "=0.4.0", path = "src/FerroUI.View.Macros" }
 ferroui-controls-color-picker = { version = "=0.4.0", path = "src/FerroUI.Controls.ColorPicker" }
 ferroui-treedatagrid-core = { version = "=0.4.0", path = "src/TreeDataGrid/FerroUI.TreeDataGrid.Core" }
 ferroui-controls-treedatagrid = { version = "=0.4.0", path = "src/TreeDataGrid/FerroUI.Controls.TreeDataGrid" }
+ferroui-static-view-locator = { version = "=0.4.0", path = "src/StaticViewLocator/FerroUI.StaticViewLocator" }
+ferroui-static-view-locator-macros = { version = "=0.4.0", path = "src/StaticViewLocator/FerroUI.StaticViewLocator.Macros" }
+ferroui-static-view-locator-build = { version = "=0.4.0", path = "src/StaticViewLocator/FerroUI.StaticViewLocator.Build" }
 ferroui-markup = { version = "=0.4.0", path = "src/Markup/FerroUI.Markup" }
 ferroui-markup-xaml = { version = "=0.4.0", path = "src/Markup/FerroUI.Markup.Xaml" }
 # Without the default features: the default is the run-time back end, which links the XAML runtime library

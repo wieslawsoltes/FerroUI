@@ -2,6 +2,8 @@
 
 //! `CompositionVisual`.
 //!
+//! Properties added by the FerroUI overlay (scripts/composition-schema-winui.xml): `CompositionClip`, `RotationAxis`, `RelativeOffsetAdjustment`, `RelativeSizeAdjustment`, `IsHitTestVisible`, `IsPixelSnappingEnabled`, `BorderMode`, `BackfaceVisibility`, `CompositeMode`, `ParentForTransform`.
+//!
 //! Schema attributes: abstract.
 
 use bitflags::bitflags;
@@ -14,6 +16,9 @@ use crate::media::RenderOptions;
 use crate::media::TextOptions;
 use crate::numerics::Quaternion;
 use crate::platform::IGeometryImpl;
+use crate::rendering::composition::CompositionBackfaceVisibility;
+use crate::rendering::composition::CompositionBorderMode;
+use crate::rendering::composition::CompositionCompositeMode;
 use crate::rendering::composition::ICompositionObject;
 use crate::rendering::composition::ICompositionObjectHost;
 use crate::rendering::composition::animations::AnimationInstanceFactory;
@@ -82,6 +87,19 @@ bitflags! {
         const RENDER_OPTIONS = 2147483648;
         const TEXT_OPTIONS = 4294967296;
         const CACHE_MODE = 8589934592;
+        const COMPOSITION_CLIP = 17179869184;
+        const ROTATION_AXIS = 34359738368;
+        const ROTATION_AXIS_ANIMATED = 68719476736;
+        const RELATIVE_OFFSET_ADJUSTMENT = 137438953472;
+        const RELATIVE_OFFSET_ADJUSTMENT_ANIMATED = 274877906944;
+        const RELATIVE_SIZE_ADJUSTMENT = 549755813888;
+        const RELATIVE_SIZE_ADJUSTMENT_ANIMATED = 1099511627776;
+        const IS_HIT_TEST_VISIBLE = 2199023255552;
+        const IS_PIXEL_SNAPPING_ENABLED = 4398046511104;
+        const BORDER_MODE = 8796093022208;
+        const BACKFACE_VISIBILITY = 17592186044416;
+        const COMPOSITE_MODE = 35184372088832;
+        const PARENT_FOR_TRANSFORM = 70368744177664;
     }
 }
 
@@ -189,6 +207,46 @@ pub trait CompositionVisualHooks: ICompositionObjectHost {
     fn validate_cache_mode_change(&self, _old_value: &Option<Rc<dyn ICompositionObject>>, _new_value: &Option<Rc<dyn ICompositionObject>>) {}
     fn on_cache_mode_changed(&self) {}
     fn on_cache_mode_changing(&self) {}
+
+    fn validate_composition_clip_change(&self, _old_value: &Option<Rc<dyn ICompositionObject>>, _new_value: &Option<Rc<dyn ICompositionObject>>) {}
+    fn on_composition_clip_changed(&self) {}
+    fn on_composition_clip_changing(&self) {}
+
+    fn validate_rotation_axis_change(&self, _old_value: Vector3D, _new_value: Vector3D) {}
+    fn on_rotation_axis_changed(&self) {}
+    fn on_rotation_axis_changing(&self) {}
+
+    fn validate_relative_offset_adjustment_change(&self, _old_value: Vector3D, _new_value: Vector3D) {}
+    fn on_relative_offset_adjustment_changed(&self) {}
+    fn on_relative_offset_adjustment_changing(&self) {}
+
+    fn validate_relative_size_adjustment_change(&self, _old_value: Vector, _new_value: Vector) {}
+    fn on_relative_size_adjustment_changed(&self) {}
+    fn on_relative_size_adjustment_changing(&self) {}
+
+    fn validate_is_hit_test_visible_change(&self, _old_value: bool, _new_value: bool) {}
+    fn on_is_hit_test_visible_changed(&self) {}
+    fn on_is_hit_test_visible_changing(&self) {}
+
+    fn validate_is_pixel_snapping_enabled_change(&self, _old_value: bool, _new_value: bool) {}
+    fn on_is_pixel_snapping_enabled_changed(&self) {}
+    fn on_is_pixel_snapping_enabled_changing(&self) {}
+
+    fn validate_border_mode_change(&self, _old_value: CompositionBorderMode, _new_value: CompositionBorderMode) {}
+    fn on_border_mode_changed(&self) {}
+    fn on_border_mode_changing(&self) {}
+
+    fn validate_backface_visibility_change(&self, _old_value: CompositionBackfaceVisibility, _new_value: CompositionBackfaceVisibility) {}
+    fn on_backface_visibility_changed(&self) {}
+    fn on_backface_visibility_changing(&self) {}
+
+    fn validate_composite_mode_change(&self, _old_value: CompositionCompositeMode, _new_value: CompositionCompositeMode) {}
+    fn on_composite_mode_changed(&self) {}
+    fn on_composite_mode_changing(&self) {}
+
+    fn validate_parent_for_transform_change(&self, _old_value: &Option<Rc<dyn ICompositionObject>>, _new_value: &Option<Rc<dyn ICompositionObject>>) {}
+    fn on_parent_for_transform_changed(&self) {}
+    fn on_parent_for_transform_changing(&self) {}
 }
 
 /// The UI-thread properties of `CompositionVisual`.
@@ -216,6 +274,16 @@ pub struct CompositionVisualProps {
     render_options: Cell<RenderOptions>,
     text_options: Cell<TextOptions>,
     cache_mode: RefCell<Option<Rc<dyn ICompositionObject>>>,
+    composition_clip: RefCell<Option<Rc<dyn ICompositionObject>>>,
+    rotation_axis: Cell<Vector3D>,
+    relative_offset_adjustment: Cell<Vector3D>,
+    relative_size_adjustment: Cell<Vector>,
+    is_hit_test_visible: Cell<bool>,
+    is_pixel_snapping_enabled: Cell<bool>,
+    border_mode: Cell<CompositionBorderMode>,
+    backface_visibility: Cell<CompositionBackfaceVisibility>,
+    composite_mode: Cell<CompositionCompositeMode>,
+    parent_for_transform: RefCell<Option<Rc<dyn ICompositionObject>>>,
 }
 
 impl Default for CompositionVisualProps {
@@ -253,6 +321,16 @@ impl CompositionVisualProps {
             render_options: Cell::new(Default::default()),
             text_options: Cell::new(Default::default()),
             cache_mode: RefCell::new(None),
+            composition_clip: RefCell::new(None),
+            rotation_axis: Cell::new(Default::default()),
+            relative_offset_adjustment: Cell::new(Default::default()),
+            relative_size_adjustment: Cell::new(Default::default()),
+            is_hit_test_visible: Cell::new(Default::default()),
+            is_pixel_snapping_enabled: Cell::new(Default::default()),
+            border_mode: Cell::new(Default::default()),
+            backface_visibility: Cell::new(Default::default()),
+            composite_mode: Cell::new(Default::default()),
+            parent_for_transform: RefCell::new(None),
         }
     }
 
@@ -271,6 +349,8 @@ impl CompositionVisualProps {
         self.set_orientation(host, Quaternion::IDENTITY);
         self.set_scale(host, Vector3D::new(1.0, 1.0, 1.0));
         self.set_transform_matrix(host, Matrix::IDENTITY);
+        self.set_rotation_axis(host, Vector3D::new(0.0, 0.0, 1.0));
+        self.set_is_hit_test_visible(host, true);
     }
 
     /// `Root` (internal).
@@ -1015,6 +1095,304 @@ impl CompositionVisualProps {
         }
     }
 
+    /// `CompositionClip` (FerroUI overlay).
+    pub fn composition_clip(&self) -> Option<Rc<dyn ICompositionObject>> {
+        self.composition_clip.borrow().clone()
+    }
+
+    /// Sets `CompositionClip` (FerroUI overlay).
+    pub fn set_composition_clip(&self, host: &dyn CompositionVisualHooks, value: Option<Rc<dyn ICompositionObject>>) {
+        let mut changed = false;
+        let old_value = self.composition_clip.borrow().clone();
+        if old_value.differs(&value) {
+            CompositionVisualHooks::validate_composition_clip_change(host, &old_value, &value);
+            CompositionVisualHooks::on_composition_clip_changing(host);
+            changed = true;
+            // Update the backing value
+            *self.composition_clip.borrow_mut() = value.clone();
+            // Register object for serialization in the next batch
+            self.changed_fields_of_composition_visual.set(self.changed_fields_of_composition_visual.get() | CompositionVisualChangedFields::COMPOSITION_CLIP);
+            host.register_for_serialization();
+        }
+        *self.composition_clip.borrow_mut() = value;
+        if changed {
+            CompositionVisualHooks::on_composition_clip_changed(host);
+        }
+    }
+
+    /// `RotationAxis` (animated, default `Vector3D::new(0.0, 0.0, 1.0)`, FerroUI overlay).
+    pub fn rotation_axis(&self) -> Vector3D {
+        self.rotation_axis.get()
+    }
+
+    /// Sets `RotationAxis` (animated, default `Vector3D::new(0.0, 0.0, 1.0)`, FerroUI overlay).
+    pub fn set_rotation_axis(&self, host: &dyn CompositionVisualHooks, value: Vector3D) {
+        let mut changed = false;
+        let old_value = self.rotation_axis.get();
+        if old_value.differs(&value) {
+            CompositionVisualHooks::validate_rotation_axis_change(host, old_value, value);
+            CompositionVisualHooks::on_rotation_axis_changing(host);
+            changed = true;
+            // Update the backing value
+            self.rotation_axis.set(value);
+            // Register object for serialization in the next batch
+            self.changed_fields_of_composition_visual.set(self.changed_fields_of_composition_visual.get() | CompositionVisualChangedFields::ROTATION_AXIS);
+            host.register_for_serialization();
+            // Reset previous animation if any
+            host.pending_animations().remove(ServerCompositionVisualProps::id_of_rotation_axis_property().base());
+            self.changed_fields_of_composition_visual.set(self.changed_fields_of_composition_visual.get() & !CompositionVisualChangedFields::ROTATION_AXIS_ANIMATED);
+            // Check for implicit animations
+            if let Some(animation) = host.implicit_animation("RotationAxis") {
+                // Animation affects only current property
+                if let Some(a) = animation.as_composition_animation() {
+                    self.changed_fields_of_composition_visual.set(self.changed_fields_of_composition_visual.get() | CompositionVisualChangedFields::ROTATION_AXIS_ANIMATED);
+                    host.pending_animations().set(
+                        ServerCompositionVisualProps::id_of_rotation_axis_property().base(),
+                        a.create_instance(host.server(), Some(ExpressionVariant::create(value))),
+                    );
+                }
+                // Animation is triggered by the current field, but does not necessary affects it
+                host.start_animation_group(&animation, "RotationAxis", ExpressionVariant::create(value));
+            }
+        }
+        self.rotation_axis.set(value);
+        if changed {
+            CompositionVisualHooks::on_rotation_axis_changed(host);
+        }
+    }
+
+    /// `RelativeOffsetAdjustment` (animated, FerroUI overlay).
+    pub fn relative_offset_adjustment(&self) -> Vector3D {
+        self.relative_offset_adjustment.get()
+    }
+
+    /// Sets `RelativeOffsetAdjustment` (animated, FerroUI overlay).
+    pub fn set_relative_offset_adjustment(&self, host: &dyn CompositionVisualHooks, value: Vector3D) {
+        let mut changed = false;
+        let old_value = self.relative_offset_adjustment.get();
+        if old_value.differs(&value) {
+            CompositionVisualHooks::validate_relative_offset_adjustment_change(host, old_value, value);
+            CompositionVisualHooks::on_relative_offset_adjustment_changing(host);
+            changed = true;
+            // Update the backing value
+            self.relative_offset_adjustment.set(value);
+            // Register object for serialization in the next batch
+            self.changed_fields_of_composition_visual.set(self.changed_fields_of_composition_visual.get() | CompositionVisualChangedFields::RELATIVE_OFFSET_ADJUSTMENT);
+            host.register_for_serialization();
+            // Reset previous animation if any
+            host.pending_animations().remove(ServerCompositionVisualProps::id_of_relative_offset_adjustment_property().base());
+            self.changed_fields_of_composition_visual.set(self.changed_fields_of_composition_visual.get() & !CompositionVisualChangedFields::RELATIVE_OFFSET_ADJUSTMENT_ANIMATED);
+            // Check for implicit animations
+            if let Some(animation) = host.implicit_animation("RelativeOffsetAdjustment") {
+                // Animation affects only current property
+                if let Some(a) = animation.as_composition_animation() {
+                    self.changed_fields_of_composition_visual.set(self.changed_fields_of_composition_visual.get() | CompositionVisualChangedFields::RELATIVE_OFFSET_ADJUSTMENT_ANIMATED);
+                    host.pending_animations().set(
+                        ServerCompositionVisualProps::id_of_relative_offset_adjustment_property().base(),
+                        a.create_instance(host.server(), Some(ExpressionVariant::create(value))),
+                    );
+                }
+                // Animation is triggered by the current field, but does not necessary affects it
+                host.start_animation_group(&animation, "RelativeOffsetAdjustment", ExpressionVariant::create(value));
+            }
+        }
+        self.relative_offset_adjustment.set(value);
+        if changed {
+            CompositionVisualHooks::on_relative_offset_adjustment_changed(host);
+        }
+    }
+
+    /// `RelativeSizeAdjustment` (animated, FerroUI overlay).
+    pub fn relative_size_adjustment(&self) -> Vector {
+        self.relative_size_adjustment.get()
+    }
+
+    /// Sets `RelativeSizeAdjustment` (animated, FerroUI overlay).
+    pub fn set_relative_size_adjustment(&self, host: &dyn CompositionVisualHooks, value: Vector) {
+        let mut changed = false;
+        let old_value = self.relative_size_adjustment.get();
+        if old_value.differs(&value) {
+            CompositionVisualHooks::validate_relative_size_adjustment_change(host, old_value, value);
+            CompositionVisualHooks::on_relative_size_adjustment_changing(host);
+            changed = true;
+            // Update the backing value
+            self.relative_size_adjustment.set(value);
+            // Register object for serialization in the next batch
+            self.changed_fields_of_composition_visual.set(self.changed_fields_of_composition_visual.get() | CompositionVisualChangedFields::RELATIVE_SIZE_ADJUSTMENT);
+            host.register_for_serialization();
+            // Reset previous animation if any
+            host.pending_animations().remove(ServerCompositionVisualProps::id_of_relative_size_adjustment_property().base());
+            self.changed_fields_of_composition_visual.set(self.changed_fields_of_composition_visual.get() & !CompositionVisualChangedFields::RELATIVE_SIZE_ADJUSTMENT_ANIMATED);
+            // Check for implicit animations
+            if let Some(animation) = host.implicit_animation("RelativeSizeAdjustment") {
+                // Animation affects only current property
+                if let Some(a) = animation.as_composition_animation() {
+                    self.changed_fields_of_composition_visual.set(self.changed_fields_of_composition_visual.get() | CompositionVisualChangedFields::RELATIVE_SIZE_ADJUSTMENT_ANIMATED);
+                    host.pending_animations().set(
+                        ServerCompositionVisualProps::id_of_relative_size_adjustment_property().base(),
+                        a.create_instance(host.server(), Some(ExpressionVariant::create(value))),
+                    );
+                }
+                // Animation is triggered by the current field, but does not necessary affects it
+                host.start_animation_group(&animation, "RelativeSizeAdjustment", ExpressionVariant::create(value));
+            }
+        }
+        self.relative_size_adjustment.set(value);
+        if changed {
+            CompositionVisualHooks::on_relative_size_adjustment_changed(host);
+        }
+    }
+
+    /// `IsHitTestVisible` (default `true`, FerroUI overlay).
+    pub fn is_hit_test_visible(&self) -> bool {
+        self.is_hit_test_visible.get()
+    }
+
+    /// Sets `IsHitTestVisible` (default `true`, FerroUI overlay).
+    pub fn set_is_hit_test_visible(&self, host: &dyn CompositionVisualHooks, value: bool) {
+        let mut changed = false;
+        let old_value = self.is_hit_test_visible.get();
+        if old_value.differs(&value) {
+            CompositionVisualHooks::validate_is_hit_test_visible_change(host, old_value, value);
+            CompositionVisualHooks::on_is_hit_test_visible_changing(host);
+            changed = true;
+            // Update the backing value
+            self.is_hit_test_visible.set(value);
+            // Register object for serialization in the next batch
+            self.changed_fields_of_composition_visual.set(self.changed_fields_of_composition_visual.get() | CompositionVisualChangedFields::IS_HIT_TEST_VISIBLE);
+            host.register_for_serialization();
+        }
+        self.is_hit_test_visible.set(value);
+        if changed {
+            CompositionVisualHooks::on_is_hit_test_visible_changed(host);
+        }
+    }
+
+    /// `IsPixelSnappingEnabled` (FerroUI overlay).
+    pub fn is_pixel_snapping_enabled(&self) -> bool {
+        self.is_pixel_snapping_enabled.get()
+    }
+
+    /// Sets `IsPixelSnappingEnabled` (FerroUI overlay).
+    pub fn set_is_pixel_snapping_enabled(&self, host: &dyn CompositionVisualHooks, value: bool) {
+        let mut changed = false;
+        let old_value = self.is_pixel_snapping_enabled.get();
+        if old_value.differs(&value) {
+            CompositionVisualHooks::validate_is_pixel_snapping_enabled_change(host, old_value, value);
+            CompositionVisualHooks::on_is_pixel_snapping_enabled_changing(host);
+            changed = true;
+            // Update the backing value
+            self.is_pixel_snapping_enabled.set(value);
+            // Register object for serialization in the next batch
+            self.changed_fields_of_composition_visual.set(self.changed_fields_of_composition_visual.get() | CompositionVisualChangedFields::IS_PIXEL_SNAPPING_ENABLED);
+            host.register_for_serialization();
+        }
+        self.is_pixel_snapping_enabled.set(value);
+        if changed {
+            CompositionVisualHooks::on_is_pixel_snapping_enabled_changed(host);
+        }
+    }
+
+    /// `BorderMode` (FerroUI overlay).
+    pub fn border_mode(&self) -> CompositionBorderMode {
+        self.border_mode.get()
+    }
+
+    /// Sets `BorderMode` (FerroUI overlay).
+    pub fn set_border_mode(&self, host: &dyn CompositionVisualHooks, value: CompositionBorderMode) {
+        let mut changed = false;
+        let old_value = self.border_mode.get();
+        if old_value.differs(&value) {
+            CompositionVisualHooks::validate_border_mode_change(host, old_value, value);
+            CompositionVisualHooks::on_border_mode_changing(host);
+            changed = true;
+            // Update the backing value
+            self.border_mode.set(value);
+            // Register object for serialization in the next batch
+            self.changed_fields_of_composition_visual.set(self.changed_fields_of_composition_visual.get() | CompositionVisualChangedFields::BORDER_MODE);
+            host.register_for_serialization();
+        }
+        self.border_mode.set(value);
+        if changed {
+            CompositionVisualHooks::on_border_mode_changed(host);
+        }
+    }
+
+    /// `BackfaceVisibility` (FerroUI overlay).
+    pub fn backface_visibility(&self) -> CompositionBackfaceVisibility {
+        self.backface_visibility.get()
+    }
+
+    /// Sets `BackfaceVisibility` (FerroUI overlay).
+    pub fn set_backface_visibility(&self, host: &dyn CompositionVisualHooks, value: CompositionBackfaceVisibility) {
+        let mut changed = false;
+        let old_value = self.backface_visibility.get();
+        if old_value.differs(&value) {
+            CompositionVisualHooks::validate_backface_visibility_change(host, old_value, value);
+            CompositionVisualHooks::on_backface_visibility_changing(host);
+            changed = true;
+            // Update the backing value
+            self.backface_visibility.set(value);
+            // Register object for serialization in the next batch
+            self.changed_fields_of_composition_visual.set(self.changed_fields_of_composition_visual.get() | CompositionVisualChangedFields::BACKFACE_VISIBILITY);
+            host.register_for_serialization();
+        }
+        self.backface_visibility.set(value);
+        if changed {
+            CompositionVisualHooks::on_backface_visibility_changed(host);
+        }
+    }
+
+    /// `CompositeMode` (FerroUI overlay).
+    pub fn composite_mode(&self) -> CompositionCompositeMode {
+        self.composite_mode.get()
+    }
+
+    /// Sets `CompositeMode` (FerroUI overlay).
+    pub fn set_composite_mode(&self, host: &dyn CompositionVisualHooks, value: CompositionCompositeMode) {
+        let mut changed = false;
+        let old_value = self.composite_mode.get();
+        if old_value.differs(&value) {
+            CompositionVisualHooks::validate_composite_mode_change(host, old_value, value);
+            CompositionVisualHooks::on_composite_mode_changing(host);
+            changed = true;
+            // Update the backing value
+            self.composite_mode.set(value);
+            // Register object for serialization in the next batch
+            self.changed_fields_of_composition_visual.set(self.changed_fields_of_composition_visual.get() | CompositionVisualChangedFields::COMPOSITE_MODE);
+            host.register_for_serialization();
+        }
+        self.composite_mode.set(value);
+        if changed {
+            CompositionVisualHooks::on_composite_mode_changed(host);
+        }
+    }
+
+    /// `ParentForTransform` (FerroUI overlay).
+    pub fn parent_for_transform(&self) -> Option<Rc<dyn ICompositionObject>> {
+        self.parent_for_transform.borrow().clone()
+    }
+
+    /// Sets `ParentForTransform` (FerroUI overlay).
+    pub fn set_parent_for_transform(&self, host: &dyn CompositionVisualHooks, value: Option<Rc<dyn ICompositionObject>>) {
+        let mut changed = false;
+        let old_value = self.parent_for_transform.borrow().clone();
+        if old_value.differs(&value) {
+            CompositionVisualHooks::validate_parent_for_transform_change(host, &old_value, &value);
+            CompositionVisualHooks::on_parent_for_transform_changing(host);
+            changed = true;
+            // Update the backing value
+            *self.parent_for_transform.borrow_mut() = value.clone();
+            // Register object for serialization in the next batch
+            self.changed_fields_of_composition_visual.set(self.changed_fields_of_composition_visual.get() | CompositionVisualChangedFields::PARENT_FOR_TRANSFORM);
+            host.register_for_serialization();
+        }
+        *self.parent_for_transform.borrow_mut() = value;
+        if changed {
+            CompositionVisualHooks::on_parent_for_transform_changed(host);
+        }
+    }
+
     /// Connects an animation with the named property. Returns `false` when
     /// neither this class nor its generated bases have an animated property
     /// of that name: the caller continues with its hand-written base.
@@ -1106,6 +1484,27 @@ impl CompositionVisualProps {
             let server = animation.create_instance(host.server(), final_value);
             host.pending_animations().set(ServerCompositionVisualProps::id_of_transform_matrix_property().base(), server);
             self.changed_fields_of_composition_visual.set(self.changed_fields_of_composition_visual.get() | CompositionVisualChangedFields::TRANSFORM_MATRIX_ANIMATED);
+            host.register_for_serialization();
+            return true;
+        }
+        if property_name == "RotationAxis" {
+            let server = animation.create_instance(host.server(), final_value);
+            host.pending_animations().set(ServerCompositionVisualProps::id_of_rotation_axis_property().base(), server);
+            self.changed_fields_of_composition_visual.set(self.changed_fields_of_composition_visual.get() | CompositionVisualChangedFields::ROTATION_AXIS_ANIMATED);
+            host.register_for_serialization();
+            return true;
+        }
+        if property_name == "RelativeOffsetAdjustment" {
+            let server = animation.create_instance(host.server(), final_value);
+            host.pending_animations().set(ServerCompositionVisualProps::id_of_relative_offset_adjustment_property().base(), server);
+            self.changed_fields_of_composition_visual.set(self.changed_fields_of_composition_visual.get() | CompositionVisualChangedFields::RELATIVE_OFFSET_ADJUSTMENT_ANIMATED);
+            host.register_for_serialization();
+            return true;
+        }
+        if property_name == "RelativeSizeAdjustment" {
+            let server = animation.create_instance(host.server(), final_value);
+            host.pending_animations().set(ServerCompositionVisualProps::id_of_relative_size_adjustment_property().base(), server);
+            self.changed_fields_of_composition_visual.set(self.changed_fields_of_composition_visual.get() | CompositionVisualChangedFields::RELATIVE_SIZE_ADJUSTMENT_ANIMATED);
             host.register_for_serialization();
             return true;
         }
@@ -1207,6 +1606,42 @@ impl CompositionVisualProps {
         if changed.contains(CompositionVisualChangedFields::CACHE_MODE) {
             writer.write_server_object(self.cache_mode.borrow().clone().map(|o| o.server()));
         }
+        if changed.contains(CompositionVisualChangedFields::COMPOSITION_CLIP) {
+            writer.write_server_object(self.composition_clip.borrow().clone().map(|o| o.server()));
+        }
+        if changed.contains(CompositionVisualChangedFields::ROTATION_AXIS_ANIMATED) {
+            writer.write_value(host.pending_animations().get_and_remove(ServerCompositionVisualProps::id_of_rotation_axis_property().base()));
+        } else if changed.contains(CompositionVisualChangedFields::ROTATION_AXIS) {
+            writer.write(self.rotation_axis.get());
+        }
+        if changed.contains(CompositionVisualChangedFields::RELATIVE_OFFSET_ADJUSTMENT_ANIMATED) {
+            writer.write_value(host.pending_animations().get_and_remove(ServerCompositionVisualProps::id_of_relative_offset_adjustment_property().base()));
+        } else if changed.contains(CompositionVisualChangedFields::RELATIVE_OFFSET_ADJUSTMENT) {
+            writer.write(self.relative_offset_adjustment.get());
+        }
+        if changed.contains(CompositionVisualChangedFields::RELATIVE_SIZE_ADJUSTMENT_ANIMATED) {
+            writer.write_value(host.pending_animations().get_and_remove(ServerCompositionVisualProps::id_of_relative_size_adjustment_property().base()));
+        } else if changed.contains(CompositionVisualChangedFields::RELATIVE_SIZE_ADJUSTMENT) {
+            writer.write(self.relative_size_adjustment.get());
+        }
+        if changed.contains(CompositionVisualChangedFields::IS_HIT_TEST_VISIBLE) {
+            writer.write(self.is_hit_test_visible.get());
+        }
+        if changed.contains(CompositionVisualChangedFields::IS_PIXEL_SNAPPING_ENABLED) {
+            writer.write(self.is_pixel_snapping_enabled.get());
+        }
+        if changed.contains(CompositionVisualChangedFields::BORDER_MODE) {
+            writer.write(self.border_mode.get());
+        }
+        if changed.contains(CompositionVisualChangedFields::BACKFACE_VISIBILITY) {
+            writer.write(self.backface_visibility.get());
+        }
+        if changed.contains(CompositionVisualChangedFields::COMPOSITE_MODE) {
+            writer.write(self.composite_mode.get());
+        }
+        if changed.contains(CompositionVisualChangedFields::PARENT_FOR_TRANSFORM) {
+            writer.write_server_object(self.parent_for_transform.borrow().clone().map(|o| o.server()));
+        }
         self.changed_fields_of_composition_visual.set(CompositionVisualChangedFields::empty());
     }
 }
@@ -1246,6 +1681,27 @@ pub trait ServerCompositionVisualHooks: IServerAnimatedPropertyHost {
 
     fn on_cache_mode_changed(&self) {}
     fn on_cache_mode_changing(&self) {}
+
+    fn on_composition_clip_changed(&self) {}
+    fn on_composition_clip_changing(&self) {}
+
+    fn on_is_hit_test_visible_changed(&self) {}
+    fn on_is_hit_test_visible_changing(&self) {}
+
+    fn on_is_pixel_snapping_enabled_changed(&self) {}
+    fn on_is_pixel_snapping_enabled_changing(&self) {}
+
+    fn on_border_mode_changed(&self) {}
+    fn on_border_mode_changing(&self) {}
+
+    fn on_backface_visibility_changed(&self) {}
+    fn on_backface_visibility_changing(&self) {}
+
+    fn on_composite_mode_changed(&self) {}
+    fn on_composite_mode_changing(&self) {}
+
+    fn on_parent_for_transform_changed(&self) {}
+    fn on_parent_for_transform_changing(&self) {}
 }
 
 /// The server-side properties of `ServerCompositionVisual`.
@@ -1272,6 +1728,16 @@ pub struct ServerCompositionVisualProps {
     render_options: Cell<RenderOptions>,
     text_options: Cell<TextOptions>,
     cache_mode: RefCell<Option<Rc<dyn IServerObject>>>,
+    composition_clip: RefCell<Option<Rc<dyn IServerObject>>>,
+    rotation_axis: Cell<Vector3D>,
+    relative_offset_adjustment: Cell<Vector3D>,
+    relative_size_adjustment: Cell<Vector>,
+    is_hit_test_visible: Cell<bool>,
+    is_pixel_snapping_enabled: Cell<bool>,
+    border_mode: Cell<CompositionBorderMode>,
+    backface_visibility: Cell<CompositionBackfaceVisibility>,
+    composite_mode: Cell<CompositionCompositeMode>,
+    parent_for_transform: RefCell<Option<Rc<dyn IServerObject>>>,
 }
 
 impl Default for ServerCompositionVisualProps {
@@ -1307,6 +1773,16 @@ impl ServerCompositionVisualProps {
             render_options: Cell::new(Default::default()),
             text_options: Cell::new(Default::default()),
             cache_mode: RefCell::new(None),
+            composition_clip: RefCell::new(None),
+            rotation_axis: Cell::new(Default::default()),
+            relative_offset_adjustment: Cell::new(Default::default()),
+            relative_size_adjustment: Cell::new(Default::default()),
+            is_hit_test_visible: Cell::new(Default::default()),
+            is_pixel_snapping_enabled: Cell::new(Default::default()),
+            border_mode: Cell::new(Default::default()),
+            backface_visibility: Cell::new(Default::default()),
+            composite_mode: Cell::new(Default::default()),
+            parent_for_transform: RefCell::new(None),
         }
     }
 
@@ -2029,6 +2505,368 @@ impl ServerCompositionVisualProps {
         }
     }
 
+    /// The composition property of `CompositionClip`.
+    pub fn id_of_composition_clip_property() -> &'static CompositionPropertyOf<Option<Rc<dyn IServerObject>>> {
+        static PROPERTY: OnceLock<CompositionPropertyOf<Option<Rc<dyn IServerObject>>>> = OnceLock::new();
+        PROPERTY.get_or_init(|| {
+            CompositionProperty::register::<ServerCompositionVisualProps, Option<Rc<dyn IServerObject>>>(
+                "CompositionClip",
+                "ServerCompositionVisual",
+                |obj| props_of::<ServerCompositionVisualProps>(obj).composition_clip.borrow().clone(),
+                |obj, v| *props_of::<ServerCompositionVisualProps>(obj).composition_clip.borrow_mut() = v,
+                None,
+                None,
+            )
+        })
+    }
+
+    /// `CompositionClip`.
+    pub fn composition_clip(&self) -> Option<Rc<dyn IServerObject>> {
+        self.composition_clip.borrow().clone()
+    }
+
+    pub fn set_composition_clip(&self, host: &dyn ServerCompositionVisualHooks, value: Option<Rc<dyn IServerObject>>) {
+        let old_value = self.composition_clip.borrow().clone();
+        let mut changed = false;
+        if old_value.differs(&value) {
+            ServerCompositionVisualHooks::on_composition_clip_changing(host);
+            changed = true;
+        }
+        host.set_value(
+            Self::id_of_composition_clip_property().base(),
+            ServerValueChange {
+                equal: old_value.default_equals(&value),
+                old_resource: old_value.as_server_render_resource(),
+                new_resource: value.as_server_render_resource(),
+                assign: &mut || *self.composition_clip.borrow_mut() = value.clone(),
+            },
+        );
+        if changed {
+            ServerCompositionVisualHooks::on_composition_clip_changed(host);
+        }
+    }
+
+    /// The composition property of `RotationAxis`.
+    pub fn id_of_rotation_axis_property() -> &'static CompositionPropertyOf<Vector3D> {
+        static PROPERTY: OnceLock<CompositionPropertyOf<Vector3D>> = OnceLock::new();
+        PROPERTY.get_or_init(|| {
+            CompositionProperty::register::<ServerCompositionVisualProps, Vector3D>(
+                "RotationAxis",
+                "ServerCompositionVisual",
+                |obj| props_of::<ServerCompositionVisualProps>(obj).rotation_axis.get(),
+                |obj, v| props_of::<ServerCompositionVisualProps>(obj).rotation_axis.set(v),
+                Some(|obj| ExpressionVariant::create(props_of::<ServerCompositionVisualProps>(obj).rotation_axis.get())),
+                Some(|obj, v: ExpressionVariant| props_of::<ServerCompositionVisualProps>(obj).rotation_axis.set(v.cast_or_default::<Vector3D>())),
+            )
+        })
+    }
+
+    /// `RotationAxis` (animated).
+    pub fn rotation_axis(&self) -> Vector3D {
+        self.rotation_axis.get()
+    }
+
+    pub fn set_rotation_axis(&self, host: &dyn ServerCompositionVisualHooks, value: Vector3D) {
+        self.rotation_axis.set(value);
+        host.remove_animation_for_property(Self::id_of_rotation_axis_property().base());
+    }
+
+    /// The composition property of `RelativeOffsetAdjustment`.
+    pub fn id_of_relative_offset_adjustment_property() -> &'static CompositionPropertyOf<Vector3D> {
+        static PROPERTY: OnceLock<CompositionPropertyOf<Vector3D>> = OnceLock::new();
+        PROPERTY.get_or_init(|| {
+            CompositionProperty::register::<ServerCompositionVisualProps, Vector3D>(
+                "RelativeOffsetAdjustment",
+                "ServerCompositionVisual",
+                |obj| props_of::<ServerCompositionVisualProps>(obj).relative_offset_adjustment.get(),
+                |obj, v| props_of::<ServerCompositionVisualProps>(obj).relative_offset_adjustment.set(v),
+                Some(|obj| ExpressionVariant::create(props_of::<ServerCompositionVisualProps>(obj).relative_offset_adjustment.get())),
+                Some(|obj, v: ExpressionVariant| props_of::<ServerCompositionVisualProps>(obj).relative_offset_adjustment.set(v.cast_or_default::<Vector3D>())),
+            )
+        })
+    }
+
+    /// `RelativeOffsetAdjustment` (animated).
+    pub fn relative_offset_adjustment(&self) -> Vector3D {
+        self.relative_offset_adjustment.get()
+    }
+
+    pub fn set_relative_offset_adjustment(&self, host: &dyn ServerCompositionVisualHooks, value: Vector3D) {
+        self.relative_offset_adjustment.set(value);
+        host.remove_animation_for_property(Self::id_of_relative_offset_adjustment_property().base());
+    }
+
+    /// The composition property of `RelativeSizeAdjustment`.
+    pub fn id_of_relative_size_adjustment_property() -> &'static CompositionPropertyOf<Vector> {
+        static PROPERTY: OnceLock<CompositionPropertyOf<Vector>> = OnceLock::new();
+        PROPERTY.get_or_init(|| {
+            CompositionProperty::register::<ServerCompositionVisualProps, Vector>(
+                "RelativeSizeAdjustment",
+                "ServerCompositionVisual",
+                |obj| props_of::<ServerCompositionVisualProps>(obj).relative_size_adjustment.get(),
+                |obj, v| props_of::<ServerCompositionVisualProps>(obj).relative_size_adjustment.set(v),
+                Some(|obj| ExpressionVariant::create(props_of::<ServerCompositionVisualProps>(obj).relative_size_adjustment.get())),
+                Some(|obj, v: ExpressionVariant| props_of::<ServerCompositionVisualProps>(obj).relative_size_adjustment.set(v.cast_or_default::<Vector>())),
+            )
+        })
+    }
+
+    /// `RelativeSizeAdjustment` (animated).
+    pub fn relative_size_adjustment(&self) -> Vector {
+        self.relative_size_adjustment.get()
+    }
+
+    pub fn set_relative_size_adjustment(&self, host: &dyn ServerCompositionVisualHooks, value: Vector) {
+        self.relative_size_adjustment.set(value);
+        host.remove_animation_for_property(Self::id_of_relative_size_adjustment_property().base());
+    }
+
+    /// The composition property of `IsHitTestVisible`.
+    pub fn id_of_is_hit_test_visible_property() -> &'static CompositionPropertyOf<bool> {
+        static PROPERTY: OnceLock<CompositionPropertyOf<bool>> = OnceLock::new();
+        PROPERTY.get_or_init(|| {
+            CompositionProperty::register::<ServerCompositionVisualProps, bool>(
+                "IsHitTestVisible",
+                "ServerCompositionVisual",
+                |obj| props_of::<ServerCompositionVisualProps>(obj).is_hit_test_visible.get(),
+                |obj, v| props_of::<ServerCompositionVisualProps>(obj).is_hit_test_visible.set(v),
+                Some(|obj| ExpressionVariant::create(props_of::<ServerCompositionVisualProps>(obj).is_hit_test_visible.get())),
+                None,
+            )
+        })
+    }
+
+    /// `IsHitTestVisible`.
+    pub fn is_hit_test_visible(&self) -> bool {
+        self.is_hit_test_visible.get()
+    }
+
+    pub fn set_is_hit_test_visible(&self, host: &dyn ServerCompositionVisualHooks, value: bool) {
+        let old_value = self.is_hit_test_visible.get();
+        let mut changed = false;
+        if old_value.differs(&value) {
+            ServerCompositionVisualHooks::on_is_hit_test_visible_changing(host);
+            changed = true;
+        }
+        host.set_value(
+            Self::id_of_is_hit_test_visible_property().base(),
+            ServerValueChange {
+                equal: old_value.default_equals(&value),
+                old_resource: None,
+                new_resource: None,
+                assign: &mut || self.is_hit_test_visible.set(value),
+            },
+        );
+        if changed {
+            ServerCompositionVisualHooks::on_is_hit_test_visible_changed(host);
+        }
+    }
+
+    /// The composition property of `IsPixelSnappingEnabled`.
+    pub fn id_of_is_pixel_snapping_enabled_property() -> &'static CompositionPropertyOf<bool> {
+        static PROPERTY: OnceLock<CompositionPropertyOf<bool>> = OnceLock::new();
+        PROPERTY.get_or_init(|| {
+            CompositionProperty::register::<ServerCompositionVisualProps, bool>(
+                "IsPixelSnappingEnabled",
+                "ServerCompositionVisual",
+                |obj| props_of::<ServerCompositionVisualProps>(obj).is_pixel_snapping_enabled.get(),
+                |obj, v| props_of::<ServerCompositionVisualProps>(obj).is_pixel_snapping_enabled.set(v),
+                Some(|obj| ExpressionVariant::create(props_of::<ServerCompositionVisualProps>(obj).is_pixel_snapping_enabled.get())),
+                None,
+            )
+        })
+    }
+
+    /// `IsPixelSnappingEnabled`.
+    pub fn is_pixel_snapping_enabled(&self) -> bool {
+        self.is_pixel_snapping_enabled.get()
+    }
+
+    pub fn set_is_pixel_snapping_enabled(&self, host: &dyn ServerCompositionVisualHooks, value: bool) {
+        let old_value = self.is_pixel_snapping_enabled.get();
+        let mut changed = false;
+        if old_value.differs(&value) {
+            ServerCompositionVisualHooks::on_is_pixel_snapping_enabled_changing(host);
+            changed = true;
+        }
+        host.set_value(
+            Self::id_of_is_pixel_snapping_enabled_property().base(),
+            ServerValueChange {
+                equal: old_value.default_equals(&value),
+                old_resource: None,
+                new_resource: None,
+                assign: &mut || self.is_pixel_snapping_enabled.set(value),
+            },
+        );
+        if changed {
+            ServerCompositionVisualHooks::on_is_pixel_snapping_enabled_changed(host);
+        }
+    }
+
+    /// The composition property of `BorderMode`.
+    pub fn id_of_border_mode_property() -> &'static CompositionPropertyOf<CompositionBorderMode> {
+        static PROPERTY: OnceLock<CompositionPropertyOf<CompositionBorderMode>> = OnceLock::new();
+        PROPERTY.get_or_init(|| {
+            CompositionProperty::register::<ServerCompositionVisualProps, CompositionBorderMode>(
+                "BorderMode",
+                "ServerCompositionVisual",
+                |obj| props_of::<ServerCompositionVisualProps>(obj).border_mode.get(),
+                |obj, v| props_of::<ServerCompositionVisualProps>(obj).border_mode.set(v),
+                None,
+                None,
+            )
+        })
+    }
+
+    /// `BorderMode`.
+    pub fn border_mode(&self) -> CompositionBorderMode {
+        self.border_mode.get()
+    }
+
+    pub fn set_border_mode(&self, host: &dyn ServerCompositionVisualHooks, value: CompositionBorderMode) {
+        let old_value = self.border_mode.get();
+        let mut changed = false;
+        if old_value.differs(&value) {
+            ServerCompositionVisualHooks::on_border_mode_changing(host);
+            changed = true;
+        }
+        host.set_value(
+            Self::id_of_border_mode_property().base(),
+            ServerValueChange {
+                equal: old_value.default_equals(&value),
+                old_resource: None,
+                new_resource: None,
+                assign: &mut || self.border_mode.set(value),
+            },
+        );
+        if changed {
+            ServerCompositionVisualHooks::on_border_mode_changed(host);
+        }
+    }
+
+    /// The composition property of `BackfaceVisibility`.
+    pub fn id_of_backface_visibility_property() -> &'static CompositionPropertyOf<CompositionBackfaceVisibility> {
+        static PROPERTY: OnceLock<CompositionPropertyOf<CompositionBackfaceVisibility>> = OnceLock::new();
+        PROPERTY.get_or_init(|| {
+            CompositionProperty::register::<ServerCompositionVisualProps, CompositionBackfaceVisibility>(
+                "BackfaceVisibility",
+                "ServerCompositionVisual",
+                |obj| props_of::<ServerCompositionVisualProps>(obj).backface_visibility.get(),
+                |obj, v| props_of::<ServerCompositionVisualProps>(obj).backface_visibility.set(v),
+                None,
+                None,
+            )
+        })
+    }
+
+    /// `BackfaceVisibility`.
+    pub fn backface_visibility(&self) -> CompositionBackfaceVisibility {
+        self.backface_visibility.get()
+    }
+
+    pub fn set_backface_visibility(&self, host: &dyn ServerCompositionVisualHooks, value: CompositionBackfaceVisibility) {
+        let old_value = self.backface_visibility.get();
+        let mut changed = false;
+        if old_value.differs(&value) {
+            ServerCompositionVisualHooks::on_backface_visibility_changing(host);
+            changed = true;
+        }
+        host.set_value(
+            Self::id_of_backface_visibility_property().base(),
+            ServerValueChange {
+                equal: old_value.default_equals(&value),
+                old_resource: None,
+                new_resource: None,
+                assign: &mut || self.backface_visibility.set(value),
+            },
+        );
+        if changed {
+            ServerCompositionVisualHooks::on_backface_visibility_changed(host);
+        }
+    }
+
+    /// The composition property of `CompositeMode`.
+    pub fn id_of_composite_mode_property() -> &'static CompositionPropertyOf<CompositionCompositeMode> {
+        static PROPERTY: OnceLock<CompositionPropertyOf<CompositionCompositeMode>> = OnceLock::new();
+        PROPERTY.get_or_init(|| {
+            CompositionProperty::register::<ServerCompositionVisualProps, CompositionCompositeMode>(
+                "CompositeMode",
+                "ServerCompositionVisual",
+                |obj| props_of::<ServerCompositionVisualProps>(obj).composite_mode.get(),
+                |obj, v| props_of::<ServerCompositionVisualProps>(obj).composite_mode.set(v),
+                None,
+                None,
+            )
+        })
+    }
+
+    /// `CompositeMode`.
+    pub fn composite_mode(&self) -> CompositionCompositeMode {
+        self.composite_mode.get()
+    }
+
+    pub fn set_composite_mode(&self, host: &dyn ServerCompositionVisualHooks, value: CompositionCompositeMode) {
+        let old_value = self.composite_mode.get();
+        let mut changed = false;
+        if old_value.differs(&value) {
+            ServerCompositionVisualHooks::on_composite_mode_changing(host);
+            changed = true;
+        }
+        host.set_value(
+            Self::id_of_composite_mode_property().base(),
+            ServerValueChange {
+                equal: old_value.default_equals(&value),
+                old_resource: None,
+                new_resource: None,
+                assign: &mut || self.composite_mode.set(value),
+            },
+        );
+        if changed {
+            ServerCompositionVisualHooks::on_composite_mode_changed(host);
+        }
+    }
+
+    /// The composition property of `ParentForTransform`.
+    pub fn id_of_parent_for_transform_property() -> &'static CompositionPropertyOf<Option<Rc<dyn IServerObject>>> {
+        static PROPERTY: OnceLock<CompositionPropertyOf<Option<Rc<dyn IServerObject>>>> = OnceLock::new();
+        PROPERTY.get_or_init(|| {
+            CompositionProperty::register::<ServerCompositionVisualProps, Option<Rc<dyn IServerObject>>>(
+                "ParentForTransform",
+                "ServerCompositionVisual",
+                |obj| props_of::<ServerCompositionVisualProps>(obj).parent_for_transform.borrow().clone(),
+                |obj, v| *props_of::<ServerCompositionVisualProps>(obj).parent_for_transform.borrow_mut() = v,
+                None,
+                None,
+            )
+        })
+    }
+
+    /// `ParentForTransform`.
+    pub fn parent_for_transform(&self) -> Option<Rc<dyn IServerObject>> {
+        self.parent_for_transform.borrow().clone()
+    }
+
+    pub fn set_parent_for_transform(&self, host: &dyn ServerCompositionVisualHooks, value: Option<Rc<dyn IServerObject>>) {
+        let old_value = self.parent_for_transform.borrow().clone();
+        let mut changed = false;
+        if old_value.differs(&value) {
+            ServerCompositionVisualHooks::on_parent_for_transform_changing(host);
+            changed = true;
+        }
+        host.set_value(
+            Self::id_of_parent_for_transform_property().base(),
+            ServerValueChange {
+                equal: old_value.default_equals(&value),
+                old_resource: old_value.as_server_render_resource(),
+                new_resource: value.as_server_render_resource(),
+                assign: &mut || *self.parent_for_transform.borrow_mut() = value.clone(),
+            },
+        );
+        if changed {
+            ServerCompositionVisualHooks::on_parent_for_transform_changed(host);
+        }
+    }
+
     /// Reads the changes of the object: the base class first, then the
     /// changed-fields mask and the changed members of this class.
     pub fn deserialize_changes_core(
@@ -2248,6 +3086,76 @@ impl ServerCompositionVisualProps {
             let value = read_server_object(reader, compositor.as_ref());
             self.set_cache_mode(host, value);
         }
+        if changed.contains(CompositionVisualChangedFields::COMPOSITION_CLIP) {
+            let value = read_server_object(reader, compositor.as_ref());
+            self.set_composition_clip(host, value);
+        }
+        if changed.contains(CompositionVisualChangedFields::ROTATION_AXIS_ANIMATED) {
+            let Some(animation) = reader.read_value::<AnimationInstanceFactory>().map(AnimationInstanceFactory::create) else {
+                panic!("a batch starts an animation of `RotationAxis` without an animation instance");
+            };
+            host.set_animated_value(
+                Self::id_of_rotation_axis_property().base(),
+                ExpressionVariant::create(self.rotation_axis.get()),
+                committed_at,
+                animation,
+            );
+        } else if changed.contains(CompositionVisualChangedFields::ROTATION_AXIS) {
+            let value = reader.read::<Vector3D>();
+            self.set_rotation_axis(host, value);
+        }
+        if changed.contains(CompositionVisualChangedFields::RELATIVE_OFFSET_ADJUSTMENT_ANIMATED) {
+            let Some(animation) = reader.read_value::<AnimationInstanceFactory>().map(AnimationInstanceFactory::create) else {
+                panic!("a batch starts an animation of `RelativeOffsetAdjustment` without an animation instance");
+            };
+            host.set_animated_value(
+                Self::id_of_relative_offset_adjustment_property().base(),
+                ExpressionVariant::create(self.relative_offset_adjustment.get()),
+                committed_at,
+                animation,
+            );
+        } else if changed.contains(CompositionVisualChangedFields::RELATIVE_OFFSET_ADJUSTMENT) {
+            let value = reader.read::<Vector3D>();
+            self.set_relative_offset_adjustment(host, value);
+        }
+        if changed.contains(CompositionVisualChangedFields::RELATIVE_SIZE_ADJUSTMENT_ANIMATED) {
+            let Some(animation) = reader.read_value::<AnimationInstanceFactory>().map(AnimationInstanceFactory::create) else {
+                panic!("a batch starts an animation of `RelativeSizeAdjustment` without an animation instance");
+            };
+            host.set_animated_value(
+                Self::id_of_relative_size_adjustment_property().base(),
+                ExpressionVariant::create(self.relative_size_adjustment.get()),
+                committed_at,
+                animation,
+            );
+        } else if changed.contains(CompositionVisualChangedFields::RELATIVE_SIZE_ADJUSTMENT) {
+            let value = reader.read::<Vector>();
+            self.set_relative_size_adjustment(host, value);
+        }
+        if changed.contains(CompositionVisualChangedFields::IS_HIT_TEST_VISIBLE) {
+            let value = reader.read::<bool>();
+            self.set_is_hit_test_visible(host, value);
+        }
+        if changed.contains(CompositionVisualChangedFields::IS_PIXEL_SNAPPING_ENABLED) {
+            let value = reader.read::<bool>();
+            self.set_is_pixel_snapping_enabled(host, value);
+        }
+        if changed.contains(CompositionVisualChangedFields::BORDER_MODE) {
+            let value = reader.read::<CompositionBorderMode>();
+            self.set_border_mode(host, value);
+        }
+        if changed.contains(CompositionVisualChangedFields::BACKFACE_VISIBILITY) {
+            let value = reader.read::<CompositionBackfaceVisibility>();
+            self.set_backface_visibility(host, value);
+        }
+        if changed.contains(CompositionVisualChangedFields::COMPOSITE_MODE) {
+            let value = reader.read::<CompositionCompositeMode>();
+            self.set_composite_mode(host, value);
+        }
+        if changed.contains(CompositionVisualChangedFields::PARENT_FOR_TRANSFORM) {
+            let value = read_server_object(reader, compositor.as_ref());
+            self.set_parent_for_transform(host, value);
+        }
         ServerCompositionVisualHooks::on_fields_deserialized(host, changed);
     }
 
@@ -2289,6 +3197,21 @@ impl ServerCompositionVisualProps {
         }
         if name == "AdornerIsClipped" {
             return Some(Self::id_of_adorner_is_clipped_property().base());
+        }
+        if name == "RotationAxis" {
+            return Some(Self::id_of_rotation_axis_property().base());
+        }
+        if name == "RelativeOffsetAdjustment" {
+            return Some(Self::id_of_relative_offset_adjustment_property().base());
+        }
+        if name == "RelativeSizeAdjustment" {
+            return Some(Self::id_of_relative_size_adjustment_property().base());
+        }
+        if name == "IsHitTestVisible" {
+            return Some(Self::id_of_is_hit_test_visible_property().base());
+        }
+        if name == "IsPixelSnappingEnabled" {
+            return Some(Self::id_of_is_pixel_snapping_enabled_property().base());
         }
         None
     }

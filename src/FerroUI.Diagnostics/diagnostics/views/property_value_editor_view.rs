@@ -29,12 +29,13 @@ use ferroui_controls::primitives::{FlyoutBase, SelectingItemsControl, TemplatedC
 use ferroui_controls::shapes::{Ellipse, Path, Shape};
 use ferroui_controls::{
     Border, CheckBox, ComboBox, ContentControlImpl, Control, ControlImpl, DataValidationErrors, Flyout, Image,
-    ItemsSource, NumericUpDown, StackPanel, TextBlock, TextBox, ToolTip, UserControl,
+    ItemsSource, NumericUpDown, Panel, StackPanel, TextBlock, TextBox, ToolTip, UserControl,
 };
 use ferroui_controls_color_picker::{AlphaComponentPosition, ColorView};
 use ferroui_markup::data::Binding;
 use ferroui_markup_xaml::converters::ColorToBrushConverter;
-use std::cell::OnceCell;
+use std::any::TypeId;
+use std::cell::{Cell, OnceCell, RefCell};
 use std::rc::Rc;
 
 ferroui_base::ferro_thread_local! {
@@ -66,12 +67,45 @@ fn color2_brush() -> Rc<ColorToBrushConverter> {
     COLOR2_BRUSH.with(|converter| converter.get_or_init(ColorToBrushConverter::new).clone())
 }
 
+/// The kinds of editors the view keeps once built (see [`PropertyValueEditorView`]).
+#[derive(Clone, Copy, PartialEq, Eq)]
+enum EditorKind {
+    CheckBox,
+    Number,
+    Brush,
+    Enum,
+    Text,
+}
+
 /// The editor of the value of a property: its content is the control that edits a value of the
 /// type of the property (its data context), bound to the value of the property.
+///
+/// Deviation (DEVIATIONS.md, Developer tools): the managed original builds a new editor at every
+/// change of the data context. The property grid is a TreeDataGrid, whose rows and cells are
+/// recycled while it scrolls and when another control is selected, and the cells keep their
+/// editor view and give it the next row as its data context; building a text box, a number box or
+/// a combo box (each with its template) for every row made scrolling and selecting slow. The view
+/// keeps the editor of each kind it has built (check box, number box, brush, enumeration, text
+/// box) in a panel that is its content, shows the one of the property and binds it to the
+/// property, as the TreeDataGrid keeps its recycled cells parented and hidden: an editor is built,
+/// attached and styled once, and a recycled row only changes which editor is visible and what it
+/// is bound to. The editors look and behave as the original's.
 #[repr(C)]
 pub struct PropertyValueEditorView {
     base: UserControl,
     cleanup: CompositeDisposable,
+    /// The editors built so far, by kind; at most one of each, all children of `host`.
+    editors: RefCell<Vec<(EditorKind, Ref<Control>)>>,
+    /// The content: the panel of the editors.
+    host: OnceCell<Ref<Panel>>,
+    /// The editor built for the current property only (the color, image and geometry editors,
+    /// which few properties use), a child of `host` while it is shown.
+    transient: RefCell<Option<Ref<Control>>>,
+    /// The enumeration whose members the combo box of the enumeration editor lists.
+    enum_type: Cell<Option<TypeId>>,
+    /// Whether the content is bound to the property of the data context (it is not after the
+    /// view left the visual tree, which disposes the bindings).
+    bound: Cell<bool>,
 }
 
 ferro_class!(PropertyValueEditorView: UserControl);
@@ -90,16 +124,26 @@ impl StyledElementImpl for PropertyValueEditorView {
     fn on_data_context_changed(this: &Self) {
         Self::parent_on_data_context_changed(this);
 
-        let content = this.update_control().map(Control::boxed);
-        this.set_content(content);
+        this.refresh();
     }
 }
 
 impl VisualImpl for PropertyValueEditorView {
+    fn on_attached_to_visual_tree(this: &Self, e: &VisualTreeAttachmentEventArgs) {
+        Self::parent_on_attached_to_visual_tree(this, e);
+
+        // Back in the tree with the same data context: bind the editor again (leaving the tree
+        // disposed its bindings).
+        if !this.bound.get() && this.data_context().is_some() {
+            this.refresh();
+        }
+    }
+
     fn on_detached_from_visual_tree(this: &Self, e: &VisualTreeAttachmentEventArgs) {
         Self::parent_on_detached_from_visual_tree(this, e);
 
         this.cleanup.clear();
+        this.bound.set(false);
     }
 }
 
@@ -156,7 +200,73 @@ fn format_number(value: f64) -> String {
 
 impl PropertyValueEditorView {
     pub fn construct() -> Self {
-        Self { base: UserControl::construct(), cleanup: CompositeDisposable::new() }
+        Self {
+            base: UserControl::construct(),
+            cleanup: CompositeDisposable::new(),
+            editors: RefCell::new(Vec::new()),
+            host: OnceCell::new(),
+            transient: RefCell::new(None),
+            enum_type: Cell::new(None),
+            bound: Cell::new(false),
+        }
+    }
+
+    /// Binds the content to the property of the data context.
+    fn refresh(&self) {
+        let editor = self.update_control();
+        self.bound.set(true);
+        let host = self.host();
+
+        let is_cached = |editor: &Ref<Control>| self.editors.borrow().iter().any(|(_, cached)| cached.ptr_eq(editor));
+        let transient = editor.clone().filter(|editor| !is_cached(editor));
+        let old_transient = self.transient.replace(transient.clone());
+        if let Some(old_transient) = old_transient {
+            if transient.as_ref().is_none_or(|transient| !transient.ptr_eq(&old_transient)) {
+                host.children().remove(&old_transient);
+            }
+        }
+        if let Some(transient) = &transient {
+            if !host.children().contains(transient) {
+                host.children().add(transient.clone());
+            }
+        }
+
+        for (_, cached) in self.editors.borrow().iter() {
+            cached.set_is_visible(editor.as_ref().is_some_and(|editor| editor.ptr_eq(cached)));
+        }
+    }
+
+    /// The panel of the editors, the content of the view.
+    fn host(&self) -> Ref<Panel> {
+        self.host
+            .get_or_init(|| {
+                let host = Panel::new();
+                self.set_content(Some(Control::boxed(host.clone())));
+                host
+            })
+            .clone()
+    }
+
+    /// The editor that is shown (the tests' view of the content).
+    #[cfg(test)]
+    pub(crate) fn shown_editor(&self) -> Option<Ref<Control>> {
+        self.host.get()?.children().to_vec().into_iter().find(|child| child.is_visible())
+    }
+
+    /// The editor of `kind`, built by `build` the first time.
+    fn editor<T>(&self, kind: EditorKind, build: impl FnOnce() -> Ref<T>) -> Ref<T>
+    where
+        T: ferroui_base::ObjectType + ferroui_base::Upcast<Control>,
+    {
+        let existing = self.editors.borrow().iter().find(|(k, _)| *k == kind).map(|(_, editor)| editor.clone());
+        if let Some(editor) = existing.and_then(|editor| editor.cast::<T>()) {
+            return editor;
+        }
+        let editor = build();
+        let control: Ref<Control> = editor.clone().upcast();
+        self.editors.borrow_mut().push((kind, control.clone()));
+        self.host().children().add(control);
+        editor
     }
 
     pub fn new() -> Ref<Self> {
@@ -178,22 +288,28 @@ impl PropertyValueEditorView {
         let property_type = property.property_type();
 
         if property_type.is::<bool>() || property_type.is::<Option<bool>>() {
-            let check_box = CheckBox::new();
-            check_box.classes().add("editor");
+            let check_box = self.editor(EditorKind::CheckBox, || {
+                let check_box = CheckBox::new();
+                check_box.classes().add("editor");
+                check_box
+            });
             self.create_control(&property, &check_box, ToggleButton::is_checked_property().as_property(), None, None);
             return Some(check_box.upcast());
         }
 
         // TODO (from the original): Infinity, NaN not working with NumericUpDown.
         if is_valid_numeric(property_type) {
-            let n = NumericUpDown::new();
-            n.classes().add("editor");
-            // `init`.
-            n.set_increment(Decimal::from(1));
-            let number_format = NumberFormatInfo::new();
-            number_format.set_number_decimal_digits(0);
-            n.set_number_format(Some(Rc::new(number_format)));
-            n.set_parsing_number_style(NumberStyles::INTEGER);
+            let n = self.editor(EditorKind::Number, || {
+                let n = NumericUpDown::new();
+                n.classes().add("editor");
+                // `init`.
+                n.set_increment(Decimal::from(1));
+                let number_format = NumberFormatInfo::new();
+                number_format.set_number_decimal_digits(0);
+                n.set_number_format(Some(Rc::new(number_format)));
+                n.set_parsing_number_style(NumberStyles::INTEGER);
+                n
+            });
 
             self.create_control(
                 &property,
@@ -256,8 +372,11 @@ impl PropertyValueEditorView {
         }
 
         if implements_interface::<Rc<dyn IBrush>>(property_type) {
-            let brush_editor = BrushEditor::new();
-            brush_editor.classes().add("editor");
+            let brush_editor = self.editor(EditorKind::Brush, || {
+                let brush_editor = BrushEditor::new();
+                brush_editor.classes().add("editor");
+                brush_editor
+            });
             self.create_control(&property, &brush_editor, BrushEditor::brush_property().as_property(), None, None);
             return Some(brush_editor.upcast());
         }
@@ -277,7 +396,9 @@ impl PropertyValueEditorView {
 
             let icon = Path::new();
             icon.set_data(if is_image { image_icon() } else { geometry_icon() });
-            icon.set_fill(Some(Brushes::gray() as Rc<dyn IBrush>));
+            // Deviation (DEVIATIONS.md, Developer tools): the colour of the icon comes from the
+            // theme (the class `value-icon` of DevToolsStyles.xaml) in place of Gray.
+            icon.classes().add("value-icon");
             icon.set_width(12.0);
             icon.set_height(12.0);
             icon.set_stretch(Stretch::Uniform);
@@ -304,7 +425,10 @@ impl PropertyValueEditorView {
             } else {
                 let preview_shape = Path::new();
                 preview_shape.set_stretch(Stretch::Uniform);
-                preview_shape.set_fill(Some(Brushes::white() as Rc<dyn IBrush>));
+                // Deviation (DEVIATIONS.md, Developer tools): the colour of the preview comes from
+                // the theme (the class `preview-geometry` of DevToolsStyles.xaml) in place of White,
+                // which did not show on the light background of a tool tip.
+                preview_shape.classes().add("preview-geometry");
                 preview_shape.set_vertical_alignment(VerticalAlignment::Center);
                 preview_shape.set_horizontal_alignment(HorizontalAlignment::Center);
 
@@ -322,11 +446,18 @@ impl PropertyValueEditorView {
         }
 
         if is_enum(property_type) {
-            let c = ComboBox::new();
-            c.classes().add("editor");
-            // `init`: `Enum.GetValues(propertyType)`.
-            let members = MarkupType::find_by_handle(property_type.id()).map(|markup| markup.enum_members).unwrap_or(&[]);
-            c.set_items_source(Some(ItemsSource::from_items(members.iter().map(|member| Some((member.get)())))));
+            let c = self.editor(EditorKind::Enum, || {
+                let c = ComboBox::new();
+                c.classes().add("editor");
+                c
+            });
+            // `init`: `Enum.GetValues(propertyType)`, listed again only for another enumeration.
+            if self.enum_type.get() != Some(property_type.id()) {
+                self.enum_type.set(Some(property_type.id()));
+                let members =
+                    MarkupType::find_by_handle(property_type.id()).map(|markup| markup.enum_members).unwrap_or(&[]);
+                c.set_items_source(Some(ItemsSource::from_items(members.iter().map(|member| Some((member.get)())))));
+            }
             self.create_control(
                 &property,
                 &c,
@@ -337,12 +468,15 @@ impl PropertyValueEditorView {
             return Some(c.upcast());
         }
 
-        let tb = CommitTextBox::new();
-        // Deviation (DEVIATIONS.md, Developer tools): every editor has the class `editor`, which
-        // the sheet of the tools (DevToolsStyles.xaml) gives one compact form.
-        tb.classes().add("editor");
-        // `init`.
-        tb.set_placeholder_text(Some("(null)"));
+        let tb = self.editor(EditorKind::Text, || {
+            let tb = CommitTextBox::new();
+            // Deviation (DEVIATIONS.md, Developer tools): every editor has the class `editor`,
+            // which the sheet of the tools (DevToolsStyles.xaml) gives one compact form.
+            tb.classes().add("editor");
+            // `init`.
+            tb.set_placeholder_text(Some("(null)"));
+            tb
+        });
         self.create_control(
             &property,
             &tb,
@@ -354,6 +488,11 @@ impl PropertyValueEditorView {
         let is_read_only =
             tb.is_read_only() || property_type.is_object() || !StringConversionHelper::can_convert_from_string(property_type);
         tb.set_is_read_only(is_read_only);
+        // The text box may have shown another property with an invalid text.
+        {
+            let text_box: &TextBox = &tb;
+            DataValidationErrors::clear_errors(text_box);
+        }
 
         if !tb.is_read_only() {
             // `tb.GetObservable(TextBox.TextProperty).Subscribe(..)`: the current text, then every
@@ -401,6 +540,10 @@ impl PropertyValueEditorView {
         readonly_property: Option<ReadonlyProperty>,
     ) {
         let binding_mode = if property.is_readonly() { BindingMode::OneWay } else { BindingMode::TwoWay };
+
+        // A kept editor starts from the state of a new one: the value it showed for the previous
+        // property (its binding is disposed) is cleared before it is bound to this one.
+        control.clear_value_untyped(value_property);
 
         let binding = Binding::with_path_and_mode("Value", binding_mode)
             .with_source(Some(property.boxed()))

@@ -4579,6 +4579,7 @@
     "media/text_formatting/unicode/testing.rs",
     "media/text_formatting/unicode/ucd_test_data.rs",
     "media/text_formatting/unicode/unicode_data_trie.rs",
+    "media/text_line_bounds.rs",
     "media/tile_mode.rs",
     "metadata/markup_macros.rs",
     "metadata/property_accessors.rs",

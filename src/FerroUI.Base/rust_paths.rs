@@ -321,6 +321,7 @@ crate::ferro_rust_paths! {
         crate::media::TextDecorationUnit,
         crate::media::TextDecorations,
         crate::media::TextHintingMode,
+        crate::media::TextLineBounds,
         crate::media::TextRenderingMode,
         crate::media::TextWrapping,
         crate::media::TileMode,

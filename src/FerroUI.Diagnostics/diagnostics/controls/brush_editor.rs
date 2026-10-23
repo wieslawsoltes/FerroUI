@@ -90,6 +90,11 @@ impl FerroObjectImpl for BrushEditor {
     fn on_property_changed(this: &Self, change: &FerroPropertyChangedEventArgs<'_>) {
         Self::parent_on_property_changed(this, change);
 
+        // The outline and the text of the swatch are colours of the theme variant.
+        if change.property().name() == "ActualThemeVariant" {
+            this.invalidate_visual();
+        }
+
         if change.property() == Self::brush_property().as_property() {
             let brush = this.brush();
             if let Some(scb) = brush.as_ref().and_then(|brush| brush.as_solid_color_brush()) {
@@ -169,7 +174,9 @@ impl VisualImpl for BrushEditor {
         let (text, text_brush) = match &brush {
             Some(brush) => (
                 brush.as_solid_color_brush().map(|solid| solid.color().to_string()).unwrap_or_else(|| brush_type_name(&**brush)),
-                Self::get_text_brush(brush),
+                Self::get_text_brush(brush).unwrap_or_else(|| {
+                    resource("TextFillColorPrimaryBrush").unwrap_or_else(|| Brushes::black() as Rc<dyn IBrush>)
+                }),
             ),
             None => ("(null)".to_string(), resource("TextFillColorSecondaryBrush").unwrap_or_else(|| Brushes::gray())),
         };
@@ -214,14 +221,22 @@ impl BrushEditor {
     }
 
     /// Get Contrasted Text Color.
-    fn get_text_brush(brush: &Rc<dyn IBrush>) -> Rc<dyn IBrush> {
+    ///
+    /// Deviation (DEVIATIONS.md, Developer tools): `None` for a colour that is mostly transparent,
+    /// whose text is drawn in the text colour of the theme: the swatch shows the background
+    /// through it, and the white or black of its luminance did not show on it (the translucent
+    /// brushes of the WinUI 3 theme are most of the brushes of the tools).
+    fn get_text_brush(brush: &Rc<dyn IBrush>) -> Option<Rc<dyn IBrush>> {
         if let Some(solid) = brush.as_solid_color_brush() {
             let color = solid.color();
+            if (color.a as f64) * brush.opacity() < 128.0 {
+                return None;
+            }
             let l = get_relative_luminance(color);
 
-            return if l < 0.5 { Brushes::white() } else { Brushes::black() };
+            return Some(if l < 0.5 { Brushes::white() } else { Brushes::black() });
         }
-        Brushes::white()
+        Some(Brushes::white())
     }
 }
 

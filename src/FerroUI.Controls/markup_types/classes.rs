@@ -33,7 +33,7 @@ use ferroui_base::input::*;
 use ferroui_base::interactivity::*;
 use ferroui_base::media::{
     FontFamily, FontFeatureCollection, FontStretch, FontStyle, FontWeight, IBrush, TextAlignment, TextDecorationCollection,
-    TextTrimming, TextWrapping,
+    TextLineBounds, TextTrimming, TextWrapping,
 };
 use ferroui_base::metadata::{into_markup_value, MarkupDelegate, MarkupType};
 use ferroui_base::styling::*;
@@ -710,6 +710,12 @@ ferro_class_info!(TextBlock {
                 get: |this: &Ref<TextBlock>| this.get_value(TextBlock::layout_rounding_placement_property()),
                 set: |this: &Ref<TextBlock>, value: TextLayoutRoundingPlacement| {
                     this.set_value(TextBlock::layout_rounding_placement_property(), value)
+                }
+            },
+            TextLineBounds: TextLineBounds {
+                get: |this: &Ref<TextBlock>| this.get_value(TextBlock::text_line_bounds_property()),
+                set: |this: &Ref<TextBlock>, value: TextLineBounds| {
+                    this.set_value(TextBlock::text_line_bounds_property(), value)
                 }
             },
             LineHeight: f64 {

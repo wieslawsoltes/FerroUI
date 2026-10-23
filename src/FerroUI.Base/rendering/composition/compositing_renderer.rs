@@ -27,10 +27,18 @@ crate::ferro_thread_local! {
 }
 
 /// A set of visuals that keeps the order in which they were added.
+///
+/// A removal drops the key at once and leaves its entry in the list, which is compacted when the
+/// stale entries are half of it or the set is read, so that removing is amortised constant time,
+/// as in the reference's `HashSet<Visual>`, instead of a scan of the list for every visual that is
+/// invalidated while it has no composition visual (DEVIATIONS.md, corrected divergences). The
+/// visuals the set yields are unchanged; a removed visual is released at the next compaction.
 #[derive(Default)]
 struct VisualSet {
     items: Vec<Ref<Visual>>,
     keys: HashSet<*const Visual>,
+    /// The entries of `items` whose key was removed.
+    stale: usize,
 }
 
 impl VisualSet {
@@ -47,17 +55,44 @@ impl VisualSet {
     fn remove(&mut self, visual: &Visual) {
         let key = visual as *const Visual;
         if self.keys.remove(&key) {
-            self.items.retain(|item| !std::ptr::eq(&**item, key));
+            self.stale += 1;
+            if self.stale * 2 >= self.items.len() {
+                self.compact();
+            }
         }
     }
 
+    /// Drops the stale entries (and an entry added again after its removal is kept once, at its
+    /// last place).
+    fn compact(&mut self) {
+        let mut seen = HashSet::with_capacity(self.keys.len());
+        let mut items = std::mem::take(&mut self.items);
+        items.reverse();
+        items.retain(|item| {
+            let key = &**item as *const Visual;
+            self.keys.contains(&key) && seen.insert(key)
+        });
+        items.reverse();
+        self.items = items;
+        self.stale = 0;
+    }
+
+    /// The visuals of the set, in the order in which they were added.
+    fn snapshot(&mut self) -> Vec<Ref<Visual>> {
+        if self.stale > 0 {
+            self.compact();
+        }
+        self.items.clone()
+    }
+
     fn is_empty(&self) -> bool {
-        self.items.is_empty()
+        self.keys.is_empty()
     }
 
     fn clear(&mut self) {
         self.items.clear();
         self.keys.clear();
+        self.stale = 0;
     }
 }
 
@@ -250,7 +285,7 @@ impl CompositingRenderer {
 
     fn update_core(&self) {
         self.queued_update.set(false);
-        let dirty: Vec<Ref<Visual>> = self.dirty.borrow().items.clone();
+        let dirty: Vec<Ref<Visual>> = self.dirty.borrow_mut().snapshot();
         for visual in &dirty {
             let Some(comp) = visual.composition_visual() else { continue };
 
@@ -277,7 +312,7 @@ impl CompositingRenderer {
 
             visual.synchronize_composition_child_visuals();
         }
-        let recalculate: Vec<Ref<Visual>> = self.recalculate_children.borrow().items.clone();
+        let recalculate: Vec<Ref<Visual>> = self.recalculate_children.borrow_mut().snapshot();
         for visual in &recalculate {
             if !self.dirty.borrow().contains(visual) {
                 visual.synchronize_composition_child_visuals();

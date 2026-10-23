@@ -503,3 +503,103 @@ fn the_thickness_editor_takes_a_thickness_parsed_from_text() {
     assert_eq!(Thickness::new(1.0, 2.0, 1.0, 2.0), editor.thickness());
     assert!(Thickness::parse("1,2,3").is_err());
 }
+
+#[test]
+fn the_editor_of_a_recycled_row_is_kept_and_bound_to_the_property_of_the_next_row() {
+    use crate::diagnostics::views::PropertyValueEditorView;
+    use ferroui_controls::{CheckBox, Control, TextBox};
+
+    let _scope = scope();
+    let border = Border::new();
+    border.set_width(40.0);
+    border.set_height(30.0);
+    let content = |view: &PropertyValueEditorView| view.shown_editor().expect("an editor");
+    let text = |editor: &ferroui_base::Ref<Control>| editor.cast::<TextBox>().expect("a text box").text();
+
+    // The cells of the property grid keep their editor view while the grid scrolls and give it the
+    // next row: the text box built for Width is bound to Height, not built again.
+    let view = PropertyValueEditorView::new();
+    view.set_data_context(Some(ferro_property(&border, Layoutable::width_property().as_property()).boxed()));
+    let text_box = content(&view);
+    assert_eq!(Some("40".to_string()), text(&text_box));
+
+    view.set_data_context(Some(ferro_property(&border, Layoutable::height_property().as_property()).boxed()));
+    assert!(content(&view).ptr_eq(&text_box));
+    assert_eq!(Some("30".to_string()), text(&text_box));
+
+    // A property of another kind gets its own editor, and the text box is kept for the next text.
+    view.set_data_context(Some(ferro_property(&border, Visual::is_visible_property().as_property()).boxed()));
+    let check_box = content(&view);
+    assert!(check_box.cast::<CheckBox>().is_some());
+
+    view.set_data_context(Some(ferro_property(&border, Layoutable::width_property().as_property()).boxed()));
+    assert!(content(&view).ptr_eq(&text_box));
+    assert_eq!(Some("40".to_string()), text(&text_box));
+
+    view.set_data_context(Some(ferro_property(&border, Visual::is_visible_property().as_property()).boxed()));
+    assert!(content(&view).ptr_eq(&check_box));
+
+    // Only the property of the current row is bound: Height no longer moves the text box.
+    view.set_data_context(Some(ferro_property(&border, Layoutable::width_property().as_property()).boxed()));
+    border.set_height(10.0);
+    assert_eq!(Some("40".to_string()), text(&text_box));
+}
+
+#[test]
+fn the_view_of_the_details_is_reused_for_the_details_of_the_next_selection() {
+    use crate::diagnostics::views::ControlDetailsView;
+    use crate::diagnostics::ViewLocator;
+    use ferroui_base::metadata::into_markup_value;
+    use ferroui_controls::templates::ITemplateWithParam;
+
+    crate::register_types();
+    let _app = ferroui_controls::testing::UnitTestApplication::start(ferroui_controls::testing::TestServices::styled_window());
+    let pinned = Rc::new(RefCell::new(HashSet::new()));
+    let (_page, first) = details_of(&Border::new(), pinned.clone());
+    let (_page, second) = details_of(&Border::new(), pinned);
+
+    // A content presenter gives the locator the view it built for the previous details: the view
+    // is kept for the next ones (and gets them as its data context), not built again.
+    let locator = ViewLocator::new();
+    let view = locator.build(&into_markup_value(first)).expect("the view of the details");
+    assert!(view.cast::<ControlDetailsView>().is_some());
+    let recycling = locator.as_data_template();
+    let recycling = recycling.as_recycling_data_template().expect("a recycling data template");
+    let next = recycling.build_with_existing(into_markup_value(second).as_ref(), Some(view.clone())).unwrap();
+    assert!(next.ptr_eq(&view));
+
+    // A view of another kind is not reused.
+    let other = ferroui_controls::TextBlock::new().upcast::<ferroui_controls::Control>();
+    let (_page, third) = details_of(&Border::new(), Rc::new(RefCell::new(HashSet::new())));
+    let built = recycling.build_with_existing(into_markup_value(third).as_ref(), Some(other.clone())).unwrap();
+    assert!(!built.ptr_eq(&other));
+    assert!(built.cast::<ControlDetailsView>().is_some());
+}
+
+#[test]
+fn a_kept_text_box_shows_the_next_property_without_the_errors_or_the_text_of_the_previous_one() {
+    use crate::diagnostics::views::PropertyValueEditorView;
+    use ferroui_controls::{DataValidationErrors, TextBlock, TextBox};
+
+    let _scope = scope();
+    let text_block = TextBlock::new();
+    text_block.set_width(40.0);
+    let view = PropertyValueEditorView::new();
+    let editor = |view: &PropertyValueEditorView| view.shown_editor().expect("an editor").cast::<TextBox>().expect("a text box");
+
+    // An editable value, then values of types that do not convert from text (read-only text), in turn.
+    for property in [
+        Layoutable::width_property().as_property(),
+        TextBlock::text_trimming_property().as_property(),
+        ferroui_controls::Control::tag_property().as_property(),
+        Layoutable::width_property().as_property(),
+        TextBlock::text_trimming_property().as_property(),
+    ] {
+        let view_model = PropertyViewModelRef::Ferro(FerroPropertyViewModel::new(&text_block, property));
+        view.set_data_context(Some(view_model.boxed()));
+        let text_box = editor(&view);
+        assert!(!DataValidationErrors::get_has_errors(&text_box), "{}: no errors", property.name());
+        assert_eq!(text_block.width(), 40.0, "{}: the previous value is not written to the property", property.name());
+    }
+}
+

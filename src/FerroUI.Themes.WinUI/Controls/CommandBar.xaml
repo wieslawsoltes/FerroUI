@@ -216,9 +216,10 @@
         <Setter Property="Margin" Value="{DynamicResource AppBarButtonInnerBorderMargin}" />
       </Style>
       <!-- The icon and the label centred in the height of the button: the content grid, in the
-           middle of the root, which keeps the compact height (WinUI places both 16 below the top,
-           which lines them up with the metrics of Segoe UI only). Deviation
-           (winui-theme/DEVIATIONS.md, G-29). -->
+           middle of the root, which keeps the compact height, and the label bounded by its
+           capitals and its baseline (TextLineBounds Tight), so that its capitals are in the middle
+           whatever its font (WinUI places both 16 below the top, which lines them up with the
+           metrics of Segoe UI only). Deviation (winui-theme/DEVIATIONS.md, G-29). -->
       <Style Selector="^ /template/ Viewbox#ContentViewbox">
         <Setter Property="Margin" Value="12,0,0,0" />
         <Setter Property="VerticalAlignment" Value="Center" />
@@ -236,6 +237,7 @@
         <Setter Property="Grid.Column" Value="1" />
         <Setter Property="TextAlignment" Value="Left" />
         <Setter Property="VerticalAlignment" Value="Center" />
+        <Setter Property="TextLineBounds" Value="Tight" />
         <Setter Property="Margin" Value="8,0,12,0" />
       </Style>
     </Style>
@@ -450,6 +452,7 @@
         <Setter Property="Grid.Column" Value="1" />
         <Setter Property="TextAlignment" Value="Left" />
         <Setter Property="VerticalAlignment" Value="Center" />
+        <Setter Property="TextLineBounds" Value="Tight" />
         <Setter Property="Margin" Value="8,0,12,0" />
       </Style>
     </Style>

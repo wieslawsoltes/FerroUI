@@ -234,3 +234,28 @@ fn text_blocks_put_the_layout_rounding_above_their_text_as_winui() {
     }
     window.close();
 }
+
+#[test]
+fn a_command_bar_label_on_the_right_is_bounded_by_its_capitals_and_its_baseline() {
+    let _app = start_themed_application();
+
+    // G-29 (docs/porting/winui-theme/DEVIATIONS.md): the label is centred by its capitals.
+    let button = ferroui_controls::CommandBarButton::new();
+    button.set_label(Some("Screenshot"));
+    button.set_label_position(ferroui_controls::CommandBarDefaultLabelPosition::Right);
+    let window = Window::new();
+    window.set_content(Some(Control::boxed(&button)));
+    window.show();
+
+    let label = button
+        .get_visual_descendants()
+        .into_iter()
+        .filter_map(|visual| visual.cast::<TextBlock>())
+        .find(|text| text.name().as_deref() == Some("TextLabel"))
+        .expect("the label of the button");
+    assert_eq!(ferroui_base::media::TextLineBounds::Tight, label.text_line_bounds());
+
+    // The text of the other controls keeps the box of the reference.
+    assert_eq!(ferroui_base::media::TextLineBounds::Full, TextBlock::new().text_line_bounds());
+    window.close();
+}

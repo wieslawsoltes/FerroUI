@@ -12,14 +12,32 @@ const COMPOSITION_FIELDS_MASK: F = F::OPACITY
     .union(F::SIZE)
     .union(F::SIZE_ANIMATED)
     .union(F::RENDER_OPTIONS)
-    .union(F::EFFECT);
+    .union(F::EFFECT)
+    .union(F::COMPOSITION_CLIP)
+    .union(WINUI_SIZE_FIELDS_MASK);
+
+/// The WinUI size adjustment (not from upstream): it changes the size of the
+/// visual as `Size` does.
+const WINUI_SIZE_FIELDS_MASK: F = F::RELATIVE_SIZE_ADJUSTMENT.union(F::RELATIVE_SIZE_ADJUSTMENT_ANIMATED);
+
+/// The WinUI members that change the transform of the visual (not from
+/// upstream).
+const WINUI_TRANSFORM_FIELDS_MASK: F = F::ROTATION_AXIS
+    .union(F::ROTATION_AXIS_ANIMATED)
+    .union(F::RELATIVE_OFFSET_ADJUSTMENT)
+    .union(F::RELATIVE_OFFSET_ADJUSTMENT_ANIMATED)
+    .union(F::IS_PIXEL_SNAPPING_ENABLED)
+    .union(F::PARENT_FOR_TRANSFORM)
+    .union(WINUI_SIZE_FIELDS_MASK);
 
 const OWN_BOUNDS_UPDATE_FIELDS_MASK: F = F::CLIP
     .union(F::CLIP_TO_BOUNDS)
     .union(F::CLIP_TO_BOUNDS_ANIMATED)
     .union(F::SIZE)
     .union(F::SIZE_ANIMATED)
-    .union(F::EFFECT);
+    .union(F::EFFECT)
+    .union(F::COMPOSITION_CLIP)
+    .union(WINUI_SIZE_FIELDS_MASK);
 
 const COMBINED_TRANSFORM_FIELDS_MASK: F = F::SIZE
     .union(F::SIZE_ANIMATED)
@@ -38,10 +56,16 @@ const COMBINED_TRANSFORM_FIELDS_MASK: F = F::SIZE
     .union(F::OFFSET)
     .union(F::OFFSET_ANIMATED)
     .union(F::TRANSLATION)
-    .union(F::TRANSLATION_ANIMATED);
+    .union(F::TRANSLATION_ANIMATED)
+    .union(WINUI_TRANSFORM_FIELDS_MASK);
 
-const CLIP_SIZE_DIRTY_MASK: F =
-    F::SIZE.union(F::SIZE_ANIMATED).union(F::CLIP_TO_BOUNDS).union(F::CLIP).union(F::CLIP_TO_BOUNDS_ANIMATED);
+const CLIP_SIZE_DIRTY_MASK: F = F::SIZE
+    .union(F::SIZE_ANIMATED)
+    .union(F::CLIP_TO_BOUNDS)
+    .union(F::CLIP)
+    .union(F::CLIP_TO_BOUNDS_ANIMATED)
+    .union(F::COMPOSITION_CLIP)
+    .union(WINUI_SIZE_FIELDS_MASK);
 
 const READBACK_DIRTY_MASK: F =
     COMBINED_TRANSFORM_FIELDS_MASK.union(F::ROOT).union(F::VISIBLE).union(F::VISIBLE_ANIMATED);
@@ -71,8 +95,10 @@ impl ServerCompositionVisual {
             self.trigger_visible_dirty();
         }
 
-        if changed.intersects(F::SIZE_ANIMATED | F::SIZE) {
+        if changed.intersects((F::SIZE_ANIMATED | F::SIZE).union(WINUI_SIZE_FIELDS_MASK)) {
             self.content.size_changed(self);
+            // The children whose offset or size follow it (WinUI).
+            self.notify_children_of_size_change();
         }
     }
 
@@ -81,7 +107,8 @@ impl ServerCompositionVisual {
         // for a visual.
         let is = |p: &CompositionProperty| p == property;
         let clip_to_bounds = is(P::id_of_clip_to_bounds_property().base());
-        let size = is(P::id_of_size_property().base());
+        // The WinUI size adjustment changes the size as `Size` does.
+        let size = is(P::id_of_size_property().base()) || is(P::id_of_relative_size_adjustment_property().base());
 
         if clip_to_bounds || is(P::id_of_opacity_property().base()) || size {
             self.trigger_composition_fields_dirty();
@@ -97,6 +124,8 @@ impl ServerCompositionVisual {
             || is(P::id_of_orientation_property().base())
             || is(P::id_of_offset_property().base())
             || is(P::id_of_translation_property().base())
+            || is(P::id_of_rotation_axis_property().base())
+            || is(P::id_of_relative_offset_adjustment_property().base())
         {
             self.trigger_combined_transform_dirty();
         }
@@ -107,6 +136,7 @@ impl ServerCompositionVisual {
 
         if size {
             self.content.size_changed(self);
+            self.notify_children_of_size_change();
         }
 
         if is(P::id_of_visible_property().base()) {
@@ -140,6 +170,7 @@ impl ServerCompositionVisual {
             parent.add_extra_dirty_rect(bounds);
         }
         self.att_helper_parent_changing();
+        self.winui_members_parent_changing();
     }
 
     pub(super) fn on_parent_changed_core(&self) {
@@ -149,6 +180,7 @@ impl ServerCompositionVisual {
             self.enqueue_own_properties_recompute();
         }
         self.att_helper_parent_changed();
+        self.winui_members_parent_changed();
     }
 
     pub(crate) fn add_extra_dirty_rect(&self, rect: LtrbRect) {

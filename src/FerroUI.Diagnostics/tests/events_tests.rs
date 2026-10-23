@@ -542,3 +542,23 @@ fn registered_pages_are_tabs_after_the_tabs_of_the_main_view_model() {
 fn titles(pages: &[DevToolsPage]) -> Vec<String> {
     pages.iter().map(|page| page.title().to_string()).collect()
 }
+
+// --- the top level under the pointer (Ctrl+Shift) -----------------------------------------
+
+#[test]
+fn the_top_level_of_an_input_root_is_found_through_its_host() {
+    crate::register_types();
+    let _app = UnitTestApplication::start(TestServices::styled_window());
+    let (root, _panel, _button) = top_level_with_button();
+
+    // The root element of the input root of a top level is the host of its decorations, with the
+    // top level as its child: the hot keys that need the hovered top level (Ctrl+Shift to inspect
+    // the control under the pointer) find the top level through it.
+    let input_root = root.input_root();
+    assert!(
+        input_root.try_root_element().and_then(|element| element.cast::<TopLevel>()).is_none(),
+        "the root element is the host of the top level, not the top level"
+    );
+    let top_level = crate::diagnostics::views::top_level_of_root(&*input_root).expect("the top level of the root");
+    assert!(top_level.ptr_eq(&root.clone().upcast::<TopLevel>()));
+}

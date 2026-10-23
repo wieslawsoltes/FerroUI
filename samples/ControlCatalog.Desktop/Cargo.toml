@@ -16,6 +16,9 @@ name = "control-catalog-desktop"
 path = "program.rs"
 
 [dependencies]
+ferroui-mcp = { workspace = true, optional = true }
+ferroui-headless = { workspace = true, optional = true }
+ferroui-devtools = { workspace = true, optional = true, features = ["server"] }
 ferroui-base = { workspace = true }
 ferroui-controls = { workspace = true }
 ferroui-desktop = { workspace = true }
@@ -43,6 +46,9 @@ ferroui-wayland = { workspace = true }
 ferroui-linuxframebuffer = { workspace = true }
 
 [features]
+mcp = ["dep:ferroui-mcp", "dep:ferroui-headless"]
+# Explicit opt-in to the local CDP endpoint; FERROUI_CDP_PORT starts it.
+cdp = ["dep:ferroui-devtools"]
 # The Vello render backend beside Skia: `FERROUI_RENDERER=vello` (the default order of its modes),
 # `vello-hybrid`, `vello-gpu` or `vello-cpu` then chooses it at start.
 vello = ["dep:ferroui-vello"]
