@@ -3,7 +3,7 @@ use ferroui_base::media::text_formatting::TextParagraphStyles;
 use crate::primitives::{
     ScrollBarVisibility, TemplateAppliedEventArgs, TemplatedControl, TemplatedControlImpl,
 };
-use crate::text_box_text_input_method_client::TextBoxTextInputMethodClient;
+use crate::text_box_text_input_method_client::{PreeditSelectionError, TextBoxTextInputMethodClient};
 use crate::utils::{ClipboardHelper, IUndoRedoHost, PrimarySelectionHelper, StringUtils, UndoRedoHelper};
 use crate::{
     Application, Border, ContentControl, ControlImpl, Decorator, PastingFromClipboardEventArgs, ScrollViewer,
@@ -2729,6 +2729,81 @@ impl TextBox {
     /// the text box is read-only).
     pub(crate) fn delete_selection(&self) -> bool {
         self.delete_selection_with_kind(TextMutationKind::Edit)
+    }
+
+    /// Makes room for the first IME clause before its visual is published.
+    /// Synchronous TextChanging, caret and selection observers may replace the
+    /// input owner, text or selection; stop before applying stale writes.
+    pub(crate) fn prepare_preedit_selection(&self, owns_update: impl Fn() -> bool) -> Result<u64, PreeditSelectionError> {
+        if !owns_update() {
+            return Err(PreeditSelectionError::Superseded);
+        }
+        if self.is_read_only() {
+            return Ok(self.text_change_generation());
+        }
+        let change = self.im_client.begin_change();
+        let (start, end) = self.get_selection_range();
+        let selection = || (self.caret_index(), self.selection_start(), self.selection_end());
+        let original_selection = selection();
+        if start != end {
+            let mut text = self.text_utf16();
+            remove_range(&mut text, start, end - start);
+            if !self.set_text_from_range_change(
+                Some(String::from_utf16_lossy(&text)), start..end, 0,
+                TextMutationKind::InternalSynchronization,
+            ) {
+                return Err(PreeditSelectionError::TextChanged);
+            }
+            // Text automatically coerces the old caret and endpoints before
+            // TextChanging. A coerced caret collapses both endpoints; equal
+            // coerced endpoints move the caret. Anything else is a host-owned
+            // selection change, which this older clause must not overwrite.
+            let caret = Self::coerce_caret_index(self, original_selection.0);
+            let expected = if caret != original_selection.0 {
+                (caret, caret, caret)
+            } else {
+                let start = Self::coerce_caret_index(self, original_selection.1);
+                let end = Self::coerce_caret_index(self, original_selection.2);
+                (if start == end { start } else { caret }, start, end)
+            };
+            if selection() != expected {
+                return Err(PreeditSelectionError::SelectionChanged);
+            }
+        }
+        let generation = self.text_change_generation();
+        let check_current = || {
+            if !owns_update() { Err(PreeditSelectionError::Superseded) }
+            else if self.text_change_generation() != generation { Err(PreeditSelectionError::TextChanged) }
+            else { Ok(()) }
+        };
+        check_current()?;
+        let caret = Self::coerce_caret_index(self, start);
+        let previous_caret = self.caret_index();
+        let previous_end = self.selection_end();
+        self.set_current_value(Self::caret_index_property(), caret);
+        check_current()?;
+        if self.caret_index() != caret {
+            return Err(PreeditSelectionError::SelectionChanged);
+        }
+        if previous_caret == caret {
+            // An unchanged caret does not trigger its normal selection
+            // collapse. Check each explicit endpoint write before continuing.
+            self.set_current_value(Self::selection_start_property(), caret);
+            check_current()?;
+            if selection() != (caret, caret, previous_end) {
+                return Err(PreeditSelectionError::SelectionChanged);
+            }
+            self.set_current_value(Self::selection_end_property(), caret);
+        }
+        // The coalesced SelectionChanged notification can itself cancel the
+        // composition or supply a newer clause/selection. Check after it runs.
+        drop(change);
+        check_current()?;
+        if selection() != (caret, caret, caret) {
+            Err(PreeditSelectionError::SelectionChanged)
+        } else {
+            Ok(generation)
+        }
     }
 
     fn delete_selection_with_kind(&self, mutation_kind: TextMutationKind) -> bool {
