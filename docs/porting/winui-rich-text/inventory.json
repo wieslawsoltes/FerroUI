@@ -32020,6 +32020,10 @@
         {
           "path": "src/FerroUI.Controls/documents/rich_text_document.rs",
           "symbol": "position_changed"
+        },
+        {
+          "path": "src/FerroUI.Controls/documents/rich_text_document.rs",
+          "symbol": "fn observe_text_change("
         }
       ],
       "tests": [
@@ -32054,6 +32058,18 @@
         {
           "path": "src/FerroUI.Controls/documents/rich_text_pointer_tests.rs",
           "symbol": "rich_pointer_tracking_keeps_weak_document_and_subscription_lifetimes"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text/rich_edit_text_range_tracking_tests.rs",
+          "symbol": "rich_range_tracking_operation_span_is_private_and_precedes_public_notifications"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text/rich_edit_text_range_tracking_tests.rs",
+          "symbol": "rich_range_tracking_nested_text_read_write_cannot_replay_stale_outer_text"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text/rich_edit_text_range_tracking_tests.rs",
+          "symbol": "rich_range_tracking_field_reconciliation_callbacks_observe_current_coordinates"
         }
       ],
       "includes": [
@@ -32068,7 +32084,7 @@
         }
       ],
       "callable_candidates": [],
-      "reason": "Weak live pointers track edits and resolve shaped insertion geometry with gravity. Public text offsets count UTF-16 scalar-safe text instead of native synthetic element positions; unreviewed source position members remain partial. Live pointers now follow each completed replacement immediately through internal position notifications, before public batch publication; pointers created during a batch never replay earlier edits. Nested rollback and reentrant notification order preserve weak lifetime.",
+      "reason": "Weak live pointers track edits and resolve shaped insertion geometry with gravity. Public text offsets count UTF-16 scalar-safe text instead of native synthetic element positions; unreviewed source position members remain partial. Live pointers now follow each completed replacement immediately through internal position notifications, before public batch publication; pointers created during a batch never replay earlier edits. Nested rollback and reentrant notification order preserve weak lifetime. Observation now rejects stale virtual text reads and advances private coordinates before callback-bearing field reconciliation. Independent range SetText has a separate measured pair channel; these ordinary pointers keep their existing minimal-diff policy. See RANGE-TRACKING.md.",
       "deviations": [
         "RT-I01",
         "RT-I02"
@@ -47101,6 +47117,10 @@
         {
           "path": "src/FerroUI.Controls/documents/rich_text_document.rs",
           "symbol": "position_changed"
+        },
+        {
+          "path": "src/FerroUI.Controls/documents/rich_text_document.rs",
+          "symbol": "fn observe_text_change("
         }
       ],
       "tests": [
@@ -47135,6 +47155,18 @@
         {
           "path": "src/FerroUI.Controls/documents/rich_text_pointer_tests.rs",
           "symbol": "rich_pointer_tracking_keeps_weak_document_and_subscription_lifetimes"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text/rich_edit_text_range_tracking_tests.rs",
+          "symbol": "rich_range_tracking_operation_span_is_private_and_precedes_public_notifications"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text/rich_edit_text_range_tracking_tests.rs",
+          "symbol": "rich_range_tracking_nested_text_read_write_cannot_replay_stale_outer_text"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text/rich_edit_text_range_tracking_tests.rs",
+          "symbol": "rich_range_tracking_field_reconciliation_callbacks_observe_current_coordinates"
         }
       ],
       "includes": [
@@ -47337,7 +47369,7 @@
           "state": "unreviewed"
         }
       ],
-      "reason": "Weak live pointers track edits and resolve shaped insertion geometry with gravity. Public text offsets count UTF-16 scalar-safe text instead of native synthetic element positions; unreviewed source position members remain partial. Live pointers now follow each completed replacement immediately through internal position notifications, before public batch publication; pointers created during a batch never replay earlier edits. Nested rollback and reentrant notification order preserve weak lifetime.",
+      "reason": "Weak live pointers track edits and resolve shaped insertion geometry with gravity. Public text offsets count UTF-16 scalar-safe text instead of native synthetic element positions; unreviewed source position members remain partial. Live pointers now follow each completed replacement immediately through internal position notifications, before public batch publication; pointers created during a batch never replay earlier edits. Nested rollback and reentrant notification order preserve weak lifetime. Observation now rejects stale virtual text reads and advances private coordinates before callback-bearing field reconciliation. Independent range SetText has a separate measured pair channel; these ordinary pointers keep their existing minimal-diff policy. See RANGE-TRACKING.md.",
       "deviations": [
         "RT-I01",
         "RT-I02"
@@ -78464,6 +78496,34 @@
         {
           "path": "src/FerroUI.Controls/rich_text/rich_text_editor.rs",
           "symbol": "struct NavigationAffinity"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text/rich_edit_text_range_tracking.rs",
+          "symbol": "pub(super) struct RangePosition"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text/rich_edit_text_range_tracking.rs",
+          "symbol": "fn map_set_text_pair("
+        },
+        {
+          "path": "src/FerroUI.Controls/documents/rich_text_document.rs",
+          "symbol": "pub(crate) fn replace_range_text("
+        },
+        {
+          "path": "src/FerroUI.Controls/documents/rich_text_document.rs",
+          "symbol": "fn observe_text_change("
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text/rich_text_editor.rs",
+          "symbol": "fn insert_range_text("
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text/rich_edit_text_range_tracking_native_cases.rs",
+          "symbol": "pub(super) const ORIGINAL:"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text/rich_edit_text_range_tracking_native_cases.rs",
+          "symbol": "pub(super) const ADDITIONAL:"
         }
       ],
       "tests": [
@@ -78774,9 +78834,85 @@
         {
           "path": "src/FerroUI.Controls/rich_text/rich_edit_text_selection_movement_tests.rs",
           "symbol": "rich_selection_vertical_redirected_extensions_count_actual_story_edge_units"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text/rich_edit_text_range_tracking_tests.rs",
+          "symbol": "rich_range_tracking_replays_115_original_native_edits_and_230_passive_pairs"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text/rich_edit_text_range_tracking_tests.rs",
+          "symbol": "rich_range_tracking_replays_15_additional_native_edits_and_30_passive_pairs"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text/rich_edit_text_range_tracking_tests.rs",
+          "symbol": "rich_range_tracking_operation_span_is_private_and_precedes_public_notifications"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text/rich_edit_text_range_tracking_tests.rs",
+          "symbol": "rich_range_tracking_same_visible_diff_keeps_distinct_origins_and_operation_spans"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text/rich_edit_text_range_tracking_tests.rs",
+          "symbol": "rich_range_tracking_duplicate_identity_and_formatting_gravity_remain_independent"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text/rich_edit_text_range_tracking_tests.rs",
+          "symbol": "rich_range_tracking_same_text_has_no_semantic_event_and_cannot_leak_origin"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text/rich_edit_text_range_tracking_tests.rs",
+          "symbol": "rich_range_tracking_uses_accepted_scalar_safe_text_and_structural_normalization"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text/rich_edit_text_range_tracking_tests.rs",
+          "symbol": "rich_range_tracking_updates_each_edit_inside_one_notification_batch"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text/rich_edit_text_range_tracking_tests.rs",
+          "symbol": "rich_range_tracking_failed_group_restores_collapsed_pairs_before_publication"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text/rich_edit_text_range_tracking_tests.rs",
+          "symbol": "rich_range_tracking_unchanged_semantic_pair_still_participates_in_rollback"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text/rich_edit_text_range_tracking_tests.rs",
+          "symbol": "rich_range_tracking_rollback_preserves_new_endpoint_identity_and_new_ranges"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text/rich_edit_text_range_tracking_tests.rs",
+          "symbol": "rich_range_tracking_successful_undo_uses_existing_restore_policy_and_one_history_unit"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text/rich_edit_text_range_tracking_tests.rs",
+          "symbol": "rich_range_tracking_text_read_callback_cannot_replay_into_a_new_range_identity"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text/rich_edit_text_range_tracking_tests.rs",
+          "symbol": "rich_range_tracking_callback_owned_model_and_endpoints_survive_failed_publication"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text/rich_edit_text_range_tracking_tests.rs",
+          "symbol": "rich_range_tracking_private_subscriptions_do_not_retain_ranges_or_documents"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text/rich_edit_text_range_tracking_tests.rs",
+          "symbol": "rich_range_tracking_empty_rich_snapshot_keeps_its_original_transaction_origin"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text/rich_edit_text_range_tracking_tests.rs",
+          "symbol": "rich_range_tracking_nested_text_read_write_cannot_replay_stale_outer_text"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text/rich_edit_text_range_tracking_tests.rs",
+          "symbol": "rich_range_tracking_property_callback_writes_before_or_after_invalidation_own_their_content"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text/rich_edit_text_range_tracking_tests.rs",
+          "symbol": "rich_range_tracking_field_reconciliation_callbacks_observe_current_coordinates"
         }
       ],
-      "reason": "This file declares the exact public RichEdit document/range text and stream contracts. The RTF engine implementation is external to the WinUI tree; portable codec targets are mapped against the declared contract, not presented as source copied from this XML. Every documented member retains its individual state in the API inventory. Portable byte decoding supports 874, 932, 936, 949, 950, 1250..1258, 10000, 10007 and 65001 through pinned encoding_rs tables. Raw/escaped multibyte tokens share one incremental UTF-16 decoder; malformed input and incomplete sequences at syntax boundaries fail without replacement. Font-scoped fcharset/cpg, default-font/plain resets, font names and field destinations share that codec. Symbol/OEM/Johab and unspecified pages remain explicit errors. Export retains the canonical Unicode-escaped writer; byte-for-byte native code-page roundtrip and full RTF content are not claimed. Paragraph/character stylesheet references now resolve forward based-on chains, additive formatting and subsequent direct overrides through the shared property decoder, with cycle/kind/reference/depth checks and an independent expansion work budget. Ignored style names/keycodes/metadata never become story text. Resolved appearance is retained; live named-style identity, next-style policies and section/table styles are not implemented. Hyperlink field results spanning paragraphs become separate paragraph-owned links with identical URI/target and retained metrics/formatting; empty paragraphs create no invisible links. Cumulative materialized URI/target bytes are checked against max_bytes before cloning. Imports finish parsing before model/history/preview mutation. Native field identity and full content/format conformance remain pending. The selection HomeKey/EndKey declarations now map to the shared Line/Story navigation module with directed event handling. Their exact native collapse/count conventions remain explicitly partial under RT-I21.",
+      "reason": "This file declares the exact public RichEdit document/range text and stream contracts. The RTF engine implementation is external to the WinUI tree; portable codec targets are mapped against the declared contract, not presented as source copied from this XML. Every documented member retains its individual state in the API inventory. Portable byte decoding supports 874, 932, 936, 949, 950, 1250..1258, 10000, 10007 and 65001 through pinned encoding_rs tables. Raw/escaped multibyte tokens share one incremental UTF-16 decoder; malformed input and incomplete sequences at syntax boundaries fail without replacement. Font-scoped fcharset/cpg, default-font/plain resets, font names and field destinations share that codec. Symbol/OEM/Johab and unspecified pages remain explicit errors. Export retains the canonical Unicode-escaped writer; byte-for-byte native code-page roundtrip and full RTF content are not claimed. Paragraph/character stylesheet references now resolve forward based-on chains, additive formatting and subsequent direct overrides through the shared property decoder, with cycle/kind/reference/depth checks and an independent expansion work budget. Ignored style names/keycodes/metadata never become story text. Resolved appearance is retained; live named-style identity, next-style policies and section/table styles are not implemented. Hyperlink field results spanning paragraphs become separate paragraph-owned links with identical URI/target and retained metrics/formatting; empty paragraphs create no invisible links. Cumulative materialized URI/target bytes are checked against max_bytes before cloning. Imports finish parsing before model/history/preview mutation. Native field identity and full content/format conformance remain pending. The selection HomeKey/EndKey declarations now map to the shared Line/Story navigation module with directed event handling. Their exact native collapse/count conventions remain explicitly partial under RT-I21. Explicit plain range SetText now tracks independent ranges as endpoint pairs from the accepted original replacement span, separately from public minimal-diff records and ordinary TextPointer affinity. Literal native replay covers 130 successful edits and 260 passive after-pairs from independently verified x64/ARM64 records. Private one-shot origin matching, weak coordinate identities, immediate bookkeeping, callback ownership and failed-group restoration reuse the shared editor/document; formatting Gravity remains independent. TypeText, rich fragments (including empty deletion), direct tree writes and successful history retain their existing origins. Native repeated edits, paragraph/object/source-surrogate boundaries, overlapping identical-text replacement, synthetic terminal positions, duplicate-format caches and packaged WinUI behavior remain unverified. See RANGE-TRACKING.md and source-bound execution in TESTS.md.",
       "deviations": [
         "RT-A03",
         "RT-I04",
@@ -78784,7 +78920,8 @@
         "RT-I18",
         "RT-I19",
         "RT-I21",
-        "RT-I23"
+        "RT-I23",
+        "RT-I36"
       ]
     },
     {

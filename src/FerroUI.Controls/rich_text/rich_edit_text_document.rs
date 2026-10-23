@@ -1,7 +1,7 @@
 use super::{EditError, EditKind, EditorSelection, RichTextEditor, RtfError, RtfReader, RtfWriter};
 use crate::documents::{
     CharacterFormat, DocumentError, DocumentSnapshot, InlineSnapshot, InlineSnapshotKind,
-    Paragraph, ParagraphFormat, RichTextDocument, TextGravity, TextPointer,
+    Paragraph, ParagraphFormat, RichTextDocument, TextGravity,
 };
 use crate::RichTextBlock;
 use ferroui_base::media::text_formatting::unicode::{GraphemeEnumerator, WordBreakEnumerator};
@@ -21,6 +21,10 @@ pub use case::LetterCase;
 
 #[path = "rich_edit_text_range_operations.rs"]
 mod range_operations;
+
+#[path = "rich_edit_text_range_tracking.rs"]
+mod range_tracking;
+use range_tracking::RangePosition;
 
 #[path = "rich_edit_text_clipboard.rs"]
 mod clipboard;
@@ -442,8 +446,7 @@ impl RichEditTextDocument {
 }
 
 struct RangeData {
-    start: TextPointer,
-    end: TextPointer,
+    position: RangePosition,
     typing_format: Rc<CharacterFormat>,
     gravity: RangeGravity,
     // Explicit range/format ownership changes are distinct from the document's
@@ -451,7 +454,9 @@ struct RangeData {
     generation: u64,
 }
 
-/// A live, independent range. Its endpoints use the document's TextPointer tracking.
+/// A live, independent range. Explicit plain range SetText tracks its endpoints
+/// as a pair from the accepted operation span. Other mutation origins retain the
+/// document's ordinary TextPointer affinity policy.
 /// RangeGravity independently selects formatting at a collapsed boundary.
 /// Cloning shares the range object; [`get_clone`](Self::get_clone) creates independent endpoints.
 #[derive(Clone)]
@@ -464,15 +469,9 @@ impl RichEditTextRange {
     fn new(editor: Rc<RichTextEditor>, range: Range<usize>) -> Result<Self, EditError> {
         let document = editor.document();
         document.validate_range(range.clone())?;
-        let start_gravity = if range.is_empty() {
-            TextGravity::Forward
-        } else {
-            TextGravity::Backward
-        };
         Ok(Self {
             data: Rc::new(RefCell::new(RangeData {
-                start: document.create_pointer(range.start, start_gravity)?,
-                end: document.create_pointer(range.end, TextGravity::Forward)?,
+                position: RangePosition::new(&document, range)?,
                 typing_format: Rc::new(CharacterFormat::default()),
                 gravity: RangeGravity::UIBehavior,
                 generation: 0,
@@ -490,8 +489,7 @@ impl RichEditTextRange {
         self.range().end
     }
     pub fn range(&self) -> Range<usize> {
-        let data = self.data.borrow();
-        data.start.offset().min(data.end.offset())..data.start.offset().max(data.end.offset())
+        self.data.borrow().position.range()
     }
     pub fn length(&self) -> usize {
         self.range().len()
@@ -606,17 +604,7 @@ impl RichEditTextRange {
             return Ok(());
         }
         let replacement = RangeData {
-            start: self.document().create_pointer(
-                range.start,
-                if range.is_empty() {
-                    TextGravity::Forward
-                } else {
-                    TextGravity::Backward
-                },
-            )?,
-            end: self
-                .document()
-                .create_pointer(range.end, TextGravity::Forward)?,
+            position: RangePosition::new(&self.document(), range)?,
             typing_format: Rc::new(CharacterFormat::default()),
             gravity: self.data.borrow().gravity,
             generation: self.data.borrow().generation.wrapping_add(1),
@@ -677,6 +665,10 @@ impl RichEditTextRange {
     /// Replaces the range while preserving and rebasing the editor's independent selection.
     /// The change, formatting, and selection are one undoable transaction.
     pub fn set_text(&self, text: &str) -> Result<(), EditError> {
+        self.set_text_core(text, true)
+    }
+
+    fn set_text_core(&self, text: &str, paired_tracking: bool) -> Result<(), EditError> {
         self.editor.prepare_edit()?;
         let checkpoint = self.range_read_checkpoint();
         let original = self.range();
@@ -705,7 +697,11 @@ impl RichEditTextRange {
                 self.ensure_range_read(checkpoint)?;
             }
             self.ensure_range_generation(checkpoint.0)?;
-            editor.insert_text(text, EditKind::Programmatic)?;
+            if paired_tracking {
+                editor.insert_range_text(text)?;
+            } else {
+                editor.insert_text(text, EditKind::Programmatic)?;
+            }
             self.ensure_range_generation(checkpoint.0)?;
             let inserted = self
                 .document()
@@ -837,7 +833,9 @@ impl RichEditTextRange {
         snapshot.validate()?;
         self.editor.prepare_edit()?;
         if snapshot.paragraphs.is_empty() {
-            return self.set_text("");
+            // An empty rich fragment retains its original mutation origin even
+            // though its transaction shares the plain deletion implementation.
+            return self.set_text_core("", false);
         }
         let checkpoint = self.range_read_checkpoint();
         let original = self.range();

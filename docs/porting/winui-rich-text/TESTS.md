@@ -1,5 +1,65 @@
 # Rich text verification
 
+## 2026-10-23 continuation: independent SetText range pairs
+
+The bounded paired-range implementation builds on published fixture-correction
+commit `9a1a756beba5014ff0c6d72a4ee02cc642e637f1`. Its six changed Rust files
+are identified by SHA-256 in
+[continuation-validation.json](continuation-validation.json). The unchanged
+dependency graph and all other source come from that base. Documentation and
+generated map edits do not change the tested binary.
+
+Two native replay definitions execute 130 successful external SetText operations
+and compare 260 independent primary/duplicate after-pairs. All 1,690 represented
+literal fields were separately compared against the preserved official x64 and
+ARM64 observations. Seventeen additional regressions test FerroUI transaction,
+UTF-16, notification, virtual/property callback and weak-lifetime policies.
+Those framework cases are separate from the native evidence. The implementation,
+original-span counterexamples and remaining boundaries are described in
+[RANGE-TRACKING.md](RANGE-TRACKING.md).
+
+The frozen Base/Controls test-target metadata check passed in 1m24s; Controls
+executable compilation passed in 4m06s. Both use Rust 1.99.1, locked/offline
+dependencies, one build job and disabled incremental/debug artifacts. The
+fresh executable's SHA-256 is
+`a4a9e8f1ad3536daa6ec26b746f813c2a0c7173664950e73bf5e82f5559df49e`.
+
+| Executed filter | Result |
+|---|---:|
+| Independent SetText pair tracking | 19 passed |
+| Hosted objects | 21 passed |
+| Paragraph typing | 13 passed |
+| Live-selection Gravity | 29 passed |
+| Selection Options | 20 passed |
+| Full Controls, with loopback access | 5,320 passed |
+
+These focused results have zero failures and include all three fixture
+corrections described below. The full serial Controls run passed in 92.87s
+with zero failed or ignored tests, including its loopback cases. The source inventory regeneration/check
+passes with unchanged file/API disposition counts; no runtime source file is
+promoted to complete.
+
+The repaired IBus real-window smoke also passed in the published f7e9899e
+[X11 job](https://github.com/wieslawsoltes/FerroUI/actions/runs/39943953089/job/120381900112),
+step 24. Its log confirms ContentType values `(6,0)`, `(2,0)`, then `(3,0)`.
+That broad run was canceled during later catalog compilation when the fixture
+correction was pushed, so this is a successful smoke step rather than a fully
+successful broad run. At 9a1a756b, the entire X11 job has passed in
+[run 39946646944](https://github.com/wieslawsoltes/FerroUI/actions/runs/39946646944),
+including the IBus transitions and later catalog smoke. The time-stamped CI
+snapshot in continuation-validation.json also records completed Base/Controls
+and bridge steps plus the successful ARM64 native-oracle job. Other jobs were
+still running at that observation, so neither whole workflow is declared passed.
+
+The new ARM64 artifact records measured PR merge
+`5a51a2f716291bbd32f2e18bd93079349979a2f7` and the unchanged probe blob, now
+with MSFTEDIT 6.2.26100.9711. The actual ZIP length/SHA-256 and every member CRC
+were verified. Canonical serial and separate concurrent diagnostics each pass
+eight tests; all extracted behavior and fixture arrays equal the earlier
+immutable ARM64 record. That comparison retains the newer engine/provenance
+separately. It does not validate the later Rust tracking implementation; the
+local frozen-source runtime gate above does.
+
 ## 2026-10-23 continuation: measured typing and hosted objects
 
 The continuation is integrated with main `0526a3ca17ec2da5b44489617393c382153678b8`

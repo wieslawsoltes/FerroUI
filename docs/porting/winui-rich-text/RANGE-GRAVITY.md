@@ -101,12 +101,14 @@ plain insertion, exact typing restoration, grouped failure, custom brush
 callbacks, endpoint publication and asynchronous cut/paste. Actual execution
 results belong to the checkpoint records in [TESTS.md](TESTS.md).
 
-The measured insertion and replacement fixtures show that native paired-range
-endpoint rebasing differs from current FerroUI TextPointer tracking at carets,
-end boundaries and overlap replacements. Formatting gravity does not change
-that tracking policy. The actual selection is a distinct native object; its
-consumer below is based on its own observations, not inferred from independent
-ITextRange2 behavior.
+The measured insertion and replacement fixtures distinguish native paired-range
+endpoint rebasing from ordinary FerroUI TextPointer tracking at carets, end
+boundaries and overlap replacements. Explicit plain range SetText now consumes
+that bounded pair contract through the private operation-span path described in
+[RANGE-TRACKING.md](RANGE-TRACKING.md). Formatting gravity stays independent, and
+other edit origins retain their existing policy. The actual selection is a
+distinct native object; its consumer below is based on its own observations,
+not inferred from independent ITextRange2 behavior.
 
 ## Live selection consumer
 
@@ -261,7 +263,10 @@ The 1,577 independent Gravity and 137 Link observations stay immutable.
 
 Because these snapshots read GetFont/GetPara, they can populate formatting
 caches. They cannot resolve the remaining independent-duplicate cached-format
-contract. Stage B needs a distinct experiment that controls when the first font
-read occurs. The completed 50-test extractor gate checks the observation protocol
-only. No production tracking or format-cache policy is changed by this
-measurement alone, and the relevant API mappings remain partial.
+contract. A further experiment must control when the first font read occurs.
+The completed 50-test extractor gate checks the observation protocol only. The
+subsequent [bounded SetText consumer](RANGE-TRACKING.md) replays these 15 edits
+alongside 115 original Gravity-family edits, covering 260 passive after-pairs.
+It preserves formatting-cache and other-origin boundaries; relevant API mappings
+remain partial. Its Rust execution belongs to the separate implementation
+checkpoint in [TESTS.md](TESTS.md).

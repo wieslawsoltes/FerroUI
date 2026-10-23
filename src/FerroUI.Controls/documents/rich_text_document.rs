@@ -3,12 +3,12 @@ use super::{
     BlockCollection, Bold, CharacterFormat, DocumentLinkField, DocumentSnapshot, Hyperlink,
     IInlineHost, Inline, InlineCollection, InlineSnapshot, InlineSnapshotKind, InlineUIContainer,
     Italic, LineBreak, Paragraph, ParagraphFormat, ParagraphSnapshot, Run, Span, TextElement,
-    TextGravity, TextPointer, TextPosition, Underline,
+    TextGravity, TextPointer, TextPosition, TextRange, Underline,
 };
 use crate::Control;
 use ferroui_base::media::text_formatting::unicode::{GraphemeEnumerator, WordBreakEnumerator};
 use ferroui_base::reactive::{Disposable, IDisposable};
-use ferroui_base::utilities::HandlerList;
+use ferroui_base::utilities::{HandlerList, HandlerSnapshot};
 use ferroui_base::{Ref, StyledElement};
 use std::cell::{Cell, RefCell};
 use std::collections::{HashSet, VecDeque};
@@ -137,12 +137,84 @@ enum ParagraphAlignmentSource {
     Trailing,
 }
 
+type RangePositionHandler = dyn Fn(&DocumentTextChange, Option<&DocumentTextChange>);
+type RangePositionHandlers = HandlerSnapshot<RangePositionHandler>;
+
+struct RangeTrackingReference {
+    position: Weak<Cell<TextRange>>,
+    paired_generation: Weak<Cell<u64>>,
+}
+
+pub(crate) struct RangeTrackingCheckpoint {
+    positions: Vec<(RangeTrackingReference, TextRange, u64)>,
+}
+
+/// A one-shot description of an explicit range SetText mutation. It is installed
+/// only at the final Run splice or completed structural install, after reads
+/// which can call application services. Matching the complete before/after text
+/// prevents a callback-owned mutation from inheriting the enclosing origin.
+struct PendingRangeTextChange {
+    generation: u64,
+    expected_mutation: u64,
+    before: Rc<str>,
+    byte_range: Range<usize>,
+    inserted: String,
+    change: DocumentTextChange,
+    handlers: RangePositionHandlers,
+    interrupted: Rc<Cell<bool>>,
+}
+
+impl PendingRangeTextChange {
+    fn matches(&self, before: &Rc<str>, after: &str, mutation: u64) -> bool {
+        if self.expected_mutation != mutation || !Rc::ptr_eq(&self.before, before) {
+            return false;
+        }
+        let Some(inserted_end) = self.byte_range.start.checked_add(self.inserted.len()) else {
+            return false;
+        };
+        after.get(..self.byte_range.start) == before.get(..self.byte_range.start)
+            && after.get(self.byte_range.start..inserted_end) == Some(self.inserted.as_str())
+            && after.get(inserted_end..) == before.get(self.byte_range.end..)
+    }
+}
+
+struct RangeTextChangeScope {
+    document: RichTextDocument,
+    generation: u64,
+    before_mutation: u64,
+    interrupted: Rc<Cell<bool>>,
+}
+
+impl RangeTextChangeScope {
+    fn was_interrupted(&self) -> bool {
+        let current = self.document.mutation_version();
+        self.interrupted.get()
+            || (current != self.before_mutation && current != self.before_mutation.wrapping_add(1))
+    }
+}
+
+impl Drop for RangeTextChangeScope {
+    fn drop(&mut self) {
+        let mut pending = self.document.0.pending_range_change.borrow_mut();
+        if pending
+            .as_ref()
+            .is_some_and(|change| change.generation == self.generation)
+        {
+            *pending = None;
+        }
+    }
+}
+
 struct RichTextDocumentData {
     blocks: BlockCollection,
     revision: Cell<u64>,
     mutation_version: Cell<u64>,
     changed: Rc<HandlerList<dyn Fn(&DocumentChangedEventArgs)>>,
     position_changed: Rc<HandlerList<dyn Fn(&DocumentTextChange)>>,
+    range_position_changed: Rc<HandlerList<RangePositionHandler>>,
+    range_positions: RefCell<Vec<RangeTrackingReference>>,
+    pending_range_change: RefCell<Option<PendingRangeTextChange>>,
+    range_change_generation: Cell<u64>,
     cached_text: RefCell<Rc<str>>,
     observed_text: RefCell<Rc<str>>,
     text_changes: RefCell<Vec<DocumentTextChange>>,
@@ -219,6 +291,10 @@ impl RichTextDocument {
             mutation_version: Cell::new(0),
             changed: Rc::new(HandlerList::new()),
             position_changed: Rc::new(HandlerList::new()),
+            range_position_changed: Rc::new(HandlerList::new()),
+            range_positions: RefCell::new(Vec::new()),
+            pending_range_change: RefCell::new(None),
+            range_change_generation: Cell::new(0),
             cached_text: RefCell::new(text.clone()),
             observed_text: RefCell::new(text),
             text_changes: RefCell::new(Vec::new()),
@@ -327,6 +403,105 @@ impl RichTextDocument {
         })
     }
 
+    /// Private paired-range bookkeeping. Ordinary TextPointer listeners keep
+    /// receiving the visible minimal change through their separate channel.
+    /// The optional operation describes only an accepted explicit range SetText;
+    /// typed input, rich fragments, restoration and external tree writes omit it.
+    pub(crate) fn range_position_changed(
+        &self,
+        position: &Rc<Cell<TextRange>>,
+        paired_generation: &Rc<Cell<u64>>,
+        handler: impl Fn(&DocumentTextChange, Option<&DocumentTextChange>) + 'static,
+    ) -> Rc<dyn IDisposable> {
+        let mut positions = self.0.range_positions.borrow_mut();
+        positions.retain(|entry| entry.position.strong_count() != 0);
+        positions.push(RangeTrackingReference {
+            position: Rc::downgrade(position),
+            paired_generation: Rc::downgrade(paired_generation),
+        });
+        drop(positions);
+        let token = self.0.range_position_changed.add(Rc::new(handler));
+        let weak = Rc::downgrade(&self.0.range_position_changed);
+        Disposable::create(move || {
+            if let Some(handlers) = weak.upgrade() {
+                handlers.remove(token);
+            }
+        })
+    }
+
+    pub(crate) fn capture_range_tracking(&self) -> RangeTrackingCheckpoint {
+        let mut positions = self.0.range_positions.borrow_mut();
+        positions.retain(|entry| entry.position.strong_count() != 0);
+        RangeTrackingCheckpoint {
+            positions: positions
+                .iter()
+                .filter_map(|entry| {
+                    let position = entry.position.upgrade()?;
+                    let generation = entry.paired_generation.upgrade()?;
+                    Some((
+                        RangeTrackingReference {
+                            position: entry.position.clone(),
+                            paired_generation: entry.paired_generation.clone(),
+                        },
+                        position.get(),
+                        generation.get(),
+                    ))
+                })
+                .collect(),
+        }
+    }
+
+    /// Restore only trackers which participated in an explicit SetText and still
+    /// have their original identity. An explicit endpoint setter replaces that
+    /// identity; new or dropped ranges cannot be resurrected by a failed group.
+    pub(crate) fn restore_range_tracking(&self, checkpoint: RangeTrackingCheckpoint) {
+        for (entry, before, generation) in checkpoint.positions {
+            let (Some(position), Some(current)) =
+                (entry.position.upgrade(), entry.paired_generation.upgrade())
+            else {
+                continue;
+            };
+            if current.get() != generation {
+                position.set(before);
+                current.set(current.get().wrapping_add(1));
+            }
+        }
+    }
+
+    fn begin_range_text_change(
+        &self,
+        range: Range<usize>,
+        inserted: String,
+        handlers: RangePositionHandlers,
+    ) -> Option<RangeTextChangeScope> {
+        let before = self.0.observed_text.borrow().clone();
+        let byte_range = utf16_to_byte(&before, range.start)?..utf16_to_byte(&before, range.end)?;
+        let generation = self.0.range_change_generation.get().wrapping_add(1);
+        self.0.range_change_generation.set(generation);
+        let inserted_length = inserted.encode_utf16().count();
+        let interrupted = Rc::new(Cell::new(false));
+        let before_mutation = self.mutation_version();
+        *self.0.pending_range_change.borrow_mut() = Some(PendingRangeTextChange {
+            generation,
+            expected_mutation: before_mutation.wrapping_add(1),
+            before,
+            byte_range,
+            inserted,
+            change: DocumentTextChange {
+                range,
+                inserted_length,
+            },
+            handlers,
+            interrupted: interrupted.clone(),
+        });
+        Some(RangeTextChangeScope {
+            document: self.clone(),
+            generation,
+            before_mutation,
+            interrupted,
+        })
+    }
+
     /// Nested batches publish one revision and one Changed event at the outer end.
     pub fn begin_edit(&self) -> DocumentEditBatch {
         self.0.edit_depth.set(self.0.edit_depth.get() + 1);
@@ -387,7 +562,17 @@ impl RichTextDocument {
     }
 
     pub fn replace_text(&self, range: Range<usize>, text: &str) -> Result<(), DocumentError> {
-        self.replace_text_core(range, text, ParagraphAlignmentSource::Leading)
+        self.replace_text_core(range, text, ParagraphAlignmentSource::Leading, false)
+    }
+
+    /// Explicit range SetText is the only measured origin for paired endpoint
+    /// tracking. Its accepted operation span is distinct from a string diff.
+    pub(crate) fn replace_range_text(
+        &self,
+        range: Range<usize>,
+        text: &str,
+    ) -> Result<(), DocumentError> {
+        self.replace_text_core(range, text, ParagraphAlignmentSource::Leading, true)
     }
 
     /// Typed replacement across paragraphs retains the trailing paragraph's
@@ -399,7 +584,7 @@ impl RichTextDocument {
         range: Range<usize>,
         text: &str,
     ) -> Result<(), DocumentError> {
-        self.replace_text_core(range, text, ParagraphAlignmentSource::Trailing)
+        self.replace_text_core(range, text, ParagraphAlignmentSource::Trailing, false)
     }
 
     fn replace_text_core(
@@ -407,6 +592,7 @@ impl RichTextDocument {
         range: Range<usize>,
         text: &str,
         alignment_source: ParagraphAlignmentSource,
+        paired_tracking: bool,
     ) -> Result<(), DocumentError> {
         self.ensure_available()?;
         self.validate_range(range.clone())?;
@@ -430,7 +616,22 @@ impl RichTextDocument {
                 value.replace_range(start..end, &normalized);
                 let _batch = self.begin_edit();
                 self.0.change_kind.set(Some(DocumentChangeKind::Content));
+                let tracking = if paired_tracking {
+                    self.begin_range_text_change(
+                        range,
+                        normalized,
+                        self.0.range_position_changed.snapshot(),
+                    )
+                } else {
+                    None
+                };
                 found.run.set_text(Some(&value));
+                if tracking
+                    .as_ref()
+                    .is_some_and(|scope| scope.was_interrupted())
+                {
+                    return Err(DocumentError::EditInProgress);
+                }
                 return Ok(());
             }
         }
@@ -522,7 +723,7 @@ impl RichTextDocument {
                 replacement.next_link_field_id = snapshot.next_link_field_id;
             }
         }
-        self.replace_range_internal(range, &replacement, true, alignment_source)
+        self.replace_range_internal(range, &replacement, true, alignment_source, paired_tracking)
     }
 
     pub fn replace_range(
@@ -530,7 +731,13 @@ impl RichTextDocument {
         range: Range<usize>,
         fragment: &DocumentSnapshot,
     ) -> Result<(), DocumentError> {
-        self.replace_range_internal(range, fragment, false, ParagraphAlignmentSource::Leading)
+        self.replace_range_internal(
+            range,
+            fragment,
+            false,
+            ParagraphAlignmentSource::Leading,
+            false,
+        )
     }
 
     /// Internal text transformations retain existing field identity; copied
@@ -553,7 +760,13 @@ impl RichTextDocument {
                 ));
             }
         }
-        self.replace_range_internal(range, fragment, true, ParagraphAlignmentSource::Leading)
+        self.replace_range_internal(
+            range,
+            fragment,
+            true,
+            ParagraphAlignmentSource::Leading,
+            false,
+        )
     }
 
     fn replace_range_internal(
@@ -562,6 +775,7 @@ impl RichTextDocument {
         fragment: &DocumentSnapshot,
         inherited: bool,
         alignment_source: ParagraphAlignmentSource,
+        paired_tracking: bool,
     ) -> Result<(), DocumentError> {
         self.ensure_available()?;
         self.validate_range(range.clone())?;
@@ -627,8 +841,9 @@ impl RichTextDocument {
         snapshot
             .paragraphs
             .splice(start_index..=end_index, inserted);
+        let tracked = paired_tracking.then(|| (range.clone(), fragment.text()));
         snapshot.replace_link_fields(&before, range, &fragment, next)?;
-        self.install(&snapshot, DocumentChangeKind::Content)
+        self.install_with_range_change(&snapshot, DocumentChangeKind::Content, tracked)
     }
 
     pub fn apply_format(
@@ -795,6 +1010,15 @@ impl RichTextDocument {
         snapshot: &DocumentSnapshot,
         kind: DocumentChangeKind,
     ) -> Result<(), DocumentError> {
+        self.install_with_range_change(snapshot, kind, None)
+    }
+
+    fn install_with_range_change(
+        &self,
+        snapshot: &DocumentSnapshot,
+        kind: DocumentChangeKind,
+        range_change: Option<(Range<usize>, String)>,
+    ) -> Result<(), DocumentError> {
         self.ensure_available()?;
         let version = self.mutation_version();
         snapshot.validate()?;
@@ -823,6 +1047,10 @@ impl RichTextDocument {
         // Reuse preparation captures formatting again. Fence its final read
         // before clearing the live tree or reserving structural installation.
         self.ensure_install_read(version)?;
+        // A range created by an installation callback already addresses that
+        // tree state; it must not receive the replacement which preceded it.
+        let range_change = range_change
+            .map(|(range, inserted)| (range, inserted, self.0.range_position_changed.snapshot()));
         let _batch = self.begin_edit();
         self.0.installing.set(true);
         self.0.change_kind.set(Some(kind));
@@ -840,7 +1068,16 @@ impl RichTextDocument {
         );
         self.0.installed_field_snapshot.set(true);
         self.0.installing.set(false);
+        let tracking = range_change.and_then(|(range, inserted, handlers)| {
+            self.begin_range_text_change(range, inserted, handlers)
+        });
         self.on_invalidated();
+        if tracking
+            .as_ref()
+            .is_some_and(|scope| scope.was_interrupted())
+        {
+            return Err(DocumentError::EditInProgress);
+        }
         Ok(())
     }
 
@@ -945,7 +1182,24 @@ impl RichTextDocument {
     }
 
     fn observe_text_change(&self) {
+        // Take the hint before virtual text reads. A nested application mutation
+        // cannot consume it, and the post-read identity check rejects stale text.
+        let tracked = self.0.pending_range_change.borrow_mut().take();
+        let range_handlers = tracked.as_ref().map_or_else(
+            || self.0.range_position_changed.snapshot(),
+            |tracked| tracked.handlers.clone(),
+        );
+        let mutation = self.mutation_version();
         let text = self.0.blocks.text();
+        if self.mutation_version() != mutation {
+            // A virtual text read accepted a nested model mutation. Its own
+            // observation already owns the current text and coordinates; this
+            // outer read must not publish a stale synthetic replacement.
+            if let Some(tracked) = &tracked {
+                tracked.interrupted.set(true);
+            }
+            return;
+        }
         let previous = self.0.observed_text.replace(Rc::from(text.as_str()));
         let change = (previous.as_ref() != text).then(|| {
             let (range, inserted_length) = changed_range(&previous, &text);
@@ -955,19 +1209,32 @@ impl RichTextDocument {
             }
         });
         let installed = self.0.installed_field_snapshot.replace(false);
-        let has_fields = !self.0.link_fields.borrow().is_empty();
-        if !installed && has_fields {
-            self.reconcile_external_fields(change.as_ref());
-        }
-        if let Some(change) = change {
+        let operation = tracked.as_ref().filter(|tracked| {
+            let matches = tracked.matches(&previous, &text, mutation);
+            if !matches {
+                tracked.interrupted.set(true);
+            }
+            matches
+        });
+        if let Some(change) = &change {
             self.0.text_changes.borrow_mut().push(change.clone());
             // These handlers are private pointer bookkeeping, with no application
             // callbacks. Apply each replacement once before public notifications;
             // a pointer created afterwards starts in the new coordinates and must
             // not replay this replacement when the enclosing batch is published.
             for (_, handler) in self.0.position_changed.snapshot().iter() {
-                handler(&change);
+                handler(change);
             }
+            for (_, handler) in range_handlers.iter() {
+                handler(change, operation.map(|tracked| &tracked.change));
+            }
+        }
+        // Semantic reconciliation can call custom inline/block readers. Both
+        // private coordinate channels must already address the accepted text
+        // before a nested mutation can emit its subsequent replacement.
+        let has_fields = !self.0.link_fields.borrow().is_empty();
+        if !installed && has_fields {
+            self.reconcile_external_fields(change.as_ref());
         }
     }
 

@@ -1418,3 +1418,41 @@ explicitly use their default LTR direction; the converter resolves Start/End
 by direction and still distinguishes all physical alignments and Mixed. The
 inheritance regression asserts local and snapshot None, effective Start and
 exact undo/redo. No recorded native expectation or production policy changed.
+
+## 2026-10-23 — Port measured independent SetText endpoint pairs
+
+Explicit plain range SetText now passes its accepted original operation span
+through the shared editor/document transaction. A private one-shot description
+validates the full splice and updates weak paired coordinates before public
+publication; public minimal changes and ordinary TextPointer affinity remain
+separate. Literal native cases cover 115 original Gravity-family edits and
+15 additional passive-range edits, with 260 primary/duplicate after-pairs.
+Independent review checked every one of the 1,690 represented values against
+both preserved architecture records. A prior-policy simulation had disagreed
+on 90 pairs; that audit is distinguished from runtime execution.
+
+Source review found concrete callback and origin boundaries: ranges created
+during virtual reads must not replay earlier writes; an empty rich fragment
+must retain its original origin; stale outer text reads must yield to nested
+content; Run property callbacks before or after parent invalidation must retire
+older ownership; field reconciliation must see current private coordinates.
+The implementation fences those boundaries through the shared model. Failed
+groups additionally checkpoint weak coordinate identities so a covering edit
+can restore lost endpoints without overwriting a newer explicit identity or
+callback-owned document. Successful undo/redo retains existing generic tracking.
+
+The six changed Rust source files were frozen on top of published 9a1a756b for
+metadata and runtime gates. Base/Controls test-target metadata passed in 1m24s
+and executable compilation in 4m06s. All nineteen new tracking definitions pass,
+including the two complete native replay tests and seventeen framework-policy
+regressions. Hosted, typing, live Gravity and Options filters also pass with
+21/13/29/20 tests. Full execution and exact source/command/log/binary hashes are
+recorded separately in TESTS.md and continuation-validation.json. The full
+Controls run with loopback access passed all 5,320 tests in 92.87s, with zero
+failures or ignored tests; the three preceding fixture failures are corrected.
+
+RANGE-TRACKING.md records the operation-span counterexamples, pair rules,
+ownership policies, source evidence and limits. RT-I36 and regenerated source/API
+maps keep affected entries partial or reference-only. TypeText duplicate
+tracking, unobserved cache behavior, overlapping identical-text edits, native
+history and the other unmeasured engine boundaries remain open.

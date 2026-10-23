@@ -430,7 +430,7 @@ Every file in the three primary roots is retained, including build and data file
 | `dxaml/xcp/tools/XCPTypesAutoGen/XamlOM/Model/Microsoft.UI.Xaml.Input.cs` | reference | — |
 | `dxaml/xcp/tools/XCPTypesAutoGen/XamlOM/Model/Microsoft.UI.Xaml.Internal.cs` | reference | — |
 | `dxaml/xcp/tools/XCPTypesAutoGen/XamlOM/Model/Microsoft.UI.Xaml.cs` | reference | `src/FerroUI.Base/media/font_typography.rs` |
-| `packaging/Intellisense/generated/Microsoft.UI.Text.xml` | reference | `src/FerroUI.Controls/rich_text/rtf.rs`, `src/FerroUI.Controls/rich_text/rtf.rs`, `src/FerroUI.Controls/rich_text/rtf.rs`, `src/FerroUI.Controls/rich_text/rtf.rs`, `src/FerroUI.Controls/rich_text/rtf_encoding.rs`, `src/FerroUI.Controls/rich_text/rtf.rs`, `src/FerroUI.Controls/rich_text/rtf_styles.rs`, `src/FerroUI.Controls/rich_text/rtf.rs`, `src/FerroUI.Controls/rich_text/rtf.rs`, `src/FerroUI.Controls/rich_text/rich_edit_text_selection_navigation.rs`, `src/FerroUI.Controls/rich_text/rich_edit_text_selection_movement.rs`, `src/FerroUI.Controls/rich_text/rich_edit_text_selection_movement.rs`, `src/FerroUI.Controls/rich_text/rich_edit_text_units.rs`, `src/FerroUI.Controls/rich_text/rich_text_editor.rs` |
+| `packaging/Intellisense/generated/Microsoft.UI.Text.xml` | reference | `src/FerroUI.Controls/rich_text/rtf.rs`, `src/FerroUI.Controls/rich_text/rtf.rs`, `src/FerroUI.Controls/rich_text/rtf.rs`, `src/FerroUI.Controls/rich_text/rtf.rs`, `src/FerroUI.Controls/rich_text/rtf_encoding.rs`, `src/FerroUI.Controls/rich_text/rtf.rs`, `src/FerroUI.Controls/rich_text/rtf_styles.rs`, `src/FerroUI.Controls/rich_text/rtf.rs`, `src/FerroUI.Controls/rich_text/rtf.rs`, `src/FerroUI.Controls/rich_text/rich_edit_text_selection_navigation.rs`, `src/FerroUI.Controls/rich_text/rich_edit_text_selection_movement.rs`, `src/FerroUI.Controls/rich_text/rich_edit_text_selection_movement.rs`, `src/FerroUI.Controls/rich_text/rich_edit_text_units.rs`, `src/FerroUI.Controls/rich_text/rich_text_editor.rs`, `src/FerroUI.Controls/rich_text/rich_edit_text_range_tracking.rs`, `src/FerroUI.Controls/rich_text/rich_edit_text_range_tracking.rs`, `src/FerroUI.Controls/documents/rich_text_document.rs`, `src/FerroUI.Controls/documents/rich_text_document.rs`, `src/FerroUI.Controls/rich_text/rich_text_editor.rs`, `src/FerroUI.Controls/rich_text/rich_edit_text_range_tracking_native_cases.rs`, `src/FerroUI.Controls/rich_text/rich_edit_text_range_tracking_native_cases.rs` |
 | `packaging/Intellisense/generated/Microsoft.UI.Xaml.xml` | reference | — |
 
 ## Rich formatting contracts and structures
@@ -557,7 +557,7 @@ Every file in the three primary roots is retained, including build and data file
 | `dxaml/xcp/core/text/Inc/Gripper.h` | pending | — |
 | `dxaml/xcp/core/text/Inc/ITextSelection.h` | partial | `src/FerroUI.Controls/rich_text_block.rs`, `src/FerroUI.Controls/rich_text_block.rs` |
 | `dxaml/xcp/core/text/Inc/InputProcessor.h` | pending | — |
-| `dxaml/xcp/core/text/Inc/PlainTextPosition.h` | partial | `src/FerroUI.Controls/documents/text_position.rs`, `src/FerroUI.Controls/documents/text_position.rs`, `src/FerroUI.Controls/documents/text_position.rs`, `src/FerroUI.Controls/documents/rich_text_document.rs` |
+| `dxaml/xcp/core/text/Inc/PlainTextPosition.h` | partial | `src/FerroUI.Controls/documents/text_position.rs`, `src/FerroUI.Controls/documents/text_position.rs`, `src/FerroUI.Controls/documents/text_position.rs`, `src/FerroUI.Controls/documents/rich_text_document.rs`, `src/FerroUI.Controls/documents/rich_text_document.rs` |
 | `dxaml/xcp/core/text/Inc/RichEditGripper.h` | pending | — |
 | `dxaml/xcp/core/text/Inc/RichEditGripperChild.h` | pending | — |
 | `dxaml/xcp/core/text/Inc/RichEditGripperCommon.h` | pending | — |
@@ -570,7 +570,7 @@ Every file in the three primary roots is retained, including build and data file
 | `dxaml/xcp/core/text/Inc/TouchSelectionSnappingCalculator.h` | pending | — |
 | `dxaml/xcp/core/text/Inc/XcpTextGripperInputProcessor.h` | pending | — |
 | `dxaml/xcp/core/text/RichTextArea/TextPointerWrapper.cpp` | partial | `src/FerroUI.Controls/documents/text_position.rs`, `src/FerroUI.Controls/documents/text_position.rs`, `src/FerroUI.Controls/documents/text_position.rs`, `src/FerroUI.Controls/documents/rich_text_document.rs` |
-| `dxaml/xcp/core/text/TextBox/PlainTextPosition.cpp` | partial | `src/FerroUI.Controls/documents/text_position.rs`, `src/FerroUI.Controls/documents/text_position.rs`, `src/FerroUI.Controls/documents/text_position.rs`, `src/FerroUI.Controls/documents/rich_text_document.rs` |
+| `dxaml/xcp/core/text/TextBox/PlainTextPosition.cpp` | partial | `src/FerroUI.Controls/documents/text_position.rs`, `src/FerroUI.Controls/documents/text_position.rs`, `src/FerroUI.Controls/documents/text_position.rs`, `src/FerroUI.Controls/documents/rich_text_document.rs`, `src/FerroUI.Controls/documents/rich_text_document.rs` |
 | `dxaml/xcp/core/text/TextBox/TextSelection.cpp` | partial | `src/FerroUI.Controls/rich_text_block.rs`, `src/FerroUI.Controls/rich_text_block.rs` |
 | `dxaml/xcp/core/text/common/Gripper.cpp` | pending | — |
 | `dxaml/xcp/core/text/common/InputProcessor.cpp` | pending | — |

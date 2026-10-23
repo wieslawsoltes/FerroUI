@@ -38,6 +38,8 @@ parity at this reference.
   shaped fragments, native transforms and callback ownership.
 - [RANGE-GRAVITY.md](RANGE-GRAVITY.md): independently measured range and live-selection
   formatting affinity, insertion/clipboard behavior and tracking boundaries.
+- [RANGE-TRACKING.md](RANGE-TRACKING.md): measured independent-range SetText pairs,
+  original operation spans, private observation ordering and transaction ownership.
 - [LINK-FIELDS.md](LINK-FIELDS.md): common cross-paragraph field metadata, typed
   projected Link ranges, RTF/transfer preservation and measured limits.
 - [API-MAP.md](API-MAP.md): a destination/review plan for every public API owner,

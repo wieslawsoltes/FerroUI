@@ -939,6 +939,21 @@ impl RichTextEditor {
     /// Typing uses the selected-paragraph endpoint/alignment contract; bulk and
     /// composition edits retain their independent replacement policies.
     pub fn insert_text(&self, text: &str, kind: EditKind) -> Result<bool, EditError> {
+        self.insert_text_core(text, kind, false)
+    }
+
+    /// Only the explicit independent range SetText facade supplies this origin.
+    /// Generic programmatic edits and typed input keep their own tracking policy.
+    pub(in crate::rich_text) fn insert_range_text(&self, text: &str) -> Result<bool, EditError> {
+        self.insert_text_core(text, EditKind::Programmatic, true)
+    }
+
+    fn insert_text_core(
+        &self,
+        text: &str,
+        kind: EditKind,
+        paired_tracking: bool,
+    ) -> Result<bool, EditError> {
         if self.is_composing() && matches!(kind, EditKind::Typing | EditKind::Composition) {
             return self.commit_composition(text);
         }
@@ -957,9 +972,9 @@ impl RichTextEditor {
                 .contains(SelectionOptions::OVERTYPE)
         {
             let (range, text) = self.prepare_overtype_text(text, range)?;
-            return self.replace_text_core(&text, kind, range);
+            return self.replace_text_core(&text, kind, range, false);
         }
-        self.replace_text_core(text, kind, range)
+        self.replace_text_core(text, kind, range, paired_tracking)
     }
 
     fn replace_text_core(
@@ -967,8 +982,11 @@ impl RichTextEditor {
         text: &str,
         kind: EditKind,
         range: Range<usize>,
+        paired_tracking: bool,
     ) -> Result<bool, EditError> {
-        let Some((before, text)) = self.replace_text_unrecorded(text, kind, range)? else {
+        let Some((before, text)) =
+            self.replace_text_unrecorded(text, kind, range, paired_tracking)?
+        else {
             return Ok(false);
         };
         if text.contains('\n') {
@@ -983,6 +1001,7 @@ impl RichTextEditor {
         text: &str,
         kind: EditKind,
         range: Range<usize>,
+        paired_tracking: bool,
     ) -> Result<Option<(EditorSnapshot, String)>, EditError> {
         let checkpoint = self.selection_format_checkpoint();
         let limit = self.max_length();
@@ -1007,6 +1026,18 @@ impl RichTextEditor {
             let _batch = self.document.begin_edit();
             if kind == EditKind::Typing {
                 self.document.replace_typed_text(range.clone(), &text)?;
+            } else if paired_tracking {
+                match self.document.replace_range_text(range.clone(), &text) {
+                    Err(DocumentError::EditInProgress) => {
+                        // The model proved that a callback accepted a newer
+                        // write during preflight or a virtual observation read.
+                        // Retire our transaction before a failed group can
+                        // restore an older image over that callback's content.
+                        self.observe_external_document_change();
+                        return Err(EditError::ReentrantEdit);
+                    }
+                    result => result?,
+                }
             } else {
                 self.document.replace_text(range.clone(), &text)?;
             }
@@ -1137,7 +1168,7 @@ impl RichTextEditor {
         } else {
             self.selection().range()
         };
-        self.replace_text_core("", EditKind::Delete, range)
+        self.replace_text_core("", EditKind::Delete, range, false)
     }
 
     pub fn delete_forward(&self, whole_word: bool) -> Result<bool, EditError> {
@@ -1155,7 +1186,7 @@ impl RichTextEditor {
         } else {
             self.selection().range()
         };
-        self.replace_text_core("", EditKind::Delete, range)
+        self.replace_text_core("", EditKind::Delete, range, false)
     }
 
     pub fn apply_format(&self, format: &CharacterFormat) -> Result<(), EditError> {
@@ -1233,6 +1264,7 @@ impl RichTextEditor {
         }
         self.synchronize();
         let before = self.capture();
+        let range_tracking = self.document.capture_range_tracking();
         let before_limit = self.max_length();
         let before_options = self.selection_options.get();
         let before_gravity = self.selection_gravity();
@@ -1264,8 +1296,12 @@ impl RichTextEditor {
             self.pending_composition_changes
                 .borrow_mut()
                 .truncate(pending_start);
-            if let Err(error) = self.restore(&before) {
-                result = Err(error);
+            match self.restore(&before) {
+                Ok(()) if self.external_change_generation() == external_generation => {
+                    self.document.restore_range_tracking(range_tracking);
+                }
+                Ok(()) => {}
+                Err(error) => result = Err(error),
             }
         }
         let publication_version = self.document.mutation_version();
@@ -1492,7 +1528,7 @@ impl RichTextEditor {
         let Some(composition) = composition else {
             self.checkpoint();
             return self
-                .replace_text_core(text, EditKind::Composition, self.selection().range())
+                .replace_text_core(text, EditKind::Composition, self.selection().range(), false)
                 .map(|changed| (changed, None));
         };
         let start = composition.before.selection.range().start;
@@ -1514,6 +1550,7 @@ impl RichTextEditor {
                 text,
                 EditKind::Composition,
                 composition.before.selection.range(),
+                false,
             )
         })();
         let accepted = match result {
