@@ -5,6 +5,32 @@
   "license": "MIT; Copyright (c) Microsoft Corporation. All rights reserved. See NOTICE.md.",
   "metadata_source": "WinUIGallery/SampleSupport/Data/ControlInfoData.json",
   "metadata_sha256": "334896cc85905de1afe64bdac7717218dc6f60607c132443312d1e9d37b0e27b",
+  "sample_media_sources": [
+    {
+      "path": "WinUIGallery/Samples/Image/ImagePage.xaml",
+      "sha256": "d0997a310e862aae57c19c8c09fea11c54ea9f91c45003cd84a9fe868d317b0f"
+    },
+    {
+      "path": "WinUIGallery/Samples/Image/ImagePage.xaml.cs",
+      "sha256": "e215e8d6e6ee7ba37f2f6b7a41b86a32bad1e4e680bd07b2d5f6c1824e93fe00"
+    },
+    {
+      "path": "WinUIGallery/Samples/FlipView/FlipViewPage.xaml",
+      "sha256": "cc8876b2483cf607b12930361ae0aedb3513e2f848870282eda7207b2a82eb80"
+    },
+    {
+      "path": "WinUIGallery/Samples/FlipView/FlipViewPage.xaml.cs",
+      "sha256": "acc206e79dc09adedfb3c0c4819019824e400740c1dc137447dced4ef2812a62"
+    },
+    {
+      "path": "WinUIGallery/Samples/ConnectedAnimation/ConnectedAnimationPage.xaml",
+      "sha256": "001900e418d2b94c79981cb97e74543a9d2dafe7e11b07173c4b9fc32a94fdb3"
+    },
+    {
+      "path": "WinUIGallery/Samples/ConnectedAnimation/ConnectedAnimationPage.xaml.cs",
+      "sha256": "0d3c4a3d1e17027b2e6ba7c0566326c107b0a1bebd4831ae0141656b2f72c169"
+    }
+  ],
   "assembly": "WinUIGallery",
   "uri_scheme": "ferres",
   "path_policy": "Original filenames and bytes are preserved. Registered source paths explicitly retain Windows case differences as aliases.",
@@ -1305,6 +1331,270 @@
       ],
       "source_uris": [
         "ms-appx:///Assets/ControlImages/WrapPanel.png"
+      ]
+    },
+    {
+      "source": "WinUIGallery/Assets/SampleMedia/LandscapeImage1.jpg",
+      "path": "samples/WinUIGallery/Assets/SampleMedia/LandscapeImage1.jpg",
+      "sha256": "e95f378499f06d2ec43b6633b8f81971961d15700f26566096d9b446863fc188",
+      "size_bytes": 84659,
+      "registered_paths": [
+        "Assets/SampleMedia/LandscapeImage1.jpg"
+      ],
+      "source_uris": [
+        "ms-appx:///Assets/SampleMedia/LandscapeImage1.jpg"
+      ]
+    },
+    {
+      "source": "WinUIGallery/Assets/SampleMedia/LandscapeImage10.jpg",
+      "path": "samples/WinUIGallery/Assets/SampleMedia/LandscapeImage10.jpg",
+      "sha256": "a83e0ee6399f80f0172004c233ffe92b3332df82f1015e826de7a9a28386a418",
+      "size_bytes": 189420,
+      "registered_paths": [
+        "Assets/SampleMedia/LandscapeImage10.jpg"
+      ],
+      "source_uris": [
+        "ms-appx:///Assets/SampleMedia/LandscapeImage10.jpg"
+      ]
+    },
+    {
+      "source": "WinUIGallery/Assets/SampleMedia/LandscapeImage11.jpg",
+      "path": "samples/WinUIGallery/Assets/SampleMedia/LandscapeImage11.jpg",
+      "sha256": "ef425fc738141b0b90e432a8e170d1b0ba5461f1e308714cab8baacbc1625970",
+      "size_bytes": 26070,
+      "registered_paths": [
+        "Assets/SampleMedia/LandscapeImage11.jpg"
+      ],
+      "source_uris": [
+        "ms-appx:///Assets/SampleMedia/LandscapeImage11.jpg"
+      ]
+    },
+    {
+      "source": "WinUIGallery/Assets/SampleMedia/LandscapeImage12.jpg",
+      "path": "samples/WinUIGallery/Assets/SampleMedia/LandscapeImage12.jpg",
+      "sha256": "ec739a0ef01e4bd5eba38e77748453e0f1eda09061686b281cfe69c1d8ac4626",
+      "size_bytes": 38555,
+      "registered_paths": [
+        "Assets/SampleMedia/LandscapeImage12.jpg"
+      ],
+      "source_uris": [
+        "ms-appx:///Assets/SampleMedia/LandscapeImage12.jpg"
+      ]
+    },
+    {
+      "source": "WinUIGallery/Assets/SampleMedia/LandscapeImage13.jpg",
+      "path": "samples/WinUIGallery/Assets/SampleMedia/LandscapeImage13.jpg",
+      "sha256": "f0a67632f9868fd790d3790370a435a4fcbbce5619c7389b9aa9dc720a030a14",
+      "size_bytes": 43455,
+      "registered_paths": [
+        "Assets/SampleMedia/LandscapeImage13.jpg"
+      ],
+      "source_uris": [
+        "ms-appx:///Assets/SampleMedia/LandscapeImage13.jpg"
+      ]
+    },
+    {
+      "source": "WinUIGallery/Assets/SampleMedia/LandscapeImage2.jpg",
+      "path": "samples/WinUIGallery/Assets/SampleMedia/LandscapeImage2.jpg",
+      "sha256": "b254e87421c16d866af1e011e4c33d757797ac033c21f1d7a7ba8f2fcf59dc7e",
+      "size_bytes": 67449,
+      "registered_paths": [
+        "Assets/SampleMedia/LandscapeImage2.jpg"
+      ],
+      "source_uris": [
+        "ms-appx:///Assets/SampleMedia/LandscapeImage2.jpg"
+      ]
+    },
+    {
+      "source": "WinUIGallery/Assets/SampleMedia/LandscapeImage3.jpg",
+      "path": "samples/WinUIGallery/Assets/SampleMedia/LandscapeImage3.jpg",
+      "sha256": "8bd801d195e98f7a98794aef74e36d84f6e8d49446925eb4c62e034a9c6bb540",
+      "size_bytes": 83628,
+      "registered_paths": [
+        "Assets/SampleMedia/LandscapeImage3.jpg"
+      ],
+      "source_uris": [
+        "ms-appx:///Assets/SampleMedia/LandscapeImage3.jpg"
+      ]
+    },
+    {
+      "source": "WinUIGallery/Assets/SampleMedia/LandscapeImage4.jpg",
+      "path": "samples/WinUIGallery/Assets/SampleMedia/LandscapeImage4.jpg",
+      "sha256": "974b7459835f9936c1d82a999891ec223ef331e8c0a380935f2a6d49eabc2fc3",
+      "size_bytes": 176812,
+      "registered_paths": [
+        "Assets/SampleMedia/LandscapeImage4.jpg"
+      ],
+      "source_uris": [
+        "ms-appx:///Assets/SampleMedia/LandscapeImage4.jpg"
+      ]
+    },
+    {
+      "source": "WinUIGallery/Assets/SampleMedia/LandscapeImage5.jpg",
+      "path": "samples/WinUIGallery/Assets/SampleMedia/LandscapeImage5.jpg",
+      "sha256": "6e5095b4dfaadbaee1f11de08499c401d9298adc7f688f127aa788959bf7a2c5",
+      "size_bytes": 127560,
+      "registered_paths": [
+        "Assets/SampleMedia/LandscapeImage5.jpg"
+      ],
+      "source_uris": [
+        "ms-appx:///Assets/SampleMedia/LandscapeImage5.jpg"
+      ]
+    },
+    {
+      "source": "WinUIGallery/Assets/SampleMedia/LandscapeImage6.jpg",
+      "path": "samples/WinUIGallery/Assets/SampleMedia/LandscapeImage6.jpg",
+      "sha256": "5b865660a933383b3fe3689db03c846b2f84886d8f7197a70547336d4fdf6431",
+      "size_bytes": 117162,
+      "registered_paths": [
+        "Assets/SampleMedia/LandscapeImage6.jpg"
+      ],
+      "source_uris": [
+        "ms-appx:///Assets/SampleMedia/LandscapeImage6.jpg"
+      ]
+    },
+    {
+      "source": "WinUIGallery/Assets/SampleMedia/LandscapeImage7.jpg",
+      "path": "samples/WinUIGallery/Assets/SampleMedia/LandscapeImage7.jpg",
+      "sha256": "d2afe0d8cfce8ba794987c69cf1085f5c02a2a4bdb4337b860c53649fbfe6e77",
+      "size_bytes": 137565,
+      "registered_paths": [
+        "Assets/SampleMedia/LandscapeImage7.jpg"
+      ],
+      "source_uris": [
+        "ms-appx:///Assets/SampleMedia/LandscapeImage7.jpg"
+      ]
+    },
+    {
+      "source": "WinUIGallery/Assets/SampleMedia/LandscapeImage8.jpg",
+      "path": "samples/WinUIGallery/Assets/SampleMedia/LandscapeImage8.jpg",
+      "sha256": "c581c21ab8523e0a48fa463f1df6b9bbc5007d6b2b4321cbf6e9f5bab5c30b36",
+      "size_bytes": 157194,
+      "registered_paths": [
+        "Assets/SampleMedia/LandscapeImage8.jpg"
+      ],
+      "source_uris": [
+        "ms-appx:///Assets/SampleMedia/LandscapeImage8.jpg"
+      ]
+    },
+    {
+      "source": "WinUIGallery/Assets/SampleMedia/LandscapeImage9.jpg",
+      "path": "samples/WinUIGallery/Assets/SampleMedia/LandscapeImage9.jpg",
+      "sha256": "6ee8e036511b2f61d2d37284f23dab8a7ce7125206f3777d70c7daaa09df814b",
+      "size_bytes": 55405,
+      "registered_paths": [
+        "Assets/SampleMedia/LandscapeImage9.jpg"
+      ],
+      "source_uris": [
+        "ms-appx:///Assets/SampleMedia/LandscapeImage9.jpg"
+      ]
+    },
+    {
+      "source": "WinUIGallery/Assets/SampleMedia/MirrorPCConsent.svg",
+      "path": "samples/WinUIGallery/Assets/SampleMedia/MirrorPCConsent.svg",
+      "sha256": "7aabf9a35b9770f018ad9703a553147600982d3e333f345c760bac34252c09b0",
+      "size_bytes": 28578,
+      "registered_paths": [
+        "Assets/SampleMedia/MirrorPCConsent.svg"
+      ],
+      "source_uris": [
+        "ms-appx:///Assets/SampleMedia/MirrorPCConsent.svg"
+      ]
+    },
+    {
+      "source": "WinUIGallery/Assets/SampleMedia/animated.gif",
+      "path": "samples/WinUIGallery/Assets/SampleMedia/animated.gif",
+      "sha256": "77ba66bbf56e2e94eb285d00d2f31ee03e57f340c68fb82fb0d49f2ee83b79f9",
+      "size_bytes": 14871,
+      "registered_paths": [
+        "Assets/SampleMedia/animated.gif"
+      ],
+      "source_uris": [
+        "ms-appx:///Assets/SampleMedia/animated.gif"
+      ]
+    },
+    {
+      "source": "WinUIGallery/Assets/SampleMedia/cliff.jpg",
+      "path": "samples/WinUIGallery/Assets/SampleMedia/cliff.jpg",
+      "sha256": "89a8ebd17bba8842568bb2647943c3f10a703ecb46cc9046f4165932d5a1139a",
+      "size_bytes": 162111,
+      "registered_paths": [
+        "Assets/SampleMedia/cliff.jpg"
+      ],
+      "source_uris": [
+        "ms-appx:///Assets/SampleMedia/cliff.jpg"
+      ]
+    },
+    {
+      "source": "WinUIGallery/Assets/SampleMedia/grapes.jpg",
+      "path": "samples/WinUIGallery/Assets/SampleMedia/grapes.jpg",
+      "sha256": "b8fb9d46903e1d27b59649537eb31b9a0975765305de9731f9062d2d5de9c4ee",
+      "size_bytes": 125029,
+      "registered_paths": [
+        "Assets/SampleMedia/grapes.jpg"
+      ],
+      "source_uris": [
+        "ms-appx:///Assets/SampleMedia/grapes.jpg"
+      ]
+    },
+    {
+      "source": "WinUIGallery/Assets/SampleMedia/ninegrid.gif",
+      "path": "samples/WinUIGallery/Assets/SampleMedia/ninegrid.gif",
+      "sha256": "22ee861a1427d37f8c5e1997ae4fc0e7523eaa31483d1133f6763a35c0a56500",
+      "size_bytes": 1419,
+      "registered_paths": [
+        "Assets/SampleMedia/ninegrid.gif"
+      ],
+      "source_uris": [
+        "ms-appx:///Assets/SampleMedia/ninegrid.gif"
+      ]
+    },
+    {
+      "source": "WinUIGallery/Assets/SampleMedia/rainier.jpg",
+      "path": "samples/WinUIGallery/Assets/SampleMedia/rainier.jpg",
+      "sha256": "e592c58f29a7cea37e338c364a15d0801e490511c5239a1f99da84f632cc2503",
+      "size_bytes": 736388,
+      "registered_paths": [
+        "Assets/SampleMedia/rainier.jpg"
+      ],
+      "source_uris": [
+        "ms-appx:///Assets/SampleMedia/rainier.jpg"
+      ]
+    },
+    {
+      "source": "WinUIGallery/Assets/SampleMedia/sunset.jpg",
+      "path": "samples/WinUIGallery/Assets/SampleMedia/sunset.jpg",
+      "sha256": "dde8ca43fdedd3d1746cf29c9d1a3d2b428066ea75c5a87f3d6eeddbd1f930aa",
+      "size_bytes": 96309,
+      "registered_paths": [
+        "Assets/SampleMedia/sunset.jpg"
+      ],
+      "source_uris": [
+        "ms-appx:///Assets/SampleMedia/sunset.jpg"
+      ]
+    },
+    {
+      "source": "WinUIGallery/Assets/SampleMedia/treetops.jpg",
+      "path": "samples/WinUIGallery/Assets/SampleMedia/treetops.jpg",
+      "sha256": "c81ff5da7162cc0e80400859207b7a7f08e6322e02ca835e7ed327b1e1b6a0f0",
+      "size_bytes": 61815,
+      "registered_paths": [
+        "Assets/SampleMedia/treetops.jpg"
+      ],
+      "source_uris": [
+        "ms-appx:///Assets/SampleMedia/treetops.jpg"
+      ]
+    },
+    {
+      "source": "WinUIGallery/Assets/SampleMedia/valley.jpg",
+      "path": "samples/WinUIGallery/Assets/SampleMedia/valley.jpg",
+      "sha256": "4ad3c0819ccaa45322319a085c3a3d314c683d26dd53e1378c5210dacbe7432e",
+      "size_bytes": 154556,
+      "registered_paths": [
+        "Assets/SampleMedia/valley.jpg"
+      ],
+      "source_uris": [
+        "ms-appx:///Assets/SampleMedia/valley.jpg"
       ]
     }
   ]

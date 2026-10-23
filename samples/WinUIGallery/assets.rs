@@ -1,4 +1,4 @@
-//! Original pinned control-detail images exposed through the native asset loader.
+//! Original pinned control-detail and sample media exposed through the native asset loader.
 
 use ferroui_base::media::imaging::Bitmap;
 use ferroui_base::platform::AssetLoader;

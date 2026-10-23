@@ -905,8 +905,8 @@ fn embedded_control_images_resolve_original_uri_paths_and_exact_bytes() {
     crate::assets::register();
     assert_eq!(
         crate::assets_data::ASSETS.len(),
-        110,
-        "108 files and two explicit source-path case aliases"
+        132,
+        "108 control images, 22 sample media files and two explicit source-path case aliases"
     );
     for entry in CATALOG {
         let path = entry
@@ -930,5 +930,33 @@ fn embedded_control_images_resolve_original_uri_paths_and_exact_bytes() {
             entry.id
         );
         assert!(actual.starts_with(b"\x89PNG\r\n\x1a\n"));
+    }
+}
+
+#[test]
+fn embedded_sample_media_resolve_original_paths_and_exact_bytes() {
+    use ferroui_base::platform::AssetLoader;
+    use ferroui_base::utilities::{Uri, UriKind};
+    use std::io::Read;
+    let _application = start();
+    crate::assets::register();
+    let media: Vec<_> = crate::assets_data::ASSETS
+        .iter()
+        .filter(|(path, _)| path.starts_with("Assets/SampleMedia/"))
+        .collect();
+    assert_eq!(media.len(), 22);
+    for (path, expected) in media {
+        let uri = Uri::new(&format!("ferres://WinUIGallery/{path}"), UriKind::Absolute).unwrap();
+        let mut actual = Vec::new();
+        AssetLoader::open(&uri, None).unwrap().read_to_end(&mut actual).unwrap();
+        assert_eq!(&actual, expected, "{path} resolves its original source bytes");
+        if path.ends_with(".jpg") {
+            assert!(actual.starts_with(&[0xff, 0xd8, 0xff]), "{path}");
+        } else if path.ends_with(".gif") {
+            assert!(actual.starts_with(b"GIF8"), "{path}");
+        } else {
+            assert!(path.ends_with(".svg"), "Unexpected media type: {path}");
+            assert!(std::str::from_utf8(&actual).unwrap().contains("<svg"));
+        }
     }
 }

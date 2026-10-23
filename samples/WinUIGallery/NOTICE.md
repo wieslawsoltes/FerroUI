@@ -6,8 +6,11 @@ The gallery shell is new FerroUI code. The Rust sample behaviors, navigation lay
 and color-contrast calculation adapt the pinned Gallery sources cited in their
 files; the original C# is retained for reference and is not executed.
 
-`Assets/ControlImages/` contains 108 original PNG files copied byte-for-byte from
-the same pinned Gallery repository. `assets-manifest.json` records each original
+`Assets/ControlImages/` contains 108 original PNG files, and `Assets/SampleMedia/`
+contains 22 original JPEG, GIF and SVG files for the Image, FlipView and
+ConnectedAnimation examples, all copied byte-for-byte from the same pinned Gallery
+repository. Keeping the original media does not imply support for SVG decoding or
+animated GIF playback. `assets-manifest.json` records each original
 path, SHA-256 hash, size and native resource registration. The source URI spellings
 `CheckBox.png` and `AnnotatedScrollbar.png` are registered as aliases for the
 original `Checkbox.png` and `AnnotatedScrollBar.png` files, preserving Windows
