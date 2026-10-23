@@ -10,8 +10,8 @@ use ferroui_base::media::imaging::Bitmap;
 use ferroui_base::media::{AcrylicBrush, Color, ColorMatrix, FontWeight, MaterialPolicy};
 use ferroui_base::platform::{AlphaFormat, PixelFormats};
 use ferroui_base::rendering::composition::effects::{
-    BlendEffect, BlendEffectMode, ColorMatrixEffect, GraphicsEffect, GrayscaleEffect, InvertEffect, SaturationEffect,
-    TintEffect,
+    ArithmeticCompositeEffect, BlendEffect, BlendEffectMode, CanvasComposite, ColorMatrixEffect, CompositeEffect,
+    GraphicsEffect, GrayscaleEffect, InvertEffect, SaturationEffect, SceneLightingEffect, ShadowEffect, TintEffect,
 };
 use ferroui_base::rendering::composition::system_backdrops::{ICompositionSupportsSystemBackdrop, MicaKind};
 use ferroui_base::rendering::composition::{
@@ -139,6 +139,8 @@ fn acrylic_section() -> Ref<StackPanel> {
     let tinted = acrylic(Color::from_rgb(0xE8, 0x5D, 0x3A), 0.4, None, Color::from_rgb(0xE8, 0x5D, 0x3A));
     let fallback = acrylic(Color::from_rgb(0x2C, 0x2C, 0x2C), 0.15, Some(0.96), Color::from_rgb(0x2C, 0x2C, 0x2C));
     fallback.set_always_use_fallback(true);
+    let host = acrylic(Color::from_rgb(0x2C, 0x2C, 0x2C), 0.3, Some(0.6), Color::from_rgb(0x40, 0x40, 0x40));
+    host.set_background_source(ferroui_base::media::AcrylicBackgroundSource::HostBackdrop);
 
     let cards = row(16.0);
     cards.set_margin(Thickness::new(16.0, 36.0, 16.0, 16.0));
@@ -147,11 +149,12 @@ fn acrylic_section() -> Ref<StackPanel> {
     cards.children().add(acrylic_card(&accent, "Accent: tint 0.8", false).upcast());
     cards.children().add(acrylic_card(&tinted, "Tint 0.4, luminosity from the tint", false).upcast());
     cards.children().add(acrylic_card(&fallback, "AlwaysUseFallback", false).upcast());
+    cards.children().add(acrylic_card(&host, "BackgroundSource HostBackdrop", false).upcast());
 
     let stage = Panel::new();
     stage.set_horizontal_alignment(HorizontalAlignment::Left);
     stage.set_clip_to_bounds(true);
-    stage.children().add(scene(780.0, 190.0).upcast());
+    stage.children().add(scene(940.0, 190.0).upcast());
     stage.children().add(cards.upcast());
 
     let controls = row(24.0);
@@ -224,7 +227,7 @@ fn acrylic_section() -> Ref<StackPanel> {
     content.children().add(policy.upcast());
     section(
         "AcrylicBrush",
-        "The acrylic recipe of WinUI over what is drawn behind each card: the backdrop over the opaque fallback colour, blurred by 30, its luminosity from TintLuminosityOpacity (or from the tint), its colour from TintColor and TintOpacity, and 2 % noise. TintColor changes cross-fade over TintTransitionDuration; the material policy (transparency effects off, energy saver, the simulation) cross-fades to the FallbackColor.",
+        "The acrylic recipe of WinUI over what is drawn behind each card: the backdrop over the opaque fallback colour, blurred by 30, its luminosity from TintLuminosityOpacity (or from the tint), its colour from TintColor and TintOpacity, and 2 % noise. TintColor changes cross-fade over TintTransitionDuration; the material policy (transparency effects off, energy saver, the simulation) cross-fades to the FallbackColor. The HostBackdrop card (WinUI 2's window acrylic) shows what is behind the window where the window is transparent with a blur (Settings, transparency AcrylicBlur), its fallback colour in an opaque window and while no window of the application is active.",
         &content.upcast(),
     )
 }
@@ -366,6 +369,46 @@ fn effects_section() -> Ref<StackPanel> {
             }
             .into(),
         ),
+        ("BlendEffect PinLight", blend(BlendEffectMode::PinLight)),
+        ("BlendEffect VividLight", blend(BlendEffectMode::VividLight)),
+        ("BlendEffect Subtract", blend(BlendEffectMode::Subtract)),
+        ("BlendEffect Dissolve", blend(BlendEffectMode::Dissolve)),
+        (
+            "ArithmeticCompositeEffect of two images",
+            ArithmeticCompositeEffect {
+                name: "Arithmetic".into(),
+                multiply_amount: 1.0,
+                source1_amount: 0.3,
+                source2_amount: 0.3,
+                offset: 0.0,
+                source1: parameter("image"),
+                source2: parameter("rings"),
+            }
+            .into(),
+        ),
+        (
+            "CompositeEffect MaskInvert",
+            CompositeEffect {
+                name: String::new(),
+                mode: CanvasComposite::MaskInvert,
+                sources: vec![
+                    CompositionEffectSourceParameter::new("image").into(),
+                    CompositionEffectSourceParameter::new("rings").into(),
+                ],
+            }
+            .into(),
+        ),
+        (
+            "ShadowEffect (blur 4, teal)",
+            ShadowEffect {
+                name: "Shadow".into(),
+                blur_amount: 4.0,
+                shadow_color: Color::from_rgb(0x1A, 0xA6, 0xA6),
+                source: parameter("rings"),
+                ..Default::default()
+            }
+            .into(),
+        ),
         (
             "ColorMatrixEffect (sepia)",
             ColorMatrixEffect {
@@ -389,6 +432,140 @@ fn effects_section() -> Ref<StackPanel> {
     section(
         "Blend and colour effects",
         "The effects of the materials of WinUI in the effect graph of the compositor: BlendEffect (the 25 modes of Win2D; the acrylic uses Luminosity and Color), SaturationEffect, GrayscaleEffect, InvertEffect, TintEffect and ColorMatrixEffect, drawn as blend layers and colour matrix layers of Skia and Vello.",
+        &grid.upcast(),
+    )
+}
+
+// --- lighting ------------------------------------------------------------------------------
+
+/// A host of composition visuals, `width` by `height`, with a caption.
+fn light_tile(name: &str, width: f64, height: f64, build: impl Fn(&Ref<Border>, &Rc<Compositor>) + 'static) -> Ref<StackPanel> {
+    let host = Border::new();
+    host.set_width(width);
+    host.set_height(height);
+    host.set_corner_radius(CornerRadius::uniform(8.0));
+    host.set_clip_to_bounds(true);
+    host.set_horizontal_alignment(HorizontalAlignment::Left);
+    host.set_background(Some(brush(Color::from_rgb(0x10, 0x12, 0x18))));
+    let weak = host.downgrade();
+    let build = Rc::new(build);
+    let _ = host.attached_to_visual_tree(move |_| {
+        let (weak, build) = (weak.clone(), build.clone());
+        let _ = Dispatcher::ui_thread().invoke_async_local_with_priority(
+            move || {
+                let Some(host) = weak.upgrade() else { return };
+                let Some(compositor) = compositor_of(&host) else { return };
+                build(&host, &compositor);
+            },
+            DispatcherPriority::BACKGROUND,
+        );
+    });
+    let tile = column(6.0);
+    tile.set_margin(Thickness::new(0.0, 0.0, 16.0, 12.0));
+    tile.children().add(host.upcast());
+    let about = caption(name);
+    about.set_max_width(width);
+    about.set_horizontal_alignment(HorizontalAlignment::Left);
+    tile.children().add(about.upcast());
+    tile
+}
+
+fn lighting_section() -> Ref<StackPanel> {
+    let grid = WrapPanel::new();
+    grid.set_orientation(Orientation::Horizontal);
+
+    // A coloured light brighter than full on coloured content: each channel
+    // of the content times the light, brightened where the light is above 1.
+    grid.children().add(
+        light_tile("PointLight (orange, intensity 1.8) following the pointer over a gradient", 300.0, 180.0, |host, compositor| {
+            let container = compositor.create_container_visual();
+            container.set_size(Vector::new(300.0, 180.0));
+            let sprite = compositor.create_sprite_visual();
+            sprite.set_size(Vector::new(300.0, 180.0));
+            sprite.set_brush(Some(surface_brush(compositor, &gradient_bitmap(300, 180))));
+            container.children().insert_at_top((*sprite).clone());
+            let ambient = compositor.create_ambient_light();
+            ambient.set_intensity(0.25);
+            ambient.targets().add((*sprite).clone());
+            let light = compositor.create_point_light();
+            light.set_color(Color::from_rgb(0xFF, 0xB0, 0x60));
+            light.set_intensity(1.8);
+            light.set_constant_attenuation(1.0);
+            light.set_offset(ferroui_base::Vector3D::new(150.0, 90.0, 80.0));
+            light.set_coordinate_space(Some(container.clone()));
+            light.targets().add((*sprite).clone());
+            if let Some(pointer) = ElementCompositionPreview::get_pointer_position_property_set(host) {
+                let follow = compositor.create_expression_animation_with("Vector3(pointer.Position.X, pointer.Position.Y, 80)");
+                follow.set_reference_parameter("pointer", pointer);
+                light.start_animation("Offset", &*follow);
+            }
+            ElementCompositionPreview::set_element_child_visual(host, Some(container.visual().clone()));
+        })
+        .upcast(),
+    );
+
+    // A spot light whose coordinate space is a visual that moves: the light
+    // moves with it and lights its target again.
+    grid.children().add(
+        light_tile("SpotLight in the coordinate space of a moving visual", 300.0, 180.0, |host, compositor| {
+            let container = compositor.create_container_visual();
+            container.set_size(Vector::new(300.0, 180.0));
+            let sprite = compositor.create_sprite_visual();
+            sprite.set_size(Vector::new(300.0, 180.0));
+            sprite.set_brush(Some((*compositor.create_color_brush_with_color(Color::from_rgb(0xE0, 0xE4, 0xF0))).clone()));
+            container.children().insert_at_top((*sprite).clone());
+            let space = compositor.create_container_visual();
+            space.set_size(Vector::new(1.0, 1.0));
+            container.children().insert_at_top((*space).clone());
+            let light = compositor.create_spot_light();
+            light.set_offset(ferroui_base::Vector3D::new(0.0, 90.0, 120.0));
+            light.set_outer_cone_angle_in_degrees(30.0);
+            light.set_inner_cone_angle_in_degrees(15.0);
+            light.set_coordinate_space(Some(space.clone()));
+            light.targets().add((*sprite).clone());
+            let travel = compositor.create_scalar_key_frame_animation();
+            travel.insert_key_frame(0.0, 20.0);
+            travel.insert_key_frame(1.0, 280.0);
+            travel.set_duration(std::time::Duration::from_millis(2400));
+            travel.set_iteration_behavior(ferroui_base::rendering::composition::animations::AnimationIterationBehavior::Forever);
+            travel.set_direction(ferroui_base::animation::PlaybackDirection::Alternate);
+            space.start_animation("Offset.X", &*travel);
+            ElementCompositionPreview::set_element_child_visual(host, Some(container.visual().clone()));
+        })
+        .upcast(),
+    );
+
+    // The scene lighting effect with a specular highlight.
+    grid.children().add(
+        light_tile("SceneLightingEffect: diffuse 0.6, specular 1, shine 24", 300.0, 180.0, |host, compositor| {
+            let factory = compositor.create_effect_factory(SceneLightingEffect {
+                name: "Lighting".into(),
+                ambient_amount: 0.1,
+                diffuse_amount: 0.6,
+                specular_amount: 1.0,
+                specular_shine: 24.0,
+                ..Default::default()
+            });
+            let lighting = factory.create_brush();
+            let sprite = compositor.create_sprite_visual();
+            sprite.set_size(Vector::new(300.0, 180.0));
+            sprite.set_brush(Some(lighting.brush().clone()));
+            let light = compositor.create_point_light();
+            light.set_offset(ferroui_base::Vector3D::new(150.0, 90.0, 120.0));
+            light.targets().add((*sprite).clone());
+            if let Some(pointer) = ElementCompositionPreview::get_pointer_position_property_set(host) {
+                let follow = compositor.create_expression_animation_with("Vector3(pointer.Position.X, pointer.Position.Y, 120)");
+                follow.set_reference_parameter("pointer", pointer);
+                light.start_animation("Offset", &*follow);
+            }
+            ElementCompositionPreview::set_element_child_visual(host, Some(sprite.visual().clone()));
+        })
+        .upcast(),
+    );
+
+    section(
+        "Lights",
+        "The content a light reaches is multiplied by the light, channel by channel, in a multiply layer of the drawing context: a coloured light tints coloured content exactly, a light above full brightens it, and the light map is sampled every second device pixel. A light in the coordinate space of a moving visual moves with it. The scene lighting effect adds a specular highlight.",
         &grid.upcast(),
     )
 }
@@ -597,6 +774,7 @@ pub fn winui_materials_page() -> Ref<ContentPage> {
     panel.set_vertical_alignment(VerticalAlignment::Top);
     panel.children().add(acrylic_section().upcast());
     panel.children().add(effects_section().upcast());
+    panel.children().add(lighting_section().upcast());
     panel.children().add(reveal_section().upcast());
     panel.children().add(backdrop_section().upcast());
     panel.children().add(menu_section().upcast());
