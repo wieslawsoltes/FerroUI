@@ -115,8 +115,26 @@ Its [verified browser build](browser-build-dc361/README.md) contains a
 **53,795,035-byte WASM** and **17 payloads plus provenance**. Cargo took
 **11m29s**. Archive integrity, exact source/host assets, all payload hashes,
 seven static modules, dynamic storage, relative favicon and the Vello/no-Skia
-graph passed verification. Browser interactions and timing measurements
-require their own records; this build evidence does not establish them.
+graph passed verification. Its separate [selected interaction replay](browser-runtime-dc361/README.md)
+passed **10/10 selected scenario executions** with **57 Software2D / 54 WebGL2
+checks**, normal common gates and zero page/console errors. All frozen runtime
+and harness hashes matched after execution. This is `scope.full: false`; the
+paragraph screenshots retain a real missing-Hebrew/emoji-glyph defect.
+
+The distinct [strict dc361 text-pan benchmark](browser-text-pan-dc361/README.md)
+completed **36 normal plus six separate trace samples per mode**, with all
+frame/cache/work invariants and confirmed graceful owned browser shutdown.
+Native-frame median/p95 was **13.574/25.093 ms** in Software2D and
+**20.063/762.638 ms** in WebGL2/SwiftShader. The raw traces, all five timing
+distributions and their explicit clock origins remain recorded; these are host
+observations, not FPS, display-completion or physical-GPU measurements.
+
+The full b500 run has separate failures. Its [Software2D paragraph entry
+record](paragraph-entry-b500/README.md) preserves the original failed report,
+complete trusted key evidence and source-inferred double-click/extra-Enter
+mechanism. The reviewed `f8f30173` helper correction has its own exact snapshot;
+it leaves the original caret, paragraph and history gates intact and needs its
+own replay. The independent CI benchmark's forced shutdown also remains failed.
 
 The [completed sequential c7 browser job](full-browser-c7/README.md) was
 **canceled after its 120-minute budget with failed and incomplete coverage**.

@@ -1,0 +1,241 @@
+{
+  "algorithm": "SHA-256",
+  "scope": "All files in this evidence folder except this manifest itself.",
+  "files": [
+    {
+      "path": "README.md",
+      "bytes": 8116,
+      "sha256": "ac511332bde795960ccdd6a4223a3cdf06e9c3074067a6fb0ec5b4b00ebff5c6"
+    },
+    {
+      "path": "Software2D-gradient-entry-input.json",
+      "bytes": 186922,
+      "sha256": "c1b11512a64616c73d852bb379eb0fdc7e3535c09f290add4b5dd7c04f58b739"
+    },
+    {
+      "path": "Software2D-gradient-handles-angular-capture.json",
+      "bytes": 3177,
+      "sha256": "999de174483712f2daf7aae4f6de9567f40fe3e315fe53a75d6aa1685c32c5d1"
+    },
+    {
+      "path": "Software2D-gradient-handles-angular.png",
+      "bytes": 168350,
+      "sha256": "31f65ab2cfff97da02450d0bac0c8b6814948ff1b33d9a45c1e87a454c6a6c30"
+    },
+    {
+      "path": "Software2D-gradient-handles-radial-capture.json",
+      "bytes": 3176,
+      "sha256": "1aeb3ddd16917b45e414a577f9b98a3969c005d4119f2898e394915ef12687e0"
+    },
+    {
+      "path": "Software2D-gradient-handles-radial.png",
+      "bytes": 179562,
+      "sha256": "12a4810da7e9fa8a55ca03bf98175b693a2d4b212e0a793e7739cd582d96586f"
+    },
+    {
+      "path": "Software2D-gradient-insertion-input.json",
+      "bytes": 80398,
+      "sha256": "067ae607292bf46a452390de99aa52a7ac2b007c85e184a314149716f25500e9"
+    },
+    {
+      "path": "Software2D-guide-snapped-artwork-capture.json",
+      "bytes": 3176,
+      "sha256": "1103e4ce3337966394bf8fca1099bc8f0bac4f3479c0c04165adb750fa56c757"
+    },
+    {
+      "path": "Software2D-guide-snapped-artwork.png",
+      "bytes": 69897,
+      "sha256": "7624bbaaf4910fc9ffcea96c3a1975cd8644a5ad270c8d0d80caa2c1dfa01133"
+    },
+    {
+      "path": "Software2D-initial.png",
+      "bytes": 187960,
+      "sha256": "14ace8cd02acaec6fa68055c284956905ca52c999e268fec187018b657d52fe2"
+    },
+    {
+      "path": "Software2D-native-paragraph-inline-capture.json",
+      "bytes": 13446,
+      "sha256": "4745e409dd11c3a0440969f43936449e48bd7696ac5e0e6fc9eeec6ad6586326"
+    },
+    {
+      "path": "Software2D-native-paragraph-inline.png",
+      "bytes": 77754,
+      "sha256": "a00ab9b072dbe648ab4946b8449d3e00f9ada2be17917747afeb601ccf86a727"
+    },
+    {
+      "path": "Software2D-native-paragraph-paste-input.json",
+      "bytes": 15613,
+      "sha256": "c5d75dc08e8fce64ac2a05c0334b5a75cbd1c4e5f4e58e141f5cbb479ee9e1f9"
+    },
+    {
+      "path": "Software2D-native-paragraph-split-input.json",
+      "bytes": 57479,
+      "sha256": "e9ba67ac74858874d13634f00a5c8cd5b67606de2a648f5df9d892ee7600e617"
+    },
+    {
+      "path": "Software2D-polygon-corners-triangle-coverage.json",
+      "bytes": 2827,
+      "sha256": "f03dc8a20cf7e36a9bf4921f6c70885522ee976858c8c314179387f72a3a6908"
+    },
+    {
+      "path": "Software2D-polygon-corners-triangle.png",
+      "bytes": 2665,
+      "sha256": "a2a43d411bd53602f28f7c9aa9fd0c2eeacc46943808714aa86579d0c2877317"
+    },
+    {
+      "path": "Software2D-polygon-corners-triangle.svg",
+      "bytes": 859,
+      "sha256": "4deb2fb86a042fd560a533de5dff27bdcdd1fbbf8181cad45c4b650ebff1bece"
+    },
+    {
+      "path": "Software2D-polygon-corners-triangle.xaml",
+      "bytes": 1262,
+      "sha256": "33abd203cd2874f0de09077cc622f4f0797a70dfd2eafb08d0a76909d6316ce1"
+    },
+    {
+      "path": "Software2D-smoothed-corners.png",
+      "bytes": 2354,
+      "sha256": "9e291cc9a8238eb6e4a40a39efe23e2cb9bd1a6721a062c22a2e1aea3b673527"
+    },
+    {
+      "path": "Software2D-smoothed-corners.svg",
+      "bytes": 1048,
+      "sha256": "a732be48d8bdc9a64455039a36fc5f37b2d31fbd2fe862019e0529256cfe82c9"
+    },
+    {
+      "path": "WebGL2-gradient-entry-input.json",
+      "bytes": 187016,
+      "sha256": "c4f33d61e37562bdefd31771f3227e9f09f0d02b12d5607fc82905dd1f8287eb"
+    },
+    {
+      "path": "WebGL2-gradient-handles-angular-capture.json",
+      "bytes": 3165,
+      "sha256": "5cfd6b6da930da139cfcf1ef5577641174ee0cf41aeb39110b39b559c25518c6"
+    },
+    {
+      "path": "WebGL2-gradient-handles-angular.png",
+      "bytes": 168181,
+      "sha256": "212dab6d93d61212f4b3b04e81612b5d5a7e75adfe7724861558b8e2e6915020"
+    },
+    {
+      "path": "WebGL2-gradient-handles-radial-capture.json",
+      "bytes": 3165,
+      "sha256": "8a260e274ca942f72b74ddfbdeeb41385c518965e8f8899bbae49fd0e3f56823"
+    },
+    {
+      "path": "WebGL2-gradient-handles-radial.png",
+      "bytes": 178956,
+      "sha256": "b248904d7c63ab28e3c963028f925a754c86e425107b6cb088978538c45e8029"
+    },
+    {
+      "path": "WebGL2-gradient-insertion-input.json",
+      "bytes": 80657,
+      "sha256": "83dac6cc803e7c3a053c17b33ba64f24ff1687b7b5dcd5ea62ea024cf1f3592c"
+    },
+    {
+      "path": "WebGL2-guide-snapped-artwork-capture.json",
+      "bytes": 3164,
+      "sha256": "ca708dc49c6fdf51bc4c0fc2699f8b10615d8c86487c313b6423c737b45d97b4"
+    },
+    {
+      "path": "WebGL2-guide-snapped-artwork.png",
+      "bytes": 70070,
+      "sha256": "85bc958e966a55d66f7b64e113fb8b309c33db1b7da41ca4600cfa831bb5f9b2"
+    },
+    {
+      "path": "WebGL2-initial.png",
+      "bytes": 187503,
+      "sha256": "6c8f778a92c2ff61c9c35649fe66272f4685b046c9a7765a214b0d0796592463"
+    },
+    {
+      "path": "WebGL2-native-paragraph-inline-capture.json",
+      "bytes": 13429,
+      "sha256": "02cd671a3f0356791b59dc785ac4b783fa0b75a0be46a6d3186ff4670f8f0529"
+    },
+    {
+      "path": "WebGL2-native-paragraph-inline.png",
+      "bytes": 77901,
+      "sha256": "5cb8bbc37e891a2ea026694675795c4d4aea3cd0504d93ed83421dd12924cb2d"
+    },
+    {
+      "path": "WebGL2-native-paragraph-paste-input.json",
+      "bytes": 15618,
+      "sha256": "e6b6262414dc925821736f61addbc215015ab37d8ad8d33cdc1cb339fb232f0f"
+    },
+    {
+      "path": "WebGL2-native-paragraph-split-input.json",
+      "bytes": 57440,
+      "sha256": "d55da55787e4d1d92bd578a974936bdd837d4ea371a43661ff74432a3076795e"
+    },
+    {
+      "path": "WebGL2-polygon-corners-triangle-coverage.json",
+      "bytes": 2827,
+      "sha256": "f03dc8a20cf7e36a9bf4921f6c70885522ee976858c8c314179387f72a3a6908"
+    },
+    {
+      "path": "WebGL2-polygon-corners-triangle.png",
+      "bytes": 2665,
+      "sha256": "a2a43d411bd53602f28f7c9aa9fd0c2eeacc46943808714aa86579d0c2877317"
+    },
+    {
+      "path": "WebGL2-polygon-corners-triangle.svg",
+      "bytes": 859,
+      "sha256": "4deb2fb86a042fd560a533de5dff27bdcdd1fbbf8181cad45c4b650ebff1bece"
+    },
+    {
+      "path": "WebGL2-polygon-corners-triangle.xaml",
+      "bytes": 1262,
+      "sha256": "33abd203cd2874f0de09077cc622f4f0797a70dfd2eafb08d0a76909d6316ce1"
+    },
+    {
+      "path": "WebGL2-smoothed-corners.png",
+      "bytes": 2354,
+      "sha256": "9e291cc9a8238eb6e4a40a39efe23e2cb9bd1a6721a062c22a2e1aea3b673527"
+    },
+    {
+      "path": "WebGL2-smoothed-corners.svg",
+      "bytes": 1048,
+      "sha256": "a732be48d8bdc9a64455039a36fc5f37b2d31fbd2fe862019e0529256cfe82c9"
+    },
+    {
+      "path": "browser.log.gz",
+      "bytes": 5402,
+      "sha256": "dafc4d4a07de7607f86e006be46d3b2fdab686c84a00b327c41c2e8d527b97d5"
+    },
+    {
+      "path": "correctness-execution.json",
+      "bytes": 17918,
+      "sha256": "6c9c99273c64a1b805dd7e4ebd8fdbc3eb6a55f7f1ced95fead0f0aa6969bc38"
+    },
+    {
+      "path": "memory-pressure.jsonl",
+      "bytes": 256,
+      "sha256": "3a1115035fdbdd458ede16e21103e4e2e21c4e9605b6fbaaaddbf4ffe4cc7749"
+    },
+    {
+      "path": "provenance.json",
+      "bytes": 25951,
+      "sha256": "641584f8b4c6f31cb5c9d55e4145d8af73cb3f1791f1335ded18de91115b185c"
+    },
+    {
+      "path": "report.json.gz",
+      "bytes": 59118,
+      "sha256": "448103e59884efcf5bd57b6e012c4e1923c0d2fbc8acfc1bd272fbd530fb2703"
+    },
+    {
+      "path": "resource-history.jsonl",
+      "bytes": 1491,
+      "sha256": "6e72fa4210ad73cf3b7872ce3c2ef97b7dd7bd41d6b20adfe241b8fa91bdf70d"
+    },
+    {
+      "path": "source-provenance.json",
+      "bytes": 10471,
+      "sha256": "25219b61f46d8e2bc8da5a9e10bf8e5e83bb0e3704fbf7c511134ef7159f6a4c"
+    },
+    {
+      "path": "summary.json",
+      "bytes": 23601,
+      "sha256": "d84e4d1a1d338675dd7954b37ae44572f1d7e9616d98e7797279887cbb5613c9"
+    }
+  ]
+}

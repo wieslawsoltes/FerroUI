@@ -1,0 +1,1 @@
+{"utc": "2026-10-23T15:38:36.862041+00:00", "current": 8576651264, "stat": {"anon": 4458901504, "file": 3468537856, "inactive_file": 490344448, "slab_reclaimable": 602221120}, "events": "low 0\nhigh 0\nmax 4231668\noom 74\noom_kill 6\noom_group_kill 0\n"}

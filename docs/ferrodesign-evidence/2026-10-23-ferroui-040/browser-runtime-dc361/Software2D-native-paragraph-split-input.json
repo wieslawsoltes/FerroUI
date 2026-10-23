@@ -1,0 +1,2252 @@
+[
+  {
+    "entry": 1,
+    "expectedCaretIndex": 3,
+    "keys": [
+      "Control+Home",
+      "ArrowRight",
+      "ArrowRight"
+    ],
+    "before": {
+      "renderedFrames": 14,
+      "sceneFrames": 132,
+      "documentRevision": 14,
+      "historyLength": 6,
+      "selection": [
+        2
+      ],
+      "editingText": 2,
+      "pointerPresses": {
+        "capacity": 8,
+        "entries": [
+          {
+            "buttons": 1,
+            "clickCount": 1,
+            "pan": {
+              "x": -15.545454545454504,
+              "y": 196.09090909090907
+            },
+            "renderedFramesBefore": 2,
+            "screen": {
+              "x": 115.34091186523438,
+              "y": 316.9090881347656
+            },
+            "selectionCountBefore": 0,
+            "serial": 1,
+            "timestamp": 658,
+            "world": {
+              "x": 65.00000137776874,
+              "y": 59.999998622231246
+            },
+            "zoom": 2.0136363636363637
+          },
+          {
+            "buttons": 1,
+            "clickCount": 1,
+            "pan": {
+              "x": -15.545454545454504,
+              "y": 196.09090909090907
+            },
+            "renderedFramesBefore": 9,
+            "screen": {
+              "x": 75.06817626953125,
+              "y": 286.7045593261719
+            },
+            "selectionCountBefore": 0,
+            "serial": 2,
+            "timestamp": 12452,
+            "world": {
+              "x": 44.99999724446245,
+              "y": 45.000006888843835
+            },
+            "zoom": 2.0136363636363637
+          },
+          {
+            "buttons": 1,
+            "clickCount": 1,
+            "pan": {
+              "x": -15.545454545454504,
+              "y": 196.09090909090907
+            },
+            "renderedFramesBefore": 12,
+            "screen": {
+              "x": 115.34091186523438,
+              "y": 316.9090881347656
+            },
+            "selectionCountBefore": 0,
+            "serial": 3,
+            "timestamp": 13340,
+            "world": {
+              "x": 65.00000137776874,
+              "y": 59.999998622231246
+            },
+            "zoom": 2.0136363636363637
+          }
+        ],
+        "serial": 3,
+        "timestampUnit": "native monotonic milliseconds"
+      },
+      "zoom": 2.0136363636363637,
+      "pan": {
+        "x": -15.545454545454504,
+        "y": 196.09090909090907
+      },
+      "tool": "Select",
+      "chrome": {
+        "CanvasHost": {
+          "x": 296,
+          "y": 0,
+          "width": 1016,
+          "height": 1000,
+          "visible": true,
+          "enabled": true,
+          "measureValid": true,
+          "arrangeValid": true,
+          "focused": false,
+          "focusWithin": true
+        },
+        "InlineTextHost": null,
+        "InlineTextBox": {
+          "x": 361.00000000000006,
+          "y": 276.6363636363636,
+          "width": 440,
+          "height": 103,
+          "visible": true,
+          "enabled": true,
+          "measureValid": true,
+          "arrangeValid": true,
+          "focused": true,
+          "focusWithin": true
+        },
+        "ModalBackdrop": {
+          "x": 0,
+          "y": 0,
+          "width": 1600,
+          "height": 1000,
+          "visible": false,
+          "enabled": true,
+          "measureValid": true,
+          "arrangeValid": true,
+          "focused": false,
+          "focusWithin": false
+        },
+        "PageInspector": {
+          "x": 1329,
+          "y": 160,
+          "width": 255,
+          "height": 376,
+          "visible": false,
+          "enabled": true,
+          "measureValid": true,
+          "arrangeValid": true,
+          "focused": false,
+          "focusWithin": false
+        },
+        "DesignInspector": {
+          "x": 1329,
+          "y": 210,
+          "width": 255,
+          "height": 1707,
+          "visible": true,
+          "enabled": true,
+          "measureValid": true,
+          "arrangeValid": true,
+          "focused": false,
+          "focusWithin": false
+        }
+      }
+    },
+    "beforeTypography": {
+      "baseline": 27.272727272727273,
+      "caret": {
+        "height": 30,
+        "width": 0,
+        "x": 44.41761363636364,
+        "y": 5
+      },
+      "caretIndex": 0,
+      "direction": "LeftToRight",
+      "layoutHeight": 103,
+      "layoutWidth": 154.48863636363637,
+      "lineCount": 3,
+      "lines": [
+        {
+          "direction": "LeftToRight",
+          "height": 30,
+          "length": 10,
+          "start": 0,
+          "x": 14,
+          "y": 5
+        },
+        {
+          "direction": "RightToLeft",
+          "height": 24,
+          "length": 12,
+          "start": 10,
+          "x": 0,
+          "y": 55
+        },
+        {
+          "direction": "LeftToRight",
+          "height": 24,
+          "length": 4,
+          "start": 22,
+          "x": 0,
+          "y": 79
+        }
+      ],
+      "paragraphStyleCount": 3,
+      "preedit": null,
+      "runCount": 7,
+      "runs": [
+        {
+          "color": [
+            20,
+            20,
+            20,
+            255
+          ],
+          "decorationCount": 0,
+          "features": [],
+          "fontFamily": "Inter",
+          "fontSize": 20,
+          "fontWeight": 400,
+          "italic": false,
+          "text": "A",
+          "utf16Length": 1
+        },
+        {
+          "color": [
+            20,
+            20,
+            20,
+            255
+          ],
+          "decorationCount": 0,
+          "features": [],
+          "fontFamily": "Inter",
+          "fontSize": 20,
+          "fontWeight": 400,
+          "italic": false,
+          "text": "🦀 ",
+          "utf16Length": 3
+        },
+        {
+          "color": [
+            20,
+            20,
+            20,
+            255
+          ],
+          "decorationCount": 0,
+          "features": [],
+          "fontFamily": "Inter",
+          "fontSize": 20,
+          "fontWeight": 400,
+          "italic": false,
+          "text": "first\n",
+          "utf16Length": 6
+        },
+        {
+          "color": [
+            20,
+            20,
+            20,
+            255
+          ],
+          "decorationCount": 0,
+          "features": [],
+          "fontFamily": "Inter",
+          "fontSize": 20,
+          "fontWeight": 400,
+          "italic": false,
+          "text": "\n",
+          "utf16Length": 1
+        },
+        {
+          "color": [
+            20,
+            20,
+            20,
+            255
+          ],
+          "decorationCount": 0,
+          "features": [],
+          "fontFamily": "Inter",
+          "fontSize": 20,
+          "fontWeight": 400,
+          "italic": false,
+          "text": "second",
+          "utf16Length": 6
+        },
+        {
+          "color": [
+            20,
+            20,
+            20,
+            255
+          ],
+          "decorationCount": 0,
+          "features": [],
+          "fontFamily": "Inter",
+          "fontSize": 20,
+          "fontWeight": 400,
+          "italic": false,
+          "text": "שלום ",
+          "utf16Length": 5
+        },
+        {
+          "color": [
+            20,
+            20,
+            20,
+            255
+          ],
+          "decorationCount": 0,
+          "features": [],
+          "fontFamily": "Inter",
+          "fontSize": 20,
+          "fontWeight": 400,
+          "italic": false,
+          "text": "Last",
+          "utf16Length": 4
+        }
+      ],
+      "selectionEnd": 26,
+      "selectionRects": [
+        {
+          "height": 30,
+          "width": 80.66477272727272,
+          "x": 44.41761363636364,
+          "y": 5
+        },
+        {
+          "height": 24,
+          "width": 69.31818181818181,
+          "x": 0,
+          "y": 55
+        },
+        {
+          "height": 24,
+          "width": 0,
+          "x": 0,
+          "y": 55
+        },
+        {
+          "height": 24,
+          "width": 85.17045454545455,
+          "x": 69.31818181818183,
+          "y": 55
+        },
+        {
+          "height": 24,
+          "width": 40.25568181818182,
+          "x": 0,
+          "y": 79
+        }
+      ],
+      "selectionStart": 0,
+      "styleCount": 1
+    },
+    "typography": {
+      "baseline": 27.272727272727273,
+      "caret": {
+        "height": 30,
+        "width": 0,
+        "x": 78.82670454545455,
+        "y": 5
+      },
+      "caretIndex": 3,
+      "direction": "LeftToRight",
+      "layoutHeight": 103,
+      "layoutWidth": 154.48863636363637,
+      "lineCount": 3,
+      "lines": [
+        {
+          "direction": "LeftToRight",
+          "height": 30,
+          "length": 10,
+          "start": 0,
+          "x": 14,
+          "y": 5
+        },
+        {
+          "direction": "RightToLeft",
+          "height": 24,
+          "length": 12,
+          "start": 10,
+          "x": 0,
+          "y": 55
+        },
+        {
+          "direction": "LeftToRight",
+          "height": 24,
+          "length": 4,
+          "start": 22,
+          "x": 0,
+          "y": 79
+        }
+      ],
+      "paragraphStyleCount": 3,
+      "preedit": null,
+      "runCount": 7,
+      "runs": [
+        {
+          "color": [
+            20,
+            20,
+            20,
+            255
+          ],
+          "decorationCount": 0,
+          "features": [],
+          "fontFamily": "Inter",
+          "fontSize": 20,
+          "fontWeight": 400,
+          "italic": false,
+          "text": "A",
+          "utf16Length": 1
+        },
+        {
+          "color": [
+            20,
+            20,
+            20,
+            255
+          ],
+          "decorationCount": 0,
+          "features": [],
+          "fontFamily": "Inter",
+          "fontSize": 20,
+          "fontWeight": 400,
+          "italic": false,
+          "text": "🦀 ",
+          "utf16Length": 3
+        },
+        {
+          "color": [
+            20,
+            20,
+            20,
+            255
+          ],
+          "decorationCount": 0,
+          "features": [],
+          "fontFamily": "Inter",
+          "fontSize": 20,
+          "fontWeight": 400,
+          "italic": false,
+          "text": "first\n",
+          "utf16Length": 6
+        },
+        {
+          "color": [
+            20,
+            20,
+            20,
+            255
+          ],
+          "decorationCount": 0,
+          "features": [],
+          "fontFamily": "Inter",
+          "fontSize": 20,
+          "fontWeight": 400,
+          "italic": false,
+          "text": "\n",
+          "utf16Length": 1
+        },
+        {
+          "color": [
+            20,
+            20,
+            20,
+            255
+          ],
+          "decorationCount": 0,
+          "features": [],
+          "fontFamily": "Inter",
+          "fontSize": 20,
+          "fontWeight": 400,
+          "italic": false,
+          "text": "second",
+          "utf16Length": 6
+        },
+        {
+          "color": [
+            20,
+            20,
+            20,
+            255
+          ],
+          "decorationCount": 0,
+          "features": [],
+          "fontFamily": "Inter",
+          "fontSize": 20,
+          "fontWeight": 400,
+          "italic": false,
+          "text": "שלום ",
+          "utf16Length": 5
+        },
+        {
+          "color": [
+            20,
+            20,
+            20,
+            255
+          ],
+          "decorationCount": 0,
+          "features": [],
+          "fontFamily": "Inter",
+          "fontSize": 20,
+          "fontWeight": 400,
+          "italic": false,
+          "text": "Last",
+          "utf16Length": 4
+        }
+      ],
+      "selectionEnd": 3,
+      "selectionRects": [],
+      "selectionStart": 3,
+      "styleCount": 1
+    },
+    "observation": {
+      "clock": "page performance milliseconds",
+      "startedAtMs": 15062.89999999851,
+      "endedAtMs": 15271.39999999851,
+      "events": [
+        {
+          "type": "keydown",
+          "phase": "capture",
+          "trusted": true,
+          "eventTimeMs": 15066.10000000149,
+          "observedAtMs": 15066.89999999851,
+          "detail": 0,
+          "key": "Control",
+          "code": "ControlLeft",
+          "ctrlKey": true,
+          "metaKey": false,
+          "altKey": false,
+          "shiftKey": false,
+          "inputType": null,
+          "data": null,
+          "isComposing": false,
+          "defaultPrevented": false,
+          "clipboardText": null,
+          "pointerId": null,
+          "pointerType": null,
+          "offsetX": null,
+          "offsetY": null,
+          "target": {
+            "tag": "INPUT",
+            "className": "ferroui-input-element"
+          }
+        },
+        {
+          "type": "keydown",
+          "phase": "bubble",
+          "trusted": true,
+          "eventTimeMs": 15066.10000000149,
+          "observedAtMs": 15067.800000000745,
+          "detail": 0,
+          "key": "Control",
+          "code": "ControlLeft",
+          "ctrlKey": true,
+          "metaKey": false,
+          "altKey": false,
+          "shiftKey": false,
+          "inputType": null,
+          "data": null,
+          "isComposing": false,
+          "defaultPrevented": false,
+          "clipboardText": null,
+          "pointerId": null,
+          "pointerType": null,
+          "offsetX": null,
+          "offsetY": null,
+          "target": {
+            "tag": "INPUT",
+            "className": "ferroui-input-element"
+          }
+        },
+        {
+          "type": "keydown",
+          "phase": "capture",
+          "trusted": true,
+          "eventTimeMs": 15068.300000000745,
+          "observedAtMs": 15068.60000000149,
+          "detail": 0,
+          "key": "Home",
+          "code": "Home",
+          "ctrlKey": true,
+          "metaKey": false,
+          "altKey": false,
+          "shiftKey": false,
+          "inputType": null,
+          "data": null,
+          "isComposing": false,
+          "defaultPrevented": false,
+          "clipboardText": null,
+          "pointerId": null,
+          "pointerType": null,
+          "offsetX": null,
+          "offsetY": null,
+          "target": {
+            "tag": "INPUT",
+            "className": "ferroui-input-element"
+          }
+        },
+        {
+          "type": "keydown",
+          "phase": "bubble",
+          "trusted": true,
+          "eventTimeMs": 15068.300000000745,
+          "observedAtMs": 15069.199999999255,
+          "detail": 0,
+          "key": "Home",
+          "code": "Home",
+          "ctrlKey": true,
+          "metaKey": false,
+          "altKey": false,
+          "shiftKey": false,
+          "inputType": null,
+          "data": null,
+          "isComposing": false,
+          "defaultPrevented": true,
+          "clipboardText": null,
+          "pointerId": null,
+          "pointerType": null,
+          "offsetX": null,
+          "offsetY": null,
+          "target": {
+            "tag": "INPUT",
+            "className": "ferroui-input-element"
+          }
+        },
+        {
+          "type": "keyup",
+          "phase": "capture",
+          "trusted": true,
+          "eventTimeMs": 15069.89999999851,
+          "observedAtMs": 15069.89999999851,
+          "detail": 0,
+          "key": "Home",
+          "code": "Home",
+          "ctrlKey": true,
+          "metaKey": false,
+          "altKey": false,
+          "shiftKey": false,
+          "inputType": null,
+          "data": null,
+          "isComposing": false,
+          "defaultPrevented": false,
+          "clipboardText": null,
+          "pointerId": null,
+          "pointerType": null,
+          "offsetX": null,
+          "offsetY": null,
+          "target": {
+            "tag": "INPUT",
+            "className": "ferroui-input-element"
+          }
+        },
+        {
+          "type": "keyup",
+          "phase": "bubble",
+          "trusted": true,
+          "eventTimeMs": 15069.89999999851,
+          "observedAtMs": 15070.10000000149,
+          "detail": 0,
+          "key": "Home",
+          "code": "Home",
+          "ctrlKey": true,
+          "metaKey": false,
+          "altKey": false,
+          "shiftKey": false,
+          "inputType": null,
+          "data": null,
+          "isComposing": false,
+          "defaultPrevented": false,
+          "clipboardText": null,
+          "pointerId": null,
+          "pointerType": null,
+          "offsetX": null,
+          "offsetY": null,
+          "target": {
+            "tag": "INPUT",
+            "className": "ferroui-input-element"
+          }
+        },
+        {
+          "type": "keyup",
+          "phase": "capture",
+          "trusted": true,
+          "eventTimeMs": 15070.39999999851,
+          "observedAtMs": 15070.800000000745,
+          "detail": 0,
+          "key": "Control",
+          "code": "ControlLeft",
+          "ctrlKey": false,
+          "metaKey": false,
+          "altKey": false,
+          "shiftKey": false,
+          "inputType": null,
+          "data": null,
+          "isComposing": false,
+          "defaultPrevented": false,
+          "clipboardText": null,
+          "pointerId": null,
+          "pointerType": null,
+          "offsetX": null,
+          "offsetY": null,
+          "target": {
+            "tag": "INPUT",
+            "className": "ferroui-input-element"
+          }
+        },
+        {
+          "type": "keyup",
+          "phase": "bubble",
+          "trusted": true,
+          "eventTimeMs": 15070.39999999851,
+          "observedAtMs": 15070.89999999851,
+          "detail": 0,
+          "key": "Control",
+          "code": "ControlLeft",
+          "ctrlKey": false,
+          "metaKey": false,
+          "altKey": false,
+          "shiftKey": false,
+          "inputType": null,
+          "data": null,
+          "isComposing": false,
+          "defaultPrevented": false,
+          "clipboardText": null,
+          "pointerId": null,
+          "pointerType": null,
+          "offsetX": null,
+          "offsetY": null,
+          "target": {
+            "tag": "INPUT",
+            "className": "ferroui-input-element"
+          }
+        },
+        {
+          "type": "keydown",
+          "phase": "capture",
+          "trusted": true,
+          "eventTimeMs": 15073.60000000149,
+          "observedAtMs": 15073.800000000745,
+          "detail": 0,
+          "key": "ArrowRight",
+          "code": "ArrowRight",
+          "ctrlKey": false,
+          "metaKey": false,
+          "altKey": false,
+          "shiftKey": false,
+          "inputType": null,
+          "data": null,
+          "isComposing": false,
+          "defaultPrevented": false,
+          "clipboardText": null,
+          "pointerId": null,
+          "pointerType": null,
+          "offsetX": null,
+          "offsetY": null,
+          "target": {
+            "tag": "INPUT",
+            "className": "ferroui-input-element"
+          }
+        },
+        {
+          "type": "keydown",
+          "phase": "bubble",
+          "trusted": true,
+          "eventTimeMs": 15073.60000000149,
+          "observedAtMs": 15075.39999999851,
+          "detail": 0,
+          "key": "ArrowRight",
+          "code": "ArrowRight",
+          "ctrlKey": false,
+          "metaKey": false,
+          "altKey": false,
+          "shiftKey": false,
+          "inputType": null,
+          "data": null,
+          "isComposing": false,
+          "defaultPrevented": true,
+          "clipboardText": null,
+          "pointerId": null,
+          "pointerType": null,
+          "offsetX": null,
+          "offsetY": null,
+          "target": {
+            "tag": "INPUT",
+            "className": "ferroui-input-element"
+          }
+        },
+        {
+          "type": "keyup",
+          "phase": "capture",
+          "trusted": true,
+          "eventTimeMs": 15075.800000000745,
+          "observedAtMs": 15076,
+          "detail": 0,
+          "key": "ArrowRight",
+          "code": "ArrowRight",
+          "ctrlKey": false,
+          "metaKey": false,
+          "altKey": false,
+          "shiftKey": false,
+          "inputType": null,
+          "data": null,
+          "isComposing": false,
+          "defaultPrevented": false,
+          "clipboardText": null,
+          "pointerId": null,
+          "pointerType": null,
+          "offsetX": null,
+          "offsetY": null,
+          "target": {
+            "tag": "INPUT",
+            "className": "ferroui-input-element"
+          }
+        },
+        {
+          "type": "keyup",
+          "phase": "bubble",
+          "trusted": true,
+          "eventTimeMs": 15075.800000000745,
+          "observedAtMs": 15076,
+          "detail": 0,
+          "key": "ArrowRight",
+          "code": "ArrowRight",
+          "ctrlKey": false,
+          "metaKey": false,
+          "altKey": false,
+          "shiftKey": false,
+          "inputType": null,
+          "data": null,
+          "isComposing": false,
+          "defaultPrevented": false,
+          "clipboardText": null,
+          "pointerId": null,
+          "pointerType": null,
+          "offsetX": null,
+          "offsetY": null,
+          "target": {
+            "tag": "INPUT",
+            "className": "ferroui-input-element"
+          }
+        },
+        {
+          "type": "keydown",
+          "phase": "capture",
+          "trusted": true,
+          "eventTimeMs": 15129.699999999255,
+          "observedAtMs": 15133.800000000745,
+          "detail": 0,
+          "key": "ArrowRight",
+          "code": "ArrowRight",
+          "ctrlKey": false,
+          "metaKey": false,
+          "altKey": false,
+          "shiftKey": false,
+          "inputType": null,
+          "data": null,
+          "isComposing": false,
+          "defaultPrevented": false,
+          "clipboardText": null,
+          "pointerId": null,
+          "pointerType": null,
+          "offsetX": null,
+          "offsetY": null,
+          "target": {
+            "tag": "INPUT",
+            "className": "ferroui-input-element"
+          }
+        },
+        {
+          "type": "keydown",
+          "phase": "bubble",
+          "trusted": true,
+          "eventTimeMs": 15129.699999999255,
+          "observedAtMs": 15135.60000000149,
+          "detail": 0,
+          "key": "ArrowRight",
+          "code": "ArrowRight",
+          "ctrlKey": false,
+          "metaKey": false,
+          "altKey": false,
+          "shiftKey": false,
+          "inputType": null,
+          "data": null,
+          "isComposing": false,
+          "defaultPrevented": true,
+          "clipboardText": null,
+          "pointerId": null,
+          "pointerType": null,
+          "offsetX": null,
+          "offsetY": null,
+          "target": {
+            "tag": "INPUT",
+            "className": "ferroui-input-element"
+          }
+        },
+        {
+          "type": "keyup",
+          "phase": "capture",
+          "trusted": true,
+          "eventTimeMs": 15148.60000000149,
+          "observedAtMs": 15149.300000000745,
+          "detail": 0,
+          "key": "ArrowRight",
+          "code": "ArrowRight",
+          "ctrlKey": false,
+          "metaKey": false,
+          "altKey": false,
+          "shiftKey": false,
+          "inputType": null,
+          "data": null,
+          "isComposing": false,
+          "defaultPrevented": false,
+          "clipboardText": null,
+          "pointerId": null,
+          "pointerType": null,
+          "offsetX": null,
+          "offsetY": null,
+          "target": {
+            "tag": "INPUT",
+            "className": "ferroui-input-element"
+          }
+        },
+        {
+          "type": "keyup",
+          "phase": "bubble",
+          "trusted": true,
+          "eventTimeMs": 15148.60000000149,
+          "observedAtMs": 15149.5,
+          "detail": 0,
+          "key": "ArrowRight",
+          "code": "ArrowRight",
+          "ctrlKey": false,
+          "metaKey": false,
+          "altKey": false,
+          "shiftKey": false,
+          "inputType": null,
+          "data": null,
+          "isComposing": false,
+          "defaultPrevented": false,
+          "clipboardText": null,
+          "pointerId": null,
+          "pointerType": null,
+          "offsetX": null,
+          "offsetY": null,
+          "target": {
+            "tag": "INPUT",
+            "className": "ferroui-input-element"
+          }
+        }
+      ],
+      "droppedEvents": 0,
+      "longTaskSupported": true,
+      "longTasks": [],
+      "droppedLongTasks": 0
+    },
+    "after": {
+      "renderedFrames": 14,
+      "sceneFrames": 134,
+      "documentRevision": 14,
+      "historyLength": 6,
+      "selection": [
+        2
+      ],
+      "editingText": 2,
+      "pointerPresses": {
+        "capacity": 8,
+        "entries": [
+          {
+            "buttons": 1,
+            "clickCount": 1,
+            "pan": {
+              "x": -15.545454545454504,
+              "y": 196.09090909090907
+            },
+            "renderedFramesBefore": 2,
+            "screen": {
+              "x": 115.34091186523438,
+              "y": 316.9090881347656
+            },
+            "selectionCountBefore": 0,
+            "serial": 1,
+            "timestamp": 658,
+            "world": {
+              "x": 65.00000137776874,
+              "y": 59.999998622231246
+            },
+            "zoom": 2.0136363636363637
+          },
+          {
+            "buttons": 1,
+            "clickCount": 1,
+            "pan": {
+              "x": -15.545454545454504,
+              "y": 196.09090909090907
+            },
+            "renderedFramesBefore": 9,
+            "screen": {
+              "x": 75.06817626953125,
+              "y": 286.7045593261719
+            },
+            "selectionCountBefore": 0,
+            "serial": 2,
+            "timestamp": 12452,
+            "world": {
+              "x": 44.99999724446245,
+              "y": 45.000006888843835
+            },
+            "zoom": 2.0136363636363637
+          },
+          {
+            "buttons": 1,
+            "clickCount": 1,
+            "pan": {
+              "x": -15.545454545454504,
+              "y": 196.09090909090907
+            },
+            "renderedFramesBefore": 12,
+            "screen": {
+              "x": 115.34091186523438,
+              "y": 316.9090881347656
+            },
+            "selectionCountBefore": 0,
+            "serial": 3,
+            "timestamp": 13340,
+            "world": {
+              "x": 65.00000137776874,
+              "y": 59.999998622231246
+            },
+            "zoom": 2.0136363636363637
+          }
+        ],
+        "serial": 3,
+        "timestampUnit": "native monotonic milliseconds"
+      },
+      "zoom": 2.0136363636363637,
+      "pan": {
+        "x": -15.545454545454504,
+        "y": 196.09090909090907
+      },
+      "tool": "Select",
+      "chrome": {
+        "CanvasHost": {
+          "x": 296,
+          "y": 0,
+          "width": 1016,
+          "height": 1000,
+          "visible": true,
+          "enabled": true,
+          "measureValid": true,
+          "arrangeValid": true,
+          "focused": false,
+          "focusWithin": true
+        },
+        "InlineTextHost": null,
+        "InlineTextBox": {
+          "x": 361.00000000000006,
+          "y": 276.6363636363636,
+          "width": 440,
+          "height": 103,
+          "visible": true,
+          "enabled": true,
+          "measureValid": true,
+          "arrangeValid": true,
+          "focused": true,
+          "focusWithin": true
+        },
+        "ModalBackdrop": {
+          "x": 0,
+          "y": 0,
+          "width": 1600,
+          "height": 1000,
+          "visible": false,
+          "enabled": true,
+          "measureValid": true,
+          "arrangeValid": true,
+          "focused": false,
+          "focusWithin": false
+        },
+        "PageInspector": {
+          "x": 1329,
+          "y": 160,
+          "width": 255,
+          "height": 376,
+          "visible": false,
+          "enabled": true,
+          "measureValid": true,
+          "arrangeValid": true,
+          "focused": false,
+          "focusWithin": false
+        },
+        "DesignInspector": {
+          "x": 1329,
+          "y": 210,
+          "width": 255,
+          "height": 1707,
+          "visible": true,
+          "enabled": true,
+          "measureValid": true,
+          "arrangeValid": true,
+          "focused": false,
+          "focusWithin": false
+        }
+      }
+    },
+    "actualText": "A🦀 first\nשלום second\nLast"
+  },
+  {
+    "entry": 2,
+    "expectedCaretIndex": 3,
+    "keys": [
+      "Control+Home",
+      "ArrowRight",
+      "ArrowRight"
+    ],
+    "before": {
+      "renderedFrames": 18,
+      "sceneFrames": 139,
+      "documentRevision": 17,
+      "historyLength": 6,
+      "selection": [
+        2
+      ],
+      "editingText": 2,
+      "pointerPresses": {
+        "capacity": 8,
+        "entries": [
+          {
+            "buttons": 1,
+            "clickCount": 1,
+            "pan": {
+              "x": -15.545454545454504,
+              "y": 196.09090909090907
+            },
+            "renderedFramesBefore": 2,
+            "screen": {
+              "x": 115.34091186523438,
+              "y": 316.9090881347656
+            },
+            "selectionCountBefore": 0,
+            "serial": 1,
+            "timestamp": 658,
+            "world": {
+              "x": 65.00000137776874,
+              "y": 59.999998622231246
+            },
+            "zoom": 2.0136363636363637
+          },
+          {
+            "buttons": 1,
+            "clickCount": 1,
+            "pan": {
+              "x": -15.545454545454504,
+              "y": 196.09090909090907
+            },
+            "renderedFramesBefore": 9,
+            "screen": {
+              "x": 75.06817626953125,
+              "y": 286.7045593261719
+            },
+            "selectionCountBefore": 0,
+            "serial": 2,
+            "timestamp": 12452,
+            "world": {
+              "x": 44.99999724446245,
+              "y": 45.000006888843835
+            },
+            "zoom": 2.0136363636363637
+          },
+          {
+            "buttons": 1,
+            "clickCount": 1,
+            "pan": {
+              "x": -15.545454545454504,
+              "y": 196.09090909090907
+            },
+            "renderedFramesBefore": 12,
+            "screen": {
+              "x": 115.34091186523438,
+              "y": 316.9090881347656
+            },
+            "selectionCountBefore": 0,
+            "serial": 3,
+            "timestamp": 13340,
+            "world": {
+              "x": 65.00000137776874,
+              "y": 59.999998622231246
+            },
+            "zoom": 2.0136363636363637
+          },
+          {
+            "buttons": 1,
+            "clickCount": 1,
+            "pan": {
+              "x": -15.545454545454504,
+              "y": 196.09090909090907
+            },
+            "renderedFramesBefore": 16,
+            "screen": {
+              "x": 115.34091186523438,
+              "y": 316.9090881347656
+            },
+            "selectionCountBefore": 1,
+            "serial": 4,
+            "timestamp": 14361,
+            "world": {
+              "x": 65.00000137776874,
+              "y": 59.999998622231246
+            },
+            "zoom": 2.0136363636363637
+          }
+        ],
+        "serial": 4,
+        "timestampUnit": "native monotonic milliseconds"
+      },
+      "zoom": 2.0136363636363637,
+      "pan": {
+        "x": -15.545454545454504,
+        "y": 196.09090909090907
+      },
+      "tool": "Select",
+      "chrome": {
+        "CanvasHost": {
+          "x": 296,
+          "y": 0,
+          "width": 1016,
+          "height": 1000,
+          "visible": true,
+          "enabled": true,
+          "measureValid": true,
+          "arrangeValid": true,
+          "focused": false,
+          "focusWithin": true
+        },
+        "InlineTextHost": null,
+        "InlineTextBox": {
+          "x": 361.00000000000006,
+          "y": 276.6363636363636,
+          "width": 440,
+          "height": 103,
+          "visible": true,
+          "enabled": true,
+          "measureValid": true,
+          "arrangeValid": true,
+          "focused": true,
+          "focusWithin": true
+        },
+        "ModalBackdrop": {
+          "x": 0,
+          "y": 0,
+          "width": 1600,
+          "height": 1000,
+          "visible": false,
+          "enabled": true,
+          "measureValid": true,
+          "arrangeValid": true,
+          "focused": false,
+          "focusWithin": false
+        },
+        "PageInspector": {
+          "x": 1329,
+          "y": 160,
+          "width": 255,
+          "height": 376,
+          "visible": false,
+          "enabled": true,
+          "measureValid": true,
+          "arrangeValid": true,
+          "focused": false,
+          "focusWithin": false
+        },
+        "DesignInspector": {
+          "x": 1329,
+          "y": 210,
+          "width": 255,
+          "height": 1707,
+          "visible": true,
+          "enabled": true,
+          "measureValid": true,
+          "arrangeValid": true,
+          "focused": false,
+          "focusWithin": false
+        }
+      }
+    },
+    "beforeTypography": {
+      "baseline": 27.272727272727273,
+      "caret": {
+        "height": 30,
+        "width": 0,
+        "x": 84.95170454545455,
+        "y": 5
+      },
+      "caretIndex": 4,
+      "direction": "LeftToRight",
+      "layoutHeight": 103,
+      "layoutWidth": 154.48863636363637,
+      "lineCount": 3,
+      "lines": [
+        {
+          "direction": "LeftToRight",
+          "height": 30,
+          "length": 10,
+          "start": 0,
+          "x": 14,
+          "y": 5
+        },
+        {
+          "direction": "RightToLeft",
+          "height": 24,
+          "length": 12,
+          "start": 10,
+          "x": 0,
+          "y": 55
+        },
+        {
+          "direction": "LeftToRight",
+          "height": 24,
+          "length": 4,
+          "start": 22,
+          "x": 0,
+          "y": 79
+        }
+      ],
+      "paragraphStyleCount": 3,
+      "preedit": null,
+      "runCount": 7,
+      "runs": [
+        {
+          "color": [
+            20,
+            20,
+            20,
+            255
+          ],
+          "decorationCount": 0,
+          "features": [],
+          "fontFamily": "Inter",
+          "fontSize": 20,
+          "fontWeight": 400,
+          "italic": false,
+          "text": "A",
+          "utf16Length": 1
+        },
+        {
+          "color": [
+            20,
+            20,
+            20,
+            255
+          ],
+          "decorationCount": 0,
+          "features": [],
+          "fontFamily": "Inter",
+          "fontSize": 20,
+          "fontWeight": 400,
+          "italic": false,
+          "text": "🦀 ",
+          "utf16Length": 3
+        },
+        {
+          "color": [
+            20,
+            20,
+            20,
+            255
+          ],
+          "decorationCount": 0,
+          "features": [],
+          "fontFamily": "Inter",
+          "fontSize": 20,
+          "fontWeight": 400,
+          "italic": false,
+          "text": "first\n",
+          "utf16Length": 6
+        },
+        {
+          "color": [
+            20,
+            20,
+            20,
+            255
+          ],
+          "decorationCount": 0,
+          "features": [],
+          "fontFamily": "Inter",
+          "fontSize": 20,
+          "fontWeight": 400,
+          "italic": false,
+          "text": "\n",
+          "utf16Length": 1
+        },
+        {
+          "color": [
+            20,
+            20,
+            20,
+            255
+          ],
+          "decorationCount": 0,
+          "features": [],
+          "fontFamily": "Inter",
+          "fontSize": 20,
+          "fontWeight": 400,
+          "italic": false,
+          "text": "second",
+          "utf16Length": 6
+        },
+        {
+          "color": [
+            20,
+            20,
+            20,
+            255
+          ],
+          "decorationCount": 0,
+          "features": [],
+          "fontFamily": "Inter",
+          "fontSize": 20,
+          "fontWeight": 400,
+          "italic": false,
+          "text": "שלום ",
+          "utf16Length": 5
+        },
+        {
+          "color": [
+            20,
+            20,
+            20,
+            255
+          ],
+          "decorationCount": 0,
+          "features": [],
+          "fontFamily": "Inter",
+          "fontSize": 20,
+          "fontWeight": 400,
+          "italic": false,
+          "text": "Last",
+          "utf16Length": 4
+        }
+      ],
+      "selectionEnd": 26,
+      "selectionRects": [
+        {
+          "height": 30,
+          "width": 80.66477272727272,
+          "x": 44.41761363636364,
+          "y": 5
+        },
+        {
+          "height": 24,
+          "width": 69.31818181818181,
+          "x": 0,
+          "y": 55
+        },
+        {
+          "height": 24,
+          "width": 0,
+          "x": 0,
+          "y": 55
+        },
+        {
+          "height": 24,
+          "width": 85.17045454545455,
+          "x": 69.31818181818183,
+          "y": 55
+        },
+        {
+          "height": 24,
+          "width": 40.25568181818182,
+          "x": 0,
+          "y": 79
+        }
+      ],
+      "selectionStart": 0,
+      "styleCount": 1
+    },
+    "typography": {
+      "baseline": 27.272727272727273,
+      "caret": {
+        "height": 30,
+        "width": 0,
+        "x": 78.82670454545455,
+        "y": 5
+      },
+      "caretIndex": 3,
+      "direction": "LeftToRight",
+      "layoutHeight": 103,
+      "layoutWidth": 154.48863636363637,
+      "lineCount": 3,
+      "lines": [
+        {
+          "direction": "LeftToRight",
+          "height": 30,
+          "length": 10,
+          "start": 0,
+          "x": 14,
+          "y": 5
+        },
+        {
+          "direction": "RightToLeft",
+          "height": 24,
+          "length": 12,
+          "start": 10,
+          "x": 0,
+          "y": 55
+        },
+        {
+          "direction": "LeftToRight",
+          "height": 24,
+          "length": 4,
+          "start": 22,
+          "x": 0,
+          "y": 79
+        }
+      ],
+      "paragraphStyleCount": 3,
+      "preedit": null,
+      "runCount": 7,
+      "runs": [
+        {
+          "color": [
+            20,
+            20,
+            20,
+            255
+          ],
+          "decorationCount": 0,
+          "features": [],
+          "fontFamily": "Inter",
+          "fontSize": 20,
+          "fontWeight": 400,
+          "italic": false,
+          "text": "A",
+          "utf16Length": 1
+        },
+        {
+          "color": [
+            20,
+            20,
+            20,
+            255
+          ],
+          "decorationCount": 0,
+          "features": [],
+          "fontFamily": "Inter",
+          "fontSize": 20,
+          "fontWeight": 400,
+          "italic": false,
+          "text": "🦀 ",
+          "utf16Length": 3
+        },
+        {
+          "color": [
+            20,
+            20,
+            20,
+            255
+          ],
+          "decorationCount": 0,
+          "features": [],
+          "fontFamily": "Inter",
+          "fontSize": 20,
+          "fontWeight": 400,
+          "italic": false,
+          "text": "first\n",
+          "utf16Length": 6
+        },
+        {
+          "color": [
+            20,
+            20,
+            20,
+            255
+          ],
+          "decorationCount": 0,
+          "features": [],
+          "fontFamily": "Inter",
+          "fontSize": 20,
+          "fontWeight": 400,
+          "italic": false,
+          "text": "\n",
+          "utf16Length": 1
+        },
+        {
+          "color": [
+            20,
+            20,
+            20,
+            255
+          ],
+          "decorationCount": 0,
+          "features": [],
+          "fontFamily": "Inter",
+          "fontSize": 20,
+          "fontWeight": 400,
+          "italic": false,
+          "text": "second",
+          "utf16Length": 6
+        },
+        {
+          "color": [
+            20,
+            20,
+            20,
+            255
+          ],
+          "decorationCount": 0,
+          "features": [],
+          "fontFamily": "Inter",
+          "fontSize": 20,
+          "fontWeight": 400,
+          "italic": false,
+          "text": "שלום ",
+          "utf16Length": 5
+        },
+        {
+          "color": [
+            20,
+            20,
+            20,
+            255
+          ],
+          "decorationCount": 0,
+          "features": [],
+          "fontFamily": "Inter",
+          "fontSize": 20,
+          "fontWeight": 400,
+          "italic": false,
+          "text": "Last",
+          "utf16Length": 4
+        }
+      ],
+      "selectionEnd": 3,
+      "selectionRects": [],
+      "selectionStart": 3,
+      "styleCount": 1
+    },
+    "observation": {
+      "clock": "page performance milliseconds",
+      "startedAtMs": 16053.300000000745,
+      "endedAtMs": 16181.89999999851,
+      "events": [
+        {
+          "type": "keydown",
+          "phase": "capture",
+          "trusted": true,
+          "eventTimeMs": 16056.800000000745,
+          "observedAtMs": 16057.5,
+          "detail": 0,
+          "key": "Control",
+          "code": "ControlLeft",
+          "ctrlKey": true,
+          "metaKey": false,
+          "altKey": false,
+          "shiftKey": false,
+          "inputType": null,
+          "data": null,
+          "isComposing": false,
+          "defaultPrevented": false,
+          "clipboardText": null,
+          "pointerId": null,
+          "pointerType": null,
+          "offsetX": null,
+          "offsetY": null,
+          "target": {
+            "tag": "INPUT",
+            "className": "ferroui-input-element"
+          }
+        },
+        {
+          "type": "keydown",
+          "phase": "bubble",
+          "trusted": true,
+          "eventTimeMs": 16056.800000000745,
+          "observedAtMs": 16057.699999999255,
+          "detail": 0,
+          "key": "Control",
+          "code": "ControlLeft",
+          "ctrlKey": true,
+          "metaKey": false,
+          "altKey": false,
+          "shiftKey": false,
+          "inputType": null,
+          "data": null,
+          "isComposing": false,
+          "defaultPrevented": false,
+          "clipboardText": null,
+          "pointerId": null,
+          "pointerType": null,
+          "offsetX": null,
+          "offsetY": null,
+          "target": {
+            "tag": "INPUT",
+            "className": "ferroui-input-element"
+          }
+        },
+        {
+          "type": "keydown",
+          "phase": "capture",
+          "trusted": true,
+          "eventTimeMs": 16058.39999999851,
+          "observedAtMs": 16058.699999999255,
+          "detail": 0,
+          "key": "Home",
+          "code": "Home",
+          "ctrlKey": true,
+          "metaKey": false,
+          "altKey": false,
+          "shiftKey": false,
+          "inputType": null,
+          "data": null,
+          "isComposing": false,
+          "defaultPrevented": false,
+          "clipboardText": null,
+          "pointerId": null,
+          "pointerType": null,
+          "offsetX": null,
+          "offsetY": null,
+          "target": {
+            "tag": "INPUT",
+            "className": "ferroui-input-element"
+          }
+        },
+        {
+          "type": "keydown",
+          "phase": "bubble",
+          "trusted": true,
+          "eventTimeMs": 16058.39999999851,
+          "observedAtMs": 16060.800000000745,
+          "detail": 0,
+          "key": "Home",
+          "code": "Home",
+          "ctrlKey": true,
+          "metaKey": false,
+          "altKey": false,
+          "shiftKey": false,
+          "inputType": null,
+          "data": null,
+          "isComposing": false,
+          "defaultPrevented": true,
+          "clipboardText": null,
+          "pointerId": null,
+          "pointerType": null,
+          "offsetX": null,
+          "offsetY": null,
+          "target": {
+            "tag": "INPUT",
+            "className": "ferroui-input-element"
+          }
+        },
+        {
+          "type": "keyup",
+          "phase": "capture",
+          "trusted": true,
+          "eventTimeMs": 16061.39999999851,
+          "observedAtMs": 16062.5,
+          "detail": 0,
+          "key": "Home",
+          "code": "Home",
+          "ctrlKey": true,
+          "metaKey": false,
+          "altKey": false,
+          "shiftKey": false,
+          "inputType": null,
+          "data": null,
+          "isComposing": false,
+          "defaultPrevented": false,
+          "clipboardText": null,
+          "pointerId": null,
+          "pointerType": null,
+          "offsetX": null,
+          "offsetY": null,
+          "target": {
+            "tag": "INPUT",
+            "className": "ferroui-input-element"
+          }
+        },
+        {
+          "type": "keyup",
+          "phase": "bubble",
+          "trusted": true,
+          "eventTimeMs": 16061.39999999851,
+          "observedAtMs": 16062.60000000149,
+          "detail": 0,
+          "key": "Home",
+          "code": "Home",
+          "ctrlKey": true,
+          "metaKey": false,
+          "altKey": false,
+          "shiftKey": false,
+          "inputType": null,
+          "data": null,
+          "isComposing": false,
+          "defaultPrevented": false,
+          "clipboardText": null,
+          "pointerId": null,
+          "pointerType": null,
+          "offsetX": null,
+          "offsetY": null,
+          "target": {
+            "tag": "INPUT",
+            "className": "ferroui-input-element"
+          }
+        },
+        {
+          "type": "keyup",
+          "phase": "capture",
+          "trusted": true,
+          "eventTimeMs": 16063.10000000149,
+          "observedAtMs": 16063.199999999255,
+          "detail": 0,
+          "key": "Control",
+          "code": "ControlLeft",
+          "ctrlKey": false,
+          "metaKey": false,
+          "altKey": false,
+          "shiftKey": false,
+          "inputType": null,
+          "data": null,
+          "isComposing": false,
+          "defaultPrevented": false,
+          "clipboardText": null,
+          "pointerId": null,
+          "pointerType": null,
+          "offsetX": null,
+          "offsetY": null,
+          "target": {
+            "tag": "INPUT",
+            "className": "ferroui-input-element"
+          }
+        },
+        {
+          "type": "keyup",
+          "phase": "bubble",
+          "trusted": true,
+          "eventTimeMs": 16063.10000000149,
+          "observedAtMs": 16063.300000000745,
+          "detail": 0,
+          "key": "Control",
+          "code": "ControlLeft",
+          "ctrlKey": false,
+          "metaKey": false,
+          "altKey": false,
+          "shiftKey": false,
+          "inputType": null,
+          "data": null,
+          "isComposing": false,
+          "defaultPrevented": false,
+          "clipboardText": null,
+          "pointerId": null,
+          "pointerType": null,
+          "offsetX": null,
+          "offsetY": null,
+          "target": {
+            "tag": "INPUT",
+            "className": "ferroui-input-element"
+          }
+        },
+        {
+          "type": "keydown",
+          "phase": "capture",
+          "trusted": true,
+          "eventTimeMs": 16082.39999999851,
+          "observedAtMs": 16082.800000000745,
+          "detail": 0,
+          "key": "ArrowRight",
+          "code": "ArrowRight",
+          "ctrlKey": false,
+          "metaKey": false,
+          "altKey": false,
+          "shiftKey": false,
+          "inputType": null,
+          "data": null,
+          "isComposing": false,
+          "defaultPrevented": false,
+          "clipboardText": null,
+          "pointerId": null,
+          "pointerType": null,
+          "offsetX": null,
+          "offsetY": null,
+          "target": {
+            "tag": "INPUT",
+            "className": "ferroui-input-element"
+          }
+        },
+        {
+          "type": "keydown",
+          "phase": "bubble",
+          "trusted": true,
+          "eventTimeMs": 16082.39999999851,
+          "observedAtMs": 16085.39999999851,
+          "detail": 0,
+          "key": "ArrowRight",
+          "code": "ArrowRight",
+          "ctrlKey": false,
+          "metaKey": false,
+          "altKey": false,
+          "shiftKey": false,
+          "inputType": null,
+          "data": null,
+          "isComposing": false,
+          "defaultPrevented": true,
+          "clipboardText": null,
+          "pointerId": null,
+          "pointerType": null,
+          "offsetX": null,
+          "offsetY": null,
+          "target": {
+            "tag": "INPUT",
+            "className": "ferroui-input-element"
+          }
+        },
+        {
+          "type": "keyup",
+          "phase": "capture",
+          "trusted": true,
+          "eventTimeMs": 16086.199999999255,
+          "observedAtMs": 16086.800000000745,
+          "detail": 0,
+          "key": "ArrowRight",
+          "code": "ArrowRight",
+          "ctrlKey": false,
+          "metaKey": false,
+          "altKey": false,
+          "shiftKey": false,
+          "inputType": null,
+          "data": null,
+          "isComposing": false,
+          "defaultPrevented": false,
+          "clipboardText": null,
+          "pointerId": null,
+          "pointerType": null,
+          "offsetX": null,
+          "offsetY": null,
+          "target": {
+            "tag": "INPUT",
+            "className": "ferroui-input-element"
+          }
+        },
+        {
+          "type": "keyup",
+          "phase": "bubble",
+          "trusted": true,
+          "eventTimeMs": 16086.199999999255,
+          "observedAtMs": 16086.89999999851,
+          "detail": 0,
+          "key": "ArrowRight",
+          "code": "ArrowRight",
+          "ctrlKey": false,
+          "metaKey": false,
+          "altKey": false,
+          "shiftKey": false,
+          "inputType": null,
+          "data": null,
+          "isComposing": false,
+          "defaultPrevented": false,
+          "clipboardText": null,
+          "pointerId": null,
+          "pointerType": null,
+          "offsetX": null,
+          "offsetY": null,
+          "target": {
+            "tag": "INPUT",
+            "className": "ferroui-input-element"
+          }
+        },
+        {
+          "type": "keydown",
+          "phase": "capture",
+          "trusted": true,
+          "eventTimeMs": 16091.699999999255,
+          "observedAtMs": 16091.89999999851,
+          "detail": 0,
+          "key": "ArrowRight",
+          "code": "ArrowRight",
+          "ctrlKey": false,
+          "metaKey": false,
+          "altKey": false,
+          "shiftKey": false,
+          "inputType": null,
+          "data": null,
+          "isComposing": false,
+          "defaultPrevented": false,
+          "clipboardText": null,
+          "pointerId": null,
+          "pointerType": null,
+          "offsetX": null,
+          "offsetY": null,
+          "target": {
+            "tag": "INPUT",
+            "className": "ferroui-input-element"
+          }
+        },
+        {
+          "type": "keydown",
+          "phase": "bubble",
+          "trusted": true,
+          "eventTimeMs": 16091.699999999255,
+          "observedAtMs": 16093.199999999255,
+          "detail": 0,
+          "key": "ArrowRight",
+          "code": "ArrowRight",
+          "ctrlKey": false,
+          "metaKey": false,
+          "altKey": false,
+          "shiftKey": false,
+          "inputType": null,
+          "data": null,
+          "isComposing": false,
+          "defaultPrevented": true,
+          "clipboardText": null,
+          "pointerId": null,
+          "pointerType": null,
+          "offsetX": null,
+          "offsetY": null,
+          "target": {
+            "tag": "INPUT",
+            "className": "ferroui-input-element"
+          }
+        },
+        {
+          "type": "keyup",
+          "phase": "capture",
+          "trusted": true,
+          "eventTimeMs": 16093.699999999255,
+          "observedAtMs": 16103.199999999255,
+          "detail": 0,
+          "key": "ArrowRight",
+          "code": "ArrowRight",
+          "ctrlKey": false,
+          "metaKey": false,
+          "altKey": false,
+          "shiftKey": false,
+          "inputType": null,
+          "data": null,
+          "isComposing": false,
+          "defaultPrevented": false,
+          "clipboardText": null,
+          "pointerId": null,
+          "pointerType": null,
+          "offsetX": null,
+          "offsetY": null,
+          "target": {
+            "tag": "INPUT",
+            "className": "ferroui-input-element"
+          }
+        },
+        {
+          "type": "keyup",
+          "phase": "bubble",
+          "trusted": true,
+          "eventTimeMs": 16093.699999999255,
+          "observedAtMs": 16103.300000000745,
+          "detail": 0,
+          "key": "ArrowRight",
+          "code": "ArrowRight",
+          "ctrlKey": false,
+          "metaKey": false,
+          "altKey": false,
+          "shiftKey": false,
+          "inputType": null,
+          "data": null,
+          "isComposing": false,
+          "defaultPrevented": false,
+          "clipboardText": null,
+          "pointerId": null,
+          "pointerType": null,
+          "offsetX": null,
+          "offsetY": null,
+          "target": {
+            "tag": "INPUT",
+            "className": "ferroui-input-element"
+          }
+        }
+      ],
+      "droppedEvents": 0,
+      "longTaskSupported": true,
+      "longTasks": [],
+      "droppedLongTasks": 0
+    },
+    "after": {
+      "renderedFrames": 18,
+      "sceneFrames": 140,
+      "documentRevision": 17,
+      "historyLength": 6,
+      "selection": [
+        2
+      ],
+      "editingText": 2,
+      "pointerPresses": {
+        "capacity": 8,
+        "entries": [
+          {
+            "buttons": 1,
+            "clickCount": 1,
+            "pan": {
+              "x": -15.545454545454504,
+              "y": 196.09090909090907
+            },
+            "renderedFramesBefore": 2,
+            "screen": {
+              "x": 115.34091186523438,
+              "y": 316.9090881347656
+            },
+            "selectionCountBefore": 0,
+            "serial": 1,
+            "timestamp": 658,
+            "world": {
+              "x": 65.00000137776874,
+              "y": 59.999998622231246
+            },
+            "zoom": 2.0136363636363637
+          },
+          {
+            "buttons": 1,
+            "clickCount": 1,
+            "pan": {
+              "x": -15.545454545454504,
+              "y": 196.09090909090907
+            },
+            "renderedFramesBefore": 9,
+            "screen": {
+              "x": 75.06817626953125,
+              "y": 286.7045593261719
+            },
+            "selectionCountBefore": 0,
+            "serial": 2,
+            "timestamp": 12452,
+            "world": {
+              "x": 44.99999724446245,
+              "y": 45.000006888843835
+            },
+            "zoom": 2.0136363636363637
+          },
+          {
+            "buttons": 1,
+            "clickCount": 1,
+            "pan": {
+              "x": -15.545454545454504,
+              "y": 196.09090909090907
+            },
+            "renderedFramesBefore": 12,
+            "screen": {
+              "x": 115.34091186523438,
+              "y": 316.9090881347656
+            },
+            "selectionCountBefore": 0,
+            "serial": 3,
+            "timestamp": 13340,
+            "world": {
+              "x": 65.00000137776874,
+              "y": 59.999998622231246
+            },
+            "zoom": 2.0136363636363637
+          },
+          {
+            "buttons": 1,
+            "clickCount": 1,
+            "pan": {
+              "x": -15.545454545454504,
+              "y": 196.09090909090907
+            },
+            "renderedFramesBefore": 16,
+            "screen": {
+              "x": 115.34091186523438,
+              "y": 316.9090881347656
+            },
+            "selectionCountBefore": 1,
+            "serial": 4,
+            "timestamp": 14361,
+            "world": {
+              "x": 65.00000137776874,
+              "y": 59.999998622231246
+            },
+            "zoom": 2.0136363636363637
+          }
+        ],
+        "serial": 4,
+        "timestampUnit": "native monotonic milliseconds"
+      },
+      "zoom": 2.0136363636363637,
+      "pan": {
+        "x": -15.545454545454504,
+        "y": 196.09090909090907
+      },
+      "tool": "Select",
+      "chrome": {
+        "CanvasHost": {
+          "x": 296,
+          "y": 0,
+          "width": 1016,
+          "height": 1000,
+          "visible": true,
+          "enabled": true,
+          "measureValid": true,
+          "arrangeValid": true,
+          "focused": false,
+          "focusWithin": true
+        },
+        "InlineTextHost": null,
+        "InlineTextBox": {
+          "x": 361.00000000000006,
+          "y": 276.6363636363636,
+          "width": 440,
+          "height": 103,
+          "visible": true,
+          "enabled": true,
+          "measureValid": true,
+          "arrangeValid": true,
+          "focused": true,
+          "focusWithin": true
+        },
+        "ModalBackdrop": {
+          "x": 0,
+          "y": 0,
+          "width": 1600,
+          "height": 1000,
+          "visible": false,
+          "enabled": true,
+          "measureValid": true,
+          "arrangeValid": true,
+          "focused": false,
+          "focusWithin": false
+        },
+        "PageInspector": {
+          "x": 1329,
+          "y": 160,
+          "width": 255,
+          "height": 376,
+          "visible": false,
+          "enabled": true,
+          "measureValid": true,
+          "arrangeValid": true,
+          "focused": false,
+          "focusWithin": false
+        },
+        "DesignInspector": {
+          "x": 1329,
+          "y": 210,
+          "width": 255,
+          "height": 1707,
+          "visible": true,
+          "enabled": true,
+          "measureValid": true,
+          "arrangeValid": true,
+          "focused": false,
+          "focusWithin": false
+        }
+      }
+    },
+    "actualText": "A🦀 first\nשלום second\nLast"
+  }
+]

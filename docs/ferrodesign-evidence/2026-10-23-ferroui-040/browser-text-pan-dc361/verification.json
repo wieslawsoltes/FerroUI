@@ -1,0 +1,137 @@
+{
+  "verified_at": "2026-10-23T15:49:30.072926+00:00",
+  "source_commit": "dc36199693472ac8297bafdaad6d4a0701acddf0",
+  "source_tree": "57c2625a948b9401b9517b2724b2715d8e7ca92b",
+  "report_sha256": "1ff4ca28531b63522b0f26bfddc400d50e81b9921e0c17e3f27964f9c761db49",
+  "frozen_harness_files_verified": 56,
+  "runtime_payloads_verified": 17,
+  "report_fingerprint_files_verified": 9,
+  "normal_statistics_recomputed_exactly": true,
+  "normal_samples_verified": 72,
+  "separate_trace_samples_verified": 12,
+  "all_normal_frame_and_presentation_deltas_one": true,
+  "all_normal_preparation_and_projection_deltas_zero": true,
+  "all_normal_visible_and_cached_nodes_150": true,
+  "trace_hashes_and_standalone_summaries_verified": true,
+  "browser_shutdown": {
+    "reason": "Text benchmark finished",
+    "processId": 275777,
+    "status": "closed",
+    "clientDisconnectAttempted": true,
+    "clientDisconnectCompleted": true,
+    "clientDisconnected": true,
+    "gracefulCloseCompleted": true,
+    "forcedKillAttempted": false,
+    "directKillAttempted": false,
+    "processExit": {
+      "observed": true,
+      "code": 0,
+      "signal": null
+    },
+    "errors": []
+  },
+  "owned_processes_after_exit": [],
+  "results": [
+    {
+      "mode": "Software2D",
+      "normal_samples": 36,
+      "separate_trace_samples": 6,
+      "statistics": {
+        "timing": {
+          "count": 36,
+          "medianMs": 13.574318500000118,
+          "p95Ms": 25.093112999998993,
+          "minMs": 8.157912999999098,
+          "maxMs": 33.89113200000065
+        },
+        "dispatchTiming": {
+          "count": 36,
+          "medianMs": 9.288042500000302,
+          "p95Ms": 16.22613000000092,
+          "minMs": 4.526855999998588,
+          "maxMs": 22.924417000000176
+        },
+        "frameObservationTiming": {
+          "count": 36,
+          "medianMs": 4.341434500000105,
+          "p95Ms": 10.796270999999251,
+          "minMs": 2.726195999999618,
+          "maxMs": 10.966715000000477
+        },
+        "presentationTiming": {
+          "count": 36,
+          "medianMs": 85.7083894999987,
+          "p95Ms": 147.30781899999965,
+          "minMs": 73.15317700000014,
+          "maxMs": 215.55636500000037
+        },
+        "settlingTiming": {
+          "count": 36,
+          "medianMs": 112.11504250000053,
+          "p95Ms": 263.3817089999993,
+          "minMs": 94.78265499999907,
+          "maxMs": 319.011579
+        }
+      },
+      "trace": {
+        "file": "current-Software2D-pan-trace.json",
+        "bytes": 2481256,
+        "sha256": "1a8ea30e8c0600dcbec71fc72b344df42061dbe90433bfe1782a03fcf76eac3e",
+        "streamTruncated": false,
+        "dataLossOccurred": false,
+        "peakBufferFraction": 0.02651512622833252
+      }
+    },
+    {
+      "mode": "WebGL2",
+      "normal_samples": 36,
+      "separate_trace_samples": 6,
+      "statistics": {
+        "timing": {
+          "count": 36,
+          "medianMs": 20.063320500001282,
+          "p95Ms": 762.637733999989,
+          "minMs": 4.595900000000256,
+          "maxMs": 776.8578669999988
+        },
+        "dispatchTiming": {
+          "count": 36,
+          "medianMs": 15.254487999998673,
+          "p95Ms": 700.7696739999956,
+          "minMs": 2.4053429999985383,
+          "maxMs": 724.4804530000038
+        },
+        "frameObservationTiming": {
+          "count": 36,
+          "medianMs": 5.158100500000728,
+          "p95Ms": 72.37446500000078,
+          "minMs": 2.190557000001718,
+          "maxMs": 122.84822800000256
+        },
+        "presentationTiming": {
+          "count": 36,
+          "medianMs": 91.49396049999632,
+          "p95Ms": 769.3246289999952,
+          "minMs": 70.3534359999976,
+          "maxMs": 779.3435200000022
+        },
+        "settlingTiming": {
+          "count": 36,
+          "medianMs": 1028.6194250000008,
+          "p95Ms": 1716.6494959999982,
+          "minMs": 95.41156700000283,
+          "maxMs": 1824.7970019999993
+        }
+      },
+      "trace": {
+        "file": "current-WebGL2-pan-trace.json",
+        "bytes": 2804290,
+        "sha256": "0b7508257769602eeec26a79a15b5bc001bc7e8fe8f01e4c96d05e5e72c78d8a",
+        "streamTruncated": false,
+        "dataLossOccurred": false,
+        "peakBufferFraction": 0.13162875175476074
+      }
+    }
+  ],
+  "scope": "Post-run verification and independent arithmetic recomputation. No additional browser workload was executed. Timing origins are defined by the frozen benchmark source; presentation and settled observations are cumulative from dispatch start, and are not display completion fences."
+}

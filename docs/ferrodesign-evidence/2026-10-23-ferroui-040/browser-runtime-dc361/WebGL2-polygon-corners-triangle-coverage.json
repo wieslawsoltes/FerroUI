@@ -1,0 +1,154 @@
+{
+  "scales": [
+    16,
+    32
+  ],
+  "stage": "complete",
+  "rawComparison": {
+    "width": 180,
+    "height": 160,
+    "pixels": 28800,
+    "differingOver12": 212,
+    "edgeCoverageDifferences": 212,
+    "oppositeOpaqueTransparent": 0,
+    "threshold128Differences": 37,
+    "maxAlphaDifference": 83,
+    "nativePartialPixels": 354,
+    "svgPartialPixels": 194,
+    "nativeAlphaArea": 8637.47451,
+    "svgAlphaArea": 8627.172549,
+    "absoluteAlphaAreaDifference": 28.160784,
+    "differenceBounds": {
+      "left": 27,
+      "top": 15,
+      "right": 152,
+      "bottom": 119
+    },
+    "quadrantDifferences": [
+      57,
+      65,
+      42,
+      48
+    ],
+    "nativeMirrorMax": {
+      "horizontal": 0,
+      "vertical": 255
+    },
+    "svgMirrorMax": {
+      "horizontal": 64,
+      "vertical": 255
+    },
+    "samples": [
+      {
+        "x": 86,
+        "y": 15,
+        "native": 43,
+        "svg": 0
+      },
+      {
+        "x": 87,
+        "y": 15,
+        "native": 89,
+        "svg": 64
+      },
+      {
+        "x": 88,
+        "y": 15,
+        "native": 113,
+        "svg": 128
+      },
+      {
+        "x": 91,
+        "y": 15,
+        "native": 113,
+        "svg": 64
+      },
+      {
+        "x": 92,
+        "y": 15,
+        "native": 89,
+        "svg": 64
+      },
+      {
+        "x": 93,
+        "y": 15,
+        "native": 43,
+        "svg": 0
+      },
+      {
+        "x": 142,
+        "y": 80,
+        "native": 73,
+        "svg": 128
+      },
+      {
+        "x": 36,
+        "y": 81,
+        "native": 13,
+        "svg": 0
+      },
+      {
+        "x": 37,
+        "y": 81,
+        "native": 225,
+        "svg": 191
+      },
+      {
+        "x": 142,
+        "y": 81,
+        "native": 225,
+        "svg": 255
+      },
+      {
+        "x": 143,
+        "y": 81,
+        "native": 13,
+        "svg": 0
+      },
+      {
+        "x": 36,
+        "y": 82,
+        "native": 149,
+        "svg": 128
+      }
+    ]
+  },
+  "convergence": {
+    "maxAlphaDifference": 3.30078125,
+    "absoluteAlphaAreaDifference": 0.83516,
+    "oppositeOpaqueTransparent": 0,
+    "maxAllowedAlphaDifference": 4,
+    "converged": true
+  },
+  "comparison": {
+    "width": 180,
+    "height": 160,
+    "pixels": 28800,
+    "differingOver12": 0,
+    "edgeCoverageDifferences": 0,
+    "oppositeOpaqueTransparent": 0,
+    "threshold128Differences": 4,
+    "maxAlphaDifference": 12,
+    "nativePartialPixels": 354,
+    "svgPartialPixels": 356,
+    "nativeAlphaArea": 8637.47451,
+    "svgAlphaArea": 8640.313725,
+    "absoluteAlphaAreaDifference": 2.980392,
+    "differenceBounds": null,
+    "quadrantDifferences": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "nativeMirrorMax": {
+      "horizontal": 0,
+      "vertical": 255
+    },
+    "svgMirrorMax": {
+      "horizontal": 1,
+      "vertical": 255
+    },
+    "samples": []
+  }
+}

@@ -1,0 +1,3131 @@
+[
+  {
+    "label": "Linear axis insertion",
+    "before": {
+      "renderedFrames": 67,
+      "sceneFrames": 97,
+      "documentRevision": 39,
+      "historyLength": 8,
+      "selection": [
+        2
+      ],
+      "gradientEdit": {
+        "active": false,
+        "axis": {
+          "end": {
+            "x": 320,
+            "y": 160
+          },
+          "start": {
+            "x": 80,
+            "y": 160
+          }
+        },
+        "fill": 0,
+        "gradientKind": "linear",
+        "handles": [
+          {
+            "kind": "start",
+            "local": {
+              "x": 0,
+              "y": 80
+            },
+            "markerScreen": {
+              "x": 65,
+              "y": 478
+            },
+            "markerWorld": {
+              "x": 80,
+              "y": 160
+            },
+            "offset": null,
+            "screen": {
+              "x": 65,
+              "y": 478
+            },
+            "stop": null,
+            "world": {
+              "x": 80,
+              "y": 160
+            }
+          },
+          {
+            "kind": "end",
+            "local": {
+              "x": 240,
+              "y": 80
+            },
+            "markerScreen": {
+              "x": 951.0000000000001,
+              "y": 478
+            },
+            "markerWorld": {
+              "x": 320,
+              "y": 160
+            },
+            "offset": null,
+            "screen": {
+              "x": 951.0000000000001,
+              "y": 478
+            },
+            "stop": null,
+            "world": {
+              "x": 320,
+              "y": 160
+            }
+          },
+          {
+            "kind": "stop",
+            "local": {
+              "x": 0,
+              "y": 80
+            },
+            "markerScreen": {
+              "x": 65,
+              "y": 494
+            },
+            "markerWorld": {
+              "x": 80,
+              "y": 164.33408577878106
+            },
+            "offset": 0,
+            "screen": {
+              "x": 65,
+              "y": 478
+            },
+            "stop": 0,
+            "world": {
+              "x": 80,
+              "y": 160
+            }
+          },
+          {
+            "kind": "stop",
+            "local": {
+              "x": 240,
+              "y": 80
+            },
+            "markerScreen": {
+              "x": 951.0000000000001,
+              "y": 494
+            },
+            "markerWorld": {
+              "x": 320,
+              "y": 164.33408577878106
+            },
+            "offset": 1,
+            "screen": {
+              "x": 951.0000000000001,
+              "y": 478
+            },
+            "stop": 1,
+            "world": {
+              "x": 320,
+              "y": 160
+            }
+          }
+        ],
+        "hover": null,
+        "node": 2,
+        "ring": [],
+        "selected": null
+      },
+      "pointerPresses": {
+        "capacity": 8,
+        "entries": [
+          {
+            "buttons": 1,
+            "clickCount": 1,
+            "pan": {
+              "x": -204.75297290629612,
+              "y": 133.42146208821845
+            },
+            "renderedFramesBefore": 25,
+            "screen": {
+              "x": 343.57598876953125,
+              "y": 493.7926330566406
+            },
+            "selectionCountBefore": 1,
+            "serial": 5,
+            "timestamp": 5433,
+            "world": {
+              "x": 327.3597320757191,
+              "y": 215.1464143266983
+            },
+            "zoom": 1.6750043085598494
+          },
+          {
+            "buttons": 1,
+            "clickCount": 1,
+            "pan": {
+              "x": -204.75297290629612,
+              "y": 133.42146208821845
+            },
+            "renderedFramesBefore": 27,
+            "screen": {
+              "x": 343.57598876953125,
+              "y": 493.7926330566406
+            },
+            "selectionCountBefore": 1,
+            "serial": 6,
+            "timestamp": 5816,
+            "world": {
+              "x": 327.3597320757191,
+              "y": 215.1464143266983
+            },
+            "zoom": 1.6750043085598494
+          },
+          {
+            "buttons": 1,
+            "clickCount": 1,
+            "pan": {
+              "x": -204.75297290629612,
+              "y": 133.42146208821845
+            },
+            "renderedFramesBefore": 31,
+            "screen": {
+              "x": 339.38873291015625,
+              "y": 453.36773681640625
+            },
+            "selectionCountBefore": 1,
+            "serial": 7,
+            "timestamp": 6346,
+            "world": {
+              "x": 324.85988426161094,
+              "y": 191.01220999441736
+            },
+            "zoom": 1.6750043085598494
+          },
+          {
+            "buttons": 1,
+            "clickCount": 1,
+            "pan": {
+              "x": -204.75297290629612,
+              "y": 133.42146208821845
+            },
+            "renderedFramesBefore": 37,
+            "screen": {
+              "x": 251.81304931640625,
+              "y": 435.4602966308594
+            },
+            "selectionCountBefore": 1,
+            "serial": 8,
+            "timestamp": 7464,
+            "world": {
+              "x": 272.57602854481786,
+              "y": 180.3212284285589
+            },
+            "zoom": 1.6750043085598494
+          },
+          {
+            "buttons": 1,
+            "clickCount": 1,
+            "pan": {
+              "x": -204.75297290629612,
+              "y": 133.42146208821845
+            },
+            "renderedFramesBefore": 43,
+            "screen": {
+              "x": 423.75897216796875,
+              "y": 486.9507751464844
+            },
+            "selectionCountBefore": 1,
+            "serial": 9,
+            "timestamp": 8317,
+            "world": {
+              "x": 375.2300467899409,
+              "y": 211.06173354397316
+            },
+            "zoom": 1.6750043085598494
+          },
+          {
+            "buttons": 1,
+            "clickCount": 1,
+            "pan": {
+              "x": -204.75297290629612,
+              "y": 133.42146208821845
+            },
+            "renderedFramesBefore": 49,
+            "screen": {
+              "x": 150.9151611328125,
+              "y": 422.779052734375
+            },
+            "selectionCountBefore": 1,
+            "serial": 10,
+            "timestamp": 9740,
+            "world": {
+              "x": 212.33863830768783,
+              "y": 172.75035602442307
+            },
+            "zoom": 1.6750043085598494
+          },
+          {
+            "buttons": 1,
+            "clickCount": 1,
+            "pan": {
+              "x": -204.75297290629612,
+              "y": 133.42146208821845
+            },
+            "renderedFramesBefore": 56,
+            "screen": {
+              "x": 501.2176513671875,
+              "y": 494.40863037109375
+            },
+            "selectionCountBefore": 1,
+            "serial": 11,
+            "timestamp": 11138,
+            "world": {
+              "x": 421.4739154196383,
+              "y": 215.5141729714404
+            },
+            "zoom": 1.6750043085598494
+          },
+          {
+            "buttons": 1,
+            "clickCount": 1,
+            "pan": {
+              "x": -230.33333333333337,
+              "y": -112.66666666666674
+            },
+            "renderedFramesBefore": 64,
+            "screen": {
+              "x": 508,
+              "y": 478
+            },
+            "selectionCountBefore": 0,
+            "serial": 12,
+            "timestamp": 12290,
+            "world": {
+              "x": 200,
+              "y": 160
+            },
+            "zoom": 3.691666666666667
+          }
+        ],
+        "serial": 12,
+        "timestampUnit": "native monotonic milliseconds"
+      },
+      "zoom": 3.691666666666667,
+      "pan": {
+        "x": -230.33333333333337,
+        "y": -112.66666666666674
+      },
+      "chrome": {
+        "CanvasHost": {
+          "arrangeValid": true,
+          "enabled": true,
+          "focusWithin": true,
+          "focused": false,
+          "height": 1000,
+          "measureValid": true,
+          "pointerOver": false,
+          "visible": true,
+          "width": 1016,
+          "x": 296,
+          "y": 0
+        }
+      }
+    },
+    "requested": {
+      "world": {
+        "x": 140,
+        "y": 160
+      },
+      "page": {
+        "x": 582.5,
+        "y": 478
+      }
+    },
+    "action": {
+      "clock": "Node performance milliseconds",
+      "startedAtMs": 72651.83873,
+      "endedAtMs": 72657.769477,
+      "durationMs": 5.930746999991243
+    },
+    "observation": {
+      "clock": "page performance milliseconds",
+      "startedAtMs": 13704.300000000745,
+      "endedAtMs": 13712.800000000745,
+      "events": [
+        {
+          "type": "pointerdown",
+          "phase": "capture",
+          "trusted": true,
+          "eventTimeMs": 13706.89999999851,
+          "observedAtMs": 13707.800000000745,
+          "detail": 0,
+          "button": 0,
+          "buttons": 1,
+          "key": null,
+          "code": null,
+          "ctrlKey": false,
+          "metaKey": false,
+          "altKey": false,
+          "shiftKey": false,
+          "inputType": null,
+          "data": null,
+          "isComposing": false,
+          "defaultPrevented": false,
+          "clipboardText": null,
+          "pointerId": 1,
+          "pointerType": "mouse",
+          "x": 582.5,
+          "y": 478,
+          "offsetX": 582.5,
+          "offsetY": 478,
+          "target": {
+            "tag": "DIV",
+            "className": "ferroui-native-host"
+          }
+        },
+        {
+          "type": "pointerdown",
+          "phase": "bubble",
+          "trusted": true,
+          "eventTimeMs": 13706.89999999851,
+          "observedAtMs": 13708.300000000745,
+          "detail": 0,
+          "button": 0,
+          "buttons": 1,
+          "key": null,
+          "code": null,
+          "ctrlKey": false,
+          "metaKey": false,
+          "altKey": false,
+          "shiftKey": false,
+          "inputType": null,
+          "data": null,
+          "isComposing": false,
+          "defaultPrevented": true,
+          "clipboardText": null,
+          "pointerId": 1,
+          "pointerType": "mouse",
+          "x": 582.5,
+          "y": 478,
+          "offsetX": 582.5,
+          "offsetY": 478,
+          "target": {
+            "tag": "DIV",
+            "className": "ferroui-native-host"
+          }
+        },
+        {
+          "type": "pointerup",
+          "phase": "capture",
+          "trusted": true,
+          "eventTimeMs": 13707,
+          "observedAtMs": 13708.300000000745,
+          "detail": 0,
+          "button": 0,
+          "buttons": 0,
+          "key": null,
+          "code": null,
+          "ctrlKey": false,
+          "metaKey": false,
+          "altKey": false,
+          "shiftKey": false,
+          "inputType": null,
+          "data": null,
+          "isComposing": false,
+          "defaultPrevented": false,
+          "clipboardText": null,
+          "pointerId": 1,
+          "pointerType": "mouse",
+          "x": 582.5,
+          "y": 478,
+          "offsetX": 582.5,
+          "offsetY": 478,
+          "target": {
+            "tag": "MAIN",
+            "className": "ferroui-container"
+          }
+        },
+        {
+          "type": "pointerup",
+          "phase": "bubble",
+          "trusted": true,
+          "eventTimeMs": 13707,
+          "observedAtMs": 13708.89999999851,
+          "detail": 0,
+          "button": 0,
+          "buttons": 0,
+          "key": null,
+          "code": null,
+          "ctrlKey": false,
+          "metaKey": false,
+          "altKey": false,
+          "shiftKey": false,
+          "inputType": null,
+          "data": null,
+          "isComposing": false,
+          "defaultPrevented": true,
+          "clipboardText": null,
+          "pointerId": 1,
+          "pointerType": "mouse",
+          "x": 582.5,
+          "y": 478,
+          "offsetX": 582.5,
+          "offsetY": 478,
+          "target": {
+            "tag": "MAIN",
+            "className": "ferroui-container"
+          }
+        },
+        {
+          "type": "click",
+          "phase": "capture",
+          "trusted": true,
+          "eventTimeMs": 13707,
+          "observedAtMs": 13708.89999999851,
+          "detail": 1,
+          "button": 0,
+          "buttons": 0,
+          "key": null,
+          "code": null,
+          "ctrlKey": false,
+          "metaKey": false,
+          "altKey": false,
+          "shiftKey": false,
+          "inputType": null,
+          "data": null,
+          "isComposing": false,
+          "defaultPrevented": false,
+          "clipboardText": null,
+          "pointerId": 1,
+          "pointerType": "mouse",
+          "x": 582,
+          "y": 478,
+          "offsetX": 583,
+          "offsetY": 478,
+          "target": {
+            "tag": "MAIN",
+            "className": "ferroui-container"
+          }
+        },
+        {
+          "type": "click",
+          "phase": "bubble",
+          "trusted": true,
+          "eventTimeMs": 13707,
+          "observedAtMs": 13708.89999999851,
+          "detail": 1,
+          "button": 0,
+          "buttons": 0,
+          "key": null,
+          "code": null,
+          "ctrlKey": false,
+          "metaKey": false,
+          "altKey": false,
+          "shiftKey": false,
+          "inputType": null,
+          "data": null,
+          "isComposing": false,
+          "defaultPrevented": false,
+          "clipboardText": null,
+          "pointerId": 1,
+          "pointerType": "mouse",
+          "x": 582,
+          "y": 478,
+          "offsetX": 583,
+          "offsetY": 478,
+          "target": {
+            "tag": "MAIN",
+            "className": "ferroui-container"
+          }
+        },
+        {
+          "type": "pointerdown",
+          "phase": "capture",
+          "trusted": true,
+          "eventTimeMs": 13707,
+          "observedAtMs": 13709,
+          "detail": 0,
+          "button": 0,
+          "buttons": 1,
+          "key": null,
+          "code": null,
+          "ctrlKey": false,
+          "metaKey": false,
+          "altKey": false,
+          "shiftKey": false,
+          "inputType": null,
+          "data": null,
+          "isComposing": false,
+          "defaultPrevented": false,
+          "clipboardText": null,
+          "pointerId": 1,
+          "pointerType": "mouse",
+          "x": 582.5,
+          "y": 478,
+          "offsetX": 582.5,
+          "offsetY": 478,
+          "target": {
+            "tag": "DIV",
+            "className": "ferroui-native-host"
+          }
+        },
+        {
+          "type": "pointerdown",
+          "phase": "bubble",
+          "trusted": true,
+          "eventTimeMs": 13707,
+          "observedAtMs": 13709.099999997765,
+          "detail": 0,
+          "button": 0,
+          "buttons": 1,
+          "key": null,
+          "code": null,
+          "ctrlKey": false,
+          "metaKey": false,
+          "altKey": false,
+          "shiftKey": false,
+          "inputType": null,
+          "data": null,
+          "isComposing": false,
+          "defaultPrevented": true,
+          "clipboardText": null,
+          "pointerId": 1,
+          "pointerType": "mouse",
+          "x": 582.5,
+          "y": 478,
+          "offsetX": 582.5,
+          "offsetY": 478,
+          "target": {
+            "tag": "DIV",
+            "className": "ferroui-native-host"
+          }
+        },
+        {
+          "type": "pointerup",
+          "phase": "capture",
+          "trusted": true,
+          "eventTimeMs": 13707,
+          "observedAtMs": 13709.300000000745,
+          "detail": 0,
+          "button": 0,
+          "buttons": 0,
+          "key": null,
+          "code": null,
+          "ctrlKey": false,
+          "metaKey": false,
+          "altKey": false,
+          "shiftKey": false,
+          "inputType": null,
+          "data": null,
+          "isComposing": false,
+          "defaultPrevented": false,
+          "clipboardText": null,
+          "pointerId": 1,
+          "pointerType": "mouse",
+          "x": 582.5,
+          "y": 478,
+          "offsetX": 582.5,
+          "offsetY": 478,
+          "target": {
+            "tag": "MAIN",
+            "className": "ferroui-container"
+          }
+        },
+        {
+          "type": "pointerup",
+          "phase": "bubble",
+          "trusted": true,
+          "eventTimeMs": 13707,
+          "observedAtMs": 13710,
+          "detail": 0,
+          "button": 0,
+          "buttons": 0,
+          "key": null,
+          "code": null,
+          "ctrlKey": false,
+          "metaKey": false,
+          "altKey": false,
+          "shiftKey": false,
+          "inputType": null,
+          "data": null,
+          "isComposing": false,
+          "defaultPrevented": true,
+          "clipboardText": null,
+          "pointerId": 1,
+          "pointerType": "mouse",
+          "x": 582.5,
+          "y": 478,
+          "offsetX": 582.5,
+          "offsetY": 478,
+          "target": {
+            "tag": "MAIN",
+            "className": "ferroui-container"
+          }
+        },
+        {
+          "type": "click",
+          "phase": "capture",
+          "trusted": true,
+          "eventTimeMs": 13707,
+          "observedAtMs": 13710,
+          "detail": 2,
+          "button": 0,
+          "buttons": 0,
+          "key": null,
+          "code": null,
+          "ctrlKey": false,
+          "metaKey": false,
+          "altKey": false,
+          "shiftKey": false,
+          "inputType": null,
+          "data": null,
+          "isComposing": false,
+          "defaultPrevented": false,
+          "clipboardText": null,
+          "pointerId": 1,
+          "pointerType": "mouse",
+          "x": 582,
+          "y": 478,
+          "offsetX": 583,
+          "offsetY": 478,
+          "target": {
+            "tag": "MAIN",
+            "className": "ferroui-container"
+          }
+        },
+        {
+          "type": "click",
+          "phase": "bubble",
+          "trusted": true,
+          "eventTimeMs": 13707,
+          "observedAtMs": 13710.099999997765,
+          "detail": 2,
+          "button": 0,
+          "buttons": 0,
+          "key": null,
+          "code": null,
+          "ctrlKey": false,
+          "metaKey": false,
+          "altKey": false,
+          "shiftKey": false,
+          "inputType": null,
+          "data": null,
+          "isComposing": false,
+          "defaultPrevented": false,
+          "clipboardText": null,
+          "pointerId": 1,
+          "pointerType": "mouse",
+          "x": 582,
+          "y": 478,
+          "offsetX": 583,
+          "offsetY": 478,
+          "target": {
+            "tag": "MAIN",
+            "className": "ferroui-container"
+          }
+        },
+        {
+          "type": "dblclick",
+          "phase": "capture",
+          "trusted": true,
+          "eventTimeMs": 13710.099999997765,
+          "observedAtMs": 13710.099999997765,
+          "detail": 2,
+          "button": 0,
+          "buttons": 0,
+          "key": null,
+          "code": null,
+          "ctrlKey": false,
+          "metaKey": false,
+          "altKey": false,
+          "shiftKey": false,
+          "inputType": null,
+          "data": null,
+          "isComposing": false,
+          "defaultPrevented": false,
+          "clipboardText": null,
+          "pointerId": null,
+          "pointerType": null,
+          "x": 582,
+          "y": 478,
+          "offsetX": 582,
+          "offsetY": 478,
+          "target": {
+            "tag": "MAIN",
+            "className": "ferroui-container"
+          }
+        },
+        {
+          "type": "dblclick",
+          "phase": "bubble",
+          "trusted": true,
+          "eventTimeMs": 13710.099999997765,
+          "observedAtMs": 13710.099999997765,
+          "detail": 2,
+          "button": 0,
+          "buttons": 0,
+          "key": null,
+          "code": null,
+          "ctrlKey": false,
+          "metaKey": false,
+          "altKey": false,
+          "shiftKey": false,
+          "inputType": null,
+          "data": null,
+          "isComposing": false,
+          "defaultPrevented": false,
+          "clipboardText": null,
+          "pointerId": null,
+          "pointerType": null,
+          "x": 582,
+          "y": 478,
+          "offsetX": 582,
+          "offsetY": 478,
+          "target": {
+            "tag": "MAIN",
+            "className": "ferroui-container"
+          }
+        }
+      ],
+      "droppedEvents": 0,
+      "longTaskSupported": true,
+      "longTasks": [],
+      "droppedLongTasks": 0
+    },
+    "after": {
+      "renderedFrames": 68,
+      "sceneFrames": 97,
+      "documentRevision": 42,
+      "historyLength": 9,
+      "selection": [
+        2
+      ],
+      "gradientEdit": {
+        "active": false,
+        "axis": {
+          "end": {
+            "x": 320,
+            "y": 160
+          },
+          "start": {
+            "x": 80,
+            "y": 160
+          }
+        },
+        "fill": 0,
+        "gradientKind": "linear",
+        "handles": [
+          {
+            "kind": "start",
+            "local": {
+              "x": 0,
+              "y": 80
+            },
+            "markerScreen": {
+              "x": 65,
+              "y": 478
+            },
+            "markerWorld": {
+              "x": 80,
+              "y": 160
+            },
+            "offset": null,
+            "screen": {
+              "x": 65,
+              "y": 478
+            },
+            "stop": null,
+            "world": {
+              "x": 80,
+              "y": 160
+            }
+          },
+          {
+            "kind": "end",
+            "local": {
+              "x": 240,
+              "y": 80
+            },
+            "markerScreen": {
+              "x": 951.0000000000001,
+              "y": 478
+            },
+            "markerWorld": {
+              "x": 320,
+              "y": 160
+            },
+            "offset": null,
+            "screen": {
+              "x": 951.0000000000001,
+              "y": 478
+            },
+            "stop": null,
+            "world": {
+              "x": 320,
+              "y": 160
+            }
+          },
+          {
+            "kind": "stop",
+            "local": {
+              "x": 0,
+              "y": 80
+            },
+            "markerScreen": {
+              "x": 65,
+              "y": 494
+            },
+            "markerWorld": {
+              "x": 80,
+              "y": 164.33408577878106
+            },
+            "offset": 0,
+            "screen": {
+              "x": 65,
+              "y": 478
+            },
+            "stop": 0,
+            "world": {
+              "x": 80,
+              "y": 160
+            }
+          },
+          {
+            "kind": "stop",
+            "local": {
+              "x": 240,
+              "y": 80
+            },
+            "markerScreen": {
+              "x": 951.0000000000001,
+              "y": 494
+            },
+            "markerWorld": {
+              "x": 320,
+              "y": 164.33408577878106
+            },
+            "offset": 1,
+            "screen": {
+              "x": 951.0000000000001,
+              "y": 478
+            },
+            "stop": 1,
+            "world": {
+              "x": 320,
+              "y": 160
+            }
+          },
+          {
+            "kind": "stop",
+            "local": {
+              "x": 60,
+              "y": 80
+            },
+            "markerScreen": {
+              "x": 286.5,
+              "y": 494
+            },
+            "markerWorld": {
+              "x": 140,
+              "y": 164.33408577878106
+            },
+            "offset": 0.25,
+            "screen": {
+              "x": 286.5,
+              "y": 478
+            },
+            "stop": 2,
+            "world": {
+              "x": 140,
+              "y": 160
+            }
+          }
+        ],
+        "hover": null,
+        "node": 2,
+        "ring": [],
+        "selected": {
+          "kind": "stop",
+          "stop": 2
+        }
+      },
+      "pointerPresses": {
+        "capacity": 8,
+        "entries": [
+          {
+            "buttons": 1,
+            "clickCount": 1,
+            "pan": {
+              "x": -204.75297290629612,
+              "y": 133.42146208821845
+            },
+            "renderedFramesBefore": 31,
+            "screen": {
+              "x": 339.38873291015625,
+              "y": 453.36773681640625
+            },
+            "selectionCountBefore": 1,
+            "serial": 7,
+            "timestamp": 6346,
+            "world": {
+              "x": 324.85988426161094,
+              "y": 191.01220999441736
+            },
+            "zoom": 1.6750043085598494
+          },
+          {
+            "buttons": 1,
+            "clickCount": 1,
+            "pan": {
+              "x": -204.75297290629612,
+              "y": 133.42146208821845
+            },
+            "renderedFramesBefore": 37,
+            "screen": {
+              "x": 251.81304931640625,
+              "y": 435.4602966308594
+            },
+            "selectionCountBefore": 1,
+            "serial": 8,
+            "timestamp": 7464,
+            "world": {
+              "x": 272.57602854481786,
+              "y": 180.3212284285589
+            },
+            "zoom": 1.6750043085598494
+          },
+          {
+            "buttons": 1,
+            "clickCount": 1,
+            "pan": {
+              "x": -204.75297290629612,
+              "y": 133.42146208821845
+            },
+            "renderedFramesBefore": 43,
+            "screen": {
+              "x": 423.75897216796875,
+              "y": 486.9507751464844
+            },
+            "selectionCountBefore": 1,
+            "serial": 9,
+            "timestamp": 8317,
+            "world": {
+              "x": 375.2300467899409,
+              "y": 211.06173354397316
+            },
+            "zoom": 1.6750043085598494
+          },
+          {
+            "buttons": 1,
+            "clickCount": 1,
+            "pan": {
+              "x": -204.75297290629612,
+              "y": 133.42146208821845
+            },
+            "renderedFramesBefore": 49,
+            "screen": {
+              "x": 150.9151611328125,
+              "y": 422.779052734375
+            },
+            "selectionCountBefore": 1,
+            "serial": 10,
+            "timestamp": 9740,
+            "world": {
+              "x": 212.33863830768783,
+              "y": 172.75035602442307
+            },
+            "zoom": 1.6750043085598494
+          },
+          {
+            "buttons": 1,
+            "clickCount": 1,
+            "pan": {
+              "x": -204.75297290629612,
+              "y": 133.42146208821845
+            },
+            "renderedFramesBefore": 56,
+            "screen": {
+              "x": 501.2176513671875,
+              "y": 494.40863037109375
+            },
+            "selectionCountBefore": 1,
+            "serial": 11,
+            "timestamp": 11138,
+            "world": {
+              "x": 421.4739154196383,
+              "y": 215.5141729714404
+            },
+            "zoom": 1.6750043085598494
+          },
+          {
+            "buttons": 1,
+            "clickCount": 1,
+            "pan": {
+              "x": -230.33333333333337,
+              "y": -112.66666666666674
+            },
+            "renderedFramesBefore": 64,
+            "screen": {
+              "x": 508,
+              "y": 478
+            },
+            "selectionCountBefore": 0,
+            "serial": 12,
+            "timestamp": 12290,
+            "world": {
+              "x": 200,
+              "y": 160
+            },
+            "zoom": 3.691666666666667
+          },
+          {
+            "buttons": 1,
+            "clickCount": 1,
+            "pan": {
+              "x": -230.33333333333337,
+              "y": -112.66666666666674
+            },
+            "renderedFramesBefore": 67,
+            "screen": {
+              "x": 286.5,
+              "y": 478
+            },
+            "selectionCountBefore": 1,
+            "serial": 13,
+            "timestamp": 13304,
+            "world": {
+              "x": 140,
+              "y": 160
+            },
+            "zoom": 3.691666666666667
+          },
+          {
+            "buttons": 1,
+            "clickCount": 2,
+            "pan": {
+              "x": -230.33333333333337,
+              "y": -112.66666666666674
+            },
+            "renderedFramesBefore": 67,
+            "screen": {
+              "x": 286.5,
+              "y": 478
+            },
+            "selectionCountBefore": 1,
+            "serial": 14,
+            "timestamp": 13304,
+            "world": {
+              "x": 140,
+              "y": 160
+            },
+            "zoom": 3.691666666666667
+          }
+        ],
+        "serial": 14,
+        "timestampUnit": "native monotonic milliseconds"
+      },
+      "zoom": 3.691666666666667,
+      "pan": {
+        "x": -230.33333333333337,
+        "y": -112.66666666666674
+      },
+      "chrome": {
+        "CanvasHost": {
+          "arrangeValid": true,
+          "enabled": true,
+          "focusWithin": true,
+          "focused": false,
+          "height": 1000,
+          "measureValid": true,
+          "pointerOver": true,
+          "visible": true,
+          "width": 1016,
+          "x": 296,
+          "y": 0
+        }
+      }
+    },
+    "nativePresses": [
+      {
+        "buttons": 1,
+        "clickCount": 1,
+        "pan": {
+          "x": -230.33333333333337,
+          "y": -112.66666666666674
+        },
+        "renderedFramesBefore": 67,
+        "screen": {
+          "x": 286.5,
+          "y": 478
+        },
+        "selectionCountBefore": 1,
+        "serial": 13,
+        "timestamp": 13304,
+        "world": {
+          "x": 140,
+          "y": 160
+        },
+        "zoom": 3.691666666666667
+      },
+      {
+        "buttons": 1,
+        "clickCount": 2,
+        "pan": {
+          "x": -230.33333333333337,
+          "y": -112.66666666666674
+        },
+        "renderedFramesBefore": 67,
+        "screen": {
+          "x": 286.5,
+          "y": 478
+        },
+        "selectionCountBefore": 1,
+        "serial": 14,
+        "timestamp": 13304,
+        "world": {
+          "x": 140,
+          "y": 160
+        },
+        "zoom": 3.691666666666667
+      }
+    ],
+    "timing": {
+      "domPressIntervalsMs": [
+        0.10000000149011612
+      ],
+      "observedPressIntervalsMs": [
+        1.199999999254942
+      ],
+      "nativePressIntervalsMs": [
+        0
+      ],
+      "domDeliveryAgesMs": [
+        0.9000000022351742,
+        2
+      ]
+    },
+    "event": {
+      "type": "pointerdown",
+      "phase": "capture",
+      "trusted": true,
+      "eventTimeMs": 13707,
+      "observedAtMs": 13709,
+      "detail": 0,
+      "button": 0,
+      "buttons": 1,
+      "key": null,
+      "code": null,
+      "ctrlKey": false,
+      "metaKey": false,
+      "altKey": false,
+      "shiftKey": false,
+      "inputType": null,
+      "data": null,
+      "isComposing": false,
+      "defaultPrevented": false,
+      "clipboardText": null,
+      "pointerId": 1,
+      "pointerType": "mouse",
+      "x": 582.5,
+      "y": 478,
+      "offsetX": 582.5,
+      "offsetY": 478,
+      "target": {
+        "tag": "DIV",
+        "className": "ferroui-native-host"
+      }
+    }
+  },
+  {
+    "label": "Angular ring insertion",
+    "before": {
+      "renderedFrames": 137,
+      "sceneFrames": 199,
+      "documentRevision": 83,
+      "historyLength": 18,
+      "selection": [
+        2
+      ],
+      "gradientEdit": {
+        "active": false,
+        "axis": {
+          "end": {
+            "x": 294.145852464119,
+            "y": 149.65264762398243
+          },
+          "start": {
+            "x": 328.89269404153225,
+            "y": 205.71800093341037
+          }
+        },
+        "fill": 0,
+        "gradientKind": "angular",
+        "handles": [
+          {
+            "kind": "start",
+            "local": {
+              "x": 120,
+              "y": 80
+            },
+            "markerScreen": {
+              "x": 508,
+              "y": 477.9999999999999
+            },
+            "markerWorld": {
+              "x": 328.89269404153225,
+              "y": 205.71800093341037
+            },
+            "offset": null,
+            "screen": {
+              "x": 508,
+              "y": 477.9999999999999
+            },
+            "stop": null,
+            "world": {
+              "x": 328.89269404153225,
+              "y": 205.71800093341037
+            }
+          },
+          {
+            "kind": "end",
+            "local": {
+              "x": 175.5726642105082,
+              "y": 22.45281073287679
+            },
+            "markerScreen": {
+              "x": 416.2921266559732,
+              "y": 330.0258507860643
+            },
+            "markerWorld": {
+              "x": 294.145852464119,
+              "y": 149.65264762398243
+            },
+            "offset": null,
+            "screen": {
+              "x": 416.2921266559732,
+              "y": 330.0258507860643
+            },
+            "stop": null,
+            "world": {
+              "x": 294.145852464119,
+              "y": 149.65264762398243
+            }
+          },
+          {
+            "kind": "stop",
+            "local": {
+              "x": 175.5726642105082,
+              "y": 22.45281073287679
+            },
+            "markerScreen": {
+              "x": 407.86348863454145,
+              "y": 316.42592206920426
+            },
+            "markerWorld": {
+              "x": 290.9523583903288,
+              "y": 144.49982321144654
+            },
+            "offset": 0,
+            "screen": {
+              "x": 416.2921266559732,
+              "y": 330.0258507860643
+            },
+            "stop": 0,
+            "world": {
+              "x": 294.145852464119,
+              "y": 149.65264762398243
+            }
+          },
+          {
+            "kind": "stop",
+            "local": {
+              "x": 64.4273357894918,
+              "y": 137.54718926712323
+            },
+            "markerScreen": {
+              "x": 608.1365113654583,
+              "y": 639.5740779307955
+            },
+            "markerWorld": {
+              "x": 366.83302969273564,
+              "y": 266.9361786553742
+            },
+            "offset": 0.5,
+            "screen": {
+              "x": 599.7078733440266,
+              "y": 625.9741492139354
+            },
+            "stop": 1,
+            "world": {
+              "x": 363.63953561894544,
+              "y": 261.7833542428383
+            }
+          },
+          {
+            "kind": "stop",
+            "local": {
+              "x": 40.01218444449401,
+              "y": 81.3961957808108
+            },
+            "markerScreen": {
+              "x": 753.4174181187499,
+              "y": 521.3519202721087
+            },
+            "markerWorld": {
+              "x": 421.87795077865644,
+              "y": 222.14344240145994
+            },
+            "offset": 0.625000008508813,
+            "screen": {
+              "x": 737.6613534703233,
+              "y": 518.5686799313181
+            },
+            "stop": 2,
+            "world": {
+              "x": 415.9081963588957,
+              "y": 221.08891122908688
+            }
+          },
+          {
+            "kind": "stop",
+            "local": {
+              "x": 175.5726642105082,
+              "y": 22.4528107328768
+            },
+            "markerScreen": {
+              "x": 399.4348506131097,
+              "y": 302.8259933523442
+            },
+            "markerWorld": {
+              "x": 287.7588643165386,
+              "y": 139.34699879891068
+            },
+            "offset": 1,
+            "screen": {
+              "x": 416.2921266559732,
+              "y": 330.0258507860643
+            },
+            "stop": 3,
+            "world": {
+              "x": 294.145852464119,
+              "y": 149.65264762398243
+            }
+          }
+        ],
+        "hover": null,
+        "node": 2,
+        "ring": [
+          {
+            "x": 603.9434394271939,
+            "y": 308.6193090333996
+          },
+          {
+            "x": 582.5062369502003,
+            "y": 305.9002648108321
+          },
+          {
+            "x": 560.4516523290715,
+            "y": 304.60729319460546
+          },
+          {
+            "x": 537.9624367977812,
+            "y": 304.7511081547364
+          },
+          {
+            "x": 515.2249430789062,
+            "y": 306.3305179951728
+          },
+          {
+            "x": 492.4275812062782,
+            "y": 309.3324352285619
+          },
+          {
+            "x": 469.7592573001049,
+            "y": 313.7319850232936
+          },
+          {
+            "x": 447.40780823136515,
+            "y": 319.4927113241878
+          },
+          {
+            "x": 425.55844514633964,
+            "y": 326.56687893884975
+          },
+          {
+            "x": 404.39221874872237,
+            "y": 334.89586908650784
+          },
+          {
+            "x": 384.0845190564705,
+            "y": 344.41066513169187
+          },
+          {
+            "x": 364.80362206487894,
+            "y": 355.03242447781065
+          },
+          {
+            "x": 346.7092953586864,
+            "y": 366.67313188173796
+          },
+          {
+            "x": 329.95147422755224,
+            "y": 379.23632877583617
+          },
+          {
+            "x": 314.6690192550261,
+            "y": 392.6179125540259
+          },
+          {
+            "x": 300.9885656760199,
+            "y": 406.7069991987661
+          },
+          {
+            "x": 289.0234740373693,
+            "y": 421.38684210094465
+          },
+          {
+            "x": 278.87289085664145,
+            "y": 436.5357994590494
+          },
+          {
+            "x": 270.6209270628656,
+            "y": 452.02834224144465
+          },
+          {
+            "x": 264.3359610268851,
+            "y": 467.73609435946184
+          },
+          {
+            "x": 260.07007195664187,
+            "y": 483.5288964320994
+          },
+          {
+            "x": 257.8586083524584,
+            "y": 499.27588432764685
+          },
+          {
+            "x": 257.7198950982299,
+            "y": 514.8465735450936
+          },
+          {
+            "x": 259.65508161566765,
+            "y": 530.1119404497987
+          },
+          {
+            "x": 263.6481323398258,
+            "y": 544.9454914039618
+          },
+          {
+            "x": 269.66595959484516,
+            "y": 559.2243109327437
+          },
+          {
+            "x": 277.6586977688544,
+            "y": 572.8300802406012
+          },
+          {
+            "x": 287.56011651613505,
+            "y": 585.65005763809
+          },
+          {
+            "x": 299.28816956262483,
+            "y": 597.57801275501
+          },
+          {
+            "x": 312.7456745671835,
+            "y": 608.5151067987089
+          },
+          {
+            "x": 327.82111840507764,
+            "y": 618.3707115634456
+          },
+          {
+            "x": 344.3895812008526,
+            "y": 627.0631604042457
+          },
+          {
+            "x": 362.31377145376155,
+            "y": 634.5204249524411
+          },
+          {
+            "x": 381.44516367837923,
+            "y": 640.680711965417
+          },
+          {
+            "x": 401.62522913355053,
+            "y": 645.4929753648823
+          },
+          {
+            "x": 422.6867494414656,
+            "y": 648.9173392207496
+          },
+          {
+            "x": 444.45520221180243,
+            "y": 650.9254281756504
+          },
+          {
+            "x": 466.7502071892168,
+            "y": 651.5006025720829
+          },
+          {
+            "x": 489.38702094094435,
+            "y": 650.6380963338547
+          },
+          {
+            "x": 512.1780676990696,
+            "y": 648.3450564592908
+          },
+          {
+            "x": 534.9344936724129,
+            "y": 644.640483798955
+          },
+          {
+            "x": 557.4677319485197,
+            "y": 639.5550756086172
+          },
+          {
+            "x": 579.5910650184849,
+            "y": 633.1309711821258
+          },
+          {
+            "x": 601.1211719770362,
+            "y": 625.4214026719463
+          },
+          {
+            "x": 621.879647577289,
+            "y": 616.490253990782
+          },
+          {
+            "x": 641.6944805528091,
+            "y": 606.4115314493536
+          },
+          {
+            "x": 660.4014789571381,
+            "y": 595.2687505168013
+          },
+          {
+            "x": 677.8456307099734,
+            "y": 583.1542437852056
+          },
+          {
+            "x": 693.8823880760831,
+            "y": 570.1683958726504
+          },
+          {
+            "x": 708.3788654333644,
+            "y": 556.418811604662
+          },
+          {
+            "x": 721.2149404049583,
+            "y": 542.019424366737
+          },
+          {
+            "x": 732.2842492310965,
+            "y": 527.0895520164279
+          },
+          {
+            "x": 741.4950681327114,
+            "y": 511.75290817799714
+          },
+          {
+            "x": 748.771073363557,
+            "y": 496.13657711236635
+          },
+          {
+            "x": 754.0519736528074,
+            "y": 480.36996065690414
+          },
+          {
+            "x": 757.2940097975159,
+            "y": 464.5837059610508
+          },
+          {
+            "x": 758.47031726515,
+            "y": 448.9086229028908
+          },
+          {
+            "x": 757.5711488015704,
+            "y": 433.47460015730655
+          },
+          {
+            "x": 754.6039551998479,
+            "y": 418.409528897512
+          },
+          {
+            "x": 749.5933235606449,
+            "y": 403.8382430485132
+          },
+          {
+            "x": 742.5807735557571,
+            "y": 389.88148487389105
+          },
+          {
+            "x": 733.6244133830357,
+            "y": 376.6549044673789
+          },
+          {
+            "x": 722.7984582635609,
+            "y": 364.2681014397642
+          },
+          {
+            "x": 710.1926154709454,
+            "y": 352.82371674199555
+          },
+          {
+            "x": 695.9113409886145,
+            "y": 342.41658214993777
+          },
+          {
+            "x": 680.0729739546298,
+            "y": 333.1329344584122
+          },
+          {
+            "x": 662.8087560663215,
+            "y": 325.049700895954
+          },
+          {
+            "x": 644.2617440702523,
+            "y": 318.2338616815709
+          },
+          {
+            "x": 624.5856243489606,
+            "y": 312.74189500555246
+          },
+          {
+            "x": 603.9434394271939,
+            "y": 308.61930903339965
+          }
+        ],
+        "selected": {
+          "kind": "stop",
+          "stop": 2
+        }
+      },
+      "pointerPresses": {
+        "capacity": 8,
+        "entries": [
+          {
+            "buttons": 1,
+            "clickCount": 1,
+            "pan": {
+              "x": -230.33333333333337,
+              "y": -112.66666666666674
+            },
+            "renderedFramesBefore": 90,
+            "screen": {
+              "x": 65,
+              "y": 494
+            },
+            "selectionCountBefore": 1,
+            "serial": 17,
+            "timestamp": 16055,
+            "world": {
+              "x": 80,
+              "y": 164.33408577878106
+            },
+            "zoom": 3.691666666666667
+          },
+          {
+            "buttons": 1,
+            "clickCount": 1,
+            "pan": {
+              "x": -360.0515453969506,
+              "y": -64.9546835834185
+            },
+            "renderedFramesBefore": 96,
+            "screen": {
+              "x": 508,
+              "y": 478
+            },
+            "selectionCountBefore": 0,
+            "serial": 18,
+            "timestamp": 17157,
+            "world": {
+              "x": 328.89269404153225,
+              "y": 205.7180009334104
+            },
+            "zoom": 2.63931537891606
+          },
+          {
+            "buttons": 1,
+            "clickCount": 1,
+            "pan": {
+              "x": -360.0515453969506,
+              "y": -64.9546835834185
+            },
+            "renderedFramesBefore": 100,
+            "screen": {
+              "x": 160.94345092773438,
+              "y": 421.5725402832031
+            },
+            "selectionCountBefore": 1,
+            "serial": 19,
+            "timestamp": 18786,
+            "world": {
+              "x": 197.39777992679763,
+              "y": 184.33841887680487
+            },
+            "zoom": 2.63931537891606
+          },
+          {
+            "buttons": 1,
+            "clickCount": 1,
+            "pan": {
+              "x": -360.0515453969506,
+              "y": -64.9546835834185
+            },
+            "renderedFramesBefore": 106,
+            "screen": {
+              "x": 508,
+              "y": 478
+            },
+            "selectionCountBefore": 1,
+            "serial": 20,
+            "timestamp": 19542,
+            "world": {
+              "x": 328.89269404153225,
+              "y": 205.7180009334104
+            },
+            "zoom": 2.63931537891606
+          },
+          {
+            "buttons": 1,
+            "clickCount": 1,
+            "pan": {
+              "x": -360.0515453969506,
+              "y": -64.9546835834185
+            },
+            "renderedFramesBefore": 113,
+            "screen": {
+              "x": 74.17929077148438,
+              "y": 407.4656677246094
+            },
+            "selectionCountBefore": 1,
+            "serial": 21,
+            "timestamp": 20642,
+            "world": {
+              "x": 164.5240427260986,
+              "y": 178.99352047198167
+            },
+            "zoom": 2.63931537891606
+          },
+          {
+            "buttons": 1,
+            "clickCount": 1,
+            "pan": {
+              "x": -360.0515453969506,
+              "y": -64.9546835834185
+            },
+            "renderedFramesBefore": 120,
+            "screen": {
+              "x": 508,
+              "y": 478
+            },
+            "selectionCountBefore": 0,
+            "serial": 22,
+            "timestamp": 21835,
+            "world": {
+              "x": 328.89269404153225,
+              "y": 205.7180009334104
+            },
+            "zoom": 2.63931537891606
+          },
+          {
+            "buttons": 1,
+            "clickCount": 1,
+            "pan": {
+              "x": -360.0515453969506,
+              "y": -64.9546835834185
+            },
+            "renderedFramesBefore": 124,
+            "screen": {
+              "x": 607.966796875,
+              "y": 309.3016357421875
+            },
+            "selectionCountBefore": 1,
+            "serial": 23,
+            "timestamp": 23146,
+            "world": {
+              "x": 366.76872722558295,
+              "y": 141.80052990836936
+            },
+            "zoom": 2.63931537891606
+          },
+          {
+            "buttons": 1,
+            "clickCount": 1,
+            "pan": {
+              "x": -360.0515453969506,
+              "y": -64.9546835834185
+            },
+            "renderedFramesBefore": 132,
+            "screen": {
+              "x": 616.5651245117188,
+              "y": 653.1740112304688
+            },
+            "selectionCountBefore": 1,
+            "serial": 24,
+            "timestamp": 24456,
+            "world": {
+              "x": 370.02651434166836,
+              "y": 272.0890048042744
+            },
+            "zoom": 2.63931537891606
+          }
+        ],
+        "serial": 24,
+        "timestampUnit": "native monotonic milliseconds"
+      },
+      "zoom": 2.63931537891606,
+      "pan": {
+        "x": -360.0515453969506,
+        "y": -64.9546835834185
+      },
+      "chrome": {
+        "CanvasHost": {
+          "arrangeValid": true,
+          "enabled": true,
+          "focusWithin": true,
+          "focused": false,
+          "height": 1000,
+          "measureValid": true,
+          "pointerOver": true,
+          "visible": true,
+          "width": 1016,
+          "x": 296,
+          "y": 0
+        }
+      }
+    },
+    "requested": {
+      "world": {
+        "x": 240.58103496872863,
+        "y": 240.04559960404384
+      },
+      "page": {
+        "x": 570.9176800715574,
+        "y": 568.6013590926614
+      }
+    },
+    "action": {
+      "clock": "Node performance milliseconds",
+      "startedAtMs": 84724.58608,
+      "endedAtMs": 84734.445813,
+      "durationMs": 9.85973300000478
+    },
+    "observation": {
+      "clock": "page performance milliseconds",
+      "startedAtMs": 25776.5,
+      "endedAtMs": 25790.300000000745,
+      "events": [
+        {
+          "type": "pointerdown",
+          "phase": "capture",
+          "trusted": true,
+          "eventTimeMs": 25780.300000000745,
+          "observedAtMs": 25781.699999999255,
+          "detail": 0,
+          "button": 0,
+          "buttons": 1,
+          "key": null,
+          "code": null,
+          "ctrlKey": false,
+          "metaKey": false,
+          "altKey": false,
+          "shiftKey": false,
+          "inputType": null,
+          "data": null,
+          "isComposing": false,
+          "defaultPrevented": false,
+          "clipboardText": null,
+          "pointerId": 1,
+          "pointerType": "mouse",
+          "x": 570.9176635742188,
+          "y": 568.6013793945312,
+          "offsetX": 570.9176635742188,
+          "offsetY": 568.6013793945312,
+          "target": {
+            "tag": "DIV",
+            "className": "ferroui-native-host"
+          }
+        },
+        {
+          "type": "pointerdown",
+          "phase": "bubble",
+          "trusted": true,
+          "eventTimeMs": 25780.300000000745,
+          "observedAtMs": 25782.199999999255,
+          "detail": 0,
+          "button": 0,
+          "buttons": 1,
+          "key": null,
+          "code": null,
+          "ctrlKey": false,
+          "metaKey": false,
+          "altKey": false,
+          "shiftKey": false,
+          "inputType": null,
+          "data": null,
+          "isComposing": false,
+          "defaultPrevented": true,
+          "clipboardText": null,
+          "pointerId": 1,
+          "pointerType": "mouse",
+          "x": 570.9176635742188,
+          "y": 568.6013793945312,
+          "offsetX": 570.9176635742188,
+          "offsetY": 568.6013793945312,
+          "target": {
+            "tag": "DIV",
+            "className": "ferroui-native-host"
+          }
+        },
+        {
+          "type": "pointerup",
+          "phase": "capture",
+          "trusted": true,
+          "eventTimeMs": 25780.5,
+          "observedAtMs": 25782.5,
+          "detail": 0,
+          "button": 0,
+          "buttons": 0,
+          "key": null,
+          "code": null,
+          "ctrlKey": false,
+          "metaKey": false,
+          "altKey": false,
+          "shiftKey": false,
+          "inputType": null,
+          "data": null,
+          "isComposing": false,
+          "defaultPrevented": false,
+          "clipboardText": null,
+          "pointerId": 1,
+          "pointerType": "mouse",
+          "x": 570.9176635742188,
+          "y": 568.6013793945312,
+          "offsetX": 570.9176635742188,
+          "offsetY": 568.6013793945312,
+          "target": {
+            "tag": "MAIN",
+            "className": "ferroui-container"
+          }
+        },
+        {
+          "type": "pointerup",
+          "phase": "bubble",
+          "trusted": true,
+          "eventTimeMs": 25780.5,
+          "observedAtMs": 25783.300000000745,
+          "detail": 0,
+          "button": 0,
+          "buttons": 0,
+          "key": null,
+          "code": null,
+          "ctrlKey": false,
+          "metaKey": false,
+          "altKey": false,
+          "shiftKey": false,
+          "inputType": null,
+          "data": null,
+          "isComposing": false,
+          "defaultPrevented": true,
+          "clipboardText": null,
+          "pointerId": 1,
+          "pointerType": "mouse",
+          "x": 570.9176635742188,
+          "y": 568.6013793945312,
+          "offsetX": 570.9176635742188,
+          "offsetY": 568.6013793945312,
+          "target": {
+            "tag": "MAIN",
+            "className": "ferroui-container"
+          }
+        },
+        {
+          "type": "click",
+          "phase": "capture",
+          "trusted": true,
+          "eventTimeMs": 25780.5,
+          "observedAtMs": 25783.300000000745,
+          "detail": 1,
+          "button": 0,
+          "buttons": 0,
+          "key": null,
+          "code": null,
+          "ctrlKey": false,
+          "metaKey": false,
+          "altKey": false,
+          "shiftKey": false,
+          "inputType": null,
+          "data": null,
+          "isComposing": false,
+          "defaultPrevented": false,
+          "clipboardText": null,
+          "pointerId": 1,
+          "pointerType": "mouse",
+          "x": 570,
+          "y": 568,
+          "offsetX": 571,
+          "offsetY": 569,
+          "target": {
+            "tag": "MAIN",
+            "className": "ferroui-container"
+          }
+        },
+        {
+          "type": "click",
+          "phase": "bubble",
+          "trusted": true,
+          "eventTimeMs": 25780.5,
+          "observedAtMs": 25783.300000000745,
+          "detail": 1,
+          "button": 0,
+          "buttons": 0,
+          "key": null,
+          "code": null,
+          "ctrlKey": false,
+          "metaKey": false,
+          "altKey": false,
+          "shiftKey": false,
+          "inputType": null,
+          "data": null,
+          "isComposing": false,
+          "defaultPrevented": false,
+          "clipboardText": null,
+          "pointerId": 1,
+          "pointerType": "mouse",
+          "x": 570,
+          "y": 568,
+          "offsetX": 571,
+          "offsetY": 569,
+          "target": {
+            "tag": "MAIN",
+            "className": "ferroui-container"
+          }
+        },
+        {
+          "type": "pointerdown",
+          "phase": "capture",
+          "trusted": true,
+          "eventTimeMs": 25780.5,
+          "observedAtMs": 25783.5,
+          "detail": 0,
+          "button": 0,
+          "buttons": 1,
+          "key": null,
+          "code": null,
+          "ctrlKey": false,
+          "metaKey": false,
+          "altKey": false,
+          "shiftKey": false,
+          "inputType": null,
+          "data": null,
+          "isComposing": false,
+          "defaultPrevented": false,
+          "clipboardText": null,
+          "pointerId": 1,
+          "pointerType": "mouse",
+          "x": 570.9176635742188,
+          "y": 568.6013793945312,
+          "offsetX": 570.9176635742188,
+          "offsetY": 568.6013793945312,
+          "target": {
+            "tag": "DIV",
+            "className": "ferroui-native-host"
+          }
+        },
+        {
+          "type": "pointerdown",
+          "phase": "bubble",
+          "trusted": true,
+          "eventTimeMs": 25780.5,
+          "observedAtMs": 25784.199999999255,
+          "detail": 0,
+          "button": 0,
+          "buttons": 1,
+          "key": null,
+          "code": null,
+          "ctrlKey": false,
+          "metaKey": false,
+          "altKey": false,
+          "shiftKey": false,
+          "inputType": null,
+          "data": null,
+          "isComposing": false,
+          "defaultPrevented": true,
+          "clipboardText": null,
+          "pointerId": 1,
+          "pointerType": "mouse",
+          "x": 570.9176635742188,
+          "y": 568.6013793945312,
+          "offsetX": 570.9176635742188,
+          "offsetY": 568.6013793945312,
+          "target": {
+            "tag": "DIV",
+            "className": "ferroui-native-host"
+          }
+        },
+        {
+          "type": "pointerup",
+          "phase": "capture",
+          "trusted": true,
+          "eventTimeMs": 25780.699999999255,
+          "observedAtMs": 25784.300000000745,
+          "detail": 0,
+          "button": 0,
+          "buttons": 0,
+          "key": null,
+          "code": null,
+          "ctrlKey": false,
+          "metaKey": false,
+          "altKey": false,
+          "shiftKey": false,
+          "inputType": null,
+          "data": null,
+          "isComposing": false,
+          "defaultPrevented": false,
+          "clipboardText": null,
+          "pointerId": 1,
+          "pointerType": "mouse",
+          "x": 570.9176635742188,
+          "y": 568.6013793945312,
+          "offsetX": 570.9176635742188,
+          "offsetY": 568.6013793945312,
+          "target": {
+            "tag": "MAIN",
+            "className": "ferroui-container"
+          }
+        },
+        {
+          "type": "pointerup",
+          "phase": "bubble",
+          "trusted": true,
+          "eventTimeMs": 25780.699999999255,
+          "observedAtMs": 25785.300000000745,
+          "detail": 0,
+          "button": 0,
+          "buttons": 0,
+          "key": null,
+          "code": null,
+          "ctrlKey": false,
+          "metaKey": false,
+          "altKey": false,
+          "shiftKey": false,
+          "inputType": null,
+          "data": null,
+          "isComposing": false,
+          "defaultPrevented": true,
+          "clipboardText": null,
+          "pointerId": 1,
+          "pointerType": "mouse",
+          "x": 570.9176635742188,
+          "y": 568.6013793945312,
+          "offsetX": 570.9176635742188,
+          "offsetY": 568.6013793945312,
+          "target": {
+            "tag": "MAIN",
+            "className": "ferroui-container"
+          }
+        },
+        {
+          "type": "click",
+          "phase": "capture",
+          "trusted": true,
+          "eventTimeMs": 25780.699999999255,
+          "observedAtMs": 25785.300000000745,
+          "detail": 2,
+          "button": 0,
+          "buttons": 0,
+          "key": null,
+          "code": null,
+          "ctrlKey": false,
+          "metaKey": false,
+          "altKey": false,
+          "shiftKey": false,
+          "inputType": null,
+          "data": null,
+          "isComposing": false,
+          "defaultPrevented": false,
+          "clipboardText": null,
+          "pointerId": 1,
+          "pointerType": "mouse",
+          "x": 570,
+          "y": 568,
+          "offsetX": 571,
+          "offsetY": 569,
+          "target": {
+            "tag": "MAIN",
+            "className": "ferroui-container"
+          }
+        },
+        {
+          "type": "click",
+          "phase": "bubble",
+          "trusted": true,
+          "eventTimeMs": 25780.699999999255,
+          "observedAtMs": 25785.300000000745,
+          "detail": 2,
+          "button": 0,
+          "buttons": 0,
+          "key": null,
+          "code": null,
+          "ctrlKey": false,
+          "metaKey": false,
+          "altKey": false,
+          "shiftKey": false,
+          "inputType": null,
+          "data": null,
+          "isComposing": false,
+          "defaultPrevented": false,
+          "clipboardText": null,
+          "pointerId": 1,
+          "pointerType": "mouse",
+          "x": 570,
+          "y": 568,
+          "offsetX": 571,
+          "offsetY": 569,
+          "target": {
+            "tag": "MAIN",
+            "className": "ferroui-container"
+          }
+        },
+        {
+          "type": "dblclick",
+          "phase": "capture",
+          "trusted": true,
+          "eventTimeMs": 25785.300000000745,
+          "observedAtMs": 25785.300000000745,
+          "detail": 2,
+          "button": 0,
+          "buttons": 0,
+          "key": null,
+          "code": null,
+          "ctrlKey": false,
+          "metaKey": false,
+          "altKey": false,
+          "shiftKey": false,
+          "inputType": null,
+          "data": null,
+          "isComposing": false,
+          "defaultPrevented": false,
+          "clipboardText": null,
+          "pointerId": null,
+          "pointerType": null,
+          "x": 570,
+          "y": 568,
+          "offsetX": 570,
+          "offsetY": 568,
+          "target": {
+            "tag": "MAIN",
+            "className": "ferroui-container"
+          }
+        },
+        {
+          "type": "dblclick",
+          "phase": "bubble",
+          "trusted": true,
+          "eventTimeMs": 25785.300000000745,
+          "observedAtMs": 25785.300000000745,
+          "detail": 2,
+          "button": 0,
+          "buttons": 0,
+          "key": null,
+          "code": null,
+          "ctrlKey": false,
+          "metaKey": false,
+          "altKey": false,
+          "shiftKey": false,
+          "inputType": null,
+          "data": null,
+          "isComposing": false,
+          "defaultPrevented": false,
+          "clipboardText": null,
+          "pointerId": null,
+          "pointerType": null,
+          "x": 570,
+          "y": 568,
+          "offsetX": 570,
+          "offsetY": 568,
+          "target": {
+            "tag": "MAIN",
+            "className": "ferroui-container"
+          }
+        }
+      ],
+      "droppedEvents": 0,
+      "longTaskSupported": true,
+      "longTasks": [],
+      "droppedLongTasks": 0
+    },
+    "after": {
+      "renderedFrames": 138,
+      "sceneFrames": 199,
+      "documentRevision": 86,
+      "historyLength": 19,
+      "selection": [
+        2
+      ],
+      "gradientEdit": {
+        "active": false,
+        "axis": {
+          "end": {
+            "x": 294.145852464119,
+            "y": 149.65264762398243
+          },
+          "start": {
+            "x": 328.89269404153225,
+            "y": 205.71800093341037
+          }
+        },
+        "fill": 0,
+        "gradientKind": "angular",
+        "handles": [
+          {
+            "kind": "start",
+            "local": {
+              "x": 120,
+              "y": 80
+            },
+            "markerScreen": {
+              "x": 508,
+              "y": 477.9999999999999
+            },
+            "markerWorld": {
+              "x": 328.89269404153225,
+              "y": 205.71800093341037
+            },
+            "offset": null,
+            "screen": {
+              "x": 508,
+              "y": 477.9999999999999
+            },
+            "stop": null,
+            "world": {
+              "x": 328.89269404153225,
+              "y": 205.71800093341037
+            }
+          },
+          {
+            "kind": "end",
+            "local": {
+              "x": 175.5726642105082,
+              "y": 22.45281073287679
+            },
+            "markerScreen": {
+              "x": 416.2921266559732,
+              "y": 330.0258507860643
+            },
+            "markerWorld": {
+              "x": 294.145852464119,
+              "y": 149.65264762398243
+            },
+            "offset": null,
+            "screen": {
+              "x": 416.2921266559732,
+              "y": 330.0258507860643
+            },
+            "stop": null,
+            "world": {
+              "x": 294.145852464119,
+              "y": 149.65264762398243
+            }
+          },
+          {
+            "kind": "stop",
+            "local": {
+              "x": 175.5726642105082,
+              "y": 22.45281073287679
+            },
+            "markerScreen": {
+              "x": 407.86348863454145,
+              "y": 316.42592206920426
+            },
+            "markerWorld": {
+              "x": 290.9523583903288,
+              "y": 144.49982321144654
+            },
+            "offset": 0,
+            "screen": {
+              "x": 416.2921266559732,
+              "y": 330.0258507860643
+            },
+            "stop": 0,
+            "world": {
+              "x": 294.145852464119,
+              "y": 149.65264762398243
+            }
+          },
+          {
+            "kind": "stop",
+            "local": {
+              "x": 64.4273357894918,
+              "y": 137.54718926712323
+            },
+            "markerScreen": {
+              "x": 608.1365113654583,
+              "y": 639.5740779307955
+            },
+            "markerWorld": {
+              "x": 366.83302969273564,
+              "y": 266.9361786553742
+            },
+            "offset": 0.5,
+            "screen": {
+              "x": 599.7078733440266,
+              "y": 625.9741492139354
+            },
+            "stop": 1,
+            "world": {
+              "x": 363.63953561894544,
+              "y": 261.7833542428383
+            }
+          },
+          {
+            "kind": "stop",
+            "local": {
+              "x": 40.01218444449401,
+              "y": 81.3961957808108
+            },
+            "markerScreen": {
+              "x": 753.4174181187499,
+              "y": 521.3519202721087
+            },
+            "markerWorld": {
+              "x": 421.87795077865644,
+              "y": 222.14344240145994
+            },
+            "offset": 0.625000008508813,
+            "screen": {
+              "x": 737.6613534703233,
+              "y": 518.5686799313181
+            },
+            "stop": 2,
+            "world": {
+              "x": 415.9081963588957,
+              "y": 221.08891122908688
+            }
+          },
+          {
+            "kind": "stop",
+            "local": {
+              "x": 175.5726642105082,
+              "y": 22.4528107328768
+            },
+            "markerScreen": {
+              "x": 399.4348506131097,
+              "y": 302.8259933523442
+            },
+            "markerWorld": {
+              "x": 287.7588643165386,
+              "y": 139.34699879891068
+            },
+            "offset": 1,
+            "screen": {
+              "x": 416.2921266559732,
+              "y": 330.0258507860643
+            },
+            "stop": 3,
+            "world": {
+              "x": 294.145852464119,
+              "y": 149.65264762398243
+            }
+          },
+          {
+            "kind": "stop",
+            "local": {
+              "x": 177.5471850635966,
+              "y": 135.5726685633879
+            },
+            "markerScreen": {
+              "x": 260.0047100669929,
+              "y": 574.3981899951124
+            },
+            "markerWorld": {
+              "x": 234.93071741907335,
+              "y": 242.24193845341307
+            },
+            "offset": 0.25000001203850886,
+            "screen": {
+              "x": 274.91768700835837,
+              "y": 568.6013702854525
+            },
+            "stop": 4,
+            "world": {
+              "x": 240.58103759698633,
+              "y": 240.04560384483722
+            }
+          }
+        ],
+        "hover": null,
+        "node": 2,
+        "ring": [
+          {
+            "x": 603.9434394271939,
+            "y": 308.6193090333996
+          },
+          {
+            "x": 582.5062369502003,
+            "y": 305.9002648108321
+          },
+          {
+            "x": 560.4516523290715,
+            "y": 304.60729319460546
+          },
+          {
+            "x": 537.9624367977812,
+            "y": 304.7511081547364
+          },
+          {
+            "x": 515.2249430789062,
+            "y": 306.3305179951728
+          },
+          {
+            "x": 492.4275812062782,
+            "y": 309.3324352285619
+          },
+          {
+            "x": 469.7592573001049,
+            "y": 313.7319850232936
+          },
+          {
+            "x": 447.40780823136515,
+            "y": 319.4927113241878
+          },
+          {
+            "x": 425.55844514633964,
+            "y": 326.56687893884975
+          },
+          {
+            "x": 404.39221874872237,
+            "y": 334.89586908650784
+          },
+          {
+            "x": 384.0845190564705,
+            "y": 344.41066513169187
+          },
+          {
+            "x": 364.80362206487894,
+            "y": 355.03242447781065
+          },
+          {
+            "x": 346.7092953586864,
+            "y": 366.67313188173796
+          },
+          {
+            "x": 329.95147422755224,
+            "y": 379.23632877583617
+          },
+          {
+            "x": 314.6690192550261,
+            "y": 392.6179125540259
+          },
+          {
+            "x": 300.9885656760199,
+            "y": 406.7069991987661
+          },
+          {
+            "x": 289.0234740373693,
+            "y": 421.38684210094465
+          },
+          {
+            "x": 278.87289085664145,
+            "y": 436.5357994590494
+          },
+          {
+            "x": 270.6209270628656,
+            "y": 452.02834224144465
+          },
+          {
+            "x": 264.3359610268851,
+            "y": 467.73609435946184
+          },
+          {
+            "x": 260.07007195664187,
+            "y": 483.5288964320994
+          },
+          {
+            "x": 257.8586083524584,
+            "y": 499.27588432764685
+          },
+          {
+            "x": 257.7198950982299,
+            "y": 514.8465735450936
+          },
+          {
+            "x": 259.65508161566765,
+            "y": 530.1119404497987
+          },
+          {
+            "x": 263.6481323398258,
+            "y": 544.9454914039618
+          },
+          {
+            "x": 269.66595959484516,
+            "y": 559.2243109327437
+          },
+          {
+            "x": 277.6586977688544,
+            "y": 572.8300802406012
+          },
+          {
+            "x": 287.56011651613505,
+            "y": 585.65005763809
+          },
+          {
+            "x": 299.28816956262483,
+            "y": 597.57801275501
+          },
+          {
+            "x": 312.7456745671835,
+            "y": 608.5151067987089
+          },
+          {
+            "x": 327.82111840507764,
+            "y": 618.3707115634456
+          },
+          {
+            "x": 344.3895812008526,
+            "y": 627.0631604042457
+          },
+          {
+            "x": 362.31377145376155,
+            "y": 634.5204249524411
+          },
+          {
+            "x": 381.44516367837923,
+            "y": 640.680711965417
+          },
+          {
+            "x": 401.62522913355053,
+            "y": 645.4929753648823
+          },
+          {
+            "x": 422.6867494414656,
+            "y": 648.9173392207496
+          },
+          {
+            "x": 444.45520221180243,
+            "y": 650.9254281756504
+          },
+          {
+            "x": 466.7502071892168,
+            "y": 651.5006025720829
+          },
+          {
+            "x": 489.38702094094435,
+            "y": 650.6380963338547
+          },
+          {
+            "x": 512.1780676990696,
+            "y": 648.3450564592908
+          },
+          {
+            "x": 534.9344936724129,
+            "y": 644.640483798955
+          },
+          {
+            "x": 557.4677319485197,
+            "y": 639.5550756086172
+          },
+          {
+            "x": 579.5910650184849,
+            "y": 633.1309711821258
+          },
+          {
+            "x": 601.1211719770362,
+            "y": 625.4214026719463
+          },
+          {
+            "x": 621.879647577289,
+            "y": 616.490253990782
+          },
+          {
+            "x": 641.6944805528091,
+            "y": 606.4115314493536
+          },
+          {
+            "x": 660.4014789571381,
+            "y": 595.2687505168013
+          },
+          {
+            "x": 677.8456307099734,
+            "y": 583.1542437852056
+          },
+          {
+            "x": 693.8823880760831,
+            "y": 570.1683958726504
+          },
+          {
+            "x": 708.3788654333644,
+            "y": 556.418811604662
+          },
+          {
+            "x": 721.2149404049583,
+            "y": 542.019424366737
+          },
+          {
+            "x": 732.2842492310965,
+            "y": 527.0895520164279
+          },
+          {
+            "x": 741.4950681327114,
+            "y": 511.75290817799714
+          },
+          {
+            "x": 748.771073363557,
+            "y": 496.13657711236635
+          },
+          {
+            "x": 754.0519736528074,
+            "y": 480.36996065690414
+          },
+          {
+            "x": 757.2940097975159,
+            "y": 464.5837059610508
+          },
+          {
+            "x": 758.47031726515,
+            "y": 448.9086229028908
+          },
+          {
+            "x": 757.5711488015704,
+            "y": 433.47460015730655
+          },
+          {
+            "x": 754.6039551998479,
+            "y": 418.409528897512
+          },
+          {
+            "x": 749.5933235606449,
+            "y": 403.8382430485132
+          },
+          {
+            "x": 742.5807735557571,
+            "y": 389.88148487389105
+          },
+          {
+            "x": 733.6244133830357,
+            "y": 376.6549044673789
+          },
+          {
+            "x": 722.7984582635609,
+            "y": 364.2681014397642
+          },
+          {
+            "x": 710.1926154709454,
+            "y": 352.82371674199555
+          },
+          {
+            "x": 695.9113409886145,
+            "y": 342.41658214993777
+          },
+          {
+            "x": 680.0729739546298,
+            "y": 333.1329344584122
+          },
+          {
+            "x": 662.8087560663215,
+            "y": 325.049700895954
+          },
+          {
+            "x": 644.2617440702523,
+            "y": 318.2338616815709
+          },
+          {
+            "x": 624.5856243489606,
+            "y": 312.74189500555246
+          },
+          {
+            "x": 603.9434394271939,
+            "y": 308.61930903339965
+          }
+        ],
+        "selected": {
+          "kind": "stop",
+          "stop": 4
+        }
+      },
+      "pointerPresses": {
+        "capacity": 8,
+        "entries": [
+          {
+            "buttons": 1,
+            "clickCount": 1,
+            "pan": {
+              "x": -360.0515453969506,
+              "y": -64.9546835834185
+            },
+            "renderedFramesBefore": 100,
+            "screen": {
+              "x": 160.94345092773438,
+              "y": 421.5725402832031
+            },
+            "selectionCountBefore": 1,
+            "serial": 19,
+            "timestamp": 18786,
+            "world": {
+              "x": 197.39777992679763,
+              "y": 184.33841887680487
+            },
+            "zoom": 2.63931537891606
+          },
+          {
+            "buttons": 1,
+            "clickCount": 1,
+            "pan": {
+              "x": -360.0515453969506,
+              "y": -64.9546835834185
+            },
+            "renderedFramesBefore": 106,
+            "screen": {
+              "x": 508,
+              "y": 478
+            },
+            "selectionCountBefore": 1,
+            "serial": 20,
+            "timestamp": 19542,
+            "world": {
+              "x": 328.89269404153225,
+              "y": 205.7180009334104
+            },
+            "zoom": 2.63931537891606
+          },
+          {
+            "buttons": 1,
+            "clickCount": 1,
+            "pan": {
+              "x": -360.0515453969506,
+              "y": -64.9546835834185
+            },
+            "renderedFramesBefore": 113,
+            "screen": {
+              "x": 74.17929077148438,
+              "y": 407.4656677246094
+            },
+            "selectionCountBefore": 1,
+            "serial": 21,
+            "timestamp": 20642,
+            "world": {
+              "x": 164.5240427260986,
+              "y": 178.99352047198167
+            },
+            "zoom": 2.63931537891606
+          },
+          {
+            "buttons": 1,
+            "clickCount": 1,
+            "pan": {
+              "x": -360.0515453969506,
+              "y": -64.9546835834185
+            },
+            "renderedFramesBefore": 120,
+            "screen": {
+              "x": 508,
+              "y": 478
+            },
+            "selectionCountBefore": 0,
+            "serial": 22,
+            "timestamp": 21835,
+            "world": {
+              "x": 328.89269404153225,
+              "y": 205.7180009334104
+            },
+            "zoom": 2.63931537891606
+          },
+          {
+            "buttons": 1,
+            "clickCount": 1,
+            "pan": {
+              "x": -360.0515453969506,
+              "y": -64.9546835834185
+            },
+            "renderedFramesBefore": 124,
+            "screen": {
+              "x": 607.966796875,
+              "y": 309.3016357421875
+            },
+            "selectionCountBefore": 1,
+            "serial": 23,
+            "timestamp": 23146,
+            "world": {
+              "x": 366.76872722558295,
+              "y": 141.80052990836936
+            },
+            "zoom": 2.63931537891606
+          },
+          {
+            "buttons": 1,
+            "clickCount": 1,
+            "pan": {
+              "x": -360.0515453969506,
+              "y": -64.9546835834185
+            },
+            "renderedFramesBefore": 132,
+            "screen": {
+              "x": 616.5651245117188,
+              "y": 653.1740112304688
+            },
+            "selectionCountBefore": 1,
+            "serial": 24,
+            "timestamp": 24456,
+            "world": {
+              "x": 370.02651434166836,
+              "y": 272.0890048042744
+            },
+            "zoom": 2.63931537891606
+          },
+          {
+            "buttons": 1,
+            "clickCount": 1,
+            "pan": {
+              "x": -360.0515453969506,
+              "y": -64.9546835834185
+            },
+            "renderedFramesBefore": 137,
+            "screen": {
+              "x": 274.91766357421875,
+              "y": 568.6013793945312
+            },
+            "selectionCountBefore": 1,
+            "serial": 25,
+            "timestamp": 25377,
+            "world": {
+              "x": 240.5810287181158,
+              "y": 240.04560729614084
+            },
+            "zoom": 2.63931537891606
+          },
+          {
+            "buttons": 1,
+            "clickCount": 2,
+            "pan": {
+              "x": -360.0515453969506,
+              "y": -64.9546835834185
+            },
+            "renderedFramesBefore": 137,
+            "screen": {
+              "x": 274.91766357421875,
+              "y": 568.6013793945312
+            },
+            "selectionCountBefore": 1,
+            "serial": 26,
+            "timestamp": 25377,
+            "world": {
+              "x": 240.5810287181158,
+              "y": 240.04560729614084
+            },
+            "zoom": 2.63931537891606
+          }
+        ],
+        "serial": 26,
+        "timestampUnit": "native monotonic milliseconds"
+      },
+      "zoom": 2.63931537891606,
+      "pan": {
+        "x": -360.0515453969506,
+        "y": -64.9546835834185
+      },
+      "chrome": {
+        "CanvasHost": {
+          "arrangeValid": true,
+          "enabled": true,
+          "focusWithin": true,
+          "focused": false,
+          "height": 1000,
+          "measureValid": true,
+          "pointerOver": true,
+          "visible": true,
+          "width": 1016,
+          "x": 296,
+          "y": 0
+        }
+      }
+    },
+    "nativePresses": [
+      {
+        "buttons": 1,
+        "clickCount": 1,
+        "pan": {
+          "x": -360.0515453969506,
+          "y": -64.9546835834185
+        },
+        "renderedFramesBefore": 137,
+        "screen": {
+          "x": 274.91766357421875,
+          "y": 568.6013793945312
+        },
+        "selectionCountBefore": 1,
+        "serial": 25,
+        "timestamp": 25377,
+        "world": {
+          "x": 240.5810287181158,
+          "y": 240.04560729614084
+        },
+        "zoom": 2.63931537891606
+      },
+      {
+        "buttons": 1,
+        "clickCount": 2,
+        "pan": {
+          "x": -360.0515453969506,
+          "y": -64.9546835834185
+        },
+        "renderedFramesBefore": 137,
+        "screen": {
+          "x": 274.91766357421875,
+          "y": 568.6013793945312
+        },
+        "selectionCountBefore": 1,
+        "serial": 26,
+        "timestamp": 25377,
+        "world": {
+          "x": 240.5810287181158,
+          "y": 240.04560729614084
+        },
+        "zoom": 2.63931537891606
+      }
+    ],
+    "timing": {
+      "domPressIntervalsMs": [
+        0.19999999925494194
+      ],
+      "observedPressIntervalsMs": [
+        1.800000000745058
+      ],
+      "nativePressIntervalsMs": [
+        0
+      ],
+      "domDeliveryAgesMs": [
+        1.3999999985098839,
+        3
+      ]
+    },
+    "event": {
+      "type": "pointerdown",
+      "phase": "capture",
+      "trusted": true,
+      "eventTimeMs": 25780.5,
+      "observedAtMs": 25783.5,
+      "detail": 0,
+      "button": 0,
+      "buttons": 1,
+      "key": null,
+      "code": null,
+      "ctrlKey": false,
+      "metaKey": false,
+      "altKey": false,
+      "shiftKey": false,
+      "inputType": null,
+      "data": null,
+      "isComposing": false,
+      "defaultPrevented": false,
+      "clipboardText": null,
+      "pointerId": 1,
+      "pointerType": "mouse",
+      "x": 570.9176635742188,
+      "y": 568.6013793945312,
+      "offsetX": 570.9176635742188,
+      "offsetY": 568.6013793945312,
+      "target": {
+        "tag": "DIV",
+        "className": "ferroui-native-host"
+      }
+    }
+  }
+]

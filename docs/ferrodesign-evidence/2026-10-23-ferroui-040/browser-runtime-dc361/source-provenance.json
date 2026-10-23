@@ -1,0 +1,143 @@
+{
+  "created_at": "2026-10-23T15:11:23.806469+00:00",
+  "runtime_commit": "dc36199693472ac8297bafdaad6d4a0701acddf0",
+  "harness_commit": "dc36199693472ac8297bafdaad6d4a0701acddf0",
+  "harness_tree": "57c2625a948b9401b9517b2724b2715d8e7ca92b",
+  "tests_tree": "cd2a1a68b0579ea3bdaa2bd25922885ca51cfdc6",
+  "scope_full": false,
+  "modes": [
+    "Software2D",
+    "WebGL2"
+  ],
+  "scenarios": [
+    "corners",
+    "polygon-corners",
+    "gradient-handles",
+    "paragraphs",
+    "guide-bindings"
+  ],
+  "snapshot_directory": "/tmp/ferrodesign-e99-harness-dc361",
+  "file_sha256": {
+    "samples/FerroDesign/package-lock.json": "79084a131673247139b5baac8e065ed4604ede5c79d750b076a18455de41d2d0",
+    "samples/FerroDesign/package.json": "b4a693a06e7c2390b63afcb926e222641d7edf900d7299837d8b21143a013da2",
+    "samples/FerroDesign/tests/alpha-coverage.mjs": "c4e27b7b5a4a82bd4dd6f9a5619d0c570b430ed0a2136e3a386289d5d04a7779",
+    "samples/FerroDesign/tests/alpha-coverage.test.mjs": "d2da8b35fd7a32355d70b5e457b5440d485eca0b9524d27bfeb59825b9576302",
+    "samples/FerroDesign/tests/angular-paints-browser.mjs": "5a7eebeea291b425fc1075d3e55f5af5f8191f0f8f24a9a10fc8a954b7be4908",
+    "samples/FerroDesign/tests/authoring-browser.mjs": "776b73e603a00984d3d566e964bf1c911960bc7fce3cfe9344278f0679edb7ef",
+    "samples/FerroDesign/tests/browser.mjs": "78dd7a5aa0d104f31627b034e0998fc78f627b187594575f0db561a35f20f678",
+    "samples/FerroDesign/tests/components-browser.mjs": "cf3ed180f41a62e0b2520917735b3ad238f5013a091ddf1a70743661a9940c96",
+    "samples/FerroDesign/tests/compositing-browser.mjs": "897c50eba3d818f5603aaa08a9c025a44e91192f7e4ea325b8c2e652ca4ad9d4",
+    "samples/FerroDesign/tests/corner-radius-handles-browser.mjs": "17a82205d52399eb76e7117eca1ff7a6485325f3e5a34b37dd5c0c153490177f",
+    "samples/FerroDesign/tests/corner-radius-input.test.mjs": "bdaf5265fc7eee1797fe6ece48d3291c99baac6211cb8459e9a4bfcaf8c25435",
+    "samples/FerroDesign/tests/corners-browser.mjs": "6b9e400d2023a0a638b7c5e99e27920e03a9d272b7b8ee74f00b6d051daac22a",
+    "samples/FerroDesign/tests/document-store-browser.mjs": "466adceb3877b299ce92d610a15b40ff2e47cfa1f71a8e0901bcb9f15f49c0cf",
+    "samples/FerroDesign/tests/document-store.test.mjs": "d3794e220039aed72b31745dd1601443bf06f7378b2ccffce90e4ea601fc3334",
+    "samples/FerroDesign/tests/effects-browser.mjs": "814aad28948d9bdf677ffc69e3e32817be87915ed3fb4cd6e42d042dc9a47dbe",
+    "samples/FerroDesign/tests/flatten-browser.mjs": "dc706d5e13e7471c0b075f2d9978b9d958420d703e566ddc401250396fd21585",
+    "samples/FerroDesign/tests/geometry-authoring-browser.mjs": "720d3ab736b1c83ac399c1e5619b9f0b299d2485ba774a67401b6d7dd40e70d3",
+    "samples/FerroDesign/tests/gradient-handles-browser.mjs": "dbab66644e67057b0b63e3902394569ccaab1bf37e463a640ce0c47daa5b615d",
+    "samples/FerroDesign/tests/gradient-input.mjs": "377dc27ea56191da15e0f6bbedb3f56bdb64ba44c5571a3f8a831541a5b0890f",
+    "samples/FerroDesign/tests/gradient-input.test.mjs": "8026377652fdaf825163cd3c1075cdb1b1bc4cfef0745c294627912abe1b538a",
+    "samples/FerroDesign/tests/grid-styles-browser.mjs": "cb17248da5fea1a5d3d93b750484484c93633ad89963e83549a0169824bb63f4",
+    "samples/FerroDesign/tests/guide-bindings-browser.mjs": "2277edfc9db64a73d846fb56a804ef12d6527e65d98fb5d71d0ccb7a2fe9e92f",
+    "samples/FerroDesign/tests/history-browser.mjs": "7fa18bd154e1e041d3184d4536b0116b6d9c82cde01f3291106f826b043eeae7",
+    "samples/FerroDesign/tests/image-crop-browser.mjs": "c85627f32166fb1855f814d51c07cfd6ccf8371f82f02923a6887df76548c95c",
+    "samples/FerroDesign/tests/input-observations.mjs": "4ca6a96bb6c5a61bf9963e1bff0bb66690f222972b2ebe9e92b79470ef1af576",
+    "samples/FerroDesign/tests/input-observations.test.mjs": "6fc6d90dc556d0173ef5661d1c246dda513356015f6082a88bc51c6386c96996",
+    "samples/FerroDesign/tests/inspector-lifecycle-browser.mjs": "32ccdcf1f7b10942ce1a9df22f5be6092a461661e17838b6f9e9058c4db777a8",
+    "samples/FerroDesign/tests/isolated-scenario.mjs": "c2216ac8f127f7922cff5e803c88641bfd433ac2fa5b1186526288ec489e953e",
+    "samples/FerroDesign/tests/isolated-scenario.test.mjs": "97104f6ce5ddd019857527a83ff363db5e064cb60e954e0235f9f41166422031",
+    "samples/FerroDesign/tests/layout-browser.mjs": "604b4ba44c7367e2247b7f6aba5605b29a2d4ccb2745c77a8911280a291befe0",
+    "samples/FerroDesign/tests/layout-drag-browser.mjs": "9f1e1383c7b325b7e31411e0122f91da9aa2fc116201feff454b87e406ac5ff3",
+    "samples/FerroDesign/tests/layout-padding-browser.mjs": "129050daf3a324156671284d7e43481ea0c3e78d9b03ed4ed8940519991a9921",
+    "samples/FerroDesign/tests/layout-transfer-browser.mjs": "a6d1a86daccc8f480ce2f5f34eae295f9ee2bd2bbbc9e414bd0a51f7a4de4ff3",
+    "samples/FerroDesign/tests/layout-variables-browser.mjs": "7b0c426208eca77a2f35f1943e1348786f33b15849b4fb6de08157904141c14c",
+    "samples/FerroDesign/tests/masks-browser.mjs": "9a451dd494d98ec8c05a8460c2665c9b15d4194c3b4f25ef61f86e429fca01fd",
+    "samples/FerroDesign/tests/matching-browser.mjs": "a6a20bd9fb0254dbbec64364dc3532eb1bd2d6919ac66e890133d139e6e59eb1",
+    "samples/FerroDesign/tests/network-browser.mjs": "e4f871fd55532c9ea8992373fdedcd8f779eb64873804b97b94e0adfd1b8d2bb",
+    "samples/FerroDesign/tests/network-bucket-browser.mjs": "cc28fe60f63e7f09afad2c14e67cbb209f0873d6b6d6a760fedcda3379a431a7",
+    "samples/FerroDesign/tests/page-inspector-browser.mjs": "d1f36523f17c1dbfd0792365fe61ac14a8b98ce71e26cf4571948cb9dd82f733",
+    "samples/FerroDesign/tests/panels-browser.mjs": "2e6ee77644f053cb6fc47346e3907e85ca4f913dcebdfa9dbc1692182e8e00bc",
+    "samples/FerroDesign/tests/paragraphs-browser.mjs": "99820e4aa77a3ef79cbcbab6afaac8bf45d9339dcb5e9f5c87af545cc1d1ca65",
+    "samples/FerroDesign/tests/polygon-corners-browser.mjs": "69aaae8d5976b425d6c6aeb28641bb0e93df675a5ce596c4cd425e3ab4334932",
+    "samples/FerroDesign/tests/prototype-browser.mjs": "8be66151238e66c71e22624ad1bdc3fe8faaa6cc64c074ee0fac009ab06cb0cb",
+    "samples/FerroDesign/tests/region-paints-browser.mjs": "8ec7e757e05821916fc5bc809748091608b37e11eae119af17c7b3e2c43087af",
+    "samples/FerroDesign/tests/selection-browser.mjs": "28b8129bf0ab07d879f2c65ff6f5ea2e4ad62ff158c1929b002a55923cb4dd35",
+    "samples/FerroDesign/tests/serialization-browser.mjs": "47d8b18654497944c92eec207da238ac4bf483a52ad840a4477540d6fd35699b",
+    "samples/FerroDesign/tests/styles-browser.mjs": "9805ac10253ef5abab7fd8ea9da153017d9f1e19c653af191d3b6467244222d7",
+    "samples/FerroDesign/tests/svg-alpha-reference.mjs": "779d7dab31108ad243ce42d23eb8f7bdee4dac7ccceaf0b19c2dbe5e38178355",
+    "samples/FerroDesign/tests/svg-compositing-browser.mjs": "3fec5edd0697a24103e1d3094fb52e1357420048e29f7017824461fe50fffdd9",
+    "samples/FerroDesign/tests/text-pan-trace-analysis.mjs": "1c3ec7b5c479e73bbf349ea542a99528c9764cfa426bd31525633a963523dc0a",
+    "samples/FerroDesign/tests/text-pan-trace-analysis.test.mjs": "5d1b90f2d8180d99219823f19213689fe019187fca7c6247cac7824d0bd92862",
+    "samples/FerroDesign/tests/text-pan-trace.mjs": "e00f71644d1c533567b849d5b1d506459765962c0baae00cd3848eb6a9e0de05",
+    "samples/FerroDesign/tests/text-render-benchmark.mjs": "edd21fc76ba181f765a7b90461e89e8db9527042c68957f01ce7b2d0a6f6ca5b",
+    "samples/FerroDesign/tests/typography-browser.mjs": "5b50194c8e80bb2c5000227ef7b4818a6a1b7008bfaf6a544283c77661716ecc",
+    "samples/FerroDesign/tests/width-handles-browser.mjs": "3e581626e0e7fc563d5a00b0540f7ebda71136e21196941908ca15347b971129",
+    "samples/FerroDesign/tests/width-profiles-browser.mjs": "9c524052923414b4b185568661c52520d7b2a1416e6b65c1cf115cd22460b8cf"
+  },
+  "expected_runtime_host_files": {
+    "app.css": {
+      "source_path": "samples/FerroDesign/web/app.css",
+      "bytes": 1698,
+      "sha256": "bc13442e4a8b8d92c33428c53a65ebcd0e22423d623c1418bc137a0a23b9453b"
+    },
+    "document-store.js": {
+      "source_path": "samples/FerroDesign/web/document-store.js",
+      "bytes": 15559,
+      "sha256": "6e6cca56c8af8567bd8b1f183eceed55815b2ec63e3ea222d45be93f25b4f012"
+    },
+    "favicon.svg": {
+      "source_path": "samples/FerroDesign/web/favicon.svg",
+      "bytes": 222,
+      "sha256": "883347dbc8832de4f398160d8fff0f69e8ef4ca831ffca045d670a3228ed08a7"
+    },
+    "index.html": {
+      "source_path": "samples/FerroDesign/web/index.html",
+      "bytes": 1189,
+      "sha256": "5655bc554cb0568f2eadb3fe81085103c270821dac6c9e9443219d3541a5531d"
+    },
+    "main.js": {
+      "source_path": "samples/FerroDesign/web/main.js",
+      "bytes": 2720,
+      "sha256": "8f81710a5fe670e9fe5438e1c2cd8feec6d1c05dfbbf8ad21be1aaa1d4f638ea"
+    },
+    "Cargo.lock": {
+      "source_path": "samples/FerroDesign/Cargo.lock",
+      "bytes": 80615,
+      "sha256": "1e11d66cfe586f859f3f7027d83b1f596a401184feb81e08fdf2f658ca5b87a9"
+    },
+    "ferroui-loader.js": {
+      "source_path": "scripts/browser/threads/ferroui-loader.js",
+      "bytes": 16165,
+      "sha256": "817aa151802ca2aa17c25861fac1271538edeaac4161b198e461d2e306fe5db6"
+    }
+  },
+  "runtime_artifact_status": "Verified exact dc361996 artifact, extracted and executed by this completed replay.",
+  "chromium_executable": "/tmp/ferrodesign-e99-browsers/chrome-linux64/chrome",
+  "expected_chromium_version": "156.0.8078.4",
+  "expected_playwright_version": "1.64.1",
+  "node_executable": "/opt/codex/runtimes/codex-primary-runtime/dependencies/node/bin/node",
+  "sequence": [
+    "Five selected scenarios with all normal common gates, both modes",
+    "After correctness replay and resource check:36 normal plus6 separately traced text-pan samples per mode"
+  ],
+  "source_file_hashes": {
+    "src/FerroUI.Controls/text_box.rs": "5016e1fa72ecbe0c01894369c3769b2f65d23c558ff5a53dc4c0a60a6e341ad3",
+    "src/FerroUI.Controls/text_box_text_input_method_client.rs": "eedbb0cab330323fea543cf093e3863de3efd3970e67f9913295ef2828141c57",
+    "src/FerroUI.Controls/text_box_tests.rs": "e741dea15cce9b34dee92610cc7e473af7fee9ee7348ad92c5b2207f890852a1"
+  },
+  "runtime_artifact": {
+    "artifact_id": 12512495659,
+    "archive_bytes": 12643773,
+    "archive_sha256": "62525059621c4aa1aff6998db2a1bdcd02c5b906bfc956fa434fd350abad8537",
+    "manifest_payload_count": 17,
+    "workflow_run": 39976024338,
+    "workflow_job": 120490704316
+  },
+  "runtime_wasm": {
+    "path": "ferrodesign_app.wasm",
+    "bytes": 53795035,
+    "sha256": "b531f97834ce74271b85e368b48a8428063fec301c7419abc53eeeb0e53a656a"
+  },
+  "actual_runtime_verification": "All 17 payload hashes verified before and after this execution."
+}

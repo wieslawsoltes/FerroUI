@@ -1,0 +1,136 @@
+{
+  "name": "WebGL2-gradient-handles-radial",
+  "before": {
+    "view": {
+      "activePage": 1,
+      "selection": [
+        2
+      ],
+      "tool": "Select",
+      "pan": {
+        "x": -360.0515453969506,
+        "y": -64.9546835834185
+      },
+      "zoom": 2.63931537891606,
+      "presentation": null,
+      "prototypeOverlays": [],
+      "imageCrop": null,
+      "layoutDrag": null,
+      "vectorNode": null,
+      "vectorPoint": null,
+      "modalVisible": false,
+      "controls": {
+        "CanvasHost": {
+          "arrangeValid": true,
+          "enabled": true,
+          "focusWithin": true,
+          "focused": false,
+          "height": 1000,
+          "measureValid": true,
+          "pointerOver": true,
+          "visible": true,
+          "width": 1016,
+          "x": 296,
+          "y": 0
+        }
+      }
+    },
+    "renderedFrames": 102,
+    "sceneFrames": 103,
+    "documentRevision": 71,
+    "fonts": {
+      "status": "loaded",
+      "faces": []
+    },
+    "surface": {
+      "kind": "WebGL2",
+      "width": 1600,
+      "height": 1000,
+      "contextLost": false
+    },
+    "visibility": "visible",
+    "focus": {
+      "tag": "MAIN",
+      "id": "out"
+    },
+    "startupErrors": [],
+    "renderPanics": [],
+    "document": {
+      "sha256": "0788d37ada7d50c4950a57ee56d3c091835783d0a82e26afeb8e99314cd1dd70",
+      "bytes": 3577
+    }
+  },
+  "attempts": [
+    {
+      "attempt": 1,
+      "timeoutMs": 30000,
+      "pixels": {
+        "width": 1600,
+        "height": 1000,
+        "colors": 340
+      },
+      "after": {
+        "view": {
+          "activePage": 1,
+          "selection": [
+            2
+          ],
+          "tool": "Select",
+          "pan": {
+            "x": -360.0515453969506,
+            "y": -64.9546835834185
+          },
+          "zoom": 2.63931537891606,
+          "presentation": null,
+          "prototypeOverlays": [],
+          "imageCrop": null,
+          "layoutDrag": null,
+          "vectorNode": null,
+          "vectorPoint": null,
+          "modalVisible": false,
+          "controls": {
+            "CanvasHost": {
+              "arrangeValid": true,
+              "enabled": true,
+              "focusWithin": true,
+              "focused": false,
+              "height": 1000,
+              "measureValid": true,
+              "pointerOver": true,
+              "visible": true,
+              "width": 1016,
+              "x": 296,
+              "y": 0
+            }
+          }
+        },
+        "renderedFrames": 102,
+        "sceneFrames": 103,
+        "documentRevision": 71,
+        "fonts": {
+          "status": "loaded",
+          "faces": []
+        },
+        "surface": {
+          "kind": "WebGL2",
+          "width": 1600,
+          "height": 1000,
+          "contextLost": false
+        },
+        "visibility": "visible",
+        "focus": {
+          "tag": "MAIN",
+          "id": "out"
+        },
+        "startupErrors": [],
+        "renderPanics": [],
+        "document": {
+          "sha256": "0788d37ada7d50c4950a57ee56d3c091835783d0a82e26afeb8e99314cd1dd70",
+          "bytes": 3577
+        }
+      },
+      "status": "passed",
+      "durationMs": 1327
+    }
+  ]
+}

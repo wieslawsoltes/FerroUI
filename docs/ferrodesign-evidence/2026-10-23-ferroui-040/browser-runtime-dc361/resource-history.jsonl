@@ -1,0 +1,7 @@
+{"utc": "2026-10-23T15:31:10.116845+00:00", "disk_free_bytes": 317976576, "memory_current_bytes": 6132916224, "memory_events": {"low": 0, "high": 0, "max": 4225667, "oom": 74, "oom_kill": 6, "oom_group_kill": 0}}
+{"utc": "2026-10-23T15:32:05.504560+00:00", "disk_free_bytes": 311488512, "memory_current_bytes": 6522241024, "memory_events": {"low": 0, "high": 0, "max": 4225667, "oom": 74, "oom_kill": 6, "oom_group_kill": 0}}
+{"utc": "2026-10-23T15:33:26.323556+00:00", "disk_free_bytes": 619421696, "memory_current_bytes": 5966184448, "memory_events": {"low": 0, "high": 0, "max": 4225667, "oom": 74, "oom_kill": 6, "oom_group_kill": 0}}
+{"utc": "2026-10-23T15:34:41.791580+00:00", "disk_free_bytes": 598605824, "memory_current_bytes": 6047318016, "memory_events": {"low": 0, "high": 0, "max": 4225667, "oom": 74, "oom_kill": 6, "oom_group_kill": 0}}
+{"utc": "2026-10-23T15:36:00.935527+00:00", "disk_free_bytes": 581570560, "memory_current_bytes": 6066827264, "memory_events": {"low": 0, "high": 0, "max": 4225667, "oom": 74, "oom_kill": 6, "oom_group_kill": 0}}
+{"utc": "2026-10-23T15:37:04.926920+00:00", "disk_free_bytes": 439312384, "memory_current_bytes": 6344863744, "memory_events": {"low": 0, "high": 0, "max": 4225667, "oom": 74, "oom_kill": 6, "oom_group_kill": 0}}
+{"utc": "2026-10-23T15:38:20.240408+00:00", "disk_free_bytes": 370315264, "memory_current_bytes": 8589811712, "memory_events": {"low": 0, "high": 0, "max": 4228223, "oom": 74, "oom_kill": 6, "oom_group_kill": 0}}

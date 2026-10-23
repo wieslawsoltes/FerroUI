@@ -1,0 +1,76 @@
+{
+  "verifiedAt": "2026-10-23T15:49:57.941Z",
+  "sourceCommit": "dc36199693472ac8297bafdaad6d4a0701acddf0",
+  "analysisSourceSha256": "1c3ec7b5c479e73bbf349ea542a99528c9764cfa426bd31525633a963523dc0a",
+  "scope": "Consistency check using the frozen production trace parser on preserved raw trace bytes; no extra browser execution and no causal GPU profiling claim.",
+  "results": [
+    {
+      "mode": "Software2D",
+      "traceSha256": "1a8ea30e8c0600dcbec71fc72b344df42061dbe90433bfe1782a03fcf76eac3e",
+      "analysisStatus": "complete",
+      "rawReanalysisExactlyMatchesSaved": true,
+      "clock": {
+        "traceUnit": "monotonic microseconds",
+        "pageUnit": "performance.now/Event.timeStamp milliseconds",
+        "hostClockUsed": false,
+        "method": "Intersect trace-marker offsets bracketed by page performance.now before/after performance.mark.",
+        "anchorCount": 42,
+        "aligned": true,
+        "offsetUs": 20865532994,
+        "uncertaintyMs": 0.191,
+        "quantizationAllowanceMs": 0.25
+      },
+      "evidence": {
+        "inputEvents": 10335,
+        "analyzedEvents": 10335,
+        "eventLimitExceeded": false,
+        "unmatchedEnds": 0,
+        "unmatchedBegins": 26,
+        "invalidDurations": 0,
+        "asyncOrFlowRecords": 2483,
+        "dataLossOccurred": false,
+        "streamTruncated": false,
+        "peakBufferFraction": 0.02651512622833252,
+        "bufferMayBeFull": false,
+        "missingMarkers": [],
+        "duplicateMarkers": [],
+        "wrongThreadMarkers": [],
+        "droppedInputEvents": 0
+      }
+    },
+    {
+      "mode": "WebGL2",
+      "traceSha256": "0b7508257769602eeec26a79a15b5bc001bc7e8fe8f01e4c96d05e5e72c78d8a",
+      "analysisStatus": "complete",
+      "rawReanalysisExactlyMatchesSaved": true,
+      "clock": {
+        "traceUnit": "monotonic microseconds",
+        "pageUnit": "performance.now/Event.timeStamp milliseconds",
+        "hostClockUsed": false,
+        "method": "Intersect trace-marker offsets bracketed by page performance.now before/after performance.mark.",
+        "anchorCount": 42,
+        "aligned": true,
+        "offsetUs": 20878951174,
+        "uncertaintyMs": 0.19,
+        "quantizationAllowanceMs": 0.25
+      },
+      "evidence": {
+        "inputEvents": 11325,
+        "analyzedEvents": 11325,
+        "eventLimitExceeded": false,
+        "unmatchedEnds": 0,
+        "unmatchedBegins": 26,
+        "invalidDurations": 0,
+        "asyncOrFlowRecords": 3159,
+        "dataLossOccurred": false,
+        "streamTruncated": false,
+        "peakBufferFraction": 0.13162875175476074,
+        "bufferMayBeFull": false,
+        "missingMarkers": [],
+        "duplicateMarkers": [],
+        "wrongThreadMarkers": [],
+        "droppedInputEvents": 0
+      }
+    }
+  ]
+}

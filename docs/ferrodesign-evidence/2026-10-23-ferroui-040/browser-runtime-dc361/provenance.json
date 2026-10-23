@@ -1,0 +1,723 @@
+{
+  "recorded_at": "2026-10-23T15:44:55.199718+00:00",
+  "source_commit": "dc36199693472ac8297bafdaad6d4a0701acddf0",
+  "source_tree": "57c2625a948b9401b9517b2724b2715d8e7ca92b",
+  "report_directory": "/tmp/ferrodesign-e99-browser-dc361-focused-report",
+  "exit_code": 0,
+  "raw_report_files": [
+    {
+      "path": "Software2D-angular-gradient-handles-artwork.png",
+      "bytes": 7898,
+      "sha256": "f7e6d665123de327c04879f831430831a1f23729b63f5de9b4a471611928362c",
+      "copied_to_repository": false
+    },
+    {
+      "path": "Software2D-angular-gradient-input.json",
+      "bytes": 121929,
+      "sha256": "b0d288c0bb63cf34021b54cbd52963619a9e5611da2e131b28383ec35db61097",
+      "copied_to_repository": false
+    },
+    {
+      "path": "Software2D-compact.png",
+      "bytes": 91056,
+      "sha256": "45ed32f4424679216d493821bad50bec70e1aecd63f47e583f57de5969370d33",
+      "copied_to_repository": false
+    },
+    {
+      "path": "Software2D-corner-smoothing-capture.json",
+      "bytes": 3305,
+      "sha256": "31fe6f438ac247161c79bee23de9f9f1f486b0dfa27a3829fda8d0be2570694f",
+      "copied_to_repository": false
+    },
+    {
+      "path": "Software2D-corner-smoothing.png",
+      "bytes": 79105,
+      "sha256": "76ee24f96ec0fec8a3a66162894c0fff0a32a0c7711cc979cc0274fb6af79963",
+      "copied_to_repository": false
+    },
+    {
+      "path": "Software2D-edited.png",
+      "bytes": 203691,
+      "sha256": "53483f1719780158e436ea7965926ef1ff1ae83d9b3e9d99a6611e76e5223e02",
+      "copied_to_repository": false
+    },
+    {
+      "path": "Software2D-export.png",
+      "bytes": 10440,
+      "sha256": "24fd62627518b3289bba7fadd56707cdac1962dcf27d92308e4d7b38f260b6e4",
+      "copied_to_repository": false
+    },
+    {
+      "path": "Software2D-gradient-entry-input.json",
+      "bytes": 186922,
+      "sha256": "c1b11512a64616c73d852bb379eb0fdc7e3535c09f290add4b5dd7c04f58b739",
+      "copied_to_repository": true
+    },
+    {
+      "path": "Software2D-gradient-handles-angular-capture.json",
+      "bytes": 3177,
+      "sha256": "999de174483712f2daf7aae4f6de9567f40fe3e315fe53a75d6aa1685c32c5d1",
+      "copied_to_repository": true
+    },
+    {
+      "path": "Software2D-gradient-handles-angular.png",
+      "bytes": 168350,
+      "sha256": "31f65ab2cfff97da02450d0bac0c8b6814948ff1b33d9a45c1e87a454c6a6c30",
+      "copied_to_repository": true
+    },
+    {
+      "path": "Software2D-gradient-handles-artwork.png",
+      "bytes": 569,
+      "sha256": "dbd679b6c0242d02ac9e8fbf2e4652428d328210a66fb4ee7764be09a2d58728",
+      "copied_to_repository": false
+    },
+    {
+      "path": "Software2D-gradient-handles-radial-capture.json",
+      "bytes": 3176,
+      "sha256": "1aeb3ddd16917b45e414a577f9b98a3969c005d4119f2898e394915ef12687e0",
+      "copied_to_repository": true
+    },
+    {
+      "path": "Software2D-gradient-handles-radial.png",
+      "bytes": 179562,
+      "sha256": "12a4810da7e9fa8a55ca03bf98175b693a2d4b212e0a793e7739cd582d96586f",
+      "copied_to_repository": true
+    },
+    {
+      "path": "Software2D-gradient-handles-tied-affine-capture.json",
+      "bytes": 3181,
+      "sha256": "31cbfa65d27a80b3ab84384886fd0a20f20ff6da734d96d1b51b2695261bcc9e",
+      "copied_to_repository": false
+    },
+    {
+      "path": "Software2D-gradient-handles-tied-affine.png",
+      "bytes": 128911,
+      "sha256": "e627a86e3b3911dfa47d49f9301198e0cdf0b647247c9b22f78a8e1f1b4a1b30",
+      "copied_to_repository": false
+    },
+    {
+      "path": "Software2D-gradient-handles-touch-input.json",
+      "bytes": 4875,
+      "sha256": "4bb21d29deadafb63576eecbc102423d681a91ed03fe0424c4b043196a430e02",
+      "copied_to_repository": false
+    },
+    {
+      "path": "Software2D-gradient-handles-translated-capture.json",
+      "bytes": 3184,
+      "sha256": "f4d54acaa68c92bc5438d8711fbf12bdbb4c78c018b16dc971ebf8a7c5f1a295",
+      "copied_to_repository": false
+    },
+    {
+      "path": "Software2D-gradient-handles-translated.png",
+      "bytes": 136741,
+      "sha256": "d54a39abde4e0f2fcf873f379d942f11039cc2165edd6538ab0f32672a44ceca",
+      "copied_to_repository": false
+    },
+    {
+      "path": "Software2D-gradient-held-save.ferrodesign",
+      "bytes": 9860,
+      "sha256": "8e35eb76c97a3b69099fb4e678bead70b88972f3560522a426f601a4be226155",
+      "copied_to_repository": false
+    },
+    {
+      "path": "Software2D-gradient-insertion-input.json",
+      "bytes": 80398,
+      "sha256": "067ae607292bf46a452390de99aa52a7ac2b007c85e184a314149716f25500e9",
+      "copied_to_repository": true
+    },
+    {
+      "path": "Software2D-guide-snapped-artwork-capture.json",
+      "bytes": 3176,
+      "sha256": "1103e4ce3337966394bf8fca1099bc8f0bac4f3479c0c04165adb750fa56c757",
+      "copied_to_repository": true
+    },
+    {
+      "path": "Software2D-guide-snapped-artwork.png",
+      "bytes": 69897,
+      "sha256": "7624bbaaf4910fc9ffcea96c3a1975cd8644a5ad270c8d0d80caa2c1dfa01133",
+      "copied_to_repository": true
+    },
+    {
+      "path": "Software2D-guide-variable-picker-capture.json",
+      "bytes": 6066,
+      "sha256": "b387aa857215fd8c9b9610b8c58cb145e524d4883c6a79af852286edca53f765",
+      "copied_to_repository": false
+    },
+    {
+      "path": "Software2D-guide-variable-picker.png",
+      "bytes": 108998,
+      "sha256": "572dc21a0fbf47e3a087bc54686ce7a718bce26019dfa1b732da6e03c0553817",
+      "copied_to_repository": false
+    },
+    {
+      "path": "Software2D-initial.png",
+      "bytes": 187960,
+      "sha256": "14ace8cd02acaec6fa68055c284956905ca52c999e268fec187018b657d52fe2",
+      "copied_to_repository": true
+    },
+    {
+      "path": "Software2D-inline-text.png",
+      "bytes": 82502,
+      "sha256": "b72b2b0a6e15460f1bfd75a0c324d2921a21b2224e6cbabb7f3a6e5e1f22145f",
+      "copied_to_repository": false
+    },
+    {
+      "path": "Software2D-large-document.png",
+      "bytes": 418680,
+      "sha256": "4ac776c876d17dc343a7cb9f9cdd40e1e40bb9fb936e35501403dc5fbf81e606",
+      "copied_to_repository": false
+    },
+    {
+      "path": "Software2D-many-pages.png",
+      "bytes": 46177,
+      "sha256": "98d840f2ae880b2c733643f7b7387b8e895ee47aa6bc2577dd1dcc2c4ee60237",
+      "copied_to_repository": false
+    },
+    {
+      "path": "Software2D-native-paragraph-authoring-capture.json",
+      "bytes": 13657,
+      "sha256": "6e9b8f10a116910c63ad6b2dea4e7638509281932be09c2dd3fd06820e6b3247",
+      "copied_to_repository": false
+    },
+    {
+      "path": "Software2D-native-paragraph-authoring.png",
+      "bytes": 108344,
+      "sha256": "d0f69d11d12de89931ad799c39ffa2e704972f9267d2cfdafced2e52e4b93da4",
+      "copied_to_repository": false
+    },
+    {
+      "path": "Software2D-native-paragraph-inline-capture.json",
+      "bytes": 13446,
+      "sha256": "4745e409dd11c3a0440969f43936449e48bd7696ac5e0e6fc9eeec6ad6586326",
+      "copied_to_repository": true
+    },
+    {
+      "path": "Software2D-native-paragraph-inline.png",
+      "bytes": 77754,
+      "sha256": "a00ab9b072dbe648ab4946b8449d3e00f9ada2be17917747afeb601ccf86a727",
+      "copied_to_repository": true
+    },
+    {
+      "path": "Software2D-native-paragraph-paste-input.json",
+      "bytes": 15613,
+      "sha256": "c5d75dc08e8fce64ac2a05c0334b5a75cbd1c4e5f4e58e141f5cbb479ee9e1f9",
+      "copied_to_repository": true
+    },
+    {
+      "path": "Software2D-native-paragraph-split-input.json",
+      "bytes": 57479,
+      "sha256": "e9ba67ac74858874d13634f00a5c8cd5b67606de2a648f5df9d892ee7600e617",
+      "copied_to_repository": true
+    },
+    {
+      "path": "Software2D-native-text-entry-input.json",
+      "bytes": 157458,
+      "sha256": "82dc545760d4a5716e1ff333476b6fc7e3396cd4cf1e7fa19f63668b7253f84f",
+      "copied_to_repository": false
+    },
+    {
+      "path": "Software2D-paint-stack-capture.json",
+      "bytes": 4730,
+      "sha256": "ff1c0f8649546a70a6ecdbfe777656d79bbd1ae1ebca239bb2c374474e56a5ef",
+      "copied_to_repository": false
+    },
+    {
+      "path": "Software2D-paint-stack.png",
+      "bytes": 151522,
+      "sha256": "30dfbbf8cbf5d9a845581b33f319864d2960150aa714ccd0d52e6228fc088679",
+      "copied_to_repository": false
+    },
+    {
+      "path": "Software2D-paragraph-artwork.png",
+      "bytes": 5288,
+      "sha256": "48b9565bd86be22f649df406be29a24f2b35727611cfa529b4b5e3ad19670802",
+      "copied_to_repository": false
+    },
+    {
+      "path": "Software2D-polygon-corner-radius-capture.json",
+      "bytes": 4046,
+      "sha256": "58e34fa597db23457a7cae19ce17fd3d20f86566938dfc15fdd6e6dbe6515c20",
+      "copied_to_repository": false
+    },
+    {
+      "path": "Software2D-polygon-corner-radius.png",
+      "bytes": 79222,
+      "sha256": "b7df9784463348581b437789c4f5c059d54551c1b3a2e9f9a68d5e527624c5dc",
+      "copied_to_repository": false
+    },
+    {
+      "path": "Software2D-polygon-corners-affine-star.xaml",
+      "bytes": 2658,
+      "sha256": "b1ec10b57c1210546321cb02e974af5239b0b9211ca74edacbe9c16a0c2a3c9d",
+      "copied_to_repository": false
+    },
+    {
+      "path": "Software2D-polygon-corners-triangle-coverage.json",
+      "bytes": 2827,
+      "sha256": "f03dc8a20cf7e36a9bf4921f6c70885522ee976858c8c314179387f72a3a6908",
+      "copied_to_repository": true
+    },
+    {
+      "path": "Software2D-polygon-corners-triangle.png",
+      "bytes": 2665,
+      "sha256": "a2a43d411bd53602f28f7c9aa9fd0c2eeacc46943808714aa86579d0c2877317",
+      "copied_to_repository": true
+    },
+    {
+      "path": "Software2D-polygon-corners-triangle.svg",
+      "bytes": 859,
+      "sha256": "4deb2fb86a042fd560a533de5dff27bdcdd1fbbf8181cad45c4b650ebff1bece",
+      "copied_to_repository": true
+    },
+    {
+      "path": "Software2D-polygon-corners-triangle.xaml",
+      "bytes": 1262,
+      "sha256": "33abd203cd2874f0de09077cc622f4f0797a70dfd2eafb08d0a76909d6316ce1",
+      "copied_to_repository": true
+    },
+    {
+      "path": "Software2D-radial-gradient-handles-artwork.png",
+      "bytes": 8333,
+      "sha256": "4aff9bc2fccaaaf40ad9fe03c6d65dfa12c7fc34909b1eb178306f3b0276ce81",
+      "copied_to_repository": false
+    },
+    {
+      "path": "Software2D-reloaded.png",
+      "bytes": 169965,
+      "sha256": "c517327ca3313bce1a5e31bf1d6538ea0ca4792257fa5bdc7159e082c3b399cc",
+      "copied_to_repository": false
+    },
+    {
+      "path": "Software2D-smoothed-corners.png",
+      "bytes": 2354,
+      "sha256": "9e291cc9a8238eb6e4a40a39efe23e2cb9bd1a6721a062c22a2e1aea3b673527",
+      "copied_to_repository": true
+    },
+    {
+      "path": "Software2D-smoothed-corners.svg",
+      "bytes": 1048,
+      "sha256": "a732be48d8bdc9a64455039a36fc5f37b2d31fbd2fe862019e0529256cfe82c9",
+      "copied_to_repository": true
+    },
+    {
+      "path": "Software2D-star-corner-radius-capture.json",
+      "bytes": 4017,
+      "sha256": "1670cd3931409ff8393f44480355c1c70402586c8c03b048bd9053ed70dfdd35",
+      "copied_to_repository": false
+    },
+    {
+      "path": "Software2D-star-corner-radius.png",
+      "bytes": 93311,
+      "sha256": "bc7c090bb71426198b39e684a456a88cd381f09c1bd6db10c048b3c001a8e177",
+      "copied_to_repository": false
+    },
+    {
+      "path": "Software2D-svg.png",
+      "bytes": 111444,
+      "sha256": "3b8f9851ae86207fe5ea69ffff2d8f2affa038dd141fd6698929b0766430fea4",
+      "copied_to_repository": false
+    },
+    {
+      "path": "Software2D-trace.zip",
+      "bytes": 41359724,
+      "sha256": "0b233ea0a86d2de14f5daacd632a79166c498b898e8be294c87541f9289ca316",
+      "copied_to_repository": false
+    },
+    {
+      "path": "Software2D-vector-edit.png",
+      "bytes": 83153,
+      "sha256": "5ec22265a7890583746f694e14308823b2280cf92222b5b2808a2d39f208742b",
+      "copied_to_repository": false
+    },
+    {
+      "path": "WebGL2-angular-gradient-handles-artwork.png",
+      "bytes": 7898,
+      "sha256": "f7e6d665123de327c04879f831430831a1f23729b63f5de9b4a471611928362c",
+      "copied_to_repository": false
+    },
+    {
+      "path": "WebGL2-angular-gradient-input.json",
+      "bytes": 122144,
+      "sha256": "fa6e4354cb5c2489ee8f4f08f070e16a5abe50a1743306890aede72c3b2f55bf",
+      "copied_to_repository": false
+    },
+    {
+      "path": "WebGL2-compact.png",
+      "bytes": 90803,
+      "sha256": "47faecf1b812b8cecaf058b181114ca98f16cf2c7302ff9cbcdb49a8bf43c674",
+      "copied_to_repository": false
+    },
+    {
+      "path": "WebGL2-corner-smoothing-capture.json",
+      "bytes": 3294,
+      "sha256": "81b672ba9ab0fbd49b1e332f4de22c0a953b6770ca84a005ecb9365cec472b68",
+      "copied_to_repository": false
+    },
+    {
+      "path": "WebGL2-corner-smoothing.png",
+      "bytes": 79258,
+      "sha256": "c97c6f956cd5e7fa321ad259e51dc18e4050f37402c74c318f3b9b9d105c53b8",
+      "copied_to_repository": false
+    },
+    {
+      "path": "WebGL2-edited.png",
+      "bytes": 203396,
+      "sha256": "3042957d6ea6ffc1a8c36ed3433b2b828da592725f1c1cb176c43f35bc1d810c",
+      "copied_to_repository": false
+    },
+    {
+      "path": "WebGL2-export.png",
+      "bytes": 10440,
+      "sha256": "24fd62627518b3289bba7fadd56707cdac1962dcf27d92308e4d7b38f260b6e4",
+      "copied_to_repository": false
+    },
+    {
+      "path": "WebGL2-gradient-entry-input.json",
+      "bytes": 187016,
+      "sha256": "c4f33d61e37562bdefd31771f3227e9f09f0d02b12d5607fc82905dd1f8287eb",
+      "copied_to_repository": true
+    },
+    {
+      "path": "WebGL2-gradient-handles-angular-capture.json",
+      "bytes": 3165,
+      "sha256": "5cfd6b6da930da139cfcf1ef5577641174ee0cf41aeb39110b39b559c25518c6",
+      "copied_to_repository": true
+    },
+    {
+      "path": "WebGL2-gradient-handles-angular.png",
+      "bytes": 168181,
+      "sha256": "212dab6d93d61212f4b3b04e81612b5d5a7e75adfe7724861558b8e2e6915020",
+      "copied_to_repository": true
+    },
+    {
+      "path": "WebGL2-gradient-handles-artwork.png",
+      "bytes": 569,
+      "sha256": "dbd679b6c0242d02ac9e8fbf2e4652428d328210a66fb4ee7764be09a2d58728",
+      "copied_to_repository": false
+    },
+    {
+      "path": "WebGL2-gradient-handles-radial-capture.json",
+      "bytes": 3165,
+      "sha256": "8a260e274ca942f72b74ddfbdeeb41385c518965e8f8899bbae49fd0e3f56823",
+      "copied_to_repository": true
+    },
+    {
+      "path": "WebGL2-gradient-handles-radial.png",
+      "bytes": 178956,
+      "sha256": "b248904d7c63ab28e3c963028f925a754c86e425107b6cb088978538c45e8029",
+      "copied_to_repository": true
+    },
+    {
+      "path": "WebGL2-gradient-handles-tied-affine-capture.json",
+      "bytes": 3169,
+      "sha256": "8005198cfa6446974157a7ad867a63bb85204c46b83ce775f65d8329cd379950",
+      "copied_to_repository": false
+    },
+    {
+      "path": "WebGL2-gradient-handles-tied-affine.png",
+      "bytes": 128085,
+      "sha256": "d6e25166057c9a0f73a29342962e5fdb2d368aa273f5d16a91231f8899111df7",
+      "copied_to_repository": false
+    },
+    {
+      "path": "WebGL2-gradient-handles-touch-input.json",
+      "bytes": 5022,
+      "sha256": "c866544b621e164323e5ba89d861d6b4abb1c519caf55e802e0d7b679a79b4c4",
+      "copied_to_repository": false
+    },
+    {
+      "path": "WebGL2-gradient-handles-translated-capture.json",
+      "bytes": 3173,
+      "sha256": "2edfc8e662ab8145e40ceaed0c90df66100e8ae9e3fdd6a9ac724f285c7918b0",
+      "copied_to_repository": false
+    },
+    {
+      "path": "WebGL2-gradient-handles-translated.png",
+      "bytes": 136312,
+      "sha256": "07be075e48e708b1ef4b48a91792b6dd66b95c76205d48f65982664fe98461d2",
+      "copied_to_repository": false
+    },
+    {
+      "path": "WebGL2-gradient-held-save.ferrodesign",
+      "bytes": 9860,
+      "sha256": "8e35eb76c97a3b69099fb4e678bead70b88972f3560522a426f601a4be226155",
+      "copied_to_repository": false
+    },
+    {
+      "path": "WebGL2-gradient-insertion-input.json",
+      "bytes": 80657,
+      "sha256": "83dac6cc803e7c3a053c17b33ba64f24ff1687b7b5dcd5ea62ea024cf1f3592c",
+      "copied_to_repository": true
+    },
+    {
+      "path": "WebGL2-guide-snapped-artwork-capture.json",
+      "bytes": 3164,
+      "sha256": "ca708dc49c6fdf51bc4c0fc2699f8b10615d8c86487c313b6423c737b45d97b4",
+      "copied_to_repository": true
+    },
+    {
+      "path": "WebGL2-guide-snapped-artwork.png",
+      "bytes": 70070,
+      "sha256": "85bc958e966a55d66f7b64e113fb8b309c33db1b7da41ca4600cfa831bb5f9b2",
+      "copied_to_repository": true
+    },
+    {
+      "path": "WebGL2-guide-variable-picker-capture.json",
+      "bytes": 6055,
+      "sha256": "dfb4f52262a4c59e7a3360bb2f0271dfabd1343e8b7a5273a92900ea65178265",
+      "copied_to_repository": false
+    },
+    {
+      "path": "WebGL2-guide-variable-picker.png",
+      "bytes": 108453,
+      "sha256": "abc3be0dedb22e1e89889e33b3e9eff757609a02ddb1e8968bdaabe4322855bf",
+      "copied_to_repository": false
+    },
+    {
+      "path": "WebGL2-initial.png",
+      "bytes": 187503,
+      "sha256": "6c8f778a92c2ff61c9c35649fe66272f4685b046c9a7765a214b0d0796592463",
+      "copied_to_repository": true
+    },
+    {
+      "path": "WebGL2-inline-text.png",
+      "bytes": 82407,
+      "sha256": "6373b2ae8ffab0a7289f6ece3f774501d87d8495273191be83bede2bae32cca6",
+      "copied_to_repository": false
+    },
+    {
+      "path": "WebGL2-many-pages.png",
+      "bytes": 46222,
+      "sha256": "59417b35202a40f58defde4f0cf47b9aca20b676dc17575843e391e4623f00c9",
+      "copied_to_repository": false
+    },
+    {
+      "path": "WebGL2-native-paragraph-authoring-capture.json",
+      "bytes": 13643,
+      "sha256": "d9e431a08f498659b391e0c929de66a22854cfa528ffaf3ebfcf5038c6c6f594",
+      "copied_to_repository": false
+    },
+    {
+      "path": "WebGL2-native-paragraph-authoring.png",
+      "bytes": 108970,
+      "sha256": "842ff38a1447bed919ee199d739ff37915a46a4ff0c3ab2d972d0a7e7a0d0dde",
+      "copied_to_repository": false
+    },
+    {
+      "path": "WebGL2-native-paragraph-inline-capture.json",
+      "bytes": 13429,
+      "sha256": "02cd671a3f0356791b59dc785ac4b783fa0b75a0be46a6d3186ff4670f8f0529",
+      "copied_to_repository": true
+    },
+    {
+      "path": "WebGL2-native-paragraph-inline.png",
+      "bytes": 77901,
+      "sha256": "5cb8bbc37e891a2ea026694675795c4d4aea3cd0504d93ed83421dd12924cb2d",
+      "copied_to_repository": true
+    },
+    {
+      "path": "WebGL2-native-paragraph-paste-input.json",
+      "bytes": 15618,
+      "sha256": "e6b6262414dc925821736f61addbc215015ab37d8ad8d33cdc1cb339fb232f0f",
+      "copied_to_repository": true
+    },
+    {
+      "path": "WebGL2-native-paragraph-split-input.json",
+      "bytes": 57440,
+      "sha256": "d55da55787e4d1d92bd578a974936bdd837d4ea371a43661ff74432a3076795e",
+      "copied_to_repository": true
+    },
+    {
+      "path": "WebGL2-native-text-entry-input.json",
+      "bytes": 157038,
+      "sha256": "eb17b4f08be974c65dedf7bed5ddb641f57a2d0eee1b29b93599d02fe22895de",
+      "copied_to_repository": false
+    },
+    {
+      "path": "WebGL2-paint-stack-capture.json",
+      "bytes": 4718,
+      "sha256": "6656212773cef9c0ee4cca2c9825c6120c7e4b9e439c1b266902a9ab40e10240",
+      "copied_to_repository": false
+    },
+    {
+      "path": "WebGL2-paint-stack.png",
+      "bytes": 146064,
+      "sha256": "2d044f1acaf2560469f134948b24f111194bbed4c1819a16befb710474ea069d",
+      "copied_to_repository": false
+    },
+    {
+      "path": "WebGL2-paragraph-artwork.png",
+      "bytes": 5288,
+      "sha256": "48b9565bd86be22f649df406be29a24f2b35727611cfa529b4b5e3ad19670802",
+      "copied_to_repository": false
+    },
+    {
+      "path": "WebGL2-polygon-corner-radius-capture.json",
+      "bytes": 4037,
+      "sha256": "fd9cfbc90dc9a0f9a0be12901f19727f2b59f442a33f7d529d668820ba1985bd",
+      "copied_to_repository": false
+    },
+    {
+      "path": "WebGL2-polygon-corner-radius.png",
+      "bytes": 79244,
+      "sha256": "2e29f462b5ac60614dbb2ab7a3f93327d71b057f768bd3eec07ea17247df83c3",
+      "copied_to_repository": false
+    },
+    {
+      "path": "WebGL2-polygon-corners-affine-star.xaml",
+      "bytes": 2658,
+      "sha256": "b1ec10b57c1210546321cb02e974af5239b0b9211ca74edacbe9c16a0c2a3c9d",
+      "copied_to_repository": false
+    },
+    {
+      "path": "WebGL2-polygon-corners-triangle-coverage.json",
+      "bytes": 2827,
+      "sha256": "f03dc8a20cf7e36a9bf4921f6c70885522ee976858c8c314179387f72a3a6908",
+      "copied_to_repository": true
+    },
+    {
+      "path": "WebGL2-polygon-corners-triangle.png",
+      "bytes": 2665,
+      "sha256": "a2a43d411bd53602f28f7c9aa9fd0c2eeacc46943808714aa86579d0c2877317",
+      "copied_to_repository": true
+    },
+    {
+      "path": "WebGL2-polygon-corners-triangle.svg",
+      "bytes": 859,
+      "sha256": "4deb2fb86a042fd560a533de5dff27bdcdd1fbbf8181cad45c4b650ebff1bece",
+      "copied_to_repository": true
+    },
+    {
+      "path": "WebGL2-polygon-corners-triangle.xaml",
+      "bytes": 1262,
+      "sha256": "33abd203cd2874f0de09077cc622f4f0797a70dfd2eafb08d0a76909d6316ce1",
+      "copied_to_repository": true
+    },
+    {
+      "path": "WebGL2-radial-gradient-handles-artwork.png",
+      "bytes": 8333,
+      "sha256": "4aff9bc2fccaaaf40ad9fe03c6d65dfa12c7fc34909b1eb178306f3b0276ce81",
+      "copied_to_repository": false
+    },
+    {
+      "path": "WebGL2-reloaded.png",
+      "bytes": 169713,
+      "sha256": "c21415d633e2b7614c63819caafcb91fc9675e0b09a080c0eca2bedbdf4e986b",
+      "copied_to_repository": false
+    },
+    {
+      "path": "WebGL2-smoothed-corners.png",
+      "bytes": 2354,
+      "sha256": "9e291cc9a8238eb6e4a40a39efe23e2cb9bd1a6721a062c22a2e1aea3b673527",
+      "copied_to_repository": true
+    },
+    {
+      "path": "WebGL2-smoothed-corners.svg",
+      "bytes": 1048,
+      "sha256": "a732be48d8bdc9a64455039a36fc5f37b2d31fbd2fe862019e0529256cfe82c9",
+      "copied_to_repository": true
+    },
+    {
+      "path": "WebGL2-star-corner-radius-capture.json",
+      "bytes": 4005,
+      "sha256": "fd3909d2aa1578f78e5b27a249113e75cabc31f6b9ef6d9703e297bc9d7eeba0",
+      "copied_to_repository": false
+    },
+    {
+      "path": "WebGL2-star-corner-radius.png",
+      "bytes": 93146,
+      "sha256": "d6b8ef490aeb5c42d4b165e9655384188575de98d843271837655e1bfbd3fe7a",
+      "copied_to_repository": false
+    },
+    {
+      "path": "WebGL2-svg.png",
+      "bytes": 160155,
+      "sha256": "1ff6eae7330981f6f6c5ed836cceeb285c36f7d20cbad71495251334b523cba0",
+      "copied_to_repository": false
+    },
+    {
+      "path": "WebGL2-trace.zip",
+      "bytes": 30532098,
+      "sha256": "1df941151a82ae8fcc49bd5a7d83940f1bd2104c7e7f8488ded38a6a3d0c72a4",
+      "copied_to_repository": false
+    },
+    {
+      "path": "WebGL2-vector-edit.png",
+      "bytes": 83729,
+      "sha256": "a3c550b9c7d19ae67f50357d3f6fc51c21c569caf48be32a66fbd82947dd6781",
+      "copied_to_repository": false
+    },
+    {
+      "path": "index.html",
+      "bytes": 1372456,
+      "sha256": "e2676175fb4752880ee0c1a0bf7822110894864f25bbb1f13ffb7ed1b66a0350",
+      "copied_to_repository": false
+    },
+    {
+      "path": "report.json",
+      "bytes": 1165341,
+      "sha256": "c8f355762a340ccc4feff77c79f5ebd567fd2f20930229834d1774f7074ee8ad",
+      "copied_to_repository": false
+    }
+  ],
+  "retained_trace_archives": [
+    {
+      "path": "Software2D-trace.zip",
+      "bytes": 41359724,
+      "sha256": "0b233ea0a86d2de14f5daacd632a79166c498b898e8be294c87541f9289ca316",
+      "copied_to_repository": false,
+      "crc_valid": true,
+      "storage": "Preserved original ZIP at the recorded local report directory; not duplicated in Git."
+    },
+    {
+      "path": "WebGL2-trace.zip",
+      "bytes": 30532098,
+      "sha256": "1df941151a82ae8fcc49bd5a7d83940f1bd2104c7e7f8488ded38a6a3d0c72a4",
+      "copied_to_repository": false,
+      "crc_valid": true,
+      "storage": "Preserved original ZIP at the recorded local report directory; not duplicated in Git."
+    }
+  ],
+  "lossless_compression": {
+    "format": "gzip",
+    "mtime": 0,
+    "report_uncompressed_sha256": "c8f355762a340ccc4feff77c79f5ebd567fd2f20930229834d1774f7074ee8ad",
+    "browser_log_uncompressed_sha256": "f66bc2ecc2e761666d19f118281b9bd8eefd940e8ad45223cab21d4121b3889f"
+  },
+  "cleanup_records": [
+    {
+      "record_path": "/tmp/ferrodesign-e99-extracted-runtime-cleanup.json",
+      "bytes": 10496,
+      "sha256": "8fcc9fb5d32b0271c0a698cbdfbaccd682fb135c1662ef78993142ebb65786b4",
+      "started_at": "2026-10-23T15:28:01.453506+00:00",
+      "completed_at": "2026-10-23T15:28:03.117430+00:00",
+      "disk_free_before": 298065920,
+      "disk_free_after": 456347648,
+      "scope": "Only redundant historical extracted distributions; retained original ZIP archives and all raw browser reports/evidence are preserved.",
+      "archives_preserved": true
+    },
+    {
+      "record_path": "/tmp/ferrodesign-e99-extracted-c549-runtime-cleanup.json",
+      "bytes": 4065,
+      "sha256": "cf10e9911c1c1a5d1b0f92267ada23ea808e9406b5ea4e0b23fd94fb1c9f0a09",
+      "started_at": "2026-10-23T15:32:27.568880+00:00",
+      "completed_at": "2026-10-23T15:32:28.309914+00:00",
+      "disk_free_before": 573902848,
+      "disk_free_after": 628404224,
+      "scope": "Only redundant historical extracted distributions; retained original ZIP archives and all raw browser reports/evidence are preserved.",
+      "archives_preserved": true
+    },
+    {
+      "record_path": "/tmp/ferrodesign-e99-emergency-crate-source-cleanup.json",
+      "bytes": 699853,
+      "sha256": "6932a97ef773f7694fda39ad0d3a8835e55581db9c6b2cc328337204e56e5420",
+      "started_at": "2026-10-23T15:40:49.171827+00:00",
+      "completed_at": "2026-10-23T15:40:51.990688+00:00",
+      "disk_free_before": 206090240,
+      "disk_free_after": 309776384,
+      "scope": "Shared disk exhausted during exact dc browser run; reclaim only ten verified unused unpacked crate sources, retaining original archives, binaries, toolchains and every raw browser artifact.",
+      "archives_preserved": true
+    }
+  ],
+  "resource_scope": "Shared host disk reached zero and memory reached its cgroup cap during the run; verified redundant owned files were reclaimed. Complete report and both CRC-valid traces were written, and no new OOM event/kill was recorded. This does not establish absence of scheduling pressure."
+}

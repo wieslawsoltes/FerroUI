@@ -1,0 +1,136 @@
+{
+  "name": "Software2D-guide-snapped-artwork",
+  "before": {
+    "view": {
+      "activePage": 1,
+      "selection": [
+        4
+      ],
+      "tool": "Select",
+      "pan": {
+        "x": 278.15978666666655,
+        "y": 309.5359999999999
+      },
+      "zoom": 1.2096853333333337,
+      "presentation": null,
+      "prototypeOverlays": [],
+      "imageCrop": null,
+      "layoutDrag": null,
+      "vectorNode": null,
+      "vectorPoint": null,
+      "modalVisible": false,
+      "controls": {
+        "CanvasHost": {
+          "arrangeValid": true,
+          "enabled": true,
+          "focusWithin": true,
+          "focused": false,
+          "height": 1000,
+          "measureValid": true,
+          "pointerOver": true,
+          "visible": true,
+          "width": 1016,
+          "x": 296,
+          "y": 0
+        }
+      }
+    },
+    "renderedFrames": 58,
+    "sceneFrames": 162,
+    "documentRevision": 47,
+    "fonts": {
+      "status": "loaded",
+      "faces": []
+    },
+    "surface": {
+      "kind": "Software2D",
+      "width": 1600,
+      "height": 1000,
+      "contextLost": false
+    },
+    "visibility": "visible",
+    "focus": {
+      "tag": "MAIN",
+      "id": "out"
+    },
+    "startupErrors": [],
+    "renderPanics": [],
+    "document": {
+      "sha256": "fe95c230d7bdb74e744798c9d84749ecdfe5c226a16c0eb2c3e13f80aa5bde43",
+      "bytes": 6426
+    }
+  },
+  "attempts": [
+    {
+      "attempt": 1,
+      "timeoutMs": 30000,
+      "pixels": {
+        "width": 1600,
+        "height": 1000,
+        "colors": 126
+      },
+      "after": {
+        "view": {
+          "activePage": 1,
+          "selection": [
+            4
+          ],
+          "tool": "Select",
+          "pan": {
+            "x": 278.15978666666655,
+            "y": 309.5359999999999
+          },
+          "zoom": 1.2096853333333337,
+          "presentation": null,
+          "prototypeOverlays": [],
+          "imageCrop": null,
+          "layoutDrag": null,
+          "vectorNode": null,
+          "vectorPoint": null,
+          "modalVisible": false,
+          "controls": {
+            "CanvasHost": {
+              "arrangeValid": true,
+              "enabled": true,
+              "focusWithin": true,
+              "focused": false,
+              "height": 1000,
+              "measureValid": true,
+              "pointerOver": true,
+              "visible": true,
+              "width": 1016,
+              "x": 296,
+              "y": 0
+            }
+          }
+        },
+        "renderedFrames": 58,
+        "sceneFrames": 162,
+        "documentRevision": 47,
+        "fonts": {
+          "status": "loaded",
+          "faces": []
+        },
+        "surface": {
+          "kind": "Software2D",
+          "width": 1600,
+          "height": 1000,
+          "contextLost": false
+        },
+        "visibility": "visible",
+        "focus": {
+          "tag": "MAIN",
+          "id": "out"
+        },
+        "startupErrors": [],
+        "renderPanics": [],
+        "document": {
+          "sha256": "fe95c230d7bdb74e744798c9d84749ecdfe5c226a16c0eb2c3e13f80aa5bde43",
+          "bytes": 6426
+        }
+      },
+      "status": "passed",
+      "durationMs": 246
+    }
+  ]
+}

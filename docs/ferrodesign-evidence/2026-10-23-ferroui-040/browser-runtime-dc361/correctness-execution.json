@@ -1,0 +1,241 @@
+{
+  "runtime_commit": "dc36199693472ac8297bafdaad6d4a0701acddf0",
+  "harness_commit": "dc36199693472ac8297bafdaad6d4a0701acddf0",
+  "source_tree": "57c2625a948b9401b9517b2724b2715d8e7ca92b",
+  "input_manifest": "/tmp/ferrodesign-e99-dc361-browser-inputs.json",
+  "input_manifest_sha256": "9d95e3adff8a0c59b5ffcbf0ba8ae468b33a92c64979ce00aeae930afc3c3edc",
+  "frozen_harness": "/tmp/ferrodesign-e99-harness-dc361",
+  "verified_harness_files": 56,
+  "workflow_run": 39976024338,
+  "artifact_verification": {
+    "path": "/tmp/ferrodesign-e99-browser-dc361-provenance.json",
+    "sha256": "bdbf0684d8ac6c7522fb01edcb47a97d3b808a0ab11fbcf1de4f7d8e6b0c8cea"
+  },
+  "delivery_verification": {
+    "path": "/tmp/ferrodesign-e99-browser-dc361-delivery.json",
+    "sha256": "eb75699f7e9a3d6e0c282e5791554febb4808b6cefe5645f208aa349c8f9719a"
+  },
+  "native_readiness": {
+    "run_id": 39976024451,
+    "job_id": 120490704088,
+    "shared_paragraph_native_editing": "success",
+    "unhinted_renderer": "success",
+    "required_gpu": "success",
+    "evidence_scope": "Completed step status reported by native CI owner; closed detailed logs packaged separately."
+  },
+  "correctness": {
+    "scope_full": false,
+    "modes": [
+      "Software2D",
+      "WebGL2"
+    ],
+    "scenarios": [
+      "corners",
+      "polygon-corners",
+      "gradient-handles",
+      "paragraphs",
+      "guide-bindings"
+    ],
+    "log": "/tmp/ferrodesign-e99-browser-dc361-focused.log",
+    "report_directory": "/tmp/ferrodesign-e99-browser-dc361-focused-report",
+    "prepared_at": "2026-10-23T15:26:04.982067+00:00",
+    "prelaunch_resources": {
+      "utc": "2026-10-23T15:25:50.041804+00:00",
+      "owned_browser_or_task_tool_processes": [],
+      "disk_free": 663273472,
+      "memory_current": 4775464960,
+      "memory_stat": {
+        "anon": 1312268288,
+        "file": 2865594368,
+        "inactive_file": 1143898112,
+        "slab_reclaimable": 579941744
+      },
+      "memory_events": "low 0\nhigh 0\nmax 4225667\noom 74\noom_kill 6\noom_group_kill 0\n",
+      "process_scan_scope": "Restricted execution namespace; complete task-browser ownership was recorded separately after launch using host-visible /proc."
+    },
+    "command": [
+      "/opt/codex/runtimes/codex-primary-runtime/dependencies/node/bin/node",
+      "tests/browser.mjs"
+    ],
+    "working_directory": "/tmp/ferrodesign-e99-harness-dc361",
+    "environment": {
+      "FERRODESIGN_DIST": "/tmp/ferrodesign-e99-browser-dc361",
+      "FERRODESIGN_CHROMIUM": "/tmp/ferrodesign-e99-browsers/chrome-linux64/chrome",
+      "FERRODESIGN_REPORT": "/tmp/ferrodesign-e99-browser-dc361-focused-report",
+      "FERRODESIGN_MODES": "Software2D,WebGL2",
+      "FERRODESIGN_SCENARIOS": "corners,polygon-corners,gradient-handles,paragraphs,guide-bindings"
+    },
+    "exec_session_id": 48102,
+    "launched_at": "2026-10-23T15:26:24.950866+00:00",
+    "initial_owned_processes": [
+      {
+        "pid": 267607,
+        "exe": "/opt/codex/runtimes/codex-primary-runtime/dependencies/node/bin/node",
+        "args": [
+          "/opt/codex/runtimes/codex-primary-runtime/dependencies/node/bin/node",
+          "tests/browser.mjs"
+        ]
+      },
+      {
+        "pid": 267619,
+        "exe": "/tmp/ferrodesign-e99-browsers/chrome-linux64/chrome",
+        "args": [
+          "/tmp/ferrodesign-e99-browsers/chrome-linux64/chrome",
+          "--disable-field-trial-config",
+          "--disable-background-networking",
+          "--disable-background-timer-throttling",
+          "--disable-backgrounding-occluded-windows",
+          "--disable-back-forward-cache",
+          "--disable-breakpad",
+          "--disable-client-side-phishing-detection",
+          "--disable-component-extensions-with-background-pages",
+          "--disable-component-update",
+          "--no-default-browser-check",
+          "--disable-default-apps",
+          "--disable-dev-shm-usage",
+          "--disable-edgeupdater",
+          "--disable-extensions",
+          "--disable-features=AvoidUnnecessaryBeforeUnloadCheckSync,DestroyProfileOnBrowserClose,DialMediaRouteProvider,GlobalMediaControls,HttpsUpgrades,LensOverlay,MediaRouter,PaintHolding,ThirdPartyStoragePartitioning,BlockOriginHeaderModificationOnRedirect,AvoidCorsURLLoaderRestartOnRedirect,Translate,AutoDeElevate,OptimizationHints,NetworkTimeServiceQuerying,AimEnabled,msForceBrowserSignIn,msEdgeUpdateLaunchServicesPreferredVersion",
+          "--enable-features=CDPScreenshotNewSurface",
+          "--allow-pre-commit-input",
+          "--disable-hang-monitor",
+          "--disable-ipc-flooding-protection",
+          "--disable-popup-blocking",
+          "--disable-prompt-on-repost",
+          "--disable-renderer-backgrounding",
+          "--disable-updater-scheduler",
+          "--force-color-profile=srgb",
+          "--metrics-recording-only",
+          "--no-first-run",
+          "--password-store=basic",
+          "--use-mock-keychain",
+          "--no-service-autorun",
+          "--export-tagged-pdf",
+          "--disable-search-engine-choice-screen",
+          "--unsafely-disable-devtools-self-xss-warnings",
+          "--edge-skip-compat-layer-relaunch",
+          "--disable-infobars",
+          "--disable-search-engine-choice-screen",
+          "--disable-sync",
+          "--enable-unsafe-swiftshader",
+          "--headless",
+          "--hide-scrollbars",
+          "--mute-audio",
+          "--blink-settings=primaryHoverType=2,availableHoverTypes=2,primaryPointerType=4,availablePointerTypes=4",
+          "--no-sandbox",
+          "--use-gl=angle",
+          "--use-angle=swiftshader",
+          "--enable-unsafe-swiftshader",
+          "--ignore-gpu-blocklist",
+          "--user-data-dir=/tmp/playwright_chromiumdev_profile-ylTHkz",
+          "--remote-debugging-pipe",
+          "--no-startup-window"
+        ]
+      },
+      {
+        "pid": 267621,
+        "exe": "/tmp/ferrodesign-e99-browsers/chrome-linux64/chrome_crashpad_handler",
+        "args": [
+          "/tmp/ferrodesign-e99-browsers/chrome-linux64/chrome_crashpad_handler",
+          "--monitor-self",
+          "--monitor-self-annotation=ptype=crashpad-handler",
+          "--user-stream-region=6,65568",
+          "--database=/root/.config/google-chrome-for-testing/Crash Reports",
+          "--annotation=lsb-release=Ubuntu 24.04.3 LTS",
+          "--annotation=plat=Linux",
+          "--annotation=prod=Chrome_Linux",
+          "--annotation=ver=156.0.8078.4",
+          "--initial-client-fd=9",
+          "--shared-client-connection"
+        ]
+      },
+      {
+        "pid": 267623,
+        "exe": "/tmp/ferrodesign-e99-browsers/chrome-linux64/chrome_crashpad_handler",
+        "args": [
+          "/tmp/ferrodesign-e99-browsers/chrome-linux64/chrome_crashpad_handler",
+          "--no-periodic-tasks",
+          "--monitor-self-annotation=ptype=crashpad-handler",
+          "--database=/root/.config/google-chrome-for-testing/Crash Reports",
+          "--annotation=lsb-release=Ubuntu 24.04.3 LTS",
+          "--annotation=plat=Linux",
+          "--annotation=prod=Chrome_Linux",
+          "--annotation=ver=156.0.8078.4",
+          "--initial-client-fd=4",
+          "--shared-client-connection"
+        ]
+      },
+      {
+        "pid": 267626,
+        "exe": "/tmp/ferrodesign-e99-browsers/chrome-linux64/chrome",
+        "args": [
+          "/tmp/ferrodesign-e99-browsers/chrome-linux64/chrome --type=zygote --no-zygote-sandbox --no-sandbox --headless --crashpad-handler-pid=0 --enable-crash-reporter=, --noerrdialogs --user-data-dir=/tmp/playwright_chromiumdev_profile-ylTHkz --change-stack-guard-on-fork=enable --no-first-run --ozone-platform=headless --ozone-override-screen-size=800,600 --use-angle=swiftshader-webgl"
+        ]
+      },
+      {
+        "pid": 267627,
+        "exe": "/tmp/ferrodesign-e99-browsers/chrome-linux64/chrome",
+        "args": [
+          "/tmp/ferrodesign-e99-browsers/chrome-linux64/chrome --type=zygote --no-sandbox --headless --crashpad-handler-pid=0 --enable-crash-reporter=, --noerrdialogs --user-data-dir=/tmp/playwright_chromiumdev_profile-ylTHkz --change-stack-guard-on-fork=enable --no-first-run --ozone-platform=headless --ozone-override-screen-size=800,600 --use-angle=swiftshader-webgl"
+        ]
+      },
+      {
+        "pid": 267647,
+        "exe": "/tmp/ferrodesign-e99-browsers/chrome-linux64/chrome",
+        "args": [
+          "/tmp/ferrodesign-e99-browsers/chrome-linux64/chrome --type=gpu-process --gpu-recent-crash-count=0 --no-sandbox --disable-dev-shm-usage --disable-breakpad --headless --ozone-platform=headless --use-angle=swiftshader --enable-unsafe-swiftshader --crashpad-handler-pid=0 --enable-crash-reporter=, --noerrdialogs --user-data-dir=/tmp/playwright_chromiumdev_profile-ylTHkz --change-stack-guard-on-fork=enable --gpu-preferences=YAAAAAAAAAAgAAAMAAAAAAAAAAAAAGAASAAAAAAAAAABAAAAAAAAAEAAAAAAAAAAAAAAAAAAAAACAAAAAAAAAAAAAAAAAAAAMAAAAAAAAAAwAAAAAAAAAAAAAAAAAAAACAAAAAAAAAAMAAAAAQAAAAAAAAAAAAAACAAAAAAAAAAIAAAAAAAAAA== --use-gl=angle --shared-files --field-trial-handle=3,i,7567013052018942379,17988690224568711871,262144 --enable-features=CDPScreenshotNewSurface --disable-features=AimEnabled,AutoDeElevate,AvoidCorsURLLoaderRestartOnRedirect,AvoidUnnecessaryBeforeUnloadCheckSync,BlockOriginHeaderModificationOnRedirect,DestroyProfileOnBrowserClose,DialMediaRouteProvider,GlobalMediaControls,HttpsUpgrades,LensOverlay,MediaRouter,NetworkTimeServiceQuerying,OptimizationHints,PaintHolding,ThirdPartyStoragePartitioning,Translate,msEdgeUpdateLaunchServicesPreferredVersion,msForceBrowserSignIn --variations-seed-version --pseudonymization-salt-handle=7,i,5387315197432494502,8286548630516316249,4 --trace-process-track-uuid=3190708988185955192"
+        ]
+      },
+      {
+        "pid": 267650,
+        "exe": "/tmp/ferrodesign-e99-browsers/chrome-linux64/chrome",
+        "args": [
+          "/tmp/ferrodesign-e99-browsers/chrome-linux64/chrome --type=utility --utility-sub-type=network.mojom.NetworkService --lang=en-US --service-sandbox-type=none --no-sandbox --disable-dev-shm-usage --use-angle=swiftshader --use-gl=angle --mute-audio --crashpad-handler-pid=0 --enable-crash-reporter=, --noerrdialogs --user-data-dir=/tmp/playwright_chromiumdev_profile-ylTHkz --change-stack-guard-on-fork=enable --shared-files=v8_context_snapshot_data:100 --field-trial-handle=3,i,7567013052018942379,17988690224568711871,262144 --enable-features=CDPScreenshotNewSurface --disable-features=AimEnabled,AutoDeElevate,AvoidCorsURLLoaderRestartOnRedirect,AvoidUnnecessaryBeforeUnloadCheckSync,BlockOriginHeaderModificationOnRedirect,DestroyProfileOnBrowserClose,DialMediaRouteProvider,GlobalMediaControls,HttpsUpgrades,LensOverlay,MediaRouter,NetworkTimeServiceQuerying,OptimizationHints,PaintHolding,ThirdPartyStoragePartitioning,Translate,msEdgeUpdateLaunchServicesPreferredVersion,msForceBrowserSignIn --variations-seed-version --pseudonymization-salt-handle=7,i,5387315197432494502,8286548630516316249,4 --trace-process-track-uuid=3190708989122997041"
+        ]
+      },
+      {
+        "pid": 267669,
+        "exe": "/tmp/ferrodesign-e99-browsers/chrome-linux64/chrome",
+        "args": [
+          "/tmp/ferrodesign-e99-browsers/chrome-linux64/chrome --type=utility --utility-sub-type=storage.mojom.StorageService --lang=en-US --service-sandbox-type=utility --no-sandbox --disable-dev-shm-usage --use-angle=swiftshader --use-gl=angle --mute-audio --crashpad-handler-pid=0 --enable-crash-reporter=, --noerrdialogs --user-data-dir=/tmp/playwright_chromiumdev_profile-ylTHkz --change-stack-guard-on-fork=enable --shared-files=v8_context_snapshot_data:100 --field-trial-handle=3,i,7567013052018942379,17988690224568711871,262144 --enable-features=CDPScreenshotNewSurface --disable-features=AimEnabled,AutoDeElevate,AvoidCorsURLLoaderRestartOnRedirect,AvoidUnnecessaryBeforeUnloadCheckSync,BlockOriginHeaderModificationOnRedirect,DestroyProfileOnBrowserClose,DialMediaRouteProvider,GlobalMediaControls,HttpsUpgrades,LensOverlay,MediaRouter,NetworkTimeServiceQuerying,OptimizationHints,PaintHolding,ThirdPartyStoragePartitioning,Translate,msEdgeUpdateLaunchServicesPreferredVersion,msForceBrowserSignIn --variations-seed-version --pseudonymization-salt-handle=7,i,5387315197432494502,8286548630516316249,4 --trace-process-track-uuid=3190708990060038890"
+        ]
+      },
+      {
+        "pid": 267729,
+        "exe": "/tmp/ferrodesign-e99-browsers/chrome-linux64/chrome",
+        "args": [
+          "/tmp/ferrodesign-e99-browsers/chrome-linux64/chrome --type=renderer --top-chrome-webui --crashpad-handler-pid=0 --enable-crash-reporter=, --noerrdialogs --user-data-dir=/tmp/playwright_chromiumdev_profile-ylTHkz --change-stack-guard-on-fork=enable --no-sandbox --disable-dev-shm-usage --disable-back-forward-cache --disable-background-timer-throttling --disable-breakpad --force-color-profile=srgb --remote-debugging-pipe --allow-pre-commit-input --blink-settings=primaryHoverType=2,availableHoverTypes=2,primaryPointerType=4,availablePointerTypes=4 --ozone-platform=headless --lang=en-US --num-raster-threads=4 --enable-main-frame-before-activation --renderer-client-id=5 --launch-time-ticks=19837541446 --shared-files=v8_context_snapshot_data:100 --field-trial-handle=3,i,7567013052018942379,17988690224568711871,262144 --enable-features=CDPScreenshotNewSurface --disable-features=AimEnabled,AutoDeElevate,AvoidCorsURLLoaderRestartOnRedirect,AvoidUnnecessaryBeforeUnloadCheckSync,BlockOriginHeaderModificationOnRedirect,DestroyProfileOnBrowserClose,DialMediaRouteProvider,GlobalMediaControls,HttpsUpgrades,LensOverlay,MediaRouter,NetworkTimeServiceQuerying,OptimizationHints,PaintHolding,ThirdPartyStoragePartitioning,Translate,msEdgeUpdateLaunchServicesPreferredVersion,msForceBrowserSignIn --variations-seed-version --pseudonymization-salt-handle=7,i,5387315197432494502,8286548630516316249,4 --trace-process-track-uuid=3190708990997080739"
+        ]
+      },
+      {
+        "pid": 267761,
+        "exe": "/tmp/ferrodesign-e99-browsers/chrome-linux64/chrome",
+        "args": [
+          "/tmp/ferrodesign-e99-browsers/chrome-linux64/chrome --type=renderer --crashpad-handler-pid=0 --enable-crash-reporter=, --noerrdialogs --user-data-dir=/tmp/playwright_chromiumdev_profile-ylTHkz --change-stack-guard-on-fork=enable --no-sandbox --disable-dev-shm-usage --disable-back-forward-cache --disable-background-timer-throttling --disable-breakpad --force-color-profile=srgb --remote-debugging-pipe --allow-pre-commit-input --blink-settings=primaryHoverType=2,availableHoverTypes=2,primaryPointerType=4,availablePointerTypes=4 --ozone-platform=headless --lang=en-US --num-raster-threads=4 --enable-main-frame-before-activation --renderer-client-id=7 --launch-time-ticks=19837700433 --shared-files=v8_context_snapshot_data:100 --field-trial-handle=3,i,7567013052018942379,17988690224568711871,262144 --enable-features=CDPScreenshotNewSurface --disable-features=AimEnabled,AutoDeElevate,AvoidCorsURLLoaderRestartOnRedirect,AvoidUnnecessaryBeforeUnloadCheckSync,BlockOriginHeaderModificationOnRedirect,DestroyProfileOnBrowserClose,DialMediaRouteProvider,GlobalMediaControls,HttpsUpgrades,LensOverlay,MediaRouter,NetworkTimeServiceQuerying,OptimizationHints,PaintHolding,ThirdPartyStoragePartitioning,Translate,msEdgeUpdateLaunchServicesPreferredVersion,msForceBrowserSignIn --variations-seed-version --pseudonymization-salt-handle=7,i,5387315197432494502,8286548630516316249,4 --trace-process-track-uuid=3190708992871164437"
+        ]
+      },
+      {
+        "pid": 267763,
+        "exe": "/tmp/ferrodesign-e99-browsers/chrome-linux64/chrome",
+        "args": [
+          "/tmp/ferrodesign-e99-browsers/chrome-linux64/chrome --type=renderer --crashpad-handler-pid=0 --enable-crash-reporter=, --noerrdialogs --user-data-dir=/tmp/playwright_chromiumdev_profile-ylTHkz --change-stack-guard-on-fork=enable --no-sandbox --disable-dev-shm-usage --disable-back-forward-cache --disable-background-timer-throttling --disable-breakpad --force-color-profile=srgb --remote-debugging-pipe --allow-pre-commit-input --blink-settings=primaryHoverType=2,availableHoverTypes=2,primaryPointerType=4,availablePointerTypes=4 --ozone-platform=headless --lang=en-US --num-raster-threads=4 --enable-main-frame-before-activation --renderer-client-id=6 --launch-time-ticks=19837708413 --shared-files=v8_context_snapshot_data:100 --field-trial-handle=3,i,7567013052018942379,17988690224568711871,262144 --enable-features=CDPScreenshotNewSurface --disable-features=AimEnabled,AutoDeElevate,AvoidCorsURLLoaderRestartOnRedirect,AvoidUnnecessaryBeforeUnloadCheckSync,BlockOriginHeaderModificationOnRedirect,DestroyProfileOnBrowserClose,DialMediaRouteProvider,GlobalMediaControls,HttpsUpgrades,LensOverlay,MediaRouter,NetworkTimeServiceQuerying,OptimizationHints,PaintHolding,ThirdPartyStoragePartitioning,Translate,msEdgeUpdateLaunchServicesPreferredVersion,msForceBrowserSignIn --variations-seed-version --pseudonymization-salt-handle=7,i,5387315197432494502,8286548630516316249,4 --trace-process-track-uuid=3190708991934122588"
+        ]
+      }
+    ],
+    "owned_process_snapshot_at": "2026-10-23T15:26:40.839839+00:00",
+    "owned_process_snapshot_scope": "Host-visible /proc read with elevated filesystem visibility; filtered exclusively to this task browser executable or exact frozen runner.",
+    "exit_code": 0,
+    "report_passed": true,
+    "post_run_harness_files_verified": 56,
+    "post_run_runtime_payloads_verified": 17,
+    "owned_processes_after_exit": [],
+    "report_sha256": "c8f355762a340ccc4feff77c79f5ebd567fd2f20930229834d1774f7074ee8ad",
+    "resources_after_exit": {
+      "disk_free_bytes": 308908032,
+      "memory_current_bytes": 2808098816,
+      "memory_events": "low 0\nhigh 0\nmax 4232664\noom 74\noom_kill 6\noom_group_kill 0\n"
+    },
+    "completion_verified_at": "2026-10-23T15:41:27.729498+00:00",
+    "report_file_modified_at": "2026-10-23T15:40:09.936095+00:00"
+  }
+}

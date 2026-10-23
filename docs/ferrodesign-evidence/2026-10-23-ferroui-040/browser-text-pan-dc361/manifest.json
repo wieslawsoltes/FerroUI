@@ -1,0 +1,86 @@
+{
+  "algorithm": "SHA-256",
+  "scope": "All files in this evidence folder except this manifest itself.",
+  "files": [
+    {
+      "path": "README.md",
+      "bytes": 7235,
+      "sha256": "f16fe6fac372964509cb11b42e29bf334425cdd4a71f5b50d831d39a0f596fa3"
+    },
+    {
+      "path": "benchmark.log.gz",
+      "bytes": 4767,
+      "sha256": "e7d2083c02b9a314d0d0f4351285c1d139018c362aa51c011a0af2a6a318ff02"
+    },
+    {
+      "path": "current-Software2D-pan-trace-summary.json.gz",
+      "bytes": 10499,
+      "sha256": "8211b94489375c6bab5abcd96cfff75eebb4b7b2d2594c71f15ea75efee7d531"
+    },
+    {
+      "path": "current-Software2D-pan-trace.json.gz",
+      "bytes": 241381,
+      "sha256": "0fa6718151eea487fbc549a6d585b31d00c0c18896d9c3b10d268ab311771950"
+    },
+    {
+      "path": "current-Software2D-text.png",
+      "bytes": 413661,
+      "sha256": "f5ff3e9ab116f7e1f0bab777a380a688ec063f3183e6bab740ce3b3198c13527"
+    },
+    {
+      "path": "current-WebGL2-pan-trace-summary.json.gz",
+      "bytes": 10193,
+      "sha256": "81a8644d6c52bb2433b960d6d3c5a65bbce5ff38aeab5d876edb132ad1233c59"
+    },
+    {
+      "path": "current-WebGL2-pan-trace.json.gz",
+      "bytes": 263651,
+      "sha256": "996db2880fe508a5039e0f3034b29c694093e7671c3a45e8523689a12e412928"
+    },
+    {
+      "path": "current-WebGL2-text.png",
+      "bytes": 412907,
+      "sha256": "d9cf56a030801fc99609ff33fe94cd1ab1f4189f26a02fb8a46d52239fa86c91"
+    },
+    {
+      "path": "execution-provenance.json",
+      "bytes": 36348,
+      "sha256": "e89409de63afe494c5d4d9ff85efe18a28be33c11604950aa3b47d7d0fb2e309"
+    },
+    {
+      "path": "fixture.json.gz",
+      "bytes": 3875,
+      "sha256": "7a2e9ccb651176219eccc9b7307a5e6a4cf186a7598e8d5491d1748439e5ec95"
+    },
+    {
+      "path": "provenance.json",
+      "bytes": 3715,
+      "sha256": "bd87efb3ccec2ee65820514664bb107a83cd64953e613e55c579fa5bc2520228"
+    },
+    {
+      "path": "report.json.gz",
+      "bytes": 38194,
+      "sha256": "3b5b9df61e24cbc027e121f33608552327a3cd3cd1d4ed683dcbb4f1bc2e6445"
+    },
+    {
+      "path": "source-provenance.json",
+      "bytes": 10993,
+      "sha256": "2928c94a29a3ba94a4210eaf15e2bd6e5376ac2b67f10c83c3ae414821556265"
+    },
+    {
+      "path": "summary.json",
+      "bytes": 9461,
+      "sha256": "e216a0e101a04cc8d854cb4b8462ce5d5172273c7af2289ed752c476241ddf3f"
+    },
+    {
+      "path": "trace-reanalysis.json",
+      "bytes": 2776,
+      "sha256": "7c7ae9aa118d0fcaa3cd7d850bde8e3ccba13d4700ae32f6501780f4e08d1751"
+    },
+    {
+      "path": "verification.json",
+      "bytes": 4572,
+      "sha256": "699df198f170c898b560a45f8145e0c2ed2d9f31c193a5d6f458114409b98ad2"
+    }
+  ]
+}

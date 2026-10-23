@@ -2,6 +2,54 @@
 
 This file distinguishes implemented paths, completed checks and measurements. Each observation belongs to its stated source, runtime and run; older successful runs do not validate later changes. The branch incorporates FerroUI `934b9ce1` / `0.4.0` and uses Vello for every application target through public FerroUI APIs. [PR #254](https://github.com/wieslawsoltes/FerroUI/pull/254) collects the complete source and current review status. Current continuation evidence is recorded first; earlier checkpoints remain below with their original scope.
 
+## Selected browser replay and strict text-pan measurement at dc361996 (2026-10-23)
+
+The exact `dc361996` native WASM and frozen 56-file harness completed **all ten
+selected scenario executions**, with **57 Software2D / 54 WebGL2 named checks**
+including their ordinary common gates. Corners, polygon/star rounding, gradient
+handles, paragraphs and guide bindings passed in both modes. Both mode reports
+had no page/console errors and zero reported unsupported effects. The process
+exited 0; all 17 runtime payloads and frozen harness hashes matched again, both
+trace ZIPs passed CRC validation, and all owned processes closed.
+[The full report, exact input records and screenshots](../../../docs/ferrodesign-evidence/2026-10-23-ferroui-040/browser-runtime-dc361/README.md)
+retain the selected `scope.full: false` boundary.
+
+This run preserves a visible defect: the paragraph screenshots show missing
+Hebrew and crab glyphs despite successful Unicode editing and history checks.
+Those interaction results do not establish font coverage. Any fallback-font
+change requires a separately built runtime and actual glyph/color validation.
+
+The independent [strict text-pan benchmark](../../../docs/ferrodesign-evidence/2026-10-23-ferroui-040/browser-text-pan-dc361/README.md)
+then completed **36 normal samples after 12 warmups plus six separate trace
+samples per mode**, with graceful BrowserServer close and owned exit code 0.
+All 72 normal samples recorded one frame and presentation increment, 150 visible
+cached labels, and zero preparation, visual-rebuild or layer-projection deltas.
+Every saved timing distribution was independently recomputed; both raw traces
+reproduced their complete saved analyses.
+
+| Dispatch-start interval, median / p95 ms | Software2D | WebGL2 / SwiftShader |
+| --- | ---: | ---: |
+| Native frame observed at the expected camera | 13.574 / 25.093 | 20.063 / 762.638 |
+| Public native presentation counter observed | 85.708 / 147.308 | 91.494 / 769.325 |
+| Observation after two subsequent animation callbacks | 112.115 / 263.382 | 1,028.619 / 1,716.649 |
+
+These rows share the dispatch-start origin and must not be added together.
+They include host input dispatch, bridge work, scheduling and observation; the
+presentation counter and animation callbacks do not establish GPU or display
+completion. The high WebGL2 tails remain in the result. No baseline comparison,
+speed threshold, FPS claim or physical-GPU measurement was made.
+
+The separate full `b5008093` CI run has retained failures: its Software2D
+paragraph scenario entered a second native editing session with the text
+already replaced by LF, and its data job required forced browser termination
+after completing the benchmark cohorts. The local successful shutdown above
+does not erase the CI failure. [The original paragraph failure and reviewed
+entry correction](../../../docs/ferrodesign-evidence/2026-10-23-ferroui-040/paragraph-entry-b500/README.md)
+record how a native double-click could already open the TextBox before an
+unconditional extra Enter. Published `f8f30173` checks actual editing state and
+preserves complete text/styles/history before navigation; all original caret,
+split and undo assertions remain. Its own browser replay is a separate gate.
+
 ## First-preedit native execution and correction (2026-10-23)
 
 **The corrected `dc361996` native feedback run passed completely.** The closed
