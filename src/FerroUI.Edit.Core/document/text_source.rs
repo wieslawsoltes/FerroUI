@@ -1,5 +1,9 @@
-use super::{DocumentError, DocumentLine, DocumentVersion, ITextSourceVersion, TextLocation};
-use crate::utils::Utf16Rope;
+use super::{
+    DocumentError, DocumentLine, DocumentVersion, ISegment, ITextSourceVersion, TextComparison,
+    TextLocation, Utf16TextWriter,
+};
+use crate::utils::{RopeTextReader, Utf16Memory, Utf16Rope};
+use std::io;
 use std::sync::Arc;
 
 /// Read-only UTF-16 text source. Snapshot values are `Send + Sync`; the mutable
@@ -25,6 +29,132 @@ pub trait ITextSource {
     fn text(&self) -> String {
         self.create_snapshot().text()
     }
+    // Each operation captures one snapshot before invoking any external sink.
+    fn get_text_as_memory(
+        &self,
+        offset: usize,
+        length: usize,
+    ) -> Result<Utf16Memory, DocumentError> {
+        self.create_snapshot().get_text_as_memory(offset, length)
+    }
+    fn get_text_segment(&self, segment: &dyn ISegment) -> Result<String, DocumentError> {
+        self.create_snapshot().get_text_segment(segment)
+    }
+    fn create_reader(&self) -> RopeTextReader {
+        self.create_snapshot().create_reader()
+    }
+    fn create_reader_range(
+        &self,
+        offset: usize,
+        length: usize,
+    ) -> Result<RopeTextReader, DocumentError> {
+        self.create_snapshot().create_reader_range(offset, length)
+    }
+    fn write_text_to(&self, writer: &mut dyn Utf16TextWriter) -> io::Result<()> {
+        self.create_snapshot().write_text_to(writer)
+    }
+    fn write_text_range_to(
+        &self,
+        writer: &mut dyn Utf16TextWriter,
+        offset: usize,
+        length: usize,
+    ) -> io::Result<()> {
+        self.create_snapshot()
+            .write_text_range_to(writer, offset, length)
+    }
+    fn write_utf8_to(&self, writer: &mut dyn io::Write) -> io::Result<u64> {
+        self.create_snapshot().write_utf8_to(writer)
+    }
+    fn write_utf8_range_to(
+        &self,
+        writer: &mut dyn io::Write,
+        offset: usize,
+        length: usize,
+    ) -> io::Result<u64> {
+        self.create_snapshot()
+            .write_utf8_range_to(writer, offset, length)
+    }
+    fn index_of_char(
+        &self,
+        value: u16,
+        offset: usize,
+        length: usize,
+    ) -> Result<Option<usize>, DocumentError> {
+        self.create_snapshot().index_of_char(value, offset, length)
+    }
+    fn last_index_of_char(
+        &self,
+        value: u16,
+        offset: usize,
+        length: usize,
+    ) -> Result<Option<usize>, DocumentError> {
+        self.create_snapshot()
+            .last_index_of_char(value, offset, length)
+    }
+    fn index_of_any(
+        &self,
+        values: &[u16],
+        offset: usize,
+        length: usize,
+    ) -> Result<Option<usize>, DocumentError> {
+        self.create_snapshot().index_of_any(values, offset, length)
+    }
+    fn index_of(
+        &self,
+        value: &str,
+        offset: usize,
+        length: usize,
+    ) -> Result<Option<usize>, DocumentError> {
+        self.create_snapshot().index_of(value, offset, length)
+    }
+    fn last_index_of(
+        &self,
+        value: &str,
+        offset: usize,
+        length: usize,
+    ) -> Result<Option<usize>, DocumentError> {
+        self.create_snapshot().last_index_of(value, offset, length)
+    }
+    fn index_of_with_comparison(
+        &self,
+        value: &str,
+        offset: usize,
+        length: usize,
+        comparison: TextComparison,
+    ) -> Result<Option<usize>, DocumentError> {
+        self.create_snapshot()
+            .index_of_with_comparison(value, offset, length, comparison)
+    }
+    fn last_index_of_with_comparison(
+        &self,
+        value: &str,
+        offset: usize,
+        length: usize,
+        comparison: TextComparison,
+    ) -> Result<Option<usize>, DocumentError> {
+        self.create_snapshot()
+            .last_index_of_with_comparison(value, offset, length, comparison)
+    }
+    fn index_of_utf16(
+        &self,
+        value: &[u16],
+        offset: usize,
+        length: usize,
+        comparison: TextComparison,
+    ) -> Result<Option<usize>, DocumentError> {
+        self.create_snapshot()
+            .index_of_utf16(value, offset, length, comparison)
+    }
+    fn last_index_of_utf16(
+        &self,
+        value: &[u16],
+        offset: usize,
+        length: usize,
+        comparison: TextComparison,
+    ) -> Result<Option<usize>, DocumentError> {
+        self.create_snapshot()
+            .last_index_of_utf16(value, offset, length, comparison)
+    }
 }
 
 /// Immutable, persistent UTF-16 snapshot. `text()` is a UTF-8 projection and
@@ -37,6 +167,8 @@ pub struct TextSnapshot {
 
 /// Immutable string source uses the same UTF-16 snapshot representation.
 pub type StringTextSource = TextSnapshot;
+/// The immutable rope source shares the snapshot representation.
+pub type RopeTextSource = TextSnapshot;
 
 impl TextSnapshot {
     pub fn new(text: &str) -> Self {
@@ -53,6 +185,16 @@ impl TextSnapshot {
             rope: Utf16Rope::from_utf16(text),
             version: None,
         }
+    }
+    pub fn from_rope(rope: Utf16Rope) -> Self {
+        Self {
+            rope,
+            version: None,
+        }
+    }
+    /// Shares the immutable rope; replacing the returned rope cannot change this source.
+    pub fn get_rope(&self) -> Utf16Rope {
+        self.rope.clone()
     }
     pub fn empty() -> Self {
         Self::default()
@@ -167,21 +309,87 @@ impl TextSnapshot {
         self.rope.for_each_chunk(visitor);
     }
 
+    /// Retained memory shares a leaf when the requested range is contiguous.
+    pub fn get_text_as_memory(
+        &self,
+        offset: usize,
+        length: usize,
+    ) -> Result<Utf16Memory, DocumentError> {
+        self.rope
+            .get_memory(offset, length)
+            .ok_or(DocumentError::InvalidRange {
+                offset,
+                length,
+                text_length: self.text_length(),
+            })
+    }
+
+    pub fn get_text_segment(&self, segment: &dyn ISegment) -> Result<String, DocumentError> {
+        self.get_text(segment.offset(), segment.length())
+    }
+
+    pub fn create_reader(&self) -> RopeTextReader {
+        RopeTextReader::new(&self.rope)
+    }
+
+    pub fn create_reader_range(
+        &self,
+        offset: usize,
+        length: usize,
+    ) -> Result<RopeTextReader, DocumentError> {
+        RopeTextReader::from_range(&self.rope, offset, length).ok_or(DocumentError::InvalidRange {
+            offset,
+            length,
+            text_length: self.text_length(),
+        })
+    }
+
+    /// Streams shared UTF-16 leaves. The snapshot is stable even when a sink
+    /// edits the originating document; no document borrow spans the callback.
+    pub fn write_text_to(&self, writer: &mut dyn Utf16TextWriter) -> io::Result<()> {
+        self.write_text_range_to(writer, 0, self.text_length())
+    }
+
+    pub fn write_text_range_to(
+        &self,
+        writer: &mut dyn Utf16TextWriter,
+        offset: usize,
+        length: usize,
+    ) -> io::Result<()> {
+        let mut reader = self
+            .create_reader_range(offset, length)
+            .map_err(|error| io::Error::new(io::ErrorKind::InvalidInput, error))?;
+        while let Some(chunk) = reader.read_chunk() {
+            writer.write_utf16(&chunk)?;
+        }
+        Ok(())
+    }
+
+    /// UTF-8 projection, replacing isolated surrogates. Returns the byte count.
+    pub fn write_utf8_to(&self, writer: &mut dyn io::Write) -> io::Result<u64> {
+        self.write_utf8_range_to(writer, 0, self.text_length())
+    }
+
+    pub fn write_utf8_range_to(
+        &self,
+        writer: &mut dyn io::Write,
+        offset: usize,
+        length: usize,
+    ) -> io::Result<u64> {
+        let mut reader = self
+            .create_reader_range(offset, length)
+            .map_err(|error| io::Error::new(io::ErrorKind::InvalidInput, error))?
+            .into_utf8();
+        io::copy(&mut reader, writer)
+    }
+
     pub fn index_of(
         &self,
         value: &str,
         offset: usize,
         length: usize,
     ) -> Result<Option<usize>, DocumentError> {
-        let haystack = self.get_text_utf16(offset, length)?;
-        let needle: Vec<_> = value.encode_utf16().collect();
-        if needle.is_empty() {
-            return Ok(Some(offset));
-        }
-        Ok(haystack
-            .windows(needle.len())
-            .position(|s| s == needle)
-            .map(|i| offset + i))
+        self.index_of_with_comparison(value, offset, length, TextComparison::Ordinal)
     }
 
     pub fn last_index_of(
@@ -190,15 +398,7 @@ impl TextSnapshot {
         offset: usize,
         length: usize,
     ) -> Result<Option<usize>, DocumentError> {
-        let haystack = self.get_text_utf16(offset, length)?;
-        let needle: Vec<_> = value.encode_utf16().collect();
-        if needle.is_empty() {
-            return Ok(Some(offset + length));
-        }
-        Ok(haystack
-            .windows(needle.len())
-            .rposition(|s| s == needle)
-            .map(|i| offset + i))
+        self.last_index_of_with_comparison(value, offset, length, TextComparison::Ordinal)
     }
 }
 

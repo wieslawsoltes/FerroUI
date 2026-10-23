@@ -1,5 +1,7 @@
 use std::sync::Arc;
 
+use super::Utf16Memory;
+
 const LEAF_CAPACITY: usize = 512;
 
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
@@ -409,6 +411,44 @@ impl Utf16Rope {
         Some(break_end(root, line_index))
     }
 
+    /// An owned, snapshot-retaining iterator over shared contiguous UTF-16 memory.
+    /// It keeps a logarithmic traversal stack and does not flatten the rope.
+    pub fn chunks(&self) -> RopeChunks {
+        self.chunks_range(0, self.len()).expect("valid whole rope")
+    }
+
+    pub fn chunks_range(&self, offset: usize, length: usize) -> Option<RopeChunks> {
+        if offset > self.len() || length > self.len() - offset {
+            return None;
+        }
+        let mut stack = Vec::new();
+        if length != 0 {
+            stack.push((self.root.clone()?, offset, length));
+        }
+        Some(RopeChunks {
+            stack,
+            remaining: length,
+        })
+    }
+
+    /// Shares an existing leaf for a contiguous range; only a range spanning
+    /// multiple leaves needs a new allocation. Empty ranges allocate no data.
+    pub fn get_memory(&self, offset: usize, length: usize) -> Option<Utf16Memory> {
+        let mut chunks = self.chunks_range(offset, length)?;
+        let Some(first) = chunks.next() else {
+            return Some(Utf16Memory::default());
+        };
+        if first.len() == length {
+            return Some(first);
+        }
+        let mut result = Vec::with_capacity(length);
+        result.extend_from_slice(&first);
+        for chunk in chunks {
+            result.extend_from_slice(&chunk);
+        }
+        Some(Utf16Memory::from(result))
+    }
+
     /// Visits immutable contiguous chunks without materializing the document.
     pub fn for_each_chunk(&self, mut visitor: impl FnMut(&[u16])) {
         fn visit(node: &Node, visitor: &mut impl FnMut(&[u16])) {
@@ -429,6 +469,64 @@ impl Utf16Rope {
         }
     }
 }
+
+/// A forward iterator whose items retain their immutable leaf allocation.
+/// Cloning gives an independent cursor; `size_hint` counts chunks, not units.
+#[derive(Clone)]
+pub struct RopeChunks {
+    stack: Vec<(Arc<Node>, usize, usize)>,
+    remaining: usize,
+}
+
+impl std::fmt::Debug for RopeChunks {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("RopeChunks")
+            .field("remaining_units", &self.remaining)
+            .field("pending_nodes", &self.stack.len())
+            .finish()
+    }
+}
+
+impl RopeChunks {
+    pub fn remaining_units(&self) -> usize {
+        self.remaining
+    }
+}
+
+impl Iterator for RopeChunks {
+    type Item = Utf16Memory;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        while let Some((node, offset, length)) = self.stack.pop() {
+            match &node.kind {
+                NodeKind::Leaf { data, start, .. } => {
+                    self.remaining -= length;
+                    return Some(Utf16Memory::shared(data.clone(), start + offset, length));
+                }
+                NodeKind::Branch { left, right } => {
+                    let left_length = left.metrics.length;
+                    if offset < left_length {
+                        let count = length.min(left_length - offset);
+                        if count < length {
+                            self.stack.push((right.clone(), 0, length - count));
+                        }
+                        self.stack.push((left.clone(), offset, count));
+                    } else {
+                        self.stack
+                            .push((right.clone(), offset - left_length, length));
+                    }
+                }
+            }
+        }
+        None
+    }
+
+    fn size_hint(&self) -> (usize, Option<usize>) {
+        (usize::from(self.remaining != 0), Some(self.remaining))
+    }
+}
+
+impl std::iter::FusedIterator for RopeChunks {}
 
 #[cfg(test)]
 mod tests {

@@ -9,15 +9,18 @@ mod i_undoable_operation;
 mod line_manager;
 mod live_document_line;
 mod offset_change_map;
+mod ordinal_casing;
 mod text_anchor;
 mod text_anchor_tree;
 mod text_document;
 mod text_location;
+mod text_search;
 mod text_segment;
 mod text_segment_collection;
 mod text_source;
 mod text_source_version_provider;
 mod text_utilities;
+mod text_writer;
 mod undo_stack;
 mod weak_line_tracker;
 
@@ -37,13 +40,18 @@ pub use offset_change_map::{
 pub use text_anchor::{AnchorSegment, TextAnchor};
 pub use text_document::{DocumentEdit, DocumentError, TextDocument, UpdateGuard};
 pub use text_location::{ISegment, SimpleSegment, TextLocation};
+pub use text_search::TextComparison;
 pub use text_segment::{ITextSegment, SegmentError, TextSegment};
 pub use text_segment_collection::TextSegmentCollection;
-pub use text_source::{ITextSource, StringTextSource, TextSnapshot};
+pub use text_source::{ITextSource, RopeTextSource, StringTextSource, TextSnapshot};
 pub use text_source_version_provider::{DocumentVersion, TextSourceVersionProvider};
 pub use text_utilities::{CaretPositioningMode, CharacterClass, LogicalDirection, TextUtilities};
+pub use text_writer::Utf16TextWriter;
 pub use undo_stack::UndoStack;
 pub use weak_line_tracker::WeakLineTracker;
 
 #[cfg(test)]
 mod tests;
+
+#[cfg(test)]
+mod text_streaming_tests;

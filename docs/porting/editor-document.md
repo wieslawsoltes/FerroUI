@@ -27,8 +27,8 @@ All Rust paths in the table are relative to `src/FerroUI.Edit.Core/`. Consolidat
 | `Document/TextLocation.cs` | `document/text_location.rs`: `TextLocation` | One-based values, ordering, formatting, and parsing. Negative coordinates are not representable by `usize`. |
 | `Document/TextLocation.cs`, `Document/SimpleSegment.cs` | `document/text_location.rs`: `ISegment`, `SimpleSegment`; `document/text_anchor.rs`: `AnchorSegment` | Segment trait, immutable value, and live anchored segment; checked document ranges. |
 | `Document/IDocument.cs` | `document/i_document.rs`: `IDocument`, `IDocumentLine`, `UndoableAction`; `document/document_change_event_args.rs`: `TextChangeEventArgs` | Object-safe editing/refactoring document and live line contracts, per-edit/group notifications, source edits, manual/RAII groups, filename access and generic source changes. |
-| `Document/ITextSource.cs` | `document/text_source.rs`: `ITextSource`, `TextSnapshot`, `StringTextSource`; `document/i_text_source_version.rs`: `ITextSourceVersion` | Snapshot/range access and optional thread-safe version trait objects; managed IO and comparison overload gaps below. |
-| `Document/RopeTextSource.cs` | `document/text_source.rs`: `TextSnapshot` | Immutable, shared rope snapshot replaces the wrapper class. |
+| `Document/ITextSource.cs` | `document/text_source.rs`: `ITextSource`, `TextSnapshot`, `StringTextSource`; `document/i_text_source_version.rs`: `ITextSourceVersion` | Snapshot/range access, retained UTF-16 memory, streaming readers/writers, character/set searches, ordinal and ordinal-ignore-case string/UTF-16 searches, and optional thread-safe version trait objects; culture-sensitive comparisons remain distinct below. |
+| `Document/RopeTextSource.cs` | `document/text_source.rs`: `TextSnapshot`, `RopeTextSource` | Immutable, shared rope snapshot replaces the wrapper class; `from_rope`/`get_rope` preserve structural sharing without mutable aliasing. |
 | `Document/DocumentChangeEventArgs.cs` | `document/document_change_event_args.rs`: `DocumentChangeEventArgs` | Removed/inserted snapshots, validated custom maps, inversion, offset mapping. |
 | `Document/OffsetChangeMap.cs` | `document/offset_change_map.rs`: `OffsetChangeMap`, `OffsetChangeMapEntry`, `OffsetChangeMappingType` | Immutable maps replace mutable/freezable lists; the four mapping modes retain their anchor behavior. |
 | `Document/ITextAnchor.cs`, `Document/TextAnchor.cs` | `document/i_text_anchor.rs`: `ITextAnchor`; `document/text_anchor.rs`: `TextAnchor`; `document/offset_change_map.rs`: `AnchorMovementType` | Object-safe live positions, shared anchor handles, before/after insertion affinity, deletion survival, location and explicit subscriptions. |
@@ -37,9 +37,11 @@ All Rust paths in the table are relative to `src/FerroUI.Edit.Core/`. Consolidat
 | `Document/TextSegment.cs`, `Document/TextSegmentCollection.cs` | `document/text_segment.rs`: `TextSegment`, `ITextSegment`, private `ISegmentTree`; `document/text_segment_collection.rs`: `TextSegmentCollection<T>` | Shared mutable intervals, generic payload composition, indexed inclusive-overlap queries, automatic document tracking and manual offset-map updates. |
 | `Document/UndoStack.cs`, `Document/UndoOperationGroup.cs`, `Document/DocumentChangeOperation.cs` | `document/undo_stack.rs`: `UndoStack`, private `UndoHistory`/`UndoGroup`; `document/text_document.rs`: replay | Document/custom undo and redo, nested/continued groups, optional operations, size limits, original-file marker. |
 | `Document/IUndoableOperation.cs` | `document/i_undoable_operation.rs`: `IUndoableOperation`, `IUndoableOperationWithContext` | Plain and context-aware custom actions; explicit push variants replace runtime interface probing. |
-| `Document/DocumentTextWriter.cs` | `document/document_text_writer.rs`: `DocumentTextWriter` | Insertion-position writer, newline inference, UTF-16 writing, grouped line writes, `std::fmt::Write`. |
+| `Document/DocumentTextWriter.cs` | `document/document_text_writer.rs`: `DocumentTextWriter` | Insertion-position writer, newline inference, UTF-16 writing, grouped line writes, `std::fmt::Write`, and the object-safe `Utf16TextWriter` sink contract. |
 | `Document/TextUtilities.cs`, `Document/NewLineFinder.cs` | `document/text_utilities.rs`: `TextUtilities`, `LogicalDirection`, `CaretPositioningMode`, `CharacterClass` | Whitespace and indentation segments, newline discovery/normalization, reference caret stops and Unicode category classification. |
 | `Utils/Rope.cs`, `Utils/RopeNode.cs`, `Utils/CharRope.cs` | `utils/rope.rs`: `Utf16Rope` | Specialized persistent UTF-16 rope; not a generic collection or complete overload-for-overload `Rope<T>` API. |
+| `Utils/RopeTextReader.cs` | `utils/rope_text_reader.rs`: `RopeTextReader`, `Utf8TextReader`; `utils/rope.rs`: `RopeChunks` | Owned snapshot-retaining forward cursor, peek, single-unit/short/block reads, shared chunk reads, CR/LF/CRLF line reading, read-to-end, explicit UTF-8 IO projection. |
+| `Utils/CharRope.cs` search/memory/writer extensions | `document/text_search.rs`: `TextComparison`; `utils/utf16_memory.rs`: `Utf16Memory`; `document/text_writer.rs`: `Utf16TextWriter` | Streamed searches and writes avoid flattening the document; contiguous memory retains one shared leaf and cross-leaf memory copies only the requested range. |
 | `Utils/DelayedEvents.cs`, weak event plumbing | `utils/events.rs`: private `Event`, `DocumentSubscription`; document edit notification queue | Callback snapshots and explicit subscription disposal replace framework weak-event managers. Weak subscription ownership is not automatically reproduced. |
 
 ## Document interfaces and metadata
@@ -51,6 +53,69 @@ The interface's `text_changing` and `text_changed` events describe each individu
 `ITextSource::version` returns an optional `Arc<dyn ITextSourceVersion>`, while existing concrete version methods keep returning `DocumentVersion`. Version interfaces are `Send + Sync`, translate custom maps in either direction and reject unrelated version implementations/documents. Range snapshots deliberately omit document-version identity because their coordinates address only the sliced range. Source insertion/replacement takes snapshots directly, preserving isolated UTF-16 surrogates.
 
 `file_name`, `set_file_name`, and `file_name_changed` provide shared optional metadata. Setting an equal value sends no event. Notifications run outside the metadata borrow, so handlers can read or replace the name. The name neither performs filesystem access nor changes text, versions, undo history, read-only policy, or the original-file marker. Framework service discovery remains a host responsibility; the core does not introduce a duplicate `IServiceProvider` abstraction or a dependency on the rendering framework.
+
+## Streaming text sources, memory, and ordinal comparisons
+
+`ITextSource` now exposes object-safe `create_reader`/`create_reader_range`,
+`get_text_as_memory`, `get_text_segment`, `write_text_to`/`write_text_range_to`,
+`write_utf8_to`/`write_utf8_range_to`, character/set searches, and string or
+lossless UTF-16 pattern searches. Concrete snapshots expose the same methods;
+mutable documents inherit them by importing `ITextSource`. Each operation
+captures one immutable snapshot before calling application sinks, so a sink
+can inspect or edit the originating document without invalidating the traversal
+or crossing an active document borrow.
+
+`RopeChunks` traverses shared immutable nodes with a logarithmic stack and
+returns `Utf16Memory` handles that retain the original leaf allocation.
+`RopeTextReader` owns this cursor and has independent clone semantics. `peek`
+does not advance; `read` returns one UTF-16 unit; `read_into` may return a short
+read at a leaf boundary; `read_block` fills across boundaries. Empty buffers
+consume nothing. `position_utf16` is relative to the requested range, not the
+original document. `read_chunk` exposes the next shared region without copying.
+`read_line_utf16` removes CR, LF, or CRLF even across leaves and returns `None`
+at EOF; a final delimiter does not create an additional empty line. String
+projections explicitly replace isolated surrogates, while the UTF-16 APIs keep
+them unchanged. Readers and memory handles are `Send + Sync` and need not keep
+the mutable document alive.
+
+`Utf8TextReader` implements `std::io::Read` with at most four pending encoded
+bytes. It recognizes surrogate pairs across leaves and across arbitrarily
+small destination buffers. This explicit adapter avoids treating Rust byte IO
+as a lossless UTF-16 interface. `Utf16TextWriter` is the separate lossless sink,
+implemented by `Vec<u16>` and `DocumentTextWriter`. Successful sink calls consume
+one complete shared chunk; a sink error stops traversal immediately and retains
+previous successful writes. Invalid ranges are checked before any sink call and
+appear as `io::ErrorKind::InvalidInput` with the original `DocumentError` as
+cause. To copy into a document as one undo operation, keep its `begin_update`
+guard alive around the copy. The generic sink contract does not promise rollback
+of arbitrary external writes.
+
+Ordinal `index_of`/`last_index_of` now use streaming KMP rather than flattening the
+searched range, with O(n + m) time and O(m + log n) auxiliary space. Character
+and character-set searches stream directly. The reverse API accepts the same
+forward `(offset, length)` range as the reference rope source, returns the last
+overlapping match, and returns range end for an empty pattern. Oversized patterns
+return `None`; invalid ranges remain errors even for empty patterns. UTF-16
+patterns can contain isolated surrogate units and match individual halves of
+stored pairs.
+
+`TextComparison::OrdinalIgnoreCase` uses Unicode 17.0.0 simple uppercase data,
+with the U+0131 and U+017F identity exceptions used by .NET's ordinal casing.
+The compressed table records its source URL and SHA-256, and the crate notice
+retains the Unicode license. Simple mapping preserves UTF-16 length and never
+performs expanding case folding, normalization, or locale collation: `ß` does
+not become `SS`, and dotted/dotless Turkish I are not conflated. Supplementary
+casing retains original UTF-16 offsets. Well-formed patterns retain the streaming
+KMP complexity above. An ignore-case pattern containing isolated surrogates
+uses an O(m) rolling window and O(n*m) worst-case candidate comparison because
+its boundary may match one raw half of a supplementary scalar; normalizing the
+entire input would corrupt that behavior. This exceptional malformed-pattern
+path remains explicit rather than silently changing matching semantics.
+
+The pinned Unicode version makes behavior deterministic across native/Wasm
+hosts. It does not claim agreement with every older .NET/ICU/NLS globalization
+database. Current/invariant culture comparison overloads are not represented by
+an ordinal approximation and remain unimplemented.
 
 ## Mutation, anchors, and event semantics
 
@@ -86,8 +151,8 @@ These gaps are not implemented as placeholder methods and are not implied comple
 | `UndoStack` descriptors and sharing | Custom and optional actions are implemented. `LastGroupDescriptor`, descriptor-bearing overloads, and assigning one undo stack to multiple documents remain absent. The independent context trait is selected through `push_with_context` rather than runtime interface discovery. |
 | `TextSegmentCollection` inheritance and bounds | `ITextSegment` composition replaces subclassing. Connected intervals must lie within the document, while the managed API permits arbitrary offsets. The treap has expected rather than red-black worst-case bounds. Explicit property changes raise `segment_changed`; automatic document changes are silent. Disconnected collections remain UI-thread handles, not concurrently readable objects. |
 | Mutable `OffsetChangeMap` and freeze semantics | Maps are immutable owned Rust values. Build entries, construct a map, and validate it when attaching to a change. |
-| `Rope<T>` generic collection, lazy `FunctionNode`, `RopeTextReader` | Storage is specialized for UTF-16. There is no deferred arbitrary rope function node, generic collection facade, or `TextReader` compatibility wrapper. Chunk traversal and snapshots provide the implemented streaming boundary. |
-| `ITextSource` readers, writers, and culture-sensitive search overloads | UTF-16 range access, snapshots, ordinal forward/backward search are present. Managed IO classes and the entire `StringComparison` overload family are absent. |
+| `Rope<T>` generic collection and lazy `FunctionNode` | Storage remains specialized for UTF-16; no deferred arbitrary rope function node or generic collection facade. `RopeTextReader` is implemented as an owned UTF-16 iterator with explicit Rust UTF-8 IO adaptation, replacing managed IO inheritance. |
+| `ITextSource` culture-sensitive search overloads | Streaming readers/writers, retained memory, ordinal and ordinal-ignore-case search are implemented. Managed `TextReader`/`TextWriter` inheritance becomes Rust reader/sink traits; current/invariant culture comparisons still require a separately specified collation service. Unicode casing is pinned to 17.0.0. |
 | Control caret navigation | `TextUtilities` implements the reference UTF-16/codepoint and combining-mark stop rules. Editing services may use Unicode grapheme navigation; that is a separate host behavior and not an identity claim about every reference caret mode. |
 | Invalid/negative values | Rust offsets use `usize`, errors use `Result`, and empty locations use `(0, 0)`. Negative sentinel offsets and culture-dependent formatting are not reproduced. |
 | Newline fallback | Existing document delimiters are inferred; a document without a delimiter uses CRLF on Windows and LF on other targets. This selects the target platform convention without a managed environment dependency. |
@@ -110,6 +175,7 @@ The document and rope tests combine translated edge cases with deterministic mod
 - Forward/backward version translation, cross-document rejection, snapshots crossing threads, and iterative release of a 40,000-change chain.
 - AVL balance and cached metrics checked against a flat UTF-16 model for 1,600 randomized edits and 5,000 repeated appends.
 - Newline/whitespace utilities, Unicode character categories, surrogate/combining-mark caret positions, and text-writer cursor/undo behavior.
+- Snapshot reader retention, independent cursors, short/block/chunk reads, cross-leaf CRLF and surrogate handling, shared-memory identity, one-byte UTF-8 reads, reentrant/failing sinks, same-document copy and undo, thread transfer, invalid ranges, overlapping matches, simple-case exceptions, supplementary/isolated-surrogate searches, and randomized flat-model ordinal comparisons.
 
 Reproduce with:
 
@@ -120,3 +186,19 @@ python3 scripts/edit-port/editor_port.py --check
 ```
 
 Verified checkpoint: before the additive document interfaces, the combined Cargo run reports `185 passed; 0 failed` for `ferroui-edit-core`, `34 passed; 0 failed` for the control, and `2 passed; 0 failed` for `EditorDemo`. A standalone harness compiling the same `document/` and `utils/` modules, including the eight new interface/metadata tests, reports `67 passed; 0 failed` (65 document tests and 2 rope tests). The combined control build is a separate integration gate for the additions. The upstream-name convention scan over `document/` and `utils/` finds no matches. These tests exercise the listed contracts; they do not establish complete upstream test-suite parity or the absent interfaces above. Attribution and the upstream MIT license accompany the crate in `src/FerroUI.Edit.Core/NOTICE.md`.
+
+### Streaming/search checkpoint (2026-10-23)
+
+An isolated harness compiling the actual `document/` and `utils/` modules
+passes all 84 cases, including all 17 dedicated `document::text_streaming_tests`.
+Their deterministic
+models cover 1,400 ordinal and 800 ordinal-ignore-case query/range combinations,
+including malformed UTF-16. The compressed uppercase data was independently
+compared against the pinned Unicode source for all 1,114,112 code points,
+including the two documented ordinal exceptions: 1,503 mappings in 202 ranges.
+The earlier full core run passed 274 cases before these 17 additions; the shared
+editor integration gate records its final count separately.
+
+```sh
+cargo test --offline -p ferroui-edit-core --lib text_streaming_tests
+```
