@@ -1,12 +1,21 @@
-use super::SnippetError;
 use super::snippet::Placeholder;
+use super::{DeactivateReason, SnippetError, SnippetEventArgs};
 use crate::document::{
-    AnchorMovementType, DocumentEdit, DocumentError, DocumentSubscription, IUndoableOperation,
-    SimpleSegment, TextAnchor, TextDocument,
+    AnchorMovementType, AnchorSegment, DocumentEdit, DocumentError, DocumentSubscription,
+    IUndoableOperation, SimpleSegment, TextAnchor, TextDocument,
 };
+use crate::utils::Event;
 use std::cell::{Cell, RefCell};
 use std::collections::BTreeMap;
 use std::rc::{Rc, Weak};
+
+type InsertionHandler = Rc<dyn Fn(&SnippetSession)>;
+type DeactivationHandler = Rc<dyn Fn(&SnippetSession, &SnippetEventArgs)>;
+#[derive(Default)]
+pub(crate) struct SnippetLifecycle {
+    pub insertion_completed: Vec<InsertionHandler>,
+    pub deactivated: Vec<DeactivationHandler>,
+}
 
 pub type SnippetEditValidator = dyn Fn(&[DocumentEdit]) -> Result<(), DocumentError>;
 
@@ -31,6 +40,11 @@ struct SessionInner {
     caret: TextAnchor,
     caret_order: usize,
     closed: Cell<bool>,
+    completed: Cell<bool>,
+    deactivation_reason: Cell<Option<DeactivateReason>>,
+    whole_range: AnchorSegment,
+    deactivate_when_empty: Cell<bool>,
+    deactivated: Event<(SnippetSession, SnippetEventArgs)>,
     syncing: Cell<bool>,
     last_text: RefCell<String>,
     subscriptions: RefCell<Vec<DocumentSubscription>>,
@@ -82,6 +96,8 @@ impl SnippetSession {
         placeholders: Vec<Placeholder>,
         caret: usize,
         caret_order: usize,
+        length: usize,
+        lifecycle: SnippetLifecycle,
     ) -> Result<Self, SnippetError> {
         let mut elements = Vec::new();
         let mut order = BTreeMap::new();
@@ -105,6 +121,13 @@ impl SnippetSession {
         let tab_order: Vec<_> = order.into_values().collect();
         let active = (!tab_order.is_empty()).then_some(0);
         let owner = tab_order.first().copied();
+        let whole_range = AnchorSegment::new(&document, offset, length)?;
+        whole_range
+            .start
+            .set_movement_type(AnchorMovementType::BeforeInsertion);
+        whole_range
+            .end
+            .set_movement_type(AnchorMovementType::AfterInsertion);
         let inner = Rc::new(SessionInner {
             document: document.clone(),
             elements,
@@ -113,7 +136,12 @@ impl SnippetSession {
             owner: Cell::new(owner),
             caret,
             caret_order,
-            closed: Cell::new(active.is_none()),
+            closed: Cell::new(false),
+            completed: Cell::new(false),
+            deactivation_reason: Cell::new(None),
+            whole_range,
+            deactivate_when_empty: Cell::new(length != 0),
+            deactivated: Event::default(),
             syncing: Cell::new(false),
             last_text: RefCell::new(String::new()),
             subscriptions: RefCell::new(Vec::new()),
@@ -121,6 +149,9 @@ impl SnippetSession {
             edit_validator: RefCell::new(None),
         });
         let session = Self { inner };
+        for handler in lifecycle.deactivated {
+            session.deactivated(move |context, args| handler(context, args));
+        }
         session.restore_active_owner();
         session.refresh_last_text();
         let weak = Rc::downgrade(&session.inner);
@@ -139,17 +170,64 @@ impl SnippetSession {
         let subscription = document.text_changed(move || {
             if let Some(inner) = weak.upgrade() {
                 let session = SnippetSession { inner };
-                if let Err(error) = session.synchronize() {
+                if session.should_deactivate_after_deletion() {
+                    session.deactivate(DeactivateReason::Deleted);
+                } else if let Err(error) = session.synchronize() {
                     *session.inner.error.borrow_mut() = Some(error.to_string());
-                    session.finish();
+                    session.deactivate(DeactivateReason::Error);
                 }
             }
         });
         *session.inner.subscriptions.borrow_mut() = vec![changing, changed, subscription];
+        session.inner.completed.set(true);
+        for handler in lifecycle.insertion_completed {
+            handler(&session);
+        }
+        if session.inner.tab_order.is_empty() {
+            session.deactivate(DeactivateReason::NoActiveElements);
+        }
         Ok(session)
     }
     pub fn is_closed(&self) -> bool {
         self.inner.closed.get()
+    }
+    pub fn is_insertion_completed(&self) -> bool {
+        self.inner.completed.get()
+    }
+    pub fn document(&self) -> TextDocument {
+        self.inner.document.clone()
+    }
+    pub fn segment(&self) -> Option<SimpleSegment> {
+        self.inner.whole_range.segment().ok()
+    }
+    pub fn start_position(&self) -> Option<usize> {
+        self.inner.whole_range.offset().ok()
+    }
+    pub fn deactivation_reason(&self) -> Option<DeactivateReason> {
+        self.inner.deactivation_reason.get()
+    }
+    /// Controls upstream's deletion rule. It is enabled for an initially
+    /// nonempty expansion. Hosts retaining empty linked fields may opt out.
+    pub fn set_deactivate_when_empty(&self, value: bool) {
+        self.inner.deactivate_when_empty.set(value);
+    }
+    pub fn deactivated(
+        &self,
+        handler: impl Fn(&SnippetSession, &SnippetEventArgs) + 'static,
+    ) -> DocumentSubscription {
+        self.inner
+            .deactivated
+            .subscribe(move |(session, args)| handler(session, args))
+    }
+    fn should_deactivate_after_deletion(&self) -> bool {
+        self.inner.completed.get()
+            && !self.is_closed()
+            && self.inner.deactivate_when_empty.get()
+            && self
+                .inner
+                .whole_range
+                .length()
+                .is_ok_and(|length| length == 0)
     }
     pub fn error(&self) -> Option<String> {
         self.inner.error.borrow().clone()
@@ -180,7 +258,7 @@ impl SnippetSession {
             index + 1
         };
         if next >= self.inner.tab_order.len() {
-            self.finish();
+            self.deactivate(DeactivateReason::Completed);
             return None;
         }
         self.inner.active.set(Some(next));
@@ -189,8 +267,23 @@ impl SnippetSession {
         self.active_segment()
     }
     pub fn finish(&self) {
-        self.inner.closed.set(true);
+        self.deactivate(DeactivateReason::Unknown);
+    }
+    /// Terminal, idempotent transition. State and document subscriptions are
+    /// cleared before application callbacks, allowing safe reentrant teardown.
+    pub fn deactivate(&self, reason: DeactivateReason) {
+        if self.inner.closed.replace(true) {
+            return;
+        }
         self.inner.active.set(None);
+        self.inner.deactivation_reason.set(Some(reason));
+        let subscriptions = std::mem::take(&mut *self.inner.subscriptions.borrow_mut());
+        for subscription in subscriptions {
+            subscription.dispose();
+        }
+        self.inner
+            .deactivated
+            .raise(&(self.clone(), SnippetEventArgs::new(reason)));
     }
     pub fn replace_active(&self, text: &str) -> Result<(), SnippetError> {
         let segment = self.active_segment().ok_or(SnippetError::Closed)?;
@@ -265,7 +358,7 @@ impl SnippetSession {
                     }))
             {
                 *self.inner.error.borrow_mut() = Some(error.to_string());
-                self.finish();
+                self.deactivate(DeactivateReason::Error);
             }
         }
     }
@@ -482,6 +575,7 @@ mod tests {
             .unwrap()
             .insert(document.clone(), 0, "")
             .unwrap();
+        session.set_deactivate_when_empty(false);
         session.replace_active("").unwrap();
         assert_eq!(document.text(), "BB");
         assert_eq!(session.next_element(false), Some(SimpleSegment::new(0, 1)));
@@ -612,5 +706,84 @@ mod tests {
         assert_eq!(document.text(), "changed-name");
         assert!(session.is_closed());
         assert!(session.error().is_some());
+    }
+    #[test]
+    fn prepared_callbacks_observe_completed_before_immediate_deactivation() {
+        let document = TextDocument::new();
+        let mut prepared = Snippet::parse("plain$0").unwrap().prepare("").unwrap();
+        let events = Rc::new(RefCell::new(Vec::new()));
+        let captured = events.clone();
+        prepared.on_insertion_completed(move |session| {
+            assert!(session.is_insertion_completed());
+            assert!(!session.is_closed());
+            assert_eq!(session.segment(), Some(SimpleSegment::new(0, 5)));
+            captured.borrow_mut().push("completed");
+        });
+        let captured = events.clone();
+        prepared.on_deactivated(move |session, args| {
+            assert!(session.is_closed());
+            assert_eq!(args.reason, DeactivateReason::NoActiveElements);
+            assert!(args.moves_to_final_caret());
+            captured.borrow_mut().push("deactivated");
+            session.finish(); // Reentrant deactivation is an idempotent no-op.
+        });
+        document.insert(0, prepared.text()).unwrap();
+        let session = prepared.activate(document, 0).unwrap();
+        assert_eq!(*events.borrow(), ["completed", "deactivated"]);
+        assert_eq!(
+            session.deactivation_reason(),
+            Some(DeactivateReason::NoActiveElements)
+        );
+    }
+
+    #[test]
+    fn deleting_or_undoing_the_inserted_snippet_ends_it_once_without_mirror_writes() {
+        for undo in [false, true] {
+            let document = TextDocument::from_text("[]");
+            let session = Snippet::parse("${1:name}-$1$0")
+                .unwrap()
+                .insert(document.clone(), 1, "")
+                .unwrap();
+            let reasons = Rc::new(RefCell::new(Vec::new()));
+            let captured = reasons.clone();
+            session.deactivated(move |session, args| {
+                captured.borrow_mut().push(args.reason);
+                session.deactivate(DeactivateReason::EscapePressed);
+            });
+            if undo {
+                document.undo().unwrap();
+            } else {
+                document.remove(1, 9).unwrap();
+            }
+            assert_eq!(document.text(), "[]");
+            assert!(session.is_closed());
+            assert_eq!(*reasons.borrow(), [DeactivateReason::Deleted]);
+            document.insert(1, "new").unwrap();
+            assert_eq!(document.text(), "[new]");
+            assert_eq!(*reasons.borrow(), [DeactivateReason::Deleted]);
+        }
+    }
+
+    #[test]
+    fn empty_initial_fields_remain_interactive_and_terminal_listeners_are_disposable() {
+        let document = TextDocument::new();
+        let session = Snippet::parse("$1$1")
+            .unwrap()
+            .insert(document.clone(), 0, "")
+            .unwrap();
+        let count = Rc::new(Cell::new(0));
+        let captured = count.clone();
+        let subscription = session.deactivated(move |_, _| captured.set(captured.get() + 1));
+        subscription.dispose();
+        session.replace_active("x").unwrap();
+        session.replace_active("").unwrap();
+        assert!(!session.is_closed());
+        session.deactivate(DeactivateReason::ReturnPressed);
+        assert_eq!(count.get(), 0);
+        assert_eq!(
+            session.deactivation_reason(),
+            Some(DeactivateReason::ReturnPressed)
+        );
+        assert!(session.next_element(false).is_none());
     }
 }

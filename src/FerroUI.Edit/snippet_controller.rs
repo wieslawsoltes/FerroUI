@@ -3,9 +3,13 @@ use ferroui_base::input::{InputElement, Key, KeyEventArgs, KeyModifiers};
 use ferroui_base::interactivity::RoutingStrategies;
 use ferroui_base::reactive::IDisposable;
 use ferroui_base::{Ref, WeakRef};
-use ferroui_edit_core::document::{DocumentEdit, DocumentError, TextDocument};
+use ferroui_edit_core::document::{
+    DocumentEdit, DocumentError, DocumentSubscription, TextDocument,
+};
 use ferroui_edit_core::editing::EditError;
-use ferroui_edit_core::snippets::{Snippet, SnippetError, SnippetSession};
+use ferroui_edit_core::snippets::{
+    DeactivateReason, Snippet, SnippetError, SnippetEventArgs, SnippetSession,
+};
 use std::cell::RefCell;
 use std::rc::Rc;
 
@@ -17,6 +21,7 @@ pub struct SnippetController {
     document: TextDocument,
     session: SnippetSession,
     subscriptions: RefCell<Vec<Rc<dyn IDisposable>>>,
+    deactivated: RefCell<Option<DocumentSubscription>>,
 }
 
 impl SnippetController {
@@ -55,7 +60,22 @@ impl SnippetController {
             document,
             session,
             subscriptions: RefCell::new(Vec::new()),
+            deactivated: RefCell::new(None),
         });
+        let weak = Rc::downgrade(&controller);
+        *controller.deactivated.borrow_mut() =
+            Some(controller.session.deactivated(move |_, args| {
+                if let Some(controller) = weak.upgrade() {
+                    controller.dispose_input();
+                    if args.moves_to_final_caret() {
+                        if let Err(error) = controller.select_active() {
+                            if let Some(editor) = controller.editor.upgrade() {
+                                editor.report_error(error.to_string());
+                            }
+                        }
+                    }
+                }
+            }));
         let weak = Rc::downgrade(&controller);
         controller
             .subscriptions
@@ -89,6 +109,9 @@ impl SnippetController {
             );
         drop(update);
         controller.select_active()?;
+        if !controller.is_active() {
+            controller.dispose_input();
+        }
         Ok(controller)
     }
 
@@ -101,7 +124,15 @@ impl SnippetController {
 
     /// Ends the session without changing document text or current selection.
     pub fn finish(&self) {
-        self.session.finish();
+        self.session
+            .deactivate(DeactivateReason::InputHandlerDetached);
+        self.dispose_input();
+    }
+
+    fn dispose_input(&self) {
+        if let Some(subscription) = self.deactivated.borrow_mut().take() {
+            subscription.dispose();
+        }
         let subscriptions = std::mem::take(&mut *self.subscriptions.borrow_mut());
         for subscription in subscriptions {
             subscription.dispose();
@@ -133,8 +164,14 @@ impl SnippetController {
             editor
                 .select(segment.offset, segment.length)
                 .map_err(edit_error)?;
-        } else if let Some(offset) = self.session.caret_offset() {
-            editor.set_caret_offset(offset).map_err(edit_error)?;
+        } else if self
+            .session
+            .deactivation_reason()
+            .is_some_and(|reason| SnippetEventArgs::new(reason).moves_to_final_caret())
+        {
+            if let Some(offset) = self.session.caret_offset() {
+                editor.set_caret_offset(offset).map_err(edit_error)?;
+            }
         }
         Ok(())
     }
@@ -158,7 +195,11 @@ impl SnippetController {
         }
         match event.key {
             Key::Escape => {
-                self.finish();
+                self.session.deactivate(DeactivateReason::EscapePressed);
+                event.set_handled(true);
+            }
+            Key::Return => {
+                self.session.deactivate(DeactivateReason::ReturnPressed);
                 event.set_handled(true);
             }
             Key::Tab
@@ -197,7 +238,11 @@ fn edit_error(error: EditError) -> SnippetError {
 
 impl Drop for SnippetController {
     fn drop(&mut self) {
-        self.session.finish();
+        self.session
+            .deactivate(DeactivateReason::InputHandlerDetached);
+        if let Some(subscription) = self.deactivated.get_mut().take() {
+            subscription.dispose();
+        }
         for subscription in self.subscriptions.get_mut().drain(..) {
             subscription.dispose();
         }
@@ -273,5 +318,44 @@ mod tests {
         editor.text_area().raise_event(&tab);
         assert!(tab.handled());
         assert!(!controller.is_active());
+    }
+    #[test]
+    fn return_accepts_at_final_caret_and_escape_preserves_selection() {
+        for (key, reason, expected_caret) in [
+            (Key::Return, DeactivateReason::ReturnPressed, 5),
+            (Key::Escape, DeactivateReason::EscapePressed, 4),
+        ] {
+            let _scope = crate::tests::test_scope();
+            let editor = TextEditor::new();
+            let controller =
+                SnippetController::insert(&editor, &Snippet::parse("${1:name};$0tail").unwrap())
+                    .unwrap();
+            let mut event = KeyEventArgs::new();
+            event.key = key;
+            event.set_routed_event(Some(InputElement::key_down_event()));
+            editor.text_area().raise_event(&event);
+            assert!(event.handled());
+            assert_eq!(editor.text(), "name;tail");
+            assert_eq!(editor.caret_offset(), expected_caret);
+            assert_eq!(controller.session().deactivation_reason(), Some(reason));
+            assert!(!controller.is_active());
+            assert!(controller.subscriptions.borrow().is_empty());
+        }
+    }
+
+    #[test]
+    fn undoing_the_insertion_removes_snippet_keyboard_handlers() {
+        let _scope = crate::tests::test_scope();
+        let editor = TextEditor::new();
+        let controller =
+            SnippetController::insert(&editor, &Snippet::parse("${1:name}-$1$0").unwrap()).unwrap();
+        editor.undo().unwrap();
+        assert_eq!(editor.text(), "");
+        assert_eq!(
+            controller.session().deactivation_reason(),
+            Some(DeactivateReason::Deleted)
+        );
+        assert!(controller.subscriptions.borrow().is_empty());
+        assert_eq!(editor.caret_offset(), 0);
     }
 }

@@ -1,7 +1,9 @@
-use super::SnippetSession;
+use super::snippet_session::SnippetLifecycle;
+use super::{SnippetEventArgs, SnippetSession};
 use crate::document::{DocumentError, TextDocument};
 use std::collections::BTreeMap;
 use std::fmt;
+use std::rc::Rc;
 
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub enum SnippetElement {
@@ -63,10 +65,22 @@ pub struct PreparedSnippet {
     placeholders: Vec<Placeholder>,
     caret: usize,
     caret_order: usize,
+    lifecycle: SnippetLifecycle,
 }
 impl PreparedSnippet {
     pub fn text(&self) -> &str {
         &self.text
+    }
+    /// Registers a callback before activation, so even a snippet with no tab
+    /// stops reports completion before its immediate deactivation.
+    pub fn on_insertion_completed(&mut self, handler: impl Fn(&SnippetSession) + 'static) {
+        self.lifecycle.insertion_completed.push(Rc::new(handler));
+    }
+    pub fn on_deactivated(
+        &mut self,
+        handler: impl Fn(&SnippetSession, &SnippetEventArgs) + 'static,
+    ) {
+        self.lifecycle.deactivated.push(Rc::new(handler));
     }
     pub fn activate(
         self,
@@ -82,6 +96,8 @@ impl PreparedSnippet {
             self.placeholders,
             self.caret,
             self.caret_order,
+            self.text.encode_utf16().count(),
+            self.lifecycle,
         )
     }
 }
@@ -225,6 +241,7 @@ impl Snippet {
             placeholders,
             caret,
             caret_order,
+            lifecycle: SnippetLifecycle::default(),
         })
     }
 }
