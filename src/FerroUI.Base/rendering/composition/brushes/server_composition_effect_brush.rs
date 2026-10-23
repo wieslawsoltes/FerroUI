@@ -6,9 +6,10 @@ use super::{paint_composition_brush, ServerCompositionSurfaceBrush};
 use crate::media::immutable::ImmutableSolidColorBrush;
 use crate::media::imaging::BitmapBlendingMode;
 use crate::media::{BoxShadows, Color, ColorMatrix, ColorMatrixAlphaMode, EffectExtensions, IEffect, ImmutableBlurEffect};
-use crate::platform::IDrawingContextImpl;
+use crate::platform::{AlphaFormat, IDrawingContextImpl, PixelFormat, PixelFormats};
 use crate::rendering::composition::effects::{
-    blur_amount_to_radius, EffectColor, EffectGraph, EffectMatrix, EffectNode, EffectNodeKind, EffectScalar,
+    blur_amount_to_radius, BlendEffectMode, EffectColor, EffectGraph, EffectMatrix, EffectNode, EffectNodeKind,
+    EffectScalar, PixelOp,
 };
 use crate::rendering::composition::generated::{ServerCompositionBrushHooks, ServerCompositionBrushProps};
 use crate::rendering::composition::server::{
@@ -17,7 +18,7 @@ use crate::rendering::composition::server::{
     ServerRenderResource,
 };
 use crate::rendering::composition::transport::BatchStreamReader;
-use crate::{Rect, RoundedRect, Thickness};
+use crate::{Matrix, PixelSize, Rect, RoundedRect, Thickness, Vector};
 use std::any::{Any, TypeId};
 use std::cell::{Cell, RefCell};
 use std::rc::{Rc, Weak};
@@ -378,11 +379,21 @@ impl ServerCompositionEffectBrush {
                 self.paint_node_with_opacity(source, canvas, rect, self.unit(opacity));
             }
             EffectNodeKind::CrossFade { weight, source1, source2 } => {
-                // Deviation (winui-composition.md): the second source is drawn
-                // over the first, each with its weight.
+                // `source1 * (1 - weight) + source2 * weight` (premultiplied):
+                // the second source is added to the first in a layer of their
+                // own. Without blend layers the second is drawn over the first.
                 let weight = self.unit(weight);
+                if weight <= 0.0 || weight >= 1.0 {
+                    self.paint_node_with_opacity(source1, canvas, rect, 1.0 - weight);
+                    self.paint_node_with_opacity(source2, canvas, rect, weight);
+                    return;
+                }
+                canvas.push_layer(rect);
                 self.paint_node_with_opacity(source1, canvas, rect, 1.0 - weight);
+                let pushed = Self::push_blend(canvas, rect, BitmapBlendingMode::Plus);
                 self.paint_node_with_opacity(source2, canvas, rect, weight);
+                Self::pop_blend(canvas, pushed);
+                canvas.pop_layer();
             }
             EffectNodeKind::Composite { mode, sources } => {
                 if *mode == BitmapBlendingMode::SourceOver {
@@ -450,14 +461,123 @@ impl ServerCompositionEffectBrush {
                 self.paint_node(image, canvas, rect);
                 Self::pop_matrix(canvas, pushed);
             }
-            EffectNodeKind::SceneLighting { ambient, diffuse, .. } => {
-                crate::rendering::composition::server::paint_scene_lighting(
-                    canvas,
-                    rect,
-                    self.scalar(ambient),
-                    self.scalar(diffuse),
-                );
+            EffectNodeKind::Shadow { amount, color, source } => {
+                let radius = self.blur_radius(amount);
+                let matrix = shadow_matrix(self.color(color));
+                let blurred = Self::push_blur(canvas, rect, radius);
+                let colored = Self::push_matrix(canvas, rect, &matrix, ColorMatrixAlphaMode::Straight);
+                self.paint_node(source, canvas, rect);
+                Self::pop_matrix(canvas, colored);
+                Self::pop_blur(canvas, blurred);
             }
+            EffectNodeKind::Pixels { op, sources } => self.paint_pixels(op, sources, canvas, rect),
+            EffectNodeKind::SceneLighting { ambient, diffuse, specular, shine } => {
+                let material = crate::rendering::composition::server::LightingMaterial {
+                    ambient: self.scalar(ambient),
+                    diffuse: self.scalar(diffuse),
+                    specular: self.scalar(specular),
+                    shine: self.scalar(shine),
+                };
+                crate::rendering::composition::server::paint_scene_lighting(canvas, rect, &material);
+            }
+        }
+    }
+
+    /// Draws `node` over `rect` into a bitmap of its own at the resolution of
+    /// `canvas` and returns its premultiplied RGBA pixels, or `None` when the
+    /// compositor has no render interface.
+    fn render_node_pixels(&self, node: &EffectNode, canvas: &dyn IDrawingContextImpl, rect: Rect, size: PixelSize) -> Option<Vec<u8>> {
+        let compositor = self.base.compositor()?;
+        let transform = Matrix::create_translation(-rect.x, -rect.y)
+            * Matrix::create_scale(size.width as f64 / rect.width, size.height as f64 / rect.height);
+        let _ = canvas;
+        compositor.render_interface().with_platform_render_interface(|render_interface| {
+            let bitmap = render_interface.create_render_target_bitmap(size, Vector::new(96.0, 96.0));
+            {
+                let mut context = bitmap.create_drawing_context();
+                context.set_transform(transform);
+                self.paint_node(node, &mut *context, rect);
+                context.dispose();
+            }
+            let framebuffer = bitmap.lock();
+            let (width, height) = (size.width as usize, size.height as usize);
+            let row_bytes = framebuffer.row_bytes() as usize;
+            let bgra = framebuffer.format() == PixelFormat::BGRA8888;
+            let premultiplied = framebuffer.alpha_format() != AlphaFormat::Unpremul;
+            let mut rgba = vec![0u8; width * height * 4];
+            framebuffer.with_data(&mut |data| {
+                for y in 0..height {
+                    for x in 0..width {
+                        let at = y * row_bytes + x * 4;
+                        let Some(pixel) = data.get(at..at + 4) else { continue };
+                        let (mut r, mut g, mut b, a) =
+                            if bgra { (pixel[2], pixel[1], pixel[0], pixel[3]) } else { (pixel[0], pixel[1], pixel[2], pixel[3]) };
+                        if !premultiplied {
+                            let scale = |c: u8| ((u32::from(c) * u32::from(a) + 127) / 255) as u8;
+                            (r, g, b) = (scale(r), scale(g), scale(b));
+                        }
+                        rgba[(y * width + x) * 4..(y * width + x) * 4 + 4].copy_from_slice(&[r, g, b, a]);
+                    }
+                }
+            });
+            framebuffer.dispose();
+            rgba
+        })
+    }
+
+    /// Paints an operation on the pixels of `sources`: each source is drawn
+    /// apart into a bitmap at the resolution of `canvas` (at most 4096
+    /// pixels a side), the pixels are combined, and the result is drawn over
+    /// `rect`. Nothing is drawn without a render interface.
+    fn paint_pixels(&self, op: &PixelOp, sources: &[EffectNode], canvas: &mut dyn IDrawingContextImpl, rect: Rect) {
+        if sources.is_empty() || is_empty(&rect) {
+            return;
+        }
+        let transform = canvas.transform();
+        let scale_x = (transform.m11 * transform.m11 + transform.m12 * transform.m12).sqrt().max(1e-6);
+        let scale_y = (transform.m21 * transform.m21 + transform.m22 * transform.m22).sqrt().max(1e-6);
+        let size = PixelSize::new(
+            ((rect.width * scale_x).ceil() as i32).clamp(1, 4096),
+            ((rect.height * scale_y).ceil() as i32).clamp(1, 4096),
+        );
+        let mut images = Vec::with_capacity(sources.len());
+        for source in sources {
+            match self.render_node_pixels(source, canvas, rect, size) {
+                Some(pixels) => images.push(pixels),
+                None => return,
+            }
+        }
+        let mut images = images.into_iter();
+        let Some(mut result) = images.next() else { return };
+        let width = size.width as usize;
+        for (index, other) in images.enumerate() {
+            match op {
+                PixelOp::Blend(mode) => blend_pixels(*mode, &mut result, &other, width),
+                PixelOp::Arithmetic { multiply, source1, source2, offset } => {
+                    let k = [self.scalar(multiply), self.scalar(source1), self.scalar(source2), self.scalar(offset)];
+                    arithmetic_pixels(k.map(|k| k as f32), &mut result, &other);
+                }
+                PixelOp::MaskInvert => mask_invert_pixels(&mut result, &other),
+            }
+            // A blend and an arithmetic composite have two sources.
+            if !matches!(op, PixelOp::MaskInvert) && index == 0 {
+                break;
+            }
+        }
+        let Some(compositor) = self.base.compositor() else { return };
+        let bitmap = compositor.render_interface().with_platform_render_interface(|render_interface| {
+            render_interface.load_bitmap_from_pixels(
+                PixelFormats::RGBA8888,
+                AlphaFormat::Premul,
+                &result,
+                size,
+                Vector::new(96.0, 96.0),
+                size.width * 4,
+            )
+        });
+        if let Some(Some(bitmap)) = bitmap {
+            let source = Rect::new(0.0, 0.0, size.width as f64, size.height as f64);
+            canvas.draw_bitmap(&*bitmap, 1.0, source, rect);
         }
     }
 
@@ -639,6 +759,28 @@ impl ServerCompositionEffectBrush {
             }
             EffectNodeKind::Border { source, .. } => {
                 self.paint_around_layer(source, rest, canvas, rect, phase);
+            }
+            EffectNodeKind::Shadow { amount, color, source } => {
+                let radius = self.blur_radius(amount);
+                let matrix = shadow_matrix(self.color(color));
+                if before {
+                    Self::push_blur(canvas, rect, radius);
+                    Self::push_matrix(canvas, rect, &matrix, ColorMatrixAlphaMode::Straight);
+                    self.paint_around_layer(source, rest, canvas, rect, phase);
+                } else {
+                    self.paint_around_layer(source, rest, canvas, rect, phase);
+                    Self::pop_matrix(canvas, has_layers && !matrix.is_identity());
+                    let pushed = Self::blur_is_pushed(canvas, radius);
+                    Self::pop_blur(canvas, pushed);
+                }
+            }
+            // Deviation (winui-materials.md): the children of a layer visual
+            // are drawn by the render walk, not into a bitmap of their own,
+            // so an operation on their pixels draws them unchanged.
+            EffectNodeKind::Pixels { sources, .. } => {
+                if let Some(layer) = sources.get(index) {
+                    self.paint_around_layer(layer, rest, canvas, rect, phase);
+                }
             }
         }
     }
@@ -965,5 +1107,236 @@ impl IServerObject for ServerCompositionHostBackdropBrush {
 
     fn into_any_rc(self: Rc<Self>) -> Rc<dyn Any> {
         self
+    }
+}
+
+/// The colour matrix of a shadow (on straight colours): the colour of the
+/// shadow, with the alpha of the source times the alpha of the colour.
+fn shadow_matrix(color: Color) -> ColorMatrix {
+    let channel = |value: u8| f32::from(value) / 255.0;
+    ColorMatrix::new([
+        [0.0, 0.0, 0.0, 0.0],
+        [0.0, 0.0, 0.0, 0.0],
+        [0.0, 0.0, 0.0, 0.0],
+        [0.0, 0.0, 0.0, channel(color.a)],
+        [channel(color.r), channel(color.g), channel(color.b), 0.0],
+    ])
+}
+
+/// A premultiplied RGBA pixel as straight colour channels and alpha, 0 to 1.
+fn unpremultiply(pixel: &[u8]) -> ([f32; 3], f32) {
+    let alpha = f32::from(pixel[3]) / 255.0;
+    if alpha <= 0.0 {
+        return ([0.0; 3], 0.0);
+    }
+    let channel = |value: u8| (f32::from(value) / 255.0 / alpha).min(1.0);
+    ([channel(pixel[0]), channel(pixel[1]), channel(pixel[2])], alpha)
+}
+
+fn store(pixel: &mut [u8], color: [f32; 3], alpha: f32) {
+    let alpha = alpha.clamp(0.0, 1.0);
+    for channel in 0..3 {
+        pixel[channel] = (color[channel].clamp(0.0, 1.0) * alpha * 255.0).round() as u8;
+    }
+    pixel[3] = (alpha * 255.0).round() as u8;
+}
+
+fn luminosity(color: [f32; 3]) -> f32 {
+    0.3 * color[0] + 0.59 * color[1] + 0.11 * color[2]
+}
+
+fn color_dodge(b: f32, s: f32) -> f32 {
+    if b <= 0.0 {
+        0.0
+    } else if s >= 1.0 {
+        1.0
+    } else {
+        (b / (1.0 - s)).min(1.0)
+    }
+}
+
+fn color_burn(b: f32, s: f32) -> f32 {
+    if b >= 1.0 {
+        1.0
+    } else if s <= 0.0 {
+        0.0
+    } else {
+        1.0 - ((1.0 - b) / s).min(1.0)
+    }
+}
+
+/// A small hash of a pixel position, 0 to 1: the random choice of
+/// `Dissolve`, the same for a pixel in every frame.
+fn dissolve_noise(index: usize) -> f32 {
+    let mut x = index as u32 ^ 0x9E37_79B9;
+    x = x.wrapping_mul(0x85EB_CA6B);
+    x ^= x >> 13;
+    x = x.wrapping_mul(0xC2B2_AE35);
+    x ^= x >> 16;
+    (x & 0xFFFF) as f32 / 65535.0
+}
+
+/// Blends the premultiplied pixels of `foreground` into `background` with
+/// one of the modes of Direct2D's blend effect that the blend layers do not
+/// have; the result is composed as a separable blend is:
+/// `(1 - as) ab Cb + (1 - ab) as Cs + as ab B(Cb, Cs)`.
+fn blend_pixels(mode: BlendEffectMode, background: &mut [u8], foreground: &[u8], width: usize) {
+    let _ = width;
+    for (index, (back, fore)) in background.chunks_exact_mut(4).zip(foreground.chunks_exact(4)).enumerate() {
+        let (cb, ab) = unpremultiply(back);
+        let (cs, as_) = unpremultiply(fore);
+        if mode == BlendEffectMode::Dissolve {
+            // The foreground where a random number falls under its alpha,
+            // opaque; the background elsewhere.
+            if as_ > 0.0 && dissolve_noise(index) < as_ {
+                store(back, cs, 1.0);
+            }
+            continue;
+        }
+        let blended: [f32; 3] = match mode {
+            BlendEffectMode::DarkerColor => {
+                if luminosity(cs) < luminosity(cb) {
+                    cs
+                } else {
+                    cb
+                }
+            }
+            BlendEffectMode::LighterColor => {
+                if luminosity(cs) > luminosity(cb) {
+                    cs
+                } else {
+                    cb
+                }
+            }
+            _ => std::array::from_fn(|channel| {
+                let (b, s) = (cb[channel], cs[channel]);
+                match mode {
+                    BlendEffectMode::LinearBurn => (b + s - 1.0).max(0.0),
+                    BlendEffectMode::VividLight => {
+                        if s <= 0.5 {
+                            color_burn(b, 2.0 * s)
+                        } else {
+                            color_dodge(b, 2.0 * (s - 0.5))
+                        }
+                    }
+                    BlendEffectMode::LinearLight => (b + 2.0 * s - 1.0).clamp(0.0, 1.0),
+                    BlendEffectMode::PinLight => {
+                        if s <= 0.5 {
+                            b.min(2.0 * s)
+                        } else {
+                            b.max(2.0 * s - 1.0)
+                        }
+                    }
+                    BlendEffectMode::HardMix => {
+                        if b + s >= 1.0 {
+                            1.0
+                        } else {
+                            0.0
+                        }
+                    }
+                    BlendEffectMode::Subtract => (b - s).max(0.0),
+                    BlendEffectMode::Division => {
+                        if s <= 0.0 {
+                            if b <= 0.0 {
+                                0.0
+                            } else {
+                                1.0
+                            }
+                        } else {
+                            (b / s).min(1.0)
+                        }
+                    }
+                    // The other modes are drawn by the blend layers.
+                    _ => s,
+                }
+            }),
+        };
+        let alpha = as_ + ab - as_ * ab;
+        if alpha <= 0.0 {
+            store(back, [0.0; 3], 0.0);
+            continue;
+        }
+        let premultiplied: [f32; 3] = std::array::from_fn(|channel| {
+            (1.0 - as_) * ab * cb[channel] + (1.0 - ab) * as_ * cs[channel] + as_ * ab * blended[channel]
+        });
+        store(back, premultiplied.map(|value| value / alpha), alpha);
+    }
+}
+
+/// `k1 * s1 * s2 + k2 * s1 + k3 * s2 + k4` of premultiplied pixels, per
+/// channel, clamped to 0..1 and the colour to the alpha (Direct2D's
+/// arithmetic composite).
+fn arithmetic_pixels(k: [f32; 4], first: &mut [u8], second: &[u8]) {
+    for (one, two) in first.chunks_exact_mut(4).zip(second.chunks_exact(4)) {
+        let mut out = [0.0f32; 4];
+        for channel in 0..4 {
+            let (a, b) = (f32::from(one[channel]) / 255.0, f32::from(two[channel]) / 255.0);
+            out[channel] = (k[0] * a * b + k[1] * a + k[2] * b + k[3]).clamp(0.0, 1.0);
+        }
+        for channel in 0..3 {
+            out[channel] = out[channel].min(out[3]);
+        }
+        for channel in 0..4 {
+            one[channel] = (out[channel] * 255.0).round() as u8;
+        }
+    }
+}
+
+/// The `MaskInvert` composite of the premultiplied pixels of `source` onto
+/// `destination`: the colour of the destination inverted where the source
+/// covers it (`as (ad - Cd) + (1 - as) Cd`), the alpha of the destination
+/// kept.
+fn mask_invert_pixels(destination: &mut [u8], source: &[u8]) {
+    for (dest, src) in destination.chunks_exact_mut(4).zip(source.chunks_exact(4)) {
+        let source_alpha = f32::from(src[3]) / 255.0;
+        let dest_alpha = f32::from(dest[3]) / 255.0;
+        for channel in 0..3 {
+            let d = f32::from(dest[channel]) / 255.0;
+            let out = source_alpha * (dest_alpha - d) + (1.0 - source_alpha) * d;
+            dest[channel] = (out.clamp(0.0, dest_alpha) * 255.0).round() as u8;
+        }
+    }
+}
+
+#[cfg(test)]
+mod pixel_tests {
+    use super::*;
+
+    #[test]
+    fn the_extra_blend_modes_follow_their_formulas() {
+        let opaque = |r: u8, g: u8, b: u8| vec![r, g, b, 255];
+        let mut back = opaque(200, 100, 50);
+        blend_pixels(BlendEffectMode::Subtract, &mut back, &opaque(100, 150, 25), 1);
+        assert_eq!(opaque(100, 0, 25), back);
+        let mut back = opaque(200, 100, 50);
+        blend_pixels(BlendEffectMode::LinearBurn, &mut back, &opaque(100, 255, 0), 1);
+        assert_eq!(opaque(45, 100, 0), back);
+        let mut back = opaque(100, 100, 100);
+        blend_pixels(BlendEffectMode::HardMix, &mut back, &opaque(200, 100, 0), 1);
+        assert_eq!(opaque(255, 0, 0), back);
+        let mut back = opaque(10, 10, 10);
+        blend_pixels(BlendEffectMode::LighterColor, &mut back, &opaque(200, 0, 0), 1);
+        assert_eq!(opaque(200, 0, 0), back);
+    }
+
+    #[test]
+    fn a_blend_over_transparency_is_the_foreground() {
+        let mut back = vec![0, 0, 0, 0];
+        blend_pixels(BlendEffectMode::Division, &mut back, &[100, 50, 0, 255], 1);
+        assert_eq!(vec![100, 50, 0, 255], back);
+    }
+
+    #[test]
+    fn the_arithmetic_composite_of_two_images() {
+        let mut first = vec![255, 0, 128, 255];
+        arithmetic_pixels([0.0, 0.5, 0.5, 0.0], &mut first, &[0, 255, 128, 255]);
+        assert_eq!(vec![128, 128, 128, 255], first);
+    }
+
+    #[test]
+    fn mask_invert_inverts_the_destination_under_the_source() {
+        let mut destination = vec![255, 0, 64, 255, 255, 0, 64, 255];
+        mask_invert_pixels(&mut destination, &[0, 0, 0, 255, 0, 0, 0, 0]);
+        assert_eq!(vec![0, 255, 191, 255, 255, 0, 64, 255], destination);
     }
 }

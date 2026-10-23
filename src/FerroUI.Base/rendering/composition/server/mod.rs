@@ -130,9 +130,10 @@ pub use server_drop_shadow::ServerDropShadow;
 pub use server_composition_light::{
     distant_light_incidence, light_map_of, point_light_incidence, spot_light_cone, IServerCompositionLight,
     LightAttenuation, LightColor, LightMap, LightSource, LitContent, ServerAmbientLight, ServerDistantLight,
-    ServerLightState, ServerPointLight, ServerSpotLight, ServerVisualUnorderedCollection, LIGHT_MAP_CELL,
-    LIGHT_MAP_MAX_CELLS,
+    ServerLightState, ServerPointLight, ServerSpotLight, ServerVisualUnorderedCollection,
+    LightingMaterial, LIGHT_MAP_MAX_SAMPLES, LIGHT_MAP_MAX_SCALE, LIGHT_MAP_SAMPLE_SPACING,
 };
+pub use server_composition_light::invalidate_lights_with_moved_spaces;
 pub use server_composition_light::{paint_scene_lighting, scene_light_map, SCENE_LIGHTING_DISTANCE_UNIT};
 pub(crate) use server_composition_light::XamlLightChanges;
 pub use server_loaded_image_surface::ServerLoadedImageSurface;

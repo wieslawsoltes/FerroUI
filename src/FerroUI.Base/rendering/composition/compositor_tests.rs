@@ -1604,3 +1604,8 @@ mod composition_winui_effect_tests;
 // this module.
 #[path = "composition_winui_material_tests.rs"]
 mod composition_winui_material_tests;
+
+// The tests of the lighting and the effect graph of the composition port
+// (winui-materials.md) use the fixture of this module.
+#[path = "composition_winui_lighting_tests.rs"]
+mod composition_winui_lighting_tests;

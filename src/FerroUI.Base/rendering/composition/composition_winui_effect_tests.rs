@@ -209,19 +209,16 @@ fn an_unsupported_effect_reports_its_load_status_and_draws_nothing() {
     let s = CompositorCanvas::new();
     let log = s.render_interface.log().clone();
 
-    // An arithmetic composite of two images (winui-materials.md: drawn only
-    // when one side is a colour).
+    // An effect without its source does not load (Win2D's effects fail on a
+    // missing input), and its brushes draw nothing.
     let factory = s.compositor.create_effect_factory(crate::rendering::composition::effects::ArithmeticCompositeEffect {
         name: "Arithmetic".into(),
         source1: parameter("source"),
-        source2: parameter("other"),
+        source2: None,
         ..Default::default()
     });
     assert_eq!(CompositionEffectFactoryLoadStatus::Other, factory.load_status());
-    assert_eq!(
-        Some(&CompositionEffectFactoryError::EffectTypeNotSupported("ArithmeticCompositeEffect")),
-        factory.extended_error()
-    );
+    assert!(matches!(factory.extended_error(), Some(CompositionEffectFactoryError::MissingSource { .. })));
     let brush = factory.create_brush();
     brush.set_source_parameter("source", Some((*s.compositor.create_color_brush_with_color(Colors::BLUE)).clone()));
     let sprite = sprite_with(&s, &brush);
@@ -230,17 +227,14 @@ fn an_unsupported_effect_reports_its_load_status_and_draws_nothing() {
     let server = s.compositor.server().get::<ServerCompositionEffectBrush>(brush.server()).expect("the server brush exists");
     assert!(!server.is_loaded());
 
-    // A composite mode the drawing contexts do not have.
+    // Every composite mode loads (winui-materials.md: `MaskInvert` is drawn
+    // from the pixels).
     let composite = s.compositor.create_effect_factory(CompositeEffect {
         mode: CanvasComposite::MaskInvert,
         sources: vec![CompositionEffectSourceParameter::new("a").into()],
         ..Default::default()
     });
-    assert_eq!(CompositionEffectFactoryLoadStatus::Other, composite.load_status());
-    assert_eq!(
-        Some(&CompositionEffectFactoryError::CompositeModeNotSupported(CanvasComposite::MaskInvert)),
-        composite.extended_error()
-    );
+    assert_eq!(CompositionEffectFactoryLoadStatus::Success, composite.load_status());
 
     // A saturation loads (winui-materials.md).
     let saturation = s.compositor.create_effect_factory(SaturationEffect {

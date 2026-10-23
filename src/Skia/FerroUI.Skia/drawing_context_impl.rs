@@ -285,6 +285,9 @@ pub struct DrawingContextImpl {
     // transform.
     intermediate_surface_dpi: Vector,
     mask_stack: Vec<(sk::M44, PaintWrapper)>,
+    /// The multiply layers that are pushed: the image of their factors, their
+    /// bounds, and whether a scaling layer is under them.
+    multiply_stack: Vec<(Option<sk::Image>, sk::Rect, bool)>,
     opacity_stack: Vec<f64>,
     render_options_stack: Vec<RenderOptions>,
     text_options_stack: Vec<TextOptions>,
@@ -343,6 +346,7 @@ impl DrawingContextImpl {
             disposables,
             intermediate_surface_dpi: create_info.dpi,
             mask_stack: Vec::new(),
+            multiply_stack: Vec::new(),
             opacity_stack: Vec::new(),
             render_options_stack: Vec::new(),
             text_options_stack: Vec::new(),
@@ -1842,6 +1846,60 @@ impl ferroui_base::platform::IDrawingContextImplWithLayerEffects for DrawingCont
     fn pop_color_matrix_layer(&mut self) {
         self.check_lease();
         self.restore_canvas();
+        self.restore_canvas();
+    }
+
+    fn push_multiply_layer(&mut self, bounds: Rect, factors: &ferroui_base::platform::MultiplyLayerFactors) {
+        self.check_lease();
+        let (width, height) = (factors.size.width.max(1), factors.size.height.max(1));
+        let info = sk::ImageInfo::new((width, height), sk::ColorType::RGBA8888, sk::AlphaType::Premul, None);
+        let image = sk::images::raster_from_data(&info, sk::Data::new_copy(&factors.rgba), width as usize * 4);
+        let bounds = to_sk_rect(bounds);
+        let canvas = self.canvas.get();
+        canvas.save();
+        // Nothing outside the bounds is kept.
+        canvas.clip_rect(bounds, sk::ClipOp::Intersect, false);
+        // Factors above 1: the product of the content and the factors over
+        // the scale is scaled back up by a colour matrix (premultiplied, so
+        // the result is clamped to the alpha).
+        let scaled = factors.scale > 1.0;
+        if scaled {
+            let scale = factors.scale;
+            let matrix = ferroui_base::media::ColorMatrix::scale_and_offset([scale, scale, scale, 1.0], [0.0; 4]);
+            let mut paint = SkPaintCache::get();
+            paint.set_color_filter(color_matrix_filter(&matrix, ferroui_base::media::ColorMatrixAlphaMode::Premultiplied));
+            canvas.save_layer(&SaveLayerRec::default().bounds(&bounds).paint(&paint));
+            SkPaintCache::return_reset(paint);
+        }
+        canvas.save_layer(&SaveLayerRec::default().bounds(&bounds));
+        // No image of the factors: the content is drawn unchanged.
+        self.multiply_stack.push((image, bounds, scaled));
+    }
+
+    fn pop_multiply_layer(&mut self) {
+        self.check_lease();
+        let Some((image, bounds, scaled)) = self.multiply_stack.pop() else {
+            panic!("The multiply layer stack is empty")
+        };
+        if let Some(image) = image {
+            // `Modulate`: each premultiplied channel of the layer times the
+            // opaque factor image; the alpha of the layer is kept.
+            let mut paint = SkPaintCache::get();
+            paint.set_blend_mode(sk::BlendMode::Modulate);
+            let sampling = sk::SamplingOptions::new(sk::FilterMode::Linear, sk::MipmapMode::None);
+            self.canvas.get().draw_image_rect_with_sampling_options(
+                &image,
+                None,
+                bounds,
+                sampling,
+                &paint,
+            );
+            SkPaintCache::return_reset(paint);
+        }
+        self.restore_canvas();
+        if scaled {
+            self.restore_canvas();
+        }
         self.restore_canvas();
     }
 }

@@ -28,5 +28,5 @@ pub use graphics_effects::{
     CanvasEdgeBehavior, ColorMatrixEffect, ColorSourceEffect, CompositeEffect, CompositionEffectSourceParameter,
     CrossFadeEffect, EffectBorderMode, EffectOptimization, GaussianBlurEffect, GraphicsEffect, GraphicsEffectSource,
     GrayscaleEffect, InvertEffect, LuminanceToAlphaEffect, OpacityEffect, SaturationEffect, SceneLightingEffect,
-    TintEffect,
+    ShadowEffect, TintEffect,
 };

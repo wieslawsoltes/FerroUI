@@ -1,4 +1,4 @@
-//! The blend layers and colour matrix layers of the drawing context
+//! The blend, colour matrix and multiply layers of the drawing context
 //! (`IDrawingContextImplWithLayerEffects`, docs/porting/winui-materials.md,
 //! section 6.2): drawn onto a raster target and checked pixel by pixel. The
 //! other backend has the same tests with the same expectations.
@@ -127,4 +127,36 @@ fn an_invert_matrix_layer_of_a_translucent_colour_keeps_its_alpha() {
         let actual = through_matrix(half_red, &ColorMatrix::invert(), alpha_mode);
         assert_near((0, 255, 255, 128), actual);
     }
+}
+
+fn multiplied(color: Color, factor: [u8; 3], scale: f32) -> (u8, u8, u8, u8) {
+    let factors = ferroui_base::platform::MultiplyLayerFactors {
+        size: PixelSize::new(1, 1),
+        rgba: Arc::new(vec![factor[0], factor[1], factor[2], 255]),
+        scale,
+    };
+    let target = target();
+    draw(&target, |context| {
+        context.push_multiply_layer(bounds(), &factors);
+        fill(context, color);
+        context.pop_multiply_layer();
+    });
+    middle(&target)
+}
+
+#[test]
+fn a_multiply_layer_multiplies_each_channel() {
+    assert_near((100, 100, 50, 255), multiplied(Color::from_rgb(200, 100, 50), [128, 255, 255], 1.0));
+}
+
+#[test]
+fn a_multiply_layer_keeps_the_alpha_of_what_is_drawn_in_it() {
+    let actual = multiplied(Color::from_argb(128, 200, 100, 50), [128, 255, 255], 1.0);
+    assert_near((100, 100, 50, 128), actual);
+}
+
+#[test]
+fn a_multiply_layer_with_a_scale_brightens_up_to_full() {
+    // Factors of 2, 1 and 0.
+    assert_near((255, 100, 0, 255), multiplied(Color::from_rgb(200, 100, 50), [255, 128, 0], 2.0));
 }

@@ -26,7 +26,7 @@ use crate::vello_extensions::rect_path;
 use ferroui_base::media::effects::IEffect;
 use ferroui_base::platform::{IDrawingContextImpl, IDrawingContextImplWithEffects};
 use ferroui_base::{PixelSize, Rect};
-use kurbo::{Shape, Vec2};
+use kurbo::{Affine, Shape, Vec2};
 use peniko::color::AlphaColor;
 use peniko::BlendMode;
 
@@ -296,8 +296,17 @@ impl IDrawingContextImplWithEffects for DrawingContextImpl {
 /// `ColorMatrix` unimplemented), so the matrix is applied to the pixels.
 pub(super) struct ColorMatrixFrame {
     outer: OuterScene,
-    matrix: ferroui_base::media::ColorMatrix,
-    alpha_mode: ferroui_base::media::ColorMatrixAlphaMode,
+    operation: CpuLayerOperation,
+}
+
+/// What a layer drawn by the CPU renderer does to its pixels.
+enum CpuLayerOperation {
+    /// A colour matrix layer.
+    Matrix { matrix: ferroui_base::media::ColorMatrix, alpha_mode: ferroui_base::media::ColorMatrixAlphaMode },
+    /// A multiply layer: the factors stretched over `bounds` (in the
+    /// coordinates of the context); `scene_to_local` maps the pixels of the
+    /// scene of the layer to those coordinates.
+    Multiply { factors: ferroui_base::platform::MultiplyLayerFactors, bounds: Rect, scene_to_local: Affine },
 }
 
 impl DrawingContextImpl {
@@ -340,7 +349,16 @@ impl DrawingContextImpl {
         crate::perf::count(crate::perf::Phase::EffectAsImage, u64::from(width) * u64::from(height) * 4);
         let mut rgba = vec![0u8; width as usize * height as usize * 4];
         scene.render_to_pixels(&mut rgba);
-        frame.matrix.apply_to_rgba8(&mut rgba, frame.alpha_mode);
+        match frame.operation {
+            CpuLayerOperation::Matrix { matrix, alpha_mode } => matrix.apply_to_rgba8(&mut rgba, alpha_mode),
+            CpuLayerOperation::Multiply { factors, bounds, scene_to_local } => {
+                factors.apply_to_premultiplied_rgba8(&mut rgba, width as usize, |x, y| {
+                    let local = scene_to_local * kurbo::Point::new(x, y);
+                    let (u, v) = ((local.x - bounds.x) / bounds.width, (local.y - bounds.y) / bounds.height);
+                    ((0.0..=1.0).contains(&u) && (0.0..=1.0).contains(&v)).then_some((u, v))
+                });
+            }
+        }
         let image = to_image(rgba, PixelSize::new(width as i32, height as i32));
         self.draw_image_at_pixels(image, position.x, position.y);
     }
@@ -365,7 +383,8 @@ impl ferroui_base::platform::IDrawingContextImplWithLayerEffects for DrawingCont
         alpha_mode: ferroui_base::media::ColorMatrixAlphaMode,
     ) {
         let outer = self.begin_cpu_scene(bounds);
-        self.color_matrix_stack.push(ColorMatrixFrame { outer, matrix: *matrix, alpha_mode });
+        self.color_matrix_stack
+            .push(ColorMatrixFrame { outer, operation: CpuLayerOperation::Matrix { matrix: *matrix, alpha_mode } });
         self.save(SavedKind::ColorMatrix);
         // Nothing outside the bounds is kept.
         self.push_clip(bounds);
@@ -373,6 +392,25 @@ impl ferroui_base::platform::IDrawingContextImplWithLayerEffects for DrawingCont
 
     fn pop_color_matrix_layer(&mut self) {
         // The clip, then the layer.
+        self.restore();
+        self.restore();
+    }
+
+    /// The factors are applied to the pixels of a scene of the CPU renderer,
+    /// as a colour matrix is: vello has no blend mode that multiplies the
+    /// colour and keeps the alpha of what is under it.
+    fn push_multiply_layer(&mut self, bounds: Rect, factors: &ferroui_base::platform::MultiplyLayerFactors) {
+        let outer = self.begin_cpu_scene(bounds);
+        let scene_to_local = self.device_transform().inverse();
+        self.color_matrix_stack.push(ColorMatrixFrame {
+            outer,
+            operation: CpuLayerOperation::Multiply { factors: factors.clone(), bounds, scene_to_local },
+        });
+        self.save(SavedKind::ColorMatrix);
+        self.push_clip(bounds);
+    }
+
+    fn pop_multiply_layer(&mut self) {
         self.restore();
         self.restore();
     }

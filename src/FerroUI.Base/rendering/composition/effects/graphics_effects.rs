@@ -33,10 +33,10 @@ impl CompositionEffectSourceParameter {
     }
 }
 
-/// How a blur treats the edges of its input (Win2D `EffectBorderMode`).
-///
-/// Deviation (winui-composition.md): stored only; the blur of the drawing
-/// contexts fades the edges (`Soft`).
+/// How a blur treats the edges of its input (Win2D `EffectBorderMode`):
+/// `Soft` fades the edges (the blur reads transparent pixels beyond its
+/// area), `Hard` keeps them (the blur reads its source beyond the area and
+/// its output is cut to the area).
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq, Hash)]
 #[repr(i32)]
 pub enum EffectBorderMode {
@@ -50,8 +50,9 @@ pub enum EffectBorderMode {
 /// The speed and quality trade-off of an effect (Win2D
 /// `EffectOptimization`).
 ///
-/// Deviation (winui-composition.md): stored only; the drawing contexts have
-/// one quality of blur.
+/// Deviation (winui-materials.md): the blurs of the drawing contexts are
+/// exact at every setting; `Speed` and `Balanced` draw the output of
+/// `Quality` (Direct2D's approximations are not reproduced).
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq, Hash)]
 #[repr(i32)]
 pub enum EffectOptimization {
@@ -67,9 +68,9 @@ pub enum EffectOptimization {
 /// How a composite effect combines its sources (Win2D `CanvasComposite`):
 /// each source is composed onto what the sources before it made.
 ///
-/// Every mode but `MaskInvert` is drawn; an effect factory made from a
-/// composite effect with `MaskInvert` reports
-/// [`CompositionEffectFactoryError::CompositeModeNotSupported`](super::CompositionEffectFactoryError::CompositeModeNotSupported).
+/// Every mode is drawn: the Porter-Duff modes with the blend layers of the
+/// drawing contexts, `MaskInvert` from the pixels of the sources drawn
+/// apart (winui-materials.md).
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq, Hash)]
 #[repr(i32)]
 pub enum CanvasComposite {
@@ -132,6 +133,7 @@ pub enum GraphicsEffect {
     AlphaMask(AlphaMaskEffect),
     Border(BorderEffect),
     SceneLighting(SceneLightingEffect),
+    Shadow(ShadowEffect),
 }
 
 impl GraphicsEffect {
@@ -155,6 +157,7 @@ impl GraphicsEffect {
             GraphicsEffect::AlphaMask(effect) => &effect.name,
             GraphicsEffect::Border(effect) => &effect.name,
             GraphicsEffect::SceneLighting(effect) => &effect.name,
+            GraphicsEffect::Shadow(effect) => &effect.name,
         }
     }
 
@@ -177,6 +180,7 @@ impl GraphicsEffect {
             GraphicsEffect::AlphaMask(_) => "AlphaMaskEffect",
             GraphicsEffect::Border(_) => "BorderEffect",
             GraphicsEffect::SceneLighting(_) => "SceneLightingEffect",
+            GraphicsEffect::Shadow(_) => "ShadowEffect",
         }
     }
 }
@@ -213,6 +217,7 @@ graphics_effect_conversions! {
     ArithmeticCompositeEffect => ArithmeticComposite,
     AlphaMaskEffect => AlphaMask,
     BorderEffect => Border,
+    ShadowEffect => Shadow,
     SceneLightingEffect => SceneLighting,
 }
 
@@ -225,9 +230,9 @@ pub struct GaussianBlurEffect {
     /// The standard deviation of the blur, in device independent pixels
     /// (default 3).
     pub blur_amount: f32,
-    /// How the edges of the source are treated (stored only).
+    /// How the edges of the source are treated.
     pub border_mode: EffectBorderMode,
-    /// The speed and quality trade-off (stored only).
+    /// The speed and quality trade-off (every setting draws the exact blur).
     pub optimization: EffectOptimization,
     /// The input.
     pub source: Option<GraphicsEffectSource>,
@@ -590,6 +595,36 @@ impl Default for SceneLightingEffect {
             specular_amount: 0.0,
             specular_shine: 16.0,
             normal_map_source: None,
+        }
+    }
+}
+
+/// The shadow of its source (Win2D `ShadowEffect`): the alpha of the source
+/// in the shadow colour, blurred. Animatable: `BlurAmount`, `ShadowColor`.
+#[derive(Clone, Debug, PartialEq)]
+pub struct ShadowEffect {
+    /// The name of the effect.
+    pub name: String,
+    /// The standard deviation of the blur, in device independent pixels
+    /// (default 1).
+    pub blur_amount: f32,
+    /// The colour of the shadow (default opaque black); its alpha scales the
+    /// alpha of the source.
+    pub shadow_color: Color,
+    /// The speed and quality trade-off (every setting draws the exact blur).
+    pub optimization: EffectOptimization,
+    /// The input.
+    pub source: Option<GraphicsEffectSource>,
+}
+
+impl Default for ShadowEffect {
+    fn default() -> Self {
+        Self {
+            name: String::new(),
+            blur_amount: 1.0,
+            shadow_color: Color::from_argb(255, 0, 0, 0),
+            optimization: EffectOptimization::Balanced,
+            source: None,
         }
     }
 }

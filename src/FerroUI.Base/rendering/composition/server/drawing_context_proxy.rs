@@ -442,6 +442,22 @@ impl crate::platform::IDrawingContextImplWithLayerEffects for CompositorDrawingC
             None => self.inner.pop_layer(),
         }
     }
+
+    fn push_multiply_layer(&mut self, bounds: Rect, factors: &crate::platform::MultiplyLayerFactors) {
+        self.flush();
+        match self.inner.as_drawing_context_impl_with_layer_effects() {
+            Some(layers) => layers.push_multiply_layer(bounds, factors),
+            None => self.inner.push_layer(bounds),
+        }
+    }
+
+    fn pop_multiply_layer(&mut self) {
+        self.flush();
+        match self.inner.as_drawing_context_impl_with_layer_effects() {
+            Some(layers) => layers.pop_multiply_layer(),
+            None => self.inner.pop_layer(),
+        }
+    }
 }
 
 impl IDrawingContextImplWithEffects for CompositorDrawingContextProxy {
