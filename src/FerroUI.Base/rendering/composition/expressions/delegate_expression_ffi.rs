@@ -1,5 +1,6 @@
 //! Foreign function interface for composition animations based on calling closures.
 
+use std::borrow::Cow;
 use std::collections::HashMap;
 use std::sync::Arc;
 
@@ -22,9 +23,13 @@ struct FfiRecord {
 /// single-precision vector arguments to the double-precision vector types;
 /// then for one reachable by converting between the two vector families in
 /// either direction.
+///
+/// Names are compared exactly, or ignoring ASCII case for a registry created
+/// with [`DelegateExpressionFfi::new_ignoring_case`].
 #[derive(Default)]
 pub struct DelegateExpressionFfi {
     registry: HashMap<String, HashMap<usize, Vec<FfiRecord>>>,
+    ignore_case: bool,
 }
 
 /// The variant type a parameter of type `T` is matched against.
@@ -64,9 +69,28 @@ macro_rules! add_overload {
 }
 
 impl DelegateExpressionFfi {
-    /// Creates an empty registry.
+    /// Creates an empty registry whose function names are case-sensitive.
     pub fn new() -> Self {
         Self::default()
+    }
+
+    /// Creates an empty registry whose function names are compared ignoring
+    /// ASCII case (`lerp` calls the function registered as `Lerp`), as the
+    /// functions of WinUI composition expressions are.
+    pub fn new_ignoring_case() -> Self {
+        Self {
+            ignore_case: true,
+            ..Self::default()
+        }
+    }
+
+    /// The key a function name is registered and looked up under.
+    fn normalized_name<'n>(&self, name: &'n str) -> Cow<'n, str> {
+        if self.ignore_case && name.bytes().any(|b| b.is_ascii_uppercase()) {
+            Cow::Owned(name.to_ascii_lowercase())
+        } else {
+            Cow::Borrowed(name)
+        }
     }
 
     fn call_with_cast(
@@ -104,8 +128,9 @@ impl DelegateExpressionFfi {
     }
 
     fn add(&mut self, name: &str, cb: FfiDelegate, types: Vec<VariantType>) {
+        let key = self.normalized_name(name).into_owned();
         self.registry
-            .entry(name.to_owned())
+            .entry(key)
             .or_default()
             .entry(types.len())
             .or_default()
@@ -144,26 +169,30 @@ impl DelegateExpressionFfi {
     add_overload!(
         /// Registers a function with six parameters.
         ///
-        /// As in the reference implementation, the sixth parameter is read
-        /// from the fifth argument.
-        add6; T1 => 0, T2 => 1, T3 => 2, T4 => 3, T5 => 4, T6 => 4
+        /// The reference implementation reads the sixth parameter from the
+        /// fifth argument; here each parameter reads its own argument, so
+        /// `Matrix3x2(m11, m12, m21, m22, m31, m32)` builds the matrix WinUI
+        /// builds.
+        add6; T1 => 0, T2 => 1, T3 => 2, T4 => 3, T5 => 4, T6 => 5
     );
     add_overload!(
         /// Registers a function with sixteen parameters.
         ///
-        /// As in the reference implementation, the sixth to sixteenth
-        /// parameters are read from the fifth argument.
+        /// The reference implementation reads the sixth to sixteenth
+        /// parameters from the fifth argument; here each parameter reads its
+        /// own argument, as `Matrix4x4(m11, ..., m44)` of WinUI needs.
         add16;
         T1 => 0, T2 => 1, T3 => 2, T4 => 3,
-        T5 => 4, T6 => 4, T7 => 4, T8 => 4,
-        T9 => 4, T10 => 4, T11 => 4, T12 => 4,
-        T13 => 4, T14 => 4, T15 => 4, T16 => 4
+        T5 => 4, T6 => 5, T7 => 6, T8 => 7,
+        T9 => 8, T10 => 9, T11 => 10, T12 => 11,
+        T13 => 12, T14 => 13, T15 => 14, T16 => 15
     );
 }
 
 impl IExpressionForeignFunctionInterface for DelegateExpressionFfi {
     fn call(&self, name: &str, arguments: &[ExpressionVariant]) -> Option<ExpressionVariant> {
-        let name_group = self.registry.get(name)?;
+        let key = self.normalized_name(name);
+        let name_group = self.registry.get(key.as_ref())?;
         let count_group = name_group.get(&arguments.len())?;
         for record in count_group {
             let mut matches = true;
@@ -255,15 +284,51 @@ mod tests {
     }
 
     #[test]
-    fn parameters_past_the_fifth_read_the_fifth_argument() {
+    fn every_parameter_reads_its_own_argument() {
         let mut ffi = DelegateExpressionFfi::new();
         ffi.add5("F", |a: f32, b: f32, c: f32, d: f32, e: f32| {
             a + 10.0 * b + 100.0 * c + 1000.0 * d + 10000.0 * e
         });
         ffi.add6("F", |_a: f32, _b: f32, _c: f32, _d: f32, e: f32, f: f32| e * 10.0 + f);
-        let args: Vec<ExpressionVariant> = (1..=6).map(|v| (v as f64).into()).collect();
+        #[allow(clippy::too_many_arguments)]
+        ffi.add16(
+            "F",
+            |a: f32,
+             _b: f32,
+             _c: f32,
+             _d: f32,
+             e: f32,
+             f: f32,
+             _g: f32,
+             _h: f32,
+             _i: f32,
+             j: f32,
+             _k: f32,
+             _l: f32,
+             _m: f32,
+             _n: f32,
+             _o: f32,
+             p: f32| a + e * 10.0 + f * 100.0 + j * 1000.0 + p * 10000.0,
+        );
+        let args: Vec<ExpressionVariant> = (1..=16).map(|v| (v as f64).into()).collect();
         assert_eq!(call(&ffi, "F", &args[..5]), Some(54321.0.into()));
-        assert_eq!(call(&ffi, "F", &args), Some(55.0.into()));
+        assert_eq!(call(&ffi, "F", &args[..6]), Some(56.0.into()));
+        assert_eq!(call(&ffi, "F", &args), Some(170651.0.into()));
+    }
+
+    #[test]
+    fn a_registry_ignoring_case_matches_names_in_any_case() {
+        let mut ffi = DelegateExpressionFfi::new_ignoring_case();
+        ffi.add1("Lerp", |a: f32| a);
+        ffi.add1("Matrix3x2.CreateScale", |a: f32| a * 2.0);
+        assert_eq!(call(&ffi, "Lerp", &[1.0.into()]), Some(1.0.into()));
+        assert_eq!(call(&ffi, "lerp", &[1.0.into()]), Some(1.0.into()));
+        assert_eq!(call(&ffi, "LERP", &[1.0.into()]), Some(1.0.into()));
+        assert_eq!(call(&ffi, "matrix3x2.createscale", &[1.0.into()]), Some(2.0.into()));
+        assert_eq!(call(&ffi, "Lerp2", &[1.0.into()]), None);
+        // Overloads registered under different cases of a name are one group.
+        ffi.add1("LERP", |a: Vector2| a.x);
+        assert_eq!(call(&ffi, "lerp", &[Vector2::new(3.0, 0.0).into()]), Some(3.0.into()));
     }
 
     #[test]

@@ -1,4 +1,4 @@
-use super::{CompositionAnimation, IKeyFrames};
+use super::{CompositionAnimation, CompositionColorSpace, IKeyFrames};
 use crate::animation::easings::{Easing, IEasing};
 use crate::animation::PlaybackDirection;
 use crate::rendering::composition::Compositor;
@@ -24,6 +24,10 @@ pub struct KeyFrameAnimation {
     iteration_behavior: Cell<AnimationIterationBehavior>,
     iteration_count: Cell<i32>,
     stop_behavior: Cell<AnimationStopBehavior>,
+    /// `ColorKeyFrameAnimation.InterpolationColorSpace`: held here, as the
+    /// classes of the value types are expanded from one macro; only the colour
+    /// animation exposes it.
+    interpolation_color_space: Cell<CompositionColorSpace>,
     /// `private protected abstract IKeyFrames KeyFrames`: the key frames of
     /// the class for the value type.
     key_frames: RefCell<Box<dyn IKeyFrames>>,
@@ -48,6 +52,7 @@ impl KeyFrameAnimation {
             iteration_behavior: Cell::new(AnimationIterationBehavior::default()),
             iteration_count: Cell::new(1),
             stop_behavior: Cell::new(AnimationStopBehavior::default()),
+            interpolation_color_space: Cell::new(CompositionColorSpace::default()),
             key_frames: RefCell::new(key_frames),
         }
     }
@@ -123,6 +128,21 @@ impl KeyFrameAnimation {
 
     pub fn set_stop_behavior(&self, value: AnimationStopBehavior) {
         self.stop_behavior.set(value)
+    }
+
+    /// The colour space the key frames are interpolated in; used by the
+    /// colour animation only.
+    pub(crate) fn interpolation_color_space_core(&self) -> CompositionColorSpace {
+        self.interpolation_color_space.get()
+    }
+
+    pub(crate) fn set_interpolation_color_space_core(&self, value: CompositionColorSpace) {
+        self.interpolation_color_space.set(value)
+    }
+
+    /// The number of key frames in the animation (WinUI `KeyFrameCount`).
+    pub fn key_frame_count(&self) -> i32 {
+        self.key_frames.borrow().key_frame_count() as i32
     }
 
     /// Inserts an expression keyframe.
@@ -241,12 +261,27 @@ macro_rules! key_frame_animation_classes {
                 self.base.target()
             }
 
+            fn composition_animation(&self) -> Option<&super::CompositionAnimation> {
+                Some(&*self.base)
+            }
+
             fn create_instance(
                 &self,
                 target_object: crate::rendering::composition::server::ServerObjectId,
                 final_value: Option<crate::rendering::composition::expressions::ExpressionVariant>,
             ) -> super::AnimationInstanceFactory {
-                let interpolator: &'static (dyn super::IInterpolator<$ty> + Sync) = <$interpolator>::instance();
+                // The colour animation interpolates in its colour space.
+                let interpolator: &'static (dyn super::IInterpolator<$ty> + Sync) =
+                    super::interpolators::interpolator_for_color_space::<$ty>(
+                        <$interpolator>::instance(),
+                        self.base.interpolation_color_space_core(),
+                    );
+                // Parsed now: an expression that cannot be parsed fails the
+                // start, as in WinUI.
+                let initial_values = match self.initial_value_expressions().parse_all() {
+                    Ok(initial_values) => initial_values,
+                    Err(error) => panic!("{error}"),
+                };
                 let key_frames = self.base.with_key_frames::<$ty, _>(|key_frames| key_frames.snapshot());
                 let parameters = self.create_snapshot_source();
                 let final_value = final_value.map(|value| {
@@ -261,8 +296,13 @@ macro_rules! key_frame_animation_classes {
                 let iteration_behavior = self.iteration_behavior();
                 let iteration_count = self.iteration_count();
                 let stop_behavior = self.stop_behavior();
+                // The animation belongs to the batches that are open now; an
+                // animation that loops forever counts as infinite.
+                let completion = self.compositor().acquire_animation_completion(
+                    iteration_behavior == AnimationIterationBehavior::Forever,
+                );
                 super::AnimationInstanceFactory::new(move || {
-                    super::KeyFrameAnimationInstance::<$ty>::new(
+                    let instance = super::KeyFrameAnimationInstance::<$ty>::new(
                         interpolator,
                         key_frames,
                         Rc::new(parameters.build()),
@@ -275,7 +315,10 @@ macro_rules! key_frame_animation_classes {
                         iteration_behavior,
                         iteration_count,
                         stop_behavior,
-                    )
+                    );
+                    instance.set_completion(completion);
+                    instance.set_initial_value_expressions(initial_values);
+                    instance
                 })
             }
         }
@@ -299,3 +342,15 @@ macro_rules! key_frame_animation_classes {
 }
 
 crate::rendering::composition::generated::for_each_composition_key_frame_animation!(key_frame_animation_classes);
+
+impl ColorKeyFrameAnimation {
+    /// The colour space the key frames are interpolated in (WinUI
+    /// `InterpolationColorSpace`); `Auto` interpolates in RGB.
+    pub fn interpolation_color_space(&self) -> CompositionColorSpace {
+        self.base.interpolation_color_space_core()
+    }
+
+    pub fn set_interpolation_color_space(&self, value: CompositionColorSpace) {
+        self.base.set_interpolation_color_space_core(value)
+    }
+}

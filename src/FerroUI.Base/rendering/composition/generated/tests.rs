@@ -688,7 +688,11 @@ fn default_values_reach_the_server() {
     // property.
     let log = server.take_log();
     assert!(log.contains(&"remove_animation Opacity".to_string()));
-    assert!(!log.iter().any(|entry| entry.starts_with("set_value")));
+    // (The non-animated properties the WinUI overlay adds to the visual, with their defaults, are
+    // set as values; the animated properties of the upstream schema are not.)
+    for name in ["Visible", "Opacity", "ClipToBounds", "Orientation", "Scale", "TransformMatrix"] {
+        assert!(!log.iter().any(|entry| entry.starts_with(&format!("set_value {name}"))), "{log:?}");
+    }
 
     let fresh = ServerCompositionVisualProps::new();
     assert!(!fresh.visible());

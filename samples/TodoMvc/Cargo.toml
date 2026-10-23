@@ -1,0 +1,30 @@
+[package]
+name = "todo-mvc"
+description = "TodoMVC written with components that run again, hooks and the router of ferroui-view, in the WinUI 3 theme"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+publish = false
+
+# The scenario tests are a module of the library (`tests.rs`), not integration test targets.
+autotests = false
+
+[lib]
+path = "lib.rs"
+doctest = false
+
+[[bin]]
+name = "todo-mvc"
+path = "main.rs"
+test = false
+
+[dependencies]
+ferroui-base = { workspace = true }
+ferroui-controls = { workspace = true }
+ferroui-view = { workspace = true, features = ["desktop"] }
+ferroui-themes-winui = { workspace = true }
+
+[dev-dependencies]
+# The test application of the scenario tests (a dispatcher of the thread).
+ferroui-controls = { workspace = true, features = ["testing"] }

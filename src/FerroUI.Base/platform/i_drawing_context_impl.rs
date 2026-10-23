@@ -1,5 +1,5 @@
 use super::{
-    IBitmapImpl, IDrawingContextImplWithEffects, IDrawingContextWithAcrylicLikeSupport, IGeometryImpl, IGlyphRunImpl,
+    IBitmapImpl, IDrawingContextImplWithEffects, IDrawingContextImplWithFragments, IDrawingContextWithAcrylicLikeSupport, IGeometryImpl, IGlyphRunImpl,
     IPlatformRenderInterfaceRegion,
 };
 use crate::media::{BoxShadows, Color, IBrush, IPen, RenderOptions};
@@ -140,6 +140,13 @@ pub trait IDrawingContextImpl {
     /// (`impl as IDrawingContextImplWithEffects`): a backend that implements
     /// the trait overrides this to return itself.
     fn as_drawing_context_impl_with_effects(&mut self) -> Option<&mut dyn IDrawingContextImplWithEffects> {
+        None
+    }
+
+    /// The context viewed as [`IDrawingContextImplWithFragments`], when the
+    /// backend can keep what is drawn as fragments and draw them again. A
+    /// backend that implements the trait overrides this to return itself.
+    fn as_drawing_context_impl_with_fragments(&mut self) -> Option<&mut dyn IDrawingContextImplWithFragments> {
         None
     }
 

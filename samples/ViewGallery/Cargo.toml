@@ -1,0 +1,34 @@
+[package]
+name = "view-gallery"
+description = "ferroui-view, phase 3: styles, the theme variant and resources, transitions, a context menu, and controls of the colour picker and the TreeDataGrid, under a light and dark switch"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+publish = false
+
+[lib]
+path = "lib.rs"
+test = false
+doctest = false
+
+[[bin]]
+name = "view-gallery"
+path = "main.rs"
+test = false
+
+[features]
+# Hot reload of the literals of `rsx!` (`cargo run -p view-gallery --features hot-reload`).
+hot-reload = ["ferroui-view/hot-reload"]
+
+[dependencies]
+ferroui-base = { workspace = true }
+ferroui-controls = { workspace = true }
+ferroui-view = { workspace = true, features = ["desktop", "color-picker", "treedatagrid"] }
+ferroui-controls-color-picker = { workspace = true }
+ferroui-controls-treedatagrid = { workspace = true }
+ferroui-treedatagrid-core = { workspace = true }
+ferroui-markup-xaml = { workspace = true }
+ferroui-themes-fluent = { workspace = true }
+# The picture of the window, as the 7GUIs samples take theirs.
+seven-guis-model = { path = "../SevenGuis/Model" }

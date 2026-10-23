@@ -104,12 +104,25 @@ impl BindingBase for Binding {
     ) -> Rc<dyn BindingExpressionBase> {
         self.base.create_instance(target, target_property, anchor)
     }
+
+    /// The binding itself (the class it derives from is its `Deref` target), so that a holder of
+    /// `Rc<dyn BindingBase>` can tell it apart, as the extensions of the markup crate allow.
+    fn as_any(&self) -> Option<&dyn std::any::Any> {
+        Some(self)
+    }
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
     use ferroui_base::StyledElement;
+
+    #[test]
+    fn binding_is_told_apart_through_the_contract() {
+        let binding: Rc<dyn BindingBase> = Binding::with_path("Name");
+        let any = binding.as_any().expect("the binding itself");
+        assert_eq!(any.downcast_ref::<Binding>().map(|binding| binding.path()), Some("Name".to_string()));
+    }
 
     #[test]
     fn binding_with_empty_path_binds_to_data_context() {

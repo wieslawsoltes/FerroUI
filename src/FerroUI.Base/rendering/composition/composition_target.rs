@@ -263,7 +263,9 @@ impl CompositionTarget {
         parent_input: &H::Input,
         filter: VisualFilter<'_>,
     ) -> Option<H::Input> {
-        if !visual.visible() {
+        // A visual that is not hit test visible (WinUI `IsHitTestVisible`)
+        // is skipped with its subtree.
+        if !visual.visible() || !visual.is_hit_test_visible() {
             return None;
         }
 

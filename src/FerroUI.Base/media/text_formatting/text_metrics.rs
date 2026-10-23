@@ -13,6 +13,9 @@ pub struct TextMetrics {
     pub descent: f64,
     /// Gets the recommended additional space between two lines of text.
     pub line_gap: f64,
+    /// The height of the capital letters above the baseline (positive; a FerroUI addition,
+    /// `FontMetrics::cap_height`).
+    pub cap_height: f64,
     /// Gets the recommended line height.
     pub line_height: f64,
     /// Gets a value that indicates the thickness of the underline.
@@ -40,6 +43,7 @@ impl TextMetrics {
             ascent,
             descent,
             line_gap,
+            cap_height: font_metrics.cap_height as f64 * scale,
             baseline: -ascent + line_gap * 0.5,
             line_height: descent - ascent + line_gap,
             underline_thickness: font_metrics.underline_thickness as f64 * scale,

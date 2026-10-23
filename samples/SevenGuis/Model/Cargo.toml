@@ -1,0 +1,22 @@
+[package]
+name = "seven-guis-model"
+description = "What the two ports of the 7GUIs tasks share apart from their user interface"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+publish = false
+
+[lib]
+path = "lib.rs"
+
+[dependencies]
+ferroui-base = { workspace = true }
+ferroui-controls = { workspace = true }
+ferroui-view = { workspace = true, features = ["desktop"] }
+ferroui-themes-winui = { workspace = true }
+
+[features]
+# The scenarios the tests of the two ports run (`scenarios.rs`), on the test application of
+# ferroui-controls.
+scenarios = ["ferroui-controls/testing"]

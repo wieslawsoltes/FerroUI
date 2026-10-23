@@ -70,7 +70,7 @@ jobs:
         run: |
           rustup toolchain install 1.99.0 --profile minimal --no-self-update
           sudo apt-get update
-          sudo apt-get install --no-install-recommends -y pkg-config libfontconfig1-dev libfreetype6-dev
+          sudo apt-get install --no-install-recommends -y pkg-config libfontconfig1-dev libfreetype6-dev libvulkan1 mesa-vulkan-drivers
       - name: Verify source timestamp reuse and changed-input rebuilding
         id: source-mtimes-cargo
         run: python3 scripts/test_source_mtime_cargo.py
@@ -86,10 +86,16 @@ jobs:
           # fails. Preserve a failing step/job after collecting all results.
           failed=0
           cargo +1.99.0 test --locked --manifest-path ../../Cargo.toml -p ferroui-base --lib paragraph --jobs 1 -- --test-threads=1 || failed=1
+          cargo +1.99.0 test --locked --manifest-path ../../Cargo.toml -p ferroui-base --lib text_line_bounds --jobs 1 -- --test-threads=1 || failed=1
           cargo +1.99.0 test --locked --manifest-path ../../Cargo.toml -p ferroui-controls --lib paragraph --jobs 1 -- --test-threads=1 || failed=1
           cargo +1.99.0 test --locked --manifest-path ../../Cargo.toml -p ferroui-controls --lib text_box_tests:: --jobs 1 -- --test-threads=1 || failed=1
           cargo +1.99.0 test --locked --manifest-path ../../Cargo.toml -p ferroui-controls --lib text_box_history:: --jobs 1 -- --test-threads=1 || failed=1
           exit "$failed"
+      - name: Validate GPU fragment capture and clip pixels
+        if: ${{ !cancelled() && steps.native_toolchain.outcome == 'success' && steps.source-mtimes-cargo.outcome == 'success' }}
+        env:
+          FERROUI_VELLO_REQUIRE_GPU: '1'
+        run: cargo +1.99.0 test --locked --manifest-path ../../Cargo.toml -p ferroui-vello --features gpu --lib gpu::fragment_tests:: --jobs 1 -- --test-threads=1 --nocapture
       - name: Validate native editor and public renderer pixels
         # Keep independent application compiler/pixel feedback available if a
         # preceding framework test fails. Its failure still fails this job.

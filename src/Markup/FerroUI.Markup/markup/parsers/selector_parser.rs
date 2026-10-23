@@ -172,10 +172,12 @@ impl SelectorParser {
                         .ok_or_else(|| SelectorParserError::NotSupported("Invalid selector!".to_string()))?;
                     results.get_or_insert_with(Vec::new).push(selector);
                 }
+                // Deviation (DEVIATIONS.md, Parsers of markup): upstream's run-time parser
+                // refuses the nesting selector, which only the selector transformer of the markup
+                // compiler builds; here a selector of a nested style written in code (`^.selected`,
+                // `^:pointerover > Button`) parses too.
                 SelectorSyntax::Nesting => {
-                    return Err(SelectorParserError::NotSupported(
-                        "Unsupported selector grammar 'NestingSyntax'.".to_string(),
-                    ));
+                    result = Some(Selectors::nesting(result));
                 }
             }
         }

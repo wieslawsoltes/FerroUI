@@ -90,6 +90,8 @@ pub fn create_gpu(graphics_context: &Rc<dyn IPlatformGraphicsContext>) -> Option
 #[cfg(all(test, feature = "hybrid"))]
 mod layer_tests;
 #[cfg(test)]
+mod fragment_tests;
+#[cfg(test)]
 mod tests;
 
 use ferroui_base::logging::{LogArea, LogEventLevel, Logger};

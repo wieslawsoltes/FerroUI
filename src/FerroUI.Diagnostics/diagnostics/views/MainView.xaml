@@ -1,0 +1,268 @@
+﻿<UserControl xmlns="https://github.com/ferroui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:views="using:FerroUI.Diagnostics.Views"
+             xmlns:viewModels="using:FerroUI.Diagnostics.ViewModels"
+             xmlns:convertes="using:FerroUI.Diagnostics.Converters"
+             x:Class="FerroUI.Diagnostics.Views.MainView"
+             x:DataType="viewModels:MainViewModel">
+  <!-- Deviation (DEVIATIONS.md, Developer tools): the brushes of the WinUI 3 theme in place of the
+       ones of the Simple theme: AccentFillColorDefaultBrush for HighlightBrush,
+       ControlStrongStrokeColorDefaultBrush for ThemeBorderHighBrush and CardStrokeColorDefaultBrush
+       for ThemeControlMidBrush. -->
+  <UserControl.Resources>
+    <x:Double x:Key="SampleSize">16</x:Double>
+    <convertes:BrushSelectorConveter x:Key="bsc"
+               Brush="{DynamicResource AccentFillColorDefaultBrush}"/>
+  </UserControl.Resources>
+  <UserControl.Styles>
+    <Style Selector="Border.Sample">
+      <Setter Property="BorderBrush" Value="{DynamicResource ControlStrongStrokeColorDefaultBrush}"/>
+      <Setter Property="BorderThickness" Value="1"/>
+      <Setter Property="Grid.Column" Value="1"/>
+      <Setter Property="Width" Value="{StaticResource SampleSize}"/>
+      <Setter Property="Height" Value="{StaticResource SampleSize}"/>
+      <Setter Property="Margin" Value="10 0 -20 0"/>
+    </Style>
+  </UserControl.Styles>
+  <Grid Name="rootGrid" RowDefinitions="Auto,Auto,Auto,*,Auto,Auto">
+    <!-- Deviation (DEVIATIONS.md, Developer tools): a header in the title bar of the window (its
+         client area extends into the decorations, MainWindow.xaml) in place of upstream's menu
+         bar: the button of the left pane, the title, and a command bar with the commands of the
+         menus (the ones used most as buttons, the others in its overflow). -->
+    <Border Grid.Row="0" Classes="title-bar">
+      <Grid ColumnDefinitions="Auto,Auto,*,Auto">
+        <Button Grid.Column="0" Classes="title-bar-button"
+                Theme="{StaticResource SubtleButtonStyle}"
+                Command="{Binding ToggleTreePane}"
+                ToolTip.Tip="Show or hide the tree">
+          <PathIcon Data="M3,6H21V8H3V6M3,11H21V13H3V11M3,16H21V18H3V16Z" />
+        </Button>
+        <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="10" Margin="8,0,0,0" VerticalAlignment="Center"
+                    IsHitTestVisible="False">
+          <Border Width="20" Height="20" CornerRadius="5" Background="{DynamicResource AccentFillColorDefaultBrush}">
+            <TextBlock Text="&lt;/&gt;" FontSize="10" FontWeight="Bold" HorizontalAlignment="Center" VerticalAlignment="Center"
+                       Foreground="{DynamicResource TextOnAccentFillColorPrimaryBrush}" />
+          </Border>
+          <TextBlock Classes="section-header" Text="DevTools" />
+        </StackPanel>
+        <CommandBar Grid.Column="3" DefaultLabelPosition="Right" VerticalAlignment="Center" Background="Transparent">
+          <CommandBar.PrimaryCommands>
+            <CommandBarButton Label="Screenshot" Command="{Binding Shot}" ToolTip.Tip="Screenshot of the selected control (F8)">
+              <CommandBarButton.Icon><PathIcon Data="M4,7H7.5L9.5,5H14.5L16.5,7H20A1,1 0 0,1 21,8V18A1,1 0 0,1 20,19H4A1,1 0 0,1 3,18V8A1,1 0 0,1 4,7M12,9.5A3.5,3.5 0 1,0 12,16.5A3.5,3.5 0 1,0 12,9.5M12,11A2,2 0 1,1 12,15A2,2 0 1,1 12,11Z" /></CommandBarButton.Icon>
+            </CommandBarButton>
+            <CommandBarToggleButton Label="Freeze popups" IsChecked="{Binding FreezePopups}" ToolTip.Tip="Keep popups open (Ctrl+Alt+F)">
+              <CommandBarToggleButton.Icon><PathIcon Data="M7,5H10V19H7V5M14,5H17V19H14V5Z" /></CommandBarToggleButton.Icon>
+            </CommandBarToggleButton>
+            <CommandBarToggleButton Label="Margins" IsChecked="{Binding ShouldVisualizeMarginPadding}" ToolTip.Tip="Show the margin and padding of the selected control">
+              <CommandBarToggleButton.Icon><PathIcon Data="M3,3H21V21H3V3M5,5V19H19V5H5M8,8H16V16H8V8Z" /></CommandBarToggleButton.Icon>
+            </CommandBarToggleButton>
+            <!-- Addition of the port: shows or hides the side pane of the details of a control. -->
+            <CommandBarToggleButton Label="Side pane" IsChecked="{Binding IsSidePaneOpen, Mode=TwoWay}" ToolTip.Tip="Show or hide the layout, value frames and pseudo-classes beside the properties">
+              <CommandBarToggleButton.Icon><PathIcon Data="M3,4H21V20H3V4M5,6V18H14V6H5M16,6V18H19V6H16Z" /></CommandBarToggleButton.Icon>
+            </CommandBarToggleButton>
+            <CommandBarButton Label="Focus highlight" ToolTip.Tip="The brush that highlights the focused control">
+              <CommandBarButton.Icon><PathIcon Data="M12,2A10,10 0 1,1 2,12A10,10 0 0,1 12,2M12,4A8,8 0 1,0 20,12A8,8 0 0,0 12,4M12,7A5,5 0 1,1 7,12A5,5 0 0,1 12,7M12,9A3,3 0 1,0 15,12A3,3 0 0,0 12,9Z" /></CommandBarButton.Icon>
+              <CommandBarButton.Flyout>
+                <MenuFlyout Placement="BottomEdgeAlignedRight">
+            <!-- None -->
+            <MenuItem Command="{Binding SelectFocusHighlighter}"
+                      CommandParameter="{x:Null}">
+              <MenuItem.Header>
+                <Grid>
+                  <Grid.ColumnDefinitions>
+                    <ColumnDefinition/>
+                    <ColumnDefinition SharedSizeGroup="Sample"/>
+                  </Grid.ColumnDefinitions>
+                  <TextBlock Text="(none)"
+                             VerticalAlignment="Center"/>
+                  <Border Classes="Sample"/>
+                </Grid>
+              </MenuItem.Header>
+              <MenuItem.Icon>
+                <Border CornerRadius="8"
+                        Width="16"
+                        Height="16"
+                        BorderBrush="{DynamicResource ControlStrongStrokeColorDefaultBrush}"
+                        BorderThickness="1"
+                        >
+                  <Border Background="{Binding FocusHighlighter,Converter={StaticResource bsc},ConverterParameter={x:Null}}"
+                          Margin="2"
+                          CornerRadius="6"/>
+                </Border>
+              </MenuItem.Icon>
+            </MenuItem>
+            <!-- Red -->
+            <MenuItem Command="{Binding SelectFocusHighlighter}"
+                      CommandParameter="{x:Static Brushes.Red}">
+              <MenuItem.Header>
+                <Grid>
+                  <Grid.ColumnDefinitions>
+                    <ColumnDefinition/>
+                    <ColumnDefinition SharedSizeGroup="Sample"/>
+                  </Grid.ColumnDefinitions>
+                  <TextBlock Text="Red"
+                             VerticalAlignment="Center"/>
+                  <Border Classes="Sample" Background="Red"/>
+                </Grid>
+              </MenuItem.Header>
+              <MenuItem.Icon>
+                <Border CornerRadius="8"
+                        Width="16"
+                        Height="16"
+                        BorderBrush="{DynamicResource ControlStrongStrokeColorDefaultBrush}"
+                        BorderThickness="1"
+                        >
+                  <Border Background="{Binding FocusHighlighter,Converter={StaticResource bsc},ConverterParameter={x:Static Brushes.Red}}"
+                          Margin="2"
+                          CornerRadius="6"/>
+                </Border>
+              </MenuItem.Icon>
+            </MenuItem>
+            <!-- Blue -->
+            <MenuItem Command="{Binding SelectFocusHighlighter}"
+                      CommandParameter="{x:Static Brushes.Blue}">
+              <MenuItem.Header>
+                <Grid>
+                  <Grid.ColumnDefinitions>
+                    <ColumnDefinition/>
+                    <ColumnDefinition SharedSizeGroup="Sample"/>
+                  </Grid.ColumnDefinitions>
+                  <TextBlock Text="Blue"
+                             VerticalAlignment="Center"/>
+                  <Border Classes="Sample" Background="Blue"/>
+                </Grid>
+              </MenuItem.Header>
+              <MenuItem.Icon>
+                <Border CornerRadius="8"
+                        Width="16"
+                        Height="16"
+                        BorderBrush="{DynamicResource ControlStrongStrokeColorDefaultBrush}"
+                        BorderThickness="1"
+                        >
+                  <Border Background="{Binding FocusHighlighter,Converter={StaticResource bsc},ConverterParameter={x:Static Brushes.Blue}}"
+                          Margin="2"
+                          CornerRadius="6"/>
+                </Border>
+              </MenuItem.Icon>
+            </MenuItem>
+            <!-- Black -->
+            <MenuItem Command="{Binding SelectFocusHighlighter}"
+                      CommandParameter="{x:Static Brushes.Black}">
+              <MenuItem.Header>
+                <Grid>
+                  <Grid.ColumnDefinitions>
+                    <ColumnDefinition/>
+                    <ColumnDefinition SharedSizeGroup="Sample"/>
+                  </Grid.ColumnDefinitions>
+                  <TextBlock Text="Black"
+                             VerticalAlignment="Center"/>
+                  <Border Classes="Sample" Background="Black"/>
+                </Grid>
+              </MenuItem.Header>
+              <MenuItem.Icon>
+                <Border CornerRadius="8"
+                        Width="16"
+                        Height="16"
+                        BorderBrush="{DynamicResource ControlStrongStrokeColorDefaultBrush}"
+                        BorderThickness="1"
+                        >
+                  <Border Background="{Binding FocusHighlighter,Converter={StaticResource bsc},ConverterParameter={x:Static Brushes.Black}}"
+                          Margin="2"
+                          CornerRadius="6"/>
+                </Border>
+              </MenuItem.Icon>
+            </MenuItem>
+            <!-- White -->
+            <MenuItem Command="{Binding SelectFocusHighlighter}"
+                      CommandParameter="{x:Static Brushes.White}">
+              <MenuItem.Header>
+                <Grid>
+                  <Grid.ColumnDefinitions>
+                    <ColumnDefinition/>
+                    <ColumnDefinition SharedSizeGroup="Sample"/>
+                  </Grid.ColumnDefinitions>
+                  <TextBlock Text="White"
+                             VerticalAlignment="Center"/>
+                  <Border Classes="Sample" Background="White"/>
+                </Grid>
+              </MenuItem.Header>
+              <MenuItem.Icon>
+                <Border CornerRadius="8"
+                        Width="16"
+                        Height="16"
+                        BorderBrush="{DynamicResource ControlStrongStrokeColorDefaultBrush}"
+                        BorderThickness="1"
+                        >
+                  <Border Background="{Binding FocusHighlighter,Converter={StaticResource bsc},ConverterParameter={x:Static Brushes.White}}"
+                          Margin="2"
+                          CornerRadius="6"/>
+                </Border>
+              </MenuItem.Icon>
+            </MenuItem>
+          </MenuFlyout>
+              </CommandBarButton.Flyout>
+            </CommandBarButton>
+          </CommandBar.PrimaryCommands>
+          <CommandBar.SecondaryCommands>
+            <CommandBarToggleButton Label="Dirty rects" IsChecked="{Binding ShowDirtyRectsOverlay}" />
+            <CommandBarToggleButton Label="FPS" IsChecked="{Binding ShowFpsOverlay}" />
+            <CommandBarToggleButton Label="Layout time graph" IsChecked="{Binding ShowLayoutTimeGraphOverlay}" />
+            <CommandBarToggleButton Label="Render time graph" IsChecked="{Binding ShowRenderTimeGraphOverlay}" />
+            <CommandBarSeparator />
+            <CommandBarToggleButton Label="Show implemented interfaces" Command="{Binding ToggleShowImplementedInterfaces}" IsChecked="{Binding ShowImplementedInterfaces, Mode=OneWay}" />
+            <CommandBarToggleButton Label="Split property type" Command="{Binding ToggleShowDetailsPropertyType}" IsChecked="{Binding ShowDetailsPropertyType, Mode=OneWay}" />
+            <CommandBarSeparator />
+            <CommandBarButton Label="Hot keys" Command="{Binding ShowHotKeys}" />
+            <CommandBarButton Label="Close" Command="{Binding $parent[Window].Close}" />
+          </CommandBar.SecondaryCommands>
+        </CommandBar>
+      </Grid>
+    </Border>
+    
+
+    <!-- Upstream has a banner here (Grid.Row="1") that advertises its commercial developer tools;
+         the port has no such product and leaves the row empty. Deviation (DEVIATIONS.md, Developer tools). -->
+
+
+    <!-- The tabs of the extension pages are added after these by the code of the view.
+         Deviation (DEVIATIONS.md, Developer tools): an addition of the port.
+         Deviation (DEVIATIONS.md, Developer tools): a tab control, which the WinUI 3 theme shows as
+         a TabView, in place of upstream's tab strip over a content control. Every tab shows the
+         content of the view model (Content), which follows the selected tab (SelectedTab). -->
+    <TabControl Name="tabControl" Grid.Row="2" Grid.RowSpan="2"
+                SelectedIndex="{Binding SelectedTab, Mode=TwoWay}">
+      <!-- Deviation (DEVIATIONS.md, Developer tools): the combined tree, an addition of the port,
+           is the first tab and the default one. -->
+      <TabItem Header="Combined Tree" Content="{Binding Content}" />
+      <TabItem Header="Logical Tree" Content="{Binding Content}" />
+      <TabItem Header="Visual Tree" Content="{Binding Content}" />
+      <TabItem Header="Events" Content="{Binding Content}" />
+      <TabItem Header="HotKeys" Content="{Binding Content}" IsVisible="False" />
+    </TabControl>
+
+    <GridSplitter Name="consoleSplitter" Grid.Row="4" Height="1"
+                  Background="{DynamicResource CardStrokeColorDefaultBrush}"
+                  IsVisible="False" />
+
+    <Border Grid.Row="5" Classes="status-bar">
+      <Grid ColumnDefinitions="*, Auto">
+        <StackPanel Grid.Column="0" Spacing="16" Orientation="Horizontal">
+          <TextBlock Classes="label">Hold Ctrl+Shift over a control to inspect.</TextBlock>
+          <StackPanel Orientation="Horizontal" Spacing="4">
+            <TextBlock Classes="label">Focused:</TextBlock>
+            <TextBlock Text="{Binding FocusedControl}" />
+          </StackPanel>
+          <StackPanel Orientation="Horizontal" Spacing="4">
+            <TextBlock Classes="label">Pointer over:</TextBlock>
+            <TextBlock Text="{Binding PointerOverElementName}" />
+          </StackPanel>
+        </StackPanel>
+
+        <TextBlock Grid.Column="1"
+                   Classes="label"
+                   Text="Popups frozen"
+                   IsVisible="{Binding FreezePopups}" />
+      </Grid>
+    </Border>
+  </Grid>
+</UserControl>

@@ -1,5 +1,5 @@
 use super::{IServerRenderResource, IServerRenderResourceObserver, IServerVisualContent, ServerCompositionVisual, ServerVisualRenderContext};
-use crate::platform::LtrbRect;
+use crate::platform::{IDrawingFragment, LtrbRect};
 use crate::rendering::composition::drawing::ServerCompositionRenderData;
 use crate::rendering::composition::transport::BatchStreamReader;
 use std::any::Any;
@@ -11,6 +11,10 @@ use std::time::Duration;
 #[derive(Default)]
 pub struct ServerCompositionDrawListVisual {
     render_commands: RefCell<Option<Rc<ServerCompositionRenderData>>>,
+    /// What the backend kept of the commands when they were drawn, to draw
+    /// them again from while they do not change: dropped when the commands
+    /// or a resource of them change.
+    fragment: RefCell<Option<Rc<dyn IDrawingFragment>>>,
 }
 
 impl ServerCompositionDrawListVisual {
@@ -49,6 +53,7 @@ impl IServerVisualContent for ServerCompositionDrawListVisual {
                 commands.add_observer(&observer);
             }
             *self.render_commands.borrow_mut() = commands;
+            *self.fragment.borrow_mut() = None;
             visual.invalidate_content();
         }
         visual.base_deserialize_changes_core(reader, committed_at);
@@ -61,17 +66,35 @@ impl IServerVisualContent for ServerCompositionDrawListVisual {
         _current_transformed_clip: LtrbRect,
     ) {
         let commands = self.render_commands.borrow().clone();
-        if let Some(commands) = commands {
-            commands.render(context.canvas());
+        let Some(commands) = commands else { return };
+        let canvas = context.canvas();
+
+        // Deviation (DEVIATIONS.md, Server composition visuals): upstream
+        // replays the commands every time (`RenderCore`). A backend that
+        // keeps fragments draws them from the one it kept when it can, and
+        // keeps a new one when it cannot.
+        if let Some(fragments) = canvas.as_drawing_context_impl_with_fragments() {
+            let kept = self.fragment.borrow().clone();
+            if kept.is_some_and(|fragment| fragments.draw_fragment(&fragment)) {
+                return;
+            }
+            fragments.begin_fragment();
+            commands.render(fragments);
+            *self.fragment.borrow_mut() = fragments.end_fragment();
+            return;
         }
+
+        commands.render(canvas);
     }
 
     fn dependency_queued_invalidate(&self, visual: &ServerCompositionVisual) {
+        *self.fragment.borrow_mut() = None;
         visual.invalidate_content();
     }
 
     fn dispose(&self, _visual: &ServerCompositionVisual) {
         *self.render_commands.borrow_mut() = None;
+        *self.fragment.borrow_mut() = None;
     }
 
     fn as_any(&self) -> &dyn Any {

@@ -1,6 +1,6 @@
 use std::rc::Rc;
 
-use crate::media::{FlowDirection, TextAlignment, TextDecorationCollection, TextWrapping};
+use crate::media::{FlowDirection, TextAlignment, TextDecorationCollection, TextLineBounds, TextWrapping};
 use crate::utilities::ValueSpan;
 
 use super::{TextParagraphProperties, TextRunProperties};
@@ -82,6 +82,7 @@ impl TextParagraphProperties for StyledParagraph {
     }
     fn first_line_in_paragraph(&self) -> bool { self.first_line }
     fn line_spacing(&self) -> f64 { self.defaults.line_spacing() }
+    fn text_line_bounds(&self) -> TextLineBounds { self.defaults.text_line_bounds() }
     fn always_collapsible(&self) -> bool { self.defaults.always_collapsible() }
     fn default_text_run_properties(&self) -> &Rc<dyn TextRunProperties> {
         self.defaults.default_text_run_properties()

@@ -1,0 +1,60 @@
+[package]
+name = "ferroui-diagnostics"
+description = "The developer tools of FerroUI: the logical and visual trees, the properties and their value sources, routed events, the layout explorer and screenshots of a running application"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+homepage.workspace = true
+readme.workspace = true
+keywords.workspace = true
+categories.workspace = true
+build = "build.rs"
+# The build script compiles the markup of the crate and exports its type model with it
+# (`DEP_FERROUI_DIAGNOSTICS_XAML_XAMLMETA`; docs/porting/xaml.md, 9.5.13 and 9.6.3).
+links = "ferroui_diagnostics_xaml"
+
+# Unit tests live next to the code (`tests/` modules of the library), not as
+# integration test targets.
+autotests = false
+autobenches = false
+autoexamples = false
+
+[lib]
+path = "lib.rs"
+
+[dependencies]
+# The compiled markup of the crate calls the typed functions of the declared members, which exist
+# with this feature.
+ferroui-base = { workspace = true, features = ["markup-functions"] }
+ferroui-controls = { workspace = true }
+ferroui-markup = { workspace = true }
+# The runtime library of compiled markup.
+ferroui-markup-xaml = { workspace = true }
+# The theme of the developer tools window: the owner's decision is the WinUI 3 theme in its compact
+# density in place of the Simple theme of upstream (docs/porting/DEVIATIONS.md, Developer tools).
+ferroui-themes-winui = { workspace = true }
+# The brush editor of the property grid, as upstream.
+ferroui-controls-color-picker = { workspace = true }
+# The property grid of the control details: the owner's decision is the TreeDataGrid of the port in
+# place of the DataGrid that upstream compiled into its project; the logical and visual trees and
+# the tree of the routed events are TreeDataGrids too, in place of tree views
+# (docs/porting/DEVIATIONS.md, Developer tools).
+ferroui-controls-treedatagrid = { workspace = true }
+ferroui-treedatagrid-core = { workspace = true }
+# The regular expressions of the filters (upstream uses the regular expressions of .NET; the port has
+# no engine of its own: docs/porting/DEVIATIONS.md, Developer tools).
+regex = "1"
+
+[build-dependencies]
+# The build script compiles the documents of the crate against the type models (`build.rs`).
+ferroui-build = { workspace = true }
+
+[dev-dependencies]
+ferroui-base = { workspace = true, features = ["testing"] }
+ferroui-controls = { workspace = true, features = ["testing"] }
+
+# The group of the crate in the table of the README (docs/release.md).
+[package.metadata.release]
+group = "controls"

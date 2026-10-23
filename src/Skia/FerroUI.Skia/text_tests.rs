@@ -885,3 +885,20 @@ fn zero_width_joiner_sequences_are_one_emoji_glyph_each() {
     layout.dispose();
     scope.dispose();
 }
+
+#[test]
+fn the_cap_height_of_a_font_is_the_one_of_its_os2_table() {
+    let scope = start();
+
+    // Inter has an OS/2 table of version 3 with its cap height; Skia reads the same field.
+    let glyph_typeface = test_typeface("Inter").glyph_typeface();
+    let metrics = glyph_typeface.metrics();
+    let font_data: &[u8] = include_bytes!("test_assets/assets/Inter-Regular.ttf");
+    let skia_typeface = skia_safe::FontMgr::new().new_from_data(skia_safe::Data::new_copy(font_data), None).expect("the font loads");
+    let skia_font = skia_safe::Font::from_typeface(&skia_typeface, metrics.design_em_height as f32);
+
+    assert!(metrics.cap_height > 0 && metrics.cap_height < -metrics.ascent, "{metrics:?}");
+    assert_eq!(metrics.cap_height as f32, skia_font.metrics().1.cap_height.round());
+
+    scope.dispose();
+}

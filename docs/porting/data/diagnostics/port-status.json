@@ -1,0 +1,267 @@
+{
+ "upstreamCommit": "4af92dcce2e1cdc091565c533de69d9ad8dfde54",
+ "inScope": {
+  "files": [
+   63,
+   63,
+   0
+  ],
+  "types": [
+   70,
+   70,
+   0
+  ],
+  "members": [
+   393,
+   430,
+   0
+  ]
+ },
+ "allProjects": {
+  "membersPresent": 393,
+  "members": 430,
+  "membersNotApplicable": 0,
+  "membersOutOfScope": 0
+ },
+ "projects": [
+  {
+   "name": "Avalonia.Diagnostics",
+   "path": "src/Avalonia.Diagnostics",
+   "rust": "src/FerroUI.Diagnostics",
+   "scope": "in",
+   "detail": "full",
+   "files": [
+    63,
+    63,
+    0
+   ],
+   "types": [
+    70,
+    70,
+    0
+   ],
+   "members": [
+    393,
+    430,
+    0
+   ],
+   "interfaces": [
+    2,
+    2
+   ],
+   "propertyRegistrations": [
+    16,
+    16
+   ],
+   "routedEvents": [
+    0,
+    0
+   ],
+   "notApplicableFiles": 0,
+   "matchKinds": {
+    "field": 3,
+    "fn": 378,
+    "overload fn": 9,
+    "variant": 3
+   },
+   "presentFiles": {
+    "DevToolsExtensions.cs": [
+     "dev_tools_extensions.rs"
+    ],
+    "Diagnostics/Behaviors/ColumnDefinition.cs": [
+     "diagnostics/behaviors/column_definition.rs"
+    ],
+    "Diagnostics/Controls/Application.cs": [
+     "diagnostics/controls/application.rs"
+    ],
+    "Diagnostics/Controls/BrushEditor.axaml.cs": [
+     "diagnostics/controls/brush_editor.rs"
+    ],
+    "Diagnostics/Controls/CommitTextBox.cs": [
+     "diagnostics/controls/commit_text_box.rs"
+    ],
+    "Diagnostics/Controls/ControlHighlightAdorner.cs": [
+     "diagnostics/controls/control_highlight_adorner.rs"
+    ],
+    "Diagnostics/Controls/FilterTextBox.cs": [
+     "diagnostics/controls/filter_text_box.rs"
+    ],
+    "Diagnostics/Controls/ThicknessEditor.cs": [
+     "diagnostics/controls/thickness_editor.rs"
+    ],
+    "Diagnostics/Controls/TopLevelGroup.cs": [
+     "diagnostics/controls/top_level_group.rs"
+    ],
+    "Diagnostics/Conventions.cs": [
+     "diagnostics/conventions.rs"
+    ],
+    "Diagnostics/Converters/BoolToImageConverter.cs": [
+     "diagnostics/converters/bool_to_image_converter.rs"
+    ],
+    "Diagnostics/Converters/BoolToOpacityConverter.cs": [
+     "diagnostics/converters/bool_to_opacity_converter.rs"
+    ],
+    "Diagnostics/Converters/BrushSelectorConveter.cs": [
+     "diagnostics/converters/brush_selector_conveter.rs"
+    ],
+    "Diagnostics/Converters/EnumToCheckedConverter.cs": [
+     "diagnostics/converters/enum_to_checked_converter.rs"
+    ],
+    "Diagnostics/Converters/GetTypeNameConverter.cs": [
+     "diagnostics/converters/get_type_name_converter.rs"
+    ],
+    "Diagnostics/DevTools.cs": [
+     "diagnostics/dev_tools.rs"
+    ],
+    "Diagnostics/DevToolsDataFormats.cs": [
+     "diagnostics/dev_tools_data_formats.rs"
+    ],
+    "Diagnostics/DevToolsOptions.cs": [
+     "diagnostics/dev_tools_options.rs"
+    ],
+    "Diagnostics/DevToolsViewKind.cs": [
+     "diagnostics/dev_tools_view_kind.rs"
+    ],
+    "Diagnostics/HotKeyConfiguration.cs": [
+     "diagnostics/hot_key_configuration.rs"
+    ],
+    "Diagnostics/IDevToolsTopLevelGroup.cs": [
+     "diagnostics/i_dev_tools_top_level_group.rs"
+    ],
+    "Diagnostics/IScreenshotHandler.cs": [
+     "diagnostics/i_screenshot_handler.rs"
+    ],
+    "Diagnostics/KeyGestureExtesions.cs": [
+     "diagnostics/key_gesture_extesions.rs"
+    ],
+    "Diagnostics/Models/EventChainLink.cs": [
+     "diagnostics/models/event_chain_link.rs"
+    ],
+    "Diagnostics/Screenshots/BaseRenderToStreamHandler.cs": [
+     "diagnostics/screenshots/base_render_to_stream_handler.rs"
+    ],
+    "Diagnostics/Screenshots/FilePickerHandler.cs": [
+     "diagnostics/screenshots/file_picker_handler.rs"
+    ],
+    "Diagnostics/TypeExtesnions.cs": [
+     "diagnostics/type_extesnions.rs"
+    ],
+    "Diagnostics/ViewLocator.cs": [
+     "diagnostics/view_locator.rs"
+    ],
+    "Diagnostics/ViewModels/AvaloniaPropertyViewModel.cs": [
+     "diagnostics/view_models/ferro_property_view_model.rs"
+    ],
+    "Diagnostics/ViewModels/BindingSetterViewModel.cs": [
+     "diagnostics/view_models/binding_setter_view_model.rs"
+    ],
+    "Diagnostics/ViewModels/ClrPropertyViewModel.cs": [
+     "diagnostics/view_models/clr_property_view_model.rs"
+    ],
+    "Diagnostics/ViewModels/ControlDetailsViewModel.cs": [
+     "diagnostics/view_models/control_details_view_model.rs"
+    ],
+    "Diagnostics/ViewModels/ControlLayoutViewModel.cs": [
+     "diagnostics/view_models/control_layout_view_model.rs"
+    ],
+    "Diagnostics/ViewModels/EventOwnerTreeNode.cs": [
+     "diagnostics/view_models/event_owner_tree_node.rs"
+    ],
+    "Diagnostics/ViewModels/EventTreeNode.cs": [
+     "diagnostics/view_models/event_tree_node.rs"
+    ],
+    "Diagnostics/ViewModels/EventTreeNodeBase.cs": [
+     "diagnostics/view_models/event_tree_node_base.rs"
+    ],
+    "Diagnostics/ViewModels/EventsPageViewModel.cs": [
+     "diagnostics/view_models/events_page_view_model.rs"
+    ],
+    "Diagnostics/ViewModels/FilterViewModel.cs": [
+     "diagnostics/view_models/filter_view_model.rs"
+    ],
+    "Diagnostics/ViewModels/FiredEvent.cs": [
+     "diagnostics/view_models/fired_event.rs"
+    ],
+    "Diagnostics/ViewModels/HotKeyPageViewModel.cs": [
+     "diagnostics/view_models/hot_key_page_view_model.rs"
+    ],
+    "Diagnostics/ViewModels/LogicalTreeNode.cs": [
+     "diagnostics/view_models/logical_tree_node.rs"
+    ],
+    "Diagnostics/ViewModels/MainViewModel.cs": [
+     "diagnostics/view_models/main_view_model.rs"
+    ],
+    "Diagnostics/ViewModels/PropertyViewModel.cs": [
+     "diagnostics/view_models/property_view_model.rs"
+    ],
+    "Diagnostics/ViewModels/PseudoClassViewModel.cs": [
+     "diagnostics/view_models/pseudo_class_view_model.rs"
+    ],
+    "Diagnostics/ViewModels/ReactiveExtensions.cs": [
+     "diagnostics/view_models/reactive_extensions.rs"
+    ],
+    "Diagnostics/ViewModels/ResourceSetterViewModel.cs": [
+     "diagnostics/view_models/resource_setter_view_model.rs"
+    ],
+    "Diagnostics/ViewModels/SetterViewModel.cs": [
+     "diagnostics/view_models/setter_view_model.rs"
+    ],
+    "Diagnostics/ViewModels/TreeNode.cs": [
+     "diagnostics/view_models/tree_node.rs"
+    ],
+    "Diagnostics/ViewModels/TreeNodeCollection.cs": [
+     "diagnostics/view_models/tree_node_collection.rs"
+    ],
+    "Diagnostics/ViewModels/TreePageViewModel.cs": [
+     "diagnostics/view_models/tree_page_view_model.rs"
+    ],
+    "Diagnostics/ViewModels/ValueFrameViewModel.cs": [
+     "diagnostics/view_models/value_frame_view_model.rs"
+    ],
+    "Diagnostics/ViewModels/ViewModelBase.cs": [
+     "diagnostics/view_models/view_model_base.rs"
+    ],
+    "Diagnostics/ViewModels/VisualTreeNode.cs": [
+     "diagnostics/view_models/visual_tree_node.rs"
+    ],
+    "Diagnostics/Views/ControlDetailsView.xaml.cs": [
+     "diagnostics/views/control_details_view.rs"
+    ],
+    "Diagnostics/Views/EventsPageView.xaml.cs": [
+     "diagnostics/views/events_page_view.rs"
+    ],
+    "Diagnostics/Views/HotKeyPageView.axaml.cs": [
+     "diagnostics/views/hot_key_page_view.rs"
+    ],
+    "Diagnostics/Views/LayoutExplorerView.axaml.cs": [
+     "diagnostics/views/layout_explorer_view.rs"
+    ],
+    "Diagnostics/Views/MainView.xaml.cs": [
+     "diagnostics/views/main_view.rs"
+    ],
+    "Diagnostics/Views/MainWindow.xaml.cs": [
+     "diagnostics/views/main_window.rs"
+    ],
+    "Diagnostics/Views/PropertyValueEditorView.cs": [
+     "diagnostics/views/property_value_editor_view.rs"
+    ],
+    "Diagnostics/Views/TreePageView.xaml.cs": [
+     "diagnostics/views/tree_page_view.rs"
+    ],
+    "Diagnostics/VisualExtensions.cs": [
+     "diagnostics/visual_extensions.rs"
+    ],
+    "Diagnostics/VisualTreeDebug.cs": [
+     "diagnostics/visual_tree_debug.rs"
+    ]
+   },
+   "rustOnly": [
+    "diagnostics/view_models/combined_tree_node.rs",
+    "register_types.rs",
+    "rust_paths.rs"
+   ]
+  }
+ ],
+ "unusedPathOverrides": [],
+ "unusedWaivers": []
+}

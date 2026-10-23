@@ -17,7 +17,7 @@ git clone --depth 1 --branch feat/ferrodesign-editor --single-branch https://git
 cd FerroUI/samples/FerroDesign
 ```
 
-The implementation began from upstream commit `325b3ce4b0fcf154eba79cbd92262536daf77e71` and incorporates upstream `ab7a15b8641a54c8964b6ec10a3efe9af38d29b5` (FerroUI 0.4.0-preview.1), including its Vello performance improvements. The branch contains the complete application, independent browser backend selection, native text-input fixes, public isolated compositing and editable geometry/text-outline APIs. [PR #254](https://github.com/wieslawsoltes/FerroUI/pull/254) collects the branch changes.
+The implementation began from upstream commit `325b3ce4b0fcf154eba79cbd92262536daf77e71` and incorporates upstream `934b9ce16e2ada890ee31534f1a98808f483a14f` (FerroUI 0.4.0), including its Vello performance improvements. The branch contains the complete application, independent browser backend selection, native text-input fixes, public isolated compositing and editable geometry/text-outline APIs. [PR #254](https://github.com/wieslawsoltes/FerroUI/pull/254) collects the branch changes.
 
 The [source-delivery audit at `b83deee6`](docs/evidence/2026-10-22-f2bb1d61/source-delivery-audit.json) found the required framework path dependencies and assets in the tracked repository, with no submodules, LFS pointers or build-script dependence on FerroUI's `.git` directory. Extract the complete repository, including its root `.cargo` configuration. This was a source-tree audit, not a build from an independently downloaded ZIP; toolchain and third-party dependency downloads are still required.
 
@@ -160,6 +160,14 @@ Artwork also retains documented limits: arbitrary vector-anchor fillets, every s
 
 ## Validation
 
+The FerroUI **0.4.0** integration preserves both upstream ancestry and the
+editor's public API additions. All **533 core tests** and the five active
+**Vello/no-Skia** target graphs pass locally with the refreshed lockfile. New
+framework/native/browser execution is required for this merged source; the
+completed pre-integration results below retain their original source scope.
+[Integration details](docs/VALIDATION.md#ferroui-040-integration-2026-10-23)
+describe the inherited text-bounds and native GPU fragment corrections.
+
 The 23 October continuation has completed native and core checks for the new
 radial/angular gradient handles, spacing-variable controls and prototype reflow.
 **The production checkpoint `1637a093` passed 533 core and 239 native application
@@ -168,8 +176,8 @@ parity are not yet established.
 
 | Gate | Exact source and completed result |
 | --- | --- |
-| Current production core | [`1637a093`, run 39944253726](https://github.com/wieslawsoltes/FerroUI/actions/runs/39944253726): **533 passed**, **2.50 s**, including prototype spacing reflow/rollback and unchanged-binding redo preservation |
-| Current native application | [`1637a093`, run 39944253747](https://github.com/wieslawsoltes/FerroUI/actions/runs/39944253747): **239 passed**, **43.57 s**, including the clipped-selection/radius-control priority regression and native diagnostic controls |
+| Pre-integration production core | [`1637a093`, run 39944253726](https://github.com/wieslawsoltes/FerroUI/actions/runs/39944253726): **533 passed**, **2.50 s**, including prototype spacing reflow/rollback and unchanged-binding redo preservation |
+| Pre-integration native application | [`1637a093`, run 39944253747](https://github.com/wieslawsoltes/FerroUI/actions/runs/39944253747): **239 passed**, **43.57 s**, including the clipped-selection/radius-control priority regression and native diagnostic controls |
 | Feature core | [`dfab0ed9`, run 39942848092](https://github.com/wieslawsoltes/FerroUI/actions/runs/39942848092): **528 passed**, **1.72 s**, including radial/angular authoring and spacing-variable ownership/reflow |
 | Feature native application | [`dfab0ed9`, run 39942848091](https://github.com/wieslawsoltes/FerroUI/actions/runs/39942848091): **238 passed**, **28.42 s**, including five new radial/angular native cases and three native spacing-variable UI cases |
 | Padding Escape correction | [`3be16cb7`, run 39941952822](https://github.com/wieslawsoltes/FerroUI/actions/runs/39941952822): **230 application tests passed**, including the previously failing grouped-draft Escape case |

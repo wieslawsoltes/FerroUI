@@ -1,7 +1,7 @@
 use std::rc::Rc;
-use super::{TextLayout, TextLayoutOptions, TextParagraphStyle, TextParagraphStyles};
-use super::testing::TextTestScope;
-use crate::media::{Brushes, CharacterHit, FlowDirection, TextAlignment, TextWrapping, Typeface};
+use super::{GenericTextParagraphProperties, TextLayout, TextLayoutOptions, TextParagraphStyle, TextParagraphStyles};
+use super::testing::{run_properties, SingleBufferTextSource, TextTestScope};
+use crate::media::{Brushes, CharacterHit, FlowDirection, TextAlignment, TextLineBounds, TextWrapping, Typeface};
 use crate::utilities::ValueSpan;
 use crate::Point;
 
@@ -86,5 +86,109 @@ fn absent_paragraph_overrides_preserve_legacy_layout_lines_and_all_hit_positions
     assert_eq!(legacy.text_lines().len(), paragraphs.text_lines().len());
     for at in 0..=value.encode_utf16().count() as i32 {
         assert_eq!(legacy.hit_test_text_position(at), paragraphs.hit_test_text_position(at));
+    }
+}
+
+#[test]
+fn paragraph_styles_inherit_trimmed_line_bounds_across_wraps_breaks_and_empty_paragraphs() {
+    let _scope = TextTestScope::new();
+    let value = "Hxg Hxg\nאבg\n";
+    let length = value.encode_utf16().count() as i32;
+    let styles = TextParagraphStyles::from([
+        ValueSpan::new(0, 8, TextParagraphStyle::default()),
+        ValueSpan::new(8, 4, TextParagraphStyle::default()),
+        ValueSpan::new(length, 0, TextParagraphStyle::default()),
+    ]);
+    let build = |bounds, styles| {
+        let runs = run_properties(12.0);
+        let properties = GenericTextParagraphProperties::with_all(
+            FlowDirection::LeftToRight,
+            TextAlignment::Left,
+            true,
+            false,
+            runs.clone(),
+            TextWrapping::Wrap,
+            f64::NAN,
+            0.0,
+            0.0,
+        );
+        properties.set_text_line_bounds(bounds);
+        properties.set_line_spacing(1.25);
+        TextLayout::from_text_source_with_paragraph_styles(
+            Rc::new(SingleBufferTextSource::new(value, runs)),
+            Rc::new(properties),
+            None,
+            30.0,
+            f64::INFINITY,
+            0,
+            None,
+            styles,
+        )
+    };
+
+    // The deterministic 12-DIP test font has ascent 9.6, descent 2.4,
+    // line gap 1.2 and cap height 6.72. Its six-DIP advance wraps the first
+    // paragraph once. A default style must preserve all four inherited boxes,
+    // including the otherwise-empty final paragraph and their caret geometry.
+    for (bounds, baseline, height) in [
+        (TextLineBounds::Full, 10.2, 13.2),
+        (TextLineBounds::TrimToCapHeight, 6.72, 9.72),
+        (TextLineBounds::TrimToBaseline, 10.2, 10.2),
+        (TextLineBounds::Tight, 6.72, 6.72),
+    ] {
+        let inherited = build(bounds, None);
+        let styled = build(bounds, Some(styles.clone()));
+        assert_eq!(inherited.text_lines().len(), 4, "{bounds:?}");
+        assert_eq!(styled.text_lines().len(), inherited.text_lines().len());
+        assert_eq!(styled.height(), inherited.height(), "{bounds:?}");
+        assert_eq!(styled.baseline(), inherited.baseline(), "{bounds:?}");
+        assert_eq!(
+            styled.width_including_trailing_whitespace(),
+            inherited.width_including_trailing_whitespace(),
+            "{bounds:?}"
+        );
+        for (index, (actual, expected)) in styled
+            .text_lines()
+            .iter()
+            .zip(inherited.text_lines())
+            .enumerate()
+        {
+            assert_eq!(
+                actual.first_text_source_index(),
+                expected.first_text_source_index()
+            );
+            assert_eq!(actual.length(), expected.length());
+            assert_eq!(
+                actual.height(),
+                expected.height(),
+                "{bounds:?} line {index}"
+            );
+            assert_eq!(
+                actual.baseline(),
+                expected.baseline(),
+                "{bounds:?} line {index}"
+            );
+            assert_eq!(styled.line_origin(index), inherited.line_origin(index));
+            assert!(
+                (actual.baseline() - baseline).abs() < 1e-9,
+                "{bounds:?} line {index}"
+            );
+            assert!(
+                (actual.height() - height - 1.25).abs() < 1e-9,
+                "{bounds:?} line {index}"
+            );
+        }
+        for at in 0..=length {
+            assert_eq!(
+                styled.hit_test_text_position(at),
+                inherited.hit_test_text_position(at),
+                "{bounds:?} caret {at}"
+            );
+        }
+        assert_eq!(
+            styled.hit_test_text_range(0, length),
+            inherited.hit_test_text_range(0, length),
+            "{bounds:?} selection"
+        );
     }
 }

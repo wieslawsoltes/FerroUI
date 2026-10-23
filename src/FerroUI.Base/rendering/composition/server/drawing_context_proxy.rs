@@ -6,7 +6,8 @@ use crate::media::imaging::BitmapBlendingMode;
 use crate::media::immutable::ImmutableSolidColorBrush;
 use crate::media::{BoxShadows, Color, IBrush, IExperimentalAcrylicMaterial, IPen, RenderOptions, TextOptions};
 use crate::platform::{
-    IBitmapImpl, IDrawingContextImpl, IDrawingContextImplWithEffects, IDrawingContextLayerImpl,
+    IBitmapImpl, IDrawingContextImpl, IDrawingContextImplWithEffects, IDrawingContextImplWithFragments,
+    IDrawingContextLayerImpl, IDrawingFragment,
     IDrawingContextWithAcrylicLikeSupport, IGeometryImpl, IGlyphRunImpl, IPlatformRenderInterfaceRegion,
 };
 use crate::{Matrix, PixelSize, Point, Rect, RoundedRect};
@@ -379,6 +380,13 @@ impl IDrawingContextImpl for CompositorDrawingContextProxy {
         Some(self)
     }
 
+    fn as_drawing_context_impl_with_fragments(&mut self) -> Option<&mut dyn IDrawingContextImplWithFragments> {
+        match self.inner.as_drawing_context_impl_with_fragments() {
+            Some(_) => Some(self),
+            None => None,
+        }
+    }
+
     fn as_any_mut(&mut self) -> &mut dyn Any {
         self
     }
@@ -495,5 +503,24 @@ mod tests {
         let mut inner = proxy.into_inner();
         assert_eq!(inner.transform(), Matrix::create_translation(1.0, 1.0) * Matrix::create_scale(2.0, 2.0));
         inner.dispose();
+    }
+}
+
+impl IDrawingContextImplWithFragments for CompositorDrawingContextProxy {
+    fn begin_fragment(&mut self) {
+        self.flush();
+        if let Some(inner) = self.inner.as_drawing_context_impl_with_fragments() {
+            inner.begin_fragment();
+        }
+    }
+
+    fn end_fragment(&mut self) -> Option<Rc<dyn IDrawingFragment>> {
+        self.flush();
+        self.inner.as_drawing_context_impl_with_fragments()?.end_fragment()
+    }
+
+    fn draw_fragment(&mut self, fragment: &Rc<dyn IDrawingFragment>) -> bool {
+        self.flush();
+        self.inner.as_drawing_context_impl_with_fragments().is_some_and(|inner| inner.draw_fragment(fragment))
     }
 }

@@ -16,8 +16,10 @@ use crate::rendering::composition::server::{
     IAnimatedServerObject, IServerObject, IServerRenderResource, IServerRenderResourceHost, ServerCompositor,
     ServerRenderResource, ServerRenderResourceCore, ServerResourceRef,
 };
+use super::composition_gradient_winui::{with_winui_anchor, with_winui_transform, IServerBrushWinUiTransform};
+use crate::rendering::composition::server::composition_transform;
 use crate::rendering::composition::transport::BatchStreamReader;
-use crate::{RelativePoint, RelativeScalar};
+use crate::{Matrix, RelativePoint, RelativeScalar, Vector};
 use std::any::{Any, TypeId};
 use std::cell::{Cell, RefCell};
 use std::rc::{Rc, Weak};
@@ -231,16 +233,26 @@ macro_rules! server_composition_brush {
                 self.brush_props().opacity()
             }
 
+            /// The upstream transform with the WinUI brush transform (not
+            /// from upstream).
             fn transform(&self) -> Option<Rc<dyn ITransform>> {
-                self.brush_props().transform().map(|transform| transform.value)
+                with_winui_transform(
+                    self.brush_props().transform().map(|transform| transform.value),
+                    IServerBrushWinUiTransform::winui_transform(self),
+                )
             }
 
             fn transform_origin(&self) -> RelativePoint {
                 self.brush_props().transform_origin()
             }
 
+            /// The upstream relative transform with the WinUI anchor point
+            /// (not from upstream).
             fn relative_transform(&self) -> Option<Rc<dyn ITransform>> {
-                self.brush_props().relative_transform().map(|transform| transform.value)
+                with_winui_anchor(
+                    self.brush_props().relative_transform().map(|transform| transform.value),
+                    IServerBrushWinUiTransform::winui_anchor_point(self),
+                )
             }
 
             fn as_any(&self) -> &dyn Any {
@@ -270,6 +282,9 @@ server_composition_brush! {
 }
 
 impl ServerCompositionSolidColorBrushHooks for ServerCompositionSolidColorBrush {}
+
+/// A colour brush has no WinUI brush transform.
+impl IServerBrushWinUiTransform for ServerCompositionSolidColorBrush {}
 
 impl ServerCompositionSolidColorBrush {
     /// The properties of the brush.
@@ -326,6 +341,25 @@ macro_rules! server_composition_gradient_brush {
 
             pub fn spread_method(&self) -> GradientSpreadMethod {
                 self.gradient.spread_method()
+            }
+        }
+
+        /// The WinUI brush transform of the gradient (not from upstream).
+        impl IServerBrushWinUiTransform for $name {
+            fn winui_transform(&self) -> Option<Matrix> {
+                composition_transform(
+                    Vector::default(),
+                    Vector::default(),
+                    self.props.center_point(),
+                    self.props.transform_matrix(),
+                    self.props.scale(),
+                    self.props.rotation_angle(),
+                    self.props.offset(),
+                )
+            }
+
+            fn winui_anchor_point(&self) -> Vector {
+                self.props.anchor_point()
             }
         }
 

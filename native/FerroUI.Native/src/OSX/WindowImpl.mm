@@ -289,6 +289,7 @@ HRESULT WindowImpl::SetTitle(char *utf8title) {
     @autoreleasepool {
         _lastTitle = [NSString stringWithUTF8String:(const char *) utf8title];
         [Window setTitle:_lastTitle];
+        [GetWindowProtocol() layoutStandardButtons];
 
         return S_OK;
     }

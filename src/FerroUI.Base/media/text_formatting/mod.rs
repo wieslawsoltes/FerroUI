@@ -88,6 +88,8 @@ mod text_layout_tests;
 #[cfg(test)]
 mod text_paragraph_tests;
 #[cfg(test)]
+mod text_line_bounds_tests;
+#[cfg(test)]
 mod text_line_tests;
 #[cfg(test)]
 mod text_run_cache_tests;

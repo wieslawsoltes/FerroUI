@@ -19,8 +19,8 @@
     its other themes; WinUI's template has no brush and no radius, so a WinUI item has none); the
     ContentPresenter of the source is PART_ContentPresenter, with the setters of the
     template-local styles BaseContentPresenterStyle and BodyContentPresenterStyle (the body font,
-    normal weight); LineStackingStrategy, TextLineBounds and OpticalMarginAlignment of those styles
-    have no counterpart. The states of the single group CommonStates are the pseudo-classes in the
+    normal weight), TextLineBounds as FerroUI's attached TextBlock.TextLineBounds; LineStackingStrategy
+    and OpticalMarginAlignment of those styles have no counterpart. The states of the single group CommonStates are the pseudo-classes in the
     order of the source; Disabled is written last, as ListBoxItem::ChangeVisualState chooses it
     for a selected item too (there is no SelectedDisabled state in the template), and resets the
     fill of PressedBackground. Selected and SelectedUnfocused have the same values: one style.
@@ -67,6 +67,9 @@
   </Design.PreviewWith>
 
   <ControlTheme x:Key="DefaultListBoxItemStyle" TargetType="ListBoxItem">
+    <!-- The defaults of a WinUI 3 control, which its style leaves unset and its template binds
+         (FerroUI's defaults are Stretch). Deviation (winui-theme/DEVIATIONS.md, G-27). -->
+    <Setter Property="VerticalContentAlignment" Value="Center" />
     <Setter Property="Background" Value="Transparent" />
     <Setter Property="KeyboardNavigation.TabNavigation" Value="Local" />
     <Setter Property="Padding" Value="{StaticResource ListBoxItemPadding}" />
@@ -92,6 +95,7 @@
                               FontWeight="Normal"
                               FontSize="{DynamicResource ControlContentThemeFontSize}"
                               TextWrapping="NoWrap"
+                              TextBlock.TextLineBounds="Full"
                               HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
                               VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
                               Margin="{TemplateBinding Padding}" />

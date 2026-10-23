@@ -47,15 +47,19 @@
 pub mod animations;
 pub mod brushes;
 pub mod drawing;
+pub mod effects;
 pub mod expressions;
 pub mod generated;
 pub mod hit_testing;
+pub mod interactions;
 pub mod server;
 #[cfg(any(test, feature = "testing"))]
 pub mod testing;
 pub mod transport;
 
+mod composition_batch;
 mod composition_cache_mode;
+mod composition_clip;
 mod composition_custom_visual;
 mod composition_custom_visual_handler;
 mod composition_draw_list_visual;
@@ -63,17 +67,35 @@ mod composition_drawing_surface;
 mod composition_external_memory;
 mod composition_interop;
 mod composition_experimental_acrylic_visual;
+mod composition_geometry;
+mod composition_light;
 mod composition_gradient_stop;
 mod composition_object;
+mod composition_object_impls;
 mod composition_options;
 mod composition_property_set;
+mod composition_shape;
+mod composition_shape_factories;
 mod composition_solid_color_visual;
 mod composition_surface;
 mod composition_surface_visual;
 mod composition_target;
+mod composition_view_box;
+mod composition_visual_surface;
+mod composition_winui_factories;
+mod composition_visual_winui;
+mod composition_winui_enums;
+mod composition_winui_layer_factories;
+mod layer_visual;
+mod redirect_visual;
 mod compositing_renderer;
 mod compositor_factories;
 mod container_visual;
+mod drop_shadow;
+mod i_composition_surface;
+mod loaded_image_surface;
+mod shape_visual;
+mod sprite_visual;
 mod element_composition_preview;
 mod visual;
 mod visual_collection;
@@ -86,6 +108,10 @@ mod i_compositor_serializable;
 mod matrix_utils;
 mod render_interface_feature;
 
+pub use composition_batch::{
+    AnimationCompletion, BatchCompletionGuard, CompositionBatchCompletedEventArgs, CompositionBatchTypes,
+    CompositionCommitBatch, CompositionScopedBatch,
+};
 pub use composition_cache_mode::{CompositionBitmapCache, CompositionCacheMode};
 pub use composition_custom_visual::CompositionCustomVisual;
 pub use composition_custom_visual_handler::{CompositionCustomVisualHandler, ICompositionCustomVisualHandler};
@@ -103,8 +129,40 @@ pub use composition_interop::{
 pub use composition_draw_list_visual::{CompositionDrawListVisual, ICompositionDrawListVisualExtension};
 pub use brushes::{
     CompositionBrush, CompositionConicGradientBrush, CompositionGradientBrush, CompositionLinearGradientBrush,
-    CompositionRadialGradientBrush, CompositionSolidColorBrush,
+    CompositionRadialGradientBrush, CompositionSolidColorBrush, CompositionSurfaceBrush,
 };
+pub use composition_clip::{CompositionClip, GeometricClip, InsetClip, RectangleClip};
+pub use composition_geometry::{
+    CompositionEllipseGeometry, CompositionGeometry, CompositionLineGeometry, CompositionPath, CompositionPathGeometry,
+    CompositionRectangleGeometry, CompositionRoundedRectangleGeometry,
+};
+pub use composition_shape::{
+    CompositionContainerShape, CompositionShape, CompositionShapeCollection, CompositionSpriteShape, CompositionStrokeCap,
+    CompositionStrokeLineJoin,
+};
+pub use composition_view_box::CompositionViewBox;
+pub use shape_visual::ShapeVisual;
+pub use brushes::{CompositionMaskBrush, CompositionNineGridBrush};
+// The WinUI effect brushes (phase 6); the effect descriptions and the
+// factory are in `effects`.
+pub use brushes::{CompositionBackdropBrush, CompositionEffectBrush};
+pub use effects::{
+    CompositionEffectFactory, CompositionEffectFactoryError, CompositionEffectFactoryLoadStatus,
+    CompositionEffectSourceParameter,
+};
+pub use composition_winui_enums::{
+    CompositionBackfaceVisibility, CompositionBorderMode, CompositionCompositeMode, CompositionMappingMode,
+};
+pub use layer_visual::LayerVisual;
+pub use redirect_visual::RedirectVisual;
+pub use composition_visual_surface::CompositionVisualSurface;
+pub use drop_shadow::DropShadow;
+pub use composition_light::{
+    AmbientLight, CompositionLight, DistantLight, PointLight, SpotLight, VisualUnorderedCollection,
+};
+pub use i_composition_surface::ICompositionSurface;
+pub use loaded_image_surface::{LoadedImageSourceLoadStatus, LoadedImageSurface};
+pub use sprite_visual::SpriteVisual;
 pub use composition_experimental_acrylic_visual::CompositionExperimentalAcrylicVisual;
 pub use composition_gradient_stop::CompositionGradientStop;
 pub use composition_object::{AsCompositionObject, CompositionObject, ICompositionObjectAnimations};
@@ -124,7 +182,10 @@ pub use composition_transparency_level::CompositionTransparencyLevel;
 pub use compositor::{
     CompositionVisualSnapshotError, Compositor, ICompositorScheduler, LocalFuture, ServerJobError, ServerJobTask,
 };
-pub use enums::{CompositionBlendMode, CompositionGradientExtendMode, CompositionStretch, CompositionTileMode};
+pub use enums::{
+    CompositionBitmapInterpolationMode, CompositionBlendMode, CompositionDropShadowSourcePolicy,
+    CompositionGradientExtendMode, CompositionStretch, CompositionTileMode,
+};
 pub use i_composition_object_host::{ICompositionObject, ICompositionObjectHost, PendingAnimations};
 pub use i_composition_target_debug_events::ICompositionTargetDebugEvents;
 pub use i_compositor_serializable::ICompositorSerializable;
@@ -137,7 +198,19 @@ pub use animations::{
     RelativePointKeyFrameAnimation, RelativeScalarKeyFrameAnimation, ScalarKeyFrameAnimation, Vector2KeyFrameAnimation,
     Vector3DKeyFrameAnimation, Vector3KeyFrameAnimation, Vector4KeyFrameAnimation, VectorKeyFrameAnimation,
 };
+// The WinUI animation types of `Microsoft.UI.Composition` that are not in the
+// schema: the natural motion animations, the animation controller and the
+// colour space of colour animations.
+pub use animations::{
+    AnimationController, AnimationControllerProgressBehavior, CompositionColorSpace, NaturalMotionAnimation,
+    ScalarNaturalMotionAnimation, SpringScalarNaturalMotionAnimation, SpringVector2NaturalMotionAnimation,
+    SpringVector3NaturalMotionAnimation, Vector2NaturalMotionAnimation, Vector3NaturalMotionAnimation,
+};
 
+#[cfg(test)]
+mod composition_property_set_tests;
+#[cfg(test)]
+mod composition_batch_tests;
 #[cfg(test)]
 mod compositor_tests;
 #[cfg(test)]

@@ -4,6 +4,136 @@ All notable changes to FerroUI are recorded in this file. The format follows [Ke
 
 ## [Unreleased]
 
+### Added
+
+- **View locators generated at build time** (#310): a port of StaticViewLocator (<https://github.com/wieslawsoltes/StaticViewLocator>), three new crates. `ferroui-static-view-locator` holds the attributes and the tables. `ferroui-static-view-locator-macros` holds `#[static_view_locator]` and `#[static_view_mapping]`. `ferroui-static-view-locator-build` is the generator, which the build script runs. Its view-to-view-model mapping:
+  - a locator maps each view model of the crate to its view by naming convention (`view_models::SettingsViewModel` to `views::SettingsView`, and `settings_view_model.rs` to `settings_view.rs`), by contracts its views implement, by the views that implement `IControlViewFor`, and by explicit mappings, through a table keyed by `TypeId`; no type is looked up by name at run time;
+  - optionally the generator writes the data template (`IDataTemplate` with `build`, `match_` and replaceable hooks), the view locator of ReactiveUI (feature `reactiveui`) and an exact factory; five resolution modes are flattened into the table at build time;
+  - the reference's options, its diagnostics SVL0001 to SVL0008, and its 59 tests are ported ([docs/porting/static-view-locator.md](docs/porting/static-view-locator.md));
+  - the sample `samples/StaticViewLocatorDemo` ports both demos of the reference.
+- **The WinUI 3 composition API** on the compositor of FerroUI ([docs/porting/winui-composition.md](docs/porting/winui-composition.md): the inventory of the WinUI surface, the plan and the deviations):
+  - connected animations with the engine of WinUI (`ConnectedAnimation.cpp` of microsoft-ui-xaml): a frozen image of the source and a live image of the destination on sprite visuals in a layer of the window, animated by the compositor, with the gravity, direct and basic configurations, coordinated elements, `cancel`, `is_scale_animation_enabled`, `set_animation_component` and `ConnectedAnimationService::get_for_current_view`;
+  - `ferroui_controls::hosting::ElementCompositionPreview`: the element visual and child visual, implicit show and hide animations (also when an element leaves the tree), `set_is_translation_enabled`, the manipulation property set of a scroll viewer and the pointer position property set; the `Translation`, `Rotation`, `RotationAxis`, `Scale`, `CenterPoint` and `TransformMatrix` facades of `Visual` and the opacity, rotation, scale and translation transitions;
+  - live property sets (a server counterpart, animatable entries, read live by expressions); scoped and commit batches with `Completed`; `StopBehavior`; sub-channel targets (`Offset.X`); the WinUI easing functions (cubic Bezier, linear, step, back, bounce, circle, elastic, exponential, power, sine); spring natural motion animations; `AnimationController` and the global playback rate; the colour spaces of colour key frame animations; the missing expression functions and parameters;
+  - `SpriteVisual`, `ShapeVisual` with sprite and container shapes and the rectangle, rounded rectangle, ellipse, line and path geometries (trimmed), `LayerVisual`, `RedirectVisual`; the surface, nine-grid and mask brushes and the WinUI members of the gradient brushes; `CompositionVisualSurface` and `LoadedImageSurface`; `DropShadow`; the inset, rectangle and geometric clips; the remaining members of `Visual`;
+  - `InteractionTracker` and `VisualInteractionSource` (on the UI thread);
+  - a "Composition (WinUI)" page in the ControlCatalog.
+
+- Opt-in application inspection and automation through MCP (#235): `ferroui-inspect` provides weak node IDs, trees, properties and styles, resource lookup, selectors, raw input, automation patterns, PNG screenshots, condition probes, logs and render/layout statistics. `ferroui-mcp` exposes the core over stdio and authenticated loopback Streamable HTTP, with UI dispatcher marshalling and separate input/property-write permissions.
+- ControlCatalog's `mcp` feature, native and headless launch modes, a protocol smoke test for both transports, and [MCP/Claude Code setup documentation](docs/mcp.md).
+- `ferroui-dependency-injection` (#251): a port of Microsoft.Extensions.DependencyInjection (dotnet/runtime v10.0.13) with singleton, scoped, transient and keyed services, typed factories and the `service_factory!` macro for constructor injection, validation of scopes and of the graph on build, disposal in reverse order through FerroUI tasks, and an optional adapter to Splat's resolver for ReactiveUI ([docs/porting/dependency-injection.md](docs/porting/dependency-injection.md)).
+- `ferroui-devtools` (#236): an opt-in Chrome DevTools Protocol endpoint on loopback, for the Chrome DevTools front end and CDP clients such as Playwright, with DOM, read-only CSS, Overlay, Page, Input, Accessibility and Log, and a JavaScript bridge in the browser ([docs/devtools-cdp.md](docs/devtools-cdp.md)).
+
+### Changed
+
+- The MCP server and the CDP endpoint share one inspector per UI thread (`ferroui_inspect::Inspector::shared`, with the per-window view `ferroui_inspect::target::Target`) and one log capture per process (`LogCapture::install`), where each had its own: a node has the same ID in both, the highlights of the CDP sessions are left out of every tree, malformed selectors are refused by both before the framework parses them, and the log sink is replaced once. `ferroui_mcp::serve_with_inspector` is removed (register the roots of a custom lifetime with the shared inspector). The CDP server no longer runs a 10 ms timer on the UI thread: it posts each request to the dispatcher. MCP: invalid tool arguments are a tool result with `isError`, a `2025-03-26` session takes JSON-RPC batches, a cancellation that arrives before its request cancels it, the log capture records from Information up unless a client asks for debug, `get_resources` no longer creates a resource dictionary, an open SSE stream keeps its session alive, and a search past the node limit returns the matches it found. CDP: a panic in a command of the browser bridge answers it with an error. Dependency injection: validation checks a graph whose branches meet again once per service rather than once per path, and the Splat adapter keeps a provider that it is handed back.
+
+- Composition, with the WinUI composition API (see `docs/porting/DEVIATIONS.md`, "WinUI composition"): a `CompositionPropertySet` made with `new` is live on the compositor; an animation that reads nothing (a constant expression) now applies; the operators of expressions combine the single- and double-precision forms of a vector; the expression functions `Matrix3x2.CreateTranslation` and `Matrix4x4.CreateTranslation` build translations, the 6- and 16-argument matrix constructors read every argument, and function names are matched ignoring case; in a window rendered by a compositor, `ConnectedAnimation` runs on the compositor with the engine of WinUI.
+
+## [0.4.0] - 2026-10-22
+
+The fourth release. It completes the declarative Rust API of `0.4.0-preview.1` and adds the developer tools:
+- the declarative API in all its phases ([docs/declarative-ui.md](docs/declarative-ui.md)): element builders and `rsx!`, signals, components that run again with hooks and a reconciler, interoperation with XAML and data templates, styles, resources, transitions and popups as elements, hot reload of the literals of `rsx!`, diagnostics and an inspector, the fewest moves of keyed children, asynchronous data, error boundaries and a router;
+- the samples: the 7GUIs in three versions, a gallery, TodoMVC and ReactiveDemo as components;
+- the developer tools, `ferroui-diagnostics`, a port of upstream's last open-source version on the WinUI 3 theme, with the TreeDataGrid for the trees and the property grid.
+
+One crate joins, `ferroui-diagnostics`. The additions since the preview are listed below; the known limitations are those of `0.4.0-preview.1`. Within 0.4 the public API is kept; 0.5.0 may change it.
+
+### Added
+
+- **Components that run again** in `ferroui-view` (phase 1 of the declarative API, `docs/declarative-ui.md`, sections 7 and 8):
+  - `rerender(..)` and `#[component(rerender)]`: a component whose function runs again when a signal it read changes or its parent runs again; `#[component(rerender, memo)]` skips a run for equal parameters;
+  - hooks: `use_hook`, `use_signal`, `use_memo`, `use_effect`, `use_effect_with`; contexts: `provide_context`, `use_context`;
+  - a reconciler that patches the mounted controls into the elements a component returns: siblings matched by key and by place, equal values left alone, values that are gone cleared, handlers attached again, controls kept;
+  - the 7GUIs tasks as components that run again (`samples/SevenGuis/Hooks`), in the scenario tests with the other ports;
+  - `docs/declarative-ui-react.md`, a comparison of the API with React, and the plan of the phases that remain.
+- **XAML and templates** in `ferroui-view` (phase 2, `docs/declarative-ui.md`, section 9):
+  - `ComponentHost`, a control that shows a component in XAML or any tree of controls; `register_component` names components for its `Component` property; `register_types` registers the types of the crate for markup (`using:FerroUI.View`);
+  - `template(|item: T| ..)`, a data template whose items are components, which recycles its hosts through a pool so that a virtualized list patches its items as it scrolls;
+  - `use_data_context`, `use_data_context_value` and `use_parent_control`;
+  - with the feature `xaml`: `load_xaml`, `load_xaml_uri`, `xaml` and `use_xaml`, XAML in a component;
+  - the sample `samples/ViewInterop`: a virtualized directory of 10,000 people with XAML details and a component inside the XAML.
+- **The rest of the API** in `ferroui-view` (phase 3, `docs/declarative-ui.md`, section 10):
+  - the builders of the TreeDataGrid, the colour picker, the dialogs and the ReactiveUI controls, each behind a feature (`treedatagrid`, `color-picker`, `dialogs`, `reactiveui`), from the same generator;
+  - styles: `style("Button.accent").set(..).nested(style("^:pointerover")..)`, `style_of(selector)`, and `.styles([..])` of an element;
+  - hooks: `use_parent_property`, `use_theme_variant`, `use_resource`, `use_resource_as`;
+  - transitions and animations: `transition`, `transition_eased`, `transitions`, `ms`, `animation(..).key_frame(..)`, `use_animation`;
+  - a `Popup` holds its child element, and a property that holds a control of a class (`context_menu`) takes an element;
+  - `ferroui-view` exports its type model, so compiled XAML names `ComponentHost`; `samples/ViewInterop` compiles its XAML;
+  - the sample `samples/ViewGallery`: styles, the theme variant and resources, a transition, a context menu, a `ColorView` and a `TreeDataGrid`, light and dark.
+- **Tools** in `ferroui-view` (phase 4, `docs/declarative-ui.md`, section 11):
+  - hot reload of the literals of `rsx!` (feature `hot-reload`): `hot::lit`, `hot::watch`, `hot::poll`, `hot::apply_source`; `launch` watches the sources;
+  - diagnostics in debug builds: `Diagnostic` (`MissingKeys`, `DuplicateKey`, `RunawayComponent`, `NeedsRebuild`, `HotReloaded`), `set_diagnostics_handler`; `Element::List` for iterations;
+  - the inspector: `mounted_trees()`, `inspector()`, `open_inspector()`, `attach_inspector()` (Shift+F12 in debug builds).
+- **Performance** of `ferroui-view` (phase 5, `docs/declarative-ui.md`, section 12):
+  - keyed children of panels and items controls reordered with the fewest moves (the longest increasing subsequence), a panel moving controls without taking them out of the visual tree;
+  - handlers kept attached with their closures swapped on each run (`Handler`), and values that follow the same signal or memo kept (`PropValue::Follows`);
+  - `view_stats()`, the counts of the mounting and the reconciler;
+  - benchmarks of the declarative API in `ferroui-benchmarks` (`declarative`);
+  - the README gains a section on the declarative API with its features and a comparison with React, and `examples/counter.rs` keeps its example building.
+- **Patterns of larger applications** in `ferroui-view` (phase 6, `docs/declarative-ui.md`, section 13):
+  - asynchronous data: `use_future(deps, make)`, a hook that runs a future on the executor of the thread and starts it again when its dependencies change, abandoning the one before; its state `AsyncState` (`Pending`, `Ready`, `Failed`); `suspense(state, pending, ready, failed)`; `sleep(duration)` on a timer of the dispatcher;
+  - error boundaries: `error_boundary(child, fallback)` shows a fallback when a run of a component below it panics, with `ErrorInfo` (`message`, `reset`), and reports `Diagnostic::ErrorCaught`;
+  - navigation modelled on the routing of ReactiveUI: `router(initial, routes)`, `route(pattern, view)` with `:name` parameters and `*`, `Router` (`navigate`, `navigate_back`, `navigate_and_reset`, `current`, `can_go_back`, `stack`), `use_router`, `try_use_router`, `RouteMatch`;
+  - the samples `samples/TodoMvc` (TodoMVC, its filters as routes) and `samples/ReactiveDemoComponents` (the crate browser of ReactiveDemo as components), in the WinUI 3 theme.
+- **Developer tools** (`ferroui-diagnostics`, a new published crate): the port of upstream's developer tools at their last open-source version, opened with F12 on a window or an application:
+  - the logical and visual trees with a filter, the details of the selected control (its properties with their priorities and an editor for each, the value frames with their setters and resources, the pseudo-classes, the layout explorer), the routed events with their routes, the hot keys, and screenshots of a control;
+  - the property grid is the TreeDataGrid of the port, grouped and sortable, in place of upstream's DataGrid;
+  - the window has the WinUI 3 theme in its compact density, in place of upstream's Simple theme, with compact rows; the logical and visual trees and the tree of the routed events are TreeDataGrids too, in place of tree views: their rows are virtualized, and selecting a node (Ctrl+Shift over a control, a link of an event chain) expands its ancestors and scrolls to its row even when it was not shown;
+  - a combined tree, the first tab and the default view: the logical tree with the parts of the template of each element, greyed out;
+  - a header in the title bar with a button that collapses the tree pane and a command bar in place of the menus, and the pages in the tab view of WinUI 3;
+  - one design for every view (`DevToolsStyles.xaml`): consistent spacing, section headers, thin dividers, a status bar, and a property grid whose editors share one compact form, with read-only values shown as text and brushes as outlined swatches;
+  - Ctrl+Shift selects the control under the pointer; selecting a node shows its properties without a delay and the property grid scrolls smoothly (its editors are kept for the recycled rows and the view of the details is reused); the colours of the TreeDataGrids, the colour picker and the layout box model follow the light and dark variants of the WinUI 3 theme; the tree pane is set apart from the details, a toggle hides the side pane of the details, and a page with nothing to show says what to do;
+  - `MainViewModel::register_page` adds pages of other crates to the tools;
+  - the ControlCatalog attaches them in debug builds, and `FERROUI_SMOKE_DEVTOOLS=<directory>` runs them without a person and writes pictures of their window;
+  - the facade has them as the feature `diagnostics`.
+- **Text**: `TextBlock.TextLineBounds` (`Full`, `TrimToCapHeight`, `TrimToBaseline`, `Tight`), after WinUI's: the box of each line can be trimmed to the cap height of its font and to its baseline, so that centred text is centred by its capitals whatever the font; `FontMetrics::cap_height` reads the cap height of a font. The WinUI 3 theme bounds the labels of command bar buttons beside their icons that way.
+
+### Changed
+
+- **WinUI 3 theme**: the controls whose WinUI style leaves the content alignments unset centre their content, as WinUI's defaults do (the placeholder of a combo box, the content of stretched buttons, the fields of the date and time pickers); a single-line text box centres its line, and a command bar button with its label on the right centres the icon and the label, which with the fonts of macOS and Linux sat above the middle (`docs/porting/winui-theme/DEVIATIONS.md`, G-27 to G-29).
+- **macOS**: a window that extends into a title bar taller than the system's (`ExtendClientAreaTitleBarHeightHint`) centres the close, minimise and zoom buttons in it vertically.
+- **`#[component(rerender)]` memoizes by default** a component whose parameters are `PartialEq + Clone`; `#[component(rerender, always)]` runs it with its parent every time, and `memo` makes comparable parameters required.
+- **Markup compiler**: a setter of a style class in a style (`<Setter Property="Classes.name" .../>`) compiles to Rust; it was refused (`FRN3000`).
+- **Markup**: `Binding` returns itself from `BindingBase::as_any`, as the other bindings do; `Window.Close()` can be called from markup.
+- **`ferroui-view`**: mounting is built on instances that the reconciler patches (`mount.rs`). A routed handler attached by an element is detached when the owner of the element ends. A dynamic list may give other dynamic lists.
+- **Performance of styling, layout and text** (`docs/porting/DEVIATIONS.md`): a text block keeps its text layout for a new width when the layout does not depend on it (no wrapping, no trimming, left aligned); the metadata of a property is looked up in a hash map, as upstream does; the renderer removes a visual from its sets in constant time; a name selector compares the name in place. Selecting a control in the developer tools creates about a quarter fewer text layouts (274 instead of 369).
+
+## [0.4.0-preview.1] - 2026-10-20
+
+The first preview of 0.4. It adds:
+- a declarative Rust API for user interfaces without XAML: element builders for every control, the `rsx!` macro and `#[component]`, and signals that the properties of controls follow ([docs/declarative-ui.md](docs/declarative-ui.md), phase 0 of issue #237);
+- the 7GUIs as samples, each task in two versions, one with the builders and one with the macros;
+- the performance work on the Vello backend: in software it is now as fast as Skia or faster on macOS, Linux and Windows, as it is with ANGLE on the Windows virtual machine, and on Metal it is faster for partial redraws and effects ([docs/porting/vello-performance.md](docs/porting/vello-performance.md)).
+
+Two crates join: `ferroui-view` and `ferroui-view-macros`. As a preview, it may change any part of the public API.
+
+### Added
+
+- **`ferroui-view`**: the declarative API, built beside the controls and adding nothing to them:
+  - an element tree that is data (the class, a key, a name, classes, property values, handlers and children), mounted into controls between `begin_init` and `end_init`;
+  - element builders with chained setters for every control and property of `ferroui-controls`, generated from their sources by `scripts/generate_view_builders.py` (a check in the continuous integration keeps them current); a setter takes a value, a signal, a memo or a closure, with conversions of the common types;
+  - a reactive runtime of signals, memos, effects and owners with `Copy` handles, which the properties of controls follow;
+  - children that follow state: keyed lists (`for_each`), conditions (`show`, `show_else`) and `dynamic`;
+  - `launch`, `launch_with`, `launch_themed` and `open_window` (feature `desktop`).
+- **`ferroui-view-macros`**: `rsx!`, with attributes, shorthand, attached properties (`Grid.row`), method-call attributes, `if` and `for`; and `#[component]`, which makes a function a component with its builder.
+- **The 7GUIs samples** (`samples/SevenGuis`): counter, temperature converter, flight booker, timer, CRUD, circle drawer and cells, each a crate of its own in a builders version and a macros version, on the WinUI 3 theme, with a shared crate for the logic and the state and 14 scenario tests. The screenshots and the code of each are in [docs/declarative-ui.md](docs/declarative-ui.md).
+- **Vello performance**, rounds 1 to 5 and an experimental round (#263 to #268), on the published Vello crates without patches:
+  - rectangles and rectangle clips drawn by the renderers' own paths; text of the hybrid mode from its glyph atlas;
+  - the CPU mode keeps its render contexts, renders kept targets and windows only where they changed, renders large scenes on the thread pool of `vello_cpu`, and keeps the pictures of box shadows;
+  - the GPU mode draws its filters on the device and renders kept targets only where they are cleared;
+  - on Linux and Windows a device of the backend's own (Vulkan or OpenGL through EGL; Direct3D 12), and the hybrid mode on the OpenGL context of the platform (ANGLE on Windows);
+  - a depth buffer for the hybrid renderer, so opaque content is drawn front to back; the Metal queues ordered by a shared event instead of a wait on the processor;
+  - `FERROUI_FRAME_TIMES`, and benchmark and profiling scripts (`scripts/vello-perf`).
+- **Draw-list fragments**: `IDrawingContextImplWithFragments` in `ferroui-base`, an optional extension of the drawing context (`None` by default), lets a backend keep what it made of the commands of a draw-list visual and draw it again in later frames until the commands or their resources change. The GPU mode of Vello uses it. The deviation is recorded in `docs/porting/DEVIATIONS.md`.
+
+### Known limitations
+
+- **No reconciler yet.** A component runs once; what changes later is changed through signals and the children that follow state. Running a component again and comparing its element trees is the next phase ([docs/declarative-ui.md](docs/declarative-ui.md), section 8).
+- **Builders for the controls of `ferroui-controls` only.** The TreeDataGrid, the colour picker and other crates of controls are used through `Element::Existing` until the generator covers them.
+- **Vello stays optional.** Skia is the default backend. On a real GPU, a full redraw (scrolling, a page drawn again) is still slower with Vello than with Skia. Vulkan and Direct3D 12 were tested in software only, not on hardware.
+- The limitations of 0.3.0 below still apply.
+
 ## [0.3.0] - 2026-10-19
 
 The third release. It is `0.3.0-preview.1` as a stable release: the reactive foundation for applications written in the MVVM pattern, with nothing changed since the preview. It contains:
@@ -239,7 +369,9 @@ The preview makes the framework available as crates so that it can be tried outs
 - **Documentation.** The API documentation is the documentation comments carried over by the port; there are no guides beyond the README and the documents under `docs/`. Not every crate is expected to build on docs.rs (see `docs/release.md`).
 - **Tests of the published crates.** The packages hold the sources of the tests but not the test fonts and images of the Skia backend; the test suites are run from the repository.
 
-[Unreleased]: https://github.com/wieslawsoltes/FerroUI/compare/v0.3.0...main
+[Unreleased]: https://github.com/wieslawsoltes/FerroUI/compare/v0.4.0...main
+[0.4.0]: https://github.com/wieslawsoltes/FerroUI/releases/tag/v0.4.0
+[0.4.0-preview.1]: https://github.com/wieslawsoltes/FerroUI/releases/tag/v0.4.0-preview.1
 [0.3.0]: https://github.com/wieslawsoltes/FerroUI/releases/tag/v0.3.0
 [0.3.0-preview.1]: https://github.com/wieslawsoltes/FerroUI/releases/tag/v0.3.0-preview.1
 [0.2.0]: https://github.com/wieslawsoltes/FerroUI/releases/tag/v0.2.0

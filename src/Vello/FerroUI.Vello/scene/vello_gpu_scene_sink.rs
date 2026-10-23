@@ -130,6 +130,29 @@ struct OpenClip {
     transform: Affine,
 }
 
+/// A fragment of the scene that is being recorded (see
+/// [`IVelloSceneSink::begin_fragment`]).
+struct FragmentRecording {
+    /// The scene the fragment is recorded in the place of: what it records
+    /// is appended to it when it ends.
+    outer: Scene,
+    /// The transform to the pixels of the scene the fragment is drawn at.
+    placed: Affine,
+    /// How many clips and layers were open when it started.
+    open: usize,
+    /// Whether what was recorded cannot be recorded again from the
+    /// fragment: it paints with an image.
+    spoiled: bool,
+}
+
+/// A fragment of a scene of the GPU mode: what was recorded, as the scene
+/// of `vello` encodes it, and the transform it was recorded at. Another
+/// scene takes it whole (`Scene::append`), moved by whole pixels.
+struct GpuSceneFragment {
+    scene: Scene,
+    placed: Affine,
+}
+
 /// The scene of the GPU mode: the scene of `vello`, the renderer of the
 /// Vello project that does everything from the flattening of curves to the
 /// composition in compute shaders.
@@ -214,6 +237,8 @@ pub struct VelloGpuSceneSink {
     stand_ins: HashMap<u64, peniko::ImageData>,
     /// How many images of each size the scene paints with.
     place_counts: HashMap<ImagePlace, usize>,
+    /// The fragment that is being recorded.
+    fragment: Option<FragmentRecording>,
 }
 
 impl VelloGpuSceneSink {
@@ -247,6 +272,24 @@ impl VelloGpuSceneSink {
             images: Vec::new(),
             stand_ins: HashMap::new(),
             place_counts: HashMap::new(),
+            fragment: None,
+        }
+    }
+
+    /// Something is recorded that a fragment cannot record again.
+    fn spoil_fragment(&mut self) {
+        if let Some(fragment) = &mut self.fragment {
+            fragment.spoiled = true;
+        }
+    }
+
+    /// Ends the fragment that is being recorded before something that
+    /// changes the scene around it: what it recorded goes into its place,
+    /// and it is not kept.
+    fn abandon_fragment(&mut self) {
+        if let Some(recording) = self.fragment.take() {
+            let fragment = std::mem::replace(&mut self.scene, recording.outer);
+            self.scene.append(&fragment, None);
         }
     }
 
@@ -281,6 +324,7 @@ impl VelloGpuSceneSink {
         if !std::mem::take(&mut self.unbounded) {
             return;
         }
+        self.abandon_fragment();
         let mut bounded = std::mem::replace(&mut self.scene, Scene::new());
         // The clips still open in the bounded scene end there and are
         // opened again, in the pixels of the target.
@@ -373,6 +417,7 @@ impl VelloGpuSceneSink {
             VelloSceneBrush::Solid(color) => Brush::Solid(*color),
             VelloSceneBrush::Gradient(gradient) => Brush::Gradient(gradient.clone()),
             VelloSceneBrush::Image(image) => {
+                self.spoil_fragment();
                 let place = ImagePlace {
                     width: image.image.width,
                     height: image.image.height,
@@ -391,6 +436,7 @@ impl VelloGpuSceneSink {
                 })
             }
             VelloSceneBrush::Texture(texture) => {
+                self.spoil_fragment();
                 assert!(
                     Arc::ptr_eq(texture.texture.device(), &self.device),
                     "A texture is painted with on the device it belongs to"
@@ -772,6 +818,7 @@ impl IVelloSceneSink for VelloGpuSceneSink {
     }
 
     fn retain_target(&mut self, cleared: &[VelloScenePixelRect]) {
+        self.abandon_fragment();
         // Before anything but clips was recorded, a scene that is composed
         // over its target in the rectangles it clears is rendered there
         // only: a scene of the rectangle around them, rendered into a
@@ -820,6 +867,7 @@ impl IVelloSceneSink for VelloGpuSceneSink {
     }
 
     fn reset(&mut self) {
+        self.fragment = None;
         self.scene.reset();
         self.open.clear();
         self.origin = (0, 0);
@@ -893,6 +941,10 @@ impl IVelloSceneSink for VelloGpuSceneSink {
             return;
         }
 
+        // These clips may have been opened before the fragment began.
+        // Rejoin its outer scene before closing them: an empty fragment's
+        // encoding cannot pop the clips that only the outer scene holds.
+        self.abandon_fragment();
         let clips = self.local_clips();
         self.close_clips(&clips);
 
@@ -919,6 +971,60 @@ impl IVelloSceneSink for VelloGpuSceneSink {
         }
 
         self.open_clips(&clips);
+    }
+
+    fn begin_fragment(&mut self, transform: Affine) -> bool {
+        if self.fragment.is_some() {
+            return false;
+        }
+        // What the scene keeps of its target and of the clips around the
+        // fragment is decided before it starts.
+        self.drawing();
+        let placed = self.placed(transform);
+        let outer = std::mem::replace(&mut self.scene, Scene::new());
+        self.fragment = Some(FragmentRecording { outer, placed, open: self.open.len(), spoiled: false });
+        true
+    }
+
+    fn end_fragment(&mut self) -> Option<std::rc::Rc<dyn std::any::Any>> {
+        let recording = self.fragment.take()?;
+        let scene = std::mem::replace(&mut self.scene, recording.outer);
+        self.scene.append(&scene, None);
+
+        let balanced = self.open.len() == recording.open;
+        (balanced && !recording.spoiled).then(|| {
+            std::rc::Rc::new(GpuSceneFragment { scene, placed: recording.placed }) as std::rc::Rc<dyn std::any::Any>
+        })
+    }
+
+    fn draw_fragment(&mut self, fragment: &dyn std::any::Any, transform: Affine) -> bool {
+        let Some(fragment) = fragment.downcast_ref::<GpuSceneFragment>() else {
+            return false;
+        };
+        if self.fragment.is_some() {
+            return false;
+        }
+
+        // The pixels are those the fragment gave when it was recorded only
+        // when it is drawn at its transform moved by whole pixels: then its
+        // curves are flattened, its rectangles snapped and its glyphs
+        // placed as they were, relative to the pixels.
+        let [a, b, c, d, x, y] = self.placed(transform).as_coeffs();
+        let [a0, b0, c0, d0, x0, y0] = fragment.placed.as_coeffs();
+        let same = |value: f64, other: f64| (value - other).abs() <= 1e-9 * value.abs().max(other.abs()).max(1.0);
+        let whole = |value: f64| value.is_finite() && (value - value.round()).abs() <= 1e-6;
+        let (dx, dy) = (x - x0, y - y0);
+        if !(same(a, a0) && same(b, b0) && same(c, c0) && same(d, d0) && whole(dx) && whole(dy)) {
+            return false;
+        }
+
+        self.drawing();
+        let offset = (dx.round(), dy.round());
+        match offset {
+            (0.0, 0.0) => self.scene.append(&fragment.scene, None),
+            offset => self.scene.append(&fragment.scene, Some(Affine::translate(offset))),
+        }
+        true
     }
 
     fn stroke(&mut self, path: &BezPath, stroke: &Stroke, transform: Affine, paint: &VelloScenePaint, _anti_alias: bool) {
@@ -1003,6 +1109,9 @@ impl IVelloSceneSink for VelloGpuSceneSink {
     }
 
     fn pop_clip(&mut self) {
+        if self.fragment.as_ref().is_some_and(|fragment| self.open.len() <= fragment.open) {
+            self.abandon_fragment();
+        }
         self.first_clips = None;
         if let Some(Open::Clip(_)) = self.open.last() {
             self.open.pop();
@@ -1015,6 +1124,11 @@ impl IVelloSceneSink for VelloGpuSceneSink {
 
     fn push_layer(&mut self, blend_mode: BlendMode, opacity: f32) {
         self.drawing();
+        // Every layer encodes the current target rectangle as its clip.
+        // That clip must not move with a reused fragment or outlive a
+        // target resize. Rejoin before recording it; blended layers also
+        // need the outer scene's clips to be present when they close them.
+        self.abandon_fragment();
         let target = self.target_rect();
 
         if blend_mode == BlendMode::default() {
@@ -1036,6 +1150,11 @@ impl IVelloSceneSink for VelloGpuSceneSink {
 
     fn pop_layer(&mut self) {
         self.drawing();
+        if self.fragment.as_ref().is_some_and(|fragment| {
+            self.open.iter().rposition(|open| matches!(open, Open::Layer { .. })).is_none_or(|index| index < fragment.open)
+        }) {
+            self.abandon_fragment();
+        }
         let Some(index) = self.open.iter().rposition(|open| matches!(open, Open::Layer { .. })) else {
             return;
         };

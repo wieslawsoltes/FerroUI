@@ -61,6 +61,9 @@
   </Design.PreviewWith>
 
   <ControlTheme x:Key="ExpanderHeaderDownStyle" TargetType="ToggleButton">
+    <!-- The defaults of a WinUI 3 control, which its style leaves unset and its template binds
+         (FerroUI's defaults are Stretch). Deviation (winui-theme/DEVIATIONS.md, G-27). -->
+    <Setter Property="VerticalContentAlignment" Value="Center" />
     <!-- The setters of DefaultToggleButtonStyle this style does not override. -->
     <Setter Property="VerticalAlignment" Value="Center" />
     <Setter Property="FontFamily" Value="{DynamicResource ContentControlThemeFontFamily}" />

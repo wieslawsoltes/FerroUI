@@ -4812,6 +4812,64 @@ fn build_class_binding_xaml_untyped(
     ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
 }
 
+/// The base URI and the XML namespaces of `class_setter.xaml`.
+static BUILD_CLASS_SETTER_XAML_DOCUMENT: rt::DocumentInfo = rt::DocumentInfo { base_uri: ::core::option::Option::Some("ferres://FerroUI.Markup.Xaml.UnitTests/Emitter/class_setter.xaml"), namespaces: XML_NAMESPACES_0 };
+
+/// Generated from `class_setter.xaml`.
+pub fn build_class_setter_xaml(
+    service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
+) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::StackPanel>, ::ferroui_markup_xaml::XamlLoadException> {
+    // class_setter.xaml(1,2) StackPanel
+    let stack_panel_0 = ::ferroui_controls::StackPanel::new();
+    let context = rt::populate_context(service_provider, &BUILD_CLASS_SETTER_XAML_DOCUMENT, rt::to_value(stack_panel_0.clone()));
+    let name_scope = context.name_scope_field();
+    stack_panel_0.begin_init();
+    // class_setter.xaml(3,6) Styles
+    let styles_collection_0 = ::ferroui_base::StyledElement::__markup_get_Styles(stack_panel_0.upcast_ref::<::ferroui_base::StyledElement>());
+    // class_setter.xaml(3,6) Style
+    let style_0 = ::ferroui_base::styling::Style::new();
+    // class_setter.xaml(3,6) Selector
+    let selector_0 = ::ferroui_base::styling::Selectors::of_type_info(::core::option::Option::None, <::ferroui_controls::Border as ::ferroui_base::StaticType>::TYPE);
+    ::ferroui_base::styling::Style::__markup_set_Selector(&style_0, ::core::option::Option::Some(selector_0.clone()));
+    // class_setter.xaml(3,31) Content
+    rt::add_setter(style_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::class_property("accent"), rt::to_object(::core::clone::Clone::clone(&true)));
+    rt::invoked(::ferroui_base::styling::Styles::__markup_Add_0(&styles_collection_0, rt::cast(style_0.clone(), 3, 6)?), 3, 6)?;
+    // class_setter.xaml(4,6) Styles
+    let styles_collection_1 = ::ferroui_base::StyledElement::__markup_get_Styles(stack_panel_0.upcast_ref::<::ferroui_base::StyledElement>());
+    // class_setter.xaml(4,6) Style
+    let style_1 = ::ferroui_base::styling::Style::new();
+    // class_setter.xaml(4,6) Selector
+    let selector_1 = ::ferroui_base::styling::Selectors::of_type_info(::core::option::Option::None, <::ferroui_controls::TextBlock as ::ferroui_base::StaticType>::TYPE);
+    ::ferroui_base::styling::Style::__markup_set_Selector(&style_1, ::core::option::Option::Some(selector_1.clone()));
+    // class_setter.xaml(4,34) Content
+    rt::add_setter(style_1.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::class_property("muted"), rt::to_object(::core::clone::Clone::clone(&false)));
+    rt::invoked(::ferroui_base::styling::Styles::__markup_Add_0(&styles_collection_1, rt::cast(style_1.clone(), 4, 6)?), 4, 6)?;
+    // class_setter.xaml(6,4) Children
+    let children_collection_0 = ::ferroui_controls::Panel::__markup_get_Children(stack_panel_0.upcast_ref::<::ferroui_controls::Panel>());
+    // class_setter.xaml(6,4) Border
+    let border_0 = ::ferroui_controls::Border::new();
+    border_0.begin_init();
+    ::ferroui_controls::Controls::__markup_Add_0(&children_collection_0, ::core::clone::Clone::clone(&border_0).upcast::<::ferroui_controls::Control>());
+    rt::invoked(border_0.try_end_init(), 6, 4)?;
+    // class_setter.xaml(7,4) Children
+    let children_collection_1 = ::ferroui_controls::Panel::__markup_get_Children(stack_panel_0.upcast_ref::<::ferroui_controls::Panel>());
+    // class_setter.xaml(7,4) TextBlock
+    let text_block_0 = ::ferroui_controls::TextBlock::new();
+    text_block_0.begin_init();
+    ::ferroui_controls::Controls::__markup_Add_0(&children_collection_1, ::core::clone::Clone::clone(&text_block_0).upcast::<::ferroui_controls::Control>());
+    rt::invoked(text_block_0.try_end_init(), 7, 4)?;
+    rt::invoked(stack_panel_0.try_end_init(), 1, 2)?;
+    rt::complete_root_name_scope(::core::option::Option::Some(&stack_panel_0), name_scope.as_ref(), 1, 2)?;
+    ::core::result::Result::Ok(stack_panel_0)
+}
+
+fn build_class_setter_xaml_untyped(
+    service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
+) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadException> {
+    let root = build_class_setter_xaml(service_provider)?;
+    ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
+}
+
 /// The base URI and the XML namespaces of `list_text_held_collection.xaml`.
 static BUILD_LIST_TEXT_HELD_COLLECTION_XAML_DOCUMENT: rt::DocumentInfo = rt::DocumentInfo { base_uri: ::core::option::Option::Some("ferres://FerroUI.Markup.Xaml.UnitTests/Emitter/list_text_held_collection.xaml"), namespaces: XML_NAMESPACES_0 };
 
@@ -5614,6 +5672,7 @@ pub const DOCUMENTS: &[(&str, BuildDocument)] = &[
     ("items_source_typed_list.xaml", build_items_source_typed_list_xaml_untyped as BuildDocument),
     ("class_value.xaml", build_class_value_xaml_untyped as BuildDocument),
     ("class_binding.xaml", build_class_binding_xaml_untyped as BuildDocument),
+    ("class_setter.xaml", build_class_setter_xaml_untyped as BuildDocument),
     ("list_text_held_collection.xaml", build_list_text_held_collection_xaml_untyped as BuildDocument),
     ("type_extension_object.xaml", build_type_extension_object_xaml_untyped as BuildDocument),
     ("compiled_binding_unnamed_types.xaml", build_compiled_binding_unnamed_types_xaml_untyped as BuildDocument),

@@ -1,0 +1,25 @@
+[package]
+name = "seven-guis-counter-builders"
+description = "7GUIs, Counter: written with the builders of ferroui-view"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+publish = false
+
+[lib]
+path = "lib.rs"
+# The scenario of the task runs in seven-guis-tests, with those of the other tasks.
+test = false
+doctest = false
+
+[[bin]]
+name = "seven-guis-counter-builders"
+path = "main.rs"
+test = false
+
+[dependencies]
+ferroui-base = { workspace = true }
+ferroui-controls = { workspace = true }
+ferroui-view = { workspace = true }
+seven-guis-model = { path = "../../Model" }

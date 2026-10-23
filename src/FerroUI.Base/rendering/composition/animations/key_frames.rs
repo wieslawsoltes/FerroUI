@@ -97,6 +97,9 @@ pub struct ServerKeyFrame<T> {
 pub trait IKeyFrames: Any {
     fn insert_expression_key_frame(&mut self, normalized_progress_key: f32, value: &str, easing_function: Rc<dyn IEasing>);
 
+    /// The number of key frames.
+    fn key_frame_count(&self) -> usize;
+
     fn as_any(&self) -> &dyn Any;
 
     fn as_any_mut(&mut self) -> &mut dyn Any;
@@ -105,6 +108,10 @@ pub trait IKeyFrames: Any {
 impl<T: Copy + Default + 'static> IKeyFrames for KeyFrames<T> {
     fn insert_expression_key_frame(&mut self, normalized_progress_key: f32, value: &str, easing_function: Rc<dyn IEasing>) {
         KeyFrames::insert_expression_key_frame(self, normalized_progress_key, value, easing_function)
+    }
+
+    fn key_frame_count(&self) -> usize {
+        self.count()
     }
 
     fn as_any(&self) -> &dyn Any {

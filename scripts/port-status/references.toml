@@ -73,3 +73,39 @@ test_roots = ["tests/FerroUI.Reactive.Tests", "src/FerroUI.Reactive", "src/Ferro
 test_attributes = ["TestMethod", "DataTestMethod"]
 stated_reasons = true
 test_files = "snake"
+
+[[reference]]
+name = "diagnostics"
+title = "the developer tools"
+# The developer tools left upstream in 71ce62ae32; the extraction was made at its parent
+# (TRACKED_COMMIT=71ce62ae32~1 scripts/port-status/run.sh --reference diagnostics), which
+# upstream-api.json records.
+checkout = "../Avalonia"
+checkout_env = "UPSTREAM"
+projects = "scripts/api-extract/projects-diagnostics.json"
+data = "docs/porting/data/diagnostics"
+tracking = "docs/porting/tracking/diagnostics"
+documents = "library"
+# The overloads of `AttachDevTools` are Rust functions with suffixes (`attach_dev_tools_with_options`).
+overloads = "name"
+test_projects = []
+
+[[reference]]
+name = "dependency-injection"
+title = "Microsoft.Extensions.DependencyInjection"
+plan = "docs/porting/dependency-injection.md"
+checkout = "../runtime"
+checkout_env = "DI_UPSTREAM"
+projects = "scripts/api-extract/projects-dependency-injection.json"
+data = "docs/porting/data/dependency-injection"
+tracking = "docs/porting/tracking/dependency-injection"
+documents = "library"
+api = "public"
+overloads = "name"
+method_macros = true
+doc_citations = true
+waived_files = true
+test_projects = [["di-specification", "src/libraries/Microsoft.Extensions.DependencyInjection.Specification.Tests/src"], ["di", "src/libraries/Microsoft.Extensions.DependencyInjection/tests/DI.Tests"]]
+test_roots = ["tests/FerroUI.DependencyInjection.Tests"]
+stated_reasons = true
+test_files = "snake"

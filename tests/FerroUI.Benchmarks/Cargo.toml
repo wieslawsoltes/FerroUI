@@ -24,6 +24,8 @@ count-allocations = []
 ferroui-base = { workspace = true, features = ["testing"] }
 ferroui-controls = { workspace = true, features = ["testing"] }
 ferroui-markup = { workspace = true }
+# The benchmarks of the declarative API (`declarative/`), an addition.
+ferroui-view = { workspace = true }
 ferroui-themes-fluent = { workspace = true }
 ferroui-themes-simple = { workspace = true }
 ferroui-harfbuzz = { workspace = true }

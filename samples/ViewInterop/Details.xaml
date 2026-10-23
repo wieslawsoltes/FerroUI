@@ -1,0 +1,9 @@
+<Border xmlns="https://github.com/ferroui" xmlns:view="using:FerroUI.View"
+        Padding="16" BorderBrush="#DDDDDD" BorderThickness="1" CornerRadius="4">
+  <StackPanel Spacing="8">
+    <TextBlock Text="Details (compiled XAML)" FontWeight="SemiBold" Foreground="#666666" />
+    <TextBlock Name="Title" FontSize="22" Text="Select a person" />
+    <TextBlock Name="City" />
+    <view:ComponentHost Component="Badge" />
+  </StackPanel>
+</Border>

@@ -1,6 +1,45 @@
 # Validation and measurements
 
-This file distinguishes implemented paths, completed checks and measurements. Each observation belongs to its stated source, runtime and run; older successful runs do not validate later changes. The branch incorporates FerroUI `ab7a15b8` / `0.4.0-preview.1` and uses Vello for every application target through public FerroUI APIs. [PR #254](https://github.com/wieslawsoltes/FerroUI/pull/254) collects the complete source and current review status. Current continuation evidence is recorded first; earlier checkpoints remain below with their original scope.
+This file distinguishes implemented paths, completed checks and measurements. Each observation belongs to its stated source, runtime and run; older successful runs do not validate later changes. The branch incorporates FerroUI `934b9ce1` / `0.4.0` and uses Vello for every application target through public FerroUI APIs. [PR #254](https://github.com/wieslawsoltes/FerroUI/pull/254) collects the complete source and current review status. Current continuation evidence is recorded first; earlier checkpoints remain below with their original scope.
+
+## FerroUI 0.4.0 integration (2026-10-23)
+
+The branch merges upstream release commit
+`934b9ce16e2ada890ee31534f1a98808f483a14f` into the published continuation
+`0f0732784bd6fdf1cb2477a61dd332d9a007fec2`, retaining both parents. The two
+additive conflicts preserve both paragraph test modules and both mock drawing
+context capabilities. The sample lockfile changes only 26 local FerroUI package
+versions from `0.4.0-preview.1` to `0.4.0`.
+
+`StyledParagraph` forwards the new inherited `TextLineBounds` property to its
+defaults. Its regression compares styled and unstyled line, caret and selection
+geometry across all four bounds modes, wrapping, hard breaks and an empty final
+paragraph. The native feedback gate also executes upstream's text-line-bounds
+tests.
+
+Native GPU fragment capture rejoins the outer scene before recording
+target-bounded layers or non-default fills that close outer clips. This
+preserves the first draw's clip stack and prevents reuse of a target-sized clip
+after translation or target resize. Plain safe fragments retain reuse. GPU
+pixel regressions run with `FERROUI_VELLO_REQUIRE_GPU=1`, so a missing compute
+adapter fails this CI gate. These fixes concern the optional native **Gpu**
+mode; FerroDesign's configured **Hybrid/Cpu** desktop and **WebGL2/Software2D**
+browser modes do not use GPU fragments.
+
+With the updated lockfile, all **533 core tests passed locally in 4.24 s**, and
+the five active application dependency graphs contain Vello without Skia. These
+checks establish core behavior and backend selection, not execution of the
+changed native framework or browser build. Those source-specific CI and browser
+gates remain pending at this integration checkpoint. The verified `08e29e4f`
+browser runtime uses the preceding framework and is tracked separately.
+
+The browser's read-only native control projection now includes the existing
+Design/Prototype/Inspect tabs, their panels and both constraint ComboBoxes.
+This permits tests to click actual tab/control bounds without changing editor
+layout, visibility or commands. The earlier frozen run exposed XAML export
+being requested while its Inspect panel was hidden and a constraint choice
+missing from that diagnostic projection; neither failure is relabeled as a
+pass by this source correction.
 
 ## Gradient and spacing continuation (2026-10-23)
 
@@ -14,8 +53,8 @@ records exact source IDs, CI links, decoded-log hashes and selected result lines
 
 | Gate | Exact source and result |
 | --- | --- |
-| Current production core | `1637a093`, [core run 39944253726](https://github.com/wieslawsoltes/FerroUI/actions/runs/39944253726/job/120382892496): **533/533 passed**, **2.50 s**, including all five prototype-spacing cases and the strengthened stale-effective-value no-op regression |
-| Current native application | `1637a093`, [native feedback run 39944253747](https://github.com/wieslawsoltes/FerroUI/actions/runs/39944253747/job/120382892411): **239/239 passed**, **43.57 s**, including the clipped selection/radius-control priority regression and Present button diagnostic. All five configured framework filters also passed |
+| Pre-integration production core | `1637a093`, [core run 39944253726](https://github.com/wieslawsoltes/FerroUI/actions/runs/39944253726/job/120382892496): **533/533 passed**, **2.50 s**, including all five prototype-spacing cases and the strengthened stale-effective-value no-op regression |
+| Pre-integration native application | `1637a093`, [native feedback run 39944253747](https://github.com/wieslawsoltes/FerroUI/actions/runs/39944253747/job/120382892411): **239/239 passed**, **43.57 s**, including the clipped selection/radius-control priority regression and Present button diagnostic. All five configured framework filters also passed |
 | Corrected padding Escape and native application | `3be16cb7`, [native feedback run 39941952822](https://github.com/wieslawsoltes/FerroUI/actions/runs/39941952822/job/120375277944): **230/230 passed**, **27.27 s**, including the previously failing grouped-draft discard case |
 | Full-workflow native checks | `3be16cb7`, [native job 120375278062](https://github.com/wieslawsoltes/FerroUI/actions/runs/39941952796/job/120375278062): **511 core / 230 app**, native compile, configured public geometry/compositing/text gates and five **Vello/no-Skia** active target graphs passed |
 | Radial/angular and spacing-variable core | `dfab0ed9`, [core run 39942848092](https://github.com/wieslawsoltes/FerroUI/actions/runs/39942848092/job/120378251111): **528/528 passed**, **1.72 s** |

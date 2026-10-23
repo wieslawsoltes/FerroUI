@@ -2522,7 +2522,7 @@ For applications, `export_metadata()` can generate the whole function (`$OUT_DIR
 | `FerroXamlIlArrayConstantAstNode` | list of element values | `vec![a, b, c]` (typed) / `Vec<MarkupValue>` when the element type is `object` | array representation per receiving member |
 | `FerroXamlIlFerroListConstantAstNode` | new list, capacity, `Add` each | `let l = FerroList::<T>::new(); l.add(a); ..` | no capacity setter was found on `FerroList`; the interpreter calls the method the node carries (`list_set_capacity_method`), the emitter does the same through form C or omits it if it is a pure hint (to be decided with the node's owner) |
 | `XamlIlFerroPropertyNode`, `XamlIlFerroPropertyFieldNode` | load the property definition | `Owner::name_property().as_property()` (or without `.as_property()` where the typed definition is wanted) | — |
-| `XamlIlFerroClassProperty` | `GetClassProperty(className)` | `ClassBindingManager::get_class_property("name")` | — |
+| `XamlIlFerroClassProperty` | `GetClassProperty(className)` | `rt::class_property("name")` (`StyledElement::get_class_property`), the property of a setter of a style class (corpus `class_setter.xaml`) | — |
 | `BindingSetter`, `BindingWithPrioritySetter` | `bind_binding` | 9.3.3 | binding value form: decision 17 (`rt::binding_of`) |
 | `SetValueWithPrioritySetter` | `set_value_untyped(.., priority)` | `set_value_with_priority` | — |
 | `UnsetValueSetter` | set the unset marker | 9.3.3 | — |

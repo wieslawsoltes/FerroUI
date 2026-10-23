@@ -1,0 +1,93 @@
+<UserControl xmlns="https://github.com/ferroui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:FerroUI.Diagnostics.ViewModels"
+             xmlns:vmm="using:FerroUI.Diagnostics.ViewModels"
+             xmlns:local="using:FerroUI.Diagnostics.Views"
+             xmlns:lb="using:FerroUI.Diagnostics.Behaviors"
+             x:Class="FerroUI.Diagnostics.Views.TreePageView"
+             x:DataType="vm:TreePageViewModel">
+  <!--
+  Deviation (DEVIATIONS.md, Developer tools): the nodes are the rows of a TreeDataGrid, not the
+  items of a tree view, for the performance of large trees: the rows are virtualized and only the
+  children of the nodes that are shown are listed. The source of the grid, its expander column and
+  the selection of its rows (SelectedNode) are those of TreePageViewModel (tree_page_view_model.rs);
+  the cells of the nodes are the template TreeNodeCell, which shows what the item template of the
+  tree view showed, with the classes and the name in lighter colours and the nodes of template
+  parts in italics.
+  -->
+  <UserControl.Resources>
+    <DataTemplate x:Key="TreeNodeCell" x:DataType="vm:TreeNode">
+      <StackPanel Orientation="Horizontal"
+                  Spacing="8"
+                  VerticalAlignment="Center"
+                  Classes.in-template="{Binding IsInTemplate}"
+                  Classes.visual-only="{Binding IsVisualOnly}">
+        <TextBlock Classes="node-type" Text="{Binding Type}" FontWeight="{Binding FontWeight}"/>
+        <TextBlock Classes="node-classes" Text="{Binding Classes}"/>
+        <TextBlock Classes="node-name" Text="{Binding ElementName}"/>
+      </StackPanel>
+    </DataTemplate>
+  </UserControl.Resources>
+
+  <UserControl.Styles>
+    <Style Selector="TextBlock.node-classes">
+      <Setter Property="Foreground" Value="{DynamicResource TextFillColorSecondaryBrush}"/>
+    </Style>
+    <Style Selector="TextBlock.node-name">
+      <Setter Property="Foreground" Value="{DynamicResource TextFillColorTertiaryBrush}"/>
+    </Style>
+    <Style Selector="StackPanel.in-template > TextBlock.node-type">
+      <Setter Property="FontStyle" Value="Italic"/>
+    </Style>
+    <!-- The parts of a template in the combined tree, greyed out (an addition of the port). -->
+    <Style Selector="StackPanel.visual-only > TextBlock">
+      <Setter Property="Foreground" Value="{DynamicResource TextFillColorTertiaryBrush}"/>
+    </Style>
+  </UserControl.Styles>
+
+  <!-- Deviation (DEVIATIONS.md, Developer tools): the tree is a pane the header of the tools
+       collapses (IsTreePaneOpen of the main view model), an addition of the port. -->
+  <Grid>
+    <Grid.ColumnDefinitions>
+      <ColumnDefinition Width="0.35*" lb:ColumnDefinition.IsVisible="{Binding $parent[local:MainView].((vmm:MainViewModel)DataContext).IsTreePaneOpen}" />
+      <ColumnDefinition Width="1" lb:ColumnDefinition.IsVisible="{Binding $parent[local:MainView].((vmm:MainViewModel)DataContext).IsTreePaneOpen}" />
+      <ColumnDefinition Width="0.65*" />
+    </Grid.ColumnDefinitions>
+    <!-- The tree in a pane of its own colour, set off from the details (DevToolsStyles.xaml). -->
+    <Border Classes="tree-pane" Grid.Column="0">
+      <TreeDataGrid Name="tree"
+                    BorderThickness="0"
+                    ShowColumnHeaders="False"
+                    CanUserResizeColumns="False"
+                    CanUserSortColumns="False"
+                    Source="{Binding NodesSource}"
+                    PointerMoved="UpdateAdorner"
+                    PointerExited="RemoveAdorner"
+                    DoubleTapped="ToggleExpanded">
+        <TreeDataGrid.ContextFlyout>
+          <MenuFlyout>
+            <MenuItem Header="Copy">
+              <MenuItem Header="Copy individual node selector" Command="{Binding CopySelector}" />
+              <MenuItem Header="Copy selector from template parent" Command="{Binding CopySelectorFromTemplateParent}" />
+            </MenuItem>
+            <MenuItem Header="-" />
+            <MenuItem Header="Expand recursively" Command="{Binding ExpandRecursively}" />
+            <MenuItem Header="Collapse children" Command="{Binding CollapseChildren}" />
+            <MenuItem Header="Capture node screenshot" Command="{Binding CaptureNodeScreenshot}" />
+            <MenuItem Header="Bring into view" Command="{Binding BringIntoView}" />
+            <MenuItem Header="Focus" Command="{Binding Focus}" />
+          </MenuFlyout>
+        </TreeDataGrid.ContextFlyout>
+      </TreeDataGrid>
+    </Border>
+
+    <!-- Deviation (DEVIATIONS.md, Developer tools): a divider of the sheet of the tools
+         (DevToolsStyles.xaml) in place of a splitter of the Simple theme. -->
+    <GridSplitter Classes="divider vertical" Grid.Column="1"/>
+    <ContentControl Content="{Binding Details}" Grid.Column="2"/>
+    <!-- Nothing selected: what to do, so that a page with the tree pane collapsed is not blank. -->
+    <TextBlock Grid.Column="2" Classes="empty-state"
+               IsVisible="{Binding Details, Converter={x:Static ObjectConverters.IsNull}}"
+               Text="Select a control in the tree, or hold Ctrl+Shift over a control to inspect it." />
+  </Grid>
+</UserControl>

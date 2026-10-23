@@ -28,7 +28,7 @@ impl ICompositionHitTester for GeometryCompositionHitTester {
 
     fn clipped_bounds_match(visual: &CompositionVisual, input: &Ref<Geometry>) -> bool {
         let bounds = input.bounds();
-        let size = visual.size();
+        let size = visual.effective_size();
         bounds.width > 0.0 && bounds.height > 0.0 && bounds.intersects(Rect::from_size(Size::new(size.x, size.y)))
     }
 

@@ -649,7 +649,7 @@ dependencies = [
 
 [[package]]
 name = "ferroui-base"
-version = "0.4.0-preview.1"
+version = "0.4.0"
 dependencies = [
  "bitflags",
  "ferroui-build-scan",
@@ -664,7 +664,7 @@ dependencies = [
 
 [[package]]
 name = "ferroui-browser"
-version = "0.4.0-preview.1"
+version = "0.4.0"
 dependencies = [
  "ferroui-base",
  "ferroui-controls",
@@ -676,7 +676,7 @@ dependencies = [
 
 [[package]]
 name = "ferroui-build"
-version = "0.4.0-preview.1"
+version = "0.4.0"
 dependencies = [
  "ferroui-base",
  "ferroui-build-scan",
@@ -686,7 +686,7 @@ dependencies = [
 
 [[package]]
 name = "ferroui-build-scan"
-version = "0.4.0-preview.1"
+version = "0.4.0"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -695,7 +695,7 @@ dependencies = [
 
 [[package]]
 name = "ferroui-controls"
-version = "0.4.0-preview.1"
+version = "0.4.0"
 dependencies = [
  "bitflags",
  "ferroui-base",
@@ -707,7 +707,7 @@ dependencies = [
 
 [[package]]
 name = "ferroui-dialogs"
-version = "0.4.0-preview.1"
+version = "0.4.0"
 dependencies = [
  "ferroui-base",
  "ferroui-build",
@@ -718,7 +718,7 @@ dependencies = [
 
 [[package]]
 name = "ferroui-fonts-inter"
-version = "0.4.0-preview.1"
+version = "0.4.0"
 dependencies = [
  "ferroui-base",
  "ferroui-controls",
@@ -726,7 +726,7 @@ dependencies = [
 
 [[package]]
 name = "ferroui-freedesktop"
-version = "0.4.0-preview.1"
+version = "0.4.0"
 dependencies = [
  "bitflags",
  "ferroui-base",
@@ -737,7 +737,7 @@ dependencies = [
 
 [[package]]
 name = "ferroui-harfbuzz"
-version = "0.4.0-preview.1"
+version = "0.4.0"
 dependencies = [
  "ferroui-base",
  "ferroui-controls",
@@ -746,7 +746,7 @@ dependencies = [
 
 [[package]]
 name = "ferroui-headless"
-version = "0.4.0-preview.1"
+version = "0.4.0"
 dependencies = [
  "ferroui-base",
  "ferroui-controls",
@@ -755,14 +755,14 @@ dependencies = [
 
 [[package]]
 name = "ferroui-markup"
-version = "0.4.0-preview.1"
+version = "0.4.0"
 dependencies = [
  "ferroui-base",
 ]
 
 [[package]]
 name = "ferroui-markup-xaml"
-version = "0.4.0-preview.1"
+version = "0.4.0"
 dependencies = [
  "ferroui-base",
  "ferroui-build-scan",
@@ -772,7 +772,7 @@ dependencies = [
 
 [[package]]
 name = "ferroui-markup-xaml-loader"
-version = "0.4.0-preview.1"
+version = "0.4.0"
 dependencies = [
  "ferroui-base",
  "ferroui-build-scan",
@@ -783,18 +783,18 @@ dependencies = [
 
 [[package]]
 name = "ferroui-metal"
-version = "0.4.0-preview.1"
+version = "0.4.0"
 dependencies = [
  "ferroui-base",
 ]
 
 [[package]]
 name = "ferroui-microcom"
-version = "0.4.0-preview.1"
+version = "0.4.0"
 
 [[package]]
 name = "ferroui-native"
-version = "0.4.0-preview.1"
+version = "0.4.0"
 dependencies = [
  "cc",
  "ferroui-base",
@@ -808,7 +808,7 @@ dependencies = [
 
 [[package]]
 name = "ferroui-opengl"
-version = "0.4.0-preview.1"
+version = "0.4.0"
 dependencies = [
  "ferroui-base",
  "ferroui-build-scan",
@@ -819,18 +819,18 @@ dependencies = [
 
 [[package]]
 name = "ferroui-remote-protocol"
-version = "0.4.0-preview.1"
+version = "0.4.0"
 
 [[package]]
 name = "ferroui-system"
-version = "0.4.0-preview.1"
+version = "0.4.0"
 dependencies = [
  "smallvec",
 ]
 
 [[package]]
 name = "ferroui-themes-fluent"
-version = "0.4.0-preview.1"
+version = "0.4.0"
 dependencies = [
  "ferroui-base",
  "ferroui-build",
@@ -841,7 +841,7 @@ dependencies = [
 
 [[package]]
 name = "ferroui-vello"
-version = "0.4.0-preview.1"
+version = "0.4.0"
 dependencies = [
  "ferroui-base",
  "ferroui-controls",
@@ -872,7 +872,7 @@ dependencies = [
 
 [[package]]
 name = "ferroui-vulkan"
-version = "0.4.0-preview.1"
+version = "0.4.0"
 dependencies = [
  "ash",
  "ferroui-base",
@@ -880,7 +880,7 @@ dependencies = [
 
 [[package]]
 name = "ferroui-win32"
-version = "0.4.0-preview.1"
+version = "0.4.0"
 dependencies = [
  "bitflags",
  "ferroui-base",
@@ -894,7 +894,7 @@ dependencies = [
 
 [[package]]
 name = "ferroui-x11"
-version = "0.4.0-preview.1"
+version = "0.4.0"
 dependencies = [
  "bitflags",
  "ferroui-base",
@@ -1515,7 +1515,7 @@ dependencies = [
 
 [[package]]
 name = "microcom-codegen"
-version = "0.4.0-preview.1"
+version = "0.4.0"
 
 [[package]]
 name = "miniz_oxide"
@@ -3154,7 +3154,7 @@ dependencies = [
 
 [[package]]
 name = "xamlx"
-version = "0.4.0-preview.1"
+version = "0.4.0"
 dependencies = [
  "roxmltree 0.20.0",
 ]

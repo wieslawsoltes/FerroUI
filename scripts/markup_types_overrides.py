@@ -350,6 +350,13 @@ CONTROLS = {
             "DependencyResolver: Option<Rc<dyn IFerroDependencyResolver>> { set: Popup::set_dependency_resolver }",
         ],
     },
+    'Window': {
+        # The public method of the managed original without parameters: a binding path that ends
+        # in it is a command (`{Binding $parent[Window].Close}`, the menu of the developer tools).
+        'methods': [
+            "fn Close() => |window: &Ref<Window>| window.close()",
+        ],
+    },
     'WindowBase': {
         # The public methods of the managed original without parameters, in the order of their
         # declaration: a binding path that ends in one is a command
@@ -361,14 +368,20 @@ CONTROLS = {
         ],
     },
     'TextBlock': {
-        # A FerroUI addition (docs/porting/DEVIATIONS.md, Text block): an attached property that
-        # a text block also exposes as a property of its own, as `LineHeight` and the other
+        # FerroUI additions (docs/porting/DEVIATIONS.md, Text block): attached properties that
+        # a text block also exposes as properties of its own, as `LineHeight` and the other
         # attached text properties of the managed original.
         'properties': [
             """LayoutRoundingPlacement: TextLayoutRoundingPlacement {
                 get: |this: &Ref<TextBlock>| this.get_value(TextBlock::layout_rounding_placement_property()),
                 set: |this: &Ref<TextBlock>, value: TextLayoutRoundingPlacement| {
                     this.set_value(TextBlock::layout_rounding_placement_property(), value)
+                }
+            }""",
+            """TextLineBounds: TextLineBounds {
+                get: |this: &Ref<TextBlock>| this.get_value(TextBlock::text_line_bounds_property()),
+                set: |this: &Ref<TextBlock>, value: TextLineBounds| {
+                    this.set_value(TextBlock::text_line_bounds_property(), value)
                 }
             }""",
         ],

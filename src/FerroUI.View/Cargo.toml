@@ -1,0 +1,76 @@
+[package]
+name = "ferroui-view"
+description = "A declarative Rust API for FerroUI user interfaces without XAML: element builders generated for every control, an rsx! macro, signals that properties follow, components that run again with hooks and a reconciler"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+homepage.workspace = true
+readme.workspace = true
+keywords.workspace = true
+categories.workspace = true
+
+# The build script exports the type model of the crate (`build.rs`), so that compiled XAML names
+# `ComponentHost` (`DEP_FERROUI_VIEW_XAML_XAMLMETA`; docs/porting/xaml.md, 9.5.13 and 9.6.3).
+build = "build.rs"
+links = "ferroui_view_xaml"
+# Unit tests live in `tests/` as a module tree of the library (`mod tests;`), not as integration test
+# targets.
+autotests = false
+
+[lib]
+path = "lib.rs"
+
+# The counter of the README.
+[[example]]
+name = "counter"
+path = "examples/counter.rs"
+required-features = ["desktop"]
+
+[features]
+default = []
+# `launch`, `open_window`: an application on the platform of the operating system with the Fluent theme.
+desktop = ["dep:ferroui-desktop", "dep:ferroui-themes-fluent"]
+# XAML in a component (`load_xaml`, `use_xaml`): the XAML runtime library and its run-time loader.
+xaml = ["dep:ferroui-markup-xaml", "dep:ferroui-markup-xaml-loader"]
+# The builders of the other crates of controls (`scripts/generate_view_builders.py`, GROUPS).
+treedatagrid = ["dep:ferroui-controls-treedatagrid"]
+color-picker = ["dep:ferroui-controls-color-picker"]
+dialogs = ["dep:ferroui-dialogs"]
+reactiveui = ["dep:ferroui-reactiveui-controls", "dep:ferroui-reactiveui"]
+# Hot reload of the literals of `rsx!` (`hot.rs`): the sources are read again with `proc-macro2`.
+hot-reload = ["dep:proc-macro2", "dep:syn"]
+
+[dependencies]
+ferroui-base = { workspace = true }
+ferroui-controls = { workspace = true }
+# The executor of the thread, which runs the futures of `use_future` (`async_data.rs`).
+ferroui-system = { workspace = true }
+# The parser of selectors of `style("Button.accent")`.
+ferroui-markup = { workspace = true }
+ferroui-view-macros = { workspace = true }
+ferroui-desktop = { workspace = true, optional = true }
+ferroui-themes-fluent = { workspace = true, optional = true }
+ferroui-markup-xaml = { workspace = true, optional = true }
+ferroui-markup-xaml-loader = { workspace = true, optional = true, features = ["runtime"] }
+ferroui-controls-treedatagrid = { workspace = true, optional = true }
+ferroui-controls-color-picker = { workspace = true, optional = true }
+ferroui-dialogs = { workspace = true, optional = true }
+ferroui-reactiveui-controls = { workspace = true, optional = true }
+ferroui-reactiveui = { workspace = true, optional = true }
+proc-macro2 = { version = "1", optional = true, features = ["span-locations"] }
+syn = { version = "2", optional = true, features = ["full", "parsing"] }
+
+[build-dependencies]
+# The source scanner and the export of the type model.
+ferroui-build-scan = { workspace = true }
+
+[dev-dependencies]
+ferroui-controls = { workspace = true, features = ["testing"] }
+ferroui-markup-xaml = { workspace = true }
+ferroui-markup-xaml-loader = { workspace = true, features = ["runtime"] }
+
+# The group of the crate in the table of the README (docs/release.md).
+[package.metadata.release]
+group = "controls"

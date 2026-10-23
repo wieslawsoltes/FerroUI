@@ -100,3 +100,16 @@ fn throws_if_is_type_not_found() {
 
     assert!(matches!(target.parse(":is(NotFound)"), Err(SelectorParserError::InvalidOperation(_))));
 }
+
+#[test]
+fn parses_nesting_selectors() {
+    setup();
+    let target = SelectorParser::new(|_ns, type_| (type_ == "Button").then_some(Control::TYPE));
+    for (text, expected) in [("^", "^"), ("^.selected", "^.selected"), ("^:pointerover", "^:pointerover")] {
+        let result = target.parse(text);
+        let selector = result.unwrap_or_else(|error| panic!("{text}: {error}")).expect("a selector");
+        assert_eq!(selector.to_string(), expected);
+    }
+    let child = target.parse("^:pointerover > Button").expect("parses").expect("a selector");
+    assert!(child.to_string().starts_with("^:pointerover"), "{child}");
+}

@@ -42,7 +42,7 @@ use crate::compiler_extensions::transformers::{
 };
 use crate::compiler_extensions::{
     BindingSetter, BindingWithPrioritySetter, SetValueWithPrioritySetter, UnsetValueSetter, XamlIlBindingPathElementNode, XamlIlBindingPathNode,
-    XamlIlClrIndexerPathElementNode, XamlIlClrMethodAsCommandPathElementNode, XamlIlFerroPropertyFieldNode,
+    XamlIlClrIndexerPathElementNode, XamlIlClrMethodAsCommandPathElementNode, XamlIlFerroClassProperty, XamlIlFerroPropertyFieldNode,
     XamlIlFerroPropertyHelper, XamlIlFerroPropertyNode, XamlIlProvideValueTargetProperty,
 };
 use crate::back_end::{context_definition, numeric_constant, plan_setters, FRAMEWORK_CONTEXT};
@@ -677,6 +677,10 @@ impl<'a> Emitter<'a> {
         }
         if let Some(n) = node.cast::<XamlIlFerroPropertyFieldNode>() {
             return self.property_field(node, n.field());
+        }
+        if let Some(n) = node.cast::<XamlIlFerroClassProperty>() {
+            // `StyledElementExtensions.GetClassProperty(className)`: the property of the class.
+            return Ok(self.exact(Known::Property, format!("rt::class_property({})", rust_string_literal(n.class_name()))));
         }
         if let Some(n) = node.cast::<XamlTypeExtensionNode>() {
             // `typeof(T)`: the type, written where it goes.

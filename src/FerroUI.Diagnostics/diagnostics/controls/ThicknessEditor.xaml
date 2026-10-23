@@ -1,0 +1,113 @@
+﻿<Styles xmlns="https://github.com/ferroui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:controls="using:FerroUI.Diagnostics.Controls"
+        x:ClassModifier="internal">
+
+    <Styles.Resources>
+        <!-- Deviation (DEVIATIONS.md, Developer tools): the boxes of the layout in the design of
+             the WinUI 3 theme: rounded, with the stroke of a control of the theme (upstream: square
+             boxes with a #666666 border). -->
+    </Styles.Resources>
+
+    <Style Selector="controls|ThicknessEditor">
+        <Setter Property="HorizontalContentAlignment" Value="Center" />
+        <Setter Property="VerticalContentAlignment" Value="Center" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="BorderBrush" Value="{DynamicResource ControlStrokeColorSecondaryBrush}" />
+        <Setter Property="CornerRadius" Value="6" />
+        <Setter Property="Template">
+            <ControlTemplate>
+                <Panel>
+                    <Border x:Name="PART_Background"
+                            CornerRadius="{TemplateBinding CornerRadius}"
+                            Classes.no-content-pointerover="{Binding !#PART_ContentPresenter.IsPointerOver}" />
+                    <Border
+                        x:Name="PART_Border"
+                        Classes.no-content-pointerover="{Binding !#PART_ContentPresenter.IsPointerOver}"
+                        CornerRadius="{TemplateBinding CornerRadius}"
+                        BorderBrush="{TemplateBinding BorderBrush}"
+                        BorderThickness="{TemplateBinding BorderThickness}">
+                        <Grid RowDefinitions="Auto,*,Auto" ColumnDefinitions="Auto,*,Auto">
+                            <Grid.Styles>
+                                <!-- Deviation (DEVIATIONS.md, Developer tools): MinWidth, MinHeight
+                                     and Padding: the boxes of the sides, without the minimum size
+                                     and the padding of a WinUI 3 text box. -->
+                                <Style Selector="TextBox.thickness-edit">
+                                    <Setter Property="MinWidth" Value="0" />
+                                    <Setter Property="MinHeight" Value="0" />
+                                    <Setter Property="Padding" Value="2,0" />
+                                    <Setter Property="FontSize" Value="12" />
+                                    <Setter Property="Background" Value="Transparent" />
+                                    <Setter Property="BorderThickness" Value="0" />
+                                    <Setter Property="Margin" Value="2" />
+                                    <Setter Property="HorizontalAlignment" Value="Stretch" />
+                                    <Setter Property="VerticalAlignment" Value="Stretch" />
+                                    <Setter Property="HorizontalContentAlignment" Value="Center" />
+                                    <Setter Property="VerticalContentAlignment" Value="Center" />
+                                    <Setter Property="(ScrollViewer.HorizontalScrollBarVisibility)"
+                                            Value="Disabled" />
+                                    <Setter Property="(ScrollViewer.VerticalScrollBarVisibility)" Value="Disabled" />
+                                    <Setter Property="IsVisible"
+                                            Value="{Binding $parent[controls:ThicknessEditor].IsPresent}" />
+                                    <!-- The numbers in the colour of the editor (black on the light
+                                         boxes of the layout), not in the text colour of the theme,
+                                         which is white in the dark variant. -->
+                                    <Setter Property="Foreground"
+                                            Value="{Binding $parent[controls:ThicknessEditor].Foreground}" />
+                                </Style>
+                                <Style Selector="TextBox.thickness-edit /template/ ScrollViewer#PART_ScrollViewer">
+                                    <Setter Property="Foreground"
+                                            Value="{Binding $parent[controls:ThicknessEditor].Foreground}" />
+                                </Style>
+                                <Style Selector="TextBox.thickness-edit /template/ Border#BorderElement">
+                                    <Setter Property="Background" Value="Transparent" />
+                                    <Setter Property="BorderBrush" Value="Transparent" />
+                                </Style>
+                            </Grid.Styles>
+                            <TextBlock IsVisible="{TemplateBinding IsPresent}" Margin="6,2,0,0"
+                                       Text="{TemplateBinding Header}" Grid.Row="0" Grid.Column="0"
+                                       Grid.ColumnSpan="2" FontSize="11"
+                                       Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+                            <TextBox Grid.Row="1" Grid.Column="0"
+                                     Text="{Binding Left, RelativeSource={RelativeSource TemplatedParent}}"
+                                     Classes="thickness-edit" />
+                            <TextBox x:Name="Right" Grid.Row="0" Grid.Column="1"
+                                     Text="{Binding Top, RelativeSource={RelativeSource TemplatedParent}}"
+                                     Classes="thickness-edit" />
+                            <TextBox Grid.Row="1" Grid.Column="2"
+                                     Text="{Binding Right, RelativeSource={RelativeSource TemplatedParent}}"
+                                     Classes="thickness-edit" />
+                            <TextBox Grid.Row="2" Grid.Column="1"
+                                     Text="{Binding Bottom, RelativeSource={RelativeSource TemplatedParent}}"
+                                     Classes="thickness-edit" />
+                            <ContentPresenter Grid.Row="1" Grid.Column="1"
+                                              Name="PART_ContentPresenter"
+                                              ContentTemplate="{TemplateBinding ContentTemplate}"
+                                              Content="{TemplateBinding Content}"
+                                              Padding="{TemplateBinding Padding}"
+                                              VerticalContentAlignment="{TemplateBinding VerticalContentAlignment}"
+                                              HorizontalContentAlignment="{TemplateBinding HorizontalContentAlignment}" />
+                        </Grid>
+                    </Border>
+                </Panel>
+
+            </ControlTemplate>
+        </Setter>
+    </Style>
+
+    <Style Selector="controls|ThicknessEditor[IsPresent=False]">
+        <Setter Property="BorderThickness" Value="0" />
+    </Style>
+
+    <Style Selector="controls|ThicknessEditor /template/ Border#PART_Background">
+        <Setter Property="Background" Value="{Binding Background, RelativeSource={RelativeSource TemplatedParent}}" />
+    </Style>
+
+    <Style Selector="controls|ThicknessEditor:pointerover /template/ Border#PART_Background.no-content-pointerover">
+        <Setter Property="Background" Value="{Binding Highlight, RelativeSource={RelativeSource TemplatedParent}}" />
+    </Style>
+
+    <Style Selector="controls|ThicknessEditor:pointerover /template/ Border#PART_Border.no-content-pointerover">
+        <Setter Property="BorderBrush" Value="{DynamicResource AccentFillColorDefaultBrush}" />
+    </Style>
+</Styles>

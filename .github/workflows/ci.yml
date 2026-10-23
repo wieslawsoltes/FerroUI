@@ -6,6 +6,11 @@ on:
     # A change of the documentation alone builds and tests nothing.
     paths-ignore: ['docs/**', '**/*.md']
   pull_request:
+    # `edited` too: a pull request of a stack is retargeted to main when the one below it merges
+    # (docs/stacked-pull-requests.md), and the checks run again against the new base. An edit
+    # that leaves the base alone (the title, the description) runs nothing: every job starts with
+    # the condition `github.event.action != 'edited' || github.event.changes.base != null`.
+    types: [opened, synchronize, reopened, edited]
     paths-ignore: ['docs/**', '**/*.md']
   workflow_dispatch:
     inputs:
@@ -22,7 +27,9 @@ on:
         default: ''
 
 concurrency:
-  group: ci-${{ github.ref }}
+  # An edit that leaves the base alone gets a group of its own, so that it does not cancel the
+  # run of the pull request that is in progress.
+  group: ci-${{ github.ref }}-${{ (github.event.action == 'edited' && github.event.changes.base == null) && github.run_id || 'run' }}
   cancel-in-progress: true
 
 permissions:
@@ -35,6 +42,7 @@ env:
 
 jobs:
   conventions:
+    if: (github.event.action != 'edited' || github.event.changes.base != null)
     name: Source conventions
     runs-on: ubuntu-latest
     steps:
@@ -50,6 +58,10 @@ jobs:
       # is lost at the next regeneration, so it has to be made in the script.
       - name: Generated composition code is up to date
         run: python3 scripts/generate_composition.py --check
+      # The element builders of ferroui-view are written by a script from the sources of
+      # FerroUI.Base and FerroUI.Controls (docs/declarative-ui.md, section 4).
+      - name: Generated view builders are up to date
+        run: python3 scripts/generate_view_builders.py --check
       # Thread-local variables are declared with ferroui_base::ferro_thread_local!, which on Android
       # is a slot of one table per thread: a thread_local! there takes one of the 128 keys of the C
       # library (docs/porting/android-platform.md, section 5.1). The allow-list is in the script.
@@ -62,6 +74,7 @@ jobs:
   # README is current. Nothing is compiled and nothing is published: about two minutes, most of it
   # the toolchain and the index.
   packaging:
+    if: (github.event.action != 'edited' || github.event.changes.base != null)
     name: Packages of the published crates
     runs-on: ubuntu-latest
     timeout-minutes: 20
@@ -87,7 +100,7 @@ jobs:
   #   still reports its message and location, a backtrace has no line numbers.
   macos:
     name: Build and test (macOS)
-    if: github.event_name != 'push'
+    if: (github.event.action != 'edited' || github.event.changes.base != null) && (github.event_name != 'push')
     runs-on: macos-15
     timeout-minutes: 180
     env:
@@ -129,7 +142,7 @@ jobs:
   #   binaries are published stays informative: it gates them.
   windows:
     name: Build, test and smoke run (Windows platform backend)
-    if: github.event_name != 'push'
+    if: (github.event.action != 'edited' || github.event.changes.base != null) && (github.event_name != 'push')
     runs-on: windows-latest
     timeout-minutes: 120
     env:
@@ -512,7 +525,7 @@ jobs:
   # for the target and runs there. Informative as a whole until its first green run.
   windows-arm64:
     name: Build, test and smoke run (Windows platform backend, ARM64; informative)
-    if: github.event_name != 'push'
+    if: (github.event.action != 'edited' || github.event.changes.base != null) && (github.event_name != 'push')
     runs-on: windows-11-arm
     continue-on-error: true
     timeout-minutes: 120
@@ -632,6 +645,7 @@ jobs:
           done
 
   browser:
+    if: (github.event.action != 'edited' || github.event.changes.base != null)
     name: Check (browser, wasm32-unknown-emscripten)
     runs-on: ubuntu-latest
     timeout-minutes: 150
@@ -673,6 +687,9 @@ jobs:
           -p ferroui-browser --features vello --examples
           && cargo check --locked --target wasm32-unknown-emscripten
           -p control-catalog-browser --features vello
+      # The JavaScript bridge of the CDP developer tools (docs/devtools-cdp.md), also behind a feature.
+      - name: Check the catalog host with the CDP bridge
+        run: cargo check --locked --target wasm32-unknown-emscripten -p control-catalog-browser --features cdp
       - name: Build the themed view site
         run: scripts/build-browser.sh themed_view
       - name: Behaviour tests in headless Chrome
@@ -713,6 +730,7 @@ jobs:
   # toolchain a second time (from caches) and nothing else twice: the sites with both modules are
   # composed, by the job below, from the sites the two jobs built.
   browser-threads:
+    if: (github.event.action != 'edited' || github.event.changes.base != null)
     name: Check (browser with threads, wasm32-unknown-emscripten)
     runs-on: ubuntu-latest
     timeout-minutes: 150
@@ -769,6 +787,7 @@ jobs:
   # above, which also checks that the files the two builds share are identical, and tested: nothing
   # is compiled in this job.
   browser-site:
+    if: (github.event.action != 'edited' || github.event.changes.base != null)
     name: Check (browser, the site with both modules)
     needs: [browser, browser-threads]
     runs-on: ubuntu-latest
@@ -806,7 +825,7 @@ jobs:
   # mode in a simulator is run with scripts/ios/sim-smoke.sh on the development machine.
   ios:
     name: Build and test (iOS, simulator target)
-    if: github.event_name != 'push'
+    if: (github.event.action != 'edited' || github.event.changes.base != null) && (github.event_name != 'push')
     runs-on: macos-15
     timeout-minutes: 90
     env:
@@ -854,6 +873,7 @@ jobs:
   # software rasterizer, with frames read back), under a window manager, and with two monitors
   # (xrandr --setmonitor). No compositing manager: that is not covered here.
   x11:
+    if: (github.event.action != 'edited' || github.event.changes.base != null)
     name: Build and test (Linux, X11 under Xvfb)
     runs-on: ubuntu-latest
     timeout-minutes: 90
@@ -1125,6 +1145,7 @@ jobs:
   # EGL (Mesa's software rasterizer), on an output of scale 1 and of scale 2. Not covered: a
   # desktop compositor (Mutter, KWin), a hardware GPU, touch, a compositor restart.
   wayland:
+    if: (github.event.action != 'edited' || github.event.changes.base != null)
     name: Build and test (Linux, Wayland under headless sway)
     runs-on: ubuntu-latest
     timeout-minutes: 90
@@ -1317,6 +1338,7 @@ jobs:
   # workflow (docs/porting/wayland-platform.md, section 12.3). The compositor does not run as
   # root: the run is made by a user of the container.
   wayland-next:
+    if: (github.event.action != 'edited' || github.event.changes.base != null)
     name: Informational (Linux, Wayland under the sway of Debian 13)
     runs-on: ubuntu-latest
     container: debian:trixie
@@ -1376,6 +1398,7 @@ jobs:
   # (uinput). The step that looks for them says what the kernel of the runner has; what is missing is
   # skipped with a reason. A real board with a panel and a touch screen is not covered by any of this.
   linuxfb:
+    if: (github.event.action != 'edited' || github.event.changes.base != null)
     name: Build and test (Linux framebuffer, virtual devices)
     runs-on: ubuntu-latest
     timeout-minutes: 90
@@ -1420,7 +1443,10 @@ jobs:
       # The catalog on the virtual framebuffer: the content of the device per page, as pictures
       # (the memory of the framebuffer device, read from its node).
       - name: Build the ControlCatalog
-        run: cargo build --locked -p control-catalog-desktop
+        run: cargo build --locked -p control-catalog-desktop --features mcp,cdp
+      - name: Inspect and drive the headless ControlCatalog over MCP
+        timeout-minutes: 5
+        run: python3 scripts/test-mcp.py
       - name: The ControlCatalog on the virtual framebuffer
         run: |
           . "$RUNNER_TEMP/linuxfb-devices"
@@ -1458,6 +1484,7 @@ jobs:
   # and the package of the smoke application built without Gradle. Nothing runs on a device here:
   # the emulator runs are made on the development machine (scripts/android/emu-smoke.sh).
   android:
+    if: (github.event.action != 'edited' || github.event.changes.base != null)
     name: Build and package (Android, arm64)
     runs-on: ubuntu-latest
     timeout-minutes: 90

@@ -70,6 +70,9 @@ fn letter_spacing_property_uses_text_element_definition() {
 fn calling_measure_should_update_text_layout() {
     let _scope = test_scope();
     let text_block = text_block("Hello World");
+    // Wrapped: a layout that neither wraps nor trims is kept for a new width
+    // (`a_layout_that_does_not_depend_on_the_width_is_kept`).
+    text_block.set_text_wrapping(TextWrapping::Wrap);
 
     let constraint = text_block.constraint();
     assert!(constraint.width.is_nan());
@@ -169,6 +172,9 @@ fn reattaching_should_rebuild_text_layout() {
 fn calling_arrange_with_different_size_should_update_constraint_and_text_layout() {
     let _scope = test_scope();
     let text_block = text_block("Hello World");
+    // Wrapped: a layout that neither wraps nor trims is kept for a new width
+    // (`a_layout_that_does_not_depend_on_the_width_is_kept`).
+    text_block.set_text_wrapping(TextWrapping::Wrap);
 
     text_block.measure(infinity());
 
@@ -228,6 +234,83 @@ fn arranging_at_the_measured_constraint_should_not_recreate_the_text_layout() {
 
     assert!(!Rc::ptr_eq(&text_layout, &text_block.text_layout()));
     assert_eq!(text_block.text_layout().text_lines()[0].start(), (200.0 - 11.0 * 6.0) / 2.0);
+}
+
+/// Not in the reference tests: the lines of a left aligned layout that
+/// neither wraps nor trims do not depend on its width, so a new width keeps
+/// it (DEVIATIONS.md, Text block).
+#[test]
+fn a_layout_that_does_not_depend_on_the_width_is_kept() {
+    let _scope = test_scope();
+    let text_block = text_block("Hello World");
+
+    text_block.measure(infinity());
+
+    let text_layout = text_block.text_layout();
+    let width = text_layout.width_including_trailing_whitespace();
+
+    text_block.arrange(Rect::new(0.0, 0.0, width + 40.0, 100.0));
+    assert!(Rc::ptr_eq(&text_layout, &text_block.text_layout()));
+    assert_eq!(text_block.constraint(), Size::new(width + 40.0, 100.0));
+
+    // Narrower than the text: a line that does not wrap is still the whole
+    // paragraph.
+    text_block.measure(Size::new(width / 2.0, 100.0));
+    assert!(Rc::ptr_eq(&text_layout, &text_block.text_layout()));
+
+    // A height below the one of the layout may drop lines.
+    text_block.measure(Size::new(width, text_layout.height() / 2.0));
+    assert!(!Rc::ptr_eq(&text_layout, &text_block.text_layout()));
+}
+
+/// Not in the reference tests: a layout that depends on its width is created
+/// again for a new one.
+#[test]
+fn a_layout_that_depends_on_the_width_is_created_again() {
+    let _scope = test_scope();
+
+    for configure in [
+        (|text_block: &TextBlock| text_block.set_text_wrapping(TextWrapping::Wrap)) as fn(&TextBlock),
+        |text_block| text_block.set_text_trimming(<dyn TextTrimming>::character_ellipsis()),
+        |text_block| text_block.set_text_alignment(TextAlignment::Center),
+    ] {
+        let text_block = text_block("Hello World");
+        configure(&text_block);
+
+        text_block.measure(Size::new(200.0, 100.0));
+        text_block.arrange(Rect::new(0.0, 0.0, 200.0, 100.0));
+
+        let text_layout = text_block.text_layout();
+
+        text_block.measure(Size::new(150.0, 100.0));
+        text_block.arrange(Rect::new(0.0, 0.0, 150.0, 100.0));
+
+        assert!(!Rc::ptr_eq(&text_layout, &text_block.text_layout()));
+    }
+}
+
+/// Not in the reference tests: a layout created for a height that dropped
+/// lines is not kept for a taller one.
+#[test]
+fn a_layout_with_dropped_lines_is_not_kept_for_a_taller_constraint() {
+    let _scope = test_scope();
+    let text_block = text_block("One\nTwo\nThree");
+
+    text_block.measure(infinity());
+    let line_height = text_block.text_layout().height() / 3.0;
+
+    text_block.measure(Size::new(200.0, line_height * 1.5));
+    let text_layout = text_block.text_layout();
+    assert_eq!(text_layout.text_lines().len(), 1);
+
+    text_block.measure(Size::new(200.0, line_height * 3.5));
+    assert!(!Rc::ptr_eq(&text_layout, &text_block.text_layout()));
+    assert_eq!(text_block.text_layout().text_lines().len(), 3);
+
+    // Lower again, down to the height the lines kept need.
+    let text_layout = text_block.text_layout();
+    text_block.measure(Size::new(200.0, line_height * 3.2));
+    assert!(Rc::ptr_eq(&text_layout, &text_block.text_layout()));
 }
 
 #[test]

@@ -178,6 +178,9 @@
   </ControlTheme>
 
   <ControlTheme x:Key="DefaultComboBoxStyle" TargetType="ComboBox">
+    <!-- The defaults of a WinUI 3 control, which its style leaves unset and its template binds
+         (FerroUI's defaults are Stretch). Deviation (winui-theme/DEVIATIONS.md, G-27). -->
+    <Setter Property="VerticalContentAlignment" Value="Center" />
     <Setter Property="Padding" Value="{DynamicResource ComboBoxPadding}" />
     <Setter Property="MaxDropDownHeight" Value="504" />
     <Setter Property="Foreground" Value="{DynamicResource ComboBoxForeground}" />

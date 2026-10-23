@@ -1,0 +1,38 @@
+[package]
+name = "seven-guis-tests"
+description = "The scenarios of the 7GUIs tasks, run on every port: one test binary for the fourteen crates"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+publish = false
+
+autotests = false
+
+[lib]
+path = "lib.rs"
+
+[dependencies]
+seven-guis-model = { path = "../Model", features = ["scenarios"] }
+ferroui-view = { workspace = true }
+seven-guis-counter-builders = { path = "../Builders/Counter" }
+seven-guis-counter-macros = { path = "../Macros/Counter" }
+seven-guis-temperature-builders = { path = "../Builders/Temperature" }
+seven-guis-temperature-macros = { path = "../Macros/Temperature" }
+seven-guis-flight-booker-builders = { path = "../Builders/FlightBooker" }
+seven-guis-flight-booker-macros = { path = "../Macros/FlightBooker" }
+seven-guis-timer-builders = { path = "../Builders/Timer" }
+seven-guis-timer-macros = { path = "../Macros/Timer" }
+seven-guis-crud-builders = { path = "../Builders/Crud" }
+seven-guis-crud-macros = { path = "../Macros/Crud" }
+seven-guis-circle-drawer-builders = { path = "../Builders/CircleDrawer" }
+seven-guis-circle-drawer-macros = { path = "../Macros/CircleDrawer" }
+seven-guis-cells-builders = { path = "../Builders/Cells" }
+seven-guis-cells-macros = { path = "../Macros/Cells" }
+seven-guis-counter-hooks = { path = "../Hooks/Counter" }
+seven-guis-temperature-hooks = { path = "../Hooks/Temperature" }
+seven-guis-flight-booker-hooks = { path = "../Hooks/FlightBooker" }
+seven-guis-timer-hooks = { path = "../Hooks/Timer" }
+seven-guis-crud-hooks = { path = "../Hooks/Crud" }
+seven-guis-circle-drawer-hooks = { path = "../Hooks/CircleDrawer" }
+seven-guis-cells-hooks = { path = "../Hooks/Cells" }

@@ -1,0 +1,11 @@
+{
+  "//": "dotnet/runtime v10.0.13, latest stable on 2026-10-22. One Rust crate holds both DI packages.",
+  "preprocessorSymbols": ["NET", "NETCOREAPP", "NET10_0", "NET10_0_OR_GREATER", "NET9_0_OR_GREATER", "NET8_0_OR_GREATER", "NET7_0_OR_GREATER", "NET6_0_OR_GREATER"],
+  "excludeDirs": ["bin", "obj"],
+  "excludeFiles": ["*.g.cs"],
+  "projects": [
+    { "path": "src/libraries/Microsoft.Extensions.DependencyInjection.Abstractions/src", "name": "Microsoft.Extensions.DependencyInjection.Abstractions", "detail": "full", "rust": "src/FerroUI.DependencyInjection", "crate": "ferroui-dependency-injection", "phase": "251 - DI", "priority": "P1" },
+    { "path": "src/libraries/Microsoft.Extensions.DependencyInjection/src", "name": "Microsoft.Extensions.DependencyInjection", "detail": "full", "rust": "src/FerroUI.DependencyInjection", "crate": "ferroui-dependency-injection", "phase": "251 - DI", "priority": "P1" }
+  ],
+  "expanded": []
+}

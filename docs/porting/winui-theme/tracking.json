@@ -90241,7 +90241,7 @@
    "winui": "Button: DefaultButtonStyle, AccentButtonStyle, SubtleButtonStyle (Button_themeresources.xaml).",
    "status": "ported",
    "deviations": 8,
-   "date": "2026-10-16"
+   "date": "2026-10-22"
   },
   {
    "document": "ButtonSpinner.xaml",
@@ -90285,7 +90285,7 @@
    "winui": "CalendarDatePicker: DefaultCalendarDatePicker (CalendarDatePicker_themeresources.xaml).",
    "status": "ported",
    "deviations": 11,
-   "date": "2026-10-17"
+   "date": "2026-10-22"
   },
   {
    "document": "CalendarDayButton.xaml",
@@ -90307,7 +90307,7 @@
    "winui": "The header, navigation buttons and views of the CalendarView template (DefaultCalendarViewStyle).",
    "status": "ported",
    "deviations": 16,
-   "date": "2026-10-17"
+   "date": "2026-10-22"
   },
   {
    "document": "Carousel.xaml",
@@ -90351,7 +90351,7 @@
    "winui": "ComboBox: DefaultComboBoxStyle (ComboBox_themeresources.xaml).",
    "status": "ported",
    "deviations": 16,
-   "date": "2026-10-17"
+   "date": "2026-10-22"
   },
   {
    "document": "ComboBoxItem.xaml",
@@ -90362,7 +90362,7 @@
    "winui": "ComboBoxItem: DefaultComboBoxItemStyle, ComboBoxItemPill (ComboBox_themeresources.xaml).",
    "status": "ported",
    "deviations": 7,
-   "date": "2026-10-17"
+   "date": "2026-10-22"
   },
   {
    "document": "CommandBar.xaml",
@@ -90421,7 +90421,7 @@
    "winui": "DatePicker: DefaultDatePickerStyle; DatePickerFlyoutPresenter: DefaultDatePickerFlyoutPresenterStyle (DatePicker_themeresources.xaml).",
    "status": "ported",
    "deviations": 15,
-   "date": "2026-10-17"
+   "date": "2026-10-22"
   },
   {
    "document": "DateTimePickerShared.xaml",
@@ -90430,7 +90430,7 @@
    "winui": "LoopingSelector: DefaultLoopingSelectorStyle, LoopingSelectorItem; DateTimePickerFlyoutButtonStyle, DateTimePickerFlyoutLoopingSelectorNavigationButtonStyle (DateTimePickerFlyout_themeresources.xaml).",
    "status": "ported",
    "deviations": 10,
-   "date": "2026-10-16"
+   "date": "2026-10-22"
   },
   {
    "document": "DrawerPage.xaml",
@@ -90452,7 +90452,7 @@
    "winui": "DropDownButton: DefaultDropDownButtonStyle (DropDownButton.xaml, DropDownButton_themeresources.xaml).",
    "status": "ported",
    "deviations": 4,
-   "date": "2026-10-16"
+   "date": "2026-10-22"
   },
   {
    "document": "EmbeddableControlRoot.xaml",
@@ -90474,7 +90474,7 @@
    "winui": "Expander: DefaultExpanderStyle (Expander.xaml), ExpanderHeaderDownStyle, ExpanderHeaderUpStyle (Expander_themeresources.xaml).",
    "status": "ported",
    "deviations": 8,
-   "date": "2026-10-17"
+   "date": "2026-10-22"
   },
   {
    "document": "FlyoutPresenter.xaml",
@@ -90529,7 +90529,7 @@
    "winui": "HyperlinkButton: DefaultHyperlinkButtonStyle (HyperlinkButton_themeresources.xaml).",
    "status": "ported",
    "deviations": 3,
-   "date": "2026-10-16"
+   "date": "2026-10-22"
   },
   {
    "document": "ItemsControl.xaml",
@@ -90573,7 +90573,7 @@
    "winui": "ListBoxItem: DefaultListBoxItemStyle (ListBox_themeresources.xaml).",
    "status": "ported",
    "deviations": 11,
-   "date": "2026-10-17"
+   "date": "2026-10-22"
   },
   {
    "document": "ManagedFileChooser.xaml",
@@ -90759,7 +90759,7 @@
    "winui": "RepeatButton: DefaultRepeatButtonStyle (RepeatButton_themeresources.xaml).",
    "status": "ported",
    "deviations": 1,
-   "date": "2026-10-16"
+   "date": "2026-10-22"
   },
   {
    "document": "ScrollBar.xaml",
@@ -90825,7 +90825,7 @@
    "winui": "SplitButton: SplitButtonStyle (SplitButton.xaml), SplitButtonCommandBarStyle (SplitButton_themeresources.xaml); ToggleSplitButton.",
    "status": "ported",
    "deviations": 15,
-   "date": "2026-10-16"
+   "date": "2026-10-22"
   },
   {
    "document": "SplitView.xaml",
@@ -90880,7 +90880,7 @@
    "winui": "SelectorBarItem: DefaultSelectorBarItemStyle, SelectorBarItemPill (SelectorBar.xaml, SelectorBar_themeresources.xaml).",
    "status": "ported",
    "deviations": 8,
-   "date": "2026-10-17"
+   "date": "2026-10-22"
   },
   {
    "document": "TabbedPage.xaml",
@@ -90946,7 +90946,7 @@
    "winui": "TextBox: DefaultTextBoxStyle and its DeleteButtonStyle (TextBox_themeresources.xaml); PasswordBox: DefaultPasswordBoxStyle (PasswordBox_themeresources.xaml), a keyed theme with the reveal button; the context flyout of TextCommandBarFlyout as a menu flyout (B3).",
    "status": "ported",
    "deviations": 21,
-   "date": "2026-10-17"
+   "date": "2026-10-22"
   },
   {
    "document": "TextSelectionHandle.xaml",
@@ -90991,7 +90991,7 @@
    "winui": "ToggleButton: DefaultToggleButtonStyle (ToggleButton_themeresources.xaml).",
    "status": "ported",
    "deviations": 3,
-   "date": "2026-10-16"
+   "date": "2026-10-22"
   },
   {
    "document": "ToggleSwitch.xaml",
@@ -91522,7 +91522,7 @@
   }
  ],
  "deviations": {
-  "General": 26,
+  "General": 29,
   "Resources": 9,
   "AdornerLayer": 1,
   "AutoCompleteBox": 9,

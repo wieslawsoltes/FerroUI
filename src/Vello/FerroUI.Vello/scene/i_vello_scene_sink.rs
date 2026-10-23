@@ -237,6 +237,34 @@ pub trait IVelloSceneSink {
         self.fill(&rect.to_path(0.1), Fill::NonZero, transform, paint, blend_mode, anti_alias);
     }
 
+    /// Starts a fragment of the scene: what is recorded until the matching
+    /// [`end_fragment`](Self::end_fragment) is recorded as usual and also
+    /// kept, to be recorded again in the scene of a later frame
+    /// ([`draw_fragment`](Self::draw_fragment)). `transform` is the
+    /// transform to the pixels of the target the fragment is drawn at.
+    /// Returns `false` when the sink keeps no fragments; it then records as
+    /// usual and keeps nothing.
+    fn begin_fragment(&mut self, _transform: Affine) -> bool {
+        false
+    }
+
+    /// Ends the fragment that was started. What was recorded stays in the
+    /// scene. Returns the fragment, or `None` when what was recorded cannot
+    /// be recorded again from a fragment (it paints with an image, it is
+    /// not balanced, it changes what the scene keeps of its target).
+    fn end_fragment(&mut self) -> Option<std::rc::Rc<dyn std::any::Any>> {
+        None
+    }
+
+    /// Records a fragment this sink's kind made in an earlier frame, at
+    /// `transform` to the pixels of the target, when that gives the pixels
+    /// it gave when it was made: the transform is the one it was made at,
+    /// moved by whole pixels. Returns `false` without recording anything
+    /// otherwise.
+    fn draw_fragment(&mut self, _fragment: &dyn std::any::Any, _transform: Affine) -> bool {
+        false
+    }
+
     /// Strokes a path.
     fn stroke(&mut self, path: &BezPath, stroke: &Stroke, transform: Affine, paint: &VelloScenePaint, anti_alias: bool);
 

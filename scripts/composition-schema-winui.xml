@@ -1,0 +1,292 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    The FerroUI overlay of the composition schema: the classes and properties of
+    the WinUI composition API (Microsoft.UI.Composition) that the upstream schema
+    (scripts/composition-schema.xml, kept verbatim) does not have.
+
+    scripts/generate_composition.py merges this file into the upstream schema: an
+    <Object> whose Name is a class of the upstream schema adds its properties to
+    that class (after the upstream ones), any other <Object> is a new class. See
+    the docstring of the generator and docs/porting/winui-composition.md.
+
+    Types are the Rust-side spellings of the generator's TYPES table: Vector is a
+    WinUI Vector2, Vector3D a Vector3, Matrix a Matrix3x2, float a WinUI float.
+-->
+<NComposition>
+    <!-- Visual.Clip: the WinUI clip objects. The upstream Clip property is a
+         geometry; this one is named CompositionClip. -->
+    <Object Name="CompositionVisual">
+        <Property Name="CompositionClip" Type="CompositionClip?" />
+    </Object>
+
+    <!-- Microsoft.UI.Composition.CompositionClip and its subclasses. -->
+    <Object Name="CompositionClip" Abstract="true" ServerBase="ServerRenderResource">
+        <Property Name="AnchorPoint" Type="Vector" Animated="true"/>
+        <Property Name="CenterPoint" Type="Vector" Animated="true"/>
+        <Property Name="Offset" Type="Vector" Animated="true"/>
+        <Property Name="RotationAngle" Type="float" Animated="true"/>
+        <Property Name="Scale" Type="Vector" Animated="true" DefaultValue="Vector.One"/>
+        <Property Name="TransformMatrix" Type="Matrix" Animated="true" DefaultValue="Matrix.Identity"/>
+    </Object>
+    <Object Name="InsetClip" Inherits="CompositionClip">
+        <Property Name="LeftInset" Type="float" Animated="true"/>
+        <Property Name="TopInset" Type="float" Animated="true"/>
+        <Property Name="RightInset" Type="float" Animated="true"/>
+        <Property Name="BottomInset" Type="float" Animated="true"/>
+    </Object>
+    <Object Name="RectangleClip" Inherits="CompositionClip">
+        <Property Name="Left" Type="float" Animated="true"/>
+        <Property Name="Top" Type="float" Animated="true"/>
+        <Property Name="Right" Type="float" Animated="true"/>
+        <Property Name="Bottom" Type="float" Animated="true"/>
+        <Property Name="TopLeftRadius" Type="Vector" Animated="true"/>
+        <Property Name="TopRightRadius" Type="Vector" Animated="true"/>
+        <Property Name="BottomLeftRadius" Type="Vector" Animated="true"/>
+        <Property Name="BottomRightRadius" Type="Vector" Animated="true"/>
+    </Object>
+
+    <!-- Microsoft.UI.Composition.DropShadow. -->
+    <Object Name="DropShadow" ServerBase="ServerRenderResource">
+        <Property Name="BlurRadius" Type="float" Animated="true" DefaultValue="9"/>
+        <Property Name="Color" Type="Color" Animated="true" DefaultValue="Colors.Black"/>
+        <Property Name="Mask" Type="CompositionBrush?" />
+        <Property Name="Offset" Type="Vector3D" Animated="true"/>
+        <Property Name="Opacity" Type="float" Animated="true" DefaultValue="1"/>
+        <Property Name="SourcePolicy" Type="CompositionDropShadowSourcePolicy" />
+    </Object>
+
+    <!-- Microsoft.UI.Composition.CompositionSurfaceBrush. -->
+    <Object Name="CompositionSurfaceBrush" Inherits="CompositionBrush" ServerBase="ServerCompositionBrush">
+        <Property Name="Surface" Type="CompositionSurface?" />
+        <Property Name="Stretch" Type="CompositionStretch" DefaultValue="CompositionStretch.Fill"/>
+        <Property Name="HorizontalAlignmentRatio" Type="float" Animated="true" DefaultValue="0.5"/>
+        <Property Name="VerticalAlignmentRatio" Type="float" Animated="true" DefaultValue="0.5"/>
+        <Property Name="BitmapInterpolationMode" Type="CompositionBitmapInterpolationMode"
+                  DefaultValue="CompositionBitmapInterpolationMode.Linear"/>
+        <Property Name="AnchorPoint" Type="Vector" Animated="true"/>
+        <Property Name="CenterPoint" Type="Vector" Animated="true"/>
+        <Property Name="Offset" Type="Vector" Animated="true"/>
+        <Property Name="RotationAngle" Type="float" Animated="true"/>
+        <Property Name="Scale" Type="Vector" Animated="true" DefaultValue="Vector.One"/>
+        <Property Name="TransformMatrix" Type="Matrix" Animated="true" DefaultValue="Matrix.Identity"/>
+        <Property Name="SnapToPixels" Type="bool" />
+    </Object>
+
+    <!-- Microsoft.UI.Composition.CompositionVisualSurface. -->
+    <Object Name="CompositionVisualSurface" ServerBase="ServerRenderResource">
+        <Property Name="SourceVisual" Type="CompositionVisual?" />
+        <Property Name="SourceOffset" Type="Vector" Animated="true"/>
+        <Property Name="SourceSize" Type="Vector" Animated="true"/>
+    </Object>
+
+    <!-- Microsoft.UI.Composition.SpriteVisual. -->
+    <Object Name="SpriteVisual" Inherits="CompositionContainerVisual" ServerBase="ServerSizeDependantVisual">
+        <Property Name="Brush" Type="CompositionBrush?" />
+        <Property Name="Shadow" Type="DropShadow?" />
+    </Object>
+
+    <!-- Microsoft.UI.Composition.CompositionGeometry and its subclasses. -->
+    <Object Name="CompositionGeometry" Abstract="true" ServerBase="ServerRenderResource">
+        <Property Name="TrimEnd" Type="float" Animated="true" DefaultValue="1"/>
+        <Property Name="TrimOffset" Type="float" Animated="true"/>
+        <Property Name="TrimStart" Type="float" Animated="true"/>
+    </Object>
+    <Object Name="CompositionRectangleGeometry" Inherits="CompositionGeometry">
+        <Property Name="Offset" Type="Vector" Animated="true"/>
+        <Property Name="Size" Type="Vector" Animated="true"/>
+    </Object>
+    <Object Name="CompositionRoundedRectangleGeometry" Inherits="CompositionGeometry">
+        <Property Name="CornerRadius" Type="Vector" Animated="true"/>
+        <Property Name="Offset" Type="Vector" Animated="true"/>
+        <Property Name="Size" Type="Vector" Animated="true"/>
+    </Object>
+    <Object Name="CompositionEllipseGeometry" Inherits="CompositionGeometry">
+        <Property Name="Center" Type="Vector" Animated="true"/>
+        <Property Name="Radius" Type="Vector" Animated="true"/>
+    </Object>
+    <Object Name="CompositionLineGeometry" Inherits="CompositionGeometry">
+        <Property Name="Start" Type="Vector" Animated="true"/>
+        <Property Name="End" Type="Vector" Animated="true"/>
+    </Object>
+    <Object Name="CompositionPathGeometry" Inherits="CompositionGeometry">
+        <Property Name="Path" Type="CompositionPath?" />
+    </Object>
+
+    <!-- Microsoft.UI.Composition.CompositionViewBox. -->
+    <Object Name="CompositionViewBox" ServerBase="ServerRenderResource">
+        <Property Name="HorizontalAlignmentRatio" Type="float" Animated="true" DefaultValue="0.5"/>
+        <Property Name="Offset" Type="Vector" Animated="true"/>
+        <Property Name="Size" Type="Vector" Animated="true"/>
+        <Property Name="Stretch" Type="CompositionStretch" DefaultValue="CompositionStretch.Fill"/>
+        <Property Name="VerticalAlignmentRatio" Type="float" Animated="true" DefaultValue="0.5"/>
+    </Object>
+
+    <!-- Microsoft.UI.Composition.CompositionShape, its subclasses and
+         CompositionShapeCollection. -->
+    <Object Name="CompositionShape" Abstract="true" ServerBase="ServerRenderResource">
+        <Property Name="CenterPoint" Type="Vector" Animated="true"/>
+        <Property Name="Offset" Type="Vector" Animated="true"/>
+        <Property Name="RotationAngle" Type="float" Animated="true"/>
+        <Property Name="Scale" Type="Vector" Animated="true" DefaultValue="Vector.One"/>
+        <Property Name="TransformMatrix" Type="Matrix" Animated="true" DefaultValue="Matrix.Identity"/>
+    </Object>
+    <List Name="CompositionShapeCollection" ItemType="CompositionShape"/>
+    <Object Name="CompositionSpriteShape" Inherits="CompositionShape">
+        <Property Name="FillBrush" Type="CompositionBrush?" />
+        <Property Name="Geometry" Type="CompositionGeometry?" />
+        <Property Name="IsStrokeNonScaling" Type="bool" />
+        <Property Name="StrokeBrush" Type="CompositionBrush?" />
+        <Property Name="StrokeDashArray" Type="CompositionStrokeDashArray?" />
+        <Property Name="StrokeDashCap" Type="CompositionStrokeCap" />
+        <Property Name="StrokeDashOffset" Type="float" Animated="true"/>
+        <Property Name="StrokeEndCap" Type="CompositionStrokeCap" />
+        <Property Name="StrokeLineJoin" Type="CompositionStrokeLineJoin" />
+        <Property Name="StrokeMiterLimit" Type="float" Animated="true" DefaultValue="2"/>
+        <Property Name="StrokeStartCap" Type="CompositionStrokeCap" />
+        <Property Name="StrokeThickness" Type="float" Animated="true" DefaultValue="1"/>
+    </Object>
+    <Object Name="CompositionContainerShape" Inherits="CompositionShape">
+        <Property Name="Shapes" Type="CompositionShapeCollection?" />
+    </Object>
+
+    <!-- Microsoft.UI.Composition.ShapeVisual. -->
+    <Object Name="ShapeVisual" Inherits="CompositionContainerVisual" ServerBase="ServerSizeDependantVisual">
+        <Property Name="Shapes" Type="CompositionShapeCollection?" />
+        <Property Name="ViewBox" Type="CompositionViewBox?" />
+    </Object>
+
+    <!-- Microsoft.UI.Composition.GeometricClip. -->
+    <Object Name="GeometricClip" Inherits="CompositionClip">
+        <Property Name="Geometry" Type="CompositionGeometry?" />
+        <Property Name="ViewBox" Type="CompositionViewBox?" />
+    </Object>
+
+    <!-- The remaining members of Microsoft.UI.Composition.Visual (phase 2):
+         the rotation axis, the relative adjustments, hit testing, pixel
+         snapping, the 3D modes a 2D renderer stores only, and the visual the
+         transform is relative to. -->
+    <Object Name="CompositionVisual">
+        <Property Name="RotationAxis" Type="Vector3D" Animated="true" DefaultValue="Vector3D.UnitZ"/>
+        <Property Name="RelativeOffsetAdjustment" Type="Vector3D" Animated="true"/>
+        <Property Name="RelativeSizeAdjustment" Type="Vector" Animated="true"/>
+        <Property Name="IsHitTestVisible" Type="bool" DefaultValue="true"/>
+        <Property Name="IsPixelSnappingEnabled" Type="bool"/>
+        <Property Name="BorderMode" Type="CompositionBorderMode"/>
+        <Property Name="BackfaceVisibility" Type="CompositionBackfaceVisibility"/>
+        <Property Name="CompositeMode" Type="CompositionCompositeMode"/>
+        <Property Name="ParentForTransform" Type="CompositionVisual?"/>
+    </Object>
+
+    <!-- Microsoft.UI.Composition.LayerVisual. EffectBrush is the WinUI Effect
+         (a CompositionEffectBrush, phase 6), named apart from the upstream
+         Effect of every visual. -->
+    <Object Name="LayerVisual" Inherits="CompositionContainerVisual" ServerBase="ServerSizeDependantVisual">
+        <Property Name="Shadow" Type="DropShadow?" />
+        <Property Name="EffectBrush" Type="CompositionBrush?" />
+    </Object>
+
+    <!-- Microsoft.UI.Composition.RedirectVisual. SourceSurface is the hidden
+         visual surface that follows the source for the redirect visual. -->
+    <Object Name="RedirectVisual" Inherits="CompositionContainerVisual" ServerBase="ServerSizeDependantVisual">
+        <Property Name="Source" Type="CompositionVisual?" />
+        <Property Name="SourceSurface" Type="CompositionVisualSurface?" Internal="true" />
+    </Object>
+
+    <!-- Microsoft.UI.Composition.CompositionNineGridBrush. -->
+    <Object Name="CompositionNineGridBrush" Inherits="CompositionBrush" ServerBase="ServerCompositionBrush">
+        <Property Name="Source" Type="CompositionBrush?" />
+        <Property Name="LeftInset" Type="float" Animated="true"/>
+        <Property Name="TopInset" Type="float" Animated="true"/>
+        <Property Name="RightInset" Type="float" Animated="true"/>
+        <Property Name="BottomInset" Type="float" Animated="true"/>
+        <Property Name="LeftInsetScale" Type="float" Animated="true" DefaultValue="1"/>
+        <Property Name="TopInsetScale" Type="float" Animated="true" DefaultValue="1"/>
+        <Property Name="RightInsetScale" Type="float" Animated="true" DefaultValue="1"/>
+        <Property Name="BottomInsetScale" Type="float" Animated="true" DefaultValue="1"/>
+        <Property Name="IsCenterHollow" Type="bool" />
+    </Object>
+
+    <!-- Microsoft.UI.Composition.CompositionMaskBrush. -->
+    <Object Name="CompositionMaskBrush" Inherits="CompositionBrush" ServerBase="ServerCompositionBrush">
+        <Property Name="Source" Type="CompositionBrush?" />
+        <Property Name="Mask" Type="CompositionBrush?" />
+    </Object>
+
+    <!-- Microsoft.UI.Composition.VisualUnorderedCollection: the targets and the
+         exclusions of a light (phase 5). -->
+    <List Name="VisualUnorderedCollection" ItemType="CompositionVisual"/>
+
+    <!-- Microsoft.UI.Composition.CompositionLight and its subclasses (phase 5).
+         Targets and ExclusionsFromTargets are the collections the light
+         creates with itself. -->
+    <Object Name="CompositionLight" Abstract="true" ServerBase="ServerRenderResource">
+        <Property Name="Targets" Type="VisualUnorderedCollection?" Internal="true"/>
+        <Property Name="ExclusionsFromTargets" Type="VisualUnorderedCollection?" Internal="true"/>
+        <Property Name="IsEnabled" Type="bool" DefaultValue="true"/>
+    </Object>
+    <Object Name="AmbientLight" Inherits="CompositionLight">
+        <Property Name="Color" Type="Color" Animated="true" DefaultValue="Colors.White"/>
+        <Property Name="Intensity" Type="float" Animated="true" DefaultValue="1"/>
+    </Object>
+    <Object Name="DistantLight" Inherits="CompositionLight">
+        <Property Name="Color" Type="Color" Animated="true" DefaultValue="Colors.White"/>
+        <Property Name="CoordinateSpace" Type="CompositionVisual?"/>
+        <Property Name="Direction" Type="Vector3D" Animated="true" DefaultValue="Vector3D.NegativeUnitZ"/>
+        <Property Name="Intensity" Type="float" Animated="true" DefaultValue="1"/>
+    </Object>
+    <Object Name="PointLight" Inherits="CompositionLight">
+        <Property Name="Color" Type="Color" Animated="true" DefaultValue="Colors.White"/>
+        <Property Name="ConstantAttenuation" Type="float" Animated="true" DefaultValue="1"/>
+        <Property Name="LinearAttenuation" Type="float" Animated="true"/>
+        <Property Name="QuadraticAttenuation" Type="float" Animated="true"/>
+        <Property Name="CoordinateSpace" Type="CompositionVisual?"/>
+        <Property Name="Offset" Type="Vector3D" Animated="true"/>
+        <Property Name="Intensity" Type="float" Animated="true" DefaultValue="1"/>
+        <Property Name="MinAttenuationCutoff" Type="float" Animated="true"/>
+        <Property Name="MaxAttenuationCutoff" Type="float" Animated="true" DefaultValue="float.MaxValue"/>
+    </Object>
+    <Object Name="SpotLight" Inherits="CompositionLight">
+        <Property Name="ConstantAttenuation" Type="float" Animated="true" DefaultValue="1"/>
+        <Property Name="LinearAttenuation" Type="float" Animated="true"/>
+        <Property Name="QuadraticAttenuation" Type="float" Animated="true"/>
+        <Property Name="CoordinateSpace" Type="CompositionVisual?"/>
+        <Property Name="Direction" Type="Vector3D" Animated="true" DefaultValue="Vector3D.NegativeUnitZ"/>
+        <Property Name="InnerConeAngle" Type="float" Animated="true"/>
+        <Property Name="InnerConeColor" Type="Color" Animated="true" DefaultValue="Colors.White"/>
+        <Property Name="InnerConeIntensity" Type="float" Animated="true" DefaultValue="1"/>
+        <Property Name="OuterConeAngle" Type="float" Animated="true" DefaultValue="0.7853982"/>
+        <Property Name="OuterConeColor" Type="Color" Animated="true" DefaultValue="Colors.White"/>
+        <Property Name="OuterConeIntensity" Type="float" Animated="true" DefaultValue="1"/>
+        <Property Name="Offset" Type="Vector3D" Animated="true"/>
+        <Property Name="MinAttenuationCutoff" Type="float" Animated="true"/>
+        <Property Name="MaxAttenuationCutoff" Type="float" Animated="true" DefaultValue="float.MaxValue"/>
+    </Object>
+
+    <!-- The brush transform of Microsoft.UI.Composition.CompositionGradientBrush,
+         on each gradient class of the upstream schema (their common base is a
+         manual class). -->
+    <Object Name="CompositionLinearGradientBrush">
+        <Property Name="AnchorPoint" Type="Vector" Animated="true"/>
+        <Property Name="CenterPoint" Type="Vector" Animated="true"/>
+        <Property Name="Offset" Type="Vector" Animated="true"/>
+        <Property Name="RotationAngle" Type="float" Animated="true"/>
+        <Property Name="Scale" Type="Vector" Animated="true" DefaultValue="Vector.One"/>
+        <Property Name="TransformMatrix" Type="Matrix" Animated="true" DefaultValue="Matrix.Identity"/>
+    </Object>
+    <Object Name="CompositionRadialGradientBrush">
+        <Property Name="AnchorPoint" Type="Vector" Animated="true"/>
+        <Property Name="CenterPoint" Type="Vector" Animated="true"/>
+        <Property Name="Offset" Type="Vector" Animated="true"/>
+        <Property Name="RotationAngle" Type="float" Animated="true"/>
+        <Property Name="Scale" Type="Vector" Animated="true" DefaultValue="Vector.One"/>
+        <Property Name="TransformMatrix" Type="Matrix" Animated="true" DefaultValue="Matrix.Identity"/>
+    </Object>
+    <Object Name="CompositionConicGradientBrush">
+        <Property Name="AnchorPoint" Type="Vector" Animated="true"/>
+        <Property Name="CenterPoint" Type="Vector" Animated="true"/>
+        <Property Name="Offset" Type="Vector" Animated="true"/>
+        <Property Name="RotationAngle" Type="float" Animated="true"/>
+        <Property Name="Scale" Type="Vector" Animated="true" DefaultValue="Vector.One"/>
+        <Property Name="TransformMatrix" Type="Matrix" Animated="true" DefaultValue="Matrix.Identity"/>
+    </Object>
+</NComposition>

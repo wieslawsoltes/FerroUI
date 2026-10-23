@@ -456,6 +456,13 @@ impl StyledElement {
         self.name.borrow().clone()
     }
 
+    /// Whether the name of the styled element is `name`, without a copy of the name (the name
+    /// selectors of styles test it for every element they are evaluated on).
+    #[inline]
+    pub fn has_name(&self, name: &str) -> bool {
+        self.name.borrow().as_deref() == Some(name)
+    }
+
     pub fn set_name(&self, value: Option<String>) {
         assert!(!self.styles_applied.get(), "Cannot set Name : styled element already styled.");
         *self.name.borrow_mut() = value;
@@ -525,6 +532,12 @@ impl StyledElement {
         let resources = ResourceDictionary::with_owner(self.to_ref());
         *self.resources.borrow_mut() = Some(resources.clone());
         resources
+    }
+
+    /// The resource dictionary of the element if it has been created; unlike `resources`, this
+    /// does not create one.
+    pub fn resources_if_created(&self) -> Option<Ref<ResourceDictionary>> {
+        self.resources.borrow().clone()
     }
 
     pub fn set_resources(&self, value: Ref<ResourceDictionary>) {

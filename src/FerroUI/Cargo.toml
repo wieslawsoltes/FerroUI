@@ -32,6 +32,12 @@ xaml = ["dep:ferroui-markup-xaml", "dep:ferroui-markup-xaml-loader"]
 color-picker = ["dep:ferroui-controls-color-picker"]
 treedatagrid = ["dep:ferroui-controls-treedatagrid", "dep:ferroui-treedatagrid-core"]
 dialogs = ["dep:ferroui-dialogs"]
+# The developer tools (F12 on a window or an application in debug builds).
+diagnostics = ["dep:ferroui-diagnostics"]
+# Localhost CDP inspection and automation; no listener starts until explicitly requested.
+# The endpoint on native targets, the JavaScript bridge in the browser (each feature is gated to
+# its target inside the crate).
+devtools = ["dep:ferroui-devtools", "ferroui-devtools/browser"]
 # The reactive foundation (docs/mvvm.md): Rx, DynamicData, and ReactiveUI with its integration
 # with the controls and Splat.
 reactive = ["dep:ferroui-system", "dep:ferroui-reactive"]
@@ -66,6 +72,8 @@ ferroui-controls-color-picker = { workspace = true, optional = true }
 ferroui-controls-treedatagrid = { workspace = true, optional = true }
 ferroui-treedatagrid-core = { workspace = true, optional = true }
 ferroui-dialogs = { workspace = true, optional = true }
+ferroui-diagnostics = { workspace = true, optional = true }
+ferroui-devtools = { workspace = true, optional = true, features = ["server"] }
 ferroui-system = { workspace = true, optional = true }
 ferroui-reactive = { workspace = true, optional = true }
 ferroui-dynamic-data = { workspace = true, optional = true }
@@ -97,7 +105,7 @@ required-features = ["desktop", "fluent"]
 # docs.rs documents the default features with the libraries that need no more than the host
 # (docs/release.md, section 7).
 [package.metadata.docs.rs]
-features = ["simple", "winui-theme", "xaml", "color-picker", "treedatagrid", "dialogs", "reactive", "dynamic-data", "reactiveui", "headless", "opengl", "metal", "vulkan"]
+features = ["simple", "winui-theme", "xaml", "color-picker", "treedatagrid", "dialogs", "diagnostics", "reactive", "dynamic-data", "reactiveui", "headless", "opengl", "metal", "vulkan"]
 
 # The group of the crate in the table of the README (docs/release.md).
 [package.metadata.release]

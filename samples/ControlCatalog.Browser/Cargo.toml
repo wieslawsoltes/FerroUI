@@ -19,6 +19,7 @@ name = "control-catalog-browser"
 path = "program.rs"
 
 [dependencies]
+ferroui-devtools = { workspace = true, optional = true, default-features = false, features = ["browser"] }
 ferroui-base = { workspace = true }
 ferroui-controls = { workspace = true }
 ferroui-browser = { workspace = true }
@@ -29,6 +30,7 @@ wasm-bindgen = { workspace = true }
 # The Vello render backend beside Skia in the module, chosen with `?Renderer=Vello`
 # (docs/porting/vello-backend.md, section 12). Off by default: the published module is the Skia one.
 [features]
+cdp = ["dep:ferroui-devtools"]
 default = []
 vello = ["ferroui-browser/vello"]
 

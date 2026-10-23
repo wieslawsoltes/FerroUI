@@ -35,12 +35,15 @@
 //!
 //! Two queues are not ordered against each other. The frame is presented
 //! by the platform on its queue when the session is disposed; before that
-//! the render target waits until the device has **scheduled** what was
-//! committed to its own queue ([`VelloMetalGpu::wait_until_scheduled`]:
-//! an empty command buffer behind the frame, `waitUntilScheduled`), which
-//! is what the platform itself waits for before it presents a frame of the
-//! UI thread. The wait is for the hand-over to the GPU, not for the GPU to
-//! draw.
+//! the render target orders the queue of the platform after its own
+//! ([`VelloMetalGpu::order_platform_after_device`]): its queue signals a
+//! shared event behind the frame, and a command buffer of the platform's
+//! queue that waits for the event is committed ahead of the presentation.
+//! The GPU waits, the processor does not. Without a shared event (or a
+//! queue of the platform) the render target waits until the device has
+//! **scheduled** what was committed to its own queue (`waitUntilScheduled`
+//! on an empty command buffer behind the frame), which is what the platform
+//! itself waits for before it presents a frame of the UI thread.
 //!
 //! This is the one file of the crate with `unsafe`: the raw handles of the
 //! contract become objects of `wgpu`.
@@ -60,8 +63,10 @@ use ferroui_base::PixelSize;
 use ferroui_metal::{try_get_metal_surface, IMetalDevice, IMetalPlatformSurfaceRenderTarget};
 use objc2::rc::{autoreleasepool, Retained};
 use objc2::runtime::ProtocolObject;
-use objc2_metal::{MTLCommandBuffer, MTLCommandQueue, MTLDevice, MTLPixelFormat, MTLTexture, MTLTextureType};
-use std::cell::RefCell;
+use objc2_metal::{
+    MTLCommandBuffer, MTLCommandQueue, MTLDevice, MTLEvent, MTLPixelFormat, MTLSharedEvent, MTLTexture, MTLTextureType,
+};
+use std::cell::{Cell, RefCell};
 use std::ffi::c_void;
 use std::rc::Rc;
 use std::sync::Arc;
@@ -84,6 +89,12 @@ pub struct VelloMetalGpu {
     /// The command queue the device draws with: a queue of the Metal device
     /// of the platform that is the backend's own (see the module).
     queue: Retained<ProtocolObject<dyn MTLCommandQueue>>,
+    /// The command queue of the platform, which presents the frames.
+    platform_queue: Option<Retained<ProtocolObject<dyn MTLCommandQueue>>>,
+    /// The event the queue of the device signals and the queue of the
+    /// platform waits for, and the value it was signaled with last.
+    event: Option<Retained<ProtocolObject<dyn MTLSharedEvent>>>,
+    signaled: Cell<u64>,
 }
 
 impl VelloMetalGpu {
@@ -101,6 +112,12 @@ impl VelloMetalGpu {
         // device keeps until it is dropped.
         let mtl_device: Retained<ProtocolObject<dyn MTLDevice>> = unsafe { Retained::retain(raw_device.cast()) }
             .ok_or_else(|| unavailable("the platform has no Metal device"))?;
+        // SAFETY: the contract hands out a valid `id<MTLCommandQueue>` of
+        // the device (or null), which lives as long as the platform device;
+        // `retain` takes a reference of its own.
+        let platform_queue: Option<Retained<ProtocolObject<dyn MTLCommandQueue>>> =
+            unsafe { Retained::retain(metal.command_queue().cast()) };
+        let event = mtl_device.newSharedEvent();
         let mtl_queue: Retained<ProtocolObject<dyn MTLCommandQueue>> = mtl_device
             .newCommandQueueWithMaxCommandBufferCount(COMMAND_BUFFERS)
             .ok_or_else(|| unavailable("the Metal device of the platform made no command queue"))?;
@@ -154,7 +171,35 @@ impl VelloMetalGpu {
         // Layers and bitmaps of the GPU modes are drawn on this device too.
         device.prefer();
 
-        Ok(Rc::new(Self { metal, device, queue: own_queue }))
+        Ok(Rc::new(Self { metal, device, queue: own_queue, platform_queue, event, signaled: Cell::new(0) }))
+    }
+
+    /// Orders what the platform commits to its queue from now on (the
+    /// presentation of a frame) after every command buffer that was
+    /// committed to the queue of the device: the queue of the device
+    /// signals the shared event with a new value, and the queue of the
+    /// platform gets a command buffer that waits for that value. Neither
+    /// waits on the processor. Without an event or a queue of the platform,
+    /// waits until the device has scheduled what was committed instead
+    /// ([`wait_until_scheduled`](Self::wait_until_scheduled)).
+    pub fn order_platform_after_device(&self) {
+        let (Some(event), Some(platform_queue)) = (&self.event, &self.platform_queue) else {
+            self.wait_until_scheduled();
+            return;
+        };
+        autoreleasepool(|_| {
+            let value = self.signaled.get() + 1;
+            let event: &ProtocolObject<dyn MTLEvent> = ProtocolObject::from_ref(&**event);
+            let (Some(signal), Some(wait)) = (self.queue.commandBuffer(), platform_queue.commandBuffer()) else {
+                self.wait_until_scheduled();
+                return;
+            };
+            signal.encodeSignalEvent_value(event, value);
+            signal.commit();
+            wait.encodeWaitForEvent_value(event, value);
+            wait.commit();
+            self.signaled.set(value);
+        });
     }
 
     /// Waits until the device has scheduled every command buffer that was
@@ -370,9 +415,9 @@ impl IRenderTarget for VelloMetalRenderTarget {
                     // before the session presents the drawable.
                     drop(texture);
                 });
-                // The platform presents on its own queue: the frame is on
-                // its way to the GPU before it does.
-                gpu.wait_until_scheduled();
+                // The platform presents on its own queue: it runs the
+                // presentation after the frame.
+                gpu.order_platform_after_device();
             }),
             // Disposing the session presents the frame, with a command
             // buffer of the queue of the platform.

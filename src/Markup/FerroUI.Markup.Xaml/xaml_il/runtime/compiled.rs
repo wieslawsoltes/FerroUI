@@ -411,6 +411,12 @@ pub fn property(property: &'static FerroProperty) -> &'static FerroProperty {
     property
 }
 
+/// The property that stands for the style class `class_name` (`Classes.name`
+/// in a setter): `StyledElementExtensions.GetClassProperty(className)`.
+pub fn class_property(class_name: &str) -> &'static FerroProperty {
+    StyledElement::get_class_property(class_name)
+}
+
 /// A registered property as a value (the descriptor of the provide-value
 /// target property): its definition, as the run-time loader boxes it.
 pub fn property_value(property: &'static FerroProperty) -> MarkupValue {

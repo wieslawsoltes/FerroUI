@@ -72,7 +72,7 @@ wgpu = { workspace = true, optional = true, features = ["dx12", "gles"] }
 [target.'cfg(target_os = "macos")'.dependencies]
 ferroui-metal = { workspace = true, optional = true }
 objc2 = { version = "0.6.3", optional = true }
-objc2-metal = { version = "0.3.2", optional = true, default-features = false, features = ["std", "MTLDevice", "MTLCommandQueue", "MTLCommandBuffer", "MTLTexture", "MTLResource", "MTLPixelFormat", "MTLTypes"] }
+objc2-metal = { version = "0.3.2", optional = true, default-features = false, features = ["std", "MTLDevice", "MTLCommandQueue", "MTLCommandBuffer", "MTLTexture", "MTLResource", "MTLPixelFormat", "MTLTypes", "MTLEvent"] }
 
 # The windows of a platform whose graphics are OpenGL drawn in the CPU mode
 # and presented through its context (gl_window.rs), on every target but the

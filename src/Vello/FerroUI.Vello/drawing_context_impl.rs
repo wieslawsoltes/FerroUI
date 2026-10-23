@@ -38,6 +38,7 @@ use std::rc::Rc;
 mod acrylic;
 pub(crate) mod box_shadows;
 mod effects;
+mod fragments;
 mod scene_brushes;
 
 /// Context create info.
@@ -264,6 +265,8 @@ pub struct DrawingContextImpl {
     /// the context: not the first one while an effect is recorded into a
     /// scene of its own.
     sink_origin: kurbo::Vec2,
+    /// The fragment that is being made ([`fragments`]).
+    fragment: Option<fragments::FragmentRecording>,
     /// When the context was created, while the phases of a frame are timed
     /// ([`crate::perf`]).
     created: Option<std::time::Instant>,
@@ -316,6 +319,7 @@ impl DrawingContextImpl {
             effect_stack: Vec::new(),
             open_clips: 0,
             sink_origin: kurbo::Vec2::ZERO,
+            fragment: None,
             created: crate::perf::frame_start(),
         };
         crate::perf::count(crate::perf::Phase::Context, 0);
@@ -1142,6 +1146,7 @@ impl IDrawingContextImpl for DrawingContextImpl {
     }
 
     fn clear(&mut self, color: Color) {
+        self.fragment_cleared();
         // Outside every clip and layer a clear replaces all there is: the
         // scene starts over, and nothing of the target is kept.
         if self.state_stack.is_empty() && self.mask_stack.is_empty() {
@@ -1736,6 +1741,15 @@ impl IDrawingContextImpl for DrawingContextImpl {
         &mut self,
     ) -> Option<&mut dyn ferroui_base::platform::IDrawingContextWithAcrylicLikeSupport> {
         Some(self)
+    }
+
+    fn as_drawing_context_impl_with_fragments(
+        &mut self,
+    ) -> Option<&mut dyn ferroui_base::platform::IDrawingContextImplWithFragments> {
+        match self.keeps_fragments() {
+            true => Some(self),
+            false => None,
+        }
     }
 
     fn get_feature(&mut self, _feature_type: TypeId) -> Option<Rc<dyn Any>> {

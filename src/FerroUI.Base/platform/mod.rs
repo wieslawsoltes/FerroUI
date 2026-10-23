@@ -115,6 +115,7 @@ pub use i_platform_settings::IPlatformSettings;
 mod asset_loader;
 mod i_asset_loader;
 mod i_drawing_context_impl_with_effects;
+mod i_drawing_context_impl_with_fragments;
 mod i_drawing_context_with_acrylic_like_support;
 mod internal;
 mod i_runtime_platform;
@@ -128,6 +129,7 @@ pub use i_runtime_platform::{FormFactorType, IRuntimePlatform, RuntimePlatformIn
 pub use standard_runtime_platform::StandardRuntimePlatform;
 pub use standard_runtime_platform_services::StandardRuntimePlatformServices;
 pub use i_drawing_context_impl_with_effects::IDrawingContextImplWithEffects;
+pub use i_drawing_context_impl_with_fragments::{IDrawingContextImplWithFragments, IDrawingFragment};
 pub use i_drawing_context_with_acrylic_like_support::IDrawingContextWithAcrylicLikeSupport;
 pub use internal::{register_assets, register_manifest_resources};
 pub use standard_asset_loader::StandardAssetLoader;

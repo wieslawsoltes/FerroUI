@@ -1,7 +1,7 @@
 use std::rc::Rc;
 
 use crate::media::text_formatting::TextRunProperties;
-use crate::media::{FlowDirection, TextAlignment, TextDecorationCollection, TextWrapping};
+use crate::media::{FlowDirection, TextAlignment, TextDecorationCollection, TextLineBounds, TextWrapping};
 
 /// Provides a set of properties that are used during the paragraph layout.
 pub trait TextParagraphProperties: 'static {
@@ -18,6 +18,13 @@ pub trait TextParagraphProperties: 'static {
     /// Paragraph's line spacing.
     fn line_spacing(&self) -> f64 {
         0.0
+    }
+
+    /// How the box of each line is bounded above and below (a FerroUI addition,
+    /// docs/porting/DEVIATIONS.md, Text block): by the ascent and the descent of the font, or
+    /// trimmed to its cap height and to the baseline.
+    fn text_line_bounds(&self) -> TextLineBounds {
+        TextLineBounds::Full
     }
 
     /// Indicates the first line of the paragraph.

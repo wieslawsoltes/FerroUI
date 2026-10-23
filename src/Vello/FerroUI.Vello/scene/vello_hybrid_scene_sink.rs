@@ -41,6 +41,9 @@ struct ImageTexture {
 struct HybridRendererState {
     renderers: HashMap<wgpu::TextureFormat, FormatRenderer>,
     images: HashMap<u64, ImageTexture>,
+    /// The depth buffers of the targets by their size, with the render
+    /// they were last used in.
+    depth_views: HashMap<(u16, u16), (wgpu::TextureView, u64)>,
     render_count: u64,
 }
 
@@ -108,7 +111,12 @@ impl VelloHybridSceneSink {
     }
 
     fn new_state(_device: &VelloWgpuDevice) -> HybridRendererState {
-        HybridRendererState { renderers: HashMap::new(), images: HashMap::new(), render_count: 0 }
+        HybridRendererState {
+            renderers: HashMap::new(),
+            images: HashMap::new(),
+            depth_views: HashMap::new(),
+            render_count: 0,
+        }
     }
 
     fn format_renderer<'a>(
@@ -237,6 +245,19 @@ impl VelloHybridSceneSink {
                     None => TargetInit::Clear(ClearSettings::Viewport { color: AlphaColor::TRANSPARENT }),
                 };
 
+                // A depth buffer of the size of the target: with it the
+                // renderer draws what is opaque front to back and leaves
+                // out the pixels that are covered, rather than drawing every
+                // layer of the frame over the one below.
+                let render_size = RenderSize { width, height };
+                let (depth_view, last_used) = state
+                    .depth_views
+                    .entry((width, height))
+                    .or_insert_with(|| (Renderer::create_depth_texture_view(device.device(), &render_size), 0));
+                *last_used = render_count;
+                let depth_view = depth_view.clone();
+                state.depth_views.retain(|_, (_, last_used)| render_count - *last_used < IMAGE_TEXTURE_LIFETIME);
+
                 let format_renderer = Self::format_renderer(state, device, format, width, height);
 
                 let _perf =
@@ -251,9 +272,9 @@ impl VelloHybridSceneSink {
                     device.device(),
                     device.queue(),
                     &mut encoder,
-                    &RenderSize { width, height },
+                    &render_size,
                     view,
-                    None,
+                    Some(&depth_view),
                     &bindings,
                     target_init,
                 );

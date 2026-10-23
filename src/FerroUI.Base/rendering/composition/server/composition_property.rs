@@ -85,6 +85,57 @@ impl CompositionProperty {
     }
 }
 
+/// The dynamic properties by name (see [`CompositionProperty::dynamic`]).
+static DYNAMIC_PROPERTIES: std::sync::OnceLock<
+    std::sync::Mutex<std::collections::HashMap<String, &'static CompositionProperty>>,
+> = std::sync::OnceLock::new();
+
+impl CompositionProperty {
+    /// The property of a property set named `name`: the entries of a `CompositionPropertySet`
+    /// are animatable properties that are not declared by a class. They are registered once per
+    /// process and name, like the declared properties, so that the animations of the server and
+    /// the subscriptions of expressions can refer to them by identity.
+    ///
+    /// A dynamic property has no field accessors (`get_variant` and `set_variant` are `None`):
+    /// the object that holds it reads and writes it through
+    /// [`IAnimatedServerObject::read_property_variant`](super::IAnimatedServerObject::read_property_variant)
+    /// and [`write_property_variant`](super::IAnimatedServerObject::write_property_variant).
+    ///
+    /// Not from upstream, whose property sets live on the UI thread only (see
+    /// `docs/porting/winui-composition.md`). Each distinct name stays registered for the life of
+    /// the process; the names come from the keys of property sets and from expressions.
+    pub fn dynamic(name: &str) -> &'static CompositionProperty {
+        let mut properties = DYNAMIC_PROPERTIES
+            .get_or_init(Default::default)
+            .lock()
+            .unwrap_or_else(std::sync::PoisonError::into_inner);
+        if let Some(property) = properties.get(name) {
+            return property;
+        }
+        let id = NEXT_ID.fetch_add(1, Ordering::SeqCst);
+        let name: &'static str = Box::leak(name.to_owned().into_boxed_str());
+        let property: &'static CompositionProperty = Box::leak(Box::new(CompositionProperty::new(
+            id,
+            name,
+            TypeId::of::<DynamicPropertyOwner>(),
+            "CompositionPropertySet",
+            None,
+            None,
+        )));
+        properties.insert(name.to_owned(), property);
+        property
+    }
+
+    /// Whether the property is an entry of a property set
+    /// ([`dynamic`](Self::dynamic)).
+    pub fn is_dynamic(&self) -> bool {
+        self.owner == TypeId::of::<DynamicPropertyOwner>()
+    }
+}
+
+/// The owner type of the dynamic properties.
+struct DynamicPropertyOwner;
+
 impl PartialEq for CompositionProperty {
     fn eq(&self, other: &Self) -> bool {
         self.id == other.id

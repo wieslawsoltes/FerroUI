@@ -107,6 +107,8 @@
     tbar.size.height = height < 1 ? 0 : 1;
     [_titleBarUnderline setFrame:tbar];
 
+    [window setStandardButtonsTitleBarHeight:_titleBarHeightHint > 0 ? _titleBarHeightHint : 0];
+
     _settingSize = false;
 }
 @end

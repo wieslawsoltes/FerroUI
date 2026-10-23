@@ -1244,7 +1244,7 @@ Since 2026-10-19 the speed of the backend against Skia is worked on, on every de
 
 ## 14. Speed against Skia (from 2026-10-19)
 
-The goal: each of the three modes as fast as the Skia backend or faster, on macOS, Windows and Linux. This section is the record of what was measured and changed; each round of changes is a pull request with its numbers.
+The goal: each of the three modes as fast as the Skia backend or faster, on macOS, Windows and Linux. This section is the record of what was measured and changed; each round of changes is a pull request with its numbers. The summary of the whole work, the cost model, the experiments that were not kept and the open designs are in `vello-performance.md`.
 
 ### 14.1 How it is measured
 
@@ -1452,3 +1452,65 @@ The same machines and tour as 14.8, one session each, milliseconds a frame:
 | p95 | 5.70, 7.36 | 7.65, 6.85 |
 
 The window as the system composed it (Windows) and as X shows it (Linux) has the content of the catalog, upright. The first frame of the hybrid mode on a context of OpenGL takes up to 1.2 s (the shaders of the renderer are compiled by the driver; Skia's first frame there 0.26 s).
+
+## 15. Experimental: stock Vello used the way it is fast (from 2026-10-20)
+
+The renderer crates stay those of crates.io; what changes is how the backend and the compositor drive them. The work is on the branch `vello-renderer-experimental` (a draft pull request).
+
+### 15.1 What the measures say
+
+On a full redraw of the catalog at 2560 by 1600 (Metal, M3 Pro), the hybrid mode spent about 2.5 times Skia's processor time and about 1.5 times its GPU time. The processor time is the coverage of every path, which the sparse-strips renderers compute on the processor while a scene is recorded: replaying the draw list of every visual into a new scene each frame (as the drawing context of the contract does, and as Skia is driven) pays it again for content that only moved. Vello itself has no way to keep it: `vello_gpu` and `vello_cpu` removed their recordings in 0.0.8, and only classic `vello` appends one scene to another (`Scene::append`), which is how Xilem keeps the drawing of its widgets and Graphite its documents.
+
+### 15.2 Changes
+
+| # | Change | Where |
+|---|---|---|
+| 1 | **A depth buffer for the hybrid renderer**: `vello_gpu` draws what is opaque front to back and leaves out the pixels it covers | `scene/vello_hybrid_scene_sink.rs` |
+| 2 | **The Metal queues ordered by a shared event**: the device's queue signals an `MTLSharedEvent` behind the frame and a command buffer of the platform's queue waits for it ahead of the presentation; the processor no longer waits until the frame is scheduled (`waitUntilScheduled` remains the fallback) | `gpu/metal.rs` |
+| 3 | **Fragments** (`IDrawingContextImplWithFragments`, an optional extension of the drawing context reached like the effects one): the compositor keeps what the backend made of the draw list of a visual and has it drawn again while the draw list and its resources do not change. The GPU mode keeps a scene of `vello` per visual and appends it whole; it draws a fragment again only at the transform it was made at moved by whole pixels, with the opacity and options it was made with, and keeps none that paints with an image or blends with what lies outside it. Other backends and modes keep none | `FerroUI.Base` (`platform/i_drawing_context_impl_with_fragments.rs`, `server_composition_draw_list_visual.rs`), `drawing_context_impl/fragments.rs`, `scene/vello_gpu_scene_sink.rs`, `gpu/fragment_tests.rs` |
+
+### 15.3 Measures
+
+One session, one build, the frame benchmarks of the catalog on the Metal surface at scaling 2; median milliseconds a frame, with the device waited for / without:
+
+| Scenario | Skia | hybrid, before 1-2 | hybrid, after 1-2 |
+|---|---|---|---|
+| pointer moving across buttons | 0.78 / 0.18 | 0.77 / 0.42 | 0.73 / 0.28 |
+| wheel scrolling 20 px a frame | 1.20 / 0.45 | 2.33 / 1.22 | 1.73 / 1.04 |
+| text page drawn again | 0.70 / 0.21 | 1.39 / 0.52 | 1.22 / 0.44 |
+
+(Skia's two runs of the second session: 1.14 and 0.90, 1.59 and 0.94, 0.69 and 0.70; the first two lines of Skia vary between runs by up to a factor of 1.7.)
+
+| Scenario | Skia | GPU mode, before 3 | GPU mode, after 3 | hybrid |
+|---|---|---|---|---|
+| pointer moving across buttons | 0.64 / 0.16 | 1.11 / 0.36 | 1.12 / 0.34 | 0.74 / 0.30 |
+| wheel scrolling 20 px a frame | 0.92 / 0.34 | 2.51 / 0.71 | 2.26 / 0.48 | 1.80 / 1.10 |
+| text page drawn again | 0.69 / 0.20 | 2.00 / 0.57 | 1.99 / 0.56 | 1.26 / 0.45 |
+| catalog tour 2 (total ms) | 483 | 1150 | 1150 | 853 |
+
+Fragments take a third of the processor time of the GPU mode off a scrolled frame and leave the pixels as they were (`gpu/fragment_tests.rs`: equal at the place a fragment was made, within one level moved by whole pixels). The GPU mode stays bound by its GPU: a Metal trace of the scrolled frames has about 0.85 ms of compute passes of `vello` and 0.3 ms of copies (the region of a kept frame, and the frame into the drawable with the alpha premultiplied) a frame, where Skia's whole frame takes about 0.6 ms of GPU. The hybrid mode stays the faster one, and the default.
+
+### 15.4 Not built: retained texture layers in the compositor
+
+(`vello-performance.md`, section 9, has this design with the others that are open.)
+
+The Vello work stops here (2026-10-20): Skia stays the default backend, and its speed is enough for now. This is the design of the next step for the hybrid mode, the one that would close the gap on scrolling and on content that moves.
+
+**What it is for.** In a scrolled frame nothing changes but the offset of the content: the hybrid mode computes the coverage of every path of it again, while Skia only records commands for the GPU. A retained layer draws such a subtree once into a texture of the device and, in the frames after, composes the texture at its new place: for `vello_gpu` one rectangle painted with an image, and no strips. Only what changed inside the subtree, and what scrolls into view, is drawn again. It is the way Graphite keeps the tiles of its documents, applied to visuals.
+
+**What exists.** The bitmap cache of a visual (`ServerCompositionVisualCache`, the cache mode of the contract) already does most of it:
+
+- it renders the subtree into an offscreen layer of the render interface (`create_offscreen_render_target`);
+- it is the dirty rectangle collector of its subtree in the update pass (`push_cache_if_needed`), so a change inside the subtree re-renders only that part of the layer, while a change of the transform of the visual itself dirties only the target;
+- it composes the layer with `draw_bitmap`, snapped to the pixels of the device.
+
+**What has to be added.**
+
+1. **A layer that is not asked for.** A visual gets a retained layer from the compositor itself, not from its cache mode, when its own transform changed in two frames in a row while nothing else in its subtree did (the content of a scroll viewer, a panel that slides). It loses it when its subtree changes in most frames, after some frames without a move, or when the budget of the layers (memory of the device) is spent. The visual's `cache()` returns the explicit cache or this one, so the update and render passes take both the same way.
+2. **The part that is visible, and a margin.** The bitmap cache renders the whole bounds of the subtree, clamped to the largest texture (which loses resolution): the content of a long list would be a texture of tens of megabytes. A retained layer holds the bounds of the subtree within the clip it is drawn in, widened by a margin (a viewport in the direction of the move), in the pixels of the device. When the visible part leaves the layer, the layer moves: what it still holds is copied to its new place on the device (`copy_texture_region`), and the strip that came into view is drawn as a dirty rectangle of the cache.
+3. **The same pixels.** A layer is drawn again only when the transform of the visual to the device is the one it was rendered at moved by whole pixels; another scale or a fraction of a pixel renders it again, so text, snapped rectangles and flattened curves are where they would be. Composing source-over is associative, so the pixels are those of drawing the subtree directly, but for the rounding of the layer (one level of 255). A subtree is not retained when the opacity at the visual is not 1 (the drawing context multiplies opacity into each paint: a group opacity on the layer would compose overlapping shapes differently), when something in it is composed other than source-over with what lies below it, or when an effect or an opacity mask is pushed at the visual itself.
+4. **Only where it gains.** The render interface says whether it wants retained layers: an optional feature of the context of the render interface (asked as the other optional features are), which the Vello backend gives in the hybrid and CPU modes. The Skia backend gives it only if a measure shows that it gains: it composes its own layers on the GPU already, and a texture per subtree costs memory and a copy.
+
+**How it would be measured.** The frame benchmarks of the catalog (scrolling 20 px a frame, the pointer across buttons, the tour), in one session with Skia first and last (section 14.1), and the comparison harness for the pixels: a scene drawn through a retained layer against the same scene drawn directly, at the place it was rendered at and moved by whole pixels.
+
+**After it.** The scene of a full redraw (new content, which no layer holds) built in bands on several threads: the drawing context records into a list the threads can share, each thread replays it into a scene of `vello_gpu` of its band, and the bands are the textures of the frame of the window, so that no copy is added.

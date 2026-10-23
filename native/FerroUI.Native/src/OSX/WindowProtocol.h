@@ -20,6 +20,8 @@ struct IFrnAutomationPeer;
 
 -(double) getExtendedTitleBarHeight;
 -(void) setIsExtended:(bool)value;
+-(void) setStandardButtonsTitleBarHeight:(double)height;
+-(void) layoutStandardButtons;
 -(void) disconnectParent;
 -(bool) isDialog;
 

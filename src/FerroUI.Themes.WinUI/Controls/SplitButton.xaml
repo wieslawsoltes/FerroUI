@@ -61,6 +61,10 @@
 
   <!-- The implicit Button style of the Grid.Resources of the template of SplitButtonStyle. -->
   <ControlTheme x:Key="SplitButtonInnerButtonStyle" TargetType="Button">
+    <!-- The defaults of a WinUI 3 control, which its style leaves unset and its template binds
+         (FerroUI's defaults are Stretch). Deviation (winui-theme/DEVIATIONS.md, G-27). -->
+    <Setter Property="HorizontalContentAlignment" Value="Center" />
+    <Setter Property="VerticalContentAlignment" Value="Center" />
     <Setter Property="Foreground" Value="{DynamicResource SplitButtonForeground}" />
     <Setter Property="BorderBrush" Value="Transparent" />
     <Setter Property="BorderThickness" Value="{DynamicResource SplitButtonBorderThemeThickness}" />
@@ -112,6 +116,10 @@
   </ControlTheme>
 
   <ControlTheme x:Key="SplitButtonStyle" TargetType="SplitButton">
+    <!-- The defaults of a WinUI 3 control, which its style leaves unset and its template binds
+         (FerroUI's defaults are Stretch). Deviation (winui-theme/DEVIATIONS.md, G-27). -->
+    <Setter Property="HorizontalContentAlignment" Value="Center" />
+    <Setter Property="VerticalContentAlignment" Value="Center" />
     <Setter Property="Background" Value="{DynamicResource SplitButtonBackground}" />
     <Setter Property="Foreground" Value="{DynamicResource SplitButtonForeground}" />
     <Setter Property="BorderBrush" Value="{DynamicResource SplitButtonBorderBrush}" />
@@ -426,6 +434,9 @@
        SplitButtonStyle, whose state styles select the same element names, and writes out the
        setter of SplitButtonStyle it does not override (BorderThickness). -->
   <ControlTheme x:Key="SplitButtonCommandBarStyle" TargetType="SplitButton">
+    <!-- The defaults of a WinUI 3 control, which its style leaves unset and its template binds
+         (FerroUI's defaults are Stretch). Deviation (winui-theme/DEVIATIONS.md, G-27). -->
+    <Setter Property="VerticalContentAlignment" Value="Center" />
     <Setter Property="Background" Value="{DynamicResource AppBarButtonBackground}" />
     <Setter Property="Foreground" Value="{DynamicResource AppBarButtonForeground}" />
     <Setter Property="BorderBrush" Value="{DynamicResource AppBarButtonBorderBrush}" />
