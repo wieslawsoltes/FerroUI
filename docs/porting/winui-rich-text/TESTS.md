@@ -1,5 +1,182 @@
 # Rich text verification
 
+## 2026-10-23 configured read-only context-menu continuation
+
+The configured-menu bridge and shared popup ownership changes are described in
+[CONTEXT-MENUS.md](CONTEXT-MENUS.md). They build on the source in fa3b9033 plus
+the documentation-only local checkpoint b462d5b0. Thirty-one read-only Controls
+test definitions cover typed metadata and root coordinates, cancellation,
+replacement, actual context keys, holding, nested readers and editor presenter
+ownership, overflow lookup/default gating, and callback-bearing transforms.
+One runtime/compiled XAML definition covers live arguments and weak handler
+lifetime. Actual emitter regeneration and the final rebuilt XAML gate now pass.
+
+The shared popup suite is deliberately recorded by source version:
+
+| Attempt | Frozen scope and actual outcome |
+|---|---|
+| Initial old-production build | Failed after 86.373s with four diagnostics from three mechanical fixture issues: a missing visual trait import at two calls, one ambiguous upcast, and one collection getter treated as optional. No tests executed. |
+| Corrected old-production baseline | Built successfully in 250.808s. Eighteen popup test bodies ran in two framework host modes: **6 passed, 30 failed**, zero ignored. The failures reproduce stale target/session/host ownership. Only this focused 36-case suite ran. |
+| First ownership-fix build | Expanded to 22 bodies / 44 definitions, but compilation was killed with SIGKILL after 221.203s. No runtime result exists for this source. |
+| Interim parent-ticket source | Built successfully in 254.899s. All 48 popup cases passed. Read-only cases passed 26 and failed five on the fixture's out-of-bounds pointer coordinates. Existing flyout / popup / editor-context filters passed 112 / 129 / 18. No full Controls suite ran on this source. |
+| Final source | Completes templated-parent assignment after a nested same-parent call, adding two host variants for 25 bodies / 50 definitions. All 50 popup and 31 read-only cases pass, as does the full 5,401-case Controls suite. Five read-only input points are corrected as described below. |
+
+Both host modes use framework test services: one separate-window popup host
+mode and one overlay mode. They do not constitute actual native desktop
+execution. The parent-assignment defect was found by source review; its four
+host variants were not present in the measured 36-case red baseline.
+Definitions added after that baseline are not presented as failing old-code
+executions.
+
+The five read-only fixture failures requested root Y values 87.75–97.75 from a
+view whose root interval is 19–79. The existing shared positioner clamps an
+explicit point to its target bounds, correctly yielding Y=79. All preceding
+ownership and event assertions passed. The corrected fixtures use distinct
+fractional in-bounds Y values 61.75, 63.75, 65.75, 67.75 and 69.75 and retain
+their exact anchor assertions. The production positioner is unchanged; the
+assertions still require the exact requested in-bounds coordinates. The failed 26/5 run remains
+preserved with its original source manifest.
+
+The interim 48-case executable has SHA-256
+`15062b660ac7100e7e8e9098fcff59a6984f2a23b05e1ca69f3127a5d2f25034`;
+its popup runtime log has SHA-256
+`32bd319c61607cdb6a6b73b93fcb62e554e297e852d31e2ffc6d53c2d2fb6056`.
+
+The measured red binary has SHA-256
+`0c68b8d8ba5cd83f5304c034288c8aa8900125cb3854eff89e91ca88f7340f64`.
+Its focused log has SHA-256
+`4f683fae7331af99ca4a09503bc35af8d3c258c1b9f332263f9137358896674e`.
+The failed first-green build log has SHA-256
+`09d4d3be26bc1f3f0f22aa83062a910e313d2f0361841c3382d34f4b38dd55ce`.
+Each attempt retains its own source manifest, exact command/environment,
+timing, exit code and unchanged-source check. Shared memory and storage
+exhaustion are recorded as build failures, never as passing or ignored tests.
+The complete final record is embedded in
+[continuation-validation.json](continuation-validation.json), with original
+report SHA-256
+`8935682b683ae70ffb1e0a84e51015c909beff1e08eddcb9f859d277d7d90fd8`
+(80,036 bytes). The record retains eight source manifests, 25 log digests,
+actual generator outputs and the final source audit. Local source commit
+`e0c0a2e8ef360c0e05cc2a86d39a850df63f55e9` and its GitHub equivalent
+`309ff267aec5d80fdfec4019c0e8db1cceb8168f` have identical tree
+`89113341778c640dc00a69fab8182ecf34bfbee9`. The final XAML source adds exactly
+the three fixture files identified below; no Controls source changed after its
+passing full gate.
+
+| Final executed gate | Result |
+|---|---:|
+| Popup ownership | 50 passed |
+| Read-only context menus | 31 passed |
+| All flyouts / Popup primitives / editor context menus | 114 / 129 / 18 passed |
+| Full Controls, with loopback access | 5,401 passed, zero failed or ignored |
+| Corrected actual XAML emitter regeneration | One passed |
+| Final emitter model/runtime parity | One passed |
+| Live read-only XAML handler | One passed |
+| Full XAML | 621 passed, zero failed, 17 existing ignored |
+
+The final Controls build passed in 260.043s. Its executable SHA-256 is
+`b8f5ea01e380b1ef96545d7faa1e18381b770fe92cc3bb26de0d43aec25621f4`.
+The full run used the binary without a test-thread override and finished in
+19.08s; its log SHA-256 is
+`78e1b3be73371ec990cb8b06be72cedc138e210ed2334b4f806a31fc64d702f1`.
+
+The first actual XAML generation succeeded and reproduced all nine prepared
+handler outputs byte-for-byte. Model/runtime emitter parity passed, but the
+focused live handler exposed an editor-only fixture assertion: the shared
+code-behind method required a RichEditBox sender. The correction adds a
+dedicated read-only handler and appends its metadata method, preserving the
+existing editor assertion and helper indices. Only the read-only corpus wiring
+changes. The second actual emitter run changed one generated line, calling
+`OnReadonlyContextMenuOpening_5`; all eight other outputs stayed byte-identical.
+The final binary was rebuilt from that actual generated output before the
+focused and full gates. The three overrides are `support/xaml/event_tests.rs`,
+`emitter/corpus.rs`, and `emitter/generated_handlers/rich_readonly_context_menu_event.rs`
+inside the XAML test crate.
+
+The final XAML executable SHA-256 is
+`46ece101ba7e82147fac5a00e60c541eff7756b324c35dfc841d5dc31a982365`.
+Full XAML ran with `--test-threads=1` in 248.33s; its log SHA-256 is
+`f88f53f8033a96dbf4c0209393c6bcf5b6a25b09a07f54a1c9cc498ef404d661`.
+During constrained code generation, the task's inactive Base artifacts were
+archived, verified by decompression hash, and later restored with their original
+bytes and mtimes. These resource actions, the distinct failed fixture run and
+all successful final gates remain recorded. They do not establish native OS
+popup or packaged WinUI execution.
+
+## 2026-10-23 published SetText conformance
+
+Rich text conformance
+[39948857233](https://github.com/wieslawsoltes/FerroUI/actions/runs/39948857233)
+completed successfully for published head
+`fa3b9033e200c7638a9c47e9d7a09120bde6f7ed`, tree
+`7642661c6255aaebb5d315c0e168bf6083e4240b`. All three jobs passed. Completed
+Linux/Windows logs and both native artifact manifests identify measured PR
+merge `4676e0828babbec8f792f3d4b5a78981f93cbdf3`. These results validate that
+published checkpoint; they do not include the later configured read-only
+context-menu work.
+
+| Completed gate | Result |
+|---|---|
+| Linux observation extractor | 50 passed |
+| Linux Base / Controls | 4,640 / 5,320 passed |
+| Linux Win32 / WinUI host | 329 / 50 passed |
+| Fluent / Simple / WinUI themes | 210 / 213 / 301 passed, with 2 / 3 / 2 existing ignored tests |
+| XAML | 620 passed, 17 existing ignored; separate doctest: zero executed, one ignored |
+| Generated references | All five regeneration/check gates passed |
+| Native Windows WinUI / counted UTF-16 / IMM32 | 65 / 2 / 23 passed |
+| Native Windows selected rich Controls | 832 passed |
+| System MSFTEDIT x64 | Eight serial oracle tests passed |
+| System MSFTEDIT ARM64 | Eight serial tests passed; separate concurrent diagnostic also passed eight |
+
+All executed suites above have zero failures. Official x64 artifact
+`12499797710` is 102,678 bytes with archive SHA-256
+`a832630c806005078d482b1f014bbd03c97df778d559e85d688da37b613f959c`.
+ARM64 artifact `12500390895` is 232,156 bytes with archive SHA-256
+`a031c126b32995e8a1bf75856fd3cff673e568ca5fdd1a2e1125b9e974e5d0be`.
+Both lengths and digests match the API metadata, and every archive member CRC
+passes. Both measured the unchanged probe blob
+`64262e70bb48d4241fbe4626d27df85c388284ba`. The x64 engine is MSFTEDIT
+6.2.26100.33648; the ARM64 engine is 6.2.26100.9711. Each architecture's
+canonical observation families and counts equal its earlier immutable e5a0778a
+record, with the newer source, runner and engine provenance retained separately.
+
+At the separate 12:22:20 UTC observation, broad platform workflow
+[39948857226](https://github.com/wieslawsoltes/FerroUI/actions/runs/39948857226)
+was still running. Its entire X11 job had succeeded, including the real-window
+IBus transitions `(6,0)`, `(2,0)`, `(3,0)` and the later catalog smoke. No whole
+broad-workflow pass is inferred from the completed conformance run. Later broad
+results are separate observations rather than edits to this snapshot.
+
+The aggregate report is embedded as a distinct CI observation in
+[continuation-validation.json](continuation-validation.json). Its original
+54,089-byte JSON has SHA-256
+`a56c0bcb97d262d364ce37d2a06f1e83ffa1d9e09b7db63bc17795f317c33ec0`.
+It retains source identities, exact completed test summaries, decoded log
+hashes, both archive proofs and the X11 proof. The earlier interim and canceled
+9a1a756b observations remain unchanged.
+
+### Final broad-platform observation for the same published SetText source
+
+Broad CI [39948857226](https://github.com/wieslawsoltes/FerroUI/actions/runs/39948857226)
+completed successfully at 12:51:59 UTC, verified at 12:55:23 UTC. All 14 jobs
+passed, including macOS, native Windows, X11, both Wayland jobs, framebuffer,
+Android, browser builds and the dependent combined browser site. Together with
+the three successful conformance jobs, both workflows are now fully green for
+fa3b9033. This final observation does not cover the later context-menu source.
+
+Completed broad logs record macOS Base 4,640, Controls 5,320, render-backend
+comparison 32 and Vello 521 with nine ignored, all with zero failures. Native
+Windows records Win32 372, Desktop one and WinUI 65, plus successful rendering,
+native-window, Windows App Runtime and sample smoke steps. Both completed logs
+identify the same measured merge 4676e082. The macOS log's interleaved Cargo
+headers were associated with each actual `running N tests` start; all 157
+result rows agree with their harness counts.
+
+The separate immutable final broad report is also embedded in
+continuation-validation.json. Its original 17,778-byte JSON has SHA-256
+`74812c6a678d41816405eb529b7f4fa4d0cb2410f57aa62f4dff8f79de23f561`.
+The earlier 12:22:20 in-progress observation remains unchanged.
+
 ## 2026-10-23 continuation: independent SetText range pairs
 
 The bounded paired-range implementation builds on published fixture-correction

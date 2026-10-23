@@ -46,7 +46,7 @@ pub fn populate_handlers_richreadonlycontextmenuevent_xaml(
     rich_text_block_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("display")));
     rt::register_name(name_scope.as_ref(), "display", ::core::clone::Clone::clone(&rich_text_block_0).upcast::<::ferroui_base::FerroObject>(), 1, 165)?;
     // Handlers/RichReadonlyContextMenuEvent.xaml(1,151) ContextMenuOpening
-    rt::add_handler(&rich_text_block_0, &::ferroui_controls::RichTextBlock::__markup_field_ContextMenuOpeningEvent(), rt::method_delegate(&context, 2, |this, arguments| { crate::support::xaml::event_tests::MyHost::__markup_OnContextMenuOpening_3(this, arguments.next()?, arguments.next()?); ::core::result::Result::Ok(::core::option::Option::None) }));
+    rt::add_handler(&rich_text_block_0, &::ferroui_controls::RichTextBlock::__markup_field_ContextMenuOpeningEvent(), rt::method_delegate(&context, 2, |this, arguments| { crate::support::xaml::event_tests::MyHost::__markup_OnReadonlyContextMenuOpening_5(this, arguments.next()?, arguments.next()?); ::core::result::Result::Ok(::core::option::Option::None) }));
     rt::invoked(rich_text_block_0.try_end_init(), 1, 151)?;
     rt::invoked(root.try_end_init(), 1, 2)?;
     rt::complete_root_name_scope(::core::option::Option::Some(&root), name_scope.as_ref(), 1, 2)?;

@@ -42,6 +42,9 @@ parity at this reference.
   original operation spans, private observation ordering and transaction ownership.
 - [LINK-FIELDS.md](LINK-FIELDS.md): common cross-paragraph field metadata, typed
   projected Link ranges, RTF/transfer preservation and measured limits.
+- [CONTEXT-MENUS.md](CONTEXT-MENUS.md): configured read-only context menus,
+  synchronous typed events, overflow flyout lookup, property provenance and
+  shared popup ownership; automatic selection menus remain separate work.
 - [API-MAP.md](API-MAP.md): a destination/review plan for every public API owner,
   with exact member, Rust target, test and deviation evidence for reviewed entries.
 - [JOURNAL.md](JOURNAL.md): implementation/checkpoint history and the distinction

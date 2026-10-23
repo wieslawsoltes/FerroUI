@@ -1591,6 +1591,22 @@
         {
           "path": "src/FerroUI.Controls/rich_text_block.rs",
           "symbol": "pub fn set_text_line_bounds("
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_context_menu.rs",
+          "symbol": "pub fn context_menu_opening_event()"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_context_menu.rs",
+          "symbol": "pub fn context_menu_opening("
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_context_menu.rs",
+          "symbol": "pub(super) fn on_context_requested("
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_block.rs",
+          "symbol": "ContextMenuOpeningEvent: RoutedEvent<crate::ContextMenuEventArgs>"
         }
       ],
       "tests": [
@@ -1657,15 +1673,60 @@
         {
           "path": "src/FerroUI.Controls/rich_text_line_bounds_tests.rs",
           "symbol": "rich_text_line_bounds_trimming_keeps_visible_ranges_and_embedded_ink"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_context_menu_tests.rs",
+          "symbol": "rich_readonly_context_metadata_exposes_the_exact_distinct_typed_event"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_context_menu_tests.rs",
+          "symbol": "rich_readonly_context_pointer_reports_root_dips_and_cancels_configured_menus"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_context_menu_tests.rs",
+          "symbol": "rich_readonly_context_keyboard_uses_view_origin_for_selection_and_direction"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_context_menu_tests.rs",
+          "symbol": "rich_readonly_context_opening_can_replace_or_remove_the_configured_flyout"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_context_menu_tests.rs",
+          "symbol": "rich_readonly_context_nested_request_owns_the_opening_and_pointer_anchor"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_context_menu_tests.rs",
+          "symbol": "rich_readonly_context_unconfigured_nested_request_retires_outer_intent"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_context_menu_tests.rs",
+          "symbol": "rich_readonly_context_detach_and_reattach_invalidates_the_typed_opening"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_context_menu_tests.rs",
+          "symbol": "rich_readonly_context_menu_precedence_survives_canceled_property_removal"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_context_menu_tests.rs",
+          "symbol": "rich_readonly_context_embedded_reader_has_one_public_opening_owner"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_context_menu_tests.rs",
+          "symbol": "rich_readonly_context_presenter_defers_the_public_event_to_its_editor"
+        },
+        {
+          "path": "tests/FerroUI.Markup.Xaml.UnitTests/emitter/event_handlers.rs",
+          "symbol": "rich_readonly_context_menu_event_calls_the_method_with_live_arguments"
         }
       ],
-      "reason": "The rich view lays out the shared document through the existing TextFormatter/TextLine pipeline. This maps the stated property/operation, while exact native formatter, visual and platform behavior remains under review. Public properties and native projection members are reviewed individually in the API map. Rich TextLineBounds reuses the main formatter/property and propagates head-owned policy to linked layouts, with explicit source/cache invalidation and clipping. Native metric/pixel policy remains separately qualified.",
+      "reason": "The rich view lays out the shared document through the existing TextFormatter/TextLine pipeline. This maps the stated property/operation, while exact native formatter, visual and platform behavior remains under review. Public properties and native projection members are reviewed individually in the API map. Rich TextLineBounds reuses the main formatter/property and propagates head-owned policy to linked layouts, with explicit source/cache invalidation and clipping. Native metric/pixel policy remains separately qualified. Configured read-only rich-text requests now use a distinct synchronous typed ContextMenuOpening event with root-DIP coordinates and shared Handled cancellation. Pointerless requests use the read-only view origin, not editable selection-edge geometry. Handlers can replace/remove the configured menu; nested requests and detach/reattach retire older intent. The editable presenter defers to its editor owner and embedded readers project only their own event. Existing framework ContextMenu precedence, bubble routing, weak runtime/compiled XAML handlers, retained-popup reposition and actual-key toggle are explicit translations. Native default command construction, automatic selection flyouts, legacy asynchronous command-gated Copy menus, modern overflow event forwarding (absent from the source), exact native close/reopen timing and platform/pixel conformance are not supplied. See CONTEXT-MENUS.md; test definitions and actual executed source checkpoints are recorded separately.",
       "deviations": [
         "RT-A02",
         "RT-I01",
         "RT-I02",
         "RT-I03",
-        "RT-I31"
+        "RT-I31",
+        "RT-I37"
       ]
     },
     "dxaml/xcp/dxaml/lib/RichTextBlock_Partial.cpp": {
@@ -1781,6 +1842,26 @@
         {
           "path": "src/FerroUI.Controls/rich_text_block_overflow.rs",
           "symbol": "RichTextBlockOverflow"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_context_menu.rs",
+          "symbol": "pub(crate) fn inherited_context_flyout("
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_context_menu.rs",
+          "symbol": "fn context_flyout_master("
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_context_menu.rs",
+          "symbol": "pub(crate) fn context_flyout_is_enabled("
+        },
+        {
+          "path": "src/FerroUI.Controls/flyouts/popup_flyout_base.rs",
+          "symbol": "pub(crate) fn effective_context_flyout("
+        },
+        {
+          "path": "src/FerroUI.Controls/flyouts/popup_flyout_base.rs",
+          "symbol": "pub(crate) fn context_flyout_for_request("
         }
       ],
       "tests": [
@@ -1799,11 +1880,44 @@
         {
           "path": "tests/FerroUI.Markup.Xaml.UnitTests/xaml/rich_text_tests.rs",
           "symbol": "rich_text_markup_links_overflow_to_the_same_document"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_context_menu_tests.rs",
+          "symbol": "rich_readonly_context_overflow_inherits_root_master_and_keeps_requesting_target"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_context_menu_tests.rs",
+          "symbol": "rich_readonly_context_overflow_local_override_clear_and_orphan_chain"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_context_menu_tests.rs",
+          "symbol": "rich_readonly_context_default_overflow_flyout_uses_master_selection_gate"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_context_menu_tests.rs",
+          "symbol": "rich_readonly_context_local_menu_is_independent_of_default_flyout_selection_gate"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_context_menu_tests.rs",
+          "symbol": "rich_readonly_context_overflow_keyboard_anchor_dismissal_and_target_cancellation"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_context_menu_tests.rs",
+          "symbol": "rich_readonly_context_overflow_local_menu_precedes_inherited_flyout"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_context_menu_tests.rs",
+          "symbol": "rich_readonly_context_inherited_flyout_opening_cancellation_is_not_retried"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_context_menu_tests.rs",
+          "symbol": "rich_readonly_context_holding_keeps_overflow_feedback_and_selection_policy"
         }
       ],
-      "reason": "A derived rich view uses the shared weak continuation chain and document selection. Native separate class topology and unreviewed overflow members remain adapted or pending.",
+      "reason": "A derived rich view uses the shared weak continuation chain and document selection. Native separate class topology and unreviewed overflow members remain adapted or pending. Configured overflow lookup now prefers a non-null local ContextFlyout and otherwise resolves the root primary master, never an intermediate continuation. The requesting overflow retains placement, target cancellation and holding feedback. A default overflow property uses the master selection-enabled gate; explicit null preserves master fallback but bypasses that default gate, and Clear restores it. Eligibility applies only on opening so later selection changes cannot block dismissal. Modern configured overflow requests do not raise or forward the typed event, matching the helper branches. The separate legacy selection-manager owner event and built-in default flyout remain pending. Framework inheritance topology and menu/keyboard translations remain explicit in CONTEXT-MENUS.md. Native m_pMaster is reset on link changes and resolved during linked block-layout setup. The configured-menu helper currently follows the live framework chain; exact cached-master availability/timing and the separate public ContentSource predecessor mismatch remain partial.",
       "deviations": [
-        "RT-I02"
+        "RT-I02",
+        "RT-I37"
       ]
     },
     "dxaml/xcp/dxaml/lib/RichTextBlockOverflow_Partial.cpp": {
@@ -10188,6 +10302,46 @@
         {
           "path": "src/FerroUI.Base/input/text_input/input_method_manager.rs",
           "symbol": "fn try_find_and_apply_client("
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_context_menu.rs",
+          "symbol": "pub fn context_menu_opening_event()"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_context_menu.rs",
+          "symbol": "pub fn context_menu_opening("
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_context_menu.rs",
+          "symbol": "pub(super) fn on_context_requested("
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_block.rs",
+          "symbol": "ContextMenuOpeningEvent: RoutedEvent<crate::ContextMenuEventArgs>"
+        },
+        {
+          "path": "src/FerroUI.Controls/flyouts/popup_flyout_base.rs",
+          "symbol": "struct TargetHandlers"
+        },
+        {
+          "path": "src/FerroUI.Controls/flyouts/popup_flyout_base.rs",
+          "symbol": "struct FlyoutSessionHandlers"
+        },
+        {
+          "path": "src/FerroUI.Controls/flyouts/popup_flyout_base.rs",
+          "symbol": "struct TargetLifetime"
+        },
+        {
+          "path": "src/FerroUI.Controls/primitives/popup.rs",
+          "symbol": "struct PopupClosingRequest"
+        },
+        {
+          "path": "src/FerroUI.Controls/primitives/popup.rs",
+          "symbol": "fn subscribe_placement_target_transforms("
+        },
+        {
+          "path": "src/FerroUI.Controls/primitives/popup.rs",
+          "symbol": "pub fn set_popup_parent("
         }
       ],
       "tests": [
@@ -10302,14 +10456,159 @@
         {
           "path": "src/FerroUI.Controls/rich_edit_input_focus_tests.rs",
           "symbol": "rich_input_canceled_nested_focus_keeps_post_event_client_installation"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_context_menu_tests.rs",
+          "symbol": "rich_readonly_context_metadata_exposes_the_exact_distinct_typed_event"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_context_menu_tests.rs",
+          "symbol": "rich_readonly_context_pointer_reports_root_dips_and_cancels_configured_menus"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_context_menu_tests.rs",
+          "symbol": "rich_readonly_context_keyboard_uses_view_origin_for_selection_and_direction"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_context_menu_tests.rs",
+          "symbol": "rich_readonly_context_opening_can_replace_or_remove_the_configured_flyout"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_context_menu_tests.rs",
+          "symbol": "rich_readonly_context_nested_request_owns_the_opening_and_pointer_anchor"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_context_menu_tests.rs",
+          "symbol": "rich_readonly_context_unconfigured_nested_request_retires_outer_intent"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_context_menu_tests.rs",
+          "symbol": "rich_readonly_context_detach_and_reattach_invalidates_the_typed_opening"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_context_menu_tests.rs",
+          "symbol": "rich_readonly_context_menu_precedence_survives_canceled_property_removal"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_context_menu_tests.rs",
+          "symbol": "rich_readonly_context_embedded_reader_has_one_public_opening_owner"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_context_menu_tests.rs",
+          "symbol": "rich_readonly_context_presenter_defers_the_public_event_to_its_editor"
+        },
+        {
+          "path": "tests/FerroUI.Markup.Xaml.UnitTests/emitter/event_handlers.rs",
+          "symbol": "rich_readonly_context_menu_event_calls_the_method_with_live_arguments"
+        },
+        {
+          "path": "src/FerroUI.Controls/flyouts/popup_flyout_request_tests.rs",
+          "symbol": "popup_request_opening_new_target_replaces_older_publication"
+        },
+        {
+          "path": "src/FerroUI.Controls/flyouts/popup_flyout_request_tests.rs",
+          "symbol": "popup_request_opened_new_target_owns_detach_handlers"
+        },
+        {
+          "path": "src/FerroUI.Controls/flyouts/popup_flyout_request_tests.rs",
+          "symbol": "popup_request_closed_callback_owns_reopened_target"
+        },
+        {
+          "path": "src/FerroUI.Controls/flyouts/popup_flyout_request_tests.rs",
+          "symbol": "popup_request_opening_hide_retires_pending_open"
+        },
+        {
+          "path": "src/FerroUI.Controls/flyouts/popup_flyout_request_tests.rs",
+          "symbol": "popup_request_opening_detach_reattach_retires_pending_open"
+        },
+        {
+          "path": "src/FerroUI.Controls/flyouts/popup_flyout_request_tests.rs",
+          "symbol": "popup_request_closing_nested_show_wins"
+        },
+        {
+          "path": "src/FerroUI.Controls/flyouts/popup_flyout_request_tests.rs",
+          "symbol": "popup_request_canceled_hide_keeps_session_handlers"
+        },
+        {
+          "path": "src/FerroUI.Controls/flyouts/popup_flyout_request_tests.rs",
+          "symbol": "popup_request_retarget_close_preserves_nested_closed_show"
+        },
+        {
+          "path": "src/FerroUI.Controls/flyouts/popup_flyout_request_tests.rs",
+          "symbol": "popup_request_property_callback_new_target_preserves_is_open"
+        },
+        {
+          "path": "src/FerroUI.Controls/flyouts/popup_flyout_request_tests.rs",
+          "symbol": "popup_request_same_target_reposition_keeps_detach_subscription"
+        },
+        {
+          "path": "src/FerroUI.Controls/flyouts/popup_flyout_request_tests.rs",
+          "symbol": "popup_request_canceled_outer_open_cannot_overwrite_nested_is_open"
+        },
+        {
+          "path": "src/FerroUI.Controls/flyouts/popup_flyout_request_tests.rs",
+          "symbol": "popup_request_open_property_handler_can_hide"
+        },
+        {
+          "path": "src/FerroUI.Controls/flyouts/popup_flyout_request_tests.rs",
+          "symbol": "popup_request_close_property_handler_can_reopen"
+        },
+        {
+          "path": "src/FerroUI.Controls/flyouts/popup_flyout_request_tests.rs",
+          "symbol": "popup_request_popup_host_closed_callback_can_reopen"
+        },
+        {
+          "path": "src/FerroUI.Controls/flyouts/popup_flyout_request_tests.rs",
+          "symbol": "popup_request_popup_host_opened_callback_can_retarget"
+        },
+        {
+          "path": "src/FerroUI.Controls/flyouts/popup_flyout_request_tests.rs",
+          "symbol": "popup_request_redundant_popup_open_keeps_completion_events"
+        },
+        {
+          "path": "src/FerroUI.Controls/flyouts/popup_flyout_request_tests.rs",
+          "symbol": "popup_request_popup_open_during_closing_retires_close"
+        },
+        {
+          "path": "src/FerroUI.Controls/flyouts/popup_flyout_request_tests.rs",
+          "symbol": "popup_request_popup_open_during_flyout_hide_keeps_session_ownership"
+        },
+        {
+          "path": "src/FerroUI.Controls/flyouts/popup_flyout_request_tests.rs",
+          "symbol": "popup_request_superseded_control_request_does_not_open_ancestor_menu"
+        },
+        {
+          "path": "src/FerroUI.Controls/flyouts/popup_flyout_request_tests.rs",
+          "symbol": "popup_request_pending_host_cleanup_preserves_new_presenter"
+        },
+        {
+          "path": "src/FerroUI.Controls/flyouts/popup_flyout_request_tests.rs",
+          "symbol": "popup_request_transform_subscription_callback_keeps_current_target_handlers"
+        },
+        {
+          "path": "src/FerroUI.Controls/flyouts/popup_flyout_request_tests.rs",
+          "symbol": "popup_request_measure_callback_preserves_new_anchor"
+        },
+        {
+          "path": "src/FerroUI.Controls/flyouts/popup_flyout_request_tests.rs",
+          "symbol": "popup_request_parent_callback_reopen_keeps_the_new_parent"
+        },
+        {
+          "path": "src/FerroUI.Controls/flyouts/popup_flyout_request_tests.rs",
+          "symbol": "popup_request_parent_callback_closed_session_retires_old_assignment"
+        },
+        {
+          "path": "src/FerroUI.Controls/flyouts/popup_flyout_request_tests.rs",
+          "symbol": "popup_request_same_parent_callback_completes_templated_parent"
         }
       ],
-      "reason": "The current owned ContextFlyout target and actual popup-focused descendant retain editor selection/composition state. Close, replacement, focus return and real blur clear weak subscriptions. Native IME transport retention and remaining flyout helper behavior are not supplied by this control policy. RichEditBox now projects pointer, Apps/Shift+F10 and holding ContextRequested into one synchronous bubble ContextMenuOpening before default menu dispatch. Immutable f64 CursorLeft/Top use root DIPs and shared inherited Handled cancels the request. Keyboard anchors use the normalized LTR end/bottom or RTL start/bottom selected grapheme edge, independently of directed anchor, with shaped caret fallback and soft-wrap retention. The edge is selected in presenter coordinates before transforming the point, preserving the selected side under reflection/rotation. Weak per-request rectangles carry the actual anchor through existing ContextMenu/PopupFlyoutBase lifecycle, RTL gravity and constrained popup positioning; zero-size points remain valid. Handlers may install/replace/remove menus; nested requests, stale layout and detach/reattach are fenced, canceled openings are consumed once, and existing precedence/focus/IME retention remain shared. Ordinary popup dismissal retains composition and the semantic connection by avoiding a redundant unchanged-view requery during GotFocus; a real redirected focus retires that session. Routed metadata and named runtime/compiled handlers use the live base-argument handle. Native automatic selection floaties, legacy asynchronous command-gated PopupMenu, exact native edge metrics and close/reopen event order remain pending. An already open owned FerroUI popup is repositioned in place; this does not claim native WinUI flyout or platform event conformance. Test definitions and their actual completed execution records are tracked separately. The keyboard records its accepted destination in the shared input manager before LostFocus/GotFocus, while ordinary client installation remains after those events. Legitimate synchronous template/view requery now resolves the accepted owner and preserves an owned-popup composition. Accepted focus generations fence nested Losing/Getting/Lost/Got transitions, including round trips; canceled nested requests do not supersede an outer accepted transition. Input-client and view-accessor callbacks recheck both binding and focus identity. This covers synchronous framework focus/requery ownership, not arbitrary native asynchronous focus order.",
+      "reason": "The current owned ContextFlyout target and actual popup-focused descendant retain editor selection/composition state. Close, replacement, focus return and real blur clear weak subscriptions. Native IME transport retention and remaining flyout helper behavior are not supplied by this control policy. RichEditBox now projects pointer, Apps/Shift+F10 and holding ContextRequested into one synchronous bubble ContextMenuOpening before default menu dispatch. Immutable f64 CursorLeft/Top use root DIPs and shared inherited Handled cancels the request. Keyboard anchors use the normalized LTR end/bottom or RTL start/bottom selected grapheme edge, independently of directed anchor, with shaped caret fallback and soft-wrap retention. The edge is selected in presenter coordinates before transforming the point, preserving the selected side under reflection/rotation. Weak per-request rectangles carry the actual anchor through existing ContextMenu/PopupFlyoutBase lifecycle, RTL gravity and constrained popup positioning; zero-size points remain valid. Handlers may install/replace/remove menus; nested requests, stale layout and detach/reattach are fenced, canceled openings are consumed once, and existing precedence/focus/IME retention remain shared. Ordinary popup dismissal retains composition and the semantic connection by avoiding a redundant unchanged-view requery during GotFocus; a real redirected focus retires that session. Routed metadata and named runtime/compiled handlers use the live base-argument handle. Native automatic selection floaties, legacy asynchronous command-gated PopupMenu, exact native edge metrics and close/reopen event order remain pending. An already open owned FerroUI popup is repositioned in place; this does not claim native WinUI flyout or platform event conformance. Test definitions and their actual completed execution records are tracked separately. The keyboard records its accepted destination in the shared input manager before LostFocus/GotFocus, while ordinary client installation remains after those events. Legitimate synchronous template/view requery now resolves the accepted owner and preserves an owned-popup composition. Accepted focus generations fence nested Losing/Getting/Lost/Got transitions, including round trips; canceled nested requests do not supersede an outer accepted transition. Input-client and view-accessor callbacks recheck both binding and focus identity. This covers synchronous framework focus/requery ownership, not arbitrary native asynchronous focus order. Configured read-only rich-text requests now use a distinct synchronous typed ContextMenuOpening event with root-DIP coordinates and shared Handled cancellation. Pointerless requests use the read-only view origin, not editable selection-edge geometry. Handlers can replace/remove the configured menu; nested requests and detach/reattach retire older intent. The editable presenter defers to its editor owner and embedded readers project only their own event. Existing framework ContextMenu precedence, bubble routing, weak runtime/compiled XAML handlers, retained-popup reposition and actual-key toggle are explicit translations. Native default command construction, automatic selection flyouts, legacy asynchronous command-gated Copy menus, modern overflow event forwarding (absent from the source), exact native close/reopen timing and platform/pixel conformance are not supplied. See CONTEXT-MENUS.md; test definitions and actual executed source checkpoints are recorded separately. Shared FerroUI popup services now fence show/hide, host setup/close, internal IsOpen publication and callback-bearing transform subscription boundaries by request/state identity. Scoped target/transient registrations remove handlers from their actual owner or restore the exact retained session after a canceled raw close. Superseded routed requests remain consumed, and ordinary redundant open preserves completion events. These are framework ownership guarantees, not measured native flyout event order. The old-code red36 and later expanded green gates remain distinct in continuation-validation.json. Parent assignment has a separate ticket because normal logical detach can advance the popup lifecycle; post-write ticket/parent/placement checks preserve newer callbacks, including a nested show/hide that returns both values to null. Nested same-parent assignment completes its own templated-parent association; the superseded outer assignment is not responsible for completing newer work.",
       "deviations": [
         "RT-A01",
         "RT-A04",
         "RT-I06",
-        "RT-I22"
+        "RT-I22",
+        "RT-I37"
       ]
     },
     "dxaml/xcp/dxaml/lib/TextControlFlyoutHelper.h": {
@@ -10366,6 +10665,46 @@
         {
           "path": "src/FerroUI.Base/input/text_input/input_method_manager.rs",
           "symbol": "fn try_find_and_apply_client("
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_context_menu.rs",
+          "symbol": "pub fn context_menu_opening_event()"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_context_menu.rs",
+          "symbol": "pub fn context_menu_opening("
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_context_menu.rs",
+          "symbol": "pub(super) fn on_context_requested("
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_block.rs",
+          "symbol": "ContextMenuOpeningEvent: RoutedEvent<crate::ContextMenuEventArgs>"
+        },
+        {
+          "path": "src/FerroUI.Controls/flyouts/popup_flyout_base.rs",
+          "symbol": "struct TargetHandlers"
+        },
+        {
+          "path": "src/FerroUI.Controls/flyouts/popup_flyout_base.rs",
+          "symbol": "struct FlyoutSessionHandlers"
+        },
+        {
+          "path": "src/FerroUI.Controls/flyouts/popup_flyout_base.rs",
+          "symbol": "struct TargetLifetime"
+        },
+        {
+          "path": "src/FerroUI.Controls/primitives/popup.rs",
+          "symbol": "struct PopupClosingRequest"
+        },
+        {
+          "path": "src/FerroUI.Controls/primitives/popup.rs",
+          "symbol": "fn subscribe_placement_target_transforms("
+        },
+        {
+          "path": "src/FerroUI.Controls/primitives/popup.rs",
+          "symbol": "pub fn set_popup_parent("
         }
       ],
       "tests": [
@@ -10480,14 +10819,159 @@
         {
           "path": "src/FerroUI.Controls/rich_edit_input_focus_tests.rs",
           "symbol": "rich_input_canceled_nested_focus_keeps_post_event_client_installation"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_context_menu_tests.rs",
+          "symbol": "rich_readonly_context_metadata_exposes_the_exact_distinct_typed_event"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_context_menu_tests.rs",
+          "symbol": "rich_readonly_context_pointer_reports_root_dips_and_cancels_configured_menus"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_context_menu_tests.rs",
+          "symbol": "rich_readonly_context_keyboard_uses_view_origin_for_selection_and_direction"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_context_menu_tests.rs",
+          "symbol": "rich_readonly_context_opening_can_replace_or_remove_the_configured_flyout"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_context_menu_tests.rs",
+          "symbol": "rich_readonly_context_nested_request_owns_the_opening_and_pointer_anchor"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_context_menu_tests.rs",
+          "symbol": "rich_readonly_context_unconfigured_nested_request_retires_outer_intent"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_context_menu_tests.rs",
+          "symbol": "rich_readonly_context_detach_and_reattach_invalidates_the_typed_opening"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_context_menu_tests.rs",
+          "symbol": "rich_readonly_context_menu_precedence_survives_canceled_property_removal"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_context_menu_tests.rs",
+          "symbol": "rich_readonly_context_embedded_reader_has_one_public_opening_owner"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_context_menu_tests.rs",
+          "symbol": "rich_readonly_context_presenter_defers_the_public_event_to_its_editor"
+        },
+        {
+          "path": "tests/FerroUI.Markup.Xaml.UnitTests/emitter/event_handlers.rs",
+          "symbol": "rich_readonly_context_menu_event_calls_the_method_with_live_arguments"
+        },
+        {
+          "path": "src/FerroUI.Controls/flyouts/popup_flyout_request_tests.rs",
+          "symbol": "popup_request_opening_new_target_replaces_older_publication"
+        },
+        {
+          "path": "src/FerroUI.Controls/flyouts/popup_flyout_request_tests.rs",
+          "symbol": "popup_request_opened_new_target_owns_detach_handlers"
+        },
+        {
+          "path": "src/FerroUI.Controls/flyouts/popup_flyout_request_tests.rs",
+          "symbol": "popup_request_closed_callback_owns_reopened_target"
+        },
+        {
+          "path": "src/FerroUI.Controls/flyouts/popup_flyout_request_tests.rs",
+          "symbol": "popup_request_opening_hide_retires_pending_open"
+        },
+        {
+          "path": "src/FerroUI.Controls/flyouts/popup_flyout_request_tests.rs",
+          "symbol": "popup_request_opening_detach_reattach_retires_pending_open"
+        },
+        {
+          "path": "src/FerroUI.Controls/flyouts/popup_flyout_request_tests.rs",
+          "symbol": "popup_request_closing_nested_show_wins"
+        },
+        {
+          "path": "src/FerroUI.Controls/flyouts/popup_flyout_request_tests.rs",
+          "symbol": "popup_request_canceled_hide_keeps_session_handlers"
+        },
+        {
+          "path": "src/FerroUI.Controls/flyouts/popup_flyout_request_tests.rs",
+          "symbol": "popup_request_retarget_close_preserves_nested_closed_show"
+        },
+        {
+          "path": "src/FerroUI.Controls/flyouts/popup_flyout_request_tests.rs",
+          "symbol": "popup_request_property_callback_new_target_preserves_is_open"
+        },
+        {
+          "path": "src/FerroUI.Controls/flyouts/popup_flyout_request_tests.rs",
+          "symbol": "popup_request_same_target_reposition_keeps_detach_subscription"
+        },
+        {
+          "path": "src/FerroUI.Controls/flyouts/popup_flyout_request_tests.rs",
+          "symbol": "popup_request_canceled_outer_open_cannot_overwrite_nested_is_open"
+        },
+        {
+          "path": "src/FerroUI.Controls/flyouts/popup_flyout_request_tests.rs",
+          "symbol": "popup_request_open_property_handler_can_hide"
+        },
+        {
+          "path": "src/FerroUI.Controls/flyouts/popup_flyout_request_tests.rs",
+          "symbol": "popup_request_close_property_handler_can_reopen"
+        },
+        {
+          "path": "src/FerroUI.Controls/flyouts/popup_flyout_request_tests.rs",
+          "symbol": "popup_request_popup_host_closed_callback_can_reopen"
+        },
+        {
+          "path": "src/FerroUI.Controls/flyouts/popup_flyout_request_tests.rs",
+          "symbol": "popup_request_popup_host_opened_callback_can_retarget"
+        },
+        {
+          "path": "src/FerroUI.Controls/flyouts/popup_flyout_request_tests.rs",
+          "symbol": "popup_request_redundant_popup_open_keeps_completion_events"
+        },
+        {
+          "path": "src/FerroUI.Controls/flyouts/popup_flyout_request_tests.rs",
+          "symbol": "popup_request_popup_open_during_closing_retires_close"
+        },
+        {
+          "path": "src/FerroUI.Controls/flyouts/popup_flyout_request_tests.rs",
+          "symbol": "popup_request_popup_open_during_flyout_hide_keeps_session_ownership"
+        },
+        {
+          "path": "src/FerroUI.Controls/flyouts/popup_flyout_request_tests.rs",
+          "symbol": "popup_request_superseded_control_request_does_not_open_ancestor_menu"
+        },
+        {
+          "path": "src/FerroUI.Controls/flyouts/popup_flyout_request_tests.rs",
+          "symbol": "popup_request_pending_host_cleanup_preserves_new_presenter"
+        },
+        {
+          "path": "src/FerroUI.Controls/flyouts/popup_flyout_request_tests.rs",
+          "symbol": "popup_request_transform_subscription_callback_keeps_current_target_handlers"
+        },
+        {
+          "path": "src/FerroUI.Controls/flyouts/popup_flyout_request_tests.rs",
+          "symbol": "popup_request_measure_callback_preserves_new_anchor"
+        },
+        {
+          "path": "src/FerroUI.Controls/flyouts/popup_flyout_request_tests.rs",
+          "symbol": "popup_request_parent_callback_reopen_keeps_the_new_parent"
+        },
+        {
+          "path": "src/FerroUI.Controls/flyouts/popup_flyout_request_tests.rs",
+          "symbol": "popup_request_parent_callback_closed_session_retires_old_assignment"
+        },
+        {
+          "path": "src/FerroUI.Controls/flyouts/popup_flyout_request_tests.rs",
+          "symbol": "popup_request_same_parent_callback_completes_templated_parent"
         }
       ],
-      "reason": "The current owned ContextFlyout target and actual popup-focused descendant retain editor selection/composition state. Close, replacement, focus return and real blur clear weak subscriptions. Native IME transport retention and remaining flyout helper behavior are not supplied by this control policy. RichEditBox now projects pointer, Apps/Shift+F10 and holding ContextRequested into one synchronous bubble ContextMenuOpening before default menu dispatch. Immutable f64 CursorLeft/Top use root DIPs and shared inherited Handled cancels the request. Keyboard anchors use the normalized LTR end/bottom or RTL start/bottom selected grapheme edge, independently of directed anchor, with shaped caret fallback and soft-wrap retention. The edge is selected in presenter coordinates before transforming the point, preserving the selected side under reflection/rotation. Weak per-request rectangles carry the actual anchor through existing ContextMenu/PopupFlyoutBase lifecycle, RTL gravity and constrained popup positioning; zero-size points remain valid. Handlers may install/replace/remove menus; nested requests, stale layout and detach/reattach are fenced, canceled openings are consumed once, and existing precedence/focus/IME retention remain shared. Ordinary popup dismissal retains composition and the semantic connection by avoiding a redundant unchanged-view requery during GotFocus; a real redirected focus retires that session. Routed metadata and named runtime/compiled handlers use the live base-argument handle. Native automatic selection floaties, legacy asynchronous command-gated PopupMenu, exact native edge metrics and close/reopen event order remain pending. An already open owned FerroUI popup is repositioned in place; this does not claim native WinUI flyout or platform event conformance. Test definitions and their actual completed execution records are tracked separately. The keyboard records its accepted destination in the shared input manager before LostFocus/GotFocus, while ordinary client installation remains after those events. Legitimate synchronous template/view requery now resolves the accepted owner and preserves an owned-popup composition. Accepted focus generations fence nested Losing/Getting/Lost/Got transitions, including round trips; canceled nested requests do not supersede an outer accepted transition. Input-client and view-accessor callbacks recheck both binding and focus identity. This covers synchronous framework focus/requery ownership, not arbitrary native asynchronous focus order.",
+      "reason": "The current owned ContextFlyout target and actual popup-focused descendant retain editor selection/composition state. Close, replacement, focus return and real blur clear weak subscriptions. Native IME transport retention and remaining flyout helper behavior are not supplied by this control policy. RichEditBox now projects pointer, Apps/Shift+F10 and holding ContextRequested into one synchronous bubble ContextMenuOpening before default menu dispatch. Immutable f64 CursorLeft/Top use root DIPs and shared inherited Handled cancels the request. Keyboard anchors use the normalized LTR end/bottom or RTL start/bottom selected grapheme edge, independently of directed anchor, with shaped caret fallback and soft-wrap retention. The edge is selected in presenter coordinates before transforming the point, preserving the selected side under reflection/rotation. Weak per-request rectangles carry the actual anchor through existing ContextMenu/PopupFlyoutBase lifecycle, RTL gravity and constrained popup positioning; zero-size points remain valid. Handlers may install/replace/remove menus; nested requests, stale layout and detach/reattach are fenced, canceled openings are consumed once, and existing precedence/focus/IME retention remain shared. Ordinary popup dismissal retains composition and the semantic connection by avoiding a redundant unchanged-view requery during GotFocus; a real redirected focus retires that session. Routed metadata and named runtime/compiled handlers use the live base-argument handle. Native automatic selection floaties, legacy asynchronous command-gated PopupMenu, exact native edge metrics and close/reopen event order remain pending. An already open owned FerroUI popup is repositioned in place; this does not claim native WinUI flyout or platform event conformance. Test definitions and their actual completed execution records are tracked separately. The keyboard records its accepted destination in the shared input manager before LostFocus/GotFocus, while ordinary client installation remains after those events. Legitimate synchronous template/view requery now resolves the accepted owner and preserves an owned-popup composition. Accepted focus generations fence nested Losing/Getting/Lost/Got transitions, including round trips; canceled nested requests do not supersede an outer accepted transition. Input-client and view-accessor callbacks recheck both binding and focus identity. This covers synchronous framework focus/requery ownership, not arbitrary native asynchronous focus order. Configured read-only rich-text requests now use a distinct synchronous typed ContextMenuOpening event with root-DIP coordinates and shared Handled cancellation. Pointerless requests use the read-only view origin, not editable selection-edge geometry. Handlers can replace/remove the configured menu; nested requests and detach/reattach retire older intent. The editable presenter defers to its editor owner and embedded readers project only their own event. Existing framework ContextMenu precedence, bubble routing, weak runtime/compiled XAML handlers, retained-popup reposition and actual-key toggle are explicit translations. Native default command construction, automatic selection flyouts, legacy asynchronous command-gated Copy menus, modern overflow event forwarding (absent from the source), exact native close/reopen timing and platform/pixel conformance are not supplied. See CONTEXT-MENUS.md; test definitions and actual executed source checkpoints are recorded separately. Shared FerroUI popup services now fence show/hide, host setup/close, internal IsOpen publication and callback-bearing transform subscription boundaries by request/state identity. Scoped target/transient registrations remove handlers from their actual owner or restore the exact retained session after a canceled raw close. Superseded routed requests remain consumed, and ordinary redundant open preserves completion events. These are framework ownership guarantees, not measured native flyout event order. The old-code red36 and later expanded green gates remain distinct in continuation-validation.json. Parent assignment has a separate ticket because normal logical detach can advance the popup lifecycle; post-write ticket/parent/placement checks preserve newer callbacks, including a nested show/hide that returns both values to null. Nested same-parent assignment completes its own templated-parent association; the superseded outer assignment is not responsible for completing newer work.",
       "deviations": [
         "RT-A01",
         "RT-A04",
         "RT-I06",
-        "RT-I22"
+        "RT-I22",
+        "RT-I37"
       ]
     },
     "dxaml/xcp/win/shared/UIAWindow.cpp": {
@@ -12541,6 +13025,211 @@
       "deviations": [
         "RT-A02",
         "RT-I31"
+      ]
+    },
+    "dxaml/xcp/dxaml/lib/TextControlHelper.h": {
+      "state": "partial",
+      "targets": [
+        {
+          "path": "src/FerroUI.Controls/rich_text_context_menu.rs",
+          "symbol": "pub fn context_menu_opening_event()"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_context_menu.rs",
+          "symbol": "pub fn context_menu_opening("
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_context_menu.rs",
+          "symbol": "pub(super) fn on_context_requested("
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_block.rs",
+          "symbol": "ContextMenuOpeningEvent: RoutedEvent<crate::ContextMenuEventArgs>"
+        }
+      ],
+      "tests": [
+        {
+          "path": "src/FerroUI.Controls/rich_text_context_menu_tests.rs",
+          "symbol": "rich_readonly_context_metadata_exposes_the_exact_distinct_typed_event"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_context_menu_tests.rs",
+          "symbol": "rich_readonly_context_pointer_reports_root_dips_and_cancels_configured_menus"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_context_menu_tests.rs",
+          "symbol": "rich_readonly_context_keyboard_uses_view_origin_for_selection_and_direction"
+        },
+        {
+          "path": "tests/FerroUI.Markup.Xaml.UnitTests/emitter/event_handlers.rs",
+          "symbol": "rich_readonly_context_menu_event_calls_the_method_with_live_arguments"
+        }
+      ],
+      "reason": "Only the synchronous typed OnContextMenuOpeningHandler seam is reviewed here: immutable coordinate fields, one shared Handled object, and cancellation before configured read-only menu dispatch. Remaining helper methods, automatic selection visibility and native callback scheduling remain pending. Configured read-only rich-text requests now use a distinct synchronous typed ContextMenuOpening event with root-DIP coordinates and shared Handled cancellation. Pointerless requests use the read-only view origin, not editable selection-edge geometry. Handlers can replace/remove the configured menu; nested requests and detach/reattach retire older intent. The editable presenter defers to its editor owner and embedded readers project only their own event. Existing framework ContextMenu precedence, bubble routing, weak runtime/compiled XAML handlers, retained-popup reposition and actual-key toggle are explicit translations. Native default command construction, automatic selection flyouts, legacy asynchronous command-gated Copy menus, modern overflow event forwarding (absent from the source), exact native close/reopen timing and platform/pixel conformance are not supplied. See CONTEXT-MENUS.md; test definitions and actual executed source checkpoints are recorded separately.",
+      "deviations": [
+        "RT-A01",
+        "RT-A04",
+        "RT-I37"
+      ]
+    },
+    "dxaml/xcp/core/text/common/TextCore.cpp": {
+      "state": "partial",
+      "targets": [
+        {
+          "path": "src/FerroUI.Controls/rich_text_context_menu.rs",
+          "symbol": "pub(crate) fn inherited_context_flyout("
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_context_menu.rs",
+          "symbol": "fn context_flyout_master("
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_context_menu.rs",
+          "symbol": "pub(crate) fn context_flyout_is_enabled("
+        },
+        {
+          "path": "src/FerroUI.Controls/flyouts/popup_flyout_base.rs",
+          "symbol": "pub(crate) fn effective_context_flyout("
+        },
+        {
+          "path": "src/FerroUI.Controls/flyouts/popup_flyout_base.rs",
+          "symbol": "pub(crate) fn context_flyout_for_request("
+        }
+      ],
+      "tests": [
+        {
+          "path": "src/FerroUI.Controls/rich_text_context_menu_tests.rs",
+          "symbol": "rich_readonly_context_default_overflow_flyout_uses_master_selection_gate"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_context_menu_tests.rs",
+          "symbol": "rich_readonly_context_local_menu_is_independent_of_default_flyout_selection_gate"
+        }
+      ],
+      "reason": "Only IsTextControl/IsTextSelectionEnabled dispatch for the configured rich-text menu path is reviewed. Overflow text selection policy resolves through the root master. Other TextCore services and control cases remain pending; no whole-file completion is inferred. Configured overflow lookup now prefers a non-null local ContextFlyout and otherwise resolves the root primary master, never an intermediate continuation. The requesting overflow retains placement, target cancellation and holding feedback. A default overflow property uses the master selection-enabled gate; explicit null preserves master fallback but bypasses that default gate, and Clear restores it. Eligibility applies only on opening so later selection changes cannot block dismissal. Modern configured overflow requests do not raise or forward the typed event, matching the helper branches. The separate legacy selection-manager owner event and built-in default flyout remain pending. Framework inheritance topology and menu/keyboard translations remain explicit in CONTEXT-MENUS.md. Native m_pMaster is reset on link changes and resolved during linked block-layout setup. The configured-menu helper currently follows the live framework chain; exact cached-master availability/timing and the separate public ContentSource predecessor mismatch remain partial.",
+      "deviations": [
+        "RT-A01",
+        "RT-A04",
+        "RT-I37"
+      ]
+    },
+    "dxaml/xcp/core/core/elements/uielement.cpp": {
+      "state": "partial",
+      "targets": [
+        {
+          "path": "src/FerroUI.Controls/rich_text_context_menu.rs",
+          "symbol": "pub fn context_menu_opening_event()"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_context_menu.rs",
+          "symbol": "pub fn context_menu_opening("
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_context_menu.rs",
+          "symbol": "pub(super) fn on_context_requested("
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_block.rs",
+          "symbol": "ContextMenuOpeningEvent: RoutedEvent<crate::ContextMenuEventArgs>"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_context_menu.rs",
+          "symbol": "pub(crate) fn inherited_context_flyout("
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_context_menu.rs",
+          "symbol": "fn context_flyout_master("
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_context_menu.rs",
+          "symbol": "pub(crate) fn context_flyout_is_enabled("
+        },
+        {
+          "path": "src/FerroUI.Controls/flyouts/popup_flyout_base.rs",
+          "symbol": "pub(crate) fn effective_context_flyout("
+        },
+        {
+          "path": "src/FerroUI.Controls/flyouts/popup_flyout_base.rs",
+          "symbol": "pub(crate) fn context_flyout_for_request("
+        }
+      ],
+      "tests": [
+        {
+          "path": "src/FerroUI.Controls/rich_text_context_menu_tests.rs",
+          "symbol": "rich_readonly_context_metadata_exposes_the_exact_distinct_typed_event"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_context_menu_tests.rs",
+          "symbol": "rich_readonly_context_pointer_reports_root_dips_and_cancels_configured_menus"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_context_menu_tests.rs",
+          "symbol": "rich_readonly_context_keyboard_uses_view_origin_for_selection_and_direction"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_context_menu_tests.rs",
+          "symbol": "rich_readonly_context_default_overflow_flyout_uses_master_selection_gate"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_context_menu_tests.rs",
+          "symbol": "rich_readonly_context_local_menu_is_independent_of_default_flyout_selection_gate"
+        }
+      ],
+      "reason": "This general framework source is selected for OnContextRequestedCore text branches only. The existing FerroUI input/menu services supply configured rich-text dispatch, pointer/read-only-origin positioning and default selection gating. Native general UIElement behavior, unrelated controls and automatic command menus are outside this reviewed seam. Configured read-only rich-text requests now use a distinct synchronous typed ContextMenuOpening event with root-DIP coordinates and shared Handled cancellation. Pointerless requests use the read-only view origin, not editable selection-edge geometry. Handlers can replace/remove the configured menu; nested requests and detach/reattach retire older intent. The editable presenter defers to its editor owner and embedded readers project only their own event. Existing framework ContextMenu precedence, bubble routing, weak runtime/compiled XAML handlers, retained-popup reposition and actual-key toggle are explicit translations. Native default command construction, automatic selection flyouts, legacy asynchronous command-gated Copy menus, modern overflow event forwarding (absent from the source), exact native close/reopen timing and platform/pixel conformance are not supplied. See CONTEXT-MENUS.md; test definitions and actual executed source checkpoints are recorded separately. Configured overflow lookup now prefers a non-null local ContextFlyout and otherwise resolves the root primary master, never an intermediate continuation. The requesting overflow retains placement, target cancellation and holding feedback. A default overflow property uses the master selection-enabled gate; explicit null preserves master fallback but bypasses that default gate, and Clear restores it. Eligibility applies only on opening so later selection changes cannot block dismissal. Modern configured overflow requests do not raise or forward the typed event, matching the helper branches. The separate legacy selection-manager owner event and built-in default flyout remain pending. Framework inheritance topology and menu/keyboard translations remain explicit in CONTEXT-MENUS.md.",
+      "deviations": [
+        "RT-A01",
+        "RT-A04",
+        "RT-I37"
+      ]
+    },
+    "dxaml/xcp/components/DependencyObject/DependencyProperty.cpp": {
+      "state": "partial",
+      "targets": [
+        {
+          "path": "src/FerroUI.Controls/rich_text_context_menu.rs",
+          "symbol": "pub(crate) fn context_flyout_is_enabled("
+        }
+      ],
+      "tests": [
+        {
+          "path": "src/FerroUI.Controls/rich_text_context_menu_tests.rs",
+          "symbol": "rich_readonly_context_default_overflow_flyout_uses_master_selection_gate"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_context_menu_tests.rs",
+          "symbol": "rich_readonly_context_local_menu_is_independent_of_default_flyout_selection_gate"
+        }
+      ],
+      "reason": "This general dependency-property source is selected only for the reviewed text ContextFlyout default/provenance seam. FerroUI reuses its existing is_set/clear property APIs to distinguish an explicit null from an unset default when deciding whether an overflow inherited flyout requires master text selection. The source default factory supplies TextBlock/RichTextBlock, not Overflow; constructing that native default command flyout remains pending. This does not implement or verify the entire native property system. See CONTEXT-MENUS.md.",
+      "deviations": [
+        "RT-A01",
+        "RT-A04",
+        "RT-I37"
+      ]
+    },
+    "dxaml/xcp/components/DependencyObject/PropertySystem.cpp": {
+      "state": "partial",
+      "targets": [
+        {
+          "path": "src/FerroUI.Controls/rich_text_context_menu.rs",
+          "symbol": "pub(crate) fn context_flyout_is_enabled("
+        }
+      ],
+      "tests": [
+        {
+          "path": "src/FerroUI.Controls/rich_text_context_menu_tests.rs",
+          "symbol": "rich_readonly_context_default_overflow_flyout_uses_master_selection_gate"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_context_menu_tests.rs",
+          "symbol": "rich_readonly_context_local_menu_is_independent_of_default_flyout_selection_gate"
+        }
+      ],
+      "reason": "This general dependency-property source is selected only for the reviewed text ContextFlyout default/provenance seam. FerroUI reuses its existing is_set/clear property APIs to distinguish an explicit null from an unset default when deciding whether an overflow inherited flyout requires master text selection. The source default factory supplies TextBlock/RichTextBlock, not Overflow; constructing that native default command flyout remains pending. This does not implement or verify the entire native property system. See CONTEXT-MENUS.md.",
+      "deviations": [
+        "RT-A01",
+        "RT-A04",
+        "RT-I37"
       ]
     }
   },
@@ -14660,6 +15349,22 @@
         {
           "path": "src/FerroUI.Controls/rich_text_block.rs",
           "symbol": "RichTextBlock"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_context_menu.rs",
+          "symbol": "pub fn context_menu_opening_event()"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_context_menu.rs",
+          "symbol": "pub fn context_menu_opening("
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_context_menu.rs",
+          "symbol": "pub(super) fn on_context_requested("
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_block.rs",
+          "symbol": "ContextMenuOpeningEvent: RoutedEvent<crate::ContextMenuEventArgs>"
         }
       ],
       "tests": [
@@ -14686,13 +15391,30 @@
         {
           "path": "tests/FerroUI.Markup.Xaml.UnitTests/xaml/rich_text_tests.rs",
           "symbol": "rich_text_markup_links_overflow_to_the_same_document"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_context_menu_tests.rs",
+          "symbol": "rich_readonly_context_metadata_exposes_the_exact_distinct_typed_event"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_context_menu_tests.rs",
+          "symbol": "rich_readonly_context_pointer_reports_root_dips_and_cancels_configured_menus"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_context_menu_tests.rs",
+          "symbol": "rich_readonly_context_keyboard_uses_view_origin_for_selection_and_direction"
+        },
+        {
+          "path": "tests/FerroUI.Markup.Xaml.UnitTests/emitter/event_handlers.rs",
+          "symbol": "rich_readonly_context_menu_event_calls_the_method_with_live_arguments"
         }
       ],
-      "reason": "The rich view lays out the shared document through the existing TextFormatter/TextLine pipeline. This maps the stated property/operation, while exact native formatter, visual and platform behavior remains under review.",
+      "reason": "The rich view lays out the shared document through the existing TextFormatter/TextLine pipeline. This maps the stated property/operation, while exact native formatter, visual and platform behavior remains under review. Configured read-only rich-text requests now use a distinct synchronous typed ContextMenuOpening event with root-DIP coordinates and shared Handled cancellation. Pointerless requests use the read-only view origin, not editable selection-edge geometry. Handlers can replace/remove the configured menu; nested requests and detach/reattach retire older intent. The editable presenter defers to its editor owner and embedded readers project only their own event. Existing framework ContextMenu precedence, bubble routing, weak runtime/compiled XAML handlers, retained-popup reposition and actual-key toggle are explicit translations. Native default command construction, automatic selection flyouts, legacy asynchronous command-gated Copy menus, modern overflow event forwarding (absent from the source), exact native close/reopen timing and platform/pixel conformance are not supplied. See CONTEXT-MENUS.md; test definitions and actual executed source checkpoints are recorded separately.",
       "deviations": [
         "RT-A02",
         "RT-I01",
-        "RT-I02"
+        "RT-I02",
+        "RT-I37"
       ]
     },
     "M:Microsoft.UI.Xaml.Controls.RichTextBlock.#ctor": {
@@ -14726,6 +15448,26 @@
         {
           "path": "src/FerroUI.Controls/rich_text_block_overflow.rs",
           "symbol": "RichTextBlockOverflow"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_context_menu.rs",
+          "symbol": "pub(crate) fn inherited_context_flyout("
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_context_menu.rs",
+          "symbol": "fn context_flyout_master("
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_context_menu.rs",
+          "symbol": "pub(crate) fn context_flyout_is_enabled("
+        },
+        {
+          "path": "src/FerroUI.Controls/flyouts/popup_flyout_base.rs",
+          "symbol": "pub(crate) fn effective_context_flyout("
+        },
+        {
+          "path": "src/FerroUI.Controls/flyouts/popup_flyout_base.rs",
+          "symbol": "pub(crate) fn context_flyout_for_request("
         }
       ],
       "tests": [
@@ -14752,11 +15494,44 @@
         {
           "path": "tests/FerroUI.Markup.Xaml.UnitTests/xaml/rich_text_tests.rs",
           "symbol": "rich_text_markup_links_overflow_to_the_same_document"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_context_menu_tests.rs",
+          "symbol": "rich_readonly_context_overflow_inherits_root_master_and_keeps_requesting_target"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_context_menu_tests.rs",
+          "symbol": "rich_readonly_context_overflow_local_override_clear_and_orphan_chain"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_context_menu_tests.rs",
+          "symbol": "rich_readonly_context_default_overflow_flyout_uses_master_selection_gate"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_context_menu_tests.rs",
+          "symbol": "rich_readonly_context_local_menu_is_independent_of_default_flyout_selection_gate"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_context_menu_tests.rs",
+          "symbol": "rich_readonly_context_overflow_keyboard_anchor_dismissal_and_target_cancellation"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_context_menu_tests.rs",
+          "symbol": "rich_readonly_context_overflow_local_menu_precedes_inherited_flyout"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_context_menu_tests.rs",
+          "symbol": "rich_readonly_context_inherited_flyout_opening_cancellation_is_not_retried"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_context_menu_tests.rs",
+          "symbol": "rich_readonly_context_holding_keeps_overflow_feedback_and_selection_policy"
         }
       ],
-      "reason": "Overflow derives from the shared rich view and uses weak continuation links with one primary document owner; native class hierarchy and control surface are adapted.",
+      "reason": "Overflow derives from the shared rich view and uses weak continuation links with one primary document owner; native class hierarchy and control surface are adapted. Configured overflow lookup now prefers a non-null local ContextFlyout and otherwise resolves the root primary master, never an intermediate continuation. The requesting overflow retains placement, target cancellation and holding feedback. A default overflow property uses the master selection-enabled gate; explicit null preserves master fallback but bypasses that default gate, and Clear restores it. Eligibility applies only on opening so later selection changes cannot block dismissal. Modern configured overflow requests do not raise or forward the typed event, matching the helper branches. The separate legacy selection-manager owner event and built-in default flyout remain pending. Framework inheritance topology and menu/keyboard translations remain explicit in CONTEXT-MENUS.md. Native m_pMaster is reset on link changes and resolved during linked block-layout setup. The configured-menu helper currently follows the live framework chain; exact cached-master availability/timing and the separate public ContentSource predecessor mismatch remain partial.",
       "deviations": [
-        "RT-I02"
+        "RT-I02",
+        "RT-I37"
       ]
     },
     "M:Microsoft.UI.Xaml.Controls.RichTextBlockOverflow.#ctor": {
@@ -32137,6 +32912,22 @@
         {
           "path": "src/FerroUI.Base/input/text_input/input_method_manager.rs",
           "symbol": "fn try_find_and_apply_client("
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_context_menu.rs",
+          "symbol": "pub fn context_menu_opening_event()"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_context_menu.rs",
+          "symbol": "pub fn context_menu_opening("
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_context_menu.rs",
+          "symbol": "pub(super) fn on_context_requested("
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_block.rs",
+          "symbol": "ContextMenuOpeningEvent: RoutedEvent<crate::ContextMenuEventArgs>"
         }
       ],
       "tests": [
@@ -32175,14 +32966,31 @@
         {
           "path": "src/FerroUI.Controls/rich_edit_input_focus_tests.rs",
           "symbol": "rich_input_canceled_nested_focus_keeps_post_event_client_installation"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_context_menu_tests.rs",
+          "symbol": "rich_readonly_context_metadata_exposes_the_exact_distinct_typed_event"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_context_menu_tests.rs",
+          "symbol": "rich_readonly_context_pointer_reports_root_dips_and_cancels_configured_menus"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_context_menu_tests.rs",
+          "symbol": "rich_readonly_context_keyboard_uses_view_origin_for_selection_and_direction"
+        },
+        {
+          "path": "tests/FerroUI.Markup.Xaml.UnitTests/emitter/event_handlers.rs",
+          "symbol": "rich_readonly_context_menu_event_calls_the_method_with_live_arguments"
         }
       ],
-      "reason": "RichEditBox now projects pointer, Apps/Shift+F10 and holding ContextRequested into one synchronous bubble ContextMenuOpening before default menu dispatch. Immutable f64 CursorLeft/Top use root DIPs and shared inherited Handled cancels the request. Keyboard anchors use the normalized LTR end/bottom or RTL start/bottom selected grapheme edge, independently of directed anchor, with shaped caret fallback and soft-wrap retention. The edge is selected in presenter coordinates before transforming the point, preserving the selected side under reflection/rotation. Weak per-request rectangles carry the actual anchor through existing ContextMenu/PopupFlyoutBase lifecycle, RTL gravity and constrained popup positioning; zero-size points remain valid. Handlers may install/replace/remove menus; nested requests, stale layout and detach/reattach are fenced, canceled openings are consumed once, and existing precedence/focus/IME retention remain shared. Ordinary popup dismissal retains composition and the semantic connection by avoiding a redundant unchanged-view requery during GotFocus; a real redirected focus retires that session. Routed metadata and named runtime/compiled handlers use the live base-argument handle. Native automatic selection floaties, legacy asynchronous command-gated PopupMenu, exact native edge metrics and close/reopen event order remain pending. An already open owned FerroUI popup is repositioned in place; this does not claim native WinUI flyout or platform event conformance. Test definitions and their actual completed execution records are tracked separately. The keyboard records its accepted destination in the shared input manager before LostFocus/GotFocus, while ordinary client installation remains after those events. Legitimate synchronous template/view requery now resolves the accepted owner and preserves an owned-popup composition. Accepted focus generations fence nested Losing/Getting/Lost/Got transitions, including round trips; canceled nested requests do not supersede an outer accepted transition. Input-client and view-accessor callbacks recheck both binding and focus identity. This covers synchronous framework focus/requery ownership, not arbitrary native asynchronous focus order.",
+      "reason": "RichEditBox now projects pointer, Apps/Shift+F10 and holding ContextRequested into one synchronous bubble ContextMenuOpening before default menu dispatch. Immutable f64 CursorLeft/Top use root DIPs and shared inherited Handled cancels the request. Keyboard anchors use the normalized LTR end/bottom or RTL start/bottom selected grapheme edge, independently of directed anchor, with shaped caret fallback and soft-wrap retention. The edge is selected in presenter coordinates before transforming the point, preserving the selected side under reflection/rotation. Weak per-request rectangles carry the actual anchor through existing ContextMenu/PopupFlyoutBase lifecycle, RTL gravity and constrained popup positioning; zero-size points remain valid. Handlers may install/replace/remove menus; nested requests, stale layout and detach/reattach are fenced, canceled openings are consumed once, and existing precedence/focus/IME retention remain shared. Ordinary popup dismissal retains composition and the semantic connection by avoiding a redundant unchanged-view requery during GotFocus; a real redirected focus retires that session. Routed metadata and named runtime/compiled handlers use the live base-argument handle. Native automatic selection floaties, legacy asynchronous command-gated PopupMenu, exact native edge metrics and close/reopen event order remain pending. An already open owned FerroUI popup is repositioned in place; this does not claim native WinUI flyout or platform event conformance. Test definitions and their actual completed execution records are tracked separately. The keyboard records its accepted destination in the shared input manager before LostFocus/GotFocus, while ordinary client installation remains after those events. Legitimate synchronous template/view requery now resolves the accepted owner and preserves an owned-popup composition. Accepted focus generations fence nested Losing/Getting/Lost/Got transitions, including round trips; canceled nested requests do not supersede an outer accepted transition. Input-client and view-accessor callbacks recheck both binding and focus identity. This covers synchronous framework focus/requery ownership, not arbitrary native asynchronous focus order. Configured read-only rich-text requests now use a distinct synchronous typed ContextMenuOpening event with root-DIP coordinates and shared Handled cancellation. Pointerless requests use the read-only view origin, not editable selection-edge geometry. Handlers can replace/remove the configured menu; nested requests and detach/reattach retire older intent. The editable presenter defers to its editor owner and embedded readers project only their own event. Existing framework ContextMenu precedence, bubble routing, weak runtime/compiled XAML handlers, retained-popup reposition and actual-key toggle are explicit translations. Native default command construction, automatic selection flyouts, legacy asynchronous command-gated Copy menus, modern overflow event forwarding (absent from the source), exact native close/reopen timing and platform/pixel conformance are not supplied. See CONTEXT-MENUS.md; test definitions and actual executed source checkpoints are recorded separately.",
       "deviations": [
         "RT-A01",
         "RT-A04",
         "RT-I06",
-        "RT-I22"
+        "RT-I22",
+        "RT-I37"
       ]
     },
     "P:Microsoft.UI.Xaml.Controls.ContextMenuEventArgs.CursorLeft": {
@@ -32203,6 +33011,22 @@
         {
           "path": "src/FerroUI.Base/input/text_input/input_method_manager.rs",
           "symbol": "fn try_find_and_apply_client("
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_context_menu.rs",
+          "symbol": "pub fn context_menu_opening_event()"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_context_menu.rs",
+          "symbol": "pub fn context_menu_opening("
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_context_menu.rs",
+          "symbol": "pub(super) fn on_context_requested("
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_block.rs",
+          "symbol": "ContextMenuOpeningEvent: RoutedEvent<crate::ContextMenuEventArgs>"
         }
       ],
       "tests": [
@@ -32241,14 +33065,31 @@
         {
           "path": "src/FerroUI.Controls/rich_edit_input_focus_tests.rs",
           "symbol": "rich_input_canceled_nested_focus_keeps_post_event_client_installation"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_context_menu_tests.rs",
+          "symbol": "rich_readonly_context_metadata_exposes_the_exact_distinct_typed_event"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_context_menu_tests.rs",
+          "symbol": "rich_readonly_context_pointer_reports_root_dips_and_cancels_configured_menus"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_context_menu_tests.rs",
+          "symbol": "rich_readonly_context_keyboard_uses_view_origin_for_selection_and_direction"
+        },
+        {
+          "path": "tests/FerroUI.Markup.Xaml.UnitTests/emitter/event_handlers.rs",
+          "symbol": "rich_readonly_context_menu_event_calls_the_method_with_live_arguments"
         }
       ],
-      "reason": "RichEditBox now projects pointer, Apps/Shift+F10 and holding ContextRequested into one synchronous bubble ContextMenuOpening before default menu dispatch. Immutable f64 CursorLeft/Top use root DIPs and shared inherited Handled cancels the request. Keyboard anchors use the normalized LTR end/bottom or RTL start/bottom selected grapheme edge, independently of directed anchor, with shaped caret fallback and soft-wrap retention. The edge is selected in presenter coordinates before transforming the point, preserving the selected side under reflection/rotation. Weak per-request rectangles carry the actual anchor through existing ContextMenu/PopupFlyoutBase lifecycle, RTL gravity and constrained popup positioning; zero-size points remain valid. Handlers may install/replace/remove menus; nested requests, stale layout and detach/reattach are fenced, canceled openings are consumed once, and existing precedence/focus/IME retention remain shared. Ordinary popup dismissal retains composition and the semantic connection by avoiding a redundant unchanged-view requery during GotFocus; a real redirected focus retires that session. Routed metadata and named runtime/compiled handlers use the live base-argument handle. Native automatic selection floaties, legacy asynchronous command-gated PopupMenu, exact native edge metrics and close/reopen event order remain pending. An already open owned FerroUI popup is repositioned in place; this does not claim native WinUI flyout or platform event conformance. Test definitions and their actual completed execution records are tracked separately. The keyboard records its accepted destination in the shared input manager before LostFocus/GotFocus, while ordinary client installation remains after those events. Legitimate synchronous template/view requery now resolves the accepted owner and preserves an owned-popup composition. Accepted focus generations fence nested Losing/Getting/Lost/Got transitions, including round trips; canceled nested requests do not supersede an outer accepted transition. Input-client and view-accessor callbacks recheck both binding and focus identity. This covers synchronous framework focus/requery ownership, not arbitrary native asynchronous focus order.",
+      "reason": "RichEditBox now projects pointer, Apps/Shift+F10 and holding ContextRequested into one synchronous bubble ContextMenuOpening before default menu dispatch. Immutable f64 CursorLeft/Top use root DIPs and shared inherited Handled cancels the request. Keyboard anchors use the normalized LTR end/bottom or RTL start/bottom selected grapheme edge, independently of directed anchor, with shaped caret fallback and soft-wrap retention. The edge is selected in presenter coordinates before transforming the point, preserving the selected side under reflection/rotation. Weak per-request rectangles carry the actual anchor through existing ContextMenu/PopupFlyoutBase lifecycle, RTL gravity and constrained popup positioning; zero-size points remain valid. Handlers may install/replace/remove menus; nested requests, stale layout and detach/reattach are fenced, canceled openings are consumed once, and existing precedence/focus/IME retention remain shared. Ordinary popup dismissal retains composition and the semantic connection by avoiding a redundant unchanged-view requery during GotFocus; a real redirected focus retires that session. Routed metadata and named runtime/compiled handlers use the live base-argument handle. Native automatic selection floaties, legacy asynchronous command-gated PopupMenu, exact native edge metrics and close/reopen event order remain pending. An already open owned FerroUI popup is repositioned in place; this does not claim native WinUI flyout or platform event conformance. Test definitions and their actual completed execution records are tracked separately. The keyboard records its accepted destination in the shared input manager before LostFocus/GotFocus, while ordinary client installation remains after those events. Legitimate synchronous template/view requery now resolves the accepted owner and preserves an owned-popup composition. Accepted focus generations fence nested Losing/Getting/Lost/Got transitions, including round trips; canceled nested requests do not supersede an outer accepted transition. Input-client and view-accessor callbacks recheck both binding and focus identity. This covers synchronous framework focus/requery ownership, not arbitrary native asynchronous focus order. Configured read-only rich-text requests now use a distinct synchronous typed ContextMenuOpening event with root-DIP coordinates and shared Handled cancellation. Pointerless requests use the read-only view origin, not editable selection-edge geometry. Handlers can replace/remove the configured menu; nested requests and detach/reattach retire older intent. The editable presenter defers to its editor owner and embedded readers project only their own event. Existing framework ContextMenu precedence, bubble routing, weak runtime/compiled XAML handlers, retained-popup reposition and actual-key toggle are explicit translations. Native default command construction, automatic selection flyouts, legacy asynchronous command-gated Copy menus, modern overflow event forwarding (absent from the source), exact native close/reopen timing and platform/pixel conformance are not supplied. See CONTEXT-MENUS.md; test definitions and actual executed source checkpoints are recorded separately.",
       "deviations": [
         "RT-A01",
         "RT-A04",
         "RT-I06",
-        "RT-I22"
+        "RT-I22",
+        "RT-I37"
       ]
     },
     "P:Microsoft.UI.Xaml.Controls.ContextMenuEventArgs.CursorTop": {
@@ -32269,6 +33110,22 @@
         {
           "path": "src/FerroUI.Base/input/text_input/input_method_manager.rs",
           "symbol": "fn try_find_and_apply_client("
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_context_menu.rs",
+          "symbol": "pub fn context_menu_opening_event()"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_context_menu.rs",
+          "symbol": "pub fn context_menu_opening("
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_context_menu.rs",
+          "symbol": "pub(super) fn on_context_requested("
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_block.rs",
+          "symbol": "ContextMenuOpeningEvent: RoutedEvent<crate::ContextMenuEventArgs>"
         }
       ],
       "tests": [
@@ -32307,14 +33164,31 @@
         {
           "path": "src/FerroUI.Controls/rich_edit_input_focus_tests.rs",
           "symbol": "rich_input_canceled_nested_focus_keeps_post_event_client_installation"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_context_menu_tests.rs",
+          "symbol": "rich_readonly_context_metadata_exposes_the_exact_distinct_typed_event"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_context_menu_tests.rs",
+          "symbol": "rich_readonly_context_pointer_reports_root_dips_and_cancels_configured_menus"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_context_menu_tests.rs",
+          "symbol": "rich_readonly_context_keyboard_uses_view_origin_for_selection_and_direction"
+        },
+        {
+          "path": "tests/FerroUI.Markup.Xaml.UnitTests/emitter/event_handlers.rs",
+          "symbol": "rich_readonly_context_menu_event_calls_the_method_with_live_arguments"
         }
       ],
-      "reason": "RichEditBox now projects pointer, Apps/Shift+F10 and holding ContextRequested into one synchronous bubble ContextMenuOpening before default menu dispatch. Immutable f64 CursorLeft/Top use root DIPs and shared inherited Handled cancels the request. Keyboard anchors use the normalized LTR end/bottom or RTL start/bottom selected grapheme edge, independently of directed anchor, with shaped caret fallback and soft-wrap retention. The edge is selected in presenter coordinates before transforming the point, preserving the selected side under reflection/rotation. Weak per-request rectangles carry the actual anchor through existing ContextMenu/PopupFlyoutBase lifecycle, RTL gravity and constrained popup positioning; zero-size points remain valid. Handlers may install/replace/remove menus; nested requests, stale layout and detach/reattach are fenced, canceled openings are consumed once, and existing precedence/focus/IME retention remain shared. Ordinary popup dismissal retains composition and the semantic connection by avoiding a redundant unchanged-view requery during GotFocus; a real redirected focus retires that session. Routed metadata and named runtime/compiled handlers use the live base-argument handle. Native automatic selection floaties, legacy asynchronous command-gated PopupMenu, exact native edge metrics and close/reopen event order remain pending. An already open owned FerroUI popup is repositioned in place; this does not claim native WinUI flyout or platform event conformance. Test definitions and their actual completed execution records are tracked separately. The keyboard records its accepted destination in the shared input manager before LostFocus/GotFocus, while ordinary client installation remains after those events. Legitimate synchronous template/view requery now resolves the accepted owner and preserves an owned-popup composition. Accepted focus generations fence nested Losing/Getting/Lost/Got transitions, including round trips; canceled nested requests do not supersede an outer accepted transition. Input-client and view-accessor callbacks recheck both binding and focus identity. This covers synchronous framework focus/requery ownership, not arbitrary native asynchronous focus order.",
+      "reason": "RichEditBox now projects pointer, Apps/Shift+F10 and holding ContextRequested into one synchronous bubble ContextMenuOpening before default menu dispatch. Immutable f64 CursorLeft/Top use root DIPs and shared inherited Handled cancels the request. Keyboard anchors use the normalized LTR end/bottom or RTL start/bottom selected grapheme edge, independently of directed anchor, with shaped caret fallback and soft-wrap retention. The edge is selected in presenter coordinates before transforming the point, preserving the selected side under reflection/rotation. Weak per-request rectangles carry the actual anchor through existing ContextMenu/PopupFlyoutBase lifecycle, RTL gravity and constrained popup positioning; zero-size points remain valid. Handlers may install/replace/remove menus; nested requests, stale layout and detach/reattach are fenced, canceled openings are consumed once, and existing precedence/focus/IME retention remain shared. Ordinary popup dismissal retains composition and the semantic connection by avoiding a redundant unchanged-view requery during GotFocus; a real redirected focus retires that session. Routed metadata and named runtime/compiled handlers use the live base-argument handle. Native automatic selection floaties, legacy asynchronous command-gated PopupMenu, exact native edge metrics and close/reopen event order remain pending. An already open owned FerroUI popup is repositioned in place; this does not claim native WinUI flyout or platform event conformance. Test definitions and their actual completed execution records are tracked separately. The keyboard records its accepted destination in the shared input manager before LostFocus/GotFocus, while ordinary client installation remains after those events. Legitimate synchronous template/view requery now resolves the accepted owner and preserves an owned-popup composition. Accepted focus generations fence nested Losing/Getting/Lost/Got transitions, including round trips; canceled nested requests do not supersede an outer accepted transition. Input-client and view-accessor callbacks recheck both binding and focus identity. This covers synchronous framework focus/requery ownership, not arbitrary native asynchronous focus order. Configured read-only rich-text requests now use a distinct synchronous typed ContextMenuOpening event with root-DIP coordinates and shared Handled cancellation. Pointerless requests use the read-only view origin, not editable selection-edge geometry. Handlers can replace/remove the configured menu; nested requests and detach/reattach retire older intent. The editable presenter defers to its editor owner and embedded readers project only their own event. Existing framework ContextMenu precedence, bubble routing, weak runtime/compiled XAML handlers, retained-popup reposition and actual-key toggle are explicit translations. Native default command construction, automatic selection flyouts, legacy asynchronous command-gated Copy menus, modern overflow event forwarding (absent from the source), exact native close/reopen timing and platform/pixel conformance are not supplied. See CONTEXT-MENUS.md; test definitions and actual executed source checkpoints are recorded separately.",
       "deviations": [
         "RT-A01",
         "RT-A04",
         "RT-I06",
-        "RT-I22"
+        "RT-I22",
+        "RT-I37"
       ]
     },
     "P:Microsoft.UI.Xaml.Controls.ContextMenuEventArgs.Handled": {
@@ -32405,6 +33279,22 @@
         {
           "path": "src/FerroUI.Base/input/text_input/input_method_manager.rs",
           "symbol": "fn try_find_and_apply_client("
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_context_menu.rs",
+          "symbol": "pub fn context_menu_opening_event()"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_context_menu.rs",
+          "symbol": "pub fn context_menu_opening("
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_context_menu.rs",
+          "symbol": "pub(super) fn on_context_requested("
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_block.rs",
+          "symbol": "ContextMenuOpeningEvent: RoutedEvent<crate::ContextMenuEventArgs>"
         }
       ],
       "tests": [
@@ -32439,14 +33329,31 @@
         {
           "path": "src/FerroUI.Controls/rich_edit_input_focus_tests.rs",
           "symbol": "rich_input_canceled_nested_focus_keeps_post_event_client_installation"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_context_menu_tests.rs",
+          "symbol": "rich_readonly_context_metadata_exposes_the_exact_distinct_typed_event"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_context_menu_tests.rs",
+          "symbol": "rich_readonly_context_pointer_reports_root_dips_and_cancels_configured_menus"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_context_menu_tests.rs",
+          "symbol": "rich_readonly_context_keyboard_uses_view_origin_for_selection_and_direction"
+        },
+        {
+          "path": "tests/FerroUI.Markup.Xaml.UnitTests/emitter/event_handlers.rs",
+          "symbol": "rich_readonly_context_menu_event_calls_the_method_with_live_arguments"
         }
       ],
-      "reason": "RichEditBox now projects pointer, Apps/Shift+F10 and holding ContextRequested into one synchronous bubble ContextMenuOpening before default menu dispatch. Immutable f64 CursorLeft/Top use root DIPs and shared inherited Handled cancels the request. Keyboard anchors use the normalized LTR end/bottom or RTL start/bottom selected grapheme edge, independently of directed anchor, with shaped caret fallback and soft-wrap retention. The edge is selected in presenter coordinates before transforming the point, preserving the selected side under reflection/rotation. Weak per-request rectangles carry the actual anchor through existing ContextMenu/PopupFlyoutBase lifecycle, RTL gravity and constrained popup positioning; zero-size points remain valid. Handlers may install/replace/remove menus; nested requests, stale layout and detach/reattach are fenced, canceled openings are consumed once, and existing precedence/focus/IME retention remain shared. Ordinary popup dismissal retains composition and the semantic connection by avoiding a redundant unchanged-view requery during GotFocus; a real redirected focus retires that session. Routed metadata and named runtime/compiled handlers use the live base-argument handle. Native automatic selection floaties, legacy asynchronous command-gated PopupMenu, exact native edge metrics and close/reopen event order remain pending. An already open owned FerroUI popup is repositioned in place; this does not claim native WinUI flyout or platform event conformance. Test definitions and their actual completed execution records are tracked separately. The keyboard records its accepted destination in the shared input manager before LostFocus/GotFocus, while ordinary client installation remains after those events. Legitimate synchronous template/view requery now resolves the accepted owner and preserves an owned-popup composition. Accepted focus generations fence nested Losing/Getting/Lost/Got transitions, including round trips; canceled nested requests do not supersede an outer accepted transition. Input-client and view-accessor callbacks recheck both binding and focus identity. This covers synchronous framework focus/requery ownership, not arbitrary native asynchronous focus order.",
+      "reason": "RichEditBox now projects pointer, Apps/Shift+F10 and holding ContextRequested into one synchronous bubble ContextMenuOpening before default menu dispatch. Immutable f64 CursorLeft/Top use root DIPs and shared inherited Handled cancels the request. Keyboard anchors use the normalized LTR end/bottom or RTL start/bottom selected grapheme edge, independently of directed anchor, with shaped caret fallback and soft-wrap retention. The edge is selected in presenter coordinates before transforming the point, preserving the selected side under reflection/rotation. Weak per-request rectangles carry the actual anchor through existing ContextMenu/PopupFlyoutBase lifecycle, RTL gravity and constrained popup positioning; zero-size points remain valid. Handlers may install/replace/remove menus; nested requests, stale layout and detach/reattach are fenced, canceled openings are consumed once, and existing precedence/focus/IME retention remain shared. Ordinary popup dismissal retains composition and the semantic connection by avoiding a redundant unchanged-view requery during GotFocus; a real redirected focus retires that session. Routed metadata and named runtime/compiled handlers use the live base-argument handle. Native automatic selection floaties, legacy asynchronous command-gated PopupMenu, exact native edge metrics and close/reopen event order remain pending. An already open owned FerroUI popup is repositioned in place; this does not claim native WinUI flyout or platform event conformance. Test definitions and their actual completed execution records are tracked separately. The keyboard records its accepted destination in the shared input manager before LostFocus/GotFocus, while ordinary client installation remains after those events. Legitimate synchronous template/view requery now resolves the accepted owner and preserves an owned-popup composition. Accepted focus generations fence nested Losing/Getting/Lost/Got transitions, including round trips; canceled nested requests do not supersede an outer accepted transition. Input-client and view-accessor callbacks recheck both binding and focus identity. This covers synchronous framework focus/requery ownership, not arbitrary native asynchronous focus order. Configured read-only rich-text requests now use a distinct synchronous typed ContextMenuOpening event with root-DIP coordinates and shared Handled cancellation. Pointerless requests use the read-only view origin, not editable selection-edge geometry. Handlers can replace/remove the configured menu; nested requests and detach/reattach retire older intent. The editable presenter defers to its editor owner and embedded readers project only their own event. Existing framework ContextMenu precedence, bubble routing, weak runtime/compiled XAML handlers, retained-popup reposition and actual-key toggle are explicit translations. Native default command construction, automatic selection flyouts, legacy asynchronous command-gated Copy menus, modern overflow event forwarding (absent from the source), exact native close/reopen timing and platform/pixel conformance are not supplied. See CONTEXT-MENUS.md; test definitions and actual executed source checkpoints are recorded separately.",
       "deviations": [
         "RT-A01",
         "RT-A04",
         "RT-I06",
-        "RT-I22"
+        "RT-I22",
+        "RT-I37"
       ]
     },
     "T:Microsoft.UI.Xaml.Input.InputScope": {
@@ -43929,6 +44836,175 @@
         "RT-I08",
         "RT-I34"
       ]
+    },
+    "E:Microsoft.UI.Xaml.Controls.RichTextBlock.ContextMenuOpening": {
+      "state": "partial",
+      "targets": [
+        {
+          "path": "src/FerroUI.Controls/rich_text_context_menu.rs",
+          "symbol": "pub fn context_menu_opening_event()"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_context_menu.rs",
+          "symbol": "pub fn context_menu_opening("
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_context_menu.rs",
+          "symbol": "pub(super) fn on_context_requested("
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_block.rs",
+          "symbol": "ContextMenuOpeningEvent: RoutedEvent<crate::ContextMenuEventArgs>"
+        },
+        {
+          "path": "src/FerroUI.Controls/context_menu.rs",
+          "symbol": "pub(crate) fn control_context_requested("
+        },
+        {
+          "path": "src/FerroUI.Controls/flyouts/popup_flyout_base.rs",
+          "symbol": "pub(crate) fn on_control_context_requested("
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_context_menu.rs",
+          "symbol": "pub(crate) fn context_menu_request_generation("
+        }
+      ],
+      "tests": [
+        {
+          "path": "src/FerroUI.Controls/rich_text_context_menu_tests.rs",
+          "symbol": "rich_readonly_context_metadata_exposes_the_exact_distinct_typed_event"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_context_menu_tests.rs",
+          "symbol": "rich_readonly_context_pointer_reports_root_dips_and_cancels_configured_menus"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_context_menu_tests.rs",
+          "symbol": "rich_readonly_context_keyboard_uses_view_origin_for_selection_and_direction"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_context_menu_tests.rs",
+          "symbol": "rich_readonly_context_opening_can_replace_or_remove_the_configured_flyout"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_context_menu_tests.rs",
+          "symbol": "rich_readonly_context_nested_request_owns_the_opening_and_pointer_anchor"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_context_menu_tests.rs",
+          "symbol": "rich_readonly_context_unconfigured_nested_request_retires_outer_intent"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_context_menu_tests.rs",
+          "symbol": "rich_readonly_context_detach_and_reattach_invalidates_the_typed_opening"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_context_menu_tests.rs",
+          "symbol": "rich_readonly_context_menu_precedence_survives_canceled_property_removal"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_context_menu_tests.rs",
+          "symbol": "rich_readonly_context_embedded_reader_has_one_public_opening_owner"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_context_menu_tests.rs",
+          "symbol": "rich_readonly_context_presenter_defers_the_public_event_to_its_editor"
+        },
+        {
+          "path": "tests/FerroUI.Markup.Xaml.UnitTests/emitter/event_handlers.rs",
+          "symbol": "rich_readonly_context_menu_event_calls_the_method_with_live_arguments"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_context_menu_tests.rs",
+          "symbol": "rich_readonly_context_programmatic_repeats_raise_opening_before_retained_popup_placement"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_context_menu_tests.rs",
+          "symbol": "rich_readonly_context_actual_keys_keep_typed_cancellation_before_shared_closing"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_context_menu_tests.rs",
+          "symbol": "rich_readonly_context_nested_programmatic_request_does_not_inherit_key_toggle"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_context_menu_tests.rs",
+          "symbol": "rich_readonly_context_nested_keyboard_request_supersedes_outer_key_identity"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_context_menu_tests.rs",
+          "symbol": "rich_readonly_context_tunnel_nested_requests_cannot_revive_an_older_key_scope"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_context_menu_tests.rs",
+          "symbol": "rich_readonly_context_key_handler_replacement_or_removal_closes_previous_popup_once"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_context_menu_tests.rs",
+          "symbol": "rich_readonly_context_unconfigured_or_prehandled_requests_do_not_project_an_event"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_context_menu_tests.rs",
+          "symbol": "rich_readonly_context_transform_reentry_retires_outer_before_typed_opening"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_context_menu_tests.rs",
+          "symbol": "rich_readonly_context_transform_detach_reattach_suppresses_stale_typed_opening"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_context_menu_tests.rs",
+          "symbol": "rich_readonly_context_placement_transform_preserves_nested_flyout_anchor"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_context_menu_tests.rs",
+          "symbol": "rich_readonly_context_placement_transform_unconfigured_reentry_retires_same_flyout"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_context_menu_tests.rs",
+          "symbol": "rich_readonly_context_menu_placement_transform_preserves_newer_menu_choice"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_context_menu_tests.rs",
+          "symbol": "rich_readonly_context_menu_opening_reentry_preserves_newer_menu_choice"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_context_menu_tests.rs",
+          "symbol": "rich_readonly_context_overflow_inherits_root_master_and_keeps_requesting_target"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_context_menu_tests.rs",
+          "symbol": "rich_readonly_context_overflow_local_override_clear_and_orphan_chain"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_context_menu_tests.rs",
+          "symbol": "rich_readonly_context_default_overflow_flyout_uses_master_selection_gate"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_context_menu_tests.rs",
+          "symbol": "rich_readonly_context_local_menu_is_independent_of_default_flyout_selection_gate"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_context_menu_tests.rs",
+          "symbol": "rich_readonly_context_overflow_keyboard_anchor_dismissal_and_target_cancellation"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_context_menu_tests.rs",
+          "symbol": "rich_readonly_context_overflow_local_menu_precedes_inherited_flyout"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_context_menu_tests.rs",
+          "symbol": "rich_readonly_context_inherited_flyout_opening_cancellation_is_not_retried"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_context_menu_tests.rs",
+          "symbol": "rich_readonly_context_holding_keeps_overflow_feedback_and_selection_policy"
+        }
+      ],
+      "reason": "Configured read-only rich-text requests now use a distinct synchronous typed ContextMenuOpening event with root-DIP coordinates and shared Handled cancellation. Pointerless requests use the read-only view origin, not editable selection-edge geometry. Handlers can replace/remove the configured menu; nested requests and detach/reattach retire older intent. The editable presenter defers to its editor owner and embedded readers project only their own event. Existing framework ContextMenu precedence, bubble routing, weak runtime/compiled XAML handlers, retained-popup reposition and actual-key toggle are explicit translations. Native default command construction, automatic selection flyouts, legacy asynchronous command-gated Copy menus, modern overflow event forwarding (absent from the source), exact native close/reopen timing and platform/pixel conformance are not supplied. See CONTEXT-MENUS.md; test definitions and actual executed source checkpoints are recorded separately. Coordinate conversion invokes virtual transforms. The read-only bridge checks ownership before the typed event, and both shared menu dispatch paths recheck the rich request after Opening/anchor conversion so newer accepted rich requests retain their menu and anchor.",
+      "deviations": [
+        "RT-A01",
+        "RT-A04",
+        "RT-I37"
+      ]
     }
   },
   "capabilities": {
@@ -43938,7 +45014,7 @@
     },
     "Rich view and overflow": {
       "state": "partial",
-      "description": "Existing TextFormatter/TextLine integration, linked continuation, selection, embedded controls and hyperlinks, paragraph spacing/signed indents, inherited language, shaped explicit/default tabs with leaders and RTL decimal fields, and a persistent editor presenter with logical scrolling. Full native formatting/appearance and remaining members stay pending. Rich line bounds and source-derived stacking retain common allocation/draw geometry; native font metric and rendering boundaries are explicit in RT-I31. Rich line boxes now use an opt-in requested-family metric policy, per-run bounds and complete baseline-object contributions. Optional scale transport retains source em and mapped face/scale ownership; current Skia/Vello providers remain at scale one. RT-I31 and LAYOUT.md retain native matching, cap-height, TextDpi, object-protocol and rendering limits."
+      "description": "Existing TextFormatter/TextLine integration, linked continuation, selection, embedded controls and hyperlinks, paragraph spacing/signed indents, inherited language, shaped explicit/default tabs with leaders and RTL decimal fields, and a persistent editor presenter with logical scrolling. Full native formatting/appearance and remaining members stay pending. Rich line bounds and source-derived stacking retain common allocation/draw geometry; native font metric and rendering boundaries are explicit in RT-I31. Rich line boxes now use an opt-in requested-family metric policy, per-run bounds and complete baseline-object contributions. Optional scale transport retains source em and mapped face/scale ownership; current Skia/Vello providers remain at scale one. RT-I31 and LAYOUT.md retain native matching, cap-height, TextDpi, object-protocol and rendering limits. Configured RichTextBlock context requests expose a distinct synchronous typed event through existing ContextMenu/ContextFlyout and runtime/compiled XAML services. Read-only origin coordinates, overflow master fallback/default selection gating, shared cancellation and callback ownership are documented in CONTEXT-MENUS.md; native default commands, cached-master timing and automatic selection flyouts remain partial."
     },
     "Editing, history and text object services": {
       "state": "partial",
@@ -43958,7 +45034,7 @@
     },
     "Rich editor themes and markup": {
       "state": "partial",
-      "description": "Compiled WinUI, Fluent and Simple ControlThemes host the persistent presenter and framework command flyout. Independent mixed formatting queries and one-transaction toggles retain history. Runtime/emitted rich-document fixtures include copied TextRange value construction, actual rich collection comparison and a ControlCatalog page. Generated references and complete suite results have separate records. Native command-bar/touch/lazy-part behavior, localization and appearance remain pending. Context/composition/selection/text-changing metadata now uses the shared routed-argument representation with runtime/compiled base-handler and typed-subscriber parity. TextElement.FindName uses shared nearest scopes; real template scopes are discoverable without retaining their declaring trees."
+      "description": "Compiled WinUI, Fluent and Simple ControlThemes host the persistent presenter and framework command flyout. Independent mixed formatting queries and one-transaction toggles retain history. Runtime/emitted rich-document fixtures include copied TextRange value construction, actual rich collection comparison and a ControlCatalog page. Generated references and complete suite results have separate records. Native command-bar/touch/lazy-part behavior, localization and appearance remain pending. Context/composition/selection/text-changing metadata now uses the shared routed-argument representation with runtime/compiled base-handler and typed-subscriber parity. TextElement.FindName uses shared nearest scopes; real template scopes are discoverable without retaining their declaring trees. Configured RichTextBlock context requests expose a distinct synchronous typed event through existing ContextMenu/ContextFlyout and runtime/compiled XAML services. Read-only origin coordinates, overflow master fallback/default selection gating, shared cancellation and callback ownership are documented in CONTEXT-MENUS.md; native default commands, cached-master timing and automatic selection flyouts remain partial."
     },
     "Typography and font features": {
       "state": "partial",
@@ -44472,6 +45548,32 @@
       "source": "Six-file paired-range source manifest on published 9a1a756beba5014ff0c6d72a4ee02cc642e637f1; exact source, argv, binary and log hashes in continuation-validation.json.",
       "command": "cargo check --locked --offline -p ferroui-base -p ferroui-controls --tests; cargo test --locked --offline -p ferroui-controls --lib --no-run; execute fresh Controls binary with --test-threads=1 and approved loopback access.",
       "result": "PASS: Base/Controls test-target metadata (1m24s), Controls executable build (4m06s), full Controls 5320 passed / 0 failed / 0 ignored (92.87s). Focused tracking19, hosted21, paragraph typing13, live Gravity29 and Options20 all passed. The two tracking replay tests cover all130 literal native operations and260 passive after-pairs;17 additional tracking tests cover explicit framework policies. Historical failed gates remain preserved; system-MSFTEDIT agreement is bounded and does not complete packaged WinUI parity."
+    },
+    {
+      "kind": "ci_runtime",
+      "commit": "fa3b9033e200c7638a9c47e9d7a09120bde6f7ed",
+      "source": "Rich text conformance 39948857233, measured PR merge 4676e0828babbec8f792f3d4b5a78981f93cbdf3; immutable 12:22:20 UTC report and source/log/artifact proofs in continuation-validation.json.",
+      "command": "Complete three-job Rich text conformance workflow; official x64/ARM64 artifact byte-length, API digest, all-member CRC and strict canonical observation comparison.",
+      "result": "PASS: all three jobs. Linux extractor 50, Base 4640, Controls 5320, Win32/WinUI host 329/50, Fluent 210 with 2 ignored, Simple 213 with 3 ignored, WinUI theme 301 with 2 ignored, XAML 620 with 17 ignored, and all five generated-reference gates. Windows WinUI 65, exact UTF-16 two, IMM32 scope 23, MSFTEDIT eight, and rich Controls 832. ARM64 serial eight and separate concurrent diagnostic eight pass. Zero executed failures. Both canonical native artifact families equal earlier architecture-specific immutable records; newer provenance remains distinct. Broad 39948857226 was still running, with entire X11 job successful. Does not validate later context-menu sources."
+    },
+    {
+      "kind": "source_review",
+      "source": "Configured read-only context bridge and shared popup ownership continuation based on the source in fa3b9033; pinned WinUI fe244ca6ac4d482712b234a9de3cf771cc6481de.",
+      "command": "Trace native synchronous helper, root-DIP coordinate projection, default-property provenance and overflow lookup; review FerroUI routed menu, callback, host, transform and parent-assignment ownership.",
+      "result": "Initial review defined 31 read-only Controls tests, 24 shared popup bodies expanded into 48 framework host variants, and one runtime/compiled XAML test. The actual old-production red baseline executed 36 popup cases: 6 passed and 30 failed. Initial fixture compile failure and the expanded 44-definition SIGKILL build remain separate. The subsequent same-parent completion fix adds two cases for final50. Completed runtime and actual emitter regeneration results follow in the separate framework_runtime record and continuation-validation.json. No whole native source file or native flyout event order is promoted to complete."
+    },
+    {
+      "kind": "framework_runtime",
+      "source": "Configured context-menu source tree89113341778c640dc00a69fab8182ecf34bfbee9 (locale0c0a2e8/GitHub309ff267), plus exactly three final XAML fixture overrides. Eight source manifests, exact commands, binaries and25 log digests in continuation-validation.json; original aggregate SHA2568935682b683ae70ffb1e0a84e51015c909beff1e08eddcb9f859d277d7d90fd8.",
+      "command": "Build and execute actual Controls test binary; run actual XAML emitter twice as recorded, rebuild final output, execute live handler/model parity and full XAML with --test-threads=1.",
+      "result": "PASS: popup ownership50, readonly context31, flyouts114, Popup primitives129, editor context18; full Controls5401 passed/0failed/0ignored. Corrected actual emitter1, model parity1, live handler1 and full XAML621 passed/0failed/17existing ignored. No production or Controls source changed after the full gate. Initial compile diagnostics, red36 (6/30), green44 SIGKILL, interim48 readonly26/5 and first XAML editor-only fixture failure remain preserved. Fixtures use mocked framework popup hosts, not actual native OS sessions."
+    },
+    {
+      "kind": "ci_runtime",
+      "commit": "fa3b9033e200c7638a9c47e9d7a09120bde6f7ed",
+      "source": "Final broad CI39948857226, measured merge4676e0828babbec8f792f3d4b5a78981f93cbdf3; immutable report SHA25674812c6a678d41816405eb529b7f4fa4d0cb2410f57aa62f4dff8f79de23f561.",
+      "command": "Verify aggregate workflow conclusion, complete14-job list and completed macOS/Windows/X11 log evidence.",
+      "result": "PASS: all14 broad jobs; dedicated conformance previously passed all3 jobs. macOS Base4640, Controls5320, render-backend comparison32 and Vello521/9ignored; Windows Win32372, Desktop1 and WinUI65, plus native/render/runtime/sample smoke gates. Exact-head X11/IBus and browser/combined-site jobs succeeded. Source remains fa3b9033; these results do not validate later configured menus or cached-master work."
     }
   ]
 }

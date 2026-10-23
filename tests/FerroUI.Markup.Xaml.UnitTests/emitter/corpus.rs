@@ -364,7 +364,7 @@ pub const CLASS_DOCUMENTS: &[ClassDocument] = &[
         module: "rich_readonly_context_menu_event",
         name: "Handlers/RichReadonlyContextMenuEvent.xaml",
         class: "FerroUI.Markup.Xaml.UnitTests.Xaml.MyHost",
-        xaml: "<Panel xmlns='https://github.com/ferroui' xmlns:x='http://schemas.microsoft.com/winfx/2006/xaml' x:Class='FerroUI.Markup.Xaml.UnitTests.Xaml.MyHost'><RichTextBlock Name='display' ContextMenuOpening='OnContextMenuOpening'/></Panel>",
+        xaml: "<Panel xmlns='https://github.com/ferroui' xmlns:x='http://schemas.microsoft.com/winfx/2006/xaml' x:Class='FerroUI.Markup.Xaml.UnitTests.Xaml.MyHost'><RichTextBlock Name='display' ContextMenuOpening='OnReadonlyContextMenuOpening'/></Panel>",
     },
     // The rich editor's existing custom argument types must also remain
     // assignable to a code-behind method accepting routed-event arguments.

@@ -636,6 +636,1842 @@
         "dependencies": "locked, offline"
       },
       "source_scope": "Six Rust overrides listed below on base9a1a756b; all other source/dependency inputs are from that published base. Documentation and regenerated inventory are excluded from executable source identity."
+    },
+    {
+      "checkpoint": "Configured rich reader context menus and shared popup ownership",
+      "source_scope": "Final Controls source is local e0c0a2e8, identical tree to GitHub309ff267. Final XAML adds exactly three test-file overrides preserved in the evidence. Source manifests retain historical local commit IDs and bytes; documentation changes do not change binaries.",
+      "record_sha256": "8935682b683ae70ffb1e0a84e51015c909beff1e08eddcb9f859d277d7d90fd8",
+      "record_bytes": 80036,
+      "git_commit_equivalence": [
+        {
+          "local_commit": "b462d5b05aaa42899cbdef7c319474304dce34e8",
+          "github_commit": "86acb858d8f319882f7ed186fe7c0b33db1e616c",
+          "tree": "ff8f968d5386661bfd2f43b170911f081a2efa94"
+        },
+        {
+          "local_commit": "e0c0a2e8ef360c0e05cc2a86d39a850df63f55e9",
+          "github_commit": "309ff267aec5d80fdfec4019c0e8db1cceb8168f",
+          "tree": "89113341778c640dc00a69fab8182ecf34bfbee9"
+        }
+      ],
+      "record": {
+        "status": "Final Controls and XAML gates complete",
+        "updated_utc": "2026-10-23T13:23:59.016275+00:00",
+        "purpose": "Configured read-only rich context menus and shared popup/flyout callback request ownership",
+        "trials": [
+          {
+            "id": "ferroui-popup-red",
+            "scope": "Initial compiler diagnostics",
+            "popup_test_definitions": 36,
+            "source_manifest_path": "/tmp/ferroui-popup-red/source-manifest.json",
+            "source_manifest_sha256": "d68ff99f101be4de40d86d6dbe604ddd48f29ddcfdc1608938756d5c3ad9220e",
+            "source_manifest": {
+              "base_commit": "b462d5b05aaa42899cbdef7c319474304dce34e8",
+              "base_tree": "ff8f968d5386661bfd2f43b170911f081a2efa94",
+              "files": [
+                {
+                  "path": "src/FerroUI.Controls/context_menu.rs",
+                  "sha256": "360150127edfd1d435182c54eef7336932b8224dc319099e7023696a72c6268d",
+                  "bytes": 28529
+                },
+                {
+                  "path": "src/FerroUI.Controls/flyouts/flyout_tests.rs",
+                  "sha256": "74810b31a9015e9a96ef302697abf6745193c8ca05f57e59233c66442c29dc99",
+                  "bytes": 33720
+                },
+                {
+                  "path": "src/FerroUI.Controls/flyouts/popup_flyout_base.rs",
+                  "sha256": "ffc441307f26ef58c97b6ff42162f503f181f9d1f1ca20b2af4e1b3e2ac3c783",
+                  "bytes": 34930
+                },
+                {
+                  "path": "src/FerroUI.Controls/flyouts/popup_flyout_request_tests.rs",
+                  "sha256": "84139772762c257ff4a80cc1a2a67fff54ac10656d42dfbafb182c79be036274",
+                  "bytes": 14115
+                },
+                {
+                  "path": "src/FerroUI.Controls/rich_text_block.rs",
+                  "sha256": "36992e2529cc4f8db9150681e1d9bbe26b7bbc7afb49ea19af7a9a41759acba5",
+                  "bytes": 80503
+                },
+                {
+                  "path": "src/FerroUI.Controls/rich_text_context_menu.rs",
+                  "sha256": "c67b5b384b2ea0bc40faa7b0d696835a797f2758bc6aee14300780e83de5568b",
+                  "bytes": 12935
+                },
+                {
+                  "path": "src/FerroUI.Controls/rich_text_context_menu_tests.rs",
+                  "sha256": "7fd60f7cab92bfbbc00bc6435a351057b0dd8fa3b81dce1e89f9c90d99d00545",
+                  "bytes": 44258
+                },
+                {
+                  "path": "tests/FerroUI.Markup.Xaml.UnitTests/emitter/corpus.rs",
+                  "sha256": "30bd57e440185f15ab1c698d2499d99729ba0d4c9044c1526f620d8ed45ce344",
+                  "bytes": 47732
+                },
+                {
+                  "path": "tests/FerroUI.Markup.Xaml.UnitTests/emitter/event_handlers.rs",
+                  "sha256": "c5297076a05b402a9a5d9b08dad4b43b92c4b6e2bae5f43b76f642a779a60adf",
+                  "bytes": 24308
+                },
+                {
+                  "path": "tests/FerroUI.Markup.Xaml.UnitTests/emitter/generated_handlers/mod.rs",
+                  "sha256": "95db5965a8e76ee83ec3afd03a04116b49c020f2f8b3e054d57a3d37b7c0369e",
+                  "bytes": 552
+                },
+                {
+                  "path": "tests/FerroUI.Markup.Xaml.UnitTests/emitter/generated_handlers/rich_readonly_context_menu_event.rs",
+                  "sha256": "4c6211686837146827ba809af8761c2901655d1b64f481e89f62cd70464b8fed",
+                  "bytes": 6141
+                }
+              ]
+            },
+            "build": {
+              "argv": [
+                "/tmp/ferroedit-cargo/bin/cargo",
+                "test",
+                "--locked",
+                "--offline",
+                "-p",
+                "ferroui-controls",
+                "--lib",
+                "--no-run"
+              ],
+              "env": {
+                "PATH": "/tmp/ferroedit-cargo/bin:/usr/local/bin:/usr/bin:/bin",
+                "CARGO_HOME": "/tmp/ferroedit-cargo",
+                "RUSTUP_HOME": "/tmp/ferroedit-rustup",
+                "CARGO_TARGET_DIR": "/tmp/ferroui-richtext-target",
+                "CARGO_BUILD_JOBS": "1",
+                "CARGO_PROFILE_DEV_DEBUG": "0",
+                "CARGO_PROFILE_TEST_DEBUG": "0",
+                "CARGO_INCREMENTAL": "0"
+              },
+              "cwd": "/workspace/scratch/e589b83e3196/FerroUI",
+              "started_utc": "2026-10-23T12:13:22.313662+00:00",
+              "source_manifest_sha256": "d68ff99f101be4de40d86d6dbe604ddd48f29ddcfdc1608938756d5c3ad9220e",
+              "exit_code": 101,
+              "duration_seconds": 86.373,
+              "log_sha256": "0a31ab0d9524f21129a4c67fb2bdadc569016dc42427bce973017ff3689ecaa4",
+              "finished_utc": "2026-10-23T12:14:48.687083+00:00",
+              "source_unchanged": true,
+              "record_path": "/tmp/ferroui-popup-red/build.json",
+              "log_path": "/tmp/ferroui-popup-red/build.log"
+            },
+            "runtime_gates": [],
+            "cleanup": []
+          },
+          {
+            "id": "ferroui-popup-red-02",
+            "scope": "Old popup lifecycle runtime reproduction",
+            "popup_test_definitions": 36,
+            "source_manifest_path": "/tmp/ferroui-popup-red-02/source-manifest.json",
+            "source_manifest_sha256": "b64c87962d5f19903584f94e432fadfe5bb2608476eb3583f2bccd763eb72975",
+            "source_manifest": {
+              "base_commit": "b462d5b05aaa42899cbdef7c319474304dce34e8",
+              "base_tree": "ff8f968d5386661bfd2f43b170911f081a2efa94",
+              "files": [
+                {
+                  "path": "src/FerroUI.Controls/context_menu.rs",
+                  "sha256": "360150127edfd1d435182c54eef7336932b8224dc319099e7023696a72c6268d",
+                  "bytes": 28529
+                },
+                {
+                  "path": "src/FerroUI.Controls/flyouts/flyout_tests.rs",
+                  "sha256": "74810b31a9015e9a96ef302697abf6745193c8ca05f57e59233c66442c29dc99",
+                  "bytes": 33720
+                },
+                {
+                  "path": "src/FerroUI.Controls/flyouts/popup_flyout_base.rs",
+                  "sha256": "ffc441307f26ef58c97b6ff42162f503f181f9d1f1ca20b2af4e1b3e2ac3c783",
+                  "bytes": 34930
+                },
+                {
+                  "path": "src/FerroUI.Controls/flyouts/popup_flyout_request_tests.rs",
+                  "sha256": "c9bad90a7cfddbeb581811703768e226dc9ad0de09beef630893573d478324b8",
+                  "bytes": 14194
+                },
+                {
+                  "path": "src/FerroUI.Controls/rich_text_block.rs",
+                  "sha256": "935fbfba9c97b5e8dea0f653698d9d5a1a1470851dd8b89ddb0bb23e7a6fa270",
+                  "bytes": 80518
+                },
+                {
+                  "path": "src/FerroUI.Controls/rich_text_context_menu.rs",
+                  "sha256": "c67b5b384b2ea0bc40faa7b0d696835a797f2758bc6aee14300780e83de5568b",
+                  "bytes": 12935
+                },
+                {
+                  "path": "src/FerroUI.Controls/rich_text_context_menu_tests.rs",
+                  "sha256": "7dd9c45dc4d457c4eafc380b89fc2486f7239d6d0ca6fa97a076aec460429e7b",
+                  "bytes": 44344
+                },
+                {
+                  "path": "tests/FerroUI.Markup.Xaml.UnitTests/emitter/corpus.rs",
+                  "sha256": "30bd57e440185f15ab1c698d2499d99729ba0d4c9044c1526f620d8ed45ce344",
+                  "bytes": 47732
+                },
+                {
+                  "path": "tests/FerroUI.Markup.Xaml.UnitTests/emitter/event_handlers.rs",
+                  "sha256": "c5297076a05b402a9a5d9b08dad4b43b92c4b6e2bae5f43b76f642a779a60adf",
+                  "bytes": 24308
+                },
+                {
+                  "path": "tests/FerroUI.Markup.Xaml.UnitTests/emitter/generated_handlers/mod.rs",
+                  "sha256": "95db5965a8e76ee83ec3afd03a04116b49c020f2f8b3e054d57a3d37b7c0369e",
+                  "bytes": 552
+                },
+                {
+                  "path": "tests/FerroUI.Markup.Xaml.UnitTests/emitter/generated_handlers/rich_readonly_context_menu_event.rs",
+                  "sha256": "4c6211686837146827ba809af8761c2901655d1b64f481e89f62cd70464b8fed",
+                  "bytes": 6141
+                }
+              ]
+            },
+            "build": {
+              "argv": [
+                "/tmp/ferroedit-cargo/bin/cargo",
+                "test",
+                "--locked",
+                "--offline",
+                "-p",
+                "ferroui-controls",
+                "--lib",
+                "--no-run"
+              ],
+              "env": {
+                "PATH": "/tmp/ferroedit-cargo/bin:/usr/local/bin:/usr/bin:/bin",
+                "CARGO_HOME": "/tmp/ferroedit-cargo",
+                "RUSTUP_HOME": "/tmp/ferroedit-rustup",
+                "CARGO_TARGET_DIR": "/tmp/ferroui-richtext-target",
+                "CARGO_BUILD_JOBS": "1",
+                "CARGO_PROFILE_DEV_DEBUG": "0",
+                "CARGO_PROFILE_TEST_DEBUG": "0",
+                "CARGO_INCREMENTAL": "0"
+              },
+              "cwd": "/workspace/scratch/e589b83e3196/FerroUI",
+              "started_utc": "2026-10-23T12:16:07.935500+00:00",
+              "source_manifest_sha256": "b64c87962d5f19903584f94e432fadfe5bb2608476eb3583f2bccd763eb72975",
+              "exit_code": 0,
+              "duration_seconds": 250.808,
+              "log_sha256": "6e9431a3f4beb6360818cc82262def0b1de437c3ee8ce48c63b8f520b62f734c",
+              "finished_utc": "2026-10-23T12:20:18.745177+00:00",
+              "source_unchanged": true,
+              "record_path": "/tmp/ferroui-popup-red-02/build.json",
+              "log_path": "/tmp/ferroui-popup-red-02/build.log"
+            },
+            "runtime_gates": [
+              {
+                "argv": [
+                  "/tmp/ferroui-richtext-target/debug/deps/ferroui_controls-8d2b7e7a6d2ee4d8",
+                  "popup_request_",
+                  "--test-threads=1"
+                ],
+                "cwd": "/workspace/scratch/e589b83e3196/FerroUI",
+                "binary": {
+                  "path": "/tmp/ferroui-richtext-target/debug/deps/ferroui_controls-8d2b7e7a6d2ee4d8",
+                  "bytes": 280471040,
+                  "sha256": "0c68b8d8ba5cd83f5304c034288c8aa8900125cb3854eff89e91ca88f7340f64"
+                },
+                "started_utc": "2026-10-23T12:21:20.120887+00:00",
+                "source_manifest_sha256": "b64c87962d5f19903584f94e432fadfe5bb2608476eb3583f2bccd763eb72975",
+                "exit_code": 101,
+                "duration_seconds": 0.849,
+                "log_sha256": "4f683fae7331af99ca4a09503bc35af8d3c258c1b9f332263f9137358896674e",
+                "source_unchanged": true,
+                "record_path": "/tmp/ferroui-popup-red-02/popup-request.json",
+                "log_path": "/tmp/ferroui-popup-red-02/popup-request.log",
+                "tests": {
+                  "passed": 6,
+                  "failed": 30,
+                  "ignored": 0,
+                  "measured": 0,
+                  "filtered_out": 5351
+                },
+                "test_duration_seconds": 0.84
+              }
+            ],
+            "cleanup": []
+          },
+          {
+            "id": "ferroui-popup-green-01",
+            "scope": "Reviewed lifecycle source; code generation SIGKILL",
+            "popup_test_definitions": 44,
+            "source_manifest_path": "/tmp/ferroui-popup-green-01/source-manifest.json",
+            "source_manifest_sha256": "f05804f446ab550cc49a8adc2ac97989973f811e14d04b32b4ac9ee3dd7b48ec",
+            "source_manifest": {
+              "base_commit": "b462d5b05aaa42899cbdef7c319474304dce34e8",
+              "base_tree": "ff8f968d5386661bfd2f43b170911f081a2efa94",
+              "files": [
+                {
+                  "path": "src/FerroUI.Controls/NOTICE.md",
+                  "sha256": "e51d799468d4ddf98c75634667a4fc8c58cf442c9f55c31e9dd9b5bdfb8a9598",
+                  "bytes": 11921
+                },
+                {
+                  "path": "src/FerroUI.Controls/context_menu.rs",
+                  "sha256": "360150127edfd1d435182c54eef7336932b8224dc319099e7023696a72c6268d",
+                  "bytes": 28529
+                },
+                {
+                  "path": "src/FerroUI.Controls/flyouts/flyout_tests.rs",
+                  "sha256": "74810b31a9015e9a96ef302697abf6745193c8ca05f57e59233c66442c29dc99",
+                  "bytes": 33720
+                },
+                {
+                  "path": "src/FerroUI.Controls/flyouts/popup_flyout_base.rs",
+                  "sha256": "d0232a9908e43340f12ca64ec5b9a80d307d061371acc7501c2ec882360192f1",
+                  "bytes": 44846
+                },
+                {
+                  "path": "src/FerroUI.Controls/flyouts/popup_flyout_request_tests.rs",
+                  "sha256": "e50f76452656ff371fab6e40ef0a908b652620d695b6de58d8cfdc566c1398bc",
+                  "bytes": 19571
+                },
+                {
+                  "path": "src/FerroUI.Controls/primitives/popup.rs",
+                  "sha256": "88bae52d8d31c8619a33b799301b7d2d23a4d98210658d9a39dc2cb78fe3a1d2",
+                  "bytes": 64856
+                },
+                {
+                  "path": "src/FerroUI.Controls/rich_text_block.rs",
+                  "sha256": "935fbfba9c97b5e8dea0f653698d9d5a1a1470851dd8b89ddb0bb23e7a6fa270",
+                  "bytes": 80518
+                },
+                {
+                  "path": "src/FerroUI.Controls/rich_text_context_menu.rs",
+                  "sha256": "c67b5b384b2ea0bc40faa7b0d696835a797f2758bc6aee14300780e83de5568b",
+                  "bytes": 12935
+                },
+                {
+                  "path": "src/FerroUI.Controls/rich_text_context_menu_tests.rs",
+                  "sha256": "7dd9c45dc4d457c4eafc380b89fc2486f7239d6d0ca6fa97a076aec460429e7b",
+                  "bytes": 44344
+                },
+                {
+                  "path": "tests/FerroUI.Markup.Xaml.UnitTests/emitter/corpus.rs",
+                  "sha256": "30bd57e440185f15ab1c698d2499d99729ba0d4c9044c1526f620d8ed45ce344",
+                  "bytes": 47732
+                },
+                {
+                  "path": "tests/FerroUI.Markup.Xaml.UnitTests/emitter/event_handlers.rs",
+                  "sha256": "c5297076a05b402a9a5d9b08dad4b43b92c4b6e2bae5f43b76f642a779a60adf",
+                  "bytes": 24308
+                },
+                {
+                  "path": "tests/FerroUI.Markup.Xaml.UnitTests/emitter/generated_handlers/mod.rs",
+                  "sha256": "95db5965a8e76ee83ec3afd03a04116b49c020f2f8b3e054d57a3d37b7c0369e",
+                  "bytes": 552
+                },
+                {
+                  "path": "tests/FerroUI.Markup.Xaml.UnitTests/emitter/generated_handlers/rich_readonly_context_menu_event.rs",
+                  "sha256": "4c6211686837146827ba809af8761c2901655d1b64f481e89f62cd70464b8fed",
+                  "bytes": 6141
+                }
+              ]
+            },
+            "build": {
+              "argv": [
+                "/tmp/ferroedit-cargo/bin/cargo",
+                "test",
+                "--locked",
+                "--offline",
+                "-p",
+                "ferroui-controls",
+                "--lib",
+                "--no-run"
+              ],
+              "env": {
+                "PATH": "/tmp/ferroedit-cargo/bin:/usr/local/bin:/usr/bin:/bin",
+                "CARGO_HOME": "/tmp/ferroedit-cargo",
+                "RUSTUP_HOME": "/tmp/ferroedit-rustup",
+                "CARGO_TARGET_DIR": "/tmp/ferroui-richtext-target",
+                "CARGO_BUILD_JOBS": "1",
+                "CARGO_PROFILE_DEV_DEBUG": "0",
+                "CARGO_PROFILE_TEST_DEBUG": "0",
+                "CARGO_INCREMENTAL": "0"
+              },
+              "cwd": "/workspace/scratch/e589b83e3196/FerroUI",
+              "started_utc": "2026-10-23T12:25:01.217717+00:00",
+              "source_manifest_sha256": "f05804f446ab550cc49a8adc2ac97989973f811e14d04b32b4ac9ee3dd7b48ec",
+              "exit_code": 101,
+              "duration_seconds": 221.203,
+              "log_sha256": "09d4d3be26bc1f3f0f22aa83062a910e313d2f0361841c3382d34f4b38dd55ce",
+              "finished_utc": "2026-10-23T12:28:42.424377+00:00",
+              "source_unchanged": true,
+              "record_path": "/tmp/ferroui-popup-green-01/build.json",
+              "log_path": "/tmp/ferroui-popup-green-01/build.log"
+            },
+            "runtime_gates": [],
+            "cleanup": [
+              {
+                "reason": "Retired metadata-only check artifacts; current linked Base rlib and associated rmeta retained",
+                "files": [
+                  {
+                    "path": "/tmp/ferroui-richtext-target/debug/deps/libferroui_base-2a3394a4aa00ae07.rmeta",
+                    "bytes": 55614250,
+                    "sha256": "78131b9b3088545bfeb77b7ef97ea56b8a0f512698a6c276c35de9bdb98a109b"
+                  },
+                  {
+                    "path": "/tmp/ferroui-richtext-target/debug/deps/libferroui_base-3fbbf87686bc137d.rmeta",
+                    "bytes": 44034460,
+                    "sha256": "6bc2343e7f22fd43f8699f39169c8a8559dee9db2d7571a9ef6b259259d641eb"
+                  }
+                ],
+                "bytes_removed": 99648710,
+                "record_path": "/tmp/ferroui-popup-green-01/cleanup-metadata.json"
+              },
+              {
+                "reason": "Verified retired red executable and incomplete green-01 codegen objects after compiler SIGKILL; current dependency rlibs retained",
+                "files": [
+                  {
+                    "path": "/tmp/ferroui-richtext-target/debug/deps/ferroui_controls-8d2b7e7a6d2ee4d8",
+                    "bytes": 280471040,
+                    "sha256": "0c68b8d8ba5cd83f5304c034288c8aa8900125cb3854eff89e91ca88f7340f64"
+                  },
+                  {
+                    "path": "/tmp/ferroui-richtext-target/debug/deps/ferroui_controls-8d2b7e7a6d2ee4d8.ferroui_controls.8230507629e9e554-cgu.00.rcgu.o",
+                    "bytes": 31568256,
+                    "sha256": "0e58026da6ff5b9716753dbc900c47a2276d8c0a6bb148c553df88f976038ef5"
+                  },
+                  {
+                    "path": "/tmp/ferroui-richtext-target/debug/deps/ferroui_controls-8d2b7e7a6d2ee4d8.ferroui_controls.8230507629e9e554-cgu.01.rcgu.o",
+                    "bytes": 26124784,
+                    "sha256": "0af9541b608a91c98dc4291996a9ebcd0ad57b8c81b2e9d6f3ab8794f6ff8606"
+                  },
+                  {
+                    "path": "/tmp/ferroui-richtext-target/debug/deps/ferroui_controls-8d2b7e7a6d2ee4d8.ferroui_controls.8230507629e9e554-cgu.02.rcgu.o",
+                    "bytes": 25311904,
+                    "sha256": "1382445d0f3521aaadc1444d9b06466d150b7238334db4d2cc094d8ccc0af490"
+                  },
+                  {
+                    "path": "/tmp/ferroui-richtext-target/debug/deps/ferroui_controls-8d2b7e7a6d2ee4d8.ferroui_controls.8230507629e9e554-cgu.03.rcgu.o",
+                    "bytes": 19358152,
+                    "sha256": "45c229f55bdeb5d9f3372e04b0a883562159cf98fe370b1144ec28849a86d1d2"
+                  },
+                  {
+                    "path": "/tmp/ferroui-richtext-target/debug/deps/ferroui_controls-8d2b7e7a6d2ee4d8.ferroui_controls.8230507629e9e554-cgu.12.rcgu.o",
+                    "bytes": 0,
+                    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+                  },
+                  {
+                    "path": "/tmp/ferroui-richtext-target/debug/deps/ferroui_controls-8d2b7e7a6d2ee4d8.ferroui_controls.8230507629e9e554-cgu.13.rcgu.o",
+                    "bytes": 21115456,
+                    "sha256": "f92ff40ef4d1b12a6a8c301f0ed5b94aafc7a138da4f3643dfaf3a4eaf4ff78d"
+                  },
+                  {
+                    "path": "/tmp/ferroui-richtext-target/debug/deps/ferroui_controls-8d2b7e7a6d2ee4d8.ferroui_controls.8230507629e9e554-cgu.14.rcgu.o",
+                    "bytes": 37763328,
+                    "sha256": "761c25b4567242b6247a587a7e928b7c698d6f2e4dc7eebfd3385cc8931cc633"
+                  },
+                  {
+                    "path": "/tmp/ferroui-richtext-target/debug/deps/ferroui_controls-8d2b7e7a6d2ee4d8.ferroui_controls.8230507629e9e554-cgu.15.rcgu.o",
+                    "bytes": 21054088,
+                    "sha256": "6768f7497543974a469589c63f57c253557891f336d83b66458e87d2dc3271d8"
+                  }
+                ],
+                "bytes_removed": 462767008,
+                "record_path": "/tmp/ferroui-popup-green-01/cleanup.json"
+              }
+            ]
+          },
+          {
+            "id": "ferroui-popup-green-02",
+            "scope": "Interim Parent ownership source; focused runtime",
+            "popup_test_definitions": 48,
+            "source_manifest_path": "/tmp/ferroui-popup-green-02/source-manifest.json",
+            "source_manifest_sha256": "27bf4daf8b2a8ebcb42795450c0b83220e551f8d32934046b4e0005316b3facb",
+            "source_manifest": {
+              "base_commit": "b462d5b05aaa42899cbdef7c319474304dce34e8",
+              "base_tree": "ff8f968d5386661bfd2f43b170911f081a2efa94",
+              "files": [
+                {
+                  "path": "src/FerroUI.Controls/NOTICE.md",
+                  "sha256": "e51d799468d4ddf98c75634667a4fc8c58cf442c9f55c31e9dd9b5bdfb8a9598",
+                  "bytes": 11921
+                },
+                {
+                  "path": "src/FerroUI.Controls/context_menu.rs",
+                  "sha256": "360150127edfd1d435182c54eef7336932b8224dc319099e7023696a72c6268d",
+                  "bytes": 28529
+                },
+                {
+                  "path": "src/FerroUI.Controls/flyouts/flyout_tests.rs",
+                  "sha256": "74810b31a9015e9a96ef302697abf6745193c8ca05f57e59233c66442c29dc99",
+                  "bytes": 33720
+                },
+                {
+                  "path": "src/FerroUI.Controls/flyouts/popup_flyout_base.rs",
+                  "sha256": "d0232a9908e43340f12ca64ec5b9a80d307d061371acc7501c2ec882360192f1",
+                  "bytes": 44846
+                },
+                {
+                  "path": "src/FerroUI.Controls/flyouts/popup_flyout_request_tests.rs",
+                  "sha256": "f265282647c67c4c9a010927114a0efab2eddf4f34f74e93e7a6573e8c40b98f",
+                  "bytes": 21878
+                },
+                {
+                  "path": "src/FerroUI.Controls/primitives/popup.rs",
+                  "sha256": "d53c6dab4f8ce434499202ab755e60939a5f3948cf1ed288943c58fc852a67cc",
+                  "bytes": 65937
+                },
+                {
+                  "path": "src/FerroUI.Controls/rich_text_block.rs",
+                  "sha256": "935fbfba9c97b5e8dea0f653698d9d5a1a1470851dd8b89ddb0bb23e7a6fa270",
+                  "bytes": 80518
+                },
+                {
+                  "path": "src/FerroUI.Controls/rich_text_context_menu.rs",
+                  "sha256": "c67b5b384b2ea0bc40faa7b0d696835a797f2758bc6aee14300780e83de5568b",
+                  "bytes": 12935
+                },
+                {
+                  "path": "src/FerroUI.Controls/rich_text_context_menu_tests.rs",
+                  "sha256": "7dd9c45dc4d457c4eafc380b89fc2486f7239d6d0ca6fa97a076aec460429e7b",
+                  "bytes": 44344
+                },
+                {
+                  "path": "tests/FerroUI.Markup.Xaml.UnitTests/emitter/corpus.rs",
+                  "sha256": "30bd57e440185f15ab1c698d2499d99729ba0d4c9044c1526f620d8ed45ce344",
+                  "bytes": 47732
+                },
+                {
+                  "path": "tests/FerroUI.Markup.Xaml.UnitTests/emitter/event_handlers.rs",
+                  "sha256": "c5297076a05b402a9a5d9b08dad4b43b92c4b6e2bae5f43b76f642a779a60adf",
+                  "bytes": 24308
+                },
+                {
+                  "path": "tests/FerroUI.Markup.Xaml.UnitTests/emitter/generated_handlers/mod.rs",
+                  "sha256": "95db5965a8e76ee83ec3afd03a04116b49c020f2f8b3e054d57a3d37b7c0369e",
+                  "bytes": 552
+                },
+                {
+                  "path": "tests/FerroUI.Markup.Xaml.UnitTests/emitter/generated_handlers/rich_readonly_context_menu_event.rs",
+                  "sha256": "4c6211686837146827ba809af8761c2901655d1b64f481e89f62cd70464b8fed",
+                  "bytes": 6141
+                }
+              ]
+            },
+            "build": {
+              "argv": [
+                "/tmp/ferroedit-cargo/bin/cargo",
+                "test",
+                "--locked",
+                "--offline",
+                "-p",
+                "ferroui-controls",
+                "--lib",
+                "--no-run"
+              ],
+              "env": {
+                "PATH": "/tmp/ferroedit-cargo/bin:/usr/local/bin:/usr/bin:/bin",
+                "CARGO_HOME": "/tmp/ferroedit-cargo",
+                "RUSTUP_HOME": "/tmp/ferroedit-rustup",
+                "CARGO_TARGET_DIR": "/tmp/ferroui-richtext-target",
+                "CARGO_BUILD_JOBS": "1",
+                "CARGO_PROFILE_DEV_DEBUG": "0",
+                "CARGO_PROFILE_TEST_DEBUG": "0",
+                "CARGO_INCREMENTAL": "0"
+              },
+              "cwd": "/workspace/scratch/e589b83e3196/FerroUI",
+              "started_utc": "2026-10-23T12:36:25.647625+00:00",
+              "source_manifest_sha256": "27bf4daf8b2a8ebcb42795450c0b83220e551f8d32934046b4e0005316b3facb",
+              "exit_code": 0,
+              "duration_seconds": 254.899,
+              "log_sha256": "aa5cc25f5a227b2f886ad5f78632b459b50d46fd6eeae5ffe98d847a749b7109",
+              "finished_utc": "2026-10-23T12:40:40.548154+00:00",
+              "source_unchanged": true,
+              "record_path": "/tmp/ferroui-popup-green-02/build.json",
+              "log_path": "/tmp/ferroui-popup-green-02/build.log"
+            },
+            "runtime_gates": [
+              {
+                "argv": [
+                  "/tmp/ferroui-richtext-target/debug/deps/ferroui_controls-8d2b7e7a6d2ee4d8",
+                  "rich_context_",
+                  "--test-threads=1"
+                ],
+                "cwd": "/workspace/scratch/e589b83e3196/FerroUI",
+                "binary": {
+                  "path": "/tmp/ferroui-richtext-target/debug/deps/ferroui_controls-8d2b7e7a6d2ee4d8",
+                  "bytes": 280568696,
+                  "sha256": "15062b660ac7100e7e8e9098fcff59a6984f2a23b05e1ca69f3127a5d2f25034"
+                },
+                "started_utc": "2026-10-23T12:41:45.717421+00:00",
+                "source_manifest_sha256": "27bf4daf8b2a8ebcb42795450c0b83220e551f8d32934046b4e0005316b3facb",
+                "exit_code": 0,
+                "duration_seconds": 0.729,
+                "log_sha256": "f955ae94c714fab0b85ce2544c4d0543632e50512c89ebb4ce8a4cd9850ca326",
+                "source_unchanged": true,
+                "tests": {
+                  "passed": 18,
+                  "failed": 0,
+                  "ignored": 0,
+                  "measured": 0,
+                  "filtered_out": 5381
+                },
+                "test_duration_seconds": 0.7,
+                "record_path": "/tmp/ferroui-popup-green-02/editor-context.json",
+                "log_path": "/tmp/ferroui-popup-green-02/editor-context.log"
+              },
+              {
+                "argv": [
+                  "/tmp/ferroui-richtext-target/debug/deps/ferroui_controls-8d2b7e7a6d2ee4d8",
+                  "flyouts::",
+                  "--test-threads=1"
+                ],
+                "cwd": "/workspace/scratch/e589b83e3196/FerroUI",
+                "binary": {
+                  "path": "/tmp/ferroui-richtext-target/debug/deps/ferroui_controls-8d2b7e7a6d2ee4d8",
+                  "bytes": 280568696,
+                  "sha256": "15062b660ac7100e7e8e9098fcff59a6984f2a23b05e1ca69f3127a5d2f25034"
+                },
+                "started_utc": "2026-10-23T12:41:36.132951+00:00",
+                "source_manifest_sha256": "27bf4daf8b2a8ebcb42795450c0b83220e551f8d32934046b4e0005316b3facb",
+                "exit_code": 0,
+                "duration_seconds": 3.466,
+                "log_sha256": "9180af67dacc17ad23cdc9e3adbe9a0ff9faf521b751d5e7aa079746c18a6fd1",
+                "source_unchanged": true,
+                "tests": {
+                  "passed": 112,
+                  "failed": 0,
+                  "ignored": 0,
+                  "measured": 0,
+                  "filtered_out": 5287
+                },
+                "test_duration_seconds": 3.45,
+                "record_path": "/tmp/ferroui-popup-green-02/existing-flyouts.json",
+                "log_path": "/tmp/ferroui-popup-green-02/existing-flyouts.log"
+              },
+              {
+                "argv": [
+                  "/tmp/ferroui-richtext-target/debug/deps/ferroui_controls-8d2b7e7a6d2ee4d8",
+                  "primitives::popup",
+                  "--test-threads=1"
+                ],
+                "cwd": "/workspace/scratch/e589b83e3196/FerroUI",
+                "binary": {
+                  "path": "/tmp/ferroui-richtext-target/debug/deps/ferroui_controls-8d2b7e7a6d2ee4d8",
+                  "bytes": 280568696,
+                  "sha256": "15062b660ac7100e7e8e9098fcff59a6984f2a23b05e1ca69f3127a5d2f25034"
+                },
+                "started_utc": "2026-10-23T12:41:40.242492+00:00",
+                "source_manifest_sha256": "27bf4daf8b2a8ebcb42795450c0b83220e551f8d32934046b4e0005316b3facb",
+                "exit_code": 0,
+                "duration_seconds": 3.239,
+                "log_sha256": "5b2616f027955e87d69c2ffaec34bc6f2f1c90653a252783f63aee2e640bb9e8",
+                "source_unchanged": true,
+                "tests": {
+                  "passed": 129,
+                  "failed": 0,
+                  "ignored": 0,
+                  "measured": 0,
+                  "filtered_out": 5270
+                },
+                "test_duration_seconds": 3.22,
+                "record_path": "/tmp/ferroui-popup-green-02/existing-popups.json",
+                "log_path": "/tmp/ferroui-popup-green-02/existing-popups.log"
+              },
+              {
+                "argv": [
+                  "/tmp/ferroui-richtext-target/debug/deps/ferroui_controls-8d2b7e7a6d2ee4d8",
+                  "popup_request_",
+                  "--test-threads=1"
+                ],
+                "cwd": "/workspace/scratch/e589b83e3196/FerroUI",
+                "binary": {
+                  "path": "/tmp/ferroui-richtext-target/debug/deps/ferroui_controls-8d2b7e7a6d2ee4d8",
+                  "bytes": 280568696,
+                  "sha256": "15062b660ac7100e7e8e9098fcff59a6984f2a23b05e1ca69f3127a5d2f25034"
+                },
+                "started_utc": "2026-10-23T12:41:06.937300+00:00",
+                "source_manifest_sha256": "27bf4daf8b2a8ebcb42795450c0b83220e551f8d32934046b4e0005316b3facb",
+                "exit_code": 0,
+                "duration_seconds": 0.859,
+                "log_sha256": "32bd319c61607cdb6a6b73b93fcb62e554e297e852d31e2ffc6d53c2d2fb6056",
+                "source_unchanged": true,
+                "tests": {
+                  "passed": 48,
+                  "failed": 0,
+                  "ignored": 0,
+                  "measured": 0,
+                  "filtered_out": 5351
+                },
+                "test_duration_seconds": 0.84,
+                "record_path": "/tmp/ferroui-popup-green-02/popup-request.json",
+                "log_path": "/tmp/ferroui-popup-green-02/popup-request.log"
+              },
+              {
+                "argv": [
+                  "/tmp/ferroui-richtext-target/debug/deps/ferroui_controls-8d2b7e7a6d2ee4d8",
+                  "rich_readonly_context_",
+                  "--test-threads=1"
+                ],
+                "cwd": "/workspace/scratch/e589b83e3196/FerroUI",
+                "binary": {
+                  "path": "/tmp/ferroui-richtext-target/debug/deps/ferroui_controls-8d2b7e7a6d2ee4d8",
+                  "bytes": 280568696,
+                  "sha256": "15062b660ac7100e7e8e9098fcff59a6984f2a23b05e1ca69f3127a5d2f25034"
+                },
+                "started_utc": "2026-10-23T12:41:31.004648+00:00",
+                "source_manifest_sha256": "27bf4daf8b2a8ebcb42795450c0b83220e551f8d32934046b4e0005316b3facb",
+                "exit_code": 101,
+                "duration_seconds": 4.383,
+                "log_sha256": "bdf564705b43714396998ed6a92a9e6290e42bbfa9f6d42a80f1049241c5dd21",
+                "source_unchanged": true,
+                "tests": {
+                  "passed": 26,
+                  "failed": 5,
+                  "ignored": 0,
+                  "measured": 0,
+                  "filtered_out": 5368
+                },
+                "test_duration_seconds": 4.36,
+                "record_path": "/tmp/ferroui-popup-green-02/readonly-context.json",
+                "log_path": "/tmp/ferroui-popup-green-02/readonly-context.log"
+              }
+            ],
+            "cleanup": [
+              {
+                "reason": "Superseded interim48 executable after all planned focused gates; exact source and runtime hashes retained",
+                "removed_utc": "2026-10-23T12:43:28.281153+00:00",
+                "binary": {
+                  "path": "/tmp/ferroui-richtext-target/debug/deps/ferroui_controls-8d2b7e7a6d2ee4d8",
+                  "bytes": 280568696,
+                  "sha256": "15062b660ac7100e7e8e9098fcff59a6984f2a23b05e1ca69f3127a5d2f25034"
+                },
+                "record_path": "/tmp/ferroui-popup-green-02/cleanup.json"
+              }
+            ]
+          },
+          {
+            "id": "ferroui-popup-green-03",
+            "scope": "Final same-parent completion and in-bounds read-only fixtures",
+            "popup_test_definitions": 50,
+            "source_manifest_path": "/tmp/ferroui-popup-green-03/source-manifest.json",
+            "source_manifest_sha256": "0ce65915242a8308c7a6779c1c94144d7e38ce83c3f5916408464a0c4fefaa15",
+            "source_manifest": {
+              "base_commit": "b462d5b05aaa42899cbdef7c319474304dce34e8",
+              "base_tree": "ff8f968d5386661bfd2f43b170911f081a2efa94",
+              "files": [
+                {
+                  "path": "src/FerroUI.Controls/NOTICE.md",
+                  "sha256": "e51d799468d4ddf98c75634667a4fc8c58cf442c9f55c31e9dd9b5bdfb8a9598",
+                  "bytes": 11921
+                },
+                {
+                  "path": "src/FerroUI.Controls/context_menu.rs",
+                  "sha256": "360150127edfd1d435182c54eef7336932b8224dc319099e7023696a72c6268d",
+                  "bytes": 28529
+                },
+                {
+                  "path": "src/FerroUI.Controls/flyouts/flyout_tests.rs",
+                  "sha256": "74810b31a9015e9a96ef302697abf6745193c8ca05f57e59233c66442c29dc99",
+                  "bytes": 33720
+                },
+                {
+                  "path": "src/FerroUI.Controls/flyouts/popup_flyout_base.rs",
+                  "sha256": "d0232a9908e43340f12ca64ec5b9a80d307d061371acc7501c2ec882360192f1",
+                  "bytes": 44846
+                },
+                {
+                  "path": "src/FerroUI.Controls/flyouts/popup_flyout_request_tests.rs",
+                  "sha256": "d4e8c34855eddd4b7583a724abe4565606a9bb7298426ebb745d0b5550a9b447",
+                  "bytes": 22883
+                },
+                {
+                  "path": "src/FerroUI.Controls/primitives/popup.rs",
+                  "sha256": "6f1b6b844c88657a0e07bd5503c58f2d79c93713e14dffdf868f3e60f3bd3c6a",
+                  "bytes": 66057
+                },
+                {
+                  "path": "src/FerroUI.Controls/rich_text_block.rs",
+                  "sha256": "935fbfba9c97b5e8dea0f653698d9d5a1a1470851dd8b89ddb0bb23e7a6fa270",
+                  "bytes": 80518
+                },
+                {
+                  "path": "src/FerroUI.Controls/rich_text_context_menu.rs",
+                  "sha256": "c67b5b384b2ea0bc40faa7b0d696835a797f2758bc6aee14300780e83de5568b",
+                  "bytes": 12935
+                },
+                {
+                  "path": "src/FerroUI.Controls/rich_text_context_menu_tests.rs",
+                  "sha256": "482f990d96bb1c20ce749d6db9c72bfd1ef0c3fb0916f77410d9e2f52a46df20",
+                  "bytes": 44493
+                },
+                {
+                  "path": "tests/FerroUI.Markup.Xaml.UnitTests/emitter/corpus.rs",
+                  "sha256": "30bd57e440185f15ab1c698d2499d99729ba0d4c9044c1526f620d8ed45ce344",
+                  "bytes": 47732
+                },
+                {
+                  "path": "tests/FerroUI.Markup.Xaml.UnitTests/emitter/event_handlers.rs",
+                  "sha256": "c5297076a05b402a9a5d9b08dad4b43b92c4b6e2bae5f43b76f642a779a60adf",
+                  "bytes": 24308
+                },
+                {
+                  "path": "tests/FerroUI.Markup.Xaml.UnitTests/emitter/generated_handlers/mod.rs",
+                  "sha256": "95db5965a8e76ee83ec3afd03a04116b49c020f2f8b3e054d57a3d37b7c0369e",
+                  "bytes": 552
+                },
+                {
+                  "path": "tests/FerroUI.Markup.Xaml.UnitTests/emitter/generated_handlers/rich_readonly_context_menu_event.rs",
+                  "sha256": "4c6211686837146827ba809af8761c2901655d1b64f481e89f62cd70464b8fed",
+                  "bytes": 6141
+                }
+              ]
+            },
+            "build": {
+              "argv": [
+                "/tmp/ferroedit-cargo/bin/cargo",
+                "test",
+                "--locked",
+                "--offline",
+                "-p",
+                "ferroui-controls",
+                "--lib",
+                "--no-run"
+              ],
+              "env": {
+                "PATH": "/tmp/ferroedit-cargo/bin:/usr/local/bin:/usr/bin:/bin",
+                "CARGO_HOME": "/tmp/ferroedit-cargo",
+                "RUSTUP_HOME": "/tmp/ferroedit-rustup",
+                "CARGO_TARGET_DIR": "/tmp/ferroui-richtext-target",
+                "CARGO_BUILD_JOBS": "1",
+                "CARGO_PROFILE_DEV_DEBUG": "0",
+                "CARGO_PROFILE_TEST_DEBUG": "0",
+                "CARGO_INCREMENTAL": "0"
+              },
+              "cwd": "/workspace/scratch/e589b83e3196/FerroUI",
+              "started_utc": "2026-10-23T12:43:40.143875+00:00",
+              "source_manifest_sha256": "0ce65915242a8308c7a6779c1c94144d7e38ce83c3f5916408464a0c4fefaa15",
+              "exit_code": 0,
+              "duration_seconds": 260.043,
+              "log_sha256": "78366577fbf85e02f1f714e77cf1f9ccdf272a34d7e2a9e573b766bdb3d7bd90",
+              "finished_utc": "2026-10-23T12:48:00.187351+00:00",
+              "source_unchanged": true,
+              "record_path": "/tmp/ferroui-popup-green-03/build.json",
+              "log_path": "/tmp/ferroui-popup-green-03/build.log"
+            },
+            "runtime_gates": [
+              {
+                "argv": [
+                  "/tmp/ferroui-richtext-target/debug/deps/ferroui_controls-8d2b7e7a6d2ee4d8",
+                  "rich_context_",
+                  "--test-threads=1"
+                ],
+                "cwd": "/workspace/scratch/e589b83e3196/FerroUI",
+                "binary": {
+                  "path": "/tmp/ferroui-richtext-target/debug/deps/ferroui_controls-8d2b7e7a6d2ee4d8",
+                  "bytes": 280598992,
+                  "sha256": "b8f5ea01e380b1ef96545d7faa1e18381b770fe92cc3bb26de0d43aec25621f4"
+                },
+                "started_utc": "2026-10-23T12:48:26.803215+00:00",
+                "source_manifest_sha256": "0ce65915242a8308c7a6779c1c94144d7e38ce83c3f5916408464a0c4fefaa15",
+                "exit_code": 0,
+                "duration_seconds": 1.77,
+                "log_sha256": "28b8a60b10ecfc1b71797897ac9d250a2a50d7f422e06b3ff085f18d112c92a9",
+                "source_unchanged": true,
+                "tests": {
+                  "passed": 18,
+                  "failed": 0,
+                  "ignored": 0,
+                  "measured": 0,
+                  "filtered_out": 5383
+                },
+                "test_duration_seconds": 1.76,
+                "record_path": "/tmp/ferroui-popup-green-03/editor-context.json",
+                "log_path": "/tmp/ferroui-popup-green-03/editor-context.log"
+              },
+              {
+                "argv": [
+                  "/tmp/ferroui-richtext-target/debug/deps/ferroui_controls-8d2b7e7a6d2ee4d8",
+                  "flyouts::",
+                  "--test-threads=1"
+                ],
+                "cwd": "/workspace/scratch/e589b83e3196/FerroUI",
+                "binary": {
+                  "path": "/tmp/ferroui-richtext-target/debug/deps/ferroui_controls-8d2b7e7a6d2ee4d8",
+                  "bytes": 280598992,
+                  "sha256": "b8f5ea01e380b1ef96545d7faa1e18381b770fe92cc3bb26de0d43aec25621f4"
+                },
+                "started_utc": "2026-10-23T12:48:18.891762+00:00",
+                "source_manifest_sha256": "0ce65915242a8308c7a6779c1c94144d7e38ce83c3f5916408464a0c4fefaa15",
+                "exit_code": 0,
+                "duration_seconds": 3.588,
+                "log_sha256": "9d136b564400a79b31c299e3bdf5871e8014774571b484474dc48dedb9f27d36",
+                "source_unchanged": true,
+                "tests": {
+                  "passed": 114,
+                  "failed": 0,
+                  "ignored": 0,
+                  "measured": 0,
+                  "filtered_out": 5287
+                },
+                "test_duration_seconds": 3.57,
+                "record_path": "/tmp/ferroui-popup-green-03/existing-flyouts.json",
+                "log_path": "/tmp/ferroui-popup-green-03/existing-flyouts.log"
+              },
+              {
+                "argv": [
+                  "/tmp/ferroui-richtext-target/debug/deps/ferroui_controls-8d2b7e7a6d2ee4d8",
+                  "primitives::popup",
+                  "--test-threads=1"
+                ],
+                "cwd": "/workspace/scratch/e589b83e3196/FerroUI",
+                "binary": {
+                  "path": "/tmp/ferroui-richtext-target/debug/deps/ferroui_controls-8d2b7e7a6d2ee4d8",
+                  "bytes": 280598992,
+                  "sha256": "b8f5ea01e380b1ef96545d7faa1e18381b770fe92cc3bb26de0d43aec25621f4"
+                },
+                "started_utc": "2026-10-23T12:48:22.969255+00:00",
+                "source_manifest_sha256": "0ce65915242a8308c7a6779c1c94144d7e38ce83c3f5916408464a0c4fefaa15",
+                "exit_code": 0,
+                "duration_seconds": 3.052,
+                "log_sha256": "214e5c37534b4c9d38a29984652fb6c53f58b21ea2423683d6e8a85b4baefdd7",
+                "source_unchanged": true,
+                "tests": {
+                  "passed": 129,
+                  "failed": 0,
+                  "ignored": 0,
+                  "measured": 0,
+                  "filtered_out": 5272
+                },
+                "test_duration_seconds": 3.04,
+                "record_path": "/tmp/ferroui-popup-green-03/existing-popups.json",
+                "log_path": "/tmp/ferroui-popup-green-03/existing-popups.log"
+              },
+              {
+                "argv": [
+                  "/tmp/ferroui-richtext-target/debug/deps/ferroui_controls-8d2b7e7a6d2ee4d8"
+                ],
+                "cwd": "/workspace/scratch/e589b83e3196/FerroUI",
+                "binary": {
+                  "path": "/tmp/ferroui-richtext-target/debug/deps/ferroui_controls-8d2b7e7a6d2ee4d8",
+                  "bytes": 280598992,
+                  "sha256": "b8f5ea01e380b1ef96545d7faa1e18381b770fe92cc3bb26de0d43aec25621f4"
+                },
+                "started_utc": "2026-10-23T12:48:49.404697+00:00",
+                "source_manifest_sha256": "0ce65915242a8308c7a6779c1c94144d7e38ce83c3f5916408464a0c4fefaa15",
+                "exit_code": 0,
+                "duration_seconds": 19.181,
+                "log_sha256": "78e1b3be73371ec990cb8b06be72cedc138e210ed2334b4f806a31fc64d702f1",
+                "source_unchanged": true,
+                "tests": {
+                  "passed": 5401,
+                  "failed": 0,
+                  "ignored": 0,
+                  "measured": 0,
+                  "filtered_out": 0
+                },
+                "test_duration_seconds": 19.08,
+                "record_path": "/tmp/ferroui-popup-green-03/full-controls.json",
+                "log_path": "/tmp/ferroui-popup-green-03/full-controls.log"
+              },
+              {
+                "argv": [
+                  "/tmp/ferroui-richtext-target/debug/deps/ferroui_controls-8d2b7e7a6d2ee4d8",
+                  "popup_request_",
+                  "--test-threads=1"
+                ],
+                "cwd": "/workspace/scratch/e589b83e3196/FerroUI",
+                "binary": {
+                  "path": "/tmp/ferroui-richtext-target/debug/deps/ferroui_controls-8d2b7e7a6d2ee4d8",
+                  "bytes": 280598992,
+                  "sha256": "b8f5ea01e380b1ef96545d7faa1e18381b770fe92cc3bb26de0d43aec25621f4"
+                },
+                "started_utc": "2026-10-23T12:48:14.562136+00:00",
+                "source_manifest_sha256": "0ce65915242a8308c7a6779c1c94144d7e38ce83c3f5916408464a0c4fefaa15",
+                "exit_code": 0,
+                "duration_seconds": 1.019,
+                "log_sha256": "fea69a2f1d45a0aebac475b14d25450e50ac3dbed6f39ab2215af0abde3ab67c",
+                "source_unchanged": true,
+                "tests": {
+                  "passed": 50,
+                  "failed": 0,
+                  "ignored": 0,
+                  "measured": 0,
+                  "filtered_out": 5351
+                },
+                "test_duration_seconds": 1.01,
+                "record_path": "/tmp/ferroui-popup-green-03/popup-request.json",
+                "log_path": "/tmp/ferroui-popup-green-03/popup-request.log"
+              },
+              {
+                "argv": [
+                  "/tmp/ferroui-richtext-target/debug/deps/ferroui_controls-8d2b7e7a6d2ee4d8",
+                  "rich_readonly_context_",
+                  "--test-threads=1"
+                ],
+                "cwd": "/workspace/scratch/e589b83e3196/FerroUI",
+                "binary": {
+                  "path": "/tmp/ferroui-richtext-target/debug/deps/ferroui_controls-8d2b7e7a6d2ee4d8",
+                  "bytes": 280598992,
+                  "sha256": "b8f5ea01e380b1ef96545d7faa1e18381b770fe92cc3bb26de0d43aec25621f4"
+                },
+                "started_utc": "2026-10-23T12:48:15.960905+00:00",
+                "source_manifest_sha256": "0ce65915242a8308c7a6779c1c94144d7e38ce83c3f5916408464a0c4fefaa15",
+                "exit_code": 0,
+                "duration_seconds": 2.525,
+                "log_sha256": "b674dab68c5acdb8a285a43d2d1a2b09695cfbb96177fbf5c3f10b9d1bfc29c5",
+                "source_unchanged": true,
+                "tests": {
+                  "passed": 31,
+                  "failed": 0,
+                  "ignored": 0,
+                  "measured": 0,
+                  "filtered_out": 5370
+                },
+                "test_duration_seconds": 2.51,
+                "record_path": "/tmp/ferroui-popup-green-03/readonly-context.json",
+                "log_path": "/tmp/ferroui-popup-green-03/readonly-context.log"
+              }
+            ],
+            "cleanup": [
+              {
+                "reason": "Completed final50 Controls executable after all focused and full5401 tests; preserve hashes and release space for XAML test-feature dependencies",
+                "removed_utc": "2026-10-23T12:51:01.281869+00:00",
+                "binary": {
+                  "path": "/tmp/ferroui-richtext-target/debug/deps/ferroui_controls-8d2b7e7a6d2ee4d8",
+                  "bytes": 280598992,
+                  "sha256": "b8f5ea01e380b1ef96545d7faa1e18381b770fe92cc3bb26de0d43aec25621f4"
+                },
+                "record_path": "/tmp/ferroui-popup-green-03/cleanup.json"
+              }
+            ]
+          }
+        ],
+        "interpretation": [
+          "The initial compilation exited101 on four diagnostics fixed with three minimal source corrections; it produced no runtime evidence.",
+          "The source-bound old-lifecycle red36 runtime produced6 passes and30 failures; no full suite ran against known-red source.",
+          "The first repaired lifecycle44 build was SIGKILLed during code generation, with no Rust compiler error or runtime result.",
+          "The interim48 source compiled and passed48 ownership cases,112 flyout cases,129 popup cases,18 editor context cases. Its31 read-only cases had26 passes and5 fixture failures.",
+          "The five read-only failures came from explicit root-coordinate test points below the requester bottom79DIPs. The existing shared positioner clamps anchors to requester bounds. Only five pointer input Ys were moved inside the bounds; strict coordinate and callback assertions were retained.",
+          "The four Parent association cases added after green44 and the two same-parent completion cases added after interim48 are source-review findings, distinct from the measured red36 scope.",
+          "Popup lifecycle tests use separate-window and overlay framework test hosts with mocked platform services, not native OS execution.",
+          "Owned superseded binaries/incomplete objects/old metadata artifacts were removed only after preserving hashes; source/log records were retained.",
+          "The first actual XAML regeneration succeeded and reproduced all nine generated files byte-for-byte. Emitter model parity also passed. The focused read-only runtime then exposed a test fixture wired to an editor-only sender assertion; no full XAML suite ran against that known failing fixture.",
+          "The fixture correction introduces a dedicated RichTextBlock sender/source/live-argument handler and appends its metadata method without changing the existing RichEditBox handler assertions. Only the read-only corpus event is rewired, then generated through the actual emitter.",
+          "To fit XAML dependency feature variants on the shared volume, the inactive Controls-only Base artifact pair was gzip-archived, fully round-trip hash-verified, and removed from the target. Its exact bytes and mtimes remain recoverable with the recorded restore script."
+        ],
+        "pending": [],
+        "xaml_trials": [
+          {
+            "id": "ferroui-popup-xaml-regeneration",
+            "source_manifest_path": "/tmp/ferroui-popup-xaml-regeneration/source-manifest.json",
+            "source_manifest_sha256": "b3de1ac21396e8e1f69647cc8fc52b4ee01e6f17583ebad2ea64426eb7f1ba1b",
+            "source_manifest": {
+              "base_commit": "e0c0a2e8ef360c0e05cc2a86d39a850df63f55e9",
+              "base_tree": "89113341778c640dc00a69fab8182ecf34bfbee9",
+              "files": []
+            },
+            "build": {
+              "argv": [
+                "/tmp/ferroedit-cargo/bin/cargo",
+                "test",
+                "--locked",
+                "--offline",
+                "-p",
+                "ferroui-markup-xaml-tests",
+                "--lib",
+                "emitter::event_handlers::regenerate_class_documents",
+                "--",
+                "--ignored",
+                "--exact"
+              ],
+              "env": {
+                "PATH": "/tmp/ferroedit-cargo/bin:/usr/local/bin:/usr/bin:/bin",
+                "CARGO_HOME": "/tmp/ferroedit-cargo",
+                "RUSTUP_HOME": "/tmp/ferroedit-rustup",
+                "CARGO_TARGET_DIR": "/tmp/ferroui-richtext-target",
+                "CARGO_BUILD_JOBS": "1",
+                "CARGO_PROFILE_DEV_DEBUG": "0",
+                "CARGO_PROFILE_TEST_DEBUG": "0",
+                "CARGO_INCREMENTAL": "0"
+              },
+              "cwd": "/workspace/scratch/e589b83e3196/FerroUI",
+              "started_utc": "2026-10-23T12:50:17.525490+00:00",
+              "source_manifest_sha256": "b3de1ac21396e8e1f69647cc8fc52b4ee01e6f17583ebad2ea64426eb7f1ba1b",
+              "exit_code": 0,
+              "duration_seconds": 1057.034,
+              "log_sha256": "062d91bc359db9fc8b6c1c2eacb170bc46b1f64448acf533cc2bae7c4be85725",
+              "finished_utc": "2026-10-23T13:07:54.560287+00:00",
+              "source_unchanged": true,
+              "record_path": "/tmp/ferroui-popup-xaml-regeneration/build.json",
+              "log_path": "/tmp/ferroui-popup-xaml-regeneration/build.log",
+              "tests": {
+                "passed": 1,
+                "failed": 0,
+                "ignored": 0,
+                "measured": 0,
+                "filtered_out": 637
+              },
+              "test_duration_seconds": 24.12
+            },
+            "runtime_gates": [
+              {
+                "argv": [
+                  "/tmp/ferroui-richtext-target/debug/deps/ferroui_markup_xaml_tests-712b55a699fdb755",
+                  "emitter::event_handlers::class_documents_are_emitted_the_same_by_both_hosts",
+                  "--exact",
+                  "--test-threads=1"
+                ],
+                "cwd": "/workspace/scratch/e589b83e3196/FerroUI",
+                "env": {
+                  "PATH": "/tmp/ferroedit-cargo/bin:/usr/local/bin:/usr/bin:/bin",
+                  "CARGO_HOME": "/tmp/ferroedit-cargo",
+                  "RUSTUP_HOME": "/tmp/ferroedit-rustup",
+                  "CARGO_TARGET_DIR": "/tmp/ferroui-richtext-target",
+                  "CARGO_BUILD_JOBS": "1",
+                  "CARGO_PROFILE_DEV_DEBUG": "0",
+                  "CARGO_PROFILE_TEST_DEBUG": "0",
+                  "CARGO_INCREMENTAL": "0"
+                },
+                "binary": {
+                  "path": "/tmp/ferroui-richtext-target/debug/deps/ferroui_markup_xaml_tests-712b55a699fdb755",
+                  "bytes": 315438048,
+                  "sha256": "a2b3cd6c9302b27e7d9ccc658c46eb2ea681c507ea5ab4453765d4ed53320f37"
+                },
+                "started_utc": "2026-10-23T13:09:25.485231+00:00",
+                "source_manifest_sha256": "b3de1ac21396e8e1f69647cc8fc52b4ee01e6f17583ebad2ea64426eb7f1ba1b",
+                "exit_code": 0,
+                "duration_seconds": 15.785,
+                "log_sha256": "cc03db67244d32a3abf2554a41ca847b616d0f9097f135ab3cbcdfe49b4d2726",
+                "source_unchanged": true,
+                "tests": {
+                  "passed": 1,
+                  "failed": 0,
+                  "ignored": 0,
+                  "measured": 0,
+                  "filtered_out": 637
+                },
+                "test_duration_seconds": 15.74,
+                "record_path": "/tmp/ferroui-popup-xaml-regeneration/emitter-model-parity.json",
+                "log_path": "/tmp/ferroui-popup-xaml-regeneration/emitter-model-parity.log"
+              },
+              {
+                "argv": [
+                  "/tmp/ferroui-richtext-target/debug/deps/ferroui_markup_xaml_tests-712b55a699fdb755",
+                  "emitter::event_handlers::rich_readonly_context_menu_event_calls_the_method_with_live_arguments",
+                  "--exact",
+                  "--test-threads=1"
+                ],
+                "cwd": "/workspace/scratch/e589b83e3196/FerroUI",
+                "env": {
+                  "PATH": "/tmp/ferroedit-cargo/bin:/usr/local/bin:/usr/bin:/bin",
+                  "CARGO_HOME": "/tmp/ferroedit-cargo",
+                  "RUSTUP_HOME": "/tmp/ferroedit-rustup",
+                  "CARGO_TARGET_DIR": "/tmp/ferroui-richtext-target",
+                  "CARGO_BUILD_JOBS": "1",
+                  "CARGO_PROFILE_DEV_DEBUG": "0",
+                  "CARGO_PROFILE_TEST_DEBUG": "0",
+                  "CARGO_INCREMENTAL": "0"
+                },
+                "binary": {
+                  "path": "/tmp/ferroui-richtext-target/debug/deps/ferroui_markup_xaml_tests-712b55a699fdb755",
+                  "bytes": 315438048,
+                  "sha256": "a2b3cd6c9302b27e7d9ccc658c46eb2ea681c507ea5ab4453765d4ed53320f37"
+                },
+                "started_utc": "2026-10-23T13:09:42.504123+00:00",
+                "source_manifest_sha256": "b3de1ac21396e8e1f69647cc8fc52b4ee01e6f17583ebad2ea64426eb7f1ba1b",
+                "exit_code": 101,
+                "duration_seconds": 0.054,
+                "log_sha256": "28c3d17f039535ca03b7229542d6a9c4789bcd3782e9844e810a0d752dfb1bae",
+                "source_unchanged": true,
+                "tests": {
+                  "passed": 0,
+                  "failed": 1,
+                  "ignored": 0,
+                  "measured": 0,
+                  "filtered_out": 637
+                },
+                "test_duration_seconds": 0.04,
+                "record_path": "/tmp/ferroui-popup-xaml-regeneration/rich-readonly-handler.json",
+                "log_path": "/tmp/ferroui-popup-xaml-regeneration/rich-readonly-handler.log"
+              }
+            ],
+            "resource_pauses": [
+              {
+                "reason": "Pause own build before shared disk exhaustion; no files or other tasks touched",
+                "at_utc": "2026-10-23T12:54:51.615659+00:00",
+                "processes": [
+                  {
+                    "pid": 190680,
+                    "parent": 190650,
+                    "name": "cargo"
+                  },
+                  {
+                    "pid": 193838,
+                    "parent": 190680,
+                    "name": "rustc"
+                  }
+                ],
+                "resumed_utc": "2026-10-23T12:55:05.777706+00:00",
+                "available_bytes_on_resume": 1253076992,
+                "signal_delivery": "Attempt only; no stopped state was verified. A later normal-sandbox resume failed with ProcessLookupError because the visible host PIDs are outside that sandbox PID namespace; treat this earlier attempt as unconfirmed.",
+                "record_path": "/tmp/ferroui-popup-xaml-regeneration/paused.json"
+              },
+              {
+                "reason": "Pause only own build at shared disk exhaustion before any additional artifact writes",
+                "at_utc": "2026-10-23T13:00:14.989746+00:00",
+                "processes": [
+                  {
+                    "pid": 190680,
+                    "parent": 190650,
+                    "name": "cargo"
+                  },
+                  {
+                    "pid": 199373,
+                    "parent": 190680,
+                    "name": "build-script-bu"
+                  }
+                ],
+                "resumed_utc": "2026-10-23T13:05:43.304788+00:00",
+                "available_bytes_on_resume": 629866496,
+                "signal_delivery": "SIGSTOP confirmed by process State:T; SIGCONT sent from escalated PID namespace",
+                "record_path": "/tmp/ferroui-popup-xaml-regeneration/paused-02.json"
+              }
+            ],
+            "cleanup": [
+              {
+                "reason": "Remove already verified superseded XAML test executable before rebuilding the corrected fixture; dependencies and source/log evidence retained.",
+                "utc": "2026-10-23T13:15:18.128313+00:00",
+                "files": [
+                  {
+                    "path": "/tmp/ferroui-richtext-target/debug/deps/ferroui_markup_xaml_tests-712b55a699fdb755",
+                    "bytes": 315438048,
+                    "sha256": "a2b3cd6c9302b27e7d9ccc658c46eb2ea681c507ea5ab4453765d4ed53320f37"
+                  }
+                ],
+                "available_bytes_after": 537288704,
+                "record_path": "/tmp/ferroui-popup-xaml-regeneration/cleanup.json"
+              }
+            ]
+          },
+          {
+            "id": "ferroui-popup-xaml-regeneration-02",
+            "source_manifest_path": "/tmp/ferroui-popup-xaml-regeneration-02/source-manifest.json",
+            "source_manifest_sha256": "af6f1b860d92db80d3b84cb09b19824cbd2aae5b0982535a2de6ce52255dfad3",
+            "source_manifest": {
+              "base_commit": "e0c0a2e8ef360c0e05cc2a86d39a850df63f55e9",
+              "base_tree": "89113341778c640dc00a69fab8182ecf34bfbee9",
+              "files": [
+                {
+                  "path": "tests/FerroUI.Markup.Xaml.UnitTests/emitter/corpus.rs",
+                  "sha256": "a61e26d5b690cf28b5c290850ad74f025485bd406e785e5185d5e10eadd850b6",
+                  "bytes": 47740
+                },
+                {
+                  "path": "tests/FerroUI.Markup.Xaml.UnitTests/support/xaml/event_tests.rs",
+                  "sha256": "55a27d0d031f0b9bf9d4b907d544b677dbd48f391afc8b34862bb99acec2a156",
+                  "bytes": 11970
+                }
+              ]
+            },
+            "build": {
+              "argv": [
+                "/tmp/ferroedit-cargo/bin/cargo",
+                "test",
+                "--locked",
+                "--offline",
+                "-p",
+                "ferroui-markup-xaml-tests",
+                "--lib",
+                "emitter::event_handlers::regenerate_class_documents",
+                "--",
+                "--ignored",
+                "--exact"
+              ],
+              "env": {
+                "PATH": "/tmp/ferroedit-cargo/bin:/usr/local/bin:/usr/bin:/bin",
+                "CARGO_HOME": "/tmp/ferroedit-cargo",
+                "RUSTUP_HOME": "/tmp/ferroedit-rustup",
+                "CARGO_TARGET_DIR": "/tmp/ferroui-richtext-target",
+                "CARGO_BUILD_JOBS": "1",
+                "CARGO_PROFILE_DEV_DEBUG": "0",
+                "CARGO_PROFILE_TEST_DEBUG": "0",
+                "CARGO_INCREMENTAL": "0"
+              },
+              "cwd": "/workspace/scratch/e589b83e3196/FerroUI",
+              "started_utc": "2026-10-23T13:15:23.532145+00:00",
+              "source_manifest_sha256": "af6f1b860d92db80d3b84cb09b19824cbd2aae5b0982535a2de6ce52255dfad3",
+              "exit_code": 0,
+              "duration_seconds": 66.133,
+              "log_sha256": "3e40aa01906f025afb197aa18569003e1688c0f70eef0c709385eb7d83507e06",
+              "finished_utc": "2026-10-23T13:16:29.665322+00:00",
+              "source_unchanged": true,
+              "binary": {
+                "path": "/tmp/ferroui-richtext-target/debug/deps/ferroui_markup_xaml_tests-712b55a699fdb755",
+                "bytes": 315436656,
+                "sha256": "c38f49453dbf33cd07340858cbb6da8c8e45610044158657f0be7d4aa2fb5165"
+              },
+              "record_path": "/tmp/ferroui-popup-xaml-regeneration-02/build.json",
+              "log_path": "/tmp/ferroui-popup-xaml-regeneration-02/build.log",
+              "tests": {
+                "passed": 1,
+                "failed": 0,
+                "ignored": 0,
+                "measured": 0,
+                "filtered_out": 637
+              },
+              "test_duration_seconds": 18.19
+            },
+            "runtime_gates": [],
+            "resource_pauses": [],
+            "cleanup": [
+              {
+                "reason": "Regeneration produced changed source, requiring a final rebuild. Remove this superseded generation executable after recording its exact hash.",
+                "utc": "2026-10-23T13:16:57.114872+00:00",
+                "files": [
+                  {
+                    "path": "/tmp/ferroui-richtext-target/debug/deps/ferroui_markup_xaml_tests-712b55a699fdb755",
+                    "bytes": 315436656,
+                    "sha256": "c38f49453dbf33cd07340858cbb6da8c8e45610044158657f0be7d4aa2fb5165"
+                  }
+                ],
+                "available_bytes_after": 548872192,
+                "record_path": "/tmp/ferroui-popup-xaml-regeneration-02/cleanup.json"
+              }
+            ]
+          },
+          {
+            "id": "ferroui-popup-xaml-final",
+            "source_manifest_path": "/tmp/ferroui-popup-xaml-final/source-manifest.json",
+            "source_manifest_sha256": "541a4a6aa159782d310c8858d874036e5fde7bab3a6d1720b42ea2195260e224",
+            "source_manifest": {
+              "base_commit": "e0c0a2e8ef360c0e05cc2a86d39a850df63f55e9",
+              "base_tree": "89113341778c640dc00a69fab8182ecf34bfbee9",
+              "files": [
+                {
+                  "path": "tests/FerroUI.Markup.Xaml.UnitTests/emitter/corpus.rs",
+                  "sha256": "a61e26d5b690cf28b5c290850ad74f025485bd406e785e5185d5e10eadd850b6",
+                  "bytes": 47740
+                },
+                {
+                  "path": "tests/FerroUI.Markup.Xaml.UnitTests/emitter/generated_handlers/rich_readonly_context_menu_event.rs",
+                  "sha256": "7805016bdd74623bb4694dee9278efe5f3cc04b0eacd208d1721ac3fe3e004a5",
+                  "bytes": 6149
+                },
+                {
+                  "path": "tests/FerroUI.Markup.Xaml.UnitTests/support/xaml/event_tests.rs",
+                  "sha256": "55a27d0d031f0b9bf9d4b907d544b677dbd48f391afc8b34862bb99acec2a156",
+                  "bytes": 11970
+                }
+              ]
+            },
+            "build": {
+              "argv": [
+                "/tmp/ferroedit-cargo/bin/cargo",
+                "test",
+                "--locked",
+                "--offline",
+                "-p",
+                "ferroui-markup-xaml-tests",
+                "--lib",
+                "--no-run"
+              ],
+              "env": {
+                "PATH": "/tmp/ferroedit-cargo/bin:/usr/local/bin:/usr/bin:/bin",
+                "CARGO_HOME": "/tmp/ferroedit-cargo",
+                "RUSTUP_HOME": "/tmp/ferroedit-rustup",
+                "CARGO_TARGET_DIR": "/tmp/ferroui-richtext-target",
+                "CARGO_BUILD_JOBS": "1",
+                "CARGO_PROFILE_DEV_DEBUG": "0",
+                "CARGO_PROFILE_TEST_DEBUG": "0",
+                "CARGO_INCREMENTAL": "0"
+              },
+              "cwd": "/workspace/scratch/e589b83e3196/FerroUI",
+              "started_utc": "2026-10-23T13:17:01.127602+00:00",
+              "source_manifest_sha256": "541a4a6aa159782d310c8858d874036e5fde7bab3a6d1720b42ea2195260e224",
+              "exit_code": 0,
+              "duration_seconds": 39.406,
+              "log_sha256": "ebedf06dec358e0560135420ccaa49c84178ae71ffbca5eaaf78f0b1c6109b79",
+              "finished_utc": "2026-10-23T13:17:40.534812+00:00",
+              "source_unchanged": true,
+              "record_path": "/tmp/ferroui-popup-xaml-final/build.json",
+              "log_path": "/tmp/ferroui-popup-xaml-final/build.log"
+            },
+            "runtime_gates": [
+              {
+                "argv": [
+                  "/tmp/ferroui-richtext-target/debug/deps/ferroui_markup_xaml_tests-712b55a699fdb755",
+                  "emitter::event_handlers::class_documents_are_emitted_the_same_by_both_hosts",
+                  "--exact",
+                  "--test-threads=1"
+                ],
+                "cwd": "/workspace/scratch/e589b83e3196/FerroUI",
+                "env": {
+                  "PATH": "/tmp/ferroedit-cargo/bin:/usr/local/bin:/usr/bin:/bin",
+                  "CARGO_HOME": "/tmp/ferroedit-cargo",
+                  "RUSTUP_HOME": "/tmp/ferroedit-rustup",
+                  "CARGO_TARGET_DIR": "/tmp/ferroui-richtext-target",
+                  "CARGO_BUILD_JOBS": "1",
+                  "CARGO_PROFILE_DEV_DEBUG": "0",
+                  "CARGO_PROFILE_TEST_DEBUG": "0",
+                  "CARGO_INCREMENTAL": "0"
+                },
+                "binary": {
+                  "path": "/tmp/ferroui-richtext-target/debug/deps/ferroui_markup_xaml_tests-712b55a699fdb755",
+                  "bytes": 315443368,
+                  "sha256": "46ece101ba7e82147fac5a00e60c541eff7756b324c35dfc841d5dc31a982365"
+                },
+                "started_utc": "2026-10-23T13:17:53.325739+00:00",
+                "source_manifest_sha256": "541a4a6aa159782d310c8858d874036e5fde7bab3a6d1720b42ea2195260e224",
+                "exit_code": 0,
+                "duration_seconds": 20.116,
+                "log_sha256": "ac5fa3547a1c09e843ca6d8f49348e396831ed2c354c726efe23ead05810399d",
+                "source_unchanged": true,
+                "tests": {
+                  "passed": 1,
+                  "failed": 0,
+                  "ignored": 0,
+                  "measured": 0,
+                  "filtered_out": 637
+                },
+                "test_duration_seconds": 20.0,
+                "record_path": "/tmp/ferroui-popup-xaml-final/emitter-model-parity.json",
+                "log_path": "/tmp/ferroui-popup-xaml-final/emitter-model-parity.log"
+              },
+              {
+                "argv": [
+                  "/tmp/ferroui-richtext-target/debug/deps/ferroui_markup_xaml_tests-712b55a699fdb755",
+                  "--test-threads=1"
+                ],
+                "cwd": "/workspace/scratch/e589b83e3196/FerroUI",
+                "env": {
+                  "PATH": "/tmp/ferroedit-cargo/bin:/usr/local/bin:/usr/bin:/bin",
+                  "CARGO_HOME": "/tmp/ferroedit-cargo",
+                  "RUSTUP_HOME": "/tmp/ferroedit-rustup",
+                  "CARGO_TARGET_DIR": "/tmp/ferroui-richtext-target",
+                  "CARGO_BUILD_JOBS": "1",
+                  "CARGO_PROFILE_DEV_DEBUG": "0",
+                  "CARGO_PROFILE_TEST_DEBUG": "0",
+                  "CARGO_INCREMENTAL": "0"
+                },
+                "binary": {
+                  "path": "/tmp/ferroui-richtext-target/debug/deps/ferroui_markup_xaml_tests-712b55a699fdb755",
+                  "bytes": 315443368,
+                  "sha256": "46ece101ba7e82147fac5a00e60c541eff7756b324c35dfc841d5dc31a982365"
+                },
+                "started_utc": "2026-10-23T13:18:19.048117+00:00",
+                "source_manifest_sha256": "541a4a6aa159782d310c8858d874036e5fde7bab3a6d1720b42ea2195260e224",
+                "exit_code": 0,
+                "duration_seconds": 248.375,
+                "log_sha256": "f88f53f8033a96dbf4c0209393c6bcf5b6a25b09a07f54a1c9cc498ef404d661",
+                "source_unchanged": true,
+                "tests": {
+                  "passed": 621,
+                  "failed": 0,
+                  "ignored": 17,
+                  "measured": 0,
+                  "filtered_out": 0
+                },
+                "test_duration_seconds": 248.33,
+                "record_path": "/tmp/ferroui-popup-xaml-final/full-xaml.json",
+                "log_path": "/tmp/ferroui-popup-xaml-final/full-xaml.log"
+              },
+              {
+                "argv": [
+                  "/tmp/ferroui-richtext-target/debug/deps/ferroui_markup_xaml_tests-712b55a699fdb755",
+                  "emitter::event_handlers::rich_readonly_context_menu_event_calls_the_method_with_live_arguments",
+                  "--exact",
+                  "--test-threads=1"
+                ],
+                "cwd": "/workspace/scratch/e589b83e3196/FerroUI",
+                "env": {
+                  "PATH": "/tmp/ferroedit-cargo/bin:/usr/local/bin:/usr/bin:/bin",
+                  "CARGO_HOME": "/tmp/ferroedit-cargo",
+                  "RUSTUP_HOME": "/tmp/ferroedit-rustup",
+                  "CARGO_TARGET_DIR": "/tmp/ferroui-richtext-target",
+                  "CARGO_BUILD_JOBS": "1",
+                  "CARGO_PROFILE_DEV_DEBUG": "0",
+                  "CARGO_PROFILE_TEST_DEBUG": "0",
+                  "CARGO_INCREMENTAL": "0"
+                },
+                "binary": {
+                  "path": "/tmp/ferroui-richtext-target/debug/deps/ferroui_markup_xaml_tests-712b55a699fdb755",
+                  "bytes": 315443368,
+                  "sha256": "46ece101ba7e82147fac5a00e60c541eff7756b324c35dfc841d5dc31a982365"
+                },
+                "started_utc": "2026-10-23T13:17:48.472160+00:00",
+                "source_manifest_sha256": "541a4a6aa159782d310c8858d874036e5fde7bab3a6d1720b42ea2195260e224",
+                "exit_code": 0,
+                "duration_seconds": 0.056,
+                "log_sha256": "72e23a2bef3ee4eb6eea12302b3be2d439e25e8fefa9e7e2eb050d0fc31d52b3",
+                "source_unchanged": true,
+                "tests": {
+                  "passed": 1,
+                  "failed": 0,
+                  "ignored": 0,
+                  "measured": 0,
+                  "filtered_out": 637
+                },
+                "test_duration_seconds": 0.04,
+                "record_path": "/tmp/ferroui-popup-xaml-final/rich-readonly-handler.json",
+                "log_path": "/tmp/ferroui-popup-xaml-final/rich-readonly-handler.log"
+              }
+            ],
+            "resource_pauses": [],
+            "cleanup": [
+              {
+                "reason": "Full XAML and focused gates have completed successfully; remove verified test executable to recover target headroom for restoring the retained Controls-only cache.",
+                "utc": "2026-10-23T13:23:38.458925+00:00",
+                "files": [
+                  {
+                    "path": "/tmp/ferroui-richtext-target/debug/deps/ferroui_markup_xaml_tests-712b55a699fdb755",
+                    "bytes": 315443368,
+                    "sha256": "46ece101ba7e82147fac5a00e60c541eff7756b324c35dfc841d5dc31a982365"
+                  }
+                ],
+                "available_bytes_after": 993861632,
+                "record_path": "/tmp/ferroui-popup-xaml-final/cleanup.json"
+              }
+            ]
+          }
+        ],
+        "xaml_regeneration_comparisons": [
+          {
+            "recorded_utc": "2026-10-23T13:08:30.215665+00:00",
+            "before_manifest_path": "/tmp/ferroui-popup-xaml-generated-before/manifest.json",
+            "before": [
+              {
+                "path": "tests/FerroUI.Markup.Xaml.UnitTests/emitter/generated_handlers/attached_event.rs",
+                "bytes": 6708,
+                "sha256": "f4cb48fadabe9a8ab1cecd4754fc9e0e1fa8f2042b12b3da466ef4437fa74f4c"
+              },
+              {
+                "path": "tests/FerroUI.Markup.Xaml.UnitTests/emitter/generated_handlers/delegate_property.rs",
+                "bytes": 8365,
+                "sha256": "e62dd478226388fca3c9c23893dacab116e3b48d14178e91a31410763f631f77"
+              },
+              {
+                "path": "tests/FerroUI.Markup.Xaml.UnitTests/emitter/generated_handlers/mod.rs",
+                "bytes": 552,
+                "sha256": "95db5965a8e76ee83ec3afd03a04116b49c020f2f8b3e054d57a3d37b7c0369e"
+              },
+              {
+                "path": "tests/FerroUI.Markup.Xaml.UnitTests/emitter/generated_handlers/plain_event.rs",
+                "bytes": 6324,
+                "sha256": "c0339b6e6d3c2008adf65d8ce046d100cdc259d9ea8d3b7e3b2be5e37c0afed7"
+              },
+              {
+                "path": "tests/FerroUI.Markup.Xaml.UnitTests/emitter/generated_handlers/rich_context_menu_event.rs",
+                "bytes": 6015,
+                "sha256": "f7f6dc596bef1fd0aca785261b2be50032d93192f2efcfcabb97441de60f6950"
+              },
+              {
+                "path": "tests/FerroUI.Markup.Xaml.UnitTests/emitter/generated_handlers/rich_editor_events.rs",
+                "bytes": 7576,
+                "sha256": "f87be6bbb58721a0d0acdb6d1194bd48bfb8b30efd108ccb43dd736690c52ac2"
+              },
+              {
+                "path": "tests/FerroUI.Markup.Xaml.UnitTests/emitter/generated_handlers/rich_readonly_context_menu_event.rs",
+                "bytes": 6141,
+                "sha256": "4c6211686837146827ba809af8761c2901655d1b64f481e89f62cd70464b8fed"
+              },
+              {
+                "path": "tests/FerroUI.Markup.Xaml.UnitTests/emitter/generated_handlers/routed_event.rs",
+                "bytes": 5316,
+                "sha256": "139e1642f52c884393d674519a403edb1de950bc8e1c1c710e2d52f84e1a679e"
+              },
+              {
+                "path": "tests/FerroUI.Markup.Xaml.UnitTests/emitter/generated_handlers/template_event.rs",
+                "bytes": 7790,
+                "sha256": "2d324225053cc79c39fe1e74c01d05b5ededd10abefa80727126d17108ca649a"
+              }
+            ],
+            "after": [
+              {
+                "path": "tests/FerroUI.Markup.Xaml.UnitTests/emitter/generated_handlers/attached_event.rs",
+                "bytes": 6708,
+                "sha256": "f4cb48fadabe9a8ab1cecd4754fc9e0e1fa8f2042b12b3da466ef4437fa74f4c"
+              },
+              {
+                "path": "tests/FerroUI.Markup.Xaml.UnitTests/emitter/generated_handlers/delegate_property.rs",
+                "bytes": 8365,
+                "sha256": "e62dd478226388fca3c9c23893dacab116e3b48d14178e91a31410763f631f77"
+              },
+              {
+                "path": "tests/FerroUI.Markup.Xaml.UnitTests/emitter/generated_handlers/mod.rs",
+                "bytes": 552,
+                "sha256": "95db5965a8e76ee83ec3afd03a04116b49c020f2f8b3e054d57a3d37b7c0369e"
+              },
+              {
+                "path": "tests/FerroUI.Markup.Xaml.UnitTests/emitter/generated_handlers/plain_event.rs",
+                "bytes": 6324,
+                "sha256": "c0339b6e6d3c2008adf65d8ce046d100cdc259d9ea8d3b7e3b2be5e37c0afed7"
+              },
+              {
+                "path": "tests/FerroUI.Markup.Xaml.UnitTests/emitter/generated_handlers/rich_context_menu_event.rs",
+                "bytes": 6015,
+                "sha256": "f7f6dc596bef1fd0aca785261b2be50032d93192f2efcfcabb97441de60f6950"
+              },
+              {
+                "path": "tests/FerroUI.Markup.Xaml.UnitTests/emitter/generated_handlers/rich_editor_events.rs",
+                "bytes": 7576,
+                "sha256": "f87be6bbb58721a0d0acdb6d1194bd48bfb8b30efd108ccb43dd736690c52ac2"
+              },
+              {
+                "path": "tests/FerroUI.Markup.Xaml.UnitTests/emitter/generated_handlers/rich_readonly_context_menu_event.rs",
+                "bytes": 6141,
+                "sha256": "4c6211686837146827ba809af8761c2901655d1b64f481e89f62cd70464b8fed"
+              },
+              {
+                "path": "tests/FerroUI.Markup.Xaml.UnitTests/emitter/generated_handlers/routed_event.rs",
+                "bytes": 5316,
+                "sha256": "139e1642f52c884393d674519a403edb1de950bc8e1c1c710e2d52f84e1a679e"
+              },
+              {
+                "path": "tests/FerroUI.Markup.Xaml.UnitTests/emitter/generated_handlers/template_event.rs",
+                "bytes": 7790,
+                "sha256": "2d324225053cc79c39fe1e74c01d05b5ededd10abefa80727126d17108ca649a"
+              }
+            ],
+            "changed_files": [],
+            "all_nine_files_byte_identical": true,
+            "record_path": "/tmp/ferroui-popup-xaml-regeneration-comparison.json"
+          },
+          {
+            "at_utc": "2026-10-23T13:16:56.219768+00:00",
+            "generation_build_record": "/tmp/ferroui-popup-xaml-regeneration-02/build.json",
+            "files": [
+              {
+                "before": {
+                  "path": "tests/FerroUI.Markup.Xaml.UnitTests/emitter/generated_handlers/attached_event.rs",
+                  "bytes": 6708,
+                  "sha256": "f4cb48fadabe9a8ab1cecd4754fc9e0e1fa8f2042b12b3da466ef4437fa74f4c"
+                },
+                "after": {
+                  "path": "tests/FerroUI.Markup.Xaml.UnitTests/emitter/generated_handlers/attached_event.rs",
+                  "bytes": 6708,
+                  "sha256": "f4cb48fadabe9a8ab1cecd4754fc9e0e1fa8f2042b12b3da466ef4437fa74f4c"
+                },
+                "changed": false
+              },
+              {
+                "before": {
+                  "path": "tests/FerroUI.Markup.Xaml.UnitTests/emitter/generated_handlers/delegate_property.rs",
+                  "bytes": 8365,
+                  "sha256": "e62dd478226388fca3c9c23893dacab116e3b48d14178e91a31410763f631f77"
+                },
+                "after": {
+                  "path": "tests/FerroUI.Markup.Xaml.UnitTests/emitter/generated_handlers/delegate_property.rs",
+                  "bytes": 8365,
+                  "sha256": "e62dd478226388fca3c9c23893dacab116e3b48d14178e91a31410763f631f77"
+                },
+                "changed": false
+              },
+              {
+                "before": {
+                  "path": "tests/FerroUI.Markup.Xaml.UnitTests/emitter/generated_handlers/mod.rs",
+                  "bytes": 552,
+                  "sha256": "95db5965a8e76ee83ec3afd03a04116b49c020f2f8b3e054d57a3d37b7c0369e"
+                },
+                "after": {
+                  "path": "tests/FerroUI.Markup.Xaml.UnitTests/emitter/generated_handlers/mod.rs",
+                  "bytes": 552,
+                  "sha256": "95db5965a8e76ee83ec3afd03a04116b49c020f2f8b3e054d57a3d37b7c0369e"
+                },
+                "changed": false
+              },
+              {
+                "before": {
+                  "path": "tests/FerroUI.Markup.Xaml.UnitTests/emitter/generated_handlers/plain_event.rs",
+                  "bytes": 6324,
+                  "sha256": "c0339b6e6d3c2008adf65d8ce046d100cdc259d9ea8d3b7e3b2be5e37c0afed7"
+                },
+                "after": {
+                  "path": "tests/FerroUI.Markup.Xaml.UnitTests/emitter/generated_handlers/plain_event.rs",
+                  "bytes": 6324,
+                  "sha256": "c0339b6e6d3c2008adf65d8ce046d100cdc259d9ea8d3b7e3b2be5e37c0afed7"
+                },
+                "changed": false
+              },
+              {
+                "before": {
+                  "path": "tests/FerroUI.Markup.Xaml.UnitTests/emitter/generated_handlers/rich_context_menu_event.rs",
+                  "bytes": 6015,
+                  "sha256": "f7f6dc596bef1fd0aca785261b2be50032d93192f2efcfcabb97441de60f6950"
+                },
+                "after": {
+                  "path": "tests/FerroUI.Markup.Xaml.UnitTests/emitter/generated_handlers/rich_context_menu_event.rs",
+                  "bytes": 6015,
+                  "sha256": "f7f6dc596bef1fd0aca785261b2be50032d93192f2efcfcabb97441de60f6950"
+                },
+                "changed": false
+              },
+              {
+                "before": {
+                  "path": "tests/FerroUI.Markup.Xaml.UnitTests/emitter/generated_handlers/rich_editor_events.rs",
+                  "bytes": 7576,
+                  "sha256": "f87be6bbb58721a0d0acdb6d1194bd48bfb8b30efd108ccb43dd736690c52ac2"
+                },
+                "after": {
+                  "path": "tests/FerroUI.Markup.Xaml.UnitTests/emitter/generated_handlers/rich_editor_events.rs",
+                  "bytes": 7576,
+                  "sha256": "f87be6bbb58721a0d0acdb6d1194bd48bfb8b30efd108ccb43dd736690c52ac2"
+                },
+                "changed": false
+              },
+              {
+                "before": {
+                  "path": "tests/FerroUI.Markup.Xaml.UnitTests/emitter/generated_handlers/rich_readonly_context_menu_event.rs",
+                  "bytes": 6141,
+                  "sha256": "4c6211686837146827ba809af8761c2901655d1b64f481e89f62cd70464b8fed"
+                },
+                "after": {
+                  "path": "tests/FerroUI.Markup.Xaml.UnitTests/emitter/generated_handlers/rich_readonly_context_menu_event.rs",
+                  "bytes": 6149,
+                  "sha256": "7805016bdd74623bb4694dee9278efe5f3cc04b0eacd208d1721ac3fe3e004a5"
+                },
+                "changed": true
+              },
+              {
+                "before": {
+                  "path": "tests/FerroUI.Markup.Xaml.UnitTests/emitter/generated_handlers/routed_event.rs",
+                  "bytes": 5316,
+                  "sha256": "139e1642f52c884393d674519a403edb1de950bc8e1c1c710e2d52f84e1a679e"
+                },
+                "after": {
+                  "path": "tests/FerroUI.Markup.Xaml.UnitTests/emitter/generated_handlers/routed_event.rs",
+                  "bytes": 5316,
+                  "sha256": "139e1642f52c884393d674519a403edb1de950bc8e1c1c710e2d52f84e1a679e"
+                },
+                "changed": false
+              },
+              {
+                "before": {
+                  "path": "tests/FerroUI.Markup.Xaml.UnitTests/emitter/generated_handlers/template_event.rs",
+                  "bytes": 7790,
+                  "sha256": "2d324225053cc79c39fe1e74c01d05b5ededd10abefa80727126d17108ca649a"
+                },
+                "after": {
+                  "path": "tests/FerroUI.Markup.Xaml.UnitTests/emitter/generated_handlers/template_event.rs",
+                  "bytes": 7790,
+                  "sha256": "2d324225053cc79c39fe1e74c01d05b5ededd10abefa80727126d17108ca649a"
+                },
+                "changed": false
+              }
+            ],
+            "changed_paths": [
+              "tests/FerroUI.Markup.Xaml.UnitTests/emitter/generated_handlers/rich_readonly_context_menu_event.rs"
+            ],
+            "record_path": "/tmp/ferroui-popup-xaml-regeneration-02-comparison.json"
+          }
+        ],
+        "source_audits": [
+          {
+            "base_commit": "e0c0a2e8ef360c0e05cc2a86d39a850df63f55e9",
+            "base_tree": "89113341778c640dc00a69fab8182ecf34bfbee9",
+            "tracked_source_changes": [],
+            "untracked_source_files": [],
+            "generated_outputs_byte_identical": true,
+            "recorded_utc": "2026-10-23T13:09:23.846488+00:00",
+            "binary_reused_because_all_compiled_source_bytes_are_unchanged": true,
+            "record_path": "/tmp/ferroui-popup-xaml-source-audit.json"
+          },
+          {
+            "at_utc": "2026-10-23T13:23:32.539683+00:00",
+            "current_commit": "e0c0a2e8ef360c0e05cc2a86d39a850df63f55e9",
+            "source_baseline_commit": "e0c0a2e8ef360c0e05cc2a86d39a850df63f55e9",
+            "source_baseline_tree": "89113341778c640dc00a69fab8182ecf34bfbee9",
+            "final_xaml_source_manifest": "/tmp/ferroui-popup-xaml-final/source-manifest.json",
+            "final_xaml_source_manifest_sha256": "541a4a6aa159782d310c8858d874036e5fde7bab3a6d1720b42ea2195260e224",
+            "exact_override_paths": [
+              "tests/FerroUI.Markup.Xaml.UnitTests/emitter/corpus.rs",
+              "tests/FerroUI.Markup.Xaml.UnitTests/emitter/generated_handlers/rich_readonly_context_menu_event.rs",
+              "tests/FerroUI.Markup.Xaml.UnitTests/support/xaml/event_tests.rs"
+            ],
+            "overrides_match_built_bytes": true,
+            "untracked_source_files": [],
+            "production_source_changes_after_controls_full_pass": [],
+            "controls_manifest": "/tmp/ferroui-popup-green-03/source-manifest.json",
+            "controls_manifest_sha256": "0ce65915242a8308c7a6779c1c94144d7e38ce83c3f5916408464a0c4fefaa15",
+            "controls_source_override_count_checked": 9,
+            "controls_source_overrides_match_passed_build": true,
+            "generated_files_match_actual_second_emitter_output": true,
+            "generated_files_checked": 9,
+            "git_diff_check_exit_code": 0,
+            "record_path": "/tmp/ferroui-popup-final-source-audit.json"
+          }
+        ],
+        "reversible_cache_archive": {
+          "reason": "Preserve inactive Controls-only testing-feature Base9f559875 artifacts; current XAML host Base93ab has no features and target Base50801260 uses compiler-metadata+markup-functions+testing. Archives verified before originals removed.",
+          "started_utc": "2026-10-23T13:03:36.955727+00:00",
+          "files": [
+            {
+              "original_path": "/tmp/ferroui-richtext-target/debug/deps/libferroui_base-9f55987531e22910.rlib",
+              "archive_path": "/tmp/ferroui-richtext-archived-baseline/libferroui_base-9f55987531e22910.rlib.gz",
+              "original_bytes": 343251786,
+              "original_sha256": "69ba350ded3b7bc2b395f8d2a5eb6d3a6d7d90614ef464989a49e6a1113461bb",
+              "original_mtime_ns": 1792753943556026790,
+              "original_mode": 420,
+              "archive_bytes": 50002177,
+              "archive_sha256": "70404e3a0dc586ca0fb286aad037936833ff34ccbf2959b815ffc93028fe04a7",
+              "roundtrip_verified": true
+            },
+            {
+              "original_path": "/tmp/ferroui-richtext-target/debug/deps/libferroui_base-9f55987531e22910.rmeta",
+              "archive_path": "/tmp/ferroui-richtext-archived-baseline/libferroui_base-9f55987531e22910.rmeta.gz",
+              "original_bytes": 64709912,
+              "original_sha256": "b242911682fe7c4e4c3c607d24e56312601797d480f20587b2771521e58b1660",
+              "original_mtime_ns": 1792753886557962214,
+              "original_mode": 420,
+              "archive_bytes": 19838307,
+              "archive_sha256": "53169f6da6d7aed442c4d4a28f7b1ab7cb557547bcf67cadd20c9320ed982548",
+              "roundtrip_verified": true
+            }
+          ],
+          "finished_utc": "2026-10-23T13:03:41.947066+00:00",
+          "feature_evidence": {
+            "9f55987531e22910": [
+              "testing"
+            ],
+            "93ab9670c927353b": [],
+            "508012602b7c4820": [
+              "compiler-metadata",
+              "markup-functions",
+              "testing"
+            ]
+          },
+          "record_path": "/tmp/ferroui-richtext-archived-baseline/manifest.json",
+          "restore_script": {
+            "path": "/tmp/ferroui-richtext-archived-baseline/restore.py",
+            "sha256": "8ffd612c1a57c71b615bbe088334a066cbdc6ce66bbbafd8beae962a7eacdc63"
+          },
+          "originals_restored": true,
+          "restoration": {
+            "started_utc": "2026-10-23T13:23:46.257258+00:00",
+            "argv": [
+              "python3",
+              "/tmp/ferroui-richtext-archived-baseline/restore.py"
+            ],
+            "files": [
+              {
+                "path": "/tmp/ferroui-richtext-target/debug/deps/libferroui_base-9f55987531e22910.rlib",
+                "bytes": 343251786,
+                "sha256": "69ba350ded3b7bc2b395f8d2a5eb6d3a6d7d90614ef464989a49e6a1113461bb",
+                "mtime_ns": 1792753943556026790,
+                "mode": 420
+              },
+              {
+                "path": "/tmp/ferroui-richtext-target/debug/deps/libferroui_base-9f55987531e22910.rmeta",
+                "bytes": 64709912,
+                "sha256": "b242911682fe7c4e4c3c607d24e56312601797d480f20587b2771521e58b1660",
+                "mtime_ns": 1792753886557962214,
+                "mode": 420
+              }
+            ],
+            "duration_seconds": 1.984,
+            "exit_code": 0,
+            "stdout": "Restored /tmp/ferroui-richtext-target/debug/deps/libferroui_base-9f55987531e22910.rlib\nRestored /tmp/ferroui-richtext-target/debug/deps/libferroui_base-9f55987531e22910.rmeta\n",
+            "stderr": "",
+            "finished_utc": "2026-10-23T13:23:48.560601+00:00",
+            "available_bytes_after": 476106752,
+            "record_path": "/tmp/ferroui-richtext-archived-baseline/restored.json"
+          }
+        }
+      }
     }
   ],
   "tooling": {
@@ -2359,6 +4195,1864 @@
         },
         "full_archive_member_evidence": "Preserved unchanged in the previous interim report."
       }
+    },
+    {
+      "schema_version": 1,
+      "source_commit": "fa3b9033e200c7638a9c47e9d7a09120bde6f7ed",
+      "source_tree": "7642661c6255aaebb5d315c0e168bf6083e4240b",
+      "source_scope": "Published explicit SetText passive-range tracking checkpoint, including prior typing, hosted-object layout, main integration and fixture corrections. This report does not validate later uncommitted context-menu or popup changes.",
+      "observed_at_utc": "2026-10-23 12:22:20 UTC",
+      "report_state": "conformance_final_broad_in_progress",
+      "conclusion": "Rich text conformance completed successfully with all three jobs. Broad CI remains in progress; only explicitly completed job and test results are claimed. No all-green broad run is inferred.",
+      "ci_runs": [
+        {
+          "workflow": "Rich text conformance",
+          "run_id": 39948857233,
+          "url": "https://github.com/wieslawsoltes/FerroUI/actions/runs/39948857233",
+          "workflow_head_commit": "fa3b9033e200c7638a9c47e9d7a09120bde6f7ed",
+          "event": "pull_request",
+          "attempt": 1,
+          "reported_status": "completed",
+          "reported_conclusion": "success",
+          "jobs": [
+            {
+              "job_id": 120398650934,
+              "name": "Document, controls, themes and XAML",
+              "url": "https://github.com/wieslawsoltes/FerroUI/actions/runs/39948857233/job/120398650934",
+              "status": "completed",
+              "conclusion": "success",
+              "steps": [
+                {
+                  "name": "Set up job",
+                  "status": "completed",
+                  "conclusion": "success",
+                  "number": 1
+                },
+                {
+                  "name": "Run actions/checkout@v4",
+                  "status": "completed",
+                  "conclusion": "success",
+                  "number": 2
+                },
+                {
+                  "name": "Run dtolnay/rust-toolchain@stable",
+                  "status": "completed",
+                  "conclusion": "success",
+                  "number": 3
+                },
+                {
+                  "name": "Run Swatinem/rust-cache@v2",
+                  "status": "completed",
+                  "conclusion": "success",
+                  "number": 4
+                },
+                {
+                  "name": "Install font discovery build dependencies",
+                  "status": "completed",
+                  "conclusion": "success",
+                  "number": 5
+                },
+                {
+                  "name": "Native observation extractor contracts",
+                  "status": "completed",
+                  "conclusion": "success",
+                  "number": 6
+                },
+                {
+                  "name": "Base contracts",
+                  "status": "completed",
+                  "conclusion": "success",
+                  "number": 7
+                },
+                {
+                  "name": "Full controls suite",
+                  "status": "completed",
+                  "conclusion": "success",
+                  "number": 8
+                },
+                {
+                  "name": "CoreText synchronization and Win32 bridge host tests",
+                  "status": "completed",
+                  "conclusion": "success",
+                  "number": 9
+                },
+                {
+                  "name": "Actual theme templates and generated markup references",
+                  "status": "completed",
+                  "conclusion": "success",
+                  "number": 10
+                },
+                {
+                  "name": "Runtime and compiled XAML",
+                  "status": "completed",
+                  "conclusion": "success",
+                  "number": 11
+                },
+                {
+                  "name": "Regenerate WinUI theme reference",
+                  "status": "completed",
+                  "conclusion": "success",
+                  "number": 12
+                },
+                {
+                  "name": "Regenerate Fluent theme reference",
+                  "status": "completed",
+                  "conclusion": "success",
+                  "number": 13
+                },
+                {
+                  "name": "Regenerate Simple theme reference",
+                  "status": "completed",
+                  "conclusion": "success",
+                  "number": 14
+                },
+                {
+                  "name": "Regenerate differential XAML reference",
+                  "status": "completed",
+                  "conclusion": "success",
+                  "number": 15
+                },
+                {
+                  "name": "Regenerate markup Rust path reference",
+                  "status": "completed",
+                  "conclusion": "success",
+                  "number": 16
+                },
+                {
+                  "name": "Verify checked-in generated references",
+                  "status": "completed",
+                  "conclusion": "success",
+                  "number": 17
+                },
+                {
+                  "name": "Upload generated references for review",
+                  "status": "completed",
+                  "conclusion": "success",
+                  "number": 18
+                },
+                {
+                  "name": "Post Run Swatinem/rust-cache@v2",
+                  "status": "completed",
+                  "conclusion": "success",
+                  "number": 35
+                },
+                {
+                  "name": "Post Run actions/checkout@v4",
+                  "status": "completed",
+                  "conclusion": "success",
+                  "number": 36
+                },
+                {
+                  "name": "Complete job",
+                  "status": "completed",
+                  "conclusion": "success",
+                  "number": 37
+                }
+              ],
+              "measured_checkout_commit": "4676e0828babbec8f792f3d4b5a78981f93cbdf3",
+              "checkout_evidence": {
+                "source": "normalized workflow job log: git log -1 --format=%H",
+                "log_line": 130
+              },
+              "log": {
+                "file_name": "fa3b9033-linux-conformance-job-120398650934.log",
+                "bytes": 2011634,
+                "sha256": "e23bbf1cd481f2c07f16fdc94c84f668a89b68e28887e51c6b267d19326eecab",
+                "normalization": "Connector-decoded log, CRLF normalized to LF and one terminal newline."
+              },
+              "test_results": [
+                {
+                  "command_group": "python3 scripts/porting/test_rich_text_tom_observations.py -v",
+                  "test_binary": null,
+                  "test_kind": "Python unittest",
+                  "result": "OK",
+                  "passed": 50,
+                  "failed": 0,
+                  "seconds": 4.154,
+                  "log_line": 753
+                },
+                {
+                  "command_group": "cargo test --locked -p ferroui-base --lib --no-fail-fast",
+                  "test_binary": "unittests lib.rs (target/debug/deps/ferroui_base-0ef6929a7c66088e)",
+                  "test_kind": "test",
+                  "result": "ok",
+                  "passed": 4640,
+                  "failed": 0,
+                  "ignored": 0,
+                  "measured": 0,
+                  "filtered_out": 0,
+                  "seconds": 5.94,
+                  "log_line": 6311
+                },
+                {
+                  "command_group": "cargo test --locked -p ferroui-controls --lib --no-fail-fast",
+                  "test_binary": "unittests lib.rs (target/debug/deps/ferroui_controls-8d2b7e7a6d2ee4d8)",
+                  "test_kind": "test",
+                  "result": "ok",
+                  "passed": 5320,
+                  "failed": 0,
+                  "ignored": 0,
+                  "measured": 0,
+                  "filtered_out": 0,
+                  "seconds": 21.44,
+                  "log_line": 12034
+                },
+                {
+                  "command_group": "cargo test --locked -p ferroui-winui -p ferroui-win32 --lib --no-fail-fast",
+                  "test_binary": "unittests lib.rs (target/debug/deps/ferroui_win32-975525d6ef5e3317)",
+                  "test_kind": "test",
+                  "result": "ok",
+                  "passed": 329,
+                  "failed": 0,
+                  "ignored": 0,
+                  "measured": 0,
+                  "filtered_out": 0,
+                  "seconds": 0.27,
+                  "log_line": 12950
+                },
+                {
+                  "command_group": "cargo test --locked -p ferroui-winui -p ferroui-win32 --lib --no-fail-fast",
+                  "test_binary": "unittests lib.rs (target/debug/deps/ferroui_winui-26e927640680a5c9)",
+                  "test_kind": "test",
+                  "result": "ok",
+                  "passed": 50,
+                  "failed": 0,
+                  "ignored": 0,
+                  "measured": 0,
+                  "filtered_out": 0,
+                  "seconds": 0.0,
+                  "log_line": 13006
+                },
+                {
+                  "command_group": "cargo test --locked -p ferroui-themes-winui -p ferroui-themes-fluent -p ferroui-themes-simple --lib --no-fail-fast",
+                  "test_binary": "unittests lib.rs (target/debug/deps/ferroui_themes_fluent-922c0ed1ac50bba8)",
+                  "test_kind": "test",
+                  "result": "ok",
+                  "passed": 210,
+                  "failed": 0,
+                  "ignored": 2,
+                  "measured": 0,
+                  "filtered_out": 0,
+                  "seconds": 12.3,
+                  "log_line": 13890
+                },
+                {
+                  "command_group": "cargo test --locked -p ferroui-themes-winui -p ferroui-themes-fluent -p ferroui-themes-simple --lib --no-fail-fast",
+                  "test_binary": "unittests lib.rs (target/debug/deps/ferroui_themes_simple-9b1ba9682044edd1)",
+                  "test_kind": "test",
+                  "result": "ok",
+                  "passed": 213,
+                  "failed": 0,
+                  "ignored": 3,
+                  "measured": 0,
+                  "filtered_out": 0,
+                  "seconds": 6.17,
+                  "log_line": 14112
+                },
+                {
+                  "command_group": "cargo test --locked -p ferroui-themes-winui -p ferroui-themes-fluent -p ferroui-themes-simple --lib --no-fail-fast",
+                  "test_binary": "unittests lib.rs (target/debug/deps/ferroui_themes_winui-9d348a8d0502d909)",
+                  "test_kind": "test",
+                  "result": "ok",
+                  "passed": 301,
+                  "failed": 0,
+                  "ignored": 2,
+                  "measured": 0,
+                  "filtered_out": 0,
+                  "seconds": 33.08,
+                  "log_line": 14421
+                },
+                {
+                  "command_group": "cargo test --locked -p ferroui-markup-xaml-tests --no-fail-fast",
+                  "test_binary": "unittests lib.rs (target/debug/deps/ferroui_markup_xaml_tests-712b55a699fdb755)",
+                  "test_kind": "test",
+                  "result": "ok",
+                  "passed": 620,
+                  "failed": 0,
+                  "ignored": 17,
+                  "measured": 0,
+                  "filtered_out": 0,
+                  "seconds": 84.21,
+                  "log_line": 15435
+                },
+                {
+                  "command_group": "cargo test --locked -p ferroui-markup-xaml-tests --no-fail-fast",
+                  "test_binary": null,
+                  "test_kind": "Doc-tests ferroui_markup_xaml_tests",
+                  "result": "ok",
+                  "passed": 0,
+                  "failed": 0,
+                  "ignored": 1,
+                  "measured": 0,
+                  "filtered_out": 0,
+                  "seconds": 0.0,
+                  "log_line": 15442
+                },
+                {
+                  "command_group": "cargo test --locked -p ferroui-themes-winui --lib tests::compiled_xaml_tests::regenerate_compiled_xaml -- --ignored --exact",
+                  "test_binary": "unittests lib.rs (target/debug/deps/ferroui_themes_winui-5ff78a1cda5be2e9)",
+                  "test_kind": "test",
+                  "result": "ok",
+                  "passed": 1,
+                  "failed": 0,
+                  "ignored": 0,
+                  "measured": 0,
+                  "filtered_out": 302,
+                  "seconds": 14.05,
+                  "log_line": 15812
+                },
+                {
+                  "command_group": "cargo test --locked -p ferroui-themes-fluent --lib tests::compiled_xaml_tests::regenerate_compiled_xaml -- --ignored --exact",
+                  "test_binary": "unittests lib.rs (target/debug/deps/ferroui_themes_fluent-4975db9df6fc626e)",
+                  "test_kind": "test",
+                  "result": "ok",
+                  "passed": 1,
+                  "failed": 0,
+                  "ignored": 0,
+                  "measured": 0,
+                  "filtered_out": 211,
+                  "seconds": 4.88,
+                  "log_line": 16182
+                },
+                {
+                  "command_group": "cargo test --locked -p ferroui-themes-simple --lib tests::compiled_xaml_tests::regenerate_compiled_xaml -- --ignored --exact",
+                  "test_binary": "unittests lib.rs (target/debug/deps/ferroui_themes_simple-9b1ba9682044edd1)",
+                  "test_kind": "test",
+                  "result": "ok",
+                  "passed": 1,
+                  "failed": 0,
+                  "ignored": 0,
+                  "measured": 0,
+                  "filtered_out": 215,
+                  "seconds": 2.93,
+                  "log_line": 16603
+                },
+                {
+                  "command_group": "cargo test --locked -p ferroui-markup-xaml-tests --lib emitter::differential_tests::regenerate_emitter_output -- --ignored --exact",
+                  "test_binary": "unittests lib.rs (target/debug/deps/ferroui_markup_xaml_tests-712b55a699fdb755)",
+                  "test_kind": "test",
+                  "result": "ok",
+                  "passed": 1,
+                  "failed": 0,
+                  "ignored": 0,
+                  "measured": 0,
+                  "filtered_out": 636,
+                  "seconds": 0.41,
+                  "log_line": 16973
+                },
+                {
+                  "command_group": "cargo test --locked -p ferroui-markup-xaml-tests --lib emitter::rust_paths_tests::regenerate_rust_paths_check -- --ignored --exact",
+                  "test_binary": "unittests lib.rs (target/debug/deps/ferroui_markup_xaml_tests-712b55a699fdb755)",
+                  "test_kind": "test",
+                  "result": "ok",
+                  "passed": 1,
+                  "failed": 0,
+                  "ignored": 0,
+                  "measured": 0,
+                  "filtered_out": 636,
+                  "seconds": 0.45,
+                  "log_line": 17341
+                }
+              ],
+              "cancellation_evidence": []
+            },
+            {
+              "job_id": 120398651103,
+              "name": "System MSFTEDIT oracle (Windows ARM64)",
+              "url": "https://github.com/wieslawsoltes/FerroUI/actions/runs/39948857233/job/120398651103",
+              "status": "completed",
+              "conclusion": "success",
+              "steps": [
+                {
+                  "name": "Set up job",
+                  "status": "completed",
+                  "conclusion": "success",
+                  "number": 1
+                },
+                {
+                  "name": "Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262",
+                  "status": "completed",
+                  "conclusion": "success",
+                  "number": 2
+                },
+                {
+                  "name": "Run dtolnay/rust-toolchain@89b12181fb390509a0842a86cc55eeb8eb928c1d",
+                  "status": "completed",
+                  "conclusion": "success",
+                  "number": 3
+                },
+                {
+                  "name": "Run Swatinem/rust-cache@v2",
+                  "status": "completed",
+                  "conclusion": "success",
+                  "number": 4
+                },
+                {
+                  "name": "Record and verify the native ARM64 environment",
+                  "status": "completed",
+                  "conclusion": "success",
+                  "number": 5
+                },
+                {
+                  "name": "Characterize system MSFTEDIT with the canonical serial command",
+                  "status": "completed",
+                  "conclusion": "success",
+                  "number": 6
+                },
+                {
+                  "name": "Diagnose concurrent native oracle setup in a fresh test process",
+                  "status": "completed",
+                  "conclusion": "success",
+                  "number": 7
+                },
+                {
+                  "name": "Preserve ARM64 native observations and diagnostic provenance",
+                  "status": "completed",
+                  "conclusion": "success",
+                  "number": 8
+                },
+                {
+                  "name": "Post Run Swatinem/rust-cache@v2",
+                  "status": "completed",
+                  "conclusion": "success",
+                  "number": 15
+                },
+                {
+                  "name": "Post Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262",
+                  "status": "completed",
+                  "conclusion": "success",
+                  "number": 16
+                },
+                {
+                  "name": "Complete job",
+                  "status": "completed",
+                  "conclusion": "success",
+                  "number": 17
+                }
+              ],
+              "measured_checkout_commit": "4676e0828babbec8f792f3d4b5a78981f93cbdf3",
+              "checkout_evidence": "Official artifact source-commit.txt, with archive and every member hash verified below."
+            },
+            {
+              "job_id": 120398651285,
+              "name": "Native Windows input and automation contracts",
+              "url": "https://github.com/wieslawsoltes/FerroUI/actions/runs/39948857233/job/120398651285",
+              "status": "completed",
+              "conclusion": "success",
+              "steps": [
+                {
+                  "name": "Set up job",
+                  "status": "completed",
+                  "conclusion": "success",
+                  "number": 1
+                },
+                {
+                  "name": "Run actions/checkout@v4",
+                  "status": "completed",
+                  "conclusion": "success",
+                  "number": 2
+                },
+                {
+                  "name": "Run dtolnay/rust-toolchain@stable",
+                  "status": "completed",
+                  "conclusion": "success",
+                  "number": 3
+                },
+                {
+                  "name": "Run Swatinem/rust-cache@v2",
+                  "status": "completed",
+                  "conclusion": "success",
+                  "number": 4
+                },
+                {
+                  "name": "Compile native CoreText adapter",
+                  "status": "completed",
+                  "conclusion": "success",
+                  "number": 5
+                },
+                {
+                  "name": "Native WinUI contract tests",
+                  "status": "completed",
+                  "conclusion": "success",
+                  "number": 6
+                },
+                {
+                  "name": "Exact native UTF-16 string contracts",
+                  "status": "completed",
+                  "conclusion": "success",
+                  "number": 7
+                },
+                {
+                  "name": "Native IMM32 input scope contracts",
+                  "status": "completed",
+                  "conclusion": "success",
+                  "number": 8
+                },
+                {
+                  "name": "Characterize system MSFTEDIT selection navigation contracts",
+                  "status": "completed",
+                  "conclusion": "success",
+                  "number": 9
+                },
+                {
+                  "name": "Preserve native observations before the full control suite",
+                  "status": "completed",
+                  "conclusion": "success",
+                  "number": 10
+                },
+                {
+                  "name": "Rich text control contracts on Windows",
+                  "status": "completed",
+                  "conclusion": "success",
+                  "number": 11
+                },
+                {
+                  "name": "Post Run Swatinem/rust-cache@v2",
+                  "status": "completed",
+                  "conclusion": "success",
+                  "number": 21
+                },
+                {
+                  "name": "Post Run actions/checkout@v4",
+                  "status": "completed",
+                  "conclusion": "success",
+                  "number": 22
+                },
+                {
+                  "name": "Complete job",
+                  "status": "completed",
+                  "conclusion": "success",
+                  "number": 23
+                }
+              ],
+              "measured_checkout_commit": "4676e0828babbec8f792f3d4b5a78981f93cbdf3",
+              "checkout_evidence": {
+                "source": "normalized workflow job log: git log -1 --format=%H",
+                "log_line": 202
+              },
+              "log": {
+                "file_name": "fa3b9033-windows-conformance-job-120398651285.log",
+                "bytes": 5614058,
+                "sha256": "2b6b60f905f99fa36d89479b6241c50355e49ba3bcb8ab63e240e954986433a1",
+                "normalization": "Connector-decoded log, CRLF normalized to LF and one terminal newline."
+              },
+              "test_results": [
+                {
+                  "command_group": "cargo test --locked -p ferroui-winui --lib --no-fail-fast",
+                  "test_binary": "unittests lib.rs (target\\debug\\deps\\ferroui_winui-41c5f20f9e13c195.exe)",
+                  "test_kind": "test",
+                  "result": "ok",
+                  "passed": 65,
+                  "failed": 0,
+                  "ignored": 0,
+                  "measured": 0,
+                  "filtered_out": 0,
+                  "seconds": 0.02,
+                  "log_line": 1547
+                },
+                {
+                  "command_group": "cargo test --locked -p ferroui-win32 --no-default-features --lib exact_hstring --no-fail-fast",
+                  "test_binary": "unittests lib.rs (target\\debug\\deps\\ferroui_win32-d1b0e3b69f8ab878.exe)",
+                  "test_kind": "test",
+                  "result": "ok",
+                  "passed": 2,
+                  "failed": 0,
+                  "ignored": 0,
+                  "measured": 0,
+                  "filtered_out": 370,
+                  "seconds": 0.0,
+                  "log_line": 2105
+                },
+                {
+                  "command_group": "cargo test --locked -p ferroui-win32 --no-default-features --lib imm32_input_scope -- --test-threads=1",
+                  "test_binary": "unittests lib.rs (target\\debug\\deps\\ferroui_win32-d1b0e3b69f8ab878.exe)",
+                  "test_kind": "test",
+                  "result": "ok",
+                  "passed": 23,
+                  "failed": 0,
+                  "ignored": 0,
+                  "measured": 0,
+                  "filtered_out": 349,
+                  "seconds": 0.08,
+                  "log_line": 2541
+                },
+                {
+                  "command_group": "git rev-parse HEAD > system-msftedit-source-commit.txt",
+                  "test_binary": "unittests lib.rs (target\\debug\\deps\\ferroui_win32-d1b0e3b69f8ab878.exe)",
+                  "test_kind": "test",
+                  "result": "ok",
+                  "passed": 8,
+                  "failed": 0,
+                  "ignored": 0,
+                  "measured": 0,
+                  "filtered_out": 364,
+                  "seconds": 4.0,
+                  "log_line": 6704
+                },
+                {
+                  "command_group": "cargo test --locked -p ferroui-controls --lib rich_ --no-fail-fast",
+                  "test_binary": "unittests lib.rs (target\\debug\\deps\\ferroui_controls-9d5933a5168c3e9b.exe)",
+                  "test_kind": "test",
+                  "result": "ok",
+                  "passed": 832,
+                  "failed": 0,
+                  "ignored": 0,
+                  "measured": 0,
+                  "filtered_out": 4488,
+                  "seconds": 2.96,
+                  "log_line": 7960
+                }
+              ],
+              "cancellation_evidence": []
+            }
+          ]
+        },
+        {
+          "workflow": "CI",
+          "run_id": 39948857226,
+          "url": "https://github.com/wieslawsoltes/FerroUI/actions/runs/39948857226",
+          "workflow_head_commit": "fa3b9033e200c7638a9c47e9d7a09120bde6f7ed",
+          "event": "pull_request",
+          "attempt": 1,
+          "reported_status": "in_progress",
+          "reported_conclusion": null,
+          "jobs": [
+            {
+              "job_id": 120398679529,
+              "name": "Check (browser with threads, wasm32-unknown-emscripten)",
+              "url": "https://github.com/wieslawsoltes/FerroUI/actions/runs/39948857226/job/120398679529",
+              "status": "in_progress",
+              "conclusion": null,
+              "incomplete_steps": [
+                {
+                  "name": "Build the ControlCatalog site with threads",
+                  "status": "in_progress",
+                  "conclusion": null,
+                  "number": 12
+                },
+                {
+                  "name": "ControlCatalog tests on the render thread, in headless Chrome",
+                  "status": "pending",
+                  "conclusion": null,
+                  "number": 13
+                },
+                {
+                  "name": "Sizes of the modules built with threads",
+                  "status": "pending",
+                  "conclusion": null,
+                  "number": 14
+                },
+                {
+                  "name": "Keep the screenshot",
+                  "status": "pending",
+                  "conclusion": null,
+                  "number": 15
+                },
+                {
+                  "name": "Keep the sites built with threads",
+                  "status": "pending",
+                  "conclusion": null,
+                  "number": 16
+                },
+                {
+                  "name": "Post Run ./.github/actions/browser-toolchain",
+                  "status": "pending",
+                  "conclusion": null,
+                  "number": 31
+                },
+                {
+                  "name": "Post Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262",
+                  "status": "pending",
+                  "conclusion": null,
+                  "number": 32
+                }
+              ],
+              "failed_steps": [],
+              "canceled_steps": []
+            },
+            {
+              "job_id": 120398679716,
+              "name": "Build, test and smoke run (Windows platform backend, ARM64; informative)",
+              "url": "https://github.com/wieslawsoltes/FerroUI/actions/runs/39948857226/job/120398679716",
+              "status": "completed",
+              "conclusion": "success",
+              "incomplete_steps": [],
+              "failed_steps": [],
+              "canceled_steps": []
+            },
+            {
+              "job_id": 120398679780,
+              "name": "Build and test (macOS)",
+              "url": "https://github.com/wieslawsoltes/FerroUI/actions/runs/39948857226/job/120398679780",
+              "status": "in_progress",
+              "conclusion": null,
+              "incomplete_steps": [
+                {
+                  "name": "Test",
+                  "status": "in_progress",
+                  "conclusion": null,
+                  "number": 5
+                },
+                {
+                  "name": "Test (the Vello backend and the render backends compared)",
+                  "status": "pending",
+                  "conclusion": null,
+                  "number": 6
+                },
+                {
+                  "name": "Post Run Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6",
+                  "status": "pending",
+                  "conclusion": null,
+                  "number": 11
+                },
+                {
+                  "name": "Post Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262",
+                  "status": "pending",
+                  "conclusion": null,
+                  "number": 12
+                }
+              ],
+              "failed_steps": [],
+              "canceled_steps": []
+            },
+            {
+              "job_id": 120398679834,
+              "name": "Build and package (Android, arm64)",
+              "url": "https://github.com/wieslawsoltes/FerroUI/actions/runs/39948857226/job/120398679834",
+              "status": "completed",
+              "conclusion": "success",
+              "incomplete_steps": [],
+              "failed_steps": [],
+              "canceled_steps": []
+            },
+            {
+              "job_id": 120398679900,
+              "name": "Check (browser, wasm32-unknown-emscripten)",
+              "url": "https://github.com/wieslawsoltes/FerroUI/actions/runs/39948857226/job/120398679900",
+              "status": "in_progress",
+              "conclusion": null,
+              "incomplete_steps": [
+                {
+                  "name": "Build the ControlCatalog site",
+                  "status": "in_progress",
+                  "conclusion": null,
+                  "number": 14
+                },
+                {
+                  "name": "ControlCatalog tests in headless Chrome (rendering, resize, console, drawer, navigation, click, typing)",
+                  "status": "pending",
+                  "conclusion": null,
+                  "number": 15
+                },
+                {
+                  "name": "Sizes of the published modules",
+                  "status": "pending",
+                  "conclusion": null,
+                  "number": 16
+                },
+                {
+                  "name": "Keep the screenshot",
+                  "status": "pending",
+                  "conclusion": null,
+                  "number": 17
+                },
+                {
+                  "name": "Keep the sites built without threads",
+                  "status": "pending",
+                  "conclusion": null,
+                  "number": 18
+                },
+                {
+                  "name": "Post Run ./.github/actions/browser-toolchain",
+                  "status": "pending",
+                  "conclusion": null,
+                  "number": 35
+                },
+                {
+                  "name": "Post Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262",
+                  "status": "pending",
+                  "conclusion": null,
+                  "number": 36
+                }
+              ],
+              "failed_steps": [],
+              "canceled_steps": []
+            },
+            {
+              "job_id": 120398679925,
+              "name": "Build and test (Linux framebuffer, virtual devices)",
+              "url": "https://github.com/wieslawsoltes/FerroUI/actions/runs/39948857226/job/120398679925",
+              "status": "completed",
+              "conclusion": "success",
+              "incomplete_steps": [],
+              "failed_steps": [],
+              "canceled_steps": []
+            },
+            {
+              "job_id": 120398679966,
+              "name": "Source conventions",
+              "url": "https://github.com/wieslawsoltes/FerroUI/actions/runs/39948857226/job/120398679966",
+              "status": "completed",
+              "conclusion": "success",
+              "incomplete_steps": [],
+              "failed_steps": [],
+              "canceled_steps": []
+            },
+            {
+              "job_id": 120398680003,
+              "name": "Build and test (Linux, Wayland under headless sway)",
+              "url": "https://github.com/wieslawsoltes/FerroUI/actions/runs/39948857226/job/120398680003",
+              "status": "completed",
+              "conclusion": "success",
+              "incomplete_steps": [],
+              "failed_steps": [],
+              "canceled_steps": []
+            },
+            {
+              "job_id": 120398680017,
+              "name": "Build and test (iOS, simulator target)",
+              "url": "https://github.com/wieslawsoltes/FerroUI/actions/runs/39948857226/job/120398680017",
+              "status": "completed",
+              "conclusion": "success",
+              "incomplete_steps": [],
+              "failed_steps": [],
+              "canceled_steps": []
+            },
+            {
+              "job_id": 120398680020,
+              "name": "Build and test (Linux, X11 under Xvfb)",
+              "url": "https://github.com/wieslawsoltes/FerroUI/actions/runs/39948857226/job/120398680020",
+              "status": "completed",
+              "conclusion": "success",
+              "incomplete_steps": [],
+              "failed_steps": [],
+              "canceled_steps": [],
+              "measured_checkout_commit": "4676e0828babbec8f792f3d4b5a78981f93cbdf3",
+              "checkout_evidence": {
+                "source": "normalized workflow job log: git log -1 --format=%H",
+                "log_line": 129
+              },
+              "log": {
+                "file_name": "fa3b9033-x11-job-120398680020.log",
+                "bytes": 588601,
+                "sha256": "2d31aa3b22f1636c6936571d5af404320f654262c8c5233877fe925c22ae39f4",
+                "normalization": "Connector-decoded log, CRLF normalized to LF and one terminal newline."
+              },
+              "test_results": [
+                {
+                  "command_group": "cargo test --locked -p ferroui-x11 --no-fail-fast",
+                  "test_binary": "unittests lib.rs (target/debug/deps/ferroui_x11-3064760994325adf)",
+                  "test_kind": "test",
+                  "result": "ok",
+                  "passed": 255,
+                  "failed": 0,
+                  "ignored": 0,
+                  "measured": 0,
+                  "filtered_out": 0,
+                  "seconds": 0.18,
+                  "log_line": 1718
+                },
+                {
+                  "command_group": "cargo test --locked -p ferroui-x11 --no-fail-fast",
+                  "test_binary": null,
+                  "test_kind": "Doc-tests ferroui_x11",
+                  "result": "ok",
+                  "passed": 0,
+                  "failed": 0,
+                  "ignored": 0,
+                  "measured": 0,
+                  "filtered_out": 0,
+                  "seconds": 0.0,
+                  "log_line": 1724
+                },
+                {
+                  "command_group": "cargo test --locked -p ferroui-vulkan --no-fail-fast -- --nocapture --test-threads=1",
+                  "test_binary": "unittests lib.rs (target/debug/deps/ferroui_vulkan-61de863c073695b7)",
+                  "test_kind": "test",
+                  "result": "ok",
+                  "passed": 78,
+                  "failed": 0,
+                  "ignored": 0,
+                  "measured": 0,
+                  "filtered_out": 0,
+                  "seconds": 0.61,
+                  "log_line": 2131
+                },
+                {
+                  "command_group": "cargo test --locked -p ferroui-vulkan --no-fail-fast -- --nocapture --test-threads=1",
+                  "test_binary": null,
+                  "test_kind": "Doc-tests ferroui_vulkan",
+                  "result": "ok",
+                  "passed": 0,
+                  "failed": 0,
+                  "ignored": 0,
+                  "measured": 0,
+                  "filtered_out": 0,
+                  "seconds": 0.0,
+                  "log_line": 2137
+                },
+                {
+                  "command_group": "cargo test --locked -p ferroui-skia --test vulkan_frames -- --nocapture",
+                  "test_binary": "gpu/vulkan/frames_test.rs (target/debug/deps/vulkan_frames-2dc645b8dabf0c51)",
+                  "test_kind": "test",
+                  "result": "ok",
+                  "passed": 1,
+                  "failed": 0,
+                  "ignored": 0,
+                  "measured": 0,
+                  "filtered_out": 0,
+                  "seconds": 0.07,
+                  "log_line": 2520
+                },
+                {
+                  "command_group": "cargo test --locked -p ferroui-freedesktop --no-fail-fast",
+                  "test_binary": "unittests lib.rs (target/debug/deps/ferroui_freedesktop-ab0abe2f166e4b32)",
+                  "test_kind": "test",
+                  "result": "ok",
+                  "passed": 134,
+                  "failed": 0,
+                  "ignored": 0,
+                  "measured": 0,
+                  "filtered_out": 0,
+                  "seconds": 0.49,
+                  "log_line": 2973
+                },
+                {
+                  "command_group": "cargo test --locked -p ferroui-freedesktop --no-fail-fast",
+                  "test_binary": null,
+                  "test_kind": "Doc-tests ferroui_freedesktop",
+                  "result": "ok",
+                  "passed": 0,
+                  "failed": 0,
+                  "ignored": 0,
+                  "measured": 0,
+                  "filtered_out": 0,
+                  "seconds": 0.0,
+                  "log_line": 2979
+                },
+                {
+                  "command_group": "FERROUI_FREEDESKTOP_TEST_BUS=session dbus-run-session -- \\",
+                  "test_binary": "unittests lib.rs (target/debug/deps/ferroui_freedesktop-ab0abe2f166e4b32)",
+                  "test_kind": "test",
+                  "result": "ok",
+                  "passed": 75,
+                  "failed": 0,
+                  "ignored": 0,
+                  "measured": 0,
+                  "filtered_out": 59,
+                  "seconds": 1.98,
+                  "log_line": 3371
+                },
+                {
+                  "command_group": "FERROUI_FREEDESKTOP_TEST_BUS=session dbus-run-session -- \\",
+                  "test_binary": null,
+                  "test_kind": "Doc-tests ferroui_freedesktop",
+                  "result": "ok",
+                  "passed": 0,
+                  "failed": 0,
+                  "ignored": 0,
+                  "measured": 0,
+                  "filtered_out": 0,
+                  "seconds": 0.0,
+                  "log_line": 3377
+                },
+                {
+                  "command_group": "cargo test --locked -p ferroui-desktop --lib",
+                  "test_binary": "unittests lib.rs (target/debug/deps/ferroui_desktop-ecd63bbec6510acf)",
+                  "test_kind": "test",
+                  "result": "ok",
+                  "passed": 1,
+                  "failed": 0,
+                  "ignored": 0,
+                  "measured": 0,
+                  "filtered_out": 0,
+                  "seconds": 0.0,
+                  "log_line": 3786
+                }
+              ],
+              "cancellation_evidence": []
+            },
+            {
+              "job_id": 120398680050,
+              "name": "Build, test and smoke run (Windows platform backend)",
+              "url": "https://github.com/wieslawsoltes/FerroUI/actions/runs/39948857226/job/120398680050",
+              "status": "in_progress",
+              "conclusion": null,
+              "incomplete_steps": [
+                {
+                  "name": "Integration tests of windows on the desktop",
+                  "status": "in_progress",
+                  "conclusion": null,
+                  "number": 20
+                },
+                {
+                  "name": "Presented frames reach the edges of the window (software rendering and ANGLE)",
+                  "status": "pending",
+                  "conclusion": null,
+                  "number": 21
+                },
+                {
+                  "name": "Automation tests of the IntegrationTestApp sample",
+                  "status": "pending",
+                  "conclusion": null,
+                  "number": 22
+                },
+                {
+                  "name": "The GpuInterop sample builds",
+                  "status": "pending",
+                  "conclusion": null,
+                  "number": 23
+                },
+                {
+                  "name": "The Direct3D 11 demo of the GpuInterop sample (informative)",
+                  "status": "pending",
+                  "conclusion": null,
+                  "number": 24
+                },
+                {
+                  "name": "Pictures of the catalog (software rendering and ANGLE)",
+                  "status": "pending",
+                  "conclusion": null,
+                  "number": 25
+                },
+                {
+                  "name": "The accessibility tree of the catalog",
+                  "status": "pending",
+                  "conclusion": null,
+                  "number": 26
+                },
+                {
+                  "name": "WinUI integration (tests, the Windows App Runtime, the smoke runs of the samples)",
+                  "status": "pending",
+                  "conclusion": null,
+                  "number": 27
+                },
+                {
+                  "name": "Keep the pictures of the catalog",
+                  "status": "pending",
+                  "conclusion": null,
+                  "number": 28
+                },
+                {
+                  "name": "WinUI theme gallery (capture, comparison with native WinUI 3; informative)",
+                  "status": "pending",
+                  "conclusion": null,
+                  "number": 29
+                },
+                {
+                  "name": "Keep the pictures of the WinUI theme gallery",
+                  "status": "pending",
+                  "conclusion": null,
+                  "number": 30
+                },
+                {
+                  "name": "Post Run Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6",
+                  "status": "pending",
+                  "conclusion": null,
+                  "number": 59
+                },
+                {
+                  "name": "Post Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262",
+                  "status": "pending",
+                  "conclusion": null,
+                  "number": 60
+                }
+              ],
+              "failed_steps": [],
+              "canceled_steps": []
+            },
+            {
+              "job_id": 120398680106,
+              "name": "Packages of the published crates",
+              "url": "https://github.com/wieslawsoltes/FerroUI/actions/runs/39948857226/job/120398680106",
+              "status": "completed",
+              "conclusion": "success",
+              "incomplete_steps": [],
+              "failed_steps": [],
+              "canceled_steps": []
+            },
+            {
+              "job_id": 120398680179,
+              "name": "Informational (Linux, Wayland under the sway of Debian 13)",
+              "url": "https://github.com/wieslawsoltes/FerroUI/actions/runs/39948857226/job/120398680179",
+              "status": "completed",
+              "conclusion": "success",
+              "incomplete_steps": [],
+              "failed_steps": [],
+              "canceled_steps": []
+            }
+          ]
+        }
+      ],
+      "exact_head_ibus": {
+        "source_commit": "fa3b9033e200c7638a9c47e9d7a09120bde6f7ed",
+        "run_id": 39948857226,
+        "job_id": 120398680020,
+        "job_url": "https://github.com/wieslawsoltes/FerroUI/actions/runs/39948857226/job/120398680020",
+        "job_status": "completed",
+        "job_conclusion": "success",
+        "ibus_step": {
+          "name": "Text through an input method over D-Bus (a double of the IBus portal)",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 24
+        },
+        "measured_checkout_commit": "4676e0828babbec8f792f3d4b5a78981f93cbdf3",
+        "checkout_evidence": {
+          "source": "normalized workflow job log: git log -1 --format=%H",
+          "log_line": 129
+        },
+        "log": {
+          "file_name": "fa3b9033-x11-job-120398680020.log",
+          "bytes": 588601,
+          "sha256": "2d31aa3b22f1636c6936571d5af404320f654262c8c5233877fe925c22ae39f4",
+          "normalization": "Connector-decoded log, CRLF normalized to LF and one terminal newline."
+        },
+        "ibus_log_evidence": [
+          {
+            "log_line": 4762,
+            "text": "2026-10-23T12:06:19.1128166Z   [ok] ordered input scope on the portal: the first scope is Email, before Url and legacy Number: [\"CreateInputContext(FerroUI X11 window)\", \"SetCapabilities(8)\", \"SetContentType(6, 0)\", \"SetCursorLocation(333, 332, 0, 14)\", \"FocusIn\", \"SetCapabilities(9)\"]"
+          },
+          {
+            "log_line": 4763,
+            "text": "2026-10-23T12:06:19.1637783Z   [ok] live input scope on the portal: the focused context received the Digits scope: [\"CreateInputContext(FerroUI X11 window)\", \"SetCapabilities(8)\", \"SetContentType(6, 0)\", \"SetCursorLocation(333, 332, 0, 14)\", \"FocusIn\", \"SetCapabilities(9)\", \"SetContentType(2, 0)\"]"
+          },
+          {
+            "log_line": 4764,
+            "text": "2026-10-23T12:06:19.2148664Z   [ok] legacy content type after clearing the scope: the focused context returned to legacy Number: [\"CreateInputContext(FerroUI X11 window)\", \"SetCapabilities(8)\", \"SetContentType(6, 0)\", \"SetCursorLocation(333, 332, 0, 14)\", \"FocusIn\", \"SetCapabilities(9)\", \"SetContentType(2, 0)\", \"SetContentType(3, 0)\"]"
+          }
+        ]
+      },
+      "native_x64": {
+        "schema_version": 1,
+        "observed_at_utc": "2026-10-23T12:18:05.620335+00:00",
+        "source_commit": "fa3b9033e200c7638a9c47e9d7a09120bde6f7ed",
+        "source_tree": "7642661c6255aaebb5d315c0e168bf6083e4240b",
+        "workflow_run": 39948857233,
+        "workflow_url": "https://github.com/wieslawsoltes/FerroUI/actions/runs/39948857233",
+        "job_id": 120398651285,
+        "job_url": "https://github.com/wieslawsoltes/FerroUI/actions/runs/39948857233/job/120398651285",
+        "job_status": "completed",
+        "job_conclusion": "success",
+        "measured_checkout_commit": "4676e0828babbec8f792f3d4b5a78981f93cbdf3",
+        "probe_git_blob": "64262e70bb48d4241fbe4626d27df85c388284ba",
+        "engine": {
+          "windows_version": [
+            10,
+            0,
+            26100
+          ],
+          "dll_path": "C:\\Windows\\SYSTEM32\\Msftedit.dll",
+          "dll_file_version": "6.2.26100.33648"
+        },
+        "counts": {
+          "home_end": 60,
+          "home_end_repeats": 60,
+          "vertical": 290,
+          "horizontal": 300,
+          "options": 316,
+          "link": 137,
+          "link_fixtures": 59,
+          "gravity": 1577,
+          "gravity_fixtures": 199,
+          "range_tracking": 90,
+          "range_tracking_fixtures": 15,
+          "selection_gravity": 490,
+          "selection_gravity_fixtures": 34
+        },
+        "artifact": {
+          "artifact_id": 12499797710,
+          "workflow_run": 39948857233,
+          "workflow_head_commit": "fa3b9033e200c7638a9c47e9d7a09120bde6f7ed",
+          "archive_name": "fa3b9033-x64-native.zip",
+          "archive_bytes": 102678,
+          "archive_sha256": "a832630c806005078d482b1f014bbd03c97df778d559e85d688da37b613f959c",
+          "archive_digest_matches_api": true,
+          "all_member_crcs_valid": true,
+          "members": [
+            {
+              "name": "system-msftedit.log",
+              "bytes": 5086048,
+              "sha256": "3fac31071d85723ff1379fb89ce9b954af5fb75f10e9278d35212e1c4bf5ecf5"
+            },
+            {
+              "name": "system-msftedit-source-commit.txt",
+              "bytes": 41,
+              "sha256": "865c7f4d37e5258159e20218992aad3971f8a99209213834e1711850b7a53648"
+            },
+            {
+              "name": "system-msftedit-probe-blob.txt",
+              "bytes": 41,
+              "sha256": "c73c118b9b4bb81109d2ee65a4d5984cdc3b3d64e8889111123e3d95f45adb61"
+            }
+          ]
+        },
+        "test_result": "test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 364 filtered out; finished in 4.00s",
+        "observation_comparison": {
+          "extractor_file": "scripts/porting/rich-text-tom-observations.py",
+          "extractor_sha256": "50777bd2c98ea1b7c9e8061be2b8c3c36ef726a5ea2821c06a8918f06fc31a21",
+          "baseline_file": "docs/porting/winui-rich-text/native-msftedit-e5a0778a-x64.json",
+          "baseline_sha256": "4ec016e499094ee1b0aa575db79bc7d3e0ae9e583f3442155d439ce5a32b1e09",
+          "compared_top_level_fields": [
+            "fixtures",
+            "home_end",
+            "vertical",
+            "counts",
+            "horizontal",
+            "options",
+            "link",
+            "gravity",
+            "range_tracking",
+            "selection_gravity_interfaces",
+            "selection_gravity"
+          ],
+          "all_observations_and_counts_equal": true,
+          "baseline_engine": {
+            "windows_version": [
+              10,
+              0,
+              26100
+            ],
+            "dll_path": "C:\\Windows\\SYSTEM32\\Msftedit.dll",
+            "dll_file_version": "6.2.26100.33648"
+          },
+          "engine_equal": true,
+          "scope": "Compares every extracted observation family and count from the official native artifact log. Engine and provenance are recorded separately; no unmeasured behavior or whole-workflow completion is inferred."
+        },
+        "evidence_method": "Official GitHub Actions artifact downloaded through the GitHub connector; exact archive bytes, API SHA256, and all member CRCs independently verified. Measured source and probe identity come from archived manifests."
+      },
+      "native_arm64": {
+        "schema_version": 1,
+        "observed_at_utc": "2026-10-23T12:05:30.831779+00:00",
+        "source_commit": "fa3b9033e200c7638a9c47e9d7a09120bde6f7ed",
+        "source_tree": "7642661c6255aaebb5d315c0e168bf6083e4240b",
+        "workflow_run": 39948857233,
+        "workflow_url": "https://github.com/wieslawsoltes/FerroUI/actions/runs/39948857233",
+        "job_id": 120398651103,
+        "job_url": "https://github.com/wieslawsoltes/FerroUI/actions/runs/39948857233/job/120398651103",
+        "job_status": "completed",
+        "job_conclusion": "success",
+        "measured_checkout_commit": "4676e0828babbec8f792f3d4b5a78981f93cbdf3",
+        "probe_git_blob": "64262e70bb48d4241fbe4626d27df85c388284ba",
+        "engine": {
+          "windows_version": [
+            10,
+            0,
+            26200
+          ],
+          "dll_path": "C:\\Windows\\SYSTEM32\\Msftedit.dll",
+          "dll_file_version": "6.2.26100.9711"
+        },
+        "counts": {
+          "home_end": 60,
+          "home_end_repeats": 60,
+          "vertical": 290,
+          "horizontal": 300,
+          "options": 316,
+          "link": 137,
+          "link_fixtures": 59,
+          "gravity": 1577,
+          "gravity_fixtures": 199,
+          "range_tracking": 90,
+          "range_tracking_fixtures": 15,
+          "selection_gravity": 490,
+          "selection_gravity_fixtures": 34
+        },
+        "runner_manifest": "runner_label=windows-11-arm\nrunner_arch=ARM64\nrunner_os=Windows\nimage_os=win11-vs2026-arm64\nimage_version=20261021.192.1\ncargo_build_target=aarch64-pc-windows-msvc\nworkflow=Rich text conformance\njob=windows-arm64-native\nrun_attempt=1\nrun_url=https://github.com/wieslawsoltes/FerroUI/actions/runs/39948857233/attempts/1",
+        "rustc_manifest": "rustc 1.99.1 (58cf8f9c3 2026-10-13)\nbinary: rustc\ncommit-hash: 58cf8f9c35b355199727627d07ae34a4e2846d67\ncommit-date: 2026-10-13\nhost: aarch64-pc-windows-msvc\nrelease: 1.99.1\nLLVM version: 23.1.1",
+        "artifact": {
+          "artifact_id": 12500390895,
+          "workflow_run": 39948857233,
+          "workflow_head_commit": "fa3b9033e200c7638a9c47e9d7a09120bde6f7ed",
+          "archive_name": "fa3b9033-arm64-native.zip",
+          "archive_bytes": 232156,
+          "archive_sha256": "a031c126b32995e8a1bf75856fd3cff673e568ca5fdd1a2e1125b9e974e5d0be",
+          "archive_digest_matches_api": true,
+          "all_member_crcs_valid": true,
+          "members": [
+            {
+              "name": "concurrent-command.txt",
+              "bytes": 118,
+              "sha256": "286a8796d3230a9b24e7aa901ce71f6ea2001f64ebf1d3cd1bb2a153bcc50146"
+            },
+            {
+              "name": "concurrent-diagnostic.log",
+              "bytes": 5086064,
+              "sha256": "6d892a80017b36beb4af398aa8152de48c874bd2474cc76a76fa349d18051fd0"
+            },
+            {
+              "name": "concurrent-pipeline-exit-code.txt",
+              "bytes": 2,
+              "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+            },
+            {
+              "name": "probe-blob.txt",
+              "bytes": 41,
+              "sha256": "c73c118b9b4bb81109d2ee65a4d5984cdc3b3d64e8889111123e3d95f45adb61"
+            },
+            {
+              "name": "runner.txt",
+              "bytes": 319,
+              "sha256": "09706376bbd615930cf1bb79bcdb0d0cd038ed1588f62b6d02669a5c09065abe"
+            },
+            {
+              "name": "rustc.txt",
+              "bytes": 195,
+              "sha256": "0400e842b69023487d35975ececcd0edec4f13d84d2fc9a87a2de331b2df2d2f"
+            },
+            {
+              "name": "serial-command.txt",
+              "bytes": 118,
+              "sha256": "d9d0337b4230940e66cc973f2501e57b7617737338ba2ea73839dbd4b9372b82"
+            },
+            {
+              "name": "serial-pipeline-exit-code.txt",
+              "bytes": 2,
+              "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+            },
+            {
+              "name": "source-commit.txt",
+              "bytes": 41,
+              "sha256": "865c7f4d37e5258159e20218992aad3971f8a99209213834e1711850b7a53648"
+            },
+            {
+              "name": "system-msftedit.log",
+              "bytes": 5087153,
+              "sha256": "21870b35f74267f5e8fd958b473ad810d36326912cf6b9dfea8fb8c6764dd6b4"
+            }
+          ]
+        },
+        "serial": {
+          "command": "cargo test --locked -p ferroui-win32 --no-default-features --lib rich_text_tom_oracle -- --nocapture --test-threads=1",
+          "pipeline_exit_code": 0,
+          "test_result": "test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 364 filtered out; finished in 6.05s"
+        },
+        "concurrent_diagnostic": {
+          "command": "cargo test --locked -p ferroui-win32 --no-default-features --lib rich_text_tom_oracle -- --nocapture --test-threads=4",
+          "pipeline_exit_code": 0,
+          "test_result": "test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 364 filtered out; finished in 3.56s"
+        },
+        "observation_comparison": {
+          "extractor_file": "scripts/porting/rich-text-tom-observations.py",
+          "extractor_sha256": "50777bd2c98ea1b7c9e8061be2b8c3c36ef726a5ea2821c06a8918f06fc31a21",
+          "baseline_file": "docs/porting/winui-rich-text/native-msftedit-e5a0778a-arm64.json",
+          "baseline_sha256": "9e494a2032a6d193a8fab5fa5966f24f5dee4494f67528ee3480d4fc19164adc",
+          "compared_top_level_fields": [
+            "fixtures",
+            "home_end",
+            "vertical",
+            "counts",
+            "horizontal",
+            "options",
+            "link",
+            "gravity",
+            "range_tracking",
+            "selection_gravity_interfaces",
+            "selection_gravity"
+          ],
+          "all_observations_and_counts_equal": true,
+          "baseline_engine": {
+            "windows_version": [
+              10,
+              0,
+              26200
+            ],
+            "dll_path": "C:\\Windows\\SYSTEM32\\Msftedit.dll",
+            "dll_file_version": "6.2.26100.9278"
+          },
+          "engine_equal": false,
+          "scope": "Compares every extracted observation family and count from the canonical serial artifact log. Engine and provenance are recorded separately; this is not an inference about unmeasured behavior or a completed whole workflow."
+        },
+        "evidence_method": "Official GitHub Actions artifact obtained through the GitHub connector. Downloaded archive bytes, SHA256 against API metadata, and all member CRCs independently verified. No full decoded ARM64 workflow log is claimed."
+      },
+      "evidence_method": {
+        "job_status": "GitHub connector workflow-run and job API responses for the explicitly named source head, captured with timestamps. Run status is reported separately from completed individual jobs.",
+        "logs": "GitHub connector decoded workflow job logs. Saved text is normalized from CRLF to LF with one terminal newline; log hashes describe those saved bytes, not an original workflow-log ZIP archive.",
+        "native_artifacts": "Official artifact ZIP bytes downloaded from connector-provided artifact URLs; actual byte lengths, SHA256 equality with GitHub API digest and every ZIP member CRC independently checked. Extracted member hashes and manifests distinguish x64 from ARM64 and source head from measured PR merge.",
+        "native_observations": "All extracted observation families and counts were compared with the corresponding immutable e5a0778a architecture baseline. ARM64 engine version differs; that difference is preserved. Equality is limited to the measured fixture corpus and does not establish unmeasured parity."
+      },
+      "supporting_files": [
+        {
+          "file_name": "fa3b9033-native-x64-proof.json",
+          "bytes": 3614,
+          "sha256": "a696b7cf266352c7d0c4004a022539bf225498ab5d6fdaf21450d03f8a09091f"
+        },
+        {
+          "file_name": "fa3b9033-native-arm64-proof.json",
+          "bytes": 5836,
+          "sha256": "7aa9e48e5e61ecd8f99fdcb09217a8912e79d906928976bbc110e3e88fcc639c"
+        },
+        {
+          "file_name": "fa3b9033-x11-proof.json",
+          "bytes": 5946,
+          "sha256": "f875ca0b4c4258bbaa5da8be1ca03ab9fce015f39010971a3232ed04a8ecd17a"
+        },
+        {
+          "file_name": "fa3b9033-linux-log-summary.json",
+          "bytes": 6896,
+          "sha256": "e1034fec9375be2d13625259bdf7e1c678d77dbea5eb68f39a9ed18792cd72ba"
+        },
+        {
+          "file_name": "fa3b9033-windows-log-summary.json",
+          "bytes": 2611,
+          "sha256": "3e7387b3087cf9f1441ca4a352979aa3c712b546a2b1188701b95336e256af09"
+        }
+      ]
+    },
+    {
+      "schema_version": 1,
+      "source_commit": "fa3b9033e200c7638a9c47e9d7a09120bde6f7ed",
+      "source_tree": "7642661c6255aaebb5d315c0e168bf6083e4240b",
+      "source_scope": "Published fa3b9033 tracking checkpoint only. Does not validate later configured context-menu, popup-lifecycle, cached overflow-master, or default-provider work.",
+      "observed_at_utc": "2026-10-23T12:55:23Z",
+      "report_state": "final_broad_ci",
+      "conclusion": "Both the dedicated rich-text conformance workflow and broad CI workflow for fa3b9033 completed successfully; all 3 conformance jobs and all 14 broad CI jobs succeeded.",
+      "prior_immutable_conformance_report": {
+        "file_name": "fa3b9033-ci-conformance-final.json",
+        "bytes": 54089,
+        "sha256": "a56c0bcb97d262d364ce37d2a06f1e83ffa1d9e09b7db63bc17795f317c33ec0"
+      },
+      "update_scope": "Adds final broad CI outcome and completed macOS/Windows broad logs. Earlier in-progress observations remain immutable.",
+      "workflow": {
+        "id": 39948857226,
+        "name": "CI",
+        "url": "https://github.com/wieslawsoltes/FerroUI/actions/runs/39948857226",
+        "head_sha": "fa3b9033e200c7638a9c47e9d7a09120bde6f7ed",
+        "event": "pull_request",
+        "run_attempt": 1,
+        "created_at": "2026-10-23T11:49:58Z",
+        "updated_at": "2026-10-23T12:51:59Z",
+        "status": "completed",
+        "conclusion": "success",
+        "job_counts": {
+          "success": 14,
+          "failure": 0,
+          "cancelled": 0,
+          "in_progress": 0
+        },
+        "jobs": [
+          {
+            "id": 120398679529,
+            "name": "Check (browser with threads, wasm32-unknown-emscripten)",
+            "url": "https://github.com/wieslawsoltes/FerroUI/actions/runs/39948857226/job/120398679529",
+            "status": "completed",
+            "conclusion": "success"
+          },
+          {
+            "id": 120398679716,
+            "name": "Build, test and smoke run (Windows platform backend, ARM64; informative)",
+            "url": "https://github.com/wieslawsoltes/FerroUI/actions/runs/39948857226/job/120398679716",
+            "status": "completed",
+            "conclusion": "success"
+          },
+          {
+            "id": 120398679780,
+            "name": "Build and test (macOS)",
+            "url": "https://github.com/wieslawsoltes/FerroUI/actions/runs/39948857226/job/120398679780",
+            "status": "completed",
+            "conclusion": "success"
+          },
+          {
+            "id": 120398679834,
+            "name": "Build and package (Android, arm64)",
+            "url": "https://github.com/wieslawsoltes/FerroUI/actions/runs/39948857226/job/120398679834",
+            "status": "completed",
+            "conclusion": "success"
+          },
+          {
+            "id": 120398679900,
+            "name": "Check (browser, wasm32-unknown-emscripten)",
+            "url": "https://github.com/wieslawsoltes/FerroUI/actions/runs/39948857226/job/120398679900",
+            "status": "completed",
+            "conclusion": "success"
+          },
+          {
+            "id": 120398679925,
+            "name": "Build and test (Linux framebuffer, virtual devices)",
+            "url": "https://github.com/wieslawsoltes/FerroUI/actions/runs/39948857226/job/120398679925",
+            "status": "completed",
+            "conclusion": "success"
+          },
+          {
+            "id": 120398679966,
+            "name": "Source conventions",
+            "url": "https://github.com/wieslawsoltes/FerroUI/actions/runs/39948857226/job/120398679966",
+            "status": "completed",
+            "conclusion": "success"
+          },
+          {
+            "id": 120398680003,
+            "name": "Build and test (Linux, Wayland under headless sway)",
+            "url": "https://github.com/wieslawsoltes/FerroUI/actions/runs/39948857226/job/120398680003",
+            "status": "completed",
+            "conclusion": "success"
+          },
+          {
+            "id": 120398680017,
+            "name": "Build and test (iOS, simulator target)",
+            "url": "https://github.com/wieslawsoltes/FerroUI/actions/runs/39948857226/job/120398680017",
+            "status": "completed",
+            "conclusion": "success"
+          },
+          {
+            "id": 120398680020,
+            "name": "Build and test (Linux, X11 under Xvfb)",
+            "url": "https://github.com/wieslawsoltes/FerroUI/actions/runs/39948857226/job/120398680020",
+            "status": "completed",
+            "conclusion": "success"
+          },
+          {
+            "id": 120398680050,
+            "name": "Build, test and smoke run (Windows platform backend)",
+            "url": "https://github.com/wieslawsoltes/FerroUI/actions/runs/39948857226/job/120398680050",
+            "status": "completed",
+            "conclusion": "success"
+          },
+          {
+            "id": 120398680106,
+            "name": "Packages of the published crates",
+            "url": "https://github.com/wieslawsoltes/FerroUI/actions/runs/39948857226/job/120398680106",
+            "status": "completed",
+            "conclusion": "success"
+          },
+          {
+            "id": 120398680179,
+            "name": "Informational (Linux, Wayland under the sway of Debian 13)",
+            "url": "https://github.com/wieslawsoltes/FerroUI/actions/runs/39948857226/job/120398680179",
+            "status": "completed",
+            "conclusion": "success"
+          },
+          {
+            "id": 120419470006,
+            "name": "Check (browser, the site with both modules)",
+            "url": "https://github.com/wieslawsoltes/FerroUI/actions/runs/39948857226/job/120419470006",
+            "status": "completed",
+            "conclusion": "success"
+          }
+        ]
+      },
+      "dedicated_conformance": {
+        "id": 39948857233,
+        "url": "https://github.com/wieslawsoltes/FerroUI/actions/runs/39948857233",
+        "status": "completed",
+        "conclusion": "success",
+        "successful_jobs": 3,
+        "evidence": "See the unchanged prior_immutable_conformance_report for full final job metadata, test counts, and exact x64/ARM64 official artifact proofs."
+      },
+      "measured_checkout_commit": "4676e0828babbec8f792f3d4b5a78981f93cbdf3",
+      "macos_broad": {
+        "job_id": 120398679780,
+        "status": "completed",
+        "conclusion": "success",
+        "measured_checkout_commit": "4676e0828babbec8f792f3d4b5a78981f93cbdf3",
+        "checkout_evidence": {
+          "source": "normalized workflow job log: git log -1 --format=%H",
+          "log_line": 189
+        },
+        "log": {
+          "file_name": "fa3b9033-macos-job-120398679780.log",
+          "bytes": 3977868,
+          "sha256": "cdee38137de3cafe544198dac1f651c9eca69a19c8191121602c1341f706a2cb",
+          "normalization": "Connector-decoded log, CRLF normalized to LF and one terminal newline."
+        },
+        "summary": {
+          "file_name": "fa3b9033-macos-log-summary.json",
+          "bytes": 95623,
+          "sha256": "07ad1fb8c391d43203fa1eed31596431fb184464238129b36fcd5292c676baad"
+        },
+        "logged_result_rows": 157,
+        "selected_test_results": [
+          {
+            "command_group": "cargo test --workspace --locked --no-fail-fast --lib --tests --exclude ferroui-render-backends-comparison --exclude ferroui-vello",
+            "test_binary": "unittests lib.rs (target/debug/deps/ferroui_base-7614478d0364f455)",
+            "test_kind": "test",
+            "result": "ok",
+            "passed": 4640,
+            "failed": 0,
+            "ignored": 0,
+            "measured": 0,
+            "filtered_out": 0,
+            "seconds": 7.98,
+            "log_line": 9619,
+            "test_binary_evidence": {
+              "header_log_line": 4899,
+              "start_log_line": 4976,
+              "declared_tests": 4640
+            }
+          },
+          {
+            "command_group": "cargo test --workspace --locked --no-fail-fast --lib --tests --exclude ferroui-render-backends-comparison --exclude ferroui-vello",
+            "test_binary": "unittests lib.rs (target/debug/deps/ferroui_controls-6e4a417f35aa447d)",
+            "test_kind": "test",
+            "result": "ok",
+            "passed": 5320,
+            "failed": 0,
+            "ignored": 0,
+            "measured": 0,
+            "filtered_out": 0,
+            "seconds": 17.43,
+            "log_line": 15389,
+            "test_binary_evidence": {
+              "header_log_line": 10064,
+              "start_log_line": 10066,
+              "declared_tests": 5320
+            }
+          },
+          {
+            "command_group": "for attempt in 1 2 3; do",
+            "test_binary": "unittests lib.rs (target/debug/deps/ferroui_render_backends_comparison-d37b4dba3bb7b8b2)",
+            "test_kind": "test",
+            "result": "ok",
+            "passed": 32,
+            "failed": 0,
+            "ignored": 0,
+            "measured": 0,
+            "filtered_out": 0,
+            "seconds": 60.01,
+            "log_line": 31998,
+            "test_binary_evidence": {
+              "header_log_line": 31962,
+              "start_log_line": 31964,
+              "declared_tests": 32
+            }
+          },
+          {
+            "command_group": "for attempt in 1 2 3; do",
+            "test_binary": "unittests lib.rs (target/debug/deps/ferroui_vello-934437828a24089f)",
+            "test_kind": "test",
+            "result": "ok",
+            "passed": 521,
+            "failed": 0,
+            "ignored": 9,
+            "measured": 0,
+            "filtered_out": 0,
+            "seconds": 13.43,
+            "log_line": 32534,
+            "test_binary_evidence": {
+              "header_log_line": 32000,
+              "start_log_line": 32002,
+              "declared_tests": 530
+            }
+          }
+        ],
+        "test_binary_attribution": "Cargo Running headers queued and consumed at the corresponding running N tests line; result count must match. A later stderr Running header cannot relabel an already-started stdout harness. Ambiguous rows have null binary.",
+        "all_logged_results_failed_count": 0,
+        "count_scope": "Selected suite results are shown individually; they are not a distinct-test total across workflows."
+      },
+      "windows_broad": {
+        "job_id": 120398680050,
+        "status": "completed",
+        "conclusion": "success",
+        "measured_checkout_commit": "4676e0828babbec8f792f3d4b5a78981f93cbdf3",
+        "checkout_evidence": {
+          "source": "normalized workflow job log: git log -1 --format=%H",
+          "log_line": 203
+        },
+        "log": {
+          "file_name": "fa3b9033-windows-broad-job-120398680050.log",
+          "bytes": 2804783,
+          "sha256": "e3b7c884f27e8ed41139b33f21fe024d3692a697380e74072dc3f5c5e114a262",
+          "normalization": "Connector-decoded log, CRLF normalized to LF and one terminal newline."
+        },
+        "summary": {
+          "file_name": "fa3b9033-windows-broad-log-summary.json",
+          "bytes": 3072,
+          "sha256": "96d16a6a1ea07e2e517af8054ac4850540a7dd4c2dfd618aaef81fe6dab571de"
+        },
+        "test_results": [
+          {
+            "command_group": "cargo test --locked -p ferroui-win32 --no-default-features --no-fail-fast",
+            "test_binary": "unittests lib.rs (target\\debug\\deps\\ferroui_win32-d1b0e3b69f8ab878.exe)",
+            "test_kind": "test",
+            "result": "ok",
+            "passed": 372,
+            "failed": 0,
+            "ignored": 0,
+            "measured": 0,
+            "filtered_out": 0,
+            "seconds": 9.14,
+            "log_line": 2043,
+            "test_binary_evidence": {
+              "header_log_line": 1667,
+              "start_log_line": 1669,
+              "declared_tests": 372
+            }
+          },
+          {
+            "command_group": "cargo test --locked -p ferroui-win32 --no-default-features --no-fail-fast",
+            "test_binary": null,
+            "test_kind": "Doc-tests ferroui_win32",
+            "result": "ok",
+            "passed": 0,
+            "failed": 0,
+            "ignored": 0,
+            "measured": 0,
+            "filtered_out": 0,
+            "seconds": 0.03,
+            "log_line": 2049
+          },
+          {
+            "command_group": "cargo test --locked -p ferroui-desktop --lib",
+            "test_binary": "unittests lib.rs (target\\debug\\deps\\ferroui_desktop-6617710e967642fe.exe)",
+            "test_kind": "test",
+            "result": "ok",
+            "passed": 1,
+            "failed": 0,
+            "ignored": 0,
+            "measured": 0,
+            "filtered_out": 0,
+            "seconds": 0.0,
+            "log_line": 7749,
+            "test_binary_evidence": {
+              "header_log_line": 7744,
+              "start_log_line": 7746,
+              "declared_tests": 1
+            }
+          },
+          {
+            "command_group": "cargo test --locked -p ferroui-winui --no-fail-fast",
+            "test_binary": "unittests lib.rs (target\\debug\\deps\\ferroui_winui-41c5f20f9e13c195.exe)",
+            "test_kind": "test",
+            "result": "ok",
+            "passed": 65,
+            "failed": 0,
+            "ignored": 0,
+            "measured": 0,
+            "filtered_out": 0,
+            "seconds": 0.02,
+            "log_line": 20514,
+            "test_binary_evidence": {
+              "header_log_line": 20445,
+              "start_log_line": 20447,
+              "declared_tests": 65
+            }
+          },
+          {
+            "command_group": "cargo test --locked -p ferroui-winui --no-fail-fast",
+            "test_binary": null,
+            "test_kind": "Doc-tests ferroui_winui",
+            "result": "ok",
+            "passed": 0,
+            "failed": 0,
+            "ignored": 0,
+            "measured": 0,
+            "filtered_out": 0,
+            "seconds": 0.0,
+            "log_line": 20520
+          }
+        ],
+        "completed_integration_steps": [
+          {
+            "name": "Smoke run of a window (software rendering)",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 7
+          },
+          {
+            "name": "Smoke run with the OpenGL of the system (WGL), or its fallback",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 8
+          },
+          {
+            "name": "Smoke run through ANGLE with the ANGLE probe",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 11
+          },
+          {
+            "name": "Smoke run through ANGLE, presented through DirectComposition",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 12
+          },
+          {
+            "name": "Smoke run through ANGLE, presented through Windows.UI.Composition",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 14
+          },
+          {
+            "name": "Smoke run through ANGLE, presented through a DXGI swap chain",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 16
+          },
+          {
+            "name": "WinUI integration (tests, the Windows App Runtime, the smoke runs of the samples)",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 27
+          }
+        ],
+        "test_binary_attribution": "Cargo Running headers queued and consumed at the corresponding running N tests line; result count must match. A later stderr Running header cannot relabel an already-started stdout harness. Ambiguous rows have null binary."
+      },
+      "exact_head_ibus": {
+        "job_id": 120398680020,
+        "job_url": "https://github.com/wieslawsoltes/FerroUI/actions/runs/39948857226/job/120398680020",
+        "job_status": "completed",
+        "job_conclusion": "success",
+        "ibus_step": {
+          "name": "Text through an input method over D-Bus (a double of the IBus portal)",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 24
+        },
+        "measured_checkout_commit": "4676e0828babbec8f792f3d4b5a78981f93cbdf3",
+        "ibus_log_evidence": [
+          {
+            "log_line": 4762,
+            "text": "2026-10-23T12:06:19.1128166Z   [ok] ordered input scope on the portal: the first scope is Email, before Url and legacy Number: [\"CreateInputContext(FerroUI X11 window)\", \"SetCapabilities(8)\", \"SetContentType(6, 0)\", \"SetCursorLocation(333, 332, 0, 14)\", \"FocusIn\", \"SetCapabilities(9)\"]"
+          },
+          {
+            "log_line": 4763,
+            "text": "2026-10-23T12:06:19.1637783Z   [ok] live input scope on the portal: the focused context received the Digits scope: [\"CreateInputContext(FerroUI X11 window)\", \"SetCapabilities(8)\", \"SetContentType(6, 0)\", \"SetCursorLocation(333, 332, 0, 14)\", \"FocusIn\", \"SetCapabilities(9)\", \"SetContentType(2, 0)\"]"
+          },
+          {
+            "log_line": 4764,
+            "text": "2026-10-23T12:06:19.2148664Z   [ok] legacy content type after clearing the scope: the focused context returned to legacy Number: [\"CreateInputContext(FerroUI X11 window)\", \"SetCapabilities(8)\", \"SetContentType(6, 0)\", \"SetCursorLocation(333, 332, 0, 14)\", \"FocusIn\", \"SetCapabilities(9)\", \"SetContentType(2, 0)\", \"SetContentType(3, 0)\"]"
+          }
+        ],
+        "proof": {
+          "file_name": "fa3b9033-x11-proof.json",
+          "bytes": 5946,
+          "sha256": "f875ca0b4c4258bbaa5da8be1ca03ab9fce015f39010971a3232ed04a8ecd17a"
+        }
+      },
+      "evidence_method": {
+        "status": "GitHub connector workflow-run job metadata plus approved REST workflow-run resource, observed together at the timestamp above.",
+        "logs": "GitHub connector decoded job logs; CRLF normalized to LF with one terminal newline. Digests describe the preserved normalized UTF-8 files, not GitHub ZIP archive bytes.",
+        "binary_mapping": "Cargo Running headers are queued and consumed at harness start, and result counts are checked against running N tests; this handles stderr headers arriving before prior stdout summaries. Doc-test rows have no test binary.",
+        "source_identity": "Workflow head SHA is distinct from the measured PR merge checkout SHA read from job logs.",
+        "failures": "No failure or cancellation inferred from missing logs; both final aggregate and all final jobs are directly observed as success."
+      },
+      "supporting_files": [
+        {
+          "file_name": "fa3b9033-broad-final-api.json",
+          "bytes": 64294,
+          "sha256": "59d56f1842816455dbfc61a068c028eff64550642bfb696e5e6c6ce4e33bce34"
+        },
+        {
+          "file_name": "fa3b9033-macos-log-summary.json",
+          "bytes": 95623,
+          "sha256": "07ad1fb8c391d43203fa1eed31596431fb184464238129b36fcd5292c676baad"
+        },
+        {
+          "file_name": "fa3b9033-windows-broad-log-summary.json",
+          "bytes": 3072,
+          "sha256": "96d16a6a1ea07e2e517af8054ac4850540a7dd4c2dfd618aaef81fe6dab571de"
+        },
+        {
+          "file_name": "fa3b9033-x11-proof.json",
+          "bytes": 5946,
+          "sha256": "f875ca0b4c4258bbaa5da8be1ca03ab9fce015f39010971a3232ed04a8ecd17a"
+        },
+        {
+          "file_name": "attribute_cargo_harness.py",
+          "bytes": 3537,
+          "sha256": "227c29e067d166cdaa4fcbf034666360b2362d1be2f1a07fab9204423102367b"
+        }
+      ]
     }
   ]
 }

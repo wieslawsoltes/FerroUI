@@ -1467,3 +1467,89 @@ Windows suites, canceled jobs and unfinished suites without promoting the runs
 to a full pass. TESTS.md records the exact scope and report hash. This evidence
 checkpoint changes no Rust behavior and does not validate the subsequent
 read-only-menu work.
+
+## 2026-10-23 — Complete the published SetText conformance gate
+
+Conformance run 39948857233 completed successfully for fa3b9033, with all three
+jobs passing. Linux completed Base 4,640, Controls 5,320, Win32/WinUI host
+329/50, all three themes, XAML 620 with 17 existing ignored tests, and all five
+generated-reference gates. Native Windows completed WinUI 65, exact UTF-16
+two, IMM32 23, system-MSFTEDIT eight and selected rich Controls 832. ARM64
+completed its eight-test serial oracle and separate eight-test concurrent
+diagnostic. No executed suite failed.
+
+Completed logs and verified native archives identify measured PR merge
+4676e0828babbec8f792f3d4b5a78981f93cbdf3. Both architecture artifacts pass exact
+byte-length, API-digest and member-CRC checks; their canonical behavior arrays
+match the earlier immutable observations while retaining new provenance. At
+12:22:20 UTC the broader workflow still ran, with its whole X11 job successful.
+That immutable aggregate is appended to continuation-validation.json; previous
+interim and canceled observations remain intact. Current context-menu source
+changes require their own subsequent gates.
+
+## 2026-10-23 — Port configured read-only context dispatch
+
+RichTextBlock now defines a distinct synchronous ContextMenuOpening event,
+projects root-DIP coordinates and shared Handled through the existing routed
+argument and runtime/compiled XAML services, and rereads the configured menu
+after callbacks. Pointerless read-only requests use the view origin. The
+editable presenter retains its editor's event, and modern overflow requests
+retain their placement target without inventing a typed overflow/master event.
+Overflow configured flyouts prefer a local value, then the root master's value;
+default selection gating preserves the explicit-null versus Clear distinction.
+The native cached-master timing gap remains explicit for the next slice.
+
+Source review and executable regressions exposed stale ownership in the shared
+popup services, including show/hide callbacks, open-state notifications, host
+setup/cleanup and virtual transform reads. The fix uses scoped actual-owner
+registrations and operation identities; raw close cancellation restores the
+retained session. Parent assignment has a separate ticket because ordinary
+logical detach itself advances the popup lifecycle. A nested show/hide cannot
+restore an older parent assignment even when values return to null.
+
+After correcting three mechanical test-fixture issues, the old production
+lifecycle compiled and executed 36 focused cases: six passed and 30 failed.
+The first expanded 44-definition fix build was killed by shared memory
+pressure, and produced no runtime result. Shared storage later reached zero
+free space; only this task's already-hashed retired binary and incomplete or
+obsolete compiler outputs were removed. The final source adds four parent
+callback variants for 48 popup definitions and awaits its separate runtime and
+actual XAML-generation gates. TESTS.md preserves these distinct scopes. The
+new source/API mapping stays partial; native default commands, automatic
+selection flyouts and legacy asynchronous Copy menus remain unfinished.
+
+The subsequent parent-ticket source compiled in 254.899s and passed all 48
+popup cases, plus existing flyout/popup/editor-context filters 112/129/18.
+Read-only cases passed 26 and failed five: their synthetic points were below
+the requesting view, so the unchanged shared target-bound clamp correctly
+returned Y=79. The fixtures now use distinct fractional in-bounds inputs while
+retaining exact anchor assertions. Review also found that a nested same-parent
+assignment must complete its own templated-parent association; the small
+completion fix adds two host variants. This 50-definition source receives a
+new freeze and gate. No full Controls result is inferred from interim filters.
+
+## 2026-10-23 — Verify context dispatch and actual XAML output
+
+The final 50-case popup suite and all 31 read-only context tests pass. Existing
+flyout/popup/editor-context filters pass 114/129/18, and the complete Controls
+suite passes all 5,401 tests with zero failures or ignores. The first real XAML
+generation and emitter parity checks passed, then the focused runtime exposed
+an editor-only code-behind fixture. A dedicated RichTextBlock-aware handler
+preserves the editor assertion; the second real generator changed one call in
+the new delegate and left eight other outputs unchanged. A fresh final binary
+passed the live handler, emitter parity and all 621 XAML tests, with zero
+failures and 17 existing ignores. No production or Controls source changed
+after its full passing run.
+
+The complete record retains every failed, resource-limited and successful
+attempt separately, with eight source manifests, 25 log digests and the final
+source audit. Temporarily archived Base artifacts were restored with verified
+original bytes and mtimes. Source checkpoint e0c0a2e8 and GitHub equivalent
+309ff267 have identical tree 89113341778c640dc00a69fab8182ecf34bfbee9. The
+remaining three XAML fixture changes and evidence are committed separately.
+
+Meanwhile the preceding fa3b9033 broad CI completed successfully with all 14
+jobs, joining its three successful conformance jobs. The immutable final broad
+report is appended separately from its earlier in-progress observation. Its
+macOS/Windows/X11 results and measured merge belong only to that published
+source, not to the newer configured-menu implementation.

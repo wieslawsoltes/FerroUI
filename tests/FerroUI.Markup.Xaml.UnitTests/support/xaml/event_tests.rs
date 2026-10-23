@@ -16,7 +16,7 @@ use ferroui_controls::primitives::popup_positioning::{CustomPopupPlacement, Popu
 use ferroui_controls::primitives::TemplatedControlImpl;
 use ferroui_controls::{
     Button, ButtonImpl, ContentControlImpl, ContextMenuEventArgs, ControlImpl, Panel, PanelImpl, RichEditBox,
-    RichEditBoxSelectionChangingEventArgs,
+    RichEditBoxSelectionChangingEventArgs, RichTextBlock,
 };
 
 use crate::support::TypeModule;
@@ -215,6 +215,10 @@ ferro_class_info!(MyHost {
                 |this: &Ref<MyHost>, sender: Object, e: Rc<dyn IRoutedEventArgs>| {
                     this.on_rich_event(&sender, e.as_ref())
                 },
+            fn OnReadonlyContextMenuOpening(Option<BoxedValue>, Rc<dyn IRoutedEventArgs>) =>
+                |this: &Ref<MyHost>, sender: Object, e: Rc<dyn IRoutedEventArgs>| {
+                    this.on_readonly_context_menu_opening(&sender, e.as_ref())
+                },
         ],
         events: [
             // `event EventHandler Opening`, raised with cancellable arguments.
@@ -282,6 +286,14 @@ impl MyHost {
         let editor = from_markup_value::<Ref<RichEditBox>>(sender).expect("the handler receives the rich editor as sender");
         let args = e.downcast_ref::<ContextMenuEventArgs>().expect("the handler receives the live context-menu arguments");
         assert_eq!(args.source(), Some(editor.upcast()));
+        self.context_menu_positions.borrow_mut().push(Point::new(args.cursor_left(), args.cursor_top()));
+        args.set_handled(true);
+    }
+
+    pub fn on_readonly_context_menu_opening(&self, sender: &Object, e: &dyn IRoutedEventArgs) {
+        let display = from_markup_value::<Ref<RichTextBlock>>(sender).expect("the handler receives the read-only rich view as sender");
+        let args = e.downcast_ref::<ContextMenuEventArgs>().expect("the handler receives the live context-menu arguments");
+        assert_eq!(args.source(), Some(display.upcast()));
         self.context_menu_positions.borrow_mut().push(Point::new(args.cursor_left(), args.cursor_top()));
         args.set_handled(true);
     }
