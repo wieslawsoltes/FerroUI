@@ -77,6 +77,14 @@ struct CompositionExtras {
     /// `CenterPoint`, `TransformMatrix`) and the transitions (`OpacityTransition`,
     /// `RotationTransition`, `ScaleTransition`, `TranslationTransition`).
     facades: composition_facades::CompositionFacades,
+    /// `UIElement.Lights`: the XAML lights the element holds (winui-materials.md), and the
+    /// subscriptions that connect them while the element is in a visual tree.
+    lights: Option<FerroList<Ref<crate::media::XamlLight>>>,
+    lights_subscriptions: Vec<Rc<dyn IDisposable>>,
+    /// The ids of the XAML lights that target the element (`XamlLight.AddTargetElement`), and
+    /// the subscription that offers the element to those lights when it enters a tree.
+    light_target_ids: Vec<String>,
+    light_target_subscription: Option<Rc<dyn IDisposable>>,
 }
 
 mod composition_facades;
@@ -1023,6 +1031,62 @@ impl Visual {
 
     fn read_composition_extras<R>(&self, f: impl FnOnce(&CompositionExtras) -> R) -> Option<R> {
         self.composition_extras.borrow().as_deref().map(f)
+    }
+
+    /// `UIElement.Lights`: the XAML lights the element holds. A light added
+    /// to the collection is connected to the element (`OnConnected`) while
+    /// the element is in a visual tree, and lights the targets of its id in
+    /// the subtree of the element (winui-materials.md).
+    pub fn lights(&self) -> FerroList<Ref<crate::media::XamlLight>> {
+        if let Some(lights) = self.read_composition_extras(|extras| extras.lights.clone()).flatten() {
+            return lights;
+        }
+        let lights: FerroList<Ref<crate::media::XamlLight>> = FerroList::new();
+        let subscriptions = crate::media::xaml_light::track_lights(self, &lights);
+        self.with_composition_extras(|extras| {
+            extras.lights = Some(lights.clone());
+            extras.lights_subscriptions = subscriptions;
+        });
+        lights
+    }
+
+    /// Whether the element holds a lights collection.
+    pub fn has_lights(&self) -> bool {
+        self.read_composition_extras(|extras| extras.lights.as_ref().is_some_and(|lights| lights.count() > 0))
+            .unwrap_or(false)
+    }
+
+    /// The ids of the XAML lights that target the element.
+    pub fn light_target_ids(&self) -> Vec<String> {
+        self.read_composition_extras(|extras| extras.light_target_ids.clone()).unwrap_or_default()
+    }
+
+    /// Adds `id` to the ids of the XAML lights that target the element;
+    /// returns whether it was added.
+    pub(crate) fn add_light_target_id(&self, id: &str) -> bool {
+        let added = self.with_composition_extras(|extras| {
+            if extras.light_target_ids.iter().any(|existing| existing == id) {
+                return false;
+            }
+            extras.light_target_ids.push(id.to_owned());
+            true
+        });
+        if added && self.read_composition_extras(|extras| extras.light_target_subscription.is_none()).unwrap_or(true) {
+            let subscription = crate::media::xaml_light::track_light_target(self);
+            self.with_composition_extras(|extras| extras.light_target_subscription = Some(subscription));
+        }
+        added
+    }
+
+    /// Removes `id` from the ids of the XAML lights that target the element;
+    /// returns whether it was there.
+    pub(crate) fn remove_light_target_id(&self, id: &str) -> bool {
+        self.read_composition_extras(|extras| extras.light_target_ids.iter().any(|existing| existing == id))
+            .unwrap_or(false)
+            && self.with_composition_extras(|extras| {
+                extras.light_target_ids.retain(|existing| existing != id);
+                true
+            })
     }
 
     /// `UIElement.Translation`: the translation of the composition visual of the visual, applied

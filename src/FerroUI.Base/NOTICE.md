@@ -21,3 +21,7 @@ The two WenQuanYi Micro Hei files are licensed under the Apache License, Version
     http://www.apache.org/licenses/LICENSE-2.0
 
 Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language governing permissions and limitations under the License.
+
+## WinUI materials
+
+`media/acrylic_brush.rs`, `media/material_policy.rs`, `media/xaml_composition_brush_base.rs`, `media/xaml_light.rs` and `rendering/composition/system_backdrops.rs` are ported from microsoft-ui-xaml (<https://github.com/microsoft/microsoft-ui-xaml>, branch `winui3/main`, commit `7e4b0c2096be402f51cc8f7d203ebf67cff183d0`; MIT License, Copyright (c) Microsoft Corporation; see `docs/porting/winui-materials.md`). The noise texture `media/assets/noise_asset_256x256_png.png` is copied unmodified from `controls/dev/Materials/Acrylic/Assets/NoiseAsset_256X256_PNG.png` of the same commit, under the same license.

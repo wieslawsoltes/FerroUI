@@ -45,6 +45,7 @@ mod fps_counter;
 mod frame_time_graph;
 mod i_server_clock_item;
 mod readback_indices;
+mod render_scope;
 mod server_composition_simple_brush;
 mod server_composition_simple_geometry;
 mod server_composition_simple_transform;
@@ -67,6 +68,8 @@ pub use fps_counter::FpsCounter;
 pub use frame_time_graph::FrameTimeGraph;
 pub use i_server_clock_item::IServerClockItem;
 pub use readback_indices::{ReadbackIndices, ReadbackWriteScope};
+pub use render_scope::{brush_light_ids, draw_backdrop, painting_visual, MAX_BACKDROP_DEPTH};
+pub(crate) use render_scope::{is_self_or_ancestor, take_backdrop_regions, with_brush_light_ids};
 pub(crate) use server_composition_simple_brush::server_simple_brush;
 pub use server_composition_simple_brush::{
     ServerCompositionSimpleBrush, ServerCompositionSimpleConicGradientBrush, ServerCompositionSimpleGradientBrush,
@@ -130,6 +133,8 @@ pub use server_composition_light::{
     ServerLightState, ServerPointLight, ServerSpotLight, ServerVisualUnorderedCollection, LIGHT_MAP_CELL,
     LIGHT_MAP_MAX_CELLS,
 };
+pub use server_composition_light::{paint_scene_lighting, scene_light_map, SCENE_LIGHTING_DISTANCE_UNIT};
+pub(crate) use server_composition_light::XamlLightChanges;
 pub use server_loaded_image_surface::ServerLoadedImageSurface;
 pub use server_sprite_visual::ServerSpriteVisual;
 pub use server_layer_visual::{drop_shadow_effect, ServerLayerVisual};

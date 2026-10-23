@@ -218,3 +218,20 @@ mod tests {
         assert_eq!(dark, PlatformColorValues::new().with_theme_variant(PlatformThemeVariant::Dark).with_contrast_preference(ColorContrastPreference::High));
     }
 }
+
+/// The settings of the system that decide whether materials are drawn
+/// ([`IPlatformSettings::get_material_settings`](super::IPlatformSettings::get_material_settings)).
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
+pub struct PlatformMaterialSettings {
+    /// Whether the user lets windows be transparent (Windows: the
+    /// transparency effects setting; macOS: not reduce transparency).
+    pub transparency_effects_enabled: bool,
+    /// Whether the energy saver (battery saver, low power mode) is on.
+    pub energy_saver_on: bool,
+}
+
+impl Default for PlatformMaterialSettings {
+    fn default() -> Self {
+        Self { transparency_effects_enabled: true, energy_saver_on: false }
+    }
+}

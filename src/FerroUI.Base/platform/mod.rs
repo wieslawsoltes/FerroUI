@@ -104,7 +104,9 @@ mod platform_handle;
 pub use default_platform_settings::DefaultPlatformSettings;
 pub use i_mac_os_top_level_platform_handle::IMacOSTopLevelPlatformHandle;
 pub use i_platform_handle::IPlatformHandle;
-pub use platform_color_values::{AccentColorShades, ColorContrastPreference, PlatformColorValues, PlatformThemeVariant};
+pub use platform_color_values::{
+    AccentColorShades, ColorContrastPreference, PlatformColorValues, PlatformMaterialSettings, PlatformThemeVariant,
+};
 pub use platform_handle::PlatformHandle;
 pub use i_cursor_factory::ICursorFactory;
 pub use i_cursor_impl::ICursorImpl;
@@ -115,6 +117,7 @@ pub use i_platform_settings::IPlatformSettings;
 mod asset_loader;
 mod i_asset_loader;
 mod i_drawing_context_impl_with_effects;
+mod i_drawing_context_impl_with_layer_effects;
 mod i_drawing_context_impl_with_fragments;
 mod i_drawing_context_with_acrylic_like_support;
 mod internal;
@@ -129,6 +132,7 @@ pub use i_runtime_platform::{FormFactorType, IRuntimePlatform, RuntimePlatformIn
 pub use standard_runtime_platform::StandardRuntimePlatform;
 pub use standard_runtime_platform_services::StandardRuntimePlatformServices;
 pub use i_drawing_context_impl_with_effects::IDrawingContextImplWithEffects;
+pub use i_drawing_context_impl_with_layer_effects::IDrawingContextImplWithLayerEffects;
 pub use i_drawing_context_impl_with_fragments::{IDrawingContextImplWithFragments, IDrawingFragment};
 pub use i_drawing_context_with_acrylic_like_support::IDrawingContextWithAcrylicLikeSupport;
 pub use internal::{register_assets, register_manifest_resources};

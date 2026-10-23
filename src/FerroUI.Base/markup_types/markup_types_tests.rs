@@ -99,9 +99,10 @@ line.starts_with("ferro_markup_type!(") || line.starts_with("ferro_markup_enum!(
         })
         .count();
     let types = declared_types();
-    // `Decimal`, `NumberStyles` and `TextLineBounds` (a FerroUI addition) declare their
-    // metadata next to the type and are registered with the values.
-    assert_eq!(types.len(), declared + 3);
+    // `Decimal`, `NumberStyles`, `TextLineBounds` (a FerroUI addition) and the three
+    // enums of the system backdrops declare their metadata next to the type and are
+    // registered with the values.
+    assert_eq!(types.len(), declared + 6);
 
     for type_ in &types {
         let found = MarkupType::find(type_.namespace(), type_.name)

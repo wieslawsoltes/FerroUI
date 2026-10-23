@@ -540,6 +540,19 @@ fn enabled_lights() -> Vec<Rc<dyn IServerCompositionLight>> {
         .unwrap_or_default()
 }
 
+/// The lights of this thread that are alive and not disposed, enabled or
+/// not.
+fn live_lights() -> Vec<Rc<dyn IServerCompositionLight>> {
+    LIGHTS
+        .try_with(|lights| {
+            lights.try_borrow().map_or_else(
+                |_| Vec::new(),
+                |lights| lights.iter().filter_map(Weak::upgrade).filter(|light| !light.is_disposed()).collect(),
+            )
+        })
+        .unwrap_or_default()
+}
+
 /// The transform from the coordinates of `visual` to those of the root of
 /// its tree: its own transform and those of its ancestors.
 fn to_root(visual: &ServerCompositionVisual) -> Matrix {
@@ -611,6 +624,20 @@ impl IServerRenderResourceObserver for LightObserver {
 pub struct ServerLightState {
     observer: RefCell<Option<Rc<dyn IServerRenderResourceObserver>>>,
     lit_targets: RefCell<Vec<Weak<ServerCompositionVisual>>>,
+    /// The id of the XAML light the light belongs to and the visual of the
+    /// element that holds it: the light lights the XAML brushes targeted by
+    /// that id in the subtree of that visual (winui-materials.md).
+    xaml_binding: RefCell<Option<(String, Option<Weak<ServerCompositionVisual>>)>>,
+    /// The visuals whose brushes the light was offered to by a scene
+    /// lighting effect: drawn again when the light changes.
+    brush_lit: RefCell<Vec<Weak<ServerCompositionVisual>>>,
+}
+
+/// The XAML part of a light that a batch carries (see
+/// `CompositionLight::set_xaml_binding`).
+pub(crate) struct XamlLightChanges {
+    pub(crate) id: Option<String>,
+    pub(crate) scope: Option<super::ServerObjectId>,
 }
 
 impl ServerLightState {
@@ -620,6 +647,29 @@ impl ServerLightState {
         base.core().add_observer(&observer);
         *state.observer.borrow_mut() = Some(observer);
         register_light(light);
+    }
+
+    /// The id of the XAML light and the visual of the element that holds
+    /// it, when the light belongs to a XAML light.
+    pub fn xaml_binding(&self) -> Option<(String, Option<Rc<ServerCompositionVisual>>)> {
+        self.xaml_binding
+            .borrow()
+            .as_ref()
+            .map(|(id, scope)| (id.clone(), scope.as_ref().and_then(Weak::upgrade)))
+    }
+
+    fn set_xaml_binding(&self, id: Option<String>, scope: Option<Rc<ServerCompositionVisual>>) {
+        *self.xaml_binding.borrow_mut() = id.map(|id| (id, scope.as_ref().map(Rc::downgrade)));
+    }
+
+    /// Records that a scene lighting effect painted in `visual` was offered
+    /// the light.
+    fn note_brush_lit(&self, visual: &Rc<ServerCompositionVisual>) {
+        let mut brush_lit = self.brush_lit.borrow_mut();
+        brush_lit.retain(|existing| existing.strong_count() > 0);
+        if !brush_lit.iter().any(|existing| std::ptr::eq(existing.as_ptr(), Rc::as_ptr(visual))) {
+            brush_lit.push(Rc::downgrade(visual));
+        }
     }
 
     /// The targets the light lit when it last changed.
@@ -641,6 +691,12 @@ impl ServerLightState {
             invalidate_subtree(&visual);
         }
         *self.lit_targets.borrow_mut() = current.iter().map(Rc::downgrade).collect();
+        // The brushes the light was offered to are drawn again, alone: their
+        // visuals, not the subtrees.
+        let brush_lit: Vec<_> = self.brush_lit.borrow().iter().filter_map(Weak::upgrade).collect();
+        for visual in brush_lit {
+            visual.invalidate_content();
+        }
     }
 
     /// The light is disposed: what it lit is drawn without it.
@@ -648,6 +704,9 @@ impl ServerLightState {
         let previous = std::mem::take(&mut *self.lit_targets.borrow_mut());
         for visual in previous.iter().filter_map(Weak::upgrade) {
             invalidate_subtree(&visual);
+        }
+        for visual in std::mem::take(&mut *self.brush_lit.borrow_mut()).iter().filter_map(Weak::upgrade) {
+            visual.invalidate_content();
         }
         self.observer.borrow_mut().take();
     }
@@ -748,6 +807,12 @@ macro_rules! server_light {
         impl IServerObject for $name {
             fn deserialize_changes_core(&self, reader: &mut BatchStreamReader<'_>, committed_at: Duration) {
                 self.props.deserialize_changes_core(self, reader, committed_at);
+                if let Some(changes) = reader.read_value::<XamlLightChanges>() {
+                    let compositor = self.base.compositor();
+                    let scope = changes.scope.and_then(|id| compositor.as_ref().and_then(|compositor| compositor.get_object(id)));
+                    self.state.set_xaml_binding(changes.id, visual_of(scope));
+                    self.base.core().invalidated(self);
+                }
             }
 
             fn values_invalidated(&self) {
@@ -902,5 +967,135 @@ impl LitContent {
         canvas.draw_bitmap(&*self.bitmap, 1.0, source, self.rect);
         canvas.pop_render_options();
         canvas.pop_layer();
+    }
+}
+
+// --- scene lighting (winui-materials.md) -----------------------------------------------
+
+/// The unit of the distances of the attenuation of the scene lighting
+/// effect, in device independent pixels.
+///
+/// Deviation (winui-materials.md): WinUI does not say in which unit the
+/// attenuation of a light is computed; with the constants of Reveal
+/// (constant 2, linear 0.5, a light 256 above the visual) only a unit of a
+/// hundred pixels gives the light WinUI shows, so the scene lighting uses
+/// it. The lighting of the content of a visual keeps pixels.
+pub const SCENE_LIGHTING_DISTANCE_UNIT: f64 = 100.0;
+
+impl LightAttenuation {
+    /// The attenuation with distances measured in units of `unit` pixels.
+    fn in_units_of(self, unit: f64) -> LightAttenuation {
+        LightAttenuation { linear: self.linear / unit, quadratic: self.quadratic / (unit * unit), ..self }
+    }
+}
+
+impl LightSource {
+    /// The light with its attenuation in units of `unit` pixels.
+    fn with_distance_unit(self, unit: f64) -> LightSource {
+        match self {
+            LightSource::Point { color, position, attenuation } => {
+                LightSource::Point { color, position, attenuation: attenuation.in_units_of(unit) }
+            }
+            LightSource::Spot { inner_color, outer_color, position, direction, inner_cone_angle, outer_cone_angle, attenuation } => {
+                LightSource::Spot {
+                    inner_color,
+                    outer_color,
+                    position,
+                    direction,
+                    inner_cone_angle,
+                    outer_cone_angle,
+                    attenuation: attenuation.in_units_of(unit),
+                }
+            }
+            other => other,
+        }
+    }
+}
+
+impl LightMap {
+    /// The opaque RGBA pixels (row by row from the top) of the lighting of
+    /// a scene lighting effect over `rect` at `size`: the ambient lights
+    /// times `ambient_amount` plus the other lights times `diffuse_amount`,
+    /// clamped to 1, at the centre of each cell.
+    pub fn scene_pixels(&self, rect: Rect, size: PixelSize, ambient_amount: f64, diffuse_amount: f64) -> Vec<u8> {
+        let (columns, rows) = (size.width.max(1), size.height.max(1));
+        let mut pixels = Vec::with_capacity((columns * rows * 4) as usize);
+        for row in 0..rows {
+            let y = rect.y + (row as f64 + 0.5) * rect.height / rows as f64;
+            for column in 0..columns {
+                let x = rect.x + (column as f64 + 0.5) * rect.width / columns as f64;
+                let point = Point::new(x, y);
+                let mut light = LightColor::BLACK;
+                for (source, to_light_space) in &self.lights {
+                    let amount = if matches!(source, LightSource::Ambient { .. }) { ambient_amount } else { diffuse_amount };
+                    light = light.add(source.light_at(to_light_space.transform(point)).scale(amount));
+                }
+                let light = light.clamped();
+                let channel = |value: f64| (value * 255.0).round().clamp(0.0, 255.0) as u8;
+                pixels.extend_from_slice(&[channel(light.r), channel(light.g), channel(light.b), 255]);
+            }
+        }
+        pixels
+    }
+}
+
+/// The lights a scene lighting effect painted in `visual` receives: the
+/// composition lights that target the visual (or an ancestor), and the
+/// lights of XAML lights whose id is one of `brush_light_ids` and whose
+/// element holds the visual. The light map is in the coordinates of the
+/// visual, with the attenuation in units of
+/// [`SCENE_LIGHTING_DISTANCE_UNIT`]. Every such light, enabled or not,
+/// remembers the visual, which it draws again when it changes.
+pub fn scene_light_map(visual: &Rc<ServerCompositionVisual>, brush_light_ids: &[String]) -> LightMap {
+    let mut map = LightMap::new();
+    let mut visual_to_root: Option<Matrix> = None;
+    for light in live_lights() {
+        let space = if let Some(target) = light.target_of(visual) {
+            light.coordinate_space().unwrap_or(target)
+        } else if let Some((id, Some(scope))) = light.light_state().xaml_binding() {
+            if !brush_light_ids.iter().any(|existing| *existing == id) || !super::is_self_or_ancestor(&scope, visual) {
+                continue;
+            }
+            light.light_state().note_brush_lit(visual);
+            light.coordinate_space().unwrap_or(scope)
+        } else {
+            continue;
+        };
+        if !light.light_props().is_enabled() {
+            continue;
+        }
+        let to_root_of_visual = *visual_to_root.get_or_insert_with(|| to_root(visual));
+        let Some(from_root_to_space) = to_root(&space).try_invert() else { continue };
+        map.add(light.source().with_distance_unit(SCENE_LIGHTING_DISTANCE_UNIT), to_root_of_visual * from_root_to_space);
+    }
+    map
+}
+
+/// Paints the lighting of a scene lighting effect over `rect` (in the
+/// coordinates of `canvas`) for the visual being drawn and the XAML brush
+/// being painted: an opaque light map, black where no light shines.
+pub fn paint_scene_lighting(canvas: &mut dyn IDrawingContextImpl, rect: Rect, ambient_amount: f64, diffuse_amount: f64) {
+    if rect.width <= 0.0 || rect.height <= 0.0 {
+        return;
+    }
+    let Some(visual) = super::painting_visual() else { return };
+    let ids = super::brush_light_ids();
+    let map = scene_light_map(&visual, &ids);
+    let size = LightMap::size_for(rect);
+    let pixels = map.scene_pixels(rect, size, ambient_amount, diffuse_amount);
+    let Some(compositor) = visual.compositor() else { return };
+    let bitmap = compositor.render_interface().with_platform_render_interface(|render_interface| {
+        render_interface.load_bitmap_from_pixels(
+            PixelFormats::RGBA8888,
+            AlphaFormat::Premul,
+            &pixels,
+            size,
+            Vector::new(96.0, 96.0),
+            size.width * 4,
+        )
+    });
+    if let Some(bitmap) = bitmap {
+        let source = Rect::new(0.0, 0.0, size.width as f64, size.height as f64);
+        canvas.draw_bitmap(&*bitmap, 1.0, source, rect);
     }
 }
