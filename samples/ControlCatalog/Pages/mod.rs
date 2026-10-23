@@ -59,6 +59,7 @@ mod relative_panel_page;
 mod screen_page;
 mod winui_composition_page;
 mod winui_composition_phases;
+mod winui_materials_page;
 mod section_page;
 mod settings_page;
 mod slider_page;
@@ -205,6 +206,7 @@ pub use winui_composition_page::{
     winui_composition_page,
 };
 pub use winui_composition_phases::{smoke_expand_sections, smoke_show_section};
+pub use winui_materials_page::{smoke_set_materials_backdrop, winui_materials_page};
 pub use scroll_viewer_page::{ScrollViewerPage, ScrollViewerPageViewModel};
 pub use section_page::SectionPage;
 pub use settings_page::SettingsPage;

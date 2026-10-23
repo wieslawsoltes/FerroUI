@@ -119,6 +119,11 @@ pub fn phase_sections() -> Vec<Ref<StackPanel>> {
             "CompositionEffectFactory and CompositionEffectBrush for the effects of the port: GaussianBlurEffect, OpacityEffect, CrossFadeEffect, CompositeEffect and ColorSourceEffect, over a LoadedImageSurface.",
             effects_demo,
         ),
+        lazy_section(
+            "Reveal and XAML lights",
+            "RevealBackgroundBrush and RevealBorderBrush lit by the XAML lights of WinUI: RevealBrush.State (set here by the pointer) gives the element a RevealHoverLight and a RevealPressLight in its Lights, and the window's RevealBorderLight lights the borders near the pointer. More on the page Materials (WinUI).",
+            reveal_demo,
+        ),
     ]
 }
 
@@ -1235,4 +1240,20 @@ fn effects_demo() -> Demo {
     content.children().add(grid);
     let smoke: SmokeAction = Rc::new(move || blur_slider.set_range_value(8.0));
     Demo { content: content.upcast(), smoke }
+}
+
+// --- Reveal --------------------------------------------------------------------------------
+
+fn reveal_demo() -> Demo {
+    let surface = Border::new();
+    surface.set_padding(Thickness::uniform(12.0));
+    surface.set_corner_radius(CornerRadius::uniform(8.0));
+    surface.set_background(Some(brush(DARK)));
+    let tiles = row(8.0);
+    for name in ["Reveal", "Hover", "Press"] {
+        tiles.children().add(super::winui_materials_page::reveal_tile(name));
+    }
+    surface.set_child(tiles);
+    let smoke: SmokeAction = Rc::new(|| {});
+    Demo { content: surface.upcast(), smoke }
 }
