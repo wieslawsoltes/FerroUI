@@ -1,0 +1,307 @@
+<!--
+  Ported from microsoft-ui-xaml (https://github.com/microsoft/microsoft-ui-xaml),
+  commit 7e4b0c2096be402f51cc8f7d203ebf67cff183d0:
+    controls/dev/Materials/Reveal/RevealBrush_themeresources.xaml (the styles ButtonRevealStyle,
+    RepeatButtonRevealStyle and ToggleButtonRevealStyle; their resources are
+    Resources/RevealBrush_themeresources.xaml)
+  Copyright (c) Microsoft Corporation. Licensed under the MIT License (see NOTICE.md of the crate).
+
+  Translation notes (docs/porting/winui-theme.md, section 4; docs/porting/winui-materials.md):
+  - The visual states are pseudo-class styles: PointerOver is :pointerover, Pressed is :pressed,
+    Disabled is :disabled, and the checked and indeterminate states of the toggle button combine
+    :checked and :indeterminate with them, in the order of the source.
+  - The setters of RevealBrush.State (revealBrushPresent:Setter Target="RootGrid.(media:RevealBrush.State)")
+    set the attached property RevealBrush.State of the border RootGrid (the Grid RootGrid of the
+    source, which has a background and a corner radius), which gives it the Reveal hover and press
+    lights; its background is the Reveal background brush, the border of the content presenter
+    the Reveal border brush.
+  - The PointerUpThemeAnimation and PointerDownThemeAnimation of the states, ContentTransitions
+    and UseSystemFocusVisuals have no counterpart; the focus visual with FocusVisualMargin="-3" is
+    the FocusAdorner, as for Button.
+-->
+<ResourceDictionary xmlns="https://github.com/ferroui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    x:ClassModifier="internal">
+  <Design.PreviewWith>
+    <Border Padding="20" Background="#202020">
+      <StackPanel Spacing="12">
+        <Button Theme="{StaticResource ButtonRevealStyle}" Content="Reveal button" />
+        <RepeatButton Theme="{StaticResource RepeatButtonRevealStyle}" Content="Reveal repeat button" />
+        <ToggleButton Theme="{StaticResource ToggleButtonRevealStyle}" Content="Reveal toggle button" />
+      </StackPanel>
+    </Border>
+  </Design.PreviewWith>
+
+  <ControlTheme x:Key="ButtonRevealStyle" TargetType="Button">
+    <Setter Property="HorizontalContentAlignment" Value="Center" />
+    <Setter Property="VerticalContentAlignment" Value="Center" />
+    <Setter Property="Background" Value="{DynamicResource ButtonRevealBackground}" />
+    <Setter Property="Foreground" Value="{DynamicResource ButtonForeground}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource ButtonRevealBorderBrush}" />
+    <Setter Property="BorderThickness" Value="{DynamicResource ButtonRevealBorderThemeThickness}" />
+    <Setter Property="Padding" Value="{StaticResource ButtonPadding}" />
+    <Setter Property="HorizontalAlignment" Value="Left" />
+    <Setter Property="VerticalAlignment" Value="Center" />
+    <Setter Property="FontFamily" Value="{DynamicResource ContentControlThemeFontFamily}" />
+    <Setter Property="FontWeight" Value="Normal" />
+    <Setter Property="FontSize" Value="{DynamicResource ControlContentThemeFontSize}" />
+    <Setter Property="CornerRadius" Value="{DynamicResource ControlCornerRadius}" />
+    <Setter Property="FocusAdorner">
+      <FocusAdornerTemplate>
+        <Border Margin="-3"
+                BorderThickness="2"
+                BorderBrush="{DynamicResource SystemControlFocusVisualPrimaryBrush}"
+                CornerRadius="{DynamicResource ControlCornerRadius}">
+          <Border BorderThickness="1"
+                  BorderBrush="{DynamicResource SystemControlFocusVisualSecondaryBrush}"
+                  CornerRadius="{DynamicResource ControlCornerRadius}" />
+        </Border>
+      </FocusAdornerTemplate>
+    </Setter>
+    <Setter Property="Template">
+      <ControlTemplate>
+        <Border x:Name="RootGrid"
+                Background="{TemplateBinding Background}"
+                CornerRadius="{TemplateBinding CornerRadius}">
+          <ContentPresenter x:Name="PART_ContentPresenter"
+                            Foreground="{TemplateBinding Foreground}"
+                            BorderBrush="{TemplateBinding BorderBrush}"
+                            BorderThickness="{TemplateBinding BorderThickness}"
+                            Content="{TemplateBinding Content}"
+                            ContentTemplate="{TemplateBinding ContentTemplate}"
+                            CornerRadius="{TemplateBinding CornerRadius}"
+                            Padding="{TemplateBinding Padding}"
+                            HorizontalContentAlignment="{TemplateBinding HorizontalContentAlignment}"
+                            VerticalContentAlignment="{TemplateBinding VerticalContentAlignment}"
+                            RecognizesAccessKey="True" />
+        </Border>
+      </ControlTemplate>
+    </Setter>
+
+    <Style Selector="^:pointerover /template/ Border#RootGrid">
+      <Setter Property="RevealBrush.State" Value="PointerOver" />
+      <Setter Property="Background" Value="{DynamicResource ButtonRevealBackgroundPointerOver}" />
+    </Style>
+    <Style Selector="^:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+      <Setter Property="BorderBrush" Value="{DynamicResource ButtonRevealBorderBrushPointerOver}" />
+      <Setter Property="Foreground" Value="{DynamicResource ButtonForegroundPointerOver}" />
+    </Style>
+    <Style Selector="^:pressed /template/ Border#RootGrid">
+      <Setter Property="RevealBrush.State" Value="Pressed" />
+      <Setter Property="Background" Value="{DynamicResource ButtonRevealBackgroundPressed}" />
+    </Style>
+    <Style Selector="^:pressed /template/ ContentPresenter#PART_ContentPresenter">
+      <Setter Property="BorderBrush" Value="{DynamicResource ButtonRevealBorderBrushPressed}" />
+      <Setter Property="Foreground" Value="{DynamicResource ButtonForegroundPressed}" />
+    </Style>
+    <Style Selector="^:disabled /template/ Border#RootGrid">
+      <Setter Property="Background" Value="{DynamicResource ButtonRevealBackgroundDisabled}" />
+    </Style>
+    <Style Selector="^:disabled /template/ ContentPresenter#PART_ContentPresenter">
+      <Setter Property="BorderBrush" Value="{DynamicResource ButtonRevealBorderBrushDisabled}" />
+      <Setter Property="Foreground" Value="{DynamicResource ButtonForegroundDisabled}" />
+    </Style>
+  </ControlTheme>
+
+  <ControlTheme x:Key="RepeatButtonRevealStyle" TargetType="RepeatButton">
+    <Setter Property="HorizontalContentAlignment" Value="Center" />
+    <Setter Property="VerticalContentAlignment" Value="Center" />
+    <Setter Property="Background" Value="{DynamicResource RepeatButtonRevealBackground}" />
+    <Setter Property="Foreground" Value="{DynamicResource RepeatButtonForeground}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource RepeatButtonRevealBorderBrush}" />
+    <Setter Property="BorderThickness" Value="{DynamicResource RepeatButtonRevealBorderThemeThickness}" />
+    <Setter Property="Padding" Value="{StaticResource ButtonPadding}" />
+    <Setter Property="HorizontalAlignment" Value="Left" />
+    <Setter Property="VerticalAlignment" Value="Center" />
+    <Setter Property="FontFamily" Value="{DynamicResource ContentControlThemeFontFamily}" />
+    <Setter Property="FontWeight" Value="Normal" />
+    <Setter Property="FontSize" Value="{DynamicResource ControlContentThemeFontSize}" />
+    <Setter Property="CornerRadius" Value="{DynamicResource ControlCornerRadius}" />
+    <Setter Property="FocusAdorner">
+      <FocusAdornerTemplate>
+        <Border Margin="-3"
+                BorderThickness="2"
+                BorderBrush="{DynamicResource SystemControlFocusVisualPrimaryBrush}"
+                CornerRadius="{DynamicResource ControlCornerRadius}">
+          <Border BorderThickness="1"
+                  BorderBrush="{DynamicResource SystemControlFocusVisualSecondaryBrush}"
+                  CornerRadius="{DynamicResource ControlCornerRadius}" />
+        </Border>
+      </FocusAdornerTemplate>
+    </Setter>
+    <Setter Property="Template">
+      <ControlTemplate>
+        <Border x:Name="RootGrid"
+                Background="{TemplateBinding Background}"
+                CornerRadius="{TemplateBinding CornerRadius}">
+          <ContentPresenter x:Name="PART_ContentPresenter"
+                            Foreground="{TemplateBinding Foreground}"
+                            BorderBrush="{TemplateBinding BorderBrush}"
+                            BorderThickness="{TemplateBinding BorderThickness}"
+                            Content="{TemplateBinding Content}"
+                            ContentTemplate="{TemplateBinding ContentTemplate}"
+                            CornerRadius="{TemplateBinding CornerRadius}"
+                            Padding="{TemplateBinding Padding}"
+                            HorizontalContentAlignment="{TemplateBinding HorizontalContentAlignment}"
+                            VerticalContentAlignment="{TemplateBinding VerticalContentAlignment}"
+                            RecognizesAccessKey="True" />
+        </Border>
+      </ControlTemplate>
+    </Setter>
+
+    <Style Selector="^:pointerover /template/ Border#RootGrid">
+      <Setter Property="RevealBrush.State" Value="PointerOver" />
+      <Setter Property="Background" Value="{DynamicResource RepeatButtonRevealBackgroundPointerOver}" />
+    </Style>
+    <Style Selector="^:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+      <Setter Property="BorderBrush" Value="{DynamicResource RepeatButtonRevealBorderBrushPointerOver}" />
+      <Setter Property="Foreground" Value="{DynamicResource RepeatButtonForegroundPointerOver}" />
+    </Style>
+    <Style Selector="^:pressed /template/ Border#RootGrid">
+      <Setter Property="RevealBrush.State" Value="Pressed" />
+      <Setter Property="Background" Value="{DynamicResource RepeatButtonRevealBackgroundPressed}" />
+    </Style>
+    <Style Selector="^:pressed /template/ ContentPresenter#PART_ContentPresenter">
+      <Setter Property="BorderBrush" Value="{DynamicResource RepeatButtonRevealBorderBrushPressed}" />
+      <Setter Property="Foreground" Value="{DynamicResource RepeatButtonForegroundPressed}" />
+    </Style>
+    <Style Selector="^:disabled /template/ Border#RootGrid">
+      <Setter Property="Background" Value="{DynamicResource RepeatButtonRevealBackgroundDisabled}" />
+    </Style>
+    <Style Selector="^:disabled /template/ ContentPresenter#PART_ContentPresenter">
+      <Setter Property="BorderBrush" Value="{DynamicResource RepeatButtonRevealBorderBrushDisabled}" />
+      <Setter Property="Foreground" Value="{DynamicResource RepeatButtonForegroundDisabled}" />
+    </Style>
+  </ControlTheme>
+
+  <ControlTheme x:Key="ToggleButtonRevealStyle" TargetType="ToggleButton">
+    <Setter Property="HorizontalContentAlignment" Value="Center" />
+    <Setter Property="VerticalContentAlignment" Value="Center" />
+    <Setter Property="Background" Value="{DynamicResource ToggleButtonRevealBackground}" />
+    <Setter Property="Foreground" Value="{DynamicResource ToggleButtonForeground}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource ToggleButtonRevealBorderBrush}" />
+    <Setter Property="BorderThickness" Value="{DynamicResource ToggleButtonRevealBorderThemeThickness}" />
+    <Setter Property="Padding" Value="{StaticResource ButtonPadding}" />
+    <Setter Property="HorizontalAlignment" Value="Left" />
+    <Setter Property="VerticalAlignment" Value="Center" />
+    <Setter Property="FontFamily" Value="{DynamicResource ContentControlThemeFontFamily}" />
+    <Setter Property="FontWeight" Value="Normal" />
+    <Setter Property="FontSize" Value="{DynamicResource ControlContentThemeFontSize}" />
+    <Setter Property="CornerRadius" Value="{DynamicResource ControlCornerRadius}" />
+    <Setter Property="FocusAdorner">
+      <FocusAdornerTemplate>
+        <Border Margin="-3"
+                BorderThickness="2"
+                BorderBrush="{DynamicResource SystemControlFocusVisualPrimaryBrush}"
+                CornerRadius="{DynamicResource ControlCornerRadius}">
+          <Border BorderThickness="1"
+                  BorderBrush="{DynamicResource SystemControlFocusVisualSecondaryBrush}"
+                  CornerRadius="{DynamicResource ControlCornerRadius}" />
+        </Border>
+      </FocusAdornerTemplate>
+    </Setter>
+    <Setter Property="Template">
+      <ControlTemplate>
+        <Border x:Name="RootGrid"
+                Background="{TemplateBinding Background}"
+                CornerRadius="{TemplateBinding CornerRadius}">
+          <ContentPresenter x:Name="PART_ContentPresenter"
+                            Foreground="{TemplateBinding Foreground}"
+                            BorderBrush="{TemplateBinding BorderBrush}"
+                            BorderThickness="{TemplateBinding BorderThickness}"
+                            Content="{TemplateBinding Content}"
+                            ContentTemplate="{TemplateBinding ContentTemplate}"
+                            CornerRadius="{TemplateBinding CornerRadius}"
+                            Padding="{TemplateBinding Padding}"
+                            HorizontalContentAlignment="{TemplateBinding HorizontalContentAlignment}"
+                            VerticalContentAlignment="{TemplateBinding VerticalContentAlignment}"
+                            RecognizesAccessKey="True" />
+        </Border>
+      </ControlTemplate>
+    </Setter>
+
+    <Style Selector="^:pointerover /template/ Border#RootGrid">
+      <Setter Property="RevealBrush.State" Value="PointerOver" />
+      <Setter Property="Background" Value="{DynamicResource ToggleButtonRevealBackgroundPointerOver}" />
+    </Style>
+    <Style Selector="^:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+      <Setter Property="BorderBrush" Value="{DynamicResource ToggleButtonRevealBorderBrushPointerOver}" />
+      <Setter Property="Foreground" Value="{DynamicResource ToggleButtonForegroundPointerOver}" />
+    </Style>
+    <Style Selector="^:pressed /template/ Border#RootGrid">
+      <Setter Property="RevealBrush.State" Value="Pressed" />
+      <Setter Property="Background" Value="{DynamicResource ToggleButtonRevealBackgroundPressed}" />
+    </Style>
+    <Style Selector="^:pressed /template/ ContentPresenter#PART_ContentPresenter">
+      <Setter Property="BorderBrush" Value="{DynamicResource ToggleButtonRevealBorderBrushPressed}" />
+      <Setter Property="Foreground" Value="{DynamicResource ToggleButtonForegroundPressed}" />
+    </Style>
+    <Style Selector="^:disabled /template/ Border#RootGrid">
+      <Setter Property="Background" Value="{DynamicResource ToggleButtonRevealBackgroundDisabled}" />
+    </Style>
+    <Style Selector="^:disabled /template/ ContentPresenter#PART_ContentPresenter">
+      <Setter Property="BorderBrush" Value="{DynamicResource ToggleButtonRevealBorderBrushDisabled}" />
+      <Setter Property="Foreground" Value="{DynamicResource ToggleButtonForegroundDisabled}" />
+    </Style>
+    <Style Selector="^:checked /template/ Border#RootGrid">
+      <Setter Property="Background" Value="{DynamicResource ToggleButtonRevealBackgroundChecked}" />
+    </Style>
+    <Style Selector="^:checked /template/ ContentPresenter#PART_ContentPresenter">
+      <Setter Property="BorderBrush" Value="{DynamicResource ToggleButtonRevealBorderBrushChecked}" />
+      <Setter Property="Foreground" Value="{DynamicResource ToggleButtonForegroundChecked}" />
+    </Style>
+    <Style Selector="^:checked:pointerover /template/ Border#RootGrid">
+      <Setter Property="RevealBrush.State" Value="PointerOver" />
+      <Setter Property="Background" Value="{DynamicResource ToggleButtonRevealBackgroundCheckedPointerOver}" />
+    </Style>
+    <Style Selector="^:checked:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+      <Setter Property="BorderBrush" Value="{DynamicResource ToggleButtonRevealBorderBrushCheckedPointerOver}" />
+      <Setter Property="Foreground" Value="{DynamicResource ToggleButtonForegroundCheckedPointerOver}" />
+    </Style>
+    <Style Selector="^:checked:pressed /template/ Border#RootGrid">
+      <Setter Property="RevealBrush.State" Value="Pressed" />
+      <Setter Property="Background" Value="{DynamicResource ToggleButtonRevealBackgroundCheckedPressed}" />
+    </Style>
+    <Style Selector="^:checked:pressed /template/ ContentPresenter#PART_ContentPresenter">
+      <Setter Property="BorderBrush" Value="{DynamicResource ToggleButtonRevealBorderBrushCheckedPressed}" />
+      <Setter Property="Foreground" Value="{DynamicResource ToggleButtonForegroundCheckedPressed}" />
+    </Style>
+    <Style Selector="^:checked:disabled /template/ Border#RootGrid">
+      <Setter Property="Background" Value="{DynamicResource ToggleButtonRevealBackgroundCheckedDisabled}" />
+    </Style>
+    <Style Selector="^:checked:disabled /template/ ContentPresenter#PART_ContentPresenter">
+      <Setter Property="BorderBrush" Value="{DynamicResource ToggleButtonRevealBorderBrushCheckedDisabled}" />
+      <Setter Property="Foreground" Value="{DynamicResource ToggleButtonForegroundCheckedDisabled}" />
+    </Style>
+    <Style Selector="^:indeterminate /template/ Border#RootGrid">
+      <Setter Property="Background" Value="{DynamicResource ToggleButtonRevealBackgroundIndeterminate}" />
+    </Style>
+    <Style Selector="^:indeterminate /template/ ContentPresenter#PART_ContentPresenter">
+      <Setter Property="BorderBrush" Value="{DynamicResource ToggleButtonRevealBorderBrushIndeterminate}" />
+      <Setter Property="Foreground" Value="{DynamicResource ToggleButtonForegroundIndeterminate}" />
+    </Style>
+    <Style Selector="^:indeterminate:pointerover /template/ Border#RootGrid">
+      <Setter Property="RevealBrush.State" Value="PointerOver" />
+      <Setter Property="Background" Value="{DynamicResource ToggleButtonRevealBackgroundIndeterminatePointerOver}" />
+    </Style>
+    <Style Selector="^:indeterminate:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+      <Setter Property="BorderBrush" Value="{DynamicResource ToggleButtonRevealBorderBrushIndeterminatePointerOver}" />
+      <Setter Property="Foreground" Value="{DynamicResource ToggleButtonForegroundIndeterminatePointerOver}" />
+    </Style>
+    <Style Selector="^:indeterminate:pressed /template/ Border#RootGrid">
+      <Setter Property="RevealBrush.State" Value="Pressed" />
+      <Setter Property="Background" Value="{DynamicResource ToggleButtonRevealBackgroundIndeterminatePressed}" />
+    </Style>
+    <Style Selector="^:indeterminate:pressed /template/ ContentPresenter#PART_ContentPresenter">
+      <Setter Property="BorderBrush" Value="{DynamicResource ToggleButtonRevealBorderBrushIndeterminatePressed}" />
+      <Setter Property="Foreground" Value="{DynamicResource ToggleButtonForegroundIndeterminatePressed}" />
+    </Style>
+    <Style Selector="^:indeterminate:disabled /template/ Border#RootGrid">
+      <Setter Property="Background" Value="{DynamicResource ToggleButtonRevealBackgroundIndeterminateDisabled}" />
+    </Style>
+    <Style Selector="^:indeterminate:disabled /template/ ContentPresenter#PART_ContentPresenter">
+      <Setter Property="BorderBrush" Value="{DynamicResource ToggleButtonRevealBorderBrushIndeterminateDisabled}" />
+      <Setter Property="Foreground" Value="{DynamicResource ToggleButtonForegroundIndeterminateDisabled}" />
+    </Style>
+  </ControlTheme>
+</ResourceDictionary>

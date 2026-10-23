@@ -8,13 +8,13 @@
     },
     {
       "document": "controls/dev/Materials/Reveal/RevealBrush_themeresources.xaml",
-      "key": "re:(?!(SystemControl\\w*Reveal\\w*(Background|Border)Brush|SystemReveal\\w*Color|CommandBarMoreButtonMargin|AppBarButtonContentHeight)$).*",
-      "reason": "The resources of the Reveal styles (the aliases ButtonRevealBackground and the like, the Reveal thicknesses and paddings): their styles are not ported (see the Reveal styles). The Reveal brushes and colours are ported as FerroUI's Reveal brushes (docs/porting/winui-materials.md), and two keys of the document that are not Reveal resources: CommandBarMoreButtonMargin and AppBarButtonContentHeight, the last definitions of two values of generic.xaml that the CommandBar and AppBarButton templates name."
+      "key": "re:(?!(SystemControl\\w*Reveal\\w*(Background|Border)Brush|SystemReveal\\w*Color|(Button|RepeatButton|ToggleButton)Reveal\\w*|CommandBarMoreButtonMargin|AppBarButtonContentHeight)$).*",
+      "reason": "The resources of the Reveal styles that are not ported (the aliases ListViewItemRevealBackground and the like, the Reveal thicknesses and paddings; see the Reveal styles). The resources of ButtonRevealStyle, RepeatButtonRevealStyle and ToggleButtonRevealStyle, which are ported (Controls/RevealStyles.xaml), are kept. The Reveal brushes and colours are ported as FerroUI's Reveal brushes (docs/porting/winui-materials.md), and two keys of the document that are not Reveal resources: CommandBarMoreButtonMargin and AppBarButtonContentHeight, the last definitions of two values of generic.xaml that the CommandBar and AppBarButton templates name."
     },
     {
       "document": "*",
-      "key": "re:.*Reveal.*Style",
-      "reason": "Reveal styles (ButtonRevealStyle, ListViewItemRevealStyle, ...): deprecated in WinUI 3 (see the Reveal brushes); the default styles they duplicate are ported."
+      "key": "re:(?!(Button|RepeatButton|ToggleButton)RevealStyle$).*Reveal.*Style",
+      "reason": "Reveal styles other than ButtonRevealStyle, RepeatButtonRevealStyle and ToggleButtonRevealStyle (ListViewItemRevealStyle, AppBarButtonRevealStyle, ...): deprecated in WinUI 3, and their controls have themes of their own (see the Reveal brushes); the default styles they duplicate are ported. The three button styles are ported by hand in Controls/RevealStyles.xaml (docs/porting/winui-materials.md)."
     },
     {
       "document": "controls/dev/CommonStyles/Deprecated_themeresources.xaml",
