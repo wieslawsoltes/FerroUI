@@ -673,9 +673,17 @@
         {
           "path": "src/FerroUI.Controls/rich_text_block_tests.rs",
           "symbol": "rich_embedded_controls_keep_text_offsets_and_receive_layout"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_hosted_object_tests.rs",
+          "symbol": "rich_hosted_detach_callback_transfer_retires_measure_without_reclaiming_child"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_hosted_object_tests.rs",
+          "symbol": "rich_hosted_arrange_callback_replacement_stops_retired_children"
         }
       ],
-      "reason": "Inline controls use existing visual ownership, measure and arrange, occupy U+FFFC in the shared model, and retain identity in snapshots. Native hosted-object ABI and full conformance remain partial.",
+      "reason": "Inline controls use existing visual ownership, measure and arrange, occupy U+FFFC in the shared model, and retain identity in snapshots. Native hosted-object ABI and full conformance remain partial. Last successful hosting metrics persist on the container across source rebuilds; replacing the child resets cache ownership. Logical/visual detach callbacks can transfer ownership without the outer setter reclaiming it.",
       "deviations": [
         "RT-I01",
         "RT-I02"
@@ -705,9 +713,17 @@
         {
           "path": "src/FerroUI.Controls/rich_text_block_tests.rs",
           "symbol": "rich_embedded_controls_keep_text_offsets_and_receive_layout"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_hosted_object_tests.rs",
+          "symbol": "rich_hosted_detach_callback_transfer_retires_measure_without_reclaiming_child"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_hosted_object_tests.rs",
+          "symbol": "rich_hosted_arrange_callback_replacement_stops_retired_children"
         }
       ],
-      "reason": "Inline controls use existing visual ownership, measure and arrange, occupy U+FFFC in the shared model, and retain identity in snapshots. Native hosted-object ABI and full conformance remain partial.",
+      "reason": "Inline controls use existing visual ownership, measure and arrange, occupy U+FFFC in the shared model, and retain identity in snapshots. Native hosted-object ABI and full conformance remain partial. Last successful hosting metrics persist on the container across source rebuilds; replacing the child resets cache ownership. Logical/visual detach callbacks can transfer ownership without the outer setter reclaiming it.",
       "deviations": [
         "RT-I01",
         "RT-I02"
@@ -2910,6 +2926,22 @@
         {
           "path": "src/FerroUI.Controls/rich_text_layout.rs",
           "symbol": "fn embedded_controls("
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_layout.rs",
+          "symbol": "struct HostedParagraphSource"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_block.rs",
+          "symbol": "fn measure_hosted_control("
+        },
+        {
+          "path": "src/FerroUI.Controls/documents/inline_run.rs",
+          "symbol": "fn with_hosted_measurement("
+        },
+        {
+          "path": "src/FerroUI.Base/media/text_formatting/text_line_break.rs",
+          "symbol": "fn fork_with_object_runs("
         }
       ],
       "tests": [
@@ -2924,9 +2956,29 @@
         {
           "path": "src/FerroUI.Controls/rich_text_family_metrics_tests.rs",
           "symbol": "rich_family_metrics_captured_object_size_matches_run_geometry_after_independent_child_measure"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_hosted_object_tests.rs",
+          "symbol": "rich_hosted_constraints_use_page_padding_remaining_height_and_collapsed_margins"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_hosted_object_tests.rs",
+          "symbol": "rich_hosted_overflow_rebinds_object_continuations_without_reshaping_or_mutating_head"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_hosted_object_tests.rs",
+          "symbol": "rich_hosted_geometry_reuses_last_host_measure_after_independent_child_measure"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_hosted_object_tests.rs",
+          "symbol": "rich_hosted_detach_callback_transfer_retires_measure_without_reclaiming_child"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_hosted_object_tests.rs",
+          "symbol": "rich_hosted_arrange_callback_replacement_stops_retired_children"
         }
       ],
-      "reason": "Rich runs freeze measured size and baseline for consistent later metrics/child geometry; equal-size baseline changes retire source/layout without document or history edits. Native PageHostedObjectRun is fixed with respect to line position and measures using the current paragraph host Size, not the generic remaining-width argument. Paragraph/page measurement constraints and measure-time host attachment remain partial.",
+      "reason": "Each paragraph fragment measures embedded controls against its current page inner size, remaining height and collapsed margins. Measurements are independent of pen position. Measure-time visual ownership, generation/current-parent guards and container-owned last-host caches preserve callback transfers. Each published page freezes its object sizes/baselines; continuation object rebinding retains shaped text and bidi state without changing earlier pages. Geometry-only reads neither measure nor reparent. The editor retains its existing additive paragraph-spacing policy. Native TextDpi, exact backtracking/detachment scheduling, cross-root topology, unmeasured baseline alignments and native rendering remain partial; LAYOUT.md records the boundaries.",
       "deviations": [
         "RT-A02",
         "RT-I02",
@@ -2939,15 +2991,51 @@
         {
           "path": "src/FerroUI.Controls/rich_text_layout.rs",
           "symbol": "embedded_controls"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_layout.rs",
+          "symbol": "struct HostedParagraphSource"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_block.rs",
+          "symbol": "fn measure_hosted_control("
+        },
+        {
+          "path": "src/FerroUI.Controls/documents/inline_run.rs",
+          "symbol": "fn with_hosted_measurement("
+        },
+        {
+          "path": "src/FerroUI.Base/media/text_formatting/text_line_break.rs",
+          "symbol": "fn fork_with_object_runs("
         }
       ],
       "tests": [
         {
           "path": "src/FerroUI.Controls/rich_text_block_tests.rs",
           "symbol": "rich_embedded_controls_keep_text_offsets_and_receive_layout"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_hosted_object_tests.rs",
+          "symbol": "rich_hosted_constraints_use_page_padding_remaining_height_and_collapsed_margins"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_hosted_object_tests.rs",
+          "symbol": "rich_hosted_overflow_rebinds_object_continuations_without_reshaping_or_mutating_head"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_hosted_object_tests.rs",
+          "symbol": "rich_hosted_geometry_reuses_last_host_measure_after_independent_child_measure"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_hosted_object_tests.rs",
+          "symbol": "rich_hosted_detach_callback_transfer_retires_measure_without_reclaiming_child"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_hosted_object_tests.rs",
+          "symbol": "rich_hosted_arrange_callback_replacement_stops_retired_children"
         }
       ],
-      "reason": "Embedded control measurement and arrangement use the existing drawable text-run/control layout contracts, preserving the model object offset. Native hosted-object ABI and every sizing case remain pending.",
+      "reason": "Each paragraph fragment measures embedded controls against its current page inner size, remaining height and collapsed margins. Measurements are independent of pen position. Measure-time visual ownership, generation/current-parent guards and container-owned last-host caches preserve callback transfers. Each published page freezes its object sizes/baselines; continuation object rebinding retains shaped text and bidi state without changing earlier pages. Geometry-only reads neither measure nor reparent. The editor retains its existing additive paragraph-spacing policy. Native TextDpi, exact backtracking/detachment scheduling, cross-root topology, unmeasured baseline alignments and native rendering remain partial; LAYOUT.md records the boundaries.",
       "deviations": [
         "RT-A02",
         "RT-I02"

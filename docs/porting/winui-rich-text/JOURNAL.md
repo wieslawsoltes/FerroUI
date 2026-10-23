@@ -1356,3 +1356,26 @@ execution is still pending here: initial Controls and Base test code generation
 were killed by SIGKILL under concurrent workspace memory pressure. The failed
 builds are not reported as conformance passes; metadata checking and later
 execution are recorded at their actual checkpoint.
+
+## 2026-10-23 — Port paragraph/page hosted-object measurement
+
+RichTextBlock now measures embedded controls per paragraph fragment using that
+page's inner width, remaining height and source-derived collapsed margins. The
+editor presenter keeps its established additive paragraph-spacing policy. Object
+runs freeze page-local size/baseline values; retained continuations rebind only
+objects and preserve shaped text/bidi ownership. Last successful host metrics
+live on InlineUIContainer across source regeneration and reset on child changes.
+Geometry-only reads never measure or move a child.
+
+Review exposed stale-layout arrangement and detach-callback ownership transfers.
+Cached layout identity, generation and actual visual-parent checks now guard
+measure/synchronization/arrange and inline child transitions, preserving newer
+application changes. Twenty-one Controls and four Base regression definitions
+cover constraints, continuations, cache lifetime, immutable geometry, original
+editor spacing and callbacks. These are test definitions until executed.
+
+The first metadata-only check found two test-fixture API mismatches (FerroList
+count and LineBreak length), both corrected. A separate review tightened native
+alignment assertions so Center/Justify can no longer masquerade as Left. Final
+metadata/runtime validation follows main integration. Native paragraph detach/
+backtracking scheduling, TextDpi and physical rendering remain explicit limits.

@@ -52,6 +52,7 @@ ferro_impl_classes!(RichEditBoxTextPresenter: StyledElementImpl, InteractiveImpl
 impl FerroObjectImpl for RichEditBoxTextPresenter {
     fn constructed(this: &Self) {
         Self::parent_constructed(this);
+        this.set_paragraph_margin_collapsing(false);
         AutomationProperties::set_accessibility_view(this, AccessibilityView::Raw);
     }
 

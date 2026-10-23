@@ -29,10 +29,10 @@ use ferroui_base::media::{
 use ferroui_base::reactive::{Disposable, IDisposable};
 use ferroui_base::utilities::HandlerList;
 use ferroui_base::{
-    ferro_class, instantiate, DirectProperty, ElementRef, FerroObject, FerroObjectImpl, FerroObjectImplExt,
-    FerroProperty, FerroPropertyChangedEventArgs, IntoRef, Point, Rect, Ref, Size,
-    StyledElementImpl, StyledProperty, StyledPropertyMetadata, StyledPropertyOptions, Thickness, Vector, Visual,
-    VisualImpl, WeakRef,
+    ferro_class, instantiate, DirectProperty, ElementRef, FerroObject, FerroObjectImpl,
+    FerroObjectImplExt, FerroProperty, FerroPropertyChangedEventArgs, IntoRef, Point, Rect, Ref,
+    Size, StyledElementImpl, StyledProperty, StyledPropertyMetadata, StyledPropertyOptions,
+    Thickness, Vector, Visual, VisualImpl, WeakRef,
 };
 use std::cell::{Cell, RefCell};
 use std::ops::Range;
@@ -58,6 +58,7 @@ pub struct RichTextBlock {
     source: RefCell<Option<Rc<RichTextSource>>>,
     layout: RefCell<Option<Rc<RichTextLayout>>>,
     layout_generation: Cell<u64>,
+    collapse_paragraph_margins: Cell<bool>,
     constraint: Cell<Size>,
     selection_start: Cell<usize>,
     selection_end: Cell<usize>,
@@ -317,17 +318,22 @@ impl LayoutableImpl for RichTextBlock {
         if this.constraint.replace(inner) != inner {
             this.clear_page_layout();
         }
-        if this.flow_parent.borrow().is_none() {
-            let mut changed = false;
-            for block in this.document().blocks().snapshot().iter() {
-                changed |= block.measure_embedded_controls(inner);
-            }
-            if changed {
-                this.source.borrow_mut().take();
-                this.clear_page_layout();
-            }
+        let cached = this.cached_page_layout();
+        if cached
+            .as_ref()
+            .is_some_and(|layout| !layout.hosted_objects_are_current())
+        {
+            this.clear_page_layout();
         }
-        this.page_layout().size.inflate(this.text_insets())
+        let layout = this.page_layout_core(true);
+        if this
+            .cached_page_layout()
+            .as_ref()
+            .is_some_and(|cached| Rc::ptr_eq(cached, &layout))
+        {
+            this.synchronize_hosted_visuals(&layout);
+        }
+        layout.size.inflate(this.text_insets())
     }
 
     fn arrange_override(this: &Self, final_size: Size) -> Size {
@@ -336,26 +342,31 @@ impl LayoutableImpl for RichTextBlock {
             this.clear_page_layout();
         }
         let layout = this.page_layout();
-        let children = layout.embedded_controls(this.text_origin());
-        let mut desired: Vec<Ref<Visual>> = children
-            .iter()
-            .map(|(child, _)| child.clone().upcast())
-            .collect();
-        desired.extend(this.additional_visual_children());
-        let current = this.visual_children().snapshot();
-        if current.as_slice() != desired.as_slice() {
-            this.visual_children().clear();
-            for child in desired {
-                // A control crossing a column boundary moves to the view that
-                // currently owns its formatted run.
-                if let Some(parent) = child.visual_parent() {
-                    parent.visual_children().remove(&child);
-                }
-                this.visual_children().add(child);
-            }
+        if !this.synchronize_hosted_visuals(&layout) {
+            return final_size;
         }
+        let generation = this.page_layout_generation();
+        let origin = this.text_origin();
+        if !this.owns_page_layout(&layout, generation) {
+            return final_size;
+        }
+        let children = layout.embedded_controls(origin);
+        let owner = this.to_ref().upcast::<Visual>();
         for (child, rect) in children {
+            if !this.owns_page_layout(&layout, generation) {
+                break;
+            }
+            if child.visual_parent().as_ref() != Some(&owner) {
+                this.clear_page_layout();
+                break;
+            }
             child.arrange(rect);
+            if this.owns_page_layout(&layout, generation)
+                && child.visual_parent().as_ref() != Some(&owner)
+            {
+                this.clear_page_layout();
+                break;
+            }
         }
         final_size
     }
@@ -363,6 +374,134 @@ impl LayoutableImpl for RichTextBlock {
     fn on_measure_invalidated(this: &Self) {
         this.clear_page_layout();
         Self::parent_on_measure_invalidated(this);
+    }
+}
+
+impl RichTextBlock {
+    fn owns_page_layout(&self, layout: &Rc<RichTextLayout>, generation: u64) -> bool {
+        self.page_layout_generation() == generation
+            && self
+                .cached_page_layout()
+                .as_ref()
+                .is_some_and(|cached| Rc::ptr_eq(cached, layout))
+    }
+
+    fn synchronize_hosted_visuals(&self, layout: &Rc<RichTextLayout>) -> bool {
+        let generation = self.page_layout_generation();
+        if !self.owns_page_layout(layout, generation) {
+            return false;
+        }
+        let children = layout.embedded_controls(Point::default());
+        let mut desired: Vec<Ref<Visual>> = children
+            .iter()
+            .map(|(child, _)| child.clone().upcast())
+            .collect();
+        desired.extend(self.additional_visual_children());
+        if !self.owns_page_layout(layout, generation) {
+            return false;
+        }
+        let owner = self.to_ref().upcast::<Visual>();
+        let current = self.visual_children().snapshot();
+        if current.as_slice() != desired.as_slice() {
+            // Remove only absent objects. Retained children keep their visual
+            // attachment and do not receive a false detach/attach lifecycle.
+            for child in current.iter().filter(|child| !desired.contains(child)) {
+                self.visual_children().remove(child);
+                if !self.owns_page_layout(layout, generation) {
+                    return false;
+                }
+                if child.visual_parent().as_ref() == Some(&owner) {
+                    self.clear_page_layout();
+                    return false;
+                }
+            }
+            for (index, child) in desired.into_iter().enumerate() {
+                if index < self.visual_children().count()
+                    && self.visual_children().get(index) == child
+                {
+                    continue;
+                }
+                if let Some(previous_index) = self.visual_children().index_of(&child) {
+                    if previous_index != index {
+                        self.visual_children().move_item(previous_index, index);
+                        if !self.owns_page_layout(layout, generation) {
+                            return false;
+                        }
+                        if child.visual_parent().as_ref() != Some(&owner) {
+                            self.clear_page_layout();
+                            return false;
+                        }
+                    }
+                    continue;
+                }
+                // A control crossing a column boundary moves to the view that
+                // currently owns its formatted run.
+                if let Some(parent) = child.visual_parent() {
+                    parent.visual_children().remove(&child);
+                }
+                if !self.owns_page_layout(layout, generation) {
+                    return false;
+                }
+                if child.visual_parent().is_some() {
+                    self.clear_page_layout();
+                    return false;
+                }
+                if index > self.visual_children().count() {
+                    self.clear_page_layout();
+                    return false;
+                }
+                self.visual_children().insert(index, child.clone());
+                if !self.owns_page_layout(layout, generation) {
+                    return false;
+                }
+                if child.visual_parent().as_ref() != Some(&owner) {
+                    self.clear_page_layout();
+                    return false;
+                }
+            }
+        }
+        true
+    }
+
+    /// A hosted object is attached before measurement, matching the paragraph
+    /// host's capability. Geometry readers never enter this path.
+    pub(crate) fn measure_hosted_control(
+        &self,
+        child: &Ref<Control>,
+        size: Size,
+        generation: u64,
+    ) -> bool {
+        if self.page_layout_generation() != generation {
+            return false;
+        }
+        let visual = child.clone().upcast::<Visual>();
+        let owner = self.to_ref().upcast::<Visual>();
+        if visual.visual_parent().as_ref() != Some(&owner) {
+            if let Some(parent) = visual.visual_parent() {
+                parent.visual_children().remove(&visual);
+            }
+            if self.page_layout_generation() != generation {
+                return false;
+            }
+            if visual.visual_parent().is_some() {
+                self.clear_page_layout();
+                return false;
+            }
+            self.visual_children().add(visual);
+        }
+        if self.page_layout_generation() == generation {
+            if child.visual_parent().as_ref() != Some(&owner) {
+                self.clear_page_layout();
+                return false;
+            }
+            child.measure(size);
+            if child.visual_parent().as_ref() != Some(&owner) {
+                // A callback transferred ownership. The outer page cannot
+                // reclaim it during its final synchronization pass.
+                self.clear_page_layout();
+            }
+        }
+        self.page_layout_generation() == generation
     }
 }
 
@@ -738,11 +877,13 @@ impl RichTextBlock {
         // shared TextBlock formatter does. Overflow uses the document owner's
         // bounds policy even when it is not in the owner's logical tree.
         Visual::clip_to_bounds_property().override_metadata::<RichTextBlock>(
-            StyledPropertyMetadata::new(Some(true)).with_coerce(|object: &FerroObject, clip: bool| {
-                clip && object
-                    .downcast_ref::<RichTextBlock>()
-                    .is_none_or(|view| view.effective_text_line_bounds() == TextLineBounds::Full)
-            }),
+            StyledPropertyMetadata::new(Some(true)).with_coerce(
+                |object: &FerroObject, clip: bool| {
+                    clip && object.downcast_ref::<RichTextBlock>().is_none_or(|view| {
+                        view.effective_text_line_bounds() == TextLineBounds::Full
+                    })
+                },
+            ),
         );
         Visual::affects_render::<RichTextBlock>(&[
             Self::background_property().as_property(),
@@ -762,6 +903,7 @@ impl RichTextBlock {
             source: RefCell::new(None),
             layout: RefCell::new(None),
             layout_generation: Cell::new(0),
+            collapse_paragraph_margins: Cell::new(true),
             constraint: Cell::new(Size::new(f64::INFINITY, f64::INFINITY)),
             selection_start: Cell::new(0),
             selection_end: Cell::new(0),
@@ -1624,7 +1766,8 @@ impl RichTextBlock {
         }
     }
     fn clear_page_layout(&self) {
-        self.layout_generation.set(self.layout_generation.get().wrapping_add(1));
+        self.layout_generation
+            .set(self.layout_generation.get().wrapping_add(1));
         self.layout.borrow_mut().take();
     }
 
@@ -1632,6 +1775,18 @@ impl RichTextBlock {
     /// a layout that has not yet been published in the cache.
     pub(crate) fn page_layout_generation(&self) -> u64 {
         self.layout_generation.get()
+    }
+
+    pub(crate) fn collapses_paragraph_margins(&self) -> bool {
+        self.collapse_paragraph_margins.get()
+    }
+
+    /// Editable paragraph spacing is additive; read-only block layout uses
+    /// the pinned BlockNode margin-collapsing contract.
+    pub(crate) fn set_paragraph_margin_collapsing(&self, value: bool) {
+        if self.collapse_paragraph_margins.replace(value) != value {
+            self.invalidate_document_layout();
+        }
     }
 
     /// Observes the current layout identity without formatting or callbacks.
@@ -1642,10 +1797,17 @@ impl RichTextBlock {
     /// The baseline published with the current page cache. Reading it does
     /// not format, invoke a virtual origin, or enter nested layout.
     pub(crate) fn cached_baseline_offset(&self) -> Option<f64> {
-        self.layout.borrow().as_ref().map(|_| self.reported_baseline.get())
+        self.layout
+            .borrow()
+            .as_ref()
+            .map(|_| self.reported_baseline.get())
     }
 
     pub(crate) fn page_layout(&self) -> Rc<RichTextLayout> {
+        self.page_layout_core(false)
+    }
+
+    fn page_layout_core(&self, measure_objects: bool) -> Rc<RichTextLayout> {
         if let Some(layout) = self.layout.borrow().as_ref() {
             return layout.clone();
         }
@@ -1662,8 +1824,8 @@ impl RichTextBlock {
             // Building runs can call custom text elements. Release the cache
             // borrow before doing so and preserve any newer reentrant source.
             let cached_source = self.source.borrow().clone();
-            let source = cached_source
-                .unwrap_or_else(|| RichTextSource::new(&self.document(), self));
+            let source =
+                cached_source.unwrap_or_else(|| RichTextSource::new(&self.document(), self));
             if self.layout_generation.get() == generation {
                 *self.source.borrow_mut() = Some(source.clone());
             }
@@ -1678,6 +1840,7 @@ impl RichTextBlock {
             &self.text_trimming(),
             self.overflow_content_target().is_none(),
             &start,
+            measure_objects.then_some((self, generation)),
         );
         let baseline = layout
             .metrics(self.text_origin())

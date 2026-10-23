@@ -76,8 +76,8 @@ Every file in the three primary roots is retained, including build and data file
 | `dxaml/xcp/core/text/BlockLayout/DrawingContext.cpp` | partial | `src/FerroUI.Controls/rich_text_layout.rs` |
 | `dxaml/xcp/core/text/BlockLayout/DrawingContext.h` | partial | `src/FerroUI.Controls/rich_text_layout.rs` |
 | `dxaml/xcp/core/text/BlockLayout/LineMetrics.h` | partial | `src/FerroUI.Controls/rich_text_layout.rs` |
-| `dxaml/xcp/core/text/BlockLayout/PageHostedObjectRun.cpp` | partial | `src/FerroUI.Controls/rich_text_layout.rs`, `src/FerroUI.Controls/documents/inline_run.rs`, `src/FerroUI.Controls/documents/inline_ui_container.rs`, `src/FerroUI.Controls/rich_text_layout.rs` |
-| `dxaml/xcp/core/text/BlockLayout/PageHostedObjectRun.h` | partial | `src/FerroUI.Controls/rich_text_layout.rs` |
+| `dxaml/xcp/core/text/BlockLayout/PageHostedObjectRun.cpp` | partial | `src/FerroUI.Controls/rich_text_layout.rs`, `src/FerroUI.Controls/documents/inline_run.rs`, `src/FerroUI.Controls/documents/inline_ui_container.rs`, `src/FerroUI.Controls/rich_text_layout.rs`, `src/FerroUI.Controls/rich_text_layout.rs`, `src/FerroUI.Controls/rich_text_block.rs`, `src/FerroUI.Controls/documents/inline_run.rs`, `src/FerroUI.Base/media/text_formatting/text_line_break.rs` |
+| `dxaml/xcp/core/text/BlockLayout/PageHostedObjectRun.h` | partial | `src/FerroUI.Controls/rich_text_layout.rs`, `src/FerroUI.Controls/rich_text_layout.rs`, `src/FerroUI.Controls/rich_text_block.rs`, `src/FerroUI.Controls/documents/inline_run.rs`, `src/FerroUI.Base/media/text_formatting/text_line_break.rs` |
 | `dxaml/xcp/core/text/BlockLayout/PageNode.cpp` | partial | `src/FerroUI.Controls/rich_text_layout.rs`, `src/FerroUI.Controls/rich_text_layout.rs` |
 | `dxaml/xcp/core/text/BlockLayout/PageNode.h` | partial | `src/FerroUI.Controls/rich_text_layout.rs`, `src/FerroUI.Controls/rich_text_layout.rs` |
 | `dxaml/xcp/core/text/BlockLayout/PageNodeBreak.cpp` | partial | `src/FerroUI.Controls/rich_text_layout.rs` |

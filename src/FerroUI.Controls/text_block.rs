@@ -1290,6 +1290,11 @@ impl InlinesTextSource {
     pub fn text_runs(&self) -> &Rc<Vec<Rc<dyn TextRun>>> {
         &self.text_runs
     }
+
+    /// Rebinds page-local objects while retaining the logical formatting spans.
+    pub(crate) fn with_text_runs(&self, text_runs: Rc<Vec<Rc<dyn TextRun>>>) -> Self {
+        Self::new(text_runs, self.text_modifier.clone())
+    }
 }
 
 impl ITextSource for InlinesTextSource {

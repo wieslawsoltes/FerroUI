@@ -126,14 +126,14 @@ baseline-aligned contribution in
 An explicitly smaller line height can still allocate less space than that
 natural contribution.
 
-The rich source freezes each embedded control's measured size and baseline.
+Each rich paragraph fragment freezes its embedded controls' measured size and baseline.
 Later object metrics and arranged child rectangles use the same captured size.
 Nested TextBlock, RichTextBlock and RichTextBlockOverflow baselines come from
 completed first-line caches; these readers never force nested formatting.
 Absent or stale caches fall back to desired height. FerroUI's existing nonzero
 attached BaselineOffset override retains precedence, while zero keeps its
 existing no-override meaning. A changed baseline with equal desired size retires
-the source/layout cache without editing document content or history. The source
+the page snapshot without editing document content, source revision or history. The source
 contracts are
 [`BlockLayoutHelpers::GetElementBaseline`](https://github.com/microsoft/microsoft-ui-xaml/blob/fe244ca6ac4d482712b234a9de3cf771cc6481de/dxaml/xcp/core/text/BlockLayout/BlockLayoutHelpers.cpp)
 and [`PageHostedObjectRun::Format`](https://github.com/microsoft/microsoft-ui-xaml/blob/fe244ca6ac4d482712b234a9de3cf771cc6481de/dxaml/xcp/core/text/BlockLayout/PageHostedObjectRun.cpp).
@@ -163,25 +163,76 @@ visible in
 [`BlockNode::Measure`](https://github.com/microsoft/microsoft-ui-xaml/blob/fe244ca6ac4d482712b234a9de3cf771cc6481de/dxaml/xcp/core/text/BlockLayout/BlockNode.cpp#L61-L120)
 and [`ParagraphNode::GetAvailableMeasureSize`](https://github.com/microsoft/microsoft-ui-xaml/blob/fe244ca6ac4d482712b234a9de3cf771cc6481de/dxaml/xcp/core/text/BlockLayout/ParagraphNode.cpp#L184-L193).
 
-This measurement contract is still partial in FerroUI. The head RichTextBlock
-measures embedded controls before constructing the shared rich source, using
-the head's inner width and infinite height. That measurement does not subtract
-individual paragraph margins or use a later overflow view's own constraints.
-The captured metrics keep line and child geometry consistent, but sharing them
-across views does not establish the native paragraph/page constraint behavior.
-The implementation points are
-[`RichTextBlock::measure_override`](../../../src/FerroUI.Controls/rich_text_block.rs),
-[`InlineUIContainer::measure_embedded_controls`](../../../src/FerroUI.Controls/documents/inline_ui_container.rs)
-and [`RichTextSource`](../../../src/FerroUI.Controls/rich_text_layout.rs).
+FerroUI now prepares objects when its layout visits a paragraph fragment. The
+current page's inner width and remaining height, after the block margins, feed
+the ordinary control `measure` call. First-line indentation, the current pen
+position and previous lines inside the same fragment do not reduce this host
+constraint. An overflow page uses its own padding, width and height. A page
+already exhausted by height or MaxLines does not visit the following paragraph.
 
-Native host ownership is a separate boundary: a different host can attach the
-control during paragraph measure; when it cannot attach, the object retains its
-cached host and metrics. FerroUI currently moves visual children to their
-formatted view during arrange. A future paragraph/page measurement integration
-must preserve immutable earlier-page metrics and distinguish measure-time host
-changes from later geometry reads. It does not require changing the shared
-formatter's public drawable-run API merely to match the generic native method
-signature.
+Read-only rich blocks apply the pinned `BlockNode::Measure` margin rule: suppress
+the first top margin on each page, use `max(previous bottom, current top)` between
+paragraphs, and leave the last bottom margin outside the page's desired size.
+An empty rejected paragraph fragment contributes no margin. The editor presenter
+explicitly retains additive paragraph spacing; native RichEdit's spacing does
+not become a read-only BlockLayout margin by sharing the document model. This is
+an internal layout policy, without a new public XAML property or virtual member.
+
+The shared `RichTextSource` remains the logical document revision. Paragraphs
+without objects retain their ordinary shared shaping cache. A paragraph with
+objects instead supplies immutable page-local `EmbeddedControlRun` snapshots;
+its contextual object metrics never enter that document-wide cache. Wrapped
+continuations use `TextLineBreak::fork_with_object_runs` to replace the object
+runs with the next page's captured metrics. Already shaped text, resolved bidi
+direction, source lengths and line-metrics policy remain intact. This operation
+does not consume the preceding page's continuation or reshape its retained text.
+
+Each InlineUIContainer retains its last successful hosting measurement separately
+from the control's current desired size. New source runs share that cache, following
+the storage lifetime of native `SetChildLayoutCache`; replacing Child creates a
+separate cache so retired runs cannot publish into the replacement's metrics.
+Geometry-only reformatting uses that cache even after a source revision changes:
+an independent caller measuring the child cannot silently rewrite a rich page's
+object size. A completed page always keeps its own captured size and baseline,
+even after another page is measured or the object is independently resized.
+At the next actual measure, changed size, baseline or an unmeasured read cache
+causes the page snapshot to be rebuilt without replacing the logical source or
+editing document/history state.
+
+During measure, the current rich view becomes the object's visual parent before
+the child is measured. The document's inline ownership stays unchanged. The
+accepted page removes objects that did not fit; retained visuals avoid a false
+detach/attach cycle, and changed visual order uses the framework collection's
+move operation. Replacing or removing an InlineUIContainer child detaches its
+actual visual owner, including a later overflow page. Callback invalidation or
+ownership transfer retires the outer layout instead of reinstalling it or
+measuring later objects through stale source state. Arrangement verifies the
+retained page identity and generation after virtual callbacks and each child
+arrange; a retired page cannot reattach or arrange later children. Logical and
+visual detachment also preserve a callback's replacement child or new owner.
+Geometry queries never
+measure or reparent a child, and the continuation mapper holds no cache borrow
+across application code.
+
+Implementation points are
+[`RichTextBlock`](../../../src/FerroUI.Controls/rich_text_block.rs),
+[`HostedParagraphSource`](../../../src/FerroUI.Controls/rich_text_layout.rs),
+[`EmbeddedControlRun`](../../../src/FerroUI.Controls/documents/inline_run.rs),
+[`InlineUIContainer`](../../../src/FerroUI.Controls/documents/inline_ui_container.rs)
+and the shared
+[`TextLineBreak`](../../../src/FerroUI.Base/media/text_formatting/text_line_break.rs).
+Focused regressions are in
+[`rich_text_hosted_object_tests.rs`](../../../src/FerroUI.Controls/rich_text_hosted_object_tests.rs)
+and
+[`text_line_break_object_tests.rs`](../../../src/FerroUI.Base/media/text_formatting/text_line_break_object_tests.rs).
+
+The preparation visits remaining object runs in a selected paragraph before
+formatting it. Exact native object-Format invocation timing is not asserted.
+Arrange-time reflow retains the existing FerroUI visual synchronization and uses
+cached object metrics; it is separate from the native host's full CanAddElement
+policy. Native widget reparenting, platform rendering and pixel equivalence still
+need independent execution. These source-derived constraints do not claim the
+whole `PageHostedObjectRun`, paragraph or page implementation complete.
 
 ## Optional fallback scale
 
@@ -232,7 +283,7 @@ partial for these reasons:
 | Family baseline and gap | Rich FontFamily mode retains the requested regular-family baseline independently of half-gap placement and applies bounds per run. Existing TextBlock keeps GlyphTypeface behavior. Platform family resolution and native rounding remain separate. |
 | Fallback glyphs and scale | Requested-family metrics survive actual glyph fallback. Optional face/prefix/scale transport is functional for a supplied mapper; current Skia/Vello providers remain absent and use scale `1`. Native composite matching and platform scale provision remain partial. |
 | Cap height | Main uses positive OS/2 sCapHeight, then a TrueType H outline, then a proportional fallback. DirectWrite's internal missing-cap-height policy is not in the public source. |
-| Embedded objects | Full baseline-aligned height/ascent/descent and captured nested text-control baselines contribute independently of text trimming. Other baseline alignments keep FerroUI placement; Top/TextTop can extend outside allocation. Native paragraph/page measurement constraints and measure-time host ownership remain partial; the concrete hosted run does not use the generic remaining-width argument. |
+| Embedded objects | Full baseline-aligned height/ascent/descent and captured nested text-control baselines contribute independently of text trimming. Paragraph/page constraints, collapsed margins, immutable overflow metrics and measure-time visual ownership follow the pinned public source. Other baseline alignments keep FerroUI placement; Top/TextTop can extend outside allocation. Exact object-format callback timing, full arrange-time host capability policy and native widget execution remain separate. |
 | Property inheritance | The existing FerroUI attached property inherits. Native controls have individual, non-inherited TextLineBounds properties. |
 | Engine output | The open formulas do not reproduce opaque LineServices, TextDpi quantization, native font rounding, shaping or rasterization. |
 
@@ -291,6 +342,8 @@ native rendering.
 | [`font_fallback_scale_tests.rs`](../../../src/FerroUI.Base/media/text_formatting/font_fallback_scale_tests.rs), 17 definitions | Controlled provider contracts, face/scale grouping, Unicode prefixes, fallback progress, configured collection precedence, effective em, cache ownership and reentry. |
 | [`rich_text_fallback_scale_tests.rs`](../../../src/FerroUI.Controls/rich_text_fallback_scale_tests.rs), 3 definitions | Real rich bounds/caret/ranges, source mutation during mapping and preservation of a newer reentrant layout. |
 | [`rich_text_line_stacking_tests.rs`](../../../src/FerroUI.Controls/rich_text_line_stacking_tests.rs) and [`rich_text_line_bounds_tests.rs`](../../../src/FerroUI.Controls/rich_text_line_bounds_tests.rs) | Allocation, paragraph fragments, fitting, modes, clipping, fallback, embedded controls, draw/caret/range geometry and explicit spacing. |
+| [`rich_text_hosted_object_tests.rs`](../../../src/FerroUI.Controls/rich_text_hosted_object_tests.rs), 21 definitions | Page/paragraph constraints, margins and editor spacing, overflow continuations, immutable object snapshots, persistent container caches, geometry-only access and ownership changes during measure, arrange, logical/visual detach and Child replacement. |
+| [`text_line_break_object_tests.rs`](../../../src/FerroUI.Base/media/text_formatting/text_line_break_object_tests.rs), 4 definitions | Object rebinding without reshaping, bidi/metric/source-length preservation, independent continuation ownership and mapper reentry. |
 
 The existing `rich_text_document.xaml` corpus fixture exercises all four bounds
 modes through runtime and emitted markup. Actual framework gate results belong

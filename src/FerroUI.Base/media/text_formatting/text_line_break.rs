@@ -89,6 +89,47 @@ impl TextLineBreak {
         })
     }
 
+    /// Forks a continuation while replacing its embedded drawable objects.
+    ///
+    /// A paginated host can measure an object with the next page's constraints
+    /// without reshaping its retained text or changing the preceding page's
+    /// metrics. Shaped runs, bidi state and metric policy are retained exactly.
+    /// The callback is invoked without a cache borrow and only for non-shaped
+    /// drawable runs. `None` keeps the original object; a replacement must also
+    /// be a non-shaped drawable with the same source length. Invalid
+    /// replacements are ignored, preserving the continuation's index contract.
+    pub fn fork_with_object_runs(
+        &self,
+        mut replace: impl FnMut(&Rc<dyn TextRun>) -> Option<Rc<dyn TextRun>>,
+    ) -> Rc<Self> {
+        let fork = self.fork();
+        // Keep the fork's shaping references installed while invoking user
+        // code. Reentrancy may release the original break, and unwinding must
+        // still release every reference owned by this fork.
+        let remaining = fork.remaining_runs.borrow().clone();
+        if let Some(remaining) = remaining {
+            let mapped = remaining
+                .iter()
+                .map(|run| {
+                    if run.is::<ShapedTextRun>() || run.as_drawable().is_none() {
+                        return run.clone();
+                    }
+                    replace(run)
+                        .filter(|candidate| {
+                            !candidate.is::<ShapedTextRun>()
+                                && candidate.as_drawable().is_some()
+                                && candidate.length() == run.length()
+                        })
+                        .unwrap_or_else(|| run.clone())
+                })
+                .collect();
+            // Shaped handles are identical: their existing ownership moves
+            // between the vectors without adding or disposing a reference.
+            *fork.remaining_runs.borrow_mut() = Some(mapped);
+        }
+        fork
+    }
+
     /// Releases an unused continuation after a fork has been accepted. A
     /// formatted page retains only its final continuation, rather than keeping
     /// every wrapped paragraph remainder alive on every preceding line.
@@ -117,3 +158,7 @@ impl Drop for TextLineBreak {
         }
     }
 }
+
+#[cfg(test)]
+#[path = "text_line_break_object_tests.rs"]
+mod object_tests;

@@ -157,7 +157,9 @@ fn rich_family_metrics_equal_size_baseline_change_reflows_without_document_or_hi
     let current = view.page_layout();
     assert_eq!(child.desired_size(), size);
     assert!(!Rc::ptr_eq(&old, &current));
-    assert!(!Rc::ptr_eq(&old.source, &current.source));
+    // Object metrics belong to the measured page; its logical source remains
+    // shared and does not need rebuilding for a layout-only baseline change.
+    assert!(Rc::ptr_eq(&old.source, &current.source));
     close(current.lines[0].line.baseline(), 12.0);
     close(current.lines[0].line.height(), 20.0);
     assert_eq!(editor.document().snapshot(), snapshot);
@@ -217,7 +219,7 @@ fn rich_family_metrics_captured_object_size_matches_run_geometry_after_independe
 
     measure(&view, 100.0);
     let current = view.page_layout();
-    assert!(!Rc::ptr_eq(&old.source, &current.source));
+    assert!(Rc::ptr_eq(&old.source, &current.source));
     close(current.lines[0].line.width(), 42.0);
     assert_eq!(
         current.embedded_controls(Point::default())[0].1.size(),

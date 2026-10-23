@@ -215,9 +215,8 @@ fn rich_selection_paragraph_typing_does_not_protect_inline_literal_or_soft_break
         let paragraph = Paragraph::new();
         let end = if soft {
             paragraph.inlines().add(Run::with_text(Some("ab")));
-            let line_break = LineBreak::new();
-            let end = 2 + line_break.text_length();
-            paragraph.inlines().add(line_break);
+            paragraph.inlines().add(LineBreak::new());
+            let end = paragraph.text_length();
             paragraph.inlines().add(Run::with_text(Some("cd")));
             end
         } else {

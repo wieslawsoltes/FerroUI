@@ -9,10 +9,10 @@ use crate::text_block::InlinesTextSource;
 use crate::RichTextBlockImplExt;
 use ferroui_base::media::text_formatting::TextRun;
 use ferroui_base::media::text_formatting::{
-    FontFamilyLineMetrics, GenericTextParagraphProperties, GenericTextRunProperties, ITextDrawingSink,
-    InterWordJustification, LogicalTextRunEnumerator, TextCollapsingProperties, TextEndOfParagraph,
-    TextFormatter, TextFormatterImpl, TextLine, TextLineBreak, TextLineImpl, TextLineMetricsMode,
-    TextParagraphProperties, TextRunCache, TextRunProperties, TextTabStops,
+    FontFamilyLineMetrics, GenericTextParagraphProperties, GenericTextRunProperties,
+    ITextDrawingSink, InterWordJustification, LogicalTextRunEnumerator, TextCollapsingProperties,
+    TextEndOfParagraph, TextFormatter, TextFormatterImpl, TextLine, TextLineBreak, TextLineImpl,
+    TextLineMetricsMode, TextParagraphProperties, TextRunCache, TextRunProperties, TextTabStops,
 };
 use ferroui_base::media::{
     BaselineAlignment, CharacterHit, TextAlignment, TextCollapsingCreateInfo, TextLineBounds,
@@ -20,6 +20,7 @@ use ferroui_base::media::{
 };
 use ferroui_base::utilities::ValueSpan;
 use ferroui_base::{Point, Rect, Ref, Size, Vector};
+use rustc_hash::FxHashMap;
 use std::ops::Range;
 use std::rc::Rc;
 
@@ -31,6 +32,7 @@ pub(crate) struct RichParagraphSource {
     pub properties: Rc<dyn TextRunProperties>,
     pub default_tab_stop: f64,
     pub cache: TextRunCache,
+    has_embedded_controls: bool,
 }
 
 /// A revision of the document's formatter input, shared by all overflow views.
@@ -40,6 +42,8 @@ pub(crate) struct RichTextSource {
     pub default_indent: f64,
     pub text_line_bounds: TextLineBounds,
     pub highlights: Vec<TextHighlightRegion>,
+    pub collapse_paragraph_margins: bool,
+    has_embedded_controls: bool,
 }
 
 impl RichTextSource {
@@ -114,6 +118,7 @@ impl RichTextSource {
                     |paragraph| paragraph.default_tab_stop(),
                 );
             let modifiers = formatting_overrides(&runs, offset, &highlights, view);
+            let has_embedded_controls = runs.iter().any(|run| run.is::<EmbeddedControlRun>());
             paragraphs.push(RichParagraphSource {
                 block,
                 source: InlinesTextSource::new(Rc::new(runs), modifiers),
@@ -122,15 +127,21 @@ impl RichTextSource {
                 properties,
                 default_tab_stop,
                 cache: TextRunCache::new(),
+                has_embedded_controls,
             });
             offset += length + 1;
         }
+        let has_embedded_controls = paragraphs
+            .iter()
+            .any(|paragraph| paragraph.has_embedded_controls);
         Rc::new(Self {
             paragraphs,
             length: document.text_length(),
             default_indent: view.text_indent(),
             text_line_bounds: view.text_line_bounds(),
             highlights,
+            collapse_paragraph_margins: view.collapses_paragraph_margins(),
+            has_embedded_controls,
         })
     }
 }
@@ -404,6 +415,69 @@ pub(crate) struct RichTextLayout {
     pub next: RichTextBreak,
     pub has_overflow: bool,
     pub is_trimmed: bool,
+    hosted_objects_measured: bool,
+}
+
+/// Object runs are snapshots of one paragraph fragment's host. They cannot
+/// enter the document-wide shaping cache: a later page has another width and
+/// remaining height, and must not overwrite the preceding page's geometry.
+struct HostedParagraphSource {
+    source: InlinesTextSource,
+    objects: FxHashMap<Ref<crate::Control>, Rc<dyn TextRun>>,
+}
+
+impl HostedParagraphSource {
+    fn new(
+        paragraph: &RichParagraphSource,
+        local_start: usize,
+        available_size: Size,
+        host: Option<(&crate::RichTextBlock, u64)>,
+    ) -> Option<Self> {
+        if !paragraph.has_embedded_controls {
+            return None;
+        }
+        let mut position = 0usize;
+        let mut objects = FxHashMap::default();
+        let runs = paragraph
+            .source
+            .text_runs()
+            .iter()
+            .map(|run| {
+                let start = position;
+                position = position.saturating_add(run.length().max(0) as usize);
+                let Some(embedded) = run.downcast_ref::<EmbeddedControlRun>() else {
+                    return run.clone();
+                };
+                if start < local_start {
+                    return run.clone();
+                }
+                let can_capture = if let Some((host, generation)) = host {
+                    if host.page_layout_generation() != generation {
+                        return run.clone();
+                    }
+                    host.measure_hosted_control(embedded.control(), available_size, generation)
+                } else {
+                    false
+                };
+                let measured: Rc<dyn TextRun> = Rc::new(if can_capture {
+                    embedded.with_hosted_measurement()
+                } else {
+                    embedded.with_cached_hosted_metrics()
+                });
+                objects.insert(embedded.control().clone(), measured.clone());
+                measured
+            })
+            .collect();
+        Some(Self {
+            source: paragraph.source.with_text_runs(Rc::new(runs)),
+            objects,
+        })
+    }
+
+    fn replace_object(&self, run: &Rc<dyn TextRun>) -> Option<Rc<dyn TextRun>> {
+        let embedded = run.downcast_ref::<EmbeddedControlRun>()?;
+        self.objects.get(embedded.control()).cloned()
+    }
 }
 
 /// The line's allocation and the position of its natural glyph box within it.
@@ -466,6 +540,7 @@ impl RichTextLayout {
         trimming: &Rc<dyn TextTrimming>,
         terminal: bool,
         start: &RichTextBreak,
+        host: Option<(&crate::RichTextBlock, u64)>,
     ) -> Rc<Self> {
         let formatter = <dyn TextFormatter>::current();
         let mut result = Self {
@@ -475,6 +550,7 @@ impl RichTextLayout {
             next: start.clone(),
             has_overflow: false,
             is_trimmed: false,
+            hosted_objects_measured: host.is_some(),
         };
         let width = if constraint.width.is_nan() {
             f64::INFINITY
@@ -488,11 +564,13 @@ impl RichTextLayout {
         };
         let mut y = 0.0_f64;
         let mut widest = 0.0_f64;
+        let mut preceding_bottom_margin = 0.0_f64;
 
         'paragraphs: for paragraph_index in start.paragraph..result.source.paragraphs.len() {
             let paragraph = &result.source.paragraphs[paragraph_index];
             let block = &paragraph.block;
-            let mut margin = block.margin();
+            let block_margin = block.margin();
+            let mut margin = block_margin;
             if let Some(paragraph) = block.to_ref().cast::<Paragraph>() {
                 margin.left += paragraph.left_indent();
                 margin.right += paragraph.right_indent();
@@ -508,10 +586,46 @@ impl RichTextLayout {
                 None
             };
             let mut previous_is_shared = previous.is_some();
-            if local == 0 {
+            // A full page does not visit or measure objects in the next block.
+            if !result.lines.is_empty()
+                && ((height.is_finite() && y >= height)
+                    || (max_lines > 0 && result.lines.len() >= max_lines))
+            {
+                result.next = RichTextBreak {
+                    paragraph: paragraph_index,
+                    local_position: local,
+                    position: paragraph.offset + local,
+                    previous_line_break: previous,
+                };
+                result.has_overflow = true;
+                break;
+            }
+            let paragraph_y = y;
+            if result.source.collapse_paragraph_margins {
+                // BlockNode::Measure suppresses the first page margin, carries
+                // only the preceding bottom margin, and applies their maximum.
+                margin.top = if result.lines.is_empty() {
+                    0.0
+                } else {
+                    margin.top.max(preceding_bottom_margin)
+                };
+                margin.bottom = 0.0;
+                y += margin.top;
+            } else if local == 0 {
                 y += margin.top;
             }
             let paragraph_width = (width - margin.left - margin.right).max(0.0);
+            // The hosted object receives the paragraph's fixed available
+            // measure size, independent of pen position and first-line indent.
+            let hosted = HostedParagraphSource::new(
+                paragraph,
+                local,
+                Size::new(
+                    (width - block_margin.left - block_margin.right).max(0.0),
+                    (height - y - margin.bottom).max(0.0),
+                ),
+                host,
+            );
             let line_height = block.line_height();
             let strategy = block.line_stacking_strategy();
             let (spacing_rule, spacing) = block
@@ -587,18 +701,27 @@ impl RichTextLayout {
                 properties.set_text_line_bounds(result.source.text_line_bounds);
                 properties.set_line_metrics_mode(TextLineMetricsMode::FontFamily);
                 let properties: Rc<dyn TextParagraphProperties> = Rc::new(properties);
-                let input_break = previous.as_ref().map(|value| value.fork());
+                let input_break = previous.as_ref().map(|value| {
+                    if first_line {
+                        if let Some(hosted) = &hosted {
+                            return value.fork_with_object_runs(|run| hosted.replace_object(run));
+                        }
+                    }
+                    value.fork()
+                });
                 let Some(index) = i32::try_from(local).ok() else {
                     result.has_overflow = true;
                     break 'paragraphs;
                 };
                 let formatted = formatter.format_line_with_cache(
-                    &paragraph.source,
+                    hosted
+                        .as_ref()
+                        .map_or(&paragraph.source, |hosted| &hosted.source),
                     index,
                     line_width.max(f64::MIN_POSITIVE),
                     &properties,
                     input_break.as_ref(),
-                    Some(&paragraph.cache),
+                    hosted.is_none().then_some(&paragraph.cache),
                 );
                 let empty_line = formatted.is_none();
                 let mut line = formatted.unwrap_or_else(|| {
@@ -634,6 +757,10 @@ impl RichTextLayout {
                         || (max_lines > 0 && result.lines.len() >= max_lines))
                 {
                     line.dispose();
+                    if first_line {
+                        // An empty paragraph fragment contributes no margin.
+                        y = paragraph_y;
+                    }
                     result.next = RichTextBreak {
                         paragraph: paragraph_index,
                         local_position: local,
@@ -692,6 +819,7 @@ impl RichTextLayout {
                 previous_is_shared = false;
                 if end_of_paragraph || consumed == 0 {
                     y += margin.bottom;
+                    preceding_bottom_margin = block_margin.bottom;
                     result.next = RichTextBreak {
                         paragraph: paragraph_index + 1,
                         local_position: 0,
@@ -737,6 +865,20 @@ impl RichTextLayout {
             .fold(0.0_f64, f64::max);
         result.size = Size::new(widest.max(0.0), y.max(0.0));
         Rc::new(result)
+    }
+
+    pub(crate) fn hosted_objects_are_current(&self) -> bool {
+        if !self.source.has_embedded_controls {
+            return true;
+        }
+        self.lines.iter().all(|line| {
+            line.line.text_runs().iter().all(|run| {
+                run.downcast_ref::<EmbeddedControlRun>()
+                    .is_none_or(|embedded| {
+                        self.hosted_objects_measured && embedded.measured_metrics_are_current()
+                    })
+            })
+        })
     }
 
     pub fn draw(&self, sink: &mut dyn ITextDrawingSink, origin: Point) {
@@ -918,3 +1060,7 @@ mod family_metrics_tests;
 #[cfg(test)]
 #[path = "rich_text_fallback_scale_tests.rs"]
 mod fallback_scale_tests;
+
+#[cfg(test)]
+#[path = "rich_text_hosted_object_tests.rs"]
+mod hosted_object_tests;

@@ -342,11 +342,20 @@ fn range_pair(range: &RichEditTextRange) -> (i32, i32) {
     }
 }
 fn paragraph_alignment(selection: &RichEditTextSelection) -> i32 {
-    match selection.paragraph_format().unwrap() {
-        TextFormatValue::Uniform(format) if format.text_alignment == Some(TextAlignment::Right) => {
-            2
-        }
-        TextFormatValue::Uniform(_) => 0,
+    native_paragraph_alignment(selection.paragraph_format().unwrap())
+}
+fn native_paragraph_alignment(value: TextFormatValue<ParagraphFormat>) -> i32 {
+    match value {
+        TextFormatValue::Uniform(format) => match format.text_alignment {
+            Some(TextAlignment::Left) => 0,
+            Some(TextAlignment::Center) => 1,
+            Some(TextAlignment::Right) => 2,
+            Some(TextAlignment::Justify) => 3,
+            Some(other) => panic!("Unmapped native paragraph alignment {other:?}"),
+            // The queried fixtures contain paragraphs; effective formatting
+            // must resolve even an inherited alignment to its concrete value.
+            None => panic!("Native paragraph replay requires resolved alignment"),
+        },
         TextFormatValue::Mixed => -9_999_999,
     }
 }
@@ -512,13 +521,8 @@ fn rich_selection_paragraph_typing_replays_240_native_commands_and_alignment_que
                 if matches!(command.operation, NativeOperation::GetGravity) {
                     if let NativeTarget::External(..) = command.target {
                         let range = replay.independent_target(command.target);
-                        let alignment = match range.paragraph_format().unwrap() {
-                            TextFormatValue::Uniform(format) => match format.text_alignment {
-                                Some(TextAlignment::Right) => 2,
-                                _ => 0,
-                            },
-                            TextFormatValue::Mixed => -9_999_999,
-                        };
+                        let alignment =
+                            native_paragraph_alignment(range.paragraph_format().unwrap());
                         assert_eq!(
                             alignment, command.action_format.2,
                             "{} step {} paragraph alignment",
@@ -540,7 +544,10 @@ fn rich_selection_paragraph_typing_replays_240_native_commands_and_alignment_que
             commands += 1;
         }
     }
-    assert_eq!((commands, paragraph_queries, inserted_format_queries), (240, 64, 11));
+    assert_eq!(
+        (commands, paragraph_queries, inserted_format_queries),
+        (240, 64, 11)
+    );
 }
 
 #[test]
