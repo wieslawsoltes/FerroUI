@@ -197,10 +197,31 @@ impl InputElementImpl for Control {
                 }
             }
         }
+
+        // Reveal focus (winui-materials.md): a glow around the focus visual.
+        if this.is_focused() {
+            let target = if this.focus_adorner.borrow().is_some() { this.get_template_focus_target() } else { None };
+            crate::media::on_control_got_focus(
+                target.as_ref().map(|target| {
+                    let visual: &ferroui_base::Visual = target;
+                    visual
+                }),
+                e,
+            );
+        }
     }
 
     fn on_lost_focus(this: &Self, e: &FocusChangedEventArgs) {
         Self::parent_on_lost_focus(this, e);
+
+        let target = this.get_template_focus_target();
+        crate::media::on_control_lost_focus(
+            this,
+            target.as_ref().map(|target| {
+                let visual: &ferroui_base::Visual = target;
+                visual
+            }),
+        );
 
         let focus_adorner = this.focus_adorner.borrow().clone();
         if let Some(focus_adorner) = focus_adorner {

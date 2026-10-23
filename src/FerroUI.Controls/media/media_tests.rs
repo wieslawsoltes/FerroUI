@@ -178,3 +178,56 @@ fn a_system_backdrop_of_a_window_shows_its_fallback_where_the_platform_draws_non
     assert!(backdrop.controller_of(&as_target).is_none());
     assert!(DesktopAcrylicBackdrop::new().controller_of(&as_target).is_none());
 }
+
+#[test]
+fn reveal_focus_shows_a_glow_around_the_element_keyboard_focus_moves_to() {
+    use crate::primitives::{AdornerLayer, VisualLayerManager};
+    use crate::test_support::TestRoot;
+    use crate::StackPanel;
+    use ferroui_base::input::{KeyModifiers, NavigationMethod};
+
+    let focusable = || {
+        let control = Control::new();
+        control.set_focusable(true);
+        control.set_width(120.0);
+        control.set_height(32.0);
+        control
+    };
+    let (first, second) = (focusable(), focusable());
+    let panel = StackPanel::new();
+    panel.children().add(&first);
+    panel.children().add(&second);
+    let manager = VisualLayerManager::new();
+    manager.set_child(panel);
+    let root = TestRoot::with_child(&manager);
+    root.execute_initial_layout_pass();
+    // The focus visual of the controls (Reveal focus glows around it).
+    let layer = manager.adorner_layer().expect("an adorner layer");
+    let template: Rc<dyn crate::templates::ITemplateOf<Option<Ref<Control>>>> =
+        crate::templates::FuncTemplate::new(|| -> Option<Ref<Control>> { Some(Border::new().upcast()) });
+    layer.set_default_focus_adorner(Some(template));
+
+    // The default kind shows no glow.
+    assert!(first.focus_with(NavigationMethod::Tab, KeyModifiers::NONE));
+    assert!(RevealFocus::glow_host().is_none());
+
+    RevealFocus::set_focus_visual_kind(FocusVisualKind::Reveal);
+    assert!(second.focus_with(NavigationMethod::Tab, KeyModifiers::NONE));
+    let host = RevealFocus::glow_host().expect("a glow");
+    assert!(RevealFocus::focused_element().is_some_and(|element| std::ptr::eq::<ferroui_base::Visual>(&*element, &*second)));
+    let adorned = AdornerLayer::get_adorned_element(&host).expect("adorned");
+    assert!(std::ptr::eq::<ferroui_base::Visual>(&*adorned, &*second));
+    assert_eq!(Thickness::uniform(-glow_inset(2.0)), host.margin());
+    assert!(layer.children().snapshot().iter().any(|child| std::ptr::eq::<Control>(&**child, &*host)));
+
+    // Focus moved by the pointer shows none.
+    assert!(first.focus_with(NavigationMethod::Pointer, KeyModifiers::NONE));
+    assert!(RevealFocus::glow_host().is_none());
+    assert!(!layer.children().snapshot().iter().any(|child| std::ptr::eq::<Control>(&**child, &*host)));
+
+    // Back to the default kind: the glow goes.
+    assert!(second.focus_with(NavigationMethod::Directional, KeyModifiers::NONE));
+    assert!(RevealFocus::glow_host().is_some());
+    RevealFocus::set_focus_visual_kind(FocusVisualKind::HighVisibility);
+    assert!(RevealFocus::glow_host().is_none());
+}

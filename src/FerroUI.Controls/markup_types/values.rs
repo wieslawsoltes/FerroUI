@@ -100,6 +100,7 @@ pub(super) const TYPES: &[&MarkupType] = &[
     // The WinUI materials (winui-materials.md), declared next to the types.
     <crate::media::ApplicationTheme as MarkupTyped>::MARKUP,
     <crate::media::RevealBrushState as MarkupTyped>::MARKUP,
+    <crate::media::FocusVisualKind as MarkupTyped>::MARKUP,
 ];
 
 /// Registers the nullable forms of the value types with the untyped value
@@ -113,6 +114,7 @@ pub(super) fn register_value_types() {
     ValueTypes::register_nullable::<TextLayoutRoundingPlacement>();
     ValueTypes::register_nullable::<crate::media::ApplicationTheme>();
     ValueTypes::register_nullable::<crate::media::RevealBrushState>();
+    ValueTypes::register_nullable::<crate::media::FocusVisualKind>();
     // A tick list is the list of numbers it derives from: the same list, so that the
     // members of the list (`Capacity`, `Add`) are reached through the tick list.
     ValueTypes::register_cast::<TickList, MediaCollection<f64>>(|ticks| MediaCollection::from_list(ticks.list().clone()));

@@ -140,3 +140,7 @@ A "contributor" is any person that distributes its contribution under this licen
 (D) If you distribute any portion of the software in source code form, you may do so only under this license by including a complete copy of this license with your distribution. If you distribute any portion of the software in compiled or object code form, you may only do so under a license that complies with this license.
 (E) The software is licensed "as-is." You bear the risk of using it. The contributors give no express warranties, guarantees or conditions. You may have additional consumer rights under your local laws which this license cannot change. To the extent permitted under your local laws, the contributors exclude the implied warranties of merchantability, fitness for a particular purpose and non-infringement.
 ```
+
+## WinUI Reveal focus
+
+`media/reveal_focus.rs` is ported from microsoft-ui-xaml (<https://github.com/microsoft/microsoft-ui-xaml>, branch `winui3/main`, commit `7e4b0c2096be402f51cc8f7d203ebf67cff183d0`, `dxaml/xcp/components/FocusRect`; MIT License, Copyright (c) Microsoft Corporation). The glow image `media/assets/nine_grid_focus_glow.png` is copied unmodified from `dxaml/xcp/dxaml/images/NineGridFocusGlow.png` of the same commit, under the same license. The other files of `media/` (the Reveal brushes and lights and the system backdrops) are ported from the same project (`docs/porting/winui-materials.md`).

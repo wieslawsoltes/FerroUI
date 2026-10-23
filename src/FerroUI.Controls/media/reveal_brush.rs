@@ -229,6 +229,7 @@ pub(crate) fn on_top_level_created(top_level: &TopLevel) {
         attach_lights_to_element(top_level);
     }
     track_window_activation(top_level);
+    super::track_focus(top_level);
 }
 
 /// Tells the material policy whether a window of the application is active
