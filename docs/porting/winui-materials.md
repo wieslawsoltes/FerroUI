@@ -270,14 +270,32 @@ Windows checks are listed in section 9.
 
 ## 7. Status
 
-| Phase | State |
-|---|---|
-| 1 | planned |
-| 2 | planned |
-| 3 | planned |
-| 4 | planned |
-| 5 | planned |
-| 6 | planned |
+All six phases are implemented. The inventory of section 4 has 52 rows (14 rendering primitives,
+8 acrylic, 13 Reveal and XAML lights, 12 system backdrops, 5 theme and samples); before the port 9
+were partial and 43 missing. After it:
+
+| Section | Rows | Done | Partial (see section 8) |
+|---|---|---|---|
+| 4.1 Rendering primitives | 14 | 11 | 3: `ArithmeticCompositeEffect` (an image and a colour, not two images), `CompositeEffect` (every mode but `MaskInvert`), `SceneLightingEffect` (ambient and diffuse; no specular, no normal map) |
+| 4.2 Acrylic | 8 | 8 | |
+| 4.3 Reveal and XAML lights | 13 | 13 | |
+| 4.4 System backdrops | 12 | 11 | 1: `SystemBackdrop` on windows, the menu flyout presenter and (an addition) the context menu; not on `Popup` and `FlyoutBase` |
+| 4.5 Theme and samples | 5 | 4 | 1: the Reveal brushes and colours are ported, the Reveal styles stay waived (deprecated in WinUI 3) |
+
+| Phase | State | Where |
+|---|---|---|
+| 1 | done | `ferroui_base::media::ColorMatrix`, `platform::IDrawingContextImplWithLayerEffects` (Skia, Vello, the compositor's proxy, the mock), `rendering::composition::effects` (the effects and the effect graph), `server::render_scope` (the backdrop), `drawing::composition_painted_brush` (composition brushes as element brushes), `CompositionHostBackdropBrush` |
+| 2 | done | `media::{MaterialPolicy, XamlCompositionBrushBase, AcrylicBrush}`, `PlatformMaterialSettings` (macOS: reduce transparency and low power mode; Windows: `EnableTransparency` and the battery saver) |
+| 3 | done | `media::XamlLight`, `Visual::lights()`, the scene lighting of `server_composition_light.rs`, `ferroui_controls::media::{RevealBrush, RevealBackgroundBrush, RevealBorderBrush, RevealHoverLight, RevealPressLight, RevealBorderLight, XamlAmbientLight}` |
+| 4 | done | `rendering::composition::system_backdrops`, `ferroui_controls::media::{SystemBackdrop, MicaBackdrop, DesktopAcrylicBackdrop}`, `TopLevel::system_backdrop`, `MenuFlyoutPresenter::system_backdrop`, `ContextMenu::system_backdrop`, `ITopLevelImpl::set_system_backdrop` (macOS, Windows) |
+| 5 | done | `scripts/winui-theme/convert.py` keeps `AcrylicBrush`, the Reveal brushes and `DesktopAcrylicBackdrop`; the menu flyout presenter and the context menu draw `MenuFlyoutSystemBackdrop`; the popups of `Menu` and `MenuItem` draw `AcrylicBackgroundFillColorDefaultBrush`; a window with a system backdrop has a transparent background |
+| 6 | done | the "Materials (WinUI)" page and the "Reveal and XAML lights" section of "Composition (WinUI)" in the ControlCatalog (section 10) |
+
+Tests: `composition_winui_material_tests.rs` (the effects, the backdrop, composition brushes as
+element brushes, the acrylic recipe, its policy and cross-fade, the XAML lights, the controllers),
+`color_matrix.rs`, `acrylic_brush.rs`, `effect_graph.rs` (unit tests), `ferroui_controls::media`
+(`media_tests.rs`: the Reveal states and lights, the border lights of the window, the effects of
+Reveal, the system backdrop of a window), the platform settings of macOS and Windows.
 
 ## 8. Deviations from WinUI
 
@@ -286,10 +304,51 @@ Addition). `DEVIATIONS.md` points here for this area.
 
 | WinUI | Port | Kind | Why | Since |
 |---|---|---|---|---|
+| A backdrop brush reads the pixels composed under the visual | The compositor renders the tree again from its root up to the visual that paints the brush, inside the brush's rectangle (section 6.1); backdrops nest two deep | Representation | No backend can read its target back in the middle of a frame (the Vello scene is drawn at the end) | 0.4 |
+| `CompositionHostBackdropBrush`: what the system composes behind the window, blurred by the system | Clears its rectangle to transparent when the window is transparent (the platform shows what is behind it), draws nothing when the window is opaque | Representation | The desktop behind a window is not readable by an application | 0.4 |
+| The acrylic recipe asks the effect wrapper for `Color` where it means the luminosity blend and for `Luminosity` where it means the colour blend (the names are swapped between Direct2D and its wrapper) | `BlendEffectMode` has the documented meaning of each mode; the acrylic graph asks for the mode that gives WinUI's result (the luminosity of the luminosity colour, then the hue and saturation of the tint) | Representation | One meaning per name | 0.4 |
+| `SceneLightingEffect`: ambient, diffuse and specular lighting of a normal map | Ambient and diffuse, a flat surface; `SpecularAmount`, `SpecularShine` and `NormalMapSource` are accepted and not drawn | Missing | Reveal uses ambient 0 and diffuse 0.2 on a flat surface | 0.4 |
+| The attenuation of a light lighting a scene lighting effect, in device-independent pixels | In units of 100 DIPs (`SCENE_LIGHTING_DISTANCE_UNIT`) | Representation | The constants of the Reveal lights (linear 0.5, constant 2) are meant for the effect's units; in DIPs the light would not reach past a few pixels. The lighting of content (`winui-composition.md`) keeps DIPs | 0.4 |
+| `ArithmeticCompositeEffect` of any two sources | Of an image and a colour (a colour matrix); two images fail to load (`EffectNotSupported`) | Missing | Reveal needs the colour form only | 0.4 |
+| `CompositeEffect` with `MaskInvert` | Fails to load | Missing | No blend mode of the backends draws it in one layer | 0.4 |
+| The noise of the materials at 1 texel per physical pixel | 1 texel per DIP | Representation | The brush has no scale of its own | 0.4 |
+| WinUI 3 always draws the Reveal brushes as their fallback colour (Reveal is deprecated; its policy reports "disabled") | The Reveal brushes draw their lights unless `AlwaysUseFallback` is set or the material policy disables materials | Behaviour | The port of Reveal is asked for; an application that wants WinUI 3's look sets `AlwaysUseFallback` | 0.4 |
+| The Reveal styles (`ButtonRevealStyle`, ...) | Waived, as before | Missing | Deprecated in WinUI 3; the default styles they duplicate are ported | 0.4 |
+| `UIElement.Lights` in markup | `Visual::lights()` in code | Missing | The markup collection property is not part of this port | 0.4 |
+| A XAML composition brush on several compositors | Bound to the compositor of the first element that draws it | Representation | One compositor per process in practice | 0.4 |
+| `MicaController`, `DesktopAcrylicController` default colours (closed source) | Chosen from the documented look of each kind and theme: Mica `Base` light `#F3F3F3` tint 0.5, dark `#202020` tint 0.8; `BaseAlt` light `#DADADA` 0.5 (fallback `#E8E8E8`), dark `#0A0A0A` 0 (fallback `#202020`); desktop acrylic `Base` light `#F3F3F3` 0 / luminosity 0.9 (fallback `#F9F9F9`), dark `#202020` 0.5 / 0.96 (fallback `#2C2C2C`); `Thin` light `#D3D3D3` 0 / 0.44, dark `#545454` 0 / 0.64 | Representation | Not published; to be compared on Windows (section 9) | 0.4 |
+| The system draws Mica and desktop acrylic | macOS: an `NSVisualEffectView` behind the content (`windowBackground` for Mica `Base`, `underWindowBackground` for `BaseAlt`, `menu` for desktop acrylic `Base`, `sidebar` for `Thin`) in the appearance of the configuration's theme; the controller's tint, luminosity and fallback colours do not change it; elsewhere but Windows the fallback colour | Representation | The closest material of each platform | 0.4 |
+| `Popup.SystemBackdrop`, `FlyoutBase.SystemBackdrop` | Not ported | Missing | The menu flyout presenter is where the theme uses a system backdrop | 0.4 |
+| The system backdrop of a menu flyout presenter in a windowed popup (the system draws desktop acrylic behind the popup's window) | The fallback colour in a popup window of its own; in-app acrylic of the window in an overlay popup | Behaviour | Only windows get a platform backdrop in the port | 0.4 |
+| (no counterpart) `ContextMenu.SystemBackdrop` | The property of the menu flyout presenter, shared by the context menu; the WinUI theme sets `MenuFlyoutSystemBackdrop` | Addition | FerroUI's context menu is a presenter of its own | 0.4 |
+| The popups of a menu bar item and of a sub item are menu flyout presenters with the system backdrop | FerroUI's `Menu` and `MenuItem` popups draw `AcrylicBackgroundFillColorDefaultBrush` | Representation | A border of a template has no system backdrop | 0.4 |
+| (no counterpart) the window's background under a system backdrop | The WinUI theme's `Window` has a transparent background in `:system-backdrop` | Addition | FerroUI's window theme draws a background WinUI's window does not | 0.4 |
+| `MicaKind`, `DesktopAcrylicKind`, `SystemBackdropTheme` in `Microsoft.UI.Composition.SystemBackdrops` | Markup enums of the namespace `FerroUI.Media` | Representation | The XAML namespace of the other materials | 0.4 |
+| The material policy reads the energy saver, the transparency effects setting and the speed of effects of Windows | The same on Windows; on macOS low power mode and "reduce transparency"; elsewhere materials are always on | Representation | The settings each platform has | 0.4 |
+| The colour matrix of an effect runs on the GPU | Skia: a matrix colour filter (straight alpha) or a runtime colour filter (premultiplied); Vello: applied to the pixels of a scene of the CPU renderer | Representation | vello has no colour matrix filter | 0.4 |
 
 ## 9. Windows checks
 
 What a Windows machine (Windows 11 22H2 or later, and Windows 10) must confirm, because it was not
-run in this port's development:
+run in this port's development (it is compiled for `x86_64-pc-windows-msvc` only):
 
-- to be filled in with phase 4.
+1. `MicaBackdrop` (`Base`, `BaseAlt`) and `DesktopAcrylicBackdrop` on a window: DWM draws
+   `DWMSBT_MAINWINDOW`, `DWMSBT_TABBEDWINDOW` and `DWMSBT_TRANSIENTWINDOW` behind the client area
+   (`DWMWA_SYSTEMBACKDROP_TYPE`, frame extended into the whole client area), and the render
+   surface leaves it visible (the window's background is transparent, the clear colour has zero
+   alpha).
+2. `DWMWA_USE_IMMERSIVE_DARK_MODE` follows the theme of the configuration (dark Mica in the dark
+   theme).
+3. An inactive window shows the fallback colour (`IsInputActive` false), and the material comes back
+   when it is activated.
+4. Windows 10 and Windows 11 before 22H2 (no system backdrop types): the controllers report
+   `Fallback` and the window shows the fallback colour.
+5. The material policy: turning "Transparency effects" off (`EnableTransparency`, read again on
+   `WM_SETTINGCHANGE`) and the battery saver (`WM_POWERBROADCAST`) make acrylic and Reveal draw their
+   fallback colours and the system backdrops fall back.
+6. High contrast: the controllers draw the high contrast background colour.
+7. The default colours of the controllers (section 8) against WinUI's own window with the same
+   backdrop.
+8. Removing the system backdrop gives the window its opaque background back (`DWMSBT_AUTO`).
+9. The menu flyout presenter and the context menu with `MenuFlyoutSystemBackdrop` in overlay popups
+   and in popup windows.
