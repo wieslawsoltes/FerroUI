@@ -131,6 +131,12 @@ impl DocumentChangedEventArgs {
 #[derive(Clone)]
 pub struct RichTextDocument(Rc<RichTextDocumentData>);
 
+#[derive(Clone, Copy, PartialEq, Eq)]
+enum ParagraphAlignmentSource {
+    Leading,
+    Trailing,
+}
+
 struct RichTextDocumentData {
     blocks: BlockCollection,
     revision: Cell<u64>,
@@ -381,6 +387,27 @@ impl RichTextDocument {
     }
 
     pub fn replace_text(&self, range: Range<usize>, text: &str) -> Result<(), DocumentError> {
+        self.replace_text_core(range, text, ParagraphAlignmentSource::Leading)
+    }
+
+    /// Typed replacement across paragraphs retains the trailing paragraph's
+    /// alignment. The remaining paragraph-format fields keep the established
+    /// structured-document policy: the native observation corpus characterizes
+    /// alignment, not tabs, indents, spacing or arbitrary paragraph defaults.
+    pub(crate) fn replace_typed_text(
+        &self,
+        range: Range<usize>,
+        text: &str,
+    ) -> Result<(), DocumentError> {
+        self.replace_text_core(range, text, ParagraphAlignmentSource::Trailing)
+    }
+
+    fn replace_text_core(
+        &self,
+        range: Range<usize>,
+        text: &str,
+        alignment_source: ParagraphAlignmentSource,
+    ) -> Result<(), DocumentError> {
         self.ensure_available()?;
         self.validate_range(range.clone())?;
         if range.is_empty() && text.is_empty() {
@@ -495,7 +522,7 @@ impl RichTextDocument {
                 replacement.next_link_field_id = snapshot.next_link_field_id;
             }
         }
-        self.replace_range_internal(range, &replacement, true)
+        self.replace_range_internal(range, &replacement, true, alignment_source)
     }
 
     pub fn replace_range(
@@ -503,7 +530,7 @@ impl RichTextDocument {
         range: Range<usize>,
         fragment: &DocumentSnapshot,
     ) -> Result<(), DocumentError> {
-        self.replace_range_internal(range, fragment, false)
+        self.replace_range_internal(range, fragment, false, ParagraphAlignmentSource::Leading)
     }
 
     /// Internal text transformations retain existing field identity; copied
@@ -526,7 +553,7 @@ impl RichTextDocument {
                 ));
             }
         }
-        self.replace_range_internal(range, fragment, true)
+        self.replace_range_internal(range, fragment, true, ParagraphAlignmentSource::Leading)
     }
 
     fn replace_range_internal(
@@ -534,6 +561,7 @@ impl RichTextDocument {
         range: Range<usize>,
         fragment: &DocumentSnapshot,
         inherited: bool,
+        alignment_source: ParagraphAlignmentSource,
     ) -> Result<(), DocumentError> {
         self.ensure_available()?;
         self.validate_range(range.clone())?;
@@ -587,6 +615,14 @@ impl RichTextDocument {
             inserted[0].format = first.format.clone();
             let inserted_last = inserted.len() - 1;
             inserted[inserted_last].inlines.append(&mut suffix);
+        }
+        if alignment_source == ParagraphAlignmentSource::Trailing && start_index != end_index {
+            // A typed break creates another paragraph in the merged context;
+            // every inserted paragraph therefore receives the same alignment.
+            // Preserve None exactly so inherited alignment remains inherited.
+            for paragraph in &mut inserted {
+                paragraph.format.text_alignment = last.format.text_alignment;
+            }
         }
         snapshot
             .paragraphs

@@ -155,47 +155,93 @@ The 29 `rich_selection_gravity_` regression definitions replay the representable
 commands, mode readbacks, duplicates, selected navigation units and projected
 visible endpoints. Ten ordinary/paragraph formatting fixtures include 75 target
 format checks and ten inserted-range checks. Five nonempty replacement fixtures
-retain and explicitly assert the native trailing-paragraph alignment versus the
-model's current leading-paragraph merge policy. The literal generated data keeps
+now assert the measured trailing-paragraph alignment. The later paragraph-boundary
+matrix below supplies the additional evidence that permitted this correction.
+The literal generated data keeps
 all 250 native observations, including the two null-BSTR calls. New framework
 runtime results belong to the current central gate in [TESTS.md](TESTS.md).
 
 Remaining partials are the synthetic terminal EOP, independent duplicate cached
 collapsed formatting/physical rebasing, initial native caret caches after external
-format setup, automatic AT_END_OF_LINE updates, and the cross-paragraph alignment
-difference. Native flags are retained in the literal data; replay asserts
+format setup, automatic AT_END_OF_LINE updates, and the remaining unmeasured
+paragraph-format survival rules. Native flags are retained in the literal data;
+replay asserts
 START_ACTIVE and REPLACE without pretending automatic line-affinity parity.
 The stronger direct-child structural-install boundary in [LINK-FIELDS.md](LINK-FIELDS.md)
 also remains. No system-MSFTEDIT record establishes the external WinUI engine's
 complete behavior. These differences are RT-I32 and RT-I35.
 
-## Pending paragraph TypeText boundary measurement
+## Measured TypeText paragraph boundaries and alignment
 
-The actual-selection oracle now defines 16 more paragraph replacement fixtures,
-adding 240 commands to the original 250 and producing a declared 490-command /
-34-fixture family. The historical 250-command evidence remains immutable. The
-new fixtures reuse the existing actual-selection identity and raw format/text
-snapshots; no new COM ABI or observation fields are introduced. Their Windows
-execution is pending. The parser's 39 passing tests validate extraction and
-historical preservation, not the unexecuted native outcomes.
+The expanded actual-selection oracle has executed on both x64 and ARM64. Its
+**490 commands / 34 fixtures** include the historical 250-command matrix and
+16 additional paragraph replacement fixtures containing **240 commands**. The
+[x64 record](native-msftedit-e5a0778a-x64.json) and
+[ARM64 record](native-msftedit-e5a0778a-arm64.json) preserve their separate engine,
+checkout, workflow and verified archive provenance. Their fixture, command,
+endpoint, format, HRESULT and interface observations agree. The earlier
+250-command JSON remains immutable.
 
-The five measured reversed emoji replacements still establish only their exact
-source ranges and assigned alignment/Bold/Italic values. The additional matrix
-will distinguish paragraph-mark/start/end boundaries, direction, empty input,
-CR/LF/CRLF, opposite alignments and multiple paragraphs before changing the
-production splice policy. The present leading-versus-trailing alignment mismatch
-and its regression remain intact under RT-I35.
+These measurements distinguish two cases that a plain string splice cannot:
 
-Neither this probe nor successful extraction proves general paragraph-format
-survival. It does not measure indents, paragraph spacing, tabs, style inheritance,
-all Gravity/input combinations, bulk SetText/Delete, clipboard or IME policy.
-Synthetic terminal-EOP projection and automatic AT_END_OF_LINE affinity remain
-separate. System MSFTEDIT observations also do not establish external WinUI text
-engine parity. New native evidence and a bounded implementation with independent
-framework regressions are required before any corresponding partial mapping is
-promoted.
+| Source, visible UTF-16 selection and TypeText | Visible result | Alignment |
+|---|---|---|
+| `ab\ncd`, `1..4`, `"X"` | `aXd` | Trailing paragraph |
+| `ab\ncd`, `2..3`, `"X"` | `abX\ncd` | Existing first and second paragraphs |
+| `ab\ncd`, `1..3`, `"X"` | `aX\ncd` | Existing first and second paragraphs |
+| `ab\ncd`, `0..3`, `"X"` | `X\ncd` | Existing first and second paragraphs |
+| `ab\ncd`, `1..5`, `"X"` | `aX` | Trailing paragraph |
+| `ab\ncd`, `1..4`, `"\r\n"` | `a\n\nd` | Trailing alignment on all resulting paragraphs |
 
-## Pending endpoint evidence: Stage A
+The table uses the model's visible LF separators; the record keeps native CR and
+its synthetic terminal EOP. Forward and reversed selections give the same text
+and alignment. Empty TypeText remains a no-op with the directed selection intact.
+The matrix also checks emoji replacement, opposite alignments and three source
+paragraphs.
+
+`RichTextEditor::prepare_typing_range` now excludes the last selected structural
+paragraph mark when the selection ends exactly at the next block's start. It
+uses actual block boundaries, so a literal LF inside a Run and an inline
+`LineBreak` do not acquire paragraph protection. The accepted replacement range
+is computed before overtype and MaxLength planning; a retained mark cannot create
+false insertion capacity or cause rejected Unicode input to delete the selection.
+Ordinary caret typing keeps its existing fast path. The original directed
+selection stays in the undo snapshot. OVERTYPE also uses the original selection
+to decide whether its first scalar replaces selected content, even when mark
+protection has shortened the effective replacement range to zero.
+
+A nonempty typed replacement crossing the remaining paragraph boundary retains
+the trailing paragraph's **alignment** through the existing rich model splice.
+This applies to all paragraphs created by typed CR/LF, with the existing TypeText
+rule that CR and LF are separate typed breaks. An inherited alignment remains
+unassigned in the resulting snapshot instead of being frozen to the current
+value. Character formatting, semantic inlines, Link IDs and all other paragraph
+properties keep their existing policies. Bulk SetText, Delete, paste and IME
+replacement do not use the new typed endpoint/alignment policy.
+
+The literal Rust replay executes all **240 new commands** and checks all
+**64 external paragraph alignment queries**, eleven printable inserted-range
+Bold/Italic queries, projected visible text, selection
+direction, accepted Gravity and supported flags. The five older reversed emoji
+replacement fixtures now agree on alignment as well. Twelve independent framework
+tests cover scalar-safe truncation, both selection directions, exact undo/redo,
+inherited alignment, rejected length-limited input, soft/literal breaks, atomic
+publication, failed grouped edits and independent metadata. A combined OVERTYPE
+regression checks retained marks, supplementary scalars, length limits and history.
+Native observations independently establish OVERTYPE stopping at a mark and the
+selected-mark retention rule; their combination remains a framework regression,
+not a separately measured native fixture. These test definitions supplement the
+native observations; execution results belong in [TESTS.md](TESTS.md).
+
+This closes the measured TypeText endpoint/alignment discrepancy, not every
+paragraph-format contract. Tabs, indents, line/paragraph spacing, arbitrary
+paragraph inheritance, post-break cached character formatting, independent
+paragraph-mark styling, bulk deletion/paste/IME policies and automatic
+AT_END_OF_LINE affinity still need their own native comparisons. System-MSFTEDIT
+results do not establish the packaged WinUI engine's complete behavior. The
+relevant public API entries therefore remain partial.
+
+## Measured endpoint evidence: Stage A
 
 The separate native `range_tracking` source family adds 15 fresh-control
 fixtures and 90 commands without extending or rewriting the immutable
@@ -204,17 +250,18 @@ an independent range, sets requested UIBehavior or Forward, creates its
 duplicate, replaces text through a separate range and reads both modes. The
 new relationships examine shared endpoints, exact/covering/right-overlap
 replacements and carets, including identical text and retained prefixes or
-suffixes. These cases can distinguish an edit's original span from a minimal
-visible-string difference. Their native results are pending.
+suffixes. These cases distinguish an edit's original span from a minimal
+visible-string difference. Their 90-command / 15-fixture native results are now
+preserved in the separate x64 and ARM64 records linked above; both agree.
 
 Raw HRESULTs, full story and primary/duplicate states are retained; neither the
-probe nor its parser predicts a readback or endpoint law. The existing 490-call
-actual-selection source matrix and measured 250-call record remain separate.
+probe nor its parser predicts a readback or endpoint law. The executed 490-call
+actual-selection matrix and historical 250-call record remain separate.
 The 1,577 independent Gravity and 137 Link observations stay immutable.
 
 Because these snapshots read GetFont/GetPara, they can populate formatting
 caches. They cannot resolve the remaining independent-duplicate cached-format
 contract. Stage B needs a distinct experiment that controls when the first font
 read occurs. The completed 50-test extractor gate checks the observation protocol
-only. No production tracking or format-cache policy follows from this pending
-matrix, and the relevant API mappings remain partial.
+only. No production tracking or format-cache policy is changed by this
+measurement alone, and the relevant API mappings remain partial.

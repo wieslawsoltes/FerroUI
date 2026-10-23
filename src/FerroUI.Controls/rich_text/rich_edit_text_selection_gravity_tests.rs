@@ -14,6 +14,9 @@ use std::cell::Cell;
 #[path = "rich_edit_text_selection_gravity_native_cases.rs"]
 mod native_cases;
 
+#[path = "rich_edit_text_paragraph_typing_native_cases.rs"]
+mod paragraph_native_cases;
+
 #[derive(Clone, Copy, Debug)]
 enum NativeTarget {
     Primary,
@@ -143,7 +146,14 @@ impl Replay {
     fn independent_target(&self, target: NativeTarget) -> RichEditTextRange {
         match target {
             NativeTarget::Duplicate => self.duplicate.as_ref().unwrap().clone(),
-            NativeTarget::External(start, end) => self.document.get_range(start, end).unwrap(),
+            NativeTarget::External(start, end) => {
+                let length = self.document.document().text_length();
+                assert!(start <= length && end <= length + 1);
+                // Native paragraph inspection includes its synthetic terminal
+                // EOP. Only that extra endpoint projects to the visible end;
+                // this does not model independently styled paragraph marks.
+                self.document.get_range(start, end.min(length)).unwrap()
+            }
             NativeTarget::Primary => panic!("the native selection is not an independent range"),
         }
     }
@@ -444,7 +454,7 @@ fn rich_selection_gravity_replays_ten_native_collapsed_format_and_typing_fixture
 }
 
 #[test]
-fn rich_selection_gravity_native_nonempty_replacement_keeps_model_paragraph_merge_policy() {
+fn rich_selection_gravity_native_nonempty_replacement_retains_trailing_alignment() {
     let _scope = test_scope();
     let mut replacements = 0;
     for fixture in native_cases::FIXTURES
@@ -463,16 +473,74 @@ fn rich_selection_gravity_native_nonempty_replacement_keeps_model_paragraph_merg
                     character_pair(&replay.document.selection().character_format().unwrap()),
                     (command.after.bold, command.after.italic)
                 );
-                // This native engine retains the trailing paragraph alignment.
-                // The existing structured model retains the leading paragraph;
-                // selection Gravity does not redefine paragraph merge ownership.
+                // The extended native paragraph boundary matrix separately
+                // confirms this alignment rule across direction and input form.
                 assert_eq!(command.after.alignment, 2);
-                assert_eq!(paragraph_alignment(&replay.document.selection()), 0);
+                assert_eq!(paragraph_alignment(&replay.document.selection()), 2);
                 replacements += 1;
             }
         }
     }
     assert_eq!(replacements, 5);
+}
+
+#[test]
+fn rich_selection_paragraph_typing_replays_240_native_commands_and_alignment_queries() {
+    let _scope = test_scope();
+    assert_eq!(paragraph_native_cases::FIXTURES.len(), 16);
+    let mut commands = 0;
+    let mut paragraph_queries = 0;
+    let mut inserted_format_queries = 0;
+    for fixture in paragraph_native_cases::FIXTURES {
+        let mut replay = Replay::new(fixture);
+        let printable_insertion = matches!(
+            fixture.commands[9].operation,
+            NativeOperation::TypeText(Some(text))
+                if !text.is_empty() && !text.contains(['\r', '\n'])
+        );
+        for command in fixture.commands {
+            assert!(replay.apply(fixture, command));
+            replay.assert_state(fixture, command.step, command.after);
+            if command.step >= 9 {
+                assert_eq!(
+                    paragraph_alignment(&replay.document.selection()),
+                    command.after.alignment,
+                    "{} step {} live alignment",
+                    fixture.name,
+                    command.step,
+                );
+                if matches!(command.operation, NativeOperation::GetGravity) {
+                    if let NativeTarget::External(..) = command.target {
+                        let range = replay.independent_target(command.target);
+                        let alignment = match range.paragraph_format().unwrap() {
+                            TextFormatValue::Uniform(format) => match format.text_alignment {
+                                Some(TextAlignment::Right) => 2,
+                                _ => 0,
+                            },
+                            TextFormatValue::Mixed => -9_999_999,
+                        };
+                        assert_eq!(
+                            alignment, command.action_format.2,
+                            "{} step {} paragraph alignment",
+                            fixture.name, command.step,
+                        );
+                        if command.step == 10 && printable_insertion {
+                            assert_eq!(
+                                range_pair(&range),
+                                (command.action_format.0, command.action_format.1),
+                                "{} inserted character format",
+                                fixture.name,
+                            );
+                            inserted_format_queries += 1;
+                        }
+                        paragraph_queries += 1;
+                    }
+                }
+            }
+            commands += 1;
+        }
+    }
+    assert_eq!((commands, paragraph_queries, inserted_format_queries), (240, 64, 11));
 }
 
 #[test]

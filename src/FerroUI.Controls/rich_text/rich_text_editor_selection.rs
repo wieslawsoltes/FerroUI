@@ -86,11 +86,43 @@ impl RichTextEditor {
     /// Enters every supplied scalar as typed input. Unlike bulk text insertion,
     /// TypeText treats CR and LF independently: a CRLF pair types two paragraph
     /// breaks. An empty call is a no-op, including during an IME preview.
+    /// A selection ending at a paragraph start retains its final selected mark;
+    /// a replacement crossing an earlier mark retains the trailing alignment.
     pub fn type_text(&self, text: &str) -> Result<bool, EditError> {
         if text.is_empty() {
             return Ok(false);
         }
         self.insert_text(&text.replace('\r', "\n"), EditKind::Typing)
+    }
+
+    /// Typed replacement retains the last selected paragraph mark when the
+    /// selection ends exactly at the next paragraph's start. This is an actual
+    /// block boundary, not an arbitrary LF inside a Run or a soft LineBreak.
+    /// Native selection observations cover both directed selections, a selected
+    /// mark alone and a whole first paragraph. Bulk edits and IME replacement
+    /// have separate contracts and do not use this adjustment.
+    pub(super) fn prepare_typing_range(
+        &self,
+        mut range: Range<usize>,
+    ) -> Result<Range<usize>, EditError> {
+        if range.is_empty() {
+            return Ok(range);
+        }
+        let checkpoint = self.selection_format_checkpoint();
+        self.document.validate_range(range.clone())?;
+        let mut start = 0;
+        for (index, block) in self.document.blocks().snapshot().iter().enumerate() {
+            if index > 0 && start == range.end {
+                range.end -= 1;
+                break;
+            }
+            if start >= range.end {
+                break;
+            }
+            start += block.text_length() + 1;
+        }
+        self.ensure_selection_format(checkpoint)?;
+        Ok(range)
     }
 
     /// Plans one rich replacement from the original source. Native TypeText
@@ -122,7 +154,10 @@ impl RichTextEditor {
         let mut accepted = String::new();
         let mut accepted_length = 0;
         for (index, scalar) in normalized.chars().enumerate() {
-            let next_end = if !(index == 0 && !range.is_empty())
+            // Paragraph endpoint protection can shorten a selected mark to an
+            // empty replacement range. It remains a selected replacement: the
+            // first scalar must use the original selection's typing semantics.
+            let next_end = if !(index == 0 && !selection.is_empty())
                 && scalar != '\n'
                 && source
                     .get(end)

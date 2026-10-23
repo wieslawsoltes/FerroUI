@@ -1331,3 +1331,28 @@ That dedicated workflow passed Linux Base 4,470, Controls 5,251, XAML 620 with
 generated-reference checks. Windows passed 65 WinUI, two exact-HSTRING, 23 IMM32,
 eight system probes and 779 selected rich Controls tests. Those results belong
 to the measured checkpoint, before this continuation's implementation changes.
+
+## 2026-10-23 — Port measured TypeText paragraph replacement
+
+The verified extension supplies sixteen new native fixtures and 240 commands.
+Typed replacement now retains a selected final structural paragraph mark when
+the range ends at the next paragraph's start. A replacement crossing an earlier
+mark takes the trailing paragraph's alignment, including inherited None, for
+every inserted paragraph. Soft inline breaks remain distinct. Other paragraph
+properties retain their existing, separately documented policy.
+
+Planning occurs before length limits and overtype consumption; original directed
+selection remains in the undo snapshot. The literal replay checks all represented
+command fields, 64 paragraph-alignment queries and eleven inserted-character
+format observations. Twelve framework regressions cover UTF-16 boundaries,
+accepted-input limits, history/group rollback, retained inheritance, publication,
+real RichEditBox integration and the selected-mark/overtype combination. The last
+combination is a framework composition check, not a directly measured native
+fixture. Independent source review compared all sixteen fixtures and 240 literal
+rows against the official x64 record without a mismatch.
+
+The 50 extractor tests pass and pinned inventory regeneration passes. Rust test
+execution is still pending here: initial Controls and Base test code generation
+were killed by SIGKILL under concurrent workspace memory pressure. The failed
+builds are not reported as conformance passes; metadata checking and later
+execution are recorded at their actual checkpoint.

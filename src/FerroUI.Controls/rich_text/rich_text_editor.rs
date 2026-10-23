@@ -936,6 +936,8 @@ impl RichTextEditor {
     }
 
     /// Replaces the selection and applies the current insertion format in one undo unit.
+    /// Typing uses the selected-paragraph endpoint/alignment contract; bulk and
+    /// composition edits retain their independent replacement policies.
     pub fn insert_text(&self, text: &str, kind: EditKind) -> Result<bool, EditError> {
         if self.is_composing() && matches!(kind, EditKind::Typing | EditKind::Composition) {
             return self.commit_composition(text);
@@ -944,6 +946,11 @@ impl RichTextEditor {
         let _operation = self.enter(true)?;
         self.synchronize();
         let range = self.selection().range();
+        let range = if kind == EditKind::Typing {
+            self.prepare_typing_range(range)?
+        } else {
+            range
+        };
         if kind == EditKind::Typing
             && self
                 .selection_options()
@@ -998,7 +1005,11 @@ impl RichTextEditor {
         }
         {
             let _batch = self.document.begin_edit();
-            self.document.replace_text(range.clone(), &text)?;
+            if kind == EditKind::Typing {
+                self.document.replace_typed_text(range.clone(), &text)?;
+            } else {
+                self.document.replace_text(range.clone(), &text)?;
+            }
             if before.document.text_length() == 0 || self.document.text_length() == 0 {
                 self.document.apply_paragraph_format(
                     0..self.document.text_length(),
@@ -1630,3 +1641,7 @@ mod selection;
 
 #[path = "rich_text_editor_gravity.rs"]
 mod gravity;
+
+#[cfg(test)]
+#[path = "rich_text_editor_paragraph_typing_tests.rs"]
+mod paragraph_typing_tests;

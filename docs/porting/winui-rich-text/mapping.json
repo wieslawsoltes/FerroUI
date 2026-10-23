@@ -21101,7 +21101,7 @@
         },
         {
           "path": "src/FerroUI.Controls/rich_text/rich_edit_text_selection_gravity_tests.rs",
-          "symbol": "rich_selection_gravity_native_nonempty_replacement_keeps_model_paragraph_merge_policy"
+          "symbol": "rich_selection_gravity_native_nonempty_replacement_retains_trailing_alignment"
         },
         {
           "path": "src/FerroUI.Controls/rich_text/rich_edit_text_selection_gravity_tests.rs",
@@ -21140,6 +21140,14 @@
         {
           "path": "src/FerroUI.Controls/rich_text/rich_text_editor_gravity.rs",
           "symbol": "fn insertion_character_format("
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text/rich_text_editor_selection.rs",
+          "symbol": "fn prepare_typing_range("
+        },
+        {
+          "path": "src/FerroUI.Controls/documents/rich_text_document.rs",
+          "symbol": "fn replace_typed_text("
         }
       ],
       "tests": [
@@ -21177,7 +21185,7 @@
         },
         {
           "path": "src/FerroUI.Controls/rich_text/rich_edit_text_selection_gravity_tests.rs",
-          "symbol": "rich_selection_gravity_native_nonempty_replacement_keeps_model_paragraph_merge_policy"
+          "symbol": "rich_selection_gravity_native_nonempty_replacement_retains_trailing_alignment"
         },
         {
           "path": "src/FerroUI.Controls/rich_text/rich_edit_text_selection_gravity_tests.rs",
@@ -21190,9 +21198,25 @@
         {
           "path": "src/FerroUI.Controls/rich_text/rich_edit_text_selection_gravity_tests.rs",
           "symbol": "rich_selection_gravity_explicit_affinity_survives_overtype_extent_planning"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text/rich_edit_text_selection_gravity_tests.rs",
+          "symbol": "rich_selection_paragraph_typing_replays_240_native_commands_and_alignment_queries"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text/rich_text_editor_paragraph_typing_tests.rs",
+          "symbol": "rich_selection_paragraph_typing_is_used_by_the_real_control_and_shared_history"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text/rich_text_editor_paragraph_typing_tests.rs",
+          "symbol": "rich_selection_paragraph_typing_limit_counts_the_retained_mark_before_accepting_input"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text/rich_text_editor_paragraph_typing_tests.rs",
+          "symbol": "rich_selection_paragraph_typing_overtype_composes_with_retained_mark_and_history"
         }
       ],
-      "reason": "Typing uses the shared editor and its actual Overtype mode. Each accepted input scalar consumes one target grapheme; a selected range is consumed by the first scalar. Typed CR and LF insert separate paragraph breaks without consuming target text, so typed CRLF differs from bulk newline normalization. MaxLength plans accepted input and target consumption together, preserving targets for rejected suffixes. Empty TypeText is a no-op even during preedit/read-only state. Rich structure, formatting and one undo unit are preserved. Existing CR/LF soft breaks are protected as a documented FerroUI model policy; unmeasured native soft-break encodings, terminal EOP and external WinUI engine parity remain separate. Collapsed typing additionally consumes the separately measured live Gravity resolver with explicit typing overrides; actual nonempty cross-paragraph replacement retains the documented leading-format merge difference under RT-I35.",
+      "reason": "Typing uses the shared editor and its actual Overtype mode. Each accepted input scalar consumes one target grapheme; a selected range is consumed by the first scalar. Typed CR and LF insert separate paragraph breaks without consuming target text, so typed CRLF differs from bulk newline normalization. MaxLength plans accepted input and target consumption together, preserving targets for rejected suffixes. Empty TypeText is a no-op even during preedit/read-only state. Rich structure, formatting and one undo unit are preserved. Existing CR/LF soft breaks are protected as a documented FerroUI model policy; unmeasured native soft-break encodings, terminal EOP and external WinUI engine parity remain separate. Collapsed typing additionally consumes the separately measured live Gravity resolver with explicit typing overrides; the verified x64/ARM64 extension supplies 240 additional commands for typed paragraph replacement. A selected final structural mark is retained at a next-paragraph-start endpoint, and replacements crossing an earlier paragraph retain trailing alignment (including inherited None) for every inserted paragraph. Original directed selection, one-unit history, MaxLength and unrelated paragraph properties are preserved. Non-alignment paragraph formats, synthetic terminal EOP and post-break cached character formatting remain partial under RT-I35.",
       "deviations": [
         "RT-I01",
         "RT-I07",
@@ -42514,7 +42538,7 @@
         },
         {
           "path": "src/FerroUI.Controls/rich_text/rich_edit_text_selection_gravity_tests.rs",
-          "symbol": "rich_selection_gravity_native_nonempty_replacement_keeps_model_paragraph_merge_policy"
+          "symbol": "rich_selection_gravity_native_nonempty_replacement_retains_trailing_alignment"
         },
         {
           "path": "src/FerroUI.Controls/rich_text/rich_edit_text_selection_gravity_tests.rs",
@@ -42663,7 +42687,7 @@
         },
         {
           "path": "src/FerroUI.Controls/rich_text/rich_edit_text_selection_gravity_tests.rs",
-          "symbol": "rich_selection_gravity_native_nonempty_replacement_keeps_model_paragraph_merge_policy"
+          "symbol": "rich_selection_gravity_native_nonempty_replacement_retains_trailing_alignment"
         },
         {
           "path": "src/FerroUI.Controls/rich_text/rich_edit_text_selection_gravity_tests.rs",
@@ -42993,7 +43017,7 @@
     },
     "Editing, history and text object services": {
       "state": "partial",
-      "description": "Shared formats/history, cancellable reentrant selection, typed flags, UTF-16 live ranges, eight native-valued TOM units including shaped Cluster, range Delete/Character with scalar-safe Rust extensions, movement/index services, Line/Story Home/End with native-derived real-paragraph endpoints, Line/Paragraph vertical navigation with retained collapsed columns and stepwise extension clamping, logical Character/Word horizontal selection movement with grapheme keyboard Character independent of scalar range Character, Unicode case conversion and transactional Rust streams. Layout/publication mutation fences retain external edits and protect callback-owned navigation state. Further units, synthetic terminal EOP, native Gravity cache/tracking details, shape classification and automatic affinity/activity, arbitrary stories, advanced formats, locale-specific casing and external ABI remain pending. Shared Options/Type and native-derived overtype/TypeText behavior now have explicit mappings, including 316 literal native observations, accepted-input length planning and callback/history ownership under RT-I26. Independent range Gravity now controls collapsed format queries/plain insertion with literal native affinity/retention fixtures and reentrant typing restoration; physical range tracking remains separate. Live selection Gravity now consumes its own measured record through shared transient query/typing/IME resolution with generation/history guards; automatic AT_END_OF_LINE and native trailing-paragraph replacement alignment remain partial. The typed projected Link service uses the same snapshot/editor and measured transitions, preserving visible coordinates; RT-I34 lists unsupported operations."
+      "description": "Shared formats/history, cancellable reentrant selection, typed flags, UTF-16 live ranges, eight native-valued TOM units including shaped Cluster, range Delete/Character with scalar-safe Rust extensions, movement/index services, Line/Story Home/End with native-derived real-paragraph endpoints, Line/Paragraph vertical navigation with retained collapsed columns and stepwise extension clamping, logical Character/Word horizontal selection movement with grapheme keyboard Character independent of scalar range Character, Unicode case conversion and transactional Rust streams. Layout/publication mutation fences retain external edits and protect callback-owned navigation state. Further units, synthetic terminal EOP, native Gravity cache/tracking details, shape classification and automatic affinity/activity, arbitrary stories, advanced formats, locale-specific casing and external ABI remain pending. Shared Options/Type and native-derived overtype/TypeText behavior now have explicit mappings, including 316 literal native observations, accepted-input length planning and callback/history ownership under RT-I26. Independent range Gravity now controls collapsed format queries/plain insertion with literal native affinity/retention fixtures and reentrant typing restoration; physical range tracking remains separate. Live selection Gravity now consumes its own measured record through shared transient query/typing/IME resolution with generation/history guards; typed structural-mark retention and trailing paragraph alignment now follow the verified 16-fixture/240-command extension. Automatic AT_END_OF_LINE, other paragraph formats and independent range caches/tracking remain partial. The typed projected Link service uses the same snapshot/editor and measured transitions, preserving visible coordinates; RT-I34 lists unsupported operations."
     },
     "Clipboard, RTF and input method": {
       "state": "partial",
@@ -43468,7 +43492,7 @@
       "kind": "ci_runtime",
       "source": "Broader workflow at 8508220d; run39825948242, ARM64 job119989156134.",
       "command": "Windows ARM64 informative backend tests; remaining broad repository jobs",
-      "result": "ARM64: 370 passed / 1 failed on vertical_utf16 native setup: selection.text() was empty after WM_SETTEXT rather than A\ud83d\ude00B\\rxy\\rA\ud83d\ude00B. The exact setup assertion is retained; dedicated x64 serial native probes passed separately. Successful broad jobs: Android, framebuffer, both Wayland jobs, source conventions and package checks. macOS, Windows x64, iOS, Linux X11 and all browser checks were cancelled, so the broader run is not a complete passing gate. Native ARM64 setup/isolation remains to diagnose."
+      "result": "ARM64: 370 passed / 1 failed on vertical_utf16 native setup: selection.text() was empty after WM_SETTEXT rather than A😀B\\rxy\\rA😀B. The exact setup assertion is retained; dedicated x64 serial native probes passed separately. Successful broad jobs: Android, framebuffer, both Wayland jobs, source conventions and package checks. macOS, Windows x64, iOS, Linux X11 and all browser checks were cancelled, so the broader run is not a complete passing gate. Native ARM64 setup/isolation remains to diagnose."
     },
     {
       "kind": "standalone_core_runtime",
@@ -43499,6 +43523,18 @@
       "source": "Coordinated family/Link/selection-Gravity source checkpoint based on 86f2cd639836991ca336612dc0073612104e5436; 81 changed source hashes and log hashes in framework-family-link-validation.json.",
       "command": "cargo test --locked --offline --no-default-features -p ferroui-base -p ferroui-controls -p ferroui-markup-xaml-tests -p ferroui-markup-xaml -p ferroui-harfbuzz -p ferroui-winui -p ferroui-win32 -p ferroui-browser -p ferroui-freedesktop -p ferroui-native -p ferroui-wayland -p ferroui-view -p ferroui-android -p ferroui-ios --lib --no-run; execute each fresh test binary, with private-session IBus and Controls loopback permission.",
       "result": "PASS: all 14 targets compile. Full Base 4470, Controls 5251, XAML 620 / 17 existing ignored, XAML runtime 202, Browser 278, WinUI/Win32 host 50/329, View 73, HarfBuzz 8, Native/Wayland 6/118, Android/iOS host 165/102, private-session IBus 35. Zero executed failures. Earlier Base 4468/2, Controls 5242/7 and XAML 619/1 gates are retained with corrections; compiler/setup failures are not passes. Native probe execution and external WinUI/pixel parity remain separate."
+    },
+    {
+      "kind": "native_observations",
+      "source": "Verified official artifact ZIPs from Rich text conformance run 39865036758, measured merge 87aa7390668cf0450e18c4f3f7839df5db22ccd1 and workflow head e5a0778a9be45d82e9915c985fc835b575bdf337; separate immutable x64 and ARM64 JSON records.",
+      "command": "Strict rich-text-tom-observations.py extraction of original serial system-msftedit.log artifacts; ZIP lengths, SHA-256 and member CRCs verified; independently decoded x64 workflow log compared.",
+      "result": "490 actual-selection commands/34 fixtures and 90 passive-range commands/15 fixtures, alongside all earlier families; all behavioral arrays agree across x64 and ARM64. Serial and separate concurrent ARM64 diagnostic exit codes are both zero. Engine versions and both source manifests remain distinct; this does not prove packaged WinUI runtime parity."
+    },
+    {
+      "kind": "tooling",
+      "source": "Current continuation of e5a0778a, extractor unchanged.",
+      "command": "python3 scripts/porting/test_rich_text_tom_observations.py -q",
+      "result": "PASS: 50 tests, no failures, 41.914 seconds. New Rust implementation execution remains separately pending at this checkpoint."
     }
   ]
 }
