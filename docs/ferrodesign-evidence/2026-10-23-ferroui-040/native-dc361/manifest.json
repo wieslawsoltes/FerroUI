@@ -1,0 +1,51 @@
+{
+  "source_commit": "dc36199693472ac8297bafdaad6d4a0701acddf0",
+  "scope": "Exact completed native and generated-reference CI evidence; no browser execution claim. Manifest excludes itself.",
+  "files": [
+    {
+      "path": "README.md",
+      "bytes": 7943,
+      "sha256": "eda47280ea9e5e2a1eecdc34f56c96110022c91d5be52fd8ca933cda4bc8a588"
+    },
+    {
+      "path": "analysis.json",
+      "bytes": 16814,
+      "sha256": "fc74e9661e54374db6e2c64d44246add867e6538bc4efbefb54ff49a927ce16b"
+    },
+    {
+      "path": "analyze_log.py",
+      "bytes": 4874,
+      "sha256": "98866a7560e91ca082eca02806dcb1aa3e9bb3a81c7b011140f4d5e4d05c0ca6"
+    },
+    {
+      "path": "compressed-provenance.json",
+      "bytes": 1140,
+      "sha256": "2f926332d53b60b6883d983d3aae06a42fea3006a9bb77bc90c171d06aca0825"
+    },
+    {
+      "path": "full-log-analysis.json.gz",
+      "bytes": 14803,
+      "sha256": "49fb461e0c70fad13452da1cf72b32e534a3ccd052a3b1acde6b935715b54d5e"
+    },
+    {
+      "path": "generated-references-job.log.gz",
+      "bytes": 37134,
+      "sha256": "94345b10005346b47f9fd7b2346e019fbdc4546a2797611dc0adc8c76eeb81c3"
+    },
+    {
+      "path": "metadata.json",
+      "bytes": 12964,
+      "sha256": "6b0f9a308f20e45027cfc0719f609af6ee9be540a73951793941280bc30590b2"
+    },
+    {
+      "path": "native-job.log.gz",
+      "bytes": 91166,
+      "sha256": "d2f4ac87f8f0a632bea73fbbf858133bfde99e111c3414d88d2089185d066609"
+    },
+    {
+      "path": "source-provenance.json",
+      "bytes": 3173,
+      "sha256": "d268e6fb59035aaa631dbe37b06bc32889a9e5e7b28d1acc7f497c9bcb710b0f"
+    }
+  ]
+}

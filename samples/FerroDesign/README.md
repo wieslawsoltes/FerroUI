@@ -169,28 +169,33 @@ do not substitute for a current-source complete browser pass.
 [Integration details](docs/VALIDATION.md#ferroui-040-integration-2026-10-23)
 describe the inherited text-bounds and native GPU fragment corrections.
 
-The 23 October continuation has completed native and core checks for the new
-radial/angular gradient handles, spacing-variable controls and prototype reflow.
-**Checkpoint `c549f6bc` passed 239 native application tests in 43.60 s and all
-seven required GPU fragment tests in 9.09 s.** Its core source is identical to
-the integrated `1c7151f5` tree that passed 533 core tests; the native job did not
-rerun that suite. Both the `1c7151f5` and `c549f6bc` browser builds and delivered
-files are verified. The exact `c549f6bc` focused replay completed **50 / 38
-checks** but **failed overall**; its strict text-pan measurement passed in both
-modes. The failures and subsequent corrections retain separate source records.
-A complete current-source browser pass and matched Figma visual parity are not
-established.
+**The corrected `dc361996` native checkpoint passed all 14 added first-preedit
+regressions, the complete 188-case TextBox substring filter, 239 application
+tests and seven required GPU fragment tests.** Its paragraph, line-bounds,
+rich-history and generated Rust/XAML reference checks also passed. Framework
+filter counts overlap and are not additive. The exact browser distribution is
+verified, including its 53,795,035-byte WASM, all 17 payloads and copied host
+sources. Compilation took 11m29s in Cargo; browser interaction results are a
+separate gate.
+
+The earlier `c549f6bc` focused replay completed **50 / 38 checks** but **failed
+overall**; its strict text-pan measurement passed in both modes. Those failures,
+the native `4d3c796c` failures and their corrections retain separate source
+records. A complete current-source browser pass and matched Figma visual parity
+are not established.
 
 | Gate | Exact source and completed result |
 | --- | --- |
+| Corrected first-preedit native execution | [`dc361996`, job 120490704088](https://github.com/wieslawsoltes/FerroUI/actions/runs/39976024451/job/120490704088): **all 14 added regressions**, **188/188 TextBox-filter cases**, **239/239 application tests in 37.96 s** and **7/7 required GPU fragment tests in 6.00 s** passed; all other configured paragraph, bounds, glyph and history filters also passed. Generated references passed separately at the same SHA. [Exact logs, names and overlapping counts](../../docs/ferrodesign-evidence/2026-10-23-ferroui-040/native-dc361/README.md) |
+| Corrected first-preedit browser delivery | [`dc361996`, job 120490704316](https://github.com/wieslawsoltes/FerroUI/actions/runs/39976024338/job/120490704316): **53,795,035-byte WASM**, **17 payloads plus provenance**, exact source/tree/run and host resources, archive integrity, seven-module delivery closure and Vello/no-Skia graph verified. Cargo build **11m29s**; all ten host input tests passed. [Complete build and delivery evidence](../../docs/ferrodesign-evidence/2026-10-23-ferroui-040/browser-build-dc361/README.md). This build record does not establish an editor interaction pass |
 | Current selected browser execution | Exact `c549f6bc` runtime and harness: **50 Software2D / 38 WebGL2 completed checks**; **1 of 8** complete scenario executions passed. Software2D gradients passed all **17** groups. Polygon coverage, first IME preedit and guide input failed in both modes; WebGL2 also failed a later double-click insertion. Both modes had no console/page errors. [Unabridged failure evidence](../../docs/ferrodesign-evidence/2026-10-23-ferroui-040/browser-runtime-c549/README.md) |
 | Current strict text-pan measurement | Exact `c549f6bc`: **36 normal plus 6 separate trace observations per mode**, all invariants and graceful browser shutdown passed. Slow timing tails remain recorded; this is not an FPS or physical-GPU result. [All phases, traces and boundaries](../../docs/ferrodesign-evidence/2026-10-23-ferroui-040/browser-text-pan-c549/README.md) |
 | Full native workflow | [`c7dbf26f`, job 120423823557](https://github.com/wieslawsoltes/FerroUI/actions/runs/39955698269/job/120423823557): **533 core / 239 application tests**, native launcher compilation and configured public input/compositing/text/geometry gates passed. Production is identical to `c549`; this predates the new first-preedit fix. [Exact full native record](../../docs/ferrodesign-evidence/2026-10-23-ferroui-040/full-native-c7/README.md) |
 | Sequential full browser workflow | [`c7dbf26f`, job 120423823862](https://github.com/wieslawsoltes/FerroUI/actions/runs/39955698269/job/120423823862): **failed and incomplete**, canceled after the 120-minute budget while continuing WebGL2 guide work; six later scenarios were not reached and no final report was produced. The independent cache bridge worked and the browser build took **9m54s**. [Terminal job, capture timings and lossless log](../../docs/ferrodesign-evidence/2026-10-23-ferroui-040/full-browser-c7/README.md) |
-| First-preedit native checkpoint | [`4d3c796c`](../../docs/ferrodesign-evidence/2026-10-23-ferroui-040/native-4d3/README.md) compiled but **failed three new caret/selection/template regressions**; all 13 new functions ran and ten passed. The full TextBox substring filter passed **184/187**. Independent application **239/239** and required GPU **7/7** stages passed. The distinct `dc361996` follow-up preserves expectations and adds a five-case reentry regression; its source review is separate from execution |
+| First-preedit native checkpoint | [`4d3c796c`](../../docs/ferrodesign-evidence/2026-10-23-ferroui-040/native-4d3/README.md) compiled but **failed three new caret/selection/template regressions**; all 13 new functions ran and ten passed. The full TextBox substring filter passed **184/187**. Independent application **239/239** and required GPU **7/7** stages passed. The distinct `dc361996` follow-up preserves expectations, adds a five-case reentry regression and passed the separate native run recorded above |
 | First-preedit browser delivery | [`4d3c796c`](../../docs/ferrodesign-evidence/2026-10-23-ferroui-040/browser-build-4d3/README.md): verified **53,794,092-byte WASM**, **17 payloads plus provenance**, exact source/tree/run, archive integrity and Vello/no-Skia graph. Build step **15m24s**, Cargo **15m14s**. No local extraction or browser replay; the native failures required the follow-up |
-| Current native application and framework | [`c549f6bc`, job 120410483091](https://github.com/wieslawsoltes/FerroUI/actions/runs/39952473854/job/120410483091): **239/239 app tests**, **43.60 s**, and all configured framework filters passed, including the new native hover/pressed projection. Mandatory GPU fragments: **7/7**, **9.09 s**, with `FERROUI_VELLO_REQUIRE_GPU=1`; no failed or ignored tests. [Exact native evidence](../../docs/ferrodesign-evidence/2026-10-23-ferroui-040/native-c549/README.md) |
-| Current browser build and delivery | [`c549f6bc`, job 120415321864](https://github.com/wieslawsoltes/FerroUI/actions/runs/39952473917/job/120415321864): build step **10 min 10 s**; verified **53,785,830-byte WASM**, **17 payload files plus the provenance manifest**, Vello/no-Skia graph, local resource/module closure and exact-source relative favicon. [Artifact and cache evidence](../../docs/ferrodesign-evidence/2026-10-23-ferroui-040/browser-build-c549/README.md); runtime checks remain separately labeled |
+| Previous native application and framework | [`c549f6bc`, job 120410483091](https://github.com/wieslawsoltes/FerroUI/actions/runs/39952473854/job/120410483091): **239/239 app tests**, **43.60 s**, and all configured framework filters passed, including the new native hover/pressed projection. Mandatory GPU fragments: **7/7**, **9.09 s**, with `FERROUI_VELLO_REQUIRE_GPU=1`; no failed or ignored tests. [Exact native evidence](../../docs/ferrodesign-evidence/2026-10-23-ferroui-040/native-c549/README.md) |
+| Previous browser build and delivery | [`c549f6bc`, job 120415321864](https://github.com/wieslawsoltes/FerroUI/actions/runs/39952473917/job/120415321864): build step **10 min 10 s**; verified **53,785,830-byte WASM**, **17 payload files plus the provenance manifest**, Vello/no-Skia graph, local resource/module closure and exact-source relative favicon. [Artifact and cache evidence](../../docs/ferrodesign-evidence/2026-10-23-ferroui-040/browser-build-c549/README.md); runtime checks remain separately labeled |
 | Integrated core | [`1c7151f5`, run 39950194410](https://github.com/wieslawsoltes/FerroUI/actions/runs/39950194410): **533 passed**, **2.41 s**, with the FerroUI 0.4.0 lockfile |
 | Integrated generated references | [`1c7151f5`, run 39950194402](https://github.com/wieslawsoltes/FerroUI/actions/runs/39950194402): all generators and drift checks passed; **five generated files match their committed SHA-256 hashes**, with an empty patch |
 | Integrated browser build and delivery | [`1c7151f5`, job 120403095053](https://github.com/wieslawsoltes/FerroUI/actions/runs/39950194298/job/120403095053): build step **28 min 17 s**; verified **53,785,479-byte WASM**, **16 payload files plus the provenance manifest**, Vello/no-Skia graph and local module/resource closure. [Archive, payload hashes and scope](../../docs/ferrodesign-evidence/2026-10-23-ferroui-040/browser-build-1c/README.md). No editor or benchmark was executed against this runtime |

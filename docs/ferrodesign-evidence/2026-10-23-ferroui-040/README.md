@@ -101,8 +101,22 @@ tests passed. The [matching browser build](browser-build-4d3/README.md)
 passed archive/source verification with a 53,794,092-byte WASM and 17 payloads;
 it was not replayed. The distinct `dc361996` correction preserves the failed
 expectations, synchronizes provisional Text before native caret movement,
-and adds a five-case reentry regression. Its source review is not an execution
-pass; the validation record distinguishes later results.
+and adds a five-case reentry regression.
+
+The [exact corrected dc361 native run](native-dc361/README.md) subsequently
+**passed all 14 added regression functions**, the **188-case TextBox filter**,
+**239 application tests in 37.96 s**, and **seven required GPU fragment tests
+in 6.00 s**. Every other configured glyph, paragraph, bounds and rich-history
+filter passed; filter counts overlap. Generated Rust/XAML reference checks
+passed separately at the same SHA. The retained parser reproduces every named
+outcome from the complete raw log.
+
+Its [verified browser build](browser-build-dc361/README.md) contains a
+**53,795,035-byte WASM** and **17 payloads plus provenance**. Cargo took
+**11m29s**. Archive integrity, exact source/host assets, all payload hashes,
+seven static modules, dynamic storage, relative favicon and the Vello/no-Skia
+graph passed verification. Browser interactions and timing measurements
+require their own records; this build evidence does not establish them.
 
 The [completed sequential c7 browser job](full-browser-c7/README.md) was
 **canceled after its 120-minute budget with failed and incomplete coverage**.

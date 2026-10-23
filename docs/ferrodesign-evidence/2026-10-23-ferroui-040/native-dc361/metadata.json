@@ -1,0 +1,343 @@
+{
+  "repository": "wieslawsoltes/FerroUI",
+  "commit": "dc36199693472ac8297bafdaad6d4a0701acddf0",
+  "tree": "57c2625a948b9401b9517b2724b2715d8e7ca92b",
+  "captured_utc": "2026-10-23T15:28:37.956970+00:00",
+  "native": {
+    "run": {
+      "id": 39976024451,
+      "name": "FerroDesign native feedback",
+      "node_id": "WFR_kwLOU8dlHs8AAAAJTsG5gw",
+      "workflow_id": 393228874,
+      "head_sha": "dc36199693472ac8297bafdaad6d4a0701acddf0",
+      "head_branch": "feat/ferrodesign-editor",
+      "event": "push",
+      "run_number": 40,
+      "run_attempt": 1,
+      "status": "completed",
+      "conclusion": "success",
+      "created_at": "2026-10-23T15:10:43Z",
+      "updated_at": "2026-10-23T15:25:31Z",
+      "run_started_at": "2026-10-23T15:10:43Z",
+      "html_url": "https://github.com/wieslawsoltes/FerroUI/actions/runs/39976024451",
+      "url": "https://api.github.com/repos/wieslawsoltes/FerroUI/actions/runs/39976024451",
+      "path": ".github/workflows/ferrodesign-native.yml",
+      "check_suite_id": 108354698078
+    },
+    "jobs": [
+      {
+        "id": 120490704088,
+        "name": "native",
+        "run_id": 39976024451,
+        "head_sha": "dc36199693472ac8297bafdaad6d4a0701acddf0",
+        "status": "completed",
+        "conclusion": "success",
+        "started_at": "2026-10-23T15:10:47Z",
+        "completed_at": "2026-10-23T15:25:30Z",
+        "html_url": "https://github.com/wieslawsoltes/FerroUI/actions/runs/39976024451/job/120490704088",
+        "url": "https://api.github.com/repos/wieslawsoltes/FerroUI/actions/jobs/120490704088",
+        "check_run_url": "https://api.github.com/repos/wieslawsoltes/FerroUI/check-runs/120490704088",
+        "runner_name": "GitHub Actions 1000302831",
+        "runner_group_name": "GitHub Actions",
+        "labels": [
+          "ubuntu-24.04"
+        ],
+        "steps": [
+          {
+            "name": "Set up job",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 1,
+            "started_at": "2026-10-23T15:10:48Z",
+            "completed_at": "2026-10-23T15:10:49Z"
+          },
+          {
+            "name": "Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 2,
+            "started_at": "2026-10-23T15:10:49Z",
+            "completed_at": "2026-10-23T15:10:55Z"
+          },
+          {
+            "name": "Configure runner-local toolchain paths",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 3,
+            "started_at": "2026-10-23T15:10:55Z",
+            "completed_at": "2026-10-23T15:10:55Z"
+          },
+          {
+            "name": "Run actions/cache/restore@0057852bfaa89a56745cba8c7296529d2fc39830",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 4,
+            "started_at": "2026-10-23T15:10:55Z",
+            "completed_at": "2026-10-23T15:11:23Z"
+          },
+          {
+            "name": "Restore content-verified source timestamps",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 5,
+            "started_at": "2026-10-23T15:11:23Z",
+            "completed_at": "2026-10-23T15:11:27Z"
+          },
+          {
+            "name": "Install pinned Rust and native font dependencies",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 6,
+            "started_at": "2026-10-23T15:11:27Z",
+            "completed_at": "2026-10-23T15:18:30Z"
+          },
+          {
+            "name": "Verify source timestamp reuse and changed-input rebuilding",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 7,
+            "started_at": "2026-10-23T15:18:30Z",
+            "completed_at": "2026-10-23T15:18:31Z"
+          },
+          {
+            "name": "Validate public unhinted glyph geometry and pixels",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 8,
+            "started_at": "2026-10-23T15:18:31Z",
+            "completed_at": "2026-10-23T15:19:40Z"
+          },
+          {
+            "name": "Validate shared paragraph layout and native editing",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 9,
+            "started_at": "2026-10-23T15:19:40Z",
+            "completed_at": "2026-10-23T15:21:17Z"
+          },
+          {
+            "name": "Validate GPU fragment capture and clip pixels",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 10,
+            "started_at": "2026-10-23T15:21:17Z",
+            "completed_at": "2026-10-23T15:22:32Z"
+          },
+          {
+            "name": "Validate native editor and public renderer pixels",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 11,
+            "started_at": "2026-10-23T15:22:32Z",
+            "completed_at": "2026-10-23T15:25:09Z"
+          },
+          {
+            "name": "Snapshot source timestamps with the partial build",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 12,
+            "started_at": "2026-10-23T15:25:09Z",
+            "completed_at": "2026-10-23T15:25:10Z"
+          },
+          {
+            "name": "Run actions/cache/save@0057852bfaa89a56745cba8c7296529d2fc39830",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 13,
+            "started_at": "2026-10-23T15:25:10Z",
+            "completed_at": "2026-10-23T15:25:27Z"
+          },
+          {
+            "name": "Post Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 26,
+            "started_at": "2026-10-23T15:25:27Z",
+            "completed_at": "2026-10-23T15:25:27Z"
+          },
+          {
+            "name": "Complete job",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 27,
+            "started_at": "2026-10-23T15:25:27Z",
+            "completed_at": "2026-10-23T15:25:27Z"
+          }
+        ]
+      }
+    ]
+  },
+  "generated_references": {
+    "run": {
+      "id": 39976024371,
+      "name": "FerroDesign generated references",
+      "node_id": "WFR_kwLOU8dlHs8AAAAJTsG5Mw",
+      "workflow_id": 390559583,
+      "head_sha": "dc36199693472ac8297bafdaad6d4a0701acddf0",
+      "head_branch": "feat/ferrodesign-editor",
+      "event": "push",
+      "run_number": 10,
+      "run_attempt": 1,
+      "status": "completed",
+      "conclusion": "success",
+      "created_at": "2026-10-23T15:10:43Z",
+      "updated_at": "2026-10-23T15:22:19Z",
+      "run_started_at": "2026-10-23T15:10:43Z",
+      "html_url": "https://github.com/wieslawsoltes/FerroUI/actions/runs/39976024371",
+      "url": "https://api.github.com/repos/wieslawsoltes/FerroUI/actions/runs/39976024371",
+      "path": ".github/workflows/ferrodesign-generated-references.yml",
+      "check_suite_id": 108354697835
+    },
+    "jobs": [
+      {
+        "id": 120490704061,
+        "name": "references",
+        "run_id": 39976024371,
+        "head_sha": "dc36199693472ac8297bafdaad6d4a0701acddf0",
+        "status": "completed",
+        "conclusion": "success",
+        "started_at": "2026-10-23T15:10:48Z",
+        "completed_at": "2026-10-23T15:22:18Z",
+        "html_url": "https://github.com/wieslawsoltes/FerroUI/actions/runs/39976024371/job/120490704061",
+        "url": "https://api.github.com/repos/wieslawsoltes/FerroUI/actions/jobs/120490704061",
+        "check_run_url": "https://api.github.com/repos/wieslawsoltes/FerroUI/check-runs/120490704061",
+        "runner_name": "GitHub Actions 1000302832",
+        "runner_group_name": "GitHub Actions",
+        "labels": [
+          "ubuntu-24.04"
+        ],
+        "steps": [
+          {
+            "name": "Set up job",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 1,
+            "started_at": "2026-10-23T15:10:49Z",
+            "completed_at": "2026-10-23T15:10:50Z"
+          },
+          {
+            "name": "Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 2,
+            "started_at": "2026-10-23T15:10:50Z",
+            "completed_at": "2026-10-23T15:10:57Z"
+          },
+          {
+            "name": "Run dtolnay/rust-toolchain@89b12181fb390509a0842a86cc55eeb8eb928c1d",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 3,
+            "started_at": "2026-10-23T15:10:57Z",
+            "completed_at": "2026-10-23T15:11:07Z"
+          },
+          {
+            "name": "Restore generator dependencies and compiled framework",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 4,
+            "started_at": "2026-10-23T15:11:07Z",
+            "completed_at": "2026-10-23T15:11:42Z"
+          },
+          {
+            "name": "Prepare framework test prerequisites",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 5,
+            "started_at": "2026-10-23T15:11:42Z",
+            "completed_at": "2026-10-23T15:11:53Z"
+          },
+          {
+            "name": "Regenerate registered Rust paths",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 6,
+            "started_at": "2026-10-23T15:11:53Z",
+            "completed_at": "2026-10-23T15:16:13Z"
+          },
+          {
+            "name": "Regenerate Fluent compiled XAML and runtime metadata",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 7,
+            "started_at": "2026-10-23T15:16:13Z",
+            "completed_at": "2026-10-23T15:16:31Z"
+          },
+          {
+            "name": "Regenerate Simple compiled XAML and runtime metadata",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 8,
+            "started_at": "2026-10-23T15:16:31Z",
+            "completed_at": "2026-10-23T15:20:42Z"
+          },
+          {
+            "name": "Recompile and verify the registered Rust-path reference",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 9,
+            "started_at": "2026-10-23T15:20:42Z",
+            "completed_at": "2026-10-23T15:21:26Z"
+          },
+          {
+            "name": "Verify Fluent runtime emitter and build-script reference checks",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 10,
+            "started_at": "2026-10-23T15:21:26Z",
+            "completed_at": "2026-10-23T15:21:44Z"
+          },
+          {
+            "name": "Verify Simple runtime emitter and build-script reference checks",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 11,
+            "started_at": "2026-10-23T15:21:44Z",
+            "completed_at": "2026-10-23T15:21:58Z"
+          },
+          {
+            "name": "Collect generated files, exact source provenance and output hashes",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 12,
+            "started_at": "2026-10-23T15:21:58Z",
+            "completed_at": "2026-10-23T15:21:59Z"
+          },
+          {
+            "name": "Upload generated references, logs and provenance for review",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 13,
+            "started_at": "2026-10-23T15:21:59Z",
+            "completed_at": "2026-10-23T15:22:01Z"
+          },
+          {
+            "name": "Cache partial generator build for subsequent runs",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 14,
+            "started_at": "2026-10-23T15:22:01Z",
+            "completed_at": "2026-10-23T15:22:11Z"
+          },
+          {
+            "name": "Post Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 28,
+            "started_at": "2026-10-23T15:22:11Z",
+            "completed_at": "2026-10-23T15:22:12Z"
+          },
+          {
+            "name": "Complete job",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 29,
+            "started_at": "2026-10-23T15:22:12Z",
+            "completed_at": "2026-10-23T15:22:12Z"
+          }
+        ]
+      }
+    ]
+  },
+  "scope": "Final completed GitHub run and job API metadata for exact dc361 source; native execution and generated-reference verification only. No browser runtime or whole-workflow conclusion is inferred."
+}

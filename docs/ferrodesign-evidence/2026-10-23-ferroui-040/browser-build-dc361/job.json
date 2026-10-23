@@ -1,0 +1,180 @@
+{
+  "id": 120490704316,
+  "run_id": 39976024338,
+  "workflow_name": "FerroDesign browser build feedback",
+  "head_branch": "feat/ferrodesign-editor",
+  "run_url": "https://api.github.com/repos/wieslawsoltes/FerroUI/actions/runs/39976024338",
+  "run_attempt": 1,
+  "node_id": "CR_kwDOU8dlHs8AAAAcDc49vA",
+  "head_sha": "dc36199693472ac8297bafdaad6d4a0701acddf0",
+  "url": "https://api.github.com/repos/wieslawsoltes/FerroUI/actions/jobs/120490704316",
+  "html_url": "https://github.com/wieslawsoltes/FerroUI/actions/runs/39976024338/job/120490704316",
+  "status": "completed",
+  "conclusion": "success",
+  "created_at": "2026-10-23T15:10:44Z",
+  "started_at": "2026-10-23T15:10:47Z",
+  "completed_at": "2026-10-23T15:23:25Z",
+  "name": "browser-build",
+  "steps": [
+    {
+      "name": "Set up job",
+      "status": "completed",
+      "conclusion": "success",
+      "number": 1,
+      "started_at": "2026-10-23T15:10:47Z",
+      "completed_at": "2026-10-23T15:10:48Z"
+    },
+    {
+      "name": "Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262",
+      "status": "completed",
+      "conclusion": "success",
+      "number": 2,
+      "started_at": "2026-10-23T15:10:48Z",
+      "completed_at": "2026-10-23T15:10:54Z"
+    },
+    {
+      "name": "Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020",
+      "status": "completed",
+      "conclusion": "success",
+      "number": 3,
+      "started_at": "2026-10-23T15:10:54Z",
+      "completed_at": "2026-10-23T15:10:55Z"
+    },
+    {
+      "name": "Restore pinned toolchain",
+      "status": "completed",
+      "conclusion": "success",
+      "number": 4,
+      "started_at": "2026-10-23T15:10:55Z",
+      "completed_at": "2026-10-23T15:11:05Z"
+    },
+    {
+      "name": "Restore browser dependencies and compiled framework",
+      "status": "completed",
+      "conclusion": "success",
+      "number": 5,
+      "started_at": "2026-10-23T15:11:05Z",
+      "completed_at": "2026-10-23T15:11:14Z"
+    },
+    {
+      "name": "Restore content-verified source timestamps",
+      "status": "completed",
+      "conclusion": "success",
+      "number": 6,
+      "started_at": "2026-10-23T15:11:14Z",
+      "completed_at": "2026-10-23T15:11:17Z"
+    },
+    {
+      "name": "Install pinned Rust, Emscripten and wasm-bindgen",
+      "status": "completed",
+      "conclusion": "success",
+      "number": 7,
+      "started_at": "2026-10-23T15:11:17Z",
+      "completed_at": "2026-10-23T15:11:18Z"
+    },
+    {
+      "name": "Verify source timestamp reuse and changed-input rebuilding",
+      "status": "completed",
+      "conclusion": "success",
+      "number": 8,
+      "started_at": "2026-10-23T15:11:18Z",
+      "completed_at": "2026-10-23T15:11:20Z"
+    },
+    {
+      "name": "Install native font build dependencies",
+      "status": "completed",
+      "conclusion": "success",
+      "number": 9,
+      "started_at": "2026-10-23T15:11:20Z",
+      "completed_at": "2026-10-23T15:11:31Z"
+    },
+    {
+      "name": "Build actual FerroUI Vello WebAssembly application",
+      "status": "completed",
+      "conclusion": "success",
+      "number": 10,
+      "started_at": "2026-10-23T15:11:31Z",
+      "completed_at": "2026-10-23T15:23:09Z"
+    },
+    {
+      "name": "Record exact browser build provenance",
+      "status": "completed",
+      "conclusion": "success",
+      "number": 11,
+      "started_at": "2026-10-23T15:23:09Z",
+      "completed_at": "2026-10-23T15:23:12Z"
+    },
+    {
+      "name": "Upload complete browser build with provenance",
+      "status": "completed",
+      "conclusion": "success",
+      "number": 12,
+      "started_at": "2026-10-23T15:23:12Z",
+      "completed_at": "2026-10-23T15:23:14Z"
+    },
+    {
+      "name": "Snapshot source timestamps with the partial build",
+      "status": "completed",
+      "conclusion": "success",
+      "number": 13,
+      "started_at": "2026-10-23T15:23:14Z",
+      "completed_at": "2026-10-23T15:23:15Z"
+    },
+    {
+      "name": "Upload browser build logs and provenance",
+      "status": "completed",
+      "conclusion": "success",
+      "number": 14,
+      "started_at": "2026-10-23T15:23:15Z",
+      "completed_at": "2026-10-23T15:23:16Z"
+    },
+    {
+      "name": "Cache pinned toolchain",
+      "status": "completed",
+      "conclusion": "skipped",
+      "number": 15,
+      "started_at": "2026-10-23T15:23:16Z",
+      "completed_at": "2026-10-23T15:23:16Z"
+    },
+    {
+      "name": "Cache partial browser build",
+      "status": "completed",
+      "conclusion": "success",
+      "number": 16,
+      "started_at": "2026-10-23T15:23:16Z",
+      "completed_at": "2026-10-23T15:23:21Z"
+    },
+    {
+      "name": "Post Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020",
+      "status": "completed",
+      "conclusion": "success",
+      "number": 31,
+      "started_at": "2026-10-23T15:23:21Z",
+      "completed_at": "2026-10-23T15:23:21Z"
+    },
+    {
+      "name": "Post Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262",
+      "status": "completed",
+      "conclusion": "success",
+      "number": 32,
+      "started_at": "2026-10-23T15:23:21Z",
+      "completed_at": "2026-10-23T15:23:21Z"
+    },
+    {
+      "name": "Complete job",
+      "status": "completed",
+      "conclusion": "success",
+      "number": 33,
+      "started_at": "2026-10-23T15:23:21Z",
+      "completed_at": "2026-10-23T15:23:21Z"
+    }
+  ],
+  "check_run_url": "https://api.github.com/repos/wieslawsoltes/FerroUI/check-runs/120490704316",
+  "labels": [
+    "ubuntu-24.04"
+  ],
+  "runner_id": 1000302830,
+  "runner_name": "GitHub Actions 1000302830",
+  "runner_group_id": 0,
+  "runner_group_name": "GitHub Actions"
+}

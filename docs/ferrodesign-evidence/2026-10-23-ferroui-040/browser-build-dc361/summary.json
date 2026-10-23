@@ -1,0 +1,49 @@
+{
+  "recorded_at": "2026-10-23T15:29:25.871459+00:00",
+  "source_commit": "dc36199693472ac8297bafdaad6d4a0701acddf0",
+  "source_tree": "57c2625a948b9401b9517b2724b2715d8e7ca92b",
+  "workflow_run": 39976024338,
+  "workflow_job": 120490704316,
+  "conclusion": "success",
+  "workflow_url": "https://github.com/wieslawsoltes/FerroUI/actions/runs/39976024338",
+  "build_started_at": "2026-10-23T15:11:31Z",
+  "build_completed_at": "2026-10-23T15:23:09Z",
+  "cargo_elapsed": "11m 29s",
+  "artifact_id": 12512495659,
+  "archive_bytes": 12643773,
+  "archive_sha256": "62525059621c4aa1aff6998db2a1bdcd02c5b906bfc956fa434fd350abad8537",
+  "manifest_payload_count": 17,
+  "wasm": {
+    "path": "ferrodesign_app.wasm",
+    "bytes": 53795035,
+    "sha256": "b531f97834ce74271b85e368b48a8428063fec301c7419abc53eeeb0e53a656a"
+  },
+  "cache": {
+    "toolchain_restored": true,
+    "framework_restored_from_commit": "4d3c796c7d5b76eb1e9d7f4f24b523841adbd994",
+    "unchanged_source_timestamps_restored": 10573,
+    "changed_files_skipped": 5,
+    "source_timestamps_snapshotted": 10578
+  },
+  "gates": {
+    "build": true,
+    "active_vello_no_skia_dependency_graph": true,
+    "host_typecheck": true,
+    "host_input_tests": {
+      "passed": 10
+    },
+    "archive_digest_crc_paths_and_all_manifest_hashes": true,
+    "exact_source_host_hashes": true,
+    "static_modules": 7,
+    "relative_favicon_and_explicit_dynamic_storage": true,
+    "actual_browser_interactions": "Separate browser-runtime-dc361 evidence; no interaction claim is made by this build record."
+  },
+  "decoded_log": {
+    "encoding": "UTF-8 with original BOM and line endings retained",
+    "bytes": 98764,
+    "sha256": "3cc3429e2bf19e748d5ed26f5de970f7e935c503ae5391e94199bc84ad324d50",
+    "file": "build.log.gz",
+    "compression": "lossless gzip, mtime=0"
+  },
+  "scope": "Exact dc361996 build, archive/source integrity and static delivery closure. This record alone does not prove native tests, browser interactions, performance, or visual parity."
+}

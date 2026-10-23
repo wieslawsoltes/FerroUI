@@ -1,0 +1,27 @@
+{
+  "artifacts": [
+    {
+      "file": "native-job.log.gz",
+      "compressed_bytes": 91166,
+      "compressed_sha256": "d2f4ac87f8f0a632bea73fbbf858133bfde99e111c3414d88d2089185d066609",
+      "uncompressed_bytes": 731629,
+      "uncompressed_sha256": "da4f4e961d93edd28eb06e0c6bd2cf2534821affe7b6f9af1f5aa9a5767e5f47"
+    },
+    {
+      "file": "generated-references-job.log.gz",
+      "compressed_bytes": 37134,
+      "compressed_sha256": "94345b10005346b47f9fd7b2346e019fbdc4546a2797611dc0adc8c76eeb81c3",
+      "uncompressed_bytes": 241832,
+      "uncompressed_sha256": "1f560910bfdb54320ec85554e6a56a2c5ccbc391d862647af948246fe1dddcc1"
+    },
+    {
+      "file": "full-log-analysis.json.gz",
+      "compressed_bytes": 14803,
+      "compressed_sha256": "49fb461e0c70fad13452da1cf72b32e534a3ccd052a3b1acde6b935715b54d5e",
+      "uncompressed_bytes": 112269,
+      "uncompressed_sha256": "a1f058f9f0de29aaa49f6e613323e466141072ac5aa106d670cb8dfbac979217"
+    }
+  ],
+  "compression": "lossless gzip level9, mtime0",
+  "raw_log_retrieval": "GitHub connector decoded UTF-8 job logs; ANSI escapes and original GitHub timestamps retained."
+}

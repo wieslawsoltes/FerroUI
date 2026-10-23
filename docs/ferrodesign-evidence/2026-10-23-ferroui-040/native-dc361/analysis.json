@@ -1,0 +1,425 @@
+{
+  "commit": "dc36199693472ac8297bafdaad6d4a0701acddf0",
+  "tree": "57c2625a948b9401b9517b2724b2715d8e7ca92b",
+  "native_conclusion": "success",
+  "suites": [
+    {
+      "crate": "ferroui-vello",
+      "filter": "unhinted_",
+      "start_line": 1491,
+      "announced_test_count": 8,
+      "result": {
+        "outcome": "ok",
+        "passed": 8,
+        "failed": 0,
+        "ignored": 0,
+        "measured": 0,
+        "filtered_out": 516,
+        "duration_seconds": 0.26,
+        "line": 1501
+      },
+      "identity_hint": "inspect_names",
+      "test_lines_match_announced_count": true,
+      "result_count_matches_announced_count": true
+    },
+    {
+      "crate": "ferroui-base",
+      "filter": "paragraph",
+      "start_line": 2377,
+      "announced_test_count": 17,
+      "result": {
+        "outcome": "ok",
+        "passed": 17,
+        "failed": 0,
+        "ignored": 0,
+        "measured": 0,
+        "filtered_out": 4549,
+        "duration_seconds": 0.04,
+        "line": 2396
+      },
+      "identity_hint": "inspect_names",
+      "test_lines_match_announced_count": true,
+      "result_count_matches_announced_count": true
+    },
+    {
+      "crate": "ferroui-base",
+      "filter": "text_line_bounds",
+      "start_line": 3252,
+      "announced_test_count": 8,
+      "result": {
+        "outcome": "ok",
+        "passed": 8,
+        "failed": 0,
+        "ignored": 0,
+        "measured": 0,
+        "filtered_out": 4558,
+        "duration_seconds": 0.02,
+        "line": 3262
+      },
+      "identity_hint": "inspect_names",
+      "test_lines_match_announced_count": true,
+      "result_count_matches_announced_count": true
+    },
+    {
+      "crate": "ferroui-controls",
+      "filter": "paragraph",
+      "start_line": 3529,
+      "announced_test_count": 17,
+      "result": {
+        "outcome": "ok",
+        "passed": 17,
+        "failed": 0,
+        "ignored": 0,
+        "measured": 0,
+        "filtered_out": 4475,
+        "duration_seconds": 0.19,
+        "line": 3548
+      },
+      "identity_hint": "inspect_names",
+      "test_lines_match_announced_count": true,
+      "result_count_matches_announced_count": true
+    },
+    {
+      "crate": "ferroui-controls",
+      "filter": "text_box_tests::",
+      "start_line": 3814,
+      "announced_test_count": 188,
+      "result": {
+        "outcome": "ok",
+        "passed": 188,
+        "failed": 0,
+        "ignored": 0,
+        "measured": 0,
+        "filtered_out": 4304,
+        "duration_seconds": 3.1,
+        "line": 4004
+      },
+      "identity_hint": "full_text_box_filter_including_masked",
+      "test_lines_match_announced_count": true,
+      "result_count_matches_announced_count": true
+    },
+    {
+      "crate": "ferroui-controls",
+      "filter": "text_box_history::",
+      "start_line": 4270,
+      "announced_test_count": 5,
+      "result": {
+        "outcome": "ok",
+        "passed": 5,
+        "failed": 0,
+        "ignored": 0,
+        "measured": 0,
+        "filtered_out": 4487,
+        "duration_seconds": 0.06,
+        "line": 4277
+      },
+      "identity_hint": "native_text_history",
+      "test_lines_match_announced_count": true,
+      "result_count_matches_announced_count": true
+    },
+    {
+      "crate": "ferroui-vello --features gpu",
+      "filter": "gpu::fragment_tests::",
+      "start_line": 4631,
+      "announced_test_count": 7,
+      "result": {
+        "outcome": "ok",
+        "passed": 7,
+        "failed": 0,
+        "ignored": 0,
+        "measured": 0,
+        "filtered_out": 539,
+        "duration_seconds": 6.0,
+        "line": 4640
+      },
+      "identity_hint": "required_gpu_fragments",
+      "test_lines_match_announced_count": true,
+      "result_count_matches_announced_count": true
+    },
+    {
+      "crate": "ferrodesign-app",
+      "filter": "--lib (unfiltered)",
+      "start_line": 5063,
+      "announced_test_count": 239,
+      "result": {
+        "outcome": "ok",
+        "passed": 239,
+        "failed": 0,
+        "ignored": 0,
+        "measured": 0,
+        "filtered_out": 0,
+        "duration_seconds": 37.96,
+        "line": 5304
+      },
+      "identity_hint": "inspect_names",
+      "test_lines_match_announced_count": true,
+      "result_count_matches_announced_count": true
+    }
+  ],
+  "new_regressions": {
+    "text_box_tests::paragraph_first_preedit_preserves_unicode_styles_cancel_commit_and_native_history": [
+      {
+        "name": "text_box_tests::paragraph_first_preedit_preserves_unicode_styles_cancel_commit_and_native_history",
+        "outcome": "ok",
+        "line": 3540,
+        "suffix": "ok",
+        "raw_log_line": "2026-10-23T15:21:14.0693781Z test text_box_tests::paragraph_first_preedit_preserves_unicode_styles_cancel_commit_and_native_history ... ok"
+      },
+      {
+        "name": "text_box_tests::paragraph_first_preedit_preserves_unicode_styles_cancel_commit_and_native_history",
+        "outcome": "ok",
+        "line": 3931,
+        "suffix": "ok",
+        "raw_log_line": "2026-10-23T15:21:16.1550944Z test text_box_tests::paragraph_first_preedit_preserves_unicode_styles_cancel_commit_and_native_history ... ok"
+      }
+    ],
+    "text_box_tests::first_preedit_respects_reentrant_cancellation_before_publication": [
+      {
+        "name": "text_box_tests::first_preedit_respects_reentrant_cancellation_before_publication",
+        "outcome": "ok",
+        "line": 3900,
+        "suffix": "ok",
+        "raw_log_line": "2026-10-23T15:21:15.5185552Z test text_box_tests::first_preedit_respects_reentrant_cancellation_before_publication ... ok"
+      }
+    ],
+    "text_box_tests::first_preedit_respects_reentrant_detach_before_publication": [
+      {
+        "name": "text_box_tests::first_preedit_respects_reentrant_detach_before_publication",
+        "outcome": "ok",
+        "line": 3901,
+        "suffix": "ok",
+        "raw_log_line": "2026-10-23T15:21:15.5311342Z test text_box_tests::first_preedit_respects_reentrant_detach_before_publication ... ok"
+      }
+    ],
+    "text_box_tests::first_preedit_respects_reentrant_template_replacement_before_publication": [
+      {
+        "name": "text_box_tests::first_preedit_respects_reentrant_template_replacement_before_publication",
+        "outcome": "ok",
+        "line": 3904,
+        "suffix": "ok",
+        "raw_log_line": "2026-10-23T15:21:15.5803187Z test text_box_tests::first_preedit_respects_reentrant_template_replacement_before_publication ... ok"
+      }
+    ],
+    "text_box_tests::first_preedit_respects_reentrant_host_text_before_publication": [
+      {
+        "name": "text_box_tests::first_preedit_respects_reentrant_host_text_before_publication",
+        "outcome": "ok",
+        "line": 3903,
+        "suffix": "ok",
+        "raw_log_line": "2026-10-23T15:21:15.5652059Z test text_box_tests::first_preedit_respects_reentrant_host_text_before_publication ... ok"
+      }
+    ],
+    "text_box_tests::first_preedit_keeps_reentrant_host_text_that_returns_to_the_provisional_value": [
+      {
+        "name": "text_box_tests::first_preedit_keeps_reentrant_host_text_that_returns_to_the_provisional_value",
+        "outcome": "ok",
+        "line": 3899,
+        "suffix": "ok",
+        "raw_log_line": "2026-10-23T15:21:15.5064393Z test text_box_tests::first_preedit_keeps_reentrant_host_text_that_returns_to_the_provisional_value ... ok"
+      }
+    ],
+    "text_box_tests::preedit_clear_queues_a_new_clause_until_confirmed_selection_is_restored": [
+      {
+        "name": "text_box_tests::preedit_clear_queues_a_new_clause_until_confirmed_selection_is_restored",
+        "outcome": "ok",
+        "line": 3947,
+        "suffix": "ok",
+        "raw_log_line": "2026-10-23T15:21:16.4008755Z test text_box_tests::preedit_clear_queues_a_new_clause_until_confirmed_selection_is_restored ... ok"
+      }
+    ],
+    "text_box_tests::first_preedit_coalesces_newer_clauses_during_provisional_text_changing": [
+      {
+        "name": "text_box_tests::first_preedit_coalesces_newer_clauses_during_provisional_text_changing",
+        "outcome": "ok",
+        "line": 3897,
+        "suffix": "ok",
+        "raw_log_line": "2026-10-23T15:21:15.4791003Z test text_box_tests::first_preedit_coalesces_newer_clauses_during_provisional_text_changing ... ok"
+      }
+    ],
+    "text_box_tests::first_preedit_respects_reentrant_host_selection_before_publication_and_clear": [
+      {
+        "name": "text_box_tests::first_preedit_respects_reentrant_host_selection_before_publication_and_clear",
+        "outcome": "ok",
+        "line": 3902,
+        "suffix": "ok",
+        "raw_log_line": "2026-10-23T15:21:15.5527709Z test text_box_tests::first_preedit_respects_reentrant_host_selection_before_publication_and_clear ... ok"
+      }
+    ],
+    "text_box_tests::first_preedit_checks_selection_notification_before_publication": [
+      {
+        "name": "text_box_tests::first_preedit_checks_selection_notification_before_publication",
+        "outcome": "ok",
+        "line": 3896,
+        "suffix": "ok",
+        "raw_log_line": "2026-10-23T15:21:15.4627736Z test text_box_tests::first_preedit_checks_selection_notification_before_publication ... ok"
+      }
+    ],
+    "text_box_tests::first_preedit_accepts_native_caret_coercion_and_reversed_selection": [
+      {
+        "name": "text_box_tests::first_preedit_accepts_native_caret_coercion_and_reversed_selection",
+        "outcome": "ok",
+        "line": 3895,
+        "suffix": "ok",
+        "raw_log_line": "2026-10-23T15:21:15.4464002Z test text_box_tests::first_preedit_accepts_native_caret_coercion_and_reversed_selection ... ok"
+      }
+    ],
+    "text_box_tests::first_preedit_does_not_overwrite_a_newer_clause_or_its_cursor": [
+      {
+        "name": "text_box_tests::first_preedit_does_not_overwrite_a_newer_clause_or_its_cursor",
+        "outcome": "ok",
+        "line": 3898,
+        "suffix": "ok",
+        "raw_log_line": "2026-10-23T15:21:15.4924360Z test text_box_tests::first_preedit_does_not_overwrite_a_newer_clause_or_its_cursor ... ok"
+      }
+    ],
+    "text_box_tests::first_preedit_still_clears_on_external_text_or_caret_changes": [
+      {
+        "name": "text_box_tests::first_preedit_still_clears_on_external_text_or_caret_changes",
+        "outcome": "ok",
+        "line": 3905,
+        "suffix": "ok",
+        "raw_log_line": "2026-10-23T15:21:15.5966798Z test text_box_tests::first_preedit_still_clears_on_external_text_or_caret_changes ... ok"
+      }
+    ],
+    "text_box_tests::first_preedit_text_synchronization_respects_reentrant_owner_changes": [
+      {
+        "name": "text_box_tests::first_preedit_text_synchronization_respects_reentrant_owner_changes",
+        "outcome": "ok",
+        "line": 3906,
+        "suffix": "ok",
+        "raw_log_line": "2026-10-23T15:21:15.6242029Z test text_box_tests::first_preedit_text_synchronization_respects_reentrant_owner_changes ... ok"
+      }
+    ]
+  },
+  "all_14_new_names_executed_and_passed": true,
+  "unique_new_names_passed": 14,
+  "unique_new_names_failed": 0,
+  "new_case_execution_occurrences": 15,
+  "text_box_substring_filter": {
+    "total": 188,
+    "modules": {
+      "masked_text_box_tests": 55,
+      "text_box_tests": 133
+    },
+    "expected_panic_cases": 4,
+    "all_outcomes": "ok"
+  },
+  "overlap": {
+    "counts_are_not_additive": true,
+    "base_paragraph_and_text_line_bounds": [
+      "media::text_formatting::text_line_bounds_tests::full_is_the_default_of_paragraph_properties"
+    ],
+    "controls_paragraph_and_text_box_tests": [
+      "text_box_tests::paragraph_first_preedit_preserves_unicode_styles_cancel_commit_and_native_history",
+      "text_box_tests::paragraph_ime_cancel_restores_confirmation_and_commit_reports_original_selection",
+      "text_box_tests::paragraph_ime_cancellation_does_not_enter_native_history_or_discard_redo",
+      "text_box_tests::paragraph_ime_restore_respects_a_synchronous_application_replacement",
+      "text_box_tests::paragraph_preedit_subscription_tracks_late_template_replacement_and_detach",
+      "text_box_tests::paragraph_preedit_template_removal_respects_reentrant_template_installation",
+      "text_box_tests::paragraph_preedit_template_removal_restores_confirmation_without_discarding_redo"
+    ],
+    "new_synchronization_test": "One libtest function contains five source-level reentrant callback cases; it is counted once, not as five additional named tests."
+  },
+  "required_gpu_environment_occurrences": [
+    {
+      "line": 4290,
+      "text": "FERROUI_VELLO_REQUIRE_GPU: 1"
+    }
+  ],
+  "checkout_and_source_occurrences": [
+    {
+      "line": 36,
+      "text": "ref: dc36199693472ac8297bafdaad6d4a0701acddf0"
+    },
+    {
+      "line": 99,
+      "text": "[command]/usr/bin/git -c protocol.version=2 fetch --no-tags --prune --no-recurse-submodules --depth=1 origin dc36199693472ac8297bafdaad6d4a0701acddf0"
+    },
+    {
+      "line": 101,
+      "text": "* branch            dc36199693472ac8297bafdaad6d4a0701acddf0 -> FETCH_HEAD"
+    },
+    {
+      "line": 108,
+      "text": "[command]/usr/bin/git checkout --progress --force dc36199693472ac8297bafdaad6d4a0701acddf0"
+    },
+    {
+      "line": 109,
+      "text": "Note: switching to 'dc36199693472ac8297bafdaad6d4a0701acddf0'."
+    },
+    {
+      "line": 129,
+      "text": "dc36199693472ac8297bafdaad6d4a0701acddf0"
+    },
+    {
+      "line": 147,
+      "text": "key: ferrodesign-native-feedback-Linux-24a777fa3f5a49b7d3ee6f58d5272afd4ddeb69feae9cfcb0d339824746d878e-dc36199693472ac8297bafdaad6d4a0701acddf0"
+    },
+    {
+      "line": 5325,
+      "text": "key: ferrodesign-native-feedback-Linux-24a777fa3f5a49b7d3ee6f58d5272afd4ddeb69feae9cfcb0d339824746d878e-dc36199693472ac8297bafdaad6d4a0701acddf0"
+    },
+    {
+      "line": 5345,
+      "text": "Cache saved with key: ferrodesign-native-feedback-Linux-24a777fa3f5a49b7d3ee6f58d5272afd4ddeb69feae9cfcb0d339824746d878e-dc36199693472ac8297bafdaad6d4a0701acddf0"
+    }
+  ],
+  "failure_lines": [],
+  "generated_references_checkout_occurrences": [
+    {
+      "line": 102,
+      "text": "2026-10-23T15:10:50.7482868Z [command]/usr/bin/git -c protocol.version=2 fetch --no-tags --prune --no-recurse-submodules --depth=1 origin +dc36199693472ac8297bafdaad6d4a0701acddf0:refs/remotes/origin/feat/ferrodesign-editor"
+    },
+    {
+      "line": 104,
+      "text": "2026-10-23T15:10:56.6476773Z  * [new ref]         dc36199693472ac8297bafdaad6d4a0701acddf0 -> origin/feat/ferrodesign-editor"
+    },
+    {
+      "line": 116,
+      "text": "2026-10-23T15:10:57.6707603Z dc36199693472ac8297bafdaad6d4a0701acddf0"
+    },
+    {
+      "line": 389,
+      "text": "2026-10-23T15:11:07.7791101Z   key: ferroui-generated-references-Linux-rust1.99.0-ac9371f35947e16bdfd9a82b8f1a12828f50c9819d65a225a7abc3f2b9a8e021-dc36199693472ac8297bafdaad6d4a0701acddf0"
+    },
+    {
+      "line": 2665,
+      "text": "2026-10-23T15:21:59.8134776Z   \"source_commit\": \"dc36199693472ac8297bafdaad6d4a0701acddf0\","
+    },
+    {
+      "line": 2667,
+      "text": "2026-10-23T15:21:59.8135872Z   \"event_sha\": \"dc36199693472ac8297bafdaad6d4a0701acddf0\","
+    },
+    {
+      "line": 2714,
+      "text": "2026-10-23T15:21:59.8230573Z   name: FerroUI-generated-references-dc36199693472ac8297bafdaad6d4a0701acddf0"
+    },
+    {
+      "line": 2742,
+      "text": "2026-10-23T15:22:01.2671501Z Artifact FerroUI-generated-references-dc36199693472ac8297bafdaad6d4a0701acddf0.zip successfully finalized. Artifact ID 12512420884"
+    },
+    {
+      "line": 2743,
+      "text": "2026-10-23T15:22:01.2673267Z Artifact FerroUI-generated-references-dc36199693472ac8297bafdaad6d4a0701acddf0 has been successfully uploaded! Final size is 816125 bytes. Artifact ID is 12512420884"
+    },
+    {
+      "line": 2751,
+      "text": "2026-10-23T15:22:01.2801060Z   key: ferroui-generated-references-Linux-rust1.99.0-ac9371f35947e16bdfd9a82b8f1a12828f50c9819d65a225a7abc3f2b9a8e021-dc36199693472ac8297bafdaad6d4a0701acddf0"
+    },
+    {
+      "line": 2771,
+      "text": "2026-10-23T15:22:11.8828488Z Cache saved with key: ferroui-generated-references-Linux-rust1.99.0-ac9371f35947e16bdfd9a82b8f1a12828f50c9819d65a225a7abc3f2b9a8e021-dc36199693472ac8297bafdaad6d4a0701acddf0"
+    }
+  ],
+  "previous_native_failure": {
+    "commit": "4d3c796c7d5b76eb1e9d7f4f24b523841adbd994",
+    "evidence": "../native-4d3/",
+    "distinct_result_preserved": true,
+    "now_passing_names": [
+      "text_box_tests::first_preedit_accepts_native_caret_coercion_and_reversed_selection",
+      "text_box_tests::first_preedit_respects_reentrant_host_selection_before_publication_and_clear",
+      "text_box_tests::first_preedit_respects_reentrant_template_replacement_before_publication"
+    ]
+  },
+  "scope": "Actual CI execution of the named native filters on dc361. This is not a browser pass, a full framework test run, a full workflow result, a performance comparison or a claim about OS IME candidate UI."
+}

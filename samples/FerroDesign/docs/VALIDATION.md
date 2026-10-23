@@ -4,6 +4,28 @@ This file distinguishes implemented paths, completed checks and measurements. Ea
 
 ## First-preedit native execution and correction (2026-10-23)
 
+**The corrected `dc361996` native feedback run passed completely.** The closed
+log contains passing outcomes for all **14 added regression functions**, the
+complete **188-case TextBox substring filter** (133 TextBox and 55 masked
+TextBox), **five rich-history cases**, **239 application tests in 37.96 s**
+and **seven required GPU fragment tests in 6.00 s**. All other configured
+glyph, paragraph and line-bounds filters passed. None failed or was ignored;
+overlapping filters are not additive. The final new synchronization test has
+five reentry cases within one named function. Generated Rust paths and both
+compiled theme references passed separately at the same source SHA.
+[Exact executed names, metadata and lossless logs](../../../docs/ferrodesign-evidence/2026-10-23-ferroui-040/native-dc361/README.md)
+preserve the complete counts and their scope.
+
+The [matching browser distribution](../../../docs/ferrodesign-evidence/2026-10-23-ferroui-040/browser-build-dc361/README.md)
+also passed build and delivery verification: **53,795,035-byte WASM**, **17
+payloads plus provenance**, exact source/tree/run, archive CRC/path/hash checks,
+all payload hashes and copied source assets, seven static JavaScript modules,
+dynamic storage and relative favicon, and the active Vello/no-Skia graph.
+Cargo took **11m29s** after restoring 10,573 matching source timestamps and
+skipping five changed inputs; all ten host input tests passed. These native
+and delivery results do not substitute for browser interaction or timing
+evidence.
+
 The exact `4d3c796c` native feedback job **failed three new regression tests
 after successful compilation**. All 13 newly introduced functions ran: ten
 passed, including the styled Unicode first-clause/cancel/commit/history case
@@ -32,8 +54,8 @@ layout. It preserves all existing caret expectations and adds a five-case
 reentry regression. The template fixture checks restored text, selection and
 the replacement native owner synchronously, then checks visual attachment
 after normal child layout. There are now 14 new regression functions. Source
-review and Rust syntax parsing passed; this record does not assert a native
-or browser execution pass for the follow-up.
+review and Rust syntax parsing preceded the completed native run recorded
+above; browser execution remains a separate gate.
 
 The same follow-up adds bounded passive keydown/keyup evidence around the
 unchanged Control+Home, ArrowRight, ArrowRight sequence and immediate native

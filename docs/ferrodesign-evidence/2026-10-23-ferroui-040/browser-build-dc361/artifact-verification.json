@@ -1,0 +1,137 @@
+{
+  "verified_utc": "2026-10-23T15:25:33.236201+00:00",
+  "source_commit": "dc36199693472ac8297bafdaad6d4a0701acddf0",
+  "source_tree": "57c2625a948b9401b9517b2724b2715d8e7ca92b",
+  "workflow_run": 39976024338,
+  "workflow_job": 120490704316,
+  "workflow_url": "https://github.com/wieslawsoltes/FerroUI/actions/runs/39976024338",
+  "artifact_id": 12512495659,
+  "artifact_name": "FerroDesign-browser-build-dc36199693472ac8297bafdaad6d4a0701acddf0",
+  "archive_bytes": 12643773,
+  "archive_sha256": "62525059621c4aa1aff6998db2a1bdcd02c5b906bfc956fa434fd350abad8537",
+  "archive_crc_valid": true,
+  "archive_paths_safe_and_unique": true,
+  "archive_uncompressed_bytes": 54504769,
+  "manifest_payload_count": 17,
+  "all_manifest_hashes_valid": true,
+  "exact_copied_source_host_hashes_valid": true,
+  "renderer_graph": {
+    "vello_present": true,
+    "skia_absent": true
+  },
+  "extracted": true,
+  "runtime_directory": "/tmp/ferrodesign-e99-browser-dc361",
+  "disk_free_bytes_before": 717836288,
+  "disk_free_bytes_after": 663289856,
+  "build_provenance": {
+    "schema_version": 1,
+    "repository": "wieslawsoltes/FerroUI",
+    "commit": "dc36199693472ac8297bafdaad6d4a0701acddf0",
+    "tree": "57c2625a948b9401b9517b2724b2715d8e7ca92b",
+    "ref": "refs/heads/feat/ferrodesign-editor",
+    "run_id": "39976024338",
+    "run_attempt": "1",
+    "run_url": "https://github.com/wieslawsoltes/FerroUI/actions/runs/39976024338",
+    "created_utc": "2026-10-23T15:23:12.335461+00:00",
+    "profile": "browser",
+    "target": "wasm32-unknown-emscripten",
+    "renderer_graph": "dependencies.txt",
+    "validation_scope": "Build, active Vello/no-Skia graph, host input tests and static module imports; browser interactions require the separate full workflow.",
+    "tools": {
+      "rustc": "rustc 1.99.0 (b940084d7 2026-09-28)",
+      "cargo": "cargo 1.99.0 (5f94df478 2026-08-27)",
+      "emcc": "emcc (Emscripten gcc/clang-like replacement + linker emulating GNU ld) 6.0.10 (d6c521a7f05449857c76bd99e396895583cf2083)",
+      "wasm-bindgen": "wasm-bindgen 0.2.129",
+      "node": "v22.23.3",
+      "npm": "10.9.9"
+    },
+    "files": [
+      {
+        "path": "Cargo.lock",
+        "bytes": 80615,
+        "sha256": "1e11d66cfe586f859f3f7027d83b1f596a401184feb81e08fdf2f658ca5b87a9"
+      },
+      {
+        "path": "app.css",
+        "bytes": 1698,
+        "sha256": "bc13442e4a8b8d92c33428c53a65ebcd0e22423d623c1418bc137a0a23b9453b"
+      },
+      {
+        "path": "dependencies.txt",
+        "bytes": 52382,
+        "sha256": "804490d69cc51af45177b6046bdbea24a46b08aa7bcea9c10f8c926863e7cef7"
+      },
+      {
+        "path": "document-store.js",
+        "bytes": 15559,
+        "sha256": "6e6cca56c8af8567bd8b1f183eceed55815b2ec63e3ea222d45be93f25b4f012"
+      },
+      {
+        "path": "favicon.svg",
+        "bytes": 222,
+        "sha256": "883347dbc8832de4f398160d8fff0f69e8ef4ca831ffca045d670a3228ed08a7"
+      },
+      {
+        "path": "ferrodesign-app.js",
+        "bytes": 208809,
+        "sha256": "caca67e45b86dc2480dff4ded0fa4d554d0c7850234ebf001cfbc7e47f30e7a0"
+      },
+      {
+        "path": "ferrodesign_app.wasm",
+        "bytes": 53795035,
+        "sha256": "b531f97834ce74271b85e368b48a8428063fec301c7419abc53eeeb0e53a656a"
+      },
+      {
+        "path": "ferroui-loader.js",
+        "bytes": 16165,
+        "sha256": "817aa151802ca2aa17c25861fac1271538edeaac4161b198e461d2e306fe5db6"
+      },
+      {
+        "path": "ferroui-sw.js",
+        "bytes": 1528,
+        "sha256": "339767474c06dc15f8230f690701a6b5e915cbeea68ff1dce53a830e71d8bbbb"
+      },
+      {
+        "path": "ferroui-sw.js.map",
+        "bytes": 7970,
+        "sha256": "11f37d837801cc53a3da0effb98b669a42a1e3673e8b58c2430ba66aed913af8"
+      },
+      {
+        "path": "ferroui.js",
+        "bytes": 35910,
+        "sha256": "40f2c812b4ee1c8fa3ebbc1e0ff453256cc08f8a73fa5bbc01b96ab9bd2e2a20"
+      },
+      {
+        "path": "ferroui.js.map",
+        "bytes": 155919,
+        "sha256": "13e462b3c4f182ab0b4f544468b622f18cb5a770def9477476083cb2f7f46d75"
+      },
+      {
+        "path": "index.html",
+        "bytes": 1189,
+        "sha256": "5655bc554cb0568f2eadb3fe81085103c270821dac6c9e9443219d3541a5531d"
+      },
+      {
+        "path": "main.js",
+        "bytes": 2720,
+        "sha256": "8f81710a5fe670e9fe5438e1c2cd8feec6d1c05dfbbf8ad21be1aaa1d4f638ea"
+      },
+      {
+        "path": "snippets/ferrodesign-app-f10485043b6c20d9/inline0.js",
+        "bytes": 3013,
+        "sha256": "89166deca77a446127adbe9767606b79f84a8253395a468643a977030fe32734"
+      },
+      {
+        "path": "storage.js",
+        "bytes": 27573,
+        "sha256": "a0c9d1ba7aef2a9e7cba10a79d61a99ba61db9faaa9290224ab07d39112d61fb"
+      },
+      {
+        "path": "storage.js.map",
+        "bytes": 94853,
+        "sha256": "43ca70c7239cfb3a736dada8df9e8f5926864c013a06190bd41f5d956f2d7931"
+      }
+    ]
+  },
+  "scope": "Archive and source verification only; static module closure and actual browser execution are separate gates."
+}

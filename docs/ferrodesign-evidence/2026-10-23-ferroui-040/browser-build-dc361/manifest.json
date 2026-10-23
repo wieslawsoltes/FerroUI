@@ -1,0 +1,41 @@
+{
+  "source_commit": "dc36199693472ac8297bafdaad6d4a0701acddf0",
+  "scope": "Exact completed browser build and static delivery evidence; editor interactions are a separate record. Manifest excludes itself.",
+  "files": [
+    {
+      "path": "README.md",
+      "bytes": 2735,
+      "sha256": "b3ce6c7a8307eddc21af969e2eca56d83e11f7d6e501034faf76465b5d9629e7"
+    },
+    {
+      "path": "artifact-metadata.json",
+      "bytes": 791,
+      "sha256": "425c5ad8de7a2207ebba1c8ab0ef404e18f7135d005c71e9b759df9fd3056dbb"
+    },
+    {
+      "path": "artifact-verification.json",
+      "bytes": 5007,
+      "sha256": "bdbf0684d8ac6c7522fb01edcb47a97d3b808a0ab11fbcf1de4f7d8e6b0c8cea"
+    },
+    {
+      "path": "build.log.gz",
+      "bytes": 22075,
+      "sha256": "0048be7b84a8e8faca5297d8bd9981e5623f84137ceca06afa073606dfbbef94"
+    },
+    {
+      "path": "delivery-verification.json",
+      "bytes": 2565,
+      "sha256": "eb75699f7e9a3d6e0c282e5791554febb4808b6cefe5645f208aa349c8f9719a"
+    },
+    {
+      "path": "job.json",
+      "bytes": 5645,
+      "sha256": "1fd9b17c502dbadd2c7e2a1076687a110cb35292e4aa2a1dcf9d5c95aebb5005"
+    },
+    {
+      "path": "summary.json",
+      "bytes": 2013,
+      "sha256": "55bc3b1ba596cf4d611db1975a81f20dc61181f55023e760506db3faca742693"
+    }
+  ]
+}
