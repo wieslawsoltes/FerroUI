@@ -109,6 +109,54 @@ fn standard_namespace_prefixes_and_foreign_extensions_are_handled() {
 }
 
 #[test]
+fn xshd_compilation_applies_explicit_capture_without_rewriting_the_editable_pattern() {
+    let xml = r#"<SyntaxDefinition><RuleSet><Rule foreground="Red"><![CDATA[(a)(?<word>b)\1]]></Rule><Span begin="(x)" end="(y)"/></RuleSet></SyntaxDefinition>"#;
+    let syntax = load_xshd(xml).unwrap();
+    let XshdElement::RuleSet(set) = &syntax.elements[0] else {
+        panic!()
+    };
+    let XshdElement::Rule(rule) = &set.elements[0] else {
+        panic!()
+    };
+    assert_eq!(rule.regex.as_deref(), Some(r"(a)(?<word>b)\1"));
+    let definition = syntax.compile().unwrap();
+    let set = &definition.rule_sets[definition.main_rule_set];
+    assert_eq!(set.rules[0].regex.captures_len(), 2);
+    assert_eq!(set.spans[0].start_expression.captures_len(), 1);
+    assert_eq!(set.spans[0].end_expression.captures_len(), 1);
+    assert_eq!(
+        foreground_at(&highlight(definition.clone(), "abb"), 0),
+        Some("Red")
+    );
+    assert_equivalent(
+        definition,
+        compiled(&syntax.to_xml().unwrap()),
+        &["abb", "ab", "xay"],
+    );
+}
+
+#[test]
+fn unsupported_capture_patterns_keep_xshd_source_diagnostics() {
+    for pattern in [r"(a)\1", r"(?<name>a)(?<name>b)", r"(?<first-second>a)"] {
+        let error = HighlightingDefinition::load(&format!(
+            "<SyntaxDefinition>\n<RuleSet><Rule><![CDATA[{pattern}]]></Rule></RuleSet></SyntaxDefinition>"
+        )).unwrap_err();
+        assert!(matches!(
+            error,
+            crate::highlighting::HighlightingError::Pattern(_)
+        ));
+        assert!(error.to_string().contains("line 2"));
+    }
+}
+
+#[test]
+fn active_loader_uses_structural_validation_without_enforcing_the_archived_xsd() {
+    let syntax = load_xshd(r#"<SyntaxDefinition custom="metadata"><Color name="Text" fontSize="14.5" custom="metadata"/><RuleSet unknown="metadata"><Rule color="Text">x</Rule></RuleSet></SyntaxDefinition>"#).unwrap();
+    let definition = syntax.compile().unwrap();
+    assert_eq!(definition.colors["Text"].font_size, Some(14.5));
+}
+
+#[test]
 fn parser_rejects_ambiguous_span_members_with_source_locations() {
     for span in [
         r#"<Span begin="x"><Begin>x</Begin></Span>"#,
@@ -148,7 +196,9 @@ fn compiler_validates_duplicate_names_properties_main_sets_and_missing_reference
         "<SyntaxDefinition><RuleSet><Keywords><Word/></Keywords></RuleSet></SyntaxDefinition>",
         "<SyntaxDefinition><RuleSet><Span begin=\"\" end=\"\"/></RuleSet></SyntaxDefinition>",
         "<SyntaxDefinition><RuleSet><Span begin=\"x\" multiline=\"true\"/></RuleSet></SyntaxDefinition>",
-    ] { assert!(load_xshd(xml).unwrap().compile().is_err(), "{xml}"); }
+    ] {
+        assert!(load_xshd(xml).unwrap().compile().is_err(), "{xml}");
+    }
 }
 
 #[test]
@@ -175,9 +225,11 @@ fn imports_preserve_rule_and_span_precedence_at_their_source_position() {
                 r#"<SyntaxDefinition><RuleSet>{body}</RuleSet><RuleSet name="Other">{imported}</RuleSet></SyntaxDefinition>"#
             );
             let definition = compiled(&xml);
-            assert!(definition.rule_sets[definition.main_rule_set]
-                .imports
-                .is_empty());
+            assert!(
+                definition.rule_sets[definition.main_rule_set]
+                    .imports
+                    .is_empty()
+            );
             assert_eq!(
                 foreground_at(&highlight(definition, "xy"), 0),
                 Some(if import_first { "Red" } else { "Blue" })
@@ -197,9 +249,11 @@ fn external_definitions_support_slashes_main_sets_and_forward_colors() {
     assert_eq!(foreground_at(&result, 0), Some("Red"));
     assert_eq!(foreground_at(&result, 1), Some("Red"));
     assert!(syntax.compile().is_err());
-    assert!(syntax
-        .compile_with_dependencies(&[&dependency, &dependency])
-        .is_err());
+    assert!(
+        syntax
+            .compile_with_dependencies(&[&dependency, &dependency])
+            .is_err()
+    );
 }
 
 #[test]
@@ -335,7 +389,9 @@ fn inline_font_colors_validate_programmatic_ast_and_named_weight_aliases() {
         ("1", 1),
         ("1000", 1000),
     ] {
-        let xml = format!("<SyntaxDefinition><RuleSet><Rule fontWeight=\"{name}\" fontStyle=\"2\">x</Rule></RuleSet></SyntaxDefinition>");
+        let xml = format!(
+            "<SyntaxDefinition><RuleSet><Rule fontWeight=\"{name}\" fontStyle=\"2\">x</Rule></RuleSet></SyntaxDefinition>"
+        );
         let definition = load_xshd(&xml).unwrap().compile().unwrap();
         let color = definition.rule_sets[definition.main_rule_set].rules[0]
             .color
@@ -482,11 +538,13 @@ fn writer_hoists_inline_imports_without_name_collisions_or_losing_case_context()
         restored.compile().unwrap(),
         &["X x"],
     );
-    assert!(restored
-        .compile()
-        .unwrap()
-        .colors
-        .contains_key("InlineColor"));
+    assert!(
+        restored
+            .compile()
+            .unwrap()
+            .colors
+            .contains_key("InlineColor")
+    );
     assert_eq!(restored.to_xml().unwrap(), saved);
 }
 
@@ -600,7 +658,9 @@ fn immutable_and_mutable_visitors_visit_properties_and_inline_references() {
     syntax.accept_elements(&mut visitor).unwrap();
     assert_eq!(
         visitor.seen,
-        ["property", "set", "keywords", "color", "span", "set", "rule", "color"]
+        [
+            "property", "set", "keywords", "color", "span", "set", "rule", "color"
+        ]
     );
     syntax.accept_elements_mut(&mut Edit).unwrap();
     assert_eq!(syntax.compile().unwrap().properties["A"], "v!");

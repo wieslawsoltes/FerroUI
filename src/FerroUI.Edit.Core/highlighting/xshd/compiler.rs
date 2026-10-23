@@ -503,7 +503,12 @@ fn compile_regex(
     position: XshdPosition,
 ) -> Result<Regex, HighlightingError> {
     let pattern = pattern.ok_or_else(|| position.error("Regex missing"))?;
-    RegexBuilder::new(pattern)
+    let pattern = super::regex_compat::explicit_capture(
+        pattern,
+        kind == XshdRegexType::IgnorePatternWhitespace,
+    )
+    .map_err(|error| position.pattern_error(error))?;
+    RegexBuilder::new(&pattern)
         .case_insensitive(ignore_case)
         .ignore_whitespace(kind == XshdRegexType::IgnorePatternWhitespace)
         .backtrack_limit(1_000_000)

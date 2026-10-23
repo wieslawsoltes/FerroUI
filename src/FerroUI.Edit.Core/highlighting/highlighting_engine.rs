@@ -18,17 +18,23 @@ pub struct HighlightingEngine {
 enum Candidate {
     End(usize, usize),
     Span(usize, usize, usize, usize),
-    Rule(usize, usize, usize, usize),
+}
+
+#[derive(Clone, Copy)]
+enum RuleMatch {
+    Unsearched,
+    NotFound,
+    Found(usize, usize),
 }
 impl Candidate {
     fn start(&self) -> usize {
         match self {
-            Self::End(s, _) | Self::Span(_, _, s, _) | Self::Rule(_, _, s, _) => *s,
+            Self::End(s, _) | Self::Span(_, _, s, _) => *s,
         }
     }
     fn end(&self) -> usize {
         match self {
-            Self::End(_, e) | Self::Span(_, _, _, e) | Self::Rule(_, _, _, e) => *e,
+            Self::End(_, e) | Self::Span(_, _, _, e) => *e,
         }
     }
 }
@@ -108,29 +114,32 @@ impl HighlightingEngine {
             let mut scanned = HashSet::new();
             if let Some(ruleset) = ruleset {
                 self.find_candidates(text, position, ruleset, &mut scanned, &mut candidate)?;
-                let boundary = candidate.as_ref().map_or(text.len(), |c| c.start());
-                scanned.clear();
-                self.find_rule_candidate(
+            }
+            let boundary = candidate.as_ref().map_or(text.len(), |c| c.start());
+            if let Some(ruleset) = ruleset {
+                self.highlight_non_spans(
                     text,
-                    position,
+                    position..boundary,
                     ruleset,
-                    boundary,
-                    &mut scanned,
-                    &mut candidate,
+                    &utf16,
+                    offset,
+                    ambient.clone(),
+                    &mut sections,
+                    &mut iterations,
                 )?;
+            } else {
+                self.push(
+                    &mut sections,
+                    &utf16,
+                    position,
+                    boundary,
+                    offset,
+                    ambient.clone(),
+                );
             }
             let Some(candidate) = candidate else {
-                self.push(&mut sections, &utf16, position, text.len(), offset, ambient);
                 break;
             };
-            self.push(
-                &mut sections,
-                &utf16,
-                position,
-                candidate.start(),
-                offset,
-                ambient.clone(),
-            );
             let end = candidate.end();
             match candidate {
                 Candidate::End(start, end) => {
@@ -153,33 +162,6 @@ impl HighlightingEngine {
                     );
                     self.push(&mut sections, &utf16, start, end, offset, color);
                     state.stack.push((set, index));
-                }
-                Candidate::Rule(set, index, start, end) => {
-                    let color = self.definition.rule_sets[set].rules[index].color.as_ref();
-                    self.push(
-                        &mut sections,
-                        &utf16,
-                        start,
-                        end,
-                        offset,
-                        overlay(ambient, color),
-                    );
-                    if start == end {
-                        if end == text.len() {
-                            break;
-                        }
-                        let next = end + text[end..].chars().next().unwrap().len_utf8();
-                        self.push(
-                            &mut sections,
-                            &utf16,
-                            end,
-                            next,
-                            offset,
-                            self.ambient(&state)?,
-                        );
-                        position = next;
-                        continue;
-                    }
                 }
             }
             if end > position {
@@ -253,14 +235,11 @@ impl HighlightingEngine {
         }
         Ok(())
     }
-    fn find_rule_candidate(
+    fn collect_rules(
         &self,
-        text: &str,
-        position: usize,
         set: usize,
-        boundary: usize,
         scanned: &mut HashSet<usize>,
-        candidate: &mut Option<Candidate>,
+        rules: &mut Vec<(usize, usize)>,
     ) -> Result<(), HighlightingError> {
         if !scanned.insert(set) {
             return Ok(());
@@ -270,27 +249,86 @@ impl HighlightingEngine {
             .rule_sets
             .get(set)
             .ok_or(HighlightingError::InvalidState)?;
-        for (index, rule) in ruleset.rules.iter().enumerate() {
-            if let Some(m) = rule
-                .regex
-                .find_from_pos(text, position)
-                .map_err(|e| HighlightingError::MatchBudget(e.to_string()))?
-            {
-                if m.start() < boundary && candidate.as_ref().is_none_or(|c| m.start() < c.start())
-                {
-                    *candidate = Some(Candidate::Rule(
-                        set,
-                        index,
-                        m.start(),
-                        m.end().min(boundary),
-                    ));
-                }
-            }
-        }
+        rules.extend((0..ruleset.rules.len()).map(|index| (set, index)));
         for import in &ruleset.imports {
-            self.find_rule_candidate(text, position, *import, boundary, scanned, candidate)?;
+            self.collect_rules(*import, scanned, rules)?;
         }
         Ok(())
+    }
+    #[allow(clippy::too_many_arguments)]
+    fn highlight_non_spans(
+        &self,
+        text: &str,
+        region: std::ops::Range<usize>,
+        set: usize,
+        utf16: &[(usize, usize)],
+        offset: usize,
+        ambient: Option<HighlightingColor>,
+        sections: &mut Vec<HighlightedSection>,
+        iterations: &mut usize,
+    ) -> Result<(), HighlightingError> {
+        if region.is_empty() {
+            return Ok(());
+        }
+        let mut rules = Vec::new();
+        self.collect_rules(set, &mut HashSet::new(), &mut rules)?;
+        // An evaluated miss remains cached until the next span boundary. A successful match is
+        // recomputed only once another rule has advanced beyond its start.
+        let mut matches = vec![RuleMatch::Unsearched; rules.len()];
+        let mut position = region.start;
+        loop {
+            let mut first: Option<(usize, usize, usize)> = None;
+            for (index, (set, rule)) in rules.iter().enumerate() {
+                if matches!(matches[index], RuleMatch::Unsearched)
+                    || matches!(matches[index], RuleMatch::Found(start, _) if start < position)
+                {
+                    // Regex.Match(input, beginning, length) in upstream hides
+                    // both sides of the region from anchors and lookarounds.
+                    // Matching the whole line and truncating a successful
+                    // match would accept expressions whose suffix cannot fit.
+                    matches[index] = self.definition.rule_sets[*set].rules[*rule]
+                        .regex
+                        .find(&text[position..region.end])
+                        .map_err(|e| HighlightingError::MatchBudget(e.to_string()))?
+                        .map_or(RuleMatch::NotFound, |m| {
+                            RuleMatch::Found(position + m.start(), position + m.end())
+                        });
+                }
+                if let RuleMatch::Found(start, end) = matches[index] {
+                    if first.is_none_or(|(_, first_start, _)| start < first_start) {
+                        first = Some((index, start, end));
+                    }
+                }
+            }
+            let Some((index, start, end)) = first else {
+                self.push(sections, utf16, position, region.end, offset, ambient);
+                return Ok(());
+            };
+            let (set, rule) = rules[index];
+            let rule = &self.definition.rule_sets[set].rules[rule];
+            if start == end {
+                return Err(HighlightingError::InvalidDefinition(format!(
+                    "A highlighting rule matched 0 characters: {}",
+                    rule.regex.as_str()
+                )));
+            }
+            *iterations += 1;
+            if *iterations > self.operation_limit {
+                return Err(HighlightingError::MatchBudget(
+                    "line operation count".into(),
+                ));
+            }
+            self.push(sections, utf16, position, start, offset, ambient.clone());
+            self.push(
+                sections,
+                utf16,
+                start,
+                end,
+                offset,
+                overlay(ambient.clone(), rule.color.as_ref()),
+            );
+            position = end;
+        }
     }
     fn push(
         &self,
@@ -366,9 +404,11 @@ mod tests {
         let definition=Rc::new(HighlightingDefinition::load(r#"<SyntaxDefinition><RuleSet name="recursive"><Span begin="" end="z" ruleSet="recursive"/></RuleSet><RuleSet><Import ruleSet="recursive"/></RuleSet></SyntaxDefinition>"#).unwrap());
         let mut engine = HighlightingEngine::new(definition);
         engine.operation_limit = 32;
-        assert!(engine
-            .highlight_line("x", 1, 0, &HighlightingState::default())
-            .is_err());
+        assert!(
+            engine
+                .highlight_line("x", 1, 0, &HighlightingState::default())
+                .is_err()
+        );
     }
     #[test]
     fn greedy_rule_cannot_consume_span_boundaries() {
@@ -391,5 +431,83 @@ mod tests {
                 (9, 2, "Red")
             ]
         );
+    }
+
+    #[test]
+    fn required_rule_suffixes_cannot_cross_a_span_boundary() {
+        let definition = Rc::new(HighlightingDefinition::load(
+            r#"<SyntaxDefinition><RuleSet><Rule foreground="Red">a.*z</Rule><Span begin="\[" end="\]" foreground="Green"><RuleSet><Rule foreground="Blue">x.*\]</Rule></RuleSet></Span></RuleSet></SyntaxDefinition>"#,
+        ).unwrap());
+        let line = HighlightingEngine::new(definition)
+            .highlight_line("a[x]z", 1, 0, &HighlightingState::default())
+            .unwrap();
+        assert_eq!(line.sections.len(), 1);
+        assert_eq!((line.sections[0].offset, line.sections[0].length), (1, 3));
+        assert_eq!(line.sections[0].color.foreground.as_deref(), Some("Green"));
+    }
+
+    #[test]
+    fn region_anchors_and_lookarounds_use_both_boundaries_and_utf16_offsets() {
+        let definition = Rc::new(HighlightingDefinition::load(
+            r#"<SyntaxDefinition><RuleSet><Rule foreground="Red">a(?=\[)|(?&lt;=\])b</Rule><Rule foreground="Blue">^b$</Rule><Span begin="\[" end="\]" foreground="Green"><RuleSet><Rule foreground="Red">(?&lt;=\[)x|x(?=\])</Rule><Rule foreground="Blue">^x$</Rule></RuleSet></Span></RuleSet></SyntaxDefinition>"#,
+        ).unwrap());
+        let line = HighlightingEngine::new(definition)
+            .highlight_line("😀a[x]b[y]", 1, 10, &HighlightingState::default())
+            .unwrap();
+        assert_eq!(
+            line.sections
+                .iter()
+                .map(|section| (
+                    section.offset,
+                    section.length,
+                    section.color.foreground.as_deref().unwrap()
+                ))
+                .collect::<Vec<_>>(),
+            [
+                (13, 1, "Green"),
+                (14, 1, "Blue"),
+                (15, 1, "Green"),
+                (16, 1, "Blue"),
+                (17, 3, "Green")
+            ]
+        );
+    }
+
+    #[test]
+    fn bounded_region_caches_failed_rules_and_future_matches() {
+        let definition = Rc::new(HighlightingDefinition::load(
+            r#"<SyntaxDefinition><RuleSet><Rule foreground="Red">a</Rule><Rule foreground="Blue">^b</Rule><Rule foreground="Green">(?&lt;=a)b</Rule></RuleSet></SyntaxDefinition>"#,
+        ).unwrap());
+        let line = HighlightingEngine::new(definition)
+            .highlight_line("ab", 1, 0, &HighlightingState::default())
+            .unwrap();
+        assert_eq!(line.sections.len(), 2);
+        assert_eq!(line.sections[0].color.foreground.as_deref(), Some("Red"));
+        assert_eq!(line.sections[1].color.foreground.as_deref(), Some("Green"));
+    }
+
+    #[test]
+    fn zero_length_rules_are_errors_in_nonempty_regions_including_the_end() {
+        for pattern in ["", "$", "a|$", "(?=b)"] {
+            let definition = Rc::new(HighlightingDefinition::load(&format!(
+                r#"<SyntaxDefinition><RuleSet><Rule foreground="Red">{pattern}</Rule></RuleSet></SyntaxDefinition>"#,
+            )).unwrap());
+            let engine = HighlightingEngine::new(definition);
+            assert!(
+                matches!(
+                    engine.highlight_line("ab", 1, 0, &HighlightingState::default()),
+                    Err(HighlightingError::InvalidDefinition(message)) if message.contains("0 characters")
+                ),
+                "{pattern}"
+            );
+            // Upstream does not evaluate any rules for an initially empty region.
+            assert!(
+                engine
+                    .highlight_line("", 1, 0, &HighlightingState::default())
+                    .unwrap()
+                    .sections
+                    .is_empty()
+            );
+        }
     }
 }

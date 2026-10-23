@@ -241,6 +241,13 @@ An unterminated non-multiline span ends at the logical line boundary. Extended
 end expressions preserve trailing comments and explicit whitespace-mode changes
 when that boundary alternative is added.
 
+Executable patterns now apply the source's default explicit-capture policy,
+including scoped `n` options and capture-reference remapping. Non-span rules
+match inside actual span-bounded regions, retaining the source's per-region
+match cache and zero-length-match errors. The dedicated
+[XSHD runtime audit](editor-xshd-runtime.md) maps these changes and records the
+remaining regex-engine differences.
+
 `XshdSyntaxDefinition::to_xml` and `SaveXshdVisitor` write canonical v2 XML.
 The writer preserves properties and all color metadata, including font family,
 font size, underline, strikethrough and example text that parts of the pinned
@@ -477,11 +484,13 @@ parity or operating-system clipboard/input-method behavior.
   active-element implementations and every upstream snippet lifecycle event
   are not exposed.
 - Typed XSHD loading, visitors, serialization and archived v1 conversion have
-  regression coverage. XML Schema validation and comprehensive .NET regex
-  differential parity remain absent. Validation is implemented directly in the
-  Rust parser/compiler; unknown attributes are not checked against an XSD.
-  Regex Unicode/culture behavior and .NET's `ExplicitCapture` option are not
-  identical to the selected Rust regex backend. Source positions and XML
+  regression coverage. The pinned upstream loader has XSD validation commented
+  out; the Rust parser/compiler likewise validates supported structure and
+  values directly, without checking unknown attributes against that schema.
+  Default explicit captures, option scopes and bounded rule regions are
+  adapted, but comprehensive .NET regex differential parity remains absent.
+  Unicode/culture behavior and capture histories retain differences documented
+  in [editor-xshd-runtime.md](editor-xshd-runtime.md). Source positions and XML
   formatting are not preserved by serialization.
 - XML folding preserves previous regions while the input is malformed instead
   of publishing a partial recovery parse. Its generated document offsets are

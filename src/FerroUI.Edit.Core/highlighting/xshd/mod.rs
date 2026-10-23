@@ -8,6 +8,7 @@ mod compiler;
 mod legacy;
 mod loader;
 mod model;
+mod regex_compat;
 mod visitor;
 mod writer;
 
