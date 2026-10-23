@@ -211,7 +211,7 @@ impl ExpressionVariant {
     /// The `==` operator of expressions: a `Boolean` for two values of the
     /// same comparable type, `Invalid` otherwise.
     pub fn equals_to(&self, right: ExpressionVariant) -> ExpressionVariant {
-        match (*self, right) {
+        match unify(*self, right) {
             (V::Double(l), V::Double(r)) => (l == r).into(),
             (V::Vector2(l), V::Vector2(r)) => (l == r).into(),
             (V::Vector(l), V::Vector(r)) => (l == r).into(),
@@ -289,6 +289,24 @@ impl ExpressionVariant {
     #[inline]
     pub fn cast_or_default<T: ExpressionVariantValue>(&self) -> T {
         self.try_cast::<T>().unwrap_or_default()
+    }
+}
+
+/// The operands of a binary operator with the single- and double-precision forms of a vector
+/// made the same: a `Vector3` with a `Vector3D` gives two `Vector3D`, a `Vector2` with a
+/// `Vector` two `Vector`.
+///
+/// Not from upstream, whose operators take the same variant on both sides. The visual properties
+/// of the compositor are double-precision (`Offset` is a `Vector3D`) and the values of WinUI's
+/// property sets single-precision (`Vector3`), and an expression written for WinUI combines them
+/// (`visual.Offset + props.Offset`).
+fn unify(left: ExpressionVariant, right: ExpressionVariant) -> (ExpressionVariant, ExpressionVariant) {
+    match (left, right) {
+        (V::Vector3(l), V::Vector3D(r)) => (V::Vector3D(l.into()), V::Vector3D(r)),
+        (V::Vector3D(l), V::Vector3(r)) => (V::Vector3D(l), V::Vector3D(r.into())),
+        (V::Vector2(l), V::Vector(r)) => (V::Vector(l.into()), V::Vector(r)),
+        (V::Vector(l), V::Vector2(r)) => (V::Vector(l), V::Vector(r.into())),
+        pair => pair,
     }
 }
 
@@ -405,7 +423,7 @@ impl Add for ExpressionVariant {
     type Output = ExpressionVariant;
 
     fn add(self, right: ExpressionVariant) -> ExpressionVariant {
-        match (self, right) {
+        match unify(self, right) {
             (V::Double(l), V::Double(r)) => (l + r).into(),
             (V::Vector2(l), V::Vector2(r)) => (l + r).into(),
             (V::Vector(l), V::Vector(r)) => (l + r).into(),
@@ -430,7 +448,7 @@ impl Sub for ExpressionVariant {
     type Output = ExpressionVariant;
 
     fn sub(self, right: ExpressionVariant) -> ExpressionVariant {
-        match (self, right) {
+        match unify(self, right) {
             (V::Double(l), V::Double(r)) => (l - r).into(),
             (V::Vector2(l), V::Vector2(r)) => (l - r).into(),
             (V::Vector(l), V::Vector(r)) => (l - r).into(),
@@ -477,7 +495,7 @@ impl Mul for ExpressionVariant {
     type Output = ExpressionVariant;
 
     fn mul(self, right: ExpressionVariant) -> ExpressionVariant {
-        match (self, right) {
+        match unify(self, right) {
             (V::Double(l), V::Double(r)) => (l * r).into(),
             (V::Vector2(l), V::Vector2(r)) => (l * r).into(),
             (V::Vector(l), V::Vector(r)) => Vector::multiply(l, r).into(),
@@ -515,7 +533,7 @@ impl Div for ExpressionVariant {
     type Output = ExpressionVariant;
 
     fn div(self, right: ExpressionVariant) -> ExpressionVariant {
-        match (self, right) {
+        match unify(self, right) {
             (V::Double(l), V::Double(r)) => (l / r).into(),
             (V::Vector2(l), V::Vector2(r)) => (l / r).into(),
             (V::Vector(l), V::Vector(r)) => Vector::divide(l, r).into(),

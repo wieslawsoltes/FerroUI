@@ -378,7 +378,7 @@ impl_batch_value_for_enum!(CompositionBlendMode as i32 {
     Multiply, Hue, Saturation, Color, Luminosity
 });
 impl_batch_value_for_enum!(CompositionGradientExtendMode as i32 { Clamp, Wrap, Mirror });
-impl_batch_value_for_enum!(CompositionStretch as i32 { None, Fill });
+impl_batch_value_for_enum!(CompositionStretch as i32 { None, Fill, Uniform, UniformToFill });
 
 impl BatchValue for RendererDebugOverlays {
     fn write_to(&self, out: &mut Vec<u8>) {

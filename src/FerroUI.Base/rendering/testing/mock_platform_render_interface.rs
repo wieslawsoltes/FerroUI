@@ -55,6 +55,15 @@ impl MockGeometryImpl {
         Self::with_edges(bounds, vec![p1, p2])
     }
 
+    /// The end points of a line geometry (an untransformed geometry with
+    /// two edge points).
+    fn line_points(&self) -> Option<(Point, Point)> {
+        match (&self.source, &self.edges) {
+            (None, Some(points)) if points.len() == 2 => Some((points[0], points[1])),
+            _ => None,
+        }
+    }
+
     /// The points of the geometry when it is a geometry with edges
     /// (`IHeadlessGeometryWithEdges.Points`): its own points, or, for a
     /// transformed geometry, the transformed points of its source (none
@@ -139,6 +148,10 @@ impl IGeometryImpl for MockGeometryImpl {
         self.bounds
     }
     fn contour_length(&self) -> f64 {
+        // A line knows its length; every other geometry is its bounds.
+        if let Some((p1, p2)) = self.line_points() {
+            return (p2.x - p1.x).hypot(p2.y - p1.y);
+        }
         let bounds = self.bounds;
         2.0 * (bounds.width + bounds.height)
     }
@@ -212,8 +225,18 @@ impl IGeometryImpl for MockGeometryImpl {
     fn try_get_point_and_tangent_at_distance(&self, _distance: f64) -> Option<(Point, Point)> {
         None
     }
-    fn try_get_segment(&self, _start: f64, _stop: f64, _begin: bool) -> Option<Arc<dyn IGeometryImpl>> {
-        None
+    fn try_get_segment(&self, start: f64, stop: f64, _begin: bool) -> Option<Arc<dyn IGeometryImpl>> {
+        // A line can be cut: the part between the two distances.
+        let (p1, p2) = self.line_points()?;
+        let length = (p2.x - p1.x).hypot(p2.y - p1.y);
+        if length <= 0.0 || stop <= start {
+            return None;
+        }
+        let at = |distance: f64| {
+            let t = (distance / length).clamp(0.0, 1.0);
+            Point::new(p1.x + (p2.x - p1.x) * t, p1.y + (p2.y - p1.y) * t)
+        };
+        Some(MockGeometryImpl::line(at(start), at(stop)))
     }
     fn as_transformed_geometry(&self) -> Option<&dyn ITransformedGeometryImpl> {
         self.source.as_ref().map(|_| self as &dyn ITransformedGeometryImpl)

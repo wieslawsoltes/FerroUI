@@ -5,6 +5,7 @@ members = [
     "src/FerroUI.Reactive",
     "src/FerroUI.Reactive.Testing",
     "src/FerroUI.Splat",
+    "src/FerroUI.DependencyInjection",
     "src/FerroUI.DynamicData",
     "src/FerroUI.ReactiveUI",
     "src/FerroUI.ReactiveUI.Testing",
@@ -40,6 +41,9 @@ members = [
     "src/FerroUI.Fonts.Inter",
     "src/FerroUI.Dialogs",
     "src/FerroUI.Diagnostics",
+    "src/FerroUI.Inspect",
+    "src/FerroUI.DevTools",
+    "src/FerroUI.Mcp",
     "src/FerroUI.Themes.Simple",
     "src/FerroUI.Themes.Fluent",
     "src/FerroUI.Themes.WinUI",
@@ -55,6 +59,7 @@ members = [
     "tests/FerroUI.Markup.Xaml.UnitTests",
     "tests/FerroUI.Reactive.Tests",
     "tests/FerroUI.Splat.Tests",
+    "tests/FerroUI.DependencyInjection.Tests",
     "tests/FerroUI.DynamicData.Tests",
     "tests/FerroUI.ReactiveUI.Tests",
     "tests/FerroUI.ReactiveUI.Testing.Tests",
@@ -145,9 +150,13 @@ categories = ["gui"]
 # that the crates of a release are only ever resolved together (docs/release.md, "Version scheme").
 # `scripts/release/set-version.sh <version>` writes the version above and these keys.
 [workspace.dependencies]
+ferroui-inspect = { version = "=0.4.0", path = "src/FerroUI.Inspect" }
+ferroui-devtools = { version = "=0.4.0", path = "src/FerroUI.DevTools", default-features = false }
+ferroui-mcp = { version = "=0.4.0", path = "src/FerroUI.Mcp" }
 ferroui-system = { version = "=0.4.0", path = "src/FerroUI.System" }
 ferroui-reactive = { version = "=0.4.0", path = "src/FerroUI.Reactive" }
 ferroui-reactive-testing = { version = "=0.4.0", path = "src/FerroUI.Reactive.Testing" }
+ferroui-dependency-injection = { version = "=0.4.0", path = "src/FerroUI.DependencyInjection" }
 ferroui-splat = { version = "=0.4.0", path = "src/FerroUI.Splat" }
 ferroui-dynamic-data = { version = "=0.4.0", path = "src/FerroUI.DynamicData" }
 ferroui-reactiveui = { version = "=0.4.0", path = "src/FerroUI.ReactiveUI" }

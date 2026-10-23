@@ -4,6 +4,27 @@ All notable changes to FerroUI are recorded in this file. The format follows [Ke
 
 ## [Unreleased]
 
+### Added
+
+- **The WinUI 3 composition API** on the compositor of FerroUI ([docs/porting/winui-composition.md](docs/porting/winui-composition.md): the inventory of the WinUI surface, the plan and the deviations):
+  - connected animations with the engine of WinUI (`ConnectedAnimation.cpp` of microsoft-ui-xaml): a frozen image of the source and a live image of the destination on sprite visuals in a layer of the window, animated by the compositor, with the gravity, direct and basic configurations, coordinated elements, `cancel`, `is_scale_animation_enabled`, `set_animation_component` and `ConnectedAnimationService::get_for_current_view`;
+  - `ferroui_controls::hosting::ElementCompositionPreview`: the element visual and child visual, implicit show and hide animations (also when an element leaves the tree), `set_is_translation_enabled`, the manipulation property set of a scroll viewer and the pointer position property set; the `Translation`, `Rotation`, `RotationAxis`, `Scale`, `CenterPoint` and `TransformMatrix` facades of `Visual` and the opacity, rotation, scale and translation transitions;
+  - live property sets (a server counterpart, animatable entries, read live by expressions); scoped and commit batches with `Completed`; `StopBehavior`; sub-channel targets (`Offset.X`); the WinUI easing functions (cubic Bezier, linear, step, back, bounce, circle, elastic, exponential, power, sine); spring natural motion animations; `AnimationController` and the global playback rate; the colour spaces of colour key frame animations; the missing expression functions and parameters;
+  - `SpriteVisual`, `ShapeVisual` with sprite and container shapes and the rectangle, rounded rectangle, ellipse, line and path geometries (trimmed), `LayerVisual`, `RedirectVisual`; the surface, nine-grid and mask brushes and the WinUI members of the gradient brushes; `CompositionVisualSurface` and `LoadedImageSurface`; `DropShadow`; the inset, rectangle and geometric clips; the remaining members of `Visual`;
+  - `InteractionTracker` and `VisualInteractionSource` (on the UI thread);
+  - a "Composition (WinUI)" page in the ControlCatalog.
+
+- Opt-in application inspection and automation through MCP (#235): `ferroui-inspect` provides weak node IDs, trees, properties and styles, resource lookup, selectors, raw input, automation patterns, PNG screenshots, condition probes, logs and render/layout statistics. `ferroui-mcp` exposes the core over stdio and authenticated loopback Streamable HTTP, with UI dispatcher marshalling and separate input/property-write permissions.
+- ControlCatalog's `mcp` feature, native and headless launch modes, a protocol smoke test for both transports, and [MCP/Claude Code setup documentation](docs/mcp.md).
+- `ferroui-dependency-injection` (#251): a port of Microsoft.Extensions.DependencyInjection (dotnet/runtime v10.0.13) with singleton, scoped, transient and keyed services, typed factories and the `service_factory!` macro for constructor injection, validation of scopes and of the graph on build, disposal in reverse order through FerroUI tasks, and an optional adapter to Splat's resolver for ReactiveUI ([docs/porting/dependency-injection.md](docs/porting/dependency-injection.md)).
+- `ferroui-devtools` (#236): an opt-in Chrome DevTools Protocol endpoint on loopback, for the Chrome DevTools front end and CDP clients such as Playwright, with DOM, read-only CSS, Overlay, Page, Input, Accessibility and Log, and a JavaScript bridge in the browser ([docs/devtools-cdp.md](docs/devtools-cdp.md)).
+
+### Changed
+
+- The MCP server and the CDP endpoint share one inspector per UI thread (`ferroui_inspect::Inspector::shared`, with the per-window view `ferroui_inspect::target::Target`) and one log capture per process (`LogCapture::install`), where each had its own: a node has the same ID in both, the highlights of the CDP sessions are left out of every tree, malformed selectors are refused by both before the framework parses them, and the log sink is replaced once. `ferroui_mcp::serve_with_inspector` is removed (register the roots of a custom lifetime with the shared inspector). The CDP server no longer runs a 10 ms timer on the UI thread: it posts each request to the dispatcher. MCP: invalid tool arguments are a tool result with `isError`, a `2025-03-26` session takes JSON-RPC batches, a cancellation that arrives before its request cancels it, the log capture records from Information up unless a client asks for debug, `get_resources` no longer creates a resource dictionary, an open SSE stream keeps its session alive, and a search past the node limit returns the matches it found. CDP: a panic in a command of the browser bridge answers it with an error. Dependency injection: validation checks a graph whose branches meet again once per service rather than once per path, and the Splat adapter keeps a provider that it is handed back.
+
+- Composition, with the WinUI composition API (see `docs/porting/DEVIATIONS.md`, "WinUI composition"): a `CompositionPropertySet` made with `new` is live on the compositor; an animation that reads nothing (a constant expression) now applies; the operators of expressions combine the single- and double-precision forms of a vector; the expression functions `Matrix3x2.CreateTranslation` and `Matrix4x4.CreateTranslation` build translations, the 6- and 16-argument matrix constructors read every argument, and function names are matched ignoring case; in a window rendered by a compositor, `ConnectedAnimation` runs on the compositor with the engine of WinUI.
+
 ## [0.4.0] - 2026-10-22
 
 The fourth release. It completes the declarative Rust API of `0.4.0-preview.1` and adds the developer tools:
@@ -57,6 +78,7 @@ One crate joins, `ferroui-diagnostics`. The additions since the preview are list
   - a combined tree, the first tab and the default view: the logical tree with the parts of the template of each element, greyed out;
   - a header in the title bar with a button that collapses the tree pane and a command bar in place of the menus, and the pages in the tab view of WinUI 3;
   - one design for every view (`DevToolsStyles.xaml`): consistent spacing, section headers, thin dividers, a status bar, and a property grid whose editors share one compact form, with read-only values shown as text and brushes as outlined swatches;
+  - Ctrl+Shift selects the control under the pointer; selecting a node shows its properties without a delay and the property grid scrolls smoothly (its editors are kept for the recycled rows and the view of the details is reused); the colours of the TreeDataGrids, the colour picker and the layout box model follow the light and dark variants of the WinUI 3 theme; the tree pane is set apart from the details, a toggle hides the side pane of the details, and a page with nothing to show says what to do;
   - `MainViewModel::register_page` adds pages of other crates to the tools;
   - the ControlCatalog attaches them in debug builds, and `FERROUI_SMOKE_DEVTOOLS=<directory>` runs them without a person and writes pictures of their window;
   - the facade has them as the feature `diagnostics`.
@@ -70,6 +92,7 @@ One crate joins, `ferroui-diagnostics`. The additions since the preview are list
 - **Markup compiler**: a setter of a style class in a style (`<Setter Property="Classes.name" .../>`) compiles to Rust; it was refused (`FRN3000`).
 - **Markup**: `Binding` returns itself from `BindingBase::as_any`, as the other bindings do; `Window.Close()` can be called from markup.
 - **`ferroui-view`**: mounting is built on instances that the reconciler patches (`mount.rs`). A routed handler attached by an element is detached when the owner of the element ends. A dynamic list may give other dynamic lists.
+- **Performance of styling, layout and text** (`docs/porting/DEVIATIONS.md`): a text block keeps its text layout for a new width when the layout does not depend on it (no wrapping, no trimming, left aligned); the metadata of a property is looked up in a hash map, as upstream does; the renderer removes a visual from its sets in constant time; a name selector compares the name in place. Selecting a control in the developer tools creates about a quarter fewer text layouts (274 instead of 369).
 
 ## [0.4.0-preview.1] - 2026-10-20
 

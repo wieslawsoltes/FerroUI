@@ -32,6 +32,12 @@ pub trait ICompositionAnimation: ICompositionAnimationBase {
     /// The name of the property the animation targets, if set.
     fn target(&self) -> Option<String>;
 
+    /// The `CompositionAnimation` part of the animation, through which its parameters are set
+    /// (`SetScalarParameter`, ...); `None` for an animation without one.
+    fn composition_animation(&self) -> Option<&super::CompositionAnimation> {
+        None
+    }
+
     /// Creates the server-side instance of the animation for a property of
     /// `target_object`, as the factory that is sent to the server. `final_value` is the value the property was just
     /// set to when the animation is implicit.

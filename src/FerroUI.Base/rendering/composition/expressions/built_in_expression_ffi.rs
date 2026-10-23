@@ -5,7 +5,7 @@ use std::sync::OnceLock;
 use super::delegate_expression_ffi::DelegateExpressionFfi;
 use super::expression_evaluation_context::IExpressionForeignFunctionInterface;
 use super::expression_variant::ExpressionVariant;
-use crate::media::Color;
+use crate::media::{Color, HslColor};
 use crate::numerics::{Matrix3x2, Matrix4x4, Quaternion, Vector2, Vector3, Vector4};
 use crate::rendering::composition::animations::ColorInterpolator;
 use crate::utilities::math_utilities::{max_f32, min_f32};
@@ -13,6 +13,14 @@ use crate::utilities::MathUtilities;
 use crate::{RelativePoint, RelativeScalar, RelativeUnit, Vector, Vector3D};
 
 /// Built-in functions for Foreign Function Interface available from composition animation expressions
+///
+/// The functions are those of the WinUI composition expression reference
+/// (`ExpressionAnimation`, "Expression Functions per Type"), with the overloads
+/// the reference does not list but the WinUI expression engine accepts (the
+/// scalar `Length`, `Distance` and `Scale`, the vector `Mod`), a few
+/// `System.Numerics` overloads of the matrix factories, and the functions of
+/// the upstream framework (`SmoothStep`, the relative point and scalar
+/// constructors). Function names are case-insensitive, as in WinUI.
 pub struct BuiltInExpressionFfi {
     registry: DelegateExpressionFfi,
 }
@@ -23,6 +31,25 @@ fn lerp(a: f32, b: f32, p: f32) -> f32 {
 
 fn lerp_f64(a: f64, b: f64, p: f64) -> f64 {
     (a * (1.0 - p)) + (b * p)
+}
+
+/// `ColorHsl(h, s, l)`: an opaque colour from a hue in radians (0 to 2 pi, other
+/// values wrap around) and a saturation and a lightness in 0..1 (clamped).
+fn color_hsl(hue_radians: f32, saturation: f32, lightness: f32) -> Color {
+    HslColor::hsl_to_rgb((hue_radians as f64).to_degrees(), saturation as f64, lightness as f64, 1.0)
+}
+
+/// `ColorLerpHSL(color1, color2, progress)`: interpolates in the HSL colour
+/// space, giving `color1` at progress 0 and `color2` at progress 1 (the
+/// argument order of `ColorLerp`). Saturation, lightness and alpha are
+/// interpolated linearly; the hue takes the shorter way around the colour
+/// wheel, and the hue of an achromatic colour (no saturation: black, white,
+/// greys) is that of the other colour, so a grey turns into a colour without
+/// passing through other hues. The interpolation is
+/// [`ColorInterpolator::lerp_hsl`], which the `Hsl` colour space of a colour
+/// animation uses too.
+fn color_lerp_hsl(color1: Color, color2: Color, progress: f32) -> Color {
+    ColorInterpolator::lerp_hsl(color1, color2, progress)
 }
 
 fn smooth_step(edge0: f32, edge1: f32, x: f32) -> f32 {
@@ -82,7 +109,7 @@ fn via_f64(value: f32, function: impl FnOnce(f64) -> f64) -> f32 {
 
 impl BuiltInExpressionFfi {
     fn new() -> Self {
-        let mut r = DelegateExpressionFfi::new();
+        let mut r = DelegateExpressionFfi::new_ignoring_case();
 
         r.add1("Abs", |f: f32| f.abs());
         r.add1("Abs", |v: Vector2| Vector2::abs(v));
@@ -110,16 +137,18 @@ impl BuiltInExpressionFfi {
         });
         r.add1("Cos", |a: f32| via_f64(a, f64::cos));
 
-        /*
-        TODO:
-            ColorHsl(Float h, Float s, Float l)
-            ColorLerpHSL(Color colorTo, CompositionColorcolorFrom, Float progress)
-        */
-
+        r.add3("ColorHsl", color_hsl);
         r.add3("ColorLerp", |to: Color, from: Color, progress: f32| {
             ColorInterpolator::lerp_rgb(to, from, progress)
         });
+        r.add3("ColorLerpHSL", color_lerp_hsl);
+        // The name the WinUI expression builder writes for `ColorLerpHSL`.
+        r.add3("ColorHslLerp", color_lerp_hsl);
         r.add3("ColorLerpRGB", |to: Color, from: Color, progress: f32| {
+            ColorInterpolator::lerp_rgb(to, from, progress)
+        });
+        // The name the WinUI expression builder writes for `ColorLerpRGB`.
+        r.add3("ColorRgbLerp", |to: Color, from: Color, progress: f32| {
             ColorInterpolator::lerp_rgb(to, from, progress)
         });
         r.add4("ColorRGB", |a: f32, r: f32, g: f32, b: f32| {
@@ -131,12 +160,14 @@ impl BuiltInExpressionFfi {
             )
         });
 
+        r.add2("Distance", |a1: f32, a2: f32| (a1 - a2).abs());
         r.add2("Distance", |a1: Vector2, a2: Vector2| Vector2::distance(a1, a2));
         r.add2("Distance", |a1: Vector, a2: Vector| Vector::distance(a1, a2));
         r.add2("Distance", |a1: Vector3, a2: Vector3| Vector3::distance(a1, a2));
         r.add2("Distance", |a1: Vector3D, a2: Vector3D| Vector3D::distance(a1, a2));
         r.add2("Distance", |a1: Vector4, a2: Vector4| Vector4::distance(a1, a2));
 
+        r.add2("DistanceSquared", |a1: f32, a2: f32| (a1 - a2) * (a1 - a2));
         r.add2("DistanceSquared", |a1: Vector2, a2: Vector2| {
             Vector2::distance_squared(a1, a2)
         });
@@ -158,6 +189,7 @@ impl BuiltInExpressionFfi {
         r.add1("Inverse", |v: Matrix3x2| Matrix3x2::invert_or_nan(v));
         r.add1("Inverse", |v: Matrix4x4| Matrix4x4::invert_or_nan(v));
 
+        r.add1("Length", |a1: f32| a1.abs());
         r.add1("Length", |a1: Vector2| a1.length());
         r.add1("Length", |a1: Vector| a1.length());
         r.add1("Length", |a1: Vector3| a1.length());
@@ -165,6 +197,7 @@ impl BuiltInExpressionFfi {
         r.add1("Length", |a1: Vector4| a1.length());
         r.add1("Length", |a1: Quaternion| a1.length());
 
+        r.add1("LengthSquared", |a1: f32| a1 * a1);
         r.add1("LengthSquared", |a1: Vector2| a1.length_squared());
         r.add1("LengthSquared", |a1: Vector| a1 * a1);
         r.add1("LengthSquared", |a1: Vector3| a1.length_squared());
@@ -189,21 +222,38 @@ impl BuiltInExpressionFfi {
             )
         });
         r.add3("Lerp", |a1: Vector4, a2: Vector4, a3: f32| Vector4::lerp(a1, a2, a3));
+        r.add3("Lerp", |a1: Matrix3x2, a2: Matrix3x2, a3: f32| Matrix3x2::lerp(a1, a2, a3));
+        r.add3("Lerp", |a1: Matrix4x4, a2: Matrix4x4, a3: f32| Matrix4x4::lerp(a1, a2, a3));
 
         r.add1("Ln", |f: f32| via_f64(f, f64::ln));
         r.add1("Log10", |f: f32| via_f64(f, f64::log10));
 
+        // The static factories of the reference take the overloads listed
+        // there; the other overloads are those of `System.Numerics`.
         r.add1("Matrix3x2.CreateFromScale", |v: Vector2| Matrix3x2::create_scale(v));
         r.add1("Matrix3x2.CreateFromTranslation", |v: Vector2| {
             Matrix3x2::create_translation(v)
         });
         r.add1("Matrix3x2.CreateRotation", |v: f32| Matrix3x2::create_rotation(v));
+        r.add2("Matrix3x2.CreateRotation", |v: f32, center: Vector2| {
+            Matrix3x2::create_rotation_at(v, center)
+        });
         r.add1("Matrix3x2.CreateScale", |v: Vector2| Matrix3x2::create_scale(v));
+        r.add1("Matrix3x2.CreateScale", |v: f32| Matrix3x2::create_scale_uniform(v));
+        r.add2("Matrix3x2.CreateScale", |x: f32, y: f32| Matrix3x2::create_scale_xy(x, y));
+        r.add2("Matrix3x2.CreateScale", |v: Vector2, center: Vector2| {
+            Matrix3x2::create_scale_at(v, center)
+        });
+        r.add2("Matrix3x2.CreateSkew", |a1: f32, a2: f32| Matrix3x2::create_skew(a1, a2));
         r.add3("Matrix3x2.CreateSkew", |a1: f32, a2: f32, a3: Vector2| {
             Matrix3x2::create_skew_at(a1, a2, a3)
         });
-        // As in the reference implementation, this creates a scale matrix.
-        r.add1("Matrix3x2.CreateTranslation", |v: Vector2| Matrix3x2::create_scale(v));
+        // The reference implementation creates a scale matrix here; WinUI
+        // documents it as the same function as `CreateFromTranslation`.
+        r.add1("Matrix3x2.CreateTranslation", |v: Vector2| Matrix3x2::create_translation(v));
+        r.add2("Matrix3x2.CreateTranslation", |x: f32, y: f32| {
+            Matrix3x2::create_translation_xy(x, y)
+        });
         r.add6(
             "Matrix3x2",
             |m11: f32, m12: f32, m21: f32, m22: f32, m31: f32, m32: f32| Matrix3x2::new(m11, m12, m21, m22, m31, m32),
@@ -215,9 +265,32 @@ impl BuiltInExpressionFfi {
         r.add1("Matrix4x4.CreateFromTranslation", |v: Vector3| {
             Matrix4x4::create_translation(v)
         });
+        r.add1("Matrix4x4.CreateRotationX", |angle: f32| Matrix4x4::create_rotation_x(angle));
+        r.add2("Matrix4x4.CreateRotationX", |angle: f32, center: Vector3| {
+            Matrix4x4::create_rotation_x_at(angle, center)
+        });
+        r.add1("Matrix4x4.CreateRotationY", |angle: f32| Matrix4x4::create_rotation_y(angle));
+        r.add2("Matrix4x4.CreateRotationY", |angle: f32, center: Vector3| {
+            Matrix4x4::create_rotation_y_at(angle, center)
+        });
+        r.add1("Matrix4x4.CreateRotationZ", |angle: f32| Matrix4x4::create_rotation_z(angle));
+        r.add2("Matrix4x4.CreateRotationZ", |angle: f32, center: Vector3| {
+            Matrix4x4::create_rotation_z_at(angle, center)
+        });
         r.add1("Matrix4x4.CreateScale", |v: Vector3| Matrix4x4::create_scale(v));
-        // As in the reference implementation, this creates a scale matrix.
-        r.add1("Matrix4x4.CreateTranslation", |v: Vector3| Matrix4x4::create_scale(v));
+        r.add1("Matrix4x4.CreateScale", |v: f32| Matrix4x4::create_scale_uniform(v));
+        r.add3("Matrix4x4.CreateScale", |x: f32, y: f32, z: f32| {
+            Matrix4x4::create_scale_xyz(x, y, z)
+        });
+        r.add2("Matrix4x4.CreateScale", |v: Vector3, center: Vector3| {
+            Matrix4x4::create_scale_at(v, center)
+        });
+        // The reference implementation creates a scale matrix here; WinUI
+        // documents it as the same function as `CreateFromTranslation`.
+        r.add1("Matrix4x4.CreateTranslation", |v: Vector3| Matrix4x4::create_translation(v));
+        r.add3("Matrix4x4.CreateTranslation", |x: f32, y: f32, z: f32| {
+            Matrix4x4::create_translation_xyz(x, y, z)
+        });
         r.add1("Matrix4x4", |m: Matrix3x2| Matrix4x4::from_matrix3x2(m));
         #[allow(clippy::too_many_arguments)]
         r.add16(
@@ -259,6 +332,15 @@ impl BuiltInExpressionFfi {
         r.add2("Min", |a1: Vector4, a2: Vector4| Vector4::min(a1, a2));
 
         r.add2("Mod", |a: f32, b: f32| a % b);
+        r.add2("Mod", |a: Vector2, b: Vector2| Vector2::new(a.x % b.x, a.y % b.y));
+        r.add2("Mod", |a: Vector, b: Vector| Vector::new(a.x % b.x, a.y % b.y));
+        r.add2("Mod", |a: Vector3, b: Vector3| Vector3::new(a.x % b.x, a.y % b.y, a.z % b.z));
+        r.add2("Mod", |a: Vector3D, b: Vector3D| {
+            Vector3D::new(a.x % b.x, a.y % b.y, a.z % b.z)
+        });
+        r.add2("Mod", |a: Vector4, b: Vector4| {
+            Vector4::new(a.x % b.x, a.y % b.y, a.z % b.z, a.w % b.w)
+        });
 
         r.add1("Normalize", |a: Quaternion| Quaternion::normalize(a));
         r.add1("Normalize", |a: Vector2| Vector2::normalize(a));
@@ -278,6 +360,7 @@ impl BuiltInExpressionFfi {
 
         r.add1("Round", |a: f32| via_f64(a, f64::round_ties_even));
 
+        r.add2("Scale", |a: f32, b: f32| a * b);
         r.add2("Scale", |a: Matrix3x2, b: f32| a * b);
         r.add2("Scale", |a: Matrix4x4, b: f32| a * b);
         r.add2("Scale", |a: Vector2, b: f32| a * b);
@@ -320,6 +403,7 @@ impl BuiltInExpressionFfi {
 
         r.add2("Transform", |a: Vector2, b: Matrix3x2| Vector2::transform(a, b));
         r.add2("Transform", |a: Vector3, b: Matrix4x4| Vector3::transform(a, b));
+        r.add2("Transform", |a: Vector4, b: Matrix4x4| Vector4::transform(a, b));
 
         r.add0("RelativeUnit.Absolute", || RelativeUnit::Absolute);
         r.add0("RelativeUnit.Relative", || RelativeUnit::Relative);

@@ -15,6 +15,8 @@ A pull request is merged only when:
 - every check of its head commit has ended in success, was skipped or neutral, and the latest run
   of each check started after the last change of its base (so a pull request that was retargeted
   from the branch below it is merged on checks against the default branch, not the old base);
+  a check whose latest run was cancelled (a newer run of the workflow superseded it, as the retarget
+  does) is not a failure: it is waited for, as a running one, until a newer run of it ends;
 - it is not a draft.
 
 It is merged with a merge commit (never squashed or rebased: that would rewrite the commits the
@@ -37,6 +39,9 @@ from datetime import datetime, timezone
 
 FIELDS = "number,title,state,isDraft,baseRefName,headRefName,headRefOid,mergeable,mergeStateStatus,statusCheckRollup,url"
 GOOD = {"SUCCESS", "SKIPPED", "NEUTRAL"}
+# A run cancelled by a newer run of its workflow (the concurrency group of the CI cancels the run of
+# the old base when a retarget starts one on the new base): neither passed nor failed.
+SUPERSEDED = {"CANCELLED", "STALE"}
 
 
 def gh(*args, parse=True):
@@ -119,22 +124,27 @@ def checks(pr, since):
             conclusion = item.get("conclusion") or ""
         started = parse_time(started)
         previous = latest.get(name)
-        if previous is None or (started and previous[0] and started > previous[0]):
+        # A run that has not started yet is newer than one that has ended.
+        newer = started is None and not done and previous is not None and previous[1]
+        if previous is None or newer or (started and previous[0] and started > previous[0]):
             latest[name] = (started, done, conclusion)
     if not latest:
         return False, "no checks"
     pending = [n for n, (_, done, _) in latest.items() if not done]
-    failed = [n for n, (_, done, c) in latest.items() if done and c not in GOOD]
+    cancelled = [n for n, (_, done, c) in latest.items() if done and c in SUPERSEDED]
+    failed = [n for n, (_, done, c) in latest.items() if done and c not in GOOD and c not in SUPERSEDED]
     stale = [n for n, (s, _, _) in latest.items() if since and (s is None or s < since)]
-    passed = len(latest) - len(pending) - len(failed)
+    passed = len(latest) - len(pending) - len(cancelled) - len(failed)
     summary = f"{passed}/{len(latest)} passed"
     if failed:
         summary += f", failed: {', '.join(sorted(failed))}"
     if pending:
         summary += f", {len(pending)} running"
+    if cancelled:
+        summary += f", cancelled (waiting for a newer run): {', '.join(sorted(cancelled))}"
     if stale:
         summary += f", {len(stale)} older than the last change of the base"
-    return not pending and not failed and not stale, summary
+    return not pending and not cancelled and not failed and not stale, summary
 
 
 def readiness(repo, pr, default):

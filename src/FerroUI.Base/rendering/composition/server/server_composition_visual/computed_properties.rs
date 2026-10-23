@@ -1,6 +1,5 @@
 use super::ServerCompositionVisual;
 use crate::platform::LtrbRect;
-use crate::rendering::composition::MatrixUtils;
 use crate::Matrix;
 
 impl ServerCompositionVisual {
@@ -22,6 +21,16 @@ impl ServerCompositionVisual {
 
     pub fn combined_transform_matrix(&self) -> Matrix {
         self.combined_transform_matrix.get()
+    }
+
+    /// Whether the visual or a visual of its subtree changed since the last
+    /// update pass of its target: what a visual surface showing the subtree
+    /// follows (not from upstream).
+    pub fn has_pending_render_changes(&self) -> bool {
+        self.is_dirty_for_render.get()
+            || self.is_dirty_for_render_in_subgraph.get()
+            || self.needs_bounding_box_update.get()
+            || self.needs_to_add_extra_dirty_rect_to_dirty_region.get()
     }
 
     // WPF's cheatsheet
@@ -116,6 +125,15 @@ impl ServerCompositionVisual {
                     None => bounds,
                 });
             }
+            // The WinUI clip object (not from upstream): the bounds of the
+            // area it leaves visible.
+            if let Some(shape) = self.composition_clip_shape() {
+                let bounds = shape.bounds();
+                clip = Some(match clip {
+                    Some(clip) => clip.intersect_or_empty(bounds),
+                    None => bounds,
+                });
+            }
 
             if self.own_clip_rect.get() != clip {
                 self.own_clip_rect.set(clip);
@@ -125,16 +143,13 @@ impl ServerCompositionVisual {
         }
 
         if self.combined_transform_dirty.get() {
-            self.own_transform.set(MatrixUtils::compute_transform(
-                self.size(),
-                self.anchor_point(),
-                self.center_point(),
-                self.transform_matrix(),
-                self.scale(),
-                self.rotation_angle(),
-                self.orientation(),
-                self.offset() + self.translation(),
-            ));
+            // With the WinUI members (the relative adjustments, the rotation
+            // axis, pixel snapping) applied; a visual with a
+            // `ParentForTransform` is completed by the adorner pass.
+            self.own_transform.set(self.compute_own_transform_from_properties(self.transform_matrix()));
+            if self.parent_for_transform().is_some() {
+                self.adorner_helper_enqueue_for_adorner_update();
+            }
 
             set_dirty_for_render = true;
             set_dirty_bounds = true;

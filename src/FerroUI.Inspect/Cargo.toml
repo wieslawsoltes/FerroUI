@@ -1,0 +1,32 @@
+[package]
+name = "ferroui-inspect"
+description = "Opt-in application inspection core for FerroUI, shared by its MCP server and its Chrome DevTools Protocol endpoint"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+homepage.workspace = true
+readme.workspace = true
+keywords.workspace = true
+categories.workspace = true
+
+[lib]
+path = "lib.rs"
+
+[dependencies]
+serde_json = "1"
+ferroui-base.workspace = true
+ferroui-controls.workspace = true
+ferroui-markup.workspace = true
+base64 = "0.22"
+
+[dev-dependencies]
+ferroui-skia.workspace = true
+ferroui-themes-simple.workspace = true
+ferroui-headless.workspace = true
+ferroui-controls = { workspace = true, features = ["testing"] }
+ferroui-base = { workspace = true, features = ["testing"] }
+
+[package.metadata.release]
+group = "tools"

@@ -10,6 +10,70 @@
   such sheet; their controls took the sizes of the Simple theme.
   -->
 
+  <!--
+  The brushes the included themes of the TreeDataGrid and of the colour picker take from the Fluent
+  theme, as the WinUI 3 brushes of the same roles. The TreeDataGrid theme keys its light brushes
+  "Default", which is the dark variant of the WinUI theme, so in a light window its header text
+  turned white on hover and its grid lines and hover backgrounds disappeared; the colour picker's
+  tabs use TabItemHeader brushes only the Fluent theme defines. Each alias is resolved in the
+  variant of its dictionary (Dark falls back to the "Default" dictionary of the WinUI theme).
+  -->
+  <Styles.Resources>
+    <ResourceDictionary>
+      <ResourceDictionary.ThemeDictionaries>
+        <ResourceDictionary x:Key="Light">
+          <StaticResource x:Key="TreeDataGridGridLinesBrush" ResourceKey="DividerStrokeColorDefaultBrush" />
+          <StaticResource x:Key="TreeDataGridHeaderBackgroundPointerOverBrush" ResourceKey="SubtleFillColorSecondaryBrush" />
+          <StaticResource x:Key="TreeDataGridHeaderBackgroundPressedBrush" ResourceKey="SubtleFillColorTertiaryBrush" />
+          <StaticResource x:Key="TreeDataGridHeaderBorderBrushPointerOverBrush" ResourceKey="SubtleFillColorTransparentBrush" />
+          <StaticResource x:Key="TreeDataGridHeaderBorderBrushPressedBrush" ResourceKey="SubtleFillColorTransparentBrush" />
+          <StaticResource x:Key="TreeDataGridHeaderForegroundPointerOverBrush" ResourceKey="TextFillColorPrimaryBrush" />
+          <StaticResource x:Key="TreeDataGridHeaderForegroundPressedBrush" ResourceKey="TextFillColorSecondaryBrush" />
+          <StaticResource x:Key="TreeDataGridSelectedCellBackgroundBrush" ResourceKey="SubtleFillColorSecondaryBrush" />
+          <StaticResource x:Key="TabItemHeaderBackgroundSelected" ResourceKey="SelectorBarItemBackgroundSelected" />
+          <StaticResource x:Key="TabItemHeaderBackgroundSelectedPointerOver" ResourceKey="SelectorBarItemBackgroundPointerOver" />
+          <StaticResource x:Key="TabItemHeaderBackgroundSelectedPressed" ResourceKey="SelectorBarItemBackgroundPressed" />
+          <StaticResource x:Key="TabItemHeaderBackgroundUnselected" ResourceKey="SelectorBarItemBackground" />
+          <StaticResource x:Key="TabItemHeaderBackgroundUnselectedPointerOver" ResourceKey="SelectorBarItemBackgroundPointerOver" />
+          <StaticResource x:Key="TabItemHeaderBackgroundUnselectedPressed" ResourceKey="SelectorBarItemBackgroundPressed" />
+          <StaticResource x:Key="TabItemHeaderForegroundSelected" ResourceKey="SelectorBarItemForegroundSelected" />
+          <StaticResource x:Key="TabItemHeaderForegroundSelectedPointerOver" ResourceKey="SelectorBarItemForegroundPointerOver" />
+          <StaticResource x:Key="TabItemHeaderForegroundSelectedPressed" ResourceKey="SelectorBarItemForegroundPressed" />
+          <StaticResource x:Key="TabItemHeaderForegroundUnselected" ResourceKey="SelectorBarItemForeground" />
+          <StaticResource x:Key="TabItemHeaderForegroundUnselectedPointerOver" ResourceKey="SelectorBarItemForegroundPointerOver" />
+          <StaticResource x:Key="TabItemHeaderForegroundUnselectedPressed" ResourceKey="SelectorBarItemForegroundPressed" />
+          <StaticResource x:Key="TabItemHeaderSelectedPipeFill" ResourceKey="SelectorBarItemPillFill" />
+        </ResourceDictionary>
+        <ResourceDictionary x:Key="Dark">
+          <StaticResource x:Key="TreeDataGridGridLinesBrush" ResourceKey="DividerStrokeColorDefaultBrush" />
+          <StaticResource x:Key="TreeDataGridHeaderBackgroundPointerOverBrush" ResourceKey="SubtleFillColorSecondaryBrush" />
+          <StaticResource x:Key="TreeDataGridHeaderBackgroundPressedBrush" ResourceKey="SubtleFillColorTertiaryBrush" />
+          <StaticResource x:Key="TreeDataGridHeaderBorderBrushPointerOverBrush" ResourceKey="SubtleFillColorTransparentBrush" />
+          <StaticResource x:Key="TreeDataGridHeaderBorderBrushPressedBrush" ResourceKey="SubtleFillColorTransparentBrush" />
+          <StaticResource x:Key="TreeDataGridHeaderForegroundPointerOverBrush" ResourceKey="TextFillColorPrimaryBrush" />
+          <StaticResource x:Key="TreeDataGridHeaderForegroundPressedBrush" ResourceKey="TextFillColorSecondaryBrush" />
+          <StaticResource x:Key="TreeDataGridSelectedCellBackgroundBrush" ResourceKey="SubtleFillColorSecondaryBrush" />
+          <StaticResource x:Key="TabItemHeaderBackgroundSelected" ResourceKey="SelectorBarItemBackgroundSelected" />
+          <StaticResource x:Key="TabItemHeaderBackgroundSelectedPointerOver" ResourceKey="SelectorBarItemBackgroundPointerOver" />
+          <StaticResource x:Key="TabItemHeaderBackgroundSelectedPressed" ResourceKey="SelectorBarItemBackgroundPressed" />
+          <StaticResource x:Key="TabItemHeaderBackgroundUnselected" ResourceKey="SelectorBarItemBackground" />
+          <StaticResource x:Key="TabItemHeaderBackgroundUnselectedPointerOver" ResourceKey="SelectorBarItemBackgroundPointerOver" />
+          <StaticResource x:Key="TabItemHeaderBackgroundUnselectedPressed" ResourceKey="SelectorBarItemBackgroundPressed" />
+          <StaticResource x:Key="TabItemHeaderForegroundSelected" ResourceKey="SelectorBarItemForegroundSelected" />
+          <StaticResource x:Key="TabItemHeaderForegroundSelectedPointerOver" ResourceKey="SelectorBarItemForegroundPointerOver" />
+          <StaticResource x:Key="TabItemHeaderForegroundSelectedPressed" ResourceKey="SelectorBarItemForegroundPressed" />
+          <StaticResource x:Key="TabItemHeaderForegroundUnselected" ResourceKey="SelectorBarItemForeground" />
+          <StaticResource x:Key="TabItemHeaderForegroundUnselectedPointerOver" ResourceKey="SelectorBarItemForegroundPointerOver" />
+          <StaticResource x:Key="TabItemHeaderForegroundUnselectedPressed" ResourceKey="SelectorBarItemForegroundPressed" />
+          <StaticResource x:Key="TabItemHeaderSelectedPipeFill" ResourceKey="SelectorBarItemPillFill" />
+        </ResourceDictionary>
+      </ResourceDictionary.ThemeDictionaries>
+      <StaticResource x:Key="TabItemHeaderFontSize" ResourceKey="ControlContentThemeFontSize" />
+      <FontWeight x:Key="TabItemHeaderThemeFontWeight">Normal</FontWeight>
+      <StaticResource x:Key="TabItemPipeThickness" ResourceKey="SelectorBarItemPillHeight" />
+    </ResourceDictionary>
+  </Styles.Resources>
+
   <!-- Text -->
   <Style Selector="TextBlock.section-header">
     <Setter Property="FontSize" Value="14" />
@@ -63,6 +127,39 @@
   </Style>
   <Style Selector="Border.status-bar TextBlock.label">
     <Setter Property="Foreground" Value="{DynamicResource TextFillColorSecondaryBrush}" />
+  </Style>
+
+  <!-- The pane of a tree (the trees, the routed events): a shade darker than the details beside it,
+       as the pane of a WinUI navigation view, with room around its rows. -->
+  <Style Selector="Grid.tree-pane">
+    <Setter Property="Background" Value="{DynamicResource SolidBackgroundFillColorSecondaryBrush}" />
+  </Style>
+  <Style Selector="Border.tree-pane">
+    <Setter Property="Background" Value="{DynamicResource SolidBackgroundFillColorSecondaryBrush}" />
+    <Setter Property="Padding" Value="4,6,0,6" />
+  </Style>
+  <Style Selector=".tree-pane TreeDataGrid">
+    <Setter Property="Background" Value="Transparent" />
+  </Style>
+
+  <!-- The icon of an image or a geometry value and the preview of a geometry in its tool tip. -->
+  <Style Selector="Path.value-icon">
+    <Setter Property="Fill" Value="{DynamicResource TextFillColorSecondaryBrush}" />
+  </Style>
+  <Style Selector="Path.preview-geometry">
+    <Setter Property="Fill" Value="{DynamicResource TextFillColorPrimaryBrush}" />
+  </Style>
+
+  <!-- The text of an empty page or list: what to do. -->
+  <Style Selector="TextBlock.empty-state">
+    <Setter Property="Foreground" Value="{DynamicResource TextFillColorSecondaryBrush}" />
+    <Setter Property="TextWrapping" Value="Wrap" />
+    <Setter Property="TextAlignment" Value="Center" />
+    <Setter Property="HorizontalAlignment" Value="Center" />
+    <Setter Property="VerticalAlignment" Value="Center" />
+    <Setter Property="MaxWidth" Value="360" />
+    <Setter Property="Margin" Value="24" />
+    <Setter Property="IsHitTestVisible" Value="False" />
   </Style>
 
   <!-- A pane beside another one: the details, the layout and the frames, the events. -->

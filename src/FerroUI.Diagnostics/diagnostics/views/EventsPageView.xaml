@@ -58,9 +58,10 @@
       <Setter Property="VerticalContentAlignment" Value="Center" />
     </Style>
 
+    <!-- A handled event: the success background of the theme in place of #34c940 with black text,
+         which the selection of the WinUI list turned into white text on bright green. -->
     <Style Selector="ListBoxItem.handled" >
-      <Setter Property="Background" Value="#34c940" />
-      <Setter Property="Foreground" Value="Black" />
+      <Setter Property="Background" Value="{DynamicResource SystemFillColorSuccessBackgroundBrush}" />
     </Style>
   </UserControl.Styles>
 
@@ -73,7 +74,7 @@
       <ColumnDefinition Width="3*" />
     </Grid.ColumnDefinitions>
 
-    <Grid Grid.Column="0" RowDefinitions="Auto,*,Auto">
+    <Grid Grid.Column="0" RowDefinitions="Auto,*,Auto" Classes="tree-pane">
 
       <controls:FilterTextBox Grid.Row="0" Margin="12,10,12,8"
                               DataContext="{Binding EventsFilter}"
@@ -145,6 +146,11 @@
         </ListBox.ItemTemplate>
       </ListBox>
 
+      <!-- No events yet: what to do, so that the page with the events pane collapsed is not blank. -->
+      <TextBlock Grid.Row="0" Classes="empty-state"
+                 IsVisible="{Binding !#EventsList.ItemCount}"
+                 Text="No events recorded yet. Choose the events to record in the events pane, then interact with the application." />
+
       <GridSplitter Classes="divider horizontal" Grid.Row="1" />
 
       <DockPanel Grid.Row="2" LastChildFill="True">
@@ -163,7 +169,7 @@
                           PointerEntered="ListBoxItem_PointerEntered"
                           PointerExited="ListBoxItem_PointerExited">
 
-                <Rectangle IsVisible="{Binding BeginsNewRoute}" StrokeDashArray="2,2" StrokeThickness="1" Stroke="Gray" />
+                <Rectangle IsVisible="{Binding BeginsNewRoute}" StrokeDashArray="2,2" StrokeThickness="1" Stroke="{DynamicResource ControlStrongStrokeColorDefaultBrush}" />
 
                 <StackPanel Orientation="Horizontal" Spacing="2">
                   <TextBlock Text="{Binding Route}" FontWeight="Bold" />

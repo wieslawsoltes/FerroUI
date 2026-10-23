@@ -747,4 +747,7 @@ pub(super) fn register_value_types() {
     ValueTypes::register_display::<Uri>();
     ValueTypes::register_display::<CultureInfo>();
     ValueTypes::register_display::<Rc<Cursor>>();
+    // The text of a text trimming is the name it parses from (`CharacterEllipsis`, `None`, ...),
+    // as the `ToString()` of the trimmings of the managed original.
+    ValueTypes::register_display::<Rc<dyn crate::media::TextTrimming>>();
 }

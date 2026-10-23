@@ -123,7 +123,9 @@ pub use type_system::{
 #[cfg(feature = "tagged-weak-references")]
 pub use type_system::WEAK_REFERENCE_TAG;
 pub use vector::Vector;
-pub use visual::{Visual, VisualImpl, VisualImplExt, VisualVTable};
+pub use visual::{
+    ScalarTransition, Vector3Transition, Vector3TransitionComponents, Visual, VisualImpl, VisualImplExt, VisualVTable,
+};
 pub use visual_tree_attachment_event_args::VisualTreeAttachmentEventArgs;
 pub use vector3d::Vector3D;
 

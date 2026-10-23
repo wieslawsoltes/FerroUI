@@ -1,0 +1,83 @@
+# Rust factories replace reflection; related contracts share files. See dependency-injection.md.
+[[map]]
+project = "Microsoft.Extensions.DependencyInjection.Abstractions"
+upstream = ["ServiceCollectionServiceExtensions.cs", "ServiceCollectionServiceExtensions.Keyed.cs", "Extensions/ServiceCollectionDescriptorExtensions.cs", "Extensions/ServiceCollectionDescriptorExtensions.Keyed.cs"]
+kind = "merged"
+rust = ["service_collection.rs"]
+types = { ServiceCollectionServiceExtensions = ["ServiceCollection"], ServiceCollectionDescriptorExtensions = ["ServiceCollection"] }
+reason = "extension methods are inherent methods of the collection; lifetime factory overloads use typed factories and descriptors"
+
+[[map]]
+project = "Microsoft.Extensions.DependencyInjection.Abstractions"
+upstream = ["ServiceProviderServiceExtensions.cs", "ServiceProviderKeyedServiceExtensions.cs"]
+kind = "merged"
+rust = ["service_provider.rs"]
+types = { ServiceProviderKeyedServiceExtensions = ["ServiceProviderServiceExtensions"] }
+reason = "the typed resolution extension trait contains keyed and unkeyed resolution and scope creation"
+
+[[map]]
+project = "Microsoft.Extensions.DependencyInjection.Abstractions"
+upstream = ["AsyncServiceScope.cs"]
+kind = "merged"
+rust = ["service_provider.rs"]
+reason = "AsyncServiceScope wraps IServiceScope and uses its optional async-disposal capability"
+
+[[map]]
+project = "Microsoft.Extensions.DependencyInjection.Abstractions"
+upstream = ["IKeyedServiceProvider.cs"]
+kind = "merged"
+rust = ["service_provider.rs", "service_type.rs"]
+types = { KeyedService = ["ServiceKey"] }
+reason = "KeyedService.AnyKey is ServiceKey::ANY; value keys support Rust Eq and Hash"
+
+[[map]]
+project = "Microsoft.Extensions.DependencyInjection"
+upstream = ["ServiceCollectionContainerBuilderExtensions.cs"]
+kind = "merged"
+rust = ["service_collection.rs"]
+types = { ServiceCollectionContainerBuilderExtensions = ["ServiceCollection"] }
+reason = "BuildServiceProvider is an inherent method of ServiceCollection"
+
+[[map]]
+project = "Microsoft.Extensions.DependencyInjection"
+upstream = ["ServiceLookup/CallSiteKind.cs", "ServiceLookup/CallSiteResultCacheLocation.cs", "ServiceLookup/CallSiteVisitor.cs", "ServiceLookup/ConstantCallSite.cs", "ServiceLookup/ConstructorCallSite.cs", "ServiceLookup/FactoryCallSite.cs", "ServiceLookup/IEnumerableCallSite.cs", "ServiceLookup/ResultCache.cs", "ServiceLookup/RuntimeServiceProviderEngine.cs", "ServiceLookup/ServiceCacheKey.cs", "ServiceLookup/ServiceCallSite.cs", "ServiceLookup/ServiceDescriptorExtensions.cs", "ServiceLookup/ServiceProviderCallSite.cs", "ServiceLookup/ServiceProviderEngine.cs", "ServiceLookup/ThrowHelper.cs"]
+kind = "merged"
+rust = ["service_provider.rs", "service_descriptor.rs"]
+reason = "typed factories, dependency metadata and descriptor/key cache slots replace the reflected call-site class hierarchy; resolution and validation walk this metadata directly"
+
+[[map]]
+project = "Microsoft.Extensions.DependencyInjection"
+upstream = ["ServiceLookup/ServiceIdentifier.cs"]
+kind = "merged"
+rust = ["service_type.rs"]
+reason = "TypeId plus value key, with erased Rc service values and structured errors"
+
+[[map]]
+project = "Microsoft.Extensions.DependencyInjection"
+upstream = ["ServiceLookup/CompiledServiceProviderEngine.cs", "ServiceLookup/DynamicServiceProviderEngine.cs", "ServiceLookup/Expressions/ExpressionResolverBuilder.cs", "ServiceLookup/Expressions/ExpressionsServiceProviderEngine.cs", "ServiceLookup/ILEmit/ILEmitResolverBuilder.cs", "ServiceLookup/ILEmit/ILEmitResolverBuilderContext.cs", "ServiceLookup/ILEmit/ILEmitServiceProviderEngine.cs", "ServiceLookup/ServiceLookupHelpers.cs", "ServiceLookup/StackGuard.cs"]
+kind = "not-applicable"
+reason = "CLR reflection, emitted IL/expression trees, JIT switching, and stack recovery by dispatching to worker threads have no counterpart in this per-thread AOT Rust factory implementation"
+
+[[map]]
+project = "Microsoft.Extensions.DependencyInjection"
+upstream = ["CallSiteJsonFormatter.cs", "DependencyInjectionEventSource.cs"]
+kind = "not-applicable"
+reason = "CLR EventSource diagnostics and its reflected call-site JSON payload are not a Rust event tracing API; service errors carry typed dependency paths"
+
+[[rust_only]]
+path = "src/FerroUI.DependencyInjection/splat.rs"
+reason = "optional Splat MicrosoftDependencyResolver adapter, from reactiveui/splat 39466de; not part of dotnet/runtime"
+
+[[map]]
+project = "Microsoft.Extensions.DependencyInjection.Abstractions"
+upstream = ["ActivatorUtilitiesConstructorAttribute.cs"]
+kind = "not-applicable"
+reason = "Rust factories explicitly select a constructor; no CLR attribute representation"
+
+[[rust_only]]
+path = "src/FerroUI.DependencyInjection/activator_utilities.rs"
+reason = "shared crate contains the activation helpers from the Abstractions project, not the implementation project"
+
+[[rust_only]]
+path = "src/FerroUI.DependencyInjection/default_service_provider_factory.rs"
+reason = "shared crate contains the default provider factory from the implementation project and its Abstractions interface"

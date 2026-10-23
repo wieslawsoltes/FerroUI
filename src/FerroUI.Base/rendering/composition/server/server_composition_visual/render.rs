@@ -2,7 +2,7 @@ use super::walker::{walk, IServerTreeVisitor, TreeWalkContext};
 use super::ServerCompositionVisual;
 use crate::media::{RenderOptions, TextOptions};
 use crate::platform::{IDrawingContextImpl, LtrbRect};
-use crate::rendering::composition::server::{CompositorPools, IDirtyRectTracker, ServerVisualRenderContext};
+use crate::rendering::composition::server::{CompositorPools, IDirtyRectTracker, LitContent, ServerVisualRenderContext};
 use crate::Matrix;
 use std::rc::Rc;
 
@@ -127,6 +127,12 @@ impl<'a> RenderContext<'a> {
             self.canvas.push_geometry_clip(&*clip);
         }
 
+        // The WinUI clip object (not from upstream), in the space of the
+        // visual.
+        if let Some(shape) = visual.composition_clip_shape() {
+            shape.push(self.canvas);
+        }
+
         true
     }
 
@@ -184,7 +190,13 @@ impl IServerTreeVisitor for RenderContext<'_> {
         }
 
         let clip = self.walk_context.clip;
+        // The WinUI lights that reach the content (not from upstream): the
+        // content is drawn into a layer and the light map over it.
+        let lit = LitContent::begin(visual, self.canvas);
         visual.render_core(&mut ServerVisualRenderContext::new(self.canvas), clip);
+        if let Some(lit) = lit {
+            lit.end(self.canvas);
+        }
 
         self.render_children
     }
@@ -199,6 +211,9 @@ impl IServerTreeVisitor for RenderContext<'_> {
 
         // If we've used cache, those never got pushed in PreSubgraph
         if !self.used_cache {
+            // What the content pushed for its children (not from upstream).
+            visual.content.render_after_children(visual, &mut ServerVisualRenderContext::new(self.canvas));
+
             if visual.effect().is_some() && visual.sub_tree_bounds.get().is_some() {
                 if let Some(effects) = self.canvas.as_drawing_context_impl_with_effects() {
                     effects.pop_effect();
@@ -227,6 +242,10 @@ impl IServerTreeVisitor for RenderContext<'_> {
         if !bitmap_cache_root {
             if visual.adorned_visual().is_some() {
                 self.adorner_helper_render_post_graph_push_adorner_clip(visual);
+            }
+
+            if let Some(shape) = visual.composition_clip_shape() {
+                shape.pop(self.canvas);
             }
 
             if visual.clip().is_some() {

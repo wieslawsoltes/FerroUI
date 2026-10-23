@@ -98,6 +98,8 @@ pub fn run_main(href: &str) {
             .and_then(|lifetime| lifetime.as_single_top_level_application_lifetime())
             .and_then(|lifetime| lifetime.top_level())
         {
+            #[cfg(all(feature = "cdp", target_arch = "wasm32"))]
+            CDP_BRIDGE.with(|bridge| *bridge.borrow_mut() = Some(ferroui_devtools::BrowserBridge::install(&top_level)));
             top_level.renderer_diagnostics().set_debug_overlays(RendererDebugOverlays::FPS);
         }
     });
@@ -596,4 +598,9 @@ mod tests {
 
         assert_eq!(vec![BrowserRenderingMode::WebGL1, BrowserRenderingMode::Software2D], options.rendering_mode);
     }
+}
+
+#[cfg(all(feature = "cdp", target_arch = "wasm32"))]
+ferroui_base::ferro_thread_local! {
+    static CDP_BRIDGE: RefCell<Option<ferroui_devtools::BrowserBridge>> = const { RefCell::new(None) };
 }

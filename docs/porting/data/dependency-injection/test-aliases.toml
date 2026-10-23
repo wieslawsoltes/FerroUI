@@ -1,0 +1,453 @@
+# Behavior-based aliases for combined Rust cases; CLR-only exclusions are explicit.
+
+[[alias]]
+project = "src"
+file = "DependencyInjectionSpecificationTests.cs"
+tests = ["ServicesRegisteredWithImplementationTypeCanBeResolved", "FactoryServicesCanBeCreatedByGetService", "SingletonServiceCanBeResolved"]
+rust = "services_registered_with_implementation_type_return_same_instances_per_resolution_for_singletons"
+reason = "Combined Rust specification case exercises these behaviors with typed factories instead of reflected constructors"
+
+[[alias]]
+project = "src"
+file = "DependencyInjectionSpecificationTests.cs"
+tests = ["TransientServiceCanBeResolvedFromProvider"]
+rust = "services_registered_with_implementation_type_return_different_instances_per_resolution_for_transient_services"
+reason = "Combined Rust specification case exercises these behaviors with typed factories instead of reflected constructors"
+
+[[alias]]
+project = "src"
+file = "DependencyInjectionSpecificationTests.cs"
+tests = ["SingletonServiceCanBeResolvedFromScope"]
+rust = "singleton_services_come_from_root_provider"
+reason = "Combined Rust specification case exercises these behaviors with typed factories instead of reflected constructors"
+
+[[alias]]
+project = "src"
+file = "DependencyInjectionSpecificationTests.cs"
+tests = ["MultipleServiceCanBeIEnumerableResolved"]
+rust = "registration_order_is_preserved_when_services_are_ienumerable_resolved"
+reason = "Combined Rust specification case exercises these behaviors with typed factories instead of reflected constructors"
+
+[[alias]]
+project = "src"
+file = "DependencyInjectionSpecificationTests.cs"
+tests = ["ServiceProviderRegistersServiceScopeFactory"]
+rust = "service_scope_factory_is_singleton"
+reason = "Combined Rust specification case exercises these behaviors with typed factories instead of reflected constructors"
+
+[[alias]]
+project = "src"
+file = "DependencyInjectionSpecificationTests.cs"
+tests = ["NonexistentServiceCanBeIEnumerableResolved"]
+rust = "attempting_to_resolve_nonexistent_service_returns_null"
+reason = "Combined Rust specification case exercises these behaviors with typed factories instead of reflected constructors"
+
+[[alias]]
+project = "src"
+file = "DependencyInjectionSpecificationTests.cs"
+tests = ["DisposingScopeDisposesService", "ServiceProviderIsDisposable"]
+rust = "singleton_is_disposed_only_by_root_and_transient_by_owning_scope"
+reason = "Combined Rust specification case exercises these behaviors with typed factories instead of reflected constructors"
+
+[[alias]]
+project = "src"
+file = "DependencyInjectionSpecificationTests.cs"
+tests = ["SelfResolveThenDispose", "SafelyDisposeNestedProviderReferences"]
+rust = "disposing_releases_cached_service_provider_cycles"
+reason = "Combined Rust specification case exercises these behaviors with typed factories instead of reflected constructors"
+
+[[waive]]
+project = "src"
+file = "DependencyInjectionSpecificationTests.cs"
+tests = ["*OpenGeneric*", "*ConstrainedOpenGeneric*", "*ClosedServicesPreferredOverOpenGeneric*", "ServiceContainerPicksConstructorWithLongestMatches"]
+reason = "Runtime open generic construction and reflected constructor selection are replaced by concrete Rust registrations and explicit constructors"
+
+[[alias]]
+project = "src"
+file = "KeyedDependencyInjectionSpecificationTests.cs"
+tests = ["ResolveNonKeyedService", "SimpleServiceKeyedResolution"]
+rust = "resolve_keyed_service"
+reason = "Combined Rust specification case exercises these behaviors with typed factories instead of reflected constructors"
+
+[[alias]]
+project = "src"
+file = "KeyedDependencyInjectionSpecificationTests.cs"
+tests = ["ResolveKeyedServicesAnyKey", "ResolveKeyedServicesAnyKeyWithAnyKeyRegistration", "ResolveKeyedServicesAnyKeyConsistency", "ResolveWithAnyKeyQuery_Constructor", "ResolveWithAnyKeyQuery_Constructor_Duplicates", "ResolveKeyedServicesAnyKeyOrdering"]
+rust = "resolve_keyed_services_any_key_consistency_with_any_key_registration"
+reason = "Combined Rust specification case exercises these behaviors with typed factories instead of reflected constructors"
+
+[[alias]]
+project = "src"
+file = "KeyedDependencyInjectionSpecificationTests.cs"
+tests = ["ResolveKeyedServiceSingletonFactory", "ResolveKeyedServiceSingletonType", "ResolveKeyedServiceTransientFactory", "ResolveKeyedServiceTransientType", "ResolveKeyedSingletonFromInjectedServiceProvider", "ResolveKeyedTransientFromInjectedServiceProvider", "ResolveKeyedSingletonFromScopeServiceProvider", "ResolveKeyedScopedFromScopeServiceProvider", "ResolveKeyedTransientFromScopeServiceProvider", "ResolveRequiredKeyedServiceThrowsIfNotFound"]
+rust = "keyed_lifetimes_work_through_scopes_and_injected_providers"
+reason = "Combined Rust specification case exercises these behaviors with typed factories instead of reflected constructors"
+
+[[alias]]
+project = "src"
+file = "KeyedDependencyInjectionSpecificationTests.cs"
+tests = ["ResolveKeyedGenericServices"]
+rust = "closed_generic_types_and_key_probes_remain_distinct"
+reason = "Combined Rust specification case exercises these behaviors with typed factories instead of reflected constructors"
+
+[[alias]]
+project = "src"
+file = "KeyedDependencyInjectionSpecificationTests.cs"
+tests = ["ResolveKeyedServiceSingletonInstanceWithKeyedParameter", "CreateServiceWithKeyedParameter", "ResolveKeyedServiceWithFromServiceKeyAttribute"]
+rust = "keyed_inherited_and_service_key_parameters_are_injected"
+reason = "Combined Rust specification case exercises these behaviors with typed factories instead of reflected constructors"
+
+[[waive]]
+project = "src"
+file = "KeyedDependencyInjectionSpecificationTests.cs"
+tests = ["ResolveKeyedOpenGenericService"]
+reason = "Open generic CLR instantiation is replaced by concrete Rust type registration"
+
+[[waive]]
+project = "src"
+file = "KeyedDependencyInjectionSpecificationTests.cs"
+tests = ["ResolveKeyedServiceThrowsIfNotSupported"]
+reason = "Rust IServiceProvider includes keyed identifier resolution; unsupported keyed providers cannot implement this contract"
+
+[[alias]]
+project = "src"
+file = "ActivatorUtilitiesTests.cs"
+tests = ["TypeActivatorEnablesYouToCreateAnyTypeWithServicesEvenWhenNotInIocContainer", "TypeActivatorAcceptsAnyNumberOfAdditionalConstructorParametersToProvide"]
+rust = "create_instance_uses_constructor_services_and_explicit_arguments"
+reason = "Combined Rust specification case exercises these behaviors with typed factories instead of reflected constructors"
+
+[[alias]]
+project = "src"
+file = "ActivatorUtilitiesTests.cs"
+tests = ["GetServiceOrCreateInstanceRegisteredServiceSingleton", "GetServiceOrCreateInstanceUnregisteredService"]
+rust = "get_service_or_create_instance_prefers_registered_service"
+reason = "Combined Rust specification case exercises these behaviors with typed factories instead of reflected constructors"
+
+[[waive]]
+project = "src"
+file = "ActivatorUtilitiesTests.cs"
+tests = ["TypeActivatorWorksWithStaticCtor", "TypeActivatorCanDisambiguateConstructorsWithUniqueArguments", "TypeActivatorRequiresPublicConstructor", "TypeActivatorRequiresAllArgumentsCanBeAccepted", "TypeActivatorCreateFactoryDoesNotAllowForAmbiguousConstructorMatches", "TypeActivatorCreateInstanceUsesLongestAvailableConstructor", "TypeActivatorUsesMarkedConstructor", "TypeActivatorThrowsOnMultipleMarkedCtors", "TypeActivatorThrowsWhenMarkedCtorDoesntAcceptArguments", "CreateInstance_WithAbstractTypeAndPublicConstructor_ThrowsCorrectException", "CreateInstance_CapturesInnerException_OfTargetInvocationException"]
+reason = "Rust explicitly names a constructor, checks its arguments and visibility at compilation, and has no CLR static constructors or reflection exception wrapping"
+
+[[alias]]
+project = "src"
+file = "ServiceProviderIsServiceSpecificationTests.cs"
+tests = ["ExplicitServiceRegisterationWithIsService", "BuiltInServicesWithIsServiceReturnsTrue"]
+rust = "is_service_does_not_invoke_factory"
+reason = "Combined Rust specification case exercises these behaviors with typed factories instead of reflected constructors"
+
+[[alias]]
+project = "src"
+file = "ServiceProviderIsServiceSpecificationTests.cs"
+tests = ["ClosedGenericsWithIsService"]
+rust = "closed_generic_types_and_key_probes_remain_distinct"
+reason = "Combined Rust specification case exercises these behaviors with typed factories instead of reflected constructors"
+
+[[alias]]
+project = "src"
+file = "ServiceProviderIsKeyedServiceSpecificationTests.cs"
+tests = ["ExplicitServiceRegistrationWithIsKeyedService", "ClosedGenericsWithIsKeyedService", "NonKeyedServiceWithIsKeyedService"]
+rust = "closed_generic_types_and_key_probes_remain_distinct"
+reason = "Combined Rust specification case exercises these behaviors with typed factories instead of reflected constructors"
+
+[[waive]]
+project = "src"
+file = "ServiceProviderIsServiceSpecificationTests.cs"
+tests = ["OpenGenerics*", "IEnumerable*"]
+reason = "Rust has no runtime open generic Type; get_services is an explicit vector operation, not a reflected enumerable service type"
+
+[[waive]]
+project = "src"
+file = "ServiceProviderIsKeyedServiceSpecificationTests.cs"
+tests = ["OpenGenerics*", "IEnumerable*"]
+reason = "Rust has no runtime open generic Type; get_services is an explicit vector operation, not a reflected enumerable service type"
+
+[[alias]]
+project = "DI.Tests"
+file = "ServiceCollectionTests.cs"
+tests = ["TestMakeReadOnly"]
+rust = "read_only_collection_rejects_mutation_but_can_build"
+reason = "Combined Rust specification case exercises these behaviors with typed factories instead of reflected constructors"
+
+[[alias]]
+project = "DI.Tests"
+file = "CircularDependencyTests.cs"
+tests = ["SelfCircularDependency"]
+rust = "runtime_factory_cycles_fail_and_unwind"
+reason = "Combined Rust specification case exercises these behaviors with typed factories instead of reflected constructors"
+
+[[alias]]
+project = "DI.Tests"
+file = "CircularDependencyTests.cs"
+tests = ["DirectCircularDependency", "IndirectCircularDependency"]
+rust = "circular_dependencies_report_a_path_without_recursing_forever"
+reason = "Combined Rust specification case exercises these behaviors with typed factories instead of reflected constructors"
+
+[[alias]]
+project = "DI.Tests"
+file = "CircularDependencyTests.cs"
+tests = ["SelfCircularDependencyInEnumerable"]
+rust = "self_dependency_in_enumerable_is_a_cycle"
+reason = "Combined Rust specification case exercises these behaviors with typed factories instead of reflected constructors"
+
+[[alias]]
+project = "DI.Tests"
+file = "CircularDependencyTests.cs"
+tests = ["NoCircularDependencySameTypeMultipleTimes"]
+rust = "same_dependency_in_two_constructor_parameters_is_not_a_cycle"
+reason = "Combined Rust specification case exercises these behaviors with typed factories instead of reflected constructors"
+
+[[alias]]
+project = "DI.Tests"
+file = "ServiceProviderValidationTests.cs"
+tests = ["GetService_Throws_WhenGetServiceForScopedServiceIsCalledOnRoot"]
+rust = "default_provider_factory_applies_options_without_activating_services"
+reason = "Combined Rust specification case exercises these behaviors with typed factories instead of reflected constructors"
+
+[[alias]]
+project = "DI.Tests"
+file = "ServiceProviderValidationTests.cs"
+tests = ["BuildServiceProvider_ValidateOnBuild_Throws_WhenScopedIsInjectedIntoSingleton", "BuildServiceProvider_ValidateOnBuild_Throws_WhenScopedIsInjectedIntoSingleton_ReverseRegistrationOrder"]
+rust = "get_service_throws_when_scoped_is_injected_into_singleton"
+reason = "Combined Rust specification case exercises these behaviors with typed factories instead of reflected constructors"
+
+[[alias]]
+project = "DI.Tests"
+file = "ServiceProviderValidationTests.cs"
+tests = ["BuildServiceProvider_ValidateOnBuild_DoesNotThrow_WhenScopeFactoryIsInjectedIntoSingleton"]
+rust = "get_service_does_not_throw_when_scope_factory_is_injected_into_singleton"
+reason = "Combined Rust specification case exercises these behaviors with typed factories instead of reflected constructors"
+
+[[alias]]
+project = "DI.Tests"
+file = "ServiceProviderValidationTests.cs"
+tests = ["GetService_DoesNotThrow_WhenGetServiceForPolymorphicServiceIsCalledOnRoot_AndTheLastOneIsNotScoped", "GetService_DoesNotThrow_WhenGetServiceForServiceWithMultipleImplementationScopesWhereLastIsNotScoped"]
+rust = "validation_checks_all_enumerable_dependencies_but_only_last_single_dependency"
+reason = "Combined Rust specification case exercises these behaviors with typed factories instead of reflected constructors"
+
+[[alias]]
+project = "DI.Tests"
+file = "ServiceCollectionServiceExtensionsTest.cs"
+tests = ["TryAddNoOpFailsIfExists", "TryAdd_WithType_AddsService", "TryAdd_WithType_DoesNotAddDuplicate", "TryAddIfMissingActuallyAdds"]
+rust = "try_add_uses_type_and_key"
+reason = "Combined Rust specification case exercises these behaviors with typed factories instead of reflected constructors"
+
+[[alias]]
+project = "DI.Tests"
+file = "ServiceCollectionServiceExtensionsTest.cs"
+tests = ["TryAddEnumerable_AddsService", "TryAddEnumerable_DoesNotAddDuplicate"]
+rust = "try_add_enumerable_distinguishes_implementation_and_key"
+reason = "Combined Rust specification case exercises these behaviors with typed factories instead of reflected constructors"
+
+[[alias]]
+project = "DI.Tests"
+file = "ServiceCollectionServiceExtensionsTest.cs"
+tests = ["RemoveAll_RemovesAllServicesWithMatchingServiceType"]
+rust = "remove_all_only_removes_matching_type_and_key"
+reason = "Combined Rust specification case exercises these behaviors with typed factories instead of reflected constructors"
+
+[[alias]]
+project = "DI.Tests"
+file = "ServiceCollectionKeyedServiceExtensionsTest.cs"
+tests = ["TryAddNoOpFailsIfExists", "TryAdd_WithType_AddsService", "TryAdd_WithType_DoesNotAddDuplicate", "TryAddIfMissingActuallyAdds"]
+rust = "try_add_uses_type_and_key"
+reason = "Combined Rust specification case exercises these behaviors with typed factories instead of reflected constructors"
+
+[[alias]]
+project = "DI.Tests"
+file = "ServiceCollectionKeyedServiceExtensionsTest.cs"
+tests = ["TryAddEnumerable_AddsService", "TryAddEnumerable_DoesNotAddDuplicate"]
+rust = "try_add_enumerable_distinguishes_implementation_and_key"
+reason = "Combined Rust specification case exercises these behaviors with typed factories instead of reflected constructors"
+
+[[alias]]
+project = "DI.Tests"
+file = "ServiceCollectionKeyedServiceExtensionsTest.cs"
+tests = ["RemoveAll_RemovesAllServicesWithMatchingServiceType"]
+rust = "remove_all_only_removes_matching_type_and_key"
+reason = "Combined Rust specification case exercises these behaviors with typed factories instead of reflected constructors"
+
+[[alias]]
+project = "DI.Tests"
+file = "ServiceCollectionServiceExtensionsTest.cs"
+tests = ["Replace_ReplacesFirstServiceWithMatchingServiceType"]
+rust = "replace_removes_first_match_and_appends"
+reason = "Combined Rust specification case exercises these behaviors with typed factories instead of reflected constructors"
+
+[[alias]]
+project = "DI.Tests"
+file = "ServiceCollectionDescriptorExtensionsTests.cs"
+tests = ["ServiceDescriptors_AllowsRemovingPreviousRegisteredServices"]
+rust = "collection_identity_indexing_and_copy_preserve_descriptors"
+reason = "Combined Rust specification case exercises these behaviors with typed factories instead of reflected constructors"
+
+[[alias]]
+project = "DI.Tests"
+file = "ServiceProviderContainerTests.cs"
+tests = ["DoesNotDisposeSingletonInstances", "SingletonServiceCreatedFromInstanceIsNotDisposedWhenContainerIsDisposed"]
+rust = "instance_registrations_and_unresolved_services_are_not_disposed"
+reason = "Combined Rust specification case exercises these behaviors with typed factories instead of reflected constructors"
+
+[[alias]]
+project = "DI.Tests"
+file = "ServiceProviderContainerTests.cs"
+tests = ["RootProviderDispose_PreventsServiceResolution_InChildScope", "RootProviderDispose_PreventsScopeCreation"]
+rust = "root_disposal_invalidates_scopes_but_scopes_retain_disposal_ownership"
+reason = "Combined Rust specification case exercises these behaviors with typed factories instead of reflected constructors"
+
+[[alias]]
+project = "DI.Tests"
+file = "ServiceProviderContainerTests.cs"
+tests = ["GetService_DisposeOnSameThread_Throws", "GetService_DisposeOnSameThread_ThrowsAndDoesNotHangAndDisposeGetsCalled"]
+rust = "service_created_by_a_factory_that_disposes_its_scope_is_disposed_immediately"
+reason = "Combined Rust specification case exercises these behaviors with typed factories instead of reflected constructors"
+
+[[alias]]
+project = "DI.Tests"
+file = "ServiceProviderContainerTests.cs"
+tests = ["ProviderDisposeAsyncCallsDisposeAsyncOnServices", "ProviderDisposeAsyncPrefersDisposeAsyncOnServices"]
+rust = "async_disposal_waits_in_reverse_order_and_prefers_async"
+reason = "Combined Rust specification case exercises these behaviors with typed factories instead of reflected constructors"
+
+[[alias]]
+project = "DI.Tests"
+file = "ServiceProviderContainerTests.cs"
+tests = ["ProviderDisposeThrowsWhenOnlyDisposeAsyncImplemented", "ProviderDisposeAsyncCallsDisposeAsyncOnceOnServices"]
+rust = "sync_disposal_of_async_only_service_can_be_retried_asynchronously"
+reason = "Combined Rust specification case exercises these behaviors with typed factories instead of reflected constructors"
+
+[[alias]]
+project = "DI.Tests"
+file = "ServiceProviderContainerTests.cs"
+tests = ["ProviderScopeDisposeAsyncCallsDisposeAsyncOnServices", "ProviderScopeDisposeAsyncPrefersDisposeAsyncOnServices", "ProviderScopeDisposePrefersServiceDispose", "ProviderAsyncScopeDisposeAsyncCallsDisposeAsyncOnServices", "ProviderAsyncScopeDisposeAsyncPrefersDisposeAsyncOnServices", "ProviderAsyncScopeDisposePrefersServiceDispose"]
+rust = "scope_disposal_modes_prefer_the_requested_mode"
+reason = "Combined Rust specification case exercises these behaviors with typed factories instead of reflected constructors"
+
+[[alias]]
+project = "DI.Tests"
+file = "ServiceProviderContainerTests.cs"
+tests = ["SingletonServiceCreatedFromFactoryIsDisposedWhenContainerIsDisposed"]
+rust = "singleton_is_disposed_only_by_root_and_transient_by_owning_scope"
+reason = "Combined Rust specification case exercises these behaviors with typed factories instead of reflected constructors"
+
+[[alias]]
+project = "DI.Tests"
+file = "ServiceProviderContainerTests.cs"
+tests = ["MultipleServicesAreOrdered"]
+rust = "registration_order_is_preserved_when_services_are_ienumerable_resolved"
+reason = "Combined Rust specification case exercises these behaviors with typed factories instead of reflected constructors"
+
+[[waive]]
+project = "DI.Tests"
+file = "DependencyInjectionEventSourceTests.cs"
+tests = ["*"]
+reason = "CLR EventSource tracing is not part of the Rust provider"
+
+[[waive]]
+project = "DI.Tests"
+file = "ServiceProviderCompilationTest.cs"
+tests = ["*"]
+reason = "No runtime expression/IL compiler or thread-pool stack-guard engine in Rust"
+
+[[waive]]
+project = "DI.Tests"
+file = "ServiceTableTest.cs"
+tests = ["*"]
+reason = "Invalid CLR open generic registration forms are not representable by this API"
+
+[[waive]]
+project = "DI.Tests"
+file = "ServiceProviderContainerTests.cs"
+tests = ["*OpenGeneric*", "*TwoThreads*", "*SingletonAndLazyLocks*", "*Concurrently*", "*AfterCompilation*", "DependencyWithPrivateConstructorIsIdentifiedAsPartOfException"]
+reason = "Open generic reflection, thread-safe shared service locks and JIT compilation are not part of this per-thread Rust factory provider; Rust checks constructor visibility"
+
+[[waive]]
+project = "DI.Tests"
+file = "ServiceProviderValidationTests.cs"
+tests = ["*OpenGenerics*", "*IL_Replacement*", "BuildServiceProvider_ValidateOnBuild_ThrowsWhenImplementationIsNotAssignableToService"]
+reason = "Open generic / emitted IL paths do not exist; typed Rc factory return values enforce assignability at compilation"
+
+[[waive]]
+project = "DI.Tests"
+file = "ActivatorUtilitiesTests.cs"
+tests = ["*Longest*", "*ConstructorWithAttribute*", "*Ambiguous*", "*ConstructorAttribute*", "*MultipleCtors*", "*ChoosesDefaultConstructor*", "*NullProvider*", "*RemoteExecutor*", "*Assembly*"]
+reason = "Explicit Rust factory selection replaces reflected constructor matching; providers are non-null references; no CLR assemblies or RemoteExecutor"
+
+[[waive]]
+project = "DI.Tests"
+file = "ServiceLookup/CallSiteFactoryTest.cs"
+tests = ["*GenericConstraint*", "*ClosedType*", "*PublicConstructors*", "*NonOverlappingConstructors*", "*Trimmability*", "*DynamicCode*", "*OpenGeneric*", "*MostNumberOfResolvedParameters*", "*NullaryConstructor*"]
+reason = "CLR reflected generic constraints, runtime code generation, trimming and constructor overload selection are replaced by Rust types and explicit factories"
+
+[[waive]]
+project = "DI.Tests"
+file = "CallSiteTests.cs"
+tests = ["*Expression*", "*OpenGeneric*"]
+reason = "Tests of emitted expression trees or runtime open generic reflection; Rust uses compiled typed factories"
+
+[[waive]]
+project = "DI.Tests"
+file = "AsyncServiceScopeTests.cs"
+tests = ["ThrowsIfServiceScopeIsNull"]
+reason = "Rust scope handles cannot be null"
+
+[[alias]]
+project = "src"
+file = "DependencyInjectionSpecificationTests.cs"
+tests = ["TransientServiceCanBeResolvedFromScope", "SingleServiceCanBeIEnumerableResolved", "OuterServiceCanHaveOtherServicesInjected", "FactoryServicesAreCreatedAsPartOfCreatingObjectGraph", "NestedScopedServiceCanBeResolved", "ScopedServices_FromCachedScopeFactory_CanBeResolvedAndDisposed", "NestedScopedServiceCanBeResolvedWithNoFallbackProvider", "ResolvesDifferentInstancesForServiceWhenResolvingEnumerable"]
+rust = "nested_service_graphs_and_enumerations_obey_all_lifetimes"
+reason = "Combined Rust specification case exercises these behaviors with typed factories instead of reflected constructors"
+
+[[waive]]
+project = "src"
+file = "DependencyInjectionSpecificationTests.cs"
+tests = ["ResolvesMixedOpenClosedGenericsAsEnumerable"]
+reason = "Rust supports closed generic registrations but has no reflected open generic registrations"
+
+[[alias]]
+project = "src"
+file = "KeyedDependencyInjectionSpecificationTests.cs"
+tests = ["CombinationalRegistration", "ResolveKeyedServices", "ResolveWithAnyKeyQuery_InstanceProvided", "ResolveWithAnyKeyQuery_InstanceProvided_Duplicates", "ResolveKeyedServiceSingletonInstance", "ResolveKeyedServiceSingletonInstanceWithAnyKey", "ResolveKeyedServicesSingletonInstanceWithAnyKey"]
+rust = "keyed_instances_and_catch_all_instances_preserve_identity_and_order"
+reason = "Combined Rust specification case exercises these behaviors with typed factories instead of reflected constructors"
+
+[[alias]]
+project = "src"
+file = "KeyedDependencyInjectionSpecificationTests.cs"
+tests = ["ResolveKeyedServiceSingletonInstanceWithKeyInjection"]
+rust = "keyed_inherited_and_service_key_parameters_are_injected"
+reason = "Combined Rust specification case exercises these behaviors with typed factories instead of reflected constructors"
+
+[[alias]]
+project = "src"
+file = "KeyedDependencyInjectionSpecificationTests.cs"
+tests = ["ResolveKeyedServiceWithKeyedParameter_MissingRegistration_SecondParameter", "ResolveKeyedServiceWithKeyedParameter_MissingRegistration_FirstParameter", "ResolveKeyedServiceWithKeyedParameter_MissingRegistrationButWithDefaults"]
+rust = "missing_keyed_parameters_fail_in_either_position_and_can_use_explicit_defaults"
+reason = "Combined Rust specification case exercises these behaviors with typed factories instead of reflected constructors"
+
+[[alias]]
+project = "src"
+file = "KeyedDependencyInjectionSpecificationTests.cs"
+tests = ["ResolveKeyedServiceSingletonFactoryWithAnyKeyIgnoreWrongType", "ResolveKeyedServiceTransientTypeWithAnyKey"]
+rust = "catch_all_transient_only_matches_the_requested_service_type"
+reason = "Combined Rust specification case exercises these behaviors with typed factories instead of reflected constructors"
+
+[[alias]]
+project = "src"
+file = "KeyedDependencyInjectionSpecificationTests.cs"
+tests = ["ResolveUnkeyedServiceWithFromServiceKeyAttributeWithNullKey"]
+rust = "service_key_parameter_supports_unkeyed_activation"
+reason = "Combined Rust specification case exercises these behaviors with typed factories instead of reflected constructors"
+
+[[waive]]
+project = "src"
+file = "KeyedDependencyInjectionSpecificationTests.cs"
+tests = ["ResolveKeyedServiceWithFromServiceKeyAttribute_NotFound", "ResolveKeyedServiceWithFromServiceKeyAttribute_NotFound_WithUnkeyed"]
+reason = "The typed key() parameter always receives Option<ServiceKey>; mismatched CLR parameter types are not representable"
+
+[[alias]]
+project = "src"
+file = "ActivatorUtilitiesTests.cs"
+tests = ["TypeActivatorWorksWithCtorWithOptionalArgs", "TypeActivatorWorksWithCtorWithOptionalArgs_WithStructDefaults", "TypeActivatorRethrowsOriginalExceptionFromConstructor", "GetServiceOrCreateInstanceRegisteredServiceTransient", "UnRegisteredServiceAsConstructorParameterThrowsException"]
+rust = "activation_defaults_errors_missing_parameters_and_transients"
+reason = "Combined Rust specification case exercises these behaviors with typed factories instead of reflected constructors"

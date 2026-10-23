@@ -6,18 +6,14 @@
              xmlns:viewModels="using:FerroUI.Diagnostics.ViewModels"
              x:DataType="viewModels:ControlLayoutViewModel">
 
-    <UserControl.Resources>
-        <SolidColorBrush x:Key="SizeGuidelineBrush" Color="#333333" />
-        <SolidColorBrush x:Key="MarginBackgroundBrush" Color="#D78965" />
-        <SolidColorBrush x:Key="MarginHighlightBrush" Color="#EA966F" />
-        <SolidColorBrush x:Key="BorderBackgroundBrush" Color="#E3C381" />
-        <SolidColorBrush x:Key="BorderHighlightBrush" Color="#EFCD88" />
-        <SolidColorBrush x:Key="PaddingBackgroundBrush" Color="#B8C47F" />
-        <SolidColorBrush x:Key="PaddingHighlightBrush" Color="#CEDA8E" />
-        <SolidColorBrush x:Key="SizeBackgroundBrush" Color="#88B2BD" />
-        <SolidColorBrush x:Key="SizeHighlightBrush" Color="#9ED0DC" />
-        <SolidColorBrush x:Key="ThicknessEditorForeground" Color="Black" />
-    </UserControl.Resources>
+    <!--
+    Deviation (DEVIATIONS.md, Developer tools): the box model in the design of the WinUI 3 theme.
+    Upstream fills the margin, border, padding and content boxes with fixed pastel colours (#D78965,
+    #E3C381, #B8C47F, #88B2BD) under black text. Here they are the tinted backgrounds of the theme
+    in the same hues (critical, caution, success) and the accent colour for the content, which
+    follow the light and dark variants, with rounded corners, the text colours of the theme and
+    the accent outline on the box under the pointer.
+    -->
 
     <Grid RowDefinitions="*,Auto">
 
@@ -33,14 +29,16 @@
                 </Grid.Styles>
 
                 <Border x:Name="VerticalSize" Grid.Row="0" Grid.Column="1">
-                    <TextBlock VerticalAlignment="Center" FontWeight="Bold"
+                    <TextBlock VerticalAlignment="Center" Margin="6,0,0,0" FontSize="12" FontWeight="SemiBold"
+                               Foreground="{DynamicResource TextFillColorSecondaryBrush}"
                                Classes.with-constraint="{Binding HeightConstraint, Converter={x:Static StringConverters.IsNotNullOrEmpty}}"
                                Text="{Binding Height}"
                                ToolTip.Tip="{Binding HeightConstraint}" />
                 </Border>
 
                 <Border x:Name="HorizontalSize" Grid.Row="1" Grid.Column="0">
-                    <TextBlock HorizontalAlignment="Center" FontWeight="Bold"
+                    <TextBlock HorizontalAlignment="Center" Margin="0,4,0,0" FontSize="12" FontWeight="SemiBold"
+                               Foreground="{DynamicResource TextFillColorSecondaryBrush}"
                                Classes.with-constraint="{Binding WidthConstraint, Converter={x:Static StringConverters.IsNotNullOrEmpty}}"
                                Text="{Binding Width}"
                                ToolTip.Tip="{Binding WidthConstraint}" />
@@ -48,33 +46,35 @@
 
                 <controls:ThicknessEditor Grid.Row="0" Grid.Column="0" Header="margin" VerticalAlignment="Top"
                                           HorizontalAlignment="Center"
-                                          Foreground="{StaticResource ThicknessEditorForeground}"
-                                          Background="{StaticResource MarginBackgroundBrush}"
-                                          Highlight="{StaticResource MarginHighlightBrush}"
+                                          Foreground="{DynamicResource TextFillColorPrimaryBrush}"
+                                          Background="{DynamicResource SystemFillColorCriticalBackgroundBrush}"
+                                          Highlight="{DynamicResource SystemFillColorCriticalBackgroundBrush}"
                                           Thickness="{Binding MarginThickness}">
                     <controls:ThicknessEditor x:Name="BorderArea" Header="border"
-                                              Background="{StaticResource BorderBackgroundBrush}"
-                                              Highlight="{StaticResource BorderHighlightBrush}"
+                                              Background="{DynamicResource SystemFillColorCautionBackgroundBrush}"
+                                              Highlight="{DynamicResource SystemFillColorCautionBackgroundBrush}"
                                               Thickness="{Binding BorderThickness}"
                                               IsPresent="{Binding HasBorder}">
                         <controls:ThicknessEditor x:Name="PaddingArea" Header="padding"
-                                                  Background="{StaticResource PaddingBackgroundBrush}"
-                                                  Highlight="{StaticResource PaddingHighlightBrush}"
+                                                  Background="{DynamicResource SystemFillColorSuccessBackgroundBrush}"
+                                                  Highlight="{DynamicResource SystemFillColorSuccessBackgroundBrush}"
                                                   Thickness="{Binding PaddingThickness}"
                                                   IsPresent="{Binding HasPadding}">
-                            <Border x:Name="ContentArea" BorderThickness="1" MinWidth="100" MinHeight="16"
+                            <Border x:Name="ContentArea" BorderThickness="1" MinWidth="100" MinHeight="20"
+                                    CornerRadius="4" Margin="2"
                                     VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
                                 <Border.Styles>
                                     <Style Selector="Border">
-                                        <Setter Property="Background" Value="{StaticResource SizeBackgroundBrush}" />
-                                        <Setter Property="BorderBrush" Value="{DynamicResource ThicknessBorderBrush}" />
+                                        <Setter Property="Background" Value="{DynamicResource AccentFillColorDefaultBrush}" />
+                                        <Setter Property="BorderBrush" Value="Transparent" />
                                     </Style>
                                     <Style Selector="Border:pointerover">
-                                        <Setter Property="Background" Value="{StaticResource SizeHighlightBrush}" />
-                                        <Setter Property="BorderBrush" Value="{DynamicResource HighlightBorderBrush}" />
+                                        <Setter Property="Background" Value="{DynamicResource AccentFillColorSecondaryBrush}" />
                                     </Style>
                                 </Border.Styles>
-                                <TextBlock Margin="2" HorizontalAlignment="Center" VerticalAlignment="Center"
+                                <TextBlock Margin="6,2" HorizontalAlignment="Center" VerticalAlignment="Center"
+                                           FontSize="12"
+                                           Foreground="{DynamicResource TextOnAccentFillColorPrimaryBrush}"
                                            Text="content" />
                             </Border>
                         </controls:ThicknessEditor>
@@ -85,7 +85,7 @@
                     <Canvas.Styles>
                         <Style Selector="Rectangle">
                             <Setter Property="StrokeDashArray" Value="1,3" />
-                            <Setter Property="Stroke" Value="{StaticResource SizeGuidelineBrush}" />
+                            <Setter Property="Stroke" Value="{DynamicResource ControlStrongStrokeColorDefaultBrush}" />
                             <Setter Property="StrokeThickness" Value="1" />
                             <Setter Property="IsHitTestVisible" Value="False" />
                         </Style>

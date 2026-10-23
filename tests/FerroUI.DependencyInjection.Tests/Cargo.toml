@@ -1,0 +1,19 @@
+[package]
+name = "ferroui-dependency-injection-tests"
+description = "Specification tests for the dependency injection port"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+publish = false
+autotests = false
+
+[lib]
+path = "lib.rs"
+
+[dependencies]
+ferroui-dependency-injection = { workspace = true, features = ["splat"] }
+ferroui-system = { workspace = true }
+ferroui-splat = { workspace = true }
+ferroui-reactiveui = { workspace = true }

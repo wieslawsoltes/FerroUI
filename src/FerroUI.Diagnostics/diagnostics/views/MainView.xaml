@@ -56,6 +56,10 @@
             <CommandBarToggleButton Label="Margins" IsChecked="{Binding ShouldVisualizeMarginPadding}" ToolTip.Tip="Show the margin and padding of the selected control">
               <CommandBarToggleButton.Icon><PathIcon Data="M3,3H21V21H3V3M5,5V19H19V5H5M8,8H16V16H8V8Z" /></CommandBarToggleButton.Icon>
             </CommandBarToggleButton>
+            <!-- Addition of the port: shows or hides the side pane of the details of a control. -->
+            <CommandBarToggleButton Label="Side pane" IsChecked="{Binding IsSidePaneOpen, Mode=TwoWay}" ToolTip.Tip="Show or hide the layout, value frames and pseudo-classes beside the properties">
+              <CommandBarToggleButton.Icon><PathIcon Data="M3,4H21V20H3V4M5,6V18H14V6H5M16,6V18H19V6H16Z" /></CommandBarToggleButton.Icon>
+            </CommandBarToggleButton>
             <CommandBarButton Label="Focus highlight" ToolTip.Tip="The brush that highlights the focused control">
               <CommandBarButton.Icon><PathIcon Data="M12,2A10,10 0 1,1 2,12A10,10 0 0,1 12,2M12,4A8,8 0 1,0 20,12A8,8 0 0,0 12,4M12,7A5,5 0 1,1 7,12A5,5 0 0,1 12,7M12,9A3,3 0 1,0 15,12A3,3 0 0,0 12,9Z" /></CommandBarButton.Icon>
               <CommandBarButton.Flyout>

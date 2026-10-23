@@ -4,7 +4,7 @@
 use ferroui_base::data::core::ValueType;
 use ferroui_base::metadata::MarkupType;
 use ferroui_base::{ferro_markup_type, BoxedValue, Ref, TypeInfo};
-use ferroui_controls::templates::{IDataTemplate, ITemplateWithParam};
+use ferroui_controls::templates::{IDataTemplate, IRecyclingDataTemplate, ITemplateWithParam};
 use ferroui_controls::{Control, TextBlock};
 use std::rc::{Rc, Weak};
 
@@ -101,10 +101,28 @@ impl ViewLocator {
 
 impl ITemplateWithParam<Option<BoxedValue>, Option<Ref<Control>>> for ViewLocator {
     fn build(&self, data: &Option<BoxedValue>) -> Option<Ref<Control>> {
-        let data = data.as_ref()?;
+        self.build_with_existing(data.as_ref(), None)
+    }
+}
+
+/// Deviation (DEVIATIONS.md, Developer tools): the locator is a recycling data template. The view
+/// it built last for a content is reused for the next view model of the same view, which gets it as
+/// its data context, where upstream builds a new view for every view model: the details of a
+/// control are a new view model at every selection of a node, and building their view again (the
+/// property grid with its columns, rows and editors, the layout, the value frames) made the
+/// properties appear a moment after the selection. The views follow their data context.
+impl IRecyclingDataTemplate for ViewLocator {
+    fn build_with_existing(&self, data: Option<&BoxedValue>, existing: Option<Ref<Control>>) -> Option<Ref<Control>> {
+        let data = data?;
 
         let name = Self::full_name_of(data).replace("ViewModel", "View");
         let type_ = Self::find_type(&name);
+
+        if let (Some(existing), Some(type_)) = (existing, type_) {
+            if std::ptr::eq(existing.get_type(), type_) {
+                return Some(existing);
+            }
+        }
 
         if let Some(type_) = type_ {
             // `(Control)Activator.CreateInstance(type)!`.
@@ -130,6 +148,10 @@ impl IDataTemplate for ViewLocator {
     }
 
     fn as_any(&self) -> Option<&dyn std::any::Any> {
+        Some(self)
+    }
+
+    fn as_recycling_data_template(&self) -> Option<&dyn IRecyclingDataTemplate> {
         Some(self)
     }
 }
