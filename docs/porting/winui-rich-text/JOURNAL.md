@@ -1303,3 +1303,31 @@ real-window smoke exercises ordered input-scope precedence, a live scope change,
 and return to the legacy content hint after clearing the scope, before checking
 consumed and forwarded keys. Validation of this correction is recorded separately
 from the successful earlier dedicated workflow and the failed broader run.
+
+## 2026-10-23 — Preserve verified x64 and ARM64 native measurements
+
+Recovered the original official artifacts of conformance run `39865036758` for
+workflow head `e5a0778a`, measured merge checkout
+`87aa7390668cf0450e18c4f3f7839df5db22ccd1`, probe blob
+`64262e70bb48d4241fbe4626d27df85c388284ba`. Both downloaded ZIP byte lengths and
+SHA-256 digests match GitHub metadata; every member passes CRC verification.
+The new immutable `native-msftedit-e5a0778a-x64.json` and
+`native-msftedit-e5a0778a-arm64.json` retain archive and member hashes, extractor
+identity, exact commands, source manifests and platform details. Historical
+records remain unchanged.
+
+Each strict extraction includes 490 actual-selection Gravity commands across
+34 fixtures, 90 passive-range commands across 15 fixtures, 1,577 independent
+Gravity commands and 137 Link operations, alongside the earlier navigation
+families. Every extracted behavioral observation agrees between x64 MSFTEDIT
+6.2.26100.33648 and ARM64 MSFTEDIT 6.2.26100.9278. ARM64 canonical serial and
+separate four-thread diagnostic runs both exited zero; only serial observations
+are used as evidence. The x64 artifact extraction also equals the independently
+retrieved decoded workflow log. These remain system-engine observations; they do
+not establish packaged WinUI runtime parity or unobserved formatting caches.
+
+That dedicated workflow passed Linux Base 4,470, Controls 5,251, XAML 620 with
+17 existing ignored, WinUI/Win32 host 50/329 and all three theme suites plus five
+generated-reference checks. Windows passed 65 WinUI, two exact-HSTRING, 23 IMM32,
+eight system probes and 779 selected rich Controls tests. Those results belong
+to the measured checkpoint, before this continuation's implementation changes.
