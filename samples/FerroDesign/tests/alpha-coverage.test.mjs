@@ -22,7 +22,7 @@ test("nonoverlapping RGBA blocks keep row/column indexing and conserve alpha are
 });
 
 test("opaque and transparent coverage stays exact at both declared reference scales", () => {
-    for (const scale of [8, 16]) {
+    for (const scale of [16, 32]) {
         const pixels = rgba(3 * scale, 2 * scale, (x, y) => x < scale && y < scale ? 255 : 0);
         assert.deepEqual(areaAverageAlpha({ pixels, width: 3, height: 2, scale }), [255, 0, 0, 0, 0, 0]);
     }
@@ -33,7 +33,7 @@ test("fractionally translated analytic rectangle coverage survives byte rounding
     // separable; no rasterizer, downscaler or copy of the averaging loop is used.
     const overlap = (a, b, c, d) => Math.max(0, Math.min(b, d) - Math.max(a, c));
     const exact = [107.1, 153, 22.95, 107.1, 153, 22.95], references = [];
-    for (const scale of [8, 16]) {
+    for (const scale of [16, 32]) {
         const pixels = rgba(3 * scale, 2 * scale, (x, y) => Math.round(
             overlap(x / scale, (x + 1) / scale, 0.3, 2.15) *
             overlap(y / scale, (y + 1) / scale, 0.4, 1.6) * scale * scale * 255));
@@ -48,6 +48,20 @@ test("fractionally translated analytic rectangle coverage survives byte rounding
     assert.equal(coverageConvergence(...references).converged, true);
 });
 
+test("sequential strips preserve coverage across row seams and a short final strip", () => {
+    for (const scale of [16, 32]) {
+        const width = 3, height = 5;
+        const pixels = rgba(width * scale, height * scale, (x, y) => (x * 29 + y * 53) % 256);
+        const complete = areaAverageAlpha({ pixels, width, height, scale }), strips = [];
+        for (let row = 0; row < height; row += 2) {
+            const rows = Math.min(2, height - row), stride = width * scale * 4;
+            const strip = pixels.subarray(row * scale * stride, (row + rows) * scale * stride);
+            strips.push(...areaAverageAlpha({ pixels: strip, width, height: rows, scale }));
+        }
+        assert.deepEqual(strips, complete, "Integer-row strip boundaries cannot shift or duplicate a sample");
+    }
+});
+
 test("unstable references are rejected even when the finer raster would match a candidate", () => {
     assert.equal(coverageConvergence([0, 60, 255], [0, 64, 255]).converged, true);
     const unstable = coverageConvergence([0, 59.5, 255], [0, 64, 255]);
@@ -59,7 +73,7 @@ test("unstable references are rejected even when the finer raster would match a 
 });
 
 test("invalid dimensions, excessive work and malformed coverage fail explicitly", () => {
-    for (const scale of [0, 1.5, 17]) {
+    for (const scale of [0, 1.5, 33]) {
         assert.throws(() => areaAverageAlpha({ pixels: new Uint8Array(4), width: 1, height: 1, scale }), RangeError);
     }
     assert.throws(() => areaAverageAlpha({ pixels: new Uint8Array(4), width: 281, height: 100, scale: 1 }), RangeError);

@@ -1,4 +1,6 @@
 import assert from "node:assert/strict";
+import { writeFile } from "node:fs/promises";
+import { resolve } from "node:path";
 
 // Starting geometry is imported; edits use native controls and captured input.
 export async function widthHandleRegressions(page, reference, check, helpers, output, mode) {
@@ -13,6 +15,56 @@ export async function widthHandleRegressions(page, reference, check, helpers, ou
     }, { source: predicate.toString(), args }, { timeout: 10000 });
     const stroke = { paint: { type: "solid", r: 37, g: 99, b: 235, a: 255 },
         width: 20, opacity: 1, visible: true, align: "center", cap: "butt", join: "round", dash: [] };
+    const inputs = [];
+    const beginGesture = async start => {
+        await moveWorld(page, ...start);
+        const before = await state(page);
+        await page.evaluate(() => {
+            if (globalThis.__ferroDesignWidthInput) throw new Error("A width input observer is already active");
+            const observed = { down: null, move: null, count: 0 };
+            const record = event => {
+                if (!(event.buttons & 1)) return;
+                if (++observed.count > 64) return;
+                observed[event.type === "pointerdown" ? "down" : "move"] = {
+                    trusted: event.isTrusted, x: event.offsetX, y: event.offsetY,
+                    clientX: event.clientX, clientY: event.clientY,
+                };
+            };
+            document.addEventListener("pointerdown", record, { capture: true, passive: true });
+            document.addEventListener("pointermove", record, { capture: true, passive: true });
+            globalThis.__ferroDesignWidthInput = { observed, stop() {
+                document.removeEventListener("pointerdown", record, true);
+                document.removeEventListener("pointermove", record, true);
+                delete globalThis.__ferroDesignWidthInput;
+            } };
+        });
+        await page.mouse.down();
+        await wait(view => view.strokeWidth.active);
+        const view = await state(page), press = view.pointerPresses.entries.at(-1);
+        assert.ok(press.serial > before.pointerPresses.serial && press.buttons === 1,
+            "The width expectation requires its actual routed native press");
+        return press;
+    };
+    const moveGesture = async (press, end) => {
+        await moveWorld(page, ...end);
+        const view = await state(page);
+        const observed = await page.evaluate(() => globalThis.__ferroDesignWidthInput.observed);
+        assert.ok(observed.count <= 64 && observed.down?.trusted && observed.move?.trusted,
+            "Width input must contain bounded real browser press/move observations");
+        assert.equal(view.zoom, press.zoom); assert.deepEqual(view.pan, press.pan);
+        near(observed.down.x - observed.down.clientX, observed.move.x - observed.move.clientX, "Pointer X coordinate origin");
+        near(observed.down.y - observed.down.clientY, observed.move.y - observed.move.clientY, "Pointer Y coordinate origin");
+        // Browser/CDP delivery can quantize requested fractional coordinates.
+        // Derive the geometric expectation from the delivered input, anchored
+        // to its observed native press, without reading the resulting profile.
+        const delta = { x: (observed.move.x - observed.down.x) / press.zoom,
+            y: (observed.move.y - observed.down.y) / press.zoom };
+        const input = { press, observed, delta, end: { x: press.world.x + delta.x, y: press.world.y + delta.y } };
+        inputs.push(input);
+        await writeFile(resolve(output, mode + "-stroke-width-input.json"), JSON.stringify(inputs, null, 2));
+        return input;
+    };
+    const finishObservation = () => page.evaluate(() => globalThis.__ferroDesignWidthInput?.stop());
     const enter = async (x, y) => {
         await clickNative(page, "SelectTool");
         await clickWorld(page, x, y);
@@ -35,13 +87,14 @@ export async function widthHandleRegressions(page, reference, check, helpers, ou
         assert.deepEqual(await documentState(page), after, label + " exact redo");
     };
     const gesture = async (start, end, cancel = false) => {
-        await moveWorld(page, ...start); await page.mouse.down();
+        let input;
         try {
-            await wait(view => view.strokeWidth.active);
-            await moveWorld(page, ...end);
+            const press = await beginGesture(start);
+            input = await moveGesture(press, end);
             if (cancel) await page.keyboard.press("Escape");
-        } finally { await page.mouse.up(); }
+        } finally { try { await page.mouse.up(); } finally { await finishObservation(); } }
         await wait(view => !view.strokeWidth.active); await frames(page);
+        return input;
     };
     await importFixture(page, isolatedDocument(reference, [fixtureNode(reference, 2, {
         kind: "line", name: "Native width handles", x: 80, y: 100, width: 200, height: 0,
@@ -54,11 +107,13 @@ export async function widthHandleRegressions(page, reference, check, helpers, ou
     assert.equal(hover.documentRevision, view.documentRevision);
     assert.equal(hover.historyLength, depth);
     assert.deepEqual(await documentState(page), before);
-    await gesture([180, 100], [180, 115]);
+    const insertionInput = await gesture([180, 100], [180, 115]);
     let after = await documentState(page);
-    assert.deepEqual(after.nodes[2].strokes[0].width_profile, { type: "custom", points: [
-        { position: 0, width: 1 }, { position: 0.5, width: 2.5 }, { position: 1, width: 1 },
-    ] });
+    const insertedProfile = after.nodes[2].strokes[0].width_profile;
+    assert.equal(insertedProfile.type, "custom"); assert.equal(insertedProfile.points.length, 3);
+    assert.deepEqual([insertedProfile.points[0], insertedProfile.points[2]], [{ position: 0, width: 1 }, { position: 1, width: 1 }]);
+    near(insertedProfile.points[1].position, (insertionInput.press.world.x - 80) / 200, "Actual insertion position");
+    near(insertedProfile.points[1].width, 1 + insertionInput.delta.y / 10, "Actual normal drag width");
     assert.deepEqual(after.nodes[2].path, before.nodes[2].path);
     assert.equal(after.nodes[2].kind, "line");
     await captureNativeScreenshot(mode + "-stroke-width-handles", { controls: ["CanvasHost"] });
@@ -66,10 +121,11 @@ export async function widthHandleRegressions(page, reference, check, helpers, ou
     check("Native width handles enter without converting the source line; hover preserves revision/history, and a captured insertion plus normal drag creates one exact undoable custom profile");
 
     before = await documentState(page); depth = (await state(page)).historyLength;
-    await gesture([180, 100], [220, 100]);
+    const positionInput = await gesture([180, 100], [220, 100]);
     after = await documentState(page);
-    near(after.nodes[2].strokes[0].width_profile.points[1].position, 0.7, "Center handle moves along contour");
-    near(after.nodes[2].strokes[0].width_profile.points[1].width, 2.5, "Center handle retains width");
+    near(after.nodes[2].strokes[0].width_profile.points[1].position, (positionInput.end.x - 80) / 200, "Center handle moves along contour");
+    assert.equal(after.nodes[2].strokes[0].width_profile.points[1].width,
+        before.nodes[2].strokes[0].width_profile.points[1].width, "Center handle retains the exact authored width");
     await history(before, after, depth, "Move native width point along path");
     before = await documentState(page); depth = (await state(page)).historyLength;
     await page.keyboard.press("Delete"); await wait((view, doc) => doc.nodes[2].strokes[0].width_profile.points.length === 2);
@@ -95,11 +151,12 @@ export async function widthHandleRegressions(page, reference, check, helpers, ou
     const baseline = await flush();
     assert.equal(baseline.saved, true); assert.equal(baseline.status.dirty, false);
     assert.deepEqual(baseline.document, before);
-    await moveWorld(page, 180, 100); await page.mouse.down();
     let lifecycle;
     try {
-        await wait(view => view.strokeWidth.active); await moveWorld(page, 180, 120);
-        await wait((view, doc) => doc.nodes[2].strokes[0].width_profile.points[1].width === 3);
+        const press = await beginGesture([180, 100]);
+        const input = await moveGesture(press, [180, 120]);
+        const expectedWidth = 1 + input.delta.y / 10;
+        await wait((_view, doc, expected) => Math.abs(doc.nodes[2].strokes[0].width_profile.points[1].width - expected) < 1e-7, expectedWidth);
         lifecycle = await documentState(page);
         assert.equal((await state(page)).historyLength, depth);
         assert.equal(await page.evaluate(() => globalThis.ferroDesignStorage.status().draftDirty), true);
@@ -109,7 +166,7 @@ export async function widthHandleRegressions(page, reference, check, helpers, ou
         const saved = await flush();
         assert.equal(saved.saved, true); assert.equal(saved.status.dirty, false); assert.equal(saved.status.draftDirty, false);
         assert.deepEqual(saved.document, lifecycle);
-    } finally { await page.mouse.up(); }
+    } finally { try { await page.mouse.up(); } finally { await finishObservation(); } }
     await frames(page);
     assert.equal((await state(page)).historyLength, depth + 1);
     assert.deepEqual(await documentState(page), lifecycle);
@@ -130,17 +187,21 @@ export async function widthHandleRegressions(page, reference, check, helpers, ou
     await enter(...world(100, 100));
     assert.equal((await state(page)).strokeWidth.contours, 2);
     before = await documentState(page); depth = (await state(page)).historyLength;
-    await gesture(world(100, 120), world(100, 130));
+    const affineWidthInput = await gesture(world(100, 120), world(100, 130));
     after = await documentState(page);
-    near(after.nodes[2].strokes[0].width_profile.points[1].width, 3, "Affine normal-offset width");
+    const localDeltaY = (-0.3 * affineWidthInput.delta.x - 1.2 * affineWidthInput.delta.y) / (-1.2 * 0.9 - 0.3 * 0.4);
+    near(after.nodes[2].strokes[0].width_profile.points[1].width, 2 + localDeltaY / 10, "Affine normal-offset width");
     assert.equal((await state(page)).strokeWidth.contour, 1);
     assert.deepEqual(after.nodes[2].path, before.nodes[2].path);
     assert.deepEqual(after.nodes[2].affine_transform, before.nodes[2].affine_transform);
     await history(before, after, depth, "Reflected sheared contour width");
     before = await documentState(page); depth = (await state(page)).historyLength;
-    await gesture(world(100, 100), world(150, 100));
+    const affinePositionInput = await gesture(world(100, 100), world(150, 100));
     after = await documentState(page);
-    near(after.nodes[2].strokes[0].width_profile.points[1].position, 0.75, "Second contour normalized position");
+    const [originX, originY] = world(0, 100), direction = { x: -240, y: 60 };
+    const expectedPosition = ((affinePositionInput.end.x - originX) * direction.x +
+        (affinePositionInput.end.y - originY) * direction.y) / (direction.x ** 2 + direction.y ** 2);
+    near(after.nodes[2].strokes[0].width_profile.points[1].position, expectedPosition, "Second contour normalized position");
     assert.deepEqual(after.nodes[2].path, path);
     await captureNativeScreenshot(mode + "-stroke-width-multiple-contours", { controls: ["CanvasHost"] });
     await history(before, after, depth, "Repeated contour position");

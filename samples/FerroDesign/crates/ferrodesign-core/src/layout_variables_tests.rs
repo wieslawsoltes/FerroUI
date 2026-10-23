@@ -619,6 +619,18 @@ fn identical_binding_and_mode_do_not_arrange_unsettled_geometry_or_consume_redo(
     assert!(editor.undo());
     let restored = editor.document.to_json().unwrap();
     editor.document.nodes.get_mut(&child).unwrap().x = 123.5;
+    // Imported effective values can also lag their still-valid binding. An
+    // identical command must not silently reconcile them or consume redo.
+    editor
+        .document
+        .nodes
+        .get_mut(&frame)
+        .unwrap()
+        .layout
+        .as_mut()
+        .unwrap()
+        .padding
+        .left = 31.75;
     editor.refresh();
     let before = editor.document.clone();
     let token = editor.render_change_token();
@@ -642,6 +654,16 @@ fn identical_binding_and_mode_do_not_arrange_unsettled_geometry_or_consume_redo(
     // Restore the external test-only perturbation before exercising the actual
     // retained redo entry, which is independent of the no-op command.
     editor.document.nodes.get_mut(&child).unwrap().x = 10.0;
+    editor
+        .document
+        .nodes
+        .get_mut(&frame)
+        .unwrap()
+        .layout
+        .as_mut()
+        .unwrap()
+        .padding
+        .left = 10.0;
     editor.refresh();
     assert_eq!(editor.document.to_json().unwrap(), restored);
     assert!(editor.redo());

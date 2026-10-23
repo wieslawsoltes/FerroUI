@@ -1,7 +1,28 @@
 import assert from "node:assert/strict";
 import { writeFile } from "node:fs/promises";
 import { resolve } from "node:path";
-import { startInputObservation, stopInputObservation } from "./input-observations.mjs";
+import { readInputObservation, startInputObservation, stopInputObservation } from "./input-observations.mjs";
+
+// An independent input oracle: use the browser-delivered bridge coordinates,
+// then invert the fixture's authored linear transform. Requested CDP positions
+// can be rounded before they become PointerEvents; no native result is read.
+export function radiusFromPointerInput({ node, localPerRadius, authoredRadius, zoom, down, move }) {
+    const matrix = node.affine_transform || { a: 1, b: 0, c: 0, d: 1 };
+    const angle = node.rotation * Math.PI / 180, cosine = Math.cos(angle), sine = Math.sin(angle);
+    const sx = node.flip_x ? -1 : 1, sy = node.flip_y ? -1 : 1;
+    const a = cosine * sx * matrix.a - sine * sy * matrix.b;
+    const b = sine * sx * matrix.a + cosine * sy * matrix.b;
+    const c = cosine * sx * matrix.c - sine * sy * matrix.d;
+    const d = sine * sx * matrix.c + cosine * sy * matrix.d;
+    const determinant = a * d - b * c;
+    const axisSquared = localPerRadius.x ** 2 + localPerRadius.y ** 2;
+    assert.ok(Number.isFinite(determinant) && determinant !== 0 && Number.isFinite(axisSquared) && axisSquared > 0);
+    assert.ok(Number.isFinite(zoom) && zoom > 0);
+    for (const event of [down, move]) assert.ok(Number.isFinite(event.offsetX) && Number.isFinite(event.offsetY));
+    const dx = (move.offsetX - down.offsetX) / zoom, dy = (move.offsetY - down.offsetY) / zoom;
+    const localX = (d * dx - c * dy) / determinant, localY = (a * dy - b * dx) / determinant;
+    return Math.max(0, authoredRadius + (localX * localPerRadius.x + localY * localPerRadius.y) / axisSquared);
+}
 
 // Only initial isolated fixtures enter through document import. Every edit uses
 // native pointer input; cornerRadius supplies read-only handle geometry.
@@ -22,6 +43,37 @@ export async function cornerRadiusHandleRegressions(page, reference, check, help
     };
     const storage = () => page.evaluate(() => globalThis.ferroDesignStorage.status());
     const durable = () => page.evaluate(async () => JSON.parse((await globalThis.ferroDesignStorage.backend.load()).text));
+    const inputs = [];
+    const saveInputs = () => writeFile(resolve(output, mode + "-corner-radius-input.json"), JSON.stringify(inputs, null, 2));
+    const pointer = (observation, type, pointerType = "mouse") => {
+        assert.equal(observation.droppedEvents, 0, "Pointer evidence must be complete");
+        const events = observation.events.filter(event => event.type === type && event.phase === "capture");
+        assert.equal(events.length, 1, "Each requested " + type + " supplies one observed pointer position");
+        const event = events[0];
+        assert.ok(event.trusted && event.pointerType === pointerType, "The radius oracle uses trusted " + pointerType + " input");
+        assert.ok(Number.isFinite(event.offsetX) && Number.isFinite(event.offsetY));
+        return event;
+    };
+    const observe = async (type, action) => {
+        const input = { type };
+        await startInputObservation(page, [type], 16);
+        try { input.requested = await action(); }
+        finally {
+            input.observation = await stopInputObservation(page);
+            inputs.push(input); await saveInputs();
+        }
+        input.event = pointer(input.observation, type);
+        return input;
+    };
+    const deliveredRadius = (item, down, move) => {
+        assert.equal(move.pointerId, down.pointerId);
+        // Native capture retargets the host overlay's press to the top-level
+        // container. Their coordinate origin, not their DOM identity, is the
+        // invariant required to measure the bridge's exact displacement.
+        near(move.offsetX - move.x, down.offsetX - down.x, "Captured pointer X origin");
+        near(move.offsetY - move.y, down.offsetY - down.y, "Captured pointer Y origin");
+        return radiusFromPointerInput({ ...item, node: item.input.node, zoom: item.input.press.zoom, down, move });
+    };
     const world = (node, x, y) => {
         const matrix = node.affine_transform || { a: 1, b: 0, c: 0, d: 1, e: 0, f: 0 };
         const dx = (matrix.a * x + matrix.c * y + matrix.e - node.width / 2) * (node.flip_x ? -1 : 1);
@@ -89,22 +141,34 @@ export async function cornerRadiusHandleRegressions(page, reference, check, help
     };
     const press = async (corner, individual = false) => {
         const item = await handle(corner);
-        await moveWorld(page, item.world.x, item.world.y);
+        const requested = await moveWorld(page, item.world.x, item.world.y);
         await wait((view, _document, corner) => view.cornerRadius.hover === corner, corner);
         const before = await documentState(page), view = await state(page);
-        await page.mouse.down();
+        const observed = await observe("pointerdown", () => page.mouse.down());
         await wait((view, _document, args) => view.cornerRadius.active &&
             view.cornerRadius.corner === args.corner && view.cornerRadius.individual === args.individual,
         { corner, individual });
         const pressed = await state(page);
+        const nativePress = pressed.pointerPresses.entries.at(-1);
+        assert.ok(nativePress.serial > view.pointerPresses.serial && nativePress.buttons === 1,
+            "The radius oracle requires its real routed native press");
         assert.deepEqual(await documentState(page), before, "Pressing a displaced radius marker cannot change its bound value");
         assert.equal(pressed.historyLength, view.historyLength);
         assert.equal(pressed.canRedo, view.canRedo);
-        return item;
+        return { ...item, input: { node: before.nodes[2], press: nativePress, requested, down: observed.event } };
     };
     const move = async (item, delta, individual = false) => {
-        const point = destination(item, delta), expected = item.authoredRadius + delta;
-        await moveWorld(page, point.x, point.y);
+        const point = destination(item, delta);
+        const observed = await observe("pointermove", () => moveWorld(page, point.x, point.y));
+        const view = await state(page);
+        assert.equal(view.zoom, item.input.press.zoom); assert.deepEqual(view.pan, item.input.press.pan);
+        near(radiusFromPointerInput({ ...item, node: item.input.node, zoom: view.zoom,
+            down: { offsetX: item.input.requested.x, offsetY: item.input.requested.y },
+            move: { offsetX: observed.requested.x, offsetY: observed.requested.y } }),
+        item.authoredRadius + delta, "Requested fractional radius target");
+        const expected = deliveredRadius(item, item.input.down, observed.event);
+        observed.radius = { requestedDelta: delta, expected, input: item.input, localPerRadius: item.localPerRadius };
+        await saveInputs();
         await wait((_view, document, args) => Math.abs((args.individual
             ? document.nodes[2].corner_radii?.[args.corner] : document.nodes[2].corner_radius) - args.expected) < 1e-6,
         { corner: item.corner, individual, expected });
@@ -159,8 +223,7 @@ export async function cornerRadiusHandleRegressions(page, reference, check, help
 
     let expectedRadius = await drag(0, 10.5);
     const uniform = await documentState(page);
-    near(expectedRadius, 18.5, "Uniform drag target");
-    assertRadiusMutation(original, uniform, 18.5);
+    assertRadiusMutation(original, uniform, expectedRadius);
     await history(original, uniform, initial.historyLength, "Uniform corner handle");
     check("A captured fractional corner drag preserves the editable rectangle, smoothing, affine transform and artwork; it detaches only the radius binding and commits one exactly reversible edit");
 
@@ -221,8 +284,16 @@ export async function cornerRadiusHandleRegressions(page, reference, check, help
         await client.send("Input.dispatchTouchEvent", { type: "touchStart", touchPoints: [{ ...touchStart, id: 31, force: 1 }] });
         await wait(view => view.cornerRadius.active && view.cornerRadius.corner === 0);
         assert.deepEqual(await documentState(page), original);
+        const touchPress = (await state(page)).pointerPresses.entries.at(-1);
+        assert.ok(touchPress.serial > touchView.pointerPresses.serial && touchPress.buttons === 1);
+        item.input = { node: original.nodes[2], press: touchPress };
         await client.send("Input.dispatchTouchEvent", { type: "touchMove", touchPoints: [{ ...touchEnd, id: 31, force: 1 }] });
-        await wait((_view, document) => Math.abs(document.nodes[2].corner_radius - 14.5) < 1e-6);
+        const touchInput = await readInputObservation(page);
+        const touchRadius = deliveredRadius(item, pointer(touchInput, "pointerdown", "touch"), pointer(touchInput, "pointermove", "touch"));
+        inputs.push({ type: "touch-radius", requested: { start: touchStart, end: touchEnd },
+            observation: touchInput, radius: { expected: touchRadius, input: item.input, localPerRadius: item.localPerRadius } });
+        await saveInputs();
+        await wait((_view, document, expected) => Math.abs(document.nodes[2].corner_radius - expected) < 1e-6, touchRadius);
         const beforeCancel = await state(page);
         await client.send("Input.dispatchTouchEvent", { type: "touchCancel", touchPoints: [] }); touchHeld = false;
         await wait(view => !view.cornerRadius.active);
@@ -255,8 +326,7 @@ export async function cornerRadiusHandleRegressions(page, reference, check, help
     const individualDepth = (await state(page)).historyLength;
     expectedRadius = await drag(1, 6.25, true);
     const individual = await documentState(page);
-    near(expectedRadius, 24.75, "Alt corner target");
-    assertRadiusMutation(uniform, individual, 24.75, 1);
+    assertRadiusMutation(uniform, individual, expectedRadius, 1);
     assert.equal(individual.nodes[2].corner_radius, uniform.nodes[2].corner_radius);
     await captureNativeScreenshot(mode + "-corner-radius-independent", { controls: ["CanvasHost"] });
     await history(uniform, individual, individualDepth, "Alt rectangle corner");
@@ -280,9 +350,9 @@ export async function cornerRadiusHandleRegressions(page, reference, check, help
     let lifecycle;
     try {
         held = true; item = await press(0);
-        await move(item, 10.75);
+        expectedRadius = await move(item, 10.75);
         lifecycle = await documentState(page);
-        assertRadiusMutation(individual, lifecycle, 29.25);
+        assertRadiusMutation(individual, lifecycle, expectedRadius);
         assert.equal((await state(page)).historyLength, savedNative.historyLength);
         assert.equal((await storage()).draftDirty, true);
         assert.equal((await state(page)).saveSerializations, savedNative.saveSerializations);
@@ -314,9 +384,9 @@ export async function cornerRadiusHandleRegressions(page, reference, check, help
             affine_transform: { a: 1.1, b: 0.2, c: 0.25, d: 0.9, e: 0, f: 0 } });
         await load(isolatedDocument(reference, [shape], "Affine " + kind + " radius gesture"));
         const before = await documentState(page), depth = (await state(page)).historyLength;
-        await drag(0, delta);
+        expectedRadius = await drag(0, delta);
         const after = await documentState(page);
-        assertRadiusMutation(before, after, radius + delta);
+        assertRadiusMutation(before, after, expectedRadius);
         assert.equal(after.nodes[2].kind, kind);
         assert.equal(after.nodes[2].corner_radii, null);
         await captureNativeScreenshot(mode + "-corner-radius-affine-" + kind, { controls: ["CanvasHost"] });

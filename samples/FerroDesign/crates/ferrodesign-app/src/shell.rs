@@ -712,6 +712,7 @@ impl EditorShell {
             "HandTool",
             "CommentTool",
             "ActionsButton",
+            "PresentButton",
             "PagesViewport",
             "LayersViewport",
             "InspectorViewport",

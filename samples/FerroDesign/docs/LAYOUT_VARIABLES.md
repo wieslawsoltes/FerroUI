@@ -44,6 +44,17 @@ before one history commit. Arrangement errors, including finite inputs whose
 combined geometry overflows, reject the candidate. Other edits cannot join a
 currently held canvas transaction through variable authoring.
 
+Prototype **Set variable** actions also reflow spacing in the disposable preview
+document. The player follows effective aliases, including earlier session
+overrides, to identify an affected spacing binding. It then validates the
+temporary mode values and arranges a private candidate before publishing the
+preview. Negative or wrongly typed values, alias cycles and geometry overflow
+leave both the previous preview and its session override map intact. Authored
+variable definitions, including absent mode entries, are restored in every
+path. Reversible hover/press actions restore the complete geometry snapshot.
+Actions unrelated to spacing retain the existing path without a document clone
+or auto-layout pass.
+
 Undo and redo restore the complete authored document: variable definitions,
 mode, bindings, padding, gaps, child positions, Hug dimensions and component
 metadata. Runtime revision counters continue to advance to invalidate render
@@ -107,7 +118,18 @@ Native regressions execute the compiled-XAML rail button, property choice,
 Bind/Unbind buttons and fractional padding fields. The
 [`layout-variables` browser scenario](../tests/layout-variables-browser.mjs)
 uses trusted pointer/keyboard input and checks reflow, exact history,
-mode activation, literal ownership and persisted JSON.
+mode activation, literal ownership and persisted JSON. Its fifth check starts
+presentation with the native Play button, clicks a frame's SetVariable action,
+and checks independently calculated old/new child positions in actual browser
+pixels. Exports, a save during playback, history and Escape restoration must
+retain the complete authored document.
+
+`prototype_layout_variables_tests.rs` additionally exercises actual SetVariable
+actions through the player: nested Hug dimensions and sibling positions, aliases
+retargeted by session overrides, atomic invalid-action rollback, reversible hover
+restoration and the unchanged path for unrelated color actions. The focused five
+tests and complete 533-test core suite passed locally after this integration;
+that result does not establish a native app or browser validation gate.
 
 Runtime results are recorded by exact source in [VALIDATION.md](VALIDATION.md).
 Authored tests and syntax checks do not establish a completed native or browser

@@ -55,21 +55,37 @@ Selected SVG samples also differed from converged mathematical pixel coverage.
 Those observations make the direct 1× raster unsuitable as a strict coverage
 reference for this fixture; they do not establish a particular backend defect.
 
-The independent decoder now uses fixed 8× and 16× intrinsic SVG viewports,
+The independent decoder now uses fixed 16× and 32× intrinsic SVG viewports,
 preserving the exported viewBox, paths and transforms. Each decoded image is
 drawn 1:1 and its alpha is explicitly averaged over disjoint pixel blocks; no
 canvas downscale filter supplies the reference. Before comparison, the two
 averaged references must differ by at most 4 alpha units at every output pixel
 and contain no opposite opaque/transparent pixels. This convergence check is
-not an absolute mathematical error bound. The final rounded 16× reference uses
+not an absolute mathematical error bound. The final rounded 32× reference uses
 the unchanged native comparison: at most 48 pixels may differ by more than 12
 alpha units. Native PNG dimensions, transparent exterior, opaque interior,
 twelve cubic segments, document preservation and history checks remain.
 
-The reference work is bounded by this 200×140 fixture: the largest decoded
-buffer is 3200×2240 RGBA8, about 29 MB. Scales run sequentially; temporary image,
-canvas and browser handles are released. Only averaged alpha values cross the
-test protocol, and logs contain scalar summaries. Pure math regressions in
+The preceding 8×/16× pair failed this convergence gate at exact source
+`b7b0b885`: [browser job 120138674133](https://github.com/wieslawsoltes/FerroUI/actions/runs/39869066118/job/120138674133)
+recorded a maximum difference of **4.453125** in both modes. The native PNG
+comparison was not reached. The fixed 16×/32× pair increases reference precision
+while retaining the four-alpha convergence limit and the native comparison's
+12-alpha/48-pixel limits; it does not accept the earlier unstable reference.
+
+The reference work is bounded by this 200×140 fixture. The 32× SVG has intrinsic
+dimensions 6400×4480, but it is drawn 1:1 into fixed strips of at most sixteen
+output rows with integer vertical translations. Each explicit canvas/readback
+buffer is at most 6400×512 RGBA8, about 13 MB, rather than one 115 MB full raster.
+Strips and scales run sequentially; temporary image, canvas and browser handles
+are released. Only averaged alpha values cross the test protocol, and logs
+contain scalar summaries. Chromium's strip clipping can slightly change edge
+coverage despite the unchanged sampling grid; byte-identical full-canvas
+rasterization is not assumed. A [standalone measurement of actual native exports](../../../docs/ferrodesign-evidence/2026-10-23-browser-harness/README.md)
+records a 16×/32× maximum difference of 1.96875, below the unchanged convergence
+limit, and zero native pixels differing by more than 12 alpha units. That
+measurement does not substitute for the full editor browser scenario.
+Pure math regressions in
 [alpha-coverage.test.mjs](../tests/alpha-coverage.test.mjs) check block indexing,
 area conservation, fractional analytic coverage and rejection of unstable
 references. There is no adaptive scale, tolerance increase or retry.

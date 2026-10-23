@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { afterEach, beforeEach, test } from "node:test";
-import { inlineInputState, startInputObservation, stopInputObservation } from "./input-observations.mjs";
+import { inlineInputState, readInputObservation, startInputObservation, stopInputObservation } from "./input-observations.mjs";
 
 const page = { evaluate: async (callback, args) => callback(args) };
 const originals = new Map();
@@ -22,7 +22,8 @@ afterEach(async () => {
 
 function press() {
     const event = new Event("pointerdown", { cancelable: true });
-    Object.assign(event, { button: 0, buttons: 1, clientX: 12, clientY: 34, detail: 0, pointerId: 1, pointerType: "mouse" });
+    Object.assign(event, { button: 0, buttons: 1, clientX: 12.25, clientY: 34.5,
+        offsetX: 2.25, offsetY: 4.5, detail: 0, pointerId: 1, pointerType: "mouse" });
     document.dispatchEvent(event);
     return event;
 }
@@ -37,7 +38,22 @@ test("input observation remains passive, labels synthetic input honestly, and do
     assert.ok(observation.events.every(event => event.eventTimeMs > 0 && event.observedAtMs >= event.eventTimeMs));
     assert.equal(observation.longTaskSupported, false);
     assert.equal(observation.droppedEvents, 0);
+    assert.ok(observation.events.every(event => event.x === 12.25 && event.y === 34.5 &&
+        event.offsetX === 2.25 && event.offsetY === 4.5), "Evidence retains the delivered fractional bridge coordinates");
     assert.equal(globalThis.__ferroDesignInputObservation, undefined);
+});
+
+test("reading pointer evidence retains listeners and returns a stable bounded snapshot", async () => {
+    assert.equal(await readInputObservation(page), null);
+    await startInputObservation(page, ["pointerdown"], 4);
+    press();
+    const before = await readInputObservation(page);
+    assert.equal(before.events.length, 2);
+    press();
+    assert.equal((await readInputObservation(page)).events.length, 4);
+    assert.equal(before.events.length, 2, "Later input cannot mutate previously sampled evidence");
+    assert.equal((await stopInputObservation(page)).events.length, 4);
+    assert.equal(await readInputObservation(page), null);
 });
 
 test("input evidence is bounded and records overflow instead of silently discarding it", async () => {

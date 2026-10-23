@@ -450,6 +450,89 @@ fn lifecycle_finish_commits_once_and_late_capture_or_motion_cannot_reopen_the_dr
 }
 
 #[test]
+fn alt_radius_markers_inside_a_rounded_clip_cutout_remain_distinct_from_layer_picking() {
+    let scope = backend();
+    let mut document = core::Document::new("Affine rounded clip and radius controls");
+    let back = document
+        .insert_node(
+            1,
+            Node::new(NodeKind::Rectangle, "Backdrop", 40.0, 40.0, 300.0, 220.0)
+                .with_fill(Color::WHITE),
+        )
+        .unwrap();
+    let mut frame = Node::new(NodeKind::Frame, "Rounded clip", 60.0, 60.0, 160.0, 140.0);
+    frame.corner_radius = 40.0;
+    frame.clip_content = true;
+    frame.fills.clear();
+    frame.affine_transform = Some(core::Transform {
+        a: 1.0,
+        b: 0.2,
+        c: 0.3,
+        d: 1.0,
+        e: 0.0,
+        f: 0.0,
+    });
+    let parent = document.insert_node(1, frame).unwrap();
+    let child = document
+        .insert_node(
+            parent,
+            Node::new(NodeKind::Rectangle, "Clipped child", 0.0, 0.0, 160.0, 140.0)
+                .with_fill(Color::WHITE),
+        )
+        .unwrap();
+    let mut editor = Editor::new(document);
+    editor.update_node(child, "Seed redo", |node| node.name = "Redo child".into());
+    assert!(editor.undo());
+    editor.selection = vec![child];
+    let canvas = DesignCanvas::new(Rc::new(RefCell::new(editor)));
+    canvas.viewport.set(Viewport {
+        width: 1016.0,
+        height: 956.0,
+        zoom: 2.953333333333333,
+        pan: Point::new(-53.133333333333326, 35.0),
+    });
+    let before = json(&canvas);
+    let world = |x, y| Point::new(60.0 + x + 0.3 * y, 60.0 + 0.2 * x + y);
+    assert_eq!(canvas.pick(world(50.0, 50.0)), Some(child));
+    let control_point = world(3.0, 3.0);
+    assert_eq!(canvas.pick(control_point), Some(back));
+    assert!(
+        handle(&canvas, 0)
+            .screen
+            .distance(canvas.viewport.get().world_to_screen(control_point))
+            < HIT_RADIUS,
+        "The historical clipped-picking probe actually hit a radius control"
+    );
+    assert!(canvas.corner_radius_press(control_point, KeyModifiers::ALT));
+    assert!(canvas.corner_radius_state()["individual"]
+        .as_bool()
+        .unwrap());
+    assert_eq!(canvas.editor.borrow().selection, [child]);
+    assert!(canvas.finish_corner_radius_edit());
+    assert_eq!(json(&canvas), before);
+    assert_eq!(canvas.editor.borrow().history_len(), 0);
+    assert!(canvas.editor.borrow().can_redo());
+
+    let local = Point::new(3.0, 20.0);
+    assert!(local.distance(Point::new(40.0, 40.0)) > 40.0);
+    let empty = world(local.x, local.y);
+    assert!(handles(&canvas).iter().all(|handle| handle
+        .screen
+        .distance(canvas.viewport.get().world_to_screen(empty))
+        > 2.0 * HIT_RADIUS));
+    assert_eq!(canvas.handle_at(empty), None);
+    assert!(!canvas.corner_radius_press(empty, KeyModifiers::ALT));
+    assert_eq!(canvas.pick(empty), Some(back));
+    canvas.cycle_selection_at(empty, core::SelectionCycle::Behind);
+    assert_eq!(canvas.editor.borrow().selection, [back]);
+    assert_eq!(json(&canvas), before);
+    assert_eq!(canvas.editor.borrow().history_len(), 0);
+    assert!(canvas.editor.borrow().can_redo());
+    assert!(!canvas.editor.borrow().has_active_transaction());
+    scope.dispose();
+}
+
+#[test]
 fn tiny_hidden_locked_singular_and_exclusive_modes_preserve_resize_and_deep_selection_precedence() {
     let scope = backend();
     let (canvas, id) = fixture(NodeKind::Rectangle, 0.0, false);

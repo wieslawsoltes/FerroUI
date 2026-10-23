@@ -418,8 +418,26 @@ impl PrototypePlayer {
                 {
                     return false;
                 }
-                self.variable_overrides.insert(variable, value);
-                self.apply_variable_overrides(document);
+                let previous = self.variable_overrides.insert(variable, value);
+                if variable_affects_layout(document, variable, &self.variable_overrides) {
+                    // Spacing can resize Hug ancestors and move siblings. Work
+                    // on one candidate so failed validation or reflow cannot
+                    // partially change either the preview or its override map.
+                    let mut candidate = document.clone();
+                    if !self.apply_variable_overrides(&mut candidate, true) {
+                        if let Some(previous) = previous {
+                            self.variable_overrides.insert(variable, previous);
+                        } else {
+                            self.variable_overrides.remove(&variable);
+                        }
+                        return false;
+                    }
+                    *document = candidate;
+                } else {
+                    // Preserve the existing allocation-light path for color,
+                    // text and other actions unrelated to spacing bindings.
+                    self.apply_variable_overrides(document, false);
+                }
             }
             PrototypeAction::OpenUrl { url } => {
                 let Some(url) = prototype_external_url(&url) else {
@@ -469,7 +487,7 @@ impl PrototypePlayer {
             .retain(|(id, _, _)| self.activations.iter().any(|scope| scope.id == *id));
     }
 
-    fn apply_variable_overrides(&self, document: &mut Document) {
+    fn apply_variable_overrides(&self, document: &mut Document, reflow_layout: bool) -> bool {
         let mode = document.variable_mode.clone();
         let mut authored = Vec::with_capacity(self.variable_overrides.len());
         for (id, value) in &self.variable_overrides {
@@ -477,7 +495,15 @@ impl PrototypePlayer {
                 authored.push((*id, variable.values.insert(mode.clone(), value.clone())));
             }
         }
-        document.apply_variables();
+        // Validate while temporary mode values are installed; restoring the
+        // authored table first would hide negative or wrongly typed overrides.
+        let valid = if reflow_layout && document.validate_variables().is_err() {
+            false
+        } else {
+            document.apply_variables();
+            !reflow_layout
+                || (document.layout_all().errors.is_empty() && document.validate().is_ok())
+        };
         for (id, value) in authored {
             if let Some(variable) = document.variables.get_mut(&id) {
                 if let Some(value) = value {
@@ -487,7 +513,38 @@ impl PrototypePlayer {
                 }
             }
         }
+        valid
     }
+}
+
+/// Follow the effective alias path, including prior session overrides, before
+/// deciding whether an action needs an atomic document-wide layout candidate.
+/// A color-only action does not clone/reflow unrelated auto-layout trees.
+fn variable_affects_layout(
+    document: &Document,
+    changed: VariableId,
+    overrides: &BTreeMap<VariableId, VariableValue>,
+) -> bool {
+    let bindings: BTreeSet<_> = document.nodes.values().flat_map(|node| {
+        node.variable_bindings.iter().filter_map(|(property, &id)| {
+            crate::parse_layout_variable_binding(property).map(|_| id)
+        })
+    }).collect();
+    for mut id in bindings {
+        let mut seen = BTreeSet::new();
+        while seen.insert(id) {
+            if id == changed { return true; }
+            let value = overrides.get(&id).or_else(|| {
+                let variable = document.variables.get(&id)?;
+                variable.values.get(&document.variable_mode)
+                    .or_else(|| variable.values.get("Default"))
+                    .or_else(|| variable.values.values().next())
+            });
+            let Some(VariableValue::Alias(target)) = value else { break; };
+            id = *target;
+        }
+    }
+    false
 }
 
 fn is_within(document: &Document, mut node: NodeId, root: NodeId) -> bool {
@@ -715,3 +772,7 @@ pub fn validate_prototype_interaction(
 #[cfg(test)]
 #[path = "prototype_tests.rs"]
 mod tests;
+
+#[cfg(test)]
+#[path = "prototype_layout_variables_tests.rs"]
+mod layout_variable_tests;

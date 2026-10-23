@@ -213,7 +213,26 @@ export async function selectionRegressions(page, reference, check, helpers, outp
     ], "Native affine clipping selection"));
     await click(world(50, 50), [], [4]);
     const beforeClip = await snapshot();
-    await click(world(3, 3), ["Alt"], [2]);
+    // The selected child's zero-radius marker is inset near local (3, 3).
+    // Alt at that real control correctly starts independent radius editing.
+    // Probe a different point in the same rounded cutout, explicitly clear of
+    // both radius and resize targets, so this assertion exercises layer picking.
+    const emptyLocal = { x: 3, y: 20 }, emptyWorld = world(emptyLocal.x, emptyLocal.y);
+    assert.ok(emptyLocal.x > 0 && emptyLocal.y > 0 && emptyLocal.x < 40 && emptyLocal.y < 40);
+    assert.ok(Math.hypot(emptyLocal.x - 40, emptyLocal.y - 40) > 40,
+        "The probe is inside the frame box but outside its exact rounded corner");
+    const clipView = await state(page), emptyScreen = {
+        x: clipView.pan.x + emptyWorld.x * clipView.zoom,
+        y: clipView.pan.y + emptyWorld.y * clipView.zoom,
+    };
+    assert.equal(clipView.cornerRadius.node, 4); assert.equal(clipView.cornerRadius.handles.length, 4);
+    for (const handle of clipView.cornerRadius.handles) {
+        assert.ok(Math.hypot(handle.screen.x - emptyScreen.x, handle.screen.y - emptyScreen.y) > 16,
+            "The rounded-cutout probe is clear of every native radius hit target");
+        assert.ok(Math.hypot(handle.vertexWorld.x - emptyWorld.x, handle.vertexWorld.y - emptyWorld.y) * clipView.zoom > 16,
+            "The rounded-cutout probe is clear of every native resize hit target");
+    }
+    await click(emptyWorld, ["Alt"], [2]);
     await unchanged(beforeClip, "Affine rounded clip picking");
     check("Native picking applies the exact rounded ancestor clip in its affine coordinate system instead of accepting the clip's world bounding box");
 

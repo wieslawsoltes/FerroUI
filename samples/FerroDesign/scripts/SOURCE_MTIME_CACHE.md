@@ -1,4 +1,4 @@
-# Optional native Cargo source timestamp reuse
+# Optional Cargo source timestamp reuse
 
 `source_mtime_cache.py` preserves source timestamps only when the current
 Git-tracked file has exactly the bytes and size recorded with a restored Cargo
@@ -10,7 +10,7 @@ and workflow changes, and the workflow change only enables fingerprint logging.
 This helper does not establish a measured reduction in FerroUI build time or any
 change in editor runtime performance.
 
-The helper is optional and supports the existing Linux native CI environment.
+The helper is optional and supports the existing Linux native and browser CI jobs.
 It uses only Python's standard library and read-only Git inventory commands.
 It does not invoke Cargo, edit Cargo fingerprints, change compiled artifacts,
 modify source bytes, infer Git commit dates, or override Cargo's toolchain,
@@ -35,7 +35,7 @@ python3 samples/FerroDesign/scripts/source_mtime_cache.py restore \
   --repo "$GITHUB_WORKSPACE" \
   --target-dir "$CARGO_TARGET_DIR"
 
-# The workflow's ordinary native Cargo commands run here.
+# The workflow's ordinary native or WebAssembly Cargo commands run here.
 
 python3 samples/FerroDesign/scripts/source_mtime_cache.py snapshot \
   --repo "$GITHUB_WORKSPACE" \
@@ -183,11 +183,30 @@ or FerroUI compilation.
 python3 samples/FerroDesign/scripts/test_source_mtime_cargo.py
 ```
 
-Both native CI jobs run these safeguards before project compilation. Snapshot
-and target-cache save require a successful restore/probe and a job that was not
-cancelled; completed failed builds can still preserve useful partial outputs.
-A failed restore or correctness probe blocks the independent application gate.
-The browser job retains its existing cache behavior for this initial rollout.
+Both native CI jobs and the browser CI job run these safeguards before project
+compilation. Snapshot and target-cache save require a successful restore/probe
+and a job that was not cancelled; completed failed builds can still preserve
+useful partial outputs. A failed restore or correctness probe blocks subsequent
+application compilation in that job.
+
+The browser job uses the same repository root and co-cached
+`samples/FerroDesign/target` directory as its WebAssembly build, with its existing
+separate browser cache key. Root-scoped Git inventory includes the Rust browser
+host, tracked TypeScript host sources, XAML and assets outside the sample. The
+normal host build still runs its type checks, input tests and bundler. Untracked
+host outputs, downloaded tools and generated WebAssembly binaries receive no
+source timestamp restoration; normal build dependency checks still apply.
+Caches from before this integration have no manifest and produce a conservative
+miss until a completed job saves a new snapshot.
+
+The complete browser distribution is uploaded immediately after the successful
+WebAssembly build and static JavaScript import validation, before Chromium
+installation and browser tests. This makes that exact commit's runtime available
+for independent replay while CI continues. Its artifact is build evidence;
+browser screenshots, traces and reports remain a separate validation artifact,
+and a failed browser test or benchmark still fails the job. The browser report
+also records the restore, correctness probe and post-build snapshot diagnostics.
+
 The local probe establishes this isolated fixture's correctness. Actual FerroUI
 cache-hit rates and reduced CI duration still require subsequent completed jobs;
 no editor runtime speedup follows from this build optimization.

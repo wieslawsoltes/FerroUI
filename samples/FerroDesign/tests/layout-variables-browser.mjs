@@ -1,10 +1,12 @@
 import assert from "node:assert/strict";
+import { resolve } from "node:path";
+import { PNG } from "pngjs";
 
 // Only the initial fixture supplies document data. All authored bindings,
 // mode changes and literal edits use real native controls and pointer/keys.
 export async function layoutVariableRegressions(page, reference, check, helpers, output, mode) {
     const { fixtureNode, isolatedDocument, importFixture, documentState, state,
-        clickWorld, clickNative, chooseNative, frames, waitForNativeScene,
+        clickWorld, clickNative, chooseNative, frames, waitForNativeFrame, waitForNativeScene,
         captureNativeScreenshot, flushStorage } = helpers;
     const wait = (predicate, args) => page.waitForFunction(({ source, args }) => {
         const view = JSON.parse(globalThis.ferroDesign.ferroDesignState());
@@ -111,4 +113,58 @@ export async function layoutVariableRegressions(page, reference, check, helpers,
     assert.equal(unbound.nodes[2].layout.gap, beforeUnbind.nodes[2].layout.gap);
     await close(); await history(beforeUnbind, unbound, unbindDepth, "Spacing unbind");
     check("Native Unbind freezes the resolved gap and preserves exact binding ownership through undo and redo");
+
+    // A separate starting fixture reuses the bindings just authored with native
+    // controls. Its click action exercises the real presentation player; pixels
+    // establish reflow because exports deliberately expose authored state.
+    const previewFixture = structuredClone(afterGap);
+    previewFixture.name = "Prototype spacing reflow";
+    previewFixture.pages[0].prototype_start = 2;
+    previewFixture.nodes[2].fills = [{ paint: { type: "solid", r: 255, g: 255, b: 255, a: 255 }, opacity: 1, visible: true }];
+    previewFixture.nodes[2].interactions = [{ trigger: "click",
+        action: { type: "set_variable", variable: 100, value: { type: "number", value: 32.5 } },
+        transition: { kind: "instant", duration_ms: 0, easing: "linear" }, delay_ms: 0, key: null }];
+    for (const [id, color] of [[3, { r: 255, g: 0, b: 0, a: 255 }], [4, { r: 0, g: 0, b: 255, a: 255 }]]) {
+        Object.assign(previewFixture.nodes[id], { corner_radius: 0, corner_radii: null, strokes: [], effects: [],
+            fills: [{ paint: { type: "solid", ...color }, opacity: 1, visible: true }] });
+    }
+    await importFixture(page, previewFixture);
+    await clickWorld(page, 44, 44);
+    await wait(view => view.selection.join() === "2");
+    const authored = await documentState(page), editing = await state(page);
+    await flushStorage(page);
+    await clickNative(page, "PresentButton");
+    await wait(view => view.presentation === 2);
+    await waitForNativeFrame(page, editing.renderedFrames, "Present bound layout");
+    await frames(page);
+    const camera = await state(page);
+    const pixel = (png, view, x, y) => {
+        const sx = Math.floor(view.chrome.CanvasHost.x + view.pan.x + x * view.zoom);
+        const sy = Math.floor(view.chrome.CanvasHost.y + view.pan.y + y * view.zoom);
+        assert.ok(sx >= 0 && sy >= 0 && sx < png.width && sy < png.height, "Prototype sample is on the actual native canvas");
+        return [...png.data.subarray((sy * png.width + sx) * 4, (sy * png.width + sx) * 4 + 4)];
+    };
+    const sample = async suffix => PNG.sync.read(await page.screenshot({ path: resolve(output, mode + "-prototype-spacing-" + suffix + ".png") }));
+    const beforePixels = await sample("before");
+    assert.deepEqual(pixel(beforePixels, camera, 76.25, 68.75), [255, 0, 0, 255], "The first child starts at its authored bound padding");
+    assert.deepEqual(pixel(beforePixels, camera, 92.5, 85), [255, 255, 255, 255], "The future child center starts on the white frame");
+    await clickWorld(page, 340, 200);
+    await waitForNativeFrame(page, camera.renderedFrames, "Reflow prototype spacing action");
+    await frames(page);
+    const reflowed = await state(page), afterPixels = await sample("after");
+    assert.equal(reflowed.presentation, 2);
+    assert.deepEqual(reflowed.pan, camera.pan); assert.equal(reflowed.zoom, camera.zoom);
+    assert.deepEqual(pixel(afterPixels, reflowed, 76.25, 68.75), [255, 255, 255, 255], "Spacing reflow clears the child's previous rendered position");
+    assert.deepEqual(pixel(afterPixels, reflowed, 92.5, 85), [255, 0, 0, 255], "Spacing reflow paints the child at the independently calculated new position");
+    assert.deepEqual(await documentState(page), authored, "Prototype exports keep authored spacing and variable definitions");
+    assert.equal(reflowed.historyLength, editing.historyLength);
+    await flushStorage(page);
+    assert.deepEqual(await page.evaluate(async () => JSON.parse((await globalThis.ferroDesignStorage.backend.load()).text)), authored,
+        "Saving during the prototype preserves the complete authored document");
+    await page.keyboard.press("Escape");
+    await wait(view => view.presentation === null);
+    assert.deepEqual(await documentState(page), authored, "Leaving the prototype restores authored layout and variables");
+    assert.deepEqual((await state(page)).selection, editing.selection);
+    assert.equal((await state(page)).historyLength, editing.historyLength);
+    check("A real prototype click reflows spacing into independently checked native pixels while exports, durable saves, exit and history preserve the authored design");
 }

@@ -1,0 +1,45 @@
+{
+  "scope": "Minimal actual Playwright BrowserServer/connect lifecycle with Canvas2D and WebGL2 frames and drained CDP tracing; not the actual FerroDesign benchmark. Both variants passed, so this does not reproduce or prove the cause of the CI shutdown failure.",
+  "observed": [
+    {
+      "attachClient": false,
+      "browserVersion": "156.0.8078.4",
+      "elapsedMs": 211,
+      "reason": "lifecycle reproduction",
+      "processId": 17982,
+      "status": "closed",
+      "clientDisconnectAttempted": false,
+      "clientDisconnectCompleted": false,
+      "clientDisconnected": null,
+      "gracefulCloseCompleted": true,
+      "forcedKillAttempted": false,
+      "directKillAttempted": false,
+      "processExit": {
+        "observed": true,
+        "code": 0,
+        "signal": null
+      },
+      "errors": []
+    },
+    {
+      "attachClient": true,
+      "browserVersion": "156.0.8078.4",
+      "elapsedMs": 250,
+      "reason": "lifecycle reproduction",
+      "processId": 18337,
+      "status": "closed",
+      "clientDisconnectAttempted": true,
+      "clientDisconnectCompleted": true,
+      "clientDisconnected": true,
+      "gracefulCloseCompleted": true,
+      "forcedKillAttempted": false,
+      "directKillAttempted": false,
+      "processExit": {
+        "observed": true,
+        "code": 0,
+        "signal": null
+      },
+      "errors": []
+    }
+  ]
+}

@@ -3,8 +3,8 @@
 // the page with a JSHandle to its RGBA buffer, without transferring that buffer.
 export function areaAverageAlpha({ pixels, width, height, scale }) {
     if (!Number.isInteger(width) || !Number.isInteger(height) || width < 1 || height < 1 ||
-        width * height > 28000 || !Number.isInteger(scale) || scale < 1 || scale > 16) {
-        throw new RangeError("Coverage requires 1..28000 output pixels and an integer scale from 1 to 16.");
+        width * height > 28000 || !Number.isInteger(scale) || scale < 1 || scale > 32) {
+        throw new RangeError("Coverage requires 1..28000 output pixels and an integer scale from 1 to 32.");
     }
     const sourceWidth = width * scale, sourceHeight = height * scale;
     if (!(pixels instanceof Uint8Array || pixels instanceof Uint8ClampedArray) ||

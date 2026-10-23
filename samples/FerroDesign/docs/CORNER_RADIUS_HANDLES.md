@@ -80,6 +80,21 @@ center rotation, reflection and shear. The lifecycle case starts from a clean
 IndexedDB snapshot and requires exactly one history entry, serialization and
 durable revision after `pagehide`, without an explicit post-event flush.
 
+Fractional drag expectations use the trusted browser pointer coordinates that
+the production bridge receives. A separate test calculation converts their
+displacement through the fixture's inverse affine transform and compares the
+authored radius at the existing `1e-6` tolerance. The requested CDP coordinates
+and observed input are retained in `*-corner-radius-input.json`; this avoids
+treating Chromium's coordinate rounding as an editor error. The oracle has a
+regression for the exact fractional result in run `39869066118`, plus reflected,
+rotated and sheared local-unit checks.
+
+Selection tests place the rounded-clip probe outside the actual corner path
+and clear of editing targets. A native regression separately verifies that
+Alt pressing a radius marker in the same clipped area starts radius editing,
+while the nearby empty probe cycles to the underlying layer without changing
+the document or consuming redo.
+
 A separate real Chromium touch gesture uses `touchStart`, `touchMove` and
 `touchCancel`. The production browser bridge forwards touch cancellation to the
 native pointer-disposal/capture-loss path. Read-only input observations require

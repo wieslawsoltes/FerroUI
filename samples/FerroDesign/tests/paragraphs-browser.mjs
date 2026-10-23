@@ -150,6 +150,28 @@ export async function paragraphRegressions(page, reference, check, helpers, outp
     await page.waitForFunction(() => !JSON.parse(globalThis.ferroDesign.ferroDesignState()).chrome.ModalBackdrop.visible,
         undefined, { timeout: 10000 });
     await history(authored, inherited, depth + 2, "Inherit second paragraph");
+    // Text-layer PNG exports retain conservative glyph-overhang paint bounds.
+    // Use an explicitly clipped artboard to test exact paragraph bands in the
+    // intended 440x200 viewport instead of treating a selection box as a crop.
+    // All paragraph values come unchanged from the native authored document;
+    // this separate starting fixture does not replace the history checks above.
+    const exportDocument = structuredClone(inherited);
+    exportDocument.nodes[2] = { ...exportDocument.nodes[2], parent: 3, x: 0, y: 0 };
+    exportDocument.nodes[3] = fixtureNode(reference, 3, {
+        kind: "frame", name: "Paragraph export artboard", x: 40, y: 40, width: 440, height: 200,
+        children: [2], clip_content: true, corner_radius: 0, corner_radii: null,
+        fills: [], strokes: [], effects: [],
+    });
+    exportDocument.pages[0].children = [3];
+    exportDocument.next_id = Math.max(exportDocument.next_id, 4);
+    await importFixture(page, exportDocument);
+    await clickWorld(page, 45, 45);
+    await page.keyboard.press("Control+a");
+    await page.waitForFunction(() => {
+        const view = JSON.parse(globalThis.ferroDesign.ferroDesignState());
+        return view.selection.length === 1 && view.selection[0] === 3;
+    }, undefined, { timeout: 10000 });
+    const exportBefore = await documentState(page);
     const [download] = await Promise.all([
         page.waitForEvent("download", { timeout: 60000 }),
         clickNative(page, "ExportPngButton", "InspectorViewport"),
@@ -166,8 +188,10 @@ export async function paragraphRegressions(page, reference, check, helpers, outp
     };
     assert.ok(ink(5, 35) > 40 && ink(55, 79) > 40 && ink(79, 103) > 20, "Actual native PNG contains all three independently positioned paragraphs");
     assert.equal(ink(40, 50), 0, "Authored paragraph spacing leaves a real transparent gap in exported artwork");
-    assert.deepEqual(await documentState(page), inherited, "Native export preserves the exact authored paragraph document");
-    check("Paragraph Inherit has exact one-step undo/redo and preserves the first paragraph; actual downloaded native PNG contains the three text bands and the authored transparent spacing gap");
+    assert.deepEqual(await documentState(page), exportBefore, "Native export preserves the exact clipped paragraph fixture");
+    await importFixture(page, inherited);
+    assert.deepEqual(await documentState(page), inherited, "Restore the exact authored document before native inline editing");
+    check("Paragraph Inherit has exact one-step undo/redo and preserves the first paragraph; its native clipped-artboard PNG has exact dimensions, three text bands and the authored transparent spacing gap");
 
     const enterInline = async () => {
         await clickWorld(page, 65, 60);

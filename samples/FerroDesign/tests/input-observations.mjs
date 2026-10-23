@@ -14,6 +14,7 @@ export async function startInputObservation(page, types = ["pointerdown", "point
                 detail: event.detail, button: event.button, buttons: event.buttons,
                 pointerId: event.pointerId ?? null, pointerType: event.pointerType ?? null,
                 x: event.clientX, y: event.clientY,
+                offsetX: event.offsetX ?? null, offsetY: event.offsetY ?? null,
                 target: event.target instanceof Element ? {
                     tag: event.target.tagName, className: event.target.getAttribute("class"),
                 } : null });
@@ -32,16 +33,21 @@ export async function startInputObservation(page, types = ["pointerdown", "point
         const supported = globalThis.PerformanceObserver?.supportedEntryTypes?.includes("longtask") ?? false;
         const observer = supported ? new PerformanceObserver((list) => collectTasks(list.getEntries())) : null;
         observer?.observe({ type: "longtask" });
-        globalThis.__ferroDesignInputObservation = { stop() {
+        const snapshot = () => ({ clock: "page performance milliseconds", startedAtMs: started, endedAtMs: performance.now(),
+            events: events.slice(), droppedEvents, longTaskSupported: supported, longTasks: longTasks.slice(), droppedLongTasks });
+        globalThis.__ferroDesignInputObservation = { snapshot, stop() {
             for (const type of types) {
                 document.removeEventListener(type, before, true);
                 document.removeEventListener(type, after);
             }
             if (observer) { collectTasks(observer.takeRecords()); observer.disconnect(); }
-            return { clock: "page performance milliseconds", startedAtMs: started, endedAtMs: performance.now(),
-                events, droppedEvents, longTaskSupported: supported, longTasks, droppedLongTasks };
+            return snapshot();
         } };
     }, { types, limit: Math.max(1, Math.min(1024, limit)) });
+}
+
+export async function readInputObservation(page) {
+    return page.evaluate(() => globalThis.__ferroDesignInputObservation?.snapshot() ?? null);
 }
 
 export async function stopInputObservation(page) {

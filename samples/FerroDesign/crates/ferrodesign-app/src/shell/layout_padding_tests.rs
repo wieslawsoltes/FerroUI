@@ -171,7 +171,7 @@ fn native_padding_diagnostics_publish_real_fields_and_export_controls() {
     assert_eq!(state["chrome"]["LayoutPaddingTop"]["text"], "10");
     assert_eq!(state["chrome"]["LayoutPaddingLinked"]["checked"], true);
     assert!(state["chrome"]["ModalTitle"]["text"].as_str().unwrap().contains("Layout padding"));
-    for name in ["ExportXamlButton", "VariablesRailButton", "GapField", "CrossGapField"] {
+    for name in ["ExportXamlButton", "VariablesRailButton", "PresentButton", "GapField", "CrossGapField"] {
         assert!(state["chrome"][name].is_object(), "Missing native control diagnostic {name}");
     }
 }

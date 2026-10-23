@@ -62,10 +62,12 @@ function alphaDiagnostics(png, svgAlpha) {
 }
 
 async function areaAveragedSvgAlpha(page, source, width, height, scale) {
-    // Keep the large RGBA buffer in the page. Only 28000 averaged alpha values
-    // cross the protocol; the same pure averaging function is unit tested.
-    const pixels = await page.evaluateHandle(async ({ source, width, height, scale }) => {
-        if (width !== 200 || height !== 140 || ![8, 16].includes(scale)) {
+    // Keep RGBA in the page and raster only sixteen output rows at a time.
+    // Integer translations preserve the intrinsic 1:1 sampling grid. Only
+    // 28000 averaged alpha values cross the protocol; the same pure averaging
+    // function is unit tested. Even at 32x, a canvas/readback is at most 13 MB.
+    const decoded = await page.evaluateHandle(async ({ source, width, height, scale }) => {
+        if (width !== 200 || height !== 140 || ![16, 32].includes(scale)) {
             throw new Error("The corner coverage reference has a fixed bounded fixture and scales.");
         }
         const parsed = new DOMParser().parseFromString(source, "image/svg+xml");
@@ -82,29 +84,48 @@ async function areaAveragedSvgAlpha(page, source, width, height, scale) {
             throw new Error("Changing the SVG viewport must preserve its viewBox and every path.");
         }
         const url = URL.createObjectURL(new Blob([encoded], { type: "image/svg+xml" }));
-        const image = new Image(), canvas = document.createElement("canvas");
+        const image = new Image();
         try {
             image.src = url;
             await image.decode();
             if (image.naturalWidth !== width * scale || image.naturalHeight !== height * scale) {
                 throw new Error("SVG must decode at its declared reference resolution.");
             }
-            canvas.width = image.naturalWidth; canvas.height = image.naturalHeight;
-            const context = canvas.getContext("2d");
-            if (!context) throw new Error("The independent SVG decoder requires Canvas2D.");
-            context.imageSmoothingEnabled = false;
-            context.drawImage(image, 0, 0); // Intrinsic 1:1; no canvas downscale filter.
-            return context.getImageData(0, 0, canvas.width, canvas.height).data;
-        } finally {
+            return { image, url, width, height, scale };
+        } catch (error) {
             image.removeAttribute("src");
-            canvas.width = 0; canvas.height = 0;
             URL.revokeObjectURL(url);
+            throw error;
         }
     }, { source, width, height, scale });
     try {
-        return await page.evaluate(areaAverageAlpha, { pixels, width, height, scale });
+        const alpha = [];
+        for (let row = 0; row < height; row += 16) {
+            const rows = Math.min(16, height - row);
+            const pixels = await page.evaluateHandle(({ decoded, row, rows }) => {
+                const { image, width, height, scale } = decoded;
+                if (!Number.isInteger(row) || !Number.isInteger(rows) || row < 0 || rows < 1 ||
+                    rows > 16 || row + rows > height) throw new Error("Coverage strip exceeds its fixed bounds.");
+                const canvas = document.createElement("canvas");
+                try {
+                    canvas.width = width * scale; canvas.height = rows * scale;
+                    const context = canvas.getContext("2d");
+                    if (!context) throw new Error("The independent SVG decoder requires Canvas2D.");
+                    context.imageSmoothingEnabled = false;
+                    context.drawImage(image, 0, -row * scale); // Intrinsic 1:1, integer translation only.
+                    return context.getImageData(0, 0, canvas.width, canvas.height).data;
+                } finally { canvas.width = 0; canvas.height = 0; }
+            }, { decoded, row, rows });
+            try { alpha.push(...await page.evaluate(areaAverageAlpha, { pixels, width, height: rows, scale })); }
+            finally { await pixels.dispose(); }
+        }
+        return alpha;
     } finally {
-        await pixels.dispose();
+        try {
+            await page.evaluate(({ image, url }) => {
+                image.removeAttribute("src"); URL.revokeObjectURL(url);
+            }, decoded);
+        } finally { await decoded.dispose(); }
     }
 }
 
@@ -182,14 +203,17 @@ export async function cornerRegressions(page, reference, check, helpers, output,
     // Preserve the original 1x evidence, but do not use its unverified edge AA
     // samples as a pixel-area oracle. Both fixed references must converge.
     console.log("[corners-alpha " + mode + "] " + JSON.stringify(alphaDiagnostics(png, external.alpha)));
-    const coarse = await areaAveragedSvgAlpha(page, svg, png.width, png.height, 8);
-    const fine = await areaAveragedSvgAlpha(page, svg, png.width, png.height, 16);
+    // The 8x/16x pair failed its unchanged four-alpha convergence contract on
+    // Chromium 156 (4.453125). Increase the fixed numerical reference precision,
+    // retaining both the convergence limit and the native comparison threshold.
+    const coarse = await areaAveragedSvgAlpha(page, svg, png.width, png.height, 16);
+    const fine = await areaAveragedSvgAlpha(page, svg, png.width, png.height, 32);
     const convergence = coverageConvergence(coarse, fine);
-    console.log("[corners-coverage-convergence " + mode + "] " + JSON.stringify({ scales: [8, 16], ...convergence }));
+    console.log("[corners-coverage-convergence " + mode + "] " + JSON.stringify({ scales: [16, 32], ...convergence }));
     assert.ok(convergence.converged, "Independent SVG area coverage must converge within 4 alpha units without opposite opaque/transparent pixels");
     const referenceAlpha = fine.map(alpha => Math.round(alpha));
     const comparison = alphaDiagnostics(png, referenceAlpha);
-    console.log("[corners-area-alpha " + mode + "] " + JSON.stringify({ referenceScale: 16, ...comparison }));
+    console.log("[corners-area-alpha " + mode + "] " + JSON.stringify({ referenceScale: 32, ...comparison }));
     const edgeDifferences = comparison.differingOver12;
     assert.ok(edgeDifferences <= 48, "Independent SVG decoder and FerroUI PNG share the smooth silhouette: " + edgeDifferences);
     assert.deepEqual(await documentState(page), after, "Both exports preserve editable corner parameters");
