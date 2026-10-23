@@ -1916,8 +1916,13 @@
       "examples_total": 1,
       "examples_verified": 0,
       "id": "ColorPicker",
-      "implementation": [],
-      "notes": null,
+      "implementation": [
+        "samples/WinUIGallery/Pages/ColorPicker.xaml",
+        "samples/WinUIGallery/color_picker_samples.rs",
+        "src/FerroUI.Controls.ColorPicker/color_view/color_view.rs",
+        "src/FerroUI.Controls.ColorPicker/Themes/Fluent/Fluent.xaml"
+      ],
+      "notes": "The original inline ColorPicker maps to a composition of existing native ColorView, ColorSlider, TextBox, ToggleButton and RadioButtons controls; the native ColorPicker dropdown API remains unchanged. Two ColorViews present spectrum and component editing together. All seven source options, Box/Ring selection and the Rectangle preview are wired with weak Rust callbacks. Source x:Bind expressions and the single-control layout are explicit sample adaptations. Component text editing retains native NumericUpDown behavior. Exact visual layout, localization and host pointer, keyboard and accessibility acceptance remain pending. Named test anchors describe the intended logical coverage; this entry asserts no successful execution record or full page, rendering, input or accessibility parity.",
       "requirements": [
         {
           "status": "source-candidate",
@@ -1964,8 +1969,45 @@
           "type": "{http://schemas.microsoft.com/winfx/2006/xaml}String"
         }
       ],
-      "status": "pending",
-      "tests": [],
+      "status": "partial",
+      "tests": [
+        {
+          "name": "color_picker_page_preserves_source_option_defaults_with_native_inline_views",
+          "path": "samples/WinUIGallery/color_picker_samples_tests.rs"
+        },
+        {
+          "name": "color_picker_page_maps_visibility_options_and_box_ring_handler",
+          "path": "samples/WinUIGallery/color_picker_samples_tests.rs"
+        },
+        {
+          "name": "color_picker_page_keeps_alpha_visibility_independent_and_more_expansion_state",
+          "path": "samples/WinUIGallery/color_picker_samples_tests.rs"
+        },
+        {
+          "name": "color_picker_page_synchronizes_views_alpha_input_and_rectangle_preview",
+          "path": "samples/WinUIGallery/color_picker_samples_tests.rs"
+        },
+        {
+          "name": "color_picker_page_rejects_invalid_alpha_without_changing_selected_color",
+          "path": "samples/WinUIGallery/color_picker_samples_tests.rs"
+        },
+        {
+          "name": "color_picker_page_preserves_alpha_when_disabled_and_switches_hex_representation",
+          "path": "samples/WinUIGallery/color_picker_samples_tests.rs"
+        },
+        {
+          "name": "color_picker_page_parses_live_argb_and_rgb_hex_without_css_shorthand",
+          "path": "samples/WinUIGallery/color_picker_samples_tests.rs"
+        },
+        {
+          "name": "color_picker_page_preserves_live_text_and_rolls_invalid_edits_back_on_focus_loss",
+          "path": "samples/WinUIGallery/color_picker_samples_tests.rs"
+        },
+        {
+          "name": "color_picker_callbacks_do_not_retain_the_gallery_page",
+          "path": "samples/WinUIGallery/color_picker_samples_tests.rs"
+        }
+      ],
       "title": "ColorPicker"
     },
     {
@@ -2216,8 +2258,23 @@
       "examples_total": 4,
       "examples_verified": 0,
       "id": "ConnectedAnimation",
-      "implementation": [],
-      "notes": null,
+      "implementation": [
+        "samples/WinUIGallery/Pages/ConnectedAnimation.xaml",
+        "samples/WinUIGallery/Pages/ConnectedCollection.xaml",
+        "samples/WinUIGallery/Pages/ConnectedCards.xaml",
+        "samples/WinUIGallery/Pages/ConnectedDetail.xaml",
+        "samples/WinUIGallery/Pages/ConnectedTiles.xaml",
+        "samples/WinUIGallery/Pages/NavigationSample1.xaml",
+        "samples/WinUIGallery/Pages/NavigationSample2.xaml",
+        "samples/WinUIGallery/connected_animation_samples.rs",
+        "samples/WinUIGallery/assets.rs",
+        "samples/WinUIGallery/assets_data.rs",
+        "samples/WinUIGallery/assets-manifest.json",
+        "src/FerroUI.Controls/frame.rs",
+        "src/FerroUI.Controls/animation/connected_animation.rs",
+        "src/FerroUI.Controls/animation/connected_animation_service.rs"
+      ],
+      "notes": "All four source compositions use native Frame/FramePage navigation and ConnectedAnimationService directly. Original collection, card and manual-item counts are 8, 13 and 13, with original landscape assets, item order, descriptions, selected data and randomized view/like ranges. Native StackPanel/WrapPanel plus Button compositions explicitly adapt ListView, GridView and ItemsRepeater containers; no container compatibility shims are introduced. Cache/history, configuration choices, coordinated detail elements, direct return animation, scroll/focus restoration and animation disposal have authored logical coverage. Container virtualization, full WinUI item-container semantics, acrylic, EntranceThemeTransition and exact native-host/input/rendering/accessibility parity remain pending. Named test anchors describe the intended logical coverage; this entry asserts no successful execution record or full page, rendering, input or accessibility parity.",
       "requirements": [
         {
           "status": "source-candidate",
@@ -2252,8 +2309,41 @@
           "type": "WinUIGallery.Controls.ControlExample"
         }
       ],
-      "status": "pending",
-      "tests": [],
+      "status": "partial",
+      "tests": [
+        {
+          "name": "connected_animation_initializes_all_four_source_compositions_and_original_item_counts",
+          "path": "samples/WinUIGallery/connected_animation_samples_tests.rs"
+        },
+        {
+          "name": "connected_collection_passes_selected_data_and_returns_to_the_cached_source_page",
+          "path": "samples/WinUIGallery/connected_animation_samples_tests.rs"
+        },
+        {
+          "name": "connected_manual_items_accept_keyboard_activation_and_restore_the_saved_scroll_offset",
+          "path": "samples/WinUIGallery/connected_animation_samples_tests.rs"
+        },
+        {
+          "name": "connected_card_uses_selected_item_details_and_restores_its_overlay_after_return",
+          "path": "samples/WinUIGallery/connected_animation_samples_tests.rs"
+        },
+        {
+          "name": "connected_configurations_alternate_original_destinations_and_preserve_frame_history",
+          "path": "samples/WinUIGallery/connected_animation_samples_tests.rs"
+        },
+        {
+          "name": "connected_configuration_handler_starts_a_real_compositor_flight_and_releases_it",
+          "path": "samples/WinUIGallery/connected_animation_samples_tests.rs"
+        },
+        {
+          "name": "connected_gallery_can_be_released_after_navigation_without_retaining_its_root",
+          "path": "samples/WinUIGallery/connected_animation_samples_tests.rs"
+        },
+        {
+          "name": "connected_capture_decodes_original_landscapes_and_propagates_the_selected_bitmap",
+          "path": "samples/WinUIGallery/connected_animation_samples_tests.rs"
+        }
+      ],
       "title": "Connected Animation"
     },
     {
@@ -2709,15 +2799,23 @@
       "examples_total": 2,
       "examples_verified": 0,
       "id": "FlipView",
-      "implementation": [],
-      "notes": null,
+      "implementation": [
+        "samples/WinUIGallery/Pages/FlipView.xaml",
+        "samples/WinUIGallery/media_samples.rs",
+        "samples/WinUIGallery/assets.rs",
+        "samples/WinUIGallery/assets_data.rs",
+        "samples/WinUIGallery/assets-manifest.json",
+        "src/FerroUI.Controls/carousel.rs",
+        "src/FerroUI.Controls/pips_pager/pips_pager.rs"
+      ],
+      "notes": "All three actual source ControlExample compositions use existing native Carousel and PipsPager controls. The imported catalog lists only inline and vertical snippets; the bound-data composition is additionally mapped from the actual page markup. Original five-image order, automation names, all fifteen first-three-group data items, fixed sizes and horizontal/vertical selection are retained. Native PageSlide determines layout, swipe and keyboard axes; PipsPager supplies explicit navigation with nonwrapping selection. WinUI FlipView overlay buttons, focus transfer, LocalizedControlType, RTL gestures, exact transitions, full binding/template and host visual/accessibility parity remain pending. Named test anchors describe the intended logical coverage; this entry asserts no successful execution record or full page, rendering, input or accessibility parity.",
       "requirements": [
         {
           "status": "source-candidate",
           "type": "Microsoft.UI.Xaml.Controls.Border"
         },
         {
-          "status": "missing-source-candidate",
+          "status": "source-candidate",
           "type": "Microsoft.UI.Xaml.Controls.FlipView"
         },
         {
@@ -2761,8 +2859,29 @@
           "type": "WinUIGallery.Pages.ItemsPageBase"
         }
       ],
-      "status": "pending",
-      "tests": [],
+      "status": "partial",
+      "tests": [
+        {
+          "name": "flip_view_page_preserves_declared_images_data_order_and_orientation",
+          "path": "samples/WinUIGallery/media_samples_tests.rs"
+        },
+        {
+          "name": "flip_view_pager_and_carousel_selection_synchronize_both_directions_without_wrapping",
+          "path": "samples/WinUIGallery/media_samples_tests.rs"
+        },
+        {
+          "name": "flip_view_keyboard_navigation_follows_each_native_carousel_axis",
+          "path": "samples/WinUIGallery/media_samples_tests.rs"
+        },
+        {
+          "name": "flip_view_bound_template_uses_original_first_three_groups_and_actual_page_layout",
+          "path": "samples/WinUIGallery/media_samples_tests.rs"
+        },
+        {
+          "name": "media_page_callbacks_do_not_keep_the_page_and_controls_alive",
+          "path": "samples/WinUIGallery/media_samples_tests.rs"
+        }
+      ],
       "title": "FlipView"
     },
     {
@@ -3305,8 +3424,17 @@
       "examples_total": 6,
       "examples_verified": 0,
       "id": "Image",
-      "implementation": [],
-      "notes": null,
+      "implementation": [
+        "samples/WinUIGallery/Pages/Image.xaml",
+        "samples/WinUIGallery/media_samples.rs",
+        "samples/WinUIGallery/assets.rs",
+        "samples/WinUIGallery/assets_data.rs",
+        "samples/WinUIGallery/assets-manifest.json",
+        "src/FerroUI.Controls/image.rs",
+        "src/FerroUI.Base/media/imaging/bitmap.rs",
+        "src/FerroUI.Base/media/imaging/cropped_bitmap.rs"
+      ],
+      "notes": "All six original source compositions are represented with native Image controls and explicit adaptation states. Basic bitmap loading, rendering-size decode, all four Stretch options and fixed nine-grid drawings use existing native APIs. The SVG example remains pending with the original asset and an explicit unavailable-decoder diagnostic. All three animated GIF positions are static first-frame previews only; playback controls are disabled. BitmapImage URI lifecycle/events, generalized Image.NineGrid, SVG decoding, animated playback, exact pixels and host accessibility remain pending. Named test anchors describe the intended logical coverage; this entry asserts no successful execution record or full page, rendering, input or accessibility parity.",
       "requirements": [
         {
           "status": "source-candidate",
@@ -3349,8 +3477,29 @@
           "type": "WinUIGallery.Controls.ControlExampleSubstitution"
         }
       ],
-      "status": "pending",
-      "tests": [],
+      "status": "partial",
+      "tests": [
+        {
+          "name": "image_page_preserves_all_six_compositions_and_marks_unavailable_decoders",
+          "path": "samples/WinUIGallery/media_samples_tests.rs"
+        },
+        {
+          "name": "image_stretch_options_update_the_real_native_image",
+          "path": "samples/WinUIGallery/media_samples_tests.rs"
+        },
+        {
+          "name": "native_nine_grid_drawings_retain_source_corners_and_stretch_the_center",
+          "path": "samples/WinUIGallery/media_samples_tests.rs"
+        },
+        {
+          "name": "image_decode_reports_missing_asset_errors",
+          "path": "samples/WinUIGallery/media_samples_tests.rs"
+        },
+        {
+          "name": "media_page_callbacks_do_not_keep_the_page_and_controls_alive",
+          "path": "samples/WinUIGallery/media_samples_tests.rs"
+        }
+      ],
       "title": "Image"
     },
     {
@@ -4990,7 +5139,7 @@
           "type": "Microsoft.UI.Xaml.Controls.ComboBox"
         },
         {
-          "status": "missing-source-candidate",
+          "status": "source-candidate",
           "type": "Microsoft.UI.Xaml.Controls.FlipView"
         },
         {

@@ -2,8 +2,8 @@
   "meaning": "XAML member spellings joined through WinUI and FerroUI inheritance; candidates are not semantic compatibility.",
   "member_statuses": {
     "gallery-owned-contract": 102,
-    "missing-source-candidate": 522,
-    "source-candidate": 562,
+    "missing-source-candidate": 515,
+    "source-candidate": 569,
     "unresolved-upstream-member": 208
   },
   "members": [
@@ -6062,7 +6062,7 @@
       "declared_by": "Microsoft.UI.Xaml.Controls.ColorPicker",
       "rust_member": "color_changed",
       "status": "source-candidate",
-      "target": "FerroUI.Controls.ColorPicker",
+      "target": "FerroUI.Controls.ColorView",
       "target_declared_by": "FerroUI.Controls.ColorView",
       "upstream": "Microsoft.UI.Xaml.Controls.ColorPicker.ColorChanged",
       "uses": [
@@ -6081,7 +6081,7 @@
       "declared_by": "Microsoft.UI.Xaml.Controls.ColorPicker",
       "rust_member": "color_spectrum_shape",
       "status": "missing-source-candidate",
-      "target": "FerroUI.Controls.ColorPicker",
+      "target": "FerroUI.Controls.ColorView",
       "target_declared_by": null,
       "upstream": "Microsoft.UI.Xaml.Controls.ColorPicker.ColorSpectrumShape",
       "uses": [
@@ -6096,7 +6096,7 @@
       "declared_by": "Microsoft.UI.Xaml.Controls.ColorPicker",
       "rust_member": "is_alpha_enabled",
       "status": "missing-source-candidate",
-      "target": "FerroUI.Controls.ColorPicker",
+      "target": "FerroUI.Controls.ColorView",
       "target_declared_by": null,
       "upstream": "Microsoft.UI.Xaml.Controls.ColorPicker.IsAlphaEnabled",
       "uses": [
@@ -6115,7 +6115,7 @@
       "declared_by": "Microsoft.UI.Xaml.Controls.ColorPicker",
       "rust_member": "is_alpha_slider_visible",
       "status": "missing-source-candidate",
-      "target": "FerroUI.Controls.ColorPicker",
+      "target": "FerroUI.Controls.ColorView",
       "target_declared_by": null,
       "upstream": "Microsoft.UI.Xaml.Controls.ColorPicker.IsAlphaSliderVisible",
       "uses": [
@@ -6134,7 +6134,7 @@
       "declared_by": "Microsoft.UI.Xaml.Controls.ColorPicker",
       "rust_member": "is_alpha_text_input_visible",
       "status": "missing-source-candidate",
-      "target": "FerroUI.Controls.ColorPicker",
+      "target": "FerroUI.Controls.ColorView",
       "target_declared_by": null,
       "upstream": "Microsoft.UI.Xaml.Controls.ColorPicker.IsAlphaTextInputVisible",
       "uses": [
@@ -6151,9 +6151,9 @@
     {
       "behavior": "unverified",
       "declared_by": "Microsoft.UI.Xaml.Controls.ColorPicker",
-      "rust_member": "is_color_channel_text_input_visible",
+      "rust_member": "is_component_text_input_visible",
       "status": "missing-source-candidate",
-      "target": "FerroUI.Controls.ColorPicker",
+      "target": "FerroUI.Controls.ColorView",
       "target_declared_by": null,
       "upstream": "Microsoft.UI.Xaml.Controls.ColorPicker.IsColorChannelTextInputVisible",
       "uses": [
@@ -6174,9 +6174,9 @@
     {
       "behavior": "unverified",
       "declared_by": "Microsoft.UI.Xaml.Controls.ColorPicker",
-      "rust_member": "is_color_slider_visible",
+      "rust_member": "is_color_spectrum_slider_visible",
       "status": "missing-source-candidate",
-      "target": "FerroUI.Controls.ColorPicker",
+      "target": "FerroUI.Controls.ColorView",
       "target_declared_by": null,
       "upstream": "Microsoft.UI.Xaml.Controls.ColorPicker.IsColorSliderVisible",
       "uses": [
@@ -6195,7 +6195,7 @@
       "declared_by": "Microsoft.UI.Xaml.Controls.ColorPicker",
       "rust_member": "is_hex_input_visible",
       "status": "missing-source-candidate",
-      "target": "FerroUI.Controls.ColorPicker",
+      "target": "FerroUI.Controls.ColorView",
       "target_declared_by": null,
       "upstream": "Microsoft.UI.Xaml.Controls.ColorPicker.IsHexInputVisible",
       "uses": [
@@ -6218,7 +6218,7 @@
       "declared_by": "Microsoft.UI.Xaml.Controls.ColorPicker",
       "rust_member": "is_more_button_visible",
       "status": "missing-source-candidate",
-      "target": "FerroUI.Controls.ColorPicker",
+      "target": "FerroUI.Controls.ColorView",
       "target_declared_by": null,
       "upstream": "Microsoft.UI.Xaml.Controls.ColorPicker.IsMoreButtonVisible",
       "uses": [
@@ -8386,9 +8386,9 @@
       "behavior": "unverified",
       "declared_by": "Microsoft.UI.Xaml.Controls.Control",
       "rust_member": "border_brush",
-      "status": "missing-source-candidate",
-      "target": null,
-      "target_declared_by": null,
+      "status": "source-candidate",
+      "target": "FerroUI.Controls.Carousel",
+      "target_declared_by": "FerroUI.Controls.Primitives.TemplatedControl",
       "upstream": "Microsoft.UI.Xaml.Controls.FlipView.BorderBrush",
       "uses": [
         {
@@ -8401,9 +8401,9 @@
       "behavior": "unverified",
       "declared_by": "Microsoft.UI.Xaml.Controls.Control",
       "rust_member": "border_thickness",
-      "status": "missing-source-candidate",
-      "target": null,
-      "target_declared_by": null,
+      "status": "source-candidate",
+      "target": "FerroUI.Controls.Carousel",
+      "target_declared_by": "FerroUI.Controls.Primitives.TemplatedControl",
       "upstream": "Microsoft.UI.Xaml.Controls.FlipView.BorderThickness",
       "uses": [
         {
@@ -8416,9 +8416,9 @@
       "behavior": "unverified",
       "declared_by": "Microsoft.UI.Xaml.FrameworkElement",
       "rust_member": "height",
-      "status": "missing-source-candidate",
-      "target": null,
-      "target_declared_by": null,
+      "status": "source-candidate",
+      "target": "FerroUI.Controls.Carousel",
+      "target_declared_by": "FerroUI.Layout.Layoutable",
       "upstream": "Microsoft.UI.Xaml.Controls.FlipView.Height",
       "uses": [
         {
@@ -8435,9 +8435,9 @@
       "behavior": "unverified",
       "declared_by": "Microsoft.UI.Xaml.Controls.ItemsControl",
       "rust_member": "item_template",
-      "status": "missing-source-candidate",
-      "target": null,
-      "target_declared_by": null,
+      "status": "source-candidate",
+      "target": "FerroUI.Controls.Carousel",
+      "target_declared_by": "FerroUI.Controls.ItemsControl",
       "upstream": "Microsoft.UI.Xaml.Controls.FlipView.ItemTemplate",
       "uses": [
         {
@@ -8454,9 +8454,9 @@
       "behavior": "unverified",
       "declared_by": "Microsoft.UI.Xaml.Controls.ItemsControl",
       "rust_member": "items_panel",
-      "status": "missing-source-candidate",
-      "target": null,
-      "target_declared_by": null,
+      "status": "source-candidate",
+      "target": "FerroUI.Controls.Carousel",
+      "target_declared_by": "FerroUI.Controls.ItemsControl",
       "upstream": "Microsoft.UI.Xaml.Controls.FlipView.ItemsPanel",
       "uses": [
         {
@@ -8469,9 +8469,9 @@
       "behavior": "unverified",
       "declared_by": "Microsoft.UI.Xaml.Controls.ItemsControl",
       "rust_member": "items_source",
-      "status": "missing-source-candidate",
-      "target": null,
-      "target_declared_by": null,
+      "status": "source-candidate",
+      "target": "FerroUI.Controls.Carousel",
+      "target_declared_by": "FerroUI.Controls.ItemsControl",
       "upstream": "Microsoft.UI.Xaml.Controls.FlipView.ItemsSource",
       "uses": [
         {
@@ -8488,9 +8488,9 @@
       "behavior": "unverified",
       "declared_by": "Microsoft.UI.Xaml.FrameworkElement",
       "rust_member": "max_width",
-      "status": "missing-source-candidate",
-      "target": null,
-      "target_declared_by": null,
+      "status": "source-candidate",
+      "target": "FerroUI.Controls.Carousel",
+      "target_declared_by": "FerroUI.Layout.Layoutable",
       "upstream": "Microsoft.UI.Xaml.Controls.FlipView.MaxWidth",
       "uses": [
         {

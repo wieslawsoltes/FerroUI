@@ -2,15 +2,15 @@
 
 This ledger records bounded evidence for the native FerroUI sample. Page and API
 completion remains governed by `port-status.json` and the framework parity scanner.
-The catalog contains 126 pages: **72 have partial native implementations**, including
-the ScratchPad, and **54 remain pending**. There are **44 explicit partial mappings to
-original source examples**. No page is marked `ported` or `verified`.
+The catalog contains 126 pages: **76 have partial native implementations**, including
+the ScratchPad, and **50 remain pending**. There are **57 explicit partial mappings to
+original source examples and one pending SVG mapping**. No page is marked `ported` or `verified`.
 
 The current [generated API summary](../../docs/porting/winui-gallery/data/summary.json)
 records 1 verified type, 54 partial types, 202 verified members and 264 partial members.
 The complete `Symbol` enum contributes 197 of those verified members; these counts do
 not certify complete control, page, visual or platform parity.
-The source candidate map separately identifies 315 types and 1,537 members without
+The source candidate map separately identifies 320 types and 1,554 members without
 certifying their signatures, defaults, behavior or WinMD ABI compatibility.
 
 ## Reproducible source inputs
@@ -24,8 +24,8 @@ that exact commit and refuses tracked modifications to its inputs.
 | Original `WinUIGallery/SampleSupport/Data/ControlInfoData.json` | `334896cc85905de1afe64bdac7717218dc6f60607c132443312d1e9d37b0e27b` |
 | Generated `catalog_data.rs` | `451aa227d421cab6eae1a76573ed5c32a8ac55bed6965041bbdffaa850d26416` |
 | Original sample files for 350 catalog definitions | Raw source hashes are retained in every `SampleDefinition` in `catalog_data.rs`. |
-| Explicit mappings for 44 partial source examples | Source paths, raw hashes and named test anchors are in `port-status.json`. |
-| Original control images | `assets-manifest.json` records the source path, original filename, byte count, SHA-256 and registered URI paths of every PNG. |
+| Explicit mappings for 57 partial source examples and one pending SVG example | Source paths, raw hashes and named test anchors are in `port-status.json`. |
+| Original control images and sample media | `assets-manifest.json` records paths, byte counts, hashes and resource URI paths for 108 control PNGs and 22 original media files, plus six source page/code-behind hashes. The two path-case aliases remain explicit. |
 
 The source browser preserves original handlers, binding expressions and substitution
 tokens. Exported catalog transformations are not used to sanitize the displayed
@@ -49,7 +49,55 @@ the original Windows metadata spells `CheckBox.png` and `AnnotatedScrollbar.png`
 differently from the tracked filenames `Checkbox.png` and `AnnotatedScrollBar.png`.
 Both spellings are explicit aliases; original filenames and image bytes are retained.
 
-## Native control promotion
+## Native reuse increment after main `0526a3ca`
+
+Merge `7fa010c9234686e6e914c7167033545d01bf8ce6` integrates the native composition
+services from main `0526a3ca17ec2da5b44489617393c382153678b8`. The four additional
+Gallery pages use existing ColorView, Carousel, Image/drawing and connected-animation
+APIs. The [machine-readable execution record](../../docs/porting/winui-gallery/data/native-reuse-validation.json)
+retains exact commands, test names, source scopes, raw log hashes, compressed logs
+and the corrected failed attempt.
+
+| Local validation | Result | Exact boundary |
+|---|---|---|
+| Native controls | **182 passed**, all 12 integration targets | [Execution 008](../../docs/porting/winui-gallery/data/executions/native-controls-008.json) freezes 53 source inputs before and after the twelve commands. All 521 current API evidence entries reference it; earlier records remain unchanged. |
+| WinUI importer | **53 passed** | Eight new tests cover ColorPicker mappings, semantic rejection, explicit policies, property elements, native-host type references and bounded nesting. Nine relevant inputs were unchanged before/after. An unrelated Gallery test edit observed by the broad collector is explicitly excluded from this importer scope. |
+| Gallery library | **80 passed**, zero failures or ignored tests | Includes 25 new page tests and one original-media test; 125 selected inputs were unchanged before/after. This default-feature library run excludes the capture binary and its Skia-gated test. |
+| Source comparison | **47 scanner regressions passed**; exact maps and generated registries pass | Preserves 3,170 existing types, 28,435 declared member names and 458 registrations; 487 additional types remain separate. Events, Symbol values, builders and public Rust paths pass their freshness checks. |
+| Strict completeness | **Expected exit 2** | 1,544 types, 7,264 members and all 126 pages still lack complete behavioral evidence. The gate remains active. |
+| Original assets | **130 files reproducible**, registered at 132 paths | 108 original control PNGs plus 22 original media files; two existing path-case aliases are explicit. Six original page/code-behind hashes accompany the media manifest. |
+| Rendering and image decoding | Current CI execution pending | The workflow requests **183 PNGs**: 126 light pages, 13 dark pages, 16 named NavigationView views and 28 named views for the 14 new compositions. It also requests the real-Skia JPEG/selected-image test. These requests are not recorded as passing output. |
+
+The first local native build was killed under the shared memory limit before its
+tests ran. A second feature-variant build was stopped before tests to conserve shared
+resources. The successful run reused the existing Gallery feature graph with one
+compiler job. These attempts do not alter the final 182-test result or its hashes.
+
+The first executable Gallery run passed 79 tests and failed the hosted scrolling
+assertion. Its test service supplied no ScrollViewer theme, so the presenter never
+created a scrolling extent. The corrected test installs the existing native
+ScrollContentPresenter/scrollbar test theme and verifies presenter identity, a
+measured extent larger than the viewport, a nonzero offset, exact offset restoration
+and keyboard-focus restoration. The final 80-test run passed without removing those
+assertions. The failed log is retained separately.
+
+ColorPicker's options, alpha preservation, live integer hex/percentage inputs,
+visibility and lifetime are logical native-control tests. Its byte-valued alpha
+slider, native component editors and layout remain explicit source differences.
+ConnectedAnimation tests exercise all four compositions, cached return navigation,
+keyboard activation, scroll/focus restoration and an actual compositor flight;
+manual native item controls do not establish WinUI container/virtualization parity.
+Image tests cover native drawing geometry and stretch state. FlipView tests cover
+original item order, bound template geometry, both axes and pager/selection state.
+
+Default mock renderers deliberately reject JPEG streams. Logical tests require the
+resulting visible image-load diagnostics; they do not fabricate decoded images.
+The capture host separately requires decoded sources, and the Skia-gated test reads
+all 13 original landscape JPEGs' pixels and checks selected-detail propagation.
+SVG decoding remains pending; GIF examples are static first-frame previews with
+explicit playback diagnostics. No new page, API type or member is marked verified.
+
+## Native control promotion checkpoint
 
 The reviewed Gallery pages now use ordinary native control identities in the default
 FerroUI XAML namespace. Rust samples import the controls directly from
@@ -59,8 +107,8 @@ control-navigation argument contracts. The embedded InfoBadge dictionary now com
 from `FerroUI.Themes.WinUI/Controls/InfoBadge.xaml` and targets the native InfoBadge.
 Original source previews still use the explicit WinUI importer.
 
-All 72 implemented pages remain partial, with 54 pending and no completed or verified
-page. API behavior statuses are also unchanged. The promotion changes source identity
+At the promotion checkpoint, all 72 implemented pages remained partial, with 54 pending
+and no completed or verified page. API behavior statuses are also unchanged. The promotion changes source identity
 and usage; it does not demonstrate additional source-example, rendering or platform
 coverage. Original catalog/source/assets and their upstream hashes remain intact.
 
@@ -72,7 +120,7 @@ local command. The record identifies that tested source by its hashes; its paren
 commit identifies the base of the changes. Record 005 retains this original evidence
 after main integration changed `Cargo.lock`.
 
-All **521 current API evidence entries** reference the fresh
+At main integration `171a9ad8`, all **521 API evidence entries** referenced the then-current
 [CI native-control execution record](../../docs/porting/winui-gallery/data/executions/native-controls-007.json),
 which records **182 native tests passed across 12 targets** on actual CI checkout
 `2041e251e6c8f9e1ad1aa7415b4a5eaa338c979c`, tree
@@ -91,7 +139,7 @@ with main `87fb` and the corresponding merge `aae91cbe`. That step passed on
 below. Only `Cargo.lock` changed among the 53 native inputs between records 006 and
 007. Neither historical record nor the exact source guard was changed.
 
-The current comparison reports **315 type candidates and 1,537 member candidates**.
+The promotion comparison reported **315 type candidates and 1,537 member candidates**.
 The increase consists only of the newly matching native `NumberBoxValueChangedEventArgs`
 type and its `OldValue`/`NewValue` members; their behavior remains unverified. The
 existing-API guard reports **204 additive types** against the unchanged protected
@@ -185,7 +233,7 @@ Inspection of NumberBox, InfoBar, NavigationView and AutoSuggestBox captures sho
 native compositions, with missing icon-font glyph boxes on Linux. These captures
 do not establish pixel equality with Windows WinUI or complete page behavior.
 
-### Current integration after main `171a9ad8`
+### Earlier integration after main `171a9ad8`
 
 The [native/XAML/Gallery contract job](https://github.com/wieslawsoltes/FerroUI/actions/runs/39862318897/job/120115819634)
 completed successfully on actual checkout `2041e251`, tree `ab341a63`. This execution
@@ -193,7 +241,7 @@ includes the `Sample Page N` label correction and the newer main integration. Th
 proper branch merge `34671e41` has the same tree; it is recorded separately from the
 commit that GitHub Actions actually checked out.
 
-| Current integration CI execution | Actual result |
+| Integration CI execution at `171a9ad8` | Actual result |
 | --- | --- |
 | Native controls | **182 passed** across all 12 targets; immutable record 007 retains the exact native-step log. |
 | Local values / binding lifetime / deferred resources | **13 / 13 / 3 passed** respectively. |
@@ -211,7 +259,7 @@ execution. Record 007 records a new successful native execution with that lockfi
 the promotion validation JSON. No evidence guard or completeness requirement was
 relaxed.
 
-The [current rendering artifact](https://github.com/wieslawsoltes/FerroUI/actions/runs/39862318897/artifacts/12462876765)
+The [rendering artifact from that integration](https://github.com/wieslawsoltes/FerroUI/actions/runs/39862318897/artifacts/12462876765)
 has SHA-256 `5dee24eb38174ccfa2354ac0551c31ab35fa93e434a4a03f09156a12d5d56363`.
 All 151 files decoded at 1280×900. Of these, 136 are byte-identical to the preceding
 artifact; the remaining 15 retain per-file comparison bounds in the validation
@@ -228,6 +276,17 @@ the corresponding scenario on main `171a9ad8` and the preceding PR checkout
 `63e82a17`. The cause remains unclassified; the observed timeout and serial-quiescence
 heuristic suggest a timing issue without proving one. This failure is retained
 separately from the successful native control and Gallery contract job.
+
+The subsequent [general CI run for `cc463ddf`](https://github.com/wieslawsoltes/FerroUI/actions/runs/39864622258)
+finished with **all 14 jobs successful**. Its [Wayland job](https://github.com/wieslawsoltes/FerroUI/actions/runs/39864622258/job/120124097893)
+passed 116 unit tests; the repeated first EGL scenario passed **103 checks with no
+failures**, including the Chinese `你好` commit and cleared preedit. The later scale,
+fallback and ControlCatalog IME checks passed. The runner had no DRM render node,
+so the optional hardware dmabuf path was not observed. This is evidence of an
+intermittent earlier failure, without an identified cause or a claimed code fix.
+The exact decoded log has SHA-256
+`1523d8d03cfa8b401f90480b157563972336010c626bb13e42cd894960b5f654`.
+These completed results belong to that preceding head, not the new Gallery pages.
 
 The revision-specific executions and captures below predate this promotion. They
 retain their original commands, namespaces, paths, counts and hashes as historical

@@ -85,11 +85,28 @@
       "notes": "Pinned UserInput, ProgrammaticChange and SuggestionChosen reasons accompany the native text-change contract.",
       "target": "FerroUI.Controls.AutoSuggestionBoxTextChangeReason"
     },
+    "Microsoft.UI.Xaml.Controls.ColorPicker": {
+      "kind": "candidate-requiring-adapter",
+      "members": {
+        "IsColorSliderVisible": "is_color_spectrum_slider_visible",
+        "IsColorSliderVisibleProperty": "is_color_spectrum_slider_visible_property",
+        "IsColorChannelTextInputVisible": "is_component_text_input_visible",
+        "IsColorChannelTextInputVisibleProperty": "is_component_text_input_visible_property"
+      },
+      "notes": "WinUI's inline ColorPicker maps to the existing native ColorView, preserving FerroUI ColorPicker's dropdown contract. More, independent alpha editors, hex presentation and alpha-disable semantics require an explicit composition; the Gallery implements those separately. Native ColorView coerces opacity when alpha editing is disabled, while the source picker preserves Color.A. This declaration mapping does not certify equal defaults, layout, input, accessibility or behavior.",
+      "target": "FerroUI.Controls.ColorView"
+    },
     "Microsoft.UI.Xaml.Controls.ContentPresenter": {
       "kind": "shared-core-adaptation",
       "members": {},
       "notes": "Reuse content presentation; WinUI template and alignment semantics require review.",
       "target": "FerroUI.Controls.Presenters.ContentPresenter"
+    },
+    "Microsoft.UI.Xaml.Controls.FlipView": {
+      "kind": "candidate-requiring-adapter",
+      "members": {},
+      "notes": "Existing native Carousel provides the single-selected-item host. The Gallery composes PipsPager navigation and axis-specific PageSlide transitions explicitly. WinUI flip-button chrome, containers, input/focus/RTL behavior, animation timing and full FlipView API remain unverified; this is a reviewed adaptation candidate, not a built-in XAML alias.",
+      "target": "FerroUI.Controls.Carousel"
     },
     "Microsoft.UI.Xaml.Controls.FontIcon": {
       "kind": "implemented-subset",

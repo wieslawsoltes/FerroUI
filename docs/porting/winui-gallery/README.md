@@ -95,29 +95,51 @@ settings and InfoBarPanel follow `FerroUI.Controls.Primitives`, and the eight
 automation peers follow `FerroUI.Automation.Peers`. The source importer maps the
 pinned WinUI identities to these native APIs. There is no separate controls shim.
 
-The [local native-promotion record](data/executions/native-controls-005.json)
-preserves **182 passing tests across 12 native integration targets**, with **53 source
-hashes** frozen before and checked after that local execution. The fresh
-[CI native-control record](data/executions/native-controls-007.json) records another
-**182 passing tests** on actual checkout `2041e251`, tree `ab341a63`, after main
-`171a9ad8` changed `Cargo.lock`. All **521 current API evidence entries** reference 007.
-Its 53 hashes were extracted afterward from the actual checkout's Git blobs; they
-are not execution-time before/after snapshots. The corresponding merge `34671e41`
-has the same tree, but it was not the execution commit. Only `Cargo.lock` changed
-among these inputs since [record 006](data/executions/native-controls-006.json),
-which remains unchanged. The exact source guard is unchanged. See the
-[validation ledger](../../../samples/WinUIGallery/VALIDATION.md) for full identities.
+The [current native-control execution](data/executions/native-controls-008.json)
+records **182 passing tests across all 12 integration targets** on the working tree
+based on main integration `7fa010c9` (main parent `0526a3ca`), including the Gallery's
+new color-picker dependency. Its **53 named source inputs** were frozen before
+and checked after all twelve serialized commands. All **521 current API evidence
+entries** reference 008. The recorded parent is not presented as the complete
+working-tree snapshot. The older [local record 005](data/executions/native-controls-005.json)
+and [CI records 006](data/executions/native-controls-006.json) and
+[007](data/executions/native-controls-007.json) retain their exact original sources,
+commands, logs and boundaries. The exact source guard remains active.
 
-Behavior classifications and Gallery page statuses remain unchanged. Earlier
-execution records and captures retain their original revisions, namespaces and
-counts; loader, theme and Gallery results keep their separately recorded scopes.
+The current source map identifies **320 type candidates and 1,554 member candidates**;
+the existing-API guard preserves **3,170 types, 28,435 declared member names and 458
+registrations**, and reports **487 additive types** after integrating main. Candidate
+matches remain separate from behavioral evidence. The API behavior counts are unchanged:
+1 verified type, 54 partial types, 202 verified members and 264 partial members. The
+complete Symbol enum accounts for the verified type and 197 verified members.
 
-The current source map identifies **315 type candidates and 1,537 member candidates**;
-the existing-API guard reports **204 additive types**. The only new matches are
-`NumberBoxValueChangedEventArgs` and its `OldValue`/`NewValue` members, without a
-behavior-status upgrade. The current theme ledger records **6,912 ported, 1,974 waived
-and 87 pending definitions**, including twelve RadioButtons definitions whose obsolete
-no-control waivers were removed.
+The theme ledger retains **6,912 ported, 1,974 waived and 87 pending definitions**.
+It has its own scope and acceptance gates; native control availability does not
+supply missing source templates or Windows visual acceptance.
+
+### Existing controls used by additional Gallery pages
+
+Four additional pages use existing FerroUI APIs directly, bringing the Gallery to
+**76 partial pages and 50 pending pages**. No page is marked ported or verified.
+Their 14 original source compositions have **13 partial mappings and one pending
+SVG example**. The complete curated ledger contains 57 partial example mappings
+and that pending mapping, separate from all 355 actual source ControlExamples.
+
+| Page | Native API reused | Original compositions and remaining scope |
+|---|---|---|
+| ColorPicker | ColorView, ColorSlider, RadioButtons, TextBox and ToggleButton | One interactive options example; explicit alpha/More/hex composition preserves the existing native dropdown ColorPicker and ColorView contracts. Native slider units, component editing, layout and host acceptance differ. |
+| ConnectedAnimation | ConnectedAnimationService, Frame and FramePage | Four collection/card/configuration/tile compositions with original media and return flows. Item virtualization, exact XY focus, entrance transitions and acrylic remain pending. |
+| Image | Image, Bitmap and drawing primitives | Six source compositions; decode sizing, stretching and fixed nine-grid drawing are supplied. SVG decoding is pending and GIF playback remains static previews with visible diagnostics. |
+| FlipView | Carousel, PageSlide and PipsPager | All three actual source compositions, including the bound-data example omitted from the exported catalog. WinUI container/chrome/focus/RTL/transition equivalence remains pending. |
+
+The [native reuse guide](NATIVE-CONTROLS.md#reusing-controls-already-in-ferroui)
+and [Gallery implementation notes](../../../samples/WinUIGallery/README.md) describe
+these adapters. The source importer maps inline WinUI ColorPicker to ColorView with
+an adaptation diagnostic; alpha and More members require an explicit host policy.
+The asset manifest retains 22 additional original media files and six source-page
+hashes, alongside 108 control images and two explicit case aliases. Rendering CI
+requests all 14 compositions in both themes and rejects image decode failures;
+those requests are not themselves evidence of a completed render or pixel parity.
 
 ### Main integration checkpoint at `7c679ceb`
 
@@ -168,9 +190,9 @@ CI results from local reruns and retains exact commands, versions and hashes.
 The pinned source inventory contains **1,545 public-source types, 7,466 public-source
 members and 198 separately counted private-source types**. The Gallery has **126 catalog
 pages, 350 exported examples and 355 actual ControlExample instances**. All 126 pages are
-searchable and navigable. The port records **72 partial pages**, including the live
-ScratchPad editor, and **54 pending pages**. There are **44 explicit partial mappings to
-original exported examples**. No complete page is claimed as ported or behaviorally
+searchable and navigable. The port records **76 partial pages**, including the live
+ScratchPad editor, and **50 pending pages**. There are **57 explicit partial mappings
+to original examples and one pending SVG mapping**. No complete page is claimed as ported or behaviorally
 verified. The generated [report](data/REPORT.md) and [summary](data/summary.json) are the
 current ledger.
 

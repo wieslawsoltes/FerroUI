@@ -90,6 +90,44 @@ existing root `ferroui_controls::NavigationEventArgs`.
 
 ## Existing contracts and evidence
 
+### Reusing controls already in FerroUI
+
+The next Gallery pages use the existing native implementations below. They do not
+introduce a second control identity just to retain the WinUI source spelling.
+These are explicit adaptations; the API map keeps their semantic differences.
+
+| Source feature | Existing native API | Adaptation and acceptance boundary |
+|---|---|---|
+| Inline `ColorPicker` | `ferroui_controls_color_picker::ColorView`, `ColorSlider`, `RadioButtons`, `TextBox` | Register the color-picker package and include its Fluent styles in the page scope. Independent alpha editors and More behavior are composed explicitly. Native `ColorPicker` keeps its dropdown contract. |
+| `FlipView` | `ferroui_controls::Carousel`, `PipsPager`, `PageSlide` | Three original compositions use horizontal/vertical transitions and original item order. Source container APIs, button overlays, focus transfer and RTL behavior remain pending. |
+| `Image` and decode sizing | `Image`, `Bitmap::decode_to_height` | Original JPEG/GIF bytes are embedded; the decoder controls bitmap size. SVG decoding and animated GIF playback remain pending. |
+| Fixed-size `Image.NineGrid` samples | `CroppedBitmap`, `ImageDrawing`, `DrawingGroup`, `DrawingImage` | Nine native drawing patches retain the original corner pixels at the source example's 164 × 164 output size. This does not add a general NineGrid property to Image. |
+| Connected animation | `ConnectedAnimationService`, `ConnectedAnimation`, `Frame`, `FramePage` | All four source compositions use the merged native composition services. Manual native item buttons replace source list/repeater containers; virtualization, exact XY focus, entrance transitions and acrylic remain separate work. |
+
+For native inline color markup, register
+`ferroui_controls_color_picker::register_types()` before loading the document:
+
+```xml
+<StackPanel xmlns="https://github.com/ferroui">
+  <StackPanel.Styles>
+    <StyleInclude Source="ferres://FerroUI.Controls.ColorPicker/Themes/Fluent/Fluent.xaml" />
+  </StackPanel.Styles>
+  <ColorView Color="CornflowerBlue" IsColorSpectrumSliderVisible="True" />
+</StackPanel>
+```
+
+The package dependency enables `document-assets` for that embedded style include.
+The source importer maps a WinUI `ColorPicker` to `ColorView` and emits `WXAML2006`.
+`IsColorSliderVisible` and `IsColorChannelTextInputVisible` map to the native
+`IsColorSpectrumSliderVisible` and `IsComponentTextInputVisible`. The importer
+reports `WXAML1012` for source alpha enable/visibility and More members unless the
+application supplies an explicit policy. In particular, disabling source alpha
+editing preserves the selected alpha, while native `ColorView.IsAlphaEnabled`
+coerces it to opaque. The Gallery therefore controls its external alpha editors
+without changing the existing native contract.
+
+### Preserved native contracts
+
 The existing `Page`, `ContentPage` and native navigation hierarchy keep their
 identities and asynchronous contracts. `FramePage` supplies the separate Frame
 destination/cache lifecycle. `NumericUpDown` retains its original API and numeric
@@ -110,15 +148,15 @@ Namespace promotion does not upgrade API or Gallery parity statuses. See the
 execution evidence. The promotion's
 [local native-control record](data/executions/native-controls-005.json) preserves
 182 passing tests across 12 integration targets and 53 source hashes frozen before
-and checked after the local run. All 521 current API evidence entries reference the
-fresh [CI native-control record](data/executions/native-controls-007.json), which
-records 182 passing tests on actual checkout `2041e251`, tree `ab341a63`, with main
-`171a9ad8`'s updated `Cargo.lock`. Its 53 source hashes were extracted afterward from
-that checkout's Git blobs, without an execution-time before/after snapshot. The
-corresponding merge `34671e41` has the same tree and was not the execution commit.
-Only `Cargo.lock` changed among the 53 inputs since the
-[preceding CI execution](data/executions/native-controls-006.json), which remains
-unchanged. The exact source guard and behavior classifications remain unchanged.
+and checked after the local run. All 521 current API evidence entries reference
+[record 008](data/executions/native-controls-008.json): 182 tests passed across twelve
+serialized targets after integrating main `0526a3ca` and the Gallery dependency
+change. The 53 named inputs were frozen before and checked after execution; its
+recorded parent is not presented as the complete tested working tree. The previous
+CI records [006](data/executions/native-controls-006.json) and
+[007](data/executions/native-controls-007.json) remain unchanged, with their actual
+checkout identities and post-execution Git-blob hash scopes. The exact source guard
+and API behavior classifications remain unchanged.
 
 The [promotion validation record](data/native-promotion-validation.json) separately
 records loader, theme, external-path and CI results, including corrected failures

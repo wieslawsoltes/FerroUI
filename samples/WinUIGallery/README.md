@@ -13,7 +13,7 @@ and live theme selection use real FerroUI controls.
 
 **This is not a completed port of every Gallery behavior.** `port-status.json`
 separates source coverage from executable page coverage. The current native subset
-contains 71 explicit markup adaptations and a working ScratchPad editor, for 72 partial
+contains 75 explicit markup adaptations and a working ScratchPad editor, for 76 partial
 pages. Each remains `partial`; it does not imply that
 all examples, events, binding expressions, platform capabilities or exact pixels of
 the original page have been reproduced. The generated framework parity reports are
@@ -107,6 +107,39 @@ are local to each compact page. PasswordBox and Header remain explicit native
 TextBox/composition adaptations; changing the example does not change application
 density.
 
+`color_picker_samples.rs` ports the original ColorPicker options to the existing
+inline `ColorView`, with page-scoped color-picker styles. It composes the More
+toggle, independent alpha visibility, RGB/HSV selection and integer RGB/ARGB hex
+editing using native controls. Disabling alpha editing preserves the selected
+color; native ColorView's alpha-coercion contract is unchanged. The native alpha
+slider remains byte-valued (0–255); the percentage editor accepts integers 0–100.
+Native component editing, the two-view layout and Windows hex overflow quirks are
+explicit differences. The existing native `ColorPicker` remains a dropdown.
+
+`connected_animation_samples.rs` supplies all four original connected-animation
+compositions using the native `ConnectedAnimationService`, `Frame` and `FramePage`:
+collection/detail return, card overlay, selectable configuration and manually
+laid-out tiles. Original images, navigation keys, saved scroll/focus and forward/
+return flows are preserved. Native buttons and WrapPanel replace source item
+containers; source virtualization, full XY focus, entrance transitions, acrylic
+and platform acceptance remain pending.
+
+`media_samples.rs` uses native `Image`/`Bitmap` and `Carousel`/`PipsPager` for the
+Image and FlipView pages. Original JPEG/GIF bytes, decode-to-height, four stretch
+modes and fixed-size nine-grid drawings are supplied. SVG decoding is explicitly
+pending, and GIF examples display static first-frame previews with playback
+diagnostics. All three actual FlipView compositions are represented, including
+the bound-data example omitted from the exported catalog. Their native keyboard
+axis and selection synchronization are exercised without claiming WinUI container,
+overlay, focus, RTL or exact transition parity.
+
+The media asset manifest now contains 22 additional original files and the exact
+six source page/code-behind hashes, alongside the 108 control images. The two
+existing path-case aliases remain explicit. The real rendering host rejects
+JPEG/GIF decode failures and checks the actual 100-pixel decode height and realized
+Carousel images. CI requests every new composition in both themes; rendering a
+pending-feature diagnostic does not establish that feature's parity.
+
 `platform_samples.rs` ports the Popup open/close handlers, asynchronous clipboard
 text/format/clear operations and the RefreshContainer request/deferral example.
 Clipboard access comes from the containing window's existing platform service;
@@ -157,26 +190,21 @@ preview behavior and actual native event/property interactions. Tests that const
 controls do not claim an interactive desktop run, pixel equality, keyboard traversal,
 screen-reader interoperability or verification on every host.
 
-The **native control promotion** preserves its
-[local execution record](../../docs/porting/winui-gallery/data/executions/native-controls-005.json):
-**182 native control tests passed across 12 targets**, with **53 source hashes**
-frozen before and checked after the local run. All 521 current API evidence entries
-reference the fresh
-[CI execution record](../../docs/porting/winui-gallery/data/executions/native-controls-007.json),
-with **182 native tests passed** on actual checkout `2041e251`, tree `ab341a63`, after
-main `171a9ad8` updated `Cargo.lock`. The 53 CI source hashes were extracted afterward
-from that checkout's Git blobs; they are not execution-time before/after snapshots.
-The corresponding merge `34671e41` has the same tree, but was not the execution
-commit. Only `Cargo.lock` changed among these inputs since
-[record 006](../../docs/porting/winui-gallery/data/executions/native-controls-006.json),
-which remains unchanged. The exact source guard remains in place.
-[VALIDATION.md](VALIDATION.md) records the full identities and separate execution scopes.
+The **native control promotion** preserves its historical
+[local execution record](../../docs/porting/winui-gallery/data/executions/native-controls-005.json)
+and CI records 006/007 unchanged. All 521 current API evidence entries reference the
+[new native execution](../../docs/porting/winui-gallery/data/executions/native-controls-008.json):
+**182 tests passed across 12 targets**, with **53 named inputs frozen before and
+checked after** execution on the main-integrated working tree and updated Gallery
+dependency lock. Its parent revision is not claimed as the complete tested working
+tree. The exact source guard remains active; [VALIDATION.md](VALIDATION.md) separates
+native-control, importer, Gallery and rendering evidence.
 
-The current maps report **315 type candidates, 1,537 member candidates and 204
-additive types**; the new source matches are `NumberBoxValueChangedEventArgs` and its
-`OldValue`/`NewValue` members. Behavior classifications and page statuses are unchanged.
-Loader, theme and Gallery results below remain tied to their stated historical
-checkpoints.
+The current maps report **320 type candidates, 1,554 member candidates and 487
+additive types**. API behavior classifications remain unchanged. The four new pages
+bring the source-example ledger to 57 partial mappings and one pending SVG mapping;
+no page is ported or verified. Results for earlier checkpoints below retain their
+stated historical sources and scope.
 
 The **main integration checkpoint `7c679ceb`** incorporates main's TextLineBounds
 work at `0ce4e90c` and regenerates the complete combined WinUI theme reference.
