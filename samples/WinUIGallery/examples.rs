@@ -32,6 +32,10 @@ macro_rules! page {
 }
 
 pub static ADAPTATIONS: &[PageAdaptation] = &[
+    page!("Image", "Original bitmaps, four stretch modes, decode-to-height and both NineGrid examples use native Image, Bitmap, CroppedBitmap and DrawingImage. SVG decoding and animated GIF playback remain explicit unsupported examples with visible diagnostics; exact native WinUI decoding and pixel parity remain pending."),
+    page!("FlipView", "All three source compositions use native Carousel, PageSlide and PipsPager with original images, labels, horizontal/vertical layouts and the first three source data groups. WinUI container APIs, flip chrome, XY-focus, RTL and exact transition parity remain pending."),
+    page!("ConnectedAnimation", "All four source compositions use the native ConnectedAnimationService with Frame/FramePage navigation, original keys, configuration choices and source image assets. ItemsControl/WrapPanel compositions explicitly adapt ListView/ItemsRepeater containers; virtualization, XY-focus, entrance transitions and exact rendering acceptance remain pending."),
+    page!("ColorPicker", "The original options use native ColorView, ColorSlider and explicit text/More controls. WinUI's inline ColorPicker maps to ColorView while FerroUI ColorPicker retains its dropdown API. Color, alpha, input visibility and Box/Ring handlers are preserved; exact source layout, localization and host input/accessibility acceptance remain pending."),
     page!("CompactSizing", "The source standard/compact page navigation copies all four text/password values and the selected date. The existing native compact dictionary is scoped to each compact page; global theme density remains unchanged. Header and PasswordBox are explicit compositions/adaptations; full WinUI control contracts and input/visual acceptance remain pending."),
     page!("InfoBadge", "All four source compositions use native InfoBadge: NavigationView item badges, severity styles, an embedded button badge and dynamic NumberBox values. Visibility and pane options retain the original handlers. Exact upstream rendering and host accessibility acceptance remain pending."),
     page!("NavigationView", "All eight source compositions use native NavigationView, items, hierarchy, footer, settings and Frame navigation. Model templates and C# handlers are explicitly adapted to Rust. Top overflow, selectors, transition effects and platform visual/accessibility acceptance remain pending."),
@@ -113,6 +117,7 @@ pub fn find(page_id: &str) -> Option<&'static PageAdaptation> {
 /// behavior in Rust. No alternate drawing or input system is used.
 pub fn create(sample: &PageAdaptation) -> Result<Ref<Control>, XamlLoadException> {
     crate::assets::register();
+    ferroui_controls_color_picker::register_types();
     let root = FerroRuntimeXamlLoader::parse_as::<Ref<Control>>(sample.xaml, None)?;
     crate::frame_sample::wire(&root)?;
     crate::navigation_view_samples::wire(&root)?;
@@ -121,6 +126,9 @@ pub fn create(sample: &PageAdaptation) -> Result<Ref<Control>, XamlLoadException
     crate::input_samples::wire(&root);
     crate::control_samples::wire(&root);
     crate::feedback_samples::wire(&root);
+    crate::color_picker_samples::wire(&root);
+    crate::connected_animation_samples::wire(&root)?;
+    crate::media_samples::wire(&root);
     wire(&root);
     Ok(root)
 }

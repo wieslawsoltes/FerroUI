@@ -33,6 +33,7 @@ capture = ["dep:ferroui-headless", "dep:ferroui-skia", "dep:ferroui-harfbuzz", "
 [dependencies]
 ferroui-base = { workspace = true }
 ferroui-controls = { workspace = true }
+ferroui-controls-color-picker = { workspace = true, features = ["document-assets"] }
 ferroui-markup-xaml = { workspace = true }
 ferroui-markup-xaml-loader = { workspace = true, features = ["runtime"] }
 ferroui-desktop = { workspace = true, optional = true }

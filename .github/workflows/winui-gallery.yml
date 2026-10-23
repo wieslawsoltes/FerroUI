@@ -143,7 +143,7 @@ jobs:
       - name: Render representative controls in the dark theme
         run: >-
           cargo run --locked -p winui-gallery --features capture
-          --bin winui-gallery-capture -- --pages=NumberBox,RadioButton,AutoSuggestBox,InfoBar,InfoBadge,ProgressRing,RatingControl,CompactSizing,NavigationView
+          --bin winui-gallery-capture -- --pages=NumberBox,RadioButton,AutoSuggestBox,InfoBar,InfoBadge,ProgressRing,RatingControl,CompactSizing,NavigationView,ColorPicker,ConnectedAnimation,Image,FlipView
           --dark --query=Button --output-dir=gallery-captures/dark
       - name: Render all eight NavigationView compositions in both themes
         run: |
@@ -158,6 +158,31 @@ jobs:
                 --output-dir="gallery-captures/$theme"
             done
           done
+      - name: Render every new native reuse composition in both themes
+        run: |
+          for theme in light dark; do
+            theme_args=()
+            if [ "$theme" = dark ]; then
+              theme_args=(--dark)
+            fi
+            for entry in \
+              ColorPicker:ColorPickerExample1 \
+              ConnectedAnimation:ConnectedCollectionFrame \
+              ConnectedAnimation:ConnectedCardFrame \
+              ConnectedAnimation:ConnectedContentFrame \
+              ConnectedAnimation:ConnectedRepeaterFrame \
+              Image:ImageExample1 Image:ImageExample2 Image:ImageExample3 \
+              Image:ImageExample4 Image:ImageExample5 Image:ImageExample6 \
+              FlipView:FlipViewExample1 FlipView:FlipViewExample2 FlipView:FlipViewExample3; do
+              cargo run --locked -p winui-gallery --features capture --bin winui-gallery-capture -- \
+                --pages="${entry%%:*}" --control="${entry#*:}" "${theme_args[@]}" \
+                --output-dir="gallery-captures/$theme"
+            done
+          done
+      - name: Decode original connected-animation images and preserve selected-image data
+        run: >-
+          cargo test --locked -p winui-gallery --features capture --lib
+          connected_capture_decodes_original_landscapes_and_propagates_the_selected_bitmap
       - name: Upload native rendering artifacts
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4

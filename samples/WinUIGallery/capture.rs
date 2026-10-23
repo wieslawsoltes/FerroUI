@@ -5,7 +5,8 @@ use ferroui_base::media::imaging::PngBitmapEncoderOptions;
 use ferroui_base::styling::ThemeVariant;
 use ferroui_base::{Rect, Ref};
 use ferroui_controls::{
-    AppBuilder, Application, AutoSuggestBox, ComboBox, Control, Image, ScrollViewer, Window,
+    AppBuilder, Application, AutoSuggestBox, Carousel, ComboBox, Control, Frame, Image,
+    ScrollViewer, TextBlock, Window,
 };
 use ferroui_harfbuzz::HarfBuzzApplicationExtensions;
 use ferroui_headless::{
@@ -99,6 +100,22 @@ fn main() -> Result<(), Box<dyn Error>> {
         if let Some(error) = gallery.native_example_error() {
             return Err(format!("{page}: native example failed to load: {error}").into());
         }
+        window.update_layout();
+        if matches!(page.as_str(), "Image" | "FlipView") {
+            verify_media_decoding(
+                &page,
+                &gallery
+                    .native_example()
+                    .ok_or("The native media example is missing.")?,
+            )?;
+        }
+        if page == "ConnectedAnimation" {
+            verify_connected_animation_decoding(
+                &gallery
+                    .native_example()
+                    .ok_or("The connected-animation example is missing.")?,
+            )?;
+        }
         if page == "AutoSuggestBox" {
             if let Some(query) = &query {
                 let native = gallery
@@ -184,6 +201,164 @@ fn main() -> Result<(), Box<dyn Error>> {
         println!("{}: {}", page, path.display());
     }
     window.close();
+    Ok(())
+}
+
+/// The logical test renderer does not decode the pinned JPEG/GIF bytes. These
+/// checks run in the real Skia host so a blank image cannot pass as a render.
+/// SVG and GIF playback remain explicitly pending; GIF previews are static.
+fn verify_media_decoding(page: &str, native: &Control) -> Result<(), Box<dyn Error>> {
+    let error = native.get_control::<TextBlock>(&format!("{page}LoadError"));
+    if error.is_visible() {
+        return Err(format!("{page}: {}", error.text().unwrap_or_default()).into());
+    }
+    if page == "Image" {
+        for name in [
+            "BasicImage",
+            "DecodedImage",
+            "StretchImage",
+            "NineGridNormal",
+            "NineGridSmallInsets",
+            "NineGridLargeInsets",
+            "GifAutoPreview",
+            "GifPausedPreview",
+            "GifManualPreview",
+        ] {
+            if native.get_control::<Image>(name).source().is_none() {
+                return Err(format!("{page}: {name} has no decoded native image.").into());
+            }
+        }
+        if native
+            .get_control::<TextBlock>("DecodedImageDimensions")
+            .text()
+            .as_deref()
+            != Some("Decoded image height: 100 pixels")
+        {
+            return Err(
+                "The native decoder did not produce the requested 100-pixel height.".into(),
+            );
+        }
+    } else {
+        // Each initial Carousel realizes one item. An aggregate page count can
+        // hide a missing bound template behind images in another Carousel.
+        for name in ["DeclaredFlipView", "BoundFlipView", "VerticalFlipView"] {
+            let carousel = native
+                .find_control::<Carousel>(name)
+                .ok_or_else(|| format!("FlipView: the native Carousel {name} is missing."))?;
+            let images: Vec<_> = carousel
+                .get_self_and_visual_descendants()
+                .filter_map(|visual| visual.cast::<Image>())
+                .collect();
+            if images.len() != 1 {
+                return Err(format!(
+                    "FlipView: {name} realized {} images; exactly one initial item image is required.",
+                    images.len()
+                )
+                .into());
+            }
+            if images[0].source().is_none() {
+                return Err(format!("FlipView: {name} has no decoded native item image.").into());
+            }
+        }
+    }
+    Ok(())
+}
+
+/// Check each current Frame page, including items below its scroll viewport.
+/// Finding no error labels must not let an unrealized or empty page pass.
+fn verify_connected_animation_decoding(native: &Control) -> Result<(), Box<dyn Error>> {
+    for (frame_name, expected_count, error_name) in [
+        ("ConnectedCollectionFrame", 8, "CollectionImageErrors"),
+        ("ConnectedCardFrame", 13, "CardImageErrors"),
+        ("ConnectedRepeaterFrame", 13, "CollectionImageErrors"),
+    ] {
+        let frame = native
+            .find_control::<Frame>(frame_name)
+            .ok_or_else(|| format!("ConnectedAnimation: {frame_name} is missing."))?;
+        let form = frame
+            .current_page()
+            .and_then(|page| page.content())
+            .and_then(|content| Control::from_boxed(&content))
+            .ok_or_else(|| {
+                format!("ConnectedAnimation: {frame_name} has no current native page content.")
+            })?;
+        if !form
+            .get_visual_ancestors()
+            .any(|visual| visual.cast::<Frame>().as_ref() == Some(&frame))
+        {
+            return Err(format!(
+                "ConnectedAnimation: {frame_name}'s current page content is not realized inside its Frame."
+            )
+            .into());
+        }
+
+        let errors: Vec<_> = form
+            .get_self_and_visual_descendants()
+            .filter_map(|visual| visual.cast::<TextBlock>())
+            .filter(|text| {
+                let name = text.name();
+                name.as_deref() == Some(error_name) || name.as_deref() == Some("DetailImageError")
+            })
+            .collect();
+        let expected_error_count = errors
+            .iter()
+            .filter(|text| text.name().as_deref() == Some(error_name))
+            .count();
+        if expected_error_count != 1 {
+            return Err(format!(
+                "ConnectedAnimation: {frame_name} contains {expected_error_count} {error_name} controls; exactly one is required."
+            )
+            .into());
+        }
+        for error in errors {
+            if error.is_visible() {
+                return Err(format!(
+                    "ConnectedAnimation: {frame_name}: {}",
+                    error.text().unwrap_or_default()
+                )
+                .into());
+            }
+        }
+
+        // Only source item images are required. The same-page card overlay's
+        // DetailImage is intentionally empty until a card is selected.
+        let images: Vec<_> = form
+            .get_self_and_visual_descendants()
+            .filter_map(|visual| visual.cast::<Image>())
+            .filter(|image| {
+                image
+                    .name()
+                    .is_some_and(|name| name.starts_with("ConnectedImage"))
+            })
+            .collect();
+        if images.len() != expected_count {
+            return Err(format!(
+                "ConnectedAnimation: {frame_name} realized {} named source images; expected {expected_count}.",
+                images.len()
+            )
+            .into());
+        }
+        for index in 1..=expected_count {
+            let name = format!("ConnectedImage{index}");
+            let matches: Vec<_> = images
+                .iter()
+                .filter(|image| image.name().as_deref() == Some(name.as_str()))
+                .collect();
+            if matches.len() != 1 {
+                return Err(format!(
+                    "ConnectedAnimation: {frame_name} contains {} {name} controls; exactly one is required.",
+                    matches.len()
+                )
+                .into());
+            }
+            if matches[0].source().is_none() {
+                return Err(format!(
+                    "ConnectedAnimation: {frame_name}/{name} has no decoded native image."
+                )
+                .into());
+            }
+        }
+    }
     Ok(())
 }
 

@@ -9,6 +9,8 @@
 mod assets;
 mod assets_data;
 mod cat_data;
+mod color_picker_samples;
+mod connected_animation_samples;
 pub mod catalog;
 mod catalog_data;
 pub mod contrast;
@@ -18,6 +20,7 @@ mod feedback_samples;
 mod frame_sample;
 pub mod gallery;
 mod input_samples;
+mod media_samples;
 pub mod navigation;
 mod navigation_view_samples;
 mod platform_samples;
@@ -40,3 +43,12 @@ mod feedback_samples_tests;
 
 #[cfg(test)]
 mod navigation_view_samples_tests;
+
+#[cfg(test)]
+mod color_picker_samples_tests;
+
+#[cfg(test)]
+mod connected_animation_samples_tests;
+
+#[cfg(test)]
+mod media_samples_tests;
