@@ -156,6 +156,7 @@ FerroUI's existing Rust scanner. It does not infer method parity from a name.
 | [File and stream input](editor-file-io.md) | Bounded encoding detection/replay, BOM decoding, UTF-16 readers and standard Rust/native-storage byte streams |
 | [Browser editor](editor-browser.md) | Linked native application, production Oniguruma initialization, renderer/input conformance gates and current evidence |
 | [TextMate engine](textmate-engine.md) | Grammar/scanner semantics, registry/catalog, metadata, theme rules, incremental states, native/Wasm oracle and remaining engine differences |
+| [TextMate runtime contracts](textmate-runtime-contracts.md) | Source/member audit of compiler, parser, theme and model helpers; token-type boundary correction and explicit public API gaps |
 | [Source inventory](editor-source-map.md) | Per-file source hashes, exact aliases, partial contracts and unmapped APIs |
 | [Editor demo](../../samples/EditorDemo/README.md) | Run commands, runtime XAML, toolbar, explicit-region provider and headless/desktop limits |
 
@@ -173,8 +174,10 @@ Checkpoint evidence is recorded with the commits and updated as tests land:
   stale coordinates after both host protection callbacks and update-start
   handlers. Character-mapped transformations use the document's atomic batch
   path while retaining anchor mapping and one undo group.
-- The native TextMate library passes **37 tests** and the explicit portable
-  backend passes **36 tests**. Native TextMate and actual compiled Rust/Wasm
+- The native TextMate library passes **40 tests** and the explicit portable
+  backend passes **39 tests**. These include regressions for the pinned first
+  word-boundary token-type match, inherited types and embedded-language resets;
+  all three reproduced failures before the correction. Native TextMate and actual compiled Rust/Wasm
   both match all **74 reference
   lines across 11 language families**, comparing token boundaries, scopes and
   continuation depths. The fixture is generated independently with the pinned

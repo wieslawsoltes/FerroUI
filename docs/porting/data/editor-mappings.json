@@ -5590,12 +5590,24 @@
     },
     {
       "source": "textmatesharp:src/TextMateSharp.Grammars/GrammarNames.cs",
-      "status": "unmapped",
-      "targets": [],
-      "unmapped_types": [
-        "TextMateSharp.Grammars.GrammarNames"
+      "status": "adapted",
+      "targets": [
+        {
+          "path": "src/FerroUI.TextMate/catalog.rs",
+          "symbols": [
+            "BundledCatalog",
+            "BundledCatalog::packages"
+          ],
+          "aliases": [
+            {
+              "upstream": "TextMateSharp.Grammars.GrammarNames",
+              "rust": "BundledCatalog"
+            }
+          ]
+        }
       ],
-      "notes": "No verified Rust destination for this upstream source/API.",
+      "unmapped_types": [],
+      "notes": "Actual package resources drive the bundled grammar inventory rather than a second hand-maintained managed spelling array. Member evidence is in textmate-runtime-contracts.md.",
       "limitations": []
     },
     {
@@ -6130,13 +6142,27 @@
     },
     {
       "source": "textmatesharp:src/TextMateSharp/Grammar/Injection.cs",
-      "status": "unmapped",
-      "targets": [],
-      "unmapped_types": [
-        "TextMateSharp.Grammars.Injection"
+      "status": "adapted",
+      "targets": [
+        {
+          "path": "src/FerroUI.TextMate/grammar.rs",
+          "symbols": [
+            "Program::compile",
+            "Grammar::scan"
+          ],
+          "aliases": [
+            {
+              "upstream": "TextMateSharp.Grammars.Injection",
+              "rust": "Program::compile"
+            }
+          ]
+        }
       ],
-      "notes": "No verified Rust destination for this upstream source/API.",
-      "limitations": []
+      "unmapped_types": [],
+      "notes": "Internal injection records consolidate into ordered selector/rule arena entries and native scan precedence. Member evidence is in textmate-runtime-contracts.md.",
+      "limitations": [
+        "External equal-priority injection tie ordering needs an additional pinned reference comparison."
+      ]
     },
     {
       "source": "textmatesharp:src/TextMateSharp/Grammar/LineText.cs",
@@ -6314,12 +6340,23 @@
               "rust": "Grammar"
             }
           ]
+        },
+        {
+          "path": "src/FerroUI.TextMate/registry.rs",
+          "symbols": [
+            "IGrammarRepository",
+            "Grammar::from_repository"
+          ],
+          "aliases": [
+            {
+              "upstream": "TextMateSharp.Internal.Grammars.Grammar.GrammarRepository",
+              "rust": "IGrammarRepository"
+            }
+          ]
         }
       ],
-      "unmapped_types": [
-        "TextMateSharp.Internal.Grammars.Grammar.GrammarRepository"
-      ],
-      "notes": "Compiled grammar tokenizer with captures, begin/end/while, injections and state.",
+      "unmapped_types": [],
+      "notes": "Owned raw grammars and repository dependency collection build shared compiled arenas before returning a native grammar handle. Member evidence is in textmate-runtime-contracts.md.",
       "limitations": [
         "Nested GrammarRepository interface facade is absent; differential coverage is finite."
       ]
@@ -6332,21 +6369,28 @@
           "path": "src/FerroUI.TextMate/grammar.rs",
           "symbols": [
             "Grammar::emit_captures",
-            "Grammar::scan"
+            "Grammar::scan",
+            "Frame",
+            "Grammar::tokenize_line_with_options"
           ],
           "aliases": [
             {
               "upstream": "TextMateSharp.Internal.Grammars.LineTokenizer",
               "rust": "Grammar::scan"
+            },
+            {
+              "upstream": "TextMateSharp.Internal.Grammars.LineTokenizer.WhileStack",
+              "rust": "Frame"
+            },
+            {
+              "upstream": "TextMateSharp.Internal.Grammars.LineTokenizer.WhileCheckResult",
+              "rust": "Grammar::tokenize_line_with_options"
             }
           ]
         }
       ],
-      "unmapped_types": [
-        "TextMateSharp.Internal.Grammars.LineTokenizer.WhileCheckResult",
-        "TextMateSharp.Internal.Grammars.LineTokenizer.WhileStack"
-      ],
-      "notes": "Tokenizer loop and capture retokenization consolidated into Grammar.",
+      "unmapped_types": [],
+      "notes": "Continuation frames, while-condition checks, cursor and anchor state are local Rust tokenizer data rather than independently mutable helper objects. Member evidence is in textmate-runtime-contracts.md.",
       "limitations": [
         "While-stack bookkeeping is private Rust state, not exposed managed helper objects."
       ]
@@ -6397,22 +6441,45 @@
     },
     {
       "source": "textmatesharp:src/TextMateSharp/Internal/Grammars/MetadataConsts.cs",
-      "status": "unmapped",
-      "targets": [],
-      "unmapped_types": [
-        "TextMateSharp.Internal.Grammars.MetadataConsts"
+      "status": "adapted",
+      "targets": [
+        {
+          "path": "src/FerroUI.TextMate/metadata.rs",
+          "symbols": [
+            "EncodedTokenAttributes"
+          ],
+          "aliases": [
+            {
+              "upstream": "TextMateSharp.Internal.Grammars.MetadataConsts",
+              "rust": "EncodedTokenAttributes"
+            }
+          ]
+        }
       ],
-      "notes": "No verified Rust destination for this upstream source/API.",
+      "unmapped_types": [],
+      "notes": "Packed metadata masks and shifts are implemented by the checked constructor/accessor contract with boundary-value regressions. Member evidence is in textmate-runtime-contracts.md.",
       "limitations": []
     },
     {
       "source": "textmatesharp:src/TextMateSharp/Internal/Grammars/OptionalStandardTokenType.cs",
-      "status": "unmapped",
-      "targets": [],
-      "unmapped_types": [
-        "TextMateSharp.Internal.Grammars.OptionalStandardTokenType"
+      "status": "adapted",
+      "targets": [
+        {
+          "path": "src/FerroUI.TextMate/metadata.rs",
+          "symbols": [
+            "scope_token_type",
+            "StandardTokenType"
+          ],
+          "aliases": [
+            {
+              "upstream": "TextMateSharp.Internal.Grammars.OptionalStandardTokenType",
+              "rust": "scope_token_type"
+            }
+          ]
+        }
       ],
-      "notes": "No verified Rust destination for this upstream source/API.",
+      "unmapped_types": [],
+      "notes": "Option<StandardTokenType> distinguishes inheritance from explicit Other reset. The managed numeric NotSet sentinel is not stored in packed tokens. Member evidence is in textmate-runtime-contracts.md.",
       "limitations": []
     },
     {
@@ -6651,42 +6718,70 @@
         {
           "path": "src/FerroUI.TextMate/selector.rs",
           "symbols": [
-            "ScopeSelector"
+            "ScopeSelector",
+            "matches_name",
+            "ScopeSelector::matches"
           ],
           "aliases": [
             {
               "upstream": "TextMateSharp.Internal.Matcher.NameMatcher",
               "rust": "ScopeSelector"
+            },
+            {
+              "upstream": "TextMateSharp.Internal.Matcher.IMatchesName",
+              "rust": "matches_name"
             }
           ]
         }
       ],
-      "unmapped_types": [
-        "TextMateSharp.Internal.Matcher.IMatchesName"
-      ],
-      "notes": "Parsed scope-selector expression tree and matching priorities.",
+      "unmapped_types": [],
+      "notes": "Concrete ancestor/name matching supplies the tokenizer selector predicate. Member evidence is in textmate-runtime-contracts.md.",
       "limitations": [
-        "Managed generic matcher/builder/name-matcher interfaces are not exposed."
+        "Caller-supplied generic name predicates are not exposed."
       ]
     },
     {
       "source": "textmatesharp:src/TextMateSharp/Internal/Matcher/MatchInjectionResult.cs",
-      "status": "unmapped",
-      "targets": [],
-      "unmapped_types": [
-        "TextMateSharp.Internal.Matcher.MatchInjectionsResult"
+      "status": "adapted",
+      "targets": [
+        {
+          "path": "src/FerroUI.TextMate/grammar.rs",
+          "symbols": [
+            "Match",
+            "Grammar::consider"
+          ],
+          "aliases": [
+            {
+              "upstream": "TextMateSharp.Internal.Matcher.MatchInjectionsResult",
+              "rust": "Match"
+            }
+          ]
+        }
       ],
-      "notes": "No verified Rust destination for this upstream source/API.",
+      "unmapped_types": [],
+      "notes": "Checked capture ranges, arena rule IDs and injection precedence share one private match result. UTF-8 byte ranges convert to public UTF-16 token coordinates. Member evidence is in textmate-runtime-contracts.md.",
       "limitations": []
     },
     {
       "source": "textmatesharp:src/TextMateSharp/Internal/Matcher/MatchResult.cs",
-      "status": "unmapped",
-      "targets": [],
-      "unmapped_types": [
-        "TextMateSharp.Internal.Matcher.MatchResult"
+      "status": "adapted",
+      "targets": [
+        {
+          "path": "src/FerroUI.TextMate/grammar.rs",
+          "symbols": [
+            "Match",
+            "Grammar::consider"
+          ],
+          "aliases": [
+            {
+              "upstream": "TextMateSharp.Internal.Matcher.MatchResult",
+              "rust": "Match"
+            }
+          ]
+        }
       ],
-      "notes": "No verified Rust destination for this upstream source/API.",
+      "unmapped_types": [],
+      "notes": "Checked capture ranges, arena rule IDs and injection precedence share one private match result. UTF-8 byte ranges convert to public UTF-16 token coordinates. Member evidence is in textmate-runtime-contracts.md.",
       "limitations": []
     },
     {
@@ -6719,22 +6814,26 @@
         {
           "path": "src/FerroUI.TextMate/selector.rs",
           "symbols": [
-            "ScopeSelector"
+            "ScopeSelector",
+            "lex",
+            "Parser"
           ],
           "aliases": [
             {
               "upstream": "TextMateSharp.Internal.Matcher.MatcherBuilder",
               "rust": "ScopeSelector"
+            },
+            {
+              "upstream": "TextMateSharp.Internal.Matcher.MatcherBuilder.Tokenizer",
+              "rust": "lex"
             }
           ]
         }
       ],
-      "unmapped_types": [
-        "TextMateSharp.Internal.Matcher.MatcherBuilder.Tokenizer"
-      ],
-      "notes": "Parsed scope-selector expression tree and matching priorities.",
+      "unmapped_types": [],
+      "notes": "Rust selector lexing and recursive parsing consolidate the managed builder and nested tokenizer. Member evidence is in textmate-runtime-contracts.md.",
       "limitations": [
-        "Managed generic matcher/builder/name-matcher interfaces are not exposed."
+        "Malformed-selector permissiveness is not proven equivalent for every source form."
       ]
     },
     {
@@ -6843,13 +6942,26 @@
     },
     {
       "source": "textmatesharp:src/TextMateSharp/Internal/Parser/PListObject.cs",
-      "status": "unmapped",
-      "targets": [],
-      "unmapped_types": [
-        "TextMateSharp.Internal.Parser.PListObject"
+      "status": "adapted",
+      "targets": [
+        {
+          "path": "src/FerroUI.TextMate/raw.rs",
+          "symbols": [
+            "read_plist"
+          ],
+          "aliases": [
+            {
+              "upstream": "TextMateSharp.Internal.Parser.PListObject",
+              "rust": "read_plist"
+            }
+          ]
+        }
       ],
-      "notes": "No verified Rust destination for this upstream source/API.",
-      "limitations": []
+      "unmapped_types": [],
+      "notes": "Recursive XML conversion builds owned serde_json values, replacing the managed parent/pending-key accumulation object. Member evidence is in textmate-runtime-contracts.md.",
+      "limitations": [
+        "Only the documented plist value kinds are supported; no mutable public builder facade is provided."
+      ]
     },
     {
       "source": "textmatesharp:src/TextMateSharp/Internal/Rules/BeginEndRule.cs",
@@ -6968,13 +7080,26 @@
     },
     {
       "source": "textmatesharp:src/TextMateSharp/Internal/Rules/IGrammarRegistry.cs",
-      "status": "unmapped",
-      "targets": [],
-      "unmapped_types": [
-        "TextMateSharp.Internal.Rules.IGrammarRegistry"
+      "status": "adapted",
+      "targets": [
+        {
+          "path": "src/FerroUI.TextMate/grammar.rs",
+          "symbols": [
+            "Program::collect"
+          ],
+          "aliases": [
+            {
+              "upstream": "TextMateSharp.Internal.Rules.IGrammarRegistry",
+              "rust": "Program::collect"
+            }
+          ]
+        }
       ],
-      "notes": "No verified Rust destination for this upstream source/API.",
-      "limitations": []
+      "unmapped_types": [],
+      "notes": "External grammar lookup, lexical repositories and owner/base roots resolve through the compiled arena. Member evidence is in textmate-runtime-contracts.md.",
+      "limitations": [
+        "Custom managed compiler registry implementations are replaced by IGrammarRepository and owned RawGrammar inputs."
+      ]
     },
     {
       "source": "textmatesharp:src/TextMateSharp/Internal/Rules/IRegExpSourceAnchorCache.cs",
@@ -6999,23 +7124,53 @@
     },
     {
       "source": "textmatesharp:src/TextMateSharp/Internal/Rules/IRuleFactoryHelper.cs",
-      "status": "unmapped",
-      "targets": [],
-      "unmapped_types": [
-        "TextMateSharp.Internal.Rules.IRuleFactoryHelper"
+      "status": "adapted",
+      "targets": [
+        {
+          "path": "src/FerroUI.TextMate/grammar.rs",
+          "symbols": [
+            "Program",
+            "Program::reserve",
+            "Program::fill"
+          ],
+          "aliases": [
+            {
+              "upstream": "TextMateSharp.Internal.Rules.IRuleFactoryHelper",
+              "rust": "Program"
+            }
+          ]
+        }
       ],
-      "notes": "No verified Rust destination for this upstream source/API.",
-      "limitations": []
+      "unmapped_types": [],
+      "notes": "Two-phase rule reservation and filling handles recursive references with safe indexed nodes. Member evidence is in textmate-runtime-contracts.md.",
+      "limitations": [
+        "Externally subclassed compiled rules and mutable rule-factory callbacks are not accepted."
+      ]
     },
     {
       "source": "textmatesharp:src/TextMateSharp/Internal/Rules/IRuleRegistry.cs",
-      "status": "unmapped",
-      "targets": [],
-      "unmapped_types": [
-        "TextMateSharp.Internal.Rules.IRuleRegistry"
+      "status": "adapted",
+      "targets": [
+        {
+          "path": "src/FerroUI.TextMate/grammar.rs",
+          "symbols": [
+            "Program",
+            "Program::reserve",
+            "Program::fill"
+          ],
+          "aliases": [
+            {
+              "upstream": "TextMateSharp.Internal.Rules.IRuleRegistry",
+              "rust": "Program"
+            }
+          ]
+        }
       ],
-      "notes": "No verified Rust destination for this upstream source/API.",
-      "limitations": []
+      "unmapped_types": [],
+      "notes": "Two-phase rule reservation and filling handles recursive references with safe indexed nodes. Member evidence is in textmate-runtime-contracts.md.",
+      "limitations": [
+        "Externally subclassed compiled rules and mutable rule-factory callbacks are not accepted."
+      ]
     },
     {
       "source": "textmatesharp:src/TextMateSharp/Internal/Rules/IncludeOnlyRule.cs",
@@ -7095,22 +7250,25 @@
         {
           "path": "src/FerroUI.TextMate/regex_source.rs",
           "symbols": [
-            "RegexCache"
+            "RegexCache",
+            "resolve_anchors"
           ],
           "aliases": [
             {
               "upstream": "TextMateSharp.Internal.Rules.RegExpSourceList",
               "rust": "RegexCache"
+            },
+            {
+              "upstream": "TextMateSharp.Internal.Rules.RegExpSourceList.RegExpSourceListAnchorCache",
+              "rust": "RegexCache"
             }
           ]
         }
       ],
-      "unmapped_types": [
-        "TextMateSharp.Internal.Rules.RegExpSourceList.RegExpSourceListAnchorCache"
-      ],
-      "notes": "Compiled pattern caching consolidates source-list scanner ownership.",
+      "unmapped_types": [],
+      "notes": "Resolved-expression cache keys incorporate both first-line and anchor choices, replacing the four managed scanner cache slots. Member evidence is in textmate-runtime-contracts.md.",
       "limitations": [
-        "No managed list/anchor-cache public API."
+        "Individual expression caching does not establish the upstream multi-pattern scanner performance."
       ]
     },
     {
@@ -7253,13 +7411,26 @@
     },
     {
       "source": "textmatesharp:src/TextMateSharp/Internal/Types/IRawCaptures.cs",
-      "status": "unmapped",
-      "targets": [],
-      "unmapped_types": [
-        "TextMateSharp.Internal.Types.IRawCaptures"
+      "status": "adapted",
+      "targets": [
+        {
+          "path": "src/FerroUI.TextMate/raw.rs",
+          "symbols": [
+            "RawRule"
+          ],
+          "aliases": [
+            {
+              "upstream": "TextMateSharp.Internal.Types.IRawCaptures",
+              "rust": "RawRule"
+            }
+          ]
+        }
       ],
-      "notes": "No verified Rust destination for this upstream source/API.",
-      "limitations": []
+      "unmapped_types": [],
+      "notes": "Owned capture maps expose key iteration and lookup; compilation converts numeric capture keys into ordered entries. Member evidence is in textmate-runtime-contracts.md.",
+      "limitations": [
+        "No dynamically implemented captures interface is required by the Rust compiler."
+      ]
     },
     {
       "source": "textmatesharp:src/TextMateSharp/Internal/Types/IRawGrammar.cs",
@@ -7286,13 +7457,27 @@
     },
     {
       "source": "textmatesharp:src/TextMateSharp/Internal/Types/IRawRepository.cs",
-      "status": "unmapped",
-      "targets": [],
-      "unmapped_types": [
-        "TextMateSharp.Internal.Types.IRawRepository"
+      "status": "adapted",
+      "targets": [
+        {
+          "path": "src/FerroUI.TextMate/raw.rs",
+          "symbols": [
+            "RawRule",
+            "RawGrammar"
+          ],
+          "aliases": [
+            {
+              "upstream": "TextMateSharp.Internal.Types.IRawRepository",
+              "rust": "RawRule"
+            }
+          ]
+        }
       ],
-      "notes": "No verified Rust destination for this upstream source/API.",
-      "limitations": []
+      "unmapped_types": [],
+      "notes": "Owned lexical repository maps merge during compilation; arena owner/base IDs replace synthetic raw $self/$base entries. Member evidence is in textmate-runtime-contracts.md.",
+      "limitations": [
+        "The mutable managed repository facade is replaced by ordinary Rust maps."
+      ]
     },
     {
       "source": "textmatesharp:src/TextMateSharp/Internal/Types/IRawRule.cs",
@@ -7342,33 +7527,82 @@
     },
     {
       "source": "textmatesharp:src/TextMateSharp/Internal/Utils/StringUtils.cs",
-      "status": "unmapped",
-      "targets": [],
-      "unmapped_types": [
-        "TextMateSharp.Internal.Utils.StringUtils"
+      "status": "adapted",
+      "targets": [
+        {
+          "path": "src/FerroUI.TextMate/line_text.rs",
+          "symbols": [
+            "LineText::slice"
+          ],
+          "aliases": [
+            {
+              "upstream": "TextMateSharp.Internal.Utils.StringUtils",
+              "rust": "LineText::slice"
+            }
+          ]
+        }
       ],
-      "notes": "No standalone port of this managed utility API. Rust standard-library or FerroUI services may replace internal uses without providing this public contract.",
-      "limitations": []
+      "unmapped_types": [],
+      "notes": "Checked UTF-16 slicing, complete hexadecimal Color parsing and ordinary Rust comparisons supply the internal helper uses. Member evidence is in textmate-runtime-contracts.md.",
+      "limitations": [
+        "Slicing rejects split surrogate pairs; color parsing does not preserve permissive valid-prefix behavior; culture-dependent string ordering is not reproduced."
+      ]
     },
     {
       "source": "textmatesharp:src/TextMateSharp/Model/AbstractLineList.cs",
-      "status": "unmapped",
-      "targets": [],
-      "unmapped_types": [
-        "TextMateSharp.Model.AbstractLineList"
+      "status": "adapted",
+      "targets": [
+        {
+          "path": "src/FerroUI.TextMate/model_contract.rs",
+          "symbols": [
+            "IModelLines"
+          ],
+          "aliases": [
+            {
+              "upstream": "TextMateSharp.Model.AbstractLineList",
+              "rust": "IModelLines"
+            }
+          ]
+        },
+        {
+          "path": "src/FerroUI.TextMate/model.rs",
+          "symbols": [
+            "TokenizationModel::replace_lines",
+            "TokenizationModel::invalidate_lines",
+            "TokenizationModel::force_tokenization"
+          ],
+          "aliases": []
+        }
       ],
-      "notes": "This managed token model/decoder/listener API has no direct Rust counterpart; the synchronous TokenizationModel has a separate contract.",
-      "limitations": []
+      "unmapped_types": [],
+      "notes": "Borrowed host text is snapshotted through IModelLines and explicit cache edits/invalidation replace managed mutable line-list publication. Member evidence is in textmate-runtime-contracts.md.",
+      "limitations": [
+        "Managed lock ordering, SetModel callbacks and Dispose subclassing are not reproduced."
+      ]
     },
     {
       "source": "textmatesharp:src/TextMateSharp/Model/DecodeMap.cs",
-      "status": "unmapped",
-      "targets": [],
-      "unmapped_types": [
-        "TextMateSharp.Model.DecodeMap"
+      "status": "adapted",
+      "targets": [
+        {
+          "path": "src/FerroUI.TextMate/grammar.rs",
+          "symbols": [
+            "ByteToken",
+            "emit"
+          ],
+          "aliases": [
+            {
+              "upstream": "TextMateSharp.Model.DecodeMap",
+              "rust": "ByteToken"
+            }
+          ]
+        }
       ],
-      "notes": "This managed token model/decoder/listener API has no direct Rust counterpart; the synchronous TokenizationModel has a separate contract.",
-      "limitations": []
+      "unmapped_types": [],
+      "notes": "Adjacent token coalescing uses complete ordered scope vectors instead of component interning/previous-token dictionaries. Member evidence is in textmate-runtime-contracts.md.",
+      "limitations": [
+        "This intentionally preserves distinctions that the upstream component-set equality key loses; helper mutation APIs are not replicated."
+      ]
     },
     {
       "source": "textmatesharp:src/TextMateSharp/Model/IModelLines.cs",
@@ -7485,13 +7719,27 @@
     },
     {
       "source": "textmatesharp:src/TextMateSharp/Model/ModelLine.cs",
-      "status": "unmapped",
-      "targets": [],
-      "unmapped_types": [
-        "TextMateSharp.Model.ModelLine"
+      "status": "adapted",
+      "targets": [
+        {
+          "path": "src/FerroUI.TextMate/model.rs",
+          "symbols": [
+            "LineTokens",
+            "TokenizationModel"
+          ],
+          "aliases": [
+            {
+              "upstream": "TextMateSharp.Model.ModelLine",
+              "rust": "LineTokens"
+            }
+          ]
+        }
       ],
-      "notes": "This managed token model/decoder/listener API has no direct Rust counterpart; the synchronous TokenizationModel has a separate contract.",
-      "limitations": []
+      "unmapped_types": [],
+      "notes": "Owned tokens/continuation state and optional or masked cache entries encode invalid lines and state reset. Member evidence is in textmate-runtime-contracts.md.",
+      "limitations": [
+        "Public independent mutation of cached State/Tokens/IsInvalid fields is intentionally prevented."
+      ]
     },
     {
       "source": "textmatesharp:src/TextMateSharp/Model/ModelTokensChangedEvent.cs",
@@ -7569,22 +7817,25 @@
         {
           "path": "src/FerroUI.TextMate/model.rs",
           "symbols": [
-            "TokenizationModel"
+            "TokenizationModel",
+            "TokenizationModel::retokenize_with_options"
           ],
           "aliases": [
             {
               "upstream": "TextMateSharp.Model.TMModel",
               "rust": "TokenizationModel"
+            },
+            {
+              "upstream": "TextMateSharp.Model.TMModel.TokenizerThread",
+              "rust": "TokenizationModel::retokenize_with_options"
             }
           ]
         }
       ],
-      "unmapped_types": [
-        "TextMateSharp.Model.TMModel.TokenizerThread"
-      ],
-      "notes": "Incremental cache/state convergence, host line snapshots, forced or budgeted tokenization and FerroUI event listeners.",
+      "unmapped_types": [],
+      "notes": "Bounded host-scheduled work, cancellation, convergence and range events replace the managed tokenizer thread. Member evidence is in textmate-runtime-contracts.md.",
       "limitations": [
-        "The caller schedules work and owns worker shutdown; no managed TokenizerThread or nullable grammar lifecycle."
+        "Thread creation/joining and nullable-grammar lifecycle remain host/API differences."
       ]
     },
     {
@@ -7612,23 +7863,48 @@
     },
     {
       "source": "textmatesharp:src/TextMateSharp/Model/TMToken.cs",
-      "status": "unmapped",
-      "targets": [],
-      "unmapped_types": [
-        "TextMateSharp.Model.TMToken"
+      "status": "adapted",
+      "targets": [
+        {
+          "path": "src/FerroUI.TextMate/grammar.rs",
+          "symbols": [
+            "Token"
+          ],
+          "aliases": [
+            {
+              "upstream": "TextMateSharp.Model.TMToken",
+              "rust": "Token"
+            }
+          ]
+        }
       ],
-      "notes": "This managed token model/decoder/listener API has no direct Rust counterpart; the synchronous TokenizationModel has a separate contract.",
+      "unmapped_types": [],
+      "notes": "UTF-16 start index and ordered scopes are retained; the Rust token also carries its exclusive end bound. Member evidence is in textmate-runtime-contracts.md.",
       "limitations": []
     },
     {
       "source": "textmatesharp:src/TextMateSharp/Model/TMTokenDecodeData.cs",
-      "status": "unmapped",
-      "targets": [],
-      "unmapped_types": [
-        "TextMateSharp.Model.TMTokenDecodeData"
+      "status": "adapted",
+      "targets": [
+        {
+          "path": "src/FerroUI.TextMate/grammar.rs",
+          "symbols": [
+            "ByteToken",
+            "emit"
+          ],
+          "aliases": [
+            {
+              "upstream": "TextMateSharp.Model.TMTokenDecodeData",
+              "rust": "ByteToken"
+            }
+          ]
+        }
       ],
-      "notes": "This managed token model/decoder/listener API has no direct Rust counterpart; the synchronous TokenizationModel has a separate contract.",
-      "limitations": []
+      "unmapped_types": [],
+      "notes": "Adjacent token coalescing uses complete ordered scope vectors instead of component interning/previous-token dictionaries. Member evidence is in textmate-runtime-contracts.md.",
+      "limitations": [
+        "This intentionally preserves distinctions that the upstream component-set equality key loses; helper mutation APIs are not replicated."
+      ]
     },
     {
       "source": "textmatesharp:src/TextMateSharp/Model/Tokenizer.cs",
@@ -7777,23 +8053,51 @@
     },
     {
       "source": "textmatesharp:src/TextMateSharp/Themes/IRawTheme.cs",
-      "status": "unmapped",
-      "targets": [],
-      "unmapped_types": [
-        "TextMateSharp.Themes.IRawTheme"
+      "status": "adapted",
+      "targets": [
+        {
+          "path": "src/FerroUI.TextMate/theme.rs",
+          "symbols": [
+            "Theme::apply",
+            "Theme"
+          ],
+          "aliases": [
+            {
+              "upstream": "TextMateSharp.Themes.IRawTheme",
+              "rust": "Theme::apply"
+            }
+          ]
+        }
       ],
-      "notes": "No verified Rust destination for this upstream source/API.",
-      "limitations": []
+      "unmapped_types": [],
+      "notes": "Raw JSON/plist theme fields are consumed into typed resolved colors, includes and selector rules. Member evidence is in textmate-runtime-contracts.md.",
+      "limitations": [
+        "Arbitrary raw values, typed mutable raw-theme interfaces and lossless raw-theme round trips are not retained."
+      ]
     },
     {
       "source": "textmatesharp:src/TextMateSharp/Themes/IRawThemeSetting.cs",
-      "status": "unmapped",
-      "targets": [],
-      "unmapped_types": [
-        "TextMateSharp.Themes.IRawThemeSetting"
+      "status": "adapted",
+      "targets": [
+        {
+          "path": "src/FerroUI.TextMate/theme.rs",
+          "symbols": [
+            "Rule",
+            "Theme::apply"
+          ],
+          "aliases": [
+            {
+              "upstream": "TextMateSharp.Themes.IRawThemeSetting",
+              "rust": "Rule"
+            }
+          ]
+        }
       ],
-      "notes": "No verified Rust destination for this upstream source/API.",
-      "limitations": []
+      "unmapped_types": [],
+      "notes": "String/array scope selectors and style settings become ordered native theme rules. Member evidence is in textmate-runtime-contracts.md.",
+      "limitations": [
+        "Display names and unrecognized raw setting data are discarded; a caller-implemented raw setting interface is not exposed."
+      ]
     },
     {
       "source": "textmatesharp:src/TextMateSharp/Themes/IThemeProvider.cs",
@@ -7820,13 +8124,29 @@
     },
     {
       "source": "textmatesharp:src/TextMateSharp/Themes/IThemeSetting.cs",
-      "status": "unmapped",
-      "targets": [],
-      "unmapped_types": [
-        "TextMateSharp.Themes.IThemeSetting"
+      "status": "adapted",
+      "targets": [
+        {
+          "path": "src/FerroUI.TextMate/theme.rs",
+          "symbols": [
+            "TokenStyle",
+            "FontStyle",
+            "Color",
+            "Rule"
+          ],
+          "aliases": [
+            {
+              "upstream": "TextMateSharp.Themes.IThemeSetting",
+              "rust": "TokenStyle"
+            }
+          ]
+        }
       ],
-      "notes": "No verified Rust destination for this upstream source/API.",
-      "limitations": []
+      "unmapped_types": [],
+      "notes": "Optional rule fields and typed resolved styles preserve foreground/background inheritance and explicit font reset. Member evidence is in textmate-runtime-contracts.md.",
+      "limitations": [
+        "Unrecognized raw style fields are not preserved."
+      ]
     },
     {
       "source": "textmatesharp:src/TextMateSharp/Themes/ParsedThemeRule.cs",
@@ -7858,22 +8178,25 @@
         {
           "path": "src/FerroUI.TextMate/theme.rs",
           "symbols": [
-            "Theme"
+            "Theme",
+            "Theme::match_scopes"
           ],
           "aliases": [
             {
               "upstream": "TextMateSharp.Themes.Theme",
               "rust": "Theme"
+            },
+            {
+              "upstream": "TextMateSharp.Themes.ParsedTheme",
+              "rust": "Theme"
             }
           ]
         }
       ],
-      "unmapped_types": [
-        "TextMateSharp.Themes.ParsedTheme"
-      ],
-      "notes": "Theme selectors/styles and stable encoded color identifiers.",
+      "unmapped_types": [],
+      "notes": "Ordered selector cascade, parsed defaults/rule order and scope cache replace the mutable theme trie. Member evidence is in textmate-runtime-contracts.md.",
       "limitations": [
-        "Theme trie/ParsedTheme public helpers are not reproduced."
+        "The complete upstream trie behavior suite has not been translated; current conformance fixtures are finite."
       ]
     },
     {
