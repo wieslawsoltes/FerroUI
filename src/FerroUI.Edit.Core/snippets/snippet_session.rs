@@ -1,8 +1,12 @@
+use super::i_active_element::ActiveElementRegistration;
 use super::snippet::Placeholder;
-use super::{DeactivateReason, SnippetError, SnippetEventArgs};
+use super::{
+    AnchorElement, DeactivateReason, IActiveElement, IReplaceableActiveElement, SnippetElementRef,
+    SnippetError, SnippetEventArgs, SnippetTextTransform,
+};
 use crate::document::{
-    AnchorMovementType, AnchorSegment, DocumentEdit, DocumentError, DocumentSubscription,
-    IUndoableOperation, SimpleSegment, TextAnchor, TextDocument,
+    AnchorMovementType, AnchorSegment, DocumentChangeEventArgs, DocumentEdit, DocumentError,
+    DocumentSubscription, IUndoableOperation, SimpleSegment, TextAnchor, TextDocument,
 };
 use crate::utils::Event;
 use std::cell::{Cell, RefCell};
@@ -23,6 +27,30 @@ struct ActiveElement {
     id: usize,
     start: TextAnchor,
     end: TextAnchor,
+    editable: bool,
+    transform: Option<SnippetTextTransform>,
+    text_changed: Event<()>,
+    cached_text: RefCell<String>,
+}
+impl IActiveElement for ActiveElement {
+    fn is_editable(&self) -> bool {
+        self.editable
+    }
+    fn segment(&self) -> Option<SimpleSegment> {
+        self.segment()
+    }
+}
+impl IReplaceableActiveElement for ActiveElement {
+    fn text(&self) -> Result<String, SnippetError> {
+        let segment = self.segment().ok_or(DocumentError::DeletedAnchor)?;
+        Ok(self
+            .start
+            .document()
+            .get_text(segment.offset, segment.length)?)
+    }
+    fn text_changed(&self, handler: Rc<dyn Fn()>) -> DocumentSubscription {
+        self.text_changed.subscribe(move |_| handler())
+    }
 }
 impl ActiveElement {
     fn segment(&self) -> Option<SimpleSegment> {
@@ -33,8 +61,11 @@ impl ActiveElement {
 }
 struct SessionInner {
     document: TextDocument,
-    elements: Vec<ActiveElement>,
+    elements: Vec<Rc<ActiveElement>>,
     tab_order: Vec<usize>,
+    named_anchors: RefCell<Vec<Rc<AnchorElement>>>,
+    custom_elements: RefCell<Vec<(SnippetElementRef, Rc<dyn IActiveElement>)>>,
+    custom_tab_order: RefCell<Vec<usize>>,
     active: Cell<Option<usize>>,
     owner: Cell<Option<usize>>,
     caret: TextAnchor,
@@ -46,7 +77,6 @@ struct SessionInner {
     deactivate_when_empty: Cell<bool>,
     deactivated: Event<(SnippetSession, SnippetEventArgs)>,
     syncing: Cell<bool>,
-    last_text: RefCell<String>,
     subscriptions: RefCell<Vec<DocumentSubscription>>,
     error: RefCell<Option<String>>,
     edit_validator: RefCell<Option<Rc<SnippetEditValidator>>>,
@@ -55,6 +85,12 @@ impl Drop for SessionInner {
     fn drop(&mut self) {
         for subscription in self.subscriptions.get_mut().drain(..) {
             subscription.dispose();
+        }
+        if !self.closed.get() {
+            let args = SnippetEventArgs::new(DeactivateReason::InputHandlerDetached);
+            for (_, element) in self.custom_elements.get_mut().iter() {
+                element.deactivate(&args);
+            }
         }
     }
 }
@@ -82,6 +118,16 @@ impl IUndoableOperation for RestoreOwner {
     }
 }
 
+struct DeactivateOnInsertionUndo(WeakSnippetSession);
+impl IUndoableOperation for DeactivateOnInsertionUndo {
+    fn undo(&self) {
+        if let Some(session) = self.0.upgrade() {
+            session.deactivate(DeactivateReason::Deleted);
+        }
+    }
+    fn redo(&self) {}
+}
+
 /// A linked-placeholder insertion context. Edits through any host to the active
 /// editable element propagate to its bound occurrences after the document's
 /// transaction completes. The mirror edits continue the original undo group.
@@ -89,7 +135,103 @@ impl IUndoableOperation for RestoreOwner {
 pub struct SnippetSession {
     inner: Rc<SessionInner>,
 }
+#[derive(Clone)]
+pub struct WeakSnippetSession(Weak<SessionInner>);
+impl WeakSnippetSession {
+    pub fn upgrade(&self) -> Option<SnippetSession> {
+        self.0.upgrade().map(|inner| SnippetSession { inner })
+    }
+}
+
 impl SnippetSession {
+    pub fn downgrade(&self) -> WeakSnippetSession {
+        WeakSnippetSession(Rc::downgrade(&self.inner))
+    }
+    pub(crate) fn track_insertion_undo(&self) -> Result<(), SnippetError> {
+        // A host may atomically replace the selection with the expansion.
+        // Restoring that selection can leave every anchor at a nonempty
+        // range, so range deletion alone cannot identify insertion undo.
+        if !self.is_closed()
+            && self.inner.document.is_in_update()
+            && self.inner.document.accept_changes()
+        {
+            self.inner
+                .document
+                .undo_stack()
+                .push_optional(Rc::new(DeactivateOnInsertionUndo(self.downgrade())))?;
+        }
+        Ok(())
+    }
+    /// Links existing document ranges without inserting or replacing text.
+    /// Subsequent edits of the primary range update every bound range in the
+    /// same undo group. All ranges are validated before anchors are created.
+    pub fn link(
+        document: TextDocument,
+        main: SimpleSegment,
+        bound: &[SimpleSegment],
+    ) -> Result<Self, SnippetError> {
+        let bound: Vec<_> = bound.iter().map(|range| (*range, None)).collect();
+        Self::link_with_transforms(document, main, &bound)
+    }
+    pub fn link_with_transforms(
+        document: TextDocument,
+        main: SimpleSegment,
+        bound: &[(SimpleSegment, Option<SnippetTextTransform>)],
+    ) -> Result<Self, SnippetError> {
+        let mut ranges = vec![(main, true, None)];
+        ranges.extend(
+            bound
+                .iter()
+                .map(|(range, transform)| (*range, false, transform.clone())),
+        );
+        for (range, _, _) in &ranges {
+            if range.offset > document.text_length()
+                || range.length > document.text_length() - range.offset
+            {
+                return Err(DocumentError::InvalidRange {
+                    offset: range.offset,
+                    length: range.length,
+                    text_length: document.text_length(),
+                }
+                .into());
+            }
+        }
+        ranges.sort_by_key(|(range, _, _)| range.offset);
+        for pair in ranges.windows(2) {
+            if pair[0].0.end_offset() > pair[1].0.offset {
+                return Err(DocumentError::OverlappingEdits.into());
+            }
+        }
+        let start = ranges[0].0.offset;
+        let end = ranges
+            .iter()
+            .map(|(range, _, _)| range.end_offset())
+            .max()
+            .unwrap();
+        let count = ranges.len();
+        let placeholders = ranges
+            .into_iter()
+            .map(|(range, editable, transform)| Placeholder {
+                id: 1,
+                start: range.offset - start,
+                end: range.end_offset() - start,
+                editable,
+                transform,
+            })
+            .collect();
+        Self::new(
+            document,
+            start,
+            placeholders,
+            end - start,
+            count,
+            end - start,
+            SnippetLifecycle::default(),
+            Vec::new(),
+            Vec::new(),
+            None,
+        )
+    }
     pub(crate) fn new(
         document: TextDocument,
         offset: usize,
@@ -98,6 +240,9 @@ impl SnippetSession {
         caret_order: usize,
         length: usize,
         lifecycle: SnippetLifecycle,
+        anchors: Vec<(String, usize)>,
+        registrations: Vec<ActiveElementRegistration>,
+        edit_validator: Option<Rc<SnippetEditValidator>>,
     ) -> Result<Self, SnippetError> {
         let mut elements = Vec::new();
         let mut order = BTreeMap::new();
@@ -109,11 +254,19 @@ impl SnippetSession {
             if placeholder.editable {
                 order.entry(placeholder.id).or_insert(elements.len());
             }
-            elements.push(ActiveElement {
+            let cached_text = document.get_text(
+                offset + placeholder.start,
+                placeholder.end - placeholder.start,
+            )?;
+            elements.push(Rc::new(ActiveElement {
                 id: placeholder.id,
                 start,
                 end,
-            });
+                editable: placeholder.editable,
+                transform: placeholder.transform,
+                text_changed: Event::default(),
+                cached_text: RefCell::new(cached_text),
+            }));
         }
         let caret = document.create_anchor(offset + caret)?;
         caret.set_movement_type(AnchorMovementType::AfterInsertion);
@@ -132,6 +285,9 @@ impl SnippetSession {
             document: document.clone(),
             elements,
             tab_order,
+            named_anchors: RefCell::new(Vec::new()),
+            custom_elements: RefCell::new(Vec::new()),
+            custom_tab_order: RefCell::new(Vec::new()),
             active: Cell::new(active),
             owner: Cell::new(owner),
             caret,
@@ -143,21 +299,67 @@ impl SnippetSession {
             deactivate_when_empty: Cell::new(length != 0),
             deactivated: Event::default(),
             syncing: Cell::new(false),
-            last_text: RefCell::new(String::new()),
             subscriptions: RefCell::new(Vec::new()),
             error: RefCell::new(None),
-            edit_validator: RefCell::new(None),
+            edit_validator: RefCell::new(edit_validator),
         });
         let session = Self { inner };
         for handler in lifecycle.deactivated {
             session.deactivated(move |context, args| handler(context, args));
         }
+        for (name, position) in anchors {
+            let anchor = Rc::new(AnchorElement::new(&session, name, offset + position)?);
+            session.inner.named_anchors.borrow_mut().push(anchor);
+        }
+        for registration in registrations {
+            let version = document.version();
+            let element = match (registration.factory)(&session) {
+                Ok(element) => element,
+                Err(error) => {
+                    session.deactivate(DeactivateReason::Error);
+                    return Err(error);
+                }
+            };
+            if document.version() != version || session.is_closed() {
+                element.deactivate(&SnippetEventArgs::new(DeactivateReason::Error));
+                session.deactivate(DeactivateReason::Error);
+                return Err(SnippetError::InvalidExpansion(
+                    "active factories cannot edit or deactivate the insertion context",
+                ));
+            }
+            if let Some(range) = element.segment() {
+                if range.offset > document.text_length()
+                    || range.length > document.text_length() - range.offset
+                {
+                    element.deactivate(&SnippetEventArgs::new(DeactivateReason::Error));
+                    session.deactivate(DeactivateReason::Error);
+                    return Err(SnippetError::InvalidExpansion(
+                        "custom active segment is outside the document",
+                    ));
+                }
+            }
+            let editable = element.is_editable() && element.segment().is_some();
+            let index = session.inner.custom_elements.borrow().len();
+            session
+                .inner
+                .custom_elements
+                .borrow_mut()
+                .push((registration.owner, element));
+            if editable {
+                session.inner.custom_tab_order.borrow_mut().push(index);
+            }
+        }
+        session
+            .inner
+            .active
+            .set((session.tab_count() != 0).then_some(0));
         session.restore_active_owner();
-        session.refresh_last_text();
         let weak = Rc::downgrade(&session.inner);
-        let changing = document.changing(move |_| {
+        let changing = document.changing(move |change| {
             if let Some(inner) = weak.upgrade() {
-                SnippetSession { inner }.record_owner();
+                let session = SnippetSession { inner };
+                session.prepare_edit_owner(change);
+                session.record_owner();
             }
         });
         let weak = Rc::downgrade(&session.inner);
@@ -176,17 +378,91 @@ impl SnippetSession {
                     *session.inner.error.borrow_mut() = Some(error.to_string());
                     session.deactivate(DeactivateReason::Error);
                 }
+                if !session.inner.syncing.get() && !session.is_closed() {
+                    session.publish_field_changes();
+                }
             }
         });
         *session.inner.subscriptions.borrow_mut() = vec![changing, changed, subscription];
+        for element in session.active_elements() {
+            if let Err(error) = element.on_insertion_completed(&session) {
+                session.deactivate(DeactivateReason::Error);
+                return Err(error);
+            }
+            if session.is_closed() {
+                break;
+            }
+        }
         session.inner.completed.set(true);
         for handler in lifecycle.insertion_completed {
             handler(&session);
         }
-        if session.inner.tab_order.is_empty() {
+        if session.active_elements().is_empty() {
             session.deactivate(DeactivateReason::NoActiveElements);
         }
         Ok(session)
+    }
+    /// Returns a snapshot, so extension callbacks never run under a collection borrow.
+    pub fn active_elements(&self) -> Vec<Rc<dyn IActiveElement>> {
+        let mut elements: Vec<Rc<dyn IActiveElement>> = self
+            .inner
+            .elements
+            .iter()
+            .map(|element| element.clone() as Rc<dyn IActiveElement>)
+            .collect();
+        elements.extend(
+            self.inner
+                .named_anchors
+                .borrow()
+                .iter()
+                .map(|element| element.clone() as Rc<dyn IActiveElement>),
+        );
+        elements.extend(
+            self.inner
+                .custom_elements
+                .borrow()
+                .iter()
+                .map(|(_, element)| element.clone()),
+        );
+        elements
+    }
+    pub fn get_active_element(&self, owner: &SnippetElementRef) -> Option<Rc<dyn IActiveElement>> {
+        self.inner
+            .custom_elements
+            .borrow()
+            .iter()
+            .find(|(key, _)| key == owner)
+            .map(|(_, element)| element.clone())
+    }
+    pub fn replaceable_element(&self, id: usize) -> Option<Rc<dyn IReplaceableActiveElement>> {
+        self.inner
+            .elements
+            .iter()
+            .find(|element| element.editable && element.id == id)
+            .map(|element| element.clone() as Rc<dyn IReplaceableActiveElement>)
+    }
+    pub fn named_anchor(&self, name: &str) -> Option<Rc<AnchorElement>> {
+        self.inner
+            .named_anchors
+            .borrow()
+            .iter()
+            .find(|anchor| anchor.name() == name)
+            .cloned()
+    }
+    fn tab_count(&self) -> usize {
+        self.inner.tab_order.len() + self.inner.custom_tab_order.borrow().len()
+    }
+    fn tab_element(&self, index: usize) -> Option<Rc<dyn IActiveElement>> {
+        if let Some(&element) = self.inner.tab_order.get(index) {
+            return Some(self.inner.elements[element].clone());
+        }
+        let index = index.checked_sub(self.inner.tab_order.len())?;
+        let custom_index = *self.inner.custom_tab_order.borrow().get(index)?;
+        self.inner
+            .custom_elements
+            .borrow()
+            .get(custom_index)
+            .map(|(_, element)| element.clone())
     }
     pub fn is_closed(&self) -> bool {
         self.inner.closed.get()
@@ -242,7 +518,7 @@ impl SnippetSession {
         if self.is_closed() {
             return None;
         }
-        self.inner.elements.get(self.active_index()?)?.segment()
+        self.tab_element(self.inner.active.get()?)?.segment()
     }
     pub fn active_placeholder(&self) -> Option<usize> {
         self.inner.elements.get(self.active_index()?).map(|e| e.id)
@@ -251,19 +527,65 @@ impl SnippetSession {
         self.inner.caret.offset().ok()
     }
     pub fn next_element(&self, backwards: bool) -> Option<SimpleSegment> {
-        let index = self.inner.active.get()?;
-        let next = if backwards {
-            index.saturating_sub(1)
-        } else {
-            index + 1
-        };
-        if next >= self.inner.tab_order.len() {
-            self.deactivate(DeactivateReason::Completed);
+        let mut index = self.inner.active.get()?;
+        loop {
+            let next = if backwards {
+                index.saturating_sub(1)
+            } else {
+                index + 1
+            };
+            if next >= self.tab_count() {
+                self.deactivate(DeactivateReason::Completed);
+                return None;
+            }
+            if let Some(element) = self.tab_element(next) {
+                if element.is_editable() && element.segment().is_some() {
+                    self.inner.active.set(Some(next));
+                    self.restore_active_owner();
+                    return self.active_segment();
+                }
+            }
+            if next == index {
+                return None;
+            }
+            index = next;
+        }
+    }
+    /// Positional cyclic traversal corresponding to upstream's input handler.
+    /// Numeric `next_element` keeps its additional finish-after-last behavior.
+    pub fn next_element_from_offset(
+        &self,
+        offset: usize,
+        backwards: bool,
+    ) -> Option<SimpleSegment> {
+        if self.is_closed() {
             return None;
         }
-        self.inner.active.set(Some(next));
+        let mut candidates = Vec::new();
+        for index in 0..self.tab_count() {
+            if let Some(element) = self.tab_element(index) {
+                if element.is_editable() {
+                    if let Some(range) = element.segment() {
+                        candidates.push((index, range));
+                    }
+                }
+            }
+        }
+        candidates.sort_by_key(|(_, range)| range.offset);
+        let (index, _) = if backwards {
+            candidates
+                .iter()
+                .rev()
+                .find(|(_, range)| offset > range.end_offset())
+                .or_else(|| candidates.last())
+        } else {
+            candidates
+                .iter()
+                .find(|(_, range)| offset < range.offset)
+                .or_else(|| candidates.first())
+        }?;
+        self.inner.active.set(Some(*index));
         self.restore_active_owner();
-        self.refresh_last_text();
         self.active_segment()
     }
     pub fn finish(&self) {
@@ -281,17 +603,48 @@ impl SnippetSession {
         for subscription in subscriptions {
             subscription.dispose();
         }
-        self.inner
-            .deactivated
-            .raise(&(self.clone(), SnippetEventArgs::new(reason)));
+        let args = SnippetEventArgs::new(reason);
+        for element in self.active_elements() {
+            element.deactivate(&args);
+        }
+        self.inner.deactivated.raise(&(self.clone(), args));
     }
     pub fn replace_active(&self, text: &str) -> Result<(), SnippetError> {
         let segment = self.active_segment().ok_or(SnippetError::Closed)?;
+        let version = self.inner.document.version();
+        self.validate_edits(&[DocumentEdit::new(segment.offset, segment.length, text)])?;
+        if self.is_closed() {
+            return Err(SnippetError::Closed);
+        }
+        if self.inner.document.version() != version || self.active_segment() != Some(segment) {
+            return Err(DocumentError::ReentrantChange.into());
+        }
         let _update = self.inner.document.begin_update()?;
         self.inner
             .document
             .replace(segment.offset, segment.length, text)?;
         Ok(())
+    }
+    pub(crate) fn validate_edits(&self, edits: &[DocumentEdit]) -> Result<(), DocumentError> {
+        let validator = self.inner.edit_validator.borrow().clone();
+        if let Some(validator) = validator {
+            validator(edits)?;
+        }
+        Ok(())
+    }
+    fn publish_field_changes(&self) {
+        for element in &self.inner.elements {
+            if !element.editable {
+                continue;
+            }
+            if let Ok(text) = element.text() {
+                let changed = *element.cached_text.borrow() != text;
+                if changed {
+                    *element.cached_text.borrow_mut() = text;
+                    element.text_changed.raise(&());
+                }
+            }
+        }
     }
     fn active_index(&self) -> Option<usize> {
         self.inner.tab_order.get(self.inner.active.get()?).copied()
@@ -299,6 +652,29 @@ impl SnippetSession {
     fn restore_active_owner(&self) {
         if let Some(owner) = self.active_index() {
             self.set_owner(owner);
+        } else {
+            self.inner.owner.set(None);
+            let active = self.active_segment();
+            for element in &self.inner.elements {
+                let range = element.segment();
+                if range.is_some_and(|range| range.length == 0) {
+                    let movement =
+                        if active.is_some_and(|active| range.unwrap().offset < active.offset) {
+                            AnchorMovementType::BeforeInsertion
+                        } else {
+                            AnchorMovementType::AfterInsertion
+                        };
+                    element.start.set_movement_type(movement);
+                    element.end.set_movement_type(movement);
+                } else {
+                    element
+                        .start
+                        .set_movement_type(AnchorMovementType::AfterInsertion);
+                    element
+                        .end
+                        .set_movement_type(AnchorMovementType::BeforeInsertion);
+                }
+            }
         }
     }
     fn set_owner(&self, owner: usize) {
@@ -334,6 +710,46 @@ impl SnippetSession {
                 AnchorMovementType::AfterInsertion
             });
     }
+    fn prepare_edit_owner(&self, change: &DocumentChangeEventArgs) {
+        if self.is_closed() || self.inner.syncing.get() {
+            return;
+        }
+        let end = change.offset + change.removal_length();
+        // A removal crossing a field boundary deletes its identity upstream.
+        // Ordinary replacement exactly within that field preserves it.
+        if change.removal_length() != 0
+            && self.inner.tab_order.iter().any(|&index| {
+                self.inner.elements[index].segment().is_some_and(|range| {
+                    (change.offset < range.offset && range.offset < end)
+                        || (change.offset < range.end_offset() && range.end_offset() < end)
+                })
+            })
+        {
+            self.deactivate(DeactivateReason::Deleted);
+            return;
+        }
+        if !self.inner.document.accept_changes() {
+            return;
+        }
+        let contains = |index: usize| {
+            self.inner.elements[index]
+                .segment()
+                .is_some_and(|range| range.offset <= change.offset && end <= range.end_offset())
+        };
+        let owner = self
+            .active_index()
+            .filter(|index| contains(*index))
+            .or_else(|| {
+                self.inner
+                    .tab_order
+                    .iter()
+                    .copied()
+                    .find(|index| contains(*index))
+            });
+        if let Some(owner) = owner {
+            self.set_owner(owner);
+        }
+    }
     fn record_owner(&self) {
         if self.is_closed() {
             return;
@@ -362,61 +778,14 @@ impl SnippetSession {
             }
         }
     }
-    fn refresh_last_text(&self) {
-        if let Some(segment) = self.active_segment() {
-            if let Ok(text) = self.inner.document.get_text(segment.offset, segment.length) {
-                *self.inner.last_text.borrow_mut() = text;
-            }
-        }
-    }
     fn synchronize(&self) -> Result<(), SnippetError> {
         if self.is_closed() || self.inner.syncing.get() {
             return Ok(());
         }
-        self.restore_active_owner();
-        let Some(segment) = self.active_segment() else {
-            self.finish();
-            return Ok(());
-        };
-        let text = self
-            .inner
-            .document
-            .get_text(segment.offset, segment.length)?;
-        if *self.inner.last_text.borrow() == text {
-            return Ok(());
-        }
-        *self.inner.last_text.borrow_mut() = text.clone();
-        // Undo/redo already contain the mirror operations and must replay them
-        // without causing additional changes from this listener.
+        // Undo/redo already contain every mirror operation.
         if !self.inner.document.accept_changes() {
+            self.restore_active_owner();
             return Ok(());
-        }
-        let active = self.active_index().ok_or(SnippetError::Closed)?;
-        let id = self.inner.elements[active].id;
-        let mut targets: Vec<_> = self
-            .inner
-            .elements
-            .iter()
-            .enumerate()
-            .filter(|(i, e)| *i != active && e.id == id)
-            .filter_map(|(index, element)| element.segment().map(|range| (index, range)))
-            .collect();
-        targets.sort_by_key(|(index, range)| (range.offset, *index));
-        if targets.is_empty() {
-            return Ok(());
-        }
-        for pair in targets.windows(2) {
-            if pair[0].1.offset + pair[0].1.length > pair[1].1.offset {
-                return Err(DocumentError::OverlappingEdits.into());
-            }
-        }
-        let edits: Vec<_> = targets
-            .iter()
-            .map(|(_, range)| DocumentEdit::new(range.offset, range.length, &text))
-            .collect();
-        let validator = self.inner.edit_validator.borrow().clone();
-        if let Some(validator) = validator {
-            validator(&edits)?;
         }
         self.inner.syncing.set(true);
         struct Reset<'a>(&'a SnippetSession);
@@ -427,9 +796,65 @@ impl SnippetSession {
             }
         }
         let _reset = Reset(self);
+        let version = self.inner.document.version();
+        let mut pending = Vec::new();
+        for &source_index in &self.inner.tab_order {
+            let source = &self.inner.elements[source_index];
+            let Some(source_range) = source.segment() else {
+                self.deactivate(DeactivateReason::Deleted);
+                return Ok(());
+            };
+            let text = source.text()?;
+            if *source.cached_text.borrow() == text {
+                continue;
+            }
+            for (target_index, target) in self.inner.elements.iter().enumerate() {
+                if target_index == source_index || target.id != source.id {
+                    continue;
+                }
+                let Some(range) = target.segment() else {
+                    continue;
+                };
+                if range.offset < source_range.end_offset()
+                    && source_range.offset < range.end_offset()
+                {
+                    return Err(DocumentError::OverlappingEdits.into());
+                }
+                let replacement = match &target.transform {
+                    Some(transform) => transform.convert(&text)?,
+                    None => text.clone(),
+                };
+                if self.inner.document.version() != version {
+                    return Err(DocumentError::ReentrantChange.into());
+                }
+                if self.inner.document.get_text(range.offset, range.length)? != replacement {
+                    pending.push((
+                        target_index,
+                        DocumentEdit::new(range.offset, range.length, replacement),
+                    ));
+                }
+            }
+        }
+        if pending.is_empty() {
+            return Ok(());
+        }
+        pending.sort_by_key(|(index, edit)| (edit.offset, *index));
+        for pair in pending.windows(2) {
+            if pair[0].1.offset + pair[0].1.length > pair[1].1.offset {
+                return Err(DocumentError::OverlappingEdits.into());
+            }
+        }
+        let edits: Vec<_> = pending.iter().map(|(_, edit)| edit.clone()).collect();
+        self.validate_edits(&edits)?;
+        if self.is_closed() {
+            return Ok(());
+        }
+        if self.inner.document.version() != version {
+            return Err(DocumentError::ReentrantChange.into());
+        }
         let _update = self.inner.document.begin_continued_update()?;
-        for ((owner, _), edit) in targets.iter().zip(&edits).rev() {
-            self.set_owner(*owner);
+        for (owner, edit) in pending.into_iter().rev() {
+            self.set_owner(owner);
             self.inner
                 .document
                 .replace(edit.offset, edit.length, &edit.text)?;

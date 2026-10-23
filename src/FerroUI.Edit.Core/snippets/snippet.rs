@@ -1,5 +1,9 @@
+use super::i_active_element::ActiveElementRegistration;
 use super::snippet_session::SnippetLifecycle;
-use super::{SnippetEventArgs, SnippetSession};
+use super::{
+    SnippetElementRef, SnippetEventArgs, SnippetInsertionContext, SnippetInsertionOptions,
+    SnippetSession, SnippetTextTransform,
+};
 use crate::document::{DocumentError, TextDocument};
 use std::collections::BTreeMap;
 use std::fmt;
@@ -8,10 +12,27 @@ use std::rc::Rc;
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub enum SnippetElement {
     Text(String),
-    Replaceable { id: usize, text: String },
-    Bound { id: usize },
+    Replaceable {
+        id: usize,
+        text: String,
+    },
+    Bound {
+        id: usize,
+    },
+    TransformedBound {
+        id: usize,
+        transform: SnippetTextTransform,
+    },
+    Anchor {
+        name: String,
+    },
+    Custom(SnippetElementRef),
     Caret,
+    CaretIfSelection,
     Selection,
+    SelectionWithIndentation {
+        indentation: usize,
+    },
     Container(Vec<SnippetElement>),
 }
 #[derive(Clone, Debug, Default, PartialEq, Eq)]
@@ -25,6 +46,8 @@ pub enum SnippetError {
     InvalidSyntax(usize),
     MultipleSelections,
     ExpansionMismatch,
+    InvalidExpansion(&'static str),
+    Extension(String),
     Closed,
 }
 impl fmt::Display for SnippetError {
@@ -35,6 +58,8 @@ impl fmt::Display for SnippetError {
             Self::InvalidSyntax(offset) => {
                 write!(f, "Invalid snippet syntax at UTF-8 byte {offset}")
             }
+            Self::InvalidExpansion(message) => f.write_str(message),
+            Self::Extension(message) => f.write_str(message),
             Self::Closed => f.write_str("The snippet session is closed"),
             Self::MultipleSelections => f.write_str("A linked snippet requires one selection"),
             Self::ExpansionMismatch => {
@@ -55,17 +80,20 @@ pub(crate) struct Placeholder {
     pub start: usize,
     pub end: usize,
     pub editable: bool,
+    pub transform: Option<SnippetTextTransform>,
 }
 
 /// A validated expansion that can be inserted by a host's editing transaction.
 /// Separating preparation from activation lets a host enforce protected ranges
 /// without removing selected text before an invalid snippet is diagnosed.
 pub struct PreparedSnippet {
-    text: String,
-    placeholders: Vec<Placeholder>,
-    caret: usize,
-    caret_order: usize,
-    lifecycle: SnippetLifecycle,
+    pub(crate) text: String,
+    pub(crate) placeholders: Vec<Placeholder>,
+    pub(crate) caret: usize,
+    pub(crate) caret_order: usize,
+    pub(crate) lifecycle: SnippetLifecycle,
+    pub(crate) anchors: Vec<(String, usize)>,
+    pub(crate) registrations: Vec<ActiveElementRegistration>,
 }
 impl PreparedSnippet {
     pub fn text(&self) -> &str {
@@ -87,10 +115,19 @@ impl PreparedSnippet {
         document: TextDocument,
         offset: usize,
     ) -> Result<SnippetSession, SnippetError> {
+        self.activate_with_validator(document, offset, None)
+    }
+    /// Installs the host edit policy before custom activation callbacks run.
+    pub fn activate_with_validator(
+        self,
+        document: TextDocument,
+        offset: usize,
+        edit_validator: Option<Rc<super::SnippetEditValidator>>,
+    ) -> Result<SnippetSession, SnippetError> {
         if document.get_text(offset, self.text.encode_utf16().count())? != self.text {
             return Err(SnippetError::ExpansionMismatch);
         }
-        SnippetSession::new(
+        let session = SnippetSession::new(
             document,
             offset,
             self.placeholders,
@@ -98,7 +135,12 @@ impl PreparedSnippet {
             self.caret_order,
             self.text.encode_utf16().count(),
             self.lifecycle,
-        )
+            self.anchors,
+            self.registrations,
+            edit_validator,
+        )?;
+        session.track_insertion_undo()?;
+        Ok(session)
     }
 }
 impl Snippet {
@@ -213,93 +255,47 @@ impl Snippet {
         offset: usize,
         selected_text: &str,
     ) -> Result<SnippetSession, SnippetError> {
-        let prepared = self.prepare(selected_text)?;
+        let options = SnippetInsertionOptions::from_document(&document, offset, "\t")?;
+        let version = document.version();
+        let prepared = self.prepare_with_options(selected_text, options)?;
+        if document.version() != version {
+            return Err(DocumentError::ReentrantChange.into());
+        }
         let _update = document.begin_update()?;
+        if document.version() != version {
+            return Err(DocumentError::ReentrantChange.into());
+        }
         document.insert(offset, prepared.text())?;
         prepared.activate(document.clone(), offset)
     }
 
     pub fn prepare(&self, selected_text: &str) -> Result<PreparedSnippet, SnippetError> {
+        self.prepare_with_options(selected_text, SnippetInsertionOptions::default())
+    }
+
+    pub fn prepare_with_options(
+        &self,
+        selected_text: &str,
+        options: SnippetInsertionOptions,
+    ) -> Result<PreparedSnippet, SnippetError> {
         let mut defaults = BTreeMap::new();
         collect_defaults(&self.elements, &mut defaults);
-        let mut text = String::new();
-        let mut placeholders = Vec::new();
-        let mut position = 0;
-        let mut caret = None;
-        expand(
-            &self.elements,
-            selected_text,
-            &defaults,
-            &mut text,
-            &mut position,
-            &mut placeholders,
-            &mut caret,
-        )?;
-        let (caret, caret_order) = caret.unwrap_or((position, placeholders.len()));
-        Ok(PreparedSnippet {
-            text,
-            placeholders,
-            caret,
-            caret_order,
-            lifecycle: SnippetLifecycle::default(),
-        })
+        let mut context = SnippetInsertionContext::new(selected_text, options, defaults)?;
+        for element in &self.elements {
+            context.insert_element(element)?;
+        }
+        Ok(context.finish())
     }
 }
 fn collect_defaults(elements: &[SnippetElement], defaults: &mut BTreeMap<usize, String>) {
-    for element in elements {
+    let mut pending: Vec<_> = elements.iter().rev().collect();
+    while let Some(element) = pending.pop() {
         match element {
             SnippetElement::Replaceable { id, text } => {
                 defaults.entry(*id).or_insert_with(|| text.clone());
             }
-            SnippetElement::Container(children) => collect_defaults(children, defaults),
+            SnippetElement::Container(children) => pending.extend(children.iter().rev()),
             _ => {}
         }
     }
-}
-fn expand(
-    elements: &[SnippetElement],
-    selected: &str,
-    defaults: &BTreeMap<usize, String>,
-    output: &mut String,
-    position: &mut usize,
-    placeholders: &mut Vec<Placeholder>,
-    caret: &mut Option<(usize, usize)>,
-) -> Result<(), SnippetError> {
-    for element in elements {
-        let text = match element {
-            SnippetElement::Text(text) => text.as_str(),
-            SnippetElement::Selection => selected,
-            SnippetElement::Caret => {
-                *caret = Some((*position, placeholders.len()));
-                continue;
-            }
-            SnippetElement::Container(children) => {
-                expand(
-                    children,
-                    selected,
-                    defaults,
-                    output,
-                    position,
-                    placeholders,
-                    caret,
-                )?;
-                continue;
-            }
-            SnippetElement::Replaceable { id, .. } | SnippetElement::Bound { id } => {
-                let text = defaults
-                    .get(id)
-                    .ok_or(SnippetError::UnknownPlaceholder(*id))?;
-                placeholders.push(Placeholder {
-                    id: *id,
-                    start: *position,
-                    end: *position + text.encode_utf16().count(),
-                    editable: matches!(element, SnippetElement::Replaceable { .. }),
-                });
-                text
-            }
-        };
-        output.push_str(text);
-        *position += text.encode_utf16().count();
-    }
-    Ok(())
 }

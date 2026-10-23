@@ -4,11 +4,12 @@ use ferroui_base::interactivity::RoutingStrategies;
 use ferroui_base::reactive::IDisposable;
 use ferroui_base::{Ref, WeakRef};
 use ferroui_edit_core::document::{
-    DocumentEdit, DocumentError, DocumentSubscription, TextDocument,
+    DocumentEdit, DocumentError, DocumentSubscription, TextDocument, TextUtilities,
 };
 use ferroui_edit_core::editing::EditError;
 use ferroui_edit_core::snippets::{
-    DeactivateReason, Snippet, SnippetError, SnippetEventArgs, SnippetSession,
+    DeactivateReason, Snippet, SnippetError, SnippetEventArgs, SnippetInsertionOptions,
+    SnippetSession,
 };
 use std::cell::RefCell;
 use std::rc::Rc;
@@ -33,28 +34,68 @@ impl SnippetController {
         let selected = selection.primary();
         let document = editor.document();
         let selected_text = document.get_text(selected.start_offset(), selected.length())?;
-        let prepared = snippet.prepare(&selected_text)?;
+        // Preserve selected leading indentation, as upstream Snippet.Insert
+        // does, while keeping whitespace-only selections within their bounds.
+        let insertion_offset = if selected.length() != 0 {
+            TextUtilities::get_whitespace_after(&document, selected.start_offset())?
+                .end_offset()
+                .min(selected.end_offset())
+        } else {
+            selected.start_offset()
+        };
+        let options = SnippetInsertionOptions::from_document(
+            &document,
+            insertion_offset,
+            editor.options().indentation_string(),
+        )?;
+        let version = document.version();
+        let prepared = snippet.prepare_with_options(&selected_text, options)?;
+        if document.version() != version
+            || editor.document() != document
+            || editor.selection() != selection
+        {
+            return Err(DocumentError::ReentrantChange.into());
+        }
         let update = document.begin_update()?;
+        if document.version() != version
+            || editor.document() != document
+            || editor.selection() != selection
+        {
+            return Err(DocumentError::ReentrantChange.into());
+        }
         editor
             .session()
             .apply_document_edits(&[DocumentEdit::new(
-                selected.start_offset(),
-                selected.length(),
+                insertion_offset,
+                selected.end_offset() - insertion_offset,
                 prepared.text(),
             )])
             .map_err(edit_error)?;
-        let session = prepared.activate(document.clone(), selected.start_offset())?;
         let weak_editor = editor.downgrade();
-        session.set_edit_validator(Some(Rc::new(move |edits| {
-            let editor = weak_editor.upgrade().ok_or(DocumentError::ReadOnly)?;
-            editor
-                .session()
-                .validate_document_edits(edits)
-                .map_err(|error| match error {
-                    EditError::Document(error) => error,
-                    _ => DocumentError::ReadOnly,
-                })
-        })));
+        let expected_document = document.clone();
+        let validator: Rc<ferroui_edit_core::snippets::SnippetEditValidator> =
+            Rc::new(move |edits| {
+                let editor = weak_editor.upgrade().ok_or(DocumentError::ReadOnly)?;
+                if editor.document() != expected_document {
+                    return Err(DocumentError::DifferentDocument);
+                }
+                editor
+                    .session()
+                    .validate_document_edits(edits)
+                    .map_err(|error| match error {
+                        EditError::Document(error) => error,
+                        _ => DocumentError::ReadOnly,
+                    })?;
+                if editor.document() != expected_document {
+                    return Err(DocumentError::DifferentDocument);
+                }
+                Ok(())
+            });
+        let session = prepared.activate_with_validator(
+            document.clone(),
+            insertion_offset,
+            Some(validator),
+        )?;
         let controller = Rc::new(Self {
             editor: editor.downgrade(),
             document,
@@ -357,5 +398,25 @@ mod tests {
         );
         assert!(controller.subscriptions.borrow().is_empty());
         assert_eq!(editor.caret_offset(), 0);
+    }
+    #[test]
+    fn selected_leading_indentation_survives_context_formatted_insertion() {
+        let _scope = crate::tests::test_scope();
+        let editor = TextEditor::new();
+        editor.set_text("  old\r\n").unwrap();
+        editor.select(0, 5).unwrap();
+        let controller =
+            SnippetController::insert(&editor, &Snippet::parse("{\n\t${1:name}\n}$0").unwrap())
+                .unwrap();
+        let expected = format!(
+            "  {{\r\n  {}name\r\n  }}\r\n",
+            editor.options().indentation_string()
+        );
+        assert_eq!(editor.text(), expected);
+        assert_eq!(editor.selected_text().unwrap(), "name");
+        assert!(controller.is_active());
+        editor.undo().unwrap();
+        assert_eq!(editor.text(), "  old\r\n");
+        assert!(!controller.is_active());
     }
 }
