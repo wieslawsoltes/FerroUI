@@ -416,6 +416,7 @@ does not prove the target implements the source contract.
 | `ThemeResource` | Require explicit dynamic-resource policy and installed ported dictionaries/theme scopes. |
 | Named WinUI `Style` resource | Map to `ControlTheme` only for an audited key; arbitrary setter/state semantics require a real projection. |
 | `NavigationViewItem.Icon` and `AutoSuggestBox.QueryIcon` symbol literals | Expand plain WinUI literals into instance-owned native `SymbolIcon` property elements; record `WXAML2005` at the original value range. |
+| Inline WinUI `ColorPicker` | Map to existing `ColorView`, with `WXAML2006`; preserve the native dropdown `ColorPicker`. Rename audited spectrum-slider/component-text visibility members. Source alpha and More semantics require explicit adaptation (`WXAML1012`). |
 | `ms-appx:///` | Convert resource-bearing URI attributes only when the host supplies an absolute asset base. |
 | Application `x:Class` | Apply explicit namespace identity mappings; require the application's actual Rust type and code-behind. |
 | `mc:Ignorable` | Respect namespace scopes; ignored designer trees do not create runtime compatibility claims. |
@@ -434,6 +435,28 @@ and paired interpreted/compiled
 [NavigationView fixture](../../../src/Markup/FerroUI.Markup.Xaml.Loader/tests/fixtures/winui_navigation.xaml)
 provide separate assertions for lexical preservation and runtime ownership;
 execution evidence is recorded independently.
+
+The inline color-editor mapping applies only to recognized WinUI control
+namespaces. It handles attributes and property elements, including their owner
+type, and leaves native FerroUI markup unchanged on repeated import. Explicit
+application type, namespace and member policies take precedence. Hosts must
+register the native color-picker package and provide its styles; the migration
+does not install a global theme or fabricate missing behavior.
+
+`IsAlphaEnabled`, `IsAlphaSliderVisible`, `IsAlphaTextInputVisible` and
+`IsMoreButtonVisible` cannot be treated as simple member renames. WinUI preserves
+the selected alpha when editing is disabled; native `ColorView` coerces its color
+to opaque. Native ColorView also has a different arrangement of component, alpha
+and expansion controls. The Gallery composes two ColorViews, a ColorSlider,
+text editors and a ToggleButton, retaining the native APIs and making this
+adaptation visible in the source-example ledger. The byte-valued native alpha
+slider and component editor behavior remain explicit differences.
+
+The reviewed API map also associates WinUI `FlipView` with existing `Carousel`
+as an adapter candidate. Native `PageSlide` and `PipsPager` provide the Gallery's
+axis, transitions and navigation. This mapping does not promise the WinUI item
+containers, button overlays, focus transfer, swipe/RTL semantics or exact timing.
+No new FlipView class or transparent migration rule is inferred from this map.
 
 Deferred resource construction may cross a framework interface that cannot
 return `Result`. Fresh-root WinUI loading has a narrow typed-error bridge for

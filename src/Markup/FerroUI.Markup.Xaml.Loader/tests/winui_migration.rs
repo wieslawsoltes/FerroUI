@@ -59,6 +59,187 @@ fn source_page_maps_to_native_frame_page_with_balanced_property_elements() {
 }
 
 #[test]
+fn inline_color_picker_maps_to_color_view_and_preserves_property_element_owners() {
+    let input = source("<ColorPicker Color='Red' IsColorSliderVisible='False' IsColorChannelTextInputVisible='True'><ColorPicker.ColorSpectrumShape>Ring</ColorPicker.ColorSpectrumShape></ColorPicker><Grid Tag='{x:Type ColorPicker}'/>");
+    let result = migrate_winui_xaml(&input, &WinUIXamlOptions::default()).unwrap();
+    assert!(!result.has_errors(), "{:?}", result.diagnostics);
+    let document = Document::parse(&result.xaml).unwrap();
+    let picker = document.descendants().find(|node| node.has_tag_name((CONTROLS_NAMESPACE, "ColorView"))).unwrap();
+    assert_eq!(picker.attribute("Color"), Some("Red"));
+    assert_eq!(picker.attribute("IsColorSpectrumSliderVisible"), Some("False"));
+    assert_eq!(picker.attribute("IsComponentTextInputVisible"), Some("True"));
+    assert!(picker.children().any(|node| node.has_tag_name((CONTROLS_NAMESPACE, "ColorView.ColorSpectrumShape"))));
+    assert!(result.xaml.contains(":ColorView}"));
+    let notice = result.diagnostics.iter().find(|diagnostic| diagnostic.code == "WXAML2006").unwrap();
+    assert_eq!(&input[notice.span.bytes.clone()], "ColorPicker");
+    let repeated = migrate_winui_xaml(&result.xaml, &WinUIXamlOptions::default()).unwrap();
+    assert_eq!(repeated.xaml, result.xaml);
+    assert!(repeated.edits.is_empty() && repeated.diagnostics.is_empty());
+}
+
+#[test]
+fn color_picker_member_renames_apply_to_property_elements_and_explicit_overrides() {
+    for (prefix, declaration) in [
+        ("", ""),
+        ("w:", " xmlns:w='using:Microsoft.UI.Xaml.Controls'"),
+    ] {
+        let input = source(&format!("<{prefix}ColorPicker{declaration}><{prefix}ColorPicker.IsColorSliderVisible>False</{prefix}ColorPicker.IsColorSliderVisible><{prefix}ColorPicker.IsColorChannelTextInputVisible>True</{prefix}ColorPicker.IsColorChannelTextInputVisible></{prefix}ColorPicker>"));
+        let result = migrate_winui_xaml(&input, &WinUIXamlOptions::default()).unwrap();
+        assert!(!result.has_errors(), "{:?}", result.diagnostics);
+        let document = Document::parse(&result.xaml).unwrap();
+        for (member, text) in [
+            ("ColorView.IsColorSpectrumSliderVisible", "False"),
+            ("ColorView.IsComponentTextInputVisible", "True"),
+        ] {
+            let element = document.descendants().find(|node| node.has_tag_name((CONTROLS_NAMESPACE, member))).unwrap();
+            assert_eq!(element.text(), Some(text));
+        }
+        let mut options = WinUIXamlOptions::default();
+        options.members.push(WinUIXamlMemberMapping::new(
+            if prefix.is_empty() { WINUI_PRESENTATION_NAMESPACE } else { "using:Microsoft.UI.Xaml.Controls" },
+            "ColorPicker", "IsColorSliderVisible", "ShowSourceSlider",
+        ));
+        let mapped = migrate_winui_xaml(&input, &options).unwrap();
+        assert!(!mapped.has_errors());
+        let document = Document::parse(&mapped.xaml).unwrap();
+        assert!(document.descendants().any(|node| node.has_tag_name((CONTROLS_NAMESPACE, "ColorView.ShowSourceSlider"))));
+        assert!(!document.descendants().any(|node| node.has_tag_name((CONTROLS_NAMESPACE, "ColorView.IsColorSpectrumSliderVisible"))));
+    }
+}
+
+#[test]
+fn native_hosts_resolve_source_type_references_without_importing_binding_or_extension_semantics() {
+    let input = format!(r#"<Grid xmlns="{FERRO_XML_NAMESPACE}" xmlns:w="using:Microsoft.UI.Xaml.Controls" xmlns:x="{XAML_NAMESPACE}" xmlns:app="using:App.Markup">
+        <ControlTemplate TargetType="w:ColorPicker" />
+        <TextBlock x:DataType="w:ColorPicker" />
+        <Grid Tag="{{x:Type w:ColorPicker}}" />
+        <TextBox Text="{{Binding Name}}" Tag="{{Binding Item, ConverterParameter={{x:Type w:ColorPicker}}}}" />
+        <Grid Tag="{{app:Resolve Value={{x:Type w:ColorPicker}}, Literal='{{x:Type w:ColorPicker}}'}}" />
+        <Grid Tag="{{app:Type w:ColorPicker}}" />
+        <Grid Tag="{{}}{{x:Type w:ColorPicker}}" />
+        <Grid xmlns:w="using:Other.Controls" Tag="{{x:Type w:ColorPicker}}" />
+        <Binding Path="Name" />
+        <TextBox Text="{{Binding Name, Mode=Default}}" />
+    </Grid>"#);
+    let result = migrate_winui_xaml(&input, &WinUIXamlOptions::default()).unwrap();
+    assert!(!result.has_errors(), "{:?}", result.diagnostics);
+    let document = Document::parse(&result.xaml).unwrap();
+    let children: Vec<_> = document.root_element().children().filter(Node::is_element).collect();
+    let target = children[0].attribute("TargetType").unwrap();
+    let (prefix, name) = target.split_once(':').unwrap();
+    assert_eq!(name, "ColorView");
+    assert_eq!(children[0].lookup_namespace_uri(Some(prefix)), Some(CONTROLS_NAMESPACE));
+    assert_eq!(children[1].attribute((XAML_NAMESPACE, "DataType")), Some(target));
+    assert_eq!(children[2].attribute("Tag"), Some(format!("{{x:Type {target}}}").as_str()));
+    assert_eq!(children[3].attribute("Text"), Some("{Binding Name}"));
+    assert_eq!(children[3].attribute("Tag"), Some(format!("{{Binding Item, ConverterParameter={{x:Type {target}}}}}").as_str()));
+    assert_eq!(children[4].attribute("Tag"), Some(format!("{{app:Resolve Value={{x:Type {target}}}, Literal='{{x:Type w:ColorPicker}}'}}").as_str()));
+    assert_eq!(children[5].attribute("Tag"), Some("{app:Type w:ColorPicker}"));
+    assert_eq!(children[6].attribute("Tag"), Some("{}{x:Type w:ColorPicker}"));
+    assert_eq!(children[7].attribute("Tag"), Some("{x:Type w:ColorPicker}"));
+    assert_eq!(children[7].lookup_namespace_uri(Some("w")), Some("using:Other.Controls"));
+    assert_eq!(children[8].attribute("Mode"), None);
+    assert_eq!(children[9].attribute("Text"), Some("{Binding Name, Mode=Default}"));
+    let repeated = migrate_winui_xaml(&result.xaml, &WinUIXamlOptions::default()).unwrap();
+    assert_eq!(repeated.xaml, result.xaml);
+    assert!(repeated.edits.is_empty() && repeated.diagnostics.is_empty());
+}
+
+#[test]
+fn native_host_type_references_obey_explicit_namespace_and_type_policies() {
+    let input = format!("<ControlTemplate xmlns='{FERRO_XML_NAMESPACE}' xmlns:w='using:Microsoft.UI.Xaml.Controls' xmlns:x='{XAML_NAMESPACE}' TargetType='w:ColorPicker'><Grid Tag='{{x:Type w:ColorPicker}}'/></ControlTemplate>");
+    for override_type in [false, true] {
+        let mut options = WinUIXamlOptions::default();
+        options.namespaces.push(WinUIXamlNamespaceMapping::new(
+            "using:Microsoft.UI.Xaml.Controls", "using:App.Controls",
+        ));
+        if override_type {
+            options.types.push(WinUIXamlTypeMapping::new(
+                "using:Microsoft.UI.Xaml.Controls", "ColorPicker", "using:App.Palettes", "Palette",
+            ));
+        }
+        let result = migrate_winui_xaml(&input, &options).unwrap();
+        assert!(!result.has_errors(), "{:?}", result.diagnostics);
+        let document = Document::parse(&result.xaml).unwrap();
+        let node = document.root_element();
+        let target = node.attribute("TargetType").unwrap();
+        let (prefix, name) = target.split_once(':').unwrap();
+        assert_eq!(name, if override_type { "Palette" } else { "ColorPicker" });
+        assert_eq!(node.lookup_namespace_uri(Some(prefix)), Some(if override_type { "using:App.Palettes" } else { "using:App.Controls" }));
+        assert_eq!(node.first_element_child().unwrap().attribute("Tag"), Some(format!("{{x:Type {target}}}").as_str()));
+        assert!(!result.xaml.contains("ColorView"));
+        assert!(result.diagnostics.is_empty());
+    }
+}
+
+#[test]
+fn type_reference_scans_reject_excessive_nested_extensions_in_native_hosts() {
+    let mut value = "{x:Type w:ColorPicker}".to_string();
+    for _ in 0..80 {
+        value = format!("{{Binding Item, ConverterParameter={value}}}");
+    }
+    let input = format!("<Grid xmlns='{FERRO_XML_NAMESPACE}' xmlns:w='using:Microsoft.UI.Xaml.Controls' xmlns:x='{XAML_NAMESPACE}' Tag='{value}'/>");
+    let result = migrate_winui_xaml(&input, &WinUIXamlOptions::default()).unwrap();
+    assert!(result.has_errors());
+    assert!(result.diagnostics.iter().any(|diagnostic| diagnostic.code == "WXAML0002"));
+    assert!(result.into_xaml().is_err());
+}
+
+#[test]
+fn color_picker_alpha_and_editor_contracts_require_explicit_adaptation() {
+    for member in ["IsAlphaEnabled", "IsMoreButtonVisible", "IsAlphaSliderVisible", "IsAlphaTextInputVisible"] {
+        for body in [
+            format!("<ColorPicker {member}='False'/>"),
+            format!("<ColorPicker><ColorPicker.{member}>False</ColorPicker.{member}></ColorPicker>"),
+            format!("<c:ColorPicker xmlns:c='using:Microsoft.UI.Xaml.Controls' {member}='True'/>"),
+        ] {
+            let input = source(&body);
+            let result = migrate_winui_xaml(&input, &WinUIXamlOptions::default()).unwrap();
+            let errors: Vec<_> = result.diagnostics.iter().filter(|diagnostic| diagnostic.code == "WXAML1012").collect();
+            assert_eq!(errors.len(), 1, "{body}: {:?}", result.diagnostics);
+            assert!(result.has_errors());
+            assert!(input[errors[0].span.bytes.clone()].contains(member));
+            assert!(result.xaml.contains(member), "Unsupported input must remain visible");
+        }
+    }
+}
+
+#[test]
+fn color_picker_explicit_host_policies_take_precedence_over_inline_adaptation() {
+    let input = "<c:ColorPicker xmlns:c='using:Microsoft.UI.Xaml.Controls' IsMoreButtonVisible='True' IsColorSliderVisible='False'/>";
+    let mut options = WinUIXamlOptions::default();
+    options.types.push(WinUIXamlTypeMapping::new("using:Microsoft.UI.Xaml.Controls", "ColorPicker", "using:App.Controls", "Palette"));
+    let result = migrate_winui_xaml(input, &options).unwrap();
+    assert!(!result.has_errors());
+    assert!(result.xaml.contains(":Palette"));
+    assert!(result.xaml.contains("IsColorSliderVisible='False'"));
+    assert!(result.diagnostics.is_empty());
+
+    let mut options = WinUIXamlOptions::default();
+    options.namespaces.push(WinUIXamlNamespaceMapping::new("using:Microsoft.UI.Xaml.Controls", "using:App.Controls"));
+    let result = migrate_winui_xaml(input, &options).unwrap();
+    assert!(!result.has_errors());
+    assert!(result.xaml.contains("using:App.Controls"));
+    assert!(!result.xaml.contains("ColorView"));
+
+    let mut options = WinUIXamlOptions::default();
+    options.members.push(WinUIXamlMemberMapping::new("using:Microsoft.UI.Xaml.Controls", "ColorPicker", "IsAlphaEnabled", "IsAlphaEnabled"));
+    let result = migrate_winui_xaml("<c:ColorPicker xmlns:c='using:Microsoft.UI.Xaml.Controls' IsAlphaEnabled='False'/>", &options).unwrap();
+    assert!(!result.has_errors(), "{:?}", result.diagnostics);
+    assert!(result.diagnostics.iter().any(|diagnostic| diagnostic.code == "WXAML2006"));
+}
+
+#[test]
+fn native_color_picker_and_color_view_keep_their_existing_meanings() {
+    for name in ["ColorPicker", "ColorView"] {
+        let input = format!("<{name} xmlns='{FERRO_XML_NAMESPACE}' IsAlphaEnabled='False'/>");
+        let result = migrate_winui_xaml(&input, &WinUIXamlOptions::default()).unwrap();
+        assert_eq!(result.xaml, input);
+        assert!(result.edits.is_empty() && result.diagnostics.is_empty());
+    }
+}
+
+#[test]
 fn implemented_controls_use_the_native_controls_namespace() {
     let result = migrate(
         "<NumberBox Value='12'/><RadioButtons/><FontIcon Glyph='A'/><SymbolIcon Symbol='Accept'/><InfoBar/><FontIconSource/><SymbolIconSource/><PathIconSource/><AutoSuggestBox/>",

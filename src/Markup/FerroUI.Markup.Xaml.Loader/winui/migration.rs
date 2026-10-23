@@ -214,6 +214,10 @@ impl Migration<'_, '_> {
                     .then(|| (CONTROLS_NAMESPACE.to_string(), "FramePage".to_string()))
             })
             .or_else(|| {
+                self.inline_color_picker(namespace, name)
+                    .then(|| (CONTROLS_NAMESPACE.to_string(), "ColorView".to_string()))
+            })
+            .or_else(|| {
                 ((is_control_namespace(namespace)
                     || namespace == "using:Microsoft.UI.Xaml.Navigation")
                     && matches!(
@@ -325,7 +329,34 @@ impl Migration<'_, '_> {
         if is_control_namespace(namespace) && owner == "ToggleSwitch" && name == "IsOn" {
             return "IsChecked".to_string();
         }
+        if self.inline_color_picker(namespace, owner) {
+            return match name {
+                "IsColorSliderVisible" => "IsColorSpectrumSliderVisible",
+                "IsColorChannelTextInputVisible" => "IsComponentTextInputVisible",
+                _ => name,
+            }.to_string();
+        }
         name.to_string()
+    }
+
+    fn inline_color_picker(&self, namespace: &str, owner: &str) -> bool {
+        is_control_namespace(namespace) && owner == "ColorPicker"
+            && !self.explicit_type(namespace, owner)
+            && !self.options.namespaces.iter().any(|mapping| mapping.source == namespace)
+    }
+
+    fn color_picker_member_requires_adapter(&self, namespace: &str, owner: &str, member: &str) -> bool {
+        self.inline_color_picker(namespace, owner)
+            && matches!(member, "IsMoreButtonVisible" | "IsAlphaSliderVisible" | "IsAlphaTextInputVisible" | "IsAlphaEnabled")
+            && !self.options.members.iter().any(|mapping| {
+                mapping.source_namespace == namespace && mapping.source_type == owner
+                    && mapping.source_member == member
+            })
+    }
+
+    fn color_picker_adapter_diagnostic(&mut self, member: &str, span: Range<usize>) {
+        self.diagnostic("WXAML1012", true, span,
+            format!("ColorPicker.{member} requires an explicit native composition or reviewed member mapping. ColorView has different alpha-disable semantics and no independent More/alpha-editor visibility contract; FerroUI ColorPicker retains its dropdown API."));
     }
 
     fn element(&mut self, node: Node<'_, '_>) {
@@ -357,6 +388,16 @@ impl Migration<'_, '_> {
         self.edit(opening.clone(), name.clone());
         if let Some(closing) = closing_name(self.source, node.range()) {
             self.edit(closing, name);
+        }
+        if self.inline_color_picker(namespace, owner) {
+            if let Some(member) = member {
+                if self.color_picker_member_requires_adapter(namespace, owner, member) {
+                    self.color_picker_adapter_diagnostic(member, opening.clone());
+                }
+            } else {
+                self.diagnostic("WXAML2006", false, opening.clone(),
+                    "WinUI's inline ColorPicker is adapted to native ColorView. Register the color-picker library and install its styles; review layout, defaults, alpha and text-input behavior. The existing native ColorPicker dropdown is unchanged.");
+            }
         }
         if is_winui_namespace(namespace) && !self.explicit_type(namespace, owner) {
             match owner {
@@ -432,6 +473,13 @@ impl Migration<'_, '_> {
         attribute: &LexicalAttribute,
         value: &str,
     ) {
+        if attribute_namespace.is_none() || attribute_namespace.is_some_and(is_winui_namespace) {
+            let (member_owner, member) = local.split_once('.').unwrap_or((owner, local));
+            let member_namespace = attribute_namespace.unwrap_or(namespace);
+            if self.color_picker_member_requires_adapter(member_namespace, member_owner, member) {
+                self.color_picker_adapter_diagnostic(member, attribute.name.clone());
+            }
+        }
         // WinUI's icon shorthand creates a fresh SymbolIcon. Expand only these audited
         // imported members; adding a parser to the shared IconElement would also change
         // existing native-dialect documents. Property elements work with both back ends.
@@ -515,9 +563,6 @@ impl Migration<'_, '_> {
             } else if attribute_namespace.is_none() {
                 name = self.member_name(namespace, owner, local);
                 match local {
-                    "TargetType" if !value.starts_with('{') => {
-                        result = self.qualified_type(node, value);
-                    },
                     "Mode" if owner == "Binding" && value == "Default" => self.diagnostic(
                         "WXAML1009", true, attribute.value.clone(), "Binding Mode=Default must explicitly be OneWay for WinUI"),
                     "Visibility" => match value {
@@ -565,10 +610,18 @@ impl Migration<'_, '_> {
                 }
             }
         }
-        if context && value.starts_with('{') && !value.starts_with("{}") {
+        // A native template can refer to a source type through an explicit prefix.
+        // Resolve that type independently of the host dialect, just as x:DataType
+        // does. The reference itself still selects the namespace/type policy.
+        if attribute_namespace.is_none() && local == "TargetType" && !value.starts_with('{') {
+            result = self.qualified_type(node, value);
+        }
+        if value.starts_with('{') && !value.starts_with("{}") {
             // Semantic conversions above own their value. Otherwise rewrite the markup syntax.
+            // Outside a source context, visit only explicit type references: native
+            // Binding defaults and the behavior of custom extensions stay untouched.
             if result == value {
-                result = self.extension(node, value, attribute.value.clone(), 0, Some(local));
+                result = self.extension(node, value, attribute.value.clone(), 0, Some(local), context);
             }
         }
         if context && matches!(local, "Source" | "UriSource" | "NavigateUri") {
@@ -658,11 +711,14 @@ impl Migration<'_, '_> {
         span: Range<usize>,
         depth: usize,
         target_member: Option<&str>,
+        source_semantics: bool,
     ) -> String {
         if value.starts_with("{}") {
             return value.to_string();
         }
         if depth >= 64 {
+            // Bound the type-only walk too; do not silently accept an imported
+            // type reference hidden beyond the traversal limit.
             self.diagnostic(
                 "WXAML0002",
                 true,
@@ -672,7 +728,11 @@ impl Migration<'_, '_> {
             return value.to_string();
         }
         let Some((name_range, nested, parts)) = extension_parts(value) else {
-            self.diagnostic("WXAML0002", true, span, "Malformed markup extension");
+            // Native/custom extension syntax is not validated by a type-reference
+            // scan. Normal XAML loading remains responsible for those extensions.
+            if source_semantics {
+                self.diagnostic("WXAML0002", true, span, "Malformed markup extension");
+            }
             return value.to_string();
         };
         let name = &value[name_range.clone()];
@@ -680,13 +740,13 @@ impl Migration<'_, '_> {
             .split_once(':')
             .map_or((None, name), |(prefix, name)| (Some(prefix), name));
         let namespace = node.lookup_namespace_uri(prefix).unwrap_or("");
-        if namespace == XAML_NAMESPACE && local == "Bind" {
+        if source_semantics && namespace == XAML_NAMESPACE && local == "Bind" {
             return self.x_bind(node, value, &parts, span, depth, target_member);
         }
         let mut edits: Vec<(Range<usize>, String)> = Vec::new();
         for nested_range in nested {
             let nested_value = &value[nested_range.clone()];
-            let replacement = self.extension(node, nested_value, span.clone(), depth + 1, None);
+            let replacement = self.extension(node, nested_value, span.clone(), depth + 1, None, source_semantics);
             if nested_value != replacement {
                 edits.push((nested_range, replacement));
             }
@@ -701,7 +761,7 @@ impl Migration<'_, '_> {
                     edits.push((start..start + argument.len(), mapped));
                 }
             }
-        } else if is_winui_namespace(namespace) {
+        } else if source_semantics && is_winui_namespace(namespace) {
             match local {
                 "ThemeResource" => match self.options.theme_resources {
                     WinUIThemeResourcePolicy::Reject => self.diagnostic("WXAML1008", true, span.clone(),
