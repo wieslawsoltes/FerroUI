@@ -107,7 +107,7 @@ fn wheel_and_programmatic_zoom_ignore_axis_labels_and_outside_plot() {
 
 #[test]
 fn resize_before_pointer_input_uses_current_control_bounds() {
-    let _scope = Dispatcher::unit_test_scope();
+    let _app = UnitTestApplication::start(TestServices::styled_window());
     let chart = cartesian();
     chart.set_draw_margin(None);
     chart.measure(Size::new(400.0, 300.0));
@@ -125,7 +125,7 @@ fn resize_before_pointer_input_uses_current_control_bounds() {
 
 #[test]
 fn logarithmic_inverted_zoom_keeps_pointer_value_fixed() {
-    let _scope = Dispatcher::unit_test_scope();
+    let _app = UnitTestApplication::start(TestServices::styled_window());
     let chart = cartesian();
     let axis = chart.x_axes().get(0);
     axis.set_min_limit(Some(1.0));
@@ -188,7 +188,7 @@ fn polar_multiple_axes_convert_in_control_coordinates_with_title_layout() {
 
 #[test]
 fn virtual_axes_support_input_without_mutating_the_declared_collections() {
-    let _scope = Dispatcher::unit_test_scope();
+    let _app = UnitTestApplication::start(TestServices::styled_window());
     let chart = Chart::new();
     chart.set_animations_speed(0.0);
     chart.set_zoom_mode(ZoomAndPanMode::BOTH);
@@ -350,7 +350,7 @@ fn animated_hit_testing_uses_the_displayed_point_position() {
 
 #[test]
 fn section_zoom_normalizes_reverse_drag_and_clamps_to_plot() {
-    let _scope = Dispatcher::unit_test_scope();
+    let _app = UnitTestApplication::start(TestServices::styled_window());
     let chart = cartesian();
     chart.set_zoom_mode(ZoomAndPanMode::ZOOM_X);
     assert!(chart

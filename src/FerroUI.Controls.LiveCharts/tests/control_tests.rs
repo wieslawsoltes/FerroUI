@@ -65,7 +65,7 @@ fn default_collections_are_per_instance_and_derived_series_keep_their_kind() {
 
 #[test]
 fn shared_series_mutation_invalidates_each_chart_and_scene_cache() {
-    let _scope = Dispatcher::unit_test_scope();
+    let _app = UnitTestApplication::start(TestServices::styled_window());
     let a = CartesianChart::new();
     let b = CartesianChart::new();
     let series = line();
@@ -120,7 +120,7 @@ fn removed_and_replaced_sources_stop_notifying_and_drop_releases_owners() {
 
 #[test]
 fn reentrant_change_and_update_handlers_can_replace_data() {
-    let _scope = Dispatcher::unit_test_scope();
+    let _app = UnitTestApplication::start(TestServices::styled_window());
     let chart = CartesianChart::new();
     let series = line();
     chart.series().add(series.clone().upcast());
