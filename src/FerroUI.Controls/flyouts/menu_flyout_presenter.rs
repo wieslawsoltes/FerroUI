@@ -14,14 +14,15 @@ use std::rc::Rc;
 #[repr(C)]
 pub struct MenuFlyoutPresenter {
     base: MenuBase,
+    /// The system backdrop of the presenter (winui-materials.md).
+    element_backdrop: crate::media::ElementSystemBackdrop,
 }
 
 ferro_class!(MenuFlyoutPresenter: MenuBase);
 ferro_class_info!(MenuFlyoutPresenter { new: MenuFlyoutPresenter::new });
 
 ferro_impl_classes!(
-    MenuFlyoutPresenter: FerroObjectImpl,
-    StyledElementImpl,
+    MenuFlyoutPresenter: StyledElementImpl,
     LayoutableImpl,
     InteractiveImpl,
     InputElementImpl,
@@ -31,9 +32,24 @@ ferro_impl_classes!(
     SelectingItemsControlImpl
 );
 
+impl FerroObjectImpl for MenuFlyoutPresenter {
+    fn on_property_changed(this: &Self, change: &ferroui_base::FerroPropertyChangedEventArgs<'_>) {
+        <Self as ferroui_base::FerroObjectImplExt>::parent_on_property_changed(this, change);
+        if change.property() == Self::system_backdrop_property().as_property() && this.is_attached_to_visual_tree() {
+            this.element_backdrop.connect(this, this.system_backdrop());
+        }
+    }
+}
+
 impl VisualImpl for MenuFlyoutPresenter {
+    fn on_attached_to_visual_tree(this: &Self, e: &VisualTreeAttachmentEventArgs) {
+        Self::parent_on_attached_to_visual_tree(this, e);
+        this.element_backdrop.connect(this, this.system_backdrop());
+    }
+
     fn on_detached_from_visual_tree(this: &Self, e: &VisualTreeAttachmentEventArgs) {
         Self::parent_on_detached_from_visual_tree(this, e);
+        this.element_backdrop.disconnect();
 
         let children = StyledElement::logical_children(this).to_vec();
         for i in children {
@@ -43,6 +59,15 @@ impl VisualImpl for MenuFlyoutPresenter {
         }
     }
 }
+
+ferroui_base::ferro_properties! { impl MenuFlyoutPresenter {
+    ferroui_base::ferro_property!(
+        /// Defines the `SystemBackdrop` property.
+        pub fn system_backdrop_property() -> ferroui_base::StyledProperty<Option<Ref<crate::media::SystemBackdrop>>> {
+            ferroui_base::FerroProperty::register::<MenuFlyoutPresenter, _>("SystemBackdrop", None)
+        }
+    );
+} }
 
 impl MenuBaseImpl for MenuFlyoutPresenter {
     fn close(this: &Self) {
@@ -70,7 +95,20 @@ impl MenuFlyoutPresenter {
     /// Creates the class data of a presenter that uses
     /// `menu_interaction_handler`.
     pub fn construct_with(menu_interaction_handler: Rc<dyn IMenuInteractionHandler>) -> Self {
-        Self { base: MenuBase::construct_with(menu_interaction_handler) }
+        Self {
+            base: MenuBase::construct_with(menu_interaction_handler),
+            element_backdrop: Default::default(),
+        }
+    }
+
+    /// `SystemBackdrop` (WinUI `MenuFlyoutPresenter.SystemBackdrop`): the
+    /// system backdrop drawn as the background of the presenter.
+    pub fn system_backdrop(&self) -> Option<Ref<crate::media::SystemBackdrop>> {
+        self.get_value(Self::system_backdrop_property())
+    }
+
+    pub fn set_system_backdrop(&self, value: Option<Ref<crate::media::SystemBackdrop>>) {
+        self.set_value(Self::system_backdrop_property(), value)
     }
 
     /// Creates a menu flyout presenter.

@@ -97,6 +97,9 @@ pub(super) const TYPES: &[&MarkupType] = &[
     <TickList as MarkupTyped>::MARKUP,
     // Declared next to the type (a FerroUI addition, not in the managed original).
     <TextLayoutRoundingPlacement as MarkupTyped>::MARKUP,
+    // The WinUI materials (winui-materials.md), declared next to the types.
+    <crate::media::ApplicationTheme as MarkupTyped>::MARKUP,
+    <crate::media::RevealBrushState as MarkupTyped>::MARKUP,
 ];
 
 /// Registers the nullable forms of the value types with the untyped value
@@ -108,6 +111,8 @@ pub(super) fn register_value_types() {
     ValueTypes::register_nullable::<AcrylicPlatformCompensationLevels>();
     ValueTypes::register_nullable::<TickList>();
     ValueTypes::register_nullable::<TextLayoutRoundingPlacement>();
+    ValueTypes::register_nullable::<crate::media::ApplicationTheme>();
+    ValueTypes::register_nullable::<crate::media::RevealBrushState>();
     // A tick list is the list of numbers it derives from: the same list, so that the
     // members of the list (`Capacity`, `Add`) are reached through the tick list.
     ValueTypes::register_cast::<TickList, MediaCollection<f64>>(|ticks| MediaCollection::from_list(ticks.list().clone()));

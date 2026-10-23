@@ -74,6 +74,10 @@ pub struct TopLevel {
     frame_size: Cell<Option<Size>>,
     actual_transparency_level: Cell<WindowTransparencyLevel>,
     transparency_fallback_border: RefCell<Option<Ref<Border>>>,
+    /// The top level as the target of its system backdrop, and the backdrop
+    /// it is connected to (winui-materials.md).
+    system_backdrop_target: RefCell<Option<Rc<crate::media::TopLevelBackdropTarget>>>,
+    connected_system_backdrop: RefCell<Option<Ref<crate::media::SystemBackdrop>>>,
     visual_layer_manager: RefCell<Option<Ref<crate::primitives::VisualLayerManager>>>,
     screens: RefCell<Option<Rc<Screens>>>,
     storage_provider: RefCell<Option<Rc<dyn ferroui_base::platform::storage::IStorageProvider>>>,
@@ -122,6 +126,8 @@ impl FerroObjectImpl for TopLevel {
 
         if change.property() == ContentControl::content_property().as_property() {
             this.invalidate_child_insets_padding();
+        } else if change.property() == Self::system_backdrop_property().as_property() {
+            this.connect_system_backdrop();
         } else {
             let actions = this.platform_impl_bindings.borrow().get(&property_key(change.property())).cloned();
             if let Some(actions) = actions {
@@ -177,6 +183,7 @@ impl TemplatedControlImpl for TopLevel {
 
 impl TopLevelImpl for TopLevel {
     fn handle_closed(this: &Self) {
+        this.disconnect_system_backdrop();
         let source = this.presentation_source().clone();
         source.dispose();
         this.stop_rendering();
@@ -359,6 +366,15 @@ ferroui_base::ferro_properties! { impl TopLevel, also [
             FerroProperty::register::<TopLevel, _>("TransparencyBackgroundFallback", Some(white))
         }
     );
+
+    ferro_property!(
+        /// Defines the `SystemBackdrop` property (WinUI `Window.SystemBackdrop`,
+        /// `Popup.SystemBackdrop`; winui-materials.md): the system backdrop
+        /// drawn behind the content of the top level.
+        pub fn system_backdrop_property() -> StyledProperty<Option<Ref<crate::media::SystemBackdrop>>> {
+            FerroProperty::register::<TopLevel, _>("SystemBackdrop", None)
+        }
+    );
 } }
 
 impl TopLevel {
@@ -492,6 +508,8 @@ impl TopLevel {
             frame_size: Cell::new(None),
             actual_transparency_level: Cell::new(WindowTransparencyLevel::none()),
             transparency_fallback_border: RefCell::new(None),
+            system_backdrop_target: RefCell::new(None),
+            connected_system_backdrop: RefCell::new(None),
             visual_layer_manager: RefCell::new(None),
             screens: RefCell::new(None),
             storage_provider: RefCell::new(None),
@@ -549,6 +567,8 @@ impl TopLevel {
 
         self.scaling.set(LayoutHelper::validate_scaling(platform_impl.render_scaling()));
         self.actual_transparency_level.set(platform_impl.transparency_level());
+        // The Reveal lights are attached to the windows (winui-materials.md).
+        crate::media::on_top_level_created(self);
 
         let renderer = source.typed_renderer();
         renderer.set_transparency_level(to_composition_transparency_level(self.actual_transparency_level.get()));
@@ -1286,7 +1306,10 @@ impl TopLevel {
     fn handle_transparency_level_changed(&self, transparency_level: WindowTransparencyLevel) {
         let border = self.transparency_fallback_border.borrow().clone();
         if let Some(border) = border {
-            if transparency_level == WindowTransparencyLevel::none() {
+            if let Some(target) = self.active_system_backdrop_target() {
+                // The system backdrop draws there (winui-materials.md).
+                border.set_background(Some(target.host_brush()));
+            } else if transparency_level == WindowTransparencyLevel::none() {
                 border.set_background(self.transparency_background_fallback());
             } else {
                 border.set_background(None);
@@ -1295,6 +1318,87 @@ impl TopLevel {
 
         self.set_actual_transparency_level(transparency_level);
         self.renderer().set_transparency_level(to_composition_transparency_level(transparency_level));
+    }
+
+    /// The target of the system backdrop, while one is connected.
+    fn active_system_backdrop_target(&self) -> Option<Rc<crate::media::TopLevelBackdropTarget>> {
+        self.connected_system_backdrop
+            .borrow()
+            .is_some()
+            .then(|| self.system_backdrop_target.borrow().clone())
+            .flatten()
+    }
+
+    /// `SystemBackdrop`.
+    pub fn system_backdrop(&self) -> Option<Ref<crate::media::SystemBackdrop>> {
+        self.get_value(Self::system_backdrop_property())
+    }
+
+    pub fn set_system_backdrop(&self, value: Option<Ref<crate::media::SystemBackdrop>>) {
+        self.set_value(Self::system_backdrop_property(), value)
+    }
+
+    /// The top level as the target of system backdrops.
+    pub fn system_backdrop_target(&self) -> Rc<crate::media::TopLevelBackdropTarget> {
+        self.system_backdrop_target
+            .borrow_mut()
+            .get_or_insert_with(|| crate::media::TopLevelBackdropTarget::new(self))
+            .clone()
+    }
+
+    /// Connects the system backdrop to the top level (and disconnects the
+    /// previous one): WinUI's `OnTargetConnected` and `OnTargetDisconnected`.
+    fn connect_system_backdrop(&self) {
+        self.disconnect_system_backdrop();
+        let Some(backdrop) = self.system_backdrop() else {
+            self.update_system_backdrop_visual();
+            return;
+        };
+        if self.platform_impl().is_none() {
+            return;
+        }
+        let target = self.system_backdrop_target();
+        *self.connected_system_backdrop.borrow_mut() = Some(backdrop.clone());
+        let target: Rc<dyn ferroui_base::rendering::composition::system_backdrops::ICompositionSupportsSystemBackdrop> =
+            target;
+        backdrop.on_target_connected(&target, self);
+        self.update_system_backdrop_visual();
+    }
+
+    fn disconnect_system_backdrop(&self) {
+        let previous = self.connected_system_backdrop.borrow_mut().take();
+        if let Some(previous) = previous {
+            if let Some(target) = self.system_backdrop_target.borrow().clone() {
+                let target: Rc<dyn ferroui_base::rendering::composition::system_backdrops::ICompositionSupportsSystemBackdrop> =
+                    target;
+                previous.on_target_disconnected(&target);
+            }
+        }
+        self.update_system_backdrop_visual();
+    }
+
+    /// Shows the system backdrop under the content: the template part of
+    /// the transparency fallback draws the brush of the backdrop, and the
+    /// top level has the pseudo class `:system-backdrop` (a theme makes its
+    /// background transparent there).
+    pub(crate) fn update_system_backdrop_visual(&self) {
+        let active = self.active_system_backdrop_target().is_some();
+        if active {
+            self.pseudo_classes().add_pseudo(":system-backdrop");
+        } else {
+            self.pseudo_classes().remove_pseudo(":system-backdrop");
+        }
+        let level = self.actual_transparency_level();
+        let border = self.transparency_fallback_border.borrow().clone();
+        if let Some(border) = border {
+            if let Some(target) = self.active_system_backdrop_target() {
+                border.set_background(Some(target.host_brush()));
+            } else if level == WindowTransparencyLevel::none() {
+                border.set_background(self.transparency_background_fallback());
+            } else {
+                border.set_background(None);
+            }
+        }
     }
 
     fn handle_platform_specific_scene_info_changed(&self, scene_info: Option<std::sync::Arc<dyn Any + Send + Sync>>) {
