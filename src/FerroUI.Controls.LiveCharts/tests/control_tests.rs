@@ -47,8 +47,10 @@ fn default_collections_are_per_instance_and_derived_series_keep_their_kind() {
     let b = CartesianChart::new();
     a.series().add(line().upcast());
     assert!(b.series().is_empty());
-    a.x_axes().get(0).set_name("first only".into());
-    assert_eq!(b.x_axes().get(0).name(), "");
+    let axis = Axis::new();
+    axis.set_name("first only".into());
+    a.x_axes().add(axis);
+    assert!(b.x_axes().is_empty());
     assert_eq!(CandlesticksSeries::new().kind(), SeriesKind::Financial);
     assert_eq!(
         StackedStepAreaSeries::new().kind(),
@@ -174,6 +176,29 @@ fn native_binding_changes_point_and_invalidates_chart() {
 }
 
 #[test]
+fn source_family_padding_defaults_remain_overridable_by_native_style_priority() {
+    let _scope = Dispatcher::unit_test_scope();
+    let column = ColumnSeries::new();
+    let polar = PolarLineSeries::new();
+    assert_eq!(column.data_padding(), ferroui_base::Point::new(0.0, 1.0));
+    assert_eq!(polar.data_padding(), ferroui_base::Point::new(1.0, 1.5));
+    let styled = ferroui_base::Point::new(3.0, 4.0);
+    let subscription = column
+        .set_value_with_priority(
+            ChartSeries::data_padding_property(),
+            styled,
+            BindingPriority::Style,
+        )
+        .unwrap();
+    assert_eq!(column.snapshot().data_padding, styled);
+    subscription.dispose();
+    assert_eq!(
+        column.snapshot().data_padding,
+        ferroui_base::Point::new(0.0, 1.0)
+    );
+}
+
+#[test]
 fn native_gradient_stop_changes_invalidate_and_replaced_brushes_unsubscribe() {
     use ferroui_base::media::{Colors, GradientStop, IBrush, LinearGradientBrush};
     let _scope = Dispatcher::unit_test_scope();
@@ -226,7 +251,7 @@ fn runtime_xaml_loads_native_chart_series_points_and_axes() {
         r##"<lc:CartesianChart xmlns="https://github.com/ferroui"
             xmlns:lc="https://ferroui.dev/livecharts" Title="Native markup" ZoomMode="Both">
           <lc:CartesianChart.XAxes>
-            <lc:Axes><lc:Axis Name="Time" MinLimit="0" MaxLimit="10" /></lc:Axes>
+            <lc:Axis Name="Time" MinLimit="0" MaxLimit="10" />
           </lc:CartesianChart.XAxes>
           <lc:LineSeries Name="Temperature" Stroke="#2563eb">
             <lc:ChartPoint X="0" Y="4" />

@@ -72,7 +72,10 @@ axis_props = [
  ('position','Position','AxisPosition','AxisPosition::Start'),('text_size','TextSize','f64','12.0'),
  ('labels_rotation','LabelsRotation','f64','0.0'),('labels_color','LabelsColor','Color','Color::from_rgb(75,85,99)'),
  ('separators_color','SeparatorsColor','Color','Color::from_argb(50,107,114,128)'),
- ('logarithmic_base','LogarithmicBase','Option<f64>','None'),('padding','Padding','f64','0.05')]
+ ('logarithmic_base','LogarithmicBase','Option<f64>','None'),('padding','Padding','f64','0.0'),
+ ('min_separators','MinSeparators','u32','3'),('labels_angle','LabelsAngle','f64','0.0'),
+ ('custom_separators','CustomSeparators','Vec<f64>','Vec::new()'),('labels_padding','LabelsPadding','f64','3.0'),
+ ('labels_density','LabelsDensity','f64','0.85')]
 axis = HEADER + IMPORTS + '''use ferroui_base::media::Color;
 use ferroui_livecharts::{Axis as AxisSnapshot, AxisPosition};
 #[repr(C)]
@@ -117,9 +120,10 @@ series_props = [
  ('max_radial_column_width','MaxRadialColumnWidth','f64','f64::MAX'),('radial_align','RadialAlign','RadialAlignment','RadialAlignment::Outer'),
  ('inverted_corner_radius','InvertedCornerRadius','bool','false'),
  ('polar_labels_position','PolarLabelsPosition','PolarLabelsPosition','PolarLabelsPosition::Middle'),
- ('data_labels_rotation','DataLabelsRotation','f64','0.0')]
+ ('data_labels_rotation','DataLabelsRotation','f64','0.0'),
+ ('polar_stacked','IsStacked','bool','false'),('data_padding','DataPadding','Point','Point::new(0.5,1.0)')]
 series = HEADER + IMPORTS + '''use crate::{ChartPoints, ChartPoint};
-use ferroui_base::{FerroObjectImplExt,FerroPropertyChangedEventArgs};
+use ferroui_base::{FerroObjectImplExt,FerroPropertyChangedEventArgs,Point};
 use ferroui_base::media::{Color,IBrush,PenLineCap,PenLineJoin};
 use ferroui_base::reactive::{Disposable, IDisposable};
 use ferroui_base::utilities::HandlerList;
@@ -233,6 +237,10 @@ impl FerroObjectImpl for {name} {{
     fn constructed(this:&Self) {{ Self::parent_constructed(this);this.set_kind(SeriesKind::{kind}); }}
 }}
 impl {name} {{
+    fn static_constructor() {{
+        ChartSeries::kind_property().override_default_value::<{name}>(SeriesKind::{kind});
+        ChartSeries::data_padding_property().override_default_value::<{name}>(ferroui_livecharts::Series::default_data_padding(SeriesKind::{kind}));
+    }}
     pub fn construct()->Self {{Self{{base:ChartSeries::construct()}}}}
     pub fn new()->Ref<Self> {{instantiate(Self::construct())}}
 }}
@@ -279,6 +287,7 @@ chart_props = [
  ('sections','Sections','Vec<Section>','Vec::new()'),
  ('initial_rotation','InitialRotation','f64','0.0'),
  ('max_angle','MaxAngle','f64','360.0'),('inner_radius','InnerRadius','f64','0.0'),
+ ('fit_to_bounds','FitToBounds','bool','false'),
  ('min_value','MinValue','f64','0.0'),('max_value','MaxValue','Option<f64>','None'),
  ('clockwise','Clockwise','bool','true'),
  ('sankey_nodes','Nodes','SankeyNodes','SankeyNodes::new()'),
@@ -291,8 +300,9 @@ chart_props = [
  ('heat_lands','HeatLands','HeatLands','HeatLands::new()'),
  ('geo_markers','GeoMarkers','GeoMarkers','GeoMarkers::new()'),
  ('geo_options','MapOptions','GeoMapOptions','GeoMapOptions::default()'),
+ ('map_interaction_mode','InteractionMode','MapInteractionMode','MapInteractionMode::NONE'),
 ]
-chart_properties=HEADER+'''use crate::{Chart,ChartKind,ChartSeriesCollection,Axes,LegendPosition,TooltipPosition,ZoomAndPanMode};
+chart_properties=HEADER+'''use crate::{Chart,ChartKind,ChartSeriesCollection,Axes,LegendPosition,TooltipPosition,ZoomAndPanMode,MapInteractionMode};
 use crate::{SankeyNodes,SankeyLinks,TreemapNodes,HeatLands,GeoMarkers};
 use ferroui_base::{ferro_properties,FerroProperty,StyledProperty,Rect};
 use ferroui_base::media::Color;
@@ -331,11 +341,11 @@ def main():
     opts=args.parse_args()
     failed=[]
     for name,content in FILES.items():
-        content=subprocess.run([opts.rustfmt,'--edition','2021','--emit','stdout'],input=content,text=True,check=True,capture_output=True).stdout
+        content=subprocess.run([opts.rustfmt,'--edition','2021','--emit','stdout'],input=content,text=True,encoding='utf-8',check=True,capture_output=True).stdout
         path=DEST/name
         if opts.check:
-            if not path.exists() or path.read_text()!=content: failed.append(str(path.relative_to(ROOT)))
+            if not path.exists() or path.read_text(encoding='utf-8')!=content: failed.append(str(path.relative_to(ROOT)))
         else:
-            path.parent.mkdir(parents=True,exist_ok=True);path.write_text(content)
+            path.parent.mkdir(parents=True,exist_ok=True);path.write_text(content,encoding='utf-8',newline='\n')
     if failed: raise SystemExit('Regenerate native chart declarations: '+', '.join(failed))
 if __name__=='__main__':main()

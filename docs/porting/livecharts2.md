@@ -240,13 +240,29 @@ the visual tree stays alive and each chart receives changes through its normal
 collection/property observation. The sample compares the compiled document with
 the runtime XAML loader and checks that the update action changes geometry in
 every family. A separate gradient test changes a native stop and checks chart
-invalidation.
+invalidation. The initial three-test gate passed on 2026-10-23: compiled and runtime markup
+produced equal chart kinds, plot bounds, hit regions and primitive geometry;
+the routed button click changed geometry and invalidated all six charts; and a
+compiled native gradient remained observable after construction. The later
+explicit assertions for one declared axis in each direction and per-series
+doughnut radius are included in the expanded CI gate; they are not counted as
+new local test evidence.
 
 The optional desktop executable and the optional Vello CPU render executable
 load this same compiled document. The CPU capture traverses the native visual
 tree, including layout, text shaping, controls and brushes. It is an integration
 smoke capture and does not claim upstream golden-image parity. The sample's
 README records the commands and platform feature choices.
+
+Both 1440 × 1040 CPU captures completed and were visually inspected on
+2026-10-23, including a second capture after the deterministic live update. The
+measured hit counts were 12 Cartesian, 4 pie, 12 polar, 9 Sankey, 6 treemap and
+180 geographic regions in both states. Pixel comparison found changes in all
+six chart cards. The final captures use the corrected source axis contract:
+declared axis collections start empty, and the control keeps its implicit
+default axes internally. Ordinary `<Axis>` children in XAML therefore create
+one declared axis. These images cover native window attachment, theme
+application, font shaping, layout, drawing and the live-data action.
 
 ### Evidence boundaries
 
@@ -382,5 +398,18 @@ runtime evidence.
 | Offline generated-record consistency check | Passed |
 | Test declaration discovery | 1,066 declarations: 826 core, 172 snapshot, 33 console, 32 shared UI and 3 generator |
 | Completion gate (`--require-complete`) | Correctly fails while unimplemented/unreviewed records remain |
+| Core and native control gate | Passed: 150 core unit tests, 28 native unit tests and 10 native integration tests (188 total) |
+| Initial compiled native gallery gate | Passed: 3 tests for compiled/runtime construction equivalence, all-family live mutation and mutable native gradients; later axis/radius assertions are queued in CI |
+| Native Vello CPU captures | Passed: the compiled six-family view rendered at 1440 × 1040 before and after mutation; both images inspected, every chart card changed |
 
 No upstream test execution is implied by these declaration counts.
+
+The gallery gate was run with `cargo test -p livecharts-demo --lib`. The local
+verification additionally used a package-only
+`profile.test.package.livecharts-demo.strip="symbols"` override to reduce the
+test executable's disk footprint; it does not change chart logic or dependency
+features. The CPU capture used `cargo run -p livecharts-demo --features render
+--bin livecharts-render`, with matching local dependency feature unification
+and a package-only symbol stripping override. Subsequent source-parity
+additions receive their own test evidence before their map dispositions are
+advanced.

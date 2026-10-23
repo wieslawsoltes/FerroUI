@@ -3,8 +3,8 @@
 use crate::renderer::NativeScene;
 use crate::scene_transition::SceneTransition;
 use crate::{
-    Axes, Axis, ChartKind, ChartSeriesCollection, GeoMarkers, HeatLands, SankeyLinks, SankeyNodes,
-    TooltipPosition, TreemapNodes, ZoomAndPanMode,
+    Axes, Axis, ChartKind, ChartSeriesCollection, GeoMarkers, HeatLands, MapInteractionMode,
+    SankeyLinks, SankeyNodes, TooltipPosition, TreemapNodes, ZoomAndPanMode,
 };
 use ferroui_base::collections::FerroList;
 use ferroui_base::input::{
@@ -24,8 +24,9 @@ use ferroui_base::{
     VisualImpl, VisualImplExt, VisualTreeAttachmentEventArgs,
 };
 use ferroui_controls::{Control, ControlImpl};
-use ferroui_livecharts::geo::DrawnMap;
-use ferroui_livecharts::geo_map_chart::{GeoData, GeoMapChartEngine};
+use ferroui_livecharts::geo::{DrawnMap, GeoCoordinate, MapProjector, Projector};
+use ferroui_livecharts::geo_map_chart::{GeoData, GeoMapChartEngine, MapViewportTransform};
+use ferroui_livecharts::polar_chart_engine::PolarScale;
 use ferroui_livecharts::sankey_chart_engine::SankeyChartEngine;
 use ferroui_livecharts::treemap_chart_engine::TreemapChartEngine;
 use ferroui_livecharts::{
@@ -33,7 +34,7 @@ use ferroui_livecharts::{
     PieOptions, PolarChartEngine, PolarOptions, Scene,
 };
 use std::{
-    cell::{Cell, RefCell},
+    cell::{Cell, OnceCell, RefCell},
     rc::{Rc, Weak},
     time::Duration,
 };
@@ -50,6 +51,14 @@ struct Measurement {
     scene: Rc<Scene>,
     x_scales: Vec<AxisScale>,
     y_scales: Vec<AxisScale>,
+    polar_origin: Option<(Point, f64)>,
+    map_transform: Option<MapTransform>,
+}
+
+struct MapTransform {
+    projector: Projector,
+    viewport: MapViewportTransform,
+    origin: Point,
 }
 
 /// Shared host for all chart families. All application state stays on the UI thread.
@@ -60,6 +69,8 @@ pub struct Chart {
     measurement: RefCell<Option<Measurement>>,
     native_scene: RefCell<Option<Rc<NativeScene>>>,
     source_subscriptions: RefCell<Vec<Rc<dyn IDisposable>>>,
+    fallback_x_axes: OnceCell<Axes>,
+    fallback_y_axes: OnceCell<Axes>,
     pointer_down: Cell<Option<Point>>,
     pointer_capture: RefCell<Option<Weak<dyn IPointer>>>,
     pointer_button: Cell<MouseButton>,
@@ -84,8 +95,8 @@ impl FerroObjectImpl for Chart {
     fn constructed(this: &Self) {
         Self::parent_constructed(this);
         this.set_series(ChartSeriesCollection::new());
-        this.set_x_axes(Axes::from_items([Axis::new()]));
-        this.set_y_axes(Axes::from_items([Axis::new()]));
+        this.set_x_axes(Axes::new());
+        this.set_y_axes(Axes::new());
         // Native collections are per-instance mutable objects; property defaults
         // must never let two charts share the same observable collection.
         this.set_sankey_nodes(SankeyNodes::new());
@@ -111,6 +122,7 @@ impl FerroObjectImpl for Chart {
         }
         if property == Self::chart_kind_property().as_property()
             || property == Self::zoom_mode_property().as_property()
+            || property == Self::map_interaction_mode_property().as_property()
         {
             this.cancel_pointer_gesture();
         }
@@ -265,12 +277,20 @@ impl InputElementImpl for Chart {
             .properties
             .pointer_update_kind
             .get_mouse_button();
-        let action = pointer_action(
-            this.zoom_mode(),
-            e.pointer().type_(),
-            button,
-            e.click_count(),
-        );
+        let action = if this.chart_kind() == ChartKind::GeoMap {
+            if e.pointer().type_() != PointerType::Mouse || button == MouseButton::Left {
+                PointerAction::Pan
+            } else {
+                PointerAction::None
+            }
+        } else {
+            pointer_action(
+                this.zoom_mode(),
+                e.pointer().type_(),
+                button,
+                e.click_count(),
+            )
+        };
         if this
             .pointer_capture
             .borrow()
@@ -311,10 +331,7 @@ impl InputElementImpl for Chart {
             return;
         }
         if action == PointerAction::Pan
-            && this.chart_kind() == ChartKind::Cartesian
-            && this
-                .zoom_mode()
-                .intersects(ZoomAndPanMode::PAN_X | ZoomAndPanMode::PAN_Y)
+            && this.pan_enabled()
             && this.ensure_measurement().is_ok()
             && this.in_plot(position)
         {
@@ -331,6 +348,9 @@ impl InputElementImpl for Chart {
         {
             if let Some(start) = this.section_start.get() {
                 let _ = this.zoom_to_section(start, e.get_position(Some(this)));
+            }
+            if this.pointer_down.get().is_some() && this.chart_kind() == ChartKind::GeoMap {
+                let _ = this.constrain_map_viewport();
             }
             this.cancel_pointer_gesture();
             e.set_handled(true);
@@ -385,6 +405,8 @@ impl Chart {
             measurement: RefCell::new(None),
             native_scene: RefCell::new(None),
             source_subscriptions: RefCell::new(Vec::new()),
+            fallback_x_axes: OnceCell::new(),
+            fallback_y_axes: OnceCell::new(),
             pointer_down: Cell::new(None),
             pointer_capture: RefCell::new(None),
             pointer_button: Cell::new(MouseButton::None),
@@ -415,6 +437,32 @@ impl Chart {
         self.revision.set(self.revision.get().wrapping_add(1));
         self.native_scene.borrow_mut().take();
         self.invalidate_visual();
+    }
+
+    // Upstream views expose empty, independently owned collections. The engine
+    // supplies virtual axes only while a collection is empty. Keeping those axes
+    // outside the declared collection also lets XAML append the first real axis
+    // without accidentally retaining an extra default axis.
+    fn effective_x_axes(&self) -> Axes {
+        let declared = self.x_axes();
+        if declared.is_empty() {
+            self.fallback_x_axes
+                .get_or_init(|| Axes::from_items([Axis::new()]))
+                .clone()
+        } else {
+            declared
+        }
+    }
+
+    fn effective_y_axes(&self) -> Axes {
+        let declared = self.y_axes();
+        if declared.is_empty() {
+            self.fallback_y_axes
+                .get_or_init(|| Axes::from_items([Axis::new()]))
+                .clone()
+        } else {
+            declared
+        }
     }
 
     fn rebind_sources(&self) {
@@ -467,6 +515,8 @@ impl Chart {
                     this.invalidate_chart();
                 }
             }));
+        }
+        for axes in [self.effective_x_axes(), self.effective_y_axes()] {
             for axis in axes.to_vec() {
                 let weak = self.to_ref().downgrade();
                 subscriptions.push(axis.property_changed(move |_| {
@@ -505,23 +555,41 @@ impl Chart {
         let models = self.series().to_vec();
         let series: Vec<_> = models.iter().map(|s| s.snapshot()).collect();
         let xs: Vec<_> = self
-            .x_axes()
+            .effective_x_axes()
             .to_vec()
             .iter()
             .map(|a| a.snapshot())
             .collect();
         let ys: Vec<_> = self
-            .y_axes()
+            .effective_y_axes()
             .to_vec()
             .iter()
             .map(|a| a.snapshot())
             .collect();
         let margin = self.draw_margin().or_else(|| {
-            crate::decorations::draw_margin(size, self.legend_position(), !self.title().is_empty())
+            crate::decorations::draw_margin(
+                size,
+                self.legend_position(),
+                !self.title().is_empty(),
+                self.chart_kind(),
+            )
         });
+        let viewport = margin.unwrap_or(Rect::from_size(size));
+        if ![viewport.x, viewport.y, viewport.width, viewport.height]
+            .iter()
+            .all(|v| v.is_finite())
+            || viewport.width < 0.0
+            || viewport.height < 0.0
+        {
+            return Err(ChartError::InvalidData(
+                "drawing margin must be a finite nonnegative rectangle".into(),
+            ));
+        }
+        let mut polar_origin = None;
+        let mut map_transform = None;
         let (mut scene, x_scales, y_scales) = match self.chart_kind() {
             ChartKind::Cartesian => {
-                let measured = CartesianChartEngine::measure_with_axes(
+                let measured = CartesianChartEngine::measure_with_axes_and_labels(
                     size,
                     &series,
                     &xs,
@@ -530,6 +598,7 @@ impl Chart {
                         draw_margin: margin,
                         sections: self.sections(),
                     },
+                    crate::decorations::text_size,
                 )?;
                 (measured.scene, measured.x_scales, measured.y_scales)
             }
@@ -550,43 +619,58 @@ impl Chart {
                 Vec::new(),
                 Vec::new(),
             ),
-            ChartKind::Polar => (
-                PolarChartEngine::measure(
-                    size,
+            ChartKind::Polar => {
+                // Automatic title/legend space is external to polar axis-label
+                // negotiation. Explicit drawing margins retain control coordinates.
+                let local = self.draw_margin().is_none();
+                let mut measured = PolarChartEngine::measure_with_axes_and_labels(
+                    if local { viewport.size() } else { size },
                     &series,
-                    &xs.first().cloned().unwrap_or_default(),
-                    &ys.first().cloned().unwrap_or_default(),
+                    &xs,
+                    &ys,
                     &PolarOptions {
-                        draw_margin: margin,
+                        draw_margin: if local { None } else { margin },
                         inner_radius: self.inner_radius(),
                         initial_rotation: self.initial_rotation(),
                         total_angle: self.max_angle(),
+                        fit_to_bounds: self.fit_to_bounds(),
                     },
-                )?,
-                Vec::new(),
-                Vec::new(),
-            ),
-            ChartKind::Sankey => (
-                SankeyChartEngine::measure_with_labels(
+                    crate::decorations::text_size,
+                )?;
+                if local {
+                    let offset = Point::new(viewport.x, viewport.y);
+                    measured.scene.translate(offset, size)?;
+                    measured.center.x += offset.x;
+                    measured.center.y += offset.y;
+                }
+                polar_origin = Some((measured.center, measured.initial_rotation));
+                (
+                    measured.scene,
+                    measured.angle_scales,
+                    measured.radius_scales,
+                )
+            }
+            ChartKind::Sankey => {
+                let mut scene = SankeyChartEngine::measure_with_labels(
                     &self.sankey_nodes().snapshots(),
                     &self.sankey_links().snapshots(),
-                    size,
+                    viewport.size(),
                     &self.sankey_options(),
                     crate::decorations::text_size,
-                )?,
-                Vec::new(),
-                Vec::new(),
-            ),
-            ChartKind::Treemap => (
-                TreemapChartEngine::measure_with_labels(
+                )?;
+                scene.translate(Point::new(viewport.x, viewport.y), size)?;
+                (scene, Vec::new(), Vec::new())
+            }
+            ChartKind::Treemap => {
+                let mut scene = TreemapChartEngine::measure_with_labels(
                     &self.treemap_roots().snapshots()?,
-                    size,
+                    viewport.size(),
                     &self.treemap_options(),
                     crate::decorations::text_size,
-                )?,
-                Vec::new(),
-                Vec::new(),
-            ),
+                )?;
+                scene.translate(Point::new(viewport.x, viewport.y), size)?;
+                (scene, Vec::new(), Vec::new())
+            }
             ChartKind::GeoMap => {
                 let mut data = if let Some(data) = self.geo_data() {
                     data
@@ -617,11 +701,16 @@ impl Chart {
                 };
                 data.heat.extend(self.heat_lands().snapshots());
                 data.markers.extend(self.geo_markers().snapshots());
-                (
-                    GeoMapChartEngine::measure(&data, size, &self.geo_options())?,
-                    Vec::new(),
-                    Vec::new(),
-                )
+                let mut measured =
+                    GeoMapChartEngine::layout(&data, viewport.size(), &self.geo_options())?;
+                let origin = Point::new(viewport.x, viewport.y);
+                measured.scene.translate(origin, size)?;
+                map_transform = Some(MapTransform {
+                    projector: measured.projector,
+                    viewport: measured.viewport,
+                    origin,
+                });
+                (measured.scene, Vec::new(), Vec::new())
             }
         };
         crate::decorations::decorate(
@@ -667,6 +756,8 @@ impl Chart {
             scene: scene.clone(),
             x_scales,
             y_scales,
+            polar_origin,
+            map_transform,
         });
         self.last_error.borrow_mut().take();
         self.native_scene.borrow_mut().take();
@@ -685,7 +776,8 @@ impl Chart {
             cached_size.unwrap_or(size)
         };
         match self.scene(size) {
-            Ok(scene) => scene
+            Ok(scene) => self
+                .presentation_scene(Dispatcher::ui_thread().now() as f64, scene)
                 .hit_test(
                     position,
                     self.tooltip_finding_strategy(),
@@ -760,6 +852,45 @@ impl Chart {
 
     /// Zooms about a control-local point. A disabled gesture returns false.
     pub fn zoom_at(&self, position: Point, factor: f64) -> Result<bool, ChartError> {
+        if self.chart_kind() == ChartKind::GeoMap {
+            if !self
+                .map_interaction_mode()
+                .contains(MapInteractionMode::ZOOM)
+            {
+                return Ok(false);
+            }
+            if !factor.is_finite()
+                || factor <= 0.0
+                || ![position.x, position.y].iter().all(|v| v.is_finite())
+            {
+                return Err(ChartError::InvalidData(
+                    "zoom factor and position must be finite; factor must be positive".into(),
+                ));
+            }
+            self.ensure_measurement()?;
+            if !self.in_plot(position) {
+                return Ok(false);
+            }
+            let plot = self
+                .measurement
+                .borrow()
+                .as_ref()
+                .unwrap()
+                .scene
+                .plot_bounds;
+            let mut options = self.geo_options();
+            let previous = options.clone();
+            options.zoom_at(
+                Point::new(position.x - plot.x, position.y - plot.y),
+                1.0 / factor,
+                plot.size(),
+            )?;
+            if options == previous {
+                return Ok(false);
+            }
+            self.set_geo_options(options);
+            return Ok(true);
+        }
         if self.chart_kind() != ChartKind::Cartesian
             || !self
                 .zoom_mode()
@@ -783,14 +914,36 @@ impl Chart {
         let (xs, ys) = self.axis_scales();
         let mut changed = false;
         if self.zoom_mode().contains(ZoomAndPanMode::ZOOM_X) {
-            changed |= zoom_axes(&self.x_axes(), &xs, position.x, factor);
+            changed |= zoom_axes(&self.effective_x_axes(), &xs, position.x, factor);
         }
         if self.zoom_mode().contains(ZoomAndPanMode::ZOOM_Y) {
-            changed |= zoom_axes(&self.y_axes(), &ys, position.y, factor);
+            changed |= zoom_axes(&self.effective_y_axes(), &ys, position.y, factor);
         }
         Ok(changed)
     }
     pub fn pan_by(&self, from: Point, to: Point) -> Result<bool, ChartError> {
+        if self.chart_kind() == ChartKind::GeoMap {
+            if !self.pan_enabled() {
+                return Ok(false);
+            }
+            if ![from.x, from.y, to.x, to.y].iter().all(|v| v.is_finite()) {
+                return Err(ChartError::InvalidData(
+                    "pan coordinates must be finite".into(),
+                ));
+            }
+            self.ensure_measurement()?;
+            if self.pointer_down.get().is_none() && !self.in_plot(from) {
+                return Ok(false);
+            }
+            let mut options = self.geo_options();
+            let previous = options.clone();
+            options.pan_by(Point::new(to.x - from.x, to.y - from.y))?;
+            if options == previous {
+                return Ok(false);
+            }
+            self.set_geo_options(options);
+            return Ok(true);
+        }
         if self.chart_kind() != ChartKind::Cartesian
             || !self
                 .zoom_mode()
@@ -810,10 +963,10 @@ impl Chart {
         let (xs, ys) = self.axis_scales();
         let mut changed = false;
         if self.zoom_mode().contains(ZoomAndPanMode::PAN_X) {
-            changed |= pan_axes(&self.x_axes(), &xs, from.x, to.x);
+            changed |= pan_axes(&self.effective_x_axes(), &xs, from.x, to.x);
         }
         if self.zoom_mode().contains(ZoomAndPanMode::PAN_Y) {
-            changed |= pan_axes(&self.y_axes(), &ys, from.y, to.y);
+            changed |= pan_axes(&self.effective_y_axes(), &ys, from.y, to.y);
         }
         Ok(changed)
     }
@@ -846,15 +999,21 @@ impl Chart {
         let (xs, ys) = self.axis_scales();
         let mut changed = false;
         if mode.contains(ZoomAndPanMode::ZOOM_X) && (from.x - to.x).abs() >= 4.0 {
-            changed |= section_axes(&self.x_axes(), &xs, from.x, to.x);
+            changed |= section_axes(&self.effective_x_axes(), &xs, from.x, to.x);
         }
         if mode.contains(ZoomAndPanMode::ZOOM_Y) && (from.y - to.y).abs() >= 4.0 {
-            changed |= section_axes(&self.y_axes(), &ys, from.y, to.y);
+            changed |= section_axes(&self.effective_y_axes(), &ys, from.y, to.y);
         }
         Ok(changed)
     }
     pub fn reset_zoom(&self) {
-        for axes in [self.x_axes(), self.y_axes()] {
+        if self.chart_kind() == ChartKind::GeoMap {
+            let mut options = self.geo_options();
+            options.reset_viewport();
+            self.set_geo_options(options);
+            return;
+        }
+        for axes in [self.effective_x_axes(), self.effective_y_axes()] {
             for axis in axes.to_vec() {
                 axis.set_min_limit(None);
                 axis.set_max_limit(None);
@@ -880,6 +1039,176 @@ impl Chart {
             .as_ref()
             .map(|m| (m.x_scales.clone(), m.y_scales.clone()))
             .unwrap_or_default()
+    }
+
+    /// A resolved polar axis pair. The angular scale is in degrees; the radial
+    /// scale is in logical pixels. Its center includes native title/legend layout.
+    pub fn polar_scale(
+        &self,
+        angle_axis: usize,
+        radius_axis: usize,
+    ) -> Result<Option<PolarScale>, ChartError> {
+        self.ensure_measurement()?;
+        let measured = self.measurement.borrow();
+        let Some(measured) = measured.as_ref() else {
+            return Ok(None);
+        };
+        let Some((center, initial_rotation)) = measured.polar_origin else {
+            return Ok(None);
+        };
+        let (Some(angle), Some(radius)) = (
+            measured.x_scales.get(angle_axis),
+            measured.y_scales.get(radius_axis),
+        ) else {
+            return Ok(None);
+        };
+        Ok(Some(PolarScale {
+            center,
+            angle: *angle,
+            radius: *radius,
+            initial_rotation,
+        }))
+    }
+
+    /// Converts chart values (X/Y, or angle/radius) into control-local pixels.
+    /// A missing axis or a chart family without axes returns `None`.
+    pub fn scale_data_to_pixels(
+        &self,
+        data: Point,
+        x_axis: usize,
+        y_axis: usize,
+    ) -> Result<Option<Point>, ChartError> {
+        if !data.x.is_finite() || !data.y.is_finite() {
+            return Ok(None);
+        }
+        if self.chart_kind() == ChartKind::Polar {
+            return Ok(self
+                .polar_scale(x_axis, y_axis)?
+                .map(|scale| scale.to_pixels(data.x, data.y))
+                .filter(|point| point.x.is_finite() && point.y.is_finite()));
+        }
+        self.ensure_measurement()?;
+        let measured = self.measurement.borrow();
+        let Some(measured) = measured.as_ref() else {
+            return Ok(None);
+        };
+        let (Some(x), Some(y)) = (measured.x_scales.get(x_axis), measured.y_scales.get(y_axis))
+        else {
+            return Ok(None);
+        };
+        let point = Point::new(x.to_pixels(data.x), y.to_pixels(data.y));
+        Ok((point.x.is_finite() && point.y.is_finite()).then_some(point))
+    }
+
+    /// Inverse of `scale_data_to_pixels`, using the current layout and axis limits.
+    pub fn scale_pixels_to_data(
+        &self,
+        point: Point,
+        x_axis: usize,
+        y_axis: usize,
+    ) -> Result<Option<Point>, ChartError> {
+        if !point.x.is_finite() || !point.y.is_finite() {
+            return Ok(None);
+        }
+        if self.chart_kind() == ChartKind::Polar {
+            return Ok(self
+                .polar_scale(x_axis, y_axis)?
+                .map(|scale| scale.to_chart_values(point))
+                .filter(|data| data.x.is_finite() && data.y.is_finite()));
+        }
+        self.ensure_measurement()?;
+        let measured = self.measurement.borrow();
+        let Some(measured) = measured.as_ref() else {
+            return Ok(None);
+        };
+        let (Some(x), Some(y)) = (measured.x_scales.get(x_axis), measured.y_scales.get(y_axis))
+        else {
+            return Ok(None);
+        };
+        let data = Point::new(x.to_chart_values(point.x), y.to_chart_values(point.y));
+        Ok((data.x.is_finite() && data.y.is_finite()).then_some(data))
+    }
+
+    /// Projects a geographic coordinate through the active projection and viewport.
+    /// Points on the hidden side of an orthographic globe return `None`.
+    pub fn project_coordinate(
+        &self,
+        coordinate: GeoCoordinate,
+    ) -> Result<Option<Point>, ChartError> {
+        if !coordinate.is_finite() {
+            return Ok(None);
+        }
+        self.ensure_measurement()?;
+        let measured = self.measurement.borrow();
+        let Some(transform) = measured.as_ref().and_then(|m| m.map_transform.as_ref()) else {
+            return Ok(None);
+        };
+        if !transform
+            .projector
+            .is_visible(coordinate.longitude, coordinate.latitude)
+        {
+            return Ok(None);
+        }
+        let mut point = transform.viewport.transform(
+            transform
+                .projector
+                .to_map(coordinate.longitude, coordinate.latitude),
+        );
+        point.x += transform.origin.x;
+        point.y += transform.origin.y;
+        Ok((point.x.is_finite() && point.y.is_finite()).then_some(point))
+    }
+
+    pub fn unproject_coordinate(&self, point: Point) -> Result<Option<GeoCoordinate>, ChartError> {
+        if !point.x.is_finite() || !point.y.is_finite() {
+            return Ok(None);
+        }
+        self.ensure_measurement()?;
+        let measured = self.measurement.borrow();
+        let Some(transform) = measured.as_ref().and_then(|m| m.map_transform.as_ref()) else {
+            return Ok(None);
+        };
+        let point = Point::new(point.x - transform.origin.x, point.y - transform.origin.y);
+        Ok(transform
+            .viewport
+            .inverse(point)
+            .and_then(|p| transform.projector.to_coordinates(p)))
+    }
+
+    /// Settles a geographic viewport inside its configured zoom and pan limits.
+    pub fn constrain_map_viewport(&self) -> Result<bool, ChartError> {
+        if self.chart_kind() != ChartKind::GeoMap {
+            return Ok(false);
+        }
+        self.ensure_measurement()?;
+        let size = self
+            .measurement
+            .borrow()
+            .as_ref()
+            .unwrap()
+            .scene
+            .plot_bounds
+            .size();
+        let mut options = self.geo_options();
+        let previous = options.clone();
+        options.constrain_viewport(size)?;
+        if options == previous {
+            return Ok(false);
+        }
+        self.set_geo_options(options);
+        Ok(true)
+    }
+
+    fn pan_enabled(&self) -> bool {
+        match self.chart_kind() {
+            ChartKind::Cartesian => self
+                .zoom_mode()
+                .intersects(ZoomAndPanMode::PAN_X | ZoomAndPanMode::PAN_Y),
+            ChartKind::GeoMap => self
+                .map_interaction_mode()
+                .contains(MapInteractionMode::PAN),
+            _ => false,
+        }
     }
 
     fn in_plot(&self, point: Point) -> bool {

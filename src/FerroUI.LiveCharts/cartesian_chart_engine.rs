@@ -1,11 +1,12 @@
 //! Cartesian measurement adapted from the pinned chart and series implementations.
 //! Pure calculation produces a retained FerroUI drawing scene; native controls own scheduling.
 
-use crate::axis::{Axis, AxisPosition, AxisScale, format_number};
+use crate::axis::{format_number, Axis, AxisPosition, AxisScale};
 use crate::kernel::Coordinate;
+use crate::measure::{AxisOrientation, Bounds};
 use crate::scene::*;
 use crate::series::{Series, SeriesKind};
-use ferroui_base::{Point, Rect, Size, media::Color};
+use ferroui_base::{media::Color, Point, Rect, Size};
 use std::collections::BTreeMap;
 
 #[derive(Clone, Debug, PartialEq)]
@@ -57,6 +58,14 @@ pub struct CartesianMeasurement {
     pub scene: Scene,
     pub x_scales: Vec<AxisScale>,
     pub y_scales: Vec<AxisScale>,
+    /// Per-series data extrema and source padding/geometry requests, in model order.
+    pub series_bounds: Vec<Option<CartesianSeriesBounds>>,
+}
+
+#[derive(Clone, Copy, Debug, PartialEq)]
+pub struct CartesianSeriesBounds {
+    pub x: Bounds,
+    pub y: Bounds,
 }
 
 pub struct CartesianChartEngine;
@@ -76,6 +85,18 @@ impl CartesianChartEngine {
         x_axes: &[Axis],
         y_axes: &[Axis],
         options: &CartesianOptions,
+    ) -> Result<CartesianMeasurement, ChartError> {
+        Self::measure_with_axes_and_labels(size, series, x_axes, y_axes, options, |text, size| {
+            Size::new(text.chars().count() as f64 * size * 0.6, size * 1.2)
+        })
+    }
+    pub fn measure_with_axes_and_labels(
+        size: Size,
+        series: &[Series],
+        x_axes: &[Axis],
+        y_axes: &[Axis],
+        options: &CartesianOptions,
+        mut measure_text: impl FnMut(&str, f64) -> Size,
     ) -> Result<CartesianMeasurement, ChartError> {
         validate_size(size)?;
         let defaults = [Axis::default()];
@@ -133,12 +154,16 @@ impl CartesianChartEngine {
         }
         let mut stacks: BTreeMap<StackKey, (f64, f64)> = BTreeMap::new();
         let mut measured: Vec<Vec<Option<MeasuredPoint>>> = Vec::with_capacity(series.len());
+        let mut series_bounds = Vec::with_capacity(series.len());
         for s in series {
             let mut points = Vec::with_capacity(s.values.len());
             if !s.visible {
                 measured.push(points);
+                series_bounds.push(None);
                 continue;
             }
+            let mut own_x = (f64::INFINITY, f64::NEG_INFINITY);
+            let mut own_y = (f64::INFINITY, f64::NEG_INFINITY);
             let category_half = if s.kind.is_bar() {
                 if s.kind.is_row() {
                     y_axes[s.y_axis].unit_width
@@ -199,7 +224,8 @@ impl CartesianChartEngine {
                         top,
                     )
                 };
-                if s.kind.is_bar() || s.kind.is_area() || s.fill.is_some() {
+                if s.kind.is_bar() || s.kind.is_area() || s.fill.is_some() || s.fill_brush.is_some()
+                {
                     if s.kind.is_row() {
                         xmin = xmin.min(bottom);
                         xmax = xmax.max(bottom);
@@ -219,28 +245,30 @@ impl CartesianChartEngine {
                     ymin = ymin.min(cy - c.point_error.yj.abs());
                     ymax = ymax.max(cy + c.point_error.yi.abs());
                 }
-                include_axis(&mut x_bounds[s.x_axis], xmin, &x_axes[s.x_axis]);
-                include_axis(&mut x_bounds[s.x_axis], xmax, &x_axes[s.x_axis]);
-                include_axis(
-                    &mut x_bounds[s.x_axis],
+                for value in [
+                    xmin,
+                    xmax,
                     if s.kind.is_row() {
                         top
                     } else {
                         c.secondary_value
                     },
-                    &x_axes[s.x_axis],
-                );
-                include_axis(&mut y_bounds[s.y_axis], ymin, &y_axes[s.y_axis]);
-                include_axis(&mut y_bounds[s.y_axis], ymax, &y_axes[s.y_axis]);
-                include_axis(
-                    &mut y_bounds[s.y_axis],
+                ] {
+                    include_axis(&mut x_bounds[s.x_axis], value, &x_axes[s.x_axis]);
+                    include_axis(&mut own_x, value, &x_axes[s.x_axis]);
+                }
+                for value in [
+                    ymin,
+                    ymax,
                     if s.kind.is_row() {
                         c.secondary_value
                     } else {
                         top
                     },
-                    &y_axes[s.y_axis],
-                );
+                ] {
+                    include_axis(&mut y_bounds[s.y_axis], value, &y_axes[s.y_axis]);
+                    include_axis(&mut own_y, value, &y_axes[s.y_axis]);
+                }
                 points.push(Some(MeasuredPoint {
                     index,
                     coordinate: c,
@@ -248,13 +276,22 @@ impl CartesianChartEngine {
                     top,
                 }));
             }
+            series_bounds.push(if own_x.0.is_finite() && own_y.0.is_finite() {
+                Some(CartesianSeriesBounds {
+                    x: data_bounds(own_x),
+                    y: data_bounds(own_y),
+                })
+            } else {
+                None
+            });
             measured.push(points);
         }
         // Heat cells represent a data interval, not a pixel sized glyph. Infer irregular
         // date/number spacing rather than assuming the default axis unit of one.
-        for s in series
+        for (si, s) in series
             .iter()
-            .filter(|s| s.visible && s.kind == SeriesKind::Heat)
+            .enumerate()
+            .filter(|(_, s)| s.visible && s.kind == SeriesKind::Heat)
         {
             let dx = minimum_delta(
                 s.values
@@ -276,24 +313,136 @@ impl CartesianChartEngine {
             for c in s.values.iter().filter(|c| valid_point(s, c)) {
                 for value in [c.secondary_value - dx * 0.5, c.secondary_value + dx * 0.5] {
                     include_axis(&mut x_bounds[s.x_axis], value, &x_axes[s.x_axis]);
+                    if value.is_finite()
+                        && (x_axes[s.x_axis].logarithmic_base.is_none() || value > 0.0)
+                    {
+                        if let Some(bounds) = &mut series_bounds[si] {
+                            bounds.x.append_value(value);
+                        }
+                    }
                 }
                 for value in [c.primary_value - dy * 0.5, c.primary_value + dy * 0.5] {
                     include_axis(&mut y_bounds[s.y_axis], value, &y_axes[s.y_axis]);
+                    if value.is_finite()
+                        && (y_axes[s.y_axis].logarithmic_base.is_none() || value > 0.0)
+                    {
+                        if let Some(bounds) = &mut series_bounds[si] {
+                            bounds.y.append_value(value);
+                        }
+                    }
                 }
             }
         }
+        let x_label_sizes = x_axes
+            .iter()
+            .zip(&x_bounds)
+            .map(|(axis, bounds)| maximum_label_size(axis, *bounds, &mut measure_text))
+            .collect::<Vec<_>>();
+        let y_label_sizes = y_axes
+            .iter()
+            .zip(&y_bounds)
+            .map(|(axis, bounds)| maximum_label_size(axis, *bounds, &mut measure_text))
+            .collect::<Vec<_>>();
+        let mut x_requests = vec![Bounds::default(); x_axes.len()];
+        let mut y_requests = vec![Bounds::default(); y_axes.len()];
+        for (si, s) in series.iter().enumerate().filter(|(_, s)| s.visible) {
+            let Some(bounds) = &mut series_bounds[si] else {
+                continue;
+            };
+            let geometry_size = if matches!(
+                s.kind,
+                SeriesKind::Line
+                    | SeriesKind::StepLine
+                    | SeriesKind::Area
+                    | SeriesKind::StackedArea
+                    | SeriesKind::StackedStepArea
+                    | SeriesKind::RangeLine
+            ) {
+                (s.geometry_size.max(0.0)
+                    + if s.geometry_size > 0.0 {
+                        s.stroke_width.max(0.0)
+                    } else {
+                        0.0
+                    })
+                    * 0.5
+            } else {
+                0.0
+            };
+            set_padding_request(
+                &mut bounds.x,
+                &x_axes[s.x_axis],
+                size,
+                AxisOrientation::X,
+                x_label_sizes[s.x_axis],
+                s.data_padding.x,
+                geometry_size,
+            )?;
+            set_padding_request(
+                &mut bounds.y,
+                &y_axes[s.y_axis],
+                size,
+                AxisOrientation::Y,
+                y_label_sizes[s.y_axis],
+                s.data_padding.y,
+                geometry_size,
+            )?;
+            bounds.x.min_delta = minimum_delta(measured[si].iter().flatten().map(|p| {
+                if s.kind.is_row() {
+                    p.top
+                } else {
+                    p.coordinate.secondary_value
+                }
+            }))
+            .unwrap_or(f64::MAX);
+            bounds.y.min_delta = minimum_delta(measured[si].iter().flatten().map(|p| {
+                if s.kind.is_row() {
+                    p.coordinate.secondary_value
+                } else {
+                    p.top
+                }
+            }))
+            .unwrap_or(f64::MAX);
+            x_requests[s.x_axis].append_bounds(&bounds.x);
+            y_requests[s.y_axis].append_bounds(&bounds.y);
+        }
+        let all_columns = series
+            .iter()
+            .filter(|s| s.visible)
+            .all(|s| matches!(s.kind, SeriesKind::Column | SeriesKind::StackedColumn));
         let x_scales = x_axes
             .iter()
-            .zip(x_bounds)
-            .map(|(a, (min, max))| AxisScale::new(a, min, max, plot.x, plot.x + plot.width))
+            .zip(x_bounds.iter())
+            .zip(&x_requests)
+            .map(|((a, &(min, max)), request)| {
+                padded_scale(a, min, max, plot.x, plot.x + plot.width, request, false)
+            })
             .collect::<Result<Vec<_>, _>>()?;
         let y_scales = y_axes
             .iter()
-            .zip(y_bounds)
-            .map(|(a, (min, max))| AxisScale::new(a, min, max, plot.y + plot.height, plot.y))
+            .zip(y_bounds.iter())
+            .zip(&y_requests)
+            .map(|((a, &(min, max)), request)| {
+                padded_scale(
+                    a,
+                    min,
+                    max,
+                    plot.y + plot.height,
+                    plot.y,
+                    request,
+                    all_columns,
+                )
+            })
             .collect::<Result<Vec<_>, _>>()?;
         draw_sections(&mut scene, &options.sections, &x_scales, &y_scales)?;
-        draw_axes(&mut scene, x_axes, y_axes, &x_scales, &y_scales);
+        draw_axes(
+            &mut scene,
+            x_axes,
+            y_axes,
+            &x_scales,
+            &y_scales,
+            &x_label_sizes,
+            &y_label_sizes,
+        );
         for (si, s) in series.iter().enumerate().filter(|(_, s)| s.visible) {
             let xs = x_scales[s.x_axis];
             let ys = y_scales[s.y_axis];
@@ -337,8 +486,128 @@ impl CartesianChartEngine {
             scene,
             x_scales,
             y_scales,
+            series_bounds,
         })
     }
+}
+
+fn data_bounds((min, max): (f64, f64)) -> Bounds {
+    Bounds {
+        min,
+        max,
+        is_empty: false,
+        ..Bounds::default()
+    }
+}
+fn maximum_label_size(
+    axis: &Axis,
+    bounds: (f64, f64),
+    measure: &mut impl FnMut(&str, f64) -> Size,
+) -> Size {
+    let min = axis
+        .min_limit
+        .unwrap_or(if bounds.0.is_finite() { bounds.0 } else { 0.0 });
+    let max = axis
+        .max_limit
+        .unwrap_or(if bounds.1.is_finite() { bounds.1 } else { 10.0 });
+    let mut maximum = Size::new(0.0, 0.0);
+    // Source CoreAxis.GetPossibleMaxLabelSize samples 25 intervals before ticks.
+    for i in 0..=25 {
+        let fraction = i as f64 / 25.0;
+        let value = min * (1.0 - fraction) + max * fraction;
+        let measured = measure(&axis.label(value), axis.text_size);
+        if measured.width.is_finite() && measured.height.is_finite() {
+            maximum.width = maximum
+                .width
+                .max(measured.width + axis.labels_padding * 2.0);
+            maximum.height = maximum
+                .height
+                .max(measured.height + axis.labels_padding * 2.0);
+        }
+    }
+    maximum
+}
+fn set_padding_request(
+    bounds: &mut Bounds,
+    axis: &Axis,
+    size: Size,
+    orientation: AxisOrientation,
+    labels: Size,
+    padding: f64,
+    geometry: f64,
+) -> Result<(), ChartError> {
+    let mut axis = axis.clone();
+    axis.padding = 0.0;
+    let scale = AxisScale::new(&axis, bounds.min, bounds.max, 0.0, 1.0)?;
+    let request = scale
+        .tick_with_metrics(&axis, size, orientation, labels)
+        .value
+        * padding;
+    bounds.padding_min = if request.is_finite() {
+        request.max(0.0)
+    } else {
+        0.0
+    };
+    bounds.padding_max = bounds.padding_min;
+    bounds.requested_geometry_size = geometry;
+    Ok(())
+}
+fn padded_scale(
+    axis: &Axis,
+    raw_min: f64,
+    raw_max: f64,
+    start: f64,
+    end: f64,
+    request: &Bounds,
+    columns: bool,
+) -> Result<AxisScale, ChartError> {
+    let mut plain = axis.clone();
+    plain.padding = 0.0;
+    let initial = AxisScale::new(&plain, raw_min, raw_max, start, end)?;
+    if axis.logarithmic_base.is_some() {
+        return Ok(initial);
+    }
+    let (mut min, mut max) = (initial.min, initial.max);
+    let percent = ((max - min) * axis.padding.max(0.0)).max(0.0);
+    let percent = if percent.is_finite() { percent } else { 0.0 };
+    let geometry_padding = |scale: AxisScale| {
+        if start == end {
+            return 0.0;
+        }
+        let value = (scale.to_chart_values(start + request.requested_geometry_size)
+            - scale.to_chart_values(start))
+        .abs();
+        if value.is_finite() {
+            value
+        } else {
+            0.0
+        }
+    };
+    if axis.min_limit.is_none() {
+        let amount = geometry_padding(initial)
+            .max(request.padding_min)
+            .max(percent);
+        if (min - amount).is_finite() {
+            min -= amount;
+        }
+        if columns && raw_min >= 0.0 {
+            min = min.max(0.0);
+        }
+    }
+    if axis.max_limit.is_none() {
+        // The source re-creates its scaler after applying the lower padding.
+        let after_min = AxisScale::new(&plain, min, max, start, end)?;
+        let amount = geometry_padding(after_min)
+            .max(request.padding_max)
+            .max(percent);
+        if (max + amount).is_finite() {
+            max += amount;
+        }
+        if columns && raw_max <= 0.0 {
+            max = max.min(0.0);
+        }
+    }
+    AxisScale::new(&plain, min, max, start, end)
 }
 
 #[derive(Clone, Copy)]
@@ -422,10 +691,14 @@ fn validate_series(s: &Series, x: usize, y: usize) -> Result<(), ChartError> {
         s.corner_radius,
         s.max_bar_width,
         s.data_labels_size,
+        s.data_padding.x,
+        s.data_padding.y,
     ]
     .iter()
     .any(|v| !v.is_finite())
         || s.dashes.iter().any(|d| !d.is_finite() || *d < 0.0)
+        || s.data_padding.x < 0.0
+        || s.data_padding.y < 0.0
     {
         return Err(ChartError::InvalidData(
             "series dimensions and paint values must be finite".into(),
@@ -483,18 +756,31 @@ fn plot_bounds(
         (size.height - (top + bottom) * sy).max(0.0),
     ))
 }
-fn draw_axes(scene: &mut Scene, x: &[Axis], y: &[Axis], xs: &[AxisScale], ys: &[AxisScale]) {
+fn draw_axes(
+    scene: &mut Scene,
+    x: &[Axis],
+    y: &[Axis],
+    xs: &[AxisScale],
+    ys: &[AxisScale],
+    x_label_sizes: &[Size],
+    y_label_sizes: &[Size],
+) {
     let r = scene.plot_bounds;
     let mut x_offsets = [0.0, 0.0];
     let mut y_offsets = [0.0, 0.0];
-    for (axis, scale) in x.iter().zip(xs).filter(|(a, _)| a.visible) {
+    for ((axis, scale), labels) in x
+        .iter()
+        .zip(xs)
+        .zip(x_label_sizes)
+        .filter(|((a, _), _)| a.visible)
+    {
         let side = usize::from(axis.position == AxisPosition::End);
         let baseline = if side == 0 {
             r.y + r.height + x_offsets[side]
         } else {
             r.y - x_offsets[side]
         };
-        for value in scale.ticks(axis, r.width) {
+        for value in scale.ticks_with_metrics(axis, scene.size, AxisOrientation::X, *labels) {
             let px = scale.to_pixels(value);
             if !px.is_finite() {
                 continue;
@@ -550,14 +836,19 @@ fn draw_axes(scene: &mut Scene, x: &[Axis], y: &[Axis], xs: &[AxisScale], ys: &[
         }
         x_offsets[side] += 40.0;
     }
-    for (axis, scale) in y.iter().zip(ys).filter(|(a, _)| a.visible) {
+    for ((axis, scale), labels) in y
+        .iter()
+        .zip(ys)
+        .zip(y_label_sizes)
+        .filter(|((a, _), _)| a.visible)
+    {
         let side = usize::from(axis.position == AxisPosition::End);
         let baseline = if side == 0 {
             r.x - y_offsets[side]
         } else {
             r.x + r.width + y_offsets[side]
         };
-        for value in scale.ticks(axis, r.height) {
+        for value in scale.ticks_with_metrics(axis, scene.size, AxisOrientation::Y, *labels) {
             let py = scale.to_pixels(value);
             if !py.is_finite() {
                 continue;
@@ -1550,16 +1841,14 @@ mod tests {
     fn missing_axis_is_an_error() {
         let mut s = Series::default();
         s.y_axis = 2;
-        assert!(
-            CartesianChartEngine::measure(
-                Size::new(640.0, 400.0),
-                &[s],
-                &[],
-                &[],
-                &CartesianOptions::default()
-            )
-            .is_err()
-        );
+        assert!(CartesianChartEngine::measure(
+            Size::new(640.0, 400.0),
+            &[s],
+            &[],
+            &[],
+            &CartesianOptions::default()
+        )
+        .is_err());
     }
     #[test]
     fn grouped_bars_have_distinct_centers_and_shared_category() {
@@ -1652,11 +1941,9 @@ mod tests {
                 .len(),
             1
         );
-        assert!(
-            result
-                .hit_test(pointer, FindingStrategy::CompareAll, 0.0)
-                .is_empty()
-        );
+        assert!(result
+            .hit_test(pointer, FindingStrategy::CompareAll, 0.0)
+            .is_empty());
         let rows = scene(&[Series::from_values(SeriesKind::Row, [2.0, 8.0])]);
         assert_eq!(
             rows.automatic_finding_strategy,
@@ -1698,11 +1985,9 @@ mod tests {
                 .len(),
             1
         );
-        assert!(
-            result
-                .hit_test(hit.center, FindingStrategy::ExactMatch, 0.0)
-                .is_empty()
-        );
+        assert!(result
+            .hit_test(hit.center, FindingStrategy::ExactMatch, 0.0)
+            .is_empty());
         assert!(hit.label.contains('2') && hit.label.contains("10"));
     }
     #[test]
@@ -1723,11 +2008,9 @@ mod tests {
                 .len(),
             1
         );
-        assert!(
-            result
-                .hit_test(pointer, FindingStrategy::ExactMatch, 0.0)
-                .is_empty()
-        );
+        assert!(result
+            .hit_test(pointer, FindingStrategy::ExactMatch, 0.0)
+            .is_empty());
     }
     #[test]
     fn line_fill_is_behind_markers_and_labels() {

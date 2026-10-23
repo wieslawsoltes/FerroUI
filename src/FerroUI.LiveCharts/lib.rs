@@ -19,10 +19,11 @@ pub mod scene;
 mod scene_transform;
 pub mod series;
 pub mod treemap_chart_engine;
+pub mod visual_states;
 
 pub use axis::{Axis, AxisPosition, AxisScale};
 pub use cartesian_chart_engine::{
-    CartesianChartEngine, CartesianMeasurement, CartesianOptions, Section,
+    CartesianChartEngine, CartesianMeasurement, CartesianOptions, CartesianSeriesBounds, Section,
 };
 pub use easing_functions::{EasingFunctions, KeyFrame};
 pub use geo_map_chart::{
@@ -31,15 +32,21 @@ pub use geo_map_chart::{
 };
 pub use heat_functions::HeatFunctions;
 pub use kernel::{Coordinate, Error, StackedValue, Stacker};
-pub use motion::{Animation, MotionProperty, Repeat};
+pub use motion::{Animatable, Animation, MotionProperty, Repeat};
 pub use paint::BrushSpace;
 pub use pie_chart_engine::{PieChartEngine, PieOptions};
-pub use polar_chart_engine::{PolarChartEngine, PolarOptions};
+pub use polar_chart_engine::{
+    PolarChartEngine, PolarMeasurement, PolarOptions, PolarScale, COTANGENT_ANGLE, TANGENT_ANGLE,
+};
 pub use scene::{
     ChartError, FindingStrategy, Geometry, HitRegion, HitShape, LegendItem, PaintStyle,
     PathCommand, PointId, Primitive, Scene, TextAnchor,
 };
 pub use series::{PolarLabelsPosition, RadialAlignment, Series, SeriesKind};
+pub use visual_states::{
+    DrawnPropertiesDictionary, DrawnPropertySetter, IStateBehavior, StateBehavior, StateOrigin,
+    VisualStatesDictionary,
+};
 mod register_types;
 pub use register_types::register_types;
 

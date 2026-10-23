@@ -30,7 +30,7 @@ pub use chart_classes::*;
 pub use chart_point::ChartPoint;
 pub use chart_series::ChartSeries;
 pub use collections::{Axes, ChartPoints, ChartSeriesCollection};
-pub use enums::{ChartKind, LegendPosition, TooltipPosition, ZoomAndPanMode};
+pub use enums::{ChartKind, LegendPosition, MapInteractionMode, TooltipPosition, ZoomAndPanMode};
 pub use ferroui_livecharts::{
     AxisPosition, BrushSpace, FindingStrategy, PolarLabelsPosition, RadialAlignment, SeriesKind,
 };

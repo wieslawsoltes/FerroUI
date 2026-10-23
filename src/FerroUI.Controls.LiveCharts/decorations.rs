@@ -1,33 +1,44 @@
-use crate::{ChartPointerEventArgs, LegendPosition, TooltipPosition};
+use crate::{ChartKind, ChartPointerEventArgs, LegendPosition, TooltipPosition};
 use ferroui_base::media::{Color, FlowDirection, FormattedText, Typeface};
 use ferroui_base::utilities::CultureInfo;
 use ferroui_base::{Point, Rect, Size};
 use ferroui_livecharts::{Geometry, PaintStyle, Primitive, Scene, TextAnchor};
 
-pub(crate) fn draw_margin(size: Size, legend: LegendPosition, title: bool) -> Option<Rect> {
+pub(crate) fn draw_margin(
+    size: Size,
+    legend: LegendPosition,
+    title: bool,
+    kind: ChartKind,
+) -> Option<Rect> {
     if legend == LegendPosition::Hidden && !title {
         return None;
     }
-    let left: f64 = 64.0
+    let (base_left, base_right, base_top, base_bottom): (f64, f64, f64, f64) =
+        if kind == ChartKind::Cartesian {
+            (64.0, 24.0, 24.0, 44.0)
+        } else {
+            (12.0, 12.0, 12.0, 12.0)
+        };
+    let left: f64 = base_left
         + if legend == LegendPosition::Left {
             150.0
         } else {
             0.0
         };
-    let right = 24.0
+    let right = base_right
         + if legend == LegendPosition::Right {
             150.0
         } else {
             0.0
         };
-    let top: f64 = 24.0
+    let top: f64 = base_top
         + if title { 36.0 } else { 0.0 }
         + if legend == LegendPosition::Top {
             32.0
         } else {
             0.0
         };
-    let bottom = 44.0
+    let bottom = base_bottom
         + if legend == LegendPosition::Bottom {
             32.0
         } else {

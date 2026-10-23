@@ -40,6 +40,11 @@ impl Axis {
             separators_color: self.separators_color(),
             logarithmic_base: self.logarithmic_base(),
             padding: self.padding(),
+            min_separators: self.min_separators(),
+            labels_angle: self.labels_angle(),
+            custom_separators: self.custom_separators(),
+            labels_padding: self.labels_padding(),
+            labels_density: self.labels_density(),
         }
     }
 }
@@ -93,7 +98,22 @@ ferro_properties! { impl Axis {
         FerroProperty::register::<Axis, _>("LogarithmicBase", None)
     }
     pub fn padding_property() -> StyledProperty<f64> {
-        FerroProperty::register::<Axis, _>("Padding", 0.05)
+        FerroProperty::register::<Axis, _>("Padding", 0.0)
+    }
+    pub fn min_separators_property() -> StyledProperty<u32> {
+        FerroProperty::register::<Axis, _>("MinSeparators", 3)
+    }
+    pub fn labels_angle_property() -> StyledProperty<f64> {
+        FerroProperty::register::<Axis, _>("LabelsAngle", 0.0)
+    }
+    pub fn custom_separators_property() -> StyledProperty<Vec<f64>> {
+        FerroProperty::register::<Axis, _>("CustomSeparators", Vec::new())
+    }
+    pub fn labels_padding_property() -> StyledProperty<f64> {
+        FerroProperty::register::<Axis, _>("LabelsPadding", 3.0)
+    }
+    pub fn labels_density_property() -> StyledProperty<f64> {
+        FerroProperty::register::<Axis, _>("LabelsDensity", 0.85)
     }
 } }
 impl Axis {
@@ -198,5 +218,35 @@ impl Axis {
     }
     pub fn set_padding(&self, value: f64) {
         self.set_value(Self::padding_property(), value);
+    }
+    pub fn min_separators(&self) -> u32 {
+        self.get_value(Self::min_separators_property())
+    }
+    pub fn set_min_separators(&self, value: u32) {
+        self.set_value(Self::min_separators_property(), value);
+    }
+    pub fn labels_angle(&self) -> f64 {
+        self.get_value(Self::labels_angle_property())
+    }
+    pub fn set_labels_angle(&self, value: f64) {
+        self.set_value(Self::labels_angle_property(), value);
+    }
+    pub fn custom_separators(&self) -> Vec<f64> {
+        self.get_value(Self::custom_separators_property())
+    }
+    pub fn set_custom_separators(&self, value: Vec<f64>) {
+        self.set_value(Self::custom_separators_property(), value);
+    }
+    pub fn labels_padding(&self) -> f64 {
+        self.get_value(Self::labels_padding_property())
+    }
+    pub fn set_labels_padding(&self, value: f64) {
+        self.set_value(Self::labels_padding_property(), value);
+    }
+    pub fn labels_density(&self) -> f64 {
+        self.get_value(Self::labels_density_property())
+    }
+    pub fn set_labels_density(&self, value: f64) {
+        self.set_value(Self::labels_density_property(), value);
     }
 }

@@ -79,3 +79,18 @@ ferroui_base::ferro_markup_enum!(flags ZoomAndPanMode {
     NoFit=ZoomAndPanMode::NO_FIT,NoZoomBySection=ZoomAndPanMode::NO_ZOOM_BY_SECTION,
     InvertPanningPointerTrigger=ZoomAndPanMode::INVERT_PANNING_POINTER_TRIGGER
 });
+
+bitflags::bitflags! {
+    /// Geographic gestures are disabled by default, as in the source map view.
+    #[derive(Clone,Copy,Debug,Default,PartialEq,Eq,Hash)]
+    pub struct MapInteractionMode:u32 {
+        const NONE=0;
+        const PAN=1;
+        const ZOOM=2;
+        const BOTH=Self::PAN.bits()|Self::ZOOM.bits();
+    }
+}
+ferroui_base::ferro_markup_enum!(flags MapInteractionMode {
+    None=MapInteractionMode::NONE,Pan=MapInteractionMode::PAN,
+    Zoom=MapInteractionMode::ZOOM,Both=MapInteractionMode::BOTH
+});

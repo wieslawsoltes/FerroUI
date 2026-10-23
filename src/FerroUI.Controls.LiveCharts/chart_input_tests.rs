@@ -2,11 +2,11 @@
 //! adapted from LiveChartsCore/CartesianChartEngine.cs at the pinned source.
 
 use super::*;
-use ferroui_base::layout::ILayoutManager;
 use crate::{ChartSeries, GeoMarker, HeatLand, SankeyLink, SankeyNode, TreemapNode};
 use ferroui_base::input::{
     KeyModifiers, Pointer, PointerPointProperties, PointerUpdateKind, RawInputModifiers,
 };
+use ferroui_base::layout::ILayoutManager;
 use ferroui_base::{FerroObject, Vector};
 use ferroui_controls::testing::{MockWindowingPlatform, TestServices, UnitTestApplication};
 use ferroui_controls::Window;
@@ -22,6 +22,7 @@ fn cartesian() -> Ref<Chart> {
     series.set_numeric_values([0.0, 10.0]);
     chart.series().add(series);
     for axes in [chart.x_axes(), chart.y_axes()] {
+        axes.add(Axis::new());
         axes.get(0).set_min_limit(Some(0.0));
         axes.get(0).set_max_limit(Some(10.0));
         axes.get(0).set_padding(0.0);
@@ -140,6 +141,211 @@ fn logarithmic_inverted_zoom_keeps_pointer_value_fixed() {
     let after = chart.axis_scales().0[0].to_chart_values(pivot.x);
     assert!((before - after).abs() / before < 1e-12);
     assert!(axis.min_limit().unwrap() > 0.0);
+}
+
+#[test]
+fn polar_multiple_axes_convert_in_control_coordinates_with_title_layout() {
+    let _app = UnitTestApplication::start(TestServices::styled_window());
+    let chart = Chart::new();
+    chart.set_chart_kind(ChartKind::Polar);
+    chart.set_title("Independent polar axes".into());
+    chart.set_initial_rotation(-90.0);
+    chart.set_animations_speed(0.0);
+    chart.x_axes().add(Axis::new());
+    chart.y_axes().add(Axis::new());
+    let angle = Axis::new();
+    angle.set_min_limit(Some(0.0));
+    angle.set_max_limit(Some(8.0));
+    angle.set_inverted(true);
+    chart.x_axes().add(angle);
+    let radius = Axis::new();
+    radius.set_min_limit(Some(0.0));
+    radius.set_max_limit(Some(100.0));
+    chart.y_axes().add(radius);
+    let series = crate::PolarLineSeries::new();
+    series.set_x_axis(1);
+    series.set_y_axis(1);
+    series.set_coordinates([
+        ferroui_livecharts::kernel::Coordinate::new(1.0, 20.0),
+        ferroui_livecharts::kernel::Coordinate::new(5.0, 80.0),
+    ]);
+    chart.series().add(series.upcast());
+    let scene = chart.scene(Size::new(640.0, 360.0)).unwrap();
+    let data = Point::new(2.0, 60.0);
+    let pixel = chart.scale_data_to_pixels(data, 1, 1).unwrap().unwrap();
+    let restored = chart.scale_pixels_to_data(pixel, 1, 1).unwrap().unwrap();
+    assert!((restored.x - data.x).abs() < 1e-9);
+    assert!((restored.y - data.y).abs() < 1e-9);
+    assert!(scene.plot_bounds.y >= 48.0);
+    assert_eq!(chart.axis_scales().0.len(), 2);
+    assert_eq!(chart.axis_scales().1.len(), 2);
+    assert!(chart.polar_scale(2, 0).unwrap().is_none());
+    assert!(chart
+        .scale_data_to_pixels(Point::new(f64::NAN, 1.0), 0, 0)
+        .unwrap()
+        .is_none());
+}
+
+#[test]
+fn virtual_axes_support_input_without_mutating_the_declared_collections() {
+    let _scope = Dispatcher::unit_test_scope();
+    let chart = Chart::new();
+    chart.set_animations_speed(0.0);
+    chart.set_zoom_mode(ZoomAndPanMode::BOTH);
+    chart.set_draw_margin(Some(Rect::new(20.0, 20.0, 600.0, 320.0)));
+    let series = crate::LineSeries::new();
+    series.set_numeric_values([0.0, 10.0]);
+    chart.series().add(series.upcast());
+    let size = Size::new(640.0, 360.0);
+    chart.scene(size).unwrap();
+    let before = chart.axis_scales().0[0];
+    let revision = chart.revision();
+    assert!(chart.zoom_at(Point::new(320.0, 180.0), 0.5).unwrap());
+    assert!(chart.revision() > revision);
+    chart.scene(size).unwrap();
+    let zoomed = chart.axis_scales().0[0];
+    assert!(zoomed.max - zoomed.min < before.max - before.min);
+    assert!(chart.x_axes().is_empty() && chart.y_axes().is_empty());
+    chart.reset_zoom();
+    chart.scene(size).unwrap();
+    assert_eq!(chart.axis_scales().0[0], before);
+
+    let declared = Axis::new();
+    declared.set_min_limit(Some(20.0));
+    declared.set_max_limit(Some(40.0));
+    chart.x_axes().add(declared.clone());
+    chart.scene(size).unwrap();
+    assert_eq!(chart.axis_scales().0.len(), 1);
+    assert_eq!(chart.axis_scales().0[0].min, 20.0);
+    let revision = chart.revision();
+    declared.set_max_limit(Some(50.0));
+    assert!(chart.revision() > revision);
+    chart.x_axes().clear();
+    chart.scene(size).unwrap();
+    assert_eq!(chart.axis_scales().0[0], before);
+    let revision = chart.revision();
+    declared.set_max_limit(Some(60.0));
+    assert_eq!(chart.revision(), revision);
+}
+
+fn geo_map() -> Ref<Chart> {
+    let chart = Chart::new();
+    chart.set_chart_kind(ChartKind::GeoMap);
+    chart.set_geo_data(Some(GeoData::default()));
+    chart.set_title("Map viewport".into());
+    chart.set_animations_speed(0.0);
+    chart.scene(Size::new(640.0, 360.0)).unwrap();
+    chart
+}
+
+#[test]
+fn geographic_gestures_are_opt_in_and_zoom_keeps_local_pivot_fixed() {
+    let _app = UnitTestApplication::start(TestServices::styled_window());
+    let chart = geo_map();
+    let pivot = Point::new(270.0, 180.0);
+    assert!(!chart.zoom_at(pivot, 0.5).unwrap());
+    assert!(!chart.pan_by(pivot, Point::new(280.0, 190.0)).unwrap());
+    chart.set_map_interaction_mode(MapInteractionMode::BOTH);
+    let before = chart.unproject_coordinate(pivot).unwrap().unwrap();
+    assert!(chart.zoom_at(pivot, 0.5).unwrap());
+    assert_eq!(chart.geo_options().zoom, 2.0);
+    let after = chart.unproject_coordinate(pivot).unwrap().unwrap();
+    assert!((before.longitude - after.longitude).abs() < 1e-9);
+    assert!((before.latitude - after.latitude).abs() < 1e-9);
+    let projected = chart.project_coordinate(before).unwrap().unwrap();
+    assert!((projected.x - pivot.x).abs() < 1e-9);
+    assert!((projected.y - pivot.y).abs() < 1e-9);
+    assert!(!chart.zoom_at(Point::new(1.0, 1.0), 0.5).unwrap());
+    assert!(chart.zoom_at(pivot, f64::NAN).is_err());
+    chart.reset_zoom();
+    assert_eq!(chart.geo_options().zoom, 1.0);
+    assert_eq!(chart.geo_options().pan, Point::new(0.0, 0.0));
+}
+
+#[test]
+fn geographic_pointer_capture_settles_pan_and_mode_change_releases_capture() {
+    let _app = UnitTestApplication::start(TestServices::styled_window());
+    let chart = geo_map();
+    let _window = attach(&chart);
+    let pointer = mouse();
+    let pivot = Point::new(320.0, 180.0);
+    press(
+        &chart,
+        &pointer,
+        PointerUpdateKind::LeftButtonPressed,
+        pivot,
+    );
+    assert!(pointer.captured().is_none());
+    chart.set_map_interaction_mode(MapInteractionMode::BOTH);
+    chart.zoom_at(pivot, 0.5).unwrap();
+    press(
+        &chart,
+        &pointer,
+        PointerUpdateKind::LeftButtonPressed,
+        pivot,
+    );
+    assert!(pointer.captured().is_some());
+    assert!(chart.pan_by(pivot, Point::new(2000.0, 2000.0)).unwrap());
+    release(
+        &chart,
+        &pointer,
+        MouseButton::Left,
+        Point::new(2000.0, 2000.0),
+    );
+    assert!(pointer.captured().is_none());
+    let plot = chart.scene(chart.bounds().size()).unwrap().plot_bounds;
+    assert!(chart.geo_options().pan.x.abs() <= plot.width * 0.5 + 1e-9);
+    assert!(chart.geo_options().pan.y.abs() <= plot.height * 0.5 + 1e-9);
+    press(
+        &chart,
+        &pointer,
+        PointerUpdateKind::LeftButtonPressed,
+        pivot,
+    );
+    assert!(pointer.captured().is_some());
+    chart.set_map_interaction_mode(MapInteractionMode::NONE);
+    assert!(pointer.captured().is_none());
+}
+
+#[test]
+fn orthographic_coordinate_conversion_rejects_hidden_hemisphere() {
+    let _app = UnitTestApplication::start(TestServices::styled_window());
+    let chart = geo_map();
+    let mut options = chart.geo_options();
+    options.projection = ferroui_livecharts::geo::MapProjection::Orthographic;
+    chart.set_geo_options(options);
+    assert!(chart
+        .project_coordinate(GeoCoordinate::new(0.0, 0.0))
+        .unwrap()
+        .is_some());
+    assert!(chart
+        .project_coordinate(GeoCoordinate::new(180.0, 0.0))
+        .unwrap()
+        .is_none());
+    assert!(chart
+        .unproject_coordinate(Point::new(-1000.0, -1000.0))
+        .unwrap()
+        .is_none());
+}
+
+#[test]
+fn animated_hit_testing_uses_the_displayed_point_position() {
+    let _app = UnitTestApplication::start(TestServices::styled_window());
+    let chart = cartesian();
+    let series = chart.series().get(0);
+    series.set_kind(SeriesKind::Scatter);
+    series.set_coordinates([ferroui_livecharts::kernel::Coordinate::new(5.0, 2.0)]);
+    chart.set_tooltip_finding_strategy(ferroui_livecharts::FindingStrategy::ExactMatch);
+    let _window = attach(&chart);
+    let initial = chart.scene(chart.bounds().size()).unwrap();
+    let before = initial.hits[0].center;
+    chart.set_animations_speed(10_000.0);
+    series.values().get(0).set_y(8.0);
+    let target = chart.scene(chart.bounds().size()).unwrap();
+    assert!(!target.hits[0].contains(before));
+    let hits = chart.find_points(before);
+    assert_eq!(hits.len(), 1);
+    assert_eq!(hits[0].id, target.hits[0].id);
 }
 
 #[test]
@@ -284,7 +490,7 @@ fn treemap_nested_mutations_remeasure_and_cycles_report_error() {
     chart.set_treemap_roots(TreemapNodes::from_items([root.clone()]));
     chart.scene(Size::new(640.0, 360.0)).unwrap();
     let revision = chart.revision();
-    leaf.set_value(7.0);
+    leaf.set_numeric_value(7.0);
     assert!(chart.revision() > revision);
     children.add(root);
     assert!(chart.scene(Size::new(640.0, 360.0)).is_err());
@@ -303,7 +509,7 @@ fn geography_overlays_are_observed_and_default_collections_are_independent() {
     assert!(b.heat_lands().is_empty());
     assert!(b.geo_markers().is_empty());
     let revision = a.revision();
-    heat.set_value(42.0);
+    heat.set_numeric_value(42.0);
     assert!(a.revision() > revision);
     let revision = a.revision();
     marker.set_longitude(12.0);

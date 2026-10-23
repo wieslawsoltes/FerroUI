@@ -48,8 +48,8 @@ jobs:
         run: python scripts/livecharts2/inventory.py --check
       - name: Generated native declarations
         run: python scripts/livecharts2/generate_controls.py --check
-      - name: Algorithms, bindings, XAML, input and lifecycle
-        run: cargo test --locked -p ferroui-livecharts -p ferroui-controls-livecharts --lib --tests --no-fail-fast
+      - name: Algorithms, bindings, compiled and runtime XAML, input and lifecycle
+        run: cargo test --locked -p ferroui-livecharts -p ferroui-controls-livecharts -p livecharts-demo --lib --tests --no-fail-fast
 
   browser:
     name: Browser target compilation
@@ -66,4 +66,32 @@ jobs:
       # Both libraries use framework drawing contracts and have no graphics-backend
       # or C/C++ dependency. This checks the target without linking a browser host.
       - name: Compile the engines and native controls for the browser target
-        run: cargo check --locked --target wasm32-unknown-emscripten -p ferroui-livecharts -p ferroui-controls-livecharts
+        run: cargo check --locked --target wasm32-unknown-emscripten -p ferroui-livecharts -p ferroui-controls-livecharts -p livecharts-demo
+
+  render:
+    name: Compiled gallery native CPU render
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: dtolnay/rust-toolchain@89b12181fb390509a0842a86cc55eeb8eb928c1d # stable
+      - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2
+        with:
+          shared-key: livecharts-native-render
+      - name: Native font dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends libfontconfig1-dev libfreetype6-dev fonts-dejavu-core pkg-config
+      - name: Render the compiled native gallery
+        run: cargo run --locked -p livecharts-demo --features render --bin livecharts-render -- target/livecharts-demo.png
+      - name: Render after a live-data update
+        run: cargo run --locked -p livecharts-demo --features render --bin livecharts-render -- target/livecharts-demo-updated.png --mutated
+      - name: Preserve native rendering evidence
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: livecharts-native-cpu-gallery
+          path: |
+            target/livecharts-demo.png
+            target/livecharts-demo-updated.png
+          if-no-files-found: error
+          retention-days: 14

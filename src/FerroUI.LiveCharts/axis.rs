@@ -1,7 +1,9 @@
 //! Chart axis snapshots and stable value/pixel conversion.
 
+use crate::measure::{AxisOrientation, AxisTick, TickOptions};
 use crate::scene::ChartError;
 use ferroui_base::media::Color;
+use ferroui_base::Size;
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Default)]
 pub enum AxisPosition {
@@ -18,6 +20,7 @@ pub struct Axis {
     pub min_limit: Option<f64>,
     pub max_limit: Option<f64>,
     pub min_step: f64,
+    pub min_separators: u32,
     pub force_step: bool,
     pub unit_width: f64,
     pub inverted: bool,
@@ -26,6 +29,13 @@ pub struct Axis {
     pub position: AxisPosition,
     pub text_size: f64,
     pub labels_rotation: f64,
+    pub labels_density: f64,
+    /// Absolute angular position, in degrees, of radial-axis labels.
+    pub labels_angle: f64,
+    /// Explicit axis separators; an empty list uses automatically calculated ticks.
+    pub custom_separators: Vec<f64>,
+    /// Padding around polar labels, in FerroUI logical pixels.
+    pub labels_padding: f64,
     pub labels_color: Color,
     pub separators_color: Color,
     pub logarithmic_base: Option<f64>,
@@ -39,6 +49,7 @@ impl Default for Axis {
             min_limit: None,
             max_limit: None,
             min_step: 0.0,
+            min_separators: 3,
             force_step: false,
             unit_width: 1.0,
             inverted: false,
@@ -47,10 +58,14 @@ impl Default for Axis {
             position: AxisPosition::Start,
             text_size: 12.0,
             labels_rotation: 0.0,
+            labels_density: 0.85,
+            labels_angle: 0.0,
+            custom_separators: Vec::new(),
+            labels_padding: 3.0,
             labels_color: Color::from_rgb(75, 85, 99),
             separators_color: Color::from_argb(50, 107, 114, 128),
             logarithmic_base: None,
-            padding: 0.05,
+            padding: 0.0,
         }
     }
 }
@@ -82,6 +97,31 @@ impl AxisScale {
         pixel_start: f64,
         pixel_end: f64,
     ) -> Result<Self, ChartError> {
+        if [
+            pixel_start,
+            pixel_end,
+            axis.unit_width,
+            axis.min_step,
+            axis.text_size,
+            axis.labels_rotation,
+            axis.labels_density,
+            axis.labels_angle,
+            axis.labels_padding,
+            axis.padding,
+        ]
+        .iter()
+        .any(|v| !v.is_finite())
+            || axis.unit_width <= 0.0
+            || axis.min_step < 0.0
+            || axis.text_size < 0.0
+            || axis.labels_density <= -1.0
+            || axis.labels_padding < 0.0
+            || axis.custom_separators.iter().any(|v| !v.is_finite())
+        {
+            return Err(ChartError::InvalidAxis(
+                "axis dimensions, units, density and separators must be finite and valid".into(),
+            ));
+        }
         if axis.min_limit.is_some_and(|v| !v.is_finite())
             || axis.max_limit.is_some_and(|v| !v.is_finite())
         {
@@ -165,6 +205,60 @@ impl AxisScale {
         }
     }
     pub fn ticks(self, axis: &Axis, pixel_length: f64) -> Vec<f64> {
+        let max_chars = [self.min, self.max, (self.min * 0.5 + self.max * 0.5)]
+            .into_iter()
+            .map(|v| axis.label(v).chars().count())
+            .max()
+            .unwrap_or(0);
+        self.ticks_with_metrics(
+            axis,
+            Size::new(pixel_length, pixel_length),
+            AxisOrientation::X,
+            Size::new(
+                max_chars as f64 * axis.text_size * 0.6,
+                axis.text_size * 1.2,
+            ),
+        )
+    }
+    /// Source tick calculation using actual native font measurements.
+    pub fn tick_with_metrics(
+        self,
+        axis: &Axis,
+        size: Size,
+        orientation: AxisOrientation,
+        labels: Size,
+    ) -> AxisTick {
+        AxisTick::cartesian(
+            size,
+            self.min,
+            self.max,
+            TickOptions {
+                orientation,
+                label_size: labels,
+                labels_rotation: axis.labels_rotation,
+                labels_density: axis.labels_density,
+                unit_width: axis.unit_width,
+                min_step: axis.min_step,
+                min_separators: axis.min_separators,
+                force_step_to_min: axis.force_step,
+            },
+        )
+    }
+    pub fn ticks_with_metrics(
+        self,
+        axis: &Axis,
+        size: Size,
+        orientation: AxisOrientation,
+        labels: Size,
+    ) -> Vec<f64> {
+        if !axis.custom_separators.is_empty() {
+            return axis
+                .custom_separators
+                .iter()
+                .copied()
+                .filter(|v| v.is_finite() && *v >= self.min && *v <= self.max)
+                .collect();
+        }
         if let Some(base) = self.logarithmic_base {
             let first = self.min.log(base).ceil() as i32;
             let last = self.max.log(base).floor() as i32;
@@ -174,33 +268,34 @@ impl AxisScale {
                 .filter(|v| v.is_finite())
                 .collect();
         }
-        let count = (pixel_length / 80.0).clamp(2.0, 20.0);
-        let raw = self.max / count - self.min / count;
-        let magnitude = 10.0_f64.powf(raw.log10().floor());
-        let residual = raw / magnitude;
-        let step = if residual > 5.0 {
-            10.0
-        } else if residual > 2.0 {
-            5.0
-        } else if residual > 1.0 {
-            2.0
+        let step = self
+            .tick_with_metrics(axis, size, orientation, labels)
+            .value;
+        let minimum = axis
+            .min_step
+            .max(if axis.labels.is_empty() { 0.0 } else { 1.0 });
+        let step = if axis.force_step && minimum > 0.0 {
+            minimum
         } else {
-            1.0
-        } * magnitude;
-        let step = if axis.force_step && axis.min_step > 0.0 {
-            axis.min_step
-        } else {
-            step.max(axis.min_step)
-                .max(if axis.labels.is_empty() { 0.0 } else { 1.0 })
+            step.max(minimum)
         };
         if !step.is_finite() || step <= 0.0 {
             return vec![self.min, self.max];
         }
         let start = (self.min / step).ceil() * step;
-        (0..1024)
-            .map(|i| start + i as f64 * step)
-            .take_while(|v| v.is_finite() && *v <= self.max + step * 1e-9)
-            .collect()
+        let mut result = Vec::new();
+        for i in 0..1024 {
+            let value = start + i as f64 * step;
+            if !value.is_finite() || value > self.max + step * 1e-9 {
+                break;
+            }
+            // Steps below the local f64 precision cannot advance the separator.
+            if result.last().is_some_and(|last| *last >= value) {
+                break;
+            }
+            result.push(value);
+        }
+        result
     }
 }
 

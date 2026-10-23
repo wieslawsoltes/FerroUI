@@ -4,6 +4,7 @@ use crate::kernel::Coordinate;
 use crate::paint::{representative_color, snapshot_brush, BrushSpace};
 use crate::scene::{palette_color, PaintStyle};
 use ferroui_base::media::{Color, IBrush, PenLineCap, PenLineJoin};
+use ferroui_base::Point;
 use std::rc::Rc;
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, Default)]
@@ -161,6 +162,10 @@ pub struct Series {
     pub is_relative_to_min_value: bool,
     pub polar_labels_position: PolarLabelsPosition,
     pub polar_closed: bool,
+    /// Stack polar radii within the selected axes and stack group.
+    pub polar_stacked: bool,
+    /// Requested axis padding, expressed in nice tick steps for polar radii.
+    pub data_padding: Point,
 }
 impl Default for Series {
     fn default() -> Self {
@@ -218,6 +223,28 @@ impl Series {
             is_relative_to_min_value: false,
             polar_labels_position: PolarLabelsPosition::Middle,
             polar_closed: true,
+            polar_stacked: false,
+            data_padding: Self::default_data_padding(kind),
+        }
+    }
+    /// Constructor defaults from each upstream series family.
+    pub fn default_data_padding(kind: SeriesKind) -> Point {
+        match kind {
+            SeriesKind::Line
+            | SeriesKind::StepLine
+            | SeriesKind::Area
+            | SeriesKind::StackedArea
+            | SeriesKind::StackedStepArea
+            | SeriesKind::RangeLine => Point::new(0.5, 1.0),
+            SeriesKind::Column
+            | SeriesKind::StackedColumn
+            | SeriesKind::RangeColumn
+            | SeriesKind::Box => Point::new(0.0, 1.0),
+            SeriesKind::Row | SeriesKind::StackedRow | SeriesKind::RangeRow => Point::new(1.0, 0.0),
+            SeriesKind::Scatter => Point::new(1.0, 1.0),
+            SeriesKind::Heat => Point::new(0.0, 0.0),
+            SeriesKind::PolarLine => Point::new(1.0, 1.5),
+            SeriesKind::Pie | SeriesKind::Financial => Point::new(0.5, 0.5),
         }
     }
     pub fn from_values(kind: SeriesKind, values: impl IntoIterator<Item = f64>) -> Self {

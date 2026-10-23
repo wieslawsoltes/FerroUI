@@ -1,4 +1,4 @@
-use ferroui_base::{media::Color, Point, Rect, Size, Thickness};
+use ferroui_base::{Point, Rect, Size, Thickness, media::Color};
 
 /// Typed interpolation replaces the generated hierarchy of motion properties.
 pub trait Interpolate: Clone {

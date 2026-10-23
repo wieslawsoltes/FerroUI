@@ -15,6 +15,9 @@ use ferroui_base::media::{Color, IBrush, IGradientBrush};
 use ferroui_base::{Matrix, Rect, RelativePoint, RelativeScalar, RelativeUnit, Size};
 use std::rc::Rc;
 
+mod paint_motion;
+pub use paint_motion::{PaintError, PaintKind, PaintMotion, PaintSnapshot};
+
 /// The rectangle against which relative gradient coordinates are evaluated.
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq, Hash)]
 pub enum BrushSpace {

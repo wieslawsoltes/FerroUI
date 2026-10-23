@@ -236,7 +236,7 @@ impl TreemapNode {
     }
     pub fn with_value(value: f64, name: impl Into<String>) -> Ref<Self> {
         let node = Self::new();
-        node.set_value(value);
+        node.set_numeric_value(value);
         node.set_name(name.into());
         node
     }
@@ -273,7 +273,7 @@ impl TreemapNode {
                     let node = Self::new();
                     node.set_id(value.id);
                     node.set_name(value.name.clone());
-                    node.set_value(value.value);
+                    node.set_numeric_value(value.value);
                     node.set_color(value.color);
                     if value.children.is_some() {
                         node.set_children(Some(TreemapNodes::from_items(children)));
@@ -303,7 +303,7 @@ impl TreemapNode {
     pub fn value(&self) -> f64 {
         self.get_value(Self::value_property())
     }
-    pub fn set_value(&self, value: f64) {
+    pub fn set_numeric_value(&self, value: f64) {
         self.base.set_value(Self::value_property(), value);
     }
     pub fn children(&self) -> Option<TreemapNodes> {
@@ -346,7 +346,7 @@ impl HeatLand {
     pub fn with_value(name: impl Into<String>, value: f64) -> Ref<Self> {
         let land = Self::new();
         land.set_name(name.into());
-        land.set_value(value);
+        land.set_numeric_value(value);
         land
     }
     pub fn from_snapshot(value: &HeatLandSnapshot) -> Ref<Self> {
@@ -373,7 +373,7 @@ impl HeatLand {
     pub fn value(&self) -> f64 {
         self.get_value(Self::value_property())
     }
-    pub fn set_value(&self, value: f64) {
+    pub fn set_numeric_value(&self, value: f64) {
         self.base.set_value(Self::value_property(), value);
     }
     pub fn color(&self) -> Option<Color> {
@@ -421,7 +421,7 @@ impl GeoMarker {
             value.label.clone(),
         );
         marker.set_radius(value.radius);
-        marker.set_value(value.value);
+        marker.set_numeric_value(value.value);
         marker.set_color(value.color);
         marker.set_show_label(value.show_label);
         marker
@@ -466,7 +466,7 @@ impl GeoMarker {
     pub fn value(&self) -> f64 {
         self.get_value(Self::value_property())
     }
-    pub fn set_value(&self, value: f64) {
+    pub fn set_numeric_value(&self, value: f64) {
         self.base.set_value(Self::value_property(), value);
     }
     pub fn color(&self) -> Color {
@@ -981,16 +981,16 @@ mod tests {
         let calls = Rc::new(Cell::new(0));
         let recorded = calls.clone();
         let subscription = roots.changed(move || recorded.set(recorded.get() + 1));
-        leaf.set_value(20.0);
+        leaf.set_numeric_value(20.0);
         assert_eq!(calls.get(), 1);
         let next = TreemapNode::with_value(30.0, "next");
         children.add(next.clone());
-        next.set_value(40.0);
+        next.set_numeric_value(40.0);
         assert_eq!(calls.get(), 3);
         root.set_children(Some(TreemapNodes::new()));
         assert_eq!(calls.get(), 4);
-        leaf.set_value(50.0);
-        next.set_value(60.0);
+        leaf.set_numeric_value(50.0);
+        next.set_numeric_value(60.0);
         assert_eq!(calls.get(), 4);
         assert!(!children.has_collection_changed_subscribers());
         drop(subscription);
@@ -1009,7 +1009,7 @@ mod tests {
             snapshot
         );
         let root = TreemapNode::with_children("parent", TreemapNodes::from_items([leaf]));
-        root.set_value(100.0);
+        root.set_numeric_value(100.0);
         let snapshot = root.snapshot().unwrap();
         assert_eq!(
             TreemapNode::from_snapshot(&snapshot).snapshot().unwrap(),
@@ -1040,7 +1040,7 @@ mod tests {
                 changed_items.clear();
             }
         });
-        item.set_value(20.0);
+        item.set_numeric_value(20.0);
         assert!(items.is_empty());
         assert_eq!(item.property_changed_subscriber_count(), 0);
         subscription.dispose();

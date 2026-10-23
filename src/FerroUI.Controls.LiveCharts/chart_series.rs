@@ -7,7 +7,7 @@ use ferroui_base::{
     ferro_class, ferro_class_info, ferro_properties, instantiate, FerroObject, FerroObjectImpl,
     FerroProperty, Ref, StyledProperty,
 };
-use ferroui_base::{FerroObjectImplExt, FerroPropertyChangedEventArgs};
+use ferroui_base::{FerroObjectImplExt, FerroPropertyChangedEventArgs, Point};
 use ferroui_livecharts::kernel::Coordinate;
 use ferroui_livecharts::{
     BrushSpace, PolarLabelsPosition, RadialAlignment, Series as SeriesSnapshot, SeriesKind,
@@ -216,6 +216,8 @@ impl ChartSeries {
             inverted_corner_radius: self.inverted_corner_radius(),
             polar_labels_position: self.polar_labels_position(),
             data_labels_rotation: self.data_labels_rotation(),
+            polar_stacked: self.polar_stacked(),
+            data_padding: self.data_padding(),
         }
     }
 }
@@ -376,6 +378,12 @@ ferro_properties! { impl ChartSeries {
     }
     pub fn data_labels_rotation_property() -> StyledProperty<f64> {
         FerroProperty::register::<ChartSeries, _>("DataLabelsRotation", 0.0)
+    }
+    pub fn polar_stacked_property() -> StyledProperty<bool> {
+        FerroProperty::register::<ChartSeries, _>("IsStacked", false)
+    }
+    pub fn data_padding_property() -> StyledProperty<Point> {
+        FerroProperty::register::<ChartSeries, _>("DataPadding", Point::new(0.5,1.0))
     }
 } }
 impl ChartSeries {
@@ -666,5 +674,17 @@ impl ChartSeries {
     }
     pub fn set_data_labels_rotation(&self, value: f64) {
         self.set_value(Self::data_labels_rotation_property(), value);
+    }
+    pub fn polar_stacked(&self) -> bool {
+        self.get_value(Self::polar_stacked_property())
+    }
+    pub fn set_polar_stacked(&self, value: bool) {
+        self.set_value(Self::polar_stacked_property(), value);
+    }
+    pub fn data_padding(&self) -> Point {
+        self.get_value(Self::data_padding_property())
+    }
+    pub fn set_data_padding(&self, value: Point) {
+        self.set_value(Self::data_padding_property(), value);
     }
 }

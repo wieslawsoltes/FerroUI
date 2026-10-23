@@ -39,7 +39,14 @@ impl<T: Interpolate> MotionProperty<T> {
     }
 
     pub fn set_movement(&mut self, value: T, now_ms: f64) {
-        self.from_value = self.get_movement(now_ms);
+        let from = self.get_movement(now_ms);
+        self.set_movement_from(from, value, now_ms);
+    }
+
+    // The registry samples once before running completion handlers. Reusing
+    // that sample avoids advancing a repeating timeline twice at its boundary.
+    pub(crate) fn set_movement_from(&mut self, from: T, value: T, now_ms: f64) {
+        self.from_value = from;
         self.to_value = value;
         self.force_finish = false;
         if let Some(animation) = &self.animation {

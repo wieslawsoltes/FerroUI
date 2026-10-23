@@ -124,6 +124,7 @@ members = [
     "samples/StaticViewLocatorDemo",
     "samples/TextTestApp",
     "samples/Sandbox",
+    "samples/LiveChartsDemo",
     "samples/AppWithoutLifetime",
     "samples/IntegrationTestApp",
     "samples/ControlCatalog.Android",
