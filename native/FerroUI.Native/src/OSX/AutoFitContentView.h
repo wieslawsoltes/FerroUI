@@ -13,4 +13,5 @@
 -(void) SetTitleBarHeightHint: (double) height;
 
 -(void) ShowBlur: (bool) show;
+-(void) SetBlurMaterial: (int) material appearance: (int) appearance;
 @end

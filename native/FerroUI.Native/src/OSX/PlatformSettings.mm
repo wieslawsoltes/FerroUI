@@ -10,10 +10,16 @@
 -(void)localeDidChange:(NSNotification *)notification;
 @end
 
+@interface CocoaMaterialPolicyObserver : NSObject
+-(id)initWithCallback:(IFrnActionCallback *)callback;
+-(void)settingsDidChange:(NSNotification *)notification;
+@end
+
 class PlatformSettings : public ComSingleObject<IFrnPlatformSettings, &IID_IFrnPlatformSettings>
 {
     CocoaThemeObserver* observer;
     CocoaLocaleObserver* localeObserver;
+    CocoaMaterialPolicyObserver* materialPolicyObserver;
 
 public:
     FORWARD_IUNKNOWN()
@@ -99,6 +105,42 @@ public:
                                                    object:nil];
     }
     
+    virtual int GetMaterialPolicyFlags() override
+    {
+        @autoreleasepool
+        {
+            int flags = 0;
+            if ([[NSWorkspace sharedWorkspace] accessibilityDisplayShouldReduceTransparency])
+            {
+                flags |= 1;
+            }
+            if (@available(macOS 12.0, *))
+            {
+                if ([[NSProcessInfo processInfo] isLowPowerModeEnabled])
+                {
+                    flags |= 2;
+                }
+            }
+            return flags;
+        }
+    }
+
+    virtual void RegisterMaterialPolicyChange(IFrnActionCallback *callback) override
+    {
+        materialPolicyObserver = [[CocoaMaterialPolicyObserver alloc] initWithCallback: callback];
+        [[[NSWorkspace sharedWorkspace] notificationCenter] addObserver:materialPolicyObserver
+                                                               selector:@selector(settingsDidChange:)
+                                                                   name:NSWorkspaceAccessibilityDisplayOptionsDidChangeNotification
+                                                                 object:nil];
+        if (@available(macOS 12.0, *))
+        {
+            [[NSNotificationCenter defaultCenter] addObserver:materialPolicyObserver
+                                                     selector:@selector(settingsDidChange:)
+                                                         name:NSProcessInfoPowerStateDidChangeNotification
+                                                       object:nil];
+        }
+    }
+
 private:
     unsigned int to_argb(NSColor* color)
     {
@@ -161,6 +203,27 @@ private:
 
 - (void)localeDidChange:(NSNotification *)notification {
     _callback->Run();
+}
+@end
+
+@implementation CocoaMaterialPolicyObserver
+{
+    ComPtr<IFrnActionCallback> _callback;
+}
+- (id) initWithCallback:(IFrnActionCallback *)callback {
+    self = [super init];
+    if (self) {
+        _callback = callback;
+    }
+    return self;
+}
+
+// The power state notification comes on any thread: the callback runs on the main thread.
+- (void)settingsDidChange:(NSNotification *)notification {
+    ComPtr<IFrnActionCallback> callback = _callback;
+    dispatch_async(dispatch_get_main_queue(), ^{
+        callback->Run();
+    });
 }
 @end
 

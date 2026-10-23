@@ -175,6 +175,8 @@ pub struct TopLevelImpl {
     saved_logical_size: Cell<Size>,
     saved_scaling: Cell<f64>,
     transparency_level: Cell<WindowTransparencyLevel>,
+    /// Whether a system backdrop is drawn behind the window (winui-materials.md).
+    system_backdrop_active: Cell<bool>,
 
     handle: RefCell<Option<Rc<MacOSTopLevelHandle>>>,
 
@@ -210,6 +212,7 @@ impl TopLevelImpl {
             saved_logical_size: Cell::new(Size::default()),
             saved_scaling: Cell::new(0.0),
             transparency_level: Cell::new(WindowTransparencyLevel::none()),
+            system_backdrop_active: Cell::new(false),
             handle: RefCell::new(None),
             surfaces: Arc::new(Mutex::new(Vec::new())),
             gl_surface: RefCell::new(None),
@@ -630,6 +633,55 @@ impl TopLevelImpl {
             }),
         };
         native.set_cursor(native_cursor.as_deref()).check();
+    }
+
+    /// Draws a system backdrop behind the window with the blur view of the
+    /// native window: the `NSVisualEffectView` material that corresponds to
+    /// the material of WinUI (winui-materials.md, section 6.3).
+    pub fn set_system_backdrop(
+        &self,
+        backdrop: Option<&ferroui_base::rendering::composition::system_backdrops::PlatformSystemBackdrop>,
+    ) -> ferroui_base::rendering::composition::system_backdrops::SystemBackdropSupport {
+        use ferroui_base::rendering::composition::system_backdrops::{
+            DesktopAcrylicKind, MicaKind, PlatformSystemBackdropKind, SystemBackdropSupport, SystemBackdropTheme,
+        };
+        let Some(native) = self.native() else { return SystemBackdropSupport::None };
+        match backdrop {
+            Some(backdrop) => {
+                // NSVisualEffectMaterial: windowBackground (12), underWindowBackground (21),
+                // menu (5), sidebar (7).
+                let material = match backdrop.kind {
+                    PlatformSystemBackdropKind::Mica(MicaKind::Base) => 12,
+                    PlatformSystemBackdropKind::Mica(MicaKind::BaseAlt) => 21,
+                    PlatformSystemBackdropKind::DesktopAcrylic(DesktopAcrylicKind::Thin) => 7,
+                    PlatformSystemBackdropKind::DesktopAcrylic(_) => 5,
+                };
+                let appearance = match backdrop.theme {
+                    SystemBackdropTheme::Default => 0,
+                    SystemBackdropTheme::Light => 1,
+                    SystemBackdropTheme::Dark => 2,
+                };
+                native.set_blur_material(material, appearance).check();
+                native.set_transparency_mode(FrnWindowTransparencyMode::Blur).check();
+                self.system_backdrop_active.set(true);
+                SystemBackdropSupport::Native
+            }
+            None => {
+                if self.system_backdrop_active.replace(false) {
+                    native.set_blur_material(-1, 0).check();
+                    let level = self.transparency_level();
+                    let mode = if level == WindowTransparencyLevel::transparent() {
+                        FrnWindowTransparencyMode::Transparent
+                    } else if level == WindowTransparencyLevel::acrylic_blur() {
+                        FrnWindowTransparencyMode::Blur
+                    } else {
+                        FrnWindowTransparencyMode::Opaque
+                    };
+                    native.set_transparency_mode(mode).check();
+                }
+                SystemBackdropSupport::None
+            }
+        }
     }
 
     pub fn set_transparency_level_hint(&self, transparency_levels: &[WindowTransparencyLevel]) {
@@ -1354,6 +1406,13 @@ macro_rules! impl_top_level_contract {
 
             fn transparency_level(&self) -> ferroui_controls::WindowTransparencyLevel {
                 $crate::top_level_impl::TopLevelParent::top_level(self).transparency_level()
+            }
+
+            fn set_system_backdrop(
+                &self,
+                backdrop: Option<&ferroui_base::rendering::composition::system_backdrops::PlatformSystemBackdrop>,
+            ) -> ferroui_base::rendering::composition::system_backdrops::SystemBackdropSupport {
+                $crate::top_level_impl::TopLevelParent::top_level(self).set_system_backdrop(backdrop)
             }
 
             fn acrylic_compensation_levels(&self) -> ferroui_controls::AcrylicPlatformCompensationLevels {

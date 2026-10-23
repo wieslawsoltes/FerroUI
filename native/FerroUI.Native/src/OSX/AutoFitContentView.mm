@@ -68,6 +68,43 @@
     _blurBehind.hidden = !show;
 }
 
+-(void) SetBlurMaterial:(int)material appearance:(int)appearance
+{
+    if (material < 0)
+    {
+        if (@available(macOS 10.14, *))
+        {
+            [_blurBehind setMaterial:NSVisualEffectMaterialHUDWindow];
+        }
+        else
+        {
+            [_blurBehind setMaterial:NSVisualEffectMaterialSidebar];
+        }
+        _blurBehind.appearance = nil;
+        [_blurBehind setState:NSVisualEffectStateFollowsWindowActiveState];
+        return;
+    }
+
+    [_blurBehind setMaterial:(NSVisualEffectMaterial)material];
+    if (appearance == 1)
+    {
+        _blurBehind.appearance = [NSAppearance appearanceNamed:NSAppearanceNameAqua];
+    }
+    else if (appearance == 2)
+    {
+        if (@available(macOS 10.14, *))
+        {
+            _blurBehind.appearance = [NSAppearance appearanceNamed:NSAppearanceNameDarkAqua];
+        }
+    }
+    else
+    {
+        _blurBehind.appearance = nil;
+    }
+    // The controller decides when the window is inactive (it shows the fallback colour).
+    [_blurBehind setState:NSVisualEffectStateActive];
+}
+
 -(void) ShowTitleBar: (bool) show
 {
     _titleBarMaterial.hidden = !show;

@@ -69,6 +69,7 @@ public:
     virtual HRESULT SetFrameThemeVariant(FrnPlatformThemeVariant variant) override;
 
     virtual HRESULT SetTransparencyMode(FrnWindowTransparencyMode mode) override;
+    virtual HRESULT SetBlurMaterial(int material, int appearance) override;
                            
     virtual bool IsModal();
 

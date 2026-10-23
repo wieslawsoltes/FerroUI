@@ -57,6 +57,7 @@ public:
     virtual HRESULT PointToScreen(FrnPoint point, FrnPoint *ret) override;
      
     virtual HRESULT SetTransparencyMode(FrnWindowTransparencyMode mode) override;
+    virtual HRESULT SetBlurMaterial(int material, int appearance) override;
 
     virtual HRESULT GetCurrentDisplayId (CGDirectDisplayID* ret) override;
 

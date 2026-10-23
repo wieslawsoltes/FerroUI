@@ -367,7 +367,11 @@ impl Win32Platform {
                 // setting that changed, or is null.
                 let changed_setting = unsafe { read_setting_name(l_param) };
                 match setting_change(changed_setting.as_deref()) {
-                    Some(SettingChange::ColorValues) => win32_platform_settings.on_color_values_changed(),
+                    Some(SettingChange::ColorValues) => {
+                        win32_platform_settings.on_color_values_changed();
+                        // The transparency effects setting is announced with the colours.
+                        win32_platform_settings.on_material_settings_changed();
+                    }
                     Some(SettingChange::Language) => win32_platform_settings.on_language_changed(),
                     None => {}
                 }
@@ -378,6 +382,14 @@ impl Win32Platform {
                 if let Some(screen) = self.screen.borrow().clone() {
                     screen.on_changed();
                 }
+            }
+        }
+
+        if msg == WindowsMessage::WM_POWERBROADCAST {
+            // The battery saver may have changed (winui-materials.md).
+            let win32_platform_settings = self.win32_platform_settings.borrow().clone();
+            if let Some(win32_platform_settings) = win32_platform_settings {
+                win32_platform_settings.on_material_settings_changed();
             }
         }
 

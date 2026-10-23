@@ -755,6 +755,10 @@ interface IFrnTopLevel : IUnknown
      
      HRESULT GetInputMethod(IFrnTextInputMethod **ppv);
      HRESULT SetTransparencyMode(FrnWindowTransparencyMode mode);
+     // The material and appearance of the blur behind the window (an NSVisualEffectMaterial;
+     // appearance 0 follows the window, 1 aqua, 2 dark aqua); a negative material restores
+     // the default. A FerroUI addition for the system backdrops (docs/porting/winui-materials.md).
+     HRESULT SetBlurMaterial(int material, int appearance);
      
      HRESULT GetCurrentDisplayId(uint* ret);
 
@@ -1377,6 +1381,10 @@ interface IFrnPlatformSettings : IUnknown
     void RegisterColorsChange(IFrnActionCallback* callback);
     HRESULT GetPreferredLanguage(IFrnString** ret);
     void RegisterLanguageChange(IFrnActionCallback* callback);
+    // The settings that decide whether materials are drawn: bit 1 reduce transparency, bit 2
+    // low power mode. A FerroUI addition (docs/porting/winui-materials.md).
+    int GetMaterialPolicyFlags();
+    void RegisterMaterialPolicyChange(IFrnActionCallback* callback);
 }
 
 [uuid(12edf00d-5803-4d3f-9947-b4840e5e9372)]

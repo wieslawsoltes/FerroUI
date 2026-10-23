@@ -455,6 +455,14 @@ HRESULT WindowBaseImpl::SetTransparencyMode(FrnWindowTransparencyMode mode) {
     return S_OK;
 }
 
+HRESULT WindowBaseImpl::SetBlurMaterial(int material, int appearance) {
+    START_COM_CALL;
+
+    [StandardContainer SetBlurMaterial: material appearance: appearance];
+
+    return S_OK;
+}
+
 HRESULT WindowBaseImpl::SetFrameThemeVariant(FrnPlatformThemeVariant variant) {
     START_COM_CALL;
 
