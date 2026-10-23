@@ -95,7 +95,8 @@ jobs:
         if: ${{ !cancelled() && steps.native_toolchain.outcome == 'success' && steps.source-mtimes-cargo.outcome == 'success' }}
         env:
           FERROUI_VELLO_REQUIRE_GPU: '1'
-        run: cargo +1.99.0 test --locked --manifest-path ../../Cargo.toml -p ferroui-vello --features gpu --lib gpu::fragment_tests:: --jobs 1 -- --test-threads=1 --nocapture
+        run: |
+          cargo +1.99.0 test --locked --manifest-path ../../Cargo.toml -p ferroui-vello --features gpu --lib gpu::fragment_tests:: --jobs 1 -- --test-threads=1 --nocapture
       - name: Validate native editor and public renderer pixels
         # Keep independent application compiler/pixel feedback available if a
         # preceding framework test fails. Its failure still fails this job.
