@@ -623,12 +623,13 @@
   "published_importer_commit": "996f2094d3367a5cf0ee65bf3c6a5a7331798506",
   "rendering": {
     "dark_pages": 13,
+    "followup_record": "docs/porting/winui-gallery/data/native-reuse-ci-validation.json",
     "light_pages": 126,
     "navigation_named": 16,
     "new_compositions_both_themes": 28,
     "note": "A requested capture is not an observed output. SVG diagnostics and static GIF previews remain explicit pending behaviors; captures do not establish Windows pixel, accessibility or input parity.",
     "requested_outputs": 183,
-    "status": "pending-current-CI-execution"
+    "status": "superseded-by-ci-followup-record"
   },
   "schema_version": 1,
   "scope": "Native reuse increment: ColorPicker, ConnectedAnimation, Image and FlipView; partial source adaptations and exact execution scopes.",

@@ -95,16 +95,23 @@ settings and InfoBarPanel follow `FerroUI.Controls.Primitives`, and the eight
 automation peers follow `FerroUI.Automation.Peers`. The source importer maps the
 pinned WinUI identities to these native APIs. There is no separate controls shim.
 
-The [current native-control execution](data/executions/native-controls-008.json)
-records **182 passing tests across all 12 integration targets** on the working tree
-based on main integration `7fa010c9` (main parent `0526a3ca`), including the Gallery's
-new color-picker dependency. Its **53 named source inputs** were frozen before
-and checked after all twelve serialized commands. All **521 current API evidence
-entries** reference 008. The recorded parent is not presented as the complete
-working-tree snapshot. The older [local record 005](data/executions/native-controls-005.json)
-and [CI records 006](data/executions/native-controls-006.json) and
-[007](data/executions/native-controls-007.json) retain their exact original sources,
-commands, logs and boundaries. The exact source guard remains active.
+The [current native-control execution](data/executions/native-controls-009.json)
+records **182 passing tests across all 12 integration targets** at actual CI checkout
+`47bbaf91`, which merged the Gallery increment with main `934b9ce1`. Its **53 named
+source inputs** were extracted afterward from that exact Git tree; they are not
+execution-time before/after snapshots. All **521 current API evidence entries**
+reference 009. The [preceding local record 008](data/executions/native-controls-008.json)
+preserves its 182 passing tests and 53 inputs frozen before and after execution.
+The newer main added StaticViewLocator lockfile entries, so the exact source guard
+correctly rejected the older lockfile hash. The new CI result supplies fresh
+evidence; the earlier records retain their original sources, commands, logs and
+boundaries. API behavior classifications are unchanged.
+
+The [native reuse CI ledger](data/native-reuse-ci-validation.json) separately records
+**653 passing contract tests and four intentional ignores**, including 80 Gallery
+tests and 53 importer tests, on that actual checkout. It also retains the rejected
+stale-lockfile comparison and failed capture compilation. Corrected rendering
+remains pending until the later run produces and validates its outputs.
 
 The current source map identifies **320 type candidates and 1,554 member candidates**;
 the existing-API guard preserves **3,170 types, 28,435 declared member names and 458

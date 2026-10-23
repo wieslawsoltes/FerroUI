@@ -149,14 +149,15 @@ execution evidence. The promotion's
 [local native-control record](data/executions/native-controls-005.json) preserves
 182 passing tests across 12 integration targets and 53 source hashes frozen before
 and checked after the local run. All 521 current API evidence entries reference
-[record 008](data/executions/native-controls-008.json): 182 tests passed across twelve
-serialized targets after integrating main `0526a3ca` and the Gallery dependency
-change. The 53 named inputs were frozen before and checked after execution; its
-recorded parent is not presented as the complete tested working tree. The previous
-CI records [006](data/executions/native-controls-006.json) and
-[007](data/executions/native-controls-007.json) remain unchanged, with their actual
-checkout identities and post-execution Git-blob hash scopes. The exact source guard
-and API behavior classifications remain unchanged.
+[record 009](data/executions/native-controls-009.json): 182 tests passed across twelve
+targets at CI checkout `47bbaf91`, including the Gallery dependency change and main
+`934b9ce1`. Its 53 named input hashes come from that exact Git tree after execution.
+The [local record 008](data/executions/native-controls-008.json) retains its separate
+before/after hash scope and original lockfile; the newer main's additive lockfile
+change required fresh execution evidence. Previous CI records
+[006](data/executions/native-controls-006.json) and
+[007](data/executions/native-controls-007.json) also remain unchanged. The exact
+source guard and API behavior classifications remain unchanged.
 
 The [promotion validation record](data/native-promotion-validation.json) separately
 records loader, theme, external-path and CI results, including corrected failures

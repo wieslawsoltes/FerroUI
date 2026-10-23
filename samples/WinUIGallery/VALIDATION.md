@@ -60,13 +60,39 @@ and the corrected failed attempt.
 
 | Local validation | Result | Exact boundary |
 |---|---|---|
-| Native controls | **182 passed**, all 12 integration targets | [Execution 008](../../docs/porting/winui-gallery/data/executions/native-controls-008.json) freezes 53 source inputs before and after the twelve commands. All 521 current API evidence entries reference it; earlier records remain unchanged. |
+| Native controls | **182 passed**, all 12 integration targets | [Execution 008](../../docs/porting/winui-gallery/data/executions/native-controls-008.json) freezes 53 source inputs before and after the twelve commands. The later CI execution 009 supplies current API evidence after the newer main's lockfile change; 008 remains unchanged. |
 | WinUI importer | **53 passed** | Eight new tests cover ColorPicker mappings, semantic rejection, explicit policies, property elements, native-host type references and bounded nesting. Nine relevant inputs were unchanged before/after. An unrelated Gallery test edit observed by the broad collector is explicitly excluded from this importer scope. |
 | Gallery library | **80 passed**, zero failures or ignored tests | Includes 25 new page tests and one original-media test; 125 selected inputs were unchanged before/after. This default-feature library run excludes the capture binary and its Skia-gated test. |
 | Source comparison | **47 scanner regressions passed**; exact maps and generated registries pass | Preserves 3,170 existing types, 28,435 declared member names and 458 registrations; 487 additional types remain separate. Events, Symbol values, builders and public Rust paths pass their freshness checks. |
 | Strict completeness | **Expected exit 2** | 1,544 types, 7,264 members and all 126 pages still lack complete behavioral evidence. The gate remains active. |
 | Original assets | **130 files reproducible**, registered at 132 paths | 108 original control PNGs plus 22 original media files; two existing path-case aliases are explicit. Six original page/code-behind hashes accompany the media manifest. |
-| Rendering and image decoding | Current CI execution pending | The workflow requests **183 PNGs**: 126 light pages, 13 dark pages, 16 named NavigationView views and 28 named views for the 14 new compositions. It also requests the real-Skia JPEG/selected-image test. These requests are not recorded as passing output. |
+| Rendering and image decoding | Corrected CI execution pending | The first CI attempt failed to compile the capture binary before producing images; the two reference coercions are corrected in `07aa0120`. The workflow requests **183 PNGs** and the real-Skia JPEG/selected-image test. These requests are not recorded as passing output. |
+
+### CI integration with main `934b9ce1`
+
+The first [CI run for the native reuse increment](https://github.com/wieslawsoltes/FerroUI/actions/runs/39944797126)
+checked out merge `47bbaf918294f29fb7143b228a2eff081cd987fc`, tree
+`1fab463e47c7d04b6f808de9bc4ea1be2eab5b20`. Main had advanced to `934b9ce1`,
+whose StaticViewLocator addition changed `Cargo.lock`. The exact comparison rejected
+the older 008 hash after all 47 scanner regressions passed. Merge `9e2c4219`
+integrates the same tree into this branch. [Execution 009](../../docs/porting/winui-gallery/data/executions/native-controls-009.json)
+records the newly passed 182 native tests at that actual CI checkout. All 53 selected
+Git-blob hashes match the integrated sources; only `Cargo.lock` differs from 008.
+All 521 current API evidence references use 009, with no behavioral status upgrade.
+
+The complete contract job passed **653 tests with zero failures and four intentional
+ignores**, including all 80 Gallery library tests and 53 importer tests. Declarative
+API compilation also passed. The [CI execution ledger](../../docs/porting/winui-gallery/data/native-reuse-ci-validation.json)
+retains the whole job log, named result summaries, ignored-test reasons and 177
+selected inputs audited against that exact Git tree after execution. These logical
+tests do not execute the capture binary or its feature-gated real-Skia test.
+
+The rendering job failed at compile time on two `&Ref<Control>` argument expressions
+containing `?`. Commit `07aa0120` binds each reference before ordinary dereference
+coercion into the verifier. No PNGs or rendering artifact were produced by the failed
+attempt. Its scanner and rendering logs remain in the execution ledger. The corrected
+workflow requests 126 light pages, 13 dark pages, 16 named NavigationView views and
+28 named views for the 14 new compositions; a requested view is not rendering evidence.
 
 The first local native build was killed under the shared memory limit before its
 tests ran. A second feature-variant build was stopped before tests to conserve shared
