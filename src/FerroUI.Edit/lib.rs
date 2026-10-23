@@ -9,6 +9,9 @@ pub use ferroui_edit_core::document::{TextDocument, TextLocation};
 pub use ferroui_textmate as textmate;
 
 pub mod automation;
+mod background_geometry_builder;
+mod background_geometry_rects;
+mod background_renderer;
 mod clipboard_event_args;
 mod collapse_if_single_overload_converter;
 mod commands;
@@ -53,6 +56,12 @@ mod visual_line_link_text;
 mod visual_line_text;
 mod visual_line_transformer;
 
+pub use background_geometry_builder::{BackgroundGeometryBuilder, BackgroundGeometryError};
+pub use background_geometry_rects::{
+    BackgroundGeometryLine, BackgroundGeometryViewport, get_rects_for_segment,
+    get_rects_for_selection, get_rects_from_visual_segment,
+};
+pub use background_renderer::{BackgroundRendererRef, IBackgroundRenderer, KnownLayer};
 pub use clipboard_event_args::{
     ClipboardSelectionKind, CopyingToClipboardEventArgs, PastingFromClipboardEventArgs,
     TextCopiedEventArgs, TextPastedEventArgs,
@@ -127,3 +136,5 @@ pub use visual_line_transformer::{
 mod tests;
 #[cfg(test)]
 mod visual_line_tests;
+#[cfg(test)]
+mod background_geometry_tests;
