@@ -161,10 +161,11 @@ Artwork also retains documented limits: arbitrary vector-anchor fillets, every s
 ## Validation
 
 The FerroUI **0.4.0** integration preserves both upstream ancestry and the
-editor's public API additions. All **533 core tests** and the five active
-**Vello/no-Skia** target graphs pass locally with the refreshed lockfile. New
-framework/native/browser execution is required for this merged source; the
-completed pre-integration results below retain their original source scope.
+editor's public API additions. The merged source passed **533 core tests in CI**,
+all five generated Rust/XAML reference checks, and the five active
+**Vello/no-Skia** target graphs locally. Native and browser results remain
+attached to their exact sources; the completed pre-integration results below
+do not substitute for a current-source complete browser pass.
 [Integration details](docs/VALIDATION.md#ferroui-040-integration-2026-10-23)
 describe the inherited text-bounds and native GPU fragment corrections.
 
@@ -176,6 +177,11 @@ parity are not yet established.
 
 | Gate | Exact source and completed result |
 | --- | --- |
+| Integrated core | [`1c7151f5`, run 39950194410](https://github.com/wieslawsoltes/FerroUI/actions/runs/39950194410): **533 passed**, **2.41 s**, with the FerroUI 0.4.0 lockfile |
+| Integrated generated references | [`1c7151f5`, run 39950194402](https://github.com/wieslawsoltes/FerroUI/actions/runs/39950194402): all generators and drift checks passed; **five generated files match their committed SHA-256 hashes**, with an empty patch |
+| Integrated native application and framework | [`2d6284d9`, run 39950436412](https://github.com/wieslawsoltes/FerroUI/actions/runs/39950436412): **239/239 app tests**, **26.03 s**, and all configured framework filters passed. Mandatory native GPU fragments: **7/7**, **7.14 s**; no skipped adapter fallback |
+| Feature browser execution | Verified `08e29e4f` WASM with frozen `0f073278` harness: **9/12 Software2D and 8/12 WebGL2 scenarios passed**, **88 / 68 completed check groups**. Both modes failed overall. All five spacing-variable checks passed in both modes; all 17 gradient checks passed in Software2D. [Exact results and failures](../../docs/ferrodesign-evidence/2026-10-23-continuation/browser-runtime08-harness0f/README.md) |
+| Current browser helper checks | Published `c549f6bc` source tree: **46/46 local cases passed** across coverage, pointer expectations, passive input evidence, isolated scenarios and trace/process ownership. Separate from actual editor execution |
 | Pre-integration production core | [`1637a093`, run 39944253726](https://github.com/wieslawsoltes/FerroUI/actions/runs/39944253726): **533 passed**, **2.50 s**, including prototype spacing reflow/rollback and unchanged-binding redo preservation |
 | Pre-integration native application | [`1637a093`, run 39944253747](https://github.com/wieslawsoltes/FerroUI/actions/runs/39944253747): **239 passed**, **43.57 s**, including the clipped-selection/radius-control priority regression and native diagnostic controls |
 | Feature core | [`dfab0ed9`, run 39942848092](https://github.com/wieslawsoltes/FerroUI/actions/runs/39942848092): **528 passed**, **1.72 s**, including radial/angular authoring and spacing-variable ownership/reflow |
@@ -185,6 +191,14 @@ parity are not yet established.
 | Prototype spacing integration | Exact published tree of [`1637a093`](https://github.com/wieslawsoltes/FerroUI/commit/1637a093723a4f899b7f4e371fd53f0b91914a98): **533 core tests passed locally**, **5.91 s**, including five preview reflow/rollback cases. **34 pure JavaScript** coverage/input/trace-ownership tests passed separately |
 | Latest recovered full browser result | [`b7b0b885`, run 39869066118](https://github.com/wieslawsoltes/FerroUI/actions/runs/39869066118) built actual Vello WASM and passed IndexedDB checks, but **failed overall**: **161 Software2D / 155 WebGL2 completed checks**, with **9 / 10 failed scenarios** among 37 requested per mode. The failures and subsequent corrections are preserved; this is not a current-source pass |
 | Independent corner reference | The [fixed 16×/32× Chromium decoder experiment](../../docs/ferrodesign-evidence/2026-10-23-browser-harness/README.md) converged at **1.96875 alpha units** and had **0 native PNG pixels differing by more than 12**, retaining the original limits. This isolated reference check is separate from complete editor execution |
+
+Checkpoint [`c549f6bc`](https://github.com/wieslawsoltes/FerroUI/commit/c549f6bcafe614a6373c743f5efbf2a3cb0eccd2)
+uses real native hover/press readiness for gradient entry, one verified multiline
+clipboard paste, actual Inspect-tab navigation for XAML export, and a relative
+favicon asset. The [input evidence](../../docs/ferrodesign-evidence/2026-10-23-continuation/browser-input-readiness/README.md)
+preserves the preceding failures and unchanged assertions. These corrections
+require the new browser runtime; no activation retry or tolerance relaxation
+turns the earlier run into a pass.
 
 [Current evidence](../../docs/ferrodesign-evidence/2026-10-23-continuation/README.md)
 records exact commits, CI links, log digests and selected result lines.
@@ -225,6 +239,22 @@ each payload in `ferrodesign-provenance.json`. This build-only feedback does not
 replace persistence, interaction, pixel or benchmark validation.
 
 ## Rendering performance
+
+The [completed feature-runtime text-pan measurement](../../docs/ferrodesign-evidence/2026-10-23-continuation/browser-text-pan-runtime08-harness0f/README.md)
+at `08e29e4f` recorded 36 motions per mode. WebGL2's observed dispatch-to-frame
+median/p95 was **15.24 / 26.77 ms**, native-presentation p95 **118.86 ms**, and
+settling p95 **905.03 ms**. Those distinct phases include automation and shared-host
+SwiftShader work; the first counter advance is not display FPS or complete
+presentation. The overall benchmark failed because Software2D requested a missing
+favicon. Its normal samples, WebGL2's separate six-motion trace, and successful
+graceful shutdown are retained. The favicon correction and FerroUI 0.4.0 runtime
+need their own execution.
+
+The [matched frame analysis](../../docs/ferrodesign-evidence/2026-10-23-continuation/browser-text-pan-runtime08-harness0f/presentation-analysis/README.md)
+locates the dominant recorded late wait at Chromium's display-swap boundary,
+while separately retaining substantial FerroUI callback work. It does not
+identify the underlying driver/worker/scheduling cause or demonstrate a
+current-runtime speedup.
 
 The renderer retains immutable geometry, paints, text, image assets and prepared subtree bounds. Scoped changes refresh affected nodes and ancestors, and the layer sidebar reuses unchanged row projections. Scenes with at least 32 prepared roots also use a balanced bounds hierarchy to find paint candidates for the viewport. Candidates return to document paint order before compositing, so spatial partitioning preserves stacking. Unchanged viewport queries reuse their candidate buffer; scoped root-bound changes refit the affected tree branch. A view containing the entire root bounds uses the retained paint-order list directly.
 

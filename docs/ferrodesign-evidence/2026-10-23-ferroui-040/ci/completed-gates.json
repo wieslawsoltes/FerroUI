@@ -1,0 +1,260 @@
+{
+  "repository": "wieslawsoltes/FerroUI",
+  "branch": "feat/ferrodesign-editor",
+  "captured_at": "2026-10-23T12:24:52.505125+00:00",
+  "scope": "Completed core, generated-reference and native validation of the 1c upstream integration; 2d changes only workflow YAML. Browser runtime/interactions and later c549 changes have separate evidence.",
+  "completed": [
+    {
+      "label": "1c-core",
+      "scope": "Core engine after upstream integration",
+      "source_commit": "1c7151f57614915796e4aa54f9b497f1ac842aad",
+      "source_tree": "aef243ffe3c0c035b9e1686079b19d635f78a626",
+      "run_id": 39950194410,
+      "job_id": 120402492690,
+      "run_url": "https://github.com/wieslawsoltes/FerroUI/actions/runs/39950194410",
+      "job_url": "https://github.com/wieslawsoltes/FerroUI/actions/runs/39950194410/job/120402492690",
+      "status": "completed",
+      "conclusion": "success",
+      "created_at": "2026-10-23T12:01:03Z",
+      "run_started_at": "2026-10-23T12:01:03Z",
+      "updated_at": "2026-10-23T12:02:39Z",
+      "decoded_log": {
+        "archive": "1c-core.log.gz",
+        "raw_bytes": 88588,
+        "raw_sha256": "ed0ff078d3d5cc20d3c8af7d4950b820cd4567e00f9276a1c1f2a8e684a5c3ff",
+        "gzip_bytes": 21681,
+        "gzip_sha256": "8e3cc69f9335403f9e5b9021bdf83e3a95bd48974fcc918eb207b46a8143b9d4",
+        "encoding": "UTF-8 including provider BOM; exact decoded GitHub job-log response"
+      },
+      "test_results": [
+        {
+          "result": "ok",
+          "passed": 533,
+          "failed": 0,
+          "ignored": 0,
+          "measured": 0,
+          "filtered": 0,
+          "seconds": 2.41
+        },
+        {
+          "result": "ok",
+          "passed": 0,
+          "failed": 0,
+          "ignored": 0,
+          "measured": 0,
+          "filtered": 0,
+          "seconds": 0.0
+        }
+      ]
+    },
+    {
+      "label": "1c-generated-references",
+      "scope": "Generated Rust paths and compiled theme XAML after upstream integration",
+      "source_commit": "1c7151f57614915796e4aa54f9b497f1ac842aad",
+      "source_tree": "aef243ffe3c0c035b9e1686079b19d635f78a626",
+      "run_id": 39950194402,
+      "job_id": 120402493015,
+      "run_url": "https://github.com/wieslawsoltes/FerroUI/actions/runs/39950194402",
+      "job_url": "https://github.com/wieslawsoltes/FerroUI/actions/runs/39950194402/job/120402493015",
+      "status": "completed",
+      "conclusion": "success",
+      "created_at": "2026-10-23T12:01:03Z",
+      "run_started_at": "2026-10-23T12:01:03Z",
+      "updated_at": "2026-10-23T12:15:12Z",
+      "decoded_log": {
+        "archive": "1c-generated-references.log.gz",
+        "raw_bytes": 258938,
+        "raw_sha256": "c8656738d67398433167b737a7c039bf97c8a723379ad534ebe6254c3bd68ad1",
+        "gzip_bytes": 42940,
+        "gzip_sha256": "7faef1f72a9b27446cc062a8ce5078c5294f426bafea3fe42fc59fe153995eb8",
+        "encoding": "UTF-8 including provider BOM; exact decoded GitHub job-log response"
+      },
+      "test_results": [
+        {
+          "result": "ok",
+          "passed": 1,
+          "failed": 0,
+          "ignored": 0,
+          "measured": 0,
+          "filtered": 614,
+          "seconds": 0.39
+        },
+        {
+          "result": "ok",
+          "passed": 1,
+          "failed": 0,
+          "ignored": 0,
+          "measured": 0,
+          "filtered": 203,
+          "seconds": 4.66
+        },
+        {
+          "result": "ok",
+          "passed": 1,
+          "failed": 0,
+          "ignored": 0,
+          "measured": 0,
+          "filtered": 207,
+          "seconds": 2.74
+        },
+        {
+          "result": "ok",
+          "passed": 1,
+          "failed": 0,
+          "ignored": 0,
+          "measured": 0,
+          "filtered": 614,
+          "seconds": 0.33
+        },
+        {
+          "result": "ok",
+          "passed": 2,
+          "failed": 0,
+          "ignored": 1,
+          "measured": 0,
+          "filtered": 201,
+          "seconds": 4.47
+        },
+        {
+          "result": "ok",
+          "passed": 2,
+          "failed": 0,
+          "ignored": 1,
+          "measured": 0,
+          "filtered": 205,
+          "seconds": 2.74
+        }
+      ]
+    },
+    {
+      "label": "2d-native-feedback",
+      "scope": "Native framework, adapter-backed GPU fragments and native editor",
+      "source_commit": "2d6284d98550eb1029542ced06d2be346cdb8d27",
+      "source_tree": "baefd9e6ca400627e073b1de06eb17aad2c9e161",
+      "run_id": 39950436412,
+      "job_id": 120403288368,
+      "run_url": "https://github.com/wieslawsoltes/FerroUI/actions/runs/39950436412",
+      "job_url": "https://github.com/wieslawsoltes/FerroUI/actions/runs/39950436412/job/120403288368",
+      "status": "completed",
+      "conclusion": "success",
+      "created_at": "2026-10-23T12:03:01Z",
+      "run_started_at": "2026-10-23T12:03:01Z",
+      "updated_at": "2026-10-23T12:20:41Z",
+      "decoded_log": {
+        "archive": "2d-native-feedback.log.gz",
+        "raw_bytes": 673058,
+        "raw_sha256": "453c7b890d213459b42f65726a2edaff953a4f280b94d8cb45481330b27034c1",
+        "gzip_bytes": 100374,
+        "gzip_sha256": "91502a21d5eb1cec1590e51287e30aeb0ffcbae487b197952c511325de49d06a",
+        "encoding": "UTF-8 including provider BOM; exact decoded GitHub job-log response"
+      },
+      "test_results": [
+        {
+          "result": "ok",
+          "passed": 8,
+          "failed": 0,
+          "ignored": 0,
+          "measured": 0,
+          "filtered": 516,
+          "seconds": 0.21,
+          "suite": "Vello unhinted glyph geometry/pixels"
+        },
+        {
+          "result": "ok",
+          "passed": 17,
+          "failed": 0,
+          "ignored": 0,
+          "measured": 0,
+          "filtered": 4549,
+          "seconds": 0.02,
+          "suite": "Base paragraph layout"
+        },
+        {
+          "result": "ok",
+          "passed": 8,
+          "failed": 0,
+          "ignored": 0,
+          "measured": 0,
+          "filtered": 4558,
+          "seconds": 0.01,
+          "suite": "Base text_line_bounds"
+        },
+        {
+          "result": "ok",
+          "passed": 16,
+          "failed": 0,
+          "ignored": 0,
+          "measured": 0,
+          "filtered": 4462,
+          "seconds": 0.13,
+          "suite": "Controls paragraph editing"
+        },
+        {
+          "result": "ok",
+          "passed": 174,
+          "failed": 0,
+          "ignored": 0,
+          "measured": 0,
+          "filtered": 4304,
+          "seconds": 1.83,
+          "suite": "Controls TextBox"
+        },
+        {
+          "result": "ok",
+          "passed": 5,
+          "failed": 0,
+          "ignored": 0,
+          "measured": 0,
+          "filtered": 4473,
+          "seconds": 0.05,
+          "suite": "Controls text history"
+        },
+        {
+          "result": "ok",
+          "passed": 7,
+          "failed": 0,
+          "ignored": 0,
+          "measured": 0,
+          "filtered": 539,
+          "seconds": 7.14,
+          "suite": "Vello GPU fragment capture/replay"
+        },
+        {
+          "result": "ok",
+          "passed": 239,
+          "failed": 0,
+          "ignored": 0,
+          "measured": 0,
+          "filtered": 0,
+          "seconds": 26.03,
+          "suite": "FerroDesign application"
+        }
+      ],
+      "gpu_requirement": {
+        "features": "gpu",
+        "FERROUI_VELLO_REQUIRE_GPU": "1",
+        "adapter_required": true,
+        "all_seven_executed": true,
+        "no_adapter_or_missing_compute_causes_failure": true,
+        "pixel_tests_are_adapter_backed_not_browser_surface_tests": true
+      },
+      "source_equivalence": {
+        "production_same_as": "1c7151f57614915796e4aa54f9b497f1ac842aad",
+        "changed_paths": [
+          ".github/workflows/ferrodesign-native.yml"
+        ]
+      },
+      "regression_test_names": [
+        "media::text_formatting::text_paragraph_tests::paragraph_styles_inherit_trimmed_line_bounds_across_wraps_breaks_and_empty_paragraphs",
+        "gpu::fragment_tests::a_fragment_gives_the_pixels_of_its_commands",
+        "gpu::fragment_tests::a_fragment_is_refused_where_its_pixels_would_differ",
+        "gpu::fragment_tests::a_fragment_moved_by_whole_pixels_gives_the_pixels_of_its_commands_there",
+        "gpu::fragment_tests::fragment_blended_fills_preserve_outer_clips_and_following_draws",
+        "gpu::fragment_tests::fragment_compositing_preserves_outer_clips_and_following_draws",
+        "gpu::fragment_tests::ordinary_content_inside_an_outer_layer_keeps_reusable_fragments",
+        "gpu::fragment_tests::target_bounded_layers_redraw_after_fragment_moves_and_target_resizes"
+      ],
+      "count_note": "Filtered suite totals overlap (the Base paragraph and line-bounds filters share a case); do not add them as unique tests."
+    }
+  ]
+}

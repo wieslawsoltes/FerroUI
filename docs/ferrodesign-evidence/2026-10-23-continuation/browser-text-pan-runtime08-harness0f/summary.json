@@ -1,0 +1,231 @@
+{
+  "benchmark": "native-text-pan-v2",
+  "runtime_commit": "08e29e4f530c0ae65f6e2ac072f381605e23ed0c",
+  "harness_commit": "0f0732784bd6fdf1cb2477a61dd332d9a007fec2",
+  "created": "2026-10-23T12:10:46.532Z",
+  "finished": "2026-10-23T12:12:04.187Z",
+  "exit_code": 1,
+  "warmup_count": 12,
+  "normal_sample_count": 36,
+  "workload": {
+    "inputSha256": "adaa9a7e4d2a10fb3c96fce28de8a1dfe58c75c13cc8b5cb4baec46a97a26492",
+    "labels": 150,
+    "inputCodePoints": 4000,
+    "inputNonSpaceCodePoints": 3250,
+    "actualRenderedGlyphCount": null,
+    "actualRenderedGlyphCountReason": "Not exposed by the native bridge; no glyph count is inferred from characters.",
+    "font": "Inter",
+    "fontSize": 12.75,
+    "styles": [
+      "regular",
+      "bold",
+      "italic",
+      "bold italic"
+    ],
+    "wrapping": "disabled",
+    "ligatures": "liga/clig/calt disabled",
+    "columns": 5,
+    "rows": 30
+  },
+  "browser_shutdown": {
+    "reason": "Text benchmark finished",
+    "processId": 144265,
+    "status": "closed",
+    "clientDisconnectAttempted": true,
+    "clientDisconnectCompleted": true,
+    "clientDisconnected": true,
+    "gracefulCloseCompleted": true,
+    "forcedKillAttempted": false,
+    "directKillAttempted": false,
+    "processExit": {
+      "observed": true,
+      "code": 0,
+      "signal": null
+    },
+    "errors": []
+  },
+  "limitations": [
+    "Primary timings still include Playwright dispatch, compact bridge serialization and browser scheduling; they are not isolated renderer timings. Native presentation is the public FerroUI surface counter, not a GPU completion timestamp. Settling includes two subsequent animation callbacks.",
+    "Browser event timestamps and performance/long-task observations use the page clock; host phase durations use the Node clock. They are reported separately and must not be subtracted across clock origins.",
+    "An explicitly requested historical baseline without the compact frame bridge is marked legacy; timing comparisons across different bridge methods are suppressed.",
+    "Native label visibility/preparation counters are observed. The bridge does not expose actual shaped/drawn glyph totals; exact input character counts describe the workload instead.",
+    "The WebGL2 launch requests SwiftShader; the actual renderer string is recorded when available. This is not a hardware-GPU throughput measurement. No speed threshold or FPS assertion is made.",
+    "Baseline/current order is sequential and not randomized; machine load and thermal/order effects can affect a paired comparison.",
+    "If enabled, a separately labelled trace cohort follows each mode's ordinary measurements and adds between-run work; compare runs with matching diagnostic configuration.",
+    "Trace-enabled runs use an owned Playwright BrowserServer and WebSocket connection for bounded process termination. Trace-off runs retain chromium.launch(); dispatch observations from different transport/trace configurations are not a transport-identical comparison."
+  ],
+  "results": [
+    {
+      "requestedMode": "Software2D",
+      "status": "failed",
+      "environment": {
+        "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/156.0.0.0 Safari/537.36",
+        "hardwareConcurrency": 9,
+        "devicePixelRatio": 1,
+        "canvas": {
+          "width": 1600,
+          "height": 1100
+        },
+        "surface": "Software2D",
+        "device": null
+      },
+      "metricBridge": {
+        "kind": "compact-v1"
+      },
+      "timing": {
+        "count": 36,
+        "medianMs": 18.202731499999572,
+        "p95Ms": 214.22660600000017,
+        "minMs": 5.667273999999452,
+        "maxMs": 1569.7839950000016
+      },
+      "dispatchTiming": {
+        "count": 36,
+        "medianMs": 11.020837999998548,
+        "p95Ms": 102.85073700000066,
+        "minMs": 2.5435059999999794,
+        "maxMs": 167.613566
+      },
+      "frameObservationTiming": {
+        "count": 36,
+        "medianMs": 6.420476499999495,
+        "p95Ms": 111.37586899999951,
+        "minMs": 2.4286840000022494,
+        "maxMs": 1402.1704290000016
+      },
+      "presentationTiming": {
+        "count": 36,
+        "medianMs": 111.44677099999899,
+        "p95Ms": 356.16943899999933,
+        "minMs": 69.1324280000008,
+        "maxMs": 1753.2570369999994
+      },
+      "settlingTiming": {
+        "count": 36,
+        "medianMs": 141.76713500000005,
+        "p95Ms": 711.0402599999998,
+        "minMs": 95.5363750000015,
+        "maxMs": 1912.6397450000004
+      },
+      "preparationDelta": {
+        "totalFullPrepares": 0,
+        "totalIncrementalPrepares": 0,
+        "totalPreparedNodes": 0,
+        "totalRebuiltVisuals": 0,
+        "layerProjectionBuilds": 0,
+        "layerProjectionReuses": 0
+      },
+      "nativeFrameDelta": 36,
+      "renderPanics": [],
+      "pageErrors": [],
+      "consoleErrors": [
+        "Failed to load resource: the server responded with a status of 404 (Not Found)"
+      ],
+      "error": "AssertionError [ERR_ASSERTION]: Expected values to be strictly deep-equal:\n+ actual - expected\n\n+ [\n+   'Failed to load resource: the server responded with a status of 404 (Not Found)'\n+ ]\n- []\n\n    at file:///tmp/ferrodesign-e99-benchmark-0f/tests/text-render-benchmark.mjs:326:20",
+      "trace_status": "not run: normal cohort console assertion failed",
+      "trace_motion_count": 0
+    },
+    {
+      "requestedMode": "WebGL2",
+      "status": "passed",
+      "environment": {
+        "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/156.0.0.0 Safari/537.36",
+        "hardwareConcurrency": 9,
+        "devicePixelRatio": 1,
+        "canvas": {
+          "width": 1600,
+          "height": 1100
+        },
+        "surface": "WebGL2",
+        "device": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver)"
+      },
+      "metricBridge": {
+        "kind": "compact-v1"
+      },
+      "timing": {
+        "count": 36,
+        "medianMs": 15.237483500000963,
+        "p95Ms": 26.77441099999851,
+        "minMs": 4.242373999994015,
+        "maxMs": 117.06411999999546
+      },
+      "dispatchTiming": {
+        "count": 36,
+        "medianMs": 11.764461999999185,
+        "p95Ms": 19.766150000010384,
+        "minMs": 2.3259689999977127,
+        "maxMs": 24.021741999997175
+      },
+      "frameObservationTiming": {
+        "count": 36,
+        "medianMs": 2.8545909999993455,
+        "p95Ms": 5.714201000002504,
+        "minMs": 1.9164049999963026,
+        "maxMs": 105.14904299999762
+      },
+      "presentationTiming": {
+        "count": 36,
+        "medianMs": 77.60555050000403,
+        "p95Ms": 118.86267800000496,
+        "minMs": 62.08816800000204,
+        "maxMs": 124.00124099999812
+      },
+      "settlingTiming": {
+        "count": 36,
+        "medianMs": 775.3144654999996,
+        "p95Ms": 905.0304170000018,
+        "minMs": 681.4241299999994,
+        "maxMs": 1018.558812000003
+      },
+      "preparationDelta": {
+        "totalFullPrepares": 0,
+        "totalIncrementalPrepares": 0,
+        "totalPreparedNodes": 0,
+        "totalRebuiltVisuals": 0,
+        "layerProjectionBuilds": 0,
+        "layerProjectionReuses": 0
+      },
+      "nativeFrameDelta": 36,
+      "renderPanics": [],
+      "pageErrors": [],
+      "consoleErrors": [],
+      "error": null,
+      "trace_status": "completed",
+      "trace_motion_count": 6,
+      "trace_motions": [
+        [
+          4,
+          0
+        ],
+        [
+          4,
+          4
+        ],
+        [
+          0,
+          4
+        ],
+        [
+          -4,
+          4
+        ],
+        [
+          -4,
+          0
+        ],
+        [
+          -4,
+          -4
+        ]
+      ],
+      "trace_artifact": {
+        "file": "current-WebGL2-pan-trace.json",
+        "bytes": 2739494,
+        "sha256": "5fb1aefbc1c5a239892f608e6cc19a7caf6386f0800fb18917b0ecfdc96074b4",
+        "streamTruncated": false,
+        "dataLossOccurred": false,
+        "peakBufferFraction": 0.13257575035095215
+      }
+    }
+  ]
+}

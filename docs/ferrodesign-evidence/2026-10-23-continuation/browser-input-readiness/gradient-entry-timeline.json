@@ -1,0 +1,233 @@
+{
+  "runtimeCommit": "08e29e4f530c0ae65f6e2ac072f381605e23ed0c",
+  "harnessCommit": "0f0732784bd6fdf1cb2477a61dd332d9a007fec2",
+  "traceSha256": "99b4d0d9b9eecd504e8d4f31905b0823b10ed88cdc4264d04d50485d0ce8627d",
+  "clock": {
+    "contextWallTimeMs": 1792756458282,
+    "contextMonotonicTimeMs": 258346.065,
+    "wallMinusMonotonicMs": 1792756199935.935,
+    "presentationEstimateFormula": "frameSwapWallTimeMs - (contextWallTimeMs - contextMonotonicTimeMs)",
+    "limitation": "Sampled presentation estimates only. These are not DOM event creation times or native pointer timestamps."
+  },
+  "events": [
+    {
+      "callId": "xvrq@15409",
+      "traceStartMs": 650567.011,
+      "method": "mouseClick",
+      "params": {
+        "x": 1456.5,
+        "y": 952
+      }
+    },
+    {
+      "callId": "xvrq@15419",
+      "traceEndMs": 651924.815,
+      "sceneFrames": 8,
+      "button": {
+        "arrangeValid": true,
+        "enabled": true,
+        "focusWithin": false,
+        "focused": false,
+        "height": 30,
+        "measureValid": true,
+        "visible": true,
+        "width": 92,
+        "x": 1001,
+        "y": 846
+      },
+      "modalVisible": true,
+      "canvasFocusWithin": true,
+      "gradientNode": null,
+      "gradientFill": null
+    },
+    {
+      "callId": "xvrq@15421",
+      "traceStartMs": 651935.198,
+      "method": "mouseMove",
+      "params": {
+        "x": 1274,
+        "y": 345
+      }
+    },
+    {
+      "callId": "xvrq@15423",
+      "traceStartMs": 652602.644,
+      "method": "mouseWheel",
+      "params": {
+        "deltaX": 0,
+        "deltaY": 240
+      }
+    },
+    {
+      "callId": "xvrq@15427",
+      "traceEndMs": 652675.412,
+      "sceneFrames": 9,
+      "button": {
+        "arrangeValid": true,
+        "enabled": true,
+        "focusWithin": false,
+        "focused": false,
+        "height": 30,
+        "measureValid": true,
+        "visible": true,
+        "width": 92,
+        "x": 1001,
+        "y": 606
+      },
+      "modalVisible": true,
+      "canvasFocusWithin": true,
+      "gradientNode": null,
+      "gradientFill": null
+    },
+    {
+      "callId": "xvrq@15429",
+      "traceStartMs": 652683.108,
+      "method": "mouseMove",
+      "params": {
+        "x": 1274,
+        "y": 345
+      }
+    },
+    {
+      "callId": "xvrq@15431",
+      "traceStartMs": 653363.623,
+      "method": "mouseWheel",
+      "params": {
+        "deltaX": 0,
+        "deltaY": 240
+      }
+    },
+    {
+      "callId": "xvrq@15435",
+      "traceEndMs": 654156.751,
+      "sceneFrames": 11,
+      "button": {
+        "arrangeValid": true,
+        "enabled": true,
+        "focusWithin": false,
+        "focused": false,
+        "height": 30,
+        "measureValid": true,
+        "visible": true,
+        "width": 92,
+        "x": 1001,
+        "y": 366
+      },
+      "modalVisible": true,
+      "canvasFocusWithin": true,
+      "gradientNode": null,
+      "gradientFill": null
+    },
+    {
+      "callId": "xvrq@15437",
+      "traceEndMs": 654184.244,
+      "sceneFrames": 11,
+      "button": {
+        "arrangeValid": true,
+        "enabled": true,
+        "focusWithin": false,
+        "focused": false,
+        "height": 30,
+        "measureValid": true,
+        "visible": true,
+        "width": 92,
+        "x": 1001,
+        "y": 366
+      },
+      "modalVisible": true,
+      "canvasFocusWithin": true,
+      "gradientNode": null,
+      "gradientFill": null
+    },
+    {
+      "callId": "xvrq@15441",
+      "traceEndMs": 654222.92,
+      "sceneFrames": 11,
+      "button": {
+        "arrangeValid": true,
+        "enabled": true,
+        "focusWithin": false,
+        "focused": false,
+        "height": 30,
+        "measureValid": true,
+        "visible": true,
+        "width": 92,
+        "x": 1001,
+        "y": 366
+      },
+      "modalVisible": true,
+      "canvasFocusWithin": true,
+      "gradientNode": null,
+      "gradientFill": null
+    },
+    {
+      "callId": "xvrq@15443",
+      "traceStartMs": 654233.899,
+      "method": "mouseClick",
+      "params": {
+        "x": 1047,
+        "y": 381
+      }
+    },
+    {
+      "callId": "xvrq@15449",
+      "traceEndMs": 664820.414,
+      "sceneFrames": 13,
+      "button": {
+        "arrangeValid": true,
+        "enabled": true,
+        "focusWithin": false,
+        "focused": false,
+        "height": 30,
+        "measureValid": true,
+        "visible": true,
+        "width": 92,
+        "x": 1001,
+        "y": 366
+      },
+      "modalVisible": true,
+      "canvasFocusWithin": true,
+      "gradientNode": null,
+      "gradientFill": null
+    }
+  ],
+  "sampledFrames": [
+    {
+      "archiveMember": "screencast/page@aa7dc5219787d93fbce7ce450cc39f4f-1792756854050.jpeg",
+      "sha256": "23e8f2aaf4ad1c3a86244efee227937083ce0f501f20b221b673af8c8bcef74c",
+      "traceReceivedMs": 654113.901,
+      "frameSwapWallTimeMs": 1792756853309.153,
+      "estimatedPresentationTraceMs": 653373.2180175781,
+      "estimatedPresentationRelativeToClickMs": -860.6809824218508,
+      "visualObservation": "Previous scroll position; entry button below viewport."
+    },
+    {
+      "archiveMember": "screencast/page@aa7dc5219787d93fbce7ce450cc39f4f-1792756854672.jpeg",
+      "sha256": "9ab33b1459697257ca5746fb4cf7feb21c157892ac0870e34d9828fa65542c13",
+      "traceReceivedMs": 654735.57,
+      "frameSwapWallTimeMs": 1792756854059.122,
+      "estimatedPresentationTraceMs": 654123.1870117188,
+      "estimatedPresentationRelativeToClickMs": -110.71198828122579,
+      "visualObservation": "Previous scroll position; entry button below viewport."
+    },
+    {
+      "archiveMember": "screencast/page@aa7dc5219787d93fbce7ce450cc39f4f-1792756855354.jpeg",
+      "sha256": "97da35a34b45619f2285cf4b7fea8914549ef8fa2a7d1c4f878e51faaa3984c6",
+      "traceReceivedMs": 655417.847,
+      "frameSwapWallTimeMs": 1792756854692.431,
+      "estimatedPresentationTraceMs": 654756.4958496094,
+      "estimatedPresentationRelativeToClickMs": 522.5968496093992,
+      "visualObservation": "New scroll position; entry button visible at the reported y366 position."
+    },
+    {
+      "archiveMember": "screencast/page@aa7dc5219787d93fbce7ce450cc39f4f-1792756856122.jpeg",
+      "sha256": "b594c6d30b8a3006d715435b7163b9c089d347a66ce841bd81c936cf7b26f252",
+      "traceReceivedMs": 656185.211,
+      "frameSwapWallTimeMs": 1792756855359.07,
+      "estimatedPresentationTraceMs": 655423.1350097656,
+      "estimatedPresentationRelativeToClickMs": 1189.2360097656492,
+      "visualObservation": "New scroll position; entry button visible at the reported y366 position."
+    }
+  ],
+  "inferenceLimit": "The requested click and current UI geometry are known. No historical DOM pointer collector or native Button source/pressed observation identifies the actual pressed native element."
+}

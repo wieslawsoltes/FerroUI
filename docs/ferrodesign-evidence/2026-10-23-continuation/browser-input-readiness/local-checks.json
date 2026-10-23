@@ -1,0 +1,155 @@
+{
+  "sourceCommit": "c549f6bcafe614a6373c743f5efbf2a3cb0eccd2",
+  "sourceTree": "8c5bbcc8ed5e5a61d287708cf4e2c0e7c912259d",
+  "startedUtc": "2026-10-23T12:22:13.434851+00:00",
+  "completedUtc": "2026-10-23T12:22:13.881660+00:00",
+  "scope": "Local pure JavaScript helper tests and module syntax only. No native application tests, browser launch, or WebAssembly interaction replay.",
+  "node": "v24.19.0",
+  "workingDirectory": "samples/FerroDesign",
+  "command": [
+    "node",
+    "--test",
+    "--test-isolation=none",
+    "--test-reporter=tap",
+    "tests/alpha-coverage.test.mjs",
+    "tests/corner-radius-input.test.mjs",
+    "tests/gradient-input.test.mjs",
+    "tests/input-observations.test.mjs",
+    "tests/isolated-scenario.test.mjs",
+    "tests/text-pan-trace-analysis.test.mjs"
+  ],
+  "testIsolation": "none; report actual test cases instead of file-wrapper cases",
+  "exitCode": 0,
+  "summary": {
+    "tests": 46,
+    "suites": 0,
+    "pass": 46,
+    "fail": 0,
+    "cancelled": 0,
+    "skipped": 0,
+    "todo": 0
+  },
+  "passedCases": [
+    "nonoverlapping RGBA blocks keep row/column indexing and conserve alpha area",
+    "opaque and transparent coverage stays exact at both declared reference scales",
+    "fractionally translated analytic rectangle coverage survives byte rounding and averaging",
+    "sequential strips preserve coverage across row seams and a short final strip",
+    "unstable references are rejected even when the finer raster would match a candidate",
+    "invalid dimensions, excessive work and malformed coverage fail explicitly",
+    "the b7 Alt-radius failure matches delivered float32 input without weakening the authored-radius assertion",
+    "the pointer oracle preserves local radius units under reflection, shear, rotation and viewport zoom",
+    "invalid geometry fails the oracle and negative delivered radius clamps to the authored lower bound",
+    "quantized affine pointer samples preserve the strict angular oracle across the 360-degree seam",
+    "logical local-pixel rays ignore displaced markers and preserve source-stop identity on a nonsquare box",
+    "angular input accumulates winding and restores the complete original paint on exact drag-back",
+    "insertion derives the actual affine ray before exact RGBA interpolation at a rounding boundary",
+    "stable authored tie order supplies the same exact color on and after a repeated offset",
+    "input observation remains passive, labels synthetic input honestly, and does not call the native bridge",
+    "reading pointer evidence retains listeners and returns a stable bounded snapshot",
+    "input evidence is bounded and records overflow instead of silently discarding it",
+    "nested observers fail explicitly and leave the first observation intact",
+    "inline evidence retains native pointer facts and excludes document and typography payloads",
+    "keyboard evidence retains the actual shortcut without changing its default",
+    "text and paste evidence preserve Unicode and newlines without dispatching input",
+    "successful features preserve boundary ordering and actual check counts",
+    "an assertion failure is retained while a later independent feature runs",
+    "failed draft/storage/panic/reload boundaries abort before running the feature",
+    "a failed capture never overwrites the primary feature or boundary error",
+    "an unresponsive capture has a deadline and aborts with the original failure",
+    "union clips overlap without adding nested or parallel wall time",
+    "marked clock alignment identifies the page thread and clips actual pre-capture work",
+    "inconsistent or absent anchors suppress projected input windows rather than mixing clocks",
+    "duplicate markers, input loss and CDP data loss are explicit incomplete evidence",
+    "async input records are counted without pretending their spans are synchronous thread work",
+    "a timestamp from an incompatible origin is not projected onto the trace",
+    "the event-count ceiling marks bounded analysis incomplete rather than silently omitting work",
+    "unmatched synchronous slices are reported and do not invent activity",
+    "the console projection is bounded and never prints trace events or input payloads",
+    "owned shutdown confirms exit and is reused by the outer finalizer",
+    "hung graceful and kill cleanup still return bounded actual process-exit evidence",
+    "a failed public server kill falls back only to its exact owned ChildProcess",
+    "a kill request without an actual exit is never reported as stopped",
+    "owned shutdown disconnects the connected Browser before closing its BrowserServer",
+    "a stalled client disconnect still closes the owned process and remains a failed shutdown",
+    "resolved client close cannot claim successful disposal while the client stays connected",
+    "a disconnected client and completed server close still require actual process-exit evidence",
+    "normal process exit can arrive after the graceful close promise without requiring a kill",
+    "an already crashed owned process cannot be reported as a clean shutdown",
+    "client ownership is unique and cannot change after shutdown starts"
+  ],
+  "testInputs": [
+    {
+      "path": "samples/FerroDesign/tests/alpha-coverage.test.mjs",
+      "sha256": "6e700d0f3a3ce1e3ed9fc61c6308583683aae11cdd979b0bd329501afc7d3dfb",
+      "declaredTopLevelCases": 6
+    },
+    {
+      "path": "samples/FerroDesign/tests/corner-radius-input.test.mjs",
+      "sha256": "bdaf5265fc7eee1797fe6ece48d3291c99baac6211cb8459e9a4bfcaf8c25435",
+      "declaredTopLevelCases": 3
+    },
+    {
+      "path": "samples/FerroDesign/tests/gradient-input.test.mjs",
+      "sha256": "f70f3b8b52e97b2ed3fd4fe9de1fad7744e196fb57dce92110e3050c9cc76728",
+      "declaredTopLevelCases": 5
+    },
+    {
+      "path": "samples/FerroDesign/tests/input-observations.test.mjs",
+      "sha256": "6fc6d90dc556d0173ef5661d1c246dda513356015f6082a88bc51c6386c96996",
+      "declaredTopLevelCases": 7
+    },
+    {
+      "path": "samples/FerroDesign/tests/isolated-scenario.test.mjs",
+      "sha256": "97104f6ce5ddd019857527a83ff363db5e064cb60e954e0235f9f41166422031",
+      "declaredTopLevelCases": 5
+    },
+    {
+      "path": "samples/FerroDesign/tests/text-pan-trace-analysis.test.mjs",
+      "sha256": "5d1b90f2d8180d99219823f19213689fe019187fca7c6247cac7824d0bd92862",
+      "declaredTopLevelCases": 20
+    }
+  ],
+  "tapStdoutSha256": "38bb520c63ed756f5de7aac9bc22780e36ea792ddedf86058db53ffe87db5349",
+  "stderr": "",
+  "syntaxChecks": [
+    {
+      "command": [
+        "node",
+        "--check",
+        "tests/gradient-handles-browser.mjs"
+      ],
+      "exitCode": 0,
+      "sha256": "2d0bacff02503cdfded6f71bdc322209043ab0946d0d75c896796d8584597873"
+    },
+    {
+      "command": [
+        "node",
+        "--check",
+        "tests/paragraphs-browser.mjs"
+      ],
+      "exitCode": 0,
+      "sha256": "e784ba2e202f4aa8a391b7008315ef6635cf356def24f8f1dea697e5eeb82a85"
+    },
+    {
+      "command": [
+        "node",
+        "--check",
+        "tests/polygon-corners-browser.mjs"
+      ],
+      "exitCode": 0,
+      "sha256": "709f2060c725fc812e4fb60140ff7eea84703f9b696ccd8a6b8eca1bda4ae115"
+    },
+    {
+      "command": [
+        "node",
+        "--check",
+        "tests/input-observations.mjs"
+      ],
+      "exitCode": 0,
+      "sha256": "4ca6a96bb6c5a61bf9963e1bff0bb66690f222972b2ebe9e92b79470ef1af576"
+    }
+  ],
+  "nativeReplay": "Not performed for this checkpoint in this evidence snapshot.",
+  "browserReplay": "Not performed for this checkpoint in this evidence snapshot.",
+  "recordedClock": "executor UTC clock; separate from browser/native/trace clocks"
+}

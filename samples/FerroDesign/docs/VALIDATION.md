@@ -2,6 +2,58 @@
 
 This file distinguishes implemented paths, completed checks and measurements. Each observation belongs to its stated source, runtime and run; older successful runs do not validate later changes. The branch incorporates FerroUI `934b9ce1` / `0.4.0` and uses Vello for every application target through public FerroUI APIs. [PR #254](https://github.com/wieslawsoltes/FerroUI/pull/254) collects the complete source and current review status. Current continuation evidence is recorded first; earlier checkpoints remain below with their original scope.
 
+## Completed feature-runtime browser run and input corrections (2026-10-23)
+
+The verified `08e29e4f` distribution completed a selected 12-scenario run with
+the frozen `0f073278` harness and normal shared setup, input, persistence and
+reload gates. Software2D passed **9/12 scenarios**, with **88 completed check
+groups**; WebGL2 passed **8/12**, with **68 completed groups**. Both modes
+**failed overall**, and `scope.full` is false. The [complete compressed report,
+failure table and provenance](../../../docs/ferrodesign-evidence/2026-10-23-continuation/browser-runtime08-harness0f/README.md)
+retain partial progress and all failures. This binary predates the FerroUI
+0.4.0 integration.
+
+Both modes passed corners, radius handles, width profiles/handles, independent
+padding, all five spacing-variable checks, selection and prototype motion.
+Spacing checks include a real Save download during prototype preview and exact
+authored-state verification. Software2D passed all 17 gradient checks, including
+radial/angular editing; WebGL2 stopped at entry before any gradient checks.
+Shared failures were hidden-tab XAML export, the multiline repeated-paragraph
+insertion and absent constraint ComboBox diagnostics. No page exception or new
+shared-host OOM was observed.
+
+Checkpoint [`c549f6bc`](https://github.com/wieslawsoltes/FerroUI/commit/c549f6bcafe614a6373c743f5efbf2a3cb0eccd2)
+addresses those observed paths. Gradient entry waits for public native
+`pointerOver` and Button `pressed` after one real pointer move/down, then
+releases exactly once in `finally`. Evidence supports an older compositor
+hit-test scene at the historical click; the actual native event target was not
+recorded, so that cause remains an inference. Full document/history preservation
+and original entry/geometry/pixel assertions remain mandatory. The paragraph
+case verifies the complete `text/plain` clipboard and uses one native Ctrl+V,
+retaining one exact native Undo/Redo and complete rich-range/indent assertions.
+XAML export clicks the actual Inspect tab and restores Design in `finally`.
+Read-only tab and constraint diagnostics were added at the integration checkpoint.
+The browser host now supplies a relative SVG favicon, including when served at
+the benchmark's `/current/` path.
+
+The [compact input review](../../../docs/ferrodesign-evidence/2026-10-23-continuation/browser-input-readiness/README.md)
+records exact sources and inference limits. **46/46 pure JavaScript cases passed
+locally** for the published correction tree. Syntax checks and Rust parsing
+passed; those checks are distinct from native compilation or current-runtime
+browser execution. The new hover fields require a new runtime.
+
+The separate [08-runtime text-pan benchmark](../../../docs/ferrodesign-evidence/2026-10-23-continuation/browser-text-pan-runtime08-harness0f/README.md)
+also **failed overall**, from Software2D's strict empty-console assertion on a
+missing `/favicon.ico`. Both modes recorded 36 normal motions; WebGL2 completed
+six separate traced motions, while Software2D never reached its trace. WebGL2
+dispatch-to-observed-frame median/p95 was **15.24 / 26.77 ms**,
+native-presentation p95 **118.86 ms**, and settling p95 **905.03 ms**.
+Settling and slow outliers remain in the report; these shared-host SwiftShader
+observations do not establish FPS or physical-GPU performance. The actual WASM
+shutdown now completed with the owned Chromium process exiting normally,
+without a forced kill or cleanup error. That successful cleanup does not change
+the failed benchmark outcome.
+
 ## FerroUI 0.4.0 integration (2026-10-23)
 
 The branch merges upstream release commit
@@ -27,11 +79,28 @@ mode; FerroDesign's configured **Hybrid/Cpu** desktop and **WebGL2/Software2D**
 browser modes do not use GPU fragments.
 
 With the updated lockfile, all **533 core tests passed locally in 4.24 s**, and
-the five active application dependency graphs contain Vello without Skia. These
-checks establish core behavior and backend selection, not execution of the
-changed native framework or browser build. Those source-specific CI and browser
-gates remain pending at this integration checkpoint. The verified `08e29e4f`
-browser runtime uses the preceding framework and is tracked separately.
+the five active application dependency graphs contain Vello without Skia.
+Merged-source [core run 39950194410](https://github.com/wieslawsoltes/FerroUI/actions/runs/39950194410)
+then passed **533/533 in 2.41 s** at `1c7151f5`.
+[Generated-reference run 39950194402](https://github.com/wieslawsoltes/FerroUI/actions/runs/39950194402)
+regenerated and checked all five Rust/XAML reference files: every generated
+hash matches its committed source hash and the generated patch is empty.
+These checks establish their stated gates, not a current-source browser pass.
+The verified `08e29e4f` browser runtime uses the preceding framework and is
+tracked separately.
+
+The first native feedback run at `1c7151f5` created **zero jobs** because the
+GPU test filter's trailing colons occurred in a YAML plain scalar. Checkpoint
+`2d6284d9` uses a literal command block; all five FerroDesign workflow files
+parse successfully. Production Rust is unchanged between those commits. The
+corrected [native run 39950436412](https://github.com/wieslawsoltes/FerroUI/actions/runs/39950436412/job/120403288368)
+at `2d6284d9` **passed completely**: **239/239 application tests in 26.03 s**;
+**8** unhinted glyph, **17** Base paragraph, **8** separate line-bounds,
+**16** Controls paragraph, **174** TextBox, **5** rich-history, and **7**
+mandatory GPU fragment cases. The GPU cases took **7.14 s** with the adapter
+required; no case failed or was ignored. Framework filters overlap and their
+counts are not additive. This run predates c549's added read-only hover/pressed
+projection. Merged-source browser execution remains a separate gate.
 
 The browser's read-only native control projection now includes the existing
 Design/Prototype/Inspect tabs, their panels and both constraint ComboBoxes.

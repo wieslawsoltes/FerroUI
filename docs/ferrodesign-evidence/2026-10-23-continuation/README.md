@@ -12,10 +12,38 @@ complete Figma compatibility or matched Figma visual parity.
 | [`dfab0ed9`](https://github.com/wieslawsoltes/FerroUI/commit/dfab0ed9a0146a892b40d2db0590b0193c80f672) | Native radial/angular gradient handles and six typed auto-layout spacing bindings, with exact transaction/override ownership |
 | [`1637a093`](https://github.com/wieslawsoltes/FerroUI/commit/1637a093723a4f899b7f4e371fd53f0b91914a98) | Atomic prototype spacing reflow/rollback, browser input/coverage/crop corrections, and early browser artifact publication with verified source timestamp reuse |
 | [`08e29e4f`](https://github.com/wieslawsoltes/FerroUI/commit/08e29e4f530c0ae65f6e2ac072f381605e23ed0c) | Independent browser-build feedback and passive angular-input expectations; the production core/application source is unchanged from `1637a093` |
+| [`0f073278`](https://github.com/wieslawsoltes/FerroUI/commit/0f0732784bd6fdf1cb2477a61dd332d9a007fec2) | Native text-entry and painted prototype readiness, actual preview Save verification, and frozen feature/benchmark harness inputs |
+| [`1c7151f5`](https://github.com/wieslawsoltes/FerroUI/commit/1c7151f57614915796e4aa54f9b497f1ac842aad) | Two-parent FerroUI 0.4.0 integration with inherited text bounds, safe native GPU fragment capture, and read-only inspector/constraint diagnostics |
+| [`2d6284d9`](https://github.com/wieslawsoltes/FerroUI/commit/2d6284d98550eb1029542ced06d2be346cdb8d27) | Correct YAML literal command block for the mandatory GPU fragment test gate |
+| [`c549f6bc`](https://github.com/wieslawsoltes/FerroUI/commit/c549f6bcafe614a6373c743f5efbf2a3cb0eccd2) | Native gradient hover/press readiness, one multiline clipboard paste, real Inspect-tab export navigation, and relative SVG favicon |
 
 All application rendering continues through public FerroUI APIs and Vello.
 The active target dependency checks reject Skia. Browser Canvas2D SVG decoding
 in the independent comparison is a test oracle, not the editor's renderer.
+
+## Completed feature-runtime browser and performance evidence
+
+The [08-runtime / 0f-harness editor report](browser-runtime08-harness0f/README.md)
+completed 12 selected scenarios per mode and **failed overall**. Software2D
+passed **9/12**, with **88 completed check groups**; WebGL2 passed **8/12**,
+with **68 groups**. Both modes passed all five spacing-variable checks and
+the real prototype Save boundary. Software2D passed all 17 gradient checks.
+The complete compressed report, exact failures, runtime manifest and unchanged
+harness hashes remain available. This is pre-integration browser evidence,
+not a full current-source pass.
+
+The [separate text-pan measurement](browser-text-pan-runtime08-harness0f/README.md)
+retains both sets of 36 normal motions and WebGL2's complete six-motion trace.
+It failed because Software2D encountered a missing favicon. WebGL2's
+dispatch-to-frame p95 was **26.77 ms**, native-presentation p95 **118.86 ms**,
+and settling p95 **905.03 ms**. These phase observations are not FPS. The real
+WASM browser shutdown completed gracefully with process exit code 0.
+
+The [input-readiness review](browser-input-readiness/README.md) documents the
+following c549 corrections and their exact source evidence. The local pure
+helper gate passed **46/46** cases; new native/browser execution remains
+separate. [FerroUI 0.4.0 evidence](../2026-10-23-ferroui-040/README.md) records
+the integration's 533-test core pass and exact generated-reference results.
 
 ## Completed checks
 

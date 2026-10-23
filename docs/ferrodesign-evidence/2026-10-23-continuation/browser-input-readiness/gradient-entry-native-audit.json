@@ -1,0 +1,165 @@
+{
+  "runtimeSource": "08e29e4f530c0ae65f6e2ac072f381605e23ed0c",
+  "harnessSource": "0f0732784bd6fdf1cb2477a61dd332d9a007fec2",
+  "mode": "WebGL2",
+  "scenario": "gradient-handles",
+  "claim": "Native input-readiness diagnosis; no production or harness change and no new browser execution.",
+  "stateEvidence": [
+    {
+      "path": "/tmp/ferrodesign-e99-xvrq-15441.json",
+      "sha256": "bc0fd545f9e3b935430bd807ce7d554e7c96ba72ff356210266a1be75b7d387e"
+    },
+    {
+      "path": "/tmp/ferrodesign-e99-xvrq-15449.json",
+      "sha256": "226a6f091bb55e8174c4638e0e1ece8a5a5cff5d8fd699fabdbd02dd5a7de015"
+    }
+  ],
+  "onlyStateChanges": {
+    "sceneFrames": {
+      "before": 11,
+      "after": 13
+    }
+  },
+  "target": {
+    "arrangeValid": true,
+    "enabled": true,
+    "focusWithin": false,
+    "focused": false,
+    "height": 30,
+    "measureValid": true,
+    "visible": true,
+    "width": 92,
+    "x": 1001,
+    "y": 366
+  },
+  "storage": {
+    "phase": "saved",
+    "backend": "indexedDB",
+    "dirty": false,
+    "draftDirty": false,
+    "serializationPending": false,
+    "revision": 95,
+    "sequence": 1,
+    "committedSequence": 1,
+    "characters": 4578,
+    "error": ""
+  },
+  "domFocus": {
+    "tag": "MAIN",
+    "id": "out",
+    "value": null,
+    "selectionStart": null,
+    "selectionEnd": null
+  },
+  "focusedChrome": {
+    "CanvasHost": {
+      "arrangeValid": true,
+      "enabled": true,
+      "focusWithin": true,
+      "focused": false,
+      "height": 1000,
+      "measureValid": true,
+      "visible": true,
+      "width": 1016,
+      "x": 296,
+      "y": 0
+    }
+  },
+  "nativeContract": [
+    "Mouse down chooses an existing capture or the compositor-backed root input hit test; it takes implicit capture until release.",
+    "Button release needs prior pressed state, initial left button, and a second compositor-backed hit test inside the button subtree. Lost focus/capture clears pressed state.",
+    "paint_button first checks shell.updating, then flush_inspector_drafts. Flush focuses canvas and returns false only if at least one currently live inspector draft remains dirty.",
+    "The gradient-entry apply callback closes the modal before entering gradient edit, so the unchanged visible modal establishes that callback did not execute.",
+    "Native pointer-over derives from actual input hit testing and refreshes the resting pointer when the compositor publishes a scene; capture disagreement suppresses pointer-over."
+  ],
+  "inference": "Stale compositor hit-test geometry is the strongest supported explanation when combined with the trace screencast timing reviewed separately by gradient_parity. The actual historical native press target was not recorded, so exact routing cannot be proven from this report.",
+  "unsupportedAlternatives": [
+    "No evidence supports a dirty-draft/IME validation rejection: storage draftDirty is false and all captured paint text values/composition states are unchanged.",
+    "No native capture-loss or button-pressed diagnostic existed in this executed runtime, so a transient capture/focus interruption cannot be conclusively excluded."
+  ],
+  "proposedReadinessCheck": "Expose public native InputElement.is_pointer_over and Button.is_pressed read-only in chrome diagnostics. Move the real pointer to the fresh paint button, wait up to the existing bounded deadline for native hover, then perform exactly one down/up activation. Preserve original failure evidence and all outcome assertions; no retries, synthetic click, fixed sleep, or threshold relaxation.",
+  "sourceReferences": [
+    {
+      "path": "src/FerroUI.Controls/button.rs",
+      "sha256": "fa1d0d630da8f895f998c9bda460f1587987fed1ef8073607b4d9ba9614c5603",
+      "lineRanges": [
+        [
+          302,
+          356
+        ]
+      ]
+    },
+    {
+      "path": "src/FerroUI.Base/input/mouse_device.rs",
+      "sha256": "d1874140203a432ae448ceadd195013b614ae4d3554a03dba0f0687ef143a5b8",
+      "lineRanges": [
+        [
+          200,
+          255
+        ],
+        [
+          299,
+          339
+        ]
+      ]
+    },
+    {
+      "path": "src/FerroUI.Base/input/focus_manager.rs",
+      "sha256": "9eb5eca7fcb39050e79e72d0884308d5875148e0592a520003b30a33aa0ff6df",
+      "lineRanges": [
+        [
+          310,
+          345
+        ]
+      ]
+    },
+    {
+      "path": "src/FerroUI.Base/input/pointer_over_pre_processor.rs",
+      "sha256": "6736de94647f342b99ea2d5fc2e27699024b1fdf25d9cdcd8df6ed4329921a38",
+      "lineRanges": [
+        [
+          123,
+          165
+        ],
+        [
+          178,
+          187
+        ]
+      ]
+    },
+    {
+      "path": "src/FerroUI.Base/rendering/composition/compositing_renderer.rs",
+      "sha256": "01846eb95ba87912e1eae21e267cdf4521cb824a1504183e3e262b32d4e6314c",
+      "lineRanges": [
+        [
+          293,
+          312
+        ]
+      ]
+    },
+    {
+      "path": "samples/FerroDesign/crates/ferrodesign-app/src/shell/fields.rs",
+      "sha256": "45bfb72c5fecf58fd78f73653ae0a8a95738c6d454a3a80f22c09a23c6a94fee",
+      "lineRanges": [
+        [
+          256,
+          277
+        ]
+      ]
+    },
+    {
+      "path": "samples/FerroDesign/crates/ferrodesign-app/src/shell/paints.rs",
+      "sha256": "ba310342ca0ac03fbdf2581a501d2e96c08773bbf95355cf5f0f8dbbbad6330e",
+      "lineRanges": [
+        [
+          379,
+          387
+        ],
+        [
+          720,
+          742
+        ]
+      ]
+    }
+  ]
+}
