@@ -4,6 +4,7 @@ pub mod app;
 pub mod canvas;
 #[cfg(not(target_os = "emscripten"))]
 pub mod desktop;
+mod fonts;
 pub mod icons;
 pub mod platform;
 pub mod prototype;

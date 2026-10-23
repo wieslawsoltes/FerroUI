@@ -1,5 +1,4 @@
 use crate::shell::EditorShell;
-use ferroui_base::media::FontManagerOptions;
 use ferroui_base::{ferro_class, ferro_impl_classes, instantiate, FerroObjectImpl, Ref};
 use ferroui_controls::{
     AppBuilder, Application, ApplicationImpl, ApplicationImplExt, Control, NewApplication, Window,
@@ -62,10 +61,8 @@ impl ApplicationImpl for App {
 pub fn build_app() -> AppBuilder {
     AppBuilder::configure::<App>()
         .with_inter_font()
-        .with(Rc::new(FontManagerOptions {
-            default_family_name: Some("fonts:Inter#Inter".into()),
-            ..Default::default()
-        }))
+        .with(Rc::new(crate::fonts::options()))
+        .configure_fonts(crate::fonts::register_fallbacks)
 }
 pub fn with_shell<R>(f: impl FnOnce(&Rc<EditorShell>) -> R) -> Option<R> {
     SHELL.with(|slot| slot.borrow().as_ref().map(f))

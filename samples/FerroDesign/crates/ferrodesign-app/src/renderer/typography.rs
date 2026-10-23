@@ -170,6 +170,7 @@ pub(crate) fn inline_geometry(node: &Node, brush: Rc<dyn IBrush>) -> (UiPoint, f
 /// Read-only browser diagnostics from the actual native presenter. Keep the
 /// bounded run sample out of ordinary TextBox probes and the rendering path.
 pub(crate) fn text_box_state(field: &TextBox) -> serde_json::Value {
+    use ferroui_base::media::text_formatting::ShapedTextRun;
     use ferroui_controls::presenters::TextPresenter;
     use serde_json::json;
     let Some(presenter) = field.find_descendant_of_type::<TextPresenter>(false) else { return serde_json::Value::Null; };
@@ -188,12 +189,26 @@ pub(crate) fn text_box_state(field: &TextBox) -> serde_json::Value {
             });
             let features: Vec<_> = properties.font_features().into_iter().flat_map(|features| features.iter())
                 .map(|feature| json!({"tag":feature.tag,"value":feature.value as u32})).collect();
+            // Inspect the actual shaped face and glyphs, independently of the
+            // authored family. A glyph-zero fallback can otherwise pass every
+            // text, range and geometry check while drawing missing-glyph bars.
+            // Both the run sample above and this per-run sample are bounded.
+            let shaped = run.downcast_ref::<ShapedTextRun>().map(|run| {
+                let glyph_run = run.glyph_run();
+                let infos = glyph_run.glyph_infos();
+                let glyphs = infos.borrow();
+                json!({"family":glyph_run.glyph_typeface().family_name(),
+                    "count":glyphs.len(),"complete":glyphs.len() <= 64,
+                    "glyphs":glyphs.iter().take(64).map(|glyph| json!({
+                        "id":glyph.glyph_index,"cluster":glyph.glyph_cluster,"advance":glyph.glyph_advance,
+                    })).collect::<Vec<_>>()})
+            });
             runs.push(json!({"text":run.text().to_string_lossy(),"utf16Length":run.text().len(),
                 "fontFamily":properties.typeface().font_family().to_string(),
                 "fontSize":properties.font_rendering_em_size(),"fontWeight":properties.typeface().weight().0,
                 "italic":properties.typeface().style() == FontStyle::Italic,
                 "decorationCount":properties.text_decorations().map_or(0, |value| value.len()),
-                "features":features,"color":color}));
+                "features":features,"color":color,"shaped":shaped}));
         }
     }
     let start = field.selection_start().min(field.selection_end());
@@ -220,7 +235,8 @@ mod tests {
     use super::*;
     use ferrodesign_core::{FontFeatureSetting, TextRun};
     use ferroui_base::media::imaging::RenderTargetBitmap;
-    use ferroui_base::media::FontManager;
+    use ferroui_base::media::text_formatting::ShapedTextRun;
+    use ferroui_base::media::{FontManager, FontManagerOptions, FontSimulations};
     use ferroui_base::platform::{IAssetLoader, StandardAssetLoader};
     use ferroui_base::{FerroLocator, PixelRect, PixelSize, Size};
     use ferroui_controls::presenters::TextPresenter;
@@ -228,9 +244,11 @@ mod tests {
     fn fonts() -> Rc<dyn ferroui_base::reactive::IDisposable> {
         let scope = FerroLocator::enter_scope();
         FerroLocator::current_mutable().bind::<dyn IAssetLoader>().to_constant(Rc::new(StandardAssetLoader::new(None)));
+        FerroLocator::current_mutable().bind::<FontManagerOptions>().to_constant(Rc::new(crate::fonts::options()));
         ferroui_vello::VelloPlatform::initialize();
         ferroui_harfbuzz::HarfBuzzPlatform::initialize();
         FontManager::current().add_font_collection(Rc::new(ferroui_fonts_inter::InterFontCollection::new()));
+        crate::fonts::register_fallbacks(&FontManager::current());
         scope
     }
 
@@ -277,6 +295,63 @@ mod tests {
         let mut pixels = vec![0; 512 * 160 * 4];
         bitmap.copy_pixels(PixelRect::new(0, 0, 512, 160), &mut pixels, 512 * 4);
         pixels
+    }
+
+    fn assert_embedded_fallback_glyphs(layout: &TextLayout) {
+        for (character, family, key) in [
+            ('A', "Inter", "fonts:Inter#Inter"),
+            ('🦀', "Noto Color Emoji", crate::fonts::EMOJI_FAMILY),
+            ('ש', "Noto Sans Hebrew", crate::fonts::HEBREW_FAMILY),
+            ('ל', "Noto Sans Hebrew", crate::fonts::HEBREW_FAMILY),
+            ('ו', "Noto Sans Hebrew", crate::fonts::HEBREW_FAMILY),
+            ('ם', "Noto Sans Hebrew", crate::fonts::HEBREW_FAMILY),
+        ] {
+            let mut found = false;
+            for line in layout.text_lines() {
+                for run in line.text_runs().iter().filter(|run| run.text().to_string_lossy().contains(character)) {
+                    let shaped = run.downcast_ref::<ShapedTextRun>().expect("visible text is shaped");
+                    let glyph_run = shaped.glyph_run();
+                    assert_eq!(glyph_run.glyph_typeface().family_name(), family, "actual {character} face");
+                    assert_eq!(shaped.run_properties().typeface().font_family().to_string(), key,
+                        "{character} resolves from the embedded collection, independently of installed fonts");
+                    let glyph_id = glyph_run.glyph_typeface().character_to_glyph_map().get_glyph(character as i32);
+                    assert_ne!(glyph_id, 0, "{character} has an actual cmap glyph");
+                    assert!(glyph_run.glyph_infos().borrow().iter().any(|glyph| glyph.glyph_index == glyph_id),
+                        "the shaped {character} run contains its real glyph, not just its text");
+                    found = true;
+                }
+            }
+            assert!(found, "missing shaped run for {character}");
+        }
+    }
+
+    #[test]
+    fn typography_embedded_fallbacks_preserve_real_hebrew_weights_and_non_bmp_glyphs() {
+        let scope = fonts();
+        for weight in [400, 700] {
+            let face = typeface(crate::fonts::HEBREW_FAMILY, weight, false).glyph_typeface();
+            assert_eq!(face.family_name(), "Noto Sans Hebrew");
+            assert_eq!(face.weight(), FontWeight(weight as i32), "select the actual embedded static weight");
+            assert_eq!(face.font_simulations(), FontSimulations::None);
+            for character in "שלום".chars() {
+                assert_ne!(face.character_to_glyph_map().get_glyph(character as i32), 0);
+            }
+        }
+        let emoji = typeface(crate::fonts::EMOJI_FAMILY, 400, false).glyph_typeface();
+        assert_eq!(emoji.family_name(), "Noto Color Emoji");
+        // The independently inspected cmap of the pinned upstream COLRv1 asset.
+        assert_eq!(emoji.character_to_glyph_map().get_glyph('🦀' as i32), 2623);
+        let node = text_node("A🦀 שלום");
+        let canvas = make_text_layout(&node, editor_brush(&node));
+        assert_embedded_fallback_glyphs(&canvas.layout);
+        let native = presenter(&node).text_layout();
+        assert_embedded_fallback_glyphs(&native);
+        assert_eq!(canvas.layout.hit_test_text_range(1, 2), native.hit_test_text_range(1, 2));
+        assert_eq!(canvas.layout.hit_test_text_range(4, 4), native.hit_test_text_range(4, 4));
+        assert_eq!(canvas.layout.height(), native.height());
+        assert!(canvas.layout.try_build_geometry(canvas.origin).is_none(),
+            "COLR artwork must retain its native colors instead of a partial monochrome outline");
+        scope.dispose();
     }
 
     #[test]
@@ -416,6 +491,8 @@ mod tests {
         let canvas = make_text_layout(&node, editor_brush(&node));
         let presenter = presenter(&node);
         let native = presenter.text_layout();
+        assert_embedded_fallback_glyphs(&canvas.layout);
+        assert_embedded_fallback_glyphs(&native);
         assert_eq!(canvas.layout.height(), native.height());
         assert_eq!(native.text_lines().len(), 3);
         assert_eq!(native.line_origin(0), UiPoint::new(12.25, 3.5));
@@ -441,6 +518,14 @@ mod tests {
             &presenter.clone().upcast(), UiRect::new(0.0, 0.0, 512.0, 160.0)));
         assert!(canvas_pixels.chunks_exact(4).filter(|pixel| pixel[3] > 0).count() > 100);
         assert_eq!(canvas_pixels, native_pixels);
+        let crab = canvas.layout.hit_test_text_range(1, 2)[0]
+            .translate(ferroui_base::Vector::new(canvas.origin.x, canvas.origin.y));
+        let colored = canvas_pixels.chunks_exact(4).enumerate().filter(|(index, pixel)| {
+            let point = UiPoint::new((*index % 512) as f64 + 0.5, (*index / 512) as f64 + 0.5);
+            pixel[3] > 32 && *pixel[..3].iter().max().unwrap() - *pixel[..3].iter().min().unwrap() > 64
+                && crab.contains(point)
+        }).count();
+        assert!(colored > 20, "the black-text fixture paints actual color inside the crab hit rectangle: {colored}");
         scope.dispose();
     }
 }

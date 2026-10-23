@@ -126,6 +126,8 @@ Double-click a text layer to edit directly on the canvas with a native FerroUI c
 
 **Style selected characters…** opens a native range-selection editor with character styles and a rich preview. Its paragraph panel edits alignment, LTR/RTL/Auto direction, line height, letter spacing, before/after spacing and first-line indent for selected hard paragraphs. Shared FerroUI paragraph layout drives canvas text, the inline editor, caret/selection geometry and preview; validated OpenType features remain available. The editing overlay uses one foreground paint per run. Multiple fill stacks, effects and ancestor masks/blending remain canvas-renderer features outside that overlay. [Native text](docs/NATIVE_TEXT.md) describes Unicode replacement, IME cancellation, rich undo and the supported shaped-text XAML export.
 
+Inter remains the primary font. Public FerroUI `FontManagerOptions`, `FontFallback` and `EmbeddedFontCollection` APIs register the same fallback assets in native and browser builds: static **Noto Sans Hebrew Regular 400 and Bold 700**, plus **Noto Color Emoji COLRv1**. Covered characters do not depend on host-installed fonts. Color glyphs retain native color rendering and remain excluded from monochrome-only outline conversion. The [font asset guide and SIL Open Font Licenses](crates/ferrodesign-app/Assets/Fonts/README.md) and [exact upstream provenance](crates/ferrodesign-app/Assets/Fonts/provenance.json) accompany all three unmodified files, totaling **5,092,300 added uncompressed bytes**. Their coverage does not include every writing system or arbitrary document font; [native text](docs/NATIVE_TEXT.md#embedded-font-coverage) defines the boundary.
+
 Use **Affine transform and skew…** for complete parent-relative matrix values and centered skew without flattening children. The constraint diagram controls edge pins and centering during parent resizing. **Frame presets…** creates editable phone, tablet, desktop, presentation or social frames. Authoring palettes can be dragged by their native headers and keep canvas input available; they follow the current selection and stay within the window.
 
 Use the property sidebar for geometry, fills, strokes, typography and layout. With no layer selected it shows the page background and local styles, variables and components. The paint-stack dialog edits fill order, visibility/opacity, gradients, stops and image source windows. **Crop image…** provides native pan and corner gestures for Fill/Stretch images; Escape cancels the active gesture, and Undo restores the whole gesture. Numeric crop windows are also available for Fit and Tile.
@@ -186,8 +188,11 @@ benchmark completed 36 normal plus six trace observations per mode and closed
 the browser gracefully. The WebGL2 p95 native-frame observation was **762.638 ms**
 on SwiftShader; this does not establish physical-GPU speed or FPS.
 
-The saved paragraph images still show missing Hebrew and crab glyphs. The
-separate full `b5008093` CI run also retains a paragraph-entry setup failure and
+The saved `dc361996` paragraph images still show missing Hebrew and crab glyphs.
+They predate the embedded fallback change described above, whose **native and
+browser validation is pending**; static asset and source checks are separate
+from a rendering pass. The separate full `b5008093` CI run also retains a
+paragraph-entry setup failure and
 a strict browser-shutdown failure. Its [entry diagnosis and source correction](../../docs/ferrodesign-evidence/2026-10-23-ferroui-040/paragraph-entry-b500/README.md)
 preserve the original failure; the correction requires its own replay. Earlier
 failed runs remain recorded. A complete current-source browser pass and matched

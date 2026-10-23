@@ -35,6 +35,33 @@ export async function paragraphRegressions(page, reference, check, helpers, outp
         }, name, { timeout: 10000 });
         return (await state(page)).chrome[name].typography;
     };
+    const glyphCoverage = (layout, label) => {
+        assert.ok(Number.isInteger(layout.runCount) && layout.runCount <= 64,
+            label + " fits the bounded native run sample");
+        // Glyph IDs come from the pinned embedded font cmaps, independently of
+        // the runtime diagnostic. Newline/control glyphs may legitimately be
+        // empty; require the actual visible characters and their shaped faces.
+        return [
+            ["A", "Inter", "Inter", 2],
+            ["🦀", "Noto Color Emoji", "fonts:FerroDesignFallback#Noto Color Emoji", 2623],
+            ["ש", "Noto Sans Hebrew", "fonts:FerroDesignFallback#Noto Sans Hebrew", 96],
+            ["ל", "Noto Sans Hebrew", "fonts:FerroDesignFallback#Noto Sans Hebrew", 55],
+            ["ו", "Noto Sans Hebrew", "fonts:FerroDesignFallback#Noto Sans Hebrew", 124],
+            ["ם", "Noto Sans Hebrew", "fonts:FerroDesignFallback#Noto Sans Hebrew", 23],
+        ].map(([character, family, key, glyphId]) => {
+            const runs = layout.runs.filter(run => run.text.includes(character));
+            assert.ok(runs.length > 0, label + " has a native run for " + character);
+            for (const run of runs) {
+                assert.equal(run.shaped?.family, family, label + " uses the actual " + character + " face");
+                assert.equal(run.fontFamily, key, label + " resolves " + character + " through the embedded family");
+                assert.equal(run.shaped.complete, true, label + " retains the complete shaped run sample");
+                assert.equal(run.shaped.glyphs.length, run.shaped.count);
+                assert.ok(run.shaped.glyphs.some(glyph => glyph.id === glyphId && glyph.advance > 0),
+                    label + " shapes the real nonempty " + character + " glyph instead of .notdef");
+            }
+            return { character, family, key, glyphId, runs: runs.length };
+        });
+    };
     const history = async (before, after, depth, label) => {
         assert.equal((await state(page)).historyLength, depth + 1, label + " commits once");
         let view = await state(page);
@@ -75,6 +102,7 @@ export async function paragraphRegressions(page, reference, check, helpers, outp
     await page.keyboard.press("Control+Home");
     await page.keyboard.press("Shift+End");
     let layout = await typography("ParagraphSelection");
+    const authoringGlyphs = glyphCoverage(layout, "Native paragraph authoring");
     assert.deepEqual([Math.min(layout.selectionStart, layout.selectionEnd), Math.max(layout.selectionStart, layout.selectionEnd)], [0, 9]);
     await choose("ParagraphAlignment", 2);
     await choose("ParagraphDirection", 3);
@@ -190,10 +218,22 @@ export async function paragraphRegressions(page, reference, check, helpers, outp
     };
     assert.ok(ink(5, 35) > 40 && ink(55, 79) > 40 && ink(79, 103) > 20, "Actual native PNG contains all three independently positioned paragraphs");
     assert.equal(ink(40, 50), 0, "Authored paragraph spacing leaves a real transparent gap in exported artwork");
+    let emojiColorPixels = 0;
+    for (let y = 5; y < 35; y++) for (let x = 0; x < png.width; x++) {
+        const offset = (y * png.width + x) * 4;
+        const channels = png.data.subarray(offset, offset + 3);
+        if (png.data[offset + 3] > 32 && Math.max(...channels) - Math.min(...channels) > 64) emojiColorPixels++;
+    }
+    assert.ok(emojiColorPixels > 20,
+        "The black-text native PNG paints the crab's actual COLRv1 colors in its first paragraph band");
+    await writeFile(resolve(output, mode + "-paragraph-glyph-coverage.json"), JSON.stringify({
+        authoringGlyphs, exportedPng: { file: mode + "-paragraph-artwork.png", width: png.width,
+            height: png.height, firstParagraphBand: [5, 35], emojiColorPixels },
+    }, null, 2));
     assert.deepEqual(await documentState(page), exportBefore, "Native export preserves the exact clipped paragraph fixture");
     await importFixture(page, inherited);
     assert.deepEqual(await documentState(page), inherited, "Restore the exact authored document before native inline editing");
-    check("Paragraph Inherit has exact one-step undo/redo and preserves the first paragraph; its native clipped-artboard PNG has exact dimensions, three text bands and the authored transparent spacing gap");
+    check("Paragraph Inherit has exact one-step undo/redo and preserves the first paragraph; its native clipped-artboard PNG has exact dimensions, three text bands, the authored transparent spacing gap and actual COLRv1 crab colors");
 
     const inlineEntries = [];
     const enterInline = async () => {
@@ -297,6 +337,7 @@ export async function paragraphRegressions(page, reference, check, helpers, outp
         const split = await documentState(page);
         assert.deepEqual(split.nodes[2].text_paragraphs, [{ ...first, end: 6 }, { ...first, start: 6, end: firstEnd + 1 }]);
         const native = await typography("InlineTextBox");
+        glyphCoverage(native, "Native paragraph inline editing");
         assert.equal(native.lineCount, 4);
         assert.deepEqual(native.lines.slice(0,2).map(line => [line.x, line.y, line.height]), [[14,5,30],[14,60,30]]);
         return split;
@@ -316,7 +357,7 @@ export async function paragraphRegressions(page, reference, check, helpers, outp
     await importFixture(page, split);
     assert.deepEqual(await documentState(page), split);
     assert.equal(before.nodes[2].text, split.nodes[2].text.replace("🦀\n", "🦀"));
-    check("Real native Unicode editing splits paragraph styles with correct UTF-8 remapping and shared line/caret offsets; cancel restores the original, commit is one exact undo/redo step and JSON round-trip preserves every paragraph field");
+    check("Real native Unicode editing retains actual embedded Hebrew/emoji glyphs and splits paragraph styles with correct UTF-8 remapping and shared line/caret offsets; cancel restores the original, commit is one exact undo/redo step and JSON round-trip preserves every paragraph field");
 
     // Identical text makes a string-diff guess ambiguous. Give each repeated
     // paragraph distinct character and paragraph styling, then edit at an

@@ -2,6 +2,14 @@
 
 FerroDesign uses the public FerroUI `TextLayout`, `TextBox`, `TextPresenter`, shaped `GlyphRun`, `Geometry` and drawing-sink APIs. The application renderer does not draw through Skia or construct a second browser text editor. The editable document remains UTF-8; native caret, selection and style spans use UTF-16.
 
+## Embedded font coverage
+
+Inter remains the primary family. The application registers the same embedded fallback collection in native and browser builds through public `AppBuilder::configure_fonts`, `FontManagerOptions`, `FontFallback` and `EmbeddedFontCollection` APIs. Missing characters resolve by actual font coverage to Noto Sans Hebrew Regular and Bold, with real static weights 400 and 700, or Noto Color Emoji COLRv1. Characters covered by these bundled faces do not depend on fonts installed on the host. The application makes no backend-specific font-axis or glyph-rendering calls.
+
+The three unmodified font files add **5,092,300 uncompressed bytes** before build compression. The [font asset guide and complete SIL Open Font License texts](../crates/ferrodesign-app/Assets/Fonts/README.md) accompany the [pinned source commits, Git blobs and SHA-256 provenance](../crates/ferrodesign-app/Assets/Fonts/provenance.json). These faces address the observed Hebrew/emoji gap; they do not supply every writing system or every family a document may name. The asset byte count is not a browser transfer-size, memory or performance measurement.
+
+Color emoji use the existing native color-glyph drawing path. Flattening and shaped-text XAML export still refuse glyphs that cannot provide a complete monochrome outline; they must not discard COLRv1 colors to produce a partial path. Editable text and JSON retain the original characters and styles.
+
 ## Paragraph authoring
 
 The character-style dialog opens a native paragraph panel for the selected hard paragraphs. Alignment, LTR/RTL/Auto direction, line-height multiplier, letter spacing, space before/after and first-line indent can be set or inherited independently. CRLF, Unicode line/paragraph separators and the final empty paragraph retain exact ranges. Shared `TextParagraphStyles` drive canvas text, native inline editing, caret navigation, selection geometry and the rich-text preview. Both compiled native themes bind the paragraph collection to their TextPresenter.
@@ -41,5 +49,7 @@ Outline export is bounded per text layer to 50,000 glyphs, 100,000 drawing opera
 ## Verification boundary
 
 Source includes exact-range/core history tests, native paragraph/IME/history tests, native glyph-vs-path and runtime-XAML pixel comparisons, and browser paragraph/Unicode history coverage. [VALIDATION.md](VALIDATION.md) records executed runs separately. Authored tests and successful parsing alone do not establish an executed result.
+
+**Native and browser validation of the embedded fallback change is pending.** Static checks verified the pinned asset hashes, actual Hebrew face weights, visible-character glyph IDs and the crab's COLRv1 paint record. Added regression assertions require actual shaped families and glyphs, exact native/canvas geometry and pixels, and colored crab pixels in the native PNG export. Those assertions require execution against the matching new build. The source-tagged `dc361996` results below predate these fallback assets; its saved browser paragraph images retain the original missing Hebrew/emoji glyphs despite passing the interaction checks.
 
 The [exact dc361 native evidence](../../../docs/ferrodesign-evidence/2026-10-23-ferroui-040/native-dc361/) records all 14 added first-preedit regression functions passing, including the earlier presenter Text synchronization and reentrant ownership cases. The complete TextBox substring filter passed 188 cases (133 TextBox and 55 masked TextBox), and native rich history passed five. Shared paragraph, line-bounds, seven required GPU fragment tests and all 239 application tests also passed. These filter counts overlap and are not additive. Generated Rust paths and both compiled theme references passed in a separate job at the same source SHA. Browser execution and platform IME behavior require their own evidence; they are not established by this native run.

@@ -1,0 +1,144 @@
+{
+  "schema": 1,
+  "license": "SIL Open Font License 1.1; complete upstream license text accompanies each family",
+  "scope": "Unmodified pinned upstream font and license bytes; metadata inspection is not renderer execution proof.",
+  "files": [
+    {
+      "file": "NotoColorEmoji-COLRv1.ttf",
+      "upstream_repository": "googlefonts/noto-emoji",
+      "upstream_commit": "e20cbc2bbec1926686be9f9bee7d1d2cfa1fea0e",
+      "upstream_url": "https://raw.githubusercontent.com/googlefonts/noto-emoji/e20cbc2bbec1926686be9f9bee7d1d2cfa1fea0e/2D/fonts/Noto-COLRv1.ttf",
+      "git_blob": "d1c82373d26e6949d81bbaefa4323f1e19f77262",
+      "bytes": 5038236,
+      "sha256": "b8e25ea68db82f9e4d0aee921f4420be2be39887bd5c893a2ad98710531f9d0c",
+      "modified": false,
+      "family": "Noto Color Emoji",
+      "glyph_probes": {
+        "U+1F980": 2623,
+        "U+1F600": 1875,
+        "U+1F3F3": 451
+      },
+      "tables": [
+        "COLR",
+        "CPAL",
+        "GSUB",
+        "GlyphOrder",
+        "OS/2",
+        "cmap",
+        "glyf",
+        "head",
+        "hhea",
+        "hmtx",
+        "loca",
+        "maxp",
+        "name",
+        "post",
+        "vhea",
+        "vmtx"
+      ],
+      "colr_version": 1
+    },
+    {
+      "file": "NotoColorEmoji-OFL.txt",
+      "upstream_repository": "googlefonts/noto-emoji",
+      "upstream_commit": "e20cbc2bbec1926686be9f9bee7d1d2cfa1fea0e",
+      "upstream_url": "https://raw.githubusercontent.com/googlefonts/noto-emoji/e20cbc2bbec1926686be9f9bee7d1d2cfa1fea0e/2D/fonts/LICENSE",
+      "git_blob": "d952d62c065f3f35fb83a173496e90b21525aef3",
+      "bytes": 4301,
+      "sha256": "6a73f9541c2de74158c0e7cf6b0a58ef774f5a780bf191f2d7ec9cc53efe2bf2",
+      "modified": false
+    },
+    {
+      "file": "NotoSansHebrew-Regular.ttf",
+      "upstream_repository": "notofonts/noto-fonts",
+      "upstream_commit": "ffebf8c1ee449e544955a7e813c54f9b73848eac",
+      "upstream_url": "https://raw.githubusercontent.com/notofonts/noto-fonts/ffebf8c1ee449e544955a7e813c54f9b73848eac/hinted/ttf/NotoSansHebrew/NotoSansHebrew-Regular.ttf",
+      "git_blob": "5b43c56fa688b0ff9302a82cbebb1dae1201cf7f",
+      "bytes": 26900,
+      "sha256": "a7fa16fffb27bedb060a0866267c29e9859aeb9c21cc33f5b3aaf6eb062eca85",
+      "modified": false,
+      "family": "Noto Sans Hebrew",
+      "weight": 400,
+      "glyph_probes": {
+        "U+05E9": 96,
+        "U+05DC": 55,
+        "U+05D5": 124,
+        "U+05DD": 23
+      },
+      "tables": [
+        "DSIG",
+        "GDEF",
+        "GPOS",
+        "GSUB",
+        "GlyphOrder",
+        "OS/2",
+        "cmap",
+        "cvt ",
+        "fpgm",
+        "gasp",
+        "glyf",
+        "head",
+        "hhea",
+        "hmtx",
+        "loca",
+        "maxp",
+        "name",
+        "post",
+        "prep"
+      ]
+    },
+    {
+      "file": "NotoSansHebrew-Bold.ttf",
+      "upstream_repository": "notofonts/noto-fonts",
+      "upstream_commit": "ffebf8c1ee449e544955a7e813c54f9b73848eac",
+      "upstream_url": "https://raw.githubusercontent.com/notofonts/noto-fonts/ffebf8c1ee449e544955a7e813c54f9b73848eac/hinted/ttf/NotoSansHebrew/NotoSansHebrew-Bold.ttf",
+      "git_blob": "506da288db456970b8ca27f618038f40e064c6c4",
+      "bytes": 27164,
+      "sha256": "a30243d1c625eaf63bb889f036fe9de97e81d9248976f89e6e4252f9668c832e",
+      "modified": false,
+      "family": "Noto Sans Hebrew",
+      "weight": 700,
+      "glyph_probes": {
+        "U+05E9": 96,
+        "U+05DC": 55,
+        "U+05D5": 124,
+        "U+05DD": 23
+      },
+      "tables": [
+        "DSIG",
+        "GDEF",
+        "GPOS",
+        "GSUB",
+        "GlyphOrder",
+        "OS/2",
+        "cmap",
+        "cvt ",
+        "fpgm",
+        "gasp",
+        "glyf",
+        "head",
+        "hhea",
+        "hmtx",
+        "loca",
+        "maxp",
+        "name",
+        "post",
+        "prep"
+      ]
+    },
+    {
+      "file": "NotoSansHebrew-OFL.txt",
+      "upstream_repository": "notofonts/noto-fonts",
+      "upstream_commit": "ffebf8c1ee449e544955a7e813c54f9b73848eac",
+      "upstream_url": "https://raw.githubusercontent.com/notofonts/noto-fonts/ffebf8c1ee449e544955a7e813c54f9b73848eac/LICENSE",
+      "git_blob": "c82d72e422e2d08c5ab439b6bac7c2177ea0c565",
+      "bytes": 4377,
+      "sha256": "0dab92d0544f7b233403f14b84a663bdbfa746982eda629e7f4f9ffe1b036feb",
+      "modified": false
+    }
+  ],
+  "selection_notes": [
+    "Static Hebrew Regular400/Bold700 preserve requested native weights through public EmbeddedFontCollection. The inspected Google Fonts variable candidate defaults to wght100 and the public font-collection matcher does not instantiate wght; that candidate is not shipped.",
+    "Noto COLRv1 retains native color glyphs with the existing FerroUI Vello renderer; actual rendering is validated separately."
+  ]
+}
