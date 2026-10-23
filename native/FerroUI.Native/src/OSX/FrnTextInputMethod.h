@@ -15,7 +15,7 @@
 #include "ferro-native.h"
 #import "FrnTextInputMethodDelegate.h"
 
-class FrnTextInputMethod: public virtual ComObject, public virtual IFrnTextInputMethod{
+class FrnTextInputMethod: public virtual ComObject, public virtual IFrnTextInputMethod, public virtual IFrnTextInputMethodOptions{
 private:
     id<FrnTextInputMethodDelegate> _inputMethodDelegate;
 public:
@@ -23,6 +23,7 @@ public:
     
     BEGIN_INTERFACE_MAP()
     INTERFACE_MAP_ENTRY(IFrnTextInputMethod, IID_IFrnTextInputMethod)
+    INTERFACE_MAP_ENTRY(IFrnTextInputMethodOptions, IID_IFrnTextInputMethodOptions)
     END_INTERFACE_MAP()
     
     virtual ~FrnTextInputMethod();
@@ -40,6 +41,8 @@ public:
     virtual void SetSurroundingText (char* text, int start, int end) override;
     
     virtual void SetSelectionInSurroundingText (int start, int end) override;
+
+    virtual void SetContentType (FrnTextInputContentType contentType) override;
     
 public:
     ComPtr<IFrnTextInputMethodClient> Client;

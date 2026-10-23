@@ -10,6 +10,7 @@
 //! on every system, which is where its tests run.
 
 use ferroui_base::input::text_input::{TextInputContentType, TextInputOptions};
+use ferroui_base::input::InputScopeNameValue;
 
 bitflags::bitflags! {
     /// `zwp_text_input_v3.content_hint`: a bit field.
@@ -53,20 +54,25 @@ pub fn convert(options: &TextInputOptions) -> (ContentHint, ContentPurpose) {
     let mut hint = ContentHint::NONE;
     let mut purpose = ContentPurpose::Normal;
 
-    match options.content_type {
-        TextInputContentType::Normal => {}
-        TextInputContentType::Alpha => hint |= ContentHint::LATIN,
-        TextInputContentType::Digits => purpose = ContentPurpose::Digits,
-        TextInputContentType::Pin => purpose = ContentPurpose::Pin,
-        TextInputContentType::Number => purpose = ContentPurpose::Number,
-        TextInputContentType::Email => purpose = ContentPurpose::Email,
-        TextInputContentType::Url => purpose = ContentPurpose::Url,
-        TextInputContentType::Name => purpose = ContentPurpose::Name,
-        TextInputContentType::Password => {
-            purpose = ContentPurpose::Password;
-            hint |= ContentHint::HIDDEN_TEXT | ContentHint::SENSITIVE_DATA;
+    let scope = options.effective_input_scope();
+    if let Some(scope) = scope {
+        (hint, purpose) = convert_scope(scope);
+    } else {
+        match options.content_type {
+            TextInputContentType::Normal => {}
+            TextInputContentType::Alpha => hint |= ContentHint::LATIN,
+            TextInputContentType::Digits => purpose = ContentPurpose::Digits,
+            TextInputContentType::Pin => purpose = ContentPurpose::Pin,
+            TextInputContentType::Number => purpose = ContentPurpose::Number,
+            TextInputContentType::Email => purpose = ContentPurpose::Email,
+            TextInputContentType::Url => purpose = ContentPurpose::Url,
+            TextInputContentType::Name => purpose = ContentPurpose::Name,
+            TextInputContentType::Password => {
+                purpose = ContentPurpose::Password;
+                hint |= ContentHint::HIDDEN_TEXT | ContentHint::SENSITIVE_DATA;
+            }
+            TextInputContentType::Social | TextInputContentType::Search => {}
         }
-        TextInputContentType::Social | TextInputContentType::Search => {}
     }
 
     if options.multiline {
@@ -89,8 +95,18 @@ pub fn convert(options: &TextInputOptions) -> (ContentHint, ContentPurpose) {
         hint |= ContentHint::COMPLETION | ContentHint::SPELLCHECK;
     }
 
-    // Password always overrides: even with ShowSuggestions=true, never reveal text.
-    if options.content_type == TextInputContentType::Password {
+    // These hints ask the input method to protect its candidates and learning;
+    // they do not mask or validate the control's document.
+    let password_scope = matches!(
+        scope,
+        Some(
+            InputScopeNameValue::Password
+                | InputScopeNameValue::NumericPassword
+                | InputScopeNameValue::NumericPin
+                | InputScopeNameValue::AlphanumericPin
+        )
+    );
+    if password_scope || (scope.is_none() && options.content_type == TextInputContentType::Password) {
         hint &= !(ContentHint::COMPLETION | ContentHint::SPELLCHECK);
         hint |= ContentHint::HIDDEN_TEXT | ContentHint::SENSITIVE_DATA;
     }
@@ -98,9 +114,121 @@ pub fn convert(options: &TextInputOptions) -> (ContentHint, ContentPurpose) {
     (hint, purpose)
 }
 
+fn convert_scope(scope: InputScopeNameValue) -> (ContentHint, ContentPurpose) {
+    use InputScopeNameValue as Scope;
+    let purpose = match scope {
+        Scope::Url => ContentPurpose::Url,
+        Scope::EmailSmtpAddress | Scope::EmailNameOrAddress => ContentPurpose::Email,
+        Scope::PersonalFullName | Scope::NameOrPhoneNumber => ContentPurpose::Name,
+        Scope::CurrencyAmountAndSymbol
+        | Scope::CurrencyAmount
+        | Scope::Number
+        | Scope::NumberFullWidth
+        | Scope::FormulaNumber => ContentPurpose::Number,
+        Scope::DateMonthNumber | Scope::DateDayNumber | Scope::DateYear => ContentPurpose::Date,
+        Scope::TimeHour | Scope::TimeMinutesOrSeconds => ContentPurpose::Time,
+        Scope::Digits => ContentPurpose::Digits,
+        Scope::TelephoneNumber
+        | Scope::TelephoneCountryCode
+        | Scope::TelephoneAreaCode
+        | Scope::TelephoneLocalNumber => ContentPurpose::Phone,
+        Scope::Password | Scope::AlphanumericPin => ContentPurpose::Password,
+        Scope::NumericPassword | Scope::NumericPin => ContentPurpose::Pin,
+        Scope::Default
+        | Scope::AlphanumericHalfWidth
+        | Scope::AlphanumericFullWidth
+        | Scope::Hiragana
+        | Scope::KatakanaHalfWidth
+        | Scope::KatakanaFullWidth
+        | Scope::Hanja
+        | Scope::HangulHalfWidth
+        | Scope::HangulFullWidth
+        | Scope::Search
+        | Scope::Formula
+        | Scope::SearchIncremental
+        | Scope::ChineseHalfWidth
+        | Scope::ChineseFullWidth
+        | Scope::NativeScript
+        | Scope::Text
+        | Scope::Chat
+        | Scope::Maps
+        | Scope::ChatWithoutEmoji => ContentPurpose::Normal,
+    };
+    // The protocol has no script/width selector. Half-width alphanumeric input
+    // can request Latin; a full-width or non-Latin scope must not force Latin.
+    let hint = if scope == Scope::AlphanumericHalfWidth { ContentHint::LATIN } else { ContentHint::NONE };
+    (hint, purpose)
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
+    use std::rc::Rc;
+
+    #[test]
+    fn input_scope_maps_components_phones_names_and_secrets_to_distinct_purposes() {
+        use InputScopeNameValue as Scope;
+        let cases = [
+            (Scope::Digits, ContentPurpose::Digits),
+            (Scope::DateMonthNumber, ContentPurpose::Date),
+            (Scope::DateDayNumber, ContentPurpose::Date),
+            (Scope::DateYear, ContentPurpose::Date),
+            (Scope::TimeHour, ContentPurpose::Time),
+            (Scope::TimeMinutesOrSeconds, ContentPurpose::Time),
+            (Scope::TelephoneNumber, ContentPurpose::Phone),
+            (Scope::TelephoneCountryCode, ContentPurpose::Phone),
+            (Scope::TelephoneAreaCode, ContentPurpose::Phone),
+            (Scope::TelephoneLocalNumber, ContentPurpose::Phone),
+            (Scope::EmailNameOrAddress, ContentPurpose::Email),
+            (Scope::EmailSmtpAddress, ContentPurpose::Email),
+            (Scope::PersonalFullName, ContentPurpose::Name),
+            (Scope::NameOrPhoneNumber, ContentPurpose::Name),
+            (Scope::CurrencyAmountAndSymbol, ContentPurpose::Number),
+            (Scope::FormulaNumber, ContentPurpose::Number),
+            (Scope::NumericPassword, ContentPurpose::Pin),
+            (Scope::NumericPin, ContentPurpose::Pin),
+            (Scope::AlphanumericPin, ContentPurpose::Password),
+            (Scope::Password, ContentPurpose::Password),
+        ];
+        for (scope, expected) in cases {
+            let options = TextInputOptions {
+                content_type: TextInputContentType::Url,
+                input_scope_names: Some(Rc::from([scope])),
+                show_suggestions: Some(true),
+                ..Default::default()
+            };
+            let (hint, purpose) = convert(&options);
+            assert_eq!(purpose, expected, "{scope:?}");
+            let secret = matches!(expected, ContentPurpose::Password | ContentPurpose::Pin);
+            assert_eq!(hint.contains(ContentHint::HIDDEN_TEXT | ContentHint::SENSITIVE_DATA), secret);
+            assert_eq!(hint.contains(ContentHint::COMPLETION | ContentHint::SPELLCHECK), !secret);
+        }
+    }
+
+    #[test]
+    fn input_scope_default_and_empty_names_have_distinct_fallback_and_privacy() {
+        let mut options = TextInputOptions {
+            content_type: TextInputContentType::Password,
+            input_scope_names: Some(Rc::from([InputScopeNameValue::Default, InputScopeNameValue::NumericPin])),
+            ..Default::default()
+        };
+        assert_eq!(convert(&options), (ContentHint::NONE, ContentPurpose::Normal));
+        options.input_scope_names = Some(Rc::from([]));
+        assert_eq!(
+            convert(&options),
+            (ContentHint::HIDDEN_TEXT | ContentHint::SENSITIVE_DATA, ContentPurpose::Password)
+        );
+        options.input_scope_names = Some(Rc::from([InputScopeNameValue::AlphanumericHalfWidth]));
+        assert_eq!(convert(&options), (ContentHint::LATIN, ContentPurpose::Normal));
+        for scope in [
+            InputScopeNameValue::AlphanumericFullWidth,
+            InputScopeNameValue::Hiragana,
+            InputScopeNameValue::HangulFullWidth,
+        ] {
+            options.input_scope_names = Some(Rc::from([scope]));
+            assert_eq!(convert(&options), (ContentHint::NONE, ContentPurpose::Normal));
+        }
+    }
 
     #[test]
     fn default_is_none_normal() {

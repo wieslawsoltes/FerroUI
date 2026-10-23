@@ -5,9 +5,12 @@
 //! (docs/porting/xaml.md, 9.5.13). It is the document of [`WinUITheme`] and
 //! every document it includes, compiled as one group.
 //!
-//! The checked-in `compiled_xaml.rs` and `compiled_xaml.xamlmeta` are the
-//! reference. Two tests hold the three texts together: the output of the build
-//! is the checked-in file, byte for byte, and the checked-in file is the output
+//! The checked-in `compiled_xaml/parts.txt` inventory and its `.rs.part` files,
+//! together with `compiled_xaml.xamlmeta`, are the reference. Each source part
+//! is below 4 MiB and ends at a newline boundary, except the final part may
+//! lack a final newline. Concatenation preserves every emitted byte.
+//! Two tests hold the three texts together: the output of the build
+//! is the concatenated reference, byte for byte, and the reference is the output
 //! of the emitter run here against the run-time type system, where every type
 //! is linked and registered and the documents are read as the run-time loader
 //! reads them. As the tests of the Fluent theme.
@@ -23,8 +26,16 @@ use ferroui_markup_xaml_loader::FerroRuntimeXamlLoader;
 use super::support::start_application;
 use crate::WinUITheme;
 
-const PATH: &str = concat!(env!("CARGO_MANIFEST_DIR"), "/compiled_xaml.rs");
+#[path = "compiled_xaml_reference.rs"]
+mod reference;
+
+const REFERENCE_DIRECTORY: &str = concat!(env!("CARGO_MANIFEST_DIR"), "/compiled_xaml");
 const METADATA_PATH: &str = concat!(env!("CARGO_MANIFEST_DIR"), "/compiled_xaml.xamlmeta");
+
+fn checked_in_source() -> String {
+    reference::read(std::path::Path::new(REFERENCE_DIRECTORY))
+        .unwrap_or_else(|error| panic!("invalid compiled_xaml reference: {error}"))
+}
 
 fn generate() -> ClassFile {
     let _app = start_application();
@@ -52,14 +63,14 @@ fn compiled_xaml_is_up_to_date() {
          `cargo test -p ferroui-themes-winui --lib tests::compiled_xaml_tests::regenerate_compiled_xaml -- --ignored`"
     );
     let generated = file.source;
-    let checked_in = std::fs::read_to_string(PATH).expect("compiled_xaml.rs can be read");
+    let checked_in = checked_in_source();
     if generated != checked_in {
         let line = generated.lines().zip(checked_in.lines()).position(|(a, b)| a != b).map_or_else(
             || generated.lines().count().min(checked_in.lines().count()),
             |index| index,
         );
         panic!(
-            "compiled_xaml.rs is out of date (first difference at line {}); regenerate it with \
+            "compiled_xaml reference is out of date (first difference at line {}); regenerate it with \
              `cargo test -p ferroui-themes-winui --lib tests::compiled_xaml_tests::regenerate_compiled_xaml -- --ignored`",
             line + 1
         );
@@ -72,7 +83,7 @@ fn compiled_xaml_is_up_to_date() {
 #[test]
 fn build_script_output_is_the_checked_in_reference() {
     let built = include_str!(concat!(env!("OUT_DIR"), "/xaml/compiled_xaml.rs"));
-    let checked_in = std::fs::read_to_string(PATH).expect("compiled_xaml.rs can be read");
+    let checked_in = checked_in_source();
     if built != checked_in {
         let line = built
             .lines()
@@ -93,9 +104,10 @@ fn build_script_output_is_the_checked_in_reference() {
 }
 
 #[test]
-#[ignore = "writes compiled_xaml.rs and compiled_xaml.xamlmeta; run it to regenerate the checked-in output"]
+#[ignore = "writes compiled_xaml reference parts and compiled_xaml.xamlmeta; run it to regenerate the checked-in output"]
 fn regenerate_compiled_xaml() {
     let file = generate();
-    std::fs::write(PATH, &file.source).expect("compiled_xaml.rs can be written");
+    reference::write(std::path::Path::new(REFERENCE_DIRECTORY), &file.source)
+        .unwrap_or_else(|error| panic!("compiled_xaml reference cannot be written: {error}"));
     std::fs::write(METADATA_PATH, file.metadata(&[]).to_json()).expect("compiled_xaml.xamlmeta can be written");
 }

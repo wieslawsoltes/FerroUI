@@ -1201,13 +1201,17 @@ def main():
     parser.add_argument("--target", action="append", choices=["enums", "classes", "named-values", "rust-paths"])
     args = parser.parse_args()
 
+    targets = args.target or ["enums", "classes", "named-values", "rust-paths"]
+    # Public Rust paths are derived solely from this repository's registrations
+    # and exports. A Rust-only type must not need a managed source checkout to
+    # regenerate its path table. Other targets still require that reference.
+    needs_upstream = any(target != "rust-paths" for target in targets)
     upstream = os.path.join(args.upstream, "src")
-    if not os.path.isdir(os.path.join(upstream, "Avalonia.Base")):
+    if needs_upstream and not os.path.isdir(os.path.join(upstream, "Avalonia.Base")):
         print("no upstream checkout at %s (pass --upstream or set FERROUI_UPSTREAM)" % args.upstream)
         return 2
-    targets = args.target or ["enums", "classes", "named-values", "rust-paths"]
-    sources = Sources(upstream)
-    overrides = load_overrides()
+    sources = Sources(upstream) if needs_upstream else None
+    overrides = load_overrides() if "classes" in targets else {}
     report, files = [], {}
     # The base crate declares its typed routed events first; the crates built on it add theirs.
     known_event_arguments = []

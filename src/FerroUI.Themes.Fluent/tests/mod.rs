@@ -10,3 +10,5 @@ mod public_api_tests;
 mod resource_dictionary_tests;
 mod support;
 mod theme_class_tests;
+
+mod rich_edit_box_tests;

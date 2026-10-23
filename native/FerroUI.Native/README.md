@@ -18,3 +18,6 @@ These files are imported, not edited by hand: see `NOTICE.md` for origin and
 license, `UPSTREAM_REVISION` for the imported revision, and
 `scripts/sync-native.sh` for how to refresh them. Local changes, should any
 become necessary, belong in `patches/*.patch` (applied by the sync script).
+
+The local semantic text-input hint extension, its AppKit availability and
+remaining service boundary are described in [INPUT_OPTIONS.md](INPUT_OPTIONS.md).

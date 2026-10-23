@@ -1,6 +1,7 @@
 use crate::frn_string::to_c_string;
 use crate::helpers::{to_frn_rect, ComResultExt};
 use crate::interop::*;
+use crate::native_text_input_options::{NativeTextContentType, NativeTextInputOptions};
 use ferroui_base::input::text_input::{ITextInputMethodImpl, TextInputMethodClient, TextInputOptions, TextSelection};
 use ferroui_base::reactive::IDisposable;
 use ferroui_base::Rect;
@@ -17,17 +18,22 @@ pub struct FerroNativeTextInputMethod {
     subscriptions: RefCell<Vec<Rc<dyn IDisposable>>>,
     native_client: RefCell<Option<ComPtr<IFrnTextInputMethodClient>>>,
     input_method: RefCell<Option<ComPtr<IFrnTextInputMethod>>>,
+    native_options: RefCell<Option<ComPtr<IFrnTextInputMethodOptions>>>,
+    options: NativeTextInputOptions,
 }
 
 impl FerroNativeTextInputMethod {
     pub(crate) fn new(top_level: &IFrnTopLevel) -> Rc<FerroNativeTextInputMethod> {
         let input_method = top_level.get_input_method().check();
+        let native_options = input_method.as_ref().and_then(|method| method.cast().ok());
         Rc::new_cyclic(|weak_self| FerroNativeTextInputMethod {
             weak_self: weak_self.clone(),
             client: RefCell::new(None),
             subscriptions: RefCell::new(Vec::new()),
             native_client: RefCell::new(None),
             input_method: RefCell::new(input_method),
+            native_options: RefCell::new(native_options),
+            options: NativeTextInputOptions::default(),
         })
     }
 
@@ -45,6 +51,11 @@ impl FerroNativeTextInputMethod {
 
     /// Releases the native input method and the native client.
     pub fn dispose(&self) {
+        self.options.set_active(false);
+        let native_options = self.native_options.borrow_mut().take();
+        if let Some(native_options) = native_options {
+            native_options.set_content_type(FrnTextInputContentType::FrnTextInputContentNone);
+        }
         let input_method = self.input_method.borrow_mut().take();
         drop(input_method);
         let native_client = self.native_client.borrow_mut().take();
@@ -108,6 +119,23 @@ impl FerroNativeTextInputMethod {
             }
         })
     }
+
+    fn apply_options(&self) {
+        let native_options = self.native_options.borrow().clone();
+        if let Some(native_options) = native_options {
+            self.options.set_active(self.client().is_some());
+            self.options.apply(|content| {
+                let content = match content {
+                    NativeTextContentType::None => FrnTextInputContentType::FrnTextInputContentNone,
+                    NativeTextContentType::Url => FrnTextInputContentType::FrnTextInputContentUrl,
+                    NativeTextContentType::EmailAddress => FrnTextInputContentType::FrnTextInputContentEmailAddress,
+                    NativeTextContentType::Name => FrnTextInputContentType::FrnTextInputContentName,
+                    NativeTextContentType::TelephoneNumber => FrnTextInputContentType::FrnTextInputContentTelephoneNumber,
+                };
+                native_options.set_content_type(content);
+            });
+        }
+    }
 }
 
 impl ITextInputMethodImpl for FerroNativeTextInputMethod {
@@ -148,13 +176,17 @@ impl ITextInputMethodImpl for FerroNativeTextInputMethod {
 
         let native_client = self.native_client.borrow().clone();
         self.input_method().set_client(native_client.as_deref()).check();
+        self.apply_options();
     }
 
     fn set_cursor_rect(&self, rect: Rect) {
         self.input_method().set_cursor_rect(to_frn_rect(rect));
     }
 
-    fn set_options(&self, _options: &TextInputOptions) {}
+    fn set_options(&self, options: &TextInputOptions) {
+        self.options.set_options(options);
+        self.apply_options();
+    }
 }
 
 /// The client handed to the native input method.

@@ -152,3 +152,109 @@ impl IToggleProviderImpl for TestProvider {
 fn test_provider(value: i32) -> ComPtr<IToggleProvider> {
     IToggleProvider::from_impl(TestProvider { value })
 }
+
+// Regression coverage for allocation/element-conversion failure paths added
+// while porting the native TextEdit event's SAFEARRAY(BSTR) payload.
+
+#[test]
+fn text_safe_array_failed_element_conversion_releases_initialized_com_references() {
+    use super::{SafeArrayElement, SafeArrayLockError, VarEnum};
+    use ferroui_microcom::ComObject;
+    use std::panic::{catch_unwind, AssertUnwindSafe};
+
+    #[derive(Clone, Copy)]
+    enum Failure { Never, Error, Panic }
+    struct Element { provider: ComPtr<IToggleProvider>, failure: Failure }
+    impl SafeArrayElement for Element {
+        const VAR_TYPE: VarEnum = VarEnum::VT_UNKNOWN;
+        type Raw = *mut c_void;
+        fn to_raw(&self) -> Self::Raw {
+            self.provider.clone().into_raw().cast()
+        }
+        fn try_to_raw(&self) -> Result<Self::Raw, SafeArrayLockError> {
+            match self.failure {
+                Failure::Never => Ok(self.to_raw()),
+                Failure::Error => Err(SafeArrayLockError(ferroui_microcom::E_FAIL as i32)),
+                Failure::Panic => panic!("injected element conversion failure"),
+            }
+        }
+        unsafe fn from_raw(raw: Self::Raw) -> Self {
+            // SAFETY: this test's array contains live toggle interfaces.
+            Self { provider: unsafe { ComPtr::from_raw_add_ref(raw.cast()) }.unwrap(), failure: Failure::Never }
+        }
+    }
+    for failure in [Failure::Error, Failure::Panic] {
+        let provider = test_provider(7);
+        let elements = [
+            Element { provider: provider.clone(), failure: Failure::Never },
+            Element { provider: provider.clone(), failure },
+        ];
+        // SAFETY: the factory above creates a ComObject<TestProvider>.
+        let count = || unsafe { ComObject::<TestProvider>::ref_count(provider.as_ptr().cast()) };
+        assert_eq!(count(), 3);
+        let result = catch_unwind(AssertUnwindSafe(|| SafeArrayMarshaller::<Element>::convert_to_unmanaged(Some(&elements))));
+        match failure {
+            Failure::Error => assert_eq!(result.unwrap().unwrap_err(), SafeArrayLockError(ferroui_microcom::E_FAIL as i32)),
+            Failure::Panic => assert!(result.is_err()),
+            Failure::Never => unreachable!("the loop injects a failing conversion"),
+        }
+        // The first slot acquired a COM reference before the second failed.
+        // The zeroed remainder and initialized slot have both been freed.
+        assert_eq!(count(), 3);
+        drop(elements);
+        assert_eq!(count(), 1);
+    }
+}
+
+#[test]
+fn text_safe_array_rejects_invalid_shape_before_converting_elements() {
+    use super::{SafeArrayElement, SafeArrayLockError, VarEnum};
+    use std::cell::Cell;
+    use std::rc::Rc;
+
+    struct WrongSize(Rc<Cell<usize>>);
+    impl SafeArrayElement for WrongSize {
+        const VAR_TYPE: VarEnum = VarEnum::VT_UI8;
+        type Raw = u16;
+        fn to_raw(&self) -> Self::Raw { self.0.set(self.0.get() + 1); 0 }
+        unsafe fn from_raw(_: Self::Raw) -> Self { Self(Rc::new(Cell::new(0))) }
+    }
+    struct UnsupportedType(Rc<Cell<usize>>);
+    impl SafeArrayElement for UnsupportedType {
+        const VAR_TYPE: VarEnum = VarEnum::VT_EMPTY;
+        type Raw = u8;
+        fn to_raw(&self) -> Self::Raw { self.0.set(self.0.get() + 1); 0 }
+        unsafe fn from_raw(_: Self::Raw) -> Self { Self(Rc::new(Cell::new(0))) }
+    }
+    let calls = Rc::new(Cell::new(0));
+    assert_eq!(SafeArrayMarshaller::<WrongSize>::convert_to_unmanaged(Some(&[WrongSize(calls.clone())])).unwrap_err(), SafeArrayLockError(ferroui_microcom::E_INVALIDARG as i32));
+    assert_eq!(calls.get(), 0);
+    assert_eq!(SafeArrayMarshaller::<UnsupportedType>::convert_to_unmanaged(Some(&[UnsupportedType(calls.clone())])).unwrap_err(), SafeArrayLockError(0x8007_000Eu32 as i32));
+    assert_eq!(calls.get(), 0);
+}
+
+#[test]
+fn text_safe_array_reader_unwind_releases_the_native_lock() {
+    use super::{SafeArrayElement, VarEnum};
+    use std::panic::{catch_unwind, AssertUnwindSafe};
+
+    struct PanickingRead;
+    impl SafeArrayElement for PanickingRead {
+        const VAR_TYPE: VarEnum = VarEnum::VT_UI1;
+        type Raw = u8;
+        fn to_raw(&self) -> Self::Raw { 0 }
+        unsafe fn from_raw(_: Self::Raw) -> Self { panic!("injected element read failure") }
+    }
+    let array = SafeArrayMarshaller::<u8>::convert_to_unmanaged(Some(&[1])).unwrap();
+    let result = catch_unwind(AssertUnwindSafe(|| {
+        // SAFETY: the decoder's raw element type and VAR_TYPE match this
+        // array. Only its deliberate conversion failure differs.
+        unsafe { SafeArrayMarshaller::<PanickingRead>::convert_to_managed(array) }
+    }));
+    assert!(result.is_err());
+    // SAFETY: this test still owns the same live array after decoding failed.
+    unsafe {
+        assert_eq!((*array.as_ptr()).c_locks, 0);
+        SafeArrayMarshaller::<u8>::free(array);
+    }
+}

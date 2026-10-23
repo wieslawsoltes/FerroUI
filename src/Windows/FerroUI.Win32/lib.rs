@@ -78,6 +78,8 @@ mod ole_data_object_to_data_transfer_item_wrapper;
 mod ole_data_object_to_data_transfer_wrapper;
 #[cfg(all(windows, test))]
 mod ole_tests;
+#[cfg(all(windows, test))]
+mod rich_text_tom_oracle_tests;
 #[cfg(windows)]
 mod popup_impl;
 #[cfg(windows)]

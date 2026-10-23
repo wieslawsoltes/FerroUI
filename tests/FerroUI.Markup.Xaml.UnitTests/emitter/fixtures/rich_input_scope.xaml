@@ -1,0 +1,17 @@
+<UserControl xmlns="https://github.com/ferroui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+  <StackPanel>
+    <RichEditBox Name="shortScope" InputScope="EmailSmtpAddress" />
+    <RichEditBox Name="fullScope">
+      <RichEditBox.InputScope>
+        <InputScope>
+          <InputScope.Names>
+            <InputScopeName NameValue="Hiragana" />
+            <InputScopeName>KatakanaFullWidth</InputScopeName>
+          </InputScope.Names>
+        </InputScope>
+      </RichEditBox.InputScope>
+    </RichEditBox>
+    <RichEditBox Name="nullScope" InputScope="{x:Null}" />
+  </StackPanel>
+</UserControl>

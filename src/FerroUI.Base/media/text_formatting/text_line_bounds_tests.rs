@@ -146,3 +146,29 @@ fn full_is_the_default_of_paragraph_properties() {
 
     assert_eq!(copy.text_line_bounds(), TextLineBounds::Tight);
 }
+
+#[test]
+fn paragraph_copy_preserves_tabs_spacing_and_line_bounds() {
+    use crate::media::text_formatting::TextTabStops;
+
+    let _scope = TextTestScope::new();
+    let properties = GenericTextParagraphProperties::new(run_properties(EM)).with_tabs(
+        TextTabStops::parse("48,Left;96,Decimal,Dots").unwrap(),
+        24.0,
+        7.0,
+    );
+    properties.set_line_spacing(3.0);
+    properties.set_text_line_bounds(TextLineBounds::Tight);
+
+    let copy = GenericTextParagraphProperties::from_properties(&properties);
+
+    assert_eq!(copy.tab_stops(), properties.tab_stops());
+    assert_eq!(copy.default_incremental_tab(), 24.0);
+    assert_eq!(copy.tab_origin(), 7.0);
+    assert_eq!(copy.line_spacing(), 3.0);
+    assert_eq!(copy.text_line_bounds(), TextLineBounds::Tight);
+    properties.set_line_spacing(9.0);
+    properties.set_text_line_bounds(TextLineBounds::Full);
+    assert_eq!(copy.line_spacing(), 3.0);
+    assert_eq!(copy.text_line_bounds(), TextLineBounds::Tight);
+}

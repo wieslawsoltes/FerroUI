@@ -1,0 +1,102 @@
+diff --git a/native/FerroUI.Native/src/OSX/FrnTextInputMethod.h b/native/FerroUI.Native/src/OSX/FrnTextInputMethod.h
+index a55c8f31..19fa0b86 100644
+--- a/native/FerroUI.Native/src/OSX/FrnTextInputMethod.h
++++ b/native/FerroUI.Native/src/OSX/FrnTextInputMethod.h
+@@ -17,3 +17,3 @@
+ 
+-class FrnTextInputMethod: public virtual ComObject, public virtual IFrnTextInputMethod{
++class FrnTextInputMethod: public virtual ComObject, public virtual IFrnTextInputMethod, public virtual IFrnTextInputMethodOptions{
+ private:
+@@ -25,2 +25,3 @@ public:
+     INTERFACE_MAP_ENTRY(IFrnTextInputMethod, IID_IFrnTextInputMethod)
++    INTERFACE_MAP_ENTRY(IFrnTextInputMethodOptions, IID_IFrnTextInputMethodOptions)
+     END_INTERFACE_MAP()
+@@ -42,2 +43,4 @@ public:
+     virtual void SetSelectionInSurroundingText (int start, int end) override;
++
++    virtual void SetContentType (FrnTextInputContentType contentType) override;
+     
+diff --git a/native/FerroUI.Native/src/OSX/FrnTextInputMethod.mm b/native/FerroUI.Native/src/OSX/FrnTextInputMethod.mm
+index 063c72b4..f4020301 100644
+--- a/native/FerroUI.Native/src/OSX/FrnTextInputMethod.mm
++++ b/native/FerroUI.Native/src/OSX/FrnTextInputMethod.mm
+@@ -48 +48,5 @@ void FrnTextInputMethod::SetSelectionInSurroundingText(int start, int end) {
+ }
++
++void FrnTextInputMethod::SetContentType(FrnTextInputContentType contentType) {
++    [_inputMethodDelegate setInputContentType:contentType];
++}
+diff --git a/native/FerroUI.Native/src/OSX/FrnTextInputMethodDelegate.h b/native/FerroUI.Native/src/OSX/FrnTextInputMethodDelegate.h
+index 57533c85..0131f440 100644
+--- a/native/FerroUI.Native/src/OSX/FrnTextInputMethodDelegate.h
++++ b/native/FerroUI.Native/src/OSX/FrnTextInputMethodDelegate.h
+@@ -16,2 +16,3 @@
+ -(void) resetInputMethod;
++-(void) setInputContentType:(FrnTextInputContentType) contentType;
+ 
+diff --git a/native/FerroUI.Native/src/OSX/FrnView.h b/native/FerroUI.Native/src/OSX/FrnView.h
+index 6c4fe5a2..797b3643 100644
+--- a/native/FerroUI.Native/src/OSX/FrnView.h
++++ b/native/FerroUI.Native/src/OSX/FrnView.h
+@@ -14,3 +14,4 @@
+ 
+-@interface FrnView : NSView<NSTextInputClient, NSDraggingDestination, FrnTextInputMethodDelegate, CALayerDelegate>
++@interface FrnView : NSView<NSTextInputClient, NSTextContent, NSDraggingDestination, FrnTextInputMethodDelegate, CALayerDelegate>
++@property (copy, nullable) NSTextContentType contentType;
+ -(FrnView* _Nonnull) initWithParent: (TopLevelImpl* _Nonnull) parent;
+diff --git a/native/FerroUI.Native/src/OSX/FrnView.mm b/native/FerroUI.Native/src/OSX/FrnView.mm
+index e8a31c04..48d39a0f 100644
+--- a/native/FerroUI.Native/src/OSX/FrnView.mm
++++ b/native/FerroUI.Native/src/OSX/FrnView.mm
+@@ -29,2 +29,4 @@
+ 
++@synthesize contentType = _contentType;
++
+ - (void)onClosed
+@@ -1221,2 +1223,23 @@ static bool KeyboardInputSourceComposes(NSString* sourceId)
+ 
++- (void)setInputContentType:(FrnTextInputContentType)contentType
++{
++    NSTextContentType nativeType = nil;
++    // These public semantic types were added in macOS 14. Earlier supported
++    // systems retain the default; no private string constants are invented.
++    if (@available(macOS 14.0, *))
++    {
++        switch (contentType)
++        {
++            case FrnTextInputContentUrl: nativeType = NSTextContentTypeURL; break;
++            case FrnTextInputContentEmailAddress: nativeType = NSTextContentTypeEmailAddress; break;
++            case FrnTextInputContentName: nativeType = NSTextContentTypeName; break;
++            case FrnTextInputContentTelephoneNumber: nativeType = NSTextContentTypeTelephoneNumber; break;
++            default: break;
++        }
++    }
++    // This updates the protocol consumed by AppKit on the existing input
++    // client. It neither replaces its context nor discards its marked text.
++    self.contentType = nativeType;
++}
++
+ - (void) resetInputMethod{
+diff --git a/src/FerroUI.Native/frn.idl b/src/FerroUI.Native/frn.idl
+index 5adf2997..9113abe7 100644
+--- a/src/FerroUI.Native/frn.idl
++++ b/src/FerroUI.Native/frn.idl
+@@ -887,2 +887,18 @@ interface IFrnTextInputMethod : IUnknown
+ 
++enum FrnTextInputContentType
++{
++    FrnTextInputContentNone = 0,
++    FrnTextInputContentUrl = 1,
++    FrnTextInputContentEmailAddress = 2,
++    FrnTextInputContentName = 3,
++    FrnTextInputContentTelephoneNumber = 4
++}
++
++// An optional extension: the original text-input vtable remains unchanged.
++[uuid(8b73203e-0e92-493d-b290-fe3fd801fdb8)]
++interface IFrnTextInputMethodOptions : IUnknown
++{
++    void SetContentType(FrnTextInputContentType contentType);
++}
++
+ [uuid(e34ae0f8-18b4-48a3-b09d-2e6b19a3cf5e)]

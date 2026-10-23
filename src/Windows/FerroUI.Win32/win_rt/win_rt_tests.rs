@@ -31,6 +31,38 @@ fn a_string_handle_holds_its_text() {
 }
 
 #[test]
+fn exact_hstring_retains_astral_text_and_embedded_nuls_with_borrowed_ownership() {
+    let text = "a\0😀\0b";
+    let units: Vec<u16> = text.encode_utf16().collect();
+    let string = HStringInterop::new_utf16(&units).unwrap();
+    assert_eq!(string.try_value().unwrap().as_deref(), Some(text));
+    let borrowed = HStringInterop::from_handle(string.handle(), false);
+    assert_eq!(borrowed.try_value().unwrap().as_deref(), Some(text));
+    drop(borrowed);
+    assert_eq!(string.try_value().unwrap().as_deref(), Some(text));
+    assert_eq!(
+        HStringInterop::new_utf16(&[]).unwrap().try_value().unwrap(),
+        None
+    );
+}
+
+#[test]
+fn exact_hstring_rejects_isolated_surrogates_without_substituting_text() {
+    for units in [&[0xd800][..], &[0xdc00][..], &[0x61, 0xd83d, 0x62][..]] {
+        let string = HStringInterop::new_utf16(units).unwrap();
+        assert_eq!(
+            string.try_value(),
+            Err(ferroui_microcom::HResult::INVALIDARG)
+        );
+        // The handle is still owned and can be read again after a failed decode.
+        assert_eq!(
+            string.try_value(),
+            Err(ferroui_microcom::HResult::INVALIDARG)
+        );
+    }
+}
+
+#[test]
 fn the_api_information_knows_the_types_of_the_system() {
     let factory = NativeWinRTMethods::create_activation_factory::<IApiInformationStatics>(
         "Windows.Foundation.Metadata.ApiInformation",

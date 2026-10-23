@@ -1,24 +1,29 @@
+use crate::documents::{
+    EmbeddedControlRun, IInlineHost, Inline, InlineCollection, TextElement, Typography,
+};
 use crate::utils::debug_display::{append_optional_value, build_base_debug_display};
-use crate::documents::{EmbeddedControlRun, IInlineHost, Inline, InlineCollection, TextElement};
 use crate::{Border, Control, ControlImpl, Decorator, TextLayoutRoundingPlacement};
 use ferroui_base::collections::FerroList;
 use ferroui_base::input::InputElementImpl;
 use ferroui_base::interactivity::InteractiveImpl;
 use ferroui_base::layout::{LayoutHelper, LayoutableImpl, LayoutableImplExt, VerticalAlignment};
 use ferroui_base::media::text_formatting::{
-    FormattedTextSource, GenericTextParagraphProperties, GenericTextRunProperties, ITextSource, TextCharacters,
-    TextEndOfParagraph, TextLayout, TextLineImpl, TextRun, TextRunCache, TextRunProperties,
+    FormattedTextSource, GenericTextParagraphProperties, GenericTextRunProperties, ITextSource,
+    TextCharacters, TextEndOfParagraph, TextLayout, TextLineImpl, TextRun, TextRunCache,
+    TextRunProperties,
 };
 use ferroui_base::media::{
-    DrawingContext, FlowDirection, FontFamily, FontFeatureCollection, FontStretch, FontStyle, FontWeight, IBrush, TextAlignment,
-    TextDecorationCollection, TextLineBounds, TextTrimming, TextWrapping, Typeface,
+    DrawingContext, FlowDirection, FontFamily, FontFeatureCollection, FontStretch, FontStyle,
+    FontWeight, IBrush, TextAlignment, TextDecorationCollection, TextLineBounds, TextTrimming,
+    TextWrapping, Typeface,
 };
 use ferroui_base::reactive::IDisposable;
 use ferroui_base::utilities::{MathUtilities, ReadOnlyMemory, ValueSpan};
 use ferroui_base::{
-    ferro_class, ferro_property, instantiate, AttachedProperty, DirectProperty, FerroObject, FerroObjectImpl, FerroObjectImplExt,
-    FerroProperty, FerroPropertyChangedEventArgs, Point, Rect, Ref, Size, StyledElementImpl, StyledProperty,
-    StyledPropertyMetadata, StyledPropertyOptions, Thickness, Visual, VisualImpl, VisualImplExt, VisualTreeAttachmentEventArgs, WeakRef,
+    ferro_class, ferro_property, instantiate, AttachedProperty, DirectProperty, FerroObject,
+    FerroObjectImpl, FerroObjectImplExt, FerroProperty, FerroPropertyChangedEventArgs, Point, Rect, Ref,
+    Size, StyledElementImpl, StyledProperty, StyledPropertyMetadata, StyledPropertyOptions, Thickness,
+    Visual, VisualImpl, VisualImplExt, VisualTreeAttachmentEventArgs, WeakRef,
 };
 use std::cell::{Cell, OnceCell, RefCell};
 use std::rc::Rc;
@@ -33,6 +38,7 @@ pub struct TextBlock {
     text_runs: RefCell<Option<Rc<Vec<Rc<dyn TextRun>>>>>,
     inlines: RefCell<Option<InlineCollection>>,
     inlines_invalidated: RefCell<Option<Rc<dyn IDisposable>>>,
+    font_features_subscription: RefCell<Option<Rc<dyn IDisposable>>>,
     inline_host: OnceCell<Rc<dyn IInlineHost>>,
     clear_text_internal: Cell<bool>,
     /// The (resolved) text alignment the cached layout was created with.
@@ -54,7 +60,9 @@ ferro_class! {
         fn create_text_layout(this, text: Option<&str>) -> Rc<TextLayout>;
     }
 }
-ferroui_base::ferro_class_info!(TextBlock { new: TextBlock::new });
+ferroui_base::ferro_class_info!(TextBlock {
+    new: TextBlock::new
+});
 
 ferroui_base::ferro_impl_classes!(TextBlock: InteractiveImpl);
 ferroui_base::ferro_impl_classes!(TextBlock: InputElementImpl);
@@ -73,10 +81,18 @@ ferroui_base::ferro_overrides! { impl FerroObjectImpl for TextBlock {
         inlines.set_logical_children(Some(this));
         inlines.set_inline_host(Some(this.as_inline_host()));
         this.set_inlines(Some(inlines));
+        this.refresh_font_features_subscription();
     }
 
     fn on_property_changed(this: &Self, change: &FerroPropertyChangedEventArgs<'_>) {
         Self::parent_on_property_changed(this, change);
+
+        if change.property() == Self::font_features_property().as_property() {
+            this.refresh_font_features_subscription();
+        }
+        if Typography::is_property(change.property()) {
+            this.invalidate_text_layout();
+        }
 
         if change.property() == Self::text_property().as_property()
             && this.has_complex_content()
@@ -117,6 +133,14 @@ ferroui_base::ferro_overrides! { impl FerroObjectImpl for TextBlock {
         }
     }
 } }
+
+impl Drop for TextBlock {
+    fn drop(&mut self) {
+        if let Some(subscription) = self.font_features_subscription.get_mut().take() {
+            subscription.dispose();
+        }
+    }
+}
 
 impl VisualImpl for TextBlock {
     /// Renders the `TextBlock` to a drawing context.
@@ -182,7 +206,11 @@ impl LayoutableImpl for TextBlock {
 
         // The text width used here is matching that the text presenter uses
         // to measure the text.
-        Size::new(text_layout.width_including_trailing_whitespace(), text_layout.height()).inflate(padding)
+        Size::new(
+            text_layout.width_including_trailing_whitespace(),
+            text_layout.height(),
+        )
+        .inflate(padding)
     }
 
     fn arrange_override(this: &Self, final_size: Size) -> Size {
@@ -224,7 +252,8 @@ impl LayoutableImpl for TextBlock {
 
             // A FerroUI addition: the embedded controls move with the text when the height
             // layout rounding adds is above it (`LayoutRoundingPlacement`).
-            let mut current_y = padding.top + this.layout_rounding_offset_of(&text_layout, padding, layout_scale);
+            let mut current_y =
+                padding.top + this.layout_rounding_offset_of(&text_layout, padding, layout_scale);
 
             for text_line in text_layout.text_lines() {
                 let mut current_x = padding.left + text_line.start();
@@ -237,7 +266,8 @@ impl LayoutableImpl for TextBlock {
                             // Add again to prevent clipping.
                             this.visual_children().add(control.clone().upcast());
 
-                            let offset_y = TextLineImpl::get_baseline_offset(&**text_line, drawable);
+                            let offset_y =
+                                TextLineImpl::get_baseline_offset(&**text_line, drawable);
 
                             control.arrange(Rect::from_position_size(
                                 Point::new(current_x, current_y + offset_y),
@@ -297,23 +327,32 @@ impl TextBlockImpl for TextBlock {
     }
 
     fn create_text_layout(this: &Self, text: Option<&str>) -> Rc<TextLayout> {
-        let typeface =
-            Typeface::with_style(this.font_family(), this.font_style(), this.font_weight(), this.font_stretch());
+        let typeface = Typeface::with_style(
+            this.font_family(),
+            this.font_style(),
+            this.font_weight(),
+            this.font_stretch(),
+        );
 
-        let default_properties: Rc<dyn TextRunProperties> = Rc::new(GenericTextRunProperties::with_all(
-            typeface,
-            this.font_size(),
-            this.text_decorations(),
-            this.foreground(),
-            None,
-            Default::default(),
-            None,
-            this.font_features(),
-        ));
+        let default_properties: Rc<dyn TextRunProperties> =
+            Rc::new(GenericTextRunProperties::with_all(
+                typeface,
+                this.font_size(),
+                this.text_decorations(),
+                this.foreground(),
+                None,
+                Default::default(),
+                None,
+                Typography::effective_font_features(this),
+            ));
 
         let paragraph_properties = GenericTextParagraphProperties::with_all(
             this.flow_direction(),
-            if this.is_measure_valid() { this.text_alignment() } else { TextAlignment::Left },
+            if this.is_measure_valid() {
+                this.text_alignment()
+            } else {
+                TextAlignment::Left
+            },
             true,
             false,
             default_properties.clone(),
@@ -332,12 +371,19 @@ impl TextBlockImpl for TextBlock {
 
             Rc::new(InlinesTextSource::new(text_runs, None))
         } else {
-            Rc::new(SimpleTextSource::new(this.utf16_text(text.unwrap_or("")), default_properties))
+            Rc::new(SimpleTextSource::new(
+                this.utf16_text(text.unwrap_or("")),
+                default_properties,
+            ))
         };
 
         let max_size = this.get_max_size_from_constraint();
 
-        let text_run_cache = this.text_run_cache.borrow_mut().get_or_insert_with(|| Rc::new(TextRunCache::new())).clone();
+        let text_run_cache = this
+            .text_run_cache
+            .borrow_mut()
+            .get_or_insert_with(|| Rc::new(TextRunCache::new()))
+            .clone();
 
         Rc::new(TextLayout::from_text_source(
             text_source,
@@ -592,6 +638,7 @@ impl TextBlock {
             text_runs: RefCell::new(None),
             inlines: RefCell::new(None),
             inlines_invalidated: RefCell::new(None),
+            font_features_subscription: RefCell::new(None),
             inline_host: OnceCell::new(),
             clear_text_internal: Cell::new(false),
             layout_text_alignment: Cell::new(TextAlignment::Left),
@@ -615,12 +662,32 @@ impl TextBlock {
 
         // The alignment `create_text_layout` uses: text is left aligned
         // until the control has been measured.
-        let text_alignment = if self.is_measure_valid() { self.text_alignment() } else { TextAlignment::Left };
-        self.layout_text_alignment.set(self.resolve_text_alignment(text_alignment));
+        let text_alignment = if self.is_measure_valid() {
+            self.text_alignment()
+        } else {
+            TextAlignment::Left
+        };
+        self.layout_text_alignment
+            .set(self.resolve_text_alignment(text_alignment));
 
         let text_layout = self.create_text_layout_core();
         *self.text_layout.borrow_mut() = Some(text_layout.clone());
         text_layout
+    }
+
+    /// Baseline of the current measured text, without creating a layout or
+    /// invoking its formatter. Embedded rich objects use the rendered origin,
+    /// including padding and the existing layout-rounding placement policy.
+    pub(crate) fn cached_text_baseline(&self) -> Option<f64> {
+        let layout = self.text_layout.borrow().clone()?;
+        let mut padding = self.padding();
+        let mut scale = None;
+        if self.use_layout_rounding() {
+            let value = LayoutHelper::get_layout_scale(self);
+            padding = LayoutHelper::round_layout_thickness(padding, value);
+            scale = Some(value);
+        }
+        Some(padding.top + self.layout_rounding_offset_of(&layout, padding, scale) + layout.baseline())
     }
 
     /// The physical alignment of a logical one for the flow direction of the
@@ -819,6 +886,22 @@ impl TextBlock {
         self.set_value(Self::font_features_property(), value)
     }
 
+    fn refresh_font_features_subscription(&self) {
+        let previous = self.font_features_subscription.borrow_mut().take();
+        if let Some(previous) = previous {
+            previous.dispose();
+        }
+        let subscription = self.font_features().map(|features| {
+            let weak = self.to_ref().downgrade();
+            features.collection_changed(move |_| {
+                if let Some(this) = weak.upgrade() {
+                    this.invalidate_text_layout();
+                }
+            })
+        });
+        *self.font_features_subscription.borrow_mut() = subscription;
+    }
+
     /// The inlines.
     pub fn inlines(&self) -> Option<InlineCollection> {
         self.inlines.borrow().clone()
@@ -830,15 +913,26 @@ impl TextBlock {
 
     /// Whether the text block displays inlines rather than its `Text`.
     pub fn has_complex_content(&self) -> bool {
-        self.inlines.borrow().as_ref().is_some_and(|inlines| inlines.count() > 0)
+        self.inlines
+            .borrow()
+            .as_ref()
+            .is_some_and(|inlines| inlines.count() > 0)
     }
 
     /// The constraint of the text layout as a maximum size: an unset
     /// constraint is zero.
     pub fn get_max_size_from_constraint(&self) -> Size {
         let constraint = self.constraint.get();
-        let max_width = if constraint.width.is_nan() { 0.0 } else { constraint.width };
-        let max_height = if constraint.height.is_nan() { 0.0 } else { constraint.height };
+        let max_width = if constraint.width.is_nan() {
+            0.0
+        } else {
+            constraint.width
+        };
+        let max_height = if constraint.height.is_nan() {
+            0.0
+        } else {
+            constraint.height
+        };
         Size::new(max_width, max_height)
     }
 
@@ -930,7 +1024,12 @@ impl TextBlock {
 
     /// The offset of [`layout_rounding_offset`](Self::layout_rounding_offset) for a text layout,
     /// the rounded padding and the layout scale (`None` without layout rounding).
-    fn layout_rounding_offset_of(&self, text_layout: &TextLayout, padding: Thickness, layout_scale: Option<f64>) -> f64 {
+    fn layout_rounding_offset_of(
+        &self,
+        text_layout: &TextLayout,
+        padding: Thickness,
+        layout_scale: Option<f64>,
+    ) -> f64 {
         let Some(scale) = layout_scale else {
             return 0.0;
         };
@@ -1132,7 +1231,11 @@ impl TextBlock {
         !line_spacing.is_nan() && !line_spacing.is_infinite()
     }
 
-    fn on_inlines_changed(&self, old_value: Option<InlineCollection>, new_value: Option<InlineCollection>) {
+    fn on_inlines_changed(
+        &self,
+        old_value: Option<InlineCollection>,
+        new_value: Option<InlineCollection>,
+    ) {
         self.visual_children().clear();
 
         if let Some(old_value) = old_value {
@@ -1157,7 +1260,9 @@ impl TextBlock {
 
     /// The handle through which inlines reach this text block.
     pub(crate) fn as_inline_host(&self) -> Rc<dyn IInlineHost> {
-        self.inline_host.get_or_init(|| Rc::new(TextBlockInlineHost(self.to_ref().downgrade()))).clone()
+        self.inline_host
+            .get_or_init(|| Rc::new(TextBlockInlineHost(self.to_ref().downgrade())))
+            .clone()
     }
 
     /// The UTF-16 form of `text`, transcoded only when it differs from the
@@ -1184,7 +1289,10 @@ pub struct SimpleTextSource {
 
 impl SimpleTextSource {
     pub fn new(text: ReadOnlyMemory<u16>, default_properties: Rc<dyn TextRunProperties>) -> Self {
-        Self { text, default_properties }
+        Self {
+            text,
+            default_properties,
+        }
     }
 }
 
@@ -1200,7 +1308,10 @@ impl ITextSource for SimpleTextSource {
             return Some(Rc::new(TextEndOfParagraph::new()));
         }
 
-        Some(Rc::new(TextCharacters::new(run_text, self.default_properties.clone())))
+        Some(Rc::new(TextCharacters::new(
+            run_text,
+            self.default_properties.clone(),
+        )))
     }
 }
 
@@ -1217,12 +1328,20 @@ impl InlinesTextSource {
         text_runs: Rc<Vec<Rc<dyn TextRun>>>,
         text_modifier: Option<Rc<[ValueSpan<Rc<dyn TextRunProperties>>]>>,
     ) -> Self {
-        Self { text_runs, text_modifier }
+        Self {
+            text_runs,
+            text_modifier,
+        }
     }
 
     /// The text runs of the source.
     pub fn text_runs(&self) -> &Rc<Vec<Rc<dyn TextRun>>> {
         &self.text_runs
+    }
+
+    /// Rebinds page-local objects while retaining the logical formatting spans.
+    pub(crate) fn with_text_runs(&self, text_runs: Rc<Vec<Rc<dyn TextRun>>>) -> Self {
+        Self::new(text_runs, self.text_modifier.clone())
     }
 }
 
@@ -1273,7 +1392,9 @@ impl TextBlock {
         build_base_debug_display(self, builder);
 
         if include_content {
-            let text = self.text().or_else(|| self.inlines().and_then(|inlines| inlines.text()));
+            let text = self
+                .text()
+                .or_else(|| self.inlines().and_then(|inlines| inlines.text()));
             append_optional_value(builder, "Text", text.as_deref());
         }
     }

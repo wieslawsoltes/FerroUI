@@ -1,0 +1,82 @@
+{
+  "reviewed_at": "2026-10-22",
+  "purpose": "Public AppKit contracts for the Native input-options bridge; source hashes identify the reviewed Apple documentation response, not a native runtime validation.",
+  "sources": [
+    {
+      "url": "https://developer.apple.com/documentation/appkit/nstextcontent/contenttype",
+      "retrieval_url": "https://developer.apple.com/tutorials/data/documentation/appkit/nstextcontent/contenttype.json",
+      "sha256": "5167428031f705c6e79257d3461e6f509f14e07b3ff70bd083eb2662733f72f4",
+      "platforms": [
+        {
+          "introducedAt": "11.0",
+          "name": "macOS"
+        }
+      ]
+    },
+    {
+      "url": "https://developer.apple.com/documentation/appkit/nstextcontenttype/url",
+      "retrieval_url": "https://developer.apple.com/tutorials/data/documentation/appkit/nstextcontenttype/url.json",
+      "sha256": "46c5c25930af4d1d789c20c213ffac43ce94567221721c518cb4e37f4cca5564",
+      "platforms": [
+        {
+          "introducedAt": "14.0",
+          "name": "macOS"
+        }
+      ]
+    },
+    {
+      "url": "https://developer.apple.com/documentation/appkit/nstextcontenttype/name",
+      "retrieval_url": "https://developer.apple.com/tutorials/data/documentation/appkit/nstextcontenttype/name.json",
+      "sha256": "143c6764ae433a9266ab5fa61807b0e67ca8eaaedb7cafcf52880f7c8245c210",
+      "platforms": [
+        {
+          "introducedAt": "14.0",
+          "name": "macOS"
+        }
+      ]
+    },
+    {
+      "url": "https://developer.apple.com/documentation/appkit/nstextcontenttype/emailaddress",
+      "retrieval_url": "https://developer.apple.com/tutorials/data/documentation/appkit/nstextcontenttype/emailaddress.json",
+      "sha256": "67011f419da0a49b15383d5cd39df01d0e2f926fe6132f503426eba4da860f2d",
+      "platforms": [
+        {
+          "introducedAt": "14.0",
+          "name": "macOS"
+        }
+      ]
+    },
+    {
+      "url": "https://developer.apple.com/documentation/appkit/nstextcontenttype/telephonenumber",
+      "retrieval_url": "https://developer.apple.com/tutorials/data/documentation/appkit/nstextcontenttype/telephonenumber.json",
+      "sha256": "5eb9673363cce1aeabd8ffd095c396c96ec7d4cf732be412c17d4c339caf5274",
+      "platforms": [
+        {
+          "introducedAt": "14.0",
+          "name": "macOS"
+        }
+      ]
+    },
+    {
+      "url": "https://developer.apple.com/documentation/appkit/nstextcheckingclient",
+      "retrieval_url": "https://developer.apple.com/tutorials/data/documentation/appkit/nstextcheckingclient.json",
+      "sha256": "5d72786de0dd9a42b2b086ad860a0272df2c1f7e23f99dc732daac4549129ae3",
+      "platforms": [
+        {
+          "name": "macOS"
+        }
+      ]
+    },
+    {
+      "url": "https://developer.apple.com/documentation/appkit/nstextcheckingcontroller",
+      "retrieval_url": "https://developer.apple.com/tutorials/data/documentation/appkit/nstextcheckingcontroller.json",
+      "sha256": "44c16f0236ad1de749ec107d536f0001cef4f73289fd12d4e519368805a3a91e",
+      "platforms": [
+        {
+          "introducedAt": "10.15",
+          "name": "macOS"
+        }
+      ]
+    }
+  ]
+}

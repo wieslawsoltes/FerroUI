@@ -7,28 +7,28 @@ mod colors;
 mod drawing_context;
 #[cfg(test)]
 mod drawing_context_tests;
-mod immediate_drawing_context;
-mod platform_drawing_context;
 mod flow_direction;
 mod hsl_color;
 mod hsv_color;
+mod immediate_drawing_context;
 mod known_colors;
 mod media_context;
 mod media_context_clock;
 #[cfg(test)]
 mod media_context_tests;
+mod platform_drawing_context;
 
 pub use color::Color;
 pub use colors::Colors;
 pub use drawing_context::{DrawingContext, IDrawingContextCore, PushedScope, PushedState};
-pub use immediate_drawing_context::{ImmediateDrawingContext, ImmediatePushedState};
-pub use platform_drawing_context::PlatformDrawingContext;
 pub use flow_direction::FlowDirection;
 pub use hsl_color::HslColor;
 pub use hsv_color::HsvColor;
+pub use immediate_drawing_context::{ImmediateDrawingContext, ImmediatePushedState};
 pub use known_colors::{KnownColor, KnownColors};
 pub use media_context::MediaContext;
 pub use media_context_clock::MediaContextClock;
+pub use platform_drawing_context::PlatformDrawingContext;
 
 // --- brushes, pens, transforms and geometry ---
 
@@ -61,7 +61,6 @@ mod gradient_spread_method;
 mod gradient_stop;
 mod gradient_stops;
 mod i_brush;
-mod shared_brush;
 mod i_conic_gradient_brush;
 mod i_dash_style;
 mod i_gradient_brush;
@@ -102,6 +101,7 @@ mod ref_adapter;
 mod render_options;
 mod rotate_transform;
 mod scale_transform;
+mod shared_brush;
 mod skew_transform;
 mod solid_color_brush;
 mod stream_geometry;
@@ -136,12 +136,13 @@ pub use geometry::{Geometry, GeometryImpl, GeometryImplExt, GeometryVTable};
 pub use geometry_builder::{GeometryBuilder, RoundedRectKeypoints};
 pub use geometry_collection::GeometryCollection;
 pub use geometry_group::GeometryGroup;
-pub use gradient_brush::{GradientBrush, GradientBrushImpl, GradientBrushImplExt, GradientBrushVTable};
+pub use gradient_brush::{
+    GradientBrush, GradientBrushImpl, GradientBrushImplExt, GradientBrushVTable,
+};
 pub use gradient_spread_method::GradientSpreadMethod;
 pub use gradient_stop::GradientStop;
 pub use gradient_stops::GradientStops;
 pub use i_brush::IBrush;
-pub use shared_brush::{shared_brush_of, shared_pen_of, SharedBrush, SharedPen};
 pub use i_conic_gradient_brush::IConicGradientBrush;
 pub use i_dash_style::IDashStyle;
 pub use i_gradient_brush::IGradientBrush;
@@ -180,9 +181,12 @@ pub use rectangle_geometry::RectangleGeometry;
 pub use render_options::RenderOptions;
 pub use rotate_transform::RotateTransform;
 pub use scale_transform::ScaleTransform;
+pub use shared_brush::{shared_brush_of, shared_pen_of, SharedBrush, SharedPen};
 pub use skew_transform::SkewTransform;
 pub use solid_color_brush::SolidColorBrush;
-pub use stream_geometry::{StreamGeometry, StreamGeometryImpl, StreamGeometryImplExt, StreamGeometryVTable};
+pub use stream_geometry::{
+    StreamGeometry, StreamGeometryImpl, StreamGeometryImplExt, StreamGeometryVTable,
+};
 pub use stream_geometry_context::StreamGeometryContext;
 pub use stretch::Stretch;
 pub use stretch_direction::StretchDirection;
@@ -211,8 +215,8 @@ mod drawing_group;
 mod drawing_image;
 mod experimental_acrylic_material;
 mod geometry_drawing;
-mod glyph_run_drawing;
 mod geometry_hit_test_result;
+mod glyph_run_drawing;
 mod i_affects_render;
 mod i_experimental_acrylic_material;
 mod i_image;
@@ -239,14 +243,15 @@ pub use drawing_collection::DrawingCollection;
 pub use drawing_group::DrawingGroup;
 pub use drawing_image::DrawingImage;
 pub use effects::{
-    BlurEffect, DropShadowDirectionEffect, DropShadowEffect, DropShadowEffectBase, Effect, EffectExtensions,
-    IBlurEffect, IDirectionDropShadowEffect, IDropShadowEffect, IEffect, IImmutableEffect, IMutableEffect,
-    ImmutableBlurEffect, ImmutableDropShadowDirectionEffect, ImmutableDropShadowEffect,
+    BlurEffect, DropShadowDirectionEffect, DropShadowEffect, DropShadowEffectBase, Effect,
+    EffectExtensions, IBlurEffect, IDirectionDropShadowEffect, IDropShadowEffect, IEffect,
+    IImmutableEffect, IMutableEffect, ImmutableBlurEffect, ImmutableDropShadowDirectionEffect,
+    ImmutableDropShadowEffect,
 };
 pub use experimental_acrylic_material::ExperimentalAcrylicMaterial;
 pub use geometry_drawing::GeometryDrawing;
-pub use glyph_run_drawing::GlyphRunDrawing;
 pub use geometry_hit_test_result::GeometryHitTestResult;
+pub use glyph_run_drawing::GlyphRunDrawing;
 pub use i_affects_render::{can_value_affect_render, subscribe_invalidated, IAffectsRender};
 pub use i_experimental_acrylic_material::IExperimentalAcrylicMaterial;
 pub use i_image::IImage;
@@ -272,32 +277,30 @@ mod baseline_pixel_alignment;
 mod character_hit;
 mod composite_font_family_key;
 mod font_fallback;
+mod font_fallback_mapping;
 mod font_family;
 mod font_feature;
 mod font_feature_collection;
 mod font_manager;
+mod font_manager_options;
 #[cfg(test)]
 mod font_manager_tests;
-#[cfg(test)]
-mod glyph_run_tests;
-#[cfg(test)]
-mod synthetic_font_variable_tests;
-mod font_manager_options;
 mod font_metrics;
 mod font_simulations;
 mod font_source_identifier;
 mod font_stretch;
 mod font_style;
+mod font_typography;
 mod font_variation_settings;
 mod font_weight;
 mod glyph_bounds;
-#[cfg(any(test, feature = "testing"))]
-pub mod testing;
 mod glyph_drawing_options;
 mod glyph_drawing_type;
 mod glyph_metrics;
 mod glyph_run;
 mod glyph_run_metrics;
+#[cfg(test)]
+mod glyph_run_tests;
 mod glyph_typeface;
 #[cfg(test)]
 mod glyph_typeface_tests;
@@ -307,6 +310,10 @@ mod i_immutable_glyph_run_reference;
 mod i_platform_typeface;
 mod i_text_shaper_typeface;
 mod normalized_variation_position;
+#[cfg(test)]
+mod synthetic_font_variable_tests;
+#[cfg(any(test, feature = "testing"))]
+pub mod testing;
 mod text_alignment;
 mod text_decoration;
 mod text_decoration_collection;
@@ -325,6 +332,7 @@ pub use baseline_alignment::BaselineAlignment;
 pub use baseline_pixel_alignment::BaselinePixelAlignment;
 pub use character_hit::CharacterHit;
 pub use font_fallback::FontFallback;
+pub use font_fallback_mapping::FontFallbackMapping;
 pub use font_family::FontFamily;
 pub use font_feature::FontFeature;
 pub use font_feature_collection::FontFeatureCollection;
@@ -334,6 +342,10 @@ pub use font_metrics::FontMetrics;
 pub use font_simulations::FontSimulations;
 pub use font_stretch::FontStretch;
 pub use font_style::FontStyle;
+pub use font_typography::{
+    FontCapitals, FontEastAsianLanguage, FontEastAsianWidths, FontFraction, FontNumeralAlignment,
+    FontNumeralStyle, FontVariants,
+};
 pub use font_variation_settings::{FontVariation, FontVariationSettings};
 pub use font_weight::FontWeight;
 pub(crate) use glyph_bounds::GlyphBounds;

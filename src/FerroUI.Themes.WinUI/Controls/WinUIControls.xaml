@@ -30,6 +30,7 @@
         <MergeResourceInclude Source="ferres://FerroUI.Themes.WinUI/Controls/ScrollBar.xaml" />
         <MergeResourceInclude Source="ferres://FerroUI.Themes.WinUI/Controls/ScrollViewer.xaml" />
         <MergeResourceInclude Source="ferres://FerroUI.Themes.WinUI/Controls/TextBox.xaml" />
+        <MergeResourceInclude Source="ferres://FerroUI.Themes.WinUI/Controls/RichEditBox.xaml" />
         <!-- B1: primitives and simple content. -->
         <MergeResourceInclude Source="ferres://FerroUI.Themes.WinUI/Controls/ToolTip.xaml" />
         <MergeResourceInclude Source="ferres://FerroUI.Themes.WinUI/Controls/ProgressBar.xaml" />

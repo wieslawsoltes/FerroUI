@@ -13,7 +13,7 @@
 
 use crate::assigned_binding::AssignedBinding;
 use ferroui_base::data::core::ValueTypes;
-use ferroui_base::metadata::MarkupType;
+use ferroui_base::metadata::{MarkupType, MarkupTyped};
 
 mod classes;
 mod contracts;
@@ -33,7 +33,44 @@ mod markup_types_tests;
 
 /// The lists of the types declared in this module, by area.
 pub(crate) const TYPE_LISTS: &[&[&MarkupType]] =
-    &[enums::TYPES, values::TYPES, contracts::TYPES, plain::TYPES, classes::TYPES, converters::TYPES];
+    &[enums::TYPES, values::TYPES, contracts::TYPES, plain::TYPES, classes::TYPES, converters::TYPES, RICH_TEXT_TYPES];
+
+/// Rich text metadata is defined alongside the WinUI-derived Rust types. Keep a
+/// normal type table so the public Rust path generator sees the same registry.
+const RICH_TEXT_TYPES: &[&MarkupType] = &[
+    <crate::documents::Typography as MarkupTyped>::MARKUP,
+    <crate::documents::BlockCollection as MarkupTyped>::MARKUP,
+    <crate::documents::RichTextDocument as MarkupTyped>::MARKUP,
+    <crate::documents::LineStackingStrategy as MarkupTyped>::MARKUP,
+    <crate::documents::LineSpacingRule as MarkupTyped>::MARKUP,
+    <crate::documents::TextGravity as MarkupTyped>::MARKUP,
+    <crate::documents::UnderlineStyle as MarkupTyped>::MARKUP,
+    <crate::documents::HyperlinkClickEventArgs as MarkupTyped>::MARKUP,
+    <crate::documents::TextHighlightRange as MarkupTyped>::MARKUP,
+    <crate::documents::TextRangeCollection as MarkupTyped>::MARKUP,
+    <crate::documents::TextHighlighterCollection as MarkupTyped>::MARKUP,
+    <crate::RichEditCharacterCasing as MarkupTyped>::MARKUP,
+    <crate::DisabledFormattingAccelerators as MarkupTyped>::MARKUP,
+    <crate::ContextMenuEventArgs as MarkupTyped>::MARKUP,
+    <crate::ContextMenuOpeningRoutedEvent as MarkupTyped>::MARKUP,
+    <crate::RichEditCompositionEventArgs as MarkupTyped>::MARKUP,
+    <crate::RichEditCompositionRoutedEvent as MarkupTyped>::MARKUP,
+    <crate::RichEditBoxSelectionChangingEventArgs as MarkupTyped>::MARKUP,
+    <crate::RichEditBoxSelectionChangingRoutedEvent as MarkupTyped>::MARKUP,
+    <crate::RichEditBoxTextChangingEventArgs as MarkupTyped>::MARKUP,
+    <crate::RichEditBoxTextChangingRoutedEvent as MarkupTyped>::MARKUP,
+    <crate::rich_text::RichEditClipboardFormat as MarkupTyped>::MARKUP,
+    <crate::rich_text::FindOptions as MarkupTyped>::MARKUP,
+    <crate::rich_text::RangeGravity as MarkupTyped>::MARKUP,
+    <crate::rich_text::SelectionOptions as MarkupTyped>::MARKUP,
+    <crate::rich_text::SelectionType as MarkupTyped>::MARKUP,
+    <crate::rich_text::TextGetOptions as MarkupTyped>::MARKUP,
+    <crate::rich_text::TextSetOptions as MarkupTyped>::MARKUP,
+    <crate::rich_text::TextStreamEncoding as MarkupTyped>::MARKUP,
+    <crate::rich_text::TextRangeUnit as MarkupTyped>::MARKUP,
+    <crate::rich_text::LetterCase as MarkupTyped>::MARKUP,
+    <crate::automation::provider::TextEditChangeType as MarkupTyped>::MARKUP,
+];
 
 /// Adds the types declared in this module to the process-wide table of
 /// types with markup metadata. Called once by `register_types()`.
@@ -62,9 +99,40 @@ fn register_value_types() {
     classes::register_value_types();
     converters::register_value_types();
     register_assigned_binding();
+    register_rich_text_value_types();
     // The delegate of `DataValidationErrors.ErrorConverter` (`Func<object, object>?`): a binding
     // delivers a converter, and the property holds the nullable form.
     ValueTypes::register_nullable::<crate::ErrorConverter>();
+}
+
+fn register_rich_text_value_types() {
+    ValueTypes::register_nullable::<crate::documents::BlockCollection>();
+    ValueTypes::register_nullable::<crate::documents::RichTextDocument>();
+    ValueTypes::register_nullable::<crate::documents::LineStackingStrategy>();
+    ValueTypes::register_nullable::<crate::documents::LineSpacingRule>();
+    ValueTypes::register_nullable::<crate::documents::TextGravity>();
+    ValueTypes::register_nullable::<crate::documents::UnderlineStyle>();
+    ValueTypes::register_nullable::<crate::documents::TextHighlightRange>();
+    ValueTypes::register_reference::<crate::documents::TextHighlightRange>();
+    ValueTypes::register_nullable::<crate::documents::TextRangeCollection>();
+    ValueTypes::register_nullable::<crate::documents::TextHighlighterCollection>();
+    ValueTypes::register_nullable::<crate::RichEditCharacterCasing>();
+    ValueTypes::register_nullable::<crate::DisabledFormattingAccelerators>();
+    ValueTypes::register_nullable::<crate::rich_text::RichEditClipboardFormat>();
+    ValueTypes::register_nullable::<crate::rich_text::FindOptions>();
+    ValueTypes::register_nullable::<crate::rich_text::RangeGravity>();
+    ValueTypes::register_nullable::<crate::rich_text::SelectionOptions>();
+    ValueTypes::register_nullable::<crate::rich_text::SelectionType>();
+    ValueTypes::register_nullable::<crate::rich_text::TextGetOptions>();
+    ValueTypes::register_nullable::<crate::rich_text::TextSetOptions>();
+    ValueTypes::register_nullable::<crate::rich_text::TextStreamEncoding>();
+    ValueTypes::register_nullable::<crate::rich_text::TextRangeUnit>();
+    ValueTypes::register_nullable::<crate::rich_text::LetterCase>();
+    ValueTypes::register_nullable::<crate::automation::provider::TextEditChangeType>();
+    ValueTypes::register_nullable::<ferroui_base::interactivity::RoutedEvent<crate::ContextMenuEventArgs>>();
+    ValueTypes::register_nullable::<ferroui_base::interactivity::RoutedEvent<crate::RichEditCompositionEventArgs>>();
+    ValueTypes::register_nullable::<ferroui_base::interactivity::RoutedEvent<crate::RichEditBoxSelectionChangingEventArgs>>();
+    ValueTypes::register_nullable::<ferroui_base::interactivity::RoutedEvent<crate::RichEditBoxTextChangingEventArgs>>();
 }
 
 /// The casts between a binding and the value of a property that is assigned a binding.

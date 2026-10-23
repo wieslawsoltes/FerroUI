@@ -32,6 +32,9 @@ mod win_ui_cursor_factory;
 mod win_ui_drag_source;
 mod win_ui_key_interop;
 mod win_ui_text_input_method;
+mod core_text_input_options;
+mod core_text_layout;
+mod core_text_synchronization;
 mod windows_app_sdk;
 mod xaml_application;
 

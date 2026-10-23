@@ -34,7 +34,7 @@ extern "C" {
 
     /// Empties the hidden input element.
     #[wasm_bindgen(js_namespace = InputHelper, js_name = clearInput)]
-    pub fn clear_input_element(html_element: &JsObject);
+    pub fn clear_input_element(html_element: &JsObject, revision: u32);
 
     /// Gives the keyboard focus of the page to the element.
     #[wasm_bindgen(js_namespace = InputHelper, js_name = focusElement)]
@@ -53,12 +53,24 @@ extern "C" {
     /// Mirrors the text around the caret and the selection into the hidden
     /// input element.
     #[wasm_bindgen(js_namespace = InputHelper, js_name = setSurroundingText)]
-    pub fn set_surrounding_text(html_element: &JsObject, text: &str, start: i32, end: i32);
+    pub fn set_surrounding_text(html_element: &JsObject, text: &str, start: i32, end: i32, revision: u32);
 
     /// Moves the hidden input element so that its caret is where the caret
     /// of the text is.
     #[wasm_bindgen(js_namespace = InputHelper, js_name = setBounds)]
     pub fn set_bounds(html_element: &JsObject, x: i32, y: i32, width: i32, height: i32, caret: i32);
+
+    /// Updates keyboard/prediction hints without replacing the focused DOM input.
+    #[wasm_bindgen(js_namespace = InputHelper, js_name = setInputOptions)]
+    pub fn set_input_options(
+        html_element: &JsObject,
+        input_mode: &str,
+        enter_key_hint: &str,
+        capitalization: &str,
+        suggestions: bool,
+        sensitive: bool,
+        language: &str,
+    );
 
     /// Installs the handlers of the page that are not bound to a view.
     #[wasm_bindgen(js_namespace = InputHelper, js_name = initializeBackgroundHandlers)]
@@ -276,30 +288,37 @@ pub fn on_key_up(top_level_id: i32, code: Option<String>, key: Option<String>, m
 }
 
 #[wasm_bindgen(js_name = InputHelper_OnBeforeInput)]
-pub fn on_before_input(top_level_id: i32, input_type: &str, start: i32, end: i32) {
+pub fn on_before_input(top_level_id: i32, revision: u32, input_type: &str, value: &str, start: i32, end: i32) -> u32 {
+    BrowserTopLevelImpl::try_get_top_level(top_level_id).map_or(0, |top_level| {
+        top_level.input_handler().text_input_method().on_dom_before_input(revision, input_type, value, start, end)
+    })
+}
+
+#[wasm_bindgen(js_name = InputHelper_OnInput)]
+pub fn on_input(top_level_id: i32, revision: u32, token: u32, input_type: &str, value: &str, start: i32, end: i32) {
     if let Some(top_level) = BrowserTopLevelImpl::try_get_top_level(top_level_id) {
-        top_level.input_handler().text_input_method().on_before_input(input_type, start, end);
+        top_level.input_handler().text_input_method().on_dom_input(revision, token, input_type, value, start, end);
     }
 }
 
 #[wasm_bindgen(js_name = InputHelper_OnCompositionStart)]
-pub fn on_composition_start(top_level_id: i32) {
-    if let Some(top_level) = BrowserTopLevelImpl::try_get_top_level(top_level_id) {
-        top_level.input_handler().text_input_method().on_composition_start();
-    }
+pub fn on_composition_start(top_level_id: i32, revision: u32, value: &str, start: i32, end: i32) -> u32 {
+    BrowserTopLevelImpl::try_get_top_level(top_level_id).map_or(0, |top_level| {
+        top_level.input_handler().text_input_method().on_dom_composition_start(revision, value, start, end)
+    })
 }
 
 #[wasm_bindgen(js_name = InputHelper_OnCompositionUpdate)]
-pub fn on_composition_update(top_level_id: i32, data: Option<String>) {
+pub fn on_composition_update(top_level_id: i32, token: u32, data: &str) {
     if let Some(top_level) = BrowserTopLevelImpl::try_get_top_level(top_level_id) {
-        top_level.input_handler().text_input_method().on_composition_update(data.as_deref());
+        top_level.input_handler().text_input_method().on_dom_composition_update(token, data);
     }
 }
 
 #[wasm_bindgen(js_name = InputHelper_OnCompositionEnd)]
-pub fn on_composition_end(top_level_id: i32, data: Option<String>) {
+pub fn on_composition_end(top_level_id: i32, token: u32, data: &str, value: &str, start: i32, end: i32) {
     if let Some(top_level) = BrowserTopLevelImpl::try_get_top_level(top_level_id) {
-        top_level.input_handler().text_input_method().on_composition_end(data.as_deref());
+        top_level.input_handler().text_input_method().on_dom_composition_end(token, data, value, start, end);
     }
 }
 

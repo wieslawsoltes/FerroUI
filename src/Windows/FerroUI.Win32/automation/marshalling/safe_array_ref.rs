@@ -63,14 +63,14 @@ bitflags::bitflags! {
     }
 }
 
-/// A failure of the library to lock an array (the `Win32Exception` of the
-/// reference), with the result code.
+/// A native array allocation, element conversion, or locking failure (the
+/// `Win32Exception` of the reference), with the result code.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub struct SafeArrayLockError(pub i32);
 
 impl std::fmt::Display for SafeArrayLockError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "the safe array could not be locked: {:#010x}", self.0)
+        write!(f, "the safe array could not be marshalled: {:#010x}", self.0)
     }
 }
 
@@ -86,6 +86,12 @@ pub trait SafeArrayElement: Sized {
     /// The element for the array, which owns what it is given (a string of
     /// the system, a reference of a COM object).
     fn to_raw(&self) -> Self::Raw;
+
+    /// Allocates an element for the array, propagating native allocation errors.
+    /// Implementations that cannot fail may use the default conversion.
+    fn try_to_raw(&self) -> Result<Self::Raw, SafeArrayLockError> {
+        Ok(self.to_raw())
+    }
 
     /// The value of an element, which stays the array's.
     ///
@@ -153,6 +159,17 @@ impl SafeArrayElement for String {
 
     fn to_raw(&self) -> *mut u16 {
         ole_aut::string_to_bstr(self)
+    }
+
+    fn try_to_raw(&self) -> Result<*mut u16, SafeArrayLockError> {
+        if u32::try_from(self.encode_utf16().count()).is_err() {
+            return Err(SafeArrayLockError(ferroui_microcom::E_INVALIDARG as i32));
+        }
+        let raw = self.to_raw();
+        if raw.is_null() {
+            return Err(SafeArrayLockError(0x8007_000Eu32 as i32));
+        }
+        Ok(raw)
     }
 
     unsafe fn from_raw(raw: *mut u16) -> String {
@@ -257,34 +274,31 @@ impl SafeArrayRef {
         let Some(managed) = managed else {
             return Ok(None);
         };
-        let raw: Vec<T::Raw> = managed.iter().map(SafeArrayElement::to_raw).collect();
-        Self::create_from_span(&raw, T::VAR_TYPE).map(|array| Some((array, T::VAR_TYPE)))
-    }
-
-    /// `CreateFromSpan`: an array of `var_enum` elements with a copy of
-    /// `span`.
-    fn create_from_span<R: Copy>(span: &[R], var_enum: VarEnum) -> Result<SafeArrayRef, SafeArrayLockError> {
-        let safearray = ole_aut::safe_array_create(var_enum.0, span.len() as u32);
-        if span.is_empty() || safearray.is_null() {
-            return Ok(SafeArrayRef { ptr: safearray });
+        let count = u32::try_from(managed.len())
+            .map_err(|_| SafeArrayLockError(ferroui_microcom::E_INVALIDARG as i32))?;
+        let pointer = ole_aut::safe_array_create(T::VAR_TYPE.0, count);
+        if pointer.is_null() {
+            return Err(SafeArrayLockError(0x8007_000Eu32 as i32));
         }
-
-        // SAFETY: the array that was just created.
-        let lock_result = unsafe { ole_aut::safe_array_lock(safearray) };
-        if lock_result != 0 {
-            return Err(SafeArrayLockError(lock_result));
-        }
-        // SAFETY: the array is locked, so its data stays where it is; it
-        // was created for `span.len()` elements of the size of `R` (the
-        // element types of this file are stored at the size the system
-        // gives their type).
+        let mut pending = PendingSafeArray(SafeArrayRef { ptr: pointer });
+        let lock = SafeArrayLock::new(pending.0)?;
+        // SAFETY: the allocated array is locked, zero initialized by OleAut,
+        // and has `count` slots. Validate the public element implementation's
+        // raw size before writing, then transfer each successfully allocated
+        // string/reference directly to the array. The guards unlock and free
+        // all initialized slots if a later allocation fails or conversion panics.
         unsafe {
-            debug_assert_eq!((*safearray).cb_elements as usize, std::mem::size_of::<R>());
-            std::ptr::copy_nonoverlapping(span.as_ptr(), (*safearray).pv_data.cast::<R>(), span.len());
-            ole_aut::safe_array_unlock(safearray);
+            if (*pointer).cb_elements as usize != std::mem::size_of::<T::Raw>() {
+                return Err(SafeArrayLockError(ferroui_microcom::E_INVALIDARG as i32));
+            }
+            let data = (*pointer).pv_data.cast::<T::Raw>();
+            for (index, value) in managed.iter().enumerate() {
+                data.add(index).write_unaligned(value.try_to_raw()?);
+            }
         }
-
-        Ok(SafeArrayRef { ptr: safearray })
+        drop(lock);
+        let array = std::mem::take(&mut pending.0);
+        Ok(Some((array, T::VAR_TYPE)))
     }
 
     /// `AccessData`: the data and the number of elements of a locked
@@ -296,19 +310,49 @@ impl SafeArrayRef {
         safearray: SafeArrayRef,
         accessor: impl FnOnce(*const c_void, usize) -> R,
     ) -> Result<R, SafeArrayLockError> {
-        // SAFETY: the contract of the function.
-        let lock_result = unsafe { ole_aut::safe_array_lock(safearray.ptr) };
-        if lock_result != 0 {
-            return Err(SafeArrayLockError(lock_result));
-        }
-        // SAFETY: the array is live and locked.
+        let _lock = SafeArrayLock::new(safearray)?;
+        // SAFETY: the array is live and locked. The guard also releases the
+        // lock if copying an element invokes a conversion that unwinds.
         unsafe {
             debug_assert_eq!((*safearray.ptr).c_dims, 1);
             let data = (*safearray.ptr).pv_data;
             let length = (*safearray.ptr).rgsabound[0].c_elements;
-            let result = accessor(data, length as usize);
-            ole_aut::safe_array_unlock(safearray.ptr);
-            Ok(result)
+            Ok(accessor(data, length as usize))
         }
+    }
+}
+
+
+/// Owns an array until every slot has been initialized successfully.
+struct PendingSafeArray(SafeArrayRef);
+
+impl Drop for PendingSafeArray {
+    fn drop(&mut self) {
+        // SAFETY: this guard owns the array. Any inner lock guard has already
+        // dropped; the still-zero slots hold no strings or COM references.
+        unsafe { self.0.destroy() };
+    }
+}
+
+struct SafeArrayLock(SafeArrayRef);
+
+impl SafeArrayLock {
+    fn new(array: SafeArrayRef) -> Result<Self, SafeArrayLockError> {
+        // SAFETY: creation and access supply a live array, as their contracts
+        // require. A failed lock acquires no ownership or element references.
+        let result = unsafe { ole_aut::safe_array_lock(array.ptr) };
+        if result != 0 {
+            Err(SafeArrayLockError(result))
+        } else {
+            Ok(Self(array))
+        }
+    }
+}
+
+impl Drop for SafeArrayLock {
+    fn drop(&mut self) {
+        // SAFETY: construction acquired this lock, and the array's owner
+        // outlives the guard. The lock is released exactly once.
+        unsafe { ole_aut::safe_array_unlock(self.0.ptr) };
     }
 }

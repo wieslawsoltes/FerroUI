@@ -10,3 +10,5 @@ pub(crate) mod support;
 mod tab_control_layout_tests;
 mod theme_class_tests;
 mod winui_theme_tests;
+
+mod rich_edit_box_tests;

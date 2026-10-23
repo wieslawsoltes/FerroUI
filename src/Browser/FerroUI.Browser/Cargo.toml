@@ -33,6 +33,7 @@ default = []
 vello = ["dep:ferroui-vello"]
 
 [dev-dependencies]
+ferroui-controls = { workspace = true, features = ["testing"] }
 # The example shows a themed view with the embedded default font.
 ferroui-themes-fluent.workspace = true
 ferroui-fonts-inter.workspace = true

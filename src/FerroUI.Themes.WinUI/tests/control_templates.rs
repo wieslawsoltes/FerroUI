@@ -223,6 +223,7 @@ control_tests! {
     scroll_bar => "ScrollBar";
     scroll_viewer => "ScrollViewer";
     text_box => "TextBox";
+    rich_edit_box => "RichEditBox";
     theme_variant_scope => "ThemeVariantScope";
     thumb => "Thumb";
     time_picker => "TimePicker";

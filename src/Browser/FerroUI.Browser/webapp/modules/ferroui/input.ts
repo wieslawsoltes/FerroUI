@@ -1,6 +1,8 @@
 import { CaretHelper } from "./caretHelper";
 import { FerroExports } from "./ferroExports";
 import { StorageItem } from "../storage/storageItem";
+import { applyTextInputOptions } from "./inputOptions";
+import { setTextInputState, subscribeTextInput, TextInputElement } from "./textInput";
 
 enum RawInputModifiers {
     None = 0,
@@ -84,6 +86,13 @@ type ReadableDataValue = {
 const eventAge = (args: Event): number => performance.now() - args.timeStamp;
 
 export class InputHelper {
+    public static setInputOptions(input: TextInputElement, inputMode: string,
+        enterKeyHint: string, capitalization: string, suggestions: boolean,
+        sensitive: boolean, language: string): void {
+        applyTextInputOptions(input, inputMode, enterKeyHint, capitalization,
+            suggestions, sensitive, language);
+    }
+
     static clipboardState: ClipboardState = ClipboardState.None;
     static resolveClipboard?: (value: ClipboardResult) => void;
     static rejectClipboard?: (reason?: any) => void;
@@ -476,49 +485,23 @@ export class InputHelper {
     }
 
     public static subscribeTextEvents(
-        element: HTMLInputElement,
+        element: HTMLElement,
         topLevelId: number) {
-        const compositionStartHandler = (args: CompositionEvent) => {
-            FerroExports.InputHelper?.OnCompositionStart(topLevelId);
-        };
-        element.addEventListener("compositionstart", compositionStartHandler);
-
-        const beforeInputHandler = (args: InputEvent) => {
-            const ranges = args.getTargetRanges();
-            let start = -1;
-            let end = -1;
-            if (ranges.length > 0) {
-                start = ranges[0].startOffset;
-                end = ranges[0].endOffset;
-            }
-
-            if (args.inputType === "insertCompositionText") {
-                start = 2;
-                end = start + 2;
-            }
-
-            FerroExports.InputHelper?.OnBeforeInput(topLevelId, args.inputType, start, end);
-        };
-        element.addEventListener("beforeinput", beforeInputHandler);
-
-        const compositionUpdateHandler = (args: CompositionEvent) => {
-            FerroExports.InputHelper?.OnCompositionUpdate(topLevelId, args.data);
-        };
-        element.addEventListener("compositionupdate", compositionUpdateHandler);
-
-        const compositionEndHandler = (args: CompositionEvent) => {
-            FerroExports.InputHelper?.OnCompositionEnd(topLevelId, args.data);
-            args.preventDefault();
-        };
-        element.addEventListener("compositionend", compositionEndHandler);
-
-        return () => {
-            element.removeEventListener("compositionstart", compositionStartHandler);
-            // Differs from the original, which leaves the "beforeinput" listener in place.
-            element.removeEventListener("beforeinput", beforeInputHandler);
-            element.removeEventListener("compositionupdate", compositionUpdateHandler);
-            element.removeEventListener("compositionend", compositionEndHandler);
-        };
+        const input = element.querySelector<TextInputElement>(":scope > .ferroui-input-element");
+        if (!input) return () => { };
+        return subscribeTextInput(input, {
+            beforeInput: (revision, type, value, anchor, active) =>
+                FerroExports.InputHelper?.OnBeforeInput(topLevelId, revision, type, value, anchor, active) ?? 0,
+            input: (revision, token, type, value, anchor, active) =>
+                FerroExports.InputHelper?.OnInput(topLevelId, revision, token, type, value, anchor, active),
+            compositionStart: (revision, value, anchor, active) =>
+                FerroExports.InputHelper?.OnCompositionStart(topLevelId, revision, value, anchor, active) ?? 0,
+            compositionUpdate: (token, data) =>
+                FerroExports.InputHelper?.OnCompositionUpdate(topLevelId, token, data),
+            compositionEnd: (token, data, value, anchor, active) =>
+                FerroExports.InputHelper?.OnCompositionEnd(topLevelId, token, data, value, anchor, active),
+            ownsPaste: () => this.clipboardState === ClipboardState.Pending
+        });
     }
 
     public static subscribePointerEvents(
@@ -699,8 +682,8 @@ export class InputHelper {
         return () => { };
     }
 
-    public static clearInput(inputElement: HTMLInputElement) {
-        inputElement.value = "";
+    public static clearInput(inputElement: TextInputElement, revision: number) {
+        setTextInputState(inputElement, "", 0, 0, revision);
     }
 
     public static focusElement(inputElement: HTMLElement) {
@@ -715,7 +698,7 @@ export class InputHelper {
         }
     }
 
-    public static setBounds(inputElement: HTMLInputElement, x: number, y: number, caretWidth: number, caretHeight: number, caret: number) {
+    public static setBounds(inputElement: TextInputElement, x: number, y: number, caretWidth: number, caretHeight: number, caret: number) {
         inputElement.style.left = (x).toFixed(0) + "px";
         inputElement.style.top = (y).toFixed(0) + "px";
 
@@ -733,13 +716,12 @@ export class InputHelper {
         inputElement.style.display = "block";
     }
 
-    public static setSurroundingText(inputElement: HTMLInputElement, text: string, start: number, end: number) {
+    public static setSurroundingText(inputElement: TextInputElement, text: string, start: number, end: number, revision: number) {
         if (!inputElement) {
             return;
         }
 
-        inputElement.value = text;
-        inputElement.setSelectionRange(start, end);
+        setTextInputState(inputElement, text, start, end, revision);
         inputElement.style.width = "20px";
         inputElement.style.width = `${inputElement.scrollWidth}px`;
     }

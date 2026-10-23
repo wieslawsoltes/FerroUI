@@ -6,15 +6,18 @@ use std::rc::Rc;
 use ferroui_base::input::InputElementImpl;
 use ferroui_base::interactivity::{IRoutedEventArgs, InteractiveImpl, RoutedEventArgs};
 use ferroui_base::layout::LayoutableImpl;
-use ferroui_base::metadata::{into_markup_value, MarkupDelegate};
+use ferroui_base::metadata::{from_markup_value, into_markup_value, MarkupDelegate};
 use ferroui_base::utilities::{CancelEventArgs, EventArgs};
 use ferroui_base::{
     ferro_class, ferro_class_info, ferro_impl_classes, instantiate, BoxedValue, FerroObjectImpl,
-    OwnedFerroPropertyChangedEventArgs, Ref, StyledElementImpl, VisualImpl,
+    OwnedFerroPropertyChangedEventArgs, Point, Ref, StyledElementImpl, VisualImpl,
 };
 use ferroui_controls::primitives::popup_positioning::{CustomPopupPlacement, PopupAnchor};
 use ferroui_controls::primitives::TemplatedControlImpl;
-use ferroui_controls::{Button, ButtonImpl, ContentControlImpl, ControlImpl, Panel, PanelImpl};
+use ferroui_controls::{
+    Button, ButtonImpl, ContentControlImpl, ContextMenuEventArgs, ControlImpl, Panel, PanelImpl, RichEditBox,
+    RichEditBoxSelectionChangingEventArgs, RichTextBlock,
+};
 
 use crate::support::TypeModule;
 
@@ -172,6 +175,8 @@ pub struct MyHost {
     opening: RefCell<Vec<MarkupDelegate>>,
     openings: Cell<u32>,
     changed_properties: RefCell<Vec<String>>,
+    context_menu_positions: RefCell<Vec<Point>>,
+    rich_events: RefCell<Vec<String>>,
 }
 
 ferro_class!(MyHost: Panel);
@@ -202,6 +207,18 @@ ferro_class_info!(MyHost {
                 |this: &Ref<MyHost>, sender: Object, e: OwnedFerroPropertyChangedEventArgs| {
                     this.on_property_changed(&sender, &e)
                 },
+            fn OnContextMenuOpening(Option<BoxedValue>, Rc<dyn IRoutedEventArgs>) =>
+                |this: &Ref<MyHost>, sender: Object, e: Rc<dyn IRoutedEventArgs>| {
+                    this.on_context_menu_opening(&sender, e.as_ref())
+                },
+            fn OnRichEvent(Option<BoxedValue>, Rc<dyn IRoutedEventArgs>) =>
+                |this: &Ref<MyHost>, sender: Object, e: Rc<dyn IRoutedEventArgs>| {
+                    this.on_rich_event(&sender, e.as_ref())
+                },
+            fn OnReadonlyContextMenuOpening(Option<BoxedValue>, Rc<dyn IRoutedEventArgs>) =>
+                |this: &Ref<MyHost>, sender: Object, e: Rc<dyn IRoutedEventArgs>| {
+                    this.on_readonly_context_menu_opening(&sender, e.as_ref())
+                },
         ],
         events: [
             // `event EventHandler Opening`, raised with cancellable arguments.
@@ -220,6 +237,8 @@ impl MyHost {
             opening: RefCell::new(Vec::new()),
             openings: Cell::new(0),
             changed_properties: RefCell::new(Vec::new()),
+            context_menu_positions: RefCell::new(Vec::new()),
+            rich_events: RefCell::new(Vec::new()),
         }
     }
 
@@ -257,6 +276,39 @@ impl MyHost {
     /// The names of the properties whose changes the handler of `PropertyChanged` received.
     pub fn changed_properties(&self) -> Vec<String> {
         self.changed_properties.borrow().clone()
+    }
+
+    pub fn context_menu_positions(&self) -> Vec<Point> {
+        self.context_menu_positions.borrow().clone()
+    }
+
+    pub fn on_context_menu_opening(&self, sender: &Object, e: &dyn IRoutedEventArgs) {
+        let editor = from_markup_value::<Ref<RichEditBox>>(sender).expect("the handler receives the rich editor as sender");
+        let args = e.downcast_ref::<ContextMenuEventArgs>().expect("the handler receives the live context-menu arguments");
+        assert_eq!(args.source(), Some(editor.upcast()));
+        self.context_menu_positions.borrow_mut().push(Point::new(args.cursor_left(), args.cursor_top()));
+        args.set_handled(true);
+    }
+
+    pub fn on_readonly_context_menu_opening(&self, sender: &Object, e: &dyn IRoutedEventArgs) {
+        let display = from_markup_value::<Ref<RichTextBlock>>(sender).expect("the handler receives the read-only rich view as sender");
+        let args = e.downcast_ref::<ContextMenuEventArgs>().expect("the handler receives the live context-menu arguments");
+        assert_eq!(args.source(), Some(display.upcast()));
+        self.context_menu_positions.borrow_mut().push(Point::new(args.cursor_left(), args.cursor_top()));
+        args.set_handled(true);
+    }
+
+    pub fn rich_events(&self) -> Vec<String> {
+        self.rich_events.borrow().clone()
+    }
+
+    pub fn on_rich_event(&self, sender: &Object, e: &dyn IRoutedEventArgs) {
+        let editor = from_markup_value::<Ref<RichEditBox>>(sender).expect("the handler receives the rich editor as sender");
+        assert_eq!(e.source(), Some(editor.upcast()));
+        self.rich_events.borrow_mut().push(e.routed_event().expect("a routed event is raised").name().to_owned());
+        if let Some(args) = e.downcast_ref::<RichEditBoxSelectionChangingEventArgs>() {
+            args.set_cancel(true);
+        }
     }
 
     pub fn on_property_changed(&self, sender: &Object, e: &OwnedFerroPropertyChangedEventArgs) {

@@ -221,6 +221,9 @@ ferroui-skia = { version = "=0.4.0", path = "src/Skia/FerroUI.Skia" }
 ferroui-vello = { version = "=0.4.0", path = "src/Vello/FerroUI.Vello" }
 ferroui-harfbuzz = { version = "=0.4.0", path = "src/HarfBuzz/FerroUI.HarfBuzz" }
 bitflags = "2"
+# Strict legacy byte decoding for rich-text exchange. No platform text engine or
+# OS code-page dependency; the codec shares the same implementation on every target.
+encoding_rs = { version = "=0.8.42", default-features = false }
 # A fast hasher for maps keyed by identities and short keys (the TreeDataGrid's recycle pools).
 rustc-hash = "2.1"
 smallvec = "1.16"

@@ -1,4 +1,4 @@
-use crate::documents::TextElement;
+use crate::documents::{TextElement, Typography};
 use crate::primitives::{TextSelectionHandleCanvas, TextSelectorLayer};
 use crate::{Border, Control, ControlImpl, TextBlock, TextBox, TextBoxTextInputMethodClient};
 use ferroui_base::animation::TimeSpan;
@@ -7,21 +7,22 @@ use ferroui_base::interactivity::InteractiveImpl;
 use ferroui_base::layout::{LayoutableImpl, VerticalAlignment};
 use ferroui_base::media::immutable::{ImmutablePen, ImmutableSolidColorBrush};
 use ferroui_base::media::text_formatting::{
-    GenericTextRunProperties, LogicalDirection, TextLayout, TextLayoutOptions, TextRunCache, TextRunProperties,
+    GenericTextRunProperties, LogicalDirection, TextLayout, TextLayoutOptions, TextRunCache,
+    TextRunProperties,
 };
 use ferroui_base::media::{
-    BaselineAlignment, BrushExtensions, Brushes, CharacterHit, Color, DrawingContext, FlowDirection, FontFamily,
-    FontFeatureCollection, FontStretch, FontStyle, FontWeight, IBrush, IImmutableBrush, IPen, TextAlignment,
-    TextDecorations, TextWrapping, Typeface,
+    BaselineAlignment, BrushExtensions, Brushes, CharacterHit, Color, DrawingContext,
+    FlowDirection, FontFamily, FontFeatureCollection, FontStretch, FontStyle, FontWeight, IBrush,
+    IImmutableBrush, IPen, TextAlignment, TextDecorations, TextWrapping, Typeface,
 };
 use ferroui_base::reactive::{Disposable, IDisposable};
 use ferroui_base::threading::{Dispatcher, DispatcherPriority, DispatcherTimer};
 use ferroui_base::utilities::{HandlerList, MathUtilities, ReadOnlyMemory, ValueSpan};
 use ferroui_base::{
-    ferro_class, ferro_property, instantiate, AttachedProperty, FerroObjectImpl, FerroObjectImplExt,
-    FerroProperty, FerroPropertyChangedEventArgs, PixelRect, Point, Rect, Ref, Size, StyledElementImpl,
-    StyledProperty, StyledPropertyMetadata, Visual, VisualImpl, VisualImplExt,
-    VisualTreeAttachmentEventArgs, WeakRef,
+    ferro_class, ferro_property, instantiate, AttachedProperty, FerroObjectImpl,
+    FerroObjectImplExt, FerroProperty, FerroPropertyChangedEventArgs, PixelRect, Point, Rect, Ref,
+    Size, StyledElementImpl, StyledProperty, StyledPropertyMetadata, Visual, VisualImpl,
+    VisualImplExt, VisualTreeAttachmentEventArgs, WeakRef,
 };
 use std::cell::{Cell, RefCell};
 use std::rc::{Rc, Weak};
@@ -61,6 +62,7 @@ pub struct TextPresenter {
     /// The UTF-16 form of `Text` (the outer `None`: not transcoded since the
     /// text changed; the inner one: the text is null).
     utf16_text: RefCell<Option<Option<ReadOnlyMemory<u16>>>>,
+    font_features_subscription: RefCell<Option<Rc<dyn IDisposable>>>,
 }
 
 ferro_class! {
@@ -71,7 +73,9 @@ ferro_class! {
         fn invalidate_text_layout(this);
     }
 }
-ferroui_base::ferro_class_info!(TextPresenter { new: TextPresenter::new });
+ferroui_base::ferro_class_info!(TextPresenter {
+    new: TextPresenter::new
+});
 
 ferroui_base::ferro_impl_classes!(TextPresenter: InteractiveImpl);
 ferroui_base::ferro_impl_classes!(TextPresenter: InputElementImpl);
@@ -79,6 +83,11 @@ ferroui_base::ferro_impl_classes!(TextPresenter: ControlImpl);
 ferroui_base::ferro_impl_classes!(TextPresenter: StyledElementImpl);
 
 impl FerroObjectImpl for TextPresenter {
+    fn constructed(this: &Self) {
+        Self::parent_constructed(this);
+        this.refresh_font_features_subscription();
+    }
+
     fn on_property_changed(this: &Self, change: &FerroPropertyChangedEventArgs<'_>) {
         let property = change.property();
 
@@ -88,12 +97,22 @@ impl FerroObjectImpl for TextPresenter {
 
         Self::parent_on_property_changed(this, change);
 
+        if property == TextElement::font_features_property().as_property() {
+            this.refresh_font_features_subscription();
+        }
+        if Typography::is_property(property) {
+            this.invalidate_text_layout();
+        }
+
         if property == Self::caret_index_property().as_property() {
             this.move_caret_to_text_position(change.get_new_value::<i32>(), false);
         }
 
-        if (property == Self::text_property().as_property() || property == Self::caret_index_property().as_property())
-            && this.preedit_text().is_some_and(|preedit_text| !preedit_text.is_empty())
+        if (property == Self::text_property().as_property()
+            || property == Self::caret_index_property().as_property())
+            && this
+                .preedit_text()
+                .is_some_and(|preedit_text| !preedit_text.is_empty())
         {
             this.set_current_value(Self::preedit_text_property(), None);
         }
@@ -104,9 +123,21 @@ impl FerroObjectImpl for TextPresenter {
 
         match property.name() {
             // Properties that affect shaping: invalidate the run cache + layout.
-            "PreeditText" | "Foreground" | "FontSize" | "FontStyle" | "FontWeight" | "FontFamily" | "FontStretch"
-            | "Text" | "LetterSpacing" | "PasswordChar" | "RevealPassword" | "FlowDirection"
-            | "SelectionForegroundBrush" | "ShowSelectionHighlight" => {
+            "PreeditText"
+            | "Foreground"
+            | "FontSize"
+            | "FontStyle"
+            | "FontWeight"
+            | "FontFamily"
+            | "FontStretch"
+            | "Text"
+            | "LetterSpacing"
+            | "PasswordChar"
+            | "RevealPassword"
+            | "FlowDirection"
+            | "SelectionForegroundBrush"
+            | "ShowSelectionHighlight"
+            | "FontFeatures" => {
                 this.invalidate_text_layout();
             }
             // Properties that do not affect shaping: preserve the run cache.
@@ -138,6 +169,14 @@ impl FerroObjectImpl for TextPresenter {
     }
 }
 
+impl Drop for TextPresenter {
+    fn drop(&mut self) {
+        if let Some(subscription) = self.font_features_subscription.get_mut().take() {
+            subscription.dispose();
+        }
+    }
+}
+
 impl VisualImpl for TextPresenter {
     /// Renders the `TextPresenter` to a drawing context.
     ///
@@ -155,7 +194,11 @@ impl VisualImpl for TextPresenter {
                 let rects = this.text_layout().hit_test_text_range(start, length);
 
                 for rect in rects {
-                    context.fill_rectangle(&selection_brush, PixelRect::from_rect(rect, 1.0).to_rect(1.0), 0.0);
+                    context.fill_rectangle(
+                        &selection_brush,
+                        PixelRect::from_rect(rect, 1.0).to_rect(1.0),
+                        0.0,
+                    );
                 }
             }
         }
@@ -177,9 +220,9 @@ impl VisualImpl for TextPresenter {
         let caret_brush: Rc<dyn IImmutableBrush> = match this.caret_brush() {
             Some(caret_brush) => BrushExtensions::to_immutable(&caret_brush),
             None => {
-                let background_color = this
-                    .background()
-                    .and_then(|background| background.as_solid_color_brush().map(|brush| brush.color()));
+                let background_color = this.background().and_then(|background| {
+                    background.as_solid_color_brush().map(|brush| brush.color())
+                });
 
                 match background_color {
                     Some(background_color) => {
@@ -187,7 +230,9 @@ impl VisualImpl for TextPresenter {
                         let green = !background_color.g;
                         let blue = !background_color.b;
 
-                        Rc::new(ImmutableSolidColorBrush::new(Color::from_rgb(red, green, blue)))
+                        Rc::new(ImmutableSolidColorBrush::new(Color::from_rgb(
+                            red, green, blue,
+                        )))
                     }
                     None => Brushes::black(),
                 }
@@ -237,7 +282,10 @@ impl LayoutableImpl for TextPresenter {
 
         // The text width used here is matching that TextBlock uses to
         // measure the text.
-        let size = Size::new(text_layout.width_including_trailing_whitespace(), text_layout.height());
+        let size = Size::new(
+            text_layout.width_including_trailing_whitespace(),
+            text_layout.height(),
+        );
 
         this.ensure_caret_bounds();
 
@@ -247,7 +295,10 @@ impl LayoutableImpl for TextPresenter {
     fn arrange_override(this: &Self, mut final_size: Size) -> Size {
         let final_width = final_size.width;
 
-        let text_width = this.text_layout().width_including_trailing_whitespace().ceil();
+        let text_width = this
+            .text_layout()
+            .width_including_trailing_whitespace()
+            .ceil();
 
         if final_size.width < text_width {
             final_size = final_size.with_width(text_width);
@@ -258,7 +309,8 @@ impl LayoutableImpl for TextPresenter {
         // NOTE: It is important to check this against the actual final size
         // (excluding the trailing whitespace) to avoid text layout overflow.
         if !MathUtilities::are_close(this.constraint.get().width, final_width) {
-            this.constraint.set(Size::new(final_width.ceil(), f64::INFINITY));
+            this.constraint
+                .set(Size::new(final_width.ceil(), f64::INFINITY));
 
             this.dispose_text_layout();
 
@@ -275,11 +327,18 @@ impl LayoutableImpl for TextPresenter {
 impl TextPresenterImpl for TextPresenter {
     fn create_text_layout(this: &Self) -> Rc<TextLayout> {
         let caret_index = this.caret_index();
-        let preedit_text = this.preedit_text().filter(|preedit_text| !preedit_text.is_empty());
-        let preedit_text = preedit_text.map(|preedit_text| ReadOnlyMemory::<u16>::from_str(&preedit_text));
+        let preedit_text = this
+            .preedit_text()
+            .filter(|preedit_text| !preedit_text.is_empty());
+        let preedit_text =
+            preedit_text.map(|preedit_text| ReadOnlyMemory::<u16>::from_str(&preedit_text));
         let text = Self::get_combined_text(this.utf16_text(), caret_index, preedit_text.as_ref());
-        let typeface =
-            Typeface::with_style(this.font_family(), this.font_style(), this.font_weight(), this.font_stretch());
+        let typeface = Typeface::with_style(
+            this.font_family(),
+            this.font_style(),
+            this.font_weight(),
+            this.font_stretch(),
+        );
         let selection_start = this.selection_start();
         let selection_end = this.selection_end();
         let start = selection_start.min(selection_end);
@@ -290,32 +349,35 @@ impl TextPresenterImpl for TextPresenter {
         let foreground = this.foreground();
 
         if let Some(preedit_text) = &preedit_text {
-            let properties: Rc<dyn TextRunProperties> = Rc::new(GenericTextRunProperties::with_all(
-                typeface.clone(),
-                this.font_size(),
-                Some(TextDecorations::underline()),
-                foreground,
-                None,
-                BaselineAlignment::Baseline,
-                None,
-                this.font_features(),
-            ));
+            let properties: Rc<dyn TextRunProperties> =
+                Rc::new(GenericTextRunProperties::with_all(
+                    typeface.clone(),
+                    this.font_size(),
+                    Some(TextDecorations::underline()),
+                    foreground,
+                    None,
+                    BaselineAlignment::Baseline,
+                    None,
+                    Typography::effective_font_features(this),
+                ));
 
-            let preedit_highlight = ValueSpan::new(caret_index, preedit_text.len() as i32, properties);
+            let preedit_highlight =
+                ValueSpan::new(caret_index, preedit_text.len() as i32, properties);
 
             text_style_overrides = Some(Rc::new([preedit_highlight]));
         } else if this.show_selection_highlight() && length > 0 {
             if let Some(selection_foreground_brush) = this.selection_foreground_brush() {
-                let properties: Rc<dyn TextRunProperties> = Rc::new(GenericTextRunProperties::with_all(
-                    typeface.clone(),
-                    this.font_size(),
-                    None,
-                    Some(selection_foreground_brush),
-                    None,
-                    BaselineAlignment::Baseline,
-                    None,
-                    this.font_features(),
-                ));
+                let properties: Rc<dyn TextRunProperties> =
+                    Rc::new(GenericTextRunProperties::with_all(
+                        typeface.clone(),
+                        this.font_size(),
+                        None,
+                        Some(selection_foreground_brush),
+                        None,
+                        BaselineAlignment::Baseline,
+                        None,
+                        Typography::effective_font_features(this),
+                    ));
 
                 text_style_overrides = Some(Rc::new([ValueSpan::new(start, length, properties)]));
             }
@@ -340,7 +402,12 @@ impl TextPresenterImpl for TextPresenter {
                 text_style_overrides,
             )
         } else {
-            this.create_text_layout_internal(this.constraint.get(), text, typeface, text_style_overrides)
+            this.create_text_layout_internal(
+                this.constraint.get(),
+                text,
+                typeface,
+                text_style_overrides,
+            )
         }
     }
 
@@ -522,6 +589,7 @@ impl TextPresenter {
             caret_bounds_changed: HandlerList::new(),
             current_im_client: RefCell::new(None),
             utf16_text: RefCell::new(None),
+            font_features_subscription: RefCell::new(None),
         }
     }
 
@@ -602,6 +670,22 @@ impl TextPresenter {
 
     pub fn set_font_features(&self, value: Option<FontFeatureCollection>) {
         TextElement::set_font_features_on(self, value)
+    }
+
+    fn refresh_font_features_subscription(&self) {
+        let previous = self.font_features_subscription.borrow_mut().take();
+        if let Some(previous) = previous {
+            previous.dispose();
+        }
+        let subscription = self.font_features().map(|features| {
+            let weak = self.to_ref().downgrade();
+            features.collection_changed(move |_| {
+                if let Some(this) = weak.upgrade() {
+                    this.invalidate_text_layout();
+                }
+            })
+        });
+        *self.font_features_subscription.borrow_mut() = subscription;
     }
 
     /// The font size.
@@ -800,13 +884,15 @@ impl TextPresenter {
     /// presenter. The client refers to the presenter, so the presenter
     /// refers to it weakly.
     pub fn current_im_client(&self) -> Option<Rc<TextBoxTextInputMethodClient>> {
-        self.current_im_client.borrow().as_ref().and_then(Weak::upgrade)
+        self.current_im_client
+            .borrow()
+            .as_ref()
+            .and_then(Weak::upgrade)
     }
 
     pub fn set_current_im_client(&self, value: Option<Rc<TextBoxTextInputMethodClient>>) {
         *self.current_im_client.borrow_mut() = value.as_ref().map(Rc::downgrade);
     }
-
 
     /// The UTF-16 form of `Text`, transcoded once per text.
     fn utf16_text(&self) -> Option<ReadOnlyMemory<u16>> {
@@ -814,7 +900,9 @@ impl TextPresenter {
             return utf16_text.clone();
         }
 
-        let utf16_text = self.text().map(|text| ReadOnlyMemory::<u16>::from_str(&text));
+        let utf16_text = self
+            .text()
+            .map(|text| ReadOnlyMemory::<u16>::from_str(&text));
         *self.utf16_text.borrow_mut() = Some(utf16_text.clone());
         utf16_text
     }
@@ -830,10 +918,22 @@ impl TextPresenter {
         typeface: Typeface,
         text_style_overrides: Option<Rc<[ValueSpan<Rc<dyn TextRunProperties>>]>>,
     ) -> Rc<TextLayout> {
-        let max_width = if MathUtilities::is_zero(constraint.width) { f64::INFINITY } else { constraint.width };
-        let max_height = if MathUtilities::is_zero(constraint.height) { f64::INFINITY } else { constraint.height };
+        let max_width = if MathUtilities::is_zero(constraint.width) {
+            f64::INFINITY
+        } else {
+            constraint.width
+        };
+        let max_height = if MathUtilities::is_zero(constraint.height) {
+            f64::INFINITY
+        } else {
+            constraint.height
+        };
 
-        let text_run_cache = self.text_run_cache.borrow_mut().get_or_insert_with(|| Rc::new(TextRunCache::new())).clone();
+        let text_run_cache = self
+            .text_run_cache
+            .borrow_mut()
+            .get_or_insert_with(|| Rc::new(TextRunCache::new()))
+            .clone();
 
         Rc::new(TextLayout::from_utf16(
             text.unwrap_or_default(),
@@ -851,7 +951,7 @@ impl TextPresenter {
                 line_height: self.line_height(),
                 letter_spacing: self.letter_spacing(),
                 max_lines: 0,
-                font_features: self.font_features(),
+                font_features: Typography::effective_font_features(self),
                 text_style_overrides,
                 text_run_cache: Some(text_run_cache),
             },
@@ -885,10 +985,13 @@ impl TextPresenter {
     /// The end points of the line the caret is drawn as.
     pub(crate) fn get_caret_points(&self) -> (Point, Point) {
         let last_character_hit = self.last_character_hit.get();
-        let caret_index = last_character_hit.first_character_index() + last_character_hit.trailing_length();
+        let caret_index =
+            last_character_hit.first_character_index() + last_character_hit.trailing_length();
         let text_layout = self.text_layout();
-        let line_index =
-            text_layout.get_line_index_from_character_index(caret_index, last_character_hit.trailing_length() > 0);
+        let line_index = text_layout.get_line_index_from_character_index(
+            caret_index,
+            last_character_hit.trailing_length() > 0,
+        );
         let text_line = &text_layout.text_lines()[line_index as usize];
 
         let caret_bounds = self.caret_bounds.get();
@@ -897,7 +1000,8 @@ impl TextPresenter {
         let y = caret_bounds.y.floor() + 0.5;
         let b = caret_bounds.bottom().ceil() - 0.5;
 
-        if caret_bounds.x > 0.0 && caret_bounds.x >= text_line.width_including_trailing_whitespace() {
+        if caret_bounds.x > 0.0 && caret_bounds.x >= text_line.width_including_trailing_whitespace()
+        {
             x -= 1.0;
         }
 
@@ -971,7 +1075,11 @@ impl TextPresenter {
 
         self.ensure_caret_timer();
 
-        let is_enabled = self.caret_timer.borrow().as_ref().is_some_and(|caret_timer| caret_timer.is_enabled());
+        let is_enabled = self
+            .caret_timer
+            .borrow()
+            .as_ref()
+            .is_some_and(|caret_timer| caret_timer.is_enabled());
 
         if is_enabled {
             self.caret_blink.set(true);
@@ -1010,7 +1118,8 @@ impl TextPresenter {
         caret_index: i32,
         preedit_text: Option<&ReadOnlyMemory<u16>>,
     ) -> Option<ReadOnlyMemory<u16>> {
-        let Some(preedit_text) = preedit_text.filter(|preedit_text| !preedit_text.is_empty()) else {
+        let Some(preedit_text) = preedit_text.filter(|preedit_text| !preedit_text.is_empty())
+        else {
             return text;
         };
 
@@ -1081,11 +1190,17 @@ impl TextPresenter {
     /// line's caret hit walkers, so positions on cluster or run boundaries
     /// (the end of a preedit shaped with a fallback font, a surrogate pair)
     /// resolve to a hit the layout can measure.
-    fn get_caret_character_hit(text_layout: &TextLayout, text_position: i32, trailing_edge: bool) -> CharacterHit {
-        let line_index = text_layout.get_line_index_from_character_index(text_position, trailing_edge);
+    fn get_caret_character_hit(
+        text_layout: &TextLayout,
+        text_position: i32,
+        trailing_edge: bool,
+    ) -> CharacterHit {
+        let line_index =
+            text_layout.get_line_index_from_character_index(text_position, trailing_edge);
         let text_line = &text_layout.text_lines()[line_index as usize];
 
-        let mut character_hit = text_line.get_previous_caret_character_hit(CharacterHit::new(text_position));
+        let mut character_hit =
+            text_line.get_previous_caret_character_hit(CharacterHit::new(text_position));
 
         let next_caret_character_hit = text_line.get_next_caret_character_hit(character_hit);
 
@@ -1093,7 +1208,8 @@ impl TextPresenter {
             character_hit = next_caret_character_hit;
         }
 
-        if text_position == character_hit.first_character_index() + character_hit.trailing_length() {
+        if text_position == character_hit.first_character_index() + character_hit.trailing_length()
+        {
             return character_hit;
         }
 
@@ -1107,9 +1223,13 @@ impl TextPresenter {
     pub fn move_caret_to_text_position(&self, text_position: i32, trailing_edge: bool) {
         let text_layout = self.text_layout();
 
-        self.update_caret(Self::get_caret_character_hit(&text_layout, text_position, trailing_edge), true);
+        self.update_caret(
+            Self::get_caret_character_hit(&text_layout, text_position, trailing_edge),
+            true,
+        );
 
-        self.navigation_position.set(self.caret_bounds.get().position());
+        self.navigation_position
+            .set(self.caret_bounds.get().position());
 
         self.caret_changed();
     }
@@ -1119,7 +1239,8 @@ impl TextPresenter {
 
         self.update_caret(hit.character_hit(), true);
 
-        self.navigation_position.set(self.caret_bounds.get().position());
+        self.navigation_position
+            .set(self.caret_bounds.get().position());
 
         self.caret_changed();
     }
@@ -1136,7 +1257,10 @@ impl TextPresenter {
             return;
         }
 
-        let Point { x: current_x, y: mut current_y } = self.navigation_position.get();
+        let Point {
+            x: current_x,
+            y: mut current_y,
+        } = self.navigation_position.get();
 
         if direction == LogicalDirection::Forward {
             if line_index + 1 > text_layout.text_lines().len() as i32 - 1 {
@@ -1162,7 +1286,8 @@ impl TextPresenter {
 
         self.move_caret_to_point(Point::new(current_x, current_y));
 
-        self.navigation_position.set(navigation_position.with_y(self.caret_bounds.get().y));
+        self.navigation_position
+            .set(navigation_position.with_y(self.caret_bounds.get().y));
 
         self.caret_changed();
     }
@@ -1218,7 +1343,8 @@ impl TextPresenter {
         let text_length = text.len() as i32;
 
         let mut character_hit = self.last_character_hit.get();
-        let mut caret_index = character_hit.first_character_index() + character_hit.trailing_length();
+        let mut caret_index =
+            character_hit.first_character_index() + character_hit.trailing_length();
 
         let text_layout = self.text_layout();
         let text_lines = text_layout.text_lines();
@@ -1235,7 +1361,8 @@ impl TextPresenter {
 
                 character_hit = text_line.get_next_caret_character_hit(character_hit);
 
-                caret_index = character_hit.first_character_index() + character_hit.trailing_length();
+                caret_index =
+                    character_hit.first_character_index() + character_hit.trailing_length();
 
                 if text_line.trailing_whitespace_length() > 0
                     && caret_index == text_line.first_text_source_index() + text_line.length()
@@ -1249,7 +1376,8 @@ impl TextPresenter {
                     break;
                 }
 
-                if caret_index - text_line.new_line_length() == text_line.first_text_source_index() + text_line.length()
+                if caret_index - text_line.new_line_length()
+                    == text_line.first_text_source_index() + text_line.length()
                 {
                     break;
                 }
@@ -1268,7 +1396,8 @@ impl TextPresenter {
 
                 character_hit = text_line.get_previous_caret_character_hit(character_hit);
 
-                caret_index = character_hit.first_character_index() + character_hit.trailing_length();
+                caret_index =
+                    character_hit.first_character_index() + character_hit.trailing_length();
 
                 if caret_index >= self.caret_index() {
                     line_index -= 1;
@@ -1296,7 +1425,8 @@ impl TextPresenter {
 
         self.update_caret(character_hit, true);
 
-        self.navigation_position.set(self.caret_bounds.get().position());
+        self.navigation_position
+            .set(self.caret_bounds.get().position());
 
         self.caret_changed();
     }
@@ -1332,14 +1462,18 @@ impl TextPresenter {
         self.caret_bounds_dirty.set(false);
 
         if let Some(pending_position) = self.pending_caret_text_position.take() {
-            self.last_character_hit.set(Self::get_caret_character_hit(&text_layout, pending_position, false));
+            self.last_character_hit.set(Self::get_caret_character_hit(
+                &text_layout,
+                pending_position,
+                false,
+            ));
         }
 
         let character_hit = self.last_character_hit.get();
         let caret_index = character_hit.first_character_index() + character_hit.trailing_length();
 
-        let line_index =
-            text_layout.get_line_index_from_character_index(caret_index, character_hit.trailing_length() > 0);
+        let line_index = text_layout
+            .get_line_index_from_character_index(caret_index, character_hit.trailing_length() > 0);
         let text_lines = text_layout.text_lines();
         let text_line = &text_lines[line_index as usize];
         let distance_x = text_line.get_distance_from_character_hit(character_hit);
@@ -1367,7 +1501,8 @@ impl TextPresenter {
     fn on_preedit_changed(&self, preedit_text: Option<&str>, cursor_position: Option<i32>) {
         match preedit_text.filter(|preedit_text| !preedit_text.is_empty()) {
             None => {
-                self.pending_caret_text_position.set(Some(self.caret_index()));
+                self.pending_caret_text_position
+                    .set(Some(self.caret_index()));
                 self.caret_bounds_dirty.set(true);
 
                 self.ensure_caret_bounds();
@@ -1376,13 +1511,16 @@ impl TextPresenter {
                 let preedit_length = preedit_text.encode_utf16().count() as i32;
 
                 let cursor_pos = match cursor_position {
-                    Some(cursor_position) if cursor_position >= 0 && cursor_position <= preedit_length => {
+                    Some(cursor_position)
+                        if cursor_position >= 0 && cursor_position <= preedit_length =>
+                    {
                         cursor_position
                     }
                     _ => preedit_length,
                 };
 
-                self.pending_caret_text_position.set(Some(self.caret_index() + cursor_pos));
+                self.pending_caret_text_position
+                    .set(Some(self.caret_index() + cursor_pos));
                 self.caret_bounds_dirty.set(true);
 
                 self.invalidate_measure();

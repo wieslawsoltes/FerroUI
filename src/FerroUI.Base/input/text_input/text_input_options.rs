@@ -1,4 +1,5 @@
 use super::{TextInputContentType, TextInputReturnKeyType};
+use crate::input::InputScopeNameValue;
 use crate::{ferro_property, AttachedProperty, FerroProperty, StyledElement, StyledPropertyOptions};
 use std::rc::Rc;
 
@@ -10,6 +11,9 @@ use std::rc::Rc;
 pub struct TextInputOptions {
     /// The content type (mostly for determining the shape of the virtual keyboard).
     pub content_type: TextInputContentType,
+
+    /// Ordered, immutable WinUI input scope hints. Empty or absent uses ContentType.
+    pub input_scope_names: Option<Rc<[InputScopeNameValue]>>,
 
     /// Determines what the Return key says and how it behaves.
     pub return_key_type: TextInputReturnKeyType,
@@ -41,6 +45,7 @@ crate::ferro_static_type!(TextInputOptions);
 crate::ferro_properties! {
     impl TextInputOptions, also [
         TextInputOptions::content_type_property,
+        TextInputOptions::input_scope_names_property,
         TextInputOptions::return_key_type_property,
         TextInputOptions::multiline_property,
         TextInputOptions::lowercase_property,
@@ -58,6 +63,7 @@ impl TextInputOptions {
     pub fn from_styled_element(ferro_object: &StyledElement) -> TextInputOptions {
         TextInputOptions {
             content_type: Self::get_content_type(ferro_object),
+            input_scope_names: Self::get_input_scope_names(ferro_object),
             return_key_type: Self::get_return_key_type(ferro_object),
             multiline: Self::get_multiline(ferro_object),
             auto_capitalization: Self::get_auto_capitalization(ferro_object),
@@ -67,6 +73,30 @@ impl TextInputOptions {
             show_suggestions: Self::get_show_suggestions(ferro_object),
             locale_hints: Self::get_locale_hints(ferro_object),
         }
+    }
+
+    /// The first explicit scope, retaining list order without collapsing the transport.
+    pub fn effective_input_scope(&self) -> Option<InputScopeNameValue> {
+        self.input_scope_names.as_deref().and_then(|names| names.first().copied())
+    }
+
+    /// Best matching legacy content hint for platforms without an exact scope mapping.
+    pub fn effective_content_type(&self) -> TextInputContentType {
+        self.effective_input_scope().map_or(self.content_type, InputScopeNameValue::content_type)
+    }
+
+    ferro_property!(for TextInputOptions;
+        /// Defines the inherited immutable input-scope snapshot.
+        pub fn input_scope_names_property() -> AttachedProperty<Option<Rc<[InputScopeNameValue]>>> {
+            FerroProperty::register_attached_with::<TextInputOptions, StyledElement, _>(
+                "InputScopeNames", StyledPropertyOptions::new(None).inherits(true))
+        }
+    );
+    pub fn set_input_scope_names(ferro_object: &StyledElement, value: Option<Rc<[InputScopeNameValue]>>) {
+        ferro_object.set_value(Self::input_scope_names_property(), value)
+    }
+    pub fn get_input_scope_names(ferro_object: &StyledElement) -> Option<Rc<[InputScopeNameValue]>> {
+        ferro_object.get_value(Self::input_scope_names_property())
     }
 
     /// The default options.

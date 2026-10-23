@@ -66,6 +66,7 @@ pub(super) fn page_sections() -> (Vec<Rc<HomeSection>>, Vec<UnavailablePage>) {
                 Rc::new(crate::pages::TextBoxPage::demos().snapshot().to_vec()),
             );
             s.add("/Pages/TextBlockPage.xaml", "TextBlock", Icons::TEXT_INPUT, "Styled read-only text display");
+            s.add("/Pages/RichTextPage.xaml", "Rich Text", Icons::TEXT_INPUT, "Rich paragraph editing, shared document views and linked columns");
         }),
         section("Collections & Data", Icons::LISTS, &mut unavailable, |s| {
             s.add("/Pages/CarouselPage.xaml", "Carousel", Icons::SLIDES, "Cycle through a collection of items");

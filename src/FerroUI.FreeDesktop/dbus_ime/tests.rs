@@ -9,22 +9,26 @@ use super::fcitx::{FcitxCapabilityFlags, FcitxKeyState, FcitxX11TextInputMethod}
 use super::ibus::{IBusCapability, IBusModifierMask, IBusX11TextInputMethod};
 use super::DBusTextInputMethodBase;
 use crate::ix11_input_method::{IX11InputMethodControl, X11InputMethodForwardedKey};
-use crate::test_support::{emit_from_service, log, pump_until, scope, Log, ServiceBuilder, TestConnections};
+use crate::test_support::{
+    emit_from_service, log, pump_until, scope, Log, ServiceBuilder, TestConnections,
+};
 use ferroui_base::input::raw::{IRawInputEventArgs, RawKeyEventArgs, RawKeyEventType};
 use ferroui_base::input::text_input::{
-    ITextInputMethodImpl, TextInputContentType, TextInputMethodClient, TextInputMethodClientEvents, TextInputOptions,
-    TextSelection,
+    ITextInputMethodImpl, TextInputContentType, TextInputMethodClient, TextInputMethodClientEvents,
+    TextInputOptions, TextSelection,
 };
 use ferroui_base::input::{
-    FocusManager, IInputDevice, IInputRoot, InputElement, Key, KeyDeviceType, KeyModifiers, PhysicalKey,
-    RawInputModifiers,
+    FocusManager, IInputDevice, IInputRoot, InputElement, Key, KeyDeviceType, KeyModifiers,
+    PhysicalKey, RawInputModifiers,
 };
 use ferroui_base::{PixelPoint, Rect, Ref, Visual};
 use std::any::Any;
 use std::cell::RefCell;
 use std::collections::HashMap;
 use std::rc::Rc;
+use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::{Arc, Mutex};
+use std::task::{Poll, Waker};
 use zbus::zvariant::{ObjectPath, OwnedObjectPath, Structure, Value};
 
 const IBUS_NAME: &str = "org.freedesktop.portal.IBus";
@@ -51,20 +55,76 @@ fn ibus_text(text: &str) -> Value<'static> {
 // ---------------------------------------------------------------------
 // IBus.
 
+#[derive(Default)]
+struct DeferredCall {
+    state: Mutex<(bool, Option<Waker>)>,
+}
+
+impl DeferredCall {
+    fn hold(&self) {
+        self.state.lock().unwrap().0 = true;
+    }
+
+    fn release(&self) {
+        let waker = {
+            let mut state = self.state.lock().unwrap();
+            state.0 = false;
+            state.1.take()
+        };
+        if let Some(waker) = waker {
+            waker.wake();
+        }
+    }
+
+    async fn wait(&self) {
+        futures_util::future::poll_fn(|cx| {
+            let mut state = self.state.lock().unwrap();
+            if state.0 {
+                state.1 = Some(cx.waker().clone());
+                Poll::Pending
+            } else {
+                Poll::Ready(())
+            }
+        })
+        .await;
+    }
+}
+
+#[derive(Default)]
+struct IBusCalls {
+    create: DeferredCall,
+    options: DeferredCall,
+    fail_next_options: AtomicBool,
+    signal_next_options: AtomicBool,
+}
+
 struct IBusPortal {
     log: Log,
+    calls: Arc<IBusCalls>,
 }
 
 #[zbus::interface(name = "org.freedesktop.IBus.Portal")]
 impl IBusPortal {
-    fn create_input_context(&self, client_name: &str) -> OwnedObjectPath {
-        log(&self.log, format!("CreateInputContext({})", if client_name.is_empty() { "empty" } else { "name" }));
+    async fn create_input_context(&self, client_name: &str) -> OwnedObjectPath {
+        log(
+            &self.log,
+            format!(
+                "CreateInputContext({})",
+                if client_name.is_empty() {
+                    "empty"
+                } else {
+                    "name"
+                }
+            ),
+        );
+        self.calls.create.wait().await;
         ObjectPath::try_from(IBUS_CONTEXT_PATH).unwrap().into()
     }
 }
 
 struct IBusContext {
     log: Log,
+    calls: Arc<IBusCalls>,
 }
 
 #[zbus::interface(name = "org.freedesktop.IBus.InputContext")]
@@ -76,13 +136,23 @@ impl IBusContext {
         state: u32,
         #[zbus(connection)] connection: &zbus::Connection,
     ) -> zbus::fdo::Result<bool> {
-        log(&self.log, format!("ProcessKeyEvent({keyval:#x}, {keycode}, {state:#x})"));
+        log(
+            &self.log,
+            format!("ProcessKeyEvent({keyval:#x}, {keycode}, {state:#x})"),
+        );
         if keyval == KEY_FAILS {
             return Err(zbus::fdo::Error::Failed("the engine is gone".to_string()));
         }
         if keyval == KEY_A && state & IBusModifierMask::RELEASE_MASK.bits() == 0 {
             // The key is consumed and becomes committed text.
-            emit_from_service(connection, IBUS_CONTEXT_PATH, "org.freedesktop.IBus.InputContext", "CommitText", &(ibus_text("あ"),)).await;
+            emit_from_service(
+                connection,
+                IBUS_CONTEXT_PATH,
+                "org.freedesktop.IBus.InputContext",
+                "CommitText",
+                &(ibus_text("あ"),),
+            )
+            .await;
             return Ok(true);
         }
         Ok(false)
@@ -103,11 +173,51 @@ impl IBusContext {
     async fn reset(&self, #[zbus(connection)] connection: &zbus::Connection) {
         log(&self.log, "Reset");
         // What IBus does: it commits the pre-edit while it is being reset.
-        emit_from_service(connection, IBUS_CONTEXT_PATH, "org.freedesktop.IBus.InputContext", "CommitText", &(ibus_text("left over"),)).await;
+        emit_from_service(
+            connection,
+            IBUS_CONTEXT_PATH,
+            "org.freedesktop.IBus.InputContext",
+            "CommitText",
+            &(ibus_text("left over"),),
+        )
+        .await;
     }
 
     fn set_capabilities(&self, caps: u32) {
         log(&self.log, format!("SetCapabilities({caps})"));
+    }
+
+    // A write-only property, matching the actual IBus (uu) protocol. The
+    // roundtrip tests fail if the proxy accidentally calls a method instead.
+    #[zbus(property)]
+    async fn set_content_type(
+        &self,
+        value: (u32, u32),
+        #[zbus(connection)] connection: &zbus::Connection,
+    ) -> zbus::fdo::Result<()> {
+        log(
+            &self.log,
+            format!("SetContentType({}, {})", value.0, value.1),
+        );
+        let fail = self.calls.fail_next_options.swap(false, Ordering::SeqCst);
+        if self.calls.signal_next_options.swap(false, Ordering::SeqCst) {
+            emit_from_service(
+                connection,
+                IBUS_CONTEXT_PATH,
+                "org.freedesktop.IBus.InputContext",
+                "CommitText",
+                &(ibus_text("options callback"),),
+            )
+            .await;
+        }
+        self.calls.options.wait().await;
+        if fail {
+            Err(zbus::fdo::Error::Failed(
+                "the old options reply failed".to_string(),
+            ))
+        } else {
+            Ok(())
+        }
     }
 }
 
@@ -134,7 +244,13 @@ impl Fcitx4Method {
     #[zbus(name = "CreateICv3")]
     fn create_icv3(&self, appname: &str, pid: i32) -> (i32, bool, u32, u32, u32, u32) {
         let own_pid = pid == std::process::id() as i32;
-        log(&self.log, format!("CreateICv3(name: {}, own pid: {own_pid})", !appname.is_empty()));
+        log(
+            &self.log,
+            format!(
+                "CreateICv3(name: {}, own pid: {own_pid})",
+                !appname.is_empty()
+            ),
+        );
         (7, true, 0, 0, 0, 0)
     }
 }
@@ -179,9 +295,19 @@ impl Fcitx4Context {
         time: u32,
         #[zbus(connection)] connection: &zbus::Connection,
     ) -> i32 {
-        log(&self.log, format!("ProcessKeyEvent({keyval:#x}, {keycode}, {state}, {type_}, {time})"));
+        log(
+            &self.log,
+            format!("ProcessKeyEvent({keyval:#x}, {keycode}, {state}, {type_}, {time})"),
+        );
         if keyval == KEY_A && type_ == 0 {
-            emit_from_service(connection, FCITX4_CONTEXT_PATH, "org.fcitx.Fcitx.InputContext", "CommitString", &("四",)).await;
+            emit_from_service(
+                connection,
+                FCITX4_CONTEXT_PATH,
+                "org.fcitx.Fcitx.InputContext",
+                "CommitString",
+                &("四",),
+            )
+            .await;
             return 1;
         }
         0
@@ -196,8 +322,14 @@ struct Fcitx5Method {
 impl Fcitx5Method {
     fn create_input_context(&self, arg0: Vec<(String, String)>) -> (OwnedObjectPath, Vec<u8>) {
         let keys: Vec<&str> = arg0.iter().map(|(key, _)| key.as_str()).collect();
-        log(&self.log, format!("CreateInputContext({})", keys.join(", ")));
-        (ObjectPath::try_from(FCITX5_CONTEXT_PATH).unwrap().into(), vec![1, 2, 3])
+        log(
+            &self.log,
+            format!("CreateInputContext({})", keys.join(", ")),
+        );
+        (
+            ObjectPath::try_from(FCITX5_CONTEXT_PATH).unwrap().into(),
+            vec![1, 2, 3],
+        )
     }
 }
 
@@ -241,9 +373,19 @@ impl Fcitx5Context {
         time: u32,
         #[zbus(connection)] connection: &zbus::Connection,
     ) -> bool {
-        log(&self.log, format!("ProcessKeyEvent({keyval:#x}, {keycode}, {state}, {type_}, {time})"));
+        log(
+            &self.log,
+            format!("ProcessKeyEvent({keyval:#x}, {keycode}, {state}, {type_}, {time})"),
+        );
         if keyval == KEY_A && !type_ {
-            emit_from_service(connection, FCITX5_CONTEXT_PATH, "org.fcitx.Fcitx.InputContext1", "CommitString", &("五",)).await;
+            emit_from_service(
+                connection,
+                FCITX5_CONTEXT_PATH,
+                "org.fcitx.Fcitx.InputContext1",
+                "CommitString",
+                &("五",),
+            )
+            .await;
             return true;
         }
         false
@@ -256,6 +398,7 @@ impl Fcitx5Context {
 struct TestBus {
     connections: TestConnections,
     log: Log,
+    ibus_calls: Arc<IBusCalls>,
 }
 
 impl std::ops::Deref for TestBus {
@@ -269,13 +412,27 @@ impl std::ops::Deref for TestBus {
 impl TestBus {
     fn new() -> TestBus {
         let log: Log = Arc::new(Mutex::new(Vec::new()));
+        let ibus_calls = Arc::new(IBusCalls::default());
 
         let serve = {
             let log = log.clone();
+            let calls = ibus_calls.clone();
             move |builder: ServiceBuilder| {
                 builder
-                    .serve_at("/org/freedesktop/IBus", IBusPortal { log: log.clone() })?
-                    .serve_at(IBUS_CONTEXT_PATH, IBusContext { log: log.clone() })?
+                    .serve_at(
+                        "/org/freedesktop/IBus",
+                        IBusPortal {
+                            log: log.clone(),
+                            calls: calls.clone(),
+                        },
+                    )?
+                    .serve_at(
+                        IBUS_CONTEXT_PATH,
+                        IBusContext {
+                            log: log.clone(),
+                            calls,
+                        },
+                    )?
                     .serve_at(IBUS_CONTEXT_PATH, IBusService { log: log.clone() })?
                     .serve_at("/inputmethod", Fcitx4Method { log: log.clone() })?
                     .serve_at(FCITX4_CONTEXT_PATH, Fcitx4Context { log: log.clone() })?
@@ -284,7 +441,11 @@ impl TestBus {
             }
         };
 
-        TestBus { connections: TestConnections::new("/org/freedesktop/IBus", serve), log }
+        TestBus {
+            connections: TestConnections::new("/org/freedesktop/IBus", serve),
+            log,
+            ibus_calls,
+        }
     }
 
     fn take_log(&self) -> Vec<String> {
@@ -310,7 +471,10 @@ struct TestClient {
 
 impl TestClient {
     fn new(supports_preedit: bool) -> Rc<TestClient> {
-        Rc::new(TestClient { supports_preedit, ..Default::default() })
+        Rc::new(TestClient {
+            supports_preedit,
+            ..Default::default()
+        })
     }
 
     fn take_preedit(&self) -> Vec<(Option<String>, Option<i32>)> {
@@ -350,7 +514,9 @@ impl TextInputMethodClient for TestClient {
     fn set_selection(&self, _value: TextSelection) {}
 
     fn set_preedit_text_with_cursor(&self, preedit_text: Option<&str>, cursor_pos: Option<i32>) {
-        self.preedit.borrow_mut().push((preedit_text.map(str::to_string), cursor_pos));
+        self.preedit
+            .borrow_mut()
+            .push((preedit_text.map(str::to_string), cursor_pos));
     }
 }
 
@@ -394,7 +560,11 @@ impl IInputRoot for TestRoot {
     fn pointer_over_invalidated(&self) {}
 }
 
-fn key(type_: RawKeyEventType, modifiers: RawInputModifiers, timestamp: u64) -> Rc<dyn IRawInputEventArgs> {
+fn key(
+    type_: RawKeyEventType,
+    modifiers: RawInputModifiers,
+    timestamp: u64,
+) -> Rc<dyn IRawInputEventArgs> {
     Rc::new(RawKeyEventArgs::new(
         Rc::new(TestDevice),
         timestamp,
@@ -419,9 +589,13 @@ fn handle(
     let handled = im.handle_event_async(args, key_val as i32, key_code);
     {
         let answer = answer.clone();
-        drop(ferroui_base::threading::Dispatcher::ui_thread().invoke_async_task_local(move || async move {
-            *answer.borrow_mut() = Some(handled.await);
-        }));
+        drop(
+            ferroui_base::threading::Dispatcher::ui_thread().invoke_async_task_local(
+                move || async move {
+                    *answer.borrow_mut() = Some(handled.await);
+                },
+            ),
+        );
     }
     pump_until(|| answer.borrow().is_some());
     let answer = answer.borrow_mut().take().unwrap();
@@ -434,14 +608,19 @@ struct Recorded {
 }
 
 fn record(im: &Rc<DBusTextInputMethodBase>) -> Recorded {
-    let recorded = Recorded { commits: Rc::default(), forwarded: Rc::default() };
+    let recorded = Recorded {
+        commits: Rc::default(),
+        forwarded: Rc::default(),
+    };
     {
         let commits = recorded.commits.clone();
-        im.commit().subscribe(move |text| commits.borrow_mut().push(text));
+        im.commit()
+            .subscribe(move |text| commits.borrow_mut().push(text));
     }
     {
         let forwarded = recorded.forwarded.clone();
-        im.forward_key().subscribe(move |key| forwarded.borrow_mut().push(key));
+        im.forward_key()
+            .subscribe(move |key| forwarded.borrow_mut().push(key));
     }
     recorded
 }
@@ -476,7 +655,10 @@ fn ibus_connects_when_its_portal_is_on_the_bus_and_follows_focus() {
 
     let client = TestClient::new(true);
     im.set_client(Some(client.clone()));
-    bus.expect_calls(&["FocusIn", &caps(IBusCapability::CAP_FOCUS | IBusCapability::CAP_PREEDIT_TEXT)]);
+    bus.expect_calls(&[
+        "FocusIn",
+        &caps(IBusCapability::CAP_FOCUS | IBusCapability::CAP_PREEDIT_TEXT),
+    ]);
     assert!(im.is_enabled());
 
     // The same state again is not reported again.
@@ -553,19 +735,36 @@ fn ibus_takes_keys_commits_text_and_forwards_keys() {
     bus.expect_calls(&["FocusIn", &caps(IBusCapability::CAP_FOCUS)]);
 
     // A key the engine consumes: it commits text instead.
-    assert!(handle(&im, key(RawKeyEventType::KeyDown, RawInputModifiers::empty(), 100), KEY_A, 38));
+    assert!(handle(
+        &im,
+        key(RawKeyEventType::KeyDown, RawInputModifiers::empty(), 100),
+        KEY_A,
+        38
+    ));
     bus.expect_calls(&["ProcessKeyEvent(0x61, 38, 0x0)"]);
     assert_eq!(*recorded.commits.borrow(), ["あ"]);
 
     // Its release, and a key with modifiers, are not consumed.
-    assert!(!handle(&im, key(RawKeyEventType::KeyUp, RawInputModifiers::empty(), 101), KEY_A, 38));
     assert!(!handle(
         &im,
-        key(RawKeyEventType::KeyDown, RawInputModifiers::CONTROL | RawInputModifiers::SHIFT, 102),
+        key(RawKeyEventType::KeyUp, RawInputModifiers::empty(), 101),
+        KEY_A,
+        38
+    ));
+    assert!(!handle(
+        &im,
+        key(
+            RawKeyEventType::KeyDown,
+            RawInputModifiers::CONTROL | RawInputModifiers::SHIFT,
+            102
+        ),
         0x62,
         56
     ));
-    bus.expect_calls(&["ProcessKeyEvent(0x61, 38, 0x40000000)", "ProcessKeyEvent(0x62, 56, 0x5)"]);
+    bus.expect_calls(&[
+        "ProcessKeyEvent(0x61, 38, 0x40000000)",
+        "ProcessKeyEvent(0x62, 56, 0x5)",
+    ]);
     assert_eq!(recorded.commits.borrow().len(), 1);
 
     // A key the engine hands back.
@@ -573,7 +772,11 @@ fn ibus_takes_keys_commits_text_and_forwards_keys() {
         IBUS_CONTEXT_PATH,
         "org.freedesktop.IBus.InputContext",
         "ForwardKeyEvent",
-        &(0xff0du32, 36u32, (IBusModifierMask::RELEASE_MASK | IBusModifierMask::MOD1_MASK).bits()),
+        &(
+            0xff0du32,
+            36u32,
+            (IBusModifierMask::RELEASE_MASK | IBusModifierMask::MOD1_MASK).bits(),
+        ),
     );
     bus.settle();
     assert_eq!(
@@ -591,7 +794,12 @@ fn ibus_takes_keys_commits_text_and_forwards_keys() {
     im.reset();
     bus.expect_calls(&["Reset"]);
     assert_eq!(recorded.commits.borrow().len(), 1);
-    bus.emit(IBUS_CONTEXT_PATH, "org.freedesktop.IBus.InputContext", "CommitText", &(ibus_text("後"),));
+    bus.emit(
+        IBUS_CONTEXT_PATH,
+        "org.freedesktop.IBus.InputContext",
+        "CommitText",
+        &(ibus_text("後"),),
+    );
     bus.settle();
     assert_eq!(*recorded.commits.borrow(), ["あ", "後"]);
 }
@@ -634,16 +842,32 @@ fn ibus_shows_and_hides_the_preedit_of_a_client_that_supports_it() {
     pump_until(|| im.is_connected());
     let client = TestClient::new(true);
     im.set_client(Some(client.clone()));
-    bus.expect_calls(&["FocusOut", &caps(IBusCapability::CAP_FOCUS | IBusCapability::CAP_PREEDIT_TEXT)]);
+    bus.expect_calls(&[
+        "FocusOut",
+        &caps(IBusCapability::CAP_FOCUS | IBusCapability::CAP_PREEDIT_TEXT),
+    ]);
 
     let interface = "org.freedesktop.IBus.InputContext";
     // The cursor counts characters; the client gets code units.
-    bus.emit(IBUS_CONTEXT_PATH, interface, "UpdatePreeditText", &(ibus_text("\u{1F600}に"), 1u32, true));
+    bus.emit(
+        IBUS_CONTEXT_PATH,
+        interface,
+        "UpdatePreeditText",
+        &(ibus_text("\u{1F600}に"), 1u32, true),
+    );
     bus.settle();
-    assert_eq!(client.take_preedit(), [(Some("\u{1F600}に".to_string()), Some(2))]);
+    assert_eq!(
+        client.take_preedit(),
+        [(Some("\u{1F600}に".to_string()), Some(2))]
+    );
 
     // The same text again is not reported.
-    bus.emit(IBUS_CONTEXT_PATH, interface, "UpdatePreeditText", &(ibus_text("\u{1F600}に"), 2u32, true));
+    bus.emit(
+        IBUS_CONTEXT_PATH,
+        interface,
+        "UpdatePreeditText",
+        &(ibus_text("\u{1F600}に"), 2u32, true),
+    );
     bus.emit(IBUS_CONTEXT_PATH, interface, "ShowPreeditText", &());
     bus.settle();
     assert!(client.take_preedit().is_empty());
@@ -659,7 +883,12 @@ fn ibus_shows_and_hides_the_preedit_of_a_client_that_supports_it() {
     // A client without pre-edit support is left alone.
     let plain = TestClient::new(false);
     im.set_client(Some(plain.clone()));
-    bus.emit(IBUS_CONTEXT_PATH, interface, "UpdatePreeditText", &(ibus_text("x"), 1u32, true));
+    bus.emit(
+        IBUS_CONTEXT_PATH,
+        interface,
+        "UpdatePreeditText",
+        &(ibus_text("x"), 1u32, true),
+    );
     bus.settle();
     assert!(plain.take_preedit().is_empty());
 }
@@ -678,7 +907,12 @@ fn ibus_destroys_its_context_when_disposed_and_when_a_call_fails() {
     assert!(!im.is_connected());
     // Disposed: signals are not listened to any more.
     let recorded = record(&im);
-    bus.emit(IBUS_CONTEXT_PATH, "org.freedesktop.IBus.InputContext", "CommitText", &(ibus_text("late"),));
+    bus.emit(
+        IBUS_CONTEXT_PATH,
+        "org.freedesktop.IBus.InputContext",
+        "CommitText",
+        &(ibus_text("late"),),
+    );
     bus.settle();
     assert!(recorded.commits.borrow().is_empty());
 
@@ -687,12 +921,405 @@ fn ibus_destroys_its_context_when_disposed_and_when_a_call_fails() {
     let im = IBusX11TextInputMethod::new(bus.client.clone());
     bus.expect_calls(&["CreateInputContext(name)", &caps(IBusCapability::CAP_FOCUS)]);
     pump_until(|| im.is_connected());
-    assert!(!handle(&im, key(RawKeyEventType::KeyDown, RawInputModifiers::empty(), 1), KEY_FAILS, 52));
+    assert!(!handle(
+        &im,
+        key(RawKeyEventType::KeyDown, RawInputModifiers::empty(), 1),
+        KEY_FAILS,
+        52
+    ));
     bus.expect_calls(&["ProcessKeyEvent(0x7a, 52, 0x0)", "Destroy"]);
     assert!(!im.is_connected());
-    assert!(!handle(&im, key(RawKeyEventType::KeyDown, RawInputModifiers::empty(), 2), KEY_A, 38));
+    assert!(!handle(
+        &im,
+        key(RawKeyEventType::KeyDown, RawInputModifiers::empty(), 2),
+        KEY_A,
+        38
+    ));
     bus.settle();
     assert!(bus.take_log().is_empty());
+}
+
+fn ibus_scoped(names: &[ferroui_base::input::InputScopeNameValue]) -> TextInputOptions {
+    TextInputOptions {
+        input_scope_names: Some(Rc::from(names)),
+        ..Default::default()
+    }
+}
+
+#[test]
+fn ibus_input_scope_property_roundtrip_preserves_preedit_and_clears_to_legacy_hints() {
+    use ferroui_base::input::InputScopeNameValue as Scope;
+    let _scope = scope();
+    let bus = TestBus::new();
+    bus.start(IBUS_NAME);
+    let im = IBusX11TextInputMethod::new(bus.client.clone());
+    bus.expect_calls(&["CreateInputContext(name)", &caps(IBusCapability::CAP_FOCUS)]);
+    let client = TestClient::new(true);
+    im.set_client(Some(client.clone()));
+    bus.expect_calls(&[
+        "FocusOut",
+        &caps(IBusCapability::CAP_FOCUS | IBusCapability::CAP_PREEDIT_TEXT),
+    ]);
+    bus.emit(
+        IBUS_CONTEXT_PATH,
+        "org.freedesktop.IBus.InputContext",
+        "UpdatePreeditText",
+        &(ibus_text("😀かな"), 1u32, true),
+    );
+    bus.settle();
+    assert_eq!(
+        client.take_preedit(),
+        [(Some("😀かな".to_string()), Some(2))]
+    );
+
+    let mut options = ibus_scoped(&[Scope::Digits, Scope::TelephoneNumber]);
+    options.content_type = TextInputContentType::Email;
+    im.set_options(&options);
+    bus.expect_calls(&["SetContentType(2, 0)"]);
+    options.input_scope_names = Some(Rc::from([Scope::TelephoneNumber]));
+    im.set_options(&options);
+    bus.expect_calls(&["SetContentType(4, 0)"]);
+    options.input_scope_names = Some(Rc::from([Scope::Default]));
+    im.set_options(&options);
+    bus.expect_calls(&["SetContentType(0, 0)"]);
+    options.input_scope_names = Some(Rc::from([]));
+    im.set_options(&options);
+    bus.expect_calls(&["SetContentType(6, 0)"]);
+    options.input_scope_names = None;
+    im.set_options(&options);
+    bus.settle();
+    assert!(bus.take_log().is_empty());
+    assert!(client.take_preedit().is_empty());
+    assert!(Rc::ptr_eq(
+        &im.client().unwrap(),
+        &(client.clone() as Rc<dyn TextInputMethodClient>)
+    ));
+    bus.emit(
+        IBUS_CONTEXT_PATH,
+        "org.freedesktop.IBus.InputContext",
+        "HidePreeditText",
+        &(),
+    );
+    bus.settle();
+    assert_eq!(client.take_preedit(), [(Some(String::new()), Some(0))]);
+}
+
+#[test]
+fn ibus_input_scope_latest_snapshot_is_applied_after_deferred_context_creation() {
+    use ferroui_base::input::InputScopeNameValue as Scope;
+    let _scope = scope();
+    let bus = TestBus::new();
+    let im = IBusX11TextInputMethod::new(bus.client.clone());
+    im.set_options(&ibus_scoped(&[Scope::Digits]));
+    bus.settle();
+    assert!(bus.take_log().is_empty());
+    bus.ibus_calls.create.hold();
+    bus.start(IBUS_NAME);
+    pump_until(|| !bus.log.lock().unwrap().is_empty());
+    assert_eq!(bus.take_log(), ["CreateInputContext(name)"]);
+    assert!(!im.is_connected());
+    let mut options = ibus_scoped(&[Scope::TelephoneNumber, Scope::EmailSmtpAddress]);
+    im.set_options(&options);
+    // Mutating the caller's option container cannot change the retained
+    // snapshot, including while the native context has not arrived yet.
+    options.input_scope_names = Some(Rc::from([Scope::Url]));
+    bus.ibus_calls.create.release();
+    bus.expect_calls(&[&caps(IBusCapability::CAP_FOCUS), "SetContentType(4, 0)"]);
+    assert!(im.is_connected());
+}
+
+#[test]
+fn ibus_input_scope_queued_changes_coalesce_without_losing_equivalent_snapshot_updates() {
+    use ferroui_base::input::InputScopeNameValue as Scope;
+    let _scope = scope();
+    let bus = TestBus::new();
+    bus.start(IBUS_NAME);
+    let im = IBusX11TextInputMethod::new(bus.client.clone());
+    bus.expect_calls(&["CreateInputContext(name)", &caps(IBusCapability::CAP_FOCUS)]);
+    im.set_options(&ibus_scoped(&[Scope::Digits]));
+    im.set_options(&ibus_scoped(&[Scope::EmailSmtpAddress]));
+    im.set_options(&ibus_scoped(&[Scope::TelephoneNumber]));
+    bus.expect_calls(&["SetContentType(4, 0)"]);
+    im.set_options(&ibus_scoped(&[Scope::TelephoneAreaCode, Scope::Digits]));
+    bus.settle();
+    assert!(bus.take_log().is_empty());
+    // Equivalent wire hints still replace the retained full snapshot and are
+    // replayed after a new context is created.
+    bus.stop(IBUS_NAME);
+    pump_until(|| !im.is_connected());
+    bus.start(IBUS_NAME);
+    bus.expect_calls(&[
+        "CreateInputContext(name)",
+        &caps(IBusCapability::CAP_FOCUS),
+        "SetContentType(4, 0)",
+    ]);
+}
+
+#[test]
+fn ibus_input_scope_signal_reentry_wins_before_a_deferred_setter_completes() {
+    use ferroui_base::input::InputScopeNameValue as Scope;
+    let _scope = scope();
+    let bus = TestBus::new();
+    bus.start(IBUS_NAME);
+    let im = IBusX11TextInputMethod::new(bus.client.clone());
+    bus.expect_calls(&["CreateInputContext(name)", &caps(IBusCapability::CAP_FOCUS)]);
+    let reentered = Rc::new(std::cell::Cell::new(false));
+    let observed = reentered.clone();
+    let weak = Rc::downgrade(&im);
+    im.commit().subscribe(move |_| {
+        weak.upgrade()
+            .unwrap()
+            .set_options(&ibus_scoped(&[Scope::EmailSmtpAddress]));
+        observed.set(true);
+    });
+    bus.ibus_calls.options.hold();
+    bus.ibus_calls
+        .signal_next_options
+        .store(true, Ordering::SeqCst);
+    im.set_options(&ibus_scoped(&[Scope::Digits]));
+    pump_until(|| reentered.get());
+    assert_eq!(bus.take_log(), ["SetContentType(2, 0)"]);
+    bus.ibus_calls.options.release();
+    bus.expect_calls(&["SetContentType(6, 0)"]);
+    assert!(im.is_connected());
+}
+
+#[test]
+fn ibus_input_scope_failed_reply_from_retired_context_cannot_disconnect_its_replacement() {
+    use ferroui_base::input::InputScopeNameValue as Scope;
+    let _scope = scope();
+    let bus = TestBus::new();
+    bus.start(IBUS_NAME);
+    let im = IBusX11TextInputMethod::new(bus.client.clone());
+    bus.expect_calls(&["CreateInputContext(name)", &caps(IBusCapability::CAP_FOCUS)]);
+    bus.ibus_calls.options.hold();
+    bus.ibus_calls
+        .fail_next_options
+        .store(true, Ordering::SeqCst);
+    im.set_options(&ibus_scoped(&[Scope::Digits]));
+    pump_until(|| !bus.log.lock().unwrap().is_empty());
+    assert_eq!(bus.take_log(), ["SetContentType(2, 0)"]);
+    bus.stop(IBUS_NAME);
+    pump_until(|| !im.is_connected());
+    im.set_options(&ibus_scoped(&[Scope::TelephoneNumber]));
+    bus.start(IBUS_NAME);
+    pump_until(|| im.is_connected());
+    assert_eq!(bus.take_log(), ["CreateInputContext(name)"]);
+    bus.ibus_calls.options.release();
+    bus.expect_calls(&[&caps(IBusCapability::CAP_FOCUS), "SetContentType(4, 0)"]);
+    assert!(im.is_connected());
+    im.set_options(&ibus_scoped(&[Scope::TelephoneNumber]));
+    bus.settle();
+    assert!(bus.take_log().is_empty());
+}
+
+#[test]
+fn ibus_input_scope_dispose_during_connect_destroys_the_late_context_without_publishing_hints() {
+    use ferroui_base::input::InputScopeNameValue as Scope;
+    let _scope = scope();
+    let bus = TestBus::new();
+    bus.ibus_calls.create.hold();
+    bus.start(IBUS_NAME);
+    let im = IBusX11TextInputMethod::new(bus.client.clone());
+    let recorded = record(&im);
+    im.set_options(&ibus_scoped(&[Scope::Digits]));
+    pump_until(|| !bus.log.lock().unwrap().is_empty());
+    assert_eq!(bus.take_log(), ["CreateInputContext(name)"]);
+    im.dispose();
+    assert!(!im.is_connected());
+    im.set_options(&ibus_scoped(&[Scope::TelephoneNumber]));
+    bus.ibus_calls.create.release();
+    bus.expect_calls(&["Destroy"]);
+    assert!(!im.is_connected());
+    bus.emit(
+        IBUS_CONTEXT_PATH,
+        "org.freedesktop.IBus.InputContext",
+        "CommitText",
+        &(ibus_text("late"),),
+    );
+    bus.settle();
+    assert!(recorded.commits.borrow().is_empty());
+    assert!(bus.take_log().is_empty());
+}
+
+fn assert_pending_ibus_signal_fence(dispose: bool) {
+    use crate::signal_watch::watch_stream;
+    use ferroui_base::reactive::IDisposable;
+    use ferroui_base::threading::Dispatcher;
+    use std::cell::Cell;
+
+    struct TrackedSubscription {
+        inner: Rc<dyn IDisposable>,
+        cleaned_up: Rc<Cell<bool>>,
+    }
+
+    impl IDisposable for TrackedSubscription {
+        fn dispose(&self) {
+            self.cleaned_up.set(true);
+            self.inner.dispose();
+        }
+    }
+
+    let _scope = scope();
+    let bus = TestBus::new();
+    bus.ibus_calls.create.hold();
+    bus.start(IBUS_NAME);
+    let im = IBusX11TextInputMethod::new(bus.client.clone());
+    let recorded = record(&im);
+    let client = TestClient::new(true);
+    im.set_client(Some(client.clone()));
+    pump_until(|| !bus.log.lock().unwrap().is_empty());
+    assert_eq!(bus.take_log(), ["CreateInputContext(name)"]);
+
+    // Capture the same guard as the pending connect. A subscription's
+    // callback may already be queued while registration still awaits its
+    // return to the base, so deliberately keep that handle unregistered.
+    let signals = im.signal_guard();
+    let deliveries = Rc::new(Cell::new(0));
+    let mut guarded = signals.handler({
+        let deliveries = deliveries.clone();
+        let weak = Rc::downgrade(&im);
+        move |()| {
+            deliveries.set(deliveries.get() + 1);
+            let im = weak.upgrade().unwrap();
+            im.fire_commit("queued text".to_string());
+            im.fire_forward(super::ibus::ibus_x11_text_input_method::forwarded_key(
+                KEY_A, 0,
+            ));
+            im.client()
+                .unwrap()
+                .set_preedit_text_with_cursor(Some("queued preedit"), Some(1));
+        }
+    });
+    // A valid connecting generation still receives signals: the guard does
+    // not impose a new connected/focus requirement on existing semantics.
+    guarded(());
+    assert_eq!(deliveries.get(), 1);
+    assert_eq!(
+        std::mem::take(&mut *recorded.commits.borrow_mut()),
+        ["queued text"]
+    );
+    assert_eq!(recorded.forwarded.borrow_mut().drain(..).count(), 1);
+    assert_eq!(
+        client.take_preedit(),
+        [(Some("queued preedit".to_string()), Some(1))]
+    );
+
+    let release = Arc::new(DeferredCall::default());
+    release.hold();
+    let stream = futures_util::stream::once({
+        let release = release.clone();
+        async move {
+            release.wait().await;
+        }
+    });
+    let attempted = Rc::new(Cell::new(false));
+    let subscription = watch_stream(stream, {
+        let attempted = attempted.clone();
+        move |item| {
+            attempted.set(true);
+            guarded(item);
+        }
+    });
+    let cleaned_up = Rc::new(Cell::new(false));
+    let subscription = Rc::new(TrackedSubscription {
+        inner: subscription,
+        cleaned_up: cleaned_up.clone(),
+    });
+    Dispatcher::ui_thread().run_jobs(None);
+    assert!(!attempted.get());
+
+    if dispose {
+        im.dispose();
+    } else {
+        bus.stop(IBUS_NAME);
+        bus.settle();
+    }
+    release.release();
+    pump_until(|| attempted.get());
+    assert!(
+        !cleaned_up.get(),
+        "the queued callback ran before subscription cleanup"
+    );
+    assert_eq!(
+        deliveries.get(),
+        1,
+        "a retired callback must not reach any signal consumer"
+    );
+    assert!(recorded.commits.borrow().is_empty());
+    assert!(recorded.forwarded.borrow().is_empty());
+    assert!(client.take_preedit().is_empty());
+
+    signals.register(subscription);
+    assert!(
+        cleaned_up.get(),
+        "a late registration is disposed immediately"
+    );
+    if dispose {
+        // The shared entry points also reject late direct delivery from
+        // another backend whose registration has not returned yet.
+        im.fire_commit("late direct text".to_string());
+        im.fire_forward(super::ibus::ibus_x11_text_input_method::forwarded_key(
+            KEY_A, 0,
+        ));
+        assert!(recorded.commits.borrow().is_empty());
+        assert!(recorded.forwarded.borrow().is_empty());
+    }
+
+    bus.ibus_calls.create.release();
+    bus.expect_calls(&["Destroy"]);
+    assert!(!im.is_connected());
+    if !dispose {
+        bus.start(IBUS_NAME);
+        bus.expect_calls(&["CreateInputContext(name)", &caps(IBusCapability::CAP_FOCUS)]);
+        bus.emit(
+            IBUS_CONTEXT_PATH,
+            "org.freedesktop.IBus.InputContext",
+            "CommitText",
+            &(ibus_text("new context"),),
+        );
+        bus.settle();
+        assert_eq!(*recorded.commits.borrow(), ["new context"]);
+        im.dispose();
+        bus.expect_calls(&["Destroy"]);
+    }
+}
+
+#[test]
+fn ibus_input_scope_dispose_fences_queued_signals_before_registration_cleanup() {
+    assert_pending_ibus_signal_fence(true);
+}
+
+#[test]
+fn ibus_input_scope_owner_loss_fences_queued_signals_before_registration_cleanup() {
+    assert_pending_ibus_signal_fence(false);
+}
+
+#[test]
+fn ibus_input_scope_owner_loss_during_connect_retires_the_attempt_before_replaying_latest_options()
+{
+    use ferroui_base::input::InputScopeNameValue as Scope;
+    let _scope = scope();
+    let bus = TestBus::new();
+    bus.ibus_calls.create.hold();
+    bus.start(IBUS_NAME);
+    let im = IBusX11TextInputMethod::new(bus.client.clone());
+    im.set_options(&ibus_scoped(&[Scope::Digits]));
+    pump_until(|| !bus.log.lock().unwrap().is_empty());
+    assert_eq!(bus.take_log(), ["CreateInputContext(name)"]);
+    bus.stop(IBUS_NAME);
+    bus.settle();
+    im.set_options(&ibus_scoped(&[Scope::TelephoneNumber]));
+    bus.start(IBUS_NAME);
+    bus.settle();
+    bus.ibus_calls.create.release();
+    bus.expect_calls(&[
+        "Destroy",
+        "CreateInputContext(name)",
+        &caps(IBusCapability::CAP_FOCUS),
+        "SetContentType(4, 0)",
+    ]);
+    assert!(im.is_connected());
 }
 
 // ---------------------------------------------------------------------
@@ -712,13 +1339,20 @@ fn fcitx_round(name: &str, context_path: &str, interface: &str, modern: bool) {
             format!("SetCapacity({})", flags.bits())
         }
     };
-    let create =
-        if modern { "CreateInputContext(appName)" } else { "CreateICv3(name: true, own pid: true)" }.to_string();
+    let create = if modern {
+        "CreateInputContext(appName)"
+    } else {
+        "CreateICv3(name: true, own pid: true)"
+    }
+    .to_string();
     bus.expect_calls(&[&create]);
     pump_until(|| im.is_connected());
     im.set_window_active(true);
     im.set_client(Some(client.clone()));
-    bus.expect_calls(&["FocusIn", &set_capacity(FcitxCapabilityFlags::CAPACITY_PREEDIT)]);
+    bus.expect_calls(&[
+        "FocusIn",
+        &set_capacity(FcitxCapabilityFlags::CAPACITY_PREEDIT),
+    ]);
     assert!(im.is_enabled());
 
     // The options of the text input are added to the capabilities, and
@@ -736,32 +1370,72 @@ fn fcitx_round(name: &str, context_path: &str, interface: &str, modern: bool) {
 
     // Keys: the press of "a" is consumed and committed; the type of the
     // event is a number for version 4 and a flag for version 5.
-    assert!(handle(&im, key(RawKeyEventType::KeyDown, RawInputModifiers::empty(), 5000), KEY_A, 38));
-    assert!(!handle(&im, key(RawKeyEventType::KeyUp, RawInputModifiers::CONTROL, 5001), KEY_A, 38));
-    let (press, release) = if modern { ("false", "true") } else { ("0", "1") };
+    assert!(handle(
+        &im,
+        key(RawKeyEventType::KeyDown, RawInputModifiers::empty(), 5000),
+        KEY_A,
+        38
+    ));
+    assert!(!handle(
+        &im,
+        key(RawKeyEventType::KeyUp, RawInputModifiers::CONTROL, 5001),
+        KEY_A,
+        38
+    ));
+    let (press, release) = if modern {
+        ("false", "true")
+    } else {
+        ("0", "1")
+    };
     bus.expect_calls(&[
         &format!("ProcessKeyEvent(0x61, 38, 0, {press}, 5000)"),
-        &format!("ProcessKeyEvent(0x61, 38, {}, {release}, 5001)", FcitxKeyState::CTRL.bits()),
+        &format!(
+            "ProcessKeyEvent(0x61, 38, {}, {release}, 5001)",
+            FcitxKeyState::CTRL.bits()
+        ),
     ]);
-    assert_eq!(*recorded.commits.borrow(), [if modern { "五" } else { "四" }]);
+    assert_eq!(
+        *recorded.commits.borrow(),
+        [if modern { "五" } else { "四" }]
+    );
 
     // The cursor rectangle is never empty for Fcitx.
     im.set_cursor_rect(Rect::new(4.0, 5.0, 0.0, 0.0));
     bus.expect_calls(&["SetCursorRect(4, 5, 1, 1)"]);
 
     // A formatted pre-edit: the parts joined, the cursor from bytes.
-    bus.emit(context_path, interface, "UpdateFormattedPreedit", &(vec![("に", 8i32), ("ほ", 0i32)], 3i32));
+    bus.emit(
+        context_path,
+        interface,
+        "UpdateFormattedPreedit",
+        &(vec![("に", 8i32), ("ほ", 0i32)], 3i32),
+    );
     bus.settle();
     assert_eq!(client.take_preedit(), [(Some("にほ".to_string()), Some(1))]);
-    bus.emit(context_path, interface, "UpdateFormattedPreedit", &(Vec::<(&str, i32)>::new(), 0i32));
+    bus.emit(
+        context_path,
+        interface,
+        "UpdateFormattedPreedit",
+        &(Vec::<(&str, i32)>::new(), 0i32),
+    );
     bus.settle();
     assert_eq!(client.take_preedit(), [(None, None)]);
 
     // A forwarded key.
     if modern {
-        bus.emit(context_path, interface, "ForwardKey", &(0xff08u32, FcitxKeyState::SHIFT.bits(), false));
+        bus.emit(
+            context_path,
+            interface,
+            "ForwardKey",
+            &(0xff08u32, FcitxKeyState::SHIFT.bits(), false),
+        );
     } else {
-        bus.emit(context_path, interface, "ForwardKey", &(0xff08u32, FcitxKeyState::SHIFT.bits(), 0i32));
+        bus.emit(
+            context_path,
+            interface,
+            "ForwardKey",
+            &(0xff08u32, FcitxKeyState::SHIFT.bits(), 0i32),
+        );
     }
     bus.settle();
     assert_eq!(
@@ -780,7 +1454,9 @@ fn fcitx_round(name: &str, context_path: &str, interface: &str, modern: bool) {
     im.set_options(&options);
     bus.expect_calls(&[
         "Reset",
-        &set_capacity(FcitxCapabilityFlags::CAPACITY_PREEDIT | FcitxCapabilityFlags::CAPACITY_EMAIL),
+        &set_capacity(
+            FcitxCapabilityFlags::CAPACITY_PREEDIT | FcitxCapabilityFlags::CAPACITY_EMAIL,
+        ),
     ]);
 
     im.dispose();
@@ -791,13 +1467,23 @@ fn fcitx_round(name: &str, context_path: &str, interface: &str, modern: bool) {
 #[test]
 fn fcitx_4_is_reached_by_its_own_name() {
     let _scope = scope();
-    fcitx_round(FCITX4_NAME, FCITX4_CONTEXT_PATH, "org.fcitx.Fcitx.InputContext", false);
+    fcitx_round(
+        FCITX4_NAME,
+        FCITX4_CONTEXT_PATH,
+        "org.fcitx.Fcitx.InputContext",
+        false,
+    );
 }
 
 #[test]
 fn fcitx_5_is_reached_by_its_portal_name() {
     let _scope = scope();
-    fcitx_round(FCITX5_NAME, FCITX5_CONTEXT_PATH, "org.fcitx.Fcitx.InputContext1", true);
+    fcitx_round(
+        FCITX5_NAME,
+        FCITX5_CONTEXT_PATH,
+        "org.fcitx.Fcitx.InputContext1",
+        true,
+    );
 }
 
 #[test]

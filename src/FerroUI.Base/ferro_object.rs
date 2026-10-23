@@ -851,7 +851,6 @@ impl FerroObject {
         priority: BindingPriority,
         is_effective_value: bool,
     ) {
-        crate::perf_count!(PropertyChangesRaised);
         let e = FerroPropertyChangedEventArgs::new(
             self,
             property,
@@ -860,16 +859,33 @@ impl FerroObject {
             priority,
             is_effective_value,
         );
+        self.notify_property_changed(&e);
+    }
 
-        self.on_property_changed_core(&e);
+    pub(crate) fn raise_inherited_property_changed<T: PropertyValue>(
+        &self,
+        property: &'static FerroProperty,
+        old_value: &T,
+        new_value: &T,
+        priority: BindingPriority,
+    ) {
+        let e = FerroPropertyChangedEventArgs::new(
+            self, property, Some(old_value), new_value, priority, true,
+        ).from_inheritance();
+        self.notify_property_changed(&e);
+    }
 
-        if is_effective_value {
+    fn notify_property_changed(&self, e: &FerroPropertyChangedEventArgs<'_>) {
+        crate::perf_count!(PropertyChangesRaised);
+        self.on_property_changed_core(e);
+
+        if e.is_effective_value_change() {
             crate::perf_count!(PropertyChangesEffective);
-            property.notify_changed(&e);
+            e.property().notify_changed(e);
             if !self.property_changed.is_empty() {
                 crate::perf_count!(PropertyChangesWithObjectListeners);
                 for (_, handler) in self.property_changed.snapshot().iter() {
-                    handler(&e);
+                    handler(e);
                 }
             }
         }

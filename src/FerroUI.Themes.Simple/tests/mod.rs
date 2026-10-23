@@ -10,3 +10,5 @@ mod resource_dictionary_tests;
 mod simple_theme_tests;
 mod support;
 mod theme_class_tests;
+
+mod rich_edit_box_tests;

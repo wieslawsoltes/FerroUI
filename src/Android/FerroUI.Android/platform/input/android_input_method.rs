@@ -8,9 +8,10 @@ use ferroui_base::input::text_input::{
     ITextInputMethodImpl, TextInputContentType, TextInputMethodClient, TextInputOptions, TextInputReturnKeyType,
     TextSelection,
 };
+use ferroui_base::input::InputScopeNameValue;
 use ferroui_base::reactive::IDisposable;
 use ferroui_base::Rect;
-use std::cell::RefCell;
+use std::cell::{Cell, RefCell};
 use std::rc::{Rc, Weak};
 
 /// `android.text.InputType`.
@@ -86,7 +87,12 @@ pub(crate) struct AndroidInputMethod {
     host: Rc<dyn IInputMethodHost>,
     api_level: i32,
     client: RefCell<Option<Rc<dyn TextInputMethodClient>>>,
+    client_generation: Cell<u64>,
     input_connection: RefCell<Option<Rc<FerroInputConnection>>>,
+    input_connection_generation: Cell<u64>,
+    /// Only an options refresh may carry the current composing region into
+    /// the next native connection. A client assignment cancels this handoff.
+    options_restart_connection: RefCell<Option<Weak<FerroInputConnection>>>,
     /// The three subscriptions to the events of the client.
     client_events: RefCell<Vec<Rc<dyn IDisposable>>>,
 }
@@ -100,7 +106,10 @@ impl AndroidInputMethod {
             host,
             api_level,
             client: RefCell::new(None),
+            client_generation: Cell::new(0),
             input_connection: RefCell::new(None),
+            input_connection_generation: Cell::new(0),
+            options_restart_connection: RefCell::new(None),
             client_events: RefCell::new(Vec::new()),
         })
     }
@@ -166,24 +175,32 @@ impl AndroidInputMethod {
     pub(crate) fn fill_editor_info(options: &TextInputOptions, out_attrs: &mut EditorInfo, api_level: i32) {
         use input_types::*;
 
-        out_attrs.input_type = match options.content_type {
-            TextInputContentType::Email => CLASS_TEXT | TEXT_VARIATION_EMAIL_ADDRESS,
-            TextInputContentType::Number => CLASS_NUMBER | NUMBER_FLAG_DECIMAL | NUMBER_FLAG_SIGNED,
-            TextInputContentType::Password => CLASS_TEXT | TEXT_VARIATION_PASSWORD,
-            TextInputContentType::Pin => CLASS_NUMBER | NUMBER_VARIATION_PASSWORD,
-            TextInputContentType::Digits => CLASS_PHONE,
-            TextInputContentType::Url => CLASS_TEXT | TEXT_VARIATION_URI,
-            TextInputContentType::Name => CLASS_TEXT | TEXT_VARIATION_PERSON_NAME,
-            // Alpha/Normal/Social/Search have no dedicated Android keyboard
-            _ => CLASS_TEXT,
+        let scope = options.effective_input_scope();
+        out_attrs.input_type = if let Some(scope) = scope {
+            input_type_for_scope(scope)
+        } else {
+            match options.content_type {
+                TextInputContentType::Email => CLASS_TEXT | TEXT_VARIATION_EMAIL_ADDRESS,
+                TextInputContentType::Number => CLASS_NUMBER | NUMBER_FLAG_DECIMAL | NUMBER_FLAG_SIGNED,
+                TextInputContentType::Password => CLASS_TEXT | TEXT_VARIATION_PASSWORD,
+                TextInputContentType::Pin => CLASS_NUMBER | NUMBER_VARIATION_PASSWORD,
+                TextInputContentType::Digits => CLASS_PHONE,
+                TextInputContentType::Url => CLASS_TEXT | TEXT_VARIATION_URI,
+                TextInputContentType::Name => CLASS_TEXT | TEXT_VARIATION_PERSON_NAME,
+                // Alpha/Normal/Social/Search have no dedicated Android keyboard
+                _ => CLASS_TEXT,
+            }
         };
 
-        if options.auto_capitalization {
+        // InputType flags are specific to their class. Preserve the existing
+        // legacy conversion, but do not add text flags to scoped numeric pads.
+        let accepts_text_flags = scope.is_none() || (out_attrs.input_type & MASK_CLASS) == CLASS_TEXT;
+        if options.auto_capitalization && accepts_text_flags {
             out_attrs.initial_caps_mode = CAPITALIZATION_MODE_SENTENCES;
             out_attrs.input_type |= TEXT_FLAG_CAP_SENTENCES;
         }
 
-        if options.multiline {
+        if options.multiline && accepts_text_flags {
             out_attrs.input_type |= TEXT_FLAG_MULTI_LINE;
         }
 
@@ -214,8 +231,21 @@ impl AndroidInputMethod {
             }
         }
 
-        if options.is_sensitive {
-            out_attrs.input_type |= TEXT_FLAG_NO_SUGGESTIONS;
+        let scope_is_secret = matches!(
+            scope,
+            Some(
+                InputScopeNameValue::Password
+                    | InputScopeNameValue::NumericPassword
+                    | InputScopeNameValue::NumericPin
+                    | InputScopeNameValue::AlphanumericPin
+            )
+        );
+        let legacy_is_secret =
+            matches!(options.content_type, TextInputContentType::Password | TextInputContentType::Pin);
+        if options.is_sensitive || scope_is_secret || legacy_is_secret {
+            if (scope.is_none() && options.is_sensitive) || (out_attrs.input_type & MASK_CLASS) == CLASS_TEXT {
+                out_attrs.input_type |= TEXT_FLAG_NO_SUGGESTIONS;
+            }
 
             if api_level >= 26 {
                 out_attrs.ime_options |= ime_flags::NO_PERSONALIZED_LEARNING;
@@ -225,6 +255,55 @@ impl AndroidInputMethod {
         if let Some(locale_hints) = options.locale_hints.as_ref().filter(|hints| !hints.is_empty()) {
             out_attrs.hint_locales = Some(locale_hints.to_vec());
         }
+    }
+}
+
+/// The native view owns rendering and validation; these EditorInfo values only
+/// advise the IME. Android has no script/width-specific input type. Non-numeric
+/// script/width scopes use normal text; full-width numbers use the numeric pad.
+fn input_type_for_scope(scope: InputScopeNameValue) -> i32 {
+    use input_types::*;
+    use InputScopeNameValue as Scope;
+    match scope {
+        Scope::Url => CLASS_TEXT | TEXT_VARIATION_URI,
+        Scope::EmailSmtpAddress | Scope::EmailNameOrAddress => CLASS_TEXT | TEXT_VARIATION_EMAIL_ADDRESS,
+        Scope::PersonalFullName | Scope::NameOrPhoneNumber => CLASS_TEXT | TEXT_VARIATION_PERSON_NAME,
+        Scope::CurrencyAmountAndSymbol
+        | Scope::CurrencyAmount
+        | Scope::Number
+        | Scope::NumberFullWidth
+        | Scope::FormulaNumber => CLASS_NUMBER | NUMBER_FLAG_DECIMAL | NUMBER_FLAG_SIGNED,
+        Scope::DateMonthNumber
+        | Scope::DateDayNumber
+        | Scope::DateYear
+        | Scope::Digits
+        | Scope::TimeHour
+        | Scope::TimeMinutesOrSeconds => CLASS_NUMBER,
+        Scope::TelephoneNumber
+        | Scope::TelephoneCountryCode
+        | Scope::TelephoneAreaCode
+        | Scope::TelephoneLocalNumber => CLASS_PHONE,
+        Scope::Password | Scope::AlphanumericPin => CLASS_TEXT | TEXT_VARIATION_PASSWORD,
+        Scope::NumericPassword | Scope::NumericPin => CLASS_NUMBER | NUMBER_VARIATION_PASSWORD,
+        Scope::Default
+        | Scope::AlphanumericHalfWidth
+        | Scope::AlphanumericFullWidth
+        | Scope::Hiragana
+        | Scope::KatakanaHalfWidth
+        | Scope::KatakanaFullWidth
+        | Scope::Hanja
+        | Scope::HangulHalfWidth
+        | Scope::HangulFullWidth
+        | Scope::Search
+        | Scope::Formula
+        | Scope::SearchIncremental
+        | Scope::ChineseHalfWidth
+        | Scope::ChineseFullWidth
+        | Scope::NativeScript
+        | Scope::Text
+        | Scope::Chat
+        | Scope::Maps
+        | Scope::ChatWithoutEmoji => CLASS_TEXT,
     }
 }
 
@@ -262,6 +341,8 @@ impl ITextInputMethodImpl for AndroidInputMethod {
     fn reset(&self) {}
 
     fn set_client(&self, client: Option<Rc<dyn TextInputMethodClient>>) {
+        self.client_generation.set(self.client_generation.get().wrapping_add(1));
+        self.options_restart_connection.borrow_mut().take();
         let subscriptions = std::mem::take(&mut *self.client_events.borrow_mut());
         for subscription in subscriptions {
             subscription.dispose();
@@ -304,23 +385,48 @@ impl ITextInputMethodImpl for AndroidInputMethod {
     fn set_cursor_rect(&self, _rect: Rect) {}
 
     fn set_options(&self, options: &TextInputOptions) {
+        *self.options_restart_connection.borrow_mut() =
+            if self.input_connection_generation.get() == self.client_generation.get() {
+                self.input_connection().as_ref().map(Rc::downgrade)
+            } else {
+                None
+            };
         let this = self.this.clone();
         let options = options.clone();
         let init: InitEditorInfo = Rc::new(move |top_level, out_attrs: &mut EditorInfo| {
             let this = this.upgrade()?;
-            if this.client.borrow().is_none() {
-                return None;
-            }
+            let _client = this.client()?;
+            let generation = this.client_generation.get();
+            let previous = this.options_restart_connection.borrow_mut().take().and_then(|weak| weak.upgrade());
+            let composition = previous.and_then(|previous| {
+                this.input_connection()
+                    .filter(|current| Rc::ptr_eq(current, &previous))
+                    .and_then(|current| current.edit_buffer().composition())
+            });
 
             let input_method: Weak<dyn IAndroidInputMethod> = this.this.clone();
             let input_connection = FerroInputConnection::new(Rc::downgrade(top_level), input_method);
+            if let Some(composition) = composition {
+                input_connection.edit_buffer().set_composition(Some(composition));
+                // Clamping the region reads surrounding text from the client,
+                // which can synchronously replace focus in application code.
+                if this.client_generation.get() != generation {
+                    return None;
+                }
+            }
             *this.input_connection.borrow_mut() = Some(input_connection.clone());
+            this.input_connection_generation.set(generation);
 
             AndroidInputMethod::fill_editor_info(&options, out_attrs, this.api_level);
 
             Some(input_connection)
         });
         self.host.init_editor_info(init);
+        // A live Names/NameValue edit must replace EditorInfo on the current
+        // connection; installing the callback alone only affected future focus.
+        if self.is_active() {
+            self.host.restart_input();
+        }
     }
 }
 
@@ -434,10 +540,7 @@ mod tests {
         let client = TestClient::new("abc", 1, 1);
         input_method.set_client(Some(client.clone()));
         assert!(input_method.is_active());
-        assert_eq!(
-            host.take_calls(),
-            vec![HostCall::RequestFocus, HostCall::RestartInput, HostCall::ShowSoftInput]
-        );
+        assert_eq!(host.take_calls(), vec![HostCall::RequestFocus, HostCall::RestartInput, HostCall::ShowSoftInput]);
 
         // The client asks for the input pane again (a tap into a text box that has the focus).
         client.raise_input_pane_activation_requested();
@@ -524,11 +627,196 @@ mod tests {
         assert_eq!(of(TextInputContentType::Search), CLASS_TEXT);
         assert_eq!(of(TextInputContentType::Email), 0x21);
         assert_eq!(of(TextInputContentType::Number), 0x3002);
-        assert_eq!(of(TextInputContentType::Password), 0x81);
+        // Password retains its privacy hints as well as its keyboard purpose,
+        // including when a later scope changes that purpose independently.
+        assert_eq!(
+            of(TextInputContentType::Password),
+            CLASS_TEXT | TEXT_VARIATION_PASSWORD | TEXT_FLAG_NO_SUGGESTIONS
+        );
         assert_eq!(of(TextInputContentType::Pin), 0x12);
         assert_eq!(of(TextInputContentType::Digits), 3);
         assert_eq!(of(TextInputContentType::Url), 0x11);
         assert_eq!(of(TextInputContentType::Name), 0x61);
+    }
+
+    #[test]
+    fn input_scope_distinguishes_numeric_components_phones_and_alphanumeric_pins() {
+        use InputScopeNameValue as Scope;
+        let cases = [
+            (Scope::Digits, 0x2),
+            (Scope::DateMonthNumber, 0x2),
+            (Scope::DateDayNumber, 0x2),
+            (Scope::DateYear, 0x2),
+            (Scope::TimeHour, 0x2),
+            (Scope::TimeMinutesOrSeconds, 0x2),
+            (Scope::TelephoneNumber, 0x3),
+            (Scope::TelephoneCountryCode, 0x3),
+            (Scope::TelephoneAreaCode, 0x3),
+            (Scope::TelephoneLocalNumber, 0x3),
+            (Scope::Number, 0x3002),
+            (Scope::CurrencyAmount, 0x3002),
+            (Scope::FormulaNumber, 0x3002),
+            (Scope::EmailSmtpAddress, 0x21),
+            (Scope::EmailNameOrAddress, 0x21),
+            (Scope::PersonalFullName, 0x61),
+            (Scope::NameOrPhoneNumber, 0x61),
+            (Scope::NumericPassword, 0x12),
+            (Scope::NumericPin, 0x12),
+            (Scope::Password, 0x80081),
+            (Scope::AlphanumericPin, 0x80081),
+        ];
+        for (scope, expected) in cases {
+            let options = TextInputOptions {
+                content_type: TextInputContentType::Url,
+                input_scope_names: Some(Rc::from([scope])),
+                ..Default::default()
+            };
+            assert_eq!(info(&options).input_type, expected, "{scope:?}");
+        }
+    }
+
+    #[test]
+    fn input_scope_first_name_and_clear_update_the_android_editor_callback() {
+        use InputScopeNameValue as Scope;
+        let (host, input_method) = input_method();
+        input_method.set_client(Some(TestClient::new("", 0, 0)));
+        host.take_calls();
+        let mut options = TextInputOptions {
+            content_type: TextInputContentType::Digits,
+            input_scope_names: Some(Rc::from([Scope::Digits, Scope::TelephoneNumber])),
+            ..Default::default()
+        };
+        input_method.set_options(&options);
+        assert_eq!(host.take_calls(), [HostCall::RestartInput]);
+        let (_, editor) = host.create_input_connection().unwrap();
+        assert_eq!(editor.input_type, 2);
+        options.input_scope_names = Some(Rc::from([Scope::Default, Scope::Digits]));
+        input_method.set_options(&options);
+        assert_eq!(host.take_calls(), [HostCall::RestartInput]);
+        let (_, editor) = host.create_input_connection().unwrap();
+        assert_eq!(editor.input_type, 1);
+        options.input_scope_names = Some(Rc::from([]));
+        input_method.set_options(&options);
+        assert_eq!(host.take_calls(), [HostCall::RestartInput]);
+        let (_, editor) = host.create_input_connection().unwrap();
+        assert_eq!(editor.input_type, 3);
+    }
+
+    #[test]
+    fn input_scope_restart_preserves_the_same_clients_composing_region() {
+        let (host, input_method) = input_method();
+        let client = TestClient::new("abcd", 1, 3);
+        let top_level: Rc<dyn IInputConnectionTopLevel> = TestInputMethod::new(Some(client.clone()));
+        input_method.set_options(&TextInputOptions::default());
+        input_method.set_client(Some(client.clone()));
+        let init = host.init.borrow().clone().unwrap();
+        let first = init(&top_level, &mut EditorInfo::default()).unwrap();
+        assert!(first.set_composing_text(Some("x"), 1));
+        assert_eq!(client.text(), "axd");
+        assert_eq!(first.edit_buffer().composition(), Some(TextSelection::new(1, 2)));
+        host.take_calls();
+
+        input_method.set_options(&TextInputOptions {
+            input_scope_names: Some(Rc::from([InputScopeNameValue::Hiragana])),
+            ..Default::default()
+        });
+        assert_eq!(host.take_calls(), [HostCall::RestartInput]);
+        first.close_connection();
+        let init = host.init.borrow().clone().unwrap();
+        let next = init(&top_level, &mut EditorInfo::default()).unwrap();
+        assert!(!Rc::ptr_eq(&first, &next));
+        assert_eq!(next.edit_buffer().composition(), Some(TextSelection::new(1, 2)));
+        // The next IME update must replace its old marked text instead of
+        // inserting beside it after the option-only connection restart.
+        assert!(next.set_composing_text(Some("yz"), 1));
+        assert_eq!(client.text(), "ayzd");
+        assert!(next.commit_text(Some("accepted"), 1));
+        assert_eq!(client.text(), "aacceptedd");
+        assert_eq!(next.edit_buffer().composition(), None);
+    }
+
+    #[test]
+    fn input_scope_restart_does_not_carry_composition_across_a_client_assignment() {
+        for same_client in [false, true] {
+            let (host, input_method) = input_method();
+            let client = TestClient::new("abcd", 1, 3);
+            input_method.set_options(&TextInputOptions::default());
+            input_method.set_client(Some(client.clone()));
+            let (first, _) = host.create_input_connection().unwrap();
+            assert!(first.set_composing_region(1, 3));
+            input_method.set_options(&TextInputOptions {
+                input_scope_names: Some(Rc::from([InputScopeNameValue::EmailSmtpAddress])),
+                ..Default::default()
+            });
+            // A focus switch or explicit client reinstall before Android asks
+            // for its connection retires the pending options-only handoff.
+            input_method.set_client(Some(if same_client { client } else { TestClient::new("else", 0, 0) }));
+            // Further option changes before the new client gets a connection
+            // must not reuse the old client's still-retained native connection.
+            input_method.set_options(&TextInputOptions {
+                input_scope_names: Some(Rc::from([InputScopeNameValue::Search])),
+                ..Default::default()
+            });
+            let (next, _) = host.create_input_connection().unwrap();
+            assert_eq!(next.edit_buffer().composition(), None);
+        }
+    }
+
+    #[test]
+    fn input_scope_numeric_pads_do_not_get_text_flags_and_secrets_disable_learning() {
+        use InputScopeNameValue as Scope;
+        for scope in [Scope::Digits, Scope::NumericPin] {
+            let mut options = TextInputOptions {
+                input_scope_names: Some(Rc::from([scope])),
+                auto_capitalization: true,
+                multiline: true,
+                show_suggestions: Some(true),
+                ..Default::default()
+            };
+            let editor = info(&options);
+            assert_eq!(editor.input_type, if scope == Scope::Digits { 2 } else { 0x12 });
+            assert_eq!(editor.initial_caps_mode, 0);
+            assert_eq!(editor.ime_options & ime_flags::NO_PERSONALIZED_LEARNING != 0, scope == Scope::NumericPin);
+            options.input_scope_names = Some(Rc::from([Scope::AlphanumericPin]));
+            let mut old = EditorInfo::default();
+            AndroidInputMethod::fill_editor_info(&options, &mut old, 25);
+            assert_eq!(old.ime_options & ime_flags::NO_PERSONALIZED_LEARNING, 0);
+            assert_ne!(old.input_type & input_types::TEXT_FLAG_NO_SUGGESTIONS, 0);
+        }
+    }
+
+    #[test]
+    fn input_scope_override_preserves_independently_configured_privacy() {
+        use input_types::*;
+        use InputScopeNameValue as Scope;
+
+        for (content_type, is_sensitive) in [
+            (TextInputContentType::Password, false),
+            (TextInputContentType::Pin, false),
+            (TextInputContentType::Normal, true),
+        ] {
+            for (scope, input_type) in [
+                (Scope::Default, CLASS_TEXT | TEXT_FLAG_NO_SUGGESTIONS),
+                (Scope::EmailSmtpAddress, CLASS_TEXT | TEXT_VARIATION_EMAIL_ADDRESS | TEXT_FLAG_NO_SUGGESTIONS),
+                (Scope::Digits, CLASS_NUMBER),
+                (Scope::TelephoneNumber, CLASS_PHONE),
+            ] {
+                let options = TextInputOptions {
+                    content_type,
+                    is_sensitive,
+                    input_scope_names: Some(Rc::from([scope])),
+                    show_suggestions: Some(true),
+                    ..Default::default()
+                };
+                let editor = info(&options);
+                assert_eq!(editor.input_type, input_type, "{content_type:?}/{is_sensitive}/{scope:?}");
+                assert_ne!(editor.ime_options & ime_flags::NO_PERSONALIZED_LEARNING, 0);
+                let mut old = EditorInfo::default();
+                AndroidInputMethod::fill_editor_info(&options, &mut old, 25);
+                assert_eq!(old.input_type, input_type);
+                assert_eq!(old.ime_options & ime_flags::NO_PERSONALIZED_LEARNING, 0);
+            }
+        }
     }
 
     #[test]

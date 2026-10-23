@@ -12,10 +12,14 @@
 
 use crate::dbus_call_queue::{DBusCallError, DBusCallQueue, DBusResult};
 use crate::event::Event;
-use crate::ix11_input_method::{IX11InputMethodControl, IX11InputMethodFactory, X11InputMethodForwardedKey};
+use crate::ix11_input_method::{
+    IX11InputMethodControl, IX11InputMethodFactory, X11InputMethodForwardedKey,
+};
 use crate::signal_watch::CancellationFlag;
 use ferroui_base::input::raw::IRawInputEventArgs;
-use ferroui_base::input::text_input::{ITextInputMethodImpl, TextInputMethodClient, TextInputOptions};
+use ferroui_base::input::text_input::{
+    ITextInputMethodImpl, TextInputMethodClient, TextInputOptions,
+};
 use ferroui_base::input::LocalBoxFuture;
 use ferroui_base::logging::{LogArea, LogEventLevel, Logger};
 use ferroui_base::reactive::IDisposable;
@@ -37,12 +41,17 @@ pub struct DBusInputMethodFactory {
 
 impl DBusInputMethodFactory {
     pub fn new(factory: impl Fn(usize) -> Rc<DBusTextInputMethodBase> + 'static) -> Self {
-        Self { factory: Box::new(factory) }
+        Self {
+            factory: Box::new(factory),
+        }
     }
 }
 
 impl IX11InputMethodFactory for DBusInputMethodFactory {
-    fn create_client(&self, xid: usize) -> (Rc<dyn ITextInputMethodImpl>, Rc<dyn IX11InputMethodControl>) {
+    fn create_client(
+        &self,
+        xid: usize,
+    ) -> (Rc<dyn ITextInputMethodImpl>, Rc<dyn IX11InputMethodControl>) {
         let im = (self.factory)(xid);
         (im.clone(), im)
     }
@@ -93,12 +102,16 @@ pub struct DBusTextInputMethodBase {
     weak_self: Weak<DBusTextInputMethodBase>,
     core: Rc<dyn DBusTextInputMethodCore>,
     disposables: RefCell<Vec<Rc<dyn IDisposable>>>,
-    online_names_queue: RefCell<VecDeque<String>>,
+    online_names_queue: RefCell<VecDeque<(String, String)>>,
     connection: Connection,
     known_names: Vec<String>,
     watch_cts: RefCell<Option<CancellationFlag>>,
     connecting: Cell<bool>,
+    connecting_owner: RefCell<Option<(String, String)>>,
+    connection_generation: Cell<u64>,
+    disposed: Cell<bool>,
     current_name: RefCell<Option<String>>,
+    current_owner: RefCell<Option<String>>,
     queue: DBusCallQueue,
     window_active: Cell<bool>,
     ime_active: Cell<Option<bool>>,
@@ -109,6 +122,47 @@ pub struct DBusTextInputMethodBase {
     client: RefCell<Option<Rc<dyn TextInputMethodClient>>>,
     on_commit: Event<String>,
     on_forward: Event<X11InputMethodForwardedKey>,
+}
+
+/// A signal registration can finish after its connection was retired.
+/// Fence delivery separately from disposing the eventual registration so
+/// an already queued callback cannot escape during that interval.
+pub(crate) struct DBusSignalGuard {
+    owner: Weak<DBusTextInputMethodBase>,
+    generation: u64,
+}
+
+impl DBusSignalGuard {
+    fn is_current(&self, owner: &DBusTextInputMethodBase) -> bool {
+        !owner.disposed.get() && owner.connection_generation.get() == self.generation
+    }
+
+    pub(crate) fn handler<T>(
+        &self,
+        mut handler: impl FnMut(T) + 'static,
+    ) -> impl FnMut(T) + 'static {
+        let guard = Self {
+            owner: self.owner.clone(),
+            generation: self.generation,
+        };
+        move |item| {
+            if guard
+                .owner
+                .upgrade()
+                .is_some_and(|owner| guard.is_current(&owner))
+            {
+                handler(item);
+            }
+        }
+    }
+
+    pub(crate) fn register(&self, subscription: Rc<dyn IDisposable>) {
+        if let Some(owner) = self.owner.upgrade().filter(|owner| self.is_current(owner)) {
+            owner.add_disposable(subscription);
+        } else {
+            subscription.dispose();
+        }
+    }
 }
 
 /// Runs an `async void` of the reference: a task of the UI dispatcher
@@ -146,7 +200,11 @@ impl DBusTextInputMethodBase {
                 known_names: known_names.iter().map(|name| name.to_string()).collect(),
                 watch_cts: RefCell::new(None),
                 connecting: Cell::new(false),
+                connecting_owner: RefCell::new(None),
+                connection_generation: Cell::new(0),
+                disposed: Cell::new(false),
                 current_name: RefCell::new(None),
+                current_owner: RefCell::new(None),
                 queue: DBusCallQueue::new(move |e| {
                     let owner = queue_owner.upgrade();
                     Box::pin(async move {
@@ -175,7 +233,7 @@ impl DBusTextInputMethodBase {
     }
 
     pub fn is_connected(&self) -> bool {
-        self.current_name.borrow().is_some()
+        !self.disposed.get() && self.current_name.borrow().is_some()
     }
 
     pub fn client(&self) -> Option<Rc<dyn TextInputMethodClient>> {
@@ -220,7 +278,9 @@ impl DBusTextInputMethodBase {
             let dbus = zbus::fdo::DBusProxy::new(&connection).await?;
             // Subscribed before the current owner is asked for, so that a
             // change in between is not lost.
-            let mut changes = dbus.receive_name_owner_changed_with_args(&[(0, name.as_str())]).await?;
+            let mut changes = dbus
+                .receive_name_owner_changed_with_args(&[(0, name.as_str())])
+                .await?;
             let owner = match zbus::names::BusName::try_from(name.as_str()) {
                 Ok(bus_name) => match dbus.get_name_owner(bus_name).await {
                     Ok(owner) => Some(owner.to_string()),
@@ -244,7 +304,10 @@ impl DBusTextInputMethodBase {
 
         if let Some(Err(e)) = cancellation_token.run(watch).await {
             if !cancellation_token.is_cancellation_requested() {
-                log_error(LogArea::FREE_DESKTOP_PLATFORM, &format!("WatchNameOwner for '{name}' failed: {e}"));
+                log_error(
+                    LogArea::FREE_DESKTOP_PLATFORM,
+                    &format!("WatchNameOwner for '{name}' failed: {e}"),
+                );
             }
         }
     }
@@ -257,8 +320,39 @@ impl DBusTextInputMethodBase {
     }
 
     fn on_owner_changed(&self, service_name: &str, new_owner: Option<&str>) {
+        if self.disposed.get() {
+            return;
+        }
+        self.online_names_queue
+            .borrow_mut()
+            .retain(|(name, owner)| name != service_name || new_owner == Some(owner.as_str()));
+        // Connecting is asynchronous. An owner change invalidates that
+        // attempt even before it has published current_name. The owner may
+        // also be replaced directly, without an intermediate empty name.
+        if self
+            .connecting_owner
+            .borrow()
+            .as_ref()
+            .is_some_and(|(name, owner)| name == service_name && new_owner != Some(owner.as_str()))
+        {
+            self.connection_generation
+                .set(self.connection_generation.get().wrapping_add(1));
+        }
+        if self.current_name.borrow().as_deref() == Some(service_name)
+            && self.current_owner.borrow().as_deref() != new_owner
+        {
+            self.connection_generation
+                .set(self.connection_generation.get().wrapping_add(1));
+            *self.current_name.borrow_mut() = None;
+            *self.current_owner.borrow_mut() = None;
+            self.dispose_disposables();
+            self.core.on_disconnected();
+            self.reset_state();
+        }
         if new_owner.is_some() && self.current_name.borrow().is_none() {
-            self.online_names_queue.borrow_mut().push_back(service_name.to_string());
+            self.online_names_queue
+                .borrow_mut()
+                .push_back((service_name.to_string(), new_owner.unwrap().to_string()));
             if !self.connecting.get() {
                 self.connecting.set(true);
                 let Some(this) = self.weak_self.upgrade() else {
@@ -270,38 +364,62 @@ impl DBusTextInputMethodBase {
                     impl Drop for ResetConnecting {
                         fn drop(&mut self) {
                             self.0.connecting.set(false);
+                            self.0.connecting_owner.borrow_mut().take();
                         }
                     }
                     let guard = ResetConnecting(this);
                     let this = &guard.0;
 
                     loop {
-                        let Some(name) = this.online_names_queue.borrow_mut().pop_front() else {
+                        let Some((name, owner)) = this.online_names_queue.borrow_mut().pop_front()
+                        else {
                             break;
                         };
-                        match this.core.connect(name.clone()).await {
+                        if this.disposed.get() {
+                            return;
+                        }
+                        let generation = this.connection_generation.get().wrapping_add(1);
+                        this.connection_generation.set(generation);
+                        *this.connecting_owner.borrow_mut() = Some((name.clone(), owner.clone()));
+                        let result = this.core.connect(name.clone()).await;
+                        if this.disposed.get() || this.connection_generation.get() != generation {
+                            // Never publish a context returned after disposal or
+                            // owner replacement. Retire its subscriptions and
+                            // proxies before another connection is attempted.
+                            let disconnect = this.core.disconnect_async();
+                            this.core.on_disconnected();
+                            this.dispose_disposables();
+                            if let Err(ex) = disconnect.await {
+                                log_error(
+                                    "IME",
+                                    &format!("Error while destroying a retired context:\n{ex}"),
+                                );
+                            }
+                            if this.disposed.get() {
+                                this.online_names_queue.borrow_mut().clear();
+                                return;
+                            }
+                            continue;
+                        }
+                        this.connecting_owner.borrow_mut().take();
+                        match result {
                             Ok(true) => {
                                 this.online_names_queue.borrow_mut().clear();
                                 *this.current_name.borrow_mut() = Some(name);
+                                *this.current_owner.borrow_mut() = Some(owner);
                                 return;
                             }
                             Ok(false) => {}
                             Err(ex) => {
-                                log_error("IME", &format!("Unable to create IME input context:\n{ex}"));
+                                log_error(
+                                    "IME",
+                                    &format!("Unable to create IME input context:\n{ex}"),
+                                );
                             }
                         }
                     }
                 });
             }
-        }
-
-        // IME has crashed
-        if new_owner.is_none() && self.current_name.borrow().as_deref() == Some(service_name) {
-            *self.current_name.borrow_mut() = None;
-            self.dispose_disposables();
-
-            self.core.on_disconnected();
-            self.reset_state();
         }
     }
 
@@ -322,11 +440,16 @@ impl DBusTextInputMethodBase {
 
     async fn queue_on_error_async(&self, e: DBusCallError) {
         log_error("IME", &format!("Error:\n{e}"));
-        if let Err(ex) = self.core.disconnect_async().await {
+        self.connection_generation
+            .set(self.connection_generation.get().wrapping_add(1));
+        *self.current_name.borrow_mut() = None;
+        *self.current_owner.borrow_mut() = None;
+        let disconnect = self.core.disconnect_async();
+        self.core.on_disconnected();
+        self.dispose_disposables();
+        if let Err(ex) = disconnect.await {
             log_error("IME", &format!("Error while destroying the context:\n{ex}"));
         }
-        self.core.on_disconnected();
-        *self.current_name.borrow_mut() = None;
     }
 
     /// Queues a call behind the calls already queued (`Enqueue`).
@@ -340,15 +463,30 @@ impl DBusTextInputMethodBase {
     /// Keeps a subscription until the input method disconnects
     /// (`AddDisposable`).
     pub fn add_disposable(&self, d: Rc<dyn IDisposable>) {
-        self.disposables.borrow_mut().push(d);
+        if self.disposed.get() {
+            d.dispose();
+        } else {
+            self.disposables.borrow_mut().push(d);
+        }
+    }
+
+    pub(crate) fn signal_guard(&self) -> DBusSignalGuard {
+        DBusSignalGuard {
+            owner: self.weak_self.clone(),
+            generation: self.connection_generation.get(),
+        }
     }
 
     pub fn fire_commit(&self, s: String) {
-        self.on_commit.invoke(s);
+        if !self.disposed.get() {
+            self.on_commit.invoke(s);
+        }
     }
 
     pub fn fire_forward(&self, k: X11InputMethodForwardedKey) {
-        self.on_forward.invoke(k);
+        if !self.disposed.get() {
+            self.on_forward.invoke(k);
+        }
     }
 
     fn update_active(&self) {
@@ -380,7 +518,9 @@ impl DBusTextInputMethodBase {
                 return Ok(());
             }
 
-            this.core.set_capabilities_core(supports_preedit, supports_surrounding_text).await
+            this.core
+                .set_capabilities_core(supports_preedit, supports_surrounding_text)
+                .await
         });
     }
 
@@ -410,9 +550,10 @@ pub(crate) fn app_name() -> String {
     Application::current()
         .and_then(|application| application.name())
         .or_else(|| {
-            std::env::current_exe()
-                .ok()
-                .and_then(|path| path.file_stem().map(|name| name.to_string_lossy().into_owned()))
+            std::env::current_exe().ok().and_then(|path| {
+                path.file_stem()
+                    .map(|name| name.to_string_lossy().into_owned())
+            })
         })
         .unwrap_or_else(|| "FerroUI".to_string())
 }
@@ -434,7 +575,9 @@ impl IX11InputMethodControl for DBusTextInputMethodBase {
         key_code: i32,
     ) -> LocalBoxFuture<bool> {
         let core = self.core.clone();
-        let handled = self.queue.enqueue_async_with_result(move || core.handle_key_core(args, key_val, key_code));
+        let handled = self
+            .queue
+            .enqueue_async_with_result(move || core.handle_key_core(args, key_val, key_code));
         let this = self.weak_self.clone();
         Box::pin(async move {
             match handled.await {
@@ -467,30 +610,39 @@ impl IX11InputMethodControl for DBusTextInputMethodBase {
     }
 
     fn dispose(&self) {
+        if self.disposed.replace(true) {
+            return;
+        }
+        self.connection_generation
+            .set(self.connection_generation.get().wrapping_add(1));
         if let Some(watch_cts) = self.watch_cts.borrow().as_ref() {
             watch_cts.cancel();
         }
         self.dispose_disposables();
-        if !self.is_connected() {
+        if self.current_name.borrow_mut().take().is_none() {
+            // A pending connect is retired by its generation guard when it
+            // returns; it must not become connected after this method returns.
             return;
         }
-        let Some(this) = self.weak_self.upgrade() else {
-            return;
-        };
+        *self.current_owner.borrow_mut() = None;
+        let disconnect = self.core.disconnect_async();
+        self.core.on_disconnected();
         spawn(async move {
-            if let Err(ex) = this.core.disconnect_async().await {
+            if let Err(ex) = disconnect.await {
                 log_error("IME", &format!("Error while destroying the context:\n{ex}"));
             }
-
-            *this.current_name.borrow_mut() = None;
         });
     }
 }
 
 impl ITextInputMethodImpl for DBusTextInputMethodBase {
     fn set_client(&self, client: Option<Rc<dyn TextInputMethodClient>>) {
-        let supports_preedit = client.as_ref().is_some_and(|client| client.supports_preedit());
-        let supports_surrounding_text = client.as_ref().is_some_and(|client| client.supports_surrounding_text());
+        let supports_preedit = client
+            .as_ref()
+            .is_some_and(|client| client.supports_preedit());
+        let supports_surrounding_text = client
+            .as_ref()
+            .is_some_and(|client| client.supports_surrounding_text());
         *self.client.borrow_mut() = client;
         self.update_active();
         self.update_capabilities(supports_preedit, supports_surrounding_text);

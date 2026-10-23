@@ -8,3 +8,7 @@ pub mod delegate_property;
 pub mod plain_event;
 pub mod routed_event;
 pub mod template_event;
+
+pub mod rich_context_menu_event;
+pub mod rich_readonly_context_menu_event;
+pub mod rich_editor_events;

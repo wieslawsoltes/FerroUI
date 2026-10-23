@@ -569,6 +569,28 @@ impl ScrollContentPresenter {
     /// target visual to bring into view. Returns true if the scroll offset
     /// was changed; otherwise false.
     pub fn bring_descendant_into_view(&self, target: &Visual, target_rect: Rect) -> bool {
+        self.bring_descendant_into_view_core(target, target_rect, None)
+    }
+
+    /// Brings a descendant rectangle to the top or bottom of the viewport.
+    /// This uses extent coordinates, so repeated requests remain correct before
+    /// the next arrange pass applies a changed offset. Logical scrolling stays
+    /// delegated to the content's own scrolling contract.
+    pub fn bring_descendant_into_view_aligned(
+        &self,
+        target: &Visual,
+        target_rect: Rect,
+        align_to_top: bool,
+    ) -> bool {
+        self.bring_descendant_into_view_core(target, target_rect, Some(align_to_top))
+    }
+
+    fn bring_descendant_into_view_core(
+        &self,
+        target: &Visual,
+        target_rect: Rect,
+        align_to_top: Option<bool>,
+    ) -> bool {
         let child = match self.child() {
             Some(child) if child.is_effectively_visible() => child,
             _ => return false,
@@ -607,12 +629,16 @@ impl ScrollContentPresenter {
             rectangle.x,
             rectangle.right(),
         );
-        let min_y = Self::compute_scroll_offset_with_minimal_scroll(
-            viewport.y,
-            viewport.bottom(),
-            rectangle.y,
-            rectangle.bottom(),
-        );
+        let min_y = match align_to_top {
+            Some(true) => rectangle.y,
+            Some(false) => rectangle.bottom() - viewport_size.height,
+            None => Self::compute_scroll_offset_with_minimal_scroll(
+                viewport.y,
+                viewport.bottom(),
+                rectangle.y,
+                rectangle.bottom(),
+            ),
+        };
         let offset = Vector::new(min_x, min_y);
 
         if self.offset().nearly_equals(offset) {

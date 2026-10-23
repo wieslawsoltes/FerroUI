@@ -14,9 +14,9 @@ use super::interop::{
     IExpandCollapseProvider, IInvokeProvider, IRangeValueProvider, IRawElementProviderFragment,
     IRawElementProviderFragmentRoot, IRawElementProviderSimple, IRawElementProviderSimple2, IScrollItemProvider,
     ISelectionItemProvider, IToggleProvider, IUiaCoreProviderApi, IValueProvider, NavigateDirection, ProviderOptions,
-    StructureChangeType, UiaControlTypeId, UiaCoreProviderApi, UiaEventId, UiaPatternId, UiaPropertyId,
+    StructureChangeType, TextEditChangeType, UiaControlTypeId, UiaCoreProviderApi, UiaEventId, UiaPatternId, UiaPropertyId,
 };
-use super::marshalling::{free_bstr, ptr_to_string_bstr, SafeArrayMarshaller, VariantArray, VariantValue};
+use super::marshalling::{free_bstr, ptr_to_string_bstr, SafeArrayMarshaller, SafeArrayRef, VariantArray, VariantValue};
 use ferroui_base::layout::ILayoutManager;
 use ferroui_base::threading::Dispatcher;
 use ferroui_base::Ref;
@@ -113,6 +113,18 @@ impl IUiaCoreProviderApi for Recorder {
 
     fn uia_raise_automation_event(&self, provider: Option<&IRawElementProviderSimple>, id: i32) -> i32 {
         self.calls.borrow_mut().push(format!("event {} {:?}", number(provider), UiaEventId(id)));
+        0
+    }
+
+    fn uia_raise_text_edit_text_changed_event(
+        &self,
+        provider: Option<&IRawElementProviderSimple>,
+        change_type: TextEditChangeType,
+        changed_data: SafeArrayRef,
+    ) -> i32 {
+        // SAFETY: UiaCoreProviderApi lends a live VT_BSTR array for this call.
+        let data = unsafe { SafeArrayMarshaller::<String>::convert_to_managed(changed_data) }.unwrap();
+        self.calls.borrow_mut().push(format!("text edit {} {change_type:?} {data:?}", number(provider)));
         0
     }
 

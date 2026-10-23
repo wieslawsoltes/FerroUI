@@ -28,6 +28,7 @@ mod expander_automation_peer;
 #[cfg(test)]
 mod foundation_automation_peer_tests;
 mod image_automation_peer;
+mod hyperlink_automation_peer;
 mod interop_automation_peer;
 #[cfg(test)]
 mod items_automation_peer_tests;
@@ -62,6 +63,12 @@ mod split_button_automation_peer;
 mod split_button_automation_peer_tests;
 mod tabbed_page_automation_peer;
 mod text_block_automation_peer;
+mod rich_text_block_automation_peer;
+mod rich_edit_box_automation_peer;
+mod rich_edit_box_text_presenter_automation_peer;
+pub use rich_text_block_automation_peer::RichTextBlockAutomationPeer;
+pub use rich_edit_box_automation_peer::RichEditBoxAutomationPeer;
+pub use rich_edit_box_text_presenter_automation_peer::RichEditBoxTextPresenterAutomationPeer;
 mod text_box_automation_peer;
 mod thumb_automation_peer;
 mod time_picker_automation_peer;
@@ -100,6 +107,7 @@ pub use drawer_page_automation_peer::DrawerPageAutomationPeer;
 pub use embeddable_control_root_automation_peer::EmbeddableControlRootAutomationPeer;
 pub use expander_automation_peer::ExpanderAutomationPeer;
 pub use image_automation_peer::ImageAutomationPeer;
+pub use hyperlink_automation_peer::HyperlinkAutomationPeer;
 pub use interop_automation_peer::InteropAutomationPeer;
 pub use items_control_automation_peer::{
     ItemsControlAutomationPeer, ItemsControlAutomationPeerImpl, ItemsControlAutomationPeerImplExt,

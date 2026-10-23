@@ -29,6 +29,7 @@ ferroui-system = { workspace = true }
 # The messages and the connections of remote rendering (`remote`).
 ferroui-remote-protocol.workspace = true
 bitflags.workspace = true
+encoding_rs.workspace = true
 
 [features]
 # Test doubles (mock windowing platform, unit-test application) for the tests

@@ -14,6 +14,7 @@
 -(void) setCursorRect:(FrnRect) cursorRect;
 -(void) setSelection: (int) start : (int) end;
 -(void) resetInputMethod;
+-(void) setInputContentType:(FrnTextInputContentType) contentType;
 
 @end
 

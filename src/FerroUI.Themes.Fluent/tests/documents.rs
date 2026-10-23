@@ -166,6 +166,7 @@ document_tests! {
     controls_table_view_column_header => "/Controls/TableViewColumnHeader.xaml";
     controls_table_view_row => "/Controls/TableViewRow.xaml";
     controls_text_box => "/Controls/TextBox.xaml";
+    controls_rich_edit_box => "/Controls/RichEditBox.xaml";
     controls_text_selection_handle => "/Controls/TextSelectionHandle.xaml";
     controls_theme_variant_scope => "/Controls/ThemeVariantScope.xaml";
     controls_time_picker => "/Controls/TimePicker.xaml";

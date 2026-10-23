@@ -108,6 +108,9 @@ fn display_enum(value: &BoxedValue) -> Option<String> {
 /// in plain display form (one level).
 fn display_declared(value: &BoxedValue) -> Option<String> {
     use ferroui_base::metadata::{MarkupType, MarkupTypeKind};
+    if let Some(range) = value.downcast_ref::<ferroui_controls::documents::TextHighlightRange>() {
+        return Some(format!("TextRange {{StartIndex={}, Length={}}}", range.start_index(), range.length()));
+    }
     let markup = MarkupType::find_by_handle(value.value_type_id())?;
     if markup.kind != MarkupTypeKind::Class || markup.properties.is_empty() {
         return None;
@@ -373,7 +376,7 @@ fn collection_items(value: &BoxedValue) -> Option<Result<Vec<Option<BoxedValue>>
     use ferroui_base::input::KeyBinding;
     use ferroui_base::styling::ThemeVariant;
     use ferroui_base::styling::Styles;
-    use ferroui_controls::documents::{Inline, InlineCollection};
+    use ferroui_controls::documents::{BlockCollection, Inline, InlineCollection, TextHighlighterCollection, TextRangeCollection};
     use ferroui_controls::templates::{DataTemplates, IDataTemplate};
     use ferroui_controls::{ColumnDefinition, ColumnDefinitions, Control, Controls, ItemCollection, RowDefinition, RowDefinitions};
 
@@ -413,6 +416,18 @@ fn collection_items(value: &BoxedValue) -> Option<Result<Vec<Option<BoxedValue>>
     }
     if let Some(list) = any.downcast_ref::<InlineCollection>() {
         return Some(Ok(objects::<Inline>(list.to_vec())));
+    }
+    if let Some(list) = any.downcast_ref::<BlockCollection>() {
+        return Some(Ok(objects(list.to_vec())));
+    }
+    if let Some(list) = any.downcast_ref::<TextHighlighterCollection>() {
+        return Some(Ok(objects(list.snapshot().to_vec())));
+    }
+    if let Some(list) = any.downcast_ref::<TextRangeCollection>() {
+        return Some(Ok(list.to_vec().into_iter().map(|range| Some(Rc::new(range) as BoxedValue)).collect()));
+    }
+    if let Some(list) = any.downcast_ref::<ferroui_base::media::TextDecorationCollection>() {
+        return Some(Ok(objects(list.to_vec())));
     }
     if let Some(list) = any.downcast_ref::<FerroList<Ref<Inline>>>() {
         return Some(Ok(objects(list.to_vec())));
@@ -660,6 +675,9 @@ fn eligibility_of_the_corpus_is_as_expected() {
 #[test]
 fn both_back_ends_build_equal_object_trees() {
     let _base = xaml_test_base();
+    // Reading the rich presenter's geometry properties shapes text. Both back
+    // ends need the same deterministic font services for the canonical dump.
+    let _text = ferroui_base::media::text_formatting::testing::TextTestScope::new();
     let (mut matches, mut mismatches, mut not_eligible) = (0, Vec::new(), 0);
     for (name, xaml) in DOCUMENTS {
         // Compared with the base URI of the document, in a test of their own.

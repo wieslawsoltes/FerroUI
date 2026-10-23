@@ -33,3 +33,6 @@ mod window_tests;
 mod x_shared_directive_tests;
 mod xaml_il_tests;
 mod xaml_source_info_tests;
+
+mod rich_text_tests;
+mod typography_tests;

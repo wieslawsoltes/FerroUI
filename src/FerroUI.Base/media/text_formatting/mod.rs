@@ -26,6 +26,7 @@ pub mod unicode;
 mod bidi_reorderer;
 mod drawable_text_run;
 mod formatted_text_source;
+mod font_family_line_metrics;
 pub(crate) mod formatting_buffer_helper;
 mod formatting_object_pool;
 mod generic_text_paragraph_properties;
@@ -56,6 +57,7 @@ mod text_line;
 mod text_line_break;
 mod text_line_impl;
 mod text_line_metrics;
+mod text_line_metrics_mode;
 mod text_metrics;
 mod text_paragraph_properties;
 mod text_run;
@@ -64,6 +66,8 @@ mod text_run_cache;
 mod text_run_properties;
 mod text_shaper;
 mod text_shaper_options;
+mod text_tab_stop;
+mod text_tab_layout;
 mod text_trailing_character_ellipsis;
 mod text_trailing_word_ellipsis;
 mod unshaped_text_run;
@@ -86,9 +90,13 @@ mod text_layout_tests;
 #[cfg(test)]
 mod text_line_bounds_tests;
 #[cfg(test)]
+mod font_family_line_metrics_tests;
+#[cfg(test)]
 mod text_line_tests;
 #[cfg(test)]
 mod text_run_cache_tests;
+#[cfg(test)]
+mod text_tab_layout_tests;
 #[cfg(any(test, feature = "testing"))]
 pub mod testing;
 
@@ -99,6 +107,7 @@ pub use glyph_info::GlyphInfo;
 pub use i_text_drawing_sink::ITextDrawingSink;
 pub use i_text_source::ITextSource;
 pub use formatted_text_source::FormattedTextSource;
+pub use font_family_line_metrics::FontFamilyLineMetrics;
 // Internal upstream; public so the Skia unit tests reach it.
 pub use formatting_object_pool::{FormattingObjectPool, ListPool, RentedList};
 // Internal upstream; public so the Skia unit tests reach them.
@@ -125,6 +134,7 @@ pub use text_line::TextLine;
 pub use text_line_impl::TextLineImpl;
 pub use text_line_break::TextLineBreak;
 pub use text_line_metrics::TextLineMetrics;
+pub use text_line_metrics_mode::TextLineMetricsMode;
 pub use text_metrics::TextMetrics;
 pub use text_paragraph_properties::TextParagraphProperties;
 pub use text_run::{TextRun, DEFAULT_TEXT_SOURCE_LENGTH};
@@ -135,7 +145,11 @@ pub(crate) use text_run_cache::CachedShapingResult;
 pub use text_run_properties::TextRunProperties;
 pub use text_shaper::TextShaper;
 pub use text_shaper_options::TextShaperOptions;
+pub use text_tab_stop::{TabAlignment, TabLeader, TextTabError, TextTabStop, TextTabStops};
 pub use text_trailing_character_ellipsis::TextTrailingCharacterEllipsis;
 pub use text_trailing_word_ellipsis::TextTrailingWordEllipsis;
 pub use unshaped_text_run::UnshapedTextRun;
 pub use wrapping_text_line_break::WrappingTextLineBreak;
+
+#[cfg(test)]
+mod font_fallback_scale_tests;

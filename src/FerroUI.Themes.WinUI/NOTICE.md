@@ -18,6 +18,12 @@ of the class `CornerRadiusToThicknessConverter` of the same repository
 `TabView` in its `Equal` width mode (`TabView::UpdateTabWidths` of
 `controls/dev/TabView/TabView.cpp`, `.h` and `TabView.idl`).
 
+`Controls/RichEditBox.xaml` is ported from
+`controls/dev/CommonStyles/RichEditBox_themeresources.xaml` and the editing
+commands in `controls/dev/CommandBarFlyout/TextCommandBarFlyout.cpp` at WinUI
+commit `fe244ca6ac4d482712b234a9de3cf771cc6481de`. Its native four-part template
+contract is adapted to the existing FerroUI rich presenter and theme resources.
+
 ## microsoft-ui-xaml
 
 The ported documents are subject to the following license:

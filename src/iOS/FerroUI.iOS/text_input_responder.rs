@@ -11,9 +11,8 @@
 //! the file; the classes of the Objective-C runtime are in `uikit`.
 
 use crate::combined_span3::CombinedSpan3;
-use ferroui_base::input::text_input::{
-    TextInputContentType, TextInputOptions, TextInputReturnKeyType, TextSelection,
-};
+use ferroui_base::input::text_input::{TextInputContentType, TextInputOptions, TextInputReturnKeyType, TextSelection};
+use ferroui_base::input::InputScopeNameValue;
 
 /// The log area of the text input of the platform.
 pub const IME_LOG: &str = "IOSIME";
@@ -182,22 +181,97 @@ pub fn marked_text_range(marked_text: Option<&[u16]>, selection: TextSelection) 
     Some(TextRangeIndices::new(selection.start, selection.start + length))
 }
 
-/// The keyboard of the content type of the options.
+/// The keyboard of the first explicit input scope, or the existing content hint
+/// when the scope has no names. UIKit has no script/width selector; the active
+/// input mode and locale hints continue to choose a language.
 pub fn keyboard_type_of(options: Option<&TextInputOptions>) -> isize {
+    use InputScopeNameValue as Scope;
     match options {
         None => keyboard_type::DEFAULT,
-        Some(options) => match options.content_type {
-            TextInputContentType::Alpha => keyboard_type::ASCII_CAPABLE,
-            TextInputContentType::Digits => keyboard_type::PHONE_PAD,
-            TextInputContentType::Pin => keyboard_type::NUMBER_PAD,
-            TextInputContentType::Number => keyboard_type::DECIMAL_PAD,
-            TextInputContentType::Email => keyboard_type::EMAIL_ADDRESS,
-            TextInputContentType::Url => keyboard_type::URL,
-            TextInputContentType::Name => keyboard_type::NAME_PHONE_PAD,
-            TextInputContentType::Social => keyboard_type::TWITTER,
-            TextInputContentType::Search => keyboard_type::WEB_SEARCH,
-            _ => keyboard_type::DEFAULT,
-        },
+        Some(options) => {
+            if let Some(scope) = options.effective_input_scope() {
+                match scope {
+                    Scope::Url => keyboard_type::URL,
+                    Scope::EmailSmtpAddress | Scope::EmailNameOrAddress => keyboard_type::EMAIL_ADDRESS,
+                    Scope::NameOrPhoneNumber => keyboard_type::NAME_PHONE_PAD,
+                    Scope::CurrencyAmountAndSymbol
+                    | Scope::CurrencyAmount
+                    | Scope::Number
+                    | Scope::NumberFullWidth
+                    | Scope::FormulaNumber => keyboard_type::DECIMAL_PAD,
+                    Scope::DateMonthNumber
+                    | Scope::DateDayNumber
+                    | Scope::DateYear
+                    | Scope::Digits
+                    | Scope::TimeHour
+                    | Scope::TimeMinutesOrSeconds
+                    | Scope::NumericPassword
+                    | Scope::NumericPin => keyboard_type::NUMBER_PAD,
+                    Scope::TelephoneNumber
+                    | Scope::TelephoneCountryCode
+                    | Scope::TelephoneAreaCode
+                    | Scope::TelephoneLocalNumber => keyboard_type::PHONE_PAD,
+                    Scope::AlphanumericHalfWidth | Scope::AlphanumericPin => keyboard_type::ASCII_CAPABLE,
+                    Scope::Search | Scope::SearchIncremental | Scope::Maps => keyboard_type::WEB_SEARCH,
+                    Scope::Default
+                    | Scope::PersonalFullName
+                    | Scope::Password
+                    | Scope::AlphanumericFullWidth
+                    | Scope::Hiragana
+                    | Scope::KatakanaHalfWidth
+                    | Scope::KatakanaFullWidth
+                    | Scope::Hanja
+                    | Scope::HangulHalfWidth
+                    | Scope::HangulFullWidth
+                    | Scope::Formula
+                    | Scope::ChineseHalfWidth
+                    | Scope::ChineseFullWidth
+                    | Scope::NativeScript
+                    | Scope::Text
+                    | Scope::Chat
+                    | Scope::ChatWithoutEmoji => keyboard_type::DEFAULT,
+                }
+            } else {
+                match options.content_type {
+                    TextInputContentType::Alpha => keyboard_type::ASCII_CAPABLE,
+                    TextInputContentType::Digits => keyboard_type::PHONE_PAD,
+                    TextInputContentType::Pin => keyboard_type::NUMBER_PAD,
+                    TextInputContentType::Number => keyboard_type::DECIMAL_PAD,
+                    TextInputContentType::Email => keyboard_type::EMAIL_ADDRESS,
+                    TextInputContentType::Url => keyboard_type::URL,
+                    TextInputContentType::Name => keyboard_type::NAME_PHONE_PAD,
+                    TextInputContentType::Social => keyboard_type::TWITTER,
+                    TextInputContentType::Search => keyboard_type::WEB_SEARCH,
+                    _ => keyboard_type::DEFAULT,
+                }
+            }
+        }
+    }
+}
+
+/// The semantic UIKit content types for scopes with a direct match. A phone
+/// component is not an entire phone number, and a PIN is not necessarily an
+/// account password or a one-time code, so neither advertises those semantics.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+#[cfg(any(target_os = "ios", test))]
+enum InputScopeContentType {
+    Name,
+    EmailAddress,
+    TelephoneNumber,
+    Url,
+    Password,
+}
+
+#[cfg(any(target_os = "ios", test))]
+fn content_type_for_scope(options: Option<&TextInputOptions>) -> Option<InputScopeContentType> {
+    use InputScopeNameValue as Scope;
+    match options.and_then(TextInputOptions::effective_input_scope)? {
+        Scope::PersonalFullName => Some(InputScopeContentType::Name),
+        Scope::EmailSmtpAddress | Scope::EmailNameOrAddress => Some(InputScopeContentType::EmailAddress),
+        Scope::TelephoneNumber => Some(InputScopeContentType::TelephoneNumber),
+        Scope::Url => Some(InputScopeContentType::Url),
+        Scope::Password | Scope::NumericPassword => Some(InputScopeContentType::Password),
+        _ => None,
     }
 }
 
@@ -224,7 +298,9 @@ pub fn return_key_type_of(options: Option<&TextInputOptions>) -> isize {
     }
 }
 
-/// Whether the entry is secure: a password, a PIN, or sensitive content.
+/// Whether the entry is secure: a legacy password/PIN or explicitly sensitive
+/// content. A WinUI InputScope only advises the keyboard and does not enable or
+/// disable the control's existing secure-entry policy.
 pub fn is_secure_entry(options: Option<&TextInputOptions>) -> bool {
     options.is_some_and(|options| {
         matches!(options.content_type, TextInputContentType::Password | TextInputContentType::Pin)
@@ -232,10 +308,19 @@ pub fn is_secure_entry(options: Option<&TextInputOptions>) -> bool {
     })
 }
 
-/// Autocorrection and spell checking: on unless the options say that no
-/// suggestions are shown.
+/// Autocorrection and spell checking: off for explicit password/PIN scopes and
+/// whenever the existing options disable suggestions.
 pub fn suggestions_trait_of(options: Option<&TextInputOptions>) -> isize {
-    if options.and_then(|options| options.show_suggestions) == Some(false) {
+    let secret_scope = options.and_then(TextInputOptions::effective_input_scope).is_some_and(|scope| {
+        matches!(
+            scope,
+            InputScopeNameValue::Password
+                | InputScopeNameValue::NumericPassword
+                | InputScopeNameValue::NumericPin
+                | InputScopeNameValue::AlphanumericPin
+        )
+    });
+    if secret_scope || options.and_then(|options| options.show_suggestions) == Some(false) {
         text_trait::NO
     } else {
         text_trait::YES
@@ -301,11 +386,12 @@ mod uikit {
     };
     use objc2_ui_kit::{
         NSWritingDirection, UIEditingInteractionConfiguration, UIKeyInput, UIKeyboardType, UIResponder,
-        UIReturnKeyType, UITextAutocapitalizationType, UITextAutocorrectionType, UITextInput, UITextInputDelegate,
-        UITextInputMode, UITextInputPasswordRules, UITextInputStringTokenizer, UITextInputTokenizer,
-        UITextInputTraits, UITextLayoutDirection, UITextPosition, UITextRange, UITextSelectionRect,
-        UITextSmartDashesType, UITextSmartInsertDeleteType, UITextSmartQuotesType, UITextSpellCheckingType,
-        UITextStorageDirection, UITextView,
+        UIReturnKeyType, UITextAutocapitalizationType, UITextAutocorrectionType, UITextContentTypeEmailAddress,
+        UITextContentTypeName, UITextContentTypePassword, UITextContentTypeTelephoneNumber, UITextContentTypeURL,
+        UITextInput, UITextInputDelegate, UITextInputMode, UITextInputPasswordRules, UITextInputStringTokenizer,
+        UITextInputTokenizer, UITextInputTraits, UITextLayoutDirection, UITextPosition, UITextRange,
+        UITextSelectionRect, UITextSmartDashesType, UITextSmartInsertDeleteType, UITextSmartQuotesType,
+        UITextSpellCheckingType, UITextStorageDirection, UITextView,
     };
     use std::cell::{Cell, OnceCell, RefCell};
     use std::rc::Rc;
@@ -708,7 +794,22 @@ mod uikit {
 
             #[unsafe(method_id(textContentType))]
             fn text_content_type(&self) -> Option<Retained<NSString>> {
-                Some(self.ivars().text_content_type.borrow().clone())
+                if let Some(content_type) = content_type_for_scope(self.options().as_ref()) {
+                    // UIKit exports these immutable NSString constants. Using
+                    // the real constants also avoids inventing their contents.
+                    let value = unsafe {
+                        match content_type {
+                            InputScopeContentType::Name => UITextContentTypeName,
+                            InputScopeContentType::EmailAddress => UITextContentTypeEmailAddress,
+                            InputScopeContentType::TelephoneNumber => UITextContentTypeTelephoneNumber,
+                            InputScopeContentType::Url => UITextContentTypeURL,
+                            InputScopeContentType::Password => UITextContentTypePassword,
+                        }
+                    };
+                    Some(value.retain())
+                } else {
+                    Some(self.ivars().text_content_type.borrow().clone())
+                }
             }
 
             #[unsafe(method(setTextContentType:))]
@@ -1143,7 +1244,6 @@ mod uikit {
             unsafe { msg_send![super(this), init] }
         }
 
-
         /// Whether the next responder is `view`.
         pub(crate) fn is_of_view(&self, view: &FerroView) -> bool {
             self.ivars().view.load().is_some_and(|own| std::ptr::eq(&*own, view))
@@ -1361,6 +1461,98 @@ mod tests {
         assert_eq!(keyboard_type::TWITTER, of(TextInputContentType::Social));
         assert_eq!(keyboard_type::WEB_SEARCH, of(TextInputContentType::Search));
         assert_eq!(keyboard_type::DEFAULT, of(TextInputContentType::Password));
+    }
+
+    #[test]
+    fn input_scope_chooses_numeric_components_phone_and_alphanumeric_keyboards() {
+        use InputScopeNameValue as Scope;
+        let cases = [
+            (Scope::Digits, keyboard_type::NUMBER_PAD),
+            (Scope::DateMonthNumber, keyboard_type::NUMBER_PAD),
+            (Scope::DateDayNumber, keyboard_type::NUMBER_PAD),
+            (Scope::DateYear, keyboard_type::NUMBER_PAD),
+            (Scope::TimeHour, keyboard_type::NUMBER_PAD),
+            (Scope::TimeMinutesOrSeconds, keyboard_type::NUMBER_PAD),
+            (Scope::NumericPassword, keyboard_type::NUMBER_PAD),
+            (Scope::NumericPin, keyboard_type::NUMBER_PAD),
+            (Scope::TelephoneNumber, keyboard_type::PHONE_PAD),
+            (Scope::TelephoneCountryCode, keyboard_type::PHONE_PAD),
+            (Scope::TelephoneAreaCode, keyboard_type::PHONE_PAD),
+            (Scope::TelephoneLocalNumber, keyboard_type::PHONE_PAD),
+            (Scope::AlphanumericPin, keyboard_type::ASCII_CAPABLE),
+            (Scope::AlphanumericHalfWidth, keyboard_type::ASCII_CAPABLE),
+            (Scope::EmailNameOrAddress, keyboard_type::EMAIL_ADDRESS),
+            (Scope::EmailSmtpAddress, keyboard_type::EMAIL_ADDRESS),
+            (Scope::PersonalFullName, keyboard_type::DEFAULT),
+            (Scope::NameOrPhoneNumber, keyboard_type::NAME_PHONE_PAD),
+            (Scope::CurrencyAmount, keyboard_type::DECIMAL_PAD),
+            (Scope::FormulaNumber, keyboard_type::DECIMAL_PAD),
+            (Scope::SearchIncremental, keyboard_type::WEB_SEARCH),
+            (Scope::Hiragana, keyboard_type::DEFAULT),
+        ];
+        for (scope, expected) in cases {
+            let options = TextInputOptions {
+                content_type: TextInputContentType::Url,
+                input_scope_names: Some(std::rc::Rc::from([scope])),
+                ..Default::default()
+            };
+            assert_eq!(keyboard_type_of(Some(&options)), expected, "{scope:?}");
+        }
+    }
+
+    #[test]
+    fn input_scope_names_do_not_replace_the_existing_secure_entry_policy() {
+        use InputScopeNameValue as Scope;
+        for scope in [Scope::Password, Scope::NumericPassword, Scope::NumericPin, Scope::AlphanumericPin] {
+            let mut options = TextInputOptions {
+                input_scope_names: Some(std::rc::Rc::from([scope])),
+                show_suggestions: Some(true),
+                ..Default::default()
+            };
+            assert!(!is_secure_entry(Some(&options)), "{scope:?}");
+            assert_eq!(suggestions_trait_of(Some(&options)), text_trait::NO);
+            options.is_sensitive = true;
+            assert!(is_secure_entry(Some(&options)));
+        }
+        let mut options = TextInputOptions {
+            content_type: TextInputContentType::Password,
+            input_scope_names: Some(std::rc::Rc::from([Scope::Default, Scope::Digits])),
+            ..Default::default()
+        };
+        assert_eq!(keyboard_type_of(Some(&options)), keyboard_type::DEFAULT);
+        assert!(is_secure_entry(Some(&options)));
+        options.content_type = TextInputContentType::Digits;
+        options.input_scope_names = Some(std::rc::Rc::from([]));
+        assert_eq!(keyboard_type_of(Some(&options)), keyboard_type::PHONE_PAD);
+    }
+
+    #[test]
+    fn input_scope_semantic_content_does_not_misidentify_components_or_pin_codes() {
+        use InputScopeNameValue as Scope;
+        let cases = [
+            (Scope::PersonalFullName, Some(InputScopeContentType::Name)),
+            (Scope::EmailSmtpAddress, Some(InputScopeContentType::EmailAddress)),
+            (Scope::EmailNameOrAddress, Some(InputScopeContentType::EmailAddress)),
+            (Scope::TelephoneNumber, Some(InputScopeContentType::TelephoneNumber)),
+            (Scope::Url, Some(InputScopeContentType::Url)),
+            (Scope::Password, Some(InputScopeContentType::Password)),
+            (Scope::NumericPassword, Some(InputScopeContentType::Password)),
+            (Scope::TelephoneCountryCode, None),
+            (Scope::TelephoneAreaCode, None),
+            (Scope::TelephoneLocalNumber, None),
+            (Scope::NumericPin, None),
+            (Scope::AlphanumericPin, None),
+            (Scope::NameOrPhoneNumber, None),
+            (Scope::DateMonthNumber, None),
+            (Scope::TimeHour, None),
+        ];
+        for (scope, expected) in cases {
+            let options =
+                TextInputOptions { input_scope_names: Some(std::rc::Rc::from([scope])), ..Default::default() };
+            assert_eq!(content_type_for_scope(Some(&options)), expected, "{scope:?}");
+        }
+        assert_eq!(content_type_for_scope(None), None);
+        assert_eq!(content_type_for_scope(Some(&options(TextInputContentType::Email))), None);
     }
 
     #[test]

@@ -26,12 +26,16 @@
 use std::cell::RefCell;
 use std::rc::Rc;
 
-use ferroui_base::input::{InputElement, KeyModifiers, Pointer, PointerEventArgs, PointerPointProperties, PointerType, TappedEventArgs};
+use ferroui_base::input::{ContextRequestedEventArgs, InputElement, KeyModifiers, Pointer, PointerEventArgs, PointerPointProperties, PointerType, TappedEventArgs};
 use ferroui_base::interactivity::{RoutedEvent, RoutedEventArgs};
+use ferroui_base::media::text_formatting::testing::TextTestScope;
 use ferroui_base::{ObjectType, Point, Ref};
 use ferroui_build::type_system::{ModelEmitTypes, ModelTypeSystem};
 use ferroui_controls::primitives::{PopupFlyoutBase, TemplatedControl};
-use ferroui_controls::{Button, Control, ToolTip};
+use ferroui_controls::{
+    Button, ContextMenuEventArgs, Control, RichEditBox, RichEditBoxSelectionChangingEventArgs, RichEditBoxTextChangingEventArgs,
+    RichEditCompositionEventArgs, RichTextBlock, ToolTip,
+};
 use ferroui_markup_xaml::RuntimeXamlLoaderConfiguration;
 use ferroui_markup_xaml_loader::rust_emitter::{
     generate_class_file_with, generate_file_with, ClassGroup, DiagnosticHandler, EmitterHost, TransformOptions, GROUP_NOT_TRANSFORMED,
@@ -353,5 +357,128 @@ fn event_of_a_template_calls_the_method_of_the_class() {
         assert!(!host.was_tapped());
         part.raise_event(&RoutedEventArgs::with_event(InputElement::tapped_event()));
         assert!(host.was_tapped() && !host.was_clicked());
+    }
+}
+
+/// The control's typed context-menu event keeps its live handled flag when a
+/// named code-behind handler receives the routed-argument base interface.
+#[test]
+fn rich_context_menu_event_calls_the_method_with_live_arguments() {
+    let _base = xaml_test_base();
+    let _text = TextTestScope::new();
+    let (compiled, loaded) = populated("rich_context_menu_event", MyHost::new, generated_handlers::rich_context_menu_event::populate);
+    for host in [compiled, loaded] {
+        let editor = host.get_control::<RichEditBox>("editor");
+        let args = ContextMenuEventArgs::new(12.5, -4.25);
+        args.set_routed_event(Some(RichEditBox::context_menu_opening_event()));
+        editor.raise_event(&args);
+        assert_eq!(host.context_menu_positions(), [Point::new(12.5, -4.25)]);
+        assert!(args.handled(), "the named handler cancels the live opening event");
+
+        let request = ContextRequestedEventArgs::new();
+        editor.raise_event(&request);
+        assert!(request.handled(), "the named handler cancels the real framework context request");
+        assert_eq!(host.context_menu_positions().len(), 2);
+
+        let weak = host.downgrade();
+        drop(host);
+        assert!(weak.upgrade().is_none(), "the child handler keeps its code-behind owner alive");
+        let after_owner = ContextMenuEventArgs::new(4.0, 9.0);
+        after_owner.set_routed_event(Some(RichEditBox::context_menu_opening_event()));
+        editor.raise_event(&after_owner);
+        assert!(!after_owner.handled(), "a handler whose owner expired does nothing");
+    }
+}
+
+/// Runtime and compiled read-only handlers receive the live typed payload;
+/// configured invocations preserve the same cancellation in the input route.
+#[test]
+fn rich_readonly_context_menu_event_calls_the_method_with_live_arguments() {
+    let _base = xaml_test_base();
+    let _text = TextTestScope::new();
+    let (compiled, loaded) = populated(
+        "rich_readonly_context_menu_event",
+        MyHost::new,
+        generated_handlers::rich_readonly_context_menu_event::populate,
+    );
+    for host in [compiled, loaded] {
+        let display = host.get_control::<RichTextBlock>("display");
+        let args = ContextMenuEventArgs::new(12.5, -4.25);
+        args.set_routed_event(Some(RichTextBlock::context_menu_opening_event()));
+        display.raise_event(&args);
+        assert_eq!(host.context_menu_positions(), [Point::new(12.5, -4.25)]);
+        assert!(args.handled());
+
+        let unconfigured = ContextRequestedEventArgs::new();
+        display.raise_event(&unconfigured);
+        assert!(!unconfigured.handled());
+        assert_eq!(host.context_menu_positions().len(), 1);
+        display.set_context_flyout(ferroui_controls::Flyout::new());
+        let request = ContextRequestedEventArgs::new();
+        display.raise_event(&request);
+        assert!(request.handled());
+        assert_eq!(host.context_menu_positions().len(), 2);
+        assert!(!display.context_flyout().unwrap().is_open());
+
+        let weak = host.downgrade();
+        drop(host);
+        assert!(weak.upgrade().is_none(), "the handler has a weak code-behind owner");
+        let after_owner = ContextMenuEventArgs::new(4.0, 9.0);
+        after_owner.set_routed_event(Some(RichTextBlock::context_menu_opening_event()));
+        display.raise_event(&after_owner);
+        assert!(!after_owner.handled());
+    }
+}
+
+/// Each rich-editor payload is assignable to RoutedEventArgs in markup while
+/// the original, exactly typed Rust subscription observes the same live event.
+#[test]
+fn rich_editor_events_accept_base_code_behind_and_exact_typed_handlers() {
+    let _base = xaml_test_base();
+    let _text = TextTestScope::new();
+    let (compiled, loaded) = populated("rich_editor_events", MyHost::new, generated_handlers::rich_editor_events::populate);
+    for host in [compiled, loaded] {
+        let editor = host.get_control::<RichEditBox>("editor");
+        let typed = Rc::new(RefCell::new(Vec::<String>::new()));
+        for event in [
+            RichEditBox::text_composition_started_event(),
+            RichEditBox::text_composition_changed_event(),
+            RichEditBox::text_composition_ended_event(),
+        ] {
+            let observed = typed.clone();
+            editor.add_handler(event, move |_, args: &RichEditCompositionEventArgs| {
+                assert_eq!(args.text, "accepted 😀");
+                assert!(args.committed);
+                observed.borrow_mut().push(args.routed_event().unwrap().name().to_owned());
+            });
+            let mut args = RichEditCompositionEventArgs::default();
+            args.text = "accepted 😀".to_owned();
+            args.committed = true;
+            args.set_routed_event(Some(event));
+            editor.raise_event(&args);
+        }
+
+        let observed = typed.clone();
+        editor.selection_changing(move |_, args: &RichEditBoxSelectionChangingEventArgs| {
+            assert!(args.cancel(), "the typed subscriber sees the named handler's live cancellation");
+            observed.borrow_mut().push(args.routed_event().unwrap().name().to_owned());
+        });
+        let selection = RichEditBoxSelectionChangingEventArgs::default();
+        selection.set_routed_event(Some(RichEditBox::selection_changing_event()));
+        editor.raise_event(&selection);
+        assert!(selection.cancel());
+
+        let observed = typed.clone();
+        editor.text_changing(move |_, args: &RichEditBoxTextChangingEventArgs| {
+            assert!(!args.is_content_changing());
+            observed.borrow_mut().push(args.routed_event().unwrap().name().to_owned());
+        });
+        let changing = RichEditBoxTextChangingEventArgs::default();
+        changing.set_routed_event(Some(RichEditBox::text_changing_event()));
+        editor.raise_event(&changing);
+
+        let expected = ["TextCompositionStarted", "TextCompositionChanged", "TextCompositionEnded", "SelectionChanging", "TextChanging"];
+        assert_eq!(host.rich_events(), expected);
+        assert_eq!(*typed.borrow(), expected);
     }
 }

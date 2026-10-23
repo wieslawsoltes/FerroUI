@@ -40,6 +40,94 @@ fn setters_give_the_properties_their_values_with_the_conversions() {
 }
 
 #[test]
+fn input_scope_builder_accepts_legacy_and_native_names_shared_objects_and_none() {
+    use ferroui_base::input::text_input::{TextInputContentType, TextInputOptions};
+    use ferroui_base::input::{InputScope, InputScopeNameValue as Scope};
+    use ferroui_base::media::text_formatting::testing::TextTestScope;
+    use ferroui_controls::RichEditBox;
+
+    let _text = TextTestScope::new();
+    let shared = InputScope::with_name_value(Scope::Hiragana);
+    let (control, owner) = mount(
+        stack_panel()
+            .child(rich_edit_box().input_scope(TextInputContentType::Email))
+            .child(rich_edit_box().input_scope(Scope::NumericPin))
+            .child(rich_edit_box().input_scope(shared.clone()))
+            .child(rich_edit_box().input_scope(None)),
+    );
+    let editors: Vec<_> = control
+        .cast::<StackPanel>()
+        .unwrap()
+        .children()
+        .to_vec()
+        .iter()
+        .map(|child| child.cast::<RichEditBox>().unwrap())
+        .collect();
+    let hints: Vec<_> =
+        editors.iter().map(|editor| TextInputOptions::from_styled_element(editor).effective_input_scope()).collect();
+    assert_eq!(hints, [Some(Scope::EmailSmtpAddress), Some(Scope::NumericPin), Some(Scope::Hiragana), None]);
+    assert_eq!(editors[2].input_scope(), Some(shared.clone()));
+    assert!(editors[3].input_scope().is_none());
+
+    shared.names().get(0).set_name_value(Scope::KatakanaFullWidth);
+    assert_eq!(
+        TextInputOptions::from_styled_element(&editors[2]).effective_input_scope(),
+        Some(Scope::KatakanaFullWidth),
+        "a builder retains the live shared object instead of copying its initial name"
+    );
+    owner.dispose();
+}
+
+#[test]
+fn input_scope_builder_tracks_legacy_native_and_nullable_object_signals() {
+    use ferroui_base::input::text_input::{TextInputContentType, TextInputOptions};
+    use ferroui_base::input::{InputScope, InputScopeNameValue as Scope};
+    use ferroui_base::media::text_formatting::testing::TextTestScope;
+    use ferroui_controls::RichEditBox;
+
+    let _text = TextTestScope::new();
+    let owner = Owner::new_root();
+    let first = InputScope::with_name_value(Scope::Hiragana);
+    let (legacy, native, objects, control) = owner.with(|| {
+        let legacy = signal(TextInputContentType::Email);
+        let native = signal(Scope::Digits);
+        let objects = signal(Some(first.clone()));
+        let control = stack_panel()
+            .child(rich_edit_box().input_scope(legacy))
+            .child(rich_edit_box().input_scope(native))
+            .child(rich_edit_box().input_scope(objects))
+            .into_element()
+            .mount();
+        (legacy, native, objects, control)
+    });
+    let editors: Vec<_> = control
+        .cast::<StackPanel>()
+        .unwrap()
+        .children()
+        .to_vec()
+        .iter()
+        .map(|child| child.cast::<RichEditBox>().unwrap())
+        .collect();
+    let hints = || -> Vec<_> {
+        editors.iter().map(|editor| TextInputOptions::from_styled_element(editor).effective_input_scope()).collect()
+    };
+    assert_eq!(hints(), [Some(Scope::EmailSmtpAddress), Some(Scope::Digits), Some(Scope::Hiragana)]);
+
+    legacy.set(TextInputContentType::Alpha);
+    native.set(Scope::AlphanumericPin);
+    let replacement = InputScope::with_name_value(Scope::Search);
+    objects.set(Some(replacement.clone()));
+    first.names().get(0).set_name_value(Scope::Password);
+    assert_eq!(hints(), [Some(Scope::AlphanumericHalfWidth), Some(Scope::AlphanumericPin), Some(Scope::Search)]);
+    assert_eq!(editors[2].input_scope(), Some(replacement));
+
+    objects.set(None);
+    assert!(editors[2].input_scope().is_none());
+    assert!(TextInputOptions::from_styled_element(&editors[2]).input_scope_names.is_none());
+    owner.dispose();
+}
+
+#[test]
 fn set_takes_any_property_like_the_indexer_upstream() {
     let (control, owner) = mount(button().set(Grid::row_property(), 2).grid_column(1));
     assert_eq!(Grid::get_row(&control), 2);

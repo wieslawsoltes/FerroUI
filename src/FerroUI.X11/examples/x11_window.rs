@@ -372,6 +372,15 @@ mod app {
             fn set_capabilities(&self, caps: u32) {
                 self.log.lock().unwrap().push(format!("SetCapabilities({caps})"));
             }
+
+            // IBus exposes ContentType as a write-only (uu) D-Bus property,
+            // including through its portal. Keep the smoke service on the
+            // same protocol as the real daemon and the platform proxy.
+            #[zbus(property)]
+            fn set_content_type(&self, value: (u32, u32)) -> zbus::fdo::Result<()> {
+                self.log.lock().unwrap().push(format!("SetContentType({}, {})", value.0, value.1));
+                Ok(())
+            }
         }
 
         struct Service {
@@ -3200,6 +3209,15 @@ mod app {
             text_box.set_horizontal_alignment(HorizontalAlignment::Left);
             text_box.set_vertical_alignment(VerticalAlignment::Top);
             text_box.set_margin(Thickness::uniform(8.0));
+            if kind == "ibus" {
+                use ferroui_base::input::text_input::{TextInputContentType, TextInputOptions};
+                use ferroui_base::input::InputScopeNameValue;
+                TextInputOptions::set_content_type(&text_box, TextInputContentType::Number);
+                TextInputOptions::set_input_scope_names(
+                    &text_box,
+                    Some(Rc::from([InputScopeNameValue::EmailSmtpAddress, InputScopeNameValue::Url])),
+                );
+            }
             content.set_child(&text_box);
             delay(Duration::from_millis(300)).await;
             // Key events go to the window with the focus or, without a window manager, to the one
@@ -3239,11 +3257,46 @@ mod app {
             let text_is = |expected: &str| text_box.text().as_deref() == Some(expected);
 
             if kind == "ibus" {
+                use ferroui_base::input::text_input::TextInputOptions;
+                use ferroui_base::input::InputScopeNameValue;
+
                 let focus_in = wait_for(STEP_TIMEOUT, || ibus_double::calls().iter().any(|call| call == "FocusIn")).await;
                 report.check(
                     "focus of the input context",
                     focus_in,
                     format!("the service was called with {:?}", ibus_double::calls()),
+                );
+
+                let scoped_options = wait_for(STEP_TIMEOUT, || {
+                    ibus_double::calls().iter().any(|call| call == "SetContentType(6, 0)")
+                })
+                .await;
+                report.check(
+                    "ordered input scope on the portal",
+                    scoped_options,
+                    format!("the first scope is Email, before Url and legacy Number: {:?}", ibus_double::calls()),
+                );
+                let before_scope_change = ibus_double::calls().len();
+                TextInputOptions::set_input_scope_names(&text_box, Some(Rc::from([InputScopeNameValue::Digits])));
+                let changed_options = wait_for(STEP_TIMEOUT, || {
+                    ibus_double::calls().iter().skip(before_scope_change).any(|call| call == "SetContentType(2, 0)")
+                })
+                .await;
+                report.check(
+                    "live input scope on the portal",
+                    changed_options,
+                    format!("the focused context received the Digits scope: {:?}", ibus_double::calls()),
+                );
+                let before_scope_clear = ibus_double::calls().len();
+                TextInputOptions::set_input_scope_names(&text_box, None);
+                let fallback_options = wait_for(STEP_TIMEOUT, || {
+                    ibus_double::calls().iter().skip(before_scope_clear).any(|call| call == "SetContentType(3, 0)")
+                })
+                .await;
+                report.check(
+                    "legacy content type after clearing the scope",
+                    fallback_options,
+                    format!("the focused context returned to legacy Number: {:?}", ibus_double::calls()),
                 );
 
                 // The key the input method consumes: the application gets the committed text and

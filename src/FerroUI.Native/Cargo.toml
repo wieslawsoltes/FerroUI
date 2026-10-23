@@ -49,6 +49,12 @@ name = "accessibility_tree"
 path = "tests/accessibility_tree.rs"
 harness = false
 
+# Exercises the real AppKit input view and its public content-hint protocol.
+[[test]]
+name = "text_input_options"
+path = "tests/text_input_options.rs"
+harness = false
+
 # The group of the crate in the table of the README (docs/release.md).
 [package.metadata.release]
 group = "platforms"

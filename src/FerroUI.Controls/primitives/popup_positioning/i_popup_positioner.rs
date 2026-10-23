@@ -515,5 +515,18 @@ fn calculate_anchor_rect(top_level: &TopLevel, position_request: &PopupPositionR
 
     let bounds = Rect::from_size(target.bounds().size());
     let anchor_rect = position_request.anchor_rect().unwrap_or(bounds);
-    anchor_rect.intersect(bounds).transform_to_aabb(matrix)
+    let anchor_rect = if anchor_rect.width == 0.0 && anchor_rect.height == 0.0 {
+        // A point is a valid explicit context-menu anchor. Rect::intersect
+        // intentionally erases intersections without area, including points
+        // inside the target, so constrain its coordinates separately.
+        Rect::new(
+            anchor_rect.x.clamp(bounds.x, bounds.right()),
+            anchor_rect.y.clamp(bounds.y, bounds.bottom()),
+            0.0,
+            0.0,
+        )
+    } else {
+        anchor_rect.intersect(bounds)
+    };
+    anchor_rect.transform_to_aabb(matrix)
 }

@@ -127,6 +127,8 @@ const TYPES: &[&TypeInfo] = types![
     crate::input::Gestures,
     crate::input::InputElement,
     crate::input::InputMethod,
+    crate::input::InputScope,
+    crate::input::InputScopeName,
     crate::input::KeyBinding,
     crate::input::KeyboardNavigation,
     crate::input::navigation::XYFocus,

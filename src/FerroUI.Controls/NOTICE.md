@@ -99,6 +99,60 @@ project adapted from the WinUI project
 (<https://github.com/microsoft/microsoft-ui-xaml>), MIT License,
 Copyright (c) Microsoft Corporation.
 
+### Rich text document, view, editor and accessibility
+
+The rich text implementation adapts source and public contracts from
+`microsoft/microsoft-ui-xaml`, pinned at
+`fe244ca6ac4d482712b234a9de3cf771cc6481de`.
+
+| FerroUI files | Pinned source and contract families |
+|---|---|
+| `rich_text_block.rs`, `rich_text_block_overflow.rs`, `rich_text_layout.rs`, and their tests | `dxaml/xcp/core/text/RichTextBlock/`, `BlockLayout/`, selection/view contracts under `core/inc` and `core/text/Inc`, and `dxaml/xcp/components/text/TextHighlightRenderer.*`. |
+| `rich_text_overflow_links.rs`, `rich_text_overflow_master_tests.rs` and the ContentSource projection | Cached-master getter, linking/reset, layout setup, preceding-break and destruction contracts in `dxaml/xcp/core/text/RichTextBlock/RichTextBlockOverflow.cpp`, `core/inc/RichTextBlockOverflow.h`, `core/dll/CoreImports.cpp` and `dxaml/lib/RichTextBlockOverflow_Partial.cpp`. The bounded port and framework lifetime/notification adaptations are recorded in [OVERFLOW-LINKS.md](../../docs/porting/winui-rich-text/OVERFLOW-LINKS.md). |
+| `rich_text_context_menu.rs`, `rich_edit_context_menu.rs`, `context_menu_event_args.rs`, their shared menu integration and tests | Native rich-control context events, `dxaml/xcp/dxaml/lib/TextControlFlyoutHelper.cpp` and `TextControlHelper.h`, text dispatch in `core/core/elements/uielement.cpp` and `core/text/common/TextCore.cpp`, and text-flyout default/provenance seams in `components/DependencyObject/{DependencyProperty,PropertySystem}.cpp`. The reviewed configured-menu behavior and remaining automatic-menu contracts are recorded in [CONTEXT-MENUS.md](../../docs/porting/winui-rich-text/CONTEXT-MENUS.md). |
+| `rich_edit_box.rs`, `rich_edit_box_text_presenter.rs`, `rich_edit_box_text_input_method_client.rs`, `rich_text/`, and editor tests | `dxaml/xcp/core/native/text/Controls/RichEditBox.*`, `TextBoxBase.*`, `TextBoxView.*`, `TextServicesHost.*`, and the external text-object contracts documented by `packaging/Intellisense/generated/Microsoft.UI.Text.xml`. |
+| Rich text/edit automation peers and `automation/provider/{i_text_provider,i_text_range_provider,i_text_edit_provider,rich_text_automation}.rs` with their tests | Native rich control automation peers, text provider declarations, `dxaml/xcp/win/shared/UIAPatternProviderWrapper.cpp`, `UIAWindow.cpp`, their headers under `win/inc`, `dxaml/xcp/dxaml/lib/AutomationPeer_Partial.cpp`, and the generated public text/range provider contracts. |
+| Document modules | The block/paragraph/inline/hyperlink/position/highlighter sources recorded in [documents/NOTICE.md](documents/NOTICE.md). |
+
+The RTF charset-to-code-page interpretation in `rich_text/rtf_encoding.rs`
+was checked against Microsoft's `dotnet/wpf` implementation in
+`src/Microsoft.DotNet.Wpf/src/PresentationFramework/System/Windows/Documents/RtfToXamlReader.cs`
+(`FontTableEntry.CharSetToCodePage`), also Copyright (c) Microsoft Corporation,
+MIT License as reproduced below. Actual byte decoding uses the unmodified
+`encoding_rs` dependency at the version recorded in Cargo.lock; that crate carries
+its own Apache-2.0/MIT and BSD-3-Clause notices. No native Windows text engine is
+linked by this portable codec.
+
+The Rust document/editor/RTF implementation uses the existing FerroUI services.
+It does not incorporate the unavailable implementations of WinUIEdit, LineServices
+or the Windows text engines. The complete file/member map and remaining behavior
+differences are in [the rich text port record](../../docs/porting/winui-rich-text/README.md).
+The Windows native text bridge carries its related notice in the Win32 crate.
+
+```
+MIT License
+
+Copyright (c) Microsoft Corporation. All rights reserved.
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE
+```
+
 ## Silverlight Toolkit
 
 The files under `auto_complete_box/` (`auto_complete_box.rs`,

@@ -61,3 +61,36 @@ if you use his code.
 
 - File: `geometry_builder.rs` (ported from Avalonia `src/Avalonia.Base/Media/GeometryBuilder.cs`)
 - Origin: portions adapted from the Windows Presentation Foundation (WPF) project (<https://github.com/dotnet/wpf>, licensed to the upstream project under the MIT License, courtesy of The .NET Foundation) and from the WinUI project (<https://github.com/microsoft/microsoft-ui-xaml/tree/winui3/main>, MIT License, Copyright (c) Microsoft Corporation).
+
+## Typography enumeration contracts
+
+`font_typography.rs` retains the seven public typography enumeration types and
+their numeric values from Microsoft WinUI at commit
+`fe244ca6ac4d482712b234a9de3cf771cc6481de`, declared in
+`dxaml/xcp/tools/XCPTypesAutoGen/XamlOM/Model/Microsoft.UI.Xaml.cs` and documented
+by `packaging/Intellisense/generated/Microsoft.UI.Xaml.xml`.
+The enums use the existing FerroUI markup metadata and Rust value conventions.
+Related attached-property and shaping implementation is recorded in
+`docs/porting/winui-rich-text/`.
+
+Copyright (c) Microsoft Corporation. All rights reserved.
+
+### MIT License
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.

@@ -722,9 +722,7 @@ mod imp {
                     UiaCoreProviderApi::uia_return_raw_element_provider(hwnd, 0, 0, None);
 
                     // We need to release IMM context and state to avoid leaks.
-                    if Imm32InputMethod::current().hwnd() == hwnd {
-                        Imm32InputMethod::current().clear_language_and_window();
-                    }
+                    self.release_input_method(hwnd);
 
                     self.release_drop_target();
 
@@ -1272,17 +1270,29 @@ mod imp {
                     // the composition is drawn by the text input client.
                     def_window_proc(hwnd, msg, w_param, ime_set_context_l_param(l_param));
 
-                    self.update_input_method(get_keyboard_layout(0));
+                    if w_param != 0 {
+                        self.update_input_method(get_keyboard_layout(0));
+                    }
 
                     return 0;
                 }
 
                 WindowsMessage::WM_IME_COMPOSITION => {
-                    Imm32InputMethod::current().handle_composition(w_param, l_param, timestamp);
+                    let input_method = Imm32InputMethod::current();
+                    if input_method.hwnd() != hwnd {
+                        return 0;
+                    }
+                    input_method.handle_composition(w_param, l_param, timestamp);
+                    if input_method.has_managed_connection() { return 0; }
                 }
 
+                WindowsMessage::WM_IME_CHAR => {
+                    let input_method = Imm32InputMethod::current();
+                    if input_method.hwnd() != hwnd || input_method.has_managed_connection() {
+                        return 0;
+                    }
+                }
                 WindowsMessage::WM_IME_SELECT
-                | WindowsMessage::WM_IME_CHAR
                 | WindowsMessage::WM_IME_COMPOSITIONFULL
                 | WindowsMessage::WM_IME_CONTROL
                 | WindowsMessage::WM_IME_KEYDOWN
@@ -1290,13 +1300,19 @@ mod imp {
                 | WindowsMessage::WM_IME_NOTIFY => {}
 
                 WindowsMessage::WM_IME_STARTCOMPOSITION => {
-                    Imm32InputMethod::current().handle_composition_start();
+                    let input_method = Imm32InputMethod::current();
+                    if input_method.hwnd() == hwnd {
+                        input_method.handle_composition_start();
+                    }
 
                     return 0;
                 }
 
                 WindowsMessage::WM_IME_ENDCOMPOSITION => {
-                    Imm32InputMethod::current().handle_composition_end(timestamp);
+                    let input_method = Imm32InputMethod::current();
+                    if input_method.hwnd() == hwnd {
+                        input_method.handle_composition_end(timestamp);
+                    }
 
                     if self.kill_focus_requested() {
                         self.invoke_lost_focus();

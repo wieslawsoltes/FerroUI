@@ -106,6 +106,8 @@ fn clear_value_on_parent_raises_property_changed_on_child() {
         assert_eq!(Some(s("changed")), old_string(e));
         assert_eq!("bazdefault", new_string(e));
         assert_eq!(BindingPriority::Inherited, e.priority());
+        assert!(e.is_inherited_value_change());
+        assert!(e.to_owned_args().is_inherited_value_change());
         r.increment();
     });
 
@@ -129,6 +131,8 @@ fn clear_value_on_child_raises_property_changed_with_inherited_parent_value() {
         assert_eq!(Some(s("child")), old_string(e));
         assert_eq!("parent", new_string(e));
         assert_eq!(BindingPriority::Inherited, e.priority());
+        assert!(!e.is_inherited_value_change());
+        assert!(!e.to_owned_args().is_inherited_value_change());
         r.increment();
     });
 
@@ -176,7 +180,8 @@ fn setting_inheritance_parent_raises_property_changed_when_parent_has_value_set(
                 && e.property() == Class1::baz_property().as_property()
                 && old_string(e) == Some(s("bazdefault"))
                 && new_string(e) == "changed"
-                && e.priority() == BindingPriority::Inherited,
+                && e.priority() == BindingPriority::Inherited
+                && e.is_inherited_value_change(),
         );
     });
 

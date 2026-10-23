@@ -10,13 +10,14 @@ use crate::media::text_formatting::unicode::{
 use crate::media::text_formatting::wrapping_text_line_break::WrappingTextLineBreak;
 use crate::media::text_formatting::{
     GlyphInfo, ITextSource, ShapedBuffer, ShapedTextRun, SplitResult, TextCharacters,
-    TextFormatter, TextLine, TextLineBreak, TextParagraphProperties, TextRun, TextRunCache, TextRunProperties,
-    TextShaper, TextShaperOptions, UnshapedTextRun, DEFAULT_TEXT_SOURCE_LENGTH,
+    TextFormatter, TextLine, TextLineBreak, TextLineMetricsMode, TextParagraphProperties, TextRun, TextRunCache,
+    TextRunProperties, TextShaper, TextShaperOptions, UnshapedTextRun, DEFAULT_TEXT_SOURCE_LENGTH,
 };
 use crate::media::{FlowDirection, FontManager, TextWrapping};
 use crate::utilities::{MathUtilities, ReadOnlyMemory};
 
-const DEFAULT_TEXT: [u16; DEFAULT_TEXT_SOURCE_LENGTH as usize] = [b'a' as u16; DEFAULT_TEXT_SOURCE_LENGTH as usize];
+const DEFAULT_TEXT: [u16; DEFAULT_TEXT_SOURCE_LENGTH as usize] =
+    [b'a' as u16; DEFAULT_TEXT_SOURCE_LENGTH as usize];
 
 crate::ferro_thread_local! {
     static EMPTY: ReadOnlyMemory<u16> = ReadOnlyMemory::from_vec(vec![b' ' as u16]);
@@ -45,14 +46,22 @@ impl TextFormatterImpl {
     ) -> Rc<TextLineImpl> {
         let resolved_flow_direction = cached.resolved_flow_direction;
 
-        let next_line_break = cached
-            .text_end_of_line
-            .as_ref()
-            .map(|text_end_of_line| Rc::new(TextLineBreak::new(Some(text_end_of_line.clone()), resolved_flow_direction, false)));
+        let next_line_break = cached.text_end_of_line.as_ref().map(|text_end_of_line| {
+            Rc::new(TextLineBreak::new(
+                Some(text_end_of_line.clone()),
+                resolved_flow_direction,
+                false,
+            ))
+        });
 
         match paragraph_properties.text_wrapping() {
             TextWrapping::NoWrap => {
-                let line_runs = Self::add_ref_shaped_runs(&cached.shaped_runs);
+                let mut line_runs = Self::add_ref_shaped_runs(&cached.shaped_runs);
+                super::text_tab_layout::resolve_tabs(
+                    &mut line_runs,
+                    &**paragraph_properties,
+                    paragraph_width,
+                );
 
                 let text_line = TextLineImpl::new(
                     line_runs,
@@ -171,7 +180,10 @@ impl TextFormatterImpl {
 
                 first.push(current_run.clone());
 
-                return (SplitResult::new(Some(first), second), current_length + current_run_length);
+                return (
+                    SplitResult::new(Some(first), second),
+                    current_length + current_run_length,
+                );
             } else {
                 second_count += 1;
 
@@ -220,7 +232,10 @@ impl TextFormatterImpl {
                     second.push(text_runs[i + j].clone());
                 }
 
-                return (SplitResult::new(Some(first), Some(second)), current_length + added_first_length);
+                return (
+                    SplitResult::new(Some(first), Some(second)),
+                    current_length + added_first_length,
+                );
             }
         }
 
@@ -273,13 +288,22 @@ impl TextFormatterImpl {
 
         let resolved_embedding_level = bidi_algorithm.resolve_embedding_level(bidi_data.classes());
 
-        let resolved_flow_direction =
-            if (resolved_embedding_level & 1) == 0 { FlowDirection::LeftToRight } else { FlowDirection::RightToLeft };
+        let resolved_flow_direction = if (resolved_embedding_level & 1) == 0 {
+            FlowDirection::LeftToRight
+        } else {
+            FlowDirection::RightToLeft
+        };
 
         let mut processed_runs = object_pool.text_run_lists.rent();
         let mut grouped_runs = object_pool.unshaped_text_run_lists.rent();
 
-        Self::coalesce_levels(text_runs, bidi_algorithm.resolved_levels(), font_manager, &mut processed_runs);
+        Self::coalesce_levels(
+            text_runs,
+            bidi_algorithm.resolved_levels(),
+            font_manager,
+            paragraph_properties.line_metrics_mode(),
+            &mut processed_runs,
+        );
 
         bidi_data.reset();
         bidi_algorithm.reset();
@@ -302,13 +326,22 @@ impl TextFormatterImpl {
                     let properties = shapeable_run.run_properties().clone();
 
                     while index + 1 < processed_runs.len() {
-                        let Some(next_run) = processed_runs[index + 1].clone().downcast_rc::<UnshapedTextRun>() else {
+                        let Some(next_run) = processed_runs[index + 1]
+                            .clone()
+                            .downcast_rc::<UnshapedTextRun>()
+                        else {
                             break;
                         };
 
                         if shapeable_run.bidi_level() == next_run.bidi_level() {
-                            if let Some(joined_text) = Self::try_join_contiguous_memories(&text, &next_run.text()) {
-                                if Self::can_shape_together(&*properties, &**next_run.run_properties()) {
+                            if let Some(joined_text) =
+                                Self::try_join_contiguous_memories(&text, &next_run.text())
+                            {
+                                if Self::can_shape_together(
+                                    &*properties,
+                                    &**next_run.run_properties(),
+                                    paragraph_properties.line_metrics_mode(),
+                                ) {
                                     grouped_runs.push(next_run.clone());
                                     index += 1;
                                     shapeable_run = next_run;
@@ -323,15 +356,23 @@ impl TextFormatterImpl {
 
                     let shaper_options = TextShaperOptions::with_all(
                         properties.cached_glyph_typeface(),
-                        properties.font_rendering_em_size(),
+                        properties.effective_font_rendering_em_size(),
                         shapeable_run.bidi_level(),
                         properties.culture_info().cloned(),
                         paragraph_properties.default_incremental_tab(),
-                        paragraph_properties.letter_spacing(),
-                        properties.font_features().map(|features| Rc::new(features.to_vec())),
+                        paragraph_properties.letter_spacing() * properties.font_scale(),
+                        properties
+                            .font_features()
+                            .map(|features| Rc::new(features.to_vec())),
                     );
 
-                    Self::shape_together(&grouped_runs, &text, &shaper_options, &text_shaper, &mut shaped_runs);
+                    Self::shape_together(
+                        &grouped_runs,
+                        &text,
+                        &shaper_options,
+                        &text_shaper,
+                        &mut shaped_runs,
+                    );
                 }
                 None => {
                     shaped_runs.push(current_run.clone());
@@ -342,7 +383,9 @@ impl TextFormatterImpl {
         }
 
         object_pool.text_run_lists.return_list(processed_runs);
-        object_pool.unshaped_text_run_lists.return_list(grouped_runs);
+        object_pool
+            .unshaped_text_run_lists
+            .return_list(grouped_runs);
 
         (shaped_runs, resolved_flow_direction)
     }
@@ -351,7 +394,10 @@ impl TextFormatterImpl {
     ///
     /// Returns a memory region representing the union of the two regions when
     /// they are contiguous parts of the same buffer.
-    fn try_join_contiguous_memories(x: &ReadOnlyMemory<u16>, y: &ReadOnlyMemory<u16>) -> Option<ReadOnlyMemory<u16>> {
+    fn try_join_contiguous_memories(
+        x: &ReadOnlyMemory<u16>,
+        y: &ReadOnlyMemory<u16>,
+    ) -> Option<ReadOnlyMemory<u16>> {
         if !x.shares_owner_with(y) {
             return None;
         }
@@ -361,19 +407,46 @@ impl TextFormatterImpl {
         let x_range = (x.offset_in_owner(), x.len());
         let y_range = (y.offset_in_owner(), y.len());
 
-        let (first_range, second_range) = if x_range.0 <= y_range.0 { (x_range, y_range) } else { (y_range, x_range) };
+        let (first_range, second_range) = if x_range.0 <= y_range.0 {
+            (x_range, y_range)
+        } else {
+            (y_range, x_range)
+        };
 
         if first_range.0 + first_range.1 == second_range.0 {
-            return Some(ReadOnlyMemory::with_range(owner.clone(), first_range.0, x_range.1 + y_range.1));
+            return Some(ReadOnlyMemory::with_range(
+                owner.clone(),
+                first_range.0,
+                x_range.1 + y_range.1,
+            ));
         }
 
         None
     }
 
-    fn can_shape_together(x: &dyn TextRunProperties, y: &dyn TextRunProperties) -> bool {
+    fn can_shape_together(
+        x: &dyn TextRunProperties,
+        y: &dyn TextRunProperties,
+        line_metrics_mode: TextLineMetricsMode,
+    ) -> bool {
         MathUtilities::are_close(x.font_rendering_em_size(), y.font_rendering_em_size())
             && x.typeface() == y.typeface()
+            && x.font_scale() == y.font_scale()
             && x.baseline_alignment() == y.baseline_alignment()
+            // A cluster crossing a run boundary can absorb that run during
+            // splitting. Preserve each requested family's metric contribution
+            // even when both runs resolve to the same fallback glyph font.
+            && (line_metrics_mode == TextLineMetricsMode::GlyphTypeface
+                || (x.requested_font_family() == y.requested_font_family()
+                    && Rc::ptr_eq(&x.cached_glyph_typeface(), &y.cached_glyph_typeface())))
+            // Each group is shaped using its first run's feature list. Keep
+            // different choices separate while allowing independent resolved
+            // collections with the same ordered values to share shaping.
+            && match (x.font_features(), y.font_features()) {
+                (None, None) => true,
+                (Some(x), Some(y)) => x == y || x.list().snapshot() == y.list().snapshot(),
+                _ => false,
+            }
     }
 
     fn shape_together(
@@ -399,7 +472,10 @@ impl TextFormatterImpl {
                 Some(first) if !first.text().is_empty() => {
                     previous_length = 0;
 
-                    results.push(Rc::new(ShapedTextRun::new(first, current_run.run_properties().clone())));
+                    results.push(Rc::new(ShapedTextRun::new(
+                        first,
+                        current_run.run_properties().clone(),
+                    )));
                 }
                 _ => {
                     previous_length += current_run.length();
@@ -423,6 +499,7 @@ impl TextFormatterImpl {
         text_characters: &[Rc<dyn TextRun>],
         levels: &[i8],
         font_manager: &FontManager,
+        mode: TextLineMetricsMode,
         processed_runs: &mut Vec<Rc<dyn TextRun>>,
     ) {
         if levels.is_empty() {
@@ -461,10 +538,11 @@ impl TextFormatterImpl {
                 j += count;
 
                 if j == run_text.len() {
-                    current_run.get_shapeable_characters(
+                    current_run.get_shapeable_characters_with_metrics_mode(
                         run_text.slice(0, j),
                         run_level,
                         font_manager,
+                        mode,
                         &mut previous_properties,
                         processed_runs,
                     );
@@ -479,10 +557,11 @@ impl TextFormatterImpl {
                 }
 
                 // End of this run
-                current_run.get_shapeable_characters(
+                current_run.get_shapeable_characters_with_metrics_mode(
                     run_text.slice(0, j),
                     run_level,
                     font_manager,
+                    mode,
                     &mut previous_properties,
                     processed_runs,
                 );
@@ -504,7 +583,14 @@ impl TextFormatterImpl {
             return;
         }
 
-        current_run.get_shapeable_characters(run_text, run_level, font_manager, &mut previous_properties, processed_runs);
+        current_run.get_shapeable_characters_with_metrics_mode(
+            run_text,
+            run_level,
+            font_manager,
+            mode,
+            &mut previous_properties,
+            processed_runs,
+        );
     }
 
     /// Fetches text runs.
@@ -538,7 +624,9 @@ impl TextFormatterImpl {
             if let Some(text_characters) = text_run.downcast_ref::<TextCharacters>() {
                 if let Some(run_line_break) = Self::try_get_line_break(text_characters) {
                     let split_result = TextCharacters::new(
-                        text_characters.text().slice(0, run_line_break.position_wrap()),
+                        text_characters
+                            .text()
+                            .slice(0, run_line_break.position_wrap()),
                         text_characters.run_properties().clone(),
                     );
 
@@ -626,7 +714,10 @@ impl TextFormatterImpl {
 
                 return measured_length;
             } else if let Some(drawable_text_run) = current_run.as_drawable() {
-                if MathUtilities::greater_than(current_width + drawable_text_run.size().width, paragraph_width) {
+                if MathUtilities::greater_than(
+                    current_width + drawable_text_run.size().width,
+                    paragraph_width,
+                ) {
                     return measured_length;
                 }
 
@@ -649,18 +740,23 @@ impl TextFormatterImpl {
         let flow_direction = paragraph_properties.flow_direction();
         let properties = paragraph_properties.default_text_run_properties();
         let glyph_typeface = properties.cached_glyph_typeface();
-        let glyph = glyph_typeface.character_to_glyph_map().get_glyph(b' ' as i32);
+        let glyph = glyph_typeface
+            .character_to_glyph_map()
+            .get_glyph(b' ' as i32);
 
         let shaped_buffer = ShapedBuffer::new(
             EMPTY.with(|empty| empty.clone()),
             1,
             glyph_typeface,
-            properties.font_rendering_em_size(),
+            properties.effective_font_rendering_em_size(),
             flow_direction as i8,
         );
         shaped_buffer.set(0, GlyphInfo::new(glyph, first_text_source_index, 0.0));
 
-        let text_runs: Vec<Rc<dyn TextRun>> = vec![Rc::new(ShapedTextRun::new(shaped_buffer, properties.clone()))];
+        let text_runs: Vec<Rc<dyn TextRun>> = vec![Rc::new(ShapedTextRun::new(
+            shaped_buffer,
+            properties.clone(),
+        ))];
 
         let line = TextLineImpl::new(
             text_runs,
@@ -699,16 +795,65 @@ impl TextFormatterImpl {
         object_pool: &FormattingObjectPool,
     ) -> Rc<TextLineImpl> {
         if text_runs.is_empty() {
-            return Self::create_empty_text_line(first_text_source_index, paragraph_width, paragraph_properties);
+            return Self::create_empty_text_line(
+                first_text_source_index,
+                paragraph_width,
+                paragraph_properties,
+            );
         }
 
-        let measured_length = Self::find_wrap_length(text_runs, paragraph_width, &**paragraph_properties);
+        super::text_tab_layout::resolve_tabs(text_runs, &**paragraph_properties, paragraph_width);
+        let measured_length =
+            Self::find_wrap_length(text_runs, paragraph_width, &**paragraph_properties);
 
-        let (split, split_length) = Self::split_text_runs_with_length(text_runs, measured_length, object_pool);
+        let (split, mut split_length) =
+            Self::split_text_runs_with_length(text_runs, measured_length, object_pool);
 
         let (mut pre_split_runs, mut post_split_runs) = split.deconstruct();
 
-        let has_post_split_runs = post_split_runs.as_ref().is_some_and(|runs| !runs.is_empty());
+        // A centered or decimal-aligned field acquires a wider tab gap when its
+        // visible fragment becomes shorter. Resolve against that fragment and
+        // repeat the existing cluster-aware wrap if the new gap overflows. Each
+        // successful pass removes text from this line, so progress is bounded by
+        // its source length; the usual one-oversize-cluster rule still applies.
+        while let Some(pre_split) = pre_split_runs.as_mut() {
+            if !super::text_tab_layout::resolve_tabs(
+                pre_split,
+                &**paragraph_properties,
+                paragraph_width,
+            ) {
+                break;
+            }
+            let adjusted_length =
+                Self::find_wrap_length(pre_split, paragraph_width, &**paragraph_properties);
+            if adjusted_length >= split_length {
+                break;
+            }
+            let (adjusted, actual_length) =
+                Self::split_text_runs_with_length(pre_split, adjusted_length, object_pool);
+            let (adjusted_first, mut adjusted_second) = adjusted.deconstruct();
+            object_pool
+                .text_run_lists
+                .return_optional(pre_split_runs.take());
+            if let Some(second) = adjusted_second.as_mut() {
+                if let Some(previous_remaining) = post_split_runs.as_mut() {
+                    second.append(previous_remaining);
+                }
+                object_pool
+                    .text_run_lists
+                    .return_optional(post_split_runs.take());
+                post_split_runs = adjusted_second;
+            }
+            pre_split_runs = adjusted_first;
+            if actual_length >= split_length {
+                break;
+            }
+            split_length = actual_length;
+        }
+
+        let has_post_split_runs = post_split_runs
+            .as_ref()
+            .is_some_and(|runs| !runs.is_empty());
 
         let text_line_break = match &mut post_split_runs {
             Some(post_split_runs) if has_post_split_runs => {
@@ -729,15 +874,28 @@ impl TextFormatterImpl {
                 // The runs are moved out of the rented list, which is returned below.
                 remaining_runs.append(post_split_runs);
 
-                Some(Rc::new(WrappingTextLineBreak::new(None, resolved_flow_direction, remaining_runs)))
+                Some(Rc::new(
+                    WrappingTextLineBreak::new(None, resolved_flow_direction, remaining_runs)
+                        .with_line_metrics_mode(paragraph_properties.line_metrics_mode()),
+                ))
             }
-            _ => current_line_break.and_then(|line_break| line_break.text_end_of_line()).map(|text_end_of_line| {
-                Rc::new(TextLineBreak::new(Some(text_end_of_line.clone()), resolved_flow_direction, false))
-            }),
+            _ => current_line_break
+                .and_then(|line_break| line_break.text_end_of_line())
+                .map(|text_end_of_line| {
+                    Rc::new(TextLineBreak::new(
+                        Some(text_end_of_line.clone()),
+                        resolved_flow_direction,
+                        false,
+                    ))
+                }),
         };
 
         let text_line = match &mut pre_split_runs {
-            None => Self::create_empty_text_line(first_text_source_index, paragraph_width, paragraph_properties),
+            None => Self::create_empty_text_line(
+                first_text_source_index,
+                paragraph_width,
+                paragraph_properties,
+            ),
             Some(pre_split_runs) => {
                 if has_post_split_runs {
                     Self::reset_trailing_whitespace_bidi_levels(
@@ -827,7 +985,9 @@ impl TextFormatterImpl {
                 let mut line_breaker = LineBreakEnumerator::new(current_run.text_span());
 
                 while let Some(mut line_break) = line_breaker.move_next() {
-                    if line_break.required() && current_length + line_break.position_measure() as i32 <= measured_length {
+                    if line_break.required()
+                        && current_length + line_break.position_measure() as i32 <= measured_length
+                    {
                         // Explicit break found
                         break_found = true;
 
@@ -852,7 +1012,8 @@ impl TextFormatterImpl {
                                     // We already found the next possible wrap position.
                                     break_found = true;
 
-                                    current_position = current_length + line_break.position_wrap() as i32;
+                                    current_position =
+                                        current_length + line_break.position_wrap() as i32;
 
                                     break;
                                 }
@@ -875,10 +1036,12 @@ impl TextFormatterImpl {
                                     current_run = &text_runs[index];
                                     current_run_length = current_run.length();
 
-                                    line_breaker = LineBreakEnumerator::new(current_run.text_span());
+                                    line_breaker =
+                                        LineBreakEnumerator::new(current_run.text_span());
                                 }
                             } else {
-                                current_position = current_length + line_break.position_wrap() as i32;
+                                current_position =
+                                    current_length + line_break.position_wrap() as i32;
                             }
 
                             if current_position == 0 && measured_length > 0 {
@@ -891,7 +1054,11 @@ impl TextFormatterImpl {
                         }
 
                         // We overflowed so we use the last available wrap position.
-                        current_position = if last_wrap_position == 0 { measured_length } else { last_wrap_position };
+                        current_position = if last_wrap_position == 0 {
+                            measured_length
+                        } else {
+                            last_wrap_position
+                        };
 
                         break_found = true;
 
@@ -945,7 +1112,8 @@ impl TextFormatterImpl {
             return;
         }
 
-        let trailing_whitespace_length = shaped_text.glyph_run().metrics().trailing_whitespace_length;
+        let trailing_whitespace_length =
+            shaped_text.glyph_run().metrics().trailing_whitespace_length;
 
         if trailing_whitespace_length == 0 {
             return;
@@ -953,44 +1121,57 @@ impl TextFormatterImpl {
 
         let split_index = shaped_text.length() - trailing_whitespace_length;
 
-        let (text_runs, trailing_whitespace_runs) =
-            Self::split_text_runs(std::slice::from_ref(&last_text_run), split_index, object_pool).deconstruct();
+        let (text_runs, trailing_whitespace_runs) = Self::split_text_runs(
+            std::slice::from_ref(&last_text_run),
+            split_index,
+            object_pool,
+        )
+        .deconstruct();
 
-        let trailing_whitespace_runs = trailing_whitespace_runs.map(|mut trailing_whitespace_runs| {
-            for run in trailing_whitespace_runs.iter_mut() {
-                let replacement = run.downcast_ref::<ShapedTextRun>().and_then(|shaped_text_run| {
-                    let new_buffer = shaped_text_run.shaped_buffer().with_bidi_level(paragraph_embedding_level);
+        let trailing_whitespace_runs =
+            trailing_whitespace_runs.map(|mut trailing_whitespace_runs| {
+                for run in trailing_whitespace_runs.iter_mut() {
+                    let replacement =
+                        run.downcast_ref::<ShapedTextRun>()
+                            .and_then(|shaped_text_run| {
+                                let new_buffer = shaped_text_run
+                                    .shaped_buffer()
+                                    .with_bidi_level(paragraph_embedding_level);
 
-                    if Rc::ptr_eq(&new_buffer, shaped_text_run.shaped_buffer()) {
-                        return None;
+                                if Rc::ptr_eq(&new_buffer, shaped_text_run.shaped_buffer()) {
+                                    return None;
+                                }
+
+                                let replacement: Rc<dyn TextRun> = Rc::new(ShapedTextRun::new(
+                                    new_buffer,
+                                    shaped_text_run.run_properties().clone(),
+                                ));
+
+                                shaped_text_run.dispose();
+
+                                Some(replacement)
+                            });
+
+                    if let Some(replacement) = replacement {
+                        *run = replacement;
                     }
-
-                    let replacement: Rc<dyn TextRun> =
-                        Rc::new(ShapedTextRun::new(new_buffer, shaped_text_run.run_properties().clone()));
-
-                    shaped_text_run.dispose();
-
-                    Some(replacement)
-                });
-
-                if let Some(replacement) = replacement {
-                    *run = replacement;
                 }
-            }
 
-            line_text_runs.remove(last_text_run_index);
+                line_text_runs.remove(last_text_run_index);
 
-            if let Some(text_runs) = &text_runs {
-                line_text_runs.extend(text_runs.iter().cloned());
-            }
+                if let Some(text_runs) = &text_runs {
+                    line_text_runs.extend(text_runs.iter().cloned());
+                }
 
-            line_text_runs.extend(trailing_whitespace_runs.iter().cloned());
+                line_text_runs.extend(trailing_whitespace_runs.iter().cloned());
 
-            trailing_whitespace_runs
-        });
+                trailing_whitespace_runs
+            });
 
         object_pool.text_run_lists.return_optional(text_runs);
-        object_pool.text_run_lists.return_optional(trailing_whitespace_runs);
+        object_pool
+            .text_run_lists
+            .return_optional(trailing_whitespace_runs);
     }
 }
 
@@ -1028,8 +1209,12 @@ impl TextFormatter for TextFormatterImpl {
 
         // we've wrapped the previous line and need to continue wrapping: ignore the text source and do that instead
         if let Some(previous_line_break) = previous_line_break {
-            if WrappingTextLineBreak::is_wrapping(previous_line_break) {
-                if let Some(mut remaining_runs) = WrappingTextLineBreak::acquire_remaining_runs(previous_line_break) {
+            if WrappingTextLineBreak::is_wrapping(previous_line_break)
+                && previous_line_break.line_metrics_mode() == paragraph_properties.line_metrics_mode()
+            {
+                if let Some(mut remaining_runs) =
+                    WrappingTextLineBreak::acquire_remaining_runs(previous_line_break)
+                {
                     if paragraph_properties.text_wrapping() != TextWrapping::NoWrap {
                         return Some(Self::perform_text_wrapping(
                             &mut remaining_runs,
@@ -1048,7 +1233,10 @@ impl TextFormatter for TextFormatterImpl {
 
         // Try to use cached shaped runs to avoid redundant shaping/bidi processing.
         if let Some(text_run_cache) = text_run_cache {
-            if let Some(cached) = text_run_cache.try_get_shaped_runs(first_text_source_index) {
+            if let Some(cached) = text_run_cache
+                .try_get_shaped_runs(first_text_source_index)
+                .filter(|cached| cached.line_metrics_mode == paragraph_properties.line_metrics_mode())
+            {
                 crate::perf_count!(TextRunCacheHits);
                 return Some(Self::format_line_from_cache(
                     &cached,
@@ -1069,12 +1257,20 @@ impl TextFormatter for TextFormatterImpl {
             return None;
         }
 
-        let (mut shaped_text_runs, resolved_flow_direction) =
-            Self::shape_text_runs(&fetched_runs, &**paragraph_properties, object_pool, &font_manager);
+        let (mut shaped_text_runs, resolved_flow_direction) = Self::shape_text_runs(
+            &fetched_runs,
+            &**paragraph_properties,
+            object_pool,
+            &font_manager,
+        );
 
-        let next_line_break = text_end_of_line
-            .as_ref()
-            .map(|text_end_of_line| Rc::new(TextLineBreak::new(Some(text_end_of_line.clone()), resolved_flow_direction, false)));
+        let next_line_break = text_end_of_line.as_ref().map(|text_end_of_line| {
+            Rc::new(TextLineBreak::new(
+                Some(text_end_of_line.clone()),
+                resolved_flow_direction,
+                false,
+            ))
+        });
 
         // Store shaped runs in cache for reuse. The cache takes its own references;
         // the formatter keeps the fresh-from-shape references for the current line.
@@ -1087,14 +1283,20 @@ impl TextFormatter for TextFormatterImpl {
                     resolved_flow_direction,
                     text_end_of_line,
                     text_source_length,
-                ),
+                )
+                .with_line_metrics_mode(paragraph_properties.line_metrics_mode()),
             );
         }
 
         let text_line = match paragraph_properties.text_wrapping() {
             TextWrapping::NoWrap => {
                 // The runs are moved out of the rented list, which is returned below.
-                let line_runs: Vec<Rc<dyn TextRun>> = shaped_text_runs.drain(..).collect();
+                let mut line_runs: Vec<Rc<dyn TextRun>> = shaped_text_runs.drain(..).collect();
+                super::text_tab_layout::resolve_tabs(
+                    &mut line_runs,
+                    &**paragraph_properties,
+                    paragraph_width,
+                );
 
                 let text_line = TextLineImpl::new(
                     line_runs,
@@ -1137,7 +1339,10 @@ struct TextRunEnumerator<'a> {
 
 impl<'a> TextRunEnumerator<'a> {
     fn new(text_source: &'a dyn ITextSource, first_text_source_index: i32) -> Self {
-        Self { text_source, pos: first_text_source_index }
+        Self {
+            text_source,
+            pos: first_text_source_index,
+        }
     }
 
     fn move_next(&mut self) -> Option<Rc<dyn TextRun>> {

@@ -27,6 +27,8 @@
     bool _keyboardInputSourceComposes;
 }
 
+@synthesize contentType = _contentType;
+
 - (void)onClosed
 {
     @synchronized (self)
@@ -1217,6 +1219,27 @@ static bool KeyboardInputSourceComposes(NSString* sourceId)
     end = MAX(start, MIN(end, length));
 
     _selectedRange = NSMakeRange((NSUInteger)start, (NSUInteger)(end - start));
+}
+
+- (void)setInputContentType:(FrnTextInputContentType)contentType
+{
+    NSTextContentType nativeType = nil;
+    // These public semantic types were added in macOS 14. Earlier supported
+    // systems retain the default; no private string constants are invented.
+    if (@available(macOS 14.0, *))
+    {
+        switch (contentType)
+        {
+            case FrnTextInputContentUrl: nativeType = NSTextContentTypeURL; break;
+            case FrnTextInputContentEmailAddress: nativeType = NSTextContentTypeEmailAddress; break;
+            case FrnTextInputContentName: nativeType = NSTextContentTypeName; break;
+            case FrnTextInputContentTelephoneNumber: nativeType = NSTextContentTypeTelephoneNumber; break;
+            default: break;
+        }
+    }
+    // This updates the protocol consumed by AppKit on the existing input
+    // client. It neither replaces its context nor discards its marked text.
+    self.contentType = nativeType;
 }
 
 - (void) resetInputMethod{

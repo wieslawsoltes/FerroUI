@@ -1,10 +1,16 @@
 //! The input method of IBus, through its portal (the port of
 //! `IBusX11TextInputMethod.cs`).
 
-use super::dbus::{InputContextProxy, PortalProxy, ServiceProxy};
+use super::dbus::{
+    CommitText, ForwardKeyEvent, HidePreeditText, InputContextProxy, PortalProxy, ServiceProxy,
+    ShowPreeditText, UpdatePreeditText,
+};
 use super::ibus_enums::{IBusCapability, IBusModifierMask};
+use super::ibus_input_options::IBusInputOptions;
 use crate::dbus_call_queue::DBusResult;
-use crate::dbus_ime::dbus_text_input_method_base::{DBusTextInputMethodBase, DBusTextInputMethodCore};
+use crate::dbus_ime::dbus_text_input_method_base::{
+    DBusTextInputMethodBase, DBusTextInputMethodCore,
+};
 use crate::ix11_input_method::X11InputMethodForwardedKey;
 use crate::signal_watch::watch_stream;
 use ferroui_base::input::raw::{IRawInputEventArgs, RawKeyEventArgs, RawKeyEventType};
@@ -22,6 +28,11 @@ pub struct IBusX11TextInputMethod {
     weak_self: Weak<IBusX11TextInputMethod>,
     service: RefCell<Option<ServiceProxy<'static>>>,
     context: RefCell<Option<InputContextProxy<'static>>>,
+    context_generation: Cell<u64>,
+    // Retain the full ordered immutable scope snapshot, not only the first
+    // purpose understood by this protocol. Reconnect replays the latest value.
+    options: RefCell<Option<TextInputOptions>>,
+    applied_options: Cell<Option<IBusInputOptions>>,
     preedit_text: RefCell<String>,
     preedit_cursor: Cell<i32>,
     inside_reset: Cell<i32>,
@@ -120,6 +131,9 @@ impl IBusX11TextInputMethod {
                 weak_self: weak_self.clone(),
                 service: RefCell::new(None),
                 context: RefCell::new(None),
+                context_generation: Cell::new(0),
+                options: RefCell::new(None),
+                applied_options: Cell::new(None),
                 preedit_text: RefCell::new(String::new()),
                 preedit_cursor: Cell::new(0),
                 inside_reset: Cell::new(0),
@@ -131,8 +145,65 @@ impl IBusX11TextInputMethod {
         self.context.borrow().clone()
     }
 
+    fn is_current_context(&self, generation: u64) -> bool {
+        self.context_generation.get() == generation
+            && self.context.borrow().is_some()
+            && self.base.upgrade().is_some_and(|base| base.is_connected())
+    }
+
+    fn enqueue_options(&self) {
+        let Some(base) = self.base.upgrade() else {
+            return;
+        };
+        let weak = self.weak_self.clone();
+        let generation = self.context_generation.get();
+        base.enqueue(move || async move {
+            if let Some(this) = weak.upgrade() {
+                this.apply_options(generation).await?;
+            }
+            Ok(())
+        });
+    }
+
+    async fn apply_options(&self, generation: u64) -> DBusResult {
+        loop {
+            if !self.is_current_context(generation) {
+                return Ok(());
+            }
+            let value = self
+                .options
+                .borrow()
+                .as_ref()
+                .map(IBusInputOptions::from_options);
+            let Some(value) = value else {
+                return Ok(());
+            };
+            if self.applied_options.get() == Some(value) {
+                return Ok(());
+            }
+            let Some(context) = self.context() else {
+                return Ok(());
+            };
+            // No option/context borrow survives a D-Bus call. Signals may
+            // synchronously change the owner/options while this reply waits.
+            let result = context.set_content_type(value.wire_value()).await;
+            if !self.is_current_context(generation) {
+                // A late failure belongs to the retired context and must not
+                // make the queue disconnect a newly created context.
+                return Ok(());
+            }
+            result?;
+            self.applied_options.set(Some(value));
+            // Coalesce queued replacements and apply the latest hints before
+            // the next key/focus command. Equivalent hints need no extra write.
+        }
+    }
+
     fn supports_preedit(&self) -> bool {
-        self.base.upgrade().and_then(|base| base.client()).is_some_and(|client| client.supports_preedit())
+        self.base
+            .upgrade()
+            .and_then(|base| base.client())
+            .is_some_and(|client| client.supports_preedit())
     }
 
     fn on_hide_preedit(&self) {
@@ -156,14 +227,18 @@ impl IBusX11TextInputMethod {
         }
 
         self.preedit_cursor.set(if !preedit_text.is_empty() {
-            character_offset_to_string_offset(&preedit_text, cursor_pos.min(i32::MAX as u32) as usize)
+            character_offset_to_string_offset(
+                &preedit_text,
+                cursor_pos.min(i32::MAX as u32) as usize,
+            )
         } else {
             0
         });
         *self.preedit_text.borrow_mut() = preedit_text.clone();
 
         if let Some(client) = self.base.upgrade().and_then(|base| base.client()) {
-            client.set_preedit_text_with_cursor(Some(&preedit_text), Some(self.preedit_cursor.get()));
+            client
+                .set_preedit_text_with_cursor(Some(&preedit_text), Some(self.preedit_cursor.get()));
         }
     }
 
@@ -197,10 +272,18 @@ impl DBusTextInputMethodCore for IBusX11TextInputMethod {
             let (Some(this), Some(base)) = (this.upgrade(), base.upgrade()) else {
                 return Ok(false);
             };
+            let signals = base.signal_guard();
             let connection = base.connection().clone();
+            // Pin every proxy to this unique owner. A later owner of the
+            // well-known portal name must not receive writes or Destroy for
+            // the retired owner's context, even if it reuses the object path.
+            let dbus = zbus::fdo::DBusProxy::new(&connection).await?;
+            let bus_name =
+                zbus::names::BusName::try_from(name.as_str()).map_err(zbus::Error::from)?;
+            let owner = dbus.get_name_owner(bus_name).await?.to_string();
 
             let portal = PortalProxy::builder(&connection)
-                .destination(name.clone())?
+                .destination(owner.clone())?
                 .path("/org/freedesktop/IBus")?
                 .cache_properties(CacheProperties::No)
                 .build()
@@ -208,63 +291,99 @@ impl DBusTextInputMethodCore for IBusX11TextInputMethod {
             let path = portal.create_input_context(&base.get_app_name()).await?;
 
             let service = ServiceProxy::builder(&connection)
-                .destination(name.clone())?
+                .destination(owner.clone())?
                 .path(path.clone().into_inner())?
                 .cache_properties(CacheProperties::No)
                 .build()
                 .await?;
             let context = InputContextProxy::builder(&connection)
-                .destination(name)?
+                .destination(owner)?
                 .path(path.into_inner())?
                 .cache_properties(CacheProperties::No)
                 .build()
                 .await?;
             *this.service.borrow_mut() = Some(service);
             *this.context.borrow_mut() = Some(context.clone());
+            let generation = this.context_generation.get().wrapping_add(1);
+            this.context_generation.set(generation);
+            this.applied_options.set(None);
 
             let weak = Rc::downgrade(&this);
-            base.add_disposable(watch_stream(context.receive_commit_text().await?, {
-                let weak = weak.clone();
-                move |signal| {
-                    if let (Some(this), Ok(args)) = (weak.upgrade(), signal.args()) {
-                        this.on_commit_text(args.text());
+            signals.register(watch_stream(
+                context.receive_commit_text().await?,
+                signals.handler({
+                    let weak = weak.clone();
+                    move |signal: CommitText| {
+                        if let (Some(this), Ok(args)) = (weak.upgrade(), signal.args()) {
+                            this.on_commit_text(args.text());
+                        }
                     }
-                }
-            }));
-            base.add_disposable(watch_stream(context.receive_forward_key_event().await?, {
-                let weak = weak.clone();
-                move |signal| {
-                    if let (Some(this), Ok(args)) = (weak.upgrade(), signal.args()) {
-                        this.on_forward_key(*args.keyval(), *args.keycode(), *args.state());
+                }),
+            ));
+            signals.register(watch_stream(
+                context.receive_forward_key_event().await?,
+                signals.handler({
+                    let weak = weak.clone();
+                    move |signal: ForwardKeyEvent| {
+                        if let (Some(this), Ok(args)) = (weak.upgrade(), signal.args()) {
+                            this.on_forward_key(*args.keyval(), *args.keycode(), *args.state());
+                        }
                     }
-                }
-            }));
-            base.add_disposable(watch_stream(context.receive_update_preedit_text().await?, {
-                let weak = weak.clone();
-                move |signal| {
-                    if let (Some(this), Ok(args)) = (weak.upgrade(), signal.args()) {
-                        this.on_update_preedit(args.text(), *args.cursor_pos(), *args.visible());
+                }),
+            ));
+            signals.register(watch_stream(
+                context.receive_update_preedit_text().await?,
+                signals.handler({
+                    let weak = weak.clone();
+                    move |signal: UpdatePreeditText| {
+                        if let (Some(this), Ok(args)) = (weak.upgrade(), signal.args()) {
+                            this.on_update_preedit(
+                                args.text(),
+                                *args.cursor_pos(),
+                                *args.visible(),
+                            );
+                        }
                     }
-                }
-            }));
-            base.add_disposable(watch_stream(context.receive_show_preedit_text().await?, {
-                let weak = weak.clone();
-                move |_| {
-                    if let Some(this) = weak.upgrade() {
-                        this.on_show_preedit();
+                }),
+            ));
+            signals.register(watch_stream(
+                context.receive_show_preedit_text().await?,
+                signals.handler({
+                    let weak = weak.clone();
+                    move |_: ShowPreeditText| {
+                        if let Some(this) = weak.upgrade() {
+                            this.on_show_preedit();
+                        }
                     }
-                }
-            }));
-            base.add_disposable(watch_stream(context.receive_hide_preedit_text().await?, {
-                let weak = weak.clone();
-                move |_| {
-                    if let Some(this) = weak.upgrade() {
-                        this.on_hide_preedit();
+                }),
+            ));
+            signals.register(watch_stream(
+                context.receive_hide_preedit_text().await?,
+                signals.handler({
+                    let weak = weak.clone();
+                    move |_: HidePreeditText| {
+                        if let Some(this) = weak.upgrade() {
+                            this.on_hide_preedit();
+                        }
                     }
-                }
-            }));
+                }),
+            ));
+            let weak = this.weak_self.clone();
             base.enqueue(move || async move {
-                context.set_capabilities(IBusCapability::CAP_FOCUS.bits()).await?;
+                let Some(this) = weak.upgrade() else {
+                    return Ok(());
+                };
+                if !this.is_current_context(generation) {
+                    return Ok(());
+                }
+                let result = context
+                    .set_capabilities(IBusCapability::CAP_FOCUS.bits())
+                    .await;
+                if !this.is_current_context(generation) {
+                    return Ok(());
+                }
+                result?;
+                this.apply_options(generation).await?;
                 Ok(())
             });
             Ok(true)
@@ -272,7 +391,8 @@ impl DBusTextInputMethodCore for IBusX11TextInputMethod {
     }
 
     fn disconnect_async(&self) -> LocalBoxFuture<DBusResult> {
-        let service = self.service.borrow().clone();
+        let service = self.service.borrow_mut().take();
+        self.on_disconnected();
         Box::pin(async move {
             if let Some(service) = service {
                 service.destroy().await?;
@@ -282,6 +402,9 @@ impl DBusTextInputMethodCore for IBusX11TextInputMethod {
     }
 
     fn on_disconnected(&self) {
+        self.context_generation
+            .set(self.context_generation.get().wrapping_add(1));
+        self.applied_options.set(None);
         *self.service.borrow_mut() = None;
         *self.context.borrow_mut() = None;
     }
@@ -290,7 +413,9 @@ impl DBusTextInputMethodCore for IBusX11TextInputMethod {
         let context = self.context();
         Box::pin(async move {
             if let Some(context) = context {
-                context.set_cursor_location(rect.x, rect.y, rect.width, rect.height).await?;
+                context
+                    .set_cursor_location(rect.x, rect.y, rect.width, rect.height)
+                    .await?;
             }
             Ok(())
         })
@@ -339,14 +464,19 @@ impl DBusTextInputMethodCore for IBusX11TextInputMethod {
             let state = ibus_state(key.modifiers(), key.type_());
 
             match context {
-                Some(context) => Ok(context.process_key_event(key_val as u32, key_code as u32, state.bits()).await?),
+                Some(context) => Ok(context
+                    .process_key_event(key_val as u32, key_code as u32, state.bits())
+                    .await?),
                 None => Ok(false),
             }
         })
     }
 
-    fn set_options(&self, _options: &TextInputOptions) {
-        // No-op, because ibus
+    fn set_options(&self, options: &TextInputOptions) {
+        *self.options.borrow_mut() = Some(options.clone());
+        if self.context.borrow().is_some() {
+            self.enqueue_options();
+        }
     }
 
     fn set_capabilities_core(
@@ -379,7 +509,8 @@ mod tests {
     fn ibus_text_value(text: &str) -> Value<'static> {
         // IBusText: (sa{sv}sv): the type name, attachments, the text, the
         // attribute list.
-        let attachments: std::collections::HashMap<String, Value<'static>> = std::collections::HashMap::new();
+        let attachments: std::collections::HashMap<String, Value<'static>> =
+            std::collections::HashMap::new();
         Value::Structure(Structure::from((
             "IBusText".to_string(),
             attachments,
@@ -390,13 +521,32 @@ mod tests {
 
     #[test]
     fn the_text_of_an_ibus_text_is_its_third_member() {
-        assert_eq!(ibus_text(&ibus_text_value("にほん")).as_deref(), Some("にほん"));
+        assert_eq!(
+            ibus_text(&ibus_text_value("にほん")).as_deref(),
+            Some("にほん")
+        );
         // Wrapped once more, as a variant in a variant.
-        assert_eq!(ibus_text(&Value::Value(Box::new(ibus_text_value("a")))).as_deref(), Some("a"));
+        assert_eq!(
+            ibus_text(&Value::Value(Box::new(ibus_text_value("a")))).as_deref(),
+            Some("a")
+        );
         // Not a structure, too short, or a third member of another type.
         assert_eq!(ibus_text(&Value::from("text")), None);
-        assert_eq!(ibus_text(&Value::Structure(Structure::from(("a".to_string(), "b".to_string())))), None);
-        assert_eq!(ibus_text(&Value::Structure(Structure::from(("a".to_string(), 1u32, 2u32)))), None);
+        assert_eq!(
+            ibus_text(&Value::Structure(Structure::from((
+                "a".to_string(),
+                "b".to_string()
+            )))),
+            None
+        );
+        assert_eq!(
+            ibus_text(&Value::Structure(Structure::from((
+                "a".to_string(),
+                1u32,
+                2u32
+            )))),
+            None
+        );
     }
 
     #[test]
@@ -413,27 +563,44 @@ mod tests {
 
     #[test]
     fn modifiers_and_the_release_go_to_ibus_as_its_mask() {
-        assert_eq!(ibus_state(RawInputModifiers::empty(), RawKeyEventType::KeyDown), IBusModifierMask::empty());
         assert_eq!(
-            ibus_state(RawInputModifiers::CONTROL | RawInputModifiers::SHIFT, RawKeyEventType::KeyDown),
+            ibus_state(RawInputModifiers::empty(), RawKeyEventType::KeyDown),
+            IBusModifierMask::empty()
+        );
+        assert_eq!(
+            ibus_state(
+                RawInputModifiers::CONTROL | RawInputModifiers::SHIFT,
+                RawKeyEventType::KeyDown
+            ),
             IBusModifierMask::CONTROL_MASK | IBusModifierMask::SHIFT_MASK
         );
         assert_eq!(
-            ibus_state(RawInputModifiers::ALT | RawInputModifiers::META, RawKeyEventType::KeyUp),
-            IBusModifierMask::MOD1_MASK | IBusModifierMask::MOD4_MASK | IBusModifierMask::RELEASE_MASK
+            ibus_state(
+                RawInputModifiers::ALT | RawInputModifiers::META,
+                RawKeyEventType::KeyUp
+            ),
+            IBusModifierMask::MOD1_MASK
+                | IBusModifierMask::MOD4_MASK
+                | IBusModifierMask::RELEASE_MASK
         );
         assert_eq!(IBusModifierMask::RELEASE_MASK.bits(), 0x4000_0000);
     }
 
     #[test]
     fn a_forwarded_key_carries_its_modifiers_and_whether_it_is_a_release() {
-        let key = forwarded_key(0xff0d, (IBusModifierMask::CONTROL_MASK | IBusModifierMask::MOD1_MASK).bits());
+        let key = forwarded_key(
+            0xff0d,
+            (IBusModifierMask::CONTROL_MASK | IBusModifierMask::MOD1_MASK).bits(),
+        );
         assert_eq!(key.key_val, 0xff0d);
         assert_eq!(key.type_, RawKeyEventType::KeyDown);
         assert_eq!(key.modifiers, KeyModifiers::CONTROL | KeyModifiers::ALT);
         assert!(!key.with_text);
 
-        let key = forwarded_key(0x61, (IBusModifierMask::RELEASE_MASK | IBusModifierMask::SHIFT_MASK).bits());
+        let key = forwarded_key(
+            0x61,
+            (IBusModifierMask::RELEASE_MASK | IBusModifierMask::SHIFT_MASK).bits(),
+        );
         assert_eq!(key.type_, RawKeyEventType::KeyUp);
         assert_eq!(key.modifiers, KeyModifiers::SHIFT);
     }

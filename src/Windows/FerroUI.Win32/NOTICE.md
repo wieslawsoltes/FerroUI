@@ -1,5 +1,23 @@
 # Third-party notices
 
+## WinUI rich text automation
+
+The text pattern bridge in `automation/automation_node_text.rs`,
+`automation/text_range_node.rs`, and `automation/text_pattern_marshalling.rs`
+adapts the `CUIATextProviderWrapper` and `CUIATextRangeProviderWrapper` contracts
+in WinUI's `dxaml/xcp/win/shared/UIAPatternProviderWrapper.cpp` and
+`dxaml/xcp/win/inc/UIAPatternProviderWrapper.h`. Text attribute identifiers follow
+`dxaml/xcp/components/metadata/inc/EnumDefs.g.h`. The reference is
+`microsoft/microsoft-ui-xaml` at commit
+`fe244ca6ac4d482712b234a9de3cf771cc6481de`, Copyright (c) Microsoft Corporation,
+MIT licensed. The complete Microsoft MIT license is included in
+`src/FerroUI.Controls/documents/NOTICE.md`.
+
+FerroUI's native bridge uses its existing COM ABI and dispatcher. Rich text
+ranges remain on the UI thread, and native range wrappers retain no control.
+The WinUI rich text source/member map and tests are recorded in
+`docs/porting/winui-rich-text/`.
+
 ## Avalonia
 
 The Windows platform backend is a port of `src/Windows/Avalonia.Win32` of the

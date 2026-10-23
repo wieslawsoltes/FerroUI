@@ -330,6 +330,7 @@ const SHOWN_PAGES: &[&str] = &[
     "/Pages/CheckBoxPage.xaml",
     "/Pages/RadioButtonPage.xaml",
     "/Pages/TextBlockPage.xaml",
+    "/Pages/RichTextPage.xaml",
     "/Pages/BorderPage.xaml",
     "/Pages/CanvasPage.xaml",
     "/Pages/ToggleSwitchPage.xaml",

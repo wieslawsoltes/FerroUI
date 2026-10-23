@@ -12,14 +12,17 @@
 //! | `f64`                         | `CornerRadius`                     |
 //! | `Color`, a color name or `#rgb` text | `Option<Rc<dyn IBrush>>`    |
 //! | `&str`                        | `Option<BoxedValue>` (text content)|
+//! | `InputScopeNameValue`, `TextInputContentType` | `Option<Ref<InputScope>>` |
 //!
 //! A color text that does not parse panics with the text: it is a mistake
 //! in the source, like an attribute XAML does not compile.
 
 use crate::builder::{FromValue, IntoValue};
+use ferroui_base::input::text_input::TextInputContentType;
+use ferroui_base::input::{InputScope, InputScopeNameValue};
 use ferroui_base::media::immutable::ImmutableSolidColorBrush;
 use ferroui_base::media::{Brush, Color, IBrush};
-use ferroui_base::{BoxedValue, CornerRadius, PropertyValue, Thickness};
+use ferroui_base::{BoxedValue, CornerRadius, PropertyValue, Ref, Thickness};
 use std::rc::Rc;
 
 impl<T: PropertyValue> IntoValue<Option<T>> for T {
@@ -31,6 +34,18 @@ impl<T: PropertyValue> IntoValue<Option<T>> for T {
 impl<T: Clone> FromValue<Option<T>> for T {
     fn from_value(value: &Option<T>) -> Option<Self> {
         value.clone()
+    }
+}
+
+impl IntoValue<Option<Ref<InputScope>>> for InputScopeNameValue {
+    fn into_value(self) -> Option<Ref<InputScope>> {
+        self.into()
+    }
+}
+
+impl IntoValue<Option<Ref<InputScope>>> for TextInputContentType {
+    fn into_value(self) -> Option<Ref<InputScope>> {
+        self.into()
     }
 }
 

@@ -2,6 +2,46 @@
 
 use bitflags::bitflags;
 
+/// IBus input purposes, from IBus 1.5.32 `src/ibustypes.h` at
+/// 0fd4e408a52d3d15179c643fd54d310aafd8875f. These are input-method hints,
+/// not validation rules or a request to change the control's rendering.
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
+#[repr(u32)]
+pub enum IBusInputPurpose {
+    #[default]
+    FreeForm = 0,
+    Alpha = 1,
+    Digits = 2,
+    Number = 3,
+    Phone = 4,
+    Url = 5,
+    Email = 6,
+    Name = 7,
+    Password = 8,
+    Pin = 9,
+    Terminal = 10,
+}
+
+bitflags! {
+    /// Exact IBus 1.5.32 `IBusInputHints` bits (`src/ibustypes.h`).
+    /// Older engines ignore unknown hints; PRIVATE was added in 1.5.26.
+    #[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
+    pub struct IBusInputHints: u32 {
+        const SPELLCHECK = 1 << 0;
+        const NO_SPELLCHECK = 1 << 1;
+        const WORD_COMPLETION = 1 << 2;
+        const LOWERCASE = 1 << 3;
+        const UPPERCASE_CHARS = 1 << 4;
+        const UPPERCASE_WORDS = 1 << 5;
+        const UPPERCASE_SENTENCES = 1 << 6;
+        const INHIBIT_OSK = 1 << 7;
+        const VERTICAL_WRITING = 1 << 8;
+        const EMOJI = 1 << 9;
+        const NO_EMOJI = 1 << 10;
+        const PRIVATE = 1 << 11;
+    }
+}
+
 bitflags! {
     #[derive(Clone, Copy, Debug, Default, PartialEq, Eq, Hash)]
     pub struct IBusModifierMask: u32 {

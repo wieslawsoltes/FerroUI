@@ -56,6 +56,8 @@ const ASK_FOR_A_CAST_THAT_IS_NOT_REGISTERED: &[&str] = &[
     "dynamic_resource_local.xaml",
     "flags_value.xaml",
     "resources_many.xaml",
+    "rich_text_document.xaml",
+    "rich_typography.xaml",
     "static_resource_element.xaml",
     "static_resource_local.xaml",
     "style_resources.xaml",

@@ -467,7 +467,16 @@ impl FerroView {
     }
 
     fn set_options(&self, options: &TextInputOptions) {
-        *self.ivars().options.borrow_mut() = Some(options.clone());
+        let changed = self.ivars().options.borrow().as_ref() != Some(options);
+        if changed {
+            *self.ivars().options.borrow_mut() = Some(options.clone());
+            // Release the options borrow before UIKit queries the responder's
+            // keyboard and content traits again. Live InputScope mutations can
+            // arrive while the same text client still owns first responder.
+            if let Some(responder) = self.driving_responder() {
+                responder.reloadInputViews();
+            }
+        }
     }
 
     fn reset(&self) {

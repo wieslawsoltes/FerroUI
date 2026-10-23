@@ -1,14 +1,27 @@
 use super::IInlineHost;
 use crate::{Border, Control};
+use ferroui_base::controls::NameScopeExtensions;
 use ferroui_base::media::{
-    Brushes, FontFamily, FontFeatureCollection, FontStretch, FontStyle, FontWeight, IBrush,
+    subscribe_invalidated, Brushes, FontFamily, FontFeatureCollection, FontStretch, FontStyle,
+    FontWeight, IBrush,
 };
+use ferroui_base::reactive::IDisposable;
+use ferroui_base::utilities::CultureInfo;
 use ferroui_base::{
-    ferro_class, ferro_property, AttachedProperty, FerroObjectImpl, FerroObjectImplExt, FerroProperty,
-    FerroPropertyChangedEventArgs, StyledElement, StyledElementImpl, StyledProperty, StyledPropertyOptions,
+    ferro_class, ferro_property, AttachedProperty, FerroObject, FerroObjectImpl, FerroObjectImplExt, Ref,
+    FerroProperty, FerroPropertyChangedEventArgs, StyledElement, StyledElementImpl, StyledProperty,
+    StyledPropertyOptions,
 };
 use std::cell::RefCell;
 use std::rc::Rc;
+
+#[cfg(test)]
+#[path = "rich_presentation_invalidation_tests.rs"]
+mod rich_presentation_invalidation_tests;
+
+#[cfg(test)]
+#[path = "text_element_namescope_tests.rs"]
+mod text_element_namescope_tests;
 
 /// `TextElement` is the base class for content in text based controls.
 /// It also defines the inherited font and foreground attached properties
@@ -19,6 +32,7 @@ use std::rc::Rc;
 pub struct TextElement {
     base: StyledElement,
     inline_host: RefCell<Option<Rc<dyn IInlineHost>>>,
+    media_subscriptions: RefCell<Vec<Rc<dyn IDisposable>>>,
 }
 
 ferro_class! {
@@ -32,17 +46,39 @@ ferro_class! {
 ferroui_base::ferro_impl_classes!(TextElement: StyledElementImpl);
 
 impl FerroObjectImpl for TextElement {
+    fn constructed(this: &Self) {
+        Self::parent_constructed(this);
+        this.refresh_media_subscriptions();
+    }
+
     fn on_property_changed(this: &Self, change: &FerroPropertyChangedEventArgs<'_>) {
         Self::parent_on_property_changed(this, change);
 
+        if matches!(
+            change.property().name(),
+            "FontFeatures" | "Foreground" | "Background"
+        ) {
+            this.refresh_media_subscriptions();
+        }
+
+        if super::Typography::is_property(change.property()) {
+            this.invalidate_format_change(change);
+        }
+
         match change.property().name() {
-            "Background" | "FontFamily" | "FontSize" | "FontStyle" | "FontWeight" | "FontStretch"
-            | "Foreground" => {
-                if let Some(host) = this.inline_host() {
-                    host.invalidate();
-                }
+            "Background" | "FontFamily" | "FontSize" | "FontStyle" | "FontWeight"
+            | "FontStretch" | "Foreground" | "FontFeatures" | "LetterSpacing" | "Language" => {
+                this.invalidate_format_change(change);
             }
             _ => {}
+        }
+    }
+}
+
+impl Drop for TextElement {
+    fn drop(&mut self) {
+        for subscription in self.media_subscriptions.get_mut().drain(..) {
+            subscription.dispose();
         }
     }
 }
@@ -57,6 +93,20 @@ impl TextElementImpl for TextElement {
 }
 
 ferroui_base::ferro_properties! { impl TextElement {
+    ferro_property!(
+        /// The inherited text language, represented by FerroUI's culture value.
+        /// Markup accepts a language tag, and an empty tag resolves to the
+        /// preferred application language when text is shaped.
+        pub fn language_property() -> AttachedProperty<CultureInfo> {
+            FerroProperty::register_attached_with::<TextElement, Control, _>(
+                "Language",
+                StyledPropertyOptions::new(super::text_language::default_language())
+                    .inherits(true)
+                    .validate(|language: &CultureInfo| super::text_language::is_valid_language_tag(language.name())),
+            )
+        }
+    );
+
     ferro_property!(
         /// Defines the `Background` property.
         pub fn background_property() -> StyledProperty<Option<Rc<dyn IBrush>>> {
@@ -148,9 +198,89 @@ ferroui_base::ferro_properties! { impl TextElement {
 } }
 
 impl TextElement {
+    /// Finds a registered object in this element's nearest logical name scope.
+    ///
+    /// The result may be a control or another text element. A missing name or
+    /// name scope returns `None`. The nearest scope controls lookup, including
+    /// `ChildNameScope`'s parent fallback after completion; no descendant tree
+    /// search or additional ancestor-scope search is performed here. XAML
+    /// registers names when it loads, while code-created content uses the
+    /// existing `NameScope` API. Each call follows the current parent chain.
+    pub fn find_name(&self, name: &str) -> Option<Ref<FerroObject>> {
+        NameScopeExtensions::find_name_scope(self)?.find(name)
+    }
+
+    pub(crate) fn invalidate_format_change(&self, change: &FerroPropertyChangedEventArgs<'_>) {
+        if let Some(host) = self.inline_host() {
+            if change.is_inherited_value_change() {
+                host.invalidate_layout();
+            } else {
+                host.invalidate();
+            }
+        }
+    }
+
+    /// Gets the assigned or inherited language before empty-tag resolution.
+    pub fn language(&self) -> CultureInfo {
+        self.get_value(Self::language_property())
+    }
+
+    pub fn set_language(&self, value: CultureInfo) {
+        self.set_value(Self::language_property(), value);
+    }
+
+    /// The language passed to font fallback and shaping for this element.
+    pub fn resolved_language(&self) -> CultureInfo {
+        super::text_language::resolved_language(&self.language())
+    }
+
     /// Creates the class data; see [`ferroui_base::FerroObject::construct`].
     pub fn construct() -> Self {
-        Self { base: StyledElement::construct(), inline_host: RefCell::new(None) }
+        Self {
+            base: StyledElement::construct(),
+            inline_host: RefCell::new(None),
+            media_subscriptions: RefCell::new(Vec::new()),
+        }
+    }
+
+    fn refresh_media_subscriptions(&self) {
+        let old = std::mem::take(&mut *self.media_subscriptions.borrow_mut());
+        for subscription in old {
+            subscription.dispose();
+        }
+        let mut subscriptions = Vec::new();
+        if let Some(features) = self.font_features() {
+            let weak = self.to_ref().downgrade();
+            subscriptions.push(features.collection_changed(move |_| {
+                if let Some(element) = weak.upgrade() {
+                    if let Some(host) = element.inline_host() {
+                        if element
+                            .get_base_value(Self::font_features_property())
+                            .is_some()
+                        {
+                            host.invalidate();
+                        } else {
+                            host.invalidate_layout();
+                        }
+                    }
+                }
+            }));
+        }
+        for brush in [self.foreground(), self.background()] {
+            if brush.as_ref().and_then(|brush| brush.as_object()).is_none() {
+                continue;
+            }
+            let weak = self.to_ref().downgrade();
+            let changed: Rc<dyn Fn()> = Rc::new(move || {
+                if let Some(host) = weak.upgrade().and_then(|element| element.inline_host()) {
+                    host.invalidate_render();
+                }
+            });
+            if let Some(subscription) = subscribe_invalidated(&brush, changed) {
+                subscriptions.push(subscription);
+            }
+        }
+        *self.media_subscriptions.borrow_mut() = subscriptions;
     }
 
     /// A brush used to paint the control's background.

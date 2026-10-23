@@ -12,7 +12,8 @@
 @class FrnAccessibilityElement;
 @protocol IRenderTarget;
 
-@interface FrnView : NSView<NSTextInputClient, NSDraggingDestination, FrnTextInputMethodDelegate, CALayerDelegate>
+@interface FrnView : NSView<NSTextInputClient, NSTextContent, NSDraggingDestination, FrnTextInputMethodDelegate, CALayerDelegate>
+@property (copy, nullable) NSTextContentType contentType;
 -(FrnView* _Nonnull) initWithParent: (TopLevelImpl* _Nonnull) parent;
 -(NSEvent* _Nonnull) lastMouseDownEvent;
 -(FrnPoint) translateLocalPoint:(FrnPoint)pt;

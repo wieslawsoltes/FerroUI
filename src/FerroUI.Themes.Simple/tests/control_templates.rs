@@ -244,6 +244,7 @@ control_tests! {
     table_view_column_header => "TableViewColumnHeader";
     table_view_row => "TableViewRow";
     text_box => "TextBox";
+    rich_edit_box => "RichEditBox";
     text_selection_handle => "TextSelectionHandle";
     theme_variant_scope => "ThemeVariantScope";
     time_picker => "TimePicker";

@@ -28,6 +28,7 @@ mod ferro_xaml_il_theme_variant_provider_transformer;
 mod ferro_xaml_il_transform_instance_attached_properties;
 mod ferro_xaml_il_transform_routed_event;
 mod ferro_xaml_il_transitions_type_metadata_transformer;
+mod ferro_xaml_il_text_range_transformer;
 mod ignored_directives_transformer;
 mod x_name_transformer;
 
@@ -48,6 +49,7 @@ pub use ferro_xaml_il_theme_variant_provider_transformer::*;
 pub use ferro_xaml_il_transform_instance_attached_properties::*;
 pub use ferro_xaml_il_transform_routed_event::*;
 pub use ferro_xaml_il_transitions_type_metadata_transformer::*;
+pub use ferro_xaml_il_text_range_transformer::*;
 pub use ignored_directives_transformer::*;
 pub use x_name_transformer::*;
 

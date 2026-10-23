@@ -9,7 +9,7 @@ use crate::dbus_ime::dbus_text_input_method_base::{DBusTextInputMethodBase, DBus
 use crate::ix11_input_method::X11InputMethodForwardedKey;
 use ferroui_base::input::raw::{IRawInputEventArgs, RawKeyEventArgs, RawKeyEventType};
 use ferroui_base::input::text_input::{TextInputContentType, TextInputOptions};
-use ferroui_base::input::{KeyModifiers, LocalBoxFuture, RawInputModifiers};
+use ferroui_base::input::{InputScopeNameValue, KeyModifiers, LocalBoxFuture, RawInputModifiers};
 use ferroui_base::PixelRect;
 use std::cell::{Cell, RefCell};
 use std::rc::{Rc, Weak};
@@ -61,7 +61,9 @@ pub(crate) fn option_flags(options: &TextInputOptions) -> FcitxCapabilityFlags {
     if !options.auto_capitalization {
         flags |= FcitxCapabilityFlags::CAPACITY_NOAUTOUPPERCASE;
     }
-    if options.content_type == TextInputContentType::Email {
+    if let Some(scope) = options.effective_input_scope() {
+        flags |= scope_flags(scope);
+    } else if options.content_type == TextInputContentType::Email {
         flags |= FcitxCapabilityFlags::CAPACITY_EMAIL;
     } else if options.content_type == TextInputContentType::Number {
         flags |= FcitxCapabilityFlags::CAPACITY_NUMBER;
@@ -73,6 +75,54 @@ pub(crate) fn option_flags(options: &TextInputOptions) -> FcitxCapabilityFlags {
         flags |= FcitxCapabilityFlags::CAPACITY_URL;
     }
     flags
+}
+
+fn scope_flags(scope: InputScopeNameValue) -> FcitxCapabilityFlags {
+    use FcitxCapabilityFlags as Flags;
+    use InputScopeNameValue as Scope;
+    match scope {
+        Scope::Url => Flags::CAPACITY_URL,
+        Scope::EmailSmtpAddress | Scope::EmailNameOrAddress => Flags::CAPACITY_EMAIL,
+        Scope::PersonalFullName | Scope::NameOrPhoneNumber => Flags::CAPACITY_NAME,
+        Scope::CurrencyAmountAndSymbol
+        | Scope::CurrencyAmount
+        | Scope::Number
+        | Scope::NumberFullWidth
+        | Scope::FormulaNumber => Flags::CAPACITY_NUMBER,
+        Scope::DateMonthNumber
+        | Scope::DateDayNumber
+        | Scope::DateYear
+        | Scope::Digits
+        | Scope::TimeHour
+        | Scope::TimeMinutesOrSeconds => Flags::CAPACITY_DIGIT,
+        Scope::TelephoneNumber
+        | Scope::TelephoneCountryCode
+        | Scope::TelephoneAreaCode
+        | Scope::TelephoneLocalNumber => Flags::CAPACITY_DIALABLE,
+        Scope::Password | Scope::AlphanumericPin => Flags::CAPACITY_PASSWORD,
+        Scope::NumericPassword | Scope::NumericPin => Flags::CAPACITY_PASSWORD | Flags::CAPACITY_DIGIT,
+        // No width/script selector exists in Fcitx's capability flags. ALPHA
+        // would forbid digits and is not a substitute for an alphanumeric scope.
+        Scope::Default
+        | Scope::AlphanumericHalfWidth
+        | Scope::AlphanumericFullWidth
+        | Scope::Hiragana
+        | Scope::KatakanaHalfWidth
+        | Scope::KatakanaFullWidth
+        | Scope::Hanja
+        | Scope::HangulHalfWidth
+        | Scope::HangulFullWidth
+        | Scope::Search
+        | Scope::Formula
+        | Scope::SearchIncremental
+        | Scope::ChineseHalfWidth
+        | Scope::ChineseFullWidth
+        | Scope::NativeScript
+        | Scope::Text
+        | Scope::Chat
+        | Scope::Maps
+        | Scope::ChatWithoutEmoji => Flags::empty(),
+    }
 }
 
 /// The key state Fcitx is given with a key (`HandleKeyCore`).
@@ -444,6 +494,61 @@ mod tests {
         ] {
             options.content_type = content_type;
             assert_eq!(option_flags(&options), FcitxCapabilityFlags::CAPACITY_UPPERCASE | flag);
+        }
+    }
+
+    #[test]
+    fn input_scope_separates_numeric_phone_name_and_alphanumeric_pin_capabilities() {
+        use FcitxCapabilityFlags as Flags;
+        use InputScopeNameValue as Scope;
+        let cases = [
+            (Scope::Digits, Flags::CAPACITY_DIGIT),
+            (Scope::DateMonthNumber, Flags::CAPACITY_DIGIT),
+            (Scope::DateDayNumber, Flags::CAPACITY_DIGIT),
+            (Scope::DateYear, Flags::CAPACITY_DIGIT),
+            (Scope::TimeHour, Flags::CAPACITY_DIGIT),
+            (Scope::TimeMinutesOrSeconds, Flags::CAPACITY_DIGIT),
+            (Scope::TelephoneNumber, Flags::CAPACITY_DIALABLE),
+            (Scope::TelephoneAreaCode, Flags::CAPACITY_DIALABLE),
+            (Scope::TelephoneCountryCode, Flags::CAPACITY_DIALABLE),
+            (Scope::TelephoneLocalNumber, Flags::CAPACITY_DIALABLE),
+            (Scope::PersonalFullName, Flags::CAPACITY_NAME),
+            (Scope::NameOrPhoneNumber, Flags::CAPACITY_NAME),
+            (Scope::EmailSmtpAddress, Flags::CAPACITY_EMAIL),
+            (Scope::EmailNameOrAddress, Flags::CAPACITY_EMAIL),
+            (Scope::CurrencyAmount, Flags::CAPACITY_NUMBER),
+            (Scope::FormulaNumber, Flags::CAPACITY_NUMBER),
+            (Scope::NumericPassword, Flags::CAPACITY_PASSWORD | Flags::CAPACITY_DIGIT),
+            (Scope::NumericPin, Flags::CAPACITY_PASSWORD | Flags::CAPACITY_DIGIT),
+            (Scope::AlphanumericPin, Flags::CAPACITY_PASSWORD),
+            (Scope::Password, Flags::CAPACITY_PASSWORD),
+        ];
+        for (scope, expected) in cases {
+            let options = TextInputOptions {
+                content_type: TextInputContentType::Url,
+                input_scope_names: Some(Rc::from([scope])),
+                uppercase: true,
+                auto_capitalization: true,
+                ..Default::default()
+            };
+            assert_eq!(option_flags(&options), Flags::CAPACITY_UPPERCASE | expected, "{scope:?}");
+        }
+    }
+
+    #[test]
+    fn input_scope_default_and_empty_names_preserve_explicit_and_legacy_fcitx_policy() {
+        let mut options = TextInputOptions {
+            content_type: TextInputContentType::Digits,
+            input_scope_names: Some(Rc::from([InputScopeNameValue::Default, InputScopeNameValue::Digits])),
+            auto_capitalization: true,
+            ..Default::default()
+        };
+        assert_eq!(option_flags(&options), FcitxCapabilityFlags::empty());
+        options.input_scope_names = Some(Rc::from([]));
+        assert_eq!(option_flags(&options), FcitxCapabilityFlags::CAPACITY_DIALABLE);
+        for scope in [InputScopeNameValue::AlphanumericHalfWidth, InputScopeNameValue::Hiragana] {
+            options.input_scope_names = Some(Rc::from([scope]));
+            assert_eq!(option_flags(&options), FcitxCapabilityFlags::empty());
         }
     }
 

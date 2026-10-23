@@ -88,6 +88,7 @@ fn pipeline_has_the_upstream_order() {
             "StaticIntrinsicsPostProcessTransformer",
             "FerroXamlIlOptionMarkupExtensionTransformer",
             "ConvertPropertyValuesToAssignmentsTransformer",
+            "FerroXamlIlTextRangeTransformer",
             "ConstructableObjectTransformer",
             "AddNameScopeRegistration",
             "FerroXamlIlControlTemplatePartsChecker",

@@ -82,7 +82,7 @@ use xamlx::emit::{IXamlEmitResult, XamlLanguageEmitMappings};
 use xamlx::exceptions::{XamlError, XamlResult};
 use xamlx::parsers::XDocumentXamlParser;
 use xamlx::transform::transformers::{
-    ContentConvertTransformer, ConvertPropertyValuesToAssignmentsTransformer,
+    ConstructableObjectTransformer, ContentConvertTransformer, ConvertPropertyValuesToAssignmentsTransformer,
     DeferredContentTransformer, NewObjectTransformer, PropertyReferenceResolver,
     TypeReferenceResolver,
 };
@@ -271,6 +271,13 @@ impl FerroXamlIlCompiler {
         insert_before::<ConvertPropertyValuesToAssignmentsTransformer>(
             &mut transformers,
             vec![Box::new(FerroXamlIlOptionMarkupExtensionTransformer)],
+        )?;
+        // The WinUI TextRange projection is a copied value whose markup constructors
+        // use a shared initialization carrier. The ordinary XamlX value-type guard
+        // remains in force for every type without this explicit framework contract.
+        insert_before::<ConstructableObjectTransformer>(
+            &mut transformers,
+            vec![Box::new(FerroXamlIlTextRangeTransformer)],
         )?;
 
         insert_after::<TypeReferenceResolver>(

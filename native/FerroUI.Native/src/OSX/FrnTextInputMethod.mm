@@ -46,3 +46,7 @@ void FrnTextInputMethod::SetCursorRect(FrnRect rect) {
 void FrnTextInputMethod::SetSelectionInSurroundingText(int start, int end) {
     [_inputMethodDelegate setSelection: start:end];
 }
+
+void FrnTextInputMethod::SetContentType(FrnTextInputContentType contentType) {
+    [_inputMethodDelegate setInputContentType:contentType];
+}

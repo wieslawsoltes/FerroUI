@@ -615,6 +615,7 @@ impl BrowserInputHandler {
     /// events without them) is an unknown key.
     pub fn on_key_down(&self, code: Option<&str>, key: Option<&str>, modifier: i32) -> bool {
         let (code, key) = (code.unwrap_or_default(), key.unwrap_or_default());
+        let composing = self.text_input_method.is_composing();
         let mut handled =
             self.raw_keyboard_event(RawKeyEventType::KeyDown, code, key, Self::to_raw_input_modifiers(modifier));
 
@@ -624,7 +625,14 @@ impl BrowserInputHandler {
         // not a character (Control with Alt is AltGr and does produce one). Otherwise an
         // unhandled Ctrl+R would type "r" and, being handled as text, keep the browser from
         // reloading.
-        if !handled && key.encode_utf16().count() == 1 && !Self::is_command_chord(modifier) {
+        // An IME may report a literal character while its native composition
+        // still owns text input. Only compositionend commits that character.
+        if !handled
+            && !composing
+            && !self.text_input_method.is_composing()
+            && key.encode_utf16().count() == 1
+            && !Self::is_command_chord(modifier)
+        {
             handled = self.raw_text_event(key);
         }
 
@@ -915,12 +923,13 @@ mod tests {
     struct SilentTextInputPage;
 
     impl ITextInputPage for SilentTextInputPage {
+        fn set_input_options(&self, _: &crate::browser_text_input_options::BrowserTextInputOptions) {}
         fn hide_input_element(&self) {}
         fn show_input_element(&self) {}
         fn focus_input_element(&self) {}
         fn focus_container_element(&self) {}
-        fn clear_input_element(&self) {}
-        fn set_surrounding_text(&self, _text: &str, _start: i32, _end: i32) {}
+        fn clear_input_element(&self, _revision: u32) {}
+        fn set_surrounding_text(&self, _text: &str, _start: i32, _end: i32, _revision: u32) {}
         fn set_bounds(&self, _x: i32, _y: i32, _width: i32, _height: i32, _caret: i32) {}
 
         fn selection_start(&self) -> i32 {
@@ -1403,6 +1412,7 @@ mod tests {
     struct TestClient {
         events: TextInputMethodClientEvents,
         preedit: RefCell<Vec<Option<String>>>,
+        on_clear: RefCell<Option<Box<dyn FnOnce()>>>,
     }
 
     impl TextInputMethodClient for TestClient {
@@ -1438,6 +1448,12 @@ mod tests {
 
         fn set_preedit_text(&self, preedit_text: Option<&str>) {
             self.preedit.borrow_mut().push(preedit_text.map(str::to_string));
+            if preedit_text.is_none() {
+                let callback = self.on_clear.borrow_mut().take();
+                if let Some(callback) = callback {
+                    callback();
+                }
+            }
         }
     }
 
@@ -1564,8 +1580,11 @@ mod tests {
         fixture.handler.text_input_method().on_composition_end(Some("\u{304b}"));
         assert_eq!(0, fixture.event_count());
 
-        let client =
-            Rc::new(TestClient { events: TextInputMethodClientEvents::new(), preedit: RefCell::new(Vec::new()) });
+        let client = Rc::new(TestClient {
+            events: TextInputMethodClientEvents::new(),
+            preedit: RefCell::new(Vec::new()),
+            on_clear: RefCell::new(None),
+        });
         let text_input_client: Rc<dyn TextInputMethodClient> = client.clone();
         fixture.handler.text_input_method().set_client(Some(text_input_client));
 
@@ -1583,6 +1602,69 @@ mod tests {
         fixture.handler.text_input_method().on_composition_end(None);
         assert_eq!(1, fixture.event_count());
 
+        BrowserWindowingPlatform::set_keyboard_for_unit_tests(None);
+    }
+
+    #[test]
+    fn browser_text_input_composing_character_key_does_not_dispatch_an_extra_raw_text_commit() {
+        let _scope = Dispatcher::unit_test_scope();
+        let _keyboard = with_keyboard();
+        let fixture = Fixture::new();
+        let client = Rc::new(TestClient {
+            events: TextInputMethodClientEvents::new(),
+            preedit: RefCell::new(Vec::new()),
+            on_clear: RefCell::new(None),
+        });
+        fixture.handler.text_input_method().set_client(Some(client.clone()));
+        fixture.handler.text_input_method().on_composition_start();
+        fixture.handler.text_input_method().on_composition_update(Some("a"));
+
+        assert!(!fixture.handler.on_key_down(Some("KeyA"), Some("a"), 0));
+
+        assert_eq!(fixture.event_count(), 1);
+        assert!(fixture.event(0).downcast_ref::<RawKeyEventArgs>().is_some());
+        assert!(fixture.handler.text_input_method().is_composing());
+        fixture.handler.text_input_method().on_composition_end(Some("あ"));
+        assert_eq!(fixture.event_count(), 2);
+        assert_eq!(
+            fixture.event(1).downcast_ref::<RawTextInputEventArgs>().unwrap().text(),
+            "あ"
+        );
+        BrowserWindowingPlatform::set_keyboard_for_unit_tests(None);
+    }
+
+    #[test]
+    fn browser_text_input_legacy_composition_end_cannot_commit_to_a_reentrant_new_client() {
+        let _scope = Dispatcher::unit_test_scope();
+        let _keyboard = with_keyboard();
+        let fixture = Fixture::new();
+        let client = Rc::new(TestClient {
+            events: TextInputMethodClientEvents::new(),
+            preedit: RefCell::new(Vec::new()),
+            on_clear: RefCell::new(None),
+        });
+        let next = Rc::new(TestClient {
+            events: TextInputMethodClientEvents::new(),
+            preedit: RefCell::new(Vec::new()),
+            on_clear: RefCell::new(None),
+        });
+        let method = fixture.handler.text_input_method();
+        method.set_client(Some(client.clone()));
+        method.on_composition_start();
+        method.on_composition_update(Some("old preview"));
+        let weak_method = Rc::downgrade(method);
+        let installed = next.clone();
+        client.on_clear.replace(Some(Box::new(move || {
+            weak_method.upgrade().unwrap().set_client(Some(installed));
+        })));
+
+        method.on_composition_end(Some("old commit"));
+
+        assert_eq!(fixture.event_count(), 0, "the retired composition must not dispatch raw text");
+        assert!(!method.is_composing());
+        method.on_composition_start();
+        method.on_composition_update(Some("new preview"));
+        assert_eq!(&*next.preedit.borrow(), &[None, Some("new preview".to_owned())]);
         BrowserWindowingPlatform::set_keyboard_for_unit_tests(None);
     }
 

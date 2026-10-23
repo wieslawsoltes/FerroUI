@@ -1,0 +1,37 @@
+<UserControl xmlns="https://github.com/ferroui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+  <StackPanel TextBlock.TextLineBounds="TrimToBaseline">
+    <RichTextBlock x:Name="display" Language="pl-PL" TextWrapping="Wrap" TextLineBounds="Tight">
+      <Paragraph FontSize="18">
+        <Bold><Run Text="Bold" /></Bold><Italic><Run Text=" italic" /></Italic><Underline><Run Text=" 😀" /></Underline>
+      </Paragraph>
+      <Paragraph TextAlignment="Right"><Run Text="Second" /></Paragraph>
+      <RichTextBlock.TextHighlighters>
+        <TextHighlighter Background="Yellow" Foreground="Black">
+          <TextRange StartIndex="0" Length="4" />
+          <TextRange>
+            <TextRange.StartIndex>5</TextRange.StartIndex>
+            <TextRange.Length>6</TextRange.Length>
+          </TextRange>
+          <TextRange Length="2">
+            <x:Arguments><x:Int32>12</x:Int32><x:Int32>1</x:Int32></x:Arguments>
+          </TextRange>
+        </TextHighlighter>
+      </RichTextBlock.TextHighlighters>
+    </RichTextBlock>
+    <RichTextBlock x:Name="fullLineBounds" TextLineBounds="Full">
+      <Paragraph><Run Text="Full line bounds" /></Paragraph>
+    </RichTextBlock>
+    <RichTextBlock x:Name="capLineBounds" TextLineBounds="TrimToCapHeight">
+      <Paragraph><Run Text="Cap line bounds" /></Paragraph>
+    </RichTextBlock>
+    <RichTextBlock x:Name="inheritedLineBounds">
+      <Paragraph><Run Text="Inherited baseline bounds" /></Paragraph>
+    </RichTextBlock>
+    <RichEditBox x:Name="editor" Header="Document" Description="Rich editing"
+                 PlaceholderText="Write here" Language="pl-PL" AcceptsTab="True">
+      <Paragraph><Run Text="Edit 😀" /></Paragraph>
+    </RichEditBox>
+    <Button x:Name="bold" Command="{Binding #editor.ToggleBold}" IsEnabled="{Binding #editor.CanFormat}">Bold</Button>
+  </StackPanel>
+</UserControl>

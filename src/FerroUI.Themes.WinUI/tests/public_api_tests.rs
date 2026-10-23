@@ -54,6 +54,14 @@ fn every_document_names_its_source() {
         assert!(start.starts_with("<!--"), "{path} does not start with a comment");
         let comment = &start[..start.find("-->").unwrap_or_else(|| panic!("{path}: an unterminated comment"))];
         assert!(comment.contains("microsoft-ui-xaml"), "{path}: the first comment does not name microsoft-ui-xaml");
-        assert!(comment.contains("7e4b0c2096be402f51cc8f7d203ebf67cff183d0"), "{path}: the first comment does not name the commit");
+        // The rich-text port has its own pinned source inventory. Keep the
+        // document's real origin rather than labeling it with the older theme
+        // baseline merely to satisfy the general theme provenance assertion.
+        let source_commit = if *path == "/Controls/RichEditBox.xaml" {
+            "fe244ca6ac4d482712b234a9de3cf771cc6481de"
+        } else {
+            "7e4b0c2096be402f51cc8f7d203ebf67cff183d0"
+        };
+        assert!(comment.contains(source_commit), "{path}: the first comment does not name its pinned commit {source_commit}");
     }
 }

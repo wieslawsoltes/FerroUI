@@ -71,20 +71,24 @@ export class FerroDOM {
         nativeHost.style.position = "absolute";
 
         // IME
-        const inputElement = document.createElement("input");
+        // One persistent textarea preserves newlines and the document's UTF-16
+        // offsets. Replacing the node or using input[type=text] loses that state.
+        const inputElement = document.createElement("textarea");
         inputElement.id = `inputElement${containerId}`;
         inputElement.classList.add("ferroui-input-element");
         // Not in the original: the element takes the focus only when the framework gives it, so
         // that Tab leaves the view in one step instead of stopping on a hidden element.
         inputElement.tabIndex = -1;
         inputElement.autocapitalize = "none";
-        inputElement.type = "text";
+        inputElement.rows = 1;
+        inputElement.wrap = "off";
         inputElement.spellcheck = false;
         inputElement.style.padding = "0";
         inputElement.style.margin = "0";
         inputElement.style.borderWidth = "0";
         inputElement.style.position = "absolute";
         inputElement.style.overflow = "hidden";
+        inputElement.style.resize = "none";
         inputElement.style.borderStyle = "hidden";
         inputElement.style.outline = "none";
         inputElement.style.background = "transparent";
@@ -98,7 +102,6 @@ export class FerroDOM {
         // keyboard hides. The text of the element is transparent, so the size shows nowhere.
         inputElement.style.fontSize = "16px";
         inputElement.style.zIndex = "-1";
-        inputElement.onpaste = function () { return false; };
         inputElement.oncopy = function () { return false; };
         inputElement.oncut = function () { return false; };
 

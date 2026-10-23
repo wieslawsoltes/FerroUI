@@ -1,0 +1,101 @@
+<ContentPage xmlns="https://github.com/ferroui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:controls="using:ControlCatalog.Controls"
+             x:Class="ControlCatalog.Pages.RichTextPage"
+             Theme="{StaticResource ScrollPage}"
+             Header="Rich Text">
+  <StackPanel Spacing="24" MaxWidth="920">
+    <TextBlock Text="Edit formatted paragraphs, share a document between views, and flow text into linked columns."
+               TextWrapping="Wrap" />
+
+    <controls:SampleSection Header="Rich editing"
+                            Description="Select a range and use the toolbar or context menu. Undo and redo include both text and formatting changes.">
+      <StackPanel Spacing="12">
+        <WrapPanel>
+          <ToggleButton Content="Bold" FontWeight="Bold" Margin="0,0,6,6" Focusable="False"
+                        Command="{Binding #Editor.ToggleBold}"
+                        IsEnabled="{Binding #Editor.CanFormat}"
+                        IsChecked="{Binding #Editor.IsBold, Mode=OneWay}" />
+          <ToggleButton Content="Italic" FontStyle="Italic" Margin="0,0,6,6" Focusable="False"
+                        Command="{Binding #Editor.ToggleItalic}"
+                        IsEnabled="{Binding #Editor.CanFormat}"
+                        IsChecked="{Binding #Editor.IsItalic, Mode=OneWay}" />
+          <ToggleButton Margin="0,0,18,6" Focusable="False"
+                        Command="{Binding #Editor.ToggleUnderline}"
+                        IsEnabled="{Binding #Editor.CanFormat}"
+                        IsChecked="{Binding #Editor.IsUnderlined, Mode=OneWay}">
+            <TextBlock Text="Underline" TextDecorations="Underline" />
+          </ToggleButton>
+          <Button Content="Undo" Margin="0,0,6,6" Focusable="False"
+                  Command="{Binding #Editor.Undo}" IsEnabled="{Binding #Editor.CanUndo}" />
+          <Button Content="Redo" Margin="0,0,18,6" Focusable="False"
+                  Command="{Binding #Editor.Redo}" IsEnabled="{Binding #Editor.CanRedo}" />
+          <CheckBox Content="Read only" Margin="0,0,0,6"
+                    IsChecked="{Binding #Editor.IsReadOnly, Mode=TwoWay}" />
+        </WrapPanel>
+        <RichEditBox Name="Editor" Height="240" Header="Project notes"
+                     Description="Try typing, formatting a mixed selection, or pasting rich content."
+                     PlaceholderText="Write your notes here" AcceptsTab="True">
+          <Paragraph>
+            <Bold><Run Text="A shared document" /></Bold>
+          </Paragraph>
+          <Paragraph>
+            <Run Text="Start with a thought, add " />
+            <Italic><Run Text="emphasis" /></Italic>
+            <Run Text=", and " />
+            <Underline><Run Text="mark the next step" /></Underline>
+            <Run Text=". The preview below follows every edit." />
+          </Paragraph>
+          <Paragraph>
+            <Run Text="Text can include café, 日本語, العربية and emoji 😀." />
+          </Paragraph>
+        </RichEditBox>
+      </StackPanel>
+      <controls:SampleSection.Code><x:String xml:space="preserve"><![CDATA[<RichEditBox Name="Editor" Header="Project notes"
+             PlaceholderText="Write your notes here">
+  <Paragraph><Bold><Run Text="A shared document" /></Bold></Paragraph>
+</RichEditBox>
+<Button Content="Bold" Command="{Binding #Editor.ToggleBold}"
+        IsEnabled="{Binding #Editor.CanFormat}" />]]></x:String></controls:SampleSection.Code>
+    </controls:SampleSection>
+
+    <controls:SampleSection Header="Shared preview"
+                            Description="The editor and this read-only view show the same document. Formatting, text edits and undo appear in both views.">
+      <Border BorderBrush="{DynamicResource CatalogBaseMediumColor}" BorderThickness="1" Padding="16">
+        <ScrollViewer MaxHeight="220" HorizontalScrollBarVisibility="Disabled">
+          <RichTextBlock Name="Preview" Document="{Binding #Editor.Document}" TextWrapping="Wrap" />
+        </ScrollViewer>
+      </Border>
+      <controls:SampleSection.Code><x:String xml:space="preserve"><![CDATA[<RichTextBlock Document="{Binding #Editor.Document}" TextWrapping="Wrap" />]]></x:String></controls:SampleSection.Code>
+    </controls:SampleSection>
+
+    <controls:SampleSection Header="Linked columns"
+                            Description="A fixed-height text view continues in a RichTextBlockOverflow. Each column lays out the remaining text at its own width.">
+      <WrapPanel>
+        <Border BorderBrush="{DynamicResource CatalogBaseMediumColor}" BorderThickness="1"
+                Padding="16" Margin="0,0,12,12">
+          <RichTextBlock Name="Column" Width="250" Height="150" TextWrapping="Wrap"
+                         OverflowContentTarget="{Binding #Continuation}">
+            <Paragraph>
+              <Bold><Run Text="Room for the whole story" /></Bold>
+            </Paragraph>
+            <Paragraph>
+              <Run Text="Rich text can flow through several views without duplicating its content. This first column has a fixed height. The next column starts where it ends and retains paragraph and character formatting." />
+            </Paragraph>
+            <Paragraph>
+              <Italic><Run Text="Resize the catalog or switch its theme to explore how the controls adapt." /></Italic>
+            </Paragraph>
+          </RichTextBlock>
+        </Border>
+        <Border BorderBrush="{DynamicResource CatalogBaseMediumColor}" BorderThickness="1"
+                Padding="16" Margin="0,0,12,12">
+          <RichTextBlockOverflow Name="Continuation" Width="250" Height="150" />
+        </Border>
+      </WrapPanel>
+      <controls:SampleSection.Code><x:String xml:space="preserve"><![CDATA[<RichTextBlock Height="150" OverflowContentTarget="{Binding #Continuation}">
+  <Paragraph><Run Text="A story that continues into the next view..." /></Paragraph>
+</RichTextBlock>
+<RichTextBlockOverflow Name="Continuation" Height="150" />]]></x:String></controls:SampleSection.Code>
+    </controls:SampleSection>
+  </StackPanel>
+</ContentPage>

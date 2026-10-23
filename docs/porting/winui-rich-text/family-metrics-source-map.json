@@ -1,0 +1,637 @@
+{
+  "schema_version": 1,
+  "reference": {
+    "repository": "https://github.com/microsoft/microsoft-ui-xaml",
+    "commit": "fe244ca6ac4d482712b234a9de3cf771cc6481de"
+  },
+  "scope": "Requested-family line boxes, baseline-aligned object metrics and optional font fallback-scale transport; whole native classes/files remain partial.",
+  "source_files": [
+    {
+      "path": "dxaml/xcp/core/text/BlockLayout/BlockLayoutHelpers.cpp",
+      "sha256": "05a64d08ec9a06687f82fa97c6781100109bf4353f0449bf868e869e25aa89e3",
+      "bytes": 37402,
+      "url": "https://github.com/microsoft/microsoft-ui-xaml/blob/fe244ca6ac4d482712b234a9de3cf771cc6481de/dxaml/xcp/core/text/BlockLayout/BlockLayoutHelpers.cpp"
+    },
+    {
+      "path": "dxaml/xcp/core/text/BlockLayout/BlockNode.cpp",
+      "sha256": "6b01215b1f3e5889ee65f9aa383eb78c437b16b8a3cf8a09b8b76af59ec172e4",
+      "bytes": 14638,
+      "url": "https://github.com/microsoft/microsoft-ui-xaml/blob/fe244ca6ac4d482712b234a9de3cf771cc6481de/dxaml/xcp/core/text/BlockLayout/BlockNode.cpp"
+    },
+    {
+      "path": "dxaml/xcp/core/text/BlockLayout/PageHostedObjectRun.cpp",
+      "sha256": "64d3c545f900c35abd14345d99ac7cbf70b5f36d555fba0275d1d2110a96577f",
+      "bytes": 6764,
+      "url": "https://github.com/microsoft/microsoft-ui-xaml/blob/fe244ca6ac4d482712b234a9de3cf771cc6481de/dxaml/xcp/core/text/BlockLayout/PageHostedObjectRun.cpp"
+    },
+    {
+      "path": "dxaml/xcp/core/text/BlockLayout/PageHostedObjectRun.h",
+      "sha256": "0e0d478d8774581f09f84bc5761312d35da0ba6019903d5afe77a9bc83f58d2b",
+      "bytes": 1456,
+      "url": "https://github.com/microsoft/microsoft-ui-xaml/blob/fe244ca6ac4d482712b234a9de3cf771cc6481de/dxaml/xcp/core/text/BlockLayout/PageHostedObjectRun.h"
+    },
+    {
+      "path": "dxaml/xcp/core/text/BlockLayout/PageNode.cpp",
+      "sha256": "c975fbecf5f61df37241d21d0af5e2b1802d39b31ffb6ea6a6e6d56655b6de00",
+      "bytes": 34641,
+      "url": "https://github.com/microsoft/microsoft-ui-xaml/blob/fe244ca6ac4d482712b234a9de3cf771cc6481de/dxaml/xcp/core/text/BlockLayout/PageNode.cpp"
+    },
+    {
+      "path": "dxaml/xcp/core/text/BlockLayout/ParagraphNode.cpp",
+      "sha256": "c26d81c9ea85941eedb1f43aaa010ddcc2b406d74be8fc1453e2539ce85dde13",
+      "bytes": 55273,
+      "url": "https://github.com/microsoft/microsoft-ui-xaml/blob/fe244ca6ac4d482712b234a9de3cf771cc6481de/dxaml/xcp/core/text/BlockLayout/ParagraphNode.cpp"
+    },
+    {
+      "path": "dxaml/xcp/core/text/BlockLayout/ParagraphTextSource.cpp",
+      "sha256": "7e2719eb9026ce82eecbe822b0ea0145b4fcffc5de320fd10737e5c5187d22ef",
+      "bytes": 20853,
+      "url": "https://github.com/microsoft/microsoft-ui-xaml/blob/fe244ca6ac4d482712b234a9de3cf771cc6481de/dxaml/xcp/core/text/BlockLayout/ParagraphTextSource.cpp"
+    },
+    {
+      "path": "dxaml/xcp/core/text/Fonts/CompositeFontFamily.cpp",
+      "sha256": "66d3866fcd25ab993a358f5b4433f1dc30cb7bdb5331398e4f0f4b64c6d9da9d",
+      "bytes": 34866,
+      "url": "https://github.com/microsoft/microsoft-ui-xaml/blob/fe244ca6ac4d482712b234a9de3cf771cc6481de/dxaml/xcp/core/text/Fonts/CompositeFontFamily.cpp"
+    },
+    {
+      "path": "dxaml/xcp/core/text/Fonts/FontTypeface.cpp",
+      "sha256": "b8d236e324e0e4617324bdeb3e4c52602eb5fad89e5671020096ec83f900b505",
+      "bytes": 1347,
+      "url": "https://github.com/microsoft/microsoft-ui-xaml/blob/fe244ca6ac4d482712b234a9de3cf771cc6481de/dxaml/xcp/core/text/Fonts/FontTypeface.cpp"
+    },
+    {
+      "path": "dxaml/xcp/core/text/RichTextBlock/RichTextBlock.cpp",
+      "sha256": "97ae428c60128812c0a20dca3ba4fc9165c27176ff56afaf07ba250b21a624bc",
+      "bytes": 124538,
+      "url": "https://github.com/microsoft/microsoft-ui-xaml/blob/fe244ca6ac4d482712b234a9de3cf771cc6481de/dxaml/xcp/core/text/RichTextBlock/RichTextBlock.cpp"
+    },
+    {
+      "path": "dxaml/xcp/core/text/RichTextBlock/RichTextBlockOverflow.cpp",
+      "sha256": "c0894a387faee9789c13c0aeca1f979ffdc640134294a582044129f377983642",
+      "bytes": 81238,
+      "url": "https://github.com/microsoft/microsoft-ui-xaml/blob/fe244ca6ac4d482712b234a9de3cf771cc6481de/dxaml/xcp/core/text/RichTextBlock/RichTextBlockOverflow.cpp"
+    },
+    {
+      "path": "dxaml/xcp/core/text/RichTextServices/TextFormatter/InlineObjectHandlers.cpp",
+      "sha256": "7c2b761990f88e4e3626435bf0fc38369034eabcf25c01600517722e199f046c",
+      "bytes": 9183,
+      "url": "https://github.com/microsoft/microsoft-ui-xaml/blob/fe244ca6ac4d482712b234a9de3cf771cc6481de/dxaml/xcp/core/text/RichTextServices/TextFormatter/InlineObjectHandlers.cpp"
+    },
+    {
+      "path": "dxaml/xcp/core/text/RichTextServices/TextFormatter/LsRun.cpp",
+      "sha256": "3fe4b62b19bcb29cfc7fb0f87843cdd9993e359acb32e0fd507be9832a2adad9",
+      "bytes": 16760,
+      "url": "https://github.com/microsoft/microsoft-ui-xaml/blob/fe244ca6ac4d482712b234a9de3cf771cc6481de/dxaml/xcp/core/text/RichTextServices/TextFormatter/LsRun.cpp"
+    },
+    {
+      "path": "dxaml/xcp/core/text/RichTextServices/TextFormatter/LsTextLine.cpp",
+      "sha256": "e518e918754d43d5605b118d1b507744bdcd58aa89af402151ec216cad994380",
+      "bytes": 79086,
+      "url": "https://github.com/microsoft/microsoft-ui-xaml/blob/fe244ca6ac4d482712b234a9de3cf771cc6481de/dxaml/xcp/core/text/RichTextServices/TextFormatter/LsTextLine.cpp"
+    },
+    {
+      "path": "dxaml/xcp/core/text/RichTextServices/TextFormatter/TextSegment.cpp",
+      "sha256": "3cd4359b4b877d232ecaca2ebab469cdf5be0016750ce92114ade1f1fa152be8",
+      "bytes": 46131,
+      "url": "https://github.com/microsoft/microsoft-ui-xaml/blob/fe244ca6ac4d482712b234a9de3cf771cc6481de/dxaml/xcp/core/text/RichTextServices/TextFormatter/TextSegment.cpp"
+    },
+    {
+      "path": "dxaml/xcp/core/text/RichTextServices/TextFormatter/lineservicescallbacks.cpp",
+      "sha256": "ee5eaf598e3c7c1a7c8a0b09bd09ebe286f4bc04efea68d20dddf912ed7a0c82",
+      "bytes": 76155,
+      "url": "https://github.com/microsoft/microsoft-ui-xaml/blob/fe244ca6ac4d482712b234a9de3cf771cc6481de/dxaml/xcp/core/text/RichTextServices/TextFormatter/lineservicescallbacks.cpp"
+    },
+    {
+      "path": "dxaml/xcp/core/text/RichTextServices/inc/ObjectRun.h",
+      "sha256": "f66f1ceb17fa90c608a4d685c1bf6355b7279a11fd59e17d53ea2f61c0886eae",
+      "bytes": 4033,
+      "url": "https://github.com/microsoft/microsoft-ui-xaml/blob/fe244ca6ac4d482712b234a9de3cf771cc6481de/dxaml/xcp/core/text/RichTextServices/inc/ObjectRun.h"
+    }
+  ],
+  "contracts": [
+    {
+      "native_path": "dxaml/xcp/core/text/Fonts/CompositeFontFamily.cpp",
+      "native_symbol": "CCompositeFontFamily::DetermineDefaultLineMetrics",
+      "lines": [
+        279,
+        378
+      ],
+      "rust": [
+        {
+          "path": "src/FerroUI.Base/media/text_formatting/font_family_line_metrics.rs",
+          "symbols": [
+            "FontFamilyLineMetrics::new",
+            "FontFamilyLineMetrics::from_font_metrics"
+          ],
+          "sha256": "ffb37a03cb29ba1a14cbc65c4ec18b8f77147a4ccd69847a6e2979426826384f"
+        }
+      ],
+      "contract": "Resolve the regular face of the first working requested family; use its ascent, total line spacing and cap height independently of character fallback.",
+      "status": "ported_through_framework_font_manager; platform matching and missing cap-height behavior remain partial",
+      "native_sha256": "66d3866fcd25ab993a358f5b4433f1dc30cb7bdb5331398e4f0f4b64c6d9da9d",
+      "native_url": "https://github.com/microsoft/microsoft-ui-xaml/blob/fe244ca6ac4d482712b234a9de3cf771cc6481de/dxaml/xcp/core/text/Fonts/CompositeFontFamily.cpp"
+    },
+    {
+      "native_path": "dxaml/xcp/core/text/Fonts/CompositeFontFamily.cpp",
+      "native_symbol": "CCompositeFontFamily::GetTextLineBoundsMetrics",
+      "lines": [
+        421,
+        466
+      ],
+      "rust": [
+        {
+          "path": "src/FerroUI.Base/media/text_formatting/font_family_line_metrics.rs",
+          "symbols": [
+            "FontFamilyLineMetrics::from_font_metrics"
+          ],
+          "sha256": "ffb37a03cb29ba1a14cbc65c4ec18b8f77147a4ccd69847a6e2979426826384f"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_layout.rs",
+          "symbols": [
+            "RichTextLayout paragraph-family stacking ratio"
+          ],
+          "sha256": "6e35839d8dd7414291150dd19f9c5cf60dfb72499dba1067891a5066eea85132"
+        }
+      ],
+      "contract": "Full, TrimToCapHeight, TrimToBaseline and Tight family boxes.",
+      "status": "Actual native function and actual Rust helper passed 3240 source-formula cases; framework runtime passed the coordinated Base/Controls gate; see framework-family-link-validation.json.",
+      "native_sha256": "66d3866fcd25ab993a358f5b4433f1dc30cb7bdb5331398e4f0f4b64c6d9da9d",
+      "native_url": "https://github.com/microsoft/microsoft-ui-xaml/blob/fe244ca6ac4d482712b234a9de3cf771cc6481de/dxaml/xcp/core/text/Fonts/CompositeFontFamily.cpp"
+    },
+    {
+      "native_path": "dxaml/xcp/core/text/RichTextServices/TextFormatter/lineservicescallbacks.cpp",
+      "native_symbol": "RichTextServices::LineServicesGetRunTextMetrics",
+      "lines": [
+        682,
+        743
+      ],
+      "rust": [
+        {
+          "path": "src/FerroUI.Base/media/text_formatting/text_run_properties.rs",
+          "symbols": [
+            "TextRunProperties::requested_font_family",
+            "dyn TextRunProperties::with_typeface"
+          ],
+          "sha256": "1efba3678d1386caef78a44d8e51bbe678ea35900eb3a52dcd1241e6a3199a37"
+        },
+        {
+          "path": "src/FerroUI.Base/media/text_formatting/generic_text_run_properties.rs",
+          "symbols": [
+            "GenericTextRunProperties::with_requested_font_family"
+          ],
+          "sha256": "42ab0ac77328065445e0e5b4d4afd0ca517cfbe6b2fafdeca5430cf79feb84ca"
+        },
+        {
+          "path": "src/FerroUI.Base/media/text_formatting/text_line_impl.rs",
+          "symbols": [
+            "TextLineImpl::font_family_line_metrics"
+          ],
+          "sha256": "f108236035f82c9a01e276002e9f0829aac988b61b0a7f6111635d030245cc2d"
+        }
+      ],
+      "contract": "Use original requested family for text metrics; actual fallback font still shapes/draws glyphs. EOL markers contribute zero. Apply bounds per run before combining.",
+      "status": "Requested-family metrics use effective source em times optional mapped scale; existing providers default to scale one. Native TextDpi quantization and platform matching remain partial.",
+      "native_sha256": "ee5eaf598e3c7c1a7c8a0b09bd09ebe286f4bc04efea68d20dddf912ed7a0c82",
+      "native_url": "https://github.com/microsoft/microsoft-ui-xaml/blob/fe244ca6ac4d482712b234a9de3cf771cc6481de/dxaml/xcp/core/text/RichTextServices/TextFormatter/lineservicescallbacks.cpp"
+    },
+    {
+      "native_path": "dxaml/xcp/core/text/RichTextServices/TextFormatter/LsTextLine.cpp",
+      "native_symbol": "LsTextLine::CalculateLineMetrics",
+      "lines": [
+        1297,
+        1343
+      ],
+      "rust": [
+        {
+          "path": "src/FerroUI.Base/media/text_formatting/text_line_impl.rs",
+          "symbols": [
+            "TextLineImpl::create_line_metrics",
+            "TextLineImpl::font_family_line_metrics"
+          ],
+          "sha256": "f108236035f82c9a01e276002e9f0829aac988b61b0a7f6111635d030245cc2d"
+        }
+      ],
+      "contract": "Nonempty height retains maximum individual height and aggregate ascent plus descent; empty line uses default requested-family metrics.",
+      "status": "visible_contract_ported; actual Line Services aggregation/rendering not independently executed",
+      "native_sha256": "e518e918754d43d5605b118d1b507744bdcd58aa89af402151ec216cad994380",
+      "native_url": "https://github.com/microsoft/microsoft-ui-xaml/blob/fe244ca6ac4d482712b234a9de3cf771cc6481de/dxaml/xcp/core/text/RichTextServices/TextFormatter/LsTextLine.cpp"
+    },
+    {
+      "native_path": "dxaml/xcp/core/text/RichTextServices/TextFormatter/InlineObjectHandlers.cpp",
+      "native_symbol": "LineServicesEmbeddedObjectLineContext::FormatSimple",
+      "lines": [
+        118,
+        180
+      ],
+      "rust": [
+        {
+          "path": "src/FerroUI.Base/media/text_formatting/text_line_impl.rs",
+          "symbols": [
+            "TextLineImpl::font_family_line_metrics"
+          ],
+          "sha256": "f108236035f82c9a01e276002e9f0829aac988b61b0a7f6111635d030245cc2d"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_layout.rs",
+          "symbols": [
+            "RichTextLayout::embedded_controls"
+          ],
+          "sha256": "6e35839d8dd7414291150dd19f9c5cf60dfb72499dba1067891a5066eea85132"
+        }
+      ],
+      "contract": "Object contribution uses full measured height, baseline and height minus baseline independently of text line trimming. The generic callback supplies width/position and consumes HasFixedSize; the concrete PageHostedObjectRun does not consume those arguments.",
+      "status": "baseline_metric_contribution_ported; native host measurement/ownership, other alignment modes and full generic object protocol remain partial",
+      "native_sha256": "7c2b761990f88e4e3626435bf0fc38369034eabcf25c01600517722e199f046c",
+      "native_url": "https://github.com/microsoft/microsoft-ui-xaml/blob/fe244ca6ac4d482712b234a9de3cf771cc6481de/dxaml/xcp/core/text/RichTextServices/TextFormatter/InlineObjectHandlers.cpp"
+    },
+    {
+      "native_path": "dxaml/xcp/core/text/BlockLayout/BlockLayoutHelpers.cpp",
+      "native_symbol": "BlockLayoutHelpers::GetElementBaseline",
+      "lines": [
+        537,
+        567
+      ],
+      "rust": [
+        {
+          "path": "src/FerroUI.Controls/documents/inline_run.rs",
+          "symbols": [
+            "EmbeddedControlRun::measured_baseline"
+          ],
+          "sha256": "1c258c7db1bfae538b39030395163e5816a830a93859171fdad87bdc19f5f483"
+        },
+        {
+          "path": "src/FerroUI.Controls/text_block.rs",
+          "symbols": [
+            "TextBlock::cached_text_baseline"
+          ],
+          "sha256": "350a0386799ceaf12a1e43ad41318dc13379bde64eb52f0b6431adec55923f1c"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_block.rs",
+          "symbols": [
+            "RichTextBlock::cached_baseline_offset"
+          ],
+          "sha256": "7cb32ef1713a6bb8797897b96eaf28911539066a15878073c7acc4eaee39a7af"
+        }
+      ],
+      "contract": "Use nested RichTextBlock, Overflow and TextBlock first-line baseline, otherwise desired height. Framework attached nonzero override retains precedence.",
+      "status": "implemented_using_completed_caches_without_forcing_layout; framework runtime passed the coordinated Base/Controls gate; see framework-family-link-validation.json",
+      "native_sha256": "05a64d08ec9a06687f82fa97c6781100109bf4353f0449bf868e869e25aa89e3",
+      "native_url": "https://github.com/microsoft/microsoft-ui-xaml/blob/fe244ca6ac4d482712b234a9de3cf771cc6481de/dxaml/xcp/core/text/BlockLayout/BlockLayoutHelpers.cpp"
+    },
+    {
+      "native_path": "dxaml/xcp/core/text/BlockLayout/PageHostedObjectRun.cpp",
+      "native_symbol": "PageHostedObjectRun::HasFixedSize and PageHostedObjectRun::Format",
+      "lines": [
+        35,
+        124
+      ],
+      "rust": [
+        {
+          "path": "src/FerroUI.Controls/documents/inline_run.rs",
+          "symbols": [
+            "EmbeddedControlRun::with_measured_metrics"
+          ],
+          "sha256": "1c258c7db1bfae538b39030395163e5816a830a93859171fdad87bdc19f5f483"
+        },
+        {
+          "path": "src/FerroUI.Controls/documents/inline_ui_container.rs",
+          "symbols": [
+            "InlineUIContainer::measure_embedded_controls"
+          ],
+          "sha256": "d0666b9c91444304e9929d3556b2ee706daa454aa1fa10c56ac1c1d96047e9f5"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_layout.rs",
+          "symbols": [
+            "RichTextSource construction",
+            "RichTextLayout::embedded_controls"
+          ],
+          "sha256": "6e35839d8dd7414291150dd19f9c5cf60dfb72499dba1067891a5066eea85132"
+        }
+      ],
+      "contract": "The hosted control is fixed with respect to line position. Format ignores remainingParagraphWidth/currentPosition, measures using the current paragraph host Size when eligible, and caches desired width/height/baseline for later use. FerroUI freezes measured metrics and detects baseline-only changes without semantic document edits.",
+      "status": "cached_metrics_ported; native paragraph/page measurement constraints and measure-time host ownership remain partial",
+      "native_sha256": "64d3c545f900c35abd14345d99ac7cbf70b5f36d555fba0275d1d2110a96577f",
+      "native_url": "https://github.com/microsoft/microsoft-ui-xaml/blob/fe244ca6ac4d482712b234a9de3cf771cc6481de/dxaml/xcp/core/text/BlockLayout/PageHostedObjectRun.cpp"
+    },
+    {
+      "native": [
+        "dxaml/xcp/core/text/Fonts/FontTypeface.cpp:CFontTypeface::MapCharacters",
+        "dxaml/xcp/core/text/Fonts/CompositeFontFamily.cpp:CCompositeFontFamily::MapCharacters (889-973)"
+      ],
+      "status": "functional optional transport; existing production providers use legacy scale one",
+      "evidence": [
+        "font_fallback_scale_mapping_requires_positive_finite_scale_and_nonempty_prefix",
+        "font_fallback_scale_absent_provider_keeps_legacy_matching_at_unit_scale",
+        "font_fallback_scale_default_family_placeholder_resolves_before_provider_mapping"
+      ],
+      "targets": [
+        "platform/i_font_manager_impl.rs:IFontManagerImpl::font_fallback_mapper",
+        "platform/i_font_fallback_mapper.rs:IFontFallbackMapper::try_map_characters",
+        "media/font_fallback_mapping.rs:FontFallbackMapping"
+      ],
+      "source_scope": "optional fallback-scale transport",
+      "framework_test_execution": "PASS in coordinated full Base (4470) and Controls (5251) suites; exact source/execution record: framework-family-link-validation.json. Native platform/pixel parity is separate."
+    },
+    {
+      "native": [
+        "dxaml/xcp/core/text/RichTextServices/TextFormatter/TextSegment.cpp:TextSegment::AnalyzeFonts (755-818)"
+      ],
+      "status": "actual face plus scale split shared shaping; stricter safe grapheme-prefix validation retained",
+      "evidence": [
+        "font_fallback_scale_different_scales_split_shaping_even_with_the_same_face",
+        "font_fallback_scale_distinct_actual_faces_with_equal_metadata_do_not_merge",
+        "font_fallback_scale_identical_face_and_scale_keep_contiguous_ligature_grouping",
+        "font_fallback_scale_invalid_prefixes_preserve_whole_graphemes_and_later_mappings",
+        "font_fallback_scale_declined_uncovered_and_overflowing_mappings_make_bounded_progress"
+      ],
+      "targets": [
+        "media/text_formatting/text_characters.rs:TextCharacters::create_shapeable_run_with_mapping",
+        "media/text_formatting/text_formatter_impl.rs:TextFormatterImpl::can_shape_together"
+      ],
+      "source_scope": "optional fallback-scale transport",
+      "framework_test_execution": "PASS in coordinated full Base (4470) and Controls (5251) suites; exact source/execution record: framework-family-link-validation.json. Native platform/pixel parity is separate."
+    },
+    {
+      "native": [
+        "dxaml/xcp/core/text/RichTextServices/TextFormatter/lineservicescallbacks.cpp:LineServicesGetRunTextMetrics (724-725)"
+      ],
+      "status": "source-em times mapped scale reaches opt-in requested-family metrics",
+      "evidence": [
+        "font_fallback_scale_effective_em_reaches_glyphs_and_each_requested_family_bounds_mode",
+        "rich_text_fallback_scale_reaches_real_bounds_caret_and_ranges_without_changing_source_font_size"
+      ],
+      "targets": [
+        "media/text_formatting/text_run_properties.rs:TextRunProperties::effective_font_rendering_em_size",
+        "media/text_formatting/text_line_impl.rs:TextLineImpl::font_family_line_metrics"
+      ],
+      "source_scope": "optional fallback-scale transport",
+      "framework_test_execution": "PASS in coordinated full Base (4470) and Controls (5251) suites; exact source/execution record: framework-family-link-validation.json. Native platform/pixel parity is separate."
+    },
+    {
+      "native": [
+        "dxaml/xcp/core/text/RichTextServices/TextFormatter/lineservicescallbacks.cpp:glyph em size uses (498,1094,1584,1651)"
+      ],
+      "status": "effective em propagated through shared glyph/shaper APIs; standalone symbols consume supplied scale but do not query the mapper",
+      "evidence": [
+        "font_fallback_scale_effective_em_reaches_glyphs_and_each_requested_family_bounds_mode",
+        "font_fallback_scale_cached_and_forked_wrapped_runs_preserve_scale_without_remapping"
+      ],
+      "targets": [
+        "media/text_formatting/text_formatter_impl.rs:TextShaperOptions construction",
+        "media/text_formatting/shaped_text_run.rs:ShapedTextRun::new",
+        "media/text_formatting/text_formatter.rs:TextFormatter::create_symbol"
+      ],
+      "source_scope": "optional fallback-scale transport",
+      "framework_test_execution": "PASS in coordinated full Base (4470) and Controls (5251) suites; exact source/execution record: framework-family-link-validation.json. Native platform/pixel parity is separate."
+    },
+    {
+      "native": [
+        "dxaml/xcp/core/text/RichTextServices/TextFormatter/lineservicescallbacks.cpp:underline/strikethrough metric scale (783,822)",
+        "dxaml/xcp/core/text/RichTextServices/TextFormatter/lineservicescallbacks.cpp:character-spacing scale (1449,1459)"
+      ],
+      "status": "source em remains explicit; glyph/decoration/spacing scale applied once",
+      "evidence": [
+        "font_fallback_scale_decorations_letter_spacing_and_copied_properties_apply_scale_once"
+      ],
+      "targets": [
+        "media/text_formatting/shaped_text_run.rs:TextMetrics construction",
+        "media/text_formatting/text_formatter_impl.rs:scaled letter spacing",
+        "media/text_decoration.rs:existing TextMetrics consumer"
+      ],
+      "source_scope": "optional fallback-scale transport",
+      "framework_test_execution": "PASS in coordinated full Base (4470) and Controls (5251) suites; exact source/execution record: framework-family-link-validation.json. Native platform/pixel parity is separate."
+    },
+    {
+      "native": [
+        "dxaml/xcp/core/text/Fonts/CompositeFontFamily.cpp:CCompositeFontFamily::MapCharacters"
+      ],
+      "status": "partial provider/collection domain; configured fallback/alias/keyed collection precedence preserved; existing backends have no mapped scale output",
+      "evidence": [
+        "font_fallback_scale_configured_fallbacks_and_aliases_retain_existing_precedence",
+        "font_fallback_scale_keyed_embedded_and_composite_families_do_not_bypass_collection_rules",
+        "font_fallback_scale_default_formatter_never_queries_optional_mapper"
+      ],
+      "targets": [
+        "media/font_manager.rs:FontManager::map_characters",
+        "src/Skia/FerroUI.Skia/font_manager_impl.rs:try_match_character",
+        "src/Vello/FerroUI.Vello/font_manager_impl.rs:try_match_character"
+      ],
+      "source_scope": "optional fallback-scale transport",
+      "framework_test_execution": "PASS in coordinated full Base (4470) and Controls (5251) suites; exact source/execution record: framework-family-link-validation.json. Native platform/pixel parity is separate."
+    },
+    {
+      "native": [],
+      "status": "FerroUI ownership integration; no new shared cache/generation semantics",
+      "evidence": [
+        "font_fallback_scale_provider_reentry_can_query_fonts_and_format_an_independent_line",
+        "rich_text_fallback_scale_source_mutation_during_mapping_retires_the_outer_layout",
+        "rich_text_fallback_scale_reentry_preserves_newer_cache_and_does_not_mutate_document"
+      ],
+      "targets": [
+        "media/font_manager.rs:provider callback borrow boundary",
+        "src/FerroUI.Controls/rich_text_block.rs:existing source/layout generation checks"
+      ],
+      "source_scope": "optional fallback-scale transport",
+      "framework_test_execution": "PASS in coordinated full Base (4470) and Controls (5251) suites; exact source/execution record: framework-family-link-validation.json. Native platform/pixel parity is separate."
+    },
+    {
+      "native_path": "dxaml/xcp/core/text/RichTextServices/inc/ObjectRun.h",
+      "native_symbol": "ObjectRun::HasFixedSize and ObjectRun::Format",
+      "lines": [
+        23,
+        55
+      ],
+      "rust": [],
+      "contract": "Generic object capability permits position-dependent metrics; it is not a requirement for fixed-size PageHostedObjectRun.",
+      "status": "source_verified; native hosted measurement/lifecycle remains partial in the current rich implementation",
+      "native_sha256": "f66f1ceb17fa90c608a4d685c1bf6355b7279a11fd59e17d53ea2f61c0886eae",
+      "native_url": "https://github.com/microsoft/microsoft-ui-xaml/blob/fe244ca6ac4d482712b234a9de3cf771cc6481de/dxaml/xcp/core/text/RichTextServices/inc/ObjectRun.h"
+    },
+    {
+      "native_path": "dxaml/xcp/core/text/BlockLayout/ParagraphTextSource.cpp",
+      "native_symbol": "ParagraphTextSource object-run construction and GetEmbeddedElementHost",
+      "lines": [
+        124,
+        303
+      ],
+      "rust": [
+        {
+          "path": "src/FerroUI.Controls/rich_text_layout.rs",
+          "symbols": [
+            "RichTextSource and RichTextLayout::new"
+          ],
+          "sha256": "6e35839d8dd7414291150dd19f9c5cf60dfb72499dba1067891a5066eea85132"
+        }
+      ],
+      "contract": "InlineUIContainer is represented by PageHostedObjectRun and resolves its current paragraph node as host.",
+      "status": "source_verified; native hosted measurement/lifecycle remains partial in the current rich implementation",
+      "native_sha256": "7e2719eb9026ce82eecbe822b0ea0145b4fcffc5de320fd10737e5c5187d22ef",
+      "native_url": "https://github.com/microsoft/microsoft-ui-xaml/blob/fe244ca6ac4d482712b234a9de3cf771cc6481de/dxaml/xcp/core/text/BlockLayout/ParagraphTextSource.cpp"
+    },
+    {
+      "native_path": "dxaml/xcp/core/text/BlockLayout/ParagraphNode.cpp",
+      "native_symbol": "ParagraphNode::CanAddElement and GetAvailableMeasureSize",
+      "lines": [
+        89,
+        193
+      ],
+      "rust": [
+        {
+          "path": "src/FerroUI.Controls/rich_text_block.rs",
+          "symbols": [
+            "LayoutableImpl::measure_override and arrange_override"
+          ],
+          "sha256": "7cb32ef1713a6bb8797897b96eaf28911539066a15878073c7acc4eaee39a7af"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_layout.rs",
+          "symbols": [
+            "RichTextSource and RichTextLayout::new"
+          ],
+          "sha256": "6e35839d8dd7414291150dd19f9c5cf60dfb72499dba1067891a5066eea85132"
+        }
+      ],
+      "contract": "The paragraph permits new host attachment only during measure and returns its stored available Size; the size is constant during formatting of that paragraph fragment.",
+      "status": "source_verified; native hosted measurement/lifecycle remains partial in the current rich implementation",
+      "native_sha256": "c26d81c9ea85941eedb1f43aaa010ddcc2b406d74be8fc1453e2539ce85dde13",
+      "native_url": "https://github.com/microsoft/microsoft-ui-xaml/blob/fe244ca6ac4d482712b234a9de3cf771cc6481de/dxaml/xcp/core/text/BlockLayout/ParagraphNode.cpp"
+    },
+    {
+      "native_path": "dxaml/xcp/core/text/BlockLayout/BlockNode.cpp",
+      "native_symbol": "BlockNode::Measure",
+      "lines": [
+        61,
+        120
+      ],
+      "rust": [
+        {
+          "path": "src/FerroUI.Controls/rich_text_layout.rs",
+          "symbols": [
+            "RichTextSource and RichTextLayout::new"
+          ],
+          "sha256": "6e35839d8dd7414291150dd19f9c5cf60dfb72499dba1067891a5066eea85132"
+        }
+      ],
+      "contract": "Subtract collapsed margins and store availableSize before entering MeasureCore; same-node measure reentry is unsupported.",
+      "status": "source_verified; native hosted measurement/lifecycle remains partial in the current rich implementation",
+      "native_sha256": "6b01215b1f3e5889ee65f9aa383eb78c437b16b8a3cf8a09b8b76af59ec172e4",
+      "native_url": "https://github.com/microsoft/microsoft-ui-xaml/blob/fe244ca6ac4d482712b234a9de3cf771cc6481de/dxaml/xcp/core/text/BlockLayout/BlockNode.cpp"
+    },
+    {
+      "native_path": "dxaml/xcp/core/text/BlockLayout/PageNode.cpp",
+      "native_symbol": "PageNode::MeasureCore",
+      "lines": [
+        352,
+        527
+      ],
+      "rust": [
+        {
+          "path": "src/FerroUI.Controls/rich_text_block.rs",
+          "symbols": [
+            "LayoutableImpl::measure_override and arrange_override"
+          ],
+          "sha256": "7cb32ef1713a6bb8797897b96eaf28911539066a15878073c7acc4eaee39a7af"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_layout.rs",
+          "symbols": [
+            "RichTextSource and RichTextLayout::new"
+          ],
+          "sha256": "6e35839d8dd7414291150dd19f9c5cf60dfb72499dba1067891a5066eea85132"
+        }
+      ],
+      "contract": "Subtract page padding, pass each paragraph the current remaining page Size, then subtract accepted paragraph height before the next block.",
+      "status": "source_verified; native hosted measurement/lifecycle remains partial in the current rich implementation",
+      "native_sha256": "c975fbecf5f61df37241d21d0af5e2b1802d39b31ffb6ea6a6e6d56655b6de00",
+      "native_url": "https://github.com/microsoft/microsoft-ui-xaml/blob/fe244ca6ac4d482712b234a9de3cf771cc6481de/dxaml/xcp/core/text/BlockLayout/PageNode.cpp"
+    },
+    {
+      "native_path": "dxaml/xcp/core/text/RichTextBlock/RichTextBlock.cpp",
+      "native_symbol": "CRichTextBlock::MeasureOverride",
+      "lines": [
+        1326,
+        1377
+      ],
+      "rust": [
+        {
+          "path": "src/FerroUI.Controls/rich_text_block.rs",
+          "symbols": [
+            "LayoutableImpl::measure_override and arrange_override"
+          ],
+          "sha256": "7cb32ef1713a6bb8797897b96eaf28911539066a15878073c7acc4eaee39a7af"
+        },
+        {
+          "path": "src/FerroUI.Controls/documents/inline_ui_container.rs",
+          "symbols": [
+            "InlineUIContainer::measure_embedded_controls"
+          ],
+          "sha256": "d0666b9c91444304e9929d3556b2ee706daa454aa1fa10c56ac1c1d96047e9f5"
+        }
+      ],
+      "contract": "Remeasure dirty existing children using their previous host constraint, then measure this page with the control available Size.",
+      "status": "source_verified; native hosted measurement/lifecycle remains partial in the current rich implementation",
+      "native_sha256": "97ae428c60128812c0a20dca3ba4fc9165c27176ff56afaf07ba250b21a624bc",
+      "native_url": "https://github.com/microsoft/microsoft-ui-xaml/blob/fe244ca6ac4d482712b234a9de3cf771cc6481de/dxaml/xcp/core/text/RichTextBlock/RichTextBlock.cpp"
+    },
+    {
+      "native_path": "dxaml/xcp/core/text/RichTextBlock/RichTextBlockOverflow.cpp",
+      "native_symbol": "CRichTextBlockOverflow::MeasureOverride",
+      "lines": [
+        784,
+        847
+      ],
+      "rust": [
+        {
+          "path": "src/FerroUI.Controls/rich_text_block.rs",
+          "symbols": [
+            "LayoutableImpl::measure_override and arrange_override"
+          ],
+          "sha256": "7cb32ef1713a6bb8797897b96eaf28911539066a15878073c7acc4eaee39a7af"
+        },
+        {
+          "path": "src/FerroUI.Controls/documents/inline_ui_container.rs",
+          "symbols": [
+            "InlineUIContainer::measure_embedded_controls"
+          ],
+          "sha256": "d0666b9c91444304e9929d3556b2ee706daa454aa1fa10c56ac1c1d96047e9f5"
+        }
+      ],
+      "contract": "An overflow measures its own page with its own available Size and the preceding page break; embedded controls do not inherit the head page constraint.",
+      "status": "source_verified; native hosted measurement/lifecycle remains partial in the current rich implementation",
+      "native_sha256": "c0894a387faee9789c13c0aeca1f979ffdc640134294a582044129f377983642",
+      "native_url": "https://github.com/microsoft/microsoft-ui-xaml/blob/fe244ca6ac4d482712b234a9de3cf771cc6481de/dxaml/xcp/core/text/RichTextBlock/RichTextBlockOverflow.cpp"
+    }
+  ],
+  "current_provider_sources": [
+    {
+      "path": "src/Skia/FerroUI.Skia/font_manager_impl.rs",
+      "sha256": "8981ca6bc37adfd44f532252394944782bfb84db3122fc89a6f21ae6416ff93e",
+      "contract": "No optional fallback-scale provider; matched glyph faces retain default scale one."
+    },
+    {
+      "path": "src/Vello/FerroUI.Vello/font_manager_impl.rs",
+      "sha256": "630ec8535a1c7c73a8a04ea37714efc37e21675474010b58f0c64b887fdb1ede",
+      "contract": "No optional fallback-scale provider; matched glyph faces retain default scale one."
+    },
+    {
+      "path": "src/HarfBuzz/FerroUI.HarfBuzz/harf_buzz_text_shaper.rs",
+      "sha256": "139a7b5728d41e3e0353b7d640919a10a153052195084e6e1a9182832eb18ef5",
+      "contract": "Consumes the effective em in the shared shaping options; does not supply fallback mappings."
+    }
+  ],
+  "provider_boundary": "Skia and Vello only match faces and inherit no optional scale mapper. No separate DirectWrite font manager or measured native nonunit-scale font/input sample is provided.",
+  "formula_evidence": "family-metrics-formula.json",
+  "runtime_evidence": "framework-family-link-validation.json: coordinated full Base 4470 and Controls 5251 gates, including all 43 new metrics/scale regressions. Source-formula and framework results do not establish native rendering parity.",
+  "remaining_boundaries": [
+    "DirectWrite composite family construction, platform font matching/downloading and opaque missing-cap-height behavior.",
+    "Production nonunit-scale mapping, native number substitution, TextDpi/LineServices rounding and native pixel equivalence.",
+    "Native paragraph/page object measurement constraints and measure-time host ownership, non-Baseline alignment parity and the native two-position object representation.",
+    "Configured keyed/embedded/composite families keep the existing resolver rather than being offered to a system-only mapper.",
+    "Existing attached TextLineBounds inheritance and baseline-override semantics remain FerroUI policies."
+  ],
+  "hosted_object_measurement_boundary": "Current rich measurement uses the head inner width and infinite height before source construction; shared captured runs are not remeasured for paragraph margins, finite remaining page height or an overflow page's own constraints. Native PageHostedObjectRun is fixed within each line and ignores generic width/position inputs. Native measure-time attachment and cached-host eligibility are separate from FerroUI arrange-time visual parenting."
+}

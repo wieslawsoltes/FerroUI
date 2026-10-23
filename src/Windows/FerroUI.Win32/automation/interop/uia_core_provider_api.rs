@@ -9,8 +9,8 @@
 //! there is no automation core: a call without a recorder fails with a
 //! message that says so.
 
-use super::{IRawElementProviderSimple, StructureChangeType};
-use crate::automation::marshalling::VariantValue;
+use super::{IRawElementProviderSimple, StructureChangeType, TextEditChangeType};
+use crate::automation::marshalling::{SafeArrayMarshaller, SafeArrayRef, VariantValue};
 use ferroui_microcom::{ComPtr, HResult};
 use std::cell::RefCell;
 use std::rc::Rc;
@@ -32,6 +32,14 @@ pub(crate) trait IUiaCoreProviderApi {
     /// The provider of the system for a window.
     fn uia_host_provider_from_hwnd(&self, hwnd: isize) -> Result<Option<ComPtr<IRawElementProviderSimple>>, HResult>;
     fn uia_raise_automation_event(&self, provider: Option<&IRawElementProviderSimple>, id: i32) -> i32;
+    /// Borrows one-dimensional VT_BSTR data until this synchronous call returns.
+    /// An implementation may retain only its own copy of the strings.
+    fn uia_raise_text_edit_text_changed_event(
+        &self,
+        provider: Option<&IRawElementProviderSimple>,
+        change_type: TextEditChangeType,
+        changed_data: SafeArrayRef,
+    ) -> i32;
     fn uia_raise_automation_property_changed_event(
         &self,
         provider: Option<&IRawElementProviderSimple>,
@@ -96,6 +104,37 @@ impl UiaCoreProviderApi {
         Self::with(|api| api.uia_raise_automation_event(provider, id))
     }
 
+    pub fn uia_raise_text_edit_text_changed_event(
+        provider: Option<&IRawElementProviderSimple>,
+        change_type: TextEditChangeType,
+        changed_data: &[String],
+    ) -> i32 {
+        // Match WinUI's CUIAWindow::UIARaiseTextEditTextChangedEvent: None
+        // is a no-op, and its known nonempty causes are validated before
+        // forwarding a SAFEARRAY(BSTR) to the system.
+        match change_type {
+            TextEditChangeType::None => return 0,
+            TextEditChangeType::AutoCorrect
+            | TextEditChangeType::Composition
+            | TextEditChangeType::CompositionFinalized => {}
+            _ => return ferroui_microcom::E_INVALIDARG as i32,
+        }
+        struct ChangedData(SafeArrayRef);
+        impl Drop for ChangedData {
+            fn drop(&mut self) {
+                // SAFETY: this is the sole owning guard for the array. The
+                // synchronous native call borrows it and copies the payload.
+                unsafe { SafeArrayMarshaller::<String>::free(self.0) };
+            }
+        }
+        let data = match SafeArrayMarshaller::<String>::convert_to_unmanaged(Some(changed_data)) {
+            Ok(array) => ChangedData(array),
+            Err(error) => return error.0,
+        };
+        Self::with(|api| api.uia_raise_text_edit_text_changed_event(provider, change_type, data.0))
+    }
+
+
     pub fn uia_raise_automation_property_changed_event(
         provider: Option<&IRawElementProviderSimple>,
         id: i32,
@@ -120,8 +159,8 @@ impl UiaCoreProviderApi {
 
 #[cfg(windows)]
 mod system {
-    use super::{ComPtr, HResult, IRawElementProviderSimple, IUiaCoreProviderApi, StructureChangeType, VariantValue};
-    use crate::automation::marshalling::{ComVariant, ComVariantMarshaller};
+    use super::{ComPtr, HResult, IRawElementProviderSimple, IUiaCoreProviderApi, SafeArrayRef, StructureChangeType, TextEditChangeType, VariantValue};
+    use crate::automation::marshalling::{ComVariant, ComVariantMarshaller, SAFEARRAY};
     use std::ffi::c_void;
 
     #[cfg_attr(not(target_arch = "x86"), link(name = "uiautomationcore", kind = "raw-dylib"))]
@@ -132,6 +171,11 @@ mod system {
         fn UiaReturnRawElementProvider(hwnd: isize, w_param: usize, l_param: isize, el: *mut c_void) -> isize;
         fn UiaHostProviderFromHwnd(hwnd: isize, provider: *mut *mut IRawElementProviderSimple) -> i32;
         fn UiaRaiseAutomationEvent(provider: *mut c_void, id: i32) -> i32;
+        fn UiaRaiseTextEditTextChangedEvent(
+            provider: *mut c_void,
+            change_type: i32,
+            changed_data: *mut SAFEARRAY,
+        ) -> i32;
         fn UiaRaiseAutomationPropertyChangedEvent(
             provider: *mut c_void,
             id: i32,
@@ -187,6 +231,18 @@ mod system {
             unsafe { UiaRaiseAutomationEvent(raw(provider), id) }
         }
 
+        fn uia_raise_text_edit_text_changed_event(
+            &self,
+            provider: Option<&IRawElementProviderSimple>,
+            change_type: TextEditChangeType,
+            changed_data: SafeArrayRef,
+        ) -> i32 {
+            // SAFETY: the provider is live through this synchronous call.
+            // UiaCoreProviderApi validates the cause and owns the one-dimensional
+            // VT_BSTR array until the system has copied its changed-data strings.
+            unsafe { UiaRaiseTextEditTextChangedEvent(raw(provider), change_type.0, changed_data.as_ptr()) }
+        }
+
         fn uia_raise_automation_property_changed_event(
             &self,
             provider: Option<&IRawElementProviderSimple>,
@@ -234,7 +290,7 @@ mod system {
 
 #[cfg(not(windows))]
 mod system {
-    use super::{ComPtr, HResult, IRawElementProviderSimple, IUiaCoreProviderApi, StructureChangeType, VariantValue};
+    use super::{ComPtr, HResult, IRawElementProviderSimple, IUiaCoreProviderApi, SafeArrayRef, StructureChangeType, TextEditChangeType, VariantValue};
 
     /// No automation core: this host is not Windows.
     pub(super) struct System;
@@ -257,6 +313,15 @@ mod system {
         }
 
         fn uia_raise_automation_event(&self, _: Option<&IRawElementProviderSimple>, _: i32) -> i32 {
+            not_windows()
+        }
+
+        fn uia_raise_text_edit_text_changed_event(
+            &self,
+            _: Option<&IRawElementProviderSimple>,
+            _: TextEditChangeType,
+            _: SafeArrayRef,
+        ) -> i32 {
             not_windows()
         }
 

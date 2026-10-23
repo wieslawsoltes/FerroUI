@@ -24,6 +24,7 @@
         <MergeResourceInclude Source="ferres://FerroUI.Themes.Simple/Controls/Carousel.xaml" />
         <MergeResourceInclude Source="ferres://FerroUI.Themes.Simple/Controls/WindowDrawnDecorations.xaml" />
         <MergeResourceInclude Source="ferres://FerroUI.Themes.Simple/Controls/TextBox.xaml" />
+        <MergeResourceInclude Source="ferres://FerroUI.Themes.Simple/Controls/RichEditBox.xaml" />
         <MergeResourceInclude Source="ferres://FerroUI.Themes.Simple/Controls/AutoCompleteBox.xaml" />
         <MergeResourceInclude Source="ferres://FerroUI.Themes.Simple/Controls/DataValidationErrors.xaml" />
         <MergeResourceInclude Source="ferres://FerroUI.Themes.Simple/Controls/FlyoutPresenter.xaml" />

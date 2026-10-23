@@ -1,0 +1,129 @@
+<!--
+  RichEditBox presentation port from microsoft-ui-xaml, commit
+  fe244ca6ac4d482712b234a9de3cf771cc6481de:
+    controls/dev/CommonStyles/RichEditBox_themeresources.xaml
+    controls/dev/CommandBarFlyout/TextCommandBarFlyout.cpp
+  Copyright (c) Microsoft Corporation. MIT License; see NOTICE.md.
+
+  The existing FerroUI RichEditBox installs its persistent rich presenter in
+  ContentElement; the template never creates another document or text editor.
+  Header, placeholder and description remain normal FerroUI content controls.
+  CommonStates use selectors and dynamic resources. The owned command flyout
+  retains the focused appearance through :flyout-focus. ScrollViewer supplies
+  FerroUI's logical scrolling and raw automation view. The native command bar
+  is expressed through the framework MenuFlyout. Native lazy template-part
+  allocation, touch selection flyout and OS focus reveal remain separate.
+  Simple uses the established palette and density resources of its theme.
+-->
+<ResourceDictionary xmlns="https://github.com/ferroui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    x:ClassModifier="internal">
+  <Thickness x:Key="RichEditBoxTopHeaderMargin">0,0,0,4</Thickness>
+  <x:String x:Key="StringRichEditUndoText">Undo</x:String>
+  <x:String x:Key="StringRichEditRedoText">Redo</x:String>
+  <x:String x:Key="StringRichEditSelectAllText">Select all</x:String>
+  <x:String x:Key="StringRichEditBoldText">Bold</x:String>
+  <x:String x:Key="StringRichEditItalicText">Italic</x:String>
+  <x:String x:Key="StringRichEditUnderlineText">Underline</x:String>
+  <MenuFlyout x:Key="SimpleRichEditBoxContextFlyout">
+    <MenuItem Header="{DynamicResource StringTextFlyoutCutText}" Command="{Binding $parent[RichEditBox].Cut}" IsEnabled="{Binding $parent[RichEditBox].CanCut}" InputGesture="{x:Static TextBox.CutGesture}" />
+    <MenuItem Header="{DynamicResource StringTextFlyoutCopyText}" Command="{Binding $parent[RichEditBox].Copy}" IsEnabled="{Binding $parent[RichEditBox].CanCopy}" InputGesture="{x:Static TextBox.CopyGesture}" />
+    <MenuItem Header="{DynamicResource StringTextFlyoutPasteText}" Command="{Binding $parent[RichEditBox].Paste}" IsEnabled="{Binding $parent[RichEditBox].CanPaste}" InputGesture="{x:Static TextBox.PasteGesture}" />
+    <MenuItem Header="{DynamicResource StringRichEditUndoText}" Command="{Binding $parent[RichEditBox].Undo}" IsEnabled="{Binding $parent[RichEditBox].CanUndo}" />
+    <MenuItem Header="{DynamicResource StringRichEditRedoText}" Command="{Binding $parent[RichEditBox].Redo}" IsEnabled="{Binding $parent[RichEditBox].CanRedo}" />
+    <MenuItem Header="{DynamicResource StringRichEditSelectAllText}" Command="{Binding $parent[RichEditBox].SelectAll}" />
+    <MenuItem Header="{DynamicResource StringRichEditBoldText}"
+              Command="{Binding $parent[RichEditBox].ToggleBold}"
+              IsEnabled="{Binding $parent[RichEditBox].CanFormat}"
+              ToggleType="CheckBox"
+              IsChecked="{Binding $parent[RichEditBox].IsBold, Mode=OneWay}" />
+    <MenuItem Header="{DynamicResource StringRichEditItalicText}"
+              Command="{Binding $parent[RichEditBox].ToggleItalic}"
+              IsEnabled="{Binding $parent[RichEditBox].CanFormat}"
+              ToggleType="CheckBox"
+              IsChecked="{Binding $parent[RichEditBox].IsItalic, Mode=OneWay}" />
+    <MenuItem Header="{DynamicResource StringRichEditUnderlineText}"
+              Command="{Binding $parent[RichEditBox].ToggleUnderline}"
+              IsEnabled="{Binding $parent[RichEditBox].CanFormat}"
+              ToggleType="CheckBox"
+              IsChecked="{Binding $parent[RichEditBox].IsUnderlined, Mode=OneWay}" />
+  </MenuFlyout>
+
+  <ControlTheme x:Key="{x:Type RichEditBox}" TargetType="RichEditBox">
+    <Setter Property="Foreground" Value="{DynamicResource ThemeForegroundBrush}" />
+    <Setter Property="Background" Value="{DynamicResource ThemeBackgroundBrush}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource ThemeBorderMidBrush}" />
+    <Setter Property="BorderThickness" Value="{DynamicResource ThemeBorderThickness}" />
+    <Setter Property="CaretBrush" Value="{DynamicResource ThemeForegroundBrush}" />
+    <Setter Property="SelectionHighlightColor" Value="{DynamicResource HighlightBrush}" />
+    <Setter Property="PlaceholderForeground" Value="{DynamicResource ThemeForegroundLowBrush}" />
+    <Setter Property="SelectionForegroundBrush" Value="{DynamicResource HighlightForegroundBrush}" />
+    <Setter Property="Padding" Value="4" />
+    <Setter Property="TextWrapping" Value="Wrap" />
+    <Setter Property="ScrollViewer.HorizontalScrollBarVisibility" Value="Auto" />
+    <Setter Property="ScrollViewer.VerticalScrollBarVisibility" Value="Auto" />
+    <Setter Property="ScrollViewer.IsDeferredScrollingEnabled" Value="False" />
+    <Setter Property="ScrollViewer.IsScrollChainingEnabled" Value="True" />
+    <Setter Property="FocusAdorner" Value="{x:Null}" />
+    <Setter Property="ContextFlyout" Value="{StaticResource SimpleRichEditBoxContextFlyout}" />
+    <Setter Property="Template">
+      <ControlTemplate>
+        <Grid RowDefinitions="Auto,*,Auto">
+          <ContentPresenter x:Name="HeaderContentPresenter"
+                            Grid.Row="0"
+                            Margin="{DynamicResource RichEditBoxTopHeaderMargin}"
+                            Content="{TemplateBinding Header}"
+                            ContentTemplate="{TemplateBinding HeaderTemplate}"
+                            Foreground="{DynamicResource ThemeForegroundBrush}"
+                            FontWeight="Normal"
+                            TextWrapping="Wrap"
+                            VerticalAlignment="Top" />
+          <Border x:Name="BorderElement"
+                  Grid.Row="1"
+                  Background="{TemplateBinding Background}"
+                  BorderBrush="{TemplateBinding BorderBrush}"
+                  BorderThickness="{TemplateBinding BorderThickness}"
+                  CornerRadius="{TemplateBinding CornerRadius}" />
+          <ScrollViewer x:Name="ContentElement"
+                        Grid.Row="1"
+                        Margin="{TemplateBinding BorderThickness}"
+                        Padding="{TemplateBinding Padding}"
+                        Foreground="{TemplateBinding Foreground}"
+                        HorizontalScrollBarVisibility="{TemplateBinding (ScrollViewer.HorizontalScrollBarVisibility)}"
+                        VerticalScrollBarVisibility="{TemplateBinding (ScrollViewer.VerticalScrollBarVisibility)}"
+                        IsDeferredScrollingEnabled="{TemplateBinding (ScrollViewer.IsDeferredScrollingEnabled)}"
+                        IsScrollChainingEnabled="{TemplateBinding (ScrollViewer.IsScrollChainingEnabled)}"
+                        Focusable="False"
+                        AutomationProperties.AccessibilityView="Raw">
+            <ScrollViewer.Styles>
+              <Style Selector="ScrollContentPresenter#PART_ContentPresenter">
+                <Setter Property="Cursor" Value="IBeam" />
+              </Style>
+            </ScrollViewer.Styles>
+          </ScrollViewer>
+          <TextBlock x:Name="PlaceholderTextContentPresenter"
+                     Grid.Row="1"
+                     Margin="{TemplateBinding BorderThickness}"
+                     Padding="{TemplateBinding Padding}"
+                     Foreground="{TemplateBinding PlaceholderForeground}"
+                     Text="{TemplateBinding PlaceholderText}"
+                     TextAlignment="{TemplateBinding TextAlignment}"
+                     TextWrapping="{TemplateBinding TextWrapping}"
+                     IsHitTestVisible="False" />
+          <ContentPresenter x:Name="DescriptionPresenter"
+                            Grid.Row="2"
+                            Content="{TemplateBinding Description}"
+                            Foreground="{DynamicResource ThemeForegroundLowBrush}"
+                            TextWrapping="Wrap"
+                            AutomationProperties.AccessibilityView="Raw" />
+        </Grid>
+      </ControlTemplate>
+    </Setter>
+    <Style Selector="^:pointerover /template/ Border#BorderElement, ^:focus /template/ Border#BorderElement, ^:flyout-focus /template/ Border#BorderElement">
+      <Setter Property="BorderBrush" Value="{DynamicResource ThemeBorderHighBrush}" />
+    </Style>
+    <Style Selector="^:disabled /template/ Grid">
+      <Setter Property="Opacity" Value="{DynamicResource ThemeDisabledOpacity}" />
+    </Style>
+  </ControlTheme>
+</ResourceDictionary>

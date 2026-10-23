@@ -136,6 +136,7 @@ document_tests! {
     controls_separator => "/Controls/Separator.xaml";
     controls_text_block => "/Controls/TextBlock.xaml";
     controls_text_box => "/Controls/TextBox.xaml";
+    controls_rich_edit_box => "/Controls/RichEditBox.xaml";
     controls_text_selection_handle => "/Controls/TextSelectionHandle.xaml";
     controls_theme_variant_scope => "/Controls/ThemeVariantScope.xaml";
     controls_thumb => "/Controls/Thumb.xaml";

@@ -94,8 +94,8 @@ fn every_declaration_of_this_module_is_registered() {
         .count();
     let types = declared_types();
     // `TextLayoutRoundingPlacement` declares its metadata next to the type and is registered
-    // with the values.
-    assert_eq!(types.len(), declared + 1);
+    // with the values. The WinUI-derived rich text declarations are colocated too.
+    assert_eq!(types.len(), declared + 1 + super::RICH_TEXT_TYPES.len());
 
     for type_ in &types {
         // The collection handle of the items controls is published as the enumerable of
@@ -200,7 +200,8 @@ fn template_parts_name_classes() {
 fn enumeration_members_are_found_by_name() {
     let enums: Vec<_> = declared_types().into_iter().filter(|t| t.kind == MarkupTypeKind::Enum).collect();
     // `TextLayoutRoundingPlacement` is declared next to the type.
-    assert_eq!(enums.len(), super::enums::TYPES.len() + 1);
+    let rich_enums = super::RICH_TEXT_TYPES.iter().filter(|type_| type_.kind == MarkupTypeKind::Enum).count();
+    assert_eq!(enums.len(), super::enums::TYPES.len() + 1 + rich_enums);
     for type_ in enums {
         assert!(!type_.enum_members.is_empty(), "{type_:?}");
         for member in type_.enum_members {
@@ -280,10 +281,15 @@ fn text_convertible_types_are_parsed_by_type_lookup() {
     for type_ in declared_types() {
         if type_.parse.is_some() {
             let known = ["GridLength", "RowDefinitions", "ColumnDefinitions", "WindowTransparencyLevel",
-                "WindowTransparencyLevelCollection"];
+                "WindowTransparencyLevelCollection", "TextRange"];
             assert!(known.contains(&type_.name), "a sample for {type_:?}");
         }
     }
+
+    let range = <crate::documents::TextHighlightRange as MarkupTyped>::MARKUP;
+    let parsed = (range.parse.unwrap())(&[text("4,7")]).unwrap();
+    assert_eq!(unbox::<crate::documents::TextHighlightRange>(&parsed).range(), Some(4..11));
+    assert!((range.parse.unwrap())(&[text("invalid")]).is_err());
 
     let level = <WindowTransparencyLevel as MarkupTyped>::MARKUP;
     assert_eq!(unbox::<WindowTransparencyLevel>(&(level.find_static_property("Mica").unwrap().get.unwrap())(&[]).unwrap()), WindowTransparencyLevel::mica());

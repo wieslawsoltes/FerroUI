@@ -59,6 +59,7 @@
                 <MergeResourceInclude Source="ferres://FerroUI.Themes.Fluent/Controls/TabStrip.xaml" />
                 <MergeResourceInclude Source="ferres://FerroUI.Themes.Fluent/Controls/TabStripItem.xaml" />
                 <MergeResourceInclude Source="ferres://FerroUI.Themes.Fluent/Controls/TextBox.xaml" />
+        <MergeResourceInclude Source="ferres://FerroUI.Themes.Fluent/Controls/RichEditBox.xaml" />
                 <MergeResourceInclude Source="ferres://FerroUI.Themes.Fluent/Controls/ToggleButton.xaml" />
                 <MergeResourceInclude Source="ferres://FerroUI.Themes.Fluent/Controls/ToggleSwitch.xaml" />
                 <MergeResourceInclude Source="ferres://FerroUI.Themes.Fluent/Controls/ToolTip.xaml" />

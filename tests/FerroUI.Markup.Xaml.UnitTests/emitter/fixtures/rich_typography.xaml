@@ -1,0 +1,61 @@
+<UserControl xmlns="https://github.com/ferroui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+  <UserControl.Styles>
+    <Style Selector="TextBlock.typography">
+      <Setter Property="Typography.Kerning" Value="False" />
+      <Setter Property="Typography.Capitals" Value="SmallCaps" />
+    </Style>
+  </UserControl.Styles>
+  <StackPanel>
+    <RichTextBlock Name="fullTypography"
+                   Typography.AnnotationAlternates="1"
+                   Typography.EastAsianExpertForms="True"
+                   Typography.EastAsianLanguage="Jis90"
+                   Typography.EastAsianWidths="Half"
+                   Typography.StandardLigatures="False"
+                   Typography.ContextualLigatures="False"
+                   Typography.DiscretionaryLigatures="True"
+                   Typography.HistoricalLigatures="True"
+                   Typography.StandardSwashes="2"
+                   Typography.ContextualSwashes="3"
+                   Typography.ContextualAlternates="False"
+                   Typography.StylisticAlternates="4"
+                   Typography.StylisticSet1="True"
+                   Typography.StylisticSet2="True"
+                   Typography.StylisticSet3="True"
+                   Typography.StylisticSet4="True"
+                   Typography.StylisticSet5="True"
+                   Typography.StylisticSet6="True"
+                   Typography.StylisticSet7="True"
+                   Typography.StylisticSet8="True"
+                   Typography.StylisticSet9="True"
+                   Typography.StylisticSet10="True"
+                   Typography.StylisticSet11="True"
+                   Typography.StylisticSet12="True"
+                   Typography.StylisticSet13="True"
+                   Typography.StylisticSet14="True"
+                   Typography.StylisticSet15="True"
+                   Typography.StylisticSet16="True"
+                   Typography.StylisticSet17="True"
+                   Typography.StylisticSet18="True"
+                   Typography.StylisticSet19="True"
+                   Typography.StylisticSet20="True"
+                   Typography.Capitals="AllSmallCaps"
+                   Typography.CapitalSpacing="True"
+                   Typography.Kerning="False"
+                   Typography.CaseSensitiveForms="True"
+                   Typography.HistoricalForms="True"
+                   Typography.Fraction="Slashed"
+                   Typography.NumeralStyle="OldStyle"
+                   Typography.NumeralAlignment="Tabular"
+                   Typography.SlashedZero="True"
+                   Typography.MathematicalGreek="True"
+                   Typography.Variants="Superscript">
+      <Paragraph><Run Text="Inherited" /><Span Typography.Capitals="Normal" Typography.StandardSwashes="0"><Run Typography.Kerning="True" Text="Reset" /></Span></Paragraph>
+    </RichTextBlock>
+    <TextBlock Name="styledTypography" Classes="typography" Text="AV" />
+    <RichEditBox Name="editorTypography" Typography.NumeralAlignment="Tabular">
+      <Paragraph><Run Typography.SlashedZero="True" Text="0123" /></Paragraph>
+    </RichEditBox>
+  </StackPanel>
+</UserControl>

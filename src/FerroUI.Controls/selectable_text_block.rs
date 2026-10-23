@@ -1,30 +1,34 @@
-use crate::documents::InlineCollection;
+use crate::documents::{InlineCollection, Typography};
 use crate::text_block::InlinesTextSource;
 use crate::utils::{ClipboardHelper, PrimarySelectionHelper, StringUtils};
-use crate::{Application, ControlImpl, TextBlock, TextBlockImpl, TextBlockImplExt, TextBox, TopLevel};
+use crate::{
+    Application, ControlImpl, TextBlock, TextBlockImpl, TextBlockImplExt, TextBox, TopLevel,
+};
 use ferroui_base::input::platform::ClipboardExtensions;
-use ferroui_base::logging::{LogArea, LogEventLevel, Logger};
-use std::any::Any;
 use ferroui_base::input::{
-    FocusChangedEventArgs, InputElement, InputElementImpl, InputElementImplExt, KeyEventArgs, KeyGesture,
-    KeyModifiers, MouseButton, PointerEventArgs, PointerPressedEventArgs, PointerReleasedEventArgs,
+    FocusChangedEventArgs, InputElement, InputElementImpl, InputElementImplExt, KeyEventArgs,
+    KeyGesture, KeyModifiers, MouseButton, PointerEventArgs, PointerPressedEventArgs,
+    PointerReleasedEventArgs,
 };
 use ferroui_base::interactivity::{
-    Interactive, InteractiveImpl, RoutedEvent, RoutedEventArgs, RoutedEventHandlerToken, RoutingStrategies,
+    Interactive, InteractiveImpl, RoutedEvent, RoutedEventArgs, RoutedEventHandlerToken,
+    RoutingStrategies,
 };
 use ferroui_base::layout::LayoutableImpl;
+use ferroui_base::logging::{LogArea, LogEventLevel, Logger};
 use ferroui_base::media::text_formatting::{
-    FormattedTextSource, GenericTextParagraphProperties, GenericTextRunProperties, ITextSource, TextLayout,
-    TextRunProperties,
+    FormattedTextSource, GenericTextParagraphProperties, GenericTextRunProperties, ITextSource,
+    TextLayout, TextRunProperties,
 };
 use ferroui_base::media::{BaselineAlignment, DrawingContext, IBrush, Typeface};
 use ferroui_base::reactive::IDisposable;
 use ferroui_base::utilities::{ReadOnlyMemory, ValueSpan};
 use ferroui_base::{
     ferro_class, ferro_property, ferro_routed_event, instantiate, DirectProperty, FerroObjectImpl,
-    FerroObjectImplExt, FerroProperty, FerroPropertyChangedEventArgs, Matrix, PixelRect, Point, Ref, StyledElementImpl,
-    StyledProperty, StyledPropertyMetadata, Visual, VisualImpl,
+    FerroObjectImplExt, FerroProperty, FerroPropertyChangedEventArgs, Matrix, PixelRect, Point,
+    Ref, StyledElementImpl, StyledProperty, StyledPropertyMetadata, Visual, VisualImpl,
 };
+use std::any::Any;
 use std::cell::{Cell, RefCell};
 use std::rc::Rc;
 
@@ -78,7 +82,8 @@ impl FerroObjectImpl for SelectableTextBlock {
         Self::parent_on_property_changed(this, change);
 
         if change.property() == TextBlock::inlines_property().as_property() {
-            let (old_inlines, new_inlines) = change.get_old_and_new_value::<Option<InlineCollection>>();
+            let (old_inlines, new_inlines) =
+                change.get_old_and_new_value::<Option<InlineCollection>>();
 
             if old_inlines.is_some() {
                 let subscription = this.inlines_invalidated.borrow_mut().take();
@@ -103,7 +108,11 @@ impl FerroObjectImpl for SelectableTextBlock {
         } else if change.property() == Self::selection_start_property().as_property()
             || change.property() == Self::selection_end_property().as_property()
         {
-            this.raise_direct_property_changed(Self::selected_text_property(), &String::new(), &String::new());
+            this.raise_direct_property_changed(
+                Self::selected_text_property(),
+                &String::new(),
+                &String::new(),
+            );
             this.update_command_states();
             this.invalidate_text_layout();
         } else if change.property() == Self::selection_foreground_brush_property().as_property() {
@@ -157,7 +166,8 @@ impl InputElementImpl for SelectableTextBlock {
     fn on_pointer_pressed(this: &Self, e: &PointerPressedEventArgs) {
         Self::parent_on_pointer_pressed(this, e);
 
-        this.selection_at_pointer_press.set(this.get_selection_range());
+        this.selection_at_pointer_press
+            .set(this.get_selection_range());
 
         let text = this.content_text();
         let click_info = e.get_current_point(Some(this));
@@ -187,15 +197,28 @@ impl InputElementImpl for SelectableTextBlock {
                             let previous_word = StringUtils::previous_word(&text, index);
 
                             if index > word_selection_start {
-                                this.set_current_value(Self::selection_end_property(), StringUtils::next_word(&text, index));
+                                this.set_current_value(
+                                    Self::selection_end_property(),
+                                    StringUtils::next_word(&text, index),
+                                );
                             }
 
-                            if index < word_selection_start || previous_word == word_selection_start {
-                                this.set_current_value(Self::selection_start_property(), previous_word);
+                            if index < word_selection_start || previous_word == word_selection_start
+                            {
+                                this.set_current_value(
+                                    Self::selection_start_property(),
+                                    previous_word,
+                                );
                             }
                         } else {
-                            this.set_current_value(Self::selection_start_property(), old_index.min(index));
-                            this.set_current_value(Self::selection_end_property(), old_index.max(index));
+                            this.set_current_value(
+                                Self::selection_start_property(),
+                                old_index.min(index),
+                            );
+                            this.set_current_value(
+                                Self::selection_end_property(),
+                                old_index.max(index),
+                            );
                         }
                     } else {
                         this.set_current_value(Self::selection_start_property(), index);
@@ -205,13 +228,19 @@ impl InputElementImpl for SelectableTextBlock {
                 }
                 2 => {
                     if !StringUtils::is_start_of_word(&text, index) {
-                        this.set_current_value(Self::selection_start_property(), StringUtils::previous_word(&text, index));
+                        this.set_current_value(
+                            Self::selection_start_property(),
+                            StringUtils::previous_word(&text, index),
+                        );
                     }
 
                     this.word_selection_start.set(this.selection_start());
 
                     if !StringUtils::is_end_of_word(&text, index) {
-                        this.set_current_value(Self::selection_end_property(), StringUtils::next_word(&text, index));
+                        this.set_current_value(
+                            Self::selection_end_property(),
+                            StringUtils::next_word(&text, index),
+                        );
                     }
                 }
                 3 => {
@@ -232,7 +261,11 @@ impl InputElementImpl for SelectableTextBlock {
         Self::parent_on_pointer_moved(this, e);
 
         // The selection should not change during a pointer move if the user right clicks.
-        if this.is_captured_by(e) && e.get_current_point(Some(this)).properties.is_left_button_pressed {
+        if this.is_captured_by(e)
+            && e.get_current_point(Some(this))
+                .properties
+                .is_left_button_pressed
+        {
             let text = this.content_text();
             let padding = this.padding();
 
@@ -252,15 +285,24 @@ impl InputElementImpl for SelectableTextBlock {
                     let distance = text_position - word_selection_start;
 
                     if distance <= 0 {
-                        this.set_current_value(Self::selection_start_property(), StringUtils::previous_word(&text, text_position));
+                        this.set_current_value(
+                            Self::selection_start_property(),
+                            StringUtils::previous_word(&text, text_position),
+                        );
                     }
 
                     if distance >= 0 {
                         if this.selection_start() != word_selection_start {
-                            this.set_current_value(Self::selection_start_property(), word_selection_start);
+                            this.set_current_value(
+                                Self::selection_start_property(),
+                                word_selection_start,
+                            );
                         }
 
-                        this.set_current_value(Self::selection_end_property(), StringUtils::next_word(&text, text_position));
+                        this.set_current_value(
+                            Self::selection_end_property(),
+                            StringUtils::next_word(&text, text_position),
+                        );
                     }
                 }
                 _ => {
@@ -310,7 +352,10 @@ impl InputElementImpl for SelectableTextBlock {
         {
             // The pointer gesture changed the selection, publish it to the primary selection.
             let target = this.to_ref();
-            drop(PrimarySelectionHelper::publish_text_async(this, move || Some(target.get_selection())));
+            drop(PrimarySelectionHelper::publish_text_async(
+                this,
+                move || Some(target.get_selection()),
+            ));
         }
 
         e.pointer().capture(None);
@@ -319,19 +364,24 @@ impl InputElementImpl for SelectableTextBlock {
 
 impl TextBlockImpl for SelectableTextBlock {
     fn create_text_layout(this: &Self, text: Option<&str>) -> Rc<TextLayout> {
-        let typeface =
-            Typeface::with_style(this.font_family(), this.font_style(), this.font_weight(), this.font_stretch());
+        let typeface = Typeface::with_style(
+            this.font_family(),
+            this.font_style(),
+            this.font_weight(),
+            this.font_stretch(),
+        );
 
-        let default_properties: Rc<dyn TextRunProperties> = Rc::new(GenericTextRunProperties::with_all(
-            typeface.clone(),
-            this.font_size(),
-            this.text_decorations(),
-            this.foreground(),
-            None,
-            BaselineAlignment::Baseline,
-            None,
-            this.font_features(),
-        ));
+        let default_properties: Rc<dyn TextRunProperties> =
+            Rc::new(GenericTextRunProperties::with_all(
+                typeface.clone(),
+                this.font_size(),
+                this.text_decorations(),
+                this.foreground(),
+                None,
+                BaselineAlignment::Baseline,
+                None,
+                Typography::effective_font_features(this),
+            ));
 
         let paragraph_properties = GenericTextParagraphProperties::with_all(
             this.flow_direction(),
@@ -346,6 +396,10 @@ impl TextBlockImpl for SelectableTextBlock {
         );
         paragraph_properties.set_line_spacing(this.line_spacing());
 
+        if this.has_complex_content() {
+            this.ensure_text_runs();
+        }
+
         let mut text_style_overrides: Option<Vec<ValueSpan<Rc<dyn TextRunProperties>>>> = None;
         let selection_start = this.selection_start();
         let selection_end = this.selection_end();
@@ -354,18 +408,19 @@ impl TextBlockImpl for SelectableTextBlock {
 
         if length > 0 {
             if let Some(selection_foreground_brush) = this.selection_foreground_brush() {
-                let selection_properties = |typeface: Typeface, font_features| -> Rc<dyn TextRunProperties> {
-                    Rc::new(GenericTextRunProperties::with_all(
-                        typeface,
-                        this.font_size(),
-                        None,
-                        Some(selection_foreground_brush.clone()),
-                        None,
-                        BaselineAlignment::Baseline,
-                        None,
-                        font_features,
-                    ))
-                };
+                let selection_properties =
+                    |typeface: Typeface, font_features| -> Rc<dyn TextRunProperties> {
+                        Rc::new(GenericTextRunProperties::with_all(
+                            typeface,
+                            this.font_size(),
+                            None,
+                            Some(selection_foreground_brush.clone()),
+                            None,
+                            BaselineAlignment::Baseline,
+                            None,
+                            font_features,
+                        ))
+                    };
 
                 if let Some(text_runs) = this.text_runs() {
                     // Apply the selection foreground without changing the original text formatting:
@@ -376,7 +431,9 @@ impl TextBlockImpl for SelectableTextBlock {
                     for text_run in text_runs.iter() {
                         let run_length = text_run.text().len() as i32;
 
-                        if accumulated_length + run_length <= start || accumulated_length >= start + length {
+                        if accumulated_length + run_length <= start
+                            || accumulated_length >= start + length
+                        {
                             accumulated_length += run_length;
                             continue;
                         }
@@ -387,17 +444,20 @@ impl TextBlockImpl for SelectableTextBlock {
 
                         let run_properties = text_run.properties();
 
-                        text_style_overrides.get_or_insert_with(Vec::new).push(ValueSpan::new(
-                            overlap_start,
-                            overlap_length,
-                            selection_properties(
-                                run_properties.map_or_else(|| typeface.clone(), |p| p.typeface().clone()),
-                                match run_properties.and_then(|p| p.font_features()) {
-                                    Some(font_features) => Some(font_features.clone()),
-                                    None => this.font_features(),
-                                },
-                            ),
-                        ));
+                        text_style_overrides
+                            .get_or_insert_with(Vec::new)
+                            .push(ValueSpan::new(
+                                overlap_start,
+                                overlap_length,
+                                selection_properties(
+                                    run_properties
+                                        .map_or_else(|| typeface.clone(), |p| p.typeface().clone()),
+                                    match run_properties {
+                                        Some(properties) => properties.font_features().cloned(),
+                                        None => Typography::effective_font_features(this),
+                                    },
+                                ),
+                            ));
 
                         accumulated_length += run_length;
                     }
@@ -405,7 +465,10 @@ impl TextBlockImpl for SelectableTextBlock {
                     text_style_overrides = Some(vec![ValueSpan::new(
                         start,
                         length,
-                        selection_properties(typeface.clone(), this.font_features()),
+                        selection_properties(
+                            typeface.clone(),
+                            Typography::effective_font_features(this),
+                        ),
                     )]);
                 }
             }
@@ -415,9 +478,11 @@ impl TextBlockImpl for SelectableTextBlock {
             text_style_overrides.map(Rc::from);
 
         let text_source: Rc<dyn ITextSource> = if this.has_complex_content() {
-            this.ensure_text_runs();
 
-            Rc::new(InlinesTextSource::new(this.text_runs().unwrap_or_default(), text_style_overrides))
+            Rc::new(InlinesTextSource::new(
+                this.text_runs().unwrap_or_default(),
+                text_style_overrides,
+            ))
         } else {
             Rc::new(FormattedTextSource::new(
                 this.utf16_text(text.unwrap_or("")),
@@ -453,7 +518,11 @@ impl TextBlockImpl for SelectableTextBlock {
                 let state = context.push_transform(Matrix::create_translation(origin.x, origin.y));
 
                 for rect in rects {
-                    context.fill_rectangle(&selection_brush, PixelRect::from_rect(rect, 1.0).to_rect(1.0), 0.0);
+                    context.fill_rectangle(
+                        &selection_brush,
+                        PixelRect::from_rect(rect, 1.0).to_rect(1.0),
+                        0.0,
+                    );
                 }
 
                 context.pop(state);
@@ -519,7 +588,10 @@ impl SelectableTextBlock {
     ferro_routed_event!(
         /// Defines the `CopyingToClipboard` event.
         pub fn copying_to_clipboard_event() -> RoutedEvent<RoutedEventArgs> {
-            RoutedEvent::register::<SelectableTextBlock, _>("CopyingToClipboard", RoutingStrategies::BUBBLE)
+            RoutedEvent::register::<SelectableTextBlock, _>(
+                "CopyingToClipboard",
+                RoutingStrategies::BUBBLE,
+            )
         }
     );
 
@@ -632,7 +704,8 @@ impl SelectableTextBlock {
         self.raise_event(&event_args);
 
         if !event_args.handled() {
-            let Some(clipboard) = TopLevel::get_top_level(Some(self)).and_then(|top_level| top_level.clipboard())
+            let Some(clipboard) =
+                TopLevel::get_top_level(Some(self)).and_then(|top_level| top_level.clipboard())
             else {
                 return;
             };
@@ -643,9 +716,15 @@ impl SelectableTextBlock {
                 match clipboard.set_text_async(Some(&text)).await {
                     Ok(()) => {}
                     Err(ex) if ClipboardHelper::is_expected_clipboard_exception(&ex) => {
-                        if let Some(logger) = Logger::try_get(LogEventLevel::Warning, LogArea::CONTROL) {
+                        if let Some(logger) =
+                            Logger::try_get(LogEventLevel::Warning, LogArea::CONTROL)
+                        {
                             let source: &dyn Any = &this;
-                            logger.log_with_values(Some(source), "Failed to write text to clipboard: {Error}", &[&ex]);
+                            logger.log_with_values(
+                                Some(source),
+                                "Failed to write text to clipboard: {Error}",
+                                &[&ex],
+                            );
                         }
                     }
                     Err(ex) => return Err(ex),
@@ -661,7 +740,10 @@ impl SelectableTextBlock {
         let text = self.content_text();
 
         self.set_current_value(Self::selection_start_property(), 0);
-        self.set_current_value(Self::selection_end_property(), text.as_deref().map_or(0, utf16_length));
+        self.set_current_value(
+            Self::selection_end_property(),
+            text.as_deref().map_or(0, utf16_length),
+        );
     }
 
     /// Clears the current selection.
@@ -681,20 +763,29 @@ impl SelectableTextBlock {
 
     /// Whether the pointer of a pointer event is captured by this control.
     fn is_captured_by(&self, e: &PointerEventArgs) -> bool {
-        e.pointer().captured().is_some_and(|captured| captured == self.to_ref())
+        e.pointer()
+            .captured()
+            .is_some_and(|captured| captured == self.to_ref())
     }
 
     fn get_selection_range(&self) -> (i32, i32) {
         let selection_start = self.selection_start();
         let selection_end = self.selection_end();
 
-        (selection_start.min(selection_end), selection_start.max(selection_end))
+        (
+            selection_start.min(selection_end),
+            selection_start.max(selection_end),
+        )
     }
 
     fn on_text_or_inlines_changed(&self) {
         self.coerce_value(Self::selection_start_property().as_property());
         self.coerce_value(Self::selection_end_property().as_property());
-        self.raise_direct_property_changed(Self::selected_text_property(), &String::new(), &String::new());
+        self.raise_direct_property_changed(
+            Self::selected_text_property(),
+            &String::new(),
+            &String::new(),
+        );
         self.update_command_states();
     }
 
@@ -743,7 +834,11 @@ impl SelectableTextBlock {
 
         // The indices are UTF-16 code units; a selection that splits a
         // surrogate pair yields a replacement character for the lone half.
-        let selected_text: Vec<u16> = text.encode_utf16().skip(start.max(0) as usize).take(length as usize).collect();
+        let selected_text: Vec<u16> = text
+            .encode_utf16()
+            .skip(start.max(0) as usize)
+            .take(length as usize)
+            .collect();
 
         String::from_utf16_lossy(&selected_text)
     }

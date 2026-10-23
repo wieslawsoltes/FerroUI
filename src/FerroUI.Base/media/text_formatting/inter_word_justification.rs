@@ -3,7 +3,9 @@ use std::rc::Rc;
 
 use crate::media::text_formatting::text_line_impl::TextLineImpl;
 use crate::media::text_formatting::unicode::LineBreakEnumerator;
-use crate::media::text_formatting::{GlyphInfo, JustificationProperties, ShapedBuffer, ShapedTextRun, TextLine, TextRun};
+use crate::media::text_formatting::{
+    GlyphInfo, JustificationProperties, ShapedBuffer, ShapedTextRun, TabAlignment, TextLine, TextRun,
+};
 
 /// Justifies a line by widening the gaps at its break opportunities.
 ///
@@ -19,9 +21,13 @@ impl InterWordJustification {
         Self { width }
     }
 
-    fn collect_break_opportunities(line_impl: &TextLineImpl, break_opportunities: &mut VecDeque<i32>) {
-        let text_runs = line_impl.text_runs();
-        let mut current_position = line_impl.first_text_source_index();
+    fn collect_break_opportunities(
+        text_runs: &[(usize, i32, Rc<dyn TextRun>)],
+        first_position: i32,
+        justification_start: i32,
+        break_opportunities: &mut VecDeque<i32>,
+    ) {
+        let mut current_position = first_position;
         let mut run_index = 0usize;
 
         let mut buffer: Vec<u16> = Vec::new();
@@ -34,7 +40,7 @@ impl InterWordJustification {
             let mut segment_end = run_index;
 
             while segment_end < text_runs.len() {
-                let text_run = &text_runs[segment_end];
+                let text_run = &text_runs[segment_end].2;
                 let text = text_run.text_span();
 
                 // A run whose length doesn't match its text can't be mapped back to text source
@@ -49,7 +55,7 @@ impl InterWordJustification {
             }
 
             if segment_length == 0 {
-                current_position += text_runs[run_index].length();
+                current_position += text_runs[run_index].2.length();
                 run_index += 1;
 
                 continue;
@@ -57,7 +63,7 @@ impl InterWordJustification {
 
             buffer.clear();
 
-            for text_run in &text_runs[run_index..segment_end] {
+            for (_, _, text_run) in &text_runs[run_index..segment_end] {
                 buffer.extend_from_slice(text_run.text_span());
             }
 
@@ -85,7 +91,9 @@ impl InterWordJustification {
                     target -= 1;
                 }
 
-                break_opportunities.push_back(target);
+                if target >= justification_start {
+                    break_opportunities.push_back(target);
+                }
             }
 
             current_position = segment_start + segment_length;
@@ -112,7 +120,62 @@ impl JustificationProperties for InterWordJustification {
 
         let mut break_opportunities = VecDeque::new();
 
-        Self::collect_break_opportunities(line_impl, &mut break_opportunities);
+        // Break positions are logical UTF-16 positions; the line's drawing list
+        // has already been reordered visually for bidi. Keep the visual index
+        // alongside each logical run so replacement updates the correct glyphs.
+        let text_runs: Vec<(usize, i32, Rc<dyn TextRun>)> = if let Some(indexed) = line_impl.indexed_text_runs() {
+            indexed
+                .iter()
+                .filter_map(|run| {
+                    run.text_run
+                        .borrow()
+                        .clone()
+                        .map(|text_run| (run.run_index.get() as usize, run.text_source_character_index, text_run))
+                })
+                .collect()
+        } else {
+            let mut position = text_line.first_text_source_index();
+            line_impl
+                .text_runs()
+                .iter()
+                .enumerate()
+                .map(|(index, run)| {
+                    let result = (index, position, run.clone());
+                    position += run.length();
+                    result
+                })
+                .collect()
+        };
+
+        // Tab fields before the final tab keep their measured anchors. The
+        // final field can fill the remaining line only when its leading edge is
+        // anchored (Left in LTR, Right in RTL); expanding a centered, trailing or
+        // decimal field would move that anchor. A trailing tab therefore also
+        // prevents earlier text from receiving justification space.
+        let mut justification_start = text_line.first_text_source_index();
+        for (_, position, run) in &text_runs {
+            if let Some(shaped) = run.downcast_ref::<ShapedTextRun>() {
+                if let Some(alignment) = shaped.tab_alignment() {
+                    let leading = if shaped.bidi_level() & 1 == 0 {
+                        alignment == TabAlignment::Left
+                    } else {
+                        alignment == TabAlignment::Right
+                    };
+                    justification_start = if leading {
+                        position + run.length()
+                    } else {
+                        text_line.first_text_source_index() + text_line.length()
+                    };
+                }
+            }
+        }
+
+        Self::collect_break_opportunities(
+            &text_runs,
+            text_line.first_text_source_index(),
+            justification_start,
+            &mut break_opportunities,
+        );
 
         if break_opportunities.is_empty() {
             return;
@@ -127,17 +190,15 @@ impl JustificationProperties for InterWordJustification {
         let remaining_space = (paragraph_width - line_impl.width()).max(0.0);
         let spacing = remaining_space / break_opportunities.len() as f64;
 
-        let mut current_position = text_line.first_text_source_index();
-
-        let run_count = line_impl.text_runs().len();
-
-        for run_index in 0..run_count {
-            // The run is cloned out of the line: the line's run list is replaced below.
-            let text_run = line_impl.text_runs()[run_index].clone();
+        for (run_index, current_position, text_run) in text_runs {
             let run_length = text_run.length();
             let run_end = current_position + run_length;
 
-            let shaped_text = if text_run.text_span().is_empty() { None } else { text_run.downcast_ref::<ShapedTextRun>() };
+            let shaped_text = if text_run.text_span().is_empty() {
+                None
+            } else {
+                text_run.downcast_ref::<ShapedTextRun>()
+            };
             let mut writable_buffer: Option<Rc<ShapedBuffer>> = None;
 
             // Consume only the break opportunities that fall inside this run's range. The queue
@@ -175,20 +236,21 @@ impl JustificationProperties for InterWordJustification {
 
                 writable_buffer.set(
                     glyph_index,
-                    GlyphInfo::new(glyph_info.glyph_index, glyph_info.glyph_cluster, glyph_info.glyph_advance + spacing),
+                    GlyphInfo::new(
+                        glyph_info.glyph_index,
+                        glyph_info.glyph_cluster,
+                        glyph_info.glyph_advance + spacing,
+                    ),
                 );
             }
 
             if let (Some(writable_buffer), Some(shaped_text)) = (writable_buffer, shaped_text) {
-                let justified_run: Rc<dyn TextRun> =
-                    Rc::new(ShapedTextRun::new(writable_buffer, shaped_text.run_properties().clone()));
+                let justified_run: Rc<dyn TextRun> = Rc::new(shaped_text.with_shaped_buffer(writable_buffer));
 
                 line_impl.replace_text_run(run_index, justified_run);
 
                 shaped_text.dispose();
             }
-
-            current_position += run_length;
         }
     }
 }
