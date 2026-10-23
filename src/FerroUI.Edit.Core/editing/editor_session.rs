@@ -27,6 +27,10 @@ pub struct EditorOptions {
     pub show_spaces: bool,
     pub show_tabs: bool,
     pub show_end_of_line: bool,
+    pub show_box_for_control_characters: bool,
+    pub enable_hyperlinks: bool,
+    pub enable_email_hyperlinks: bool,
+    pub require_control_modifier_for_hyperlink_click: bool,
     pub highlight_current_line: bool,
     pub newline: String,
 }
@@ -40,6 +44,10 @@ impl Default for EditorOptions {
             show_spaces: false,
             show_tabs: false,
             show_end_of_line: false,
+            show_box_for_control_characters: true,
+            enable_hyperlinks: true,
+            enable_email_hyperlinks: true,
+            require_control_modifier_for_hyperlink_click: true,
             highlight_current_line: false,
             newline: "\n".into(),
         }

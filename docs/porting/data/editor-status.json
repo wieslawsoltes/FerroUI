@@ -1,22 +1,22 @@
 {
   "schema_version": 1,
   "inventory_sha256": "70e060d1ca9836ade3c7c6b451169e52b4209b38458309ccb4c2694bb77541b5",
-  "mappings_sha256": "cad486fe326f8a7b38f5d602fa96ce642c07288855435aab8c1128ee06e12b14",
+  "mappings_sha256": "e31bfcb038ffb1bd32befbcf8d27feeb0949197741542bb2aeb7796412652251",
   "counts": {
     "mapped": 22,
-    "adapted": 191,
-    "unmapped": 162
+    "adapted": 213,
+    "unmapped": 140
   },
   "file_count": 375,
   "declared_type_occurrences": 1310,
   "distinct_type_declarations_per_file": 554,
-  "mapped_declared_types": 261,
-  "unmapped_declared_types": 293,
+  "mapped_declared_types": 299,
+  "unmapped_declared_types": 255,
   "repositories": {
     "avaloniaedit": {
       "mapped": 13,
-      "adapted": 121,
-      "unmapped": 107
+      "adapted": 143,
+      "unmapped": 85
     },
     "textmatesharp": {
       "mapped": 9,
@@ -1889,9 +1889,9 @@
         }
       ],
       "unmapped_types": [],
-      "notes": "Snapshot text source with range snapshots and optional thread-safe version interfaces; concrete immutable versions remain available.",
+      "notes": "Object-safe text, version, shared-memory slice, reader, external writer and ordinal search contracts; defaults capture a snapshot before calling external sinks. See editor-document.md.",
       "limitations": [
-        "Managed TextReader/TextWriter and the full StringComparison overload family are absent; String conversion replaces isolated surrogates."
+        ".NET culture-sensitive StringComparison overloads are intentionally unsupported; OrdinalIgnoreCase pins Unicode 17 simple casing and .NET special-case exclusions."
       ]
     },
     {
@@ -2134,20 +2134,21 @@
         {
           "path": "src/FerroUI.Edit.Core/document/text_source.rs",
           "symbols": [
-            "TextSnapshot"
+            "TextSnapshot",
+            "RopeTextSource"
           ],
           "aliases": [
             {
               "upstream": "AvaloniaEdit.Document.RopeTextSource",
-              "rust": "TextSnapshot"
+              "rust": "RopeTextSource"
             }
           ]
         }
       ],
       "unmapped_types": [],
-      "notes": "Immutable Arc rope snapshots replace the managed text-source wrapper.",
+      "notes": "RopeTextSource aliases the immutable persistent TextSnapshot with shared chunk memory, partial snapshots, readers, external writers and streaming ordinal search.",
       "limitations": [
-        "Chunk/range APIs replace managed IO wrappers."
+        "Non-ordinal culture-sensitive comparison modes are not supplied; invariant simple case handling and surrogate behavior are explicit."
       ]
     },
     {
@@ -4019,15 +4020,45 @@
           "line": 192
         }
       ],
-      "mapped_types": [],
-      "status": "unmapped",
-      "targets": [],
-      "unmapped_types": [
+      "mapped_types": [
         "AvaloniaEdit.Folding.FoldingElementGenerator",
         "AvaloniaEdit.Folding.FoldingElementGenerator.FoldingLineElement",
         "AvaloniaEdit.Folding.FoldingElementGenerator.FoldingLineTextRun"
       ],
-      "notes": "No verified Rust destination for this upstream source/API.",
+      "status": "adapted",
+      "targets": [
+        {
+          "path": "src/FerroUI.Edit/folding_element_generator.rs",
+          "symbols": [
+            "FoldingElementGenerator",
+            "FoldingLineElement"
+          ],
+          "aliases": [
+            {
+              "upstream": "AvaloniaEdit.Folding.FoldingElementGenerator",
+              "rust": "FoldingElementGenerator"
+            },
+            {
+              "upstream": "AvaloniaEdit.Folding.FoldingElementGenerator.FoldingLineElement",
+              "rust": "FoldingLineElement"
+            }
+          ]
+        },
+        {
+          "path": "src/FerroUI.Edit/formatted_text_element.rs",
+          "symbols": [
+            "FormattedTextRun"
+          ],
+          "aliases": [
+            {
+              "upstream": "AvaloniaEdit.Folding.FoldingElementGenerator.FoldingLineTextRun",
+              "rust": "FormattedTextRun"
+            }
+          ]
+        }
+      ],
+      "unmapped_types": [],
+      "notes": "Merges overlapping/touching folded offsets into native drawable placeholders. Viewport height unions, suffix geometry, atomic keyboard motion and pointer unfolding use retained element mappings.",
       "limitations": []
     },
     {
@@ -6261,14 +6292,29 @@
           "line": 29
         }
       ],
-      "mapped_types": [],
-      "status": "unmapped",
-      "targets": [],
-      "unmapped_types": [
+      "mapped_types": [
         "AvaloniaEdit.Rendering.ColorizingTransformer"
       ],
-      "notes": "This rendering/visual-line extension surface has no direct port. Current editor layout uses FerroUI TextLayout and DrawingContext; that reuse does not reproduce the missing API.",
-      "limitations": []
+      "status": "adapted",
+      "targets": [
+        {
+          "path": "src/FerroUI.Edit/visual_line_transformer.rs",
+          "symbols": [
+            "ColorizingTransformer"
+          ],
+          "aliases": [
+            {
+              "upstream": "AvaloniaEdit.Rendering.ColorizingTransformer",
+              "rust": "ColorizingTransformer"
+            }
+          ]
+        }
+      ],
+      "unmapped_types": [],
+      "notes": "Live TextArea construction uses this native extension contract; see editor-visual-lines.md for ownership, UTF-16 semantics and tested boundaries.",
+      "limitations": [
+        "Rust scoped trait callbacks and explicit Result diagnostics replace mutable managed construction state."
+      ]
     },
     {
       "source": "avaloniaedit:src/AvaloniaEdit/Rendering/ColumnRulerRenderer.cs",
@@ -6336,14 +6382,29 @@
           "line": 30
         }
       ],
-      "mapped_types": [],
-      "status": "unmapped",
-      "targets": [],
-      "unmapped_types": [
+      "mapped_types": [
         "AvaloniaEdit.Rendering.DocumentColorizingTransformer"
       ],
-      "notes": "This rendering/visual-line extension surface has no direct port. Current editor layout uses FerroUI TextLayout and DrawingContext; that reuse does not reproduce the missing API.",
-      "limitations": []
+      "status": "adapted",
+      "targets": [
+        {
+          "path": "src/FerroUI.Edit/visual_line_transformer.rs",
+          "symbols": [
+            "DocumentColorizingTransformer"
+          ],
+          "aliases": [
+            {
+              "upstream": "AvaloniaEdit.Rendering.DocumentColorizingTransformer",
+              "rust": "DocumentColorizingTransformer"
+            }
+          ]
+        }
+      ],
+      "unmapped_types": [],
+      "notes": "Live TextArea construction uses this native extension contract; see editor-visual-lines.md for ownership, UTF-16 semantics and tested boundaries.",
+      "limitations": [
+        "Rust scoped trait callbacks and explicit Result diagnostics replace mutable managed construction state."
+      ]
     },
     {
       "source": "avaloniaedit:src/AvaloniaEdit/Rendering/FormattedTextElement.cs",
@@ -6369,14 +6430,32 @@
           "line": 102
         }
       ],
-      "mapped_types": [],
-      "status": "unmapped",
-      "targets": [],
-      "unmapped_types": [
+      "mapped_types": [
         "AvaloniaEdit.Rendering.FormattedTextElement",
         "AvaloniaEdit.Rendering.FormattedTextRun"
       ],
-      "notes": "This rendering/visual-line extension surface has no direct port. Current editor layout uses FerroUI TextLayout and DrawingContext; that reuse does not reproduce the missing API.",
+      "status": "adapted",
+      "targets": [
+        {
+          "path": "src/FerroUI.Edit/formatted_text_element.rs",
+          "symbols": [
+            "FormattedTextElement",
+            "FormattedTextRun"
+          ],
+          "aliases": [
+            {
+              "upstream": "AvaloniaEdit.Rendering.FormattedTextElement",
+              "rust": "FormattedTextElement"
+            },
+            {
+              "upstream": "AvaloniaEdit.Rendering.FormattedTextRun",
+              "rust": "FormattedTextRun"
+            }
+          ]
+        }
+      ],
+      "unmapped_types": [],
+      "notes": "Live TextArea construction uses this native extension contract; see editor-visual-lines.md for ownership, UTF-16 semantics and tested boundaries.",
       "limitations": []
     },
     {
@@ -6449,9 +6528,9 @@
       "unmapped_types": [
         "AvaloniaEdit.Rendering.HeightTree.UpdateAfterChildrenChangeRecursionMode"
       ],
-      "notes": "Sparse Fenwick line-height indexing with collapsed intervals for virtualized layout.",
+      "notes": "Sparse measured-height Fenwick tree and merged collapsed intervals; preserves existing shaped heights when discovering custom multiline spans and resolves hidden EOF hits to their visible owner.",
       "limitations": [
-        "No matching red-black node APIs or live-line-identity indexed HeightTree contract."
+        "Internal storage differs from the upstream node tree; public CollapsedLineSection ownership and restoration API remains unmapped."
       ]
     },
     {
@@ -6545,14 +6624,29 @@
           "line": 30
         }
       ],
-      "mapped_types": [],
-      "status": "unmapped",
-      "targets": [],
-      "unmapped_types": [
+      "mapped_types": [
         "AvaloniaEdit.Rendering.ITextRunConstructionContext"
       ],
-      "notes": "This rendering/visual-line extension surface has no direct port. Current editor layout uses FerroUI TextLayout and DrawingContext; that reuse does not reproduce the missing API.",
-      "limitations": []
+      "status": "adapted",
+      "targets": [
+        {
+          "path": "src/FerroUI.Edit/i_text_run_construction_context.rs",
+          "symbols": [
+            "ITextRunConstructionContext"
+          ],
+          "aliases": [
+            {
+              "upstream": "AvaloniaEdit.Rendering.ITextRunConstructionContext",
+              "rust": "ITextRunConstructionContext"
+            }
+          ]
+        }
+      ],
+      "unmapped_types": [],
+      "notes": "Live TextArea construction uses this native extension contract; see editor-visual-lines.md for ownership, UTF-16 semantics and tested boundaries.",
+      "limitations": [
+        "Rust scoped trait callbacks and explicit Result diagnostics replace mutable managed construction state."
+      ]
     },
     {
       "source": "avaloniaedit:src/AvaloniaEdit/Rendering/ITextViewConnect.cs",
@@ -6570,13 +6664,26 @@
           "line": 25
         }
       ],
-      "mapped_types": [],
-      "status": "unmapped",
-      "targets": [],
-      "unmapped_types": [
+      "mapped_types": [
         "AvaloniaEdit.Rendering.ITextViewConnect"
       ],
-      "notes": "This rendering/visual-line extension surface has no direct port. Current editor layout uses FerroUI TextLayout and DrawingContext; that reuse does not reproduce the missing API.",
+      "status": "adapted",
+      "targets": [
+        {
+          "path": "src/FerroUI.Edit/i_text_view_connect.rs",
+          "symbols": [
+            "ITextViewConnect"
+          ],
+          "aliases": [
+            {
+              "upstream": "AvaloniaEdit.Rendering.ITextViewConnect",
+              "rust": "ITextViewConnect"
+            }
+          ]
+        }
+      ],
+      "unmapped_types": [],
+      "notes": "Live TextArea construction uses this native extension contract; see editor-visual-lines.md for ownership, UTF-16 semantics and tested boundaries.",
       "limitations": []
     },
     {
@@ -6595,14 +6702,29 @@
           "line": 26
         }
       ],
-      "mapped_types": [],
-      "status": "unmapped",
-      "targets": [],
-      "unmapped_types": [
+      "mapped_types": [
         "AvaloniaEdit.Rendering.IVisualLineTransformer"
       ],
-      "notes": "This rendering/visual-line extension surface has no direct port. Current editor layout uses FerroUI TextLayout and DrawingContext; that reuse does not reproduce the missing API.",
-      "limitations": []
+      "status": "adapted",
+      "targets": [
+        {
+          "path": "src/FerroUI.Edit/visual_line_transformer.rs",
+          "symbols": [
+            "IVisualLineTransformer"
+          ],
+          "aliases": [
+            {
+              "upstream": "AvaloniaEdit.Rendering.IVisualLineTransformer",
+              "rust": "IVisualLineTransformer"
+            }
+          ]
+        }
+      ],
+      "unmapped_types": [],
+      "notes": "Live TextArea construction uses this native extension contract; see editor-visual-lines.md for ownership, UTF-16 semantics and tested boundaries.",
+      "limitations": [
+        "Rust scoped trait callbacks and explicit Result diagnostics replace mutable managed construction state."
+      ]
     },
     {
       "source": "avaloniaedit:src/AvaloniaEdit/Rendering/InlineObjectRun.cs",
@@ -6730,14 +6852,32 @@
           "line": 145
         }
       ],
-      "mapped_types": [],
-      "status": "unmapped",
-      "targets": [],
-      "unmapped_types": [
+      "mapped_types": [
         "AvaloniaEdit.Rendering.LinkElementGenerator",
         "AvaloniaEdit.Rendering.MailLinkElementGenerator"
       ],
-      "notes": "This rendering/visual-line extension surface has no direct port. Current editor layout uses FerroUI TextLayout and DrawingContext; that reuse does not reproduce the missing API.",
+      "status": "adapted",
+      "targets": [
+        {
+          "path": "src/FerroUI.Edit/link_element_generator.rs",
+          "symbols": [
+            "LinkElementGenerator",
+            "MailLinkElementGenerator"
+          ],
+          "aliases": [
+            {
+              "upstream": "AvaloniaEdit.Rendering.LinkElementGenerator",
+              "rust": "LinkElementGenerator"
+            },
+            {
+              "upstream": "AvaloniaEdit.Rendering.MailLinkElementGenerator",
+              "rust": "MailLinkElementGenerator"
+            }
+          ]
+        }
+      ],
+      "unmapped_types": [],
+      "notes": "Live TextArea construction uses this native extension contract; see editor-visual-lines.md for ownership, UTF-16 semantics and tested boundaries.",
       "limitations": []
     },
     {
@@ -6830,17 +6970,54 @@
           "line": 157
         }
       ],
-      "mapped_types": [],
-      "status": "unmapped",
-      "targets": [],
-      "unmapped_types": [
+      "mapped_types": [
         "AvaloniaEdit.Rendering.SingleCharacterElementGenerator",
         "AvaloniaEdit.Rendering.SingleCharacterElementGenerator.SpaceTextElement",
         "AvaloniaEdit.Rendering.SingleCharacterElementGenerator.SpecialCharacterBoxElement",
         "AvaloniaEdit.Rendering.SingleCharacterElementGenerator.SpecialCharacterTextRun"
       ],
-      "notes": "This rendering/visual-line extension surface has no direct port. Current editor layout uses FerroUI TextLayout and DrawingContext; that reuse does not reproduce the missing API.",
-      "limitations": []
+      "status": "adapted",
+      "targets": [
+        {
+          "path": "src/FerroUI.Edit/single_character_element_generator.rs",
+          "symbols": [
+            "SingleCharacterElementGenerator",
+            "SpaceTextElement",
+            "SpecialCharacterBoxElement"
+          ],
+          "aliases": [
+            {
+              "upstream": "AvaloniaEdit.Rendering.SingleCharacterElementGenerator",
+              "rust": "SingleCharacterElementGenerator"
+            },
+            {
+              "upstream": "AvaloniaEdit.Rendering.SingleCharacterElementGenerator.SpaceTextElement",
+              "rust": "SpaceTextElement"
+            },
+            {
+              "upstream": "AvaloniaEdit.Rendering.SingleCharacterElementGenerator.SpecialCharacterBoxElement",
+              "rust": "SpecialCharacterBoxElement"
+            }
+          ]
+        },
+        {
+          "path": "src/FerroUI.Edit/formatted_text_element.rs",
+          "symbols": [
+            "FormattedTextRun"
+          ],
+          "aliases": [
+            {
+              "upstream": "AvaloniaEdit.Rendering.SingleCharacterElementGenerator.SpecialCharacterTextRun",
+              "rust": "FormattedTextRun"
+            }
+          ]
+        }
+      ],
+      "unmapped_types": [],
+      "notes": "Space markers and control boxes are native drawable runs; the shared FormattedTextRun supplies measured content and box drawing. EditorOptions wire marker/control visibility.",
+      "limitations": [
+        "The native text drawing sink currently supplies rectangular boxes, not the upstream exact rounded corner radius."
+      ]
     },
     {
       "source": "avaloniaedit:src/AvaloniaEdit/Rendering/TabElementGenerator.cs",
@@ -6874,15 +7051,45 @@
           "line": 152
         }
       ],
-      "mapped_types": [],
-      "status": "unmapped",
-      "targets": [],
-      "unmapped_types": [
+      "mapped_types": [
         "AvaloniaEdit.Rendering.TabElementGenerator",
         "AvaloniaEdit.Rendering.TabElementGenerator.TabGlyphRun",
         "AvaloniaEdit.Rendering.TabElementGenerator.TabTextElement"
       ],
-      "notes": "This rendering/visual-line extension surface has no direct port. Current editor layout uses FerroUI TextLayout and DrawingContext; that reuse does not reproduce the missing API.",
+      "status": "adapted",
+      "targets": [
+        {
+          "path": "src/FerroUI.Edit/tab_element_generator.rs",
+          "symbols": [
+            "TabElementGenerator",
+            "TabTextElement"
+          ],
+          "aliases": [
+            {
+              "upstream": "AvaloniaEdit.Rendering.TabElementGenerator",
+              "rust": "TabElementGenerator"
+            },
+            {
+              "upstream": "AvaloniaEdit.Rendering.TabElementGenerator.TabTextElement",
+              "rust": "TabTextElement"
+            }
+          ]
+        },
+        {
+          "path": "src/FerroUI.Edit/formatted_text_element.rs",
+          "symbols": [
+            "FormattedTextRun"
+          ],
+          "aliases": [
+            {
+              "upstream": "AvaloniaEdit.Rendering.TabElementGenerator.TabGlyphRun",
+              "rust": "FormattedTextRun"
+            }
+          ]
+        }
+      ],
+      "unmapped_types": [],
+      "notes": "Required native tab expansion respects generated display columns, atomic caret boundaries and fixed-width marker runs, including long lines.",
       "limitations": []
     },
     {
@@ -6950,14 +7157,25 @@
               "rust": "TextArea"
             }
           ]
+        },
+        {
+          "path": "src/FerroUI.Edit/text_area_visual_lines.rs",
+          "symbols": [
+            "VisualLineHost",
+            "TextArea::element_generators",
+            "TextArea::line_transformers",
+            "TextArea::get_or_construct_visual_line",
+            "TextArea::visual_line_construction_starting"
+          ],
+          "aliases": []
         }
       ],
       "unmapped_types": [
         "AvaloniaEdit.Rendering.TextView.LayerCollection"
       ],
-      "notes": "Viewport, shaped TextLayout rendering, inline folding placeholders, hit mapping and syntax runs are combined into TextArea using FerroUI APIs.",
+      "notes": "TextArea combines native TextView ownership with the input surface: snapshot construction batches, shared observable extensions, actual measured heights, folds/custom multiline spans, IME, URI pointer routing, syntax transforms and retained caret/selection/popup geometry.",
       "limitations": [
-        "Separate TextView, layers, element generators, transformers and visual-line public extension contracts are absent."
+        "Separate native margin/layer and embedded-control hosts, public collapsible-height handles, complete visual-position APIs and full text-range accessibility are not yet established."
       ]
     },
     {
@@ -7075,9 +7293,10 @@
       "status": "adapted",
       "targets": [
         {
-          "path": "src/FerroUI.Edit/text_area.rs",
+          "path": "src/FerroUI.Edit/visual_line.rs",
           "symbols": [
-            "VisualLine"
+            "VisualLine",
+            "VisualLineBuilder"
           ],
           "aliases": [
             {
@@ -7091,9 +7310,9 @@
         "AvaloniaEdit.Rendering.VisualLine.LifetimePhase",
         "AvaloniaEdit.Rendering.VisualLineDrawingVisual"
       ],
-      "notes": "Cached measured/rendered line data for FerroUI TextLayout.",
+      "notes": "VisualLineBuilder produces immutable retained visual elements with native TextLayout source, caret maps, composition spans and checked transformation. TextArea uses it in the viewport, hit testing, navigation and popups.",
       "limitations": [
-        "Not the full public visual-element/lifetime API."
+        "Separate managed LifetimePhase and drawing-visual objects are replaced by builder ownership and the host cache; native embedded-control parenting and separate layers remain additional work."
       ]
     },
     {
@@ -7112,13 +7331,26 @@
           "line": 27
         }
       ],
-      "mapped_types": [],
-      "status": "unmapped",
-      "targets": [],
-      "unmapped_types": [
+      "mapped_types": [
         "AvaloniaEdit.Rendering.VisualLineConstructionStartEventArgs"
       ],
-      "notes": "This rendering/visual-line extension surface has no direct port. Current editor layout uses FerroUI TextLayout and DrawingContext; that reuse does not reproduce the missing API.",
+      "status": "adapted",
+      "targets": [
+        {
+          "path": "src/FerroUI.Edit/visual_line_construction_start_event_args.rs",
+          "symbols": [
+            "VisualLineConstructionStartEventArgs"
+          ],
+          "aliases": [
+            {
+              "upstream": "AvaloniaEdit.Rendering.VisualLineConstructionStartEventArgs",
+              "rust": "VisualLineConstructionStartEventArgs"
+            }
+          ]
+        }
+      ],
+      "unmapped_types": [],
+      "notes": "Live TextArea construction uses this native extension contract; see editor-visual-lines.md for ownership, UTF-16 semantics and tested boundaries.",
       "limitations": []
     },
     {
@@ -7137,13 +7369,26 @@
           "line": 33
         }
       ],
-      "mapped_types": [],
-      "status": "unmapped",
-      "targets": [],
-      "unmapped_types": [
+      "mapped_types": [
         "AvaloniaEdit.Rendering.VisualLineElement"
       ],
-      "notes": "This rendering/visual-line extension surface has no direct port. Current editor layout uses FerroUI TextLayout and DrawingContext; that reuse does not reproduce the missing API.",
+      "status": "adapted",
+      "targets": [
+        {
+          "path": "src/FerroUI.Edit/visual_line_element.rs",
+          "symbols": [
+            "VisualLineElement"
+          ],
+          "aliases": [
+            {
+              "upstream": "AvaloniaEdit.Rendering.VisualLineElement",
+              "rust": "VisualLineElement"
+            }
+          ]
+        }
+      ],
+      "unmapped_types": [],
+      "notes": "Live TextArea construction uses this native extension contract; see editor-visual-lines.md for ownership, UTF-16 semantics and tested boundaries.",
       "limitations": []
     },
     {
@@ -7170,15 +7415,43 @@
           "line": 79
         }
       ],
-      "mapped_types": [],
-      "status": "unmapped",
-      "targets": [],
-      "unmapped_types": [
+      "mapped_types": [
         "AvaloniaEdit.Rendering.IBuiltinElementGenerator",
         "AvaloniaEdit.Rendering.VisualLineElementGenerator"
       ],
-      "notes": "This rendering/visual-line extension surface has no direct port. Current editor layout uses FerroUI TextLayout and DrawingContext; that reuse does not reproduce the missing API.",
-      "limitations": []
+      "status": "adapted",
+      "targets": [
+        {
+          "path": "src/FerroUI.Edit/visual_line_element_generator.rs",
+          "symbols": [
+            "VisualLineElementGenerator",
+            "VisualLineElementGeneratorRef"
+          ],
+          "aliases": [
+            {
+              "upstream": "AvaloniaEdit.Rendering.VisualLineElementGenerator",
+              "rust": "VisualLineElementGenerator"
+            }
+          ]
+        },
+        {
+          "path": "src/FerroUI.Edit/single_character_element_generator.rs",
+          "symbols": [
+            "IBuiltinElementGenerator"
+          ],
+          "aliases": [
+            {
+              "upstream": "AvaloniaEdit.Rendering.IBuiltinElementGenerator",
+              "rust": "IBuiltinElementGenerator"
+            }
+          ]
+        }
+      ],
+      "unmapped_types": [],
+      "notes": "Live TextArea construction uses this native extension contract; see editor-visual-lines.md for ownership, UTF-16 semantics and tested boundaries.",
+      "limitations": [
+        "Collection changes reconnect by Rc identity; removals during generation defer disconnection until matching finish hooks."
+      ]
     },
     {
       "source": "avaloniaedit:src/AvaloniaEdit/Rendering/VisualLineElementTextRunProperties.cs",
@@ -7196,13 +7469,26 @@
           "line": 33
         }
       ],
-      "mapped_types": [],
-      "status": "unmapped",
-      "targets": [],
-      "unmapped_types": [
+      "mapped_types": [
         "AvaloniaEdit.Rendering.VisualLineElementTextRunProperties"
       ],
-      "notes": "This rendering/visual-line extension surface has no direct port. Current editor layout uses FerroUI TextLayout and DrawingContext; that reuse does not reproduce the missing API.",
+      "status": "adapted",
+      "targets": [
+        {
+          "path": "src/FerroUI.Edit/visual_line_element_text_run_properties.rs",
+          "symbols": [
+            "VisualLineElementTextRunProperties"
+          ],
+          "aliases": [
+            {
+              "upstream": "AvaloniaEdit.Rendering.VisualLineElementTextRunProperties",
+              "rust": "VisualLineElementTextRunProperties"
+            }
+          ]
+        }
+      ],
+      "unmapped_types": [],
+      "notes": "Live TextArea construction uses this native extension contract; see editor-visual-lines.md for ownership, UTF-16 semantics and tested boundaries.",
       "limitations": []
     },
     {
@@ -7229,14 +7515,32 @@
           "line": 153
         }
       ],
-      "mapped_types": [],
-      "status": "unmapped",
-      "targets": [],
-      "unmapped_types": [
+      "mapped_types": [
         "AvaloniaEdit.Rendering.OpenUriRoutedEventArgs",
         "AvaloniaEdit.Rendering.VisualLineLinkText"
       ],
-      "notes": "This rendering/visual-line extension surface has no direct port. Current editor layout uses FerroUI TextLayout and DrawingContext; that reuse does not reproduce the missing API.",
+      "status": "adapted",
+      "targets": [
+        {
+          "path": "src/FerroUI.Edit/visual_line_link_text.rs",
+          "symbols": [
+            "VisualLineLinkText",
+            "OpenUriRoutedEventArgs"
+          ],
+          "aliases": [
+            {
+              "upstream": "AvaloniaEdit.Rendering.VisualLineLinkText",
+              "rust": "VisualLineLinkText"
+            },
+            {
+              "upstream": "AvaloniaEdit.Rendering.OpenUriRoutedEventArgs",
+              "rust": "OpenUriRoutedEventArgs"
+            }
+          ]
+        }
+      ],
+      "unmapped_types": [],
+      "notes": "Live TextArea construction uses this native extension contract; see editor-visual-lines.md for ownership, UTF-16 semantics and tested boundaries.",
       "limitations": []
     },
     {
@@ -7255,13 +7559,26 @@
           "line": 30
         }
       ],
-      "mapped_types": [],
-      "status": "unmapped",
-      "targets": [],
-      "unmapped_types": [
+      "mapped_types": [
         "AvaloniaEdit.Rendering.VisualLineText"
       ],
-      "notes": "This rendering/visual-line extension surface has no direct port. Current editor layout uses FerroUI TextLayout and DrawingContext; that reuse does not reproduce the missing API.",
+      "status": "adapted",
+      "targets": [
+        {
+          "path": "src/FerroUI.Edit/visual_line_text.rs",
+          "symbols": [
+            "VisualLineText"
+          ],
+          "aliases": [
+            {
+              "upstream": "AvaloniaEdit.Rendering.VisualLineText",
+              "rust": "VisualLineText"
+            }
+          ]
+        }
+      ],
+      "unmapped_types": [],
+      "notes": "Live TextArea construction uses this native extension contract; see editor-visual-lines.md for ownership, UTF-16 semantics and tested boundaries.",
       "limitations": []
     },
     {
@@ -7305,13 +7622,26 @@
           "line": 31
         }
       ],
-      "mapped_types": [],
-      "status": "unmapped",
-      "targets": [],
-      "unmapped_types": [
+      "mapped_types": [
         "AvaloniaEdit.Rendering.VisualLineTextSource"
       ],
-      "notes": "This rendering/visual-line extension surface has no direct port. Current editor layout uses FerroUI TextLayout and DrawingContext; that reuse does not reproduce the missing API.",
+      "status": "adapted",
+      "targets": [
+        {
+          "path": "src/FerroUI.Edit/visual_line.rs",
+          "symbols": [
+            "VisualLineTextSource"
+          ],
+          "aliases": [
+            {
+              "upstream": "AvaloniaEdit.Rendering.VisualLineTextSource",
+              "rust": "VisualLineTextSource"
+            }
+          ]
+        }
+      ],
+      "unmapped_types": [],
+      "notes": "Live TextArea construction uses this native extension contract; see editor-visual-lines.md for ownership, UTF-16 semantics and tested boundaries.",
       "limitations": []
     },
     {
@@ -7330,13 +7660,26 @@
           "line": 27
         }
       ],
-      "mapped_types": [],
-      "status": "unmapped",
-      "targets": [],
-      "unmapped_types": [
+      "mapped_types": [
         "AvaloniaEdit.Rendering.VisualLinesInvalidException"
       ],
-      "notes": "This rendering/visual-line extension surface has no direct port. Current editor layout uses FerroUI TextLayout and DrawingContext; that reuse does not reproduce the missing API.",
+      "status": "adapted",
+      "targets": [
+        {
+          "path": "src/FerroUI.Edit/visual_line_error.rs",
+          "symbols": [
+            "VisualLineError"
+          ],
+          "aliases": [
+            {
+              "upstream": "AvaloniaEdit.Rendering.VisualLinesInvalidException",
+              "rust": "VisualLineError"
+            }
+          ]
+        }
+      ],
+      "unmapped_types": [],
+      "notes": "Checked construction errors include recursion and document/collection invalidation; explicit construction returns Result and native input/render routes diagnostics through the editor error event.",
       "limitations": []
     },
     {
@@ -7800,13 +8143,26 @@
           "line": 26
         }
       ],
-      "mapped_types": [],
-      "status": "unmapped",
-      "targets": [],
-      "unmapped_types": [
+      "mapped_types": [
         "AvaloniaEdit.Snippets.IActiveElement"
       ],
-      "notes": "No verified Rust destination for this upstream source/API.",
+      "status": "adapted",
+      "targets": [
+        {
+          "path": "src/FerroUI.Edit.Core/snippets/i_active_element.rs",
+          "symbols": [
+            "IActiveElement"
+          ],
+          "aliases": [
+            {
+              "upstream": "AvaloniaEdit.Snippets.IActiveElement",
+              "rust": "IActiveElement"
+            }
+          ]
+        }
+      ],
+      "unmapped_types": [],
+      "notes": "Object-safe active-element segment, editability, insertion-completed and deactivation callbacks; custom elements participate in traversal and teardown.",
       "limitations": []
     },
     {
@@ -7839,24 +8195,40 @@
       "status": "adapted",
       "targets": [
         {
-          "path": "src/FerroUI.Edit.Core/snippets/snippet_session.rs",
+          "path": "src/FerroUI.Edit.Core/snippets/insertion_context.rs",
           "symbols": [
-            "SnippetSession"
+            "SnippetInsertionContext",
+            "SnippetInsertionOptions"
           ],
           "aliases": [
             {
               "upstream": "AvaloniaEdit.Snippets.InsertionContext",
-              "rust": "SnippetSession"
+              "rust": "SnippetInsertionContext"
             }
           ]
+        },
+        {
+          "path": "src/FerroUI.Edit.Core/snippets/snippet.rs",
+          "symbols": [
+            "PreparedSnippet"
+          ],
+          "aliases": []
+        },
+        {
+          "path": "src/FerroUI.Edit.Core/snippets/snippet_session.rs",
+          "symbols": [
+            "SnippetSession",
+            "WeakSnippetSession"
+          ],
+          "aliases": []
         }
       ],
       "unmapped_types": [
         "AvaloniaEdit.Snippets.InsertionContext.Status"
       ],
-      "notes": "Active fields, anchored ranges, tab traversal and synchronized mirrors.",
+      "notes": "Preparation captures indentation, newline and selected text; scoped extension callbacks register active factories. Host activation validates the full edit then creates tracked sessions and completion callbacks.",
       "limitations": [
-        "Host input bindings are separate; no complete managed activation/deactivation event contract."
+        "Managed mutable Status is replaced by preparation/activation ownership and terminal session state; custom callback side effects after accepted insertion are not rolled back."
       ]
     },
     {
@@ -7923,14 +8295,39 @@
           "line": 55
         }
       ],
-      "mapped_types": [],
-      "status": "unmapped",
-      "targets": [],
-      "unmapped_types": [
+      "mapped_types": [
         "AvaloniaEdit.Snippets.AnchorElement",
         "AvaloniaEdit.Snippets.SnippetAnchorElement"
       ],
-      "notes": "No verified Rust destination for this upstream source/API.",
+      "status": "adapted",
+      "targets": [
+        {
+          "path": "src/FerroUI.Edit.Core/snippets/snippet_anchor_element.rs",
+          "symbols": [
+            "AnchorElement"
+          ],
+          "aliases": [
+            {
+              "upstream": "AvaloniaEdit.Snippets.AnchorElement",
+              "rust": "AnchorElement"
+            }
+          ]
+        },
+        {
+          "path": "src/FerroUI.Edit.Core/snippets/snippet.rs",
+          "symbols": [
+            "SnippetElement::Anchor"
+          ],
+          "aliases": [
+            {
+              "upstream": "AvaloniaEdit.Snippets.SnippetAnchorElement",
+              "rust": "SnippetElement::Anchor"
+            }
+          ]
+        }
+      ],
+      "unmapped_types": [],
+      "notes": "Named UTF-16 tracked anchors expose protected replacement and share the snippet host policy, including empty-range growth.",
       "limitations": []
     },
     {
@@ -7958,6 +8355,7 @@
         }
       ],
       "mapped_types": [
+        "AvaloniaEdit.Snippets.BoundActiveElement",
         "AvaloniaEdit.Snippets.SnippetBoundElement"
       ],
       "status": "adapted",
@@ -7965,7 +8363,8 @@
         {
           "path": "src/FerroUI.Edit.Core/snippets/snippet.rs",
           "symbols": [
-            "SnippetElement::Bound"
+            "SnippetElement::Bound",
+            "SnippetElement::TransformedBound"
           ],
           "aliases": [
             {
@@ -7973,15 +8372,30 @@
               "rust": "SnippetElement::Bound"
             }
           ]
+        },
+        {
+          "path": "src/FerroUI.Edit.Core/snippets/snippet_session.rs",
+          "symbols": [
+            "ActiveElement"
+          ],
+          "aliases": [
+            {
+              "upstream": "AvaloniaEdit.Snippets.BoundActiveElement",
+              "rust": "ActiveElement"
+            }
+          ]
+        },
+        {
+          "path": "src/FerroUI.Edit.Core/snippets/snippet_element.rs",
+          "symbols": [
+            "SnippetTextTransform"
+          ],
+          "aliases": []
         }
       ],
-      "unmapped_types": [
-        "AvaloniaEdit.Snippets.BoundActiveElement"
-      ],
-      "notes": "Structured snippet case represented by an enum variant.",
-      "limitations": [
-        "Custom active-element subclasses and every lifecycle event are not exposed."
-      ]
+      "unmapped_types": [],
+      "notes": "All changed primary fields synchronize transformed bound fields through complete preflight and the initiating undo group; stale converter/validator callbacks reject their write plan.",
+      "limitations": []
     },
     {
       "source": "avaloniaedit:src/AvaloniaEdit/Snippets/SnippetCaretElement.cs",
@@ -8018,7 +8432,7 @@
         }
       ],
       "unmapped_types": [],
-      "notes": "Structured snippet case represented by an enum variant.",
+      "notes": "Structured snippet case represented by an enum variant. Context formatting, selected indentation, conditional final caret and completion/deactivation behavior are detailed in editor-snippets.md; native insertion undo deactivates before mirrors can recreate deleted expansion text.",
       "limitations": [
         "Custom active-element subclasses and every lifecycle event are not exposed."
       ]
@@ -8095,10 +8509,18 @@
               "rust": "SnippetElement"
             }
           ]
+        },
+        {
+          "path": "src/FerroUI.Edit.Core/snippets/snippet_element.rs",
+          "symbols": [
+            "ISnippetElement",
+            "SnippetElementRef"
+          ],
+          "aliases": []
         }
       ],
       "unmapped_types": [],
-      "notes": "Structured snippet expansion and numeric placeholder notation.",
+      "notes": "Structured enum nodes and identity-preserving custom ISnippetElement callbacks; scoped insertion context prepares text before protected native edits.",
       "limitations": [
         "Enum/value model replaces subclass extension points; variables/choices/transformations/nested defaults are rejected."
       ]
@@ -8127,14 +8549,32 @@
           "line": 45
         }
       ],
-      "mapped_types": [],
-      "status": "unmapped",
-      "targets": [],
-      "unmapped_types": [
+      "mapped_types": [
         "AvaloniaEdit.Snippets.DeactivateReason",
         "AvaloniaEdit.Snippets.SnippetEventArgs"
       ],
-      "notes": "No verified Rust destination for this upstream source/API.",
+      "status": "adapted",
+      "targets": [
+        {
+          "path": "src/FerroUI.Edit.Core/snippets/snippet_event_args.rs",
+          "symbols": [
+            "DeactivateReason",
+            "SnippetEventArgs"
+          ],
+          "aliases": [
+            {
+              "upstream": "AvaloniaEdit.Snippets.DeactivateReason",
+              "rust": "DeactivateReason"
+            },
+            {
+              "upstream": "AvaloniaEdit.Snippets.SnippetEventArgs",
+              "rust": "SnippetEventArgs"
+            }
+          ]
+        }
+      ],
+      "unmapped_types": [],
+      "notes": "All six upstream terminal reasons plus explicit completed/error outcomes; notification subscriptions dispose without retaining session cycles.",
       "limitations": []
     },
     {
@@ -8184,7 +8624,7 @@
         }
       ],
       "unmapped_types": [],
-      "notes": "Active snippet ranges and FerroUI keyboard integration.",
+      "notes": "Active snippet ranges and FerroUI keyboard integration. Context formatting, selected indentation, conditional final caret and completion/deactivation behavior are detailed in editor-snippets.md; native insertion undo deactivates before mirrors can recreate deleted expansion text.",
       "limitations": [
         "Custom active-element plugin contract and every managed lifecycle event remain absent."
       ]
@@ -8230,6 +8670,8 @@
         }
       ],
       "mapped_types": [
+        "AvaloniaEdit.Snippets.IReplaceableActiveElement",
+        "AvaloniaEdit.Snippets.ReplaceableActiveElement",
         "AvaloniaEdit.Snippets.SnippetReplaceableTextElement"
       ],
       "status": "adapted",
@@ -8245,16 +8687,38 @@
               "rust": "SnippetElement::Replaceable"
             }
           ]
+        },
+        {
+          "path": "src/FerroUI.Edit.Core/snippets/i_active_element.rs",
+          "symbols": [
+            "IReplaceableActiveElement"
+          ],
+          "aliases": [
+            {
+              "upstream": "AvaloniaEdit.Snippets.IReplaceableActiveElement",
+              "rust": "IReplaceableActiveElement"
+            }
+          ]
+        },
+        {
+          "path": "src/FerroUI.Edit.Core/snippets/snippet_session.rs",
+          "symbols": [
+            "ActiveElement"
+          ],
+          "aliases": [
+            {
+              "upstream": "AvaloniaEdit.Snippets.ReplaceableActiveElement",
+              "rust": "ActiveElement"
+            }
+          ]
         }
       ],
       "unmapped_types": [
-        "AvaloniaEdit.Snippets.IReplaceableActiveElement",
-        "AvaloniaEdit.Snippets.ReplaceableActiveElement",
         "AvaloniaEdit.Snippets.ReplaceableActiveElement.Renderer"
       ],
-      "notes": "Structured snippet case represented by an enum variant.",
+      "notes": "Tracked editable fields expose text-change subscriptions, participate in both numeric and cyclic positional traversal, and synchronize mirrors with atomic protection checks.",
       "limitations": [
-        "Custom active-element subclasses and every lifecycle event are not exposed."
+        "The dedicated upstream active-field background renderer is not yet supplied."
       ]
     },
     {
@@ -8292,7 +8756,7 @@
         }
       ],
       "unmapped_types": [],
-      "notes": "Structured snippet case represented by an enum variant.",
+      "notes": "Structured snippet case represented by an enum variant. Context formatting, selected indentation, conditional final caret and completion/deactivation behavior are detailed in editor-snippets.md; native insertion undo deactivates before mirrors can recreate deleted expansion text.",
       "limitations": [
         "Custom active-element subclasses and every lifecycle event are not exposed."
       ]
@@ -9203,14 +9667,30 @@
           "line": 29
         }
       ],
-      "mapped_types": [],
-      "status": "unmapped",
-      "targets": [],
-      "unmapped_types": [
+      "mapped_types": [
         "AvaloniaEdit.Utils.RopeTextReader"
       ],
-      "notes": "No standalone port of this managed utility API. Rust standard-library or FerroUI services may replace internal uses without providing this public contract.",
-      "limitations": []
+      "status": "adapted",
+      "targets": [
+        {
+          "path": "src/FerroUI.Edit.Core/utils/rope_text_reader.rs",
+          "symbols": [
+            "RopeTextReader",
+            "Utf8TextReader"
+          ],
+          "aliases": [
+            {
+              "upstream": "AvaloniaEdit.Utils.RopeTextReader",
+              "rust": "RopeTextReader"
+            }
+          ]
+        }
+      ],
+      "unmapped_types": [],
+      "notes": "Snapshot-backed UTF-16 read/peek/short/block/line/end operations traverse persistent rope chunks. A separate std::io::Read UTF-8 adapter preserves pending bytes across destination boundaries.",
+      "limitations": [
+        "UTF-8 output explicitly replaces isolated UTF-16 surrogates; UTF-16 readers preserve them."
+      ]
     },
     {
       "source": "avaloniaedit:src/AvaloniaEdit/Utils/StringSegment.cs",

@@ -43,6 +43,7 @@ Rust control/API identifiers follow FerroUI naming.
 | `ferroui-textmate` | Grammar compilation, Oniguruma scanning, state stacks, captures, selectors, themes, catalog and incremental tokenization | Framework utility contracts where appropriate; no controls or render backend |
 | `ferroui-edit` | `TextEditor`, `TextArea`, viewport, command bindings, clipboard, IME, automation, search/completion popups and snippet input | `Decorator`, `ScrollViewer`, `ILogicalScrollable`, `TextLayout`, `DrawingContext`, styled/direct properties, routed events, `ICommand`, dispatcher, popup/focus infrastructure and platform services |
 | `editor-demo` | Runnable Rust/C# editor and public-API integration tests | Runtime XAML, Fluent desktop/headless hosts and existing sample support |
+| `editor-demo-browser` | Linked native editor browser host with production scanner initialization | Existing FerroUI browser/Emscripten host, native font collection and real pointer/key/composition paths |
 
 The control does not draw through Skia, browser canvas or a new widget system.
 Its text shaping, hit testing, wrapping, glyph drawing and decorations use
@@ -146,13 +147,19 @@ FerroUI's existing Rust scanner. It does not infer method parity from a name.
 | [Virtual space and rectangles](editor-virtual-space.md) | Logical/visual positions, native geometry, virtual padding, rectangular replacement and protected edit plans |
 | [Native completion and insight](editor-completion.md) | Rich completion items, list filtering, shared popup lifecycle, observable overload providers and runtime XAML |
 | [Rich text and clipboard](editor-rich-text-clipboard.md) | Native brushes/runs, complete font styles, HTML formats, cancelable events, delayed cut ownership and rectangle paste |
+| [Visual lines](editor-visual-lines.md) | Live generators/transformers, native runs, multiline projections, extension ownership, URI routing and measured geometry |
+| [Snippets](editor-snippets.md) | Extensible insertion contexts, tracked custom elements, lifecycle events, transformed fields and native undo ownership |
+| [XSHD runtime](editor-xshd-runtime.md) | Explicit capture, bounded region matching, zero-width diagnostics and remaining .NET regex differences |
+| [Browser editor](editor-browser.md) | Linked native application, production Oniguruma initialization, renderer/input conformance gates and current evidence |
 | [TextMate engine](textmate-engine.md) | Grammar/scanner semantics, registry/catalog, metadata, theme rules, incremental states, native/Wasm oracle and remaining engine differences |
 | [Source inventory](editor-source-map.md) | Per-file source hashes, exact aliases, partial contracts and unmapped APIs |
 | [Editor demo](../../samples/EditorDemo/README.md) | Run commands, runtime XAML, toolbar, explicit-region provider and headless/desktop limits |
 
 Checkpoint evidence is recorded with the commits and updated as tests land:
 
-- The checkpoint passes **271 core tests, 91 control tests and two demo tests**. It includes
+- The current core checkpoint passes **318 tests** and the live visual-line
+  control checkpoint passes **126 tests**; the earlier demo gate passed both
+  public-API integration tests. It includes
   1,600 randomized rope edits, 5,000 appends, dense anchor tests, 2,500 interval
   model edits, 8,000 lazily shifted intervals, 2,500 live-line edits with replay,
   custom undo, C# indentation, protected text transformations, rich text/HTML
@@ -192,11 +199,14 @@ Checkpoint evidence is recorded with the commits and updated as tests land:
   regression invokes FerroUI's production site composer and executes the
   generated flat JavaScript module against the actual Oniguruma binary. This
   verifies the asset/import contract, shared initialization and regex behavior;
-  a full Emscripten editor application has not yet been linked or exercised.
+  the linked Emscripten host and browser input suite are now checked in and
+  run in a separate hosted job. Its link/runtime result is tracked in the browser
+  report rather than inferred from portability checks.
 
 The dedicated [editor CI workflow](../../.github/workflows/editor.yml) runs the
 source/asset checks, native core/control/demo tests, explicit fallback tests,
-Wasm compilation and actual Rust/Wasm token-stream conformance. The existing
+Wasm compilation, actual Rust/Wasm token-stream conformance and the linked
+browser editor renderer/input suite. The existing
 workspace CI also discovers the new packages.
 
 ## Reproducing the checks
@@ -229,15 +239,18 @@ change: inspect differences before accepting a new baseline.
 ## Remaining acceptance work
 
 The generated map is the authoritative detailed backlog. The substantial open
-areas include the complete visual-line element/transformer/layer/margin
+areas include native inline-control hosting and the remaining layer/margin
 extension contracts; remaining rectangular pointer/wrap and virtual-space edge
-cases described in the linked report; remaining
-command and modern C# lexical edge cases; secondary completion-description
-placement and platform popup behavior; structured/custom snippet lifecycle;
-whole-line copy options, live rich writers, and remaining XSHD
-XSD/.NET-regex differences; complete managed reader/comparison
-overload equivalents; text-range
-accessibility; and the full upstream behavior/test corpus.
+cases described in the linked report; remaining command and modern C# lexical
+edge cases; secondary completion-description placement and platform popup
+behavior; native snippet field decorations; whole-line copy options and live
+rich writers; remaining .NET regex/capture and culture-sensitive comparison
+contracts; text-range accessibility; and the full upstream behavior/test corpus.
+Live generators/transformers, snapshot streaming readers, custom snippet
+lifecycle and ordinal comparisons now have concrete implementations and their
+own source/member reports. The XSHD schema is disabled in the pinned upstream
+loader; compatibility checks must compare actual loader behavior rather than
+introducing new schema restrictions.
 
 Ported functionality still needs platform verification for pointer capture,
 clipboard formats, IME composition, accessibility and browser host lifecycle.

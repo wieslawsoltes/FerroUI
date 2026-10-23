@@ -80,7 +80,19 @@ oversized preceding text and nonadvancing custom caret positions are reported
 explicitly. No extension failure is silently presented as a successfully
 formatted truncated line.
 
-## Host integration contract
+## Live TextArea integration
+
+`TextArea` now owns this pipeline in `text_area_visual_lines.rs`. The previous
+`DisplayLine` projection and overlay whitespace drawing have been removed.
+A retained cache entry holds the immutable `VisualLine` and its native
+`TextLayout`; all arranged geometry uses that pair. An unarranged view computes
+only UTF-16 tab columns without building a second display-text model.
+
+The public host exposes `element_generators`, `line_transformers`,
+`visual_line_construction_starting`, `visual_lines`, `get_visual_line`,
+`get_or_construct_visual_line` and `redraw`. Collections are shared native
+`FerroList` values. Reordering invalidates construction while duplicated
+identities connect only once; the final removal disconnects the entry.
 
 The stable construction sequence is:
 
@@ -116,7 +128,7 @@ strict fold interiors. `source_lines` lists the logical lines with visible
 element starts, while `first_document_line` and `last_document_line` delimit the
 complete represented document span, including hidden rows.
 
-The host advances to the line after `last_document_line` and reconciles hidden
+The host advances after construction updates its height tree and reconciles hidden
 rows in its height tree. It must account for every multiline element, including
 composition replacements and custom generators, rather than deriving all
 collapsed rows from the folding manager alone. Caret, selection, IME cursor,
@@ -125,9 +137,19 @@ popup, word wrapping and hit-test geometry use these retained mappings.
 The host exposes shared native observable collections of
 `VisualLineElementGeneratorRef` and `VisualLineTransformerRef`, connects and
 disconnects entries through `ITextViewConnect`, and invalidates cached layouts
-when either collection changes. Snapshot both collections once per viewport
-construction batch after raising `VisualLineConstructionStarting`; do not hold
-a collection or cache borrow across application callbacks.
+when either collection changes. It snapshots both collections once per viewport
+construction batch after raising `VisualLineConstructionStarting`. Fully cached
+paints do not raise another construction event or rebuild the built-in regexes.
+No collection or cache borrow survives an application callback.
+
+Removal while a batch is inside generator/transformer callbacks marks it stale
+but defers disconnect hooks until all matching finish callbacks have returned.
+The host checks document identity, version and its own layout revision before
+publishing a line, then checks again after hidden cached elements are released.
+That second check handles custom element destructors which edit the document.
+Viewport eviction also releases values outside the cache borrow. Recursive
+construction returns an explicit error; collection hooks can change membership
+and the synchronization loop reconciles those changes before finishing.
 
 Pointer processing finds the corresponding retained element and calls its
 cursor/press/release hooks before starting editor selection. The native
@@ -186,28 +208,35 @@ Other explicit adaptations and boundaries:
 * Native `Uri` is narrower than `System.Uri`; web links additionally validate
   nonempty authority and percent escapes. Exhaustive URI normalization and
   canonicalization equivalence is not claimed.
-* The existing editor options initially expose spaces, tabs, EOL visibility and
-  indentation. Generator fields expose their glyphs, brushes, control boxes and
-  link policies. Host wiring must decide which additional fields become editor
-  options; they must not silently ignore a supplied generator setting.
-* This report covers construction and extension contracts. Viewport layer
-  ordering, background geometry and exact wrapped-row geometry belong to the
-  host rendering work and require their own integration tests.
+* The editor options expose spaces, tabs, EOL visibility, indentation, control
+  boxes, web/mail links and the control-modifier click policy. Custom generator
+  fields retain their glyph, brush and matching settings. Built-in composition
+  has first priority, followed by application generators, folding, tabs, special
+  characters and optional web/mail generators.
+* Native paragraph formatting uses automatic row height so styled and drawable
+  runs can expand a row. Geometry tests target actual measured rows. Exact
+  upstream drawable line-gap and pixel appearance need reference comparisons.
+* Arbitrary custom multiline spans are discovered when their owning line is
+  constructed. Known folds and active multiline composition preseed collapse
+  intervals even before painting; generators do not provide a global offscreen
+  span index.
 
 ## Validation checkpoint
 
-The new sources pass Rust syntax/format parsing and the shared native gate on
-2026-10-22. The 21 focused regression cases in `visual_line_tests.rs` and the
-property-copy test alongside `VisualLineElementTextRunProperties` all pass.
-This checkpoint wires the public modules and tests while retaining the previous
-TextArea rendering pipeline; replacement of that pipeline has its own host
-integration gate.
+The live host checkpoint passes **126 native control tests**. This includes the
+standalone element/property tests and thirteen new live-host cases, plus the
+hidden-EOF height regression. Four obsolete `DisplayLine` model tests were
+removed with that model; UTF-16 tabs, folds and composition now have native host
+coverage. The selected-leading-indentation snippet undo regression also passes
+through the native controller.
 
-| Package | Result |
-| --- | --- |
-| `ferroui-edit-core` | 271 passed, 0 failed |
-| `ferroui-edit` | 113 passed, 0 failed; all 91 existing UI cases plus 22 visual-line/property cases |
-| `editor-demo` | 2 passed, 0 failed |
+Live cases cover custom multiline generation, suffix hit testing and retained
+owners, event-time extension registration, native font-height transformation,
+no-construction cached paints, identity-based connection hooks, mutation and
+recursive construction, deferred disconnection, reentrant extension destruction,
+hidden-row element destruction, prepaint multiline IME cursor relocation,
+atomic folded keyboard movement, overlapping offscreen fold unions, and actual
+routed pointer activation of built-in hyperlinks/folding placeholders.
 
 The cases exercise generator ordering and progress, finish-on-error, invalid
 interest, long-line required generators, CRLF boundaries, styling splits and
@@ -229,4 +258,5 @@ cargo test --offline --no-default-features \
 
 Native unit tests establish only the tested behavior. Browser layout, platform
 URI launching, arbitrary custom formatter runs and embedded native-control
-hosting require their respective integration evidence.
+hosting require their respective integration evidence. The linked browser gate
+is tracked independently in [editor-browser.md](editor-browser.md).

@@ -1,6 +1,11 @@
 use crate::TextEditor;
-use crate::rendering::{DisplayLine, HeightTree};
+use crate::rendering::HeightTree;
 use crate::text_input_method_client::EditorTextInputMethodClient;
+#[cfg(test)]
+#[path = "text_area_visual_line_tests.rs"]
+mod visual_line_tests;
+#[path = "text_area_visual_lines.rs"]
+mod visual_lines;
 use ferroui_base::input::text_input::TextInputMethodClient;
 use ferroui_base::input::{
     FocusChangedEventArgs, ICommand, IScrollable, InputElement, InputElementImpl,
@@ -10,16 +15,11 @@ use ferroui_base::input::{
 use ferroui_base::interactivity::InteractiveImpl;
 use ferroui_base::layout::LayoutableImpl;
 use ferroui_base::media::immutable::ImmutableSolidColorBrush;
-use ferroui_base::media::text_formatting::{
-    GenericTextRunProperties, TextLayout, TextLayoutOptions, TextRunProperties,
-};
-use ferroui_base::media::{
-    BaselineAlignment, Color, DrawingContext, FontStretch, FontStyle, FontWeight, IBrush,
-    TextDecorationCollection, TextWrapping, Typeface,
-};
+use ferroui_base::media::text_formatting::{TextLayout, TextLayoutOptions};
+use ferroui_base::media::{DrawingContext, IBrush, Typeface};
 use ferroui_base::reactive::{Disposable, IDisposable};
 use ferroui_base::threading::{Dispatcher, DispatcherPriority, DispatcherTimer};
-use ferroui_base::utilities::{HandlerList, ReadOnlyMemory, ValueSpan};
+use ferroui_base::utilities::HandlerList;
 use ferroui_base::{
     FerroObjectImpl, FerroObjectImplExt, Point, Rect, Ref, Size, StyledElementImpl, Vector, Visual,
     VisualImpl, WeakRef, ferro_class, ferro_impl_classes, instantiate,
@@ -32,11 +32,12 @@ use std::cell::{Cell, OnceCell, RefCell};
 use std::collections::BTreeMap;
 use std::rc::Rc;
 use std::time::Duration;
+use visual_lines::VisualLineHost;
 
-struct VisualLine {
+struct CachedVisualLine {
     offset: usize,
     length: usize,
-    display: DisplayLine,
+    display: Rc<crate::VisualLine>,
     layout: TextLayout,
     preedit: Option<(usize, usize)>,
 }
@@ -52,7 +53,8 @@ pub struct TextArea {
     extent: Cell<Size>,
     horizontal: Cell<bool>,
     vertical: Cell<bool>,
-    cache: RefCell<BTreeMap<usize, Rc<VisualLine>>>,
+    cache: RefCell<BTreeMap<usize, Rc<CachedVisualLine>>>,
+    visual_lines: VisualLineHost,
     heights: RefCell<HeightTree>,
     scroll_invalidated: Rc<HandlerList<dyn Fn()>>,
     rendering: Cell<bool>,
@@ -95,6 +97,7 @@ impl FerroObjectImpl for TextArea {
             }
         });
         this.blink_timer.set(timer).ok();
+        this.connect_visual_line_extensions();
     }
 }
 
@@ -142,24 +145,33 @@ impl VisualImpl for TextArea {
         }
         let offset = this.offset.get();
         let first = this.heights.borrow().line_at(offset.y);
+        let needs_construction = {
+            let heights = this.heights.borrow();
+            let cache = this.cache.borrow();
+            let count = editor.document().line_count();
+            std::iter::successors(Some(first), |&index| {
+                let next = heights.next_visible(index + 1);
+                (next < count).then_some(next)
+            })
+            .take_while(|&index| heights.top(index) - offset.y <= size.height)
+            .any(|index| !cache.contains_key(&index))
+        };
+        let _batch = if needs_construction {
+            match this.begin_visual_line_batch(first) {
+                Ok(batch) => Some(batch),
+                Err(error) => {
+                    editor.report_error(error.to_string());
+                    context.pop(clip);
+                    return;
+                }
+            }
+        } else {
+            None
+        };
+        let first = this.heights.borrow().line_at(offset.y);
         let line_count = editor.document().line_count();
         let gutter = this.gutter_width();
         let selection = editor.selection();
-        let options = editor.options();
-        let marker_layout = |text: &str| {
-            TextLayout::new(
-                text,
-                Typeface::new(editor.font_family()),
-                TextLayoutOptions {
-                    font_size: editor.font_size(),
-                    foreground: editor.line_numbers_foreground(),
-                    ..Default::default()
-                },
-            )
-        };
-        let space_marker = options.show_spaces.then(|| marker_layout("·"));
-        let tab_marker = options.show_tabs.then(|| marker_layout("→"));
-        let eol_marker = options.show_end_of_line.then(|| marker_layout("¶"));
         let caret = editor.caret_offset();
         let folding_sections = editor
             .folding_manager()
@@ -171,10 +183,8 @@ impl VisualImpl for TextArea {
             .map(|l| l.line_number() - 1)
             .unwrap_or(0);
         let mut last = first;
-        for index in std::iter::successors(Some(first), |&index| {
-            let next = this.heights.borrow().next_visible(index + 1);
-            (next < line_count).then_some(next)
-        }) {
+        let mut index = first;
+        while index < line_count {
             let top = this.heights.borrow().top(index) - offset.y;
             if top > size.height {
                 break;
@@ -192,7 +202,10 @@ impl VisualImpl for TextArea {
                 (size.width - gutter).max(0.0),
                 size.height,
             ));
-            if index == current_line && editor.options().highlight_current_line {
+            if index <= current_line
+                && current_line < line.display.last_document_line().line_number()
+                && editor.options().highlight_current_line
+            {
                 let brush =
                     Rc::new(ImmutableSolidColorBrush::from_uint32(0x14808080)) as Rc<dyn IBrush>;
                 context.fill_rectangle(
@@ -205,6 +218,25 @@ impl VisualImpl for TextArea {
                     ),
                     0.0,
                 );
+            }
+            for element in line.display.elements() {
+                if let Some(brush) = element.data().background_brush() {
+                    for rect in line.layout.hit_test_text_range(
+                        element.data().visual_column() as i32,
+                        element.data().visual_length() as i32,
+                    ) {
+                        context.fill_rectangle(
+                            brush,
+                            Rect::new(
+                                origin.x + rect.x,
+                                origin.y + rect.y,
+                                rect.width,
+                                rect.height,
+                            ),
+                            0.0,
+                        );
+                    }
+                }
             }
             if let Some(panel) = editor.installed_search_panel().filter(|p| p.is_open()) {
                 let brush =
@@ -277,29 +309,17 @@ impl VisualImpl for TextArea {
                 }
             }
             line.layout.draw(context, origin);
-            if space_marker.is_some() || tab_marker.is_some() {
-                for (position, tab) in line.display.whitespace_markers() {
-                    if let Some(marker) = if tab {
-                        tab_marker.as_ref()
-                    } else {
-                        space_marker.as_ref()
-                    } {
-                        let rect = line.layout.hit_test_text_position(position as i32);
-                        marker.draw(context, Point::new(origin.x + rect.x, origin.y + rect.y));
-                    }
-                }
-            }
-            if let Some(marker) = &eol_marker {
-                if line.offset + line.length < editor.document().text_length() {
-                    let rect = line
-                        .layout
-                        .hit_test_text_position(line.display.text.len() as i32);
-                    marker.draw(context, Point::new(origin.x + rect.x, origin.y + rect.y));
-                }
-            }
             if this.is_focused() && this.caret_visible.get() {
-                for segment in selection.segments().iter().filter(|s| s.is_empty()) {
-                    if segment.caret >= line.offset && segment.caret <= line.offset + line.length {
+                for segment in selection.segments().iter().filter(|s| {
+                    s.is_empty() || line.preedit.is_some() && **s == selection.primary()
+                }) {
+                    if line.preedit.is_some() && *segment == selection.primary()
+                        || segment.caret >= line.offset
+                            && segment.caret <= line.offset + line.length
+                            && line
+                                .display
+                                .is_document_offset_visible(segment.caret - line.offset)
+                    {
                         let position = if let Some((start, length)) = line.preedit {
                             start
                                 + this
@@ -384,10 +404,23 @@ impl VisualImpl for TextArea {
                 }
             }
             last = index;
+            // Construction can discover a new multiline span. Advance only
+            // after that span has updated the height tree; an iterator that
+            // precomputes its successor would format one hidden row as well.
+            index = this.heights.borrow().next_visible(index + 1);
         }
-        this.cache
-            .borrow_mut()
-            .retain(|index, _| *index >= first.saturating_sub(8) && *index <= last + 8);
+        let evicted = {
+            let mut cache = this.cache.borrow_mut();
+            let keys: Vec<_> = cache
+                .keys()
+                .copied()
+                .filter(|index| *index < first.saturating_sub(8) || *index > last + 8)
+                .collect();
+            keys.into_iter()
+                .filter_map(|key| cache.remove(&key))
+                .collect::<Vec<_>>()
+        };
+        drop(evicted);
         this.update_extent();
         context.pop(clip);
     }
@@ -687,7 +720,9 @@ impl InputElementImpl for TextArea {
                     0,
                 ))
             } else {
-                session.move_caret(movement, extend);
+                if !this.move_caret_over_visual_elements(movement, extend) {
+                    session.move_caret(movement, extend);
+                }
                 Ok(())
             }
         } else {
@@ -746,6 +781,12 @@ impl InputElementImpl for TextArea {
         let point = e.get_current_point(Some(this));
         if !point.properties.is_left_button_pressed {
             return;
+        }
+        if let Some((line, index)) = this.element_at_point(point.position) {
+            line.display.elements()[index].on_pointer_pressed(this, e);
+            if e.handled() {
+                return;
+            }
         }
         let Some(editor) = this.editor() else {
             return;
@@ -825,6 +866,12 @@ impl InputElementImpl for TextArea {
     }
     fn on_pointer_moved(this: &Self, e: &PointerEventArgs) {
         if !this.dragging.get() {
+            let cursor =
+                this.element_at_point(e.get_position(Some(this)))
+                    .and_then(|(line, index)| {
+                        line.display.elements()[index].query_cursor(e.key_modifiers())
+                    });
+            this.set_cursor(cursor);
             return;
         }
         if let Some(editor) = this.editor() {
@@ -862,11 +909,20 @@ impl InputElementImpl for TextArea {
         }
     }
     fn on_pointer_released(this: &Self, e: &PointerReleasedEventArgs) {
+        if !this.dragging.get() {
+            if let Some((line, index)) = this.element_at_point(e.get_position(Some(this))) {
+                line.display.elements()[index].on_pointer_released(this, e);
+            }
+        }
         if this.dragging.replace(false) {
             this.rectangle_drag_anchor.set(None);
             e.pointer().capture(None);
             e.set_handled(true);
         }
+    }
+    fn on_pointer_exited(this: &Self, e: &PointerEventArgs) {
+        this.set_cursor(None);
+        Self::parent_on_pointer_exited(this, e);
     }
 }
 
@@ -897,6 +953,7 @@ impl TextArea {
             horizontal: Cell::new(true),
             vertical: Cell::new(true),
             cache: RefCell::new(BTreeMap::new()),
+            visual_lines: VisualLineHost::new(),
             heights: RefCell::new(HeightTree::new(1, 20.0)),
             scroll_invalidated: Rc::new(HandlerList::new()),
             rendering: Cell::new(false),
@@ -970,12 +1027,13 @@ impl TextArea {
     pub(crate) fn invalidate_layout_cache(&self) {
         self.reset_line_metrics();
         self.extent.set(Size::default());
-        self.invalidate_measure();
+        self.invalidate_line_measure();
         self.invalidate_visual();
         self.update_extent();
     }
     fn reset_line_metrics(&self) {
-        self.cache.borrow_mut().clear();
+        self.clear_visual_line_cache();
+        self.visual_lines.collapsed.borrow_mut().clear();
         self.space_advance.set(0.0);
         self.default_line_height.set(0.0);
         let mut active = Vec::<FoldingSection>::new();
@@ -990,18 +1048,21 @@ impl TextArea {
                 let mut sections = manager.all_foldings();
                 sections.sort_by_key(|s| (s.start_offset(), std::cmp::Reverse(s.end_offset())));
                 for section in sections.into_iter().filter(|s| s.is_folded()) {
-                    if active
-                        .last()
-                        .is_some_and(|previous| section.start_offset() < previous.end_offset())
-                    {
-                        continue;
-                    }
                     let start = document.get_line_by_offset(section.start_offset());
                     let end = document.get_line_by_offset(section.end_offset());
                     if let (Ok(start), Ok(end)) = (start, end) {
                         collapsed.push((start.line_number(), end.line_number()));
                     }
                     active.push(section);
+                }
+            }
+            if self.preedit.borrow().is_some() {
+                let selection = editor.selection().primary();
+                if let (Ok(start), Ok(end)) = (
+                    document.get_line_by_offset(selection.start_offset()),
+                    document.get_line_by_offset(selection.end_offset()),
+                ) {
+                    collapsed.push((start.line_number(), end.line_number()));
                 }
             }
         }
@@ -1016,6 +1077,9 @@ impl TextArea {
         }
     }
     pub(crate) fn selection_changed_with_affinity(&self, at_end_of_line: bool) {
+        if self.preedit.borrow().is_some() {
+            self.reset_line_metrics();
+        }
         self.caret_at_end_of_line.set(at_end_of_line);
         self.rectangle_keyboard_anchor.set(None);
         if !self.moving_vertically.get() {
@@ -1077,262 +1141,16 @@ impl TextArea {
             self.raise_scroll_invalidated();
         }
     }
-    fn line_layout(&self, index: usize) -> Option<Rc<VisualLine>> {
-        if let Some(line) = self.cache.borrow().get(&index).cloned() {
-            return Some(line);
-        }
-        let editor = self.editor()?;
-        let document = editor.document();
-        let line = document.get_line_by_number(index + 1).ok()?;
-        let mut display = DisplayLine::empty();
-        let mut cursor = line.offset();
-        let mut end = line.end_offset();
-        let mut source_lines = vec![line.line_number()];
-        let folds = self.folds.borrow();
-        let first = folds.partition_point(|s| s.start_offset() < cursor);
-        for section in folds.iter().skip(first) {
-            if section.start_offset() > end {
-                break;
-            }
-            let text = document
-                .get_text_utf16(cursor, section.start_offset() - cursor)
-                .ok()?;
-            display.push_text(
-                &text,
-                cursor - line.offset(),
-                editor.options().indentation_size,
-            );
-            let title = section
-                .title()
-                .filter(|s| !s.is_empty())
-                .unwrap_or_else(|| "...".into());
-            display.push_fold(
-                section.start_offset() - line.offset(),
-                section.end_offset() - line.offset(),
-                &title,
-            );
-            cursor = section.end_offset();
-            let last_line = document.get_line_by_offset(cursor).ok()?;
-            end = last_line.end_offset();
-            if source_lines.last() != Some(&last_line.line_number()) {
-                source_lines.push(last_line.line_number());
-            }
-        }
-        drop(folds);
-        display.push_text(
-            &document.get_text_utf16(cursor, end - cursor).ok()?,
-            cursor - line.offset(),
-            editor.options().indentation_size,
-        );
-        let preedit = self.preedit.borrow().as_ref().and_then(|(text, _)| {
-            let selected = editor.selection().primary();
-            if selected.start_offset() >= line.offset() && selected.end_offset() <= end {
-                match display.apply_preedit(
-                    selected.start_offset() - line.offset(),
-                    selected.end_offset() - line.offset(),
-                    text,
-                    selected.start_virtual_space(),
-                ) {
-                    Ok(range) => Some(range),
-                    Err(error) => {
-                        editor.report_error(error.to_string());
-                        None
-                    }
+    fn line_layout(&self, index: usize) -> Option<Rc<CachedVisualLine>> {
+        match self.try_line_layout(index) {
+            Ok(line) => Some(line),
+            Err(error) => {
+                if let Some(editor) = self.editor() {
+                    editor.report_error(error.to_string());
                 }
-            } else {
                 None
             }
-        });
-        let mut styles = Vec::new();
-        if let Some(installation) = editor.textmate_installation() {
-            let target = *source_lines.last().unwrap_or(&(index + 1));
-            if !installation.advance_to(&document, target, 32)
-                && installation.last_error().is_none()
-            {
-                self.schedule_highlight(target);
-            }
-            for source_number in &source_lines {
-                let source_offset =
-                    document.get_line_by_number(*source_number).ok()?.offset() - line.offset();
-                for (start, end, style) in installation.styled_tokens(*source_number) {
-                    let foreground = style
-                        .foreground
-                        .map(|c| {
-                            Rc::new(ImmutableSolidColorBrush::new(Color::from_argb(
-                                c.a, c.r, c.g, c.b,
-                            ))) as Rc<dyn IBrush>
-                        })
-                        .or_else(|| editor.foreground());
-                    let background = style.background.map(|c| {
-                        Rc::new(ImmutableSolidColorBrush::new(Color::from_argb(
-                            c.a, c.r, c.g, c.b,
-                        ))) as Rc<dyn IBrush>
-                    });
-                    let typeface = Typeface::with_style(
-                        editor.font_family(),
-                        if style
-                            .font_style
-                            .contains(ferroui_textmate::FontStyle::ITALIC)
-                        {
-                            FontStyle::Italic
-                        } else {
-                            FontStyle::Normal
-                        },
-                        if style.font_style.contains(ferroui_textmate::FontStyle::BOLD) {
-                            FontWeight::Bold
-                        } else {
-                            FontWeight::Normal
-                        },
-                        FontStretch::Normal,
-                    );
-                    let decorations = match (
-                        style
-                            .font_style
-                            .contains(ferroui_textmate::FontStyle::UNDERLINE),
-                        style
-                            .font_style
-                            .contains(ferroui_textmate::FontStyle::STRIKETHROUGH),
-                    ) {
-                        (true, true) => {
-                            TextDecorationCollection::parse("Underline,Strikethrough").ok()
-                        }
-                        (true, false) => TextDecorationCollection::parse("Underline").ok(),
-                        (false, true) => TextDecorationCollection::parse("Strikethrough").ok(),
-                        _ => None,
-                    };
-                    let properties = Rc::new(GenericTextRunProperties::with_all(
-                        typeface,
-                        editor.font_size(),
-                        decorations,
-                        foreground,
-                        background,
-                        BaselineAlignment::Baseline,
-                        None,
-                        None,
-                    )) as Rc<dyn TextRunProperties>;
-                    let start = display.visual_offset(source_offset + start);
-                    let end = display.visual_offset(source_offset + end);
-                    if end > start {
-                        styles.push(ValueSpan::new(
-                            start as i32,
-                            (end - start) as i32,
-                            properties,
-                        ));
-                    }
-                }
-            }
-        } else if let Some(highlighter) = editor.document_highlighter() {
-            for source_number in source_lines {
-                match highlighter.highlight_line(source_number) {
-                    Ok(highlighted) => {
-                        for section in highlighted.sections {
-                            let defaults = GenericTextRunProperties::with_all(
-                                Typeface::new(editor.font_family()),
-                                editor.font_size(),
-                                None,
-                                editor.foreground(),
-                                None,
-                                BaselineAlignment::Baseline,
-                                None,
-                                None,
-                            );
-                            let properties = match crate::NativeHighlightingStyle::resolve(
-                                &section.color,
-                                Some(&editor),
-                            ) {
-                                Ok(style) => style.text_run_properties(&defaults),
-                                Err(error) => {
-                                    editor.report_error(error.to_string());
-                                    continue;
-                                }
-                            };
-                            let start =
-                                display.visual_offset(section.offset.saturating_sub(line.offset()));
-                            let end = display.visual_offset(
-                                (section.offset + section.length).saturating_sub(line.offset()),
-                            );
-                            if end > start {
-                                styles.push(ValueSpan::new(
-                                    start as i32,
-                                    (end - start) as i32,
-                                    properties,
-                                ));
-                            }
-                        }
-                    }
-                    Err(error) => editor.report_error(error.to_string()),
-                }
-            }
         }
-        if let Some((first, length)) = preedit {
-            let start = first as i32;
-            let end = (first + length) as i32;
-            let mut split = Vec::new();
-            for span in styles {
-                let a = span.start();
-                let b = a + span.length();
-                if b <= start || a >= end {
-                    split.push(span);
-                } else {
-                    if a < start {
-                        split.push(ValueSpan::new(a, start - a, span.value().clone()));
-                    }
-                    if b > end {
-                        split.push(ValueSpan::new(end, b - end, span.value().clone()));
-                    }
-                }
-            }
-            let properties = Rc::new(GenericTextRunProperties::with_all(
-                Typeface::new(editor.font_family()),
-                editor.font_size(),
-                TextDecorationCollection::parse("Underline").ok(),
-                editor.foreground(),
-                None,
-                BaselineAlignment::Baseline,
-                None,
-                None,
-            )) as Rc<dyn TextRunProperties>;
-            split.push(ValueSpan::new(start, length as i32, properties));
-            split.sort_by_key(ValueSpan::start);
-            styles = split;
-        }
-        let layout = TextLayout::from_utf16(
-            ReadOnlyMemory::from_vec(display.text.clone()),
-            Typeface::new(editor.font_family()),
-            TextLayoutOptions {
-                font_size: editor.font_size(),
-                foreground: editor.foreground(),
-                text_wrapping: if editor.word_wrap() {
-                    TextWrapping::Wrap
-                } else {
-                    TextWrapping::NoWrap
-                },
-                max_width: if editor.word_wrap() {
-                    (self.viewport.get().width - self.gutter_width() - 4.0).max(1.0)
-                } else {
-                    f64::INFINITY
-                },
-                line_height: f64::NAN,
-                text_style_overrides: if styles.is_empty() {
-                    None
-                } else {
-                    Some(Rc::from(styles))
-                },
-                ..Default::default()
-            },
-        );
-        self.heights
-            .borrow_mut()
-            .set_height(index, layout.height().max(self.line_height()));
-        let result = Rc::new(VisualLine {
-            offset: line.offset(),
-            length: end - line.offset(),
-            display,
-            layout,
-            preedit,
-        });
-        self.cache.borrow_mut().insert(index, result.clone());
-        Some(result)
     }
     fn schedule_highlight(&self, target: usize) {
         if self.highlight_pending.replace(true) {
@@ -1346,7 +1164,7 @@ impl TextArea {
                     if let Some(editor) = area.editor() {
                         if let Some(installation) = editor.textmate_installation() {
                             let done = installation.advance_to(&editor.document(), target, 256);
-                            area.cache.borrow_mut().clear();
+                            area.clear_visual_line_cache();
                             area.invalidate_visual();
                             if !done && installation.last_error().is_none() {
                                 area.schedule_highlight(target);
@@ -1384,7 +1202,7 @@ impl TextArea {
 
     fn selection_position_on_line(
         &self,
-        line: &VisualLine,
+        line: &CachedVisualLine,
         point: Point,
         allow_virtual_space: bool,
     ) -> (usize, usize) {
@@ -1393,13 +1211,13 @@ impl TextArea {
             if point.x.is_finite() && point.x > edge.x && point.y >= edge.y {
                 let extra = ((point.x - edge.x) / self.space_advance()).round().max(0.0) as usize;
                 return (
-                    line.offset + line.display.document_offset(line.display.text.len()),
+                    line.offset + line.display.document_offset(line.display.visual_length()),
                     extra,
                 );
             }
         }
         let hit = line.layout.hit_test_point(point);
-        let visual = (hit.text_position().max(0) as usize).min(line.display.text.len());
+        let visual = (hit.text_position().max(0) as usize).min(line.display.visual_length());
         let offset = line.offset + line.display.document_offset(visual);
         (offset, 0)
     }
@@ -1435,6 +1253,12 @@ impl TextArea {
         let location = editor.document().get_location(offset).ok()?;
         let index = self.heights.borrow().visible_owner(location.line - 1);
         let line = self.line_layout(index)?;
+        if !line
+            .display
+            .is_document_offset_visible(offset - line.offset)
+        {
+            return None;
+        }
         let visual = line.display.visual_offset(offset - line.offset);
         let mut result =
             crate::TextViewPosition::with_visual_column(location, visual.saturating_add(extra));
@@ -1472,9 +1296,20 @@ impl TextArea {
             .document()
             .get_text_utf16(logical.offset(), logical.length())
             .ok()?;
-        let mut display = DisplayLine::empty();
-        display.push_text(&source, 0, editor.options().indentation_size);
-        Some(display.visual_offset(offset - logical.offset()))
+        let tab_size = editor.options().indentation_size.clamp(1, 256);
+        Some(
+            source
+                .iter()
+                .take(offset - logical.offset())
+                .fold(0, |column, unit| {
+                    column
+                        + if *unit == 9 {
+                            tab_size - column % tab_size
+                        } else {
+                            1
+                        }
+                }),
+        )
     }
 
     fn caret_bounds(layout: &TextLayout, visual: usize, at_end: bool) -> Rect {
@@ -1742,6 +1577,12 @@ impl TextArea {
             return None;
         }
         let line = self.line_layout(index)?;
+        if !line
+            .display
+            .is_document_offset_visible(offset - line.offset)
+        {
+            return None;
+        }
         let visual = line.display.visual_offset(offset - line.offset);
         let rect = line.layout.hit_test_text_position(visual as i32);
         let result = Rect::new(
@@ -1806,7 +1647,11 @@ impl TextArea {
         let Some(editor) = self.editor() else {
             return Rect::default();
         };
-        let offset = editor.caret_offset();
+        let offset = if self.preedit.borrow().is_some() {
+            editor.selection().primary().start_offset()
+        } else {
+            editor.caret_offset()
+        };
         let Ok(document_line) = editor.document().get_line_by_offset(offset) else {
             return Rect::default();
         };
@@ -1879,7 +1724,7 @@ impl TextArea {
         *self.preedit.borrow_mut() = text
             .filter(|s| !s.is_empty())
             .map(|s| (s.to_owned(), cursor));
-        self.cache.borrow_mut().clear();
+        self.reset_line_metrics();
         self.invalidate_visual();
         if let Some(client) = self.im_client.get() {
             client.raise_cursor_rectangle_changed();
@@ -2008,6 +1853,7 @@ impl ILogicalScrollable for TextArea {
 
 impl Drop for TextArea {
     fn drop(&mut self) {
+        self.disconnect_visual_line_extensions();
         if let Some(timer) = self.blink_timer.get() {
             timer.stop();
         }

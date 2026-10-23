@@ -1,7 +1,7 @@
 use crate::formatted_text_element::{FormattedTextElement, FormattedTextRun};
 use crate::i_text_run_construction_context::ITextRunConstructionContext;
 use crate::i_text_view_connect::ITextViewConnect;
-use crate::visual_line_element::{atomic_caret_stop, VisualLineElement, VisualLineElementData};
+use crate::visual_line_element::{VisualLineElement, VisualLineElementData, atomic_caret_stop};
 use crate::visual_line_element_generator::VisualLineElementGenerator;
 use crate::visual_line_element_text_run_properties::VisualLineElementTextRunProperties;
 use crate::visual_line_error::VisualLineError;
@@ -83,6 +83,7 @@ impl SingleCharacterElementGenerator {
 impl IBuiltinElementGenerator for SingleCharacterElementGenerator {
     fn fetch_options(&mut self, options: &EditorOptions) {
         self.show_spaces = options.show_spaces;
+        self.show_box_for_control_characters = options.show_box_for_control_characters;
         self.prepared.get_mut().clear();
     }
 }

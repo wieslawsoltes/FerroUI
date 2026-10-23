@@ -129,7 +129,7 @@ fn editor_types_and_styled_properties_are_registered_without_instances() {
     );
 }
 
-fn laid_out_editor(text: &str) -> ferroui_base::Ref<TextEditor> {
+pub(crate) fn laid_out_editor(text: &str) -> ferroui_base::Ref<TextEditor> {
     use ferroui_base::{Rect, Size};
     let editor = TextEditor::new();
     editor.set_font_family(ferroui_base::media::FontFamily::new("Test Sans"));
@@ -140,7 +140,7 @@ fn laid_out_editor(text: &str) -> ferroui_base::Ref<TextEditor> {
     editor
 }
 
-fn render_editor(editor: &TextEditor) -> Vec<String> {
+pub(crate) fn render_editor(editor: &TextEditor) -> Vec<String> {
     use ferroui_base::media::{DrawingContext, PlatformDrawingContext};
     use ferroui_base::rendering::testing::{DrawingLog, MockDrawingContextImpl};
     let log = DrawingLog::new();
@@ -451,11 +451,9 @@ fn rectangle_geometry_skips_collapsed_lines_and_uses_visible_suffix() {
     section.set_is_folded(true);
     render_editor(&editor);
     let area = editor.text_area();
-    area.set_rectangular_selection(
-        Point::new(40.0, 1.0),
-        Point::new(55.0, area.line_height() + 1.0),
-    )
-    .unwrap();
+    let next_row = area.rectangle_for_offset(14).unwrap();
+    area.set_rectangular_selection(Point::new(40.0, 1.0), Point::new(55.0, next_row.y + 1.0))
+        .unwrap();
     assert!(editor.selection().is_rectangular());
     assert_eq!(editor.selection().segments().len(), 2);
     assert!(section.is_folded());
