@@ -527,16 +527,16 @@ Every file in the three primary roots is retained, including build and data file
 | Upstream file | State | Reviewed Rust target |
 |---|---|---|
 | `dxaml/xcp/core/inc/RichTextBlock.h` | partial | `src/FerroUI.Controls/rich_text_block.rs`, `src/FerroUI.Controls/rich_text_block.rs`, `src/FerroUI.Controls/rich_text_block.rs` |
-| `dxaml/xcp/core/inc/RichTextBlockOverflow.h` | partial | `src/FerroUI.Controls/rich_text_block_overflow.rs` |
+| `dxaml/xcp/core/inc/RichTextBlockOverflow.h` | partial | `src/FerroUI.Controls/rich_text_block_overflow.rs`, `src/FerroUI.Controls/rich_text_overflow_links.rs`, `src/FerroUI.Controls/rich_text_overflow_links.rs`, `src/FerroUI.Controls/rich_text_overflow_links.rs`, `src/FerroUI.Controls/rich_text_overflow_links.rs`, `src/FerroUI.Controls/rich_text_overflow_links.rs`, `src/FerroUI.Controls/rich_text_overflow_links.rs` |
 | `dxaml/xcp/core/text/Inc/LinkedRichTextBlockView.h` | partial | `src/FerroUI.Controls/rich_text_block.rs`, `src/FerroUI.Controls/rich_text_block.rs`, `src/FerroUI.Controls/rich_text_block.rs` |
 | `dxaml/xcp/core/text/Inc/RichTextBlockBreak.h` | partial | `src/FerroUI.Controls/rich_text_layout.rs` |
 | `dxaml/xcp/core/text/Inc/RichTextBlockView.h` | partial | `src/FerroUI.Controls/rich_text_block.rs`, `src/FerroUI.Controls/rich_text_block.rs`, `src/FerroUI.Controls/rich_text_block.rs` |
 | `dxaml/xcp/core/text/RichTextBlock/LinkedRichTextBlockView.cpp` | partial | `src/FerroUI.Controls/rich_text_block.rs`, `src/FerroUI.Controls/rich_text_block.rs`, `src/FerroUI.Controls/rich_text_block.rs` |
 | `dxaml/xcp/core/text/RichTextBlock/RichTextBlock.cpp` | partial | `src/FerroUI.Controls/rich_text_block.rs`, `src/FerroUI.Controls/rich_text_block.rs`, `src/FerroUI.Controls/rich_text_block.rs`, `src/FerroUI.Controls/rich_text_block.rs`, `src/FerroUI.Controls/rich_text_block.rs`, `src/FerroUI.Controls/rich_text_context_menu.rs`, `src/FerroUI.Controls/rich_text_context_menu.rs`, `src/FerroUI.Controls/rich_text_context_menu.rs`, `src/FerroUI.Controls/rich_text_block.rs` |
 | `dxaml/xcp/core/text/RichTextBlock/RichTextBlockBreak.cpp` | partial | `src/FerroUI.Controls/rich_text_layout.rs` |
-| `dxaml/xcp/core/text/RichTextBlock/RichTextBlockOverflow.cpp` | partial | `src/FerroUI.Controls/rich_text_block_overflow.rs`, `src/FerroUI.Controls/rich_text_context_menu.rs`, `src/FerroUI.Controls/rich_text_context_menu.rs`, `src/FerroUI.Controls/rich_text_context_menu.rs`, `src/FerroUI.Controls/flyouts/popup_flyout_base.rs`, `src/FerroUI.Controls/flyouts/popup_flyout_base.rs` |
+| `dxaml/xcp/core/text/RichTextBlock/RichTextBlockOverflow.cpp` | partial | `src/FerroUI.Controls/rich_text_block_overflow.rs`, `src/FerroUI.Controls/rich_text_context_menu.rs`, `src/FerroUI.Controls/rich_text_context_menu.rs`, `src/FerroUI.Controls/rich_text_context_menu.rs`, `src/FerroUI.Controls/flyouts/popup_flyout_base.rs`, `src/FerroUI.Controls/flyouts/popup_flyout_base.rs`, `src/FerroUI.Controls/rich_text_overflow_links.rs`, `src/FerroUI.Controls/rich_text_overflow_links.rs`, `src/FerroUI.Controls/rich_text_overflow_links.rs`, `src/FerroUI.Controls/rich_text_overflow_links.rs`, `src/FerroUI.Controls/rich_text_overflow_links.rs`, `src/FerroUI.Controls/rich_text_overflow_links.rs` |
 | `dxaml/xcp/core/text/RichTextBlock/RichTextBlockView.cpp` | partial | `src/FerroUI.Controls/rich_text_block.rs`, `src/FerroUI.Controls/rich_text_block.rs`, `src/FerroUI.Controls/rich_text_block.rs`, `src/FerroUI.Base/input/text_input/text_input_method_range_geometry.rs`, `src/FerroUI.Controls/rich_edit_input_range_geometry.rs`, `src/Windows/FerroUI.WinUI/core_text_layout.rs` |
-| `dxaml/xcp/dxaml/lib/RichTextBlockOverflow_Partial.cpp` | partial | `src/FerroUI.Controls/rich_text_block_overflow.rs` |
+| `dxaml/xcp/dxaml/lib/RichTextBlockOverflow_Partial.cpp` | partial | `src/FerroUI.Controls/rich_text_block_overflow.rs`, `src/FerroUI.Controls/rich_text_overflow_links.rs`, `src/FerroUI.Controls/rich_text_overflow_links.rs`, `src/FerroUI.Controls/rich_text_overflow_links.rs`, `src/FerroUI.Controls/rich_text_overflow_links.rs`, `src/FerroUI.Controls/rich_text_overflow_links.rs`, `src/FerroUI.Controls/rich_text_overflow_links.rs` |
 | `dxaml/xcp/dxaml/lib/RichTextBlockOverflow_Partial.h` | partial | `src/FerroUI.Controls/rich_text_block_overflow.rs` |
 | `dxaml/xcp/dxaml/lib/RichTextBlock_Partial.cpp` | partial | `src/FerroUI.Controls/rich_text_block.rs`, `src/FerroUI.Controls/rich_text_block.rs`, `src/FerroUI.Controls/rich_text_block.rs` |
 | `dxaml/xcp/dxaml/lib/RichTextBlock_Partial.h` | partial | `src/FerroUI.Controls/rich_text_block.rs`, `src/FerroUI.Controls/rich_text_block.rs`, `src/FerroUI.Controls/rich_text_block.rs` |
@@ -602,6 +602,7 @@ Every file in the three primary roots is retained, including build and data file
 | `dxaml/xcp/core/core/elements/Glyphs.cpp` | pending | — |
 | `dxaml/xcp/core/core/elements/InputScope.cpp` | partial | `src/FerroUI.Base/input/input_scope.rs`, `src/FerroUI.Base/input/input_scope.rs`, `src/FerroUI.Base/input/input_scope.rs` |
 | `dxaml/xcp/core/core/elements/uielement.cpp` | partial | `src/FerroUI.Controls/rich_text_context_menu.rs`, `src/FerroUI.Controls/rich_text_context_menu.rs`, `src/FerroUI.Controls/rich_text_context_menu.rs`, `src/FerroUI.Controls/rich_text_block.rs`, `src/FerroUI.Controls/rich_text_context_menu.rs`, `src/FerroUI.Controls/rich_text_context_menu.rs`, `src/FerroUI.Controls/rich_text_context_menu.rs`, `src/FerroUI.Controls/flyouts/popup_flyout_base.rs`, `src/FerroUI.Controls/flyouts/popup_flyout_base.rs` |
+| `dxaml/xcp/core/dll/CoreImports.cpp` | partial | `src/FerroUI.Controls/rich_text_overflow_links.rs`, `src/FerroUI.Controls/rich_text_block_overflow.rs` |
 | `dxaml/xcp/core/inc/CandidateWindowBoundsChangedEventArgs.h` | pending | — |
 | `dxaml/xcp/core/inc/CaretBrowsingCaret.h` | pending | — |
 | `dxaml/xcp/core/inc/CaretBrowsingGlobal.h` | pending | — |
@@ -628,7 +629,7 @@ Every file in the three primary roots is retained, including build and data file
 | `dxaml/xcp/core/text/common/FocusRectangle.cpp` | pending | — |
 | `dxaml/xcp/core/text/common/InheritedProperties.cpp` | pending | — |
 | `dxaml/xcp/core/text/common/JupiterTextHelper.cpp` | pending | — |
-| `dxaml/xcp/core/text/common/TextCore.cpp` | partial | `src/FerroUI.Controls/rich_text_context_menu.rs`, `src/FerroUI.Controls/rich_text_context_menu.rs`, `src/FerroUI.Controls/rich_text_context_menu.rs`, `src/FerroUI.Controls/flyouts/popup_flyout_base.rs`, `src/FerroUI.Controls/flyouts/popup_flyout_base.rs` |
+| `dxaml/xcp/core/text/common/TextCore.cpp` | partial | `src/FerroUI.Controls/rich_text_context_menu.rs`, `src/FerroUI.Controls/rich_text_context_menu.rs`, `src/FerroUI.Controls/rich_text_context_menu.rs`, `src/FerroUI.Controls/flyouts/popup_flyout_base.rs`, `src/FerroUI.Controls/flyouts/popup_flyout_base.rs`, `src/FerroUI.Controls/rich_text_overflow_links.rs`, `src/FerroUI.Controls/rich_text_overflow_links.rs` |
 | `dxaml/xcp/core/text/common/TextFormatting.cpp` | partial | `src/FerroUI.Controls/documents/text_language.rs`, `src/FerroUI.Controls/documents/text_element.rs`, `src/FerroUI.Controls/rich_text_layout.rs` |
 | `dxaml/xcp/core/text/common/TextOptions.cpp` | pending | — |
 | `dxaml/xcp/core/text/common/chash.cpp` | pending | — |

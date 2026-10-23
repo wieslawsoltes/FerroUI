@@ -16,7 +16,7 @@ pub struct RichTextBlockOverflow {
 }
 ferro_class!(RichTextBlockOverflow: RichTextBlock);
 ferroui_base::ferro_class_info!(RichTextBlockOverflow {
-    new: RichTextBlockOverflow::new
+    new: RichTextBlockOverflow::new,
 });
 ferroui_base::ferro_impl_classes!(RichTextBlockOverflow:
     FerroObjectImpl, StyledElementImpl, VisualImpl, LayoutableImpl, InteractiveImpl,
@@ -31,8 +31,10 @@ ferroui_base::ferro_properties! {
 }
 
 impl RichTextBlockOverflow {
+    /// The primary rich-text view resolved by linked layout setup. Linking a
+    /// chain clears this cache; a getter does not force the chain to measure.
     pub fn content_source(&self) -> Option<Ref<RichTextBlock>> {
-        self.base.content_source()
+        self.base.cached_overflow_master()
     }
     pub fn construct() -> Self {
         Self {

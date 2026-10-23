@@ -108,6 +108,7 @@ EXPLICIT_REFERENCES = {
     "dxaml/xcp/dxaml/lib/AutomationPeer_Partial.cpp",
     "dxaml/xcp/dxaml/lib/AutomationPeer_Partial.h",
     "dxaml/xcp/core/core/elements/uielement.cpp",
+    "dxaml/xcp/core/dll/CoreImports.cpp",
     "dxaml/xcp/components/DependencyObject/DependencyProperty.cpp",
     "dxaml/xcp/components/DependencyObject/PropertySystem.cpp",
     "dxaml/xcp/components/metadata/inc/EnumDefs.g.h",

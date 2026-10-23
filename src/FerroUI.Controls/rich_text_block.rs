@@ -41,6 +41,9 @@ use std::rc::Rc;
 #[path = "rich_text_context_menu.rs"]
 mod context_menu;
 
+#[path = "rich_text_overflow_links.rs"]
+mod overflow_links;
+
 /// An atomic selection change. Anchor and active end retain selection direction.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub struct RichTextSelectionChangedEventArgs {
@@ -75,6 +78,7 @@ pub struct RichTextBlock {
     pressed_link: RefCell<Option<WeakRef<Hyperlink>>>,
     focused_link: RefCell<Option<WeakRef<Hyperlink>>>,
     flow_parent: RefCell<Option<WeakRef<RichTextBlock>>>,
+    overflow_link: overflow_links::OverflowLinkState,
     updating_document: Cell<bool>,
     reported_overflow: Cell<bool>,
     reported_trimmed: Cell<bool>,
@@ -190,22 +194,7 @@ impl FerroObjectImpl for RichTextBlock {
             }
             "TextWrapping" | "TextTrimming" | "Padding" | "MaxLines" => this.invalidate_layout(),
             "Background" | "CaretBrush" => this.invalidate_visual(),
-            "OverflowContentTarget" => {
-                let (old, new) =
-                    change.get_old_and_new_value::<Option<ElementRef<RichTextBlockOverflow>>>();
-                if let Some(old) = old.and_then(|value| value.get()) {
-                    old.set_flow_parent(None);
-                }
-                if let Some(target) = new.and_then(|value| value.get()) {
-                    if this.can_link_target(&target) {
-                        target.set_flow_parent(Some(this.to_ref().downgrade()));
-                    } else {
-                        // Property setters from markup take the same cycle-safe path.
-                        this.set_current_value(Self::overflow_content_target_property(), None);
-                    }
-                }
-                this.invalidate_layout();
-            }
+            "OverflowContentTarget" => this.reconcile_overflow_content_target(),
             _ => {}
         }
     }
@@ -341,6 +330,9 @@ impl LayoutableImpl for RichTextBlock {
         {
             this.clear_page_layout();
         }
+        // Native SetupLinkedBlockLayout resolves only this overflow's direct
+        // predecessor. Geometry queries and recursive parent formatting do not.
+        this.setup_linked_overflow_master();
         let layout = this.page_layout_core(true);
         if this
             .cached_page_layout()
@@ -946,6 +938,7 @@ impl RichTextBlock {
             pressed_link: RefCell::new(None),
             focused_link: RefCell::new(None),
             flow_parent: RefCell::new(None),
+            overflow_link: overflow_links::OverflowLinkState::new(),
             updating_document: Cell::new(false),
             reported_overflow: Cell::new(false),
             reported_trimmed: Cell::new(false),
@@ -1075,7 +1068,7 @@ impl RichTextBlock {
         self.document().blocks()
     }
     pub fn text_highlighters(&self) -> TextHighlighterCollection {
-        self.content_source().map_or_else(
+        self.previous_flow_parent().map_or_else(
             || self.highlighters.clone(),
             |parent| parent.text_highlighters(),
         )
@@ -1664,14 +1657,14 @@ impl RichTextBlock {
         self.set_value(Self::text_line_bounds_property(), value);
     }
     fn effective_text_line_bounds(&self) -> TextLineBounds {
-        self.content_source().map_or_else(
+        self.previous_flow_parent().map_or_else(
             || self.text_line_bounds(),
             |source| source.effective_text_line_bounds(),
         )
     }
     fn refresh_text_line_bounds_clipping(&self) {
         self.coerce_value(Visual::clip_to_bounds_property().as_property());
-        if let Some(target) = self.overflow_content_target() {
+        if let Some(target) = self.installed_overflow_target() {
             target.refresh_text_line_bounds_clipping();
         }
     }
@@ -1759,26 +1752,9 @@ impl RichTextBlock {
         }
         true
     }
-    pub(crate) fn set_flow_parent(&self, parent: Option<WeakRef<RichTextBlock>>) {
-        let old_source = self.content_source();
-        let old_document = self.document();
-        *self.flow_parent.borrow_mut() = parent;
-        self.invalidate_layout();
-        self.refresh_text_line_bounds_clipping();
-        if let Some(overflow) = self.to_ref().cast::<RichTextBlockOverflow>() {
-            overflow.raise_direct_property_changed(
-                RichTextBlockOverflow::content_source_property(),
-                &old_source,
-                &self.content_source(),
-            );
-        }
-        self.raise_direct_property_changed(
-            Self::document_property(),
-            &old_document,
-            &self.document(),
-        );
-    }
-    pub(crate) fn content_source(&self) -> Option<Ref<RichTextBlock>> {
+    /// Immediate predecessor, retained separately from the public cached
+    /// ContentSource master so continuation breaks remain sequential.
+    pub(crate) fn previous_flow_parent(&self) -> Option<Ref<RichTextBlock>> {
         self.flow_parent
             .borrow()
             .as_ref()
@@ -1792,7 +1768,7 @@ impl RichTextBlock {
         self.clear_page_layout();
         self.invalidate_measure();
         self.invalidate_visual();
-        if let Some(target) = self.overflow_content_target() {
+        if let Some(target) = self.installed_overflow_target() {
             target.invalidate_layout();
         }
     }
@@ -1889,7 +1865,7 @@ impl RichTextBlock {
         // Publish the complete cache before invoking property or routed-event
         // handlers; they may immediately ask for layout or trimming state.
         *self.layout.borrow_mut() = Some(layout.clone());
-        if let Some(target) = self.overflow_content_target() {
+        if let Some(target) = self.installed_overflow_target() {
             target.invalidate_layout();
         }
         if old_overflow != layout.has_overflow {
@@ -1922,6 +1898,7 @@ impl RichTextBlock {
 
 impl Drop for RichTextBlock {
     fn drop(&mut self) {
+        self.detach_installed_overflow_on_drop();
         if let Some(subscription) = self.font_features_subscription.get_mut().take() {
             subscription.dispose();
         }

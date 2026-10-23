@@ -1819,6 +1819,30 @@
         {
           "path": "src/FerroUI.Controls/rich_text_block_overflow.rs",
           "symbol": "RichTextBlockOverflow"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_overflow_links.rs",
+          "symbol": "pub(crate) fn cached_overflow_master("
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_overflow_links.rs",
+          "symbol": "pub(super) fn setup_linked_overflow_master("
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_overflow_links.rs",
+          "symbol": "pub(super) fn reconcile_overflow_content_target("
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_overflow_links.rs",
+          "symbol": "fn replace_flow_parent("
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_overflow_links.rs",
+          "symbol": "fn publish_overflow_resets("
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_overflow_links.rs",
+          "symbol": "pub(super) fn detach_installed_overflow_on_drop("
         }
       ],
       "tests": [
@@ -1829,11 +1853,92 @@
         {
           "path": "src/FerroUI.Controls/rich_text_block_tests.rs",
           "symbol": "rich_overflow_rejects_cycles_and_second_owners"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_overflow_master_tests.rs",
+          "symbol": "rich_overflow_master_getters_and_metadata_do_not_resolve_a_linked_chain"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_overflow_master_tests.rs",
+          "symbol": "rich_overflow_master_reflection_binding_observes_cached_master_transitions"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_overflow_master_tests.rs",
+          "symbol": "rich_overflow_master_late_measure_waits_for_the_immediate_predecessor"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_overflow_master_tests.rs",
+          "symbol": "rich_overflow_master_cache_does_not_require_overflow_content"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_overflow_master_tests.rs",
+          "symbol": "rich_overflow_master_root_identity_keeps_sequential_predecessor_breaks"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_overflow_master_tests.rs",
+          "symbol": "rich_overflow_master_unlink_clears_the_entire_suffix_before_notifications"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_overflow_master_tests.rs",
+          "symbol": "rich_overflow_master_reparent_requires_new_predecessor_setup"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_overflow_master_tests.rs",
+          "symbol": "rich_overflow_master_ordinary_layout_changes_preserve_the_cached_master"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_overflow_master_tests.rs",
+          "symbol": "rich_overflow_master_property_events_follow_cache_transitions_on_each_descendant"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_overflow_master_tests.rs",
+          "symbol": "rich_overflow_master_weak_root_expiry_does_not_retain_the_owner"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_overflow_master_tests.rs",
+          "symbol": "rich_overflow_master_weak_intermediate_expiry_resets_surviving_suffix"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_overflow_master_tests.rs",
+          "symbol": "rich_overflow_master_primary_drop_notifies_the_previous_document_without_retention"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_overflow_master_tests.rs",
+          "symbol": "rich_overflow_master_intermediate_drop_notifies_the_root_document_for_its_suffix"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_overflow_master_tests.rs",
+          "symbol": "rich_overflow_master_nested_property_override_reconciles_the_installed_edge"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_overflow_master_tests.rs",
+          "symbol": "rich_overflow_master_reset_handler_preserves_a_newer_reparent_and_layout"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_overflow_master_tests.rs",
+          "symbol": "rich_overflow_master_invalidation_callback_sees_atomic_reset_and_keeps_new_owner"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_overflow_master_tests.rs",
+          "symbol": "rich_overflow_master_setup_callback_cannot_restore_a_replaced_master"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_overflow_master_tests.rs",
+          "symbol": "rich_overflow_master_drop_notification_can_reparent_the_surviving_view"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_overflow_master_tests.rs",
+          "symbol": "rich_overflow_master_invalid_markup_target_does_not_detach_another_owner"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_overflow_master_tests.rs",
+          "symbol": "rich_overflow_master_context_lookup_uses_the_same_cache_as_content_source"
         }
       ],
-      "reason": "A derived rich view uses the shared weak continuation chain and document selection. Native separate class topology and unreviewed overflow members remain adapted or pending.",
+      "reason": "A derived rich view uses the shared weak continuation chain and document selection. Native separate class topology and unreviewed overflow members remain adapted or pending. Public ContentSource and configured flyout/selection master lookup now share the layout-resolved weak primary cache. A getter does not traverse links or force setup. Link changes clear the installed continuation suffix; actual measure uses only its immediate predecessor, resolving even for empty/no-overflow content. Ordinary layout invalidation preserves the master. Immediate predecessors remain separate for sequential page breaks and document formatting. Installed-edge identity and flow/master generations preserve callback-owned links and setup, including surviving-suffix Drop document notifications. Registered direct-property and real reflection-binding transitions are tested through the existing FerroUI property service. Weak forward targets and notification ordering are framework adaptations. Native print setup, cursor propagation, strong lifetime and other overflow/geometry members remain partial. See OVERFLOW-LINKS.md; test definitions and actual source-bound execution records are distinct.",
       "deviations": [
-        "RT-I02"
+        "RT-I02",
+        "RT-I38"
       ]
     },
     "dxaml/xcp/core/text/RichTextBlock/RichTextBlockOverflow.cpp": {
@@ -1862,6 +1967,30 @@
         {
           "path": "src/FerroUI.Controls/flyouts/popup_flyout_base.rs",
           "symbol": "pub(crate) fn context_flyout_for_request("
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_overflow_links.rs",
+          "symbol": "pub(crate) fn cached_overflow_master("
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_overflow_links.rs",
+          "symbol": "pub(super) fn setup_linked_overflow_master("
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_overflow_links.rs",
+          "symbol": "pub(super) fn reconcile_overflow_content_target("
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_overflow_links.rs",
+          "symbol": "fn replace_flow_parent("
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_overflow_links.rs",
+          "symbol": "fn publish_overflow_resets("
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_overflow_links.rs",
+          "symbol": "pub(super) fn detach_installed_overflow_on_drop("
         }
       ],
       "tests": [
@@ -1912,12 +2041,93 @@
         {
           "path": "src/FerroUI.Controls/rich_text_context_menu_tests.rs",
           "symbol": "rich_readonly_context_holding_keeps_overflow_feedback_and_selection_policy"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_overflow_master_tests.rs",
+          "symbol": "rich_overflow_master_getters_and_metadata_do_not_resolve_a_linked_chain"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_overflow_master_tests.rs",
+          "symbol": "rich_overflow_master_reflection_binding_observes_cached_master_transitions"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_overflow_master_tests.rs",
+          "symbol": "rich_overflow_master_late_measure_waits_for_the_immediate_predecessor"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_overflow_master_tests.rs",
+          "symbol": "rich_overflow_master_cache_does_not_require_overflow_content"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_overflow_master_tests.rs",
+          "symbol": "rich_overflow_master_root_identity_keeps_sequential_predecessor_breaks"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_overflow_master_tests.rs",
+          "symbol": "rich_overflow_master_unlink_clears_the_entire_suffix_before_notifications"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_overflow_master_tests.rs",
+          "symbol": "rich_overflow_master_reparent_requires_new_predecessor_setup"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_overflow_master_tests.rs",
+          "symbol": "rich_overflow_master_ordinary_layout_changes_preserve_the_cached_master"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_overflow_master_tests.rs",
+          "symbol": "rich_overflow_master_property_events_follow_cache_transitions_on_each_descendant"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_overflow_master_tests.rs",
+          "symbol": "rich_overflow_master_weak_root_expiry_does_not_retain_the_owner"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_overflow_master_tests.rs",
+          "symbol": "rich_overflow_master_weak_intermediate_expiry_resets_surviving_suffix"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_overflow_master_tests.rs",
+          "symbol": "rich_overflow_master_primary_drop_notifies_the_previous_document_without_retention"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_overflow_master_tests.rs",
+          "symbol": "rich_overflow_master_intermediate_drop_notifies_the_root_document_for_its_suffix"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_overflow_master_tests.rs",
+          "symbol": "rich_overflow_master_nested_property_override_reconciles_the_installed_edge"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_overflow_master_tests.rs",
+          "symbol": "rich_overflow_master_reset_handler_preserves_a_newer_reparent_and_layout"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_overflow_master_tests.rs",
+          "symbol": "rich_overflow_master_invalidation_callback_sees_atomic_reset_and_keeps_new_owner"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_overflow_master_tests.rs",
+          "symbol": "rich_overflow_master_setup_callback_cannot_restore_a_replaced_master"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_overflow_master_tests.rs",
+          "symbol": "rich_overflow_master_drop_notification_can_reparent_the_surviving_view"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_overflow_master_tests.rs",
+          "symbol": "rich_overflow_master_invalid_markup_target_does_not_detach_another_owner"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_overflow_master_tests.rs",
+          "symbol": "rich_overflow_master_context_lookup_uses_the_same_cache_as_content_source"
         }
       ],
-      "reason": "A derived rich view uses the shared weak continuation chain and document selection. Native separate class topology and unreviewed overflow members remain adapted or pending. Configured overflow lookup now prefers a non-null local ContextFlyout and otherwise resolves the root primary master, never an intermediate continuation. The requesting overflow retains placement, target cancellation and holding feedback. A default overflow property uses the master selection-enabled gate; explicit null preserves master fallback but bypasses that default gate, and Clear restores it. Eligibility applies only on opening so later selection changes cannot block dismissal. Modern configured overflow requests do not raise or forward the typed event, matching the helper branches. The separate legacy selection-manager owner event and built-in default flyout remain pending. Framework inheritance topology and menu/keyboard translations remain explicit in CONTEXT-MENUS.md. Native m_pMaster is reset on link changes and resolved during linked block-layout setup. The configured-menu helper currently follows the live framework chain; exact cached-master availability/timing and the separate public ContentSource predecessor mismatch remain partial.",
+      "reason": "A derived rich view uses the shared weak continuation chain and document selection. Native separate class topology and unreviewed overflow members remain adapted or pending. Configured overflow lookup now prefers a non-null local ContextFlyout and otherwise resolves the root primary master, never an intermediate continuation. The requesting overflow retains placement, target cancellation and holding feedback. A default overflow property uses the master selection-enabled gate; explicit null preserves master fallback but bypasses that default gate, and Clear restores it. Eligibility applies only on opening so later selection changes cannot block dismissal. Modern configured overflow requests do not raise or forward the typed event, matching the helper branches. The separate legacy selection-manager owner event and built-in default flyout remain pending. Framework inheritance topology and menu/keyboard translations remain explicit in CONTEXT-MENUS.md. Public ContentSource and configured flyout/selection master lookup now share the layout-resolved weak primary cache. A getter does not traverse links or force setup. Link changes clear the installed continuation suffix; actual measure uses only its immediate predecessor, resolving even for empty/no-overflow content. Ordinary layout invalidation preserves the master. Immediate predecessors remain separate for sequential page breaks and document formatting. Installed-edge identity and flow/master generations preserve callback-owned links and setup, including surviving-suffix Drop document notifications. Registered direct-property and real reflection-binding transitions are tested through the existing FerroUI property service. Weak forward targets and notification ordering are framework adaptations. Native print setup, cursor propagation, strong lifetime and other overflow/geometry members remain partial. See OVERFLOW-LINKS.md; test definitions and actual source-bound execution records are distinct.",
       "deviations": [
         "RT-I02",
-        "RT-I37"
+        "RT-I37",
+        "RT-I38"
       ]
     },
     "dxaml/xcp/dxaml/lib/RichTextBlockOverflow_Partial.cpp": {
@@ -1926,6 +2136,30 @@
         {
           "path": "src/FerroUI.Controls/rich_text_block_overflow.rs",
           "symbol": "RichTextBlockOverflow"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_overflow_links.rs",
+          "symbol": "pub(crate) fn cached_overflow_master("
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_overflow_links.rs",
+          "symbol": "pub(super) fn setup_linked_overflow_master("
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_overflow_links.rs",
+          "symbol": "pub(super) fn reconcile_overflow_content_target("
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_overflow_links.rs",
+          "symbol": "fn replace_flow_parent("
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_overflow_links.rs",
+          "symbol": "fn publish_overflow_resets("
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_overflow_links.rs",
+          "symbol": "pub(super) fn detach_installed_overflow_on_drop("
         }
       ],
       "tests": [
@@ -1936,11 +2170,92 @@
         {
           "path": "src/FerroUI.Controls/rich_text_block_tests.rs",
           "symbol": "rich_overflow_rejects_cycles_and_second_owners"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_overflow_master_tests.rs",
+          "symbol": "rich_overflow_master_getters_and_metadata_do_not_resolve_a_linked_chain"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_overflow_master_tests.rs",
+          "symbol": "rich_overflow_master_reflection_binding_observes_cached_master_transitions"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_overflow_master_tests.rs",
+          "symbol": "rich_overflow_master_late_measure_waits_for_the_immediate_predecessor"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_overflow_master_tests.rs",
+          "symbol": "rich_overflow_master_cache_does_not_require_overflow_content"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_overflow_master_tests.rs",
+          "symbol": "rich_overflow_master_root_identity_keeps_sequential_predecessor_breaks"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_overflow_master_tests.rs",
+          "symbol": "rich_overflow_master_unlink_clears_the_entire_suffix_before_notifications"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_overflow_master_tests.rs",
+          "symbol": "rich_overflow_master_reparent_requires_new_predecessor_setup"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_overflow_master_tests.rs",
+          "symbol": "rich_overflow_master_ordinary_layout_changes_preserve_the_cached_master"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_overflow_master_tests.rs",
+          "symbol": "rich_overflow_master_property_events_follow_cache_transitions_on_each_descendant"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_overflow_master_tests.rs",
+          "symbol": "rich_overflow_master_weak_root_expiry_does_not_retain_the_owner"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_overflow_master_tests.rs",
+          "symbol": "rich_overflow_master_weak_intermediate_expiry_resets_surviving_suffix"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_overflow_master_tests.rs",
+          "symbol": "rich_overflow_master_primary_drop_notifies_the_previous_document_without_retention"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_overflow_master_tests.rs",
+          "symbol": "rich_overflow_master_intermediate_drop_notifies_the_root_document_for_its_suffix"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_overflow_master_tests.rs",
+          "symbol": "rich_overflow_master_nested_property_override_reconciles_the_installed_edge"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_overflow_master_tests.rs",
+          "symbol": "rich_overflow_master_reset_handler_preserves_a_newer_reparent_and_layout"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_overflow_master_tests.rs",
+          "symbol": "rich_overflow_master_invalidation_callback_sees_atomic_reset_and_keeps_new_owner"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_overflow_master_tests.rs",
+          "symbol": "rich_overflow_master_setup_callback_cannot_restore_a_replaced_master"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_overflow_master_tests.rs",
+          "symbol": "rich_overflow_master_drop_notification_can_reparent_the_surviving_view"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_overflow_master_tests.rs",
+          "symbol": "rich_overflow_master_invalid_markup_target_does_not_detach_another_owner"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_overflow_master_tests.rs",
+          "symbol": "rich_overflow_master_context_lookup_uses_the_same_cache_as_content_source"
         }
       ],
-      "reason": "A derived rich view uses the shared weak continuation chain and document selection. Native separate class topology and unreviewed overflow members remain adapted or pending.",
+      "reason": "A derived rich view uses the shared weak continuation chain and document selection. Native separate class topology and unreviewed overflow members remain adapted or pending. Public ContentSource and configured flyout/selection master lookup now share the layout-resolved weak primary cache. A getter does not traverse links or force setup. Link changes clear the installed continuation suffix; actual measure uses only its immediate predecessor, resolving even for empty/no-overflow content. Ordinary layout invalidation preserves the master. Immediate predecessors remain separate for sequential page breaks and document formatting. Installed-edge identity and flow/master generations preserve callback-owned links and setup, including surviving-suffix Drop document notifications. Registered direct-property and real reflection-binding transitions are tested through the existing FerroUI property service. Weak forward targets and notification ordering are framework adaptations. Native print setup, cursor propagation, strong lifetime and other overflow/geometry members remain partial. See OVERFLOW-LINKS.md; test definitions and actual source-bound execution records are distinct.",
       "deviations": [
-        "RT-I02"
+        "RT-I02",
+        "RT-I38"
       ]
     },
     "dxaml/xcp/dxaml/lib/RichTextBlockOverflow_Partial.h": {
@@ -13094,6 +13409,14 @@
         {
           "path": "src/FerroUI.Controls/flyouts/popup_flyout_base.rs",
           "symbol": "pub(crate) fn context_flyout_for_request("
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_overflow_links.rs",
+          "symbol": "pub(crate) fn cached_overflow_master("
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_overflow_links.rs",
+          "symbol": "pub(super) fn setup_linked_overflow_master("
         }
       ],
       "tests": [
@@ -13104,13 +13427,94 @@
         {
           "path": "src/FerroUI.Controls/rich_text_context_menu_tests.rs",
           "symbol": "rich_readonly_context_local_menu_is_independent_of_default_flyout_selection_gate"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_overflow_master_tests.rs",
+          "symbol": "rich_overflow_master_getters_and_metadata_do_not_resolve_a_linked_chain"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_overflow_master_tests.rs",
+          "symbol": "rich_overflow_master_reflection_binding_observes_cached_master_transitions"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_overflow_master_tests.rs",
+          "symbol": "rich_overflow_master_late_measure_waits_for_the_immediate_predecessor"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_overflow_master_tests.rs",
+          "symbol": "rich_overflow_master_cache_does_not_require_overflow_content"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_overflow_master_tests.rs",
+          "symbol": "rich_overflow_master_root_identity_keeps_sequential_predecessor_breaks"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_overflow_master_tests.rs",
+          "symbol": "rich_overflow_master_unlink_clears_the_entire_suffix_before_notifications"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_overflow_master_tests.rs",
+          "symbol": "rich_overflow_master_reparent_requires_new_predecessor_setup"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_overflow_master_tests.rs",
+          "symbol": "rich_overflow_master_ordinary_layout_changes_preserve_the_cached_master"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_overflow_master_tests.rs",
+          "symbol": "rich_overflow_master_property_events_follow_cache_transitions_on_each_descendant"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_overflow_master_tests.rs",
+          "symbol": "rich_overflow_master_weak_root_expiry_does_not_retain_the_owner"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_overflow_master_tests.rs",
+          "symbol": "rich_overflow_master_weak_intermediate_expiry_resets_surviving_suffix"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_overflow_master_tests.rs",
+          "symbol": "rich_overflow_master_primary_drop_notifies_the_previous_document_without_retention"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_overflow_master_tests.rs",
+          "symbol": "rich_overflow_master_intermediate_drop_notifies_the_root_document_for_its_suffix"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_overflow_master_tests.rs",
+          "symbol": "rich_overflow_master_nested_property_override_reconciles_the_installed_edge"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_overflow_master_tests.rs",
+          "symbol": "rich_overflow_master_reset_handler_preserves_a_newer_reparent_and_layout"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_overflow_master_tests.rs",
+          "symbol": "rich_overflow_master_invalidation_callback_sees_atomic_reset_and_keeps_new_owner"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_overflow_master_tests.rs",
+          "symbol": "rich_overflow_master_setup_callback_cannot_restore_a_replaced_master"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_overflow_master_tests.rs",
+          "symbol": "rich_overflow_master_drop_notification_can_reparent_the_surviving_view"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_overflow_master_tests.rs",
+          "symbol": "rich_overflow_master_invalid_markup_target_does_not_detach_another_owner"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_overflow_master_tests.rs",
+          "symbol": "rich_overflow_master_context_lookup_uses_the_same_cache_as_content_source"
         }
       ],
-      "reason": "Only IsTextControl/IsTextSelectionEnabled dispatch for the configured rich-text menu path is reviewed. Overflow text selection policy resolves through the root master. Other TextCore services and control cases remain pending; no whole-file completion is inferred. Configured overflow lookup now prefers a non-null local ContextFlyout and otherwise resolves the root primary master, never an intermediate continuation. The requesting overflow retains placement, target cancellation and holding feedback. A default overflow property uses the master selection-enabled gate; explicit null preserves master fallback but bypasses that default gate, and Clear restores it. Eligibility applies only on opening so later selection changes cannot block dismissal. Modern configured overflow requests do not raise or forward the typed event, matching the helper branches. The separate legacy selection-manager owner event and built-in default flyout remain pending. Framework inheritance topology and menu/keyboard translations remain explicit in CONTEXT-MENUS.md. Native m_pMaster is reset on link changes and resolved during linked block-layout setup. The configured-menu helper currently follows the live framework chain; exact cached-master availability/timing and the separate public ContentSource predecessor mismatch remain partial.",
+      "reason": "Only IsTextControl/IsTextSelectionEnabled dispatch for the configured rich-text menu path is reviewed. Overflow text selection policy resolves through the root master. Other TextCore services and control cases remain pending; no whole-file completion is inferred. Configured overflow lookup now prefers a non-null local ContextFlyout and otherwise resolves the root primary master, never an intermediate continuation. The requesting overflow retains placement, target cancellation and holding feedback. A default overflow property uses the master selection-enabled gate; explicit null preserves master fallback but bypasses that default gate, and Clear restores it. Eligibility applies only on opening so later selection changes cannot block dismissal. Modern configured overflow requests do not raise or forward the typed event, matching the helper branches. The separate legacy selection-manager owner event and built-in default flyout remain pending. Framework inheritance topology and menu/keyboard translations remain explicit in CONTEXT-MENUS.md. Public ContentSource and configured flyout/selection master lookup now share the layout-resolved weak primary cache. A getter does not traverse links or force setup. Link changes clear the installed continuation suffix; actual measure uses only its immediate predecessor, resolving even for empty/no-overflow content. Ordinary layout invalidation preserves the master. Immediate predecessors remain separate for sequential page breaks and document formatting. Installed-edge identity and flow/master generations preserve callback-owned links and setup, including surviving-suffix Drop document notifications. Registered direct-property and real reflection-binding transitions are tested through the existing FerroUI property service. Weak forward targets and notification ordering are framework adaptations. Native print setup, cursor propagation, strong lifetime and other overflow/geometry members remain partial. See OVERFLOW-LINKS.md; test definitions and actual source-bound execution records are distinct.",
       "deviations": [
         "RT-A01",
         "RT-A04",
-        "RT-I37"
+        "RT-I37",
+        "RT-I38"
       ]
     },
     "dxaml/xcp/core/core/elements/uielement.cpp": {
@@ -13230,6 +13634,34 @@
         "RT-A01",
         "RT-A04",
         "RT-I37"
+      ]
+    },
+    "dxaml/xcp/core/dll/CoreImports.cpp": {
+      "state": "partial",
+      "targets": [
+        {
+          "path": "src/FerroUI.Controls/rich_text_overflow_links.rs",
+          "symbol": "pub(crate) fn cached_overflow_master("
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_block_overflow.rs",
+          "symbol": "pub fn content_source("
+        }
+      ],
+      "tests": [
+        {
+          "path": "src/FerroUI.Controls/rich_text_overflow_master_tests.rs",
+          "symbol": "rich_overflow_master_getters_and_metadata_do_not_resolve_a_linked_chain"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_overflow_master_tests.rs",
+          "symbol": "rich_overflow_master_reflection_binding_observes_cached_master_transitions"
+        }
+      ],
+      "reason": "Only CRichTextBlockOverflow_GetMaster is reviewed here: its direct cached-primary read maps to the existing public read-only ContentSource property. It does not walk links or force layout. Other core imports remain unreviewed or mapped separately; no whole-file completion is inferred. Public ContentSource and configured flyout/selection master lookup now share the layout-resolved weak primary cache. A getter does not traverse links or force setup. Link changes clear the installed continuation suffix; actual measure uses only its immediate predecessor, resolving even for empty/no-overflow content. Ordinary layout invalidation preserves the master. Immediate predecessors remain separate for sequential page breaks and document formatting. Installed-edge identity and flow/master generations preserve callback-owned links and setup, including surviving-suffix Drop document notifications. Registered direct-property and real reflection-binding transitions are tested through the existing FerroUI property service. Weak forward targets and notification ordering are framework adaptations. Native print setup, cursor propagation, strong lifetime and other overflow/geometry members remain partial. See OVERFLOW-LINKS.md; test definitions and actual source-bound execution records are distinct.",
+      "deviations": [
+        "RT-I02",
+        "RT-I38"
       ]
     }
   },
@@ -15468,6 +15900,14 @@
         {
           "path": "src/FerroUI.Controls/flyouts/popup_flyout_base.rs",
           "symbol": "pub(crate) fn context_flyout_for_request("
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_overflow_links.rs",
+          "symbol": "pub(crate) fn cached_overflow_master("
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_overflow_links.rs",
+          "symbol": "pub(super) fn setup_linked_overflow_master("
         }
       ],
       "tests": [
@@ -15526,12 +15966,93 @@
         {
           "path": "src/FerroUI.Controls/rich_text_context_menu_tests.rs",
           "symbol": "rich_readonly_context_holding_keeps_overflow_feedback_and_selection_policy"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_overflow_master_tests.rs",
+          "symbol": "rich_overflow_master_getters_and_metadata_do_not_resolve_a_linked_chain"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_overflow_master_tests.rs",
+          "symbol": "rich_overflow_master_reflection_binding_observes_cached_master_transitions"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_overflow_master_tests.rs",
+          "symbol": "rich_overflow_master_late_measure_waits_for_the_immediate_predecessor"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_overflow_master_tests.rs",
+          "symbol": "rich_overflow_master_cache_does_not_require_overflow_content"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_overflow_master_tests.rs",
+          "symbol": "rich_overflow_master_root_identity_keeps_sequential_predecessor_breaks"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_overflow_master_tests.rs",
+          "symbol": "rich_overflow_master_unlink_clears_the_entire_suffix_before_notifications"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_overflow_master_tests.rs",
+          "symbol": "rich_overflow_master_reparent_requires_new_predecessor_setup"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_overflow_master_tests.rs",
+          "symbol": "rich_overflow_master_ordinary_layout_changes_preserve_the_cached_master"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_overflow_master_tests.rs",
+          "symbol": "rich_overflow_master_property_events_follow_cache_transitions_on_each_descendant"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_overflow_master_tests.rs",
+          "symbol": "rich_overflow_master_weak_root_expiry_does_not_retain_the_owner"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_overflow_master_tests.rs",
+          "symbol": "rich_overflow_master_weak_intermediate_expiry_resets_surviving_suffix"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_overflow_master_tests.rs",
+          "symbol": "rich_overflow_master_primary_drop_notifies_the_previous_document_without_retention"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_overflow_master_tests.rs",
+          "symbol": "rich_overflow_master_intermediate_drop_notifies_the_root_document_for_its_suffix"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_overflow_master_tests.rs",
+          "symbol": "rich_overflow_master_nested_property_override_reconciles_the_installed_edge"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_overflow_master_tests.rs",
+          "symbol": "rich_overflow_master_reset_handler_preserves_a_newer_reparent_and_layout"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_overflow_master_tests.rs",
+          "symbol": "rich_overflow_master_invalidation_callback_sees_atomic_reset_and_keeps_new_owner"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_overflow_master_tests.rs",
+          "symbol": "rich_overflow_master_setup_callback_cannot_restore_a_replaced_master"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_overflow_master_tests.rs",
+          "symbol": "rich_overflow_master_drop_notification_can_reparent_the_surviving_view"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_overflow_master_tests.rs",
+          "symbol": "rich_overflow_master_invalid_markup_target_does_not_detach_another_owner"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_overflow_master_tests.rs",
+          "symbol": "rich_overflow_master_context_lookup_uses_the_same_cache_as_content_source"
         }
       ],
-      "reason": "Overflow derives from the shared rich view and uses weak continuation links with one primary document owner; native class hierarchy and control surface are adapted. Configured overflow lookup now prefers a non-null local ContextFlyout and otherwise resolves the root primary master, never an intermediate continuation. The requesting overflow retains placement, target cancellation and holding feedback. A default overflow property uses the master selection-enabled gate; explicit null preserves master fallback but bypasses that default gate, and Clear restores it. Eligibility applies only on opening so later selection changes cannot block dismissal. Modern configured overflow requests do not raise or forward the typed event, matching the helper branches. The separate legacy selection-manager owner event and built-in default flyout remain pending. Framework inheritance topology and menu/keyboard translations remain explicit in CONTEXT-MENUS.md. Native m_pMaster is reset on link changes and resolved during linked block-layout setup. The configured-menu helper currently follows the live framework chain; exact cached-master availability/timing and the separate public ContentSource predecessor mismatch remain partial.",
+      "reason": "Overflow derives from the shared rich view and uses weak continuation links with one primary document owner; native class hierarchy and control surface are adapted. Configured overflow lookup now prefers a non-null local ContextFlyout and otherwise resolves the root primary master, never an intermediate continuation. The requesting overflow retains placement, target cancellation and holding feedback. A default overflow property uses the master selection-enabled gate; explicit null preserves master fallback but bypasses that default gate, and Clear restores it. Eligibility applies only on opening so later selection changes cannot block dismissal. Modern configured overflow requests do not raise or forward the typed event, matching the helper branches. The separate legacy selection-manager owner event and built-in default flyout remain pending. Framework inheritance topology and menu/keyboard translations remain explicit in CONTEXT-MENUS.md. Public ContentSource and configured flyout/selection master lookup now share the layout-resolved weak primary cache. A getter does not traverse links or force setup. Link changes clear the installed continuation suffix; actual measure uses only its immediate predecessor, resolving even for empty/no-overflow content. Ordinary layout invalidation preserves the master. Immediate predecessors remain separate for sequential page breaks and document formatting. Installed-edge identity and flow/master generations preserve callback-owned links and setup, including surviving-suffix Drop document notifications. Registered direct-property and real reflection-binding transitions are tested through the existing FerroUI property service. Weak forward targets and notification ordering are framework adaptations. Native print setup, cursor propagation, strong lifetime and other overflow/geometry members remain partial. See OVERFLOW-LINKS.md; test definitions and actual source-bound execution records are distinct.",
       "deviations": [
         "RT-I02",
-        "RT-I37"
+        "RT-I37",
+        "RT-I38"
       ]
     },
     "M:Microsoft.UI.Xaml.Controls.RichTextBlockOverflow.#ctor": {
@@ -15927,6 +16448,22 @@
         {
           "path": "src/FerroUI.Controls/rich_text_block.rs",
           "symbol": "pub fn overflow_content_target("
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_overflow_links.rs",
+          "symbol": "pub(super) fn reconcile_overflow_content_target("
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_overflow_links.rs",
+          "symbol": "fn replace_flow_parent("
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_overflow_links.rs",
+          "symbol": "fn publish_overflow_resets("
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_overflow_links.rs",
+          "symbol": "pub(super) fn detach_installed_overflow_on_drop("
         }
       ],
       "tests": [
@@ -15937,14 +16474,75 @@
         {
           "path": "src/FerroUI.Controls/rich_text_block_tests.rs",
           "symbol": "rich_overflow_rejects_cycles_and_second_owners"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_overflow_master_tests.rs",
+          "symbol": "rich_overflow_master_unlink_clears_the_entire_suffix_before_notifications"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_overflow_master_tests.rs",
+          "symbol": "rich_overflow_master_reparent_requires_new_predecessor_setup"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_overflow_master_tests.rs",
+          "symbol": "rich_overflow_master_ordinary_layout_changes_preserve_the_cached_master"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_overflow_master_tests.rs",
+          "symbol": "rich_overflow_master_property_events_follow_cache_transitions_on_each_descendant"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_overflow_master_tests.rs",
+          "symbol": "rich_overflow_master_weak_root_expiry_does_not_retain_the_owner"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_overflow_master_tests.rs",
+          "symbol": "rich_overflow_master_weak_intermediate_expiry_resets_surviving_suffix"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_overflow_master_tests.rs",
+          "symbol": "rich_overflow_master_primary_drop_notifies_the_previous_document_without_retention"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_overflow_master_tests.rs",
+          "symbol": "rich_overflow_master_intermediate_drop_notifies_the_root_document_for_its_suffix"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_overflow_master_tests.rs",
+          "symbol": "rich_overflow_master_nested_property_override_reconciles_the_installed_edge"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_overflow_master_tests.rs",
+          "symbol": "rich_overflow_master_reset_handler_preserves_a_newer_reparent_and_layout"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_overflow_master_tests.rs",
+          "symbol": "rich_overflow_master_invalidation_callback_sees_atomic_reset_and_keeps_new_owner"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_overflow_master_tests.rs",
+          "symbol": "rich_overflow_master_setup_callback_cannot_restore_a_replaced_master"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_overflow_master_tests.rs",
+          "symbol": "rich_overflow_master_drop_notification_can_reparent_the_surviving_view"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_overflow_master_tests.rs",
+          "symbol": "rich_overflow_master_invalid_markup_target_does_not_detach_another_owner"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_overflow_master_tests.rs",
+          "symbol": "rich_overflow_master_context_lookup_uses_the_same_cache_as_content_source"
         }
       ],
-      "reason": "The rich view lays out the shared document through the existing TextFormatter/TextLine pipeline. This maps the stated property/operation, while exact native formatter, visual and platform behavior remains under review.",
+      "reason": "The rich view lays out the shared document through the existing TextFormatter/TextLine pipeline. This maps the stated property/operation, while exact native formatter, visual and platform behavior remains under review. Public ContentSource and configured flyout/selection master lookup now share the layout-resolved weak primary cache. A getter does not traverse links or force setup. Link changes clear the installed continuation suffix; actual measure uses only its immediate predecessor, resolving even for empty/no-overflow content. Ordinary layout invalidation preserves the master. Immediate predecessors remain separate for sequential page breaks and document formatting. Installed-edge identity and flow/master generations preserve callback-owned links and setup, including surviving-suffix Drop document notifications. Registered direct-property and real reflection-binding transitions are tested through the existing FerroUI property service. Weak forward targets and notification ordering are framework adaptations. Native print setup, cursor propagation, strong lifetime and other overflow/geometry members remain partial. See OVERFLOW-LINKS.md; test definitions and actual source-bound execution records are distinct.",
       "deviations": [
         "RT-A02",
         "RT-I01",
         "RT-I02",
-        "RT-I03"
+        "RT-I03",
+        "RT-I38"
       ]
     },
     "P:Microsoft.UI.Xaml.Controls.RichTextBlock.OverflowContentTargetProperty": {
@@ -16961,6 +17559,22 @@
         {
           "path": "src/FerroUI.Controls/rich_text_block.rs",
           "symbol": "pub fn overflow_content_target("
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_overflow_links.rs",
+          "symbol": "pub(super) fn reconcile_overflow_content_target("
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_overflow_links.rs",
+          "symbol": "fn replace_flow_parent("
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_overflow_links.rs",
+          "symbol": "fn publish_overflow_resets("
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_overflow_links.rs",
+          "symbol": "pub(super) fn detach_installed_overflow_on_drop("
         }
       ],
       "tests": [
@@ -16971,12 +17585,73 @@
         {
           "path": "src/FerroUI.Controls/rich_text_block_tests.rs",
           "symbol": "rich_overflow_rejects_cycles_and_second_owners"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_overflow_master_tests.rs",
+          "symbol": "rich_overflow_master_unlink_clears_the_entire_suffix_before_notifications"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_overflow_master_tests.rs",
+          "symbol": "rich_overflow_master_reparent_requires_new_predecessor_setup"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_overflow_master_tests.rs",
+          "symbol": "rich_overflow_master_ordinary_layout_changes_preserve_the_cached_master"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_overflow_master_tests.rs",
+          "symbol": "rich_overflow_master_property_events_follow_cache_transitions_on_each_descendant"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_overflow_master_tests.rs",
+          "symbol": "rich_overflow_master_weak_root_expiry_does_not_retain_the_owner"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_overflow_master_tests.rs",
+          "symbol": "rich_overflow_master_weak_intermediate_expiry_resets_surviving_suffix"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_overflow_master_tests.rs",
+          "symbol": "rich_overflow_master_primary_drop_notifies_the_previous_document_without_retention"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_overflow_master_tests.rs",
+          "symbol": "rich_overflow_master_intermediate_drop_notifies_the_root_document_for_its_suffix"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_overflow_master_tests.rs",
+          "symbol": "rich_overflow_master_nested_property_override_reconciles_the_installed_edge"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_overflow_master_tests.rs",
+          "symbol": "rich_overflow_master_reset_handler_preserves_a_newer_reparent_and_layout"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_overflow_master_tests.rs",
+          "symbol": "rich_overflow_master_invalidation_callback_sees_atomic_reset_and_keeps_new_owner"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_overflow_master_tests.rs",
+          "symbol": "rich_overflow_master_setup_callback_cannot_restore_a_replaced_master"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_overflow_master_tests.rs",
+          "symbol": "rich_overflow_master_drop_notification_can_reparent_the_surviving_view"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_overflow_master_tests.rs",
+          "symbol": "rich_overflow_master_invalid_markup_target_does_not_detach_another_owner"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_overflow_master_tests.rs",
+          "symbol": "rich_overflow_master_context_lookup_uses_the_same_cache_as_content_source"
         }
       ],
-      "reason": "The overflow inherits this shared view behavior while retaining its own layout page and weak predecessor/continuation chain.",
+      "reason": "The overflow inherits this shared view behavior while retaining its own layout page and weak predecessor/continuation chain. Public ContentSource and configured flyout/selection master lookup now share the layout-resolved weak primary cache. A getter does not traverse links or force setup. Link changes clear the installed continuation suffix; actual measure uses only its immediate predecessor, resolving even for empty/no-overflow content. Ordinary layout invalidation preserves the master. Immediate predecessors remain separate for sequential page breaks and document formatting. Installed-edge identity and flow/master generations preserve callback-owned links and setup, including surviving-suffix Drop document notifications. Registered direct-property and real reflection-binding transitions are tested through the existing FerroUI property service. Weak forward targets and notification ordering are framework adaptations. Native print setup, cursor propagation, strong lifetime and other overflow/geometry members remain partial. See OVERFLOW-LINKS.md; test definitions and actual source-bound execution records are distinct.",
       "deviations": [
         "RT-A02",
-        "RT-I02"
+        "RT-I02",
+        "RT-I38"
       ]
     },
     "P:Microsoft.UI.Xaml.Controls.RichTextBlockOverflow.OverflowContentTargetProperty": {
@@ -26222,6 +26897,14 @@
         {
           "path": "src/FerroUI.Controls/rich_text_block_overflow.rs",
           "symbol": "pub fn content_source("
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_overflow_links.rs",
+          "symbol": "pub(crate) fn cached_overflow_master("
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_overflow_links.rs",
+          "symbol": "pub(super) fn setup_linked_overflow_master("
         }
       ],
       "tests": [
@@ -26232,11 +26915,92 @@
         {
           "path": "src/FerroUI.Controls/rich_text_block_tests.rs",
           "symbol": "rich_terminal_truncation_and_linked_overflow_retain_distinct_layout_states"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_overflow_master_tests.rs",
+          "symbol": "rich_overflow_master_getters_and_metadata_do_not_resolve_a_linked_chain"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_overflow_master_tests.rs",
+          "symbol": "rich_overflow_master_reflection_binding_observes_cached_master_transitions"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_overflow_master_tests.rs",
+          "symbol": "rich_overflow_master_late_measure_waits_for_the_immediate_predecessor"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_overflow_master_tests.rs",
+          "symbol": "rich_overflow_master_cache_does_not_require_overflow_content"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_overflow_master_tests.rs",
+          "symbol": "rich_overflow_master_root_identity_keeps_sequential_predecessor_breaks"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_overflow_master_tests.rs",
+          "symbol": "rich_overflow_master_unlink_clears_the_entire_suffix_before_notifications"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_overflow_master_tests.rs",
+          "symbol": "rich_overflow_master_reparent_requires_new_predecessor_setup"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_overflow_master_tests.rs",
+          "symbol": "rich_overflow_master_ordinary_layout_changes_preserve_the_cached_master"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_overflow_master_tests.rs",
+          "symbol": "rich_overflow_master_property_events_follow_cache_transitions_on_each_descendant"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_overflow_master_tests.rs",
+          "symbol": "rich_overflow_master_weak_root_expiry_does_not_retain_the_owner"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_overflow_master_tests.rs",
+          "symbol": "rich_overflow_master_weak_intermediate_expiry_resets_surviving_suffix"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_overflow_master_tests.rs",
+          "symbol": "rich_overflow_master_primary_drop_notifies_the_previous_document_without_retention"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_overflow_master_tests.rs",
+          "symbol": "rich_overflow_master_intermediate_drop_notifies_the_root_document_for_its_suffix"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_overflow_master_tests.rs",
+          "symbol": "rich_overflow_master_nested_property_override_reconciles_the_installed_edge"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_overflow_master_tests.rs",
+          "symbol": "rich_overflow_master_reset_handler_preserves_a_newer_reparent_and_layout"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_overflow_master_tests.rs",
+          "symbol": "rich_overflow_master_invalidation_callback_sees_atomic_reset_and_keeps_new_owner"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_overflow_master_tests.rs",
+          "symbol": "rich_overflow_master_setup_callback_cannot_restore_a_replaced_master"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_overflow_master_tests.rs",
+          "symbol": "rich_overflow_master_drop_notification_can_reparent_the_surviving_view"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_overflow_master_tests.rs",
+          "symbol": "rich_overflow_master_invalid_markup_target_does_not_detach_another_owner"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_overflow_master_tests.rs",
+          "symbol": "rich_overflow_master_context_lookup_uses_the_same_cache_as_content_source"
         }
       ],
-      "reason": "The overflow resolves its weak predecessor without creating a parent/child ownership cycle, and detachment clears the source.",
+      "reason": "Public ContentSource and configured flyout/selection master lookup now share the layout-resolved weak primary cache. A getter does not traverse links or force setup. Link changes clear the installed continuation suffix; actual measure uses only its immediate predecessor, resolving even for empty/no-overflow content. Ordinary layout invalidation preserves the master. Immediate predecessors remain separate for sequential page breaks and document formatting. Installed-edge identity and flow/master generations preserve callback-owned links and setup, including surviving-suffix Drop document notifications. Registered direct-property and real reflection-binding transitions are tested through the existing FerroUI property service. Weak forward targets and notification ordering are framework adaptations. Native print setup, cursor propagation, strong lifetime and other overflow/geometry members remain partial. See OVERFLOW-LINKS.md; test definitions and actual source-bound execution records are distinct.",
       "deviations": [
-        "RT-I02"
+        "RT-I02",
+        "RT-I38"
       ]
     },
     "E:Microsoft.UI.Xaml.Controls.RichTextBlock.IsTextTrimmedChanged": {
@@ -45014,7 +45778,7 @@
     },
     "Rich view and overflow": {
       "state": "partial",
-      "description": "Existing TextFormatter/TextLine integration, linked continuation, selection, embedded controls and hyperlinks, paragraph spacing/signed indents, inherited language, shaped explicit/default tabs with leaders and RTL decimal fields, and a persistent editor presenter with logical scrolling. Full native formatting/appearance and remaining members stay pending. Rich line bounds and source-derived stacking retain common allocation/draw geometry; native font metric and rendering boundaries are explicit in RT-I31. Rich line boxes now use an opt-in requested-family metric policy, per-run bounds and complete baseline-object contributions. Optional scale transport retains source em and mapped face/scale ownership; current Skia/Vello providers remain at scale one. RT-I31 and LAYOUT.md retain native matching, cap-height, TextDpi, object-protocol and rendering limits. Configured RichTextBlock context requests expose a distinct synchronous typed event through existing ContextMenu/ContextFlyout and runtime/compiled XAML services. Read-only origin coordinates, overflow master fallback/default selection gating, shared cancellation and callback ownership are documented in CONTEXT-MENUS.md; native default commands, cached-master timing and automatic selection flyouts remain partial."
+      "description": "Existing TextFormatter/TextLine integration, linked continuation, selection, embedded controls and hyperlinks, paragraph spacing/signed indents, inherited language, shaped explicit/default tabs with leaders and RTL decimal fields, and a persistent editor presenter with logical scrolling. Full native formatting/appearance and remaining members stay pending. Rich line bounds and source-derived stacking retain common allocation/draw geometry; native font metric and rendering boundaries are explicit in RT-I31. Rich line boxes now use an opt-in requested-family metric policy, per-run bounds and complete baseline-object contributions. Optional scale transport retains source em and mapped face/scale ownership; current Skia/Vello providers remain at scale one. RT-I31 and LAYOUT.md retain native matching, cap-height, TextDpi, object-protocol and rendering limits. Configured RichTextBlock context requests expose a distinct synchronous typed event through existing ContextMenu/ContextFlyout and runtime/compiled XAML services. Read-only origin coordinates, overflow master fallback/default selection gating, shared cancellation and callback ownership are documented in CONTEXT-MENUS.md; native default commands and automatic selection flyouts remain partial. Public ContentSource and configured context lookup now share a layout-resolved weak primary cache. The immediate predecessor remains separate for sequential page flow; one-predecessor setup, suffix reset, actual binding transitions and callback-owned link changes are documented in OVERFLOW-LINKS.md. Native print setup, strong target lifetime and remaining overflow behavior stay partial."
     },
     "Editing, history and text object services": {
       "state": "partial",
@@ -45034,7 +45798,7 @@
     },
     "Rich editor themes and markup": {
       "state": "partial",
-      "description": "Compiled WinUI, Fluent and Simple ControlThemes host the persistent presenter and framework command flyout. Independent mixed formatting queries and one-transaction toggles retain history. Runtime/emitted rich-document fixtures include copied TextRange value construction, actual rich collection comparison and a ControlCatalog page. Generated references and complete suite results have separate records. Native command-bar/touch/lazy-part behavior, localization and appearance remain pending. Context/composition/selection/text-changing metadata now uses the shared routed-argument representation with runtime/compiled base-handler and typed-subscriber parity. TextElement.FindName uses shared nearest scopes; real template scopes are discoverable without retaining their declaring trees. Configured RichTextBlock context requests expose a distinct synchronous typed event through existing ContextMenu/ContextFlyout and runtime/compiled XAML services. Read-only origin coordinates, overflow master fallback/default selection gating, shared cancellation and callback ownership are documented in CONTEXT-MENUS.md; native default commands, cached-master timing and automatic selection flyouts remain partial."
+      "description": "Compiled WinUI, Fluent and Simple ControlThemes host the persistent presenter and framework command flyout. Independent mixed formatting queries and one-transaction toggles retain history. Runtime/emitted rich-document fixtures include copied TextRange value construction, actual rich collection comparison and a ControlCatalog page. Generated references and complete suite results have separate records. Native command-bar/touch/lazy-part behavior, localization and appearance remain pending. Context/composition/selection/text-changing metadata now uses the shared routed-argument representation with runtime/compiled base-handler and typed-subscriber parity. TextElement.FindName uses shared nearest scopes; real template scopes are discoverable without retaining their declaring trees. Configured RichTextBlock context requests expose a distinct synchronous typed event through existing ContextMenu/ContextFlyout and runtime/compiled XAML services. Read-only origin coordinates, overflow master fallback/default selection gating, shared cancellation and callback ownership are documented in CONTEXT-MENUS.md; native default commands and automatic selection flyouts remain partial."
     },
     "Typography and font features": {
       "state": "partial",
@@ -45493,7 +46257,7 @@
       "kind": "ci_runtime",
       "source": "Broader workflow at 8508220d; run39825948242, ARM64 job119989156134.",
       "command": "Windows ARM64 informative backend tests; remaining broad repository jobs",
-      "result": "ARM64: 370 passed / 1 failed on vertical_utf16 native setup: selection.text() was empty after WM_SETTEXT rather than A😀B\\rxy\\rA😀B. The exact setup assertion is retained; dedicated x64 serial native probes passed separately. Successful broad jobs: Android, framebuffer, both Wayland jobs, source conventions and package checks. macOS, Windows x64, iOS, Linux X11 and all browser checks were cancelled, so the broader run is not a complete passing gate. Native ARM64 setup/isolation remains to diagnose."
+      "result": "ARM64: 370 passed / 1 failed on vertical_utf16 native setup: selection.text() was empty after WM_SETTEXT rather than A\ud83d\ude00B\\rxy\\rA\ud83d\ude00B. The exact setup assertion is retained; dedicated x64 serial native probes passed separately. Successful broad jobs: Android, framebuffer, both Wayland jobs, source conventions and package checks. macOS, Windows x64, iOS, Linux X11 and all browser checks were cancelled, so the broader run is not a complete passing gate. Native ARM64 setup/isolation remains to diagnose."
     },
     {
       "kind": "standalone_core_runtime",

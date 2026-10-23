@@ -2472,6 +2472,1441 @@
           }
         }
       }
+    },
+    {
+      "checkpoint": "2026-10-23-cached-overflow-master",
+      "source_scope": "Five Controls Rust overrides on context checkpoint f3dbe07f; separate immediate predecessor and measured cached primary, installed-edge ownership and framework notifications. Exact bytes, failed attempts and successful final gates are preserved in the record. Native layout/printing/notification parity is not inferred.",
+      "record_sha256": "6507240f96c66d20d52fea26e02f63c71a702611329bfeaf9ca32bf1386eba08",
+      "record_bytes": 65308,
+      "git_commit_equivalence": {
+        "local_commit": "dc636fee66e528e2f3d3bf2445604f1ed1714e76",
+        "github_commit": "f3dbe07f6df5d53e0e0cca02e448367f42066fa5",
+        "tree": "118e9f73c3b1bee20b64c7066ba007696c068e0a"
+      },
+      "record": {
+        "updated_utc": "2026-10-23T15:06:26.783760+00:00",
+        "plan": {
+          "prepared_utc": "2026-10-23T14:32:34.095610+00:00",
+          "status": "Prepared only; no freeze or execution authorized yet",
+          "repository": "/workspace/scratch/e589b83e3196/FerroUI",
+          "target": "/tmp/ferroui-richtext-target",
+          "prior_source_commit": "dc636fee66e528e2f3d3bf2445604f1ed1714e76",
+          "source_input_scopes": [
+            "src",
+            "tests",
+            "Cargo.toml",
+            "Cargo.lock",
+            "rust-toolchain",
+            "rust-toolchain.toml",
+            "build.rs",
+            ".cargo"
+          ],
+          "expected_change_paths": [
+            "src/FerroUI.Controls/rich_text_block.rs",
+            "src/FerroUI.Controls/rich_text_block_overflow.rs",
+            "src/FerroUI.Controls/rich_text_context_menu.rs",
+            "src/FerroUI.Controls/rich_text_overflow_links.rs",
+            "src/FerroUI.Controls/rich_text_overflow_master_tests.rs"
+          ],
+          "environment": {
+            "PATH": "/tmp/ferroedit-cargo/bin:/usr/local/bin:/usr/bin:/bin",
+            "CARGO_HOME": "/tmp/ferroedit-cargo",
+            "RUSTUP_HOME": "/tmp/ferroedit-rustup",
+            "CARGO_TARGET_DIR": "/tmp/ferroui-richtext-target",
+            "CARGO_BUILD_JOBS": "1",
+            "CARGO_PROFILE_DEV_DEBUG": "0",
+            "CARGO_PROFILE_TEST_DEBUG": "0",
+            "CARGO_INCREMENTAL": "0"
+          },
+          "minimum_compile_free_bytes": {
+            "metadata": 400000000,
+            "test_binary": 700000000
+          },
+          "controls_focused": [
+            {
+              "filter": "rich_overflow_master_",
+              "expected_test_definitions": 20
+            },
+            {
+              "filter": "rich_readonly_context_",
+              "expected_test_definitions": 31
+            },
+            {
+              "filter": "rich_text_block_tests::",
+              "expected_test_definitions": 22
+            },
+            {
+              "filter": "rich_hosted_",
+              "expected_test_definitions": 21
+            }
+          ],
+          "full_controls": true,
+          "xaml_gate": {
+            "required": false,
+            "reason": "The duplicate markup declaration was removed before integration. ContentSource remains the existing registered DirectProperty with unchanged public metadata shape; new Controls cases cover live ReflectionBinding and its read-only untyped getter."
+          },
+          "approved_owned_artifact_groups": {
+            "stale_controls": [
+              {
+                "path": "/tmp/ferroui-richtext-target/debug/deps/libferroui_controls-163145d6d6e8f359.rlib",
+                "bytes": 430486248,
+                "sha256": "87cae32fa155d8f056a0eac200bae74031ec27ff6e63d0582d00679fa5590186",
+                "mtime_ns": 1792760379171026151,
+                "mode": 420
+              },
+              {
+                "path": "/tmp/ferroui-richtext-target/debug/deps/libferroui_controls-163145d6d6e8f359.rmeta",
+                "bytes": 47940627,
+                "sha256": "db13543ec76485d16268171cce8b4e0b4753bacfde39142adbb996e51254e642",
+                "mtime_ns": 1792760295981514121,
+                "mode": 420
+              }
+            ],
+            "base9_controls": [
+              {
+                "path": "/tmp/ferroui-richtext-target/debug/deps/libferroui_base-9f55987531e22910.rlib",
+                "bytes": 343251786,
+                "sha256": "69ba350ded3b7bc2b395f8d2a5eb6d3a6d7d90614ef464989a49e6a1113461bb",
+                "mtime_ns": 1792753943556026790,
+                "mode": 420
+              },
+              {
+                "path": "/tmp/ferroui-richtext-target/debug/deps/libferroui_base-9f55987531e22910.rmeta",
+                "bytes": 64709912,
+                "sha256": "b242911682fe7c4e4c3c607d24e56312601797d480f20587b2771521e58b1660",
+                "mtime_ns": 1792753886557962214,
+                "mode": 420
+              }
+            ],
+            "base93_xaml_host": [
+              {
+                "path": "/tmp/ferroui-richtext-target/debug/deps/libferroui_base-93ab9670c927353b.rlib",
+                "bytes": 340923964,
+                "sha256": "ebadcd274f6386c76640689d9935b3b2ebcb90c60761b8796d4a6b00c2d7fad8",
+                "mtime_ns": 1792760006806335030,
+                "mode": 420
+              },
+              {
+                "path": "/tmp/ferroui-richtext-target/debug/deps/libferroui_base-93ab9670c927353b.rmeta",
+                "bytes": 64178595,
+                "sha256": "7bb14ca72a5908db566ecb8ef9443ed676a70d15de48fc138cb7ce15511fc050",
+                "mtime_ns": 1792759941177834794,
+                "mode": 420
+              }
+            ],
+            "duplicate_backups": [
+              {
+                "path": "/tmp/ferroui-richtext-archived-baseline/libferroui_base-9f55987531e22910.rlib.gz",
+                "bytes": 50002177,
+                "sha256": "70404e3a0dc586ca0fb286aad037936833ff34ccbf2959b815ffc93028fe04a7",
+                "mtime_ns": 1792760619051160816,
+                "mode": 420,
+                "restored_original": {
+                  "path": "/tmp/ferroui-richtext-target/debug/deps/libferroui_base-9f55987531e22910.rlib",
+                  "bytes": 343251786,
+                  "sha256": "69ba350ded3b7bc2b395f8d2a5eb6d3a6d7d90614ef464989a49e6a1113461bb",
+                  "mtime_ns": 1792753943556026790,
+                  "mode": 420
+                }
+              },
+              {
+                "path": "/tmp/ferroui-richtext-archived-baseline/libferroui_base-9f55987531e22910.rmeta.gz",
+                "bytes": 19838307,
+                "sha256": "53169f6da6d7aed442c4d4a28f7b1ab7cb557547bcf67cadd20c9320ed982548",
+                "mtime_ns": 1792760621679204055,
+                "mode": 420,
+                "restored_original": {
+                  "path": "/tmp/ferroui-richtext-target/debug/deps/libferroui_base-9f55987531e22910.rmeta",
+                  "bytes": 64709912,
+                  "sha256": "b242911682fe7c4e4c3c607d24e56312601797d480f20587b2771521e58b1660",
+                  "mtime_ns": 1792753886557962214,
+                  "mode": 420
+                }
+              }
+            ]
+          },
+          "prior_evidence": {
+            "path": "/tmp/ferroui-popup-ownership-verification.json",
+            "bytes": 80036,
+            "sha256": "8935682b683ae70ffb1e0a84e51015c909beff1e08eddcb9f859d277d7d90fd8",
+            "mtime_ns": 1792761839592603086,
+            "mode": 420
+          }
+        },
+        "plan_sha256": "3901d59e32ab20e2bf95e6f31b8917783843d5297125ce8136487f797ebc95d0",
+        "harness_sha256": "f9ed5e83a4831dece388c57ca5e60e67b4b1222d0ab5b6208f87cf2ef90598bc",
+        "freezes": [
+          {
+            "path": "/tmp/ferroui-overflow-master-verification/freezes/initial/source-manifest.json",
+            "sha256": "5285276fd1a8de171db79c4fa2c440ec7dceebe62340fac74d8ca96f460b2c4f",
+            "manifest": {
+              "at_utc": "2026-10-23T14:43:37.762215+00:00",
+              "handoff_note": "Root handoff: five reviewed Rust files applied with exact work-manifest hashes, 20 definitions and diff check passed; source and target ownership transferred for Controls validation. Local context commit will be mapped to its tree-identical GitHub equivalent separately.",
+              "base_commit": "dc636fee66e528e2f3d3bf2445604f1ed1714e76",
+              "base_tree": "118e9f73c3b1bee20b64c7066ba007696c068e0a",
+              "current_commit": "dc636fee66e528e2f3d3bf2445604f1ed1714e76",
+              "files": [
+                {
+                  "relative_path": "src/FerroUI.Controls/rich_text_block.rs",
+                  "bytes": 79624,
+                  "sha256": "04e36ca283b68a3a1ea2eb759d1fee96462b6c13bd1ebf6deade190909102dee"
+                },
+                {
+                  "relative_path": "src/FerroUI.Controls/rich_text_block_overflow.rs",
+                  "bytes": 1802,
+                  "sha256": "90c4644eaa04ed9809de801adab1e26accbefbff0e17cf6e31205e8ff4bdcc19"
+                },
+                {
+                  "relative_path": "src/FerroUI.Controls/rich_text_context_menu.rs",
+                  "bytes": 12586,
+                  "sha256": "c9909b0d792f5a91f57e7a169010a548212e904315c277584d355ff95bdf4363"
+                },
+                {
+                  "relative_path": "src/FerroUI.Controls/rich_text_overflow_links.rs",
+                  "bytes": 10735,
+                  "sha256": "406b3deb12c0a461a754fa53db7e3feb9579250e973ed315ee004ab7bff23012"
+                },
+                {
+                  "relative_path": "src/FerroUI.Controls/rich_text_overflow_master_tests.rs",
+                  "bytes": 30070,
+                  "sha256": "b22bab794637b19bfb3cf2594a3592627211e8a04dec1eb061588e8c39c06247"
+                }
+              ],
+              "expected_draft_manifest": "/tmp/ferroui-overflow-master-draft/work-manifest.json",
+              "expected_draft_manifest_sha256": "e222584866275245a4579e1348eb8c74f40dd7043d38b8abc1547a471dbfe296",
+              "compiler_input_scopes": [
+                "src",
+                "tests",
+                "Cargo.toml",
+                "Cargo.lock",
+                "rust-toolchain",
+                "rust-toolchain.toml",
+                "build.rs",
+                ".cargo"
+              ],
+              "excluded_documentation": [
+                "docs/porting/winui-rich-text",
+                "scripts/porting/winui-rich-text-inventory.py",
+                "**/NOTICE.md"
+              ]
+            }
+          },
+          {
+            "path": "/tmp/ferroui-overflow-master-verification/freezes/lifetime-fix/source-manifest.json",
+            "sha256": "d4aebe6af05213ae1e4500b9beaaa592f73efa34c195a1dcddf3411e68a190da",
+            "manifest": {
+              "at_utc": "2026-10-23T14:58:59.389128+00:00",
+              "handoff_note": "Parent handed back exactly two Some(b.clone()) lifetime fixture corrections after focused18pass2fail; four production files unchanged. No separate metadata rerun: final real Controls test build type-checks the correction. Parent may update port docs and attribution outside compiler-input scope. HEAD may move to published context-equivalent f3dbe07f6df5d53e0e0cca02e448367f42066fa5 with identical base tree.",
+              "base_commit": "dc636fee66e528e2f3d3bf2445604f1ed1714e76",
+              "base_tree": "118e9f73c3b1bee20b64c7066ba007696c068e0a",
+              "current_commit": "f3dbe07f6df5d53e0e0cca02e448367f42066fa5",
+              "files": [
+                {
+                  "relative_path": "src/FerroUI.Controls/rich_text_block.rs",
+                  "bytes": 79624,
+                  "sha256": "04e36ca283b68a3a1ea2eb759d1fee96462b6c13bd1ebf6deade190909102dee"
+                },
+                {
+                  "relative_path": "src/FerroUI.Controls/rich_text_block_overflow.rs",
+                  "bytes": 1802,
+                  "sha256": "90c4644eaa04ed9809de801adab1e26accbefbff0e17cf6e31205e8ff4bdcc19"
+                },
+                {
+                  "relative_path": "src/FerroUI.Controls/rich_text_context_menu.rs",
+                  "bytes": 12586,
+                  "sha256": "c9909b0d792f5a91f57e7a169010a548212e904315c277584d355ff95bdf4363"
+                },
+                {
+                  "relative_path": "src/FerroUI.Controls/rich_text_overflow_links.rs",
+                  "bytes": 10735,
+                  "sha256": "406b3deb12c0a461a754fa53db7e3feb9579250e973ed315ee004ab7bff23012"
+                },
+                {
+                  "relative_path": "src/FerroUI.Controls/rich_text_overflow_master_tests.rs",
+                  "bytes": 30155,
+                  "sha256": "f87e93ce6f01c9ae3cf8372583407fbf178fc0b03a51e6da0ca4163feb52c9ac"
+                }
+              ],
+              "expected_draft_manifest": "/tmp/ferroui-overflow-master-draft/work-manifest.json",
+              "expected_draft_manifest_sha256": "829876305a21092a1c1ad621ae3177d515d123bbaf02f4de597c3ee6f7dfcb86",
+              "compiler_input_scopes": [
+                "src",
+                "tests",
+                "Cargo.toml",
+                "Cargo.lock",
+                "rust-toolchain",
+                "rust-toolchain.toml",
+                "build.rs",
+                ".cargo"
+              ],
+              "excluded_documentation": [
+                "docs/porting/winui-rich-text",
+                "scripts/porting/winui-rich-text-inventory.py",
+                "**/NOTICE.md"
+              ]
+            }
+          },
+          {
+            "path": "/tmp/ferroui-overflow-master-verification/freezes/observable-fix/source-manifest.json",
+            "sha256": "31636d854f6db352996c27bc8d2abf3f41db87327db2f58cd90d1804aece5f38",
+            "manifest": {
+              "at_utc": "2026-10-23T14:47:41.270537+00:00",
+              "handoff_note": "Root corrected only the new live-binding test to explicitly invoke FerroObjectExtensions::get_observable on FerroObject, copied it to the reviewed draft, refreshed the work manifest, and returned frozen source ownership. Four production hashes remain unchanged; initial failed metadata attempt stays immutable.",
+              "base_commit": "dc636fee66e528e2f3d3bf2445604f1ed1714e76",
+              "base_tree": "118e9f73c3b1bee20b64c7066ba007696c068e0a",
+              "current_commit": "dc636fee66e528e2f3d3bf2445604f1ed1714e76",
+              "files": [
+                {
+                  "relative_path": "src/FerroUI.Controls/rich_text_block.rs",
+                  "bytes": 79624,
+                  "sha256": "04e36ca283b68a3a1ea2eb759d1fee96462b6c13bd1ebf6deade190909102dee"
+                },
+                {
+                  "relative_path": "src/FerroUI.Controls/rich_text_block_overflow.rs",
+                  "bytes": 1802,
+                  "sha256": "90c4644eaa04ed9809de801adab1e26accbefbff0e17cf6e31205e8ff4bdcc19"
+                },
+                {
+                  "relative_path": "src/FerroUI.Controls/rich_text_context_menu.rs",
+                  "bytes": 12586,
+                  "sha256": "c9909b0d792f5a91f57e7a169010a548212e904315c277584d355ff95bdf4363"
+                },
+                {
+                  "relative_path": "src/FerroUI.Controls/rich_text_overflow_links.rs",
+                  "bytes": 10735,
+                  "sha256": "406b3deb12c0a461a754fa53db7e3feb9579250e973ed315ee004ab7bff23012"
+                },
+                {
+                  "relative_path": "src/FerroUI.Controls/rich_text_overflow_master_tests.rs",
+                  "bytes": 30139,
+                  "sha256": "e37ecadbad0e9a76f6d47d64a439a6024fda96e5fec41bc4070e46a70762eb34"
+                }
+              ],
+              "expected_draft_manifest": "/tmp/ferroui-overflow-master-draft/work-manifest.json",
+              "expected_draft_manifest_sha256": "1e98a1a87a91eb8ab088b8cb53eca095202dbeef74097885edbaef46631fecf4",
+              "compiler_input_scopes": [
+                "src",
+                "tests",
+                "Cargo.toml",
+                "Cargo.lock",
+                "rust-toolchain",
+                "rust-toolchain.toml",
+                "build.rs",
+                ".cargo"
+              ],
+              "excluded_documentation": [
+                "docs/porting/winui-rich-text",
+                "scripts/porting/winui-rich-text-inventory.py",
+                "**/NOTICE.md"
+              ]
+            }
+          }
+        ],
+        "attempts": [
+          {
+            "state": "finished",
+            "started_utc": "2026-10-23T14:49:24.279841+00:00",
+            "source_manifest": "/tmp/ferroui-overflow-master-verification/freezes/observable-fix/source-manifest.json",
+            "source_manifest_sha256": "31636d854f6db352996c27bc8d2abf3f41db87327db2f58cd90d1804aece5f38",
+            "resources_before": {
+              "at_utc": "2026-10-23T14:49:24.280891+00:00",
+              "available_bytes": 1019944960,
+              "memory.current": "2925559808",
+              "memory.max": "8589934592",
+              "memory.events": "low 0\nhigh 0\nmax 4224821\noom 74\noom_kill 6\noom_group_kill 0"
+            },
+            "harness_sha256": "6c39ffa2ec3bc6c740110742d92118fd031c3d2c027abd9fcf794075a20a8352",
+            "plan_sha256": "3901d59e32ab20e2bf95e6f31b8917783843d5297125ce8136487f797ebc95d0",
+            "required_free_bytes": 700000000,
+            "argv": [
+              "/tmp/ferroedit-cargo/bin/cargo",
+              "test",
+              "--locked",
+              "--offline",
+              "-p",
+              "ferroui-controls",
+              "--lib",
+              "--no-run"
+            ],
+            "cwd": "/workspace/scratch/e589b83e3196/FerroUI",
+            "env": {
+              "PATH": "/tmp/ferroedit-cargo/bin:/usr/local/bin:/usr/bin:/bin",
+              "CARGO_HOME": "/tmp/ferroedit-cargo",
+              "RUSTUP_HOME": "/tmp/ferroedit-rustup",
+              "CARGO_TARGET_DIR": "/tmp/ferroui-richtext-target",
+              "CARGO_BUILD_JOBS": "1",
+              "CARGO_PROFILE_DEV_DEBUG": "0",
+              "CARGO_PROFILE_TEST_DEBUG": "0",
+              "CARGO_INCREMENTAL": "0"
+            },
+            "execution_context": "sandboxed",
+            "exit_code": 0,
+            "finished_utc": "2026-10-23T14:54:13.864751+00:00",
+            "duration_seconds": 289.466,
+            "resources_after": {
+              "at_utc": "2026-10-23T14:54:13.866875+00:00",
+              "available_bytes": 736337920,
+              "memory.current": "3400790016",
+              "memory.max": "8589934592",
+              "memory.events": "low 0\nhigh 0\nmax 4225087\noom 74\noom_kill 6\noom_group_kill 0"
+            },
+            "log_path": "/tmp/ferroui-overflow-master-verification/attempts/controls-build-01/output.log",
+            "log_sha256": "30efba5505d5410a5ab695bdc32e5c0a4769af77613351d71e4b5abf8083b36c",
+            "source_unchanged": true,
+            "source_issues": [],
+            "binary": {
+              "path": "/tmp/ferroui-richtext-target/debug/deps/ferroui_controls-8d2b7e7a6d2ee4d8",
+              "bytes": 281117864,
+              "sha256": "e73377cf33eb5449a6a5f6443f245f1efd051e7f3007dd6bbe4ce1ed4690f1af",
+              "mtime_ns": 1792767253034495363,
+              "mode": 493
+            },
+            "gate_passed": true,
+            "record_path": "/tmp/ferroui-overflow-master-verification/attempts/controls-build-01/record.json",
+            "record_sha256": "b78c467229929d75611eff61cdf54db31eeb1e2568cf7e68cbb940e6475c22ee"
+          },
+          {
+            "state": "finished",
+            "started_utc": "2026-10-23T14:59:09.036922+00:00",
+            "source_manifest": "/tmp/ferroui-overflow-master-verification/freezes/lifetime-fix/source-manifest.json",
+            "source_manifest_sha256": "d4aebe6af05213ae1e4500b9beaaa592f73efa34c195a1dcddf3411e68a190da",
+            "resources_before": {
+              "at_utc": "2026-10-23T14:59:09.037577+00:00",
+              "available_bytes": 869355520,
+              "memory.current": "2474676224",
+              "memory.max": "8589934592",
+              "memory.events": "low 0\nhigh 0\nmax 4225087\noom 74\noom_kill 6\noom_group_kill 0"
+            },
+            "harness_sha256": "f9ed5e83a4831dece388c57ca5e60e67b4b1222d0ab5b6208f87cf2ef90598bc",
+            "plan_sha256": "3901d59e32ab20e2bf95e6f31b8917783843d5297125ce8136487f797ebc95d0",
+            "required_free_bytes": 700000000,
+            "argv": [
+              "/tmp/ferroedit-cargo/bin/cargo",
+              "test",
+              "--locked",
+              "--offline",
+              "-p",
+              "ferroui-controls",
+              "--lib",
+              "--no-run"
+            ],
+            "cwd": "/workspace/scratch/e589b83e3196/FerroUI",
+            "env": {
+              "PATH": "/tmp/ferroedit-cargo/bin:/usr/local/bin:/usr/bin:/bin",
+              "CARGO_HOME": "/tmp/ferroedit-cargo",
+              "RUSTUP_HOME": "/tmp/ferroedit-rustup",
+              "CARGO_TARGET_DIR": "/tmp/ferroui-richtext-target",
+              "CARGO_BUILD_JOBS": "1",
+              "CARGO_PROFILE_DEV_DEBUG": "0",
+              "CARGO_PROFILE_TEST_DEBUG": "0",
+              "CARGO_INCREMENTAL": "0"
+            },
+            "execution_context": "sandboxed",
+            "exit_code": 0,
+            "finished_utc": "2026-10-23T15:04:04.860883+00:00",
+            "duration_seconds": 295.73,
+            "resources_after": {
+              "at_utc": "2026-10-23T15:04:04.863295+00:00",
+              "available_bytes": 583471104,
+              "memory.current": "3474034688",
+              "memory.max": "8589934592",
+              "memory.events": "low 0\nhigh 0\nmax 4225667\noom 74\noom_kill 6\noom_group_kill 0"
+            },
+            "log_path": "/tmp/ferroui-overflow-master-verification/attempts/controls-build-02/output.log",
+            "log_sha256": "c13a84c5683b1f6a8f9dcb7c406ce6b8522c5202ecf2254a7ea836b3c91289d3",
+            "source_unchanged": true,
+            "source_issues": [],
+            "binary": {
+              "path": "/tmp/ferroui-richtext-target/debug/deps/ferroui_controls-8d2b7e7a6d2ee4d8",
+              "bytes": 281128968,
+              "sha256": "43001b1634b6e2350b926f0b003ed5b3737d65923200074fcad942ed58f05f6c",
+              "mtime_ns": 1792767843581682618,
+              "mode": 493
+            },
+            "gate_passed": true,
+            "record_path": "/tmp/ferroui-overflow-master-verification/attempts/controls-build-02/record.json",
+            "record_sha256": "1e7237cfd79def553a6ddfd2803fa31eba1b9d266f6d6d54445678a33d8dea7f"
+          },
+          {
+            "state": "finished",
+            "started_utc": "2026-10-23T14:43:58.020378+00:00",
+            "source_manifest": "/tmp/ferroui-overflow-master-verification/freezes/initial/source-manifest.json",
+            "source_manifest_sha256": "5285276fd1a8de171db79c4fa2c440ec7dceebe62340fac74d8ca96f460b2c4f",
+            "resources_before": {
+              "at_utc": "2026-10-23T14:43:58.020720+00:00",
+              "available_bytes": 1062789120,
+              "memory.current": "2417078272",
+              "memory.max": "8589934592",
+              "memory.events": "low 0\nhigh 0\nmax 4224821\noom 74\noom_kill 6\noom_group_kill 0"
+            },
+            "harness_sha256": "6c39ffa2ec3bc6c740110742d92118fd031c3d2c027abd9fcf794075a20a8352",
+            "plan_sha256": "3901d59e32ab20e2bf95e6f31b8917783843d5297125ce8136487f797ebc95d0",
+            "required_free_bytes": 400000000,
+            "argv": [
+              "/tmp/ferroedit-cargo/bin/cargo",
+              "check",
+              "--locked",
+              "--offline",
+              "-p",
+              "ferroui-controls",
+              "--tests"
+            ],
+            "cwd": "/workspace/scratch/e589b83e3196/FerroUI",
+            "env": {
+              "PATH": "/tmp/ferroedit-cargo/bin:/usr/local/bin:/usr/bin:/bin",
+              "CARGO_HOME": "/tmp/ferroedit-cargo",
+              "RUSTUP_HOME": "/tmp/ferroedit-rustup",
+              "CARGO_TARGET_DIR": "/tmp/ferroui-richtext-target",
+              "CARGO_BUILD_JOBS": "1",
+              "CARGO_PROFILE_DEV_DEBUG": "0",
+              "CARGO_PROFILE_TEST_DEBUG": "0",
+              "CARGO_INCREMENTAL": "0"
+            },
+            "execution_context": "sandboxed",
+            "exit_code": 101,
+            "finished_utc": "2026-10-23T14:46:38.398719+00:00",
+            "duration_seconds": 160.314,
+            "resources_after": {
+              "at_utc": "2026-10-23T14:46:38.398905+00:00",
+              "available_bytes": 1017962496,
+              "memory.current": "3061391360",
+              "memory.max": "8589934592",
+              "memory.events": "low 0\nhigh 0\nmax 4224821\noom 74\noom_kill 6\noom_group_kill 0"
+            },
+            "log_path": "/tmp/ferroui-overflow-master-verification/attempts/controls-metadata-01/output.log",
+            "log_sha256": "40df1518474baf2457328ef99405d4f53d0d1e61c0600cb0b8e76bc9ecf133c1",
+            "source_unchanged": true,
+            "source_issues": [],
+            "gate_passed": false,
+            "record_path": "/tmp/ferroui-overflow-master-verification/attempts/controls-metadata-01/record.json",
+            "record_sha256": "7430a2de52ce648564aca1e89f64ef519987c4f8cee4b6d89936bb4166c2e60b"
+          },
+          {
+            "state": "finished",
+            "started_utc": "2026-10-23T14:47:44.690670+00:00",
+            "source_manifest": "/tmp/ferroui-overflow-master-verification/freezes/observable-fix/source-manifest.json",
+            "source_manifest_sha256": "31636d854f6db352996c27bc8d2abf3f41db87327db2f58cd90d1804aece5f38",
+            "resources_before": {
+              "at_utc": "2026-10-23T14:47:44.692104+00:00",
+              "available_bytes": 1021521920,
+              "memory.current": "2734587904",
+              "memory.max": "8589934592",
+              "memory.events": "low 0\nhigh 0\nmax 4224821\noom 74\noom_kill 6\noom_group_kill 0"
+            },
+            "harness_sha256": "6c39ffa2ec3bc6c740110742d92118fd031c3d2c027abd9fcf794075a20a8352",
+            "plan_sha256": "3901d59e32ab20e2bf95e6f31b8917783843d5297125ce8136487f797ebc95d0",
+            "required_free_bytes": 400000000,
+            "argv": [
+              "/tmp/ferroedit-cargo/bin/cargo",
+              "check",
+              "--locked",
+              "--offline",
+              "-p",
+              "ferroui-controls",
+              "--tests"
+            ],
+            "cwd": "/workspace/scratch/e589b83e3196/FerroUI",
+            "env": {
+              "PATH": "/tmp/ferroedit-cargo/bin:/usr/local/bin:/usr/bin:/bin",
+              "CARGO_HOME": "/tmp/ferroedit-cargo",
+              "RUSTUP_HOME": "/tmp/ferroedit-rustup",
+              "CARGO_TARGET_DIR": "/tmp/ferroui-richtext-target",
+              "CARGO_BUILD_JOBS": "1",
+              "CARGO_PROFILE_DEV_DEBUG": "0",
+              "CARGO_PROFILE_TEST_DEBUG": "0",
+              "CARGO_INCREMENTAL": "0"
+            },
+            "execution_context": "sandboxed",
+            "exit_code": 0,
+            "finished_utc": "2026-10-23T14:49:16.911449+00:00",
+            "duration_seconds": 92.129,
+            "resources_after": {
+              "at_utc": "2026-10-23T14:49:16.911541+00:00",
+              "available_bytes": 1020116992,
+              "memory.current": "2922594304",
+              "memory.max": "8589934592",
+              "memory.events": "low 0\nhigh 0\nmax 4224821\noom 74\noom_kill 6\noom_group_kill 0"
+            },
+            "log_path": "/tmp/ferroui-overflow-master-verification/attempts/controls-metadata-02/output.log",
+            "log_sha256": "e20c9e42a760255d36970991478ea0e9ffcfce20cee5c2da6924f6e208784809",
+            "source_unchanged": true,
+            "source_issues": [],
+            "gate_passed": true,
+            "record_path": "/tmp/ferroui-overflow-master-verification/attempts/controls-metadata-02/record.json",
+            "record_sha256": "4d8e903222ca89e246c8de356d2538b7052f549aed65bef73c368a4243c1336c"
+          }
+        ],
+        "runs": [
+          {
+            "state": "finished",
+            "started_utc": "2026-10-23T15:04:59.156019+00:00",
+            "source_manifest": "/tmp/ferroui-overflow-master-verification/freezes/lifetime-fix/source-manifest.json",
+            "source_manifest_sha256": "d4aebe6af05213ae1e4500b9beaaa592f73efa34c195a1dcddf3411e68a190da",
+            "resources_before": {
+              "at_utc": "2026-10-23T15:04:59.157199+00:00",
+              "available_bytes": 582496256,
+              "memory.current": "3419824128",
+              "memory.max": "8589934592",
+              "memory.events": "low 0\nhigh 0\nmax 4225667\noom 74\noom_kill 6\noom_group_kill 0"
+            },
+            "harness_sha256": "f9ed5e83a4831dece388c57ca5e60e67b4b1222d0ab5b6208f87cf2ef90598bc",
+            "plan_sha256": "3901d59e32ab20e2bf95e6f31b8917783843d5297125ce8136487f797ebc95d0",
+            "build_record": "/tmp/ferroui-overflow-master-verification/attempts/controls-build-02/record.json",
+            "binary": {
+              "path": "/tmp/ferroui-richtext-target/debug/deps/ferroui_controls-8d2b7e7a6d2ee4d8",
+              "bytes": 281128968,
+              "sha256": "43001b1634b6e2350b926f0b003ed5b3737d65923200074fcad942ed58f05f6c",
+              "mtime_ns": 1792767843581682618,
+              "mode": 493
+            },
+            "argv": [
+              "/tmp/ferroui-richtext-target/debug/deps/ferroui_controls-8d2b7e7a6d2ee4d8",
+              "rich_hosted_",
+              "--test-threads=1"
+            ],
+            "cwd": "/workspace/scratch/e589b83e3196/FerroUI",
+            "env": {
+              "PATH": "/tmp/ferroedit-cargo/bin:/usr/local/bin:/usr/bin:/bin",
+              "CARGO_HOME": "/tmp/ferroedit-cargo",
+              "RUSTUP_HOME": "/tmp/ferroedit-rustup",
+              "CARGO_TARGET_DIR": "/tmp/ferroui-richtext-target",
+              "CARGO_BUILD_JOBS": "1",
+              "CARGO_PROFILE_DEV_DEBUG": "0",
+              "CARGO_PROFILE_TEST_DEBUG": "0",
+              "CARGO_INCREMENTAL": "0"
+            },
+            "execution_context": "sandboxed",
+            "exit_code": 0,
+            "finished_utc": "2026-10-23T15:05:00.059966+00:00",
+            "duration_seconds": 0.467,
+            "resources_after": {
+              "at_utc": "2026-10-23T15:05:00.060354+00:00",
+              "available_bytes": 582488064,
+              "memory.current": "3420753920",
+              "memory.max": "8589934592",
+              "memory.events": "low 0\nhigh 0\nmax 4225667\noom 74\noom_kill 6\noom_group_kill 0"
+            },
+            "log_path": "/tmp/ferroui-overflow-master-verification/runs/final-hosted-21/output.log",
+            "log_sha256": "5a600e490e72540143ccc3c670fde5774be854ebca3a78ee557aaca2ed79d3b6",
+            "source_unchanged": true,
+            "source_issues": [],
+            "tests": {
+              "passed": 21,
+              "failed": 0,
+              "ignored": 0,
+              "measured": 0,
+              "filtered_out": 5400
+            },
+            "test_duration_seconds": 0.31,
+            "expected_passed": 21,
+            "expected_count_matched": true,
+            "gate_passed": true,
+            "record_path": "/tmp/ferroui-overflow-master-verification/runs/final-hosted-21/record.json",
+            "record_sha256": "309988dd3c5837dc76b7105b161b6ef66caa8c1b0a0bf2a6cd9ca5dbd2583b06"
+          },
+          {
+            "state": "finished",
+            "started_utc": "2026-10-23T15:04:22.536633+00:00",
+            "source_manifest": "/tmp/ferroui-overflow-master-verification/freezes/lifetime-fix/source-manifest.json",
+            "source_manifest_sha256": "d4aebe6af05213ae1e4500b9beaaa592f73efa34c195a1dcddf3411e68a190da",
+            "resources_before": {
+              "at_utc": "2026-10-23T15:04:22.537836+00:00",
+              "available_bytes": 583462912,
+              "memory.current": "3475353600",
+              "memory.max": "8589934592",
+              "memory.events": "low 0\nhigh 0\nmax 4225667\noom 74\noom_kill 6\noom_group_kill 0"
+            },
+            "harness_sha256": "f9ed5e83a4831dece388c57ca5e60e67b4b1222d0ab5b6208f87cf2ef90598bc",
+            "plan_sha256": "3901d59e32ab20e2bf95e6f31b8917783843d5297125ce8136487f797ebc95d0",
+            "build_record": "/tmp/ferroui-overflow-master-verification/attempts/controls-build-02/record.json",
+            "binary": {
+              "path": "/tmp/ferroui-richtext-target/debug/deps/ferroui_controls-8d2b7e7a6d2ee4d8",
+              "bytes": 281128968,
+              "sha256": "43001b1634b6e2350b926f0b003ed5b3737d65923200074fcad942ed58f05f6c",
+              "mtime_ns": 1792767843581682618,
+              "mode": 493
+            },
+            "argv": [
+              "/tmp/ferroui-richtext-target/debug/deps/ferroui_controls-8d2b7e7a6d2ee4d8",
+              "rich_overflow_master_",
+              "--test-threads=1"
+            ],
+            "cwd": "/workspace/scratch/e589b83e3196/FerroUI",
+            "env": {
+              "PATH": "/tmp/ferroedit-cargo/bin:/usr/local/bin:/usr/bin:/bin",
+              "CARGO_HOME": "/tmp/ferroedit-cargo",
+              "RUSTUP_HOME": "/tmp/ferroedit-rustup",
+              "CARGO_TARGET_DIR": "/tmp/ferroui-richtext-target",
+              "CARGO_BUILD_JOBS": "1",
+              "CARGO_PROFILE_DEV_DEBUG": "0",
+              "CARGO_PROFILE_TEST_DEBUG": "0",
+              "CARGO_INCREMENTAL": "0"
+            },
+            "execution_context": "sandboxed",
+            "exit_code": 0,
+            "finished_utc": "2026-10-23T15:04:23.168187+00:00",
+            "duration_seconds": 0.335,
+            "resources_after": {
+              "at_utc": "2026-10-23T15:04:23.168296+00:00",
+              "available_bytes": 583454720,
+              "memory.current": "3477893120",
+              "memory.max": "8589934592",
+              "memory.events": "low 0\nhigh 0\nmax 4225667\noom 74\noom_kill 6\noom_group_kill 0"
+            },
+            "log_path": "/tmp/ferroui-overflow-master-verification/runs/final-master-20/output.log",
+            "log_sha256": "8686474143602bc00c4f66d5612a4ed632fcc3af6110822a5c3dc26ca3e755b6",
+            "source_unchanged": true,
+            "source_issues": [],
+            "tests": {
+              "passed": 20,
+              "failed": 0,
+              "ignored": 0,
+              "measured": 0,
+              "filtered_out": 5401
+            },
+            "test_duration_seconds": 0.29,
+            "expected_passed": 20,
+            "expected_count_matched": true,
+            "gate_passed": true,
+            "record_path": "/tmp/ferroui-overflow-master-verification/runs/final-master-20/record.json",
+            "record_sha256": "9cc00adc7f9c951d20b3f0acd089bf87ff2902a0a5156237250f570974d90a29"
+          },
+          {
+            "state": "finished",
+            "started_utc": "2026-10-23T15:04:39.482931+00:00",
+            "source_manifest": "/tmp/ferroui-overflow-master-verification/freezes/lifetime-fix/source-manifest.json",
+            "source_manifest_sha256": "d4aebe6af05213ae1e4500b9beaaa592f73efa34c195a1dcddf3411e68a190da",
+            "resources_before": {
+              "at_utc": "2026-10-23T15:04:39.483205+00:00",
+              "available_bytes": 582508544,
+              "memory.current": "3482386432",
+              "memory.max": "8589934592",
+              "memory.events": "low 0\nhigh 0\nmax 4225667\noom 74\noom_kill 6\noom_group_kill 0"
+            },
+            "harness_sha256": "f9ed5e83a4831dece388c57ca5e60e67b4b1222d0ab5b6208f87cf2ef90598bc",
+            "plan_sha256": "3901d59e32ab20e2bf95e6f31b8917783843d5297125ce8136487f797ebc95d0",
+            "build_record": "/tmp/ferroui-overflow-master-verification/attempts/controls-build-02/record.json",
+            "binary": {
+              "path": "/tmp/ferroui-richtext-target/debug/deps/ferroui_controls-8d2b7e7a6d2ee4d8",
+              "bytes": 281128968,
+              "sha256": "43001b1634b6e2350b926f0b003ed5b3737d65923200074fcad942ed58f05f6c",
+              "mtime_ns": 1792767843581682618,
+              "mode": 493
+            },
+            "argv": [
+              "/tmp/ferroui-richtext-target/debug/deps/ferroui_controls-8d2b7e7a6d2ee4d8",
+              "rich_text_block_tests::",
+              "--test-threads=1"
+            ],
+            "cwd": "/workspace/scratch/e589b83e3196/FerroUI",
+            "env": {
+              "PATH": "/tmp/ferroedit-cargo/bin:/usr/local/bin:/usr/bin:/bin",
+              "CARGO_HOME": "/tmp/ferroedit-cargo",
+              "RUSTUP_HOME": "/tmp/ferroedit-rustup",
+              "CARGO_TARGET_DIR": "/tmp/ferroui-richtext-target",
+              "CARGO_BUILD_JOBS": "1",
+              "CARGO_PROFILE_DEV_DEBUG": "0",
+              "CARGO_PROFILE_TEST_DEBUG": "0",
+              "CARGO_INCREMENTAL": "0"
+            },
+            "execution_context": "sandboxed",
+            "exit_code": 0,
+            "finished_utc": "2026-10-23T15:04:40.218069+00:00",
+            "duration_seconds": 0.387,
+            "resources_after": {
+              "at_utc": "2026-10-23T15:04:40.218119+00:00",
+              "available_bytes": 582500352,
+              "memory.current": "3485405184",
+              "memory.max": "8589934592",
+              "memory.events": "low 0\nhigh 0\nmax 4225667\noom 74\noom_kill 6\noom_group_kill 0"
+            },
+            "log_path": "/tmp/ferroui-overflow-master-verification/runs/final-reader-22/output.log",
+            "log_sha256": "edb5abe63f997700b84330f7c11745bfbf7d7fa3fc844ea4450060f6bec5fe87",
+            "source_unchanged": true,
+            "source_issues": [],
+            "tests": {
+              "passed": 22,
+              "failed": 0,
+              "ignored": 0,
+              "measured": 0,
+              "filtered_out": 5399
+            },
+            "test_duration_seconds": 0.33,
+            "expected_passed": 22,
+            "expected_count_matched": true,
+            "gate_passed": true,
+            "record_path": "/tmp/ferroui-overflow-master-verification/runs/final-reader-22/record.json",
+            "record_sha256": "8340425b531ff983f5f554ff7807b7fcccfec4fdf1a807a864deb0896039d8db"
+          },
+          {
+            "state": "finished",
+            "started_utc": "2026-10-23T15:04:26.374705+00:00",
+            "source_manifest": "/tmp/ferroui-overflow-master-verification/freezes/lifetime-fix/source-manifest.json",
+            "source_manifest_sha256": "d4aebe6af05213ae1e4500b9beaaa592f73efa34c195a1dcddf3411e68a190da",
+            "resources_before": {
+              "at_utc": "2026-10-23T15:04:26.375954+00:00",
+              "available_bytes": 583450624,
+              "memory.current": "3475087360",
+              "memory.max": "8589934592",
+              "memory.events": "low 0\nhigh 0\nmax 4225667\noom 74\noom_kill 6\noom_group_kill 0"
+            },
+            "harness_sha256": "f9ed5e83a4831dece388c57ca5e60e67b4b1222d0ab5b6208f87cf2ef90598bc",
+            "plan_sha256": "3901d59e32ab20e2bf95e6f31b8917783843d5297125ce8136487f797ebc95d0",
+            "build_record": "/tmp/ferroui-overflow-master-verification/attempts/controls-build-02/record.json",
+            "binary": {
+              "path": "/tmp/ferroui-richtext-target/debug/deps/ferroui_controls-8d2b7e7a6d2ee4d8",
+              "bytes": 281128968,
+              "sha256": "43001b1634b6e2350b926f0b003ed5b3737d65923200074fcad942ed58f05f6c",
+              "mtime_ns": 1792767843581682618,
+              "mode": 493
+            },
+            "argv": [
+              "/tmp/ferroui-richtext-target/debug/deps/ferroui_controls-8d2b7e7a6d2ee4d8",
+              "rich_readonly_context_",
+              "--test-threads=1"
+            ],
+            "cwd": "/workspace/scratch/e589b83e3196/FerroUI",
+            "env": {
+              "PATH": "/tmp/ferroedit-cargo/bin:/usr/local/bin:/usr/bin:/bin",
+              "CARGO_HOME": "/tmp/ferroedit-cargo",
+              "RUSTUP_HOME": "/tmp/ferroedit-rustup",
+              "CARGO_TARGET_DIR": "/tmp/ferroui-richtext-target",
+              "CARGO_BUILD_JOBS": "1",
+              "CARGO_PROFILE_DEV_DEBUG": "0",
+              "CARGO_PROFILE_TEST_DEBUG": "0",
+              "CARGO_INCREMENTAL": "0"
+            },
+            "execution_context": "sandboxed",
+            "exit_code": 0,
+            "finished_utc": "2026-10-23T15:04:29.321801+00:00",
+            "duration_seconds": 2.573,
+            "resources_after": {
+              "at_utc": "2026-10-23T15:04:29.321954+00:00",
+              "available_bytes": 583442432,
+              "memory.current": "3478654976",
+              "memory.max": "8589934592",
+              "memory.events": "low 0\nhigh 0\nmax 4225667\noom 74\noom_kill 6\noom_group_kill 0"
+            },
+            "log_path": "/tmp/ferroui-overflow-master-verification/runs/final-readonly-context-31/output.log",
+            "log_sha256": "3ce1e09728e951738e52fe4dafeb396163ef99f9e9d29525870f95054f65f73a",
+            "source_unchanged": true,
+            "source_issues": [],
+            "tests": {
+              "passed": 31,
+              "failed": 0,
+              "ignored": 0,
+              "measured": 0,
+              "filtered_out": 5390
+            },
+            "test_duration_seconds": 2.5,
+            "expected_passed": 31,
+            "expected_count_matched": true,
+            "gate_passed": true,
+            "record_path": "/tmp/ferroui-overflow-master-verification/runs/final-readonly-context-31/record.json",
+            "record_sha256": "9bc29937edeeb64c1c7bfb078c59f9e06fc3c83c7b2db9fd3bdbc2dd969061ab"
+          },
+          {
+            "state": "finished",
+            "started_utc": "2026-10-23T15:05:12.434645+00:00",
+            "source_manifest": "/tmp/ferroui-overflow-master-verification/freezes/lifetime-fix/source-manifest.json",
+            "source_manifest_sha256": "d4aebe6af05213ae1e4500b9beaaa592f73efa34c195a1dcddf3411e68a190da",
+            "resources_before": {
+              "at_utc": "2026-10-23T15:05:12.435193+00:00",
+              "available_bytes": 582537216,
+              "memory.current": "3247185920",
+              "memory.max": "8589934592",
+              "memory.events": "low 0\nhigh 0\nmax 4225667\noom 74\noom_kill 6\noom_group_kill 0"
+            },
+            "harness_sha256": "f9ed5e83a4831dece388c57ca5e60e67b4b1222d0ab5b6208f87cf2ef90598bc",
+            "plan_sha256": "3901d59e32ab20e2bf95e6f31b8917783843d5297125ce8136487f797ebc95d0",
+            "build_record": "/tmp/ferroui-overflow-master-verification/attempts/controls-build-02/record.json",
+            "binary": {
+              "path": "/tmp/ferroui-richtext-target/debug/deps/ferroui_controls-8d2b7e7a6d2ee4d8",
+              "bytes": 281128968,
+              "sha256": "43001b1634b6e2350b926f0b003ed5b3737d65923200074fcad942ed58f05f6c",
+              "mtime_ns": 1792767843581682618,
+              "mode": 493
+            },
+            "argv": [
+              "/tmp/ferroui-richtext-target/debug/deps/ferroui_controls-8d2b7e7a6d2ee4d8"
+            ],
+            "cwd": "/workspace/scratch/e589b83e3196/FerroUI",
+            "env": {
+              "PATH": "/tmp/ferroedit-cargo/bin:/usr/local/bin:/usr/bin:/bin",
+              "CARGO_HOME": "/tmp/ferroedit-cargo",
+              "RUSTUP_HOME": "/tmp/ferroedit-rustup",
+              "CARGO_TARGET_DIR": "/tmp/ferroui-richtext-target",
+              "CARGO_BUILD_JOBS": "1",
+              "CARGO_PROFILE_DEV_DEBUG": "0",
+              "CARGO_PROFILE_TEST_DEBUG": "0",
+              "CARGO_INCREMENTAL": "0"
+            },
+            "execution_context": "escalated_loopback",
+            "exit_code": 0,
+            "finished_utc": "2026-10-23T15:05:26.205183+00:00",
+            "duration_seconds": 13.473,
+            "resources_after": {
+              "at_utc": "2026-10-23T15:05:26.205233+00:00",
+              "available_bytes": 581967872,
+              "memory.current": "3249459200",
+              "memory.max": "8589934592",
+              "memory.events": "low 0\nhigh 0\nmax 4225667\noom 74\noom_kill 6\noom_group_kill 0"
+            },
+            "log_path": "/tmp/ferroui-overflow-master-verification/runs/full-controls/output.log",
+            "log_sha256": "ac4dd2996cf73fa40a8caf564862ac9cd9ed1cec4876aa319d22ead319f87faa",
+            "source_unchanged": true,
+            "source_issues": [],
+            "tests": {
+              "passed": 5421,
+              "failed": 0,
+              "ignored": 0,
+              "measured": 0,
+              "filtered_out": 0
+            },
+            "test_duration_seconds": 13.37,
+            "gate_passed": true,
+            "record_path": "/tmp/ferroui-overflow-master-verification/runs/full-controls/record.json",
+            "record_sha256": "456da61c8753e5f43d7b713227f1d3944e7849aa568881d859a5de23f0c087f5"
+          },
+          {
+            "state": "finished",
+            "started_utc": "2026-10-23T14:57:05.684949+00:00",
+            "source_manifest": "/tmp/ferroui-overflow-master-verification/freezes/observable-fix/source-manifest.json",
+            "source_manifest_sha256": "31636d854f6db352996c27bc8d2abf3f41db87327db2f58cd90d1804aece5f38",
+            "resources_before": {
+              "at_utc": "2026-10-23T14:57:05.685856+00:00",
+              "available_bytes": 589873152,
+              "memory.current": "2893950976",
+              "memory.max": "8589934592",
+              "memory.events": "low 0\nhigh 0\nmax 4225087\noom 74\noom_kill 6\noom_group_kill 0"
+            },
+            "harness_sha256": "6c39ffa2ec3bc6c740110742d92118fd031c3d2c027abd9fcf794075a20a8352",
+            "plan_sha256": "3901d59e32ab20e2bf95e6f31b8917783843d5297125ce8136487f797ebc95d0",
+            "build_record": "/tmp/ferroui-overflow-master-verification/attempts/controls-build-01/record.json",
+            "binary": {
+              "path": "/tmp/ferroui-richtext-target/debug/deps/ferroui_controls-8d2b7e7a6d2ee4d8",
+              "bytes": 281117864,
+              "sha256": "e73377cf33eb5449a6a5f6443f245f1efd051e7f3007dd6bbe4ce1ed4690f1af",
+              "mtime_ns": 1792767253034495363,
+              "mode": 493
+            },
+            "argv": [
+              "/tmp/ferroui-richtext-target/debug/deps/ferroui_controls-8d2b7e7a6d2ee4d8",
+              "rich_hosted_",
+              "--test-threads=1"
+            ],
+            "cwd": "/workspace/scratch/e589b83e3196/FerroUI",
+            "env": {
+              "PATH": "/tmp/ferroedit-cargo/bin:/usr/local/bin:/usr/bin:/bin",
+              "CARGO_HOME": "/tmp/ferroedit-cargo",
+              "RUSTUP_HOME": "/tmp/ferroedit-rustup",
+              "CARGO_TARGET_DIR": "/tmp/ferroui-richtext-target",
+              "CARGO_BUILD_JOBS": "1",
+              "CARGO_PROFILE_DEV_DEBUG": "0",
+              "CARGO_PROFILE_TEST_DEBUG": "0",
+              "CARGO_INCREMENTAL": "0"
+            },
+            "execution_context": "sandboxed",
+            "exit_code": 0,
+            "finished_utc": "2026-10-23T14:57:07.170981+00:00",
+            "duration_seconds": 0.846,
+            "resources_after": {
+              "at_utc": "2026-10-23T14:57:07.171033+00:00",
+              "available_bytes": 589864960,
+              "memory.current": "2893860864",
+              "memory.max": "8589934592",
+              "memory.events": "low 0\nhigh 0\nmax 4225087\noom 74\noom_kill 6\noom_group_kill 0"
+            },
+            "log_path": "/tmp/ferroui-overflow-master-verification/runs/hosted-21/output.log",
+            "log_sha256": "cbfb955d88e55d5aff4456cf47b0f0d118301dcfa104df1c8b680481a3d00ae7",
+            "source_unchanged": true,
+            "source_issues": [],
+            "tests": {
+              "passed": 21,
+              "failed": 0,
+              "ignored": 0,
+              "measured": 0,
+              "filtered_out": 5400
+            },
+            "test_duration_seconds": 0.59,
+            "expected_passed": 21,
+            "expected_count_matched": true,
+            "gate_passed": true,
+            "record_path": "/tmp/ferroui-overflow-master-verification/runs/hosted-21/record.json",
+            "record_sha256": "ceb961fdd7540ef94dd4e9f842d64528d22c2658142947ee91f1daca71ecfc9a"
+          },
+          {
+            "state": "finished",
+            "started_utc": "2026-10-23T14:55:08.264757+00:00",
+            "source_manifest": "/tmp/ferroui-overflow-master-verification/freezes/observable-fix/source-manifest.json",
+            "source_manifest_sha256": "31636d854f6db352996c27bc8d2abf3f41db87327db2f58cd90d1804aece5f38",
+            "resources_before": {
+              "at_utc": "2026-10-23T14:55:08.266491+00:00",
+              "available_bytes": 590118912,
+              "memory.current": "3585748992",
+              "memory.max": "8589934592",
+              "memory.events": "low 0\nhigh 0\nmax 4225087\noom 74\noom_kill 6\noom_group_kill 0"
+            },
+            "harness_sha256": "6c39ffa2ec3bc6c740110742d92118fd031c3d2c027abd9fcf794075a20a8352",
+            "plan_sha256": "3901d59e32ab20e2bf95e6f31b8917783843d5297125ce8136487f797ebc95d0",
+            "build_record": "/tmp/ferroui-overflow-master-verification/attempts/controls-build-01/record.json",
+            "binary": {
+              "path": "/tmp/ferroui-richtext-target/debug/deps/ferroui_controls-8d2b7e7a6d2ee4d8",
+              "bytes": 281117864,
+              "sha256": "e73377cf33eb5449a6a5f6443f245f1efd051e7f3007dd6bbe4ce1ed4690f1af",
+              "mtime_ns": 1792767253034495363,
+              "mode": 493
+            },
+            "argv": [
+              "/tmp/ferroui-richtext-target/debug/deps/ferroui_controls-8d2b7e7a6d2ee4d8",
+              "rich_overflow_master_",
+              "--test-threads=1"
+            ],
+            "cwd": "/workspace/scratch/e589b83e3196/FerroUI",
+            "env": {
+              "PATH": "/tmp/ferroedit-cargo/bin:/usr/local/bin:/usr/bin:/bin",
+              "CARGO_HOME": "/tmp/ferroedit-cargo",
+              "RUSTUP_HOME": "/tmp/ferroedit-rustup",
+              "CARGO_TARGET_DIR": "/tmp/ferroui-richtext-target",
+              "CARGO_BUILD_JOBS": "1",
+              "CARGO_PROFILE_DEV_DEBUG": "0",
+              "CARGO_PROFILE_TEST_DEBUG": "0",
+              "CARGO_INCREMENTAL": "0"
+            },
+            "execution_context": "sandboxed",
+            "exit_code": 101,
+            "finished_utc": "2026-10-23T14:55:09.129890+00:00",
+            "duration_seconds": 0.406,
+            "resources_after": {
+              "at_utc": "2026-10-23T14:55:09.130039+00:00",
+              "available_bytes": 589987840,
+              "memory.current": "3665956864",
+              "memory.max": "8589934592",
+              "memory.events": "low 0\nhigh 0\nmax 4225087\noom 74\noom_kill 6\noom_group_kill 0"
+            },
+            "log_path": "/tmp/ferroui-overflow-master-verification/runs/master-20/output.log",
+            "log_sha256": "9fe10d2ee50cabcd0b68be56a2f38279f30eea4f622aa69fe4ee7697965ec4ab",
+            "source_unchanged": true,
+            "source_issues": [],
+            "tests": {
+              "passed": 18,
+              "failed": 2,
+              "ignored": 0,
+              "measured": 0,
+              "filtered_out": 5401
+            },
+            "test_duration_seconds": 0.35,
+            "expected_passed": 20,
+            "expected_count_matched": false,
+            "gate_passed": false,
+            "record_path": "/tmp/ferroui-overflow-master-verification/runs/master-20/record.json",
+            "record_sha256": "6c1102ec48b5ba7ce3e300f71dbf1dff9b538b64a74e99c3feaadb3a75212fb5"
+          },
+          {
+            "state": "finished",
+            "started_utc": "2026-10-23T14:56:55.885075+00:00",
+            "source_manifest": "/tmp/ferroui-overflow-master-verification/freezes/observable-fix/source-manifest.json",
+            "source_manifest_sha256": "31636d854f6db352996c27bc8d2abf3f41db87327db2f58cd90d1804aece5f38",
+            "resources_before": {
+              "at_utc": "2026-10-23T14:56:55.886061+00:00",
+              "available_bytes": 589889536,
+              "memory.current": "2855845888",
+              "memory.max": "8589934592",
+              "memory.events": "low 0\nhigh 0\nmax 4225087\noom 74\noom_kill 6\noom_group_kill 0"
+            },
+            "harness_sha256": "6c39ffa2ec3bc6c740110742d92118fd031c3d2c027abd9fcf794075a20a8352",
+            "plan_sha256": "3901d59e32ab20e2bf95e6f31b8917783843d5297125ce8136487f797ebc95d0",
+            "build_record": "/tmp/ferroui-overflow-master-verification/attempts/controls-build-01/record.json",
+            "binary": {
+              "path": "/tmp/ferroui-richtext-target/debug/deps/ferroui_controls-8d2b7e7a6d2ee4d8",
+              "bytes": 281117864,
+              "sha256": "e73377cf33eb5449a6a5f6443f245f1efd051e7f3007dd6bbe4ce1ed4690f1af",
+              "mtime_ns": 1792767253034495363,
+              "mode": 493
+            },
+            "argv": [
+              "/tmp/ferroui-richtext-target/debug/deps/ferroui_controls-8d2b7e7a6d2ee4d8",
+              "rich_text_block_tests::",
+              "--test-threads=1"
+            ],
+            "cwd": "/workspace/scratch/e589b83e3196/FerroUI",
+            "env": {
+              "PATH": "/tmp/ferroedit-cargo/bin:/usr/local/bin:/usr/bin:/bin",
+              "CARGO_HOME": "/tmp/ferroedit-cargo",
+              "RUSTUP_HOME": "/tmp/ferroedit-rustup",
+              "CARGO_TARGET_DIR": "/tmp/ferroui-richtext-target",
+              "CARGO_BUILD_JOBS": "1",
+              "CARGO_PROFILE_DEV_DEBUG": "0",
+              "CARGO_PROFILE_TEST_DEBUG": "0",
+              "CARGO_INCREMENTAL": "0"
+            },
+            "execution_context": "sandboxed",
+            "exit_code": 0,
+            "finished_utc": "2026-10-23T14:56:58.091981+00:00",
+            "duration_seconds": 1.473,
+            "resources_after": {
+              "at_utc": "2026-10-23T14:56:58.092059+00:00",
+              "available_bytes": 589881344,
+              "memory.current": "2861314048",
+              "memory.max": "8589934592",
+              "memory.events": "low 0\nhigh 0\nmax 4225087\noom 74\noom_kill 6\noom_group_kill 0"
+            },
+            "log_path": "/tmp/ferroui-overflow-master-verification/runs/reader-22/output.log",
+            "log_sha256": "eedffe574cb4e612c34770b129077d99fed2ba62bae76f69153aa9eea25e81e8",
+            "source_unchanged": true,
+            "source_issues": [],
+            "tests": {
+              "passed": 22,
+              "failed": 0,
+              "ignored": 0,
+              "measured": 0,
+              "filtered_out": 5399
+            },
+            "test_duration_seconds": 1.06,
+            "expected_passed": 22,
+            "expected_count_matched": true,
+            "gate_passed": true,
+            "record_path": "/tmp/ferroui-overflow-master-verification/runs/reader-22/record.json",
+            "record_sha256": "d9190f53a2434f235f0bda2f07d18d1acf24fb69a50243868a7d5d58c87ddc70"
+          },
+          {
+            "state": "finished",
+            "started_utc": "2026-10-23T14:56:45.096627+00:00",
+            "source_manifest": "/tmp/ferroui-overflow-master-verification/freezes/observable-fix/source-manifest.json",
+            "source_manifest_sha256": "31636d854f6db352996c27bc8d2abf3f41db87327db2f58cd90d1804aece5f38",
+            "resources_before": {
+              "at_utc": "2026-10-23T14:56:45.098532+00:00",
+              "available_bytes": 589910016,
+              "memory.current": "2684522496",
+              "memory.max": "8589934592",
+              "memory.events": "low 0\nhigh 0\nmax 4225087\noom 74\noom_kill 6\noom_group_kill 0"
+            },
+            "harness_sha256": "6c39ffa2ec3bc6c740110742d92118fd031c3d2c027abd9fcf794075a20a8352",
+            "plan_sha256": "3901d59e32ab20e2bf95e6f31b8917783843d5297125ce8136487f797ebc95d0",
+            "build_record": "/tmp/ferroui-overflow-master-verification/attempts/controls-build-01/record.json",
+            "binary": {
+              "path": "/tmp/ferroui-richtext-target/debug/deps/ferroui_controls-8d2b7e7a6d2ee4d8",
+              "bytes": 281117864,
+              "sha256": "e73377cf33eb5449a6a5f6443f245f1efd051e7f3007dd6bbe4ce1ed4690f1af",
+              "mtime_ns": 1792767253034495363,
+              "mode": 493
+            },
+            "argv": [
+              "/tmp/ferroui-richtext-target/debug/deps/ferroui_controls-8d2b7e7a6d2ee4d8",
+              "rich_readonly_context_",
+              "--test-threads=1"
+            ],
+            "cwd": "/workspace/scratch/e589b83e3196/FerroUI",
+            "env": {
+              "PATH": "/tmp/ferroedit-cargo/bin:/usr/local/bin:/usr/bin:/bin",
+              "CARGO_HOME": "/tmp/ferroedit-cargo",
+              "RUSTUP_HOME": "/tmp/ferroedit-rustup",
+              "CARGO_TARGET_DIR": "/tmp/ferroui-richtext-target",
+              "CARGO_BUILD_JOBS": "1",
+              "CARGO_PROFILE_DEV_DEBUG": "0",
+              "CARGO_PROFILE_TEST_DEBUG": "0",
+              "CARGO_INCREMENTAL": "0"
+            },
+            "execution_context": "sandboxed",
+            "exit_code": 0,
+            "finished_utc": "2026-10-23T14:56:48.037604+00:00",
+            "duration_seconds": 2.061,
+            "resources_after": {
+              "at_utc": "2026-10-23T14:56:48.037811+00:00",
+              "available_bytes": 589901824,
+              "memory.current": "2710228992",
+              "memory.max": "8589934592",
+              "memory.events": "low 0\nhigh 0\nmax 4225087\noom 74\noom_kill 6\noom_group_kill 0"
+            },
+            "log_path": "/tmp/ferroui-overflow-master-verification/runs/readonly-context-31/output.log",
+            "log_sha256": "6d3991e9b9e5973eed9aa58ab49684ec1fba065546e4b06440cc2acd73d63b76",
+            "source_unchanged": true,
+            "source_issues": [],
+            "tests": {
+              "passed": 31,
+              "failed": 0,
+              "ignored": 0,
+              "measured": 0,
+              "filtered_out": 5390
+            },
+            "test_duration_seconds": 1.93,
+            "expected_passed": 31,
+            "expected_count_matched": true,
+            "gate_passed": true,
+            "record_path": "/tmp/ferroui-overflow-master-verification/runs/readonly-context-31/record.json",
+            "record_sha256": "15537948a08bbf65f17c11e40a14ed936828b798660910ea99a1a6702d7093ee"
+          }
+        ],
+        "maintenance": [
+          {
+            "state": "finished",
+            "started_utc": "2026-10-23T14:59:01.906989+00:00",
+            "source_manifest": "/tmp/ferroui-overflow-master-verification/freezes/lifetime-fix/source-manifest.json",
+            "source_manifest_sha256": "d4aebe6af05213ae1e4500b9beaaa592f73efa34c195a1dcddf3411e68a190da",
+            "resources_before": {
+              "at_utc": "2026-10-23T14:59:01.907766+00:00",
+              "available_bytes": 589549568,
+              "memory.current": "2671161344",
+              "memory.max": "8589934592",
+              "memory.events": "low 0\nhigh 0\nmax 4225087\noom 74\noom_kill 6\noom_group_kill 0"
+            },
+            "harness_sha256": "f9ed5e83a4831dece388c57ca5e60e67b4b1222d0ab5b6208f87cf2ef90598bc",
+            "plan_sha256": "3901d59e32ab20e2bf95e6f31b8917783843d5297125ce8136487f797ebc95d0",
+            "operation": "binary",
+            "original_source_manifest": "/tmp/ferroui-overflow-master-verification/freezes/observable-fix/source-manifest.json",
+            "original_source_manifest_sha256": "31636d854f6db352996c27bc8d2abf3f41db87327db2f58cd90d1804aece5f38",
+            "original_build_record": "/tmp/ferroui-overflow-master-verification/attempts/controls-build-01/record.json",
+            "original_build_record_sha256": "b78c467229929d75611eff61cdf54db31eeb1e2568cf7e68cbb940e6475c22ee",
+            "files": [
+              {
+                "path": "/tmp/ferroui-richtext-target/debug/deps/ferroui_controls-8d2b7e7a6d2ee4d8",
+                "bytes": 281117864,
+                "sha256": "e73377cf33eb5449a6a5f6443f245f1efd051e7f3007dd6bbe4ce1ed4690f1af",
+                "mtime_ns": 1792767253034495363,
+                "mode": 493
+              }
+            ],
+            "verification_record": "/tmp/ferroui-overflow-master-verification/runs/master-20/record.json",
+            "verification_record_sha256": "6c1102ec48b5ba7ce3e300f71dbf1dff9b538b64a74e99c3feaadb3a75212fb5",
+            "finished_utc": "2026-10-23T14:59:02.858659+00:00",
+            "resources_after": {
+              "at_utc": "2026-10-23T14:59:02.858724+00:00",
+              "available_bytes": 869359616,
+              "memory.current": "2467688448",
+              "memory.max": "8589934592",
+              "memory.events": "low 0\nhigh 0\nmax 4225087\noom 74\noom_kill 6\noom_group_kill 0"
+            },
+            "source_unchanged": true,
+            "record_path": "/tmp/ferroui-overflow-master-verification/maintenance/remove-obsolete-controls-01/record.json",
+            "record_sha256": "67454040ebca2a2b35b30b1c69197becd819cb679e545d48e1f2998cf254cb3d"
+          },
+          {
+            "state": "finished",
+            "started_utc": "2026-10-23T14:43:53.417352+00:00",
+            "source_manifest": "/tmp/ferroui-overflow-master-verification/freezes/initial/source-manifest.json",
+            "source_manifest_sha256": "5285276fd1a8de171db79c4fa2c440ec7dceebe62340fac74d8ca96f460b2c4f",
+            "resources_before": {
+              "at_utc": "2026-10-23T14:43:53.418902+00:00",
+              "available_bytes": 584364032,
+              "memory.current": "2356281344",
+              "memory.max": "8589934592",
+              "memory.events": "low 0\nhigh 0\nmax 4224821\noom 74\noom_kill 6\noom_group_kill 0"
+            },
+            "harness_sha256": "6c39ffa2ec3bc6c740110742d92118fd031c3d2c027abd9fcf794075a20a8352",
+            "plan_sha256": "3901d59e32ab20e2bf95e6f31b8917783843d5297125ce8136487f797ebc95d0",
+            "operation": "stale_controls",
+            "files": [
+              {
+                "path": "/tmp/ferroui-richtext-target/debug/deps/libferroui_controls-163145d6d6e8f359.rlib",
+                "bytes": 430486248,
+                "sha256": "87cae32fa155d8f056a0eac200bae74031ec27ff6e63d0582d00679fa5590186",
+                "mtime_ns": 1792760379171026151,
+                "mode": 420
+              },
+              {
+                "path": "/tmp/ferroui-richtext-target/debug/deps/libferroui_controls-163145d6d6e8f359.rmeta",
+                "bytes": 47940627,
+                "sha256": "db13543ec76485d16268171cce8b4e0b4753bacfde39142adbb996e51254e642",
+                "mtime_ns": 1792760295981514121,
+                "mode": 420
+              }
+            ],
+            "finished_utc": "2026-10-23T14:43:54.575541+00:00",
+            "resources_after": {
+              "at_utc": "2026-10-23T14:43:54.575578+00:00",
+              "available_bytes": 1062801408,
+              "memory.current": "2338816000",
+              "memory.max": "8589934592",
+              "memory.events": "low 0\nhigh 0\nmax 4224821\noom 74\noom_kill 6\noom_group_kill 0"
+            },
+            "source_unchanged": true,
+            "record_path": "/tmp/ferroui-overflow-master-verification/maintenance/remove-stale-controls/record.json",
+            "record_sha256": "a31b1bd1e49c6e1d91007bc7950a62c45ef77599d22733ab5a652ba9e7ecd220"
+          }
+        ],
+        "supplemental_records": [
+          {
+            "path": "/tmp/ferroui-overflow-master-verification/supplemental/context-equivalent-commits.json",
+            "sha256": "44190a4752e623ce274fd2f22de937d8b7df8e4df6d690b5cca55108ce1e3510",
+            "record": {
+              "at_utc": "2026-10-23T14:58:53.240217+00:00",
+              "local_source_base": "dc636fee66e528e2f3d3bf2445604f1ed1714e76",
+              "published_equivalent_commit": "f3dbe07f6df5d53e0e0cca02e448367f42066fa5",
+              "local_tree": "118e9f73c3b1bee20b64c7066ba007696c068e0a",
+              "published_tree": "118e9f73c3b1bee20b64c7066ba007696c068e0a",
+              "trees_equal": true,
+              "source_policy": "All gates remain bound to the original local commit plus exact frozen five-file overrides; identical-tree HEAD movement does not mutate those inputs."
+            }
+          },
+          {
+            "path": "/tmp/ferroui-overflow-master-verification/supplemental/final-lifetime-fixture-policy.json",
+            "sha256": "976854fa1b43a2d108124f9a6603a64722c8e0779233a66d6ebcaaf5375cabeb",
+            "record": {
+              "at_utc": "2026-10-23T14:58:53.240439+00:00",
+              "correction": "Keep the new owner alive through two final assertions by using Some(b.clone()) instead of moving the final strong Ref into Some(b). No production bytes change.",
+              "metadata_gate": "controls-metadata-02 passed on the observable-fix freeze. It is retained only for that exact source.",
+              "final_gate_decision": "Do not repeat standalone metadata checking after the two-clone test-only correction; the real final Controls test-binary build also type-checks these sources.",
+              "authorization": "Parent handoff explicitly requested one final binary build followed by 20/31/22/21/full; no XAML gate for unchanged public metadata."
+            }
+          },
+          {
+            "path": "/tmp/ferroui-overflow-master-verification/supplemental/final-source-audit.json",
+            "sha256": "24383e3445acdccce4cb6cdfdb80ae03848e40bf0c77c1364d2b8fa3f8b5ccb1",
+            "record": {
+              "at_utc": "2026-10-23T15:06:17.416169+00:00",
+              "source_manifest": "/tmp/ferroui-overflow-master-verification/freezes/lifetime-fix/source-manifest.json",
+              "source_manifest_sha256": "d4aebe6af05213ae1e4500b9beaaa592f73efa34c195a1dcddf3411e68a190da",
+              "current_commit": "f3dbe07f6df5d53e0e0cca02e448367f42066fa5",
+              "compiler_inputs_unchanged": true,
+              "source_issues": [],
+              "successful_current_runtime_gates": [
+                {
+                  "name": "final-master-20",
+                  "record_path": "/tmp/ferroui-overflow-master-verification/runs/final-master-20/record.json",
+                  "record_sha256": "9cc00adc7f9c951d20b3f0acd089bf87ff2902a0a5156237250f570974d90a29",
+                  "tests": {
+                    "passed": 20,
+                    "failed": 0,
+                    "ignored": 0,
+                    "measured": 0,
+                    "filtered_out": 5401
+                  },
+                  "test_duration_seconds": 0.29
+                },
+                {
+                  "name": "final-readonly-context-31",
+                  "record_path": "/tmp/ferroui-overflow-master-verification/runs/final-readonly-context-31/record.json",
+                  "record_sha256": "9bc29937edeeb64c1c7bfb078c59f9e06fc3c83c7b2db9fd3bdbc2dd969061ab",
+                  "tests": {
+                    "passed": 31,
+                    "failed": 0,
+                    "ignored": 0,
+                    "measured": 0,
+                    "filtered_out": 5390
+                  },
+                  "test_duration_seconds": 2.5
+                },
+                {
+                  "name": "final-reader-22",
+                  "record_path": "/tmp/ferroui-overflow-master-verification/runs/final-reader-22/record.json",
+                  "record_sha256": "8340425b531ff983f5f554ff7807b7fcccfec4fdf1a807a864deb0896039d8db",
+                  "tests": {
+                    "passed": 22,
+                    "failed": 0,
+                    "ignored": 0,
+                    "measured": 0,
+                    "filtered_out": 5399
+                  },
+                  "test_duration_seconds": 0.33
+                },
+                {
+                  "name": "final-hosted-21",
+                  "record_path": "/tmp/ferroui-overflow-master-verification/runs/final-hosted-21/record.json",
+                  "record_sha256": "309988dd3c5837dc76b7105b161b6ef66caa8c1b0a0bf2a6cd9ca5dbd2583b06",
+                  "tests": {
+                    "passed": 21,
+                    "failed": 0,
+                    "ignored": 0,
+                    "measured": 0,
+                    "filtered_out": 5400
+                  },
+                  "test_duration_seconds": 0.31
+                },
+                {
+                  "name": "full-controls",
+                  "record_path": "/tmp/ferroui-overflow-master-verification/runs/full-controls/record.json",
+                  "record_sha256": "456da61c8753e5f43d7b713227f1d3944e7849aa568881d859a5de23f0c087f5",
+                  "tests": {
+                    "passed": 5421,
+                    "failed": 0,
+                    "ignored": 0,
+                    "measured": 0,
+                    "filtered_out": 0
+                  },
+                  "test_duration_seconds": 13.37
+                }
+              ],
+              "successful_binary": {
+                "path": "/tmp/ferroui-richtext-target/debug/deps/ferroui_controls-8d2b7e7a6d2ee4d8",
+                "bytes": 281128968,
+                "sha256": "43001b1634b6e2350b926f0b003ed5b3737d65923200074fcad942ed58f05f6c",
+                "mtime_ns": 1792767843581682618,
+                "mode": 493
+              },
+              "successful_binary_current_hash_and_metadata_match": true,
+              "prior_context_evidence_unchanged": true,
+              "xaml_gate_for_this_slice": {
+                "executed": false,
+                "required": false,
+                "reason": "The duplicate markup declaration was removed before integration. ContentSource remains the existing registered DirectProperty with unchanged public metadata shape; new Controls cases cover live ReflectionBinding and its read-only untyped getter."
+              },
+              "standalone_metadata_repeat_after_final_two_clone_fixture_fix": {
+                "executed": false,
+                "reason": "The final real test-binary build performs type checking; prior metadata pass stays bound to observable-fix bytes."
+              },
+              "resources_at_release": {
+                "at_utc": "2026-10-23T15:06:17.423686+00:00",
+                "available_bytes": 581906432,
+                "memory.current": "2875121664",
+                "memory.max": "8589934592",
+                "memory.events": "low 0\nhigh 0\nmax 4225667\noom 74\noom_kill 6\noom_group_kill 0"
+              },
+              "pending": []
+            }
+          },
+          {
+            "path": "/tmp/ferroui-overflow-master-verification/supplemental/harness-update-02.json",
+            "sha256": "1620cbf0fd37e5fc6ccc66c83d300b9977b0118e7e609f6279314a8c009d14d3",
+            "record": {
+              "at_utc": "2026-10-23T14:58:53.226644+00:00",
+              "old_harness_path": "/tmp/ferroui-overflow-master-verification/harness-versions/verify-v1.py",
+              "old_harness_sha256": "6c39ffa2ec3bc6c740110742d92118fd031c3d2c027abd9fcf794075a20a8352",
+              "new_harness_path": "/tmp/ferroui-overflow-master-verification/verify.py",
+              "new_harness_sha256": "f9ed5e83a4831dece388c57ca5e60e67b4b1222d0ab5b6208f87cf2ef90598bc",
+              "changes": [
+                "Cleanup can remove a recorded obsolete binary after source handoff: verify its original frozen source, successful build, build/run logs, and executable identity, while the current source freeze independently fences the cleanup.",
+                "Collector embeds standalone supplementary records with hashes. Cargo execution, runtime execution, environment and gate logic are unchanged."
+              ],
+              "authorization": "Parent approved cleanup-only provenance correction after two test lifetime fixes."
+            }
+          },
+          {
+            "path": "/tmp/ferroui-overflow-master-verification/supplemental/source-transitions.json",
+            "sha256": "f1b1996eafed2ec237f471ab6102edda93ec8b4039bf7cf91b1821d411dc1e4e",
+            "record": {
+              "at_utc": "2026-10-23T14:59:37.093939+00:00",
+              "transitions": [
+                {
+                  "from": "initial",
+                  "to": "observable-fix",
+                  "changed_files": [
+                    {
+                      "relative_path": "src/FerroUI.Controls/rich_text_overflow_master_tests.rs",
+                      "old_sha256": "b22bab794637b19bfb3cf2594a3592627211e8a04dec1eb061588e8c39c06247",
+                      "new_sha256": "e37ecadbad0e9a76f6d47d64a439a6024fda96e5fec41bc4070e46a70762eb34",
+                      "diff": "--- initial/src/FerroUI.Controls/rich_text_overflow_master_tests.rs\n+++ observable-fix/src/FerroUI.Controls/rich_text_overflow_master_tests.rs\n@@ -115,8 +115,8 @@\n     let target = Control::new();\n     let values = Rc::new(RefCell::new(Vec::new()));\n     let observed = values.clone();\n-    let _subscription = target\n-        .get_observable(Control::tag_property())\n+    let object: &ferroui_base::FerroObject = &target;\n+    let _subscription = FerroObjectExtensions::get_observable(object, Control::tag_property())\n         .subscribe_fn(move |value| {\n             observed.borrow_mut().push(\n                 from_markup_value::<Option<Ref<RichTextBlock>>>(&value)\n"
+                    }
+                  ],
+                  "four_production_files_byte_identical": true
+                },
+                {
+                  "from": "observable-fix",
+                  "to": "lifetime-fix",
+                  "changed_files": [
+                    {
+                      "relative_path": "src/FerroUI.Controls/rich_text_overflow_master_tests.rs",
+                      "old_sha256": "e37ecadbad0e9a76f6d47d64a439a6024fda96e5fec41bc4070e46a70762eb34",
+                      "new_sha256": "f87e93ce6f01c9ae3cf8372583407fbf178fc0b03a51e6da0ca4163feb52c9ac",
+                      "diff": "--- observable-fix/src/FerroUI.Controls/rich_text_overflow_master_tests.rs\n+++ lifetime-fix/src/FerroUI.Controls/rich_text_overflow_master_tests.rs\n@@ -653,7 +653,7 @@\n     a.set_overflow_content_target(None);\n     assert!(called.get());\n     assert_eq!(first.content_source(), Some(b.clone()));\n-    assert_eq!(second.content_source(), Some(b));\n+    assert_eq!(second.content_source(), Some(b.clone()));\n     assert!(second.is_measure_valid());\n }\n \n@@ -716,7 +716,7 @@\n     assert!(weak.upgrade().is_none());\n     assert!(a.overflow_content_target().is_none());\n     assert_eq!(second.previous_flow_parent(), Some(b.clone()));\n-    assert_eq!(second.content_source(), Some(b));\n+    assert_eq!(second.content_source(), Some(b.clone()));\n     assert!(second.cached_page_layout().is_some());\n }\n \n"
+                    }
+                  ],
+                  "four_production_files_byte_identical": true
+                }
+              ]
+            }
+          }
+        ]
+      }
     }
   ],
   "tooling": {

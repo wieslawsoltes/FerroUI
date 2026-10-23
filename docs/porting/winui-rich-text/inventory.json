@@ -16200,6 +16200,227 @@
       ]
     },
     {
+      "path": "dxaml/xcp/core/dll/CoreImports.cpp",
+      "git_blob": "af15f73f4dac8c30857d02036040bad87115bb00",
+      "sha256": "d90bd957f7a0c53e23a9788b6e5ebf7bcf8a1cee8483f1272ceecd830f1a2400",
+      "bytes": 124675,
+      "lines": 4071,
+      "scope_reason": "explicit dependency/reference",
+      "component": "shared text infrastructure",
+      "state": "partial",
+      "reuse_or_destination_candidates": [
+        "src/FerroUI.Base/media/text_formatting/",
+        "src/FerroUI.Controls/documents/"
+      ],
+      "targets": [
+        {
+          "path": "src/FerroUI.Controls/rich_text_overflow_links.rs",
+          "symbol": "pub(crate) fn cached_overflow_master("
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_block_overflow.rs",
+          "symbol": "pub fn content_source("
+        }
+      ],
+      "tests": [
+        {
+          "path": "src/FerroUI.Controls/rich_text_overflow_master_tests.rs",
+          "symbol": "rich_overflow_master_getters_and_metadata_do_not_resolve_a_linked_chain"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_overflow_master_tests.rs",
+          "symbol": "rich_overflow_master_reflection_binding_observes_cached_master_transitions"
+        }
+      ],
+      "includes": [
+        {
+          "header": "precomp.h",
+          "line": 5,
+          "style": "quoted",
+          "resolution": "ambiguous",
+          "candidates": [
+            "dxaml/phone/lib/precomp.h",
+            "dxaml/test/appanalysis/lib/precomp.h",
+            "dxaml/test/appanalysis/ruleSet/precomp.h",
+            "dxaml/test/infra/client/pch/precomp.h",
+            "dxaml/test/infra/logging/precomp.h",
+            "dxaml/test/infra/server/precomp.h",
+            "dxaml/xcp/components/pch/precomp.h",
+            "dxaml/xcp/control/common/shared/precomp.h",
+            "dxaml/xcp/core/Parser/pch/precomp.h",
+            "dxaml/xcp/core/Parser/staticpch/precomp.h",
+            "dxaml/xcp/core/controls/generated/precomp.h",
+            "dxaml/xcp/core/core/elements/pch/precomp.h",
+            "dxaml/xcp/core/core/elements/pchexcept/precomp.h",
+            "dxaml/xcp/core/hw/precomp.h",
+            "dxaml/xcp/core/input/precomp.h",
+            "dxaml/xcp/core/metadata/dynamic/precomp.h",
+            "dxaml/xcp/core/native/media/precomp.h",
+            "dxaml/xcp/core/native/text/Common/precomp.h",
+            "dxaml/xcp/core/native/text/Controls/precomp.h",
+            "dxaml/xcp/core/precomp.h",
+            "dxaml/xcp/core/text/precomp.h",
+            "dxaml/xcp/dxaml/dllsrv/winrt/precomp.h",
+            "dxaml/xcp/dxaml/lib/precomp.h",
+            "dxaml/xcp/dxaml/tools/AppAnalysis/dll/precomp.h",
+            "dxaml/xcp/dxaml/tools/AppAnalysis/module/precomp.h",
+            "dxaml/xcp/dxaml/tools/AppAnalysis/runtime/common/precomp.h",
+            "dxaml/xcp/dxaml/tools/AppAnalysis/runtime/framework/precomp.h",
+            "dxaml/xcp/dxaml/tools/AppAnalysis/runtime/rules/precomp.h",
+            "dxaml/xcp/dxaml/tools/AppAnalysis/tool/precomp.h",
+            "dxaml/xcp/dxaml/tools/AppAnalysis/unittests/pch/precomp.h",
+            "dxaml/xcp/dxaml/tools/xamldiagnostics/tap/precomp.h",
+            "dxaml/xcp/pal/debug/precomp.h",
+            "dxaml/xcp/plat/win/browserdesktop/precomp.h",
+            "dxaml/xcp/plat/win/desktop/precomp.h",
+            "dxaml/xcp/precomp.h",
+            "dxaml/xcp/tools/GenXbfDLL/precomp.h",
+            "dxaml/xcp/win/shared/precomp.h",
+            "src/XamlCompiler/Tests/RegressionProjects/Basic/CppWinRT/PrecompiledHeader/precomp.h"
+          ]
+        },
+        {
+          "header": "xcpsafe.h",
+          "line": 6,
+          "style": "quoted",
+          "resolution": "unique_path_suffix",
+          "candidates": [
+            "dxaml/xcp/pal/inc/xcpsafe.h"
+          ]
+        },
+        {
+          "header": "MetadataAPI.h",
+          "line": 8,
+          "style": "quoted",
+          "resolution": "unique_path_suffix",
+          "candidates": [
+            "dxaml/xcp/core/inc/MetadataAPI.h"
+          ]
+        },
+        {
+          "header": "NodeStreamCache.h",
+          "line": 9,
+          "style": "quoted",
+          "resolution": "unique_path_suffix",
+          "candidates": [
+            "dxaml/xcp/core/inc/NodeStreamCache.h"
+          ]
+        },
+        {
+          "header": "Timemgr.h",
+          "line": 10,
+          "style": "quoted",
+          "resolution": "unique_path_suffix",
+          "candidates": [
+            "dxaml/xcp/core/inc/timemgr.h"
+          ]
+        },
+        {
+          "header": "Storyboard.h",
+          "line": 11,
+          "style": "quoted",
+          "resolution": "unique_path_suffix",
+          "candidates": [
+            "dxaml/xcp/core/inc/storyboard.h"
+          ]
+        },
+        {
+          "header": "EasingFunctions.h",
+          "line": 12,
+          "style": "quoted",
+          "resolution": "unique_path_suffix",
+          "candidates": [
+            "dxaml/xcp/core/inc/EasingFunctions.h"
+          ]
+        },
+        {
+          "header": "CColor.h",
+          "line": 13,
+          "style": "system",
+          "resolution": "unique_path_suffix",
+          "candidates": [
+            "dxaml/xcp/components/colors/inc/CColor.h"
+          ]
+        },
+        {
+          "header": "FocusProperties.h",
+          "line": 14,
+          "style": "quoted",
+          "resolution": "unique_path_suffix",
+          "candidates": [
+            "dxaml/xcp/components/focus/inc/FocusProperties.h"
+          ]
+        },
+        {
+          "header": "FocusSelection.h",
+          "line": 15,
+          "style": "system",
+          "resolution": "unique_path_suffix",
+          "candidates": [
+            "dxaml/xcp/components/focus/inc/FocusSelection.h"
+          ]
+        },
+        {
+          "header": "XamlSchemaContext.h",
+          "line": 16,
+          "style": "system",
+          "resolution": "unique_path_suffix",
+          "candidates": [
+            "dxaml/xcp/core/inc/XamlSchemaContext.h"
+          ]
+        },
+        {
+          "header": "XamlBinaryMetadata.h",
+          "line": 17,
+          "style": "system",
+          "resolution": "unique_path_suffix",
+          "candidates": [
+            "dxaml/xcp/core/inc/XamlBinaryMetadata.h"
+          ]
+        },
+        {
+          "header": "XbfWriter.h",
+          "line": 18,
+          "style": "system",
+          "resolution": "unique_path_suffix",
+          "candidates": [
+            "dxaml/xcp/core/inc/XbfWriter.h"
+          ]
+        },
+        {
+          "header": "XbfVersioning.h",
+          "line": 19,
+          "style": "system",
+          "resolution": "unique_path_suffix",
+          "candidates": [
+            "dxaml/xcp/components/parser/inc/XbfVersioning.h"
+          ]
+        },
+        {
+          "header": "RootScale.h",
+          "line": 20,
+          "style": "quoted",
+          "resolution": "unique_path_suffix",
+          "candidates": [
+            "dxaml/xcp/components/scaling/inc/RootScale.h"
+          ]
+        }
+      ],
+      "callable_candidates": [
+        {
+          "name": "RootScale::GetRasterizationScaleForContentRoot",
+          "line": 3643,
+          "kind": "scoped_callable_definition_candidate",
+          "state": "unreviewed"
+        }
+      ],
+      "reason": "Only CRichTextBlockOverflow_GetMaster is reviewed here: its direct cached-primary read maps to the existing public read-only ContentSource property. It does not walk links or force layout. Other core imports remain unreviewed or mapped separately; no whole-file completion is inferred. Public ContentSource and configured flyout/selection master lookup now share the layout-resolved weak primary cache. A getter does not traverse links or force setup. Link changes clear the installed continuation suffix; actual measure uses only its immediate predecessor, resolving even for empty/no-overflow content. Ordinary layout invalidation preserves the master. Immediate predecessors remain separate for sequential page breaks and document formatting. Installed-edge identity and flow/master generations preserve callback-owned links and setup, including surviving-suffix Drop document notifications. Registered direct-property and real reflection-binding transitions are tested through the existing FerroUI property service. Weak forward targets and notification ordering are framework adaptations. Native print setup, cursor propagation, strong lifetime and other overflow/geometry members remain partial. See OVERFLOW-LINKS.md; test definitions and actual source-bound execution records are distinct.",
+      "deviations": [
+        "RT-I02",
+        "RT-I38"
+      ]
+    },
+    {
       "path": "dxaml/xcp/core/inc/BlockTextElement.h",
       "git_blob": "cf324d7ad91836774cb8f382e2c0cebcf8f36988",
       "sha256": "2728d8655e8403fcaf74bf21eeda5f987a58a753eea1920a9bf2fac155e20b8d",
@@ -16901,6 +17122,30 @@
         {
           "path": "src/FerroUI.Controls/rich_text_block_overflow.rs",
           "symbol": "RichTextBlockOverflow"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_overflow_links.rs",
+          "symbol": "pub(crate) fn cached_overflow_master("
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_overflow_links.rs",
+          "symbol": "pub(super) fn setup_linked_overflow_master("
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_overflow_links.rs",
+          "symbol": "pub(super) fn reconcile_overflow_content_target("
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_overflow_links.rs",
+          "symbol": "fn replace_flow_parent("
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_overflow_links.rs",
+          "symbol": "fn publish_overflow_resets("
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_overflow_links.rs",
+          "symbol": "pub(super) fn detach_installed_overflow_on_drop("
         }
       ],
       "tests": [
@@ -16911,6 +17156,86 @@
         {
           "path": "src/FerroUI.Controls/rich_text_block_tests.rs",
           "symbol": "rich_overflow_rejects_cycles_and_second_owners"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_overflow_master_tests.rs",
+          "symbol": "rich_overflow_master_getters_and_metadata_do_not_resolve_a_linked_chain"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_overflow_master_tests.rs",
+          "symbol": "rich_overflow_master_reflection_binding_observes_cached_master_transitions"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_overflow_master_tests.rs",
+          "symbol": "rich_overflow_master_late_measure_waits_for_the_immediate_predecessor"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_overflow_master_tests.rs",
+          "symbol": "rich_overflow_master_cache_does_not_require_overflow_content"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_overflow_master_tests.rs",
+          "symbol": "rich_overflow_master_root_identity_keeps_sequential_predecessor_breaks"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_overflow_master_tests.rs",
+          "symbol": "rich_overflow_master_unlink_clears_the_entire_suffix_before_notifications"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_overflow_master_tests.rs",
+          "symbol": "rich_overflow_master_reparent_requires_new_predecessor_setup"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_overflow_master_tests.rs",
+          "symbol": "rich_overflow_master_ordinary_layout_changes_preserve_the_cached_master"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_overflow_master_tests.rs",
+          "symbol": "rich_overflow_master_property_events_follow_cache_transitions_on_each_descendant"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_overflow_master_tests.rs",
+          "symbol": "rich_overflow_master_weak_root_expiry_does_not_retain_the_owner"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_overflow_master_tests.rs",
+          "symbol": "rich_overflow_master_weak_intermediate_expiry_resets_surviving_suffix"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_overflow_master_tests.rs",
+          "symbol": "rich_overflow_master_primary_drop_notifies_the_previous_document_without_retention"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_overflow_master_tests.rs",
+          "symbol": "rich_overflow_master_intermediate_drop_notifies_the_root_document_for_its_suffix"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_overflow_master_tests.rs",
+          "symbol": "rich_overflow_master_nested_property_override_reconciles_the_installed_edge"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_overflow_master_tests.rs",
+          "symbol": "rich_overflow_master_reset_handler_preserves_a_newer_reparent_and_layout"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_overflow_master_tests.rs",
+          "symbol": "rich_overflow_master_invalidation_callback_sees_atomic_reset_and_keeps_new_owner"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_overflow_master_tests.rs",
+          "symbol": "rich_overflow_master_setup_callback_cannot_restore_a_replaced_master"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_overflow_master_tests.rs",
+          "symbol": "rich_overflow_master_drop_notification_can_reparent_the_surviving_view"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_overflow_master_tests.rs",
+          "symbol": "rich_overflow_master_invalid_markup_target_does_not_detach_another_owner"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_overflow_master_tests.rs",
+          "symbol": "rich_overflow_master_context_lookup_uses_the_same_cache_as_content_source"
         }
       ],
       "includes": [
@@ -16943,9 +17268,10 @@
         }
       ],
       "callable_candidates": [],
-      "reason": "A derived rich view uses the shared weak continuation chain and document selection. Native separate class topology and unreviewed overflow members remain adapted or pending.",
+      "reason": "A derived rich view uses the shared weak continuation chain and document selection. Native separate class topology and unreviewed overflow members remain adapted or pending. Public ContentSource and configured flyout/selection master lookup now share the layout-resolved weak primary cache. A getter does not traverse links or force setup. Link changes clear the installed continuation suffix; actual measure uses only its immediate predecessor, resolving even for empty/no-overflow content. Ordinary layout invalidation preserves the master. Immediate predecessors remain separate for sequential page breaks and document formatting. Installed-edge identity and flow/master generations preserve callback-owned links and setup, including surviving-suffix Drop document notifications. Registered direct-property and real reflection-binding transitions are tested through the existing FerroUI property service. Weak forward targets and notification ordering are framework adaptations. Native print setup, cursor propagation, strong lifetime and other overflow/geometry members remain partial. See OVERFLOW-LINKS.md; test definitions and actual source-bound execution records are distinct.",
       "deviations": [
-        "RT-I02"
+        "RT-I02",
+        "RT-I38"
       ]
     },
     {
@@ -39666,6 +39992,30 @@
         {
           "path": "src/FerroUI.Controls/flyouts/popup_flyout_base.rs",
           "symbol": "pub(crate) fn context_flyout_for_request("
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_overflow_links.rs",
+          "symbol": "pub(crate) fn cached_overflow_master("
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_overflow_links.rs",
+          "symbol": "pub(super) fn setup_linked_overflow_master("
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_overflow_links.rs",
+          "symbol": "pub(super) fn reconcile_overflow_content_target("
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_overflow_links.rs",
+          "symbol": "fn replace_flow_parent("
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_overflow_links.rs",
+          "symbol": "fn publish_overflow_resets("
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_overflow_links.rs",
+          "symbol": "pub(super) fn detach_installed_overflow_on_drop("
         }
       ],
       "tests": [
@@ -39716,6 +40066,86 @@
         {
           "path": "src/FerroUI.Controls/rich_text_context_menu_tests.rs",
           "symbol": "rich_readonly_context_holding_keeps_overflow_feedback_and_selection_policy"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_overflow_master_tests.rs",
+          "symbol": "rich_overflow_master_getters_and_metadata_do_not_resolve_a_linked_chain"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_overflow_master_tests.rs",
+          "symbol": "rich_overflow_master_reflection_binding_observes_cached_master_transitions"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_overflow_master_tests.rs",
+          "symbol": "rich_overflow_master_late_measure_waits_for_the_immediate_predecessor"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_overflow_master_tests.rs",
+          "symbol": "rich_overflow_master_cache_does_not_require_overflow_content"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_overflow_master_tests.rs",
+          "symbol": "rich_overflow_master_root_identity_keeps_sequential_predecessor_breaks"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_overflow_master_tests.rs",
+          "symbol": "rich_overflow_master_unlink_clears_the_entire_suffix_before_notifications"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_overflow_master_tests.rs",
+          "symbol": "rich_overflow_master_reparent_requires_new_predecessor_setup"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_overflow_master_tests.rs",
+          "symbol": "rich_overflow_master_ordinary_layout_changes_preserve_the_cached_master"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_overflow_master_tests.rs",
+          "symbol": "rich_overflow_master_property_events_follow_cache_transitions_on_each_descendant"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_overflow_master_tests.rs",
+          "symbol": "rich_overflow_master_weak_root_expiry_does_not_retain_the_owner"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_overflow_master_tests.rs",
+          "symbol": "rich_overflow_master_weak_intermediate_expiry_resets_surviving_suffix"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_overflow_master_tests.rs",
+          "symbol": "rich_overflow_master_primary_drop_notifies_the_previous_document_without_retention"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_overflow_master_tests.rs",
+          "symbol": "rich_overflow_master_intermediate_drop_notifies_the_root_document_for_its_suffix"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_overflow_master_tests.rs",
+          "symbol": "rich_overflow_master_nested_property_override_reconciles_the_installed_edge"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_overflow_master_tests.rs",
+          "symbol": "rich_overflow_master_reset_handler_preserves_a_newer_reparent_and_layout"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_overflow_master_tests.rs",
+          "symbol": "rich_overflow_master_invalidation_callback_sees_atomic_reset_and_keeps_new_owner"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_overflow_master_tests.rs",
+          "symbol": "rich_overflow_master_setup_callback_cannot_restore_a_replaced_master"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_overflow_master_tests.rs",
+          "symbol": "rich_overflow_master_drop_notification_can_reparent_the_surviving_view"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_overflow_master_tests.rs",
+          "symbol": "rich_overflow_master_invalid_markup_target_does_not_detach_another_owner"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_overflow_master_tests.rs",
+          "symbol": "rich_overflow_master_context_lookup_uses_the_same_cache_as_content_source"
         }
       ],
       "includes": [
@@ -40408,10 +40838,11 @@
           "state": "unreviewed"
         }
       ],
-      "reason": "A derived rich view uses the shared weak continuation chain and document selection. Native separate class topology and unreviewed overflow members remain adapted or pending. Configured overflow lookup now prefers a non-null local ContextFlyout and otherwise resolves the root primary master, never an intermediate continuation. The requesting overflow retains placement, target cancellation and holding feedback. A default overflow property uses the master selection-enabled gate; explicit null preserves master fallback but bypasses that default gate, and Clear restores it. Eligibility applies only on opening so later selection changes cannot block dismissal. Modern configured overflow requests do not raise or forward the typed event, matching the helper branches. The separate legacy selection-manager owner event and built-in default flyout remain pending. Framework inheritance topology and menu/keyboard translations remain explicit in CONTEXT-MENUS.md. Native m_pMaster is reset on link changes and resolved during linked block-layout setup. The configured-menu helper currently follows the live framework chain; exact cached-master availability/timing and the separate public ContentSource predecessor mismatch remain partial.",
+      "reason": "A derived rich view uses the shared weak continuation chain and document selection. Native separate class topology and unreviewed overflow members remain adapted or pending. Configured overflow lookup now prefers a non-null local ContextFlyout and otherwise resolves the root primary master, never an intermediate continuation. The requesting overflow retains placement, target cancellation and holding feedback. A default overflow property uses the master selection-enabled gate; explicit null preserves master fallback but bypasses that default gate, and Clear restores it. Eligibility applies only on opening so later selection changes cannot block dismissal. Modern configured overflow requests do not raise or forward the typed event, matching the helper branches. The separate legacy selection-manager owner event and built-in default flyout remain pending. Framework inheritance topology and menu/keyboard translations remain explicit in CONTEXT-MENUS.md. Public ContentSource and configured flyout/selection master lookup now share the layout-resolved weak primary cache. A getter does not traverse links or force setup. Link changes clear the installed continuation suffix; actual measure uses only its immediate predecessor, resolving even for empty/no-overflow content. Ordinary layout invalidation preserves the master. Immediate predecessors remain separate for sequential page breaks and document formatting. Installed-edge identity and flow/master generations preserve callback-owned links and setup, including surviving-suffix Drop document notifications. Registered direct-property and real reflection-binding transitions are tested through the existing FerroUI property service. Weak forward targets and notification ordering are framework adaptations. Native print setup, cursor propagation, strong lifetime and other overflow/geometry members remain partial. See OVERFLOW-LINKS.md; test definitions and actual source-bound execution records are distinct.",
       "deviations": [
         "RT-I02",
-        "RT-I37"
+        "RT-I37",
+        "RT-I38"
       ]
     },
     {
@@ -54519,6 +54950,14 @@
         {
           "path": "src/FerroUI.Controls/flyouts/popup_flyout_base.rs",
           "symbol": "pub(crate) fn context_flyout_for_request("
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_overflow_links.rs",
+          "symbol": "pub(crate) fn cached_overflow_master("
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_overflow_links.rs",
+          "symbol": "pub(super) fn setup_linked_overflow_master("
         }
       ],
       "tests": [
@@ -54529,6 +54968,86 @@
         {
           "path": "src/FerroUI.Controls/rich_text_context_menu_tests.rs",
           "symbol": "rich_readonly_context_local_menu_is_independent_of_default_flyout_selection_gate"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_overflow_master_tests.rs",
+          "symbol": "rich_overflow_master_getters_and_metadata_do_not_resolve_a_linked_chain"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_overflow_master_tests.rs",
+          "symbol": "rich_overflow_master_reflection_binding_observes_cached_master_transitions"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_overflow_master_tests.rs",
+          "symbol": "rich_overflow_master_late_measure_waits_for_the_immediate_predecessor"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_overflow_master_tests.rs",
+          "symbol": "rich_overflow_master_cache_does_not_require_overflow_content"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_overflow_master_tests.rs",
+          "symbol": "rich_overflow_master_root_identity_keeps_sequential_predecessor_breaks"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_overflow_master_tests.rs",
+          "symbol": "rich_overflow_master_unlink_clears_the_entire_suffix_before_notifications"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_overflow_master_tests.rs",
+          "symbol": "rich_overflow_master_reparent_requires_new_predecessor_setup"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_overflow_master_tests.rs",
+          "symbol": "rich_overflow_master_ordinary_layout_changes_preserve_the_cached_master"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_overflow_master_tests.rs",
+          "symbol": "rich_overflow_master_property_events_follow_cache_transitions_on_each_descendant"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_overflow_master_tests.rs",
+          "symbol": "rich_overflow_master_weak_root_expiry_does_not_retain_the_owner"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_overflow_master_tests.rs",
+          "symbol": "rich_overflow_master_weak_intermediate_expiry_resets_surviving_suffix"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_overflow_master_tests.rs",
+          "symbol": "rich_overflow_master_primary_drop_notifies_the_previous_document_without_retention"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_overflow_master_tests.rs",
+          "symbol": "rich_overflow_master_intermediate_drop_notifies_the_root_document_for_its_suffix"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_overflow_master_tests.rs",
+          "symbol": "rich_overflow_master_nested_property_override_reconciles_the_installed_edge"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_overflow_master_tests.rs",
+          "symbol": "rich_overflow_master_reset_handler_preserves_a_newer_reparent_and_layout"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_overflow_master_tests.rs",
+          "symbol": "rich_overflow_master_invalidation_callback_sees_atomic_reset_and_keeps_new_owner"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_overflow_master_tests.rs",
+          "symbol": "rich_overflow_master_setup_callback_cannot_restore_a_replaced_master"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_overflow_master_tests.rs",
+          "symbol": "rich_overflow_master_drop_notification_can_reparent_the_surviving_view"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_overflow_master_tests.rs",
+          "symbol": "rich_overflow_master_invalid_markup_target_does_not_detach_another_owner"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_overflow_master_tests.rs",
+          "symbol": "rich_overflow_master_context_lookup_uses_the_same_cache_as_content_source"
         }
       ],
       "includes": [
@@ -54683,11 +55202,12 @@
           "state": "unreviewed"
         }
       ],
-      "reason": "Only IsTextControl/IsTextSelectionEnabled dispatch for the configured rich-text menu path is reviewed. Overflow text selection policy resolves through the root master. Other TextCore services and control cases remain pending; no whole-file completion is inferred. Configured overflow lookup now prefers a non-null local ContextFlyout and otherwise resolves the root primary master, never an intermediate continuation. The requesting overflow retains placement, target cancellation and holding feedback. A default overflow property uses the master selection-enabled gate; explicit null preserves master fallback but bypasses that default gate, and Clear restores it. Eligibility applies only on opening so later selection changes cannot block dismissal. Modern configured overflow requests do not raise or forward the typed event, matching the helper branches. The separate legacy selection-manager owner event and built-in default flyout remain pending. Framework inheritance topology and menu/keyboard translations remain explicit in CONTEXT-MENUS.md. Native m_pMaster is reset on link changes and resolved during linked block-layout setup. The configured-menu helper currently follows the live framework chain; exact cached-master availability/timing and the separate public ContentSource predecessor mismatch remain partial.",
+      "reason": "Only IsTextControl/IsTextSelectionEnabled dispatch for the configured rich-text menu path is reviewed. Overflow text selection policy resolves through the root master. Other TextCore services and control cases remain pending; no whole-file completion is inferred. Configured overflow lookup now prefers a non-null local ContextFlyout and otherwise resolves the root primary master, never an intermediate continuation. The requesting overflow retains placement, target cancellation and holding feedback. A default overflow property uses the master selection-enabled gate; explicit null preserves master fallback but bypasses that default gate, and Clear restores it. Eligibility applies only on opening so later selection changes cannot block dismissal. Modern configured overflow requests do not raise or forward the typed event, matching the helper branches. The separate legacy selection-manager owner event and built-in default flyout remain pending. Framework inheritance topology and menu/keyboard translations remain explicit in CONTEXT-MENUS.md. Public ContentSource and configured flyout/selection master lookup now share the layout-resolved weak primary cache. A getter does not traverse links or force setup. Link changes clear the installed continuation suffix; actual measure uses only its immediate predecessor, resolving even for empty/no-overflow content. Ordinary layout invalidation preserves the master. Immediate predecessors remain separate for sequential page breaks and document formatting. Installed-edge identity and flow/master generations preserve callback-owned links and setup, including surviving-suffix Drop document notifications. Registered direct-property and real reflection-binding transitions are tested through the existing FerroUI property service. Weak forward targets and notification ordering are framework adaptations. Native print setup, cursor propagation, strong lifetime and other overflow/geometry members remain partial. See OVERFLOW-LINKS.md; test definitions and actual source-bound execution records are distinct.",
       "deviations": [
         "RT-A01",
         "RT-A04",
-        "RT-I37"
+        "RT-I37",
+        "RT-I38"
       ]
     },
     {
@@ -62234,6 +62754,30 @@
         {
           "path": "src/FerroUI.Controls/rich_text_block_overflow.rs",
           "symbol": "RichTextBlockOverflow"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_overflow_links.rs",
+          "symbol": "pub(crate) fn cached_overflow_master("
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_overflow_links.rs",
+          "symbol": "pub(super) fn setup_linked_overflow_master("
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_overflow_links.rs",
+          "symbol": "pub(super) fn reconcile_overflow_content_target("
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_overflow_links.rs",
+          "symbol": "fn replace_flow_parent("
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_overflow_links.rs",
+          "symbol": "fn publish_overflow_resets("
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_overflow_links.rs",
+          "symbol": "pub(super) fn detach_installed_overflow_on_drop("
         }
       ],
       "tests": [
@@ -62244,6 +62788,86 @@
         {
           "path": "src/FerroUI.Controls/rich_text_block_tests.rs",
           "symbol": "rich_overflow_rejects_cycles_and_second_owners"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_overflow_master_tests.rs",
+          "symbol": "rich_overflow_master_getters_and_metadata_do_not_resolve_a_linked_chain"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_overflow_master_tests.rs",
+          "symbol": "rich_overflow_master_reflection_binding_observes_cached_master_transitions"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_overflow_master_tests.rs",
+          "symbol": "rich_overflow_master_late_measure_waits_for_the_immediate_predecessor"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_overflow_master_tests.rs",
+          "symbol": "rich_overflow_master_cache_does_not_require_overflow_content"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_overflow_master_tests.rs",
+          "symbol": "rich_overflow_master_root_identity_keeps_sequential_predecessor_breaks"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_overflow_master_tests.rs",
+          "symbol": "rich_overflow_master_unlink_clears_the_entire_suffix_before_notifications"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_overflow_master_tests.rs",
+          "symbol": "rich_overflow_master_reparent_requires_new_predecessor_setup"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_overflow_master_tests.rs",
+          "symbol": "rich_overflow_master_ordinary_layout_changes_preserve_the_cached_master"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_overflow_master_tests.rs",
+          "symbol": "rich_overflow_master_property_events_follow_cache_transitions_on_each_descendant"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_overflow_master_tests.rs",
+          "symbol": "rich_overflow_master_weak_root_expiry_does_not_retain_the_owner"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_overflow_master_tests.rs",
+          "symbol": "rich_overflow_master_weak_intermediate_expiry_resets_surviving_suffix"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_overflow_master_tests.rs",
+          "symbol": "rich_overflow_master_primary_drop_notifies_the_previous_document_without_retention"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_overflow_master_tests.rs",
+          "symbol": "rich_overflow_master_intermediate_drop_notifies_the_root_document_for_its_suffix"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_overflow_master_tests.rs",
+          "symbol": "rich_overflow_master_nested_property_override_reconciles_the_installed_edge"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_overflow_master_tests.rs",
+          "symbol": "rich_overflow_master_reset_handler_preserves_a_newer_reparent_and_layout"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_overflow_master_tests.rs",
+          "symbol": "rich_overflow_master_invalidation_callback_sees_atomic_reset_and_keeps_new_owner"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_overflow_master_tests.rs",
+          "symbol": "rich_overflow_master_setup_callback_cannot_restore_a_replaced_master"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_overflow_master_tests.rs",
+          "symbol": "rich_overflow_master_drop_notification_can_reparent_the_surviving_view"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_overflow_master_tests.rs",
+          "symbol": "rich_overflow_master_invalid_markup_target_does_not_detach_another_owner"
+        },
+        {
+          "path": "src/FerroUI.Controls/rich_text_overflow_master_tests.rs",
+          "symbol": "rich_overflow_master_context_lookup_uses_the_same_cache_as_content_source"
         }
       ],
       "includes": [
@@ -62355,9 +62979,10 @@
           "state": "unreviewed"
         }
       ],
-      "reason": "A derived rich view uses the shared weak continuation chain and document selection. Native separate class topology and unreviewed overflow members remain adapted or pending.",
+      "reason": "A derived rich view uses the shared weak continuation chain and document selection. Native separate class topology and unreviewed overflow members remain adapted or pending. Public ContentSource and configured flyout/selection master lookup now share the layout-resolved weak primary cache. A getter does not traverse links or force setup. Link changes clear the installed continuation suffix; actual measure uses only its immediate predecessor, resolving even for empty/no-overflow content. Ordinary layout invalidation preserves the master. Immediate predecessors remain separate for sequential page breaks and document formatting. Installed-edge identity and flow/master generations preserve callback-owned links and setup, including surviving-suffix Drop document notifications. Registered direct-property and real reflection-binding transitions are tested through the existing FerroUI property service. Weak forward targets and notification ordering are framework adaptations. Native print setup, cursor propagation, strong lifetime and other overflow/geometry members remain partial. See OVERFLOW-LINKS.md; test definitions and actual source-bound execution records are distinct.",
       "deviations": [
-        "RT-I02"
+        "RT-I02",
+        "RT-I38"
       ]
     },
     {
@@ -88109,6 +88734,30 @@
       ]
     },
     {
+      "path": "dxaml/xcp/components/deferral/inc/CustomWriterRuntimeDataTypeIndex.h",
+      "git_blob": "b0b9dee355b01d7292f85c423af090ab22aa54c6",
+      "sha256": "68537c10237e96868e4b26b83e980309c6e98d817bea98edbae24e9aafa7334d",
+      "state": "framework_dependency_review",
+      "includes": [
+        {
+          "header": "cstdint",
+          "line": 5,
+          "style": "system",
+          "resolution": "external_or_generated",
+          "candidates": []
+        },
+        {
+          "header": "StableXbfIndexes.g.h",
+          "line": 7,
+          "style": "system",
+          "resolution": "unique_path_suffix",
+          "candidates": [
+            "dxaml/xcp/core/Parser/StableXbfIndexes.g.h"
+          ]
+        }
+      ]
+    },
+    {
       "path": "dxaml/xcp/components/deferral/inc/CustomWriterRuntimeObjectCreator.h",
       "git_blob": "ba9aea089069dd3ded5e58f440bc3c294297bbc6",
       "sha256": "e8de43851c441ba76c44384a54c17daef873b4109311c358c3c8e35f856a40a5",
@@ -88512,6 +89161,59 @@
           "resolution": "relative_path",
           "candidates": [
             "dxaml/xcp/components/focus/inc/FocusChildrenIteratorWrapper.h"
+          ]
+        }
+      ]
+    },
+    {
+      "path": "dxaml/xcp/components/focus/inc/FocusSelection.h",
+      "git_blob": "727e3563b20e52577895ca7a3ab00c722e08dbd0",
+      "sha256": "54995fb8f6cf5df0152a565c7fe1d206942317f95e542a56d261900f15a46e5c",
+      "state": "framework_dependency_review",
+      "includes": [
+        {
+          "header": "enumdefs.g.h",
+          "line": 5,
+          "style": "quoted",
+          "resolution": "unique_path_suffix",
+          "candidates": [
+            "dxaml/xcp/components/metadata/inc/EnumDefs.g.h"
+          ]
+        },
+        {
+          "header": "Metadataapi.h",
+          "line": 7,
+          "style": "system",
+          "resolution": "unique_path_suffix",
+          "candidates": [
+            "dxaml/xcp/core/inc/MetadataAPI.h"
+          ]
+        },
+        {
+          "header": "CValue.h",
+          "line": 8,
+          "style": "system",
+          "resolution": "unique_path_suffix",
+          "candidates": [
+            "dxaml/xcp/inc/cvalue.h"
+          ]
+        },
+        {
+          "header": "XYFocus.h",
+          "line": 9,
+          "style": "quoted",
+          "resolution": "relative_path",
+          "candidates": [
+            "dxaml/xcp/components/focus/inc/XYFocus.h"
+          ]
+        },
+        {
+          "header": "FocusMovement.h",
+          "line": 10,
+          "style": "quoted",
+          "resolution": "relative_path",
+          "candidates": [
+            "dxaml/xcp/components/focus/inc/FocusMovement.h"
           ]
         }
       ]
@@ -89733,6 +90435,41 @@
       "sha256": "d0144ae11d5bb6f738d6d3f3dbcae8825843d686d87be4e80f62e1f12bf6d4bd",
       "state": "framework_dependency_review",
       "includes": []
+    },
+    {
+      "path": "dxaml/xcp/components/parser/inc/XbfVersioning.h",
+      "git_blob": "c19918ca5fe7417cff79ecb90d91cffbc1569bec",
+      "sha256": "a4b93b46a69288485ee26f990fb4d825f5d2e8bc90519ffd22193c7c3c5adb79",
+      "state": "framework_dependency_review",
+      "includes": [
+        {
+          "header": "CustomWriterRuntimeDataTypeIndex.h",
+          "line": 5,
+          "style": "system",
+          "resolution": "unique_path_suffix",
+          "candidates": [
+            "dxaml/xcp/components/deferral/inc/CustomWriterRuntimeDataTypeIndex.h"
+          ]
+        },
+        {
+          "header": "XamlBinaryMetadata.h",
+          "line": 7,
+          "style": "system",
+          "resolution": "unique_path_suffix",
+          "candidates": [
+            "dxaml/xcp/core/inc/XamlBinaryMetadata.h"
+          ]
+        },
+        {
+          "header": "StableXbfIndexes.g.h",
+          "line": 8,
+          "style": "system",
+          "resolution": "unique_path_suffix",
+          "candidates": [
+            "dxaml/xcp/core/Parser/StableXbfIndexes.g.h"
+          ]
+        }
+      ]
     },
     {
       "path": "dxaml/xcp/components/primitiveDependencyObjects/inc/CPropertyPath.h",
@@ -94301,6 +95038,41 @@
       ]
     },
     {
+      "path": "dxaml/xcp/core/inc/EasingFunctions.h",
+      "git_blob": "2712a8fa08f750f402a3e3c4d7cdb7271eb543b3",
+      "sha256": "a4c5797c04830bd531f2caf1a7b1c12ea6d0c3ff3ad53d79db83571bb86840a7",
+      "state": "framework_dependency_review",
+      "includes": [
+        {
+          "header": "NoParentShareableDependencyObject.h",
+          "line": 5,
+          "style": "quoted",
+          "resolution": "relative_path",
+          "candidates": [
+            "dxaml/xcp/core/inc/NoParentShareableDependencyObject.h"
+          ]
+        },
+        {
+          "header": "EnumDefs.g.h",
+          "line": 7,
+          "style": "quoted",
+          "resolution": "unique_path_suffix",
+          "candidates": [
+            "dxaml/xcp/components/metadata/inc/EnumDefs.g.h"
+          ]
+        },
+        {
+          "header": "fwd/windows.ui.composition.h",
+          "line": 8,
+          "style": "system",
+          "resolution": "unique_path_suffix",
+          "candidates": [
+            "dxaml/xcp/inc/fwd/windows.ui.composition.h"
+          ]
+        }
+      ]
+    },
+    {
       "path": "dxaml/xcp/core/inc/EffectiveValue.h",
       "git_blob": "60d6195f203dd6ff966c3a6f8e05c093238777c6",
       "sha256": "d575763b6e865b696e0473266836265ab7bb9557644f165b0d09190971733ea9",
@@ -95995,6 +96767,13 @@
           ]
         }
       ]
+    },
+    {
+      "path": "dxaml/xcp/core/inc/NodeStreamCache.h",
+      "git_blob": "0403fd64fed671324a3be26e8ea0b82a4d99480f",
+      "sha256": "306bb06779d6c8be8b18a80a2ab2e4297ba95df83678f6ec45831a6e989373b4",
+      "state": "framework_dependency_review",
+      "includes": []
     },
     {
       "path": "dxaml/xcp/core/inc/NullExtension.h",
@@ -98050,6 +98829,62 @@
       "includes": []
     },
     {
+      "path": "dxaml/xcp/core/inc/XamlBinaryMetadata.h",
+      "git_blob": "eb52b4ada565202ae97e632685be55608041b60e",
+      "sha256": "eb2bd57a6509db2ad2a697e937b9e3935120c368ce7c8d9a8663bb16145946f9",
+      "state": "framework_dependency_review",
+      "includes": [
+        {
+          "header": "TypeBits.h",
+          "line": 5,
+          "style": "quoted",
+          "resolution": "unique_path_suffix",
+          "candidates": [
+            "dxaml/xcp/inc/TypeBits.h"
+          ]
+        },
+        {
+          "header": "cstdint",
+          "line": 7,
+          "style": "system",
+          "resolution": "external_or_generated",
+          "candidates": []
+        },
+        {
+          "header": "XamlTypeInfoProviderKind.h",
+          "line": 8,
+          "style": "quoted",
+          "resolution": "relative_path",
+          "candidates": [
+            "dxaml/xcp/core/inc/XamlTypeInfoProviderKind.h"
+          ]
+        },
+        {
+          "header": "StableXbfIndexes.g.h",
+          "line": 9,
+          "style": "quoted",
+          "resolution": "unique_path_suffix",
+          "candidates": [
+            "dxaml/xcp/core/Parser/StableXbfIndexes.g.h"
+          ]
+        }
+      ]
+    },
+    {
+      "path": "dxaml/xcp/core/inc/XamlDirectives.h",
+      "git_blob": "22e45f98a0f8e95f84fa5c6a4c4cfe516630f563",
+      "sha256": "2deedccda41b1c3a0633d273baac3a5c488763b112418cfcfaf4c9c771ef1cae",
+      "state": "framework_dependency_review",
+      "includes": []
+    },
+    {
+      "path": "dxaml/xcp/core/inc/XamlFactoryKind.h",
+      "git_blob": "fc045c843ce7afbccfdb5034accb85fd85e07f44",
+      "sha256": "a0eb91e21e0e0777564caf327094193133d3e632072c40300091cac4797638fe",
+      "state": "framework_dependency_review",
+      "includes": []
+    },
+    {
       "path": "dxaml/xcp/core/inc/XamlIslandRoot.h",
       "git_blob": "63848fe636aaacfe0ff1320498c88826ace53c5e",
       "sha256": "3696b0f1bad05f4f92175c0a3b1dd57ebdebb3107da62b5641fbac54c30c5824",
@@ -98206,6 +99041,88 @@
       ]
     },
     {
+      "path": "dxaml/xcp/core/inc/XamlPropertyToken.h",
+      "git_blob": "8ef7e0ba4be17779ccc17036f26a83f9a87426d1",
+      "sha256": "b790052d91e884ad258462995efb493683309286940627c7c53daf807a0eb79e",
+      "state": "framework_dependency_review",
+      "includes": [
+        {
+          "header": "XamlToken.h",
+          "line": 5,
+          "style": "quoted",
+          "resolution": "relative_path",
+          "candidates": [
+            "dxaml/xcp/core/inc/XamlToken.h"
+          ]
+        },
+        {
+          "header": "XamlDirectives.h",
+          "line": 7,
+          "style": "quoted",
+          "resolution": "relative_path",
+          "candidates": [
+            "dxaml/xcp/core/inc/XamlDirectives.h"
+          ]
+        }
+      ]
+    },
+    {
+      "path": "dxaml/xcp/core/inc/XamlSchemaContext.h",
+      "git_blob": "2b8576d11eb25556bb7d27e456e462e6af2fd2d8",
+      "sha256": "9e6cefa2187650749d23c75bd4b59d82188d64365d1bf32d7ca626b6bb78e18c",
+      "state": "framework_dependency_review",
+      "includes": [
+        {
+          "header": "XamlTypeTokens.h",
+          "line": 5,
+          "style": "quoted",
+          "resolution": "relative_path",
+          "candidates": [
+            "dxaml/xcp/core/inc/XamlTypeTokens.h"
+          ]
+        },
+        {
+          "header": "xstring_ptr.h",
+          "line": 7,
+          "style": "quoted",
+          "resolution": "unique_path_suffix",
+          "candidates": [
+            "dxaml/xcp/components/xstring/inc/xstring_ptr.h"
+          ]
+        },
+        {
+          "header": "vector",
+          "line": 8,
+          "style": "system",
+          "resolution": "external_or_generated",
+          "candidates": []
+        },
+        {
+          "header": "stack",
+          "line": 9,
+          "style": "system",
+          "resolution": "external_or_generated",
+          "candidates": []
+        },
+        {
+          "header": "unordered_map",
+          "line": 10,
+          "style": "system",
+          "resolution": "external_or_generated",
+          "candidates": []
+        },
+        {
+          "header": "StableXbfIndexes.g.h",
+          "line": 11,
+          "style": "system",
+          "resolution": "unique_path_suffix",
+          "candidates": [
+            "dxaml/xcp/core/Parser/StableXbfIndexes.g.h"
+          ]
+        }
+      ]
+    },
+    {
       "path": "dxaml/xcp/core/inc/XamlServiceProviderContext.h",
       "git_blob": "1bf190f4921727e3c278f881acadc007c986a8b7",
       "sha256": "5a192d67117122575c902947cb150a220f9ae3a15aeee407558de6e8cf7922ab",
@@ -98253,6 +99170,127 @@
           "resolution": "relative_path",
           "candidates": [
             "dxaml/xcp/core/inc/IXamlSchemaObject.h"
+          ]
+        }
+      ]
+    },
+    {
+      "path": "dxaml/xcp/core/inc/XamlToken.h",
+      "git_blob": "767778af43dcb81de19f9e9bb64bd0ca2d8534a6",
+      "sha256": "0823be9e5dfc199b6de5c1ddddcdf014844b1558c271b95f2899d91d6bfab3f1",
+      "state": "framework_dependency_review",
+      "includes": [
+        {
+          "header": "XamlTypeInfoProviderKind.h",
+          "line": 5,
+          "style": "quoted",
+          "resolution": "relative_path",
+          "candidates": [
+            "dxaml/xcp/core/inc/XamlTypeInfoProviderKind.h"
+          ]
+        },
+        {
+          "header": "XamlFactoryKind.h",
+          "line": 7,
+          "style": "quoted",
+          "resolution": "relative_path",
+          "candidates": [
+            "dxaml/xcp/core/inc/XamlFactoryKind.h"
+          ]
+        }
+      ]
+    },
+    {
+      "path": "dxaml/xcp/core/inc/XamlTypeInfoProviderKind.h",
+      "git_blob": "933379114b23ac32dec97fb3e8889c7fb537700e",
+      "sha256": "94972257198a2d05f0387d612131c003a5360e4116f05243f08aa38c83f0c829",
+      "state": "framework_dependency_review",
+      "includes": []
+    },
+    {
+      "path": "dxaml/xcp/core/inc/XamlTypeTokens.h",
+      "git_blob": "53cb45d324cbba4d47fe6aecfcf6e9e827e1848f",
+      "sha256": "ac861bba58798b19459f8b7c0839b32dad2dbebebf651e621f0166638cdb4904",
+      "state": "framework_dependency_review",
+      "includes": [
+        {
+          "header": "Indexes.g.h",
+          "line": 5,
+          "style": "system",
+          "resolution": "unique_path_suffix",
+          "candidates": [
+            "dxaml/xcp/components/metadata/inc/Indexes.g.h"
+          ]
+        },
+        {
+          "header": "XamlDirectives.h",
+          "line": 18,
+          "style": "quoted",
+          "resolution": "relative_path",
+          "candidates": [
+            "dxaml/xcp/core/inc/XamlDirectives.h"
+          ]
+        },
+        {
+          "header": "XamlTypeInfoProviderKind.h",
+          "line": 20,
+          "style": "quoted",
+          "resolution": "relative_path",
+          "candidates": [
+            "dxaml/xcp/core/inc/XamlTypeInfoProviderKind.h"
+          ]
+        },
+        {
+          "header": "XamlFactoryKind.h",
+          "line": 22,
+          "style": "quoted",
+          "resolution": "relative_path",
+          "candidates": [
+            "dxaml/xcp/core/inc/XamlFactoryKind.h"
+          ]
+        },
+        {
+          "header": "XamlToken.h",
+          "line": 23,
+          "style": "quoted",
+          "resolution": "relative_path",
+          "candidates": [
+            "dxaml/xcp/core/inc/XamlToken.h"
+          ]
+        },
+        {
+          "header": "DataStructureFunctionProvider.h",
+          "line": 25,
+          "style": "system",
+          "resolution": "unique_path_suffix",
+          "candidates": [
+            "dxaml/xcp/pal/inc/DataStructureFunctionProvider.h"
+          ]
+        },
+        {
+          "header": "XamlPropertyToken.h",
+          "line": 141,
+          "style": "quoted",
+          "resolution": "relative_path",
+          "candidates": [
+            "dxaml/xcp/core/inc/XamlPropertyToken.h"
+          ]
+        }
+      ]
+    },
+    {
+      "path": "dxaml/xcp/core/inc/XbfWriter.h",
+      "git_blob": "616b3639b470f5558d95c5159779cdeafa134abf",
+      "sha256": "c7c31f34db18bc4cd9da2973553d0c88621072d0c50bc045236e31c68a95ef0e",
+      "state": "framework_dependency_review",
+      "includes": [
+        {
+          "header": "XbfVersioning.h",
+          "line": 5,
+          "style": "quoted",
+          "resolution": "unique_path_suffix",
+          "candidates": [
+            "dxaml/xcp/components/parser/inc/XbfVersioning.h"
           ]
         }
       ]
@@ -101559,6 +102597,92 @@
       "sha256": "dd4cdc6ba46c8a14adc1b23b9b34a75a700e9b0cf4faef11890a10039f4a9acc",
       "state": "framework_dependency_review",
       "includes": []
+    },
+    {
+      "path": "dxaml/xcp/core/inc/timemgr.h",
+      "git_blob": "13b366b17dc3b7fb66c2e56a26aaefae2c44a8d0",
+      "sha256": "bc5d9b092f48e0f838f203d389ab7d14f3df1e49e3fb2a1d0114d6762bac9885",
+      "state": "framework_dependency_review",
+      "includes": [
+        {
+          "header": "IndependentAnimationType.h",
+          "line": 5,
+          "style": "quoted",
+          "resolution": "unique_path_suffix",
+          "candidates": [
+            "dxaml/xcp/inc/IndependentAnimationType.h"
+          ]
+        },
+        {
+          "header": "CDependencyObject.h",
+          "line": 7,
+          "style": "quoted",
+          "resolution": "relative_path",
+          "candidates": [
+            "dxaml/xcp/core/inc/CDependencyObject.h"
+          ]
+        },
+        {
+          "header": "vector_map.h",
+          "line": 8,
+          "style": "system",
+          "resolution": "unique_path_suffix",
+          "candidates": [
+            "dxaml/xcp/components/base/inc/vector_map.h"
+          ]
+        },
+        {
+          "header": "array",
+          "line": 9,
+          "style": "system",
+          "resolution": "external_or_generated",
+          "candidates": []
+        },
+        {
+          "header": "unordered_set",
+          "line": 10,
+          "style": "system",
+          "resolution": "external_or_generated",
+          "candidates": []
+        },
+        {
+          "header": "weakref_ptr.h",
+          "line": 11,
+          "style": "system",
+          "resolution": "unique_path_suffix",
+          "candidates": [
+            "dxaml/xcp/components/base/inc/weakref_ptr.h"
+          ]
+        },
+        {
+          "header": "NamespaceAliases.h",
+          "line": 12,
+          "style": "system",
+          "resolution": "ambiguous",
+          "candidates": [
+            "dxaml/xcp/components/base/inc/NamespaceAliases.h",
+            "dxaml/xcp/dxaml/tools/AppAnalysis/runtime/common/NamespaceAliases.h"
+          ]
+        },
+        {
+          "header": "IATarget.h",
+          "line": 13,
+          "style": "system",
+          "resolution": "unique_path_suffix",
+          "candidates": [
+            "dxaml/xcp/components/animation/inc/IATarget.h"
+          ]
+        },
+        {
+          "header": "fwd/windows.ui.composition.h",
+          "line": 14,
+          "style": "system",
+          "resolution": "unique_path_suffix",
+          "candidates": [
+            "dxaml/xcp/inc/fwd/windows.ui.composition.h"
+          ]
+        }
+      ]
     },
     {
       "path": "dxaml/xcp/core/inc/timer.h",
@@ -115184,6 +116308,14 @@
       "candidates": []
     },
     {
+      "from": "dxaml/xcp/components/deferral/inc/CustomWriterRuntimeDataTypeIndex.h",
+      "header": "cstdint",
+      "line": 5,
+      "style": "system",
+      "resolution": "external_or_generated",
+      "candidates": []
+    },
+    {
       "from": "dxaml/xcp/components/dependencyLocator/inc/DependencyLocator.h",
       "header": "mutex",
       "line": 8,
@@ -116504,6 +117636,53 @@
       ]
     },
     {
+      "from": "dxaml/xcp/core/dll/CoreImports.cpp",
+      "header": "precomp.h",
+      "line": 5,
+      "style": "quoted",
+      "resolution": "ambiguous",
+      "candidates": [
+        "dxaml/phone/lib/precomp.h",
+        "dxaml/test/appanalysis/lib/precomp.h",
+        "dxaml/test/appanalysis/ruleSet/precomp.h",
+        "dxaml/test/infra/client/pch/precomp.h",
+        "dxaml/test/infra/logging/precomp.h",
+        "dxaml/test/infra/server/precomp.h",
+        "dxaml/xcp/components/pch/precomp.h",
+        "dxaml/xcp/control/common/shared/precomp.h",
+        "dxaml/xcp/core/Parser/pch/precomp.h",
+        "dxaml/xcp/core/Parser/staticpch/precomp.h",
+        "dxaml/xcp/core/controls/generated/precomp.h",
+        "dxaml/xcp/core/core/elements/pch/precomp.h",
+        "dxaml/xcp/core/core/elements/pchexcept/precomp.h",
+        "dxaml/xcp/core/hw/precomp.h",
+        "dxaml/xcp/core/input/precomp.h",
+        "dxaml/xcp/core/metadata/dynamic/precomp.h",
+        "dxaml/xcp/core/native/media/precomp.h",
+        "dxaml/xcp/core/native/text/Common/precomp.h",
+        "dxaml/xcp/core/native/text/Controls/precomp.h",
+        "dxaml/xcp/core/precomp.h",
+        "dxaml/xcp/core/text/precomp.h",
+        "dxaml/xcp/dxaml/dllsrv/winrt/precomp.h",
+        "dxaml/xcp/dxaml/lib/precomp.h",
+        "dxaml/xcp/dxaml/tools/AppAnalysis/dll/precomp.h",
+        "dxaml/xcp/dxaml/tools/AppAnalysis/module/precomp.h",
+        "dxaml/xcp/dxaml/tools/AppAnalysis/runtime/common/precomp.h",
+        "dxaml/xcp/dxaml/tools/AppAnalysis/runtime/framework/precomp.h",
+        "dxaml/xcp/dxaml/tools/AppAnalysis/runtime/rules/precomp.h",
+        "dxaml/xcp/dxaml/tools/AppAnalysis/tool/precomp.h",
+        "dxaml/xcp/dxaml/tools/AppAnalysis/unittests/pch/precomp.h",
+        "dxaml/xcp/dxaml/tools/xamldiagnostics/tap/precomp.h",
+        "dxaml/xcp/pal/debug/precomp.h",
+        "dxaml/xcp/plat/win/browserdesktop/precomp.h",
+        "dxaml/xcp/plat/win/desktop/precomp.h",
+        "dxaml/xcp/precomp.h",
+        "dxaml/xcp/tools/GenXbfDLL/precomp.h",
+        "dxaml/xcp/win/shared/precomp.h",
+        "src/XamlCompiler/Tests/RegressionProjects/Basic/CppWinRT/PrecompiledHeader/precomp.h"
+      ]
+    },
+    {
       "from": "dxaml/xcp/core/hw/hwtexturemgr.h",
       "header": "mutex",
       "line": 11,
@@ -116944,6 +118123,14 @@
       ]
     },
     {
+      "from": "dxaml/xcp/core/inc/XamlBinaryMetadata.h",
+      "header": "cstdint",
+      "line": 7,
+      "style": "system",
+      "resolution": "external_or_generated",
+      "candidates": []
+    },
+    {
       "from": "dxaml/xcp/core/inc/XamlIslandRoot.h",
       "header": "wil\\winrt.h",
       "line": 7,
@@ -116987,6 +118174,30 @@
       "from": "dxaml/xcp/core/inc/XamlIslandRoot.h",
       "header": "optional",
       "line": 16,
+      "style": "system",
+      "resolution": "external_or_generated",
+      "candidates": []
+    },
+    {
+      "from": "dxaml/xcp/core/inc/XamlSchemaContext.h",
+      "header": "vector",
+      "line": 8,
+      "style": "system",
+      "resolution": "external_or_generated",
+      "candidates": []
+    },
+    {
+      "from": "dxaml/xcp/core/inc/XamlSchemaContext.h",
+      "header": "stack",
+      "line": 9,
+      "style": "system",
+      "resolution": "external_or_generated",
+      "candidates": []
+    },
+    {
+      "from": "dxaml/xcp/core/inc/XamlSchemaContext.h",
+      "header": "unordered_map",
+      "line": 10,
       "style": "system",
       "resolution": "external_or_generated",
       "candidates": []
@@ -117121,6 +118332,33 @@
       "style": "system",
       "resolution": "external_or_generated",
       "candidates": []
+    },
+    {
+      "from": "dxaml/xcp/core/inc/timemgr.h",
+      "header": "array",
+      "line": 9,
+      "style": "system",
+      "resolution": "external_or_generated",
+      "candidates": []
+    },
+    {
+      "from": "dxaml/xcp/core/inc/timemgr.h",
+      "header": "unordered_set",
+      "line": 10,
+      "style": "system",
+      "resolution": "external_or_generated",
+      "candidates": []
+    },
+    {
+      "from": "dxaml/xcp/core/inc/timemgr.h",
+      "header": "NamespaceAliases.h",
+      "line": 12,
+      "style": "system",
+      "resolution": "ambiguous",
+      "candidates": [
+        "dxaml/xcp/components/base/inc/NamespaceAliases.h",
+        "dxaml/xcp/dxaml/tools/AppAnalysis/runtime/common/NamespaceAliases.h"
+      ]
     },
     {
       "from": "dxaml/xcp/core/inc/timespan.h",

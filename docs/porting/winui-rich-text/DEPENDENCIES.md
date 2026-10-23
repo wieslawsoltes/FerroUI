@@ -17,7 +17,7 @@ Generated alongside the inventory. Source links are pinned to the same commit as
 
 ## Include graph
 
-The machine-readable graph records **961 additional framework files** reached from the selected scope and **837 boundary edges**. It reads source-relative paths first and otherwise follows only unique repository path suffixes. Windows case-insensitive lookup is applied to source paths.
+The machine-readable graph records **976 additional framework files** reached from the selected scope and **846 boundary edges**. It reads source-relative paths first and otherwise follows only unique repository path suffixes. Windows case-insensitive lookup is applied to source paths.
 
 This is a source-dependency audit, not a compiler dependency dump. Conditional compilation, build include-path precedence, SDK/private-package headers, generated headers, runtime interface acquisition and linker inputs cannot be inferred from filename matching. Ambiguous and absent includes are preserved with their referring file and line; traversal stops at those boundaries. `external_or_generated` means absent from this Git tree, not proof that an API is proprietary or unavailable elsewhere.
 
@@ -27,30 +27,30 @@ General dependency-object, rendering, input, UI Automation and DXAML framework h
 
 | Include | Resolution | Referring edges |
 |---|---|---:|
-| `precomp.h` | ambiguous | 143 |
-| `vector` | external_or_generated | 28 |
+| `precomp.h` | ambiguous | 144 |
+| `vector` | external_or_generated | 29 |
 | `XamlTailored.h` | ambiguous | 26 |
 | `pch.h` | ambiguous | 26 |
-| `NamespaceAliases.h` | ambiguous | 21 |
+| `NamespaceAliases.h` | ambiguous | 22 |
 | `functional` | external_or_generated | 19 |
 | `ppltasks.h` | external_or_generated | 16 |
+| `cstdint` | external_or_generated | 15 |
 | `type_traits` | external_or_generated | 15 |
 | `utility` | external_or_generated | 14 |
-| `cstdint` | external_or_generated | 13 |
 | `memory` | external_or_generated | 13 |
+| `array` | external_or_generated | 10 |
 | `microsoft.ui.composition.h` | external_or_generated | 10 |
 | `windows.h` | external_or_generated | 10 |
-| `array` | external_or_generated | 9 |
 | `macros.h` | ambiguous | 9 |
+| `unordered_set` | external_or_generated | 9 |
 | `map` | external_or_generated | 8 |
 | `math.h` | external_or_generated | 8 |
-| `unordered_set` | external_or_generated | 8 |
+| `unordered_map` | external_or_generated | 8 |
 | `DoubleUtil.h` | ambiguous | 7 |
 | `StaticAssertFalse.h` | ambiguous | 7 |
 | `UIAutomationCore.h` | external_or_generated | 7 |
 | `optional` | external_or_generated | 7 |
 | `string` | external_or_generated | 7 |
-| `unordered_map` | external_or_generated | 7 |
 | `algorithm` | external_or_generated | 6 |
 | `chrono` | external_or_generated | 6 |
 | `windows.foundation.collections.h` | external_or_generated | 6 |
@@ -93,6 +93,7 @@ General dependency-object, rendering, input, UI Automation and DXAML framework h
 | `objbase.h` | external_or_generated | 3 |
 | `ole2.h` | external_or_generated | 3 |
 | `shobjidl_core.h` | external_or_generated | 3 |
+| `stack` | external_or_generated | 3 |
 | `stdint.h` | external_or_generated | 3 |
 | `strsafe.h` | external_or_generated | 3 |
 | `tchar.h` | external_or_generated | 3 |
@@ -106,6 +107,5 @@ General dependency-object, rendering, input, UI Automation and DXAML framework h
 | `Microsoft.DirectManipulation.h` | external_or_generated | 2 |
 | `Microsoft.UI.Xaml.coretypes.h` | external_or_generated | 2 |
 | `MuiUdk.h` | external_or_generated | 2 |
-| `Ptls-min.h` | external_or_generated | 2 |
 
 The full boundary list and all candidate matches are retained in `inventory.json`; this summary is intentionally bounded.

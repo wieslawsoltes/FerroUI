@@ -42,6 +42,8 @@ parity at this reference.
   original operation spans, private observation ordering and transaction ownership.
 - [LINK-FIELDS.md](LINK-FIELDS.md): common cross-paragraph field metadata, typed
   projected Link ranges, RTF/transfer preservation and measured limits.
+- [OVERFLOW-LINKS.md](OVERFLOW-LINKS.md): cached primary ContentSource, immediate
+  predecessors, lazy layout setup, suffix reset and framework ownership.
 - [CONTEXT-MENUS.md](CONTEXT-MENUS.md): configured read-only context menus,
   synchronous typed events, overflow flyout lookup, property provenance and
   shared popup ownership; automatic selection menus remain separate work.

@@ -1,5 +1,70 @@
 # Rich text verification
 
+## 2026-10-23 cached overflow-master continuation
+
+[OVERFLOW-LINKS.md](OVERFLOW-LINKS.md) records the source-derived cached-primary
+contract and the distinct FerroUI ownership/notification policies. The five
+Rust overrides build on context checkpoint
+`f3dbe07f6df5d53e0e0cca02e448367f42066fa5`, tree
+`118e9f73c3b1bee20b64c7066ba007696c068e0a`. The original freezes refer to local
+commit `dc636fee66e528e2f3d3bf2445604f1ed1714e76`; Git verification confirms that
+its tree is identical. Moving HEAD between these equivalent commits changed no
+compiler input.
+
+| Attempt | Actual outcome |
+|---|---|
+| Initial metadata check | Failed after 160.314s: the new fixture selected the inherited routed-event observable instead of the property extension. No runtime test ran. |
+| Qualified property-observable fixture | Metadata passed in 92.129s. The real Controls test binary built in 289.466s. The new master filter passed 18 and failed two; existing read-only, reader-flow and hosted filters passed 31 / 22 / 21. |
+| Final owner-lifetime fixture | Two assertions now clone the new primary handle. The actual test binary rebuilt in 295.730s, then every required focused and full gate passed. Production source is byte-identical across all three freezes. |
+
+Both failed runtime cases used `assert_eq!(second.content_source(), Some(b))`
+before testing retained layout. That moves the final persistent strong primary
+handle into the assertion temporary. Its destruction correctly clears the
+weak-linked overflow. `Some(b.clone())` keeps the intended owner alive through
+the unchanged cache/measure assertions. The earlier 18/2 result remains a
+failed fixture run; it is not presented as a production regression or silently
+replaced by the final pass.
+
+| Final executed gate | Result |
+|---|---:|
+| Cached overflow-master contracts | 20 passed |
+| Configured read-only context menus | 31 passed |
+| Existing rich reader/flow tests | 22 passed |
+| Hosted-object measurement/ownership | 21 passed |
+| Full Controls with loopback access | 5,421 passed, zero failed or ignored |
+
+The final source manifest has SHA-256
+`d4aebe6af05213ae1e4500b9beaaa592f73efa34c195a1dcddf3411e68a190da`.
+Its executable is 281,128,968 bytes with SHA-256
+`43001b1634b6e2350b926f0b003ed5b3737d65923200074fcad942ed58f05f6c`.
+Full Controls ran with the binary as the entire child argument vector, without
+a test-thread override, and finished in 13.37s. Its log SHA-256 is
+`ac4dd2996cf73fa40a8caf564862ac9cd9ed1cec4876aa319d22ead319f87faa`.
+
+The complete 65,308-byte aggregate has SHA-256
+`6507240f96c66d20d52fea26e02f63c71a702611329bfeaf9ca32bf1386eba08`
+and is embedded in [continuation-validation.json](continuation-validation.json).
+It preserves three source freezes, four compiler attempts, nine runtime logs,
+both fixture corrections, exact commands/environments, binary identities,
+capacity observations, cleanup records and the final source audit. The only
+removed artifacts were an already-hashed obsolete Controls library pair and
+the first test executable after its results and identity were captured. No OOM
+kill occurred during these gates. The final audit reports unchanged compiler
+inputs, unchanged preceding context evidence and no pending gate.
+
+No separate XAML run is attributed to this slice. Review removed the duplicate
+markup declaration, leaving the existing registered DirectProperty shape
+unchanged; real registry access and ReflectionBinding are exercised in Controls.
+The preceding XAML pass remains attached to its own source checkpoint. The
+final actual test build also supplies type checking after the two clone fixes,
+so the standalone metadata pass remains bound to its earlier exact fixture
+bytes instead of being repeated without a remaining risk.
+
+These are framework runtime results, not native WinUI layout/printing or
+notification-order measurements. The final source map checks successfully with
+644 files, 1,362 exact public APIs, 976 dependencies and 846 include edges.
+All containing runtime files remain partial.
+
 ## 2026-10-23 configured read-only context-menu continuation
 
 The configured-menu bridge and shared popup ownership changes are described in

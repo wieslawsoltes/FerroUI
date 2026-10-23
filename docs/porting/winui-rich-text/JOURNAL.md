@@ -1553,3 +1553,49 @@ jobs, joining its three successful conformance jobs. The immutable final broad
 report is appended separately from its earlier in-progress observation. Its
 macOS/Windows/X11 results and measured merge belong only to that published
 source, not to the newer configured-menu implementation.
+
+## 2026-10-23 — Resolve the overflow primary during linked layout
+
+The configured-menu checkpoint was published as f3dbe07f, whose tree is exactly
+the tree of local evidence commit dc636fee. The next source review followed
+the public ContentSource projection through CoreImports to GetMaster and the
+native overflow's linked-layout setup. These paths use a cached primary, while
+the immediate predecessor remains responsible for sequential page breaks.
+The source inventory now includes the previously implicit CoreImports getter.
+
+The Rust port retains that separation. Actual overflow measure examines only
+its immediate predecessor, including the predecessor's already resolved cache;
+public property and context-menu reads do not walk or measure the chain. Link
+changes clear affected masters and page caches before framework callbacks.
+Installed-edge identity and separate flow/master generations prevent an older
+notification wave from changing a callback-owned reparent or nested layout.
+Drop captures the dying predecessor's effective document directly, preserving
+the old Document notification value after its weak handle stops upgrading.
+
+Review removed an unnecessary duplicate markup declaration before integration.
+The existing read-only DirectProperty already supplies registry and binding
+metadata. The new executable coverage uses both that registered property and a
+real ReflectionBinding with exact null/A/null/B transitions. Native strong
+forward ownership, FerroUI weak ElementRef ownership, framework notification
+policy and the pending print-setup path remain explicit in OVERFLOW-LINKS.md
+and RT-I38. No entire source file or public API is promoted to complete.
+
+The first Controls metadata check failed in the new binding fixture because
+the inherited routed-event get_observable method shadowed the property
+extension. Qualifying FerroObjectExtensions corrected that fixture; the next
+metadata check passed. The first executable then passed 18 of the 20 new cases
+and all existing read-only/reader/hosted filters. Two failed layout assertions
+followed an assertion that moved the final strong primary handle into a
+temporary. Its destruction correctly detached the weak-linked suffix. Keeping
+that handle alive with clone fixes the two fixtures without changing production
+code or weakening either layout assertion. The original failures remain in the
+source-bound record, separately from the final executable's results.
+
+The final build passed in 295.730s. All 20 new master tests and the 31/22/21
+read-only, reader-flow and hosted filters passed. Full Controls then passed
+5,421 tests with zero failures or ignores in 13.37s, using its normal test
+concurrency and loopback access. The final audit verifies the source and binary,
+retains all earlier attempts and reports no pending gate. The regenerated map
+checks 644 files, 1,362 exact public API identifiers, 976 dependencies and 846
+include edges. The implementation, boundaries, test evidence and source-map
+changes form one reviewable checkpoint.

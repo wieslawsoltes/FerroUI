@@ -95,17 +95,15 @@ claim that the WinUI source has the same property or precedence rule.
 
 ## Overflow lookup and selection policy
 
-The overflow chain already stores weak continuation links. Effective flyout
-lookup walks those links to the primary `RichTextBlock` and reads that master's
-flyout. It never treats an intermediate continuation as a new master.
-
-The native master is a layout-resolved cache: link changes reset it through the
-continuation chain, and linked block-layout setup repopulates it. This bridge's
-root lookup currently follows the live FerroUI chain. Exact native availability
-before layout and reset/setup timing remain partial. The public overflow
-`ContentSource` getter also needs a separate correction from its existing
-immediate-predecessor behavior; this bridge does not infer its public parity
-from the private root lookup.
+The overflow chain stores its immediate predecessor separately from the cached
+primary `RichTextBlock`. Public `ContentSource`, configured master flyout fallback
+and the default overflow selection gate now read the same pure cache. Link changes
+clear the affected continuation suffix. Actual overflow measure resolves only the
+immediate predecessor: a primary is used directly; an overflow contributes its
+already resolved primary. Getters and recursive geometry queries do not walk farther
+back or force setup. A local non-null overflow flyout remains available without a
+resolved master. See [OVERFLOW-LINKS.md](OVERFLOW-LINKS.md) for source evidence,
+real binding coverage, callback ownership and remaining printing/lifetime limits.
 
 | Requesting overflow state | Effective configured flyout and eligibility |
 |---|---|

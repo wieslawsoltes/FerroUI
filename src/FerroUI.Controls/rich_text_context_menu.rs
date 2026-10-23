@@ -137,17 +137,7 @@ impl RichTextBlock {
     }
 
     fn context_flyout_master(&self) -> Option<Ref<RichTextBlock>> {
-        if self.to_ref().cast::<RichTextBlockOverflow>().is_none() {
-            return None;
-        }
-        let mut previous = self.content_source();
-        while let Some(view) = previous {
-            if view.to_ref().cast::<RichTextBlockOverflow>().is_none() {
-                return Some(view);
-            }
-            previous = view.content_source();
-        }
-        None
+        self.cached_overflow_master()
     }
 
     /// CUIElement gates a default ContextFlyout by the text owner's selection
