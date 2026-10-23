@@ -21,7 +21,9 @@ permissions:
 
 concurrency:
   group: editor-${{ github.ref }}
-  cancel-in-progress: true
+  # Let the linked browser build finish while frequent port checkpoints arrive.
+  # GitHub keeps the latest pending run for this group; older pending runs coalesce.
+  cancel-in-progress: false
 
 env:
   CARGO_BUILD_JOBS: 1
