@@ -3,8 +3,8 @@
 // the page with a JSHandle to its RGBA buffer, without transferring that buffer.
 export function areaAverageAlpha({ pixels, width, height, scale }) {
     if (!Number.isInteger(width) || !Number.isInteger(height) || width < 1 || height < 1 ||
-        width * height > 28000 || !Number.isInteger(scale) || scale < 1 || scale > 32) {
-        throw new RangeError("Coverage requires 1..28000 output pixels and an integer scale from 1 to 32.");
+        width * height > 28800 || !Number.isInteger(scale) || scale < 1 || scale > 32) {
+        throw new RangeError("Coverage requires 1..28800 output pixels and an integer scale from 1 to 32.");
     }
     const sourceWidth = width * scale, sourceHeight = height * scale;
     if (!(pixels instanceof Uint8Array || pixels instanceof Uint8ClampedArray) ||
@@ -30,7 +30,7 @@ export function areaAverageAlpha({ pixels, width, height, scale }) {
 // reference used by the original byte-alpha image comparison.
 export function coverageConvergence(coarse, fine) {
     if (!Array.isArray(coarse) || !Array.isArray(fine) || coarse.length !== fine.length ||
-        coarse.length < 1 || coarse.length > 28000) {
+        coarse.length < 1 || coarse.length > 28800) {
         throw new RangeError("Coverage references must have the same bounded pixel count.");
     }
     let maxAlphaDifference = 0, absoluteAlphaAreaDifference = 0, oppositeOpaqueTransparent = 0;

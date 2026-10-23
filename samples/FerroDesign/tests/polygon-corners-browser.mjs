@@ -1,7 +1,9 @@
 import assert from "node:assert/strict";
-import { readFile } from "node:fs/promises";
+import { readFile, writeFile } from "node:fs/promises";
 import { resolve } from "node:path";
 import { PNG } from "pngjs";
+import { coverageConvergence } from "./alpha-coverage.mjs";
+import { alphaDiagnostics, areaAveragedSvgAlpha } from "./svg-alpha-reference.mjs";
 
 // Native radius authoring retains editable primitives; only exported artwork
 // contains the shared cubic fillets. No document-writing test bridge is used
@@ -160,10 +162,22 @@ export async function polygonCornerRegressions(page, reference, check, helpers, 
     assert.equal(external.parseError, false);
     assert.ok(external.curves.some(curve => (curve.match(/C/g) || []).length === 6));
     assert.ok(external.nativeCurves.some(curve => (curve.match(/C/g) || []).length === 6), "XAML retains public StreamGeometry cubics");
-    let differingEdges = 0;
-    for (let index = 0; index < external.alpha.length; index++) {
-        if (Math.abs(external.alpha[index] - native.data[index * 4 + 3]) > 12) differingEdges++;
-    }
+    // Preserve the original 1x observation, then compare independent SVG area
+    // coverage using the same converged reference as the box-corner tests.
+    // The original 12-alpha / 85-pixel silhouette gate remains unchanged.
+    const rawComparison = alphaDiagnostics(native, external.alpha);
+    const coveragePath = resolve(output, mode + "-polygon-corners-triangle-coverage.json");
+    const coverage = { scales: [16, 32], stage: "raw-1x", rawComparison };
+    await writeFile(coveragePath, JSON.stringify(coverage, null, 2) + "\n");
+    const coarse = await areaAveragedSvgAlpha(page, svg, native.width, native.height, 16);
+    const fine = await areaAveragedSvgAlpha(page, svg, native.width, native.height, 32);
+    const convergence = coverageConvergence(coarse, fine);
+    const comparison = alphaDiagnostics(native, fine.map(alpha => Math.round(alpha)));
+    Object.assign(coverage, { stage: "complete", convergence, comparison });
+    await writeFile(coveragePath, JSON.stringify(coverage, null, 2) + "\n");
+    console.log("[polygon-corners-coverage " + mode + "] " + JSON.stringify(coverage));
+    assert.ok(convergence.converged, "Independent SVG area coverage must converge within 4 alpha units without opposite opaque/transparent pixels");
+    const differingEdges = comparison.differingOver12;
     assert.ok(differingEdges <= 85, "Independent SVG and native PNG share the rounded silhouette: " + differingEdges);
     assert.deepEqual(await documentState(page), rounded);
     check("Public FerroUI PNG, independent SVG decoding and native XAML geometry preserve the same six-cubic rounded triangle, transparent corner holes and authored export dimensions");

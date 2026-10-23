@@ -1,5 +1,73 @@
 import assert from "node:assert/strict";
 
+// Inspect the real input only after both presses have finished. The native
+// mouse device owns click classification; DOM click detail is not a substitute.
+export function assertGradientDoubleClickInput({ before, after, requested, observation }) {
+    assert.equal(observation.droppedEvents, 0, "Gradient insertion input evidence must be complete");
+    assert.equal(observation.events.filter(event => event.type === "pointercancel").length, 0,
+        "Gradient insertion cannot contain a cancelled pointer");
+    const pointerEvents = phase => observation.events.filter(event => event.phase === phase &&
+        (event.type === "pointerdown" || event.type === "pointerup"));
+    const events = pointerEvents("capture"), bubble = pointerEvents("bubble");
+    const sequence = ["pointerdown", "pointerup", "pointerdown", "pointerup"];
+    assert.deepEqual(events.map(event => event.type), sequence, "One ordered browser double-click is required");
+    assert.deepEqual(bubble.map(event => event.type), sequence, "Both presses and releases must traverse the native input target");
+    assert.ok(Number.isSafeInteger(events[0].pointerId) && events[0].pointerId > 0, "The actual mouse pointer identity is required");
+    for (const [index, event] of events.entries()) {
+        assert.ok(event.trusted && event.pointerType === "mouse", "Gradient insertion must use trusted mouse input");
+        assert.equal(event.button, 0);
+        assert.equal(event.buttons, index % 2 === 0 ? 1 : 0);
+        assert.equal(event.pointerId, events[0].pointerId);
+        for (const key of ["x", "y", "offsetX", "offsetY"]) {
+            assert.ok(Number.isFinite(event[key]));
+            assert.equal(event[key], events[0][key], "Every double-click event must use the same " + key);
+        }
+        assert.ok(Number.isFinite(event.eventTimeMs) && Number.isFinite(event.observedAtMs) &&
+            event.observedAtMs >= event.eventTimeMs, "Browser creation and observation times must be retained");
+        if (index > 0) assert.ok(event.eventTimeMs >= events[index - 1].eventTimeMs, "Browser input timestamps must be ordered");
+        for (const key of ["type", "trusted", "pointerType", "pointerId", "button", "buttons", "x", "y", "offsetX", "offsetY", "eventTimeMs"]) {
+            assert.equal(bubble[index][key], event[key], "Capture and bubble must describe the same actual event");
+        }
+    }
+    for (const coordinate of ["x", "y"]) {
+        // Chromium may quantize the requested CSS coordinate to float32. This
+        // permits only that conversion, never a hit-point tolerance or retry.
+        assert.ok(events[0][coordinate] === requested.page[coordinate] ||
+            events[0][coordinate] === Math.fround(requested.page[coordinate]),
+        "The delivered double-click must match the requested " + coordinate);
+    }
+    const domIntervalMs = events[2].eventTimeMs - events[0].eventTimeMs;
+    assert.ok(domIntervalMs >= 0 && domIntervalMs <= 500,
+        "Browser press creation interval must remain within 500 ms: " + domIntervalMs);
+    const presses = after.pointerPresses.entries.filter(press => press.serial > before.pointerPresses.serial);
+    assert.equal(after.pointerPresses.serial, before.pointerPresses.serial + 2, "Exactly two new presses must reach the native canvas");
+    assert.deepEqual(presses.map(press => press.serial), [before.pointerPresses.serial + 1, before.pointerPresses.serial + 2]);
+    assert.deepEqual(presses.map(press => press.clickCount), [1, 2], "The native mouse device must recognize one double-click");
+    const nativeIntervalMs = presses[1].timestamp - presses[0].timestamp;
+    assert.ok(presses.every(press => Number.isSafeInteger(press.timestamp) && press.timestamp >= 0) &&
+        nativeIntervalMs >= 0 && nativeIntervalMs <= 500,
+    "Native press interval must remain within the unchanged 500 ms platform limit: " + nativeIntervalMs);
+    for (const key of ["x", "y", "width", "height"]) {
+        assert.equal(after.chrome.CanvasHost[key], before.chrome.CanvasHost[key], "The native canvas bounds stay fixed during insertion");
+    }
+    assert.equal(after.zoom, before.zoom);
+    assert.deepEqual(after.pan, before.pan);
+    for (const press of presses) {
+        assert.equal(press.buttons, 1);
+        assert.equal(press.zoom, before.zoom);
+        assert.deepEqual(press.pan, before.pan);
+        assert.deepEqual(press.screen, presses[0].screen, "Both native presses must hit the same canvas point");
+        assert.deepEqual(press.world, presses[0].world, "Both native presses must hit the same world point");
+        for (const coordinate of ["x", "y"]) {
+            const screen = events[0][coordinate] - before.chrome.CanvasHost[coordinate];
+            assert.ok(Math.abs(press.screen[coordinate] - screen) < 1e-6, "Native press must match the delivered canvas " + coordinate);
+            assert.ok(Math.abs(press.world[coordinate] - (screen - press.pan[coordinate]) / press.zoom) < 1e-6,
+                "Native press must match the delivered world " + coordinate);
+        }
+    }
+    return { event: events[2], press: presses[1], domIntervalMs, nativeIntervalMs };
+}
+
 // Independent expected geometry for rectangular browser fixtures. Inputs are
 // passive PointerEvent samples or the actual routed native press coordinates;
 // none of these functions reads an edited gradient value.

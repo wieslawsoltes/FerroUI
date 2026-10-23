@@ -76,11 +76,21 @@ test("invalid dimensions, excessive work and malformed coverage fail explicitly"
     for (const scale of [0, 1.5, 33]) {
         assert.throws(() => areaAverageAlpha({ pixels: new Uint8Array(4), width: 1, height: 1, scale }), RangeError);
     }
-    assert.throws(() => areaAverageAlpha({ pixels: new Uint8Array(4), width: 281, height: 100, scale: 1 }), RangeError);
+    assert.throws(() => areaAverageAlpha({ pixels: new Uint8Array(289 * 100 * 4), width: 289, height: 100, scale: 1 }), RangeError);
     assert.throws(() => areaAverageAlpha({ pixels: new Uint8Array(15), width: 1, height: 1, scale: 2 }), RangeError);
     assert.throws(() => areaAverageAlpha({ pixels: [0, 0, 0, 255], width: 1, height: 1, scale: 1 }), RangeError);
     assert.throws(() => coverageConvergence([0], [0, 0]), RangeError);
     for (const value of [NaN, Infinity, -1, 256]) {
         assert.throws(() => coverageConvergence([value], [0]), RangeError);
     }
+});
+
+test("the larger polygon fixture retains the exact work bound for averaging and convergence", () => {
+    const pixels = new Uint8Array(180 * 160 * 4).fill(255);
+    const alpha = areaAverageAlpha({ pixels, width: 180, height: 160, scale: 1 });
+    assert.equal(alpha.length, 28800);
+    assert.ok(alpha.every(value => value === 255));
+    assert.equal(coverageConvergence(alpha, alpha).converged, true);
+    const oversized = [...alpha, 255];
+    assert.throws(() => coverageConvergence(oversized, oversized), RangeError);
 });

@@ -100,6 +100,7 @@ jobs:
           node --check tests/gradient-input.test.mjs
           node --check tests/isolated-scenario.mjs
           node --check tests/alpha-coverage.mjs
+          node --check tests/svg-alpha-reference.mjs
           for file in tests/*-browser.mjs; do node --check "$file"; done
           node --test tests/document-store.test.mjs
           node --test tests/isolated-scenario.test.mjs 2>&1 | tee native-report/isolated-scenario-tests.log

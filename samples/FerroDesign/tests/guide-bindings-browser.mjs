@@ -194,6 +194,23 @@ export async function guideBindingRegressions(page, reference, check, helpers, o
         fixtureNode(reference, 3, { parent: 2, name: "Snapped child", x: 36, y: 43, width: 23, height: 17,
             corner_radius: 0, corner_radii: null }),
     ], "Native guide pointer snapping"));
+    // Import fits this small frame at almost 3x. The native attraction radius
+    // is five screen pixels; the move below needs a four-world-unit correction.
+    // Use the actual zoom control so the requested move, resize and draw inputs
+    // are within that radius, preserving the exact fractional geometry checks.
+    const beforeSnapZoom = await documentState(page);
+    const snapZoomHistory = (await state(page)).historyLength;
+    for (let attempt = 0; (await state(page)).zoom > 1.25 && attempt < 16; attempt++) {
+        const previous = await state(page);
+        await clickNative(page, "ZoomOutButton");
+        await waitForNativeFrame(page, previous.renderedFrames, "Guide snapping zoom");
+        assert.ok((await state(page)).zoom < previous.zoom, "The native zoom control must reduce the actual scale");
+    }
+    const snapCamera = await state(page);
+    assert.ok(Number.isFinite(snapCamera.zoom) && snapCamera.zoom > 0 && 4 * snapCamera.zoom <= 5,
+        "The four-unit guide attraction must be inside the five-screen-pixel radius: " + snapCamera.zoom);
+    assert.equal(snapCamera.historyLength, snapZoomHistory, "Camera changes preserve guide history");
+    assert.deepEqual(await documentState(page), beforeSnapZoom, "Camera changes preserve every authored guide field");
     await select(3, 87.5, 91.5);
     before = await documentState(page); depth = (await state(page)).historyLength;
     await moveWorld(page, 87.5, 91.5); await page.mouse.down();

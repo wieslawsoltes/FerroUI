@@ -3,7 +3,7 @@ import { readFile, writeFile } from "node:fs/promises";
 import { resolve } from "node:path";
 import { PNG } from "pngjs";
 import { readInputObservation, startInputObservation, stopInputObservation } from "./input-observations.mjs";
-import { angularInsertionFromPointerInput, angularPaintFromPointerInput } from "./gradient-input.mjs";
+import { angularInsertionFromPointerInput, angularPaintFromPointerInput, assertGradientDoubleClickInput } from "./gradient-input.mjs";
 import { captureWithinDeadline } from "./isolated-scenario.mjs";
 
 // Fixtures are imported once. All subsequent edits use native controls and
@@ -33,6 +33,71 @@ export async function gradientHandleRegressions(page, reference, check, helpers,
             .map(key => [key, view.chrome[key] ?? null])),
         focusedControls: Object.keys(view.chrome).filter(key => view.chrome[key].focused),
     });
+    const insertionInputs = [];
+    const insertionState = view => ({
+        renderedFrames: view.renderedFrames, sceneFrames: view.sceneFrames,
+        documentRevision: view.documentRevision, historyLength: view.historyLength,
+        selection: view.selection, gradientEdit: view.gradientEdit,
+        pointerPresses: view.pointerPresses, zoom: view.zoom, pan: view.pan,
+        chrome: { CanvasHost: view.chrome.CanvasHost },
+    });
+    const doubleClickGradient = async (point, label) => {
+        const before = await state(page);
+        const input = { label, before: insertionState(before), requested: { world: point, page: {
+            x: before.chrome.CanvasHost.x + before.pan.x + point.x * before.zoom,
+            y: before.chrome.CanvasHost.y + before.pan.y + point.y * before.zoom,
+        } } };
+        insertionInputs.push(input);
+        let inputError, observing = false;
+        try {
+            await startInputObservation(page,
+                ["pointerdown", "pointerup", "pointercancel", "mousedown", "mouseup", "click", "dblclick"], 64);
+            observing = true;
+            input.action = { clock: "Node performance milliseconds", startedAtMs: performance.now() };
+            try {
+                // Playwright's no-delay path sends ordered move/down/up/down/up
+                // CDP commands before awaiting completion. An artificial delay
+                // serially waits for each response and can exceed native 500 ms.
+                // No native state is read between these two real browser presses.
+                await page.mouse.click(input.requested.page.x, input.requested.page.y, { clickCount: 2 });
+            } finally {
+                input.action.endedAtMs = performance.now();
+                input.action.durationMs = input.action.endedAtMs - input.action.startedAtMs;
+            }
+        } catch (error) {
+            inputError = error;
+            input.actionError = error?.stack || String(error);
+        } finally {
+            // Evidence and its assertions run outside the multi-click window.
+            // Each bounded capture preserves the original browser action error.
+            if (observing) {
+                try { input.observation = await captureWithinDeadline(() => stopInputObservation(page), 5000); }
+                catch (error) { input.observationError = error?.stack || String(error); inputError ??= error; }
+            }
+            try { input.after = insertionState(await captureWithinDeadline(() => state(page), 5000)); }
+            catch (error) { input.nativeCaptureError = error?.stack || String(error); inputError ??= error; }
+            try {
+                assert.ok(input.observation, "Gradient insertion requires its passive DOM observation");
+                assert.ok(input.after?.pointerPresses, "Gradient insertion requires native pointer observations");
+                const downs = input.observation.events.filter(event => event.type === "pointerdown" && event.phase === "capture");
+                input.nativePresses = input.after.pointerPresses.entries.filter(press => press.serial > before.pointerPresses.serial);
+                const intervals = (items, key) => items.slice(1).map((item, index) => item[key] - items[index][key]);
+                input.timing = {
+                    domPressIntervalsMs: intervals(downs, "eventTimeMs"),
+                    observedPressIntervalsMs: intervals(downs, "observedAtMs"),
+                    nativePressIntervalsMs: intervals(input.nativePresses, "timestamp"),
+                    domDeliveryAgesMs: downs.map(event => event.observedAtMs - event.eventTimeMs),
+                };
+                if (!inputError) input.event = assertGradientDoubleClickInput(input).event;
+            } catch (error) { input.recognitionError = error?.stack || String(error); inputError ??= error; }
+            try {
+                await captureWithinDeadline(() => writeFile(resolve(output, mode + "-gradient-insertion-input.json"),
+                    JSON.stringify(insertionInputs, null, 2)), 5000);
+            } catch (error) { input.writeError = error?.stack || String(error); inputError ??= error; }
+        }
+        if (inputError) throw inputError;
+        return input;
+    };
     const enterGradient = async (fill, before) => {
         const name = "PaintCanvasGradient" + fill, bounds = before.chrome[name];
         const input = { name, fill, before: { native: entryState(before, name) }, stage: "before" };
@@ -626,7 +691,7 @@ export async function gradientHandleRegressions(page, reference, check, helpers,
     await load(simple, 0);
     before = await documentState(page); depth = (await state(page)).historyLength;
     const insertion = await axis(0.25);
-    await clickWorld(page, insertion.markerWorld.x, insertion.markerWorld.y, { clickCount: 2, delay: 80 });
+    await doubleClickGradient(insertion.markerWorld, "Linear axis insertion");
     await wait(view => view.gradientEdit.selected?.kind === "stop" && view.gradientEdit.selected.stop === 2);
     expected = paint(before); expected.stops.push({ offset: 0.25, color: { r: 191, g: 0, b: 64, a: 255 } });
     await waitPaint(expected);
@@ -795,10 +860,9 @@ export async function gradientHandleRegressions(page, reference, check, helpers,
     const angle = (paint(before).angle + 90) * Math.PI / 180;
     const angularInsertion = world(before.nodes[2], before.nodes[2].width * paint(before).center.x + Math.sin(angle) * 80,
         before.nodes[2].height * paint(before).center.y - Math.cos(angle) * 80);
-    const beforeInsertion = await state(page);
-    const insertionInput = await observeAngularPointer("pointerdown", () =>
-        clickWorld(page, angularInsertion.x, angularInsertion.y, { clickCount: 2, delay: 80 }), 2);
-    const insertionPress = angularPress(await state(page), beforeInsertion, insertionInput, 2);
+    const insertionInput = await doubleClickGradient(angularInsertion, "Angular ring insertion");
+    angularInputs.push(insertionInput);
+    const insertionPress = angularPress(insertionInput.after, insertionInput.before, insertionInput, 2);
     assert.equal(insertionPress.clickCount, 2, "The native second press performs the conic insertion");
     expected = angularInsertionFromPointerInput({ node: before.nodes[2], paint: paint(before), nativeWorld: insertionPress.world });
     insertionInput.expectation = { node: before.nodes[2], paint: paint(before), press: insertionPress, expected };
