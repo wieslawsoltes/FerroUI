@@ -102,19 +102,16 @@ fn main() -> Result<(), Box<dyn Error>> {
         }
         window.update_layout();
         if matches!(page.as_str(), "Image" | "FlipView") {
-            verify_media_decoding(
-                &page,
-                &gallery
-                    .native_example()
-                    .ok_or("The native media example is missing.")?,
-            )?;
+            let native = gallery
+                .native_example()
+                .ok_or("The native media example is missing.")?;
+            verify_media_decoding(&page, &native)?;
         }
         if page == "ConnectedAnimation" {
-            verify_connected_animation_decoding(
-                &gallery
-                    .native_example()
-                    .ok_or("The connected-animation example is missing.")?,
-            )?;
+            let native = gallery
+                .native_example()
+                .ok_or("The connected-animation example is missing.")?;
+            verify_connected_animation_decoding(&native)?;
         }
         if page == "AutoSuggestBox" {
             if let Some(query) = &query {
