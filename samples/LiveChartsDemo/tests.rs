@@ -26,10 +26,10 @@ fn compiled_and_runtime_markup_produce_the_same_charts() {
         .iter()
         .all(|(_, count)| *count > 0));
     for index in [0, 2] {
-        assert_eq!(compiled.chart(index).x_axes().len(), 1);
-        assert_eq!(compiled.chart(index).y_axes().len(), 1);
-        assert_eq!(runtime.chart(index).x_axes().len(), 1);
-        assert_eq!(runtime.chart(index).y_axes().len(), 1);
+        assert_eq!(compiled.chart(index).x_axes().count(), 1);
+        assert_eq!(compiled.chart(index).y_axes().count(), 1);
+        assert_eq!(runtime.chart(index).x_axes().count(), 1);
+        assert_eq!(runtime.chart(index).y_axes().count(), 1);
     }
     assert!(compiled
         .chart(1)
