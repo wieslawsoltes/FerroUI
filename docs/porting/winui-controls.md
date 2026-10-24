@@ -70,6 +70,14 @@ A separate namespace for the controls (`ferroui_controls::winui`, `FerroUI.Contr
 - Each templated control of this page gets its default template from a control theme of the WinUI theme, converted from the WinUI document at the pin by `scripts/winui-theme/convert.py` into `src/FerroUI.Themes.WinUI/Controls/`, with its resources from the `<Control>_themeresources.xaml` documents. The converted documents are generated files: they are regenerated with the script, never edited by hand, and the differences the conversion makes are recorded in `docs/porting/winui-theme/DEVIATIONS.md`.
 - No template is built in Rust, and no template child is styled from code with resource keys or colour literals. The theme tests require a theme for every templated control registered by the theme's controls; there is no allow-list.
 - **Fluent and Simple have no templates for these controls for now.** In an application with the Fluent or the Simple theme a templated control of this page has no template, and so shows nothing: use the WinUI theme (`WinUITheme`) for applications that use them. Fluent and Simple documents may follow later; this section is updated when they do.
+- The controls only the WinUI theme styles are listed in one place, `ferroui_controls::testing::WINUI_ONLY_CONTROLS` (feature `testing`), with the table below; the theme tests of Fluent and Simple check that these controls have no control theme there (and every other templated control has one), and a test of `ferroui-controls` checks that the table names the same controls.
+
+<!-- winui-only:begin -->
+| Control | Why only the WinUI theme | Since |
+|---|---|---|
+| `FontIcon` | WinUI's FontIcon: its text part is in the WinUI theme only | W4 |
+| `SymbolIcon` | WinUI's SymbolIcon: its text part is in the WinUI theme only | W4 |
+<!-- winui-only:end -->
 - The tables of `winui-theme.md` that say "no FerroUI control" for these controls (NavigationView and its items, RadioButtons, ProgressRing, RatingControl, InfoBadge; DRP-1, DRP-2, DRP-11, DRP-13, NVP-1 and G-23 of the theme's DEVIATIONS) are updated in the pull request that lands each control.
 
 ### 5.2 The symbol font
@@ -147,6 +155,20 @@ Each pull request carries its tests, its `DEVIATIONS.md` rows and a line in `CHA
 
 ## 10. Deviations
 
-- Differences from WinUI of each control are listed in the section of the control below as it lands (none yet).
+- Differences from WinUI of each control are listed in the section of the control below as it lands.
 - Changes to upstream-ported controls and to core crates are in `DEVIATIONS.md`: "WinUI additions to upstream controls", "Automation peers" and "Windows platform backend" (W1), and the markup section (W2).
 - Differences of the converted templates are in `docs/porting/winui-theme/DEVIATIONS.md`.
+
+### 10.1 Icons (W4)
+
+`src/FerroUI.Controls/font_icon.rs`, `symbol_icon.rs`, `icon_source.rs`; themes `Controls/FontIcon.xaml` and `Controls/SymbolIcon.xaml` of the WinUI theme. Tests: `font_icon_tests`, `symbol_icon_tests`, `icon_source_tests` (`ferroui-controls`), `the_icons_draw_in_the_symbol_font_of_the_theme` (`ferroui-themes-winui`). `Symbol` is checked against WinUI by `scripts/winui-controls/symbol_map.py --check` and the table `docs/porting/data/winui-controls/symbol-glyphs.tsv`.
+
+| WinUI | Port | Kind | Why |
+|---|---|---|---|
+| `FontIcon` and `SymbolIcon` build a TextBlock in code (`CFontIcon::ApplyTemplate`, `CSymbolIcon::ApplyTemplate`). | The TextBlock is the part `PART_Text` of the control theme of the WinUI theme; the control gives it the glyph, the text properties and the foreground. | Representation | FerroUI's `IconElement` is a templated control (upstream). |
+| `SymbolIcon` writes the font `Segoe Fluent Icons` in code; the default font of a `FontIcon` is the system's symbol font. | Both use the theme resource `SymbolThemeFontFamily` (section 5.2). | Behaviour | Owner decision O11: an application can supply a symbol font off Windows. |
+| `FontIcon.IsTextScaleFactorEnabled`, `FontIconSource.IsTextScaleFactorEnabled` | Not ported. | Missing | FerroUI has no text scale factor. |
+| `FontIconSource.FontFamily` is a nullable font family; null leaves the icon's own. | `Option<FontFamily>`, `None` by default; a change to `None` clears the value it had set on the icons. | Representation | Rust has no null font family. |
+| `IconSource::CreateIconElementCore` of the abstract base returns `E_NOTIMPL`, and `CreateIconElement` no element. | `create_icon_element` returns `Option<Ref<IconElement>>`: `None` for the base. | Representation | #286 panicked there; WinUI's base creates no element. |
+| `BitmapIconSource`, `ImageIconSource`, `AnimatedIconSource`, `BitmapIcon`, `ImageIcon`, `AnimatedIcon` | Not ported. | Missing | Not in #286; candidates for later. |
+

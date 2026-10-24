@@ -90082,6 +90082,7 @@
   "Controls/EmbeddableControlRoot.xaml",
   "Controls/Expander.xaml",
   "Controls/FlyoutPresenter.xaml",
+  "Controls/FontIcon.xaml",
   "Controls/GridSplitter.xaml",
   "Controls/GroupBox.xaml",
   "Controls/HeaderedContentControl.xaml",
@@ -90114,6 +90115,7 @@
   "Controls/Slider.xaml",
   "Controls/SplitButton.xaml",
   "Controls/SplitView.xaml",
+  "Controls/SymbolIcon.xaml",
   "Controls/TabControl.xaml",
   "Controls/TabItem.xaml",
   "Controls/TabStrip.xaml",
@@ -90376,7 +90378,7 @@
    "winui": "CommandBar: DefaultCommandBarStyle, DefaultCommandBarOverflowPresenterStyle (CommandBar_themeresources.xaml); AppBarButton: DefaultAppBarButtonStyle, AppBarButtonOverflowStyle; AppBarToggleButton: DefaultAppBarToggleButtonStyle, AppBarToggleButtonOverflowStyle; AppBarSeparator: DefaultAppBarSeparatorStyle.",
    "status": "ported",
    "deviations": 20,
-   "date": "2026-10-17"
+   "date": "2026-10-22"
   },
   {
    "document": "ContentPage.xaml",
@@ -90683,6 +90685,28 @@
    "status": "ported",
    "deviations": 3,
    "date": "2026-10-18"
+  },
+  {
+   "document": "FontIcon.xaml",
+   "themes": [
+    "{FontIcon}"
+   ],
+   "batch": "B1",
+   "winui": "No WinUI style (IconElement has no template): the TextBlock that WinUI's FontIcon builds in code (CFontIcon::ApplyTemplate, icon.cpp), in the font SymbolThemeFontFamily. A WinUI control in ferroui-controls (docs/porting/winui-controls.md); the Fluent theme has no document for it.",
+   "status": "ported",
+   "deviations": 2,
+   "date": "2026-10-24"
+  },
+  {
+   "document": "SymbolIcon.xaml",
+   "themes": [
+    "{SymbolIcon}"
+   ],
+   "batch": "B1",
+   "winui": "No WinUI style (IconElement has no template): the TextBlock that WinUI's SymbolIcon builds in code (CSymbolIcon::ApplyTemplate, icon.cpp), 20 px, in the font SymbolThemeFontFamily. A WinUI control in ferroui-controls (docs/porting/winui-controls.md); the Fluent theme has no document for it.",
+   "status": "ported",
+   "deviations": 2,
+   "date": "2026-10-24"
   },
   {
    "document": "PipsPager.xaml",
@@ -91555,6 +91579,8 @@
   "MenuScrollViewer": 2,
   "OverlayPopupHost": 1,
   "PathIcon": 3,
+  "FontIcon": 2,
+  "SymbolIcon": 2,
   "PopupRoot": 1,
   "ProgressBar": 10,
   "RadioButton": 6,

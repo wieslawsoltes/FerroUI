@@ -371,6 +371,46 @@ fn the_path_icon_of_a_menu_item_is_unscaled() {
     window.close();
 }
 
+/// The icons of WinUI (`Controls/FontIcon.xaml`, `Controls/SymbolIcon.xaml`) draw their glyph in
+/// the font of the resource `SymbolThemeFontFamily` (docs/porting/winui-controls.md, section 5.2):
+/// an application that replaces the resource gets its font in both.
+#[test]
+fn the_icons_draw_in_the_symbol_font_of_the_theme() {
+    use ferroui_base::media::FontFamily;
+    use ferroui_controls::{FontIcon, StackPanel, Symbol, SymbolIcon, TextBlock};
+
+    let _app = start_themed_application();
+    let font_icon = FontIcon::new();
+    font_icon.set_glyph("\u{E710}");
+    let symbol_icon = SymbolIcon::with_symbol(Symbol::Accept);
+    let panel = StackPanel::new();
+    panel.children().add(&font_icon);
+    panel.children().add(&symbol_icon);
+    let window = Window::new();
+    window.set_content(Some(Control::boxed(&panel)));
+    window.show();
+    window.update_layout();
+
+    let text_of = |icon: &TemplatedControl| {
+        icon.visual_children_snapshot().expect("the template of the theme")[0].cast::<TextBlock>().expect("PART_Text")
+    };
+    let theme_font = FontFamily::new("Segoe Fluent Icons,Segoe MDL2 Assets");
+    assert_eq!(theme_font, font_icon.font_family());
+    assert_eq!(theme_font, text_of(&font_icon).font_family());
+    assert_eq!(20.0, text_of(&font_icon).font_size());
+    assert_eq!(theme_font, text_of(&symbol_icon).font_family());
+    assert_eq!(20.0, text_of(&symbol_icon).font_size());
+    assert_eq!(Some(Symbol::Accept.glyph().to_string()), text_of(&symbol_icon).text());
+
+    // An application's symbol font, through the resource.
+    let custom = FontFamily::new("Custom Icons");
+    window.resources().add("SymbolThemeFontFamily", Some(Rc::new(custom.clone()) as ferroui_base::BoxedValue));
+    window.update_layout();
+    assert_eq!(custom, text_of(&font_icon).font_family());
+    assert_eq!(custom, text_of(&symbol_icon).font_family());
+    window.close();
+}
+
 /// The keyed template `ScrollViewerScrollBarlessTemplate` (generic.xaml) of `Controls/ScrollViewer.xaml`:
 /// a scroll viewer that an application gives it is built with its content presenter and without the
 /// scroll bars, which FerroUI's scroll viewer takes as optional parts.
