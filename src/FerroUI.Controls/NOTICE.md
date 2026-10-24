@@ -132,6 +132,14 @@ directly (`dxaml/xcp/dxaml/lib/AutoSuggestBox_Partial.cpp`,
 `dxaml/xcp/tools/XCPTypesAutoGen/Modules/AutoSuggestBox/AutoSuggestBox.cs` at the same commit),
 under the same license.
 
+`radio_buttons.rs`, `primitives/radio_buttons_panel.rs`, `rating_control.rs`,
+`rating_item_info.rs`, `automation/peers/radio_buttons_automation_peer.rs` and
+`automation/peers/rating_control_automation_peer.rs` (WinUI's `RadioButtons` with the layout
+`ColumnMajorUniformToLargestGridLayout`, `RatingControl`, `RatingItemInfo`, `RatingItemFontInfo`,
+`RatingItemImageInfo` and their automation peers) are ported from the WinUI project directly
+(`controls/dev/RadioButtons` and `controls/dev/RatingControl` at the same commit), under the
+same license.
+
 ## Silverlight Toolkit
 
 The files under `auto_complete_box/` (`auto_complete_box.rs`,

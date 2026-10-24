@@ -1102,6 +1102,45 @@ pub fn radio_button() -> El<ferroui_controls::RadioButton> {
     El::new()
 }
 
+pub use ferroui_controls::RadioButtons;
+
+impl ViewClass for ferroui_controls::RadioButtons {
+    fn create() -> ferroui_base::Ref<Self> {
+        <ferroui_controls::RadioButtons>::new()
+    }
+}
+
+/// Starts an element of [`RadioButtons`](ferroui_controls::RadioButtons).
+pub fn radio_buttons() -> El<ferroui_controls::RadioButtons> {
+    El::new()
+}
+
+pub use ferroui_controls::primitives::RadioButtonsPanel;
+
+impl ViewClass for ferroui_controls::primitives::RadioButtonsPanel {
+    fn create() -> ferroui_base::Ref<Self> {
+        <ferroui_controls::primitives::RadioButtonsPanel>::new()
+    }
+}
+
+/// Starts an element of [`RadioButtonsPanel`](ferroui_controls::primitives::RadioButtonsPanel).
+pub fn radio_buttons_panel() -> El<ferroui_controls::primitives::RadioButtonsPanel> {
+    El::new()
+}
+
+pub use ferroui_controls::RatingControl;
+
+impl ViewClass for ferroui_controls::RatingControl {
+    fn create() -> ferroui_base::Ref<Self> {
+        <ferroui_controls::RatingControl>::new()
+    }
+}
+
+/// Starts an element of [`RatingControl`](ferroui_controls::RatingControl).
+pub fn rating_control() -> El<ferroui_controls::RatingControl> {
+    El::new()
+}
+
 pub use ferroui_controls::shapes::Rectangle;
 
 impl ViewClass for ferroui_controls::shapes::Rectangle {
@@ -5652,6 +5691,29 @@ pub trait RadioButtonProps: ElementBuilder {
 }
 impl<T: ObjectType + Upcast<ferroui_controls::RadioButton>> RadioButtonProps for El<T> {}
 
+/// The properties and routed events of [`RadioButtons`](ferroui_controls::RadioButtons).
+pub trait RadioButtonsProps: ElementBuilder {
+    /// Sets [`RadioButtons::max_columns_property`](ferroui_controls::RadioButtons::max_columns_property).
+    fn max_columns<M>(self, value: impl IntoProp<i32, M>) -> Self {
+        self.prop(<ferroui_controls::RadioButtons>::max_columns_property(), value)
+    }
+}
+impl<T: ObjectType + Upcast<ferroui_controls::RadioButtons>> RadioButtonsProps for El<T> {}
+
+/// The properties and routed events of [`RadioButtonsPanel`](ferroui_controls::primitives::RadioButtonsPanel).
+pub trait RadioButtonsPanelProps: ElementBuilder {
+    /// Sets [`RadioButtonsPanel::column_spacing_property`](ferroui_controls::primitives::RadioButtonsPanel::column_spacing_property).
+    fn column_spacing<M>(self, value: impl IntoProp<f64, M>) -> Self {
+        self.prop(<ferroui_controls::primitives::RadioButtonsPanel>::column_spacing_property(), value)
+    }
+
+    /// Sets [`RadioButtonsPanel::row_spacing_property`](ferroui_controls::primitives::RadioButtonsPanel::row_spacing_property).
+    fn row_spacing<M>(self, value: impl IntoProp<f64, M>) -> Self {
+        self.prop(<ferroui_controls::primitives::RadioButtonsPanel>::row_spacing_property(), value)
+    }
+}
+impl<T: ObjectType + Upcast<ferroui_controls::primitives::RadioButtonsPanel>> RadioButtonsPanelProps for El<T> {}
+
 /// The properties and routed events of [`RangeBase`](ferroui_controls::primitives::RangeBase).
 pub trait RangeBaseProps: ElementBuilder {
     /// Sets [`RangeBase::minimum_property`](ferroui_controls::primitives::RangeBase::minimum_property).
@@ -5685,6 +5747,118 @@ pub trait RangeBaseProps: ElementBuilder {
     }
 }
 impl<T: ObjectType + Upcast<ferroui_controls::primitives::RangeBase>> RangeBaseProps for El<T> {}
+
+/// The properties and routed events of [`RatingControl`](ferroui_controls::RatingControl).
+pub trait RatingControlProps: ElementBuilder {
+    /// Sets [`RatingControl::caption_property`](ferroui_controls::RatingControl::caption_property).
+    fn caption<M>(self, value: impl IntoProp<String, M>) -> Self {
+        self.prop(<ferroui_controls::RatingControl>::caption_property(), value)
+    }
+
+    /// Sets [`RatingControl::initial_set_value_property`](ferroui_controls::RatingControl::initial_set_value_property).
+    fn initial_set_value<M>(self, value: impl IntoProp<i32, M>) -> Self {
+        self.prop(<ferroui_controls::RatingControl>::initial_set_value_property(), value)
+    }
+
+    /// Sets [`RatingControl::is_clear_enabled_property`](ferroui_controls::RatingControl::is_clear_enabled_property).
+    fn is_clear_enabled<M>(self, value: impl IntoProp<bool, M>) -> Self {
+        self.prop(<ferroui_controls::RatingControl>::is_clear_enabled_property(), value)
+    }
+
+    /// Sets [`RatingControl::is_read_only_property`](ferroui_controls::RatingControl::is_read_only_property).
+    fn is_read_only<M>(self, value: impl IntoProp<bool, M>) -> Self {
+        self.prop(<ferroui_controls::RatingControl>::is_read_only_property(), value)
+    }
+
+    /// Sets [`RatingControl::max_rating_property`](ferroui_controls::RatingControl::max_rating_property).
+    fn max_rating<M>(self, value: impl IntoProp<i32, M>) -> Self {
+        self.prop(<ferroui_controls::RatingControl>::max_rating_property(), value)
+    }
+
+    /// Sets [`RatingControl::placeholder_value_property`](ferroui_controls::RatingControl::placeholder_value_property).
+    fn placeholder_value<M>(self, value: impl IntoProp<f64, M>) -> Self {
+        self.prop(<ferroui_controls::RatingControl>::placeholder_value_property(), value)
+    }
+
+    /// Sets [`RatingControl::item_info_property`](ferroui_controls::RatingControl::item_info_property).
+    fn item_info<M>(self, value: impl IntoProp<Option<ferroui_base::Ref<ferroui_controls::RatingItemInfo>>, M>) -> Self {
+        self.prop(<ferroui_controls::RatingControl>::item_info_property(), value)
+    }
+
+    /// Sets [`RatingControl::value_property`](ferroui_controls::RatingControl::value_property).
+    fn value<M>(self, value: impl IntoProp<f64, M>) -> Self {
+        self.prop(<ferroui_controls::RatingControl>::value_property(), value)
+    }
+}
+impl<T: ObjectType + Upcast<ferroui_controls::RatingControl>> RatingControlProps for El<T> {}
+
+/// The properties and routed events of [`RatingItemFontInfo`](ferroui_controls::RatingItemFontInfo).
+pub trait RatingItemFontInfoProps: ElementBuilder {
+    /// Sets [`RatingItemFontInfo::glyph_property`](ferroui_controls::RatingItemFontInfo::glyph_property).
+    fn glyph<M>(self, value: impl IntoProp<String, M>) -> Self {
+        self.prop(<ferroui_controls::RatingItemFontInfo>::glyph_property(), value)
+    }
+
+    /// Sets [`RatingItemFontInfo::disabled_glyph_property`](ferroui_controls::RatingItemFontInfo::disabled_glyph_property).
+    fn disabled_glyph<M>(self, value: impl IntoProp<String, M>) -> Self {
+        self.prop(<ferroui_controls::RatingItemFontInfo>::disabled_glyph_property(), value)
+    }
+
+    /// Sets [`RatingItemFontInfo::pointer_over_glyph_property`](ferroui_controls::RatingItemFontInfo::pointer_over_glyph_property).
+    fn pointer_over_glyph<M>(self, value: impl IntoProp<String, M>) -> Self {
+        self.prop(<ferroui_controls::RatingItemFontInfo>::pointer_over_glyph_property(), value)
+    }
+
+    /// Sets [`RatingItemFontInfo::pointer_over_placeholder_glyph_property`](ferroui_controls::RatingItemFontInfo::pointer_over_placeholder_glyph_property).
+    fn pointer_over_placeholder_glyph<M>(self, value: impl IntoProp<String, M>) -> Self {
+        self.prop(<ferroui_controls::RatingItemFontInfo>::pointer_over_placeholder_glyph_property(), value)
+    }
+
+    /// Sets [`RatingItemFontInfo::placeholder_glyph_property`](ferroui_controls::RatingItemFontInfo::placeholder_glyph_property).
+    fn placeholder_glyph<M>(self, value: impl IntoProp<String, M>) -> Self {
+        self.prop(<ferroui_controls::RatingItemFontInfo>::placeholder_glyph_property(), value)
+    }
+
+    /// Sets [`RatingItemFontInfo::unset_glyph_property`](ferroui_controls::RatingItemFontInfo::unset_glyph_property).
+    fn unset_glyph<M>(self, value: impl IntoProp<String, M>) -> Self {
+        self.prop(<ferroui_controls::RatingItemFontInfo>::unset_glyph_property(), value)
+    }
+}
+impl<T: ObjectType + Upcast<ferroui_controls::RatingItemFontInfo>> RatingItemFontInfoProps for El<T> {}
+
+/// The properties and routed events of [`RatingItemImageInfo`](ferroui_controls::RatingItemImageInfo).
+pub trait RatingItemImageInfoProps: ElementBuilder {
+    /// Sets [`RatingItemImageInfo::image_property`](ferroui_controls::RatingItemImageInfo::image_property).
+    fn image<M>(self, value: impl IntoProp<Option<std::rc::Rc<dyn ferroui_base::media::IImage>>, M>) -> Self {
+        self.prop(<ferroui_controls::RatingItemImageInfo>::image_property(), value)
+    }
+
+    /// Sets [`RatingItemImageInfo::disabled_image_property`](ferroui_controls::RatingItemImageInfo::disabled_image_property).
+    fn disabled_image<M>(self, value: impl IntoProp<Option<std::rc::Rc<dyn ferroui_base::media::IImage>>, M>) -> Self {
+        self.prop(<ferroui_controls::RatingItemImageInfo>::disabled_image_property(), value)
+    }
+
+    /// Sets [`RatingItemImageInfo::pointer_over_image_property`](ferroui_controls::RatingItemImageInfo::pointer_over_image_property).
+    fn pointer_over_image<M>(self, value: impl IntoProp<Option<std::rc::Rc<dyn ferroui_base::media::IImage>>, M>) -> Self {
+        self.prop(<ferroui_controls::RatingItemImageInfo>::pointer_over_image_property(), value)
+    }
+
+    /// Sets [`RatingItemImageInfo::pointer_over_placeholder_image_property`](ferroui_controls::RatingItemImageInfo::pointer_over_placeholder_image_property).
+    fn pointer_over_placeholder_image<M>(self, value: impl IntoProp<Option<std::rc::Rc<dyn ferroui_base::media::IImage>>, M>) -> Self {
+        self.prop(<ferroui_controls::RatingItemImageInfo>::pointer_over_placeholder_image_property(), value)
+    }
+
+    /// Sets [`RatingItemImageInfo::placeholder_image_property`](ferroui_controls::RatingItemImageInfo::placeholder_image_property).
+    fn placeholder_image<M>(self, value: impl IntoProp<Option<std::rc::Rc<dyn ferroui_base::media::IImage>>, M>) -> Self {
+        self.prop(<ferroui_controls::RatingItemImageInfo>::placeholder_image_property(), value)
+    }
+
+    /// Sets [`RatingItemImageInfo::unset_image_property`](ferroui_controls::RatingItemImageInfo::unset_image_property).
+    fn unset_image<M>(self, value: impl IntoProp<Option<std::rc::Rc<dyn ferroui_base::media::IImage>>, M>) -> Self {
+        self.prop(<ferroui_controls::RatingItemImageInfo>::unset_image_property(), value)
+    }
+}
+impl<T: ObjectType + Upcast<ferroui_controls::RatingItemImageInfo>> RatingItemImageInfoProps for El<T> {}
 
 /// The properties and routed events of [`Rectangle`](ferroui_controls::shapes::Rectangle).
 pub trait RectangleProps: ElementBuilder {

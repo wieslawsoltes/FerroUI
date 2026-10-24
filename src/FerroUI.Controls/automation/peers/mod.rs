@@ -56,7 +56,9 @@ mod popup_root_automation_peer;
 mod progress_bar_automation_peer;
 mod progress_ring_automation_peer;
 mod radio_button_automation_peer;
+mod radio_buttons_automation_peer;
 mod range_base_automation_peer;
+mod rating_control_automation_peer;
 mod scroll_bar_automation_peer;
 mod scroll_viewer_automation_peer;
 mod selecting_items_control_automation_peer;
@@ -130,10 +132,12 @@ pub use radio_button_automation_peer::{
     RadioButtonAutomationPeer, RadioButtonAutomationPeerImpl, RadioButtonAutomationPeerImplExt,
     RadioButtonAutomationPeerVTable,
 };
+pub use radio_buttons_automation_peer::RadioButtonsAutomationPeer;
 pub use range_base_automation_peer::{
     RangeBaseAutomationPeer, RangeBaseAutomationPeerImpl, RangeBaseAutomationPeerImplExt,
     RangeBaseAutomationPeerVTable,
 };
+pub use rating_control_automation_peer::RatingControlAutomationPeer;
 pub use scroll_bar_automation_peer::ScrollBarAutomationPeer;
 pub use scroll_viewer_automation_peer::ScrollViewerAutomationPeer;
 pub use selecting_items_control_automation_peer::{

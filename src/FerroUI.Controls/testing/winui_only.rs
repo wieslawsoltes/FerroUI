@@ -7,6 +7,7 @@
 use crate::{FontIcon, InfoBadge, InfoBar, ProgressRing, SymbolIcon};
 use crate::{FontIcon, NumberBox, SymbolIcon};
 use crate::{AutoSuggestBox, FontIcon, NumberBox, SymbolIcon};
+use crate::{AutoSuggestBox, FontIcon, NumberBox, RadioButtons, RatingControl, SymbolIcon};
 use ferroui_base::TypeInfo;
 
 /// The controls only the WinUI theme styles, each with the reason.
@@ -18,6 +19,8 @@ pub const WINUI_ONLY_CONTROLS: &[(&TypeInfo, &str)] = &[
     (ProgressRing::TYPE, "WinUI's ProgressRing: its template (arcs for the Lottie player) is in the WinUI theme only"),
     (NumberBox::TYPE, "WinUI's NumberBox: its template is converted from WinUI's NumberBox.xaml"),
     (AutoSuggestBox::TYPE, "WinUI's AutoSuggestBox: its template is converted from WinUI's DefaultAutoSuggestBoxStyle"),
+    (RadioButtons::TYPE, "WinUI's RadioButtons: its template and items panel are converted from WinUI's RadioButtons.xaml"),
+    (RatingControl::TYPE, "WinUI's RatingControl: its template is converted from WinUI's RatingControl.xaml"),
 ];
 
 /// Whether only the WinUI theme styles `control`.
