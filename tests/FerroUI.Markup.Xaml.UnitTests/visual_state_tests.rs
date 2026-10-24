@@ -207,3 +207,53 @@ fn a_setter_target_in_a_style_is_an_error() {
     let error = try_load(&xaml).err().expect("an error");
     assert!(describe(&error).contains("only valid in the setters of a visual state"), "{}", describe(&error));
 }
+
+#[test]
+fn state_triggers_select_the_states_of_a_window() {
+    let _app = styled_window_application();
+    let xaml = format!(
+        "
+<Window {NS}>
+  <Grid x:Name='LayoutRoot'>
+    <VisualStateManager.VisualStateGroups>
+      <VisualStateGroup x:Name='Modes'>
+        <VisualState x:Name='Forced'>
+          <VisualState.StateTriggers>
+            <StateTrigger IsActive='True'/>
+          </VisualState.StateTriggers>
+          <VisualState.Setters>
+            <Setter Target='Label.Text' Value='Forced'/>
+          </VisualState.Setters>
+        </VisualState>
+      </VisualStateGroup>
+      <VisualStateGroup x:Name='WindowStates'>
+        <VisualState x:Name='Any'>
+          <VisualState.StateTriggers>
+            <AdaptiveTrigger MinWindowWidth='0'/>
+          </VisualState.StateTriggers>
+          <VisualState.Setters>
+            <Setter Target='Label.Opacity' Value='0.5'/>
+          </VisualState.Setters>
+        </VisualState>
+        <VisualState x:Name='Huge'>
+          <VisualState.StateTriggers>
+            <AdaptiveTrigger MinWindowWidth='100000'/>
+          </VisualState.StateTriggers>
+        </VisualState>
+      </VisualStateGroup>
+    </VisualStateManager.VisualStateGroups>
+    <TextBlock x:Name='Label' Text='Normal'/>
+  </Grid>
+</Window>"
+    );
+    let window = load_as::<Ref<ferroui_controls::Window>>(&xaml);
+    let grid = Control::from_boxed(&window.content().unwrap()).unwrap().cast::<Grid>().unwrap();
+    let label = grid.children().get(0).cast::<TextBlock>().unwrap();
+    let groups = VisualStateManager::get_visual_state_groups(&grid);
+    let state = |index: usize| groups.get(index).current_state().map(|state| state.name());
+
+    assert_eq!(state(0).as_deref(), Some("Forced"));
+    assert_eq!(label.text().as_deref(), Some("Forced"));
+    assert_eq!(state(1).as_deref(), Some("Any"));
+    assert_eq!(label.opacity(), 0.5);
+}
