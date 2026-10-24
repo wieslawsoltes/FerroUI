@@ -10,7 +10,7 @@ use ferroui_base::data::core::{ValueType, ValueTypes};
 use ferroui_base::data::model::INotifyPropertyChanged;
 use ferroui_base::data::ReflectionBinding;
 use ferroui_base::metadata::{MarkupTyped, MarkupValue};
-use ferroui_base::{BoxedValue, FerroObjectExtensions};
+use ferroui_base::BoxedValue;
 use std::cell::{Cell, RefCell};
 use std::rc::Rc;
 

@@ -10,7 +10,7 @@ use ferroui_controls::{Border, Button, Control, ItemsSource, ScrollViewer, TextB
 use ferroui_base::data::ReflectionBinding;
 use ferroui_base::layout::{HorizontalAlignment, VerticalAlignment};
 use ferroui_base::{
-    ferro_class, ferro_impl_classes, instantiate, BoxedValue, FerroObjectExtensions,
+    ferro_class, ferro_impl_classes, instantiate, BoxedValue,
     FerroObjectImpl, Point, Rect, Ref, Size,
 };
 use std::cell::{Cell, RefCell};

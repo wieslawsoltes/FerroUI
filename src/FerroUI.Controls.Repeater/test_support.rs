@@ -369,6 +369,7 @@ mod scroll_viewer_template {
     use ferroui_base::controls::NameScopeRef;
     use ferroui_base::data::{BindingMode, IndexerBinding, TemplateBinding};
     use ferroui_base::layout::Orientation;
+    use ferroui_base::media::Brushes;
     use ferroui_base::{FerroProperty, Ref};
     use ferroui_controls::presenters::{ContentPresenter, ScrollContentPresenter};
     use ferroui_controls::primitives::{RangeBase, ScrollBar, TemplatedControl, Thumb, Track};

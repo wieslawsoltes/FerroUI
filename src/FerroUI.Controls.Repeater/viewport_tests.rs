@@ -1034,7 +1034,7 @@ fn reattaching_after_scrolling_keeps_the_realized_items() {
     repeater.set_items_source(Some(ItemsSource::from_values(0..100)));
     let host = Border::new();
     host.set_height(5000.0);
-    host.set_child(Some(repeater.clone()));
+    host.set_child(Some(repeater.clone().upcast()));
     let first = viewer(&host.clone().upcast(), Some(Size::new(200.0, 300.0)));
     let root = TestRoot::with_child(&first);
     root.execute_initial_layout_pass();
@@ -1049,7 +1049,7 @@ fn reattaching_after_scrolling_keeps_the_realized_items() {
     let _subscription = repeater.element_clearing(move |_| count.set(count.get() + 1));
     host.set_child(None::<Ref<Control>>);
     assert!(!repeater.is_attached_to_visual_tree());
-    host.set_child(Some(repeater.clone()));
+    host.set_child(Some(repeater.clone().upcast()));
     settle(&root);
     assert_eq!(cleared.get(), 0);
     assert_eq!(repeater.try_get_element(21), Some(visible));

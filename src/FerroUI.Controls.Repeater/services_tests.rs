@@ -3057,7 +3057,6 @@ fn validate_x_bind_without_phasing() {
 
 fn bound_text_template(text: Option<&'static str>, height: f64) -> Rc<dyn IDataTemplate> {
     use ferroui_base::data::ReflectionBinding;
-    use ferroui_base::FerroObjectExtensions;
     FuncDataTemplate::new(
         |_| true,
         move |_, _| {
@@ -3312,7 +3311,6 @@ fn validate_recycling_element_factory_with_single_template() {
 fn element_name_binding_scenario(nested: bool) {
     use ferroui_base::controls::{ChildNameScope, NameScope, NameScopeRef};
     use ferroui_base::data::ReflectionBinding;
-    use ferroui_base::FerroObjectExtensions;
     let _scope = test_scope();
     let panel = StackPanel::new();
     panel.set_width(200.0);
