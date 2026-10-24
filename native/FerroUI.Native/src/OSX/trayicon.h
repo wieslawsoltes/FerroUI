@@ -2,8 +2,6 @@
 //  trayicon.h
 //  FerroUI.Native.OSX
 //
-//  Created by Dan Walmsley on 09/09/2021.
-//
 
 #ifndef trayicon_h
 #define trayicon_h

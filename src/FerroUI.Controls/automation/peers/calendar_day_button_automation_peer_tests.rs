@@ -33,7 +33,10 @@ fn create_target(
 #[test]
 fn creates_calendar_day_button_automation_peer() {
     let _scope = test_scope();
-    let peer: Ref<AutomationPeer> = ControlAutomationPeer::create_peer_for_element(&CalendarDayButton::new());
+    // The button lives as long as the test asks its peer: the peer of a control that is gone
+    // provides no pattern (DEVIATIONS.md, Automation peers).
+    let button = CalendarDayButton::new();
+    let peer: Ref<AutomationPeer> = ControlAutomationPeer::create_peer_for_element(&button);
 
     assert!(std::ptr::eq(peer.get_type(), CalendarDayButtonAutomationPeer::TYPE));
     assert!(peer.get_provider::<dyn ISelectionItemProvider>().is_some());

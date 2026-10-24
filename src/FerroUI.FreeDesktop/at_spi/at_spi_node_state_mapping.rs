@@ -56,7 +56,8 @@ impl AtSpiNode {
                 .is_some_and(|range| range.is_read_only()),
             is_required_for_form: peer
                 .cast::<ControlAutomationPeer>()
-                .is_some_and(|control_peer| AutomationProperties::get_is_required_for_form(&control_peer.owner())),
+                .and_then(|control_peer| control_peer.try_owner())
+                .is_some_and(|owner| AutomationProperties::get_is_required_for_form(&owner)),
             control_type: peer.get_automation_control_type(),
         };
 

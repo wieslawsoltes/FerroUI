@@ -9,7 +9,7 @@ use crate::primitives::popup_positioning::{
 };
 use crate::primitives::CustomPopupPlacementCallbackValue;
 use crate::templates::{DataTemplates, IDataTemplate};
-use crate::{NativeMenuItemBase, Page, TableViewColumn};
+use crate::{ItemsSourceView, NativeMenuItemBase, Page, TableViewColumn};
 use ferroui_base::collections::FerroList;
 use crate::{
     ColumnDefinition, ColumnDefinitions, Control, Controls, ItemCollection, RowDefinition, RowDefinitions, TrayIcon,
@@ -100,6 +100,60 @@ ferro_markup_type!(class TrayIcons {
 ferro_markup_type!(class WindowIcon {
     namespace: "FerroUI.Controls",
     handles: [Rc<WindowIcon>, Option<Rc<WindowIcon>>],
+});
+
+/// `ItemsSourceView.Count`: the count does not fit the `int` of markup.
+fn items_source_view_count(view: &Rc<ItemsSourceView>) -> Result<i32, &'static str> {
+    i32::try_from(view.count()).map_err(|_| "The number of items exceeds the range of Int32.")
+}
+
+/// `ItemsSourceView.GetAt`: an index that is not the index of an item is an error.
+fn items_source_view_get_at(view: &Rc<ItemsSourceView>, index: i32) -> Result<Option<BoxedValue>, &'static str> {
+    match usize::try_from(index) {
+        Ok(index) if index < view.count() => Ok(view.get_at(index)),
+        _ => Err("Index was out of range. Must be non-negative and less than the size of the collection."),
+    }
+}
+
+/// `ItemsSourceView.KeyFromIndex`: a source without unique keys, or an index that is not the
+/// index of an item, is an error.
+fn items_source_view_key_from_index(view: &Rc<ItemsSourceView>, index: i32) -> Result<String, &'static str> {
+    if !view.has_key_index_mapping() {
+        return Err("The items source does not implement IKeyIndexMapping.");
+    }
+    match usize::try_from(index) {
+        Ok(item) if item < view.count() => Ok(view.key_from_index(index)),
+        _ => Err("Argument index is invalid."),
+    }
+}
+
+/// `ItemsSourceView.IndexFromKey`: a source without unique keys is an error.
+fn items_source_view_index_from_key(view: &Rc<ItemsSourceView>, key: String) -> Result<i32, &'static str> {
+    if !view.has_key_index_mapping() {
+        return Err("The items source does not implement IKeyIndexMapping.");
+    }
+    Ok(view.index_from_key(&key))
+}
+
+// The view of an items source: upstream's public members, with the public constructor and the
+// unique keys of WinUI's `ItemsSourceView` (DEVIATIONS.md, Items sources). A view is an
+// enumerable itself, so it is assignable to an items source.
+ferro_markup_type!(class ItemsSourceView {
+    namespace: "FerroUI.Controls",
+    handles: [Rc<ItemsSourceView>, Option<Rc<ItemsSourceView>>],
+    this: Rc<ItemsSourceView>,
+    interfaces: [crate::ItemsSource],
+    constructors: [(crate::ItemsSource) => ItemsSourceView::new],
+    properties: [
+        Count: i32 { try_get: items_source_view_count },
+        HasKeyIndexMapping: bool { get: |view: &Rc<ItemsSourceView>| view.has_key_index_mapping() },
+    ],
+    methods: [
+        try fn GetAt(i32) -> Option<BoxedValue> => items_source_view_get_at,
+        fn IndexOf(Option<BoxedValue>) -> i32 => |view: &Rc<ItemsSourceView>, item: Option<BoxedValue>| view.index_of(&item),
+        try fn KeyFromIndex(i32) -> String => items_source_view_key_from_index,
+        try fn IndexFromKey(String) -> i32 => items_source_view_index_from_key,
+    ],
 });
 
 // FerroUI.Controls.Documents
@@ -412,6 +466,7 @@ pub(super) const TYPES: &[&MarkupType] = &[
     <TrayIcons as MarkupTyped>::MARKUP,
     <FerroListOf<Ref<TrayIcon>> as MarkupTyped>::MARKUP,
     <WindowIcon as MarkupTyped>::MARKUP,
+    <ItemsSourceView as MarkupTyped>::MARKUP,
     <InlineCollection as MarkupTyped>::MARKUP,
     <DataTemplates as MarkupTyped>::MARKUP,
     <CustomPopupPlacement as MarkupTyped>::MARKUP,
@@ -485,6 +540,14 @@ pub(super) fn register_value_types() {
     });
     ValueTypes::register_conversion::<Vec<Option<BoxedValue>>, Option<crate::ItemsSource>>(|items| {
         Some(Some(crate::ItemsSource::from(items.clone())))
+    });
+    // A view of an items source is an enumerable too (upstream `ItemsSourceView :
+    // IReadOnlyList<object?>`): the handle is the view itself, which an items control then
+    // reads through (`ItemsSourceView::get_or_create` returns it as it is).
+    ValueTypes::register_nullable::<Rc<ItemsSourceView>>();
+    ValueTypes::register_cast::<Rc<ItemsSourceView>, crate::ItemsSource>(|view| crate::ItemsSource::from(view.clone()));
+    ValueTypes::register_conversion::<Rc<ItemsSourceView>, Option<crate::ItemsSource>>(|view| {
+        Some(Some(crate::ItemsSource::from(view.clone())))
     });
     ValueTypes::register_nullable::<Rc<TrayIcons>>();
     ValueTypes::register_nullable::<FerroList<Ref<TrayIcon>>>();

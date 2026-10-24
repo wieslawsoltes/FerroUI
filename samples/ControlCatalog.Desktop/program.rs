@@ -6,15 +6,16 @@
 //! FERROUI_SMOKE_EXIT_MS=3000 cargo run -p control-catalog-desktop
 //! FERROUI_SMOKE_EXIT_MS=20000 FERROUI_SMOKE_PAGES=150 cargo run -p control-catalog-desktop
 //! FERROUI_SMOKE_SCREENSHOTS=target/screenshots cargo run -p control-catalog-desktop
-//! FERROUI_CATALOG_THEME=fluent cargo run -p control-catalog-desktop
-//! FERROUI_CATALOG_THEME=simple cargo run -p control-catalog-desktop
+//! FERROUI_CATALOG_THEME=fluent cargo run -p control-catalog-desktop --features classic-themes
+//! FERROUI_CATALOG_THEME=simple cargo run -p control-catalog-desktop --features classic-themes
 //! FERROUI_CATALOG_WAYLAND=0 cargo run -p control-catalog-desktop
 //! ```
 //!
 //! `FERROUI_CATALOG_THEME` selects the theme the catalog starts with: `winui`, the WinUI theme
-//! of the port (docs/porting/winui-theme.md) and the default of the port, `fluent` (the default
-//! of the original) or `simple`; the settings page switches between them as before. Not in the
-//! original.
+//! of the port (docs/porting/winui-theme.md) and the default of the port, and, with the feature
+//! `classic-themes` (off by default, docs/binary-size.md), `fluent` (the default of the original)
+//! or `simple`; the settings page switches between the themes the catalog is built with. Not in
+//! the original.
 //!
 //! On Linux the catalog uses the Wayland backend when a compositor can be
 //! reached, with the backend of the platform detection (X11) as its
@@ -202,6 +203,7 @@ fn attach_dev_tools(builder: &AppBuilder) {
 
 /// The theme of the catalog asked for with `FERROUI_CATALOG_THEME` (`winui`, the default, `fluent`
 /// or `simple`), selected after the application is set up and before its main window is created.
+/// `fluent` and `simple` need the feature `classic-themes`.
 fn select_theme_of_the_environment() {
     use control_catalog::models::CatalogTheme;
 
@@ -211,6 +213,9 @@ fn select_theme_of_the_environment() {
         Some("simple") => CatalogTheme::Simple,
         Some(other) => panic!("FERROUI_CATALOG_THEME: unknown theme {other:?} (fluent, simple, winui)"),
     };
+    if !App::themes().contains(&theme) {
+        panic!("FERROUI_CATALOG_THEME: the theme {theme:?} needs the feature `classic-themes` of control-catalog-desktop");
+    }
     println!("ControlCatalog: the theme {theme:?}");
     App::select_initial_catalog_theme(theme);
 }

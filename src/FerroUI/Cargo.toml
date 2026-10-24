@@ -30,6 +30,7 @@ winui-theme = ["dep:ferroui-themes-winui"]
 xaml = ["dep:ferroui-markup-xaml", "dep:ferroui-markup-xaml-loader"]
 # The libraries of controls beside the control set.
 color-picker = ["dep:ferroui-controls-color-picker"]
+charts = ["dep:ferroui-controls-charts"]
 treedatagrid = ["dep:ferroui-controls-treedatagrid", "dep:ferroui-treedatagrid-core"]
 dialogs = ["dep:ferroui-dialogs"]
 # The developer tools (F12 on a window or an application in debug builds).
@@ -69,6 +70,7 @@ ferroui-themes-winui = { workspace = true, optional = true }
 ferroui-markup-xaml = { workspace = true, optional = true }
 ferroui-markup-xaml-loader = { workspace = true, optional = true, features = ["runtime"] }
 ferroui-controls-color-picker = { workspace = true, optional = true }
+ferroui-controls-charts = { workspace = true, optional = true }
 ferroui-controls-treedatagrid = { workspace = true, optional = true }
 ferroui-treedatagrid-core = { workspace = true, optional = true }
 ferroui-dialogs = { workspace = true, optional = true }
@@ -105,7 +107,7 @@ required-features = ["desktop", "fluent"]
 # docs.rs documents the default features with the libraries that need no more than the host
 # (docs/release.md, section 7).
 [package.metadata.docs.rs]
-features = ["simple", "winui-theme", "xaml", "color-picker", "treedatagrid", "dialogs", "diagnostics", "reactive", "dynamic-data", "reactiveui", "headless", "opengl", "metal", "vulkan"]
+features = ["simple", "winui-theme", "xaml", "color-picker", "charts", "treedatagrid", "dialogs", "diagnostics", "reactive", "dynamic-data", "reactiveui", "headless", "opengl", "metal", "vulkan"]
 
 # The group of the crate in the table of the README (docs/release.md).
 [package.metadata.release]

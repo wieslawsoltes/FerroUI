@@ -293,6 +293,7 @@ ferroui_base::ferro_rust_paths! {
         crate::InputPaneAwareBehavior,
         crate::ItemCollection,
         crate::ItemsSource,
+        crate::ItemsSourceView,
         crate::Location,
         crate::MenuItemToggleType,
         crate::NavigationType,

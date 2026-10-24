@@ -99,6 +99,12 @@ project adapted from the WinUI project
 (<https://github.com/microsoft/microsoft-ui-xaml>), MIT License,
 Copyright (c) Microsoft Corporation.
 
+`i_key_index_mapping.rs` and the unique-key members of `items_source_view.rs`
+(`has_key_index_mapping`, `key_from_index`, `index_from_key`) are ported from
+the WinUI project directly (`controls/dev/Repeater` at commit
+`7e4b0c2096be402f51cc8f7d203ebf67cff183d0`, the revision the WinUI theme is
+ported from), under the same license.
+
 ## Silverlight Toolkit
 
 The files under `auto_complete_box/` (`auto_complete_box.rs`,

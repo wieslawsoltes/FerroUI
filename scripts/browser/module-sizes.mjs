@@ -13,6 +13,7 @@
 // outputs `wasm_raw_bytes` and `wasm_gzip_bytes` of a GitHub Actions step (pass "$GITHUB_OUTPUT").
 import fs from "node:fs";
 import path from "node:path";
+import util from "node:util";
 import zlib from "node:zlib";
 
 const argv = process.argv.slice(2);
@@ -53,18 +54,25 @@ const total = [0, 0, 0];
 const assetDirectories = new Map();
 const wasm = [0, 0];
 const sizesOf = new Map();
-for (const name of files) {
+// The files are compressed on the thread pool of Node.js, several at a time (and the two
+// compressions of a file at the same time): brotli at its highest level is most of the run.
+const gzip = util.promisify(zlib.gzip);
+const brotli = util.promisify(zlib.brotliCompress);
+const compressed = await Promise.all(files.map(async (name) => {
     const content = fs.readFileSync(path.join(site, name));
-    const sizes = [
-        content.length,
-        zlib.gzipSync(content, { level: 9 }).length,
-        zlib.brotliCompressSync(content, {
+    const [gzipped, brotlied] = await Promise.all([
+        gzip(content, { level: 9 }),
+        brotli(content, {
             params: {
                 [zlib.constants.BROTLI_PARAM_QUALITY]: 11,
                 [zlib.constants.BROTLI_PARAM_SIZE_HINT]: content.length
             }
-        }).length
-    ];
+        })
+    ]);
+    return [content.length, gzipped.length, brotlied.length];
+}));
+for (const [index, name] of files.entries()) {
+    const sizes = compressed[index];
     sizes.forEach((value, i) => { total[i] += value; });
     sizesOf.set(name, sizes);
     if (name.endsWith(".wasm")) { wasm[0] += sizes[0]; wasm[1] += sizes[1]; }

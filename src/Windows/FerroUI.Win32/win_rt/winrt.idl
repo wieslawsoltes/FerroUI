@@ -875,6 +875,21 @@ enum UIColorType
     Complement = 9
 }
 
+// The first interface of UISettings, for AnimationsEnabled (the motion preference of the
+// platform settings; FerroUI addition). The six members before it are declared to keep the
+// layout of the table of the interface. A WinRT boolean is one byte, not a Win32 BOOL.
+[uuid(85361600-1C63-4627-BCB1-3A89E0BC9C55)]
+interface IUISettings : IInspectable
+{
+    [propget] HRESULT HandPreference([out][retval] INT32* value);
+    [propget] HRESULT CursorSize([out][retval] SIZE_F* value);
+    [propget] HRESULT ScrollBarSize([out][retval] SIZE_F* value);
+    [propget] HRESULT ScrollBarArrowSize([out][retval] SIZE_F* value);
+    [propget] HRESULT ScrollBarThumbBoxSize([out][retval] SIZE_F* value);
+    [propget] HRESULT MessageDuration([out][retval] UINT32* value);
+    [propget] HRESULT AnimationsEnabled([out][retval] BYTE* value);
+}
+
 [uuid(03021BE4-5254-4781-8194-5168F7D06D7B)]
 interface IUISettings3 : IInspectable
 {

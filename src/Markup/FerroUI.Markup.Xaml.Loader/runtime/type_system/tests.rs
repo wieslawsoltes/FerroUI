@@ -7,7 +7,7 @@ use std::rc::Rc;
 use ferroui_base::data::core::plugins::{ObservableValue, TaskValue};
 use ferroui_base::data::core::{ValueType, ValueTypes};
 use ferroui_base::media::{Color, SolidColorBrush};
-use ferroui_base::metadata::{from_markup_value, IServiceProvider, MarkupValue};
+use ferroui_base::metadata::{from_markup_value, IServiceProvider, MarkupType, MarkupTypeKind, MarkupValue};
 use ferroui_base::utilities::CultureInfo;
 use ferroui_base::{BoxedValue, FerroObject, Ref, TypeInfo};
 use xamlx::type_system::{
@@ -409,6 +409,50 @@ fn static_types_merge_their_metadata_and_project_attached_property_attributes() 
     assert_eq!(get.parameters()[0].full_name(), "FerroUI.StyledElement");
     assert_eq!(set.parameters()[0].full_name(), "FerroUI.StyledElement");
     assert_eq!(method(&ts.find_type("FerroUI.Input.KeyboardNavigation").unwrap(), "SetTabIndex").parameters()[0].full_name(), "FerroUI.StyledElement");
+}
+
+#[test]
+fn a_static_type_has_the_namespace_its_metadata_declares() {
+    let ts = system();
+    let type_info = <RtDeclaredNamespaceOwner as ferroui_base::StaticType>::TYPE;
+    let markup = <RtDeclaredNamespaceOwner as ferroui_base::metadata::MarkupTyped>::MARKUP;
+    // The Rust module of the type is registered as `RtXamlParserTests`; its metadata
+    // declares `RtXamlParserTests.Declared`, which the build-time scanner reads too.
+    assert_eq!(type_info.namespace(), "RtXamlParserTests");
+    assert_eq!(markup.full_name(), "RtXamlParserTests.Declared.RtDeclaredNamespaceOwner");
+    let through_class = ts.type_of_class(type_info);
+    assert_eq!(through_class.full_name(), "RtXamlParserTests.Declared.RtDeclaredNamespaceOwner");
+    assert_eq!(through_class.namespace().as_deref(), Some("RtXamlParserTests.Declared"));
+    assert!(through_class.equals(&*ts.type_of_markup(markup)));
+    let found = ts.find_type("RtXamlParserTests.Declared.RtDeclaredNamespaceOwner").expect("the declared name");
+    assert!(found.equals(&*through_class));
+    assert_eq!(from_markup_value::<i32>(&method(&found, "Thrice").invoke(&[boxed(4i32)]).unwrap()), Some(12));
+    // The namespace of the Rust module is not a second name of the type.
+    assert!(ts.find_type("RtXamlParserTests.RtDeclaredNamespaceOwner").is_none());
+}
+
+#[test]
+fn every_static_type_with_a_runtime_type_has_its_declared_full_name() {
+    let ts = system();
+    let mut checked = Vec::new();
+    for markup in MarkupType::registered_types() {
+        let Some(type_info) = markup.type_info.filter(|_| markup.kind == MarkupTypeKind::Static) else {
+            continue;
+        };
+        let type_info = type_info();
+        let declared = markup.full_name();
+        let projected = ts.type_of_class(type_info);
+        assert_eq!(projected.namespace().as_deref().unwrap_or_default(), markup.namespace(), "{declared}");
+        assert_eq!(projected.full_name(), format!("{}.{}", markup.namespace(), type_info.name()), "{declared}");
+        assert!(projected.equals(&*ts.type_of_markup(markup)), "{declared}");
+        let found = ts.find_type(&declared).unwrap_or_else(|| panic!("{declared} is not found by its declared name"));
+        assert!(found.equals(&*projected), "{declared}");
+        checked.push(declared);
+    }
+    // The static types of the base crate and of the tests are among them.
+    for name in ["FerroUI.Controls.NameScope", "FerroUI.Input.DragDrop", "RtXamlParserTests.Declared.RtDeclaredNamespaceOwner"] {
+        assert!(checked.iter().any(|checked| checked == name), "{name} was not checked: {checked:?}");
+    }
 }
 
 #[test]

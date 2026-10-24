@@ -1,7 +1,3 @@
-//
-// Created by Dan Walmsley on 06/05/2022.
-//
-
 #pragma once
 
 #import <AppKit/AppKit.h>

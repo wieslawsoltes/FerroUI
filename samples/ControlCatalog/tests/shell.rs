@@ -700,17 +700,28 @@ fn the_settings_page_switches_the_theme_variant_and_the_theme() {
         let bounds = combo_box.bounds();
         assert!(bounds.width >= 200.0 && bounds.height > 0.0, "a combo box of the settings page has the bounds {bounds:?}");
     }
-    // The port starts the catalog in its WinUI theme (the original in the Fluent theme); the
-    // checks of the variants below are those of the original, in the Fluent theme.
-    assert_eq!(2, combo_boxes[1].selected_index(), "the WinUI theme is selected");
+    // The port starts the catalog in its WinUI theme (the original in the Fluent theme). The list
+    // of themes is the themes the catalog is built with: the WinUI theme alone, with the feature
+    // `classic-themes` the Fluent and Simple themes before it. With the feature the checks of the
+    // variants below are those of the original, in the Fluent theme; without it they are made in
+    // the WinUI theme (the backgrounds of the cards are the catalog's own, `CustomThemes.xaml`).
+    let theme_index = |theme: CatalogTheme| {
+        App::themes().iter().position(|built| *built == theme).expect("a theme the catalog is built with") as i32
+    };
+    assert_eq!(App::themes().len(), combo_boxes[1].item_count() as usize, "the themes of the list");
+    assert_eq!(theme_index(CatalogTheme::WinUI), combo_boxes[1].selected_index(), "the WinUI theme is selected");
     assert_eq!(CatalogTheme::WinUI, App::current_theme());
     assert_eq!(0, combo_boxes[2].selected_index(), "the default variant is selected");
     assert_eq!(Some(ThemeVariant::light()), shell.window.actual_theme_variant());
-    combo_boxes[1].set_selected_index(0);
-    shell.settle();
-    assert_eq!(CatalogTheme::Fluent, App::current_theme(), "the theme the page set");
-    let combo_boxes = descendants::<ComboBox>(&shell.show(&shell.view_model.settings_item()));
-    assert_eq!(0, combo_boxes[1].selected_index(), "the Fluent theme is selected");
+    #[cfg(feature = "classic-themes")]
+    let combo_boxes = {
+        combo_boxes[1].set_selected_index(theme_index(CatalogTheme::Fluent));
+        shell.settle();
+        assert_eq!(CatalogTheme::Fluent, App::current_theme(), "the theme the page set");
+        let combo_boxes = descendants::<ComboBox>(&shell.show(&shell.view_model.settings_item()));
+        assert_eq!(theme_index(CatalogTheme::Fluent), combo_boxes[1].selected_index(), "the Fluent theme is selected");
+        combo_boxes
+    };
 
     // The first section of the home page has its cards; the background of the first.
     let card_background = |shell: &Shell| {
@@ -738,27 +749,30 @@ fn the_settings_page_switches_the_theme_variant_and_the_theme() {
     assert_eq!(Some(ThemeVariant::light()), shell.window.actual_theme_variant());
     assert_eq!(Color::parse("#FFFFFF").ok(), card_background(&shell), "the card of the light variant");
 
-    // The Simple theme, and back.
+    // The Simple theme, and back to the Fluent theme.
+    #[cfg(feature = "classic-themes")]
+    {
+        let combo_boxes = settings_combo_boxes(&shell);
+        combo_boxes[1].set_selected_index(theme_index(CatalogTheme::Simple));
+        shell.settle();
+        assert_eq!(CatalogTheme::Simple, App::current_theme(), "the theme the page set");
+        card_background(&shell);
+        let combo_boxes = settings_combo_boxes(&shell);
+        assert_eq!(theme_index(CatalogTheme::Simple), combo_boxes[1].selected_index(), "the settings page shows the theme it set");
+        combo_boxes[1].set_selected_index(theme_index(CatalogTheme::Fluent));
+        shell.settle();
+        assert_eq!(CatalogTheme::Fluent, App::current_theme());
+        card_background(&shell);
+    }
+    // The WinUI theme of the port, the catalog's default (not in the original), which themes every
+    // control alone (docs/porting/winui-theme/PROGRESS.md).
     let combo_boxes = settings_combo_boxes(&shell);
-    combo_boxes[1].set_selected_index(1);
-    shell.settle();
-    assert_eq!(CatalogTheme::Simple, App::current_theme(), "the theme the page set");
-    card_background(&shell);
-    let combo_boxes = settings_combo_boxes(&shell);
-    assert_eq!(1, combo_boxes[1].selected_index(), "the settings page shows the theme it set");
-    // Back to the Fluent theme, and to the WinUI theme of the port, the catalog's default (not in
-    // the original), which themes every control alone (docs/porting/winui-theme/PROGRESS.md).
-    combo_boxes[1].set_selected_index(0);
-    shell.settle();
-    assert_eq!(CatalogTheme::Fluent, App::current_theme());
-    card_background(&shell);
-    let combo_boxes = settings_combo_boxes(&shell);
-    combo_boxes[1].set_selected_index(2);
+    combo_boxes[1].set_selected_index(theme_index(CatalogTheme::WinUI));
     shell.settle();
     assert_eq!(CatalogTheme::WinUI, App::current_theme(), "the theme the page set");
     card_background(&shell);
     let combo_boxes = settings_combo_boxes(&shell);
-    assert_eq!(2, combo_boxes[1].selected_index(), "the settings page shows the theme it set");
+    assert_eq!(theme_index(CatalogTheme::WinUI), combo_boxes[1].selected_index(), "the settings page shows the theme it set");
 }
 
 /// Below the wide breakpoint the drawer is compact: closed it shows the icons of its entries
@@ -865,6 +879,10 @@ fn every_class_with_a_document_populates_itself() {
                     visit(&path, missing, declared);
                 }
             } else if path.extension().is_some_and(|extension| extension == "rs") {
+                // The class of the themes of the original is compiled with its feature only.
+                if !cfg!(feature = "classic-themes") && path.file_name().is_some_and(|name| name == "classic_themes.rs") {
+                    continue;
+                }
                 let source = std::fs::read_to_string(&path).expect("a source of the sample");
                 let classes = source.lines().filter(|line| line.starts_with("xaml_class!(")).count();
                 *declared += classes;

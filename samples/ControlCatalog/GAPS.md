@@ -177,14 +177,33 @@ Three holders keep an element for a while after it left the tree, here as upstre
 
 ## The WinUI theme of the port
 
-Not in the original: the settings page offers a third theme, `WinUI`, the WinUI 3 theme of the
-port (`ferroui-themes-winui`, docs/porting/winui-theme.md), and the catalog starts in it; the
-original starts in the Fluent theme. `FERROUI_CATALOG_THEME=fluent` (or `simple`) starts the
-desktop catalog in another theme, and the settings page switches between the three. The lines the
-port adds to `App.xaml` and `Pages/SettingsPage.xaml` are the additions of
-`scripts/convert_catalog_xaml.py` (`ADDITIONS`), so the sync check still holds the documents to
-their upstream files; the choice of the theme at start is in `App::initialize` (`app.rs`).
-`docs/porting/DEVIATIONS.md` (ControlCatalog sample) records them.
+Not in the original: the catalog has the WinUI 3 theme of the port (`ferroui-themes-winui`,
+docs/porting/winui-theme.md) and starts in it; the original starts in the Fluent theme.
+
+**The themes of the original are behind a feature** (since 2026-10-23, issue 306,
+`docs/binary-size.md`): by default the catalog is built with the WinUI theme alone, and neither the
+Fluent nor the Simple theme is compiled or linked. To have them back, build with the feature
+`classic-themes`:
+
+```sh
+cargo run -p control-catalog-desktop --features classic-themes
+FERROUI_CATALOG_THEME=fluent cargo run -p control-catalog-desktop --features classic-themes
+```
+
+With it the build compiles `ClassicThemes.xaml` (the two themes, the Simple styles of the colour
+picker and the generic styles of the TreeDataGrid, the resources `App.xaml` of the original
+declares for them), the application merges it into its resources, the settings page lists the
+three themes (`App.AvailableThemes`) and `FERROUI_CATALOG_THEME=fluent` (or `simple`) starts the
+desktop catalog in another theme. Without it the settings page lists the WinUI theme alone and
+`FERROUI_CATALOG_THEME=fluent` stops with a message that names the feature. A workspace build
+(`cargo build --workspace`) also builds the TreeDataGrid demo with its default features, whose
+application has the Fluent theme, so the theme is then linked into the catalog through the demo;
+build the catalog by its package (`-p control-catalog-desktop`) to leave it out.
+
+The lines the port adds to `App.xaml` and `Pages/SettingsPage.xaml` and the ones it takes out of
+them are the `ADDITIONS` and `REMOVALS` of `scripts/convert_catalog_xaml.py`, so the sync check
+still holds the documents to their upstream files; the choice of the theme at start is in
+`App::initialize` (`app.rs`). `docs/porting/DEVIATIONS.md` (ControlCatalog sample) records them.
 
 The WinUI theme styles every control (docs/porting/winui-theme/PROGRESS.md), so it is the only
 theme while it is selected (`App::set_catalog_themes`), with the Fluent styles of the colour picker:

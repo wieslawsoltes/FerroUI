@@ -169,6 +169,14 @@ mod tests {
     }
 
     #[test]
+    fn a_platform_that_does_not_report_the_motion_preference_lets_animations_play() {
+        let settings = DefaultPlatformSettings::new();
+        assert!(settings.animations_enabled());
+        let as_contract: &dyn IPlatformSettings = &settings;
+        assert!(as_contract.animations_enabled());
+    }
+
+    #[test]
     fn language_tag_is_derived_from_the_locale_name() {
         assert_eq!(DefaultPlatformSettings::language_tag_from_locale("en_US.UTF-8"), "en-US");
         assert_eq!(DefaultPlatformSettings::language_tag_from_locale("sr_RS@latin"), "sr-RS");

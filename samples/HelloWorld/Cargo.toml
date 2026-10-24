@@ -1,0 +1,44 @@
+[package]
+name = "hello-world"
+description = "The smallest FerroUI application: one window with \"Hello, World!\" in the WinUI theme, written in XAML; the size floor of an application in that theme (docs/binary-size.md)"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+publish = false
+build = "build.rs"
+
+# Unit tests live next to the code (`tests/` modules of the library), not as integration test
+# targets.
+autotests = false
+autobenches = false
+autoexamples = false
+autobins = false
+
+[lib]
+path = "lib.rs"
+
+[[bin]]
+name = "hello-world"
+path = "program.rs"
+
+# Only what the application uses: the framework, the compiled markup and its runtime library,
+# the WinUI theme and the desktop entry point.
+[dependencies]
+# The compiled markup of the crate calls the typed functions of the declared members.
+ferroui-base = { workspace = true, features = ["markup-functions"] }
+ferroui-controls = { workspace = true }
+ferroui-markup = { workspace = true }
+ferroui-markup-xaml = { workspace = true }
+ferroui-themes-winui = { workspace = true }
+ferroui-desktop = { workspace = true }
+sample-support = { path = "../SampleSupport" }
+
+[build-dependencies]
+sample-build = { path = "../SampleBuild" }
+
+[dev-dependencies]
+ferroui-base = { workspace = true, features = ["testing"] }
+ferroui-controls = { workspace = true, features = ["testing"] }
+sample-testing = { path = "../SampleTesting" }

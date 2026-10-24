@@ -30,6 +30,8 @@ use ferroui_base::TypeInfo;
 
 mod app;
 mod assets;
+#[cfg(feature = "classic-themes")]
+mod classic_themes;
 mod decorated_window;
 mod icons;
 mod main_view;
@@ -62,6 +64,8 @@ ferroui_markup_xaml::include_compiled_xaml!();
 
 pub use app::App;
 pub use assets::{documents, excluded, excluded_documents, ExcludedDocument};
+#[cfg(feature = "classic-themes")]
+pub use classic_themes::ClassicThemes;
 pub use decorated_window::DecoratedWindow;
 pub use main_view::MainView;
 pub use main_window::MainWindow;
@@ -71,11 +75,25 @@ pub use smoke::{show_every_page, show_pages};
 pub use transparent_styles::TransparentStyles;
 
 /// The classes of the root namespace `ControlCatalog` (`X::TYPE`).
+#[cfg(not(feature = "classic-themes"))]
 pub(crate) const ROOT_TYPES: &[&TypeInfo] = &[App::TYPE, DecoratedWindow::TYPE, MainView::TYPE, MainWindow::TYPE, TransparentStyles::TYPE];
+#[cfg(feature = "classic-themes")]
+pub(crate) const ROOT_TYPES: &[&TypeInfo] =
+    &[App::TYPE, ClassicThemes::TYPE, DecoratedWindow::TYPE, MainView::TYPE, MainWindow::TYPE, TransparentStyles::TYPE];
 
 /// The classes of the root namespace that have a document (`&X::XAML_CLASS`).
+#[cfg(not(feature = "classic-themes"))]
 pub(crate) const ROOT_CLASSES: &[&XamlClass] =
     &[&App::XAML_CLASS, &DecoratedWindow::XAML_CLASS, &MainView::XAML_CLASS, &MainWindow::XAML_CLASS, &TransparentStyles::XAML_CLASS];
+#[cfg(feature = "classic-themes")]
+pub(crate) const ROOT_CLASSES: &[&XamlClass] = &[
+    &App::XAML_CLASS,
+    &ClassicThemes::XAML_CLASS,
+    &DecoratedWindow::XAML_CLASS,
+    &MainView::XAML_CLASS,
+    &MainWindow::XAML_CLASS,
+    &TransparentStyles::XAML_CLASS,
+];
 
 /// The types of the root namespace declared with `ferro_markup_type!` / `ferro_markup_enum!`.
 pub(crate) const ROOT_MARKUP_TYPES: &[&MarkupType] = &[];

@@ -70,8 +70,13 @@ pub fn register_types() {
         // The runtime library of compiled markup (the markup extensions the compiled
         // documents create), which registers the controls.
         ferroui_markup_xaml::register_types();
-        ferroui_themes_simple::register_types();
-        ferroui_themes_fluent::register_types();
+        // The themes of the original: with the feature `classic-themes`, and in the tests, whose
+        // applications are themed with them (`tests/support.rs`).
+        #[cfg(any(test, feature = "classic-themes"))]
+        {
+            ferroui_themes_simple::register_types();
+            ferroui_themes_fluent::register_types();
+        }
         ferroui_themes_winui::register_types();
         ferroui_controls_color_picker::register_types();
         treedatagrid_demo::register_types();

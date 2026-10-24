@@ -17,12 +17,15 @@ Everything else (elements, attributes, order, whitespace, byte order mark, line 
 kept byte for byte. A file that still contains the upstream name after the conversion is
 reported and fails the run.
 
-Additions of the port: `ADDITIONS` below lists the lines this project adds to converted
-documents (the WinUI theme of the port as a third theme of the catalog), each inserted after an
-anchor line of the converted text, with the reason; the conversion applies them, so `--check`
-compares a document with its conversion plus its additions, and fails when an anchor is gone.
-They are recorded in docs/porting/DEVIATIONS.md (ControlCatalog sample) and
-samples/ControlCatalog/GAPS.md.
+Changes of the port: `ADDITIONS` below lists the lines this project adds to converted documents
+(the WinUI theme of the port, the theme of the catalog), each inserted after an anchor line of
+the converted text, and `REMOVALS` the lines it takes out of them (the Fluent and Simple themes,
+which the catalog has with its feature `classic-themes` only, in `ClassicThemes.xaml`), each with
+the reason; the conversion applies the additions and then the removals, so `--check` compares a
+document with its conversion and its changes, and fails when an anchor or a removed line is
+gone. `PORT_DOCUMENTS` lists the markup files of the catalog that are the port's own, which
+`--check` does not report as files without an upstream file. They are recorded in
+docs/porting/DEVIATIONS.md (ControlCatalog sample) and samples/ControlCatalog/GAPS.md.
 
 File names: `.axaml` becomes `.xaml`, and the upstream name in a file name is replaced as in
 rule 5 (`AvaloniaFlixAppPage.xaml` -> `FerroFlixAppPage.xaml`). Directories are kept.
@@ -46,31 +49,86 @@ FORBIDDEN = re.compile(rb"avalonia|\bavn|axaml|avares", re.IGNORECASE)
 ADDITIONS = [
     (
         "App.xaml",
-        b'      <SimpleTheme x:Key="SimpleTheme" />\n',
+        b"      <!-- Styles attached dynamically depending on current theme (simple or fluent) -->\n",
+        b"      <!-- Not in the original: the WinUI theme of the port, the theme of the catalog. The Fluent\n"
+        b"           and Simple themes and their styles are in ClassicThemes.xaml, with the feature\n"
+        b"           `classic-themes` of the catalog only. -->\n"
         b'      <WinUITheme x:Key="WinUITheme" />\n',
-        "the WinUI theme of the port (ferroui-themes-winui) as a third theme of the catalog",
+        "the WinUI theme of the port (ferroui-themes-winui), the theme of the catalog",
+    ),
+    (
+        "App.xaml",
+        b'      <StyleInclude x:Key="ColorPickerFluent" Source="ferres://FerroUI.Controls.ColorPicker/Themes/Fluent/Fluent.xaml" />\n',
+        b'      <StyleInclude x:Key="TreeDataGridFluent" Source="ferres://FerroUI.Controls.TreeDataGrid/Themes/Fluent.xaml" />\n',
+        "the styles of the TreeDataGrid of the port, for the page of its demo",
     ),
     (
         "Pages/SettingsPage.xaml",
-        b"            <models:CatalogTheme>Simple</models:CatalogTheme>\n",
-        b"            <models:CatalogTheme>WinUI</models:CatalogTheme>\n",
-        "the WinUI theme of the port in the theme selector of the settings page",
+        b"        <Label>Theme</Label>\n",
+        b"        <!-- Not in the original: the themes the catalog is built with (App.AvailableThemes), in\n"
+        b"             place of the Fluent and Simple items, which need the feature `classic-themes`. -->\n",
+        "the theme selector of the settings page lists the themes the catalog is built with",
     ),
+    (
+        "Pages/SettingsPage.xaml",
+        b'                  SelectedItem="{x:Static local:App.CurrentTheme}"\n',
+        b'                  ItemsSource="{x:Static local:App.AvailableThemes}"\n',
+        "the theme selector of the settings page lists the themes the catalog is built with",
+    ),
+]
+
+# The lines this project removes from converted documents (after the additions): (path relative to
+# the sample, the lines, why). Each is in the converted text once.
+REMOVALS = [
+    (
+        "App.xaml",
+        b'      <FluentTheme x:Key="FluentTheme" />\n      <SimpleTheme x:Key="SimpleTheme" />\n',
+        "the Fluent and Simple themes are in ClassicThemes.xaml, with the feature classic-themes only",
+    ),
+    (
+        "App.xaml",
+        b'      <StyleInclude x:Key="ColorPickerSimple" Source="ferres://FerroUI.Controls.ColorPicker/Themes/Simple/Simple.xaml" />\n',
+        "the Simple styles of the colour picker are in ClassicThemes.xaml, with the feature classic-themes only",
+    ),
+    (
+        "Pages/SettingsPage.xaml",
+        b"          <ComboBox.Items>\n"
+        b"            <models:CatalogTheme>Fluent</models:CatalogTheme>\n"
+        b"            <models:CatalogTheme>Simple</models:CatalogTheme>\n"
+        b"          </ComboBox.Items>\n",
+        "the theme selector of the settings page lists the themes the catalog is built with (ItemsSource)",
+    ),
+]
+
+# The markup files of the catalog that are the port's own: (path relative to the sample, why).
+PORT_DOCUMENTS = [
+    ("ClassicThemes.xaml", "the Fluent and Simple themes of the original, with the feature classic-themes only"),
+    ("Pages/TreeDataGridPage.xaml", "the page of the TreeDataGrid demo of the port"),
 ]
 
 
 def add(relative: str, data: bytes) -> bytes:
-    """The converted text with the additions of the port to the document."""
+    """The converted text with the additions and the removals of the port to the document."""
+    # Line ends of the document: the anchors and the lines are written with `\n`.
+    crlf = b"\r\n" in data
+
+    def with_line_ends(text: bytes) -> bytes:
+        return text.replace(b"\n", b"\r\n") if crlf else text
+
     for path, anchor, lines, _why in ADDITIONS:
         if path != relative:
             continue
-        # Line ends of the document: the anchors are written with `\n`.
-        crlf = b"\r\n" in data
-        anchor_text = anchor.replace(b"\n", b"\r\n") if crlf else anchor
-        lines_text = lines.replace(b"\n", b"\r\n") if crlf else lines
+        anchor_text, lines_text = with_line_ends(anchor), with_line_ends(lines)
         if data.count(anchor_text) != 1:
             raise SystemExit(f"the anchor of an addition to {relative} is not in its conversion once: {anchor!r}")
         data = data.replace(anchor_text, anchor_text + lines_text)
+    for path, lines, _why in REMOVALS:
+        if path != relative:
+            continue
+        lines_text = with_line_ends(lines)
+        if data.count(lines_text) != 1:
+            raise SystemExit(f"the lines of a removal from {relative} are not in its conversion once: {lines!r}")
+        data = data.replace(lines_text, b"")
     return data
 
 
@@ -133,9 +191,10 @@ def main() -> int:
             destination.parent.mkdir(parents=True, exist_ok=True)
             destination.write_bytes(converted)
 
+    port_documents = {target / path for path, _why in PORT_DOCUMENTS}
     if check and target.exists():
         for path in sorted(target.rglob("*.xaml")):
-            if "target" not in path.relative_to(target).parts and path not in destinations:
+            if "target" not in path.relative_to(target).parts and path not in destinations and path not in port_documents:
                 print(f"no upstream file for: {path}")
                 failed = True
 

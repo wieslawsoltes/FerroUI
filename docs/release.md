@@ -74,6 +74,8 @@ The first preview added the five other names of section 2.2 as placeholders (37 
 
 `ferroui-devtools` (`src/FerroUI.DevTools`, Controls and themes; the opt-in Chrome DevTools Protocol endpoint, docs/devtools-cdp.md) joined the same day. It is built on the `target` module of `ferroui-inspect`, so the core is published before it and it before the facade, where it is the optional feature `devtools`. The native endpoint is its default feature `server`; the browser bridge is the feature `browser`, with the default features off. Its unit tests are in the crate.
 
+`ferroui-controls-charts` (`src/FerroUI.Controls.Charts`, Controls and themes; the port of the public contract of WinUI Charts, docs/porting/winui-charts.md) joined with #282. It is an optional part of the facade (`charts`), and its sample `samples/ChartsDemo` is not published.
+
 Every crate was checked in the same way: packaged, and built from its package, by `scripts/release/publish.sh --dry-run` (section 8). `cargo publish --dry-run -p <crate>` cannot be used for this before the first release: it resolves the dependencies of the package in the registry, where the other crates of the workspace are not yet. `cargo package --workspace` (Cargo 1.90 and later) resolves them among the packages it has just assembled instead, which is what the dry run uses, and so every crate got the full check, not only the ones without dependencies in the workspace.
 
 ### 1.2 The crates that are never published
@@ -145,6 +147,7 @@ Two names are not under the `ferroui-` prefix. The owner decided on 2026-10-10 t
   | `winui-theme` | `ferroui-themes-winui` | `themes_winui` | no |
   | `xaml` | `ferroui-markup-xaml` and the run-time loader (`ferroui-markup-xaml-loader` with its feature `runtime`) | `markup_xaml`, `markup_xaml_loader` | no |
   | `color-picker`, `dialogs` | `ferroui-controls-color-picker`, `ferroui-dialogs` | `controls_color_picker`, `dialogs` | no |
+  | `charts` | `ferroui-controls-charts` (WinUI public-contract port) | `controls_charts` | no |
   | `devtools` | `ferroui-devtools`, `ferroui-inspect` (opt-in CDP inspection and automation) | `devtools` | no |
   | `diagnostics` | `ferroui-diagnostics` (added for 0.4) | `diagnostics` | no |
   | `treedatagrid` | `ferroui-controls-treedatagrid` and `ferroui-treedatagrid-core` (added for 0.2) | `controls_treedatagrid`, `treedatagrid_core` | no |

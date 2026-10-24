@@ -1,7 +1,3 @@
-//
-// Created by Dan Walmsley on 05/05/2022.
-//
-
 #include "FrnView.h"
 #include "AutoFitContentView.h"
 #include "WindowInterfaces.h"

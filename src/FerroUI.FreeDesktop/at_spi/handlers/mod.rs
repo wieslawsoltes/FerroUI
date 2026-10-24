@@ -25,7 +25,13 @@ use std::rc::{Rc, Weak};
 /// its handlers); a call that arrives for a node that is gone is
 /// answered as a call for an object that does not exist.
 pub(crate) fn node_of(node: &Weak<AtSpiNode>) -> Result<Rc<AtSpiNode>, DBusError> {
-    node.upgrade().ok_or_else(|| DBusError::new(ERROR_UNKNOWN_OBJECT, "The object is gone."))
+    let node = node.upgrade().ok_or_else(|| DBusError::new(ERROR_UNKNOWN_OBJECT, "The object is gone."))?;
+    // The peer of a control that is gone is not an element any more (DEVIATIONS.md,
+    // Automation peers): the same answer as for a node that is gone.
+    if !node.peer().is_element_available() {
+        return Err(DBusError::new(ERROR_UNKNOWN_OBJECT, "The element is gone."));
+    }
+    Ok(node)
 }
 
 /// The server of a handler: see [`node_of`].

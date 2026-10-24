@@ -282,8 +282,7 @@ impl AtSpiNode {
             attrs.insert("level".to_string(), heading_level.to_string());
         }
 
-        if let Some(control_peer) = peer.cast::<ControlAutomationPeer>() {
-            let owner = control_peer.owner();
+        if let Some(owner) = peer.cast::<ControlAutomationPeer>().and_then(|control_peer| control_peer.try_owner()) {
             let position = AutomationProperties::get_position_in_set(&owner);
             if position > 0 {
                 attrs.insert("posinset".to_string(), position.to_string());

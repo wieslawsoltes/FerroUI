@@ -43,6 +43,9 @@ extern "C" {
     #[wasm_bindgen(js_namespace = FerroDOM, js_name = getDarkMode)]
     pub fn get_dark_mode(global_this: &JsObject) -> Vec<i32>;
 
+    #[wasm_bindgen(js_namespace = FerroDOM, js_name = getAnimationsEnabled)]
+    pub fn get_animations_enabled(global_this: &JsObject) -> bool;
+
     #[wasm_bindgen(js_namespace = FerroDOM, js_name = getNavigatorLanguage)]
     pub fn get_navigator_language(global_this: &JsObject) -> Option<String>;
 

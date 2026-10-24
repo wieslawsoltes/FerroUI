@@ -1,0 +1,26 @@
+[package]
+name = "hello-world-macros"
+description = "The HelloWorld sample written with the rsx! macro and #[component] of ferroui-view, its counter a signal"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+publish = false
+
+[lib]
+path = "lib.rs"
+test = false
+doctest = false
+
+[[bin]]
+name = "hello-world-macros"
+path = "main.rs"
+test = false
+
+# Only what the application uses: the framework, ferroui-view with the desktop entry point, and
+# the WinUI theme.
+[dependencies]
+ferroui-base = { workspace = true }
+ferroui-view = { workspace = true, features = ["desktop"] }
+ferroui-themes-winui = { workspace = true }

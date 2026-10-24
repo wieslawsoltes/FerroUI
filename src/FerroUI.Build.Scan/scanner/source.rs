@@ -1799,6 +1799,16 @@ impl Source {
         }
     }
 
+    /// A constant expression written directly in the markup declaration of a known
+    /// `bitflags!` type. `type_name` is its name at the declaration site, which can be an
+    /// imported alias. Other types and arbitrary associated functions remain unresolved.
+    pub fn flags_expression_value(&self, declared: &(usize, String), type_name: &str, expression: &[TokenTree]) -> Option<i64> {
+        let constants = self.flags.get(declared)?;
+        let member = |name: &str| self.member_value(declared, name, 0);
+        let all = || constants.iter().try_fold(0i64, |union, (name, _)| Some(union | member(name)?));
+        evaluate(expression, &Scope { type_name, member: &member, all: &all })
+    }
+
     /// The value of the member `name` of the enumeration or of the set of flags declared
     /// as `declared` (the module and the name): a variant, a constant of the `bitflags!`
     /// type, or an associated constant of the type (`pub const NONE: Flags = Flags::empty();`,

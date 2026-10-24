@@ -25,11 +25,25 @@ on:
         description: 'WinUI theme comparison: the text settings of a calibration run (FERROUI_WINUI_COMPARE_TEXT_VARIANTS; none when empty)'
         required: false
         default: ''
+  # Every night, a run of main. The macOS, iOS and Windows jobs do not run for a push to main, and
+  # the Rust build caches are saved by runs of main only (see the note on the caches below): this
+  # run saves theirs, for the pull requests to restore. It also tests the merged state.
+  schedule:
+    - cron: '23 2 * * *'
+
+# The Rust build caches (Swatinem/rust-cache: the registry and the compiled dependencies). They are
+# saved by runs of main (a push, the nightly run, a run started by hand), with `save-if`, and a pull
+# request restores the cache of main and saves none. A cache saved by a pull request can be restored
+# by later runs of that pull request alone, and every run of one saved about 5 GB: the repository
+# has 10 GB, so the caches of main were evicted and almost no job found a cache (October 2026: the
+# macOS and the Windows jobs found one in 4 of 24 runs). `cache-on-failure`: a run of main whose
+# job fails (one smoke run) still saves the dependencies it compiled.
 
 concurrency:
   # An edit that leaves the base alone gets a group of its own, so that it does not cancel the
-  # run of the pull request that is in progress.
-  group: ci-${{ github.ref }}-${{ (github.event.action == 'edited' && github.event.changes.base == null) && github.run_id || 'run' }}
+  # run of the pull request that is in progress; so does the nightly run, so that it and a run of a
+  # push to main do not cancel each other.
+  group: ci-${{ github.ref }}-${{ (github.event.action == 'edited' && github.event.changes.base == null) && github.run_id || (github.event_name == 'schedule' && 'nightly' || 'run') }}
   cancel-in-progress: true
 
 permissions:
@@ -98,6 +112,9 @@ jobs:
   #   workspace has none that run) and no example or binary is linked.
   # - No debug information in the test build, which shortens compiling and linking; a failing test
   #   still reports its message and location, a backtrace has no line numbers.
+  # - The tests of the ControlCatalog with its feature classic-themes and those of the Vello
+  #   backend are in the job macos-features, which runs beside this one.
+  # - It runs in the nightly run of main, which saves its build cache.
   macos:
     name: Build and test (macOS)
     if: (github.event.action != 'edited' || github.event.changes.base != null) && (github.event_name != 'push')
@@ -110,8 +127,37 @@ jobs:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
       - uses: dtolnay/rust-toolchain@89b12181fb390509a0842a86cc55eeb8eb928c1d # stable
       - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2
+        with:
+          save-if: ${{ github.ref == 'refs/heads/main' }}
+          cache-on-failure: true
       - name: Test
         run: cargo test --workspace --locked --no-fail-fast --lib --tests --exclude ferroui-render-backends-comparison --exclude ferroui-vello
+
+  # The two test steps of the macOS job that build with other features than the workspace tests: a
+  # job of their own, beside that job and not after it. Each builds the crates it tests with the
+  # features its packages select, so as steps of that job they compiled most of their crates again
+  # (about eleven minutes after the 42 of the workspace tests); here they run in parallel with it.
+  # The commands are those the macOS job ran.
+  macos-features:
+    name: Build and test (macOS, the ControlCatalog with classic themes, Vello)
+    if: (github.event.action != 'edited' || github.event.changes.base != null) && (github.event_name != 'push')
+    runs-on: macos-15
+    timeout-minutes: 120
+    env:
+      CARGO_PROFILE_DEV_DEBUG: 0
+      CARGO_PROFILE_TEST_DEBUG: 0
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: dtolnay/rust-toolchain@89b12181fb390509a0842a86cc55eeb8eb928c1d # stable
+      - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2
+        with:
+          save-if: ${{ github.ref == 'refs/heads/main' }}
+          cache-on-failure: true
+      # The Simple and Fluent themes of the ControlCatalog are behind its feature `classic-themes`,
+      # off by default (docs/binary-size.md): the tests of the document of the two themes and of
+      # the settings page that switches between the three themes, with the feature.
+      - name: Test (the ControlCatalog with its feature classic-themes)
+        run: cargo test --locked -p control-catalog --features classic-themes --lib -- classic_themes the_settings_page
       # The tests of the Vello backend and its comparison with the Skia backend, apart from the other tests: on
       # the runner one scene of a GPU mode now and then comes out wholly different or differs
       # between two draws (docs/porting/vello-backend.md, section 13). A failure is tried again,
@@ -155,6 +201,9 @@ jobs:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
       - uses: dtolnay/rust-toolchain@89b12181fb390509a0842a86cc55eeb8eb928c1d # stable
       - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2
+        with:
+          save-if: ${{ github.ref == 'refs/heads/main' }}
+          cache-on-failure: true
       # Without the default feature `angle`: the backend with software rendering alone, which is
       # what builds where there is no libclang.
       - name: Build the backend and its example (without ANGLE)
@@ -302,6 +351,21 @@ jobs:
         env:
           FERROUI_SMOKE_EXIT_MS: 2000
         run: cargo run --locked -p ferroui-desktop --example hello_window
+      # The HelloWorld samples (the XAML one and one per style of ferroui-view, docs/binary-size.md):
+      # built, then each shown for two seconds.
+      - name: The HelloWorld samples for two seconds each
+        if: ${{ steps.skia.outputs.raster == 'true' }}
+        timeout-minutes: 30
+        env:
+          FERROUI_SMOKE_EXIT_MS: 2000
+        run: |
+          samples="hello-world hello-world-builders hello-world-macros hello-world-hooks hello-world-component-host"
+          cargo build --locked $(printf -- '-p %s ' $samples) --bins
+          result=0
+          for sample in $samples; do
+            ./target/debug/$sample.exe || { echo "::error::$sample ended with an error"; result=1; }
+          done
+          exit $result
       # Upstream's integration tests of the backend (tests/FerroUI.IntegrationTests.Win32): windows
       # of the window class on the desktop of the runner, in every state, with every kind of
       # decorations, their client area and bounds compared with the screen. One binary without
@@ -839,6 +903,8 @@ jobs:
       - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2
         with:
           key: ios
+          save-if: ${{ github.ref == 'refs/heads/main' }}
+          cache-on-failure: true
       - name: Skia features of the target
         run: |
           # Graphite on Metal, as on macOS: the feature set a Skia binary is published for. Another
@@ -886,6 +952,8 @@ jobs:
       - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2
         with:
           key: x11
+          save-if: ${{ github.ref == 'refs/heads/main' }}
+          cache-on-failure: true
       # The X libraries are opened at run time (nothing links them); Skia links FreeType and
       # Fontconfig, and needs a font to answer for the default family.
       - name: System packages
@@ -1158,6 +1226,8 @@ jobs:
       - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2
         with:
           key: wayland
+          save-if: ${{ github.ref == 'refs/heads/main' }}
+          cache-on-failure: true
       # libwayland-client, libwayland-egl, libEGL and libxkbcommon are opened at run time (nothing
       # links them); Skia links FreeType and Fontconfig, and needs a font to answer for the default
       # family. xkb-data has the keymap the virtual keyboard of the example gives the compositor;
@@ -1363,6 +1433,8 @@ jobs:
       - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2
         with:
           key: wayland-next
+          save-if: ${{ github.ref == 'refs/heads/main' }}
+          cache-on-failure: true
       - name: Build the window example
         run: cargo build --locked -p ferroui-wayland --features example --example wayland_window
       - name: A window on a compositor, rendered through wl_shm buffers
@@ -1411,6 +1483,8 @@ jobs:
       - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2
         with:
           key: linuxfb
+          save-if: ${{ github.ref == 'refs/heads/main' }}
+          cache-on-failure: true
       # Skia links FreeType and Fontconfig, and needs a font to answer for the default family.
       # The DRM output opens libdrm, libgbm and libEGL at run time; Mesa renders on the card of
       # vkms in software (its kms_swrast driver, in libgl1-mesa-dri).
@@ -1497,6 +1571,8 @@ jobs:
       - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2
         with:
           key: android
+          save-if: ${{ github.ref == 'refs/heads/main' }}
+          cache-on-failure: true
       - name: Tests of the Android crate (the logic, on the host)
         run: cargo test --locked -p ferroui-android --no-fail-fast
       # The thread-local variables of the framework are slots of one table per thread on Android

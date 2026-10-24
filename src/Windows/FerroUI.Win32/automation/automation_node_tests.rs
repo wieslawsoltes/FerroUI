@@ -606,6 +606,32 @@ fn a_node_whose_peer_is_forgotten_answers_that_its_element_is_not_available() {
     assert_eq!(Some("Save".to_owned()), text(&again, UiaPropertyId::Name));
 }
 
+// Not in the reference, whose peer holds its control: the peer of a control that is gone is
+// still held (by the children of its parent peer, as when a page is replaced), and a client asks
+// its node for the fragment root, its neighbours, its bounds and its properties.
+#[test]
+fn the_node_of_a_peer_whose_control_is_gone_answers_that_its_element_is_not_available() {
+    let _app = UnitTestApplication::start(TestServices::styled_window());
+    let border = ferroui_controls::Border::new();
+    let peer: Ref<AutomationPeer> = ControlAutomationPeer::create_peer_for_element(&border);
+    let node = AutomationNode::get_or_create(Some(&peer)).expect("a node");
+    let fragment = node.cast::<IRawElementProviderFragment>().unwrap();
+    assert!(fragment.get_bounding_rectangle().is_ok());
+
+    drop(border);
+    assert!(!peer.is_element_available());
+
+    assert_eq!(Err(ELEMENT_NOT_AVAILABLE), fragment.get_fragment_root().map(|_| ()));
+    assert_eq!(Err(ELEMENT_NOT_AVAILABLE), fragment.navigate(NavigateDirection::Parent).map(|_| ()));
+    assert_eq!(Err(ELEMENT_NOT_AVAILABLE), fragment.navigate(NavigateDirection::FirstChild).map(|_| ()));
+    assert_eq!(Err(ELEMENT_NOT_AVAILABLE), fragment.get_bounding_rectangle().map(|_| ()));
+    assert_eq!(Err(ELEMENT_NOT_AVAILABLE), fragment.set_focus());
+    assert_eq!(Err(ELEMENT_NOT_AVAILABLE), node.get_property_value(UiaPropertyId::Name.0).map(|_| ()));
+    assert_eq!(Err(ELEMENT_NOT_AVAILABLE), node.get_pattern_provider(UiaPatternId::Invoke.0).map(|_| ()));
+    // What does not ask the peer still answers.
+    assert_eq!(ProviderOptions::ServerSideProvider, node.get_provider_options().unwrap());
+}
+
 #[test]
 fn the_control_types_the_landmarks_and_the_heading_levels_of_the_system() {
     use ferroui_controls::automation::peers::{AutomationControlType, AutomationLandmarkType};

@@ -135,6 +135,9 @@ ferro_class! {
         /// Sets the parent of the peer; returns whether the peer accepted
         /// it.
         fn try_set_parent(this, parent: Option<Ref<AutomationPeer>>) -> bool;
+        /// Whether the element of the peer still exists (true by default;
+        /// a `ControlAutomationPeer` whose control is gone answers false).
+        fn is_element_available_core(this) -> bool;
     }
 }
 ferroui_base::ferro_class_info!(AutomationPeer {});
@@ -331,6 +334,10 @@ impl AutomationPeerImpl for AutomationPeer {
     fn try_set_parent(_this: &Self, _parent: Option<Ref<AutomationPeer>>) -> bool {
         abstract_member("try_set_parent")
     }
+
+    fn is_element_available_core(_this: &Self) -> bool {
+        true
+    }
 }
 
 impl AutomationPeer {
@@ -339,163 +346,266 @@ impl AutomationPeer {
         Self { base: FerroObject::construct(), children_changed: HandlerList::new(), property_changed: HandlerList::new() }
     }
 
+    /// Whether the element of the peer still exists. The peer of a control
+    /// does not keep the control alive (the control owns its peer), so a
+    /// platform can still hold a peer whose control is gone; such a peer
+    /// answers every member below with an empty value (no name, no children,
+    /// no parent, no provider, not enabled) instead of reaching its control,
+    /// and a platform bridge reports the element as not available
+    /// (`UIA_E_ELEMENTNOTAVAILABLE` on Windows).
+    // Deviation (DEVIATIONS.md, Automation peers): upstream's peer holds its control, so the
+    // element exists for as long as a platform holds the peer.
+    pub fn is_element_available(&self) -> bool {
+        self.is_element_available_core()
+    }
+
     /// Attempts to bring the element associated with the automation peer into view.
     pub fn bring_into_view(&self) {
+        if !self.is_element_available() {
+            return;
+        }
         self.bring_into_view_core()
     }
 
     /// Gets the accelerator key combinations for the element that is associated with the UI
     /// Automation peer.
     pub fn get_accelerator_key(&self) -> Option<String> {
+        if !self.is_element_available() {
+            return None;
+        }
         self.get_accelerator_key_core()
     }
 
     /// Gets the access key for the element that is associated with the automation peer.
     pub fn get_access_key(&self) -> Option<String> {
+        if !self.is_element_available() {
+            return None;
+        }
         self.get_access_key_core()
     }
 
     /// Gets the control type for the element that is associated with the UI Automation peer.
     pub fn get_automation_control_type(&self) -> AutomationControlType {
+        if !self.is_element_available() {
+            return AutomationControlType::None;
+        }
         self.get_control_type_override_core()
     }
 
     /// Gets the automation ID of the element that is associated with the automation peer.
     pub fn get_automation_id(&self) -> Option<String> {
+        if !self.is_element_available() {
+            return None;
+        }
         self.get_automation_id_core()
     }
 
     /// Gets the bounding rectangle of the element that is associated with the automation peer
     /// in top-level coordinates.
     pub fn get_bounding_rectangle(&self) -> Rect {
+        if !self.is_element_available() {
+            return Rect::default();
+        }
         self.get_bounding_rectangle_core()
     }
 
     /// Gets the child automation peers.
     pub fn get_children(&self) -> Rc<Vec<Ref<AutomationPeer>>> {
+        if !self.is_element_available() {
+            return Rc::default();
+        }
         self.get_or_create_children_core()
     }
 
     /// Gets a string that describes the class of the element.
     pub fn get_class_name(&self) -> String {
+        if !self.is_element_available() {
+            return String::new();
+        }
         self.get_class_name_override_core()
     }
 
     /// Gets the automation peer for the label that is targeted to the element.
     pub fn get_labeled_by(&self) -> Option<Ref<AutomationPeer>> {
+        if !self.is_element_available() {
+            return None;
+        }
         self.get_labeled_by_core()
     }
 
     /// Gets a human-readable localized string that represents the type of the control that is
     /// associated with this automation peer.
     pub fn get_localized_control_type(&self) -> String {
+        if !self.is_element_available() {
+            return String::new();
+        }
         self.get_localized_control_type_core()
     }
 
     /// Gets text that describes the element that is associated with this automation peer.
     pub fn get_name(&self) -> String {
+        if !self.is_element_available() {
+            return String::new();
+        }
         self.get_name_core().unwrap_or_default()
     }
 
     /// Gets text that provides help for the element that is associated with this automation peer.
     pub fn get_help_text(&self) -> String {
+        if !self.is_element_available() {
+            return String::new();
+        }
         self.get_help_text_core().unwrap_or_default()
     }
 
     /// Gets the placeholder text for the element that is associated with this automation peer.
     pub fn get_placeholder_text(&self) -> String {
+        if !self.is_element_available() {
+            return String::new();
+        }
         self.get_placeholder_text_core().unwrap_or_default()
     }
 
     /// Gets the control type for the element that is associated with the UI Automation peer.
     pub fn get_landmark_type(&self) -> Option<AutomationLandmarkType> {
+        if !self.is_element_available() {
+            return None;
+        }
         self.get_landmark_type_core()
     }
 
     /// Gets the heading level that is associated with this automation peer.
     pub fn get_heading_level(&self) -> i32 {
+        if !self.is_element_available() {
+            return 0;
+        }
         self.get_heading_level_core()
     }
 
     /// Gets the item type that is associated with this automation peer.
     pub fn get_item_type(&self) -> Option<String> {
+        if !self.is_element_available() {
+            return None;
+        }
         self.get_item_type_core()
     }
 
     /// Gets the item status that is associated with this automation peer.
     pub fn get_item_status(&self) -> Option<String> {
+        if !self.is_element_available() {
+            return None;
+        }
         self.get_item_status_core()
     }
 
     /// Gets the automation peer that is the parent of this automation peer.
     pub fn get_parent(&self) -> Option<Ref<AutomationPeer>> {
+        if !self.is_element_available() {
+            return None;
+        }
         self.get_parent_core()
     }
 
     /// Gets the automation peer that is the root of this automation peer's
     /// visual tree (not for use outside the framework).
     pub fn get_visual_root(&self) -> Option<Ref<AutomationPeer>> {
+        if !self.is_element_available() {
+            return None;
+        }
         self.get_visual_root_core()
     }
 
     /// Gets the automation peer that is the root of this automation peer's
     /// automation tree (not for use outside the framework).
     pub fn get_automation_root(&self) -> Option<Ref<AutomationPeer>> {
+        if !self.is_element_available() {
+            return None;
+        }
         self.get_automation_root_core()
     }
 
     /// Converts a rectangle in the coordinates of the visual root to screen
     /// coordinates.
     pub fn to_screen(&self, rect: Rect) -> Option<Rect> {
+        if !self.is_element_available() {
+            return None;
+        }
         self.to_screen_core(rect)
     }
 
     /// Gets a value that indicates whether the element that is associated with this automation
     /// peer currently has keyboard focus.
     pub fn has_keyboard_focus(&self) -> bool {
+        if !self.is_element_available() {
+            return false;
+        }
         self.has_keyboard_focus_core()
     }
 
     /// Gets a value that indicates whether the element that is associated with this automation
     /// peer contains data that is presented to the user.
     pub fn is_content_element(&self) -> bool {
+        if !self.is_element_available() {
+            return false;
+        }
         self.is_content_element_override_core()
     }
 
     /// Gets a value that indicates whether the element is understood by the user as
     /// interactive or as contributing to the logical structure of the control in the GUI.
     pub fn is_control_element(&self) -> bool {
+        if !self.is_element_available() {
+            return false;
+        }
         self.is_control_element_override_core()
     }
 
     /// Gets a value indicating whether the control is enabled for user interaction.
     pub fn is_enabled(&self) -> bool {
+        if !self.is_element_available() {
+            return false;
+        }
         self.is_enabled_core()
     }
 
     /// Gets a value that indicates whether the element can accept keyboard focus.
     pub fn is_keyboard_focusable(&self) -> bool {
+        if !self.is_element_available() {
+            return false;
+        }
         self.is_keyboard_focusable_core()
     }
 
     /// Gets a value that indicates whether an element is off the screen.
     pub fn is_offscreen(&self) -> bool {
+        if !self.is_element_available() {
+            return true;
+        }
         self.is_offscreen_core()
     }
 
     /// Sets the keyboard focus on the element that is associated with this automation peer.
     pub fn set_focus(&self) {
+        if !self.is_element_available() {
+            return;
+        }
         self.set_focus_core()
     }
 
     /// Shows the context menu for the element that is associated with this automation peer.
     /// Returns true if a context menu is present for the element; otherwise false.
     pub fn show_context_menu(&self) -> bool {
+        if !self.is_element_available() {
+            return false;
+        }
         self.show_context_menu_core()
     }
 
     /// Gets the current live setting that is associated with this automation peer.
     pub fn get_live_setting(&self) -> AutomationLiveSetting {
+        if !self.is_element_available() {
+            return AutomationLiveSetting::Off;
+        }
         self.get_live_setting_core()
     }
 
@@ -504,6 +614,9 @@ impl AutomationPeer {
     ///
     /// Returns the provider, or `None` if the peer does not provide it.
     pub fn get_provider<I: ?Sized + 'static>(&self) -> Option<Rc<I>> {
+        if !self.is_element_available() {
+            return None;
+        }
         let provider = self.get_provider_core(ValueType::of::<Rc<I>>())?;
         let provider: &dyn AnyValue = &*provider;
         provider.downcast_ref::<Rc<I>>().cloned()

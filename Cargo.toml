@@ -15,6 +15,7 @@ members = [
     "src/FerroUI.View",
     "src/FerroUI.View.Macros",
     "src/FerroUI.Controls.ColorPicker",
+    "src/FerroUI.Controls.Charts",
     "src/TreeDataGrid/FerroUI.TreeDataGrid.Core",
     "src/TreeDataGrid/FerroUI.Controls.TreeDataGrid",
     "src/StaticViewLocator/FerroUI.StaticViewLocator",
@@ -77,6 +78,11 @@ members = [
     "tests/FerroUI.IntegrationTests.Win32",
     "tests/FerroUI.DesignerSupport.Tests",
     "tests/FerroUI.StaticViewLocator.Tests",
+    "samples/HelloWorld",
+    "samples/HelloWorld.Builders",
+    "samples/HelloWorld.Macros",
+    "samples/HelloWorld.Hooks",
+    "samples/HelloWorld.ComponentHost",
     "samples/SevenGuis/Model",
     "samples/SevenGuis/Builders/Counter",
     "samples/SevenGuis/Macros/Counter",
@@ -117,6 +123,7 @@ members = [
     "samples/BindingDemo",
     "samples/VirtualizationDemo",
     "samples/TreeDataGridDemo",
+    "samples/ChartsDemo",
     "samples/ReactiveDemo",
     "samples/ReactiveUIExample",
     "samples/StaticViewLocatorDemo",
@@ -136,6 +143,13 @@ members = [
     "samples/PlatformSanityChecks",
     "samples/SingleProjectSandbox",
     "samples/GpuInterop",
+    "samples/Ember.Core",
+    "samples/Ember.Content",
+    "samples/Ember",
+    "samples/Ember.Desktop",
+    "samples/Ember.Browser",
+    "samples/Ember.Android",
+    "samples/Ember.iOS",
 ]
 
 [workspace.package]
@@ -172,6 +186,7 @@ ferroui-controls = { version = "=0.4.0", path = "src/FerroUI.Controls" }
 ferroui-view = { version = "=0.4.0", path = "src/FerroUI.View" }
 ferroui-view-macros = { version = "=0.4.0", path = "src/FerroUI.View.Macros" }
 ferroui-controls-color-picker = { version = "=0.4.0", path = "src/FerroUI.Controls.ColorPicker" }
+ferroui-controls-charts = { version = "=0.4.0", path = "src/FerroUI.Controls.Charts" }
 ferroui-treedatagrid-core = { version = "=0.4.0", path = "src/TreeDataGrid/FerroUI.TreeDataGrid.Core" }
 ferroui-controls-treedatagrid = { version = "=0.4.0", path = "src/TreeDataGrid/FerroUI.Controls.TreeDataGrid" }
 ferroui-static-view-locator = { version = "=0.4.0", path = "src/StaticViewLocator/FerroUI.StaticViewLocator" }
@@ -329,10 +344,17 @@ lto = "thin"
 # (docs/porting/desktop-performance.md, section 6.2); the build takes about twice as long, because
 # every executable generates the code of the whole program on one core, and its link step needs
 # about 6 GB of memory.
+#
+# The symbol table is stripped (`strip = "symbols"`): it is a sixth to a quarter of an executable of
+# macOS or Linux, and nothing of the program reads it but the symbolisation of a panic backtrace, which
+# then shows addresses (docs/binary-size.md, section 4.3). On Windows the executable never holds the
+# symbols (they are in the PDB beside it), so the setting changes nothing there. Build with the
+# release profile for a backtrace with names.
 [profile.dist]
 inherits = "release"
 lto = "fat"
 codegen-units = 1
+strip = "symbols"
 
 # The WebAssembly module of the browser (scripts/build-browser.sh): optimised for size, because the
 # module is downloaded and compiled by every visitor (docs/porting/browser-platform.md, section 18).

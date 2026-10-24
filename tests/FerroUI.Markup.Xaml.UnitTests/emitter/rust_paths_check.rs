@@ -754,6 +754,7 @@ pub fn markup_types() -> Vec<(&'static ::ferroui_base::metadata::MarkupType, &'s
         (<::ferroui_controls::InputPaneAwareBehavior as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "ferroui_controls::InputPaneAwareBehavior", false),
         (<::ferroui_controls::ItemCollection as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "ferroui_controls::ItemCollection", false),
         (<::ferroui_controls::ItemsSource as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "ferroui_controls::ItemsSource", false),
+        (<::ferroui_controls::ItemsSourceView as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "ferroui_controls::ItemsSourceView", false),
         (<::ferroui_controls::Location as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "ferroui_controls::Location", false),
         (<::ferroui_controls::MenuItemToggleType as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "ferroui_controls::MenuItemToggleType", false),
         (<::ferroui_controls::NavigationType as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "ferroui_controls::NavigationType", false),

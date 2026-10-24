@@ -35,6 +35,16 @@ pub trait IPlatformSettings {
     /// language (such as `en-US`) the platform reports for the application.
     fn preferred_application_language(&self) -> String;
 
+    /// Whether the user lets the system play animations that are not essential (WinUI
+    /// `SharedHelpers::IsAnimationsEnabled`, which reads `UISettings.AnimationsEnabled`).
+    ///
+    /// The setting is asked for each animation, not kept: a change of it applies to the next
+    /// animation. A platform that does not report it lets animations play (the default).
+    /// A FerroUI addition for the ports of WinUI controls (DEVIATIONS.md, Platform settings).
+    fn animations_enabled(&self) -> bool {
+        true
+    }
+
     /// Gets current system color values including dark mode and accent
     /// colors.
     fn get_color_values(&self) -> PlatformColorValues;

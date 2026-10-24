@@ -1,0 +1,84 @@
+name: Ember reader
+
+on:
+  push:
+    branches: [main]
+    # Changes to the framework are covered by the workspace run of ci.yml, which runs the
+    # Ember tests as well; this workflow follows the Ember sources.
+    paths:
+      - 'samples/Ember*/**'
+      - 'scripts/build-ember-browser.sh'
+      - '.github/workflows/ember.yml'
+  pull_request:
+    # Changes to the framework are covered by the workspace run of ci.yml, which runs the
+    # Ember tests as well; this workflow follows the Ember sources.
+    paths:
+      - 'samples/Ember*/**'
+      - 'scripts/build-ember-browser.sh'
+      - '.github/workflows/ember.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ember-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  CARGO_TERM_COLOR: always
+  CARGO_INCREMENTAL: '0'
+  CARGO_PROFILE_DEV_DEBUG: '0'
+  CARGO_PROFILE_TEST_DEBUG: '0'
+  RUST_BACKTRACE: '1'
+
+jobs:
+  reader:
+    name: Core, rich content and native reader
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: dtolnay/rust-toolchain@89b12181fb390509a0842a86cc55eeb8eb928c1d # stable
+      - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2
+        with:
+          key: ember-linux
+      - name: Font and rendering prerequisites
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            libfontconfig1-dev libfreetype6-dev fonts-dejavu-core pkg-config
+      - name: Repository, cache and persistent state tests
+        run: cargo test --locked -p ember-core
+      - name: Parser without a platform renderer
+        run: cargo test --locked -p ember-content --no-default-features
+      - name: Real control tree, layout, interaction and rich content tests
+        env:
+          EMBER_CAPTURE_DIR: ${{ github.workspace }}/target/ember-captures
+        run: cargo test --locked -p ember -p ember-content --features ember-content/render-tests --lib
+      - name: Desktop host compiles
+        run: cargo check --locked -p ember-desktop
+      - name: Upload reader theme captures
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: ember-reader-captures
+          path: target/ember-captures
+          if-no-files-found: ignore
+          retention-days: 7
+
+  browser-services:
+    name: Browser Fetch, IndexedDB and offline shell
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: '24'
+          cache: npm
+          cache-dependency-path: samples/Ember.Browser/package-lock.json
+      - name: Install deterministic IndexedDB test provider
+        run: npm ci --prefix samples/Ember.Browser
+      - name: Test platform bridge and offline worker
+        run: npm test --prefix samples/Ember.Browser

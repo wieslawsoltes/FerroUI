@@ -274,3 +274,79 @@ mod to_screen {
         assert_eq!(None, peer.to_screen(Rect::new(10.0, 20.0, 30.0, 40.0)));
     }
 }
+
+// Not in the reference (its peer holds its control): a platform can hold the peer of a control
+// that is gone (UI Automation asked for the fragment root of the peers of a page while the page
+// was replaced, and reached `owner()` of a `NoneAutomationPeer`). The peer answers every member
+// a platform bridge calls with an empty value and does not reach its control.
+mod a_control_that_is_gone {
+    use super::*;
+    use crate::automation::peers::{AutomationControlType, NoneAutomationPeer};
+    use crate::automation::provider::IInvokeProvider;
+    use crate::automation::AutomationLiveSetting;
+
+    #[test]
+    fn the_peer_of_a_control_reports_its_element_while_the_control_exists() {
+        let _scope = test_scope();
+        let border = Border::new();
+        let target = create_peer(&border);
+
+        assert!(target.is_element_available());
+        drop(border);
+        assert!(!target.is_element_available());
+    }
+
+    #[test]
+    fn a_none_peer_answers_every_member_with_an_empty_value() {
+        let _scope = test_scope();
+        let border = Border::new();
+        let tree = Decorator::new();
+        tree.set_child(border.clone());
+        let target = create_peer(&border);
+        assert!(target.cast::<NoneAutomationPeer>().is_some());
+        let parent = create_peer(&tree);
+        assert_eq!(parent.get_children().len(), 1);
+
+        drop(tree);
+        drop(border);
+
+        // The members a platform bridge calls: none panics, none reaches the control.
+        assert!(!target.is_element_available());
+        assert!(target.get_automation_root().is_none());
+        assert!(target.get_visual_root().is_none());
+        assert!(target.get_parent().is_none());
+        assert!(target.get_children().is_empty());
+        assert_eq!(target.get_name(), "");
+        assert_eq!(target.get_help_text(), "");
+        assert_eq!(target.get_class_name(), "");
+        assert!(target.get_automation_id().is_none());
+        assert!(target.get_labeled_by().is_none());
+        assert_eq!(target.get_bounding_rectangle(), Rect::default());
+        assert!(target.to_screen(Rect::new(0.0, 0.0, 1.0, 1.0)).is_none());
+        assert_eq!(target.get_automation_control_type(), AutomationControlType::None);
+        assert!(!target.is_enabled());
+        assert!(!target.is_keyboard_focusable());
+        assert!(!target.has_keyboard_focus());
+        assert!(!target.is_content_element());
+        assert!(!target.is_control_element());
+        assert!(target.is_offscreen());
+        assert_eq!(target.get_live_setting(), AutomationLiveSetting::Off);
+        assert!(!target.show_context_menu());
+        target.set_focus();
+        target.bring_into_view();
+    }
+
+    #[test]
+    fn the_peer_of_a_button_that_is_gone_provides_no_pattern() {
+        let _scope = test_scope();
+        let button = Button::new();
+        let target = create_peer(&button);
+        assert!(target.get_provider::<dyn IInvokeProvider>().is_some());
+
+        drop(button);
+
+        assert!(target.get_provider::<dyn IInvokeProvider>().is_none());
+        assert!(target.ensure_enabled().is_err());
+        assert_eq!(target.get_name(), "");
+    }
+}

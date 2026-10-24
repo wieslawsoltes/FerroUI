@@ -144,7 +144,8 @@ fn primary(cursor: &mut Cursor, scope: &Scope) -> Option<i64> {
                 return match (own, name.as_str(), arguments.is_empty()) {
                     (true, "empty", true) => Some(0),
                     (true, "all", true) => (scope.all)(),
-                    (true, "from_bits_retain" | "from_bits_truncate", false) => evaluate(&arguments, scope),
+                    (true, "from_bits_retain", false) => evaluate(&arguments, scope),
+                    (true, "from_bits_truncate", false) => Some(evaluate(&arguments, scope)? & (scope.all)()?),
                     _ => None,
                 };
             }
@@ -207,7 +208,9 @@ mod tests {
         assert_eq!(value("Flags::empty()"), Some(0));
         assert_eq!(value("Self::all()"), Some(11));
         assert_eq!(value("Flags::from_bits_retain(Self::A.bits() | 4)"), Some(5));
-        assert_eq!(value("Flags::from_bits_truncate(6)"), Some(6));
+        assert_eq!(value("Flags::from_bits_retain(6)"), Some(6));
+        assert_eq!(value("Flags::from_bits_truncate(6)"), Some(2));
+        assert_eq!(value("Flags::from_bits_truncate(15)"), Some(11));
         assert_eq!(value("Self::A.union(Self::D)"), Some(9));
         assert_eq!(value("Self::all().difference(Flags::B)"), Some(9));
         assert_eq!(value("Self::all().intersection(Flags::B)"), Some(2));
