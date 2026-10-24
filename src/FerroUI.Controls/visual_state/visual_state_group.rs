@@ -8,7 +8,8 @@ use super::{AppliedSetters, VisualState, VisualStateChangedEventArgs};
 use ferroui_base::collections::FerroList;
 use ferroui_base::reactive::{Disposable, IDisposable};
 use ferroui_base::utilities::HandlerList;
-use ferroui_base::{ferro_class, ferro_class_info, ferro_impl_classes, instantiate, FerroObject, FerroObjectImpl, Ref};
+use crate::Control;
+use ferroui_base::{ferro_class, ferro_class_info, ferro_impl_classes, instantiate, FerroObject, FerroObjectImpl, Ref, WeakRef};
 use std::cell::RefCell;
 use std::rc::Rc;
 
@@ -31,6 +32,10 @@ pub struct VisualStateGroup {
     applied: RefCell<AppliedSetters>,
     current_state_changing: HandlerList<StateChangedHandler>,
     current_state_changed: HandlerList<StateChangedHandler>,
+    // The element of the group while it is in a tree (the triggers select states then), and the
+    // state the triggers selected last (`None` inside: no state; `None` outside: not evaluated).
+    trigger_root: RefCell<Option<WeakRef<Control>>>,
+    trigger_selection: RefCell<Option<Option<WeakRef<VisualState>>>>,
 }
 
 ferro_class!(VisualStateGroup: FerroObject);
@@ -58,6 +63,8 @@ impl VisualStateGroup {
             applied: RefCell::new(AppliedSetters::default()),
             current_state_changing: HandlerList::new(),
             current_state_changed: HandlerList::new(),
+            trigger_root: RefCell::new(None),
+            trigger_selection: RefCell::new(None),
         }
     }
 
@@ -163,9 +170,35 @@ impl VisualStateGroup {
         }
     }
 
+    /// The element whose groups this group is, while it is in a tree.
+    pub(crate) fn trigger_root(&self) -> Option<Ref<Control>> {
+        self.trigger_root.borrow().as_ref().and_then(WeakRef::upgrade)
+    }
+
+    pub(crate) fn set_trigger_root(&self, root: Option<&Ref<Control>>) {
+        *self.trigger_root.borrow_mut() = root.map(|root| root.downgrade());
+    }
+
+    /// Records the state the triggers select; `false` when it is the one they selected last.
+    pub(crate) fn set_trigger_selection(&self, state: Option<&Ref<VisualState>>) -> bool {
+        let mut selection = self.trigger_selection.borrow_mut();
+        let same = match &*selection {
+            Some(previous) => match (previous.as_ref().and_then(WeakRef::upgrade), state) {
+                (Some(previous), Some(state)) => &previous == state,
+                (None, None) => true,
+                _ => false,
+            },
+            None => false,
+        };
+        *selection = Some(state.map(|state| state.downgrade()));
+        !same
+    }
+
     /// Leaves the current state without raising events: the values are removed (the groups are
     /// removed from their element).
     pub(crate) fn detach(&self) {
+        *self.trigger_root.borrow_mut() = None;
+        *self.trigger_selection.borrow_mut() = None;
         self.set_state(None);
     }
 }

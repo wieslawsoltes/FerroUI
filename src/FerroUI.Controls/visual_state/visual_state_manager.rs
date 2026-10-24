@@ -292,12 +292,15 @@ impl VisualStateManager {
         );
     }
 
-    /// The groups of an element were replaced: the values of the groups it had are removed.
-    fn on_visual_state_groups_changed(_element: &Control, change: &FerroPropertyChangedEventArgs<'_>) {
+    /// The groups of an element were replaced: the values of the groups it had are removed, and
+    /// the triggers of the new ones are followed.
+    fn on_visual_state_groups_changed(element: &Control, change: &FerroPropertyChangedEventArgs<'_>) {
         if let Some(Some(old)) = change.get_old_value::<Option<VisualStateGroupCollection>>() {
             for group in old.snapshot().iter() {
                 group.detach();
             }
         }
+        let new = change.get_new_value::<Option<VisualStateGroupCollection>>();
+        super::state_triggers::install(element, new.as_ref());
     }
 }

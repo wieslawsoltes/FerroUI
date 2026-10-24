@@ -6,6 +6,7 @@
 
 use ferroui_base::collections::FerroList;
 use ferroui_base::styling::SetterBase;
+use super::StateTriggerBase;
 use ferroui_base::{ferro_class, ferro_class_info, ferro_impl_classes, instantiate, FerroObject, FerroObjectImpl, Ref};
 use std::cell::RefCell;
 use std::rc::Rc;
@@ -25,6 +26,7 @@ pub struct VisualState {
     base: FerroObject,
     name: RefCell<String>,
     setters: FerroList<Rc<dyn SetterBase>>,
+    state_triggers: FerroList<Ref<StateTriggerBase>>,
 }
 
 ferro_class!(VisualState: FerroObject);
@@ -35,6 +37,7 @@ ferro_class_info!(VisualState {
         properties: [
             Name: String { get: VisualState::name, set: |this: &Ref<VisualState>, value: String| this.set_name(value) },
             Setters: FerroList<Rc<dyn SetterBase>> { get: VisualState::setters },
+            StateTriggers: FerroList<Ref<StateTriggerBase>> { get: VisualState::state_triggers },
         ],
     },
 });
@@ -42,7 +45,12 @@ ferro_impl_classes!(VisualState: FerroObjectImpl);
 
 impl VisualState {
     pub fn construct() -> Self {
-        Self { base: FerroObject::construct(), name: RefCell::new(String::new()), setters: FerroList::new() }
+        Self {
+            base: FerroObject::construct(),
+            name: RefCell::new(String::new()),
+            setters: FerroList::new(),
+            state_triggers: FerroList::new(),
+        }
     }
 
     pub fn new() -> Ref<Self> {
@@ -75,5 +83,11 @@ impl VisualState {
     /// The setters of the state (WinUI's `SetterBaseCollection`).
     pub fn setters(&self) -> FerroList<Rc<dyn SetterBase>> {
         self.setters.clone()
+    }
+
+    /// The triggers of the state: the state is a candidate to be the current state of its group
+    /// while one of them is active (several triggers of a state are alternatives).
+    pub fn state_triggers(&self) -> FerroList<Ref<StateTriggerBase>> {
+        self.state_triggers.clone()
     }
 }

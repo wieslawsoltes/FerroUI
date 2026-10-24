@@ -719,8 +719,8 @@ pub use table_view_row::TableViewRow;
 // WinUI's visual state manager (docs/porting/winui-calculator-gaps.md).
 pub mod visual_state;
 pub use visual_state::{
-    VisualState, VisualStateChangedEventArgs, VisualStateGroup, VisualStateGroupCollection, VisualStateManager,
-    VisualStateManagerImpl,
+    AdaptiveTrigger, StateTrigger, StateTriggerBase, VisualState, VisualStateChangedEventArgs, VisualStateGroup,
+    VisualStateGroupCollection, VisualStateManager, VisualStateManagerImpl,
 };
 #[cfg(test)]
 mod table_view_column_header_tests;

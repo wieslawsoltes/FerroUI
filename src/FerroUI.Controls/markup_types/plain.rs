@@ -9,7 +9,7 @@ use crate::primitives::popup_positioning::{
 };
 use crate::primitives::CustomPopupPlacementCallbackValue;
 use crate::templates::{DataTemplates, IDataTemplate};
-use crate::{ItemsSourceView, NativeMenuItemBase, Page, TableViewColumn, VisualState, VisualStateGroup};
+use crate::{ItemsSourceView, NativeMenuItemBase, Page, StateTriggerBase, TableViewColumn, VisualState, VisualStateGroup};
 use ferroui_base::collections::FerroList;
 use crate::{
     ColumnDefinition, ColumnDefinitions, Control, Controls, ItemCollection, RowDefinition, RowDefinitions, TrayIcon,
@@ -437,6 +437,20 @@ ferro_markup_type!(class FerroListOf<Ref<VisualState>> as "FerroList`1" {
     methods: [fn Add(Ref<VisualState>) => |list: &FerroList<Ref<VisualState>>, item: Ref<VisualState>| list.add(item)],
 });
 
+// The triggers of a visual state (`VisualState.StateTriggers`).
+ferro_markup_type!(class FerroListOf<Ref<StateTriggerBase>> as "FerroList`1" {
+    namespace: "FerroUI.Collections",
+    handles: [FerroList<Ref<StateTriggerBase>>, Option<FerroList<Ref<StateTriggerBase>>>],
+    this: FerroList<Ref<StateTriggerBase>>,
+    generic: "FerroList`1" [Ref<StateTriggerBase>],
+    constructors: [() => FerroList::<Ref<StateTriggerBase>>::new],
+    properties: [
+        Capacity: i32 { get: list_capacity, try_set: set_list_capacity },
+        Count: i32 { get: |list: &FerroList<Ref<StateTriggerBase>>| list.count() as i32 },
+    ],
+    methods: [fn Add(Ref<StateTriggerBase>) => |list: &FerroList<Ref<StateTriggerBase>>, item: Ref<StateTriggerBase>| list.add(item)],
+});
+
 // The arguments of `ScrollViewer.ScrollChanged` and the type of its routed event. `classes.rs`
 // declares the arguments of the routed events of the classes whose `markup:` part it generates;
 // the scroll viewer declares its part in its own file (with its public methods), so the two
@@ -509,6 +523,7 @@ pub(super) const TYPES: &[&MarkupType] = &[
     <FerroListOf<Ref<TableViewColumn>> as MarkupTyped>::MARKUP,
     <FerroListOf<Ref<VisualStateGroup>> as MarkupTyped>::MARKUP,
     <FerroListOf<Ref<VisualState>> as MarkupTyped>::MARKUP,
+    <FerroListOf<Ref<StateTriggerBase>> as MarkupTyped>::MARKUP,
 ];
 
 /// Registers the nullable forms of the types that can be held in untyped
@@ -533,6 +548,7 @@ pub(super) fn register_value_types() {
     ValueTypes::register_nullable::<FerroList<Ref<TableViewColumn>>>();
     ValueTypes::register_nullable::<FerroList<Ref<VisualStateGroup>>>();
     ValueTypes::register_nullable::<FerroList<Ref<VisualState>>>();
+    ValueTypes::register_nullable::<FerroList<Ref<StateTriggerBase>>>();
     ValueTypes::register_nullable::<Rc<WindowIcon>>();
     ValueTypes::register_nullable::<Rc<RefCell<CustomPopupPlacement>>>();
     ValueTypes::register_nullable::<CustomPopupPlacementCallbackValue>();
