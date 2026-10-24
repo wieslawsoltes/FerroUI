@@ -117,3 +117,12 @@ pub trait IStorageProvider {
         false
     }
 }
+
+/// Storage providers compare by identity (reference equality), so that they can be held in
+/// property and untyped values (the value of `TopLevel.StorageProvider` a binding reads).
+impl PartialEq for dyn IStorageProvider {
+    #[inline]
+    fn eq(&self, other: &Self) -> bool {
+        std::ptr::addr_eq(self as *const Self, other as *const Self)
+    }
+}

@@ -288,6 +288,7 @@ ferroui_base::ferro_rust_paths! {
         crate::Location,
         crate::MenuItemToggleType,
         crate::NavigationType,
+        crate::Notification,
         crate::NotificationPosition,
         crate::NotificationType,
         crate::PageSelectionChangedEventArgs,

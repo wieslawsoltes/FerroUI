@@ -45,6 +45,13 @@ All notable changes to FerroUI are recorded in this file. The format follows [Ke
 
 ### Fixed
 
+- Gaps the port of the Behaviors sample gallery found (#298):
+  - markup indexes an items source: the handle `ItemsSource` is published to markup as `System.Collections.IList` (was `IEnumerable`) with the indexer, so `{Binding Items[0]}` compiles and binds, and a reflection binding reads `Items.Count` (`ferroui-controls`, `ferroui-markup-xaml-loader`);
+  - generated code adds a value of a reference type (a view model) to a typed list created in markup (`<generic:List x:TypeArguments="vm:ItemViewModel">`): the item is cast to the handle of the element type at run time (`rt::cast_untyped`); before, the target of the cast was left to inference, which made it `()`, and the document failed with "Unable to cast the value to ()" (`ferroui-markup-xaml-loader`, `ferroui-markup-xaml`);
+  - a binding delivers the selected items of a selecting control (`SelectedItemsList`) to an items source (`ItemsSource`, `Option<ItemsSource>`), which shares the list (`ferroui-controls`);
+  - select all of a list box without items source no longer hangs: a selection model without an items view selects nothing (`ferroui-controls`, DEVIATIONS.md);
+  - a name resolved for a property of a contract type (`Target="AnimatedRenderTarget"` with `[ResolveByName]`, a property of type `Option<Rc<dyn Contract>>`) is assigned in generated code: the run-time check of the setter sees the value in the nullable form `ResolveByName` provides as what it holds (`rt::is_instance`); before, the document failed with "No setter of property Target accepts a value of type ..." (`ferroui-markup-xaml`);
+  - markup knows `TopLevel.StorageProvider` and the contract `IStorageProvider` (`{Binding $parent[TopLevel].StorageProvider}`), and creates a `Notification` with `Title`, `Message`, `Type` and `Expiration` (`ferroui-base`, `ferroui-controls`).
 - Automation: the peer of a control that is gone no longer panics ("The control of the automation peer no longer exists.") when a platform still asks it something, as UI Automation did during page navigation on Windows: `AutomationPeer::is_element_available` tells such a peer, its public members answer empty values, the nodes of UI Automation answer `UIA_E_ELEMENTNOTAVAILABLE` and the handlers of AT-SPI an unknown object.
 
 ## [0.4.0] - 2026-10-22

@@ -22,6 +22,7 @@ use xamlx::type_system::{IXamlConstructor, IXamlField, IXamlMethod, IXamlType};
 
 use crate::runtime::type_system::{
     DeclaredMember, RuntimeConstructor, RuntimeField, RuntimeFieldValue, RuntimeInvoker, RuntimeMethod, RuntimeType,
+    RuntimeTypeOrigin,
 };
 
 use super::emit_types::{
@@ -306,7 +307,18 @@ impl EmitTypes for RuntimeEmitTypes {
 
     fn metadata_of(&self, type_: &dyn IXamlType) -> Option<&dyn EmitMarkup> {
         let runtime = runtime_type(type_)?;
-        let found = runtime.markup().or_else(|| MarkupType::find_by_handle(runtime.handle()?.id()))?;
+        let found = runtime
+            .markup()
+            .or_else(|| MarkupType::find_by_handle(runtime.handle()?.id()))
+            // A type of the table of runtime library types whose metadata a crate declares
+            // (`System.Collections.IList`, the items source handle): the type is that metadata.
+            .or_else(|| match runtime.origin() {
+                RuntimeTypeOrigin::Synthetic => {
+                    let namespace = type_.namespace().filter(|namespace| namespace.starts_with("System"))?;
+                    MarkupType::find(&namespace, &type_.name()).filter(|found| found.generic.is_none())
+                }
+                _ => None,
+            })?;
         Some(markup(found))
     }
 
