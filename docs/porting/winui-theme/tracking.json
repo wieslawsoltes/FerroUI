@@ -90750,7 +90750,7 @@
    "winui": "AutoSuggestBox: the implicit style and DefaultAutoSuggestBoxStyle, with AutoSuggestBoxTextBoxStyle, QueryButtonStyle and the resources of AutoSuggestBox_themeresources.xaml (DefaultAutoSuggestBoxStyle and AutoSuggestBoxTextBoxStyle are ported in AutoCompleteBox.xaml). A WinUI control in ferroui-controls (docs/porting/winui-controls.md); the Fluent theme has no document for it.",
    "status": "ported",
    "deviations": 7,
-   "date": "not committed"
+   "date": "2026-10-24"
   },
   {
    "document": "NumberBox.xaml",
@@ -90761,7 +90761,7 @@
    "winui": "NumberBox: {NumberBox} (NumberBox.xaml, NumberBox_themeresources.xaml), with NumberBoxTextBoxStyle, NumberBoxSpinButtonStyle and NumberBoxPopupSpinButtonStyle, which NumericUpDown.xaml ports. A WinUI control in ferroui-controls (docs/porting/winui-controls.md); the Fluent theme has no document for it.",
    "status": "ported",
    "deviations": 8,
-   "date": "not committed"
+   "date": "2026-10-24"
   },
   {
    "document": "RadioButtons.xaml",
@@ -90772,7 +90772,7 @@
    "winui": "RadioButtons: DefaultRadioButtonsStyle and the implicit style (RadioButtons.xaml, RadioButtons_themeresources.xaml), the layout ColumnMajorUniformToLargestGridLayout as the items panel RadioButtonsPanel. A WinUI control in ferroui-controls (docs/porting/winui-controls.md); the Fluent theme has no document for it.",
    "status": "ported",
    "deviations": 3,
-   "date": "not committed"
+   "date": "2026-10-24"
   },
   {
    "document": "RatingControl.xaml",
@@ -90783,7 +90783,7 @@
    "winui": "RatingControl: {RatingControl} (RatingControl.xaml, RatingControl_themeresources.xaml). A WinUI control in ferroui-controls (docs/porting/winui-controls.md); the Fluent theme has no document for it.",
    "status": "ported",
    "deviations": 6,
-   "date": "not committed"
+   "date": "2026-10-24"
   },
   {
    "document": "PipsPager.xaml",
