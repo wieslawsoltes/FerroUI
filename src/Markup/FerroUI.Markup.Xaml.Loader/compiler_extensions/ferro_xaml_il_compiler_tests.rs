@@ -71,6 +71,7 @@ fn pipeline_has_the_upstream_order() {
             "FerroXamlIlDuplicateSettersChecker",
             "FerroXamlIlControlTemplateTargetTypeMetadataTransformer",
             "FerroXamlIlBindingPathParser",
+            "FerroXamlIlVisualStateSetterTransformer",
             "FerroXamlIlSetterTargetTypeMetadataTransformer",
             "FerroXamlIlSetterTransformer",
             "FerroXamlIlStyleValidatorTransformer",

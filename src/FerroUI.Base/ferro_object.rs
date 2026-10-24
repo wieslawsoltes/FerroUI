@@ -608,6 +608,25 @@ impl FerroObject {
         self.values.add_binding_expression(self, property, expression)
     }
 
+    /// Binds a property to a binding at the given priority, whatever the
+    /// default priority of the binding is. Disposing the returned expression
+    /// removes the binding.
+    ///
+    /// An addition (no upstream counterpart): the values of WinUI's visual
+    /// states are bound at [`BindingPriority::Animation`].
+    pub fn bind_binding_with_priority(
+        &self,
+        property: &'static FerroProperty,
+        binding: &dyn BindingBase,
+        priority: BindingPriority,
+        anchor: Option<&Ref<FerroObject>>,
+    ) -> Rc<dyn BindingExpressionBase> {
+        Self::validate_priority(priority);
+        crate::perf_count!(BindingsInstanced);
+        let expression = binding.create_instance(self, Some(property), anchor);
+        self.values.add_binding_expression_with_priority(self, property, expression, priority)
+    }
+
     /// Gets a binding to a property of this object: the indexer taking an
     /// [`IndexerDescriptor`](crate::data::IndexerDescriptor)
     /// (`source[!Property]` is `source.indexer(&Property.bind())`).

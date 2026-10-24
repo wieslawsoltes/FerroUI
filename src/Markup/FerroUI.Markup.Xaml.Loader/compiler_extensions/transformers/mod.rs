@@ -59,6 +59,7 @@ mod ferro_xaml_il_duplicate_setters_checker;
 mod ferro_xaml_il_query_transformer;
 mod ferro_xaml_il_selector_transformer;
 mod ferro_xaml_il_setter_target_type_metadata_transformer;
+mod ferro_xaml_il_visual_state_setter_transformer;
 mod ferro_xaml_il_setter_transformer;
 mod ferro_xaml_il_style_validator_transformer;
 
@@ -70,6 +71,7 @@ pub use ferro_xaml_il_duplicate_setters_checker::*;
 pub use ferro_xaml_il_query_transformer::*;
 pub use ferro_xaml_il_selector_transformer::*;
 pub use ferro_xaml_il_setter_target_type_metadata_transformer::*;
+pub use ferro_xaml_il_visual_state_setter_transformer::*;
 pub use ferro_xaml_il_setter_transformer::*;
 pub use ferro_xaml_il_style_validator_transformer::*;
 

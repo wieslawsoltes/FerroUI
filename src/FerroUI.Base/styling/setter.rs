@@ -1,7 +1,7 @@
 use super::{
     DirectPropertySetterBindingInstance, DirectPropertySetterInstance, IStyleInstance, ISetterInstance,
     ISetterValue, ITemplate, PropertySetterTemplateInstance, SetterBase, SetterInstance, SetterInstanceKind,
-    StyleInstance,
+    StyleInstance, TargetPropertyPath,
 };
 use crate::data::core::SinkRef;
 use crate::data::{BindingBase, BindingPriority};
@@ -43,6 +43,9 @@ pub struct Setter {
     property: Cell<Option<&'static FerroProperty>>,
     value: RefCell<Option<SetterValue>>,
     direct: OnceCell<Rc<DirectPropertySetterInstance>>,
+    // WinUI's `Setter.Target` (an opt-in addition, DEVIATIONS.md, WinUI additions to upstream
+    // controls): `None`, the default, is the upstream setter.
+    target: RefCell<Option<Rc<TargetPropertyPath>>>,
 }
 
 
@@ -57,7 +60,12 @@ impl PartialEq for Setter {
 
 impl Default for Setter {
     fn default() -> Self {
-        Self { property: Cell::new(None), value: RefCell::new(None), direct: OnceCell::new() }
+        Self {
+            property: Cell::new(None),
+            value: RefCell::new(None),
+            direct: OnceCell::new(),
+            target: RefCell::new(None),
+        }
     }
 }
 
@@ -110,6 +118,20 @@ impl Setter {
 
     pub fn set_property(&self, value: Option<&'static FerroProperty>) {
         self.property.set(value)
+    }
+
+    /// The target of the setter in a visual state (WinUI's `Setter.Target`): the object whose
+    /// [`property`](Self::property) the setter sets. `None` (the default) for the setters of
+    /// styles, which set the property of the element the style applies to.
+    ///
+    /// An addition (docs/porting/winui-calculator-gaps.md, section 5.2). A style with a setter
+    /// that has a target is an error, as `Setter.Property` in a visual state is in WinUI.
+    pub fn target(&self) -> Option<Rc<TargetPropertyPath>> {
+        self.target.borrow().clone()
+    }
+
+    pub fn set_target(&self, value: Option<Rc<TargetPropertyPath>>) {
+        *self.target.borrow_mut() = value;
     }
 
     /// The property value.
@@ -221,6 +243,13 @@ impl SetterBase for Setter {
         let Some(property) = self.property.get() else {
             panic!("Setter.Property must be set.");
         };
+
+        if self.target.borrow().is_some() {
+            panic!(
+                "Setter.Target is only valid in a visual state, not in '{}'.",
+                instance.source_display()
+            );
+        }
 
         if property.is_direct() && instance.has_activator() {
             panic!(

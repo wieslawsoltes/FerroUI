@@ -9,7 +9,7 @@ use crate::primitives::popup_positioning::{
 };
 use crate::primitives::CustomPopupPlacementCallbackValue;
 use crate::templates::{DataTemplates, IDataTemplate};
-use crate::{ItemsSourceView, NativeMenuItemBase, Page, TableViewColumn};
+use crate::{ItemsSourceView, NativeMenuItemBase, Page, TableViewColumn, VisualState, VisualStateGroup};
 use ferroui_base::collections::FerroList;
 use crate::{
     ColumnDefinition, ColumnDefinitions, Control, Controls, ItemCollection, RowDefinition, RowDefinitions, TrayIcon,
@@ -409,6 +409,34 @@ ferro_markup_type!(class FerroListOf<Ref<TableViewColumn>> as "FerroList`1" {
     methods: [fn Add(Ref<TableViewColumn>) => |list: &FerroList<Ref<TableViewColumn>>, item: Ref<TableViewColumn>| list.add(item)],
 });
 
+// The visual state groups of an element (`VisualStateManager.VisualStateGroups`).
+ferro_markup_type!(class FerroListOf<Ref<VisualStateGroup>> as "FerroList`1" {
+    namespace: "FerroUI.Collections",
+    handles: [FerroList<Ref<VisualStateGroup>>, Option<FerroList<Ref<VisualStateGroup>>>],
+    this: FerroList<Ref<VisualStateGroup>>,
+    generic: "FerroList`1" [Ref<VisualStateGroup>],
+    constructors: [() => FerroList::<Ref<VisualStateGroup>>::new],
+    properties: [
+        Capacity: i32 { get: list_capacity, try_set: set_list_capacity },
+        Count: i32 { get: |list: &FerroList<Ref<VisualStateGroup>>| list.count() as i32 },
+    ],
+    methods: [fn Add(Ref<VisualStateGroup>) => |list: &FerroList<Ref<VisualStateGroup>>, item: Ref<VisualStateGroup>| list.add(item)],
+});
+
+// The states of a visual state group (`VisualStateGroup.States`).
+ferro_markup_type!(class FerroListOf<Ref<VisualState>> as "FerroList`1" {
+    namespace: "FerroUI.Collections",
+    handles: [FerroList<Ref<VisualState>>, Option<FerroList<Ref<VisualState>>>],
+    this: FerroList<Ref<VisualState>>,
+    generic: "FerroList`1" [Ref<VisualState>],
+    constructors: [() => FerroList::<Ref<VisualState>>::new],
+    properties: [
+        Capacity: i32 { get: list_capacity, try_set: set_list_capacity },
+        Count: i32 { get: |list: &FerroList<Ref<VisualState>>| list.count() as i32 },
+    ],
+    methods: [fn Add(Ref<VisualState>) => |list: &FerroList<Ref<VisualState>>, item: Ref<VisualState>| list.add(item)],
+});
+
 // The arguments of `ScrollViewer.ScrollChanged` and the type of its routed event. `classes.rs`
 // declares the arguments of the routed events of the classes whose `markup:` part it generates;
 // the scroll viewer declares its part in its own file (with its public methods), so the two
@@ -479,6 +507,8 @@ pub(super) const TYPES: &[&MarkupType] = &[
     <FerroListOf<Ref<NativeMenuItemBase>> as MarkupTyped>::MARKUP,
     <FerroListOf<Ref<Page>> as MarkupTyped>::MARKUP,
     <FerroListOf<Ref<TableViewColumn>> as MarkupTyped>::MARKUP,
+    <FerroListOf<Ref<VisualStateGroup>> as MarkupTyped>::MARKUP,
+    <FerroListOf<Ref<VisualState>> as MarkupTyped>::MARKUP,
 ];
 
 /// Registers the nullable forms of the types that can be held in untyped
@@ -501,6 +531,8 @@ pub(super) fn register_value_types() {
     ValueTypes::register_nullable::<FerroList<Ref<NativeMenuItemBase>>>();
     ValueTypes::register_nullable::<FerroList<Ref<Page>>>();
     ValueTypes::register_nullable::<FerroList<Ref<TableViewColumn>>>();
+    ValueTypes::register_nullable::<FerroList<Ref<VisualStateGroup>>>();
+    ValueTypes::register_nullable::<FerroList<Ref<VisualState>>>();
     ValueTypes::register_nullable::<Rc<WindowIcon>>();
     ValueTypes::register_nullable::<Rc<RefCell<CustomPopupPlacement>>>();
     ValueTypes::register_nullable::<CustomPopupPlacementCallbackValue>();
