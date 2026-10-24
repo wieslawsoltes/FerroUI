@@ -52644,8 +52644,8 @@
    "key": "{InfoBadge}",
    "kind": "Style",
    "target_type": "InfoBadge",
-   "status": "waived",
-   "reason": "InfoBadge: no FerroUI control.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -52654,8 +52654,8 @@
    "key": "AttentionDotInfoBadgeStyle",
    "kind": "Style",
    "target_type": "InfoBadge",
-   "status": "waived",
-   "reason": "InfoBadge: no FerroUI control.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -52664,8 +52664,8 @@
    "key": "AttentionIconInfoBadgeStyle",
    "kind": "Style",
    "target_type": "InfoBadge",
-   "status": "waived",
-   "reason": "InfoBadge: no FerroUI control.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -52674,8 +52674,8 @@
    "key": "AttentionValueInfoBadgeStyle",
    "kind": "Style",
    "target_type": "InfoBadge",
-   "status": "waived",
-   "reason": "InfoBadge: no FerroUI control.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -52684,8 +52684,8 @@
    "key": "CautionDotInfoBadgeStyle",
    "kind": "Style",
    "target_type": "InfoBadge",
-   "status": "waived",
-   "reason": "InfoBadge: no FerroUI control.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -52694,8 +52694,8 @@
    "key": "CautionIconInfoBadgeStyle",
    "kind": "Style",
    "target_type": "InfoBadge",
-   "status": "waived",
-   "reason": "InfoBadge: no FerroUI control.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -52704,8 +52704,8 @@
    "key": "CautionValueInfoBadgeStyle",
    "kind": "Style",
    "target_type": "InfoBadge",
-   "status": "waived",
-   "reason": "InfoBadge: no FerroUI control.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -52714,8 +52714,8 @@
    "key": "CriticalDotInfoBadgeStyle",
    "kind": "Style",
    "target_type": "InfoBadge",
-   "status": "waived",
-   "reason": "InfoBadge: no FerroUI control.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -52724,8 +52724,8 @@
    "key": "CriticalIconInfoBadgeStyle",
    "kind": "Style",
    "target_type": "InfoBadge",
-   "status": "waived",
-   "reason": "InfoBadge: no FerroUI control.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -52734,8 +52734,8 @@
    "key": "CriticalValueInfoBadgeStyle",
    "kind": "Style",
    "target_type": "InfoBadge",
-   "status": "waived",
-   "reason": "InfoBadge: no FerroUI control.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -52744,8 +52744,8 @@
    "key": "DefaultInfoBadgeStyle",
    "kind": "Style",
    "target_type": "InfoBadge",
-   "status": "waived",
-   "reason": "InfoBadge: no FerroUI control.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -52754,8 +52754,8 @@
    "key": "InformationalDotInfoBadgeStyle",
    "kind": "Style",
    "target_type": "InfoBadge",
-   "status": "waived",
-   "reason": "InfoBadge: no FerroUI control.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -52764,8 +52764,8 @@
    "key": "InformationalIconInfoBadgeStyle",
    "kind": "Style",
    "target_type": "InfoBadge",
-   "status": "waived",
-   "reason": "InfoBadge: no FerroUI control.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -52774,8 +52774,8 @@
    "key": "InformationalValueInfoBadgeStyle",
    "kind": "Style",
    "target_type": "InfoBadge",
-   "status": "waived",
-   "reason": "InfoBadge: no FerroUI control.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -52784,8 +52784,8 @@
    "key": "SuccessDotInfoBadgeStyle",
    "kind": "Style",
    "target_type": "InfoBadge",
-   "status": "waived",
-   "reason": "InfoBadge: no FerroUI control.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -52794,8 +52794,8 @@
    "key": "SuccessIconInfoBadgeStyle",
    "kind": "Style",
    "target_type": "InfoBadge",
-   "status": "waived",
-   "reason": "InfoBadge: no FerroUI control.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -52804,8 +52804,8 @@
    "key": "SuccessValueInfoBadgeStyle",
    "kind": "Style",
    "target_type": "InfoBadge",
-   "status": "waived",
-   "reason": "InfoBadge: no FerroUI control.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -52814,8 +52814,8 @@
    "key": "IconInfoBadgeFontIconMargin",
    "kind": "Thickness",
    "target_type": "",
-   "status": "waived",
-   "reason": "InfoBadge: no FerroUI control.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -52824,8 +52824,8 @@
    "key": "IconInfoBadgeIconMargin",
    "kind": "Thickness",
    "target_type": "",
-   "status": "waived",
-   "reason": "InfoBadge: no FerroUI control.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -52834,8 +52834,8 @@
    "key": "InfoBadgeBackground",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "InfoBadge: no FerroUI control.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -52844,8 +52844,8 @@
    "key": "InfoBadgeForeground",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "InfoBadge: no FerroUI control.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -52854,8 +52854,8 @@
    "key": "InfoBadgeIconHeight",
    "kind": "x:Double",
    "target_type": "",
-   "status": "waived",
-   "reason": "InfoBadge: no FerroUI control.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -52864,8 +52864,8 @@
    "key": "InfoBadgeIconWidth",
    "kind": "x:Double",
    "target_type": "",
-   "status": "waived",
-   "reason": "InfoBadge: no FerroUI control.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -52874,8 +52874,8 @@
    "key": "InfoBadgeMaxHeight",
    "kind": "x:Double",
    "target_type": "",
-   "status": "waived",
-   "reason": "InfoBadge: no FerroUI control.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -52884,8 +52884,8 @@
    "key": "InfoBadgeMinHeight",
    "kind": "x:Double",
    "target_type": "",
-   "status": "waived",
-   "reason": "InfoBadge: no FerroUI control.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -52894,8 +52894,8 @@
    "key": "InfoBadgeMinWidth",
    "kind": "x:Double",
    "target_type": "",
-   "status": "waived",
-   "reason": "InfoBadge: no FerroUI control.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -52904,8 +52904,8 @@
    "key": "InfoBadgePadding",
    "kind": "Thickness",
    "target_type": "",
-   "status": "waived",
-   "reason": "InfoBadge: no FerroUI control.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -52914,8 +52914,8 @@
    "key": "InfoBadgeValueFontSize",
    "kind": "x:Double",
    "target_type": "",
-   "status": "waived",
-   "reason": "InfoBadge: no FerroUI control.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -52924,8 +52924,8 @@
    "key": "ValueInfoBadgeTextMargin",
    "kind": "Thickness",
    "target_type": "",
-   "status": "waived",
-   "reason": "InfoBadge: no FerroUI control.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -52934,8 +52934,8 @@
    "key": "IconInfoBadgeFontIconMargin",
    "kind": "Thickness",
    "target_type": "",
-   "status": "waived",
-   "reason": "InfoBadge: no FerroUI control.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -52944,8 +52944,8 @@
    "key": "IconInfoBadgeIconMargin",
    "kind": "Thickness",
    "target_type": "",
-   "status": "waived",
-   "reason": "InfoBadge: no FerroUI control.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -52954,8 +52954,8 @@
    "key": "InfoBadgeBackground",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "InfoBadge: no FerroUI control.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -52964,8 +52964,8 @@
    "key": "InfoBadgeForeground",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "InfoBadge: no FerroUI control.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -52974,8 +52974,8 @@
    "key": "InfoBadgeIconHeight",
    "kind": "x:Double",
    "target_type": "",
-   "status": "waived",
-   "reason": "InfoBadge: no FerroUI control.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -52984,8 +52984,8 @@
    "key": "InfoBadgeIconWidth",
    "kind": "x:Double",
    "target_type": "",
-   "status": "waived",
-   "reason": "InfoBadge: no FerroUI control.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -52994,8 +52994,8 @@
    "key": "InfoBadgeMaxHeight",
    "kind": "x:Double",
    "target_type": "",
-   "status": "waived",
-   "reason": "InfoBadge: no FerroUI control.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -53004,8 +53004,8 @@
    "key": "InfoBadgeMinHeight",
    "kind": "x:Double",
    "target_type": "",
-   "status": "waived",
-   "reason": "InfoBadge: no FerroUI control.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -53014,8 +53014,8 @@
    "key": "InfoBadgeMinWidth",
    "kind": "x:Double",
    "target_type": "",
-   "status": "waived",
-   "reason": "InfoBadge: no FerroUI control.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -53024,8 +53024,8 @@
    "key": "InfoBadgePadding",
    "kind": "Thickness",
    "target_type": "",
-   "status": "waived",
-   "reason": "InfoBadge: no FerroUI control.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -53034,8 +53034,8 @@
    "key": "InfoBadgeValueFontSize",
    "kind": "x:Double",
    "target_type": "",
-   "status": "waived",
-   "reason": "InfoBadge: no FerroUI control.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -53044,8 +53044,8 @@
    "key": "ValueInfoBadgeTextMargin",
    "kind": "Thickness",
    "target_type": "",
-   "status": "waived",
-   "reason": "InfoBadge: no FerroUI control.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -53054,8 +53054,8 @@
    "key": "IconInfoBadgeFontIconMargin",
    "kind": "Thickness",
    "target_type": "",
-   "status": "waived",
-   "reason": "InfoBadge: no FerroUI control.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -53064,8 +53064,8 @@
    "key": "IconInfoBadgeIconMargin",
    "kind": "Thickness",
    "target_type": "",
-   "status": "waived",
-   "reason": "InfoBadge: no FerroUI control.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -53074,8 +53074,8 @@
    "key": "InfoBadgeBackground",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "InfoBadge: no FerroUI control.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -53084,8 +53084,8 @@
    "key": "InfoBadgeForeground",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "InfoBadge: no FerroUI control.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -53094,8 +53094,8 @@
    "key": "InfoBadgeIconHeight",
    "kind": "x:Double",
    "target_type": "",
-   "status": "waived",
-   "reason": "InfoBadge: no FerroUI control.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -53104,8 +53104,8 @@
    "key": "InfoBadgeIconWidth",
    "kind": "x:Double",
    "target_type": "",
-   "status": "waived",
-   "reason": "InfoBadge: no FerroUI control.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -53114,8 +53114,8 @@
    "key": "InfoBadgeMaxHeight",
    "kind": "x:Double",
    "target_type": "",
-   "status": "waived",
-   "reason": "InfoBadge: no FerroUI control.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -53124,8 +53124,8 @@
    "key": "InfoBadgeMinHeight",
    "kind": "x:Double",
    "target_type": "",
-   "status": "waived",
-   "reason": "InfoBadge: no FerroUI control.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -53134,8 +53134,8 @@
    "key": "InfoBadgeMinWidth",
    "kind": "x:Double",
    "target_type": "",
-   "status": "waived",
-   "reason": "InfoBadge: no FerroUI control.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -53144,8 +53144,8 @@
    "key": "InfoBadgePadding",
    "kind": "Thickness",
    "target_type": "",
-   "status": "waived",
-   "reason": "InfoBadge: no FerroUI control.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -53154,8 +53154,8 @@
    "key": "InfoBadgeValueFontSize",
    "kind": "x:Double",
    "target_type": "",
-   "status": "waived",
-   "reason": "InfoBadge: no FerroUI control.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -53164,8 +53164,8 @@
    "key": "ValueInfoBadgeTextMargin",
    "kind": "Thickness",
    "target_type": "",
-   "status": "waived",
-   "reason": "InfoBadge: no FerroUI control.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -68954,8 +68954,8 @@
    "key": "{ProgressRing}",
    "kind": "Style",
    "target_type": "ProgressRing",
-   "status": "waived",
-   "reason": "ProgressRing: no FerroUI control (its animation is an animated visual, a Lottie composition).",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -68964,8 +68964,8 @@
    "key": "ProgressRingStrokeThickness",
    "kind": "x:Double",
    "target_type": "",
-   "status": "waived",
-   "reason": "ProgressRing: no FerroUI control (its animation is an animated visual, a Lottie composition).",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -68974,8 +68974,8 @@
    "key": "ProgressRingBackgroundThemeBrush",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "ProgressRing: no FerroUI control (its animation is an animated visual, a Lottie composition).",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -68984,8 +68984,8 @@
    "key": "ProgressRingForegroundThemeBrush",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "ProgressRing: no FerroUI control (its animation is an animated visual, a Lottie composition).",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -68994,8 +68994,8 @@
    "key": "ProgressRingBackgroundThemeBrush",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "ProgressRing: no FerroUI control (its animation is an animated visual, a Lottie composition).",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -69004,8 +69004,8 @@
    "key": "ProgressRingForegroundThemeBrush",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "ProgressRing: no FerroUI control (its animation is an animated visual, a Lottie composition).",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -69014,8 +69014,8 @@
    "key": "ProgressRingBackgroundThemeBrush",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "ProgressRing: no FerroUI control (its animation is an animated visual, a Lottie composition).",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -69024,8 +69024,8 @@
    "key": "ProgressRingForegroundThemeBrush",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "ProgressRing: no FerroUI control (its animation is an animated visual, a Lottie composition).",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -90087,6 +90087,8 @@
   "Controls/GroupBox.xaml",
   "Controls/HeaderedContentControl.xaml",
   "Controls/HyperlinkButton.xaml",
+  "Controls/InfoBadge.xaml",
+  "Controls/InfoBar.xaml",
   "Controls/ItemsControl.xaml",
   "Controls/Label.xaml",
   "Controls/ListBox.xaml",
@@ -90104,6 +90106,7 @@
   "Controls/PipsPager.xaml",
   "Controls/PopupRoot.xaml",
   "Controls/ProgressBar.xaml",
+  "Controls/ProgressRing.xaml",
   "Controls/RadioButton.xaml",
   "Controls/RefreshContainer.xaml",
   "Controls/RefreshVisualizer.xaml",
@@ -90170,6 +90173,7 @@
   "Resources/Glyphs.xaml",
   "Resources/HyperlinkButton_themeresources.xaml",
   "Resources/Hyperlink_themeresources.xaml",
+  "Resources/InfoBadge_themeresources.xaml",
   "Resources/InfoBar_themeresources.xaml",
   "Resources/ListBox_themeresources.xaml",
   "Resources/ListViewItem_themeresources.xaml",
@@ -90181,6 +90185,7 @@
   "Resources/PasswordBox_themeresources.xaml",
   "Resources/PipsPager_themeresources.xaml",
   "Resources/ProgressBar_themeresources.xaml",
+  "Resources/ProgressRing_themeresources.xaml",
   "Resources/RadioButton_themeresources.xaml",
   "Resources/RefreshContainer_themeresources.xaml",
   "Resources/RefreshVisualizer_themeresources.xaml",
@@ -90648,10 +90653,32 @@
     "{NotificationCard}"
    ],
    "batch": "B6",
-   "winui": "InfoBar: {InfoBar} (InfoBar.xaml, InfoBar_themeresources.xaml).",
+   "winui": "The template of InfoBar ({InfoBar}, InfoBar.xaml) and InfoBarCloseButtonStyle (InfoBar_themeresources.xaml): a toast drawn as an open InfoBar. WinUI's InfoBar itself is the InfoBar control (InfoBar.xaml).",
    "status": "ported",
    "deviations": 13,
-   "date": "2026-10-17"
+   "date": "2026-10-24"
+  },
+  {
+   "document": "InfoBar.xaml",
+   "themes": [
+    "{InfoBar}"
+   ],
+   "batch": "B6",
+   "winui": "InfoBar: {InfoBar} (InfoBar.xaml, InfoBar_themeresources.xaml), with InfoBarCloseButtonStyle of NotificationCard.xaml. A WinUI control in ferroui-controls (docs/porting/winui-controls.md); the Fluent theme has no document for it.",
+   "status": "ported",
+   "deviations": 8,
+   "date": "2026-10-24"
+  },
+  {
+   "document": "InfoBadge.xaml",
+   "themes": [
+    "{InfoBadge}"
+   ],
+   "batch": "B1",
+   "winui": "InfoBadge: {InfoBadge} (InfoBadge.xaml), DefaultInfoBadgeStyle and the Attention, Informational, Success, Caution and Critical styles (InfoBadge_themeresources.xaml). A WinUI control in ferroui-controls (docs/porting/winui-controls.md); the Fluent theme has no document for it.",
+   "status": "ported",
+   "deviations": 4,
+   "date": "2026-10-24"
   },
   {
    "document": "NumericUpDown.xaml",
@@ -90740,6 +90767,17 @@
    "status": "ported",
    "deviations": 10,
    "date": "2026-10-16"
+  },
+  {
+   "document": "ProgressRing.xaml",
+   "themes": [
+    "{ProgressRing}"
+   ],
+   "batch": "B1",
+   "winui": "ProgressRing: {ProgressRing} (ProgressRing.xaml, ProgressRing_themeresources.xaml), the AnimatedVisualPlayer drawn with arcs of the geometry of ProgressRingIndeterminate.cpp. A WinUI control in ferroui-controls (docs/porting/winui-controls.md); the Fluent theme has no document for it.",
+   "status": "ported",
+   "deviations": 4,
+   "date": "2026-10-24"
   },
   {
    "document": "RadioButton.xaml",
@@ -91244,20 +91282,6 @@
    "items": 34
   },
   {
-   "document": "controls/dev/InfoBadge/InfoBadge.xaml",
-   "key": "*",
-   "variant": null,
-   "reason": "InfoBadge: no FerroUI control.",
-   "items": 1
-  },
-  {
-   "document": "controls/dev/InfoBadge/InfoBadge_themeresources.xaml",
-   "key": "*",
-   "variant": null,
-   "reason": "InfoBadge: no FerroUI control.",
-   "items": 52
-  },
-  {
    "document": "controls/dev/PersonPicture/PersonPicture.xaml",
    "key": "*",
    "variant": null,
@@ -91440,20 +91464,6 @@
    "items": 1
   },
   {
-   "document": "controls/dev/ProgressRing/ProgressRing.xaml",
-   "key": "*",
-   "variant": null,
-   "reason": "ProgressRing: no FerroUI control (its animation is an animated visual, a Lottie composition).",
-   "items": 1
-  },
-  {
-   "document": "controls/dev/ProgressRing/ProgressRing_themeresources.xaml",
-   "key": "*",
-   "variant": null,
-   "reason": "ProgressRing: no FerroUI control (its animation is an animated visual, a Lottie composition).",
-   "items": 7
-  },
-  {
    "document": "controls/dev/ImageIcon/ImageIcon.xaml",
    "key": "*",
    "variant": null,
@@ -91583,6 +91593,8 @@
   "SymbolIcon": 2,
   "PopupRoot": 1,
   "ProgressBar": 10,
+  "InfoBadge": 4,
+  "ProgressRing": 4,
   "RadioButton": 6,
   "RepeatButton": 1,
   "ScrollBar": 11,
@@ -91603,6 +91615,7 @@
   "Window": 1,
   "ManagedFileChooser": 15,
   "NotificationCard": 13,
+  "InfoBar": 8,
   "TableView": 8,
   "TableViewCell": 3,
   "TableViewColumnHeader": 7,
@@ -91738,9 +91751,14 @@
    "ferroui": "HyperlinkButton",
    "batch": "F"
   },
+  "InfoBadge": {
+   "ferroui": "InfoBadge",
+   "batch": "B1"
+  },
   "InfoBar": {
-   "ferroui": "NotificationCard",
-   "batch": "B6"
+   "ferroui": "InfoBar",
+   "batch": "B6",
+   "note": "NotificationCard is drawn with the template of InfoBar"
   },
   "ListBox": {
    "ferroui": "ListBox",
@@ -91828,6 +91846,10 @@
   },
   "ProgressBar": {
    "ferroui": "ProgressBar",
+   "batch": "B1"
+  },
+  "ProgressRing": {
+   "ferroui": "ProgressRing",
    "batch": "B1"
   },
   "RadioButton": {

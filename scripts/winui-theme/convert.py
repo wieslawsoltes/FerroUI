@@ -35,7 +35,9 @@ The rules:
   `BottomRightValue` without a scale);
 * `CornerRadiusToThicknessConverter` becomes the converter of the same name of the theme crate
   (`FerroUI.Themes.WinUI.Converters`), with its `ConversionKind` and `Multiplier`;
-* the font family `XamlAutoFontFamily` becomes `Segoe UI Variable Text, Segoe UI, $Default`.
+* the font family `XamlAutoFontFamily` becomes `Segoe UI Variable Text, Segoe UI, $Default`;
+* a `Symbol` (`InfoBarCloseButtonSymbol`) is kept: FerroUI's `Symbol` of `ferroui-controls` has the
+  members of WinUI's.
 
 The compact density layer has one style besides its resources, the implicit `TextBlock` style
 of `Compact.xaml`: a style of the density layer whose setters are plain values becomes the default
@@ -77,6 +79,7 @@ LITERAL_KINDS = {
     "HorizontalAlignment",
     "VerticalAlignment",
     "BackgroundSizing",
+    "Symbol",
 }
 
 FONT_FAMILIES = {"XamlAutoFontFamily": "Segoe UI Variable Text, Segoe UI, $Default"}
