@@ -120,6 +120,10 @@ settings, arguments and peer, `InfoBadge` and `ProgressRing`) are ported from th
 directly (`controls/dev/InfoBar`, `controls/dev/InfoBadge` and `controls/dev/ProgressRing`, with
 the animated visuals of `controls/dev/ProgressRing/AnimatedVisuals` and the English texts of their
 `Strings/en-us/Resources.resw`, at the same commit), under the same license.
+`number_box.rs`, `utils/number_expression.rs` and
+`automation/peers/number_box_automation_peer.rs` (WinUI's `NumberBox`, its expression parser and
+its automation peer) are ported from the WinUI project directly (`controls/dev/NumberBox` at the
+same commit), under the same license.
 
 ## Silverlight Toolkit
 

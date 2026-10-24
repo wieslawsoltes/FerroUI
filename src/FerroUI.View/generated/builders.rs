@@ -907,6 +907,19 @@ pub fn notification_card() -> El<ferroui_controls::NotificationCard> {
     El::new()
 }
 
+pub use ferroui_controls::NumberBox;
+
+impl ViewClass for ferroui_controls::NumberBox {
+    fn create() -> ferroui_base::Ref<Self> {
+        <ferroui_controls::NumberBox>::new()
+    }
+}
+
+/// Starts an element of [`NumberBox`](ferroui_controls::NumberBox).
+pub fn number_box() -> El<ferroui_controls::NumberBox> {
+    El::new()
+}
+
 pub use ferroui_controls::NumericUpDown;
 
 impl ViewClass for ferroui_controls::NumericUpDown {
@@ -4810,6 +4823,85 @@ pub trait NotificationCardProps: ElementBuilder {
     }
 }
 impl<T: ObjectType + Upcast<ferroui_controls::NotificationCard>> NotificationCardProps for El<T> {}
+
+/// The properties and routed events of [`NumberBox`](ferroui_controls::NumberBox).
+pub trait NumberBoxProps: ElementBuilder {
+    /// Sets [`NumberBox::minimum_property`](ferroui_controls::NumberBox::minimum_property).
+    fn minimum<M>(self, value: impl IntoProp<f64, M>) -> Self {
+        self.prop(<ferroui_controls::NumberBox>::minimum_property(), value)
+    }
+
+    /// Sets [`NumberBox::maximum_property`](ferroui_controls::NumberBox::maximum_property).
+    fn maximum<M>(self, value: impl IntoProp<f64, M>) -> Self {
+        self.prop(<ferroui_controls::NumberBox>::maximum_property(), value)
+    }
+
+    /// Sets [`NumberBox::value_property`](ferroui_controls::NumberBox::value_property).
+    fn value<M>(self, value: impl IntoProp<f64, M>) -> Self {
+        self.prop(<ferroui_controls::NumberBox>::value_property(), value)
+    }
+
+    /// Sets [`NumberBox::small_change_property`](ferroui_controls::NumberBox::small_change_property).
+    fn small_change<M>(self, value: impl IntoProp<f64, M>) -> Self {
+        self.prop(<ferroui_controls::NumberBox>::small_change_property(), value)
+    }
+
+    /// Sets [`NumberBox::large_change_property`](ferroui_controls::NumberBox::large_change_property).
+    fn large_change<M>(self, value: impl IntoProp<f64, M>) -> Self {
+        self.prop(<ferroui_controls::NumberBox>::large_change_property(), value)
+    }
+
+    /// Sets [`NumberBox::text_property`](ferroui_controls::NumberBox::text_property).
+    fn text<M>(self, value: impl IntoProp<String, M>) -> Self {
+        self.prop(<ferroui_controls::NumberBox>::text_property(), value)
+    }
+
+    /// Sets [`NumberBox::header_property`](ferroui_controls::NumberBox::header_property).
+    fn header<M>(self, value: impl IntoProp<Option<ferroui_base::BoxedValue>, M>) -> Self {
+        self.prop(<ferroui_controls::NumberBox>::header_property(), value)
+    }
+
+    /// Sets [`NumberBox::header_template_property`](ferroui_controls::NumberBox::header_template_property).
+    fn header_template<M>(self, value: impl IntoProp<Option<std::rc::Rc<dyn ferroui_controls::templates::IDataTemplate>>, M>) -> Self {
+        self.prop(<ferroui_controls::NumberBox>::header_template_property(), value)
+    }
+
+    /// Sets [`NumberBox::placeholder_text_property`](ferroui_controls::NumberBox::placeholder_text_property).
+    fn placeholder_text<M>(self, value: impl IntoProp<String, M>) -> Self {
+        self.prop(<ferroui_controls::NumberBox>::placeholder_text_property(), value)
+    }
+
+    /// Sets [`NumberBox::text_alignment_property`](ferroui_controls::NumberBox::text_alignment_property).
+    fn text_alignment<M>(self, value: impl IntoProp<ferroui_base::media::TextAlignment, M>) -> Self {
+        self.prop(<ferroui_controls::NumberBox>::text_alignment_property(), value)
+    }
+
+    /// Sets [`NumberBox::description_property`](ferroui_controls::NumberBox::description_property).
+    fn description<M>(self, value: impl IntoProp<Option<ferroui_base::BoxedValue>, M>) -> Self {
+        self.prop(<ferroui_controls::NumberBox>::description_property(), value)
+    }
+
+    /// Sets [`NumberBox::validation_mode_property`](ferroui_controls::NumberBox::validation_mode_property).
+    fn validation_mode<M>(self, value: impl IntoProp<ferroui_controls::NumberBoxValidationMode, M>) -> Self {
+        self.prop(<ferroui_controls::NumberBox>::validation_mode_property(), value)
+    }
+
+    /// Sets [`NumberBox::spin_button_placement_mode_property`](ferroui_controls::NumberBox::spin_button_placement_mode_property).
+    fn spin_button_placement_mode<M>(self, value: impl IntoProp<ferroui_controls::NumberBoxSpinButtonPlacementMode, M>) -> Self {
+        self.prop(<ferroui_controls::NumberBox>::spin_button_placement_mode_property(), value)
+    }
+
+    /// Sets [`NumberBox::is_wrap_enabled_property`](ferroui_controls::NumberBox::is_wrap_enabled_property).
+    fn is_wrap_enabled<M>(self, value: impl IntoProp<bool, M>) -> Self {
+        self.prop(<ferroui_controls::NumberBox>::is_wrap_enabled_property(), value)
+    }
+
+    /// Sets [`NumberBox::accepts_expression_property`](ferroui_controls::NumberBox::accepts_expression_property).
+    fn accepts_expression<M>(self, value: impl IntoProp<bool, M>) -> Self {
+        self.prop(<ferroui_controls::NumberBox>::accepts_expression_property(), value)
+    }
+}
+impl<T: ObjectType + Upcast<ferroui_controls::NumberBox>> NumberBoxProps for El<T> {}
 
 /// The properties and routed events of [`NumericUpDown`](ferroui_controls::NumericUpDown).
 pub trait NumericUpDownProps: ElementBuilder {

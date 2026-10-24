@@ -304,6 +304,16 @@ mod info_badge_tests;
 mod info_bar_tests;
 #[cfg(test)]
 mod progress_ring_tests;
+// WinUI's input controls (docs/porting/winui-controls.md).
+mod number_box;
+pub use number_box::{
+    INumberBoxNumberFormatter, InvariantNumberBoxNumberFormatter, NumberBox, NumberBoxSpinButtonPlacementMode,
+    NumberBoxValidationMode, NumberBoxValueChangedEventArgs,
+};
+#[cfg(test)]
+mod input_test_support;
+#[cfg(test)]
+mod number_box_tests;
 #[cfg(test)]
 mod image_tests;
 #[cfg(test)]

@@ -5,6 +5,8 @@
 use crate::{
     AcrylicPlatformCompensationLevels, GridLength, GridUnitType, InfoBarCloseReason, InfoBarClosedEventArgs,
     InfoBarClosingEventArgs, InfoBarOpenedEventArgs, InfoBarSeverity, Symbol, TextLayoutRoundingPlacement, TickList,
+    AcrylicPlatformCompensationLevels, GridLength, GridUnitType, NumberBoxSpinButtonPlacementMode,
+    NumberBoxValidationMode, NumberBoxValueChangedEventArgs, Symbol, TextLayoutRoundingPlacement, TickList,
     WindowTransparencyLevel, WindowTransparencyLevelCollection,
 };
 use ferroui_base::data::core::ValueTypes;
@@ -106,6 +108,10 @@ pub(super) const TYPES: &[&MarkupType] = &[
     <InfoBarClosingEventArgs as MarkupTyped>::MARKUP,
     <InfoBarClosedEventArgs as MarkupTyped>::MARKUP,
     <InfoBarOpenedEventArgs as MarkupTyped>::MARKUP,
+    // WinUI's input controls, declared next to the types (docs/porting/winui-controls.md).
+    <NumberBoxSpinButtonPlacementMode as MarkupTyped>::MARKUP,
+    <NumberBoxValidationMode as MarkupTyped>::MARKUP,
+    <NumberBoxValueChangedEventArgs as MarkupTyped>::MARKUP,
 ];
 
 /// Registers the nullable forms of the value types with the untyped value
@@ -120,6 +126,8 @@ pub(super) fn register_value_types() {
     ValueTypes::register_nullable::<Symbol>();
     ValueTypes::register_nullable::<InfoBarSeverity>();
     ValueTypes::register_nullable::<InfoBarCloseReason>();
+    ValueTypes::register_nullable::<NumberBoxSpinButtonPlacementMode>();
+    ValueTypes::register_nullable::<NumberBoxValidationMode>();
     // A tick list is the list of numbers it derives from: the same list, so that the
     // members of the list (`Capacity`, `Add`) are reached through the tick list.
     ValueTypes::register_cast::<TickList, MediaCollection<f64>>(|ticks| MediaCollection::from_list(ticks.list().clone()));
