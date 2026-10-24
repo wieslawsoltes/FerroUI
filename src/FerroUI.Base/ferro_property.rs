@@ -477,6 +477,17 @@ impl FerroProperty {
         self.routes().route_get_metadata(owner.get_type())
     }
 
+    /// The default value of the property for `type_`, untyped: the default of
+    /// the metadata of a styled or attached property (upstream's internal
+    /// `IStyledPropertyAccessor.GetDefaultValue(Type)`), the unset value of a
+    /// direct property. For tests only: the snapshot of the property defaults
+    /// (`property_defaults_tests` of `ferroui-controls`) reads it.
+    #[cfg(feature = "testing")]
+    #[doc(hidden)]
+    pub fn default_value_boxed(&self, type_: &'static TypeInfo) -> BoxedValue {
+        self.routes().route_get_default_value(type_)
+    }
+
     /// Removes the metadata registered for the property on the specified
     /// type.
     pub fn unregister(&self, type_: &'static TypeInfo) {

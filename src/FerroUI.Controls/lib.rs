@@ -191,6 +191,8 @@ pub use repeat_button::RepeatButton;
 #[cfg(test)]
 mod button_tests;
 #[cfg(test)]
+mod property_defaults_tests;
+#[cfg(test)]
 mod control_focus_adorner_tests;
 #[cfg(test)]
 mod hotkey_manager_tests;
