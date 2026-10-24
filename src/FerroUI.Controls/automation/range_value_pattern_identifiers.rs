@@ -27,4 +27,22 @@ impl RangeValuePatternIdentifiers {
         static PROPERTY: AutomationProperty = AutomationProperty::new();
         &PROPERTY
     }
+
+    /// Identifies the `IRangeValueProvider::small_change` automation property.
+    ///
+    /// Deviation (DEVIATIONS.md, Automation peers): an addition after WinUI's
+    /// `RangeValuePatternIdentifiers.SmallChangeProperty`; upstream has no identifier for it.
+    pub fn small_change_property() -> &'static AutomationProperty {
+        static PROPERTY: AutomationProperty = AutomationProperty::new();
+        &PROPERTY
+    }
+
+    /// Identifies the `IRangeValueProvider::large_change` automation property.
+    ///
+    /// Deviation (DEVIATIONS.md, Automation peers): an addition after WinUI's
+    /// `RangeValuePatternIdentifiers.LargeChangeProperty`; upstream has no identifier for it.
+    pub fn large_change_property() -> &'static AutomationProperty {
+        static PROPERTY: AutomationProperty = AutomationProperty::new();
+        &PROPERTY
+    }
 }

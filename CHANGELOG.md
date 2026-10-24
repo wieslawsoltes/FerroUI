@@ -45,6 +45,7 @@ All notable changes to FerroUI are recorded in this file. The format follows [Ke
 
 ### Fixed
 
+- Automation on Windows (from #286, W1): UI Automation reads the real `SmallChange` and `LargeChange` of a range value provider (a slider, a scroll bar, a progress bar) where it read 1 for both, and `RangeValuePatternIdentifiers` has `small_change_property` and `large_change_property` (WinUI's identifiers), which the Windows backend maps to `UIA_RangeValueSmallChangePropertyId` and `UIA_RangeValueLargeChangePropertyId`.
 - Automation: the peer of a control that is gone no longer panics ("The control of the automation peer no longer exists.") when a platform still asks it something, as UI Automation did during page navigation on Windows: `AutomationPeer::is_element_available` tells such a peer, its public members answer empty values, the nodes of UI Automation answer `UIA_E_ELEMENTNOTAVAILABLE` and the handlers of AT-SPI an unknown object.
 
 ## [0.4.0] - 2026-10-22
