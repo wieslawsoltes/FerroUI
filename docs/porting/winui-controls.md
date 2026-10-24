@@ -150,3 +150,17 @@ Each pull request carries its tests, its `DEVIATIONS.md` rows and a line in `CHA
 - Differences from WinUI of each control are listed in the section of the control below as it lands (none yet).
 - Changes to upstream-ported controls and to core crates are in `DEVIATIONS.md`: "WinUI additions to upstream controls", "Automation peers" and "Windows platform backend" (W1), and the markup section (W2).
 - Differences of the converted templates are in `docs/porting/winui-theme/DEVIATIONS.md`.
+
+### VisualStateManager
+
+WinUI's visual state manager (`docs/porting/winui-calculator-gaps.md`, section 5; module
+`ferroui_controls::visual_state`). Differences from WinUI:
+
+| ID | WinUI | FerroUI | Kind | Since |
+|---|---|---|---|---|
+| VSM-D1 | The groups are on the first visual child of the control (`Control.ImplementationRoot`): the root of the template, or the content of a `UserControl` or `Page`, which have no template. | The root of the template when it has groups (or a custom manager), else the content of a content control or of a content page that is a control with groups. | Representation: FerroUI's user control and page are templated; the same groups are found. | #338 |
+| VSM-D2 | `x:Name` of a group or a state registers it in the name scope (deferred names, `VisualStateGroupCollection.cpp`). | The name is set; the group or state is not registered, so `find_name` does not find it. | Missing | #338 |
+| VSM-D3 | A setter whose target is not found fails the change of state with an error. | The compiler reports a target whose name is not in the name scope of the setter (an error of the document); at run time a setter whose target is gone, or has no property, is skipped. | Behaviour | #338 |
+| VSM-D4 | Setters of built-in properties are set synchronously and once more through a deferred operation on the next tick (`VisualStateSetterHelper.cpp`). | Set once, synchronously, at `BindingPriority::Animation`. | Representation: FerroUI's property store has no deferred animated values. | #338 |
+| VSM-D5 | A setter of a property that has no animation layer does not exist in WinUI (every dependency property has one). | A direct property has no priorities: the setter sets its value, and the value it had is set back when the state is left. | Behaviour | #338 |
+| VSM-D6 | Storyboards, `VisualTransition` and state triggers. | Not yet: they land in VSM-2 to VSM-4 (`winui-calculator-gaps.md`, section 8). | Missing (pending) | #338 |

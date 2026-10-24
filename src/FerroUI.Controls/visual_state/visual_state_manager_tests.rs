@@ -285,3 +285,27 @@ fn a_custom_manager_is_called_for_every_state_name() {
     assert_eq!(inner.opacity(), 0.25);
     assert_eq!(*manager.calls.borrow(), [("Pressed".to_string(), true), ("Missing".to_string(), false)]);
 }
+
+#[test]
+fn a_setter_has_no_target_by_default() {
+    let _scope = test_scope();
+    // The upstream setter: no target, applied by a style to the element it matches.
+    let setter = Setter::new(Visual::opacity_property(), 0.5);
+    assert!(setter.target().is_none());
+    assert!(Setter::empty().target().is_none());
+
+    let border = Border::new();
+    border.styles().add(Style::with_setters(Selectors::of_type::<Border>(), [setter]));
+    border.apply_styling();
+    assert_eq!(border.opacity(), 0.5);
+}
+
+#[test]
+#[should_panic(expected = "Setter.Target is only valid in a visual state")]
+fn a_style_with_a_setter_that_has_a_target_panics() {
+    let _scope = test_scope();
+    let border = Border::new();
+    let setter = setter(&border, Visual::opacity_property(), 0.5);
+    border.styles().add(Style::with_setters(Selectors::of_type::<Border>(), [setter]));
+    border.apply_styling();
+}

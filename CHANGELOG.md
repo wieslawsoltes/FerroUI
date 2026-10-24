@@ -6,6 +6,7 @@ All notable changes to FerroUI are recorded in this file. The format follows [Ke
 
 ### Added
 
+- **Visual states** (WinUI, VSM-1 of [docs/porting/winui-calculator-gaps.md](docs/porting/winui-calculator-gaps.md), #338): `VisualStateManager` with `go_to_state`, custom managers and the attached `VisualStateGroups`; `VisualStateGroup` with `CurrentState` and its events; `VisualState` with setters that name their target (`<Setter Target="Element.Property" Value="..."/>`, the opt-in `Setter.Target` and `TargetPropertyPath`), applied at animation priority beside the pseudo-class styles; markup support in the compiler and the run-time loader; a "Visual States" page in the ControlCatalog.
 - **Windows Calculator framework gaps plan**: [docs/porting/winui-calculator-gaps.md](docs/porting/winui-calculator-gaps.md), the inventory against WinUI, the design and the pull requests of `VisualStateManager` (groups, states, setters with targets, storyboards, transitions, `StateTriggerBase`, `StateTrigger`, `AdaptiveTrigger`), `ListView` and `GridView`, `SwipeControl`, `Pivot`, and system high contrast for the WinUI theme on Windows, macOS and Linux.
 - **Behaviors** ([docs/porting/behaviors.md](docs/porting/behaviors.md), #281): a port of Xaml.Behaviors, the behaviors, triggers and actions attached to elements in XAML (`Interaction.Behaviors`), in ten crates under `src/Behaviors/`:
   - `ferroui-xaml-interactivity`, the object model: `Interaction`, behavior and action collections, behaviors, triggers and actions on objects and on styled elements, the collection templates;

@@ -9,7 +9,7 @@
 //! styles, whose behaviour it does not change.
 
 use super::{VisualState, VisualStateChangedEventArgs, VisualStateGroup};
-use crate::{ContentControl, Control};
+use crate::{ContentControl, ContentPage, Control};
 use ferroui_base::collections::FerroList;
 use ferroui_base::threading::{Dispatcher, DispatcherPriority};
 use ferroui_base::{
@@ -24,8 +24,8 @@ pub type VisualStateGroupCollection = FerroList<Ref<VisualStateGroup>>;
 ///
 /// The visual states of an element are the [`visual_state_groups_property`](Self::visual_state_groups_property)
 /// attached to the root of its visual states: for a templated control the root of its template,
-/// for a user control (or any content control) whose template has none, the control that is its
-/// content. [`go_to_state`](Self::go_to_state) makes a state the current state of its group.
+/// for a user control (or any content control, or content page) whose template has none, the
+/// control that is its content. [`go_to_state`](Self::go_to_state) makes a state the current state of its group.
 ///
 /// A custom manager derives from this class, overrides
 /// [`go_to_state_core`](VisualStateManagerImpl::go_to_state_core) and is set on the root with
@@ -229,11 +229,15 @@ impl VisualStateManager {
                 return Some(first_child.clone());
             }
         }
-        if let Some(content_control) = control.downcast_ref::<ContentControl>() {
-            let content = content_control.content().and_then(|content| Control::from_boxed(&content));
-            if let Some(content) = content.filter(Self::has_states) {
-                return Some(content);
-            }
+        let content = if let Some(content_control) = control.downcast_ref::<ContentControl>() {
+            content_control.content()
+        } else if let Some(page) = control.downcast_ref::<ContentPage>() {
+            page.content()
+        } else {
+            None
+        };
+        if let Some(content) = content.and_then(|content| Control::from_boxed(&content)).filter(Self::has_states) {
+            return Some(content);
         }
         first_child
     }

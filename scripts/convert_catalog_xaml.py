@@ -104,6 +104,7 @@ REMOVALS = [
 PORT_DOCUMENTS = [
     ("ClassicThemes.xaml", "the Fluent and Simple themes of the original, with the feature classic-themes only"),
     ("Pages/TreeDataGridPage.xaml", "the page of the TreeDataGrid demo of the port"),
+    ("Pages/VisualStatesPage.xaml", "the page of WinUI's visual state manager (docs/porting/winui-calculator-gaps.md)"),
 ]
 
 

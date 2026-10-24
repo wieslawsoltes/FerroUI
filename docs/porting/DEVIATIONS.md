@@ -1499,6 +1499,8 @@ WinUI members added to upstream-ported controls (`winui-controls.md`, section 6)
 
 | WinUI source | Addition and default | Kind | Why | Since |
 |---|---|---|---|---|
+| `Setter.Target` (`TargetPropertyPath`), the setters of `VisualState.Setters` | `Setter::target()` / `set_target()` and the markup property `Target` (`src/FerroUI.Base/styling/setter.rs`), with the new type `TargetPropertyPath` (`styling/target_property_path.rs`, the target held weakly). Default `None`: the upstream setter, applied by styles as before (tests `visual_state_manager_tests::a_setter_has_no_target_by_default` and `a_style_with_a_setter_that_has_a_target_panics`). A style that holds a setter with a target panics when it is applied, and the compiler rejects it (`Setter.Target is only valid in the setters of a visual state`), as WinUI rejects `Setter.Property` in a visual state. | Behaviour (opt-in) | The setters of WinUI's visual states name an element and its property (`docs/porting/winui-calculator-gaps.md`, section 5.2). | #338 |
+| (none: the values of WinUI's visual states) | `FerroObject::bind_binding_with_priority(property, binding, priority, anchor)` and `ValueStore::add_binding_expression_with_priority`: a binding at a given priority, whatever the default priority of the binding is. `add_binding_expression` is `add_binding_expression_with_priority` with the binding's default priority, so nothing changes for upstream callers. | Behaviour (opt-in) | A `{DynamicResource}` or a binding in a setter of a visual state is bound at `BindingPriority::Animation`, WinUI's animation layer (section 5.5). | #338 |
 
 ## Corrected divergences
 
