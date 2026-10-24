@@ -76,18 +76,23 @@ impl ElementCompositionPreview {
         ElementComposition::set_is_translation_enabled(element, value)
     }
 
-    /// `GetScrollViewerManipulationPropertySet`: a property set that follows the scrolling of
-    /// `scroll_viewer`, with the entries `Translation` (the negated offset, as a `Vector3`),
-    /// `Pan` (the same), `Scale` (`(1, 1, 1)`, FerroUI's scroll viewer does not zoom),
-    /// `CenterPoint` (zero) and `Matrix` (the translation as a `Matrix4x4`). The same set is
-    /// returned for the same scroll viewer.
+    /// `GetScrollViewerManipulationPropertySet`: a property set that follows the scrolling and the
+    /// zoom of `scroll_viewer`, with the entries of WinUI's manipulation transform
+    /// (`ManipulationTransform.cpp`): `Translation` (the translation of the content: the negated
+    /// offset, in zoomed units, as a `Vector3`), `Pan` (the same: the zoom is about the origin of
+    /// the content), `Scale` (`(ZoomFactor, ZoomFactor, 1)`), `CenterPoint` (the centre of that
+    /// scale, the origin) and `Matrix` (the scale followed by the translation, a `Matrix4x4`).
+    /// The same set is returned for the same scroll viewer.
     ///
-    /// Typical use: an expression animation of a header's `Offset` or `Translation` that
-    /// reads `scroller.Translation.Y` for a parallax effect.
+    /// Typical uses: an expression animation of a header's `Offset` or `Translation` that reads
+    /// `scroller.Translation.Y` for a parallax effect, or `scroller.Scale.X` to keep an overlay
+    /// at the same size while the content zooms.
     ///
-    /// In WinUI the compositor updates the set during a manipulation without the UI thread;
-    /// here the set is updated when the offset of the scroll viewer changes, on the UI thread,
-    /// in the same frame as the content moves. `None` when no compositor is available.
+    /// Deviation (winui-composition.md): in WinUI the compositor updates the set during a
+    /// manipulation without the UI thread; here the set is written when the offset or the zoom
+    /// of the scroll viewer changes, on the UI thread, in the batch of the frame in which the
+    /// content moves (FerroUI scrolls on the UI thread, and its compositor runs there too).
+    /// `None` when no compositor is available.
     pub fn get_scroll_viewer_manipulation_property_set(scroll_viewer: &ScrollViewer) -> Option<Rc<CompositionPropertySet>> {
         let existing = MANIPULATION_SETS.with(|sets| {
             let mut sets = sets.borrow_mut();
@@ -108,17 +113,19 @@ impl ElementCompositionPreview {
 
         let compositor = compositor_for(scroll_viewer)?;
         let set = CompositionPropertySet::new(&compositor);
-        write_manipulation(&set, scroll_viewer.offset());
+        write_manipulation(&set, scroll_viewer.offset(), scroll_viewer.zoom_factor());
         let weak_set = Rc::downgrade(&set);
         let subscription = scroll_viewer.property_changed(move |e| {
-            if e.property() != ScrollViewer::offset_property().as_property() {
+            if e.property() != ScrollViewer::offset_property().as_property()
+                && e.property() != ScrollViewer::zoom_factor_property().as_property()
+            {
                 return;
             }
             let (Some(set), Some(scroll_viewer)) = (weak_set.upgrade(), e.sender().downcast_ref::<ScrollViewer>())
             else {
                 return;
             };
-            write_manipulation(&set, scroll_viewer.offset());
+            write_manipulation(&set, scroll_viewer.offset(), scroll_viewer.zoom_factor());
         });
         MANIPULATION_SETS.with(|sets| {
             sets.borrow_mut().push((scroll_viewer.to_ref().downgrade(), set.clone(), subscription));
@@ -151,13 +158,17 @@ fn compositor_for(visual: &Visual) -> Option<Rc<Compositor>> {
         .or_else(Compositor::try_get_default_compositor)
 }
 
-fn write_manipulation(set: &CompositionPropertySet, offset: Vector) {
+/// Writes the manipulation transform of a scroll viewer at `offset` and `zoom` into its set: the
+/// values DirectManipulation gives the shared content transform that `ManipulationTransform.cpp`
+/// connects the set to (a content offset of zero).
+fn write_manipulation(set: &CompositionPropertySet, offset: Vector, zoom: f32) {
     let translation = Vector3::new(-offset.x as f32, -offset.y as f32, 0.0);
+    let scale = Vector3::new(zoom, zoom, 1.0);
     set.insert_vector3("Translation", translation);
     set.insert_vector3("Pan", translation);
-    set.insert_vector3("Scale", Vector3::new(1.0, 1.0, 1.0));
+    set.insert_vector3("Scale", scale);
     set.insert_vector3("CenterPoint", Vector3::new(0.0, 0.0, 0.0));
-    set.insert_matrix4x4("Matrix", Matrix4x4::create_translation(translation));
+    set.insert_matrix4x4("Matrix", Matrix4x4::create_scale(scale) * Matrix4x4::create_translation(translation));
 }
 
 /// Writes the position of the pointer into a pointer position property set while the set is

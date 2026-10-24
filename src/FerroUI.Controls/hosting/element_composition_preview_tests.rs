@@ -8,7 +8,9 @@ use ferroui_base::media::Brushes;
 use ferroui_base::numerics::Vector3;
 use ferroui_base::rendering::composition::animations::ICompositionAnimationBase;
 use ferroui_base::rendering::composition::server::ServerCompositionVisual;
-use ferroui_base::rendering::composition::{CompositionGetValueStatus, CompositionVisual, Compositor};
+use ferroui_base::rendering::composition::{
+    CompositionGetValueStatus, CompositionVisual, Compositor, ICompositionObjectAnimations,
+};
 use ferroui_base::{Ref, Size, Vector, Visual};
 use std::rc::Rc;
 use std::time::{Duration, Instant};
@@ -151,6 +153,80 @@ fn the_manipulation_property_set_follows_the_offset_of_the_scroll_viewer() {
     // The same set for the same scroll viewer.
     let again = ElementCompositionPreview::get_scroll_viewer_manipulation_property_set(&scroll_viewer).unwrap();
     assert!(Rc::ptr_eq(&set, &again));
+}
+
+/// A 100 x 100 scroll viewer with the test template, scrolling both ways over a 200 x 300
+/// border, in the canvas.
+fn zoomable_scroll_viewer(services: &CompositorTestServices, canvas: &Ref<Canvas>) -> Ref<ScrollViewer> {
+    let scroll_viewer = ScrollViewer::new();
+    scroll_viewer.set_template(Some(crate::templates::FuncControlTemplate::for_type::<ScrollViewer>(
+        crate::scroll_viewer_tests::create_template,
+    )));
+    scroll_viewer.set_horizontal_scroll_bar_visibility(crate::primitives::ScrollBarVisibility::Hidden);
+    scroll_viewer.set_vertical_scroll_bar_visibility(crate::primitives::ScrollBarVisibility::Hidden);
+    scroll_viewer.set_width(100.0);
+    scroll_viewer.set_height(100.0);
+    let content = Border::new();
+    content.set_width(200.0);
+    content.set_height(300.0);
+    content.set_background(Some(Brushes::blue()));
+    scroll_viewer.set_content(Some(Control::boxed(&content)));
+    canvas.children().add(scroll_viewer.clone());
+    services.run_jobs();
+    scroll_viewer
+}
+
+#[test]
+fn the_manipulation_property_set_follows_the_zoom_of_the_scroll_viewer() {
+    let (services, canvas) = scene();
+    let scroll_viewer = zoomable_scroll_viewer(&services, &canvas);
+    let set = ElementCompositionPreview::get_scroll_viewer_manipulation_property_set(&scroll_viewer)
+        .expect("a compositor renders the window");
+    assert_eq!(set.try_get_vector3("Scale"), (CompositionGetValueStatus::Succeeded, Vector3::new(1.0, 1.0, 1.0)));
+
+    assert!(scroll_viewer.change_view(Some(30.0), Some(40.0), Some(2.0)));
+    services.run_jobs();
+    assert_eq!(2.0, scroll_viewer.zoom_factor());
+    assert_eq!(set.try_get_vector3("Scale"), (CompositionGetValueStatus::Succeeded, Vector3::new(2.0, 2.0, 1.0)));
+    assert_eq!(
+        set.try_get_vector3("Translation"),
+        (CompositionGetValueStatus::Succeeded, Vector3::new(-30.0, -40.0, 0.0))
+    );
+    assert_eq!(set.try_get_vector3("Pan"), (CompositionGetValueStatus::Succeeded, Vector3::new(-30.0, -40.0, 0.0)));
+    assert_eq!(
+        set.try_get_vector3("CenterPoint"),
+        (CompositionGetValueStatus::Succeeded, Vector3::new(0.0, 0.0, 0.0))
+    );
+    // The scale, then the translation: a point of the content at (20, 25) is drawn at
+    // (2 * 20 - 30, 2 * 25 - 40).
+    let (status, matrix) = set.try_get_matrix4x4("Matrix");
+    assert_eq!(CompositionGetValueStatus::Succeeded, status);
+    let point = ferroui_base::numerics::Vector3::transform(Vector3::new(20.0, 25.0, 0.0), matrix);
+    assert_eq!(Vector3::new(10.0, 10.0, 0.0), point);
+}
+
+#[test]
+fn expressions_that_read_the_manipulation_property_set_animate_with_it() {
+    let (services, canvas) = scene();
+    let scroll_viewer = zoomable_scroll_viewer(&services, &canvas);
+    let set = ElementCompositionPreview::get_scroll_viewer_manipulation_property_set(&scroll_viewer)
+        .expect("a compositor renders the window");
+    let compositor = compositor_of(&canvas);
+
+    // A visual whose offset follows the scrolling and the zoom.
+    let sprite = compositor.create_sprite_visual();
+    sprite.set_size(Vector::new(10.0, 10.0));
+    let follow = compositor.create_expression_animation_with("Vector3(-scroller.Translation.X, scroller.Scale.X * 10, 0)");
+    follow.set_reference_parameter("scroller", set.clone());
+    sprite.start_animation("Offset", &*follow);
+    ElementCompositionPreview::set_element_child_visual(&canvas, Some((*sprite).clone()));
+    services.run_jobs();
+    assert_eq!(server(&sprite).offset(), ferroui_base::Vector3D::new(0.0, 10.0, 0.0));
+
+    scroll_viewer.change_view(Some(30.0), None, Some(3.0));
+    services.run_jobs();
+    services.run_jobs();
+    assert_eq!(server(&sprite).offset(), ferroui_base::Vector3D::new(30.0, 30.0, 0.0));
 }
 
 #[test]
