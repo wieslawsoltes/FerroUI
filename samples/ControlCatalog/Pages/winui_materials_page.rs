@@ -15,17 +15,18 @@ use ferroui_base::rendering::composition::effects::{
 };
 use ferroui_base::rendering::composition::system_backdrops::{ICompositionSupportsSystemBackdrop, MicaKind};
 use ferroui_base::rendering::composition::{
-    CompositionBrush, CompositionEffectSourceParameter, Compositor, ICompositionSurface, LoadedImageSurface,
+    CompositionBrush, CompositionEffectSourceParameter, Compositor, ICompositionObjectAnimations, ICompositionSurface,
+    LoadedImageSurface,
 };
 use ferroui_base::threading::{Dispatcher, DispatcherPriority};
 use ferroui_base::{BoxedValue, CornerRadius, PixelSize, Ref, Thickness, Vector, WeakRef};
-use ferroui_controls::flyouts::MenuFlyout;
 use ferroui_controls::hosting::ElementCompositionPreview;
 use ferroui_controls::media::{
     DesktopAcrylicBackdrop, MicaBackdrop, RevealBackgroundBrush, RevealBorderBrush, RevealBrush, RevealBrushState,
     SystemBackdrop,
 };
 use ferroui_controls::shapes::Ellipse;
+use ferroui_controls::MenuFlyout;
 use ferroui_controls::{
     Border, Button, Canvas, ContentPage, Control, MenuItem, Panel, ScrollViewer, Slider, StackPanel, TextBlock, TopLevel,
     WrapPanel,
@@ -87,7 +88,7 @@ fn scene(width: f64, height: f64) -> Ref<Canvas> {
         disc.set_fill(Some(brush(Color::from_rgb(r, g, b))));
         Canvas::set_left(&disc, x);
         Canvas::set_top(&disc, y);
-        canvas.children().add(disc.upcast());
+        canvas.children().add(disc.upcast::<Control>());
     }
     for index in 0..8 {
         let stripe = Border::new();
@@ -96,13 +97,13 @@ fn scene(width: f64, height: f64) -> Ref<Canvas> {
         stripe.set_background(Some(brush(Color::from_rgb(0xFF, 0xFF, 0xFF))));
         stripe.set_opacity(0.5);
         Canvas::set_left(&stripe, 30.0 + index as f64 * 80.0);
-        canvas.children().add(stripe.upcast());
+        canvas.children().add(stripe.upcast::<Control>());
     }
     let words = text("FerroUI materials", 34.0, FontWeight::Bold);
     words.set_foreground(Some(brush(Color::from_rgb(0xFF, 0xFF, 0xFF))));
     Canvas::set_left(&words, 170.0);
     Canvas::set_top(&words, 20.0);
-    canvas.children().add(words.upcast());
+    canvas.children().add(words.upcast::<Control>());
     canvas
 }
 
@@ -144,18 +145,18 @@ fn acrylic_section() -> Ref<StackPanel> {
 
     let cards = row(16.0);
     cards.set_margin(Thickness::new(16.0, 36.0, 16.0, 16.0));
-    cards.children().add(acrylic_card(&light, "Light: tint 0, luminosity 0.85", true).upcast());
-    cards.children().add(acrylic_card(&dark, "Dark: tint 0.15, luminosity 0.96", false).upcast());
-    cards.children().add(acrylic_card(&accent, "Accent: tint 0.8", false).upcast());
-    cards.children().add(acrylic_card(&tinted, "Tint 0.4, luminosity from the tint", false).upcast());
-    cards.children().add(acrylic_card(&fallback, "AlwaysUseFallback", false).upcast());
-    cards.children().add(acrylic_card(&host, "BackgroundSource HostBackdrop", false).upcast());
+    cards.children().add(acrylic_card(&light, "Light: tint 0, luminosity 0.85", true).upcast::<Control>());
+    cards.children().add(acrylic_card(&dark, "Dark: tint 0.15, luminosity 0.96", false).upcast::<Control>());
+    cards.children().add(acrylic_card(&accent, "Accent: tint 0.8", false).upcast::<Control>());
+    cards.children().add(acrylic_card(&tinted, "Tint 0.4, luminosity from the tint", false).upcast::<Control>());
+    cards.children().add(acrylic_card(&fallback, "AlwaysUseFallback", false).upcast::<Control>());
+    cards.children().add(acrylic_card(&host, "BackgroundSource HostBackdrop", false).upcast::<Control>());
 
     let stage = Panel::new();
     stage.set_horizontal_alignment(HorizontalAlignment::Left);
     stage.set_clip_to_bounds(true);
-    stage.children().add(scene(940.0, 190.0).upcast());
-    stage.children().add(cards.upcast());
+    stage.children().add(scene(940.0, 190.0).upcast::<Control>());
+    stage.children().add(cards.upcast::<Control>());
 
     let controls = row(24.0);
     let tint_title = caption("TintOpacity of the tinted card: 0.40");
@@ -175,9 +176,9 @@ fn acrylic_section() -> Ref<StackPanel> {
         });
     }
     let tint_panel = column(2.0);
-    tint_panel.children().add(tint_title.upcast());
-    tint_panel.children().add(tint_slider.upcast());
-    controls.children().add(tint_panel.upcast());
+    tint_panel.children().add(tint_title.upcast::<Control>());
+    tint_panel.children().add(tint_slider.upcast::<Control>());
+    controls.children().add(tint_panel.upcast::<Control>());
 
     let policy = caption("");
     let update_policy: Rc<dyn Fn()> = {
@@ -203,7 +204,7 @@ fn acrylic_section() -> Ref<StackPanel> {
             update_policy();
         })
     };
-    controls.children().add(simulate.upcast());
+    controls.children().add(simulate.upcast::<Control>());
     let tint_color = {
         let tinted = tinted.clone();
         let index = RefCell::new(0usize);
@@ -219,12 +220,12 @@ fn acrylic_section() -> Ref<StackPanel> {
             *index += 1;
         })
     };
-    controls.children().add(tint_color.upcast());
+    controls.children().add(tint_color.upcast::<Control>());
 
     let content = column(10.0);
-    content.children().add(stage.upcast());
-    content.children().add(controls.upcast());
-    content.children().add(policy.upcast());
+    content.children().add(stage.upcast::<Control>());
+    content.children().add(controls.upcast::<Control>());
+    content.children().add(policy.upcast::<Control>());
     section(
         "AcrylicBrush",
         "The acrylic recipe of WinUI over what is drawn behind each card: the backdrop over the opaque fallback colour, blurred by 30, its luminosity from TintLuminosityOpacity (or from the tint), its colour from TintColor and TintOpacity, and 2 % noise. TintColor changes cross-fade over TintTransitionDuration; the material policy (transparency effects off, energy saver, the simulation) cross-fades to the FallbackColor. The HostBackdrop card (WinUI 2's window acrylic) shows what is behind the window where the window is transparent with a blur (Settings, transparency AcrylicBlur), its fallback colour in an opaque window and while no window of the application is active.",
@@ -331,11 +332,11 @@ fn effect_tile(name: &str, effect: GraphicsEffect) -> Ref<StackPanel> {
     });
     let tile = column(6.0);
     tile.set_margin(Thickness::new(0.0, 0.0, 12.0, 12.0));
-    tile.children().add(host.upcast());
+    tile.children().add(host.upcast::<Control>());
     let about = caption(name);
     about.set_max_width(150.0);
     about.set_horizontal_alignment(HorizontalAlignment::Left);
-    tile.children().add(about.upcast());
+    tile.children().add(about.upcast::<Control>());
     tile
 }
 
@@ -381,6 +382,7 @@ fn effects_section() -> Ref<StackPanel> {
                 source1_amount: 0.3,
                 source2_amount: 0.3,
                 offset: 0.0,
+                clamp_output: false,
                 source1: parameter("image"),
                 source2: parameter("rings"),
             }
@@ -427,7 +429,7 @@ fn effects_section() -> Ref<StackPanel> {
         ),
     ];
     for (name, effect) in tiles {
-        grid.children().add(effect_tile(name, effect).upcast());
+        grid.children().add(effect_tile(name, effect).upcast::<Control>());
     }
     section(
         "Blend and colour effects",
@@ -462,11 +464,11 @@ fn light_tile(name: &str, width: f64, height: f64, build: impl Fn(&Ref<Border>, 
     });
     let tile = column(6.0);
     tile.set_margin(Thickness::new(0.0, 0.0, 16.0, 12.0));
-    tile.children().add(host.upcast());
+    tile.children().add(host.upcast::<Control>());
     let about = caption(name);
     about.set_max_width(width);
     about.set_horizontal_alignment(HorizontalAlignment::Left);
-    tile.children().add(about.upcast());
+    tile.children().add(about.upcast::<Control>());
     tile
 }
 
@@ -501,7 +503,7 @@ fn lighting_section() -> Ref<StackPanel> {
             }
             ElementCompositionPreview::set_element_child_visual(host, Some(container.clone()));
         })
-        .upcast(),
+        .upcast::<Control>(),
     );
 
     // A spot light whose coordinate space is a visual that moves: the light
@@ -532,7 +534,7 @@ fn lighting_section() -> Ref<StackPanel> {
             space.start_animation("Offset.X", &*travel);
             ElementCompositionPreview::set_element_child_visual(host, Some(container.clone()));
         })
-        .upcast(),
+        .upcast::<Control>(),
     );
 
     // The scene lighting effect with a specular highlight.
@@ -560,7 +562,7 @@ fn lighting_section() -> Ref<StackPanel> {
             }
             ElementCompositionPreview::set_element_child_visual(host, Some(sprite.visual().clone()));
         })
-        .upcast(),
+        .upcast::<Control>(),
     );
 
     section(
@@ -642,7 +644,7 @@ fn reveal_section() -> Ref<StackPanel> {
     for name in ["Home", "Documents", "Pictures", "Music", "Videos", "Downloads", "Settings", "Help"] {
         let tile = reveal_tile(name);
         tile.set_margin(Thickness::uniform(4.0));
-        grid.children().add(tile.upcast());
+        grid.children().add(tile.upcast::<Control>());
     }
     surface.set_child(grid);
     let focus_kind = {
@@ -687,9 +689,9 @@ fn reveal_section() -> Ref<StackPanel> {
         buttons.children().add(button);
     }
     let content = column(10.0);
-    content.children().add(surface.upcast());
-    content.children().add(buttons.upcast());
-    content.children().add(focus_kind.upcast());
+    content.children().add(surface.upcast::<Control>());
+    content.children().add(buttons.upcast::<Control>());
+    content.children().add(focus_kind.upcast::<Control>());
     let surface = content;
     section(
         "Reveal",
@@ -762,11 +764,11 @@ fn backdrop_section() -> Ref<StackPanel> {
     SET_BACKDROP.with(|slot| *slot.borrow_mut() = Some(set.clone()));
     for (index, name) in ["None", "Mica", "Mica Alt", "Desktop acrylic"].into_iter().enumerate() {
         let set = set.clone();
-        anchor.children().add(button(name, move || set(index)).upcast());
+        anchor.children().add(button(name, move || set(index)).upcast::<Control>());
     }
     let content = column(8.0);
-    content.children().add(anchor.upcast());
-    content.children().add(status.upcast());
+    content.children().add(anchor.upcast::<Control>());
+    content.children().add(status.upcast::<Control>());
     section(
         "System backdrops",
         "Window.SystemBackdrop with MicaBackdrop (Kind Base and BaseAlt) and DesktopAcrylicBackdrop: a MicaController or DesktopAcrylicController per window, configured from the theme of the window, high contrast and whether the window is active. macOS draws them with an NSVisualEffectView behind the window and Windows with the system backdrop types of DWM; an inactive window, high contrast, the energy saver or transparency effects turned off show the fallback colour.",
@@ -801,8 +803,8 @@ fn menu_section() -> Ref<StackPanel> {
     target.set_context_menu(Some(context));
 
     let content = row(16.0);
-    content.children().add(open.upcast());
-    content.children().add(target.upcast());
+    content.children().add(open.upcast::<Control>());
+    content.children().add(target.upcast::<Control>());
     section(
         "Menus",
         "MenuFlyoutPresenter.SystemBackdrop is the theme resource MenuFlyoutSystemBackdrop, a DesktopAcrylicBackdrop: in a popup of the window the menu shows the acrylic of what is behind it; in a popup window of its own, the fallback colour of the acrylic. The context menu shares the property.",
@@ -818,12 +820,12 @@ pub fn winui_materials_page() -> Ref<ContentPage> {
     panel.set_spacing(28.0);
     panel.set_margin(Thickness::uniform(16.0));
     panel.set_vertical_alignment(VerticalAlignment::Top);
-    panel.children().add(acrylic_section().upcast());
-    panel.children().add(effects_section().upcast());
-    panel.children().add(lighting_section().upcast());
-    panel.children().add(reveal_section().upcast());
-    panel.children().add(backdrop_section().upcast());
-    panel.children().add(menu_section().upcast());
+    panel.children().add(acrylic_section().upcast::<Control>());
+    panel.children().add(effects_section().upcast::<Control>());
+    panel.children().add(lighting_section().upcast::<Control>());
+    panel.children().add(reveal_section().upcast::<Control>());
+    panel.children().add(backdrop_section().upcast::<Control>());
+    panel.children().add(menu_section().upcast::<Control>());
     let scroller = ScrollViewer::new();
     scroller.set_content(Some(Control::boxed(panel)));
     page.set_content(Some(Control::boxed(scroller)));
