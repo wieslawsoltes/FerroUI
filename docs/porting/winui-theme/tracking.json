@@ -69184,8 +69184,8 @@
    "key": "DefaultRadioButtonsStyle",
    "kind": "Style",
    "target_type": "RadioButtons",
-   "status": "waived",
-   "reason": "RadioButtons (the group control): no FerroUI control; FerroUI groups radio buttons by GroupName.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -69194,8 +69194,8 @@
    "key": "{RadioButtons}",
    "kind": "Style",
    "target_type": "RadioButtons",
-   "status": "waived",
-   "reason": "RadioButtons (the group control): no FerroUI control; FerroUI groups radio buttons by GroupName.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -69204,8 +69204,8 @@
    "key": "RadioButtonsColumnSpacing",
    "kind": "x:Double",
    "target_type": "",
-   "status": "waived",
-   "reason": "RadioButtons (the group control): no FerroUI control; FerroUI groups radio buttons by GroupName.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -69214,8 +69214,8 @@
    "key": "RadioButtonsRowSpacing",
    "kind": "x:Double",
    "target_type": "",
-   "status": "waived",
-   "reason": "RadioButtons (the group control): no FerroUI control; FerroUI groups radio buttons by GroupName.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -69224,8 +69224,8 @@
    "key": "RadioButtonsTopHeaderMargin",
    "kind": "Thickness",
    "target_type": "",
-   "status": "waived",
-   "reason": "RadioButtons (the group control): no FerroUI control; FerroUI groups radio buttons by GroupName.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -69234,8 +69234,8 @@
    "key": "RadioButtonsHeaderForeground",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "RadioButtons (the group control): no FerroUI control; FerroUI groups radio buttons by GroupName.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -69244,8 +69244,8 @@
    "key": "RadioButtonsHeaderForegroundDisabled",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "RadioButtons (the group control): no FerroUI control; FerroUI groups radio buttons by GroupName.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -69254,8 +69254,8 @@
    "key": "RadioButtonsHeaderForeground",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "RadioButtons (the group control): no FerroUI control; FerroUI groups radio buttons by GroupName.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -69264,8 +69264,8 @@
    "key": "RadioButtonsHeaderForegroundDisabled",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "RadioButtons (the group control): no FerroUI control; FerroUI groups radio buttons by GroupName.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -69274,8 +69274,8 @@
    "key": "RadioButtonsHeaderForeground",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "RadioButtons (the group control): no FerroUI control; FerroUI groups radio buttons by GroupName.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -69284,8 +69284,8 @@
    "key": "RadioButtonsHeaderForegroundDisabled",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "RadioButtons (the group control): no FerroUI control; FerroUI groups radio buttons by GroupName.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -69324,8 +69324,8 @@
    "key": "{RatingControl}",
    "kind": "Style",
    "target_type": "RatingControl",
-   "status": "waived",
-   "reason": "RatingControl: no FerroUI control.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -69334,8 +69334,8 @@
    "key": "BackgroundGlyphDefaultTemplate",
    "kind": "DataTemplate",
    "target_type": "",
-   "status": "waived",
-   "reason": "RatingControl: no FerroUI control.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -69344,8 +69344,8 @@
    "key": "BackgroundImageDefaultTemplate",
    "kind": "DataTemplate",
    "target_type": "",
-   "status": "waived",
-   "reason": "RatingControl: no FerroUI control.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -69354,8 +69354,8 @@
    "key": "ForegroundGlyphDefaultTemplate",
    "kind": "DataTemplate",
    "target_type": "",
-   "status": "waived",
-   "reason": "RatingControl: no FerroUI control.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -69364,8 +69364,8 @@
    "key": "ForegroundImageDefaultTemplate",
    "kind": "DataTemplate",
    "target_type": "",
-   "status": "waived",
-   "reason": "RatingControl: no FerroUI control.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -69374,8 +69374,8 @@
    "key": "RatingControlCaptionTopMargin",
    "kind": "x:Double",
    "target_type": "",
-   "status": "waived",
-   "reason": "RatingControl: no FerroUI control.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -69384,8 +69384,8 @@
    "key": "RatingControlFontSizeForRendering",
    "kind": "x:Double",
    "target_type": "",
-   "status": "waived",
-   "reason": "RatingControl: no FerroUI control.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -69394,8 +69394,8 @@
    "key": "RatingControlItemSpacing",
    "kind": "x:Double",
    "target_type": "",
-   "status": "waived",
-   "reason": "RatingControl: no FerroUI control.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -69404,8 +69404,8 @@
    "key": "MUX_RatingControlDefaultFontInfo",
    "kind": "RatingItemFontInfo",
    "target_type": "",
-   "status": "waived",
-   "reason": "RatingControl: no FerroUI control.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -69414,8 +69414,8 @@
    "key": "RatingControlCaptionForeground",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "RatingControl: no FerroUI control.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -69424,8 +69424,8 @@
    "key": "RatingControlDisabledSelectedForeground",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "RatingControl: no FerroUI control.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -69434,8 +69434,8 @@
    "key": "RatingControlPlaceholderForeground",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "RatingControl: no FerroUI control.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -69444,8 +69444,8 @@
    "key": "RatingControlPointerOverPlaceholderForeground",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "RatingControl: no FerroUI control.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -69454,8 +69454,8 @@
    "key": "RatingControlPointerOverSelectedForeground",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "RatingControl: no FerroUI control.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -69464,8 +69464,8 @@
    "key": "RatingControlPointerOverUnselectedForeground",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "RatingControl: no FerroUI control.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -69474,8 +69474,8 @@
    "key": "RatingControlSelectedForeground",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "RatingControl: no FerroUI control.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -69484,8 +69484,8 @@
    "key": "RatingControlUnselectedForeground",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "RatingControl: no FerroUI control.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -69494,8 +69494,8 @@
    "key": "MUX_RatingControlDefaultFontInfo",
    "kind": "RatingItemFontInfo",
    "target_type": "",
-   "status": "waived",
-   "reason": "RatingControl: no FerroUI control.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -69504,8 +69504,8 @@
    "key": "RatingControlCaptionForeground",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "RatingControl: no FerroUI control.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -69514,8 +69514,8 @@
    "key": "RatingControlDisabledSelectedForeground",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "RatingControl: no FerroUI control.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -69524,8 +69524,8 @@
    "key": "RatingControlPlaceholderForeground",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "RatingControl: no FerroUI control.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -69534,8 +69534,8 @@
    "key": "RatingControlPointerOverPlaceholderForeground",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "RatingControl: no FerroUI control.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -69544,8 +69544,8 @@
    "key": "RatingControlPointerOverSelectedForeground",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "RatingControl: no FerroUI control.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -69554,8 +69554,8 @@
    "key": "RatingControlPointerOverUnselectedForeground",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "RatingControl: no FerroUI control.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -69564,8 +69564,8 @@
    "key": "RatingControlSelectedForeground",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "RatingControl: no FerroUI control.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -69574,8 +69574,8 @@
    "key": "RatingControlUnselectedForeground",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "RatingControl: no FerroUI control.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -69584,8 +69584,8 @@
    "key": "MUX_RatingControlDefaultFontInfo",
    "kind": "RatingItemFontInfo",
    "target_type": "",
-   "status": "waived",
-   "reason": "RatingControl: no FerroUI control.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -69594,8 +69594,8 @@
    "key": "RatingControlCaptionForeground",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "RatingControl: no FerroUI control.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -69604,8 +69604,8 @@
    "key": "RatingControlDisabledSelectedForeground",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "RatingControl: no FerroUI control.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -69614,8 +69614,8 @@
    "key": "RatingControlPlaceholderForeground",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "RatingControl: no FerroUI control.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -69624,8 +69624,8 @@
    "key": "RatingControlPointerOverPlaceholderForeground",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "RatingControl: no FerroUI control.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -69634,8 +69634,8 @@
    "key": "RatingControlPointerOverSelectedForeground",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "RatingControl: no FerroUI control.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -69644,8 +69644,8 @@
    "key": "RatingControlPointerOverUnselectedForeground",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "RatingControl: no FerroUI control.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -69654,8 +69654,8 @@
    "key": "RatingControlSelectedForeground",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "RatingControl: no FerroUI control.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -69664,8 +69664,8 @@
    "key": "RatingControlUnselectedForeground",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "RatingControl: no FerroUI control.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -77945,7 +77945,7 @@
    "kind": "Style",
    "target_type": "ListViewItem",
    "status": "waived",
-   "reason": "RadioButtons (the group control): no FerroUI control.",
+   "reason": "A ListViewItem style of the RadioButtons of WinUI 2, which hosted its items in a ListView: no WinUI 3 template uses it; WinUI 3's RadioButtons, and FerroUI's, show their items as RadioButtons.",
    "batch": null
   },
   {
@@ -90059,6 +90059,7 @@
   "WinUITheme.xaml",
   "Controls/AdornerLayer.xaml",
   "Controls/AutoCompleteBox.xaml",
+  "Controls/AutoSuggestBox.xaml",
   "Controls/Button.xaml",
   "Controls/ButtonSpinner.xaml",
   "Controls/Calendar.xaml",
@@ -90100,6 +90101,7 @@
   "Controls/MenuScrollViewer.xaml",
   "Controls/NavigationPage.xaml",
   "Controls/NotificationCard.xaml",
+  "Controls/NumberBox.xaml",
   "Controls/NumericUpDown.xaml",
   "Controls/OverlayPopupHost.xaml",
   "Controls/PathIcon.xaml",
@@ -90108,6 +90110,8 @@
   "Controls/ProgressBar.xaml",
   "Controls/ProgressRing.xaml",
   "Controls/RadioButton.xaml",
+  "Controls/RadioButtons.xaml",
+  "Controls/RatingControl.xaml",
   "Controls/RefreshContainer.xaml",
   "Controls/RefreshVisualizer.xaml",
   "Controls/RepeatButton.xaml",
@@ -90187,6 +90191,8 @@
   "Resources/ProgressBar_themeresources.xaml",
   "Resources/ProgressRing_themeresources.xaml",
   "Resources/RadioButton_themeresources.xaml",
+  "Resources/RadioButtons_themeresources.xaml",
+  "Resources/RatingControl_themeresources.xaml",
   "Resources/RefreshContainer_themeresources.xaml",
   "Resources/RefreshVisualizer_themeresources.xaml",
   "Resources/RepeatButton_themeresources.xaml",
@@ -90736,6 +90742,50 @@
    "date": "2026-10-24"
   },
   {
+   "document": "AutoSuggestBox.xaml",
+   "themes": [
+    "{AutoSuggestBox}"
+   ],
+   "batch": "B3",
+   "winui": "AutoSuggestBox: the implicit style and DefaultAutoSuggestBoxStyle, with AutoSuggestBoxTextBoxStyle, QueryButtonStyle and the resources of AutoSuggestBox_themeresources.xaml (DefaultAutoSuggestBoxStyle and AutoSuggestBoxTextBoxStyle are ported in AutoCompleteBox.xaml). A WinUI control in ferroui-controls (docs/porting/winui-controls.md); the Fluent theme has no document for it.",
+   "status": "ported",
+   "deviations": 7,
+   "date": "2026-10-24"
+  },
+  {
+   "document": "NumberBox.xaml",
+   "themes": [
+    "{NumberBox}"
+   ],
+   "batch": "B2",
+   "winui": "NumberBox: {NumberBox} (NumberBox.xaml, NumberBox_themeresources.xaml), with NumberBoxTextBoxStyle, NumberBoxSpinButtonStyle and NumberBoxPopupSpinButtonStyle, which NumericUpDown.xaml ports. A WinUI control in ferroui-controls (docs/porting/winui-controls.md); the Fluent theme has no document for it.",
+   "status": "ported",
+   "deviations": 8,
+   "date": "2026-10-24"
+  },
+  {
+   "document": "RadioButtons.xaml",
+   "themes": [
+    "{RadioButtons}"
+   ],
+   "batch": "B3",
+   "winui": "RadioButtons: DefaultRadioButtonsStyle and the implicit style (RadioButtons.xaml, RadioButtons_themeresources.xaml), the layout ColumnMajorUniformToLargestGridLayout as the items panel RadioButtonsPanel. A WinUI control in ferroui-controls (docs/porting/winui-controls.md); the Fluent theme has no document for it.",
+   "status": "ported",
+   "deviations": 3,
+   "date": "2026-10-24"
+  },
+  {
+   "document": "RatingControl.xaml",
+   "themes": [
+    "{RatingControl}"
+   ],
+   "batch": "B2",
+   "winui": "RatingControl: {RatingControl} (RatingControl.xaml, RatingControl_themeresources.xaml). A WinUI control in ferroui-controls (docs/porting/winui-controls.md); the Fluent theme has no document for it.",
+   "status": "ported",
+   "deviations": 6,
+   "date": "2026-10-24"
+  },
+  {
    "document": "PipsPager.xaml",
    "themes": [
     "{PipsPager}"
@@ -91268,20 +91318,6 @@
    "items": 3
   },
   {
-   "document": "controls/dev/RatingControl/RatingControl.xaml",
-   "key": "*",
-   "variant": null,
-   "reason": "RatingControl: no FerroUI control.",
-   "items": 1
-  },
-  {
-   "document": "controls/dev/RatingControl/RatingControl_themeresources.xaml",
-   "key": "*",
-   "variant": null,
-   "reason": "RatingControl: no FerroUI control.",
-   "items": 34
-  },
-  {
    "document": "controls/dev/PersonPicture/PersonPicture.xaml",
    "key": "*",
    "variant": null,
@@ -91443,24 +91479,10 @@
    "items": 2
   },
   {
-   "document": "controls/dev/RadioButtons/RadioButtons.xaml",
-   "key": "*",
-   "variant": null,
-   "reason": "RadioButtons (the group control): no FerroUI control; FerroUI groups radio buttons by GroupName.",
-   "items": 2
-  },
-  {
-   "document": "controls/dev/RadioButtons/RadioButtons_themeresources.xaml",
-   "key": "*",
-   "variant": null,
-   "reason": "RadioButtons (the group control): no FerroUI control; FerroUI groups radio buttons by GroupName.",
-   "items": 9
-  },
-  {
    "document": "dxaml/xcp/dxaml/themes/generic.xaml",
    "key": "RadioButtonsItemStyle",
    "variant": null,
-   "reason": "RadioButtons (the group control): no FerroUI control.",
+   "reason": "A ListViewItem style of the RadioButtons of WinUI 2, which hosted its items in a ListView: no WinUI 3 template uses it; WinUI 3's RadioButtons, and FerroUI's, show their items as RadioButtons.",
    "items": 1
   },
   {
@@ -91560,6 +91582,7 @@
   "Resources": 9,
   "AdornerLayer": 1,
   "AutoCompleteBox": 9,
+  "AutoSuggestBox": 7,
   "Button": 8,
   "Calendar": 4,
   "CalendarButton": 7,
@@ -91596,6 +91619,7 @@
   "InfoBadge": 4,
   "ProgressRing": 4,
   "RadioButton": 6,
+  "RadioButtons": 3,
   "RepeatButton": 1,
   "ScrollBar": 11,
   "ScrollViewer": 9,
@@ -91638,7 +91662,9 @@
   "DropDownButton": 4,
   "Expander": 8,
   "NumericUpDown": 15,
+  "NumberBox": 8,
   "PipsPager": 12,
+  "RatingControl": 6,
   "RefreshContainer": 2,
   "RefreshVisualizer": 3,
   "Slider": 12,
@@ -91659,8 +91685,9 @@
    "batch": "B5"
   },
   "AutoSuggestBox": {
-   "ferroui": "AutoCompleteBox",
-   "batch": "B3"
+   "ferroui": "AutoSuggestBox",
+   "batch": "B3",
+   "note": "WinUI's AutoSuggestBox in ferroui-controls; AutoCompleteBox is drawn with the keyed DefaultAutoSuggestBoxStyle"
   },
   "Button": {
    "ferroui": "Button",
@@ -91832,8 +91859,9 @@
    "batch": "B5"
   },
   "NumberBox": {
-   "ferroui": "NumericUpDown",
-   "batch": "B2"
+   "ferroui": "NumberBox",
+   "batch": "B2",
+   "note": "WinUI's NumberBox in ferroui-controls; NumericUpDown is drawn with the styles of NumberBox too"
   },
   "PasswordBox": {
    "ferroui": "TextBox",
@@ -91856,9 +91884,19 @@
    "ferroui": "RadioButton",
    "batch": "F"
   },
+  "RadioButtons": {
+   "ferroui": "RadioButtons",
+   "batch": "B3",
+   "note": "WinUI's RadioButtons in ferroui-controls"
+  },
   "RadioMenuFlyoutItem": {
    "ferroui": "MenuItem",
    "batch": "B3"
+  },
+  "RatingControl": {
+   "ferroui": "RatingControl",
+   "batch": "B2",
+   "note": "WinUI's RatingControl in ferroui-controls"
   },
   "Rectangle": {
    "ferroui": null,
