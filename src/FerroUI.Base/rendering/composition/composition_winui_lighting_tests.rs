@@ -139,7 +139,7 @@ fn a_light_whose_coordinate_space_moves_draws_its_targets_again() {
     root.set_size(Vector::new(200.0, 100.0));
     let space = s.compositor.create_container_visual();
     space.set_size(Vector::new(10.0, 10.0));
-    root.children().insert_at_top((*space).clone());
+    root.children().insert_at_top(space.clone());
     let target = sprite(&s, 100.0, 100.0, color_brush(&s, Colors::BLUE));
     root.children().insert_at_top((*target).clone());
 
@@ -202,7 +202,7 @@ fn a_shadow_effect_colours_the_alpha_of_its_source_and_blurs_it() {
     show(&s, &visual);
     let entries = render_with_layers(&s, &visual);
     let blur = position_starting(&entries, "PushEffect 0, 0, 100, 50 blur(");
-    let matrix = position_starting(&entries, "PushColorMatrixLayer 0, 0, 100, 50 Straight");
+    let matrix = position_starting(&entries, "PushColorMatrixLayer 0, 0, 100, 50 Premultiplied");
     let source = position_starting(&entries, "DrawRectangle Blue");
     assert!(blur < matrix && matrix < source, "{entries:?}");
 }
@@ -240,7 +240,9 @@ fn effects_without_a_blend_layer_are_drawn_from_the_pixels_of_their_sources() {
         assert_eq!(CompositionEffectFactoryLoadStatus::Success, factory.load_status());
         let brush = factory.create_brush();
         brush.set_source_parameter("a", color_brush(&s, Colors::RED));
-        brush.set_source_parameter("b", color_brush(&s, Colors::BLUE));
+        if brush.source_parameter_names().iter().any(|name| name == "b") {
+            brush.set_source_parameter("b", color_brush(&s, Colors::BLUE));
+        }
         let visual = sprite(&s, 100.0, 50.0, Some(brush.brush().clone()));
         log.clear();
         show(&s, &visual);

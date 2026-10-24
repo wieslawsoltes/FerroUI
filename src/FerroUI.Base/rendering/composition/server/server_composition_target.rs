@@ -270,13 +270,11 @@ impl ServerCompositionTarget {
             None => tracker,
         };
         let pixel_size = self.pixel_size();
-        let bounds = LtrbRect::new(0.0, 0.0, pixel_size.width as f64, pixel_size.height as f64);
-        root.update_root(collector.clone(), transform, bounds);
-        // A light whose coordinate space moved in this update draws what it
-        // lights again (winui-materials.md): those areas are collected too.
-        if super::invalidate_lights_with_moved_spaces() {
-            root.update_root(collector, transform, bounds);
-        }
+        root.update_root(
+            collector,
+            transform,
+            LtrbRect::new(0.0, 0.0, pixel_size.width as f64, pixel_size.height as f64),
+        );
         self.update_requested.set(false);
         self.overlays.mark_update_call_end(self);
     }
