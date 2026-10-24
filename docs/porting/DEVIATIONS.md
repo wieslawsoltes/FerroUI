@@ -7,6 +7,7 @@ Other pages hold the entries of their own area, and this page does not repeat th
 - `browser-platform.md` section 14: the browser backend and the browser hosts of the samples (host-level differences, upstream quirks not copied).
 - `xaml.md`: the markup pipeline and the ahead-of-time compiler.
 - `winui-composition.md` section 7: the port of the WinUI 3 composition API on top of the compositor (differences from WinUI). The changes it makes to upstream behaviour are listed in the section "WinUI composition" below.
+- `winui-charts.md` section 4: the port of the WinUI Charts public contract (`src/FerroUI.Controls.Charts`; differences from the published API and tests). The decisions the port makes where the implementation is not published are in its section 3.1.
 - `winui-repeater/DEVIATIONS.md`: the port of the Repeater of WinUI (`src/FerroUI.Controls.Repeater/`), rows WR-01 onward, with the code sites marked `// Deviation (winui-repeater/DEVIATIONS.md, WR-nn)`.
 - `PORTING-GUIDE.md`: the systematic mappings that apply everywhere (class model, nullability, events, generics, naming). An application of those rules is not a deviation and is not listed here.
 

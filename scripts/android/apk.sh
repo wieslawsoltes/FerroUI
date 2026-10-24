@@ -7,6 +7,7 @@
 #   scripts/android/apk.sh catalog [options]    the ControlCatalog (samples/ControlCatalog.Android)
 #   scripts/android/apk.sh safearea [options]   the SafeAreaDemo (samples/SafeAreaDemo.Android)
 #   scripts/android/apk.sh sandbox [options]    the SingleProjectSandbox (samples/SingleProjectSandbox)
+#   scripts/android/apk.sh ember   [options]    the Ember Hacker News reader (samples/Ember.Android)
 #
 # Options:
 #   --release           build with the release profile of cargo (default: the dev profile)
@@ -38,7 +39,7 @@ run_cargo=1
 features=""
 while [ $# -gt 0 ]; do
     case "$1" in
-        smoke|catalog|safearea|sandbox) app="$1" ;;
+        smoke|catalog|safearea|sandbox|ember) app="$1" ;;
         --release) profile="release" ;;
         --abi) abi="${2:?--abi needs a value}"; shift ;;
         --out) out="${2:?--out needs a value}"; shift ;;
@@ -104,6 +105,14 @@ case "$app" in
         label="SingleProjectSandbox.Android"
         # The permission the manifest of the reference states.
         permissions='    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />'
+        ;;
+    ember)
+        cargo_args=(-p ember-android --lib)
+        library="ember_android"
+        library_dir=""
+        application_id="org.ferroui.ember"
+        label="Ember"
+        permissions='    <uses-permission android:name="android.permission.INTERNET" />'
         ;;
 esac
 min_sdk="$FERROUI_ANDROID_API"

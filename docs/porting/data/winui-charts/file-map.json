@@ -1,0 +1,710 @@
+{
+  "schema_version": 1,
+  "revision": "9427b7216337ea3d7b19ac32d48c327286ee7138",
+  "meaning": "Complete disposition of published files, not a claim that unpublished implementation or all engineering UI was copied.",
+  "files": [
+    {
+      "upstream_file": "Samples/ChartApp/ChartApp.sln",
+      "status": "native-replacement",
+      "rust_files": [
+        "samples/ChartsDemo/Cargo.toml"
+      ],
+      "notes": "Cargo and existing FerroUI platform hosts replace MSBuild, NuGet/internal package linkage, MSIX and Windows publishing profiles. No Windows package manifest is required by the controls library."
+    },
+    {
+      "upstream_file": "Samples/ChartApp/ChartAppCppPackaged/App.xaml",
+      "status": "native-replacement",
+      "rust_files": [
+        "samples/ChartsDemo/app.rs",
+        "samples/ChartsDemo/program.rs",
+        "samples/ChartsDemo/register_types.rs"
+      ],
+      "notes": "One optional native desktop runner and a backend-independent view library replace the four C#/C++ packaged/unpackaged bootstrap variants and precompiled-header/IDL glue."
+    },
+    {
+      "upstream_file": "Samples/ChartApp/ChartAppCppPackaged/App.xaml.cpp",
+      "status": "native-replacement",
+      "rust_files": [
+        "samples/ChartsDemo/app.rs",
+        "samples/ChartsDemo/program.rs",
+        "samples/ChartsDemo/register_types.rs"
+      ],
+      "notes": "One optional native desktop runner and a backend-independent view library replace the four C#/C++ packaged/unpackaged bootstrap variants and precompiled-header/IDL glue."
+    },
+    {
+      "upstream_file": "Samples/ChartApp/ChartAppCppPackaged/App.xaml.h",
+      "status": "native-replacement",
+      "rust_files": [
+        "samples/ChartsDemo/app.rs",
+        "samples/ChartsDemo/program.rs",
+        "samples/ChartsDemo/register_types.rs"
+      ],
+      "notes": "One optional native desktop runner and a backend-independent view library replace the four C#/C++ packaged/unpackaged bootstrap variants and precompiled-header/IDL glue."
+    },
+    {
+      "upstream_file": "Samples/ChartApp/ChartAppCppPackaged/Assets/LockScreenLogo.scale-200.png",
+      "status": "not-applicable",
+      "rust_files": [],
+      "notes": "Windows sample package branding; no chart behavior or reusable framework implementation. The native sample does not redistribute these logos."
+    },
+    {
+      "upstream_file": "Samples/ChartApp/ChartAppCppPackaged/Assets/SplashScreen.scale-200.png",
+      "status": "not-applicable",
+      "rust_files": [],
+      "notes": "Windows sample package branding; no chart behavior or reusable framework implementation. The native sample does not redistribute these logos."
+    },
+    {
+      "upstream_file": "Samples/ChartApp/ChartAppCppPackaged/Assets/Square150x150Logo.scale-200.png",
+      "status": "not-applicable",
+      "rust_files": [],
+      "notes": "Windows sample package branding; no chart behavior or reusable framework implementation. The native sample does not redistribute these logos."
+    },
+    {
+      "upstream_file": "Samples/ChartApp/ChartAppCppPackaged/Assets/Square44x44Logo.scale-200.png",
+      "status": "not-applicable",
+      "rust_files": [],
+      "notes": "Windows sample package branding; no chart behavior or reusable framework implementation. The native sample does not redistribute these logos."
+    },
+    {
+      "upstream_file": "Samples/ChartApp/ChartAppCppPackaged/Assets/Square44x44Logo.targetsize-24_altform-unplated.png",
+      "status": "not-applicable",
+      "rust_files": [],
+      "notes": "Windows sample package branding; no chart behavior or reusable framework implementation. The native sample does not redistribute these logos."
+    },
+    {
+      "upstream_file": "Samples/ChartApp/ChartAppCppPackaged/Assets/StoreLogo.png",
+      "status": "not-applicable",
+      "rust_files": [],
+      "notes": "Windows sample package branding; no chart behavior or reusable framework implementation. The native sample does not redistribute these logos."
+    },
+    {
+      "upstream_file": "Samples/ChartApp/ChartAppCppPackaged/Assets/Wide310x150Logo.scale-200.png",
+      "status": "not-applicable",
+      "rust_files": [],
+      "notes": "Windows sample package branding; no chart behavior or reusable framework implementation. The native sample does not redistribute these logos."
+    },
+    {
+      "upstream_file": "Samples/ChartApp/ChartAppCppPackaged/ChartAppCppPackaged.vcxproj",
+      "status": "native-replacement",
+      "rust_files": [
+        "samples/ChartsDemo/Cargo.toml"
+      ],
+      "notes": "Cargo and existing FerroUI platform hosts replace MSBuild, NuGet/internal package linkage, MSIX and Windows publishing profiles. No Windows package manifest is required by the controls library."
+    },
+    {
+      "upstream_file": "Samples/ChartApp/ChartAppCppPackaged/Package.appxmanifest",
+      "status": "native-replacement",
+      "rust_files": [
+        "samples/ChartsDemo/Cargo.toml"
+      ],
+      "notes": "Cargo and existing FerroUI platform hosts replace MSBuild, NuGet/internal package linkage, MSIX and Windows publishing profiles. No Windows package manifest is required by the controls library."
+    },
+    {
+      "upstream_file": "Samples/ChartApp/ChartAppCppPackaged/app.manifest",
+      "status": "native-replacement",
+      "rust_files": [
+        "samples/ChartsDemo/Cargo.toml"
+      ],
+      "notes": "Cargo and existing FerroUI platform hosts replace MSBuild, NuGet/internal package linkage, MSIX and Windows publishing profiles. No Windows package manifest is required by the controls library."
+    },
+    {
+      "upstream_file": "Samples/ChartApp/ChartAppCppPackaged/packages.config",
+      "status": "native-replacement",
+      "rust_files": [
+        "samples/ChartsDemo/Cargo.toml"
+      ],
+      "notes": "Cargo and existing FerroUI platform hosts replace MSBuild, NuGet/internal package linkage, MSIX and Windows publishing profiles. No Windows package manifest is required by the controls library."
+    },
+    {
+      "upstream_file": "Samples/ChartApp/ChartAppCppPackaged/pch.cpp",
+      "status": "native-replacement",
+      "rust_files": [
+        "samples/ChartsDemo/app.rs",
+        "samples/ChartsDemo/program.rs",
+        "samples/ChartsDemo/register_types.rs"
+      ],
+      "notes": "One optional native desktop runner and a backend-independent view library replace the four C#/C++ packaged/unpackaged bootstrap variants and precompiled-header/IDL glue."
+    },
+    {
+      "upstream_file": "Samples/ChartApp/ChartAppCppPackaged/pch.h",
+      "status": "native-replacement",
+      "rust_files": [
+        "samples/ChartsDemo/app.rs",
+        "samples/ChartsDemo/program.rs",
+        "samples/ChartsDemo/register_types.rs"
+      ],
+      "notes": "One optional native desktop runner and a backend-independent view library replace the four C#/C++ packaged/unpackaged bootstrap variants and precompiled-header/IDL glue."
+    },
+    {
+      "upstream_file": "Samples/ChartApp/ChartAppCppUnpackaged/App.xaml",
+      "status": "native-replacement",
+      "rust_files": [
+        "samples/ChartsDemo/app.rs",
+        "samples/ChartsDemo/program.rs",
+        "samples/ChartsDemo/register_types.rs"
+      ],
+      "notes": "One optional native desktop runner and a backend-independent view library replace the four C#/C++ packaged/unpackaged bootstrap variants and precompiled-header/IDL glue."
+    },
+    {
+      "upstream_file": "Samples/ChartApp/ChartAppCppUnpackaged/App.xaml.cpp",
+      "status": "native-replacement",
+      "rust_files": [
+        "samples/ChartsDemo/app.rs",
+        "samples/ChartsDemo/program.rs",
+        "samples/ChartsDemo/register_types.rs"
+      ],
+      "notes": "One optional native desktop runner and a backend-independent view library replace the four C#/C++ packaged/unpackaged bootstrap variants and precompiled-header/IDL glue."
+    },
+    {
+      "upstream_file": "Samples/ChartApp/ChartAppCppUnpackaged/App.xaml.h",
+      "status": "native-replacement",
+      "rust_files": [
+        "samples/ChartsDemo/app.rs",
+        "samples/ChartsDemo/program.rs",
+        "samples/ChartsDemo/register_types.rs"
+      ],
+      "notes": "One optional native desktop runner and a backend-independent view library replace the four C#/C++ packaged/unpackaged bootstrap variants and precompiled-header/IDL glue."
+    },
+    {
+      "upstream_file": "Samples/ChartApp/ChartAppCppUnpackaged/Assets/LockScreenLogo.scale-200.png",
+      "status": "not-applicable",
+      "rust_files": [],
+      "notes": "Windows sample package branding; no chart behavior or reusable framework implementation. The native sample does not redistribute these logos."
+    },
+    {
+      "upstream_file": "Samples/ChartApp/ChartAppCppUnpackaged/Assets/SplashScreen.scale-200.png",
+      "status": "not-applicable",
+      "rust_files": [],
+      "notes": "Windows sample package branding; no chart behavior or reusable framework implementation. The native sample does not redistribute these logos."
+    },
+    {
+      "upstream_file": "Samples/ChartApp/ChartAppCppUnpackaged/Assets/Square150x150Logo.scale-200.png",
+      "status": "not-applicable",
+      "rust_files": [],
+      "notes": "Windows sample package branding; no chart behavior or reusable framework implementation. The native sample does not redistribute these logos."
+    },
+    {
+      "upstream_file": "Samples/ChartApp/ChartAppCppUnpackaged/Assets/Square44x44Logo.scale-200.png",
+      "status": "not-applicable",
+      "rust_files": [],
+      "notes": "Windows sample package branding; no chart behavior or reusable framework implementation. The native sample does not redistribute these logos."
+    },
+    {
+      "upstream_file": "Samples/ChartApp/ChartAppCppUnpackaged/Assets/Square44x44Logo.targetsize-24_altform-unplated.png",
+      "status": "not-applicable",
+      "rust_files": [],
+      "notes": "Windows sample package branding; no chart behavior or reusable framework implementation. The native sample does not redistribute these logos."
+    },
+    {
+      "upstream_file": "Samples/ChartApp/ChartAppCppUnpackaged/Assets/StoreLogo.png",
+      "status": "not-applicable",
+      "rust_files": [],
+      "notes": "Windows sample package branding; no chart behavior or reusable framework implementation. The native sample does not redistribute these logos."
+    },
+    {
+      "upstream_file": "Samples/ChartApp/ChartAppCppUnpackaged/Assets/Wide310x150Logo.scale-200.png",
+      "status": "not-applicable",
+      "rust_files": [],
+      "notes": "Windows sample package branding; no chart behavior or reusable framework implementation. The native sample does not redistribute these logos."
+    },
+    {
+      "upstream_file": "Samples/ChartApp/ChartAppCppUnpackaged/ChartAppCppUnpackaged.vcxproj",
+      "status": "native-replacement",
+      "rust_files": [
+        "samples/ChartsDemo/Cargo.toml"
+      ],
+      "notes": "Cargo and existing FerroUI platform hosts replace MSBuild, NuGet/internal package linkage, MSIX and Windows publishing profiles. No Windows package manifest is required by the controls library."
+    },
+    {
+      "upstream_file": "Samples/ChartApp/ChartAppCppUnpackaged/MainWindow.idl",
+      "status": "scenario-reference",
+      "rust_files": [
+        "samples/ChartsDemo/MainView.xaml",
+        "samples/ChartsDemo/lib.rs",
+        "samples/ChartsDemo/tests.rs"
+      ],
+      "notes": "Reference for declarative series/axes, source sharing and interactive mutations. The native consolidated sample demonstrates the chart contract; it does not reproduce every engineering-menu item or secondary-window command."
+    },
+    {
+      "upstream_file": "Samples/ChartApp/ChartAppCppUnpackaged/MainWindow.xaml",
+      "status": "scenario-reference",
+      "rust_files": [
+        "samples/ChartsDemo/MainView.xaml",
+        "samples/ChartsDemo/lib.rs",
+        "samples/ChartsDemo/tests.rs"
+      ],
+      "notes": "Reference for declarative series/axes, source sharing and interactive mutations. The native consolidated sample demonstrates the chart contract; it does not reproduce every engineering-menu item or secondary-window command."
+    },
+    {
+      "upstream_file": "Samples/ChartApp/ChartAppCppUnpackaged/MainWindow.xaml.cpp",
+      "status": "scenario-reference",
+      "rust_files": [
+        "samples/ChartsDemo/MainView.xaml",
+        "samples/ChartsDemo/lib.rs",
+        "samples/ChartsDemo/tests.rs"
+      ],
+      "notes": "Reference for declarative series/axes, source sharing and interactive mutations. The native consolidated sample demonstrates the chart contract; it does not reproduce every engineering-menu item or secondary-window command."
+    },
+    {
+      "upstream_file": "Samples/ChartApp/ChartAppCppUnpackaged/MainWindow.xaml.h",
+      "status": "scenario-reference",
+      "rust_files": [
+        "samples/ChartsDemo/MainView.xaml",
+        "samples/ChartsDemo/lib.rs",
+        "samples/ChartsDemo/tests.rs"
+      ],
+      "notes": "Reference for declarative series/axes, source sharing and interactive mutations. The native consolidated sample demonstrates the chart contract; it does not reproduce every engineering-menu item or secondary-window command."
+    },
+    {
+      "upstream_file": "Samples/ChartApp/ChartAppCppUnpackaged/app.manifest",
+      "status": "native-replacement",
+      "rust_files": [
+        "samples/ChartsDemo/Cargo.toml"
+      ],
+      "notes": "Cargo and existing FerroUI platform hosts replace MSBuild, NuGet/internal package linkage, MSIX and Windows publishing profiles. No Windows package manifest is required by the controls library."
+    },
+    {
+      "upstream_file": "Samples/ChartApp/ChartAppCppUnpackaged/packages.config",
+      "status": "native-replacement",
+      "rust_files": [
+        "samples/ChartsDemo/Cargo.toml"
+      ],
+      "notes": "Cargo and existing FerroUI platform hosts replace MSBuild, NuGet/internal package linkage, MSIX and Windows publishing profiles. No Windows package manifest is required by the controls library."
+    },
+    {
+      "upstream_file": "Samples/ChartApp/ChartAppCppUnpackaged/pch.cpp",
+      "status": "native-replacement",
+      "rust_files": [
+        "samples/ChartsDemo/app.rs",
+        "samples/ChartsDemo/program.rs",
+        "samples/ChartsDemo/register_types.rs"
+      ],
+      "notes": "One optional native desktop runner and a backend-independent view library replace the four C#/C++ packaged/unpackaged bootstrap variants and precompiled-header/IDL glue."
+    },
+    {
+      "upstream_file": "Samples/ChartApp/ChartAppCppUnpackaged/pch.h",
+      "status": "native-replacement",
+      "rust_files": [
+        "samples/ChartsDemo/app.rs",
+        "samples/ChartsDemo/program.rs",
+        "samples/ChartsDemo/register_types.rs"
+      ],
+      "notes": "One optional native desktop runner and a backend-independent view library replace the four C#/C++ packaged/unpackaged bootstrap variants and precompiled-header/IDL glue."
+    },
+    {
+      "upstream_file": "Samples/ChartApp/ChartAppCsPackaged/App.xaml",
+      "status": "native-replacement",
+      "rust_files": [
+        "samples/ChartsDemo/app.rs",
+        "samples/ChartsDemo/program.rs",
+        "samples/ChartsDemo/register_types.rs"
+      ],
+      "notes": "One optional native desktop runner and a backend-independent view library replace the four C#/C++ packaged/unpackaged bootstrap variants and precompiled-header/IDL glue."
+    },
+    {
+      "upstream_file": "Samples/ChartApp/ChartAppCsPackaged/App.xaml.cs",
+      "status": "native-replacement",
+      "rust_files": [
+        "samples/ChartsDemo/app.rs",
+        "samples/ChartsDemo/program.rs",
+        "samples/ChartsDemo/register_types.rs"
+      ],
+      "notes": "One optional native desktop runner and a backend-independent view library replace the four C#/C++ packaged/unpackaged bootstrap variants and precompiled-header/IDL glue."
+    },
+    {
+      "upstream_file": "Samples/ChartApp/ChartAppCsPackaged/Assets/LockScreenLogo.scale-200.png",
+      "status": "not-applicable",
+      "rust_files": [],
+      "notes": "Windows sample package branding; no chart behavior or reusable framework implementation. The native sample does not redistribute these logos."
+    },
+    {
+      "upstream_file": "Samples/ChartApp/ChartAppCsPackaged/Assets/SplashScreen.scale-200.png",
+      "status": "not-applicable",
+      "rust_files": [],
+      "notes": "Windows sample package branding; no chart behavior or reusable framework implementation. The native sample does not redistribute these logos."
+    },
+    {
+      "upstream_file": "Samples/ChartApp/ChartAppCsPackaged/Assets/Square150x150Logo.scale-200.png",
+      "status": "not-applicable",
+      "rust_files": [],
+      "notes": "Windows sample package branding; no chart behavior or reusable framework implementation. The native sample does not redistribute these logos."
+    },
+    {
+      "upstream_file": "Samples/ChartApp/ChartAppCsPackaged/Assets/Square44x44Logo.scale-200.png",
+      "status": "not-applicable",
+      "rust_files": [],
+      "notes": "Windows sample package branding; no chart behavior or reusable framework implementation. The native sample does not redistribute these logos."
+    },
+    {
+      "upstream_file": "Samples/ChartApp/ChartAppCsPackaged/Assets/Square44x44Logo.targetsize-24_altform-unplated.png",
+      "status": "not-applicable",
+      "rust_files": [],
+      "notes": "Windows sample package branding; no chart behavior or reusable framework implementation. The native sample does not redistribute these logos."
+    },
+    {
+      "upstream_file": "Samples/ChartApp/ChartAppCsPackaged/Assets/StoreLogo.png",
+      "status": "not-applicable",
+      "rust_files": [],
+      "notes": "Windows sample package branding; no chart behavior or reusable framework implementation. The native sample does not redistribute these logos."
+    },
+    {
+      "upstream_file": "Samples/ChartApp/ChartAppCsPackaged/Assets/Wide310x150Logo.scale-200.png",
+      "status": "not-applicable",
+      "rust_files": [],
+      "notes": "Windows sample package branding; no chart behavior or reusable framework implementation. The native sample does not redistribute these logos."
+    },
+    {
+      "upstream_file": "Samples/ChartApp/ChartAppCsPackaged/ChartAppCsPackaged.csproj",
+      "status": "native-replacement",
+      "rust_files": [
+        "samples/ChartsDemo/Cargo.toml"
+      ],
+      "notes": "Cargo and existing FerroUI platform hosts replace MSBuild, NuGet/internal package linkage, MSIX and Windows publishing profiles. No Windows package manifest is required by the controls library."
+    },
+    {
+      "upstream_file": "Samples/ChartApp/ChartAppCsPackaged/Package.appxmanifest",
+      "status": "native-replacement",
+      "rust_files": [
+        "samples/ChartsDemo/Cargo.toml"
+      ],
+      "notes": "Cargo and existing FerroUI platform hosts replace MSBuild, NuGet/internal package linkage, MSIX and Windows publishing profiles. No Windows package manifest is required by the controls library."
+    },
+    {
+      "upstream_file": "Samples/ChartApp/ChartAppCsPackaged/Properties/PublishProfiles/win-arm64.pubxml",
+      "status": "native-replacement",
+      "rust_files": [
+        "samples/ChartsDemo/Cargo.toml"
+      ],
+      "notes": "Cargo and existing FerroUI platform hosts replace MSBuild, NuGet/internal package linkage, MSIX and Windows publishing profiles. No Windows package manifest is required by the controls library."
+    },
+    {
+      "upstream_file": "Samples/ChartApp/ChartAppCsPackaged/Properties/PublishProfiles/win-arm64ec.pubxml",
+      "status": "native-replacement",
+      "rust_files": [
+        "samples/ChartsDemo/Cargo.toml"
+      ],
+      "notes": "Cargo and existing FerroUI platform hosts replace MSBuild, NuGet/internal package linkage, MSIX and Windows publishing profiles. No Windows package manifest is required by the controls library."
+    },
+    {
+      "upstream_file": "Samples/ChartApp/ChartAppCsPackaged/Properties/PublishProfiles/win-x64.pubxml",
+      "status": "native-replacement",
+      "rust_files": [
+        "samples/ChartsDemo/Cargo.toml"
+      ],
+      "notes": "Cargo and existing FerroUI platform hosts replace MSBuild, NuGet/internal package linkage, MSIX and Windows publishing profiles. No Windows package manifest is required by the controls library."
+    },
+    {
+      "upstream_file": "Samples/ChartApp/ChartAppCsPackaged/Properties/PublishProfiles/win-x86.pubxml",
+      "status": "native-replacement",
+      "rust_files": [
+        "samples/ChartsDemo/Cargo.toml"
+      ],
+      "notes": "Cargo and existing FerroUI platform hosts replace MSBuild, NuGet/internal package linkage, MSIX and Windows publishing profiles. No Windows package manifest is required by the controls library."
+    },
+    {
+      "upstream_file": "Samples/ChartApp/ChartAppCsPackaged/app.manifest",
+      "status": "native-replacement",
+      "rust_files": [
+        "samples/ChartsDemo/Cargo.toml"
+      ],
+      "notes": "Cargo and existing FerroUI platform hosts replace MSBuild, NuGet/internal package linkage, MSIX and Windows publishing profiles. No Windows package manifest is required by the controls library."
+    },
+    {
+      "upstream_file": "Samples/ChartApp/ChartAppCsUnpackaged/App.xaml",
+      "status": "native-replacement",
+      "rust_files": [
+        "samples/ChartsDemo/app.rs",
+        "samples/ChartsDemo/program.rs",
+        "samples/ChartsDemo/register_types.rs"
+      ],
+      "notes": "One optional native desktop runner and a backend-independent view library replace the four C#/C++ packaged/unpackaged bootstrap variants and precompiled-header/IDL glue."
+    },
+    {
+      "upstream_file": "Samples/ChartApp/ChartAppCsUnpackaged/App.xaml.cs",
+      "status": "native-replacement",
+      "rust_files": [
+        "samples/ChartsDemo/app.rs",
+        "samples/ChartsDemo/program.rs",
+        "samples/ChartsDemo/register_types.rs"
+      ],
+      "notes": "One optional native desktop runner and a backend-independent view library replace the four C#/C++ packaged/unpackaged bootstrap variants and precompiled-header/IDL glue."
+    },
+    {
+      "upstream_file": "Samples/ChartApp/ChartAppCsUnpackaged/Assets/LockScreenLogo.scale-200.png",
+      "status": "not-applicable",
+      "rust_files": [],
+      "notes": "Windows sample package branding; no chart behavior or reusable framework implementation. The native sample does not redistribute these logos."
+    },
+    {
+      "upstream_file": "Samples/ChartApp/ChartAppCsUnpackaged/Assets/SplashScreen.scale-200.png",
+      "status": "not-applicable",
+      "rust_files": [],
+      "notes": "Windows sample package branding; no chart behavior or reusable framework implementation. The native sample does not redistribute these logos."
+    },
+    {
+      "upstream_file": "Samples/ChartApp/ChartAppCsUnpackaged/Assets/Square150x150Logo.scale-200.png",
+      "status": "not-applicable",
+      "rust_files": [],
+      "notes": "Windows sample package branding; no chart behavior or reusable framework implementation. The native sample does not redistribute these logos."
+    },
+    {
+      "upstream_file": "Samples/ChartApp/ChartAppCsUnpackaged/Assets/Square44x44Logo.scale-200.png",
+      "status": "not-applicable",
+      "rust_files": [],
+      "notes": "Windows sample package branding; no chart behavior or reusable framework implementation. The native sample does not redistribute these logos."
+    },
+    {
+      "upstream_file": "Samples/ChartApp/ChartAppCsUnpackaged/Assets/Square44x44Logo.targetsize-24_altform-unplated.png",
+      "status": "not-applicable",
+      "rust_files": [],
+      "notes": "Windows sample package branding; no chart behavior or reusable framework implementation. The native sample does not redistribute these logos."
+    },
+    {
+      "upstream_file": "Samples/ChartApp/ChartAppCsUnpackaged/Assets/StoreLogo.png",
+      "status": "not-applicable",
+      "rust_files": [],
+      "notes": "Windows sample package branding; no chart behavior or reusable framework implementation. The native sample does not redistribute these logos."
+    },
+    {
+      "upstream_file": "Samples/ChartApp/ChartAppCsUnpackaged/Assets/Wide310x150Logo.scale-200.png",
+      "status": "not-applicable",
+      "rust_files": [],
+      "notes": "Windows sample package branding; no chart behavior or reusable framework implementation. The native sample does not redistribute these logos."
+    },
+    {
+      "upstream_file": "Samples/ChartApp/ChartAppCsUnpackaged/ChartAppCsUnpackaged.csproj",
+      "status": "native-replacement",
+      "rust_files": [
+        "samples/ChartsDemo/Cargo.toml"
+      ],
+      "notes": "Cargo and existing FerroUI platform hosts replace MSBuild, NuGet/internal package linkage, MSIX and Windows publishing profiles. No Windows package manifest is required by the controls library."
+    },
+    {
+      "upstream_file": "Samples/ChartApp/ChartAppCsUnpackaged/MainWindow.xaml",
+      "status": "scenario-reference",
+      "rust_files": [
+        "samples/ChartsDemo/MainView.xaml",
+        "samples/ChartsDemo/lib.rs",
+        "samples/ChartsDemo/tests.rs"
+      ],
+      "notes": "Reference for declarative series/axes, source sharing and interactive mutations. The native consolidated sample demonstrates the chart contract; it does not reproduce every engineering-menu item or secondary-window command."
+    },
+    {
+      "upstream_file": "Samples/ChartApp/ChartAppCsUnpackaged/MainWindow.xaml.cs",
+      "status": "scenario-reference",
+      "rust_files": [
+        "samples/ChartsDemo/MainView.xaml",
+        "samples/ChartsDemo/lib.rs",
+        "samples/ChartsDemo/tests.rs"
+      ],
+      "notes": "Reference for declarative series/axes, source sharing and interactive mutations. The native consolidated sample demonstrates the chart contract; it does not reproduce every engineering-menu item or secondary-window command."
+    },
+    {
+      "upstream_file": "Samples/ChartApp/ChartAppCsUnpackaged/ObservableVector.cs",
+      "status": "native-replacement",
+      "rust_files": [
+        "src/FerroUI.Controls.Charts/samples.rs",
+        "src/FerroUI.Controls.Charts/chart_collection.rs",
+        "samples/ChartsDemo/lib.rs"
+      ],
+      "notes": "Existing FerroList, ItemsSource and ItemsSourceView replace the sample WinRT observable-vector implementation; chart ownership adds transactional validation."
+    },
+    {
+      "upstream_file": "Samples/ChartApp/ChartAppCsUnpackaged/Properties/PublishProfiles/win-arm64.pubxml",
+      "status": "native-replacement",
+      "rust_files": [
+        "samples/ChartsDemo/Cargo.toml"
+      ],
+      "notes": "Cargo and existing FerroUI platform hosts replace MSBuild, NuGet/internal package linkage, MSIX and Windows publishing profiles. No Windows package manifest is required by the controls library."
+    },
+    {
+      "upstream_file": "Samples/ChartApp/ChartAppCsUnpackaged/Properties/PublishProfiles/win-arm64ec.pubxml",
+      "status": "native-replacement",
+      "rust_files": [
+        "samples/ChartsDemo/Cargo.toml"
+      ],
+      "notes": "Cargo and existing FerroUI platform hosts replace MSBuild, NuGet/internal package linkage, MSIX and Windows publishing profiles. No Windows package manifest is required by the controls library."
+    },
+    {
+      "upstream_file": "Samples/ChartApp/ChartAppCsUnpackaged/Properties/PublishProfiles/win-x64.pubxml",
+      "status": "native-replacement",
+      "rust_files": [
+        "samples/ChartsDemo/Cargo.toml"
+      ],
+      "notes": "Cargo and existing FerroUI platform hosts replace MSBuild, NuGet/internal package linkage, MSIX and Windows publishing profiles. No Windows package manifest is required by the controls library."
+    },
+    {
+      "upstream_file": "Samples/ChartApp/ChartAppCsUnpackaged/Properties/PublishProfiles/win-x86.pubxml",
+      "status": "native-replacement",
+      "rust_files": [
+        "samples/ChartsDemo/Cargo.toml"
+      ],
+      "notes": "Cargo and existing FerroUI platform hosts replace MSBuild, NuGet/internal package linkage, MSIX and Windows publishing profiles. No Windows package manifest is required by the controls library."
+    },
+    {
+      "upstream_file": "Samples/ChartApp/ChartAppCsUnpackaged/SecondaryChartWindow.cs",
+      "status": "scenario-reference",
+      "rust_files": [
+        "samples/ChartsDemo/MainView.xaml",
+        "samples/ChartsDemo/lib.rs",
+        "samples/ChartsDemo/tests.rs"
+      ],
+      "notes": "Reference for declarative series/axes, source sharing and interactive mutations. The native consolidated sample demonstrates the chart contract; it does not reproduce every engineering-menu item or secondary-window command."
+    },
+    {
+      "upstream_file": "Samples/ChartApp/ChartAppCsUnpackaged/app.manifest",
+      "status": "native-replacement",
+      "rust_files": [
+        "samples/ChartsDemo/Cargo.toml"
+      ],
+      "notes": "Cargo and existing FerroUI platform hosts replace MSBuild, NuGet/internal package linkage, MSIX and Windows publishing profiles. No Windows package manifest is required by the controls library."
+    },
+    {
+      "upstream_file": "Samples/ChartApp/README.md",
+      "status": "reference-only",
+      "rust_files": [
+        "docs/porting/winui-charts.md",
+        "src/FerroUI.Controls.Charts/NOTICE.md"
+      ],
+      "notes": "Evidence for the unpublished internal implementation and the public-package/build boundary."
+    },
+    {
+      "upstream_file": "controls/dev/Charts/APITests/ChartAutomationTests.cs",
+      "status": "contract-tests",
+      "rust_files": [
+        "src/FerroUI.Controls.Charts/chart_tests.rs"
+      ],
+      "notes": "Every source test method is tracked individually in test-map.json; execution evidence is separate."
+    },
+    {
+      "upstream_file": "controls/dev/Charts/APITests/ChartAxisTests.cs",
+      "status": "contract-tests",
+      "rust_files": [
+        "src/FerroUI.Controls.Charts/axis_tests.rs",
+        "src/FerroUI.Controls.Charts/chart_tests.rs"
+      ],
+      "notes": "Every source test method is tracked individually in test-map.json; execution evidence is separate."
+    },
+    {
+      "upstream_file": "controls/dev/Charts/APITests/ChartSamplesTests.cs",
+      "status": "contract-tests",
+      "rust_files": [
+        "src/FerroUI.Controls.Charts/samples_tests.rs"
+      ],
+      "notes": "Every source test method is tracked individually in test-map.json; execution evidence is separate."
+    },
+    {
+      "upstream_file": "controls/dev/Charts/APITests/ChartSeriesTests.cs",
+      "status": "contract-tests",
+      "rust_files": [
+        "src/FerroUI.Controls.Charts/series_tests.rs"
+      ],
+      "notes": "Every source test method is tracked individually in test-map.json; execution evidence is separate."
+    },
+    {
+      "upstream_file": "controls/dev/Charts/APITests/ChartTestHelpers.cs",
+      "status": "native-replacement",
+      "rust_files": [
+        "src/FerroUI.Controls.Charts/chart_tests.rs",
+        "src/FerroUI.Controls.Charts/samples_tests.rs",
+        "samples/ChartsDemo/MainView.xaml"
+      ],
+      "notes": "Native test application, window/layout helpers and sample commands replace the WinUI TestApp fixture. The two interaction cases are in-process and do not claim OS input injection."
+    },
+    {
+      "upstream_file": "controls/dev/Charts/APITests/ChartTests.cs",
+      "status": "contract-tests",
+      "rust_files": [
+        "src/FerroUI.Controls.Charts/chart_tests.rs",
+        "src/FerroUI.Controls.Charts/xaml_tests.rs"
+      ],
+      "notes": "Every source test method is tracked individually in test-map.json; execution evidence is separate."
+    },
+    {
+      "upstream_file": "controls/dev/Charts/APITests/Charts_APITests.projitems",
+      "status": "native-replacement",
+      "rust_files": [
+        "src/FerroUI.Controls.Charts/Cargo.toml"
+      ],
+      "notes": "Cargo and existing FerroUI platform hosts replace MSBuild, NuGet/internal package linkage, MSIX and Windows publishing profiles. No Windows package manifest is required by the controls library."
+    },
+    {
+      "upstream_file": "controls/dev/Charts/APITests/Charts_APITests.shproj",
+      "status": "native-replacement",
+      "rust_files": [
+        "src/FerroUI.Controls.Charts/Cargo.toml"
+      ],
+      "notes": "Cargo and existing FerroUI platform hosts replace MSBuild, NuGet/internal package linkage, MSIX and Windows publishing profiles. No Windows package manifest is required by the controls library."
+    },
+    {
+      "upstream_file": "controls/dev/Charts/InteractionTests/ChartsTests.cs",
+      "status": "contract-tests",
+      "rust_files": [
+        "src/FerroUI.Controls.Charts/chart_tests.rs"
+      ],
+      "notes": "Every source test method is tracked individually in test-map.json; execution evidence is separate."
+    },
+    {
+      "upstream_file": "controls/dev/Charts/InteractionTests/Charts_InteractionTests.projitems",
+      "status": "native-replacement",
+      "rust_files": [
+        "src/FerroUI.Controls.Charts/Cargo.toml"
+      ],
+      "notes": "Cargo and existing FerroUI platform hosts replace MSBuild, NuGet/internal package linkage, MSIX and Windows publishing profiles. No Windows package manifest is required by the controls library."
+    },
+    {
+      "upstream_file": "controls/dev/Charts/InteractionTests/Charts_InteractionTests.shproj",
+      "status": "native-replacement",
+      "rust_files": [
+        "src/FerroUI.Controls.Charts/Cargo.toml"
+      ],
+      "notes": "Cargo and existing FerroUI platform hosts replace MSBuild, NuGet/internal package linkage, MSIX and Windows publishing profiles. No Windows package manifest is required by the controls library."
+    },
+    {
+      "upstream_file": "controls/dev/Charts/TestUI/ChartsObservableVector.cs",
+      "status": "native-replacement",
+      "rust_files": [
+        "src/FerroUI.Controls.Charts/samples.rs",
+        "src/FerroUI.Controls.Charts/chart_collection.rs",
+        "samples/ChartsDemo/lib.rs"
+      ],
+      "notes": "Existing FerroList, ItemsSource and ItemsSourceView replace the sample WinRT observable-vector implementation; chart ownership adds transactional validation."
+    },
+    {
+      "upstream_file": "controls/dev/Charts/TestUI/ChartsPage.xaml",
+      "status": "native-replacement",
+      "rust_files": [
+        "src/FerroUI.Controls.Charts/chart_tests.rs",
+        "src/FerroUI.Controls.Charts/samples_tests.rs",
+        "samples/ChartsDemo/MainView.xaml"
+      ],
+      "notes": "Native test application, window/layout helpers and sample commands replace the WinUI TestApp fixture. The two interaction cases are in-process and do not claim OS input injection."
+    },
+    {
+      "upstream_file": "controls/dev/Charts/TestUI/ChartsPage.xaml.cs",
+      "status": "native-replacement",
+      "rust_files": [
+        "src/FerroUI.Controls.Charts/chart_tests.rs",
+        "src/FerroUI.Controls.Charts/samples_tests.rs",
+        "samples/ChartsDemo/MainView.xaml"
+      ],
+      "notes": "Native test application, window/layout helpers and sample commands replace the WinUI TestApp fixture. The two interaction cases are in-process and do not claim OS input injection."
+    },
+    {
+      "upstream_file": "controls/dev/Charts/TestUI/Charts_TestUI.projitems",
+      "status": "native-replacement",
+      "rust_files": [
+        "src/FerroUI.Controls.Charts/Cargo.toml"
+      ],
+      "notes": "Cargo and existing FerroUI platform hosts replace MSBuild, NuGet/internal package linkage, MSIX and Windows publishing profiles. No Windows package manifest is required by the controls library."
+    },
+    {
+      "upstream_file": "controls/dev/Charts/TestUI/Charts_TestUI.shproj",
+      "status": "native-replacement",
+      "rust_files": [
+        "src/FerroUI.Controls.Charts/Cargo.toml"
+      ],
+      "notes": "Cargo and existing FerroUI platform hosts replace MSBuild, NuGet/internal package linkage, MSIX and Windows publishing profiles. No Windows package manifest is required by the controls library."
+    }
+  ]
+}

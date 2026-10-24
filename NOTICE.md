@@ -57,7 +57,7 @@ Avalonia itself incorporates code from other projects (for example WPF-derived l
 
 - Project: <https://github.com/microsoft/microsoft-ui-xaml> (branch `winui3/main`, commit `7e4b0c2096be402f51cc8f7d203ebf67cff183d0`)
 - License: MIT, Copyright (c) Microsoft Corporation
-- Used for: the WinUI theme `src/FerroUI.Themes.WinUI`, whose resource and control theme documents are ported from the theme of WinUI 3 (`generic.xaml` and the theme resources of the controls library; see `src/FerroUI.Themes.WinUI/NOTICE.md`, which holds the license text, and `docs/porting/winui-theme.md`). Also for the ItemsRepeater crate `src/FerroUI.Controls.Repeater`, ported from `controls/dev/Repeater` at the same commit (see `src/FerroUI.Controls.Repeater/NOTICE.md` and `docs/porting/winui-repeater/README.md`).
+- Used for: the WinUI theme `src/FerroUI.Themes.WinUI`, whose resource and control theme documents are ported from the theme of WinUI 3 (`generic.xaml` and the theme resources of the controls library; see `src/FerroUI.Themes.WinUI/NOTICE.md`, which holds the license text, and `docs/porting/winui-theme.md`). Also for the Charts library `src/FerroUI.Controls.Charts`, whose conformance tests and the ChartsDemo scenarios are adapted from the public Charts tests and ChartApp samples at commit `9427b7216337ea3d7b19ac32d48c327286ee7138` (see `src/FerroUI.Controls.Charts/NOTICE.md` and `docs/porting/winui-charts.md`). Also for the ItemsRepeater crate `src/FerroUI.Controls.Repeater`, ported from `controls/dev/Repeater` at the same commit (see `src/FerroUI.Controls.Repeater/NOTICE.md` and `docs/porting/winui-repeater/README.md`).
 
 ## Reactive Extensions for .NET (Rx.NET)
 

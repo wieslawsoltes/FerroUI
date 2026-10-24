@@ -1,0 +1,1711 @@
+{
+  "schema_version": 1,
+  "repository": "https://github.com/microsoft/microsoft-ui-xaml",
+  "revision": "9427b7216337ea3d7b19ac32d48c327286ee7138",
+  "discussion": "https://github.com/microsoft/microsoft-ui-xaml/discussions/12343",
+  "implementation_source": {
+    "availability": "not-published-in-pinned-public-tree",
+    "evidence": "Samples/ChartApp/README.md",
+    "package_named_by_upstream": "Microsoft.Internal.WinUIDetails"
+  },
+  "scope_roots": [
+    "controls/dev/Charts",
+    "Samples/ChartApp"
+  ],
+  "file_count": 88,
+  "test_count": 132,
+  "test_suite_counts": {
+    "api-tests": 130,
+    "interaction-tests": 2
+  },
+  "files": [
+    {
+      "path": "Samples/ChartApp/ChartApp.sln",
+      "blob_sha": "351e80d5a0a4735c791b85211b0e8bdccba4758b",
+      "mode": "100644",
+      "role": "windows-build-and-deployment",
+      "proposed_rust_targets": []
+    },
+    {
+      "path": "Samples/ChartApp/ChartAppCppPackaged/App.xaml",
+      "blob_sha": "4ab913563bfdee72444499531594350c6d5f4905",
+      "mode": "100644",
+      "role": "engineering-sample",
+      "proposed_rust_targets": []
+    },
+    {
+      "path": "Samples/ChartApp/ChartAppCppPackaged/App.xaml.cpp",
+      "blob_sha": "d80f8c8de7e73a136659cddabe9115fa512dd573",
+      "mode": "100644",
+      "role": "engineering-sample",
+      "proposed_rust_targets": []
+    },
+    {
+      "path": "Samples/ChartApp/ChartAppCppPackaged/App.xaml.h",
+      "blob_sha": "d3086a86fbf8c58f3b39743117874d7de90daa69",
+      "mode": "100644",
+      "role": "engineering-sample",
+      "proposed_rust_targets": []
+    },
+    {
+      "path": "Samples/ChartApp/ChartAppCppPackaged/Assets/LockScreenLogo.scale-200.png",
+      "blob_sha": "7440f0d4bf7c7e26e4e36328738c68e624ee851e",
+      "mode": "100644",
+      "role": "windows-host-assets",
+      "proposed_rust_targets": []
+    },
+    {
+      "path": "Samples/ChartApp/ChartAppCppPackaged/Assets/SplashScreen.scale-200.png",
+      "blob_sha": "32f486a86792a5e34cd9a8261b394c49b48f86be",
+      "mode": "100644",
+      "role": "windows-host-assets",
+      "proposed_rust_targets": []
+    },
+    {
+      "path": "Samples/ChartApp/ChartAppCppPackaged/Assets/Square150x150Logo.scale-200.png",
+      "blob_sha": "53ee3777ea27e31b260014cf4074099874ff933a",
+      "mode": "100644",
+      "role": "windows-host-assets",
+      "proposed_rust_targets": []
+    },
+    {
+      "path": "Samples/ChartApp/ChartAppCppPackaged/Assets/Square44x44Logo.scale-200.png",
+      "blob_sha": "f713bba67f551ef91020b75716a4dc8ebd744b1c",
+      "mode": "100644",
+      "role": "windows-host-assets",
+      "proposed_rust_targets": []
+    },
+    {
+      "path": "Samples/ChartApp/ChartAppCppPackaged/Assets/Square44x44Logo.targetsize-24_altform-unplated.png",
+      "blob_sha": "dc9f5bea0c3b191b5e9e13e92fcb488a8a766bd0",
+      "mode": "100644",
+      "role": "windows-host-assets",
+      "proposed_rust_targets": []
+    },
+    {
+      "path": "Samples/ChartApp/ChartAppCppPackaged/Assets/StoreLogo.png",
+      "blob_sha": "a4586f26bdf7841cad10f39cdffe2aca3af252c1",
+      "mode": "100644",
+      "role": "windows-host-assets",
+      "proposed_rust_targets": []
+    },
+    {
+      "path": "Samples/ChartApp/ChartAppCppPackaged/Assets/Wide310x150Logo.scale-200.png",
+      "blob_sha": "8b4a5d0dd5f6c6ab408e1edf04a07888859a9eab",
+      "mode": "100644",
+      "role": "windows-host-assets",
+      "proposed_rust_targets": []
+    },
+    {
+      "path": "Samples/ChartApp/ChartAppCppPackaged/ChartAppCppPackaged.vcxproj",
+      "blob_sha": "5d8825664e628975725ef8df163ac1950a7145f1",
+      "mode": "100644",
+      "role": "windows-build-and-deployment",
+      "proposed_rust_targets": []
+    },
+    {
+      "path": "Samples/ChartApp/ChartAppCppPackaged/Package.appxmanifest",
+      "blob_sha": "f653b0201cbe1ac141566930a1b48f4b325764bc",
+      "mode": "100644",
+      "role": "windows-build-and-deployment",
+      "proposed_rust_targets": []
+    },
+    {
+      "path": "Samples/ChartApp/ChartAppCppPackaged/app.manifest",
+      "blob_sha": "ebefcec162156185677097098cd98afbe97459a7",
+      "mode": "100644",
+      "role": "windows-build-and-deployment",
+      "proposed_rust_targets": []
+    },
+    {
+      "path": "Samples/ChartApp/ChartAppCppPackaged/packages.config",
+      "blob_sha": "e95c7260d6e7649a6946bd9c83f278ede357063a",
+      "mode": "100644",
+      "role": "windows-build-and-deployment",
+      "proposed_rust_targets": []
+    },
+    {
+      "path": "Samples/ChartApp/ChartAppCppPackaged/pch.cpp",
+      "blob_sha": "1d9f38c57d63f197d552a5283424f75f885bb1c2",
+      "mode": "100644",
+      "role": "engineering-sample",
+      "proposed_rust_targets": []
+    },
+    {
+      "path": "Samples/ChartApp/ChartAppCppPackaged/pch.h",
+      "blob_sha": "7debbf65ac10141ee008e28147de88c10388a7e9",
+      "mode": "100644",
+      "role": "engineering-sample",
+      "proposed_rust_targets": []
+    },
+    {
+      "path": "Samples/ChartApp/ChartAppCppUnpackaged/App.xaml",
+      "blob_sha": "4ab913563bfdee72444499531594350c6d5f4905",
+      "mode": "100644",
+      "role": "engineering-sample",
+      "proposed_rust_targets": []
+    },
+    {
+      "path": "Samples/ChartApp/ChartAppCppUnpackaged/App.xaml.cpp",
+      "blob_sha": "7d87e4e18eb04652a59d7c77de7fe3baff97b0e3",
+      "mode": "100644",
+      "role": "engineering-sample",
+      "proposed_rust_targets": []
+    },
+    {
+      "path": "Samples/ChartApp/ChartAppCppUnpackaged/App.xaml.h",
+      "blob_sha": "d3086a86fbf8c58f3b39743117874d7de90daa69",
+      "mode": "100644",
+      "role": "engineering-sample",
+      "proposed_rust_targets": []
+    },
+    {
+      "path": "Samples/ChartApp/ChartAppCppUnpackaged/Assets/LockScreenLogo.scale-200.png",
+      "blob_sha": "7440f0d4bf7c7e26e4e36328738c68e624ee851e",
+      "mode": "100644",
+      "role": "windows-host-assets",
+      "proposed_rust_targets": []
+    },
+    {
+      "path": "Samples/ChartApp/ChartAppCppUnpackaged/Assets/SplashScreen.scale-200.png",
+      "blob_sha": "32f486a86792a5e34cd9a8261b394c49b48f86be",
+      "mode": "100644",
+      "role": "windows-host-assets",
+      "proposed_rust_targets": []
+    },
+    {
+      "path": "Samples/ChartApp/ChartAppCppUnpackaged/Assets/Square150x150Logo.scale-200.png",
+      "blob_sha": "53ee3777ea27e31b260014cf4074099874ff933a",
+      "mode": "100644",
+      "role": "windows-host-assets",
+      "proposed_rust_targets": []
+    },
+    {
+      "path": "Samples/ChartApp/ChartAppCppUnpackaged/Assets/Square44x44Logo.scale-200.png",
+      "blob_sha": "f713bba67f551ef91020b75716a4dc8ebd744b1c",
+      "mode": "100644",
+      "role": "windows-host-assets",
+      "proposed_rust_targets": []
+    },
+    {
+      "path": "Samples/ChartApp/ChartAppCppUnpackaged/Assets/Square44x44Logo.targetsize-24_altform-unplated.png",
+      "blob_sha": "dc9f5bea0c3b191b5e9e13e92fcb488a8a766bd0",
+      "mode": "100644",
+      "role": "windows-host-assets",
+      "proposed_rust_targets": []
+    },
+    {
+      "path": "Samples/ChartApp/ChartAppCppUnpackaged/Assets/StoreLogo.png",
+      "blob_sha": "a4586f26bdf7841cad10f39cdffe2aca3af252c1",
+      "mode": "100644",
+      "role": "windows-host-assets",
+      "proposed_rust_targets": []
+    },
+    {
+      "path": "Samples/ChartApp/ChartAppCppUnpackaged/Assets/Wide310x150Logo.scale-200.png",
+      "blob_sha": "8b4a5d0dd5f6c6ab408e1edf04a07888859a9eab",
+      "mode": "100644",
+      "role": "windows-host-assets",
+      "proposed_rust_targets": []
+    },
+    {
+      "path": "Samples/ChartApp/ChartAppCppUnpackaged/ChartAppCppUnpackaged.vcxproj",
+      "blob_sha": "dbd29d252f0a0314403ce8eb61e334bedbd3c455",
+      "mode": "100644",
+      "role": "windows-build-and-deployment",
+      "proposed_rust_targets": []
+    },
+    {
+      "path": "Samples/ChartApp/ChartAppCppUnpackaged/MainWindow.idl",
+      "blob_sha": "7fa7a77c5f9df7d2e0e72d90b23dbeaa11e797c9",
+      "mode": "100644",
+      "role": "engineering-sample",
+      "proposed_rust_targets": []
+    },
+    {
+      "path": "Samples/ChartApp/ChartAppCppUnpackaged/MainWindow.xaml",
+      "blob_sha": "60d3776e6ec768e60a2a636199a53965c3a08654",
+      "mode": "100644",
+      "role": "engineering-sample",
+      "proposed_rust_targets": []
+    },
+    {
+      "path": "Samples/ChartApp/ChartAppCppUnpackaged/MainWindow.xaml.cpp",
+      "blob_sha": "d32d8969ed68784e31de6c9a326f82e6b5cfb37b",
+      "mode": "100644",
+      "role": "engineering-sample",
+      "proposed_rust_targets": []
+    },
+    {
+      "path": "Samples/ChartApp/ChartAppCppUnpackaged/MainWindow.xaml.h",
+      "blob_sha": "0d4718bbc50cbe269f75ae5c77259485c09132f3",
+      "mode": "100644",
+      "role": "engineering-sample",
+      "proposed_rust_targets": []
+    },
+    {
+      "path": "Samples/ChartApp/ChartAppCppUnpackaged/app.manifest",
+      "blob_sha": "12c7ac43658f058ab088e36f57989e20f5422300",
+      "mode": "100644",
+      "role": "windows-build-and-deployment",
+      "proposed_rust_targets": []
+    },
+    {
+      "path": "Samples/ChartApp/ChartAppCppUnpackaged/packages.config",
+      "blob_sha": "ab0db89a349529f594e26ad5d707636908ddb052",
+      "mode": "100644",
+      "role": "windows-build-and-deployment",
+      "proposed_rust_targets": []
+    },
+    {
+      "path": "Samples/ChartApp/ChartAppCppUnpackaged/pch.cpp",
+      "blob_sha": "1d9f38c57d63f197d552a5283424f75f885bb1c2",
+      "mode": "100644",
+      "role": "engineering-sample",
+      "proposed_rust_targets": []
+    },
+    {
+      "path": "Samples/ChartApp/ChartAppCppUnpackaged/pch.h",
+      "blob_sha": "7debbf65ac10141ee008e28147de88c10388a7e9",
+      "mode": "100644",
+      "role": "engineering-sample",
+      "proposed_rust_targets": []
+    },
+    {
+      "path": "Samples/ChartApp/ChartAppCsPackaged/App.xaml",
+      "blob_sha": "b3e24cc12af1b46fcd34283177f7c547ec7eb8ef",
+      "mode": "100644",
+      "role": "engineering-sample",
+      "proposed_rust_targets": []
+    },
+    {
+      "path": "Samples/ChartApp/ChartAppCsPackaged/App.xaml.cs",
+      "blob_sha": "5495a35ea24bd57f91b182723a7c987c3a68ccde",
+      "mode": "100644",
+      "role": "engineering-sample",
+      "proposed_rust_targets": []
+    },
+    {
+      "path": "Samples/ChartApp/ChartAppCsPackaged/Assets/LockScreenLogo.scale-200.png",
+      "blob_sha": "7440f0d4bf7c7e26e4e36328738c68e624ee851e",
+      "mode": "100644",
+      "role": "windows-host-assets",
+      "proposed_rust_targets": []
+    },
+    {
+      "path": "Samples/ChartApp/ChartAppCsPackaged/Assets/SplashScreen.scale-200.png",
+      "blob_sha": "32f486a86792a5e34cd9a8261b394c49b48f86be",
+      "mode": "100644",
+      "role": "windows-host-assets",
+      "proposed_rust_targets": []
+    },
+    {
+      "path": "Samples/ChartApp/ChartAppCsPackaged/Assets/Square150x150Logo.scale-200.png",
+      "blob_sha": "53ee3777ea27e31b260014cf4074099874ff933a",
+      "mode": "100644",
+      "role": "windows-host-assets",
+      "proposed_rust_targets": []
+    },
+    {
+      "path": "Samples/ChartApp/ChartAppCsPackaged/Assets/Square44x44Logo.scale-200.png",
+      "blob_sha": "f713bba67f551ef91020b75716a4dc8ebd744b1c",
+      "mode": "100644",
+      "role": "windows-host-assets",
+      "proposed_rust_targets": []
+    },
+    {
+      "path": "Samples/ChartApp/ChartAppCsPackaged/Assets/Square44x44Logo.targetsize-24_altform-unplated.png",
+      "blob_sha": "dc9f5bea0c3b191b5e9e13e92fcb488a8a766bd0",
+      "mode": "100644",
+      "role": "windows-host-assets",
+      "proposed_rust_targets": []
+    },
+    {
+      "path": "Samples/ChartApp/ChartAppCsPackaged/Assets/StoreLogo.png",
+      "blob_sha": "a4586f26bdf7841cad10f39cdffe2aca3af252c1",
+      "mode": "100644",
+      "role": "windows-host-assets",
+      "proposed_rust_targets": []
+    },
+    {
+      "path": "Samples/ChartApp/ChartAppCsPackaged/Assets/Wide310x150Logo.scale-200.png",
+      "blob_sha": "8b4a5d0dd5f6c6ab408e1edf04a07888859a9eab",
+      "mode": "100644",
+      "role": "windows-host-assets",
+      "proposed_rust_targets": []
+    },
+    {
+      "path": "Samples/ChartApp/ChartAppCsPackaged/ChartAppCsPackaged.csproj",
+      "blob_sha": "c9475b70cd45bde6bf87883c550a0b521218cb13",
+      "mode": "100644",
+      "role": "windows-build-and-deployment",
+      "proposed_rust_targets": []
+    },
+    {
+      "path": "Samples/ChartApp/ChartAppCsPackaged/Package.appxmanifest",
+      "blob_sha": "0c7df14f10c2d87ce5e4910d5445eca7d42aaae4",
+      "mode": "100644",
+      "role": "windows-build-and-deployment",
+      "proposed_rust_targets": []
+    },
+    {
+      "path": "Samples/ChartApp/ChartAppCsPackaged/Properties/PublishProfiles/win-arm64.pubxml",
+      "blob_sha": "6e939648e057853792d9070a34ad4a35e00456c0",
+      "mode": "100644",
+      "role": "windows-build-and-deployment",
+      "proposed_rust_targets": []
+    },
+    {
+      "path": "Samples/ChartApp/ChartAppCsPackaged/Properties/PublishProfiles/win-arm64ec.pubxml",
+      "blob_sha": "a002b6baa19dee6d5ef8ade51c3a2f0407af93d7",
+      "mode": "100644",
+      "role": "windows-build-and-deployment",
+      "proposed_rust_targets": []
+    },
+    {
+      "path": "Samples/ChartApp/ChartAppCsPackaged/Properties/PublishProfiles/win-x64.pubxml",
+      "blob_sha": "3cde7a8f4a032621d1c20623efee01797273afbf",
+      "mode": "100644",
+      "role": "windows-build-and-deployment",
+      "proposed_rust_targets": []
+    },
+    {
+      "path": "Samples/ChartApp/ChartAppCsPackaged/Properties/PublishProfiles/win-x86.pubxml",
+      "blob_sha": "6e8ec73b3b3e10356356dd9ee96a8261f95766fa",
+      "mode": "100644",
+      "role": "windows-build-and-deployment",
+      "proposed_rust_targets": []
+    },
+    {
+      "path": "Samples/ChartApp/ChartAppCsPackaged/app.manifest",
+      "blob_sha": "c79d2a665b3f741a8f028ae2066c2572482654a8",
+      "mode": "100644",
+      "role": "windows-build-and-deployment",
+      "proposed_rust_targets": []
+    },
+    {
+      "path": "Samples/ChartApp/ChartAppCsUnpackaged/App.xaml",
+      "blob_sha": "5d44159030ca84e8fa88f048cfce5c8fd512639a",
+      "mode": "100644",
+      "role": "engineering-sample",
+      "proposed_rust_targets": []
+    },
+    {
+      "path": "Samples/ChartApp/ChartAppCsUnpackaged/App.xaml.cs",
+      "blob_sha": "c1fb4adc26e5804755d09d192bcee5b62671d8f9",
+      "mode": "100644",
+      "role": "engineering-sample",
+      "proposed_rust_targets": []
+    },
+    {
+      "path": "Samples/ChartApp/ChartAppCsUnpackaged/Assets/LockScreenLogo.scale-200.png",
+      "blob_sha": "7440f0d4bf7c7e26e4e36328738c68e624ee851e",
+      "mode": "100644",
+      "role": "windows-host-assets",
+      "proposed_rust_targets": []
+    },
+    {
+      "path": "Samples/ChartApp/ChartAppCsUnpackaged/Assets/SplashScreen.scale-200.png",
+      "blob_sha": "32f486a86792a5e34cd9a8261b394c49b48f86be",
+      "mode": "100644",
+      "role": "windows-host-assets",
+      "proposed_rust_targets": []
+    },
+    {
+      "path": "Samples/ChartApp/ChartAppCsUnpackaged/Assets/Square150x150Logo.scale-200.png",
+      "blob_sha": "53ee3777ea27e31b260014cf4074099874ff933a",
+      "mode": "100644",
+      "role": "windows-host-assets",
+      "proposed_rust_targets": []
+    },
+    {
+      "path": "Samples/ChartApp/ChartAppCsUnpackaged/Assets/Square44x44Logo.scale-200.png",
+      "blob_sha": "f713bba67f551ef91020b75716a4dc8ebd744b1c",
+      "mode": "100644",
+      "role": "windows-host-assets",
+      "proposed_rust_targets": []
+    },
+    {
+      "path": "Samples/ChartApp/ChartAppCsUnpackaged/Assets/Square44x44Logo.targetsize-24_altform-unplated.png",
+      "blob_sha": "dc9f5bea0c3b191b5e9e13e92fcb488a8a766bd0",
+      "mode": "100644",
+      "role": "windows-host-assets",
+      "proposed_rust_targets": []
+    },
+    {
+      "path": "Samples/ChartApp/ChartAppCsUnpackaged/Assets/StoreLogo.png",
+      "blob_sha": "a4586f26bdf7841cad10f39cdffe2aca3af252c1",
+      "mode": "100644",
+      "role": "windows-host-assets",
+      "proposed_rust_targets": []
+    },
+    {
+      "path": "Samples/ChartApp/ChartAppCsUnpackaged/Assets/Wide310x150Logo.scale-200.png",
+      "blob_sha": "8b4a5d0dd5f6c6ab408e1edf04a07888859a9eab",
+      "mode": "100644",
+      "role": "windows-host-assets",
+      "proposed_rust_targets": []
+    },
+    {
+      "path": "Samples/ChartApp/ChartAppCsUnpackaged/ChartAppCsUnpackaged.csproj",
+      "blob_sha": "aa5020adacdce342e795e8fb15dc89ae213fdc69",
+      "mode": "100644",
+      "role": "windows-build-and-deployment",
+      "proposed_rust_targets": []
+    },
+    {
+      "path": "Samples/ChartApp/ChartAppCsUnpackaged/MainWindow.xaml",
+      "blob_sha": "f97bc5e732bef9e15e952c157ea3f0cf31d96c33",
+      "mode": "100644",
+      "role": "engineering-sample",
+      "proposed_rust_targets": []
+    },
+    {
+      "path": "Samples/ChartApp/ChartAppCsUnpackaged/MainWindow.xaml.cs",
+      "blob_sha": "56359e8e2eb35da7beb0fc25ac2f98e9fcd0855c",
+      "mode": "100644",
+      "role": "engineering-sample",
+      "proposed_rust_targets": []
+    },
+    {
+      "path": "Samples/ChartApp/ChartAppCsUnpackaged/ObservableVector.cs",
+      "blob_sha": "4924f2510ae942d96db31eb78296266c7b8d0d27",
+      "mode": "100644",
+      "role": "engineering-sample",
+      "proposed_rust_targets": []
+    },
+    {
+      "path": "Samples/ChartApp/ChartAppCsUnpackaged/Properties/PublishProfiles/win-arm64.pubxml",
+      "blob_sha": "5f8b6ac1ec3758d88b6bc1aa227a6c42046bb21b",
+      "mode": "100644",
+      "role": "windows-build-and-deployment",
+      "proposed_rust_targets": []
+    },
+    {
+      "path": "Samples/ChartApp/ChartAppCsUnpackaged/Properties/PublishProfiles/win-arm64ec.pubxml",
+      "blob_sha": "2bdc67c7a90d6470b8e843c63e99bca9bc096667",
+      "mode": "100644",
+      "role": "windows-build-and-deployment",
+      "proposed_rust_targets": []
+    },
+    {
+      "path": "Samples/ChartApp/ChartAppCsUnpackaged/Properties/PublishProfiles/win-x64.pubxml",
+      "blob_sha": "b7e2fe83d1ebafbd578f193ae983524d3abd7243",
+      "mode": "100644",
+      "role": "windows-build-and-deployment",
+      "proposed_rust_targets": []
+    },
+    {
+      "path": "Samples/ChartApp/ChartAppCsUnpackaged/Properties/PublishProfiles/win-x86.pubxml",
+      "blob_sha": "92d9847a33b3d925f4b13f2a017c122a2e95d245",
+      "mode": "100644",
+      "role": "windows-build-and-deployment",
+      "proposed_rust_targets": []
+    },
+    {
+      "path": "Samples/ChartApp/ChartAppCsUnpackaged/SecondaryChartWindow.cs",
+      "blob_sha": "8e59f0151e8cba22da28dff873f77ebdf49a9636",
+      "mode": "100644",
+      "role": "engineering-sample",
+      "proposed_rust_targets": []
+    },
+    {
+      "path": "Samples/ChartApp/ChartAppCsUnpackaged/app.manifest",
+      "blob_sha": "ee2ae3e07a6e4273857a073d72985330dfbf1096",
+      "mode": "100644",
+      "role": "windows-build-and-deployment",
+      "proposed_rust_targets": []
+    },
+    {
+      "path": "Samples/ChartApp/README.md",
+      "blob_sha": "81f8f406ace729608780d0b9ebb9822156f62f91",
+      "mode": "100644",
+      "role": "source-availability-documentation",
+      "proposed_rust_targets": []
+    },
+    {
+      "path": "controls/dev/Charts/APITests/ChartAutomationTests.cs",
+      "blob_sha": "8dd9094c1d1b6d71ddf78d1ca289885e4eec19da",
+      "mode": "100644",
+      "role": "api-tests",
+      "proposed_rust_targets": [
+        "src/FerroUI.Controls.Charts/chart_tests.rs"
+      ]
+    },
+    {
+      "path": "controls/dev/Charts/APITests/ChartAxisTests.cs",
+      "blob_sha": "9637f2aa5bf526d77a5ae1ec8e93caaf931c87c0",
+      "mode": "100644",
+      "role": "api-tests",
+      "proposed_rust_targets": [
+        "src/FerroUI.Controls.Charts/axis_tests.rs",
+        "src/FerroUI.Controls.Charts/chart_tests.rs"
+      ]
+    },
+    {
+      "path": "controls/dev/Charts/APITests/ChartSamplesTests.cs",
+      "blob_sha": "5dca932bd6575f424c24fec87c60bdf28001ba0b",
+      "mode": "100644",
+      "role": "api-tests",
+      "proposed_rust_targets": [
+        "src/FerroUI.Controls.Charts/samples_tests.rs"
+      ]
+    },
+    {
+      "path": "controls/dev/Charts/APITests/ChartSeriesTests.cs",
+      "blob_sha": "965128ca831e27d6bc813788f8c66ac7214baaad",
+      "mode": "100644",
+      "role": "api-tests",
+      "proposed_rust_targets": [
+        "src/FerroUI.Controls.Charts/series_tests.rs"
+      ]
+    },
+    {
+      "path": "controls/dev/Charts/APITests/ChartTestHelpers.cs",
+      "blob_sha": "538fb6db0c5ce83f818cc609892af12ac240d944",
+      "mode": "100644",
+      "role": "test-support",
+      "proposed_rust_targets": []
+    },
+    {
+      "path": "controls/dev/Charts/APITests/ChartTests.cs",
+      "blob_sha": "821fc7a97213ef38fb3685e3dd0b695b8ce0d855",
+      "mode": "100644",
+      "role": "api-tests",
+      "proposed_rust_targets": [
+        "src/FerroUI.Controls.Charts/chart_tests.rs",
+        "src/FerroUI.Controls.Charts/xaml_tests.rs"
+      ]
+    },
+    {
+      "path": "controls/dev/Charts/APITests/Charts_APITests.projitems",
+      "blob_sha": "d3facb07a0fa3ccc5500417bf74c823ef77530e1",
+      "mode": "100644",
+      "role": "windows-build-and-deployment",
+      "proposed_rust_targets": []
+    },
+    {
+      "path": "controls/dev/Charts/APITests/Charts_APITests.shproj",
+      "blob_sha": "3d912de3bde091700394271327e69926600c67d0",
+      "mode": "100644",
+      "role": "windows-build-and-deployment",
+      "proposed_rust_targets": []
+    },
+    {
+      "path": "controls/dev/Charts/InteractionTests/ChartsTests.cs",
+      "blob_sha": "d8e666942683a31026f1827c5c95ed9370715091",
+      "mode": "100644",
+      "role": "interaction-tests",
+      "proposed_rust_targets": [
+        "src/FerroUI.Controls.Charts/chart_tests.rs"
+      ]
+    },
+    {
+      "path": "controls/dev/Charts/InteractionTests/Charts_InteractionTests.projitems",
+      "blob_sha": "ab0035f0d7fd19dcc9764649c5d365c3f14e3d51",
+      "mode": "100644",
+      "role": "windows-build-and-deployment",
+      "proposed_rust_targets": []
+    },
+    {
+      "path": "controls/dev/Charts/InteractionTests/Charts_InteractionTests.shproj",
+      "blob_sha": "12e48519c76e845f9a3d41d8466566940481bcc9",
+      "mode": "100644",
+      "role": "windows-build-and-deployment",
+      "proposed_rust_targets": []
+    },
+    {
+      "path": "controls/dev/Charts/TestUI/ChartsObservableVector.cs",
+      "blob_sha": "41bc930e8113141dfb9bade364da9eee640e6b11",
+      "mode": "100644",
+      "role": "test-support",
+      "proposed_rust_targets": []
+    },
+    {
+      "path": "controls/dev/Charts/TestUI/ChartsPage.xaml",
+      "blob_sha": "ddcdcbac6b33620ecf106d54bfdffb671a6ad339",
+      "mode": "100644",
+      "role": "test-support",
+      "proposed_rust_targets": []
+    },
+    {
+      "path": "controls/dev/Charts/TestUI/ChartsPage.xaml.cs",
+      "blob_sha": "37e6821279f0f86a36f6b60acb37862e8c98f12f",
+      "mode": "100644",
+      "role": "test-support",
+      "proposed_rust_targets": []
+    },
+    {
+      "path": "controls/dev/Charts/TestUI/Charts_TestUI.projitems",
+      "blob_sha": "f757d949bc2eb18396229476a3283dd04d320719",
+      "mode": "100644",
+      "role": "windows-build-and-deployment",
+      "proposed_rust_targets": []
+    },
+    {
+      "path": "controls/dev/Charts/TestUI/Charts_TestUI.shproj",
+      "blob_sha": "cc9477eecaff4ffa54d142d5ddb59ed6baa7838a",
+      "mode": "100644",
+      "role": "windows-build-and-deployment",
+      "proposed_rust_targets": []
+    }
+  ],
+  "tests": [
+    {
+      "id": "controls/dev/Charts/APITests/ChartAutomationTests.cs::AppFullDescriptionWins",
+      "upstream_file": "controls/dev/Charts/APITests/ChartAutomationTests.cs",
+      "upstream_method": "AppFullDescriptionWins",
+      "upstream_line": 81,
+      "suite": "api-tests",
+      "suggested_rust_test": "app_full_description_wins"
+    },
+    {
+      "id": "controls/dev/Charts/APITests/ChartAutomationTests.cs::ExplicitAutomationNameWinsOverLabeledBy",
+      "upstream_file": "controls/dev/Charts/APITests/ChartAutomationTests.cs",
+      "upstream_method": "ExplicitAutomationNameWinsOverLabeledBy",
+      "upstream_line": 51,
+      "suite": "api-tests",
+      "suggested_rust_test": "explicit_automation_name_wins_over_labeled_by"
+    },
+    {
+      "id": "controls/dev/Charts/APITests/ChartAutomationTests.cs::LabeledBySuppliesAutomationName",
+      "upstream_file": "controls/dev/Charts/APITests/ChartAutomationTests.cs",
+      "upstream_method": "LabeledBySuppliesAutomationName",
+      "upstream_line": 35,
+      "suite": "api-tests",
+      "suggested_rust_test": "labeled_by_supplies_automation_name"
+    },
+    {
+      "id": "controls/dev/Charts/APITests/ChartAutomationTests.cs::PeerQueriesDoNotLayOutTheChart",
+      "upstream_file": "controls/dev/Charts/APITests/ChartAutomationTests.cs",
+      "upstream_method": "PeerQueriesDoNotLayOutTheChart",
+      "upstream_line": 104,
+      "suite": "api-tests",
+      "suggested_rust_test": "peer_queries_do_not_lay_out_the_chart"
+    },
+    {
+      "id": "controls/dev/Charts/APITests/ChartAxisTests.cs::AppLevelAxisResourceOverridesKeepLocalBrushPropertiesUnset",
+      "upstream_file": "controls/dev/Charts/APITests/ChartAxisTests.cs",
+      "upstream_method": "AppLevelAxisResourceOverridesKeepLocalBrushPropertiesUnset",
+      "upstream_line": 499,
+      "suite": "api-tests",
+      "suggested_rust_test": "app_level_axis_resource_overrides_keep_local_brush_properties_unset"
+    },
+    {
+      "id": "controls/dev/Charts/APITests/ChartAxisTests.cs::AxisBaseDefaultsAndRoundTrips",
+      "upstream_file": "controls/dev/Charts/APITests/ChartAxisTests.cs",
+      "upstream_method": "AxisBaseDefaultsAndRoundTrips",
+      "upstream_line": 197,
+      "suite": "api-tests",
+      "suggested_rust_test": "axis_base_defaults_and_round_trips"
+    },
+    {
+      "id": "controls/dev/Charts/APITests/ChartAxisTests.cs::AxisBaseDependencyPropertiesUpdateAndClearValues",
+      "upstream_file": "controls/dev/Charts/APITests/ChartAxisTests.cs",
+      "upstream_method": "AxisBaseDependencyPropertiesUpdateAndClearValues",
+      "upstream_line": 221,
+      "suite": "api-tests",
+      "suggested_rust_test": "axis_base_dependency_properties_update_and_clear_values"
+    },
+    {
+      "id": "controls/dev/Charts/APITests/ChartAxisTests.cs::AxisResourceOverridesAndThemeChangesDoNotChangeLocalBrushValues",
+      "upstream_file": "controls/dev/Charts/APITests/ChartAxisTests.cs",
+      "upstream_method": "AxisResourceOverridesAndThemeChangesDoNotChangeLocalBrushValues",
+      "upstream_line": 441,
+      "suite": "api-tests",
+      "suggested_rust_test": "axis_resource_overrides_and_theme_changes_do_not_change_local_brush_values"
+    },
+    {
+      "id": "controls/dev/Charts/APITests/ChartAxisTests.cs::AxisVisibilityCanChangeWhileLoaded",
+      "upstream_file": "controls/dev/Charts/APITests/ChartAxisTests.cs",
+      "upstream_method": "AxisVisibilityCanChangeWhileLoaded",
+      "upstream_line": 245,
+      "suite": "api-tests",
+      "suggested_rust_test": "axis_visibility_can_change_while_loaded"
+    },
+    {
+      "id": "controls/dev/Charts/APITests/ChartAxisTests.cs::CartesianAxisBrushDefaultsAreNull",
+      "upstream_file": "controls/dev/Charts/APITests/ChartAxisTests.cs",
+      "upstream_method": "CartesianAxisBrushDefaultsAreNull",
+      "upstream_line": 347,
+      "suite": "api-tests",
+      "suggested_rust_test": "cartesian_axis_brush_defaults_are_null"
+    },
+    {
+      "id": "controls/dev/Charts/APITests/ChartAxisTests.cs::CartesianAxisBrushDependencyPropertiesUpdateAndClearValues",
+      "upstream_file": "controls/dev/Charts/APITests/ChartAxisTests.cs",
+      "upstream_method": "CartesianAxisBrushDependencyPropertiesUpdateAndClearValues",
+      "upstream_line": 400,
+      "suite": "api-tests",
+      "suggested_rust_test": "cartesian_axis_brush_dependency_properties_update_and_clear_values"
+    },
+    {
+      "id": "controls/dev/Charts/APITests/ChartAxisTests.cs::CartesianAxisBrushesRoundTripAndClear",
+      "upstream_file": "controls/dev/Charts/APITests/ChartAxisTests.cs",
+      "upstream_method": "CartesianAxisBrushesRoundTripAndClear",
+      "upstream_line": 362,
+      "suite": "api-tests",
+      "suggested_rust_test": "cartesian_axis_brushes_round_trip_and_clear"
+    },
+    {
+      "id": "controls/dev/Charts/APITests/ChartAxisTests.cs::CartesianAxisPresentationDefaultsAreExpected",
+      "upstream_file": "controls/dev/Charts/APITests/ChartAxisTests.cs",
+      "upstream_method": "CartesianAxisPresentationDefaultsAreExpected",
+      "upstream_line": 287,
+      "suite": "api-tests",
+      "suggested_rust_test": "cartesian_axis_presentation_defaults_are_expected"
+    },
+    {
+      "id": "controls/dev/Charts/APITests/ChartAxisTests.cs::CartesianAxisPresentationDependencyPropertiesUpdateAndClearValues",
+      "upstream_file": "controls/dev/Charts/APITests/ChartAxisTests.cs",
+      "upstream_method": "CartesianAxisPresentationDependencyPropertiesUpdateAndClearValues",
+      "upstream_line": 321,
+      "suite": "api-tests",
+      "suggested_rust_test": "cartesian_axis_presentation_dependency_properties_update_and_clear_values"
+    },
+    {
+      "id": "controls/dev/Charts/APITests/ChartAxisTests.cs::CartesianAxisPresentationPropertiesRoundTrip",
+      "upstream_file": "controls/dev/Charts/APITests/ChartAxisTests.cs",
+      "upstream_method": "CartesianAxisPresentationPropertiesRoundTrip",
+      "upstream_line": 300,
+      "suite": "api-tests",
+      "suggested_rust_test": "cartesian_axis_presentation_properties_round_trip"
+    },
+    {
+      "id": "controls/dev/Charts/APITests/ChartAxisTests.cs::CategoryAxisDefaultsAreIndexAscending",
+      "upstream_file": "controls/dev/Charts/APITests/ChartAxisTests.cs",
+      "upstream_method": "CategoryAxisDefaultsAreIndexAscending",
+      "upstream_line": 149,
+      "suite": "api-tests",
+      "suggested_rust_test": "category_axis_defaults_are_index_ascending"
+    },
+    {
+      "id": "controls/dev/Charts/APITests/ChartAxisTests.cs::CategoryAxisSortDependencyPropertiesUpdateAndClearValues",
+      "upstream_file": "controls/dev/Charts/APITests/ChartAxisTests.cs",
+      "upstream_method": "CategoryAxisSortDependencyPropertiesUpdateAndClearValues",
+      "upstream_line": 176,
+      "suite": "api-tests",
+      "suggested_rust_test": "category_axis_sort_dependency_properties_update_and_clear_values"
+    },
+    {
+      "id": "controls/dev/Charts/APITests/ChartAxisTests.cs::CategoryAxisSortPropertiesRoundTrip",
+      "upstream_file": "controls/dev/Charts/APITests/ChartAxisTests.cs",
+      "upstream_method": "CategoryAxisSortPropertiesRoundTrip",
+      "upstream_line": 161,
+      "suite": "api-tests",
+      "suggested_rust_test": "category_axis_sort_properties_round_trip"
+    },
+    {
+      "id": "controls/dev/Charts/APITests/ChartAxisTests.cs::DateTimeAxisAcceptsPreEpochDates",
+      "upstream_file": "controls/dev/Charts/APITests/ChartAxisTests.cs",
+      "upstream_method": "DateTimeAxisAcceptsPreEpochDates",
+      "upstream_line": 780,
+      "suite": "api-tests",
+      "suggested_rust_test": "date_time_axis_accepts_pre_epoch_dates"
+    },
+    {
+      "id": "controls/dev/Charts/APITests/ChartAxisTests.cs::DateTimeAxisBoundsRoundTripAndNullClear",
+      "upstream_file": "controls/dev/Charts/APITests/ChartAxisTests.cs",
+      "upstream_method": "DateTimeAxisBoundsRoundTripAndNullClear",
+      "upstream_line": 733,
+      "suite": "api-tests",
+      "suggested_rust_test": "date_time_axis_bounds_round_trip_and_null_clear"
+    },
+    {
+      "id": "controls/dev/Charts/APITests/ChartAxisTests.cs::DateTimeAxisDefaultsAreAutomatic",
+      "upstream_file": "controls/dev/Charts/APITests/ChartAxisTests.cs",
+      "upstream_method": "DateTimeAxisDefaultsAreAutomatic",
+      "upstream_line": 672,
+      "suite": "api-tests",
+      "suggested_rust_test": "date_time_axis_defaults_are_automatic"
+    },
+    {
+      "id": "controls/dev/Charts/APITests/ChartAxisTests.cs::DateTimeAxisIntervalTypeRoundTripsThroughPropertyAndDependencyProperty",
+      "upstream_file": "controls/dev/Charts/APITests/ChartAxisTests.cs",
+      "upstream_method": "DateTimeAxisIntervalTypeRoundTripsThroughPropertyAndDependencyProperty",
+      "upstream_line": 686,
+      "suite": "api-tests",
+      "suggested_rust_test": "date_time_axis_interval_type_round_trips_through_property_and_dependency_property"
+    },
+    {
+      "id": "controls/dev/Charts/APITests/ChartAxisTests.cs::DateTimeAxisIntervalTypesChangeWhileLoaded",
+      "upstream_file": "controls/dev/Charts/APITests/ChartAxisTests.cs",
+      "upstream_method": "DateTimeAxisIntervalTypesChangeWhileLoaded",
+      "upstream_line": 825,
+      "suite": "api-tests",
+      "suggested_rust_test": "date_time_axis_interval_types_change_while_loaded"
+    },
+    {
+      "id": "controls/dev/Charts/APITests/ChartAxisTests.cs::DateTimeAxisLabelFormatRoundTripsThroughPropertyAndDependencyProperty",
+      "upstream_file": "controls/dev/Charts/APITests/ChartAxisTests.cs",
+      "upstream_method": "DateTimeAxisLabelFormatRoundTripsThroughPropertyAndDependencyProperty",
+      "upstream_line": 714,
+      "suite": "api-tests",
+      "suggested_rust_test": "date_time_axis_label_format_round_trips_through_property_and_dependency_property"
+    },
+    {
+      "id": "controls/dev/Charts/APITests/ChartAxisTests.cs::DateTimeAxisLoadsWithDateValues",
+      "upstream_file": "controls/dev/Charts/APITests/ChartAxisTests.cs",
+      "upstream_method": "DateTimeAxisLoadsWithDateValues",
+      "upstream_line": 797,
+      "suite": "api-tests",
+      "suggested_rust_test": "date_time_axis_loads_with_date_values"
+    },
+    {
+      "id": "controls/dev/Charts/APITests/ChartAxisTests.cs::DateTimeAxisRejectsInvalidBoundsAndPreservesPreviousValues",
+      "upstream_file": "controls/dev/Charts/APITests/ChartAxisTests.cs",
+      "upstream_method": "DateTimeAxisRejectsInvalidBoundsAndPreservesPreviousValues",
+      "upstream_line": 757,
+      "suite": "api-tests",
+      "suggested_rust_test": "date_time_axis_rejects_invalid_bounds_and_preserves_previous_values"
+    },
+    {
+      "id": "controls/dev/Charts/APITests/ChartAxisTests.cs::LineSeriesAcceptsCompatibleExplicitAxes",
+      "upstream_file": "controls/dev/Charts/APITests/ChartAxisTests.cs",
+      "upstream_method": "LineSeriesAcceptsCompatibleExplicitAxes",
+      "upstream_line": 546,
+      "suite": "api-tests",
+      "suggested_rust_test": "line_series_accepts_compatible_explicit_axes"
+    },
+    {
+      "id": "controls/dev/Charts/APITests/ChartAxisTests.cs::LineSeriesCategoryAxisHandlesXValueTypeChanges",
+      "upstream_file": "controls/dev/Charts/APITests/ChartAxisTests.cs",
+      "upstream_method": "LineSeriesCategoryAxisHandlesXValueTypeChanges",
+      "upstream_line": 625,
+      "suite": "api-tests",
+      "suggested_rust_test": "line_series_category_axis_handles_x_value_type_changes"
+    },
+    {
+      "id": "controls/dev/Charts/APITests/ChartAxisTests.cs::LineSeriesPreservesAxisAfterRejectedReplacement",
+      "upstream_file": "controls/dev/Charts/APITests/ChartAxisTests.cs",
+      "upstream_method": "LineSeriesPreservesAxisAfterRejectedReplacement",
+      "upstream_line": 605,
+      "suite": "api-tests",
+      "suggested_rust_test": "line_series_preserves_axis_after_rejected_replacement"
+    },
+    {
+      "id": "controls/dev/Charts/APITests/ChartAxisTests.cs::LineSeriesRejectsIncompatibleExplicitAxesBeforeLoad",
+      "upstream_file": "controls/dev/Charts/APITests/ChartAxisTests.cs",
+      "upstream_method": "LineSeriesRejectsIncompatibleExplicitAxesBeforeLoad",
+      "upstream_line": 587,
+      "suite": "api-tests",
+      "suggested_rust_test": "line_series_rejects_incompatible_explicit_axes_before_load"
+    },
+    {
+      "id": "controls/dev/Charts/APITests/ChartAxisTests.cs::LinearAxisDefaultsAreAutomatic",
+      "upstream_file": "controls/dev/Charts/APITests/ChartAxisTests.cs",
+      "upstream_method": "LinearAxisDefaultsAreAutomatic",
+      "upstream_line": 35,
+      "suite": "api-tests",
+      "suggested_rust_test": "linear_axis_defaults_are_automatic"
+    },
+    {
+      "id": "controls/dev/Charts/APITests/ChartAxisTests.cs::LinearAxisNullClearsToAutomatic",
+      "upstream_file": "controls/dev/Charts/APITests/ChartAxisTests.cs",
+      "upstream_method": "LinearAxisNullClearsToAutomatic",
+      "upstream_line": 94,
+      "suite": "api-tests",
+      "suggested_rust_test": "linear_axis_null_clears_to_automatic"
+    },
+    {
+      "id": "controls/dev/Charts/APITests/ChartAxisTests.cs::LinearAxisPropertiesCanChangeWhileLoaded",
+      "upstream_file": "controls/dev/Charts/APITests/ChartAxisTests.cs",
+      "upstream_method": "LinearAxisPropertiesCanChangeWhileLoaded",
+      "upstream_line": 116,
+      "suite": "api-tests",
+      "suggested_rust_test": "linear_axis_properties_can_change_while_loaded"
+    },
+    {
+      "id": "controls/dev/Charts/APITests/ChartAxisTests.cs::LinearAxisRejectsInvalidBoundsAndPreservesPreviousValues",
+      "upstream_file": "controls/dev/Charts/APITests/ChartAxisTests.cs",
+      "upstream_method": "LinearAxisRejectsInvalidBoundsAndPreservesPreviousValues",
+      "upstream_line": 48,
+      "suite": "api-tests",
+      "suggested_rust_test": "linear_axis_rejects_invalid_bounds_and_preserves_previous_values"
+    },
+    {
+      "id": "controls/dev/Charts/APITests/ChartAxisTests.cs::LinearAxisRejectsInvalidSpacingAndPreservesPreviousValue",
+      "upstream_file": "controls/dev/Charts/APITests/ChartAxisTests.cs",
+      "upstream_method": "LinearAxisRejectsInvalidSpacingAndPreservesPreviousValue",
+      "upstream_line": 72,
+      "suite": "api-tests",
+      "suggested_rust_test": "linear_axis_rejects_invalid_spacing_and_preserves_previous_value"
+    },
+    {
+      "id": "controls/dev/Charts/APITests/ChartSamplesTests.cs::BoxedMixedNumericItemsSourceCanLoad",
+      "upstream_file": "controls/dev/Charts/APITests/ChartSamplesTests.cs",
+      "upstream_method": "BoxedMixedNumericItemsSourceCanLoad",
+      "upstream_line": 193,
+      "suite": "api-tests",
+      "suggested_rust_test": "boxed_mixed_numeric_items_source_can_load"
+    },
+    {
+      "id": "controls/dev/Charts/APITests/ChartSamplesTests.cs::BoxedNumericItemsSourceCanLoad",
+      "upstream_file": "controls/dev/Charts/APITests/ChartSamplesTests.cs",
+      "upstream_method": "BoxedNumericItemsSourceCanLoad",
+      "upstream_line": 168,
+      "suite": "api-tests",
+      "suggested_rust_test": "boxed_numeric_items_source_can_load"
+    },
+    {
+      "id": "controls/dev/Charts/APITests/ChartSamplesTests.cs::BoxedStringItemsSourceCanLoadAsXValues",
+      "upstream_file": "controls/dev/Charts/APITests/ChartSamplesTests.cs",
+      "upstream_method": "BoxedStringItemsSourceCanLoadAsXValues",
+      "upstream_line": 225,
+      "suite": "api-tests",
+      "suggested_rust_test": "boxed_string_items_source_can_load_as_x_values"
+    },
+    {
+      "id": "controls/dev/Charts/APITests/ChartSamplesTests.cs::ClearingXValuesKeepsChartUsable",
+      "upstream_file": "controls/dev/Charts/APITests/ChartSamplesTests.cs",
+      "upstream_method": "ClearingXValuesKeepsChartUsable",
+      "upstream_line": 470,
+      "suite": "api-tests",
+      "suggested_rust_test": "clearing_x_values_keeps_chart_usable"
+    },
+    {
+      "id": "controls/dev/Charts/APITests/ChartSamplesTests.cs::DateTimeOffsetListItemsSourceCanLoadAsXValues",
+      "upstream_file": "controls/dev/Charts/APITests/ChartSamplesTests.cs",
+      "upstream_method": "DateTimeOffsetListItemsSourceCanLoadAsXValues",
+      "upstream_line": 139,
+      "suite": "api-tests",
+      "suggested_rust_test": "date_time_offset_list_items_source_can_load_as_x_values"
+    },
+    {
+      "id": "controls/dev/Charts/APITests/ChartSamplesTests.cs::EmptyBoxedItemsSourceCanLoadAsYValues",
+      "upstream_file": "controls/dev/Charts/APITests/ChartSamplesTests.cs",
+      "upstream_method": "EmptyBoxedItemsSourceCanLoadAsYValues",
+      "upstream_line": 250,
+      "suite": "api-tests",
+      "suggested_rust_test": "empty_boxed_items_source_can_load_as_y_values"
+    },
+    {
+      "id": "controls/dev/Charts/APITests/ChartSamplesTests.cs::IntegerAndFloatSourcesAreRetainedWithoutSetValidation",
+      "upstream_file": "controls/dev/Charts/APITests/ChartSamplesTests.cs",
+      "upstream_method": "IntegerAndFloatSourcesAreRetainedWithoutSetValidation",
+      "upstream_line": 323,
+      "suite": "api-tests",
+      "suggested_rust_test": "integer_and_float_sources_are_retained_without_set_validation"
+    },
+    {
+      "id": "controls/dev/Charts/APITests/ChartSamplesTests.cs::IteratorSourceIsRetainedWithoutSetValidation",
+      "upstream_file": "controls/dev/Charts/APITests/ChartSamplesTests.cs",
+      "upstream_method": "IteratorSourceIsRetainedWithoutSetValidation",
+      "upstream_line": 354,
+      "suite": "api-tests",
+      "suggested_rust_test": "iterator_source_is_retained_without_set_validation"
+    },
+    {
+      "id": "controls/dev/Charts/APITests/ChartSamplesTests.cs::NullSamplesAndNullItemsSourceDoNotPreventLayout",
+      "upstream_file": "controls/dev/Charts/APITests/ChartSamplesTests.cs",
+      "upstream_method": "NullSamplesAndNullItemsSourceDoNotPreventLayout",
+      "upstream_line": 436,
+      "suite": "api-tests",
+      "suggested_rust_test": "null_samples_and_null_items_source_do_not_prevent_layout"
+    },
+    {
+      "id": "controls/dev/Charts/APITests/ChartSamplesTests.cs::NumericArrayItemsSourceCanLoad",
+      "upstream_file": "controls/dev/Charts/APITests/ChartSamplesTests.cs",
+      "upstream_method": "NumericArrayItemsSourceCanLoad",
+      "upstream_line": 91,
+      "suite": "api-tests",
+      "suggested_rust_test": "numeric_array_items_source_can_load"
+    },
+    {
+      "id": "controls/dev/Charts/APITests/ChartSamplesTests.cs::NumericCollectionChangesWhileLoadedKeepChartUsable",
+      "upstream_file": "controls/dev/Charts/APITests/ChartSamplesTests.cs",
+      "upstream_method": "NumericCollectionChangesWhileLoadedKeepChartUsable",
+      "upstream_line": 609,
+      "suite": "api-tests",
+      "suggested_rust_test": "numeric_collection_changes_while_loaded_keep_chart_usable"
+    },
+    {
+      "id": "controls/dev/Charts/APITests/ChartSamplesTests.cs::NumericListItemsSourceCanLoad",
+      "upstream_file": "controls/dev/Charts/APITests/ChartSamplesTests.cs",
+      "upstream_method": "NumericListItemsSourceCanLoad",
+      "upstream_line": 66,
+      "suite": "api-tests",
+      "suggested_rust_test": "numeric_list_items_source_can_load"
+    },
+    {
+      "id": "controls/dev/Charts/APITests/ChartSamplesTests.cs::OneSamplesInstanceCanBeSharedByTwoSeries",
+      "upstream_file": "controls/dev/Charts/APITests/ChartSamplesTests.cs",
+      "upstream_method": "OneSamplesInstanceCanBeSharedByTwoSeries",
+      "upstream_line": 727,
+      "suite": "api-tests",
+      "suggested_rust_test": "one_samples_instance_can_be_shared_by_two_series"
+    },
+    {
+      "id": "controls/dev/Charts/APITests/ChartSamplesTests.cs::ReplacingSamplesLeavesOldSourceHarmless",
+      "upstream_file": "controls/dev/Charts/APITests/ChartSamplesTests.cs",
+      "upstream_method": "ReplacingSamplesLeavesOldSourceHarmless",
+      "upstream_line": 532,
+      "suite": "api-tests",
+      "suggested_rust_test": "replacing_samples_leaves_old_source_harmless"
+    },
+    {
+      "id": "controls/dev/Charts/APITests/ChartSamplesTests.cs::SamplesCanBeUsedBySeriesAndChartSamplesCollection",
+      "upstream_file": "controls/dev/Charts/APITests/ChartSamplesTests.cs",
+      "upstream_method": "SamplesCanBeUsedBySeriesAndChartSamplesCollection",
+      "upstream_line": 766,
+      "suite": "api-tests",
+      "suggested_rust_test": "samples_can_be_used_by_series_and_chart_samples_collection"
+    },
+    {
+      "id": "controls/dev/Charts/APITests/ChartSamplesTests.cs::SamplesItemsSourceDependencyPropertyUpdatesAndClearsValue",
+      "upstream_file": "controls/dev/Charts/APITests/ChartSamplesTests.cs",
+      "upstream_method": "SamplesItemsSourceDependencyPropertyUpdatesAndClearsValue",
+      "upstream_line": 49,
+      "suite": "api-tests",
+      "suggested_rust_test": "samples_items_source_dependency_property_updates_and_clears_value"
+    },
+    {
+      "id": "controls/dev/Charts/APITests/ChartSamplesTests.cs::SamplesItemsSourceRoundTripsNull",
+      "upstream_file": "controls/dev/Charts/APITests/ChartSamplesTests.cs",
+      "upstream_method": "SamplesItemsSourceRoundTripsNull",
+      "upstream_line": 32,
+      "suite": "api-tests",
+      "suggested_rust_test": "samples_items_source_round_trips_null"
+    },
+    {
+      "id": "controls/dev/Charts/APITests/ChartSamplesTests.cs::StringCategoryCollectionChangesWhileLoadedKeepChartUsable",
+      "upstream_file": "controls/dev/Charts/APITests/ChartSamplesTests.cs",
+      "upstream_method": "StringCategoryCollectionChangesWhileLoadedKeepChartUsable",
+      "upstream_line": 668,
+      "suite": "api-tests",
+      "suggested_rust_test": "string_category_collection_changes_while_loaded_keep_chart_usable"
+    },
+    {
+      "id": "controls/dev/Charts/APITests/ChartSamplesTests.cs::StringListItemsSourceCanLoadAsXValues",
+      "upstream_file": "controls/dev/Charts/APITests/ChartSamplesTests.cs",
+      "upstream_method": "StringListItemsSourceCanLoadAsXValues",
+      "upstream_line": 114,
+      "suite": "api-tests",
+      "suggested_rust_test": "string_list_items_source_can_load_as_x_values"
+    },
+    {
+      "id": "controls/dev/Charts/APITests/ChartSamplesTests.cs::StringYValuesAreRetainedButDoNotPreventLayout",
+      "upstream_file": "controls/dev/Charts/APITests/ChartSamplesTests.cs",
+      "upstream_method": "StringYValuesAreRetainedButDoNotPreventLayout",
+      "upstream_line": 411,
+      "suite": "api-tests",
+      "suggested_rust_test": "string_y_values_are_retained_but_do_not_prevent_layout"
+    },
+    {
+      "id": "controls/dev/Charts/APITests/ChartSamplesTests.cs::SwappingItemsSourceLeavesOldSourceHarmless",
+      "upstream_file": "controls/dev/Charts/APITests/ChartSamplesTests.cs",
+      "upstream_method": "SwappingItemsSourceLeavesOldSourceHarmless",
+      "upstream_line": 573,
+      "suite": "api-tests",
+      "suggested_rust_test": "swapping_items_source_leaves_old_source_harmless"
+    },
+    {
+      "id": "controls/dev/Charts/APITests/ChartSamplesTests.cs::UnsupportedBoxedElementIsRetainedAndDoesNotPreventLayout",
+      "upstream_file": "controls/dev/Charts/APITests/ChartSamplesTests.cs",
+      "upstream_method": "UnsupportedBoxedElementIsRetainedAndDoesNotPreventLayout",
+      "upstream_line": 298,
+      "suite": "api-tests",
+      "suggested_rust_test": "unsupported_boxed_element_is_retained_and_does_not_prevent_layout"
+    },
+    {
+      "id": "controls/dev/Charts/APITests/ChartSamplesTests.cs::UnsupportedScalarItemsSourceIsRetainedAndDoesNotPreventLayout",
+      "upstream_file": "controls/dev/Charts/APITests/ChartSamplesTests.cs",
+      "upstream_method": "UnsupportedScalarItemsSourceIsRetainedAndDoesNotPreventLayout",
+      "upstream_line": 275,
+      "suite": "api-tests",
+      "suggested_rust_test": "unsupported_scalar_items_source_is_retained_and_does_not_prevent_layout"
+    },
+    {
+      "id": "controls/dev/Charts/APITests/ChartSamplesTests.cs::XValuesAcceptStringsAndNumbers",
+      "upstream_file": "controls/dev/Charts/APITests/ChartSamplesTests.cs",
+      "upstream_method": "XValuesAcceptStringsAndNumbers",
+      "upstream_line": 377,
+      "suite": "api-tests",
+      "suggested_rust_test": "x_values_accept_strings_and_numbers"
+    },
+    {
+      "id": "controls/dev/Charts/APITests/ChartSamplesTests.cs::XValuesCanFlipBetweenNumericAndStringSources",
+      "upstream_file": "controls/dev/Charts/APITests/ChartSamplesTests.cs",
+      "upstream_method": "XValuesCanFlipBetweenNumericAndStringSources",
+      "upstream_line": 500,
+      "suite": "api-tests",
+      "suggested_rust_test": "x_values_can_flip_between_numeric_and_string_sources"
+    },
+    {
+      "id": "controls/dev/Charts/APITests/ChartSeriesTests.cs::AreaSeriesCanShareExplicitAxesWithLineSeries",
+      "upstream_file": "controls/dev/Charts/APITests/ChartSeriesTests.cs",
+      "upstream_method": "AreaSeriesCanShareExplicitAxesWithLineSeries",
+      "upstream_line": 546,
+      "suite": "api-tests",
+      "suggested_rust_test": "area_series_can_share_explicit_axes_with_line_series"
+    },
+    {
+      "id": "controls/dev/Charts/APITests/ChartSeriesTests.cs::AreaSeriesDefaultsArePublicProperties",
+      "upstream_file": "controls/dev/Charts/APITests/ChartSeriesTests.cs",
+      "upstream_method": "AreaSeriesDefaultsArePublicProperties",
+      "upstream_line": 59,
+      "suite": "api-tests",
+      "suggested_rust_test": "area_series_defaults_are_public_properties"
+    },
+    {
+      "id": "controls/dev/Charts/APITests/ChartSeriesTests.cs::AreaSeriesFillRoundTripsAndClearValueRestoresDefault",
+      "upstream_file": "controls/dev/Charts/APITests/ChartSeriesTests.cs",
+      "upstream_method": "AreaSeriesFillRoundTripsAndClearValueRestoresDefault",
+      "upstream_line": 216,
+      "suite": "api-tests",
+      "suggested_rust_test": "area_series_fill_round_trips_and_clear_value_restores_default"
+    },
+    {
+      "id": "controls/dev/Charts/APITests/ChartSeriesTests.cs::AutomaticStrokeIsNotWrittenBackWhileLoaded",
+      "upstream_file": "controls/dev/Charts/APITests/ChartSeriesTests.cs",
+      "upstream_method": "AutomaticStrokeIsNotWrittenBackWhileLoaded",
+      "upstream_line": 395,
+      "suite": "api-tests",
+      "suggested_rust_test": "automatic_stroke_is_not_written_back_while_loaded"
+    },
+    {
+      "id": "controls/dev/Charts/APITests/ChartSeriesTests.cs::BarOrientationChangesWhileLoadedWithAutomaticAxes",
+      "upstream_file": "controls/dev/Charts/APITests/ChartSeriesTests.cs",
+      "upstream_method": "BarOrientationChangesWhileLoadedWithAutomaticAxes",
+      "upstream_line": 583,
+      "suite": "api-tests",
+      "suggested_rust_test": "bar_orientation_changes_while_loaded_with_automatic_axes"
+    },
+    {
+      "id": "controls/dev/Charts/APITests/ChartSeriesTests.cs::BarOrientationIncompatibleWithExplicitAxesIsRetainedWithoutThrowing",
+      "upstream_file": "controls/dev/Charts/APITests/ChartSeriesTests.cs",
+      "upstream_method": "BarOrientationIncompatibleWithExplicitAxesIsRetainedWithoutThrowing",
+      "upstream_line": 618,
+      "suite": "api-tests",
+      "suggested_rust_test": "bar_orientation_incompatible_with_explicit_axes_is_retained_without_throwing"
+    },
+    {
+      "id": "controls/dev/Charts/APITests/ChartSeriesTests.cs::BarSeriesDefaultsArePublicProperties",
+      "upstream_file": "controls/dev/Charts/APITests/ChartSeriesTests.cs",
+      "upstream_method": "BarSeriesDefaultsArePublicProperties",
+      "upstream_line": 72,
+      "suite": "api-tests",
+      "suggested_rust_test": "bar_series_defaults_are_public_properties"
+    },
+    {
+      "id": "controls/dev/Charts/APITests/ChartSeriesTests.cs::BarSeriesFillAndOrientationRoundTripAndClearValueRestoresDefaults",
+      "upstream_file": "controls/dev/Charts/APITests/ChartSeriesTests.cs",
+      "upstream_method": "BarSeriesFillAndOrientationRoundTripAndClearValueRestoresDefaults",
+      "upstream_line": 236,
+      "suite": "api-tests",
+      "suggested_rust_test": "bar_series_fill_and_orientation_round_trip_and_clear_value_restores_defaults"
+    },
+    {
+      "id": "controls/dev/Charts/APITests/ChartSeriesTests.cs::CartesianSeriesPropertiesRoundTripThroughClrProperties",
+      "upstream_file": "controls/dev/Charts/APITests/ChartSeriesTests.cs",
+      "upstream_method": "CartesianSeriesPropertiesRoundTripThroughClrProperties",
+      "upstream_line": 86,
+      "suite": "api-tests",
+      "suggested_rust_test": "cartesian_series_properties_round_trip_through_clr_properties"
+    },
+    {
+      "id": "controls/dev/Charts/APITests/ChartSeriesTests.cs::CartesianSeriesPropertiesRoundTripThroughDependencyProperties",
+      "upstream_file": "controls/dev/Charts/APITests/ChartSeriesTests.cs",
+      "upstream_method": "CartesianSeriesPropertiesRoundTripThroughDependencyProperties",
+      "upstream_line": 135,
+      "suite": "api-tests",
+      "suggested_rust_test": "cartesian_series_properties_round_trip_through_dependency_properties"
+    },
+    {
+      "id": "controls/dev/Charts/APITests/ChartSeriesTests.cs::ClearValueRestoresCartesianSeriesDefaults",
+      "upstream_file": "controls/dev/Charts/APITests/ChartSeriesTests.cs",
+      "upstream_method": "ClearValueRestoresCartesianSeriesDefaults",
+      "upstream_line": 177,
+      "suite": "api-tests",
+      "suggested_rust_test": "clear_value_restores_cartesian_series_defaults"
+    },
+    {
+      "id": "controls/dev/Charts/APITests/ChartSeriesTests.cs::DataBrushesSetAndClearWhileLoaded",
+      "upstream_file": "controls/dev/Charts/APITests/ChartSeriesTests.cs",
+      "upstream_method": "DataBrushesSetAndClearWhileLoaded",
+      "upstream_line": 766,
+      "suite": "api-tests",
+      "suggested_rust_test": "data_brushes_set_and_clear_while_loaded"
+    },
+    {
+      "id": "controls/dev/Charts/APITests/ChartSeriesTests.cs::DataLabelOverrideDescriptorsRetainTextAndBrush",
+      "upstream_file": "controls/dev/Charts/APITests/ChartSeriesTests.cs",
+      "upstream_method": "DataLabelOverrideDescriptorsRetainTextAndBrush",
+      "upstream_line": 1035,
+      "suite": "api-tests",
+      "suggested_rust_test": "data_label_override_descriptors_retain_text_and_brush"
+    },
+    {
+      "id": "controls/dev/Charts/APITests/ChartSeriesTests.cs::DataLabelOverrideMapRaisesEventsForAddUpdateRemoveAndClear",
+      "upstream_file": "controls/dev/Charts/APITests/ChartSeriesTests.cs",
+      "upstream_method": "DataLabelOverrideMapRaisesEventsForAddUpdateRemoveAndClear",
+      "upstream_line": 967,
+      "suite": "api-tests",
+      "suggested_rust_test": "data_label_override_map_raises_events_for_add_update_remove_and_clear"
+    },
+    {
+      "id": "controls/dev/Charts/APITests/ChartSeriesTests.cs::DataLabelOverrideMapSupportsAddUpdateRemoveAndClear",
+      "upstream_file": "controls/dev/Charts/APITests/ChartSeriesTests.cs",
+      "upstream_method": "DataLabelOverrideMapSupportsAddUpdateRemoveAndClear",
+      "upstream_line": 913,
+      "suite": "api-tests",
+      "suggested_rust_test": "data_label_override_map_supports_add_update_remove_and_clear"
+    },
+    {
+      "id": "controls/dev/Charts/APITests/ChartSeriesTests.cs::DataLabelOverridesStartEmptyAndShareContents",
+      "upstream_file": "controls/dev/Charts/APITests/ChartSeriesTests.cs",
+      "upstream_method": "DataLabelOverridesStartEmptyAndShareContents",
+      "upstream_line": 877,
+      "suite": "api-tests",
+      "suggested_rust_test": "data_label_overrides_start_empty_and_share_contents"
+    },
+    {
+      "id": "controls/dev/Charts/APITests/ChartSeriesTests.cs::DataMarkerOverrideDescriptorsRetainShapeAndBrush",
+      "upstream_file": "controls/dev/Charts/APITests/ChartSeriesTests.cs",
+      "upstream_method": "DataMarkerOverrideDescriptorsRetainShapeAndBrush",
+      "upstream_line": 1051,
+      "suite": "api-tests",
+      "suggested_rust_test": "data_marker_override_descriptors_retain_shape_and_brush"
+    },
+    {
+      "id": "controls/dev/Charts/APITests/ChartSeriesTests.cs::DataMarkerOverrideMapRaisesEventsForAddUpdateRemoveAndClear",
+      "upstream_file": "controls/dev/Charts/APITests/ChartSeriesTests.cs",
+      "upstream_method": "DataMarkerOverrideMapRaisesEventsForAddUpdateRemoveAndClear",
+      "upstream_line": 1001,
+      "suite": "api-tests",
+      "suggested_rust_test": "data_marker_override_map_raises_events_for_add_update_remove_and_clear"
+    },
+    {
+      "id": "controls/dev/Charts/APITests/ChartSeriesTests.cs::DataMarkerOverrideMapSupportsAddUpdateRemoveAndClear",
+      "upstream_file": "controls/dev/Charts/APITests/ChartSeriesTests.cs",
+      "upstream_method": "DataMarkerOverrideMapSupportsAddUpdateRemoveAndClear",
+      "upstream_line": 940,
+      "suite": "api-tests",
+      "suggested_rust_test": "data_marker_override_map_supports_add_update_remove_and_clear"
+    },
+    {
+      "id": "controls/dev/Charts/APITests/ChartSeriesTests.cs::DataMarkerOverridesStartEmptyAndShareContents",
+      "upstream_file": "controls/dev/Charts/APITests/ChartSeriesTests.cs",
+      "upstream_method": "DataMarkerOverridesStartEmptyAndShareContents",
+      "upstream_line": 895,
+      "suite": "api-tests",
+      "suggested_rust_test": "data_marker_overrides_start_empty_and_share_contents"
+    },
+    {
+      "id": "controls/dev/Charts/APITests/ChartSeriesTests.cs::FillSetAndClearWhileLoaded",
+      "upstream_file": "controls/dev/Charts/APITests/ChartSeriesTests.cs",
+      "upstream_method": "FillSetAndClearWhileLoaded",
+      "upstream_line": 811,
+      "suite": "api-tests",
+      "suggested_rust_test": "fill_set_and_clear_while_loaded"
+    },
+    {
+      "id": "controls/dev/Charts/APITests/ChartSeriesTests.cs::InvalidMarkerShapeIsRetainedByPublicProperty",
+      "upstream_file": "controls/dev/Charts/APITests/ChartSeriesTests.cs",
+      "upstream_method": "InvalidMarkerShapeIsRetainedByPublicProperty",
+      "upstream_line": 734,
+      "suite": "api-tests",
+      "suggested_rust_test": "invalid_marker_shape_is_retained_by_public_property"
+    },
+    {
+      "id": "controls/dev/Charts/APITests/ChartSeriesTests.cs::LineSeriesDefaultsArePublicProperties",
+      "upstream_file": "controls/dev/Charts/APITests/ChartSeriesTests.cs",
+      "upstream_method": "LineSeriesDefaultsArePublicProperties",
+      "upstream_line": 47,
+      "suite": "api-tests",
+      "suggested_rust_test": "line_series_defaults_are_public_properties"
+    },
+    {
+      "id": "controls/dev/Charts/APITests/ChartSeriesTests.cs::MarkerAndLabelPropertiesCanChangeWhileLoaded",
+      "upstream_file": "controls/dev/Charts/APITests/ChartSeriesTests.cs",
+      "upstream_method": "MarkerAndLabelPropertiesCanChangeWhileLoaded",
+      "upstream_line": 661,
+      "suite": "api-tests",
+      "suggested_rust_test": "marker_and_label_properties_can_change_while_loaded"
+    },
+    {
+      "id": "controls/dev/Charts/APITests/ChartSeriesTests.cs::MarkerShapeAcceptsEveryValue",
+      "upstream_file": "controls/dev/Charts/APITests/ChartSeriesTests.cs",
+      "upstream_method": "MarkerShapeAcceptsEveryValue",
+      "upstream_line": 703,
+      "suite": "api-tests",
+      "suggested_rust_test": "marker_shape_accepts_every_value"
+    },
+    {
+      "id": "controls/dev/Charts/APITests/ChartSeriesTests.cs::OverridesBeyondCurrentSamplesAreAcceptedAndSurviveGrowth",
+      "upstream_file": "controls/dev/Charts/APITests/ChartSeriesTests.cs",
+      "upstream_method": "OverridesBeyondCurrentSamplesAreAcceptedAndSurviveGrowth",
+      "upstream_line": 1067,
+      "suite": "api-tests",
+      "suggested_rust_test": "overrides_beyond_current_samples_are_accepted_and_survive_growth"
+    },
+    {
+      "id": "controls/dev/Charts/APITests/ChartSeriesTests.cs::OverridesSurviveSampleChangesAndSeriesRemoval",
+      "upstream_file": "controls/dev/Charts/APITests/ChartSeriesTests.cs",
+      "upstream_method": "OverridesSurviveSampleChangesAndSeriesRemoval",
+      "upstream_line": 1119,
+      "suite": "api-tests",
+      "suggested_rust_test": "overrides_survive_sample_changes_and_series_removal"
+    },
+    {
+      "id": "controls/dev/Charts/APITests/ChartSeriesTests.cs::SameBrushInstanceCanBeSharedBySeriesAndOverrides",
+      "upstream_file": "controls/dev/Charts/APITests/ChartSeriesTests.cs",
+      "upstream_method": "SameBrushInstanceCanBeSharedBySeriesAndOverrides",
+      "upstream_line": 1167,
+      "suite": "api-tests",
+      "suggested_rust_test": "same_brush_instance_can_be_shared_by_series_and_overrides"
+    },
+    {
+      "id": "controls/dev/Charts/APITests/ChartSeriesTests.cs::SeriesCanBeRemovedAndAddedAgain",
+      "upstream_file": "controls/dev/Charts/APITests/ChartSeriesTests.cs",
+      "upstream_method": "SeriesCanBeRemovedAndAddedAgain",
+      "upstream_line": 513,
+      "suite": "api-tests",
+      "suggested_rust_test": "series_can_be_removed_and_added_again"
+    },
+    {
+      "id": "controls/dev/Charts/APITests/ChartSeriesTests.cs::StrokeCanChangeAndClearWhileLoaded",
+      "upstream_file": "controls/dev/Charts/APITests/ChartSeriesTests.cs",
+      "upstream_method": "StrokeCanChangeAndClearWhileLoaded",
+      "upstream_line": 418,
+      "suite": "api-tests",
+      "suggested_rust_test": "stroke_can_change_and_clear_while_loaded"
+    },
+    {
+      "id": "controls/dev/Charts/APITests/ChartSeriesTests.cs::StrokeDashStyleAcceptsEveryValue",
+      "upstream_file": "controls/dev/Charts/APITests/ChartSeriesTests.cs",
+      "upstream_method": "StrokeDashStyleAcceptsEveryValue",
+      "upstream_line": 330,
+      "suite": "api-tests",
+      "suggested_rust_test": "stroke_dash_style_accepts_every_value"
+    },
+    {
+      "id": "controls/dev/Charts/APITests/ChartSeriesTests.cs::StrokeThicknessInvalidValuesDoNotThrowWhileLoaded",
+      "upstream_file": "controls/dev/Charts/APITests/ChartSeriesTests.cs",
+      "upstream_method": "StrokeThicknessInvalidValuesDoNotThrowWhileLoaded",
+      "upstream_line": 287,
+      "suite": "api-tests",
+      "suggested_rust_test": "stroke_thickness_invalid_values_do_not_throw_while_loaded"
+    },
+    {
+      "id": "controls/dev/Charts/APITests/ChartSeriesTests.cs::StrokeThicknessValuesAreRetainedByPublicProperty",
+      "upstream_file": "controls/dev/Charts/APITests/ChartSeriesTests.cs",
+      "upstream_method": "StrokeThicknessValuesAreRetainedByPublicProperty",
+      "upstream_line": 262,
+      "suite": "api-tests",
+      "suggested_rust_test": "stroke_thickness_values_are_retained_by_public_property"
+    },
+    {
+      "id": "controls/dev/Charts/APITests/ChartSeriesTests.cs::TitleAndVisibilityCanChangeBeforeAndAfterSeriesIsAddedToLoadedChart",
+      "upstream_file": "controls/dev/Charts/APITests/ChartSeriesTests.cs",
+      "upstream_method": "TitleAndVisibilityCanChangeBeforeAndAfterSeriesIsAddedToLoadedChart",
+      "upstream_line": 468,
+      "suite": "api-tests",
+      "suggested_rust_test": "title_and_visibility_can_change_before_and_after_series_is_added_to_loaded_chart"
+    },
+    {
+      "id": "controls/dev/Charts/APITests/ChartSeriesTests.cs::UnsupportedStrokeBrushIsAcceptedAndRetained",
+      "upstream_file": "controls/dev/Charts/APITests/ChartSeriesTests.cs",
+      "upstream_method": "UnsupportedStrokeBrushIsAcceptedAndRetained",
+      "upstream_line": 365,
+      "suite": "api-tests",
+      "suggested_rust_test": "unsupported_stroke_brush_is_accepted_and_retained"
+    },
+    {
+      "id": "controls/dev/Charts/APITests/ChartTests.cs::AxisCollectionRejectsDuplicateCrossChartNullAndOutOfRange",
+      "upstream_file": "controls/dev/Charts/APITests/ChartTests.cs",
+      "upstream_method": "AxisCollectionRejectsDuplicateCrossChartNullAndOutOfRange",
+      "upstream_line": 660,
+      "suite": "api-tests",
+      "suggested_rust_test": "axis_collection_rejects_duplicate_cross_chart_null_and_out_of_range"
+    },
+    {
+      "id": "controls/dev/Charts/APITests/ChartTests.cs::AxisCollectionSupportsAddRemoveAndVectorEvents",
+      "upstream_file": "controls/dev/Charts/APITests/ChartTests.cs",
+      "upstream_method": "AxisCollectionSupportsAddRemoveAndVectorEvents",
+      "upstream_line": 622,
+      "suite": "api-tests",
+      "suggested_rust_test": "axis_collection_supports_add_remove_and_vector_events"
+    },
+    {
+      "id": "controls/dev/Charts/APITests/ChartTests.cs::ChartCanLoadUnloadAndReload",
+      "upstream_file": "controls/dev/Charts/APITests/ChartTests.cs",
+      "upstream_method": "ChartCanLoadUnloadAndReload",
+      "upstream_line": 176,
+      "suite": "api-tests",
+      "suggested_rust_test": "chart_can_load_unload_and_reload"
+    },
+    {
+      "id": "controls/dev/Charts/APITests/ChartTests.cs::ChartDefaultsExposeEmptyCollectionsAndNoLegend",
+      "upstream_file": "controls/dev/Charts/APITests/ChartTests.cs",
+      "upstream_method": "ChartDefaultsExposeEmptyCollectionsAndNoLegend",
+      "upstream_line": 131,
+      "suite": "api-tests",
+      "suggested_rust_test": "chart_defaults_expose_empty_collections_and_no_legend"
+    },
+    {
+      "id": "controls/dev/Charts/APITests/ChartTests.cs::ChartFormattingPropertiesRoundTripBeforeAndAfterLoad",
+      "upstream_file": "controls/dev/Charts/APITests/ChartTests.cs",
+      "upstream_method": "ChartFormattingPropertiesRoundTripBeforeAndAfterLoad",
+      "upstream_line": 383,
+      "suite": "api-tests",
+      "suggested_rust_test": "chart_formatting_properties_round_trip_before_and_after_load"
+    },
+    {
+      "id": "controls/dev/Charts/APITests/ChartTests.cs::ChartLegendDependencyPropertiesUpdateAndClearValues",
+      "upstream_file": "controls/dev/Charts/APITests/ChartTests.cs",
+      "upstream_method": "ChartLegendDependencyPropertiesUpdateAndClearValues",
+      "upstream_line": 362,
+      "suite": "api-tests",
+      "suggested_rust_test": "chart_legend_dependency_properties_update_and_clear_values"
+    },
+    {
+      "id": "controls/dev/Charts/APITests/ChartTests.cs::ChartMeasureUsesAvailableMinimumsAndFallback",
+      "upstream_file": "controls/dev/Charts/APITests/ChartTests.cs",
+      "upstream_method": "ChartMeasureUsesAvailableMinimumsAndFallback",
+      "upstream_line": 149,
+      "suite": "api-tests",
+      "suggested_rust_test": "chart_measure_uses_available_minimums_and_fallback"
+    },
+    {
+      "id": "controls/dev/Charts/APITests/ChartTests.cs::ChartResizeWhileLoadedUpdatesActualSize",
+      "upstream_file": "controls/dev/Charts/APITests/ChartTests.cs",
+      "upstream_method": "ChartResizeWhileLoadedUpdatesActualSize",
+      "upstream_line": 217,
+      "suite": "api-tests",
+      "suggested_rust_test": "chart_resize_while_loaded_updates_actual_size"
+    },
+    {
+      "id": "controls/dev/Charts/APITests/ChartTests.cs::DataCollectionSupportsBasicListAndVectorSemantics",
+      "upstream_file": "controls/dev/Charts/APITests/ChartTests.cs",
+      "upstream_method": "DataCollectionSupportsBasicListAndVectorSemantics",
+      "upstream_line": 741,
+      "suite": "api-tests",
+      "suggested_rust_test": "data_collection_supports_basic_list_and_vector_semantics"
+    },
+    {
+      "id": "controls/dev/Charts/APITests/ChartTests.cs::ExplicitAxesCanBeAssignedToSeriesInSameChart",
+      "upstream_file": "controls/dev/Charts/APITests/ChartTests.cs",
+      "upstream_method": "ExplicitAxesCanBeAssignedToSeriesInSameChart",
+      "upstream_line": 682,
+      "suite": "api-tests",
+      "suggested_rust_test": "explicit_axes_can_be_assigned_to_series_in_same_chart"
+    },
+    {
+      "id": "controls/dev/Charts/APITests/ChartTests.cs::FailedSeriesMutationsDoNotChangeCollectionOrRaiseEvents",
+      "upstream_file": "controls/dev/Charts/APITests/ChartTests.cs",
+      "upstream_method": "FailedSeriesMutationsDoNotChangeCollectionOrRaiseEvents",
+      "upstream_line": 597,
+      "suite": "api-tests",
+      "suggested_rust_test": "failed_series_mutations_do_not_change_collection_or_raise_events"
+    },
+    {
+      "id": "controls/dev/Charts/APITests/ChartTests.cs::LegendPropertiesRoundTripBeforeAndAfterLoad",
+      "upstream_file": "controls/dev/Charts/APITests/ChartTests.cs",
+      "upstream_method": "LegendPropertiesRoundTripBeforeAndAfterLoad",
+      "upstream_line": 296,
+      "suite": "api-tests",
+      "suggested_rust_test": "legend_properties_round_trip_before_and_after_load"
+    },
+    {
+      "id": "controls/dev/Charts/APITests/ChartTests.cs::LineSeriesWithoutExplicitAxesKeepsAxisPropertiesNullAfterLoad",
+      "upstream_file": "controls/dev/Charts/APITests/ChartTests.cs",
+      "upstream_method": "LineSeriesWithoutExplicitAxesKeepsAxisPropertiesNullAfterLoad",
+      "upstream_line": 439,
+      "suite": "api-tests",
+      "suggested_rust_test": "line_series_without_explicit_axes_keeps_axis_properties_null_after_load"
+    },
+    {
+      "id": "controls/dev/Charts/APITests/ChartTests.cs::ParentRequestedThemeCanChangeWhileChartIsLoaded",
+      "upstream_file": "controls/dev/Charts/APITests/ChartTests.cs",
+      "upstream_method": "ParentRequestedThemeCanChangeWhileChartIsLoaded",
+      "upstream_line": 249,
+      "suite": "api-tests",
+      "suggested_rust_test": "parent_requested_theme_can_change_while_chart_is_loaded"
+    },
+    {
+      "id": "controls/dev/Charts/APITests/ChartTests.cs::SeriesCanBeAddedAgainAfterRemoval",
+      "upstream_file": "controls/dev/Charts/APITests/ChartTests.cs",
+      "upstream_method": "SeriesCanBeAddedAgainAfterRemoval",
+      "upstream_line": 578,
+      "suite": "api-tests",
+      "suggested_rust_test": "series_can_be_added_again_after_removal"
+    },
+    {
+      "id": "controls/dev/Charts/APITests/ChartTests.cs::SeriesCollectionMutationDuringIterationThrows",
+      "upstream_file": "controls/dev/Charts/APITests/ChartTests.cs",
+      "upstream_method": "SeriesCollectionMutationDuringIterationThrows",
+      "upstream_line": 498,
+      "suite": "api-tests",
+      "suggested_rust_test": "series_collection_mutation_during_iteration_throws"
+    },
+    {
+      "id": "controls/dev/Charts/APITests/ChartTests.cs::SeriesCollectionRaisesExactVectorEvents",
+      "upstream_file": "controls/dev/Charts/APITests/ChartTests.cs",
+      "upstream_method": "SeriesCollectionRaisesExactVectorEvents",
+      "upstream_line": 515,
+      "suite": "api-tests",
+      "suggested_rust_test": "series_collection_raises_exact_vector_events"
+    },
+    {
+      "id": "controls/dev/Charts/APITests/ChartTests.cs::SeriesCollectionRejectsOutOfRangeAndNull",
+      "upstream_file": "controls/dev/Charts/APITests/ChartTests.cs",
+      "upstream_method": "SeriesCollectionRejectsOutOfRangeAndNull",
+      "upstream_line": 562,
+      "suite": "api-tests",
+      "suggested_rust_test": "series_collection_rejects_out_of_range_and_null"
+    },
+    {
+      "id": "controls/dev/Charts/APITests/ChartTests.cs::SeriesCollectionSupportsIndexingCopyAndEnumeration",
+      "upstream_file": "controls/dev/Charts/APITests/ChartTests.cs",
+      "upstream_method": "SeriesCollectionSupportsIndexingCopyAndEnumeration",
+      "upstream_line": 464,
+      "suite": "api-tests",
+      "suggested_rust_test": "series_collection_supports_indexing_copy_and_enumeration"
+    },
+    {
+      "id": "controls/dev/Charts/APITests/ChartTests.cs::SeriesRejectsAxisFromAnotherChart",
+      "upstream_file": "controls/dev/Charts/APITests/ChartTests.cs",
+      "upstream_method": "SeriesRejectsAxisFromAnotherChart",
+      "upstream_line": 723,
+      "suite": "api-tests",
+      "suggested_rust_test": "series_rejects_axis_from_another_chart"
+    },
+    {
+      "id": "controls/dev/Charts/APITests/ChartTests.cs::SeriesRejectsAxisNotPresentInSameChart",
+      "upstream_file": "controls/dev/Charts/APITests/ChartTests.cs",
+      "upstream_method": "SeriesRejectsAxisNotPresentInSameChart",
+      "upstream_line": 707,
+      "suite": "api-tests",
+      "suggested_rust_test": "series_rejects_axis_not_present_in_same_chart"
+    },
+    {
+      "id": "controls/dev/Charts/APITests/ChartTests.cs::XamlChartsResourcesMetadataResolvesAndConstructorSetsSource",
+      "upstream_file": "controls/dev/Charts/APITests/ChartTests.cs",
+      "upstream_method": "XamlChartsResourcesMetadataResolvesAndConstructorSetsSource",
+      "upstream_line": 1086,
+      "suite": "api-tests",
+      "suggested_rust_test": "xaml_charts_resources_metadata_resolves_and_constructor_sets_source"
+    },
+    {
+      "id": "controls/dev/Charts/APITests/ChartTests.cs::XamlMetadataAreaAndBarSeriesActivateAndExposeFill",
+      "upstream_file": "controls/dev/Charts/APITests/ChartTests.cs",
+      "upstream_method": "XamlMetadataAreaAndBarSeriesActivateAndExposeFill",
+      "upstream_line": 978,
+      "suite": "api-tests",
+      "suggested_rust_test": "xaml_metadata_area_and_bar_series_activate_and_expose_fill"
+    },
+    {
+      "id": "controls/dev/Charts/APITests/ChartTests.cs::XamlMetadataBaseTypeChainAndContentPropertiesAreReported",
+      "upstream_file": "controls/dev/Charts/APITests/ChartTests.cs",
+      "upstream_method": "XamlMetadataBaseTypeChainAndContentPropertiesAreReported",
+      "upstream_line": 1049,
+      "suite": "api-tests",
+      "suggested_rust_test": "xaml_metadata_base_type_chain_and_content_properties_are_reported"
+    },
+    {
+      "id": "controls/dev/Charts/APITests/ChartTests.cs::XamlMetadataCartesianSeriesMembersAreOnBaseType",
+      "upstream_file": "controls/dev/Charts/APITests/ChartTests.cs",
+      "upstream_method": "XamlMetadataCartesianSeriesMembersAreOnBaseType",
+      "upstream_line": 888,
+      "suite": "api-tests",
+      "suggested_rust_test": "xaml_metadata_cartesian_series_members_are_on_base_type"
+    },
+    {
+      "id": "controls/dev/Charts/APITests/ChartTests.cs::XamlMetadataChartActivatesAndAddsDataAxesAndSeries",
+      "upstream_file": "controls/dev/Charts/APITests/ChartTests.cs",
+      "upstream_method": "XamlMetadataChartActivatesAndAddsDataAxesAndSeries",
+      "upstream_line": 821,
+      "suite": "api-tests",
+      "suggested_rust_test": "xaml_metadata_chart_activates_and_adds_data_axes_and_series"
+    },
+    {
+      "id": "controls/dev/Charts/APITests/ChartTests.cs::XamlMetadataChartLegendDependencyPropertiesRoundTrip",
+      "upstream_file": "controls/dev/Charts/APITests/ChartTests.cs",
+      "upstream_method": "XamlMetadataChartLegendDependencyPropertiesRoundTrip",
+      "upstream_line": 866,
+      "suite": "api-tests",
+      "suggested_rust_test": "xaml_metadata_chart_legend_dependency_properties_round_trip"
+    },
+    {
+      "id": "controls/dev/Charts/APITests/ChartTests.cs::XamlMetadataEnumTypesCreateFromString",
+      "upstream_file": "controls/dev/Charts/APITests/ChartTests.cs",
+      "upstream_method": "XamlMetadataEnumTypesCreateFromString",
+      "upstream_line": 1004,
+      "suite": "api-tests",
+      "suggested_rust_test": "xaml_metadata_enum_types_create_from_string"
+    },
+    {
+      "id": "controls/dev/Charts/APITests/ChartTests.cs::XamlMetadataLineSeriesInheritedMembersRoundTrip",
+      "upstream_file": "controls/dev/Charts/APITests/ChartTests.cs",
+      "upstream_method": "XamlMetadataLineSeriesInheritedMembersRoundTrip",
+      "upstream_line": 925,
+      "suite": "api-tests",
+      "suggested_rust_test": "xaml_metadata_line_series_inherited_members_round_trip"
+    },
+    {
+      "id": "controls/dev/Charts/APITests/ChartTests.cs::XamlMetadataReportsUnderlyingTypes",
+      "upstream_file": "controls/dev/Charts/APITests/ChartTests.cs",
+      "upstream_method": "XamlMetadataReportsUnderlyingTypes",
+      "upstream_line": 1021,
+      "suite": "api-tests",
+      "suggested_rust_test": "xaml_metadata_reports_underlying_types"
+    },
+    {
+      "id": "controls/dev/Charts/APITests/ChartTests.cs::XamlMetadataSamplesActivatesAndItemsSourceRoundTrips",
+      "upstream_file": "controls/dev/Charts/APITests/ChartTests.cs",
+      "upstream_method": "XamlMetadataSamplesActivatesAndItemsSourceRoundTrips",
+      "upstream_line": 798,
+      "suite": "api-tests",
+      "suggested_rust_test": "xaml_metadata_samples_activates_and_items_source_round_trips"
+    },
+    {
+      "id": "controls/dev/Charts/APITests/ChartTests.cs::XamlMetadataTypeOverloadAndXmlnsDefinitionsWork",
+      "upstream_file": "controls/dev/Charts/APITests/ChartTests.cs",
+      "upstream_method": "XamlMetadataTypeOverloadAndXmlnsDefinitionsWork",
+      "upstream_line": 1071,
+      "suite": "api-tests",
+      "suggested_rust_test": "xaml_metadata_type_overload_and_xmlns_definitions_work"
+    },
+    {
+      "id": "controls/dev/Charts/APITests/ChartTests.cs::XamlMetadataUnknownTypesReturnNull",
+      "upstream_file": "controls/dev/Charts/APITests/ChartTests.cs",
+      "upstream_method": "XamlMetadataUnknownTypesReturnNull",
+      "upstream_line": 785,
+      "suite": "api-tests",
+      "suggested_rust_test": "xaml_metadata_unknown_types_return_null"
+    },
+    {
+      "id": "controls/dev/Charts/APITests/ChartTests.cs::XamlReaderLoadsChartMarkupWithSeriesAxesSamplesAndEnums",
+      "upstream_file": "controls/dev/Charts/APITests/ChartTests.cs",
+      "upstream_method": "XamlReaderLoadsChartMarkupWithSeriesAxesSamplesAndEnums",
+      "upstream_line": 1101,
+      "suite": "api-tests",
+      "suggested_rust_test": "xaml_reader_loads_chart_markup_with_series_axes_samples_and_enums"
+    },
+    {
+      "id": "controls/dev/Charts/APITests/ChartTests.cs::XamlReaderLoadsXamlChartsResourcesInMergedDictionaries",
+      "upstream_file": "controls/dev/Charts/APITests/ChartTests.cs",
+      "upstream_method": "XamlReaderLoadsXamlChartsResourcesInMergedDictionaries",
+      "upstream_line": 1180,
+      "suite": "api-tests",
+      "suggested_rust_test": "xaml_reader_loads_xaml_charts_resources_in_merged_dictionaries"
+    },
+    {
+      "id": "controls/dev/Charts/InteractionTests/ChartsTests.cs::ChartIsExposedToUIAutomation",
+      "upstream_file": "controls/dev/Charts/InteractionTests/ChartsTests.cs",
+      "upstream_method": "ChartIsExposedToUIAutomation",
+      "upstream_line": 39,
+      "suite": "interaction-tests",
+      "suggested_rust_test": "chart_is_exposed_to_ui_automation"
+    },
+    {
+      "id": "controls/dev/Charts/InteractionTests/ChartsTests.cs::ChartKeepsWorkingThroughDataSeriesLegendAndThemeChanges",
+      "upstream_file": "controls/dev/Charts/InteractionTests/ChartsTests.cs",
+      "upstream_method": "ChartKeepsWorkingThroughDataSeriesLegendAndThemeChanges",
+      "upstream_line": 49,
+      "suite": "interaction-tests",
+      "suggested_rust_test": "chart_keeps_working_through_data_series_legend_and_theme_changes"
+    }
+  ]
+}

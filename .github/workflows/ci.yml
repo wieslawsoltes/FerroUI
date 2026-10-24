@@ -351,6 +351,21 @@ jobs:
         env:
           FERROUI_SMOKE_EXIT_MS: 2000
         run: cargo run --locked -p ferroui-desktop --example hello_window
+      # The HelloWorld samples (the XAML one and one per style of ferroui-view, docs/binary-size.md):
+      # built, then each shown for two seconds.
+      - name: The HelloWorld samples for two seconds each
+        if: ${{ steps.skia.outputs.raster == 'true' }}
+        timeout-minutes: 30
+        env:
+          FERROUI_SMOKE_EXIT_MS: 2000
+        run: |
+          samples="hello-world hello-world-builders hello-world-macros hello-world-hooks hello-world-component-host"
+          cargo build --locked $(printf -- '-p %s ' $samples) --bins
+          result=0
+          for sample in $samples; do
+            ./target/debug/$sample.exe || { echo "::error::$sample ended with an error"; result=1; }
+          done
+          exit $result
       # Upstream's integration tests of the backend (tests/FerroUI.IntegrationTests.Win32): windows
       # of the window class on the desktop of the runner, in every state, with every kind of
       # decorations, their client area and bounds compared with the screen. One binary without

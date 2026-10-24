@@ -1,0 +1,70 @@
+name: Charts contract
+
+on:
+  pull_request:
+    paths:
+      - 'src/FerroUI.Controls.Charts/**'
+      - 'src/FerroUI/Cargo.toml'
+      - 'src/FerroUI/lib.rs'
+      - 'samples/ChartsDemo/**'
+      - 'docs/porting/data/winui-charts/**'
+      - 'scripts/winui-charts/**'
+      - '.github/workflows/charts.yml'
+  workflow_dispatch:
+
+concurrency:
+  group: charts-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+env:
+  CARGO_TERM_COLOR: always
+  CARGO_INCREMENTAL: 0
+  CARGO_PROFILE_DEV_DEBUG: 0
+  CARGO_PROFILE_TEST_DEBUG: 0
+  RUST_BACKTRACE: 1
+
+jobs:
+  contract:
+    name: Native contract, compiled XAML and CPU rendering
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: dtolnay/rust-toolchain@89b12181fb390509a0842a86cc55eeb8eb928c1d # stable
+        with:
+          targets: wasm32-unknown-emscripten
+      - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2
+        with:
+          key: charts
+      - name: Fonts for the actual CPU render
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends libfontconfig1-dev libfreetype6-dev fonts-dejavu-core
+      - name: Public contract and native regressions
+        run: cargo test --locked -p ferroui-controls-charts --lib | tee charts-contract.log
+      - name: Every published source test has an explicit, verified disposition
+        run: python3 scripts/winui-charts/conformance.py check --require-complete --execution-log charts-contract.log
+      # The tests of the shared XAML runtime run in ci.yml with the rest of the workspace.
+      - name: Optional facade integration
+        run: cargo check --locked -p ferroui --no-default-features --features charts
+      - name: Compiled markup and light, dark and live-data renders
+        env:
+          FERROUI_CHARTS_RENDER_OUTPUT: ${{ github.workspace }}/charts-render
+        run: cargo test --locked -p charts-demo --features render-smoke --lib -- --nocapture
+      - name: Backend-independent control compiles for the browser target
+        run: cargo check --locked -p ferroui-controls-charts --target wasm32-unknown-emscripten
+      - name: Native render evidence and contract results
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: charts-contract-and-native-renders
+          path: |
+            charts-contract.log
+            charts-render
+          if-no-files-found: warn

@@ -93,7 +93,7 @@ ferroui-themes-fluent = "=0.4.0"
 
 The WinUI 3 theme is the crate `ferroui-themes-winui` (`WinUITheme`), used in place of `ferroui-themes-fluent` or beside it; the facade crate has it as the feature `winui-theme`.
 
-An application can also name one dependency instead: the facade crate `ferroui`. It re-exports the common crates under short names (`ferroui::base`, `ferroui::controls`, ...) with a prelude of the types of a minimal application; its default features are the desktop platforms and the Fluent theme, and further features add the Simple theme, XAML loading at run time, the colour picker, the ItemsRepeater, the TreeDataGrid, the dialogs, the browser platform, the WinUI 3 theme, the Vello backend, the headless platform and the graphics contracts ([docs/release.md](docs/release.md), section 2.1). In the repository it is used already: `cargo run -p ferroui --example hello`.
+An application can also name one dependency instead: the facade crate `ferroui`. It re-exports the common crates under short names (`ferroui::base`, `ferroui::controls`, ...) with a prelude of the types of a minimal application; its default features are the desktop platforms and the Fluent theme, and further features add the Simple theme, XAML loading at run time, the colour picker, Charts, the TreeDataGrid, the dialogs, the browser platform, the WinUI 3 theme, the Vello backend, the headless platform and the graphics contracts ([docs/release.md](docs/release.md), section 2.1). In the repository it is used already: `cargo run -p ferroui --example hello`.
 
 The libraries for MVVM applications (Rx, DynamicData, ReactiveUI and their integration with the controls) are crates of the release as well: `ferroui-reactiveui-controls = "=0.4.0"` beside the crates above, or the facade crate with its feature `reactiveui` ([docs/mvvm.md](docs/mvvm.md)).
 
@@ -135,6 +135,7 @@ Markup is loaded at run time with `ferroui-markup-xaml-loader` (the feature `xam
 | [`ferroui-static-view-locator`](https://crates.io/crates/ferroui-static-view-locator) | View locators generated at build time for FerroUI: view models mapped to views by naming convention, contracts and explicit mappings, without reflection | [![version](https://img.shields.io/crates/v/ferroui-static-view-locator.svg)](https://crates.io/crates/ferroui-static-view-locator) | [![downloads](https://img.shields.io/crates/d/ferroui-static-view-locator.svg)](https://crates.io/crates/ferroui-static-view-locator) | [![docs.rs](https://img.shields.io/docsrs/ferroui-static-view-locator)](https://docs.rs/ferroui-static-view-locator) |
 | [`ferroui-treedatagrid-core`](https://crates.io/crates/ferroui-treedatagrid-core) | The framework-neutral part of FerroUI's TreeDataGrid: flat and hierarchical sources, columns, rows, sorting, expansion, and row and cell selection | [![version](https://img.shields.io/crates/v/ferroui-treedatagrid-core.svg)](https://crates.io/crates/ferroui-treedatagrid-core) | [![downloads](https://img.shields.io/crates/d/ferroui-treedatagrid-core.svg)](https://crates.io/crates/ferroui-treedatagrid-core) | [![docs.rs](https://img.shields.io/docsrs/ferroui-treedatagrid-core)](https://docs.rs/ferroui-treedatagrid-core) |
 | [`ferroui-view-macros`](https://crates.io/crates/ferroui-view-macros) | The rsx! and #[component] macros of ferroui-view, the declarative Rust API of FerroUI | [![version](https://img.shields.io/crates/v/ferroui-view-macros.svg)](https://crates.io/crates/ferroui-view-macros) | [![downloads](https://img.shields.io/crates/d/ferroui-view-macros.svg)](https://crates.io/crates/ferroui-view-macros) | [![docs.rs](https://img.shields.io/docsrs/ferroui-view-macros)](https://docs.rs/ferroui-view-macros) |
+| [`ferroui-controls-charts`](https://crates.io/crates/ferroui-controls-charts) | Native FerroUI charts: line, area and bar series, category and calendar axes, legends, markers and labels | [![version](https://img.shields.io/crates/v/ferroui-controls-charts.svg)](https://crates.io/crates/ferroui-controls-charts) | [![downloads](https://img.shields.io/crates/d/ferroui-controls-charts.svg)](https://crates.io/crates/ferroui-controls-charts) | [![docs.rs](https://img.shields.io/docsrs/ferroui-controls-charts)](https://docs.rs/ferroui-controls-charts) |
 | [`ferroui-controls-repeater`](https://crates.io/crates/ferroui-controls-repeater) | The ItemsRepeater of FerroUI, a port of the Repeater of WinUI: virtualizing stack, uniform grid, flow and lined-flow layouts, element factories, recycling, phasing, transitions and selection | [![version](https://img.shields.io/crates/v/ferroui-controls-repeater.svg)](https://crates.io/crates/ferroui-controls-repeater) | [![downloads](https://img.shields.io/crates/d/ferroui-controls-repeater.svg)](https://crates.io/crates/ferroui-controls-repeater) | [![docs.rs](https://img.shields.io/docsrs/ferroui-controls-repeater)](https://docs.rs/ferroui-controls-repeater) |
 | [`ferroui-dialogs`](https://crates.io/crates/ferroui-dialogs) | The managed dialogs of FerroUI: the managed file chooser, the managed storage provider and the about dialog | [![version](https://img.shields.io/crates/v/ferroui-dialogs.svg)](https://crates.io/crates/ferroui-dialogs) | [![downloads](https://img.shields.io/crates/d/ferroui-dialogs.svg)](https://crates.io/crates/ferroui-dialogs) | [![docs.rs](https://img.shields.io/docsrs/ferroui-dialogs)](https://docs.rs/ferroui-dialogs) |
 | [`ferroui-themes-fluent`](https://crates.io/crates/ferroui-themes-fluent) | The FerroUI Fluent theme: control themes, colour palettes and resources for the control set, in light and dark variants | [![version](https://img.shields.io/crates/v/ferroui-themes-fluent.svg)](https://crates.io/crates/ferroui-themes-fluent) | [![downloads](https://img.shields.io/crates/d/ferroui-themes-fluent.svg)](https://crates.io/crates/ferroui-themes-fluent) | [![docs.rs](https://img.shields.io/docsrs/ferroui-themes-fluent)](https://docs.rs/ferroui-themes-fluent) |
@@ -222,11 +223,25 @@ cargo run -p ferroui-desktop --example hello_window
 # Themed controls, Simple theme (add -- --fluent for the Fluent theme)
 cargo run -p ferroui-themes-simple --example themed_window
 
+# Hello, World! in the WinUI 3 theme, in XAML (samples/HelloWorld), and in each style of the
+# declarative Rust API: builders, rsx!, a component with hooks, a component in XAML
+cargo run -p hello-world
+cargo run -p hello-world-builders
+cargo run -p hello-world-macros
+cargo run -p hello-world-hooks
+cargo run -p hello-world-component-host
+
 # The ControlCatalog sample application
 cargo run -p control-catalog-desktop
 
+# Ember, an adaptive Hacker News reader with rich threads and an offline SQLite library
+cargo run -p ember-desktop
+
 # The TreeDataGrid demo (its pages are also the page TreeDataGrid of the ControlCatalog)
 cargo run -p treedatagrid-demo
+
+# Charts: compiled XAML, line/area/bar series, shared live data and light/dark resources
+cargo run -p charts-demo --features desktop
 
 # ReactiveDemo, the getting-started sample of ReactiveUI: a crates.io browser on the WinUI 3
 # theme (add --no-default-features to search an in-memory catalogue instead of crates.io)
@@ -241,6 +256,8 @@ cargo run -p winui-theme-gallery --bin winui-theme-gallery
 ```
 
 The ControlCatalog runs on the other platforms too: on Linux it takes the Wayland backend when a compositor is reachable, as the original sample does (`FERROUI_CATALOG_WAYLAND=0` keeps X11), on the framebuffer with `--fbdev` or `--drm`, and on the headless platform behind a VNC server with `--vnc`; in the browser through `scripts/build-browser.sh control-catalog-browser`; on iOS through `scripts/ios/sim-catalog.sh` and on Android through `scripts/android/emu-catalog.sh`. The platform documents under [docs/porting](docs/porting) have the details.
+
+[Ember](docs/samples/ember.md) demonstrates an application built on the WinUI 3 theme: responsive touch navigation, custom control templates, selectable rich HTML, virtualized discussions, search, custom themes and durable offline storage. Its browser host uses the same control tree with Fetch and IndexedDB; desktop, Android and iOS hosts use SQLite. See the guide for platform commands and verification status.
 
 Run the tests:
 
@@ -379,7 +396,7 @@ fn main() {
 | Asynchronous data | A future run by a component on the executor of the thread, started again when its dependencies change; its state shown pending, ready or failed; a timer for debouncing | `use_future(deps, \|deps\| future)`, `suspense(..)`, `AsyncState`, `sleep` |
 | Error boundaries | A panic of a component below shows a fallback instead of ending the application; the child can be mounted again | `error_boundary(\|\| child, \|info\| fallback)`, `info.reset()` |
 | Navigation | A router of views modelled on the routing of ReactiveUI: a stack of paths, routes with parameters | `router("/", vec![route("/people/:id", \|m\| ..)])`, `use_router().navigate(..)`, `navigate_back`, `navigate_and_reset` |
-| Samples | The 7GUIs in builders, `rsx!` and hooks versions; XAML interoperation; the gallery; TodoMVC; ReactiveDemo as components | `samples/SevenGuis`, `samples/ViewInterop`, `samples/ViewGallery`, `samples/TodoMvc`, `samples/ReactiveDemoComponents` |
+| Samples | Hello, World! in each style; the 7GUIs in builders, `rsx!` and hooks versions; XAML interoperation; the gallery; TodoMVC; ReactiveDemo as components | `samples/HelloWorld.Builders`, `.Macros`, `.Hooks`, `.ComponentHost`, `samples/SevenGuis`, `samples/ViewInterop`, `samples/ViewGallery`, `samples/TodoMvc`, `samples/ReactiveDemoComponents` |
 
 For React developers, in short:
 
@@ -460,6 +477,7 @@ The layout follows the upstream project so that files can be compared side by si
 - [Tracking](docs/porting/TRACKING.md) and [what is left](docs/porting/REMAINING.md): generated per-file, per-type and per-member status.
 - [Deviations](docs/porting/DEVIATIONS.md): every place where the port differs from upstream, and why.
 - [XAML design](docs/porting/xaml.md): the markup pipeline, the run-time loader and the compiler of markup to Rust.
+- [WinUI Charts port](docs/porting/winui-charts.md): the published-contract boundary, native implementation, complete source/test mapping, adaptations and [compiled sample](samples/ChartsDemo/README.md).
 - [Declarative Rust UI](docs/declarative-ui.md): `ferroui-view`, its builders, `rsx!`, signals, components, hooks, the reconciler, XAML interoperation, tools and the phases of the work; [compared with React](docs/declarative-ui-react.md).
 - [Developer tools](docs/porting/tracking/diagnostics/TRACKING.md): the port of upstream's developer tools, attached with F12, member by member.
 - [MVVM on FerroUI](docs/mvvm.md): ReactiveUI, DynamicData and System.Reactive on FerroUI, with the samples ReactiveDemo and ReactiveUIExample.

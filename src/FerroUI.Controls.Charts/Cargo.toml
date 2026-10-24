@@ -1,0 +1,32 @@
+[package]
+name = "ferroui-controls-charts"
+description = "Native FerroUI charts: line, area and bar series, category and calendar axes, legends, markers and labels"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+homepage.workspace = true
+readme.workspace = true
+keywords.workspace = true
+categories.workspace = true
+links = "ferroui_controls_charts_xaml"
+autotests = false
+
+[lib]
+path = "lib.rs"
+
+[dependencies]
+ferroui-base = { workspace = true, features = ["markup-functions"] }
+ferroui-controls = { workspace = true }
+
+[build-dependencies]
+ferroui-build-scan = { workspace = true }
+
+[dev-dependencies]
+ferroui-base = { workspace = true, features = ["testing"] }
+ferroui-controls = { workspace = true, features = ["testing"] }
+ferroui-markup-xaml-loader = { workspace = true, features = ["runtime", "testing"] }
+
+[package.metadata.release]
+group = "controls"

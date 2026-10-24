@@ -1,0 +1,26 @@
+[package]
+name = "hello-world-hooks"
+description = "The HelloWorld sample written as a component that runs again, its counter in a hook"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+publish = false
+
+[lib]
+path = "lib.rs"
+test = false
+doctest = false
+
+[[bin]]
+name = "hello-world-hooks"
+path = "main.rs"
+test = false
+
+# Only what the application uses: the framework, ferroui-view with the desktop entry point, and
+# the WinUI theme.
+[dependencies]
+ferroui-base = { workspace = true }
+ferroui-view = { workspace = true, features = ["desktop"] }
+ferroui-themes-winui = { workspace = true }

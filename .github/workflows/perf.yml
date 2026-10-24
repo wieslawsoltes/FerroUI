@@ -24,6 +24,11 @@ on:
         description: RUSTFLAGS for the build of the ref, not of the baseline (experiments; empty for none)
         required: false
         default: ""
+      samples:
+        description: Measure the HelloWorld samples, hello_window, the WinUI theme gallery and the catalog on macOS with the release and the dist profile, raw and stripped, with a breakdown by crate (docs/binary-size.md, section 3.6)
+        type: boolean
+        required: false
+        default: false
       windows:
         description: Also build the ControlCatalog and the WinUI theme gallery on Windows (x86-64) with the release and the dist profile, and report the sizes of their executables (docs/binary-size.md)
         type: boolean
@@ -201,6 +206,31 @@ jobs:
           PY
             echo '```'
           } | tee -a "$GITHUB_STEP_SUMMARY"
+      # The HelloWorld samples (docs/binary-size.md, section 3.6) and the theme-less hello_window
+      # of ferroui-desktop, each built by itself as an application is, with the same profile.
+      - name: Sizes of the HelloWorld samples
+        if: matrix.tree == 'measured'
+        working-directory: tree
+        env:
+          CARGO_TARGET_DIR: ${{ github.workspace }}/target
+          PROFILE: ${{ matrix.profile }}
+        run: |
+          {
+            echo "## Windows x86-64: the HelloWorld samples, profile \`$PROFILE\`"
+            echo
+            echo '```'
+          } | tee -a "$GITHUB_STEP_SUMMARY"
+          for sample in hello-world hello-world-component-host hello-world-builders hello-world-macros hello-world-hooks hello_window; do
+            if [ "$sample" = hello_window ]; then
+              cargo build --locked --profile "$PROFILE" -p ferroui-desktop --example hello_window
+              file="$CARGO_TARGET_DIR/$PROFILE/examples/hello_window.exe"
+            else
+              cargo build --locked --profile "$PROFILE" -p "$sample" --bin "$sample"
+              file="$CARGO_TARGET_DIR/$PROFILE/$sample.exe"
+            fi
+            echo "$sample: $(stat -c %s "$file") bytes" | tee -a "$GITHUB_STEP_SUMMARY"
+          done
+          echo '```' | tee -a "$GITHUB_STEP_SUMMARY"
       # What the executable of the catalog is made of, by library: the measured tree with the
       # release profile is linked once more with a map of the linker (`/MAP`), and the code and
       # data of each symbol (the distance to the next one) are summed by the library or the object
@@ -250,4 +280,58 @@ jobs:
           PY
             echo '```'
           } | tee -a "$GITHUB_STEP_SUMMARY"
+
+  # The HelloWorld samples (docs/binary-size.md, section 3.6), hello_window, the WinUI theme gallery
+  # and the catalog on macOS, each built by itself as an application is, with the release and the
+  # dist profile: the size of the executable as cargo writes it and stripped, and for the release
+  # profile the breakdown by crate of the symbol table (`scripts/symsize.py`).
+  macos-samples:
+    name: Executable sizes (macOS, ${{ matrix.profile }})
+    if: inputs.samples
+    runs-on: macos-15
+    timeout-minutes: 240
+    strategy:
+      fail-fast: false
+      matrix:
+        profile: [release, dist]
+    steps:
+      - name: Check out the ref
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.ref }}
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Build and measure
+        env:
+          PROFILE: ${{ matrix.profile }}
+          REF: ${{ inputs.ref }}
+        run: |
+          {
+            echo "## macOS: \`$REF\` at \`$(git rev-parse HEAD)\`, profile \`$PROFILE\` (MB: as written, stripped)"
+            echo
+            echo '```'
+          } | tee -a "$GITHUB_STEP_SUMMARY"
+          mkdir -p measured
+          for app in hello_window hello-world hello-world-component-host hello-world-builders hello-world-macros hello-world-hooks winui-theme-gallery control-catalog-desktop; do
+            case "$app" in
+              hello_window) cargo build --locked --profile "$PROFILE" -p ferroui-desktop --example hello_window; file="target/$PROFILE/examples/hello_window" ;;
+              *) cargo build --locked --profile "$PROFILE" -p "$app" --bin "$app"; file="target/$PROFILE/$app" ;;
+            esac
+            cp "$file" "measured/$app"
+            strip -o "measured/$app.stripped" "measured/$app"
+            raw=$(stat -f %z "measured/$app"); stripped=$(stat -f %z "measured/$app.stripped")
+            printf '%-28s %8.2f %8.2f\n' "$app" "$(echo "$raw / 1000000" | bc -l)" "$(echo "$stripped / 1000000" | bc -l)" | tee -a "$GITHUB_STEP_SUMMARY"
+          done
+          echo '```' | tee -a "$GITHUB_STEP_SUMMARY"
+      - name: Breakdown by crate
+        if: matrix.profile == 'release'
+        run: |
+          for app in hello_window hello-world hello-world-builders control-catalog-desktop; do
+            {
+              echo "### $app, release, by crate"
+              echo
+              echo '```'
+              python3 scripts/symsize.py "measured/$app" -n 0 --crates 20 | sed -n '/by crate/,/top/p' | grep -v '^# top'
+              echo '```'
+            } | tee -a "$GITHUB_STEP_SUMMARY"
+          done
 

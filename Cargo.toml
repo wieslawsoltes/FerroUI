@@ -15,6 +15,7 @@ members = [
     "src/FerroUI.View",
     "src/FerroUI.View.Macros",
     "src/FerroUI.Controls.ColorPicker",
+    "src/FerroUI.Controls.Charts",
     "src/FerroUI.Controls.Repeater",
     "src/TreeDataGrid/FerroUI.TreeDataGrid.Core",
     "src/TreeDataGrid/FerroUI.Controls.TreeDataGrid",
@@ -78,6 +79,11 @@ members = [
     "tests/FerroUI.IntegrationTests.Win32",
     "tests/FerroUI.DesignerSupport.Tests",
     "tests/FerroUI.StaticViewLocator.Tests",
+    "samples/HelloWorld",
+    "samples/HelloWorld.Builders",
+    "samples/HelloWorld.Macros",
+    "samples/HelloWorld.Hooks",
+    "samples/HelloWorld.ComponentHost",
     "samples/SevenGuis/Model",
     "samples/SevenGuis/Builders/Counter",
     "samples/SevenGuis/Macros/Counter",
@@ -118,6 +124,7 @@ members = [
     "samples/BindingDemo",
     "samples/VirtualizationDemo",
     "samples/TreeDataGridDemo",
+    "samples/ChartsDemo",
     "samples/ReactiveDemo",
     "samples/ReactiveUIExample",
     "samples/StaticViewLocatorDemo",
@@ -137,6 +144,13 @@ members = [
     "samples/PlatformSanityChecks",
     "samples/SingleProjectSandbox",
     "samples/GpuInterop",
+    "samples/Ember.Core",
+    "samples/Ember.Content",
+    "samples/Ember",
+    "samples/Ember.Desktop",
+    "samples/Ember.Browser",
+    "samples/Ember.Android",
+    "samples/Ember.iOS",
 ]
 
 [workspace.package]
@@ -173,6 +187,7 @@ ferroui-controls = { version = "=0.4.0", path = "src/FerroUI.Controls" }
 ferroui-view = { version = "=0.4.0", path = "src/FerroUI.View" }
 ferroui-view-macros = { version = "=0.4.0", path = "src/FerroUI.View.Macros" }
 ferroui-controls-color-picker = { version = "=0.4.0", path = "src/FerroUI.Controls.ColorPicker" }
+ferroui-controls-charts = { version = "=0.4.0", path = "src/FerroUI.Controls.Charts" }
 ferroui-controls-repeater = { version = "=0.4.0", path = "src/FerroUI.Controls.Repeater" }
 ferroui-treedatagrid-core = { version = "=0.4.0", path = "src/TreeDataGrid/FerroUI.TreeDataGrid.Core" }
 ferroui-controls-treedatagrid = { version = "=0.4.0", path = "src/TreeDataGrid/FerroUI.Controls.TreeDataGrid" }
