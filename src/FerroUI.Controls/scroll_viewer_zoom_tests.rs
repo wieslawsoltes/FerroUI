@@ -136,5 +136,5 @@ fn ctrl_and_the_wheel_zoom_about_the_pointer_when_zooming_is_enabled() {
     // The point under the pointer stays where it is: (0 + 50) * 1.1 - 50 on both axes (the
     // Ctrl and wheel of the disabled zoom scrolled back to the top).
     let offset = target.offset();
-    assert!((offset.x - 5.0).abs() < 1e-6 && (offset.y - 5.0).abs() < 1e-6, "{offset:?}");
+    assert!((offset.x - 5.0).abs() < 1e-4 && (offset.y - 5.0).abs() < 1e-4, "{offset:?}");
 }

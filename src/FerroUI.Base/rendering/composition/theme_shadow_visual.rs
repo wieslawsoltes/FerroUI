@@ -37,6 +37,12 @@ struct ShadowShape {
     radius_y: f64,
 }
 
+impl ShadowShape {
+    fn of(recipe: &DropShadowRecipe) -> ShadowShape {
+        ShadowShape { shadows: recipe.box_shadows(), radius_x: recipe.radius_x, radius_y: recipe.radius_y }
+    }
+}
+
 /// The shadow visual of a caster: created by the caster's
 /// [`Visual`](crate::Visual), shown by its parent before the caster's own
 /// visual.
@@ -53,10 +59,17 @@ impl ThemeShadowVisual {
     /// (`ParentForTransform`), its opacity follows the caster's through an
     /// expression (as `UpdateDropShadowVisualOpacity` does for an animated
     /// opacity), and it is not hit-testable.
-    pub fn new(caster: &Rc<CompositionVisual>) -> ThemeShadowVisual {
+    ///
+    /// The handler starts with the shape of `recipe`, so that the first frame that shows the
+    /// visual draws the shadow (a message reaches the handler a frame later).
+    pub fn new(caster: &Rc<CompositionVisual>, recipe: &DropShadowRecipe) -> ThemeShadowVisual {
         let compositor = caster.compositor().clone();
-        let visual = compositor
-            .create_custom_visual(|| Rc::new(ThemeShadowHandler::default()) as Rc<dyn ICompositionCustomVisualHandler>);
+        let shape = ShadowShape::of(recipe);
+        let initial = shape.clone();
+        let visual = compositor.create_custom_visual(move || {
+            Rc::new(ThemeShadowHandler { base: CompositionCustomVisualHandler::default(), shape: RefCell::new(Some(initial)) })
+                as Rc<dyn ICompositionCustomVisualHandler>
+        });
         visual.set_is_hit_test_visible(false);
         // The shadow lies outside the bounds of the caster.
         visual.set_clip_to_bounds(false);
@@ -64,7 +77,7 @@ impl ThemeShadowVisual {
         let opacity = compositor.create_expression_animation_with("caster.Opacity");
         opacity.set_reference_parameter("caster", caster.clone());
         visual.start_animation("Opacity", &*opacity);
-        ThemeShadowVisual { visual, shape: RefCell::new(None), size: Cell::new(Vector::default()) }
+        ThemeShadowVisual { visual, shape: RefCell::new(Some(shape)), size: Cell::new(Vector::default()) }
     }
 
     /// The composition visual.
@@ -81,7 +94,7 @@ impl ThemeShadowVisual {
             self.size.set(size);
             self.visual.set_size(size);
         }
-        let shape = ShadowShape { shadows: recipe.box_shadows(), radius_x: recipe.radius_x, radius_y: recipe.radius_y };
+        let shape = ShadowShape::of(recipe);
         if self.shape.borrow().as_ref() == Some(&shape) {
             return;
         }

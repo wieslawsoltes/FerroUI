@@ -134,7 +134,7 @@ impl Visual {
             Some(existing) => existing,
             None => {
                 self.release_theme_shadow_visual();
-                let created = Rc::new(ThemeShadowVisual::new(&caster));
+                let created = Rc::new(ThemeShadowVisual::new(&caster, &self.theme_shadow_recipe(&elevation)));
                 self.with_composition_extras(|extras| {
                     extras.theme_shadow.get_or_insert_with(ThemeShadowState::default).visual = Some(created.clone());
                 });
@@ -177,13 +177,19 @@ impl Visual {
         elevation: &Ref<Visual>,
     ) {
         let theme = ThemeShadowTheme::of(self);
-        let (radius_x, radius_y) = self.theme_shadow_corner_radius();
-        let recipe =
-            DropShadowRecipe::new(elevation.translation().z as f32, theme).with_corner_radius(radius_x, radius_y);
+        let recipe = self.theme_shadow_recipe(elevation);
         let size = self.bounds().size();
         let visible = theme != ThemeShadowTheme::HighContrast
             && self.composition_visual().is_some_and(|visual| visual.visible());
         shadow_visual.update(&recipe, Vector::new(size.width, size.height), visible);
+    }
+
+    /// The recipe of the elevation of `elevation` in the theme of this visual, with the corner
+    /// radius of the nearest rounded element (`GetDropShadowRecipe`, `UpdateDropShadowRecipeCornerRadius`).
+    fn theme_shadow_recipe(&self, elevation: &Ref<Visual>) -> DropShadowRecipe {
+        let (radius_x, radius_y) = self.theme_shadow_corner_radius();
+        DropShadowRecipe::new(elevation.translation().z as f32, ThemeShadowTheme::of(self))
+            .with_corner_radius(radius_x, radius_y)
     }
 
     /// `UpdateDropShadowRecipeCornerRadius`: from the visual up through its

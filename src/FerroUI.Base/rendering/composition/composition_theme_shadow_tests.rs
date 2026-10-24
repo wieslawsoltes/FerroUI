@@ -20,8 +20,6 @@ fn caster(s: &CompositorCanvas, z: f64) -> (Ref<TestBorder>, Ref<ThemeShadow>) {
     let as_shadow: Ref<Shadow> = shadow.clone().upcast();
     border.set_shadow(Some(as_shadow));
     s.canvas.add(&border);
-    // The frame that creates the shadow visual, then the one in which its handler has the shape.
-    s.run_jobs();
     s.run_jobs();
     (border, shadow)
 }
