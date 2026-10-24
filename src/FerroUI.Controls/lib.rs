@@ -305,11 +305,18 @@ mod info_bar_tests;
 #[cfg(test)]
 mod progress_ring_tests;
 // WinUI's input controls (docs/porting/winui-controls.md).
+mod auto_suggest_box;
 mod number_box;
+pub use auto_suggest_box::{
+    AutoSuggestBox, AutoSuggestBoxQuerySubmittedEventArgs, AutoSuggestBoxSuggestionChosenEventArgs,
+    AutoSuggestBoxTextChangedEventArgs, AutoSuggestionBoxTextChangeReason,
+};
 pub use number_box::{
     INumberBoxNumberFormatter, InvariantNumberBoxNumberFormatter, NumberBox, NumberBoxSpinButtonPlacementMode,
     NumberBoxValidationMode, NumberBoxValueChangedEventArgs,
 };
+#[cfg(test)]
+mod auto_suggest_box_tests;
 #[cfg(test)]
 mod input_test_support;
 #[cfg(test)]

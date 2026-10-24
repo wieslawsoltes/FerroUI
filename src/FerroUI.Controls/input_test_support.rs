@@ -10,7 +10,7 @@ use crate::presenters::ContentPresenter;
 use crate::primitives::{Popup, TemplatedControl};
 use crate::templates::{FuncControlTemplate, FuncTemplateNameScopeExtensions};
 use crate::testing::{TestServices, UnitTestApplication, UnitTestApplicationScope};
-use crate::{Control, RepeatButton, StackPanel, TextBox};
+use crate::{Border, Button, Control, ListBox, RepeatButton, StackPanel, TextBox};
 use ferroui_base::layout::Orientation;
 use ferroui_base::{ObjectType, Ref, StyledElement};
 use std::rc::Rc;
@@ -73,6 +73,29 @@ pub(crate) fn number_box_template() -> Rc<FuncControlTemplate> {
         popup.set_placement_target(text_box);
         row.children().add(&popup);
         root.children().add(&row);
+        root.upcast::<Control>()
+    })
+}
+
+/// The parts of `Controls/AutoSuggestBox.xaml`: the text box `TextBox`, the button `QueryButton`,
+/// and the popup `SuggestionsPopup` with `SuggestionsContainer` and the list `SuggestionsList`.
+pub(crate) fn auto_suggest_box_template() -> Rc<FuncControlTemplate> {
+    FuncControlTemplate::new(|_, scope| {
+        let root = StackPanel::new();
+        let text_box = named(TextBox::new(), "TextBox").register_in_name_scope(&**scope);
+        root.children().add(&text_box);
+        let query = named(Button::new(), "QueryButton").register_in_name_scope(&**scope);
+        query.set_focusable(false);
+        root.children().add(&query);
+        let list = named(ListBox::new(), "SuggestionsList").register_in_name_scope(&**scope);
+        list.set_focusable(false);
+        let container = named(Border::new(), "SuggestionsContainer").register_in_name_scope(&**scope);
+        container.set_child(Some(list.upcast::<Control>()));
+        let popup = named(Popup::new(), "SuggestionsPopup").register_in_name_scope(&**scope);
+        popup.set_child(container);
+        popup.set_placement_target(text_box);
+        popup.set_is_light_dismiss_enabled(true);
+        root.children().add(&popup);
         root.upcast::<Control>()
     })
 }

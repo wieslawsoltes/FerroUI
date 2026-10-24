@@ -134,6 +134,7 @@ const TYPES: &[&TypeInfo] = types![
     crate::automation::AutomationProperties,
     // FerroUI.Automation.Peers
     crate::automation::peers::AutoCompleteBoxAutomationPeer,
+    crate::automation::peers::AutoSuggestBoxAutomationPeer,
     crate::automation::peers::AutomationPeer,
     crate::automation::peers::ButtonAutomationPeer,
     crate::automation::peers::CalendarAutomationPeer,
@@ -191,6 +192,7 @@ const TYPES: &[&TypeInfo] = types![
     crate::automation::peers::ThumbAutomationPeer,
     crate::automation::peers::UserControlAutomationPeer,
     // FerroUI.Controls
+    crate::auto_suggest_box::AutoSuggestBox,
     crate::border::Border,
     crate::button::Button,
     crate::button_spinner::ButtonSpinner,

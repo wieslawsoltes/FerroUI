@@ -1,6 +1,7 @@
 //! Automation peers: the objects that expose elements to UI automation.
 
 mod auto_complete_box_automation_peer;
+mod auto_suggest_box_automation_peer;
 mod automation_peer;
 mod button_automation_peer;
 mod calendar_automation_peer;
@@ -81,6 +82,7 @@ mod window_automation_peer_tests;
 mod window_base_automation_peer;
 
 pub use auto_complete_box_automation_peer::AutoCompleteBoxAutomationPeer;
+pub use auto_suggest_box_automation_peer::AutoSuggestBoxAutomationPeer;
 pub use automation_peer::{
     AutomationControlType, AutomationLandmarkType, AutomationPeer, AutomationPeerImpl, AutomationPeerImplExt,
     AutomationPeerVTable,

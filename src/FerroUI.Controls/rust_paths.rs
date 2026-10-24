@@ -8,6 +8,7 @@ ferroui_base::ferro_rust_paths! {
     classes: [
         crate::Application,
         crate::AutoCompleteBox,
+        crate::AutoSuggestBox,
         crate::Border,
         crate::Button,
         crate::ButtonSpinner,
@@ -145,6 +146,7 @@ ferroui_base::ferro_rust_paths! {
         crate::animation::ConnectedAnimationService,
         crate::automation::AutomationProperties,
         crate::automation::peers::AutoCompleteBoxAutomationPeer,
+        crate::automation::peers::AutoSuggestBoxAutomationPeer,
         crate::automation::peers::AutomationPeer,
         crate::automation::peers::ButtonAutomationPeer,
         crate::automation::peers::CalendarAutomationPeer,
@@ -271,6 +273,10 @@ ferroui_base::ferro_rust_paths! {
     types: [
         crate::AcrylicPlatformCompensationLevels,
         crate::AutoCompleteFilterMode,
+        crate::AutoSuggestBoxQuerySubmittedEventArgs,
+        crate::AutoSuggestBoxSuggestionChosenEventArgs,
+        crate::AutoSuggestBoxTextChangedEventArgs,
+        crate::AutoSuggestionBoxTextChangeReason,
         crate::BarLayoutBehavior,
         crate::CalendarDatePickerFormat,
         crate::CalendarMode,

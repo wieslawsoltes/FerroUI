@@ -49,6 +49,19 @@ pub fn auto_complete_box() -> El<ferroui_controls::AutoCompleteBox> {
     El::new()
 }
 
+pub use ferroui_controls::AutoSuggestBox;
+
+impl ViewClass for ferroui_controls::AutoSuggestBox {
+    fn create() -> ferroui_base::Ref<Self> {
+        <ferroui_controls::AutoSuggestBox>::new()
+    }
+}
+
+/// Starts an element of [`AutoSuggestBox`](ferroui_controls::AutoSuggestBox).
+pub fn auto_suggest_box() -> El<ferroui_controls::AutoSuggestBox> {
+    El::new()
+}
+
 pub use ferroui_controls::Border;
 
 impl ViewClass for ferroui_controls::Border {
@@ -2068,6 +2081,50 @@ pub trait AutoCompleteBoxProps: ElementBuilder {
     }
 }
 impl<T: ObjectType + Upcast<ferroui_controls::AutoCompleteBox>> AutoCompleteBoxProps for El<T> {}
+
+/// The properties and routed events of [`AutoSuggestBox`](ferroui_controls::AutoSuggestBox).
+pub trait AutoSuggestBoxProps: ElementBuilder {
+    /// Sets [`AutoSuggestBox::text_property`](ferroui_controls::AutoSuggestBox::text_property).
+    fn text<M>(self, value: impl IntoProp<String, M>) -> Self {
+        self.prop(<ferroui_controls::AutoSuggestBox>::text_property(), value)
+    }
+
+    /// Sets [`AutoSuggestBox::text_member_path_property`](ferroui_controls::AutoSuggestBox::text_member_path_property).
+    fn text_member_path<M>(self, value: impl IntoProp<String, M>) -> Self {
+        self.prop(<ferroui_controls::AutoSuggestBox>::text_member_path_property(), value)
+    }
+
+    /// Sets [`AutoSuggestBox::placeholder_text_property`](ferroui_controls::AutoSuggestBox::placeholder_text_property).
+    fn placeholder_text<M>(self, value: impl IntoProp<String, M>) -> Self {
+        self.prop(<ferroui_controls::AutoSuggestBox>::placeholder_text_property(), value)
+    }
+
+    /// Sets [`AutoSuggestBox::update_text_on_select_property`](ferroui_controls::AutoSuggestBox::update_text_on_select_property).
+    fn update_text_on_select<M>(self, value: impl IntoProp<bool, M>) -> Self {
+        self.prop(<ferroui_controls::AutoSuggestBox>::update_text_on_select_property(), value)
+    }
+
+    /// Sets [`AutoSuggestBox::is_suggestion_list_open_property`](ferroui_controls::AutoSuggestBox::is_suggestion_list_open_property).
+    fn is_suggestion_list_open<M>(self, value: impl IntoProp<bool, M>) -> Self {
+        self.prop(<ferroui_controls::AutoSuggestBox>::is_suggestion_list_open_property(), value)
+    }
+
+    /// Sets [`AutoSuggestBox::max_suggestion_list_height_property`](ferroui_controls::AutoSuggestBox::max_suggestion_list_height_property).
+    fn max_suggestion_list_height<M>(self, value: impl IntoProp<f64, M>) -> Self {
+        self.prop(<ferroui_controls::AutoSuggestBox>::max_suggestion_list_height_property(), value)
+    }
+
+    /// Sets [`AutoSuggestBox::query_icon_property`](ferroui_controls::AutoSuggestBox::query_icon_property).
+    fn query_icon<M>(self, value: impl IntoProp<Option<ferroui_base::Ref<ferroui_controls::IconElement>>, M>) -> Self {
+        self.prop(<ferroui_controls::AutoSuggestBox>::query_icon_property(), value)
+    }
+
+    /// Sets [`AutoSuggestBox::description_property`](ferroui_controls::AutoSuggestBox::description_property).
+    fn description<M>(self, value: impl IntoProp<Option<ferroui_base::BoxedValue>, M>) -> Self {
+        self.prop(<ferroui_controls::AutoSuggestBox>::description_property(), value)
+    }
+}
+impl<T: ObjectType + Upcast<ferroui_controls::AutoSuggestBox>> AutoSuggestBoxProps for El<T> {}
 
 /// The properties and routed events of [`BezierSegment`](ferroui_base::media::BezierSegment).
 pub trait BezierSegmentProps: ElementBuilder {
