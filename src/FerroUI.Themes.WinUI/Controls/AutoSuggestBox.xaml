@@ -1,0 +1,204 @@
+<!--
+  Ported from microsoft-ui-xaml (https://github.com/microsoft/microsoft-ui-xaml),
+  commit 7e4b0c2096be402f51cc8f7d203ebf67cff183d0:
+    controls/dev/AutoSuggestBox/AutoSuggestBox_themeresources.xaml (the implicit style of
+    AutoSuggestBox and DefaultAutoSuggestBoxStyle, the QueryButton and QueryButtonStyle of
+    AutoSuggestBoxTextBoxStyle; DefaultAutoSuggestBoxStyle and AutoSuggestBoxTextBoxStyle are
+    ported in AutoCompleteBox.xaml, and the resources of the document are
+    Resources/AutoSuggestBox_themeresources.xaml)
+  Copyright (c) Microsoft Corporation. Licensed under the MIT License (see NOTICE.md of the crate).
+
+  Translation notes (docs/porting/winui-theme.md, section 4):
+  - FerroUI's AutoSuggestBox is WinUI's AutoSuggestBox (a WinUI control in ferroui-controls,
+    docs/porting/winui-controls.md); AutoCompleteBox.xaml draws the upstream AutoCompleteBox with
+    the same style, keyed DefaultAutoSuggestBoxStyle. That key belongs to AutoCompleteBox in this
+    theme (its TargetType), so the implicit theme of AutoSuggestBox is not based on it: it has the
+    setters and the template of DefaultAutoSuggestBoxStyle itself. The text box has the keyed theme
+    AutoSuggestBoxTextBoxStyle (the TextBoxStyle of the source), as in AutoCompleteBox.xaml.
+  - The parts keep WinUI's names, which the control looks up: TextBox, SuggestionsPopup,
+    SuggestionsContainer, SuggestionsList (a ListBox with the item theme DefaultListViewItemStyle,
+    as the ListView of the source) and QueryButton.
+  - QueryButton is a part of AutoSuggestBoxTextBoxStyle in WinUI (AutoSuggestBox finds it in the
+    template of its text box). FerroUI's text box template of AutoCompleteBox.xaml has no query
+    button, so the button is the InnerRightContent of the text box, which that template shows at the
+    right of the delete button, after the column of AutoSuggestBoxRightButtonMargin: the margin
+    -2,0,4,0 puts it 2 px from the delete button and 4 px from the edge, as the columns of the
+    source do. Its template-local QueryButtonStyle is the keyed theme AutoSuggestBoxQueryButtonStyle.
+    The control shows the button and gives it the QueryIcon (SetTextBoxQueryButtonIcon).
+  - The glyph of a SymbolIcon query icon is drawn at AutoSuggestBoxIconFontSize (WinUI sets the
+    FontSize of the icon to zero so that its glyph inherits that size from the button): a style of
+    the text part of the icon.
+  - The header and the description are presenters of the text box template in WinUI (the Header
+    and Description of TextBox); FerroUI's TextBox has neither, so they are rows of this template:
+    the header presenter PART_HeaderPresenter (the part of the headered items control,
+    HeaderContentPresenter in the source) with AutoSuggestBoxTopHeaderMargin, shown when there is a
+    header, and DescriptionPresenter.
+  - The suggestion list: SuggestionsContainer has the MaxHeight and the Width the control sets
+    (UpdateSuggestionListSize), the list the MaxHeight AutoSuggestListMaxHeight. The shadow of the
+    list (ApplyElevationEffect on the popup: a ThemeShadow at a Translation.Z of 32) is the BoxShadow
+    ThemeShadowFlyoutBoxShadow of SuggestionsContainer, with the margin ThemeShadowFlyoutMargin as the
+    room for it in the popup (Resources/ThemeShadows.xaml; DEVIATIONS.md, G-24). The popup is placed
+    under the text box; the placement above it when there is no room below is not ported.
+  - Left out, as in AutoCompleteBox.xaml: Orientation (Landscape, Portrait), UseSystemFocusVisuals
+    of IsApplicationFocusVisualKindReveal (no focus adorner), AutoSuggestBoxHelper.KeepInteriorCornersSquare,
+    DesiredCandidateWindowAlignment, Canvas.ZIndex, DisplayMemberPath, ItemTemplateSelector,
+    ItemContainerStyle and IsItemClickEnabled of the list (the control submits a suggestion on a
+    click), the item container transitions, ShouldConstrainToRootBounds and
+    AutomationProperties.AccessibilityView.
+-->
+<ResourceDictionary xmlns="https://github.com/ferroui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    x:ClassModifier="internal">
+  <Design.PreviewWith>
+    <Border Padding="20">
+      <StackPanel Spacing="12" Width="240">
+        <AutoSuggestBox PlaceholderText="Search" />
+        <AutoSuggestBox PlaceholderText="Search" Header="With a header and an icon">
+          <AutoSuggestBox.QueryIcon>
+            <SymbolIcon Symbol="Find" />
+          </AutoSuggestBox.QueryIcon>
+        </AutoSuggestBox>
+        <AutoSuggestBox Text="Disabled" IsEnabled="False" />
+      </StackPanel>
+    </Border>
+  </Design.PreviewWith>
+
+  <!-- QueryButtonStyle of the template of AutoSuggestBoxTextBoxStyle. -->
+  <ControlTheme x:Key="AutoSuggestBoxQueryButtonStyle" TargetType="Button">
+    <Setter Property="Template">
+      <ControlTemplate>
+        <ContentPresenter x:Name="PART_ContentPresenter"
+                          Background="{DynamicResource TextControlButtonBackground}"
+                          BackgroundSizing="{TemplateBinding BackgroundSizing}"
+                          BorderBrush="{DynamicResource TextControlButtonBorderBrush}"
+                          BorderThickness="{TemplateBinding BorderThickness}"
+                          Content="{TemplateBinding Content}"
+                          CornerRadius="{TemplateBinding CornerRadius}"
+                          ContentTemplate="{TemplateBinding ContentTemplate}"
+                          Foreground="{DynamicResource TextControlButtonForeground}"
+                          FontSize="{DynamicResource AutoSuggestBoxIconFontSize}"
+                          Margin="{DynamicResource AutoSuggestBoxInnerButtonMargin}"
+                          Padding="{TemplateBinding Padding}"
+                          HorizontalContentAlignment="{TemplateBinding HorizontalContentAlignment}"
+                          VerticalContentAlignment="{TemplateBinding VerticalContentAlignment}" />
+      </ControlTemplate>
+    </Setter>
+
+    <!-- PointerOver -->
+    <Style Selector="^:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+      <Setter Property="Background" Value="{DynamicResource TextControlButtonBackgroundPointerOver}" />
+      <Setter Property="BorderBrush" Value="{DynamicResource TextControlButtonBorderBrushPointerOver}" />
+      <Setter Property="Foreground" Value="{DynamicResource TextControlButtonForegroundPointerOver}" />
+    </Style>
+    <!-- Pressed -->
+    <Style Selector="^:pressed /template/ ContentPresenter#PART_ContentPresenter">
+      <Setter Property="Background" Value="{DynamicResource TextControlButtonBackgroundPressed}" />
+      <Setter Property="BorderBrush" Value="{DynamicResource TextControlButtonBorderBrushPressed}" />
+      <Setter Property="Foreground" Value="{DynamicResource TextControlButtonForegroundPressed}" />
+    </Style>
+    <!-- Disabled -->
+    <Style Selector="^:disabled /template/ ContentPresenter#PART_ContentPresenter">
+      <Setter Property="Opacity" Value="0" />
+    </Style>
+  </ControlTheme>
+
+  <!-- The implicit style of AutoSuggestBox, with the setters and the template of
+       DefaultAutoSuggestBoxStyle. -->
+  <ControlTheme x:Key="{x:Type AutoSuggestBox}" TargetType="AutoSuggestBox">
+    <Setter Property="VerticalAlignment" Value="Stretch" />
+    <Setter Property="VerticalContentAlignment" Value="Stretch" />
+    <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+    <Setter Property="IsTabStop" Value="False" />
+    <Setter Property="Foreground" Value="{DynamicResource TextControlForeground}" />
+    <Setter Property="Background" Value="{DynamicResource TextControlBackground}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource TextControlBorderBrush}" />
+    <Setter Property="BorderThickness" Value="{DynamicResource TextControlBorderThemeThickness}" />
+    <Setter Property="FontFamily" Value="{DynamicResource ContentControlThemeFontFamily}" />
+    <Setter Property="FontSize" Value="{DynamicResource ControlContentThemeFontSize}" />
+    <Setter Property="FocusAdorner" Value="{x:Null}" />
+    <Setter Property="CornerRadius" Value="{DynamicResource ControlCornerRadius}" />
+    <Setter Property="Template">
+      <ControlTemplate>
+        <Grid x:Name="LayoutRoot" RowDefinitions="Auto,*,Auto">
+          <ContentPresenter x:Name="PART_HeaderPresenter"
+                            Grid.Row="0"
+                            Content="{TemplateBinding Header}"
+                            ContentTemplate="{TemplateBinding HeaderTemplate}"
+                            IsVisible="{TemplateBinding Header, Converter={x:Static ObjectConverters.IsNotNull}}"
+                            Foreground="{DynamicResource TextControlHeaderForeground}"
+                            Margin="{DynamicResource AutoSuggestBoxTopHeaderMargin}"
+                            FontWeight="Normal"
+                            TextWrapping="Wrap" />
+          <TextBox x:Name="TextBox"
+                   Grid.Row="1"
+                   Theme="{StaticResource AutoSuggestBoxTextBoxStyle}"
+                   PlaceholderText="{TemplateBinding PlaceholderText}"
+                   Width="{TemplateBinding Width}"
+                   Foreground="{TemplateBinding Foreground}"
+                   Background="{TemplateBinding Background}"
+                   BorderBrush="{TemplateBinding BorderBrush}"
+                   BorderThickness="{TemplateBinding BorderThickness}"
+                   FontSize="{TemplateBinding FontSize}"
+                   FontFamily="{TemplateBinding FontFamily}"
+                   FontWeight="{TemplateBinding FontWeight}"
+                   FontStretch="{TemplateBinding FontStretch}"
+                   VerticalContentAlignment="{TemplateBinding VerticalContentAlignment}"
+                   HorizontalContentAlignment="{TemplateBinding HorizontalContentAlignment}"
+                   ScrollViewer.BringIntoViewOnFocusChange="False"
+                   Margin="0"
+                   CornerRadius="{TemplateBinding CornerRadius}">
+            <TextBox.InnerRightContent>
+              <Button x:Name="QueryButton"
+                      Theme="{StaticResource AutoSuggestBoxQueryButtonStyle}"
+                      CornerRadius="{TemplateBinding CornerRadius}"
+                      BorderThickness="{TemplateBinding BorderThickness}"
+                      Margin="-2,0,4,0"
+                      Padding="{DynamicResource HelperButtonThemePadding}"
+                      Focusable="False"
+                      IsTabStop="False"
+                      IsVisible="False"
+                      FontSize="{TemplateBinding FontSize}"
+                      Width="32"
+                      Height="28"
+                      VerticalAlignment="Stretch" />
+            </TextBox.InnerRightContent>
+          </TextBox>
+          <Popup x:Name="SuggestionsPopup"
+                 WindowManagerAddShadowHint="False"
+                 IsLightDismissEnabled="True"
+                 PlacementTarget="{Binding #TextBox}"
+                 Placement="Bottom">
+            <Border x:Name="SuggestionsContainer"
+                    BoxShadow="{DynamicResource ThemeShadowFlyoutBoxShadow}"
+                    Margin="{StaticResource ThemeShadowFlyoutMargin}"
+                    Padding="{DynamicResource AutoSuggestListMargin}"
+                    BorderThickness="{DynamicResource AutoSuggestListBorderThemeThickness}"
+                    BorderBrush="{DynamicResource AutoSuggestBoxSuggestionsListBorderBrush}"
+                    Background="{DynamicResource AutoSuggestBoxSuggestionsListBackground}"
+                    CornerRadius="{DynamicResource OverlayCornerRadius}">
+              <ListBox x:Name="SuggestionsList"
+                       ItemTemplate="{TemplateBinding ItemTemplate}"
+                       ItemContainerTheme="{StaticResource DefaultListViewItemStyle}"
+                       MaxHeight="{DynamicResource AutoSuggestListMaxHeight}"
+                       Margin="{DynamicResource AutoSuggestListPadding}"
+                       Focusable="False"
+                       Background="Transparent"
+                       BorderThickness="0"
+                       ScrollViewer.IsScrollChainingEnabled="False" />
+            </Border>
+          </Popup>
+          <ContentPresenter x:Name="DescriptionPresenter"
+                            Grid.Row="2"
+                            Content="{TemplateBinding Description}"
+                            IsVisible="{TemplateBinding Description, Converter={x:Static ObjectConverters.IsNotNull}}"
+                            Foreground="{DynamicResource SystemControlDescriptionTextForegroundBrush}" />
+        </Grid>
+      </ControlTemplate>
+    </Setter>
+
+    <!-- The glyph of a SymbolIcon query icon at AutoSuggestBoxIconFontSize. -->
+    <Style Selector="^ /template/ Button#QueryButton SymbolIcon /template/ TextBlock#PART_Text">
+      <Setter Property="FontSize" Value="{DynamicResource AutoSuggestBoxIconFontSize}" />
+    </Style>
+  </ControlTheme>
+</ResourceDictionary>

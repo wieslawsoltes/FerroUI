@@ -82,16 +82,6 @@
       "reason": "RichEditBox: no FerroUI control (no rich text editing)."
     },
     {
-      "document": "controls/dev/RatingControl/RatingControl.xaml",
-      "key": "*",
-      "reason": "RatingControl: no FerroUI control."
-    },
-    {
-      "document": "controls/dev/RatingControl/RatingControl_themeresources.xaml",
-      "key": "*",
-      "reason": "RatingControl: no FerroUI control."
-    },
-    {
       "document": "controls/dev/PersonPicture/PersonPicture.xaml",
       "key": "*",
       "reason": "PersonPicture: no FerroUI control."
@@ -207,19 +197,9 @@
       "reason": "TextCommandBarFlyout (the default context and selection flyouts of WinUI's text controls): no FerroUI control; the text boxes of the port get a menu flyout of the same commands, built with the MenuFlyout batch."
     },
     {
-      "document": "controls/dev/RadioButtons/RadioButtons.xaml",
-      "key": "*",
-      "reason": "RadioButtons (the group control): no FerroUI control; FerroUI groups radio buttons by GroupName."
-    },
-    {
-      "document": "controls/dev/RadioButtons/RadioButtons_themeresources.xaml",
-      "key": "*",
-      "reason": "RadioButtons (the group control): no FerroUI control; FerroUI groups radio buttons by GroupName."
-    },
-    {
       "document": "dxaml/xcp/dxaml/themes/generic.xaml",
       "key": "RadioButtonsItemStyle",
-      "reason": "RadioButtons (the group control): no FerroUI control."
+      "reason": "A ListViewItem style of the RadioButtons of WinUI 2, which hosted its items in a ListView: no WinUI 3 template uses it; WinUI 3's RadioButtons, and FerroUI's, show their items as RadioButtons."
     },
     {
       "document": "controls/dev/ImageIcon/ImageIcon.xaml",
