@@ -112,8 +112,9 @@ fn on_composition<T: ferroui_base::ObjectType + ferroui_base::Upcast<Visual>>(
     build: impl Fn(&Rc<Compositor>) + 'static,
 ) {
     let build = Rc::new(build);
-    let weak = element.clone().upcast::<Visual>().downgrade();
-    let _ = element.attached_to_visual_tree(move |_| {
+    let visual = element.clone().upcast::<Visual>();
+    let weak = visual.downgrade();
+    let _ = visual.attached_to_visual_tree(move |_| {
         let (weak, build) = (weak.clone(), build.clone());
         let _ = ferroui_base::threading::Dispatcher::ui_thread().invoke_async_local_with_priority(
             move || {
@@ -289,10 +290,10 @@ fn alpha_mask_demo() -> Demo {
     headline.set_height(80.0);
     text_canvas.children().add(headline.clone());
     {
-        let (headline, host) = (headline.clone(), text_shadow_host.clone());
+        let (block, host) = (headline.clone(), text_shadow_host.clone());
         on_composition(&headline, move |compositor| {
-            let Some(mask) = headline.get_alpha_mask() else { return };
-            let bounds = headline.bounds();
+            let Some(mask) = block.get_alpha_mask() else { return };
+            let bounds = block.bounds();
             masked_shadow(
                 compositor,
                 &host,
@@ -317,9 +318,9 @@ fn alpha_mask_demo() -> Demo {
     Canvas::set_top(&image, 40.0);
     image_canvas.children().add(image.clone());
     {
-        let (image, host) = (image.clone(), image_shadow_host.clone());
+        let (picture, host) = (image.clone(), image_shadow_host.clone());
         on_composition(&image, move |compositor| {
-            let Some(mask) = image.get_alpha_mask() else { return };
+            let Some(mask) = picture.get_alpha_mask() else { return };
             masked_shadow(
                 compositor,
                 &host,
