@@ -77,6 +77,9 @@ A separate namespace for the controls (`ferroui_controls::winui`, `FerroUI.Contr
 |---|---|---|
 | `FontIcon` | WinUI's FontIcon: its text part is in the WinUI theme only | W4 |
 | `SymbolIcon` | WinUI's SymbolIcon: its text part is in the WinUI theme only | W4 |
+| `InfoBar` | WinUI's InfoBar: its template is converted from InfoBar.xaml into the WinUI theme | W5 |
+| `InfoBadge` | WinUI's InfoBadge: its template is converted from InfoBadge_themeresources.xaml into the WinUI theme | W5 |
+| `ProgressRing` | WinUI's ProgressRing: its template (arcs for the Lottie player) is in the WinUI theme only | W5 |
 <!-- winui-only:end -->
 - The tables of `winui-theme.md` that say "no FerroUI control" for these controls (NavigationView and its items, RadioButtons, ProgressRing, RatingControl, InfoBadge; DRP-1, DRP-2, DRP-11, DRP-13, NVP-1 and G-23 of the theme's DEVIATIONS) are updated in the pull request that lands each control.
 
