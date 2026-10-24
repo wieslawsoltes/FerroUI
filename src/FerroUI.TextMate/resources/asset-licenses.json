@@ -1,0 +1,653 @@
+[
+  {
+    "repository": "AnsonYeung/vscode-pascal-language-basics",
+    "revision": "5faf4d487e08fb410f19b23562f9a3cd01f4d86b",
+    "declared_license": "MIT",
+    "packages": [
+      "pascal"
+    ],
+    "notice_file": "resources/licenses/AnsonYeung--vscode-pascal-language-basics--5faf4d487e08.md",
+    "notice_source": "https://raw.githubusercontent.com/AnsonYeung/vscode-pascal-language-basics/5faf4d487e08fb410f19b23562f9a3cd01f4d86b/LICENSE",
+    "notice_sha256": "9219cc9f941df5279fd8a594879f9b31cd100e5ffcc11c05cc4426a88001351d"
+  },
+  {
+    "repository": "Ikuyadeu/vscode-R",
+    "revision": "ff60e426f66503f3c9533c7a62a8fd3f9f6c53df",
+    "declared_license": "MIT",
+    "packages": [
+      "r"
+    ],
+    "notice_file": "resources/licenses/Ikuyadeu--vscode-R--ff60e426f665.md",
+    "notice_source": "https://raw.githubusercontent.com/Ikuyadeu/vscode-R/ff60e426f66503f3c9533c7a62a8fd3f9f6c53df/LICENSE",
+    "notice_sha256": "c1c4b270082501215b6e822f2a88365037e55bb5f1939d53b6105585b884d78f"
+  },
+  {
+    "repository": "James-Yu/LaTeX-Workshop",
+    "revision": "e4cd86f1731546c2cdde0cc93717ca3fec2da0ba",
+    "declared_license": "MIT",
+    "packages": [
+      "markdownmath"
+    ],
+    "notice_file": "resources/licenses/James-Yu--LaTeX-Workshop--e4cd86f17315.md",
+    "notice_source": "https://raw.githubusercontent.com/James-Yu/LaTeX-Workshop/e4cd86f1731546c2cdde0cc93717ca3fec2da0ba/LICENSE.txt",
+    "notice_sha256": "bdebc28d62b29a9c67936d359e7f397c50bb4c622483d01b6cad71cbbb0655ac"
+  },
+  {
+    "repository": "JuliaEditorSupport/atom-language-julia",
+    "revision": "7b7801f41ce4ac1303bd17e057dbe677e24f597f",
+    "declared_license": "MIT",
+    "packages": [
+      "julia"
+    ],
+    "notice_file": "resources/licenses/JuliaEditorSupport--atom-language-julia--7b7801f41ce4.md",
+    "notice_source": "https://raw.githubusercontent.com/JuliaEditorSupport/atom-language-julia/7b7801f41ce4ac1303bd17e057dbe677e24f597f/LICENSE.md",
+    "notice_sha256": "e7a490d196760ddf5b0252ac9f43913b49e82276a9a2392a87ac5aac336bee5a"
+  },
+  {
+    "repository": "MagicStack/MagicPython",
+    "revision": "c9b3409deb69acec31bbf7913830e93a046b30cc",
+    "declared_license": "MIT",
+    "packages": [
+      "python"
+    ],
+    "notice_file": "resources/licenses/MagicStack--MagicPython--c9b3409deb69.md",
+    "notice_source": "https://raw.githubusercontent.com/MagicStack/MagicPython/c9b3409deb69acec31bbf7913830e93a046b30cc/LICENSE",
+    "notice_sha256": "9185f3c77e9f6ef8859a6ba4c94128ac1329876be3e813aad32d7645e51ae409"
+  },
+  {
+    "repository": "Myriad-Dreamin/tinymist",
+    "revision": "c2aa453af444a98de34b9bc8533dd937bac87bc9",
+    "declared_license": "Apache-2.0",
+    "packages": [
+      "typst"
+    ],
+    "notice_file": "resources/licenses/Myriad-Dreamin--tinymist--c2aa453af444.md",
+    "notice_source": "https://raw.githubusercontent.com/Myriad-Dreamin/tinymist/c2aa453af444a98de34b9bc8533dd937bac87bc9/LICENSE",
+    "notice_sha256": "81225c13d802844dadfc70ac8d66c46d2cc7c98b94db884d009a59c3a6aeebfc"
+  },
+  {
+    "repository": "NVIDIA/cuda-cpp-grammar",
+    "revision": "81e88eaec5170aa8585736c63627c73e3589998c",
+    "declared_license": "MIT",
+    "packages": [
+      "cpp"
+    ],
+    "notice_file": "resources/licenses/NVIDIA--cuda-cpp-grammar--81e88eaec517.md",
+    "notice_source": "https://raw.githubusercontent.com/NVIDIA/cuda-cpp-grammar/81e88eaec5170aa8585736c63627c73e3589998c/LICENSE",
+    "notice_sha256": "18b6b96d68be81e40ac0fb1d9bb08b030d5d6645705fb12bca3c192e6d72d51a"
+  },
+  {
+    "repository": "PowerShell/EditorSyntax",
+    "revision": "742f0b5d4b60f5930c0b47fcc1f646860521296e",
+    "declared_license": "MIT",
+    "packages": [
+      "powershell"
+    ],
+    "notice_file": "resources/licenses/PowerShell--EditorSyntax--742f0b5d4b60.md",
+    "notice_source": "https://raw.githubusercontent.com/PowerShell/EditorSyntax/742f0b5d4b60f5930c0b47fcc1f646860521296e/LICENSE",
+    "notice_sha256": "1dd685a63af94df709490fbbc874cda8a6e98bdd957da4ae0bf7b85e363748a7"
+  },
+  {
+    "repository": "atom/language-clojure",
+    "revision": "45bdb881501d0b8f8b707ca1d3fcc8b4b99fca03",
+    "declared_license": "MIT",
+    "packages": [
+      "clojure"
+    ],
+    "notice_file": "resources/licenses/atom--language-clojure--45bdb881501d.md",
+    "notice_source": "https://raw.githubusercontent.com/atom/language-clojure/45bdb881501d0b8f8b707ca1d3fcc8b4b99fca03/LICENSE.md",
+    "notice_sha256": "a24b41776d792f6bbf323ff96f9e34b82a18ba9bb5e4a35780a7453f7f82ba60"
+  },
+  {
+    "repository": "atom/language-coffee-script",
+    "revision": "0f6db9143663e18b1ad00667820f46747dba495e",
+    "declared_license": "MIT",
+    "packages": [
+      "coffeescript"
+    ],
+    "notice_file": "resources/licenses/atom--language-coffee-script--0f6db9143663.md",
+    "notice_source": "https://raw.githubusercontent.com/atom/language-coffee-script/0f6db9143663e18b1ad00667820f46747dba495e/LICENSE.md",
+    "notice_sha256": "bde9ab2657d2018f87f2fa5033f7736e37c0d834d9effbdce183b519b1f936de"
+  },
+  {
+    "repository": "atom/language-css",
+    "revision": "4a6dc90f332bfa72c88192513435a64013d9aad4",
+    "declared_license": "GitHub License",
+    "packages": [
+      "css"
+    ],
+    "notice_file": "resources/licenses/atom--language-css--4a6dc90f332b.md",
+    "notice_source": "https://raw.githubusercontent.com/atom/language-css/4a6dc90f332bfa72c88192513435a64013d9aad4/LICENSE.md",
+    "notice_sha256": "43657f6f5f30b2df702e97d58dac539aa99af06e2700d07cf44133969520277d"
+  },
+  {
+    "repository": "atom/language-java",
+    "revision": "29f977dc42a7e2568b39bb6fb34c4ef108eb59b3",
+    "declared_license": "MIT",
+    "packages": [
+      "java"
+    ],
+    "notice_file": "resources/licenses/atom--language-java--29f977dc42a7.md",
+    "notice_source": "https://raw.githubusercontent.com/atom/language-java/29f977dc42a7e2568b39bb6fb34c4ef108eb59b3/LICENSE.md",
+    "notice_sha256": "8b23352754eb15bd7a51f43a6cb28198a1ef15c148104af5382e53e94886e58a"
+  },
+  {
+    "repository": "atom/language-less",
+    "revision": "87d4d59e8de6796b506b81a16e1dc1fafc99d30f",
+    "declared_license": "MIT",
+    "packages": [
+      "less"
+    ],
+    "notice_file": "resources/licenses/atom--language-less--87d4d59e8de6.md",
+    "notice_source": "https://raw.githubusercontent.com/atom/language-less/87d4d59e8de6796b506b81a16e1dc1fafc99d30f/LICENSE.md",
+    "notice_sha256": "c64365acbafa16989c964a8511619474a35f4dbb44580417803ce9de7fa19ef7"
+  },
+  {
+    "repository": "atom/language-php",
+    "revision": "4cdf06a944a3b3c8884a6085c6adc6b246911646",
+    "declared_license": "MIT",
+    "packages": [
+      "php"
+    ],
+    "notice_file": "resources/licenses/atom--language-php--4cdf06a944a3.md",
+    "notice_source": "https://raw.githubusercontent.com/atom/language-php/4cdf06a944a3b3c8884a6085c6adc6b246911646/LICENSE.md",
+    "notice_sha256": "13e663f183b3986d994c0f24f49d5b5d49c409af9bcbdf1455fb19c2e12969e7"
+  },
+  {
+    "repository": "atom/language-sass",
+    "revision": "f52ab12f7f9346cc2568129d8c4419bd3d506b47",
+    "declared_license": "MIT",
+    "packages": [
+      "scss"
+    ],
+    "notice_file": "resources/licenses/atom--language-sass--f52ab12f7f93.md",
+    "notice_source": "https://raw.githubusercontent.com/atom/language-sass/f52ab12f7f9346cc2568129d8c4419bd3d506b47/LICENSE.md",
+    "notice_sha256": "f83513b909f259e87e72bebd177af4882218088bda696ccbb9a1a8a443eb28c0"
+  },
+  {
+    "repository": "atom/language-shellscript",
+    "revision": "4f8d7bb5cc4d1643674551683df10fe552dd5a6f",
+    "declared_license": "MIT",
+    "packages": [
+      "shellscript"
+    ],
+    "notice_file": "resources/licenses/atom--language-shellscript--4f8d7bb5cc4d.md",
+    "notice_source": "https://raw.githubusercontent.com/atom/language-shellscript/4f8d7bb5cc4d1643674551683df10fe552dd5a6f/LICENSE.md",
+    "notice_sha256": "98405dbe1b96faa245b9199dab8d1056b4d1ec4976ca5041fbdca95a86bceedc"
+  },
+  {
+    "repository": "atom/language-xml",
+    "revision": "7bc75dfe779ad5b35d9bf4013d9181864358cb49",
+    "declared_license": "MIT",
+    "packages": [
+      "xml"
+    ],
+    "notice_file": "resources/licenses/atom--language-xml--7bc75dfe779a.md",
+    "notice_source": "https://raw.githubusercontent.com/atom/language-xml/7bc75dfe779ad5b35d9bf4013d9181864358cb49/LICENSE.md",
+    "notice_sha256": "2163297c9906af4c85a986964dab265420db519a53c088cbed9a6820fc7d73c1"
+  },
+  {
+    "repository": "daaain/Handlebars",
+    "revision": "85a153a6f759df4e8da7533e1b3651f007867c51",
+    "declared_license": "MIT",
+    "packages": [
+      "handlebars"
+    ],
+    "notice_file": "resources/licenses/daaain--Handlebars--85a153a6f759.md",
+    "notice_source": "https://raw.githubusercontent.com/daaain/Handlebars/85a153a6f759df4e8da7533e1b3651f007867c51/LICENSE",
+    "notice_sha256": "8f71659370c5268d9a1dc962a46232540e8fca63462586d8efaa95aab492a208"
+  },
+  {
+    "repository": "dart-lang/dart-syntax-highlight",
+    "revision": "9d4857e114b7000d94232d83187ad142961c678a",
+    "declared_license": "BSD",
+    "packages": [
+      "dart"
+    ],
+    "notice_file": "resources/licenses/dart-lang--dart-syntax-highlight--9d4857e114b7.md",
+    "notice_source": "https://raw.githubusercontent.com/dart-lang/dart-syntax-highlight/9d4857e114b7000d94232d83187ad142961c678a/LICENSE",
+    "notice_sha256": "d711832aeb82a7f541f9f0a435ca477c1d6debaf35f697f856044c955fdc7d42"
+  },
+  {
+    "repository": "davidrios/pug-tmbundle",
+    "revision": "e67e895f6fb64932aa122e471000fa55d826bff6",
+    "declared_license": "MIT",
+    "packages": [
+      "pug"
+    ],
+    "notice_file": "resources/licenses/davidrios--pug-tmbundle--e67e895f6fb6.md",
+    "notice_source": "https://raw.githubusercontent.com/davidrios/pug-tmbundle/e67e895f6fb64932aa122e471000fa55d826bff6/LICENSE",
+    "notice_sha256": "a4d26cc32011b36a52331b10dd6c90e9c522d528c7a290ce7e760ce4bdd8d199"
+  },
+  {
+    "repository": "demyte/language-cshtml",
+    "revision": "e6e54d5a86a28cc1e44609a32aaa10a244cd3f81",
+    "declared_license": "MIT",
+    "packages": [
+      "razor"
+    ],
+    "notice_file": "resources/licenses/demyte--language-cshtml--vscode-1.30.0.md",
+    "notice_source": "https://raw.githubusercontent.com/microsoft/vscode/1.30.0/ThirdPartyNotices.txt",
+    "notice_sha256": "8ccb8afb17bb006d62e8585657713f59330723f4d52321ee181f0668b1951edd"
+  },
+  {
+    "repository": "dotnet/csharp-tmLanguage",
+    "revision": "16612717ccd557383c0c821d7b6ae6662492ffde",
+    "declared_license": "MIT",
+    "packages": [
+      "csharp"
+    ],
+    "notice_file": "resources/licenses/dotnet--csharp-tmLanguage--16612717ccd5.md",
+    "notice_source": "https://raw.githubusercontent.com/dotnet/csharp-tmLanguage/16612717ccd557383c0c821d7b6ae6662492ffde/LICENSE",
+    "notice_sha256": "22844d95411661d8827cdbb724b55c40e779327be9892beb1c684fd393cd290e"
+  },
+  {
+    "repository": "dustypomerleau/rust-syntax",
+    "revision": "20462d50ff97338f42c6b64c3f421c634fd60734",
+    "declared_license": "MIT",
+    "packages": [
+      "rust"
+    ],
+    "notice_file": "resources/licenses/dustypomerleau--rust-syntax--20462d50ff97.md",
+    "notice_source": "https://raw.githubusercontent.com/dustypomerleau/rust-syntax/20462d50ff97338f42c6b64c3f421c634fd60734/LICENSE.txt",
+    "notice_sha256": "a7e8bd973440be8627284a007a3b76c269c483f6fa059aa9a86d19303357a952"
+  },
+  {
+    "repository": "emilast/vscode-logfile-highlighter",
+    "revision": "8acba9307254d1887ac770057767698c82d926c6",
+    "declared_license": "MIT",
+    "packages": [
+      "log"
+    ],
+    "notice_file": "resources/licenses/emilast--vscode-logfile-highlighter--8acba9307254.md",
+    "notice_source": "https://raw.githubusercontent.com/emilast/vscode-logfile-highlighter/8acba9307254d1887ac770057767698c82d926c6/LICENSE",
+    "notice_sha256": "3181bcf29a38b03a83e34addd9ec4f634c6af95f73b9c92f8f0384b3abad1e76"
+  },
+  {
+    "repository": "fadeevab/make.tmbundle",
+    "revision": "ef0c485afc66445a6cf184dc34f7744306304f1f",
+    "declared_license": "TextMate Bundle License",
+    "packages": [
+      "make"
+    ],
+    "notice_file": "resources/licenses/fadeevab--make.tmbundle--ef0c485afc66.md",
+    "notice_source": "https://raw.githubusercontent.com/fadeevab/make.tmbundle/ef0c485afc66445a6cf184dc34f7744306304f1f/LICENSE.md",
+    "notice_sha256": "ac50590580e1aaa4801cce05c04b3effa88d1f3affce12623365ba1f1f19975d"
+  },
+  {
+    "repository": "freebroccolo/atom-language-swift",
+    "revision": "d8f4ed1f79cbb4d5d215e7a68fa8cc6b618e16e0",
+    "declared_license": "MIT",
+    "packages": [
+      "swift"
+    ],
+    "notice_file": "resources/grammars/swift/LICENSE.md",
+    "notice_source": "TextMateSharp bundled Swift LICENSE.md at e0db45be30278c0f3f80302c31f498c8f8f1c4f2"
+  },
+  {
+    "repository": "haxo-games/Universal-Assembly-Syntax-Highlighting",
+    "revision": null,
+    "declared_license": "MIT",
+    "packages": [
+      "x86asm"
+    ],
+    "notice_file": "resources/licenses/haxo-games--Universal-Assembly-Syntax-Highlighting--main.md",
+    "notice_source": "https://raw.githubusercontent.com/haxo-games/Universal-Assembly-Syntax-Highlighting/main/LICENSE",
+    "notice_sha256": "df081c96e9f326a2f4ee5aa51f6f0cc5a32ef66f93deb4bbca8c15455221e08d"
+  },
+  {
+    "repository": "ionide/ionide-fsgrammar",
+    "revision": "e177bd7f9d3402f70d2f1fb42c74057ed1ccf6fa",
+    "declared_license": "MIT",
+    "packages": [
+      "fsharp"
+    ],
+    "notice_file": "resources/licenses/ionide--ionide-fsgrammar--e177bd7f9d34.md",
+    "notice_source": "https://raw.githubusercontent.com/ionide/ionide-fsgrammar/e177bd7f9d3402f70d2f1fb42c74057ed1ccf6fa/LICENSE.md",
+    "notice_sha256": "c119eb558de0b2a3f554945d208ff894417ac5e009ca236ffdb246981ffe3739"
+  },
+  {
+    "repository": "jeff-hykin/better-c-syntax",
+    "revision": "34712a6106a4ffb0a04d2fa836fd28ff6c5849a4",
+    "declared_license": "MIT",
+    "packages": [
+      "cpp"
+    ],
+    "notice_file": "resources/licenses/jeff-hykin--better-c-syntax--34712a6106a4.md",
+    "notice_source": "https://raw.githubusercontent.com/jeff-hykin/better-c-syntax/34712a6106a4ffb0a04d2fa836fd28ff6c5849a4/LICENSE",
+    "notice_sha256": "b5d4ec869a5b6f92119765a87f793669d730f480627e70a7f5dc9f74265f504a"
+  },
+  {
+    "repository": "jeff-hykin/better-cpp-syntax",
+    "revision": "924295fc44bde1a00fab60da3a2caca4509adb25",
+    "declared_license": "MIT",
+    "packages": [
+      "cpp"
+    ],
+    "notice_file": "resources/licenses/jeff-hykin--better-cpp-syntax--924295fc44bd.md",
+    "notice_source": "https://raw.githubusercontent.com/jeff-hykin/better-cpp-syntax/924295fc44bde1a00fab60da3a2caca4509adb25/LICENSE",
+    "notice_sha256": "b5d4ec869a5b6f92119765a87f793669d730f480627e70a7f5dc9f74265f504a"
+  },
+  {
+    "repository": "jeff-hykin/better-go-syntax",
+    "revision": "54ff898316f8647d77ffcf83880a9556445326f1",
+    "declared_license": "MIT",
+    "packages": [
+      "go"
+    ],
+    "notice_file": "resources/licenses/jeff-hykin--better-go-syntax--54ff898316f8.md",
+    "notice_source": "https://raw.githubusercontent.com/jeff-hykin/better-go-syntax/54ff898316f8647d77ffcf83880a9556445326f1/LICENSE",
+    "notice_sha256": "b5d4ec869a5b6f92119765a87f793669d730f480627e70a7f5dc9f74265f504a"
+  },
+  {
+    "repository": "jeff-hykin/cpp-textmate-grammar",
+    "revision": "bc7dedd28eebe52b374744d3fb34d77ff441569e",
+    "declared_license": "MIT",
+    "packages": [
+      "objectivec"
+    ],
+    "notice_file": "resources/licenses/jeff-hykin--cpp-textmate-grammar--bc7dedd28eeb.md",
+    "notice_source": "https://raw.githubusercontent.com/jeff-hykin/cpp-textmate-grammar/bc7dedd28eebe52b374744d3fb34d77ff441569e/LICENSE",
+    "notice_sha256": "b5d4ec869a5b6f92119765a87f793669d730f480627e70a7f5dc9f74265f504a"
+  },
+  {
+    "repository": "jlelong/vscode-latex-basics",
+    "revision": "7b08daed22963695616ef432c9d027427da5f450",
+    "declared_license": "MIT",
+    "packages": [
+      "latex"
+    ],
+    "notice_file": "resources/licenses/jlelong--vscode-latex-basics--7b08daed2296.md",
+    "notice_source": "https://raw.githubusercontent.com/jlelong/vscode-latex-basics/7b08daed22963695616ef432c9d027427da5f450/LICENSE.txt",
+    "notice_sha256": "62b9b932cf5effd097de675f6604f05dc1fa57553ad5e25381563c0cd9a922b4"
+  },
+  {
+    "repository": "mattneub/AsciiDoc-TextMate-2.tmbundle",
+    "revision": "df611ad3df9b71ebcc55351ee4e88e2dc0537957",
+    "declared_license": "MIT",
+    "packages": [
+      "asciidoc"
+    ],
+    "notice_file": "resources/licenses/mattneub--AsciiDoc-TextMate-2.tmbundle--manifest.md",
+    "notice_source": "resources/grammars/asciidoc/cgmanifest.json",
+    "notice_exact_revision": true
+  },
+  {
+    "repository": "microsoft/TypeScript-TmLanguage",
+    "revision": "3133e3d914db9a2bb8812119f9273727a305f16b",
+    "declared_license": "MIT",
+    "packages": [
+      "javascript"
+    ],
+    "notice_file": "resources/licenses/microsoft--TypeScript-TmLanguage--3133e3d914db.md",
+    "notice_source": "https://raw.githubusercontent.com/microsoft/TypeScript-TmLanguage/3133e3d914db9a2bb8812119f9273727a305f16b/LICENSE.txt",
+    "notice_sha256": "3389ba8955988c98891b041000e5cb916c7a3c1ac6f14b433a77755a39517e29"
+  },
+  {
+    "repository": "microsoft/TypeScript-TmLanguage",
+    "revision": "634a12f4fa2b2843c83353c0a395852c3a0c04c4",
+    "declared_license": "MIT",
+    "packages": [
+      "typescriptbasics"
+    ],
+    "notice_file": "resources/licenses/microsoft--TypeScript-TmLanguage--634a12f4fa2b.md",
+    "notice_source": "https://raw.githubusercontent.com/microsoft/TypeScript-TmLanguage/634a12f4fa2b2843c83353c0a395852c3a0c04c4/LICENSE.txt",
+    "notice_sha256": "3389ba8955988c98891b041000e5cb916c7a3c1ac6f14b433a77755a39517e29"
+  },
+  {
+    "repository": "microsoft/vscode",
+    "revision": "main",
+    "declared_license": "MIT",
+    "packages": [
+      "package metadata and themes"
+    ],
+    "notice_file": "resources/licenses/microsoft--vscode--main.md",
+    "notice_source": "https://raw.githubusercontent.com/microsoft/vscode/main/LICENSE.txt",
+    "notice_sha256": "9480271317925265e806a9a196aaa33410a962fa9d4d1e248a4a5187bc8c9df9"
+  },
+  {
+    "repository": "microsoft/vscode-JSON.tmLanguage",
+    "revision": "9bd83f1c252b375e957203f21793316203f61f70",
+    "declared_license": "MIT",
+    "packages": [
+      "json"
+    ],
+    "notice_file": "resources/licenses/microsoft--vscode-JSON.tmLanguage--9bd83f1c252b.md",
+    "notice_source": "https://raw.githubusercontent.com/microsoft/vscode-JSON.tmLanguage/9bd83f1c252b375e957203f21793316203f61f70/LICENSE",
+    "notice_sha256": "80036c1e0eaeb7c9d1f6bdbd0dcd10753c2e2dfff2c31e2fc346fc79b9e4ff6e"
+  },
+  {
+    "repository": "microsoft/vscode-markdown-tm-grammar",
+    "revision": "a612b96d62aa1ce305c4a55dc9d577316fab39da",
+    "declared_license": "MIT",
+    "packages": [
+      "markdownbasics"
+    ],
+    "notice_file": "resources/licenses/microsoft--vscode-markdown-tm-grammar--a612b96d62aa.md",
+    "notice_source": "https://raw.githubusercontent.com/microsoft/vscode-markdown-tm-grammar/a612b96d62aa1ce305c4a55dc9d577316fab39da/LICENSE.txt",
+    "notice_sha256": "604b7fc59e30d8c909bfac13f2f20bc43a0e0181244c8c1de62108505009f998"
+  },
+  {
+    "repository": "microsoft/vscode-mssql",
+    "revision": "b8b58864526c048002b7c3964bdac8aac3713bd9",
+    "declared_license": "MIT",
+    "packages": [
+      "sql"
+    ],
+    "notice_file": "resources/licenses/microsoft--vscode-mssql--b8b58864526c.md",
+    "notice_source": "https://raw.githubusercontent.com/microsoft/vscode-mssql/b8b58864526c048002b7c3964bdac8aac3713bd9/LICENSE.txt",
+    "notice_sha256": "1be5f0be404198aafad9074586623b8c879b6bb47077c320cdd5cd2c6c6cc200"
+  },
+  {
+    "repository": "mmims/language-batchfile",
+    "revision": "6154ae25a24e01ac9329e7bcf958e093cd8733a9",
+    "declared_license": "MIT",
+    "packages": [
+      "bat"
+    ],
+    "notice_file": "resources/licenses/mmims--language-batchfile--6154ae25a24e.md",
+    "notice_source": "https://raw.githubusercontent.com/mmims/language-batchfile/6154ae25a24e01ac9329e7bcf958e093cd8733a9/LICENSE.md",
+    "notice_sha256": "295aff5c4c9fcecbfb2961c5ddaf6e608bb2265d946afaec9bd600c3bacb7c5d"
+  },
+  {
+    "repository": "moby/moby",
+    "revision": "abd39744c6f3ed854500e423f5fabf952165161f",
+    "declared_license": "Apache2",
+    "packages": [
+      "docker"
+    ],
+    "notice_file": "resources/licenses/moby--moby--abd39744c6f3.md",
+    "notice_source": "https://raw.githubusercontent.com/moby/moby/abd39744c6f3ed854500e423f5fabf952165161f/LICENSE",
+    "notice_sha256": "2d81ea060825006fc8f3fe28aa5dc0ffeb80faf325b612c955229157b8c10dc0"
+  },
+  {
+    "repository": "owensd/vscode-swift",
+    "revision": "cec27af6662e3799120b208e64483efdfe5521f5",
+    "declared_license": "MIT",
+    "packages": [
+      "swift"
+    ],
+    "notice_file": "resources/licenses/owensd--vscode-swift--master.md",
+    "notice_source": "https://raw.githubusercontent.com/owensd/vscode-swift/master/README.md",
+    "notice_sha256": "d282e67eda1c3a5b175c8b3e97e8ce51a2b381b243201d5593e44a8889cb30c6",
+    "notice_exact_revision": false
+  },
+  {
+    "repository": "sumneko/lua.tmbundle",
+    "revision": "bc74f9230c3f07c0ecc1bc1727ad98d9e70aff5b",
+    "declared_license": "TextMate Bundle License",
+    "packages": [
+      "lua"
+    ],
+    "notice_file": "resources/licenses/sumneko--lua.tmbundle--master.md",
+    "notice_source": "https://raw.githubusercontent.com/sumneko/lua.tmbundle/master/LICENSE",
+    "notice_sha256": "275460eaa348705894cd36a95e1f788905611bc56440097c6cfefeb29c52ea7c",
+    "notice_exact_revision": false
+  },
+  {
+    "repository": "textmate/asp.vb.net.tmbundle",
+    "revision": "72d44550b3286d0382d7be0624140cf97857ff69",
+    "declared_license": "TextMate Bundle License",
+    "packages": [
+      "vb"
+    ],
+    "notice_file": "resources/licenses/textmate--asp.vb.net.tmbundle--72d44550b328.md",
+    "notice_source": "https://raw.githubusercontent.com/textmate/asp.vb.net.tmbundle/72d44550b3286d0382d7be0624140cf97857ff69/README.mdown",
+    "notice_sha256": "7ab0693a63bc1f61b54ba4fff7b04d17a6926899dfee40e3b6c9b9885e927dc7",
+    "notice_exact_revision": true
+  },
+  {
+    "repository": "textmate/c.tmbundle",
+    "revision": "60daf83b9d45329524f7847a75e9298b3aae5805",
+    "declared_license": "TextMate Bundle License",
+    "packages": [
+      "cpp"
+    ],
+    "notice_file": "resources/licenses/textmate--c.tmbundle--60daf83b9d45.md",
+    "notice_source": "https://raw.githubusercontent.com/textmate/c.tmbundle/60daf83b9d45329524f7847a75e9298b3aae5805/README.mdown",
+    "notice_sha256": "7ab0693a63bc1f61b54ba4fff7b04d17a6926899dfee40e3b6c9b9885e927dc7",
+    "notice_exact_revision": true
+  },
+  {
+    "repository": "textmate/diff.tmbundle",
+    "revision": "0593bb775eab1824af97ef2172fd38822abd97d7",
+    "declared_license": "TextMate Bundle License",
+    "packages": [
+      "diff",
+      "git"
+    ],
+    "notice_file": "resources/licenses/textmate--diff.tmbundle--0593bb775eab.md",
+    "notice_source": "https://raw.githubusercontent.com/textmate/diff.tmbundle/0593bb775eab1824af97ef2172fd38822abd97d7/README.mdown",
+    "notice_sha256": "7ab0693a63bc1f61b54ba4fff7b04d17a6926899dfee40e3b6c9b9885e927dc7",
+    "notice_exact_revision": true
+  },
+  {
+    "repository": "textmate/git.tmbundle",
+    "revision": "5870cf3f8abad3a6637bdf69250b5d2ded427dc4",
+    "declared_license": "MIT",
+    "packages": [
+      "git"
+    ],
+    "notice_file": "resources/licenses/textmate--git.tmbundle--manifest.md",
+    "notice_source": "resources/grammars/git/cgmanifest.json",
+    "notice_exact_revision": true
+  },
+  {
+    "repository": "textmate/groovy.tmbundle",
+    "revision": "85d8f7c97ae473ccb9473f6c8d27e4ec957f4be1",
+    "declared_license": "TextMate Bundle License",
+    "packages": [
+      "groovy"
+    ],
+    "notice_file": "resources/licenses/textmate--groovy.tmbundle--master.md",
+    "notice_source": "https://raw.githubusercontent.com/textmate/groovy.tmbundle/master/README.mdown",
+    "notice_sha256": "b4853208b2e79cceea4c7c5c3a3b70359452991daed3e2c841ef115b3fee730d",
+    "notice_exact_revision": false
+  },
+  {
+    "repository": "textmate/html.tmbundle",
+    "revision": "0c3d5ee54de3a993f747f54186b73a4d2d3c44a2",
+    "declared_license": "TextMate Bundle License",
+    "packages": [
+      "html"
+    ],
+    "notice_file": "resources/licenses/textmate--html.tmbundle--0c3d5ee54de3.md",
+    "notice_source": "https://raw.githubusercontent.com/textmate/html.tmbundle/0c3d5ee54de3a993f747f54186b73a4d2d3c44a2/README.mdown",
+    "notice_sha256": "7ab0693a63bc1f61b54ba4fff7b04d17a6926899dfee40e3b6c9b9885e927dc7",
+    "notice_exact_revision": true
+  },
+  {
+    "repository": "textmate/ini.tmbundle",
+    "revision": "2af0cbb0704940f967152616f2f1ff0aae6287a6",
+    "declared_license": "TextMate Bundle License",
+    "packages": [
+      "ini"
+    ],
+    "notice_file": "resources/licenses/textmate--ini.tmbundle--2af0cbb07049.md",
+    "notice_source": "https://raw.githubusercontent.com/textmate/ini.tmbundle/2af0cbb0704940f967152616f2f1ff0aae6287a6/README.mdown",
+    "notice_sha256": "b4853208b2e79cceea4c7c5c3a3b70359452991daed3e2c841ef115b3fee730d",
+    "notice_exact_revision": true
+  },
+  {
+    "repository": "textmate/javascript.tmbundle",
+    "revision": "fccf0af0c95430a42e1bf98f0c7a4723a53283e7",
+    "declared_license": "TextMate Bundle License",
+    "packages": [
+      "javascript"
+    ],
+    "notice_file": "resources/licenses/textmate--javascript.tmbundle--fccf0af0c954.md",
+    "notice_source": "https://raw.githubusercontent.com/textmate/javascript.tmbundle/fccf0af0c95430a42e1bf98f0c7a4723a53283e7/README.mdown",
+    "notice_sha256": "7ab0693a63bc1f61b54ba4fff7b04d17a6926899dfee40e3b6c9b9885e927dc7",
+    "notice_exact_revision": true
+  },
+  {
+    "repository": "textmate/markdown.tmbundle",
+    "revision": "11cf764606cb2cde54badb5d0e5a0758a8871c4b",
+    "declared_license": "TextMate Bundle License",
+    "packages": [
+      "markdownbasics"
+    ],
+    "notice_file": "resources/licenses/textmate--markdown.tmbundle--master.md",
+    "notice_source": "https://raw.githubusercontent.com/textmate/markdown.tmbundle/master/README.mdown",
+    "notice_sha256": "7ab0693a63bc1f61b54ba4fff7b04d17a6926899dfee40e3b6c9b9885e927dc7",
+    "notice_exact_revision": false
+  },
+  {
+    "repository": "textmate/perl.tmbundle",
+    "revision": "a85927a902d6e5d7805f56a653f324d34dfad53a",
+    "declared_license": "TextMate Bundle License",
+    "packages": [
+      "perl"
+    ],
+    "notice_file": "resources/licenses/textmate--perl.tmbundle--a85927a902d6.md",
+    "notice_source": "https://raw.githubusercontent.com/textmate/perl.tmbundle/a85927a902d6e5d7805f56a653f324d34dfad53a/README.mdown",
+    "notice_sha256": "7ab0693a63bc1f61b54ba4fff7b04d17a6926899dfee40e3b6c9b9885e927dc7",
+    "notice_exact_revision": true
+  },
+  {
+    "repository": "textmate/ruby.tmbundle",
+    "revision": "efcb8941c701343f1b2e9fb105c678152fea6892",
+    "declared_license": "TextMate Bundle License",
+    "packages": [
+      "ruby"
+    ],
+    "notice_file": "resources/licenses/textmate--ruby.tmbundle--efcb8941c701.md",
+    "notice_source": "https://raw.githubusercontent.com/textmate/ruby.tmbundle/efcb8941c701343f1b2e9fb105c678152fea6892/README.mdown",
+    "notice_sha256": "7ab0693a63bc1f61b54ba4fff7b04d17a6926899dfee40e3b6c9b9885e927dc7",
+    "notice_exact_revision": true
+  },
+  {
+    "repository": "textmate/yaml.tmbundle",
+    "revision": "e54ceae3b719506dba7e481a77cea4a8b576ae46",
+    "declared_license": "TextMate Bundle License",
+    "packages": [
+      "yaml"
+    ],
+    "notice_file": "resources/licenses/textmate--yaml.tmbundle--e54ceae3b719.md",
+    "notice_source": "https://raw.githubusercontent.com/textmate/yaml.tmbundle/e54ceae3b719506dba7e481a77cea4a8b576ae46/README.mdown",
+    "notice_sha256": "7ab0693a63bc1f61b54ba4fff7b04d17a6926899dfee40e3b6c9b9885e927dc7",
+    "notice_exact_revision": true
+  },
+  {
+    "repository": "tgjones/shaders-tmLanguage",
+    "revision": "87c0dca3a39170dbd7ee7e277db4f915fb2de14a",
+    "declared_license": "MIT",
+    "packages": [
+      "hlsl"
+    ],
+    "notice_file": "resources/licenses/tgjones--shaders-tmLanguage--87c0dca3a391.md",
+    "notice_source": "https://raw.githubusercontent.com/tgjones/shaders-tmLanguage/87c0dca3a39170dbd7ee7e277db4f915fb2de14a/LICENSE",
+    "notice_sha256": "e7ad4739e1b379175728b1fc95f7d63fda29906710771d1704ed0eca87933311"
+  },
+  {
+    "repository": "tgjones/shaders-tmLanguage",
+    "revision": "c72c8b39380ba5a86c58ceed053b5d965ebf38b3",
+    "declared_license": "MIT",
+    "packages": [
+      "shaderlab"
+    ],
+    "notice_file": "resources/licenses/tgjones--shaders-tmLanguage--c72c8b39380b.md",
+    "notice_source": "https://raw.githubusercontent.com/tgjones/shaders-tmLanguage/c72c8b39380ba5a86c58ceed053b5d965ebf38b3/LICENSE",
+    "notice_sha256": "e7ad4739e1b379175728b1fc95f7d63fda29906710771d1704ed0eca87933311"
+  }
+]

@@ -1,0 +1,24 @@
+[package]
+name = "ferroui-edit-core"
+description = "FerroEdit's UTF-16 document, persistent snapshots, undo, editing, search, folding, completion and snippets"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+homepage.workspace = true
+readme.workspace = true
+keywords.workspace = true
+categories.workspace = true
+
+[lib]
+path = "lib.rs"
+
+[dependencies]
+regex = "1.13"
+unicode-segmentation = "1.13"
+roxmltree.workspace = true
+fancy-regex = "=0.19.2"
+
+[package.metadata.release]
+group = "controls"

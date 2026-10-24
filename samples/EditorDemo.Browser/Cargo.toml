@@ -1,0 +1,28 @@
+[package]
+name = "editor-demo-browser"
+description = "Native FerroUI browser host for the AvaloniaEdit and TextMate editor port"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+publish = false
+autotests = false
+
+[[bin]]
+name = "editor-demo-browser"
+path = "program.rs"
+
+[dependencies]
+editor-demo = { path = "../EditorDemo", default-features = false }
+ferroui-base.workspace = true
+ferroui-controls.workspace = true
+ferroui-browser.workspace = true
+ferroui-edit.workspace = true
+ferroui-fonts-inter.workspace = true
+ferroui-themes-fluent.workspace = true
+wasm-bindgen.workspace = true
+serde_json = "1"
+
+[target.'cfg(target_arch = "wasm32")'.dependencies]
+wasm-bindgen-futures = "=0.4.79"

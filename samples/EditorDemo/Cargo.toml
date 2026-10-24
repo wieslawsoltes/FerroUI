@@ -1,0 +1,39 @@
+[package]
+name = "editor-demo"
+description = "FerroUI editor sample with TextMate grammars, search, completion, linked snippets and folding"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+publish = false
+autotests = false
+
+[lib]
+path = "lib.rs"
+
+[[bin]]
+name = "editor-demo"
+path = "main.rs"
+test = false
+
+[features]
+default = ["desktop"]
+desktop = ["dep:ferroui-desktop", "dep:ferroui-themes-fluent"]
+headless = ["dep:ferroui-headless", "dep:ferroui-themes-fluent"]
+
+[dependencies]
+ferroui-base.workspace = true
+ferroui-controls.workspace = true
+ferroui-desktop = { workspace = true, optional = true }
+ferroui-headless = { workspace = true, optional = true }
+ferroui-edit.workspace = true
+ferroui-markup-xaml.workspace = true
+ferroui-markup-xaml-loader = { workspace = true, features = ["runtime"] }
+ferroui-themes-fluent = { workspace = true, optional = true }
+sample-support = { path = "../SampleSupport" }
+
+[dev-dependencies]
+ferroui-base = { workspace = true, features = ["testing"] }
+ferroui-controls = { workspace = true, features = ["testing"] }
+ferroui-markup-xaml-loader = { workspace = true, features = ["runtime", "testing"] }

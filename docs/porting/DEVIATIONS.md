@@ -1421,6 +1421,22 @@ The port of StaticViewLocator (<https://github.com/wieslawsoltes/StaticViewLocat
 | The tests compile each source text into an assembly of its own; a test of the generator also compiles its output. | The tests of the generator check the text of the output; the runtime tests are modules of one crate whose build script generates their locators, so every locator sees the view models of every module. Tests of C# features Rust lacks (`ref` overloads, `dynamic`, sealed classes, run-time type tests, base-class contracts) check the Rust counterpart under the same names. | Test | A Rust test cannot compile a crate; the generated source of each shape is compiled and run by `tests/FerroUI.StaticViewLocator.Tests`. | #310 |
 | The demos write their views in markup (AXAML) with compiled bindings, and `MainWindow` is a window class. | The sample writes its views with the builders of `ferroui-view` in `UserControl` classes, from the view model of their data context; both demos are tabs of one window. | Behaviour | The sample shows the locators, which are independent of how a view is written. | #310 |
 
+## Text editor and TextMate port
+
+The ongoing editor port records its pinned sources and complete file/type inventory
+in [avaloniaedit-textmate.md](avaloniaedit-textmate.md) and
+[editor-source-map.md](editor-source-map.md). The source map distinguishes partial
+Rust adaptations from unimplemented contracts; it is not a parity percentage.
+The document, services and engine reports linked there explain the UTF-16 offset
+contract, persistent storage, value versus live line handles, callback timing,
+consolidated viewport types, browser scanner boundary and remaining API gaps.
+
+The unchanged XML language package manifest under
+`src/FerroUI.TextMate/resources/grammars/xml/package.json` retains its upstream
+`.axaml` file-extension contribution. CI exempts that exact data file from the
+source naming check, while the editor asset checker verifies its upstream hash.
+Rust sources and public control names follow the normal naming rules.
+
 ## Corrected divergences
 
 Places where the port did work that upstream does not do, or did it differently, and a later change made it match upstream again. They are kept here so a regression can be recognised. Extra allocations and copies on hot paths belong here too: `PORTING-GUIDE.md` rules out allocations on hot paths that upstream avoids.

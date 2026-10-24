@@ -1,0 +1,12 @@
+{
+  "name": "ferroui-textmate-upstream-corpus",
+  "private": true,
+  "version": "1.0.0",
+  "scripts": {
+    "generate": "node generate.cjs"
+  },
+  "dependencies": {
+    "vscode-textmate": "9.3.2",
+    "vscode-oniguruma": "2.0.1"
+  }
+}

@@ -1,0 +1,129 @@
+name: Editor port conformance
+
+on:
+  pull_request:
+    paths:
+      - 'src/FerroUI.Edit*/**'
+      - 'src/FerroUI.TextMate/**'
+      - 'src/FerroUI.Base/**'
+      - 'samples/EditorDemo/**'
+      - 'samples/EditorDemo.Browser/**'
+      - 'scripts/edit-port/**'
+      - 'scripts/browser/tests/editor_demo.test.mjs'
+      - 'docs/porting/data/editor-*.json'
+      - 'Cargo.toml'
+      - 'Cargo.lock'
+      - '.github/workflows/editor.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: editor-${{ github.ref }}
+  # Let the linked browser build finish while frequent port checkpoints arrive.
+  # GitHub keeps the latest pending run for this group; older pending runs coalesce.
+  cancel-in-progress: false
+
+env:
+  CARGO_BUILD_JOBS: 1
+  CARGO_INCREMENTAL: 0
+  CARGO_PROFILE_DEV_DEBUG: 0
+  CARGO_PROFILE_TEST_DEBUG: 0
+
+jobs:
+  native:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: dtolnay/rust-toolchain@89b12181fb390509a0842a86cc55eeb8eb928c1d # stable
+      - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2
+      - name: Source inventory and unchanged assets
+        run: |
+          python3 scripts/edit-port/editor_port.py --check
+          python3 scripts/edit-port/test_editor_port.py
+          python3 scripts/edit-port/check_assets.py
+      - name: Document, native grammar, control and XAML demo tests
+        run: >-
+          cargo test --locked --lib --no-default-features
+          -p ferroui-edit-core -p ferroui-textmate -p ferroui-edit -p editor-demo
+          --features ferroui-textmate/native-onig,ferroui-textmate/bundled-grammars
+      - name: Explicit portable regex fallback
+        run: cargo test --locked -p ferroui-textmate --lib --features portable-regex
+
+  wasm:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: dtolnay/rust-toolchain@89b12181fb390509a0842a86cc55eeb8eb928c1d # stable
+        with:
+          targets: wasm32-unknown-unknown
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: '22'
+      - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2
+        with:
+          key: editor-wasm
+      - name: Check editor control portability
+        run: cargo check --locked -p ferroui-edit-core -p ferroui-edit --target wasm32-unknown-unknown
+      - name: Verify scanner assets with the production browser site composer
+        run: node src/FerroUI.TextMate/tests/oracle/check-browser-packaging.mjs
+      - name: Build the real Rust/Wasm conformance harness
+        run: cargo build --locked -p ferroui-textmate --example textmate_browser_conformance --target wasm32-unknown-unknown
+      - name: Install matching bindings generator
+        run: cargo install wasm-bindgen-cli --version 0.2.129 --locked
+      - name: Compare every token through the browser Oniguruma engine
+        run: |
+          wasm-bindgen --target experimental-nodejs-module --out-dir /tmp/editor-wasm \
+            target/wasm32-unknown-unknown/debug/examples/textmate_browser_conformance.wasm
+          node src/FerroUI.TextMate/tests/oracle/check-wasm.mjs \
+            /tmp/editor-wasm/textmate_browser_conformance.js
+
+  browser:
+    name: Linked browser editor (Emscripten build and package)
+    runs-on: ubuntu-latest
+    timeout-minutes: 150
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: ./.github/actions/browser-toolchain
+        with:
+          cache-key: editor-browser
+      - name: Link and package the actual editor application
+        run: scripts/build-browser.sh editor-demo-browser
+      # Keep compilation independent of acceptance so its successful dependency
+      # cache is saved even when a later browser interaction finds a regression.
+      - name: Keep the linked editor site
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: editor-browser-site
+          path: target/browser/editor-demo-browser
+          if-no-files-found: error
+          retention-days: 1
+
+  browser-conformance:
+    name: Browser editor conformance (real input and rendering)
+    needs: browser
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: 24
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+        with:
+          name: editor-browser-site
+          path: target/browser/editor-demo-browser
+      - name: Browser editing, popup, scanner and rendering conformance
+        run: >-
+          node scripts/browser/tests/editor_demo.test.mjs
+          --screenshot target/browser/screenshots/editor-demo.png
+      - name: Keep the editor screenshot
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: editor-browser-screenshot
+          path: target/browser/screenshots/editor-demo.png
+          if-no-files-found: ignore

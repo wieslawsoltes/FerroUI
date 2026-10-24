@@ -751,6 +751,37 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "75b325c5dbd37f80359721ad39aca5a29fb04c89279657cffdda8736d0c0b9d2"
 
 [[package]]
+name = "editor-demo"
+version = "0.4.0"
+dependencies = [
+ "ferroui-base",
+ "ferroui-controls",
+ "ferroui-desktop",
+ "ferroui-edit",
+ "ferroui-headless",
+ "ferroui-markup-xaml",
+ "ferroui-markup-xaml-loader",
+ "ferroui-themes-fluent",
+ "sample-support",
+]
+
+[[package]]
+name = "editor-demo-browser"
+version = "0.4.0"
+dependencies = [
+ "editor-demo",
+ "ferroui-base",
+ "ferroui-browser",
+ "ferroui-controls",
+ "ferroui-edit",
+ "ferroui-fonts-inter",
+ "ferroui-themes-fluent",
+ "serde_json",
+ "wasm-bindgen",
+ "wasm-bindgen-futures",
+]
+
+[[package]]
 name = "either"
 version = "1.18.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -835,6 +866,17 @@ checksum = "8be9f3dfaaffdae2972880079a491a1a8bb7cbed0b8dd7a347f668b4150a3b93"
 dependencies = [
  "event-listener",
  "pin-project-lite",
+]
+
+[[package]]
+name = "fancy-regex"
+version = "0.19.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "d301f5bf187b3c295fce6468d3875037a0bccc5f6b151c63cac2f85babf21912"
+dependencies = [
+ "bit-set 0.8.0",
+ "regex-automata",
+ "regex-syntax",
 ]
 
 [[package]]
@@ -1133,6 +1175,29 @@ dependencies = [
  "ferroui-reactive",
  "ferroui-reactive-testing",
  "ferroui-system",
+]
+
+[[package]]
+name = "ferroui-edit"
+version = "0.4.0"
+dependencies = [
+ "ferroui-base",
+ "ferroui-build-scan",
+ "ferroui-controls",
+ "ferroui-edit-core",
+ "ferroui-markup-xaml",
+ "ferroui-markup-xaml-loader",
+ "ferroui-textmate",
+]
+
+[[package]]
+name = "ferroui-edit-core"
+version = "0.4.0"
+dependencies = [
+ "fancy-regex",
+ "regex",
+ "roxmltree 0.20.0",
+ "unicode-segmentation",
 ]
 
 [[package]]
@@ -1558,6 +1623,21 @@ name = "ferroui-system"
 version = "0.4.0"
 dependencies = [
  "smallvec",
+]
+
+[[package]]
+name = "ferroui-textmate"
+version = "0.4.0"
+dependencies = [
+ "fancy-regex",
+ "ferroui-system",
+ "js-sys",
+ "onig",
+ "roxmltree 0.20.0",
+ "serde",
+ "serde_json",
+ "wasm-bindgen",
+ "wasm-bindgen-futures",
 ]
 
 [[package]]
@@ -2923,6 +3003,28 @@ name = "once_cell"
 version = "1.21.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "9f7c3e4beb33f85d45ae3e3a1792185706c8e16d043238c593331cc7cd313b50"
+
+[[package]]
+name = "onig"
+version = "6.5.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "0cc3cbf698f9438986c11a880c90a6d04b9de27575afd28bbf45b154b6c709e2"
+dependencies = [
+ "bitflags",
+ "libc",
+ "once_cell",
+ "onig_sys",
+]
+
+[[package]]
+name = "onig_sys"
+version = "69.9.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "1e68317604e77e53b85896388e1a803c1d21b74c899ec9e5e1112db90735edd7"
+dependencies = [
+ "cc",
+ "pkg-config",
+]
 
 [[package]]
 name = "ordered-channel"
