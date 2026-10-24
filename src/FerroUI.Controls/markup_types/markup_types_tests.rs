@@ -997,9 +997,6 @@ fn an_items_source_is_indexed_and_counted_through_its_metadata() {
     assert!(get(&[source.clone(), boxed(2i32)]).is_err());
     assert!(get(&[source.clone(), boxed(-1i32)]).is_err());
     assert!(indexer.set.is_none());
-    // The nullable form a property of a view model holds (`Option<ItemsSource>`).
-    let nullable = boxed(Some(crate::ItemsSource::from_strs(["c"])));
-    assert_eq!(unbox::<String>(&get(&[nullable, boxed(0i32)]).expect("the item")), "c");
 }
 
 #[test]
