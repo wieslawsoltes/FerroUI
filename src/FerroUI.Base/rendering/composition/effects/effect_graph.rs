@@ -501,7 +501,7 @@ fn build_node(effect: &GraphicsEffect, depth: usize, count: &mut usize) -> Resul
         GraphicsEffect::ColorSource(color) => EffectNodeKind::ColorSource(EffectColor::new(color.color)),
         GraphicsEffect::Saturation(saturation) => matrix_of(
             EffectMatrix::Saturation(EffectScalar::new(saturation.saturation)),
-            ColorMatrixAlphaMode::Straight,
+            ColorMatrixAlphaMode::Premultiplied,
             &saturation.source,
             count,
         )?,
@@ -522,22 +522,22 @@ fn build_node(effect: &GraphicsEffect, depth: usize, count: &mut usize) -> Resul
         }
         GraphicsEffect::Tint(tint) => matrix_of(
             EffectMatrix::Tint(EffectColor::new(tint.color)),
-            ColorMatrixAlphaMode::Straight,
+            ColorMatrixAlphaMode::Premultiplied,
             &tint.source,
             count,
         )?,
         GraphicsEffect::Invert(invert) => {
-            matrix_of(EffectMatrix::Fixed(ColorMatrix::invert()), ColorMatrixAlphaMode::Straight, &invert.source, count)?
+            matrix_of(EffectMatrix::Fixed(ColorMatrix::invert()), ColorMatrixAlphaMode::Premultiplied, &invert.source, count)?
         }
         GraphicsEffect::Grayscale(grayscale) => matrix_of(
             EffectMatrix::Fixed(ColorMatrix::grayscale()),
-            ColorMatrixAlphaMode::Straight,
+            ColorMatrixAlphaMode::Premultiplied,
             &grayscale.source,
             count,
         )?,
         GraphicsEffect::LuminanceToAlpha(luminance) => matrix_of(
             EffectMatrix::Fixed(ColorMatrix::luminance_to_alpha()),
-            ColorMatrixAlphaMode::Straight,
+            ColorMatrixAlphaMode::Premultiplied,
             &luminance.source,
             count,
         )?,

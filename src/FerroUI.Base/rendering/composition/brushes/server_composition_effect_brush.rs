@@ -280,7 +280,7 @@ impl ServerCompositionEffectBrush {
         [color.r as f32 / 255.0 * alpha, color.g as f32 / 255.0 * alpha, color.b as f32 / 255.0 * alpha, alpha]
     }
 
-    /// The colour matrix (on premultiplied colours) an arithmetic composite
+    /// The colour matrix (applied to premultiplied colours as they are) an arithmetic composite
     /// of an image and a colour is: `image * (k1 c + k_image) + (k_color c + k4)`.
     fn arithmetic_matrix(
         &self,
@@ -457,7 +457,7 @@ impl ServerCompositionEffectBrush {
             }
             EffectNodeKind::ArithmeticWithColor { multiply, source1, source2, offset, image_is_source1, image, color } => {
                 let matrix = self.arithmetic_matrix(multiply, source1, source2, offset, *image_is_source1, color);
-                let pushed = Self::push_matrix(canvas, rect, &matrix, ColorMatrixAlphaMode::Premultiplied);
+                let pushed = Self::push_matrix(canvas, rect, &matrix, ColorMatrixAlphaMode::Straight);
                 self.paint_node(image, canvas, rect);
                 Self::pop_matrix(canvas, pushed);
             }
@@ -465,7 +465,7 @@ impl ServerCompositionEffectBrush {
                 let radius = self.blur_radius(amount);
                 let matrix = shadow_matrix(self.color(color));
                 let blurred = Self::push_blur(canvas, rect, radius);
-                let colored = Self::push_matrix(canvas, rect, &matrix, ColorMatrixAlphaMode::Straight);
+                let colored = Self::push_matrix(canvas, rect, &matrix, ColorMatrixAlphaMode::Premultiplied);
                 self.paint_node(source, canvas, rect);
                 Self::pop_matrix(canvas, colored);
                 Self::pop_blur(canvas, blurred);
@@ -723,7 +723,7 @@ impl ServerCompositionEffectBrush {
                 }
                 let matrix = self.arithmetic_matrix(multiply, source1, source2, offset, *image_is_source1, color);
                 if before {
-                    Self::push_matrix(canvas, rect, &matrix, ColorMatrixAlphaMode::Premultiplied);
+                    Self::push_matrix(canvas, rect, &matrix, ColorMatrixAlphaMode::Straight);
                     self.paint_around_layer(image, rest, canvas, rect, phase);
                 } else {
                     self.paint_around_layer(image, rest, canvas, rect, phase);
@@ -765,7 +765,7 @@ impl ServerCompositionEffectBrush {
                 let matrix = shadow_matrix(self.color(color));
                 if before {
                     Self::push_blur(canvas, rect, radius);
-                    Self::push_matrix(canvas, rect, &matrix, ColorMatrixAlphaMode::Straight);
+                    Self::push_matrix(canvas, rect, &matrix, ColorMatrixAlphaMode::Premultiplied);
                     self.paint_around_layer(source, rest, canvas, rect, phase);
                 } else {
                     self.paint_around_layer(source, rest, canvas, rect, phase);
@@ -1110,7 +1110,7 @@ impl IServerObject for ServerCompositionHostBackdropBrush {
     }
 }
 
-/// The colour matrix of a shadow (on straight colours): the colour of the
+/// The colour matrix of a shadow (on un-premultiplied colours): the colour of the
 /// shadow, with the alpha of the source times the alpha of the colour.
 fn shadow_matrix(color: Color) -> ColorMatrix {
     let channel = |value: u8| f32::from(value) / 255.0;

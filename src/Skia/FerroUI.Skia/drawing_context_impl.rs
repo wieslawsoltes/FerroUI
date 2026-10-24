@@ -1937,7 +1937,7 @@ fn color_matrix_filter(
     alpha_mode: ferroui_base::media::ColorMatrixAlphaMode,
 ) -> sk::ColorFilter {
     use ferroui_base::media::ColorMatrixAlphaMode;
-    if alpha_mode == ColorMatrixAlphaMode::Straight {
+    if alpha_mode == ColorMatrixAlphaMode::Premultiplied {
         return sk::color_filters::matrix_row_major(&matrix.to_row_major_4x5(), None);
     }
     ferroui_base::ferro_thread_local! {

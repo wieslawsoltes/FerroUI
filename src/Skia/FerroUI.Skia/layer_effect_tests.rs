@@ -123,10 +123,13 @@ fn a_saturation_matrix_layer_of_zero_is_grey() {
 #[test]
 fn an_invert_matrix_layer_of_a_translucent_colour_keeps_its_alpha() {
     let half_red = Color::from_argb(128, 255, 0, 0);
-    for alpha_mode in [ColorMatrixAlphaMode::Premultiplied, ColorMatrixAlphaMode::Straight] {
-        let actual = through_matrix(half_red, &ColorMatrix::invert(), alpha_mode);
-        assert_near((0, 255, 255, 128), actual);
-    }
+    // The colour is un-premultiplied before the matrix (`Premultiplied`).
+    let actual = through_matrix(half_red, &ColorMatrix::invert(), ColorMatrixAlphaMode::Premultiplied);
+    assert_near((0, 255, 255, 128), actual);
+    // `Straight`: the matrix on the premultiplied colour as it is.
+    let halved = ColorMatrix::scale_and_offset([0.5, 1.0, 1.0, 1.0], [0.0; 4]);
+    let actual = through_matrix(half_red, &halved, ColorMatrixAlphaMode::Straight);
+    assert_near((128, 0, 0, 128), actual);
 }
 
 fn multiplied(color: Color, factor: [u8; 3], scale: f32) -> (u8, u8, u8, u8) {

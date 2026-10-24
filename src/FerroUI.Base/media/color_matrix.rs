@@ -22,14 +22,18 @@ impl Default for ColorMatrix {
     }
 }
 
-/// Which colours a [`ColorMatrix`] is applied to (Win2D `CanvasAlphaMode`
-/// of `ColorMatrixEffect.AlphaMode`).
+/// How a [`ColorMatrix`] treats the premultiplied colours it is applied to
+/// (Win2D `CanvasAlphaMode` of `ColorMatrixEffect.AlphaMode`, Direct2D's
+/// `D2D1_COLORMATRIX_ALPHA_MODE`).
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq, Hash)]
 pub enum ColorMatrixAlphaMode {
-    /// Premultiplied colours (the Win2D default): `[R a, G a, B a, a, 1]`.
+    /// The colour is un-premultiplied, the matrix applied to `[R, G, B, a, 1]`
+    /// and the result premultiplied again (the Win2D default).
     #[default]
     Premultiplied,
-    /// Colours with straight alpha: `[R, G, B, a, 1]`.
+    /// The matrix is applied to the premultiplied colour as it is,
+    /// `[R a, G a, B a, a, 1]`, and the result taken as premultiplied (its
+    /// colour clamped to its alpha).
     Straight,
 }
 
@@ -157,11 +161,11 @@ impl ColorMatrix {
     /// channels no larger than its alpha.
     pub fn apply_premultiplied(&self, color: [f32; 4], mode: ColorMatrixAlphaMode) -> [f32; 4] {
         match mode {
-            ColorMatrixAlphaMode::Premultiplied => {
+            ColorMatrixAlphaMode::Straight => {
                 let [r, g, b, a] = self.apply(color);
                 [r.min(a), g.min(a), b.min(a), a]
             }
-            ColorMatrixAlphaMode::Straight => {
+            ColorMatrixAlphaMode::Premultiplied => {
                 let alpha = color[3];
                 let straight = |value: f32| if alpha > 0.0 { (value / alpha).min(1.0) } else { 0.0 };
                 let [r, g, b, a] = self.apply([straight(color[0]), straight(color[1]), straight(color[2]), alpha]);
@@ -173,7 +177,7 @@ impl ColorMatrix {
     /// Applies the matrix in `mode` to premultiplied RGBA pixels of eight
     /// bits a channel, in place.
     pub fn apply_to_rgba8(&self, pixels: &mut [u8], mode: ColorMatrixAlphaMode) {
-        if mode == ColorMatrixAlphaMode::Straight {
+        if mode == ColorMatrixAlphaMode::Premultiplied {
             return self.apply_to_premultiplied_rgba8(pixels);
         }
         for pixel in pixels.chunks_exact_mut(4) {
@@ -286,14 +290,14 @@ mod tests {
     fn premultiplied_mode_applies_to_premultiplied_values() {
         // Doubling every channel of half transparent grey.
         let matrix = ColorMatrix::scale_and_offset([2.0; 4], [0.0; 4]);
-        let out = matrix.apply_premultiplied([0.25, 0.25, 0.25, 0.5], ColorMatrixAlphaMode::Premultiplied);
+        let out = matrix.apply_premultiplied([0.25, 0.25, 0.25, 0.5], ColorMatrixAlphaMode::Straight);
         assert!(close(out, [0.5, 0.5, 0.5, 1.0]));
         // Colour channels never exceed the alpha.
         let out = ColorMatrix::scale_and_offset([1.0, 1.0, 1.0, 0.5], [0.0; 4])
-            .apply_premultiplied([0.5, 0.5, 0.5, 0.5], ColorMatrixAlphaMode::Premultiplied);
+            .apply_premultiplied([0.5, 0.5, 0.5, 0.5], ColorMatrixAlphaMode::Straight);
         assert!(close(out, [0.25, 0.25, 0.25, 0.25]));
         let mut pixels = [64u8, 64, 64, 128];
-        matrix.apply_to_rgba8(&mut pixels, ColorMatrixAlphaMode::Premultiplied);
+        matrix.apply_to_rgba8(&mut pixels, ColorMatrixAlphaMode::Straight);
         assert_eq!(pixels, [128, 128, 128, 255]);
     }
 

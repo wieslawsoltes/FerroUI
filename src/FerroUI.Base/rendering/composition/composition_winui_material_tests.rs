@@ -168,19 +168,16 @@ fn an_arithmetic_composite_with_a_colour_is_a_premultiplied_matrix() {
     let sprite = sprite_with(&s, brush.brush());
     show(&s, &sprite);
     let entries = render_with_layers(&s, &sprite);
-    position_starting(&entries, "PushColorMatrixLayer 0, 0, 100, 50 Premultiplied");
+    // Applied to the premultiplied colours as they are (`Straight`).
+    position_starting(&entries, "PushColorMatrixLayer 0, 0, 100, 50 Straight");
 
-    // Two images: not drawn.
+    // Two images: drawn from their pixels (composition_winui_lighting_tests.rs).
     let both = s.compositor.create_effect_factory(ArithmeticCompositeEffect {
         source1: parameter("a"),
         source2: parameter("b"),
         ..Default::default()
     });
-    assert_eq!(CompositionEffectFactoryLoadStatus::Other, both.load_status());
-    assert_eq!(
-        Some(&CompositionEffectFactoryError::EffectTypeNotSupported("ArithmeticCompositeEffect")),
-        both.extended_error()
-    );
+    assert_eq!(CompositionEffectFactoryLoadStatus::Success, both.load_status());
 }
 
 #[test]
