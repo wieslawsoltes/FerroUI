@@ -48,6 +48,16 @@ members = [
     "src/FerroUI.Inspect",
     "src/FerroUI.DevTools",
     "src/FerroUI.Mcp",
+    "src/Behaviors/FerroUI.Xaml.Interactivity",
+    "src/Behaviors/FerroUI.Xaml.Behaviors.Animations",
+    "src/Behaviors/FerroUI.Xaml.Interactions",
+    "src/Behaviors/FerroUI.Xaml.Interactions.ReactiveUI",
+    "src/Behaviors/FerroUI.Xaml.Interactions.Custom",
+    "src/Behaviors/FerroUI.Xaml.Behaviors",
+    "src/Behaviors/FerroUI.Xaml.Interactions.Draggable",
+    "src/Behaviors/FerroUI.Xaml.Interactions.DragAndDrop",
+    "src/Behaviors/FerroUI.Xaml.Interactions.Events",
+    "src/Behaviors/FerroUI.Xaml.Interactions.Responsive",
     "src/FerroUI.Themes.Simple",
     "src/FerroUI.Themes.Fluent",
     "src/FerroUI.Themes.WinUI",
@@ -135,6 +145,7 @@ members = [
     "samples/ControlGallery.WinUI",
     "samples/WinUIEmbedSample",
     "samples/WinUIThemeGallery",
+    "samples/BehaviorsGallery",
     "samples/SafeAreaDemo",
     "samples/SafeAreaDemo.Desktop",
     "samples/SafeAreaDemo.Android",
@@ -225,6 +236,16 @@ ferroui-winui = { version = "=0.4.0", path = "src/Windows/FerroUI.WinUI" }
 ferroui-fonts-inter = { version = "=0.4.0", path = "src/FerroUI.Fonts.Inter" }
 ferroui-dialogs = { version = "=0.4.0", path = "src/FerroUI.Dialogs" }
 ferroui-diagnostics = { version = "=0.4.0", path = "src/FerroUI.Diagnostics" }
+ferroui-xaml-interactivity = { version = "=0.4.0", path = "src/Behaviors/FerroUI.Xaml.Interactivity" }
+ferroui-xaml-behaviors-animations = { version = "=0.4.0", path = "src/Behaviors/FerroUI.Xaml.Behaviors.Animations" }
+ferroui-xaml-interactions = { version = "=0.4.0", path = "src/Behaviors/FerroUI.Xaml.Interactions" }
+ferroui-xaml-interactions-reactiveui = { version = "=0.4.0", path = "src/Behaviors/FerroUI.Xaml.Interactions.ReactiveUI" }
+ferroui-xaml-interactions-custom = { version = "=0.4.0", path = "src/Behaviors/FerroUI.Xaml.Interactions.Custom" }
+ferroui-xaml-behaviors = { version = "=0.4.0", path = "src/Behaviors/FerroUI.Xaml.Behaviors" }
+ferroui-xaml-interactions-draggable = { version = "=0.4.0", path = "src/Behaviors/FerroUI.Xaml.Interactions.Draggable" }
+ferroui-xaml-interactions-draganddrop = { version = "=0.4.0", path = "src/Behaviors/FerroUI.Xaml.Interactions.DragAndDrop" }
+ferroui-xaml-interactions-events = { version = "=0.4.0", path = "src/Behaviors/FerroUI.Xaml.Interactions.Events" }
+ferroui-xaml-interactions-responsive = { version = "=0.4.0", path = "src/Behaviors/FerroUI.Xaml.Interactions.Responsive" }
 ferroui-themes-simple = { version = "=0.4.0", path = "src/FerroUI.Themes.Simple" }
 ferroui-themes-fluent = { version = "=0.4.0", path = "src/FerroUI.Themes.Fluent" }
 ferroui-themes-winui = { version = "=0.4.0", path = "src/FerroUI.Themes.WinUI" }

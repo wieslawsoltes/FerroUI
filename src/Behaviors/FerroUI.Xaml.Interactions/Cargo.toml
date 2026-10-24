@@ -1,0 +1,60 @@
+[package]
+name = "ferroui-xaml-interactions"
+description = "The classic triggers and actions of the FerroUI behaviors: event, data and timer triggers, property, method and command actions, clipboard actions and storage pickers"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+homepage.workspace = true
+readme.workspace = true
+keywords.workspace = true
+categories.workspace = true
+build = "build.rs"
+# The build script exports the type model of the crate (its triggers, actions and converters, for
+# markup); Cargo hands the path of the file to the build scripts of the crates that depend on this
+# one (docs/porting/xaml.md, 9.5.13 and 9.6.3).
+links = "ferroui_xaml_interactions_xaml"
+
+# Unit tests live next to the code (the `tests/` module of the library), not as integration test
+# targets.
+autotests = false
+autobenches = false
+autoexamples = false
+
+[lib]
+path = "lib.rs"
+
+[features]
+default = []
+# The actions and the trigger of the local file system (`FileSystem/` of the reference): they use
+# `std::fs` and a watcher thread, which the browser does not have.
+file-system = []
+# The HTTP request action and the trigger of the network availability (`Network/` of the
+# reference): they use sockets and threads, which the browser does not have.
+network = []
+
+[dependencies]
+ferroui-base = { workspace = true }
+ferroui-controls = { workspace = true }
+ferroui-xaml-interactivity = { workspace = true }
+
+[build-dependencies]
+ferroui-build-scan = { workspace = true }
+
+[dev-dependencies]
+ferroui-base = { workspace = true, features = ["testing"] }
+ferroui-controls = { workspace = true, features = ["testing"] }
+# The windows of the tests are documents loaded with the run-time loader.
+ferroui-markup-xaml = { workspace = true }
+ferroui-markup-xaml-loader = { workspace = true, features = ["runtime", "testing", "emitter"] }
+# The click trigger and the conditional and switch actions of the logical tree lifetime tests. Not a
+# cycle of the build: the custom behaviors do not depend on this crate, they only have it among their
+# development dependencies. That is a cycle of the packages, though, so the dependency is named by its
+# path alone: Cargo leaves a development dependency without a version out of the package
+# (docs/release.md, "Dependency order").
+ferroui-xaml-interactions-custom = { path = "../FerroUI.Xaml.Interactions.Custom" }
+
+# The group of the crate in the table of the README (docs/release.md).
+[package.metadata.release]
+group = "controls"

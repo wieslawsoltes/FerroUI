@@ -1,0 +1,39 @@
+<UserControl xmlns="https://github.com/ferroui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="using:BehaviorsGallery.ViewModels"
+             x:Class="BehaviorsGallery.Views.Pages.FileDropHandlerView"
+             x:DataType="vm:MainWindowViewModel"
+             mc:Ignorable="d" d:DesignWidth="600" d:DesignHeight="450">
+  <!-- Ported from Views/Pages/FileDropHandlerView of the reference sample. -->
+  <Design.DataContext>
+    <vm:MainWindowViewModel />
+  </Design.DataContext>
+
+  <UserControl.Resources>
+    <FilesDropHandler x:Key="FilesDropHandler" />
+  </UserControl.Resources>
+
+  <StackPanel Margin="5" Spacing="5">
+    <Border Background="Transparent" Padding="20" BorderThickness="1" BorderBrush="{DynamicResource SystemAccentColor}">
+      <Interaction.Behaviors>
+        <ContextDropBehavior Handler="{StaticResource FilesDropHandler}" />
+      </Interaction.Behaviors>
+      <TextBlock Text="Drop files here" HorizontalAlignment="Center" VerticalAlignment="Center" />
+    </Border>
+    <Border Background="Transparent" Padding="20" BorderThickness="1" BorderBrush="{DynamicResource SystemAccentColor}">
+      <Interaction.Behaviors>
+        <FilesDropBehavior Command="{Binding OpenFilesCommand}" />
+      </Interaction.Behaviors>
+      <TextBlock Text="Drop files here" HorizontalAlignment="Center" VerticalAlignment="Center" />
+    </Border>
+    <Border Background="Transparent" Padding="20" BorderThickness="1" BorderBrush="{DynamicResource SystemAccentColor}">
+      <Interaction.Behaviors>
+        <TextDropBehavior Command="{Binding GetClipboardTextCommand}" />
+      </Interaction.Behaviors>
+      <TextBlock Text="Drop text here" HorizontalAlignment="Center" VerticalAlignment="Center" />
+    </Border>
+    <ListBox ItemsSource="{Binding FileItems}" />
+  </StackPanel>
+</UserControl>

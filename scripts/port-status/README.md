@@ -93,7 +93,10 @@ section 5. For its tests (`test_gaps.py --reference reactive`), `test_projects`,
 (MSTest's `TestMethod`) name what is read, and with `stated_reasons = true` a line `// Not ported: <Name> - <reason>`
 of the Rust test file of an upstream test file (`Tests/Linq/Observable/SelectTest.cs` ->
 `tests/FerroUI.Reactive.Tests/tests/linq/observable/select_test.rs`) states why that test is not ported: it counts as
-deferred when the reason names a later phase, else as waived. The test files of the waived API are waived in its
+deferred when the reason names a later phase, else as waived. The lines are read below the first test root, or below
+the directories that an optional third element of an entry of `test_projects` lists (Xaml.Behaviors, whose test
+project `Xaml.Behaviors.Interactions.UnitTests` is ported in the crates of the types it tests); the first reason
+found for a test is taken. The test files of the waived API are waived in its
 `test-aliases.toml`. `run.sh` does not run `test_gaps.py`; run it before `run.sh` when tests were ported, since the
 index reads the totals of its report.
 

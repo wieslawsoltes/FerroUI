@@ -1,0 +1,26 @@
+<Window xmlns="https://github.com/ferroui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+  <!-- Ported from tests/Xaml.Behaviors.Interactions.UnitTests/Custom/BindableValidationRule001 of Xaml.Behaviors.
+       Adapted: no x:Class (the test loads the window with the run-time loader); no x:DataType (the
+       bindings find the properties of the source by name); the binding source is a class of the test
+       module, in the namespace of the crate; the range rule has no type argument (the rules are not
+       generic). -->
+  <Window.DataContext>
+    <ValidationRuleBindingSource Minimum="0"
+                                 Maximum="100"
+                                 ErrorMessage="Value must be within the current bounds." />
+  </Window.DataContext>
+
+  <Slider x:Name="TargetSlider"
+          Minimum="0"
+          Maximum="200"
+          Value="50">
+    <Interaction.Behaviors>
+      <SliderValidationBehavior>
+        <RangeValidationRule Minimum="{Binding Minimum}"
+                             Maximum="{Binding Maximum}"
+                             ErrorMessage="{Binding ErrorMessage}" />
+      </SliderValidationBehavior>
+    </Interaction.Behaviors>
+  </Slider>
+</Window>

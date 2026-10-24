@@ -32,7 +32,10 @@
 #                    (`Pattern<T1, T2>` as `Pattern2`), the form of the types a macro writes per arity
 #
 # Tests (test_gaps.py):
-#   test_projects    [[short name, test project below the checkout], ...]; default: the table PROJECTS of test_gaps.py
+#   test_projects    [[short name, test project below the checkout], ...]; default: the table PROJECTS of test_gaps.py.
+#                    An optional third element lists the directories (relative to the repository) whose
+#                    `// Not ported:` lines apply to that project, for a test project whose tests the port splits
+#                    over several crates; default: the first of `test_roots`
 #   test_roots       the directories of the port searched for Rust tests; default ["src", "tests"]
 #   test_attributes  extra attribute names that mark a C# test method (MSTest's `TestMethod`)
 #   stated_reasons   true: a line `// Not ported: <Name> - <reason>` in the Rust test file of an upstream test file
@@ -109,3 +112,38 @@ test_projects = [["di-specification", "src/libraries/Microsoft.Extensions.Depend
 test_roots = ["tests/FerroUI.DependencyInjection.Tests"]
 stated_reasons = true
 test_files = "snake"
+
+[[reference]]
+name = "behaviors"
+title = "Xaml.Behaviors"
+plan = "docs/porting/behaviors.md"
+checkout = "/Volumes/1TB-macOS/behaviors-ref"
+checkout_env = "BEHAVIORS_UPSTREAM"
+projects = "scripts/api-extract/projects-behaviors.json"
+data = "docs/porting/data/behaviors"
+tracking = "docs/porting/tracking/behaviors"
+documents = "library"
+api = "public"
+overloads = "name"
+waived_files = true
+# The tests of Interactions.UnitTests are ported with the crates of the types they test (Interactions, Custom,
+# Draggable, DragAndDrop); the third element names the test directories whose `// Not ported:` lines apply, the
+# first reason of a test taken (the crates of the tested types before the Interactions crate, whose
+# `tests/not_ported.rs` lists the tests of the other crates).
+test_projects = [
+    ["interactivity", "tests/Xaml.Behaviors.Interactivity.UnitTests", ["src/Behaviors/FerroUI.Xaml.Interactivity/tests"]],
+    ["interactions", "tests/Xaml.Behaviors.Interactions.UnitTests", ["src/Behaviors/FerroUI.Xaml.Interactions.Custom/tests", "src/Behaviors/FerroUI.Xaml.Interactions.Draggable/tests", "src/Behaviors/FerroUI.Xaml.Interactions.DragAndDrop/tests", "src/Behaviors/FerroUI.Xaml.Interactions/tests"]],
+    ["animations", "tests/Xaml.Behaviors.Animations.UnitTests", ["src/Behaviors/FerroUI.Xaml.Behaviors.Animations/tests"]],
+]
+test_roots = [
+    "src/Behaviors/FerroUI.Xaml.Interactivity/tests",
+    "src/Behaviors/FerroUI.Xaml.Interactions/tests",
+    "src/Behaviors/FerroUI.Xaml.Interactions.Custom/tests",
+    "src/Behaviors/FerroUI.Xaml.Behaviors.Animations/tests",
+    "src/Behaviors/FerroUI.Xaml.Interactions.Events/tests",
+    "src/Behaviors/FerroUI.Xaml.Interactions.Draggable/tests",
+    "src/Behaviors/FerroUI.Xaml.Interactions.DragAndDrop/tests",
+    "src/Behaviors/FerroUI.Xaml.Interactions.Responsive/tests",
+    "src/Behaviors/FerroUI.Xaml.Interactions.ReactiveUI/tests",
+]
+stated_reasons = true

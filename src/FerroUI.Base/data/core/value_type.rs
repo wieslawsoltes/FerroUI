@@ -137,6 +137,7 @@ type ObjectFn = fn(&dyn AnyValue) -> Option<Ref<FerroObject>>;
 type FromObjectFn = fn(Ref<FerroObject>) -> Option<BoxedValue>;
 type InterfaceFn = Rc<dyn Fn(&Ref<FerroObject>) -> Option<BoxedValue>>;
 type InterfaceObjectFn = Rc<dyn Fn(&dyn AnyValue) -> Option<Ref<FerroObject>>>;
+type OrderingFn = Rc<dyn Fn(&dyn AnyValue, &dyn AnyValue) -> Option<std::cmp::Ordering>>;
 
 #[derive(Default)]
 struct Registry {
@@ -179,6 +180,8 @@ struct Registry {
     /// Interface handle type → the object of the object model behind a
     /// handle ([`ValueTypes::register_interface_object`]).
     interface_objects: IdMap<TypeId, InterfaceObjectFn>,
+    /// The order of the values of a type ([`ValueTypes::register_ordering`]).
+    orderings: IdMap<TypeId, OrderingFn>,
 }
 
 /// A registered cast of a reference type that applies to another form of
@@ -326,6 +329,12 @@ fn insert_interface(interface: TypeId, class: &'static TypeInfo, convert: Interf
             Some(entry) => entry.1 = convert,
             None => entries.push((class, convert)),
         }
+    });
+}
+
+fn insert_ordering(id: TypeId, compare: OrderingFn) {
+    with_registry(|r| {
+        r.orderings.insert(id, compare);
     });
 }
 
@@ -1206,6 +1215,144 @@ impl ValueTypes {
             _ => false,
         }
     }
+
+    /// Registers the order of the values of `T` (the `IComparable` of the
+    /// managed original) as its [`PartialOrd`], for [`compare`](Self::compare).
+    ///
+    /// Like every registration of this table, it applies to the calling
+    /// thread; register from a function given to
+    /// [`register_global`](Self::register_global) for every thread. The
+    /// numbers, booleans, characters, text, the decimal, dates and time
+    /// spans are registered by default.
+    pub fn register_ordering<T: PartialOrd + 'static>() {
+        Self::register_ordering_by::<T>(|a, b| a.partial_cmp(b));
+    }
+
+    /// Registers the order of the values of `T` as `compare` (the
+    /// `CompareTo` of the managed original), for [`compare`](Self::compare).
+    /// `None` from `compare` means the two values are not comparable.
+    pub fn register_ordering_by<T: 'static>(compare: impl Fn(&T, &T) -> Option<std::cmp::Ordering> + 'static) {
+        let compare: OrderingFn = Rc::new(move |a: &dyn AnyValue, b: &dyn AnyValue| {
+            compare(a.downcast_ref::<T>()?, b.downcast_ref::<T>()?)
+        });
+        insert_ordering(TypeId::of::<T>(), compare);
+    }
+
+    /// Whether the values of `type_` have an order for [`compare`](Self::compare):
+    /// a registered order, or an enumeration with markup metadata.
+    pub fn is_ordered(type_: ValueType) -> bool {
+        with_registry(|r| r.orderings.contains_key(&type_.id())) || Self::is_enumeration(type_.id())
+    }
+
+    /// Orders two untyped values, as the managed original orders two
+    /// `IComparable` operands: the right operand is converted to the type of
+    /// the left one (`Convert.ChangeType(right, left.GetType())`) and the
+    /// left one compares itself with the result (`left.CompareTo(right)`).
+    /// `None` when the values are not comparable: either one is null or of
+    /// a type without an order, or the right operand does not convert.
+    ///
+    /// - Numbers of any primitive type (and the decimal) compare
+    ///   numerically: the right operand converts with the rules of
+    ///   `Convert.ChangeType` (an integer when it is in range, a floating
+    ///   point number rounded to the nearest integer, midpoints to even);
+    ///   when it does not convert to the type of the left operand (it is out
+    ///   of its range, or not a number for an integer) both compare as
+    ///   64-bit floating point numbers. Not-a-number is less than every
+    ///   number and equal to itself, as in the managed original.
+    /// - Text compares ordinally, by character code.
+    /// - Booleans (false before true) and characters compare with each
+    ///   other and with the numbers they convert to and from.
+    /// - A value of an enumeration with markup metadata compares by its
+    ///   numeric value with a value of the same enumeration only.
+    /// - A type that registers an order ([`register_ordering`](Self::register_ordering))
+    ///   compares with values of its own type, and with values that convert
+    ///   to it ([`try_convert`](Self::try_convert)) and have an order too.
+    ///
+    /// Nullable values compare by their contents.
+    // Deviation (DEVIATIONS.md, Bindings): two numbers whose right operand does not convert
+    // to the type of the left one compare as 64-bit floating point numbers, where the
+    // managed `Convert.ChangeType` fails (an overflow) and the operands are not comparable.
+    pub fn compare(a: &BoxedValue, b: &BoxedValue) -> Option<std::cmp::Ordering> {
+        let a = Self::ordering_operand(a)?;
+        let b = Self::ordering_operand(b)?;
+        let a_id = value_type_id(&*a);
+        let b_id = value_type_id(&*b);
+
+        // `Convert.ChangeType` to an enumeration type succeeds for a value of
+        // that enumeration only.
+        if Self::is_enumeration(a_id) {
+            if a_id != b_id {
+                return None;
+            }
+            return Some(Self::enumeration_value(&a, a_id)?.cmp(&Self::enumeration_value(&b, b_id)?));
+        }
+
+        let (compare, right_is_ordered) =
+            with_registry(|r| (r.orderings.get(&a_id).cloned(), r.orderings.contains_key(&b_id)));
+        let compare = compare?;
+        if a_id == b_id {
+            return compare(&*a, &*b);
+        }
+        if !right_is_ordered && !Self::is_enumeration(b_id) {
+            return None;
+        }
+        match Self::try_convert(Some(&b), ValueType::of_value(&*a)) {
+            Some(Some(converted)) => compare(&*a, &*converted),
+            _ => Some(float_order(number_as_f64(&*a)?, number_as_f64(&*b)?)),
+        }
+    }
+
+    /// An operand of [`compare`](Self::compare): the contents of a nullable
+    /// or of an "any value" box, text as `String`; `None` for null.
+    fn ordering_operand(value: &BoxedValue) -> Option<BoxedValue> {
+        let mut value = Self::normalize(value.clone())?;
+        if let Some(inner) = value.downcast_ref::<BoxedValue>() {
+            let inner = inner.clone();
+            value = Self::normalize(inner)?;
+        }
+        if let Some(text) = value.downcast_ref::<&'static str>() {
+            return Some(Rc::new((*text).to_string()));
+        }
+        Some(value)
+    }
+
+    /// Whether `id` is the type of an enumeration with markup metadata.
+    fn is_enumeration(id: TypeId) -> bool {
+        crate::metadata::MarkupType::find_by_handle(id)
+            .is_some_and(|markup| markup.kind == crate::metadata::MarkupTypeKind::Enum)
+    }
+
+    /// The numeric value of a value of the enumeration `id`.
+    fn enumeration_value(value: &BoxedValue, id: TypeId) -> Option<i64> {
+        let markup = crate::metadata::MarkupType::find_by_handle(id)?;
+        match markup.enum_to_value {
+            Some(to_value) => to_value(&**value),
+            None => markup.enum_members.iter().find(|member| (*(member.get)()).value_eq(&**value)).map(|member| member.value),
+        }
+    }
+}
+
+/// The order of two floating point numbers of the managed original
+/// (`Double.CompareTo`): not-a-number is less than every number and equal to
+/// itself.
+fn float_order(a: f64, b: f64) -> std::cmp::Ordering {
+    a.partial_cmp(&b).unwrap_or_else(|| a.is_nan().cmp(&b.is_nan()).reverse())
+}
+
+/// A number of a primitive numeric type, or the decimal, as a 64-bit floating
+/// point number.
+fn number_as_f64(value: &dyn AnyValue) -> Option<f64> {
+    macro_rules! numbers {
+        ($($ty:ty),*) => {
+            $(
+                if let Some(v) = value.downcast_ref::<$ty>() {
+                    return Some(*v as f64);
+                }
+            )*
+        };
+    }
+    numbers!(f64, f32, i8, i16, i32, i64, u8, u16, u32, u64, isize, usize);
+    value.downcast_ref::<crate::utilities::Decimal>().map(|v| v.to_f64())
 }
 
 /// The implicit numeric conversions of the managed original
@@ -1595,6 +1742,19 @@ fn register_defaults() {
     ValueTypes::register_nullable::<crate::data::core::plugins::ObservableValue>();
 
     crate::utilities::Decimal::register_value_type();
+
+    // The order of the values of the primitive types and of the dates (`IComparable`).
+    macro_rules! orderings {
+        ($($ty:ty),*) => {
+            $( ValueTypes::register_ordering::<$ty>(); )*
+        };
+    }
+    orderings!(
+        i8, i16, i32, i64, u8, u16, u32, u64, isize, usize, bool, char, String,
+        crate::utilities::Decimal, crate::utilities::DateTime, crate::utilities::DateTimeOffset, crate::animation::TimeSpan
+    );
+    ValueTypes::register_ordering_by::<f64>(|a, b| Some(float_order(*a, *b)));
+    ValueTypes::register_ordering_by::<f32>(|a, b| Some(float_order(f64::from(*a), f64::from(*b))));
 }
 
 impl ValueTypes {
@@ -2334,5 +2494,94 @@ mod tests {
         assert!(implicit(&true, TypeId::of::<Decimal>()).is_none());
         assert!(implicit(&1i32, TypeId::of::<bool>()).is_none());
         assert!(implicit(&1.0f64, TypeId::of::<bool>()).is_none());
+    }
+
+    /// `ValueTypes::compare`: the order of two `IComparable` operands of the managed original,
+    /// the right one converted to the type of the left one (`Convert.ChangeType`).
+    #[test]
+    fn values_are_ordered_with_the_right_operand_converted_to_the_type_of_the_left_one() {
+        use std::cmp::Ordering::{Equal, Greater, Less};
+
+        fn b<T: PartialEq + 'static>(value: T) -> BoxedValue {
+            Rc::new(value)
+        }
+        let compare = |a: BoxedValue, b: BoxedValue| ValueTypes::compare(&a, &b);
+
+        // Numbers of the same type and across types.
+        assert_eq!(compare(b(1i32), b(2i32)), Some(Less));
+        assert_eq!(compare(b(2u8), b(2i64)), Some(Equal));
+        assert_eq!(compare(b(3i32), b(2.5f64)), Some(Greater));
+        assert_eq!(compare(b(5.4f64), b(5i32)), Some(Greater));
+        // The right operand becomes an integer of the left type, midpoints to even.
+        assert_eq!(compare(b(5i32), b(5.4f64)), Some(Equal));
+        assert_eq!(compare(b(2i32), b(2.5f64)), Some(Equal));
+        assert_eq!(compare(b(3i32), b(2.5f64)), Some(Greater));
+        // Out of the range of the left type: both as floating point numbers.
+        assert_eq!(compare(b(1i32), b(1e20f64)), Some(Less));
+        assert_eq!(compare(b(1u8), b(-1i32)), Some(Greater));
+        // Not-a-number is less than every number and equal to itself.
+        assert_eq!(compare(b(f64::NAN), b(1.0f64)), Some(Less));
+        assert_eq!(compare(b(f64::NAN), b(f64::NAN)), Some(Equal));
+        assert_eq!(compare(b(1.0f32), b(f64::NAN)), Some(Greater));
+        assert_eq!(compare(b(5i32), b(f64::NAN)), Some(Greater));
+        assert_eq!(compare(b(crate::utilities::Decimal::ONE), b(2i32)), Some(Less));
+
+        // Text, ordinally; text converts to the number on the left and the reverse.
+        assert_eq!(compare(b("a".to_string()), b("b".to_string())), Some(Less));
+        assert_eq!(compare(b("B".to_string()), b("a".to_string())), Some(Less));
+        assert_eq!(compare(b("a"), b("a".to_string())), Some(Equal));
+        assert_eq!(compare(b(42i32), b("41".to_string())), Some(Greater));
+        assert_eq!(compare(b("5".to_string()), b(5i32)), Some(Equal));
+        assert_eq!(compare(b(42i32), b("not-an-integer".to_string())), None);
+        assert_eq!(compare(b(42i32), b("999999999999999999999999999999".to_string())), None);
+
+        // Booleans and characters, with the numbers they convert to and from.
+        assert_eq!(compare(b(false), b(true)), Some(Less));
+        assert_eq!(compare(b(true), b(1.5f64)), Some(Equal));
+        assert_eq!(compare(b(1i32), b(true)), Some(Equal));
+        assert_eq!(compare(b('a'), b('b')), Some(Less));
+        assert_eq!(compare(b(65i32), b('A')), Some(Equal));
+        assert_eq!(compare(b('A'), b(1.0f64)), None);
+
+        // Nullable values by their contents; null and values without an order are not comparable.
+        assert_eq!(compare(b(Some(3i32)), b(2i32)), Some(Greater));
+        assert_eq!(compare(b(None::<i32>), b(1i32)), None);
+        assert_eq!(compare(b(1i32), b(None::<BoxedValue>)), None);
+        assert_eq!(compare(b(Unknown), b(Unknown)), None);
+        assert_eq!(compare(b(1i32), b(Unknown)), None);
+        assert!(ValueTypes::is_ordered(ValueType::of::<i32>()));
+        assert!(!ValueTypes::is_ordered(ValueType::of::<Unknown>()));
+
+        // An enumeration by its value, with values of the same enumeration only.
+        register_named();
+        assert_eq!(compare(b(NamedMode::First), b(NamedMode::Second)), Some(Less));
+        assert_eq!(compare(b(NamedMode::Second), b(NamedMode::Second)), Some(Equal));
+        assert_eq!(compare(b(NamedMode::First), b(0i32)), None);
+        assert_eq!(compare(b(1i32), b(NamedMode::Second)), Some(Equal));
+        assert!(ValueTypes::is_ordered(ValueType::of::<NamedMode>()));
+    }
+
+    /// A type registers its order; values that convert to it compare with it.
+    #[test]
+    fn registered_orderings_compare_values_of_the_type() {
+        #[derive(Clone, Debug, PartialEq, PartialOrd)]
+        struct Rank(i32);
+        #[derive(Clone, Debug, PartialEq)]
+        struct Reversed(i32);
+
+        let rank = |value: i32| -> BoxedValue { Rc::new(Rank(value)) };
+        assert_eq!(ValueTypes::compare(&rank(1), &rank(2)), None);
+
+        ValueTypes::register_ordering::<Rank>();
+        assert_eq!(ValueTypes::compare(&rank(1), &rank(2)), Some(std::cmp::Ordering::Less));
+        assert_eq!(ValueTypes::compare(&rank(2), &rank(2)), Some(std::cmp::Ordering::Equal));
+        // A number has an order but no conversion to the type: not comparable.
+        assert_eq!(ValueTypes::compare(&rank(1), &(Rc::new(2i32) as BoxedValue)), None);
+        ValueTypes::register_conversion::<i32, Rank>(|value| Some(Rank(*value)));
+        assert_eq!(ValueTypes::compare(&rank(1), &(Rc::new(2i32) as BoxedValue)), Some(std::cmp::Ordering::Less));
+
+        ValueTypes::register_ordering_by::<Reversed>(|a, b| Some(b.0.cmp(&a.0)));
+        let reversed = |value: i32| -> BoxedValue { Rc::new(Reversed(value)) };
+        assert_eq!(ValueTypes::compare(&reversed(1), &reversed(2)), Some(std::cmp::Ordering::Greater));
     }
 }

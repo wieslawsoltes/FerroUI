@@ -1,0 +1,56 @@
+[package]
+name = "ferroui-xaml-interactions-custom"
+description = "The custom behaviors, triggers and actions of FerroUI: about 330 behaviors for specific controls, input, focus, validation, commands, windows, dialogs and services"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+homepage.workspace = true
+readme.workspace = true
+keywords.workspace = true
+categories.workspace = true
+build = "build.rs"
+# The build script exports the type model of the crate (its behaviors, triggers and actions, for
+# markup); Cargo hands the path of the file to the build scripts of the crates that depend on this
+# one (docs/porting/xaml.md, 9.5.13 and 9.6.3).
+links = "ferroui_xaml_interactions_custom_xaml"
+
+# Unit tests live next to the code (the `tests/` module of the library), not as integration test
+# targets.
+autotests = false
+autobenches = false
+autoexamples = false
+
+[lib]
+path = "lib.rs"
+
+[features]
+default = []
+
+[dependencies]
+ferroui-base = { workspace = true }
+ferroui-controls = { workspace = true }
+ferroui-xaml-interactivity = { workspace = true }
+ferroui-xaml-behaviors-animations = { workspace = true }
+# `ObservableCollection` items sources (ItemsControl, Collections).
+ferroui-system = { workspace = true }
+# The pattern of `RegexValidationRule` (Validation).
+regex = "1"
+
+[build-dependencies]
+ferroui-build-scan = { workspace = true }
+
+[dev-dependencies]
+ferroui-base = { workspace = true, features = ["testing"] }
+ferroui-controls = { workspace = true, features = ["testing"] }
+# The application of the reference's tests has the Fluent theme.
+ferroui-themes-fluent = { workspace = true }
+ferroui-xaml-interactions = { workspace = true }
+# The windows of the tests are documents loaded with the run-time loader.
+ferroui-markup-xaml = { workspace = true }
+ferroui-markup-xaml-loader = { workspace = true, features = ["runtime", "testing", "emitter"] }
+
+# The group of the crate in the table of the README (docs/release.md).
+[package.metadata.release]
+group = "controls"

@@ -253,6 +253,36 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "72b3254f16251a8381aa12e40e3c4d2f0199f8c6508fbecb9d91f575e0fbb8c6"
 
 [[package]]
+name = "behaviors-gallery"
+version = "0.4.0"
+dependencies = [
+ "ferroui-base",
+ "ferroui-controls",
+ "ferroui-desktop",
+ "ferroui-fonts-inter",
+ "ferroui-markup",
+ "ferroui-markup-xaml",
+ "ferroui-reactive",
+ "ferroui-reactiveui",
+ "ferroui-reactiveui-controls",
+ "ferroui-splat",
+ "ferroui-system",
+ "ferroui-themes-fluent",
+ "ferroui-xaml-behaviors-animations",
+ "ferroui-xaml-interactions",
+ "ferroui-xaml-interactions-custom",
+ "ferroui-xaml-interactions-draganddrop",
+ "ferroui-xaml-interactions-draggable",
+ "ferroui-xaml-interactions-events",
+ "ferroui-xaml-interactions-reactiveui",
+ "ferroui-xaml-interactions-responsive",
+ "ferroui-xaml-interactivity",
+ "sample-build",
+ "sample-support",
+ "sample-testing",
+]
+
+[[package]]
 name = "bindgen"
 version = "0.72.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1955,6 +1985,137 @@ dependencies = [
  "libc",
  "x11-dl",
  "zbus",
+]
+
+[[package]]
+name = "ferroui-xaml-behaviors"
+version = "0.4.0"
+dependencies = [
+ "ferroui-base",
+ "ferroui-build-scan",
+ "ferroui-xaml-behaviors-animations",
+ "ferroui-xaml-interactions",
+ "ferroui-xaml-interactions-custom",
+ "ferroui-xaml-interactions-draganddrop",
+ "ferroui-xaml-interactions-draggable",
+ "ferroui-xaml-interactions-events",
+ "ferroui-xaml-interactions-reactiveui",
+ "ferroui-xaml-interactions-responsive",
+ "ferroui-xaml-interactivity",
+]
+
+[[package]]
+name = "ferroui-xaml-behaviors-animations"
+version = "0.4.0"
+dependencies = [
+ "ferroui-base",
+ "ferroui-build-scan",
+ "ferroui-controls",
+]
+
+[[package]]
+name = "ferroui-xaml-interactions"
+version = "0.4.0"
+dependencies = [
+ "ferroui-base",
+ "ferroui-build-scan",
+ "ferroui-controls",
+ "ferroui-markup-xaml",
+ "ferroui-markup-xaml-loader",
+ "ferroui-xaml-interactions-custom",
+ "ferroui-xaml-interactivity",
+]
+
+[[package]]
+name = "ferroui-xaml-interactions-custom"
+version = "0.4.0"
+dependencies = [
+ "ferroui-base",
+ "ferroui-build-scan",
+ "ferroui-controls",
+ "ferroui-markup-xaml",
+ "ferroui-markup-xaml-loader",
+ "ferroui-system",
+ "ferroui-themes-fluent",
+ "ferroui-xaml-behaviors-animations",
+ "ferroui-xaml-interactions",
+ "ferroui-xaml-interactivity",
+ "regex",
+]
+
+[[package]]
+name = "ferroui-xaml-interactions-draganddrop"
+version = "0.4.0"
+dependencies = [
+ "ferroui-base",
+ "ferroui-build",
+ "ferroui-controls",
+ "ferroui-markup-xaml",
+ "ferroui-markup-xaml-loader",
+ "ferroui-system",
+ "ferroui-themes-fluent",
+ "ferroui-xaml-interactivity",
+]
+
+[[package]]
+name = "ferroui-xaml-interactions-draggable"
+version = "0.4.0"
+dependencies = [
+ "ferroui-base",
+ "ferroui-build",
+ "ferroui-controls",
+ "ferroui-markup-xaml",
+ "ferroui-markup-xaml-loader",
+ "ferroui-system",
+ "ferroui-themes-fluent",
+ "ferroui-xaml-interactivity",
+]
+
+[[package]]
+name = "ferroui-xaml-interactions-events"
+version = "0.4.0"
+dependencies = [
+ "ferroui-base",
+ "ferroui-build-scan",
+ "ferroui-controls",
+ "ferroui-xaml-interactivity",
+]
+
+[[package]]
+name = "ferroui-xaml-interactions-reactiveui"
+version = "0.4.0"
+dependencies = [
+ "ferroui-base",
+ "ferroui-build-scan",
+ "ferroui-controls",
+ "ferroui-reactive",
+ "ferroui-reactiveui",
+ "ferroui-splat",
+ "ferroui-system",
+ "ferroui-xaml-interactivity",
+]
+
+[[package]]
+name = "ferroui-xaml-interactions-responsive"
+version = "0.4.0"
+dependencies = [
+ "ferroui-base",
+ "ferroui-build-scan",
+ "ferroui-controls",
+ "ferroui-xaml-interactivity",
+]
+
+[[package]]
+name = "ferroui-xaml-interactivity"
+version = "0.4.0"
+dependencies = [
+ "ferroui-base",
+ "ferroui-build-scan",
+ "ferroui-controls",
+ "ferroui-markup",
+ "ferroui-markup-xaml",
+ "ferroui-markup-xaml-loader",
+ "ferroui-xaml-interactions",
 ]
 
 [[package]]
