@@ -200,6 +200,19 @@ It rewrites the root manifest, runs `cargo metadata` (which also brings `Cargo.l
 
 A version that was published is never reused. If a release stops half way and cannot be completed (section 8.3), the next attempt is the next preview number.
 
+### 3.1 API stability
+
+Within a minor version the public API of the published crates only grows: `0.4.x` adds members and types and changes or removes none, and neither the default value of a property nor its default binding mode changes. Two checks of the continuous integration enforce it on every pull request that changes more than documentation:
+
+- **Signatures** (job `api-gate` of `ci.yml`, "API gate (cargo-semver-checks)"): `scripts/api-gate/semver_checks.py` runs [cargo-semver-checks](https://github.com/obi1kenobi/cargo-semver-checks) for each published crate against the sources of the release, with the release type `minor` and the default features. The baseline is the tag of the release, or, while it has none, the commit that set the workspace to its version (`BASELINE_VERSION` and `BASELINE_COMMIT` in the script; 0.4.0 is commit `2cdce0d4`). A crate that joined after the release is not checked. It runs on macOS, where the whole workspace builds, so the API of a platform crate is the one it has when built for macOS. `semver_checks.py --list` prints the baseline and the crates without running anything.
+- **Defaults of properties** (`property_defaults_tests` of `ferroui-controls`, run by the macOS job): the owner, name, value type, default value, default binding mode and inheritance of every styled and attached property of the public types of `ferroui-base` and `ferroui-controls`, and every type whose default or binding mode of a property differs from its base type's, compared with the checked-in `src/FerroUI.Controls/property_defaults.snapshot`. A changed or removed line fails as a break; an added line fails until the snapshot records it, which a pull request that adds properties does by regenerating it:
+
+  ```sh
+  FERROUI_UPDATE_PROPERTY_DEFAULTS=1 cargo test -p ferroui-controls --lib property_defaults
+  ```
+
+A change that has to break the API waits for the next minor version. When a release starts a minor version (`0.5.0`), its pull request sets `BASELINE_VERSION` and `BASELINE_COMMIT` of the script to that release.
+
 ## 4. Metadata
 
 `crates.py check` requires of every published crate: `description`, `license`, `repository`, `readme`, `keywords` (at most five) and `categories`, and the group of the README table. `homepage`, `readme`, `keywords` and `categories` are stated once in `[workspace.package]` and inherited; the build crates, the interop crates and `xamlx` state keywords and categories of their own. The `readme` is the README of the repository: Cargo copies a readme from outside the package directory into the package.
@@ -339,6 +352,7 @@ After the release:
 - [ ] At the first release only: remove the note between the `release-note` markers of the README ("Upcoming"), and the sentence of its status paragraph that says nothing has been published.
 - [ ] Set the date of the entry in `CHANGELOG.md` and point its link at the tag.
 - [ ] Look at the docs.rs badges of the README table after an hour (section 7) and note the failures for the next preview.
+- [ ] After a release that starts a minor version: set the baseline of the API gate to it (`BASELINE_VERSION` and `BASELINE_COMMIT` of `scripts/api-gate/semver_checks.py`, section 3.1).
 - [ ] Set the next version (`scripts/release/set-version.sh 0.1.0-preview.<N+1>` after a preview, the first preview of the next minor version, such as `0.2.0-preview.1`, after a release), so that `main` never carries a version that is on crates.io with other contents.
 
 ## 10. A preview that turns out broken

@@ -121,7 +121,7 @@ Use the upstream pages for an application written against upstream's model, and 
 ## 8. API stability
 
 - The controls of this page are additions to `ferroui-controls`: no existing member changes. Within 0.4 the public API only grows.
-- W11 adds a repository-wide gate to `ci.yml`: `cargo semver-checks check-release` of the published crates against 0.4.0 from crates.io, and a snapshot test of the default values of the registered properties (owner, name, value type, default for the owner, default binding mode, inheritance) compared with a checked-in snapshot.
+- The repository-wide API gate (W11, `docs/release.md` section 3.1): cargo-semver-checks of the published crates against the sources of 0.4.0 (0.4.0 has no tag and is not on crates.io yet, so the baseline is its release commit `2cdce0d4`), and the snapshot `src/FerroUI.Controls/property_defaults.snapshot` of the defaults of the styled and attached properties of `ferroui-base` and `ferroui-controls` (owner, name, value type, default, default binding mode, inheritance, and the overrides of each type). Each control pull request regenerates the snapshot with its new properties.
 - The controls of this page override no metadata of other types.
 
 ## 9. Landing plan
