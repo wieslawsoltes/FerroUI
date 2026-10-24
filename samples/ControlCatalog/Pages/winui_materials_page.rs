@@ -499,7 +499,7 @@ fn lighting_section() -> Ref<StackPanel> {
                 follow.set_reference_parameter("pointer", pointer);
                 light.start_animation("Offset", &*follow);
             }
-            ElementCompositionPreview::set_element_child_visual(host, Some(container.visual().clone()));
+            ElementCompositionPreview::set_element_child_visual(host, Some(container.clone()));
         })
         .upcast(),
     );
@@ -516,7 +516,7 @@ fn lighting_section() -> Ref<StackPanel> {
             container.children().insert_at_top((*sprite).clone());
             let space = compositor.create_container_visual();
             space.set_size(Vector::new(1.0, 1.0));
-            container.children().insert_at_top((*space).clone());
+            container.children().insert_at_top(space.clone());
             let light = compositor.create_spot_light();
             light.set_offset(ferroui_base::Vector3D::new(0.0, 90.0, 120.0));
             light.set_outer_cone_angle_in_degrees(30.0);
@@ -530,7 +530,7 @@ fn lighting_section() -> Ref<StackPanel> {
             travel.set_iteration_behavior(ferroui_base::rendering::composition::animations::AnimationIterationBehavior::Forever);
             travel.set_direction(ferroui_base::animation::PlaybackDirection::Alternate);
             space.start_animation("Offset.X", &*travel);
-            ElementCompositionPreview::set_element_child_visual(host, Some(container.visual().clone()));
+            ElementCompositionPreview::set_element_child_visual(host, Some(container.clone()));
         })
         .upcast(),
     );

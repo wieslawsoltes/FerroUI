@@ -132,7 +132,7 @@ fn template_with_fallback() -> Option<Rc<dyn crate::templates::IControlTemplate>
         let fallback = Border::new();
         fallback.set_name(Some("PART_TransparencyFallback".to_owned()));
         scope.register("PART_TransparencyFallback", fallback.clone().upcast::<FerroObject>());
-        panel.children().add(fallback.upcast());
+        panel.children().add(fallback.upcast::<Control>());
         panel.upcast()
     }))
 }
@@ -186,6 +186,8 @@ fn reveal_focus_shows_a_glow_around_the_element_keyboard_focus_moves_to() {
     use crate::StackPanel;
     use ferroui_base::input::{KeyModifiers, NavigationMethod};
 
+    let _scope = crate::test_support::test_scope();
+    let _focus = crate::test_support_buttons::focus_scope();
     let focusable = || {
         let control = Control::new();
         control.set_focusable(true);
@@ -214,20 +216,24 @@ fn reveal_focus_shows_a_glow_around_the_element_keyboard_focus_moves_to() {
     RevealFocus::set_focus_visual_kind(FocusVisualKind::Reveal);
     assert!(second.focus_with(NavigationMethod::Tab, KeyModifiers::NONE));
     let host = RevealFocus::glow_host().expect("a glow");
-    assert!(RevealFocus::focused_element().is_some_and(|element| std::ptr::eq::<ferroui_base::Visual>(&*element, &*second)));
+    assert!(RevealFocus::focused_element().is_some_and(|element| same(&element, &second)));
     let adorned = AdornerLayer::get_adorned_element(&host).expect("adorned");
-    assert!(std::ptr::eq::<ferroui_base::Visual>(&*adorned, &*second));
+    assert!(same(&adorned, &second));
     assert_eq!(Thickness::uniform(-glow_inset(2.0)), host.margin());
-    assert!(layer.children().snapshot().iter().any(|child| std::ptr::eq::<Control>(&**child, &*host)));
+    assert!(layer.children().snapshot().iter().any(|child| same(child, &host)));
 
     // Focus moved by the pointer shows none.
     assert!(first.focus_with(NavigationMethod::Pointer, KeyModifiers::NONE));
     assert!(RevealFocus::glow_host().is_none());
-    assert!(!layer.children().snapshot().iter().any(|child| std::ptr::eq::<Control>(&**child, &*host)));
+    assert!(!layer.children().snapshot().iter().any(|child| same(child, &host)));
 
     // Back to the default kind: the glow goes.
     assert!(second.focus_with(NavigationMethod::Directional, KeyModifiers::NONE));
     assert!(RevealFocus::glow_host().is_some());
     RevealFocus::set_focus_visual_kind(FocusVisualKind::HighVisibility);
     assert!(RevealFocus::glow_host().is_none());
+}
+
+fn same(a: &ferroui_base::Visual, b: &ferroui_base::Visual) -> bool {
+    std::ptr::eq(a, b)
 }

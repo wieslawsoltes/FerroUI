@@ -167,8 +167,10 @@ impl XamlCompositionBrushBase {
             }
             state.composition_brush = brush;
         }
+        // The server brush paints the new composition brush: the render
+        // data of the elements that use the brush is unchanged (and a brush
+        // that connects while the renderer draws must not invalidate them).
         self.register_for_serialization();
-        self.raise_invalidated();
     }
 
     /// Whether the composition brush shows what is behind the window (a host
@@ -184,7 +186,6 @@ impl XamlCompositionBrushBase {
         }
         self.state.borrow_mut().needs_transparent_window = value;
         self.register_for_serialization();
-        self.raise_invalidated();
     }
 
     /// The compositor the brush is connected to (`None` while it is not).
