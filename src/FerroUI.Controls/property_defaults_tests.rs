@@ -63,7 +63,7 @@ fn display(value: &BoxedValue) -> String {
 fn public_types() -> Vec<&'static TypeInfo> {
     let mut types: Vec<&'static TypeInfo> = TypeInfo::registered_types()
         .into_iter()
-        .filter(|t| t.rust_path().is_some() && t.namespace().starts_with("FerroUI"))
+        .filter(|&t| t.rust_path().is_some() && t.namespace().starts_with("FerroUI"))
         .collect();
     types.sort_by_key(|t| t.full_name());
     types.dedup_by(|a, b| std::ptr::eq(*a, *b));
