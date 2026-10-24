@@ -8,6 +8,7 @@ use ferroui_base::{
     ferro_class, ferro_class_info, ferro_impl_classes, instantiate, FerroObjectImpl, Ref, StyledElement,
     StyledElementImpl, VisualImpl, VisualImplExt, VisualTreeAttachmentEventArgs,
 };
+use ferroui_base::ferro_property;
 use std::rc::Rc;
 
 /// The control that hosts the items of a menu flyout.
@@ -61,7 +62,7 @@ impl VisualImpl for MenuFlyoutPresenter {
 }
 
 ferroui_base::ferro_properties! { impl MenuFlyoutPresenter {
-    ferroui_base::ferro_property!(
+    ferro_property!(
         /// Defines the `SystemBackdrop` property.
         pub fn system_backdrop_property() -> ferroui_base::StyledProperty<Option<Ref<crate::media::SystemBackdrop>>> {
             ferroui_base::FerroProperty::register::<MenuFlyoutPresenter, _>("SystemBackdrop", None)

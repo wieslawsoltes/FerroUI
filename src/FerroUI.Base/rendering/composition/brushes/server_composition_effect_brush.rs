@@ -575,7 +575,7 @@ impl ServerCompositionEffectBrush {
                 size.width * 4,
             )
         });
-        if let Some(Some(bitmap)) = bitmap {
+        if let Some(bitmap) = bitmap {
             let source = Rect::new(0.0, 0.0, size.width as f64, size.height as f64);
             canvas.draw_bitmap(&*bitmap, 1.0, source, rect);
         }

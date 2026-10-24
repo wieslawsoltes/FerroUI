@@ -16,7 +16,7 @@ use ferroui_base::rendering::composition::system_backdrops::{
 use ferroui_base::rendering::composition::{CompositionBrush, Compositor};
 use ferroui_base::styling::ThemeVariant;
 use ferroui_base::{
-    ferro_class, ferro_impl_classes, ferro_property, instantiate, FerroLocator, FerroObject, FerroObjectImpl,
+    ferro_class, ferro_impl_classes, ferro_property, instantiate, FerroLocator, LocatorExtensions, FerroObject, FerroObjectImpl,
     FerroObjectImplExt, FerroProperty, FerroPropertyChangedEventArgs, Ref, StyledProperty, WeakRef,
 };
 use std::cell::{Cell, RefCell};
@@ -324,7 +324,7 @@ fn is_high_contrast() -> bool {
 }
 
 fn theme_of(top_level: &TopLevel) -> SystemBackdropTheme {
-    if top_level.actual_theme_variant() == ThemeVariant::dark() {
+    if top_level.actual_theme_variant() == Some(ThemeVariant::dark()) {
         SystemBackdropTheme::Dark
     } else {
         SystemBackdropTheme::Light

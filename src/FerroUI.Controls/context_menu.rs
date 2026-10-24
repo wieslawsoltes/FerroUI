@@ -14,7 +14,7 @@ use ferroui_base::utilities::{CancelEventArgs, HandlerList};
 use ferroui_base::{
     ferro_class, ferro_class_info, ferro_impl_classes, ferro_properties, instantiate, ElementRef, FerroObjectImpl,
     FerroObjectImplExt, FerroPropertyChangedEventArgs, Nullable, Rect, Ref, StyledElement, StyledElementImpl,
-    StyledProperty, VisualImpl, VisualTreeAttachmentEventArgs, WeakRef,
+    StyledProperty, VisualImpl, VisualImplExt, VisualTreeAttachmentEventArgs, WeakRef,
 };
 use std::cell::RefCell;
 use std::rc::Rc;

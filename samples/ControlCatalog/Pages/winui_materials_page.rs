@@ -140,7 +140,7 @@ fn acrylic_section() -> Ref<StackPanel> {
     let fallback = acrylic(Color::from_rgb(0x2C, 0x2C, 0x2C), 0.15, Some(0.96), Color::from_rgb(0x2C, 0x2C, 0x2C));
     fallback.set_always_use_fallback(true);
     let host = acrylic(Color::from_rgb(0x2C, 0x2C, 0x2C), 0.3, Some(0.6), Color::from_rgb(0x40, 0x40, 0x40));
-    host.set_background_source(ferroui_base::media::AcrylicBackgroundSource::HostBackdrop);
+    host.set_background_source(ferroui_base::media::AcrylicBrushBackgroundSource::HostBackdrop);
 
     let cards = row(16.0);
     cards.set_margin(Thickness::new(16.0, 36.0, 16.0, 16.0));

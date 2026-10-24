@@ -284,7 +284,7 @@ fn hide() {
         lights.traveling_spot.targets().remove_all();
     }
     if let Some(layer) = glow.layer.upgrade() {
-        layer.children().remove(glow.host.clone().upcast());
+        layer.children().remove(glow.host.clone().upcast::<crate::Control>());
     }
 }
 
@@ -306,8 +306,8 @@ fn show(element: &Ref<Visual>, direction: RevealFocusDirection) {
     let host = Border::new();
     host.set_is_hit_test_visible(false);
     host.set_margin(Thickness::uniform(-inset));
-    AdornerLayer::set_adorned_element(&host, &**element);
-    layer.children().add(host.clone().upcast());
+    AdornerLayer::set_adorned_element(&host, element);
+    layer.children().add(host.clone().upcast::<crate::Control>());
     let glow = Rc::new(ShownGlow {
         element: element.downgrade(),
         host: host.clone(),

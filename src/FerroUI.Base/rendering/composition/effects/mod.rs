@@ -21,7 +21,7 @@ pub use composition_effect_factory::{
 };
 pub use effect_graph::blur_amount_to_radius;
 pub(crate) use effect_graph::{
-    EffectColor, EffectGraph, EffectMatrix, EffectNode, EffectNodeKind, EffectPropertyValue, EffectScalar,
+    EffectColor, EffectGraph, EffectMatrix, EffectNode, EffectNodeKind, EffectPropertyValue, EffectScalar, PixelOp,
 };
 pub use graphics_effects::{
     AlphaMaskEffect, ArithmeticCompositeEffect, BlendEffect, BlendEffectMode, BorderEffect, CanvasComposite,

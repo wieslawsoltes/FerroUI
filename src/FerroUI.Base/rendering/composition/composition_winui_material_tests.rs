@@ -644,7 +644,7 @@ fn desktop_acrylic_without_platform_support_falls_back_and_over_a_blur_draws_its
 fn host_backdrop_acrylic_shows_what_is_behind_the_window_and_falls_back_while_inactive() {
     let s = CompositorCanvas::new();
     let brush = AcrylicBrush::new();
-    brush.set_background_source(crate::media::AcrylicBackgroundSource::HostBackdrop);
+    brush.set_background_source(crate::media::AcrylicBrushBackgroundSource::HostBackdrop);
     brush.set_tint_color(Color::from_rgb(0x2c, 0x2c, 0x2c));
     brush.set_tint_opacity(0.5);
     brush.set_fallback_color(Colors::GREEN);
@@ -682,7 +682,7 @@ fn host_backdrop_acrylic_shows_what_is_behind_the_window_and_falls_back_while_in
     assert!(brush.is_using_acrylic_brush());
 
     // Back to the backdrop of the window: the in-app recipe.
-    brush.set_background_source(crate::media::AcrylicBackgroundSource::Backdrop);
+    brush.set_background_source(crate::media::AcrylicBrushBackgroundSource::Backdrop);
     assert!(!brush.needs_transparent_window());
     let effect = CompositionEffectBrush::from_brush(&brush.composition_brush().unwrap()).unwrap();
     let backdrop = effect.get_source_parameter("Backdrop").expect("a backdrop");

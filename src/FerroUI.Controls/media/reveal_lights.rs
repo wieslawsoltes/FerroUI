@@ -12,12 +12,13 @@ use ferroui_base::numerics::Vector2;
 use ferroui_base::reactive::IDisposable;
 use ferroui_base::rendering::composition::{
     AmbientLight, CompositionBatchTypes, CompositionPropertySet, CompositionScopedBatch, Compositor,
-    ExpressionAnimation, ICompositionObjectAnimations, SpotLight,
+    ICompositionObjectAnimations, SpotLight,
 };
 use ferroui_base::{
     ferro_class, ferro_impl_classes, ferro_property, instantiate, AttachedProperty, FerroObject, FerroObjectImpl,
     FerroObjectImplExt, FerroProperty, Ref, StyledProperty, Visual, WeakRef,
 };
+use ferroui_base::rendering::composition::animations::ExpressionAnimation;
 use std::cell::{Cell, RefCell};
 use std::rc::Rc;
 use std::time::Duration;
@@ -236,7 +237,7 @@ struct HoverResources {
     outer_angle_animation: Rc<ExpressionAnimation>,
     offset_props: Rc<CompositionPropertySet>,
     colors_proxy: Rc<CompositionPropertySet>,
-    pointer_pressed: Option<(WeakRef<Visual>, RoutedEventHandlerToken)>,
+    pointer_pressed: Option<(WeakRef<Interactive>, RoutedEventHandlerToken)>,
 }
 
 #[derive(Default)]
@@ -411,16 +412,20 @@ impl RevealHoverLight {
 
         // Whether a press comes from the pointer or the keyboard.
         let weak = self.to_ref().downgrade();
-        let token = element.add_handler_with(
-            &InputElement::pointer_pressed_event(),
-            move |_: &Interactive, _: &PointerPressedEventArgs| {
-                if let Some(this) = weak.upgrade() {
-                    this.on_pointer_pressed();
-                }
-            },
-            RoutingStrategies::TUNNEL | RoutingStrategies::BUBBLE,
-            true,
-        );
+        let interactive = element.clone().cast::<Interactive>();
+        let pointer_pressed = interactive.map(|interactive| {
+            let token = interactive.add_handler_with(
+                &InputElement::pointer_pressed_event(),
+                move |_: &Interactive, _: &PointerPressedEventArgs| {
+                    if let Some(this) = weak.upgrade() {
+                        this.on_pointer_pressed();
+                    }
+                },
+                RoutingStrategies::TUNNEL | RoutingStrategies::BUBBLE,
+                true,
+            );
+            (interactive.downgrade(), token)
+        });
 
         let pointer = ElementCompositionPreview::get_pointer_position_property_set(&element);
         if let Some(pointer) = &pointer {
@@ -435,7 +440,7 @@ impl RevealHoverLight {
             outer_angle_animation,
             offset_props,
             colors_proxy,
-            pointer_pressed: Some((element.to_ref().downgrade(), token)),
+            pointer_pressed,
         });
         self.set_spot_light_state_immediate(SpotState::AnimToOff);
         self.set_composition_light(Some((*light).clone()));
@@ -451,7 +456,7 @@ impl RevealHoverLight {
         if let Some(resources) = resources {
             if let Some((element, token)) = resources.pointer_pressed {
                 if let Some(element) = element.upgrade() {
-                    element.remove_handler(&InputElement::pointer_pressed_event(), token);
+                    let _ = element.remove_handler(&InputElement::pointer_pressed_event(), token);
                 }
             }
             resources.light.dispose();
@@ -940,14 +945,14 @@ impl RevealBorderLight {
         if let Some(resources) = resources {
             for (top_level, event, token) in resources.window_handlers {
                 if let Some(top_level) = top_level.upgrade() {
-                    match event {
+                    let _ = match event {
                         "entered" => top_level.remove_handler(&InputElement::pointer_entered_event(), token),
                         "exited" => top_level.remove_handler(&InputElement::pointer_exited_event(), token),
                         "moved" => top_level.remove_handler(&InputElement::pointer_moved_event(), token),
                         "pressed" => top_level.remove_handler(&InputElement::pointer_pressed_event(), token),
                         "released" => top_level.remove_handler(&InputElement::pointer_released_event(), token),
                         _ => top_level.remove_handler(&InputElement::pointer_capture_lost_event(), token),
-                    }
+                    };
                 }
             }
             resources.light.stop_animation("Offset");
