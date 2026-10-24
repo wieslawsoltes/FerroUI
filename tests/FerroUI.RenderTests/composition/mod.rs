@@ -1,2 +1,3 @@
 mod direct_fb_composition_tests;
 mod open_gl_composition_interop_tests;
+mod winui_shadow_tests;
