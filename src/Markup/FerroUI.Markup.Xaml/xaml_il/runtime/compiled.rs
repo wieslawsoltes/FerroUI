@@ -186,14 +186,12 @@ pub fn markup_handle(markup: &'static MarkupType) -> ValueType {
 /// conversions ([`ValueTypes::is_assignable`]), which the declarations of
 /// that metadata register.
 ///
-/// A value in a nullable form that holds a value (`Option<Rc<dyn Contract>>`, which a
-/// markup extension provides for a property of that type: `ResolveByName` brings the
-/// element to the type the property stores) is an instance of what it holds, as the
-/// run-time loader takes the type of such a value from the metadata that declares the
-/// form among its handles.
+/// A value held in another handle of the markup type of `target` (the nullable form
+/// `Option<Rc<dyn Contract>>`, which `ResolveByName` provides for a property of that type:
+/// it brings the element to the type the property stores) is an instance of it, as the
+/// run-time loader takes the type of a value from the metadata that declares its handle.
 pub fn is_instance(value: &MarkupValue, target: ValueType) -> bool {
     let Some(value) = value else { return false };
-    let value = &ValueTypes::normalize(value.clone()).unwrap_or_else(|| value.clone());
     if let Some(object) = ValueTypes::as_object(&**value) {
         let class = object.get_type();
         if let Some((target_class, false)) = TypeInfo::find_by_handle(target.id()) {
@@ -204,7 +202,13 @@ pub fn is_instance(value: &MarkupValue, target: ValueType) -> bool {
             None => false,
         };
     }
-    ValueTypes::is_assignable(ValueType::of_value(&**value), target)
+    if ValueTypes::is_assignable(ValueType::of_value(&**value), target) {
+        return true;
+    }
+    // Not the null of the form: the null of a nullable form is no instance (`isinst`).
+    MarkupType::find_by_handle(value.value_type_id())
+        .filter(|markup| markup.handles.iter().any(|handle| handle().id() == target.id()))
+        .is_some_and(|_| ValueTypes::normalize(value.clone()).is_some())
 }
 
 /// The value `value` as the Rust type `T` a member declares, with the
