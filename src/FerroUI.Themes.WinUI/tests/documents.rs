@@ -156,6 +156,8 @@ document_tests! {
     controls_command_bar => "/Controls/CommandBar.xaml";
     controls_content_page => "/Controls/ContentPage.xaml";
     controls_drawer_page => "/Controls/DrawerPage.xaml";
+    controls_frame => "/Controls/Frame.xaml";
+    controls_navigation_view => "/Controls/NavigationView.xaml";
     controls_navigation_page => "/Controls/NavigationPage.xaml";
     controls_split_view => "/Controls/SplitView.xaml";
     controls_tab_control => "/Controls/TabControl.xaml";

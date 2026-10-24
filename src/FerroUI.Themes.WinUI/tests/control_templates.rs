@@ -267,6 +267,11 @@ control_tests! {
     command_bar_toggle_button => "CommandBarToggleButton";
     content_page => "ContentPage";
     drawer_page => "DrawerPage";
+    frame => "Frame";
+    navigation_view => "NavigationView";
+    navigation_view_item => "NavigationViewItem";
+    navigation_view_item_header => "NavigationViewItemHeader";
+    navigation_view_item_separator => "NavigationViewItemSeparator";
     navigation_page => "NavigationPage";
     split_view => "SplitView";
     tab_control => "TabControl";
@@ -542,6 +547,63 @@ fn the_input_controls_get_their_parts_and_resources_from_the_theme() {
     assert_eq!(8.0, background.spacing());
     assert_eq!(5, background.children().count());
     assert_eq!(16.0, background.children().get(0).bounds().width);
+    window.close();
+}
+
+/// The navigation controls of WinUI (`Controls/Frame.xaml`, `Controls/NavigationView.xaml`;
+/// docs/porting/winui-controls.md, section 10.4): a NavigationView with its pane at the left gets
+/// the parts its code looks up, its items are realized in `MenuItemsHost` with the parts of the
+/// item template, the template settings carry the widths of the compact pane length, and a Frame in
+/// its content hosts its content in `PART_ContentPresenter`.
+#[test]
+fn the_navigation_controls_get_their_parts_from_the_theme() {
+    use ferroui_base::BoxedValue;
+    use ferroui_controls::presenters::ContentPresenter;
+    use ferroui_controls::primitives::Popup;
+    use ferroui_controls::{Button, Frame, NavigationView, NavigationViewItem, NavigationViewPaneDisplayMode, SplitView, StackPanel};
+
+    let _app = start_themed_application();
+    let navigation = NavigationView::new();
+    navigation.set_pane_display_mode(NavigationViewPaneDisplayMode::Left);
+    let item = NavigationViewItem::new();
+    item.set_content(Some(Rc::new("Home".to_string()) as BoxedValue));
+    item.menu_items().add(Some(Rc::new("Child".to_string()) as BoxedValue));
+    navigation.menu_items().add(Some(Control::boxed(&item)));
+    let frame = Frame::new();
+    navigation.set_content(Some(Control::boxed(&frame)));
+    let window = Window::new();
+    window.set_width(1200.0);
+    window.set_height(600.0);
+    window.set_content(Some(Control::boxed(&navigation)));
+    window.show();
+    window.update_layout();
+
+    let part = |control: &TemplatedControl, name: &str| {
+        control
+            .get_template_descendants()
+            .into_iter()
+            .find(|element| element.name().as_deref() == Some(name))
+            .unwrap_or_else(|| panic!("the part {name} of {}", control.get_type().name()))
+    };
+    assert!(part(&navigation, "RootSplitView").cast::<SplitView>().is_some());
+    assert!(part(&navigation, "TogglePaneButton").cast::<Button>().is_some());
+    let host = part(&navigation, "MenuItemsHost").cast::<StackPanel>().expect("a stack panel");
+    let item_control: Ref<Control> = item.clone().upcast();
+    assert!(host.children().snapshot().iter().any(|child| *child == item_control));
+    // The settings item is the last footer item.
+    let footer = part(&navigation, "FooterMenuItemsHost").cast::<StackPanel>().expect("a stack panel");
+    assert_eq!(1, footer.children().count());
+    // CompactPaneLength is NavigationViewCompactPaneLength (48); the smaller width is 8 less.
+    assert_eq!(48.0, navigation.compact_pane_length());
+    assert_eq!(40.0, navigation.template_settings().smaller_pane_toggle_button_width());
+    assert!(navigation.classes().contains(":expanded"));
+    assert!(part(&item, "ContentGrid").cast::<Control>().is_some());
+    assert!(part(&item, "ExpandCollapseChevron").cast::<Control>().is_some());
+    assert!(part(&item, "ChildrenFlyout").cast::<Popup>().is_some());
+    assert!(part(&item, "NavigationViewItemMenuItemsHost").cast::<StackPanel>().is_some());
+    // An item with children shows its chevron.
+    assert!(item.classes().contains(":chevron-visible-closed"));
+    assert!(part(&frame, "PART_ContentPresenter").cast::<ContentPresenter>().is_some());
     window.close();
 }
 

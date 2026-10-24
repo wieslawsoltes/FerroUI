@@ -26185,7 +26185,7 @@
    "kind": "Style",
    "target_type": "NavigationViewItemPresenter",
    "status": "waived",
-   "reason": "Reveal focus variants of the NavigationView item presenter: deprecated (Reveal focus), and FerroUI has no NavigationView.",
+   "reason": "Reveal focus variants of the NavigationView item presenter: deprecated (Reveal focus); the template of NavigationViewItem (Controls/NavigationView.xaml) is drawn after the presenter styles without Reveal focus.",
    "batch": null
   },
   {
@@ -26195,7 +26195,7 @@
    "kind": "Style",
    "target_type": "NavigationViewItemPresenter",
    "status": "waived",
-   "reason": "Reveal focus variants of the NavigationView item presenter: deprecated (Reveal focus), and FerroUI has no NavigationView.",
+   "reason": "Reveal focus variants of the NavigationView item presenter: deprecated (Reveal focus); the template of NavigationViewItem (Controls/NavigationView.xaml) is drawn after the presenter styles without Reveal focus.",
    "batch": null
   },
   {
@@ -64044,8 +64044,8 @@
    "key": "{NavigationViewItemHeader}",
    "kind": "Style",
    "target_type": "NavigationViewItemHeader",
-   "status": "waived",
-   "reason": "NavigationView: no FerroUI control (batch B5). DrawerPage, TabbedPage and the tabs of TabControl at the left and the right are built from its panes and items (Controls/DrawerPage.xaml, Controls/TabbedPage.xaml, Controls/TabItem.xaml); the styles of NavigationView itself, its items, item headers and separators have no control to style.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -64054,8 +64054,8 @@
    "key": "{NavigationViewItemSeparator}",
    "kind": "Style",
    "target_type": "NavigationViewItemSeparator",
-   "status": "waived",
-   "reason": "NavigationView: no FerroUI control (batch B5). DrawerPage, TabbedPage and the tabs of TabControl at the left and the right are built from its panes and items (Controls/DrawerPage.xaml, Controls/TabbedPage.xaml, Controls/TabItem.xaml); the styles of NavigationView itself, its items, item headers and separators have no control to style.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -64064,8 +64064,8 @@
    "key": "{NavigationViewItem}",
    "kind": "Style",
    "target_type": "NavigationViewItem",
-   "status": "waived",
-   "reason": "NavigationView: no FerroUI control (batch B5). DrawerPage, TabbedPage and the tabs of TabControl at the left and the right are built from its panes and items (Controls/DrawerPage.xaml, Controls/TabbedPage.xaml, Controls/TabItem.xaml); the styles of NavigationView itself, its items, item headers and separators have no control to style.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -64074,8 +64074,8 @@
    "key": "{NavigationView}",
    "kind": "Style",
    "target_type": "NavigationView",
-   "status": "waived",
-   "reason": "NavigationView: no FerroUI control (batch B5). DrawerPage, TabbedPage and the tabs of TabControl at the left and the right are built from its panes and items (Controls/DrawerPage.xaml, Controls/TabbedPage.xaml, Controls/TabItem.xaml); the styles of NavigationView itself, its items, item headers and separators have no control to style.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -64084,8 +64084,8 @@
    "key": "MUX_NavigationViewItemPresenterStyleWhenOnLeftPane",
    "kind": "Style",
    "target_type": "NavigationViewItemPresenter",
-   "status": "waived",
-   "reason": "NavigationView: no FerroUI control (batch B5). The item presenter styles of the left and the top pane are written into the tab themes built from them (Controls/TabItem.xaml for the tabs at the left and the right, TabbedPageTabItemTheme of Controls/TabbedPage.xaml for the top pane); the settings item, the overflow button of the top pane and the search button of the pane have no counterpart in FerroUI's pages.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -64094,8 +64094,8 @@
    "key": "MUX_NavigationViewItemPresenterStyleWhenOnTopPane",
    "kind": "Style",
    "target_type": "NavigationViewItemPresenter",
-   "status": "waived",
-   "reason": "NavigationView: no FerroUI control (batch B5). The item presenter styles of the left and the top pane are written into the tab themes built from them (Controls/TabItem.xaml for the tabs at the left and the right, TabbedPageTabItemTheme of Controls/TabbedPage.xaml for the top pane); the settings item, the overflow button of the top pane and the search button of the pane have no counterpart in FerroUI's pages.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -64104,9 +64104,9 @@
    "key": "MUX_NavigationViewItemPresenterStyleWhenOnTopPaneOverflow",
    "kind": "Style",
    "target_type": "NavigationViewItemPresenter",
-   "status": "waived",
-   "reason": "NavigationView: no FerroUI control (batch B5). The item presenter styles of the left and the top pane are written into the tab themes built from them (Controls/TabItem.xaml for the tabs at the left and the right, TabbedPageTabItemTheme of Controls/TabbedPage.xaml for the top pane); the settings item, the overflow button of the top pane and the search button of the pane have no counterpart in FerroUI's pages.",
-   "batch": null
+   "status": "pending",
+   "reason": null,
+   "batch": "B5"
   },
   {
    "document": "controls/dev/NavigationView/NavigationView_themeresources.xaml",
@@ -64114,8 +64114,8 @@
    "key": "MUX_NavigationViewSettingsItemStyleWhenOnTopPane",
    "kind": "Style",
    "target_type": "NavigationViewItem",
-   "status": "waived",
-   "reason": "NavigationView: no FerroUI control (batch B5). The item presenter styles of the left and the top pane are written into the tab themes built from them (Controls/TabItem.xaml for the tabs at the left and the right, TabbedPageTabItemTheme of Controls/TabbedPage.xaml for the top pane); the settings item, the overflow button of the top pane and the search button of the pane have no counterpart in FerroUI's pages.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -64444,9 +64444,9 @@
    "key": "NavigationViewOverflowButtonNoLabelStyleWhenPaneOnTop",
    "kind": "Style",
    "target_type": "Button",
-   "status": "waived",
-   "reason": "NavigationView: no FerroUI control (batch B5). The item presenter styles of the left and the top pane are written into the tab themes built from them (Controls/TabItem.xaml for the tabs at the left and the right, TabbedPageTabItemTheme of Controls/TabbedPage.xaml for the top pane); the settings item, the overflow button of the top pane and the search button of the pane have no counterpart in FerroUI's pages.",
-   "batch": null
+   "status": "pending",
+   "reason": null,
+   "batch": "B5"
   },
   {
    "document": "controls/dev/NavigationView/NavigationView_themeresources.xaml",
@@ -64454,9 +64454,9 @@
    "key": "NavigationViewOverflowButtonStyleWhenPaneOnTop",
    "kind": "Style",
    "target_type": "Button",
-   "status": "waived",
-   "reason": "NavigationView: no FerroUI control (batch B5). The item presenter styles of the left and the top pane are written into the tab themes built from them (Controls/TabItem.xaml for the tabs at the left and the right, TabbedPageTabItemTheme of Controls/TabbedPage.xaml for the top pane); the settings item, the overflow button of the top pane and the search button of the pane have no counterpart in FerroUI's pages.",
-   "batch": null
+   "status": "pending",
+   "reason": null,
+   "batch": "B5"
   },
   {
    "document": "controls/dev/NavigationView/NavigationView_themeresources.xaml",
@@ -64484,8 +64484,8 @@
    "key": "NavigationViewPaneSearchButtonStyle",
    "kind": "Style",
    "target_type": "Button",
-   "status": "waived",
-   "reason": "NavigationView: no FerroUI control (batch B5). The item presenter styles of the left and the top pane are written into the tab themes built from them (Controls/TabItem.xaml for the tabs at the left and the right, TabbedPageTabItemTheme of Controls/TabbedPage.xaml for the top pane); the settings item, the overflow button of the top pane and the search button of the pane have no counterpart in FerroUI's pages.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -77725,7 +77725,7 @@
    "kind": "Style",
    "target_type": "RichTextBlock",
    "status": "waived",
-   "reason": "Styles of WinUI controls FerroUI does not have (Hub, SemanticZoom, ListView, GridView, group headers, Frame, AppBar, the list and picker flyouts, RichTextBlock, the language switcher of the input method menu).",
+   "reason": "Styles of WinUI controls FerroUI does not have (Hub, SemanticZoom, ListView, GridView, group headers, AppBar, the list and picker flyouts, RichTextBlock, the language switcher of the input method menu).",
    "batch": null
   },
   {
@@ -77735,7 +77735,7 @@
    "kind": "Style",
    "target_type": "RichTextBlock",
    "status": "waived",
-   "reason": "Styles of WinUI controls FerroUI does not have (Hub, SemanticZoom, ListView, GridView, group headers, Frame, AppBar, the list and picker flyouts, RichTextBlock, the language switcher of the input method menu).",
+   "reason": "Styles of WinUI controls FerroUI does not have (Hub, SemanticZoom, ListView, GridView, group headers, AppBar, the list and picker flyouts, RichTextBlock, the language switcher of the input method menu).",
    "batch": null
   },
   {
@@ -77835,7 +77835,7 @@
    "kind": "Style",
    "target_type": "ContentPresenter",
    "status": "waived",
-   "reason": "Styles of WinUI controls FerroUI does not have (Hub, SemanticZoom, ListView, GridView, group headers, Frame, AppBar, the list and picker flyouts, RichTextBlock, the language switcher of the input method menu).",
+   "reason": "Styles of WinUI controls FerroUI does not have (Hub, SemanticZoom, ListView, GridView, group headers, AppBar, the list and picker flyouts, RichTextBlock, the language switcher of the input method menu).",
    "batch": null
   },
   {
@@ -77845,7 +77845,7 @@
    "kind": "Style",
    "target_type": "TextBlock",
    "status": "waived",
-   "reason": "Styles of WinUI controls FerroUI does not have (Hub, SemanticZoom, ListView, GridView, group headers, Frame, AppBar, the list and picker flyouts, RichTextBlock, the language switcher of the input method menu).",
+   "reason": "Styles of WinUI controls FerroUI does not have (Hub, SemanticZoom, ListView, GridView, group headers, AppBar, the list and picker flyouts, RichTextBlock, the language switcher of the input method menu).",
    "batch": null
   },
   {
@@ -77855,7 +77855,7 @@
    "kind": "Style",
    "target_type": "GridViewItem",
    "status": "waived",
-   "reason": "Styles of WinUI controls FerroUI does not have (Hub, SemanticZoom, ListView, GridView, group headers, Frame, AppBar, the list and picker flyouts, RichTextBlock, the language switcher of the input method menu).",
+   "reason": "Styles of WinUI controls FerroUI does not have (Hub, SemanticZoom, ListView, GridView, group headers, AppBar, the list and picker flyouts, RichTextBlock, the language switcher of the input method menu).",
    "batch": null
   },
   {
@@ -77895,7 +77895,7 @@
    "kind": "Style",
    "target_type": "MenuFlyoutItem",
    "status": "waived",
-   "reason": "Styles of WinUI controls FerroUI does not have (Hub, SemanticZoom, ListView, GridView, group headers, Frame, AppBar, the list and picker flyouts, RichTextBlock, the language switcher of the input method menu).",
+   "reason": "Styles of WinUI controls FerroUI does not have (Hub, SemanticZoom, ListView, GridView, group headers, AppBar, the list and picker flyouts, RichTextBlock, the language switcher of the input method menu).",
    "batch": null
   },
   {
@@ -77905,7 +77905,7 @@
    "kind": "Style",
    "target_type": "MenuFlyoutItem",
    "status": "waived",
-   "reason": "Styles of WinUI controls FerroUI does not have (Hub, SemanticZoom, ListView, GridView, group headers, Frame, AppBar, the list and picker flyouts, RichTextBlock, the language switcher of the input method menu).",
+   "reason": "Styles of WinUI controls FerroUI does not have (Hub, SemanticZoom, ListView, GridView, group headers, AppBar, the list and picker flyouts, RichTextBlock, the language switcher of the input method menu).",
    "batch": null
   },
   {
@@ -77915,7 +77915,7 @@
    "kind": "DataTemplate",
    "target_type": "",
    "status": "waived",
-   "reason": "Styles of WinUI controls FerroUI does not have (Hub, SemanticZoom, ListView, GridView, group headers, Frame, AppBar, the list and picker flyouts, RichTextBlock, the language switcher of the input method menu).",
+   "reason": "Styles of WinUI controls FerroUI does not have (Hub, SemanticZoom, ListView, GridView, group headers, AppBar, the list and picker flyouts, RichTextBlock, the language switcher of the input method menu).",
    "batch": null
   },
   {
@@ -78125,7 +78125,7 @@
    "kind": "Style",
    "target_type": "AppBarElementContainer",
    "status": "waived",
-   "reason": "Styles of WinUI controls FerroUI does not have (Hub, SemanticZoom, ListView, GridView, group headers, Frame, AppBar, the list and picker flyouts, RichTextBlock, the language switcher of the input method menu).",
+   "reason": "Styles of WinUI controls FerroUI does not have (Hub, SemanticZoom, ListView, GridView, group headers, AppBar, the list and picker flyouts, RichTextBlock, the language switcher of the input method menu).",
    "batch": null
   },
   {
@@ -78135,7 +78135,7 @@
    "kind": "Style",
    "target_type": "AppBar",
    "status": "waived",
-   "reason": "Styles of WinUI controls FerroUI does not have (Hub, SemanticZoom, ListView, GridView, group headers, Frame, AppBar, the list and picker flyouts, RichTextBlock, the language switcher of the input method menu).",
+   "reason": "Styles of WinUI controls FerroUI does not have (Hub, SemanticZoom, ListView, GridView, group headers, AppBar, the list and picker flyouts, RichTextBlock, the language switcher of the input method menu).",
    "batch": null
   },
   {
@@ -78164,8 +78164,8 @@
    "key": "{Frame}",
    "kind": "Style",
    "target_type": "Frame",
-   "status": "waived",
-   "reason": "Styles of WinUI controls FerroUI does not have (Hub, SemanticZoom, ListView, GridView, group headers, Frame, AppBar, the list and picker flyouts, RichTextBlock, the language switcher of the input method menu).",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -78175,7 +78175,7 @@
    "kind": "Style",
    "target_type": "GridViewHeaderItem",
    "status": "waived",
-   "reason": "Styles of WinUI controls FerroUI does not have (Hub, SemanticZoom, ListView, GridView, group headers, Frame, AppBar, the list and picker flyouts, RichTextBlock, the language switcher of the input method menu).",
+   "reason": "Styles of WinUI controls FerroUI does not have (Hub, SemanticZoom, ListView, GridView, group headers, AppBar, the list and picker flyouts, RichTextBlock, the language switcher of the input method menu).",
    "batch": null
   },
   {
@@ -78185,7 +78185,7 @@
    "kind": "Style",
    "target_type": "GridView",
    "status": "waived",
-   "reason": "Styles of WinUI controls FerroUI does not have (Hub, SemanticZoom, ListView, GridView, group headers, Frame, AppBar, the list and picker flyouts, RichTextBlock, the language switcher of the input method menu).",
+   "reason": "Styles of WinUI controls FerroUI does not have (Hub, SemanticZoom, ListView, GridView, group headers, AppBar, the list and picker flyouts, RichTextBlock, the language switcher of the input method menu).",
    "batch": null
   },
   {
@@ -78195,7 +78195,7 @@
    "kind": "Style",
    "target_type": "GroupItem",
    "status": "waived",
-   "reason": "Styles of WinUI controls FerroUI does not have (Hub, SemanticZoom, ListView, GridView, group headers, Frame, AppBar, the list and picker flyouts, RichTextBlock, the language switcher of the input method menu).",
+   "reason": "Styles of WinUI controls FerroUI does not have (Hub, SemanticZoom, ListView, GridView, group headers, AppBar, the list and picker flyouts, RichTextBlock, the language switcher of the input method menu).",
    "batch": null
   },
   {
@@ -78205,7 +78205,7 @@
    "kind": "Style",
    "target_type": "HubSection",
    "status": "waived",
-   "reason": "Styles of WinUI controls FerroUI does not have (Hub, SemanticZoom, ListView, GridView, group headers, Frame, AppBar, the list and picker flyouts, RichTextBlock, the language switcher of the input method menu).",
+   "reason": "Styles of WinUI controls FerroUI does not have (Hub, SemanticZoom, ListView, GridView, group headers, AppBar, the list and picker flyouts, RichTextBlock, the language switcher of the input method menu).",
    "batch": null
   },
   {
@@ -78215,7 +78215,7 @@
    "kind": "Style",
    "target_type": "Hub",
    "status": "waived",
-   "reason": "Styles of WinUI controls FerroUI does not have (Hub, SemanticZoom, ListView, GridView, group headers, Frame, AppBar, the list and picker flyouts, RichTextBlock, the language switcher of the input method menu).",
+   "reason": "Styles of WinUI controls FerroUI does not have (Hub, SemanticZoom, ListView, GridView, group headers, AppBar, the list and picker flyouts, RichTextBlock, the language switcher of the input method menu).",
    "batch": null
   },
   {
@@ -78225,7 +78225,7 @@
    "kind": "Style",
    "target_type": "ListPickerFlyoutPresenter",
    "status": "waived",
-   "reason": "Styles of WinUI controls FerroUI does not have (Hub, SemanticZoom, ListView, GridView, group headers, Frame, AppBar, the list and picker flyouts, RichTextBlock, the language switcher of the input method menu).",
+   "reason": "Styles of WinUI controls FerroUI does not have (Hub, SemanticZoom, ListView, GridView, group headers, AppBar, the list and picker flyouts, RichTextBlock, the language switcher of the input method menu).",
    "batch": null
   },
   {
@@ -78235,7 +78235,7 @@
    "kind": "Style",
    "target_type": "ListViewHeaderItem",
    "status": "waived",
-   "reason": "Styles of WinUI controls FerroUI does not have (Hub, SemanticZoom, ListView, GridView, group headers, Frame, AppBar, the list and picker flyouts, RichTextBlock, the language switcher of the input method menu).",
+   "reason": "Styles of WinUI controls FerroUI does not have (Hub, SemanticZoom, ListView, GridView, group headers, AppBar, the list and picker flyouts, RichTextBlock, the language switcher of the input method menu).",
    "batch": null
   },
   {
@@ -78245,7 +78245,7 @@
    "kind": "Style",
    "target_type": "ListView",
    "status": "waived",
-   "reason": "Styles of WinUI controls FerroUI does not have (Hub, SemanticZoom, ListView, GridView, group headers, Frame, AppBar, the list and picker flyouts, RichTextBlock, the language switcher of the input method menu).",
+   "reason": "Styles of WinUI controls FerroUI does not have (Hub, SemanticZoom, ListView, GridView, group headers, AppBar, the list and picker flyouts, RichTextBlock, the language switcher of the input method menu).",
    "batch": null
   },
   {
@@ -78265,7 +78265,7 @@
    "kind": "Style",
    "target_type": "PickerFlyoutPresenter",
    "status": "waived",
-   "reason": "Styles of WinUI controls FerroUI does not have (Hub, SemanticZoom, ListView, GridView, group headers, Frame, AppBar, the list and picker flyouts, RichTextBlock, the language switcher of the input method menu).",
+   "reason": "Styles of WinUI controls FerroUI does not have (Hub, SemanticZoom, ListView, GridView, group headers, AppBar, the list and picker flyouts, RichTextBlock, the language switcher of the input method menu).",
    "batch": null
   },
   {
@@ -78275,7 +78275,7 @@
    "kind": "Style",
    "target_type": "SemanticZoom",
    "status": "waived",
-   "reason": "Styles of WinUI controls FerroUI does not have (Hub, SemanticZoom, ListView, GridView, group headers, Frame, AppBar, the list and picker flyouts, RichTextBlock, the language switcher of the input method menu).",
+   "reason": "Styles of WinUI controls FerroUI does not have (Hub, SemanticZoom, ListView, GridView, group headers, AppBar, the list and picker flyouts, RichTextBlock, the language switcher of the input method menu).",
    "batch": null
   },
   {
@@ -90084,6 +90084,7 @@
   "Controls/Expander.xaml",
   "Controls/FlyoutPresenter.xaml",
   "Controls/FontIcon.xaml",
+  "Controls/Frame.xaml",
   "Controls/GridSplitter.xaml",
   "Controls/GroupBox.xaml",
   "Controls/HeaderedContentControl.xaml",
@@ -90100,6 +90101,7 @@
   "Controls/MenuItem.xaml",
   "Controls/MenuScrollViewer.xaml",
   "Controls/NavigationPage.xaml",
+  "Controls/NavigationView.xaml",
   "Controls/NotificationCard.xaml",
   "Controls/NumberBox.xaml",
   "Controls/NumericUpDown.xaml",
@@ -90451,7 +90453,7 @@
     "{DrawerPage}"
    ],
    "batch": "B5",
-   "winui": "No WinUI control: the pane of NavigationView (NavigationView_themeresources.xaml) and SplitView (DefaultSplitViewStyle).",
+   "winui": "No WinUI control: the left pane of NavigationView (NavigationView.xaml, NavigationView_themeresources.xaml; NavigationView itself is NavigationView.xaml) and SplitView (DefaultSplitViewStyle).",
    "status": "ported",
    "deviations": 13,
    "date": "2026-10-17"
@@ -90499,6 +90501,17 @@
    "status": "ported",
    "deviations": 3,
    "date": "2026-10-17"
+  },
+  {
+   "document": "Frame.xaml",
+   "themes": [
+    "{Frame}"
+   ],
+   "batch": "B5",
+   "winui": "Frame: {Frame} (generic.xaml). A WinUI control in ferroui-controls (docs/porting/winui-controls.md); the Fluent theme has no document for it.",
+   "status": "ported",
+   "deviations": 3,
+   "date": "not committed"
   },
   {
    "document": "GridSplitter.xaml",
@@ -90652,6 +90665,20 @@
    "status": "ported",
    "deviations": 7,
    "date": "2026-10-16"
+  },
+  {
+   "document": "NavigationView.xaml",
+   "themes": [
+    "{NavigationView}",
+    "{NavigationViewItem}",
+    "{NavigationViewItemHeader}",
+    "{NavigationViewItemSeparator}"
+   ],
+   "batch": "B5",
+   "winui": "NavigationView: {NavigationView}, {NavigationViewItem}, {NavigationViewItemHeader}, {NavigationViewItemSeparator} (NavigationView.xaml), MUX_NavigationViewItemPresenterStyleWhenOnLeftPane and MUX_NavigationViewItemPresenterStyleWhenOnTopPane folded into the item, MUX_NavigationViewSettingsItemStyleWhenOnTopPane, NavigationViewPaneSearchButtonStyle (NavigationView_themeresources.xaml), with PaneToggleButtonStyle of DrawerPage.xaml and the back button styles of NavigationPage.xaml. A WinUI control in ferroui-controls (docs/porting/winui-controls.md); the Fluent theme has no document for it.",
+   "status": "ported",
+   "deviations": 31,
+   "date": "not committed"
   },
   {
    "document": "NotificationCard.xaml",
@@ -91000,7 +91027,7 @@
     "{TabbedPage}"
    ],
    "batch": "B5",
-   "winui": "No WinUI control: NavigationView with its pane at the top (TopNavArea of NavigationView.xaml, MUX_NavigationViewItemPresenterStyleWhenOnTopPane of NavigationView_themeresources.xaml) and the page background.",
+   "winui": "No WinUI control: the top pane of NavigationView (TopNavArea of NavigationView.xaml, MUX_NavigationViewItemPresenterStyleWhenOnTopPane of NavigationView_themeresources.xaml; NavigationView itself is NavigationView.xaml) and the page background.",
    "status": "ported",
    "deviations": 8,
    "date": "2026-10-17"
@@ -91230,7 +91257,7 @@
    "document": "controls/dev/CommonStyles/Deprecated_themeresources.xaml",
    "key": "re:MUX_NavigationViewItemPresenterStyle.*WithRevealFocus",
    "variant": null,
-   "reason": "Reveal focus variants of the NavigationView item presenter: deprecated (Reveal focus), and FerroUI has no NavigationView.",
+   "reason": "Reveal focus variants of the NavigationView item presenter: deprecated (Reveal focus); the template of NavigationViewItem (Controls/NavigationView.xaml) is drawn after the presenter styles without Reveal focus.",
    "items": 2
   },
   {
@@ -91291,10 +91318,10 @@
   },
   {
    "document": "dxaml/xcp/dxaml/themes/generic.xaml",
-   "key": "re:\\{(Hub|HubSection|SemanticZoom|ListView|GridView|ListViewHeaderItem|GridViewHeaderItem|GroupItem|Frame|AppBar|AppBarElementContainer|ListPickerFlyoutPresenter|PickerFlyoutPresenter)\\}|GridViewItemExpanded|FlyoutPickerListViewItemContentPresenterStyle|FlyoutPickerTitleTextBlockStyle|ListPickerFlyoutPresenterContentTemplate|BaseRichTextBlockStyle|BodyRichTextBlockStyle|LanguageSwitcherMenuFlyoutItemStyle|LanguageSwitcherMenuFlyoutSettingsRowStyle",
+   "key": "re:\\{(Hub|HubSection|SemanticZoom|ListView|GridView|ListViewHeaderItem|GridViewHeaderItem|GroupItem|AppBar|AppBarElementContainer|ListPickerFlyoutPresenter|PickerFlyoutPresenter)\\}|GridViewItemExpanded|FlyoutPickerListViewItemContentPresenterStyle|FlyoutPickerTitleTextBlockStyle|ListPickerFlyoutPresenterContentTemplate|BaseRichTextBlockStyle|BodyRichTextBlockStyle|LanguageSwitcherMenuFlyoutItemStyle|LanguageSwitcherMenuFlyoutSettingsRowStyle",
    "variant": null,
-   "reason": "Styles of WinUI controls FerroUI does not have (Hub, SemanticZoom, ListView, GridView, group headers, Frame, AppBar, the list and picker flyouts, RichTextBlock, the language switcher of the input method menu).",
-   "items": 21
+   "reason": "Styles of WinUI controls FerroUI does not have (Hub, SemanticZoom, ListView, GridView, group headers, AppBar, the list and picker flyouts, RichTextBlock, the language switcher of the input method menu).",
+   "items": 20
   },
   {
    "document": "dxaml/xcp/dxaml/themes/generic.xaml",
@@ -91542,20 +91569,6 @@
    "items": 1
   },
   {
-   "document": "controls/dev/NavigationView/NavigationView.xaml",
-   "key": "re:\\{NavigationView(Item|ItemHeader|ItemSeparator)?\\}",
-   "variant": null,
-   "reason": "NavigationView: no FerroUI control (batch B5). DrawerPage, TabbedPage and the tabs of TabControl at the left and the right are built from its panes and items (Controls/DrawerPage.xaml, Controls/TabbedPage.xaml, Controls/TabItem.xaml); the styles of NavigationView itself, its items, item headers and separators have no control to style.",
-   "items": 4
-  },
-  {
-   "document": "controls/dev/NavigationView/NavigationView_themeresources.xaml",
-   "key": "re:MUX_NavigationViewItemPresenterStyleWhenOn(LeftPane|TopPane|TopPaneOverflow)|MUX_NavigationViewSettingsItemStyleWhenOnTopPane|NavigationViewOverflowButton(No)?(Label)?StyleWhenPaneOnTop|NavigationViewPaneSearchButtonStyle",
-   "variant": null,
-   "reason": "NavigationView: no FerroUI control (batch B5). The item presenter styles of the left and the top pane are written into the tab themes built from them (Controls/TabItem.xaml for the tabs at the left and the right, TabbedPageTabItemTheme of Controls/TabbedPage.xaml for the top pane); the settings item, the overflow button of the top pane and the search button of the pane have no counterpart in FerroUI's pages.",
-   "items": 7
-  },
-  {
    "document": "controls/dev/CommonStyles/MenuFlyout_themeresources.xaml",
    "key": "re:DefaultSplitMenuFlyoutItemStyle|\\{SplitMenuFlyoutItem\\}",
    "variant": null,
@@ -91652,6 +91665,8 @@
   "ContentPage": 1,
   "DrawerPage": 13,
   "NavigationPage": 7,
+  "Frame": 3,
+  "NavigationView": 31,
   "SplitView": 6,
   "TabControl": 9,
   "TabItem": 13,
@@ -91774,6 +91789,11 @@
    "ferroui": "FlyoutPresenter",
    "batch": "B3"
   },
+  "Frame": {
+   "ferroui": "Frame",
+   "batch": "B5",
+   "note": "WinUI's Frame in ferroui-controls"
+  },
   "HyperlinkButton": {
    "ferroui": "HyperlinkButton",
    "batch": "F"
@@ -91836,26 +91856,26 @@
    "batch": "B3"
   },
   "NavigationViewItem": {
-   "ferroui": null,
+   "ferroui": "NavigationViewItem",
    "batch": "B5",
-   "note": "keyed styles only; NavigationView has no FerroUI control"
+   "note": "WinUI's NavigationViewItem in ferroui-controls"
   },
   "NavigationViewItemPresenter": {
-   "ferroui": null,
+   "ferroui": "NavigationViewItem",
    "batch": "B5",
-   "note": "NavigationView has no FerroUI control"
+   "note": "no FerroUI control: the presenter is folded into the template of NavigationViewItem"
   },
   "NavigationView": {
-   "ferroui": null,
+   "ferroui": "NavigationView",
    "batch": "B5",
-   "note": "no FerroUI control; DrawerPage is built from its pane"
+   "note": "WinUI's NavigationView in ferroui-controls; DrawerPage and TabbedPage are drawn after its panes"
   },
   "NavigationViewItemHeader": {
-   "ferroui": null,
+   "ferroui": "NavigationViewItemHeader",
    "batch": "B5"
   },
   "NavigationViewItemSeparator": {
-   "ferroui": null,
+   "ferroui": "NavigationViewItemSeparator",
    "batch": "B5"
   },
   "NumberBox": {
