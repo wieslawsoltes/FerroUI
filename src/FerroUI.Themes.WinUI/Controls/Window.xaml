@@ -38,5 +38,10 @@
         </Panel>
       </ControlTemplate>
     </Setter>
+    <!-- A window with a system backdrop (Mica, desktop acrylic) draws no background of its own:
+         the backdrop is drawn behind the content (docs/porting/winui-materials.md). -->
+    <Style Selector="^:system-backdrop">
+      <Setter Property="Background" Value="Transparent" />
+    </Style>
   </ControlTheme>
 </ResourceDictionary>

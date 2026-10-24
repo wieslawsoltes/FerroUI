@@ -26,7 +26,7 @@ use crate::vello_extensions::rect_path;
 use ferroui_base::media::effects::IEffect;
 use ferroui_base::platform::{IDrawingContextImpl, IDrawingContextImplWithEffects};
 use ferroui_base::{PixelSize, Rect};
-use kurbo::{Shape, Vec2};
+use kurbo::{Affine, Shape, Vec2};
 use peniko::color::AlphaColor;
 use peniko::BlendMode;
 
@@ -41,7 +41,7 @@ pub(super) struct EffectFrame {
 }
 
 /// The scene of the context while an effect is recorded into another.
-struct OuterScene {
+pub(super) struct OuterScene {
     sink: Box<dyn IVelloSceneSink>,
     /// The pixel of the target that is the top left pixel of this scene.
     origin: Vec2,
@@ -283,6 +283,135 @@ impl IDrawingContextImplWithEffects for DrawingContextImpl {
         if cropped {
             self.restore();
         }
+        self.restore();
+    }
+}
+
+/// A colour matrix layer that is pushed: what is drawn inside it is
+/// recorded into a scene of the CPU renderer, whose pixels are transformed
+/// by the matrix and composed into the scene the layer was pushed in when
+/// it is popped.
+///
+/// vello 0.3 has no colour matrix filter (`vello_common` leaves
+/// `ColorMatrix` unimplemented), so the matrix is applied to the pixels.
+pub(super) struct ColorMatrixFrame {
+    outer: OuterScene,
+    operation: CpuLayerOperation,
+}
+
+/// What a layer drawn by the CPU renderer does to its pixels.
+enum CpuLayerOperation {
+    /// A colour matrix layer.
+    Matrix { matrix: ferroui_base::media::ColorMatrix, alpha_mode: ferroui_base::media::ColorMatrixAlphaMode },
+    /// A multiply layer: the factors stretched over `bounds` (in the
+    /// coordinates of the context); `scene_to_local` maps the pixels of the
+    /// scene of the layer to those coordinates.
+    Multiply { factors: ferroui_base::platform::MultiplyLayerFactors, bounds: Rect, scene_to_local: Affine },
+}
+
+impl DrawingContextImpl {
+    /// Replaces the scene of the context by one of the CPU renderer that
+    /// covers `bounds` (in the coordinates of the context), cut to the
+    /// target, and returns the scene that was replaced.
+    fn begin_cpu_scene(&mut self, bounds: Rect) -> OuterScene {
+        let (width, height) = (self.sink().width(), self.sink().height());
+        let whole = kurbo::Rect::new(0.0, 0.0, width as f64, height as f64);
+        let transform = self.device_transform();
+        let device = (transform * rect_path(bounds)).bounding_box().expand().intersect(whole);
+        let (x0, y0) = (device.x0.clamp(0.0, whole.x1 - 1.0), device.y0.clamp(0.0, whole.y1 - 1.0));
+        let device = kurbo::Rect::new(x0, y0, device.x1.clamp(x0 + 1.0, whole.x1), device.y1.clamp(y0 + 1.0, whole.y1));
+
+        let scene: Box<dyn IVelloSceneSink> =
+            Box::new(VelloCpuSceneSink::single_threaded(device.width() as u16, device.height() as u16));
+        let sink = match self.sink.replace(scene) {
+            Some(sink) => sink,
+            None => panic!("The drawing context has been disposed"),
+        };
+        let outer = OuterScene { sink, origin: self.sink_origin, open_clips: self.open_clips };
+        self.sink_origin += Vec2::new(device.x0, device.y0);
+        self.open_clips = 0;
+        outer
+    }
+
+    /// Ends the innermost colour matrix layer: its scene is rendered, its
+    /// pixels transformed and drawn into the scene it was pushed in.
+    pub(super) fn end_color_matrix(&mut self) {
+        let frame = self.color_matrix_stack.pop().unwrap_or_else(|| panic!("The colour matrix stack is empty"));
+        let mut scene = match self.sink.replace(frame.outer.sink) {
+            Some(scene) => scene,
+            None => panic!("The drawing context has been disposed"),
+        };
+        let position = self.sink_origin - frame.outer.origin;
+        self.sink_origin = frame.outer.origin;
+        self.open_clips = frame.outer.open_clips;
+
+        let (width, height) = (scene.width(), scene.height());
+        crate::perf::count(crate::perf::Phase::EffectAsImage, u64::from(width) * u64::from(height) * 4);
+        let mut rgba = vec![0u8; width as usize * height as usize * 4];
+        scene.render_to_pixels(&mut rgba);
+        match frame.operation {
+            CpuLayerOperation::Matrix { matrix, alpha_mode } => matrix.apply_to_rgba8(&mut rgba, alpha_mode),
+            CpuLayerOperation::Multiply { factors, bounds, scene_to_local } => {
+                factors.apply_to_premultiplied_rgba8(&mut rgba, width as usize, |x, y| {
+                    let local = scene_to_local * kurbo::Point::new(x, y);
+                    let (u, v) = ((local.x - bounds.x) / bounds.width, (local.y - bounds.y) / bounds.height);
+                    ((0.0..=1.0).contains(&u) && (0.0..=1.0).contains(&v)).then_some((u, v))
+                });
+            }
+        }
+        let image = to_image(rgba, PixelSize::new(width as i32, height as i32));
+        self.draw_image_at_pixels(image, position.x, position.y);
+    }
+}
+
+impl ferroui_base::platform::IDrawingContextImplWithLayerEffects for DrawingContextImpl {
+    fn push_blend_layer(&mut self, _bounds: Rect, mode: ferroui_base::media::imaging::BitmapBlendingMode) {
+        let blend =
+            if self.sink().capabilities().blend_layers { crate::vello_extensions::to_blend_mode(mode) } else { BlendMode::default() };
+        self.sink().push_layer(blend, 1.0);
+        self.save(SavedKind::Layer);
+    }
+
+    fn pop_blend_layer(&mut self) {
+        self.restore();
+    }
+
+    fn push_color_matrix_layer(
+        &mut self,
+        bounds: Rect,
+        matrix: &ferroui_base::media::ColorMatrix,
+        alpha_mode: ferroui_base::media::ColorMatrixAlphaMode,
+    ) {
+        let outer = self.begin_cpu_scene(bounds);
+        self.color_matrix_stack
+            .push(ColorMatrixFrame { outer, operation: CpuLayerOperation::Matrix { matrix: *matrix, alpha_mode } });
+        self.save(SavedKind::ColorMatrix);
+        // Nothing outside the bounds is kept.
+        self.push_clip(bounds);
+    }
+
+    fn pop_color_matrix_layer(&mut self) {
+        // The clip, then the layer.
+        self.restore();
+        self.restore();
+    }
+
+    /// The factors are applied to the pixels of a scene of the CPU renderer,
+    /// as a colour matrix is: vello has no blend mode that multiplies the
+    /// colour and keeps the alpha of what is under it.
+    fn push_multiply_layer(&mut self, bounds: Rect, factors: &ferroui_base::platform::MultiplyLayerFactors) {
+        let outer = self.begin_cpu_scene(bounds);
+        let scene_to_local = self.device_transform().inverse();
+        self.color_matrix_stack.push(ColorMatrixFrame {
+            outer,
+            operation: CpuLayerOperation::Multiply { factors: factors.clone(), bounds, scene_to_local },
+        });
+        self.save(SavedKind::ColorMatrix);
+        self.push_clip(bounds);
+    }
+
+    fn pop_multiply_layer(&mut self) {
+        self.restore();
         self.restore();
     }
 }

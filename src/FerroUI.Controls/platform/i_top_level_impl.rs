@@ -155,6 +155,18 @@ pub trait ITopLevelImpl: IOptionalFeatureProvider + IDisposable {
     /// Gets the acrylic compensation levels for the platform.
     fn acrylic_compensation_levels(&self) -> AcrylicPlatformCompensationLevels;
 
+    /// Asks the platform to draw a system backdrop (Mica, desktop acrylic)
+    /// behind the top level, `None` to remove it, and says whether it does
+    /// (winui-materials.md). The platform makes the window transparent while
+    /// it draws one. A FerroUI addition; a platform without system backdrops
+    /// returns `SystemBackdropSupport::None`.
+    fn set_system_backdrop(
+        &self,
+        _backdrop: Option<&ferroui_base::rendering::composition::system_backdrops::PlatformSystemBackdrop>,
+    ) -> ferroui_base::rendering::composition::system_backdrops::SystemBackdropSupport {
+        ferroui_base::rendering::composition::system_backdrops::SystemBackdropSupport::None
+    }
+
     /// Sets the theme variant on the frame if it should be dark or light.
     /// Also applies for the mica and acrylic backdrops, if they are
     /// applied; `None` follows the system.

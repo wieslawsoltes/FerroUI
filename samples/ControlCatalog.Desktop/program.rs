@@ -1012,6 +1012,16 @@ fn screenshot_run(directory: PathBuf) {
         // The first page is selected one interval after the start.
         winui_flight_run(&directory, interval);
     }
+    // `FERROUI_SMOKE_MATERIALS_BACKDROP=<n>` on a run whose first page is "Materials (WinUI)":
+    // the system backdrop `n` of the page (1 Mica, 2 Mica Alt, 3 desktop acrylic) is set on the
+    // window half an interval after the page is selected. Not in the managed original.
+    if let Some(index) = std::env::var("FERROUI_SMOKE_MATERIALS_BACKDROP").ok().and_then(|value| value.parse::<usize>().ok()) {
+        let _ = DispatcherTimer::run_once(
+            move || println!("Materials: set the backdrop {index}: {}", control_catalog::pages::smoke_set_materials_backdrop(index)),
+            interval + interval / 2,
+            DispatcherPriority::NORMAL,
+        );
+    }
     // Before the first page is shown: the window is made to fit its screen.
     // The timer stops itself after its only tick.
     let _timer = DispatcherTimer::run_once(

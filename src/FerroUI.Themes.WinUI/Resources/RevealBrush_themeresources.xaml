@@ -12,31 +12,319 @@
                     x:ClassModifier="internal">
   <ResourceDictionary.ThemeDictionaries>
     <ResourceDictionary x:Key="Default">
-      <SolidColorBrush x:Key="SystemControlTransparentRevealBackgroundBrush" Color="Transparent" />
-      <SolidColorBrush x:Key="SystemControlHighlightAccentRevealBackgroundBrush" Color="{DynamicResource SystemAccentColor}" />
-      <SolidColorBrush x:Key="SystemControlHighlightListMediumRevealBackgroundBrush" Color="{StaticResource SystemListMediumColor}" />
-      <SolidColorBrush x:Key="SystemControlHighlightListLowRevealBackgroundBrush" Color="{StaticResource SystemListLowColor}" />
-      <SolidColorBrush x:Key="SystemControlTransparentRevealBorderBrush" Color="Transparent" />
-      <SolidColorBrush x:Key="SystemControlBackgroundTransparentRevealBorderBrush" Color="Transparent" />
-      <SolidColorBrush x:Key="SystemControlHighlightAltTransparentRevealBorderBrush" Color="Transparent" />
+      <Color x:Key="SystemRevealAltHighColor">#F2000000</Color>
+      <Color x:Key="SystemRevealAltLowColor">#30000000</Color>
+      <Color x:Key="SystemRevealAltMediumColor">#91000000</Color>
+      <Color x:Key="SystemRevealAltMediumHighColor">#C2000000</Color>
+      <Color x:Key="SystemRevealAltMediumLowColor">#61000000</Color>
+      <Color x:Key="SystemRevealBaseHighColor">#F2FFFFFF</Color>
+      <Color x:Key="SystemRevealBaseLowColor">#30FFFFFF</Color>
+      <Color x:Key="SystemRevealBaseMediumColor">#91FFFFFF</Color>
+      <Color x:Key="SystemRevealBaseMediumHighColor">#C2FFFFFF</Color>
+      <Color x:Key="SystemRevealBaseMediumLowColor">#61FFFFFF</Color>
+      <Color x:Key="SystemRevealChromeAltLowColor">#F2F9F9F9</Color>
+      <Color x:Key="SystemRevealChromeBlackHighColor">#F2000000</Color>
+      <Color x:Key="SystemRevealChromeBlackLowColor">#30000000</Color>
+      <Color x:Key="SystemRevealChromeBlackMediumLowColor">#61000000</Color>
+      <Color x:Key="SystemRevealChromeBlackMediumColor">#C2000000</Color>
+      <Color x:Key="SystemRevealChromeHighColor">#F2767676</Color>
+      <Color x:Key="SystemRevealChromeLowColor">#F21F1F1F</Color>
+      <Color x:Key="SystemRevealChromeMediumColor">#F2393939</Color>
+      <Color x:Key="SystemRevealChromeMediumLowColor">#F22B2B2B</Color>
+      <Color x:Key="SystemRevealChromeWhiteColor">#F2FFFFFF</Color>
+      <Color x:Key="SystemRevealChromeGrayColor">#F2767676</Color>
+      <Color x:Key="SystemRevealListLowColor">#18FFFFFF</Color>
+      <Color x:Key="SystemRevealListMediumColor">#30FFFFFF</Color>
+      <RevealBackgroundBrush x:Key="SystemControlBackgroundBaseLowRevealBackgroundBrush" TargetTheme="Dark" Color="{StaticResource SystemRevealBaseLowColor}" FallbackColor="{StaticResource SystemBaseLowColor}" />
+      <RevealBackgroundBrush x:Key="SystemControlTransparentRevealBackgroundBrush" TargetTheme="Dark" Color="Transparent" FallbackColor="Transparent" />
+      <RevealBackgroundBrush x:Key="SystemControlBackgroundAltHighRevealBackgroundBrush" TargetTheme="Dark" Color="{StaticResource SystemRevealAltHighColor}" FallbackColor="{StaticResource SystemAltHighColor}" />
+      <RevealBackgroundBrush x:Key="SystemControlHighlightAccentRevealBackgroundBrush" TargetTheme="Dark" Color="{DynamicResource SystemAccentColor}" FallbackColor="{DynamicResource SystemAccentColor}" />
+      <RevealBackgroundBrush x:Key="SystemControlHighlightAccent3RevealBackgroundBrush" TargetTheme="Dark" Color="{DynamicResource SystemAccentColorDark3}" FallbackColor="{DynamicResource SystemAccentColorDark3}" />
+      <RevealBackgroundBrush x:Key="SystemControlHighlightAccent2RevealBackgroundBrush" TargetTheme="Dark" Color="{DynamicResource SystemAccentColorDark2}" FallbackColor="{DynamicResource SystemAccentColorDark2}" />
+      <RevealBackgroundBrush x:Key="SystemControlHighlightListMediumRevealBackgroundBrush" TargetTheme="Dark" Color="{StaticResource SystemRevealListMediumColor}" FallbackColor="{StaticResource SystemListMediumColor}" />
+      <RevealBackgroundBrush x:Key="SystemControlHighlightListLowRevealBackgroundBrush" TargetTheme="Dark" Color="{StaticResource SystemRevealListLowColor}" FallbackColor="{StaticResource SystemListLowColor}" />
+      <RevealBackgroundBrush x:Key="SystemControlBackgroundBaseMediumLowRevealBaseLowBackgroundBrush" TargetTheme="Dark" Color="{StaticResource SystemRevealBaseMediumLowColor}" FallbackColor="{StaticResource SystemBaseMediumLowColor}" />
+      <RevealBackgroundBrush x:Key="SystemControlHighlightBaseMediumLowRevealAccentBackgroundBrush" TargetTheme="Dark" Color="{StaticResource SystemRevealBaseMediumLowColor}" FallbackColor="{StaticResource SystemBaseMediumLowColor}" />
+      <RevealBackgroundBrush x:Key="SystemControlHighlightListMediumRevealListLowBackgroundBrush" TargetTheme="Dark" Color="{StaticResource SystemRevealListMediumColor}" FallbackColor="{StaticResource SystemListMediumColor}" />
+      <RevealBackgroundBrush x:Key="SystemControlHighlightAccent3RevealAccent2BackgroundBrush" TargetTheme="Dark" Color="{DynamicResource SystemAccentColorDark3}" FallbackColor="{DynamicResource SystemAccentColorDark3}" />
+      <RevealBorderBrush x:Key="SystemControlBackgroundAccentRevealBorderBrush" TargetTheme="Dark" Color="{DynamicResource SystemAccentColor}" FallbackColor="{DynamicResource SystemAccentColor}" />
+      <RevealBorderBrush x:Key="SystemControlBackgroundBaseHighRevealBorderBrush" TargetTheme="Dark" Color="{StaticResource SystemRevealBaseHighColor}" FallbackColor="{StaticResource SystemBaseHighColor}" />
+      <RevealBorderBrush x:Key="SystemControlBackgroundBaseLowRevealBorderBrush" TargetTheme="Dark" Color="{StaticResource SystemRevealBaseLowColor}" FallbackColor="{StaticResource SystemBaseLowColor}" />
+      <RevealBorderBrush x:Key="SystemControlBackgroundBaseMediumRevealBorderBrush" TargetTheme="Dark" Color="{StaticResource SystemRevealBaseMediumColor}" FallbackColor="{StaticResource SystemBaseMediumColor}" />
+      <RevealBorderBrush x:Key="SystemControlBackgroundBaseMediumHighRevealBorderBrush" TargetTheme="Dark" Color="{StaticResource SystemRevealBaseMediumHighColor}" FallbackColor="{StaticResource SystemBaseMediumHighColor}" />
+      <RevealBorderBrush x:Key="SystemControlBackgroundBaseMediumLowRevealBorderBrush" TargetTheme="Dark" Color="{StaticResource SystemRevealBaseMediumLowColor}" FallbackColor="{StaticResource SystemBaseMediumLowColor}" />
+      <RevealBorderBrush x:Key="SystemControlBackgroundChromeBlackHighRevealBorderBrush" TargetTheme="Dark" Color="{StaticResource SystemRevealChromeBlackHighColor}" FallbackColor="{StaticResource SystemChromeBlackHighColor}" />
+      <RevealBorderBrush x:Key="SystemControlBackgroundChromeBlackMediumRevealChromeBorderBrush" TargetTheme="Dark" Color="{StaticResource SystemRevealChromeBlackMediumColor}" FallbackColor="{StaticResource SystemChromeBlackMediumColor}" />
+      <RevealBorderBrush x:Key="SystemControlBackgroundChromeMediumRevealBorderBrush" TargetTheme="Dark" Color="{StaticResource SystemRevealChromeMediumColor}" FallbackColor="{StaticResource SystemChromeMediumColor}" />
+      <RevealBorderBrush x:Key="SystemControlBackgroundChromeMediumLowRevealBorderBrush" TargetTheme="Dark" Color="{StaticResource SystemRevealChromeMediumLowColor}" FallbackColor="{StaticResource SystemChromeMediumLowColor}" />
+      <RevealBorderBrush x:Key="SystemControlBackgroundChromeWhiteRevealBorderBrush" TargetTheme="Dark" Color="{StaticResource SystemRevealChromeWhiteColor}" FallbackColor="{StaticResource SystemChromeWhiteColor}" />
+      <RevealBorderBrush x:Key="SystemControlTransparentRevealListLowBorderBrush" TargetTheme="Dark" Color="Transparent" FallbackColor="Transparent" />
+      <RevealBorderBrush x:Key="SystemControlBackgroundListLowRevealBorderBrush" TargetTheme="Dark" Color="{StaticResource SystemRevealListLowColor}" FallbackColor="{StaticResource SystemListLowColor}" />
+      <RevealBorderBrush x:Key="SystemControlBackgroundListMediumRevealBorderBrush" TargetTheme="Dark" Color="{StaticResource SystemRevealListMediumColor}" FallbackColor="{StaticResource SystemListMediumColor}" />
+      <RevealBorderBrush x:Key="SystemControlTransparentRevealBorderBrush" TargetTheme="Dark" Color="Transparent" FallbackColor="Transparent" />
+      <RevealBorderBrush x:Key="SystemControlForegroundRevealTransparentBorderBrush" TargetTheme="Dark" Color="Transparent" FallbackColor="Transparent" />
+      <RevealBorderBrush x:Key="SystemControlBackgroundTransparentRevealBorderBrush" TargetTheme="Dark" Color="Transparent" FallbackColor="Transparent" />
+      <RevealBorderBrush x:Key="SystemControlHighlightTransparentRevealBorderBrush" TargetTheme="Dark" Color="Transparent" FallbackColor="Transparent" />
+      <RevealBorderBrush x:Key="SystemControlHighlightAltTransparentRevealBorderBrush" TargetTheme="Dark" Color="Transparent" FallbackColor="Transparent" />
+      <RevealBorderBrush x:Key="SystemControlHighlightAccentRevealBorderBrush" TargetTheme="Dark" Color="{DynamicResource SystemAccentColor}" FallbackColor="{DynamicResource SystemAccentColor}" />
+      <RevealBorderBrush x:Key="SystemControlHighlightBaseHighRevealBorderBrush" TargetTheme="Dark" Color="{StaticResource SystemRevealBaseHighColor}" FallbackColor="{StaticResource SystemBaseHighColor}" />
+      <RevealBorderBrush x:Key="SystemControlHighlightBaseLowRevealBorderBrush" TargetTheme="Dark" Color="{StaticResource SystemRevealBaseLowColor}" FallbackColor="{StaticResource SystemBaseLowColor}" />
+      <RevealBorderBrush x:Key="SystemControlHighlightBaseMediumRevealBorderBrush" TargetTheme="Dark" Color="{StaticResource SystemRevealBaseMediumColor}" FallbackColor="{StaticResource SystemBaseMediumColor}" />
+      <RevealBorderBrush x:Key="SystemControlHighlightBaseMediumHighRevealBorderBrush" TargetTheme="Dark" Color="{StaticResource SystemRevealBaseMediumHighColor}" FallbackColor="{StaticResource SystemBaseMediumHighColor}" />
+      <RevealBorderBrush x:Key="SystemControlHighlightBaseMediumLowRevealBorderBrush" TargetTheme="Dark" Color="{StaticResource SystemRevealBaseMediumLowColor}" FallbackColor="{StaticResource SystemBaseMediumLowColor}" />
+      <Thickness x:Key="ButtonRevealBorderThemeThickness">1</Thickness>
+      <Thickness x:Key="RepeatButtonRevealBorderThemeThickness">1</Thickness>
+      <Thickness x:Key="ToggleButtonRevealBorderThemeThickness">1</Thickness>
+      <StaticResource x:Key="ButtonRevealBackground" ResourceKey="SystemControlBackgroundBaseLowRevealBackgroundBrush" />
+      <StaticResource x:Key="ButtonRevealBackgroundPointerOver" ResourceKey="SystemControlBackgroundBaseLowRevealBackgroundBrush" />
+      <StaticResource x:Key="ButtonRevealBackgroundPressed" ResourceKey="SystemControlBackgroundBaseMediumLowRevealBaseLowBackgroundBrush" />
+      <StaticResource x:Key="ButtonRevealBackgroundDisabled" ResourceKey="ControlFillColorTertiaryBrush" />
+      <StaticResource x:Key="ButtonRevealBorderBrush" ResourceKey="SystemControlBackgroundTransparentRevealBorderBrush" />
+      <StaticResource x:Key="ButtonRevealBorderBrushPointerOver" ResourceKey="SystemControlHighlightBaseMediumLowRevealBorderBrush" />
+      <StaticResource x:Key="ButtonRevealBorderBrushPressed" ResourceKey="SystemControlHighlightTransparentRevealBorderBrush" />
+      <StaticResource x:Key="ButtonRevealBorderBrushDisabled" ResourceKey="SubtleFillColorDisabledBrush" />
+      <StaticResource x:Key="RepeatButtonRevealBackground" ResourceKey="SystemControlBackgroundBaseLowRevealBackgroundBrush" />
+      <StaticResource x:Key="RepeatButtonRevealBackgroundPointerOver" ResourceKey="SystemControlBackgroundBaseLowRevealBackgroundBrush" />
+      <StaticResource x:Key="RepeatButtonRevealBackgroundPressed" ResourceKey="SystemControlBackgroundBaseMediumLowRevealBaseLowBackgroundBrush" />
+      <StaticResource x:Key="RepeatButtonRevealBackgroundDisabled" ResourceKey="ControlFillColorTertiaryBrush" />
+      <StaticResource x:Key="RepeatButtonRevealBorderBrush" ResourceKey="SystemControlBackgroundTransparentRevealBorderBrush" />
+      <StaticResource x:Key="RepeatButtonRevealBorderBrushPointerOver" ResourceKey="SystemControlHighlightBaseMediumLowRevealBorderBrush" />
+      <StaticResource x:Key="RepeatButtonRevealBorderBrushPressed" ResourceKey="SystemControlHighlightTransparentRevealBorderBrush" />
+      <StaticResource x:Key="RepeatButtonRevealBorderBrushDisabled" ResourceKey="SubtleFillColorDisabledBrush" />
+      <StaticResource x:Key="ToggleButtonRevealBackground" ResourceKey="SystemControlBackgroundBaseLowRevealBackgroundBrush" />
+      <StaticResource x:Key="ToggleButtonRevealBackgroundPointerOver" ResourceKey="SystemControlBackgroundBaseLowRevealBackgroundBrush" />
+      <StaticResource x:Key="ToggleButtonRevealBackgroundPressed" ResourceKey="SystemControlBackgroundBaseMediumLowRevealBaseLowBackgroundBrush" />
+      <StaticResource x:Key="ToggleButtonRevealBackgroundDisabled" ResourceKey="ControlFillColorTertiaryBrush" />
+      <StaticResource x:Key="ToggleButtonRevealBackgroundChecked" ResourceKey="SystemControlHighlightAccentRevealBackgroundBrush" />
+      <StaticResource x:Key="ToggleButtonRevealBackgroundCheckedPointerOver" ResourceKey="SystemControlHighlightAccentRevealBackgroundBrush" />
+      <StaticResource x:Key="ToggleButtonRevealBackgroundCheckedPressed" ResourceKey="SystemControlHighlightBaseMediumLowRevealAccentBackgroundBrush" />
+      <StaticResource x:Key="ToggleButtonRevealBackgroundCheckedDisabled" ResourceKey="TextFillColorDisabledBrush" />
+      <StaticResource x:Key="ToggleButtonRevealBackgroundIndeterminate" ResourceKey="SystemControlBackgroundBaseLowRevealBackgroundBrush" />
+      <StaticResource x:Key="ToggleButtonRevealBackgroundIndeterminatePointerOver" ResourceKey="SystemControlBackgroundBaseLowRevealBackgroundBrush" />
+      <StaticResource x:Key="ToggleButtonRevealBackgroundIndeterminatePressed" ResourceKey="SystemControlBackgroundBaseMediumLowRevealBaseLowBackgroundBrush" />
+      <StaticResource x:Key="ToggleButtonRevealBackgroundIndeterminateDisabled" ResourceKey="ControlFillColorTertiaryBrush" />
+      <StaticResource x:Key="ToggleButtonRevealBorderBrush" ResourceKey="SystemControlBackgroundTransparentRevealBorderBrush" />
+      <StaticResource x:Key="ToggleButtonRevealBorderBrushPointerOver" ResourceKey="SystemControlHighlightBaseMediumLowRevealBorderBrush" />
+      <StaticResource x:Key="ToggleButtonRevealBorderBrushPressed" ResourceKey="SystemControlHighlightTransparentRevealBorderBrush" />
+      <StaticResource x:Key="ToggleButtonRevealBorderBrushDisabled" ResourceKey="SubtleFillColorDisabledBrush" />
+      <StaticResource x:Key="ToggleButtonRevealBorderBrushChecked" ResourceKey="SystemControlHighlightAltTransparentRevealBorderBrush" />
+      <StaticResource x:Key="ToggleButtonRevealBorderBrushCheckedPointerOver" ResourceKey="SystemControlHighlightBaseMediumLowRevealBorderBrush" />
+      <StaticResource x:Key="ToggleButtonRevealBorderBrushCheckedPressed" ResourceKey="SystemControlHighlightTransparentRevealBorderBrush" />
+      <StaticResource x:Key="ToggleButtonRevealBorderBrushCheckedDisabled" ResourceKey="SubtleFillColorDisabledBrush" />
+      <StaticResource x:Key="ToggleButtonRevealBorderBrushIndeterminate" ResourceKey="SystemControlBackgroundTransparentRevealBorderBrush" />
+      <StaticResource x:Key="ToggleButtonRevealBorderBrushIndeterminatePointerOver" ResourceKey="SystemControlHighlightBaseMediumLowRevealBorderBrush" />
+      <StaticResource x:Key="ToggleButtonRevealBorderBrushIndeterminatePressed" ResourceKey="SystemControlHighlightTransparentRevealBorderBrush" />
+      <StaticResource x:Key="ToggleButtonRevealBorderBrushIndeterminateDisabled" ResourceKey="SubtleFillColorDisabledBrush" />
     </ResourceDictionary>
     <ResourceDictionary x:Key="Light">
-      <SolidColorBrush x:Key="SystemControlTransparentRevealBackgroundBrush" Color="Transparent" />
-      <SolidColorBrush x:Key="SystemControlHighlightAccentRevealBackgroundBrush" Color="{DynamicResource SystemAccentColor}" />
-      <SolidColorBrush x:Key="SystemControlHighlightListMediumRevealBackgroundBrush" Color="{StaticResource SystemListMediumColor}" />
-      <SolidColorBrush x:Key="SystemControlHighlightListLowRevealBackgroundBrush" Color="{StaticResource SystemListLowColor}" />
-      <SolidColorBrush x:Key="SystemControlTransparentRevealBorderBrush" Color="Transparent" />
-      <SolidColorBrush x:Key="SystemControlBackgroundTransparentRevealBorderBrush" Color="Transparent" />
-      <SolidColorBrush x:Key="SystemControlHighlightAltTransparentRevealBorderBrush" Color="Transparent" />
+      <Color x:Key="SystemRevealAltHighColor">#E6FFFFFF</Color>
+      <Color x:Key="SystemRevealAltLowColor">#2EFFFFFF</Color>
+      <Color x:Key="SystemRevealAltMediumColor">#8AFFFFFF</Color>
+      <Color x:Key="SystemRevealAltMediumHighColor">#B8FFFFFF</Color>
+      <Color x:Key="SystemRevealAltMediumLowColor">#61FFFFFF</Color>
+      <Color x:Key="SystemRevealBaseHighColor">#E6000000</Color>
+      <Color x:Key="SystemRevealBaseLowColor">#2E000000</Color>
+      <Color x:Key="SystemRevealBaseMediumColor">#8A000000</Color>
+      <Color x:Key="SystemRevealBaseMediumHighColor">#B8000000</Color>
+      <Color x:Key="SystemRevealBaseMediumLowColor">#61000000</Color>
+      <Color x:Key="SystemRevealChromeAltLowColor">#E6171717</Color>
+      <Color x:Key="SystemRevealChromeBlackHighColor">#E6000000</Color>
+      <Color x:Key="SystemRevealChromeBlackLowColor">#2E000000</Color>
+      <Color x:Key="SystemRevealChromeBlackMediumLowColor">#66000000</Color>
+      <Color x:Key="SystemRevealChromeBlackMediumColor">#B8000000</Color>
+      <Color x:Key="SystemRevealChromeHighColor">#E6CCCCCC</Color>
+      <Color x:Key="SystemRevealChromeLowColor">#E6F2F2F2</Color>
+      <Color x:Key="SystemRevealChromeMediumColor">#E6E6E6E6</Color>
+      <Color x:Key="SystemRevealChromeMediumLowColor">#E6F2F2F2</Color>
+      <Color x:Key="SystemRevealChromeWhiteColor">#E6FFFFFF</Color>
+      <Color x:Key="SystemRevealChromeGrayColor">#E6767676</Color>
+      <Color x:Key="SystemRevealListLowColor">#17000000</Color>
+      <Color x:Key="SystemRevealListMediumColor">#2E000000</Color>
+      <RevealBackgroundBrush x:Key="SystemControlBackgroundBaseLowRevealBackgroundBrush" TargetTheme="Light" Color="{StaticResource SystemRevealBaseLowColor}" FallbackColor="{StaticResource SystemBaseLowColor}" />
+      <RevealBackgroundBrush x:Key="SystemControlTransparentRevealBackgroundBrush" TargetTheme="Light" Color="Transparent" FallbackColor="Transparent" />
+      <RevealBackgroundBrush x:Key="SystemControlBackgroundAltHighRevealBackgroundBrush" TargetTheme="Light" Color="{StaticResource SystemRevealAltHighColor}" FallbackColor="{StaticResource SystemAltHighColor}" />
+      <RevealBackgroundBrush x:Key="SystemControlHighlightAccentRevealBackgroundBrush" TargetTheme="Light" Color="{DynamicResource SystemAccentColor}" FallbackColor="{DynamicResource SystemAccentColor}" />
+      <RevealBackgroundBrush x:Key="SystemControlHighlightAccent3RevealBackgroundBrush" TargetTheme="Light" Color="{DynamicResource SystemAccentColorLight3}" FallbackColor="{DynamicResource SystemAccentColorLight3}" />
+      <RevealBackgroundBrush x:Key="SystemControlHighlightAccent2RevealBackgroundBrush" TargetTheme="Light" Color="{DynamicResource SystemAccentColorLight2}" FallbackColor="{DynamicResource SystemAccentColorLight2}" />
+      <RevealBackgroundBrush x:Key="SystemControlHighlightListMediumRevealBackgroundBrush" TargetTheme="Light" Color="{StaticResource SystemRevealListMediumColor}" FallbackColor="{StaticResource SystemListMediumColor}" />
+      <RevealBackgroundBrush x:Key="SystemControlHighlightListLowRevealBackgroundBrush" TargetTheme="Light" Color="{StaticResource SystemRevealListLowColor}" FallbackColor="{StaticResource SystemListLowColor}" />
+      <RevealBackgroundBrush x:Key="SystemControlBackgroundBaseMediumLowRevealBaseLowBackgroundBrush" TargetTheme="Light" Color="{StaticResource SystemRevealBaseMediumLowColor}" FallbackColor="{StaticResource SystemBaseMediumLowColor}" />
+      <RevealBackgroundBrush x:Key="SystemControlHighlightBaseMediumLowRevealAccentBackgroundBrush" TargetTheme="Light" Color="{StaticResource SystemRevealBaseMediumLowColor}" FallbackColor="{StaticResource SystemBaseMediumLowColor}" />
+      <RevealBackgroundBrush x:Key="SystemControlHighlightListMediumRevealListLowBackgroundBrush" TargetTheme="Light" Color="{StaticResource SystemRevealListMediumColor}" FallbackColor="{StaticResource SystemListMediumColor}" />
+      <RevealBackgroundBrush x:Key="SystemControlHighlightAccent3RevealAccent2BackgroundBrush" TargetTheme="Light" Color="{DynamicResource SystemAccentColorLight3}" FallbackColor="{DynamicResource SystemAccentColorLight3}" />
+      <RevealBorderBrush x:Key="SystemControlBackgroundAccentRevealBorderBrush" TargetTheme="Light" Color="{DynamicResource SystemAccentColor}" FallbackColor="{DynamicResource SystemAccentColor}" />
+      <RevealBorderBrush x:Key="SystemControlBackgroundBaseHighRevealBorderBrush" TargetTheme="Light" Color="{StaticResource SystemRevealBaseHighColor}" FallbackColor="{StaticResource SystemBaseHighColor}" />
+      <RevealBorderBrush x:Key="SystemControlBackgroundBaseLowRevealBorderBrush" TargetTheme="Light" Color="{StaticResource SystemRevealBaseLowColor}" FallbackColor="{StaticResource SystemBaseLowColor}" />
+      <RevealBorderBrush x:Key="SystemControlBackgroundBaseMediumRevealBorderBrush" TargetTheme="Light" Color="{StaticResource SystemRevealBaseMediumColor}" FallbackColor="{StaticResource SystemBaseMediumColor}" />
+      <RevealBorderBrush x:Key="SystemControlBackgroundBaseMediumHighRevealBorderBrush" TargetTheme="Light" Color="{StaticResource SystemRevealBaseMediumHighColor}" FallbackColor="{StaticResource SystemBaseMediumHighColor}" />
+      <RevealBorderBrush x:Key="SystemControlBackgroundBaseMediumLowRevealBorderBrush" TargetTheme="Light" Color="{StaticResource SystemRevealBaseMediumLowColor}" FallbackColor="{StaticResource SystemBaseMediumLowColor}" />
+      <RevealBorderBrush x:Key="SystemControlBackgroundChromeBlackHighRevealBorderBrush" TargetTheme="Light" Color="{StaticResource SystemRevealChromeBlackHighColor}" FallbackColor="{StaticResource SystemChromeBlackHighColor}" />
+      <RevealBorderBrush x:Key="SystemControlBackgroundChromeBlackMediumRevealChromeBorderBrush" TargetTheme="Light" Color="{StaticResource SystemRevealChromeBlackMediumColor}" FallbackColor="{StaticResource SystemChromeBlackMediumColor}" />
+      <RevealBorderBrush x:Key="SystemControlBackgroundChromeMediumRevealBorderBrush" TargetTheme="Light" Color="{StaticResource SystemRevealChromeMediumColor}" FallbackColor="{StaticResource SystemChromeMediumColor}" />
+      <RevealBorderBrush x:Key="SystemControlBackgroundChromeMediumLowRevealBorderBrush" TargetTheme="Light" Color="{StaticResource SystemRevealChromeMediumLowColor}" FallbackColor="{StaticResource SystemChromeMediumLowColor}" />
+      <RevealBorderBrush x:Key="SystemControlBackgroundChromeWhiteRevealBorderBrush" TargetTheme="Light" Color="{StaticResource SystemRevealChromeWhiteColor}" FallbackColor="{StaticResource SystemChromeWhiteColor}" />
+      <RevealBorderBrush x:Key="SystemControlTransparentRevealListLowBorderBrush" TargetTheme="Light" Color="Transparent" FallbackColor="Transparent" />
+      <RevealBorderBrush x:Key="SystemControlBackgroundListLowRevealBorderBrush" TargetTheme="Light" Color="{StaticResource SystemRevealListLowColor}" FallbackColor="{StaticResource SystemListLowColor}" />
+      <RevealBorderBrush x:Key="SystemControlBackgroundListMediumRevealBorderBrush" TargetTheme="Light" Color="{StaticResource SystemRevealListMediumColor}" FallbackColor="{StaticResource SystemListMediumColor}" />
+      <RevealBorderBrush x:Key="SystemControlTransparentRevealBorderBrush" TargetTheme="Light" Color="Transparent" FallbackColor="Transparent" />
+      <RevealBorderBrush x:Key="SystemControlForegroundRevealTransparentBorderBrush" TargetTheme="Light" Color="Transparent" FallbackColor="Transparent" />
+      <RevealBorderBrush x:Key="SystemControlBackgroundTransparentRevealBorderBrush" TargetTheme="Light" Color="Transparent" FallbackColor="Transparent" />
+      <RevealBorderBrush x:Key="SystemControlHighlightTransparentRevealBorderBrush" TargetTheme="Light" Color="Transparent" FallbackColor="Transparent" />
+      <RevealBorderBrush x:Key="SystemControlHighlightAltTransparentRevealBorderBrush" TargetTheme="Light" Color="Transparent" FallbackColor="Transparent" />
+      <RevealBorderBrush x:Key="SystemControlHighlightAccentRevealBorderBrush" TargetTheme="Light" Color="{DynamicResource SystemAccentColor}" FallbackColor="{DynamicResource SystemAccentColor}" />
+      <RevealBorderBrush x:Key="SystemControlHighlightBaseHighRevealBorderBrush" TargetTheme="Light" Color="{StaticResource SystemRevealBaseHighColor}" FallbackColor="{StaticResource SystemBaseHighColor}" />
+      <RevealBorderBrush x:Key="SystemControlHighlightBaseLowRevealBorderBrush" TargetTheme="Light" Color="{StaticResource SystemRevealBaseLowColor}" FallbackColor="{StaticResource SystemBaseLowColor}" />
+      <RevealBorderBrush x:Key="SystemControlHighlightBaseMediumRevealBorderBrush" TargetTheme="Light" Color="{StaticResource SystemRevealBaseMediumColor}" FallbackColor="{StaticResource SystemBaseMediumColor}" />
+      <RevealBorderBrush x:Key="SystemControlHighlightBaseMediumHighRevealBorderBrush" TargetTheme="Light" Color="{StaticResource SystemRevealBaseMediumHighColor}" FallbackColor="{StaticResource SystemBaseMediumHighColor}" />
+      <RevealBorderBrush x:Key="SystemControlHighlightBaseMediumLowRevealBorderBrush" TargetTheme="Light" Color="{StaticResource SystemRevealBaseMediumLowColor}" FallbackColor="{StaticResource SystemBaseMediumLowColor}" />
+      <Thickness x:Key="ButtonRevealBorderThemeThickness">1</Thickness>
+      <Thickness x:Key="RepeatButtonRevealBorderThemeThickness">1</Thickness>
+      <Thickness x:Key="ToggleButtonRevealBorderThemeThickness">1</Thickness>
+      <StaticResource x:Key="ButtonRevealBackground" ResourceKey="SystemControlBackgroundBaseLowRevealBackgroundBrush" />
+      <StaticResource x:Key="ButtonRevealBackgroundPointerOver" ResourceKey="SystemControlBackgroundBaseLowRevealBackgroundBrush" />
+      <StaticResource x:Key="ButtonRevealBackgroundPressed" ResourceKey="SystemControlBackgroundBaseMediumLowRevealBaseLowBackgroundBrush" />
+      <StaticResource x:Key="ButtonRevealBackgroundDisabled" ResourceKey="ControlFillColorTertiaryBrush" />
+      <StaticResource x:Key="ButtonRevealBorderBrush" ResourceKey="SystemControlBackgroundTransparentRevealBorderBrush" />
+      <StaticResource x:Key="ButtonRevealBorderBrushPointerOver" ResourceKey="SystemControlHighlightBaseMediumLowRevealBorderBrush" />
+      <StaticResource x:Key="ButtonRevealBorderBrushPressed" ResourceKey="SystemControlHighlightTransparentRevealBorderBrush" />
+      <StaticResource x:Key="ButtonRevealBorderBrushDisabled" ResourceKey="SubtleFillColorDisabledBrush" />
+      <StaticResource x:Key="RepeatButtonRevealBackground" ResourceKey="SystemControlBackgroundBaseLowRevealBackgroundBrush" />
+      <StaticResource x:Key="RepeatButtonRevealBackgroundPointerOver" ResourceKey="SystemControlBackgroundBaseLowRevealBackgroundBrush" />
+      <StaticResource x:Key="RepeatButtonRevealBackgroundPressed" ResourceKey="SystemControlBackgroundBaseMediumLowRevealBaseLowBackgroundBrush" />
+      <StaticResource x:Key="RepeatButtonRevealBackgroundDisabled" ResourceKey="ControlFillColorTertiaryBrush" />
+      <StaticResource x:Key="RepeatButtonRevealBorderBrush" ResourceKey="SystemControlBackgroundTransparentRevealBorderBrush" />
+      <StaticResource x:Key="RepeatButtonRevealBorderBrushPointerOver" ResourceKey="SystemControlHighlightBaseMediumLowRevealBorderBrush" />
+      <StaticResource x:Key="RepeatButtonRevealBorderBrushPressed" ResourceKey="SystemControlHighlightTransparentRevealBorderBrush" />
+      <StaticResource x:Key="RepeatButtonRevealBorderBrushDisabled" ResourceKey="SubtleFillColorDisabledBrush" />
+      <StaticResource x:Key="ToggleButtonRevealBackground" ResourceKey="SystemControlBackgroundBaseLowRevealBackgroundBrush" />
+      <StaticResource x:Key="ToggleButtonRevealBackgroundPointerOver" ResourceKey="SystemControlBackgroundBaseLowRevealBackgroundBrush" />
+      <StaticResource x:Key="ToggleButtonRevealBackgroundPressed" ResourceKey="SystemControlBackgroundBaseMediumLowRevealBaseLowBackgroundBrush" />
+      <StaticResource x:Key="ToggleButtonRevealBackgroundDisabled" ResourceKey="ControlFillColorTertiaryBrush" />
+      <StaticResource x:Key="ToggleButtonRevealBackgroundChecked" ResourceKey="SystemControlHighlightAccentRevealBackgroundBrush" />
+      <StaticResource x:Key="ToggleButtonRevealBackgroundCheckedPointerOver" ResourceKey="SystemControlHighlightAccentRevealBackgroundBrush" />
+      <StaticResource x:Key="ToggleButtonRevealBackgroundCheckedPressed" ResourceKey="SystemControlHighlightBaseMediumLowRevealAccentBackgroundBrush" />
+      <StaticResource x:Key="ToggleButtonRevealBackgroundCheckedDisabled" ResourceKey="TextFillColorDisabledBrush" />
+      <StaticResource x:Key="ToggleButtonRevealBackgroundIndeterminate" ResourceKey="SystemControlBackgroundBaseLowRevealBackgroundBrush" />
+      <StaticResource x:Key="ToggleButtonRevealBackgroundIndeterminatePointerOver" ResourceKey="SystemControlBackgroundBaseLowRevealBackgroundBrush" />
+      <StaticResource x:Key="ToggleButtonRevealBackgroundIndeterminatePressed" ResourceKey="SystemControlBackgroundBaseMediumLowRevealBaseLowBackgroundBrush" />
+      <StaticResource x:Key="ToggleButtonRevealBackgroundIndeterminateDisabled" ResourceKey="ControlFillColorTertiaryBrush" />
+      <StaticResource x:Key="ToggleButtonRevealBorderBrush" ResourceKey="SystemControlBackgroundTransparentRevealBorderBrush" />
+      <StaticResource x:Key="ToggleButtonRevealBorderBrushPointerOver" ResourceKey="SystemControlHighlightBaseMediumLowRevealBorderBrush" />
+      <StaticResource x:Key="ToggleButtonRevealBorderBrushPressed" ResourceKey="SystemControlHighlightTransparentRevealBorderBrush" />
+      <StaticResource x:Key="ToggleButtonRevealBorderBrushDisabled" ResourceKey="SubtleFillColorDisabledBrush" />
+      <StaticResource x:Key="ToggleButtonRevealBorderBrushChecked" ResourceKey="SystemControlHighlightAltTransparentRevealBorderBrush" />
+      <StaticResource x:Key="ToggleButtonRevealBorderBrushCheckedPointerOver" ResourceKey="SystemControlHighlightBaseMediumLowRevealBorderBrush" />
+      <StaticResource x:Key="ToggleButtonRevealBorderBrushCheckedPressed" ResourceKey="SystemControlHighlightTransparentRevealBorderBrush" />
+      <StaticResource x:Key="ToggleButtonRevealBorderBrushCheckedDisabled" ResourceKey="SubtleFillColorDisabledBrush" />
+      <StaticResource x:Key="ToggleButtonRevealBorderBrushIndeterminate" ResourceKey="SystemControlBackgroundTransparentRevealBorderBrush" />
+      <StaticResource x:Key="ToggleButtonRevealBorderBrushIndeterminatePointerOver" ResourceKey="SystemControlHighlightBaseMediumLowRevealBorderBrush" />
+      <StaticResource x:Key="ToggleButtonRevealBorderBrushIndeterminatePressed" ResourceKey="SystemControlHighlightTransparentRevealBorderBrush" />
+      <StaticResource x:Key="ToggleButtonRevealBorderBrushIndeterminateDisabled" ResourceKey="SubtleFillColorDisabledBrush" />
     </ResourceDictionary>
     <ResourceDictionary x:Key="{x:Static winui:WinUITheme.HighContrast}">
+      <Color x:Key="SystemRevealAltHighColor">#FF000000</Color>
+      <Color x:Key="SystemRevealAltLowColor">#33000000</Color>
+      <Color x:Key="SystemRevealAltMediumColor">#99000000</Color>
+      <Color x:Key="SystemRevealAltMediumHighColor">#CC000000</Color>
+      <Color x:Key="SystemRevealAltMediumLowColor">#66000000</Color>
+      <Color x:Key="SystemRevealBaseHighColor">#FFFFFFFF</Color>
+      <Color x:Key="SystemRevealBaseLowColor">#33FFFFFF</Color>
+      <Color x:Key="SystemRevealBaseMediumColor">#99FFFFFF</Color>
+      <Color x:Key="SystemRevealBaseMediumHighColor">#CCFFFFFF</Color>
+      <Color x:Key="SystemRevealBaseMediumLowColor">#66FFFFFF</Color>
+      <Color x:Key="SystemRevealChromeAltLowColor">#FFF9F9F9</Color>
+      <Color x:Key="SystemRevealChromeBlackHighColor">#FF000000</Color>
+      <Color x:Key="SystemRevealChromeBlackLowColor">#33000000</Color>
+      <Color x:Key="SystemRevealChromeBlackMediumLowColor">#66000000</Color>
+      <Color x:Key="SystemRevealChromeBlackMediumColor">#CC000000</Color>
+      <Color x:Key="SystemRevealChromeHighColor">#FF767676</Color>
+      <Color x:Key="SystemRevealChromeLowColor">#FF1F1F1F</Color>
+      <Color x:Key="SystemRevealChromeMediumColor">#FF393939</Color>
+      <Color x:Key="SystemRevealChromeMediumLowColor">#FF2B2B2B</Color>
+      <Color x:Key="SystemRevealChromeWhiteColor">#FFFFFFFF</Color>
+      <Color x:Key="SystemRevealChromeGrayColor">#FF767676</Color>
+      <Color x:Key="SystemRevealListLowColor">#19FFFFFF</Color>
+      <Color x:Key="SystemRevealListMediumColor">#33FFFFFF</Color>
+      <SolidColorBrush x:Key="SystemControlBackgroundBaseLowRevealBackgroundBrush" Color="{DynamicResource SystemColorButtonFaceColor}" />
       <SolidColorBrush x:Key="SystemControlTransparentRevealBackgroundBrush" Color="Transparent" />
+      <SolidColorBrush x:Key="SystemControlBackgroundAltHighRevealBackgroundBrush" Color="{DynamicResource SystemColorButtonFaceColor}" />
       <SolidColorBrush x:Key="SystemControlHighlightAccentRevealBackgroundBrush" Color="{DynamicResource SystemColorHighlightColor}" />
+      <SolidColorBrush x:Key="SystemControlHighlightAccent3RevealBackgroundBrush" Color="{DynamicResource SystemColorHighlightColor}" />
+      <SolidColorBrush x:Key="SystemControlHighlightAccent2RevealBackgroundBrush" Color="{DynamicResource SystemColorHighlightColor}" />
       <SolidColorBrush x:Key="SystemControlHighlightListMediumRevealBackgroundBrush" Color="{DynamicResource SystemColorHighlightColor}" />
       <SolidColorBrush x:Key="SystemControlHighlightListLowRevealBackgroundBrush" Color="{DynamicResource SystemColorHighlightColor}" />
+      <SolidColorBrush x:Key="SystemControlBackgroundBaseMediumLowRevealBaseLowBackgroundBrush" Color="{DynamicResource SystemColorButtonFaceColor}" />
+      <SolidColorBrush x:Key="SystemControlHighlightBaseMediumLowRevealAccentBackgroundBrush" Color="{DynamicResource SystemColorHighlightColor}" />
+      <SolidColorBrush x:Key="SystemControlHighlightListMediumRevealListLowBackgroundBrush" Color="{DynamicResource SystemColorHighlightColor}" />
+      <SolidColorBrush x:Key="SystemControlHighlightAccent3RevealAccent2BackgroundBrush" Color="{DynamicResource SystemColorHighlightColor}" />
+      <SolidColorBrush x:Key="SystemControlBackgroundAccentRevealBorderBrush" Color="{DynamicResource SystemColorButtonFaceColor}" />
+      <SolidColorBrush x:Key="SystemControlBackgroundBaseHighRevealBorderBrush" Color="{DynamicResource SystemColorButtonFaceColor}" />
+      <SolidColorBrush x:Key="SystemControlBackgroundBaseLowRevealBorderBrush" Color="{DynamicResource SystemColorButtonFaceColor}" />
+      <SolidColorBrush x:Key="SystemControlBackgroundBaseMediumRevealBorderBrush" Color="{DynamicResource SystemColorButtonFaceColor}" />
+      <SolidColorBrush x:Key="SystemControlBackgroundBaseMediumHighRevealBorderBrush" Color="{DynamicResource SystemColorButtonFaceColor}" />
+      <SolidColorBrush x:Key="SystemControlBackgroundBaseMediumLowRevealBorderBrush" Color="{DynamicResource SystemColorButtonFaceColor}" />
+      <SolidColorBrush x:Key="SystemControlBackgroundChromeBlackHighRevealBorderBrush" Color="{DynamicResource SystemColorButtonFaceColor}" />
+      <SolidColorBrush x:Key="SystemControlBackgroundChromeBlackMediumRevealChromeBorderBrush" Color="{DynamicResource SystemColorButtonFaceColor}" />
+      <SolidColorBrush x:Key="SystemControlBackgroundChromeMediumRevealBorderBrush" Color="{DynamicResource SystemColorButtonFaceColor}" />
+      <SolidColorBrush x:Key="SystemControlBackgroundChromeMediumLowRevealBorderBrush" Color="{DynamicResource SystemColorButtonFaceColor}" />
+      <SolidColorBrush x:Key="SystemControlBackgroundChromeWhiteRevealBorderBrush" Color="{DynamicResource SystemColorButtonFaceColor}" />
+      <SolidColorBrush x:Key="SystemControlTransparentRevealListLowBorderBrush" Color="Transparent" />
+      <SolidColorBrush x:Key="SystemControlBackgroundListLowRevealBorderBrush" Color="{DynamicResource SystemColorButtonFaceColor}" />
+      <SolidColorBrush x:Key="SystemControlBackgroundListMediumRevealBorderBrush" Color="{DynamicResource SystemColorButtonFaceColor}" />
       <SolidColorBrush x:Key="SystemControlTransparentRevealBorderBrush" Color="Transparent" />
+      <SolidColorBrush x:Key="SystemControlForegroundRevealTransparentBorderBrush" Color="{DynamicResource SystemColorButtonTextColor}" />
       <SolidColorBrush x:Key="SystemControlBackgroundTransparentRevealBorderBrush" Color="{DynamicResource SystemColorButtonTextColor}" />
+      <SolidColorBrush x:Key="SystemControlHighlightTransparentRevealBorderBrush" Color="{DynamicResource SystemColorHighlightColor}" />
       <SolidColorBrush x:Key="SystemControlHighlightAltTransparentRevealBorderBrush" Color="{DynamicResource SystemColorHighlightTextColor}" />
+      <SolidColorBrush x:Key="SystemControlHighlightAccentRevealBorderBrush" Color="{DynamicResource SystemColorHighlightColor}" />
+      <SolidColorBrush x:Key="SystemControlHighlightBaseHighRevealBorderBrush" Color="{DynamicResource SystemColorHighlightColor}" />
+      <SolidColorBrush x:Key="SystemControlHighlightBaseLowRevealBorderBrush" Color="{DynamicResource SystemColorHighlightColor}" />
+      <SolidColorBrush x:Key="SystemControlHighlightBaseMediumRevealBorderBrush" Color="{DynamicResource SystemColorHighlightColor}" />
+      <SolidColorBrush x:Key="SystemControlHighlightBaseMediumHighRevealBorderBrush" Color="{DynamicResource SystemColorHighlightColor}" />
+      <SolidColorBrush x:Key="SystemControlHighlightBaseMediumLowRevealBorderBrush" Color="{DynamicResource SystemColorHighlightColor}" />
+      <Thickness x:Key="ButtonRevealBorderThemeThickness">1</Thickness>
+      <Thickness x:Key="RepeatButtonRevealBorderThemeThickness">1</Thickness>
+      <Thickness x:Key="ToggleButtonRevealBorderThemeThickness">1</Thickness>
+      <StaticResource x:Key="ButtonRevealBackground" ResourceKey="SystemControlBackgroundBaseLowRevealBackgroundBrush" />
+      <StaticResource x:Key="ButtonRevealBackgroundPointerOver" ResourceKey="SystemControlBackgroundBaseLowRevealBackgroundBrush" />
+      <StaticResource x:Key="ButtonRevealBackgroundPressed" ResourceKey="SystemControlBackgroundBaseMediumLowRevealBaseLowBackgroundBrush" />
+      <StaticResource x:Key="ButtonRevealBackgroundDisabled" ResourceKey="SystemControlBackgroundBaseLowBrush" />
+      <StaticResource x:Key="ButtonRevealBorderBrush" ResourceKey="SystemControlBackgroundTransparentRevealBorderBrush" />
+      <StaticResource x:Key="ButtonRevealBorderBrushPointerOver" ResourceKey="SystemControlHighlightBaseMediumLowRevealBorderBrush" />
+      <StaticResource x:Key="ButtonRevealBorderBrushPressed" ResourceKey="SystemControlHighlightTransparentRevealBorderBrush" />
+      <StaticResource x:Key="ButtonRevealBorderBrushDisabled" ResourceKey="SystemControlDisabledTransparentBrush" />
+      <StaticResource x:Key="RepeatButtonRevealBackground" ResourceKey="SystemControlBackgroundBaseLowRevealBackgroundBrush" />
+      <StaticResource x:Key="RepeatButtonRevealBackgroundPointerOver" ResourceKey="SystemControlBackgroundBaseLowRevealBackgroundBrush" />
+      <StaticResource x:Key="RepeatButtonRevealBackgroundPressed" ResourceKey="SystemControlBackgroundBaseMediumLowRevealBaseLowBackgroundBrush" />
+      <StaticResource x:Key="RepeatButtonRevealBackgroundDisabled" ResourceKey="SystemControlBackgroundBaseLowBrush" />
+      <StaticResource x:Key="RepeatButtonRevealBorderBrush" ResourceKey="SystemControlBackgroundTransparentRevealBorderBrush" />
+      <StaticResource x:Key="RepeatButtonRevealBorderBrushPointerOver" ResourceKey="SystemControlHighlightBaseMediumLowRevealBorderBrush" />
+      <StaticResource x:Key="RepeatButtonRevealBorderBrushPressed" ResourceKey="SystemControlHighlightTransparentRevealBorderBrush" />
+      <StaticResource x:Key="RepeatButtonRevealBorderBrushDisabled" ResourceKey="SystemControlDisabledTransparentBrush" />
+      <StaticResource x:Key="ToggleButtonRevealBackground" ResourceKey="SystemControlBackgroundBaseLowRevealBackgroundBrush" />
+      <StaticResource x:Key="ToggleButtonRevealBackgroundPointerOver" ResourceKey="SystemControlBackgroundBaseLowRevealBackgroundBrush" />
+      <StaticResource x:Key="ToggleButtonRevealBackgroundPressed" ResourceKey="SystemControlBackgroundBaseMediumLowRevealBaseLowBackgroundBrush" />
+      <StaticResource x:Key="ToggleButtonRevealBackgroundDisabled" ResourceKey="SystemControlBackgroundBaseLowBrush" />
+      <StaticResource x:Key="ToggleButtonRevealBackgroundChecked" ResourceKey="SystemControlHighlightAccentRevealBackgroundBrush" />
+      <StaticResource x:Key="ToggleButtonRevealBackgroundCheckedPointerOver" ResourceKey="SystemControlHighlightAccentRevealBackgroundBrush" />
+      <StaticResource x:Key="ToggleButtonRevealBackgroundCheckedPressed" ResourceKey="SystemControlHighlightBaseMediumLowRevealAccentBackgroundBrush" />
+      <StaticResource x:Key="ToggleButtonRevealBackgroundCheckedDisabled" ResourceKey="SystemControlDisabledBaseMediumLowBrush" />
+      <StaticResource x:Key="ToggleButtonRevealBackgroundIndeterminate" ResourceKey="SystemControlBackgroundBaseLowRevealBackgroundBrush" />
+      <StaticResource x:Key="ToggleButtonRevealBackgroundIndeterminatePointerOver" ResourceKey="SystemControlBackgroundBaseLowRevealBackgroundBrush" />
+      <StaticResource x:Key="ToggleButtonRevealBackgroundIndeterminatePressed" ResourceKey="SystemControlBackgroundBaseMediumLowRevealBaseLowBackgroundBrush" />
+      <StaticResource x:Key="ToggleButtonRevealBackgroundIndeterminateDisabled" ResourceKey="SystemControlBackgroundBaseLowBrush" />
+      <StaticResource x:Key="ToggleButtonRevealBorderBrush" ResourceKey="SystemControlBackgroundTransparentRevealBorderBrush" />
+      <StaticResource x:Key="ToggleButtonRevealBorderBrushPointerOver" ResourceKey="SystemControlHighlightBaseMediumLowRevealBorderBrush" />
+      <StaticResource x:Key="ToggleButtonRevealBorderBrushPressed" ResourceKey="SystemControlHighlightTransparentRevealBorderBrush" />
+      <StaticResource x:Key="ToggleButtonRevealBorderBrushDisabled" ResourceKey="SystemControlDisabledTransparentBrush" />
+      <StaticResource x:Key="ToggleButtonRevealBorderBrushChecked" ResourceKey="SystemControlHighlightAltTransparentRevealBorderBrush" />
+      <StaticResource x:Key="ToggleButtonRevealBorderBrushCheckedPointerOver" ResourceKey="SystemControlHighlightBaseMediumLowRevealBorderBrush" />
+      <StaticResource x:Key="ToggleButtonRevealBorderBrushCheckedPressed" ResourceKey="SystemControlHighlightTransparentRevealBorderBrush" />
+      <StaticResource x:Key="ToggleButtonRevealBorderBrushCheckedDisabled" ResourceKey="SystemControlDisabledTransparentBrush" />
+      <StaticResource x:Key="ToggleButtonRevealBorderBrushIndeterminate" ResourceKey="SystemControlBackgroundTransparentRevealBorderBrush" />
+      <StaticResource x:Key="ToggleButtonRevealBorderBrushIndeterminatePointerOver" ResourceKey="SystemControlHighlightBaseMediumLowRevealBorderBrush" />
+      <StaticResource x:Key="ToggleButtonRevealBorderBrushIndeterminatePressed" ResourceKey="SystemControlHighlightTransparentRevealBorderBrush" />
+      <StaticResource x:Key="ToggleButtonRevealBorderBrushIndeterminateDisabled" ResourceKey="SystemControlDisabledTransparentBrush" />
     </ResourceDictionary>
   </ResourceDictionary.ThemeDictionaries>
   <Thickness x:Key="CommandBarMoreButtonMargin">14,19,14,0</Thickness>

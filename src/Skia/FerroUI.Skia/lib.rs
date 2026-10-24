@@ -90,6 +90,8 @@ pub use two_level_cache::TwoLevelCache;
 pub use writeable_bitmap_impl::WriteableBitmapImpl;
 
 #[cfg(test)]
+mod layer_effect_tests;
+#[cfg(test)]
 mod tests;
 #[cfg(test)]
 mod text_tests;

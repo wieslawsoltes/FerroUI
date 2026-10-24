@@ -1761,6 +1761,40 @@ pub trait AccessTextProps: ElementBuilder {
 }
 impl<T: ObjectType + Upcast<ferroui_controls::primitives::AccessText>> AccessTextProps for El<T> {}
 
+/// The properties and routed events of [`AcrylicBrush`](ferroui_base::media::AcrylicBrush).
+pub trait AcrylicBrushProps: ElementBuilder {
+    /// Sets [`AcrylicBrush::tint_color_property`](ferroui_base::media::AcrylicBrush::tint_color_property).
+    fn tint_color<M>(self, value: impl IntoProp<ferroui_base::media::Color, M>) -> Self {
+        self.prop(<ferroui_base::media::AcrylicBrush>::tint_color_property(), value)
+    }
+
+    /// Sets [`AcrylicBrush::tint_opacity_property`](ferroui_base::media::AcrylicBrush::tint_opacity_property).
+    fn tint_opacity<M>(self, value: impl IntoProp<f64, M>) -> Self {
+        self.prop(<ferroui_base::media::AcrylicBrush>::tint_opacity_property(), value)
+    }
+
+    /// Sets [`AcrylicBrush::tint_luminosity_opacity_property`](ferroui_base::media::AcrylicBrush::tint_luminosity_opacity_property).
+    fn tint_luminosity_opacity<M>(self, value: impl IntoProp<Option<f64>, M>) -> Self {
+        self.prop(<ferroui_base::media::AcrylicBrush>::tint_luminosity_opacity_property(), value)
+    }
+
+    /// Sets [`AcrylicBrush::tint_transition_duration_property`](ferroui_base::media::AcrylicBrush::tint_transition_duration_property).
+    fn tint_transition_duration<M>(self, value: impl IntoProp<std::time::Duration, M>) -> Self {
+        self.prop(<ferroui_base::media::AcrylicBrush>::tint_transition_duration_property(), value)
+    }
+
+    /// Sets [`AcrylicBrush::background_source_property`](ferroui_base::media::AcrylicBrush::background_source_property).
+    fn background_source<M>(self, value: impl IntoProp<ferroui_base::media::AcrylicBrushBackgroundSource, M>) -> Self {
+        self.prop(<ferroui_base::media::AcrylicBrush>::background_source_property(), value)
+    }
+
+    /// Sets [`AcrylicBrush::always_use_fallback_property`](ferroui_base::media::AcrylicBrush::always_use_fallback_property).
+    fn always_use_fallback<M>(self, value: impl IntoProp<bool, M>) -> Self {
+        self.prop(<ferroui_base::media::AcrylicBrush>::always_use_fallback_property(), value)
+    }
+}
+impl<T: ObjectType + Upcast<ferroui_base::media::AcrylicBrush>> AcrylicBrushProps for El<T> {}
+
 /// The properties and routed events of [`AdornerLayer`](ferroui_controls::primitives::AdornerLayer).
 pub trait AdornerLayerProps: ElementBuilder {
     /// Sets [`AdornerLayer::is_clip_enabled_property`](ferroui_controls::primitives::AdornerLayer::is_clip_enabled_property).
@@ -4380,6 +4414,15 @@ pub trait MenuItemProps: ElementBuilder {
 }
 impl<T: ObjectType + Upcast<ferroui_controls::MenuItem>> MenuItemProps for El<T> {}
 
+/// The properties and routed events of [`MicaBackdrop`](ferroui_controls::media::MicaBackdrop).
+pub trait MicaBackdropProps: ElementBuilder {
+    /// Sets [`MicaBackdrop::kind_property`](ferroui_controls::media::MicaBackdrop::kind_property).
+    fn kind<M>(self, value: impl IntoProp<ferroui_base::rendering::composition::system_backdrops::MicaKind, M>) -> Self {
+        self.prop(<ferroui_controls::media::MicaBackdrop>::kind_property(), value)
+    }
+}
+impl<T: ObjectType + Upcast<ferroui_controls::media::MicaBackdrop>> MicaBackdropProps for El<T> {}
+
 /// The properties and routed events of [`MultiPage`](ferroui_controls::MultiPage).
 pub trait MultiPageProps: ElementBuilder {
     /// Sets [`MultiPage::items_source_property`](ferroui_controls::MultiPage::items_source_property).
@@ -5412,6 +5455,35 @@ pub trait RepeatButtonProps: ElementBuilder {
     }
 }
 impl<T: ObjectType + Upcast<ferroui_controls::RepeatButton>> RepeatButtonProps for El<T> {}
+
+/// The properties and routed events of [`RevealBrush`](ferroui_controls::media::RevealBrush).
+pub trait RevealBrushProps: ElementBuilder {
+    /// Sets [`RevealBrush::color_property`](ferroui_controls::media::RevealBrush::color_property).
+    fn color<M>(self, value: impl IntoProp<ferroui_base::media::Color, M>) -> Self {
+        self.prop(<ferroui_controls::media::RevealBrush>::color_property(), value)
+    }
+
+    /// Sets [`RevealBrush::target_theme_property`](ferroui_controls::media::RevealBrush::target_theme_property).
+    fn target_theme<M>(self, value: impl IntoProp<ferroui_controls::media::ApplicationTheme, M>) -> Self {
+        self.prop(<ferroui_controls::media::RevealBrush>::target_theme_property(), value)
+    }
+
+    /// Sets [`RevealBrush::always_use_fallback_property`](ferroui_controls::media::RevealBrush::always_use_fallback_property).
+    fn always_use_fallback<M>(self, value: impl IntoProp<bool, M>) -> Self {
+        self.prop(<ferroui_controls::media::RevealBrush>::always_use_fallback_property(), value)
+    }
+
+    /// Sets [`RevealBrush::state_property`](ferroui_controls::media::RevealBrush::state_property).
+    fn state<M>(self, value: impl IntoProp<ferroui_controls::media::RevealBrushState, M>) -> Self {
+        self.prop(<ferroui_controls::media::RevealBrush>::state_property(), value)
+    }
+
+    /// Sets [`RevealBrush::is_container_property`](ferroui_controls::media::RevealBrush::is_container_property).
+    fn is_container<M>(self, value: impl IntoProp<bool, M>) -> Self {
+        self.prop(<ferroui_controls::media::RevealBrush>::is_container_property(), value)
+    }
+}
+impl<T: ObjectType + Upcast<ferroui_controls::media::RevealBrush>> RevealBrushProps for El<T> {}
 
 /// The properties and routed events of [`ReversibleStackPanel`](ferroui_controls::ReversibleStackPanel).
 pub trait ReversibleStackPanelProps: ElementBuilder {
@@ -7730,6 +7802,29 @@ pub trait WrapPanelProps: ElementBuilder {
 }
 impl<T: ObjectType + Upcast<ferroui_controls::WrapPanel>> WrapPanelProps for El<T> {}
 
+/// The properties and routed events of [`XamlAmbientLight`](ferroui_controls::media::XamlAmbientLight).
+pub trait XamlAmbientLightProps: ElementBuilder {
+    /// Sets [`XamlAmbientLight::color_property`](ferroui_controls::media::XamlAmbientLight::color_property).
+    fn color<M>(self, value: impl IntoProp<ferroui_base::media::Color, M>) -> Self {
+        self.prop(<ferroui_controls::media::XamlAmbientLight>::color_property(), value)
+    }
+
+    /// Sets [`XamlAmbientLight::is_target_property`](ferroui_controls::media::XamlAmbientLight::is_target_property).
+    fn is_target<M>(self, value: impl IntoProp<bool, M>) -> Self {
+        self.prop(<ferroui_controls::media::XamlAmbientLight>::is_target_property(), value)
+    }
+}
+impl<T: ObjectType + Upcast<ferroui_controls::media::XamlAmbientLight>> XamlAmbientLightProps for El<T> {}
+
+/// The properties and routed events of [`XamlCompositionBrushBase`](ferroui_base::media::XamlCompositionBrushBase).
+pub trait XamlCompositionBrushBaseProps: ElementBuilder {
+    /// Sets [`XamlCompositionBrushBase::fallback_color_property`](ferroui_base::media::XamlCompositionBrushBase::fallback_color_property).
+    fn fallback_color<M>(self, value: impl IntoProp<ferroui_base::media::Color, M>) -> Self {
+        self.prop(<ferroui_base::media::XamlCompositionBrushBase>::fallback_color_property(), value)
+    }
+}
+impl<T: ObjectType + Upcast<ferroui_base::media::XamlCompositionBrushBase>> XamlCompositionBrushBaseProps for El<T> {}
+
 /// The attached properties of FerroUI.Base and FerroUI.Controls, named after their owner.
 pub trait AttachedProps: ElementBuilder {
     /// Sets the attached [`AccessKeyHandler::show_access_key_property`](ferroui_base::input::AccessKeyHandler::show_access_key_property).
@@ -8162,6 +8257,16 @@ pub trait AttachedProps: ElementBuilder {
         self.prop(<ferroui_controls::RelativePanel>::right_of_property(), value)
     }
 
+    /// Sets the attached [`RevealBrush::state_property`](ferroui_controls::media::RevealBrush::state_property).
+    fn reveal_brush_state<M>(self, value: impl IntoProp<ferroui_controls::media::RevealBrushState, M>) -> Self {
+        self.prop(<ferroui_controls::media::RevealBrush>::state_property(), value)
+    }
+
+    /// Sets the attached [`RevealBrush::is_container_property`](ferroui_controls::media::RevealBrush::is_container_property).
+    fn reveal_brush_is_container<M>(self, value: impl IntoProp<bool, M>) -> Self {
+        self.prop(<ferroui_controls::media::RevealBrush>::is_container_property(), value)
+    }
+
     /// Sets the attached [`ScrollContentPresenter::horizontal_snap_points_type_property`](ferroui_controls::presenters::ScrollContentPresenter::horizontal_snap_points_type_property).
     fn scroll_content_presenter_horizontal_snap_points_type<M>(self, value: impl IntoProp<ferroui_controls::primitives::SnapPointsType, M>) -> Self {
         self.prop(<ferroui_controls::presenters::ScrollContentPresenter>::horizontal_snap_points_type_property(), value)
@@ -8540,6 +8645,11 @@ pub trait AttachedProps: ElementBuilder {
     /// Sets the attached [`XYFocus::navigation_modes_property`](ferroui_base::input::XYFocus::navigation_modes_property).
     fn xy_focus_navigation_modes<M>(self, value: impl IntoProp<ferroui_base::input::XYFocusNavigationModes, M>) -> Self {
         self.prop(<ferroui_base::input::XYFocus>::navigation_modes_property(), value)
+    }
+
+    /// Sets the attached [`XamlAmbientLight::is_target_property`](ferroui_controls::media::XamlAmbientLight::is_target_property).
+    fn xaml_ambient_light_is_target<M>(self, value: impl IntoProp<bool, M>) -> Self {
+        self.prop(<ferroui_controls::media::XamlAmbientLight>::is_target_property(), value)
     }
 }
 impl<T: ObjectType> AttachedProps for El<T> {}

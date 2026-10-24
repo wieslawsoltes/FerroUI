@@ -1159,7 +1159,24 @@ impl DwmWindowAttribute {
     pub const DWMWA_CAPTION_COLOR: u32 = Self::DWMWA_BORDER_COLOR + 1;
     pub const DWMWA_TEXT_COLOR: u32 = Self::DWMWA_CAPTION_COLOR + 1;
     pub const DWMWA_VISIBLE_FRAME_BORDER_THICKNESS: u32 = Self::DWMWA_TEXT_COLOR + 1;
-    pub const DWMWA_LAST: u32 = Self::DWMWA_VISIBLE_FRAME_BORDER_THICKNESS + 1;
+    /// The system backdrop of the window (Windows 11 22H2, build 22621 and later).
+    pub const DWMWA_SYSTEMBACKDROP_TYPE: u32 = Self::DWMWA_VISIBLE_FRAME_BORDER_THICKNESS + 1;
+    pub const DWMWA_LAST: u32 = Self::DWMWA_SYSTEMBACKDROP_TYPE + 1;
+}
+
+/// `DWM_SYSTEMBACKDROP_TYPE`: the values of `DWMWA_SYSTEMBACKDROP_TYPE`.
+pub struct DwmSystemBackdropType;
+
+#[allow(missing_docs)]
+impl DwmSystemBackdropType {
+    pub const DWMSBT_AUTO: i32 = 0;
+    pub const DWMSBT_NONE: i32 = 1;
+    /// Mica.
+    pub const DWMSBT_MAINWINDOW: i32 = 2;
+    /// Desktop acrylic.
+    pub const DWMSBT_TRANSIENTWINDOW: i32 = 3;
+    /// Mica Alt.
+    pub const DWMSBT_TABBEDWINDOW: i32 = 4;
 }
 
 /// `DwmWindowCornerPreference` of the interop declarations: the values the system uses, as constants.

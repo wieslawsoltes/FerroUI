@@ -232,13 +232,15 @@ fn a_point_light_is_strongest_under_it_and_falls_off_to_the_edge() {
         Matrix::IDENTITY,
     );
     let rect = Rect::new(0.0, 0.0, 100.0, 100.0);
-    let size = LightMap::size_for(rect);
-    assert_eq!(PixelSize::new(25, 25), size);
+    // A sample every second device pixel: 50 x 50 at a scale of 1, 100 x 100 at 2.
+    assert_eq!(PixelSize::new(100, 100), LightMap::size_for(rect, 2.0));
+    let size = LightMap::size_for(rect, 1.0);
+    assert_eq!(PixelSize::new(50, 50), size);
     let pixels = map.pixels(rect, size).expect("the corners are darker");
     let alpha = |column: i32, row: i32| pixels[((row * size.width + column) * 4 + 3) as usize];
-    assert_eq!(0, alpha(12, 12), "the centre is fully lit");
+    assert_eq!(0, alpha(24, 24), "the centre is fully lit");
     assert!(alpha(0, 0) > 90, "a corner is darker: {}", alpha(0, 0));
-    assert_eq!(alpha(0, 0), alpha(24, 24));
+    assert_eq!(alpha(0, 0), alpha(49, 49));
 }
 
 #[test]
@@ -350,13 +352,14 @@ fn an_ambient_light_of_no_intensity_darkens_its_target() {
     light.targets().add((*sprite).clone());
     show(&s, &sprite);
 
-    // The content in a layer, then the light map over it: an 8 x 5 cell map
-    // of the 30 x 20 visual, with source-atop blending.
+    // Without layer effects: the content in a layer, then the light map over
+    // it: a 15 x 10 sample map of the 30 x 20 visual, with source-atop
+    // blending.
     let entries = log.entries();
     let push = position(&entries, "PushLayer 0, 0, 30, 20");
     let content = push + position(&entries[push..], "DrawRectangle Blue none 0, 0, 30, 20 shadows=0");
     let options = content + position_starting(&entries[content..], "PushRenderOptions");
-    let map = options + position(&entries[options..], "DrawBitmap 1 0, 0, 8, 5 0, 0, 30, 20");
+    let map = options + position(&entries[options..], "DrawBitmap 1 0, 0, 15, 10 0, 0, 30, 20");
     let pop = map + position(&entries[map..], "PopRenderOptions");
     assert!(entries[pop..].iter().any(|e| e == "PopLayer"), "{entries:?}");
 
@@ -442,5 +445,5 @@ fn animating_the_offset_of_a_light_draws_its_target_again() {
     run_for(&s, Duration::from_millis(150));
     assert_eq!(Vector3D::new(100.0, 100.0, 10.0), server_light.props().offset());
     // The light map is drawn again while the light moves.
-    assert!(log.count("DrawBitmap 1 0, 0, 25, 25 0, 0, 100, 100") >= 2, "{:?}", log.entries());
+    assert!(log.count("DrawBitmap 1 0, 0, 50, 50 0, 0, 100, 100") >= 2, "{:?}", log.entries());
 }

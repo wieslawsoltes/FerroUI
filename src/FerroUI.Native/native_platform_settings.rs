@@ -5,8 +5,10 @@ use ferroui_base::input::platform::PlatformHotkeyConfiguration;
 use ferroui_base::input::PointerType;
 use ferroui_base::media::Color;
 use ferroui_base::platform::{
-    ColorContrastPreference, DefaultPlatformSettings, IPlatformSettings, PlatformColorValues, PlatformThemeVariant,
+    ColorContrastPreference, DefaultPlatformSettings, IPlatformSettings, PlatformColorValues, PlatformMaterialSettings,
+    PlatformThemeVariant,
 };
+use ferroui_base::utilities::HandlerList;
 use ferroui_base::reactive::IDisposable;
 use ferroui_base::Size;
 use ferroui_microcom::ComPtr;
@@ -50,6 +52,30 @@ pub struct NativePlatformSettings {
     platform_settings: ComPtr<IFrnPlatformSettings>,
     color_values: Cell<Option<PlatformColorValues>>,
     last_language: RefCell<Option<String>>,
+    /// The handlers of `material_settings_changed` (winui-materials.md).
+    material_settings_changed: Rc<HandlerList<dyn Fn()>>,
+}
+
+/// The material settings of the native flags: bit 1 reduce transparency,
+/// bit 2 low power mode.
+fn to_material_settings(flags: i32) -> PlatformMaterialSettings {
+    PlatformMaterialSettings { transparency_effects_enabled: flags & 1 == 0, energy_saver_on: flags & 2 != 0 }
+}
+
+struct MaterialPolicyChangeCallback {
+    settings: Weak<NativePlatformSettings>,
+}
+
+impl IFrnActionCallbackImpl for MaterialPolicyChangeCallback {
+    fn run(&self) {
+        crate::callback_base::guard((), || {
+            if let Some(settings) = self.settings.upgrade() {
+                for (_, handler) in settings.material_settings_changed.snapshot().iter() {
+                    handler();
+                }
+            }
+        })
+    }
 }
 
 struct ColorsChangeCallback {
@@ -87,12 +113,16 @@ impl NativePlatformSettings {
             platform_settings,
             color_values: Cell::new(None),
             last_language: RefCell::new(None),
+            material_settings_changed: Rc::new(HandlerList::new()),
         });
         let colors_change = IFrnActionCallback::from_impl(ColorsChangeCallback { settings: Rc::downgrade(&this) });
         this.platform_settings.register_colors_change(Some(&colors_change));
         let language_change =
             IFrnActionCallback::from_impl(LanguageChangeCallback { settings: Rc::downgrade(&this) });
         this.platform_settings.register_language_change(Some(&language_change));
+        let material_policy_change =
+            IFrnActionCallback::from_impl(MaterialPolicyChangeCallback { settings: Rc::downgrade(&this) });
+        this.platform_settings.register_material_policy_change(Some(&material_policy_change));
         this
     }
 
@@ -175,11 +205,33 @@ impl IPlatformSettings for NativePlatformSettings {
     fn preferred_application_language_changed(&self, handler: Rc<dyn Fn()>) -> Rc<dyn IDisposable> {
         self.base.preferred_application_language_changed(handler)
     }
+
+    fn get_material_settings(&self) -> PlatformMaterialSettings {
+        to_material_settings(self.platform_settings.get_material_policy_flags())
+    }
+
+    fn material_settings_changed(&self, handler: Rc<dyn Fn()>) -> Rc<dyn IDisposable> {
+        let token = self.material_settings_changed.add(handler);
+        let list = Rc::downgrade(&self.material_settings_changed);
+        ferroui_base::reactive::Disposable::create(move || {
+            if let Some(list) = list.upgrade() {
+                list.remove(token);
+            }
+        })
+    }
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn material_settings_follow_the_native_flags() {
+        assert_eq!(to_material_settings(0), PlatformMaterialSettings::default());
+        assert!(!to_material_settings(1).transparency_effects_enabled);
+        assert!(to_material_settings(2).energy_saver_on);
+        assert!(to_material_settings(2).transparency_effects_enabled);
+    }
 
     #[test]
     fn themes() {

@@ -755,6 +755,12 @@ impl ServerCompositor {
         self.animations.process();
         self.apply_enqueued_render_resource_changes_pass();
         self.visual_own_properties_update_pass();
+        // A light whose coordinate space moved in this pass draws what it
+        // lights again (winui-materials.md): the content it invalidates is
+        // recomputed in a second pass.
+        if super::invalidate_lights_with_moved_spaces() {
+            self.visual_own_properties_update_pass();
+        }
         // Adorners need to be updated after own properties recompute pass,
         // because they may depend on ancestor's transform chain to be consistent
         self.adorner_update_pass();

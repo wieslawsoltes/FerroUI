@@ -29,7 +29,10 @@
     ThemeShadowWrapper around the border of the popup (a border of its own: a border whose
     background is sized to the inner edge of its border draws no box shadow), with the margin
     ThemeShadowSubMenuMargin as the room for it in the popup; deeper submenus have the same
-    shadow (Resources/ThemeShadows.xaml; DEVIATIONS.md, G-24).
+    shadow (Resources/ThemeShadows.xaml; DEVIATIONS.md, G-24). The background of the popup is
+    AcrylicBackgroundFillColorDefaultBrush, the acrylic brush of the flyouts, where the presenter
+    draws its system backdrop MenuFlyoutSystemBackdrop (desktop acrylic; a border has no system
+    backdrop; docs/porting/winui-materials.md).
   - CheckPlaceholderStates, which the presenter computes from all of its items (the text of every
     item moves by MenuFlyoutItemPlaceholderThemeThickness when one item is a toggle item or has an
     icon), are columns of shared size: the check glyph column (12 px glyph and 16 px margin) and
@@ -177,7 +180,7 @@
                     BoxShadow="{DynamicResource ThemeShadowSubMenuBoxShadow}"
                     Margin="{StaticResource ThemeShadowSubMenuMargin}"
                     CornerRadius="{DynamicResource OverlayCornerRadius}">
-              <Border Background="{DynamicResource MenuFlyoutPresenterBackground}"
+              <Border Background="{DynamicResource AcrylicBackgroundFillColorDefaultBrush}"
                       BorderBrush="{DynamicResource MenuFlyoutPresenterBorderBrush}"
                       BorderThickness="{DynamicResource MenuFlyoutPresenterBorderThemeThickness}"
                       CornerRadius="{DynamicResource OverlayCornerRadius}"

@@ -48,6 +48,7 @@ pub mod animations;
 pub mod brushes;
 pub mod drawing;
 pub mod effects;
+pub mod system_backdrops;
 pub mod expressions;
 pub mod generated;
 pub mod hit_testing;
@@ -145,7 +146,7 @@ pub use shape_visual::ShapeVisual;
 pub use brushes::{CompositionMaskBrush, CompositionNineGridBrush};
 // The WinUI effect brushes (phase 6); the effect descriptions and the
 // factory are in `effects`.
-pub use brushes::{CompositionBackdropBrush, CompositionEffectBrush};
+pub use brushes::{CompositionBackdropBrush, CompositionEffectBrush, CompositionHostBackdropBrush};
 pub use effects::{
     CompositionEffectFactory, CompositionEffectFactoryError, CompositionEffectFactoryLoadStatus,
     CompositionEffectSourceParameter,

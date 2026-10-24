@@ -1,5 +1,5 @@
 use super::{
-    IBitmapImpl, IDrawingContextImplWithEffects, IDrawingContextImplWithFragments, IDrawingContextWithAcrylicLikeSupport, IGeometryImpl, IGlyphRunImpl,
+    IBitmapImpl, IDrawingContextImplWithEffects, IDrawingContextImplWithFragments, IDrawingContextImplWithLayerEffects, IDrawingContextWithAcrylicLikeSupport, IGeometryImpl, IGlyphRunImpl,
     IPlatformRenderInterfaceRegion,
 };
 use crate::media::{BoxShadows, Color, IBrush, IPen, RenderOptions};
@@ -126,6 +126,14 @@ pub trait IDrawingContextImpl {
     /// (`impl as IDrawingContextImplWithEffects`): a backend that implements
     /// the trait overrides this to return itself.
     fn as_drawing_context_impl_with_effects(&mut self) -> Option<&mut dyn IDrawingContextImplWithEffects> {
+        None
+    }
+
+    /// The context viewed as [`IDrawingContextImplWithLayerEffects`], when
+    /// the backend can compose a layer with a blend mode or through a colour
+    /// matrix. A backend that implements the trait overrides this to return
+    /// itself.
+    fn as_drawing_context_impl_with_layer_effects(&mut self) -> Option<&mut dyn IDrawingContextImplWithLayerEffects> {
         None
     }
 

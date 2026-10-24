@@ -2,7 +2,7 @@ use crate::media::{BoxShadows, Color, IBrush, IEffect, IExperimentalAcrylicMater
 use crate::platform::{
     AlphaFormat, IBitmapImpl, IDrawingContextImpl, IDrawingContextImplWithEffects, IDrawingContextLayerImpl,
     IDrawingContextWithAcrylicLikeSupport, IGeometryImpl, IGlyphRunImpl, ILockedFramebuffer,
-    IPlatformRenderInterfaceRegion, IReadableBitmapImpl, IRenderTargetBitmapImpl, PixelFormat,
+    IPlatformRenderInterfaceRegion, IReadableBitmapImpl, IRenderTargetBitmapImpl, PixelFormat, PixelFormats,
 };
 use crate::{Matrix, PixelSize, Rect, RoundedRect, Vector};
 use std::any::{Any, TypeId};
@@ -85,6 +85,11 @@ pub struct MockDrawingContextImpl {
     /// Whether the context reports acrylic support
     /// (`DrawRectangleWithMaterial <tint> <rect>`). Off by default.
     pub supports_acrylic: bool,
+    /// Whether the context reports blend and colour matrix layers
+    /// (`PushBlendLayer <bounds> <mode>` / `PopBlendLayer`,
+    /// `PushColorMatrixLayer <bounds>` / `PopColorMatrixLayer`). Off by
+    /// default.
+    pub supports_layer_effects: bool,
     /// Whether pushed render options are recorded with their values
     /// (`PushRenderOptions <text> <interpolation> <edge> <blending>
     /// <full opacity>`) rather than as `PushRenderOptions`. Off by default.
@@ -100,6 +105,7 @@ impl MockDrawingContextImpl {
             supports_effects: false,
             log_effects: false,
             supports_acrylic: false,
+            supports_layer_effects: false,
             log_render_options: false,
         }
     }
@@ -279,6 +285,16 @@ impl IDrawingContextImpl for MockDrawingContextImpl {
         }
     }
 
+    fn as_drawing_context_impl_with_layer_effects(
+        &mut self,
+    ) -> Option<&mut dyn crate::platform::IDrawingContextImplWithLayerEffects> {
+        if self.supports_layer_effects {
+            Some(self)
+        } else {
+            None
+        }
+    }
+
     fn as_drawing_context_with_acrylic_like_support(
         &mut self,
     ) -> Option<&mut dyn IDrawingContextWithAcrylicLikeSupport> {
@@ -313,6 +329,40 @@ impl IDrawingContextImplWithEffects for MockDrawingContextImpl {
 
     fn pop_effect(&mut self) {
         self.log.push("PopEffect");
+    }
+}
+
+impl crate::platform::IDrawingContextImplWithLayerEffects for MockDrawingContextImpl {
+    fn push_blend_layer(&mut self, bounds: Rect, mode: crate::media::imaging::BitmapBlendingMode) {
+        self.log.push(format!("PushBlendLayer {bounds} {mode:?}"));
+    }
+
+    fn pop_blend_layer(&mut self) {
+        self.log.push("PopBlendLayer");
+    }
+
+    fn push_color_matrix_layer(
+        &mut self,
+        bounds: Rect,
+        _matrix: &crate::media::ColorMatrix,
+        alpha_mode: crate::media::ColorMatrixAlphaMode,
+    ) {
+        self.log.push(format!("PushColorMatrixLayer {bounds} {alpha_mode:?}"));
+    }
+
+    fn pop_color_matrix_layer(&mut self) {
+        self.log.push("PopColorMatrixLayer");
+    }
+
+    fn push_multiply_layer(&mut self, bounds: Rect, factors: &crate::platform::MultiplyLayerFactors) {
+        self.log.push(format!(
+            "PushMultiplyLayer {bounds} {}x{} {}",
+            factors.size.width, factors.size.height, factors.scale
+        ));
+    }
+
+    fn pop_multiply_layer(&mut self) {
+        self.log.push("PopMultiplyLayer");
     }
 }
 
@@ -439,9 +489,54 @@ impl IReadableBitmapImpl for MockRenderTargetBitmapImpl {
         None
     }
 
+    /// Transparent pixels: the mock draws nothing into them.
     fn lock(&self) -> Rc<dyn ILockedFramebuffer> {
-        panic!("the mock render target bitmap has no pixels")
+        let (width, height) = (self.size.width.max(0) as usize, self.size.height.max(0) as usize);
+        Rc::new(MockLockedFramebuffer {
+            data: std::cell::RefCell::new(vec![0; width * height * 4]),
+            size: self.size,
+            dpi: self.dpi,
+        })
     }
+}
+
+/// The transparent RGBA pixels of a locked mock bitmap.
+struct MockLockedFramebuffer {
+    data: std::cell::RefCell<Vec<u8>>,
+    size: PixelSize,
+    dpi: Vector,
+}
+
+impl ILockedFramebuffer for MockLockedFramebuffer {
+    fn address(&self) -> *mut u8 {
+        self.data.borrow_mut().as_mut_ptr()
+    }
+
+    fn with_data(&self, access: &mut dyn FnMut(&mut [u8])) {
+        access(&mut self.data.borrow_mut());
+    }
+
+    fn size(&self) -> PixelSize {
+        self.size
+    }
+
+    fn row_bytes(&self) -> i32 {
+        self.size.width * 4
+    }
+
+    fn dpi(&self) -> Vector {
+        self.dpi
+    }
+
+    fn format(&self) -> PixelFormat {
+        PixelFormats::RGBA8888
+    }
+
+    fn alpha_format(&self) -> AlphaFormat {
+        AlphaFormat::Premul
+    }
+
+    fn dispose(&self) {}
 }
 
 impl IRenderTargetBitmapImpl for MockRenderTargetBitmapImpl {

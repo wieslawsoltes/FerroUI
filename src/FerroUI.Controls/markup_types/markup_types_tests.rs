@@ -95,7 +95,8 @@ fn every_declaration_of_this_module_is_registered() {
     let types = declared_types();
     // `TextLayoutRoundingPlacement` declares its metadata next to the type and is registered
     // with the values.
-    assert_eq!(types.len(), declared + 1);
+    // The enums of the WinUI materials (`media`) too.
+    assert_eq!(types.len(), declared + 1 + crate::media::MARKUP_ENUM_COUNT);
 
     for type_ in &types {
         // The collection handle of the items controls is published as the enumerable of
@@ -199,8 +200,9 @@ fn template_parts_name_classes() {
 #[test]
 fn enumeration_members_are_found_by_name() {
     let enums: Vec<_> = declared_types().into_iter().filter(|t| t.kind == MarkupTypeKind::Enum).collect();
-    // `TextLayoutRoundingPlacement` is declared next to the type.
-    assert_eq!(enums.len(), super::enums::TYPES.len() + 1);
+    // `TextLayoutRoundingPlacement` and the enums of the WinUI materials are declared next to
+    // their types.
+    assert_eq!(enums.len(), super::enums::TYPES.len() + 1 + crate::media::MARKUP_ENUM_COUNT);
     for type_ in enums {
         assert!(!type_.enum_members.is_empty(), "{type_:?}");
         for member in type_.enum_members {

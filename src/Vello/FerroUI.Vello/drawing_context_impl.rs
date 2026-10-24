@@ -213,6 +213,8 @@ enum SavedKind {
     Nothing,
     /// An effect: its layer, and its scene when it has one of its own.
     Effect,
+    /// A colour matrix layer: the scene its content is recorded into.
+    ColorMatrix,
 }
 
 /// Vello based drawing context.
@@ -255,6 +257,8 @@ pub struct DrawingContextImpl {
     text_options: TextOptions,
     /// The effects that are pushed.
     effect_stack: Vec<effects::EffectFrame>,
+    /// The colour matrix layers that are pushed, innermost last.
+    color_matrix_stack: Vec<effects::ColorMatrixFrame>,
     /// The clips that are open in the scene of the context.
     open_clips: usize,
     /// The pixel of the target that is the top left pixel of the scene of
@@ -312,6 +316,7 @@ impl DrawingContextImpl {
             render_options: RenderOptions::default(),
             text_options: TextOptions::default(),
             effect_stack: Vec::new(),
+            color_matrix_stack: Vec::new(),
             open_clips: 0,
             sink_origin: kurbo::Vec2::ZERO,
             fragment: None,
@@ -531,6 +536,7 @@ impl DrawingContextImpl {
             SavedKind::Layer => self.sink().pop_layer(),
             SavedKind::Nothing => {}
             SavedKind::Effect => self.end_effect(),
+            SavedKind::ColorMatrix => self.end_color_matrix(),
         }
 
         self.current_transform = transform;
@@ -1674,6 +1680,12 @@ impl IDrawingContextImpl for DrawingContextImpl {
     fn as_drawing_context_with_acrylic_like_support(
         &mut self,
     ) -> Option<&mut dyn ferroui_base::platform::IDrawingContextWithAcrylicLikeSupport> {
+        Some(self)
+    }
+
+    fn as_drawing_context_impl_with_layer_effects(
+        &mut self,
+    ) -> Option<&mut dyn ferroui_base::platform::IDrawingContextImplWithLayerEffects> {
         Some(self)
     }
 

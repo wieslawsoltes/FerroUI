@@ -209,16 +209,16 @@ fn an_unsupported_effect_reports_its_load_status_and_draws_nothing() {
     let s = CompositorCanvas::new();
     let log = s.render_interface.log().clone();
 
-    let factory = s.compositor.create_effect_factory(SaturationEffect {
-        name: "Saturation".into(),
-        saturation: 0.0,
-        source: parameter("source"),
+    // An effect without its source does not load (Win2D's effects fail on a
+    // missing input), and its brushes draw nothing.
+    let factory = s.compositor.create_effect_factory(crate::rendering::composition::effects::ArithmeticCompositeEffect {
+        name: "Arithmetic".into(),
+        source1: parameter("source"),
+        source2: None,
+        ..Default::default()
     });
     assert_eq!(CompositionEffectFactoryLoadStatus::Other, factory.load_status());
-    assert_eq!(
-        Some(&CompositionEffectFactoryError::EffectTypeNotSupported("SaturationEffect")),
-        factory.extended_error()
-    );
+    assert!(matches!(factory.extended_error(), Some(CompositionEffectFactoryError::MissingSource { .. })));
     let brush = factory.create_brush();
     brush.set_source_parameter("source", Some((*s.compositor.create_color_brush_with_color(Colors::BLUE)).clone()));
     let sprite = sprite_with(&s, &brush);
@@ -227,17 +227,22 @@ fn an_unsupported_effect_reports_its_load_status_and_draws_nothing() {
     let server = s.compositor.server().get::<ServerCompositionEffectBrush>(brush.server()).expect("the server brush exists");
     assert!(!server.is_loaded());
 
-    // A composite mode other than source-over.
+    // Every composite mode loads (winui-materials.md: `MaskInvert` is drawn
+    // from the pixels).
     let composite = s.compositor.create_effect_factory(CompositeEffect {
-        mode: CanvasComposite::Xor,
+        mode: CanvasComposite::MaskInvert,
         sources: vec![CompositionEffectSourceParameter::new("a").into()],
         ..Default::default()
     });
-    assert_eq!(CompositionEffectFactoryLoadStatus::Other, composite.load_status());
-    assert_eq!(
-        Some(&CompositionEffectFactoryError::CompositeModeNotSupported(CanvasComposite::Xor)),
-        composite.extended_error()
-    );
+    assert_eq!(CompositionEffectFactoryLoadStatus::Success, composite.load_status());
+
+    // A saturation loads (winui-materials.md).
+    let saturation = s.compositor.create_effect_factory(SaturationEffect {
+        name: "Saturation".into(),
+        saturation: 0.0,
+        source: parameter("source"),
+    });
+    assert_eq!(CompositionEffectFactoryLoadStatus::Success, saturation.load_status());
 
     // An effect without its source.
     let missing = s.compositor.create_effect_factory(GaussianBlurEffect::default());
@@ -361,8 +366,11 @@ fn a_layer_visual_effect_draws_its_other_sources_around_the_layer() {
 
 // --- backdrop brush --------------------------------------------------------------------
 
+/// What is behind the brushes here is empty (winui-materials.md: a backdrop
+/// brush draws what was drawn under its visual; the tests of the materials
+/// show it).
 #[test]
-fn a_backdrop_brush_draws_nothing() {
+fn a_backdrop_brush_over_nothing_draws_nothing() {
     let s = CompositorCanvas::new();
     let log = s.render_interface.log().clone();
 

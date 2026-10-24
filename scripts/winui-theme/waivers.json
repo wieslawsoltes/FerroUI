@@ -8,13 +8,13 @@
     },
     {
       "document": "controls/dev/Materials/Reveal/RevealBrush_themeresources.xaml",
-      "key": "re:(?!(SystemControlTransparentRevealBackgroundBrush|SystemControlTransparentRevealBorderBrush|SystemControlHighlightAccentRevealBackgroundBrush|SystemControlHighlightListLowRevealBackgroundBrush|SystemControlHighlightListMediumRevealBackgroundBrush|SystemControlBackgroundTransparentRevealBorderBrush|SystemControlHighlightAltTransparentRevealBorderBrush|CommandBarMoreButtonMargin|AppBarButtonContentHeight)$).*",
-      "reason": "Reveal highlight (RevealBrush, the Reveal styles): deprecated in WinUI 3, where the brushes are plain fallbacks and the Reveal styles are kept for compatibility only; FerroUI has no Reveal lighting. The seven brushes that documents of the theme still name (MenuFlyout, CalendarView, NavigationView) are ported as the plain brushes they are. Two keys of the document are not Reveal resources and are ported: CommandBarMoreButtonMargin and AppBarButtonContentHeight, the last definitions of two values of generic.xaml that the CommandBar and AppBarButton templates name."
+      "key": "re:(?!(SystemControl\\w*Reveal\\w*(Background|Border)Brush|SystemReveal\\w*Color|(Button|RepeatButton|ToggleButton)Reveal\\w*|CommandBarMoreButtonMargin|AppBarButtonContentHeight)$).*",
+      "reason": "The resources of the Reveal styles that are not ported (the aliases ListViewItemRevealBackground and the like, the Reveal thicknesses and paddings; see the Reveal styles). The resources of ButtonRevealStyle, RepeatButtonRevealStyle and ToggleButtonRevealStyle, which are ported (Controls/RevealStyles.xaml), are kept. The Reveal brushes and colours are ported as FerroUI's Reveal brushes (docs/porting/winui-materials.md), and two keys of the document that are not Reveal resources: CommandBarMoreButtonMargin and AppBarButtonContentHeight, the last definitions of two values of generic.xaml that the CommandBar and AppBarButton templates name."
     },
     {
       "document": "*",
-      "key": "re:.*Reveal.*Style",
-      "reason": "Reveal styles (ButtonRevealStyle, ListViewItemRevealStyle, ...): deprecated in WinUI 3 (see the Reveal brushes); the default styles they duplicate are ported."
+      "key": "re:(?!(Button|RepeatButton|ToggleButton)RevealStyle$).*Reveal.*Style",
+      "reason": "Reveal styles other than ButtonRevealStyle, RepeatButtonRevealStyle and ToggleButtonRevealStyle (ListViewItemRevealStyle, AppBarButtonRevealStyle, ...): deprecated in WinUI 3, and their controls have themes of their own (see the Reveal brushes); the default styles they duplicate are ported. The three button styles are ported by hand in Controls/RevealStyles.xaml (docs/porting/winui-materials.md)."
     },
     {
       "document": "controls/dev/CommonStyles/Deprecated_themeresources.xaml",
@@ -25,11 +25,6 @@
       "document": "*",
       "key": "IsApplicationFocusVisualKindReveal",
       "reason": "Reveal focus visuals: deprecated in WinUI 3; the port reads UseSystemFocusVisuals=\"{ThemeResource IsApplicationFocusVisualKindReveal}\" (always False) as no focus visual (FocusAdorner = {x:Null})."
-    },
-    {
-      "document": "*",
-      "key": "re:AcrylicBackgroundFillColorDefaultBackdrop|MenuFlyoutSystemBackdrop",
-      "reason": "DesktopAcrylicBackdrop is a system backdrop of a window or popup (Windows composition), not a brush, and MenuFlyoutSystemBackdrop names it; FerroUI's counterpart is the transparency level of a top level, which an application chooses."
     },
     {
       "document": "controls/dev/InkToolbar/InkToolbar.xaml",

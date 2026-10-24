@@ -27,6 +27,7 @@ use super::server::{
 use super::{CompositionObject, CompositionVisual, Compositor, ICompositionObject};
 use crate::media::Color;
 use crate::Vector3D;
+use std::cell::RefCell;
 use std::ops::Deref;
 use std::rc::{Rc, Weak};
 
@@ -137,6 +138,10 @@ pub struct CompositionLight {
     kind: CompositionLightKind,
     targets: Rc<VisualUnorderedCollection>,
     exclusions: Rc<VisualUnorderedCollection>,
+    /// The XAML light the light belongs to (winui-materials.md): its id and
+    /// the visual of the element that holds it, and whether they changed
+    /// since the last batch.
+    xaml_binding: RefCell<(Option<String>, Option<Rc<CompositionVisual>>, bool)>,
 }
 
 impl CompositionLight {
@@ -155,6 +160,7 @@ impl CompositionLight {
             kind,
             targets,
             exclusions,
+            xaml_binding: RefCell::new((None, None, false)),
         });
         match &light.kind {
             CompositionLightKind::Ambient(props) => props.initialize_defaults(&*light),
@@ -226,6 +232,44 @@ impl CompositionLight {
         &self.exclusions
     }
 
+    /// Binds the light to a XAML light (`XamlLight.CompositionLight`): the
+    /// light then also lights the XAML brushes that target the id `id`
+    /// (`XamlLight.AddTargetBrush`) where they are drawn in the subtree of
+    /// `scope`, the visual of the element whose `Lights` holds the XAML
+    /// light. `None` unbinds it. Called by `XamlLight`.
+    pub fn set_xaml_binding(&self, id: Option<String>, scope: Option<Rc<CompositionVisual>>) {
+        {
+            let mut binding = self.xaml_binding.borrow_mut();
+            let same_scope = match (&binding.1, &scope) {
+                (Some(a), Some(b)) => Rc::ptr_eq(a, b),
+                (None, None) => true,
+                _ => false,
+            };
+            if binding.0 == id && same_scope {
+                return;
+            }
+            *binding = (id, scope, true);
+        }
+        self.object
+            .register_for_serialization(|| self.this.upgrade().map(|this| this as Rc<dyn crate::rendering::composition::ICompositorSerializable>));
+    }
+
+    /// The id of the XAML light the light is bound to, if any.
+    pub fn xaml_id(&self) -> Option<String> {
+        self.xaml_binding.borrow().0.clone()
+    }
+
+    /// Writes the XAML binding when it changed (after the properties).
+    fn serialize_xaml_binding(&self, writer: &mut crate::rendering::composition::transport::BatchStreamWriter<'_>) {
+        let mut binding = self.xaml_binding.borrow_mut();
+        let changes = binding.2.then(|| crate::rendering::composition::server::XamlLightChanges {
+            id: binding.0.clone(),
+            scope: binding.1.as_ref().and_then(|scope| scope.object().server()),
+        });
+        binding.2 = false;
+        writer.write_value(changes);
+    }
+
     /// `IsEnabled` (default `true`): a disabled light lights nothing, and
     /// the visuals it targets are drawn as if it did not exist.
     pub fn is_enabled(&self) -> bool {
@@ -249,11 +293,14 @@ impl SpotLightHooks for CompositionLight {}
 
 composition_object_impls!(
     CompositionLight, "CompositionLight",
-    serialize: |this, writer| match &this.kind {
-        CompositionLightKind::Ambient(props) => props.serialize_changes_core(this, writer),
-        CompositionLightKind::Distant(props) => props.serialize_changes_core(this, writer),
-        CompositionLightKind::Point(props) => props.serialize_changes_core(this, writer),
-        CompositionLightKind::Spot(props) => props.serialize_changes_core(this, writer),
+    serialize: |this, writer| {
+        match &this.kind {
+            CompositionLightKind::Ambient(props) => props.serialize_changes_core(this, writer),
+            CompositionLightKind::Distant(props) => props.serialize_changes_core(this, writer),
+            CompositionLightKind::Point(props) => props.serialize_changes_core(this, writer),
+            CompositionLightKind::Spot(props) => props.serialize_changes_core(this, writer),
+        }
+        this.serialize_xaml_binding(writer);
     },
     start_animation: |this, name, animation, final_value| match &this.kind {
         CompositionLightKind::Ambient(props) => props.start_animation(this, name, animation, final_value),

@@ -83,6 +83,16 @@ impl<'a> PlatformDrawingContext<'a> {
     }
 }
 
+/// The brush the immediate drawing context hands the platform for `brush`:
+/// a XAML composition brush, which needs a compositor, is its fallback
+/// colour (winui-materials.md); any other brush is itself.
+fn immediate_brush(brush: &Rc<dyn IBrush>) -> Rc<dyn IBrush> {
+    match crate::media::XamlCompositionBrushBase::of(&**brush) {
+        Some(xaml) => Rc::new(ImmutableSolidColorBrush::with_opacity(xaml.fallback_color(), brush.opacity())),
+        None => brush.clone(),
+    }
+}
+
 impl IDrawingContextCore for PlatformDrawingContext<'_> {
     fn draw_line_core(&mut self, pen: &Rc<dyn IPen>, p1: Point, p2: Point) {
         self.platform_impl.get().draw_line(Some(&**pen), p1, p2);
@@ -94,7 +104,8 @@ impl IDrawingContextCore for PlatformDrawingContext<'_> {
         pen: Option<&Rc<dyn IPen>>,
         geometry: &Arc<dyn IGeometryImpl>,
     ) {
-        self.platform_impl.get().draw_geometry(brush.map(|b| &**b), pen.map(|p| &**p), &**geometry);
+        let brush = brush.map(immediate_brush);
+        self.platform_impl.get().draw_geometry(brush.as_deref(), pen.map(|p| &**p), &**geometry);
     }
 
     fn draw_rectangle_core(
@@ -104,11 +115,13 @@ impl IDrawingContextCore for PlatformDrawingContext<'_> {
         rrect: RoundedRect,
         box_shadows: &BoxShadows,
     ) {
-        self.platform_impl.get().draw_rectangle(brush.map(|b| &**b), pen.map(|p| &**p), rrect, box_shadows);
+        let brush = brush.map(immediate_brush);
+        self.platform_impl.get().draw_rectangle(brush.as_deref(), pen.map(|p| &**p), rrect, box_shadows);
     }
 
     fn draw_ellipse_core(&mut self, brush: Option<&Rc<dyn IBrush>>, pen: Option<&Rc<dyn IPen>>, rect: Rect) {
-        self.platform_impl.get().draw_ellipse(brush.map(|b| &**b), pen.map(|p| &**p), rect);
+        let brush = brush.map(immediate_brush);
+        self.platform_impl.get().draw_ellipse(brush.as_deref(), pen.map(|p| &**p), rect);
     }
 
     fn draw_bitmap(&mut self, source: &crate::utilities::RefCounted<crate::platform::SharedBitmapImpl>, opacity: f64, source_rect: Rect, dest_rect: Rect) {

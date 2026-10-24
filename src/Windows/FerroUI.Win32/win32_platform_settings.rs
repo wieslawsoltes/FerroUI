@@ -3,7 +3,20 @@
 //! shades, high contrast) and the preferred language of the user.
 
 use ferroui_base::media::Color;
-use ferroui_base::platform::{AccentColorShades, ColorContrastPreference, PlatformColorValues, PlatformThemeVariant};
+use ferroui_base::platform::{
+    AccentColorShades, ColorContrastPreference, PlatformColorValues, PlatformMaterialSettings, PlatformThemeVariant,
+};
+
+/// The material settings of the system from the `EnableTransparency` value of
+/// `HKCU\Software\Microsoft\Windows\CurrentVersion\Themes\Personalize` (`None` when it is
+/// not set: transparency is on) and the battery saver flag of the power status
+/// (`SYSTEM_POWER_STATUS.SystemStatusFlag`).
+pub(crate) fn material_settings_from(enable_transparency: Option<u32>, system_status_flag: u8) -> PlatformMaterialSettings {
+    PlatformMaterialSettings {
+        transparency_effects_enabled: enable_transparency != Some(0),
+        energy_saver_on: system_status_flag == 1,
+    }
+}
 
 /// The shades of the accent colour from the colours `UISettings` reports
 /// for `UIColorType` `AccentDark3` to `AccentLight3`, in the order of the
@@ -163,6 +176,8 @@ mod imp {
         base: DefaultPlatformSettings,
         color_values: Cell<Option<PlatformColorValues>>,
         last_language: RefCell<Option<String>>,
+        material_settings: Cell<Option<PlatformMaterialSettings>>,
+        material_settings_changed: Rc<ferroui_base::utilities::HandlerList<dyn Fn()>>,
     }
 
     impl Win32PlatformSettings {
@@ -172,7 +187,46 @@ mod imp {
                 base: DefaultPlatformSettings::new(),
                 color_values: Cell::new(None),
                 last_language: RefCell::new(None),
+                material_settings: Cell::new(None),
+                material_settings_changed: Rc::new(ferroui_base::utilities::HandlerList::new()),
             })
+        }
+
+        fn read_material_settings() -> PlatformMaterialSettings {
+            use windows_sys::Win32::System::Power::{GetSystemPowerStatus, SYSTEM_POWER_STATUS};
+            use windows_sys::Win32::System::Registry::{RegGetValueW, HKEY_CURRENT_USER, RRF_RT_REG_DWORD};
+            let key: Vec<u16> = "Software\\Microsoft\\Windows\\CurrentVersion\\Themes\\Personalize\0".encode_utf16().collect();
+            let value: Vec<u16> = "EnableTransparency\0".encode_utf16().collect();
+            let mut data: u32 = 0;
+            let mut size = std::mem::size_of::<u32>() as u32;
+            // SAFETY: the strings are null-terminated, the buffer is a DWORD of `size` bytes.
+            let status = unsafe {
+                RegGetValueW(
+                    HKEY_CURRENT_USER,
+                    key.as_ptr(),
+                    value.as_ptr(),
+                    RRF_RT_REG_DWORD,
+                    std::ptr::null_mut(),
+                    (&mut data as *mut u32).cast(),
+                    &mut size,
+                )
+            };
+            let enable_transparency = (status == 0).then_some(data);
+            // SAFETY: the structure is written by the call.
+            let mut power: SYSTEM_POWER_STATUS = unsafe { std::mem::zeroed() };
+            let flag = if unsafe { GetSystemPowerStatus(&mut power) } != 0 { power.SystemStatusFlag } else { 0 };
+            material_settings_from(enable_transparency, flag)
+        }
+
+        /// The system may have changed its material settings: reads them
+        /// again and raises the change event if they differ.
+        pub(crate) fn on_material_settings_changed(&self) {
+            let settings = Self::read_material_settings();
+            if self.material_settings.replace(Some(settings)) != Some(settings) {
+                for (_, handler) in self.material_settings_changed.snapshot().iter() {
+                    handler();
+                }
+            }
         }
 
         fn get_uncached_color_values(&self) -> PlatformColorValues {
@@ -362,6 +416,25 @@ mod imp {
         fn preferred_application_language_changed(&self, handler: Rc<dyn Fn()>) -> Rc<dyn IDisposable> {
             self.base.preferred_application_language_changed(handler)
         }
+
+        fn get_material_settings(&self) -> PlatformMaterialSettings {
+            if let Some(settings) = self.material_settings.get() {
+                return settings;
+            }
+            let settings = Self::read_material_settings();
+            self.material_settings.set(Some(settings));
+            settings
+        }
+
+        fn material_settings_changed(&self, handler: Rc<dyn Fn()>) -> Rc<dyn IDisposable> {
+            let token = self.material_settings_changed.add(handler);
+            let list = Rc::downgrade(&self.material_settings_changed);
+            ferroui_base::reactive::Disposable::create(move || {
+                if let Some(list) = list.upgrade() {
+                    list.remove(token);
+                }
+            })
+        }
     }
 }
 
@@ -370,6 +443,14 @@ mod tests {
     use super::*;
 
     const ACCENT: Color = Color::new(255, 0, 120, 215);
+
+    #[test]
+    fn material_settings_follow_the_registry_and_the_power_status() {
+        assert_eq!(material_settings_from(None, 0), PlatformMaterialSettings::default());
+        assert!(material_settings_from(Some(1), 0).transparency_effects_enabled);
+        assert!(!material_settings_from(Some(0), 0).transparency_effects_enabled);
+        assert!(material_settings_from(None, 1).energy_saver_on);
+    }
 
     #[test]
     fn a_dark_background_is_the_dark_theme() {
