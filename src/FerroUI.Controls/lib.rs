@@ -235,9 +235,11 @@ mod tick_bar_tests;
 mod i_scroll_anchor_provider;
 mod scroll_changed_event_args;
 mod scroll_viewer;
+mod zoom_mode;
 pub use i_scroll_anchor_provider::{as_scroll_anchor_provider, register_scroll_anchor_provider, IScrollAnchorProvider};
 pub use scroll_changed_event_args::ScrollChangedEventArgs;
 pub use scroll_viewer::{ScrollViewer, ScrollViewerImpl, ScrollViewerImplExt, ScrollViewerVTable};
+pub use zoom_mode::ZoomMode;
 #[cfg(test)]
 pub(crate) mod test_support_scrolling;
 #[cfg(test)]
@@ -246,6 +248,8 @@ mod bring_into_view_tests;
 mod scroll_viewer_tests;
 #[cfg(test)]
 mod scroll_viewer_tests_i_logical_scrollable;
+#[cfg(test)]
+mod scroll_viewer_zoom_tests;
 
 mod experimental_acrylic_border;
 #[cfg(test)]

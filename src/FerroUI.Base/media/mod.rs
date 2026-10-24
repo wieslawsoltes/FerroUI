@@ -59,6 +59,9 @@ mod geometry_group;
 mod gradient_brush;
 mod gradient_spread_method;
 mod gradient_stop;
+mod theme_shadow;
+#[cfg(test)]
+mod theme_shadow_tests;
 mod gradient_stops;
 mod i_brush;
 mod shared_brush;
@@ -139,6 +142,9 @@ pub use geometry_group::GeometryGroup;
 pub use gradient_brush::{GradientBrush, GradientBrushImpl, GradientBrushImplExt, GradientBrushVTable};
 pub use gradient_spread_method::GradientSpreadMethod;
 pub use gradient_stop::GradientStop;
+pub use theme_shadow::{
+    DropShadowRecipe, Shadow, ThemeShadow, ThemeShadowError, ThemeShadowTheme, UIElementWeakCollection,
+};
 pub use gradient_stops::GradientStops;
 pub use i_brush::IBrush;
 pub use shared_brush::{shared_brush_of, shared_pen_of, SharedBrush, SharedPen};

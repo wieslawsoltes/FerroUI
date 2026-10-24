@@ -310,6 +310,106 @@ the drawing contexts draws the content with its shadow. `CompositionBackdropBrus
 nothing, as the drawing contexts cannot read back the pixels behind a visual (the acrylic visual
 draws a tinted fill, not a blurred backdrop); `CompositionHostBackdropBrush` is not ported.
 
+### Phase 7: theme shadows, alpha masks and manipulation (COMPOSITION-03, COMPOSITION-04)
+
+The two items of the gap tracker of the Windows Calculator port
+(`behaviors-port-notes/composition-gaps-tracker.md`) that concern this API. The sources are those
+of section 1, plus:
+
+- `dxaml/xcp/core/inc/ThemeShadow.h`, `dxaml/xcp/components/graphics/ThemeShadow.cpp`,
+  `dxaml/xcp/dxaml/lib/ThemeShadow_Partial.cpp`: the class, its `Receivers` and its mask;
+- `dxaml/xcp/components/graphics/inc/DropShadowRecipe.h`: the ambient and directional shadows of an
+  elevation in the light and dark themes;
+- `dxaml/xcp/components/comptree/HWCompNodeWinRT.cpp` (`NeedsDropShadowVisual`,
+  `UpdateDropShadowVisual`, `CreateDropShadowVisual`, `UpdateDropShadowRecipeCornerRadius`): where
+  and how the shadow of a caster is drawn;
+- `dxaml/xcp/dxaml/lib/ElevationHelper.cpp` and its callers (`FlyoutPresenter_partial.cpp`,
+  `MenuFlyoutPresenter_Partial.cpp`, `ToolTip_Partial.cpp`, `ContentDialog_Partial.cpp`, ...): the
+  elevations the controls apply;
+- `dxaml/xcp/components/graphics/AlphaMask.cpp` and the `GetAlphaMask` and `NotifyRenderContent`
+  members of `CShape`, `CTextBlock` and `CImage`;
+- `dxaml/xcp/core/core/elements/ScrollViewer.cpp` (`EnsureManipulationTransformPropertySet`) and
+  `dxaml/xcp/core/hw/ManipulationTransform.cpp`: the manipulation property set.
+
+What the audit of `main` found:
+
+| Item | Status before | Notes |
+|---|---|---|
+| `UIElement.Shadow`, `Shadow`, `ThemeShadow` | missing | The WinUI theme draws a hand-written `BoxShadow` per popup (DEVIATIONS.md, G-24). |
+| `ThemeShadow.Receivers` (`UIElementWeakCollection`) | missing | |
+| Elevation from `Translation.Z`; the ambient and directional shadows; light, dark and high contrast | missing | `Visual::set_translation` exists as a facade, not a property markup can set. |
+| `Shape.GetAlphaMask`, `TextBlock.GetAlphaMask`, `Image.GetAlphaMask` | missing | |
+| `DropShadow.Mask` | partial | A colour or gradient mask scales the box shadow of the rectangle; a bitmap mask goes through the drop shadow effect of the drawing context and is then removed again with destination-out blending, which removes the shadow under the mask too and removes only what is drawn as bitmaps. |
+| `DropShadow.SourcePolicy` | partial | `InheritFromVisualContent` draws the brush through the drop shadow effect of the drawing context: the shadow is right, but a mask that is not a bitmap and the brush are composed differently. |
+| `DropShadow.Offset.Z` | missing | Ignored. |
+| `GetScrollViewerManipulationPropertySet` | partial | `Translation`, `Pan` and `Matrix` follow the offset; `Scale` is always (1, 1, 1): FerroUI's `ScrollViewer` does not zoom. |
+
+The design:
+
+1. **One way to draw the shadow of an alpha.** WinUI's drop shadow is the alpha of its source,
+   coloured, offset and blurred, drawn under the content and nothing removed. The drawing contexts
+   have no shadow-only effect (their drop shadow effect draws the content too), but both backends
+   have a blur effect, layers and the blending of bitmaps. So the shadow of a mask (any composition
+   brush) or of the content of a visual is drawn the same way on Skia and Vello: inside a blur
+   effect, the source is painted into a layer, offset by the shadow, and a bitmap of the colour of
+   the shadow is drawn over it with source-in blending; what stays is the colour with the alpha of
+   the source. The rectangle without a mask stays the box shadow of the drawing context, which is
+   the same blur of a rectangle. This replaces the opacity mask over the box shadow, the drop
+   shadow effect and the destination-out removal; the deviations they caused are gone.
+2. **`Offset.Z`.** The renderers project the 3D transform of a visual (its `Orientation`, its
+   `RotationAxis`, the Z of its `Scale`) orthographically. The shadow is a plane at the depth Z of
+   the offset in the space of its visual, projected the same way: the Z moves the shadow where the
+   visual is turned out of its plane (and does nothing in the plane, as in WinUI without a
+   perspective).
+3. **`GetAlphaMask`.** As `AlphaMask.cpp`: the element is drawn (its own content, with the scale
+   of its transform to the window and the scaling of the window) into a bitmap whose colour is
+   dropped (an alpha mask), shown by a `CompositionSurfaceBrush` with `Stretch` `Fill`; the brush
+   is the same object for the life of the element. The mask is redrawn each time the element draws
+   its content again (WinUI's `NotifyRenderContent`), so it follows text, geometry, stroke, source
+   and size changes; it is emptied while the element is not visible. A mask larger than the largest
+   texture is drawn smaller and the brush scaled back (`Scale`), as in WinUI.
+4. **`ThemeShadow`.** `ferroui_base::media::{Shadow, ThemeShadow}` and the `Shadow` property of
+   `Visual` (`UIElement.Shadow`). WinUI 3 draws every theme shadow as a drop shadow
+   (`CThemeShadow::IsDropShadowMode` returns `true`; the projected shadows onto receivers are
+   disabled, and their tests are marked "TODO: Support Projected Shadows"), so the port does what
+   WinUI 3 does:
+   - a caster (an element with a `ThemeShadow`, or the child of a `Popup` with one) gets a shadow
+     visual: a composition visual inserted just before the caster's own visual among the visuals
+     of its parent (WinUI parents it under the prepend visual of the caster), with the caster's
+     visual as its `ParentForTransform`, its opacity bound to the caster's by an expression, and
+     not hit-testable; so it follows the transform and the opacity of the caster (animations
+     included), it is clipped by the clips of the ancestors and not by the caster's own clip;
+   - it draws `GetDropShadowRecipe(Translation.Z, theme)`: the elevation is `Translation.Z / 2`
+     (at most 64), a directional shadow below 16, an ambient and a directional one above, with the
+     opacities of the light and dark themes, around a rounded rectangle of the size of the caster
+     with the corner radius `UpdateDropShadowRecipeCornerRadius` finds (a `Rectangle`'s radii, the
+     `CornerRadius` of a control, of a border), hollow over the caster, the dummy shape 1 px
+     smaller and the blur 1 more, as `CreateDropShadowVisual`;
+   - none in a high contrast theme (`NeedsDropShadowVisual`); the theme is the actual theme
+     variant of the caster (a variant that is or inherits `HighContrast` counts as high contrast);
+   - `Receivers` is a weak collection of elements with WinUI's members; an ancestor of the caster
+     is refused. As in WinUI 3, receivers do not change the drawing (the projected-shadow scene,
+     where the root and the open popups are the default receivers, is the disabled path);
+   - `Translation` becomes a property markup can set (`Translation="0,0,32"`), over the facade.
+5. **The WinUI theme.** The flyout and menu presenters, the context menu, the drop-downs and the
+   tool tip get `Translation` and a `ThemeShadow` instead of the hand-written `BoxShadow`; the
+   margins that make room for the shadow inside the popup window stay (G-24).
+6. **Zoom and the manipulation property set.** `ScrollViewer` gains WinUI's zoom: `ZoomMode`,
+   `ZoomFactor`, `MinZoomFactor`, `MaxZoomFactor`, `ChangeView` and `ZoomToFactor`, Ctrl+wheel
+   when zooming is enabled. The content keeps its layout and is scaled by a transform of the
+   presenter on its child; the extent and the offsets are in zoomed units, as in WinUI. The
+   manipulation property set follows the offset and the zoom as `ManipulationTransform.cpp`
+   connects it to the transform of DirectManipulation: `Translation` and `Pan` the translation of
+   the content, `Scale` `(zoom, zoom, 1)`, `CenterPoint` the centre of that scale, `Matrix` the
+   scale followed by the translation.
+7. **Timing.** FerroUI's scrolling and input run on the UI thread, and its compositor has no input
+   (section 7); a compositor-driven set would need the scrolling of the content itself to move to
+   the compositor. Section 7 records what stays different.
+
+The catalog page shows the Calculator's trace pointer shadow, a theme shadow at several elevations
+in both themes, the alpha masks of a shape, a text block and an image, and a zooming scroll viewer
+whose property set drives a visual through expressions.
+
 ## 5. Design notes
 
 ### 5.1 Connected animations
