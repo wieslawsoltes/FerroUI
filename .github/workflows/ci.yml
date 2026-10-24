@@ -76,6 +76,9 @@ jobs:
       # FerroUI.Base and FerroUI.Controls (docs/declarative-ui.md, section 4).
       - name: Generated view builders are up to date
         run: python3 scripts/generate_view_builders.py --check
+      # The scoped names of the generator (two public types of one crate with the same name).
+      - name: Tests of the view builder generator
+        run: python3 scripts/test_generate_view_builders.py
       # Thread-local variables are declared with ferroui_base::ferro_thread_local!, which on Android
       # is a slot of one table per thread: a thread_local! there takes one of the 128 keys of the C
       # library (docs/porting/android-platform.md, section 5.1). The allow-list is in the script.
