@@ -791,6 +791,13 @@
     {"file_lines": [5556, 5560], "document": "runtime_list_of_references.xaml", "line": 1, "position": 2},
     {"file_lines": [5561, 5562], "document": "runtime_list_of_references.xaml", "line": 5, "position": 6},
     {"file_lines": [5563, 5565], "document": "runtime_list_of_references.xaml", "line": 6, "position": 8},
-    {"file_lines": [5566, 5572], "document": "runtime_list_of_references.xaml", "line": 11, "position": 8}
+    {"file_lines": [5566, 5572], "document": "runtime_list_of_references.xaml", "line": 11, "position": 8},
+    {"file_lines": [5589, 5594], "document": "items_source_indexer.xaml", "line": 1, "position": 2},
+    {"file_lines": [5595, 5596], "document": "items_source_indexer.xaml", "line": 4, "position": 4},
+    {"file_lines": [5597, 5601], "document": "items_source_indexer.xaml", "line": 4, "position": 4},
+    {"file_lines": [5602, 5615], "document": "items_source_indexer.xaml", "line": 4, "position": 14},
+    {"file_lines": [5616, 5617], "document": "items_source_indexer.xaml", "line": 5, "position": 4},
+    {"file_lines": [5618, 5622], "document": "items_source_indexer.xaml", "line": 5, "position": 4},
+    {"file_lines": [5623, 5645], "document": "items_source_indexer.xaml", "line": 5, "position": 11}
   ]
 }
