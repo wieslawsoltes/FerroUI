@@ -90456,7 +90456,7 @@
    "winui": "No WinUI control: the left pane of NavigationView (NavigationView.xaml, NavigationView_themeresources.xaml; NavigationView itself is NavigationView.xaml) and SplitView (DefaultSplitViewStyle).",
    "status": "ported",
    "deviations": 13,
-   "date": "2026-10-17"
+   "date": "2026-10-24"
   },
   {
    "document": "DropDownButton.xaml",
@@ -90511,7 +90511,7 @@
    "winui": "Frame: {Frame} (generic.xaml). A WinUI control in ferroui-controls (docs/porting/winui-controls.md); the Fluent theme has no document for it.",
    "status": "ported",
    "deviations": 3,
-   "date": "not committed"
+   "date": "2026-10-24"
   },
   {
    "document": "GridSplitter.xaml",
@@ -90678,7 +90678,7 @@
    "winui": "NavigationView: {NavigationView}, {NavigationViewItem}, {NavigationViewItemHeader}, {NavigationViewItemSeparator} (NavigationView.xaml), MUX_NavigationViewItemPresenterStyleWhenOnLeftPane and MUX_NavigationViewItemPresenterStyleWhenOnTopPane folded into the item, MUX_NavigationViewSettingsItemStyleWhenOnTopPane, NavigationViewPaneSearchButtonStyle (NavigationView_themeresources.xaml), with PaneToggleButtonStyle of DrawerPage.xaml and the back button styles of NavigationPage.xaml. A WinUI control in ferroui-controls (docs/porting/winui-controls.md); the Fluent theme has no document for it.",
    "status": "ported",
    "deviations": 31,
-   "date": "not committed"
+   "date": "2026-10-24"
   },
   {
    "document": "NotificationCard.xaml",
