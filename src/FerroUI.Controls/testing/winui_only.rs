@@ -5,8 +5,8 @@
 //! controls (`winui_only_tests`).
 
 use crate::{
-    AutoSuggestBox, FontIcon, Frame, InfoBadge, InfoBar, NumberBox, ProgressRing, RadioButtons, RatingControl,
-    SymbolIcon,
+    AutoSuggestBox, FontIcon, Frame, InfoBadge, InfoBar, NavigationView, NavigationViewItem, NavigationViewItemHeader,
+    NavigationViewItemSeparator, NumberBox, ProgressRing, RadioButtons, RatingControl, SymbolIcon,
 };
 use ferroui_base::TypeInfo;
 
@@ -22,6 +22,10 @@ pub const WINUI_ONLY_CONTROLS: &[(&TypeInfo, &str)] = &[
     (RadioButtons::TYPE, "WinUI's RadioButtons: its template and items panel are converted from WinUI's RadioButtons.xaml"),
     (RatingControl::TYPE, "WinUI's RatingControl: its template is converted from WinUI's RatingControl.xaml"),
     (Frame::TYPE, "WinUI's Frame: its template is converted from the Frame style of WinUI's generic.xaml"),
+    (NavigationView::TYPE, "WinUI's NavigationView: its template is converted from WinUI's NavigationView.xaml"),
+    (NavigationViewItem::TYPE, "WinUI's NavigationViewItem: its template is converted from NavigationView.xaml with the item presenter styles"),
+    (NavigationViewItemHeader::TYPE, "WinUI's NavigationViewItemHeader: its template is converted from WinUI's NavigationView.xaml"),
+    (NavigationViewItemSeparator::TYPE, "WinUI's NavigationViewItemSeparator: its template is converted from WinUI's NavigationView.xaml"),
 ];
 
 /// Whether only the WinUI theme styles `control`.

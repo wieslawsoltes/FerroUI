@@ -85,6 +85,10 @@ A separate namespace for the controls (`ferroui_controls::winui`, `FerroUI.Contr
 | `RadioButtons` | WinUI's RadioButtons: its template and items panel are converted from WinUI's RadioButtons.xaml | W6 |
 | `RatingControl` | WinUI's RatingControl: its template is converted from WinUI's RatingControl.xaml | W6 |
 | `Frame` | WinUI's Frame: its template is converted from the Frame style of WinUI's generic.xaml | W8 |
+| `NavigationView` | WinUI's NavigationView: its template is converted from WinUI's NavigationView.xaml | W8 |
+| `NavigationViewItem` | WinUI's NavigationViewItem: its template is converted from NavigationView.xaml with the item presenter styles | W8 |
+| `NavigationViewItemHeader` | WinUI's NavigationViewItemHeader: its template is converted from WinUI's NavigationView.xaml | W8 |
+| `NavigationViewItemSeparator` | WinUI's NavigationViewItemSeparator: its template is converted from WinUI's NavigationView.xaml | W8 |
 <!-- winui-only:end -->
 - The tables of `winui-theme.md` that say "no FerroUI control" for these controls (NavigationView and its items, RadioButtons, RatingControl; DRP-1, DRP-2, DRP-11, DRP-13, NVP-1 and G-23 of the theme's DEVIATIONS) are updated in the pull request that lands each control; W5 updated them for InfoBar, InfoBadge and ProgressRing.
 

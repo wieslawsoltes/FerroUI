@@ -933,6 +933,58 @@ pub fn navigation_page() -> El<ferroui_controls::NavigationPage> {
     El::new()
 }
 
+pub use ferroui_controls::NavigationView;
+
+impl ViewClass for ferroui_controls::NavigationView {
+    fn create() -> ferroui_base::Ref<Self> {
+        <ferroui_controls::NavigationView>::new()
+    }
+}
+
+/// Starts an element of [`NavigationView`](ferroui_controls::NavigationView).
+pub fn navigation_view() -> El<ferroui_controls::NavigationView> {
+    El::new()
+}
+
+pub use ferroui_controls::NavigationViewItem;
+
+impl ViewClass for ferroui_controls::NavigationViewItem {
+    fn create() -> ferroui_base::Ref<Self> {
+        <ferroui_controls::NavigationViewItem>::new()
+    }
+}
+
+/// Starts an element of [`NavigationViewItem`](ferroui_controls::NavigationViewItem).
+pub fn navigation_view_item() -> El<ferroui_controls::NavigationViewItem> {
+    El::new()
+}
+
+pub use ferroui_controls::NavigationViewItemHeader;
+
+impl ViewClass for ferroui_controls::NavigationViewItemHeader {
+    fn create() -> ferroui_base::Ref<Self> {
+        <ferroui_controls::NavigationViewItemHeader>::new()
+    }
+}
+
+/// Starts an element of [`NavigationViewItemHeader`](ferroui_controls::NavigationViewItemHeader).
+pub fn navigation_view_item_header() -> El<ferroui_controls::NavigationViewItemHeader> {
+    El::new()
+}
+
+pub use ferroui_controls::NavigationViewItemSeparator;
+
+impl ViewClass for ferroui_controls::NavigationViewItemSeparator {
+    fn create() -> ferroui_base::Ref<Self> {
+        <ferroui_controls::NavigationViewItemSeparator>::new()
+    }
+}
+
+/// Starts an element of [`NavigationViewItemSeparator`](ferroui_controls::NavigationViewItemSeparator).
+pub fn navigation_view_item_separator() -> El<ferroui_controls::NavigationViewItemSeparator> {
+    El::new()
+}
+
 pub use ferroui_controls::NotificationCard;
 
 impl ViewClass for ferroui_controls::NotificationCard {
@@ -4944,6 +4996,247 @@ pub trait NavigationPageProps: ElementBuilder {
     }
 }
 impl<T: ObjectType + Upcast<ferroui_controls::NavigationPage>> NavigationPageProps for El<T> {}
+
+/// The properties and routed events of [`NavigationView`](ferroui_controls::NavigationView).
+pub trait NavigationViewProps: ElementBuilder {
+    /// Sets [`NavigationView::is_pane_open_property`](ferroui_controls::NavigationView::is_pane_open_property).
+    fn is_pane_open<M>(self, value: impl IntoProp<bool, M>) -> Self {
+        self.prop(<ferroui_controls::NavigationView>::is_pane_open_property(), value)
+    }
+
+    /// Sets [`NavigationView::compact_mode_threshold_width_property`](ferroui_controls::NavigationView::compact_mode_threshold_width_property).
+    fn compact_mode_threshold_width<M>(self, value: impl IntoProp<f64, M>) -> Self {
+        self.prop(<ferroui_controls::NavigationView>::compact_mode_threshold_width_property(), value)
+    }
+
+    /// Sets [`NavigationView::expanded_mode_threshold_width_property`](ferroui_controls::NavigationView::expanded_mode_threshold_width_property).
+    fn expanded_mode_threshold_width<M>(self, value: impl IntoProp<f64, M>) -> Self {
+        self.prop(<ferroui_controls::NavigationView>::expanded_mode_threshold_width_property(), value)
+    }
+
+    /// Sets [`NavigationView::is_settings_visible_property`](ferroui_controls::NavigationView::is_settings_visible_property).
+    fn is_settings_visible<M>(self, value: impl IntoProp<bool, M>) -> Self {
+        self.prop(<ferroui_controls::NavigationView>::is_settings_visible_property(), value)
+    }
+
+    /// Sets [`NavigationView::is_pane_toggle_button_visible_property`](ferroui_controls::NavigationView::is_pane_toggle_button_visible_property).
+    fn is_pane_toggle_button_visible<M>(self, value: impl IntoProp<bool, M>) -> Self {
+        self.prop(<ferroui_controls::NavigationView>::is_pane_toggle_button_visible_property(), value)
+    }
+
+    /// Sets [`NavigationView::always_show_header_property`](ferroui_controls::NavigationView::always_show_header_property).
+    fn always_show_header<M>(self, value: impl IntoProp<bool, M>) -> Self {
+        self.prop(<ferroui_controls::NavigationView>::always_show_header_property(), value)
+    }
+
+    /// Sets [`NavigationView::compact_pane_length_property`](ferroui_controls::NavigationView::compact_pane_length_property).
+    fn compact_pane_length<M>(self, value: impl IntoProp<f64, M>) -> Self {
+        self.prop(<ferroui_controls::NavigationView>::compact_pane_length_property(), value)
+    }
+
+    /// Sets [`NavigationView::open_pane_length_property`](ferroui_controls::NavigationView::open_pane_length_property).
+    fn open_pane_length<M>(self, value: impl IntoProp<f64, M>) -> Self {
+        self.prop(<ferroui_controls::NavigationView>::open_pane_length_property(), value)
+    }
+
+    /// Sets [`NavigationView::is_pane_visible_property`](ferroui_controls::NavigationView::is_pane_visible_property).
+    fn is_pane_visible<M>(self, value: impl IntoProp<bool, M>) -> Self {
+        self.prop(<ferroui_controls::NavigationView>::is_pane_visible_property(), value)
+    }
+
+    /// Sets [`NavigationView::is_back_enabled_property`](ferroui_controls::NavigationView::is_back_enabled_property).
+    fn is_back_enabled<M>(self, value: impl IntoProp<bool, M>) -> Self {
+        self.prop(<ferroui_controls::NavigationView>::is_back_enabled_property(), value)
+    }
+
+    /// Sets [`NavigationView::is_back_button_visible_property`](ferroui_controls::NavigationView::is_back_button_visible_property).
+    fn is_back_button_visible<M>(self, value: impl IntoProp<ferroui_controls::NavigationViewBackButtonVisible, M>) -> Self {
+        self.prop(<ferroui_controls::NavigationView>::is_back_button_visible_property(), value)
+    }
+
+    /// Sets [`NavigationView::pane_display_mode_property`](ferroui_controls::NavigationView::pane_display_mode_property).
+    fn pane_display_mode<M>(self, value: impl IntoProp<ferroui_controls::NavigationViewPaneDisplayMode, M>) -> Self {
+        self.prop(<ferroui_controls::NavigationView>::pane_display_mode_property(), value)
+    }
+
+    /// Sets [`NavigationView::selection_follows_focus_property`](ferroui_controls::NavigationView::selection_follows_focus_property).
+    fn selection_follows_focus<M>(self, value: impl IntoProp<ferroui_controls::NavigationViewSelectionFollowsFocus, M>) -> Self {
+        self.prop(<ferroui_controls::NavigationView>::selection_follows_focus_property(), value)
+    }
+
+    /// Sets [`NavigationView::pane_title_property`](ferroui_controls::NavigationView::pane_title_property).
+    fn pane_title<M>(self, value: impl IntoProp<String, M>) -> Self {
+        self.prop(<ferroui_controls::NavigationView>::pane_title_property(), value)
+    }
+
+    /// Sets [`NavigationView::header_property`](ferroui_controls::NavigationView::header_property).
+    fn header<M>(self, value: impl IntoProp<Option<ferroui_base::BoxedValue>, M>) -> Self {
+        self.prop(<ferroui_controls::NavigationView>::header_property(), value)
+    }
+
+    /// Sets [`NavigationView::header_template_property`](ferroui_controls::NavigationView::header_template_property).
+    fn header_template<M>(self, value: impl IntoProp<Option<std::rc::Rc<dyn ferroui_controls::templates::IDataTemplate>>, M>) -> Self {
+        self.prop(<ferroui_controls::NavigationView>::header_template_property(), value)
+    }
+
+    /// Sets [`NavigationView::selected_item_property`](ferroui_controls::NavigationView::selected_item_property).
+    fn selected_item<M>(self, value: impl IntoProp<Option<ferroui_base::BoxedValue>, M>) -> Self {
+        self.prop(<ferroui_controls::NavigationView>::selected_item_property(), value)
+    }
+
+    /// Sets [`NavigationView::pane_header_property`](ferroui_controls::NavigationView::pane_header_property).
+    fn pane_header<M>(self, value: impl IntoProp<Option<ferroui_base::Ref<ferroui_controls::Control>>, M>) -> Self {
+        self.prop(<ferroui_controls::NavigationView>::pane_header_property(), value)
+    }
+
+    /// Sets [`NavigationView::pane_footer_property`](ferroui_controls::NavigationView::pane_footer_property).
+    fn pane_footer<M>(self, value: impl IntoProp<Option<ferroui_base::Ref<ferroui_controls::Control>>, M>) -> Self {
+        self.prop(<ferroui_controls::NavigationView>::pane_footer_property(), value)
+    }
+
+    /// Sets [`NavigationView::pane_custom_content_property`](ferroui_controls::NavigationView::pane_custom_content_property).
+    fn pane_custom_content<M>(self, value: impl IntoProp<Option<ferroui_base::Ref<ferroui_controls::Control>>, M>) -> Self {
+        self.prop(<ferroui_controls::NavigationView>::pane_custom_content_property(), value)
+    }
+
+    /// Sets [`NavigationView::content_overlay_property`](ferroui_controls::NavigationView::content_overlay_property).
+    fn content_overlay<M>(self, value: impl IntoProp<Option<ferroui_base::Ref<ferroui_controls::Control>>, M>) -> Self {
+        self.prop(<ferroui_controls::NavigationView>::content_overlay_property(), value)
+    }
+
+    /// Sets [`NavigationView::auto_suggest_box_property`](ferroui_controls::NavigationView::auto_suggest_box_property).
+    fn auto_suggest_box<M>(self, value: impl IntoProp<Option<ferroui_base::Ref<ferroui_controls::AutoSuggestBox>>, M>) -> Self {
+        self.prop(<ferroui_controls::NavigationView>::auto_suggest_box_property(), value)
+    }
+
+    /// Sets [`NavigationView::menu_items_source_property`](ferroui_controls::NavigationView::menu_items_source_property).
+    fn menu_items_source<M>(self, value: impl IntoProp<Option<ferroui_controls::ItemsSource>, M>) -> Self {
+        self.prop(<ferroui_controls::NavigationView>::menu_items_source_property(), value)
+    }
+
+    /// Sets [`NavigationView::footer_menu_items_source_property`](ferroui_controls::NavigationView::footer_menu_items_source_property).
+    fn footer_menu_items_source<M>(self, value: impl IntoProp<Option<ferroui_controls::ItemsSource>, M>) -> Self {
+        self.prop(<ferroui_controls::NavigationView>::footer_menu_items_source_property(), value)
+    }
+
+    /// Sets [`NavigationView::menu_item_template_property`](ferroui_controls::NavigationView::menu_item_template_property).
+    fn menu_item_template<M>(self, value: impl IntoProp<Option<std::rc::Rc<dyn ferroui_controls::templates::IDataTemplate>>, M>) -> Self {
+        self.prop(<ferroui_controls::NavigationView>::menu_item_template_property(), value)
+    }
+
+    /// Sets [`NavigationView::pane_toggle_button_style_property`](ferroui_controls::NavigationView::pane_toggle_button_style_property).
+    fn pane_toggle_button_style<M>(self, value: impl IntoProp<Option<ferroui_base::Ref<ferroui_base::styling::ControlTheme>>, M>) -> Self {
+        self.prop(<ferroui_controls::NavigationView>::pane_toggle_button_style_property(), value)
+    }
+
+    /// Sets [`NavigationView::menu_item_container_style_property`](ferroui_controls::NavigationView::menu_item_container_style_property).
+    fn menu_item_container_style<M>(self, value: impl IntoProp<Option<ferroui_base::Ref<ferroui_base::styling::ControlTheme>>, M>) -> Self {
+        self.prop(<ferroui_controls::NavigationView>::menu_item_container_style_property(), value)
+    }
+}
+impl<T: ObjectType + Upcast<ferroui_controls::NavigationView>> NavigationViewProps for El<T> {}
+
+/// The properties and routed events of [`NavigationViewItem`](ferroui_controls::NavigationViewItem).
+pub trait NavigationViewItemProps: ElementBuilder {
+    /// Sets [`NavigationViewItem::icon_property`](ferroui_controls::NavigationViewItem::icon_property).
+    fn icon<M>(self, value: impl IntoProp<Option<ferroui_base::Ref<ferroui_controls::IconElement>>, M>) -> Self {
+        self.prop(<ferroui_controls::NavigationViewItem>::icon_property(), value)
+    }
+
+    /// Sets [`NavigationViewItem::info_badge_property`](ferroui_controls::NavigationViewItem::info_badge_property).
+    fn info_badge<M>(self, value: impl IntoProp<Option<ferroui_base::Ref<ferroui_controls::InfoBadge>>, M>) -> Self {
+        self.prop(<ferroui_controls::NavigationViewItem>::info_badge_property(), value)
+    }
+
+    /// Sets [`NavigationViewItem::selects_on_invoked_property`](ferroui_controls::NavigationViewItem::selects_on_invoked_property).
+    fn selects_on_invoked<M>(self, value: impl IntoProp<bool, M>) -> Self {
+        self.prop(<ferroui_controls::NavigationViewItem>::selects_on_invoked_property(), value)
+    }
+
+    /// Sets [`NavigationViewItem::is_expanded_property`](ferroui_controls::NavigationViewItem::is_expanded_property).
+    fn is_expanded<M>(self, value: impl IntoProp<bool, M>) -> Self {
+        self.prop(<ferroui_controls::NavigationViewItem>::is_expanded_property(), value)
+    }
+
+    /// Sets [`NavigationViewItem::has_unrealized_children_property`](ferroui_controls::NavigationViewItem::has_unrealized_children_property).
+    fn has_unrealized_children<M>(self, value: impl IntoProp<bool, M>) -> Self {
+        self.prop(<ferroui_controls::NavigationViewItem>::has_unrealized_children_property(), value)
+    }
+
+    /// Sets [`NavigationViewItem::is_child_selected_property`](ferroui_controls::NavigationViewItem::is_child_selected_property).
+    fn is_child_selected<M>(self, value: impl IntoProp<bool, M>) -> Self {
+        self.prop(<ferroui_controls::NavigationViewItem>::is_child_selected_property(), value)
+    }
+
+    /// Sets [`NavigationViewItem::menu_items_source_property`](ferroui_controls::NavigationViewItem::menu_items_source_property).
+    fn menu_items_source<M>(self, value: impl IntoProp<Option<ferroui_controls::ItemsSource>, M>) -> Self {
+        self.prop(<ferroui_controls::NavigationViewItem>::menu_items_source_property(), value)
+    }
+}
+impl<T: ObjectType + Upcast<ferroui_controls::NavigationViewItem>> NavigationViewItemProps for El<T> {}
+
+/// The properties and routed events of [`NavigationViewItemBase`](ferroui_controls::NavigationViewItemBase).
+pub trait NavigationViewItemBaseProps: ElementBuilder {
+    /// Sets [`NavigationViewItemBase::is_selected_property`](ferroui_controls::NavigationViewItemBase::is_selected_property).
+    fn is_selected<M>(self, value: impl IntoProp<bool, M>) -> Self {
+        self.prop(<ferroui_controls::NavigationViewItemBase>::is_selected_property(), value)
+    }
+}
+impl<T: ObjectType + Upcast<ferroui_controls::NavigationViewItemBase>> NavigationViewItemBaseProps for El<T> {}
+
+/// The properties and routed events of [`NavigationViewTemplateSettings`](ferroui_controls::primitives::NavigationViewTemplateSettings).
+pub trait NavigationViewTemplateSettingsProps: ElementBuilder {
+    /// Sets [`NavigationViewTemplateSettings::top_padding_property`](ferroui_controls::primitives::NavigationViewTemplateSettings::top_padding_property).
+    fn top_padding<M>(self, value: impl IntoProp<f64, M>) -> Self {
+        self.prop(<ferroui_controls::primitives::NavigationViewTemplateSettings>::top_padding_property(), value)
+    }
+
+    /// Sets [`NavigationViewTemplateSettings::overflow_button_visibility_property`](ferroui_controls::primitives::NavigationViewTemplateSettings::overflow_button_visibility_property).
+    fn overflow_button_visibility<M>(self, value: impl IntoProp<bool, M>) -> Self {
+        self.prop(<ferroui_controls::primitives::NavigationViewTemplateSettings>::overflow_button_visibility_property(), value)
+    }
+
+    /// Sets [`NavigationViewTemplateSettings::pane_toggle_button_visibility_property`](ferroui_controls::primitives::NavigationViewTemplateSettings::pane_toggle_button_visibility_property).
+    fn pane_toggle_button_visibility<M>(self, value: impl IntoProp<bool, M>) -> Self {
+        self.prop(<ferroui_controls::primitives::NavigationViewTemplateSettings>::pane_toggle_button_visibility_property(), value)
+    }
+
+    /// Sets [`NavigationViewTemplateSettings::back_button_visibility_property`](ferroui_controls::primitives::NavigationViewTemplateSettings::back_button_visibility_property).
+    fn back_button_visibility<M>(self, value: impl IntoProp<bool, M>) -> Self {
+        self.prop(<ferroui_controls::primitives::NavigationViewTemplateSettings>::back_button_visibility_property(), value)
+    }
+
+    /// Sets [`NavigationViewTemplateSettings::top_pane_visibility_property`](ferroui_controls::primitives::NavigationViewTemplateSettings::top_pane_visibility_property).
+    fn top_pane_visibility<M>(self, value: impl IntoProp<bool, M>) -> Self {
+        self.prop(<ferroui_controls::primitives::NavigationViewTemplateSettings>::top_pane_visibility_property(), value)
+    }
+
+    /// Sets [`NavigationViewTemplateSettings::left_pane_visibility_property`](ferroui_controls::primitives::NavigationViewTemplateSettings::left_pane_visibility_property).
+    fn left_pane_visibility<M>(self, value: impl IntoProp<bool, M>) -> Self {
+        self.prop(<ferroui_controls::primitives::NavigationViewTemplateSettings>::left_pane_visibility_property(), value)
+    }
+
+    /// Sets [`NavigationViewTemplateSettings::single_selection_follows_focus_property`](ferroui_controls::primitives::NavigationViewTemplateSettings::single_selection_follows_focus_property).
+    fn single_selection_follows_focus<M>(self, value: impl IntoProp<bool, M>) -> Self {
+        self.prop(<ferroui_controls::primitives::NavigationViewTemplateSettings>::single_selection_follows_focus_property(), value)
+    }
+
+    /// Sets [`NavigationViewTemplateSettings::pane_toggle_button_width_property`](ferroui_controls::primitives::NavigationViewTemplateSettings::pane_toggle_button_width_property).
+    fn pane_toggle_button_width<M>(self, value: impl IntoProp<f64, M>) -> Self {
+        self.prop(<ferroui_controls::primitives::NavigationViewTemplateSettings>::pane_toggle_button_width_property(), value)
+    }
+
+    /// Sets [`NavigationViewTemplateSettings::smaller_pane_toggle_button_width_property`](ferroui_controls::primitives::NavigationViewTemplateSettings::smaller_pane_toggle_button_width_property).
+    fn smaller_pane_toggle_button_width<M>(self, value: impl IntoProp<f64, M>) -> Self {
+        self.prop(<ferroui_controls::primitives::NavigationViewTemplateSettings>::smaller_pane_toggle_button_width_property(), value)
+    }
+
+    /// Sets [`NavigationViewTemplateSettings::open_pane_length_property`](ferroui_controls::primitives::NavigationViewTemplateSettings::open_pane_length_property).
+    fn open_pane_length<M>(self, value: impl IntoProp<f64, M>) -> Self {
+        self.prop(<ferroui_controls::primitives::NavigationViewTemplateSettings>::open_pane_length_property(), value)
+    }
+}
+impl<T: ObjectType + Upcast<ferroui_controls::primitives::NavigationViewTemplateSettings>> NavigationViewTemplateSettingsProps for El<T> {}
 
 /// The properties and routed events of [`NotificationCard`](ferroui_controls::NotificationCard).
 pub trait NotificationCardProps: ElementBuilder {

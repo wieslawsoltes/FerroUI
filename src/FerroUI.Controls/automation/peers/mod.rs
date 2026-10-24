@@ -46,6 +46,8 @@ mod native_menu_bar_automation_peer;
 mod native_menu_bar_automation_peer_tests;
 mod navigation_page_automation_peer;
 mod none_automation_peer;
+mod navigation_view_automation_peer;
+mod navigation_view_item_automation_peer;
 mod number_box_automation_peer;
 mod numeric_up_down_automation_peer;
 #[cfg(test)]
@@ -121,6 +123,8 @@ pub use native_control_host_peer::NativeControlHostPeer;
 pub use native_menu_bar_automation_peer::NativeMenuBarAutomationPeer;
 pub use navigation_page_automation_peer::NavigationPageAutomationPeer;
 pub use none_automation_peer::NoneAutomationPeer;
+pub use navigation_view_automation_peer::NavigationViewAutomationPeer;
+pub use navigation_view_item_automation_peer::NavigationViewItemAutomationPeer;
 pub use number_box_automation_peer::NumberBoxAutomationPeer;
 pub use numeric_up_down_automation_peer::NumericUpDownAutomationPeer;
 pub use pips_pager_automation_peer::PipsPagerAutomationPeer;
