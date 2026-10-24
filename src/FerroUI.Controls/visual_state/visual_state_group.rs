@@ -8,7 +8,7 @@ use super::{AppliedSetters, VisualState, VisualStateChangedEventArgs};
 use ferroui_base::collections::FerroList;
 use ferroui_base::reactive::{Disposable, IDisposable};
 use ferroui_base::utilities::HandlerList;
-use ferroui_base::{ferro_class, ferro_class_info, ferro_impl_classes, instantiate, FerroObject, Ref};
+use ferroui_base::{ferro_class, ferro_class_info, ferro_impl_classes, instantiate, FerroObject, FerroObjectImpl, Ref};
 use std::cell::RefCell;
 use std::rc::Rc;
 

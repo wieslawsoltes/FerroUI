@@ -6,7 +6,7 @@
 
 use ferroui_base::collections::FerroList;
 use ferroui_base::styling::SetterBase;
-use ferroui_base::{ferro_class, ferro_class_info, ferro_impl_classes, instantiate, FerroObject, Ref};
+use ferroui_base::{ferro_class, ferro_class_info, ferro_impl_classes, instantiate, FerroObject, FerroObjectImpl, Ref};
 use std::cell::RefCell;
 use std::rc::Rc;
 
