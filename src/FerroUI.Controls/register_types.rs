@@ -44,6 +44,7 @@ const NAMESPACES: &[(&str, &str)] = &[
     ("ferroui_controls::flyouts::popup_flyout_base", "FerroUI.Controls.Primitives"),
     ("ferroui_controls::metadata", "FerroUI.Controls.Metadata"),
     ("ferroui_controls::mixins", "FerroUI.Controls.Mixins"),
+    ("ferroui_controls::navigation", "FerroUI.Navigation"),
     ("ferroui_controls::notifications", "FerroUI.Controls.Notifications"),
     ("ferroui_controls::numeric_up_down", "FerroUI.Controls"),
     ("ferroui_controls::calendar", "FerroUI.Controls"),
@@ -223,6 +224,8 @@ const TYPES: &[&TypeInfo] = types![
     crate::icon_source::IconSource,
     crate::flyouts::MenuFlyout,
     crate::flyouts::MenuFlyoutPresenter,
+    crate::frame::Frame,
+    crate::frame_page::FramePage,
     crate::grid::Grid,
     crate::grid::GridLinesRenderer,
     crate::grid_splitter::GridSplitter,
@@ -318,6 +321,8 @@ const TYPES: &[&TypeInfo] = types![
     crate::documents::Underline,
     // FerroUI.Controls.Embedding
     crate::embedding::EmbeddableControlRoot,
+    // FerroUI.Navigation
+    crate::navigation::PageStackEntry,
     // FerroUI.Controls.Notifications
     crate::notifications::ReversibleStackPanel,
     // FerroUI.Controls.Presenters

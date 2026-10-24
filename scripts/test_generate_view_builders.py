@@ -77,6 +77,34 @@ class RepositoryTests(unittest.TestCase):
         self.assertEqual("Page", self.model.bases["ContentPage"])
         self.assertIn("pub fn content_page() -> El<ferroui_controls::ContentPage>", self.output)
 
+    def test_the_upstream_page_and_the_frame_page_keep_distinct_paths(self):
+        # WinUI's Page is FramePage, beside the upstream Page (docs/porting/winui-controls.md, section 7).
+        self.assertEqual("ferroui_controls::FramePage", BUILDERS.class_path(self.model, "FramePage"))
+        self.assertEqual("ferroui_controls::Frame", BUILDERS.class_path(self.model, "Frame"))
+        self.assertEqual("UserControl", self.model.bases["FramePage"])
+        self.assertIn("pub fn frame_page() -> El<ferroui_controls::FramePage>", self.output)
+        self.assertIn("pub use ferroui_controls::FramePage;", self.output)
+        self.assertIn("pub fn frame() -> El<ferroui_controls::Frame>", self.output)
+
+    def test_the_navigation_cache_mode_belongs_to_the_frame_page_only(self):
+        upstream = {entry[1] for entry in self.model.properties.get("Page", [])}
+        frame_page = {entry[1] for entry in self.model.properties.get("FramePage", [])}
+        self.assertNotIn("navigation_cache_mode", upstream)
+        self.assertIn("navigation_cache_mode", frame_page)
+        self.assertIn("pub trait PageProps", self.output)
+        self.assertIn("pub trait FramePageProps", self.output)
+        self.assertIn("IntoProp<ferroui_controls::navigation::NavigationCacheMode, M>", self.output)
+
+    def test_the_two_navigation_event_arguments_keep_their_paths(self):
+        # WinUI's arguments of Frame have the name of SCOPED_PATHS in the model; the simple name
+        # stays the upstream arguments' of the pages (UPSTREAM, when the crate lists its path).
+        self.assertEqual(SCOPED, self.model.paths[BUILDERS.SCOPED_PATHS[SCOPED]])
+        self.assertIn(self.model.paths.get("NavigationEventArgs", UPSTREAM), (UPSTREAM,))
+        self.assertNotIn("NavigationEventArgs", self.model.ambiguous)
+        self.assertEqual(
+            "ferroui_controls::navigation::NavigationMode", BUILDERS.resolve(self.model, "NavigationMode")
+        )
+
 
 if __name__ == "__main__":
     unittest.main()

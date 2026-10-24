@@ -5,7 +5,8 @@
 //! controls (`winui_only_tests`).
 
 use crate::{
-    AutoSuggestBox, FontIcon, InfoBadge, InfoBar, NumberBox, ProgressRing, RadioButtons, RatingControl, SymbolIcon,
+    AutoSuggestBox, FontIcon, Frame, InfoBadge, InfoBar, NumberBox, ProgressRing, RadioButtons, RatingControl,
+    SymbolIcon,
 };
 use ferroui_base::TypeInfo;
 
@@ -20,6 +21,7 @@ pub const WINUI_ONLY_CONTROLS: &[(&TypeInfo, &str)] = &[
     (AutoSuggestBox::TYPE, "WinUI's AutoSuggestBox: its template is converted from WinUI's DefaultAutoSuggestBoxStyle"),
     (RadioButtons::TYPE, "WinUI's RadioButtons: its template and items panel are converted from WinUI's RadioButtons.xaml"),
     (RatingControl::TYPE, "WinUI's RatingControl: its template is converted from WinUI's RatingControl.xaml"),
+    (Frame::TYPE, "WinUI's Frame: its template is converted from the Frame style of WinUI's generic.xaml"),
 ];
 
 /// Whether only the WinUI theme styles `control`.

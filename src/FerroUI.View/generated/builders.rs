@@ -556,6 +556,32 @@ pub fn font_icon() -> El<ferroui_controls::FontIcon> {
     El::new()
 }
 
+pub use ferroui_controls::Frame;
+
+impl ViewClass for ferroui_controls::Frame {
+    fn create() -> ferroui_base::Ref<Self> {
+        <ferroui_controls::Frame>::new()
+    }
+}
+
+/// Starts an element of [`Frame`](ferroui_controls::Frame).
+pub fn frame() -> El<ferroui_controls::Frame> {
+    El::new()
+}
+
+pub use ferroui_controls::FramePage;
+
+impl ViewClass for ferroui_controls::FramePage {
+    fn create() -> ferroui_base::Ref<Self> {
+        <ferroui_controls::FramePage>::new()
+    }
+}
+
+/// Starts an element of [`FramePage`](ferroui_controls::FramePage).
+pub fn frame_page() -> El<ferroui_controls::FramePage> {
+    El::new()
+}
+
 pub use ferroui_controls::Grid;
 
 impl ViewClass for ferroui_controls::Grid {
@@ -3797,6 +3823,29 @@ pub trait FontIconSourceProps: ElementBuilder {
     }
 }
 impl<T: ObjectType + Upcast<ferroui_controls::FontIconSource>> FontIconSourceProps for El<T> {}
+
+/// The properties and routed events of [`Frame`](ferroui_controls::Frame).
+pub trait FrameProps: ElementBuilder {
+    /// Sets [`Frame::cache_size_property`](ferroui_controls::Frame::cache_size_property).
+    fn cache_size<M>(self, value: impl IntoProp<i32, M>) -> Self {
+        self.prop(<ferroui_controls::Frame>::cache_size_property(), value)
+    }
+
+    /// Sets [`Frame::is_navigation_stack_enabled_property`](ferroui_controls::Frame::is_navigation_stack_enabled_property).
+    fn is_navigation_stack_enabled<M>(self, value: impl IntoProp<bool, M>) -> Self {
+        self.prop(<ferroui_controls::Frame>::is_navigation_stack_enabled_property(), value)
+    }
+}
+impl<T: ObjectType + Upcast<ferroui_controls::Frame>> FrameProps for El<T> {}
+
+/// The properties and routed events of [`FramePage`](ferroui_controls::FramePage).
+pub trait FramePageProps: ElementBuilder {
+    /// Sets [`FramePage::navigation_cache_mode_property`](ferroui_controls::FramePage::navigation_cache_mode_property).
+    fn navigation_cache_mode<M>(self, value: impl IntoProp<ferroui_controls::navigation::NavigationCacheMode, M>) -> Self {
+        self.prop(<ferroui_controls::FramePage>::navigation_cache_mode_property(), value)
+    }
+}
+impl<T: ObjectType + Upcast<ferroui_controls::FramePage>> FramePageProps for El<T> {}
 
 /// The properties and routed events of [`Geometry`](ferroui_base::media::Geometry).
 pub trait GeometryProps: ElementBuilder {
