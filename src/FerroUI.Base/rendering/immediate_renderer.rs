@@ -42,7 +42,7 @@ impl ImmediateRenderer {
         }
 
         let rect = Rect::from_size(bounds.size());
-        let transform = match visual.render_transform().map(|t| t.value()) {
+        let mut transform = match visual.render_transform().map(|t| t.value()) {
             Some(rt) => {
                 let origin = visual.render_transform_origin().to_pixels(visual.bounds().size());
                 let offset = Matrix::create_translation(origin.x, origin.y);
@@ -50,6 +50,11 @@ impl ImmediateRenderer {
             }
             None => Matrix::create_translation(bounds.position().x, bounds.position().y),
         };
+        // Not upstream: the zoom of a scroll presenter, before the position.
+        if let Some(manipulation) = visual.manipulation_transform() {
+            let position = Matrix::create_translation(bounds.position().x, bounds.position().y);
+            transform = transform * (-position) * manipulation * position;
+        }
 
         let text_options = visual.text_options();
         let s_text_options = if text_options != TextOptions::default() {

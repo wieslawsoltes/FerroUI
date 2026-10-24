@@ -1595,6 +1595,14 @@ mod composition_winui_layer_tests;
 // this module.
 #[path = "composition_light_tests.rs"]
 mod composition_light_tests;
+// The tests of the drop shadows of an alpha and of the Z of the offset
+// (phase 7) use the fixture of this module.
+#[path = "composition_shadow_tests.rs"]
+mod composition_shadow_tests;
+// The tests of the theme shadows of elements (phase 7) use the fixture of
+// this module.
+#[path = "composition_theme_shadow_tests.rs"]
+mod composition_theme_shadow_tests;
 // The tests of the WinUI effect and backdrop brushes and the effect of
 // layer visuals use the fixture of this module.
 #[path = "composition_winui_effect_tests.rs"]
