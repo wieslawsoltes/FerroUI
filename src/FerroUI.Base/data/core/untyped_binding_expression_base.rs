@@ -32,6 +32,10 @@ pub struct UntypedBindingExpressionBase {
     error: RefCell<Option<ExpressionError>>,
     frame: RefCell<Option<Weak<ImmediateValueFrame>>>,
     is_running: Cell<bool>,
+    #[cfg(all(debug_assertions, feature = "hot-reload"))]
+    reload_paused: Cell<bool>,
+    #[cfg(all(debug_assertions, feature = "hot-reload"))]
+    reload_pending: Cell<(bool, bool)>,
     produce_value: Cell<bool>,
     sink: RefCell<Option<SinkRef>>,
     observable: RefCell<Weak<ObservableSink>>,
@@ -63,6 +67,10 @@ impl UntypedBindingExpressionBase {
             error: RefCell::new(None),
             frame: RefCell::new(None),
             is_running: Cell::new(false),
+            #[cfg(all(debug_assertions, feature = "hot-reload"))]
+            reload_paused: Cell::new(false),
+            #[cfg(all(debug_assertions, feature = "hot-reload"))]
+            reload_pending: Cell::new((false, false)),
             produce_value: Cell::new(true),
             sink: RefCell::new(None),
             observable: RefCell::new(Weak::new()),
@@ -99,6 +107,44 @@ impl UntypedBindingExpressionBase {
     /// Whether the binding expression is currently running.
     pub fn is_running(&self) -> bool {
         self.is_running.get()
+    }
+
+    #[cfg(all(debug_assertions, feature = "hot-reload"))]
+    pub(crate) fn is_reload_paused(&self) -> bool {
+        self.reload_paused.get()
+    }
+
+    #[cfg(all(debug_assertions, feature = "hot-reload"))]
+    #[doc(hidden)]
+    pub fn pause_for_reload(&self) -> bool {
+        !self.reload_paused.replace(true)
+    }
+
+    #[cfg(all(debug_assertions, feature = "hot-reload"))]
+    #[doc(hidden)]
+    pub fn resume_after_reload(&self) {
+        if !self.reload_paused.get() {
+            return;
+        }
+        struct Resume<'a>(&'a Cell<bool>);
+        impl Drop for Resume<'_> {
+            fn drop(&mut self) {
+                self.0.set(false);
+            }
+        }
+        let _resume = Resume(&self.reload_paused);
+        // Keep target-to-source writes suppressed while publishing the latest
+        // source value. Reentrant source notifications are coalesced and drained.
+        loop {
+            let (value_changed, error_changed) = self.reload_pending.replace((false, false));
+            if !value_changed && !error_changed {
+                break;
+            }
+            let sink = self.sink.borrow().clone();
+            if let (Some(sink), Some(this)) = (sink, self.this.upgrade()) {
+                sink.on_changed(&this, value_changed, error_changed);
+            }
+        }
     }
 
     /// The type that values produced by the expression are converted to.
@@ -314,6 +360,12 @@ impl UntypedBindingExpressionBase {
         if !self.produce_value.get() {
             return;
         }
+        #[cfg(all(debug_assertions, feature = "hot-reload"))]
+        if self.reload_paused.get() {
+            let (value, error) = self.reload_pending.get();
+            self.reload_pending.set((value || has_value_changed, error || has_error_changed));
+            return;
+        }
         let sink = self.sink.borrow().clone();
         let (Some(sink), Some(this)) = (sink, self.this.upgrade()) else { return };
 
@@ -349,6 +401,11 @@ pub trait UntypedBindingExpression: 'static {
     /// the current state of the binding expression.
     fn should_log_error(&self) -> Option<Ref<FerroObject>> {
         self.base().try_get_target()
+    }
+
+    #[cfg(all(debug_assertions, feature = "hot-reload"))]
+    fn supports_reload_pause(&self) -> bool {
+        false
     }
 
     fn update_source_core(&self) {}
@@ -528,6 +585,8 @@ macro_rules! impl_untyped_binding_expression {
                 ::std::option::Option::Some(self)
             }
 
+            $crate::__impl_binding_reload_members!();
+
             fn as_any(&self) -> &dyn ::std::any::Any {
                 self
             }
@@ -535,6 +594,33 @@ macro_rules! impl_untyped_binding_expression {
     };
 }
 pub(crate) use impl_untyped_binding_expression;
+
+// Gate at the defining crate, not the macro caller: external expression
+// implementations need not declare a feature named "hot-reload".
+#[cfg(all(debug_assertions, feature = "hot-reload"))]
+#[doc(hidden)]
+#[macro_export]
+macro_rules! __impl_binding_reload_members {
+    () => {
+        fn can_pause_for_reload(&self) -> bool {
+            $crate::data::core::UntypedBindingExpression::supports_reload_pause(self)
+        }
+        fn pause_for_reload(&self) -> bool {
+            $crate::data::core::UntypedBindingExpression::supports_reload_pause(self)
+                && $crate::data::core::UntypedBindingExpression::base(self).pause_for_reload()
+        }
+        fn resume_after_reload(&self) {
+            $crate::data::core::UntypedBindingExpression::base(self).resume_after_reload()
+        }
+    };
+}
+
+#[cfg(not(all(debug_assertions, feature = "hot-reload")))]
+#[doc(hidden)]
+#[macro_export]
+macro_rules! __impl_binding_reload_members {
+    () => {};
+}
 
 /// Adapts a binding expression to an observable subject: observers receive
 /// the values of the expression, and values pushed into the subject are

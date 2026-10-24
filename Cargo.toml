@@ -1,6 +1,9 @@
 [workspace]
 resolver = "2"
 members = [
+    "samples/HotReload",
+    "src/FerroUI.HotReload",
+    "src/FerroUI.HotPatch",
     "src/FerroUI.System",
     "src/FerroUI.Reactive",
     "src/FerroUI.Reactive.Testing",
@@ -169,6 +172,8 @@ categories = ["gui"]
 # that the crates of a release are only ever resolved together (docs/release.md, "Version scheme").
 # `scripts/release/set-version.sh <version>` writes the version above and these keys.
 [workspace.dependencies]
+ferroui-hot-reload = { version = "=0.4.0", path = "src/FerroUI.HotReload" }
+ferroui-hot-patch = { version = "=0.4.0", path = "src/FerroUI.HotPatch" }
 ferroui-inspect = { version = "=0.4.0", path = "src/FerroUI.Inspect" }
 ferroui-devtools = { version = "=0.4.0", path = "src/FerroUI.DevTools", default-features = false }
 ferroui-mcp = { version = "=0.4.0", path = "src/FerroUI.Mcp" }

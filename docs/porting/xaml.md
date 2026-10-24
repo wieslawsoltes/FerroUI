@@ -1221,13 +1221,25 @@ The output of the five that compile is checked in (`emitter/generated_handlers/`
 Upstream stores the override in a static field found by reflection. There is no reflection, so the slot lives in the runtime library, keyed by class:
 
 ```rust
-impl FerroXamlLoader {                                   // (new) R6
-    pub fn set_populate_override(class: &'static TypeInfo, f: Option<Rc<dyn Fn(&MarkupValue)>>);
-    pub fn populate_override(class: &'static TypeInfo) -> Option<Rc<dyn Fn(&MarkupValue)>>;
+pub type PopulateOverride =
+    Rc<dyn Fn(Option<&Rc<dyn IServiceProvider>>, &BoxedValue) -> Result<(), XamlLoadException>>;
+
+impl FerroXamlLoader {
+    pub fn set_populate_override(
+        class: &'static TypeInfo,
+        populate: Option<PopulateOverride>,
+    ) -> Option<PopulateOverride>;
+    pub fn populate_override(class: &'static TypeInfo) -> Option<PopulateOverride>;
 }
 ```
 
-Thread-local map; `initialize_component` performs one lookup. The lookup is compiled out unless the crate enables the Cargo feature `hot-reload` of `ferroui-markup-xaml` (the generated code writes `rt::populate_override(Self::TYPE)`, which is `None` as a `const fn`-like inline without the feature). The previewer host registers, per class, a closure that runs the interpreter's `populate` on the instance with the current text of the document.
+Persistent overrides use a thread-local map, gated on both `hot-reload` and debug
+assertions. Constructor-scoped overrides, enabled separately by `runtime-populate`,
+take precedence and restore the previous hook on unwinding. Generated populate
+functions retain the service-provider context and propagate load failures.
+Development sessions install persistent hooks for new instances using the latest
+accepted source. Existing instances are updated through transactional reload
+adapters; calling the populate hook alone is not a safe replacement operation.
 
 #### 9.4.6 What option A requires from the class model
 
@@ -2554,7 +2566,7 @@ For applications, `export_metadata()` can generate the whole function (`$OUT_DIR
 | `ClassBindingSetter` | `BindClass(target, name, binding, null)` | as implemented: `let _ = ClassBindingManager::__markup_BindClass_0(target, name, binding, None);`, the typed function of the declared method; the subscription it returns is dropped | — |
 | `FerroAttachedInstancePropertySetterMethod` | `set_value_untyped(Field, value, LocalValue)` | typed `t.set_value(Owner::p_property(), v)` when the value type is exact, else untyped | setter arity quirk (decision 15) |
 | `FerroAttachedInstancePropertyGetterMethod` | `GetValue(Field)` | `t.get_value(Owner::p_property())` | — |
-| `XamlDirectCallAddHandler` | `AddHandler(event, handler, Direct \| Bubble, false)` | `rt::add_handler(&t, &Owner::__markup_field_NameEvent(), delegate);` (`add_handler_untyped` with `Direct \| Bubble`, `false`; 9.4.4) | a choice of the setter at run time is refused |
+| `XamlDirectCallAddHandler` | `AddHandler(event, handler, Direct \| Bubble, false)` | `rt::add_handler_with_context(&context, &t, &Owner::__markup_field_NameEvent(), delegate);` (`add_handler_untyped` with `Direct \| Bubble`, `false`; 9.4.4) | a choice of the setter at run time is refused |
 | `InjectServiceProviderNode` | context as service provider | `sp.clone()` | — |
 | `OptionsMarkupExtensionMethod` | first branch whose condition holds, else default; only tested options and the chosen value are evaluated | `if <cond>(&sp, opt1) { v1 } else if .. { .. } else { default }` as an expression; `OnPlatform` branches may be folded to `cfg!` later | conversion of the branch value to the return type per branch |
 | `ResourceAdderSetter` | dictionary (optional getter), key, value, `Add*`, optional source info | `let d = ..; let k = ..; d.add_deferred(k, value); XamlSourceInfo::set_xaml_source_info_for_key(..)` | key forms (`&str`, `&'static TypeInfo`, `ValueType`) → `ResourceKey` |
@@ -2629,7 +2641,7 @@ Loader (`ferroui-markup-xaml-loader`), phase E0:
 | **E3 Styles, resources, templates** | selectors and queries, setter transformer setter, `ResourceAdderSetter`, `EnsureCapacityNode`, deferred content, `XamlSourceInfoValueManipulation`, markup extensions with dynamic setters (`StaticResource`, `DynamicResource`), `OptionsMarkupExtensionMethod`, control themes; call form B | a styled, templated Button from XAML: equal dumps (phase 4 exit test of 7.1) |
 | **E4 Bindings** | binding path node and all elements, typed emission, `ClassBindingSetter`, `BindingWithPrioritySetter`, template bindings; R9 | ported upstream compiled-binding XAML tests pass through the emitter |
 | **E5 Includes and assets** | group transformers at build time, `compiled_xaml.rs`, loader table, cross-crate includes via `documents[]`, `embed_assets()` + R8, generated `register_types` | a two-crate fixture (theme library + application) loads `StyleInclude`, `ResourceInclude`, `MergeResourceInclude`; then the Fluent theme documents |
-| **E6 Hot reload** | R6, feature `hot-reload`, previewer hook calling the interpreter's `populate` through the override; rule for when a rebuild is required (set of names/handlers changed) | editing a document of a running application swaps content and refills the parts struct |
+| **E6 Hot reload** | Development session, source overlay, populate hooks and explicit transactional adapters; contract changes require restart | Supported edits preserve roots/view models and refresh registered cached references. |
 
 E0 and E1 are independent and can run in parallel; E2 needs both.
 
@@ -2751,3 +2763,45 @@ Status of the open technical issues: O1 (strong capture of the root by handler d
 ### 9.13 Asset scheme and file extension (owner ruling, 2026-10-05)
 
 The asset URI scheme of the port is `ferres://` everywhere (asset loader, includes, group transformers, error messages); the upstream scheme is not accepted. Markup files of the port have the extension `.xaml` only: the upstream-derived extension is not used or recognised anywhere (loader, build integration, asset and URI handling, tests, documentation). Files brought over from upstream are renamed. Earlier sections of this document were updated accordingly.
+
+### E6 implementation status (2026-10-22)
+
+The development session, populate hooks, source overlays and detached replacement
+adapters are implemented. Supported component and panel adapters preserve roots,
+view models and compatible UI state, including application state callbacks.
+Explicit root-property ownership and application resource/style include tracking
+support rollback. Eleven ControlCatalog pages demonstrate the integration.
+
+Development manifests use the compiler's type metadata to record handler
+signatures, including inherited and qualified events. Sessions freeze that
+classification across lazy runtime registration and reject changed handlers or
+unresolved-type attributes before preparing candidates. Compiled-binding data
+types and generic type arguments retain conservative restart boundaries.
+
+Explicit Rust callbacks are patched through Subsecond in the dedicated executable;
+the owning supervisor admits changes, coordinates XAML updates and builds a
+replacement before retiring the old process on restart. Native evidence exists
+on all three desktop platforms at recorded revisions.
+
+Standard component/panel adapters now support explicit inline resource/style
+ownership and routed XAML subscription ownership. Compiled and interpreted event
+setters retain a document generation; deferred declarations keep that generation
+without retaining the root. Replacement handlers target the preserved component,
+activate after successful commit, and retire old subscriptions without removing
+application subscriptions. Non-routed metadata events require an explicit adapter.
+
+Compatible template-part state transfer is implemented. Compiled and runtime
+factories record weak declaration provenance; restoration scopes identities by
+document, template declaration and owner. Explicit development keys are recorded
+during initial compiled and interpreted population without assigning public names.
+Keys precede `x:Name`; ambiguous matches and incompatible/authored/bound values are
+skipped. Tests cover repeated templates, rapid revisions and retired-part release.
+
+Cached named controls are refreshed through explicit `ComponentRefresh` adapters,
+including the sample-specific ControlCatalog loading paths. The engine does not
+assume every class has a generated parts struct; previewer/designer tooling is a
+later consumer.
+
+The [bounded completion audit](../development/hot-reload-completion-audit.md) and
+[implementation status](../development/hot-reload.md) distinguish current results
+from historical verification, later designer tooling and optional extensions.

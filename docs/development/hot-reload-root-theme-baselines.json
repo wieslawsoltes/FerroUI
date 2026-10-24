@@ -1,0 +1,207 @@
+{
+  "schema_version": 1,
+  "measured_on": "2026-10-20",
+  "scope": "runtime-xaml-root-static-theme-and-child-resource-save-to-compositor-render-completion",
+  "profile": "debug",
+  "source_changes": "Explicit root static-resource ownership, catalog Theme registration and enhanced native assertions.",
+  "source_sha256": {
+    "src/FerroUI.HotReload/root_properties.rs": "8eb62bd85662a871c58d80bbaa738ab178b41bd1fca651cfcf85c0513721491a",
+    "src/FerroUI.HotReload/component.rs": "98a15e144a7ccf65290b0aa80be87417108c91a753f9e5d095a353a85942a200",
+    "src/FerroUI.HotReload/panel.rs": "65e25c1082137dc9fb9b4cfb3ae8601f13a6c79ef78dfafb18766cdccbf93d06",
+    "samples/ControlCatalog/hot_reload.rs": "9ceedb9a6b9831d48b59ddb5b9475c69ff0b204b33f372bb66b2f8e2814a4c6d",
+    "scripts/hot-reload/resource_probe.py": "147f1d66945a74eb0c30cd64639413eda55d924c8a78d87f64463d132f77b6fb"
+  },
+  "watch_interval_ms": 60,
+  "concurrent_builds": true,
+  "limitations": [
+    "Six observations per platform, not percentile estimates or a latency guarantee.",
+    "Other validation builds were running during this correctness-focused run.",
+    "First edit follows page tracking and can include initial layout work.",
+    "Render completion is not physical display scan-out.",
+    "This validates the owned root Theme and a child static consumer, not arbitrary root bindings or every deferred template."
+  ],
+  "runs": [
+    {
+      "platform": "macOS 27.0.1 ARM64",
+      "compiler": "rustc 1.99.1",
+      "measurements": [
+        {
+          "application_us": 46266,
+          "batch": 865,
+          "commit_to_render_us": 54867,
+          "documents": [
+            "ferres://controlcatalog/CustomThemes.xaml"
+          ],
+          "preparation_us": 119325,
+          "rendered_unix_ns": "1792488826877514000",
+          "revision": 1,
+          "page": "CustomThemes",
+          "save_to_render_us": 341086.0,
+          "atomic_save": false
+        },
+        {
+          "application_us": 1686,
+          "batch": 868,
+          "commit_to_render_us": 9203,
+          "documents": [
+            "ferres://controlcatalog/Pages/BorderPage.xaml"
+          ],
+          "preparation_us": 21626,
+          "rendered_unix_ns": "1792488827074707000",
+          "revision": 2,
+          "page": "BorderPage",
+          "save_to_render_us": 183597.0,
+          "atomic_save": false
+        },
+        {
+          "application_us": 17019,
+          "batch": 869,
+          "commit_to_render_us": 31036,
+          "documents": [
+            "ferres://controlcatalog/CustomThemes.xaml"
+          ],
+          "preparation_us": 124326,
+          "rendered_unix_ns": "1792488827425560000",
+          "revision": 3,
+          "page": "CustomThemes",
+          "save_to_render_us": 323111.0,
+          "atomic_save": true
+        },
+        {
+          "application_us": 15910,
+          "batch": 870,
+          "commit_to_render_us": 34312,
+          "documents": [
+            "ferres://controlcatalog/CustomThemes.xaml"
+          ],
+          "preparation_us": 121525,
+          "rendered_unix_ns": "1792488828058804000",
+          "revision": 5,
+          "page": "CustomThemes",
+          "save_to_render_us": 338033.0,
+          "atomic_save": true
+        },
+        {
+          "application_us": 2348,
+          "batch": 871,
+          "commit_to_render_us": 14612,
+          "documents": [
+            "ferres://controlcatalog/Pages/BorderPage.xaml"
+          ],
+          "preparation_us": 14546,
+          "rendered_unix_ns": "1792488828241592000",
+          "revision": 6,
+          "page": "BorderPage",
+          "save_to_render_us": 167415.0,
+          "atomic_save": false
+        },
+        {
+          "application_us": 19016,
+          "batch": 872,
+          "commit_to_render_us": 27194,
+          "documents": [
+            "ferres://controlcatalog/CustomThemes.xaml"
+          ],
+          "preparation_us": 46208,
+          "rendered_unix_ns": "1792488828508794000",
+          "revision": 7,
+          "page": "CustomThemes",
+          "save_to_render_us": 261553.0,
+          "atomic_save": false
+        }
+      ],
+      "result": "PASS: native resource reload PID 82133: static consumer and root theme updated, missing key retained last-good view, atomic recovery preserved root/window/model"
+    },
+    {
+      "platform": "Ubuntu 24.04 ARM64 / Xvfb",
+      "compiler": "rustc 1.93.0",
+      "measurements": [
+        {
+          "application_us": 62269,
+          "batch": 818,
+          "commit_to_render_us": 40714,
+          "documents": [
+            "ferres://controlcatalog/CustomThemes.xaml"
+          ],
+          "preparation_us": 147655,
+          "rendered_unix_ns": "1792488883297053959",
+          "revision": 1,
+          "page": "CustomThemes",
+          "save_to_render_us": 473663.241,
+          "atomic_save": false
+        },
+        {
+          "application_us": 2281,
+          "batch": 824,
+          "commit_to_render_us": 14781,
+          "documents": [
+            "ferres://controlcatalog/Pages/BorderPage.xaml"
+          ],
+          "preparation_us": 22912,
+          "rendered_unix_ns": "1792488883521321393",
+          "revision": 2,
+          "page": "BorderPage",
+          "save_to_render_us": 203407.971,
+          "atomic_save": false
+        },
+        {
+          "application_us": 21278,
+          "batch": 831,
+          "commit_to_render_us": 21378,
+          "documents": [
+            "ferres://controlcatalog/CustomThemes.xaml"
+          ],
+          "preparation_us": 129754,
+          "rendered_unix_ns": "1792488883869317899",
+          "revision": 3,
+          "page": "CustomThemes",
+          "save_to_render_us": 342445.474,
+          "atomic_save": true
+        },
+        {
+          "application_us": 19238,
+          "batch": 839,
+          "commit_to_render_us": 15056,
+          "documents": [
+            "ferres://controlcatalog/CustomThemes.xaml"
+          ],
+          "preparation_us": 124812,
+          "rendered_unix_ns": "1792488884590032738",
+          "revision": 5,
+          "page": "CustomThemes",
+          "save_to_render_us": 338505.395,
+          "atomic_save": true
+        },
+        {
+          "application_us": 2131,
+          "batch": 847,
+          "commit_to_render_us": 21384,
+          "documents": [
+            "ferres://controlcatalog/Pages/BorderPage.xaml"
+          ],
+          "preparation_us": 11144,
+          "rendered_unix_ns": "1792488884797758368",
+          "revision": 6,
+          "page": "BorderPage",
+          "save_to_render_us": 195764.568,
+          "atomic_save": false
+        },
+        {
+          "application_us": 20370,
+          "batch": 855,
+          "commit_to_render_us": 17503,
+          "documents": [
+            "ferres://controlcatalog/CustomThemes.xaml"
+          ],
+          "preparation_us": 31726,
+          "rendered_unix_ns": "1792488885097341124",
+          "revision": 7,
+          "page": "CustomThemes",
+          "save_to_render_us": 282222.246,
+          "atomic_save": false
+        }
+      ],
+      "result": "PASS: native resource reload PID 136843: static consumer and root theme updated, missing key retained last-good view, atomic recovery preserved root/window/model"
+    }
+  ]
+}

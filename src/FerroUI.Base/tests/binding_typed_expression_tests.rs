@@ -377,6 +377,42 @@ fn two_way_binding_does_not_echo_source_change_back_to_source() {
     assert_eq!(source.string_value_set_count.get(), before + 1);
 }
 
+#[cfg(all(debug_assertions, feature = "hot-reload"))]
+#[test]
+fn typed_binding_reload_preserves_subscription_and_tracks_context_during_rollback() {
+    use crate::data::{BindingOperations, LocalBindingReload};
+    let source = ViewModel::with_string("old");
+    let target = create_target(Some(&source), BindingMode::TwoWay);
+    let expression = BindingOperations::get_binding_expression_base(&target, TextBlock::text_property()).unwrap();
+    assert!(expression.as_any().is::<Typed>());
+    assert!(expression.pause_for_reload());
+    let before = source.string_value_set_count.get();
+    target.set_current_value(TextBlock::text_property(), Some(s("stale")));
+    assert_eq!(source.string_value_set_count.get(), before);
+    source.set_string_value(Some(s("latest")));
+    assert_eq!(target.text(), Some(s("stale")));
+    expression.resume_after_reload();
+    assert_eq!(target.text(), Some(s("latest")));
+    assert_eq!(source.string_value_set_count.get(), before + 1);
+
+    let replacement = create_binding(BindingMode::TwoWay);
+    let mut change = LocalBindingReload::prepare(
+        &target.clone().upcast(), TextBlock::text_property(), Some(&*replacement), None,
+    ).unwrap();
+    change.commit().unwrap();
+    let next_source = ViewModel::with_string("new context");
+    target.set_data_context(Some(next_source.clone()));
+    let writes = next_source.string_value_set_count.get();
+    change.rollback().unwrap();
+    assert_eq!(target.text(), Some(s("new context")));
+    assert_eq!(next_source.string_value_set_count.get(), writes, "rollback wrote stale input");
+    assert!(Rc::ptr_eq(&expression,
+        &BindingOperations::get_binding_expression_base(&target, TextBlock::text_property()).unwrap()));
+    target.set_current_value(TextBlock::text_property(), Some(s("user")));
+    assert_eq!(next_source.string_value(), Some(s("user")));
+    assert_eq!(source.string_value(), Some(s("latest")));
+}
+
 #[test]
 fn one_time_binding_sets_target_only_once_if_data_context_does_not_change() {
     let data = ViewModel::with_string("foo");

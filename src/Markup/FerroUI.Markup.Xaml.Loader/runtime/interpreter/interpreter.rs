@@ -180,6 +180,8 @@ fn invoke_error(error: MarkupInvokeError, what: &str, line_info: &dyn IXamlLineI
 /// language maps one) and what the interpreter decided once about its
 /// nodes. It keeps the nodes of the document alive.
 pub struct RuntimeDocument {
+    #[cfg(all(feature = "hot-reload", debug_assertions))]
+    pub source_text: RefCell<Option<Rc<str>>>,
     pub base_uri: Option<Uri>,
     pub static_providers: Rc<[Rc<dyn IStaticServiceProvider>]>,
     /// The root node: the decisions below are remembered by node address,
@@ -196,6 +198,8 @@ impl RuntimeDocument {
         root: Option<Rc<dyn IXamlAstNode>>,
     ) -> Rc<Self> {
         Rc::new(Self {
+            #[cfg(all(feature = "hot-reload", debug_assertions))]
+            source_text: RefCell::new(None),
             base_uri,
             static_providers: Rc::from(static_providers),
             root,
@@ -412,6 +416,17 @@ impl Interpreter {
         let root_type = root_value.type_().get_clr_type()?;
         let instance = eval.evaluate(&root_value.as_node(), Some(&root_type))?;
         self.populate(root, parent_service_provider, &instance, document)?;
+        #[cfg(all(debug_assertions, feature = "hot-reload"))]
+        if let (Some(value), Some(uri)) = (&instance, &document.base_uri) {
+            use ferroui_markup_xaml::FromXamlObject;
+            // Linked includes call this same build path after their wrapper has
+            // been optimized away. Retain provenance, never the resource graph.
+            if Rc::<dyn ferroui_base::controls::IResourceProvider>::from_xaml_object(value).is_some() {
+                if let Some(root) = ferroui_base::Ref::<ferroui_base::FerroObject>::from_xaml_object(value) {
+                    ferroui_base::controls::resource_provenance::register(&root, uri.absolute_uri().to_owned());
+                }
+            }
+        }
         Ok(instance)
     }
 
@@ -428,6 +443,11 @@ impl Interpreter {
         let context = self.create_context(parent_service_provider, document, &*manipulation)?;
         context.set_root_object(root_instance.clone());
         context.set_intermediate_root_object(root_instance.clone());
+        #[cfg(all(debug_assertions, feature = "hot-reload"))]
+        crate::binding_capture::register_root(
+            document.base_uri.as_ref().map(|uri| uri.absolute_uri()),
+            root_instance,
+        );
         let scope = Rc::as_ptr(&manipulation) as *const () as usize;
         let mut eval = EvalContext::new(self, Some(context), document.clone(), scope);
         eval.manipulate(&manipulation.as_node(), root_instance)

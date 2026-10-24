@@ -501,6 +501,7 @@ dependencies = [
  "ferroui-controls-treedatagrid",
  "ferroui-dialogs",
  "ferroui-harfbuzz",
+ "ferroui-hot-reload",
  "ferroui-markup",
  "ferroui-markup-xaml",
  "ferroui-markup-xaml-loader",
@@ -1146,6 +1147,8 @@ dependencies = [
  "ferroui-build-scan",
  "ferroui-markup-xaml",
  "ferroui-markup-xaml-loader",
+ "roxmltree 0.20.0",
+ "serde_json",
  "xamlx",
 ]
 
@@ -1381,6 +1384,31 @@ dependencies = [
  "getrandom 0.4.3",
  "jpeg-encoder",
  "png",
+]
+
+[[package]]
+name = "ferroui-hot-patch"
+version = "0.4.0"
+dependencies = [
+ "ferroui-system",
+ "quote",
+ "serde",
+ "serde_json",
+ "subsecond",
+ "syn 2.0.119",
+ "tempfile",
+]
+
+[[package]]
+name = "ferroui-hot-reload"
+version = "0.4.0"
+dependencies = [
+ "ferroui-base",
+ "ferroui-controls",
+ "ferroui-markup-xaml",
+ "ferroui-markup-xaml-loader",
+ "roxmltree 0.20.0",
+ "serde_json",
 ]
 
 [[package]]
@@ -2452,6 +2480,21 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "7f24254aa9a54b5c858eaee2f5bccdb46aaf0e486a595ed5fd8f86ba55232a70"
 
 [[package]]
+name = "hot-reload-demo"
+version = "0.4.0"
+dependencies = [
+ "ferroui-base",
+ "ferroui-build",
+ "ferroui-controls",
+ "ferroui-desktop",
+ "ferroui-hot-patch",
+ "ferroui-hot-reload",
+ "ferroui-markup-xaml",
+ "ferroui-themes-simple",
+ "serde_json",
+]
+
+[[package]]
 name = "html5ever"
 version = "0.35.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -3006,6 +3049,15 @@ name = "memchr"
 version = "2.8.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "cf8baf1c55e62ffcace7a9f06f4bd9cd3f0c4beb022d3b367256b91b87513d98"
+
+[[package]]
+name = "memfd"
+version = "0.6.6"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "57804b2c9b69967f1536a56f86297e367a33b19e98852ed624b84551cdbc0d90"
+dependencies = [
+ "rustix",
+]
 
 [[package]]
 name = "memmap2"
@@ -4651,6 +4703,34 @@ dependencies = [
  "phf_shared",
  "proc-macro2",
  "quote",
+]
+
+[[package]]
+name = "subsecond"
+version = "0.7.10"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "d350d5788fa94d560d92269266a50efc77b036bfca6675e420b64df7b3211f37"
+dependencies = [
+ "js-sys",
+ "libc",
+ "libloading",
+ "memfd",
+ "memmap2",
+ "serde",
+ "subsecond-types",
+ "thiserror 2.0.21",
+ "wasm-bindgen",
+ "wasm-bindgen-futures",
+ "web-sys",
+]
+
+[[package]]
+name = "subsecond-types"
+version = "0.7.10"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "dcf32d66269b5fbb8558334e8d22b657b2f7af0dd2ef56c231541099a862e464"
+dependencies = [
+ "serde",
 ]
 
 [[package]]

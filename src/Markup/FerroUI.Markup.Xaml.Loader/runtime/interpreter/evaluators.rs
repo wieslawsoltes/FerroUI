@@ -702,7 +702,17 @@ pub(crate) fn evaluate_intrinsic(
 
 fn load_method_delegate(node: &Rc<XamlLoadMethodDelegateNode>, context: &mut EvalContext<'_>) -> XamlResult<EvalResult> {
     let declaring_type = node.method.declaring_type();
-    let instance = context.evaluate(&node.base.value().as_node(), Some(&declaring_type))?;
+    #[cfg(all(feature = "hot-reload", debug_assertions))]
+    let replacement = if node.base.value().as_node().cast::<XamlRootObjectNode>().is_some() {
+        let runtime = context.runtime_context()?;
+        ferroui_markup_xaml::reload_events::code_behind(&**runtime, &runtime.root_object())
+    } else { None };
+    #[cfg(not(all(feature = "hot-reload", debug_assertions)))]
+    let replacement: Option<BoxedValue> = None;
+    let instance = match replacement {
+        Some(root) => Some(root),
+        None => context.evaluate(&node.base.value().as_node(), Some(&declaring_type))?,
+    };
     if node.method.as_any().downcast_ref::<RuntimeMethod>().is_none() {
         return Err(XamlError::load_exception(
             format!(
@@ -776,5 +786,16 @@ fn deferred_content(node: &Rc<XamlDeferredContentNode>, context: &mut EvalContex
         }
         None => Some(factory),
     };
+    #[cfg(all(feature = "hot-reload", debug_assertions))]
+    {
+        use ferroui_markup_xaml::{FromXamlObject, xaml_il::runtime::DeferredContent};
+        if let Some(content) = result.as_ref().and_then(Rc::<DeferredContent>::from_xaml_object) {
+            let document = context.document();
+            content.set_declaration(ferroui_markup_xaml::reload_templates::Declaration {
+                uri: document.base_uri.as_ref().map(|uri| uri.absolute_uri().to_owned()),
+                line: node.line(), column: node.position(), source: document.source_text.borrow().clone(),
+            });
+        }
+    }
     Ok(EvalResult::value(type_, result))
 }

@@ -48,6 +48,7 @@ count-allocations = ["ferroui-base/tagged-weak-references"]
 # `ClassicThemes.xaml`, the dictionary of the two themes and of the Simple styles of the colour
 # picker and the TreeDataGrid, which the application merges into its resources.
 classic-themes = ["dep:ferroui-themes-simple", "dep:ferroui-themes-fluent"]
+hot-reload = ["runtime-markup", "dep:ferroui-hot-reload"]
 runtime-markup = [
     "dep:ferroui-markup-xaml-loader",
     "ferroui-controls-color-picker/document-assets",
@@ -55,6 +56,7 @@ runtime-markup = [
 ]
 
 [dependencies]
+ferroui-hot-reload = { workspace = true, optional = true }
 # The compiled markup of the crate calls the typed functions of the declared members.
 ferroui-base = { workspace = true, features = ["markup-functions"] }
 ferroui-controls = { workspace = true }

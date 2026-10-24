@@ -24,6 +24,12 @@ pub trait IResourceProvider: IResourceNode {
     /// Removes a resource provider owner.
     fn remove_owner(&self, owner: &ResourceHostRef);
 
+    /// Canonical source of a development markup include, without loading it.
+    #[cfg(all(debug_assertions, feature = "hot-reload"))]
+    fn development_source(&self) -> Option<String> {
+        super::resource_provenance::source(self.as_object()?)
+    }
+
     /// The provider as an object, when it is a class instance. Used for
     /// identity comparison and type tests.
     fn as_object(&self) -> Option<&FerroObject> {

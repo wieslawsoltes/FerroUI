@@ -74,6 +74,8 @@
 mod compiled_documents;
 #[path = "build/page_files.rs"]
 mod page_files;
+#[path = "build/placeholder_geometry.rs"]
+mod placeholder_geometry;
 
 use std::collections::{BTreeMap, BTreeSet};
 use std::env;
@@ -250,18 +252,10 @@ fn substitute_placeholder_geometries(root: &Path, out_dir: &Path, assets: &mut [
         let mut content = fs::read_to_string(&*path).unwrap_or_else(|e| panic!("cannot read {}: {e}", path.display()));
         let mut changed = false;
         for ((key, data), count) in geometries.iter().zip(replaced.iter_mut()) {
-            let start_tag = format!("<StreamGeometry x:Key=\"{key}\">");
-            let mut from = 0;
-            while let Some(start) = content[from..].find(&start_tag).map(|at| from + at + start_tag.len()) {
-                let end = start
-                    + content[start..]
-                        .find("</StreamGeometry>")
-                        .unwrap_or_else(|| panic!("{asset_path}: the resource {key} is not closed"));
-                content.replace_range(start..end, data);
-                from = start + data.len();
-                *count += 1;
-                changed = true;
-            }
+            let occurrences = placeholder_geometry::replace_geometry(&mut content, key, data)
+                .unwrap_or_else(|error| panic!("{asset_path}: {error}"));
+            *count += occurrences;
+            changed |= occurrences != 0;
         }
         if changed {
             let target = out_dir.join("placeholder").join(asset_path.trim_start_matches('/'));
@@ -423,6 +417,22 @@ fn main() {
             .map(|(_, variant)| *variant)
             .unwrap_or_else(|| panic!("{TEST_APPLICATION_LIST} names the application {application:?} for {asset_path}"));
         test_applications.insert(asset_path, variant);
+    }
+
+    if env::var_os("CARGO_FEATURE_HOT_RELOAD").is_some() && env::var("PROFILE").as_deref() != Ok("release") {
+        Build::from_env().type_system(TypeSystem::Model).hot_reload_manifest(true).input(".").run();
+        let mut geometries = Vec::new();
+        for entry in fs::read_dir(root.join(PLACEHOLDER_DIRECTORY).join("StreamGeometry")).unwrap() {
+            let path = entry.unwrap().path();
+            if path.extension().is_some_and(|extension| extension == "txt") {
+                geometries.push((path.file_stem().unwrap().to_string_lossy().into_owned(), fs::read_to_string(&path).unwrap().trim().to_owned()));
+            }
+        }
+        geometries.sort();
+        let mut table = String::from("const RELOAD_GEOMETRIES: &[(&str, &str)] = &[\n");
+        for (key, data) in geometries { writeln!(table, "({key:?}, {data:?}),").unwrap(); }
+        table.push_str("];\n");
+        fs::write(out_dir.join("hot_reload_geometries.rs"), table).unwrap();
     }
 
     // The compiled markup of the documents, as the placeholder artwork left them.

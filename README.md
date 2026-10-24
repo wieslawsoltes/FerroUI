@@ -193,7 +193,9 @@ Markup is loaded at run time with `ferroui-markup-xaml-loader` (the feature `xam
 | Crate | Description | Version | Downloads | Documentation |
 |---|---|---|---|---|
 | [`ferroui-remote-protocol`](https://crates.io/crates/ferroui-remote-protocol) | The remote protocol of FerroUI: the messages of the previewer and of remote rendering, their BSON serialization and the transports that carry them | [![version](https://img.shields.io/crates/v/ferroui-remote-protocol.svg)](https://crates.io/crates/ferroui-remote-protocol) | [![downloads](https://img.shields.io/crates/d/ferroui-remote-protocol.svg)](https://crates.io/crates/ferroui-remote-protocol) | [![docs.rs](https://img.shields.io/docsrs/ferroui-remote-protocol)](https://docs.rs/ferroui-remote-protocol) |
+| [`ferroui-hot-patch`](https://crates.io/crates/ferroui-hot-patch) | Development-only FerroUI hot-patch support | [![version](https://img.shields.io/crates/v/ferroui-hot-patch.svg)](https://crates.io/crates/ferroui-hot-patch) | [![downloads](https://img.shields.io/crates/d/ferroui-hot-patch.svg)](https://crates.io/crates/ferroui-hot-patch) | [![docs.rs](https://img.shields.io/docsrs/ferroui-hot-patch)](https://docs.rs/ferroui-hot-patch) |
 | [`microcom-codegen`](https://crates.io/crates/microcom-codegen) | Code generator of the FerroUI interop runtime: a C++ header and Rust bindings from an interface definition file | [![version](https://img.shields.io/crates/v/microcom-codegen.svg)](https://crates.io/crates/microcom-codegen) | [![downloads](https://img.shields.io/crates/d/microcom-codegen.svg)](https://crates.io/crates/microcom-codegen) | [![docs.rs](https://img.shields.io/docsrs/microcom-codegen)](https://docs.rs/microcom-codegen) |
+| [`ferroui-hot-reload`](https://crates.io/crates/ferroui-hot-reload) | Development-only FerroUI hot-reload support | [![version](https://img.shields.io/crates/v/ferroui-hot-reload.svg)](https://crates.io/crates/ferroui-hot-reload) | [![downloads](https://img.shields.io/crates/d/ferroui-hot-reload.svg)](https://crates.io/crates/ferroui-hot-reload) | [![docs.rs](https://img.shields.io/docsrs/ferroui-hot-reload)](https://docs.rs/ferroui-hot-reload) |
 | [`ferroui-inspect`](https://crates.io/crates/ferroui-inspect) | Opt-in application inspection core for FerroUI, shared by its MCP server and its Chrome DevTools Protocol endpoint | [![version](https://img.shields.io/crates/v/ferroui-inspect.svg)](https://crates.io/crates/ferroui-inspect) | [![downloads](https://img.shields.io/crates/d/ferroui-inspect.svg)](https://crates.io/crates/ferroui-inspect) | [![docs.rs](https://img.shields.io/docsrs/ferroui-inspect)](https://docs.rs/ferroui-inspect) |
 | [`ferroui-mcp`](https://crates.io/crates/ferroui-mcp) | Opt-in application inspection MCP server for FerroUI | [![version](https://img.shields.io/crates/v/ferroui-mcp.svg)](https://crates.io/crates/ferroui-mcp) | [![downloads](https://img.shields.io/crates/d/ferroui-mcp.svg)](https://crates.io/crates/ferroui-mcp) | [![docs.rs](https://img.shields.io/docsrs/ferroui-mcp)](https://docs.rs/ferroui-mcp) |
 | [`ferroui-designer-support`](https://crates.io/crates/ferroui-designer-support) | Designer support of FerroUI: the loader of the previewed window and the previewer that talks to an IDE over the remote protocol | [![version](https://img.shields.io/crates/v/ferroui-designer-support.svg)](https://crates.io/crates/ferroui-designer-support) | [![downloads](https://img.shields.io/crates/d/ferroui-designer-support.svg)](https://crates.io/crates/ferroui-designer-support) | [![docs.rs](https://img.shields.io/docsrs/ferroui-designer-support)](https://docs.rs/ferroui-designer-support) |
@@ -477,6 +479,7 @@ The layout follows the upstream project so that files can be compared side by si
 - [Deviations](docs/porting/DEVIATIONS.md): every place where the port differs from upstream, and why.
 - [XAML design](docs/porting/xaml.md): the markup pipeline, the run-time loader and the compiler of markup to Rust.
 - [WinUI Charts port](docs/porting/winui-charts.md): the published-contract boundary, native implementation, complete source/test mapping, adaptations and [compiled sample](samples/ChartsDemo/README.md).
+- [WinUI controls](docs/porting/winui-controls.md): the plan, inventory and rules of the native ports of WinUI 3 controls (icons, InfoBar, NumberBox, NavigationView and others), the WinUI-only templates, the symbol font and the two navigation models.
 - [Declarative Rust UI](docs/declarative-ui.md): `ferroui-view`, its builders, `rsx!`, signals, components, hooks, the reconciler, XAML interoperation, tools and the phases of the work; [compared with React](docs/declarative-ui-react.md).
 - [Developer tools](docs/porting/tracking/diagnostics/TRACKING.md): the port of upstream's developer tools, attached with F12, member by member.
 - [MVVM on FerroUI](docs/mvvm.md): ReactiveUI, DynamicData and System.Reactive on FerroUI, with the samples ReactiveDemo and ReactiveUIExample.
@@ -494,3 +497,12 @@ Please open an issue to discuss a change before sending a pull request. Contribu
 FerroUI is licensed under the [MIT License](LICENSE).
 
 It is derived from other open source projects, and some files are carried under their original licenses. See [NOTICE.md](NOTICE.md) and the component-level notices it refers to for the full attributions and license texts.
+
+### Experimental hot reload
+
+The development reload engine and sample are described in
+[Hot reload development engine](docs/development/hot-reload.md), including the
+supported edits and release gates. Runtime XAML reload preserves supported live
+components through transactional adapters. Explicit Rust functions can be patched
+with the pinned Subsecond toolchain; the sample supervisor coordinates combined
+updates and stateful restart.

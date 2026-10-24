@@ -109,6 +109,8 @@ impl ApplicationImpl for App {
     fn on_framework_initialization_completed(this: &Self) {
         let lifetime = this.application_lifetime();
         if let Some(desktop_lifetime) = lifetime.as_ref().and_then(|l| l.as_classic_desktop_style_application_lifetime()) {
+            #[cfg(all(feature = "hot-reload", debug_assertions))]
+            desktop_lifetime.exit(Rc::new(|_| crate::hot_reload::shutdown()));
             desktop_lifetime.set_main_window(Some(Self::create_main_window()));
         } else if let Some(single_view_factory_application_lifetime) =
             lifetime.as_ref().and_then(|l| l.as_activity_application_lifetime())

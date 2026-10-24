@@ -1,0 +1,160 @@
+{
+  "platform": {
+    "system": "Darwin",
+    "version": "27.0.1",
+    "machine": "arm64"
+  },
+  "compiler": "rustc 1.99.1 (58cf8f9c3 2026-10-13)\nbinary: rustc\ncommit-hash: 58cf8f9c35b355199727627d07ae34a4e2846d67\ncommit-date: 2026-10-13\nhost: aarch64-apple-darwin\nrelease: 1.99.1\nLLVM version: 23.1.1",
+  "build_command": "cargo build --locked -p control-catalog-desktop --features hot-reload",
+  "cargo_incremental": false,
+  "probe_command": "python3 scripts/hot-reload/resource_probe.py",
+  "exit_code": 0,
+  "binary_sha256": "3a54db894796a6e269d01fd5c395daa2a2ce5f0853bf337bbd214982d4b86d65",
+  "probe_sha256": "0452868fcee1ec008ac2c5c43addb76606cea5a15f180cf901ca837248136710",
+  "log_sha256": "cc2449012216d68e27df56ea3aef685db009938895be49623bd313bacb1c5de3",
+  "assertion_summary": "PASS: native resource reload PID 10357: static consumer and root theme updated, missing key retained last-good view, atomic recovery preserved root/window/model",
+  "scope": "Fresh native application resource and root-theme probe through automatic session container tracking. Dynamic addition/removal and owner-lifetime coverage is in engine tests, not this native probe.",
+  "limitations": [
+    "One macOS functional run, not an isolated latency distribution.",
+    "Save-to-render includes watcher scheduling; render completion does not establish physical display scan-out.",
+    "Does not validate native Rust patching or the final three-platform release matrix."
+  ],
+  "measurements": [
+    {
+      "application_us": 45830,
+      "batch": 875,
+      "commit_to_render_us": 38362,
+      "documents": [
+        "ferres://controlcatalog/CustomThemes.xaml"
+      ],
+      "preparation_us": 126419,
+      "rendered_unix_ns": "1792503055434736000",
+      "revision": 1,
+      "page": "CustomThemes",
+      "save_to_render_us": 385551.0,
+      "atomic_save": false
+    },
+    {
+      "application_us": 1574,
+      "batch": 877,
+      "commit_to_render_us": 18323,
+      "documents": [
+        "ferres://controlcatalog/Pages/BorderPage.xaml"
+      ],
+      "preparation_us": 19592,
+      "rendered_unix_ns": "1792503055565508000",
+      "revision": 2,
+      "page": "BorderPage",
+      "save_to_render_us": 126993.0,
+      "atomic_save": false
+    },
+    {
+      "application_us": 16232,
+      "batch": 878,
+      "commit_to_render_us": 24904,
+      "documents": [
+        "ferres://controlcatalog/CustomThemes.xaml"
+      ],
+      "preparation_us": 123643,
+      "rendered_unix_ns": "1792503055899725000",
+      "revision": 3,
+      "page": "CustomThemes",
+      "save_to_render_us": 315977.0,
+      "atomic_save": true
+    },
+    {
+      "application_us": 17143,
+      "batch": 879,
+      "commit_to_render_us": 35034,
+      "documents": [
+        "ferres://controlcatalog/CustomThemes.xaml"
+      ],
+      "preparation_us": 126567,
+      "rendered_unix_ns": "1792503056549664000",
+      "revision": 5,
+      "page": "CustomThemes",
+      "save_to_render_us": 338076.0,
+      "atomic_save": true
+    },
+    {
+      "application_us": 2428,
+      "batch": 880,
+      "commit_to_render_us": 12604,
+      "documents": [
+        "ferres://controlcatalog/Pages/BorderPage.xaml"
+      ],
+      "preparation_us": 15966,
+      "rendered_unix_ns": "1792503056732465000",
+      "revision": 6,
+      "page": "BorderPage",
+      "save_to_render_us": 167429.0,
+      "atomic_save": false
+    },
+    {
+      "application_us": 19028,
+      "batch": 881,
+      "commit_to_render_us": 28637,
+      "documents": [
+        "ferres://controlcatalog/CustomThemes.xaml"
+      ],
+      "preparation_us": 44000,
+      "rendered_unix_ns": "1792503056999725000",
+      "revision": 7,
+      "page": "CustomThemes",
+      "save_to_render_us": 259600.0,
+      "atomic_save": false
+    }
+  ],
+  "observations": [
+    {
+      "before": {
+        "revision": 2,
+        "status": "Applied",
+        "root": "0x78125f0010",
+        "window": "0x780f828c10",
+        "model": "0x7811cf9890",
+        "content": "0x780ed92010",
+        "content_width": 611,
+        "root_width": null,
+        "root_height": null,
+        "theme": "0x780e65b710"
+      },
+      "changed": {
+        "revision": 3,
+        "status": "Applied",
+        "root": "0x78125f0010",
+        "window": "0x780f828c10",
+        "model": "0x7811cf9890",
+        "content": "0x780bf4b010",
+        "content_width": 612,
+        "root_width": null,
+        "root_height": null,
+        "theme": "0x780e65bc10"
+      },
+      "failed": {
+        "revision": 4,
+        "status": "Failed",
+        "root": "0x78125f0010",
+        "window": "0x780f828c10",
+        "model": "0x7811cf9890",
+        "content": "0x780bf4b010",
+        "content_width": 612,
+        "root_width": null,
+        "root_height": null,
+        "theme": "0x780e65bc10"
+      },
+      "recovered": {
+        "revision": 5,
+        "status": "Applied",
+        "root": "0x78125f0010",
+        "window": "0x780f828c10",
+        "model": "0x7811cf9890",
+        "content": "0x780be37810",
+        "content_width": 613,
+        "root_width": null,
+        "root_height": null,
+        "theme": "0x780e65b990"
+      }
+    }
+  ]
+}

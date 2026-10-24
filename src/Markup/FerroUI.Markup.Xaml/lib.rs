@@ -18,6 +18,15 @@ pub mod xamlx_runtime;
 mod eager_parent_stack_enumerator;
 mod extensions;
 mod ferro_xaml_loader;
+mod populate_overrides;
+#[cfg(all(feature = "hot-reload", debug_assertions))]
+pub mod source_overlay;
+#[cfg(all(feature = "hot-reload", debug_assertions))]
+pub mod reload_validation;
+#[cfg(all(feature = "hot-reload", debug_assertions))]
+pub mod reload_resources;
+#[cfg(all(feature = "hot-reload", debug_assertions))]
+pub mod reload_events;
 mod markup_extension;
 mod object_casts;
 mod register_types;
@@ -29,6 +38,7 @@ mod xaml_types;
 
 pub use eager_parent_stack_enumerator::EagerParentStackEnumerator;
 pub use extensions::ServiceProviderExtensions;
+pub use populate_overrides::{PopulateOverride, PopulateOverrideGuard};
 pub use ferro_xaml_loader::{CompiledXamlLoader, FerroXamlLoader, IRuntimeXamlLoader};
 pub use markup_extension::MarkupExtension;
 pub use object_casts::{FromXamlObject, XamlResourceNode};
@@ -78,3 +88,9 @@ pub(crate) fn throw<T>(result: Result<T, XamlLoadException>) -> T {
 
 #[cfg(test)]
 mod test_support;
+
+#[cfg(all(feature = "hot-reload", debug_assertions))]
+pub mod reload_templates;
+
+#[cfg(all(feature = "hot-reload", debug_assertions))]
+pub mod reload_identity;

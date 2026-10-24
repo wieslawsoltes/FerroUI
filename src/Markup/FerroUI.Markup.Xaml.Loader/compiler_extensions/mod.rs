@@ -56,6 +56,7 @@
 //! | [`transformers::ResourceAdderSetter`] | `transformers/ferro_xaml_il_resource_transformer.rs` | property setter | `[target.Resources].Add*(key, value)` plus `XamlSourceInfo.SetXamlSourceInfo` |
 //! | [`transformers::EnsureCapacityNode`] | `transformers/ferro_xaml_il_ensure_resource_dictionary_capacity_transformer.rs` | manipulation node | `if (x is ResourceDictionary d) d.EnsureCapacity(d.Count + n)` |
 //! | [`transformers::HandleRootObjectScopeNode`] | `transformers/ferro_xaml_il_root_object_scope_transformer.rs` | manipulation node | `NameScope.SetNameScope(root, scope)` for styled elements, then `scope.Complete()` |
+//! | [`transformers::DevelopmentKeyNode`] | `transformers/development_key_transformer.rs` | manipulation node | debug-runtime weak identity metadata; no public name or namescope entry |
 //! | [`transformers::XamlSourceInfoValueManipulation`] | `transformers/ferro_xaml_il_add_source_info_transformer.rs` | manipulation node | `XamlSourceInfo.SetXamlSourceInfo(target, new XamlSourceInfo(line, position, document))` |
 //! | [`group_transformers::NewServiceProviderNode`] | `group_transformers/xaml_include_group_transformer.rs` | value node | `XamlIlRuntimeHelpers.CreateRootServiceProviderV3(context)` |
 //! | [`XamlIlBindingPathNode`] | `xaml_il_binding_path_helper.rs` | value node | `new CompiledBindingPathBuilder()`, each element's builder call, `Build()` |

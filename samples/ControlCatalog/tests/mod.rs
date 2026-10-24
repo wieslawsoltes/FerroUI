@@ -28,6 +28,8 @@ mod gaps_b;
 mod gaps_c;
 mod gaps_d;
 mod frame_benchmark;
+#[cfg(all(debug_assertions, feature = "hot-reload"))]
+mod hot_reload;
 mod interaction_controls;
 mod interaction_tour;
 mod navigation_pages_b;

@@ -1,0 +1,1373 @@
+{
+  "date": "2026-10-20",
+  "patch_toolchain": {
+    "rustc": "1.93.0 (254b59607 2026-01-19)",
+    "dioxus_cli": "0.7.10",
+    "subsecond": "0.7.10",
+    "cargo_incremental": "0"
+  },
+  "source_comparison": {
+    "files": 7291,
+    "paths": [
+      "src",
+      "external",
+      "samples",
+      "scripts/hot-reload",
+      "Cargo.toml",
+      "Cargo.lock",
+      ".cargo"
+    ],
+    "non_file_entry_excluded": "src/FerroUI.Native/native",
+    "aggregate_sha256": "ba2c21ddd04fdfce9674fb339f0736566091f6ea8dd9299ebb84c804b2bd3be6",
+    "algorithm": "git ls-files order; for each regular file append UTF-8 relative path, NUL, binary SHA256(file); SHA256 of the concatenation",
+    "result": "All compared macOS workspace and Linux snapshot files were byte-identical."
+  },
+  "runs": [
+    {
+      "platform": "macos-arm64",
+      "command": "python3 scripts/hot-reload/desktop_patch_probe.py",
+      "exit_code": 0,
+      "rustc": "1.93.0 (254b59607 2026-01-19)",
+      "log_sha256": "e65c97a826ec6c94a404cb844bbe2c22f4ed6cbdf3746696776e437d0273e54f",
+      "assertion_output": [
+        "Building isolated desktop fat binary...",
+        "Building admitted desktop patch 2...",
+        "Building admitted desktop patch 3...",
+        "Building admitted desktop patch 4...",
+        "PASS: desktop PID 96733, live root, type identity and existing handler survived two combined Rust/XAML revisions and both rollback paths; handler-only patch retained child identity and markup revision",
+        "PASS: registered view builder rebuilt the live view, rejected invalid candidate markup with code/UI rollback, and retained the derived view through a subsequent handler-only patch"
+      ],
+      "measurements": []
+    },
+    {
+      "platform": "linux-arm64-xvfb",
+      "command": "python3 scripts/hot-reload/desktop_patch_probe.py",
+      "exit_code": 0,
+      "rustc": "1.93.0 (254b59607 2026-01-19)",
+      "log_sha256": "fcb268efa0c67cb310fc985c008124723485dae0023d87bc87c902131f2d3403",
+      "assertion_output": [
+        "Building isolated desktop fat binary...",
+        "Building admitted desktop patch 2...",
+        "Building admitted desktop patch 3...",
+        "Building admitted desktop patch 4...",
+        "PASS: desktop PID 158154, live root, type identity and existing handler survived two combined Rust/XAML revisions and both rollback paths; handler-only patch retained child identity and markup revision",
+        "PASS: registered view builder rebuilt the live view, rejected invalid candidate markup with code/UI rollback, and retained the derived view through a subsequent handler-only patch"
+      ],
+      "measurements": []
+    },
+    {
+      "platform": "macos-arm64",
+      "command": "python3 scripts/hot-reload/supervisor_probe.py",
+      "exit_code": 0,
+      "rustc": "1.93.0 (254b59607 2026-01-19)",
+      "log_sha256": "3a6fbfd0973b25cb09add29410b2b8144f44a98f636634249264eb316750859a",
+      "assertion_output": [
+        "Building replacement 1; current application stays running",
+        "Running PID 97766",
+        "{\"application_us\": 1771, \"error\": null, \"markup_revision\": 2, \"preparation_us\": 6786, \"status\": \"applied\"}",
+        "{\"application_us\": 0, \"error\": \"invalid name token at 1:2\", \"markup_revision\": 3, \"preparation_us\": 14, \"status\": \"rejected\"}",
+        "{\"markup_revision\": 4, \"revision\": 1, \"status\": \"applied\", \"patch_timing\": {\"stages_us\": {\"input_preparation_us\": 88132.416, \"admission_us\": 108318.75, \"staging_us\": 337.584, \"compiler_invocation_us\": 3059810.541, \"source_revalidation_us\": 1042423.5, \"artifact_decode_us\": 298.959, \"application_ack_us\": 272584.25}, \"update_to_ack_us\": 4571907.75}}",
+        "Restart required: program.rs: Rust source cannot be parsed",
+        "Building replacement 2; current application stays running",
+        "Restart required: Unpatchable build input changed: lib.rs",
+        "Building replacement 3; current application stays running",
+        "Running PID 99448; replacement restored and acknowledged",
+        "PASS: supervisor markup, admitted combined patch, failed build retention, acknowledged stateful restart and generation cleanup"
+      ],
+      "measurements": [
+        {
+          "scope": "combined-rust-xaml-save-to-render",
+          "source_capture_us": 1078690.0,
+          "patch_timing": {
+            "stages_us": {
+              "input_preparation_us": 88132.416,
+              "admission_us": 108318.75,
+              "staging_us": 337.584,
+              "compiler_invocation_us": 3059810.541,
+              "source_revalidation_us": 1042423.5,
+              "artifact_decode_us": 298.959,
+              "application_ack_us": 272584.25
+            },
+            "update_to_ack_us": 4571907.75
+          },
+          "frame": {
+            "application_us": 158493,
+            "batch": 15,
+            "commit_to_render_us": 33983,
+            "documents": [
+              "ferres://hot_reload_demo/View.xaml"
+            ],
+            "preparation_us": 6872,
+            "rendered_unix_ns": "1792494927078757000",
+            "revision": 4
+          },
+          "save_to_render_us": 5681554.0,
+          "watch_debounce_included": false,
+          "compiler": "rust-1.93.0-dx-0.7.10"
+        }
+      ]
+    },
+    {
+      "platform": "linux-arm64-xvfb",
+      "command": "python3 scripts/hot-reload/supervisor_probe.py",
+      "exit_code": 0,
+      "rustc": "1.93.0 (254b59607 2026-01-19)",
+      "log_sha256": "7755723c922f088a0c607e5fd1c293889d0243c5f2c53b286fb577a6f010ff00",
+      "assertion_output": [
+        "Building replacement 1; current application stays running",
+        "Running PID 161864",
+        "{\"application_us\": 3044, \"error\": null, \"markup_revision\": 2, \"preparation_us\": 8530, \"status\": \"applied\"}",
+        "{\"application_us\": 0, \"error\": \"invalid name token at 1:2\", \"markup_revision\": 3, \"preparation_us\": 64, \"status\": \"rejected\"}",
+        "{\"markup_revision\": 4, \"revision\": 1, \"status\": \"applied\", \"patch_timing\": {\"stages_us\": {\"input_preparation_us\": 74890.16, \"admission_us\": 124704.045, \"staging_us\": 2209.964, \"compiler_invocation_us\": 2822401.438, \"source_revalidation_us\": 3902394.739, \"artifact_decode_us\": 165.667, \"application_ack_us\": 105811.409}, \"update_to_ack_us\": 7032580.297}}",
+        "Restart required: program.rs: Rust source cannot be parsed",
+        "Building replacement 2; current application stays running",
+        "Restart required: Unpatchable build input changed: lib.rs",
+        "Building replacement 3; current application stays running",
+        "Running PID 168972; replacement restored and acknowledged",
+        "PASS: supervisor markup, admitted combined patch, failed build retention, acknowledged stateful restart and generation cleanup"
+      ],
+      "measurements": [
+        {
+          "scope": "combined-rust-xaml-save-to-render",
+          "source_capture_us": 3842541.547,
+          "patch_timing": {
+            "stages_us": {
+              "input_preparation_us": 74890.16,
+              "admission_us": 124704.045,
+              "staging_us": 2209.964,
+              "compiler_invocation_us": 2822401.438,
+              "source_revalidation_us": 3902394.739,
+              "artifact_decode_us": 165.667,
+              "application_ack_us": 105811.409
+            },
+            "update_to_ack_us": 7032580.297
+          },
+          "frame": {
+            "application_us": 9227,
+            "batch": 13,
+            "commit_to_render_us": 17044,
+            "documents": [
+              "ferres://hot_reload_demo/View.xaml"
+            ],
+            "preparation_us": 15321,
+            "rendered_unix_ns": "1792499837323061932",
+            "revision": 4
+          },
+          "save_to_render_us": 10890147.051,
+          "watch_debounce_included": false,
+          "compiler": "rust-1.93.0-dx-0.7.10"
+        }
+      ]
+    },
+    {
+      "platform": "macos-arm64",
+      "command": "python3 scripts/hot-reload/probe.py",
+      "exit_code": 0,
+      "rustc": "1.93.0 (254b59607 2026-01-19)",
+      "log_sha256": "bf1ef192b01df1e74d7ea649c5c2cee3a0781c1a96df677e9e1bc6c805b568db",
+      "assertion_output": [
+        "",
+        "thread 'main' (1890855) panicked at src/main.rs:49:36:",
+        "candidate view panicked",
+        "note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace",
+        "PASS: PID 4585 retained its framework object, type identity, subscription and counter through two accepted patches and three view-transaction rollbacks"
+      ],
+      "measurements": []
+    },
+    {
+      "platform": "macos-arm64",
+      "command": "python3 scripts/hot-reload/resource_probe.py",
+      "exit_code": 0,
+      "rustc": "1.99.1 (58cf8f9c3 2026-10-13)",
+      "log_sha256": "ddaf65cdc714a63637d20146adb0e464dd3079e8b437d1af5ff9db8806900f23",
+      "assertion_output": [
+        "PASS: native resource reload PID 5083: static consumer and root theme updated, missing key retained last-good view, atomic recovery preserved root/window/model"
+      ],
+      "measurements": [
+        {
+          "application_us": 51744,
+          "batch": 833,
+          "commit_to_render_us": 61440,
+          "documents": [
+            "ferres://controlcatalog/CustomThemes.xaml"
+          ],
+          "preparation_us": 126778,
+          "rendered_unix_ns": "1792500222761240000",
+          "revision": 1,
+          "page": "CustomThemes",
+          "save_to_render_us": 419802.0,
+          "atomic_save": false
+        },
+        {
+          "application_us": 1754,
+          "batch": 835,
+          "commit_to_render_us": 10610,
+          "documents": [
+            "ferres://controlcatalog/Pages/BorderPage.xaml"
+          ],
+          "preparation_us": 19659,
+          "rendered_unix_ns": "1792500222942164000",
+          "revision": 2,
+          "page": "BorderPage",
+          "save_to_render_us": 174754.0,
+          "atomic_save": false
+        },
+        {
+          "application_us": 16915,
+          "batch": 836,
+          "commit_to_render_us": 31014,
+          "documents": [
+            "ferres://controlcatalog/CustomThemes.xaml"
+          ],
+          "preparation_us": 113276,
+          "rendered_unix_ns": "1792500223276270000",
+          "revision": 3,
+          "page": "CustomThemes",
+          "save_to_render_us": 310414.0,
+          "atomic_save": true
+        },
+        {
+          "application_us": 16929,
+          "batch": 837,
+          "commit_to_render_us": 29922,
+          "documents": [
+            "ferres://controlcatalog/CustomThemes.xaml"
+          ],
+          "preparation_us": 111586,
+          "rendered_unix_ns": "1792500223826371000",
+          "revision": 5,
+          "page": "CustomThemes",
+          "save_to_render_us": 268302.0,
+          "atomic_save": true
+        },
+        {
+          "application_us": 1686,
+          "batch": 838,
+          "commit_to_render_us": 17769,
+          "documents": [
+            "ferres://controlcatalog/Pages/BorderPage.xaml"
+          ],
+          "preparation_us": 8989,
+          "rendered_unix_ns": "1792500224008817000",
+          "revision": 6,
+          "page": "BorderPage",
+          "save_to_render_us": 157004.0,
+          "atomic_save": false
+        },
+        {
+          "application_us": 16966,
+          "batch": 839,
+          "commit_to_render_us": 23748,
+          "documents": [
+            "ferres://controlcatalog/CustomThemes.xaml"
+          ],
+          "preparation_us": 26394,
+          "rendered_unix_ns": "1792500224242776000",
+          "revision": 7,
+          "page": "CustomThemes",
+          "save_to_render_us": 218796.0,
+          "atomic_save": false
+        }
+      ]
+    },
+    {
+      "platform": "linux-arm64-xvfb",
+      "command": "python3 scripts/hot-reload/resource_probe.py",
+      "exit_code": 0,
+      "rustc": "1.93.0 (254b59607 2026-01-19)",
+      "log_sha256": "82058383c55a92bd415ca84add7934a8e3e4820f8a17db472cfb1deb1db94e15",
+      "assertion_output": [
+        "PASS: native resource reload PID 166316: static consumer and root theme updated, missing key retained last-good view, atomic recovery preserved root/window/model"
+      ],
+      "measurements": [
+        {
+          "application_us": 90130,
+          "batch": 821,
+          "commit_to_render_us": 65639,
+          "documents": [
+            "ferres://controlcatalog/CustomThemes.xaml"
+          ],
+          "preparation_us": 196642,
+          "rendered_unix_ns": "1792500254231902058",
+          "revision": 1,
+          "page": "CustomThemes",
+          "save_to_render_us": 600988.076,
+          "atomic_save": false
+        },
+        {
+          "application_us": 6627,
+          "batch": 827,
+          "commit_to_render_us": 57440,
+          "documents": [
+            "ferres://controlcatalog/Pages/BorderPage.xaml"
+          ],
+          "preparation_us": 51757,
+          "rendered_unix_ns": "1792500254516965583",
+          "revision": 2,
+          "page": "BorderPage",
+          "save_to_render_us": 258138.26,
+          "atomic_save": false
+        },
+        {
+          "application_us": 25109,
+          "batch": 835,
+          "commit_to_render_us": 25712,
+          "documents": [
+            "ferres://controlcatalog/CustomThemes.xaml"
+          ],
+          "preparation_us": 190068,
+          "rendered_unix_ns": "1792500254958872694",
+          "revision": 3,
+          "page": "CustomThemes",
+          "save_to_render_us": 436815.891,
+          "atomic_save": true
+        },
+        {
+          "application_us": 23447,
+          "batch": 843,
+          "commit_to_render_us": 34199,
+          "documents": [
+            "ferres://controlcatalog/CustomThemes.xaml"
+          ],
+          "preparation_us": 152108,
+          "rendered_unix_ns": "1792500255754532769",
+          "revision": 5,
+          "page": "CustomThemes",
+          "save_to_render_us": 395948.471,
+          "atomic_save": true
+        },
+        {
+          "application_us": 4680,
+          "batch": 851,
+          "commit_to_render_us": 18030,
+          "documents": [
+            "ferres://controlcatalog/Pages/BorderPage.xaml"
+          ],
+          "preparation_us": 13233,
+          "rendered_unix_ns": "1792500256009350229",
+          "revision": 6,
+          "page": "BorderPage",
+          "save_to_render_us": 228964.364,
+          "atomic_save": false
+        },
+        {
+          "application_us": 25075,
+          "batch": 859,
+          "commit_to_render_us": 46331,
+          "documents": [
+            "ferres://controlcatalog/CustomThemes.xaml"
+          ],
+          "preparation_us": 32926,
+          "rendered_unix_ns": "1792500256285859445",
+          "revision": 7,
+          "page": "CustomThemes",
+          "save_to_render_us": 268957.824,
+          "atomic_save": false
+        }
+      ]
+    },
+    {
+      "platform": "macos-arm64",
+      "command": "python3 scripts/hot-reload/catalog_probe.py",
+      "exit_code": 0,
+      "rustc": "1.99.1 (58cf8f9c3 2026-10-13)",
+      "log_sha256": "683441032c9222f00768a3458cf7c7b80415cb21417643fddc7d9335908d1025",
+      "assertion_output": [
+        "Catalog reload tracking: /Pages/BorderPage.xaml",
+        "Catalog reload: ReloadOutcome { revision: 1, documents: [\"ferres://controlcatalog/Pages/BorderPage.xaml\"], status: Applied, diagnostic: None, preparation: 20.104542ms, application: 1.968959ms }",
+        "Catalog reload: ReloadOutcome { revision: 2, documents: [\"ferres://controlcatalog/Pages/BorderPage.xaml\"], status: Failed, diagnostic: Some(\"the document does not have a root node\"), preparation: 105.25\u00b5s, application: 0ns }",
+        "Catalog reload: ReloadOutcome { revision: 3, documents: [\"ferres://controlcatalog/Pages/BorderPage.xaml\"], status: Applied, diagnostic: None, preparation: 19.164167ms, application: 2.018042ms }",
+        "Catalog reload: ReloadOutcome { revision: 4, documents: [\"ferres://controlcatalog/Pages/BorderPage.xaml\"], status: Applied, diagnostic: None, preparation: 18.9595ms, application: 1.934208ms }",
+        "PASS: ControlCatalog PID 5101 reloaded Border, recovered from invalid markup, and removed an owned root attribute",
+        "Catalog reload tracking: /Pages/SliderPage.xaml",
+        "Catalog reload: ReloadOutcome { revision: 1, documents: [\"ferres://controlcatalog/Pages/SliderPage.xaml\"], status: Applied, diagnostic: None, preparation: 20.321834ms, application: 7.250625ms }",
+        "Catalog reload: ReloadOutcome { revision: 2, documents: [\"ferres://controlcatalog/Pages/SliderPage.xaml\"], status: Failed, diagnostic: Some(\"the document does not have a root node\"), preparation: 80.833\u00b5s, application: 0ns }",
+        "Catalog reload: ReloadOutcome { revision: 3, documents: [\"ferres://controlcatalog/Pages/SliderPage.xaml\"], status: Applied, diagnostic: None, preparation: 20.106417ms, application: 7.445542ms }",
+        "Catalog reload: ReloadOutcome { revision: 4, documents: [\"ferres://controlcatalog/Pages/SliderPage.xaml\"], status: Applied, diagnostic: None, preparation: 20.413125ms, application: 7.30775ms }",
+        "PASS: ControlCatalog PID 5106 reloaded Slider, recovered from invalid markup, and removed an owned root attribute",
+        "Catalog reload tracking: /Pages/ProgressBarPage.xaml",
+        "Catalog reload: ReloadOutcome { revision: 1, documents: [\"ferres://controlcatalog/Pages/ProgressBarPage.xaml\"], status: Applied, diagnostic: None, preparation: 25.556167ms, application: 15.61025ms }",
+        "Catalog reload: ReloadOutcome { revision: 2, documents: [\"ferres://controlcatalog/Pages/ProgressBarPage.xaml\"], status: Failed, diagnostic: Some(\"the document does not have a root node\"), preparation: 85.25\u00b5s, application: 0ns }",
+        "Catalog reload: ReloadOutcome { revision: 3, documents: [\"ferres://controlcatalog/Pages/ProgressBarPage.xaml\"], status: Applied, diagnostic: None, preparation: 24.817792ms, application: 10.970875ms }",
+        "Catalog reload: ReloadOutcome { revision: 4, documents: [\"ferres://controlcatalog/Pages/ProgressBarPage.xaml\"], status: Applied, diagnostic: None, preparation: 24.408792ms, application: 11.402792ms }",
+        "PASS: ControlCatalog PID 5112 reloaded ProgressBar, recovered from invalid markup, and removed an owned root attribute",
+        "Catalog reload tracking: /Pages/CheckBoxPage.xaml",
+        "Catalog reload: ReloadOutcome { revision: 1, documents: [\"ferres://controlcatalog/Pages/CheckBoxPage.xaml\"], status: Applied, diagnostic: None, preparation: 12.02075ms, application: 4.886167ms }",
+        "Catalog reload: ReloadOutcome { revision: 2, documents: [\"ferres://controlcatalog/Pages/CheckBoxPage.xaml\"], status: Failed, diagnostic: Some(\"the document does not have a root node\"), preparation: 100.083\u00b5s, application: 0ns }",
+        "Catalog reload: ReloadOutcome { revision: 3, documents: [\"ferres://controlcatalog/Pages/CheckBoxPage.xaml\"], status: Applied, diagnostic: None, preparation: 12.038916ms, application: 4.806667ms }",
+        "Catalog reload: ReloadOutcome { revision: 4, documents: [\"ferres://controlcatalog/Pages/CheckBoxPage.xaml\"], status: Applied, diagnostic: None, preparation: 11.714083ms, application: 4.544208ms }",
+        "PASS: ControlCatalog PID 5120 reloaded CheckBox, recovered from invalid markup, and removed an owned root attribute",
+        "Catalog reload tracking: /Pages/CanvasPage.xaml",
+        "Catalog reload: ReloadOutcome { revision: 1, documents: [\"ferres://controlcatalog/Pages/CanvasPage.xaml\"], status: Applied, diagnostic: None, preparation: 19.281ms, application: 943.416\u00b5s }",
+        "Catalog reload: ReloadOutcome { revision: 2, documents: [\"ferres://controlcatalog/Pages/CanvasPage.xaml\"], status: Failed, diagnostic: Some(\"the document does not have a root node\"), preparation: 108.541\u00b5s, application: 0ns }",
+        "Catalog reload: ReloadOutcome { revision: 3, documents: [\"ferres://controlcatalog/Pages/CanvasPage.xaml\"], status: Applied, diagnostic: None, preparation: 18.631625ms, application: 868.917\u00b5s }",
+        "Catalog reload: ReloadOutcome { revision: 4, documents: [\"ferres://controlcatalog/Pages/CanvasPage.xaml\"], status: Applied, diagnostic: None, preparation: 18.395625ms, application: 854.583\u00b5s }",
+        "PASS: ControlCatalog PID 5128 reloaded Canvas, recovered from invalid markup, and removed an owned root attribute",
+        "Catalog reload tracking: /Pages/RadioButtonPage.xaml",
+        "Catalog reload: ReloadOutcome { revision: 1, documents: [\"ferres://controlcatalog/Pages/RadioButtonPage.xaml\"], status: Applied, diagnostic: None, preparation: 16.501708ms, application: 9.287042ms }",
+        "Catalog reload: ReloadOutcome { revision: 2, documents: [\"ferres://controlcatalog/Pages/RadioButtonPage.xaml\"], status: Failed, diagnostic: Some(\"the document does not have a root node\"), preparation: 114.25\u00b5s, application: 0ns }",
+        "Catalog reload: ReloadOutcome { revision: 3, documents: [\"ferres://controlcatalog/Pages/RadioButtonPage.xaml\"], status: Applied, diagnostic: None, preparation: 16.156667ms, application: 9.322125ms }",
+        "Catalog reload: ReloadOutcome { revision: 4, documents: [\"ferres://controlcatalog/Pages/RadioButtonPage.xaml\"], status: Applied, diagnostic: None, preparation: 15.72075ms, application: 9.037791ms }",
+        "PASS: ControlCatalog PID 5138 reloaded RadioButton, recovered from invalid markup, and removed an owned root attribute",
+        "Catalog reload tracking: /Pages/TextBlockPage.xaml",
+        "Catalog reload: ReloadOutcome { revision: 1, documents: [\"ferres://controlcatalog/Pages/TextBlockPage.xaml\"], status: Applied, diagnostic: None, preparation: 38.975709ms, application: 4.393833ms }",
+        "Catalog reload: ReloadOutcome { revision: 2, documents: [\"ferres://controlcatalog/Pages/TextBlockPage.xaml\"], status: Failed, diagnostic: Some(\"the document does not have a root node\"), preparation: 120.458\u00b5s, application: 0ns }",
+        "Catalog reload: ReloadOutcome { revision: 3, documents: [\"ferres://controlcatalog/Pages/TextBlockPage.xaml\"], status: Applied, diagnostic: None, preparation: 40.999417ms, application: 4.974083ms }",
+        "Catalog reload: ReloadOutcome { revision: 4, documents: [\"ferres://controlcatalog/Pages/TextBlockPage.xaml\"], status: Applied, diagnostic: None, preparation: 42.387167ms, application: 4.998041ms }",
+        "PASS: ControlCatalog PID 5176 reloaded TextBlock, recovered from invalid markup, and removed an owned root attribute",
+        "Catalog reload tracking: /Pages/ViewboxPage.xaml",
+        "Catalog reload: ReloadOutcome { revision: 1, documents: [\"ferres://controlcatalog/Pages/ViewboxPage.xaml\"], status: Applied, diagnostic: None, preparation: 20.266709ms, application: 5.133ms }",
+        "Catalog reload: ReloadOutcome { revision: 2, documents: [\"ferres://controlcatalog/Pages/ViewboxPage.xaml\"], status: Failed, diagnostic: Some(\"the document does not have a root node\"), preparation: 119.583\u00b5s, application: 0ns }",
+        "Catalog reload: ReloadOutcome { revision: 3, documents: [\"ferres://controlcatalog/Pages/ViewboxPage.xaml\"], status: Applied, diagnostic: None, preparation: 20.726959ms, application: 5.344875ms }",
+        "Catalog reload: ReloadOutcome { revision: 4, documents: [\"ferres://controlcatalog/Pages/ViewboxPage.xaml\"], status: Applied, diagnostic: None, preparation: 21.964959ms, application: 5.690916ms }",
+        "PASS: ControlCatalog PID 5191 reloaded Viewbox, recovered from invalid markup, and removed an owned root attribute",
+        "Catalog reload tracking: /Pages/ExpanderPage.xaml",
+        "Catalog reload: ReloadOutcome { revision: 1, documents: [\"ferres://controlcatalog/Pages/ExpanderPage.xaml\"], status: Applied, diagnostic: None, preparation: 22.7105ms, application: 7.034583ms }",
+        "Catalog reload: ReloadOutcome { revision: 2, documents: [\"ferres://controlcatalog/Pages/ExpanderPage.xaml\"], status: Failed, diagnostic: Some(\"the document does not have a root node\"), preparation: 108.541\u00b5s, application: 0ns }",
+        "Catalog reload: ReloadOutcome { revision: 3, documents: [\"ferres://controlcatalog/Pages/ExpanderPage.xaml\"], status: Applied, diagnostic: None, preparation: 20.566417ms, application: 6.97925ms }",
+        "Catalog reload: ReloadOutcome { revision: 4, documents: [\"ferres://controlcatalog/Pages/ExpanderPage.xaml\"], status: Applied, diagnostic: None, preparation: 20.522208ms, application: 6.923958ms }",
+        "PASS: ControlCatalog PID 5229 reloaded Expander, recovered from invalid markup, and removed an owned root attribute",
+        "Catalog reload tracking: /Pages/ListBoxPage.xaml",
+        "Catalog reload: ReloadOutcome { revision: 1, documents: [\"ferres://controlcatalog/Pages/ListBoxPage.xaml\"], status: Applied, diagnostic: None, preparation: 18.379125ms, application: 6.4785ms }",
+        "Catalog reload: ReloadOutcome { revision: 2, documents: [\"ferres://controlcatalog/Pages/ListBoxPage.xaml\"], status: Failed, diagnostic: Some(\"the document does not have a root node\"), preparation: 109.167\u00b5s, application: 0ns }",
+        "Catalog reload: ReloadOutcome { revision: 3, documents: [\"ferres://controlcatalog/Pages/ListBoxPage.xaml\"], status: Applied, diagnostic: None, preparation: 18.643708ms, application: 11.844584ms }",
+        "Catalog reload: ReloadOutcome { revision: 4, documents: [\"ferres://controlcatalog/Pages/ListBoxPage.xaml\"], status: Applied, diagnostic: None, preparation: 17.958416ms, application: 11.146875ms }",
+        "PASS: ControlCatalog PID 5240 reloaded ListBox, recovered from invalid markup, and removed an owned root attribute"
+      ],
+      "measurements": [
+        {
+          "application_us": 1968,
+          "batch": 877,
+          "commit_to_render_us": 7159,
+          "documents": [
+            "ferres://controlcatalog/Pages/BorderPage.xaml"
+          ],
+          "preparation_us": 20104,
+          "rendered_unix_ns": "1792500252942525000",
+          "revision": 1,
+          "page": "BorderPage",
+          "save_to_render_us": 207372.0,
+          "atomic_save": false
+        },
+        {
+          "application_us": 2018,
+          "batch": 886,
+          "commit_to_render_us": 15753,
+          "documents": [
+            "ferres://controlcatalog/Pages/BorderPage.xaml"
+          ],
+          "preparation_us": 19164,
+          "rendered_unix_ns": "1792500253309133000",
+          "revision": 3,
+          "page": "BorderPage",
+          "save_to_render_us": 198283.0,
+          "atomic_save": true
+        },
+        {
+          "application_us": 1934,
+          "batch": 887,
+          "commit_to_render_us": 21795,
+          "documents": [
+            "ferres://controlcatalog/Pages/BorderPage.xaml"
+          ],
+          "preparation_us": 18959,
+          "rendered_unix_ns": "1792500253459389000",
+          "revision": 4,
+          "page": "BorderPage",
+          "save_to_render_us": 140658.0,
+          "atomic_save": false
+        },
+        {
+          "application_us": 7250,
+          "batch": 879,
+          "commit_to_render_us": 51738,
+          "documents": [
+            "ferres://controlcatalog/Pages/SliderPage.xaml"
+          ],
+          "preparation_us": 20321,
+          "rendered_unix_ns": "1792500269760818000",
+          "revision": 1,
+          "page": "SliderPage",
+          "save_to_render_us": 255525.0,
+          "atomic_save": false
+        },
+        {
+          "application_us": 7445,
+          "batch": 885,
+          "commit_to_render_us": 46113,
+          "documents": [
+            "ferres://controlcatalog/Pages/SliderPage.xaml"
+          ],
+          "preparation_us": 20106,
+          "rendered_unix_ns": "1792500270110414000",
+          "revision": 3,
+          "page": "SliderPage",
+          "save_to_render_us": 168926.0,
+          "atomic_save": true
+        },
+        {
+          "application_us": 7307,
+          "batch": 886,
+          "commit_to_render_us": 49932,
+          "documents": [
+            "ferres://controlcatalog/Pages/SliderPage.xaml"
+          ],
+          "preparation_us": 20413,
+          "rendered_unix_ns": "1792500270327265000",
+          "revision": 4,
+          "page": "SliderPage",
+          "save_to_render_us": 202254.0,
+          "atomic_save": false
+        },
+        {
+          "application_us": 15610,
+          "batch": 878,
+          "commit_to_render_us": 57898,
+          "documents": [
+            "ferres://controlcatalog/Pages/ProgressBarPage.xaml"
+          ],
+          "preparation_us": 25556,
+          "rendered_unix_ns": "1792500286611381000",
+          "revision": 1,
+          "page": "ProgressBarPage",
+          "save_to_render_us": 251919.0,
+          "atomic_save": false
+        },
+        {
+          "application_us": 10970,
+          "batch": 885,
+          "commit_to_render_us": 65161,
+          "documents": [
+            "ferres://controlcatalog/Pages/ProgressBarPage.xaml"
+          ],
+          "preparation_us": 24817,
+          "rendered_unix_ns": "1792500287010952000",
+          "revision": 3,
+          "page": "ProgressBarPage",
+          "save_to_render_us": 200816.0,
+          "atomic_save": true
+        },
+        {
+          "application_us": 11402,
+          "batch": 886,
+          "commit_to_render_us": 61209,
+          "documents": [
+            "ferres://controlcatalog/Pages/ProgressBarPage.xaml"
+          ],
+          "preparation_us": 24408,
+          "rendered_unix_ns": "1792500287227543000",
+          "revision": 4,
+          "page": "ProgressBarPage",
+          "save_to_render_us": 213369.0,
+          "atomic_save": false
+        },
+        {
+          "application_us": 4886,
+          "batch": 878,
+          "commit_to_render_us": 28124,
+          "documents": [
+            "ferres://controlcatalog/Pages/CheckBoxPage.xaml"
+          ],
+          "preparation_us": 12020,
+          "rendered_unix_ns": "1792500304210311000",
+          "revision": 1,
+          "page": "CheckBoxPage",
+          "save_to_render_us": 168029.0,
+          "atomic_save": false
+        },
+        {
+          "application_us": 4806,
+          "batch": 890,
+          "commit_to_render_us": 27230,
+          "documents": [
+            "ferres://controlcatalog/Pages/CheckBoxPage.xaml"
+          ],
+          "preparation_us": 12038,
+          "rendered_unix_ns": "1792500304510361000",
+          "revision": 3,
+          "page": "CheckBoxPage",
+          "save_to_render_us": 201478.0,
+          "atomic_save": true
+        },
+        {
+          "application_us": 4544,
+          "batch": 891,
+          "commit_to_render_us": 42055,
+          "documents": [
+            "ferres://controlcatalog/Pages/CheckBoxPage.xaml"
+          ],
+          "preparation_us": 11714,
+          "rendered_unix_ns": "1792500304726723000",
+          "revision": 4,
+          "page": "CheckBoxPage",
+          "save_to_render_us": 210592.0,
+          "atomic_save": false
+        },
+        {
+          "application_us": 943,
+          "batch": 881,
+          "commit_to_render_us": 11610,
+          "documents": [
+            "ferres://controlcatalog/Pages/CanvasPage.xaml"
+          ],
+          "preparation_us": 19281,
+          "rendered_unix_ns": "1792500320976474000",
+          "revision": 1,
+          "page": "CanvasPage",
+          "save_to_render_us": 208712.0,
+          "atomic_save": false
+        },
+        {
+          "application_us": 868,
+          "batch": 890,
+          "commit_to_render_us": 8127,
+          "documents": [
+            "ferres://controlcatalog/Pages/CanvasPage.xaml"
+          ],
+          "preparation_us": 18631,
+          "rendered_unix_ns": "1792500321276323000",
+          "revision": 3,
+          "page": "CanvasPage",
+          "save_to_render_us": 133917.0,
+          "atomic_save": true
+        },
+        {
+          "application_us": 854,
+          "batch": 891,
+          "commit_to_render_us": 14759,
+          "documents": [
+            "ferres://controlcatalog/Pages/CanvasPage.xaml"
+          ],
+          "preparation_us": 18395,
+          "rendered_unix_ns": "1792500321426437000",
+          "revision": 4,
+          "page": "CanvasPage",
+          "save_to_render_us": 140889.0,
+          "atomic_save": false
+        },
+        {
+          "application_us": 9287,
+          "batch": 867,
+          "commit_to_render_us": 38093,
+          "documents": [
+            "ferres://controlcatalog/Pages/RadioButtonPage.xaml"
+          ],
+          "preparation_us": 16501,
+          "rendered_unix_ns": "1792500337562141000",
+          "revision": 1,
+          "page": "RadioButtonPage",
+          "save_to_render_us": 184931.0,
+          "atomic_save": false
+        },
+        {
+          "application_us": 9322,
+          "batch": 877,
+          "commit_to_render_us": 38169,
+          "documents": [
+            "ferres://controlcatalog/Pages/RadioButtonPage.xaml"
+          ],
+          "preparation_us": 16156,
+          "rendered_unix_ns": "1792500337911438000",
+          "revision": 3,
+          "page": "RadioButtonPage",
+          "save_to_render_us": 185526.0,
+          "atomic_save": true
+        },
+        {
+          "application_us": 9037,
+          "batch": 878,
+          "commit_to_render_us": 60484,
+          "documents": [
+            "ferres://controlcatalog/Pages/RadioButtonPage.xaml"
+          ],
+          "preparation_us": 15720,
+          "rendered_unix_ns": "1792500338144701000",
+          "revision": 4,
+          "page": "RadioButtonPage",
+          "save_to_render_us": 208161.0,
+          "atomic_save": false
+        },
+        {
+          "application_us": 4393,
+          "batch": 869,
+          "commit_to_render_us": 20431,
+          "documents": [
+            "ferres://controlcatalog/Pages/TextBlockPage.xaml"
+          ],
+          "preparation_us": 38975,
+          "rendered_unix_ns": "1792500354327915000",
+          "revision": 1,
+          "page": "TextBlockPage",
+          "save_to_render_us": 194861.0,
+          "atomic_save": false
+        },
+        {
+          "application_us": 4974,
+          "batch": 879,
+          "commit_to_render_us": 21399,
+          "documents": [
+            "ferres://controlcatalog/Pages/TextBlockPage.xaml"
+          ],
+          "preparation_us": 40999,
+          "rendered_unix_ns": "1792500354744194000",
+          "revision": 3,
+          "page": "TextBlockPage",
+          "save_to_render_us": 238116.0,
+          "atomic_save": true
+        },
+        {
+          "application_us": 4998,
+          "batch": 880,
+          "commit_to_render_us": 22698,
+          "documents": [
+            "ferres://controlcatalog/Pages/TextBlockPage.xaml"
+          ],
+          "preparation_us": 42387,
+          "rendered_unix_ns": "1792500354977590000",
+          "revision": 4,
+          "page": "TextBlockPage",
+          "save_to_render_us": 210322.0,
+          "atomic_save": false
+        },
+        {
+          "application_us": 5133,
+          "batch": 876,
+          "commit_to_render_us": 31707,
+          "documents": [
+            "ferres://controlcatalog/Pages/ViewboxPage.xaml"
+          ],
+          "preparation_us": 20266,
+          "rendered_unix_ns": "1792500371094905000",
+          "revision": 1,
+          "page": "ViewboxPage",
+          "save_to_render_us": 160639.0,
+          "atomic_save": false
+        },
+        {
+          "application_us": 5344,
+          "batch": 887,
+          "commit_to_render_us": 37626,
+          "documents": [
+            "ferres://controlcatalog/Pages/ViewboxPage.xaml"
+          ],
+          "preparation_us": 20726,
+          "rendered_unix_ns": "1792500371460711000",
+          "revision": 3,
+          "page": "ViewboxPage",
+          "save_to_render_us": 171426.0,
+          "atomic_save": true
+        },
+        {
+          "application_us": 5690,
+          "batch": 888,
+          "commit_to_render_us": 42205,
+          "documents": [
+            "ferres://controlcatalog/Pages/ViewboxPage.xaml"
+          ],
+          "preparation_us": 21964,
+          "rendered_unix_ns": "1792500371677619000",
+          "revision": 4,
+          "page": "ViewboxPage",
+          "save_to_render_us": 200358.0,
+          "atomic_save": false
+        },
+        {
+          "application_us": 7034,
+          "batch": 871,
+          "commit_to_render_us": 35725,
+          "documents": [
+            "ferres://controlcatalog/Pages/ExpanderPage.xaml"
+          ],
+          "preparation_us": 22710,
+          "rendered_unix_ns": "1792500387828811000",
+          "revision": 1,
+          "page": "ExpanderPage",
+          "save_to_render_us": 178766.0,
+          "atomic_save": false
+        },
+        {
+          "application_us": 6979,
+          "batch": 881,
+          "commit_to_render_us": 35696,
+          "documents": [
+            "ferres://controlcatalog/Pages/ExpanderPage.xaml"
+          ],
+          "preparation_us": 20566,
+          "rendered_unix_ns": "1792500388178346000",
+          "revision": 3,
+          "page": "ExpanderPage",
+          "save_to_render_us": 182320.0,
+          "atomic_save": true
+        },
+        {
+          "application_us": 6923,
+          "batch": 882,
+          "commit_to_render_us": 40097,
+          "documents": [
+            "ferres://controlcatalog/Pages/ExpanderPage.xaml"
+          ],
+          "preparation_us": 20522,
+          "rendered_unix_ns": "1792500388394670000",
+          "revision": 4,
+          "page": "ExpanderPage",
+          "save_to_render_us": 189388.0,
+          "atomic_save": false
+        },
+        {
+          "application_us": 6478,
+          "batch": 871,
+          "commit_to_render_us": 64606,
+          "documents": [
+            "ferres://controlcatalog/Pages/ListBoxPage.xaml"
+          ],
+          "preparation_us": 18379,
+          "rendered_unix_ns": "1792500404597286000",
+          "revision": 1,
+          "page": "ListBoxPage",
+          "save_to_render_us": 220281.0,
+          "atomic_save": false
+        },
+        {
+          "application_us": 11844,
+          "batch": 880,
+          "commit_to_render_us": 75077,
+          "documents": [
+            "ferres://controlcatalog/Pages/ListBoxPage.xaml"
+          ],
+          "preparation_us": 18643,
+          "rendered_unix_ns": "1792500405029915000",
+          "revision": 3,
+          "page": "ListBoxPage",
+          "save_to_render_us": 262268.0,
+          "atomic_save": true
+        },
+        {
+          "application_us": 11146,
+          "batch": 881,
+          "commit_to_render_us": 66032,
+          "documents": [
+            "ferres://controlcatalog/Pages/ListBoxPage.xaml"
+          ],
+          "preparation_us": 17958,
+          "rendered_unix_ns": "1792500405296331000",
+          "revision": 4,
+          "page": "ListBoxPage",
+          "save_to_render_us": 237115.0,
+          "atomic_save": false
+        }
+      ]
+    },
+    {
+      "platform": "linux-arm64-xvfb",
+      "command": "python3 scripts/hot-reload/catalog_probe.py",
+      "exit_code": 0,
+      "rustc": "1.93.0 (254b59607 2026-01-19)",
+      "log_sha256": "a9bf96353791295e49b90d6fec693f188c86be19688b465b031bc51e4f9d6c19",
+      "assertion_output": [
+        "Catalog reload tracking: /Pages/BorderPage.xaml",
+        "Catalog reload: ReloadOutcome { revision: 1, documents: [\"ferres://controlcatalog/Pages/BorderPage.xaml\"], status: Applied, diagnostic: None, preparation: 31.816775ms, application: 3.764883ms }",
+        "Catalog reload: ReloadOutcome { revision: 2, documents: [\"ferres://controlcatalog/Pages/BorderPage.xaml\"], status: Failed, diagnostic: Some(\"the document does not have a root node\"), preparation: 176.042\u00b5s, application: 0ns }",
+        "Catalog reload: ReloadOutcome { revision: 3, documents: [\"ferres://controlcatalog/Pages/BorderPage.xaml\"], status: Applied, diagnostic: None, preparation: 33.820737ms, application: 3.274466ms }",
+        "Catalog reload: ReloadOutcome { revision: 4, documents: [\"ferres://controlcatalog/Pages/BorderPage.xaml\"], status: Applied, diagnostic: None, preparation: 23.828717ms, application: 4.773135ms }",
+        "PASS: ControlCatalog PID 166417 reloaded Border, recovered from invalid markup, and removed an owned root attribute",
+        "Catalog reload tracking: /Pages/SliderPage.xaml",
+        "Catalog reload: ReloadOutcome { revision: 1, documents: [\"ferres://controlcatalog/Pages/SliderPage.xaml\"], status: Applied, diagnostic: None, preparation: 43.138799ms, application: 15.079406ms }",
+        "Catalog reload: ReloadOutcome { revision: 2, documents: [\"ferres://controlcatalog/Pages/SliderPage.xaml\"], status: Failed, diagnostic: Some(\"the document does not have a root node\"), preparation: 180.583\u00b5s, application: 0ns }",
+        "Catalog reload: ReloadOutcome { revision: 3, documents: [\"ferres://controlcatalog/Pages/SliderPage.xaml\"], status: Applied, diagnostic: None, preparation: 24.637801ms, application: 13.495778ms }",
+        "Catalog reload: ReloadOutcome { revision: 4, documents: [\"ferres://controlcatalog/Pages/SliderPage.xaml\"], status: Applied, diagnostic: None, preparation: 26.882639ms, application: 17.929204ms }",
+        "PASS: ControlCatalog PID 166691 reloaded Slider, recovered from invalid markup, and removed an owned root attribute",
+        "Catalog reload tracking: /Pages/ProgressBarPage.xaml",
+        "Catalog reload: ReloadOutcome { revision: 1, documents: [\"ferres://controlcatalog/Pages/ProgressBarPage.xaml\"], status: Applied, diagnostic: None, preparation: 49.925728ms, application: 21.894795ms }",
+        "Catalog reload: ReloadOutcome { revision: 2, documents: [\"ferres://controlcatalog/Pages/ProgressBarPage.xaml\"], status: Failed, diagnostic: Some(\"the document does not have a root node\"), preparation: 252.292\u00b5s, application: 0ns }",
+        "Catalog reload: ReloadOutcome { revision: 3, documents: [\"ferres://controlcatalog/Pages/ProgressBarPage.xaml\"], status: Applied, diagnostic: None, preparation: 44.91926ms, application: 23.061923ms }",
+        "Catalog reload: ReloadOutcome { revision: 4, documents: [\"ferres://controlcatalog/Pages/ProgressBarPage.xaml\"], status: Applied, diagnostic: None, preparation: 66.052596ms, application: 29.325144ms }",
+        "PASS: ControlCatalog PID 166710 reloaded ProgressBar, recovered from invalid markup, and removed an owned root attribute",
+        "Catalog reload tracking: /Pages/CheckBoxPage.xaml",
+        "Catalog reload: ReloadOutcome { revision: 1, documents: [\"ferres://controlcatalog/Pages/CheckBoxPage.xaml\"], status: Applied, diagnostic: None, preparation: 31.360815ms, application: 18.207037ms }",
+        "Catalog reload: ReloadOutcome { revision: 2, documents: [\"ferres://controlcatalog/Pages/CheckBoxPage.xaml\"], status: Failed, diagnostic: Some(\"the document does not have a root node\"), preparation: 266.917\u00b5s, application: 0ns }",
+        "Catalog reload: ReloadOutcome { revision: 3, documents: [\"ferres://controlcatalog/Pages/CheckBoxPage.xaml\"], status: Applied, diagnostic: None, preparation: 13.906987ms, application: 6.197637ms }",
+        "Catalog reload: ReloadOutcome { revision: 4, documents: [\"ferres://controlcatalog/Pages/CheckBoxPage.xaml\"], status: Applied, diagnostic: None, preparation: 13.740903ms, application: 5.751553ms }",
+        "PASS: ControlCatalog PID 166727 reloaded CheckBox, recovered from invalid markup, and removed an owned root attribute",
+        "Catalog reload tracking: /Pages/CanvasPage.xaml",
+        "Catalog reload: ReloadOutcome { revision: 1, documents: [\"ferres://controlcatalog/Pages/CanvasPage.xaml\"], status: Applied, diagnostic: None, preparation: 37.514827ms, application: 1.635253ms }",
+        "Catalog reload: ReloadOutcome { revision: 2, documents: [\"ferres://controlcatalog/Pages/CanvasPage.xaml\"], status: Failed, diagnostic: Some(\"the document does not have a root node\"), preparation: 207.583\u00b5s, application: 0ns }",
+        "Catalog reload: ReloadOutcome { revision: 3, documents: [\"ferres://controlcatalog/Pages/CanvasPage.xaml\"], status: Applied, diagnostic: None, preparation: 31.496564ms, application: 1.751462ms }",
+        "Catalog reload: ReloadOutcome { revision: 4, documents: [\"ferres://controlcatalog/Pages/CanvasPage.xaml\"], status: Applied, diagnostic: None, preparation: 24.546925ms, application: 3.066923ms }",
+        "PASS: ControlCatalog PID 166864 reloaded Canvas, recovered from invalid markup, and removed an owned root attribute",
+        "Catalog reload tracking: /Pages/RadioButtonPage.xaml",
+        "Catalog reload: ReloadOutcome { revision: 1, documents: [\"ferres://controlcatalog/Pages/RadioButtonPage.xaml\"], status: Applied, diagnostic: None, preparation: 53.823359ms, application: 13.968153ms }",
+        "Catalog reload: ReloadOutcome { revision: 2, documents: [\"ferres://controlcatalog/Pages/RadioButtonPage.xaml\"], status: Failed, diagnostic: Some(\"the document does not have a root node\"), preparation: 226.75\u00b5s, application: 0ns }",
+        "Catalog reload: ReloadOutcome { revision: 3, documents: [\"ferres://controlcatalog/Pages/RadioButtonPage.xaml\"], status: Applied, diagnostic: None, preparation: 22.278712ms, application: 14.413529ms }",
+        "Catalog reload: ReloadOutcome { revision: 4, documents: [\"ferres://controlcatalog/Pages/RadioButtonPage.xaml\"], status: Applied, diagnostic: None, preparation: 23.758715ms, application: 16.485867ms }",
+        "PASS: ControlCatalog PID 167301 reloaded RadioButton, recovered from invalid markup, and removed an owned root attribute",
+        "Catalog reload tracking: /Pages/TextBlockPage.xaml",
+        "Catalog reload: ReloadOutcome { revision: 1, documents: [\"ferres://controlcatalog/Pages/TextBlockPage.xaml\"], status: Applied, diagnostic: None, preparation: 64.746172ms, application: 6.430429ms }",
+        "Catalog reload: ReloadOutcome { revision: 2, documents: [\"ferres://controlcatalog/Pages/TextBlockPage.xaml\"], status: Failed, diagnostic: Some(\"the document does not have a root node\"), preparation: 226.667\u00b5s, application: 0ns }",
+        "Catalog reload: ReloadOutcome { revision: 3, documents: [\"ferres://controlcatalog/Pages/TextBlockPage.xaml\"], status: Applied, diagnostic: None, preparation: 52.757232ms, application: 5.622678ms }",
+        "Catalog reload: ReloadOutcome { revision: 4, documents: [\"ferres://controlcatalog/Pages/TextBlockPage.xaml\"], status: Applied, diagnostic: None, preparation: 45.727926ms, application: 9.09306ms }",
+        "PASS: ControlCatalog PID 167470 reloaded TextBlock, recovered from invalid markup, and removed an owned root attribute",
+        "Catalog reload tracking: /Pages/ViewboxPage.xaml",
+        "Catalog reload: ReloadOutcome { revision: 1, documents: [\"ferres://controlcatalog/Pages/ViewboxPage.xaml\"], status: Applied, diagnostic: None, preparation: 26.819679ms, application: 7.345139ms }",
+        "Catalog reload: ReloadOutcome { revision: 2, documents: [\"ferres://controlcatalog/Pages/ViewboxPage.xaml\"], status: Failed, diagnostic: Some(\"the document does not have a root node\"), preparation: 325.167\u00b5s, application: 0ns }",
+        "Catalog reload: ReloadOutcome { revision: 3, documents: [\"ferres://controlcatalog/Pages/ViewboxPage.xaml\"], status: Applied, diagnostic: None, preparation: 33.249359ms, application: 8.168266ms }",
+        "Catalog reload: ReloadOutcome { revision: 4, documents: [\"ferres://controlcatalog/Pages/ViewboxPage.xaml\"], status: Applied, diagnostic: None, preparation: 25.832094ms, application: 7.723598ms }",
+        "PASS: ControlCatalog PID 167831 reloaded Viewbox, recovered from invalid markup, and removed an owned root attribute",
+        "Catalog reload tracking: /Pages/ExpanderPage.xaml",
+        "Catalog reload: ReloadOutcome { revision: 1, documents: [\"ferres://controlcatalog/Pages/ExpanderPage.xaml\"], status: Applied, diagnostic: None, preparation: 25.229551ms, application: 11.476981ms }",
+        "Catalog reload: ReloadOutcome { revision: 2, documents: [\"ferres://controlcatalog/Pages/ExpanderPage.xaml\"], status: Failed, diagnostic: Some(\"the document does not have a root node\"), preparation: 247.751\u00b5s, application: 0ns }",
+        "Catalog reload: ReloadOutcome { revision: 3, documents: [\"ferres://controlcatalog/Pages/ExpanderPage.xaml\"], status: Applied, diagnostic: None, preparation: 28.588015ms, application: 11.406148ms }",
+        "Catalog reload: ReloadOutcome { revision: 4, documents: [\"ferres://controlcatalog/Pages/ExpanderPage.xaml\"], status: Applied, diagnostic: None, preparation: 24.912842ms, application: 11.254398ms }",
+        "PASS: ControlCatalog PID 168130 reloaded Expander, recovered from invalid markup, and removed an owned root attribute",
+        "Catalog reload tracking: /Pages/ListBoxPage.xaml",
+        "Catalog reload: ReloadOutcome { revision: 1, documents: [\"ferres://controlcatalog/Pages/ListBoxPage.xaml\"], status: Applied, diagnostic: None, preparation: 33.291983ms, application: 14.527779ms }",
+        "Catalog reload: ReloadOutcome { revision: 2, documents: [\"ferres://controlcatalog/Pages/ListBoxPage.xaml\"], status: Failed, diagnostic: Some(\"the document does not have a root node\"), preparation: 183.084\u00b5s, application: 0ns }",
+        "Catalog reload: ReloadOutcome { revision: 3, documents: [\"ferres://controlcatalog/Pages/ListBoxPage.xaml\"], status: Applied, diagnostic: None, preparation: 21.077ms, application: 15.347197ms }",
+        "Catalog reload: ReloadOutcome { revision: 4, documents: [\"ferres://controlcatalog/Pages/ListBoxPage.xaml\"], status: Applied, diagnostic: None, preparation: 30.123268ms, application: 19.952998ms }",
+        "PASS: ControlCatalog PID 168332 reloaded ListBox, recovered from invalid markup, and removed an owned root attribute"
+      ],
+      "measurements": [
+        {
+          "application_us": 3764,
+          "batch": 813,
+          "commit_to_render_us": 46121,
+          "documents": [
+            "ferres://controlcatalog/Pages/BorderPage.xaml"
+          ],
+          "preparation_us": 31816,
+          "rendered_unix_ns": "1792500302912249230",
+          "revision": 1,
+          "page": "BorderPage",
+          "save_to_render_us": 228016.228,
+          "atomic_save": false
+        },
+        {
+          "application_us": 3274,
+          "batch": 821,
+          "commit_to_render_us": 16728,
+          "documents": [
+            "ferres://controlcatalog/Pages/BorderPage.xaml"
+          ],
+          "preparation_us": 33820,
+          "rendered_unix_ns": "1792500303360209545",
+          "revision": 3,
+          "page": "BorderPage",
+          "save_to_render_us": 218831.876,
+          "atomic_save": true
+        },
+        {
+          "application_us": 4773,
+          "batch": 829,
+          "commit_to_render_us": 24637,
+          "documents": [
+            "ferres://controlcatalog/Pages/BorderPage.xaml"
+          ],
+          "preparation_us": 23828,
+          "rendered_unix_ns": "1792500303585342558",
+          "revision": 4,
+          "page": "BorderPage",
+          "save_to_render_us": 211860.027,
+          "atomic_save": false
+        },
+        {
+          "application_us": 15079,
+          "batch": 807,
+          "commit_to_render_us": 86250,
+          "documents": [
+            "ferres://controlcatalog/Pages/SliderPage.xaml"
+          ],
+          "preparation_us": 43138,
+          "rendered_unix_ns": "1792500320120811627",
+          "revision": 1,
+          "page": "SliderPage",
+          "save_to_render_us": 329873.479,
+          "atomic_save": false
+        },
+        {
+          "application_us": 13495,
+          "batch": 815,
+          "commit_to_render_us": 66721,
+          "documents": [
+            "ferres://controlcatalog/Pages/SliderPage.xaml"
+          ],
+          "preparation_us": 24637,
+          "rendered_unix_ns": "1792500320571504442",
+          "revision": 3,
+          "page": "SliderPage",
+          "save_to_render_us": 280876.919,
+          "atomic_save": true
+        },
+        {
+          "application_us": 17929,
+          "batch": 816,
+          "commit_to_render_us": 68827,
+          "documents": [
+            "ferres://controlcatalog/Pages/SliderPage.xaml"
+          ],
+          "preparation_us": 26882,
+          "rendered_unix_ns": "1792500320868754478",
+          "revision": 4,
+          "page": "SliderPage",
+          "save_to_render_us": 293020.653,
+          "atomic_save": false
+        },
+        {
+          "application_us": 21894,
+          "batch": 773,
+          "commit_to_render_us": 133745,
+          "documents": [
+            "ferres://controlcatalog/Pages/ProgressBarPage.xaml"
+          ],
+          "preparation_us": 49925,
+          "rendered_unix_ns": "1792500337978565440",
+          "revision": 1,
+          "page": "ProgressBarPage",
+          "save_to_render_us": 461420.914,
+          "atomic_save": false
+        },
+        {
+          "application_us": 23061,
+          "batch": 780,
+          "commit_to_render_us": 184558,
+          "documents": [
+            "ferres://controlcatalog/Pages/ProgressBarPage.xaml"
+          ],
+          "preparation_us": 44919,
+          "rendered_unix_ns": "1792500338618547057",
+          "revision": 3,
+          "page": "ProgressBarPage",
+          "save_to_render_us": 428410.887,
+          "atomic_save": true
+        },
+        {
+          "application_us": 29325,
+          "batch": 781,
+          "commit_to_render_us": 152597,
+          "documents": [
+            "ferres://controlcatalog/Pages/ProgressBarPage.xaml"
+          ],
+          "preparation_us": 66052,
+          "rendered_unix_ns": "1792500339046509610",
+          "revision": 4,
+          "page": "ProgressBarPage",
+          "save_to_render_us": 414540.65,
+          "atomic_save": false
+        },
+        {
+          "application_us": 18207,
+          "batch": 822,
+          "commit_to_render_us": 82761,
+          "documents": [
+            "ferres://controlcatalog/Pages/CheckBoxPage.xaml"
+          ],
+          "preparation_us": 31360,
+          "rendered_unix_ns": "1792500355956248186",
+          "revision": 1,
+          "page": "CheckBoxPage",
+          "save_to_render_us": 376673.567,
+          "atomic_save": false
+        },
+        {
+          "application_us": 6197,
+          "batch": 825,
+          "commit_to_render_us": 30027,
+          "documents": [
+            "ferres://controlcatalog/Pages/CheckBoxPage.xaml"
+          ],
+          "preparation_us": 13906,
+          "rendered_unix_ns": "1792500356419141097",
+          "revision": 3,
+          "page": "CheckBoxPage",
+          "save_to_render_us": 218947.451,
+          "atomic_save": true
+        },
+        {
+          "application_us": 5751,
+          "batch": 826,
+          "commit_to_render_us": 44388,
+          "documents": [
+            "ferres://controlcatalog/Pages/CheckBoxPage.xaml"
+          ],
+          "preparation_us": 13740,
+          "rendered_unix_ns": "1792500356701738637",
+          "revision": 4,
+          "page": "CheckBoxPage",
+          "save_to_render_us": 271627.851,
+          "atomic_save": false
+        },
+        {
+          "application_us": 1635,
+          "batch": 851,
+          "commit_to_render_us": 10975,
+          "documents": [
+            "ferres://controlcatalog/Pages/CanvasPage.xaml"
+          ],
+          "preparation_us": 37514,
+          "rendered_unix_ns": "1792500373425804959",
+          "revision": 1,
+          "page": "CanvasPage",
+          "save_to_render_us": 258959.322,
+          "atomic_save": false
+        },
+        {
+          "application_us": 1751,
+          "batch": 857,
+          "commit_to_render_us": 7047,
+          "documents": [
+            "ferres://controlcatalog/Pages/CanvasPage.xaml"
+          ],
+          "preparation_us": 31496,
+          "rendered_unix_ns": "1792500373870695911",
+          "revision": 3,
+          "page": "CanvasPage",
+          "save_to_render_us": 216105.859,
+          "atomic_save": true
+        },
+        {
+          "application_us": 3066,
+          "batch": 858,
+          "commit_to_render_us": 10786,
+          "documents": [
+            "ferres://controlcatalog/Pages/CanvasPage.xaml"
+          ],
+          "preparation_us": 24546,
+          "rendered_unix_ns": "1792500374089195108",
+          "revision": 4,
+          "page": "CanvasPage",
+          "save_to_render_us": 201699.329,
+          "atomic_save": false
+        },
+        {
+          "application_us": 13968,
+          "batch": 831,
+          "commit_to_render_us": 101681,
+          "documents": [
+            "ferres://controlcatalog/Pages/RadioButtonPage.xaml"
+          ],
+          "preparation_us": 53823,
+          "rendered_unix_ns": "1792500390835346696",
+          "revision": 1,
+          "page": "RadioButtonPage",
+          "save_to_render_us": 399163.229,
+          "atomic_save": false
+        },
+        {
+          "application_us": 14413,
+          "batch": 839,
+          "commit_to_render_us": 101377,
+          "documents": [
+            "ferres://controlcatalog/Pages/RadioButtonPage.xaml"
+          ],
+          "preparation_us": 22278,
+          "rendered_unix_ns": "1792500391385913775",
+          "revision": 3,
+          "page": "RadioButtonPage",
+          "save_to_render_us": 305913.039,
+          "atomic_save": true
+        },
+        {
+          "application_us": 16485,
+          "batch": 840,
+          "commit_to_render_us": 98035,
+          "documents": [
+            "ferres://controlcatalog/Pages/RadioButtonPage.xaml"
+          ],
+          "preparation_us": 23758,
+          "rendered_unix_ns": "1792500391699303871",
+          "revision": 4,
+          "page": "RadioButtonPage",
+          "save_to_render_us": 285285.372,
+          "atomic_save": false
+        },
+        {
+          "application_us": 6430,
+          "batch": 840,
+          "commit_to_render_us": 30806,
+          "documents": [
+            "ferres://controlcatalog/Pages/TextBlockPage.xaml"
+          ],
+          "preparation_us": 64746,
+          "rendered_unix_ns": "1792500408584090964",
+          "revision": 1,
+          "page": "TextBlockPage",
+          "save_to_render_us": 300354.733,
+          "atomic_save": false
+        },
+        {
+          "application_us": 5622,
+          "batch": 844,
+          "commit_to_render_us": 17989,
+          "documents": [
+            "ferres://controlcatalog/Pages/TextBlockPage.xaml"
+          ],
+          "preparation_us": 52757,
+          "rendered_unix_ns": "1792500409055628919",
+          "revision": 3,
+          "page": "TextBlockPage",
+          "save_to_render_us": 248246.336,
+          "atomic_save": true
+        },
+        {
+          "application_us": 9093,
+          "batch": 845,
+          "commit_to_render_us": 17472,
+          "documents": [
+            "ferres://controlcatalog/Pages/TextBlockPage.xaml"
+          ],
+          "preparation_us": 45727,
+          "rendered_unix_ns": "1792500409298014826",
+          "revision": 4,
+          "page": "TextBlockPage",
+          "save_to_render_us": 230652.509,
+          "atomic_save": false
+        },
+        {
+          "application_us": 7345,
+          "batch": 852,
+          "commit_to_render_us": 44987,
+          "documents": [
+            "ferres://controlcatalog/Pages/ViewboxPage.xaml"
+          ],
+          "preparation_us": 26819,
+          "rendered_unix_ns": "1792500425829180229",
+          "revision": 1,
+          "page": "ViewboxPage",
+          "save_to_render_us": 248390.791,
+          "atomic_save": false
+        },
+        {
+          "application_us": 8168,
+          "batch": 859,
+          "commit_to_render_us": 37711,
+          "documents": [
+            "ferres://controlcatalog/Pages/ViewboxPage.xaml"
+          ],
+          "preparation_us": 33249,
+          "rendered_unix_ns": "1792500426360171006",
+          "revision": 3,
+          "page": "ViewboxPage",
+          "save_to_render_us": 309430.081,
+          "atomic_save": true
+        },
+        {
+          "application_us": 7723,
+          "batch": 860,
+          "commit_to_render_us": 41951,
+          "documents": [
+            "ferres://controlcatalog/Pages/ViewboxPage.xaml"
+          ],
+          "preparation_us": 25832,
+          "rendered_unix_ns": "1792500426585660919",
+          "revision": 4,
+          "page": "ViewboxPage",
+          "save_to_render_us": 196944.439,
+          "atomic_save": false
+        },
+        {
+          "application_us": 11476,
+          "batch": 836,
+          "commit_to_render_us": 60818,
+          "documents": [
+            "ferres://controlcatalog/Pages/ExpanderPage.xaml"
+          ],
+          "preparation_us": 25229,
+          "rendered_unix_ns": "1792500443076453026",
+          "revision": 1,
+          "page": "ExpanderPage",
+          "save_to_render_us": 276594.137,
+          "atomic_save": false
+        },
+        {
+          "application_us": 11406,
+          "batch": 841,
+          "commit_to_render_us": 52960,
+          "documents": [
+            "ferres://controlcatalog/Pages/ExpanderPage.xaml"
+          ],
+          "preparation_us": 28588,
+          "rendered_unix_ns": "1792500443616342399",
+          "revision": 3,
+          "page": "ExpanderPage",
+          "save_to_render_us": 317320.51,
+          "atomic_save": true
+        },
+        {
+          "application_us": 11254,
+          "batch": 843,
+          "commit_to_render_us": 50455,
+          "documents": [
+            "ferres://controlcatalog/Pages/ExpanderPage.xaml"
+          ],
+          "preparation_us": 24912,
+          "rendered_unix_ns": "1792500443958291167",
+          "revision": 4,
+          "page": "ExpanderPage",
+          "save_to_render_us": 320616.017,
+          "atomic_save": false
+        },
+        {
+          "application_us": 14527,
+          "batch": 850,
+          "commit_to_render_us": 118183,
+          "documents": [
+            "ferres://controlcatalog/Pages/ListBoxPage.xaml"
+          ],
+          "preparation_us": 33291,
+          "rendered_unix_ns": "1792500460836608171",
+          "revision": 1,
+          "page": "ListBoxPage",
+          "save_to_render_us": 379945.716,
+          "atomic_save": false
+        },
+        {
+          "application_us": 15347,
+          "batch": 857,
+          "commit_to_render_us": 94744,
+          "documents": [
+            "ferres://controlcatalog/Pages/ListBoxPage.xaml"
+          ],
+          "preparation_us": 21077,
+          "rendered_unix_ns": "1792500461354358910",
+          "revision": 3,
+          "page": "ListBoxPage",
+          "save_to_render_us": 303443.771,
+          "atomic_save": true
+        },
+        {
+          "application_us": 19952,
+          "batch": 864,
+          "commit_to_render_us": 88763,
+          "documents": [
+            "ferres://controlcatalog/Pages/ListBoxPage.xaml"
+          ],
+          "preparation_us": 30123,
+          "rendered_unix_ns": "1792500461730607243",
+          "revision": 4,
+          "page": "ListBoxPage",
+          "save_to_render_us": 368890.901,
+          "atomic_save": false
+        }
+      ]
+    }
+  ],
+  "python_harness_tests": {
+    "macos": {
+      "run": 27,
+      "passed": 25,
+      "skipped": 2
+    },
+    "linux": {
+      "run": 27,
+      "passed": 25,
+      "skipped": 2
+    },
+    "skips": "Windows Job Object assignment and kill-on-close; these remain required on Windows."
+  },
+  "limits": [
+    "Native functional acceptance of the named scripts at the tested source revision; not completion of the feature or the full release matrix.",
+    "macOS 27.0.1 arm64; Linux Ubuntu 24.04 arm64 in the isolated Colima container, with Xvfb and a host-mounted workspace.",
+    "Supervisor timings are one combined Rust/XAML edit per platform. Watch polling/debounce is excluded; compiler time is included; compositor completion is not physical display scan-out.",
+    "Validation jobs may overlap; these are functional observations, not isolated benchmarks or percentile estimates.",
+    "The standalone probe deliberately panics during one candidate transaction and verifies rollback; its successful exit is required.",
+    "Windows execution, the current Linux standalone probe, and the remaining integration and release gates are not established by this artifact."
+  ]
+}
