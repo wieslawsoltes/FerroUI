@@ -130,17 +130,14 @@ ferro_markup_type!(interface dyn IPopupHost as "IPopupHost" {
 
 // System.Collections
 
-// The collection handle of the items controls is the enumerable of the managed original
-// (`IEnumerable? ItemsSource`): a collection created in markup is assignable to a property
-// that holds the handle.
-// Deviation (DEVIATIONS.md, Run-time type system of markup): upstream assigns any enumerable;
-// here a collection is cast to the handle by the cast registered for its type.
-//
-// The handle is an indexable list (`IItemsList`): a binding path indexes it (`Items[0]`) and
-// reads its count, as upstream binds the indexer and `Count` of the list (`IList`) behind
-// an items source.
-// Deviation (DEVIATIONS.md, Run-time type system of markup): `IEnumerable` declares neither.
-ferro_markup_type!(interface crate::ItemsSource as "IEnumerable" {
+// The collection handle of the items controls is the list behind the enumerable of the
+// managed original (`IEnumerable? ItemsSource`, whose values are lists: `IList`): a list created
+// in markup is assignable to a property that holds the handle, and a binding path indexes it
+// (`Items[0]`, the indexer of `IList`) and reads its count (`Count`, a reflection binding).
+// Deviation (DEVIATIONS.md, Run-time type system of markup): upstream types the property as
+// `IEnumerable` and assigns any enumerable; here the handle is published as `IList`, and a
+// collection is cast to it by the cast registered for its type.
+ferro_markup_type!(interface crate::ItemsSource as "IList" {
     namespace: "System.Collections",
     handles: [crate::ItemsSource, Option<crate::ItemsSource>],
     this: crate::ItemsSource,

@@ -773,14 +773,14 @@ fn the_collection_handles_of_items_controls_are_known_to_the_value_conversions()
 }
 
 #[test]
-fn the_collection_handle_of_items_controls_is_the_enumerable_of_the_runtime_library() {
+fn the_collection_handle_of_items_controls_is_the_list_of_the_runtime_library() {
     use ferroui_base::collections::FerroList;
 
     crate::register_types();
-    let enumerable = MarkupType::find("System.Collections", "IEnumerable").expect("the enumerable");
-    assert!(enumerable.kind == MarkupTypeKind::Interface);
-    assert!(std::ptr::eq(enumerable, <crate::ItemsSource as MarkupTyped>::MARKUP));
-    assert!(std::ptr::eq(MarkupType::find_by_handle(std::any::TypeId::of::<crate::ItemsSource>()).unwrap(), enumerable));
+    let list = MarkupType::find("System.Collections", "IList").expect("the list");
+    assert!(list.kind == MarkupTypeKind::Interface);
+    assert!(std::ptr::eq(list, <crate::ItemsSource as MarkupTyped>::MARKUP));
+    assert!(std::ptr::eq(MarkupType::find_by_handle(std::any::TypeId::of::<crate::ItemsSource>()).unwrap(), list));
 
     // A list of untyped items (what the run-time loader creates for a `List<T>` or an
     // `ArrayList` of markup) is assignable to an items source, which shares the list.

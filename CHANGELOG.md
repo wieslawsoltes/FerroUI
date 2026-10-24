@@ -45,7 +45,7 @@ All notable changes to FerroUI are recorded in this file. The format follows [Ke
 ### Fixed
 
 - Gaps the port of the Behaviors sample gallery found (#298):
-  - markup indexes an items source: the handle `ItemsSource` (`IEnumerable` to markup) declares the indexer and `Count`, so `{Binding Items[0]}` and `{Binding Items.Count}` compile and bind (`ferroui-controls`);
+  - markup indexes an items source: the handle `ItemsSource` is published to markup as `System.Collections.IList` (was `IEnumerable`) with the indexer, so `{Binding Items[0]}` compiles and binds, and a reflection binding reads `Items.Count` (`ferroui-controls`, `ferroui-markup-xaml-loader`);
   - generated code adds a value of a reference type (a view model) to a typed list created in markup (`<generic:List x:TypeArguments="vm:ItemViewModel">`): the item is cast to the handle of the element type at run time (`rt::cast_untyped`); before, the target of the cast was left to inference, which made it `()`, and the document failed with "Unable to cast the value to ()" (`ferroui-markup-xaml-loader`, `ferroui-markup-xaml`);
   - a binding delivers the selected items of a selecting control (`SelectedItemsList`) to an items source (`ItemsSource`, `Option<ItemsSource>`), which shares the list (`ferroui-controls`);
   - select all of a list box without items source no longer hangs: a selection model without an items view selects nothing (`ferroui-controls`, DEVIATIONS.md);

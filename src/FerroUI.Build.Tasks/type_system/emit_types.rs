@@ -985,8 +985,17 @@ impl EmitTypes for ModelEmitTypes {
         if let Some(found) = self.markup_of(type_) {
             return Some(found);
         }
-        let handle = self.handle_of(type_)?;
-        self.markup_by_handle(handle.key)
+        if let Some(found) = self.handle_of(type_).and_then(|handle| self.markup_by_handle(handle.key)) {
+            return Some(found);
+        }
+        // A type of the table of runtime library types whose metadata a crate declares
+        // (`System.Collections.IList`, the items source handle): the type is that metadata, as
+        // the run-time type system answers.
+        let full_name = type_.full_name();
+        if !full_name.starts_with("System") {
+            return None;
+        }
+        self.markups.values().find(|markup| markup.full_name == full_name).map(|markup| &**markup as &dyn EmitMarkup)
     }
 
     fn handle_of(&self, type_: &dyn IXamlType) -> Option<Handle<'_>> {
