@@ -332,6 +332,16 @@ pub enum FrameworkType {
     SetterBase,
     /// `FerroUI.Styling.StyleBase`.
     StyleBase,
+    /// `FerroUI.Controls.ResourceDictionary`.
+    ResourceDictionary,
+    /// `FerroUI.Controls.IDeferredContent`.
+    DeferredContent,
+    /// `FerroUI.Markup.Xaml.MarkupExtensions.StaticResourceExtension`.
+    StaticResourceExtension,
+    /// `FerroUI.Markup.Xaml.MarkupExtensions.DynamicResourceExtension`.
+    DynamicResourceExtension,
+    /// `FerroUI.Data.TemplateBinding`.
+    TemplateBinding,
 }
 
 /// The part of a type system the emitter of Rust source reads; see the module.

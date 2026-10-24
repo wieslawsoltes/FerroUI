@@ -146,7 +146,7 @@ impl SelectorNode for TypeNameAndClassSelector {
         let has_name = {
             let name = self.name.borrow();
             if let Some(name) = &*name {
-                if control.name().as_deref() != Some(name.as_str()) {
+                if !control.has_name(name) {
                     return SelectorMatch::NEVER_THIS_INSTANCE;
                 }
             }

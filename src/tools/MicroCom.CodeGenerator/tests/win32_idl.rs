@@ -50,9 +50,8 @@ fn winrt_idl_generates() {
     assert!(rs.contains("pub struct ICompositor {"));
     // A property: the method that reads it keeps its name, the one that sets it is `Set...`.
     assert!(rs.contains("pub fn set_opacity(&self"));
-    // UISettings uses a WinRT boolean, whose ABI is one byte rather than a
-    // Win32 BOOL. The repeater motion preference must query the original
-    // IUISettings interface, not a later UISettings interface version.
+    // `UISettings.AnimationsEnabled` is a member of the first interface, `IUISettings`, and a
+    // WinRT boolean: one byte, not a Win32 `BOOL`.
     assert!(rs.contains("pub fn animations_enabled(&self) -> Result<u8, HResult>"));
     assert!(rs.contains("const IID: Guid = Guid::from_u128(0x853616001c634627bcb13a89e0bc9c55);"));
 }

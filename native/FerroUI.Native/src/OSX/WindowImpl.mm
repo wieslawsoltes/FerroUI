@@ -1,7 +1,3 @@
-//
-// Created by Dan Walmsley on 04/05/2022.
-//
-
 #import <AppKit/AppKit.h>
 #include "AutoFitContentView.h"
 #include "FrnView.h"
@@ -289,6 +285,7 @@ HRESULT WindowImpl::SetTitle(char *utf8title) {
     @autoreleasepool {
         _lastTitle = [NSString stringWithUTF8String:(const char *) utf8title];
         [Window setTitle:_lastTitle];
+        [GetWindowProtocol() layoutStandardButtons];
 
         return S_OK;
     }

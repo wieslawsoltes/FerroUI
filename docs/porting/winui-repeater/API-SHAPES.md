@@ -1,7 +1,7 @@
 # Native API shapes and signature decisions
 
 The complete declaration list is in [API.md](API.md). Its pinned source is
-[ItemsRepeater.idl](https://github.com/microsoft/microsoft-ui-xaml/blob/1af995b98a02d86b1951c4babe35caa269a6d569/controls/dev/Repeater/ItemsRepeater.idl)
+[ItemsRepeater.idl](https://github.com/microsoft/microsoft-ui-xaml/blob/7e4b0c2096be402f51cc8f7d203ebf67cff183d0/controls/dev/Repeater/ItemsRepeater.idl)
 and the four private/automation/test-hook IDL files recorded in that map.
 This page explains the signature changes required to use the native FerroUI
 type system. An identifier match in the generated map remains a navigation
@@ -25,11 +25,11 @@ evidence described in [VALIDATION.md](VALIDATION.md).
 
 These mappings are implemented in the native
 [source contracts](../../../src/FerroUI.Controls/items_source.rs),
-[layout contexts](../../../src/FerroUI.Controls/repeater/layouts/layout_context.rs),
-[selection service](../../../src/FerroUI.Controls/repeater/selection/selection_model.rs),
-[selected views](../../../src/FerroUI.Controls/repeater/selection/selected_items.rs),
-[metadata request arguments](../../../src/FerroUI.Controls/repeater/layouts/lined_flow_layout_items_info_requested_event_args.rs)
-and [transition provider](../../../src/FerroUI.Controls/repeater/item_collection_transition_provider.rs).
+[layout contexts](../../../src/FerroUI.Controls.Repeater/layouts/layout_context.rs),
+[selection service](../../../src/FerroUI.Controls.Repeater/selection/selection_model.rs),
+[selected views](../../../src/FerroUI.Controls.Repeater/selection/selected_items.rs),
+[metadata request arguments](../../../src/FerroUI.Controls.Repeater/layouts/lined_flow_layout_items_info_requested_event_args.rs)
+and [transition provider](../../../src/FerroUI.Controls.Repeater/item_collection_transition_provider.rs).
 
 `ItemsSourceView::count()` uses the native `IItemsList::count` contract to read
 the current size. It does not expose WinRT's `GetSizeCore` override or maintain
@@ -40,8 +40,8 @@ explicitly recorded in [WR-22](DEVIATIONS.md); it is not treated as an equivalen
 assertion in the source factory scenario.
 
 `SelectedItems<T>` follows the pinned
-[`SelectedItems.h`](https://github.com/microsoft/microsoft-ui-xaml/blob/1af995b98a02d86b1951c4babe35caa269a6d569/controls/dev/Repeater/SelectedItems.h)
-and [`SelectionModel.cpp`](https://github.com/microsoft/microsoft-ui-xaml/blob/1af995b98a02d86b1951c4babe35caa269a6d569/controls/dev/Repeater/SelectionModel.cpp):
+[`SelectedItems.h`](https://github.com/microsoft/microsoft-ui-xaml/blob/7e4b0c2096be402f51cc8f7d203ebf67cff183d0/controls/dev/Repeater/SelectedItems.h)
+and [`SelectionModel.cpp`](https://github.com/microsoft/microsoft-ui-xaml/blob/7e4b0c2096be402f51cc8f7d203ebf67cff183d0/controls/dev/Repeater/SelectionModel.cpp):
 the count is captured when the view is constructed, while indexed access reads
 the current selected ranges of its referenced nodes. Access rejects a discarded
 node with `SelectionError::SelectionChanged`. A still-live node can expose a
@@ -83,9 +83,9 @@ values rather than requiring a WinRT vector.
 
 Source method names and overload arities remain in the native markup metadata
 where reflective invocation needs them. Rust callers use the explicit names.
-See [pool APIs](../../../src/FerroUI.Controls/repeater/recycle_pool.rs),
-[selection APIs](../../../src/FerroUI.Controls/repeater/selection/selection_model.rs)
-and [selection markup](../../../src/FerroUI.Controls/repeater/selection/markup.rs).
+See [pool APIs](../../../src/FerroUI.Controls.Repeater/recycle_pool.rs),
+[selection APIs](../../../src/FerroUI.Controls.Repeater/selection/selection_model.rs)
+and [selection markup](../../../src/FerroUI.Controls.Repeater/selection/markup.rs).
 
 ## Errors, callbacks and extension points
 
@@ -101,7 +101,7 @@ Invalid layout reentrancy and an unimplemented required base virtual remain
 programmer errors. Native base classes reject those calls; a panic in that path
 represents the source precondition/abstract-core failure, not a missing normal
 implementation. Such behavior must stay paired with the deriving-override and
-invalid-call tests in [the layout contract suite](../../../src/FerroUI.Controls/repeater/layout_contract_tests.rs).
+invalid-call tests in [the layout contract suite](../../../src/FerroUI.Controls.Repeater/layout_contract_tests.rs).
 
 `ferro_class!` traits preserve overridable layout/factory/provider operations.
 `FlowLayout::get_extent` groups each realized boundary's element, source index
@@ -120,7 +120,7 @@ markup delegate contract. Reentrant event delivery takes a handler snapshot.
 
 Repeater registers candidates with the nearest native `IScrollAnchorProvider`
 ancestor, following pinned
-[`ViewportManager::EnsureScroller`](https://github.com/microsoft/microsoft-ui-xaml/blob/1af995b98a02d86b1951c4babe35caa269a6d569/controls/dev/Repeater/ViewportManager.cpp#L943).
+[`ViewportManager::EnsureScroller`](https://github.com/microsoft/microsoft-ui-xaml/blob/7e4b0c2096be402f51cc8f7d203ebf67cff183d0/controls/dev/Repeater/ViewportManager.cpp#L943).
 A native `ScrollContentPresenter` therefore owns the candidates even when an
 `ItemsRepeaterScrollHost` wraps its `ScrollViewer`. The compatibility host still
 supplies aligned and animated scroll requests. Native viewer anchoring remains
@@ -129,26 +129,26 @@ observable through `ScrollViewer::current_anchor()`.
 FerroUI's default bring rectangle is the target's full arranged `Bounds`.
 [`Control::try_execute_bring_into_view`](../../../src/FerroUI.Controls/control_extensions.rs)
 waits until measure and arrange are valid before computing that rectangle. The
-[compatibility host](../../../src/FerroUI.Controls/repeater/items_repeater_scroll_host.rs)
+[compatibility host](../../../src/FerroUI.Controls.Repeater/items_repeater_scroll_host.rs)
 also waits for valid target and ancestor layout before capturing its transformed
 destination. This prevents a recycled control's parked bounds from determining
 the request and keeps a repeated aligned request stable.
 
 The pinned WinUI
-[`UIElement::StartBringIntoViewWithOptionsImpl`](https://github.com/microsoft/microsoft-ui-xaml/blob/1af995b98a02d86b1951c4babe35caa269a6d569/dxaml/xcp/dxaml/lib/UIElement_Partial.cpp#L1694)
+[`UIElement::StartBringIntoViewWithOptionsImpl`](https://github.com/microsoft/microsoft-ui-xaml/blob/7e4b0c2096be402f51cc8f7d203ebf67cff183d0/dxaml/xcp/dxaml/lib/UIElement_Partial.cpp#L1694)
 instead reads `RenderSize` immediately when `TargetRect` is omitted.
-[`ItemsRepeater::GetOrCreateElementImpl`](https://github.com/microsoft/microsoft-ui-xaml/blob/1af995b98a02d86b1951c4babe35caa269a6d569/controls/dev/Repeater/ItemsRepeater.cpp#L312)
+[`ItemsRepeater::GetOrCreateElementImpl`](https://github.com/microsoft/microsoft-ui-xaml/blob/7e4b0c2096be402f51cc8f7d203ebf67cff183d0/controls/dev/Repeater/ItemsRepeater.cpp#L312)
 measures a new target without arranging it. Its first disconnected request can
 therefore capture a zero-height rectangle. This is a source transport
 difference, recorded under [WR-27](DEVIATIONS.md), rather than a change to the
 flow algorithm's realization boundaries.
 
-The [aligned-bring scenario](../../../src/FerroUI.Controls/repeater/viewport_tests.rs)
+The [aligned-bring scenario](../../../src/FerroUI.Controls.Repeater/viewport_tests.rs)
 retains the source's 400 × 600 viewport, wrapped bound text, 94-DIP border and
 5-DIP margin. A row has a 104-DIP desired height; the arranged target is
 390 × 94 DIPs. Centering item 100's full rectangle gives
 `100 × 104 + 5 − (600 − 94) / 2 = 10152`. The comparison with the pinned
-[source scenario](https://github.com/microsoft/microsoft-ui-xaml/blob/1af995b98a02d86b1951c4babe35caa269a6d569/controls/dev/Repeater/APITests/EffectiveViewportScrollViewerTests.cs#L370)
+[source scenario](https://github.com/microsoft/microsoft-ui-xaml/blob/7e4b0c2096be402f51cc8f7d203ebf67cff183d0/controls/dev/Repeater/APITests/EffectiveViewportScrollViewerTests.cs#L370)
 is explicit in the test:
 
 | Target and vertical alignment | Pinned source realized indices | Native realized indices | Native offset |
@@ -160,7 +160,7 @@ is explicit in the test:
 
 Layout-visible rectangles use the layout's coordinate origin, while native
 scroll offsets and arranged child bounds use physical content coordinates.
-Pinned [`StackLayout::GetExtent`](https://github.com/microsoft/microsoft-ui-xaml/blob/1af995b98a02d86b1951c4babe35caa269a6d569/controls/dev/Repeater/StackLayout.cpp#L191)
+Pinned [`StackLayout::GetExtent`](https://github.com/microsoft/microsoft-ui-xaml/blob/7e4b0c2096be402f51cc8f7d203ebf67cff183d0/controls/dev/Repeater/StackLayout.cpp#L191)
 can retain a negative extent origin after making a distant anchor. For example,
 bringing row 500 of a 20-DIP stack establishes origin −10000. Scrolling back
 to native offset zero can correctly report layout-visible Y = −10000 while
@@ -176,13 +176,13 @@ sentinel. The following distinctions are significant for behavior:
 
 | Contract | Native default / distinction | Source and implementation |
 |---|---|---|
-| Repeater cache lengths | `2.0`; values must be finite and nonnegative | [Repeater properties](../../../src/FerroUI.Controls/repeater/items_repeater.rs) |
-| Stack layout | Vertical orientation, zero spacing, virtualization enabled | [Stack layout](../../../src/FerroUI.Controls/repeater/layouts/stack_layout.rs) |
-| Uniform grid | Horizontal orientation, zero public minimum dimensions/spacings, start justification, no stretch, maximum `-1` | [Uniform grid](../../../src/FerroUI.Controls/repeater/layouts/uniform_grid_layout.rs) |
-| Untouched uniform-grid item dimensions | Internal `NaN` fields cause the first item to supply its natural size until a dimension property change establishes a numeric value; the internal sentinel is separate from the public zero default | [Uniform grid initialization](../../../src/FerroUI.Controls/repeater/layouts/uniform_grid_layout.rs) |
-| Flow layout | Horizontal orientation, zero line/item spacing, start line alignment | [Flow layout](../../../src/FerroUI.Controls/repeater/layouts/flow_layout.rs) |
-| Lined flow | Start justification, no stretch, zero spacing, `LineHeight = NaN`, `ActualLineHeight = 0` before measurement | [Pinned constants](https://github.com/microsoft/microsoft-ui-xaml/blob/1af995b98a02d86b1951c4babe35caa269a6d569/controls/dev/Repeater/LinedFlowLayout.h), [native layout](../../../src/FerroUI.Controls/repeater/layouts/lined_flow_layout.rs) |
-| Metadata global minimum/maximum width | `-1` denotes unspecified; negative assignments normalize to that sentinel | [Request arguments](../../../src/FerroUI.Controls/repeater/layouts/lined_flow_layout_items_info_requested_event_args.rs) |
+| Repeater cache lengths | `2.0`; values must be finite and nonnegative | [Repeater properties](../../../src/FerroUI.Controls.Repeater/items_repeater.rs) |
+| Stack layout | Vertical orientation, zero spacing, virtualization enabled | [Stack layout](../../../src/FerroUI.Controls.Repeater/layouts/stack_layout.rs) |
+| Uniform grid | Horizontal orientation, zero public minimum dimensions/spacings, start justification, no stretch, maximum `-1` | [Uniform grid](../../../src/FerroUI.Controls.Repeater/layouts/uniform_grid_layout.rs) |
+| Untouched uniform-grid item dimensions | Internal `NaN` fields cause the first item to supply its natural size until a dimension property change establishes a numeric value; the internal sentinel is separate from the public zero default | [Uniform grid initialization](../../../src/FerroUI.Controls.Repeater/layouts/uniform_grid_layout.rs) |
+| Flow layout | Horizontal orientation, zero line/item spacing, start line alignment | [Flow layout](../../../src/FerroUI.Controls.Repeater/layouts/flow_layout.rs) |
+| Lined flow | Start justification, no stretch, zero spacing, `LineHeight = NaN`, `ActualLineHeight = 0` before measurement | [Pinned constants](https://github.com/microsoft/microsoft-ui-xaml/blob/7e4b0c2096be402f51cc8f7d203ebf67cff183d0/controls/dev/Repeater/LinedFlowLayout.h), [native layout](../../../src/FerroUI.Controls.Repeater/layouts/lined_flow_layout.rs) |
+| Metadata global minimum/maximum width | `-1` denotes unspecified; negative assignments normalize to that sentinel | [Request arguments](../../../src/FerroUI.Controls.Repeater/layouts/lined_flow_layout_items_info_requested_event_args.rs) |
 
 Default-value assertions, invalid argument tests and actual host behavior remain
 separate review gates. The signature inventory records all declared members;

@@ -10,7 +10,7 @@ The Rust sources in this module are adapted from the WinUI Repeater sources:
 
 - Repository: <https://github.com/microsoft/microsoft-ui-xaml>
 - Path: `controls/dev/Repeater`
-- Revision: `1af995b98a02d86b1951c4babe35caa269a6d569`
+- Revision: `7e4b0c2096be402f51cc8f7d203ebf67cff183d0`
 
 Copyright (c) Microsoft Corporation. All rights reserved.
 

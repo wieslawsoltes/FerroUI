@@ -109,6 +109,9 @@
   </ControlTheme>
 
   <ControlTheme x:Key="DefaultDatePickerStyle" TargetType="DatePicker">
+    <!-- The defaults of a WinUI 3 control, which its style leaves unset and its template binds
+         (FerroUI's defaults are Stretch). Deviation (winui-theme/DEVIATIONS.md, G-27). -->
+    <Setter Property="VerticalContentAlignment" Value="Center" />
     <Setter Property="FontFamily" Value="{DynamicResource ContentControlThemeFontFamily}" />
     <Setter Property="FontSize" Value="{DynamicResource ControlContentThemeFontSize}" />
     <Setter Property="Background" Value="{DynamicResource DatePickerButtonBackground}" />

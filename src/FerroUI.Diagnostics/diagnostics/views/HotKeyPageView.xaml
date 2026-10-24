@@ -1,0 +1,37 @@
+<UserControl xmlns="https://github.com/ferroui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:FerroUI.Diagnostics.ViewModels"
+             Padding="16,12"
+             x:Class="FerroUI.Diagnostics.Views.HotKeyPageView"
+             x:DataType="vm:HotKeyPageViewModel">
+  <Grid RowDefinitions="auto,*" Grid.IsSharedSizeScope="True">
+    <Grid>
+      <Grid.ColumnDefinitions>
+        <ColumnDefinition SharedSizeGroup="A" Width="auto" />
+        <ColumnDefinition Width="32" />
+        <ColumnDefinition SharedSizeGroup="B" Width="*" />
+      </Grid.ColumnDefinitions>
+
+      <!-- Deviation (DEVIATIONS.md, Developer tools): a table in the design of the tools. -->
+      <TextBlock Classes="section-header" Margin="0,0,0,8" Text="Action" />
+      <TextBlock Grid.Column="2" Classes="section-header" Margin="0,0,0,8" Text="Gesture" />
+    </Grid>
+
+    <ItemsControl Grid.Row="1" Grid.ColumnSpan="3" ItemsSource="{Binding HotKeyDescriptions}">
+      <ItemsControl.ItemTemplate>
+        <DataTemplate>
+          <Grid>
+            <Grid.ColumnDefinitions>
+              <ColumnDefinition SharedSizeGroup="A" Width="auto" />
+              <ColumnDefinition Width="32" />
+              <ColumnDefinition SharedSizeGroup="B" Width="*" />
+            </Grid.ColumnDefinitions>
+
+            <TextBlock Margin="0,4" Text="{Binding BriefDescription}" ToolTip.Tip="{Binding DetailedDescription}" />
+            <TextBlock Grid.Column="2" Margin="0,4" Classes="secondary" Text="{Binding Gesture}" />
+          </Grid>
+        </DataTemplate>
+      </ItemsControl.ItemTemplate>
+    </ItemsControl>
+  </Grid>
+</UserControl>

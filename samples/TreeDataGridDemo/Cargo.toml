@@ -23,9 +23,15 @@ path = "lib.rs"
 [[bin]]
 name = "treedatagrid-demo"
 path = "program.rs"
+required-features = ["app"]
 
 [features]
-default = ["online"]
+default = ["app", "online"]
+# The application of the demo: `App.xaml` with the Fluent theme, the main window of tabs and the
+# entry point. Without it the crate is the views and their view models, which the ControlCatalog
+# shows in its pages (it depends on the crate without the default features, so that it links
+# neither this application nor its theme; docs/binary-size.md).
+app = ["dep:ferroui-themes-fluent", "dep:ferroui-desktop"]
 # The article list of the Wikipedia page loads from the network.
 online = ["dep:ureq"]
 
@@ -35,11 +41,11 @@ ferroui-base = { workspace = true, features = ["markup-functions"] }
 ferroui-controls = { workspace = true }
 ferroui-markup = { workspace = true }
 ferroui-markup-xaml = { workspace = true }
-ferroui-themes-fluent = { workspace = true }
+ferroui-themes-fluent = { workspace = true, optional = true }
 ferroui-treedatagrid-core = { workspace = true }
 ferroui-controls-treedatagrid = { workspace = true }
 # The entry point.
-ferroui-desktop = { workspace = true }
+ferroui-desktop = { workspace = true, optional = true }
 # The articles of the Wikipedia page (the reference uses System.Text.Json).
 serde = { version = "1.0.229", features = ["derive"] }
 serde_json = "1.0.151"

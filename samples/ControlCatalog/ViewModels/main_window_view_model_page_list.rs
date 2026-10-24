@@ -68,6 +68,7 @@ pub(super) fn page_sections() -> (Vec<Rc<HomeSection>>, Vec<UnavailablePage>) {
             s.add("/Pages/TextBlockPage.xaml", "TextBlock", Icons::TEXT_INPUT, "Styled read-only text display");
         }),
         section("Collections & Data", Icons::LISTS, &mut unavailable, |s| {
+            // Not from upstream: the page of the port of the Repeater of WinUI.
             s.add("/Pages/ItemsRepeaterPage.xaml", "ItemsRepeater", Icons::GRID, "Virtualized layouts, recycling, and collection changes across 10,000 items");
             s.add("/Pages/CarouselPage.xaml", "Carousel", Icons::SLIDES, "Cycle through a collection of items");
             s.add("/Pages/ListBoxPage.xaml", "ListBox", Icons::LIST, "A selectable, virtualized list of items");
@@ -117,6 +118,13 @@ pub(super) fn page_sections() -> (Vec<Rc<HomeSection>>, Vec<UnavailablePage>) {
             s.add("/Pages/AcrylicPage.xaml", "Acrylic", Icons::BLUR, "Translucent acrylic window materials");
             s.add("/Pages/BitmapCachePage.xaml", "BitmapCache", Icons::LIGHTNING, "Cache visuals as bitmaps for performance");
             s.add("/Pages/CompositionPage.xaml", "Composition", Icons::LAYERS, "Composition-layer animations and effects");
+            // Not from upstream: the page of the WinUI composition API.
+            s.add_page(
+                || crate::pages::winui_composition_page().upcast(),
+                "Composition (WinUI)",
+                Icons::LAYERS,
+                "Connected animations and ElementCompositionPreview",
+            );
             s.add("/Pages/CustomDrawing.xaml", "Custom Drawing", Icons::BRUSH, "Render custom geometry in code");
             s.add("/Pages/ImagePage.xaml", "Image", Icons::IMAGE, "Display bitmaps with different stretch modes");
             s.add("/Pages/OpenGlPage.xaml", "OpenGL", Icons::CUBE_3D, "Embed custom OpenGL rendering");

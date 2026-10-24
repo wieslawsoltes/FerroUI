@@ -1,7 +1,3 @@
-//
-// Created by Dan Walmsley on 06/05/2022.
-//
-
 #pragma once
 
 #import <AppKit/AppKit.h>
@@ -20,6 +16,8 @@ struct IFrnAutomationPeer;
 
 -(double) getExtendedTitleBarHeight;
 -(void) setIsExtended:(bool)value;
+-(void) setStandardButtonsTitleBarHeight:(double)height;
+-(void) layoutStandardButtons;
 -(void) disconnectParent;
 -(bool) isDialog;
 

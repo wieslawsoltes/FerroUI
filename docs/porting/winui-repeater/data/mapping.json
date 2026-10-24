@@ -3,17 +3,17 @@
   "source_overrides": {
     "ItemsRepeater.idl": {
       "targets": [
-        "src/FerroUI.Controls/repeater/markup.rs",
-        "src/FerroUI.Controls/repeater/services_markup.rs",
-        "src/FerroUI.Controls/repeater/layouts/layouts_markup.rs",
-        "src/FerroUI.Controls/repeater/selection/markup.rs"
+        "src/FerroUI.Controls.Repeater/markup.rs",
+        "src/FerroUI.Controls.Repeater/services_markup.rs",
+        "src/FerroUI.Controls.Repeater/layouts/layouts_markup.rs",
+        "src/FerroUI.Controls.Repeater/selection/markup.rs"
       ],
       "status": "contract-mapped",
       "note": "Every defined IDL declaration is separately enumerated in API.md."
     },
     "RepeaterPrivate.idl": {
       "targets": [
-        "src/FerroUI.Controls/repeater/items_repeater_scroll_host.rs",
+        "src/FerroUI.Controls.Repeater/items_repeater_scroll_host.rs",
         "src/FerroUI.Controls/i_scroll_anchor_provider.rs"
       ],
       "status": "framework-replacement",
@@ -21,21 +21,21 @@
     },
     "RepeaterAutomationPeer.idl": {
       "targets": [
-        "src/FerroUI.Controls/repeater/repeater_automation_peer.rs"
+        "src/FerroUI.Controls.Repeater/repeater_automation_peer.rs"
       ],
       "status": "contract-mapped",
       "note": "Native FerroUI automation class and owner constructor."
     },
     "LayoutsTestHooks.idl": {
       "targets": [
-        "src/FerroUI.Controls/repeater/layouts/layouts_test_hooks.rs"
+        "src/FerroUI.Controls.Repeater/layouts/layouts_test_hooks.rs"
       ],
       "status": "contract-mapped",
       "note": "Private diagnostic API remains available as typed Rust hooks."
     },
     "RepeaterTestHooks.idl": {
       "targets": [
-        "src/FerroUI.Controls/repeater/repeater_test_hooks.rs"
+        "src/FerroUI.Controls.Repeater/repeater_test_hooks.rs"
       ],
       "status": "contract-mapped",
       "note": "Private scheduler/repeater diagnostic API remains available as typed Rust hooks."
@@ -44,16 +44,16 @@
   "families": {
     "ItemsRepeater": {
       "targets": [
-        "src/FerroUI.Controls/repeater/items_repeater.rs",
-        "src/FerroUI.Controls/repeater/view_manager.rs",
-        "src/FerroUI.Controls/repeater/viewport_manager.rs"
+        "src/FerroUI.Controls.Repeater/items_repeater.rs",
+        "src/FerroUI.Controls.Repeater/view_manager.rs",
+        "src/FerroUI.Controls.Repeater/viewport_manager.rs"
       ],
       "status": "implementation-mapped",
       "note": "The control delegates realization, lifecycle and viewport work to native FerroUI services."
     },
     "ChildrenInTabFocusOrderIterable": {
       "targets": [
-        "src/FerroUI.Controls/repeater/items_repeater.rs",
+        "src/FerroUI.Controls.Repeater/items_repeater.rs",
         "src/FerroUI.Base/input/i_custom_keyboard_navigation.rs",
         "src/FerroUI.Base/input/focus_helpers.rs"
       ],
@@ -62,42 +62,42 @@
     },
     "ItemsRepeaterElementPreparedEventArgs": {
       "targets": [
-        "src/FerroUI.Controls/repeater/items_repeater_event_args.rs"
+        "src/FerroUI.Controls.Repeater/items_repeater_event_args.rs"
       ],
       "status": "implementation-mapped",
       "note": "Small event-argument types share one Rust module."
     },
     "ItemsRepeaterElementClearingEventArgs": {
       "targets": [
-        "src/FerroUI.Controls/repeater/items_repeater_event_args.rs"
+        "src/FerroUI.Controls.Repeater/items_repeater_event_args.rs"
       ],
       "status": "implementation-mapped",
       "note": "Small event-argument types share one Rust module."
     },
     "ItemsRepeaterElementIndexChangedEventArgs": {
       "targets": [
-        "src/FerroUI.Controls/repeater/items_repeater_event_args.rs"
+        "src/FerroUI.Controls.Repeater/items_repeater_event_args.rs"
       ],
       "status": "implementation-mapped",
       "note": "Small event-argument types share one Rust module."
     },
     "ElementFactoryGetArgsDownlevel": {
       "targets": [
-        "src/FerroUI.Controls/repeater/element_factory.rs"
+        "src/FerroUI.Controls.Repeater/element_factory.rs"
       ],
       "status": "framework-replacement",
       "note": "WinRT downlevel adapters become native owned argument values; no ABI compatibility layer."
     },
     "ElementFactoryRecycleArgsDownlevel": {
       "targets": [
-        "src/FerroUI.Controls/repeater/element_factory.rs"
+        "src/FerroUI.Controls.Repeater/element_factory.rs"
       ],
       "status": "framework-replacement",
       "note": "WinRT downlevel adapters become native owned argument values; no ABI compatibility layer."
     },
     "SelectTemplateEventArgs": {
       "targets": [
-        "src/FerroUI.Controls/repeater/recycling_element_factory.rs"
+        "src/FerroUI.Controls.Repeater/recycling_element_factory.rs"
       ],
       "status": "implementation-mapped",
       "note": "The selection argument and keyed factory share one Rust module."
@@ -135,142 +135,142 @@
     },
     "Layout": {
       "targets": [
-        "src/FerroUI.Controls/repeater/layouts/layout.rs"
+        "src/FerroUI.Controls.Repeater/layouts/layout.rs"
       ],
       "status": "implementation-mapped",
       "note": "Base layout and virtual/nonvirtual dispatch classes share a native FerroUI class module."
     },
     "VirtualizingLayout": {
       "targets": [
-        "src/FerroUI.Controls/repeater/layouts/layout.rs"
+        "src/FerroUI.Controls.Repeater/layouts/layout.rs"
       ],
       "status": "implementation-mapped",
       "note": "Base layout and virtual/nonvirtual dispatch classes share a native FerroUI class module."
     },
     "NonVirtualizingLayout": {
       "targets": [
-        "src/FerroUI.Controls/repeater/layouts/layout.rs"
+        "src/FerroUI.Controls.Repeater/layouts/layout.rs"
       ],
       "status": "implementation-mapped",
       "note": "Base layout and virtual/nonvirtual dispatch classes share a native FerroUI class module."
     },
     "LayoutContext": {
       "targets": [
-        "src/FerroUI.Controls/repeater/layouts/layout_context.rs"
+        "src/FerroUI.Controls.Repeater/layouts/layout_context.rs"
       ],
       "status": "implementation-mapped",
       "note": "Native context classes and both adaptation directions share one module; adapters hold weak source contexts."
     },
     "VirtualizingLayoutContext": {
       "targets": [
-        "src/FerroUI.Controls/repeater/layouts/layout_context.rs"
+        "src/FerroUI.Controls.Repeater/layouts/layout_context.rs"
       ],
       "status": "implementation-mapped",
       "note": "Native context classes and both adaptation directions share one module; adapters hold weak source contexts."
     },
     "NonvirtualizingLayoutContext": {
       "targets": [
-        "src/FerroUI.Controls/repeater/layouts/layout_context.rs"
+        "src/FerroUI.Controls.Repeater/layouts/layout_context.rs"
       ],
       "status": "implementation-mapped",
       "note": "Native context classes and both adaptation directions share one module; adapters hold weak source contexts."
     },
     "LayoutContextAdapter": {
       "targets": [
-        "src/FerroUI.Controls/repeater/layouts/layout_context.rs"
+        "src/FerroUI.Controls.Repeater/layouts/layout_context.rs"
       ],
       "status": "implementation-mapped",
       "note": "Native context classes and both adaptation directions share one module; adapters hold weak source contexts."
     },
     "VirtualLayoutContextAdapter": {
       "targets": [
-        "src/FerroUI.Controls/repeater/layouts/layout_context.rs"
+        "src/FerroUI.Controls.Repeater/layouts/layout_context.rs"
       ],
       "status": "implementation-mapped",
       "note": "Native context classes and both adaptation directions share one module; adapters hold weak source contexts."
     },
     "IFlowLayoutAlgorithmDelegates": {
       "targets": [
-        "src/FerroUI.Controls/repeater/layouts/flow_layout_algorithm.rs"
+        "src/FerroUI.Controls.Repeater/layouts/flow_layout_algorithm.rs"
       ],
       "status": "implementation-mapped",
       "note": "The layout callback trait remains adjacent to the shared flow algorithm."
     },
     "LinedFlowLayout": {
       "targets": [
-        "src/FerroUI.Controls/repeater/layouts/lined_flow_layout.rs",
-        "src/FerroUI.Controls/repeater/layouts/lined_flow_layout_algorithm.rs"
+        "src/FerroUI.Controls.Repeater/layouts/lined_flow_layout.rs",
+        "src/FerroUI.Controls.Repeater/layouts/lined_flow_layout_algorithm.rs"
       ],
       "status": "implementation-mapped",
       "note": "Layout/context state and bounded row-distribution algorithm are split into two Rust modules."
     },
     "LayoutsTestHooks": {
       "targets": [
-        "src/FerroUI.Controls/repeater/layouts/layouts_test_hooks.rs"
+        "src/FerroUI.Controls.Repeater/layouts/layouts_test_hooks.rs"
       ],
       "status": "implementation-mapped",
       "note": "Static test-hook event buses, metadata and argument values share one module."
     },
     "LayoutsTestHooksFactory": {
       "targets": [
-        "src/FerroUI.Controls/repeater/layouts/layouts_test_hooks.rs"
+        "src/FerroUI.Controls.Repeater/layouts/layouts_test_hooks.rs"
       ],
       "status": "implementation-mapped",
       "note": "Static test-hook event buses, metadata and argument values share one module."
     },
     "LayoutsTestHooksLinedFlowLayoutInvalidatedEventArgs": {
       "targets": [
-        "src/FerroUI.Controls/repeater/layouts/layouts_test_hooks.rs"
+        "src/FerroUI.Controls.Repeater/layouts/layouts_test_hooks.rs"
       ],
       "status": "implementation-mapped",
       "note": "Static test-hook event buses, metadata and argument values share one module."
     },
     "LayoutsTestHooksLinedFlowLayoutItemLockedEventArgs": {
       "targets": [
-        "src/FerroUI.Controls/repeater/layouts/layouts_test_hooks.rs"
+        "src/FerroUI.Controls.Repeater/layouts/layouts_test_hooks.rs"
       ],
       "status": "implementation-mapped",
       "note": "Static test-hook event buses, metadata and argument values share one module."
     },
     "RepeaterTestHooks": {
       "targets": [
-        "src/FerroUI.Controls/repeater/repeater_test_hooks.rs"
+        "src/FerroUI.Controls.Repeater/repeater_test_hooks.rs"
       ],
       "status": "implementation-mapped",
       "note": "Activation factories become static Rust hook functions and typed subscriptions."
     },
     "RepeaterTestHooksFactory": {
       "targets": [
-        "src/FerroUI.Controls/repeater/repeater_test_hooks.rs"
+        "src/FerroUI.Controls.Repeater/repeater_test_hooks.rs"
       ],
       "status": "implementation-mapped",
       "note": "Activation factories become static Rust hook functions and typed subscriptions."
     },
     "RecyclePoolFactory": {
       "targets": [
-        "src/FerroUI.Controls/repeater/recycle_pool.rs"
+        "src/FerroUI.Controls.Repeater/recycle_pool.rs"
       ],
       "status": "framework-replacement",
       "note": "Attached values and constructor activation are native FerroUI class metadata."
     },
     "CustomProperty": {
       "targets": [
-        "src/FerroUI.Controls/repeater/selection/markup.rs",
-        "src/FerroUI.Controls/repeater/selection/selected_items_markup.rs"
+        "src/FerroUI.Controls.Repeater/selection/markup.rs",
+        "src/FerroUI.Controls.Repeater/selection/selected_items_markup.rs"
       ],
       "status": "framework-replacement",
       "note": "FerroUI native markup/INotifyPropertyChanged metadata replaces ICustomPropertyProvider reflection."
     },
     "SelectionModelSelectionChangedEventArgs": {
       "targets": [
-        "src/FerroUI.Controls/repeater/selection/selection_model.rs"
+        "src/FerroUI.Controls.Repeater/selection/selection_model.rs"
       ],
       "status": "implementation-mapped",
       "note": "The immutable selection-changed argument value lives with the model."
     },
     "QPCTimer": {
       "targets": [
-        "src/FerroUI.Controls/repeater/build_tree_scheduler.rs",
+        "src/FerroUI.Controls.Repeater/build_tree_scheduler.rs",
         "src/FerroUI.Base/threading/dispatcher.rs"
       ],
       "status": "framework-replacement",
@@ -279,10 +279,10 @@
     "ItemsRepeaterTrace": {
       "targets": [
         "src/FerroUI.Base/logging/logger.rs",
-        "src/FerroUI.Controls/repeater/diagnostics.rs",
-        "src/FerroUI.Controls/repeater/view_manager.rs",
-        "src/FerroUI.Controls/repeater/repeater_test_hooks.rs",
-        "src/FerroUI.Controls/repeater/layouts/layouts_test_hooks.rs"
+        "src/FerroUI.Controls.Repeater/diagnostics.rs",
+        "src/FerroUI.Controls.Repeater/view_manager.rs",
+        "src/FerroUI.Controls.Repeater/repeater_test_hooks.rs",
+        "src/FerroUI.Controls.Repeater/layouts/layouts_test_hooks.rs"
       ],
       "status": "framework-replacement",
       "note": "Native Logger sinks report selected-item Repeater realization/retention/recycling and arrangement snapshots through weak, deferred dispatcher delivery. Typed hooks retain their state and events. ETW schemas, debugger output, individual upstream trace messages and traces from non-Repeater layout hosts are not reproduced."
@@ -290,20 +290,20 @@
     "LinedFlowLayoutTrace": {
       "targets": [
         "src/FerroUI.Base/logging/logger.rs",
-        "src/FerroUI.Controls/repeater/diagnostics.rs",
-        "src/FerroUI.Controls/repeater/view_manager.rs",
-        "src/FerroUI.Controls/repeater/repeater_test_hooks.rs",
-        "src/FerroUI.Controls/repeater/layouts/layouts_test_hooks.rs"
+        "src/FerroUI.Controls.Repeater/diagnostics.rs",
+        "src/FerroUI.Controls.Repeater/view_manager.rs",
+        "src/FerroUI.Controls.Repeater/repeater_test_hooks.rs",
+        "src/FerroUI.Controls.Repeater/layouts/layouts_test_hooks.rs"
       ],
       "status": "framework-replacement",
       "note": "Native Logger sinks report selected-item Repeater realization/retention/recycling and arrangement snapshots through weak, deferred dispatcher delivery. Typed hooks retain their state and events. ETW schemas, debugger output, individual upstream trace messages and traces from non-Repeater layout hosts are not reproduced."
     },
     "ItemsRepeater.idl": {
       "targets": [
-        "src/FerroUI.Controls/repeater/markup.rs",
-        "src/FerroUI.Controls/repeater/services_markup.rs",
-        "src/FerroUI.Controls/repeater/layouts/layouts_markup.rs",
-        "src/FerroUI.Controls/repeater/selection/markup.rs"
+        "src/FerroUI.Controls.Repeater/markup.rs",
+        "src/FerroUI.Controls.Repeater/services_markup.rs",
+        "src/FerroUI.Controls.Repeater/layouts/layouts_markup.rs",
+        "src/FerroUI.Controls.Repeater/selection/markup.rs"
       ],
       "status": "framework-replacement",
       "note": "Public and preview declarations are projected through native classes, traits and FerroUI markup metadata."
@@ -317,93 +317,93 @@
       "src/FerroUI.Controls/items_source_view.rs"
     ],
     "ItemsRepeaterElementPreparedEventArgs": [
-      "src/FerroUI.Controls/repeater/items_repeater_event_args.rs"
+      "src/FerroUI.Controls.Repeater/items_repeater_event_args.rs"
     ],
     "ItemsRepeaterElementClearingEventArgs": [
-      "src/FerroUI.Controls/repeater/items_repeater_event_args.rs"
+      "src/FerroUI.Controls.Repeater/items_repeater_event_args.rs"
     ],
     "ItemsRepeaterElementIndexChangedEventArgs": [
-      "src/FerroUI.Controls/repeater/items_repeater_event_args.rs"
+      "src/FerroUI.Controls.Repeater/items_repeater_event_args.rs"
     ],
     "ElementRealizationOptions": [
-      "src/FerroUI.Controls/repeater/layouts/layout_context.rs"
+      "src/FerroUI.Controls.Repeater/layouts/layout_context.rs"
     ],
     "IndexBasedLayoutOrientation": [
-      "src/FerroUI.Controls/repeater/layouts/layout.rs"
+      "src/FerroUI.Controls.Repeater/layouts/layout.rs"
     ],
     "FlowLayoutLineAlignment": [
-      "src/FerroUI.Controls/repeater/layouts/flow_layout_algorithm.rs"
+      "src/FerroUI.Controls.Repeater/layouts/flow_layout_algorithm.rs"
     ],
     "FlowLayoutAnchorInfo": [
-      "src/FerroUI.Controls/repeater/layouts/flow_layout_algorithm.rs"
+      "src/FerroUI.Controls.Repeater/layouts/flow_layout_algorithm.rs"
     ],
     "UniformGridLayoutItemsJustification": [
-      "src/FerroUI.Controls/repeater/layouts/uniform_grid_layout.rs"
+      "src/FerroUI.Controls.Repeater/layouts/uniform_grid_layout.rs"
     ],
     "UniformGridLayoutItemsStretch": [
-      "src/FerroUI.Controls/repeater/layouts/uniform_grid_layout.rs"
+      "src/FerroUI.Controls.Repeater/layouts/uniform_grid_layout.rs"
     ],
     "LinedFlowLayoutItemsJustification": [
-      "src/FerroUI.Controls/repeater/layouts/lined_flow_layout.rs"
+      "src/FerroUI.Controls.Repeater/layouts/lined_flow_layout.rs"
     ],
     "LinedFlowLayoutItemsStretch": [
-      "src/FerroUI.Controls/repeater/layouts/lined_flow_layout.rs"
+      "src/FerroUI.Controls.Repeater/layouts/lined_flow_layout.rs"
     ],
     "ItemCollectionTransitionTriggers": [
-      "src/FerroUI.Controls/repeater/item_collection_transition.rs"
+      "src/FerroUI.Controls.Repeater/item_collection_transition.rs"
     ],
     "ItemCollectionTransitionOperation": [
-      "src/FerroUI.Controls/repeater/item_collection_transition.rs"
+      "src/FerroUI.Controls.Repeater/item_collection_transition.rs"
     ],
     "Layout": [
-      "src/FerroUI.Controls/repeater/layouts/layout.rs"
+      "src/FerroUI.Controls.Repeater/layouts/layout.rs"
     ],
     "VirtualizingLayout": [
-      "src/FerroUI.Controls/repeater/layouts/layout.rs"
+      "src/FerroUI.Controls.Repeater/layouts/layout.rs"
     ],
     "NonVirtualizingLayout": [
-      "src/FerroUI.Controls/repeater/layouts/layout.rs"
+      "src/FerroUI.Controls.Repeater/layouts/layout.rs"
     ],
     "LayoutContext": [
-      "src/FerroUI.Controls/repeater/layouts/layout_context.rs"
+      "src/FerroUI.Controls.Repeater/layouts/layout_context.rs"
     ],
     "VirtualizingLayoutContext": [
-      "src/FerroUI.Controls/repeater/layouts/layout_context.rs"
+      "src/FerroUI.Controls.Repeater/layouts/layout_context.rs"
     ],
     "NonVirtualizingLayoutContext": [
-      "src/FerroUI.Controls/repeater/layouts/layout_context.rs"
+      "src/FerroUI.Controls.Repeater/layouts/layout_context.rs"
     ],
     "SelectTemplateEventArgs": [
-      "src/FerroUI.Controls/repeater/recycling_element_factory.rs"
+      "src/FerroUI.Controls.Repeater/recycling_element_factory.rs"
     ],
     "SelectionModelSelectionChangedEventArgs": [
-      "src/FerroUI.Controls/repeater/selection/selection_model.rs"
+      "src/FerroUI.Controls.Repeater/selection/selection_model.rs"
     ],
     "LinedFlowLayoutInvalidationTrigger": [
-      "src/FerroUI.Controls/repeater/layouts/layouts_test_hooks.rs"
+      "src/FerroUI.Controls.Repeater/layouts/layouts_test_hooks.rs"
     ],
     "LayoutsTestHooksLinedFlowLayoutInvalidatedEventArgs": [
-      "src/FerroUI.Controls/repeater/layouts/layouts_test_hooks.rs"
+      "src/FerroUI.Controls.Repeater/layouts/layouts_test_hooks.rs"
     ],
     "LayoutsTestHooksLinedFlowLayoutItemLockedEventArgs": [
-      "src/FerroUI.Controls/repeater/layouts/layouts_test_hooks.rs"
+      "src/FerroUI.Controls.Repeater/layouts/layouts_test_hooks.rs"
     ],
     "IRepeaterScrollingSurface": [
-      "src/FerroUI.Controls/repeater/items_repeater_scroll_host.rs",
+      "src/FerroUI.Controls.Repeater/items_repeater_scroll_host.rs",
       "src/FerroUI.Controls/i_scroll_anchor_provider.rs"
     ],
     "ConfigurationChangedEventHandler": [
-      "src/FerroUI.Controls/repeater/items_repeater_scroll_host.rs"
+      "src/FerroUI.Controls.Repeater/items_repeater_scroll_host.rs"
     ],
     "PostArrangeEventHandler": [
-      "src/FerroUI.Controls/repeater/items_repeater_scroll_host.rs"
+      "src/FerroUI.Controls.Repeater/items_repeater_scroll_host.rs"
     ],
     "ViewportChangedEventHandler": [
-      "src/FerroUI.Controls/repeater/items_repeater_scroll_host.rs"
+      "src/FerroUI.Controls.Repeater/items_repeater_scroll_host.rs"
     ],
     "ItemsRepeater": [
-      "src/FerroUI.Controls/repeater/items_repeater.rs",
-      "src/FerroUI.Controls/repeater/markup.rs"
+      "src/FerroUI.Controls.Repeater/items_repeater.rs",
+      "src/FerroUI.Controls.Repeater/markup.rs"
     ]
   },
   "api_overrides": {
@@ -423,7 +423,7 @@
     },
     "RecyclePool.PoolInstanceProperty": {
       "targets": [
-        "src/FerroUI.Controls/repeater/recycle_pool.rs"
+        "src/FerroUI.Controls.Repeater/recycle_pool.rs"
       ],
       "symbols": [
         "get_pool_instance",
@@ -434,7 +434,7 @@
     },
     "IRepeaterScrollingSurface.IRepeaterScrollingSurface": {
       "targets": [
-        "src/FerroUI.Controls/repeater/items_repeater_scroll_host.rs",
+        "src/FerroUI.Controls.Repeater/items_repeater_scroll_host.rs",
         "src/FerroUI.Controls/i_scroll_anchor_provider.rs"
       ],
       "replacement": true,
@@ -442,21 +442,21 @@
     },
     "ConfigurationChangedEventHandler.ConfigurationChangedEventHandler": {
       "targets": [
-        "src/FerroUI.Controls/repeater/items_repeater_scroll_host.rs"
+        "src/FerroUI.Controls.Repeater/items_repeater_scroll_host.rs"
       ],
       "replacement": true,
       "note": "The private WinRT interface/delegate is expressed by native scrolling APIs and typed HandlerList callbacks."
     },
     "PostArrangeEventHandler.PostArrangeEventHandler": {
       "targets": [
-        "src/FerroUI.Controls/repeater/items_repeater_scroll_host.rs"
+        "src/FerroUI.Controls.Repeater/items_repeater_scroll_host.rs"
       ],
       "replacement": true,
       "note": "The private WinRT interface/delegate is expressed by native scrolling APIs and typed HandlerList callbacks."
     },
     "ViewportChangedEventHandler.ViewportChangedEventHandler": {
       "targets": [
-        "src/FerroUI.Controls/repeater/items_repeater_scroll_host.rs"
+        "src/FerroUI.Controls.Repeater/items_repeater_scroll_host.rs"
       ],
       "replacement": true,
       "note": "The private WinRT interface/delegate is expressed by native scrolling APIs and typed HandlerList callbacks."
@@ -464,91 +464,91 @@
   },
   "test_files": {
     "AccessibilityTests.cs": [
-      "src/FerroUI.Controls/repeater/conformance_tests.rs"
+      "src/FerroUI.Controls.Repeater/conformance_tests.rs"
     ],
     "EffectiveViewportScrollPresenterTests.cs": [
-      "src/FerroUI.Controls/repeater/viewport_tests.rs"
+      "src/FerroUI.Controls.Repeater/viewport_tests.rs"
     ],
     "EffectiveViewportScrollViewerTests.cs": [
-      "src/FerroUI.Controls/repeater/viewport_tests.rs"
+      "src/FerroUI.Controls.Repeater/viewport_tests.rs"
     ],
     "FlowLayoutCollectionChangeTests.cs": [
-      "src/FerroUI.Controls/repeater/layouts/layout_collection_tests.rs",
-      "src/FerroUI.Controls/repeater/layouts/flow_layout_upstream_tests.rs",
-      "src/FerroUI.Controls/repeater/acceptance_tests.rs"
+      "src/FerroUI.Controls.Repeater/layouts/layout_collection_tests.rs",
+      "src/FerroUI.Controls.Repeater/layouts/flow_layout_upstream_tests.rs",
+      "src/FerroUI.Controls.Repeater/acceptance_tests.rs"
     ],
     "FlowLayoutTests.cs": [
-      "src/FerroUI.Controls/repeater/layouts/flow_layout_upstream_tests.rs",
-      "src/FerroUI.Controls/repeater/layouts/layout_tests.rs"
+      "src/FerroUI.Controls.Repeater/layouts/flow_layout_upstream_tests.rs",
+      "src/FerroUI.Controls.Repeater/layouts/layout_tests.rs"
     ],
     "IndexPathTests.cs": [
-      "src/FerroUI.Controls/repeater/selection/tests.rs",
-      "src/FerroUI.Controls/repeater/selection/index_path.rs"
+      "src/FerroUI.Controls.Repeater/selection/tests.rs",
+      "src/FerroUI.Controls.Repeater/selection/index_path.rs"
     ],
     "InspectingDataSourceTests.cs": [
-      "src/FerroUI.Controls/repeater/source_view_tests.rs"
+      "src/FerroUI.Controls.Repeater/source_view_tests.rs"
     ],
     "ItemCollectionTransitionProviderTests.cs": [
-      "src/FerroUI.Controls/repeater/services_tests.rs"
+      "src/FerroUI.Controls.Repeater/services_tests.rs"
     ],
     "ItemTemplateTests.cs": [
-      "src/FerroUI.Controls/repeater/services_tests.rs",
-      "src/FerroUI.Controls/repeater/conformance_tests.rs"
+      "src/FerroUI.Controls.Repeater/services_tests.rs",
+      "src/FerroUI.Controls.Repeater/conformance_tests.rs"
     ],
     "ItemsRepeaterScrollHostTests.cs": [
-      "src/FerroUI.Controls/repeater/services_tests.rs"
+      "src/FerroUI.Controls.Repeater/services_tests.rs"
     ],
     "LayoutTests.cs": [
-      "src/FerroUI.Controls/repeater/layout_contract_tests.rs",
-      "src/FerroUI.Controls/repeater/layouts/layout_tests.rs",
-      "src/FerroUI.Controls/repeater/conformance_tests.rs",
-      "src/FerroUI.Controls/repeater/items_repeater_tests.rs",
-      "src/FerroUI.Controls/repeater/viewport_tests.rs"
+      "src/FerroUI.Controls.Repeater/layout_contract_tests.rs",
+      "src/FerroUI.Controls.Repeater/layouts/layout_tests.rs",
+      "src/FerroUI.Controls.Repeater/conformance_tests.rs",
+      "src/FerroUI.Controls.Repeater/items_repeater_tests.rs",
+      "src/FerroUI.Controls.Repeater/viewport_tests.rs"
     ],
     "LinedFlowLayoutTests.cs": [
-      "src/FerroUI.Controls/repeater/layouts/lined_flow_upstream_tests.rs",
-      "src/FerroUI.Controls/repeater/layouts/lined_flow_layout_tests.rs"
+      "src/FerroUI.Controls.Repeater/layouts/lined_flow_upstream_tests.rs",
+      "src/FerroUI.Controls.Repeater/layouts/lined_flow_layout_tests.rs"
     ],
     "PhasingTests.cs": [
-      "src/FerroUI.Controls/repeater/services_tests.rs"
+      "src/FerroUI.Controls.Repeater/services_tests.rs"
     ],
     "RecyclePoolTests.cs": [
-      "src/FerroUI.Controls/repeater/services_tests.rs"
+      "src/FerroUI.Controls.Repeater/services_tests.rs"
     ],
     "RepeaterApiContractTests.cs": [
-      "src/FerroUI.Controls/repeater/conformance_tests.rs",
-      "src/FerroUI.Controls/repeater/services_tests.rs"
+      "src/FerroUI.Controls.Repeater/conformance_tests.rs",
+      "src/FerroUI.Controls.Repeater/services_tests.rs"
     ],
     "RepeaterFocusTests.cs": [
-      "src/FerroUI.Controls/repeater/conformance_tests.rs",
-      "src/FerroUI.Controls/repeater/services_tests.rs",
-      "src/FerroUI.Controls/repeater/view_manager_acceptance_tests.rs"
+      "src/FerroUI.Controls.Repeater/conformance_tests.rs",
+      "src/FerroUI.Controls.Repeater/services_tests.rs",
+      "src/FerroUI.Controls.Repeater/view_manager_acceptance_tests.rs"
     ],
     "RepeaterTests.cs": [
-      "src/FerroUI.Controls/repeater/items_repeater_tests.rs",
-      "src/FerroUI.Controls/repeater/services_tests.rs",
-      "src/FerroUI.Controls/repeater/conformance_tests.rs",
-      "src/FerroUI.Controls/repeater/acceptance_tests.rs",
-      "src/FerroUI.Controls/repeater/view_manager_acceptance_tests.rs"
+      "src/FerroUI.Controls.Repeater/items_repeater_tests.rs",
+      "src/FerroUI.Controls.Repeater/services_tests.rs",
+      "src/FerroUI.Controls.Repeater/conformance_tests.rs",
+      "src/FerroUI.Controls.Repeater/acceptance_tests.rs",
+      "src/FerroUI.Controls.Repeater/view_manager_acceptance_tests.rs"
     ],
     "SelectionModelTests.cs": [
-      "src/FerroUI.Controls/repeater/selection/tests.rs"
+      "src/FerroUI.Controls.Repeater/selection/tests.rs"
     ],
     "ViewManagerTests.cs": [
-      "src/FerroUI.Controls/repeater/conformance_tests.rs",
-      "src/FerroUI.Controls/repeater/items_repeater_tests.rs",
-      "src/FerroUI.Controls/repeater/services_tests.rs",
-      "src/FerroUI.Controls/repeater/view_manager_acceptance_tests.rs"
+      "src/FerroUI.Controls.Repeater/conformance_tests.rs",
+      "src/FerroUI.Controls.Repeater/items_repeater_tests.rs",
+      "src/FerroUI.Controls.Repeater/services_tests.rs",
+      "src/FerroUI.Controls.Repeater/view_manager_acceptance_tests.rs"
     ],
     "ViewportTests.cs": [
-      "src/FerroUI.Controls/repeater/viewport_tests.rs"
+      "src/FerroUI.Controls.Repeater/viewport_tests.rs"
     ]
   },
   "dependencies": {
     "pch.h": {
       "targets": [
         "src/FerroUI.Controls/Cargo.toml",
-        "src/FerroUI.Controls/repeater/repeater_automation_peer.rs",
+        "src/FerroUI.Controls.Repeater/repeater_automation_peer.rs",
         "src/FerroUI.Controls/items_source.rs"
       ],
       "status": "framework-replacement",
@@ -557,7 +557,7 @@
     "common.h": {
       "targets": [
         "src/FerroUI.Controls/Cargo.toml",
-        "src/FerroUI.Controls/repeater/repeater_automation_peer.rs",
+        "src/FerroUI.Controls.Repeater/repeater_automation_peer.rs",
         "src/FerroUI.Controls/items_source.rs"
       ],
       "status": "framework-replacement",
@@ -566,7 +566,7 @@
     "windows.h": {
       "targets": [
         "src/FerroUI.Controls/Cargo.toml",
-        "src/FerroUI.Controls/repeater/repeater_automation_peer.rs",
+        "src/FerroUI.Controls.Repeater/repeater_automation_peer.rs",
         "src/FerroUI.Controls/items_source.rs"
       ],
       "status": "framework-replacement",
@@ -575,7 +575,7 @@
     "UIAutomationCore.h": {
       "targets": [
         "src/FerroUI.Controls/Cargo.toml",
-        "src/FerroUI.Controls/repeater/repeater_automation_peer.rs",
+        "src/FerroUI.Controls.Repeater/repeater_automation_peer.rs",
         "src/FerroUI.Controls/items_source.rs"
       ],
       "status": "framework-replacement",
@@ -584,7 +584,7 @@
     "UIAutomationCoreApi.h": {
       "targets": [
         "src/FerroUI.Controls/Cargo.toml",
-        "src/FerroUI.Controls/repeater/repeater_automation_peer.rs",
+        "src/FerroUI.Controls.Repeater/repeater_automation_peer.rs",
         "src/FerroUI.Controls/items_source.rs"
       ],
       "status": "framework-replacement",
@@ -593,7 +593,7 @@
     "winrt/Windows.UI.Xaml.Interop.h": {
       "targets": [
         "src/FerroUI.Controls/Cargo.toml",
-        "src/FerroUI.Controls/repeater/repeater_automation_peer.rs",
+        "src/FerroUI.Controls.Repeater/repeater_automation_peer.rs",
         "src/FerroUI.Controls/items_source.rs"
       ],
       "status": "framework-replacement",
@@ -632,9 +632,9 @@
     },
     "LifetimeHandler.h": {
       "targets": [
-        "src/FerroUI.Controls/repeater/items_repeater.rs",
-        "src/FerroUI.Controls/repeater/phaser.rs",
-        "src/FerroUI.Controls/repeater/viewport_manager.rs"
+        "src/FerroUI.Controls.Repeater/items_repeater.rs",
+        "src/FerroUI.Controls.Repeater/phaser.rs",
+        "src/FerroUI.Controls.Repeater/viewport_manager.rs"
       ],
       "status": "framework-replacement",
       "note": "Visual attach/detach, weak handles and explicit IDisposable cancellation replace WinRT lifetime handlers."
@@ -642,10 +642,10 @@
     "MUXControlsTestHooks.h": {
       "targets": [
         "src/FerroUI.Base/logging/logger.rs",
-        "src/FerroUI.Controls/repeater/diagnostics.rs",
-        "src/FerroUI.Controls/repeater/view_manager.rs",
-        "src/FerroUI.Controls/repeater/repeater_test_hooks.rs",
-        "src/FerroUI.Controls/repeater/layouts/layouts_test_hooks.rs"
+        "src/FerroUI.Controls.Repeater/diagnostics.rs",
+        "src/FerroUI.Controls.Repeater/view_manager.rs",
+        "src/FerroUI.Controls.Repeater/repeater_test_hooks.rs",
+        "src/FerroUI.Controls.Repeater/layouts/layouts_test_hooks.rs"
       ],
       "status": "framework-replacement",
       "note": "Native Logger sink/level/area filtering and typed diagnostic hooks replace Windows logging transport. Selected-item lifecycle and arrangement snapshots use weak deferred dispatcher delivery; ETW schemas and per-method upstream trace text are not reproduced."
@@ -653,10 +653,10 @@
     "MuxcTraceLogging.h": {
       "targets": [
         "src/FerroUI.Base/logging/logger.rs",
-        "src/FerroUI.Controls/repeater/diagnostics.rs",
-        "src/FerroUI.Controls/repeater/view_manager.rs",
-        "src/FerroUI.Controls/repeater/repeater_test_hooks.rs",
-        "src/FerroUI.Controls/repeater/layouts/layouts_test_hooks.rs"
+        "src/FerroUI.Controls.Repeater/diagnostics.rs",
+        "src/FerroUI.Controls.Repeater/view_manager.rs",
+        "src/FerroUI.Controls.Repeater/repeater_test_hooks.rs",
+        "src/FerroUI.Controls.Repeater/layouts/layouts_test_hooks.rs"
       ],
       "status": "framework-replacement",
       "note": "Native Logger sink/level/area filtering and typed diagnostic hooks replace Windows logging transport. Selected-item lifecycle and arrangement snapshots use weak deferred dispatcher delivery; ETW schemas and per-method upstream trace text are not reproduced."
@@ -669,32 +669,32 @@
     "WinEventLogLevels.h": {
       "targets": [
         "src/FerroUI.Base/logging/log_event_level.rs",
-        "src/FerroUI.Controls/repeater/diagnostics.rs"
+        "src/FerroUI.Controls.Repeater/diagnostics.rs"
       ],
       "status": "framework-replacement",
       "note": "Native LogEventLevel and installed sink filtering replace Windows event-level constants; selected-item Repeater diagnostics use Information level."
     },
     "Utils.h": {
       "targets": [
-        "src/FerroUI.Controls/repeater/view_manager.rs",
-        "src/FerroUI.Controls/repeater/viewport_manager.rs",
-        "src/FerroUI.Controls/repeater/layouts/orientation_based_measures.rs"
+        "src/FerroUI.Controls.Repeater/view_manager.rs",
+        "src/FerroUI.Controls.Repeater/viewport_manager.rs",
+        "src/FerroUI.Controls.Repeater/layouts/orientation_based_measures.rs"
       ],
       "status": "framework-replacement",
       "note": "Use existing FerroUI visual-tree, geometry, focus, collection and layout helpers at the call site."
     },
     "SharedHelpers.h": {
       "targets": [
-        "src/FerroUI.Controls/repeater/view_manager.rs",
-        "src/FerroUI.Controls/repeater/viewport_manager.rs",
-        "src/FerroUI.Controls/repeater/layouts/orientation_based_measures.rs"
+        "src/FerroUI.Controls.Repeater/view_manager.rs",
+        "src/FerroUI.Controls.Repeater/viewport_manager.rs",
+        "src/FerroUI.Controls.Repeater/layouts/orientation_based_measures.rs"
       ],
       "status": "framework-replacement",
       "note": "Use existing FerroUI visual-tree, geometry, focus, collection and layout helpers at the call site."
     },
     "ScrollingScrollStartingEventArgs.h": {
       "targets": [
-        "src/FerroUI.Controls/repeater/items_repeater_scroll_host.rs",
+        "src/FerroUI.Controls.Repeater/items_repeater_scroll_host.rs",
         "src/FerroUI.Controls/scroll_viewer.rs"
       ],
       "status": "framework-replacement",
@@ -702,7 +702,7 @@
     },
     "ScrollingZoomStartingEventArgs.h": {
       "targets": [
-        "src/FerroUI.Controls/repeater/items_repeater_scroll_host.rs",
+        "src/FerroUI.Controls.Repeater/items_repeater_scroll_host.rs",
         "src/FerroUI.Controls/scroll_viewer.rs"
       ],
       "status": "framework-replacement",
@@ -717,29 +717,29 @@
     },
     "limits": {
       "targets": [
-        "src/FerroUI.Controls/repeater/layouts/flow_layout_algorithm.rs",
-        "src/FerroUI.Controls/repeater/layouts/lined_flow_layout.rs"
+        "src/FerroUI.Controls.Repeater/layouts/flow_layout_algorithm.rs",
+        "src/FerroUI.Controls.Repeater/layouts/lined_flow_layout.rs"
       ],
       "status": "framework-replacement",
       "note": "Rust numeric constants and bounds replace the C++ standard header."
     },
     "ElementFactoryGetArgsDownLevel.h": {
       "targets": [
-        "src/FerroUI.Controls/repeater/element_factory.rs"
+        "src/FerroUI.Controls.Repeater/element_factory.rs"
       ],
       "status": "framework-replacement",
       "note": "Case variants refer to the downlevel argument adapters already mapped into native argument values."
     },
     "ElementFactoryRecycleArgsDownLevel.h": {
       "targets": [
-        "src/FerroUI.Controls/repeater/element_factory.rs"
+        "src/FerroUI.Controls.Repeater/element_factory.rs"
       ],
       "status": "framework-replacement",
       "note": "Case variants refer to the downlevel argument adapters already mapped into native argument values."
     },
     "NonVirtualizingLayoutContext.h": {
       "targets": [
-        "src/FerroUI.Controls/repeater/layouts/layout_context.rs"
+        "src/FerroUI.Controls.Repeater/layouts/layout_context.rs"
       ],
       "status": "framework-replacement",
       "note": "Case variant of NonvirtualizingLayoutContext.h; the native virtual/nonvirtual context module supplies this contract."
@@ -747,8 +747,8 @@
     "RecyclingElementFactory.properties.cpp": {
       "targets": [
         "src/FerroUI.Controls/register_types.rs",
-        "src/FerroUI.Controls/repeater/markup.rs",
-        "src/FerroUI.Controls/repeater/services_markup.rs"
+        "src/FerroUI.Controls.Repeater/markup.rs",
+        "src/FerroUI.Controls.Repeater/services_markup.rs"
       ],
       "status": "framework-replacement",
       "note": "Generated dependency-property registration is replaced by ferro_properties!, ferro_class_info! and native markup metadata."
@@ -756,8 +756,8 @@
     "RepeaterAutomationPeer.properties.cpp": {
       "targets": [
         "src/FerroUI.Controls/register_types.rs",
-        "src/FerroUI.Controls/repeater/markup.rs",
-        "src/FerroUI.Controls/repeater/services_markup.rs"
+        "src/FerroUI.Controls.Repeater/markup.rs",
+        "src/FerroUI.Controls.Repeater/services_markup.rs"
       ],
       "status": "framework-replacement",
       "note": "Generated dependency-property registration is replaced by ferro_properties!, ferro_class_info! and native markup metadata."
@@ -765,8 +765,8 @@
     "UniformGridLayout.properties.h": {
       "targets": [
         "src/FerroUI.Controls/register_types.rs",
-        "src/FerroUI.Controls/repeater/markup.rs",
-        "src/FerroUI.Controls/repeater/services_markup.rs"
+        "src/FerroUI.Controls.Repeater/markup.rs",
+        "src/FerroUI.Controls.Repeater/services_markup.rs"
       ],
       "status": "framework-replacement",
       "note": "Generated dependency-property registration is replaced by ferro_properties!, ferro_class_info! and native markup metadata."
@@ -774,8 +774,8 @@
     "SelectionModel.properties.h": {
       "targets": [
         "src/FerroUI.Controls/register_types.rs",
-        "src/FerroUI.Controls/repeater/markup.rs",
-        "src/FerroUI.Controls/repeater/services_markup.rs"
+        "src/FerroUI.Controls.Repeater/markup.rs",
+        "src/FerroUI.Controls.Repeater/services_markup.rs"
       ],
       "status": "framework-replacement",
       "note": "Generated dependency-property registration is replaced by ferro_properties!, ferro_class_info! and native markup metadata."
@@ -783,8 +783,8 @@
     "ItemCollectionTransitionProvider.properties.cpp": {
       "targets": [
         "src/FerroUI.Controls/register_types.rs",
-        "src/FerroUI.Controls/repeater/markup.rs",
-        "src/FerroUI.Controls/repeater/services_markup.rs"
+        "src/FerroUI.Controls.Repeater/markup.rs",
+        "src/FerroUI.Controls.Repeater/services_markup.rs"
       ],
       "status": "framework-replacement",
       "note": "Generated dependency-property registration is replaced by ferro_properties!, ferro_class_info! and native markup metadata."
@@ -792,8 +792,8 @@
     "StackLayoutState.properties.cpp": {
       "targets": [
         "src/FerroUI.Controls/register_types.rs",
-        "src/FerroUI.Controls/repeater/markup.rs",
-        "src/FerroUI.Controls/repeater/services_markup.rs"
+        "src/FerroUI.Controls.Repeater/markup.rs",
+        "src/FerroUI.Controls.Repeater/services_markup.rs"
       ],
       "status": "framework-replacement",
       "note": "Generated dependency-property registration is replaced by ferro_properties!, ferro_class_info! and native markup metadata."
@@ -801,8 +801,8 @@
     "VirtualizingLayout.properties.cpp": {
       "targets": [
         "src/FerroUI.Controls/register_types.rs",
-        "src/FerroUI.Controls/repeater/markup.rs",
-        "src/FerroUI.Controls/repeater/services_markup.rs"
+        "src/FerroUI.Controls.Repeater/markup.rs",
+        "src/FerroUI.Controls.Repeater/services_markup.rs"
       ],
       "status": "framework-replacement",
       "note": "Generated dependency-property registration is replaced by ferro_properties!, ferro_class_info! and native markup metadata."
@@ -810,8 +810,8 @@
     "StackLayout.properties.h": {
       "targets": [
         "src/FerroUI.Controls/register_types.rs",
-        "src/FerroUI.Controls/repeater/markup.rs",
-        "src/FerroUI.Controls/repeater/services_markup.rs"
+        "src/FerroUI.Controls.Repeater/markup.rs",
+        "src/FerroUI.Controls.Repeater/services_markup.rs"
       ],
       "status": "framework-replacement",
       "note": "Generated dependency-property registration is replaced by ferro_properties!, ferro_class_info! and native markup metadata."
@@ -819,8 +819,8 @@
     "IndexPath.properties.cpp": {
       "targets": [
         "src/FerroUI.Controls/register_types.rs",
-        "src/FerroUI.Controls/repeater/markup.rs",
-        "src/FerroUI.Controls/repeater/services_markup.rs"
+        "src/FerroUI.Controls.Repeater/markup.rs",
+        "src/FerroUI.Controls.Repeater/services_markup.rs"
       ],
       "status": "framework-replacement",
       "note": "Generated dependency-property registration is replaced by ferro_properties!, ferro_class_info! and native markup metadata."
@@ -828,8 +828,8 @@
     "LinedFlowLayout.properties.h": {
       "targets": [
         "src/FerroUI.Controls/register_types.rs",
-        "src/FerroUI.Controls/repeater/markup.rs",
-        "src/FerroUI.Controls/repeater/services_markup.rs"
+        "src/FerroUI.Controls.Repeater/markup.rs",
+        "src/FerroUI.Controls.Repeater/services_markup.rs"
       ],
       "status": "framework-replacement",
       "note": "Generated dependency-property registration is replaced by ferro_properties!, ferro_class_info! and native markup metadata."
@@ -837,8 +837,8 @@
     "LayoutsTestHooks.properties.cpp": {
       "targets": [
         "src/FerroUI.Controls/register_types.rs",
-        "src/FerroUI.Controls/repeater/markup.rs",
-        "src/FerroUI.Controls/repeater/services_markup.rs"
+        "src/FerroUI.Controls.Repeater/markup.rs",
+        "src/FerroUI.Controls.Repeater/services_markup.rs"
       ],
       "status": "framework-replacement",
       "note": "Generated dependency-property registration is replaced by ferro_properties!, ferro_class_info! and native markup metadata."
@@ -846,8 +846,8 @@
     "VirtualizingLayoutContext.properties.cpp": {
       "targets": [
         "src/FerroUI.Controls/register_types.rs",
-        "src/FerroUI.Controls/repeater/markup.rs",
-        "src/FerroUI.Controls/repeater/services_markup.rs"
+        "src/FerroUI.Controls.Repeater/markup.rs",
+        "src/FerroUI.Controls.Repeater/services_markup.rs"
       ],
       "status": "framework-replacement",
       "note": "Generated dependency-property registration is replaced by ferro_properties!, ferro_class_info! and native markup metadata."
@@ -855,8 +855,8 @@
     "NonVirtualizingLayout.properties.cpp": {
       "targets": [
         "src/FerroUI.Controls/register_types.rs",
-        "src/FerroUI.Controls/repeater/markup.rs",
-        "src/FerroUI.Controls/repeater/services_markup.rs"
+        "src/FerroUI.Controls.Repeater/markup.rs",
+        "src/FerroUI.Controls.Repeater/services_markup.rs"
       ],
       "status": "framework-replacement",
       "note": "Generated dependency-property registration is replaced by ferro_properties!, ferro_class_info! and native markup metadata."
@@ -864,8 +864,8 @@
     "RecyclePool.properties.h": {
       "targets": [
         "src/FerroUI.Controls/register_types.rs",
-        "src/FerroUI.Controls/repeater/markup.rs",
-        "src/FerroUI.Controls/repeater/services_markup.rs"
+        "src/FerroUI.Controls.Repeater/markup.rs",
+        "src/FerroUI.Controls.Repeater/services_markup.rs"
       ],
       "status": "framework-replacement",
       "note": "Generated dependency-property registration is replaced by ferro_properties!, ferro_class_info! and native markup metadata."
@@ -873,8 +873,8 @@
     "RepeaterTestHooks.properties.cpp": {
       "targets": [
         "src/FerroUI.Controls/register_types.rs",
-        "src/FerroUI.Controls/repeater/markup.rs",
-        "src/FerroUI.Controls/repeater/services_markup.rs"
+        "src/FerroUI.Controls.Repeater/markup.rs",
+        "src/FerroUI.Controls.Repeater/services_markup.rs"
       ],
       "status": "framework-replacement",
       "note": "Generated dependency-property registration is replaced by ferro_properties!, ferro_class_info! and native markup metadata."
@@ -882,8 +882,8 @@
     "ElementFactory.properties.cpp": {
       "targets": [
         "src/FerroUI.Controls/register_types.rs",
-        "src/FerroUI.Controls/repeater/markup.rs",
-        "src/FerroUI.Controls/repeater/services_markup.rs"
+        "src/FerroUI.Controls.Repeater/markup.rs",
+        "src/FerroUI.Controls.Repeater/services_markup.rs"
       ],
       "status": "framework-replacement",
       "note": "Generated dependency-property registration is replaced by ferro_properties!, ferro_class_info! and native markup metadata."
@@ -891,8 +891,8 @@
     "LinedFlowLayoutItemCollectionTransitionProvider.properties.cpp": {
       "targets": [
         "src/FerroUI.Controls/register_types.rs",
-        "src/FerroUI.Controls/repeater/markup.rs",
-        "src/FerroUI.Controls/repeater/services_markup.rs"
+        "src/FerroUI.Controls.Repeater/markup.rs",
+        "src/FerroUI.Controls.Repeater/services_markup.rs"
       ],
       "status": "framework-replacement",
       "note": "Generated dependency-property registration is replaced by ferro_properties!, ferro_class_info! and native markup metadata."
@@ -900,8 +900,8 @@
     "UniformGridLayoutState.properties.cpp": {
       "targets": [
         "src/FerroUI.Controls/register_types.rs",
-        "src/FerroUI.Controls/repeater/markup.rs",
-        "src/FerroUI.Controls/repeater/services_markup.rs"
+        "src/FerroUI.Controls.Repeater/markup.rs",
+        "src/FerroUI.Controls.Repeater/services_markup.rs"
       ],
       "status": "framework-replacement",
       "note": "Generated dependency-property registration is replaced by ferro_properties!, ferro_class_info! and native markup metadata."
@@ -909,8 +909,8 @@
     "FlowLayout.properties.h": {
       "targets": [
         "src/FerroUI.Controls/register_types.rs",
-        "src/FerroUI.Controls/repeater/markup.rs",
-        "src/FerroUI.Controls/repeater/services_markup.rs"
+        "src/FerroUI.Controls.Repeater/markup.rs",
+        "src/FerroUI.Controls.Repeater/services_markup.rs"
       ],
       "status": "framework-replacement",
       "note": "Generated dependency-property registration is replaced by ferro_properties!, ferro_class_info! and native markup metadata."
@@ -918,8 +918,8 @@
     "SelectionModel.properties.cpp": {
       "targets": [
         "src/FerroUI.Controls/register_types.rs",
-        "src/FerroUI.Controls/repeater/markup.rs",
-        "src/FerroUI.Controls/repeater/services_markup.rs"
+        "src/FerroUI.Controls.Repeater/markup.rs",
+        "src/FerroUI.Controls.Repeater/services_markup.rs"
       ],
       "status": "framework-replacement",
       "note": "Generated dependency-property registration is replaced by ferro_properties!, ferro_class_info! and native markup metadata."
@@ -927,8 +927,8 @@
     "FlowLayoutState.properties.cpp": {
       "targets": [
         "src/FerroUI.Controls/register_types.rs",
-        "src/FerroUI.Controls/repeater/markup.rs",
-        "src/FerroUI.Controls/repeater/services_markup.rs"
+        "src/FerroUI.Controls.Repeater/markup.rs",
+        "src/FerroUI.Controls.Repeater/services_markup.rs"
       ],
       "status": "framework-replacement",
       "note": "Generated dependency-property registration is replaced by ferro_properties!, ferro_class_info! and native markup metadata."
@@ -936,8 +936,8 @@
     "ItemsRepeaterScrollHost.properties.cpp": {
       "targets": [
         "src/FerroUI.Controls/register_types.rs",
-        "src/FerroUI.Controls/repeater/markup.rs",
-        "src/FerroUI.Controls/repeater/services_markup.rs"
+        "src/FerroUI.Controls.Repeater/markup.rs",
+        "src/FerroUI.Controls.Repeater/services_markup.rs"
       ],
       "status": "framework-replacement",
       "note": "Generated dependency-property registration is replaced by ferro_properties!, ferro_class_info! and native markup metadata."
@@ -945,8 +945,8 @@
     "ItemsRepeater.properties.h": {
       "targets": [
         "src/FerroUI.Controls/register_types.rs",
-        "src/FerroUI.Controls/repeater/markup.rs",
-        "src/FerroUI.Controls/repeater/services_markup.rs"
+        "src/FerroUI.Controls.Repeater/markup.rs",
+        "src/FerroUI.Controls.Repeater/services_markup.rs"
       ],
       "status": "framework-replacement",
       "note": "Generated dependency-property registration is replaced by ferro_properties!, ferro_class_info! and native markup metadata."
@@ -954,8 +954,8 @@
     "RecyclePool.properties.cpp": {
       "targets": [
         "src/FerroUI.Controls/register_types.rs",
-        "src/FerroUI.Controls/repeater/markup.rs",
-        "src/FerroUI.Controls/repeater/services_markup.rs"
+        "src/FerroUI.Controls.Repeater/markup.rs",
+        "src/FerroUI.Controls.Repeater/services_markup.rs"
       ],
       "status": "framework-replacement",
       "note": "Generated dependency-property registration is replaced by ferro_properties!, ferro_class_info! and native markup metadata."
@@ -963,8 +963,8 @@
     "RecyclingElementFactory.properties.h": {
       "targets": [
         "src/FerroUI.Controls/register_types.rs",
-        "src/FerroUI.Controls/repeater/markup.rs",
-        "src/FerroUI.Controls/repeater/services_markup.rs"
+        "src/FerroUI.Controls.Repeater/markup.rs",
+        "src/FerroUI.Controls.Repeater/services_markup.rs"
       ],
       "status": "framework-replacement",
       "note": "Generated dependency-property registration is replaced by ferro_properties!, ferro_class_info! and native markup metadata."
@@ -972,8 +972,8 @@
     "ItemCollectionTransitionProvider.properties.h": {
       "targets": [
         "src/FerroUI.Controls/register_types.rs",
-        "src/FerroUI.Controls/repeater/markup.rs",
-        "src/FerroUI.Controls/repeater/services_markup.rs"
+        "src/FerroUI.Controls.Repeater/markup.rs",
+        "src/FerroUI.Controls.Repeater/services_markup.rs"
       ],
       "status": "framework-replacement",
       "note": "Generated dependency-property registration is replaced by ferro_properties!, ferro_class_info! and native markup metadata."
@@ -981,8 +981,8 @@
     "NonVirtualizingLayoutContext.properties.cpp": {
       "targets": [
         "src/FerroUI.Controls/register_types.rs",
-        "src/FerroUI.Controls/repeater/markup.rs",
-        "src/FerroUI.Controls/repeater/services_markup.rs"
+        "src/FerroUI.Controls.Repeater/markup.rs",
+        "src/FerroUI.Controls.Repeater/services_markup.rs"
       ],
       "status": "framework-replacement",
       "note": "Generated dependency-property registration is replaced by ferro_properties!, ferro_class_info! and native markup metadata."
@@ -991,7 +991,7 @@
   "api_signature_overrides": {
     "VirtualizingLayoutContext::Microsoft.UI.Xaml.UIElement GetOrCreateElementAt(Int32 index)": {
       "targets": [
-        "src/FerroUI.Controls/repeater/layouts/layout_context.rs"
+        "src/FerroUI.Controls.Repeater/layouts/layout_context.rs"
       ],
       "symbols": [
         "get_or_create_element_at"
@@ -1000,7 +1000,7 @@
     },
     "VirtualizingLayoutContext::Microsoft.UI.Xaml.UIElement GetOrCreateElementAt(Int32 index, ElementRealizationOptions options)": {
       "targets": [
-        "src/FerroUI.Controls/repeater/layouts/layout_context.rs"
+        "src/FerroUI.Controls.Repeater/layouts/layout_context.rs"
       ],
       "symbols": [
         "get_or_create_element_at_with_options"
@@ -1009,7 +1009,7 @@
     },
     "RecyclePool::void PutElement(Microsoft.UI.Xaml.UIElement element, String key)": {
       "targets": [
-        "src/FerroUI.Controls/repeater/recycle_pool.rs"
+        "src/FerroUI.Controls.Repeater/recycle_pool.rs"
       ],
       "symbols": [
         "put_element"
@@ -1018,7 +1018,7 @@
     },
     "RecyclePool::void PutElement(Microsoft.UI.Xaml.UIElement element, String key, Microsoft.UI.Xaml.UIElement owner)": {
       "targets": [
-        "src/FerroUI.Controls/repeater/recycle_pool.rs"
+        "src/FerroUI.Controls.Repeater/recycle_pool.rs"
       ],
       "symbols": [
         "put_element_with_owner"
@@ -1027,7 +1027,7 @@
     },
     "RecyclePool::Microsoft.UI.Xaml.UIElement TryGetElement(String key)": {
       "targets": [
-        "src/FerroUI.Controls/repeater/recycle_pool.rs"
+        "src/FerroUI.Controls.Repeater/recycle_pool.rs"
       ],
       "symbols": [
         "try_get_element"
@@ -1036,7 +1036,7 @@
     },
     "RecyclePool::Microsoft.UI.Xaml.UIElement TryGetElement(String key, Microsoft.UI.Xaml.UIElement owner)": {
       "targets": [
-        "src/FerroUI.Controls/repeater/recycle_pool.rs"
+        "src/FerroUI.Controls.Repeater/recycle_pool.rs"
       ],
       "symbols": [
         "try_get_element_with_owner"
@@ -1045,7 +1045,7 @@
     },
     "IndexPath::static IndexPath CreateFrom(Int32 index)": {
       "targets": [
-        "src/FerroUI.Controls/repeater/selection/index_path.rs"
+        "src/FerroUI.Controls.Repeater/selection/index_path.rs"
       ],
       "symbols": [
         "create_from"
@@ -1054,7 +1054,7 @@
     },
     "IndexPath::static IndexPath CreateFrom(Int32 groupIndex, Int32 itemIndex)": {
       "targets": [
-        "src/FerroUI.Controls/repeater/selection/index_path.rs"
+        "src/FerroUI.Controls.Repeater/selection/index_path.rs"
       ],
       "symbols": [
         "create_from_group_and_item_index"
@@ -1063,7 +1063,7 @@
     },
     "SelectionModel::void SetAnchorIndex(Int32 index)": {
       "targets": [
-        "src/FerroUI.Controls/repeater/selection/selection_model.rs"
+        "src/FerroUI.Controls.Repeater/selection/selection_model.rs"
       ],
       "symbols": [
         "set_anchor_index_flat"
@@ -1072,7 +1072,7 @@
     },
     "SelectionModel::void SetAnchorIndex(Int32 groupIndex, Int32 itemIndex)": {
       "targets": [
-        "src/FerroUI.Controls/repeater/selection/selection_model.rs"
+        "src/FerroUI.Controls.Repeater/selection/selection_model.rs"
       ],
       "symbols": [
         "set_anchor_index_with_group"
@@ -1081,7 +1081,7 @@
     },
     "SelectionModel::void Select(Int32 index)": {
       "targets": [
-        "src/FerroUI.Controls/repeater/selection/selection_model.rs"
+        "src/FerroUI.Controls.Repeater/selection/selection_model.rs"
       ],
       "symbols": [
         "select"
@@ -1090,7 +1090,7 @@
     },
     "SelectionModel::void Select(Int32 groupIndex, Int32 itemIndex)": {
       "targets": [
-        "src/FerroUI.Controls/repeater/selection/selection_model.rs"
+        "src/FerroUI.Controls.Repeater/selection/selection_model.rs"
       ],
       "symbols": [
         "select_with_group"
@@ -1099,7 +1099,7 @@
     },
     "SelectionModel::void Deselect(Int32 index)": {
       "targets": [
-        "src/FerroUI.Controls/repeater/selection/selection_model.rs"
+        "src/FerroUI.Controls.Repeater/selection/selection_model.rs"
       ],
       "symbols": [
         "deselect"
@@ -1108,7 +1108,7 @@
     },
     "SelectionModel::void Deselect(Int32 groupIndex, Int32 itemIndex)": {
       "targets": [
-        "src/FerroUI.Controls/repeater/selection/selection_model.rs"
+        "src/FerroUI.Controls.Repeater/selection/selection_model.rs"
       ],
       "symbols": [
         "deselect_with_group"
@@ -1117,7 +1117,7 @@
     },
     "SelectionModel::Windows.Foundation.IReference<Boolean> IsSelected(Int32 index)": {
       "targets": [
-        "src/FerroUI.Controls/repeater/selection/selection_model.rs"
+        "src/FerroUI.Controls.Repeater/selection/selection_model.rs"
       ],
       "symbols": [
         "is_selected"
@@ -1126,7 +1126,7 @@
     },
     "SelectionModel::Windows.Foundation.IReference<Boolean> IsSelected(Int32 groupIndex, Int32 itemIndex)": {
       "targets": [
-        "src/FerroUI.Controls/repeater/selection/selection_model.rs"
+        "src/FerroUI.Controls.Repeater/selection/selection_model.rs"
       ],
       "symbols": [
         "is_selected_with_group"
@@ -1135,7 +1135,7 @@
     },
     "SelectionModel::void SelectRangeFromAnchor(Int32 index)": {
       "targets": [
-        "src/FerroUI.Controls/repeater/selection/selection_model.rs"
+        "src/FerroUI.Controls.Repeater/selection/selection_model.rs"
       ],
       "symbols": [
         "select_range_from_anchor"
@@ -1144,7 +1144,7 @@
     },
     "SelectionModel::void SelectRangeFromAnchor(Int32 groupIndex, Int32 itemIndex)": {
       "targets": [
-        "src/FerroUI.Controls/repeater/selection/selection_model.rs"
+        "src/FerroUI.Controls.Repeater/selection/selection_model.rs"
       ],
       "symbols": [
         "select_range_from_anchor_with_group"
@@ -1153,7 +1153,7 @@
     },
     "SelectionModel::void DeselectRangeFromAnchor(Int32 index)": {
       "targets": [
-        "src/FerroUI.Controls/repeater/selection/selection_model.rs"
+        "src/FerroUI.Controls.Repeater/selection/selection_model.rs"
       ],
       "symbols": [
         "deselect_range_from_anchor"
@@ -1162,7 +1162,7 @@
     },
     "SelectionModel::void DeselectRangeFromAnchor(Int32 groupIndex, Int32 itemIndex)": {
       "targets": [
-        "src/FerroUI.Controls/repeater/selection/selection_model.rs"
+        "src/FerroUI.Controls.Repeater/selection/selection_model.rs"
       ],
       "symbols": [
         "deselect_range_from_anchor_with_group"
@@ -1174,7 +1174,7 @@
     {
       "source": "ChildrenInTabFocusOrderIterable / ItemsRepeater tab-focus ordering",
       "targets": [
-        "src/FerroUI.Controls/repeater/items_repeater.rs",
+        "src/FerroUI.Controls.Repeater/items_repeater.rs",
         "src/FerroUI.Base/input/i_custom_keyboard_navigation.rs",
         "src/FerroUI.Base/input/focus_helpers.rs"
       ],

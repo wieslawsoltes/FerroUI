@@ -74,8 +74,6 @@ const NAMESPACES: &[(&str, &str)] = &[
     ("ferroui_controls::platform::platform_feedback", "FerroUI.Controls"),
     ("ferroui_controls::presenters", "FerroUI.Controls.Presenters"),
     ("ferroui_controls::primitives", "FerroUI.Controls.Primitives"),
-    ("ferroui_controls::repeater", "FerroUI.Controls"),
-    ("ferroui_controls::repeater::repeater_automation_peer", "FerroUI.Automation.Peers"),
     ("ferroui_controls::shapes", "FerroUI.Controls.Shapes"),
     ("ferroui_controls::split_view::split_view_template_settings", "FerroUI.Controls.Primitives"),
     ("ferroui_controls::templates", "FerroUI.Controls.Templates"),
@@ -123,41 +121,10 @@ pub fn register_types() {
         crate::rust_paths::register_rust_paths();
         MarkupAssembly::register(&ASSEMBLY);
         crate::markup_types::register();
-        crate::repeater::markup::register_types();
-        crate::repeater::layouts::layouts_markup::register_types();
-        crate::repeater::services_markup::register_types();
-        crate::repeater::selection::register_markup_types();
     });
 }
 
 const TYPES: &[&TypeInfo] = types![
-    // WinUI repeater family, implemented with native controls and layouts.
-    crate::repeater::ItemsRepeater,
-    crate::repeater::ItemsRepeaterScrollHost,
-    crate::repeater::LayoutPanel,
-    crate::repeater::RepeaterAutomationPeer,
-    crate::repeater::Layout,
-    crate::repeater::VirtualizingLayout,
-    crate::repeater::NonVirtualizingLayout,
-    crate::repeater::LayoutContext,
-    crate::repeater::VirtualizingLayoutContext,
-    crate::repeater::NonVirtualizingLayoutContext,
-    crate::repeater::StackLayout,
-    crate::repeater::StackLayoutState,
-    crate::repeater::FlowLayout,
-    crate::repeater::FlowLayoutState,
-    crate::repeater::UniformGridLayout,
-    crate::repeater::UniformGridLayoutState,
-    crate::repeater::LinedFlowLayout,
-    crate::repeater::ElementFactory,
-    crate::repeater::RecyclePool,
-    crate::repeater::RecyclingElementFactory,
-    crate::repeater::RepeaterBindingHelper,
-    crate::repeater::ItemCollectionTransitionProvider,
-    crate::repeater::LinedFlowLayoutItemCollectionTransitionProvider,
-    crate::repeater::RepeaterTestHooks,
-    crate::repeater::LayoutsTestHooks,
-    crate::repeater::animation_manager::RepeaterAnimationProxy,
     // FerroUI
     crate::application::Application,
     // FerroUI.Animation

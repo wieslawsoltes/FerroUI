@@ -210,9 +210,9 @@ export class FerroDOM {
         return globalThis.navigator?.language ?? null;
     }
 
+    // Whether the user lets animations play (not in the original): asked for each animation,
+    // so that a change of the preference applies to the next one.
     public static getAnimationsEnabled(globalThis: Window): boolean {
-        // Read at animation scheduling time so changing the system preference
-        // also affects an already running application.
         return globalThis.matchMedia === undefined ||
             !globalThis.matchMedia("(prefers-reduced-motion: reduce)").matches;
     }

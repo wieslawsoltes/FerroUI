@@ -34,7 +34,11 @@ pub fn capture_if_asked(window: &Ref<Window>, name: &'static str) {
             capture(&window, &directory.join(format!("{name}.png")));
             window.close();
         },
-        Duration::from_millis(1500),
+        // `FERROUI_SEVEN_GUIS_SHOTS_DELAY_MS` waits longer (a picture after
+        // something changed while the window is shown).
+        Duration::from_millis(
+            std::env::var("FERROUI_SEVEN_GUIS_SHOTS_DELAY_MS").ok().and_then(|ms| ms.parse().ok()).unwrap_or(1500),
+        ),
         DispatcherPriority::NORMAL,
     );
 }

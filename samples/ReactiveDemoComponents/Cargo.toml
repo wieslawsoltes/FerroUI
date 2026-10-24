@@ -1,0 +1,39 @@
+[package]
+name = "reactive-demo-components"
+description = "The getting-started sample of ReactiveUI, a crates.io browser with a throttled search, written with components that run again, hooks, use_future, suspense, an error boundary and the router of ferroui-view, in the WinUI 3 theme"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+publish = false
+
+# The scenario tests are a module of the library (`tests.rs`), not integration test targets.
+autotests = false
+
+[lib]
+path = "lib.rs"
+doctest = false
+
+[[bin]]
+name = "reactive-demo-components"
+path = "main.rs"
+test = false
+
+[features]
+default = ["online"]
+# The search calls the API of crates.io (the service of reactive-demo). Without it the search runs
+# over the in-memory catalogue of crates of reactive-demo.
+online = ["reactive-demo/online"]
+
+[dependencies]
+ferroui-base = { workspace = true }
+ferroui-controls = { workspace = true }
+ferroui-system = { workspace = true }
+ferroui-view = { workspace = true, features = ["desktop"] }
+ferroui-themes-winui = { workspace = true }
+# The search service, the metadata of a crate and the in-memory catalogue (`crate_search`).
+reactive-demo = { path = "../ReactiveDemo", default-features = false }
+
+[dev-dependencies]
+# The test application of the scenario tests (a dispatcher of the thread).
+ferroui-controls = { workspace = true, features = ["testing"] }

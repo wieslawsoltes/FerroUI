@@ -24,6 +24,11 @@ on:
         description: RUSTFLAGS for the build of the ref, not of the baseline (experiments; empty for none)
         required: false
         default: ""
+      windows:
+        description: Also build the ControlCatalog and the WinUI theme gallery on Windows (x86-64) with the release and the dist profile, and report the sizes of their executables (docs/binary-size.md)
+        type: boolean
+        required: false
+        default: false
 
 permissions:
   contents: read
@@ -129,3 +134,120 @@ jobs:
           name: perf-report
           path: "*.json"
           if-no-files-found: ignore
+
+  # The sizes of the executables of the ControlCatalog and the WinUI theme gallery on Windows
+  # (x86-64), with the release profile and the dist profile, of the ref and of the baseline: one job
+  # per tree and profile, each builds the two executables in one cargo invocation (so that the
+  # features of their common dependencies are those of every measurement) and writes their sizes
+  # and their section tables to the job summary. The symbols of a Windows executable are in its
+  # PDB, so the sizes are those of what is shipped (docs/binary-size.md, section 3.3).
+  windows-size:
+    name: Executable sizes (Windows x86-64, ${{ matrix.tree }}, ${{ matrix.profile }})
+    if: inputs.windows
+    runs-on: windows-latest
+    timeout-minutes: 150
+    strategy:
+      fail-fast: false
+      matrix:
+        tree: [measured, baseline]
+        profile: [release, dist]
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - name: Check out the tree
+        if: matrix.tree == 'measured' || inputs.baseline != ''
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ matrix.tree == 'measured' && inputs.ref || inputs.baseline }}
+          path: tree
+      - uses: dtolnay/rust-toolchain@stable
+        if: matrix.tree == 'measured' || inputs.baseline != ''
+      - name: Build
+        if: matrix.tree == 'measured' || inputs.baseline != ''
+        working-directory: tree
+        env:
+          CARGO_TARGET_DIR: ${{ github.workspace }}/target
+          PROFILE: ${{ matrix.profile }}
+        run: |
+          start=$(date +%s)
+          cargo build --locked --profile "$PROFILE" -p control-catalog-desktop -p winui-theme-gallery --bin control-catalog-desktop --bin winui-theme-gallery
+          echo "BUILD_SECONDS=$(( $(date +%s) - start ))" >> "$GITHUB_ENV"
+      - name: Sizes
+        if: matrix.tree == 'measured' || inputs.baseline != ''
+        env:
+          TREE: ${{ matrix.tree }}
+          REF: ${{ matrix.tree == 'measured' && inputs.ref || inputs.baseline }}
+          PROFILE: ${{ matrix.profile }}
+          TARGET: ${{ github.workspace }}/target
+        run: |
+          {
+            echo "## Windows x86-64: \`$REF\` ($TREE) at \`$(git -C tree rev-parse HEAD)\`, profile \`$PROFILE\`"
+            echo
+            echo "Built in $BUILD_SECONDS s."
+            echo
+            echo '```'
+            python - "$TARGET/$PROFILE/control-catalog-desktop.exe" "$TARGET/$PROFILE/winui-theme-gallery.exe" <<'PY'
+          import struct, sys
+          for path in sys.argv[1:]:
+              data = open(path, 'rb').read()
+              pe = struct.unpack_from('<I', data, 0x3C)[0]
+              sections = struct.unpack_from('<H', data, pe + 6)[0]
+              table = pe + 24 + struct.unpack_from('<H', data, pe + 20)[0]
+              print(f"{path.replace(chr(92), '/').rsplit('/', 1)[-1]}: {len(data)} bytes ({len(data) / 1e6:.2f} MB)")
+              for i in range(sections):
+                  name, virtual, _, raw = struct.unpack_from('<8sIII', data, table + 40 * i)
+                  print(f"  {name.rstrip(bytes(1)).decode():8s} {raw / 1e6:8.2f} MB on disk, {virtual / 1e6:8.2f} MB in memory")
+          PY
+            echo '```'
+          } | tee -a "$GITHUB_STEP_SUMMARY"
+      # What the executable of the catalog is made of, by library: the measured tree with the
+      # release profile is linked once more with a map of the linker (`/MAP`), and the code and
+      # data of each symbol (the distance to the next one) are summed by the library or the object
+      # that defines it. With LTO the Rust code of every crate is in the objects of the final crate.
+      - name: Attribution by library (the catalog, measured tree, release profile)
+        if: matrix.tree == 'measured' && matrix.profile == 'release'
+        working-directory: tree
+        env:
+          CARGO_TARGET_DIR: ${{ github.workspace }}/target
+          MAP: ${{ github.workspace }}/control-catalog-desktop.map
+        run: |
+          cargo rustc --locked --release -p control-catalog-desktop --bin control-catalog-desktop -- -C "link-arg=/MAP:$MAP"
+          {
+            echo "## Windows x86-64: the release executable of the catalog by library (MB)"
+            echo
+            echo '```'
+            python - "$MAP" <<'PY'
+          import collections, re, sys
+          rows = []
+          publics = False
+          for line in open(sys.argv[1], errors='replace'):
+              if 'Publics by Value' in line:
+                  publics = True
+                  continue
+              if not publics:
+                  continue
+              m = re.match(r'\s*([0-9a-fA-F]{4}):([0-9a-fA-F]{8})\s+(\S+)\s+([0-9a-fA-F]{16})\s+(?:f\s+)?(?:i\s+)?(\S+)\s*$', line)
+              if m:
+                  rows.append((int(m.group(4), 16), m.group(1), m.group(5)))
+          rows.sort()
+          sizes = collections.Counter()
+          for (address, section, origin), following in zip(rows, rows[1:] + [None]):
+              if following is None or following[1] != section:
+                  continue
+              size = following[0] - address
+              if 0 < size < 64_000_000:
+                  library = origin.split(':')[0] if ':' in origin else origin
+                  library = re.sub(r'-[0-9a-f]{16}', '', library.replace('\\', '/').rsplit('/', 1)[-1])
+                  # The objects of a crate after thin LTO: `<binary>.<crate>.<crate>.<hash>-cgu.<n>.rcgu.o`.
+                  crate = re.match(r'[a-z0-9_]+\.([a-z0-9_]+)\.\1\.[0-9a-f]+-cgu\.[0-9]+\.rcgu', library)
+                  library = f'{crate.group(1)} (Rust)' if crate else re.sub(r'\.[0-9a-z_]+-cgu\.[0-9]+\.rcgu.*$|\.lib$', '', library)
+                  sizes[library] += size
+          total = sum(sizes.values())
+          print(f'{total / 1e6:8.2f} attributed')
+          for library, size in sizes.most_common(30):
+              print(f'{size / 1e6:8.2f}  {100 * size / total:5.1f} %  {library}')
+          PY
+            echo '```'
+          } | tee -a "$GITHUB_STEP_SUMMARY"
+

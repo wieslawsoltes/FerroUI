@@ -6,9 +6,9 @@ use crate::pages::ItemsRepeaterPage;
 use ferroui_base::interactivity::RoutedEventArgs;
 use ferroui_base::threading::Dispatcher;
 use ferroui_base::{Ref, Vector};
-use ferroui_controls::{
-    Button, Control, FlowLayout, ItemsRepeater, LinedFlowLayout, ScrollViewer, StackLayout,
-    UniformGridLayout, Window,
+use ferroui_controls::{Button, Control, ScrollViewer, Window};
+use ferroui_controls_repeater::{
+    FlowLayout, ItemsRepeater, LinedFlowLayout, StackLayout, UniformGridLayout,
 };
 
 fn show(page: &Ref<ItemsRepeaterPage>) -> Ref<Window> {

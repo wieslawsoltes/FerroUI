@@ -66,6 +66,10 @@
 
   <!-- HeaderNavigationButtonStyle of the template of DefaultCalendarViewStyle. -->
   <ControlTheme x:Key="CalendarItemHeaderNavigationButtonStyle" TargetType="Button">
+    <!-- The defaults of a WinUI 3 control, which its style leaves unset and its template binds
+         (FerroUI's defaults are Stretch). Deviation (winui-theme/DEVIATIONS.md, G-27). -->
+    <Setter Property="HorizontalContentAlignment" Value="Center" />
+    <Setter Property="VerticalContentAlignment" Value="Center" />
     <Setter Property="HorizontalAlignment" Value="Stretch" />
     <Setter Property="VerticalAlignment" Value="Stretch" />
     <Setter Property="FontFamily" Value="{DynamicResource ContentControlThemeFontFamily}" />
@@ -126,6 +130,10 @@
 
   <!-- NavigationButtonStyle of the template of DefaultCalendarViewStyle. -->
   <ControlTheme x:Key="CalendarItemNavigationButtonStyle" TargetType="Button">
+    <!-- The defaults of a WinUI 3 control, which its style leaves unset and its template binds
+         (FerroUI's defaults are Stretch). Deviation (winui-theme/DEVIATIONS.md, G-27). -->
+    <Setter Property="HorizontalContentAlignment" Value="Center" />
+    <Setter Property="VerticalContentAlignment" Value="Center" />
     <Setter Property="HorizontalAlignment" Value="Stretch" />
     <Setter Property="VerticalAlignment" Value="Stretch" />
     <Setter Property="Background" Value="{DynamicResource CalendarViewNavigationButtonBackground}" />

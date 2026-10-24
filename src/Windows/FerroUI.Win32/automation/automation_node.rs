@@ -259,7 +259,10 @@ impl AutomationNode {
     /// The peer of the node with the number `id`, on the UI thread; `None`
     /// when the peer is gone.
     pub(crate) fn peer_of(id: i32) -> Option<Ref<AutomationPeer>> {
-        Self::entry(id)?.peer.upgrade()
+        // A peer whose control is gone is not an element any more: every call of the node
+        // answers `UIA_E_ELEMENTNOTAVAILABLE` (`invoke_sync`), as for a peer that is gone,
+        // instead of reaching the control (DEVIATIONS.md, Automation peers).
+        Self::entry(id)?.peer.upgrade().filter(|peer| peer.is_element_available())
     }
 
     /// The provider of the node with the number `id`, on the UI thread.

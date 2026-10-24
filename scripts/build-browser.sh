@@ -294,7 +294,8 @@ BUILT="$BUILD_DIR/wasm32-unknown-emscripten/$PROFILE"
 [ "$KIND" = "example" ] && BUILT="$BUILT/examples"
 # The script of the module names the WebAssembly file it loads: the name of the target with `-`
 # replaced by `_` for a binary, the name of the target for an example.
-WASM="$(sed -n 's/.*locateFile("\([^"]*\.wasm\)".*/\1/p; s/.*new URL("\([^"]*\.wasm\)".*/\1/p' "$BUILT/$APPLICATION.js" | head -n 1)"
+# Emscripten's optimized and development output can use either quote style.
+WASM="$(sed -n "s/.*locateFile(['\"]\\([^'\"]*\\.wasm\\)['\"].*/\\1/p; s/.*new URL(['\"]\\([^'\"]*\\.wasm\\)['\"].*/\\1/p" "$BUILT/$APPLICATION.js" | head -n 1)"
 [ -n "$WASM" ] || WASM="$APPLICATION.wasm"
 [ -f "$BUILT/$WASM" ] || { echo "the script of the module loads $WASM, which the build did not write" >&2; exit 1; }
 # The threaded mode: every object that C and C++ code brought to the link (the static archives in

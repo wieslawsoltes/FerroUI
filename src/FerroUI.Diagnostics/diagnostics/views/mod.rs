@@ -1,0 +1,16 @@
+mod control_details_view;
+pub use control_details_view::*;
+mod events_page_view;
+pub use events_page_view::*;
+mod hot_key_page_view;
+pub use hot_key_page_view::*;
+mod layout_explorer_view;
+pub use layout_explorer_view::*;
+mod main_view;
+pub use main_view::*;
+mod main_window;
+pub use main_window::*;
+mod property_value_editor_view;
+pub use property_value_editor_view::*;
+mod tree_page_view;
+pub use tree_page_view::*;

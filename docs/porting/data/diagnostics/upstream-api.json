@@ -1,0 +1,6610 @@
+{
+ "schema": 1,
+ "upstreamCommit": "4af92dcce2e1cdc091565c533de69d9ad8dfde54",
+ "submoduleCommits": {
+  "external/XamlX": "c32d3040e536ae9768233ea5a445697632578bd0"
+ },
+ "split": false,
+ "solutionLayout": {
+  "src": [
+   {
+    "path": "src/Android/Avalonia.Android",
+    "csFiles": 58
+   },
+   {
+    "path": "src/Avalonia.Base",
+    "csFiles": 1193
+   },
+   {
+    "path": "src/Avalonia.Build.Tasks",
+    "csFiles": 10
+   },
+   {
+    "path": "src/Avalonia.Controls",
+    "csFiles": 446
+   },
+   {
+    "path": "src/Avalonia.Controls.ColorPicker",
+    "csFiles": 39
+   },
+   {
+    "path": "src/Avalonia.DesignerSupport",
+    "csFiles": 9
+   },
+   {
+    "path": "src/Avalonia.Desktop",
+    "csFiles": 1
+   },
+   {
+    "path": "src/Avalonia.Diagnostics",
+    "csFiles": 63
+   },
+   {
+    "path": "src/Avalonia.Dialogs",
+    "csFiles": 17
+   },
+   {
+    "path": "src/Avalonia.Fonts.Inter",
+    "csFiles": 3
+   },
+   {
+    "path": "src/Avalonia.FreeDesktop",
+    "csFiles": 17
+   },
+   {
+    "path": "src/Avalonia.Metal",
+    "csFiles": 2
+   },
+   {
+    "path": "src/Avalonia.MicroCom",
+    "csFiles": 1
+   },
+   {
+    "path": "src/Avalonia.Native",
+    "csFiles": 49
+   },
+   {
+    "path": "src/Avalonia.OpenGL",
+    "csFiles": 29
+   },
+   {
+    "path": "src/Avalonia.Remote.Protocol",
+    "csFiles": 14
+   },
+   {
+    "path": "src/Avalonia.Themes.Fluent",
+    "csFiles": 6
+   },
+   {
+    "path": "src/Avalonia.Themes.Simple",
+    "csFiles": 2
+   },
+   {
+    "path": "src/Avalonia.Vulkan",
+    "csFiles": 30
+   },
+   {
+    "path": "src/Avalonia.X11",
+    "csFiles": 61
+   },
+   {
+    "path": "src/Browser/Avalonia.Browser",
+    "csFiles": 51
+   },
+   {
+    "path": "src/Headless/Avalonia.Headless",
+    "csFiles": 9
+   },
+   {
+    "path": "src/Headless/Avalonia.Headless.NUnit",
+    "csFiles": 3
+   },
+   {
+    "path": "src/Headless/Avalonia.Headless.Vnc",
+    "csFiles": 3
+   },
+   {
+    "path": "src/Headless/Avalonia.Headless.XUnit",
+    "csFiles": 8
+   },
+   {
+    "path": "src/Linux/Avalonia.LinuxFramebuffer",
+    "csFiles": 30
+   },
+   {
+    "path": "src/Markup/Avalonia.Markup",
+    "csFiles": 14
+   },
+   {
+    "path": "src/Markup/Avalonia.Markup.Xaml",
+    "csFiles": 47
+   },
+   {
+    "path": "src/Markup/Avalonia.Markup.Xaml.Loader",
+    "csFiles": 65
+   },
+   {
+    "path": "src/Skia/Avalonia.Skia",
+    "csFiles": 53
+   },
+   {
+    "path": "src/Windows/Avalonia.Win32",
+    "csFiles": 91
+   },
+   {
+    "path": "src/Windows/Avalonia.Win32.Automation",
+    "csFiles": 41
+   },
+   {
+    "path": "src/Windows/Avalonia.Win32.Interoperability",
+    "csFiles": 1
+   },
+   {
+    "path": "src/iOS/Avalonia.iOS",
+    "csFiles": 37
+   },
+   {
+    "path": "src/tools/Avalonia.Analyzers",
+    "csFiles": 6
+   },
+   {
+    "path": "src/tools/Avalonia.Designer.HostApp",
+    "csFiles": 3
+   },
+   {
+    "path": "src/tools/Avalonia.Generators",
+    "csFiles": 25
+   },
+   {
+    "path": "src/tools/DevAnalyzers",
+    "csFiles": 3
+   },
+   {
+    "path": "src/tools/DevGenerators",
+    "csFiles": 16
+   }
+  ],
+  "native": [],
+  "external": [
+   {
+    "path": "external/XamlX/src/Benchmarks",
+    "csFiles": 7
+   },
+   {
+    "path": "external/XamlX/src/BenchmarksCompiler",
+    "csFiles": 1
+   },
+   {
+    "path": "external/XamlX/src/XamlX",
+    "csFiles": 87
+   },
+   {
+    "path": "external/XamlX/src/XamlX.IL.Cecil",
+    "csFiles": 22
+   },
+   {
+    "path": "external/XamlX/src/XamlX.Parser.GuiLabs",
+    "csFiles": 3
+   },
+   {
+    "path": "external/XamlX/src/XamlX.Runtime",
+    "csFiles": 1
+   },
+   {
+    "path": "external/XamlX/tests/CecilNetstandardTests",
+    "csFiles": 0
+   },
+   {
+    "path": "external/XamlX/tests/CecilTests",
+    "csFiles": 3
+   },
+   {
+    "path": "external/XamlX/tests/GuilabsParserTests",
+    "csFiles": 0
+   },
+   {
+    "path": "external/XamlX/tests/TestClasses",
+    "csFiles": 1
+   },
+   {
+    "path": "external/XamlX/tests/TypeSystemTest",
+    "csFiles": 13
+   },
+   {
+    "path": "external/XamlX/tests/XamlParserTests",
+    "csFiles": 23
+   }
+  ],
+  "samples": [
+   {
+    "path": "samples/AppWithoutLifetime",
+    "csFiles": 4
+   },
+   {
+    "path": "samples/BindingDemo",
+    "csFiles": 11
+   },
+   {
+    "path": "samples/ControlCatalog",
+    "csFiles": 96
+   },
+   {
+    "path": "samples/ControlCatalog.Android",
+    "csFiles": 3
+   },
+   {
+    "path": "samples/ControlCatalog.Browser",
+    "csFiles": 2
+   },
+   {
+    "path": "samples/ControlCatalog.Desktop",
+    "csFiles": 7
+   },
+   {
+    "path": "samples/ControlCatalog.MacCatalyst",
+    "csFiles": 0
+   },
+   {
+    "path": "samples/ControlCatalog.iOS",
+    "csFiles": 3
+   },
+   {
+    "path": "samples/ControlCatalog.tvOS",
+    "csFiles": 0
+   },
+   {
+    "path": "samples/Generators.Sandbox",
+    "csFiles": 6
+   },
+   {
+    "path": "samples/GpuInterop",
+    "csFiles": 23
+   },
+   {
+    "path": "samples/IntegrationTestApp",
+    "csFiles": 36
+   },
+   {
+    "path": "samples/MiniMvvm",
+    "csFiles": 3
+   },
+   {
+    "path": "samples/PlatformSanityChecks",
+    "csFiles": 2
+   },
+   {
+    "path": "samples/Previewer",
+    "csFiles": 4
+   },
+   {
+    "path": "samples/RemoteDemo",
+    "csFiles": 1
+   },
+   {
+    "path": "samples/RenderDemo",
+    "csFiles": 23
+   },
+   {
+    "path": "samples/SafeAreaDemo",
+    "csFiles": 5
+   },
+   {
+    "path": "samples/SafeAreaDemo.Android",
+    "csFiles": 2
+   },
+   {
+    "path": "samples/SafeAreaDemo.Desktop",
+    "csFiles": 1
+   },
+   {
+    "path": "samples/SafeAreaDemo.iOS",
+    "csFiles": 2
+   },
+   {
+    "path": "samples/SampleControls",
+    "csFiles": 1
+   },
+   {
+    "path": "samples/Sandbox",
+    "csFiles": 3
+   },
+   {
+    "path": "samples/SingleProjectSandbox",
+    "csFiles": 9
+   },
+   {
+    "path": "samples/TextTestApp",
+    "csFiles": 7
+   },
+   {
+    "path": "samples/UnloadableAssemblyLoadContext/UnloadableAssemblyLoadContext",
+    "csFiles": 5
+   },
+   {
+    "path": "samples/UnloadableAssemblyLoadContext/UnloadableAssemblyLoadContextPlug",
+    "csFiles": 3
+   },
+   {
+    "path": "samples/VirtualizationDemo",
+    "csFiles": 13
+   },
+   {
+    "path": "samples/XEmbedSample",
+    "csFiles": 3
+   },
+   {
+    "path": "samples/interop/WindowsInteropTest",
+    "csFiles": 5
+   }
+  ],
+  "tests": [
+   {
+    "path": "tests/Avalonia.Base.UnitTests",
+    "csFiles": 221
+   },
+   {
+    "path": "tests/Avalonia.Benchmarks",
+    "csFiles": 45
+   },
+   {
+    "path": "tests/Avalonia.Build.Tasks.UnitTest",
+    "csFiles": 3
+   },
+   {
+    "path": "tests/Avalonia.Controls.UnitTests",
+    "csFiles": 114
+   },
+   {
+    "path": "tests/Avalonia.DesignerSupport.TestApp",
+    "csFiles": 3
+   },
+   {
+    "path": "tests/Avalonia.DesignerSupport.Tests",
+    "csFiles": 3
+   },
+   {
+    "path": "tests/Avalonia.Generators.Tests",
+    "csFiles": 10
+   },
+   {
+    "path": "tests/Avalonia.Headless.NUnit.PerAssembly.UnitTests",
+    "csFiles": 1
+   },
+   {
+    "path": "tests/Avalonia.Headless.NUnit.PerTest.UnitTests",
+    "csFiles": 1
+   },
+   {
+    "path": "tests/Avalonia.Headless.XUnit.PerAssembly.UnitTests",
+    "csFiles": 1
+   },
+   {
+    "path": "tests/Avalonia.Headless.XUnit.PerTest.UnitTests",
+    "csFiles": 1
+   },
+   {
+    "path": "tests/Avalonia.IntegrationTests.Appium",
+    "csFiles": 30
+   },
+   {
+    "path": "tests/Avalonia.IntegrationTests.Win32",
+    "csFiles": 9
+   },
+   {
+    "path": "tests/Avalonia.LeakTests",
+    "csFiles": 7
+   },
+   {
+    "path": "tests/Avalonia.Markup.UnitTests",
+    "csFiles": 28
+   },
+   {
+    "path": "tests/Avalonia.Markup.Xaml.UnitTests",
+    "csFiles": 60
+   },
+   {
+    "path": "tests/Avalonia.RenderTests.WpfCompare",
+    "csFiles": 4
+   },
+   {
+    "path": "tests/Avalonia.Skia.RenderTests",
+    "csFiles": 1
+   },
+   {
+    "path": "tests/Avalonia.Skia.UnitTests",
+    "csFiles": 19
+   },
+   {
+    "path": "tests/Avalonia.UnitTests",
+    "csFiles": 28
+   },
+   {
+    "path": "tests/BuildTests/BuildTests",
+    "csFiles": 4
+   },
+   {
+    "path": "tests/BuildTests/BuildTests.Android",
+    "csFiles": 2
+   },
+   {
+    "path": "tests/BuildTests/BuildTests.Browser",
+    "csFiles": 2
+   },
+   {
+    "path": "tests/BuildTests/BuildTests.Desktop",
+    "csFiles": 1
+   },
+   {
+    "path": "tests/BuildTests/BuildTests.NativeAot",
+    "csFiles": 1
+   },
+   {
+    "path": "tests/BuildTests/BuildTests.WpfHybrid",
+    "csFiles": 4
+   },
+   {
+    "path": "tests/BuildTests/BuildTests.iOS",
+    "csFiles": 2
+   },
+   {
+    "path": "tests/TestFiles/BuildTasks/PInvoke",
+    "csFiles": 3
+   }
+  ]
+ },
+ "projects": [
+  {
+   "name": "Avalonia.Diagnostics",
+   "path": "src/Avalonia.Diagnostics",
+   "detail": "full",
+   "scope": "in",
+   "rust": "src/FerroUI.Diagnostics",
+   "crate": "ferroui-diagnostics",
+   "phase": "DevTools",
+   "priority": "P2",
+   "files": [
+    {
+     "path": "DevToolsExtensions.cs",
+     "lines": 86,
+     "types": [
+      {
+       "name": "DevToolsExtensions",
+       "kind": "class",
+       "namespace": "Avalonia",
+       "fullName": "Avalonia.DevToolsExtensions",
+       "accessibility": "public",
+       "line": 10,
+       "modifiers": [
+        "static"
+       ],
+       "members": [
+        {
+         "kind": "method",
+         "name": "AttachDevTools",
+         "accessibility": "public",
+         "modifiers": [
+          "static"
+         ],
+         "line": 16,
+         "type": "void",
+         "params": 1,
+         "extension": true,
+         "signature": "static void AttachDevTools(this TopLevel root)"
+        },
+        {
+         "kind": "method",
+         "name": "AttachDevTools",
+         "accessibility": "public",
+         "modifiers": [
+          "static"
+         ],
+         "line": 26,
+         "type": "void",
+         "params": 2,
+         "extension": true,
+         "signature": "static void AttachDevTools(this TopLevel root, KeyGesture gesture)"
+        },
+        {
+         "kind": "method",
+         "name": "AttachDevTools",
+         "accessibility": "public",
+         "modifiers": [
+          "static"
+         ],
+         "line": 36,
+         "type": "void",
+         "params": 2,
+         "extension": true,
+         "signature": "static void AttachDevTools(this TopLevel root, DevToolsOptions options)"
+        },
+        {
+         "kind": "method",
+         "name": "AttachDevTools",
+         "accessibility": "public",
+         "modifiers": [
+          "static"
+         ],
+         "line": 45,
+         "type": "void",
+         "params": 1,
+         "extension": true,
+         "signature": "static void AttachDevTools(this Application application)"
+        },
+        {
+         "kind": "method",
+         "name": "AttachDevTools",
+         "accessibility": "public",
+         "modifiers": [
+          "static"
+         ],
+         "line": 80,
+         "type": "void",
+         "params": 2,
+         "extension": true,
+         "signature": "static void AttachDevTools(this Application application, DevToolsOptions options)"
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "path": "Diagnostics/Conventions.cs",
+     "lines": 9,
+     "types": [
+      {
+       "name": "Conventions",
+       "kind": "class",
+       "namespace": "Avalonia.Diagnostics",
+       "fullName": "Avalonia.Diagnostics.Conventions",
+       "accessibility": "internal",
+       "line": 3,
+       "modifiers": [
+        "static"
+       ],
+       "members": [
+        {
+         "kind": "property",
+         "name": "DefaultScreenshotHandler",
+         "accessibility": "public",
+         "modifiers": [
+          "static"
+         ],
+         "line": 5,
+         "type": "IScreenshotHandler",
+         "accessors": {
+          "get": "public"
+         },
+         "signature": "static IScreenshotHandler DefaultScreenshotHandler { get; }"
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "path": "Diagnostics/DevTools.cs",
+     "lines": 167,
+     "types": [
+      {
+       "name": "DevTools",
+       "kind": "class",
+       "namespace": "Avalonia.Diagnostics",
+       "fullName": "Avalonia.Diagnostics.DevTools",
+       "accessibility": "internal",
+       "line": 14,
+       "modifiers": [
+        "static"
+       ],
+       "members": [
+        {
+         "kind": "method",
+         "name": "Attach",
+         "accessibility": "public",
+         "modifiers": [
+          "static"
+         ],
+         "line": 18,
+         "type": "IDisposable",
+         "params": 2,
+         "signature": "static IDisposable Attach(TopLevel root, KeyGesture gesture)"
+        },
+        {
+         "kind": "method",
+         "name": "Attach",
+         "accessibility": "public",
+         "modifiers": [
+          "static"
+         ],
+         "line": 26,
+         "type": "IDisposable",
+         "params": 2,
+         "signature": "static IDisposable Attach(TopLevel root, DevToolsOptions options)"
+        },
+        {
+         "kind": "method",
+         "name": "Open",
+         "accessibility": "public",
+         "modifiers": [
+          "static"
+         ],
+         "line": 42,
+         "type": "IDisposable",
+         "params": 2,
+         "signature": "static IDisposable Open(TopLevel root, DevToolsOptions options)"
+        },
+        {
+         "kind": "method",
+         "name": "Open",
+         "accessibility": "internal",
+         "modifiers": [
+          "static"
+         ],
+         "line": 45,
+         "type": "IDisposable",
+         "params": 2,
+         "signature": "static IDisposable Open(IDevToolsTopLevelGroup group, DevToolsOptions options)"
+        },
+        {
+         "kind": "method",
+         "name": "Attach",
+         "accessibility": "internal",
+         "modifiers": [
+          "static"
+         ],
+         "line": 48,
+         "type": "IDisposable",
+         "params": 2,
+         "signature": "static IDisposable Attach(Application application, DevToolsOptions options)"
+        },
+        {
+         "kind": "method",
+         "name": "DoesBelongToDevTool",
+         "accessibility": "internal",
+         "modifiers": [
+          "static"
+         ],
+         "line": 148,
+         "type": "bool",
+         "params": 1,
+         "extension": true,
+         "signature": "static bool DoesBelongToDevTool(this Visual v)"
+        }
+       ],
+       "privateMembers": 3
+      }
+     ]
+    },
+    {
+     "path": "Diagnostics/DevToolsDataFormats.cs",
+     "lines": 22,
+     "types": [
+      {
+       "name": "DevToolsDataFormats",
+       "kind": "class",
+       "namespace": "Avalonia.Diagnostics",
+       "fullName": "Avalonia.Diagnostics.DevToolsDataFormats",
+       "accessibility": "public",
+       "line": 9,
+       "modifiers": [
+        "static"
+       ],
+       "members": [
+        {
+         "kind": "property",
+         "name": "Selector",
+         "accessibility": "public",
+         "modifiers": [
+          "static"
+         ],
+         "line": 20,
+         "type": "DataFormat<string>",
+         "accessors": {
+          "get": "public"
+         },
+         "signature": "static DataFormat<string> Selector { get; }"
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "path": "Diagnostics/DevToolsOptions.cs",
+     "lines": 67,
+     "types": [
+      {
+       "name": "DevToolsOptions",
+       "kind": "class",
+       "namespace": "Avalonia.Diagnostics",
+       "fullName": "Avalonia.Diagnostics.DevToolsOptions",
+       "accessibility": "public",
+       "line": 10,
+       "members": [
+        {
+         "kind": "property",
+         "name": "Gesture",
+         "accessibility": "public",
+         "line": 15,
+         "type": "KeyGesture",
+         "accessors": {
+          "get": "public",
+          "set": "public"
+         },
+         "signature": "KeyGesture Gesture { get; set; }"
+        },
+        {
+         "kind": "property",
+         "name": "ShowAsChildWindow",
+         "accessibility": "public",
+         "line": 22,
+         "type": "bool",
+         "accessors": {
+          "get": "public",
+          "set": "public"
+         },
+         "signature": "bool ShowAsChildWindow { get; set; }"
+        },
+        {
+         "kind": "property",
+         "name": "Size",
+         "accessibility": "public",
+         "line": 27,
+         "type": "Size",
+         "accessors": {
+          "get": "public",
+          "set": "public"
+         },
+         "signature": "Size Size { get; set; }"
+        },
+        {
+         "kind": "property",
+         "name": "StartupScreenIndex",
+         "accessibility": "public",
+         "line": 32,
+         "type": "int?",
+         "accessors": {
+          "get": "public",
+          "set": "public"
+         },
+         "signature": "int? StartupScreenIndex { get; set; }"
+        },
+        {
+         "kind": "property",
+         "name": "ShowImplementedInterfaces",
+         "accessibility": "public",
+         "line": 37,
+         "type": "bool",
+         "accessors": {
+          "get": "public",
+          "set": "public"
+         },
+         "signature": "bool ShowImplementedInterfaces { get; set; }"
+        },
+        {
+         "kind": "property",
+         "name": "ScreenshotHandler",
+         "accessibility": "public",
+         "line": 43,
+         "type": "IScreenshotHandler",
+         "accessors": {
+          "get": "public",
+          "set": "public"
+         },
+         "signature": "IScreenshotHandler ScreenshotHandler { get; set; }"
+        },
+        {
+         "kind": "property",
+         "name": "ThemeVariant",
+         "accessibility": "public",
+         "line": 49,
+         "type": "ThemeVariant?",
+         "accessors": {
+          "get": "public",
+          "set": "public"
+         },
+         "signature": "ThemeVariant? ThemeVariant { get; set; }"
+        },
+        {
+         "kind": "property",
+         "name": "FocusHighlighterBrush",
+         "accessibility": "public",
+         "line": 54,
+         "type": "IBrush?",
+         "accessors": {
+          "get": "public",
+          "set": "public"
+         },
+         "signature": "IBrush? FocusHighlighterBrush { get; set; }"
+        },
+        {
+         "kind": "property",
+         "name": "LaunchView",
+         "accessibility": "public",
+         "line": 59,
+         "type": "DevToolsViewKind",
+         "accessors": {
+          "get": "public",
+          "init": "public"
+         },
+         "signature": "DevToolsViewKind LaunchView { get; init; }"
+        },
+        {
+         "kind": "property",
+         "name": "HotKeys",
+         "accessibility": "public",
+         "line": 64,
+         "type": "HotKeyConfiguration",
+         "accessors": {
+          "get": "public",
+          "init": "public"
+         },
+         "signature": "HotKeyConfiguration HotKeys { get; init; }"
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "path": "Diagnostics/DevToolsViewKind.cs",
+     "lines": 21,
+     "types": [
+      {
+       "name": "DevToolsViewKind",
+       "kind": "enum",
+       "namespace": "Avalonia.Diagnostics",
+       "fullName": "Avalonia.Diagnostics.DevToolsViewKind",
+       "accessibility": "public",
+       "line": 6,
+       "members": [
+        {
+         "kind": "enum member",
+         "name": "LogicalTree",
+         "signature": "LogicalTree",
+         "accessibility": "public"
+        },
+        {
+         "kind": "enum member",
+         "name": "VisualTree",
+         "signature": "VisualTree",
+         "accessibility": "public"
+        },
+        {
+         "kind": "enum member",
+         "name": "Events",
+         "signature": "Events",
+         "accessibility": "public"
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "path": "Diagnostics/HotKeyConfiguration.cs",
+     "lines": 33,
+     "types": [
+      {
+       "name": "HotKeyConfiguration",
+       "kind": "class",
+       "namespace": "Avalonia.Diagnostics",
+       "fullName": "Avalonia.Diagnostics.HotKeyConfiguration",
+       "accessibility": "public",
+       "line": 5,
+       "members": [
+        {
+         "kind": "property",
+         "name": "ValueFramesFreeze",
+         "accessibility": "public",
+         "line": 10,
+         "type": "KeyGesture",
+         "accessors": {
+          "get": "public",
+          "init": "public"
+         },
+         "signature": "KeyGesture ValueFramesFreeze { get; init; }"
+        },
+        {
+         "kind": "property",
+         "name": "ValueFramesUnfreeze",
+         "accessibility": "public",
+         "line": 15,
+         "type": "KeyGesture",
+         "accessors": {
+          "get": "public",
+          "init": "public"
+         },
+         "signature": "KeyGesture ValueFramesUnfreeze { get; init; }"
+        },
+        {
+         "kind": "property",
+         "name": "InspectHoveredControl",
+         "accessibility": "public",
+         "line": 20,
+         "type": "KeyGesture",
+         "accessors": {
+          "get": "public",
+          "init": "public"
+         },
+         "signature": "KeyGesture InspectHoveredControl { get; init; }"
+        },
+        {
+         "kind": "property",
+         "name": "TogglePopupFreeze",
+         "accessibility": "public",
+         "line": 25,
+         "type": "KeyGesture",
+         "accessors": {
+          "get": "public",
+          "init": "public"
+         },
+         "signature": "KeyGesture TogglePopupFreeze { get; init; }"
+        },
+        {
+         "kind": "property",
+         "name": "ScreenshotSelectedControl",
+         "accessibility": "public",
+         "line": 30,
+         "type": "KeyGesture",
+         "accessors": {
+          "get": "public",
+          "init": "public"
+         },
+         "signature": "KeyGesture ScreenshotSelectedControl { get; init; }"
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "path": "Diagnostics/IDevToolsTopLevelGroup.cs",
+     "lines": 57,
+     "types": [
+      {
+       "name": "IDevToolsTopLevelGroup",
+       "kind": "interface",
+       "namespace": "Avalonia.Diagnostics",
+       "fullName": "Avalonia.Diagnostics.IDevToolsTopLevelGroup",
+       "accessibility": "internal",
+       "line": 8,
+       "members": [
+        {
+         "kind": "property",
+         "name": "Items",
+         "accessibility": "public",
+         "line": 10,
+         "type": "IReadOnlyList<TopLevel>",
+         "accessors": {
+          "get": "public"
+         },
+         "signature": "IReadOnlyList<TopLevel> Items { get; }"
+        }
+       ]
+      },
+      {
+       "name": "ClassicDesktopStyleApplicationLifetimeTopLevelGroup",
+       "kind": "class",
+       "namespace": "Avalonia.Diagnostics",
+       "fullName": "Avalonia.Diagnostics.ClassicDesktopStyleApplicationLifetimeTopLevelGroup",
+       "accessibility": "internal",
+       "line": 13,
+       "bases": [
+        "IDevToolsTopLevelGroup"
+       ],
+       "members": [
+        {
+         "kind": "ctor",
+         "name": ".ctor",
+         "accessibility": "public",
+         "line": 17,
+         "params": 1,
+         "signature": "ClassicDesktopStyleApplicationLifetimeTopLevelGroup(IClassicDesktopStyleApplicationLifetime lifetime)"
+        },
+        {
+         "kind": "property",
+         "name": "Items",
+         "accessibility": "public",
+         "line": 22,
+         "type": "IReadOnlyList<TopLevel>",
+         "accessors": {
+          "get": "public"
+         },
+         "signature": "IReadOnlyList<TopLevel> Items { get; }"
+        },
+        {
+         "kind": "method",
+         "name": "GetHashCode",
+         "accessibility": "public",
+         "modifiers": [
+          "override"
+         ],
+         "line": 24,
+         "type": "int",
+         "params": 0,
+         "signature": "override int GetHashCode()"
+        },
+        {
+         "kind": "method",
+         "name": "Equals",
+         "accessibility": "public",
+         "modifiers": [
+          "override"
+         ],
+         "line": 29,
+         "type": "bool",
+         "params": 1,
+         "signature": "override bool Equals(object? obj)"
+        }
+       ],
+       "privateMembers": 1
+      },
+      {
+       "name": "SingleViewTopLevelGroup",
+       "kind": "class",
+       "namespace": "Avalonia.Diagnostics",
+       "fullName": "Avalonia.Diagnostics.SingleViewTopLevelGroup",
+       "accessibility": "internal",
+       "line": 35,
+       "bases": [
+        "IDevToolsTopLevelGroup"
+       ],
+       "members": [
+        {
+         "kind": "ctor",
+         "name": ".ctor",
+         "accessibility": "public",
+         "line": 39,
+         "params": 1,
+         "signature": "SingleViewTopLevelGroup(TopLevel topLevel)"
+        },
+        {
+         "kind": "property",
+         "name": "Items",
+         "accessibility": "public",
+         "line": 45,
+         "type": "IReadOnlyList<TopLevel>",
+         "accessors": {
+          "get": "public"
+         },
+         "signature": "IReadOnlyList<TopLevel> Items { get; }"
+        },
+        {
+         "kind": "method",
+         "name": "GetHashCode",
+         "accessibility": "public",
+         "modifiers": [
+          "override"
+         ],
+         "line": 47,
+         "type": "int",
+         "params": 0,
+         "signature": "override int GetHashCode()"
+        },
+        {
+         "kind": "method",
+         "name": "Equals",
+         "accessibility": "public",
+         "modifiers": [
+          "override"
+         ],
+         "line": 52,
+         "type": "bool",
+         "params": 1,
+         "signature": "override bool Equals(object? obj)"
+        }
+       ],
+       "privateMembers": 1
+      }
+     ]
+    },
+    {
+     "path": "Diagnostics/IScreenshotHandler.cs",
+     "lines": 18,
+     "types": [
+      {
+       "name": "IScreenshotHandler",
+       "kind": "interface",
+       "namespace": "Avalonia.Diagnostics",
+       "fullName": "Avalonia.Diagnostics.IScreenshotHandler",
+       "accessibility": "public",
+       "line": 9,
+       "members": [
+        {
+         "kind": "method",
+         "name": "Take",
+         "accessibility": "public",
+         "line": 15,
+         "type": "Task",
+         "params": 1,
+         "signature": "Task Take(Control control)"
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "path": "Diagnostics/KeyGestureExtesions.cs",
+     "lines": 28,
+     "types": [
+      {
+       "name": "KeyGestureExtesions",
+       "kind": "class",
+       "namespace": "Avalonia.Diagnostics",
+       "fullName": "Avalonia.Diagnostics.KeyGestureExtesions",
+       "accessibility": "internal",
+       "line": 6,
+       "modifiers": [
+        "static"
+       ],
+       "members": [
+        {
+         "kind": "method",
+         "name": "Matches",
+         "accessibility": "public",
+         "modifiers": [
+          "static"
+         ],
+         "line": 8,
+         "type": "bool",
+         "params": 2,
+         "extension": true,
+         "signature": "static bool Matches(this KeyGesture gesture, RawKeyEventArgs keyEvent)"
+        }
+       ],
+       "privateMembers": 1
+      }
+     ]
+    },
+    {
+     "path": "Diagnostics/TypeExtesnions.cs",
+     "lines": 34,
+     "types": [
+      {
+       "name": "TypeExtesnions",
+       "kind": "class",
+       "namespace": "Avalonia.Diagnostics",
+       "fullName": "Avalonia.Diagnostics.TypeExtesnions",
+       "accessibility": "internal",
+       "line": 7,
+       "modifiers": [
+        "static"
+       ],
+       "members": [
+        {
+         "kind": "method",
+         "name": "GetTypeName",
+         "accessibility": "public",
+         "modifiers": [
+          "static"
+         ],
+         "line": 12,
+         "type": "string",
+         "params": 1,
+         "extension": true,
+         "signature": "static string GetTypeName(this Type type)"
+        }
+       ],
+       "privateMembers": 1
+      }
+     ]
+    },
+    {
+     "path": "Diagnostics/ViewLocator.cs",
+     "lines": 34,
+     "types": [
+      {
+       "name": "ViewLocator",
+       "kind": "class",
+       "namespace": "Avalonia.Diagnostics",
+       "fullName": "Avalonia.Diagnostics.ViewLocator",
+       "accessibility": "internal",
+       "line": 8,
+       "bases": [
+        "IDataTemplate"
+       ],
+       "members": [
+        {
+         "kind": "method",
+         "name": "Build",
+         "accessibility": "public",
+         "line": 10,
+         "type": "Control?",
+         "params": 1,
+         "signature": "Control? Build(object? data)"
+        },
+        {
+         "kind": "method",
+         "name": "Match",
+         "accessibility": "public",
+         "line": 28,
+         "type": "bool",
+         "params": 1,
+         "signature": "bool Match(object? data)"
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "path": "Diagnostics/VisualExtensions.cs",
+     "lines": 72,
+     "types": [
+      {
+       "name": "VisualExtensions",
+       "kind": "class",
+       "namespace": "Avalonia.Diagnostics",
+       "fullName": "Avalonia.Diagnostics.VisualExtensions",
+       "accessibility": "internal",
+       "line": 10,
+       "modifiers": [
+        "static"
+       ],
+       "members": [
+        {
+         "kind": "method",
+         "name": "RenderTo",
+         "accessibility": "public",
+         "modifiers": [
+          "static"
+         ],
+         "line": 18,
+         "type": "void",
+         "params": 3,
+         "extension": true,
+         "signature": "static void RenderTo(this Control source, Stream destination, double dpi = 96)"
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "path": "Diagnostics/VisualTreeDebug.cs",
+     "lines": 71,
+     "types": [
+      {
+       "name": "VisualTreeDebug",
+       "kind": "class",
+       "namespace": "Avalonia.Diagnostics",
+       "fullName": "Avalonia.Diagnostics.VisualTreeDebug",
+       "accessibility": "public",
+       "line": 10,
+       "modifiers": [
+        "static"
+       ],
+       "members": [
+        {
+         "kind": "method",
+         "name": "PrintVisualTree",
+         "accessibility": "public",
+         "modifiers": [
+          "static"
+         ],
+         "line": 12,
+         "type": "string",
+         "params": 1,
+         "signature": "static string PrintVisualTree(Visual visual)"
+        }
+       ],
+       "privateMembers": 2
+      }
+     ]
+    },
+    {
+     "path": "Diagnostics/Behaviors/ColumnDefinition.cs",
+     "lines": 48,
+     "types": [
+      {
+       "name": "ColumnDefinition",
+       "kind": "class",
+       "namespace": "Avalonia.Diagnostics.Behaviors",
+       "fullName": "Avalonia.Diagnostics.Behaviors.ColumnDefinition",
+       "accessibility": "internal",
+       "line": 6,
+       "modifiers": [
+        "static"
+       ],
+       "members": [
+        {
+         "kind": "field",
+         "name": "IsVisibleProperty",
+         "accessibility": "public",
+         "modifiers": [
+          "readonly",
+          "static"
+         ],
+         "line": 16,
+         "type": "AttachedProperty<bool>",
+         "signature": "readonly static AttachedProperty<bool> IsVisibleProperty",
+         "avaloniaProperty": "attached",
+         "registration": "RegisterAttached",
+         "registeredName": "IsVisible"
+        },
+        {
+         "kind": "method",
+         "name": "GetIsVisible",
+         "accessibility": "public",
+         "modifiers": [
+          "static"
+         ],
+         "line": 37,
+         "type": "bool",
+         "params": 1,
+         "signature": "static bool GetIsVisible(Avalonia.Controls.ColumnDefinition columnDefinition)"
+        },
+        {
+         "kind": "method",
+         "name": "SetIsVisible",
+         "accessibility": "public",
+         "modifiers": [
+          "static"
+         ],
+         "line": 42,
+         "type": "void",
+         "params": 2,
+         "signature": "static void SetIsVisible(Avalonia.Controls.ColumnDefinition columnDefinition, bool visibility)"
+        }
+       ],
+       "privateMembers": 2
+      }
+     ]
+    },
+    {
+     "path": "Diagnostics/Controls/Application.cs",
+     "lines": 141,
+     "types": [
+      {
+       "name": "Application",
+       "kind": "class",
+       "namespace": "Avalonia.Diagnostics.Controls",
+       "fullName": "Avalonia.Diagnostics.Controls.Application",
+       "accessibility": "internal",
+       "line": 8,
+       "bases": [
+        "TopLevelGroup",
+        "Input.ICloseable",
+        "IDisposable"
+       ],
+       "members": [
+        {
+         "kind": "event",
+         "name": "Closed",
+         "accessibility": "public",
+         "line": 14,
+         "type": "EventHandler?",
+         "signature": "event EventHandler? Closed"
+        },
+        {
+         "kind": "field",
+         "name": "RequestedThemeVariantProperty",
+         "accessibility": "public",
+         "modifiers": [
+          "static",
+          "readonly"
+         ],
+         "line": 16,
+         "type": "StyledProperty<ThemeVariant?>",
+         "signature": "static readonly StyledProperty<ThemeVariant?> RequestedThemeVariantProperty",
+         "avaloniaProperty": "styled",
+         "registration": "AddOwner"
+        },
+        {
+         "kind": "ctor",
+         "name": ".ctor",
+         "accessibility": "public",
+         "line": 19,
+         "params": 2,
+         "signature": "Application(ClassicDesktopStyleApplicationLifetimeTopLevelGroup group, Avalonia.Application application)"
+        },
+        {
+         "kind": "property",
+         "name": "Instance",
+         "accessibility": "internal",
+         "line": 45,
+         "type": "Avalonia.Application",
+         "accessors": {
+          "get": "internal"
+         },
+         "signature": "Avalonia.Application Instance { get; }"
+        },
+        {
+         "kind": "property",
+         "name": "DataContext",
+         "accessibility": "public",
+         "line": 50,
+         "type": "object?",
+         "accessors": {
+          "get": "public"
+         },
+         "signature": "object? DataContext { get; }"
+        },
+        {
+         "kind": "property",
+         "name": "DataTemplates",
+         "accessibility": "public",
+         "line": 59,
+         "type": "Avalonia.Controls.Templates.DataTemplates",
+         "accessors": {
+          "get": "public"
+         },
+         "signature": "Avalonia.Controls.Templates.DataTemplates DataTemplates { get; }"
+        },
+        {
+         "kind": "property",
+         "name": "InputManager",
+         "accessibility": "public",
+         "line": 68,
+         "type": "Input.InputManager?",
+         "accessors": {
+          "get": "public"
+         },
+         "signature": "Input.InputManager? InputManager { get; }"
+        },
+        {
+         "kind": "property",
+         "name": "Resources",
+         "accessibility": "public",
+         "line": 74,
+         "type": "IResourceDictionary",
+         "accessors": {
+          "get": "public"
+         },
+         "signature": "IResourceDictionary Resources { get; }"
+        },
+        {
+         "kind": "property",
+         "name": "Styles",
+         "accessibility": "public",
+         "line": 86,
+         "type": "Styling.Styles",
+         "accessors": {
+          "get": "public"
+         },
+         "signature": "Styling.Styles Styles { get; }"
+        },
+        {
+         "kind": "property",
+         "name": "ApplicationLifetime",
+         "accessibility": "public",
+         "line": 96,
+         "type": "Lifetimes.IApplicationLifetime?",
+         "accessors": {
+          "get": "public"
+         },
+         "signature": "Lifetimes.IApplicationLifetime? ApplicationLifetime { get; }"
+        },
+        {
+         "kind": "property",
+         "name": "Name",
+         "accessibility": "public",
+         "line": 102,
+         "type": "string?",
+         "accessors": {
+          "get": "public"
+         },
+         "signature": "string? Name { get; }"
+        },
+        {
+         "kind": "property",
+         "name": "RendererRoot",
+         "accessibility": "internal",
+         "line": 108,
+         "type": "Rendering.IRenderer?",
+         "accessors": {
+          "get": "internal"
+         },
+         "signature": "Rendering.IRenderer? RendererRoot { get; }"
+        },
+        {
+         "kind": "property",
+         "name": "RequestedThemeVariant",
+         "accessibility": "public",
+         "line": 111,
+         "type": "ThemeVariant?",
+         "accessors": {
+          "get": "public",
+          "set": "public"
+         },
+         "signature": "ThemeVariant? RequestedThemeVariant { get; set; }"
+        },
+        {
+         "kind": "method",
+         "name": "Dispose",
+         "accessibility": "public",
+         "line": 117,
+         "type": "void",
+         "params": 0,
+         "signature": "void Dispose()"
+        },
+        {
+         "kind": "method",
+         "name": "OnPropertyChanged",
+         "accessibility": "protected",
+         "modifiers": [
+          "override"
+         ],
+         "line": 130,
+         "type": "void",
+         "params": 1,
+         "signature": "override void OnPropertyChanged(AvaloniaPropertyChangedEventArgs change)"
+        }
+       ],
+       "privateMembers": 2
+      }
+     ]
+    },
+    {
+     "path": "Diagnostics/Controls/BrushEditor.axaml.cs",
+     "lines": 129,
+     "types": [
+      {
+       "name": "BrushEditor",
+       "kind": "class",
+       "namespace": "Avalonia.Diagnostics.Controls",
+       "fullName": "Avalonia.Diagnostics.Controls.BrushEditor",
+       "accessibility": "internal",
+       "line": 13,
+       "modifiers": [
+        "partial"
+       ],
+       "partial": true,
+       "bases": [
+        "TemplatedControl"
+       ],
+       "attributes": [
+        "TemplatePart(\"PART_ClearButton\", typeof(Button))"
+       ],
+       "members": [
+        {
+         "kind": "ctor",
+         "name": ".ctor",
+         "accessibility": "public",
+         "line": 23,
+         "params": 0,
+         "signature": "BrushEditor()"
+        },
+        {
+         "kind": "property",
+         "name": "StyleKeyOverride",
+         "accessibility": "protected",
+         "modifiers": [
+          "override"
+         ],
+         "line": 37,
+         "type": "Type",
+         "accessors": {
+          "get": "protected"
+         },
+         "signature": "override Type StyleKeyOverride { get; }"
+        },
+        {
+         "kind": "method",
+         "name": "OnApplyTemplate",
+         "accessibility": "protected",
+         "modifiers": [
+          "override"
+         ],
+         "line": 39,
+         "type": "void",
+         "params": 1,
+         "signature": "override void OnApplyTemplate(TemplateAppliedEventArgs e)"
+        },
+        {
+         "kind": "field",
+         "name": "BrushProperty",
+         "accessibility": "public",
+         "modifiers": [
+          "static",
+          "readonly"
+         ],
+         "line": 56,
+         "type": "DirectProperty<BrushEditor, IBrush?>",
+         "signature": "static readonly DirectProperty<BrushEditor, IBrush?> BrushProperty",
+         "avaloniaProperty": "direct",
+         "registration": "RegisterDirect",
+         "registeredName": "Brush"
+        },
+        {
+         "kind": "property",
+         "name": "Brush",
+         "accessibility": "public",
+         "line": 62,
+         "type": "IBrush?",
+         "accessors": {
+          "get": "public",
+          "set": "public"
+         },
+         "signature": "IBrush? Brush { get; set; }"
+        },
+        {
+         "kind": "method",
+         "name": "OnPropertyChanged",
+         "accessibility": "protected",
+         "modifiers": [
+          "override"
+         ],
+         "line": 68,
+         "type": "void",
+         "params": 1,
+         "signature": "override void OnPropertyChanged(AvaloniaPropertyChangedEventArgs change)"
+        },
+        {
+         "kind": "method",
+         "name": "OnPointerPressed",
+         "accessibility": "protected",
+         "modifiers": [
+          "override"
+         ],
+         "line": 83,
+         "type": "void",
+         "params": 1,
+         "signature": "override void OnPointerPressed(PointerPressedEventArgs e)"
+        },
+        {
+         "kind": "method",
+         "name": "Render",
+         "accessibility": "public",
+         "modifiers": [
+          "override"
+         ],
+         "line": 90,
+         "type": "void",
+         "params": 1,
+         "signature": "override void Render(DrawingContext context)"
+        }
+       ],
+       "privateMembers": 5
+      }
+     ]
+    },
+    {
+     "path": "Diagnostics/Controls/CommitTextBox.cs",
+     "lines": 90,
+     "types": [
+      {
+       "name": "CommitTextBox",
+       "kind": "class",
+       "namespace": "Avalonia.Diagnostics.Controls",
+       "fullName": "Avalonia.Diagnostics.Controls.CommitTextBox",
+       "accessibility": "internal",
+       "line": 10,
+       "modifiers": [
+        "sealed"
+       ],
+       "bases": [
+        "TextBox"
+       ],
+       "members": [
+        {
+         "kind": "property",
+         "name": "StyleKeyOverride",
+         "accessibility": "protected",
+         "modifiers": [
+          "override"
+         ],
+         "line": 12,
+         "type": "Type",
+         "accessors": {
+          "get": "protected"
+         },
+         "signature": "override Type StyleKeyOverride { get; }"
+        },
+        {
+         "kind": "field",
+         "name": "CommittedTextProperty",
+         "accessibility": "public",
+         "modifiers": [
+          "static",
+          "readonly"
+         ],
+         "line": 17,
+         "type": "DirectProperty<CommitTextBox, string?>",
+         "signature": "static readonly DirectProperty<CommitTextBox, string?> CommittedTextProperty",
+         "avaloniaProperty": "direct",
+         "registration": "RegisterDirect",
+         "registeredName": "CommittedText"
+        },
+        {
+         "kind": "property",
+         "name": "CommittedText",
+         "accessibility": "public",
+         "line": 23,
+         "type": "string?",
+         "accessors": {
+          "get": "public",
+          "set": "public"
+         },
+         "signature": "string? CommittedText { get; set; }"
+        },
+        {
+         "kind": "method",
+         "name": "OnPropertyChanged",
+         "accessibility": "protected",
+         "modifiers": [
+          "override"
+         ],
+         "line": 29,
+         "type": "void",
+         "params": 1,
+         "signature": "override void OnPropertyChanged(AvaloniaPropertyChangedEventArgs change)"
+        },
+        {
+         "kind": "method",
+         "name": "OnKeyUp",
+         "accessibility": "protected",
+         "modifiers": [
+          "override"
+         ],
+         "line": 39,
+         "type": "void",
+         "params": 1,
+         "signature": "override void OnKeyUp(KeyEventArgs e)"
+        },
+        {
+         "kind": "method",
+         "name": "OnLostFocus",
+         "accessibility": "protected",
+         "modifiers": [
+          "override"
+         ],
+         "line": 63,
+         "type": "void",
+         "params": 1,
+         "signature": "override void OnLostFocus(RoutedEventArgs e)"
+        }
+       ],
+       "privateMembers": 3
+      }
+     ]
+    },
+    {
+     "path": "Diagnostics/Controls/ControlHighlightAdorner.cs",
+     "lines": 105,
+     "types": [
+      {
+       "name": "ControlHighlightAdorner",
+       "kind": "class",
+       "namespace": "Avalonia.Diagnostics.Controls",
+       "fullName": "Avalonia.Diagnostics.Controls.ControlHighlightAdorner",
+       "accessibility": "internal",
+       "line": 10,
+       "bases": [
+        "Control"
+       ],
+       "members": [
+        {
+         "kind": "static ctor",
+         "name": ".cctor",
+         "accessibility": "static",
+         "modifiers": [
+          "static"
+         ],
+         "line": 13,
+         "params": 0,
+         "signature": "static ControlHighlightAdorner()"
+        },
+        {
+         "kind": "method",
+         "name": "Add",
+         "accessibility": "public",
+         "modifiers": [
+          "static"
+         ],
+         "line": 38,
+         "type": "IDisposable?",
+         "params": 2,
+         "signature": "static IDisposable? Add(InputElement owner, IBrush highlightBrush)"
+        },
+        {
+         "kind": "method",
+         "name": "Render",
+         "accessibility": "public",
+         "modifiers": [
+          "override"
+         ],
+         "line": 58,
+         "type": "void",
+         "params": 1,
+         "signature": "override void Render(DrawingContext context)"
+        },
+        {
+         "kind": "method",
+         "name": "Add",
+         "accessibility": "internal",
+         "modifiers": [
+          "static"
+         ],
+         "line": 64,
+         "type": "IDisposable?",
+         "params": 2,
+         "signature": "static IDisposable? Add(Visual visual, bool visualizeMarginPadding)"
+        }
+       ],
+       "privateMembers": 4
+      }
+     ]
+    },
+    {
+     "path": "Diagnostics/Controls/FilterTextBox.cs",
+     "lines": 48,
+     "types": [
+      {
+       "name": "FilterTextBox",
+       "kind": "class",
+       "namespace": "Avalonia.Diagnostics.Controls",
+       "fullName": "Avalonia.Diagnostics.Controls.FilterTextBox",
+       "accessibility": "internal",
+       "line": 8,
+       "bases": [
+        "TextBox"
+       ],
+       "members": [
+        {
+         "kind": "field",
+         "name": "UseRegexFilterProperty",
+         "accessibility": "public",
+         "modifiers": [
+          "static",
+          "readonly"
+         ],
+         "line": 10,
+         "type": "StyledProperty<bool>",
+         "signature": "static readonly StyledProperty<bool> UseRegexFilterProperty",
+         "avaloniaProperty": "styled",
+         "registration": "Register",
+         "registeredName": "UseRegexFilter"
+        },
+        {
+         "kind": "field",
+         "name": "UseCaseSensitiveFilterProperty",
+         "accessibility": "public",
+         "modifiers": [
+          "static",
+          "readonly"
+         ],
+         "line": 14,
+         "type": "StyledProperty<bool>",
+         "signature": "static readonly StyledProperty<bool> UseCaseSensitiveFilterProperty",
+         "avaloniaProperty": "styled",
+         "registration": "Register",
+         "registeredName": "UseCaseSensitiveFilter"
+        },
+        {
+         "kind": "field",
+         "name": "UseWholeWordFilterProperty",
+         "accessibility": "public",
+         "modifiers": [
+          "static",
+          "readonly"
+         ],
+         "line": 18,
+         "type": "StyledProperty<bool>",
+         "signature": "static readonly StyledProperty<bool> UseWholeWordFilterProperty",
+         "avaloniaProperty": "styled",
+         "registration": "Register",
+         "registeredName": "UseWholeWordFilter"
+        },
+        {
+         "kind": "ctor",
+         "name": ".ctor",
+         "accessibility": "public",
+         "line": 22,
+         "params": 0,
+         "signature": "FilterTextBox()"
+        },
+        {
+         "kind": "property",
+         "name": "UseRegexFilter",
+         "accessibility": "public",
+         "line": 27,
+         "type": "bool",
+         "accessors": {
+          "get": "public",
+          "set": "public"
+         },
+         "signature": "bool UseRegexFilter { get; set; }"
+        },
+        {
+         "kind": "property",
+         "name": "UseCaseSensitiveFilter",
+         "accessibility": "public",
+         "line": 33,
+         "type": "bool",
+         "accessors": {
+          "get": "public",
+          "set": "public"
+         },
+         "signature": "bool UseCaseSensitiveFilter { get; set; }"
+        },
+        {
+         "kind": "property",
+         "name": "UseWholeWordFilter",
+         "accessibility": "public",
+         "line": 39,
+         "type": "bool",
+         "accessors": {
+          "get": "public",
+          "set": "public"
+         },
+         "signature": "bool UseWholeWordFilter { get; set; }"
+        },
+        {
+         "kind": "property",
+         "name": "StyleKeyOverride",
+         "accessibility": "protected",
+         "modifiers": [
+          "override"
+         ],
+         "line": 45,
+         "type": "Type",
+         "accessors": {
+          "get": "protected"
+         },
+         "signature": "override Type StyleKeyOverride { get; }"
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "path": "Diagnostics/Controls/ThicknessEditor.cs",
+     "lines": 115,
+     "types": [
+      {
+       "name": "ThicknessEditor",
+       "kind": "class",
+       "namespace": "Avalonia.Diagnostics.Controls",
+       "fullName": "Avalonia.Diagnostics.Controls.ThicknessEditor",
+       "accessibility": "internal",
+       "line": 7,
+       "bases": [
+        "ContentControl"
+       ],
+       "members": [
+        {
+         "kind": "field",
+         "name": "ThicknessProperty",
+         "accessibility": "public",
+         "modifiers": [
+          "static",
+          "readonly"
+         ],
+         "line": 9,
+         "type": "StyledProperty<Thickness>",
+         "signature": "static readonly StyledProperty<Thickness> ThicknessProperty",
+         "avaloniaProperty": "styled",
+         "registration": "Register",
+         "registeredName": "Thickness"
+        },
+        {
+         "kind": "field",
+         "name": "HeaderProperty",
+         "accessibility": "public",
+         "modifiers": [
+          "static",
+          "readonly"
+         ],
+         "line": 13,
+         "type": "StyledProperty<string?>",
+         "signature": "static readonly StyledProperty<string?> HeaderProperty",
+         "avaloniaProperty": "styled",
+         "registration": "Register",
+         "registeredName": "Header"
+        },
+        {
+         "kind": "field",
+         "name": "IsPresentProperty",
+         "accessibility": "public",
+         "modifiers": [
+          "static",
+          "readonly"
+         ],
+         "line": 16,
+         "type": "StyledProperty<bool>",
+         "signature": "static readonly StyledProperty<bool> IsPresentProperty",
+         "avaloniaProperty": "styled",
+         "registration": "Register",
+         "registeredName": "IsPresent"
+        },
+        {
+         "kind": "field",
+         "name": "LeftProperty",
+         "accessibility": "public",
+         "modifiers": [
+          "static",
+          "readonly"
+         ],
+         "line": 19,
+         "type": "StyledProperty<double>",
+         "signature": "static readonly StyledProperty<double> LeftProperty",
+         "avaloniaProperty": "styled",
+         "registration": "Register",
+         "registeredName": "Left"
+        },
+        {
+         "kind": "field",
+         "name": "TopProperty",
+         "accessibility": "public",
+         "modifiers": [
+          "static",
+          "readonly"
+         ],
+         "line": 22,
+         "type": "StyledProperty<double>",
+         "signature": "static readonly StyledProperty<double> TopProperty",
+         "avaloniaProperty": "styled",
+         "registration": "Register",
+         "registeredName": "Top"
+        },
+        {
+         "kind": "field",
+         "name": "RightProperty",
+         "accessibility": "public",
+         "modifiers": [
+          "static",
+          "readonly"
+         ],
+         "line": 25,
+         "type": "StyledProperty<double>",
+         "signature": "static readonly StyledProperty<double> RightProperty",
+         "avaloniaProperty": "styled",
+         "registration": "Register",
+         "registeredName": "Right"
+        },
+        {
+         "kind": "field",
+         "name": "BottomProperty",
+         "accessibility": "public",
+         "modifiers": [
+          "static",
+          "readonly"
+         ],
+         "line": 28,
+         "type": "StyledProperty<double>",
+         "signature": "static readonly StyledProperty<double> BottomProperty",
+         "avaloniaProperty": "styled",
+         "registration": "Register",
+         "registeredName": "Bottom"
+        },
+        {
+         "kind": "field",
+         "name": "HighlightProperty",
+         "accessibility": "public",
+         "modifiers": [
+          "static",
+          "readonly"
+         ],
+         "line": 31,
+         "type": "StyledProperty<IBrush>",
+         "signature": "static readonly StyledProperty<IBrush> HighlightProperty",
+         "avaloniaProperty": "styled",
+         "registration": "Register",
+         "registeredName": "Highlight"
+        },
+        {
+         "kind": "property",
+         "name": "Thickness",
+         "accessibility": "public",
+         "line": 36,
+         "type": "Thickness",
+         "accessors": {
+          "get": "public",
+          "set": "public"
+         },
+         "signature": "Thickness Thickness { get; set; }"
+        },
+        {
+         "kind": "property",
+         "name": "Header",
+         "accessibility": "public",
+         "line": 42,
+         "type": "string?",
+         "accessors": {
+          "get": "public",
+          "set": "public"
+         },
+         "signature": "string? Header { get; set; }"
+        },
+        {
+         "kind": "property",
+         "name": "IsPresent",
+         "accessibility": "public",
+         "line": 48,
+         "type": "bool",
+         "accessors": {
+          "get": "public",
+          "set": "public"
+         },
+         "signature": "bool IsPresent { get; set; }"
+        },
+        {
+         "kind": "property",
+         "name": "Left",
+         "accessibility": "public",
+         "line": 54,
+         "type": "double",
+         "accessors": {
+          "get": "public",
+          "set": "public"
+         },
+         "signature": "double Left { get; set; }"
+        },
+        {
+         "kind": "property",
+         "name": "Top",
+         "accessibility": "public",
+         "line": 60,
+         "type": "double",
+         "accessors": {
+          "get": "public",
+          "set": "public"
+         },
+         "signature": "double Top { get; set; }"
+        },
+        {
+         "kind": "property",
+         "name": "Right",
+         "accessibility": "public",
+         "line": 66,
+         "type": "double",
+         "accessors": {
+          "get": "public",
+          "set": "public"
+         },
+         "signature": "double Right { get; set; }"
+        },
+        {
+         "kind": "property",
+         "name": "Bottom",
+         "accessibility": "public",
+         "line": 72,
+         "type": "double",
+         "accessors": {
+          "get": "public",
+          "set": "public"
+         },
+         "signature": "double Bottom { get; set; }"
+        },
+        {
+         "kind": "property",
+         "name": "Highlight",
+         "accessibility": "public",
+         "line": 78,
+         "type": "IBrush",
+         "accessors": {
+          "get": "public",
+          "set": "public"
+         },
+         "signature": "IBrush Highlight { get; set; }"
+        },
+        {
+         "kind": "method",
+         "name": "OnPropertyChanged",
+         "accessibility": "protected",
+         "modifiers": [
+          "override"
+         ],
+         "line": 84,
+         "type": "void",
+         "params": 1,
+         "signature": "override void OnPropertyChanged(AvaloniaPropertyChangedEventArgs change)"
+        }
+       ],
+       "privateMembers": 1
+      }
+     ]
+    },
+    {
+     "path": "Diagnostics/Controls/TopLevelGroup.cs",
+     "lines": 42,
+     "types": [
+      {
+       "name": "TopLevelGroup",
+       "kind": "class",
+       "namespace": "Avalonia.Diagnostics.Controls",
+       "fullName": "Avalonia.Diagnostics.Controls.TopLevelGroup",
+       "accessibility": "internal",
+       "line": 8,
+       "bases": [
+        "AvaloniaObject"
+       ],
+       "members": [
+        {
+         "kind": "ctor",
+         "name": ".ctor",
+         "accessibility": "public",
+         "line": 10,
+         "params": 1,
+         "signature": "TopLevelGroup(IDevToolsTopLevelGroup group)"
+        },
+        {
+         "kind": "property",
+         "name": "Group",
+         "accessibility": "public",
+         "line": 36,
+         "type": "IDevToolsTopLevelGroup",
+         "accessors": {
+          "get": "public"
+         },
+         "signature": "IDevToolsTopLevelGroup Group { get; }"
+        },
+        {
+         "kind": "property",
+         "name": "Items",
+         "accessibility": "public",
+         "line": 38,
+         "type": "IReadOnlyList<TopLevel>",
+         "accessors": {
+          "get": "public"
+         },
+         "signature": "IReadOnlyList<TopLevel> Items { get; }"
+        },
+        {
+         "kind": "event",
+         "name": "Added",
+         "accessibility": "public",
+         "line": 39,
+         "type": "EventHandler<TopLevel>?",
+         "signature": "event EventHandler<TopLevel>? Added"
+        },
+        {
+         "kind": "event",
+         "name": "Removed",
+         "accessibility": "public",
+         "line": 40,
+         "type": "EventHandler<TopLevel>?",
+         "signature": "event EventHandler<TopLevel>? Removed"
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "path": "Diagnostics/Converters/BoolToImageConverter.cs",
+     "lines": 26,
+     "types": [
+      {
+       "name": "BoolToImageConverter",
+       "kind": "class",
+       "namespace": "Avalonia.Diagnostics.Converters",
+       "fullName": "Avalonia.Diagnostics.Converters.BoolToImageConverter",
+       "accessibility": "internal",
+       "line": 9,
+       "bases": [
+        "IValueConverter"
+       ],
+       "members": [
+        {
+         "kind": "property",
+         "name": "TrueImage",
+         "accessibility": "public",
+         "line": 11,
+         "type": "IImage?",
+         "accessors": {
+          "get": "public",
+          "set": "public"
+         },
+         "signature": "IImage? TrueImage { get; set; }"
+        },
+        {
+         "kind": "property",
+         "name": "FalseImage",
+         "accessibility": "public",
+         "line": 13,
+         "type": "IImage?",
+         "accessors": {
+          "get": "public",
+          "set": "public"
+         },
+         "signature": "IImage? FalseImage { get; set; }"
+        },
+        {
+         "kind": "method",
+         "name": "Convert",
+         "accessibility": "public",
+         "line": 15,
+         "type": "object?",
+         "params": 4,
+         "signature": "object? Convert(object? value, Type targetType, object? parameter, CultureInfo culture)"
+        },
+        {
+         "kind": "method",
+         "name": "ConvertBack",
+         "accessibility": "public",
+         "line": 23,
+         "type": "object?",
+         "params": 4,
+         "signature": "object? ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture)"
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "path": "Diagnostics/Converters/BoolToOpacityConverter.cs",
+     "lines": 27,
+     "types": [
+      {
+       "name": "BoolToOpacityConverter",
+       "kind": "class",
+       "namespace": "Avalonia.Diagnostics.Converters",
+       "fullName": "Avalonia.Diagnostics.Converters.BoolToOpacityConverter",
+       "accessibility": "internal",
+       "line": 7,
+       "bases": [
+        "IValueConverter"
+       ],
+       "members": [
+        {
+         "kind": "property",
+         "name": "Opacity",
+         "accessibility": "public",
+         "line": 9,
+         "type": "double",
+         "accessors": {
+          "get": "public",
+          "set": "public"
+         },
+         "signature": "double Opacity { get; set; }"
+        },
+        {
+         "kind": "method",
+         "name": "Convert",
+         "accessibility": "public",
+         "line": 11,
+         "type": "object?",
+         "params": 4,
+         "signature": "object? Convert(object? value, Type targetType, object? parameter, CultureInfo culture)"
+        },
+        {
+         "kind": "method",
+         "name": "ConvertBack",
+         "accessibility": "public",
+         "line": 21,
+         "type": "object?",
+         "params": 4,
+         "signature": "object? ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture)"
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "path": "Diagnostics/Converters/BrushSelectorConveter.cs",
+     "lines": 41,
+     "types": [
+      {
+       "name": "BrushSelectorConveter",
+       "kind": "class",
+       "namespace": "Avalonia.Diagnostics.Converters",
+       "fullName": "Avalonia.Diagnostics.Converters.BrushSelectorConveter",
+       "accessibility": "internal",
+       "line": 9,
+       "bases": [
+        "AvaloniaObject",
+        "IValueConverter"
+       ],
+       "members": [
+        {
+         "kind": "field",
+         "name": "BrushProperty",
+         "accessibility": "public",
+         "modifiers": [
+          "static",
+          "readonly"
+         ],
+         "line": 11,
+         "type": "DirectProperty<BrushSelectorConveter, IBrush?>",
+         "signature": "static readonly DirectProperty<BrushSelectorConveter, IBrush?> BrushProperty",
+         "avaloniaProperty": "direct",
+         "registration": "RegisterDirect",
+         "registeredName": "Brush"
+        },
+        {
+         "kind": "property",
+         "name": "Brush",
+         "accessibility": "public",
+         "line": 16,
+         "type": "IBrush?",
+         "accessors": {
+          "get": "public",
+          "set": "public"
+         },
+         "signature": "IBrush? Brush { get; set; }"
+        },
+        {
+         "kind": "method",
+         "name": "Convert",
+         "accessibility": "public",
+         "line": 18,
+         "type": "object?",
+         "params": 4,
+         "signature": "object? Convert(object? value, Type targetType, object? parameter, CultureInfo culture)"
+        },
+        {
+         "kind": "method",
+         "name": "ConvertBack",
+         "accessibility": "public",
+         "line": 36,
+         "type": "object?",
+         "params": 4,
+         "signature": "object? ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture)"
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "path": "Diagnostics/Converters/EnumToCheckedConverter.cs",
+     "lines": 26,
+     "types": [
+      {
+       "name": "EnumToCheckedConverter",
+       "kind": "class",
+       "namespace": "Avalonia.Diagnostics.Converters",
+       "fullName": "Avalonia.Diagnostics.Converters.EnumToCheckedConverter",
+       "accessibility": "internal",
+       "line": 8,
+       "bases": [
+        "IValueConverter"
+       ],
+       "members": [
+        {
+         "kind": "method",
+         "name": "Convert",
+         "accessibility": "public",
+         "line": 10,
+         "type": "object?",
+         "params": 4,
+         "signature": "object? Convert(object? value, Type targetType, object? parameter, CultureInfo culture)"
+        },
+        {
+         "kind": "method",
+         "name": "ConvertBack",
+         "accessibility": "public",
+         "line": 15,
+         "type": "object?",
+         "params": 4,
+         "signature": "object? ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture)"
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "path": "Diagnostics/Converters/GetTypeNameConverter.cs",
+     "lines": 25,
+     "types": [
+      {
+       "name": "GetTypeNameConverter",
+       "kind": "class",
+       "namespace": "Avalonia.Diagnostics.Converters",
+       "fullName": "Avalonia.Diagnostics.Converters.GetTypeNameConverter",
+       "accessibility": "internal",
+       "line": 8,
+       "bases": [
+        "IValueConverter"
+       ],
+       "members": [
+        {
+         "kind": "method",
+         "name": "Convert",
+         "accessibility": "public",
+         "line": 10,
+         "type": "object?",
+         "params": 4,
+         "signature": "object? Convert(object? value, Type targetType, object? parameter, CultureInfo culture)"
+        },
+        {
+         "kind": "method",
+         "name": "ConvertBack",
+         "accessibility": "public",
+         "line": 19,
+         "type": "object?",
+         "params": 4,
+         "signature": "object? ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture)"
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "path": "Diagnostics/Models/EventChainLink.cs",
+     "lines": 37,
+     "types": [
+      {
+       "name": "EventChainLink",
+       "kind": "class",
+       "namespace": "Avalonia.Diagnostics.Models",
+       "fullName": "Avalonia.Diagnostics.Models.EventChainLink",
+       "accessibility": "internal",
+       "line": 6,
+       "members": [
+        {
+         "kind": "ctor",
+         "name": ".ctor",
+         "accessibility": "public",
+         "line": 8,
+         "params": 3,
+         "signature": "EventChainLink(object handler, bool handled, RoutingStrategies route)"
+        },
+        {
+         "kind": "property",
+         "name": "Handler",
+         "accessibility": "public",
+         "line": 15,
+         "type": "object",
+         "accessors": {
+          "get": "public"
+         },
+         "signature": "object Handler { get; }"
+        },
+        {
+         "kind": "property",
+         "name": "BeginsNewRoute",
+         "accessibility": "public",
+         "line": 17,
+         "type": "bool",
+         "accessors": {
+          "get": "public",
+          "set": "public"
+         },
+         "signature": "bool BeginsNewRoute { get; set; }"
+        },
+        {
+         "kind": "property",
+         "name": "HandlerName",
+         "accessibility": "public",
+         "line": 19,
+         "type": "string",
+         "accessors": {
+          "get": "public"
+         },
+         "signature": "string HandlerName { get; }"
+        },
+        {
+         "kind": "property",
+         "name": "Handled",
+         "accessibility": "public",
+         "line": 32,
+         "type": "bool",
+         "accessors": {
+          "get": "public",
+          "set": "public"
+         },
+         "signature": "bool Handled { get; set; }"
+        },
+        {
+         "kind": "property",
+         "name": "Route",
+         "accessibility": "public",
+         "line": 34,
+         "type": "RoutingStrategies",
+         "accessors": {
+          "get": "public"
+         },
+         "signature": "RoutingStrategies Route { get; }"
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "path": "Diagnostics/Screenshots/BaseRenderToStreamHandler.cs",
+     "lines": 33,
+     "types": [
+      {
+       "name": "BaseRenderToStreamHandler",
+       "kind": "class",
+       "namespace": "Avalonia.Diagnostics.Screenshots",
+       "fullName": "Avalonia.Diagnostics.Screenshots.BaseRenderToStreamHandler",
+       "accessibility": "public",
+       "line": 9,
+       "modifiers": [
+        "abstract"
+       ],
+       "bases": [
+        "IScreenshotHandler"
+       ],
+       "members": [
+        {
+         "kind": "method",
+         "name": "GetStream",
+         "accessibility": "protected",
+         "modifiers": [
+          "abstract"
+         ],
+         "line": 16,
+         "type": "Task<System.IO.Stream?>",
+         "params": 1,
+         "signature": "abstract Task<System.IO.Stream?> GetStream(Control control)"
+        },
+        {
+         "kind": "method",
+         "name": "Take",
+         "accessibility": "public",
+         "modifiers": [
+          "async"
+         ],
+         "line": 18,
+         "type": "Task",
+         "params": 1,
+         "signature": "async Task Take(Control control)"
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "path": "Diagnostics/Screenshots/FilePickerHandler.cs",
+     "lines": 83,
+     "types": [
+      {
+       "name": "FilePickerHandler",
+       "kind": "class",
+       "namespace": "Avalonia.Diagnostics.Screenshots",
+       "fullName": "Avalonia.Diagnostics.Screenshots.FilePickerHandler",
+       "accessibility": "public",
+       "line": 15,
+       "modifiers": [
+        "sealed"
+       ],
+       "bases": [
+        "BaseRenderToStreamHandler"
+       ],
+       "members": [
+        {
+         "kind": "ctor",
+         "name": ".ctor",
+         "accessibility": "public",
+         "line": 23,
+         "params": 0,
+         "signature": "FilePickerHandler()"
+        },
+        {
+         "kind": "ctor",
+         "name": ".ctor",
+         "accessibility": "public",
+         "line": 33,
+         "params": 2,
+         "signature": "FilePickerHandler(string? title, string? screenshotRoot = default)"
+        },
+        {
+         "kind": "method",
+         "name": "GetStream",
+         "accessibility": "protected",
+         "modifiers": [
+          "override",
+          "async"
+         ],
+         "line": 54,
+         "type": "Task<Stream?>",
+         "params": 1,
+         "signature": "override async Task<Stream?> GetStream(Control control)"
+        }
+       ],
+       "privateMembers": 3
+      }
+     ]
+    },
+    {
+     "path": "Diagnostics/ViewModels/AvaloniaPropertyViewModel.cs",
+     "lines": 129,
+     "types": [
+      {
+       "name": "AvaloniaPropertyViewModel",
+       "kind": "class",
+       "namespace": "Avalonia.Diagnostics.ViewModels",
+       "fullName": "Avalonia.Diagnostics.ViewModels.AvaloniaPropertyViewModel",
+       "accessibility": "internal",
+       "line": 7,
+       "bases": [
+        "PropertyViewModel"
+       ],
+       "members": [
+        {
+         "kind": "ctor",
+         "name": ".ctor",
+         "accessibility": "public",
+         "line": 18,
+         "params": 2,
+         "signature": "AvaloniaPropertyViewModel(AvaloniaObject o, AvaloniaProperty property)"
+        },
+        {
+         "kind": "property",
+         "name": "Property",
+         "accessibility": "public",
+         "line": 32,
+         "type": "AvaloniaProperty",
+         "accessors": {
+          "get": "public"
+         },
+         "signature": "AvaloniaProperty Property { get; }"
+        },
+        {
+         "kind": "property",
+         "name": "Key",
+         "accessibility": "public",
+         "modifiers": [
+          "override"
+         ],
+         "line": 33,
+         "type": "object",
+         "accessors": {
+          "get": "public"
+         },
+         "signature": "override object Key { get; }"
+        },
+        {
+         "kind": "property",
+         "name": "Name",
+         "accessibility": "public",
+         "modifiers": [
+          "override"
+         ],
+         "line": 34,
+         "type": "string",
+         "accessors": {
+          "get": "public"
+         },
+         "signature": "override string Name { get; }"
+        },
+        {
+         "kind": "property",
+         "name": "IsAttached",
+         "accessibility": "public",
+         "modifiers": [
+          "override"
+         ],
+         "line": 35,
+         "type": "bool?",
+         "accessors": {
+          "get": "public"
+         },
+         "signature": "override bool? IsAttached { get; }"
+        },
+        {
+         "kind": "property",
+         "name": "Priority",
+         "accessibility": "public",
+         "modifiers": [
+          "override"
+         ],
+         "line": 36,
+         "type": "string",
+         "accessors": {
+          "get": "public"
+         },
+         "signature": "override string Priority { get; }"
+        },
+        {
+         "kind": "property",
+         "name": "AssignedType",
+         "accessibility": "public",
+         "modifiers": [
+          "override"
+         ],
+         "line": 37,
+         "type": "Type",
+         "accessors": {
+          "get": "public"
+         },
+         "signature": "override Type AssignedType { get; }"
+        },
+        {
+         "kind": "property",
+         "name": "Value",
+         "accessibility": "public",
+         "modifiers": [
+          "override"
+         ],
+         "line": 39,
+         "type": "object?",
+         "accessors": {
+          "get": "public",
+          "set": "public"
+         },
+         "signature": "override object? Value { get; set; }"
+        },
+        {
+         "kind": "property",
+         "name": "Group",
+         "accessibility": "public",
+         "modifiers": [
+          "override"
+         ],
+         "line": 53,
+         "type": "string",
+         "accessors": {
+          "get": "public"
+         },
+         "signature": "override string Group { get; }"
+        },
+        {
+         "kind": "property",
+         "name": "DeclaringType",
+         "accessibility": "public",
+         "modifiers": [
+          "override"
+         ],
+         "line": 55,
+         "type": "Type?",
+         "accessors": {
+          "get": "public"
+         },
+         "signature": "override Type? DeclaringType { get; }"
+        },
+        {
+         "kind": "property",
+         "name": "PropertyType",
+         "accessibility": "public",
+         "modifiers": [
+          "override"
+         ],
+         "line": 56,
+         "type": "Type",
+         "accessors": {
+          "get": "public"
+         },
+         "signature": "override Type PropertyType { get; }"
+        },
+        {
+         "kind": "property",
+         "name": "IsReadonly",
+         "accessibility": "public",
+         "modifiers": [
+          "override"
+         ],
+         "line": 57,
+         "type": "bool",
+         "accessors": {
+          "get": "public"
+         },
+         "signature": "override bool IsReadonly { get; }"
+        },
+        {
+         "kind": "method",
+         "name": "Update",
+         "accessibility": "public",
+         "modifiers": [
+          "override"
+         ],
+         "line": 60,
+         "type": "void",
+         "params": 0,
+         "signature": "override void Update()"
+        },
+        {
+         "kind": "method",
+         "name": "OnPropertyChanged",
+         "accessibility": "protected",
+         "modifiers": [
+          "override"
+         ],
+         "line": 119,
+         "type": "void",
+         "params": 1,
+         "signature": "override void OnPropertyChanged(PropertyChangedEventArgs e)"
+        }
+       ],
+       "privateMembers": 6
+      }
+     ]
+    },
+    {
+     "path": "Diagnostics/ViewModels/BindingSetterViewModel.cs",
+     "lines": 58,
+     "types": [
+      {
+       "name": "BindingSetterViewModel",
+       "kind": "class",
+       "namespace": "Avalonia.Diagnostics.ViewModels",
+       "fullName": "Avalonia.Diagnostics.ViewModels.BindingSetterViewModel",
+       "accessibility": "internal",
+       "line": 9,
+       "bases": [
+        "SetterViewModel"
+       ],
+       "members": [
+        {
+         "kind": "ctor",
+         "name": ".ctor",
+         "accessibility": "public",
+         "line": 11,
+         "params": 3,
+         "signature": "BindingSetterViewModel(AvaloniaProperty property, object? value, IClipboard? clipboard)"
+        },
+        {
+         "kind": "property",
+         "name": "Tint",
+         "accessibility": "public",
+         "line": 46,
+         "type": "IBrush",
+         "accessors": {
+          "get": "public"
+         },
+         "signature": "IBrush Tint { get; }"
+        },
+        {
+         "kind": "property",
+         "name": "ValueTypeTooltip",
+         "accessibility": "public",
+         "line": 48,
+         "type": "string",
+         "accessors": {
+          "get": "public"
+         },
+         "signature": "string ValueTypeTooltip { get; }"
+        },
+        {
+         "kind": "property",
+         "name": "Path",
+         "accessibility": "public",
+         "line": 50,
+         "type": "string",
+         "accessors": {
+          "get": "public"
+         },
+         "signature": "string Path { get; }"
+        },
+        {
+         "kind": "method",
+         "name": "CopyValue",
+         "accessibility": "public",
+         "modifiers": [
+          "override"
+         ],
+         "line": 52,
+         "type": "void",
+         "params": 0,
+         "signature": "override void CopyValue()"
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "path": "Diagnostics/ViewModels/ClrPropertyViewModel.cs",
+     "lines": 97,
+     "types": [
+      {
+       "name": "ClrPropertyViewModel",
+       "kind": "class",
+       "namespace": "Avalonia.Diagnostics.ViewModels",
+       "fullName": "Avalonia.Diagnostics.ViewModels.ClrPropertyViewModel",
+       "accessibility": "internal",
+       "line": 7,
+       "bases": [
+        "PropertyViewModel"
+       ],
+       "members": [
+        {
+         "kind": "ctor",
+         "name": ".ctor",
+         "accessibility": "public",
+         "line": 16,
+         "params": 2,
+         "signature": "ClrPropertyViewModel(object o, PropertyInfo property)"
+        },
+        {
+         "kind": "property",
+         "name": "Property",
+         "accessibility": "public",
+         "line": 37,
+         "type": "PropertyInfo",
+         "accessors": {
+          "get": "public"
+         },
+         "signature": "PropertyInfo Property { get; }"
+        },
+        {
+         "kind": "property",
+         "name": "Key",
+         "accessibility": "public",
+         "modifiers": [
+          "override"
+         ],
+         "line": 38,
+         "type": "object",
+         "accessors": {
+          "get": "public"
+         },
+         "signature": "override object Key { get; }"
+        },
+        {
+         "kind": "property",
+         "name": "Name",
+         "accessibility": "public",
+         "modifiers": [
+          "override"
+         ],
+         "line": 39,
+         "type": "string",
+         "accessors": {
+          "get": "public"
+         },
+         "signature": "override string Name { get; }"
+        },
+        {
+         "kind": "property",
+         "name": "Group",
+         "accessibility": "public",
+         "modifiers": [
+          "override"
+         ],
+         "line": 40,
+         "type": "string",
+         "accessors": {
+          "get": "public"
+         },
+         "signature": "override string Group { get; }"
+        },
+        {
+         "kind": "property",
+         "name": "AssignedType",
+         "accessibility": "public",
+         "modifiers": [
+          "override"
+         ],
+         "line": 42,
+         "type": "Type",
+         "accessors": {
+          "get": "public"
+         },
+         "signature": "override Type AssignedType { get; }"
+        },
+        {
+         "kind": "property",
+         "name": "PropertyType",
+         "accessibility": "public",
+         "modifiers": [
+          "override"
+         ],
+         "line": 43,
+         "type": "Type",
+         "accessors": {
+          "get": "public"
+         },
+         "signature": "override Type PropertyType { get; }"
+        },
+        {
+         "kind": "property",
+         "name": "IsReadonly",
+         "accessibility": "public",
+         "modifiers": [
+          "override"
+         ],
+         "line": 44,
+         "type": "bool",
+         "accessors": {
+          "get": "public"
+         },
+         "signature": "override bool IsReadonly { get; }"
+        },
+        {
+         "kind": "property",
+         "name": "Value",
+         "accessibility": "public",
+         "modifiers": [
+          "override"
+         ],
+         "line": 46,
+         "type": "object?",
+         "accessors": {
+          "get": "public",
+          "set": "public"
+         },
+         "signature": "override object? Value { get; set; }"
+        },
+        {
+         "kind": "property",
+         "name": "Priority",
+         "accessibility": "public",
+         "modifiers": [
+          "override"
+         ],
+         "line": 60,
+         "type": "string",
+         "accessors": {
+          "get": "public"
+         },
+         "signature": "override string Priority { get; }"
+        },
+        {
+         "kind": "property",
+         "name": "IsAttached",
+         "accessibility": "public",
+         "modifiers": [
+          "override"
+         ],
+         "line": 62,
+         "type": "bool?",
+         "accessors": {
+          "get": "public"
+         },
+         "signature": "override bool? IsAttached { get; }"
+        },
+        {
+         "kind": "property",
+         "name": "DeclaringType",
+         "accessibility": "public",
+         "modifiers": [
+          "override"
+         ],
+         "line": 64,
+         "type": "Type?",
+         "accessors": {
+          "get": "public"
+         },
+         "signature": "override Type? DeclaringType { get; }"
+        },
+        {
+         "kind": "method",
+         "name": "Update",
+         "accessibility": "public",
+         "modifiers": [
+          "override"
+         ],
+         "line": 67,
+         "type": "void",
+         "params": 0,
+         "signature": "override void Update()"
+        },
+        {
+         "kind": "method",
+         "name": "OnPropertyChanged",
+         "accessibility": "protected",
+         "modifiers": [
+          "override"
+         ],
+         "line": 87,
+         "type": "void",
+         "params": 1,
+         "signature": "override void OnPropertyChanged(PropertyChangedEventArgs e)"
+        }
+       ],
+       "privateMembers": 4
+      }
+     ]
+    },
+    {
+     "path": "Diagnostics/ViewModels/ControlDetailsViewModel.cs",
+     "lines": 549,
+     "types": [
+      {
+       "name": "ControlDetailsViewModel",
+       "kind": "class",
+       "namespace": "Avalonia.Diagnostics.ViewModels",
+       "fullName": "Avalonia.Diagnostics.ViewModels.ControlDetailsViewModel",
+       "accessibility": "internal",
+       "line": 18,
+       "bases": [
+        "ViewModelBase",
+        "IDisposable",
+        "IClassesChangedListener"
+       ],
+       "members": [
+        {
+         "kind": "ctor",
+         "name": ".ctor",
+         "accessibility": "public",
+         "line": 44,
+         "params": 3,
+         "signature": "ControlDetailsViewModel(TreePageViewModel treePage, AvaloniaObject avaloniaObject, ISet<string> pinnedProperties)"
+        },
+        {
+         "kind": "property",
+         "name": "CanNavigateToParentProperty",
+         "accessibility": "public",
+         "line": 85,
+         "type": "bool",
+         "accessors": {
+          "get": "public"
+         },
+         "signature": "bool CanNavigateToParentProperty { get; }"
+        },
+        {
+         "kind": "property",
+         "name": "TreePage",
+         "accessibility": "public",
+         "line": 87,
+         "type": "TreePageViewModel",
+         "accessors": {
+          "get": "public"
+         },
+         "signature": "TreePageViewModel TreePage { get; }"
+        },
+        {
+         "kind": "property",
+         "name": "PropertiesView",
+         "accessibility": "public",
+         "line": 89,
+         "type": "DataGridCollectionView?",
+         "accessors": {
+          "get": "public",
+          "set": "private"
+         },
+         "signature": "DataGridCollectionView? PropertiesView { get; private set; }"
+        },
+        {
+         "kind": "property",
+         "name": "AppliedFrames",
+         "accessibility": "public",
+         "line": 95,
+         "type": "ObservableCollection<ValueFrameViewModel>",
+         "accessors": {
+          "get": "public"
+         },
+         "signature": "ObservableCollection<ValueFrameViewModel> AppliedFrames { get; }"
+        },
+        {
+         "kind": "property",
+         "name": "PseudoClasses",
+         "accessibility": "public",
+         "line": 97,
+         "type": "ObservableCollection<PseudoClassViewModel>",
+         "accessors": {
+          "get": "public"
+         },
+         "signature": "ObservableCollection<PseudoClassViewModel> PseudoClasses { get; }"
+        },
+        {
+         "kind": "property",
+         "name": "SelectedEntity",
+         "accessibility": "public",
+         "line": 99,
+         "type": "object?",
+         "accessors": {
+          "get": "public",
+          "set": "public"
+         },
+         "signature": "object? SelectedEntity { get; set; }"
+        },
+        {
+         "kind": "property",
+         "name": "SelectedEntityName",
+         "accessibility": "public",
+         "line": 105,
+         "type": "string?",
+         "accessors": {
+          "get": "public",
+          "set": "public"
+         },
+         "signature": "string? SelectedEntityName { get; set; }"
+        },
+        {
+         "kind": "property",
+         "name": "SelectedEntityType",
+         "accessibility": "public",
+         "line": 111,
+         "type": "string?",
+         "accessors": {
+          "get": "public",
+          "set": "public"
+         },
+         "signature": "string? SelectedEntityType { get; set; }"
+        },
+        {
+         "kind": "property",
+         "name": "SelectedProperty",
+         "accessibility": "public",
+         "line": 117,
+         "type": "PropertyViewModel?",
+         "accessors": {
+          "get": "public",
+          "set": "public"
+         },
+         "signature": "PropertyViewModel? SelectedProperty { get; set; }"
+        },
+        {
+         "kind": "property",
+         "name": "SnapshotFrames",
+         "accessibility": "public",
+         "line": 123,
+         "type": "bool",
+         "accessors": {
+          "get": "public",
+          "set": "public"
+         },
+         "signature": "bool SnapshotFrames { get; set; }"
+        },
+        {
+         "kind": "property",
+         "name": "ShowInactiveFrames",
+         "accessibility": "public",
+         "line": 129,
+         "type": "bool",
+         "accessors": {
+          "get": "public",
+          "set": "public"
+         },
+         "signature": "bool ShowInactiveFrames { get; set; }"
+        },
+        {
+         "kind": "property",
+         "name": "FramesStatus",
+         "accessibility": "public",
+         "line": 135,
+         "type": "string?",
+         "accessors": {
+          "get": "public",
+          "set": "public"
+         },
+         "signature": "string? FramesStatus { get; set; }"
+        },
+        {
+         "kind": "property",
+         "name": "Layout",
+         "accessibility": "public",
+         "line": 141,
+         "type": "ControlLayoutViewModel?",
+         "accessors": {
+          "get": "public"
+         },
+         "signature": "ControlLayoutViewModel? Layout { get; }"
+        },
+        {
+         "kind": "method",
+         "name": "OnPropertyChanged",
+         "accessibility": "protected",
+         "modifiers": [
+          "override"
+         ],
+         "line": 143,
+         "type": "void",
+         "params": 1,
+         "signature": "override void OnPropertyChanged(PropertyChangedEventArgs e)"
+        },
+        {
+         "kind": "method",
+         "name": "UpdateStyleFilters",
+         "accessibility": "public",
+         "line": 156,
+         "type": "void",
+         "params": 0,
+         "signature": "void UpdateStyleFilters()"
+        },
+        {
+         "kind": "method",
+         "name": "Dispose",
+         "accessibility": "public",
+         "line": 173,
+         "type": "void",
+         "params": 0,
+         "signature": "void Dispose()"
+        },
+        {
+         "kind": "method",
+         "name": "Changed",
+         "accessibility": "explicit",
+         "line": 262,
+         "type": "void",
+         "explicitInterface": "IClassesChangedListener",
+         "params": 0,
+         "signature": "void IClassesChangedListener.Changed()"
+        },
+        {
+         "kind": "method",
+         "name": "NavigateToSelectedProperty",
+         "accessibility": "public",
+         "line": 386,
+         "type": "void",
+         "params": 0,
+         "signature": "void NavigateToSelectedProperty()"
+        },
+        {
+         "kind": "method",
+         "name": "NavigateToParentProperty",
+         "accessibility": "public",
+         "line": 435,
+         "type": "void",
+         "params": 0,
+         "signature": "void NavigateToParentProperty()"
+        },
+        {
+         "kind": "method",
+         "name": "NavigateToProperty",
+         "accessibility": "protected",
+         "line": 446,
+         "type": "void",
+         "params": 2,
+         "signature": "void NavigateToProperty(object o, string? entityName)"
+        },
+        {
+         "kind": "method",
+         "name": "SelectProperty",
+         "accessibility": "internal",
+         "line": 495,
+         "type": "void",
+         "params": 1,
+         "signature": "void SelectProperty(AvaloniaProperty property)"
+        },
+        {
+         "kind": "method",
+         "name": "UpdatePropertiesView",
+         "accessibility": "internal",
+         "line": 522,
+         "type": "void",
+         "params": 1,
+         "signature": "void UpdatePropertiesView(bool showImplementedInterfaces)"
+        },
+        {
+         "kind": "method",
+         "name": "TogglePinnedProperty",
+         "accessibility": "public",
+         "line": 529,
+         "type": "void",
+         "params": 1,
+         "signature": "void TogglePinnedProperty(object parameter)"
+        }
+       ],
+       "privateMembers": 24
+      }
+     ]
+    },
+    {
+     "path": "Diagnostics/ViewModels/ControlLayoutViewModel.cs",
+     "lines": 249,
+     "types": [
+      {
+       "name": "ControlLayoutViewModel",
+       "kind": "class",
+       "namespace": "Avalonia.Diagnostics.ViewModels",
+       "fullName": "Avalonia.Diagnostics.ViewModels.ControlLayoutViewModel",
+       "accessibility": "internal",
+       "line": 10,
+       "bases": [
+        "ViewModelBase"
+       ],
+       "members": [
+        {
+         "kind": "ctor",
+         "name": ".ctor",
+         "accessibility": "public",
+         "line": 24,
+         "params": 1,
+         "signature": "ControlLayoutViewModel(Visual control)"
+        },
+        {
+         "kind": "property",
+         "name": "MarginThickness",
+         "accessibility": "public",
+         "line": 61,
+         "type": "Thickness",
+         "accessors": {
+          "get": "public",
+          "set": "public"
+         },
+         "signature": "Thickness MarginThickness { get; set; }"
+        },
+        {
+         "kind": "property",
+         "name": "BorderThickness",
+         "accessibility": "public",
+         "line": 67,
+         "type": "Thickness",
+         "accessors": {
+          "get": "public",
+          "set": "public"
+         },
+         "signature": "Thickness BorderThickness { get; set; }"
+        },
+        {
+         "kind": "property",
+         "name": "PaddingThickness",
+         "accessibility": "public",
+         "line": 73,
+         "type": "Thickness",
+         "accessors": {
+          "get": "public",
+          "set": "public"
+         },
+         "signature": "Thickness PaddingThickness { get; set; }"
+        },
+        {
+         "kind": "property",
+         "name": "Width",
+         "accessibility": "public",
+         "line": 79,
+         "type": "double",
+         "accessors": {
+          "get": "public",
+          "set": "private"
+         },
+         "signature": "double Width { get; private set; }"
+        },
+        {
+         "kind": "property",
+         "name": "Height",
+         "accessibility": "public",
+         "line": 85,
+         "type": "double",
+         "accessors": {
+          "get": "public",
+          "set": "private"
+         },
+         "signature": "double Height { get; private set; }"
+        },
+        {
+         "kind": "property",
+         "name": "WidthConstraint",
+         "accessibility": "public",
+         "line": 91,
+         "type": "string?",
+         "accessors": {
+          "get": "public",
+          "set": "private"
+         },
+         "signature": "string? WidthConstraint { get; private set; }"
+        },
+        {
+         "kind": "property",
+         "name": "HeightConstraint",
+         "accessibility": "public",
+         "line": 97,
+         "type": "string?",
+         "accessors": {
+          "get": "public",
+          "set": "private"
+         },
+         "signature": "string? HeightConstraint { get; private set; }"
+        },
+        {
+         "kind": "property",
+         "name": "HorizontalAlignment",
+         "accessibility": "public",
+         "line": 103,
+         "type": "HorizontalAlignment",
+         "accessors": {
+          "get": "public",
+          "set": "public"
+         },
+         "signature": "HorizontalAlignment HorizontalAlignment { get; set; }"
+        },
+        {
+         "kind": "property",
+         "name": "VerticalAlignment",
+         "accessibility": "public",
+         "line": 109,
+         "type": "VerticalAlignment",
+         "accessors": {
+          "get": "public",
+          "set": "public"
+         },
+         "signature": "VerticalAlignment VerticalAlignment { get; set; }"
+        },
+        {
+         "kind": "property",
+         "name": "HasPadding",
+         "accessibility": "public",
+         "line": 115,
+         "type": "bool",
+         "accessors": {
+          "get": "public"
+         },
+         "signature": "bool HasPadding { get; }"
+        },
+        {
+         "kind": "property",
+         "name": "HasBorder",
+         "accessibility": "public",
+         "line": 117,
+         "type": "bool",
+         "accessors": {
+          "get": "public"
+         },
+         "signature": "bool HasBorder { get; }"
+        },
+        {
+         "kind": "method",
+         "name": "OnPropertyChanged",
+         "accessibility": "protected",
+         "modifiers": [
+          "override"
+         ],
+         "line": 156,
+         "type": "void",
+         "params": 1,
+         "signature": "override void OnPropertyChanged(PropertyChangedEventArgs e)"
+        },
+        {
+         "kind": "method",
+         "name": "ControlPropertyChanged",
+         "accessibility": "public",
+         "line": 190,
+         "type": "void",
+         "params": 2,
+         "signature": "void ControlPropertyChanged(object? sender, AvaloniaPropertyChangedEventArgs e)"
+        }
+       ],
+       "privateMembers": 13
+      }
+     ]
+    },
+    {
+     "path": "Diagnostics/ViewModels/EventOwnerTreeNode.cs",
+     "lines": 48,
+     "types": [
+      {
+       "name": "EventOwnerTreeNode",
+       "kind": "class",
+       "namespace": "Avalonia.Diagnostics.ViewModels",
+       "fullName": "Avalonia.Diagnostics.ViewModels.EventOwnerTreeNode",
+       "accessibility": "internal",
+       "line": 9,
+       "bases": [
+        "EventTreeNodeBase"
+       ],
+       "members": [
+        {
+         "kind": "ctor",
+         "name": ".ctor",
+         "accessibility": "public",
+         "line": 11,
+         "params": 3,
+         "signature": "EventOwnerTreeNode(Type type, IEnumerable<RoutedEvent> events, EventsPageViewModel vm)"
+        },
+        {
+         "kind": "property",
+         "name": "IsEnabled",
+         "accessibility": "public",
+         "modifiers": [
+          "override"
+         ],
+         "line": 19,
+         "type": "bool?",
+         "accessors": {
+          "get": "public",
+          "set": "public"
+         },
+         "signature": "override bool? IsEnabled { get; set; }"
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "path": "Diagnostics/ViewModels/EventTreeNode.cs",
+     "lines": 132,
+     "types": [
+      {
+       "name": "EventTreeNode",
+       "kind": "class",
+       "namespace": "Avalonia.Diagnostics.ViewModels",
+       "fullName": "Avalonia.Diagnostics.ViewModels.EventTreeNode",
+       "accessibility": "internal",
+       "line": 11,
+       "bases": [
+        "EventTreeNodeBase"
+       ],
+       "members": [
+        {
+         "kind": "ctor",
+         "name": ".ctor",
+         "accessibility": "public",
+         "line": 17,
+         "params": 3,
+         "signature": "EventTreeNode(EventOwnerTreeNode parent, RoutedEvent @event, EventsPageViewModel vm)"
+        },
+        {
+         "kind": "property",
+         "name": "Event",
+         "accessibility": "public",
+         "line": 24,
+         "type": "RoutedEvent",
+         "accessors": {
+          "get": "public"
+         },
+         "signature": "RoutedEvent Event { get; }"
+        },
+        {
+         "kind": "property",
+         "name": "IsEnabled",
+         "accessibility": "public",
+         "modifiers": [
+          "override"
+         ],
+         "line": 26,
+         "type": "bool?",
+         "accessors": {
+          "get": "public",
+          "set": "public"
+         },
+         "signature": "override bool? IsEnabled { get; set; }"
+        }
+       ],
+       "privateMembers": 6
+      }
+     ]
+    },
+    {
+     "path": "Diagnostics/ViewModels/EventTreeNodeBase.cs",
+     "lines": 85,
+     "types": [
+      {
+       "name": "EventTreeNodeBase",
+       "kind": "class",
+       "namespace": "Avalonia.Diagnostics.ViewModels",
+       "fullName": "Avalonia.Diagnostics.ViewModels.EventTreeNodeBase",
+       "accessibility": "internal",
+       "line": 5,
+       "modifiers": [
+        "abstract"
+       ],
+       "bases": [
+        "ViewModelBase"
+       ],
+       "members": [
+        {
+         "kind": "field",
+         "name": "_updateChildren",
+         "accessibility": "internal",
+         "line": 7,
+         "type": "bool",
+         "signature": "bool _updateChildren"
+        },
+        {
+         "kind": "field",
+         "name": "_updateParent",
+         "accessibility": "internal",
+         "line": 8,
+         "type": "bool",
+         "signature": "bool _updateParent"
+        },
+        {
+         "kind": "ctor",
+         "name": ".ctor",
+         "accessibility": "protected",
+         "line": 13,
+         "params": 2,
+         "signature": "EventTreeNodeBase(EventTreeNodeBase? parent, string text)"
+        },
+        {
+         "kind": "property",
+         "name": "Children",
+         "accessibility": "public",
+         "line": 20,
+         "type": "IAvaloniaReadOnlyList<EventTreeNodeBase>?",
+         "accessors": {
+          "get": "public",
+          "set": "protected"
+         },
+         "signature": "IAvaloniaReadOnlyList<EventTreeNodeBase>? Children { get; protected set; }"
+        },
+        {
+         "kind": "property",
+         "name": "IsExpanded",
+         "accessibility": "public",
+         "line": 26,
+         "type": "bool",
+         "accessors": {
+          "get": "public",
+          "set": "public"
+         },
+         "signature": "bool IsExpanded { get; set; }"
+        },
+        {
+         "kind": "property",
+         "name": "IsEnabled",
+         "accessibility": "public",
+         "modifiers": [
+          "virtual"
+         ],
+         "line": 32,
+         "type": "bool?",
+         "accessors": {
+          "get": "public",
+          "set": "public"
+         },
+         "signature": "virtual bool? IsEnabled { get; set; }"
+        },
+        {
+         "kind": "property",
+         "name": "IsVisible",
+         "accessibility": "public",
+         "line": 38,
+         "type": "bool",
+         "accessors": {
+          "get": "public",
+          "set": "public"
+         },
+         "signature": "bool IsVisible { get; set; }"
+        },
+        {
+         "kind": "property",
+         "name": "Parent",
+         "accessibility": "public",
+         "line": 44,
+         "type": "EventTreeNodeBase?",
+         "accessors": {
+          "get": "public"
+         },
+         "signature": "EventTreeNodeBase? Parent { get; }"
+        },
+        {
+         "kind": "property",
+         "name": "Text",
+         "accessibility": "public",
+         "line": 49,
+         "type": "string",
+         "accessors": {
+          "get": "public"
+         },
+         "signature": "string Text { get; }"
+        },
+        {
+         "kind": "method",
+         "name": "UpdateChecked",
+         "accessibility": "internal",
+         "line": 54,
+         "type": "void",
+         "params": 0,
+         "signature": "void UpdateChecked()"
+        }
+       ],
+       "privateMembers": 3
+      }
+     ]
+    },
+    {
+     "path": "Diagnostics/ViewModels/EventsPageViewModel.cs",
+     "lines": 178,
+     "types": [
+      {
+       "name": "EventsPageViewModel",
+       "kind": "class",
+       "namespace": "Avalonia.Diagnostics.ViewModels",
+       "fullName": "Avalonia.Diagnostics.ViewModels.EventsPageViewModel",
+       "accessibility": "internal",
+       "line": 12,
+       "bases": [
+        "ViewModelBase"
+       ],
+       "members": [
+        {
+         "kind": "ctor",
+         "name": ".ctor",
+         "accessibility": "public",
+         "line": 28,
+         "params": 1,
+         "signature": "EventsPageViewModel(MainViewModel mainViewModel)"
+        },
+        {
+         "kind": "property",
+         "name": "Name",
+         "accessibility": "public",
+         "line": 44,
+         "type": "string",
+         "accessors": {
+          "get": "public"
+         },
+         "signature": "string Name { get; }"
+        },
+        {
+         "kind": "property",
+         "name": "Nodes",
+         "accessibility": "public",
+         "line": 46,
+         "type": "EventTreeNodeBase[]",
+         "accessors": {
+          "get": "public"
+         },
+         "signature": "EventTreeNodeBase[] Nodes { get; }"
+        },
+        {
+         "kind": "property",
+         "name": "RecordedEvents",
+         "accessibility": "public",
+         "line": 48,
+         "type": "ObservableCollection<FiredEvent>",
+         "accessors": {
+          "get": "public"
+         },
+         "signature": "ObservableCollection<FiredEvent> RecordedEvents { get; }"
+        },
+        {
+         "kind": "property",
+         "name": "SelectedEvent",
+         "accessibility": "public",
+         "line": 50,
+         "type": "FiredEvent?",
+         "accessors": {
+          "get": "public",
+          "set": "public"
+         },
+         "signature": "FiredEvent? SelectedEvent { get; set; }"
+        },
+        {
+         "kind": "property",
+         "name": "SelectedNode",
+         "accessibility": "public",
+         "line": 56,
+         "type": "EventTreeNodeBase?",
+         "accessors": {
+          "get": "public",
+          "set": "public"
+         },
+         "signature": "EventTreeNodeBase? SelectedNode { get; set; }"
+        },
+        {
+         "kind": "property",
+         "name": "EventsFilter",
+         "accessibility": "public",
+         "line": 62,
+         "type": "FilterViewModel",
+         "accessors": {
+          "get": "public"
+         },
+         "signature": "FilterViewModel EventsFilter { get; }"
+        },
+        {
+         "kind": "method",
+         "name": "Clear",
+         "accessibility": "public",
+         "line": 64,
+         "type": "void",
+         "params": 0,
+         "signature": "void Clear()"
+        },
+        {
+         "kind": "method",
+         "name": "DisableAll",
+         "accessibility": "public",
+         "line": 69,
+         "type": "void",
+         "params": 0,
+         "signature": "void DisableAll()"
+        },
+        {
+         "kind": "method",
+         "name": "EnableDefault",
+         "accessibility": "public",
+         "line": 74,
+         "type": "void",
+         "params": 0,
+         "signature": "void EnableDefault()"
+        },
+        {
+         "kind": "method",
+         "name": "RequestTreeNavigateTo",
+         "accessibility": "public",
+         "line": 79,
+         "type": "void",
+         "params": 1,
+         "signature": "void RequestTreeNavigateTo(EventChainLink navTarget)"
+        },
+        {
+         "kind": "method",
+         "name": "SelectEventByType",
+         "accessibility": "public",
+         "line": 87,
+         "type": "void",
+         "params": 1,
+         "signature": "void SelectEventByType(RoutedEvent evt)"
+        },
+        {
+         "kind": "property",
+         "name": "MainView",
+         "accessibility": "public",
+         "line": 175,
+         "type": "MainViewModel",
+         "accessors": {
+          "get": "public"
+         },
+         "signature": "MainViewModel MainView { get; }"
+        }
+       ],
+       "privateMembers": 6
+      }
+     ]
+    },
+    {
+     "path": "Diagnostics/ViewModels/FilterViewModel.cs",
+     "lines": 123,
+     "types": [
+      {
+       "name": "FilterViewModel",
+       "kind": "class",
+       "namespace": "Avalonia.Diagnostics.ViewModels",
+       "fullName": "Avalonia.Diagnostics.ViewModels.FilterViewModel",
+       "accessibility": "internal",
+       "line": 9,
+       "bases": [
+        "ViewModelBase",
+        "INotifyDataErrorInfo"
+       ],
+       "members": [
+        {
+         "kind": "event",
+         "name": "RefreshFilter",
+         "accessibility": "public",
+         "line": 16,
+         "type": "EventHandler?",
+         "signature": "event EventHandler? RefreshFilter"
+        },
+        {
+         "kind": "property",
+         "name": "HasErrors",
+         "accessibility": "public",
+         "line": 18,
+         "type": "bool",
+         "accessors": {
+          "get": "public"
+         },
+         "signature": "bool HasErrors { get; }"
+        },
+        {
+         "kind": "event",
+         "name": "ErrorsChanged",
+         "accessibility": "public",
+         "line": 20,
+         "type": "EventHandler<DataErrorsChangedEventArgs>?",
+         "signature": "event EventHandler<DataErrorsChangedEventArgs>? ErrorsChanged"
+        },
+        {
+         "kind": "method",
+         "name": "Filter",
+         "accessibility": "public",
+         "line": 22,
+         "type": "bool",
+         "params": 1,
+         "signature": "bool Filter(string input)"
+        },
+        {
+         "kind": "property",
+         "name": "FilterString",
+         "accessibility": "public",
+         "line": 61,
+         "type": "string",
+         "accessors": {
+          "get": "public",
+          "set": "public"
+         },
+         "signature": "string FilterString { get; set; }"
+        },
+        {
+         "kind": "property",
+         "name": "UseRegexFilter",
+         "accessibility": "public",
+         "line": 74,
+         "type": "bool",
+         "accessors": {
+          "get": "public",
+          "set": "public"
+         },
+         "signature": "bool UseRegexFilter { get; set; }"
+        },
+        {
+         "kind": "property",
+         "name": "UseCaseSensitiveFilter",
+         "accessibility": "public",
+         "line": 87,
+         "type": "bool",
+         "accessors": {
+          "get": "public",
+          "set": "public"
+         },
+         "signature": "bool UseCaseSensitiveFilter { get; set; }"
+        },
+        {
+         "kind": "property",
+         "name": "UseWholeWordFilter",
+         "accessibility": "public",
+         "line": 100,
+         "type": "bool",
+         "accessors": {
+          "get": "public",
+          "set": "public"
+         },
+         "signature": "bool UseWholeWordFilter { get; set; }"
+        },
+        {
+         "kind": "method",
+         "name": "GetErrors",
+         "accessibility": "public",
+         "line": 113,
+         "type": "IEnumerable",
+         "params": 1,
+         "signature": "IEnumerable GetErrors(string? propertyName)"
+        }
+       ],
+       "privateMembers": 7
+      }
+     ]
+    },
+    {
+     "path": "Diagnostics/ViewModels/FiredEvent.cs",
+     "lines": 88,
+     "types": [
+      {
+       "name": "FiredEvent",
+       "kind": "class",
+       "namespace": "Avalonia.Diagnostics.ViewModels",
+       "fullName": "Avalonia.Diagnostics.ViewModels.FiredEvent",
+       "accessibility": "internal",
+       "line": 8,
+       "bases": [
+        "ViewModelBase"
+       ],
+       "members": [
+        {
+         "kind": "ctor",
+         "name": ".ctor",
+         "accessibility": "public",
+         "line": 14,
+         "params": 3,
+         "signature": "FiredEvent(RoutedEventArgs eventArgs, EventChainLink originator, DateTime triggerTime)"
+        },
+        {
+         "kind": "method",
+         "name": "IsPartOfSameEventChain",
+         "accessibility": "public",
+         "line": 23,
+         "type": "bool",
+         "params": 1,
+         "signature": "bool IsPartOfSameEventChain(RoutedEventArgs e)"
+        },
+        {
+         "kind": "property",
+         "name": "TriggerTime",
+         "accessibility": "public",
+         "line": 30,
+         "type": "DateTime",
+         "accessors": {
+          "get": "public"
+         },
+         "signature": "DateTime TriggerTime { get; }"
+        },
+        {
+         "kind": "property",
+         "name": "Event",
+         "accessibility": "public",
+         "line": 32,
+         "type": "RoutedEvent",
+         "accessors": {
+          "get": "public"
+         },
+         "signature": "RoutedEvent Event { get; }"
+        },
+        {
+         "kind": "property",
+         "name": "IsHandled",
+         "accessibility": "public",
+         "line": 34,
+         "type": "bool",
+         "accessors": {
+          "get": "public"
+         },
+         "signature": "bool IsHandled { get; }"
+        },
+        {
+         "kind": "property",
+         "name": "EventChain",
+         "accessibility": "public",
+         "line": 36,
+         "type": "ObservableCollection<EventChainLink>",
+         "accessors": {
+          "get": "public"
+         },
+         "signature": "ObservableCollection<EventChainLink> EventChain { get; }"
+        },
+        {
+         "kind": "property",
+         "name": "DisplayText",
+         "accessibility": "public",
+         "line": 38,
+         "type": "string",
+         "accessors": {
+          "get": "public"
+         },
+         "signature": "string DisplayText { get; }"
+        },
+        {
+         "kind": "property",
+         "name": "Originator",
+         "accessibility": "public",
+         "line": 52,
+         "type": "EventChainLink",
+         "accessors": {
+          "get": "public"
+         },
+         "signature": "EventChainLink Originator { get; }"
+        },
+        {
+         "kind": "property",
+         "name": "HandledBy",
+         "accessibility": "public",
+         "line": 54,
+         "type": "EventChainLink?",
+         "accessors": {
+          "get": "public",
+          "set": "public"
+         },
+         "signature": "EventChainLink? HandledBy { get; set; }"
+        },
+        {
+         "kind": "method",
+         "name": "AddToChain",
+         "accessibility": "public",
+         "line": 69,
+         "type": "void",
+         "params": 1,
+         "signature": "void AddToChain(EventChainLink link)"
+        }
+       ],
+       "privateMembers": 3
+      }
+     ]
+    },
+    {
+     "path": "Diagnostics/ViewModels/HotKeyPageViewModel.cs",
+     "lines": 41,
+     "types": [
+      {
+       "name": "HotKeyDescription",
+       "kind": "record",
+       "namespace": "Avalonia.Diagnostics.ViewModels",
+       "fullName": "Avalonia.Diagnostics.ViewModels.HotKeyDescription",
+       "accessibility": "internal",
+       "line": 6,
+       "members": [
+        {
+         "kind": "ctor",
+         "name": ".ctor",
+         "signature": "HotKeyDescription(string Gesture, string BriefDescription, string? DetailedDescription = null)",
+         "accessibility": "public",
+         "params": 3,
+         "primary": true,
+         "line": 6
+        },
+        {
+         "kind": "property",
+         "name": "Gesture",
+         "signature": "string Gesture { get; init; }",
+         "accessibility": "public",
+         "type": "string",
+         "accessors": {
+          "get": "public",
+          "init": "public"
+         },
+         "positional": true
+        },
+        {
+         "kind": "property",
+         "name": "BriefDescription",
+         "signature": "string BriefDescription { get; init; }",
+         "accessibility": "public",
+         "type": "string",
+         "accessors": {
+          "get": "public",
+          "init": "public"
+         },
+         "positional": true
+        },
+        {
+         "kind": "property",
+         "name": "DetailedDescription",
+         "signature": "string? DetailedDescription { get; init; }",
+         "accessibility": "public",
+         "type": "string?",
+         "accessors": {
+          "get": "public",
+          "init": "public"
+         },
+         "positional": true
+        }
+       ]
+      },
+      {
+       "name": "HotKeyPageViewModel",
+       "kind": "class",
+       "namespace": "Avalonia.Diagnostics.ViewModels",
+       "fullName": "Avalonia.Diagnostics.ViewModels.HotKeyPageViewModel",
+       "accessibility": "internal",
+       "line": 8,
+       "bases": [
+        "ViewModelBase"
+       ],
+       "members": [
+        {
+         "kind": "property",
+         "name": "HotKeyDescriptions",
+         "accessibility": "public",
+         "line": 11,
+         "type": "ObservableCollection<HotKeyDescription>?",
+         "accessors": {
+          "get": "public",
+          "set": "private"
+         },
+         "signature": "ObservableCollection<HotKeyDescription>? HotKeyDescriptions { get; private set; }"
+        },
+        {
+         "kind": "method",
+         "name": "SetOptions",
+         "accessibility": "public",
+         "line": 17,
+         "type": "void",
+         "params": 1,
+         "signature": "void SetOptions(DevToolsOptions options)"
+        }
+       ],
+       "privateMembers": 2
+      }
+     ]
+    },
+    {
+     "path": "Diagnostics/ViewModels/LogicalTreeNode.cs",
+     "lines": 117,
+     "types": [
+      {
+       "name": "LogicalTreeNode",
+       "kind": "class",
+       "namespace": "Avalonia.Diagnostics.ViewModels",
+       "fullName": "Avalonia.Diagnostics.ViewModels.LogicalTreeNode",
+       "accessibility": "internal",
+       "line": 11,
+       "bases": [
+        "TreeNode"
+       ],
+       "members": [
+        {
+         "kind": "ctor",
+         "name": ".ctor",
+         "accessibility": "public",
+         "line": 13,
+         "params": 2,
+         "signature": "LogicalTreeNode(AvaloniaObject avaloniaObject, TreeNode? parent)"
+        },
+        {
+         "kind": "property",
+         "name": "Children",
+         "accessibility": "public",
+         "modifiers": [
+          "override"
+         ],
+         "line": 24,
+         "type": "TreeNodeCollection",
+         "accessors": {
+          "get": "public"
+         },
+         "signature": "override TreeNodeCollection Children { get; }"
+        },
+        {
+         "kind": "method",
+         "name": "Create",
+         "accessibility": "public",
+         "modifiers": [
+          "static"
+         ],
+         "line": 26,
+         "type": "LogicalTreeNode[]",
+         "params": 1,
+         "signature": "static LogicalTreeNode[] Create(object control)"
+        }
+       ],
+       "nestedTypes": [
+        {
+         "name": "LogicalTreeNodeCollection",
+         "kind": "class",
+         "namespace": "Avalonia.Diagnostics.ViewModels",
+         "fullName": "Avalonia.Diagnostics.ViewModels.LogicalTreeNode.LogicalTreeNodeCollection",
+         "accessibility": "internal",
+         "line": 32,
+         "outer": "LogicalTreeNode",
+         "bases": [
+          "TreeNodeCollection"
+         ],
+         "members": [
+          {
+           "kind": "ctor",
+           "name": ".ctor",
+           "accessibility": "public",
+           "line": 37,
+           "params": 2,
+           "signature": "LogicalTreeNodeCollection(TreeNode owner, ILogical control)"
+          },
+          {
+           "kind": "method",
+           "name": "Dispose",
+           "accessibility": "public",
+           "modifiers": [
+            "override"
+           ],
+           "line": 43,
+           "type": "void",
+           "params": 0,
+           "signature": "override void Dispose()"
+          },
+          {
+           "kind": "method",
+           "name": "Initialize",
+           "accessibility": "protected",
+           "modifiers": [
+            "override"
+           ],
+           "line": 49,
+           "type": "void",
+           "params": 1,
+           "signature": "override void Initialize(AvaloniaList<TreeNode> nodes)"
+          }
+         ],
+         "privateMembers": 2
+        },
+        {
+         "name": "TopLevelGroupHostLogical",
+         "kind": "class",
+         "namespace": "Avalonia.Diagnostics.ViewModels",
+         "fullName": "Avalonia.Diagnostics.ViewModels.LogicalTreeNode.TopLevelGroupHostLogical",
+         "accessibility": "internal",
+         "line": 58,
+         "outer": "LogicalTreeNode",
+         "bases": [
+          "TreeNodeCollection"
+         ],
+         "members": [
+          {
+           "kind": "ctor",
+           "name": ".ctor",
+           "accessibility": "public",
+           "line": 63,
+           "params": 2,
+           "signature": "TopLevelGroupHostLogical(TreeNode owner, Controls.TopLevelGroup host)"
+          },
+          {
+           "kind": "method",
+           "name": "Initialize",
+           "accessibility": "protected",
+           "modifiers": [
+            "override"
+           ],
+           "line": 69,
+           "type": "void",
+           "params": 1,
+           "signature": "override void Initialize(AvaloniaList<TreeNode> nodes)"
+          },
+          {
+           "kind": "method",
+           "name": "Dispose",
+           "accessibility": "public",
+           "modifiers": [
+            "override"
+           ],
+           "line": 109,
+           "type": "void",
+           "params": 0,
+           "signature": "override void Dispose()"
+          }
+         ],
+         "privateMembers": 2
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "path": "Diagnostics/ViewModels/MainViewModel.cs",
+     "lines": 388,
+     "types": [
+      {
+       "name": "MainViewModel",
+       "kind": "class",
+       "namespace": "Avalonia.Diagnostics.ViewModels",
+       "fullName": "Avalonia.Diagnostics.ViewModels.MainViewModel",
+       "accessibility": "internal",
+       "line": 15,
+       "bases": [
+        "ViewModelBase",
+        "IDisposable"
+       ],
+       "members": [
+        {
+         "kind": "ctor",
+         "name": ".ctor",
+         "accessibility": "public",
+         "line": 38,
+         "params": 1,
+         "signature": "MainViewModel(AvaloniaObject root)"
+        },
+        {
+         "kind": "property",
+         "name": "FreezePopups",
+         "accessibility": "public",
+         "line": 72,
+         "type": "bool",
+         "accessors": {
+          "get": "public",
+          "set": "public"
+         },
+         "signature": "bool FreezePopups { get; set; }"
+        },
+        {
+         "kind": "property",
+         "name": "ShouldVisualizeMarginPadding",
+         "accessibility": "public",
+         "line": 78,
+         "type": "bool",
+         "accessors": {
+          "get": "public",
+          "set": "public"
+         },
+         "signature": "bool ShouldVisualizeMarginPadding { get; set; }"
+        },
+        {
+         "kind": "method",
+         "name": "ToggleVisualizeMarginPadding",
+         "accessibility": "public",
+         "line": 84,
+         "type": "void",
+         "params": 0,
+         "signature": "void ToggleVisualizeMarginPadding()"
+        },
+        {
+         "kind": "property",
+         "name": "ShowDirtyRectsOverlay",
+         "accessibility": "public",
+         "line": 118,
+         "type": "bool",
+         "accessors": {
+          "get": "public",
+          "set": "public"
+         },
+         "signature": "bool ShowDirtyRectsOverlay { get; set; }"
+        },
+        {
+         "kind": "method",
+         "name": "ToggleDirtyRectsOverlay",
+         "accessibility": "public",
+         "line": 124,
+         "type": "void",
+         "params": 0,
+         "signature": "void ToggleDirtyRectsOverlay()"
+        },
+        {
+         "kind": "property",
+         "name": "ShowFpsOverlay",
+         "accessibility": "public",
+         "line": 127,
+         "type": "bool",
+         "accessors": {
+          "get": "public",
+          "set": "public"
+         },
+         "signature": "bool ShowFpsOverlay { get; set; }"
+        },
+        {
+         "kind": "method",
+         "name": "ToggleFpsOverlay",
+         "accessibility": "public",
+         "line": 133,
+         "type": "void",
+         "params": 0,
+         "signature": "void ToggleFpsOverlay()"
+        },
+        {
+         "kind": "property",
+         "name": "ShowLayoutTimeGraphOverlay",
+         "accessibility": "public",
+         "line": 136,
+         "type": "bool",
+         "accessors": {
+          "get": "public",
+          "set": "public"
+         },
+         "signature": "bool ShowLayoutTimeGraphOverlay { get; set; }"
+        },
+        {
+         "kind": "method",
+         "name": "ToggleLayoutTimeGraphOverlay",
+         "accessibility": "public",
+         "line": 142,
+         "type": "void",
+         "params": 0,
+         "signature": "void ToggleLayoutTimeGraphOverlay()"
+        },
+        {
+         "kind": "property",
+         "name": "ShowRenderTimeGraphOverlay",
+         "accessibility": "public",
+         "line": 145,
+         "type": "bool",
+         "accessors": {
+          "get": "public",
+          "set": "public"
+         },
+         "signature": "bool ShowRenderTimeGraphOverlay { get; set; }"
+        },
+        {
+         "kind": "method",
+         "name": "ToggleRenderTimeGraphOverlay",
+         "accessibility": "public",
+         "line": 151,
+         "type": "void",
+         "params": 0,
+         "signature": "void ToggleRenderTimeGraphOverlay()"
+        },
+        {
+         "kind": "property",
+         "name": "Content",
+         "accessibility": "public",
+         "line": 154,
+         "type": "ViewModelBase?",
+         "accessors": {
+          "get": "public",
+          "set": "private"
+         },
+         "signature": "ViewModelBase? Content { get; private set; }"
+        },
+        {
+         "kind": "property",
+         "name": "SelectedTab",
+         "accessibility": "public",
+         "line": 183,
+         "type": "int",
+         "accessors": {
+          "get": "public",
+          "set": "public"
+         },
+         "signature": "int SelectedTab { get; set; }"
+        },
+        {
+         "kind": "property",
+         "name": "FocusedControl",
+         "accessibility": "public",
+         "line": 211,
+         "type": "string?",
+         "accessors": {
+          "get": "public",
+          "set": "private"
+         },
+         "signature": "string? FocusedControl { get; private set; }"
+        },
+        {
+         "kind": "property",
+         "name": "PointerOverRoot",
+         "accessibility": "public",
+         "line": 217,
+         "type": "IInputRoot?",
+         "accessors": {
+          "get": "public",
+          "set": "private"
+         },
+         "signature": "IInputRoot? PointerOverRoot { get; private set; }"
+        },
+        {
+         "kind": "property",
+         "name": "PointerOverElement",
+         "accessibility": "public",
+         "line": 223,
+         "type": "IInputElement?",
+         "accessors": {
+          "get": "public",
+          "set": "private"
+         },
+         "signature": "IInputElement? PointerOverElement { get; private set; }"
+        },
+        {
+         "kind": "property",
+         "name": "PointerOverElementName",
+         "accessibility": "public",
+         "line": 233,
+         "type": "string?",
+         "accessors": {
+          "get": "public",
+          "set": "private"
+         },
+         "signature": "string? PointerOverElementName { get; private set; }"
+        },
+        {
+         "kind": "method",
+         "name": "ShowHotKeys",
+         "accessibility": "public",
+         "line": 239,
+         "type": "void",
+         "params": 0,
+         "signature": "void ShowHotKeys()"
+        },
+        {
+         "kind": "method",
+         "name": "SelectControl",
+         "accessibility": "public",
+         "line": 244,
+         "type": "void",
+         "params": 1,
+         "signature": "void SelectControl(Control control)"
+        },
+        {
+         "kind": "method",
+         "name": "EnableSnapshotStyles",
+         "accessibility": "public",
+         "line": 251,
+         "type": "void",
+         "params": 1,
+         "signature": "void EnableSnapshotStyles(bool enable)"
+        },
+        {
+         "kind": "method",
+         "name": "Dispose",
+         "accessibility": "public",
+         "line": 259,
+         "type": "void",
+         "params": 0,
+         "signature": "void Dispose()"
+        },
+        {
+         "kind": "method",
+         "name": "RequestTreeNavigateTo",
+         "accessibility": "public",
+         "line": 295,
+         "type": "void",
+         "params": 2,
+         "signature": "void RequestTreeNavigateTo(Control control, bool isVisualTree)"
+        },
+        {
+         "kind": "property",
+         "name": "StartupScreenIndex",
+         "accessibility": "public",
+         "line": 309,
+         "type": "int?",
+         "accessors": {
+          "get": "public",
+          "set": "private"
+         },
+         "signature": "int? StartupScreenIndex { get; private set; }"
+        },
+        {
+         "kind": "method",
+         "name": "CanShot",
+         "accessibility": "public",
+         "attributes": [
+          "DependsOn(nameof(TreePageViewModel.SelectedNode))",
+          "DependsOn(nameof(Content))"
+         ],
+         "line": 311,
+         "type": "bool",
+         "params": 1,
+         "signature": "bool CanShot(object? parameter)"
+        },
+        {
+         "kind": "method",
+         "name": "Shot",
+         "accessibility": "public",
+         "modifiers": [
+          "async"
+         ],
+         "line": 321,
+         "type": "void",
+         "params": 1,
+         "signature": "async void Shot(object? parameter)"
+        },
+        {
+         "kind": "method",
+         "name": "SetOptions",
+         "accessibility": "public",
+         "line": 339,
+         "type": "void",
+         "params": 1,
+         "signature": "void SetOptions(DevToolsOptions options)"
+        },
+        {
+         "kind": "property",
+         "name": "ShowImplementedInterfaces",
+         "accessibility": "public",
+         "line": 350,
+         "type": "bool",
+         "accessors": {
+          "get": "public",
+          "set": "private"
+         },
+         "signature": "bool ShowImplementedInterfaces { get; private set; }"
+        },
+        {
+         "kind": "method",
+         "name": "ToggleShowImplementedInterfaces",
+         "accessibility": "public",
+         "line": 356,
+         "type": "void",
+         "params": 1,
+         "signature": "void ToggleShowImplementedInterfaces(object parameter)"
+        },
+        {
+         "kind": "property",
+         "name": "ShowDetailsPropertyType",
+         "accessibility": "public",
+         "line": 365,
+         "type": "bool",
+         "accessors": {
+          "get": "public",
+          "set": "private"
+         },
+         "signature": "bool ShowDetailsPropertyType { get; private set; }"
+        },
+        {
+         "kind": "method",
+         "name": "ToggleShowDetailsPropertyType",
+         "accessibility": "public",
+         "line": 371,
+         "type": "void",
+         "params": 1,
+         "signature": "void ToggleShowDetailsPropertyType(object parameter)"
+        },
+        {
+         "kind": "property",
+         "name": "FocusHighlighter",
+         "accessibility": "public",
+         "line": 376,
+         "type": "IBrush?",
+         "accessors": {
+          "get": "public",
+          "set": "private"
+         },
+         "signature": "IBrush? FocusHighlighter { get; private set; }"
+        },
+        {
+         "kind": "method",
+         "name": "SelectFocusHighlighter",
+         "accessibility": "public",
+         "line": 382,
+         "type": "void",
+         "params": 1,
+         "signature": "void SelectFocusHighlighter(object parameter)"
+        }
+       ],
+       "privateMembers": 25
+      }
+     ]
+    },
+    {
+     "path": "Diagnostics/ViewModels/PropertyViewModel.cs",
+     "lines": 30,
+     "types": [
+      {
+       "name": "PropertyViewModel",
+       "kind": "class",
+       "namespace": "Avalonia.Diagnostics.ViewModels",
+       "fullName": "Avalonia.Diagnostics.ViewModels.PropertyViewModel",
+       "accessibility": "internal",
+       "line": 5,
+       "modifiers": [
+        "abstract"
+       ],
+       "bases": [
+        "ViewModelBase"
+       ],
+       "members": [
+        {
+         "kind": "property",
+         "name": "Key",
+         "accessibility": "public",
+         "modifiers": [
+          "abstract"
+         ],
+         "line": 9,
+         "type": "object",
+         "accessors": {
+          "get": "public"
+         },
+         "signature": "abstract object Key { get; }"
+        },
+        {
+         "kind": "property",
+         "name": "Name",
+         "accessibility": "public",
+         "modifiers": [
+          "abstract"
+         ],
+         "line": 10,
+         "type": "string",
+         "accessors": {
+          "get": "public"
+         },
+         "signature": "abstract string Name { get; }"
+        },
+        {
+         "kind": "property",
+         "name": "Group",
+         "accessibility": "public",
+         "modifiers": [
+          "abstract"
+         ],
+         "line": 11,
+         "type": "string",
+         "accessors": {
+          "get": "public"
+         },
+         "signature": "abstract string Group { get; }"
+        },
+        {
+         "kind": "property",
+         "name": "AssignedType",
+         "accessibility": "public",
+         "modifiers": [
+          "abstract"
+         ],
+         "line": 12,
+         "type": "Type",
+         "accessors": {
+          "get": "public"
+         },
+         "signature": "abstract Type AssignedType { get; }"
+        },
+        {
+         "kind": "property",
+         "name": "DeclaringType",
+         "accessibility": "public",
+         "modifiers": [
+          "abstract"
+         ],
+         "line": 13,
+         "type": "Type?",
+         "accessors": {
+          "get": "public"
+         },
+         "signature": "abstract Type? DeclaringType { get; }"
+        },
+        {
+         "kind": "property",
+         "name": "Value",
+         "accessibility": "public",
+         "modifiers": [
+          "abstract"
+         ],
+         "line": 14,
+         "type": "object?",
+         "accessors": {
+          "get": "public",
+          "set": "public"
+         },
+         "signature": "abstract object? Value { get; set; }"
+        },
+        {
+         "kind": "property",
+         "name": "Priority",
+         "accessibility": "public",
+         "modifiers": [
+          "abstract"
+         ],
+         "line": 15,
+         "type": "string",
+         "accessors": {
+          "get": "public"
+         },
+         "signature": "abstract string Priority { get; }"
+        },
+        {
+         "kind": "property",
+         "name": "IsAttached",
+         "accessibility": "public",
+         "modifiers": [
+          "abstract"
+         ],
+         "line": 16,
+         "type": "bool?",
+         "accessors": {
+          "get": "public"
+         },
+         "signature": "abstract bool? IsAttached { get; }"
+        },
+        {
+         "kind": "method",
+         "name": "Update",
+         "accessibility": "public",
+         "modifiers": [
+          "abstract"
+         ],
+         "line": 17,
+         "type": "void",
+         "params": 0,
+         "signature": "abstract void Update()"
+        },
+        {
+         "kind": "property",
+         "name": "PropertyType",
+         "accessibility": "public",
+         "modifiers": [
+          "abstract"
+         ],
+         "line": 18,
+         "type": "Type",
+         "accessors": {
+          "get": "public"
+         },
+         "signature": "abstract Type PropertyType { get; }"
+        },
+        {
+         "kind": "property",
+         "name": "Type",
+         "accessibility": "public",
+         "line": 20,
+         "type": "string",
+         "accessors": {
+          "get": "public"
+         },
+         "signature": "string Type { get; }"
+        },
+        {
+         "kind": "property",
+         "name": "IsReadonly",
+         "accessibility": "public",
+         "modifiers": [
+          "abstract"
+         ],
+         "line": 24,
+         "type": "bool",
+         "accessors": {
+          "get": "public"
+         },
+         "signature": "abstract bool IsReadonly { get; }"
+        },
+        {
+         "kind": "property",
+         "name": "IsPinned",
+         "accessibility": "public",
+         "line": 26,
+         "type": "bool",
+         "accessors": {
+          "get": "public",
+          "set": "public"
+         },
+         "signature": "bool IsPinned { get; set; }"
+        },
+        {
+         "kind": "property",
+         "name": "FullName",
+         "accessibility": "public",
+         "line": 28,
+         "type": "string",
+         "accessors": {
+          "get": "public"
+         },
+         "signature": "string FullName { get; }"
+        }
+       ],
+       "privateMembers": 1
+      }
+     ]
+    },
+    {
+     "path": "Diagnostics/ViewModels/PseudoClassViewModel.cs",
+     "lines": 52,
+     "types": [
+      {
+       "name": "PseudoClassViewModel",
+       "kind": "class",
+       "namespace": "Avalonia.Diagnostics.ViewModels",
+       "fullName": "Avalonia.Diagnostics.ViewModels.PseudoClassViewModel",
+       "accessibility": "internal",
+       "line": 5,
+       "bases": [
+        "ViewModelBase"
+       ],
+       "members": [
+        {
+         "kind": "ctor",
+         "name": ".ctor",
+         "accessibility": "public",
+         "line": 12,
+         "params": 2,
+         "signature": "PseudoClassViewModel(string name, StyledElement source)"
+        },
+        {
+         "kind": "property",
+         "name": "Name",
+         "accessibility": "public",
+         "line": 21,
+         "type": "string",
+         "accessors": {
+          "get": "public"
+         },
+         "signature": "string Name { get; }"
+        },
+        {
+         "kind": "property",
+         "name": "IsActive",
+         "accessibility": "public",
+         "line": 23,
+         "type": "bool",
+         "accessors": {
+          "get": "public",
+          "set": "public"
+         },
+         "signature": "bool IsActive { get; set; }"
+        },
+        {
+         "kind": "method",
+         "name": "Update",
+         "accessibility": "public",
+         "line": 37,
+         "type": "void",
+         "params": 0,
+         "signature": "void Update()"
+        }
+       ],
+       "privateMembers": 4
+      }
+     ]
+    },
+    {
+     "path": "Diagnostics/ViewModels/ReactiveExtensions.cs",
+     "lines": 58,
+     "types": [
+      {
+       "name": "ReactiveExtensions",
+       "kind": "class",
+       "namespace": "Avalonia.Diagnostics.ViewModels",
+       "fullName": "Avalonia.Diagnostics.ViewModels.ReactiveExtensions",
+       "accessibility": "internal",
+       "line": 9,
+       "modifiers": [
+        "static"
+       ],
+       "members": [
+        {
+         "kind": "method",
+         "name": "GetObservable",
+         "accessibility": "public",
+         "modifiers": [
+          "static"
+         ],
+         "line": 11,
+         "type": "IObservable<TValue>",
+         "params": 3,
+         "arity": 2,
+         "extension": true,
+         "signature": "static IObservable<TValue> GetObservable<TOwner, TValue>(this TOwner vm, Expression<Func<TOwner, TValue>> property, bool fireImmediately = true) where TOwner : INotifyPropertyChanged"
+        }
+       ],
+       "privateMembers": 1
+      }
+     ]
+    },
+    {
+     "path": "Diagnostics/ViewModels/ResourceSetterViewModel.cs",
+     "lines": 34,
+     "types": [
+      {
+       "name": "ResourceSetterViewModel",
+       "kind": "class",
+       "namespace": "Avalonia.Diagnostics.ViewModels",
+       "fullName": "Avalonia.Diagnostics.ViewModels.ResourceSetterViewModel",
+       "accessibility": "internal",
+       "line": 6,
+       "bases": [
+        "SetterViewModel"
+       ],
+       "members": [
+        {
+         "kind": "property",
+         "name": "Key",
+         "accessibility": "public",
+         "line": 8,
+         "type": "object",
+         "accessors": {
+          "get": "public"
+         },
+         "signature": "object Key { get; }"
+        },
+        {
+         "kind": "property",
+         "name": "Tint",
+         "accessibility": "public",
+         "line": 10,
+         "type": "IBrush",
+         "accessors": {
+          "get": "public"
+         },
+         "signature": "IBrush Tint { get; }"
+        },
+        {
+         "kind": "property",
+         "name": "ValueTypeTooltip",
+         "accessibility": "public",
+         "line": 12,
+         "type": "string",
+         "accessors": {
+          "get": "public"
+         },
+         "signature": "string ValueTypeTooltip { get; }"
+        },
+        {
+         "kind": "ctor",
+         "name": ".ctor",
+         "accessibility": "public",
+         "line": 14,
+         "params": 5,
+         "signature": "ResourceSetterViewModel(AvaloniaProperty property, object resourceKey, object? resourceValue, bool isDynamic, IClipboard? clipboard)"
+        },
+        {
+         "kind": "method",
+         "name": "CopyResourceKey",
+         "accessibility": "public",
+         "line": 21,
+         "type": "void",
+         "params": 0,
+         "signature": "void CopyResourceKey()"
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "path": "Diagnostics/ViewModels/SetterViewModel.cs",
+     "lines": 64,
+     "types": [
+      {
+       "name": "SetterViewModel",
+       "kind": "class",
+       "namespace": "Avalonia.Diagnostics.ViewModels",
+       "fullName": "Avalonia.Diagnostics.ViewModels.SetterViewModel",
+       "accessibility": "internal",
+       "line": 5,
+       "bases": [
+        "ViewModelBase"
+       ],
+       "members": [
+        {
+         "kind": "property",
+         "name": "Property",
+         "accessibility": "public",
+         "line": 10,
+         "type": "AvaloniaProperty",
+         "accessors": {
+          "get": "public"
+         },
+         "signature": "AvaloniaProperty Property { get; }"
+        },
+        {
+         "kind": "property",
+         "name": "Name",
+         "accessibility": "public",
+         "line": 12,
+         "type": "string",
+         "accessors": {
+          "get": "public"
+         },
+         "signature": "string Name { get; }"
+        },
+        {
+         "kind": "property",
+         "name": "Value",
+         "accessibility": "public",
+         "line": 14,
+         "type": "object?",
+         "accessors": {
+          "get": "public"
+         },
+         "signature": "object? Value { get; }"
+        },
+        {
+         "kind": "property",
+         "name": "IsActive",
+         "accessibility": "public",
+         "line": 16,
+         "type": "bool",
+         "accessors": {
+          "get": "public",
+          "set": "public"
+         },
+         "signature": "bool IsActive { get; set; }"
+        },
+        {
+         "kind": "property",
+         "name": "IsVisible",
+         "accessibility": "public",
+         "line": 22,
+         "type": "bool",
+         "accessors": {
+          "get": "public",
+          "set": "public"
+         },
+         "signature": "bool IsVisible { get; set; }"
+        },
+        {
+         "kind": "ctor",
+         "name": ".ctor",
+         "accessibility": "public",
+         "line": 30,
+         "params": 3,
+         "signature": "SetterViewModel(AvaloniaProperty property, object? value, IClipboard? clipboard)"
+        },
+        {
+         "kind": "method",
+         "name": "CopyValue",
+         "accessibility": "public",
+         "modifiers": [
+          "virtual"
+         ],
+         "line": 41,
+         "type": "void",
+         "params": 0,
+         "signature": "virtual void CopyValue()"
+        },
+        {
+         "kind": "method",
+         "name": "CopyPropertyName",
+         "accessibility": "public",
+         "line": 53,
+         "type": "void",
+         "params": 0,
+         "signature": "void CopyPropertyName()"
+        },
+        {
+         "kind": "method",
+         "name": "CopyToClipboard",
+         "accessibility": "protected",
+         "line": 58,
+         "type": "void",
+         "params": 1,
+         "signature": "void CopyToClipboard(string value)"
+        }
+       ],
+       "privateMembers": 3
+      }
+     ]
+    },
+    {
+     "path": "Diagnostics/ViewModels/TreeNode.cs",
+     "lines": 97,
+     "types": [
+      {
+       "name": "TreeNode",
+       "kind": "class",
+       "namespace": "Avalonia.Diagnostics.ViewModels",
+       "fullName": "Avalonia.Diagnostics.ViewModels.TreeNode",
+       "accessibility": "internal",
+       "line": 12,
+       "modifiers": [
+        "abstract"
+       ],
+       "bases": [
+        "ViewModelBase",
+        "IDisposable"
+       ],
+       "members": [
+        {
+         "kind": "ctor",
+         "name": ".ctor",
+         "accessibility": "protected",
+         "line": 18,
+         "params": 3,
+         "signature": "TreeNode(AvaloniaObject avaloniaObject, TreeNode? parent, string? customTypeName = null)"
+        },
+        {
+         "kind": "property",
+         "name": "FontWeight",
+         "accessibility": "public",
+         "line": 50,
+         "type": "FontWeight",
+         "accessors": {
+          "get": "public"
+         },
+         "signature": "FontWeight FontWeight { get; }"
+        },
+        {
+         "kind": "property",
+         "name": "Children",
+         "accessibility": "public",
+         "modifiers": [
+          "abstract"
+         ],
+         "line": 52,
+         "type": "TreeNodeCollection",
+         "accessors": {
+          "get": "public"
+         },
+         "signature": "abstract TreeNodeCollection Children { get; }"
+        },
+        {
+         "kind": "property",
+         "name": "Classes",
+         "accessibility": "public",
+         "line": 57,
+         "type": "string",
+         "accessors": {
+          "get": "public",
+          "set": "private"
+         },
+         "signature": "string Classes { get; private set; }"
+        },
+        {
+         "kind": "property",
+         "name": "ElementName",
+         "accessibility": "public",
+         "line": 63,
+         "type": "string?",
+         "accessors": {
+          "get": "public"
+         },
+         "signature": "string? ElementName { get; }"
+        },
+        {
+         "kind": "property",
+         "name": "Visual",
+         "accessibility": "public",
+         "line": 68,
+         "type": "AvaloniaObject",
+         "accessors": {
+          "get": "public"
+         },
+         "signature": "AvaloniaObject Visual { get; }"
+        },
+        {
+         "kind": "property",
+         "name": "IsExpanded",
+         "accessibility": "public",
+         "line": 73,
+         "type": "bool",
+         "accessors": {
+          "get": "public",
+          "set": "public"
+         },
+         "signature": "bool IsExpanded { get; set; }"
+        },
+        {
+         "kind": "property",
+         "name": "Parent",
+         "accessibility": "public",
+         "line": 79,
+         "type": "TreeNode?",
+         "accessors": {
+          "get": "public"
+         },
+         "signature": "TreeNode? Parent { get; }"
+        },
+        {
+         "kind": "property",
+         "name": "Type",
+         "accessibility": "public",
+         "line": 84,
+         "type": "string",
+         "accessors": {
+          "get": "public",
+          "set": "private"
+         },
+         "signature": "string Type { get; private set; }"
+        },
+        {
+         "kind": "method",
+         "name": "Dispose",
+         "accessibility": "public",
+         "line": 90,
+         "type": "void",
+         "params": 0,
+         "signature": "void Dispose()"
+        }
+       ],
+       "privateMembers": 4
+      }
+     ]
+    },
+    {
+     "path": "Diagnostics/ViewModels/TreeNodeCollection.cs",
+     "lines": 99,
+     "types": [
+      {
+       "name": "TreeNodeCollection",
+       "kind": "class",
+       "namespace": "Avalonia.Diagnostics.ViewModels",
+       "fullName": "Avalonia.Diagnostics.ViewModels.TreeNodeCollection",
+       "accessibility": "internal",
+       "line": 11,
+       "modifiers": [
+        "abstract"
+       ],
+       "bases": [
+        "IAvaloniaReadOnlyList<TreeNode>",
+        "IList",
+        "IDisposable"
+       ],
+       "members": [
+        {
+         "kind": "field",
+         "name": "Empty",
+         "accessibility": "internal",
+         "modifiers": [
+          "static",
+          "readonly"
+         ],
+         "line": 25,
+         "type": "TreeNodeCollection",
+         "signature": "static readonly TreeNodeCollection Empty"
+        },
+        {
+         "kind": "ctor",
+         "name": ".ctor",
+         "accessibility": "public",
+         "line": 29,
+         "params": 1,
+         "signature": "TreeNodeCollection(TreeNode owner)"
+        },
+        {
+         "kind": "indexer",
+         "name": "this[]",
+         "accessibility": "public",
+         "line": 31,
+         "type": "TreeNode",
+         "accessors": {
+          "get": "public"
+         },
+         "params": 1,
+         "signature": "TreeNode this[int index] { get; }"
+        },
+        {
+         "kind": "property",
+         "name": "Count",
+         "accessibility": "public",
+         "line": 33,
+         "type": "int",
+         "accessors": {
+          "get": "public"
+         },
+         "signature": "int Count { get; }"
+        },
+        {
+         "kind": "property",
+         "name": "Owner",
+         "accessibility": "protected",
+         "line": 35,
+         "type": "TreeNode",
+         "accessors": {
+          "get": "protected"
+         },
+         "signature": "TreeNode Owner { get; }"
+        },
+        {
+         "kind": "property",
+         "name": "IsFixedSize",
+         "accessibility": "explicit",
+         "line": 36,
+         "type": "bool",
+         "explicitInterface": "IList",
+         "accessors": {
+          "get": "explicit"
+         },
+         "signature": "bool IList.IsFixedSize { get; }"
+        },
+        {
+         "kind": "property",
+         "name": "IsReadOnly",
+         "accessibility": "explicit",
+         "line": 37,
+         "type": "bool",
+         "explicitInterface": "IList",
+         "accessors": {
+          "get": "explicit"
+         },
+         "signature": "bool IList.IsReadOnly { get; }"
+        },
+        {
+         "kind": "property",
+         "name": "IsSynchronized",
+         "accessibility": "explicit",
+         "line": 38,
+         "type": "bool",
+         "explicitInterface": "ICollection",
+         "accessors": {
+          "get": "explicit"
+         },
+         "signature": "bool ICollection.IsSynchronized { get; }"
+        },
+        {
+         "kind": "property",
+         "name": "SyncRoot",
+         "accessibility": "explicit",
+         "line": 39,
+         "type": "object",
+         "explicitInterface": "ICollection",
+         "accessors": {
+          "get": "explicit"
+         },
+         "signature": "object ICollection.SyncRoot { get; }"
+        },
+        {
+         "kind": "indexer",
+         "name": "this[]",
+         "accessibility": "explicit",
+         "line": 41,
+         "type": "object?",
+         "explicitInterface": "IList",
+         "accessors": {
+          "get": "explicit",
+          "set": "explicit"
+         },
+         "params": 1,
+         "signature": "object? IList.this[int index] { get; set; }"
+        },
+        {
+         "kind": "event",
+         "name": "CollectionChanged",
+         "accessibility": "public",
+         "line": 47,
+         "type": "NotifyCollectionChangedEventHandler?",
+         "signature": "event NotifyCollectionChangedEventHandler? CollectionChanged"
+        },
+        {
+         "kind": "event",
+         "name": "PropertyChanged",
+         "accessibility": "public",
+         "line": 53,
+         "type": "PropertyChangedEventHandler?",
+         "signature": "event PropertyChangedEventHandler? PropertyChanged"
+        },
+        {
+         "kind": "method",
+         "name": "Dispose",
+         "accessibility": "public",
+         "modifiers": [
+          "virtual"
+         ],
+         "line": 59,
+         "type": "void",
+         "params": 0,
+         "signature": "virtual void Dispose()"
+        },
+        {
+         "kind": "method",
+         "name": "GetEnumerator",
+         "accessibility": "public",
+         "line": 70,
+         "type": "IEnumerator<TreeNode>",
+         "params": 0,
+         "signature": "IEnumerator<TreeNode> GetEnumerator()"
+        },
+        {
+         "kind": "method",
+         "name": "GetEnumerator",
+         "accessibility": "explicit",
+         "line": 75,
+         "type": "IEnumerator",
+         "explicitInterface": "IEnumerable",
+         "params": 0,
+         "signature": "IEnumerator IEnumerable.GetEnumerator()"
+        },
+        {
+         "kind": "method",
+         "name": "Initialize",
+         "accessibility": "protected",
+         "modifiers": [
+          "abstract"
+         ],
+         "line": 77,
+         "type": "void",
+         "params": 1,
+         "signature": "abstract void Initialize(AvaloniaList<TreeNode> nodes)"
+        },
+        {
+         "kind": "method",
+         "name": "Add",
+         "accessibility": "explicit",
+         "line": 89,
+         "type": "int",
+         "explicitInterface": "IList",
+         "params": 1,
+         "signature": "int IList.Add(object? value)"
+        },
+        {
+         "kind": "method",
+         "name": "Clear",
+         "accessibility": "explicit",
+         "line": 90,
+         "type": "void",
+         "explicitInterface": "IList",
+         "params": 0,
+         "signature": "void IList.Clear()"
+        },
+        {
+         "kind": "method",
+         "name": "Contains",
+         "accessibility": "explicit",
+         "line": 91,
+         "type": "bool",
+         "explicitInterface": "IList",
+         "params": 1,
+         "signature": "bool IList.Contains(object? value)"
+        },
+        {
+         "kind": "method",
+         "name": "IndexOf",
+         "accessibility": "explicit",
+         "line": 92,
+         "type": "int",
+         "explicitInterface": "IList",
+         "params": 1,
+         "signature": "int IList.IndexOf(object? value)"
+        },
+        {
+         "kind": "method",
+         "name": "Insert",
+         "accessibility": "explicit",
+         "line": 93,
+         "type": "void",
+         "explicitInterface": "IList",
+         "params": 2,
+         "signature": "void IList.Insert(int index, object? value)"
+        },
+        {
+         "kind": "method",
+         "name": "Remove",
+         "accessibility": "explicit",
+         "line": 94,
+         "type": "void",
+         "explicitInterface": "IList",
+         "params": 1,
+         "signature": "void IList.Remove(object? value)"
+        },
+        {
+         "kind": "method",
+         "name": "RemoveAt",
+         "accessibility": "explicit",
+         "line": 95,
+         "type": "void",
+         "explicitInterface": "IList",
+         "params": 1,
+         "signature": "void IList.RemoveAt(int index)"
+        },
+        {
+         "kind": "method",
+         "name": "CopyTo",
+         "accessibility": "explicit",
+         "line": 96,
+         "type": "void",
+         "explicitInterface": "ICollection",
+         "params": 2,
+         "signature": "void ICollection.CopyTo(Array array, int index)"
+        }
+       ],
+       "privateMembers": 3
+      }
+     ]
+    },
+    {
+     "path": "Diagnostics/ViewModels/TreePageViewModel.cs",
+     "lines": 250,
+     "types": [
+      {
+       "name": "TreePageViewModel",
+       "kind": "class",
+       "namespace": "Avalonia.Diagnostics.ViewModels",
+       "fullName": "Avalonia.Diagnostics.ViewModels.TreePageViewModel",
+       "accessibility": "internal",
+       "line": 9,
+       "bases": [
+        "ViewModelBase",
+        "IDisposable"
+       ],
+       "members": [
+        {
+         "kind": "ctor",
+         "name": ".ctor",
+         "accessibility": "public",
+         "line": 15,
+         "params": 3,
+         "signature": "TreePageViewModel(MainViewModel mainView, TreeNode[] nodes, ISet<string> pinnedProperties)"
+        },
+        {
+         "kind": "event",
+         "name": "ClipboardCopyRequested",
+         "accessibility": "public",
+         "line": 27,
+         "type": "EventHandler<string>?",
+         "signature": "event EventHandler<string>? ClipboardCopyRequested"
+        },
+        {
+         "kind": "property",
+         "name": "MainView",
+         "accessibility": "public",
+         "line": 29,
+         "type": "MainViewModel",
+         "accessors": {
+          "get": "public"
+         },
+         "signature": "MainViewModel MainView { get; }"
+        },
+        {
+         "kind": "property",
+         "name": "PropertiesFilter",
+         "accessibility": "public",
+         "line": 31,
+         "type": "FilterViewModel",
+         "accessors": {
+          "get": "public"
+         },
+         "signature": "FilterViewModel PropertiesFilter { get; }"
+        },
+        {
+         "kind": "property",
+         "name": "SettersFilter",
+         "accessibility": "public",
+         "line": 33,
+         "type": "FilterViewModel",
+         "accessors": {
+          "get": "public"
+         },
+         "signature": "FilterViewModel SettersFilter { get; }"
+        },
+        {
+         "kind": "property",
+         "name": "Nodes",
+         "accessibility": "public",
+         "line": 35,
+         "type": "TreeNode[]",
+         "accessors": {
+          "get": "public",
+          "set": "protected"
+         },
+         "signature": "TreeNode[] Nodes { get; protected set; }"
+        },
+        {
+         "kind": "property",
+         "name": "SelectedNode",
+         "accessibility": "public",
+         "line": 37,
+         "type": "TreeNode?",
+         "accessors": {
+          "get": "public",
+          "set": "public"
+         },
+         "signature": "TreeNode? SelectedNode { get; set; }"
+        },
+        {
+         "kind": "property",
+         "name": "Details",
+         "accessibility": "public",
+         "line": 53,
+         "type": "ControlDetailsViewModel?",
+         "accessors": {
+          "get": "public",
+          "set": "private"
+         },
+         "signature": "ControlDetailsViewModel? Details { get; private set; }"
+        },
+        {
+         "kind": "method",
+         "name": "Dispose",
+         "accessibility": "public",
+         "line": 67,
+         "type": "void",
+         "params": 0,
+         "signature": "void Dispose()"
+        },
+        {
+         "kind": "method",
+         "name": "FindNode",
+         "accessibility": "public",
+         "line": 77,
+         "type": "TreeNode?",
+         "params": 1,
+         "signature": "TreeNode? FindNode(Control control)"
+        },
+        {
+         "kind": "method",
+         "name": "SelectControl",
+         "accessibility": "public",
+         "line": 92,
+         "type": "void",
+         "params": 1,
+         "signature": "void SelectControl(Control control)"
+        },
+        {
+         "kind": "method",
+         "name": "CopySelector",
+         "accessibility": "public",
+         "line": 114,
+         "type": "void",
+         "params": 0,
+         "signature": "void CopySelector()"
+        },
+        {
+         "kind": "method",
+         "name": "CopySelectorFromTemplateParent",
+         "accessibility": "public",
+         "line": 125,
+         "type": "void",
+         "params": 0,
+         "signature": "void CopySelectorFromTemplateParent()"
+        },
+        {
+         "kind": "method",
+         "name": "ExpandRecursively",
+         "accessibility": "public",
+         "line": 146,
+         "type": "void",
+         "params": 0,
+         "signature": "void ExpandRecursively()"
+        },
+        {
+         "kind": "method",
+         "name": "CollapseChildren",
+         "accessibility": "public",
+         "line": 167,
+         "type": "void",
+         "params": 0,
+         "signature": "void CollapseChildren()"
+        },
+        {
+         "kind": "method",
+         "name": "CaptureNodeScreenshot",
+         "accessibility": "public",
+         "line": 186,
+         "type": "void",
+         "params": 0,
+         "signature": "void CaptureNodeScreenshot()"
+        },
+        {
+         "kind": "method",
+         "name": "BringIntoView",
+         "accessibility": "public",
+         "line": 191,
+         "type": "void",
+         "params": 0,
+         "signature": "void BringIntoView()"
+        },
+        {
+         "kind": "method",
+         "name": "Focus",
+         "accessibility": "public",
+         "line": 197,
+         "type": "void",
+         "params": 0,
+         "signature": "void Focus()"
+        },
+        {
+         "kind": "method",
+         "name": "UpdatePropertiesView",
+         "accessibility": "internal",
+         "line": 244,
+         "type": "void",
+         "params": 0,
+         "signature": "void UpdatePropertiesView()"
+        }
+       ],
+       "privateMembers": 6
+      }
+     ]
+    },
+    {
+     "path": "Diagnostics/ViewModels/ValueFrameViewModel.cs",
+     "lines": 154,
+     "types": [
+      {
+       "name": "ValueFrameViewModel",
+       "kind": "class",
+       "namespace": "Avalonia.Diagnostics.ViewModels",
+       "fullName": "Avalonia.Diagnostics.ViewModels.ValueFrameViewModel",
+       "accessibility": "internal",
+       "line": 12,
+       "bases": [
+        "ViewModelBase"
+       ],
+       "members": [
+        {
+         "kind": "ctor",
+         "name": ".ctor",
+         "accessibility": "public",
+         "line": 18,
+         "params": 3,
+         "signature": "ValueFrameViewModel(StyledElement styledElement, IValueFrameDiagnostic valueFrame, IClipboard? clipboard)"
+        },
+        {
+         "kind": "property",
+         "name": "IsActive",
+         "accessibility": "public",
+         "line": 68,
+         "type": "bool",
+         "accessors": {
+          "get": "public",
+          "set": "public"
+         },
+         "signature": "bool IsActive { get; set; }"
+        },
+        {
+         "kind": "property",
+         "name": "IsVisible",
+         "accessibility": "public",
+         "line": 74,
+         "type": "bool",
+         "accessors": {
+          "get": "public",
+          "set": "public"
+         },
+         "signature": "bool IsVisible { get; set; }"
+        },
+        {
+         "kind": "property",
+         "name": "Description",
+         "accessibility": "public",
+         "line": 80,
+         "type": "string?",
+         "accessors": {
+          "get": "public"
+         },
+         "signature": "string? Description { get; }"
+        },
+        {
+         "kind": "property",
+         "name": "Setters",
+         "accessibility": "public",
+         "line": 82,
+         "type": "List<SetterViewModel>",
+         "accessors": {
+          "get": "public"
+         },
+         "signature": "List<SetterViewModel> Setters { get; }"
+        },
+        {
+         "kind": "method",
+         "name": "Update",
+         "accessibility": "public",
+         "line": 84,
+         "type": "void",
+         "params": 0,
+         "signature": "void Update()"
+        }
+       ],
+       "privateMembers": 6
+      }
+     ]
+    },
+    {
+     "path": "Diagnostics/ViewModels/ViewModelBase.cs",
+     "lines": 43,
+     "types": [
+      {
+       "name": "ViewModelBase",
+       "kind": "class",
+       "namespace": "Avalonia.Diagnostics.ViewModels",
+       "fullName": "Avalonia.Diagnostics.ViewModels.ViewModelBase",
+       "accessibility": "internal",
+       "line": 8,
+       "bases": [
+        "INotifyPropertyChanged"
+       ],
+       "members": [
+        {
+         "kind": "event",
+         "name": "PropertyChanged",
+         "accessibility": "public",
+         "line": 13,
+         "type": "PropertyChangedEventHandler?",
+         "signature": "event PropertyChangedEventHandler? PropertyChanged"
+        },
+        {
+         "kind": "method",
+         "name": "OnPropertyChanged",
+         "accessibility": "protected",
+         "modifiers": [
+          "virtual"
+         ],
+         "line": 19,
+         "type": "void",
+         "params": 1,
+         "signature": "virtual void OnPropertyChanged(PropertyChangedEventArgs e)"
+        },
+        {
+         "kind": "method",
+         "name": "RaiseAndSetIfChanged",
+         "accessibility": "protected",
+         "line": 23,
+         "type": "bool",
+         "params": 3,
+         "arity": 1,
+         "signature": "bool RaiseAndSetIfChanged<T>([NotNullIfNotNull(\"value\")] ref T field, T value, [CallerMemberName] string? propertyName = null)"
+        },
+        {
+         "kind": "method",
+         "name": "RaisePropertyChanged",
+         "accessibility": "protected",
+         "line": 35,
+         "type": "void",
+         "params": 1,
+         "signature": "void RaisePropertyChanged([CallerMemberName] string? propertyName = null)"
+        }
+       ],
+       "privateMembers": 2
+      }
+     ]
+    },
+    {
+     "path": "Diagnostics/ViewModels/VisualTreeNode.cs",
+     "lines": 239,
+     "types": [
+      {
+       "name": "VisualTreeNode",
+       "kind": "class",
+       "namespace": "Avalonia.Diagnostics.ViewModels",
+       "fullName": "Avalonia.Diagnostics.ViewModels.VisualTreeNode",
+       "accessibility": "internal",
+       "line": 14,
+       "bases": [
+        "TreeNode"
+       ],
+       "members": [
+        {
+         "kind": "ctor",
+         "name": ".ctor",
+         "accessibility": "public",
+         "line": 16,
+         "params": 3,
+         "signature": "VisualTreeNode(AvaloniaObject avaloniaObject, TreeNode? parent, string? customName = null)"
+        },
+        {
+         "kind": "property",
+         "name": "IsInTemplate",
+         "accessibility": "public",
+         "line": 30,
+         "type": "bool",
+         "accessors": {
+          "get": "public"
+         },
+         "signature": "bool IsInTemplate { get; }"
+        },
+        {
+         "kind": "property",
+         "name": "Children",
+         "accessibility": "public",
+         "modifiers": [
+          "override"
+         ],
+         "line": 32,
+         "type": "TreeNodeCollection",
+         "accessors": {
+          "get": "public"
+         },
+         "signature": "override TreeNodeCollection Children { get; }"
+        },
+        {
+         "kind": "method",
+         "name": "Create",
+         "accessibility": "public",
+         "modifiers": [
+          "static"
+         ],
+         "line": 34,
+         "type": "VisualTreeNode[]",
+         "params": 1,
+         "signature": "static VisualTreeNode[] Create(object control)"
+        }
+       ],
+       "nestedTypes": [
+        {
+         "name": "VisualTreeNodeCollection",
+         "kind": "class",
+         "namespace": "Avalonia.Diagnostics.ViewModels",
+         "fullName": "Avalonia.Diagnostics.ViewModels.VisualTreeNode.VisualTreeNodeCollection",
+         "accessibility": "internal",
+         "line": 41,
+         "outer": "VisualTreeNode",
+         "bases": [
+          "TreeNodeCollection"
+         ],
+         "members": [
+          {
+           "kind": "ctor",
+           "name": ".ctor",
+           "accessibility": "public",
+           "line": 46,
+           "params": 2,
+           "signature": "VisualTreeNodeCollection(TreeNode owner, Visual control)"
+          },
+          {
+           "kind": "method",
+           "name": "Dispose",
+           "accessibility": "public",
+           "modifiers": [
+            "override"
+           ],
+           "line": 52,
+           "type": "void",
+           "params": 0,
+           "signature": "override void Dispose()"
+          },
+          {
+           "kind": "method",
+           "name": "Initialize",
+           "accessibility": "protected",
+           "modifiers": [
+            "override"
+           ],
+           "line": 126,
+           "type": "void",
+           "params": 1,
+           "signature": "override void Initialize(AvaloniaList<TreeNode> nodes)"
+          }
+         ],
+         "privateMembers": 4
+        },
+        {
+         "name": "ApplicationHostVisuals",
+         "kind": "class",
+         "namespace": "Avalonia.Diagnostics.ViewModels",
+         "fullName": "Avalonia.Diagnostics.ViewModels.VisualTreeNode.ApplicationHostVisuals",
+         "accessibility": "internal",
+         "line": 174,
+         "outer": "VisualTreeNode",
+         "bases": [
+          "TreeNodeCollection"
+         ],
+         "members": [
+          {
+           "kind": "ctor",
+           "name": ".ctor",
+           "accessibility": "public",
+           "line": 178,
+           "params": 2,
+           "signature": "ApplicationHostVisuals(TreeNode owner, Controls.Application host)"
+          },
+          {
+           "kind": "method",
+           "name": "Initialize",
+           "accessibility": "protected",
+           "modifiers": [
+            "override"
+           ],
+           "line": 184,
+           "type": "void",
+           "params": 1,
+           "signature": "override void Initialize(AvaloniaList<TreeNode> nodes)"
+          },
+          {
+           "kind": "method",
+           "name": "Dispose",
+           "accessibility": "public",
+           "modifiers": [
+            "override"
+           ],
+           "line": 231,
+           "type": "void",
+           "params": 0,
+           "signature": "override void Dispose()"
+          }
+         ],
+         "privateMembers": 2
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "path": "Diagnostics/Views/ControlDetailsView.xaml.cs",
+     "lines": 54,
+     "types": [
+      {
+       "name": "ControlDetailsView",
+       "kind": "class",
+       "namespace": "Avalonia.Diagnostics.Views",
+       "fullName": "Avalonia.Diagnostics.Views.ControlDetailsView",
+       "accessibility": "internal",
+       "line": 8,
+       "bases": [
+        "UserControl"
+       ],
+       "members": [
+        {
+         "kind": "ctor",
+         "name": ".ctor",
+         "accessibility": "public",
+         "line": 12,
+         "params": 0,
+         "signature": "ControlDetailsView()"
+        },
+        {
+         "kind": "method",
+         "name": "PropertyNamePressed",
+         "accessibility": "public",
+         "line": 33,
+         "type": "void",
+         "params": 2,
+         "signature": "void PropertyNamePressed(object sender, PointerPressedEventArgs e)"
+        }
+       ],
+       "privateMembers": 3
+      }
+     ]
+    },
+    {
+     "path": "Diagnostics/Views/EventsPageView.xaml.cs",
+     "lines": 94,
+     "types": [
+      {
+       "name": "EventsPageView",
+       "kind": "class",
+       "namespace": "Avalonia.Diagnostics.Views",
+       "fullName": "Avalonia.Diagnostics.Views.EventsPageView",
+       "accessibility": "internal",
+       "line": 15,
+       "bases": [
+        "UserControl"
+       ],
+       "members": [
+        {
+         "kind": "ctor",
+         "name": ".ctor",
+         "accessibility": "public",
+         "line": 20,
+         "params": 0,
+         "signature": "EventsPageView()"
+        },
+        {
+         "kind": "method",
+         "name": "NavigateTo",
+         "accessibility": "public",
+         "line": 26,
+         "type": "void",
+         "params": 2,
+         "signature": "void NavigateTo(object sender, TappedEventArgs e)"
+        },
+        {
+         "kind": "method",
+         "name": "OnDataContextChanged",
+         "accessibility": "protected",
+         "modifiers": [
+          "override"
+         ],
+         "line": 47,
+         "type": "void",
+         "params": 1,
+         "signature": "override void OnDataContextChanged(EventArgs e)"
+        }
+       ],
+       "privateMembers": 6
+      }
+     ]
+    },
+    {
+     "path": "Diagnostics/Views/HotKeyPageView.axaml.cs",
+     "lines": 19,
+     "types": [
+      {
+       "name": "HotKeyPageView",
+       "kind": "class",
+       "namespace": "Avalonia.Diagnostics.Views",
+       "fullName": "Avalonia.Diagnostics.Views.HotKeyPageView",
+       "accessibility": "internal",
+       "line": 6,
+       "bases": [
+        "UserControl"
+       ],
+       "members": [
+        {
+         "kind": "ctor",
+         "name": ".ctor",
+         "accessibility": "public",
+         "line": 8,
+         "params": 0,
+         "signature": "HotKeyPageView()"
+        }
+       ],
+       "privateMembers": 1
+      }
+     ]
+    },
+    {
+     "path": "Diagnostics/Views/LayoutExplorerView.axaml.cs",
+     "lines": 134,
+     "types": [
+      {
+       "name": "LayoutExplorerView",
+       "kind": "class",
+       "namespace": "Avalonia.Diagnostics.Views",
+       "fullName": "Avalonia.Diagnostics.Views.LayoutExplorerView",
+       "accessibility": "internal",
+       "line": 11,
+       "bases": [
+        "UserControl"
+       ],
+       "members": [
+        {
+         "kind": "ctor",
+         "name": ".ctor",
+         "accessibility": "public",
+         "line": 24,
+         "params": 0,
+         "signature": "LayoutExplorerView()"
+        }
+       ],
+       "privateMembers": 12
+      }
+     ]
+    },
+    {
+     "path": "Diagnostics/Views/MainView.xaml.cs",
+     "lines": 22,
+     "types": [
+      {
+       "name": "MainView",
+       "kind": "class",
+       "namespace": "Avalonia.Diagnostics.Views",
+       "fullName": "Avalonia.Diagnostics.Views.MainView",
+       "accessibility": "internal",
+       "line": 9,
+       "bases": [
+        "UserControl"
+       ],
+       "members": [
+        {
+         "kind": "ctor",
+         "name": ".ctor",
+         "accessibility": "public",
+         "line": 11,
+         "params": 0,
+         "signature": "MainView()"
+        }
+       ],
+       "privateMembers": 1
+      }
+     ]
+    },
+    {
+     "path": "Diagnostics/Views/MainWindow.xaml.cs",
+     "lines": 317,
+     "types": [
+      {
+       "name": "MainWindow",
+       "kind": "class",
+       "namespace": "Avalonia.Diagnostics.Views",
+       "fullName": "Avalonia.Diagnostics.Views.MainWindow",
+       "accessibility": "internal",
+       "line": 20,
+       "bases": [
+        "Window",
+        "IStyleHost"
+       ],
+       "members": [
+        {
+         "kind": "ctor",
+         "name": ".ctor",
+         "accessibility": "public",
+         "line": 28,
+         "params": 0,
+         "signature": "MainWindow()"
+        },
+        {
+         "kind": "property",
+         "name": "Root",
+         "accessibility": "public",
+         "line": 70,
+         "type": "AvaloniaObject?",
+         "accessors": {
+          "get": "public",
+          "set": "public"
+         },
+         "signature": "AvaloniaObject? Root { get; set; }"
+        },
+        {
+         "kind": "property",
+         "name": "StylingParent",
+         "accessibility": "explicit",
+         "line": 97,
+         "type": "IStyleHost?",
+         "explicitInterface": "IStyleHost",
+         "accessors": {
+          "get": "explicit"
+         },
+         "signature": "IStyleHost? IStyleHost.StylingParent { get; }"
+        },
+        {
+         "kind": "method",
+         "name": "OnClosed",
+         "accessibility": "protected",
+         "modifiers": [
+          "override"
+         ],
+         "line": 99,
+         "type": "void",
+         "params": 1,
+         "signature": "override void OnClosed(EventArgs e)"
+        },
+        {
+         "kind": "method",
+         "name": "SetOptions",
+         "accessibility": "public",
+         "line": 297,
+         "type": "void",
+         "params": 1,
+         "signature": "void SetOptions(DevToolsOptions options)"
+        },
+        {
+         "kind": "method",
+         "name": "SelectedControl",
+         "accessibility": "internal",
+         "line": 308,
+         "type": "void",
+         "params": 1,
+         "signature": "void SelectedControl(Control? control)"
+        }
+       ],
+       "privateMembers": 16
+      }
+     ]
+    },
+    {
+     "path": "Diagnostics/Views/PropertyValueEditorView.cs",
+     "lines": 435,
+     "types": [
+      {
+       "name": "PropertyValueEditorView",
+       "kind": "class",
+       "namespace": "Avalonia.Diagnostics.Views",
+       "fullName": "Avalonia.Diagnostics.Views.PropertyValueEditorView",
+       "accessibility": "internal",
+       "line": 20,
+       "bases": [
+        "UserControl"
+       ],
+       "members": [
+        {
+         "kind": "method",
+         "name": "OnDataContextChanged",
+         "accessibility": "protected",
+         "modifiers": [
+          "override"
+         ],
+         "line": 33,
+         "type": "void",
+         "params": 1,
+         "signature": "override void OnDataContextChanged(EventArgs e)"
+        },
+        {
+         "kind": "method",
+         "name": "OnDetachedFromVisualTree",
+         "accessibility": "protected",
+         "modifiers": [
+          "override"
+         ],
+         "line": 40,
+         "type": "void",
+         "params": 1,
+         "signature": "override void OnDetachedFromVisualTree(VisualTreeAttachmentEventArgs e)"
+        }
+       ],
+       "privateMembers": 11
+      }
+     ]
+    },
+    {
+     "path": "Diagnostics/Views/TreePageView.xaml.cs",
+     "lines": 118,
+     "types": [
+      {
+       "name": "TreePageView",
+       "kind": "class",
+       "namespace": "Avalonia.Diagnostics.Views",
+       "fullName": "Avalonia.Diagnostics.Views.TreePageView",
+       "accessibility": "internal",
+       "line": 10,
+       "bases": [
+        "UserControl"
+       ],
+       "members": [
+        {
+         "kind": "ctor",
+         "name": ".ctor",
+         "accessibility": "public",
+         "line": 16,
+         "params": 0,
+         "signature": "TreePageView()"
+        },
+        {
+         "kind": "method",
+         "name": "UpdateAdorner",
+         "accessibility": "protected",
+         "line": 22,
+         "type": "void",
+         "params": 2,
+         "signature": "void UpdateAdorner(object? sender, PointerEventArgs e)"
+        },
+        {
+         "kind": "method",
+         "name": "OnPropertyChanged",
+         "accessibility": "protected",
+         "modifiers": [
+          "override"
+         ],
+         "line": 61,
+         "type": "void",
+         "params": 1,
+         "signature": "override void OnPropertyChanged(AvaloniaPropertyChangedEventArgs change)"
+        }
+       ],
+       "privateMembers": 7
+      }
+     ]
+    }
+   ]
+  }
+ ]
+}

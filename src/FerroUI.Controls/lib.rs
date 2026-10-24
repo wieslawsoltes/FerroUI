@@ -7,6 +7,7 @@ pub mod automation;
 pub mod chrome;
 pub mod diagnostics;
 pub mod embedding;
+pub mod hosting;
 pub mod converters;
 pub mod metadata;
 pub mod notifications;
@@ -15,28 +16,6 @@ pub mod presentation_source;
 pub mod presenters;
 pub mod primitives;
 pub mod remote;
-pub mod repeater;
-
-// Layout-driven realization and the public WinUI repeater layout family.
-pub use repeater::{
-    ItemsRepeater, ItemsRepeaterScrollHost, LayoutPanel, RepeaterAutomationPeer,
-    Layout, LayoutImpl, VirtualizingLayout, VirtualizingLayoutImpl, NonVirtualizingLayout,
-    NonVirtualizingLayoutImpl, LayoutContext, LayoutContextImpl, VirtualizingLayoutContext,
-    VirtualizingLayoutContextImpl, NonVirtualizingLayoutContext, NonVirtualizingLayoutContextImpl,
-    LayoutContextHost, ElementRealizationOptions, IndexBasedLayoutOrientation,
-    StackLayout, FlowLayout, UniformGridLayout, LinedFlowLayout, FlowLayoutLineAlignment,
-    UniformGridLayoutItemsJustification, UniformGridLayoutItemsStretch,
-    LinedFlowLayoutItemsJustification, LinedFlowLayoutItemsStretch,
-    LinedFlowLayoutItemsInfoRequestedEventArgs, ItemsRepeaterElementPreparedEventArgs,
-    ItemsRepeaterElementClearingEventArgs, ItemsRepeaterElementIndexChangedEventArgs,
-    ElementFactory, ElementFactoryImpl, IElementFactory, ElementFactoryGetArgs,
-    ElementFactoryRecycleArgs, RecyclingElementFactory, RecyclePool,
-    SelectTemplateEventArgs, ItemCollectionTransition, ItemCollectionTransitionProvider,
-    ItemCollectionTransitionProviderImpl, ItemCollectionTransitionProgress,
-    ItemCollectionTransitionCompletedEventArgs, ItemCollectionTransitionOperation,
-    ItemCollectionTransitionTriggers, LinedFlowLayoutItemCollectionTransitionProvider,
-};
-
 pub mod shapes;
 pub mod templates;
 pub mod utils;
@@ -461,6 +440,8 @@ mod selectable_text_block_tests;
 mod text_block_tests;
 #[cfg(test)]
 mod text_layout_rounding_placement_tests;
+#[cfg(test)]
+mod text_line_bounds_tests;
 #[cfg(test)]
 mod label_text_tests;
 #[cfg(test)]

@@ -2,22 +2,22 @@
 
 ## Framework boundaries
 
-The source reference is the [pinned WinUI Repeater tree](https://github.com/microsoft/microsoft-ui-xaml/tree/1af995b98a02d86b1951c4babe35caa269a6d569/controls/dev/Repeater).
+The source reference is the [pinned WinUI Repeater tree](https://github.com/microsoft/microsoft-ui-xaml/tree/7e4b0c2096be402f51cc8f7d203ebf67cff183d0/controls/dev/Repeater).
 The public names are retained for traceability. Object ownership, dependency
 properties, metadata, rendering and input use FerroUI's existing mechanisms.
 
 | Source mechanism | FerroUI mechanism | Implementation |
 |---|---|---|
-| `DependencyObject`, `FrameworkElement` and generated C++/WinRT classes | `FerroObject`, `Control`/`Panel`, `Ref<T>`, `WeakRef<T>` and `ferro_class!` | [ItemsRepeater](../../../src/FerroUI.Controls/repeater/items_repeater.rs), [layout classes](../../../src/FerroUI.Controls/repeater/layouts/layout.rs) |
-| Dependency properties and property-change callbacks | `StyledProperty`, `AttachedProperty`, `ferro_properties!`, class initialization and normal invalidation | [Repeater properties](../../../src/FerroUI.Controls/repeater/items_repeater.rs), [native registration](../../../src/FerroUI.Controls/register_types.rs) |
+| `DependencyObject`, `FrameworkElement` and generated C++/WinRT classes | `FerroObject`, `Control`/`Panel`, `Ref<T>`, `WeakRef<T>` and `ferro_class!` | [ItemsRepeater](../../../src/FerroUI.Controls.Repeater/items_repeater.rs), [layout classes](../../../src/FerroUI.Controls.Repeater/layouts/layout.rs) |
+| Dependency properties and property-change callbacks | `StyledProperty`, `AttachedProperty`, `ferro_properties!`, class initialization and normal invalidation | [Repeater properties](../../../src/FerroUI.Controls.Repeater/items_repeater.rs), [native registration](../../../src/FerroUI.Controls/register_types.rs) |
 | `IInspectable` data and WinRT collection interfaces | `BoxedValue`, `ItemsSource`, `ItemsSourceView`, collection notifications and `IKeyIndexMapping` | [source view](../../../src/FerroUI.Controls/items_source_view.rs), [source](../../../src/FerroUI.Controls/items_source.rs), [key mapping](../../../src/FerroUI.Controls/i_key_index_mapping.rs) |
-| `DataTemplate`, selector, `IElementFactory` | Existing `IDataTemplate`/recycling-template contracts and native factory traits/classes | [template adapter](../../../src/FerroUI.Controls/repeater/item_template_wrapper.rs), [factory](../../../src/FerroUI.Controls/repeater/element_factory.rs) |
-| Effective viewport, scrolling surface and scroll anchor | `Visual`, `Layoutable`, native `ScrollViewer`, `IScrollAnchorProvider`, compatibility host | [viewport manager](../../../src/FerroUI.Controls/repeater/viewport_manager.rs), [scroll host](../../../src/FerroUI.Controls/repeater/items_repeater_scroll_host.rs) |
-| WinRT events and event revokers | `HandlerList`, snapshots, explicit `IDisposable` subscriptions and weak back-references | [control events](../../../src/FerroUI.Controls/repeater/items_repeater_event_args.rs), [transition provider](../../../src/FerroUI.Controls/repeater/item_collection_transition_provider.rs) |
-| Rendering callbacks and `QueryPerformanceCounter` | Native global animation clock, dispatcher render priority and dispatcher time | [build-tree scheduler](../../../src/FerroUI.Controls/repeater/build_tree_scheduler.rs) |
-| Composition animations | Native animation/transform/opacity services with cancellation and transient-value restoration | [animation manager](../../../src/FerroUI.Controls/repeater/animation_manager.rs), [lined-flow transition provider](../../../src/FerroUI.Controls/repeater/lined_flow_layout_item_collection_transition_provider.rs) |
-| WinRT `ICustomPropertyProvider` and activation metadata | `ferro_class_info!`, `ferro_markup_type!`, `ValueTypes`, native property notifications | [layout markup](../../../src/FerroUI.Controls/repeater/markup.rs), [service markup](../../../src/FerroUI.Controls/repeater/services_markup.rs), [selection metadata](../../../src/FerroUI.Controls/repeater/selection/markup.rs) |
-| UI Automation peer and tab-focus ordering | Native automation peer and custom keyboard navigation | [automation peer](../../../src/FerroUI.Controls/repeater/repeater_automation_peer.rs), [control](../../../src/FerroUI.Controls/repeater/items_repeater.rs) |
+| `DataTemplate`, selector, `IElementFactory` | Existing `IDataTemplate`/recycling-template contracts and native factory traits/classes | [template adapter](../../../src/FerroUI.Controls.Repeater/item_template_wrapper.rs), [factory](../../../src/FerroUI.Controls.Repeater/element_factory.rs) |
+| Effective viewport, scrolling surface and scroll anchor | `Visual`, `Layoutable`, native `ScrollViewer`, `IScrollAnchorProvider`, compatibility host | [viewport manager](../../../src/FerroUI.Controls.Repeater/viewport_manager.rs), [scroll host](../../../src/FerroUI.Controls.Repeater/items_repeater_scroll_host.rs) |
+| WinRT events and event revokers | `HandlerList`, snapshots, explicit `IDisposable` subscriptions and weak back-references | [control events](../../../src/FerroUI.Controls.Repeater/items_repeater_event_args.rs), [transition provider](../../../src/FerroUI.Controls.Repeater/item_collection_transition_provider.rs) |
+| Rendering callbacks and `QueryPerformanceCounter` | Native global animation clock, dispatcher render priority and dispatcher time | [build-tree scheduler](../../../src/FerroUI.Controls.Repeater/build_tree_scheduler.rs) |
+| Composition animations | Native animation/transform/opacity services with cancellation and transient-value restoration | [animation manager](../../../src/FerroUI.Controls.Repeater/animation_manager.rs), [lined-flow transition provider](../../../src/FerroUI.Controls.Repeater/lined_flow_layout_item_collection_transition_provider.rs) |
+| WinRT `ICustomPropertyProvider` and activation metadata | `ferro_class_info!`, `ferro_markup_type!`, `ValueTypes`, native property notifications | [layout markup](../../../src/FerroUI.Controls.Repeater/markup.rs), [service markup](../../../src/FerroUI.Controls.Repeater/services_markup.rs), [selection metadata](../../../src/FerroUI.Controls.Repeater/selection/markup.rs) |
+| UI Automation peer and tab-focus ordering | Native automation peer and custom keyboard navigation | [automation peer](../../../src/FerroUI.Controls.Repeater/repeater_automation_peer.rs), [control](../../../src/FerroUI.Controls.Repeater/items_repeater.rs) |
 
 Repeater does not introduce another renderer, data-binding engine, dependency
 property store, focus manager or dispatcher. Native controls remain normal
@@ -25,10 +25,10 @@ FerroUI children with styles, bindings, logical/visual ancestry and automation.
 
 ## Element ownership
 
-[`VirtualizationInfo`](../../../src/FerroUI.Controls/repeater/virtualization_info.rs)
+[`VirtualizationInfo`](../../../src/FerroUI.Controls.Repeater/virtualization_info.rs)
 records source index, stable key, owner state, pin count, layout bounds and phased
-binding state. [`ViewManager`](../../../src/FerroUI.Controls/repeater/view_manager.rs)
-coordinates ownership; [`UniqueIdElementPool`](../../../src/FerroUI.Controls/repeater/unique_id_element_pool.rs)
+binding state. [`ViewManager`](../../../src/FerroUI.Controls.Repeater/view_manager.rs)
+coordinates ownership; [`UniqueIdElementPool`](../../../src/FerroUI.Controls.Repeater/unique_id_element_pool.rs)
 temporarily retains elements during a keyed reset.
 
 | Owner | Meaning | Exit condition |
@@ -72,7 +72,7 @@ maintaining a separate tab-focus engine. Routed focus events update each
 repeater's own pin contribution; a nested focus target must not add multiple
 pins to the same outer container.
 
-Additional [native integration scenarios](../../../src/FerroUI.Controls/repeater/view_manager_acceptance_tests.rs)
+Additional [native integration scenarios](../../../src/FerroUI.Controls.Repeater/view_manager_acceptance_tests.rs)
 exercise `Once`, `Local`, `Cycle`, `Contained` and `None` navigation, exclude a
 discarded active item while its visual remains pooled or owned by the animator,
 and remember nested `Once` targets without duplicating ancestor pins. Direct
@@ -84,7 +84,7 @@ presence is separate from the execution checkpoints in [VALIDATION.md](VALIDATIO
 
 ## Layout contexts and state
 
-[`LayoutContext`](../../../src/FerroUI.Controls/repeater/layouts/layout_context.rs)
+[`LayoutContext`](../../../src/FerroUI.Controls.Repeater/layouts/layout_context.rs)
 is an extensible native object. `VirtualizingLayoutContext` exposes source access,
 element creation/recycling, visible and realization rectangles, a recommended
 anchor, layout origin and opaque per-host state. `NonVirtualizingLayoutContext`
@@ -152,7 +152,7 @@ size-override invocation counts do not apply to this native collection boundary.
 This adaptation is recorded as [WR-22](DEVIATIONS.md).
 
 The hierarchical selection model is in
-[`repeater::selection`](../../../src/FerroUI.Controls/repeater/selection/mod.rs).
+[`repeater::selection`](../../../src/FerroUI.Controls.Repeater/selection/mod.rs).
 Its source tree is separate from the realized visual tree. `IndexPath` identifies
 arbitrary-depth nodes; child-source requests are scoped to a callback lifetime.
 Selected index/item views are shared handles and materialize source data lazily.
@@ -171,22 +171,22 @@ counted as an equivalent test.
 
 ## Scheduling, phasing and transitions
 
-The [build-tree scheduler](../../../src/FerroUI.Controls/repeater/build_tree_scheduler.rs)
+The [build-tree scheduler](../../../src/FerroUI.Controls.Repeater/build_tree_scheduler.rs)
 uses native rendering pulses and dispatcher time. Work is ordered by phase and
 registration identity, has a configurable budget, and yields remaining work to
 another frame. The dispatcher render queue is the fallback for hosts without a
 global rendering clock. No background thread or blocking wait is required.
 
-[`Phaser`](../../../src/FerroUI.Controls/repeater/phaser.rs) keeps phase-zero
+[`Phaser`](../../../src/FerroUI.Controls.Repeater/phaser.rs) keeps phase-zero
 binding synchronous, schedules later phases after preparation, prioritizes
 visible controls and cancels work when a binding generation is recycled. A
 callback can recycle its own element; its old phase must not be restored after
 return. Repeated/nonincreasing phases are invalid input to the phasing contract.
 
-The [transition provider](../../../src/FerroUI.Controls/repeater/item_collection_transition_provider.rs)
+The [transition provider](../../../src/FerroUI.Controls.Repeater/item_collection_transition_provider.rs)
 queues independent batches for the next rendering frame, retains started
 transitions for their keepalive interval and completes unstarted transitions.
-The [transition manager](../../../src/FerroUI.Controls/repeater/transition_manager.rs)
+The [transition manager](../../../src/FerroUI.Controls.Repeater/transition_manager.rs)
 combines collection and layout triggers and filters completion to its own
 elements. Motion preferences come from FerroUI `IPlatformSettings`; local opt-out
 and the provider's policy remain separate from the native user preference.

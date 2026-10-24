@@ -22,7 +22,7 @@
 //! | `control.Classes.Add("accent")`               | `.class("accent")`                           |
 //! | `control.Name = "x"`                          | `.name("x")`                                 |
 
-use crate::element::{Attach, ControlElement, Element, ElementClass, IntoChild, IntoChildren, IntoElement, PropEntry, PropValue};
+use crate::element::{Attach, ControlElement, Handler, Element, ElementClass, IntoChild, IntoChildren, IntoElement, PropEntry, PropValue};
 use crate::reactive::{Memo, Signal, TwoWay};
 use ferroui_base::data::BindingBase;
 use ferroui_base::interactivity::{IRoutedEventArgs, Interactive, RoutedEvent};
@@ -155,13 +155,13 @@ impl<T: PropertyValue, V: IntoValue<T>> IntoProp<T, markers::Value> for V {
 
 impl<T: PropertyValue, V: IntoValue<T> + Clone + 'static> IntoProp<T, markers::FromSignal<V>> for Signal<V> {
     fn into_prop(self) -> PropValue {
-        PropValue::Dynamic(Rc::new(move || boxed(self.get().into_value())))
+        PropValue::Follows { source: self.source_id(), compute: Rc::new(move || boxed(self.get().into_value())) }
     }
 }
 
 impl<T: PropertyValue, V: IntoValue<T> + Clone + 'static> IntoProp<T, markers::FromMemo<V>> for Memo<V> {
     fn into_prop(self) -> PropValue {
-        PropValue::Dynamic(Rc::new(move || boxed(self.get().into_value())))
+        PropValue::Follows { source: self.source_id(), compute: Rc::new(move || boxed(self.get().into_value())) }
     }
 }
 
@@ -177,6 +177,7 @@ impl<T: PropertyValue, V: IntoValue<T> + FromValue<T> + Clone + PartialEq + 'sta
     fn into_prop(self) -> PropValue {
         let signal = self.0;
         PropValue::TwoWay {
+            source: Some(signal.source_id()),
             get: Rc::new(move || boxed(signal.get().into_value())),
             set: Rc::new(move |value: &dyn Any| {
                 if let Some(value) = value.downcast_ref::<T>().and_then(V::from_value) {
@@ -265,12 +266,23 @@ pub trait ElementBuilder: Sized {
         event: &'static RoutedEvent<A>,
         handler: impl Fn(&Interactive, &A) + 'static,
     ) -> Self {
-        let handler = Rc::new(handler);
+        type HandlerCell<A> = RefCell<Rc<dyn Fn(&Interactive, &A)>>;
+        fn swap<A: 'static>(old: &dyn Any, new: &dyn Any) {
+            if let (Some(old), Some(new)) = (old.downcast_ref::<HandlerCell<A>>(), new.downcast_ref::<HandlerCell<A>>()) {
+                let closure = new.borrow().clone();
+                *old.borrow_mut() = closure;
+            }
+        }
+        let cell: Rc<HandlerCell<A>> = Rc::new(RefCell::new(Rc::new(handler)));
+        let attached = cell.clone();
         let attach: Attach = Rc::new(move |control: &Ref<Control>| {
-            let handler = handler.clone();
-            // The handler is detached with its owner: a component that runs
-            // again attaches its handlers again.
-            let token = control.add_handler(event, move |sender, e| handler(sender, e));
+            // The trampoline calls the closure the cell holds now; it is
+            // detached with its owner.
+            let cell = attached.clone();
+            let token = control.add_handler(event, move |sender, e| {
+                let closure = cell.borrow().clone();
+                closure(sender, e)
+            });
             let weak = control.downgrade();
             crate::reactive::on_cleanup(move || {
                 if let Some(control) = weak.upgrade() {
@@ -278,7 +290,8 @@ pub trait ElementBuilder: Sized {
                 }
             });
         });
-        self.element_mut().handlers.push(attach);
+        let identity = event as *const RoutedEvent<A> as *const () as usize;
+        self.element_mut().handlers.push(Handler { identity, attach, cell, swap: swap::<A> });
         self
     }
 }
@@ -341,20 +354,30 @@ impl<T> El<T> {
     /// Calls `handler` with the new value whenever `property` changes on the
     /// control (the user typed, a slider moved, a binding set it).
     pub fn on_changed<P: TypedProperty + ?Sized>(mut self, property: &'static P, handler: impl Fn(&P::Value) + 'static) -> Self {
+        type ChangedCell<V> = RefCell<Rc<dyn Fn(&V)>>;
+        fn swap<V: 'static>(old: &dyn Any, new: &dyn Any) {
+            if let (Some(old), Some(new)) = (old.downcast_ref::<ChangedCell<V>>(), new.downcast_ref::<ChangedCell<V>>()) {
+                let closure = new.borrow().clone();
+                *old.borrow_mut() = closure;
+            }
+        }
         let untyped = property.untyped();
-        let handler = Rc::new(handler);
+        let cell: Rc<ChangedCell<P::Value>> = Rc::new(RefCell::new(Rc::new(handler)));
+        let attached = cell.clone();
         let attach: Attach = Rc::new(move |control: &Ref<Control>| {
-            let handler = handler.clone();
+            let cell = attached.clone();
             let subscription = control.property_changed(move |e| {
                 if std::ptr::eq(e.property(), untyped) {
                     if let Some(value) = e.new_value().downcast_ref::<P::Value>() {
-                        handler(value);
+                        let closure = cell.borrow().clone();
+                        closure(value);
                     }
                 }
             });
             crate::reactive::on_cleanup(move || subscription.dispose());
         });
-        self.element.handlers.push(attach);
+        let identity = untyped as *const FerroProperty as usize;
+        self.element.handlers.push(crate::element::Handler { identity, attach, cell, swap: swap::<P::Value> });
         self
     }
 

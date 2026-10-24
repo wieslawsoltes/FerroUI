@@ -55,9 +55,6 @@ const ASK_FOR_A_CAST_THAT_IS_NOT_REGISTERED: &[&str] = &[
     "control_theme_template.xaml",
     "dynamic_resource_local.xaml",
     "flags_value.xaml",
-    // Recycle templates populate a nullable dictionary. With an unread cast
-    // registration, the model cannot decide whether it can unwrap that value.
-    "repeater_factory.xaml",
     "resources_many.xaml",
     "static_resource_element.xaml",
     "static_resource_local.xaml",

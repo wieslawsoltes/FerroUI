@@ -21,6 +21,9 @@
 //!   again on a run whose dependencies differ; what it registered with
 //!   [`on_cleanup`](crate::on_cleanup) runs before the next call and when the
 //!   component is taken out.
+//! - [`use_future`](crate::use_future) (`async_data.rs`): a future started
+//!   once the controls are in place and again on a run whose dependencies
+//!   differ, and its state as a signal.
 //!
 //! Everything a hook makes belongs to the component and is disposed when the
 //! component is taken out. Signals made with [`signal`](crate::signal) in the
@@ -73,6 +76,58 @@ pub(crate) fn render_with<R>(
         frame.index,
     );
     (result, frame.after)
+}
+
+/// [`render_with`] for a component below an error boundary: a panic of
+/// `render` is caught and returned as its message, with the runtime and the
+/// frames of the hooks put back as they were before the run. A run that
+/// calls its hooks in another order is an error too.
+pub(crate) fn render_catching<R>(
+    slots: &Rc<RefCell<Vec<Rc<dyn Any>>>>,
+    owner: Owner,
+    parent: Option<Ref<Control>>,
+    render: impl FnOnce() -> R,
+) -> Result<(R, Vec<Box<dyn FnOnce()>>), String> {
+    let depth = FRAMES.with(|frames| {
+        let mut frames = frames.borrow_mut();
+        frames.push(Frame { slots: slots.clone(), index: 0, owner, after: Vec::new(), parent });
+        frames.len()
+    });
+    let scope = crate::reactive::Scope::save();
+    let result = std::panic::catch_unwind(std::panic::AssertUnwindSafe(render));
+    // A panic leaves the frames of the runs it went through.
+    let frame = FRAMES.with(|frames| {
+        let mut frames = frames.borrow_mut();
+        frames.truncate(depth);
+        frames.pop()
+    });
+    let frame = frame.expect("the frame of the run");
+    match result {
+        Ok(result) => {
+            let count = frame.slots.borrow().len();
+            if frame.index != count {
+                return Err(format!(
+                    "a component called {} hooks on this run and {count} on the first one: hooks are called in the same order on every run",
+                    frame.index,
+                ));
+            }
+            Ok((result, frame.after))
+        }
+        Err(payload) => {
+            scope.restore();
+            Err(panic_message(&*payload))
+        }
+    }
+}
+
+/// The message of a panic: its text, or a placeholder for a payload of
+/// another type.
+pub(crate) fn panic_message(payload: &(dyn Any + Send)) -> String {
+    payload
+        .downcast_ref::<&str>()
+        .map(|text| (*text).to_string())
+        .or_else(|| payload.downcast_ref::<String>().cloned())
+        .unwrap_or_else(|| String::from("a panic without a message"))
 }
 
 /// The owner of the component that is running, if one is.
@@ -158,7 +213,7 @@ pub fn use_effect_with<D: PartialEq + 'static>(deps: D, f: impl FnOnce(&D) + 'st
 
 /// Runs `f` with the owner of the component once the controls of the run are
 /// in place.
-fn after(f: impl FnOnce(Owner) + 'static) {
+pub(crate) fn after(f: impl FnOnce(Owner) + 'static) {
     FRAMES.with(|frames| {
         let mut frames = frames.borrow_mut();
         let Some(frame) = frames.last_mut() else { no_frame() };

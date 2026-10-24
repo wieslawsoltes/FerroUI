@@ -123,6 +123,8 @@ pub struct ServerCompositor {
     visual_own_properties_recompute_pass: RefCell<VecDeque<Rc<ServerCompositionVisual>>>,
     visual_readback_update_pass_queue: RefCell<VecDeque<Rc<ServerCompositionVisual>>>,
     adorner_update_queue: RefCell<VecDeque<Rc<ServerCompositionVisual>>>,
+    /// The visual surfaces of the compositor, for their live updates.
+    visual_surfaces: RefCell<Vec<Weak<super::ServerCompositionVisualSurface>>>,
     active_targets: RefCell<Vec<Rc<ServerCompositionTarget>>>,
     pools: CompositorPools,
     animations: ServerCompositorAnimations,
@@ -168,6 +170,7 @@ impl ServerCompositor {
             visual_own_properties_recompute_pass: RefCell::new(VecDeque::new()),
             visual_readback_update_pass_queue: RefCell::new(VecDeque::new()),
             adorner_update_queue: RefCell::new(VecDeque::new()),
+            visual_surfaces: RefCell::new(Vec::new()),
             active_targets: RefCell::new(Vec::new()),
             pools: CompositorPools::default(),
             animations: ServerCompositorAnimations::new(),
@@ -504,6 +507,23 @@ impl ServerCompositor {
         }
     }
 
+    /// Registers a visual surface for its live updates (not from upstream).
+    pub fn register_visual_surface(&self, surface: Weak<super::ServerCompositionVisualSurface>) {
+        self.visual_surfaces.borrow_mut().push(surface);
+    }
+
+    /// Invalidates the visual surfaces whose source changed, and runs the
+    /// passes again for what that invalidated (not from upstream).
+    fn visual_surface_update_pass(&self) {
+        if self.visual_surfaces.borrow().is_empty() {
+            return;
+        }
+        if super::ServerCompositionVisualSurface::update_live_surfaces(self, &self.visual_surfaces) {
+            self.apply_enqueued_render_resource_changes_pass();
+            self.visual_own_properties_update_pass();
+        }
+    }
+
     // --- targets ------------------------------------------------------------
 
     pub fn add_composition_target(&self, target: &Rc<ServerCompositionTarget>) {
@@ -738,6 +758,9 @@ impl ServerCompositor {
         // Adorners need to be updated after own properties recompute pass,
         // because they may depend on ancestor's transform chain to be consistent
         self.adorner_update_pass();
+        // The visual surfaces follow their sources once the sources have
+        // their new state (the WinUI port).
+        self.visual_surface_update_pass();
         self.clock_elapsed().saturating_sub(compositor_global_passes_started)
     }
 

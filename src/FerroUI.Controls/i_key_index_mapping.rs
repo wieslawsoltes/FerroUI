@@ -1,16 +1,21 @@
-// Copyright (c) Microsoft Corporation. All rights reserved.
-// Licensed under the MIT License. See NOTICE.md for license information.
+// This source file is adapted from the WinUI project.
+// (https://github.com/microsoft/microsoft-ui-xaml, `controls/dev/Repeater/ItemsRepeater.idl`)
 
-/// Stable identities for an items source, independent of its current order.
+/// Provides methods that let an items source give each item a unique key, which stays the
+/// same while the item is in the source, whatever its index (WinUI `IKeyIndexMapping`).
 ///
-/// An [`IItemsList`](crate::IItemsList) exposes this optional contract through
-/// `key_index_mapping`. Repeaters use it to retain the same control across a
-/// reset or layout change. Keys must be unique within the source and must not
-/// change while the corresponding item remains in the source.
+/// An [`IItemsList`](crate::IItemsList) states that it implements the contract through
+/// [`key_index_mapping`](crate::IItemsList::key_index_mapping);
+/// [`ItemsSourceView::has_key_index_mapping`](crate::ItemsSourceView::has_key_index_mapping)
+/// reports it, and a control that realizes items can keep the element of an item across a
+/// reset of the source by its key.
+// Deviation (DEVIATIONS.md, Items sources): upstream has no such contract (its `ItemsSourceView`
+// keeps `HasKeyIndexMapping` and `KeyFromIndex` as internal stubs); this is WinUI's.
 pub trait IKeyIndexMapping {
-    /// Returns the stable key of the item at `index`.
+    /// Retrieves the unique key of the item at the specified index.
     fn key_from_index(&self, index: i32) -> String;
 
-    /// Returns the current index for `key`, or `-1` when the item is absent.
+    /// Retrieves the index of the item that has the specified unique key, or `-1` when no item
+    /// has it.
     fn index_from_key(&self, key: &str) -> i32;
 }

@@ -345,6 +345,109 @@ pub fn add_setter_value_with_parent(context: &Rc<XamlIlContext>, style: &Ref<Sty
     StyleBase::__markup_Add_0(style, setter.clone() as Rc<dyn SetterBase>);
 }
 
+/// A setter on the parent stack of `context` whose value is `{DynamicResource key}`
+/// (`<Setter Property=".." Value="{DynamicResource key}"/>` in a style or a control theme):
+/// [`new_setter_with_parent`], the extension created with the key
+/// (`DynamicResourceExtension::__markup_new_1`), `ProvideValue` with `Setter.Value` as the
+/// provide-value target property ([`provide_value`], [`setter_value_property`]), then
+/// [`add_setter_value_with_parent`] with the provided value as an object: the calls the
+/// statements of generated code make, in the same order.
+#[inline(never)]
+pub fn add_dynamic_resource_setter_with_parent(
+    context: &Rc<XamlIlContext>,
+    style: &Ref<StyleBase>,
+    property: &'static FerroProperty,
+    key: &str,
+) {
+    use crate::markup_extensions::DynamicResourceExtension;
+    let setter = new_setter_with_parent(context, property);
+    let extension = DynamicResourceExtension::__markup_new_1(string_object(key));
+    let provided = provide_value(context, setter_value_property(), &extension, DynamicResourceExtension::__markup_ProvideValue_0);
+    add_setter_value_with_parent(context, style, &setter, to_object(provided.clone()));
+}
+
+/// `{DynamicResource key}` as the value of the registered property `property` of `target`:
+/// the extension created with the key (`DynamicResourceExtension::__markup_new_1`),
+/// `ProvideValue` with the property as the provide-value target property ([`provide_value`],
+/// [`property_value`]), then the binding setter of the property ([`bind`]) with the provided
+/// binding at `line`, `position`: the calls the statements of generated code make, in the same
+/// order.
+#[inline(never)]
+pub fn bind_dynamic_resource(
+    context: &Rc<XamlIlContext>,
+    target: &Ref<FerroObject>,
+    property: &'static FerroProperty,
+    key: &str,
+    line: i32,
+    position: i32,
+) -> Result<(), XamlLoadException> {
+    use crate::markup_extensions::DynamicResourceExtension;
+    let extension = DynamicResourceExtension::__markup_new_1(string_object(key));
+    let provided = provide_value(context, property_value(property), &extension, DynamicResourceExtension::__markup_ProvideValue_0);
+    bind(target, property, provided, line, position)
+}
+
+/// `{TemplateBinding source}` as the value of the registered property `property` of `target`
+/// (in a control template): the binding created for the property `source` of the templated
+/// parent (`TemplateBinding::__markup_new_1`), `ProvideValue`, then the binding setter of the
+/// property ([`bind`]) at `line`, `position`: the calls the statements of generated code make,
+/// in the same order.
+#[inline(never)]
+pub fn bind_template_binding(
+    target: &Ref<FerroObject>,
+    property: &'static FerroProperty,
+    source: &'static FerroProperty,
+    line: i32,
+    position: i32,
+) -> Result<(), XamlLoadException> {
+    use ferroui_base::data::TemplateBinding;
+    let binding = TemplateBinding::__markup_new_1(source);
+    let provided = TemplateBinding::__markup_ProvideValue_0(&binding);
+    bind(target, property, provided, line, position)
+}
+
+/// The build of deferred content that is `{StaticResource key}` alone (a resource of a
+/// dictionary that names another resource): the context of the build ([`deferred_context`]
+/// of `document`), the extension created (`StaticResourceExtension::__markup_new_0`) with its
+/// `ResourceKey` set to `key`, then `ProvideValue` with the context as its service provider; a
+/// failure is the error of an invoked member at `line`, `position` ([`invoked`]). The calls the
+/// statements of a generated build function make, in the same order.
+#[inline(never)]
+pub fn static_resource_content(
+    service_provider: &Rc<dyn IServiceProvider>,
+    document: &DocumentInfo,
+    key: &str,
+    line: i32,
+    position: i32,
+) -> Result<MarkupValue, XamlLoadException> {
+    use crate::markup_extensions::StaticResourceExtension;
+    let context = deferred_context(service_provider, document);
+    let extension = StaticResourceExtension::__markup_new_0();
+    StaticResourceExtension::__markup_set_ResourceKey(&extension, string_object(key));
+    let provided =
+        invoked(StaticResourceExtension::__markup_ProvideValue_0(&extension, self::service_provider(&context)), line, position)?;
+    Ok(to_value(provided))
+}
+
+/// A deferred resource added to a resource dictionary under a text key: the deferred content
+/// of `build` ([`defer`]), then `ResourceDictionary.AddDeferred(key, content)`; a failure of
+/// either is the load error at `line`, `position`. The calls the statements of generated code
+/// make, in the same order.
+#[inline(never)]
+pub fn add_deferred_resource(
+    dictionary: &Ref<ferroui_base::controls::ResourceDictionary>,
+    key: &str,
+    result_type: ValueType,
+    context: &Rc<XamlIlContext>,
+    build: DeferredBuild,
+    line: i32,
+    position: i32,
+) -> Result<(), XamlLoadException> {
+    use ferroui_base::controls::{IDeferredContent, ResourceDictionary};
+    let deferred = defer(result_type, context, build, line, position)?;
+    invoked(ResourceDictionary::__markup_AddDeferred_1(dictionary, string_object(key), deferred as Rc<dyn IDeferredContent>), line, position)
+}
+
 /// `target.SetValue(property, FerroProperty.UnsetValue, BindingPriority.LocalValue)`:
 /// what the unset-value setter of a registered property does.
 pub fn unset_value(target: &Ref<FerroObject>, property: &'static FerroProperty) {
@@ -409,6 +512,12 @@ pub fn no_setter(property: &str, value: &MarkupValue, line: i32, position: i32) 
 /// value of the static field that holds it).
 pub fn property(property: &'static FerroProperty) -> &'static FerroProperty {
     property
+}
+
+/// The property that stands for the style class `class_name` (`Classes.name`
+/// in a setter): `StyledElementExtensions.GetClassProperty(className)`.
+pub fn class_property(class_name: &str) -> &'static FerroProperty {
+    StyledElement::get_class_property(class_name)
 }
 
 /// A registered property as a value (the descriptor of the provide-value
@@ -1012,6 +1121,14 @@ pub fn to_object<T: PartialEq + 'static>(value: T) -> MarkupValue {
         Some(untyped) => untyped.downcast_ref::<Option<BoxedValue>>().cloned().flatten(),
         None => Some(boxed),
     }
+}
+
+/// The text of markup `value` as the value of a member of type `object`: [`to_object`] of the
+/// string, in one function for every text of generated code, so that the creation of the
+/// string is not repeated at each call site.
+#[inline(never)]
+pub fn string_object(value: &str) -> MarkupValue {
+    to_object(String::from(value))
 }
 
 /// Holds an object in the handle of its run-time class (`Ref<Button>` for a

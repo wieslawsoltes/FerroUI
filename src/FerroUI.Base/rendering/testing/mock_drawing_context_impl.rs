@@ -53,6 +53,16 @@ fn brush_text(brush: Option<&dyn IBrush>) -> String {
     }
 }
 
+fn effect_text(effect: &dyn IEffect) -> String {
+    if let Some(blur) = effect.as_blur_effect() {
+        format!("blur({})", blur.radius())
+    } else if let Some(shadow) = effect.as_drop_shadow_effect() {
+        format!("drop-shadow({} {} {})", shadow.offset_x(), shadow.offset_y(), shadow.blur_radius())
+    } else {
+        "effect".to_string()
+    }
+}
+
 fn pen_text(pen: Option<&dyn IPen>) -> String {
     match pen {
         None => "none".to_string(),
@@ -69,6 +79,9 @@ pub struct MockDrawingContextImpl {
     /// Whether the context reports effect support (`PushEffect <clip>` /
     /// `PopEffect`). Off by default.
     pub supports_effects: bool,
+    /// Whether pushed effects are recorded with the effect
+    /// (`PushEffect <clip> blur(<radius>)`). Off by default.
+    pub log_effects: bool,
     /// Whether the context reports acrylic support
     /// (`DrawRectangleWithMaterial <tint> <rect>`). Off by default.
     pub supports_acrylic: bool,
@@ -85,6 +98,7 @@ impl MockDrawingContextImpl {
             transform: Matrix::IDENTITY,
             log_transforms: true,
             supports_effects: false,
+            log_effects: false,
             supports_acrylic: false,
             log_render_options: false,
         }
@@ -285,10 +299,15 @@ impl IDrawingContextImpl for MockDrawingContextImpl {
 }
 
 impl IDrawingContextImplWithEffects for MockDrawingContextImpl {
-    fn push_effect(&mut self, clip_rect: Option<Rect>, _effect: &dyn IEffect) {
-        match clip_rect {
-            Some(clip_rect) => self.log.push(format!("PushEffect {clip_rect}")),
-            None => self.log.push("PushEffect none"),
+    fn push_effect(&mut self, clip_rect: Option<Rect>, effect: &dyn IEffect) {
+        let clip = match clip_rect {
+            Some(clip_rect) => clip_rect.to_string(),
+            None => "none".to_string(),
+        };
+        if self.log_effects {
+            self.log.push(format!("PushEffect {clip} {}", effect_text(effect)));
+        } else {
+            self.log.push(format!("PushEffect {clip}"));
         }
     }
 

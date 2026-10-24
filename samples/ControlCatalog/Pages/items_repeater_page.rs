@@ -5,9 +5,8 @@ use crate::markup::{content_page_class, xaml_class};
 use ferroui_base::collections::FerroList;
 use ferroui_base::metadata::from_markup_value;
 use ferroui_base::{ferro_class_info, instantiate, Ref};
-use ferroui_controls::{
-    Button, ContentPage, ItemsRepeater, ItemsSource, Layout, LinedFlowLayout, TextBlock,
-};
+use ferroui_controls::{Button, ContentPage, ItemsSource, TextBlock};
+use ferroui_controls_repeater::{ItemsRepeater, Layout, LinedFlowLayout};
 use std::cell::Cell;
 use std::rc::Rc;
 

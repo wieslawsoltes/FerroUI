@@ -66,6 +66,9 @@ runs:
         # The build with threads has a standard library and objects of its own (target/threads), made
         # by the nightly: its cache is another one, and a change of the pin starts it anew.
         key: ${{ inputs.cache-key }}${{ inputs.threads == 'true' && format('-threads-{0}', steps.pins.outputs.nightly) || '' }}
+        # Saved by runs of main only, as the other Rust build caches (.github/workflows/ci.yml).
+        save-if: ${{ github.ref == 'refs/heads/main' }}
+        cache-on-failure: true
     - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
       with:
         node-version: 24

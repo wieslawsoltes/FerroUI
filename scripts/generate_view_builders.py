@@ -77,6 +77,9 @@ GROUPS = [
     ("dialogs", "dialogs.rs", [
         ("src/FerroUI.Dialogs", "ferroui_dialogs"),
     ], {}),
+    ("repeater", "repeater.rs", [
+        ("src/FerroUI.Controls.Repeater", "ferroui_controls_repeater"),
+    ], {}),
     ("reactiveui", "reactiveui.rs", [
         ("src/FerroUI.ReactiveUI.Controls", "ferroui_reactiveui_controls"),
     ], {

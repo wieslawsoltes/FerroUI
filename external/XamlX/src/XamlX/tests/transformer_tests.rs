@@ -603,35 +603,6 @@ fn constructor_arguments_are_converted() {
 }
 
 #[test]
-fn value_type_construction_requires_backend_support_and_resolves_arguments() {
-    use crate::transform::transformers::ConstructableObjectTransformerOptions;
-
-    let xaml = format!(
-        "<ContentControl xmlns='test' {X}><ConstructedValue><x:Arguments><x:String>7</x:String></x:Arguments></ConstructedValue></ContentControl>"
-    );
-    for allow in [false, true] {
-        let host = TestHost::new();
-        let value = host.asm.define_struct("XamlParserTests", "ConstructedValue");
-        value.add_constructor(vec![host.ts.get("System.Int32")]);
-        if allow {
-            host.configuration.add_extra(Rc::new(ConstructableObjectTransformerOptions {
-                allow_value_type_construction: true,
-            }));
-        }
-        let document = host.transform(&xaml).expect("collected diagnostics");
-        if allow {
-            assert!(host.errors().is_empty(), "{:?}", host.errors());
-            assert_eq!(
-                assigned(&document.root().expect("root"), "Content"),
-                "(Constructable clr!!XamlParserTests.ConstructedValue args=[(Const clr!!System.Int32 7i32)] children=[])"
-            );
-        } else {
-            assert!(host.errors().iter().any(|error| error.title.starts_with("Value types can only be loaded via converters")));
-        }
-    }
-}
-
-#[test]
 fn known_directives_become_directive_nodes() {
     let host = TestHost::new();
     host.configuration

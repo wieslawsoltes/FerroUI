@@ -69,7 +69,10 @@ mod program {
             .with(Rc::new(options))
             .use_x11()
             .setup_without_starting();
-        App::set_catalog_themes(CatalogTheme::Fluent);
+        // The original selects the Fluent theme; the catalog of the port is built with its WinUI
+        // theme alone unless the feature `classic-themes` of control-catalog is on
+        // (docs/binary-size.md).
+        App::set_catalog_themes(CatalogTheme::WinUI);
         let api = api();
         // SAFETY: the initialization of GTK, once, on the main thread, which runs its main
         // loop; the texts are terminated strings that live for the calls.

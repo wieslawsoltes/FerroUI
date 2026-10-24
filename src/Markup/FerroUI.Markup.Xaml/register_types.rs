@@ -20,7 +20,7 @@ use crate::templates::{
 use crate::xaml_il::runtime::{
     DeferredContent, DeferredContentBuilder, FerroXamlIlXmlNamespaceInfo, IFerroXamlIlControlTemplateProvider,
     IFerroXamlIlEagerParentStackProvider, IFerroXamlIlParentStackProvider, IFerroXamlIlXmlNamespaceInfoProvider,
-    XamlIlRuntimeHelpers,
+    RuntimeList, XamlIlRuntimeHelpers,
 };
 use crate::xamlx_runtime::{IXamlParentStackProviderV1, IXamlXmlNamespaceInfoProviderV1, XamlXmlNamespaceInfoV1};
 use crate::{FerroXamlLoader, IProvideValueTarget, IRootObjectProvider, IUriContext, IXamlTypeResolver, MarkupExtension};
@@ -239,6 +239,14 @@ macro_rules! for_each_assignability {
 ///
 /// Registered once, for every thread, by [`register_types`].
 fn register_value_types() {
+    // A list of markup (`RuntimeList`, for a `List<T>` or an `ArrayList`) that an untyped
+    // property holds stays the list (`RuntimeList::to_declared` leaves an untyped target the
+    // list itself); a binding that delivers it to an items source later converts it to the
+    // handle of its shared items, as the cast of a typed target does when the document is
+    // built (upstream: a list of the runtime library is an `IEnumerable`, assignable as it is).
+    // Deviation (DEVIATIONS.md, Run-time type system of markup): the enumerables a binding
+    // delivers to an items source are those with a registered conversion.
+    ferroui_controls::ItemsSource::register_binding_conversion_with::<RuntimeList>(|list| list.items().clone().into());
 
     macro_rules! references {
         ($($type_:ty),* $(,)?) => {
@@ -345,6 +353,31 @@ fn register_value_types() {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn a_markup_list_held_by_an_untyped_property_is_bound_to_an_items_source() {
+        use ferroui_base::collections::FerroList;
+        use ferroui_base::metadata::MarkupValue;
+        use ferroui_controls::ItemsControl;
+
+        register_types();
+        let list = RuntimeList::untyped();
+        list.add(Some(Rc::new("first".to_string())));
+        // The untyped property (`DataContext`, an `object`) holds the list itself.
+        let target = ItemsControl::new();
+        target.set_data_context(Some(Rc::new(list.clone())));
+        assert!(target.data_context().is_some_and(|value| value.downcast_ref::<RuntimeList>().is_some()));
+
+        // `{Binding}` delivers it to the items source, converted to the handle of its items.
+        let expression = target.bind_binding(ItemsControl::items_source_property(), &ReflectionBinding::new("."));
+        let source = target.items_source().expect("the items source");
+        // The items source shares the items of the list.
+        assert!(source.downcast_ref::<FerroList<MarkupValue>>().is_some_and(|items| std::ptr::eq(items, &**list.items())));
+        assert_eq!(source.count(), 1);
+        list.add(Some(Rc::new("second".to_string())));
+        assert_eq!(source.count(), 2);
+        expression.dispose();
+    }
 
     #[test]
     fn assembly_mirrors_the_xmlns_definitions_of_the_original() {

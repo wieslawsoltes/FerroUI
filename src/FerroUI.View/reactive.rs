@@ -36,6 +36,12 @@ pub(crate) struct NodeId {
     generation: u32,
 }
 
+impl NodeId {
+    fn as_u64(self) -> u64 {
+        (u64::from(self.generation) << 32) | u64::from(self.index)
+    }
+}
+
 enum Kind {
     /// A value that is written from outside.
     Signal,
@@ -77,6 +83,8 @@ struct Runtime {
     queue: RefCell<VecDeque<NodeId>>,
     batch_depth: Cell<u32>,
     flushing: Cell<bool>,
+    /// Counts the propagations of changes: what one write (or batch) runs.
+    propagation: Cell<u64>,
 }
 
 ferroui_base::ferro_thread_local! {
@@ -198,6 +206,7 @@ impl Runtime {
             return;
         }
         self.flushing.set(true);
+        self.propagation.set(self.propagation.get() + 1);
         loop {
             let next = self.queue.borrow_mut().pop_front();
             let Some(id) = next else { break };
@@ -417,6 +426,12 @@ impl<T: 'static> Signal<T> {
     pub fn is_alive(&self) -> bool {
         with_runtime(|runtime| runtime.is_alive(self.id))
     }
+
+    /// The identity of the signal: what values that follow it are compared
+    /// by.
+    pub(crate) fn source_id(&self) -> u64 {
+        self.id.as_u64()
+    }
 }
 
 /// A signal used as a two-way value of a property (see [`Signal::two_way`]).
@@ -499,6 +514,11 @@ impl<T: 'static> Memo<T> {
     {
         untrack(|| self.get())
     }
+
+    /// The identity of the memo: what values that follow it are compared by.
+    pub(crate) fn source_id(&self) -> u64 {
+        self.id.as_u64()
+    }
 }
 
 /// Runs `f` now and again whenever a signal or memo it read changes, until
@@ -521,6 +541,45 @@ pub fn on_cleanup(f: impl FnOnce() + 'static) {
             node.cleanups.push(Box::new(f));
         }
     });
+}
+
+/// The number of the propagation of changes in progress (or the last one):
+/// what the diagnostics count the runs of a component in.
+pub(crate) fn propagation() -> u64 {
+    with_runtime(|runtime| runtime.propagation.get())
+}
+
+/// The state of the runtime around a run that may panic: the observer, the
+/// owner, the depth of batches and whether changes are propagating. A panic
+/// that unwinds through `Owner::with`, `untrack`, `batch` or a nested run
+/// leaves them as they were inside; an error boundary puts them back.
+pub(crate) struct Scope {
+    observer: Option<NodeId>,
+    owner: Option<NodeId>,
+    batch_depth: u32,
+    flushing: bool,
+}
+
+impl Scope {
+    /// The state of the runtime now.
+    pub(crate) fn save() -> Self {
+        with_runtime(|runtime| Scope {
+            observer: runtime.observer.get(),
+            owner: runtime.owner.get(),
+            batch_depth: runtime.batch_depth.get(),
+            flushing: runtime.flushing.get(),
+        })
+    }
+
+    /// Puts the runtime back into the saved state.
+    pub(crate) fn restore(self) {
+        with_runtime(|runtime| {
+            runtime.observer.set(self.observer);
+            runtime.owner.set(self.owner);
+            runtime.batch_depth.set(self.batch_depth);
+            runtime.flushing.set(self.flushing);
+        });
+    }
 }
 
 /// Runs `f` without recording what it reads.

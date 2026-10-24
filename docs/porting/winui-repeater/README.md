@@ -2,15 +2,19 @@
 
 This directory records the port of the WinUI Repeater family to native FerroUI
 Rust controls, layouts and services. The implementation lives in
-[`ferroui_controls::repeater`](../../../src/FerroUI.Controls/repeater/mod.rs),
+[`ferroui_controls_repeater`](../../../src/FerroUI.Controls.Repeater/lib.rs),
 with the existing source-view and inclusive-selection-range implementations
 reused rather than duplicated.
 
 The source reference is
-[`microsoft/microsoft-ui-xaml@1af995b98a02d86b1951c4babe35caa269a6d569`](https://github.com/microsoft/microsoft-ui-xaml/tree/1af995b98a02d86b1951c4babe35caa269a6d569/controls/dev/Repeater).
+[`microsoft/microsoft-ui-xaml@7e4b0c2096be402f51cc8f7d203ebf67cff183d0`](https://github.com/microsoft/microsoft-ui-xaml/tree/7e4b0c2096be402f51cc8f7d203ebf67cff183d0/controls/dev/Repeater).
 This is the derivation revision already recorded in the implementation's
-[`NOTICE.md`](../../../src/FerroUI.Controls/repeater/NOTICE.md). Moving WinUI
+[`NOTICE.md`](../../../src/FerroUI.Controls.Repeater/NOTICE.md). Moving WinUI
 `main` does not silently change the acceptance target.
+The port was made from `1af995b98a02d86b1951c4babe35caa269a6d569`, whose
+`controls/dev/Repeater` tree is identical to that of `7e4b0c2`
+(`git diff 1af995b9 7e4b0c2 -- controls/dev/Repeater` is empty); the project pins every
+WinUI port to `7e4b0c2`, the revision of the WinUI theme (`docs/porting/winui-theme.md`).
 
 On 2026-10-20, rechecked on 2026-10-21, the upstream GitHub Contents API
 identified the same Repeater directory tree,
@@ -110,7 +114,7 @@ python3 scripts/winui-repeater/inventory.py --check
 
 The input must be the pinned commit. A Git checkout's `HEAD` is verified. A
 source archive can be obtained from the
-[official pinned archive](https://codeload.github.com/microsoft/microsoft-ui-xaml/tar.gz/1af995b98a02d86b1951c4babe35caa269a6d569);
+[official pinned archive](https://codeload.github.com/microsoft/microsoft-ui-xaml/tar.gz/7e4b0c2096be402f51cc8f7d203ebf67cff183d0);
 pass its extracted repository root. Extraction validates the pinned file and
 scenario totals. Review the committed source hashes when deliberately changing
 the extraction; a count alone is not a source integrity check.

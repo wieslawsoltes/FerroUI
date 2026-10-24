@@ -73,6 +73,15 @@ pub enum PropValue {
     /// A value computed by a reactive closure: the property is set again
     /// whenever what the closure read changes.
     Dynamic(Rc<dyn Fn() -> BoxedValue>),
+    /// A value that follows a signal or a memo: as `Dynamic`, and equal to
+    /// another that follows the same source, so that a component that runs
+    /// again does not start it again.
+    Follows {
+        /// The identity of the signal or memo.
+        source: u64,
+        /// The value of the property from the source.
+        compute: Rc<dyn Fn() -> BoxedValue>,
+    },
     /// A value that goes both ways: the property follows `get`, and a change
     /// of the property is given to `set`.
     TwoWay {
@@ -80,6 +89,9 @@ pub enum PropValue {
         get: Rc<dyn Fn() -> BoxedValue>,
         /// Takes a new value of the property.
         set: Rc<dyn Fn(&dyn Any)>,
+        /// The identity of the signal, when it is one: two-way values of the
+        /// same signal are equal.
+        source: Option<u64>,
     },
     /// An element, mounted with its parent: the property holds its control
     /// (`Content`, `Tag`, a header).
@@ -105,6 +117,8 @@ impl PartialEq for PropValue {
     fn eq(&self, other: &Self) -> bool {
         match (self, other) {
             (PropValue::Value(a), PropValue::Value(b)) => a == b,
+            (PropValue::Follows { source: a, .. }, PropValue::Follows { source: b, .. }) => a == b,
+            (PropValue::TwoWay { source: Some(a), .. }, PropValue::TwoWay { source: Some(b), .. }) => a == b,
             _ => false,
         }
     }
@@ -115,6 +129,7 @@ impl fmt::Debug for PropValue {
         match self {
             PropValue::Value(_) => f.write_str("Value"),
             PropValue::Dynamic(_) => f.write_str("Dynamic"),
+            PropValue::Follows { source, .. } => write!(f, "Follows({source})"),
             PropValue::TwoWay { .. } => f.write_str("TwoWay"),
             PropValue::Element(_) => f.write_str("Element"),
             PropValue::Binding(_) => f.write_str("Binding"),
@@ -135,6 +150,32 @@ pub struct PropEntry {
 /// What attaches a handler (a routed event, a change of a property) to the
 /// control of an element.
 pub type Attach = Rc<dyn Fn(&Ref<Control>)>;
+
+/// A handler of an element. Its closure is in a cell that the attached
+/// trampoline reads, so that a component that runs again with handlers of
+/// the same identities in the same order swaps the closures into the cells
+/// of the attached handlers instead of detaching and attaching them.
+#[derive(Clone)]
+pub struct Handler {
+    /// What it handles: the address of the routed event or of the property;
+    /// 0 for a handler that is attached again on every run.
+    pub identity: usize,
+    /// Attaches the trampoline of `cell` to a control.
+    pub attach: Attach,
+    /// The closure: a `RefCell<Rc<dyn Fn(..)>>` of the type of the handler.
+    pub cell: Rc<dyn Any>,
+    /// Puts the closure of the second cell into the first (cells of this
+    /// handler's type).
+    pub swap: fn(&dyn Any, &dyn Any),
+}
+
+impl Handler {
+    /// A handler that is attached again on every run (no cell to swap).
+    pub fn attached_again(attach: Attach) -> Self {
+        fn no_swap(_: &dyn Any, _: &dyn Any) {}
+        Handler { identity: 0, attach, cell: Rc::new(()), swap: no_swap }
+    }
+}
 
 /// The class of an element: how its control is made.
 #[derive(Clone, Copy)]
@@ -173,7 +214,7 @@ pub struct ControlElement {
     /// Values of properties, in the order they were given.
     pub props: Vec<PropEntry>,
     /// Handlers.
-    pub handlers: Vec<Attach>,
+    pub handlers: Vec<Handler>,
     /// Children, placed into the content of the control (see
     /// [`Element::mount`]).
     pub children: Vec<Element>,
@@ -292,6 +333,36 @@ where
     })
 }
 
+/// What `#[component(rerender)]` uses to memoize a component whose
+/// parameters can be compared: `(&MemoProbe(parameters)).memo_props()` is
+/// the parameters when they are `PartialEq + Clone` ([`MemoWhenComparable`])
+/// and `None` otherwise ([`MemoNever`]), chosen when the expansion is
+/// compiled, where the types of the parameters are known.
+#[doc(hidden)]
+pub struct MemoProbe<T>(pub T);
+
+#[doc(hidden)]
+pub trait MemoWhenComparable {
+    fn memo_props(&self) -> Option<Rc<dyn AnyValueEq>>;
+}
+
+impl<T: PartialEq + Clone + 'static> MemoWhenComparable for MemoProbe<T> {
+    fn memo_props(&self) -> Option<Rc<dyn AnyValueEq>> {
+        Some(Rc::new(self.0.clone()))
+    }
+}
+
+#[doc(hidden)]
+pub trait MemoNever {
+    fn memo_props(&self) -> Option<Rc<dyn AnyValueEq>>;
+}
+
+impl<T> MemoNever for &MemoProbe<T> {
+    fn memo_props(&self) -> Option<Rc<dyn AnyValueEq>> {
+        None
+    }
+}
+
 /// An element of the component `C` (the type `#[component(rerender)]`
 /// declares), for the expansion of the macro.
 #[doc(hidden)]
@@ -319,6 +390,9 @@ pub enum Element {
     Text(Rc<str>),
     /// Several elements in place of one.
     Fragment(Vec<Element>),
+    /// The elements of an iteration (`for` in `rsx!`, a `Vec`): a fragment
+    /// whose items are checked for keys in debug builds.
+    List(Vec<Element>),
     /// Children that follow reactive state.
     Dynamic(DynamicChildren),
     /// A control made elsewhere (a XAML user control, a control kept by the
@@ -335,6 +409,7 @@ impl fmt::Debug for Element {
             Element::Control(control) => control.fmt(f),
             Element::Text(text) => write!(f, "Text({text:?})"),
             Element::Fragment(items) => f.debug_tuple("Fragment").field(items).finish(),
+            Element::List(items) => f.debug_tuple("List").field(items).finish(),
             Element::Dynamic(_) => f.write_str("Dynamic"),
             Element::Existing(_) => f.write_str("Existing"),
             Element::Component(component) => write!(f, "Component({})", component.name),
@@ -368,7 +443,7 @@ impl<T: IntoElement> IntoElement for Option<T> {
 
 impl<T: IntoElement> IntoElement for Vec<T> {
     fn into_element(self) -> Element {
-        Element::Fragment(self.into_iter().map(IntoElement::into_element).collect())
+        Element::List(self.into_iter().map(IntoElement::into_element).collect())
     }
 }
 

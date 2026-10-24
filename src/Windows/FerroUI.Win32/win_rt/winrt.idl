@@ -875,9 +875,9 @@ enum UIColorType
     Complement = 9
 }
 
-// UISettings.AnimationsEnabled is the motion-preference query used by the
-// WinUI Repeater. Preserve the six preceding slots of IUISettings. WinRT's
-// boolean result occupies one byte, unlike a Win32 BOOL.
+// The first interface of UISettings, for AnimationsEnabled (the motion preference of the
+// platform settings; FerroUI addition). The six members before it are declared to keep the
+// layout of the table of the interface. A WinRT boolean is one byte, not a Win32 BOOL.
 [uuid(85361600-1C63-4627-BCB1-3A89E0BC9C55)]
 interface IUISettings : IInspectable
 {

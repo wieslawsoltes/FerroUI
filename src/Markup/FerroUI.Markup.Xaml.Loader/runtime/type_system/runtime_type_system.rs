@@ -286,9 +286,10 @@ impl RuntimeTypeSystem {
         if let Some(found) = self.by_class.borrow().get(&address) {
             return found.clone();
         }
-        // Static helpers link their metadata through `type_info` instead of
-        // storing it in TypeInfo. Honor its declared markup namespace just as
-        // the source model does, including when projecting through TypeInfo.
+        // Reflection reports the namespace a type is declared in. A static type links its
+        // metadata through `type_info` and may declare a namespace there (`namespace:`) that
+        // differs from the one of its Rust module; the build-time scanner reads the declared
+        // one, and so does this projection.
         let namespace = MarkupType::find_by_type_info(type_info)
             .and_then(|markup| markup.explicit_namespace)
             .unwrap_or_else(|| type_info.namespace());
@@ -678,6 +679,8 @@ impl RuntimeTypeSystem {
             None => ("", full_name),
         };
         if let Some(type_info) = TypeInfo::find(namespace, name) {
+            // The namespace of the Rust module is not a second name of a type that declares
+            // another one: such a type is found by its declared name below.
             let projected = self.runtime_type_of_class(type_info);
             if projected.namespace().as_deref().unwrap_or_default() == namespace {
                 return Some(projected);

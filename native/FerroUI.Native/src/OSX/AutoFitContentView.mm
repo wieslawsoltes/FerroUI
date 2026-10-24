@@ -1,7 +1,3 @@
-//
-// Created by Dan Walmsley on 05/05/2022.
-//
-
 #include "FrnView.h"
 #include "AutoFitContentView.h"
 #include "WindowInterfaces.h"
@@ -106,6 +102,8 @@
     [_titleBarMaterial setFrame:tbar];
     tbar.size.height = height < 1 ? 0 : 1;
     [_titleBarUnderline setFrame:tbar];
+
+    [window setStandardButtonsTitleBarHeight:_titleBarHeightHint > 0 ? _titleBarHeightHint : 0];
 
     _settingSize = false;
 }

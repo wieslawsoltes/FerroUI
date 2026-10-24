@@ -323,6 +323,7 @@ Upstream unit tests are ported next to the code (`#[cfg(test)] mod tests` or `<f
 | `samples/MiniMvvm` | `samples/MiniMvvm` (not tracked) |
 | `samples/PlatformSanityChecks` | `samples/PlatformSanityChecks` (not tracked) |
 | `samples/ReactiveDemo` | none (FerroUI only) |
+| `samples/ReactiveDemoComponents` | none (FerroUI only) |
 | `samples/ReactiveUIExample` | none (FerroUI only) |
 | `samples/RenderDemo` | `samples/RenderDemo` (not tracked) |
 | `samples/SafeAreaDemo` | `samples/SafeAreaDemo` (not tracked) |
@@ -334,9 +335,35 @@ Upstream unit tests are ported next to the code (`#[cfg(test)] mod tests` or `<f
 | `samples/SampleSupport` | none (FerroUI only) |
 | `samples/SampleTesting` | none (FerroUI only) |
 | `samples/Sandbox` | `samples/Sandbox` (not tracked) |
+| `samples/SevenGuis/Builders/Cells` | none (FerroUI only) |
+| `samples/SevenGuis/Builders/CircleDrawer` | none (FerroUI only) |
+| `samples/SevenGuis/Builders/Counter` | none (FerroUI only) |
+| `samples/SevenGuis/Builders/Crud` | none (FerroUI only) |
+| `samples/SevenGuis/Builders/FlightBooker` | none (FerroUI only) |
+| `samples/SevenGuis/Builders/Temperature` | none (FerroUI only) |
+| `samples/SevenGuis/Builders/Timer` | none (FerroUI only) |
+| `samples/SevenGuis/Hooks/Cells` | none (FerroUI only) |
+| `samples/SevenGuis/Hooks/CircleDrawer` | none (FerroUI only) |
+| `samples/SevenGuis/Hooks/Counter` | none (FerroUI only) |
+| `samples/SevenGuis/Hooks/Crud` | none (FerroUI only) |
+| `samples/SevenGuis/Hooks/FlightBooker` | none (FerroUI only) |
+| `samples/SevenGuis/Hooks/Temperature` | none (FerroUI only) |
+| `samples/SevenGuis/Hooks/Timer` | none (FerroUI only) |
+| `samples/SevenGuis/Macros/Cells` | none (FerroUI only) |
+| `samples/SevenGuis/Macros/CircleDrawer` | none (FerroUI only) |
+| `samples/SevenGuis/Macros/Counter` | none (FerroUI only) |
+| `samples/SevenGuis/Macros/Crud` | none (FerroUI only) |
+| `samples/SevenGuis/Macros/FlightBooker` | none (FerroUI only) |
+| `samples/SevenGuis/Macros/Temperature` | none (FerroUI only) |
+| `samples/SevenGuis/Macros/Timer` | none (FerroUI only) |
+| `samples/SevenGuis/Model` | none (FerroUI only) |
+| `samples/SevenGuis/Tests` | none (FerroUI only) |
 | `samples/SingleProjectSandbox` | `samples/SingleProjectSandbox` (not tracked) |
 | `samples/TextTestApp` | `samples/TextTestApp` (not tracked) |
+| `samples/TodoMvc` | none (FerroUI only) |
 | `samples/TreeDataGridDemo` | none (FerroUI only) |
+| `samples/ViewGallery` | none (FerroUI only) |
+| `samples/ViewInterop` | none (FerroUI only) |
 | `samples/VirtualizationDemo` | `samples/VirtualizationDemo` (not tracked) |
 | `samples/WinUIEmbedSample` | `samples/WinUIEmbedSample` (not tracked) |
 | `samples/WinUIThemeGallery` | none (FerroUI only) |
@@ -351,6 +378,7 @@ Upstream unit tests are ported next to the code (`#[cfg(test)] mod tests` or `<f
 | `src/FerroUI.Controls.ColorPicker` | `src/Avalonia.Controls.ColorPicker` |
 | `src/FerroUI.DesignerSupport` | `src/Avalonia.DesignerSupport` |
 | `src/FerroUI.Desktop` | `src/Avalonia.Desktop` |
+| `src/FerroUI.Diagnostics` | `src/Avalonia.Diagnostics` (the developer tools: [Avalonia.Diagnostics](tracking/diagnostics/Avalonia.Diagnostics.md)) |
 | `src/FerroUI.Dialogs` | `src/Avalonia.Dialogs` |
 | `src/FerroUI.DynamicData` | none (FerroUI only) |
 | `src/FerroUI.Fonts.Inter` | `src/Avalonia.Fonts.Inter` |
@@ -370,6 +398,8 @@ Upstream unit tests are ported next to the code (`#[cfg(test)] mod tests` or `<f
 | `src/FerroUI.Themes.Fluent` | `src/Avalonia.Themes.Fluent` |
 | `src/FerroUI.Themes.Simple` | `src/Avalonia.Themes.Simple` |
 | `src/FerroUI.Themes.WinUI` | none (FerroUI only) |
+| `src/FerroUI.View` | none (FerroUI only) |
+| `src/FerroUI.View.Macros` | none (FerroUI only) |
 | `src/FerroUI.Vulkan` | `src/Avalonia.Vulkan` |
 | `src/FerroUI.Wayland` | `src/Avalonia.Wayland` |
 | `src/FerroUI.X11` | `src/Avalonia.X11` |
@@ -409,7 +439,7 @@ FerroUI-only crates have no upstream source directory (for example the MicroCom 
 
 ## Rust-only files
 
-439 Rust source files have no upstream counterpart (35 without a recorded reason). They are listed at the end of each project page.
+441 Rust source files have no upstream counterpart (37 without a recorded reason). They are listed at the end of each project page.
 
 | Project | Rust file | Reason |
 |---|---|---|
@@ -475,6 +505,7 @@ FerroUI-only crates have no upstream source directory (for example the MicroCom 
 | [Avalonia.Base](tracking/Avalonia.Base.md) | `src/FerroUI.Base/media/text_formatting/unicode/testing.rs` | the generated Unicode tries, for the benchmarks (the `testing` feature): internal upstream, reached by upstream's benchmark project through its access to the internals |
 | [Avalonia.Base](tracking/Avalonia.Base.md) | `src/FerroUI.Base/media/text_formatting/unicode/ucd_test_data.rs` | helpers of the Unicode conformance tests, which read the test files of the Unicode Character Database from the repository where upstream downloads them at test time |
 | [Avalonia.Base](tracking/Avalonia.Base.md) | `src/FerroUI.Base/media/text_formatting/unicode/unicode_data_trie.rs` | generated by scripts/convert-unicode-tries.py from the upstream data file of the same name (`*.trie.cs`) |
+| [Avalonia.Base](tracking/Avalonia.Base.md) | `src/FerroUI.Base/media/text_line_bounds.rs` | **unmapped** |
 | [Avalonia.Base](tracking/Avalonia.Base.md) | `src/FerroUI.Base/media/tile_mode.rs` | the enum `TileMode`, declared in `Media/TileBrush.cs` upstream |
 | [Avalonia.Base](tracking/Avalonia.Base.md) | `src/FerroUI.Base/metadata/markup_macros.rs` | the declaration forms of markup metadata (`ferro_markup_type!` and its kin): take the place of the attributes and the reflection of upstream |
 | [Avalonia.Base](tracking/Avalonia.Base.md) | `src/FerroUI.Base/metadata/property_accessors.rs` | the Rust accessors of registered property definitions, for the Rust emitter of the XAML compiler (docs/porting/xaml.md, section 9): upstream's compiler loads a property definition from its static field |
@@ -489,6 +520,7 @@ FerroUI-only crates have no upstream source directory (for example the MicroCom 
 | [Avalonia.Base](tracking/Avalonia.Base.md) | `src/FerroUI.Base/numerics/vector3.rs` | the `System.Numerics` types the composition API takes (Vector2, Vector3, Vector4, Matrix3x2, Matrix4x4, Quaternion) and their scalar helpers: part of the .NET runtime library upstream |
 | [Avalonia.Base](tracking/Avalonia.Base.md) | `src/FerroUI.Base/numerics/vector4.rs` | the `System.Numerics` types the composition API takes (Vector2, Vector3, Vector4, Matrix3x2, Matrix4x4, Quaternion) and their scalar helpers: part of the .NET runtime library upstream |
 | [Avalonia.Base](tracking/Avalonia.Base.md) | `src/FerroUI.Base/platform/i_drawing_context_impl_with_effects.rs` | the contract `IDrawingContextImplWithEffects`, declared in `Platform/IDrawingContextImpl.cs` upstream |
+| [Avalonia.Base](tracking/Avalonia.Base.md) | `src/FerroUI.Base/platform/i_drawing_context_impl_with_fragments.rs` | **unmapped** |
 | [Avalonia.Base](tracking/Avalonia.Base.md) | `src/FerroUI.Base/platform/native_library.rs` | A shared library opened at run time and its functions resolved by name: what the runtime of the original does for a platform invoke (`DllImport`); the one loader of the X11 (GLib, GTK, libSM, libICE), Wayland (libgbm, libdrm) and Linux framebuffer (libinput, libdrm, libgbm) backends |
 | [Avalonia.Base](tracking/Avalonia.Base.md) | `src/FerroUI.Base/platform/render_interface_access.rs` | access to the platform render interface registered by the rendering backend, in one place (a service locator lookup at each site upstream) |
 | [Avalonia.Base](tracking/Avalonia.Base.md) | `src/FerroUI.Base/platform/storage/file_io/path.rs` | the path string operations of .NET `System.IO.Path` the storage helpers need |

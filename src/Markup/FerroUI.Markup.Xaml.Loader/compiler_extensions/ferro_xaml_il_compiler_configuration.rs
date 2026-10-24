@@ -9,7 +9,6 @@ use xamlx::transform::{
     XamlLanguageTypeMappings, XamlValueConverter, XamlXmlnsMappings,
 };
 use xamlx::type_system::{IXamlAssembly, IXamlTypeSystem};
-use xamlx::transform::transformers::ConstructableObjectTransformerOptions;
 
 use super::transformers::FerroXamlIlWellKnownTypes;
 
@@ -55,11 +54,6 @@ impl FerroXamlIlCompilerConfiguration {
             diagnostics_handler,
         )?;
         base.add_extra(Rc::new(FerroXamlIlWellKnownTypes::new(&base.type_system)?));
-        // Native metadata invokers and Rust source construct values directly;
-        // neither needs the indirect-load machinery of an IL backend.
-        base.add_extra(Rc::new(ConstructableObjectTransformerOptions {
-            allow_value_type_construction: true,
-        }));
         Ok(Self {
             base: Rc::new(base),
         })

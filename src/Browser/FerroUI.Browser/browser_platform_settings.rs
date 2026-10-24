@@ -11,8 +11,9 @@ use std::cell::{Cell, RefCell};
 use std::rc::Rc;
 use std::time::Duration;
 
-/// What the page reports: the dark-mode and contrast media queries and the
-/// language of the browser. Replaced by fixed values in the tests.
+/// What the page reports: the dark-mode and contrast media queries, the
+/// language of the browser and the reduced-motion media query. Replaced by
+/// fixed values in the tests.
 trait IPageSettings {
     fn get_dark_mode(&self) -> Vec<i32>;
     fn get_navigator_language(&self) -> Option<String>;
@@ -155,6 +156,7 @@ impl IPlatformSettings for BrowserPlatformSettings {
         }
     }
 
+    // Not kept: asked for each animation (`IPlatformSettings::animations_enabled`).
     fn animations_enabled(&self) -> bool {
         self.page.animations_enabled()
     }

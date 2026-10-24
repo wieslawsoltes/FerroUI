@@ -25,6 +25,7 @@ pub mod animations;
 pub mod base;
 pub mod compositor;
 pub mod data;
+pub mod declarative;
 pub mod layout;
 pub mod markup;
 pub mod navigation;
@@ -48,6 +49,7 @@ pub fn register(registry: &mut Registry) {
     base::register(registry);
     compositor::register(registry);
     data::register(registry);
+    declarative::register(registry);
     layout::register(registry);
     markup::register(registry);
     navigation::register(registry);

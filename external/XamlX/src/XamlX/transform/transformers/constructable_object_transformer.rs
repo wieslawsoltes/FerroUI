@@ -12,15 +12,6 @@ use crate::type_system::{IXamlConstructor, IXamlType};
 
 pub struct ConstructableObjectTransformer;
 
-/// Capabilities of the host's construction backend. The IL-compatible default
-/// rejects value construction because that backend needs indirect loads when
-/// initializing structs. Backends that construct and pass values directly may
-/// opt in while retaining the same constructor resolution and validation.
-#[derive(Default)]
-pub struct ConstructableObjectTransformerOptions {
-    pub allow_value_type_construction: bool,
-}
-
 fn transform_arguments_and_get_constructor(
     context: &AstTransformationContext,
     n: &XamlAstObjectNode,
@@ -79,12 +70,7 @@ impl IXamlAstTransformer for ConstructableObjectTransformer {
     ) -> XamlResult<Rc<dyn IXamlAstNode>> {
         if let Some(ni) = node.cast::<XamlAstObjectNode>() {
             let t = ni.type_.borrow().get_clr_type()?;
-            if t.is_value_type()
-                && !context
-                    .configuration()
-                    .get_extra::<ConstructableObjectTransformerOptions>()
-                    .is_ok_and(|options| options.allow_value_type_construction)
-            {
+            if t.is_value_type() {
                 return Err(XamlError::load_exception(
                     "Value types can only be loaded via converters. We don't want to mess with indirect loads and other weird stuff",
                     Some(&*node),

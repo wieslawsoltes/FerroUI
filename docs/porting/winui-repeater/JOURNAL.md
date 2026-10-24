@@ -13,7 +13,7 @@
 
 These are recoverable commits on `feat/winui-repeater-port`, not inferred local
 state. The source notice pins WinUI
-`1af995b98a02d86b1951c4babe35caa269a6d569`.
+`7e4b0c2096be402f51cc8f7d203ebf67cff183d0`.
 
 ## 2026-10-20 — source-based continuation
 

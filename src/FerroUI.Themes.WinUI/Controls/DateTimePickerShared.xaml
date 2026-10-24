@@ -64,6 +64,10 @@
 
   <!-- The accept and dismiss buttons of the flyout presenters. -->
   <ControlTheme x:Key="DateTimePickerFlyoutButtonStyle" TargetType="Button">
+    <!-- The defaults of a WinUI 3 control, which its style leaves unset and its template binds
+         (FerroUI's defaults are Stretch). Deviation (winui-theme/DEVIATIONS.md, G-27). -->
+    <Setter Property="HorizontalContentAlignment" Value="Center" />
+    <Setter Property="VerticalContentAlignment" Value="Center" />
     <Setter Property="Background" Value="{DynamicResource DateTimePickerFlyoutButtonBackground}" />
     <Setter Property="Foreground" Value="{DynamicResource ButtonForeground}" />
     <Setter Property="BackgroundSizing" Value="InnerBorderEdge" />
@@ -122,6 +126,10 @@
 
   <!-- The up and down buttons of a looping list. -->
   <ControlTheme x:Key="DateTimePickerFlyoutLoopingSelectorNavigationButtonStyle" TargetType="Button">
+    <!-- The defaults of a WinUI 3 control, which its style leaves unset and its template binds
+         (FerroUI's defaults are Stretch). Deviation (winui-theme/DEVIATIONS.md, G-27). -->
+    <Setter Property="HorizontalContentAlignment" Value="Center" />
+    <Setter Property="VerticalContentAlignment" Value="Center" />
     <Setter Property="Foreground" Value="{DynamicResource LoopingSelectorUpDownButtonForeground}" />
     <Setter Property="FontFamily" Value="{DynamicResource ContentControlThemeFontFamily}" />
     <Setter Property="FontSize" Value="{DynamicResource ControlContentThemeFontSize}" />

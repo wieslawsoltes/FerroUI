@@ -14,8 +14,9 @@
   Style="{StaticResource BodyTextBlockStyle}", a FerroUI one Theme="{StaticResource
   BodyTextBlockStyle}" (docs/porting/winui-theme.md, section 4.2). The font family
   XamlAutoFontFamily is the value of ContentControlThemeFontFamily (section 3.5).
-  LineStackingStrategy, TextLineBounds and OpticalMarginAlignment have no counterpart in
-  FerroUI's TextBlock and are left out.
+  TextLineBounds is FerroUI's TextBlock.TextLineBounds (an addition after WinUI's).
+  LineStackingStrategy and OpticalMarginAlignment have no counterpart in FerroUI's TextBlock and
+  are left out.
 -->
 <ResourceDictionary xmlns="https://github.com/ferroui"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
@@ -41,6 +42,7 @@
     <Setter Property="FontWeight" Value="SemiBold" />
     <Setter Property="TextTrimming" Value="CharacterEllipsis" />
     <Setter Property="TextWrapping" Value="Wrap" />
+    <Setter Property="TextLineBounds" Value="Full" />
   </ControlTheme>
   <ControlTheme x:Key="CaptionTextBlockStyle" TargetType="TextBlock" BasedOn="{StaticResource BaseTextBlockStyle}">
     <Setter Property="FontSize" Value="{StaticResource CaptionTextBlockFontSize}" />

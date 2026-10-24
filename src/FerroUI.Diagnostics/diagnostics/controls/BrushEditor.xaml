@@ -1,0 +1,24 @@
+<Styles xmlns="https://github.com/ferroui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:controls="using:FerroUI.Diagnostics.Controls"
+        x:ClassModifier="internal">
+  <Design.PreviewWith>
+    <controls:BrushEditor />
+  </Design.PreviewWith>
+
+  <!-- Deviation (DEVIATIONS.md, Developer tools): the delete button of a text box of the WinUI 3
+       theme (TextBoxDeleteButtonStyle) in place of the clear button of the Simple theme
+       (SimpleTextBoxClearButtonTheme). -->
+  <Style Selector=":is(controls|BrushEditor)">
+    <Setter Property="Template">
+      <ControlTemplate>
+        <Grid>
+          <Button Theme="{StaticResource TextBoxDeleteButtonStyle}"
+                  x:Name="PART_ClearButton"
+                  HorizontalAlignment="Right"
+                  VerticalContentAlignment="Center"/>
+        </Grid>
+      </ControlTemplate>
+    </Setter>
+  </Style>
+</Styles>

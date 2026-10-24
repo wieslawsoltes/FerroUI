@@ -13,8 +13,10 @@
 // The compiled markup of a document names the types of this crate by the name of the crate.
 extern crate self as treedatagrid_demo;
 
+#[cfg(feature = "app")]
 mod app;
 mod internal_tree_data_grid_source_extensions;
+#[cfg(feature = "app")]
 mod main_window;
 pub mod markup;
 mod register_types;
@@ -30,10 +32,12 @@ pub mod views;
 // markup of the crate and `register()`), which the build script of the crate generates.
 ferroui_markup_xaml::include_compiled_xaml!();
 
+#[cfg(feature = "app")]
 pub use app::App;
+#[cfg(feature = "app")]
 pub use main_window::MainWindow;
 pub use markup::SAMPLE;
 pub use register_types::{register_types, ASSEMBLY};
 
-#[cfg(test)]
+#[cfg(all(test, feature = "app"))]
 mod tests;

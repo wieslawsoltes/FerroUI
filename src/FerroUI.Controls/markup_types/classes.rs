@@ -33,7 +33,7 @@ use ferroui_base::input::*;
 use ferroui_base::interactivity::*;
 use ferroui_base::media::{
     FontFamily, FontFeatureCollection, FontStretch, FontStyle, FontWeight, IBrush, TextAlignment, TextDecorationCollection,
-    TextTrimming, TextWrapping,
+    TextLineBounds, TextTrimming, TextWrapping,
 };
 use ferroui_base::metadata::{into_markup_value, MarkupDelegate, MarkupType};
 use ferroui_base::styling::*;
@@ -712,6 +712,12 @@ ferro_class_info!(TextBlock {
                     this.set_value(TextBlock::layout_rounding_placement_property(), value)
                 }
             },
+            TextLineBounds: TextLineBounds {
+                get: |this: &Ref<TextBlock>| this.get_value(TextBlock::text_line_bounds_property()),
+                set: |this: &Ref<TextBlock>, value: TextLineBounds| {
+                    this.set_value(TextBlock::text_line_bounds_property(), value)
+                }
+            },
             LineHeight: f64 {
                 get: |this: &Ref<TextBlock>| this.get_value(TextBlock::line_height_property()),
                 set: |this: &Ref<TextBlock>, value: f64| this.set_value(TextBlock::line_height_property(), value)
@@ -883,6 +889,9 @@ ferro_class_info!(Window {
         properties: [
             SystemDecorations: WindowDecorations { get: Window::system_decorations, set: Window::set_system_decorations } [Obsolete("Use WindowDecorations instead.")],
             Position: PixelPoint { get: Window::position, set: Window::set_position },
+        ],
+        methods: [
+            fn Close() => |window: &Ref<Window>| window.close(),
         ],
         fields: [
             WindowClosedEvent: RoutedEvent<RoutedEventArgs> => || *Window::window_closed_event(),

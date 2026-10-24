@@ -22,6 +22,12 @@ autotests = false
 [lib]
 path = "lib.rs"
 
+# The counter of the README.
+[[example]]
+name = "counter"
+path = "examples/counter.rs"
+required-features = ["desktop"]
+
 [features]
 default = []
 # `launch`, `open_window`: an application on the platform of the operating system with the Fluent theme.
@@ -32,11 +38,16 @@ xaml = ["dep:ferroui-markup-xaml", "dep:ferroui-markup-xaml-loader"]
 treedatagrid = ["dep:ferroui-controls-treedatagrid"]
 color-picker = ["dep:ferroui-controls-color-picker"]
 dialogs = ["dep:ferroui-dialogs"]
+repeater = ["dep:ferroui-controls-repeater"]
 reactiveui = ["dep:ferroui-reactiveui-controls", "dep:ferroui-reactiveui"]
+# Hot reload of the literals of `rsx!` (`hot.rs`): the sources are read again with `proc-macro2`.
+hot-reload = ["dep:proc-macro2", "dep:syn"]
 
 [dependencies]
 ferroui-base = { workspace = true }
 ferroui-controls = { workspace = true }
+# The executor of the thread, which runs the futures of `use_future` (`async_data.rs`).
+ferroui-system = { workspace = true }
 # The parser of selectors of `style("Button.accent")`.
 ferroui-markup = { workspace = true }
 ferroui-view-macros = { workspace = true }
@@ -47,8 +58,11 @@ ferroui-markup-xaml-loader = { workspace = true, optional = true, features = ["r
 ferroui-controls-treedatagrid = { workspace = true, optional = true }
 ferroui-controls-color-picker = { workspace = true, optional = true }
 ferroui-dialogs = { workspace = true, optional = true }
+ferroui-controls-repeater = { workspace = true, optional = true }
 ferroui-reactiveui-controls = { workspace = true, optional = true }
 ferroui-reactiveui = { workspace = true, optional = true }
+proc-macro2 = { version = "1", optional = true, features = ["span-locations"] }
+syn = { version = "2", optional = true, features = ["full", "parsing"] }
 
 [build-dependencies]
 # The source scanner and the export of the type model.

@@ -5,6 +5,7 @@ members = [
     "src/FerroUI.Reactive",
     "src/FerroUI.Reactive.Testing",
     "src/FerroUI.Splat",
+    "src/FerroUI.DependencyInjection",
     "src/FerroUI.DynamicData",
     "src/FerroUI.ReactiveUI",
     "src/FerroUI.ReactiveUI.Testing",
@@ -14,8 +15,12 @@ members = [
     "src/FerroUI.View",
     "src/FerroUI.View.Macros",
     "src/FerroUI.Controls.ColorPicker",
+    "src/FerroUI.Controls.Repeater",
     "src/TreeDataGrid/FerroUI.TreeDataGrid.Core",
     "src/TreeDataGrid/FerroUI.Controls.TreeDataGrid",
+    "src/StaticViewLocator/FerroUI.StaticViewLocator",
+    "src/StaticViewLocator/FerroUI.StaticViewLocator.Macros",
+    "src/StaticViewLocator/FerroUI.StaticViewLocator.Build",
     "src/Markup/FerroUI.Markup",
     "src/Markup/FerroUI.Markup.Xaml",
     "src/Markup/FerroUI.Markup.Xaml.Loader",
@@ -39,6 +44,10 @@ members = [
     "src/Windows/FerroUI.WinUI",
     "src/FerroUI.Fonts.Inter",
     "src/FerroUI.Dialogs",
+    "src/FerroUI.Diagnostics",
+    "src/FerroUI.Inspect",
+    "src/FerroUI.DevTools",
+    "src/FerroUI.Mcp",
     "src/FerroUI.Themes.Simple",
     "src/FerroUI.Themes.Fluent",
     "src/FerroUI.Themes.WinUI",
@@ -54,6 +63,7 @@ members = [
     "tests/FerroUI.Markup.Xaml.UnitTests",
     "tests/FerroUI.Reactive.Tests",
     "tests/FerroUI.Splat.Tests",
+    "tests/FerroUI.DependencyInjection.Tests",
     "tests/FerroUI.DynamicData.Tests",
     "tests/FerroUI.ReactiveUI.Tests",
     "tests/FerroUI.ReactiveUI.Testing.Tests",
@@ -67,6 +77,7 @@ members = [
     "tests/FerroUI.IntegrationTests.Appium",
     "tests/FerroUI.IntegrationTests.Win32",
     "tests/FerroUI.DesignerSupport.Tests",
+    "tests/FerroUI.StaticViewLocator.Tests",
     "samples/SevenGuis/Model",
     "samples/SevenGuis/Builders/Counter",
     "samples/SevenGuis/Macros/Counter",
@@ -92,6 +103,8 @@ members = [
     "samples/SevenGuis/Tests",
     "samples/ViewInterop",
     "samples/ViewGallery",
+    "samples/TodoMvc",
+    "samples/ReactiveDemoComponents",
     "samples/MiniMvvm",
     "samples/ControlCatalog",
     "samples/ControlCatalog.Desktop",
@@ -107,6 +120,7 @@ members = [
     "samples/TreeDataGridDemo",
     "samples/ReactiveDemo",
     "samples/ReactiveUIExample",
+    "samples/StaticViewLocatorDemo",
     "samples/TextTestApp",
     "samples/Sandbox",
     "samples/AppWithoutLifetime",
@@ -126,7 +140,7 @@ members = [
 ]
 
 [workspace.package]
-version = "0.4.0-preview.1"
+version = "0.4.0"
 edition = "2021"
 rust-version = "1.89"
 license = "MIT"
@@ -142,63 +156,72 @@ categories = ["gui"]
 # that the crates of a release are only ever resolved together (docs/release.md, "Version scheme").
 # `scripts/release/set-version.sh <version>` writes the version above and these keys.
 [workspace.dependencies]
-ferroui-system = { version = "=0.4.0-preview.1", path = "src/FerroUI.System" }
-ferroui-reactive = { version = "=0.4.0-preview.1", path = "src/FerroUI.Reactive" }
-ferroui-reactive-testing = { version = "=0.4.0-preview.1", path = "src/FerroUI.Reactive.Testing" }
-ferroui-splat = { version = "=0.4.0-preview.1", path = "src/FerroUI.Splat" }
-ferroui-dynamic-data = { version = "=0.4.0-preview.1", path = "src/FerroUI.DynamicData" }
-ferroui-reactiveui = { version = "=0.4.0-preview.1", path = "src/FerroUI.ReactiveUI" }
-ferroui-reactiveui-testing = { version = "=0.4.0-preview.1", path = "src/FerroUI.ReactiveUI.Testing" }
-ferroui-reactiveui-controls = { version = "=0.4.0-preview.1", path = "src/FerroUI.ReactiveUI.Controls" }
-ferroui-base = { version = "=0.4.0-preview.1", path = "src/FerroUI.Base" }
-ferroui-controls = { version = "=0.4.0-preview.1", path = "src/FerroUI.Controls" }
-ferroui-view = { version = "=0.4.0-preview.1", path = "src/FerroUI.View" }
-ferroui-view-macros = { version = "=0.4.0-preview.1", path = "src/FerroUI.View.Macros" }
-ferroui-controls-color-picker = { version = "=0.4.0-preview.1", path = "src/FerroUI.Controls.ColorPicker" }
-ferroui-treedatagrid-core = { version = "=0.4.0-preview.1", path = "src/TreeDataGrid/FerroUI.TreeDataGrid.Core" }
-ferroui-controls-treedatagrid = { version = "=0.4.0-preview.1", path = "src/TreeDataGrid/FerroUI.Controls.TreeDataGrid" }
-ferroui-markup = { version = "=0.4.0-preview.1", path = "src/Markup/FerroUI.Markup" }
-ferroui-markup-xaml = { version = "=0.4.0-preview.1", path = "src/Markup/FerroUI.Markup.Xaml" }
+ferroui-inspect = { version = "=0.4.0", path = "src/FerroUI.Inspect" }
+ferroui-devtools = { version = "=0.4.0", path = "src/FerroUI.DevTools", default-features = false }
+ferroui-mcp = { version = "=0.4.0", path = "src/FerroUI.Mcp" }
+ferroui-system = { version = "=0.4.0", path = "src/FerroUI.System" }
+ferroui-reactive = { version = "=0.4.0", path = "src/FerroUI.Reactive" }
+ferroui-reactive-testing = { version = "=0.4.0", path = "src/FerroUI.Reactive.Testing" }
+ferroui-dependency-injection = { version = "=0.4.0", path = "src/FerroUI.DependencyInjection" }
+ferroui-splat = { version = "=0.4.0", path = "src/FerroUI.Splat" }
+ferroui-dynamic-data = { version = "=0.4.0", path = "src/FerroUI.DynamicData" }
+ferroui-reactiveui = { version = "=0.4.0", path = "src/FerroUI.ReactiveUI" }
+ferroui-reactiveui-testing = { version = "=0.4.0", path = "src/FerroUI.ReactiveUI.Testing" }
+ferroui-reactiveui-controls = { version = "=0.4.0", path = "src/FerroUI.ReactiveUI.Controls" }
+ferroui-base = { version = "=0.4.0", path = "src/FerroUI.Base" }
+ferroui-controls = { version = "=0.4.0", path = "src/FerroUI.Controls" }
+ferroui-view = { version = "=0.4.0", path = "src/FerroUI.View" }
+ferroui-view-macros = { version = "=0.4.0", path = "src/FerroUI.View.Macros" }
+ferroui-controls-color-picker = { version = "=0.4.0", path = "src/FerroUI.Controls.ColorPicker" }
+ferroui-controls-repeater = { version = "=0.4.0", path = "src/FerroUI.Controls.Repeater" }
+ferroui-treedatagrid-core = { version = "=0.4.0", path = "src/TreeDataGrid/FerroUI.TreeDataGrid.Core" }
+ferroui-controls-treedatagrid = { version = "=0.4.0", path = "src/TreeDataGrid/FerroUI.Controls.TreeDataGrid" }
+ferroui-static-view-locator = { version = "=0.4.0", path = "src/StaticViewLocator/FerroUI.StaticViewLocator" }
+ferroui-static-view-locator-macros = { version = "=0.4.0", path = "src/StaticViewLocator/FerroUI.StaticViewLocator.Macros" }
+ferroui-static-view-locator-build = { version = "=0.4.0", path = "src/StaticViewLocator/FerroUI.StaticViewLocator.Build" }
+ferroui-markup = { version = "=0.4.0", path = "src/Markup/FerroUI.Markup" }
+ferroui-markup-xaml = { version = "=0.4.0", path = "src/Markup/FerroUI.Markup.Xaml" }
 # Without the default features: the default is the run-time back end, which links the XAML runtime library
 # and the controls, and the build tool (`ferroui-build`) takes the compiler alone. Every crate that loads
 # markup at run time states the `runtime` feature.
-ferroui-markup-xaml-loader = { version = "=0.4.0-preview.1", path = "src/Markup/FerroUI.Markup.Xaml.Loader", default-features = false }
-ferroui-build-scan = { version = "=0.4.0-preview.1", path = "src/FerroUI.Build.Scan" }
-ferroui-build = { version = "=0.4.0-preview.1", path = "src/FerroUI.Build.Tasks" }
-xamlx = { version = "=0.4.0-preview.1", path = "external/XamlX/src/XamlX" }
-ferroui-microcom = { version = "=0.4.0-preview.1", path = "src/FerroUI.MicroCom" }
-microcom-codegen = { version = "=0.4.0-preview.1", path = "src/tools/MicroCom.CodeGenerator" }
-ferroui-native = { version = "=0.4.0-preview.1", path = "src/FerroUI.Native" }
+ferroui-markup-xaml-loader = { version = "=0.4.0", path = "src/Markup/FerroUI.Markup.Xaml.Loader", default-features = false }
+ferroui-build-scan = { version = "=0.4.0", path = "src/FerroUI.Build.Scan" }
+ferroui-build = { version = "=0.4.0", path = "src/FerroUI.Build.Tasks" }
+xamlx = { version = "=0.4.0", path = "external/XamlX/src/XamlX" }
+ferroui-microcom = { version = "=0.4.0", path = "src/FerroUI.MicroCom" }
+microcom-codegen = { version = "=0.4.0", path = "src/tools/MicroCom.CodeGenerator" }
+ferroui-native = { version = "=0.4.0", path = "src/FerroUI.Native" }
 # Without its default feature `angle`: a crate that wants ANGLE asks for it (ferroui-desktop, the
 # desktop catalog, the integration tests), and ferroui-winui, which does not need it to compile, is
 # checked for a Windows target on any host.
-ferroui-win32 = { version = "=0.4.0-preview.1", path = "src/Windows/FerroUI.Win32", default-features = false }
-ferroui-desktop = { version = "=0.4.0-preview.1", path = "src/FerroUI.Desktop" }
-ferroui-x11 = { version = "=0.4.0-preview.1", path = "src/FerroUI.X11" }
-ferroui-wayland = { version = "=0.4.0-preview.1", path = "src/FerroUI.Wayland" }
-ferroui-ios = { version = "=0.4.0-preview.1", path = "src/iOS/FerroUI.iOS" }
-ferroui-freedesktop = { version = "=0.4.0-preview.1", path = "src/FerroUI.FreeDesktop" }
-ferroui-android = { version = "=0.4.0-preview.1", path = "src/Android/FerroUI.Android" }
-ferroui-browser = { version = "=0.4.0-preview.1", path = "src/Browser/FerroUI.Browser" }
-ferroui-headless = { version = "=0.4.0-preview.1", path = "src/Headless/FerroUI.Headless" }
-ferroui-headless-vnc = { version = "=0.4.0-preview.1", path = "src/Headless/FerroUI.Headless.Vnc" }
+ferroui-win32 = { version = "=0.4.0", path = "src/Windows/FerroUI.Win32", default-features = false }
+ferroui-desktop = { version = "=0.4.0", path = "src/FerroUI.Desktop" }
+ferroui-x11 = { version = "=0.4.0", path = "src/FerroUI.X11" }
+ferroui-wayland = { version = "=0.4.0", path = "src/FerroUI.Wayland" }
+ferroui-ios = { version = "=0.4.0", path = "src/iOS/FerroUI.iOS" }
+ferroui-freedesktop = { version = "=0.4.0", path = "src/FerroUI.FreeDesktop" }
+ferroui-android = { version = "=0.4.0", path = "src/Android/FerroUI.Android" }
+ferroui-browser = { version = "=0.4.0", path = "src/Browser/FerroUI.Browser" }
+ferroui-headless = { version = "=0.4.0", path = "src/Headless/FerroUI.Headless" }
+ferroui-headless-vnc = { version = "=0.4.0", path = "src/Headless/FerroUI.Headless.Vnc" }
 # Reserved names: empty placeholders until the ports exist (docs/release.md, section 2.2).
-ferroui = { version = "=0.4.0-preview.1", path = "src/FerroUI" }
-ferroui-vulkan = { version = "=0.4.0-preview.1", path = "src/FerroUI.Vulkan" }
-ferroui-linuxframebuffer = { version = "=0.4.0-preview.1", path = "src/Linux/FerroUI.LinuxFramebuffer" }
-ferroui-winui = { version = "=0.4.0-preview.1", path = "src/Windows/FerroUI.WinUI" }
-ferroui-fonts-inter = { version = "=0.4.0-preview.1", path = "src/FerroUI.Fonts.Inter" }
-ferroui-dialogs = { version = "=0.4.0-preview.1", path = "src/FerroUI.Dialogs" }
-ferroui-themes-simple = { version = "=0.4.0-preview.1", path = "src/FerroUI.Themes.Simple" }
-ferroui-themes-fluent = { version = "=0.4.0-preview.1", path = "src/FerroUI.Themes.Fluent" }
-ferroui-themes-winui = { version = "=0.4.0-preview.1", path = "src/FerroUI.Themes.WinUI" }
-ferroui-opengl = { version = "=0.4.0-preview.1", path = "src/FerroUI.OpenGL" }
-ferroui-metal = { version = "=0.4.0-preview.1", path = "src/FerroUI.Metal" }
-ferroui-remote-protocol = { version = "=0.4.0-preview.1", path = "src/FerroUI.Remote.Protocol" }
-ferroui-designer-support = { version = "=0.4.0-preview.1", path = "src/FerroUI.DesignerSupport" }
-ferroui-skia = { version = "=0.4.0-preview.1", path = "src/Skia/FerroUI.Skia" }
-ferroui-vello = { version = "=0.4.0-preview.1", path = "src/Vello/FerroUI.Vello" }
-ferroui-harfbuzz = { version = "=0.4.0-preview.1", path = "src/HarfBuzz/FerroUI.HarfBuzz" }
+ferroui = { version = "=0.4.0", path = "src/FerroUI" }
+ferroui-vulkan = { version = "=0.4.0", path = "src/FerroUI.Vulkan" }
+ferroui-linuxframebuffer = { version = "=0.4.0", path = "src/Linux/FerroUI.LinuxFramebuffer" }
+ferroui-winui = { version = "=0.4.0", path = "src/Windows/FerroUI.WinUI" }
+ferroui-fonts-inter = { version = "=0.4.0", path = "src/FerroUI.Fonts.Inter" }
+ferroui-dialogs = { version = "=0.4.0", path = "src/FerroUI.Dialogs" }
+ferroui-diagnostics = { version = "=0.4.0", path = "src/FerroUI.Diagnostics" }
+ferroui-themes-simple = { version = "=0.4.0", path = "src/FerroUI.Themes.Simple" }
+ferroui-themes-fluent = { version = "=0.4.0", path = "src/FerroUI.Themes.Fluent" }
+ferroui-themes-winui = { version = "=0.4.0", path = "src/FerroUI.Themes.WinUI" }
+ferroui-opengl = { version = "=0.4.0", path = "src/FerroUI.OpenGL" }
+ferroui-metal = { version = "=0.4.0", path = "src/FerroUI.Metal" }
+ferroui-remote-protocol = { version = "=0.4.0", path = "src/FerroUI.Remote.Protocol" }
+ferroui-designer-support = { version = "=0.4.0", path = "src/FerroUI.DesignerSupport" }
+ferroui-skia = { version = "=0.4.0", path = "src/Skia/FerroUI.Skia" }
+ferroui-vello = { version = "=0.4.0", path = "src/Vello/FerroUI.Vello" }
+ferroui-harfbuzz = { version = "=0.4.0", path = "src/HarfBuzz/FerroUI.HarfBuzz" }
 bitflags = "2"
 # A fast hasher for maps keyed by identities and short keys (the TreeDataGrid's recycle pools).
 rustc-hash = "2.1"
@@ -308,10 +331,17 @@ lto = "thin"
 # (docs/porting/desktop-performance.md, section 6.2); the build takes about twice as long, because
 # every executable generates the code of the whole program on one core, and its link step needs
 # about 6 GB of memory.
+#
+# The symbol table is stripped (`strip = "symbols"`): it is a sixth to a quarter of an executable of
+# macOS or Linux, and nothing of the program reads it but the symbolisation of a panic backtrace, which
+# then shows addresses (docs/binary-size.md, section 4.3). On Windows the executable never holds the
+# symbols (they are in the PDB beside it), so the setting changes nothing there. Build with the
+# release profile for a backtrace with names.
 [profile.dist]
 inherits = "release"
 lto = "fat"
 codegen-units = 1
+strip = "symbols"
 
 # The WebAssembly module of the browser (scripts/build-browser.sh): optimised for size, because the
 # module is downloaded and compiled by every visitor (docs/porting/browser-platform.md, section 18).

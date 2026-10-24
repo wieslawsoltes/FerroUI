@@ -21,6 +21,10 @@
   </Design.PreviewWith>
 
   <ControlTheme x:Key="DefaultHyperlinkButtonStyle" TargetType="HyperlinkButton">
+    <!-- The defaults of a WinUI 3 control, which its style leaves unset and its template binds
+         (FerroUI's defaults are Stretch). Deviation (winui-theme/DEVIATIONS.md, G-27). -->
+    <Setter Property="HorizontalContentAlignment" Value="Center" />
+    <Setter Property="VerticalContentAlignment" Value="Center" />
     <!-- WinUI sets the hand cursor in the code of the control (HyperlinkButton_Partial.cpp). -->
     <Setter Property="Cursor" Value="Hand" />
     <Setter Property="Background" Value="{DynamicResource HyperlinkButtonBackground}" />

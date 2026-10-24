@@ -31,7 +31,6 @@
 
 use std::rc::Rc;
 
-use xamlx::ast::{XamlAstExtensions as _, XamlAstNodeExtensions as _};
 use xamlx::type_system::IXamlTypeSystem;
 
 use crate::compiler_extensions::IXamlCompileTimeValueParser;
@@ -196,11 +195,8 @@ pub fn compile_documents_with(
             let functions_of_group = || {
                 let mut functions = DocumentFunctions::default();
                 for (name, transformed) in names.iter().zip(&transformed) {
-                    let root_handle = transformed.root.as_value_with_manipulation_node()
-                        .and_then(|root| root.value().type_().get_clr_type().ok())
-                        .and_then(|type_| types.handle_of(&*type_));
-                    if let (Some(build), Some(root_handle)) = (&transformed.build, root_handle) {
-                        functions.insert_handle(build, name, root_handle.id());
+                    if let (Some(build), Some(root_class)) = (&transformed.build, root_class_of(types, &transformed.root)) {
+                        functions.insert(build, name, root_class);
                     }
                 }
                 functions

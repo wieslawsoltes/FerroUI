@@ -2,7 +2,7 @@
 
 This record covers WR-26, the transition lifecycle correction reviewed during
 the 2026-10-20 continuation of PR #269. The acceptance source remains
-[`microsoft-ui-xaml@1af995b98a02d86b1951c4babe35caa269a6d569`](https://github.com/microsoft/microsoft-ui-xaml/tree/1af995b98a02d86b1951c4babe35caa269a6d569/controls/dev/Repeater).
+[`microsoft-ui-xaml@7e4b0c2096be402f51cc8f7d203ebf67cff183d0`](https://github.com/microsoft/microsoft-ui-xaml/tree/7e4b0c2096be402f51cc8f7d203ebf67cff183d0/controls/dev/Repeater).
 The correction combines the source's transition notifications and factory
 ordering with FerroUI's animation values, cancellation tokens and recyclable
 native controls.
@@ -11,12 +11,12 @@ native controls.
 
 | Pinned WinUI source | Contract retained in FerroUI |
 |---|---|
-| [`TransitionManager::ClearElement` and `OnTransitionProviderTransitionCompleted`](https://github.com/microsoft/microsoft-ui-xaml/blob/1af995b98a02d86b1951c4babe35caa269a6d569/controls/dev/Repeater/TransitionManager.cpp) | An accepted removal owns its element until completion. Completion returns it to the factory and invalidates arrange. A provider can be shared by multiple repeaters. |
-| [`ViewManager::ClearElementToAnimator` and `ClearElementToElementFactory`](https://github.com/microsoft/microsoft-ui-xaml/blob/1af995b98a02d86b1951c4babe35caa269a6d569/controls/dev/Repeater/ViewManager.cpp) | Removal ownership is assigned after queueing. ElementClearing observes the original element before the factory receives it. |
-| [`ItemsRepeater::OnItemTemplateChanged`](https://github.com/microsoft/microsoft-ui-xaml/blob/1af995b98a02d86b1951c4babe35caa269a6d569/controls/dev/Repeater/ItemsRepeater.cpp) | The old layout releases its references and returns its controls while the old ItemTemplateShim remains installed. The new factory is installed afterward. |
-| [`ItemCollectionTransitionProvider::QueueTransition`, `OnRendering` and `StartNewKeepAliveTimer`](https://github.com/microsoft/microsoft-ui-xaml/blob/1af995b98a02d86b1951c4babe35caa269a6d569/controls/dev/Repeater/ItemCollectionTransitionProvider.cpp) | Queued transitions that do not start receive completion on the rendering frame. Started transitions retain the full five-second batch lifetime required by weak progress handles. |
-| [`ItemCollectionTransitionProgress::Complete`](https://github.com/microsoft/microsoft-ui-xaml/blob/1af995b98a02d86b1951c4babe35caa269a6d569/controls/dev/Repeater/ItemCollectionTransitionProgress.cpp) | Complete forwards a notification on every call while the transition and its provider remain available. Public completion is not made idempotent. |
-| [`LinedFlowLayoutItemCollectionTransitionProvider`](https://github.com/microsoft/microsoft-ui-xaml/blob/1af995b98a02d86b1951c4babe35caa269a6d569/controls/dev/Repeater/LinedFlowLayoutItemCollectionTransitionProvider.cpp) | Add, remove and move choreography is implemented through the native rendering clock; completing or replacing a native animation releases its transient values. |
+| [`TransitionManager::ClearElement` and `OnTransitionProviderTransitionCompleted`](https://github.com/microsoft/microsoft-ui-xaml/blob/7e4b0c2096be402f51cc8f7d203ebf67cff183d0/controls/dev/Repeater/TransitionManager.cpp) | An accepted removal owns its element until completion. Completion returns it to the factory and invalidates arrange. A provider can be shared by multiple repeaters. |
+| [`ViewManager::ClearElementToAnimator` and `ClearElementToElementFactory`](https://github.com/microsoft/microsoft-ui-xaml/blob/7e4b0c2096be402f51cc8f7d203ebf67cff183d0/controls/dev/Repeater/ViewManager.cpp) | Removal ownership is assigned after queueing. ElementClearing observes the original element before the factory receives it. |
+| [`ItemsRepeater::OnItemTemplateChanged`](https://github.com/microsoft/microsoft-ui-xaml/blob/7e4b0c2096be402f51cc8f7d203ebf67cff183d0/controls/dev/Repeater/ItemsRepeater.cpp) | The old layout releases its references and returns its controls while the old ItemTemplateShim remains installed. The new factory is installed afterward. |
+| [`ItemCollectionTransitionProvider::QueueTransition`, `OnRendering` and `StartNewKeepAliveTimer`](https://github.com/microsoft/microsoft-ui-xaml/blob/7e4b0c2096be402f51cc8f7d203ebf67cff183d0/controls/dev/Repeater/ItemCollectionTransitionProvider.cpp) | Queued transitions that do not start receive completion on the rendering frame. Started transitions retain the full five-second batch lifetime required by weak progress handles. |
+| [`ItemCollectionTransitionProgress::Complete`](https://github.com/microsoft/microsoft-ui-xaml/blob/7e4b0c2096be402f51cc8f7d203ebf67cff183d0/controls/dev/Repeater/ItemCollectionTransitionProgress.cpp) | Complete forwards a notification on every call while the transition and its provider remain available. Public completion is not made idempotent. |
+| [`LinedFlowLayoutItemCollectionTransitionProvider`](https://github.com/microsoft/microsoft-ui-xaml/blob/7e4b0c2096be402f51cc8f7d203ebf67cff183d0/controls/dev/Repeater/LinedFlowLayoutItemCollectionTransitionProvider.cpp) | Add, remove and move choreography is implemented through the native rendering clock; completing or replacing a native animation releases its transient values. |
 
 Template replacement can clear an element that a previous removal still owns.
 Returning that element to the old factory without stopping its queued or active
@@ -101,7 +101,7 @@ progress handle never grants ownership of a later reuse of the same control.
 
 The following regressions use FerroUI's controls, native animation clock,
 dispatcher, factories and transition provider. They are in
-[`services_tests.rs`](../../../src/FerroUI.Controls/repeater/services_tests.rs).
+[`services_tests.rs`](../../../src/FerroUI.Controls.Repeater/services_tests.rs).
 
 | Regression | Observable guarantee |
 |---|---|

@@ -37,6 +37,15 @@ where
     T: Clone + 'static,
     E: IntoElement,
 {
+    template_of("ComponentHost", view)
+}
+
+/// [`template`] whose hosts the inspector calls `origin`.
+pub(crate) fn template_of<T, E>(origin: &'static str, view: impl Fn(T) -> E + 'static) -> Rc<dyn IDataTemplate>
+where
+    T: Clone + 'static,
+    E: IntoElement,
+{
     let view = Rc::new(view);
     let item_view: Rc<dyn Fn() -> Element> = Rc::new(move || {
         let view = view.clone();
@@ -64,6 +73,7 @@ where
         view: item_view,
         owner: Owner::current(),
         pool: Rc::new(RefCell::new(Vec::new())),
+        origin,
     })
 }
 
@@ -72,6 +82,7 @@ struct ComponentTemplate {
     view: Rc<dyn Fn() -> Element>,
     owner: Option<Owner>,
     pool: Rc<HostPool>,
+    origin: &'static str,
 }
 
 impl Drop for ComponentTemplate {
@@ -90,6 +101,7 @@ impl ITemplateWithParam<Option<BoxedValue>, Option<Ref<Control>>> for ComponentT
             return Some(host.upcast());
         }
         let host = ComponentHost::new();
+        host.set_origin(self.origin);
         host.set_pool(&self.pool);
         host.set_parent_owner(self.owner);
         let view = self.view.clone();

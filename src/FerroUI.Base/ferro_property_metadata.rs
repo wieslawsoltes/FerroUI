@@ -1,5 +1,6 @@
 use crate::data::BindingMode;
 use crate::{FerroObject, TypeInfo};
+use rustc_hash::FxHashMap;
 use std::cell::RefCell;
 use std::rc::Rc;
 
@@ -234,7 +235,12 @@ struct TableInner<M> {
     /// Fast path while only the registration metadata exists.
     single: Option<(&'static TypeInfo, Rc<M>)>,
     metadata: Vec<(&'static TypeInfo, Rc<M>)>,
-    cache: Vec<(&'static TypeInfo, Rc<M>)>,
+    /// The metadata of every type it was asked for, by the address of the type.
+    ///
+    /// A hash map, as the reference's dictionary of the metadata of each type (`_metadataCache`
+    /// of the property); the port scanned a vector, which grows with every type a common property
+    /// (`DataContext`, `Background`) is read on (DEVIATIONS.md, corrected divergences).
+    cache: FxHashMap<usize, Rc<M>>,
 }
 
 impl<M: PropertyMetadata> MetadataTable<M> {
@@ -247,7 +253,7 @@ impl<M: PropertyMetadata> MetadataTable<M> {
             inner: RefCell::new(TableInner {
                 single: Some((host_type, metadata.clone())),
                 metadata: vec![(host_type, metadata)],
-                cache: Vec::new(),
+                cache: FxHashMap::default(),
             }),
         }
     }
@@ -261,7 +267,7 @@ impl<M: PropertyMetadata> MetadataTable<M> {
         }
         Self {
             default_metadata: source.default_metadata.clone(),
-            inner: RefCell::new(TableInner { single: None, metadata: entries, cache: Vec::new() }),
+            inner: RefCell::new(TableInner { single: None, metadata: entries, cache: FxHashMap::default() }),
         }
     }
 
@@ -278,7 +284,8 @@ impl<M: PropertyMetadata> MetadataTable<M> {
             }
             return if host.is_assignable_from(type_) { single.clone() } else { self.default_metadata.clone() };
         }
-        if let Some((_, m)) = inner.cache.iter().find(|(t, _)| std::ptr::eq(*t, type_)) {
+        let key = type_ as *const TypeInfo as usize;
+        if let Some(m) = inner.cache.get(&key) {
             return m.clone();
         }
         let mut current = Some(type_);
@@ -291,7 +298,7 @@ impl<M: PropertyMetadata> MetadataTable<M> {
             current = t.base_type();
         }
         let result = result.unwrap_or_else(|| self.default_metadata.clone());
-        inner.cache.push((type_, result.clone()));
+        inner.cache.insert(key, result.clone());
         result
     }
 
@@ -312,7 +319,7 @@ impl<M: PropertyMetadata> MetadataTable<M> {
     pub fn unregister(&self, type_: &'static TypeInfo) {
         let mut inner = self.inner.borrow_mut();
         inner.metadata.retain(|(t, _)| !std::ptr::eq(*t, type_));
-        inner.cache.retain(|(t, _)| !std::ptr::eq(*t, type_));
+        inner.cache.remove(&(type_ as *const TypeInfo as usize));
         inner.single = None;
     }
 }

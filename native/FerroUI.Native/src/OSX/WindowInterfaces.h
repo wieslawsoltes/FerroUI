@@ -1,7 +1,3 @@
-//
-// Created by Dan Walmsley on 06/05/2022.
-//
-
 #import <Foundation/Foundation.h>
 #import <AppKit/AppKit.h>
 #include "WindowProtocol.h"

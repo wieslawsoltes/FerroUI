@@ -1,0 +1,44 @@
+{
+  "//": "Project list of the developer tools reference (scripts/port-status/references.toml, `diagnostics`): upstream's Avalonia.Diagnostics as it was before upstream removed it in 71ce62ae32 (#20332, 2026-01-07); the tracked commit is its parent. The keys are those of projects.json.",
+  "preprocessorSymbols": [
+    "NET",
+    "NET6_0_OR_GREATER",
+    "NET7_0_OR_GREATER",
+    "NET8_0_OR_GREATER",
+    "NET9_0_OR_GREATER",
+    "NET10_0_OR_GREATER",
+    "NETCOREAPP",
+    "NETCOREAPP3_0_OR_GREATER",
+    "NETCOREAPP3_1_OR_GREATER",
+    "NET5_0_OR_GREATER"
+  ],
+  "excludeDirs": [
+    "bin",
+    "obj",
+    "node_modules",
+    ".vs",
+    "Generated",
+    "generated"
+  ],
+  "excludeFiles": [
+    "*.g.cs",
+    "*.g.i.cs",
+    "*.generated.cs",
+    "*.Generated.cs",
+    "*.Designer.cs",
+    "*.designer.cs",
+    "*.AssemblyAttributes.cs"
+  ],
+  "projects": [
+    {
+      "path": "src/Avalonia.Diagnostics",
+      "detail": "full",
+      "name": "Avalonia.Diagnostics",
+      "rust": "src/FerroUI.Diagnostics",
+      "crate": "ferroui-diagnostics",
+      "phase": "DevTools",
+      "priority": "P2"
+    }
+  ],
+  "expanded": []
+}

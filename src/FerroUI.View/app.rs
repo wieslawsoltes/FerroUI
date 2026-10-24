@@ -69,6 +69,9 @@ pub fn launch_themed(
         move |app, _| {
             app.styles().add(theme());
             let window = mount_window(view);
+            crate::hot::watch();
+            #[cfg(debug_assertions)]
+            crate::inspect::attach_inspector(&window);
             smoke_exit(&window);
             started(&window);
             app.run_window(window);

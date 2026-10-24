@@ -27,8 +27,11 @@ pub struct ItemsSourceView {
     listening: Cell<bool>,
 }
 
+/// A view is a reference: two views are equal when they are the same view.
 impl PartialEq for ItemsSourceView {
-    fn eq(&self, other: &Self) -> bool { std::ptr::eq(self, other) }
+    fn eq(&self, other: &Self) -> bool {
+        std::ptr::eq(self, other)
+    }
 }
 
 impl ItemsSourceView {
@@ -43,6 +46,8 @@ impl ItemsSourceView {
     }
 
     /// Initializes a new instance of the view for the specified data source.
+    // Deviation (DEVIATIONS.md, Items sources): upstream's constructor is `private protected`;
+    // WinUI's is public, and markup constructs a view (`ItemsSourceView(Object source)`).
     pub fn new(source: ItemsSource) -> Rc<Self> {
         Rc::new_cyclic(|this| Self {
             this: this.clone(),
@@ -60,26 +65,41 @@ impl ItemsSourceView {
         self.source.borrow().count()
     }
 
-    /// Whether the source supplies stable keys for reset-time element reuse.
+    /// Gets a value that indicates whether the items source can provide a unique key for
+    /// each item: whether the source implements [`IKeyIndexMapping`](crate::IKeyIndexMapping)
+    /// (WinUI `ItemsSourceView.HasKeyIndexMapping`).
+    // Deviation (DEVIATIONS.md, Items sources): upstream keeps the member internal and always
+    // `false` ("preserved here for ItemsRepeater's usage"); here it is WinUI's.
     pub fn has_key_index_mapping(&self) -> bool {
         self.source().list().key_index_mapping().is_some()
     }
 
-    /// Gets the source's stable key. Panics if the source does not implement
-    /// [`IKeyIndexMapping`](crate::IKeyIndexMapping), or `index` is invalid.
+    /// Retrieves the unique key of the item at `index` from the items source
+    /// (WinUI `ItemsSourceView.KeyFromIndex`).
+    ///
+    /// Panics if the source does not implement [`IKeyIndexMapping`](crate::IKeyIndexMapping)
+    /// (WinUI throws `hresult_not_implemented`), or if `index` is not the index of an item.
+    // Deviation (DEVIATIONS.md, Items sources): upstream throws `NotImplementedException`
+    // whatever the source; here it is WinUI's, with the index checked before it is passed on.
     pub fn key_from_index(&self, index: i32) -> String {
         let source = self.source();
         assert!(index >= 0 && (index as usize) < source.count(), "Argument index is invalid.");
-        source.list().key_index_mapping()
+        source
+            .list()
+            .key_index_mapping()
             .expect("The items source does not implement IKeyIndexMapping.")
             .key_from_index(index)
     }
 
-    /// Looks up a stable key without enumerating source items. Returns `-1`
-    /// for an absent key; the source must implement the mapping contract.
+    /// Retrieves the index of the item that has the unique key `key`, or `-1` when no item
+    /// has it (WinUI `ItemsSourceView.IndexFromKey`).
+    ///
+    /// Panics if the source does not implement [`IKeyIndexMapping`](crate::IKeyIndexMapping)
+    /// (WinUI throws `hresult_not_implemented`).
     pub fn index_from_key(&self, key: &str) -> i32 {
-        let source = self.source();
-        source.list().key_index_mapping()
+        self.source()
+            .list()
+            .key_index_mapping()
             .expect("The items source does not implement IKeyIndexMapping.")
             .index_from_key(key)
     }
@@ -157,8 +177,8 @@ impl ItemsSourceView {
 
     /// Gets or creates an [`ItemsSourceView`] for the specified source.
     ///
-    /// Returns [`empty`](Self::empty) if `items` is `None`, preserves an
-    /// existing view supplied as the source, or creates a view of the list.
+    /// Returns [`empty`](Self::empty) if `items` is `None`, the view itself if `items`
+    /// is a view (`ItemsSourceView isv => isv`), otherwise a new view.
     pub fn get_or_create(items: Option<&ItemsSource>) -> Rc<ItemsSourceView> {
         match items {
             None => Self::empty(),
@@ -250,13 +270,13 @@ impl ItemsSourceView {
     }
 }
 
-/// An existing view can itself be assigned to an items-source property.
-/// Keep its identity and event stream instead of unwrapping its source or
-/// layering another view over it. Stable keys remain those of its source.
+/// A view is a list of items itself (upstream `ItemsSourceView : IReadOnlyList<object?>, IList,
+/// INotifyCollectionChanged`): it can be the items source of a control, which then reads the
+/// items and the changes through the view, and [`ItemsSourceView::get_or_create`] returns it as
+/// it is. Its unique keys are those of its source.
 impl IItemsList for ItemsSourceView {
     fn key_index_mapping(&self) -> Option<&dyn crate::IKeyIndexMapping> {
-        self.has_key_index_mapping()
-            .then_some(self as &dyn crate::IKeyIndexMapping)
+        self.has_key_index_mapping().then_some(self as &dyn crate::IKeyIndexMapping)
     }
 
     fn count(&self) -> usize {
@@ -276,8 +296,7 @@ impl IItemsList for ItemsSourceView {
     }
 
     fn add_collection_changed(&self, handler: Rc<ItemsChangedHandler>) -> Option<u64> {
-        self.is_notifying()
-            .then(|| ItemsSourceView::add_collection_changed(self, handler))
+        self.is_notifying().then(|| ItemsSourceView::add_collection_changed(self, handler))
     }
 
     fn remove_collection_changed(&self, token: u64) {

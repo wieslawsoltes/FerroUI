@@ -2,7 +2,7 @@
 
 FerroUI user interfaces can be written in Rust without XAML: elements built with chained setters or with the `rsx!` macro, state held in signals that the properties of controls follow, children that follow state, and components that run again whose output a reconciler patches into the controls. The controls, themes, layout, styles and bindings are the ones XAML and imperative Rust use; this is another way to create and connect them.
 
-This document is the design of the crates and the plan of the work (issue #237). Two phases are built:
+This document is the design of the crates and the plan of the work (issue #237). Seven phases are built:
 
 - **Phase 0**: the element tree, the builders, the macros, fine-grained reactivity, and the 7GUIs samples.
 - **Phase 1**: components that run again, their hooks, and the reconciler (sections 7 and 8).
@@ -13,8 +13,11 @@ This document is the design of the crates and the plan of the work (issue #237).
   - the theme variant and resources;
   - transitions and animations;
   - popups and context menus as elements.
+- **Phase 4**: tools (section 11): hot reload of the literals of `rsx!`, diagnostics, and an inspector of the mounted trees.
+- **Phase 5**: performance and scale (section 12): the fewest moves of keyed children, handlers swapped in place, values that follow the same signal kept, memo by default, and benchmarks.
+- **Phase 6**: patterns of larger applications (section 13): futures run by components, error boundaries, a router of views, and the samples TodoMVC and ReactiveDemo as components.
 
-Section 12 plans the phases that remain. [declarative-ui-react.md](declarative-ui-react.md) compares the API with React.
+Section 15 records the phases, their plans and how what was built differs from them. [declarative-ui-react.md](declarative-ui-react.md) compares the API with React.
 
 ## 1. A first look
 
@@ -79,9 +82,9 @@ fn main() {
 | `ferroui-view` (`src/FerroUI.View`) | The element tree (`element.rs`), mounting and the reconciler (`mount.rs`), the reactive runtime with contexts (`reactive.rs`), the hooks (`hooks.rs`), `ComponentHost` (`component_host.rs`), data templates of components (`template.rs`), the types for markup and, with the feature `xaml`, XAML in a component (`xaml.rs`), the builders (generated), the conversions of values, children that follow state, and with the feature `desktop` the launch of an application |
 | `ferroui-view-macros` (`src/FerroUI.View.Macros`) | `rsx!` and `#[component]` (with `rerender` and `memo`) |
 
-`ferroui-view` also holds styles (`style.rs`), transitions and animations (`animation.rs`), and with the features `treedatagrid`, `color-picker`, `dialogs` and `reactiveui` the builders of those crates (`generated/`).
+`ferroui-view` also holds styles (`style.rs`), transitions and animations (`animation.rs`), futures run by components (`async_data.rs`), error boundaries (`error_boundary.rs`), the router (`router.rs`), and with the features `treedatagrid`, `color-picker`, `dialogs` and `reactiveui` the builders of those crates (`generated/`).
 
-`ferroui-view` depends on `ferroui-base` and `ferroui-controls`; it adds nothing to them. The builders are generated from their sources by `scripts/generate_view_builders.py`, so a control or a property ported later gets its builder by running the script again (`--check` fails when the generated file is stale; `--report` lists what was left out and why).
+`ferroui-view` depends on `ferroui-base` and `ferroui-controls`, and on `ferroui-system` for the executor of futures; it adds nothing to them. The builders are generated from their sources by `scripts/generate_view_builders.py`, so a control or a property ported later gets its builder by running the script again (`--check` fails when the generated file is stale; `--report` lists what was left out and why).
 
 ## 3. Elements
 
@@ -193,7 +196,8 @@ By default a component runs once, when its element is built: its function is cal
 |---|---|
 | `#[component]` | runs once; what changes afterwards changes through signals |
 | `#[component(rerender)]` | runs when it is mounted and again whenever a signal it read changes or its parent runs again; its parameters are cloned for each run, so they are `Clone` |
-| `#[component(rerender, memo)]` | as `rerender`, and a parent that runs again with parameters equal to the last ones (`PartialEq`) does not run it again |
+| `#[component(rerender, memo)]` | as `rerender`, and a parent that runs again with parameters equal to the last ones (`PartialEq`) does not run it again; since phase 5 that is the default of `rerender` for comparable parameters, and `memo` makes it required |
+| `#[component(rerender, always)]` | as `rerender`, and runs with its parent every time |
 
 ## 6. State
 
@@ -323,7 +327,7 @@ Every instance has an owner of the runtime of section 6, made under the owner of
 ### 8.6 Costs and limits
 
 - **The cost of a run** is the function and a walk of the elements it returned: equal plain values are compared and skipped. Reactive values, bindings and handlers are applied again on each run, so a component that runs often (the timer of the hooks samples runs on every tick) is better off with fine-grained values for what changes most.
-- **Moves.** A keyed list whose order changes is patched by the prefix and suffix rule, which removes and inserts the controls in between. That is correct and keeps the controls, but it is not the minimal number of moves (section 12, phase 5).
+- **Moves.** A keyed list whose order changes is patched by the prefix and suffix rule, which removes and inserts the controls in between. That is correct and keeps the controls, but it is not the minimal number of moves (section 12.1).
 - **Synchronous.** A run happens when the write that caused it ends (or the batch); there is no scheduler that splits or defers work, and no concurrent rendering.
 - **Items controls.** The children of an items control are its items. An items control with virtualization and an item template is not driven by the reconciler; its items are components through a data template (section 9.2).
 
@@ -511,7 +515,215 @@ Flyouts (`flyout`, `context_flyout`) are not controls (`FlyoutBase` derives from
 |---|---|
 | ![The gallery, light](images/declarative-ui/view-gallery.png) | ![The gallery, dark](images/declarative-ui/view-gallery-dark.png) |
 
-## 11. Samples: 7GUIs
+## 11. Tools (phase 4)
+
+### 11.1 Hot reload of `rsx!`
+
+With the feature `hot-reload` of `ferroui-view`, the literals of `rsx!` can be edited while the application runs:
+- the text of a child (`"Count"`);
+- a number, a text or a character given to an attribute (`width: 80.0`, `background: "#0063B1"`, `class: "accent"`).
+
+How it works:
+1. `rsx!` passes each such literal through `ferroui_view::hot::lit(site, index, value)`. The site is the place of the macro (`file!()`, `line!()`, `column!()` of the invocation and the directory of its crate). The index is the number of the literal among the literal tokens of the macro, in the order of the source; the macro counts the literals inside expressions too, to keep the numbers in step with the source.
+2. Without the feature, `lit` returns its value: the cost is nothing.
+3. With it, the first call of a file reads the file and records its `rsx!` invocations as the build saw them: where each starts, its literal tokens, and the shape of its other tokens. `launch` calls `hot::watch()`, which checks the files on the dispatcher every 300 ms.
+4. When a file changes, its invocations are read again with `proc-macro2` (with the locations of tokens). An invocation whose shape is the shape of the build gets its changed literals, and a version signal changes. `lit` reads that signal, so the components that read a changed literal run again, and the reconciler patches their controls: state, focus and scroll positions stay.
+5. An invocation whose shape changed (an attribute added, an element moved) is reported as needing a rebuild (`Diagnostic::NeedsRebuild`). The literals of the other invocations still apply.
+
+Only components that run again, and children that follow state, run again. A component that runs once keeps what it built. Literals inside expressions (`{if dark { "a" } else { "b" }}`) are code, not literals of the tree, and need a rebuild. `hot::apply_source(file, text)` applies a text as if the file had been saved with it: for tests and tools that hold the source.
+
+The gallery of section 10.6, run with `cargo run -p view-gallery --features hot-reload` and its source edited while it ran. The text of the second button and the colour of the bar changed, and the console printed `hot reload, 2 literals differ from the build`:
+
+![The gallery after a hot reload](images/declarative-ui/view-gallery-hot-reload.png)
+
+### 11.2 Diagnostics
+
+Mistakes the framework can see are checked in debug builds and reported as a `Diagnostic`:
+
+| Diagnostic | When |
+|---|---|
+| `MissingKeys` | A list (`for` in `rsx!`, a `Vec` of elements: `Element::List`) has two or more controls or components without keys |
+| `DuplicateKey` | Two siblings have the same key |
+| `RunawayComponent` | A component runs more than 100 times in one propagation of changes (its function writes a signal it reads) |
+| `NeedsRebuild`, `HotReloaded` | Hot reload: an `rsx!` changed more than its literals; literals were applied |
+| `ErrorCaught` | A run of a component below an error boundary panicked, and the boundary shows its fallback (section 13.2); reported in every build |
+
+By default each distinct diagnostic is printed once to the standard error. `set_diagnostics_handler(|d| ..)` sends them elsewhere (a test, a log, a tool). `Element::List` is new: an iteration makes it, and it is flattened like a fragment, but its items are checked for keys.
+
+### 11.3 The inspector
+
+`mounted_trees()` describes the live mounted trees of the thread as `InstanceNode`s:
+- components, with their keys, runs and hooks;
+- controls, with their class, `Name`, style classes, and properties: the value on the control now and where the element's value comes from (`value`, `follows state`, `two-way`, `element`, `binding`);
+- text;
+- the lists that follow state, with their items and keys.
+
+Each mounted tree registers its roots in a registry of the thread (`Element::mount`, a window, a `ComponentHost`), and each dynamic list keeps its items in order for it.
+
+`inspector()` is an element that shows them: a list of the instances, indented by depth, and the details of the selected one, refreshed on a click or every second. With the feature `desktop`, `open_inspector()` opens it in a window. `launch` attaches it to the main window on Shift+F12 in debug builds (`attach_inspector`), leaving F12 to the DevTools of the port, which are being ported separately. When they land, the inspector becomes their "Components" page.
+
+![The inspector](images/declarative-ui/view-inspector.png)
+
+## 12. Performance and scale (phase 5)
+
+### 12.1 The fewest moves of keyed children
+
+A list host (`Children` of a panel, `Items`) is patched child by child; content, decorator and text hosts keep the splice of section 8.1. After the common prefix and suffix:
+1. the children that are gone are removed, from the end;
+2. the kept children in the longest increasing subsequence of their new places stay where they are (O(n log n), the patience method);
+3. from the end of the new list, each other kept child is moved before the child that follows it, and each new child is inserted there.
+
+The number of moves is the number of kept children minus that subsequence: one for a child moved to the front, n - 1 for a list reversed. A panel moves a control without taking it out of the visual tree (`move_item`), so a moved control keeps its focus and its state, and a `ComponentHost` in it is not unmounted. Places are found through a map from control to index, which each move updates over the range it shifts. When there are more than 16 moves, a scan of the list costs less than keeping the map, and the patch scans instead.
+
+### 12.2 Work a run skips
+
+- **Handlers.** The closure of a handler is in a cell, and the attached trampoline calls what the cell holds (`Handler`). When a run has handlers of the same identities (the routed event, the property of `on_changed`) in the same order, the patch puts the new closures into the cells of the attached handlers and attaches nothing.
+- **Values that follow a signal.** A property set from a signal or a memo (`text: count`), and a two-way value of a signal, carry the identity of their source (`PropValue::Follows`). Two that follow the same source are equal, so a run leaves the effect of the first in place instead of stopping it and starting another.
+- **Memo by default.** `#[component(rerender)]` memoizes a component whose parameters are all `PartialEq` and `Clone`: a parent that runs again with equal parameters does not run it. The macro decides this when the expansion is compiled, with autoref specialization: `(&MemoProbe(parameters)).memo_props()` resolves to the trait implemented for comparable types first and to the fallback otherwise.
+  - `#[component(rerender, memo)]` requires comparable parameters, so it is a compile error otherwise.
+  - `#[component(rerender, always)]` runs with its parent every time.
+  - A component with a parameter that cannot be compared (a closure, `children: Element`) runs with its parent. So does a closure given to `rerender(..)`: what it captures cannot be compared.
+  - Context: a memoized component does not run again because its parent provides another context value. A value that changes is provided as a signal and read in the component.
+
+`view_stats()` counts what the mounting and the reconciler did on the thread: operations on the children of hosts, handlers attached and reactive values started. The tests of this section use it.
+
+### 12.3 Measures
+
+`tests/FerroUI.Benchmarks/declarative/view_benchmark.rs` measures with the harness of the benchmarks crate:
+```sh
+FERROUI_BENCH_FILTER=declarative cargo test --release -p ferroui-benchmarks run_benchmarks -- --ignored --nocapture
+```
+
+The benchmarks use a list of 1,000 rows, and 2,600 components (the cells of the 7GUIs spreadsheet). Medians on an M3 Pro, release build:
+
+| Benchmark | Before phase 5 | Phase 5 |
+|---|---|---|
+| Mount the list: controls made directly (the baseline) | 1.17 ms | 1.07 ms |
+| Mount the list: run-once model | 1.96 ms | 1.46 ms |
+| Mount the list: a component that runs again | 1.56 ms | 1.42 ms |
+| A run with nothing changed | 355 us | 283 us |
+| A run with one row changed | 331 us | 270 us |
+| One keyed row moved to the front | 2.88 ms | 0.46 ms |
+| All keyed rows reversed | 2.78 ms | 1.81 ms |
+| One row changed through its signal (run-once model) | 0.32 us | 0.29 us |
+| A parent that runs again over 2,600 components (not memoized) | 14.56 ms | 14.44 ms |
+| The same, memoized (opt-in before, by default now) | 0.26 ms | 0.23 ms |
+
+What the numbers say:
+- Mounting through elements costs 1.3 to 1.4 times making the controls directly.
+- A run of 1,000 rows with nothing changed costs about 0.28 ms: the function and the comparison of 1,000 elements.
+- A change that follows a signal in the run-once model costs 0.3 us, about a thousand times less. The two models mix (section 7.2), so the parts of a screen that change most often can follow signals.
+- Memo turns the parent of 2,600 components from 14 ms into 0.23 ms, which is why it is the default.
+
+## 13. Patterns of larger applications (phase 6)
+
+Phase 6 adds what an application larger than a form needs: data that arrives later, a part of the window that fails without ending the application, and navigation between views.
+
+### 13.1 Asynchronous data
+
+| Function | What it gives |
+|---|---|
+| `use_future(deps, \|deps\| future)` | A hook. It runs the future on the executor of the thread when the component first runs, and again whenever `deps` differ from those of the run before, and gives its state as a `Signal<AsyncState<T>>` |
+| `AsyncState<T>` | `Pending`, `Ready(T)` or `Failed(String)`, with `is_pending()`, `value()` and `error()` |
+| `suspense(state, pending, ready, failed)` | An element that shows the element of the state: a component that runs again when the state changes, so the controls of two states of the same shape are patched |
+| `sleep(duration)` | A future that ends after `duration`, on a timer of the dispatcher of the thread |
+
+The future of `use_future` returns `Result<T, String>`. It runs on the executor of `ferroui_system::threading::tasks` (`spawn_local`): it is polled when it starts and again when it is woken, on the thread of the user interface, so what it reads and writes needs no synchronization. A future that waits for work on another thread (`tasks::run`) is woken through the dispatcher.
+
+```rust
+#[component(rerender)]
+fn Search() -> Element {
+    let query = use_signal(String::new);
+    let results = use_future(query.get(), |query| {
+        let query = query.clone();
+        async move {
+            sleep(Duration::from_millis(300)).await;
+            search(&query).await
+        }
+    });
+    rsx! {
+        StackPanel {
+            TextBox { text: query.two_way() }
+            {suspense(
+                results,
+                || rsx! { TextBlock { text: "Searching..." } },
+                |found| rsx! { TextBlock { text: format!("{} crates", found.len()) } },
+                |error| rsx! { TextBlock { text: error } },
+            )}
+        }
+    }
+}
+```
+
+- The future starts once the controls of the run are in place, as the closure of `use_effect_with` runs. With new dependencies the state goes back to `Pending` and another future starts.
+- A future whose dependencies were replaced, or whose component was taken out, is abandoned. Its result is ignored, and the executor is woken to drop it, which ends what it waited for: a `sleep` stops its timer. In the search above, each keystroke abandons the future of the one before, so the search runs once the user pauses for 300 ms.
+- `get()` of the state needs `T: Clone`; `with(|state| ..)` reads it in place.
+
+### 13.2 Error boundaries
+
+```rust
+error_boundary(
+    || rsx! { Report {} },
+    |info| rsx! {
+        StackPanel {
+            TextBlock { text: format!("The report failed: {}", info.message()) }
+            Button { on_click: move |_| info.reset(), "Try again" }
+        }
+    },
+)
+```
+
+`error_boundary(child, fallback)` mounts the element of `child`. When a run of a component below it panics, on its first run or a later one, the boundary shows `fallback(info)` instead, and the rest of the window goes on.
+
+1. A component mounted below a boundary finds it when it is mounted, through the contexts of the owners, and runs its function under `catch_unwind`. Without a boundary above, a component runs as before, and a panic propagates.
+2. A run that panics renders nothing. The state of the reactive runtime (the observer, the owner, the depth of batches) and the frames of the hooks are put back as they were before the run. The panic is reported to the nearest boundary and as `Diagnostic::ErrorCaught`.
+3. The boundary is not changed while a tree is being reconciled. The report waits until the outermost run of a component in progress has ended. Then the boundary runs again, shows its fallback, and takes the child tree out: its owner is disposed, with the component that panicked.
+4. `info.reset()` mounts the child again, as new: its components start with fresh hooks.
+
+The nearest boundary catches, and a panic of a fallback goes to the boundary above. What is guarded is the function of each component below the boundary, `child` included (it is the function of a component of the boundary). Handlers, effects and the mounting of controls are not guarded, as React does not catch errors in event handlers either. The panic hook of the process still runs, so the message of the panic is printed.
+
+### 13.3 Navigation
+
+The router follows the routing of ReactiveUI (`RoutingState`, [mvvm.md](mvvm.md), section 7):
+
+| ReactiveUI | `ferroui-view` |
+|---|---|
+| `RoutingState` | `Router`, provided by `router(initial, routes)` to the components below; `use_router()` and `try_use_router()` find it |
+| `NavigationStack` | `router.stack()`: the paths, the current one last |
+| `Navigate` | `router.navigate(path)` |
+| `NavigateBack`, and whether it can execute | `router.navigate_back()`, false when only one path is left; `router.can_go_back()` |
+| `NavigateAndReset` | `router.navigate_and_reset(path)` |
+| `CurrentViewModel` | `router.current()`: the current path |
+| `RoutedViewHost` and the view locator | the routes: the view of the first pattern that matches |
+
+```rust
+router("/", vec![
+    route("/", |_| rsx! { Home {} }),
+    route("/people/:id", |m| rsx! { Person { id: m.param("id").unwrap_or_default().to_string() } }),
+    route("*", |m| rsx! { NotFound { path: m.path().to_string() } }),
+])
+```
+
+- **Patterns.** A pattern is segments separated by `/`. `:name` matches one segment and binds it (`m.param("name")`), `*` matches the rest of the path (`m.param("*")`) and comes last, and any other segment matches itself. Empty segments are ignored, so `/a/b/` is `/a/b`.
+- **Matching.** The first route whose pattern matches the current path is shown. A last `route("*", ..)` shows what no other route matches; without one, nothing is shown.
+- **Paths, not view models.** The entries of the stack are paths: a path names its view and its parameters. State that outlives navigation lives above the router, in signals or contexts, as the view models of ReactiveUI live in the screen.
+- **Views.** The view of the current route is a component of its own. Another route mounts its view anew and takes the view before out, with its state. The same route with other parameters runs its view again with the new `RouteMatch`, and the reconciler patches its controls.
+- **The handle.** `current()`, `can_go_back()` and `stack()` are reactive: a component that reads them runs again when the path changes. A component calls `use_router()` while it runs and keeps the handle, which is `Copy`, for its handlers.
+
+### 13.4 The samples
+
+Two applications use the API of the phases together, in the WinUI 3 theme:
+
+- **TodoMVC** (`samples/TodoMvc`, `cargo run -p todo-mvc`): the application of the TodoMVC specification as components that run again, with the state in hooks and the filters of the list (all, active, completed) as the routes of a router.
+- **ReactiveDemo as components** (`samples/ReactiveDemoComponents`, `cargo run -p reactive-demo-components`, or with `--no-default-features` to search a catalogue in memory instead of crates.io): the crate browser of `samples/ReactiveDemo` ([mvvm.md](mvvm.md), section 12) written as components that run again instead of a view model and views; what the view model computes with `when_any_value` and `to_property` (a search throttled as the user types) is computed with the hooks and the asynchronous data of section 13.1. A result opens its details as a route of the router, inside an error boundary.
+
+Each sample has scenario tests (`cargo test -p todo-mvc`, `cargo test -p reactive-demo-components`) and writes a picture of its window when `FERROUI_TODOMVC_SHOTS` or `FERROUI_REACTIVE_DEMO_SHOTS` names a directory.
+
+| TodoMVC | ReactiveDemo as components |
+|---|---|
+| ![TodoMVC](images/declarative-ui/todomvc.png) | ![ReactiveDemo as components](images/declarative-ui/reactive-demo-components.png) |
+
+## 14. Samples: 7GUIs
 
 The seven tasks of 7GUIs (<https://eugenkiss.github.io/7guis/tasks>) are written three times, each task a crate of its own so that each stays small:
 
@@ -559,7 +771,7 @@ cargo run -p seven-guis-crud-hooks
 FERROUI_SEVEN_GUIS_SHOTS=/tmp/shots cargo run -p seven-guis-crud-macros   # renders the window into /tmp/shots/macros-crud.png
 ```
 
-## 12. Phases
+## 15. Phases
 
 | Phase | Content | State |
 |---|---|---|
@@ -567,9 +779,9 @@ FERROUI_SEVEN_GUIS_SHOTS=/tmp/shots cargo run -p seven-guis-crud-macros   # rend
 | 1 | Components that run again, hooks, contexts, the reconciler, 7GUIs in a third version | done |
 | 2 | Interoperation with XAML and templates: `ComponentHost`, data templates of components, the data context, XAML in a component | done |
 | 3 | The rest of the API: other crates of controls, styles, resources and the theme variant, transitions and animations, popups and context menus | done |
-| 4 | Tools: hot reload, an inspector, diagnostics | planned |
-| 5 | Performance and scale | planned |
-| 6 | Patterns of larger applications | planned |
+| 4 | Tools: hot reload of the literals of `rsx!`, diagnostics, an inspector of the mounted trees | done |
+| 5 | Performance and scale: the fewest moves, handlers swapped, values kept, memo by default, benchmarks | done |
+| 6 | Patterns of larger applications: futures run by components, error boundaries, a router, TodoMVC and ReactiveDemo as components | done |
 
 Each phase lands as one or more pull requests with tests, and samples where they show something new. Each also updates this document and [declarative-ui-react.md](declarative-ui-react.md).
 
@@ -601,27 +813,42 @@ What was built differs from the plan above in three points:
 - The hook of animations runs an animation of the port on a control when a value changes (`use_animation`). It does not animate a value itself.
 - Flyouts are not elements (section 10.5).
 
-### Phase 4: tools
+### Phase 4: tools (done, section 11)
 
 - **Hot reload of `rsx!`.** The static parts of `rsx!` (the classes, the literal values, the layout) are kept in a form the running application can load again. Only expressions need a rebuild. The reconciler applies the new tree to the mounted controls and keeps their state.
 - **An inspector.** The DevTools of FerroUI show the instance tree beside the visual tree: components, their hooks and their keys.
 - **Diagnostics.** In debug builds, warnings for siblings of a list without keys, duplicate keys, and a component that runs again more than a given number of times in one propagation of changes.
 
-### Phase 5: performance and scale
+What was built differs from the plan above in three points:
+- Hot reload changes literals only. Classes and layout given as literals change; a new element or attribute needs a rebuild and is reported as such.
+- The inspector is an element and a window of its own until the DevTools of the port land.
+- The diagnostic of a component that runs too often counts runs in one propagation of changes, not in a frame.
+
+### Phase 5: performance and scale (done, section 12)
 
 - **Moves.** Keyed children reordered with the fewest moves (the longest increasing subsequence of the old positions, as Vue and Inferno do), instead of the prefix and suffix rule.
 - **Values that skip work.** Handlers wrapped so that the control keeps one handler and the closure behind it is swapped on each run (no detach and attach). Reactive values compared by the identity of the signal they follow.
 - **Measures.** Benchmarks of mounting and of a run of large trees (the cells of the spreadsheet, a list of 10,000 rows), against the run-once model and against a XAML view, in `scripts/` as the TreeDataGrid benchmarks are.
 - **Memo by default** for components whose parameters are all `Copy` and `PartialEq`, if the measures show a gain.
 
-### Phase 6: patterns of larger applications
+What was built differs from the plan above in two points:
+- Memo by default needs `PartialEq` and `Clone`, not `Copy`.
+- The benchmarks compare with controls made directly, not with a XAML view: a view loaded from XAML makes the same controls, after the cost of loading.
+
+### Phase 6: patterns of larger applications (done, section 13)
 
 - **Asynchronous data.** `use_resource(future)`, a hook that runs a future on the thread's executor (`ferroui_system::threading::tasks`) and gives its state (pending, done, failed), with a way to show a placeholder while it is pending.
 - **Errors.** An error boundary: a component that catches a panic of a child's run and shows a replacement instead of ending the application.
 - **Navigation.** A router of views for single-window applications, with the routing of ReactiveUI as a model.
 - **A larger sample.** TodoMVC and a port of a ReactiveUI sample to components that run again, in the WinUI 3 theme, with screenshots and scenario tests.
 
-## 13. Testing
+What was built differs from the plan above in four points:
+- The hook of futures is `use_future(deps, make)`, not `use_resource(future)`: `use_resource` follows a dynamic resource since phase 3. A future is started again when its dependencies change, and the placeholder is `suspense(state, ..)`.
+- An abandoned future is dropped by the executor, so what it waits for ends with it; `sleep` gives futures a timer of the dispatcher for debouncing.
+- An error boundary guards the functions of the components below it. Handlers, effects and the mounting of controls are not guarded.
+- The entries of the router are paths with parameters, not view models.
+
+## 16. Testing
 
 - `src/FerroUI.View/tests`: the reactive runtime, setters and conversions, mounting, two-way values, handlers, keyed lists, conditions, the macros and components; and for phase 1 (`rerender_tests.rs`):
   - runs again and kept controls;
@@ -648,5 +875,24 @@ What was built differs from the plan above in three points:
   - transitions and animations;
   - a popup's child and a context menu as elements;
   - a builder of another crate (feature `treedatagrid`).
+- `src/FerroUI.View/tests/tools_tests.rs` (phase 4):
+  - a list without keys and duplicate keys reported;
+  - a component that writes what it reads reported;
+  - hot reload of the literals of a component, keeping its controls, with a change of structure reported;
+  - the inspector's description of a mounted tree and its view.
+- `src/FerroUI.View/tests/performance_tests.rs` (phase 5):
+  - the fewest moves;
+  - 300 random edits of a keyed list against the expected list and the kept controls;
+  - the longest increasing subsequence;
+  - handlers swapped and values that follow the same signal kept;
+  - memo by default, `always`, and parameters that cannot be compared.
+- `src/FerroUI.View/tests/patterns_tests.rs` (phase 6):
+  - a future pending, then ready or failed;
+  - new dependencies that start a new future and abandon the old one, whose result is ignored;
+  - the future of a component that ended, dropped and without effect;
+  - `suspense` in its three states;
+  - an error boundary: a panic on the first run and on a later run, the components beside it still running, a reset, the nearest boundary catching and a panic of a fallback going to the one above, and a panic without a boundary propagating;
+  - the router: the initial route, navigation, going back and resetting with the stack, parameters, the rest of a path, a path no route matches, a component that reads the current path, and `use_router` without a router.
+- `tests/FerroUI.Benchmarks/declarative`: the benchmarks of section 12.3, with a smoke test in `cargo test`.
 - `samples/SevenGuis/Tests`: the scenarios of the seven tasks on the twenty-one crates, on the test application of `ferroui-controls` (a dispatcher of the thread).
 - `samples/SevenGuis/Model`: the logic without user interface.

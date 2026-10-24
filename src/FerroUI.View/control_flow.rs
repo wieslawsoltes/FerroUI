@@ -81,7 +81,7 @@ pub fn dynamic<E: IntoElement>(render: impl Fn() -> E + 'static) -> Element {
         render: Rc::new(move || {
             let element = render().into_element();
             let children = match element {
-                Element::Fragment(items) => items,
+                Element::Fragment(items) | Element::List(items) => items,
                 Element::Empty => Vec::new(),
                 element => vec![element],
             };

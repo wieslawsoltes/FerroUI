@@ -6,6 +6,11 @@ on:
     # A change of the documentation alone builds and tests nothing.
     paths-ignore: ['docs/**', '**/*.md']
   pull_request:
+    # `edited` too: a pull request of a stack is retargeted to main when the one below it merges
+    # (docs/stacked-pull-requests.md), and the checks run again against the new base. An edit
+    # that leaves the base alone (the title, the description) runs nothing: every job starts with
+    # the condition `github.event.action != 'edited' || github.event.changes.base != null`.
+    types: [opened, synchronize, reopened, edited]
     paths-ignore: ['docs/**', '**/*.md']
   workflow_dispatch:
     inputs:
@@ -20,9 +25,25 @@ on:
         description: 'WinUI theme comparison: the text settings of a calibration run (FERROUI_WINUI_COMPARE_TEXT_VARIANTS; none when empty)'
         required: false
         default: ''
+  # Every night, a run of main. The macOS, iOS and Windows jobs do not run for a push to main, and
+  # the Rust build caches are saved by runs of main only (see the note on the caches below): this
+  # run saves theirs, for the pull requests to restore. It also tests the merged state.
+  schedule:
+    - cron: '23 2 * * *'
+
+# The Rust build caches (Swatinem/rust-cache: the registry and the compiled dependencies). They are
+# saved by runs of main (a push, the nightly run, a run started by hand), with `save-if`, and a pull
+# request restores the cache of main and saves none. A cache saved by a pull request can be restored
+# by later runs of that pull request alone, and every run of one saved about 5 GB: the repository
+# has 10 GB, so the caches of main were evicted and almost no job found a cache (October 2026: the
+# macOS and the Windows jobs found one in 4 of 24 runs). `cache-on-failure`: a run of main whose
+# job fails (one smoke run) still saves the dependencies it compiled.
 
 concurrency:
-  group: ci-${{ github.ref }}
+  # An edit that leaves the base alone gets a group of its own, so that it does not cancel the
+  # run of the pull request that is in progress; so does the nightly run, so that it and a run of a
+  # push to main do not cancel each other.
+  group: ci-${{ github.ref }}-${{ (github.event.action == 'edited' && github.event.changes.base == null) && github.run_id || (github.event_name == 'schedule' && 'nightly' || 'run') }}
   cancel-in-progress: true
 
 permissions:
@@ -35,6 +56,7 @@ env:
 
 jobs:
   conventions:
+    if: (github.event.action != 'edited' || github.event.changes.base != null)
     name: Source conventions
     runs-on: ubuntu-latest
     steps:
@@ -66,6 +88,7 @@ jobs:
   # README is current. Nothing is compiled and nothing is published: about two minutes, most of it
   # the toolchain and the index.
   packaging:
+    if: (github.event.action != 'edited' || github.event.changes.base != null)
     name: Packages of the published crates
     runs-on: ubuntu-latest
     timeout-minutes: 20
@@ -89,9 +112,12 @@ jobs:
   #   workspace has none that run) and no example or binary is linked.
   # - No debug information in the test build, which shortens compiling and linking; a failing test
   #   still reports its message and location, a backtrace has no line numbers.
+  # - The tests of the ControlCatalog with its feature classic-themes and those of the Vello
+  #   backend are in the job macos-features, which runs beside this one.
+  # - It runs in the nightly run of main, which saves its build cache.
   macos:
     name: Build and test (macOS)
-    if: github.event_name != 'push'
+    if: (github.event.action != 'edited' || github.event.changes.base != null) && (github.event_name != 'push')
     runs-on: macos-15
     timeout-minutes: 180
     env:
@@ -101,8 +127,37 @@ jobs:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
       - uses: dtolnay/rust-toolchain@89b12181fb390509a0842a86cc55eeb8eb928c1d # stable
       - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2
+        with:
+          save-if: ${{ github.ref == 'refs/heads/main' }}
+          cache-on-failure: true
       - name: Test
         run: cargo test --workspace --locked --no-fail-fast --lib --tests --exclude ferroui-render-backends-comparison --exclude ferroui-vello
+
+  # The two test steps of the macOS job that build with other features than the workspace tests: a
+  # job of their own, beside that job and not after it. Each builds the crates it tests with the
+  # features its packages select, so as steps of that job they compiled most of their crates again
+  # (about eleven minutes after the 42 of the workspace tests); here they run in parallel with it.
+  # The commands are those the macOS job ran.
+  macos-features:
+    name: Build and test (macOS, the ControlCatalog with classic themes, Vello)
+    if: (github.event.action != 'edited' || github.event.changes.base != null) && (github.event_name != 'push')
+    runs-on: macos-15
+    timeout-minutes: 120
+    env:
+      CARGO_PROFILE_DEV_DEBUG: 0
+      CARGO_PROFILE_TEST_DEBUG: 0
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: dtolnay/rust-toolchain@89b12181fb390509a0842a86cc55eeb8eb928c1d # stable
+      - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2
+        with:
+          save-if: ${{ github.ref == 'refs/heads/main' }}
+          cache-on-failure: true
+      # The Simple and Fluent themes of the ControlCatalog are behind its feature `classic-themes`,
+      # off by default (docs/binary-size.md): the tests of the document of the two themes and of
+      # the settings page that switches between the three themes, with the feature.
+      - name: Test (the ControlCatalog with its feature classic-themes)
+        run: cargo test --locked -p control-catalog --features classic-themes --lib -- classic_themes the_settings_page
       # The tests of the Vello backend and its comparison with the Skia backend, apart from the other tests: on
       # the runner one scene of a GPU mode now and then comes out wholly different or differs
       # between two draws (docs/porting/vello-backend.md, section 13). A failure is tried again,
@@ -133,7 +188,7 @@ jobs:
   #   binaries are published stays informative: it gates them.
   windows:
     name: Build, test and smoke run (Windows platform backend)
-    if: github.event_name != 'push'
+    if: (github.event.action != 'edited' || github.event.changes.base != null) && (github.event_name != 'push')
     runs-on: windows-latest
     timeout-minutes: 120
     env:
@@ -146,6 +201,9 @@ jobs:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
       - uses: dtolnay/rust-toolchain@89b12181fb390509a0842a86cc55eeb8eb928c1d # stable
       - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2
+        with:
+          save-if: ${{ github.ref == 'refs/heads/main' }}
+          cache-on-failure: true
       # Without the default feature `angle`: the backend with software rendering alone, which is
       # what builds where there is no libclang.
       - name: Build the backend and its example (without ANGLE)
@@ -516,7 +574,7 @@ jobs:
   # for the target and runs there. Informative as a whole until its first green run.
   windows-arm64:
     name: Build, test and smoke run (Windows platform backend, ARM64; informative)
-    if: github.event_name != 'push'
+    if: (github.event.action != 'edited' || github.event.changes.base != null) && (github.event_name != 'push')
     runs-on: windows-11-arm
     continue-on-error: true
     timeout-minutes: 120
@@ -636,6 +694,7 @@ jobs:
           done
 
   browser:
+    if: (github.event.action != 'edited' || github.event.changes.base != null)
     name: Check (browser, wasm32-unknown-emscripten)
     runs-on: ubuntu-latest
     timeout-minutes: 150
@@ -677,6 +736,9 @@ jobs:
           -p ferroui-browser --features vello --examples
           && cargo check --locked --target wasm32-unknown-emscripten
           -p control-catalog-browser --features vello
+      # The JavaScript bridge of the CDP developer tools (docs/devtools-cdp.md), also behind a feature.
+      - name: Check the catalog host with the CDP bridge
+        run: cargo check --locked --target wasm32-unknown-emscripten -p control-catalog-browser --features cdp
       - name: Build the themed view site
         run: scripts/build-browser.sh themed_view
       - name: Behaviour tests in headless Chrome
@@ -719,6 +781,7 @@ jobs:
   # toolchain a second time (from caches) and nothing else twice: the sites with both modules are
   # composed, by the job below, from the sites the two jobs built.
   browser-threads:
+    if: (github.event.action != 'edited' || github.event.changes.base != null)
     name: Check (browser with threads, wasm32-unknown-emscripten)
     runs-on: ubuntu-latest
     timeout-minutes: 150
@@ -777,6 +840,7 @@ jobs:
   # above, which also checks that the files the two builds share are identical, and tested: nothing
   # is compiled in this job.
   browser-site:
+    if: (github.event.action != 'edited' || github.event.changes.base != null)
     name: Check (browser, the site with both modules)
     needs: [browser, browser-threads]
     runs-on: ubuntu-latest
@@ -814,7 +878,7 @@ jobs:
   # mode in a simulator is run with scripts/ios/sim-smoke.sh on the development machine.
   ios:
     name: Build and test (iOS, simulator target)
-    if: github.event_name != 'push'
+    if: (github.event.action != 'edited' || github.event.changes.base != null) && (github.event_name != 'push')
     runs-on: macos-15
     timeout-minutes: 90
     env:
@@ -828,6 +892,8 @@ jobs:
       - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2
         with:
           key: ios
+          save-if: ${{ github.ref == 'refs/heads/main' }}
+          cache-on-failure: true
       - name: Skia features of the target
         run: |
           # Graphite on Metal, as on macOS: the feature set a Skia binary is published for. Another
@@ -862,6 +928,7 @@ jobs:
   # software rasterizer, with frames read back), under a window manager, and with two monitors
   # (xrandr --setmonitor). No compositing manager: that is not covered here.
   x11:
+    if: (github.event.action != 'edited' || github.event.changes.base != null)
     name: Build and test (Linux, X11 under Xvfb)
     runs-on: ubuntu-latest
     timeout-minutes: 90
@@ -874,6 +941,8 @@ jobs:
       - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2
         with:
           key: x11
+          save-if: ${{ github.ref == 'refs/heads/main' }}
+          cache-on-failure: true
       # The X libraries are opened at run time (nothing links them); Skia links FreeType and
       # Fontconfig, and needs a font to answer for the default family.
       - name: System packages
@@ -1133,6 +1202,7 @@ jobs:
   # EGL (Mesa's software rasterizer), on an output of scale 1 and of scale 2. Not covered: a
   # desktop compositor (Mutter, KWin), a hardware GPU, touch, a compositor restart.
   wayland:
+    if: (github.event.action != 'edited' || github.event.changes.base != null)
     name: Build and test (Linux, Wayland under headless sway)
     runs-on: ubuntu-latest
     timeout-minutes: 90
@@ -1145,6 +1215,8 @@ jobs:
       - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2
         with:
           key: wayland
+          save-if: ${{ github.ref == 'refs/heads/main' }}
+          cache-on-failure: true
       # libwayland-client, libwayland-egl, libEGL and libxkbcommon are opened at run time (nothing
       # links them); Skia links FreeType and Fontconfig, and needs a font to answer for the default
       # family. xkb-data has the keymap the virtual keyboard of the example gives the compositor;
@@ -1325,6 +1397,7 @@ jobs:
   # workflow (docs/porting/wayland-platform.md, section 12.3). The compositor does not run as
   # root: the run is made by a user of the container.
   wayland-next:
+    if: (github.event.action != 'edited' || github.event.changes.base != null)
     name: Informational (Linux, Wayland under the sway of Debian 13)
     runs-on: ubuntu-latest
     container: debian:trixie
@@ -1349,6 +1422,8 @@ jobs:
       - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2
         with:
           key: wayland-next
+          save-if: ${{ github.ref == 'refs/heads/main' }}
+          cache-on-failure: true
       - name: Build the window example
         run: cargo build --locked -p ferroui-wayland --features example --example wayland_window
       - name: A window on a compositor, rendered through wl_shm buffers
@@ -1384,6 +1459,7 @@ jobs:
   # (uinput). The step that looks for them says what the kernel of the runner has; what is missing is
   # skipped with a reason. A real board with a panel and a touch screen is not covered by any of this.
   linuxfb:
+    if: (github.event.action != 'edited' || github.event.changes.base != null)
     name: Build and test (Linux framebuffer, virtual devices)
     runs-on: ubuntu-latest
     timeout-minutes: 90
@@ -1396,6 +1472,8 @@ jobs:
       - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2
         with:
           key: linuxfb
+          save-if: ${{ github.ref == 'refs/heads/main' }}
+          cache-on-failure: true
       # Skia links FreeType and Fontconfig, and needs a font to answer for the default family.
       # The DRM output opens libdrm, libgbm and libEGL at run time; Mesa renders on the card of
       # vkms in software (its kms_swrast driver, in libgl1-mesa-dri).
@@ -1428,7 +1506,10 @@ jobs:
       # The catalog on the virtual framebuffer: the content of the device per page, as pictures
       # (the memory of the framebuffer device, read from its node).
       - name: Build the ControlCatalog
-        run: cargo build --locked -p control-catalog-desktop
+        run: cargo build --locked -p control-catalog-desktop --features mcp,cdp
+      - name: Inspect and drive the headless ControlCatalog over MCP
+        timeout-minutes: 5
+        run: python3 scripts/test-mcp.py
       - name: The ControlCatalog on the virtual framebuffer
         run: |
           . "$RUNNER_TEMP/linuxfb-devices"
@@ -1466,6 +1547,7 @@ jobs:
   # and the package of the smoke application built without Gradle. Nothing runs on a device here:
   # the emulator runs are made on the development machine (scripts/android/emu-smoke.sh).
   android:
+    if: (github.event.action != 'edited' || github.event.changes.base != null)
     name: Build and package (Android, arm64)
     runs-on: ubuntu-latest
     timeout-minutes: 90
@@ -1478,6 +1560,8 @@ jobs:
       - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2
         with:
           key: android
+          save-if: ${{ github.ref == 'refs/heads/main' }}
+          cache-on-failure: true
       - name: Tests of the Android crate (the logic, on the host)
         run: cargo test --locked -p ferroui-android --no-fail-fast
       # The thread-local variables of the framework are slots of one table per thread on Android

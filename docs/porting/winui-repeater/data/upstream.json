@@ -1,7 +1,7 @@
 {
   "schema": 1,
   "repository": "microsoft/microsoft-ui-xaml",
-  "commit": "1af995b98a02d86b1951c4babe35caa269a6d569",
+  "commit": "7e4b0c2096be402f51cc8f7d203ebf67cff183d0",
   "scope": "controls/dev/Repeater",
   "files": [
     {

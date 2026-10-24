@@ -407,3 +407,26 @@ fn a_component_follows_the_data_context_of_the_control_it_is_in() {
     assert!(first.ptr_eq(&children(&panel)[0]));
     owner.dispose();
 }
+
+#[test]
+fn an_element_of_another_name_is_another_control() {
+    let owner = Owner::new_root();
+    let (named, panel) = owner.with(|| {
+        let named = signal("Pending");
+        let panel = stack_panel()
+            .child(rerender(move || text_block().name(named.get()).text(named.get())))
+            .into_element()
+            .mount();
+        (named, panel)
+    });
+    let first = children(&panel)[0].clone();
+    named.set("Ready");
+    let second = children(&panel)[0].clone();
+    // A styled control keeps its name, so the reconciler makes another one instead of renaming it.
+    assert!(!first.ptr_eq(&second));
+    assert_eq!(second.name().as_deref(), Some("Ready"));
+    assert_eq!(texts(&panel), vec!["Ready"]);
+    named.set("Ready");
+    assert!(second.ptr_eq(&children(&panel)[0]), "the same name keeps the control");
+    owner.dispose();
+}

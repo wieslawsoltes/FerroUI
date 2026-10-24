@@ -3,7 +3,7 @@ use crate::rendering::composition::expressions::{
     BuiltInExpressionFfi, Expression, ExpressionEvaluationContext, ExpressionVariant,
 };
 use crate::rendering::composition::server::{CompositionProperty, IServerClockItem, ServerCompositor, ServerObjectId};
-use std::cell::Cell;
+use std::cell::{Cell, RefCell};
 use std::collections::HashSet;
 use std::rc::{Rc, Weak};
 use std::time::Duration;
@@ -14,6 +14,9 @@ pub struct ExpressionAnimationInstance {
     expression: std::sync::Arc<Expression>,
     starting_value: Cell<ExpressionVariant>,
     final_value: Option<ExpressionVariant>,
+    /// The initial value expressions, applied when the instance is
+    /// initialized.
+    initial_values: RefCell<Vec<(String, Expression)>>,
 }
 
 impl ExpressionAnimationInstance {
@@ -28,7 +31,14 @@ impl ExpressionAnimationInstance {
             expression,
             starting_value: Cell::new(ExpressionVariant::default()),
             final_value,
+            initial_values: RefCell::new(Vec::new()),
         })
+    }
+
+    /// Sets the initial value expressions of the animation, applied to the
+    /// target when the instance is initialized.
+    pub fn set_initial_value_expressions(&self, expressions: Vec<(String, Expression)>) {
+        *self.initial_values.borrow_mut() = expressions;
     }
 
     fn evaluate_core(&self, _now: Duration, current_value: ExpressionVariant) -> ExpressionVariant {
@@ -68,6 +78,8 @@ impl IAnimationInstance for ExpressionAnimationInstance {
     }
 
     fn initialize(&self, _started_at: Duration, starting_value: ExpressionVariant, property: &'static CompositionProperty) {
+        let initial_values = std::mem::take(&mut *self.initial_values.borrow_mut());
+        let starting_value = self.base.apply_initial_values(&initial_values, property, starting_value);
         self.starting_value.set(starting_value);
         let mut hs = HashSet::new();
         self.expression.collect_references(&mut hs);

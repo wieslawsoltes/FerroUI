@@ -464,8 +464,9 @@ fn item_equals_typed<T: PropertyValue>(item: &Option<BoxedValue>, value: &T) -> 
 
 /// An untyped, indexable list of items that may notify of changes.
 pub trait IItemsList {
-    /// The optional stable-key mapping of this collection. Existing lists need
-    /// not implement it; an index is never substituted for a stable key.
+    /// The unique keys of the items, if the list provides them
+    /// ([`IKeyIndexMapping`](crate::IKeyIndexMapping)); `None` by default. An index is
+    /// never a key: a list without keys has none.
     fn key_index_mapping(&self) -> Option<&dyn crate::IKeyIndexMapping> {
         None
     }
@@ -806,6 +807,7 @@ impl From<Rc<dyn IItemsList>> for ItemsSource {
     }
 }
 
+/// A view is an items source itself; the source is the view, not the list it shows.
 impl From<Rc<crate::ItemsSourceView>> for ItemsSource {
     fn from(value: Rc<crate::ItemsSourceView>) -> Self {
         Self(value)

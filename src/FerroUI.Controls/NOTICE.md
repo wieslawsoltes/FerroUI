@@ -99,13 +99,11 @@ project adapted from the WinUI project
 (<https://github.com/microsoft/microsoft-ui-xaml>), MIT License,
 Copyright (c) Microsoft Corporation.
 
-The files under `repeater/`, and `i_key_index_mapping.rs`, are ported directly
-from `controls/dev/Repeater` in WinUI at commit
-`1af995b98a02d86b1951c4babe35caa269a6d569`. The source-to-port inventory and
-framework adaptations are recorded in
-[`docs/porting/winui-repeater/README.md`](../../docs/porting/winui-repeater/README.md).
-Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the
-MIT License; the complete notice accompanies the sources in `repeater/NOTICE.md`.
+`i_key_index_mapping.rs` and the unique-key members of `items_source_view.rs`
+(`has_key_index_mapping`, `key_from_index`, `index_from_key`) are ported from
+the WinUI project directly (`controls/dev/Repeater` at commit
+`7e4b0c2096be402f51cc8f7d203ebf67cff183d0`, the revision the WinUI theme is
+ported from), under the same license.
 
 ## Silverlight Toolkit
 

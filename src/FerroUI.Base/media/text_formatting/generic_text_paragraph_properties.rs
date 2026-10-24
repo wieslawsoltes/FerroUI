@@ -2,7 +2,7 @@ use std::cell::Cell;
 use std::rc::Rc;
 
 use crate::media::text_formatting::{TextParagraphProperties, TextRunProperties};
-use crate::media::{FlowDirection, TextAlignment, TextWrapping};
+use crate::media::{FlowDirection, TextAlignment, TextLineBounds, TextWrapping};
 
 /// Generic implementation of `TextParagraphProperties`.
 pub struct GenericTextParagraphProperties {
@@ -16,6 +16,7 @@ pub struct GenericTextParagraphProperties {
     indent: f64,
     letter_spacing: f64,
     line_spacing: Cell<f64>,
+    text_line_bounds: Cell<TextLineBounds>,
 }
 
 impl GenericTextParagraphProperties {
@@ -50,6 +51,7 @@ impl GenericTextParagraphProperties {
             indent: 0.0,
             letter_spacing,
             line_spacing: Cell::new(0.0),
+            text_line_bounds: Cell::new(TextLineBounds::Full),
         }
     }
 
@@ -77,6 +79,7 @@ impl GenericTextParagraphProperties {
             indent,
             letter_spacing,
             line_spacing: Cell::new(0.0),
+            text_line_bounds: Cell::new(TextLineBounds::Full),
         }
     }
 
@@ -85,9 +88,15 @@ impl GenericTextParagraphProperties {
         self.line_spacing.set(line_spacing);
     }
 
+    /// Sets how the box of each line is bounded (a FerroUI addition, docs/porting/DEVIATIONS.md,
+    /// Text block).
+    pub fn set_text_line_bounds(&self, text_line_bounds: TextLineBounds) {
+        self.text_line_bounds.set(text_line_bounds);
+    }
+
     /// Creates a copy of other paragraph properties.
     pub fn from_properties(text_paragraph_properties: &dyn TextParagraphProperties) -> Self {
-        Self::with_all(
+        let properties = Self::with_all(
             text_paragraph_properties.flow_direction(),
             text_paragraph_properties.text_alignment(),
             text_paragraph_properties.first_line_in_paragraph(),
@@ -97,7 +106,9 @@ impl GenericTextParagraphProperties {
             text_paragraph_properties.line_height(),
             text_paragraph_properties.indent(),
             text_paragraph_properties.letter_spacing(),
-        )
+        );
+        properties.set_text_line_bounds(text_paragraph_properties.text_line_bounds());
+        properties
     }
 
     /// Set flow direction.
@@ -136,6 +147,10 @@ impl TextParagraphProperties for GenericTextParagraphProperties {
 
     fn line_spacing(&self) -> f64 {
         self.line_spacing.get()
+    }
+
+    fn text_line_bounds(&self) -> TextLineBounds {
+        self.text_line_bounds.get()
     }
 
     fn first_line_in_paragraph(&self) -> bool {

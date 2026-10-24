@@ -1,7 +1,3 @@
-//
-// Created by Dan Walmsley on 06/05/2022.
-//
-
 
 #import <AppKit/AppKit.h>
 #import "WindowProtocol.h"
@@ -35,6 +31,7 @@
     bool _isExtended;
     bool _isTransitioningToFullScreen;
     bool _isTitlebarSession;
+    double _standardButtonsTitleBarHeight;
     FrnMenu* _menu;
     ComPtr<IFrnAutomationPeer> _automationPeer;
     FrnAutomationNode* _automationNode;
@@ -49,6 +46,54 @@
 -(void) setIsExtended:(bool)value;
 {
     _isExtended = value;
+    [self layoutStandardButtons];
+}
+
+// Deviation (DEVIATIONS.md, Native backends): a window that extends into its title bar with a
+// title bar taller than the one of the system (ExtendClientAreaTitleBarHeightHint) gets the
+// container of the title bar of that height, and the close, minimise and zoom buttons centred in
+// it vertically, as the header of the client draws them. Upstream leaves them at the top, in the
+// title bar of the system. AppKit lays the title bar out again on a resize, a change of the key
+// window or of the title and on leaving full screen, so it is done again then.
+-(void) setStandardButtonsTitleBarHeight:(double)height
+{
+    _standardButtonsTitleBarHeight = height;
+    [self layoutStandardButtons];
+}
+
+-(void) layoutStandardButtons
+{
+    if(!_isExtended || _standardButtonsTitleBarHeight <= 0 || ([self styleMask] & NSWindowStyleMaskFullScreen) != 0)
+        return;
+
+    NSButton* close = [self standardWindowButton:NSWindowCloseButton];
+    NSView* titlebar = [close superview];
+    NSView* container = [titlebar superview];
+    if(close == nil || titlebar == nil || container == nil)
+        return;
+
+    double height = _standardButtonsTitleBarHeight;
+    if(height < close.frame.size.height)
+        return;
+
+    NSRect frame = [container frame];
+    if(frame.size.height != height || frame.origin.y != self.frame.size.height - height)
+    {
+        frame.size.height = height;
+        frame.origin.y = self.frame.size.height - height;
+        [container setFrame:frame];
+    }
+
+    for(NSWindowButton kind : { NSWindowCloseButton, NSWindowMiniaturizeButton, NSWindowZoomButton })
+    {
+        NSButton* button = [self standardWindowButton:kind];
+        if(button == nil || [button superview] != titlebar)
+            continue;
+
+        NSPoint origin = button.frame.origin;
+        origin.y = round((titlebar.frame.size.height - button.frame.size.height) / 2);
+        [button setFrameOrigin:origin];
+    }
 }
 
 -(bool) isDialog
@@ -294,6 +339,8 @@
 
 - (void)windowDidBecomeKey:(NSNotification *_Nonnull)notification
 {
+    [self layoutStandardButtons];
+
     auto parent = _parent.tryGet();
     if (parent == nullptr)
         return;
@@ -337,6 +384,8 @@
 
 - (void)windowDidResize:(NSNotification *_Nonnull)notification
 {
+    [self layoutStandardButtons];
+
     auto parent = _parent.tryGetWithCast<IWindowStateChanged>();
 
     if(parent != nullptr)
@@ -361,6 +410,8 @@
 
 - (void)windowDidExitFullScreen:(NSNotification *_Nonnull)notification
 {
+    [self layoutStandardButtons];
+
     auto parent = _parent.tryGetWithCast<IWindowStateChanged>();
 
     if(parent != nullptr)
@@ -413,6 +464,8 @@
 
 -(void)windowDidResignKey:(NSNotification* _Nonnull)notification
 {
+    [self layoutStandardButtons];
+
     auto parent = _parent.tryGet();
     if(parent)
         parent->BaseEvents->Deactivated();

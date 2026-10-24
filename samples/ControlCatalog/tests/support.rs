@@ -248,7 +248,8 @@ pub fn document_loads(path: &str, application: TestApplication) {
 /// The body of the generated test `class_<name>`: the class of the document
 /// constructs (which loads the document) and can be shown: a control as the
 /// content of a window, a window on its own, styles as the styles of a
-/// window, under `application`.
+/// window, a resource dictionary as resources a window merges, under
+/// `application`.
 pub fn class_constructs(path: &str, application: TestApplication) {
     let _app = application.start();
     let class = XamlClass::find(path).unwrap_or_else(|| panic!("the class of {path} is not declared"));
@@ -271,8 +272,13 @@ pub fn class_constructs(path: &str, application: TestApplication) {
         window.styles().add(style);
         window.show();
         window.close();
+    } else if let Some(resources) = from_markup_value::<Ref<ferroui_base::controls::ResourceDictionary>>(&value) {
+        let window = Window::new();
+        window.resources().merged_dictionaries().add(resources.into());
+        window.show();
+        window.close();
     } else if from_markup_value::<Ref<Application>>(&value).is_none() {
-        panic!("{path}: the class is neither a control, a window, styles nor an application");
+        panic!("{path}: the class is neither a control, a window, styles, resources nor an application");
     }
 }
 

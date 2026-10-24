@@ -232,6 +232,11 @@
   </MenuFlyout>
 
   <ControlTheme x:Key="DefaultTextBoxStyle" TargetType="TextBox">
+    <!-- The line of a single-line box centred in its height. WinUI places it by the padding and
+         the line height of Segoe UI, which fill MinHeight; with another font (macOS, Linux) the
+         line was higher than the middle. A box of several lines keeps its text at the top (below).
+         Deviation (winui-theme/DEVIATIONS.md, G-28). -->
+    <Setter Property="VerticalContentAlignment" Value="Center" />
     <Setter Property="Foreground" Value="{DynamicResource TextControlForeground}" />
     <Setter Property="Background" Value="{DynamicResource TextControlBackground}" />
     <Setter Property="BorderBrush" Value="{DynamicResource TextControlBorderBrush}" />
@@ -307,6 +312,7 @@
             <TextBlock x:Name="PlaceholderTextContentPresenter"
                        Grid.Column="1"
                        Grid.ColumnSpan="2"
+                       VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
                        Foreground="{TemplateBinding PlaceholderForeground}"
                        Margin="{TemplateBinding BorderThickness}"
                        Padding="{TemplateBinding Padding}"
@@ -358,6 +364,10 @@
         </DataValidationErrors>
       </ControlTemplate>
     </Setter>
+    <!-- A box of several lines: its text at the top, as in WinUI (G-28). -->
+    <Style Selector="^[AcceptsReturn=True]">
+      <Setter Property="VerticalContentAlignment" Value="Top" />
+    </Style>
 
     <!-- PointerOver -->
     <Style Selector="^:pointerover">

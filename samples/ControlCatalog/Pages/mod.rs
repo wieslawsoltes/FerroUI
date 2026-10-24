@@ -58,6 +58,8 @@ mod progress_bar_page;
 mod radio_button_page;
 mod relative_panel_page;
 mod screen_page;
+mod winui_composition_page;
+mod winui_composition_phases;
 mod section_page;
 mod settings_page;
 mod slider_page;
@@ -200,6 +202,11 @@ pub use radio_button_page::RadioButtonPage;
 pub use refresh_container_page::RefreshContainerPage;
 pub use relative_panel_page::RelativePanelPage;
 pub use screen_page::ScreenPage;
+pub use winui_composition_page::{
+    smoke_close_card, smoke_open_card, smoke_scroll_parallax, smoke_set_configuration, smoke_toggle_box,
+    winui_composition_page,
+};
+pub use winui_composition_phases::{smoke_expand_sections, smoke_show_section};
 pub use scroll_viewer_page::{ScrollViewerPage, ScrollViewerPageViewModel};
 pub use section_page::SectionPage;
 pub use settings_page::SettingsPage;

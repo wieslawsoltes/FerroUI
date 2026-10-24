@@ -796,6 +796,36 @@ fn the_collection_handle_of_items_controls_is_the_enumerable_of_the_runtime_libr
 }
 
 #[test]
+fn a_view_of_an_items_source_is_constructed_and_read_through_its_metadata() {
+    crate::register_types();
+    let markup = <crate::ItemsSourceView as MarkupTyped>::MARKUP;
+    assert_eq!(markup.full_name(), "FerroUI.Controls.ItemsSourceView");
+    let view = (markup.constructors[0].invoke)(&[boxed(crate::ItemsSource::from_strs(["a", "b"]))]).expect("a view");
+    let count = markup.find_property("Count").expect("Count");
+    assert_eq!(unbox::<i32>(&(count.get.expect("a getter"))(&[view.clone()]).expect("the count")), 2);
+    let get_at = markup.find_methods("GetAt").next().expect("GetAt");
+    assert_eq!(unbox::<String>(&(get_at.invoke)(&[view.clone(), boxed(1i32)]).expect("the item")), "b");
+    // An index that is not the index of an item is an error of the call, not a panic.
+    assert!((get_at.invoke)(&[view.clone(), boxed(2i32)]).is_err());
+    assert!((get_at.invoke)(&[view.clone(), boxed(-1i32)]).is_err());
+    let index_of = markup.find_methods("IndexOf").next().expect("IndexOf");
+    assert_eq!(unbox::<i32>(&(index_of.invoke)(&[view.clone(), text("b")]).expect("the index")), 1);
+    let has_keys = markup.find_property("HasKeyIndexMapping").expect("HasKeyIndexMapping");
+    assert!(!unbox::<bool>(&(has_keys.get.expect("a getter"))(&[view.clone()]).expect("the value")));
+    // A source without unique keys: the key members are errors of the call.
+    let key_from_index = markup.find_methods("KeyFromIndex").next().expect("KeyFromIndex");
+    assert!((key_from_index.invoke)(&[view.clone(), boxed(0i32)]).is_err());
+    let index_from_key = markup.find_methods("IndexFromKey").next().expect("IndexFromKey");
+    assert!((index_from_key.invoke)(&[view.clone(), text("a")]).is_err());
+
+    // A view is an items source itself: the handle is the view, which a control reads through.
+    let source = unbox::<Option<crate::ItemsSource>>(&view).expect("an items source");
+    let view = unbox::<Rc<crate::ItemsSourceView>>(&view);
+    assert!(Rc::ptr_eq(&crate::ItemsSourceView::get_or_create(Some(&source)), &view));
+    assert_eq!(source.count(), 2);
+}
+
+#[test]
 fn a_vector_of_untyped_values_converts_to_an_items_source() {
     crate::register_types();
     // The errors of a control are such a vector; a binding delivers it to the items source

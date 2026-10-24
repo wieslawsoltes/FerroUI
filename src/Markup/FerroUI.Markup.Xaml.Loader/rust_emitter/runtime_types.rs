@@ -381,6 +381,17 @@ impl EmitTypes for RuntimeEmitTypes {
             FrameworkType::Setter => <ferroui_base::styling::Setter as MarkupTyped>::MARKUP.rust_path(),
             FrameworkType::SetterBase => <dyn ferroui_base::styling::SetterBase as MarkupTyped>::MARKUP.rust_path(),
             FrameworkType::StyleBase => ferroui_base::styling::StyleBase::TYPE.rust_path(),
+            FrameworkType::ResourceDictionary => ferroui_base::controls::ResourceDictionary::TYPE.rust_path(),
+            FrameworkType::DeferredContent => {
+                <dyn ferroui_base::controls::IDeferredContent as MarkupTyped>::MARKUP.rust_path()
+            }
+            FrameworkType::StaticResourceExtension => {
+                <ferroui_markup_xaml::markup_extensions::StaticResourceExtension as MarkupTyped>::MARKUP.rust_path()
+            }
+            FrameworkType::DynamicResourceExtension => {
+                <ferroui_markup_xaml::markup_extensions::DynamicResourceExtension as MarkupTyped>::MARKUP.rust_path()
+            }
+            FrameworkType::TemplateBinding => <ferroui_base::data::TemplateBinding as MarkupTyped>::MARKUP.rust_path(),
         };
         path.map(absolute)
     }

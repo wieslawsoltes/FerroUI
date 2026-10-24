@@ -1,13 +1,15 @@
+use super::animation_controller::{AnimationControllerClock, ProgressSpan};
 use super::{
     AnimationDelayBehavior, AnimationInstanceBase, AnimationIterationBehavior, AnimationStopBehavior,
     IAnimationInstance, IInterpolator, PropertySetSnapshot, ServerKeyFrame,
 };
 use crate::animation::PlaybackDirection;
 use crate::rendering::composition::expressions::{
-    BuiltInExpressionFfi, ExpressionEvaluationContext, ExpressionVariant, ExpressionVariantValue,
+    BuiltInExpressionFfi, Expression, ExpressionEvaluationContext, ExpressionVariant, ExpressionVariantValue,
 };
 use crate::rendering::composition::server::{CompositionProperty, IServerClockItem, ServerCompositor, ServerObjectId};
-use std::cell::Cell;
+use crate::rendering::composition::AnimationCompletion;
+use std::cell::{Cell, RefCell};
 use std::collections::HashSet;
 use std::rc::{Rc, Weak};
 use std::time::Duration;
@@ -56,13 +58,22 @@ pub struct KeyFrameAnimationInstance<T: ExpressionVariantValue> {
     duration: i64,
     iteration_behavior: AnimationIterationBehavior,
     iteration_count: i32,
-    // Stored as upstream stores it; upstream does not read it either.
-    #[allow(dead_code)]
+    /// Applied when the animation is stopped (see
+    /// [`IAnimationInstance::value_on_stop`]); upstream stores it and does
+    /// not apply it.
     stop_behavior: AnimationStopBehavior,
     started_at: Cell<i64>,
     starting_value: Cell<T>,
     total_duration: i64,
     finished: Cell<bool>,
+    /// The batches the animation belongs to, released when it finishes or
+    /// is dropped.
+    completion: RefCell<AnimationCompletion>,
+    /// The initial value expressions, applied when the instance is
+    /// initialized.
+    initial_values: RefCell<Vec<(String, Expression)>>,
+    /// The time of the animation under its controller, if it has one.
+    clock: AnimationControllerClock,
 }
 
 impl<T: ExpressionVariantValue> KeyFrameAnimationInstance<T> {
@@ -111,12 +122,67 @@ impl<T: ExpressionVariantValue> KeyFrameAnimationInstance<T> {
             starting_value: Cell::new(T::default()),
             total_duration,
             finished: Cell::new(false),
+            completion: RefCell::new(AnimationCompletion::none()),
+            initial_values: RefCell::new(Vec::new()),
+            clock: AnimationControllerClock::default(),
+        })
+    }
+
+    /// Sets the initial value expressions of the animation (parsed by
+    /// [`InitialValueExpressionCollection::parse_all`](super::InitialValueExpressionCollection::parse_all)),
+    /// applied to the target when the instance is initialized.
+    pub fn set_initial_value_expressions(&self, expressions: Vec<(String, Expression)>) {
+        *self.initial_values.borrow_mut() = expressions;
+    }
+
+    /// What the progress of a controller covers: the delay and the
+    /// iterations (one iteration of an animation that loops forever).
+    fn progress_span(&self) -> ProgressSpan {
+        let active = match self.iteration_behavior {
+            AnimationIterationBehavior::Count => self.iteration_count.max(0) as i64 * self.duration,
+            AnimationIterationBehavior::Forever => self.duration,
+        };
+        ProgressSpan { delay: self.delay_time, active }
+    }
+
+    /// Sets the batches the animation belongs to (see
+    /// [`CompositionScopedBatch`](crate::rendering::composition::CompositionScopedBatch)).
+    pub fn set_completion(&self, completion: AnimationCompletion) {
+        *self.completion.borrow_mut() = completion;
+    }
+
+    fn release_completion_now(&self) {
+        // Taken out first: releasing may post the completion of a batch,
+        // which must not run with the cell borrowed.
+        let mut completion = std::mem::take(&mut *self.completion.borrow_mut());
+        completion.release();
+    }
+
+    /// The value of the last key frame, with the context of an evaluation
+    /// at the current value.
+    fn final_key_frame_value(&self, current_value: ExpressionVariant) -> T {
+        let starting = ExpressionVariant::create(self.starting_value.get());
+        self.base.with_target_expression_object(|target| {
+            let ctx = ExpressionEvaluationContext {
+                parameters: Some(&**self.base.parameters()),
+                target,
+                current_value,
+                final_value: self.final_value.unwrap_or(starting),
+                starting_value: starting,
+                foreign_function_interface: Some(BuiltInExpressionFfi::instance()),
+            };
+            Self::get_key_frame(&ctx, &self.key_frames[self.key_frames.len() - 1])
         })
     }
 
     fn evaluate_core(&self, now: Duration, current_value: ExpressionVariant) -> ExpressionVariant {
         let starting = ExpressionVariant::create(self.starting_value.get());
-        let elapsed = ticks(now) - self.started_at.get();
+        let elapsed = self.clock.elapsed(
+            self.base.compositor().as_ref(),
+            ticks(now),
+            self.started_at.get(),
+            Some(self.progress_span()),
+        );
         let res = self.base.with_target_expression_object(|target| {
             let ctx = ExpressionEvaluationContext {
                 parameters: Some(&**self.base.parameters()),
@@ -129,15 +195,19 @@ impl<T: ExpressionVariantValue> KeyFrameAnimationInstance<T> {
             self.evaluate_impl(elapsed, current_value, &ctx)
         });
 
+        // A paused animation does not end: its controller may move it back.
         if self.iteration_behavior == AnimationIterationBehavior::Count
             && !self.finished.get()
             && elapsed > self.total_duration
+            && !self.clock.is_paused()
         {
             // Active check?
             if let (Some(compositor), Some(this)) = (self.base.compositor(), self.base.this_clock_item()) {
                 compositor.animations().remove_from_clock(&this);
             }
             self.finished.set(true);
+            // The animation is over: the batches it belongs to may complete.
+            self.release_completion_now();
         }
         res
     }
@@ -228,6 +298,16 @@ impl<T: ExpressionVariantValue> KeyFrameAnimationInstance<T> {
 
 impl<T: ExpressionVariantValue> IServerClockItem for KeyFrameAnimationInstance<T> {
     fn on_tick(&self) {
+        // A target that is gone (its server object released) never
+        // evaluates the animation again: it leaves the clock and its
+        // batches.
+        if self.base.target().is_none() {
+            if let (Some(compositor), Some(this)) = (self.base.compositor(), self.base.this_clock_item()) {
+                compositor.animations().remove_from_clock(&this);
+            }
+            self.release_completion_now();
+            return;
+        }
         self.base.on_tick()
     }
 }
@@ -247,6 +327,8 @@ impl<T: ExpressionVariantValue> IAnimationInstance for KeyFrameAnimationInstance
     }
 
     fn initialize(&self, started_at: Duration, starting_value: ExpressionVariant, property: &'static CompositionProperty) {
+        let initial_values = std::mem::take(&mut *self.initial_values.borrow_mut());
+        let starting_value = self.base.apply_initial_values(&initial_values, property, starting_value);
         self.started_at.set(ticks(started_at));
         self.starting_value.set(starting_value.cast_or_default::<T>());
         let mut hs = HashSet::new();
@@ -280,5 +362,23 @@ impl<T: ExpressionVariantValue> IAnimationInstance for KeyFrameAnimationInstance
 
     fn invalidate(&self) {
         self.base.invalidate()
+    }
+
+    fn value_on_stop(&self, current_value: ExpressionVariant) -> Option<ExpressionVariant> {
+        match self.stop_behavior {
+            AnimationStopBehavior::LeaveCurrentValue => None,
+            AnimationStopBehavior::SetToInitialValue => Some(ExpressionVariant::create(self.starting_value.get())),
+            AnimationStopBehavior::SetToFinalValue => {
+                Some(ExpressionVariant::create(self.final_key_frame_value(current_value)))
+            }
+        }
+    }
+
+    fn release_completion(&self) {
+        self.release_completion_now()
+    }
+
+    fn attach_controller(&self, controller: ServerObjectId) {
+        self.clock.attach(controller)
     }
 }

@@ -17,6 +17,10 @@ name = "view-gallery"
 path = "main.rs"
 test = false
 
+[features]
+# Hot reload of the literals of `rsx!` (`cargo run -p view-gallery --features hot-reload`).
+hot-reload = ["ferroui-view/hot-reload"]
+
 [dependencies]
 ferroui-base = { workspace = true }
 ferroui-controls = { workspace = true }

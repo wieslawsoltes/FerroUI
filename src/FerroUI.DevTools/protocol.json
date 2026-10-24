@@ -1,0 +1,1422 @@
+{
+  "version": {
+    "major": "1",
+    "minor": "3"
+  },
+  "domains": [
+    {
+      "domain": "DOM",
+      "version": "1.3",
+      "commands": [
+        {
+          "name": "enable",
+          "parameters": [],
+          "returns": []
+        },
+        {
+          "name": "disable",
+          "parameters": [],
+          "returns": []
+        },
+        {
+          "name": "getDocument",
+          "parameters": [
+            {
+              "name": "depth",
+              "type": "integer",
+              "optional": true
+            },
+            {
+              "name": "tree",
+              "type": "string",
+              "optional": true,
+              "enum": [
+                "visual",
+                "logical"
+              ]
+            }
+          ],
+          "returns": [
+            {
+              "name": "root",
+              "$ref": "Node"
+            }
+          ],
+          "description": "FerroUI extension: tree selects visual or logical elements. Depth -1 expands up to 256 levels."
+        },
+        {
+          "name": "describeNode",
+          "parameters": [
+            {
+              "name": "nodeId",
+              "$ref": "NodeId",
+              "optional": true
+            },
+            {
+              "name": "backendNodeId",
+              "type": "integer",
+              "optional": true
+            },
+            {
+              "name": "depth",
+              "type": "integer",
+              "optional": true
+            }
+          ],
+          "returns": [
+            {
+              "name": "node",
+              "$ref": "Node"
+            }
+          ]
+        },
+        {
+          "name": "requestChildNodes",
+          "parameters": [
+            {
+              "name": "nodeId",
+              "$ref": "NodeId"
+            },
+            {
+              "name": "depth",
+              "type": "integer",
+              "optional": true
+            }
+          ],
+          "returns": []
+        },
+        {
+          "name": "getAttributes",
+          "parameters": [
+            {
+              "name": "nodeId",
+              "$ref": "NodeId"
+            }
+          ],
+          "returns": [
+            {
+              "name": "attributes",
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          ]
+        },
+        {
+          "name": "querySelector",
+          "parameters": [
+            {
+              "name": "nodeId",
+              "$ref": "NodeId"
+            },
+            {
+              "name": "selector",
+              "type": "string"
+            }
+          ],
+          "returns": [
+            {
+              "name": "nodeId",
+              "$ref": "NodeId"
+            }
+          ]
+        },
+        {
+          "name": "querySelectorAll",
+          "parameters": [
+            {
+              "name": "nodeId",
+              "$ref": "NodeId"
+            },
+            {
+              "name": "selector",
+              "type": "string"
+            }
+          ],
+          "returns": [
+            {
+              "name": "nodeIds",
+              "type": "array",
+              "items": {
+                "$ref": "NodeId"
+              }
+            }
+          ]
+        },
+        {
+          "name": "setAttributeValue",
+          "parameters": [
+            {
+              "name": "nodeId",
+              "$ref": "NodeId"
+            },
+            {
+              "name": "name",
+              "type": "string"
+            },
+            {
+              "name": "value",
+              "type": "string"
+            }
+          ],
+          "returns": []
+        },
+        {
+          "name": "getBoxModel",
+          "parameters": [
+            {
+              "name": "nodeId",
+              "$ref": "NodeId"
+            }
+          ],
+          "returns": [
+            {
+              "name": "model",
+              "type": "object"
+            }
+          ]
+        },
+        {
+          "name": "getContentQuads",
+          "parameters": [
+            {
+              "name": "nodeId",
+              "$ref": "NodeId"
+            }
+          ],
+          "returns": [
+            {
+              "name": "quads",
+              "type": "array",
+              "items": {
+                "type": "array",
+                "items": {
+                  "type": "number"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "name": "getNodeForLocation",
+          "parameters": [
+            {
+              "name": "x",
+              "type": "integer"
+            },
+            {
+              "name": "y",
+              "type": "integer"
+            }
+          ],
+          "returns": [
+            {
+              "name": "nodeId",
+              "$ref": "NodeId"
+            },
+            {
+              "name": "backendNodeId",
+              "type": "integer"
+            },
+            {
+              "name": "frameId",
+              "type": "string"
+            }
+          ]
+        },
+        {
+          "name": "focus",
+          "parameters": [
+            {
+              "name": "nodeId",
+              "$ref": "NodeId"
+            }
+          ],
+          "returns": []
+        },
+        {
+          "name": "pushNodesByBackendIdsToFrontend",
+          "parameters": [
+            {
+              "name": "backendNodeIds",
+              "type": "array",
+              "items": {
+                "type": "integer"
+              }
+            }
+          ],
+          "returns": [
+            {
+              "name": "nodeIds",
+              "type": "array",
+              "items": {
+                "$ref": "NodeId"
+              }
+            }
+          ]
+        },
+        {
+          "name": "pushNodeByPathToFrontend",
+          "parameters": [
+            {
+              "name": "path",
+              "type": "string"
+            }
+          ],
+          "returns": [
+            {
+              "name": "nodeId",
+              "$ref": "NodeId"
+            }
+          ]
+        }
+      ],
+      "events": [
+        {
+          "name": "documentUpdated",
+          "parameters": []
+        },
+        {
+          "name": "setChildNodes",
+          "parameters": [
+            {
+              "name": "parentId",
+              "$ref": "NodeId"
+            },
+            {
+              "name": "nodes",
+              "type": "array",
+              "items": {
+                "$ref": "Node"
+              }
+            }
+          ]
+        },
+        {
+          "name": "attributeModified",
+          "parameters": [
+            {
+              "name": "nodeId",
+              "$ref": "NodeId"
+            },
+            {
+              "name": "name",
+              "type": "string"
+            },
+            {
+              "name": "value",
+              "type": "string"
+            }
+          ]
+        },
+        {
+          "name": "attributeRemoved",
+          "parameters": [
+            {
+              "name": "nodeId",
+              "$ref": "NodeId"
+            },
+            {
+              "name": "name",
+              "type": "string"
+            }
+          ]
+        }
+      ],
+      "types": [
+        {
+          "id": "NodeId",
+          "type": "integer"
+        },
+        {
+          "id": "Node",
+          "type": "object",
+          "properties": [
+            {
+              "name": "nodeId",
+              "$ref": "NodeId"
+            },
+            {
+              "name": "backendNodeId",
+              "type": "integer"
+            },
+            {
+              "name": "nodeType",
+              "type": "integer"
+            },
+            {
+              "name": "nodeName",
+              "type": "string"
+            },
+            {
+              "name": "localName",
+              "type": "string"
+            },
+            {
+              "name": "nodeValue",
+              "type": "string"
+            },
+            {
+              "name": "childNodeCount",
+              "type": "integer",
+              "optional": true
+            },
+            {
+              "name": "attributes",
+              "type": "array",
+              "optional": true,
+              "items": {
+                "type": "string"
+              }
+            },
+            {
+              "name": "children",
+              "type": "array",
+              "optional": true,
+              "items": {
+                "$ref": "Node"
+              }
+            },
+            {
+              "name": "parentId",
+              "$ref": "NodeId",
+              "optional": true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "domain": "CSS",
+      "version": "1.3",
+      "commands": [
+        {
+          "name": "enable",
+          "parameters": [],
+          "returns": []
+        },
+        {
+          "name": "disable",
+          "parameters": [],
+          "returns": []
+        },
+        {
+          "name": "getComputedStyleForNode",
+          "parameters": [
+            {
+              "name": "nodeId",
+              "$ref": "DOM.NodeId"
+            }
+          ],
+          "returns": [
+            {
+              "name": "computedStyle",
+              "type": "array",
+              "items": {
+                "$ref": "CSSProperty"
+              }
+            }
+          ],
+          "description": "Property names and values use FerroUI semantics."
+        },
+        {
+          "name": "getMatchedStylesForNode",
+          "parameters": [
+            {
+              "name": "nodeId",
+              "$ref": "DOM.NodeId"
+            }
+          ],
+          "returns": [
+            {
+              "name": "matchedCSSRules",
+              "type": "array",
+              "items": {
+                "type": "object"
+              }
+            },
+            {
+              "name": "inherited",
+              "type": "array",
+              "items": {
+                "type": "object"
+              }
+            },
+            {
+              "name": "pseudoElements",
+              "type": "array",
+              "items": {
+                "type": "object"
+              }
+            },
+            {
+              "name": "inlineStyle",
+              "$ref": "CSSStyle"
+            }
+          ]
+        },
+        {
+          "name": "getInlineStylesForNode",
+          "parameters": [
+            {
+              "name": "nodeId",
+              "$ref": "DOM.NodeId"
+            }
+          ],
+          "returns": [
+            {
+              "name": "inlineStyle",
+              "$ref": "CSSStyle"
+            }
+          ]
+        }
+      ],
+      "events": [],
+      "types": [
+        {
+          "id": "CSSProperty",
+          "type": "object",
+          "properties": [
+            {
+              "name": "name",
+              "type": "string"
+            },
+            {
+              "name": "value",
+              "type": "string"
+            }
+          ]
+        },
+        {
+          "id": "CSSStyle",
+          "type": "object",
+          "properties": [
+            {
+              "name": "cssProperties",
+              "type": "array",
+              "items": {
+                "$ref": "CSSProperty"
+              }
+            },
+            {
+              "name": "shorthandEntries",
+              "type": "array",
+              "items": {
+                "type": "object"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "domain": "Overlay",
+      "version": "1.3",
+      "commands": [
+        {
+          "name": "enable",
+          "parameters": [],
+          "returns": []
+        },
+        {
+          "name": "disable",
+          "parameters": [],
+          "returns": []
+        },
+        {
+          "name": "highlightNode",
+          "parameters": [
+            {
+              "name": "nodeId",
+              "$ref": "DOM.NodeId",
+              "optional": true
+            },
+            {
+              "name": "backendNodeId",
+              "type": "integer",
+              "optional": true
+            },
+            {
+              "name": "highlightConfig",
+              "type": "object",
+              "optional": true
+            }
+          ],
+          "returns": []
+        },
+        {
+          "name": "hideHighlight",
+          "parameters": [],
+          "returns": []
+        },
+        {
+          "name": "setInspectMode",
+          "parameters": [
+            {
+              "name": "mode",
+              "type": "string",
+              "enum": [
+                "none",
+                "searchForNode"
+              ]
+            },
+            {
+              "name": "highlightConfig",
+              "type": "object",
+              "optional": true
+            }
+          ],
+          "returns": []
+        }
+      ],
+      "events": [
+        {
+          "name": "inspectNodeRequested",
+          "parameters": [
+            {
+              "name": "backendNodeId",
+              "type": "integer"
+            }
+          ]
+        },
+        {
+          "name": "nodeHighlightRequested",
+          "parameters": [
+            {
+              "name": "nodeId",
+              "$ref": "DOM.NodeId"
+            }
+          ]
+        }
+      ],
+      "types": []
+    },
+    {
+      "domain": "Page",
+      "version": "1.3",
+      "commands": [
+        {
+          "name": "enable",
+          "parameters": [],
+          "returns": []
+        },
+        {
+          "name": "disable",
+          "parameters": [],
+          "returns": []
+        },
+        {
+          "name": "getFrameTree",
+          "parameters": [],
+          "returns": [
+            {
+              "name": "frameTree",
+              "$ref": "FrameTree"
+            }
+          ]
+        },
+        {
+          "name": "getLayoutMetrics",
+          "parameters": [],
+          "returns": [
+            {
+              "name": "layoutViewport",
+              "type": "object"
+            },
+            {
+              "name": "visualViewport",
+              "type": "object"
+            },
+            {
+              "name": "contentSize",
+              "type": "object"
+            },
+            {
+              "name": "cssLayoutViewport",
+              "type": "object"
+            },
+            {
+              "name": "cssVisualViewport",
+              "type": "object"
+            },
+            {
+              "name": "cssContentSize",
+              "type": "object"
+            }
+          ]
+        },
+        {
+          "name": "captureScreenshot",
+          "parameters": [
+            {
+              "name": "format",
+              "type": "string",
+              "optional": true,
+              "enum": [
+                "png"
+              ]
+            }
+          ],
+          "returns": [
+            {
+              "name": "data",
+              "type": "string"
+            }
+          ],
+          "description": "Full window at 96 DPI; PNG only; clip is unsupported."
+        },
+        {
+          "name": "setLifecycleEventsEnabled",
+          "parameters": [
+            {
+              "name": "enabled",
+              "type": "boolean"
+            }
+          ],
+          "returns": []
+        },
+        {
+          "name": "setInterceptFileChooserDialog",
+          "parameters": [
+            {
+              "name": "enabled",
+              "type": "boolean"
+            }
+          ],
+          "returns": []
+        },
+        {
+          "name": "addScriptToEvaluateOnNewDocument",
+          "parameters": [
+            {
+              "name": "source",
+              "type": "string"
+            },
+            {
+              "name": "worldName",
+              "type": "string",
+              "optional": true
+            }
+          ],
+          "returns": [
+            {
+              "name": "identifier",
+              "type": "string"
+            }
+          ],
+          "description": "Only an empty source is accepted, for client bootstrap. Nonempty scripts return an error."
+        },
+        {
+          "name": "getResourceTree",
+          "parameters": [],
+          "returns": [
+            {
+              "name": "frameTree",
+              "type": "object"
+            }
+          ]
+        }
+      ],
+      "events": [],
+      "types": [
+        {
+          "id": "FrameTree",
+          "type": "object",
+          "properties": [
+            {
+              "name": "frame",
+              "type": "object"
+            },
+            {
+              "name": "childFrames",
+              "type": "array",
+              "optional": true,
+              "items": {
+                "$ref": "FrameTree"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "domain": "Accessibility",
+      "version": "1.3",
+      "commands": [
+        {
+          "name": "enable",
+          "parameters": [],
+          "returns": []
+        },
+        {
+          "name": "disable",
+          "parameters": [],
+          "returns": []
+        },
+        {
+          "name": "getFullAXTree",
+          "parameters": [
+            {
+              "name": "depth",
+              "type": "integer",
+              "optional": true
+            }
+          ],
+          "returns": [
+            {
+              "name": "nodes",
+              "type": "array",
+              "items": {
+                "$ref": "AXNode"
+              }
+            }
+          ]
+        },
+        {
+          "name": "queryAXTree",
+          "parameters": [
+            {
+              "name": "nodeId",
+              "$ref": "DOM.NodeId",
+              "optional": true
+            },
+            {
+              "name": "backendNodeId",
+              "type": "integer",
+              "optional": true
+            },
+            {
+              "name": "accessibleName",
+              "type": "string",
+              "optional": true
+            },
+            {
+              "name": "role",
+              "type": "string",
+              "optional": true
+            }
+          ],
+          "returns": [
+            {
+              "name": "nodes",
+              "type": "array",
+              "items": {
+                "$ref": "AXNode"
+              }
+            }
+          ]
+        }
+      ],
+      "events": [],
+      "types": [
+        {
+          "id": "AXNode",
+          "type": "object",
+          "properties": [
+            {
+              "name": "nodeId",
+              "type": "string"
+            },
+            {
+              "name": "backendDOMNodeId",
+              "type": "integer",
+              "optional": true
+            },
+            {
+              "name": "ignored",
+              "type": "boolean"
+            },
+            {
+              "name": "role",
+              "type": "object"
+            },
+            {
+              "name": "name",
+              "type": "object"
+            },
+            {
+              "name": "description",
+              "type": "object"
+            },
+            {
+              "name": "properties",
+              "type": "array",
+              "items": {
+                "type": "object"
+              }
+            },
+            {
+              "name": "childIds",
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            {
+              "name": "parentId",
+              "type": "string",
+              "optional": true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "domain": "Log",
+      "version": "1.3",
+      "commands": [
+        {
+          "name": "enable",
+          "parameters": [],
+          "returns": []
+        },
+        {
+          "name": "disable",
+          "parameters": [],
+          "returns": []
+        }
+      ],
+      "events": [
+        {
+          "name": "entryAdded",
+          "parameters": [
+            {
+              "name": "entry",
+              "$ref": "LogEntry"
+            }
+          ]
+        }
+      ],
+      "types": [
+        {
+          "id": "LogEntry",
+          "type": "object",
+          "properties": [
+            {
+              "name": "source",
+              "type": "string"
+            },
+            {
+              "name": "level",
+              "type": "string"
+            },
+            {
+              "name": "text",
+              "type": "string"
+            },
+            {
+              "name": "timestamp",
+              "type": "number"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "domain": "Runtime",
+      "version": "1.3",
+      "commands": [
+        {
+          "name": "enable",
+          "parameters": [],
+          "returns": []
+        },
+        {
+          "name": "disable",
+          "parameters": [],
+          "returns": []
+        },
+        {
+          "name": "runIfWaitingForDebugger",
+          "parameters": [],
+          "returns": []
+        }
+      ],
+      "events": [
+        {
+          "name": "consoleAPICalled",
+          "parameters": [
+            {
+              "name": "type",
+              "type": "string"
+            },
+            {
+              "name": "args",
+              "type": "array",
+              "items": {
+                "type": "object"
+              }
+            },
+            {
+              "name": "executionContextId",
+              "type": "integer"
+            },
+            {
+              "name": "timestamp",
+              "type": "number"
+            }
+          ]
+        },
+        {
+          "name": "executionContextCreated",
+          "parameters": [
+            {
+              "name": "context",
+              "type": "object"
+            }
+          ]
+        }
+      ],
+      "types": []
+    },
+    {
+      "domain": "Input",
+      "version": "1.3",
+      "commands": [
+        {
+          "name": "dispatchMouseEvent",
+          "parameters": [
+            {
+              "name": "type",
+              "type": "string"
+            },
+            {
+              "name": "x",
+              "type": "number"
+            },
+            {
+              "name": "y",
+              "type": "number"
+            },
+            {
+              "name": "button",
+              "type": "string",
+              "optional": true
+            },
+            {
+              "name": "buttons",
+              "type": "integer",
+              "optional": true
+            },
+            {
+              "name": "deltaX",
+              "type": "number",
+              "optional": true
+            },
+            {
+              "name": "deltaY",
+              "type": "number",
+              "optional": true
+            },
+            {
+              "name": "modifiers",
+              "type": "integer",
+              "optional": true
+            }
+          ],
+          "returns": []
+        },
+        {
+          "name": "dispatchKeyEvent",
+          "parameters": [
+            {
+              "name": "type",
+              "type": "string"
+            },
+            {
+              "name": "key",
+              "type": "string",
+              "optional": true
+            },
+            {
+              "name": "code",
+              "type": "string",
+              "optional": true
+            },
+            {
+              "name": "text",
+              "type": "string",
+              "optional": true
+            },
+            {
+              "name": "modifiers",
+              "type": "integer",
+              "optional": true
+            }
+          ],
+          "returns": []
+        },
+        {
+          "name": "insertText",
+          "parameters": [
+            {
+              "name": "text",
+              "type": "string"
+            }
+          ],
+          "returns": []
+        },
+        {
+          "name": "dispatchTouchEvent",
+          "parameters": [
+            {
+              "name": "type",
+              "type": "string"
+            },
+            {
+              "name": "touchPoints",
+              "type": "array",
+              "items": {
+                "type": "object"
+              }
+            },
+            {
+              "name": "modifiers",
+              "type": "integer",
+              "optional": true
+            }
+          ],
+          "returns": []
+        }
+      ],
+      "events": [],
+      "types": []
+    },
+    {
+      "domain": "Target",
+      "version": "1.3",
+      "commands": [
+        {
+          "name": "getTargets",
+          "parameters": [],
+          "returns": [
+            {
+              "name": "targetInfos",
+              "type": "array",
+              "items": {
+                "$ref": "TargetInfo"
+              }
+            }
+          ]
+        },
+        {
+          "name": "getBrowserContexts",
+          "parameters": [],
+          "returns": [
+            {
+              "name": "browserContextIds",
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          ]
+        },
+        {
+          "name": "getTargetInfo",
+          "parameters": [
+            {
+              "name": "targetId",
+              "type": "string",
+              "optional": true
+            }
+          ],
+          "returns": [
+            {
+              "name": "targetInfo",
+              "$ref": "TargetInfo"
+            }
+          ]
+        },
+        {
+          "name": "setDiscoverTargets",
+          "parameters": [
+            {
+              "name": "discover",
+              "type": "boolean"
+            }
+          ],
+          "returns": []
+        },
+        {
+          "name": "setAutoAttach",
+          "parameters": [
+            {
+              "name": "autoAttach",
+              "type": "boolean"
+            },
+            {
+              "name": "waitForDebuggerOnStart",
+              "type": "boolean",
+              "optional": true
+            },
+            {
+              "name": "flatten",
+              "type": "boolean"
+            }
+          ],
+          "returns": []
+        },
+        {
+          "name": "attachToTarget",
+          "parameters": [
+            {
+              "name": "targetId",
+              "type": "string"
+            },
+            {
+              "name": "flatten",
+              "type": "boolean"
+            }
+          ],
+          "returns": [
+            {
+              "name": "sessionId",
+              "type": "string"
+            }
+          ]
+        },
+        {
+          "name": "detachFromTarget",
+          "parameters": [
+            {
+              "name": "sessionId",
+              "type": "string"
+            }
+          ],
+          "returns": []
+        },
+        {
+          "name": "attachToBrowserTarget",
+          "parameters": [],
+          "returns": [
+            {
+              "name": "sessionId",
+              "type": "string"
+            }
+          ]
+        }
+      ],
+      "events": [
+        {
+          "name": "attachedToTarget",
+          "parameters": [
+            {
+              "name": "sessionId",
+              "type": "string"
+            },
+            {
+              "name": "targetInfo",
+              "$ref": "TargetInfo"
+            },
+            {
+              "name": "waitingForDebugger",
+              "type": "boolean"
+            }
+          ]
+        },
+        {
+          "name": "detachedFromTarget",
+          "parameters": [
+            {
+              "name": "sessionId",
+              "type": "string"
+            },
+            {
+              "name": "targetId",
+              "type": "string"
+            }
+          ]
+        },
+        {
+          "name": "targetCreated",
+          "parameters": [
+            {
+              "name": "targetInfo",
+              "$ref": "TargetInfo"
+            }
+          ]
+        },
+        {
+          "name": "targetDestroyed",
+          "parameters": [
+            {
+              "name": "targetId",
+              "type": "string"
+            }
+          ]
+        }
+      ],
+      "types": [
+        {
+          "id": "TargetInfo",
+          "type": "object",
+          "properties": [
+            {
+              "name": "targetId",
+              "type": "string"
+            },
+            {
+              "name": "type",
+              "type": "string"
+            },
+            {
+              "name": "title",
+              "type": "string"
+            },
+            {
+              "name": "url",
+              "type": "string"
+            },
+            {
+              "name": "attached",
+              "type": "boolean"
+            },
+            {
+              "name": "canAccessOpener",
+              "type": "boolean"
+            },
+            {
+              "name": "browserContextId",
+              "type": "string"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "domain": "Browser",
+      "version": "1.3",
+      "commands": [
+        {
+          "name": "getVersion",
+          "parameters": [],
+          "returns": [
+            {
+              "name": "protocolVersion",
+              "type": "string"
+            },
+            {
+              "name": "product",
+              "type": "string"
+            },
+            {
+              "name": "revision",
+              "type": "string"
+            },
+            {
+              "name": "userAgent",
+              "type": "string"
+            },
+            {
+              "name": "jsVersion",
+              "type": "string"
+            }
+          ]
+        },
+        {
+          "name": "setDownloadBehavior",
+          "parameters": [
+            {
+              "name": "behavior",
+              "type": "string"
+            },
+            {
+              "name": "browserContextId",
+              "type": "string",
+              "optional": true
+            },
+            {
+              "name": "downloadPath",
+              "type": "string",
+              "optional": true
+            },
+            {
+              "name": "eventsEnabled",
+              "type": "boolean",
+              "optional": true
+            }
+          ],
+          "returns": []
+        }
+      ],
+      "events": [],
+      "types": []
+    },
+    {
+      "domain": "Network",
+      "version": "1.3",
+      "commands": [
+        {
+          "name": "enable",
+          "parameters": [],
+          "returns": []
+        },
+        {
+          "name": "disable",
+          "parameters": [],
+          "returns": []
+        }
+      ],
+      "events": [],
+      "types": []
+    },
+    {
+      "domain": "Emulation",
+      "version": "1.3",
+      "commands": [
+        {
+          "name": "setFocusEmulationEnabled",
+          "parameters": [
+            {
+              "name": "enabled",
+              "type": "boolean"
+            }
+          ],
+          "returns": []
+        },
+        {
+          "name": "setEmulatedMedia",
+          "parameters": [
+            {
+              "name": "media",
+              "type": "string",
+              "optional": true
+            },
+            {
+              "name": "features",
+              "type": "array",
+              "optional": true,
+              "items": {
+                "type": "object"
+              }
+            }
+          ],
+          "returns": []
+        }
+      ],
+      "events": [],
+      "types": []
+    },
+    {
+      "domain": "Schema",
+      "version": "1.3",
+      "commands": [
+        {
+          "name": "getDomains",
+          "parameters": [],
+          "returns": [
+            {
+              "name": "domains",
+              "type": "array",
+              "items": {
+                "type": "object"
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -47,7 +47,12 @@ use syn::{braced, token, Expr, FnArg, Ident, ItemFn, LitStr, Pat, Path, Token, T
 /// Several nodes at the root make a fragment.
 #[proc_macro]
 pub fn rsx(input: TokenStream) -> TokenStream {
-    let nodes = syn::parse_macro_input!(input as Nodes);
+    use syn::parse::Parser;
+    let counter = Counter::default();
+    let nodes = match (|input: ParseStream| parse_nodes(input, &counter)).parse(input) {
+        Ok(nodes) => nodes,
+        Err(error) => return error.to_compile_error().into(),
+    };
     let elements: Vec<TokenStream2> = nodes.0.iter().map(Node::to_element).collect();
     let tokens = if elements.len() == 1 {
         elements.into_iter().next().unwrap_or_default()
@@ -59,22 +64,61 @@ pub fn rsx(input: TokenStream) -> TokenStream {
 
 struct Nodes(Vec<Node>);
 
-impl Parse for Nodes {
-    fn parse(input: ParseStream) -> syn::Result<Self> {
-        let mut nodes = Vec::new();
-        while !input.is_empty() {
-            nodes.push(input.parse()?);
-            if input.peek(Token![,]) {
-                input.parse::<Token![,]>()?;
-            }
-        }
-        Ok(Nodes(nodes))
+/// Numbers the literal tokens of an `rsx!` in the order of the source: the
+/// key of a literal for hot reload (`ferroui_view::hot`), which the runtime
+/// finds again by counting the literal tokens of the macro in the file.
+#[derive(Default)]
+struct Counter(std::cell::Cell<u32>);
+
+impl Counter {
+    /// The number of the next literal, which this one takes.
+    fn take(&self) -> u32 {
+        let index = self.0.get();
+        self.0.set(index + 1);
+        index
     }
+
+    /// Skips the literals of tokens that are not hot literals.
+    fn skip(&self, tokens: TokenStream2) {
+        fn count(tokens: TokenStream2) -> u32 {
+            tokens
+                .into_iter()
+                .map(|token| match token {
+                    proc_macro2::TokenTree::Literal(_) => 1,
+                    proc_macro2::TokenTree::Group(group) => count(group.stream()),
+                    _ => 0,
+                })
+                .sum()
+        }
+        self.0.set(self.0.get() + count(tokens));
+    }
+}
+
+/// A literal that hot reload can change (`ferroui_view::hot::lit`).
+fn hot_literal(index: u32, literal: &TokenStream2) -> TokenStream2 {
+    quote! {
+        ::ferroui_view::hot::lit(
+            ::ferroui_view::hot::Site { file: file!(), line: line!(), column: column!(), manifest: env!("CARGO_MANIFEST_DIR") },
+            #index,
+            #literal,
+        )
+    }
+}
+
+fn parse_nodes(input: ParseStream, counter: &Counter) -> syn::Result<Nodes> {
+    let mut nodes = Vec::new();
+    while !input.is_empty() {
+        nodes.push(parse_node(input, counter)?);
+        if input.peek(Token![,]) {
+            input.parse::<Token![,]>()?;
+        }
+    }
+    Ok(Nodes(nodes))
 }
 
 enum Node {
     Element(ElementNode),
-    Text(LitStr),
+    Text(LitStr, u32),
     Expr(Expr, Span),
     If(Box<Expr>, Vec<Node>, Option<Vec<Node>>, Span),
     For(Box<Pat>, Box<Expr>, Vec<Node>, Span),
@@ -93,39 +137,52 @@ enum Attribute {
         owner: Option<Ident>,
         name: Ident,
         value: Expr,
+        /// The number of the literal when the value is one that hot reload
+        /// can change.
+        hot: Option<u32>,
     },
     /// `name(arguments)`: a method of the builder with several arguments.
     Call { name: Ident, arguments: syn::punctuated::Punctuated<Expr, Token![,]> },
 }
 
-fn parse_children(input: ParseStream) -> syn::Result<Vec<Node>> {
+fn parse_children(input: ParseStream, counter: &Counter) -> syn::Result<Vec<Node>> {
     let content;
     braced!(content in input);
-    Ok(content.parse::<Nodes>()?.0)
+    Ok(parse_nodes(&content, counter)?.0)
 }
 
-impl Parse for Node {
-    fn parse(input: ParseStream) -> syn::Result<Self> {
+/// Whether a value is a literal that hot reload can change: text, a number,
+/// a character.
+fn is_hot_literal(value: &Expr) -> bool {
+    matches!(value, Expr::Lit(lit) if matches!(lit.lit, syn::Lit::Str(_) | syn::Lit::Int(_) | syn::Lit::Float(_) | syn::Lit::Char(_)))
+}
+
+fn parse_node(input: ParseStream, counter: &Counter) -> syn::Result<Node> {
+    {
         if input.peek(LitStr) {
-            return Ok(Node::Text(input.parse()?));
+            let text: LitStr = input.parse()?;
+            return Ok(Node::Text(text, counter.take()));
         }
         if input.peek(token::Brace) {
             let span = input.span();
             let content;
             braced!(content in input);
-            return Ok(Node::Expr(content.parse()?, span));
+            let expr: Expr = content.parse()?;
+            counter.skip(expr.to_token_stream());
+            return Ok(Node::Expr(expr, span));
         }
         if input.peek(Token![if]) {
             let span = input.span();
             input.parse::<Token![if]>()?;
             let condition = Expr::parse_without_eager_brace(input)?;
-            let then = parse_children(input)?;
+            counter.skip(condition.to_token_stream());
+            let then = parse_children(input, counter)?;
             let otherwise = if input.peek(Token![else]) {
                 input.parse::<Token![else]>()?;
                 if input.peek(Token![if]) {
-                    Some(vec![input.parse::<Node>()?])
+                    Some(vec![parse_node(input, counter)?])
                 } else {
-                    Some(parse_children(input)?)
+                    Some(parse_children(input, counter)?)
                 }
             } else {
                 None
@@ -136,9 +193,11 @@ impl Parse for Node {
             let span = input.span();
             input.parse::<Token![for]>()?;
             let pattern = Pat::parse_single(input)?;
+            counter.skip(pattern.to_token_stream());
             input.parse::<Token![in]>()?;
             let items = Expr::parse_without_eager_brace(input)?;
-            let body = parse_children(input)?;
+            counter.skip(items.to_token_stream());
+            let body = parse_children(input, counter)?;
             return Ok(Node::For(Box::new(pattern), Box::new(items), body, span));
         }
         let path: Path = input.call(Path::parse_mod_style)?;
@@ -152,13 +211,14 @@ impl Parse for Node {
                 let arguments;
                 syn::parenthesized!(arguments in content);
                 let arguments = arguments.parse_terminated(Expr::parse, Token![,])?;
+                counter.skip(arguments.to_token_stream());
                 attributes.push(Attribute::Call { name, arguments });
             } else if content.peek(Ident::peek_any) && (content.peek2(Token![,]) || is_last_token(&content)) {
                 // `name` alone: the setter of the name with the variable of
                 // the name, as a field of a struct is given.
                 let name = content.call(Ident::parse_any)?;
                 let value: Expr = syn::parse_quote!(#name);
-                attributes.push(Attribute::Value { owner: None, name, value });
+                attributes.push(Attribute::Value { owner: None, name, value, hot: None });
             } else if is_attribute(&content) {
                 let owner = if content.peek2(Token![.]) {
                     let owner = content.call(Ident::parse_any)?;
@@ -170,9 +230,15 @@ impl Parse for Node {
                 let name = content.call(Ident::parse_any)?;
                 content.parse::<Token![:]>()?;
                 let value: Expr = content.parse()?;
-                attributes.push(Attribute::Value { owner, name, value });
+                let hot = if is_hot_literal(&value) {
+                    Some(counter.take())
+                } else {
+                    counter.skip(value.to_token_stream());
+                    None
+                };
+                attributes.push(Attribute::Value { owner, name, value, hot });
             } else {
-                children.push(content.parse()?);
+                children.push(parse_node(&content, counter)?);
             }
             if content.peek(Token![,]) {
                 content.parse::<Token![,]>()?;
@@ -229,7 +295,7 @@ impl Node {
     fn to_child(&self) -> TokenStream2 {
         match self {
             Node::Element(element) => element.to_builder(),
-            Node::Text(text) => text.to_token_stream(),
+            Node::Text(text, index) => hot_literal(*index, &text.to_token_stream()),
             Node::Expr(expr, span) => quote_spanned! {*span=> #expr },
             Node::If(..) | Node::For(..) => self.to_element(),
         }
@@ -242,7 +308,10 @@ impl Node {
                 let builder = element.to_builder();
                 quote! { ::ferroui_view::IntoElement::into_element(#builder) }
             }
-            Node::Text(text) => quote! { ::ferroui_view::IntoChild::into_child(#text) },
+            Node::Text(text, index) => {
+                let text = hot_literal(*index, &text.to_token_stream());
+                quote! { ::ferroui_view::IntoChild::into_child(#text) }
+            }
             Node::Expr(expr, span) => quote_spanned! {*span=> ::ferroui_view::IntoChild::into_child(#expr) },
             Node::If(condition, then, otherwise, span) => {
                 let then = fragment(then);
@@ -252,7 +321,7 @@ impl Node {
             Node::For(pattern, items, body, span) => {
                 let body = fragment(body);
                 quote_spanned! {*span=>
-                    ::ferroui_view::Element::Fragment(
+                    ::ferroui_view::Element::List(
                         ::std::iter::IntoIterator::into_iter(#items).map(|#pattern| #body).collect::<::std::vec::Vec<_>>()
                     )
                 }
@@ -277,7 +346,11 @@ impl ElementNode {
         let mut tokens = quote_spanned! {span=> <#path as ::ferroui_view::Builder>::builder() };
         for attribute in &self.attributes {
             match attribute {
-                Attribute::Value { owner, name, value } => {
+                Attribute::Value { owner, name, value, hot } => {
+                    let value = match hot {
+                        Some(index) => hot_literal(*index, &value.to_token_stream()),
+                        None => value.to_token_stream(),
+                    };
                     let method = match owner {
                         Some(owner) => {
                             format_ident!("{}_{}", snake_case(&owner.unraw().to_string()), name.unraw(), span = name.span())
@@ -323,12 +396,14 @@ impl ElementNode {
 /// the element is built.
 ///
 /// `#[component(rerender)]` makes a component that runs again: its function
-/// runs whenever a signal it read changes or its parent runs again, the
-/// elements it returns are patched into the controls it made before, and its
-/// state is kept in hooks (`use_signal`, `use_effect`, ...). Its parameters
-/// are cloned for each run, so they are `Clone`. With
-/// `#[component(rerender, memo)]` a parent that runs again with equal
-/// parameters (`PartialEq`) does not run it again.
+/// runs whenever a signal it read changes or its parent runs again with
+/// other parameters, the elements it returns are patched into the controls it
+/// made before, and its state is kept in hooks (`use_signal`, `use_effect`,
+/// ...). Its parameters are cloned for each run, so they are `Clone`. When
+/// they are also `PartialEq` it is memoized: a parent that runs again with
+/// equal parameters does not run it again. `#[component(rerender, memo)]`
+/// requires that (a compile error otherwise), and
+/// `#[component(rerender, always)]` runs it with its parent every time.
 #[proc_macro_attribute]
 pub fn component(attribute: TokenStream, item: TokenStream) -> TokenStream {
     let mut options = ComponentOptions::default();
@@ -339,15 +414,21 @@ pub fn component(attribute: TokenStream, item: TokenStream) -> TokenStream {
         } else if meta.path.is_ident("memo") {
             options.memo = true;
             Ok(())
+        } else if meta.path.is_ident("always") {
+            options.always = true;
+            Ok(())
         } else {
-            Err(meta.error("expected `rerender` or `memo`"))
+            Err(meta.error("expected `rerender`, `memo` or `always`"))
         }
     });
     syn::parse_macro_input!(attribute with parser);
-    if options.memo && !options.rerender {
-        return syn::Error::new(Span::call_site(), "`memo` is an option of a component that runs again: `#[component(rerender, memo)]`")
+    if (options.memo || options.always) && !options.rerender {
+        return syn::Error::new(Span::call_site(), "`memo` and `always` are options of a component that runs again: `#[component(rerender, memo)]`")
             .to_compile_error()
             .into();
+    }
+    if options.memo && options.always {
+        return syn::Error::new(Span::call_site(), "`memo` and `always` contradict each other").to_compile_error().into();
     }
     let function = syn::parse_macro_input!(item as ItemFn);
     match expand_component(function, options) {
@@ -359,7 +440,10 @@ pub fn component(attribute: TokenStream, item: TokenStream) -> TokenStream {
 #[derive(Default, Clone, Copy)]
 struct ComponentOptions {
     rerender: bool,
+    /// Memoized, and its parameters must be `PartialEq`.
     memo: bool,
+    /// Never memoized.
+    always: bool,
 }
 
 struct Param {
@@ -478,8 +562,16 @@ fn expand_component(mut function: ItemFn, options: ComponentOptions) -> syn::Res
     let into_element = if options.rerender {
         let props = if options.memo {
             quote! { ::std::option::Option::Some(::std::rc::Rc::new(::std::clone::Clone::clone(&props)) as ::std::rc::Rc<dyn ::ferroui_view::element::AnyValueEq>) }
-        } else {
+        } else if options.always {
             quote! { ::std::option::Option::None }
+        } else {
+            // Memoized when the parameters can be compared, which the types
+            // of the expansion decide (autoref specialization).
+            quote! {{
+                #[allow(unused_imports)]
+                use ::ferroui_view::element::{MemoNever as _, MemoWhenComparable as _};
+                (&::ferroui_view::element::MemoProbe(::std::clone::Clone::clone(&props))).memo_props()
+            }}
         };
         quote! {
             impl ::ferroui_view::IntoElement for #builder_type {

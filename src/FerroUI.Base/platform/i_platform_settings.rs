@@ -35,11 +35,12 @@ pub trait IPlatformSettings {
     /// language (such as `en-US`) the platform reports for the application.
     fn preferred_application_language(&self) -> String;
 
-    /// Whether the system permits nonessential UI animations. The setting is
-    /// queried when an animation is scheduled so changes apply to subsequent
-    /// animations. Backends without an exposed motion preference permit them.
+    /// Whether the user lets the system play animations that are not essential (WinUI
+    /// `SharedHelpers::IsAnimationsEnabled`, which reads `UISettings.AnimationsEnabled`).
     ///
-    /// Added for the WinUI Repeater transition provider's UISettings query.
+    /// The setting is asked for each animation, not kept: a change of it applies to the next
+    /// animation. A platform that does not report it lets animations play (the default).
+    /// A FerroUI addition for the ports of WinUI controls (DEVIATIONS.md, Platform settings).
     fn animations_enabled(&self) -> bool {
         true
     }

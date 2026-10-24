@@ -10,7 +10,7 @@ use crate::media::text_formatting::{
     TextCollapsingProperties, TextLine, TextLineBreak, TextLineMetrics, TextParagraphProperties, TextRun,
     TextRunBounds,
 };
-use crate::media::{BaselineAlignment, CharacterHit, FlowDirection, TextAlignment};
+use crate::media::{BaselineAlignment, CharacterHit, FlowDirection, TextAlignment, TextLineBounds};
 use crate::utilities::MathUtilities;
 use crate::{Point, Rect, Vector};
 
@@ -782,9 +782,11 @@ impl TextLineImpl {
         let mut ascent = font_metrics.ascent as f64 * scale;
         let mut descent = font_metrics.descent as f64 * scale;
         let mut line_gap = font_metrics.line_gap as f64 * scale;
+        let mut cap_height = font_metrics.cap_height as f64 * scale;
 
         let line_height = self.paragraph_properties.line_height();
         let line_spacing = self.paragraph_properties.line_spacing();
+        let text_line_bounds = self.paragraph_properties.text_line_bounds();
 
         for run in text_runs.iter() {
             if let Some(text_run) = run.downcast_ref::<ShapedTextRun>() {
@@ -800,6 +802,10 @@ impl TextLineImpl {
 
                 if line_gap < text_metrics.line_gap {
                     line_gap = text_metrics.line_gap;
+                }
+
+                if cap_height < text_metrics.cap_height {
+                    cap_height = text_metrics.cap_height;
                 }
             } else if let Some(drawable_text_run) = run.as_drawable() {
                 if drawable_text_run.baseline() > -ascent {
@@ -841,20 +847,32 @@ impl TextLineImpl {
         }
 
         let half_line_gap = line_gap * 0.5;
-        let natural_height = descent - ascent + line_gap;
-        let mut baseline = -ascent + half_line_gap;
+
+        // The box of the line (a FerroUI addition after WinUI's TextLineBounds,
+        // docs/porting/DEVIATIONS.md, Text block): above the baseline the ascent and half the
+        // line gap, or the cap height when the top is trimmed; below it the descent and half the
+        // line gap, or nothing when the bottom is trimmed. `Full` is the reference's box.
+        let (above, gap_above) =
+            if text_line_bounds.trims_top() { (cap_height.max(0.0), 0.0) } else { (-ascent, half_line_gap) };
+        let (below, gap_below) = if text_line_bounds.trims_bottom() { (0.0, 0.0) } else { (descent, half_line_gap) };
+
+        let natural_height = above + below + gap_above + gap_below;
+        let mut baseline = above + gap_above;
         let mut height = natural_height;
+        // How far below the top of the box the ink bounds, aligned at a baseline `-ascent` below
+        // the top, are drawn (half the line gap for `Full`, as the reference has it).
+        let ink_offset = baseline + ascent;
 
         if !line_height.is_nan() && !MathUtilities::is_zero(line_height) {
             if line_height <= natural_height {
                 // Clamp to the specified line height
                 height = line_height;
-                baseline = -ascent;
+                baseline = above;
             } else {
                 // Center the text vertically within the specified line height
                 height = line_height;
-                let extra = line_height - (descent - ascent);
-                baseline = -ascent + extra / 2.0;
+                let extra = line_height - (above + below);
+                baseline = above + extra / 2.0;
             }
         }
 
@@ -896,7 +914,14 @@ impl TextLineImpl {
 
         let extent = ink_bounds.height;
         // The height of overhanging pixels at the bottom
-        let overhang_after = ink_bounds.bottom() - height + half_line_gap;
+        let overhang_after = ink_bounds.bottom() - height + ink_offset;
+        // The reference keeps the ink bounds of a line aligned at a baseline `-ascent` below its
+        // top; a trimmed box moves them with its baseline.
+        let ink_bounds = if text_line_bounds == TextLineBounds::Full {
+            ink_bounds
+        } else {
+            ink_bounds.translate(Vector::new(0.0, ink_offset - half_line_gap))
+        };
         // The width of overhanging pixels at the natural alignment point. Positive value means we are inside.
         let overhang_leading = ink_bounds.left();
         // The width of overhanging pixels at the end of the natural bounds. Positive value means we are inside.

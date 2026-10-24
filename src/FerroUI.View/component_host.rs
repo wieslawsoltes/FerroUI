@@ -47,6 +47,8 @@ struct HostState {
     /// The pool of the template that made the host: a detached host goes
     /// there, mounted, instead of ending its component.
     pool: Option<Weak<HostPool>>,
+    /// What the inspector calls the tree of the host.
+    origin: Option<&'static str>,
 }
 
 /// Hosts that a data template keeps for reuse (see [`template`](crate::template)).
@@ -186,6 +188,11 @@ impl ComponentHost {
 
     /// Makes the host one of a template's: detached, it waits in `pool`
     /// with its component mounted, for the template to give it another item.
+    /// What the inspector calls the tree of the host.
+    pub(crate) fn set_origin(&self, origin: &'static str) {
+        self.state.borrow_mut().origin = Some(origin);
+    }
+
     pub(crate) fn set_pool(&self, pool: &Rc<HostPool>) {
         self.state.borrow_mut().pool = Some(Rc::downgrade(pool));
     }
@@ -203,7 +210,8 @@ impl ComponentHost {
         };
         let owner = parent.map_or_else(Owner::new_root, |parent| parent.with(Owner::new));
         let control: Ref<Control> = self.to_ref().upcast();
-        let mounted = owner.with(|| MountedChild::mount(&control, view()));
+        let origin = self.state.borrow().origin.unwrap_or("ComponentHost");
+        let mounted = owner.with(|| MountedChild::mount(&control, view(), origin));
         self.state.borrow_mut().mounted = Some((owner, mounted));
     }
 

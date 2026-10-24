@@ -378,35 +378,24 @@ impl Interpreter {
     ) -> XamlResult<MarkupValue> {
         let (root_value, _) = Self::root_group(root)?;
         let mut need_context_local = false;
-        let constructor = root_value.cast::<XamlAstNewClrObjectNode>().or_else(|| {
-            // Source information wraps construction in a value with a side
-            // effect; it must keep the same constructor checks and context.
-            root_value.as_value_with_manipulation_node()
-                .and_then(|value| value.value().as_node().cast::<XamlAstNewClrObjectNode>())
-        });
-        if let Some(new_object) = constructor {
+        if let Some(new_object) = root_value.cast::<XamlAstNewClrObjectNode>() {
             let arguments = new_object.arguments.borrow().clone();
-            let mut argument_types = Vec::with_capacity(arguments.len());
+            let mut argument_names = Vec::with_capacity(arguments.len());
             for argument in &arguments {
-                argument_types.push(argument.type_().get_clr_type()?);
+                argument_names.push(argument.type_().get_clr_type()?.get_full_name());
             }
-            // Explicit arguments can build named elements, evaluate markup
-            // extensions or request services before the root exists. Give
-            // their evaluation the document's construction context as well.
-            need_context_local = !arguments.is_empty();
-            let parameter_types = new_object.constructor.parameters();
+            if let [argument] = arguments.as_slice() {
+                need_context_local =
+                    argument.type_().get_clr_type()?.equals(&*self.configuration.type_mappings.service_provider()?);
+            }
+            let parameter_names: Vec<String> =
+                new_object.constructor.parameters().iter().map(|p| p.get_full_name()).collect();
             // Deviation (DEVIATIONS.md, Run-time type system of markup): the metadata declares the
             // public constructors only, so the parameters of a constructor that is not public
             // are not known; a root whose only constructor is not public is refused as one
             // whose constructor does not match (the original compares the parameters of the
             // non-public constructor, which takes arguments in its tests).
-            // Constructor resolution preserves an assignable argument's type:
-            // a list passed to IEnumerable, for example, remains a list node.
-            // Validate the selected signature using that same relationship.
-            let arguments_match = parameter_types.len() == argument_types.len()
-                && parameter_types.iter().zip(&argument_types)
-                    .all(|(parameter, argument)| parameter.is_assignable_from(&**argument));
-            if !arguments_match || !new_object.constructor.is_public() {
+            if parameter_names != argument_names || !new_object.constructor.is_public() {
                 return Err(XamlError::invalid_operation(
                     "Cannot compile Build method. Parameters mismatch.\
                      Type needs to have a parameterless ctor or a ctor with a single IServiceProvider argument.\

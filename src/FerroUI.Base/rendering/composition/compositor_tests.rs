@@ -1579,3 +1579,23 @@ fn an_id_released_twice_is_handed_out_once() {
         assert!(servers[index + 1..].iter().all(|other| !Rc::ptr_eq(server, other)));
     }
 }
+
+// The tests of the WinUI visual building blocks use the fixture of this
+// module.
+#[path = "composition_winui_visual_tests.rs"]
+mod composition_winui_visual_tests;
+
+#[path = "composition_shape_tests.rs"]
+mod composition_shape_tests;
+// The tests of the WinUI layer and redirect visuals, the nine-grid and mask
+// brushes and the remaining visual members use the fixture of this module.
+#[path = "composition_winui_layer_tests.rs"]
+mod composition_winui_layer_tests;
+// The tests of the WinUI shadows and lights (phase 5) use the fixture of
+// this module.
+#[path = "composition_light_tests.rs"]
+mod composition_light_tests;
+// The tests of the WinUI effect and backdrop brushes and the effect of
+// layer visuals use the fixture of this module.
+#[path = "composition_winui_effect_tests.rs"]
+mod composition_winui_effect_tests;

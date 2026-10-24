@@ -20,6 +20,10 @@ pub struct FontMetrics {
     pub strikethrough_position: i32,
     /// A value that indicates the thickness of the strikethrough in design em size.
     pub strikethrough_thickness: i32,
+    /// The height of the capital letters above the baseline in design em size (positive). A
+    /// FerroUI addition (docs/porting/DEVIATIONS.md, Fonts): the `sCapHeight` of the OS/2
+    /// table, or the top of the glyph of "H" for a font whose table has none.
+    pub cap_height: i32,
 }
 
 impl FontMetrics {

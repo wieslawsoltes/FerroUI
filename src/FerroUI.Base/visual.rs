@@ -44,11 +44,46 @@ pub struct Visual {
     text_options: Cell<TextOptions>,
     composition_visual: RefCell<Option<CompositionDrawListVisual>>,
     child_composition_visual: RefCell<Option<Rc<CompositionVisual>>>,
+    /// What the composition API of WinUI adds to the visual (the `Translation` facade, the
+    /// requests to hide the composition visual, the layer composition visual): boxed and
+    /// created on first use, so that a visual that uses none of it pays one pointer.
+    composition_extras: RefCell<Option<Box<CompositionExtras>>>,
     /// The subscription to the `changed` notification of the render
     /// transform, held while the visual is attached to a visual tree.
     render_transform_subscription: RefCell<Option<Rc<dyn IDisposable>>>,
     affects_render_subscriptions: RefCell<Vec<(&'static FerroProperty, Rc<dyn IDisposable>)>>,
 }
+
+/// The state of the WinUI composition API on a visual (see
+/// `docs/porting/winui-composition.md`).
+#[derive(Default)]
+struct CompositionExtras {
+    /// `UIElement.Translation`: `None` while the facade was never set, so that the translation
+    /// of the composition visual is left to the application.
+    translation: Option<crate::Vector3D>,
+    /// The number of outstanding requests to hide the composition visual (a connected animation
+    /// shows the element through a visual surface while it flies).
+    hide_requests: u32,
+    /// The number of outstanding requests to keep the composition visual visible although the
+    /// visual is not (an implicit hide animation runs).
+    show_requests: u32,
+    /// A composition visual shown above the children and the child composition visual: the
+    /// layer of the connected animations on a top level.
+    layer_visual: Option<Rc<CompositionVisual>>,
+    /// Composition visuals shown after the children: the images of removed children that play
+    /// their implicit hide animations (WinUI's unloading storage).
+    unloading_visuals: Vec<Rc<CompositionVisual>>,
+    /// The other transform facades of `UIElement` (`Rotation`, `RotationAxis`, `Scale`,
+    /// `CenterPoint`, `TransformMatrix`) and the transitions (`OpacityTransition`,
+    /// `RotationTransition`, `ScaleTransition`, `TranslationTransition`).
+    facades: composition_facades::CompositionFacades,
+}
+
+mod composition_facades;
+#[cfg(test)]
+mod composition_facades_tests;
+
+pub use composition_facades::{ScalarTransition, Vector3Transition, Vector3TransitionComponents};
 
 ferro_class! {
     Visual: StyledElement, virtuals VisualImpl: StyledElementImpl {
@@ -302,6 +337,9 @@ impl VisualImpl for Visual {
             if let Some(child) = this.child_composition_visual() {
                 composition_visual.children().remove(&child);
             }
+            if let Some(layer) = this.composition_layer_visual() {
+                composition_visual.children().remove(&layer);
+            }
             composition_visual.set_draw_list(None);
             composition_visual.set_opacity_mask(None);
             // The composition visual and its children refer to each other;
@@ -334,8 +372,23 @@ impl VisualImpl for Visual {
             child_visual = None;
         }
 
-        let mut expected_count = visual_children.len();
+        let mut layer_visual = this.composition_layer_visual();
+        if layer_visual.as_ref().is_some_and(|layer| !Rc::ptr_eq(layer.compositor(), composition_visual.compositor())) {
+            layer_visual = None;
+        }
+
+        let unloading_visuals: Vec<Rc<CompositionVisual>> = this
+            .read_composition_extras(|extras| extras.unloading_visuals.clone())
+            .unwrap_or_default()
+            .into_iter()
+            .filter(|unloading| Rc::ptr_eq(unloading.compositor(), composition_visual.compositor()))
+            .collect();
+
+        let mut expected_count = visual_children.len() + unloading_visuals.len();
         if child_visual.is_some() {
+            expected_count += 1;
+        }
+        if layer_visual.is_some() {
             expected_count += 1;
         }
 
@@ -356,8 +409,21 @@ impl VisualImpl for Visual {
                 }
             }
 
+            let mut index = visual_children.len();
+            for unloading in &unloading_visuals {
+                if !Rc::ptr_eq(&composition_children.get(index), unloading) {
+                    mismatch = true;
+                }
+                index += 1;
+            }
             if let Some(child_visual) = &child_visual {
-                if !Rc::ptr_eq(&composition_children.get(composition_children.count() - 1), child_visual) {
+                if !Rc::ptr_eq(&composition_children.get(index), child_visual) {
+                    mismatch = true;
+                }
+                index += 1;
+            }
+            if let Some(layer_visual) = &layer_visual {
+                if !Rc::ptr_eq(&composition_children.get(index), layer_visual) {
                     mismatch = true;
                 }
             }
@@ -385,8 +451,14 @@ impl VisualImpl for Visual {
             }
         }
 
+        for unloading in unloading_visuals {
+            composition_children.add(unloading);
+        }
         if let Some(child_visual) = child_visual {
             composition_children.add(child_visual);
+        }
+        if let Some(layer_visual) = layer_visual {
+            composition_children.add(layer_visual);
         }
     }
 
@@ -394,10 +466,15 @@ impl VisualImpl for Visual {
         let Some(comp) = this.composition_visual() else { return };
         let bounds = this.bounds();
 
+        // The implicit animations of the transitions, installed before the properties are
+        // written (so that a change animates), except on the first synchronization of a new
+        // composition visual (so that the initial values do not).
+        this.apply_composition_transitions(&comp, false);
+
         // TODO: Introduce a dirty mask like WPF has, so we don't overwrite properties every time
         comp.set_offset(crate::Vector3D::new(bounds.x, bounds.y, 0.0));
         comp.set_size(crate::Vector::new(bounds.width, bounds.height));
-        comp.set_visible(this.is_visible());
+        comp.set_visible((this.is_visible() || this.is_shown_by_composition()) && !this.is_hidden_by_composition());
         comp.set_opacity(this.opacity() as f32);
         comp.set_clip_to_bounds(this.clip_to_bounds());
         comp.set_clip(this.clip().and_then(|clip| clip.platform_impl()));
@@ -442,7 +519,20 @@ impl VisualImpl for Visual {
             render_transform = render_transform * ((-offset) * transform.value() * offset);
         }
 
+        // The `TransformMatrix` facade follows the render transform (see
+        // `composition_facade_transform_matrix`).
+        if let Some(facade) = this.composition_facade_transform_matrix() {
+            render_transform = render_transform * facade;
+        }
+
         comp.set_transform_matrix(render_transform);
+
+        if let Some(translation) = this.composition_translation() {
+            comp.set_translation(translation);
+        }
+
+        this.synchronize_composition_facades(&comp);
+        this.apply_composition_transitions(&comp, true);
     }
 
     fn invalidate_mirror_transform(this: &Self) {
@@ -633,6 +723,7 @@ impl Visual {
             text_options: Cell::new(TextOptions::default()),
             composition_visual: RefCell::new(None),
             child_composition_visual: RefCell::new(None),
+            composition_extras: RefCell::new(None),
             render_transform_subscription: RefCell::new(None),
             affects_render_subscriptions: RefCell::new(Vec::new()),
         }
@@ -925,6 +1016,120 @@ impl Visual {
         *self.child_composition_visual.borrow_mut() = value;
     }
 
+    fn with_composition_extras<R>(&self, f: impl FnOnce(&mut CompositionExtras) -> R) -> R {
+        let mut extras = self.composition_extras.borrow_mut();
+        f(extras.get_or_insert_with(Default::default))
+    }
+
+    fn read_composition_extras<R>(&self, f: impl FnOnce(&CompositionExtras) -> R) -> Option<R> {
+        self.composition_extras.borrow().as_deref().map(f)
+    }
+
+    /// `UIElement.Translation`: the translation of the composition visual of the visual, applied
+    /// after its render transform. Zero until set.
+    ///
+    /// As in WinUI the translation is not a styled property; setting it hands the `Translation`
+    /// of the composition visual to this facade, which writes it whenever the visual is
+    /// rendered again. While it was never set, the application may animate the `Translation` of
+    /// the composition visual itself.
+    pub fn translation(&self) -> crate::Vector3D {
+        self.composition_translation().unwrap_or_default()
+    }
+
+    pub fn set_translation(&self, value: crate::Vector3D) {
+        self.with_composition_extras(|extras| extras.translation = Some(value));
+        self.invalidate_visual();
+    }
+
+    fn composition_translation(&self) -> Option<crate::Vector3D> {
+        self.read_composition_extras(|extras| extras.translation).flatten()
+    }
+
+    /// Whether the composition visual of the visual is hidden by requests of the composition
+    /// API (see [`add_composition_hide_request`](Self::add_composition_hide_request)).
+    pub fn is_hidden_by_composition(&self) -> bool {
+        self.read_composition_extras(|extras| extras.hide_requests > 0).unwrap_or(false)
+    }
+
+    /// Hides the composition visual of the visual until the matching
+    /// [`remove_composition_hide_request`](Self::remove_composition_hide_request), whatever
+    /// `IsVisible` says. Requests are counted. A connected animation hides its source and
+    /// destination this way while it shows them through visual surfaces, which render a hidden
+    /// visual (WinUI hides the element's visual with `SetConnectedAnimationRunning`).
+    pub fn add_composition_hide_request(&self) {
+        self.with_composition_extras(|extras| extras.hide_requests += 1);
+        self.invalidate_visual();
+    }
+
+    /// Ends a request of [`add_composition_hide_request`](Self::add_composition_hide_request).
+    pub fn remove_composition_hide_request(&self) {
+        self.with_composition_extras(|extras| extras.hide_requests = extras.hide_requests.saturating_sub(1));
+        self.invalidate_visual();
+    }
+
+    /// Whether the composition visual of the visual is kept visible by requests of the
+    /// composition API although `IsVisible` is `false` (see
+    /// [`add_composition_show_request`](Self::add_composition_show_request)).
+    pub fn is_shown_by_composition(&self) -> bool {
+        self.read_composition_extras(|extras| extras.show_requests > 0).unwrap_or(false)
+    }
+
+    /// Keeps the composition visual of the visual visible until the matching
+    /// [`remove_composition_show_request`](Self::remove_composition_show_request), whatever
+    /// `IsVisible` says. Requests are counted. An implicit hide animation keeps the element
+    /// visible this way until it completes. A hide request wins over a show request.
+    pub fn add_composition_show_request(&self) {
+        self.with_composition_extras(|extras| extras.show_requests += 1);
+        self.invalidate_visual();
+    }
+
+    /// Ends a request of [`add_composition_show_request`](Self::add_composition_show_request).
+    pub fn remove_composition_show_request(&self) {
+        self.with_composition_extras(|extras| extras.show_requests = extras.show_requests.saturating_sub(1));
+        self.invalidate_visual();
+    }
+
+    /// A composition visual shown above the children of the visual and above its child
+    /// composition visual (the layer of the connected animations of a top level, WinUI's
+    /// `ConnectedAnimationRoot`).
+    pub fn composition_layer_visual(&self) -> Option<Rc<CompositionVisual>> {
+        self.read_composition_extras(|extras| extras.layer_visual.clone()).flatten()
+    }
+
+    /// Shows `visual` after the children of this visual until
+    /// [`remove_composition_unloading_visual`](Self::remove_composition_unloading_visual): the
+    /// image of a removed child that plays its implicit hide animation.
+    pub(crate) fn add_composition_unloading_visual(&self, visual: Rc<CompositionVisual>) {
+        self.with_composition_extras(|extras| extras.unloading_visuals.push(visual));
+        if let Some(source) = self.presentation_source() {
+            source.renderer().recalculate_children(self);
+        }
+    }
+
+    /// Ends [`add_composition_unloading_visual`](Self::add_composition_unloading_visual).
+    pub(crate) fn remove_composition_unloading_visual(&self, visual: &Rc<CompositionVisual>) {
+        self.with_composition_extras(|extras| extras.unloading_visuals.retain(|v| !Rc::ptr_eq(v, visual)));
+        if let Some(own) = self.composition_visual() {
+            own.children().remove(visual);
+        }
+        if let Some(source) = self.presentation_source() {
+            source.renderer().recalculate_children(self);
+        }
+    }
+
+    /// Sets the visual of [`composition_layer_visual`](Self::composition_layer_visual).
+    pub fn set_composition_layer_visual(&self, value: Option<Rc<CompositionVisual>>) {
+        let old = self.with_composition_extras(|extras| std::mem::replace(&mut extras.layer_visual, value.clone()));
+        if let (Some(old), Some(own)) = (&old, self.composition_visual()) {
+            if !value.as_ref().is_some_and(|new| Rc::ptr_eq(new, old)) {
+                own.children().remove(old);
+            }
+        }
+        if let Some(source) = self.presentation_source() {
+            source.renderer().recalculate_children(self);
+        }
+    }
+
     /// Makes sure the visual has a composition visual on `compositor` and
     /// returns it.
     pub fn attach_to_compositor(&self, compositor: &Rc<Compositor>) -> CompositionDrawListVisual {
@@ -934,6 +1139,7 @@ impl Visual {
             _ => {
                 let created = self.create_composition_visual(compositor);
                 *self.composition_visual.borrow_mut() = Some(created.clone());
+                self.composition_visual_created(&created);
                 created
             }
         }

@@ -338,7 +338,7 @@ cargo test --workspace --locked --no-fail-fast --lib --tests --exclude ferroui-r
 ```
 
 The final log reported one compiler error, `E0599`, at
-`src/FerroUI.Controls/repeater/acceptance_tests.rs:540`: the grid-placement
+`src/FerroUI.Controls.Repeater/acceptance_tests.rs:540`: the grid-placement
 verification helper called `len()` on `&FerroList<i32>`. FerroUI's collection API
 uses `count()`. The helper has been corrected to call `source.count()`; its
 placement and realization assertions are unchanged. This is a source correction,

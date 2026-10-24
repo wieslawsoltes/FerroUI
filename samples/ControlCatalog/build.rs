@@ -138,6 +138,10 @@ fn remove_stale(directory: &Path, keep: &BTreeSet<PathBuf>) {
     }
 }
 
+/// The document of the Simple and Fluent themes, compiled with the feature `classic-themes`
+/// only.
+const CLASSIC_THEMES_DOCUMENT: &str = "/ClassicThemes.xaml";
+
 /// Files that are assets whatever their directory.
 const ASSET_FILES: &[&str] = &["Pages/teapot.bin"];
 
@@ -385,6 +389,12 @@ fn main() {
     let mut assets = Vec::new();
     collect(&root, &root, &mut assets);
     assets.sort();
+    // The dictionary of the themes of the original names their types: without the feature
+    // `classic-themes` the crate does not depend on them, and the document is neither compiled
+    // nor embedded (docs/binary-size.md).
+    if env::var_os("CARGO_FEATURE_CLASSIC_THEMES").is_none() {
+        assets.retain(|(path, _)| path != CLASSIC_THEMES_DOCUMENT);
+    }
 
     if env::var_os("CARGO_FEATURE_PLACEHOLDER_BRANDING").is_some() {
         substitute_placeholders(&root, &mut assets);

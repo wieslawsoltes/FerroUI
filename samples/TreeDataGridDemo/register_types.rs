@@ -2,7 +2,9 @@
 //! markup, its embedded assets and the loader table of its compiled markup.
 
 use crate::markup::XamlClass;
-use crate::{models, view_models, views, App, MainWindow};
+use crate::{models, view_models, views};
+#[cfg(feature = "app")]
+use crate::{App, MainWindow};
 use ferroui_base::data::core::ValueTypes;
 use ferroui_base::metadata::{MarkupAssembly, MarkupType};
 use ferroui_base::TypeInfo;
@@ -25,11 +27,18 @@ pub static ASSEMBLY: MarkupAssembly = MarkupAssembly {
     metadata: &[],
 };
 
-/// The classes of the root namespace `TreeDataGridDemo` (`X::TYPE`).
+/// The classes of the root namespace `TreeDataGridDemo` (`X::TYPE`): the application of the
+/// demo, with the feature `app`.
+#[cfg(feature = "app")]
 const ROOT_TYPES: &[&TypeInfo] = &[App::TYPE, MainWindow::TYPE];
+#[cfg(not(feature = "app"))]
+const ROOT_TYPES: &[&TypeInfo] = &[];
 
 /// The classes of the root namespace that have a document (`&X::XAML_CLASS`).
+#[cfg(feature = "app")]
 pub(crate) const ROOT_CLASSES: &[&XamlClass] = &[&App::XAML_CLASS, &MainWindow::XAML_CLASS];
+#[cfg(not(feature = "app"))]
+pub(crate) const ROOT_CLASSES: &[&XamlClass] = &[];
 
 /// Registers the namespaces, the types, the assembly, the embedded assets and the compiled
 /// markup of this crate (and of the crates it is built on). Cheap and idempotent.
@@ -39,6 +48,8 @@ pub fn register_types() {
         // The runtime library of compiled markup (the markup extensions the compiled
         // documents create), which registers the controls.
         ferroui_markup_xaml::register_types();
+        // The theme of the application of the demo (`App.xaml`).
+        #[cfg(feature = "app")]
         ferroui_themes_fluent::register_types();
         ferroui_controls_treedatagrid::register_types();
         TypeInfo::register_namespaces(NAMESPACES);

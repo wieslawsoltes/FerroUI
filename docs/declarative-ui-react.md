@@ -5,7 +5,7 @@ This document is for developers who know React. It compares `ferroui-view`, the 
 - where the two behave alike and where they differ;
 - what React has that FerroUI does not have yet.
 
-It describes FerroUI after phases 1 to 3 of issue #237 (components that run again, hooks, the reconciler; XAML and data templates of components; styles, themes, transitions, popups) and React 18 and 19.
+It describes FerroUI after phases 1 to 6 of issue #237 (components that run again, hooks, the reconciler; XAML and data templates of components; styles, themes, transitions, popups; hot reload, diagnostics, an inspector; the fewest moves and memo by default; futures, error boundaries and a router) and React 18 and 19.
 
 ## 1. Summary
 
@@ -54,7 +54,7 @@ What sets FerroUI apart from React is where the elements end up. React DOM rende
 | `useEffect(f)` that reads state | `use_effect(|| ..)` | It runs again when the signals it read change, with no dependency list. |
 | `useLayoutEffect` | `use_effect_with` | It runs right after the controls of the run are in place, before the next layout and frame (section 7). |
 | `createContext`, `<Ctx.Provider value>`, `useContext` | `provide_context(value)`, `use_context::<T>()` | Contexts are found by type, not by an object. |
-| `React.memo(C)` | `#[component(rerender, memo)]` | It compares all parameters with `PartialEq`, where React compares props shallowly with `Object.is`. |
+| `React.memo(C)` | the default of `#[component(rerender)]` for parameters that are `PartialEq + Clone`; `memo` requires it, `always` opts out | React does not memoize by default; FerroUI does, because a run of 2,600 children costs 14 ms and a memoized one 0.23 ms (section 12.3 of declarative-ui.md). |
 | controlled input (`value` and `onChange`) | `text: name.get()` with `on_changed(TextBox::text_property(), ..)`, or `text: name.two_way()` | A two-way value is shorter. The hooks temperature converter shows both forms. |
 | uncontrolled input with a ref | a control with no bound value, read through a `NodeRef` | |
 | `createPortal` | `Popup { .. }` with a child element; `context_menu: rsx! { ContextMenu { .. } }` | The child of a popup is shown above the window, outside the visual tree of its parent, under its owner, as a portal. A second window is `open_window(|| ..)`. |
@@ -65,12 +65,14 @@ What sets FerroUI apart from React is where the elements end up. React DOM rende
 | a list virtualized with react-window or react-virtuoso | a virtualized `ListBox` with `item_template: template(|item: T| ..)` | The virtualizing panels of FerroUI realize the visible items. The template keeps a pool of hosts, so scrolling patches existing items instead of mounting new ones (as react-window reuses its rows). |
 | a React root inside a page of another framework (`createRoot(el).render(..)`) | `ComponentHost`, in XAML or any tree of controls | |
 | React inside a page of another framework, or that page inside React | `use_xaml(..)` puts XAML inside a component; `ComponentHost` puts a component inside XAML | |
-| error boundary | not yet (phase 6) | |
-| `Suspense`, `lazy`, `use(promise)` | not yet (phase 6: `use_resource`) | Futures run on the thread's executor, `ferroui_system::threading::tasks`. |
+| error boundary (`componentDidCatch`, `getDerivedStateFromError`) | `error_boundary(\|\| child, \|info\| fallback)` | A function, not a class. A panic of a component's run below it, on the first run or a later one, shows the fallback; `info.message()` is the panic's message and `info.reset()` mounts the child again. Handlers are not guarded, as in React; unlike React, effects (`use_effect`, `use_effect_with`) are not guarded either. A caught panic is reported as `Diagnostic::ErrorCaught`. |
+| `Suspense`, `use(promise)`, data fetching in `useEffect` | `use_future(deps, \|deps\| future)` and `suspense(state, pending, ready, failed)` | The future runs on the thread's executor (`ferroui_system::threading::tasks`) and its state is a signal of `AsyncState` (`Pending`, `Ready`, `Failed`). New dependencies abandon the future before, whose result is then ignored, as an effect's cleanup sets an `ignore` flag in React. `suspense` follows one state; it does not wait for the futures of the components below it as React's `Suspense` does. `sleep(duration)` debounces. |
+| `lazy` | none: the code of an application is linked in | |
+| React Router (`<Routes>`, `<Route path>`, `useNavigate`, `useParams`) | `router(initial, vec![route("/people/:id", \|m\| ..), ..])`, `use_router()`, `m.param("id")` | Modelled on the routing of ReactiveUI: a stack of paths with `navigate`, `navigate_back`, `navigate_and_reset`, `current` and `can_go_back`, all reactive. The first matching route is shown; `*` matches the rest of a path. There is no URL bar: the stack lives in the window. |
 | `useTransition`, `useDeferredValue` | none: rendering is synchronous | |
-| Fast Refresh | not yet (phase 4: hot reload of `rsx!`) | |
-| React DevTools | FerroUI DevTools show the controls; the instance tree is phase 4 | |
-| `StrictMode` | none | |
+| Fast Refresh | hot reload of the literals of `rsx!` (feature `hot-reload`) | Literals change while the application runs and components keep their state. A change of structure needs a rebuild; Fast Refresh also swaps code. |
+| React DevTools | `inspector()`, `open_inspector()` (Shift+F12 in debug builds) | Components with their runs and hooks, controls with their properties and where each value comes from. |
+| `StrictMode`, the warnings of React (keys) | diagnostics in debug builds: lists without keys, duplicate keys, components that run away | `set_diagnostics_handler` sends them elsewhere. |
 | Server components, server rendering | none: FerroUI renders on the device | |
 
 ## 4. The same programs
@@ -243,9 +245,9 @@ Three differences follow:
 | Keys | identify siblings in a list | the same |
 | Siblings without keys | matched by their index among the siblings | matched by their place among the siblings without a key, so a keyed sibling that comes or goes does not shift them |
 | Props that are equal | not compared for host elements: React compares them and writes what differs to the DOM | plain values are compared by value and left alone when equal |
-| Event handlers | React's synthetic event system holds the handler and updates it | detached and attached again on each run (phase 5 plans a stable handler) |
+| Event handlers | React's synthetic event system holds the handler and updates it | a trampoline stays attached and its closure is swapped on each run |
 | A prop that is gone | removed from the DOM node | the property is cleared back to its default or style value |
-| Moves in a keyed list | one pass over the old indices: a node whose old index falls behind the last one kept in place is moved | prefix and suffix are kept and the middle is reinserted: correct, with more moves than needed (phase 5) |
+| Moves in a keyed list | one pass over the old indices: a node whose old index falls behind the last one kept in place is moved | the longest increasing subsequence of the old places stays, the rest is moved: the fewest moves (as Vue and Inferno) |
 | Text | text nodes | text in a content or an item, a `TextBlock` elsewhere; changed in place |
 
 ## 7. Effects and their timing
@@ -267,11 +269,7 @@ React runs `useLayoutEffect` after the DOM changes and before the browser paints
 
 | React | FerroUI plan |
 |---|---|
-| Error boundaries | phase 6 |
-| Suspense and data loading | phase 6: `use_resource` |
-| Fast Refresh | phase 4: hot reload of the static parts of `rsx!` |
-| DevTools with the component tree | phase 4: the instance tree in the FerroUI DevTools |
-| Fewer moves of reordered keyed children | phase 5 (React's single pass; FerroUI plans the longest increasing subsequence) |
+| `Suspense` that waits for the data of the components below it, streaming | not planned: `suspense` follows the state of one future |
 | Concurrent rendering, transitions | not planned: rendering is synchronous by design |
 | Server components, server rendering | not planned |
 

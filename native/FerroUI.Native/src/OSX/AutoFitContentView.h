@@ -1,7 +1,3 @@
-//
-// Created by Dan Walmsley on 05/05/2022.
-//
-
 #pragma once
 
 #import <Foundation/Foundation.h>

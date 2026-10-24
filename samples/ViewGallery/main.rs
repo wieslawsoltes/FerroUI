@@ -36,6 +36,18 @@ fn main() {
                 .child(view_gallery::gallery().start_dark(start_dark))
                 .into_element()
         },
-        move |window| seven_guis_model::capture_if_asked(window, name),
+        move |window| {
+            if std::env::args().any(|arg| arg == "--inspector") {
+                // The inspector of the components of the gallery, as its picture.
+                let inspector = ferroui_view::open_inspector();
+                // The bar selected, so that its properties show.
+                if let Some(list) = inspector.get_logical_descendants().find_map(|d| d.cast::<ferroui_controls::ListBox>()) {
+                    list.set_selected_index(13);
+                }
+                seven_guis_model::capture_if_asked(&inspector, "view-inspector");
+            } else {
+                seven_guis_model::capture_if_asked(window, name);
+            }
+        },
     );
 }

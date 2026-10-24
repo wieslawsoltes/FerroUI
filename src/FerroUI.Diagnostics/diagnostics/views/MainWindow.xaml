@@ -1,0 +1,45 @@
+<Window xmlns="https://github.com/ferroui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:views="using:FerroUI.Diagnostics.Views"
+        xmlns:diag="using:FerroUI.Diagnostics"
+        xmlns:viewModels="using:FerroUI.Diagnostics.ViewModels"
+        Title="FerroUI DevTools"
+        Background="{DynamicResource ApplicationPageBackgroundThemeBrush}"
+        ExtendClientAreaToDecorationsHint="True"
+        ExtendClientAreaTitleBarHeightHint="48"
+        x:Class="FerroUI.Diagnostics.Views.MainWindow"
+        x:DataType="viewModels:MainViewModel">
+  <Window.DataTemplates>
+    <diag:ViewLocator/>
+  </Window.DataTemplates>
+
+  <Window.Styles>
+    <!-- Deviation (DEVIATIONS.md, Developer tools): the WinUI 3 theme in its compact density, the
+         default theme of the ControlCatalog, in place of the Simple theme of upstream, with the
+         Fluent styles of the colour picker and of the TreeDataGrid (the trees, the events and the
+         property grid), whose brushes come from resources the WinUI 3 theme defines. -->
+    <WinUITheme DensityStyle="Compact" />
+    <StyleInclude Source="ferres://FerroUI.Controls.TreeDataGrid/Themes/Fluent.xaml"/>
+    <StyleInclude Source="ferres://FerroUI.Diagnostics/diagnostics/controls/ThicknessEditor.xaml" />
+    <StyleInclude Source="ferres://FerroUI.Diagnostics/diagnostics/controls/FilterTextBox.xaml" />
+    <StyleInclude Source="ferres://FerroUI.Diagnostics/diagnostics/controls/BrushEditor.xaml" />
+    <StyleInclude Source="ferres://FerroUI.Controls.ColorPicker/Themes/Fluent/Fluent.xaml" />
+    <StyleInclude Source="ferres://FerroUI.Diagnostics/diagnostics/controls/DevToolsStyles.xaml" />
+
+    <!-- Deviation (DEVIATIONS.md, Developer tools): compact rows in the TreeDataGrids of the tools
+         (the logical and visual trees, the routed events and the property grid): 24 px, the height
+         of an item of a WinUI 3 tree view in the compact density (TreeViewItemMinHeight), in place
+         of the 25 px and the padding of the generic styles of the TreeDataGrid. -->
+    <Style Selector="TreeDataGrid :is(TreeDataGridCell)">
+      <Setter Property="MinHeight" Value="24" />
+    </Style>
+    <Style Selector="TreeDataGrid TreeDataGridTextCell">
+      <Setter Property="Padding" Value="4,1" />
+    </Style>
+    <Style Selector="TreeDataGrid TreeDataGridColumnHeader">
+      <Setter Property="MinHeight" Value="24" />
+      <Setter Property="Padding" Value="4,1" />
+    </Style>
+  </Window.Styles>
+  <views:MainView/>
+</Window>

@@ -6,15 +6,16 @@
 //! FERROUI_SMOKE_EXIT_MS=3000 cargo run -p control-catalog-desktop
 //! FERROUI_SMOKE_EXIT_MS=20000 FERROUI_SMOKE_PAGES=150 cargo run -p control-catalog-desktop
 //! FERROUI_SMOKE_SCREENSHOTS=target/screenshots cargo run -p control-catalog-desktop
-//! FERROUI_CATALOG_THEME=fluent cargo run -p control-catalog-desktop
-//! FERROUI_CATALOG_THEME=simple cargo run -p control-catalog-desktop
+//! FERROUI_CATALOG_THEME=fluent cargo run -p control-catalog-desktop --features classic-themes
+//! FERROUI_CATALOG_THEME=simple cargo run -p control-catalog-desktop --features classic-themes
 //! FERROUI_CATALOG_WAYLAND=0 cargo run -p control-catalog-desktop
 //! ```
 //!
 //! `FERROUI_CATALOG_THEME` selects the theme the catalog starts with: `winui`, the WinUI theme
-//! of the port (docs/porting/winui-theme.md) and the default of the port, `fluent` (the default
-//! of the original) or `simple`; the settings page switches between them as before. Not in the
-//! original.
+//! of the port (docs/porting/winui-theme.md) and the default of the port, and, with the feature
+//! `classic-themes` (off by default, docs/binary-size.md), `fluent` (the default of the original)
+//! or `simple`; the settings page switches between the themes the catalog is built with. Not in
+//! the original.
 //!
 //! On Linux the catalog uses the Wayland backend when a compositor can be
 //! reached, with the backend of the platform detection (X11) as its
@@ -86,6 +87,9 @@
 //! (`EmbedSample.Implementation`). The one for Linux is ported
 //! (`NativeControls/Gtk`).
 
+#[cfg(feature = "mcp")]
+mod mcp;
+
 #[cfg(windows)]
 mod window_capture;
 
@@ -117,7 +121,13 @@ use std::time::Duration;
 fn main() -> std::process::ExitCode {
     let args: Vec<String> = std::env::args().skip(1).collect();
 
+    // Reserve the protocol writer before builder configuration can print platform diagnostics.
+    #[cfg(feature = "mcp")]
+    let mcp_output = args.iter().any(|arg| arg == "--mcp-stdio")
+        .then(|| ferroui_mcp::reserve_stdout().expect("reserve stdout for MCP"));
     let builder = build_ferro_app();
+    #[cfg(feature = "mcp")]
+    let builder = mcp::configure(builder, &args, mcp_output);
 
     // As the desktop entry point of the reference: `--fbdev` and `--drm`
     // run the catalog on the Linux framebuffer platform, on a framebuffer
@@ -159,13 +169,41 @@ pub fn build_ferro_app() -> AppBuilder {
                 embed_sample_gtk::EmbedSampleGtk::default(),
             )));
             select_theme_of_the_environment();
-            smoke_run()
+            smoke_run();
+            #[cfg(feature = "cdp")]
+            start_cdp();
         })
+        .after_setup(attach_dev_tools)
         .log_to_trace(LogEventLevel::Warning, &[])
+}
+
+/// DevTools on F12 in debug builds, as the reference (`AttachDevTools` with the startup screen 1),
+/// but on the framebuffer platform, whose lifetime has no windows.
+fn attach_dev_tools(builder: &AppBuilder) {
+    #[cfg(debug_assertions)]
+    {
+        use ferroui_diagnostics::diagnostics::DevToolsOptions;
+        use ferroui_diagnostics::DevToolsExtensions;
+
+        if std::env::args().any(|arg| arg == "--fbdev" || arg == "--drm") {
+            return;
+        }
+        if let Some(application) = builder.instance() {
+            let options = DevToolsOptions::new().with_startup_screen_index(Some(1));
+            // The pictures of a smoke run: a window large enough for every column of the grid.
+            let options = match std::env::var_os("FERROUI_SMOKE_DEVTOOLS") {
+                Some(_) => options.with_startup_screen_index(None).with_size(ferroui_base::Size::new(1600.0, 900.0)),
+                None => options,
+            };
+            application.attach_dev_tools_with_options(options);
+        }
+    }
+    let _ = builder;
 }
 
 /// The theme of the catalog asked for with `FERROUI_CATALOG_THEME` (`winui`, the default, `fluent`
 /// or `simple`), selected after the application is set up and before its main window is created.
+/// `fluent` and `simple` need the feature `classic-themes`.
 fn select_theme_of_the_environment() {
     use control_catalog::models::CatalogTheme;
 
@@ -175,6 +213,9 @@ fn select_theme_of_the_environment() {
         Some("simple") => CatalogTheme::Simple,
         Some(other) => panic!("FERROUI_CATALOG_THEME: unknown theme {other:?} (fluent, simple, winui)"),
     };
+    if !App::themes().contains(&theme) {
+        panic!("FERROUI_CATALOG_THEME: the theme {theme:?} needs the feature `classic-themes` of control-catalog-desktop");
+    }
     println!("ControlCatalog: the theme {theme:?}");
     App::select_initial_catalog_theme(theme);
 }
@@ -967,6 +1008,10 @@ fn screenshot_run(directory: PathBuf) {
     let interval = Duration::from_millis(environment_milliseconds("FERROUI_SMOKE_PAGES").unwrap_or(1500));
     println!("Screenshots of {headers:?} to {}, {interval:?} a page", directory.display());
     open_popups_of_pages(interval);
+    if std::env::var_os("FERROUI_SMOKE_WINUI_FLIGHT").is_some() {
+        // The first page is selected one interval after the start.
+        winui_flight_run(&directory, interval);
+    }
     // Before the first page is shown: the window is made to fit its screen.
     // The timer stops itself after its only tick.
     let _timer = DispatcherTimer::run_once(
@@ -1013,6 +1058,120 @@ fn screenshot_run(directory: PathBuf) {
             }
         },
     );
+}
+
+/// With `FERROUI_SMOKE_WINUI_FLIGHT` on a screenshot run whose first page is "Composition
+/// (WinUI)": the first card is opened, which starts its connected animation, and the frames of
+/// the compositor are saved during the flight to the detail view and during the flight back
+/// (`flight-NN-<ms>.png`, the time from the selection of the page). Not in the original. The
+/// page should be shown for 5 s at least (`FERROUI_SMOKE_PAGES=5000`). The box of the implicit
+/// animations is then hidden and shown and the parallax scroller scrolled (`steps-<ms>.png`).
+/// From 5 s the sections of the later phases are opened, and each is brought into view in turn
+/// with its demo run (`section-N-<ms>.png`); that part needs `FERROUI_SMOKE_PAGES=13000`, or
+/// more with `FERROUI_SMOKE_WINUI_SECTION_MS`.
+fn winui_flight_run(directory: &std::path::Path, selected_at: Duration) {
+    let open_at = selected_at + Duration::from_millis(400);
+    let back_at = selected_at + Duration::from_millis(2000);
+    let _ = DispatcherTimer::run_once(
+        || {
+            // `FERROUI_SMOKE_WINUI_FLIGHT=1` (direct) or `2` (basic) chooses the configuration;
+            // any other value keeps the gravity one.
+            let configuration = std::env::var("FERROUI_SMOKE_WINUI_FLIGHT").ok().and_then(|value| value.parse().ok());
+            if let Some(configuration @ 1..=2) = configuration {
+                control_catalog::pages::smoke_set_configuration(configuration);
+            }
+            println!("Flight: open the first card: {}", control_catalog::pages::smoke_open_card(0));
+        },
+        open_at,
+        DispatcherPriority::NORMAL,
+    );
+    let _ = DispatcherTimer::run_once(
+        || {
+            println!("Flight: back to the list: {}", control_catalog::pages::smoke_close_card());
+        },
+        back_at,
+        DispatcherPriority::NORMAL,
+    );
+    // Then the implicit hide and show animations of the box, and the parallax header.
+    let steps: [(u64, fn() -> bool, &str); 3] = [
+        (2900, control_catalog::pages::smoke_toggle_box, "hide the box"),
+        (3600, control_catalog::pages::smoke_toggle_box, "show the box"),
+        (4300, || control_catalog::pages::smoke_scroll_parallax(160.0), "scroll the parallax scroller"),
+    ];
+    for (at, step, name) in steps {
+        let _ = DispatcherTimer::run_once(
+            move || println!("Flight: {name}: {}", step()),
+            selected_at + Duration::from_millis(at),
+            DispatcherPriority::NORMAL,
+        );
+    }
+    for at in [2960u64, 3150, 3660, 3800, 4700] {
+        let at = selected_at + Duration::from_millis(at);
+        let path = directory.join(format!("steps-{}.png", (at - selected_at).as_millis()));
+        let _ = DispatcherTimer::run_once(
+            move || {
+                if let Some(window) = main_window() {
+                    save_composed(&window, path.clone(), format!("step at {} ms", (at - selected_at).as_millis()));
+                }
+            },
+            at,
+            DispatcherPriority::NORMAL,
+        );
+    }
+    // The sections of the later phases: all opened (their demos are built then), then each
+    // brought into view with its demo run, and saved.
+    let _ = DispatcherTimer::run_once(
+        || println!("Flight: open the sections: {}", control_catalog::pages::smoke_expand_sections()),
+        selected_at + Duration::from_millis(5000),
+        DispatcherPriority::NORMAL,
+    );
+    // `FERROUI_SMOKE_WINUI_SECTION_MS`: the time between two sections (1200 ms by default); a
+    // debug build with Vello needs more, as each saved frame holds the compositor up.
+    let spacing = environment_milliseconds("FERROUI_SMOKE_WINUI_SECTION_MS").unwrap_or(1200);
+    for section in 0..6usize {
+        let shown = 5800 + section as u64 * spacing;
+        let _ = DispatcherTimer::run_once(
+            move || println!("Flight: show section {section}: {}", control_catalog::pages::smoke_show_section(section)),
+            selected_at + Duration::from_millis(shown),
+            DispatcherPriority::NORMAL,
+        );
+        let at = selected_at + Duration::from_millis(shown + 900);
+        let path = directory.join(format!("section-{section}-{}.png", (at - selected_at).as_millis()));
+        let _ = DispatcherTimer::run_once(
+            move || {
+                if let Some(window) = main_window() {
+                    save_composed(&window, path.clone(), format!("section {section}"));
+                }
+            },
+            at,
+            DispatcherPriority::NORMAL,
+        );
+    }
+    let mut index = 0;
+    // `FERROUI_SMOKE_WINUI_FLIGHT_FEW`: two frames of each flight, for a build whose encoding of
+    // a picture takes long (the debug build with Vello).
+    let few = std::env::var_os("FERROUI_SMOKE_WINUI_FLIGHT_FEW").is_some();
+    let plan: [(Duration, &[u64]); 2] = if few {
+        [(open_at, &[130, 600]), (back_at, &[70, 500])]
+    } else {
+        [(open_at, &[30, 80, 130, 180, 230, 280, 340, 600]), (back_at, &[30, 70, 110, 150, 190, 240, 300, 500])]
+    };
+    for (start, offsets) in plan {
+        for &offset in offsets {
+            index += 1;
+            let at = start + Duration::from_millis(offset);
+            let path = directory.join(format!("flight-{index:02}-{}.png", (at - selected_at).as_millis()));
+            let _ = DispatcherTimer::run_once(
+                move || {
+                    if let Some(window) = main_window() {
+                        save_composed(&window, path.clone(), format!("flight at {} ms", (at - selected_at).as_millis()));
+                    }
+                },
+                at,
+                DispatcherPriority::NORMAL,
+            );
+        }
+    }
 }
 
 /// `FERROUI_SMOKE_A11Y_TREE=<file>` (on Windows): once the window is up, a
@@ -1103,6 +1262,236 @@ fn accessibility_tree_run(path: PathBuf) {
     );
 }
 
+/// `FERROUI_SMOKE_DEVTOOLS=<directory>` (debug builds): F12 goes to the input manager as the
+/// platform passes a key (a raw key down and up on the main window), which opens DevTools; the run
+/// then selects a text block in the combined tree and in the logical tree, records the click of a button of the catalog on
+/// the events page, goes from there to the button in the visual tree, shows the hot keys, and
+/// writes the frame of the DevTools window (and nothing else) an interval after each step, once it
+/// is laid out. The main window is closed at the end.
+#[cfg(debug_assertions)]
+fn dev_tools_run(directory: PathBuf) {
+    use ferroui_base::input::raw::{RawKeyEventArgs, RawKeyEventType};
+    use ferroui_base::input::{IInputDevice, Key, RawInputModifiers, KeyDeviceType, KeyboardDevice, PhysicalKey};
+    use ferroui_base::interactivity::RoutedEventArgs;
+    use ferroui_base::metadata::from_markup_value;
+    use ferroui_controls::Button;
+    use ferroui_diagnostics::diagnostics::view_models::{MainViewModel, TreeNode};
+    use ferroui_diagnostics::diagnostics::views::MainWindow;
+    use std::rc::Rc;
+
+    if let Err(error) = std::fs::create_dir_all(&directory) {
+        println!("DevTools: the directory {} could not be created: {error}", directory.display());
+        return;
+    }
+    let interval = Duration::from_millis(environment_milliseconds("FERROUI_SMOKE_PAGES").unwrap_or(1500));
+
+    fn dev_tools() -> Option<(Ref<Window>, Rc<MainViewModel>)> {
+        let lifetime = Application::current().and_then(|application| application.application_lifetime())?;
+        let windows = lifetime.as_classic_desktop_style_application_lifetime()?.windows();
+        let window = windows.into_iter().find(|window| window.cast::<MainWindow>().is_some())?;
+        let view_model = from_markup_value::<Rc<MainViewModel>>(&window.data_context())?;
+        Some((window, view_model))
+    }
+    fn button_of_catalog() -> Option<Ref<Button>> {
+        let window = main_window()?;
+        let visual = window.upcast::<Visual>();
+        // A button of the content, which is in the logical tree too (a part of a template is not).
+        visual
+            .get_visual_descendants()
+            .filter_map(|visual| visual.cast::<Button>())
+            .find(|button| button.templated_parent().is_none())
+    }
+    fn first_text_block(node: &Rc<TreeNode>) -> Option<Ref<ferroui_controls::TextBlock>> {
+        if let Some(text_block) = node.visual().cast::<ferroui_controls::TextBlock>() {
+            return Some(text_block);
+        }
+        node.children().to_vec().iter().find_map(first_text_block)
+    }
+    let save = move |name: &str| match dev_tools() {
+        Some((window, _)) => {
+            let path = directory.join(format!("{name}.png"));
+            match save_frame(&window, &path) {
+                Ok(size) => println!("DevTools: {} ({} by {})", path.display(), size.width, size.height),
+                Err(error) => println!("DevTools: {name} could not be written: {error}"),
+            }
+        }
+        None => println!("DevTools: {name}: no DevTools window is open"),
+    };
+
+    let steps: Vec<Box<dyn Fn()>> = vec![
+        Box::new(|| {
+            let (Some(window), Some(manager), Some(keyboard)) =
+                (main_window(), ferroui_base::input::InputManager::instance(), KeyboardDevice::instance())
+            else {
+                println!("DevTools: no main window, input manager or keyboard");
+                return;
+            };
+            for type_ in [RawKeyEventType::KeyDown, RawKeyEventType::KeyUp] {
+                let device: Rc<dyn IInputDevice> = keyboard.clone();
+                let e = RawKeyEventArgs::new(
+                    device,
+                    0,
+                    window.input_root(),
+                    type_,
+                    Key::F12,
+                    RawInputModifiers::empty(),
+                    PhysicalKey::F12,
+                    None,
+                    KeyDeviceType::Keyboard,
+                );
+                manager.process_input(Rc::new(e));
+            }
+            println!("DevTools: F12 pressed; open: {}", dev_tools().is_some());
+        }),
+        // The combined tree, the first tab: the text block of the home page selected, so that its
+        // ancestors are expanded with the parts of their templates.
+        Box::new(|| {
+            if let Some((_, view_model)) = dev_tools() {
+                let text_block = view_model.logical_tree().nodes().snapshot().iter().find_map(|node| first_text_block(node));
+                if let Some(text_block) = text_block {
+                    view_model.combined_tree().select_control(&text_block.upcast());
+                }
+            }
+        }),
+        {
+            let save = save.clone();
+            Box::new(move || save("01-combined-tree"))
+        },
+        // The time a selection takes until the details of the control are laid out: controls of the
+        // catalog selected in turn in the combined tree (the property grid, the layout and the value
+        // frames of each), as a developer clicks through the tree.
+        Box::new(|| {
+            if let (Some((window, view_model)), Some(catalog)) = (dev_tools(), main_window()) {
+                let controls: Vec<Ref<ferroui_controls::Control>> = catalog
+                    .upcast::<Visual>()
+                    .get_visual_descendants()
+                    .filter_map(|visual| visual.cast::<ferroui_controls::Control>())
+                    .step_by(7)
+                    .take(16)
+                    .collect();
+                let mut times = Vec::new();
+                let counters_before = ferroui_base::diagnostics::perf_counters::snapshot();
+                for control in controls.iter().cycle().take(std::env::var("FERROUI_SMOKE_SELECTIONS").ok().and_then(|n| n.parse().ok()).unwrap_or(48)) {
+                    let start = std::time::Instant::now();
+                    view_model.combined_tree().select_control(control);
+                    window.update_layout();
+                    times.push(start.elapsed().as_secs_f64() * 1000.0);
+                }
+                if ferroui_base::diagnostics::perf_counters::ENABLED {
+                    // Per selection, with the build feature `perf-counters`.
+                    let counters = ferroui_base::diagnostics::perf_counters::snapshot().since(&counters_before);
+                    let selections = times.len().max(1) as u64;
+                    for counter in ferroui_base::diagnostics::perf_counters::PerfCounter::ALL {
+                        let value = counters.get(*counter);
+                        if value > 0 {
+                            println!("DevTools: per selection, {}: {}", counter.name(), value / selections);
+                        }
+                    }
+                }
+                times.sort_by(|a, b| a.total_cmp(b));
+                println!(
+                    "DevTools: selection to laid-out details, {} selections: median {:.1} ms, p90 {:.1} ms, max {:.1} ms",
+                    times.len(),
+                    times[times.len() / 2],
+                    times[times.len() * 9 / 10],
+                    times[times.len() - 1]
+                );
+            }
+        }),
+        Box::new(|| {
+            // A text block of the home page: the button above is part of a template, which the
+            // logical tree does not show.
+            if let Some((_, view_model)) = dev_tools() {
+                let text_block = view_model
+                    .logical_tree()
+                    .nodes()
+                    .snapshot()
+                    .iter()
+                    .find_map(|node| first_text_block(node));
+                if let Some(text_block) = text_block {
+                    view_model.request_tree_navigate_to(&text_block.clone().upcast(), false);
+                    println!("DevTools: selected the text block {:?} in the logical tree", text_block.text());
+                }
+            }
+        }),
+        {
+            let save = save.clone();
+            Box::new(move || save("02-logical-tree-details"))
+        },
+        Box::new(|| {
+            if let (Some((_, view_model)), Some(button)) = (dev_tools(), button_of_catalog()) {
+                view_model.set_selected_tab(MainViewModel::EVENTS_TAB);
+                button.raise_event(&RoutedEventArgs::with_event(Button::click_event()));
+                let events = view_model.events();
+                println!("DevTools: {} event(s) recorded", events.recorded_events().count());
+                if let Some(first) = events.recorded_events().to_vec().into_iter().next() {
+                    events.set_selected_event(Some(first));
+                }
+            }
+        }),
+        {
+            let save = save.clone();
+            Box::new(move || save("03-events"))
+        },
+        // From the events page, as a double tap on a link of the route of an event navigates.
+        Box::new(|| {
+            if let (Some((_, view_model)), Some(button)) = (dev_tools(), button_of_catalog()) {
+                view_model.request_tree_navigate_to(&button.clone().upcast(), true);
+                println!("DevTools: selected {:?} in the visual tree", button.get_type().name());
+            }
+        }),
+        {
+            let save = save.clone();
+            Box::new(move || save("04-visual-tree-button-details"))
+        },
+        Box::new(|| {
+            if let Some((_, view_model)) = dev_tools() {
+                view_model.set_selected_tab(MainViewModel::HOT_KEYS_TAB);
+            }
+        }),
+        {
+            let save = save.clone();
+            Box::new(move || save("05-hot-keys"))
+        },
+        Box::new(|| {
+            println!("DevTools: done, closing the windows");
+            if let Some((window, _)) = dev_tools() {
+                window.close();
+            }
+            if let Some(window) = main_window() {
+                window.close();
+            }
+        }),
+    ];
+    let steps = Rc::new(steps);
+    let next = Rc::new(std::cell::Cell::new(0));
+    // Two intervals for the catalog to come up, then a step an interval.
+    let _start = DispatcherTimer::run_once(
+        move || {
+            let (steps, next) = (steps.clone(), next.clone());
+            let _timer = DispatcherTimer::run(
+                move || {
+                    let index = next.get();
+                    next.set(index + 1);
+                    if let Some(step) = steps.get(index) {
+                        step();
+                    }
+                    index + 1 < steps.len()
+                },
+                interval,
+                DispatcherPriority::NORMAL,
+            );
+        },
+        interval * 2,
+        DispatcherPriority::NORMAL,
+    );
+}
+
+#[cfg(not(debug_assertions))]
+fn dev_tools_run(_directory: PathBuf) {
+    println!("DevTools: attached in debug builds only");
+}
+
 /// The smoke run asked for with `FERROUI_SMOKE_EXIT_MS`,
 /// `FERROUI_SMOKE_PAGES` and `FERROUI_SMOKE_SCREENSHOTS`.
 fn smoke_run() {
@@ -1110,6 +1499,8 @@ fn smoke_run() {
         backdrop_run(PathBuf::from(directory));
     } else if let Some(directory) = std::env::var_os("FERROUI_SMOKE_SCREENSHOTS").filter(|directory| !directory.is_empty()) {
         screenshot_run(PathBuf::from(directory));
+    } else if let Some(directory) = std::env::var_os("FERROUI_SMOKE_DEVTOOLS").filter(|directory| !directory.is_empty()) {
+        dev_tools_run(PathBuf::from(directory));
     } else if let Some(ms) = environment_milliseconds("FERROUI_SMOKE_PAGES") {
         control_catalog::show_every_page(Duration::from_millis(ms));
     }
@@ -1200,4 +1591,18 @@ mod tests {
         assert_eq!(client_size_that_fits(area, PixelPoint::new(0, 0), client, client, 1.0), Some(client));
         assert_eq!(client_size_that_fits(area, PixelPoint::new(60, 30), client, client, 1.0), None);
     }
+}
+
+#[cfg(feature = "cdp")]
+ferroui_base::ferro_thread_local! {
+    static CDP_SERVER: std::cell::RefCell<Option<ferroui_devtools::DevToolsServer>> = const { std::cell::RefCell::new(None) };
+}
+
+#[cfg(feature = "cdp")]
+fn start_cdp() {
+    let Ok(value) = std::env::var("FERROUI_CDP_PORT") else { return; };
+    let port: u16 = value.parse().expect("FERROUI_CDP_PORT must be a port number (0 selects a free port)");
+    let server = ferroui_devtools::DevToolsServer::start(port).expect("Could not start the CDP endpoint");
+    println!("FerroUI CDP: http://{}", server.local_addr());
+    CDP_SERVER.with(|slot| *slot.borrow_mut() = Some(server));
 }

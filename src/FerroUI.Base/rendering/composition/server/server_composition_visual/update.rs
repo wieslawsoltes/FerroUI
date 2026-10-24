@@ -70,6 +70,11 @@ impl UpdateContext {
                 bounds = bounds.inflate(EffectExtensions::get_effect_output_padding(Some(&*effect)));
                 node.sub_tree_bounds.set(Some(bounds));
             }
+            // What the content adds around its subtree (not from upstream).
+            if let Some(padding) = node.content.sub_tree_bounds_padding(node) {
+                bounds = bounds.inflate(padding);
+                node.sub_tree_bounds.set(Some(bounds));
+            }
 
             if let Some(clip) = node.own_clip_rect.get() {
                 node.sub_tree_bounds.set(bounds.intersect_or_null(clip));
@@ -176,6 +181,12 @@ impl IServerTreeVisitor for UpdateContext {
             // This node's bbox needs to be updated. We start out by setting his bbox to the bbox of its content. All its
             // children will union their bbox into their parent's bbox. PostSubgraph will clip the bbox and transform it
             // to outer space.
+            // Bounds that depend on other visuals are taken now (not from
+            // upstream: a redirect visual covers its source).
+            if node.content.has_update_pass_content_bounds() {
+                node.own_content_bounds
+                    .set(node.compute_own_content_bounds().and_then(LtrbRect::null_if_zero_size));
+            }
             node.sub_tree_bounds.set(node.own_content_bounds.get());
         }
 
@@ -226,7 +237,11 @@ impl IServerTreeVisitor for UpdateContext {
         // Special handling for effects: just add the entire node's old subtree bounds as a dirty region
         // WPF does this because they had legacy effects with non-affine transforms, we do this because
         // it's something to be done in the future (maybe)
-        if node.is_dirty_for_render.get() || (node.is_dirty_for_render_in_subgraph.get() && node.effect().is_some()) {
+        // As in PreSubgraph: the content says whether it has an effect (the
+        // default is `effect().is_some()`), so the count stays balanced.
+        if node.is_dirty_for_render.get()
+            || (node.is_dirty_for_render_in_subgraph.get() && node.content.has_effect(node))
+        {
             self.dirty_region_disable_count -= 1;
             self.add_to_dirty_region(node.transformed_sub_tree_bounds.get());
         }

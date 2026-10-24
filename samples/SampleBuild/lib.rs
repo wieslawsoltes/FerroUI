@@ -65,13 +65,20 @@ pub struct SampleBuild {
     default_compile_bindings: bool,
     not_compared: Vec<(String, String)>,
     refused: Vec<(String, String)>,
+    feature_documents: Vec<(String, String)>,
 }
 
 impl SampleBuild {
     /// The build of the sample whose assembly is `assembly_name` (`ASSEMBLY.name` of its
     /// `register_types.rs`: the authority of the URIs of its documents and assets).
     pub fn new(assembly_name: &str) -> Self {
-        Self { assembly_name: assembly_name.to_string(), default_compile_bindings: true, not_compared: Vec::new(), refused: Vec::new() }
+        Self {
+            assembly_name: assembly_name.to_string(),
+            default_compile_bindings: true,
+            not_compared: Vec::new(),
+            refused: Vec::new(),
+            feature_documents: Vec::new(),
+        }
     }
 
     /// Whether the bindings of a document are compiled when the document does not say
@@ -99,6 +106,15 @@ impl SampleBuild {
         self
     }
 
+    /// A document (its path below the directory of the sample) that is part of the sample only
+    /// with the Cargo feature `feature` of the crate: without the feature it is neither compiled
+    /// nor embedded, and has no tests, as a module of the crate behind the feature has no class
+    /// for it (the application of a sample whose views other crates use).
+    pub fn only_with_feature(mut self, feature: &str, document: &str) -> Self {
+        self.feature_documents.push((feature.to_string(), document.to_string()));
+        self
+    }
+
     /// Compiles the documents and writes the tables and the tests.
     pub fn run(self) {
         let root = PathBuf::from(env::var_os("CARGO_MANIFEST_DIR").expect("CARGO_MANIFEST_DIR"));
@@ -107,6 +123,17 @@ impl SampleBuild {
         let mut assets = Vec::new();
         collect(&root, &root, &mut assets);
         assets.sort();
+        for (feature, document) in &self.feature_documents {
+            let asset_path = format!("/{document}");
+            assert!(
+                assets.iter().any(|(path, _)| *path == asset_path),
+                "the build script names {document}, which is not a document of the crate"
+            );
+            let variable = format!("CARGO_FEATURE_{}", feature.to_ascii_uppercase().replace('-', "_"));
+            if env::var_os(variable).is_none() {
+                assets.retain(|(path, _)| *path != asset_path);
+            }
+        }
 
         let documents: Vec<(String, String)> = assets
             .iter()

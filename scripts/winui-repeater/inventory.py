@@ -22,10 +22,10 @@ import sys
 ROOT = Path(__file__).resolve().parents[2]
 DOC = ROOT / "docs/porting/winui-repeater"
 DATA = DOC / "data"
-PIN = "1af995b98a02d86b1951c4babe35caa269a6d569"
+PIN = "7e4b0c2096be402f51cc8f7d203ebf67cff183d0"
 PREFIX = "controls/dev/Repeater/"
 UPSTREAM = "https://github.com/microsoft/microsoft-ui-xaml/blob/" + PIN + "/"
-REPEATER = "src/FerroUI.Controls/repeater/"
+REPEATER = "src/FerroUI.Controls.Repeater/"
 
 
 def snake(name: str) -> str:

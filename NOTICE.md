@@ -51,23 +51,13 @@ Avalonia itself incorporates code from other projects (for example WPF-derived l
 
 - Project: <https://github.com/dotnet/runtime>
 - License: MIT, Copyright (c) .NET Foundation and Contributors
-- Used for: the masked text engine `src/FerroUI.Controls/utils/masked_text_provider.rs`, derived from `System.ComponentModel.MaskedTextProvider` (the class the upstream masked text box is built on).
+- Used for: the masked text engine `src/FerroUI.Controls/utils/masked_text_provider.rs`, derived from `System.ComponentModel.MaskedTextProvider` (the class the upstream masked text box is built on); and `src/FerroUI.DependencyInjection` plus `tests/FerroUI.DependencyInjection.Tests`, derived from Microsoft.Extensions.DependencyInjection, its abstractions and specification tests at `v10.0.13` (`6aa72daa24f66c01c3d7b6a32519e9d21396deec`). See `src/FerroUI.DependencyInjection/NOTICE.md` and `docs/porting/dependency-injection.md`.
 
 ## microsoft-ui-xaml (WinUI 3)
 
 - Project: <https://github.com/microsoft/microsoft-ui-xaml> (branch `winui3/main`, commit `7e4b0c2096be402f51cc8f7d203ebf67cff183d0`)
 - License: MIT, Copyright (c) Microsoft Corporation
-- Used for: the WinUI theme `src/FerroUI.Themes.WinUI`, whose resource and control theme documents are ported from the theme of WinUI 3 (`generic.xaml` and the theme resources of the controls library; see `src/FerroUI.Themes.WinUI/NOTICE.md`, which holds the license text, and `docs/porting/winui-theme.md`).
-
-The Repeater family is ported from a separate pinned revision,
-`1af995b98a02d86b1951c4babe35caa269a6d569`, under `controls/dev/Repeater`.
-This covers `src/FerroUI.Controls/repeater/`, the stable-key mapping contract
-`src/FerroUI.Controls/i_key_index_mapping.rs`, and their source-derived tests.
-Existing native item-source views and selection intervals are reused and
-extended. The Microsoft copyright and complete MIT license accompany these
-sources in [the Repeater notice](src/FerroUI.Controls/repeater/NOTICE.md).
-The pinned source inventory, native framework decisions and execution record
-are in [the Repeater port documentation](docs/porting/winui-repeater/README.md).
+- Used for: the WinUI theme `src/FerroUI.Themes.WinUI`, whose resource and control theme documents are ported from the theme of WinUI 3 (`generic.xaml` and the theme resources of the controls library; see `src/FerroUI.Themes.WinUI/NOTICE.md`, which holds the license text, and `docs/porting/winui-theme.md`). Also for the ItemsRepeater crate `src/FerroUI.Controls.Repeater`, ported from `controls/dev/Repeater` at the same commit (see `src/FerroUI.Controls.Repeater/NOTICE.md` and `docs/porting/winui-repeater/README.md`).
 
 ## Reactive Extensions for .NET (Rx.NET)
 
@@ -79,7 +69,7 @@ are in [the Repeater port documentation](docs/porting/winui-repeater/README.md).
 
 - Project: <https://github.com/reactiveui/splat> (commit `39466de`)
 - License: MIT, Copyright (c) ReactiveUI 2018 - 2025
-- Used for: `src/FerroUI.Splat` (a port of Splat.Core, Splat.Logging, Splat.Builder, and the mode detection and feature usage tracking of Splat) and its unit tests in `tests/FerroUI.Splat.Tests`, ported from Splat.Tests, Splat.Logging.Tests and Splat.Builder.Tests (`docs/porting/reactive.md`).
+- Used for: the optional `src/FerroUI.DependencyInjection/splat.rs` adapter from Splat.Microsoft.Extensions.DependencyInjection (same commit), and `src/FerroUI.Splat` (a port of Splat.Core, Splat.Logging, Splat.Builder, and the mode detection and feature usage tracking of Splat) and its unit tests in `tests/FerroUI.Splat.Tests`, ported from Splat.Tests, Splat.Logging.Tests and Splat.Builder.Tests (`docs/porting/reactive.md`).
 
 ## DynamicData
 

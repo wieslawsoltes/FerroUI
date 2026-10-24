@@ -128,6 +128,15 @@ ferro_class! {
             is_reverse: bool,
             new_tab_stop: &mut Option<Ref<InputElement>>
         ) -> bool;
+        /// The children of the element that take part in tab navigation, in
+        /// their tab order (WinUI `UIElement.GetChildrenInTabFocusOrder`).
+        /// `None`, the default, takes the input elements among the visual
+        /// children, in their order. An element that keeps children it does
+        /// not show (the recycled elements of a virtualizing panel), or whose
+        /// visual order is not the order of its items, returns its children
+        /// in tab order here. Upstream has no such member (DEVIATIONS.md,
+        /// Input).
+        fn children_in_tab_focus_order(this) -> Option<Vec<Ref<InputElement>>>;
         /// The element as a custom keyboard navigation handler, if it is
         /// one.
         fn as_custom_keyboard_navigation(this) -> Option<&dyn ICustomKeyboardNavigation>;
@@ -290,6 +299,10 @@ impl InputElementImpl for InputElement {
         _new_tab_stop: &mut Option<Ref<InputElement>>,
     ) -> bool {
         false
+    }
+
+    fn children_in_tab_focus_order(_this: &Self) -> Option<Vec<Ref<InputElement>>> {
+        None
     }
 
     fn as_custom_keyboard_navigation(_this: &Self) -> Option<&dyn ICustomKeyboardNavigation> {

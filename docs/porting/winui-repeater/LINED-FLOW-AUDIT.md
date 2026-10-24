@@ -2,7 +2,7 @@
 
 This record describes the LinedFlow corrections reviewed during the
 2026-10-20 continuation of PR #269. The acceptance source remains
-[`microsoft-ui-xaml@1af995b98a02d86b1951c4babe35caa269a6d569`](https://github.com/microsoft/microsoft-ui-xaml/blob/1af995b98a02d86b1951c4babe35caa269a6d569/controls/dev/Repeater/LinedFlowLayout.cpp).
+[`microsoft-ui-xaml@7e4b0c2096be402f51cc8f7d203ebf67cff183d0`](https://github.com/microsoft/microsoft-ui-xaml/blob/7e4b0c2096be402f51cc8f7d203ebf67cff183d0/controls/dev/Repeater/LinedFlowLayout.cpp).
 The changes preserve the source's observable contracts while using FerroUI
 controls, layout contexts, dispatcher timers and Rust-owned metadata.
 

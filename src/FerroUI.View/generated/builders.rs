@@ -673,32 +673,6 @@ pub fn items_presenter() -> El<ferroui_controls::presenters::ItemsPresenter> {
     El::new()
 }
 
-pub use ferroui_controls::ItemsRepeater;
-
-impl ViewClass for ferroui_controls::ItemsRepeater {
-    fn create() -> ferroui_base::Ref<Self> {
-        <ferroui_controls::ItemsRepeater>::new()
-    }
-}
-
-/// Starts an element of [`ItemsRepeater`](ferroui_controls::ItemsRepeater).
-pub fn items_repeater() -> El<ferroui_controls::ItemsRepeater> {
-    El::new()
-}
-
-pub use ferroui_controls::ItemsRepeaterScrollHost;
-
-impl ViewClass for ferroui_controls::ItemsRepeaterScrollHost {
-    fn create() -> ferroui_base::Ref<Self> {
-        <ferroui_controls::ItemsRepeaterScrollHost>::new()
-    }
-}
-
-/// Starts an element of [`ItemsRepeaterScrollHost`](ferroui_controls::ItemsRepeaterScrollHost).
-pub fn items_repeater_scroll_host() -> El<ferroui_controls::ItemsRepeaterScrollHost> {
-    El::new()
-}
-
 pub use ferroui_controls::Label;
 
 impl ViewClass for ferroui_controls::Label {
@@ -709,19 +683,6 @@ impl ViewClass for ferroui_controls::Label {
 
 /// Starts an element of [`Label`](ferroui_controls::Label).
 pub fn label() -> El<ferroui_controls::Label> {
-    El::new()
-}
-
-pub use ferroui_controls::LayoutPanel;
-
-impl ViewClass for ferroui_controls::LayoutPanel {
-    fn create() -> ferroui_base::Ref<Self> {
-        <ferroui_controls::LayoutPanel>::new()
-    }
-}
-
-/// Starts an element of [`LayoutPanel`](ferroui_controls::LayoutPanel).
-pub fn layout_panel() -> El<ferroui_controls::LayoutPanel> {
     El::new()
 }
 
@@ -3569,30 +3530,6 @@ pub trait FlexPanelProps: ElementBuilder {
 }
 impl<T: ObjectType + Upcast<ferroui_controls::FlexPanel>> FlexPanelProps for El<T> {}
 
-/// The properties and routed events of [`FlowLayout`](ferroui_controls::FlowLayout).
-pub trait FlowLayoutProps: ElementBuilder {
-    /// Sets [`FlowLayout::orientation_property`](ferroui_controls::FlowLayout::orientation_property).
-    fn orientation<M>(self, value: impl IntoProp<ferroui_base::layout::Orientation, M>) -> Self {
-        self.prop(<ferroui_controls::FlowLayout>::orientation_property(), value)
-    }
-
-    /// Sets [`FlowLayout::line_spacing_property`](ferroui_controls::FlowLayout::line_spacing_property).
-    fn line_spacing<M>(self, value: impl IntoProp<f64, M>) -> Self {
-        self.prop(<ferroui_controls::FlowLayout>::line_spacing_property(), value)
-    }
-
-    /// Sets [`FlowLayout::min_item_spacing_property`](ferroui_controls::FlowLayout::min_item_spacing_property).
-    fn min_item_spacing<M>(self, value: impl IntoProp<f64, M>) -> Self {
-        self.prop(<ferroui_controls::FlowLayout>::min_item_spacing_property(), value)
-    }
-
-    /// Sets [`FlowLayout::line_alignment_property`](ferroui_controls::FlowLayout::line_alignment_property).
-    fn line_alignment<M>(self, value: impl IntoProp<ferroui_controls::FlowLayoutLineAlignment, M>) -> Self {
-        self.prop(<ferroui_controls::FlowLayout>::line_alignment_property(), value)
-    }
-}
-impl<T: ObjectType + Upcast<ferroui_controls::FlowLayout>> FlowLayoutProps for El<T> {}
-
 /// The properties and routed events of [`Flyout`](ferroui_controls::Flyout).
 pub trait FlyoutProps: ElementBuilder {
     /// Sets [`Flyout::content_property`](ferroui_controls::Flyout::content_property).
@@ -4136,59 +4073,6 @@ pub trait ItemsPresenterProps: ElementBuilder {
 }
 impl<T: ObjectType + Upcast<ferroui_controls::presenters::ItemsPresenter>> ItemsPresenterProps for El<T> {}
 
-/// The properties and routed events of [`ItemsRepeater`](ferroui_controls::ItemsRepeater).
-pub trait ItemsRepeaterProps: ElementBuilder {
-    /// Sets [`ItemsRepeater::items_source_property`](ferroui_controls::ItemsRepeater::items_source_property).
-    fn items_source<M>(self, value: impl IntoProp<Option<ferroui_controls::ItemsSource>, M>) -> Self {
-        self.prop(<ferroui_controls::ItemsRepeater>::items_source_property(), value)
-    }
-
-    /// Sets [`ItemsRepeater::item_template_property`](ferroui_controls::ItemsRepeater::item_template_property).
-    fn item_template<M>(self, value: impl IntoProp<Option<ferroui_base::BoxedValue>, M>) -> Self {
-        self.prop(<ferroui_controls::ItemsRepeater>::item_template_property(), value)
-    }
-
-    /// Sets [`ItemsRepeater::layout_property`](ferroui_controls::ItemsRepeater::layout_property).
-    fn layout<M>(self, value: impl IntoProp<Option<ferroui_base::Ref<ferroui_controls::Layout>>, M>) -> Self {
-        self.prop(<ferroui_controls::ItemsRepeater>::layout_property(), value)
-    }
-
-    /// Sets [`ItemsRepeater::item_transition_provider_property`](ferroui_controls::ItemsRepeater::item_transition_provider_property).
-    fn item_transition_provider<M>(self, value: impl IntoProp<Option<ferroui_base::Ref<ferroui_controls::ItemCollectionTransitionProvider>>, M>) -> Self {
-        self.prop(<ferroui_controls::ItemsRepeater>::item_transition_provider_property(), value)
-    }
-
-    /// Sets [`ItemsRepeater::horizontal_cache_length_property`](ferroui_controls::ItemsRepeater::horizontal_cache_length_property).
-    fn horizontal_cache_length<M>(self, value: impl IntoProp<f64, M>) -> Self {
-        self.prop(<ferroui_controls::ItemsRepeater>::horizontal_cache_length_property(), value)
-    }
-
-    /// Sets [`ItemsRepeater::vertical_cache_length_property`](ferroui_controls::ItemsRepeater::vertical_cache_length_property).
-    fn vertical_cache_length<M>(self, value: impl IntoProp<f64, M>) -> Self {
-        self.prop(<ferroui_controls::ItemsRepeater>::vertical_cache_length_property(), value)
-    }
-}
-impl<T: ObjectType + Upcast<ferroui_controls::ItemsRepeater>> ItemsRepeaterProps for El<T> {}
-
-/// The properties and routed events of [`ItemsRepeaterScrollHost`](ferroui_controls::ItemsRepeaterScrollHost).
-pub trait ItemsRepeaterScrollHostProps: ElementBuilder {
-    /// Sets [`ItemsRepeaterScrollHost::scroll_viewer_property`](ferroui_controls::ItemsRepeaterScrollHost::scroll_viewer_property).
-    fn scroll_viewer<M>(self, value: impl IntoProp<Option<ferroui_base::Ref<ferroui_controls::ScrollViewer>>, M>) -> Self {
-        self.prop(<ferroui_controls::ItemsRepeaterScrollHost>::scroll_viewer_property(), value)
-    }
-
-    /// Sets [`ItemsRepeaterScrollHost::horizontal_anchor_ratio_property`](ferroui_controls::ItemsRepeaterScrollHost::horizontal_anchor_ratio_property).
-    fn horizontal_anchor_ratio<M>(self, value: impl IntoProp<f64, M>) -> Self {
-        self.prop(<ferroui_controls::ItemsRepeaterScrollHost>::horizontal_anchor_ratio_property(), value)
-    }
-
-    /// Sets [`ItemsRepeaterScrollHost::vertical_anchor_ratio_property`](ferroui_controls::ItemsRepeaterScrollHost::vertical_anchor_ratio_property).
-    fn vertical_anchor_ratio<M>(self, value: impl IntoProp<f64, M>) -> Self {
-        self.prop(<ferroui_controls::ItemsRepeaterScrollHost>::vertical_anchor_ratio_property(), value)
-    }
-}
-impl<T: ObjectType + Upcast<ferroui_controls::ItemsRepeaterScrollHost>> ItemsRepeaterScrollHostProps for El<T> {}
-
 /// The properties and routed events of [`KeyBinding`](ferroui_base::input::KeyBinding).
 pub trait KeyBindingProps: ElementBuilder {
     /// Sets [`KeyBinding::command_property`](ferroui_base::input::KeyBinding::command_property).
@@ -4207,35 +4091,6 @@ pub trait KeyBindingProps: ElementBuilder {
     }
 }
 impl<T: ObjectType + Upcast<ferroui_base::input::KeyBinding>> KeyBindingProps for El<T> {}
-
-/// The properties and routed events of [`LayoutPanel`](ferroui_controls::LayoutPanel).
-pub trait LayoutPanelProps: ElementBuilder {
-    /// Sets [`LayoutPanel::layout_property`](ferroui_controls::LayoutPanel::layout_property).
-    fn layout<M>(self, value: impl IntoProp<Option<ferroui_base::Ref<ferroui_controls::Layout>>, M>) -> Self {
-        self.prop(<ferroui_controls::LayoutPanel>::layout_property(), value)
-    }
-
-    /// Sets [`LayoutPanel::border_brush_property`](ferroui_controls::LayoutPanel::border_brush_property).
-    fn border_brush<M>(self, value: impl IntoProp<Option<std::rc::Rc<dyn ferroui_base::media::IBrush>>, M>) -> Self {
-        self.prop(<ferroui_controls::LayoutPanel>::border_brush_property(), value)
-    }
-
-    /// Sets [`LayoutPanel::border_thickness_property`](ferroui_controls::LayoutPanel::border_thickness_property).
-    fn border_thickness<M>(self, value: impl IntoProp<ferroui_base::Thickness, M>) -> Self {
-        self.prop(<ferroui_controls::LayoutPanel>::border_thickness_property(), value)
-    }
-
-    /// Sets [`LayoutPanel::corner_radius_property`](ferroui_controls::LayoutPanel::corner_radius_property).
-    fn corner_radius<M>(self, value: impl IntoProp<ferroui_base::CornerRadius, M>) -> Self {
-        self.prop(<ferroui_controls::LayoutPanel>::corner_radius_property(), value)
-    }
-
-    /// Sets [`LayoutPanel::padding_property`](ferroui_controls::LayoutPanel::padding_property).
-    fn padding<M>(self, value: impl IntoProp<ferroui_base::Thickness, M>) -> Self {
-        self.prop(<ferroui_controls::LayoutPanel>::padding_property(), value)
-    }
-}
-impl<T: ObjectType + Upcast<ferroui_controls::LayoutPanel>> LayoutPanelProps for El<T> {}
 
 /// The properties and routed events of [`LayoutTransformControl`](ferroui_controls::LayoutTransformControl).
 pub trait LayoutTransformControlProps: ElementBuilder {
@@ -4355,35 +4210,6 @@ pub trait LinearGradientBrushProps: ElementBuilder {
     }
 }
 impl<T: ObjectType + Upcast<ferroui_base::media::LinearGradientBrush>> LinearGradientBrushProps for El<T> {}
-
-/// The properties and routed events of [`LinedFlowLayout`](ferroui_controls::LinedFlowLayout).
-pub trait LinedFlowLayoutProps: ElementBuilder {
-    /// Sets [`LinedFlowLayout::items_justification_property`](ferroui_controls::LinedFlowLayout::items_justification_property).
-    fn items_justification<M>(self, value: impl IntoProp<ferroui_controls::LinedFlowLayoutItemsJustification, M>) -> Self {
-        self.prop(<ferroui_controls::LinedFlowLayout>::items_justification_property(), value)
-    }
-
-    /// Sets [`LinedFlowLayout::items_stretch_property`](ferroui_controls::LinedFlowLayout::items_stretch_property).
-    fn items_stretch<M>(self, value: impl IntoProp<ferroui_controls::LinedFlowLayoutItemsStretch, M>) -> Self {
-        self.prop(<ferroui_controls::LinedFlowLayout>::items_stretch_property(), value)
-    }
-
-    /// Sets [`LinedFlowLayout::min_item_spacing_property`](ferroui_controls::LinedFlowLayout::min_item_spacing_property).
-    fn min_item_spacing<M>(self, value: impl IntoProp<f64, M>) -> Self {
-        self.prop(<ferroui_controls::LinedFlowLayout>::min_item_spacing_property(), value)
-    }
-
-    /// Sets [`LinedFlowLayout::line_spacing_property`](ferroui_controls::LinedFlowLayout::line_spacing_property).
-    fn line_spacing<M>(self, value: impl IntoProp<f64, M>) -> Self {
-        self.prop(<ferroui_controls::LinedFlowLayout>::line_spacing_property(), value)
-    }
-
-    /// Sets [`LinedFlowLayout::line_height_property`](ferroui_controls::LinedFlowLayout::line_height_property).
-    fn line_height<M>(self, value: impl IntoProp<f64, M>) -> Self {
-        self.prop(<ferroui_controls::LinedFlowLayout>::line_height_property(), value)
-    }
-}
-impl<T: ObjectType + Upcast<ferroui_controls::LinedFlowLayout>> LinedFlowLayoutProps for El<T> {}
 
 /// The properties and routed events of [`ListBoxItem`](ferroui_controls::ListBoxItem).
 pub trait ListBoxItemProps: ElementBuilder {
@@ -5451,24 +5277,6 @@ pub trait RectangleGeometryProps: ElementBuilder {
 }
 impl<T: ObjectType + Upcast<ferroui_base::media::RectangleGeometry>> RectangleGeometryProps for El<T> {}
 
-/// The properties and routed events of [`RecyclePool`](ferroui_controls::RecyclePool).
-pub trait RecyclePoolProps: ElementBuilder {
-    /// Sets [`RecyclePool::reuse_key_property`](ferroui_controls::RecyclePool::reuse_key_property).
-    fn reuse_key<M>(self, value: impl IntoProp<String, M>) -> Self {
-        self.prop(<ferroui_controls::RecyclePool>::reuse_key_property(), value)
-    }
-}
-impl<T: ObjectType + Upcast<ferroui_controls::RecyclePool>> RecyclePoolProps for El<T> {}
-
-/// The properties and routed events of [`RecyclingElementFactory`](ferroui_controls::RecyclingElementFactory).
-pub trait RecyclingElementFactoryProps: ElementBuilder {
-    /// Sets [`RecyclingElementFactory::recycle_pool_property`](ferroui_controls::RecyclingElementFactory::recycle_pool_property).
-    fn recycle_pool<M>(self, value: impl IntoProp<Option<ferroui_base::Ref<ferroui_controls::RecyclePool>>, M>) -> Self {
-        self.prop(<ferroui_controls::RecyclingElementFactory>::recycle_pool_property(), value)
-    }
-}
-impl<T: ObjectType + Upcast<ferroui_controls::RecyclingElementFactory>> RecyclingElementFactoryProps for El<T> {}
-
 /// The properties and routed events of [`RefreshContainer`](ferroui_controls::RefreshContainer).
 pub trait RefreshContainerProps: ElementBuilder {
     /// Sets [`RefreshContainer::visualizer_property`](ferroui_controls::RefreshContainer::visualizer_property).
@@ -6277,25 +6085,6 @@ pub trait SplitViewTemplateSettingsProps: ElementBuilder {
 }
 impl<T: ObjectType + Upcast<ferroui_controls::primitives::SplitViewTemplateSettings>> SplitViewTemplateSettingsProps for El<T> {}
 
-/// The properties and routed events of [`StackLayout`](ferroui_controls::StackLayout).
-pub trait StackLayoutProps: ElementBuilder {
-    /// Sets [`StackLayout::orientation_property`](ferroui_controls::StackLayout::orientation_property).
-    fn orientation<M>(self, value: impl IntoProp<ferroui_base::layout::Orientation, M>) -> Self {
-        self.prop(<ferroui_controls::StackLayout>::orientation_property(), value)
-    }
-
-    /// Sets [`StackLayout::spacing_property`](ferroui_controls::StackLayout::spacing_property).
-    fn spacing<M>(self, value: impl IntoProp<f64, M>) -> Self {
-        self.prop(<ferroui_controls::StackLayout>::spacing_property(), value)
-    }
-
-    /// Sets [`StackLayout::is_virtualization_enabled_property`](ferroui_controls::StackLayout::is_virtualization_enabled_property).
-    fn is_virtualization_enabled<M>(self, value: impl IntoProp<bool, M>) -> Self {
-        self.prop(<ferroui_controls::StackLayout>::is_virtualization_enabled_property(), value)
-    }
-}
-impl<T: ObjectType + Upcast<ferroui_controls::StackLayout>> StackLayoutProps for El<T> {}
-
 /// The properties and routed events of [`StackPanel`](ferroui_controls::StackPanel).
 pub trait StackPanelProps: ElementBuilder {
     /// Sets [`StackPanel::spacing_property`](ferroui_controls::StackPanel::spacing_property).
@@ -6672,6 +6461,11 @@ pub trait TextBlockProps: ElementBuilder {
     /// Sets [`TextBlock::baseline_offset_property`](ferroui_controls::TextBlock::baseline_offset_property).
     fn baseline_offset<M>(self, value: impl IntoProp<f64, M>) -> Self {
         self.prop(<ferroui_controls::TextBlock>::baseline_offset_property(), value)
+    }
+
+    /// Sets [`TextBlock::text_line_bounds_property`](ferroui_controls::TextBlock::text_line_bounds_property).
+    fn text_line_bounds<M>(self, value: impl IntoProp<ferroui_base::media::TextLineBounds, M>) -> Self {
+        self.prop(<ferroui_controls::TextBlock>::text_line_bounds_property(), value)
     }
 
     /// Sets [`TextBlock::layout_rounding_placement_property`](ferroui_controls::TextBlock::layout_rounding_placement_property).
@@ -7640,50 +7434,6 @@ pub trait UniformGridProps: ElementBuilder {
 }
 impl<T: ObjectType + Upcast<ferroui_controls::primitives::UniformGrid>> UniformGridProps for El<T> {}
 
-/// The properties and routed events of [`UniformGridLayout`](ferroui_controls::UniformGridLayout).
-pub trait UniformGridLayoutProps: ElementBuilder {
-    /// Sets [`UniformGridLayout::orientation_property`](ferroui_controls::UniformGridLayout::orientation_property).
-    fn orientation<M>(self, value: impl IntoProp<ferroui_base::layout::Orientation, M>) -> Self {
-        self.prop(<ferroui_controls::UniformGridLayout>::orientation_property(), value)
-    }
-
-    /// Sets [`UniformGridLayout::min_item_width_property`](ferroui_controls::UniformGridLayout::min_item_width_property).
-    fn min_item_width<M>(self, value: impl IntoProp<f64, M>) -> Self {
-        self.prop(<ferroui_controls::UniformGridLayout>::min_item_width_property(), value)
-    }
-
-    /// Sets [`UniformGridLayout::min_item_height_property`](ferroui_controls::UniformGridLayout::min_item_height_property).
-    fn min_item_height<M>(self, value: impl IntoProp<f64, M>) -> Self {
-        self.prop(<ferroui_controls::UniformGridLayout>::min_item_height_property(), value)
-    }
-
-    /// Sets [`UniformGridLayout::min_row_spacing_property`](ferroui_controls::UniformGridLayout::min_row_spacing_property).
-    fn min_row_spacing<M>(self, value: impl IntoProp<f64, M>) -> Self {
-        self.prop(<ferroui_controls::UniformGridLayout>::min_row_spacing_property(), value)
-    }
-
-    /// Sets [`UniformGridLayout::min_column_spacing_property`](ferroui_controls::UniformGridLayout::min_column_spacing_property).
-    fn min_column_spacing<M>(self, value: impl IntoProp<f64, M>) -> Self {
-        self.prop(<ferroui_controls::UniformGridLayout>::min_column_spacing_property(), value)
-    }
-
-    /// Sets [`UniformGridLayout::items_justification_property`](ferroui_controls::UniformGridLayout::items_justification_property).
-    fn items_justification<M>(self, value: impl IntoProp<ferroui_controls::UniformGridLayoutItemsJustification, M>) -> Self {
-        self.prop(<ferroui_controls::UniformGridLayout>::items_justification_property(), value)
-    }
-
-    /// Sets [`UniformGridLayout::items_stretch_property`](ferroui_controls::UniformGridLayout::items_stretch_property).
-    fn items_stretch<M>(self, value: impl IntoProp<ferroui_controls::UniformGridLayoutItemsStretch, M>) -> Self {
-        self.prop(<ferroui_controls::UniformGridLayout>::items_stretch_property(), value)
-    }
-
-    /// Sets [`UniformGridLayout::maximum_rows_or_columns_property`](ferroui_controls::UniformGridLayout::maximum_rows_or_columns_property).
-    fn maximum_rows_or_columns<M>(self, value: impl IntoProp<i32, M>) -> Self {
-        self.prop(<ferroui_controls::UniformGridLayout>::maximum_rows_or_columns_property(), value)
-    }
-}
-impl<T: ObjectType + Upcast<ferroui_controls::UniformGridLayout>> UniformGridLayoutProps for El<T> {}
-
 /// The properties and routed events of [`Viewbox`](ferroui_controls::Viewbox).
 pub trait ViewboxProps: ElementBuilder {
     /// Sets [`Viewbox::stretch_property`](ferroui_controls::Viewbox::stretch_property).
@@ -8332,11 +8082,6 @@ pub trait AttachedProps: ElementBuilder {
         self.prop(<ferroui_controls::primitives::Popup>::takes_focus_from_native_control_property(), value)
     }
 
-    /// Sets the attached [`RecyclePool::reuse_key_property`](ferroui_controls::RecyclePool::reuse_key_property).
-    fn recycle_pool_reuse_key<M>(self, value: impl IntoProp<String, M>) -> Self {
-        self.prop(<ferroui_controls::RecyclePool>::reuse_key_property(), value)
-    }
-
     /// Sets the attached [`RelativePanel::above_property`](ferroui_controls::RelativePanel::above_property).
     fn relative_panel_above<M>(self, value: impl IntoProp<Option<ferroui_base::BoxedValue>, M>) -> Self {
         self.prop(<ferroui_controls::RelativePanel>::above_property(), value)
@@ -8415,11 +8160,6 @@ pub trait AttachedProps: ElementBuilder {
     /// Sets the attached [`RelativePanel::right_of_property`](ferroui_controls::RelativePanel::right_of_property).
     fn relative_panel_right_of<M>(self, value: impl IntoProp<Option<ferroui_base::BoxedValue>, M>) -> Self {
         self.prop(<ferroui_controls::RelativePanel>::right_of_property(), value)
-    }
-
-    /// Sets the attached [`RepeaterBindingHelper::data_template_component_property`](ferroui_controls::repeater::RepeaterBindingHelper::data_template_component_property).
-    fn repeater_binding_helper_data_template_component<M>(self, value: impl IntoProp<Option<std::rc::Rc<dyn ferroui_controls::repeater::IDataTemplateComponent>>, M>) -> Self {
-        self.prop(<ferroui_controls::repeater::RepeaterBindingHelper>::data_template_component_property(), value)
     }
 
     /// Sets the attached [`ScrollContentPresenter::horizontal_snap_points_type_property`](ferroui_controls::presenters::ScrollContentPresenter::horizontal_snap_points_type_property).
@@ -8520,6 +8260,11 @@ pub trait AttachedProps: ElementBuilder {
     /// Sets the attached [`TextBlock::baseline_offset_property`](ferroui_controls::TextBlock::baseline_offset_property).
     fn text_block_baseline_offset<M>(self, value: impl IntoProp<f64, M>) -> Self {
         self.prop(<ferroui_controls::TextBlock>::baseline_offset_property(), value)
+    }
+
+    /// Sets the attached [`TextBlock::text_line_bounds_property`](ferroui_controls::TextBlock::text_line_bounds_property).
+    fn text_block_text_line_bounds<M>(self, value: impl IntoProp<ferroui_base::media::TextLineBounds, M>) -> Self {
+        self.prop(<ferroui_controls::TextBlock>::text_line_bounds_property(), value)
     }
 
     /// Sets the attached [`TextBlock::layout_rounding_placement_property`](ferroui_controls::TextBlock::layout_rounding_placement_property).

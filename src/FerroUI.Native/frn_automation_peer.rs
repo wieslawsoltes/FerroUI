@@ -299,7 +299,7 @@ impl IFrnAutomationPeerImpl for FrnAutomationPeer {
     fn get_templated_parent(&self) -> Option<ComPtr<IFrnAutomationPeer>> {
         crate::callback_base::guard(None, || {
             let peer = self.inner.cast::<ControlAutomationPeer>()?;
-            let templated_parent = peer.owner().templated_parent()?.cast::<Control>()?;
+            let templated_parent = peer.try_owner()?.templated_parent()?.cast::<Control>()?;
             Self::wrap_native(Some(ControlAutomationPeer::create_peer_for_element(&templated_parent)))
         })
     }

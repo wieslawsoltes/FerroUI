@@ -37,7 +37,8 @@ How to rerun (from the repository root; Python 3, standard library only):
 Options:
     --upstream P   the reference checkout of the upstream project (its `src`
                    directory is read); default: $FERROUI_UPSTREAM, else the
-                   sibling directory `Avalonia` of the repository
+                   sibling directory `Avalonia` of the repository; not
+                   needed when `rust-paths` is the only target
     --check        do not write; exit with status 1 and name the stale files
                    (with a line-count summary of the difference) if a
                    generated file differs from what would be generated
@@ -86,6 +87,7 @@ RUST_PATH_CRATES = [
     "FerroUI.Base",
     "FerroUI.Controls",
     "FerroUI.Controls.ColorPicker",
+    "FerroUI.Controls.Repeater",
     os.path.join("Markup", "FerroUI.Markup.Xaml"),
     "FerroUI.Dialogs",
     "FerroUI.Themes.Simple",
@@ -93,6 +95,7 @@ RUST_PATH_CRATES = [
     "FerroUI.Themes.WinUI",
     "FerroUI.OpenGL",
     "FerroUI.View",
+    "FerroUI.Diagnostics",
 ]
 UPSTREAM_PROJECTS = {
     "FerroUI.Base": "Avalonia.Base",
@@ -218,7 +221,7 @@ use ferroui_base::input::*;
 use ferroui_base::interactivity::*;
 use ferroui_base::media::{
     FontFamily, FontFeatureCollection, FontStretch, FontStyle, FontWeight, IBrush, TextAlignment, TextDecorationCollection,
-    TextTrimming, TextWrapping,
+    TextLineBounds, TextTrimming, TextWrapping,
 };
 use ferroui_base::metadata::{into_markup_value, MarkupDelegate, MarkupType};
 use ferroui_base::styling::*;
@@ -1200,12 +1203,15 @@ def main():
     parser.add_argument("--target", action="append", choices=["enums", "classes", "named-values", "rust-paths"])
     args = parser.parse_args()
 
+    targets = args.target or ["enums", "classes", "named-values", "rust-paths"]
+    needs_upstream = any(target != "rust-paths" for target in targets)
     upstream = os.path.join(args.upstream, "src")
-    if not os.path.isdir(os.path.join(upstream, "Avalonia.Base")):
+    if needs_upstream and not os.path.isdir(os.path.join(upstream, "Avalonia.Base")):
         print("no upstream checkout at %s (pass --upstream or set FERROUI_UPSTREAM)" % args.upstream)
         return 2
-    targets = args.target or ["enums", "classes", "named-values", "rust-paths"]
-    sources = Sources(upstream)
+    # Public Rust paths depend only on this checkout, including types ported
+    # from other upstream projects. Do not require an unrelated C# checkout.
+    sources = Sources(upstream) if needs_upstream else None
     overrides = load_overrides()
     report, files = [], {}
     # The base crate declares its typed routed events first; the crates built on it add theirs.
