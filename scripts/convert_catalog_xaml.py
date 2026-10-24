@@ -104,6 +104,7 @@ REMOVALS = [
 PORT_DOCUMENTS = [
     ("ClassicThemes.xaml", "the Fluent and Simple themes of the original, with the feature classic-themes only"),
     ("Pages/TreeDataGridPage.xaml", "the page of the TreeDataGrid demo of the port"),
+    ("Pages/ItemsRepeaterPage.xaml", "the page of the ItemsRepeater of the port"),
 ]
 
 

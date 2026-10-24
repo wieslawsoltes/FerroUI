@@ -498,6 +498,7 @@ dependencies = [
  "ferroui-build",
  "ferroui-controls",
  "ferroui-controls-color-picker",
+ "ferroui-controls-repeater",
  "ferroui-controls-treedatagrid",
  "ferroui-dialogs",
  "ferroui-harfbuzz",
@@ -1047,6 +1048,7 @@ dependencies = [
  "ferroui-controls",
  "ferroui-controls-charts",
  "ferroui-controls-color-picker",
+ "ferroui-controls-repeater",
  "ferroui-controls-treedatagrid",
  "ferroui-desktop",
  "ferroui-devtools",
@@ -1191,6 +1193,19 @@ dependencies = [
  "ferroui-markup-xaml-loader",
  "ferroui-themes-fluent",
  "ferroui-themes-simple",
+]
+
+[[package]]
+name = "ferroui-controls-repeater"
+version = "0.4.0"
+dependencies = [
+ "bitflags",
+ "ferroui-base",
+ "ferroui-build-scan",
+ "ferroui-controls",
+ "ferroui-markup-xaml-loader",
+ "rustc-hash 2.1.3",
+ "xamlx",
 ]
 
 [[package]]
@@ -1852,6 +1867,7 @@ dependencies = [
  "ferroui-build-scan",
  "ferroui-controls",
  "ferroui-controls-color-picker",
+ "ferroui-controls-repeater",
  "ferroui-controls-treedatagrid",
  "ferroui-desktop",
  "ferroui-dialogs",
