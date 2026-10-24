@@ -51,6 +51,7 @@ classic-themes = ["dep:ferroui-themes-simple", "dep:ferroui-themes-fluent"]
 runtime-markup = [
     "dep:ferroui-markup-xaml-loader",
     "ferroui-controls-color-picker/document-assets",
+    "ferroui-controls-inking/document-assets",
     "ferroui-controls-treedatagrid/document-assets",
 ]
 
@@ -65,6 +66,8 @@ ferroui-controls-color-picker = { workspace = true }
 # network requests, and the article list of the demo shows that it cannot load.
 ferroui-controls-treedatagrid = { workspace = true }
 treedatagrid-demo = { path = "../TreeDataGridDemo", default-features = false }
+# The inking controls and their WinUI styles (the page Inking, not in the original).
+ferroui-controls-inking = { workspace = true }
 # The about dialog.
 ferroui-dialogs = { workspace = true }
 ferroui-markup = { workspace = true }
@@ -112,6 +115,7 @@ ferroui-vello = { workspace = true, features = ["hybrid", "gpu"] }
 # them, and the loader leaves such an include to run time only for a document the asset loader has.
 ferroui-controls-color-picker = { workspace = true, features = ["document-assets"] }
 ferroui-controls-treedatagrid = { workspace = true, features = ["document-assets"] }
+ferroui-controls-inking = { workspace = true, features = ["document-assets"] }
 # The run-time loader of the tests: every document is loaded with it too, and each class populated by
 # its compiled markup is compared with the class the loader populates (`tests/compiled_markup.rs`);
 # the reproductions of the gaps load markup text.
