@@ -284,6 +284,16 @@ ferro_markup_type!(interface dyn crate::animation::IClock as "IClock" {
     handles: [Rc<dyn crate::animation::IClock>, Option<Rc<dyn crate::animation::IClock>>],
 });
 
+// The storage provider of a top level (`TopLevel.StorageProvider`), which a binding hands to
+// the storage provider of a picker (`{Binding $parent[TopLevel].StorageProvider}`).
+ferro_markup_type!(interface dyn crate::platform::storage::IStorageProvider as "IStorageProvider" {
+    namespace: "FerroUI.Platform.Storage",
+    handles: [
+        Rc<dyn crate::platform::storage::IStorageProvider>,
+        Option<Rc<dyn crate::platform::storage::IStorageProvider>>
+    ],
+});
+
 ferro_markup_type!(interface dyn crate::metadata::IServiceProvider as "IServiceProvider" {
     namespace: "System",
     handles: [Rc<dyn crate::metadata::IServiceProvider>, Option<Rc<dyn crate::metadata::IServiceProvider>>],
@@ -389,6 +399,7 @@ pub(super) const TYPES: &[&MarkupType] = &[
     <dyn crate::animation::ICustomAnimator as MarkupTyped>::MARKUP,
     <dyn crate::animation::IPageTransition as MarkupTyped>::MARKUP,
     <dyn crate::animation::IClock as MarkupTyped>::MARKUP,
+    <dyn crate::platform::storage::IStorageProvider as MarkupTyped>::MARKUP,
     <dyn crate::metadata::IServiceProvider as MarkupTyped>::MARKUP,
     <dyn crate::controls::INameScope as MarkupTyped>::MARKUP,
     <dyn crate::styling::SetterBase as MarkupTyped>::MARKUP,
@@ -432,6 +443,7 @@ pub(super) fn register_value_types() {
     ValueTypes::register_nullable::<Rc<dyn crate::animation::ITransition>>();
     ValueTypes::register_nullable::<Rc<dyn crate::animation::IPageTransition>>();
     ValueTypes::register_nullable::<Rc<dyn crate::animation::IClock>>();
+    ValueTypes::register_nullable::<Rc<dyn crate::platform::storage::IStorageProvider>>();
     ValueTypes::register_nullable::<Rc<dyn crate::media::TextTrimming>>();
     ValueTypes::register_nullable::<crate::controls::NameScopeRef>();
     ValueTypes::register_nullable::<Rc<dyn crate::INamed>>();

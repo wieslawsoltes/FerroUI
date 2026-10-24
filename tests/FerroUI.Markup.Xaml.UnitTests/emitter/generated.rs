@@ -50,6 +50,14 @@ const XML_NAMESPACES_4: rt::XmlNamespaceTable = &[
     ("x", &[]),
 ];
 
+/// The XML namespaces of documents of this file, as the compiler resolved them.
+const XML_NAMESPACES_5: rt::XmlNamespaceTable = &[
+    ("", &[("FerroUI", "FerroUI.Base"), ("FerroUI.Animation", "FerroUI.Base"), ("FerroUI.Animation.Easings", "FerroUI.Base"), ("FerroUI.Controls", "FerroUI.Base"), ("FerroUI.Data", "FerroUI.Base"), ("FerroUI.Data.Converters", "FerroUI.Base"), ("FerroUI.Input", "FerroUI.Base"), ("FerroUI.Input.GestureRecognizers", "FerroUI.Base"), ("FerroUI.Input.TextInput", "FerroUI.Base"), ("FerroUI.Layout", "FerroUI.Base"), ("FerroUI.LogicalTree", "FerroUI.Base"), ("FerroUI.Media", "FerroUI.Base"), ("FerroUI.Media.Imaging", "FerroUI.Base"), ("FerroUI.Media.Transformation", "FerroUI.Base"), ("FerroUI.Styling", "FerroUI.Base"), ("FerroUI", "FerroUI.Controls"), ("FerroUI.Automation", "FerroUI.Controls"), ("FerroUI.Controls", "FerroUI.Controls"), ("FerroUI.Controls.Embedding", "FerroUI.Controls"), ("FerroUI.Controls.Presenters", "FerroUI.Controls"), ("FerroUI.Controls.Primitives", "FerroUI.Controls"), ("FerroUI.Controls.Shapes", "FerroUI.Controls"), ("FerroUI.Controls.Templates", "FerroUI.Controls"), ("FerroUI.Controls.Notifications", "FerroUI.Controls"), ("FerroUI.Controls.Chrome", "FerroUI.Controls"), ("FerroUI.Controls.Documents", "FerroUI.Controls"), ("FerroUI.Markup.Xaml.MarkupExtensions", "FerroUI.Markup.Xaml"), ("FerroUI.Markup.Xaml.Styling", "FerroUI.Markup.Xaml"), ("FerroUI.Markup.Xaml.Templates", "FerroUI.Markup.Xaml")]),
+    ("generic", &[("System.Collections.Generic", "netstandard")]),
+    ("t", &[("FerroUI.Markup.Xaml.UnitTests", "FerroUI.Markup.Xaml.UnitTests")]),
+    ("x", &[]),
+];
+
 /// The base URI and the XML namespaces of `border_empty.xaml`.
 static BUILD_BORDER_EMPTY_XAML_DOCUMENT: rt::DocumentInfo = rt::DocumentInfo { base_uri: ::core::option::Option::Some("ferres://FerroUI.Markup.Xaml.UnitTests/Emitter/border_empty.xaml"), namespaces: XML_NAMESPACES_0 };
 
@@ -5538,6 +5546,39 @@ fn build_static_resource_element_xaml_untyped(
     ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
 }
 
+/// The base URI and the XML namespaces of `runtime_list_of_references.xaml`.
+static BUILD_RUNTIME_LIST_OF_REFERENCES_XAML_DOCUMENT: rt::DocumentInfo = rt::DocumentInfo { base_uri: ::core::option::Option::Some("ferres://FerroUI.Markup.Xaml.UnitTests/Emitter/runtime_list_of_references.xaml"), namespaces: XML_NAMESPACES_5 };
+
+/// Generated from `runtime_list_of_references.xaml`.
+pub fn build_runtime_list_of_references_xaml(
+    service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
+) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::ItemsControl>, ::ferroui_markup_xaml::XamlLoadException> {
+    // runtime_list_of_references.xaml(1,2) ItemsControl
+    let items_control_0 = ::ferroui_controls::ItemsControl::new();
+    let context = rt::populate_context(service_provider, &BUILD_RUNTIME_LIST_OF_REFERENCES_XAML_DOCUMENT, rt::to_value(items_control_0.clone()));
+    let name_scope = context.name_scope_field();
+    items_control_0.begin_init();
+    // runtime_list_of_references.xaml(5,6) ItemsSource
+    let list_1_0 = rt::RuntimeList::of("FerroUI.Markup.Xaml.UnitTests.Note");
+    // runtime_list_of_references.xaml(6,8) Content
+    let note_0 = ::ferroui_markup_xaml_tests::support::emitter::Note::__markup_new_0(::std::string::String::from("first note"));
+    rt::RuntimeList::add(&list_1_0, rt::cast_untyped(::core::clone::Clone::clone(&note_0), rt::markup_handle(<::ferroui_markup_xaml_tests::support::emitter::Note as ::ferroui_base::metadata::MarkupTyped>::MARKUP), 6, 8)?);
+    // runtime_list_of_references.xaml(11,8) Content
+    let note_1 = ::ferroui_markup_xaml_tests::support::emitter::Note::__markup_new_0(::std::string::String::from("second note"));
+    rt::RuntimeList::add(&list_1_0, rt::cast_untyped(::core::clone::Clone::clone(&note_1), rt::markup_handle(<::ferroui_markup_xaml_tests::support::emitter::Note as ::ferroui_base::metadata::MarkupTyped>::MARKUP), 11, 8)?);
+    items_control_0.set_value(::ferroui_controls::ItemsControl::items_source_property(), rt::list_cast(&list_1_0, 11, 8)?);
+    rt::invoked(items_control_0.try_end_init(), 1, 2)?;
+    rt::complete_root_name_scope(::core::option::Option::Some(&items_control_0), name_scope.as_ref(), 1, 2)?;
+    ::core::result::Result::Ok(items_control_0)
+}
+
+fn build_runtime_list_of_references_xaml_untyped(
+    service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
+) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadException> {
+    let root = build_runtime_list_of_references_xaml(service_provider)?;
+    ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
+}
+
 /// The build function of every eligible public document, by document name.
 pub const DOCUMENTS: &[(&str, BuildDocument)] = &[
     ("border_empty.xaml", build_border_empty_xaml_untyped as BuildDocument),
@@ -5667,6 +5708,7 @@ pub const DOCUMENTS: &[(&str, BuildDocument)] = &[
     ("method_command.xaml", build_method_command_xaml_untyped as BuildDocument),
     ("container_query.xaml", build_container_query_xaml_untyped as BuildDocument),
     ("static_resource_element.xaml", build_static_resource_element_xaml_untyped as BuildDocument),
+    ("runtime_list_of_references.xaml", build_runtime_list_of_references_xaml_untyped as BuildDocument),
 ];
 
 /// The loader of the compiled markup of the assembly: builds the document with the URI

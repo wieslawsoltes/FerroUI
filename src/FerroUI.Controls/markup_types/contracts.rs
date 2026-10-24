@@ -18,7 +18,7 @@ use ferroui_base::data::core::ValueTypes;
 use ferroui_base::ferro_markup_type;
 use ferroui_base::metadata::{IAddChild, MarkupType, MarkupTyped};
 use ferroui_base::styling::ITemplate;
-use ferroui_base::Ref;
+use ferroui_base::{BoxedValue, Ref};
 use std::rc::Rc;
 
 // FerroUI.Metadata
@@ -135,10 +135,36 @@ ferro_markup_type!(interface dyn IPopupHost as "IPopupHost" {
 // that holds the handle.
 // Deviation (DEVIATIONS.md, Run-time type system of markup): upstream assigns any enumerable;
 // here a collection is cast to the handle by the cast registered for its type.
+//
+// The handle is an indexable list (`IItemsList`): a binding path indexes it (`Items[0]`) and
+// reads its count, as upstream binds the indexer and `Count` of the list (`IList`) behind
+// an items source.
+// Deviation (DEVIATIONS.md, Run-time type system of markup): `IEnumerable` declares neither.
 ferro_markup_type!(interface crate::ItemsSource as "IEnumerable" {
     namespace: "System.Collections",
     handles: [crate::ItemsSource, Option<crate::ItemsSource>],
+    this: crate::ItemsSource,
+    properties: [
+        Count: i32 { try_get: items_source_count },
+    ],
+    indexers: [
+        (i32) -> Option<BoxedValue> { try_get: items_source_item },
+    ],
 });
+
+/// `IList.Count` of an items source: the count does not fit the `int` of markup.
+fn items_source_count(source: &crate::ItemsSource) -> Result<i32, &'static str> {
+    i32::try_from(source.count()).map_err(|_| "The number of items exceeds the range of Int32.")
+}
+
+/// `IList[index]` of an items source: an index that is not the index of an item is an
+/// error, as it is upstream (`ArgumentOutOfRangeException`).
+fn items_source_item(source: &crate::ItemsSource, index: i32) -> Result<Option<BoxedValue>, &'static str> {
+    match usize::try_from(index) {
+        Ok(index) if index < source.count() => Ok(source.get_at(index)),
+        _ => Err("Index was out of range. Must be non-negative and less than the size of the collection."),
+    }
+}
 
 /// The types declared in this file.
 // FerroUI.Controls.Notifications: the data type of the notification templates of the themes.

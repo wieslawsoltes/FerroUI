@@ -350,6 +350,16 @@ CONTROLS = {
             "DependencyResolver: Option<Rc<dyn IFerroDependencyResolver>> { set: Popup::set_dependency_resolver }",
         ],
     },
+    'TopLevel': {
+        'properties': [
+            """StorageProvider: Rc<dyn ferroui_base::platform::storage::IStorageProvider> {
+                get: |this: &Ref<TopLevel>| this.storage_provider()
+            }""",
+        ],
+        'note': """// `StorageProvider` is a read-only property of the managed original: markup reads it
+// (`{Binding $parent[TopLevel].StorageProvider}`), and the generator declares a read-only property only for a
+// collection.""",
+    },
     'Window': {
         # The public method of the managed original without parameters: a binding path that ends
         # in it is a command (`{Binding $parent[Window].Close}`, the menu of the developer tools).

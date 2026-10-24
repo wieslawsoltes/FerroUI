@@ -185,8 +185,15 @@ pub fn markup_handle(markup: &'static MarkupType) -> ValueType {
 /// declares); generated code asks the assignability of the untyped value
 /// conversions ([`ValueTypes::is_assignable`]), which the declarations of
 /// that metadata register.
+///
+/// A value in a nullable form that holds a value (`Option<Rc<dyn Contract>>`, which a
+/// markup extension provides for a property of that type: `ResolveByName` brings the
+/// element to the type the property stores) is an instance of what it holds, as the
+/// run-time loader takes the type of such a value from the metadata that declares the
+/// form among its handles.
 pub fn is_instance(value: &MarkupValue, target: ValueType) -> bool {
     let Some(value) = value else { return false };
+    let value = &ValueTypes::normalize(value.clone()).unwrap_or_else(|| value.clone());
     if let Some(object) = ValueTypes::as_object(&**value) {
         let class = object.get_type();
         if let Some((target_class, false)) = TypeInfo::find_by_handle(target.id()) {
@@ -1272,6 +1279,28 @@ pub fn cast<T: Clone + 'static, V: PartialEq + 'static>(value: V, line: i32, pos
     };
     match converted.as_ref().and_then(|converted| converted.downcast_ref::<T>()) {
         Some(value) => Ok(value.clone()),
+        None => Err(at("InvalidCastException", format!("Unable to cast the value to {}.", target.name()), line, position)),
+    }
+}
+
+/// `value` cast to the type with the handle `target`, then held untyped as the run-time
+/// loader holds the value of a node ([`to_untyped`]): [`cast`] for a target that generated
+/// code names by its handle, not by a Rust type (the element type of a list of the runtime
+/// library, `List<T>`, which the adder of the list states). A value it does not convert is
+/// the `InvalidCastException` of the loader at `line`, `position`.
+pub fn cast_untyped<V: PartialEq + 'static>(
+    value: V,
+    target: ValueType,
+    line: i32,
+    position: i32,
+) -> Result<MarkupValue, XamlLoadException> {
+    let converted = match into_markup_value(value) {
+        Some(boxed) if boxed.value_type_id() == target.id() => Some(boxed),
+        Some(boxed) => ValueTypes::try_cast(&boxed, target),
+        None => ValueTypes::try_convert(None, target).flatten(),
+    };
+    match converted {
+        Some(converted) => Ok(to_untyped(converted)),
         None => Err(at("InvalidCastException", format!("Unable to cast the value to {}.", target.name()), line, position)),
     }
 }
