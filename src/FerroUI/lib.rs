@@ -154,6 +154,10 @@ pub use ferroui_markup_xaml_loader as markup_xaml_loader;
 
 #[cfg(feature = "color-picker")]
 pub use ferroui_controls_color_picker as controls_color_picker;
+#[cfg(feature = "livecharts")]
+pub use ferroui_livecharts as livecharts;
+#[cfg(feature = "livecharts")]
+pub use ferroui_controls_livecharts as controls_livecharts;
 #[cfg(feature = "treedatagrid")]
 pub use ferroui_controls_treedatagrid as controls_treedatagrid;
 #[cfg(feature = "treedatagrid")]

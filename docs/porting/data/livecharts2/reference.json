@@ -1,0 +1,11 @@
+{
+  "repository": "https://github.com/Live-Charts/LiveCharts2",
+  "commit": "8537b90ffb100a947cd0b1f6be49f896ae6050eb",
+  "license": "MIT",
+  "copyright": "Copyright (c) 2021 Alberto Rodriguez Orozco",
+  "source_roots": ["src", "generators", "build"],
+  "test_roots": ["tests"],
+  "sample_roots": ["samples"],
+  "extra_files": ["LICENSE", "Directory.Build.props", "nuget.props", "global.json"],
+  "api_profile": "Union of the named symbol profiles in scripts/livecharts2/profiles.json, including image, UI hosts, native platforms, legacy and debug branches. Syntax declarations only; no semantic compilation or Roslyn-generated sources. All tracked files, including inactive text and binary assets, remain included in the byte-level source inventory."
+}

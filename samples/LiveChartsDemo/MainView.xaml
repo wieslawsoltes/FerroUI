@@ -1,0 +1,141 @@
+<Grid xmlns="https://github.com/ferroui"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:lc="https://ferroui.dev/livecharts"
+      RowDefinitions="108,*,*,50" ColumnDefinitions="*,*,*"
+      Background="#F3F5F9">
+  <Grid Grid.ColumnSpan="3" Margin="28,24,28,12" ColumnDefinitions="*,Auto">
+    <StackPanel Spacing="5">
+      <TextBlock Text="FerroUI / LiveCharts" FontSize="28" FontWeight="Bold" Foreground="#14243A" />
+      <TextBlock Text="Six native chart families · compiled XAML · live observable data"
+                 FontSize="14" Foreground="#65758A" />
+    </StackPanel>
+    <Button x:Name="UpdateButton" Grid.Column="1" Content="Update live data"
+            VerticalAlignment="Center" Padding="20,11" FontSize="14" />
+  </Grid>
+
+  <Border Grid.Row="1" Margin="20,0,8,12" Padding="16" Background="White" CornerRadius="14">
+    <Grid RowDefinitions="Auto,Auto,*">
+      <TextBlock Text="01 / CARTESIAN" FontSize="11" FontWeight="Bold" Foreground="#62738C" />
+      <TextBlock Grid.Row="1" Text="Delivery momentum" FontSize="19" FontWeight="SemiBold" Margin="0,5,0,8" />
+      <lc:CartesianChart x:Name="CartesianDemo" Grid.Row="2" LegendPosition="Bottom">
+        <lc:CartesianChart.XAxes><lc:Axis TextSize="11" /></lc:CartesianChart.XAxes>
+        <lc:CartesianChart.YAxes><lc:Axis MinLimit="0" TextSize="11" /></lc:CartesianChart.YAxes>
+        <lc:ColumnSeries Name="Completed" MaxBarWidth="24" CornerRadius="5">
+          <lc:ColumnSeries.FillBrush>
+            <LinearGradientBrush StartPoint="0%,0%" EndPoint="0%,100%">
+              <GradientStop Offset="0" Color="#48C7C8" />
+              <GradientStop Offset="1" Color="#2877C9" />
+            </LinearGradientBrush>
+          </lc:ColumnSeries.FillBrush>
+        </lc:ColumnSeries>
+        <lc:LineSeries Name="Planned" Stroke="#DF8651" StrokeThickness="2.5" GeometrySize="6" LineSmoothness="0.6" />
+      </lc:CartesianChart>
+    </Grid>
+  </Border>
+
+  <Border Grid.Row="1" Grid.Column="1" Margin="8,0,8,12" Padding="16" Background="White" CornerRadius="14">
+    <Grid RowDefinitions="Auto,Auto,*">
+      <TextBlock Text="02 / PIE &amp; DOUGHNUT" FontSize="11" FontWeight="Bold" Foreground="#62738C" />
+      <TextBlock Grid.Row="1" Text="Work by discipline" FontSize="19" FontWeight="SemiBold" Margin="0,5,0,8" />
+      <lc:PieChart x:Name="PieDemo" Grid.Row="2" LegendPosition="Bottom">
+        <lc:PieSeries Name="Product" Fill="#2877C9" InnerRadius="56" />
+        <lc:PieSeries Name="Platform" Fill="#47BDB5" InnerRadius="56" />
+        <lc:PieSeries Name="Research" Fill="#DDA25D" InnerRadius="56" />
+        <lc:PieSeries Name="Operations" Fill="#9186CF" InnerRadius="56" />
+      </lc:PieChart>
+    </Grid>
+  </Border>
+
+  <Border Grid.Row="1" Grid.Column="2" Margin="8,0,20,12" Padding="16" Background="White" CornerRadius="14">
+    <Grid RowDefinitions="Auto,Auto,*">
+      <TextBlock Text="03 / POLAR" FontSize="11" FontWeight="Bold" Foreground="#62738C" />
+      <TextBlock Grid.Row="1" Text="Capability profile" FontSize="19" FontWeight="SemiBold" Margin="0,5,0,8" />
+      <lc:PolarChart x:Name="PolarDemo" Grid.Row="2" InitialRotation="-90" LegendPosition="Bottom">
+        <lc:PolarChart.XAxes><lc:Axis TextSize="10" /></lc:PolarChart.XAxes>
+        <lc:PolarChart.YAxes><lc:Axis MinLimit="0" MaxLimit="10" TextSize="10" /></lc:PolarChart.YAxes>
+        <lc:PolarLineSeries Name="Current" Fill="#403DB4B4" Stroke="#289EAB" GeometrySize="5" />
+        <lc:PolarLineSeries Name="Target" Fill="#15B69BE0" Stroke="#8F7AB5" GeometrySize="4" />
+      </lc:PolarChart>
+    </Grid>
+  </Border>
+
+  <Border Grid.Row="2" Margin="20,0,8,0" Padding="16" Background="White" CornerRadius="14">
+    <Grid RowDefinitions="Auto,Auto,*">
+      <TextBlock Text="04 / SANKEY" FontSize="11" FontWeight="Bold" Foreground="#62738C" />
+      <TextBlock Grid.Row="1" Text="Energy pathways" FontSize="19" FontWeight="SemiBold" Margin="0,5,0,8" />
+      <lc:SankeyChart x:Name="SankeyDemo" Grid.Row="2">
+        <lc:SankeyChart.Nodes>
+          <lc:SankeyNode Id="601" Name="Solar" Color="#DEA55E" />
+          <lc:SankeyNode Id="602" Name="Wind" Color="#43B7B0" />
+          <lc:SankeyNode Id="603" Name="Grid" Color="#5286BB" />
+          <lc:SankeyNode Id="604" Name="Homes" Color="#A28BC8" />
+          <lc:SankeyNode Id="605" Name="Industry" Color="#6E8FAD" />
+        </lc:SankeyChart.Nodes>
+        <lc:SankeyChart.Links>
+          <lc:SankeyLink SourceId="601" TargetId="603" Weight="38" />
+          <lc:SankeyLink SourceId="602" TargetId="603" Weight="62" />
+          <lc:SankeyLink SourceId="603" TargetId="604" Weight="44" />
+          <lc:SankeyLink SourceId="603" TargetId="605" Weight="56" />
+        </lc:SankeyChart.Links>
+      </lc:SankeyChart>
+    </Grid>
+  </Border>
+
+  <Border Grid.Row="2" Grid.Column="1" Margin="8,0,8,0" Padding="16" Background="White" CornerRadius="14">
+    <Grid RowDefinitions="Auto,Auto,*">
+      <TextBlock Text="05 / TREEMAP" FontSize="11" FontWeight="Bold" Foreground="#62738C" />
+      <TextBlock Grid.Row="1" Text="Portfolio composition" FontSize="19" FontWeight="SemiBold" Margin="0,5,0,8" />
+      <lc:TreemapChart x:Name="TreemapDemo" Grid.Row="2">
+        <lc:TreemapChart.Roots>
+          <lc:TreemapNode Name="Applications" Color="#E7F0F7">
+            <lc:TreemapNode.Children>
+              <lc:TreemapNodes>
+                <lc:TreemapNode Name="Desktop" Value="45" Color="#3B83BF" />
+                <lc:TreemapNode Name="Mobile" Value="24" Color="#48B6B4" />
+                <lc:TreemapNode Name="Web" Value="18" Color="#75B4D6" />
+              </lc:TreemapNodes>
+            </lc:TreemapNode.Children>
+          </lc:TreemapNode>
+          <lc:TreemapNode Name="Services" Color="#F0EAF6">
+            <lc:TreemapNode.Children>
+              <lc:TreemapNodes>
+                <lc:TreemapNode Name="Data" Value="28" Color="#9483C3" />
+                <lc:TreemapNode Name="Identity" Value="14" Color="#BA9DC7" />
+                <lc:TreemapNode Name="Delivery" Value="11" Color="#D7A76C" />
+              </lc:TreemapNodes>
+            </lc:TreemapNode.Children>
+          </lc:TreemapNode>
+        </lc:TreemapChart.Roots>
+      </lc:TreemapChart>
+    </Grid>
+  </Border>
+
+  <Border Grid.Row="2" Grid.Column="2" Margin="8,0,20,0" Padding="16" Background="White" CornerRadius="14">
+    <Grid RowDefinitions="Auto,Auto,*">
+      <TextBlock Text="06 / GEOGRAPHIC" FontSize="11" FontWeight="Bold" Foreground="#62738C" />
+      <TextBlock Grid.Row="1" Text="Connected teams" FontSize="19" FontWeight="SemiBold" Margin="0,5,0,8" />
+      <lc:GeoMap x:Name="GeoDemo" Grid.Row="2">
+        <lc:GeoMap.HeatLands>
+          <lc:HeatLand Name="usa" Value="80" />
+          <lc:HeatLand Name="bra" Value="48" />
+          <lc:HeatLand Name="gbr" Value="64" />
+          <lc:HeatLand Name="deu" Value="60" />
+          <lc:HeatLand Name="ind" Value="92" />
+          <lc:HeatLand Name="aus" Value="70" />
+        </lc:GeoMap.HeatLands>
+        <lc:GeoMap.GeoMarkers>
+          <lc:GeoMarker Longitude="-122.42" Latitude="37.77" Label="San Francisco" Radius="4" Color="#DF8651" />
+          <lc:GeoMarker Longitude="-0.12" Latitude="51.5" Label="London" Radius="4" Color="#DF8651" />
+          <lc:GeoMarker Longitude="77.59" Latitude="12.97" Label="Bengaluru" Radius="4" Color="#DF8651" />
+        </lc:GeoMap.GeoMarkers>
+      </lc:GeoMap>
+    </Grid>
+  </Border>
+
+  <Grid Grid.Row="3" Grid.ColumnSpan="3" Margin="28,0" ColumnDefinitions="*,Auto">
+    <TextBlock x:Name="StatusText" Text="Ready · hover to inspect values; press Update live data to change every chart"
+               VerticalAlignment="Center" FontSize="12" Foreground="#65758A" />
+    <TextBlock Grid.Column="1" Text="RUST + FERROUI" VerticalAlignment="Center"
+               FontSize="11" FontWeight="Bold" Foreground="#65758A" />
+  </Grid>
+</Grid>

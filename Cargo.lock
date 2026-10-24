@@ -1030,6 +1030,7 @@ dependencies = [
  "ferroui-browser",
  "ferroui-controls",
  "ferroui-controls-color-picker",
+ "ferroui-controls-livecharts",
  "ferroui-controls-treedatagrid",
  "ferroui-desktop",
  "ferroui-devtools",
@@ -1038,6 +1039,7 @@ dependencies = [
  "ferroui-dynamic-data",
  "ferroui-harfbuzz",
  "ferroui-headless",
+ "ferroui-livecharts",
  "ferroui-markup",
  "ferroui-markup-xaml",
  "ferroui-markup-xaml-loader",
@@ -1164,6 +1166,18 @@ dependencies = [
  "ferroui-markup-xaml-loader",
  "ferroui-themes-fluent",
  "ferroui-themes-simple",
+]
+
+[[package]]
+name = "ferroui-controls-livecharts"
+version = "0.4.0"
+dependencies = [
+ "bitflags",
+ "ferroui-base",
+ "ferroui-build-scan",
+ "ferroui-controls",
+ "ferroui-livecharts",
+ "ferroui-markup-xaml-loader",
 ]
 
 [[package]]
@@ -1436,6 +1450,15 @@ dependencies = [
  "ferroui-skia",
  "ferroui-themes-simple",
  "libc",
+]
+
+[[package]]
+name = "ferroui-livecharts"
+version = "0.4.0"
+dependencies = [
+ "ferroui-base",
+ "ferroui-build-scan",
+ "serde_json",
 ]
 
 [[package]]
@@ -2840,6 +2863,24 @@ name = "litrs"
 version = "1.0.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "11d3d7f243d5c5a8b9bb5d6dd2b1602c0cb0b9db1621bafc7ed66e35ff9fe092"
+
+[[package]]
+name = "livecharts-demo"
+version = "0.4.0"
+dependencies = [
+ "ferroui-base",
+ "ferroui-build",
+ "ferroui-controls",
+ "ferroui-controls-livecharts",
+ "ferroui-desktop",
+ "ferroui-fonts-inter",
+ "ferroui-headless",
+ "ferroui-livecharts",
+ "ferroui-markup-xaml",
+ "ferroui-markup-xaml-loader",
+ "ferroui-themes-simple",
+ "ferroui-vello",
+]
 
 [[package]]
 name = "lock_api"
