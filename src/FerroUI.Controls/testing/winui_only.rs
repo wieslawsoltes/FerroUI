@@ -4,10 +4,9 @@
 //! them, and their tests check that they have none; the table of section 5.1 lists the same
 //! controls (`winui_only_tests`).
 
-use crate::{FontIcon, InfoBadge, InfoBar, ProgressRing, SymbolIcon};
-use crate::{FontIcon, NumberBox, SymbolIcon};
-use crate::{AutoSuggestBox, FontIcon, NumberBox, SymbolIcon};
-use crate::{AutoSuggestBox, FontIcon, NumberBox, RadioButtons, RatingControl, SymbolIcon};
+use crate::{
+    AutoSuggestBox, FontIcon, InfoBadge, InfoBar, NumberBox, ProgressRing, RadioButtons, RatingControl, SymbolIcon,
+};
 use ferroui_base::TypeInfo;
 
 /// The controls only the WinUI theme styles, each with the reason.

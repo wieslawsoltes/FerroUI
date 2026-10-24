@@ -3,13 +3,12 @@
 //! their static values, as the managed original declares them.
 
 use crate::{
-    AcrylicPlatformCompensationLevels, GridLength, GridUnitType, InfoBarCloseReason, InfoBarClosedEventArgs,
-    InfoBarClosingEventArgs, InfoBarOpenedEventArgs, InfoBarSeverity, Symbol, TextLayoutRoundingPlacement, TickList,
-    AcrylicPlatformCompensationLevels, GridLength, GridUnitType, NumberBoxSpinButtonPlacementMode,
-    AcrylicPlatformCompensationLevels, AutoSuggestBoxQuerySubmittedEventArgs, AutoSuggestBoxSuggestionChosenEventArgs,
-    AutoSuggestBoxTextChangedEventArgs, AutoSuggestionBoxTextChangeReason, GridLength, GridUnitType, NumberBoxSpinButtonPlacementMode,
-    NumberBoxValidationMode, NumberBoxValueChangedEventArgs, Symbol, TextLayoutRoundingPlacement, TickList,
-    WindowTransparencyLevel, WindowTransparencyLevelCollection,
+    AcrylicPlatformCompensationLevels, AutoSuggestBoxQuerySubmittedEventArgs,
+    AutoSuggestBoxSuggestionChosenEventArgs, AutoSuggestBoxTextChangedEventArgs, AutoSuggestionBoxTextChangeReason,
+    GridLength, GridUnitType, InfoBarCloseReason, InfoBarClosedEventArgs, InfoBarClosingEventArgs,
+    InfoBarOpenedEventArgs, InfoBarSeverity, NumberBoxSpinButtonPlacementMode, NumberBoxValidationMode,
+    NumberBoxValueChangedEventArgs, Symbol, TextLayoutRoundingPlacement, TickList, WindowTransparencyLevel,
+    WindowTransparencyLevelCollection,
 };
 use ferroui_base::data::core::ValueTypes;
 use ferroui_base::ferro_markup_type;
