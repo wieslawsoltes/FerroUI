@@ -59,6 +59,7 @@ mod relative_panel_page;
 mod screen_page;
 mod winui_composition_page;
 mod winui_composition_phases;
+mod winui_composition_phase7;
 mod section_page;
 mod settings_page;
 mod slider_page;
