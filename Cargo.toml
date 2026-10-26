@@ -8,6 +8,7 @@ members = [
     "src/ProTranslate/FerroUI.ProTranslate.Core",
     "src/ProTranslate/FerroUI.ProTranslate.Formats",
     "src/ProTranslate/FerroUI.ProTranslate.Build",
+    "src/ProTranslate/FerroUI.ProTranslate.Studio",
     "src/ProTranslate/FerroUI.ProTranslate",
     "src/FerroUI.Reactive",
     "src/FerroUI.Reactive.Testing",
@@ -197,6 +198,7 @@ ferroui-system = { version = "=0.4.0", path = "src/FerroUI.System" }
 ferroui-protranslate-core = { version = "=0.4.0", path = "src/ProTranslate/FerroUI.ProTranslate.Core" }
 ferroui-protranslate-formats = { version = "=0.4.0", path = "src/ProTranslate/FerroUI.ProTranslate.Formats" }
 ferroui-protranslate-build = { version = "=0.4.0", path = "src/ProTranslate/FerroUI.ProTranslate.Build" }
+ferroui-protranslate-studio = { version = "=0.4.0", path = "src/ProTranslate/FerroUI.ProTranslate.Studio" }
 ferroui-protranslate = { version = "=0.4.0", path = "src/ProTranslate/FerroUI.ProTranslate" }
 ferroui-reactive = { version = "=0.4.0", path = "src/FerroUI.Reactive" }
 ferroui-reactive-testing = { version = "=0.4.0", path = "src/FerroUI.Reactive.Testing" }

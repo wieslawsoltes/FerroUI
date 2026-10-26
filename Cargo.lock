@@ -1686,6 +1686,19 @@ dependencies = [
 ]
 
 [[package]]
+name = "ferroui-protranslate-studio"
+version = "0.4.0"
+dependencies = [
+ "ferroui-protranslate-core",
+ "ferroui-protranslate-formats",
+ "regex",
+ "serde",
+ "serde_json",
+ "tempfile",
+ "url",
+]
+
+[[package]]
 name = "ferroui-reactive"
 version = "0.4.0"
 dependencies = [
