@@ -1,0 +1,28 @@
+[package]
+name = "ferroui-protranslate-build"
+description = "Deterministic typed translation catalog generation and localization diagnostics for FerroUI"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+homepage.workspace = true
+readme.workspace = true
+keywords.workspace = true
+categories.workspace = true
+
+[lib]
+path = "lib.rs"
+
+[dependencies]
+ferroui-protranslate-core.workspace = true
+ferroui-protranslate-formats.workspace = true
+syn = { version = "2", features = ["full", "visit"] }
+proc-macro2 = { version = "1", features = ["span-locations"] }
+serde_json = "1"
+
+[dev-dependencies]
+ferroui-system.workspace = true
+
+[package.metadata.release]
+group = "markup"
