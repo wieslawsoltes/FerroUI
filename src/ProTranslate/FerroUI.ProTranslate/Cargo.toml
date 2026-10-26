@@ -1,0 +1,43 @@
+[package]
+name = "ferroui-protranslate"
+description = "Native FerroUI bindings, attached properties and XAML extensions for ProTranslate localization"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+homepage.workspace = true
+readme.workspace = true
+keywords.workspace = true
+categories.workspace = true
+build = "build.rs"
+links = "ferroui_protranslate_xaml"
+autotests = false
+
+[lib]
+path = "lib.rs"
+
+[features]
+dependency-injection = ["dep:ferroui-dependency-injection"]
+markup-functions = ["ferroui-base/markup-functions"]
+compiler-metadata = ["markup-functions", "ferroui-base/compiler-metadata"]
+
+[dependencies]
+ferroui-protranslate-core = { workspace = true }
+ferroui-base = { workspace = true }
+ferroui-controls = { workspace = true }
+ferroui-markup-xaml = { workspace = true }
+ferroui-dependency-injection = { workspace = true, optional = true }
+rust_decimal.workspace = true
+time.workspace = true
+
+[build-dependencies]
+ferroui-build-scan = { workspace = true }
+
+[dev-dependencies]
+ferroui-base = { workspace = true, features = ["testing"] }
+ferroui-controls = { workspace = true, features = ["testing"] }
+ferroui-markup-xaml-loader = { workspace = true, features = ["runtime"] }
+
+[package.metadata.release]
+group = "controls"

@@ -1,0 +1,40 @@
+[package]
+name = "sample-protranslate-demo"
+description = "ProTranslate localization with native FerroUI XAML, live language switching, RTL and measurements"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+publish = false
+build = "build.rs"
+autotests = false
+autobins = false
+
+[lib]
+path = "lib.rs"
+
+[[bin]]
+name = "sample-protranslate-demo"
+path = "program.rs"
+
+[dependencies]
+ferroui-system = { workspace = true }
+ferroui-base = { workspace = true, features = ["markup-functions"] }
+ferroui-controls = { workspace = true }
+ferroui-markup = { workspace = true }
+ferroui-markup-xaml = { workspace = true }
+ferroui-protranslate = { workspace = true, features = ["markup-functions"] }
+ferroui-protranslate-core = { workspace = true }
+ferroui-themes-winui = { workspace = true }
+ferroui-desktop = { workspace = true }
+sample-support = { path = "../SampleSupport" }
+
+[build-dependencies]
+sample-build = { path = "../SampleBuild" }
+ferroui-protranslate-build.workspace = true
+
+[dev-dependencies]
+ferroui-base = { workspace = true, features = ["testing"] }
+ferroui-controls = { workspace = true, features = ["testing"] }
+sample-testing = { path = "../SampleTesting" }

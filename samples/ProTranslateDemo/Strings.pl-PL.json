@@ -1,0 +1,10 @@
+{
+  "Title": "Jedna aplikacja. Każdy język.",
+  "Subtitle": "Zmień język, aby natychmiast zaktualizować tekst, format liczb, ustawienia regionu i kierunek czytania.",
+  "AmountLabel": "Formatowanie liczb na żywo",
+  "Price": "Kwota: {0:N2}",
+  "FormatExplanation": "Przesuń suwak. To samo natywne wiązanie śledzi wartość i aktywną kulturę.",
+  "RegionLabel": "Kultura i jednostki miary",
+  "RegionDetails": "Kultura: {0} · Region: {1}",
+  "Measurements": "Odległość: {0} · Temperatura: {1}"
+}

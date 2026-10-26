@@ -1,0 +1,35 @@
+<Window xmlns="https://github.com/ferroui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:pt="https://github.com/protranslate/xaml"
+        x:Class="ProTranslateDemo.MainWindow"
+        Title="ProTranslate · FerroUI"
+        Width="820" Height="660" MinWidth="560" MinHeight="500">
+  <ScrollViewer>
+    <StackPanel Margin="36" Spacing="20" pt:Translation.AutoFlowDirection="True">
+      <TextBlock Text="ProTranslate" FontSize="14" FontWeight="SemiBold" Opacity="0.65" />
+      <TextBlock x:Name="Heading" Text="{pt:Translate Title}" FontSize="32" FontWeight="SemiBold" TextWrapping="Wrap" />
+      <TextBlock Text="{pt:T Subtitle}" FontSize="16" TextWrapping="Wrap" Opacity="0.75" />
+      <StackPanel Orientation="Horizontal" Spacing="10" FlowDirection="LeftToRight">
+        <Button x:Name="English" Content="English" />
+        <Button x:Name="Polish" Content="Polski" />
+        <Button x:Name="Arabic" Content="العربية" />
+      </StackPanel>
+      <Border Padding="22" CornerRadius="8" BorderThickness="1" BorderBrush="Gray">
+        <StackPanel Spacing="14">
+          <TextBlock Text="{pt:T AmountLabel}" FontSize="18" FontWeight="SemiBold" />
+          <Slider x:Name="Amount" Minimum="0" Maximum="5000" Value="1234.5" />
+          <TextBlock x:Name="FormattedAmount" Text="{pt:F Price, Value={Binding #Amount.Value}}" FontSize="26" />
+          <TextBlock Text="{pt:T FormatExplanation}" TextWrapping="Wrap" Opacity="0.7" />
+        </StackPanel>
+      </Border>
+      <Border Padding="22" CornerRadius="8" BorderThickness="1" BorderBrush="Gray">
+        <StackPanel Spacing="12">
+          <TextBlock pt:Translation.Key="RegionLabel" FontSize="18" FontWeight="SemiBold" />
+          <TextBlock x:Name="RegionDetails" TextWrapping="Wrap" />
+          <TextBlock x:Name="Measurements" TextWrapping="Wrap" />
+          <TextBlock pt:Translation.Key="OptionalTranslation" pt:Translation.FallbackValue="A missing translation uses this explicit fallback." Opacity="0.65" TextWrapping="Wrap" />
+        </StackPanel>
+      </Border>
+    </StackPanel>
+  </ScrollViewer>
+</Window>
