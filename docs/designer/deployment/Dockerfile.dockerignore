@@ -1,0 +1,37 @@
+# Allow only repository build inputs. In particular, a local ./private-rooms from
+# the documented process launch must never be sent to the container builder.
+**
+!Cargo.toml
+!Cargo.lock
+!README.md
+!CHANGELOG.md
+!NOTICE.md
+!LICENSE
+!src
+!src/**
+!external
+!external/**
+!samples
+!samples/**
+!tests
+!tests/**
+!native
+!native/**
+!scripts
+!scripts/**
+
+# Generated output and private state can also appear inside an allowed tree.
+**/.git
+**/target
+**/__pycache__
+**/.env
+**/.env.*
+**/administrator.json
+**/transport-key.json
+**/endpoint.json
+**/peer.json
+**/previous-document.json
+**/previous-sharing-checkpoint.json
+**/reviewed-resolution.json
+**/pending-create.json
+**/pending-join.json

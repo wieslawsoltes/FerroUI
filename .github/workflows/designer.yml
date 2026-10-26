@@ -7,6 +7,17 @@ on:
       - 'src/FerroUI.Mcp/**'
       - 'src/FerroUI.HotReload/**'
       - 'src/FerroUI.Inspect/**'
+      - 'src/FerroUI.Base/**'
+      - 'src/FerroUI.Controls/**'
+      - 'src/FerroUI.Controls.ColorPicker/**'
+      - 'src/TreeDataGrid/FerroUI.Controls.TreeDataGrid/**'
+      - 'src/FerroUI.Dialogs/**'
+      - 'src/FerroUI.ReactiveUI.Controls/**'
+      - 'scripts/generate_view_builders.py'
+      - 'external/XamlX/**'
+      - 'src/Markup/FerroUI.Markup.Xaml/**'
+      - 'src/Markup/FerroUI.Markup.Xaml.Loader/**'
+      - 'tests/FerroUI.Markup.Xaml.UnitTests/**'
       - 'src/FerroUI/Cargo.toml'
       - 'src/FerroUI/lib.rs'
       - 'samples/DesignerStudio/**'
@@ -31,16 +42,18 @@ env:
 
 jobs:
   portable:
-    name: AST, layout, animation and collaboration
+    name: AST, layout, animation, projects, language and durable rooms
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
       - uses: dtolnay/rust-toolchain@89b12181fb390509a0842a86cc55eeb8eb928c1d # stable
       - name: Source preservation, transaction and convergence regressions
-        run: cargo test --locked -p ferroui-designer-core -p ferroui-designer-tools -p ferroui-designer-animation -p ferroui-designer-collaboration
+        run: cargo test --locked -p ferroui-designer-core -p ferroui-designer-tools -p ferroui-designer-animation -p ferroui-designer-collaboration -p ferroui-designer-project -p ferroui-designer-language -p ferroui-designer-collaboration-host --features ferroui-designer-collaboration-host/client
       - name: Portable public APIs are warning-free
-        run: cargo clippy --locked -p ferroui-designer-core -p ferroui-designer-tools -p ferroui-designer-animation -p ferroui-designer-collaboration --all-targets -- -D warnings
+        run: cargo clippy --locked -p ferroui-designer-core -p ferroui-designer-tools -p ferroui-designer-animation -p ferroui-designer-collaboration -p ferroui-designer-project -p ferroui-designer-language -p ferroui-designer-collaboration-host --features ferroui-designer-collaboration-host/client --all-targets -- -D warnings
+      - name: Runtime-derived XAML schema stays reproducible
+        run: python3 src/FerroUI.Designer.Language/generate_schema.py --check
 
   native:
     name: Native workspace, hot reload and MCP
@@ -51,14 +64,10 @@ jobs:
       - uses: dtolnay/rust-toolchain@89b12181fb390509a0842a86cc55eeb8eb928c1d # stable
       - name: Fonts for actual native rendering
         run: sudo apt-get update && sudo apt-get install -y --no-install-recommends libfontconfig1-dev libfreetype6-dev fonts-dejavu-core
-      - name: Native source, preview, history and collaboration integration
+      - name: Native authoring, MCP, hosted peer transport and sample integration
         env:
           FERROUI_DESIGNER_RENDER_OUTPUT: ${{ github.workspace }}/designer-render
-        run: cargo test --locked -p ferroui-designer --features mcp,render-smoke --lib -- --test-threads=1
-      - name: Existing MCP authentication, cancellation and extension isolation
-        run: cargo test --locked -p ferroui-mcp --lib -- --test-threads=1
-      - name: Sample CLI paths and headless host
-        run: cargo test --locked -p designer-studio --no-default-features --features headless,mcp --bin designer-studio
+        run: cargo test --locked -p ferroui-designer -p designer-studio -p ferroui-mcp -p ferroui-hot-reload -p ferroui-designer-collaboration-host --no-default-features --features ferroui-designer/mcp,ferroui-designer/render-smoke,designer-studio/headless,designer-studio/mcp,ferroui-designer-collaboration-host/client,ferroui-designer-collaboration-host/server -- --test-threads=1
       - name: Headless application startup and clean shutdown
         env:
           FERROUI_SMOKE_EXIT_MS: '1500'
@@ -74,3 +83,24 @@ jobs:
           name: designer-native-renders
           path: designer-render
           if-no-files-found: warn
+
+  xaml:
+    name: Lexical namespaces and interpreted / compiled parity
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: dtolnay/rust-toolchain@89b12181fb390509a0842a86cc55eeb8eb928c1d # stable
+      - name: Parser, transforms, runtime providers and generated code
+        run: cargo test --locked -p xamlx -p ferroui-markup-xaml -p ferroui-markup-xaml-loader -p ferroui-markup-xaml-tests -- --test-threads=1
+
+  animation-runtime:
+    name: Native animation preview and application semantics
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: dtolnay/rust-toolchain@89b12181fb390509a0842a86cc55eeb8eb928c1d # stable
+      - name: Native animator interpolation, preview fill and reversible disposal
+        run: |
+          cargo test --locked -p ferroui-base --lib animation:: -- --test-threads=1

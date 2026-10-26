@@ -18,6 +18,7 @@ From the repository root:
 ```sh
 cargo run -p designer-studio
 cargo run -p designer-studio -- --file /absolute/path/to/MainWindow.xaml
+cargo run -p designer-studio -- --project /absolute/path/to/solution
 ```
 
 The desktop host uses the normal FerroUI desktop backend. A portable host can embed
@@ -34,10 +35,15 @@ application does. Use `DesignerWorkspace::with_uri` when relative includes and r
 original document location. A raw resource dictionary or style document needs a host that supplies
 an appropriate preview control; it is not a standalone control artboard.
 
-Window documents preview their content through a Border projection, because a native Window cannot
-be embedded inside another control's visual tree. Window chrome settings and the root `x:Class`
-declaration remain in the authored source; the preview masks them and reports projection notices.
-It does not instantiate the application's code-behind class.
+The **Native window** command opens the actual platform Window, including decorations, sizing and
+registered code-behind behavior. Its lifetime is owned by the preview and follows accepted source
+changes. The inline artboard retains a content projection for selection and geometry editing.
+`PreviewHostOptions` registers metadata callbacks, application root factories keyed by `x:Class`
+or qualified root type, and resource preview factories. A factory receives the original source,
+base URI and loader configuration; `PreviewRequest::populate` loads XAML into the real instance
+before the host wires application handlers. Resource/style documents use `Design.PreviewWith`
+or the supplied resource factory. Unregistered application classes produce a diagnostic requiring
+their factory instead of being silently replaced by a framework control.
 
 Open, Save and Save as use the host's existing native storage provider. Opening or closing a dirty
 document presents a save/discard/cancel choice. Local saves write a temporary sibling and replace
@@ -53,6 +59,9 @@ remain dirty.
 | `ferroui-designer-tools` | Layout adapters, property metadata/editor contracts, geometry, selection and manipulation planning | None |
 | `ferroui-designer-animation` | Typed keyframes, easing, deterministic sampling, playback and native animation XAML interchange | None |
 | `ferroui-designer-collaboration` | Replicated operations, shared identities, conflict reporting, snapshots, version summaries and presence | Document core |
+| `ferroui-designer-collaboration-host` | Durable authenticated rooms, invitations, ACLs, checkpoints, peer transport and offline outboxes | Portable store; optional existing MCP service/client |
+| `ferroui-designer-project` | Cargo/loose-file solutions, resource paths, versioned document buffers, save/rename and cancellable build/run tasks | Document core |
+| `ferroui-designer-language` | Runtime-derived schema, diagnostics, completion, navigation, refactoring, formatting, semantic tokens and stdio LSP | Core and project engines |
 | `ferroui-designer` | UI-thread session, live preview, native controls, property editors, design surface, timeline and optional MCP tools | FerroUI runtime |
 | `designer-studio` | Application lifetime, document IO, desktop/headless startup and opt-in MCP hosting | Workspace and selected platform |
 
@@ -95,6 +104,10 @@ current valid document revision; this prevents stale geometry from writing chang
 source. Source edits can be accepted immediately while expensive preview work is debounced.
 
 Debug builds reuse `HotReloadSession` and `ContentReloadTarget` for accepted preview changes.
+Designer sessions opt into runtime-only structural contract updates so adding named controls and
+changing the root remains a normal authoring operation. Compiled application sessions keep their
+existing contract protections; a runtime-only session rejects a compiled class binding. The new
+contract becomes authoritative only after its staged target commits successfully.
 Release builds use a staged runtime XAML load and replace the preview only after loading succeeds;
 the existing hot reload package is development-only. Both paths reuse FerroUI's runtime loader and
 retain the last accepted preview on failure.
@@ -107,6 +120,11 @@ file. Namespace-aware reparenting preserves the meaning of moved elements.
 The engine validates XML structure. FerroUI's existing XAML loader resolves control types,
 properties, resources, bindings, templates and converters. Unknown syntax is preserved by the
 editing engine even when the runtime cannot preview it.
+
+Lexical namespace declarations work throughout the parser, transformations, runtime loader and
+compiled emitter. Nested declarations and prefix shadowing apply at their source occurrence;
+deferred templates capture the declaration's namespace scope. Markup extensions and reflection
+binding paths use the same scope in interpreted and compiled content.
 
 ### One transaction for every authoring path
 
@@ -164,11 +182,18 @@ including operations spanning different layout parents. The registry recognizes 
 panel, content-host and framework-layer names; generated containers expose ownership restrictions
 instead of accepting edits that their item generator would overwrite.
 
-Resize and rotation gestures reject transforms they cannot faithfully translate, with a message
-directing the user to property/source editing. Custom panel semantics and layout values supplied
-implicitly by styles can require a host adapter. Duplicate gives copied controls unique names and
-refuses occupied single-content hosts; binding/reference expressions are copied verbatim and may
-need review when they refer to another control inside the copied subtree.
+Resize handles follow the element's transformed quadrilateral. Pointer deltas are converted through
+the actual ancestor/element matrices, including nonuniform scaling, skew, mirrors and absolute or
+relative transform origins. Rotation and property-element transforms preserve their source and
+compensate around the actual origin. Noninvertible geometry is rejected without changing source.
+Native planners receive resolved styled/bound layout values and measured geometry. Registered
+custom panels receive a generic child-insertion/reorder adapter and transform-preserving movement
+and resize; a host adapter can provide additional panel-specific semantic commands.
+
+Duplicate allocates unique names and program identities, rewrites references across copied
+siblings and descendants using the same namescope-aware language index, and updates copied state
+metadata. External references and ambiguous declarations retain their original meaning. Single
+content hosts and generated containers continue to enforce their actual ownership rules.
 
 ## Animation authoring
 
@@ -179,15 +204,18 @@ preview values at animation priority. Disposable preview layers restore ordinary
 values on Stop, preview reload or switching to Interact. Natural playback completion respects
 the animation's fill mode and can retain the final sample.
 
-The active workspace timeline imports the first matching local Animation on each named control.
-Tracks from different controls are combined when their timing settings match. Additional local
-animations, unmatched selectors and independent timing remain in source; the active timeline does
-not combine those independent animation programs. The graphical track lanes support scrubbing,
-keyframe selection and dragging, with explicit time, easing and removal controls.
+The program picker enumerates every Animation in local/shared/nested styles and resources. Each
+program retains its own selector, targets, timing, tracks and persisted UUID. Create, rename,
+duplicate, remove, edit source, select preview targets and play-all operate on independent programs.
+Selectors are matched by the native style system; per-target underlying values and visibility clocks
+are retained. Resource programs can be previewed against explicit targets. Graphical track lanes
+support scrubbing, keyframe selection and dragging, with explicit time, easing and removal controls.
 
-Supported values include numbers, colors, points, thicknesses and discrete values. The portable
+Supported values include numbers, colors, points, vectors, sizes, rectangles, corner radii,
+relative points/scalars, thicknesses and discrete values. The portable
 engine implements linear-light color interpolation, cubic Bézier inversion, named FerroUI easing
-families, delay, speed, finite/infinite repetition, direction, alternate playback and fill modes.
+families, parameterized spring easing, delay, delay between iterations, speed, finite/infinite repetition, direction, alternate
+playback, native visibility behavior and fill modes.
 Times are seconds in the editing API and native 100 ns times in exported markup. Import/export
 checks native duration grammar, timing range, repeat range and keyframe quantization collisions.
 
@@ -196,11 +224,69 @@ validation. Deterministic seek/scrub is independent of a wall clock. The live ru
 system remains authoritative about which property types and converters can actually receive an
 animation value.
 
-Unsupported custom animator payloads, binding-driven keyframe values and animation structures
-that cannot be represented safely remain in authored source with diagnostics. The workspace
-must not erase them to make a simplified timeline look complete. See the
+Programs with native object payloads also use the accepted runtime Animation objects directly.
+Source provenance identifies the matching style or resource program, and an explicit preview clock
+drives the framework's own shadow, gradient, effect, integer, transform-component and registered
+custom animators. This preserves native interpolation for values outside the portable model.
+The additive `Animation::apply_for_preview` retains final fill and generated transforms at animation
+priority; disposal restores underlying values and live bindings. Application `apply` behavior stays
+unchanged. Failed setup unwinds its temporary subscriptions and values before reporting the error.
+
+`AnimationCodecRegistry` allows application-specific typed tracks and animator payloads to share
+the same program, transaction and preview workflow. A codec receives original source and can
+preserve its custom objects. Unknown payloads remain available in the program's source editor;
+typed edits require a codec that represents them faithfully. See the
 [animation crate documentation](../../src/FerroUI.Designer.Animation/README.md) for interchange
 rules and runtime semantic tests.
+
+## Visual states, transitions and behaviors
+
+The **States** panel authors groups, named states, target setters, default/directional transitions,
+durations and easing. Source models emit real FerroUI classes, styles, native Animation objects
+and existing behavior actions. State navigation, seeking and playback use actual runtime values.
+Directional routes use the framework's existing ConditionalAction implementation.
+
+The **Behaviors** panel authors event/data triggers and property, command, method and class actions.
+Custom trigger/action objects retain their raw markup and can be edited in source. The designer
+registers the existing Interactivity, Interactions and Interactions.Custom types. Preview executes
+the real behavior/action implementation; Stop restores the authored view rather than preserving
+behavior-mutated default control values as hot-reload user state.
+
+Generated state programs have explicit ownership markers. Updating an endpoint preserves unrelated
+programs, authored intermediate keys/splines, custom animator data, complex Setter.Value objects,
+collection order and namespace meanings. Changing a literal to a binding removes obsolete owned
+endpoints. Application code remains responsible for the semantics of its own actions and external
+side effects; preview reconstruction restores the view, not external services or shared view models.
+
+## Solutions, documents and source language services
+
+The **Solution** command opens Cargo workspaces or loose-file projects. Discovery uses actual locked
+offline Cargo metadata, and project documents retain independent source, dirty state and undo/redo
+history in tabs. Save-all, save-as and rename preserve resource URIs and check external disk changes.
+Check/Build/Run use explicit executable/argument vectors and selected binary targets. Output is
+bounded, decoded across UTF-8 pipe boundaries and drained before completion; cancellation terminates
+the owned process group/tree. Build tasks run only when requested by the user or authorized MCP tool.
+
+The native source editor uses the reusable language service for completion, live diagnostics,
+definition/reference navigation, formatting and version-guarded cross-document rename. It supports
+incomplete drafts, typed bindings through x:DataType/ElementName/self/template sources, namescopes,
+resource dictionaries/imports and ambiguity-aware references. Refactorings validate all document
+versions before applying any part of the transaction. The service indexes unopened project XAML
+and retains open-buffer precedence over disk snapshots.
+
+The generated default schema describes 569 framework types and 1,530 declared members. Hosts add
+application controls/view models and definition locations with `Schema::register`. The same service
+is available to external editors through a real Content-Length-framed stdio language server:
+
+```sh
+cargo run -p ferroui-designer-language --bin ferroui-xaml-lsp
+```
+
+The server advertises incremental UTF-16 synchronization, diagnostics, completion, hover, signatures,
+definitions/references, rename, formatting, symbols, folding and semantic tokens. It handles workspace
+changes, file-rename edits, cancellation and shutdown. Native callers use UTF-8 byte offsets through
+strict `LineIndex` conversion. See the [language](../../src/FerroUI.Designer.Language/README.md) and
+[project](../../src/FerroUI.Designer.Project/README.md) contracts for embedding examples.
 
 ## Collaboration semantics
 
@@ -225,11 +311,56 @@ joining, and sends `collaboration_changes_since(version)` to peers. `merge_colla
 a successfully projected source through normal preview processing. Presence uses a receiver
 clock for expiry; it is ephemeral and separate from source history.
 
-The engine opens no sockets and implements no account service. A host supplies authenticated
-transport, durable snapshots/log storage, actor identity, reconnection policy and session access.
-The MCP adapter can carry synchronization envelopes through the existing authenticated endpoint.
-Operation limits are explicit; long-lived sessions need a host-coordinated new baseline instead
-of unbounded log growth. See the [collaboration crate documentation](../../src/FerroUI.Designer.Collaboration/README.md).
+The core replica stays transport-independent. `ferroui-designer-collaboration-host` supplies the
+complete room service: separate administrator/transport/member credentials, owner/editor/viewer
+roles, expiring bounded-use invitations, actor-bound operation validation, membership revocation,
+durable operation snapshots, receiver-clock presence and exact-version checkpoint epochs with an
+explicit reviewed-source path for resolving historical operation conflicts.
+Room files contain credential hashes. Unix storage uses owner-only directory/file modes; on Windows,
+credential/checkpoint files inherit the selected directory's ACL, which the host must keep private.
+The host does not create or tighten Windows ACLs. A process lock prevents multiple writers to one
+directory. Writes synchronize the file before atomic replacement; Unix also synchronizes the parent
+directory. An indeterminate post-rename durability failure blocks further store access until
+restart/validation. Windows does not perform the additional directory synchronization.
+
+**Share** hosts a room, joins an invitation or resumes a saved session. The native panel supplies
+editor/viewer invitations, membership/role controls, checkpointing and remote/resolved-source review.
+Network and disk work run on a dedicated worker. Local invalid drafts and unacknowledged operations
+are checkpointed before transmission. Disconnect captures the final outbox, detaches the UI and
+queues the checkpoint write; the sharing status confirms when that write succeeds. Wait for that
+confirmation before terminating the process or reusing the session directory. A changed tab/room
+cannot receive stale network results. Joining a different source requires an explicit revision-pinned review and saves
+the previous document and sharing checkpoint first. The review has separate actions for adopting the
+remote source, restoring a saved offline draft or publishing a reviewed resolution. Peer cursors use
+artboard coordinates, so zoom and scroll do not change their meaning. Viewers can inspect/play but
+cannot author.
+
+Review persistence has two phases: backups and the proposed resolution are written first; the
+accepted peer checkpoint is published only after the UI revision check succeeds. A rejected
+proposal never replaces the remote side of the review. Replies are fenced by room actor ownership
+as well as document URI. A viewer downgrade with unsent edits immediately blocks further authoring
+and retains the outbox for review before adopting the current remote snapshot. Viewers can adopt
+the remote snapshot; restoring or publishing a different saved draft requires an editor role.
+The [recovery guide](deployment/README.md#recovery) identifies the saved peer, backup and prepared
+resolution files, including what remains recoverable after a failed acceptance commit.
+
+The client reconnects expired MCP sessions and retries idempotent operation sets after lost replies.
+Offline edits remain in the local outbox. A new server epoch requires explicit source resolution;
+it never silently drops the old draft. Large Unicode documents use authenticated checksummed chunks
+without increasing the existing MCP message limit. Durable transport tokens survive server restarts.
+
+Run a standalone host with the existing MCP transport:
+
+```sh
+cargo run -p ferroui-designer-collaboration-host --features server \
+  --bin ferroui-collaboration-server -- --storage ./private-rooms --bind 127.0.0.1:7491
+```
+
+For a remote team, use the supplied [TLS deployment configuration](deployment/README.md). The service
+retains MCP's loopback, bearer, Host/Origin and message-limit protections. It exposes only room tools;
+application inspection, input, logs and resources are absent from the service endpoint. See the
+[host](../../src/FerroUI.Designer.Collaboration.Host/README.md) and
+[replication](../../src/FerroUI.Designer.Collaboration/README.md) documentation.
 
 ## MCP integration
 
@@ -245,13 +376,15 @@ cargo run -p designer-studio -- --mcp-stdio --mcp-write
 reports its endpoint and generated bearer token to stderr. `--mcp-stdio` reserves stdout for the
 protocol before application initialization. `--mcp-write` enables authoring commands and requires
 an explicit server option; UI input simulation remains disabled by default.
+`--mcp-input` explicitly enables input simulation. Executing native behaviors or project build/run
+tasks requires both `--mcp-write` and `--mcp-input`; inspecting a process plan needs neither.
 
 Enable the `mcp` feature of `ferroui-designer` and retain the returned server handle:
 
 ```rust
 use ferroui_designer::mcp::{Options, Permissions};
 
-let server = workspace.serve_mcp(Options {
+let server = workspace.serve_workspace_mcp(Options {
     permissions: Permissions {
         allow_property_writes: true,
         allow_input: false,
@@ -280,6 +413,13 @@ The additional tools are:
 | `designer_timeline` / `designer_animation` | Inspect, seek, play, record and edit keyframes |
 | `designer_collaboration_state` / `designer_collaboration` | Snapshots, version summaries, operations and explicit draft resolution |
 | `designer_presence` | Ephemeral peer selection/cursor updates |
+| `designer_programs` / `designer_program` | Independent program inspection, create/edit/targets/timing/source and playback |
+| `designer_states` / `designer_state` / `designer_state_actions` | State groups, setters, transitions and native actions |
+| `designer_behaviors` / `designer_behavior` | Behavior/trigger/action authoring and explicit native execution |
+| `designer_properties` / `designer_property` | Runtime-derived property schemas, typed values and transactional edits |
+| `designer_project` / `designer_project_edit` | Solution, tab, save and document lifecycle |
+| `designer_build_plan` / `designer_project_task` | Reviewable process plans and explicit build/run/cancel |
+| `designer_language` / `designer_language_apply` | Semantic queries and versioned cross-document refactoring |
 
 For example, after reading revision `7` and source node `12`:
 
@@ -307,19 +447,27 @@ The dedicated [Visual designer workflow](../../.github/workflows/designer.yml) c
 
 - Source roundtrips, Unicode spans, namespace moves, invalid drafts, identity and atomic history.
 - Layout metadata, measured panel actions, selection, transforms and snapping.
-- Native animation timing/interchange and deterministic interpolation.
+- Independent native animation programs, extension codecs, state/behavior source preservation and runtime playback.
 - Replication delivery order, duplicates, missing dependencies, identity equivocation, baseline
   mismatch, source conflicts, compensation and presence expiry.
 - Native property edits, preview retention, Window/UserControl roots, history and collaboration.
+- Actual affine manipulation, registered code-behind factories and native Window settings.
+- Project buffers, safe saves, shell-free build/cancel tasks, typed language services and the actual stdio LSP lifecycle.
+- Authenticated rooms, role changes, durable restart, offline/outbox recovery, checkpoint review and real two-peer MCP transfer.
 - Existing MCP authentication/cancellation plus provider isolation and designer commands.
 - Actual Vello/HarfBuzz workspace and animation PNG rendering.
+- Lexical namespace scopes, deferred templates and interpreted/compiled reflection-binding parity.
+- Runtime-only structural hot reload with unchanged compiled-application contract checks.
+- Native animation final fill, live binding preservation, generated transforms and failed-setup cleanup.
 - Headless sample compilation, application startup/shutdown, and the separate release preview code path.
 
 Local commands:
 
 ```sh
 cargo test -p ferroui-designer-core -p ferroui-designer-tools \
-  -p ferroui-designer-animation -p ferroui-designer-collaboration
+  -p ferroui-designer-animation -p ferroui-designer-collaboration \
+  -p ferroui-designer-project -p ferroui-designer-language \
+  -p ferroui-designer-collaboration-host --features ferroui-designer-collaboration-host/client
 cargo test -p ferroui-designer --features mcp --lib -- --test-threads=1
 cargo test -p ferroui-mcp --lib -- --test-threads=1
 FERROUI_DESIGNER_RENDER_OUTPUT=/tmp/designer-renders \
@@ -327,12 +475,11 @@ FERROUI_DESIGNER_RENDER_OUTPUT=/tmp/designer-renders \
 cargo check -p ferroui-designer --features mcp --release
 ```
 
-## Product scope
+## Host and extension contracts
 
-This is FerroUI's authoring architecture and native workspace, not a statement of complete
-Visual Studio/Blend product parity. The source editor currently uses the framework's TextBox;
-project/solution systems, language-server completion, a dedicated visual-state/behavior designer,
-custom control design assemblies, hosted multiuser infrastructure and pixel parity with those
-products are separate work. Templates/resources and unsupported animations remain editable in
-XAML. The extension points allow those workflows to share the same document and runtime services
-without replacing the engines delivered here.
+The workspace supplies native authoring workflows while applications register their own control
+metadata, real root factories, resource previews, animation codecs, custom property editors and
+panel semantics. These registrations reuse the same AST, document history, language indexes and
+runtime preview; they do not introduce parallel serialization or transport stacks. HTTPS deployment
+uses the operator's domain/certificates and private storage directory. External editors can connect
+to the stdio LSP, automation to the existing MCP server, and collaborators to the isolated room host.
