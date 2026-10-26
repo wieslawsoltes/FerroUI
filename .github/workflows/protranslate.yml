@@ -54,7 +54,7 @@ jobs:
       - name: Core behavior, all catalog formats and generator diagnostics
         run: cargo test --locked -p ferroui-protranslate-core -p ferroui-protranslate-formats -p ferroui-protranslate-build
       - name: Library lint checks
-        run: cargo clippy --locked -p ferroui-protranslate-core -p ferroui-protranslate-formats -p ferroui-protranslate-build --all-targets -- -D warnings
+        run: cargo clippy --locked -p ferroui-protranslate-core -p ferroui-protranslate-formats -p ferroui-protranslate-build --all-targets --no-deps -- -D warnings
 
   integration:
     name: Native bindings and compiled XAML
