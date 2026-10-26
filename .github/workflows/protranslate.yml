@@ -1,0 +1,101 @@
+name: ProTranslate
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'src/ProTranslate/**'
+      - 'samples/ProTranslateDemo/**'
+      - 'Cargo.toml'
+      - 'Cargo.lock'
+      - '.github/workflows/protranslate.yml'
+  pull_request:
+    paths:
+      - 'src/ProTranslate/**'
+      - 'samples/ProTranslateDemo/**'
+      - 'Cargo.toml'
+      - 'Cargo.lock'
+      - '.github/workflows/protranslate.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: protranslate-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  CARGO_TERM_COLOR: always
+  CARGO_INCREMENTAL: '0'
+  CARGO_PROFILE_DEV_DEBUG: '0'
+  CARGO_PROFILE_TEST_DEBUG: '0'
+  RUST_BACKTRACE: '1'
+
+jobs:
+  services:
+    name: Catalogs and globalization (${{ matrix.os }})
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: dtolnay/rust-toolchain@89b12181fb390509a0842a86cc55eeb8eb928c1d # stable
+        with:
+          components: clippy
+      - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2
+        with:
+          key: protranslate-services-${{ matrix.os }}
+          save-if: ${{ github.ref == 'refs/heads/main' }}
+          cache-on-failure: true
+      - name: Core behavior, all catalog formats and generator diagnostics
+        run: cargo test --locked -p ferroui-protranslate-core -p ferroui-protranslate-formats -p ferroui-protranslate-build
+      - name: Library lint checks
+        run: cargo clippy --locked -p ferroui-protranslate-core -p ferroui-protranslate-formats -p ferroui-protranslate-build --all-targets -- -D warnings
+
+  integration:
+    name: Native bindings and compiled XAML
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    env:
+      CARGO_BUILD_JOBS: '2'
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: dtolnay/rust-toolchain@89b12181fb390509a0842a86cc55eeb8eb928c1d # stable
+        with:
+          components: rustfmt
+      - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2
+        with:
+          key: protranslate-native
+          save-if: ${{ github.ref == 'refs/heads/main' }}
+          cache-on-failure: true
+      - name: Native development libraries
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends libfontconfig1-dev libfreetype6-dev fonts-dejavu-core pkg-config
+      - name: Native property system, binding refresh, target lifetime and compiled sample
+        run: cargo test --locked -p ferroui-protranslate -p sample-protranslate-demo --features ferroui-protranslate/dependency-injection --lib
+      - name: Desktop entry point
+        run: cargo check --locked -p sample-protranslate-demo --bin sample-protranslate-demo
+      - name: Port formatting
+        run: cargo fmt --check -p ferroui-protranslate-core -p ferroui-protranslate-formats -p ferroui-protranslate-build -p ferroui-protranslate -p sample-protranslate-demo
+
+  wasm:
+    name: Portable services compile for WebAssembly
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: dtolnay/rust-toolchain@89b12181fb390509a0842a86cc55eeb8eb928c1d # stable
+        with:
+          targets: wasm32-unknown-unknown
+      - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2
+        with:
+          key: protranslate-wasm
+          save-if: ${{ github.ref == 'refs/heads/main' }}
+          cache-on-failure: true
+      - name: Locale data, translation services and converters have no desktop dependency
+        run: cargo check --locked -p ferroui-protranslate-core -p ferroui-protranslate-formats --target wasm32-unknown-unknown

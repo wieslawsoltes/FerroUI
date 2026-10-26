@@ -131,3 +131,9 @@ Rust dependencies are used under their own licenses as declared in their crate m
 The Vello render backend (`src/Vello/FerroUI.Vello`) links crates of the Vello project and their companions: `kurbo`, `peniko`, `vello_cpu` (with `vello_common`), `linesweeper` and `png`, each under the Apache License 2.0 or the MIT license at the choice of the user. The versions, what each is used for and the copyright lines are in `src/Vello/FerroUI.Vello/NOTICE.md`.
 
 The Vulkan platform contracts (`src/FerroUI.Vulkan`) use `ash` 0.38.0 (MIT OR Apache-2.0, Copyright (c) 2016 ASH contributors) for the types, constants and function tables of Vulkan, with `libloading` (ISC) to open the Vulkan loader of the system at run time.
+
+## ProTranslate
+
+- Project: <https://github.com/wieslawsoltes/ProTranslate> (commit `b088669a22c8979d54dd81098991f8d16f880156`)
+- License: MIT, Copyright (c) 2026 Wiesław Šoltés.
+- Used for: the translation/globalization services, catalog formats, build-time generation and native UI integration under `src/ProTranslate/`, with the corresponding source license in each package's `NOTICE.md`.

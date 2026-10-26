@@ -5,6 +5,10 @@ members = [
     "src/FerroUI.HotReload",
     "src/FerroUI.HotPatch",
     "src/FerroUI.System",
+    "src/ProTranslate/FerroUI.ProTranslate.Core",
+    "src/ProTranslate/FerroUI.ProTranslate.Formats",
+    "src/ProTranslate/FerroUI.ProTranslate.Build",
+    "src/ProTranslate/FerroUI.ProTranslate",
     "src/FerroUI.Reactive",
     "src/FerroUI.Reactive.Testing",
     "src/FerroUI.Splat",
@@ -92,6 +96,7 @@ members = [
     "tests/FerroUI.DesignerSupport.Tests",
     "tests/FerroUI.StaticViewLocator.Tests",
     "samples/HelloWorld",
+    "samples/ProTranslateDemo",
     "samples/HelloWorld.Builders",
     "samples/HelloWorld.Macros",
     "samples/HelloWorld.Hooks",
@@ -189,6 +194,10 @@ ferroui-inspect = { version = "=0.4.0", path = "src/FerroUI.Inspect" }
 ferroui-devtools = { version = "=0.4.0", path = "src/FerroUI.DevTools", default-features = false }
 ferroui-mcp = { version = "=0.4.0", path = "src/FerroUI.Mcp" }
 ferroui-system = { version = "=0.4.0", path = "src/FerroUI.System" }
+ferroui-protranslate-core = { version = "=0.4.0", path = "src/ProTranslate/FerroUI.ProTranslate.Core" }
+ferroui-protranslate-formats = { version = "=0.4.0", path = "src/ProTranslate/FerroUI.ProTranslate.Formats" }
+ferroui-protranslate-build = { version = "=0.4.0", path = "src/ProTranslate/FerroUI.ProTranslate.Build" }
+ferroui-protranslate = { version = "=0.4.0", path = "src/ProTranslate/FerroUI.ProTranslate" }
 ferroui-reactive = { version = "=0.4.0", path = "src/FerroUI.Reactive" }
 ferroui-reactive-testing = { version = "=0.4.0", path = "src/FerroUI.Reactive.Testing" }
 ferroui-dependency-injection = { version = "=0.4.0", path = "src/FerroUI.DependencyInjection" }
