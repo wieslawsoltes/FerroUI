@@ -765,10 +765,26 @@ fn builder_rejects_non_utf8_tracking_paths_without_lossy_aliases() {
     let path = directory
         .0
         .join(std::ffi::OsString::from_vec(b"catalog\xff.json".to_vec()));
-    std::fs::write(&path, "{}").unwrap();
-    assert!(
-        matches!(Builder::new().catalog(path).generate_to(&directory.0.join("out")), Err(BuildError::Io { source, .. }) if source.kind() == std::io::ErrorKind::InvalidInput)
-    );
+    let out = directory.0.join("out");
+    // Reject the tracking name before touching the filesystem: some filesystems
+    // reject non-UTF-8 names themselves, and others would report a missing file.
+    for builder in [
+        Builder::new().catalog(&path),
+        Builder::new().source(&path, SourceAnalysisOptions::default()),
+    ] {
+        match builder.generate_to(&out) {
+            Err(BuildError::Io {
+                path: rejected,
+                source,
+            }) => {
+                assert_eq!(rejected, path);
+                assert_eq!(source.kind(), std::io::ErrorKind::InvalidInput);
+                assert_eq!(source.to_string(), "Cargo dependency paths must be UTF-8");
+            }
+            result => panic!("Expected an invalid tracking path, got {result:?}"),
+        }
+    }
+    assert!(!out.exists());
 }
 
 #[test]

@@ -358,7 +358,8 @@ Session, recovery, settings and backup services share an explicit `StudioStorage
 contract. Native `FileStudioStorage` uses atomic replacement; backups use atomic
 create-if-absent and rotate only after a successful new save. Failed saves retain
 the previous file and dirty state. Corrupt records return diagnostics. Storage
-namespaces cannot overlap. `AutoSaveScheduler::tick` lets the host schedule
+namespaces cannot overlap, including case aliases, and trailing-dot/space path
+components are rejected. `AutoSaveScheduler::tick` lets the host schedule
 snapshots on its owning thread. The in-memory engine can be used on WebAssembly
 with default features disabled.
 

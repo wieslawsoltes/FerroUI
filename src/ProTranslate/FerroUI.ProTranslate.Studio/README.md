@@ -46,6 +46,10 @@ include a collision-resistant sequence, with the session identity in the record;
 creation uses an atomic create-if-absent operation. Rotation occurs only
 after the new backup has been saved. A host-driven autosave scheduler replaces the
 sample's hidden background timer, so there are no racing UI snapshots or threads.
+Storage namespaces are validated once and remain immutable. Equality and nesting
+checks use conservative Unicode case mappings for case-insensitive filesystems;
+path components ending in a dot or space are rejected to prevent Windows aliases.
+Valid Unicode spelling and internal spaces are preserved.
 
 ### AI translation
 

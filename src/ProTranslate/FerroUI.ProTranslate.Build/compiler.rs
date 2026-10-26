@@ -904,8 +904,8 @@ impl Builder {
         paths.sort_by(|a, b| a.0.cmp(&b.0));
         paths.dedup();
         for (path, options) in paths {
-            let content = read(&path)?;
             let name = tracked_name(&path)?;
+            let content = read(&path)?;
             println!("cargo:rerun-if-changed={name}");
             if name.ends_with(".protranslate.keys.txt") {
                 compiler.add_key_list(name, content);
@@ -921,8 +921,8 @@ impl Builder {
             }
         }
         for (path, options) in self.sources {
-            let content = read(&path)?;
             let name = tracked_name(&path)?;
+            let content = read(&path)?;
             println!("cargo:rerun-if-changed={name}");
             compiler.add_rust_source(&name, &content, &options);
         }

@@ -56,7 +56,8 @@ storage and transport boundaries instead of process-global settings.
   monotonically changing revisions prevent a delayed suggestion from overwriting
   newer edits, undo/redo state, recreated entries or a restored session.
 - Session, recovery, backup and settings namespaces must be disjoint. The validated
-  paths cannot be mutated afterward. A recovery cleanup therefore cannot delete a
+  paths cannot be mutated afterward. Case aliases and Windows trailing-dot/space
+  aliases are rejected. A recovery cleanup therefore cannot delete a
   saved session. Backups use atomic create-if-absent, including across concurrent
   storage clients and restart/rotation sequences.
 - AI responses must exactly match the requested identities. Refusal, truncation,
@@ -66,6 +67,9 @@ storage and transport boundaries instead of process-global settings.
 - Native state metadata remains intact during ordinary Studio export. Explicit
   review-state projection is available and reports destination representation
   losses rather than silently overwriting unfamiliar format states.
+- Cargo tracking-path validation runs before file reads. Its invalid-UTF-8
+  regression does not require the host filesystem to accept an invalid filename,
+  so the same structured error is tested on Linux and macOS.
 
 ## Validation
 
@@ -84,10 +88,10 @@ Final local regression totals:
 | Core | 61 |
 | Formats | 46 |
 | Build | 31 |
-| Studio | 38 |
+| Studio | 39 |
 | Native adapter with dependency injection | 34 |
 | Compiled XAML sample | 11 |
-| Total package tests | 221 |
+| Total package tests | 222 |
 
 The core tests include 1,404 frozen numeric reference vectors from .NET 10.0.14;
 they validate invariant-culture algorithms, not identical bytes across every

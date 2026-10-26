@@ -427,6 +427,66 @@ fn persistence_namespaces_cannot_overlap_files_or_directories() {
     .is_ok());
 }
 
+#[test]
+fn portable_paths_reject_case_and_trailing_character_aliases_but_preserve_unicode() {
+    for (sessions, recovery, backups, settings) in [
+        (
+            "Sessions",
+            "sessions/project.json",
+            "Backups",
+            "settings.json",
+        ),
+        ("Sessions", "Recovery.json", "Backups", "RECOVERY.JSON"),
+        (
+            "Sessions",
+            "Recovery.json",
+            "Backups",
+            "BACKUPS/settings.json",
+        ),
+        (
+            "Données",
+            "dONNÉES/project.json",
+            "Backups",
+            "settings.json",
+        ),
+        ("Straße", "STRASSE/project.json", "Backups", "settings.json"),
+    ] {
+        assert!(StudioPaths::new(sessions, recovery, backups, settings).is_err());
+    }
+
+    let storage = MemoryStudioStorage::default();
+    for path in [
+        "Sessions.",
+        "Sessions ",
+        "Sessions./project.json",
+        "Sessions /project.json",
+        "Recovery.json.",
+        "Recovery.json ",
+    ] {
+        assert!(StudioPaths::new("Sessions", path, "Backups", "settings.json").is_err());
+        assert!(storage
+            .write_atomic(path, b"must not create an alias")
+            .is_err());
+    }
+
+    let paths = StudioPaths::new(
+        "翻訳 資料/Συνεδρίες",
+        "翻訳 資料/Ανάκτηση.json",
+        "翻訳 資料/备份",
+        "翻訳 資料/設定.json",
+    )
+    .unwrap();
+    assert_eq!(paths.sessions_directory(), "翻訳 資料/Συνεδρίες");
+    assert_eq!(paths.settings_path(), "翻訳 資料/設定.json");
+    storage
+        .write_atomic(paths.settings_path(), "保存".as_bytes())
+        .unwrap();
+    assert_eq!(
+        storage.read(paths.settings_path()).unwrap(),
+        Some("保存".as_bytes().to_vec())
+    );
+}
+
 #[cfg(all(feature = "filesystem", not(target_arch = "wasm32")))]
 #[test]
 fn filesystem_replaces_files_atomically_and_cleans_temporary_files() {

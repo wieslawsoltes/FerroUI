@@ -76,12 +76,12 @@ impl StudioStorage for MemoryStudioStorage {
 fn validate_path(path: &str) -> Result<(), StudioError> {
     if path.is_empty()
         || path.contains(['\\', ':', '\0'])
-        || path
-            .split('/')
-            .any(|part| part.is_empty() || part == "." || part == "..")
+        || path.split('/').any(|part| {
+            part.is_empty() || part == "." || part == ".." || part.ends_with(['.', ' '])
+        })
     {
         return Err(StudioError::InvalidInput(
-            "Storage paths must be nonempty relative paths without traversal".into(),
+            "Storage paths must be nonempty relative paths without traversal or components ending in a dot or space".into(),
         ));
     }
     Ok(())
@@ -263,14 +263,18 @@ impl StudioPaths {
             &paths.recovery_path,
             &paths.backups_directory,
             &paths.settings_path,
-        ];
+        ]
+        // Compare conservatively across case-insensitive native filesystems.
+        // Unicode case mappings also cover expansions and final-sigma forms;
+        // the actual host paths retain their original spelling.
+        .map(|path| path.to_uppercase().to_lowercase());
         for (index, left) in locations.iter().enumerate() {
             for right in &locations[index + 1..] {
                 if left == right
                     || left.starts_with(&format!("{right}/"))
                     || right.starts_with(&format!("{left}/"))
                 {
-                    return Err(StudioError::InvalidInput("Studio storage locations must be disjoint; files and directories cannot share an ancestor path".into()));
+                    return Err(StudioError::InvalidInput("Studio storage locations must be disjoint; paths cannot be equal or nested, including case aliases".into()));
                 }
             }
         }
