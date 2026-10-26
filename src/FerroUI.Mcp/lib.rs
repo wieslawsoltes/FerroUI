@@ -5,8 +5,10 @@
 //! The tools run on the shared inspector of the UI thread (`ferroui_inspect::Inspector::shared`),
 //! the one the Chrome DevTools Protocol endpoint uses too: node IDs are the same for both, and a
 //! custom lifetime registers its top levels there (`register_root`).
+mod extensions;
 mod protocol;
 mod transport;
+pub use extensions::UiToolProvider;
 use ferroui_base::threading::{Dispatcher, DispatcherPriority};
 use ferroui_inspect::LogCapture;
 pub use ferroui_inspect::Permissions;
@@ -53,6 +55,7 @@ static STDIO_STARTED: AtomicBool = AtomicBool::new(false);
 
 /// Dropping this handle stops accepting requests and invalidates queued work. A stdio reader
 /// blocked in the OS remains parked until EOF; it cannot execute more UI operations.
+/// This inspector-only handle can be moved to another thread after server startup.
 pub struct ServerHandle {
     client: Client,
     log_guard: Option<ferroui_inspect::LogGuard>,
@@ -72,8 +75,46 @@ impl Drop for ServerHandle {
     }
 }
 
+/// A server that also owns application tools on the creating UI thread.
+///
+/// Keep and drop this handle on that thread, since providers may own controls and other
+/// thread-affine state. The underlying inspector handle remains accessible through `Deref`.
+pub struct UiServerHandle {
+    // Fields drop in declaration order: cancel queued requests before disposing the provider.
+    server: ServerHandle,
+    _registration: extensions::Registration,
+}
+impl std::ops::Deref for UiServerHandle {
+    type Target = ServerHandle;
+
+    fn deref(&self) -> &Self::Target {
+        &self.server
+    }
+}
+
 /// Start the server on the UI thread. The returned handle is the lifetime of the service.
 pub fn serve(options: Options) -> io::Result<ServerHandle> {
+    serve_registered(options, None)
+}
+
+/// Serve inspector tools and application tools through the same transport, permissions,
+/// cancellation and UI dispatcher. Keep the returned handle on this UI thread.
+pub fn serve_with_tools(
+    options: Options,
+    provider: std::rc::Rc<dyn UiToolProvider>,
+) -> io::Result<UiServerHandle> {
+    let registration = extensions::Registration::new(provider)?;
+    let server = serve_registered(options, Some(registration.catalog.clone()))?;
+    Ok(UiServerHandle {
+        server,
+        _registration: registration,
+    })
+}
+
+fn serve_registered(
+    options: Options,
+    extension: Option<extensions::Catalog>,
+) -> io::Result<ServerHandle> {
     let dispatcher = Dispatcher::ui_thread();
     dispatcher.verify_access();
     if options.dispatch_timeout.is_zero() {
@@ -90,14 +131,18 @@ pub fn serve(options: Options) -> io::Result<ServerHandle> {
         ));
     }
     // A server that fails to start leaves stdio free for another attempt.
-    let result = start(options, dispatcher);
+    let result = start(options, dispatcher, extension);
     if stdio && result.is_err() {
         STDIO_STARTED.store(false, Ordering::Release);
     }
     result
 }
 
-fn start(options: Options, dispatcher: Arc<Dispatcher>) -> io::Result<ServerHandle> {
+fn start(
+    options: Options,
+    dispatcher: Arc<Dispatcher>,
+    extension: Option<extensions::Catalog>,
+) -> io::Result<ServerHandle> {
     let (http, address, token) = match &options.transport {
         Transport::Http(address) => {
             if !address.ip().is_loopback() {
@@ -126,6 +171,7 @@ fn start(options: Options, dispatcher: Arc<Dispatcher>) -> io::Result<ServerHand
     let log_guard = options.capture_logs.then(LogCapture::install);
     let client = Client {
         dispatcher,
+        extension,
         permissions: options.permissions,
         timeout: options.dispatch_timeout,
         stop: Arc::new(AtomicBool::new(false)),
@@ -157,21 +203,47 @@ fn start(options: Options, dispatcher: Arc<Dispatcher>) -> io::Result<ServerHand
 #[derive(Clone)]
 pub(crate) struct Client {
     dispatcher: Arc<Dispatcher>,
+    extension: Option<extensions::Catalog>,
     permissions: Permissions,
     timeout: Duration,
     stop: Arc<AtomicBool>,
 }
 impl Client {
+    fn tools(&self) -> Vec<Value> {
+        let mut tools = ferroui_inspect::tools();
+        if let Some(extension) = &self.extension {
+            tools.extend(extension.tools.iter().cloned());
+        }
+        tools
+    }
+    fn validate(&self, name: &str, args: &Value) -> Result<(), String> {
+        if let Some(extension) = self
+            .extension
+            .as_ref()
+            .filter(|extension| extension.contains(name))
+        {
+            extension.validate_envelope(name, args)
+        } else {
+            ferroui_inspect::validate(name, args)
+        }
+    }
     fn call(&self, name: &str, args: Value, cancel: &Arc<AtomicBool>) -> Result<Value, String> {
-        ferroui_inspect::validate(name, &args)?;
-        let deadline =
-            Instant::now() + Duration::from_millis(args["timeout_ms"].as_u64().unwrap_or(5000));
+        self.validate(name, &args)?;
+        // Only the built-in wait tool owns timeout_ms. In particular, application tools may
+        // use that argument independently, and adding an arbitrary duration to Instant can
+        // overflow on some platforms. Elapsed-time comparison also keeps wait_for portable.
+        let wait_started = Instant::now();
+        let wait_timeout = Duration::from_millis(args["timeout_ms"].as_u64().unwrap_or(5000));
         loop {
             if self.stop.load(Ordering::Acquire) || cancel.load(Ordering::Acquire) {
                 return Err("Request cancelled or server stopped".into());
             }
             let (tx, rx) = mpsc::sync_channel(1);
             let permissions = self.permissions;
+            let extension = self
+                .extension
+                .clone()
+                .filter(|extension| extension.contains(name));
             let tool = name.to_owned();
             let args = args.clone();
             let cancelled = cancel.clone();
@@ -187,7 +259,11 @@ impl Client {
                         return;
                     }
                     let result = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
-                        ferroui_inspect::execute(&tool, &args, permissions)
+                        if let Some(extension) = extension {
+                            extension.execute(&tool, &args, permissions)
+                        } else {
+                            ferroui_inspect::execute(&tool, &args, permissions)
+                        }
                     }))
                     .unwrap_or_else(|_| Err("UI operation panicked".into()));
                     let _ = tx.send(result);
@@ -216,7 +292,7 @@ impl Client {
             if name != "wait_for" || result["matched"] == true {
                 return Ok(result);
             }
-            if Instant::now() >= deadline {
+            if wait_started.elapsed() >= wait_timeout {
                 return Err("Condition timed out".into());
             }
             std::thread::sleep(Duration::from_millis(25));
@@ -251,5 +327,7 @@ pub fn reserve_stdout() -> io::Result<std::fs::File> {
     }
 }
 
+#[cfg(test)]
+mod extensions_tests;
 #[cfg(test)]
 mod tests;

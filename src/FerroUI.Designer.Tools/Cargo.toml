@@ -1,0 +1,22 @@
+[package]
+name = "ferroui-designer-tools"
+description = "Portable panel layout adapters, property metadata, selection geometry and manipulation plans for FerroUI designers"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+homepage.workspace = true
+readme = "README.md"
+keywords.workspace = true
+categories.workspace = true
+
+[lib]
+path = "lib.rs"
+
+[dependencies]
+ferroui-designer-core = { version = "=0.4.0", path = "../FerroUI.Designer.Core" }
+serde = { version = "1", features = ["derive"] }
+
+[package.metadata.release]
+group = "tools"

@@ -130,7 +130,7 @@ impl Session {
                 json!({"protocolVersion":version,"capabilities":{"tools":{},"resources":{"subscribe":false,"listChanged":false},"logging":{}},"serverInfo":{"name":"ferroui-mcp","version":env!("CARGO_PKG_VERSION")},"instructions":"Inspect a running FerroUI application. Property writes and input require explicit application permissions. IDs expire when their objects are destroyed."})
             }
             "ping" => json!({}),
-            "tools/list" => json!({"tools":ferroui_inspect::tools()}),
+            "tools/list" => json!({"tools":client.tools()}),
             "resources/list" => {
                 json!({"resources":[{"uri":TREE_URI,"name":"Current visual tree","mimeType":"application/json"},{"uri":LOG_URI,"name":"Diagnostic log","mimeType":"application/json"}]})
             }
@@ -171,7 +171,8 @@ impl Session {
                     let Some(tool) = params["name"].as_str() else {
                         return Some(error(id, -32602, "Tool name required"));
                     };
-                    if !ferroui_inspect::tools()
+                    if !client
+                        .tools()
                         .iter()
                         .any(|t| t["name"].as_str() == Some(tool))
                     {
@@ -182,7 +183,7 @@ impl Session {
                         .cloned()
                         .unwrap_or_else(|| json!({}));
                     // Invalid arguments are a result of the tool, which the model can correct.
-                    if let Err(e) = ferroui_inspect::validate(tool, &args) {
+                    if let Err(e) = client.validate(tool, &args) {
                         return Some(
                             json!({"jsonrpc":"2.0","id":id,"result":{"content":[{"type":"text","text":e}],"isError":true}}),
                         );
