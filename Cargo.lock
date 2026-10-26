@@ -1357,6 +1357,26 @@ dependencies = [
 ]
 
 [[package]]
+name = "ferroui-designer-language"
+version = "0.4.0"
+dependencies = [
+ "ferroui-designer-core",
+ "ferroui-designer-project",
+ "serde",
+ "serde_json",
+]
+
+[[package]]
+name = "ferroui-designer-project"
+version = "0.4.0"
+dependencies = [
+ "ferroui-designer-core",
+ "libc",
+ "serde",
+ "serde_json",
+]
+
+[[package]]
 name = "ferroui-designer-support"
 version = "0.4.0"
 dependencies = [

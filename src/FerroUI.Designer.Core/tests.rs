@@ -849,3 +849,51 @@ fn property_batch_coalesces_repeated_assignments_and_keeps_one_history_item() {
     assert_eq!(doc.source(), "<Grid Width='8'/>");
     assert!(!doc.can_undo());
 }
+
+#[test]
+fn restored_document_revision_rebases_without_losing_history_or_identity() {
+    let mut doc = Document::new("<Button/>").unwrap();
+    let id = doc.ast().root();
+    doc.apply(
+        "Width",
+        vec![Edit::SetAttribute {
+            node: id,
+            name: "Width".into(),
+            value: "10".into(),
+        }],
+    )
+    .unwrap();
+    doc.advance_revision_to(100).unwrap();
+    assert_eq!(doc.revision(), 100);
+    assert!(doc.is_dirty());
+    doc.advance_revision_to(5).unwrap();
+    assert_eq!(doc.revision(), 100);
+    doc.undo().unwrap();
+    assert_eq!(doc.source(), "<Button/>");
+    assert_eq!(doc.ast().root(), id);
+    assert_eq!(doc.revision(), 101);
+    assert!(!doc.is_dirty());
+    assert!(doc.advance_revision_to(u64::MAX).is_err());
+    assert_eq!(doc.revision(), 101);
+}
+
+#[test]
+fn name_scopes_distinguish_template_declarations_contents_and_siblings() {
+    let document = Document::new("<Grid Name='Root'><ControlTemplate Name='Outer'><Grid Name='Content'><DataTemplate Name='Inner'><Button Name='Nested'/><!--inside--></DataTemplate></Grid></ControlTemplate><DataTemplate Name='Sibling'><Button Name='Other'/></DataTemplate><Button Name='Outside'/></Grid>").unwrap();
+    let ast = document.ast();
+    let id = |name| ast.find_name(name).unwrap();
+    assert_eq!(ast.name_scope(id("Root")), id("Root"));
+    assert_eq!(ast.name_scope(id("Outer")), id("Root"));
+    assert_eq!(ast.name_scope(id("Content")), id("Outer"));
+    assert_eq!(ast.name_scope(id("Inner")), id("Outer"));
+    assert_eq!(ast.name_scope(id("Nested")), id("Inner"));
+    assert_eq!(ast.name_scope(id("Sibling")), id("Root"));
+    assert_eq!(ast.name_scope(id("Other")), id("Sibling"));
+    assert_eq!(ast.name_scope(id("Outside")), id("Root"));
+    let comment = ast
+        .nodes()
+        .find(|node| node.kind == crate::NodeKind::Comment)
+        .unwrap();
+    assert_eq!(ast.name_scope(comment.id), id("Inner"));
+    assert_eq!(ast.name_scope(u64::MAX), id("Root"));
+}

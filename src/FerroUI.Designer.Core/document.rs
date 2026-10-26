@@ -208,6 +208,17 @@ impl Document {
     pub fn revision(&self) -> u64 {
         self.revision
     }
+    /// Rebase a restored tab onto its host's monotonic revision sequence without altering
+    /// source, stable node IDs, dirty state or history. Reserve the next revision for editing.
+    pub fn advance_revision_to(&mut self, minimum: u64) -> Result<(), DesignerError> {
+        if minimum == u64::MAX {
+            return Err(DesignerError::InvalidEdit(
+                "Document revision exhausted".into(),
+            ));
+        }
+        self.revision = self.revision.max(minimum);
+        Ok(())
+    }
     pub fn ast(&self) -> &Ast {
         &self.current.ast
     }
@@ -222,6 +233,11 @@ impl Document {
     }
     pub fn mark_saved(&mut self) {
         self.saved_source.clone_from(&self.current.source);
+    }
+    /// Acknowledge the exact snapshot written by an asynchronous storage provider. The
+    /// current buffer may already contain newer edits; revision and history are unchanged.
+    pub fn mark_saved_snapshot(&mut self, source: impl Into<String>) {
+        self.saved_source = source.into().into();
     }
     pub fn can_undo(&self) -> bool {
         !self.undo.is_empty()

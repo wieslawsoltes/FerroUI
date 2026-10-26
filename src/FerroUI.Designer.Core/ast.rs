@@ -151,6 +151,25 @@ impl Ast {
             .find(|n| n.xaml_name() == Some(name))
             .map(|n| n.id)
     }
+    /// The containing XAML name scope. Template contents have their own scope;
+    /// a template's declaration belongs to its parent's scope. Unknown nodes and
+    /// top-level declarations use the document root.
+    pub fn name_scope(&self, node: NodeId) -> NodeId {
+        let mut current = self.node(node).and_then(|node| node.parent);
+        while let Some(id) = current {
+            let Some(ancestor) = self.node(id) else {
+                break;
+            };
+            if matches!(
+                ancestor.local_name(),
+                "ControlTemplate" | "DataTemplate" | "ItemsPanelTemplate" | "FuncTemplate"
+            ) {
+                return id;
+            }
+            current = ancestor.parent;
+        }
+        self.root()
+    }
     pub fn node_at(&self, byte_offset: usize) -> Option<NodeId> {
         self.nodes()
             .filter(|n| n.span.contains(byte_offset))
