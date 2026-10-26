@@ -24,7 +24,7 @@ def flexible_periods(locale, names):
         start = minutes(rule.get('_at', rule.get('_from', '00:00')))
         end = start if exact else minutes(rule['_before'])
         result.append(f'({start}, {end}, {str(exact).lower()}, {s(names[name])})')
-    return '&[' + ', '.join(result) + ']' 
+    return '&[' + ', '.join(result) + ']'
 with tarfile.open(source) as archive:
     records = {member.name.split('/')[2]: json.load(archive.extractfile(member))
                for member in archive if member.name.endswith('/ca-gregorian.json')}
