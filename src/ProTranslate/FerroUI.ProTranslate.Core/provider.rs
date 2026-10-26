@@ -113,31 +113,104 @@ pub trait TranslationProvider {
         0
     }
 }
-#[derive(Default)]
 pub struct InMemoryTranslationProvider {
     name: String,
     entries: RefCell<HashMap<(Culture, String), String>>,
     revision: Cell<u64>,
 }
-impl InMemoryTranslationProvider {
-    pub fn new(name: impl Into<String>) -> Self {
+impl Default for InMemoryTranslationProvider {
+    fn default() -> Self {
         Self {
-            name: name.into(),
-            ..Self::default()
+            name: "InMemory".into(),
+            entries: RefCell::default(),
+            revision: Cell::new(0),
         }
     }
+}
+/// Validate a resource key at a provider boundary, including direct lookups that
+/// do not pass through a translation service.
+pub fn validate_translation_key(key: &str) -> Result<(), TranslationError> {
+    if key.trim().is_empty() {
+        Err(TranslationError::InvalidKey)
+    } else {
+        Ok(())
+    }
+}
+fn validate_provider_name(name: &str) -> Result<(), TranslationError> {
+    if name.trim().is_empty() {
+        Err(TranslationError::InvalidProviderName)
+    } else {
+        Ok(())
+    }
+}
+impl InMemoryTranslationProvider {
+    /// Construct a named catalog. Use `try_new` for names supplied by users.
+    ///
+    /// # Panics
+    /// Panics if the name is empty or whitespace.
+    pub fn new(name: impl Into<String>) -> Self {
+        Self::try_new(name).expect("a translation provider must have a nonempty name")
+    }
+    pub fn try_new(name: impl Into<String>) -> Result<Self, TranslationError> {
+        let name = name.into();
+        validate_provider_name(&name)?;
+        Ok(Self {
+            name,
+            ..Self::default()
+        })
+    }
+    /// Insert a translation. Empty values are intentional translations.
+    ///
+    /// # Panics
+    /// Panics if the key is empty or whitespace; `try_insert` is recoverable.
     pub fn insert(
         &self,
         culture: Culture,
         key: impl Into<String>,
         value: impl Into<String>,
     ) -> Option<String> {
+        self.try_insert(culture, key, value)
+            .expect("a translation key must not be empty or whitespace")
+    }
+    pub fn try_insert(
+        &self,
+        culture: Culture,
+        key: impl Into<String>,
+        value: impl Into<String>,
+    ) -> Result<Option<String>, TranslationError> {
+        let key = key.into();
+        validate_translation_key(&key)?;
         let result = self
             .entries
             .borrow_mut()
-            .insert((culture, key.into()), value.into());
+            .insert((culture, key), value.into());
         self.revision.set(self.revision.get().wrapping_add(1));
-        result
+        Ok(result)
+    }
+    /// Add a culture's catalog atomically: an invalid key rejects the complete
+    /// batch without changing translations or the provider revision.
+    pub fn insert_many<K: Into<String>, V: Into<String>>(
+        &self,
+        culture: Culture,
+        translations: impl IntoIterator<Item = (K, V)>,
+    ) -> Result<(), TranslationError> {
+        let translations = translations
+            .into_iter()
+            .map(|(key, value)| {
+                let key = key.into();
+                validate_translation_key(&key)?;
+                Ok((key, value.into()))
+            })
+            .collect::<Result<Vec<_>, TranslationError>>()?;
+        if !translations.is_empty() {
+            self.entries.borrow_mut().extend(
+                translations
+                    .into_iter()
+                    .map(|(key, value)| ((culture.clone(), key), value)),
+            );
+            self.revision.set(self.revision.get().wrapping_add(1));
+        }
+        Ok(())
     }
     pub fn remove(&self, culture: &Culture, key: &str) -> Option<String> {
         let result = self
@@ -169,6 +242,7 @@ impl TranslationProvider for InMemoryTranslationProvider {
         key: &str,
         culture: &Culture,
     ) -> Result<LocalizedString, TranslationError> {
+        validate_translation_key(key)?;
         Ok(
             match self.entries.borrow().get(&(culture.clone(), key.into())) {
                 Some(value) => LocalizedString::found(key, value, culture.clone(), &self.name),
@@ -197,12 +271,16 @@ pub enum TranslationFormatFailureBehavior {
 pub struct CompositeTranslationProvider {
     providers: Vec<Rc<dyn TranslationProvider>>,
     failure_behavior: TranslationProviderFailureBehavior,
+    child_revisions: RefCell<Vec<u64>>,
+    revision: Cell<u64>,
 }
 impl CompositeTranslationProvider {
     pub fn new(providers: Vec<Rc<dyn TranslationProvider>>) -> Self {
         Self {
             providers,
             failure_behavior: Default::default(),
+            child_revisions: RefCell::default(),
+            revision: Cell::new(0),
         }
     }
     pub fn with_failure_behavior(mut self, behavior: TranslationProviderFailureBehavior) -> Self {
@@ -222,6 +300,7 @@ impl TranslationProvider for CompositeTranslationProvider {
         key: &str,
         culture: &Culture,
     ) -> Result<LocalizedString, TranslationError> {
+        validate_translation_key(key)?;
         let mut diagnostics = Vec::new();
         for provider in &self.providers {
             match provider.get_string(key, culture) {
@@ -252,9 +331,15 @@ impl TranslationProvider for CompositeTranslationProvider {
         Ok(missing)
     }
     fn revision(&self) -> u64 {
-        self.providers.iter().fold(0xcbf29ce484222325, |v, p| {
-            (v ^ p.revision()).wrapping_mul(0x100000001b3)
-        })
+        // Comparing the actual revision vector avoids collisions from hashing
+        // unrelated mutable providers into a single cache token.
+        let revisions: Vec<_> = self.providers.iter().map(|p| p.revision()).collect();
+        let mut previous = self.child_revisions.borrow_mut();
+        if *previous != revisions {
+            *previous = revisions;
+            self.revision.set(self.revision.get().wrapping_add(1));
+        }
+        self.revision.get()
     }
 }
 
@@ -272,11 +357,16 @@ where
     F: Fn(&str, &Culture) -> Result<Option<String>, TranslationError>,
 {
     pub fn new(name: impl Into<String>, callback: F) -> Self {
-        Self {
-            name: name.into(),
+        Self::try_new(name, callback).expect("a translation provider must have a nonempty name")
+    }
+    pub fn try_new(name: impl Into<String>, callback: F) -> Result<Self, TranslationError> {
+        let name = name.into();
+        validate_provider_name(&name)?;
+        Ok(Self {
+            name,
             callback,
             revision: Cell::new(0),
-        }
+        })
     }
     pub fn invalidate(&self) {
         self.revision.set(self.revision.get().wrapping_add(1));
@@ -294,6 +384,7 @@ where
         key: &str,
         culture: &Culture,
     ) -> Result<LocalizedString, TranslationError> {
+        validate_translation_key(key)?;
         Ok(match (self.callback)(key, culture)? {
             Some(value) => LocalizedString::found(key, value, culture.clone(), &self.name),
             None => LocalizedString::missing(key, culture.clone(), &self.name),

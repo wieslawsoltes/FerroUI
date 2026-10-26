@@ -1,4 +1,4 @@
-use crate::{event::Event, Subscription, TranslationError};
+use crate::{event::Event, RegionProfile, Subscription, TranslationError};
 use icu_locale::{Direction, Locale, LocaleDirectionality, LocaleExpander};
 use std::{cell::RefCell, fmt, rc::Rc, str::FromStr};
 
@@ -135,6 +135,20 @@ impl CultureService {
     }
     pub fn flow_direction(&self) -> TextFlowDirection {
         self.current_ui_culture().flow_direction()
+    }
+    /// Region and measurement metadata follow the formatting culture, while
+    /// text direction follows the UI culture.
+    pub fn current_region(&self) -> Result<RegionProfile, TranslationError> {
+        RegionProfile::for_culture(&self.current_culture())
+    }
+    pub fn is_metric(&self) -> Result<bool, TranslationError> {
+        self.current_region().map(|region| region.is_metric)
+    }
+    pub fn set_culture_name(&self, name: &str) -> Result<bool, TranslationError> {
+        if name.trim().is_empty() {
+            return Err(TranslationError::InvalidCulture(name.into()));
+        }
+        Ok(self.set_culture(Culture::parse(name)?))
     }
     pub fn set_culture(&self, culture: Culture) -> bool {
         self.set_cultures(culture.clone(), culture)

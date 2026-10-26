@@ -757,3 +757,219 @@ fn nested_argument_refresh_cannot_overwrite_a_newer_observed_value() {
     }))]);
     assert_eq!(observer.value().unwrap(), "new");
 }
+
+#[test]
+fn culture_region_metadata_follows_formatting_culture_and_name_setter_validates() {
+    let cultures = CultureService::new(culture("en-US"));
+    cultures.set_cultures(culture("pl"), culture("ar-SA"));
+    assert_eq!(
+        cultures
+            .current_region()
+            .unwrap()
+            .two_letter_iso_region_name,
+        "PL"
+    );
+    assert!(cultures.is_metric().unwrap());
+    assert_eq!(cultures.flow_direction(), TextFlowDirection::RightToLeft);
+    assert!(cultures.set_culture_name("en-US").unwrap());
+    assert!(!cultures.is_metric().unwrap());
+    assert!(!cultures.set_culture_name("EN-us").unwrap());
+    for invalid in ["", " ", "bad_name"] {
+        assert!(cultures.set_culture_name(invalid).is_err());
+        assert_eq!(cultures.current_culture(), culture("en-US"));
+    }
+}
+
+#[test]
+fn provider_boundaries_validate_keys_names_and_atomic_catalog_batches() {
+    let provider = InMemoryTranslationProvider::default();
+    assert_eq!(provider.name(), "InMemory");
+    assert!(matches!(
+        InMemoryTranslationProvider::try_new(" "),
+        Err(TranslationError::InvalidProviderName)
+    ));
+    assert_eq!(
+        provider.try_insert(culture("en"), " ", "bad"),
+        Err(TranslationError::InvalidKey)
+    );
+    assert!(provider.is_empty());
+    let revision = provider.revision();
+    assert_eq!(
+        provider.insert_many(culture("en"), [("valid", "value"), ("", "bad")]),
+        Err(TranslationError::InvalidKey)
+    );
+    assert_eq!(provider.revision(), revision);
+    assert!(provider.is_empty());
+    provider
+        .insert_many(culture("en"), [("Title", "hello"), ("Empty", "")])
+        .unwrap();
+    assert_eq!(provider.len(), 2);
+    assert!(
+        !provider
+            .get_string("Empty", &culture("en"))
+            .unwrap()
+            .resource_not_found
+    );
+    assert_eq!(
+        provider.get_string(" \t", &culture("en")),
+        Err(TranslationError::InvalidKey)
+    );
+    let callback = CallbackTranslationProvider::new("Host", |_: &str, _: &Culture| {
+        panic!("invalid key must not reach a host callback")
+    });
+    assert_eq!(
+        callback.get_string("", &culture("en")),
+        Err(TranslationError::InvalidKey)
+    );
+    let composite = CompositeTranslationProvider::new(vec![]);
+    assert_eq!(
+        composite.get_string("", &culture("en")),
+        Err(TranslationError::InvalidKey)
+    );
+    let (_, _, service) = setup();
+    assert!(matches!(
+        service.try_observe(" ", vec![]),
+        Err(TranslationError::InvalidKey)
+    ));
+    assert_eq!(service.subscriber_count(), 0);
+}
+
+#[test]
+fn composite_revision_changes_even_for_previously_colliding_child_tokens() {
+    struct VersionedProvider {
+        revision: Cell<u64>,
+        value: RefCell<String>,
+    }
+    impl TranslationProvider for VersionedProvider {
+        fn name(&self) -> &str {
+            "Versioned"
+        }
+        fn revision(&self) -> u64 {
+            self.revision.get()
+        }
+        fn get_string(
+            &self,
+            key: &str,
+            culture: &Culture,
+        ) -> Result<LocalizedString, TranslationError> {
+            Ok(LocalizedString::found(
+                key,
+                self.value.borrow().as_str(),
+                culture.clone(),
+                self.name(),
+            ))
+        }
+    }
+    let first = Rc::new(VersionedProvider {
+        revision: Cell::new(0),
+        value: RefCell::new("old".into()),
+    });
+    let second = Rc::new(VersionedProvider {
+        revision: Cell::new(0),
+        value: RefCell::new("unused".into()),
+    });
+    let provider = Rc::new(CompositeTranslationProvider::new(vec![
+        first.clone(),
+        second.clone(),
+    ]));
+    let service = TranslationService::new(provider.clone(), CultureService::new(culture("en")));
+    assert_eq!(service.get_string("Title").unwrap().value, "old");
+    let before = provider.revision();
+    let hash_seed = 0xcbf29ce484222325u64;
+    let prime = 0x100000001b3u64;
+    first.revision.set(1);
+    second
+        .revision
+        .set((hash_seed ^ 1).wrapping_mul(prime) ^ hash_seed.wrapping_mul(prime));
+    *first.value.borrow_mut() = "new".into();
+    assert_ne!(provider.revision(), before);
+    assert_eq!(service.get_string("Title").unwrap().value, "new");
+}
+
+#[test]
+fn explicit_cache_invalidation_during_lookup_prevents_stale_publication() {
+    for remove_one in [false, true] {
+        let holder = Rc::new(RefCell::new(None::<TranslationService>));
+        let handle = holder.clone();
+        let value = Rc::new(RefCell::new("old".to_string()));
+        let data = value.clone();
+        let once = Cell::new(false);
+        let provider = Rc::new(CallbackTranslationProvider::new(
+            "Host",
+            move |key: &str, culture: &Culture| {
+                let resolved = data.borrow().clone();
+                if !once.replace(true) {
+                    *data.borrow_mut() = "new".into();
+                    let service = handle.borrow().clone().unwrap();
+                    if remove_one {
+                        assert!(!service.remove_cached_string(key, culture));
+                    } else {
+                        service.clear_cache();
+                    }
+                }
+                Ok(Some(resolved))
+            },
+        ));
+        let service = TranslationService::new(provider, CultureService::new(culture("en")));
+        *holder.borrow_mut() = Some(service.clone());
+        assert_eq!(service.get_string("Title").unwrap().value, "old");
+        assert_eq!(service.cached_lookup_count(), 0);
+        assert_eq!(service.get_string("Title").unwrap().value, "new");
+        assert_eq!(service.cached_lookup_count(), 1);
+        holder.borrow_mut().take();
+    }
+}
+
+#[test]
+fn observable_exposes_resolved_metadata_and_notifies_for_equal_values() {
+    let (provider, cultures, service) = setup();
+    provider.insert(culture("en"), "Title", "same");
+    provider.insert(culture("fr"), "Title", "same");
+    let observer = service.observe("Title", vec![]);
+    assert_eq!(observer.culture().unwrap(), culture("en"));
+    assert_eq!(observer.localized_string().unwrap().provider_name, "Memory");
+    let snapshots = Rc::new(RefCell::new(Vec::new()));
+    let seen = snapshots.clone();
+    let _sub =
+        observer.subscribe_snapshot(move |snapshot| seen.borrow_mut().push(snapshot.clone()));
+    let value_notifications = Rc::new(Cell::new(0));
+    let count = value_notifications.clone();
+    let _values = observer.subscribe(move |_| count.set(count.get() + 1));
+    cultures.set_cultures(culture("pl-PL"), culture("fr-CA"));
+    assert_eq!(observer.value().unwrap(), "same");
+    assert_eq!(observer.culture().unwrap(), culture("fr"));
+    let snapshot = observer.snapshot();
+    assert_eq!(snapshot.cultures.culture, culture("pl-PL"));
+    assert_eq!(snapshot.cultures.ui_culture, culture("fr-CA"));
+    assert_eq!(snapshots.borrow().as_slice(), &[snapshot]);
+    observer.update_arguments(vec![]).unwrap();
+    assert_eq!(value_notifications.get(), 2);
+    assert_eq!(snapshots.borrow().len(), 2);
+}
+
+#[test]
+fn observable_format_errors_preserve_resolved_metadata_and_dispose_disconnects() {
+    let (provider, cultures, service) = setup();
+    provider.insert(culture("en"), "Title", "{2}");
+    service.set_options(TranslationFallbackOptions {
+        format_failure_behavior: TranslationFormatFailureBehavior::ReportAndReturnError,
+        ..Default::default()
+    });
+    let observer = service.observe("Title", vec![1.into()]);
+    assert!(observer.value().is_err());
+    assert_eq!(observer.localized_string().unwrap().value, "{2}");
+    assert_eq!(observer.culture().unwrap(), culture("en"));
+    assert_eq!(service.subscriber_count(), 1);
+    observer.dispose();
+    observer.dispose();
+    assert!(observer.clone().is_disposed());
+    assert_eq!(service.subscriber_count(), 0);
+    assert_eq!(
+        observer.update_arguments(vec![]),
+        Err(TranslationError::Disposed)
+    );
+    let frozen = observer.snapshot();
+    cultures.set_culture(culture("fr"));
+    observer.refresh();
+    assert_eq!(observer.snapshot(), frozen);
+}

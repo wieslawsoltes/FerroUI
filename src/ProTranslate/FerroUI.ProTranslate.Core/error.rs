@@ -5,6 +5,8 @@ use std::fmt;
 pub enum TranslationError {
     InvalidCulture(String),
     InvalidKey,
+    InvalidProviderName,
+    Disposed,
     Provider(String),
     Format(String),
     Region(String),
@@ -16,6 +18,10 @@ impl fmt::Display for TranslationError {
         match self {
             Self::InvalidCulture(v) => write!(f, "Invalid culture: {v}"),
             Self::InvalidKey => f.write_str("A translation key must not be empty or whitespace"),
+            Self::InvalidProviderName => {
+                f.write_str("A translation provider name must not be empty or whitespace")
+            }
+            Self::Disposed => f.write_str("The localized observation has been disposed"),
             Self::Provider(v) => write!(f, "Translation provider failed: {v}"),
             Self::Format(v) => write!(f, "Invalid composite format: {v}"),
             Self::Region(v) => write!(f, "Region profile could not be resolved: {v}"),

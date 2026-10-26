@@ -53,9 +53,11 @@ struct Cache {
     values: HashMap<CacheKey, LocalizedString>,
     order: VecDeque<CacheKey>,
     provider_revision: u64,
+    epoch: u64,
 }
 impl Cache {
     fn clear(&mut self) {
+        self.epoch = self.epoch.wrapping_add(1);
         self.values.clear();
         self.order.clear();
     }
@@ -173,6 +175,9 @@ impl TranslationService {
     pub fn remove_cached_string(&self, key: &str, culture: &Culture) -> bool {
         let cache_key = (culture.clone(), key.into());
         let mut cache = self.0.cache.borrow_mut();
+        // A key may still be resolving, so invalidation matters even when it
+        // has not yet been inserted into the cache.
+        cache.epoch = cache.epoch.wrapping_add(1);
         let removed = cache.values.remove(&cache_key).is_some();
         if removed {
             cache.order.retain(|key| key != &cache_key);
@@ -181,6 +186,12 @@ impl TranslationService {
     }
     pub fn fallback_cultures(&self, culture: &Culture) -> Vec<Culture> {
         let options = self.options();
+        Self::fallback_cultures_with(culture, &options)
+    }
+    fn fallback_cultures_with(
+        culture: &Culture,
+        options: &TranslationFallbackOptions,
+    ) -> Vec<Culture> {
         let mut seen = HashSet::new();
         let mut result = Vec::new();
         let mut append = |culture: &Culture| {
@@ -213,9 +224,7 @@ impl TranslationService {
         key: &str,
         culture: &Culture,
     ) -> Result<LocalizedString, TranslationError> {
-        if key.trim().is_empty() {
-            return Err(TranslationError::InvalidKey);
-        }
+        validate_translation_key(key)?;
         let cache_options = self.0.cache_options.borrow().clone();
         let cache_key = (culture.clone(), key.into());
         let provider_revision = self.0.provider.revision();
@@ -230,10 +239,11 @@ impl TranslationService {
                 return Ok(value.clone());
             }
         }
+        let cache_epoch = self.0.cache.borrow().epoch;
         let options = self.options();
         let mut all_diagnostics = Vec::new();
         let mut result = None;
-        for candidate in self.fallback_cultures(culture) {
+        for candidate in Self::fallback_cultures_with(culture, &options) {
             match self.0.provider.get_string(key, &candidate) {
                 Ok(mut localized) => {
                     for diagnostic in &localized.diagnostics {
@@ -294,7 +304,11 @@ impl TranslationService {
                 && *self.0.cache_options.borrow() == cache_options
             {
                 let mut cache = self.0.cache.borrow_mut();
-                if cache_options.maximum_entries > 0 {
+                if cache.epoch != cache_epoch {
+                    return Ok(resolved);
+                }
+                let is_new = !cache.values.contains_key(&cache_key);
+                if is_new && cache_options.maximum_entries > 0 {
                     while cache.values.len() >= cache_options.maximum_entries {
                         if let Some(old) = cache.order.pop_front() {
                             cache.values.remove(&old);
@@ -303,7 +317,9 @@ impl TranslationService {
                         }
                     }
                 }
-                cache.order.push_back(cache_key.clone());
+                if is_new {
+                    cache.order.push_back(cache_key.clone());
+                }
                 cache.values.insert(cache_key, resolved.clone());
             }
         }
@@ -384,7 +400,17 @@ impl TranslationService {
         key: impl Into<String>,
         arguments: Vec<FormatArgument>,
     ) -> ObservableLocalizedString {
-        ObservableLocalizedString::new(self.clone(), key.into(), arguments)
+        self.try_observe(key, arguments)
+            .expect("a localized observation must have a nonempty key")
+    }
+    pub fn try_observe(
+        &self,
+        key: impl Into<String>,
+        arguments: Vec<FormatArgument>,
+    ) -> Result<ObservableLocalizedString, TranslationError> {
+        let key = key.into();
+        validate_translation_key(&key)?;
+        Ok(ObservableLocalizedString::new(self.clone(), key, arguments))
     }
     pub(crate) fn report(&self, diagnostic: ProTranslateDiagnostic) {
         let sink = self.0.diagnostic_sink.borrow().clone();
@@ -394,20 +420,32 @@ impl TranslationService {
         self.0.diagnostics.emit(diagnostic);
     }
 }
+/// One coherent observation, including the resolved resource metadata and the
+/// independent UI and formatting cultures used to produce its display value.
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct ObservableLocalizedSnapshot {
+    pub value: Result<String, TranslationError>,
+    pub localized_string: Result<LocalizedString, TranslationError>,
+    pub cultures: CultureSnapshot,
+}
 struct ObservableInner {
     generation: Cell<u64>,
     service: TranslationService,
     key: String,
     arguments: RefCell<Vec<FormatArgument>>,
-    value: RefCell<Result<String, TranslationError>>,
-    changed: Event<Result<String, TranslationError>>,
-    _subscription: Subscription,
+    snapshot: RefCell<ObservableLocalizedSnapshot>,
+    changed: Event<ObservableLocalizedSnapshot>,
+    subscription: RefCell<Option<Subscription>>,
 }
 #[derive(Clone)]
 pub struct ObservableLocalizedString(Rc<ObservableInner>);
 impl ObservableLocalizedString {
     fn new(service: TranslationService, key: String, arguments: Vec<FormatArgument>) -> Self {
-        let value = Err(TranslationError::InvalidKey);
+        let snapshot = ObservableLocalizedSnapshot {
+            value: Err(TranslationError::InvalidKey),
+            localized_string: Err(TranslationError::InvalidKey),
+            cultures: service.cultures().snapshot(),
+        };
         let observable = Self(Rc::new_cyclic(|weak: &std::rc::Weak<ObservableInner>| {
             let weak = weak.clone();
             let subscription = service.subscribe(move |_| {
@@ -420,9 +458,9 @@ impl ObservableLocalizedString {
                 service,
                 key,
                 arguments: RefCell::new(arguments),
-                value: RefCell::new(value),
+                snapshot: RefCell::new(snapshot),
                 changed: Event::default(),
-                _subscription: subscription,
+                subscription: RefCell::new(Some(subscription)),
             }
         }));
         observable.refresh();
@@ -432,18 +470,69 @@ impl ObservableLocalizedString {
         &self.0.key
     }
     pub fn value(&self) -> Result<String, TranslationError> {
-        self.0.value.borrow().clone()
+        self.0.snapshot.borrow().value.clone()
     }
+    pub fn snapshot(&self) -> ObservableLocalizedSnapshot {
+        self.0.snapshot.borrow().clone()
+    }
+    pub fn localized_string(&self) -> Result<LocalizedString, TranslationError> {
+        self.0.snapshot.borrow().localized_string.clone()
+    }
+    /// The culture that supplied the resolved resource, which can be a parent
+    /// or fallback culture rather than the currently requested UI culture.
+    pub fn culture(&self) -> Result<Culture, TranslationError> {
+        self.localized_string().map(|localized| localized.culture)
+    }
+    /// Update arguments, preserving the source proxy's notification semantics
+    /// even when the formatted text remains equal.
+    ///
+    /// # Panics
+    /// Panics after disposal. `update_arguments` exposes a recoverable error.
     pub fn set_arguments(&self, arguments: Vec<FormatArgument>) {
+        self.update_arguments(arguments)
+            .expect("cannot update a disposed localized observation");
+    }
+    pub fn update_arguments(&self, arguments: Vec<FormatArgument>) -> Result<(), TranslationError> {
+        if self.is_disposed() {
+            return Err(TranslationError::Disposed);
+        }
         *self.0.arguments.borrow_mut() = arguments;
         self.refresh();
+        Ok(())
+    }
+    /// Disconnect all clones of this observation while retaining its last
+    /// snapshot. Dropping the final clone also disconnects automatically.
+    pub fn dispose(&self) {
+        self.0
+            .generation
+            .set(self.0.generation.get().wrapping_add(1));
+        self.0.subscription.borrow_mut().take();
+    }
+    pub fn is_disposed(&self) -> bool {
+        self.0.subscription.borrow().is_none()
     }
     pub fn refresh(&self) {
+        if self.is_disposed() {
+            return;
+        }
         let observation_generation = self.0.generation.get().wrapping_add(1);
         self.0.generation.set(observation_generation);
         let arguments = self.0.arguments.borrow().clone();
         let generation = self.0.service.0.generation.get();
-        let value = self.0.service.format(&self.0.key, &arguments);
+        let cultures = self.0.service.cultures().snapshot();
+        let localized_string = self
+            .0
+            .service
+            .get_string_for(&self.0.key, &cultures.ui_culture);
+        let value = localized_string.clone().and_then(|localized| {
+            if arguments.is_empty() {
+                Ok(localized.value)
+            } else {
+                self.0
+                    .service
+                    .format_localized(localized, &arguments, &cultures.culture)
+            }
+        });
         // Reentrant diagnostics may have requested a refresh or changed culture.
         // That event is already queued; it will compute the newest value.
         if self.0.service.0.generation.get() != generation
@@ -451,22 +540,27 @@ impl ObservableLocalizedString {
         {
             return;
         }
-        let changed = {
-            let mut previous = self.0.value.borrow_mut();
-            if *previous == value {
-                false
-            } else {
-                *previous = value.clone();
-                true
-            }
+        let snapshot = ObservableLocalizedSnapshot {
+            value,
+            localized_string,
+            cultures,
         };
-        if changed {
-            self.0.changed.emit(value);
-        }
+        *self.0.snapshot.borrow_mut() = snapshot.clone();
+        self.0.changed.emit(snapshot);
     }
     pub fn subscribe(
         &self,
         callback: impl Fn(&Result<String, TranslationError>) + 'static,
+    ) -> Subscription {
+        self.0
+            .changed
+            .subscribe(move |snapshot| callback(&snapshot.value))
+    }
+    /// Observe metadata and value together. Refreshes notify even if only the
+    /// resolved culture, provider, diagnostics, or formatting culture changed.
+    pub fn subscribe_snapshot(
+        &self,
+        callback: impl Fn(&ObservableLocalizedSnapshot) + 'static,
     ) -> Subscription {
         self.0.changed.subscribe(callback)
     }
