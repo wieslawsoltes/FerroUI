@@ -1,0 +1,403 @@
+use ferroui_base::animation::{IClock, PlayState, TimeSpan};
+use ferroui_base::data::core::{ValueType, ValueTypes};
+use ferroui_base::data::BindingPriority;
+use ferroui_base::reactive::IDisposable;
+use ferroui_base::reactive::{Disposable, IObservable, IObserver};
+#[cfg(not(debug_assertions))]
+use ferroui_base::utilities::Uri;
+use ferroui_base::{BoxedValue, FerroObject, Rect, Ref, StyledElement, Visual, WeakRef};
+use ferroui_controls::{ContentControl, Control};
+use ferroui_designer_animation::Sample;
+use ferroui_designer_core::{Document, NodeId};
+use ferroui_inspect::{Inspector, TreeKind};
+use ferroui_markup_xaml::diagnostics::XamlSourceInfo;
+#[cfg(not(debug_assertions))]
+use ferroui_markup_xaml::RuntimeXamlLoaderDocument;
+use ferroui_markup_xaml::{FromXamlObject, RuntimeXamlLoaderConfiguration};
+use ferroui_markup_xaml_loader::FerroRuntimeXamlLoader;
+use std::collections::{BTreeMap, BTreeSet};
+use std::rc::Rc;
+
+/// The authored document and preview have independent acceptance states.
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub enum PreviewStatus {
+    Ready { revision: u64 },
+    InvalidSource { revision: u64 },
+    Failed { revision: u64, message: String },
+}
+
+/// One live-tree row; inspector identities remain shared with MCP and DevTools.
+#[derive(Clone, Debug)]
+pub struct RuntimeNode {
+    pub inspector_id: u64,
+    pub source_id: Option<NodeId>,
+    pub parent: Option<u64>,
+    pub depth: usize,
+    pub type_name: String,
+    pub name: Option<String>,
+    pub bounds: Option<Rect>,
+}
+
+pub(crate) struct RuntimePreview {
+    pub host: Ref<ContentControl>,
+    uri: String,
+    #[cfg(not(debug_assertions))]
+    configuration: RuntimeXamlLoaderConfiguration,
+    pub status: PreviewStatus,
+    pub notices: Vec<String>,
+    objects: BTreeMap<NodeId, WeakRef<Visual>>,
+    reverse_objects: BTreeMap<u64, NodeId>,
+    animation_values: Vec<Rc<dyn IDisposable>>,
+    #[cfg(debug_assertions)]
+    session: ferroui_hot_reload::HotReloadSession,
+    #[cfg(debug_assertions)]
+    _target: Rc<dyn ferroui_hot_reload::ReloadTarget>,
+}
+
+impl RuntimePreview {
+    pub fn new(
+        host: Ref<ContentControl>,
+        uri: String,
+        document: &Document,
+    ) -> Result<Self, String> {
+        FerroRuntimeXamlLoader::register();
+        ferroui_markup_xaml::register_types();
+        host.set_clock(Some(Rc::new(DesignClock)));
+        let mut configuration = RuntimeXamlLoaderConfiguration::new();
+        configuration.design_mode = true;
+        configuration.set_create_source_info(true);
+        #[cfg(debug_assertions)]
+        let (session, target) = {
+            let mut session = ferroui_hot_reload::HotReloadSession::new();
+            session
+                .register_document(
+                    uri.clone(),
+                    crate::preview_source::project(document)
+                        .map(|projection| projection.source)
+                        .unwrap_or_else(|_| document.valid_source().to_owned()),
+                )
+                .map_err(|error| format!("{error:?}"))?;
+            let target: Rc<dyn ferroui_hot_reload::ReloadTarget> =
+                Rc::new(ferroui_hot_reload::ContentReloadTarget::new(
+                    &host,
+                    uri.clone(),
+                    Vec::new(),
+                    configuration.clone(),
+                ));
+            session.register_target(&target);
+            (session, target)
+        };
+        let mut this = Self {
+            host,
+            uri,
+            #[cfg(not(debug_assertions))]
+            configuration,
+            status: PreviewStatus::Ready { revision: 0 },
+            notices: Vec::new(),
+            objects: BTreeMap::new(),
+            reverse_objects: BTreeMap::new(),
+            animation_values: Vec::new(),
+            #[cfg(debug_assertions)]
+            session,
+            #[cfg(debug_assertions)]
+            _target: target,
+        };
+        this.reload(document);
+        Ok(this)
+    }
+
+    pub fn reload(&mut self, document: &Document) {
+        self.clear_animation();
+        if !document.diagnostics().is_empty() {
+            self.status = PreviewStatus::InvalidSource {
+                revision: document.revision(),
+            };
+            return;
+        }
+        let result = crate::preview_source::project(document).and_then(|projection| {
+            self.notices = projection.notices;
+            self.apply_source(&projection.source)
+        });
+        self.status = match result {
+            Ok(()) => PreviewStatus::Ready {
+                revision: document.revision(),
+            },
+            Err(message) => PreviewStatus::Failed {
+                revision: document.revision(),
+                message,
+            },
+        };
+        if matches!(self.status, PreviewStatus::Ready { .. }) {
+            self.host.update_layout();
+            self.rebuild_map(document);
+        }
+    }
+
+    #[cfg(debug_assertions)]
+    fn apply_source(&mut self, source: &str) -> Result<(), String> {
+        self.session.submit(self.uri.clone(), source.to_owned());
+        if let Some(outcome) = self.session.apply_pending() {
+            if outcome.status != ferroui_hot_reload::ReloadStatus::Applied {
+                return Err(outcome
+                    .diagnostic
+                    .unwrap_or_else(|| format!("{:?}", outcome.status)));
+            }
+        }
+        Ok(())
+    }
+
+    // The existing hot reload crate is development-only. Release hosts still stage a complete
+    // candidate before replacing content; they do not claim development state restoration.
+    #[cfg(not(debug_assertions))]
+    fn apply_source(&mut self, source: &str) -> Result<(), String> {
+        let uri = Uri::absolute(&self.uri).map_err(|error| error.to_string())?;
+        let document = RuntimeXamlLoaderDocument::with_base_uri(Some(uri), source);
+        let candidate =
+            FerroRuntimeXamlLoader::load_document(document, Some(self.configuration.clone()))
+                .map_err(|error| error.to_string())?;
+        if Ref::<Control>::from_xaml_object(&candidate).is_none() {
+            return Err("The artboard requires a Control root; use a preview document for resources or styles".into());
+        }
+        self.host.set_content(Some(candidate));
+        Ok(())
+    }
+
+    pub fn uri(&self) -> &str {
+        &self.uri
+    }
+
+    pub fn set_interactive(&mut self, interactive: bool) {
+        self.clear_animation();
+        self.host.set_clock(if interactive {
+            None
+        } else {
+            Some(Rc::new(DesignClock))
+        });
+    }
+
+    pub fn root(&self) -> Option<Ref<Control>> {
+        self.host
+            .content()
+            .as_ref()
+            .and_then(Ref::<Control>::from_xaml_object)
+    }
+
+    pub fn visual(&self, id: NodeId) -> Option<Ref<Visual>> {
+        self.objects.get(&id).and_then(WeakRef::upgrade)
+    }
+
+    pub fn bounds(&self, id: NodeId, relative_to: &Ref<Visual>) -> Option<Rect> {
+        let visual = self.visual(id)?;
+        Inspector::box_model(&visual, relative_to)
+            .ok()
+            .map(|model| model.border)
+    }
+
+    pub fn source_id(&self, visual: &Visual) -> Option<NodeId> {
+        let id = Inspector::shared().borrow_mut().node_id(visual);
+        self.reverse_objects.get(&id).copied()
+    }
+
+    pub fn rebuild_map(&mut self, document: &Document) {
+        if !matches!(self.status, PreviewStatus::Ready { revision } if revision == document.revision())
+        {
+            return;
+        }
+        self.objects.clear();
+        self.reverse_objects.clear();
+        let Some(root) = self.root() else {
+            return;
+        };
+        // One scan of source positions, followed by indexed lookup for each runtime object.
+        let mut names = BTreeMap::new();
+        let mut locations: BTreeMap<(String, usize), Vec<(usize, NodeId)>> = BTreeMap::new();
+        let mut elements = document.ast().elements().collect::<Vec<_>>();
+        elements.sort_by_key(|node| node.span.start);
+        let source = document.valid_source();
+        let (mut offset, mut line, mut column) = (0usize, 1usize, 1usize);
+        for node in elements {
+            for character in source[offset..node.span.start].chars() {
+                if character == '\n' {
+                    line += 1;
+                    column = 1;
+                } else {
+                    column += 1;
+                }
+            }
+            offset = node.span.start;
+            if let Some(name) = node.xaml_name() {
+                names.entry(name.to_owned()).or_insert(node.id);
+            }
+            locations
+                .entry((node.local_name().to_owned(), line))
+                .or_default()
+                .push((column, node.id));
+        }
+        // The runtime loader names in-memory documents independently of their base URI.
+        // Use the root's actual provenance, so a different template/resource document cannot
+        // claim an authored node just because its namescope repeats the same Name.
+        let root_value: BoxedValue = Rc::new(root.clone());
+        let provenance = XamlSourceInfo::get_xaml_source_info(&root_value);
+        let inspector = Inspector::shared();
+        let root_id = inspector.borrow_mut().node_id(&root);
+        self.objects.insert(
+            document.ast().root(),
+            root.clone().upcast::<Visual>().downgrade(),
+        );
+        self.reverse_objects.insert(root_id, document.ast().root());
+        let mut pending = vec![root.upcast::<FerroObject>()];
+        let mut seen = BTreeSet::new();
+        while let Some(object) = pending.pop() {
+            let id = inspector.borrow_mut().node_id(&object);
+            if !seen.insert(id) {
+                continue;
+            }
+            for tree in [TreeKind::Logical, TreeKind::Visual] {
+                pending.extend(inspector.borrow().children(&object, tree));
+            }
+            let Some(visual) = object.cast::<Visual>() else {
+                continue;
+            };
+            let value: BoxedValue = Rc::new(object.clone());
+            let Some(info) = XamlSourceInfo::get_xaml_source_info(&value) else {
+                continue;
+            };
+            if provenance
+                .as_ref()
+                .is_some_and(|root| root.source_uri() != info.source_uri())
+            {
+                continue;
+            }
+            let name = object
+                .cast::<StyledElement>()
+                .and_then(|element| element.name());
+            let named = name.as_ref().and_then(|name| names.get(name).copied());
+            let source = named.or_else(|| {
+                locations
+                    .get(&(
+                        object.get_type().name().to_owned(),
+                        info.line_number().max(1) as usize,
+                    ))
+                    .and_then(|entries| {
+                        entries
+                            .iter()
+                            .min_by_key(|(column, _)| {
+                                column.abs_diff(info.line_position().max(1) as usize)
+                            })
+                            .map(|(_, id)| *id)
+                    })
+            });
+            if let Some(source) = source {
+                self.objects
+                    .entry(source)
+                    .or_insert_with(|| visual.downgrade());
+                self.reverse_objects.insert(id, source);
+            }
+        }
+    }
+
+    pub fn tree(&self, kind: TreeKind) -> Vec<RuntimeNode> {
+        let Some(root) = self.root() else {
+            return Vec::new();
+        };
+        let mut rows = Vec::new();
+        let mut pending = vec![(root.upcast::<FerroObject>(), None, 0)];
+        let mut seen = BTreeSet::new();
+        let inspector = Inspector::shared();
+        while let Some((object, parent, depth)) = pending.pop() {
+            let id = inspector.borrow_mut().node_id(&object);
+            if !seen.insert(id) {
+                continue;
+            }
+            let visual = object.cast::<Visual>();
+            let source_id = visual.as_ref().and_then(|visual| self.source_id(visual));
+            rows.push(RuntimeNode {
+                inspector_id: id,
+                source_id,
+                parent,
+                depth,
+                type_name: object.get_type().name().to_owned(),
+                name: object
+                    .cast::<StyledElement>()
+                    .and_then(|element| element.name()),
+                bounds: visual
+                    .and_then(|visual| {
+                        Inspector::box_model(&visual, &self.host.clone().upcast()).ok()
+                    })
+                    .map(|model| model.border),
+            });
+            let children = inspector.borrow().children(&object, kind);
+            pending.extend(
+                children
+                    .into_iter()
+                    .rev()
+                    .map(|child| (child, Some(id), depth + 1)),
+            );
+        }
+        rows
+    }
+
+    pub fn preview_samples(&mut self, samples: &[Sample]) -> Result<(), String> {
+        // Validate every conversion before replacing the previous preview layer.
+        let mut staged = Vec::new();
+        for sample in samples {
+            let object = self
+                .visual(sample.target)
+                .ok_or_else(|| format!("No live animation target {}", sample.target))?;
+            let property = Inspector::property(&object, &sample.property)?;
+            if property.is_direct() || property.is_read_only() {
+                return Err(format!(
+                    "{} does not support an animation value layer",
+                    sample.property
+                ));
+            }
+            let value: BoxedValue = Rc::new(sample.value.to_xaml());
+            let converted = ValueTypes::try_convert(
+                Some(&value),
+                ValueType::new(property.property_type(), property.property_type_name()),
+            )
+            .flatten()
+            .ok_or_else(|| format!("Cannot animate {} with this value", sample.property))?;
+            if !property.is_valid_value(converted.as_any()) {
+                return Err(format!("Invalid animation value for {}", sample.property));
+            }
+            staged.push((object, property, converted));
+        }
+        self.clear_animation();
+        for (object, property, value) in staged {
+            if let Some(guard) =
+                object.set_value_untyped(property, value.as_any(), BindingPriority::Animation)
+            {
+                self.animation_values.push(guard);
+            }
+        }
+        Ok(())
+    }
+
+    pub fn clear_animation(&mut self) {
+        for guard in self.animation_values.drain(..) {
+            guard.dispose();
+        }
+    }
+}
+
+impl Drop for RuntimePreview {
+    fn drop(&mut self) {
+        self.clear_animation();
+    }
+}
+
+// Design mode owns time. Inherited runtime animations and transitions remain frozen until the
+// host explicitly enables interaction; timeline sampling uses disposable animation layers.
+struct DesignClock;
+impl IObservable<TimeSpan> for DesignClock {
+    fn subscribe(&self, _observer: Rc<dyn IObserver<TimeSpan>>) -> Rc<dyn IDisposable> {
+        Disposable::empty()
+    }
+}
+impl IClock for DesignClock {
+    fn play_state(&self) -> PlayState {
+        PlayState::Pause
+    }
+    fn set_play_state(&self, _value: PlayState) {}
+}

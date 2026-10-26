@@ -4,12 +4,12 @@ The visual designer is a reusable Rust editing system with a FerroUI workspace. 
 
 ## Module boundaries
 
-- **Document engine:** lossless XAML syntax, source spans, stable node identity, validated atomic edits, selection and undo/redo. Invalid source remains editable while the last valid preview is retained.
-- **Design tools:** extensible property metadata and editors, panel layout adapters, geometry, snapping, manipulation and drag/drop. Tools produce document transactions instead of mutating the preview behind the source editor.
+- **Document engine:** lossless XAML syntax, source spans, stable node identity, validated atomic edits and undo/redo. Invalid source remains editable while the last valid preview is retained.
+- **Design tools:** extensible property metadata and editors, panel layout adapters, selection, geometry, snapping, manipulation and drag/drop. Tools produce document transactions instead of mutating the preview behind the source editor.
 - **Animation:** deterministic keyframe evaluation, timeline editing, easing, repeat/reverse, recording, and XAML import/export.
 - **Collaboration:** replicated document operations, deterministic conflict resolution, causal identity, presence and transport-independent synchronization.
 - **Workspace:** FerroUI controls for the tool palette, object tree, properties, XAML editor, artboard and timeline. The workspace is embeddable; the sample is a host of the same components.
-- **Runtime integration:** reuse FerroUI.Inspect for visual/logical inspection, FerroUI.HotReload for accepted preview transactions, and FerroUI.Mcp for authenticated transport and UI-thread dispatch.
+- **Runtime integration:** reuse FerroUI.Inspect for visual/logical inspection, FerroUI.HotReload for accepted debug preview transactions, and FerroUI.Mcp for authenticated transport and UI-thread dispatch. Release builds stage a runtime XAML load before replacing accepted preview content.
 
 ## Invariants
 
@@ -25,4 +25,4 @@ The visual designer is a reusable Rust editing system with a FerroUI workspace. 
 
 The workspace follows the synchronized Design/XAML views, artboard, toolbox, document outline and Properties workflow described in [Microsoft's XAML designer overview](https://learn.microsoft.com/en-us/visualstudio/xaml-tools/creating-a-ui-by-using-xaml-designer-in-visual-studio). The animation workflow follows [Blend's objects and timeline editor](https://learn.microsoft.com/en-us/visualstudio/xaml-tools/creating-a-ui-by-using-blend-for-visual-studio) and [keyframe authoring](https://learn.microsoft.com/en-us/visualstudio/xaml-tools/animate-objects-in-xaml-designer).
 
-Implementation and validation details will be maintained beside each module and summarized here as code lands. No claim of full Visual Studio or Blend product parity is implied by the architecture.
+Implementation, embedding examples, engine contracts and validation commands are documented in the [Designer Studio guide](README.md). The product scope and remaining workflows are explicitly listed there.

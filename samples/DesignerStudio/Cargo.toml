@@ -1,0 +1,32 @@
+[package]
+name = "designer-studio"
+description = "Native FerroUI visual XAML designer workspace"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+publish = false
+
+[lib]
+path = "lib.rs"
+
+[[bin]]
+name = "designer-studio"
+path = "program.rs"
+
+[features]
+default = ["desktop", "mcp"]
+desktop = ["dep:ferroui-desktop"]
+headless = ["dep:ferroui-headless"]
+mcp = ["ferroui-designer/mcp"]
+
+[dependencies]
+ferroui-base.workspace = true
+ferroui-controls.workspace = true
+ferroui-designer = { version = "=0.4.0", path = "../../src/FerroUI.Designer" }
+ferroui-markup-xaml.workspace = true
+ferroui-themes-simple.workspace = true
+ferroui-desktop = { workspace = true, optional = true }
+ferroui-headless = { workspace = true, optional = true }
+sample-support = { path = "../SampleSupport" }

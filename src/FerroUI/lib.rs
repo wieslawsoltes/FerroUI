@@ -32,6 +32,7 @@
 //! | `controls_treedatagrid`, `treedatagrid_core` | `ferroui-controls-treedatagrid`, `ferroui-treedatagrid-core` | `treedatagrid` | no |
 //! | `dialogs` | `ferroui-dialogs` | `dialogs` | no |
 //! | `diagnostics` | `ferroui-diagnostics` (the developer tools) | `diagnostics` | no |
+//! | `designer` | `ferroui-designer` (native visual XAML authoring; optional MCP with `designer-mcp`) | `designer` | no |
 //! | `system`, `reactive` | `ferroui-system`, `ferroui-reactive` (Rx) | `reactive` | no |
 //! | `dynamic_data` | `ferroui-dynamic-data` (DynamicData) | `dynamic-data` | no |
 //! | `splat`, `reactiveui`, `reactiveui_controls` | `ferroui-splat`, `ferroui-reactiveui`, `ferroui-reactiveui-controls` (ReactiveUI and its integration) | `reactiveui` | no |
@@ -165,6 +166,8 @@ pub use ferroui_treedatagrid_core as treedatagrid_core;
 pub use ferroui_dialogs as dialogs;
 #[cfg(feature = "diagnostics")]
 pub use ferroui_diagnostics as diagnostics;
+#[cfg(feature = "designer")]
+pub use ferroui_designer as designer;
 
 #[cfg(feature = "reactive")]
 pub use ferroui_system as system;

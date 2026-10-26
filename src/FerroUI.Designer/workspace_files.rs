@@ -1,0 +1,420 @@
+//! File commands use the host's existing native storage provider. No file-system or platform
+//! service is created by the embeddable designer.
+use super::*;
+use ferroui_base::platform::storage::{
+    FilePickerFileType, FilePickerOpenOptions, FilePickerSaveOptions, IStorageFile,
+};
+use ferroui_base::utilities::Uri;
+use ferroui_controls::{Border, ThemeVariantScope, TopLevel};
+use std::io::{Read, Write};
+
+pub(super) struct PendingDocument {
+    source: String,
+    uri: String,
+    file: Rc<dyn IStorageFile>,
+}
+
+impl DesignerWorkspace {
+    pub fn is_dirty(&self) -> bool {
+        self.session.borrow().document().source() != self.saved_source.borrow().as_str()
+    }
+
+    /// Explicit host operation. Clear current history and sharing and open source at its URI.
+    /// The built-in file command presents a save/discard/cancel prompt before calling this.
+    pub fn open_document(self: &Rc<Self>, source: String, uri: String) -> Result<(), String> {
+        self.pending_source.set(false);
+        self.session
+            .borrow_mut()
+            .open_document(source.clone(), uri)?;
+        *self.file.borrow_mut() = None;
+        *self.saved_source.borrow_mut() = source;
+        self.runtime_selection.set(None);
+        self.surface.set_interactive(false);
+        self.refresh(true);
+        self.refresh_file_title();
+        Ok(())
+    }
+    /// Return true when a close request was deferred for a native save/discard/cancel prompt.
+    /// The host supplies a callback that performs the already-approved close without prompting again.
+    pub fn request_close(self: &Rc<Self>, close: impl Fn() + 'static) -> bool {
+        if !self.is_dirty() {
+            return false;
+        }
+        *self.pending_close.borrow_mut() = Some(Rc::new(close));
+        self.pending_open.borrow_mut().take();
+        self.root
+            .get_control::<TextBlock>("FilePromptTitle")
+            .set_text(Some("Save before closing?"));
+        self.root
+            .get_control::<TextBlock>("FilePromptText")
+            .set_text(Some("The current document has unsaved changes."));
+        self.root
+            .get_control::<Button>("SaveAndOpen")
+            .set_content(Some(Rc::new("Save and close".to_owned())));
+        self.root
+            .get_control::<Button>("DiscardAndOpen")
+            .set_content(Some(Rc::new("Discard and close".to_owned())));
+        self.root
+            .get_control::<Border>("FilePrompt")
+            .set_is_visible(true);
+        true
+    }
+    pub fn set_preview_dark(&self, dark: bool) {
+        self.root
+            .get_control::<ThemeVariantScope>("PreviewThemeScope")
+            .set_requested_theme_variant(Some(if dark {
+                ferroui_base::styling::ThemeVariant::dark()
+            } else {
+                ferroui_base::styling::ThemeVariant::light()
+            }));
+        self.root
+            .get_control::<Button>("PreviewTheme")
+            .set_content(Some(Rc::new(if dark {
+                "Dark preview".to_owned()
+            } else {
+                "Light preview".to_owned()
+            })));
+    }
+    pub(super) fn connect_file_commands(self: &Rc<Self>) {
+        for name in [
+            "OpenFile",
+            "SaveFile",
+            "SaveFileAs",
+            "SaveAndOpen",
+            "DiscardAndOpen",
+            "CancelOpen",
+            "PreviewTheme",
+        ] {
+            let weak = Rc::downgrade(self);
+            self.root.get_control::<Button>(name).click(move |_, _| {
+                let Some(this) = weak.upgrade() else {
+                    return;
+                };
+                match name {
+                    "OpenFile" => this.request_open(),
+                    "SaveFile" => this.request_save(false, false),
+                    "SaveFileAs" => this.request_save(true, false),
+                    "SaveAndOpen" => this.request_save(false, true),
+                    "DiscardAndOpen" => {
+                        let result = this.complete_open();
+                        this.report(result);
+                    }
+                    "CancelOpen" => {
+                        this.pending_open.borrow_mut().take();
+                        this.pending_close.borrow_mut().take();
+                        this.root
+                            .get_control::<Border>("FilePrompt")
+                            .set_is_visible(false);
+                    }
+                    "PreviewTheme" => {
+                        let scope = this
+                            .root
+                            .get_control::<ThemeVariantScope>("PreviewThemeScope");
+                        this.set_preview_dark(
+                            scope.requested_theme_variant()
+                                != Some(ferroui_base::styling::ThemeVariant::dark()),
+                        );
+                    }
+                    _ => {}
+                }
+            });
+        }
+        self.refresh_file_title();
+    }
+    pub(super) fn refresh_file_title(&self) {
+        let session = self.session.borrow();
+        let name = self
+            .file
+            .borrow()
+            .as_ref()
+            .map(|file| file.name())
+            .unwrap_or_else(|| {
+                session
+                    .document_uri()
+                    .rsplit('/')
+                    .next()
+                    .unwrap_or("Untitled.xaml")
+                    .to_owned()
+            });
+        let dirty = session.document().source() != self.saved_source.borrow().as_str();
+        self.root
+            .get_control::<TextBlock>("DocumentTitle")
+            .set_text(Some(&format!("{name}{}", if dirty { "  •" } else { "" })));
+    }
+    pub(super) fn request_open(self: &Rc<Self>) {
+        if self.file_busy.replace(true) {
+            return;
+        }
+        let this = self.clone();
+        Dispatcher::ui_thread()
+            .to_task_scheduler()
+            .spawn_local(async move {
+                let result = this.choose_open().await;
+                this.file_busy.set(false);
+                this.report(result);
+            });
+    }
+    async fn choose_open(self: &Rc<Self>) -> Result<(), String> {
+        let top = TopLevel::get_top_level(Some(&self.root))
+            .ok_or("The designer must be attached to a window to open files")?;
+        let provider = top.storage_provider();
+        if !provider.can_open() {
+            return Err(
+                "This host has no file picker. Use DesignerWorkspace::open_document from the host."
+                    .into(),
+            );
+        }
+        let mut options = FilePickerOpenOptions::new();
+        options.set_title(Some("Open FerroUI XAML".into()));
+        options.set_allow_multiple(false);
+        options.set_file_type_filter(Some(vec![xaml_type()]));
+        let files = provider
+            .open_file_picker_async(options)
+            .await
+            .map_err(|e| e.to_string())?;
+        let Some(file) = files.into_iter().next() else {
+            return Ok(());
+        };
+        let mut stream = file.open_read_async().await.map_err(|e| e.to_string())?;
+        let mut source = String::new();
+        stream
+            .read_to_string(&mut source)
+            .map_err(|e| e.to_string())?;
+        let path = file.path();
+        let uri = if path.is_absolute_uri() {
+            path.absolute_uri().to_owned()
+        } else {
+            format!(
+                "ferres://FerroUI.Designer/{}",
+                file.name().replace(' ', "%20")
+            )
+        };
+        self.pending_close.borrow_mut().take();
+        *self.pending_open.borrow_mut() = Some(PendingDocument { source, uri, file });
+        self.root
+            .get_control::<TextBlock>("FilePromptTitle")
+            .set_text(Some("Open another document?"));
+        self.root
+            .get_control::<Button>("SaveAndOpen")
+            .set_content(Some(Rc::new("Save and open".to_owned())));
+        self.root
+            .get_control::<Button>("DiscardAndOpen")
+            .set_content(Some(Rc::new("Discard and open".to_owned())));
+        if self.is_dirty() || self.session.borrow().collaboration_version().is_some() {
+            self.root.get_control::<TextBlock>("FilePromptText").set_text(Some(if self.session.borrow().collaboration_version().is_some(){"Opening another file leaves the current collaboration session. Save the current document before continuing?"}else{"Save the current document before opening another file?"}));
+            self.root
+                .get_control::<Border>("FilePrompt")
+                .set_is_visible(true);
+            Ok(())
+        } else {
+            self.complete_open()
+        }
+    }
+    fn complete_open(self: &Rc<Self>) -> Result<(), String> {
+        let document = self.pending_open.borrow_mut().take();
+        let Some(document) = document else {
+            let close = self.pending_close.borrow_mut().take();
+            self.root
+                .get_control::<Border>("FilePrompt")
+                .set_is_visible(false);
+            if let Some(close) = close {
+                close();
+            }
+            return Ok(());
+        };
+        self.open_document(document.source, document.uri)?;
+        *self.file.borrow_mut() = Some(document.file);
+        self.root
+            .get_control::<Border>("FilePrompt")
+            .set_is_visible(false);
+        self.refresh_file_title();
+        Ok(())
+    }
+    pub(super) fn request_save(self: &Rc<Self>, save_as: bool, then_open: bool) {
+        if self.file_busy.replace(true) {
+            return;
+        }
+        let this = self.clone();
+        Dispatcher::ui_thread()
+            .to_task_scheduler()
+            .spawn_local(async move {
+                let result = match this.save_file(save_as).await {
+                    Ok(true) if then_open => this.complete_open(),
+                    Ok(_) => Ok(()),
+                    Err(error) => Err(error),
+                };
+                this.file_busy.set(false);
+                this.report(result);
+            });
+    }
+    /// Save the authored buffer, including incomplete XAML. Returns false on picker cancellation.
+    /// Source is captured after all asynchronous operations, so a concurrent editor change is
+    /// never mistakenly marked saved. Existing files are checked for external changes first.
+    pub async fn save_file(self: &Rc<Self>, save_as: bool) -> Result<bool, String> {
+        let top = TopLevel::get_top_level(Some(&self.root))
+            .ok_or("The designer must be attached to a window to save files")?;
+        let provider = top.storage_provider();
+        let mut file = if save_as {
+            None
+        } else {
+            self.file.borrow().clone()
+        };
+        if file.is_none() && !save_as {
+            let uri = self.session.borrow().document_uri().to_owned();
+            if uri.starts_with("file:") {
+                if let Ok(uri) = Uri::absolute(&uri) {
+                    file = provider.try_get_file_from_path_async(&uri).await;
+                }
+            }
+        }
+        let existing = file.is_some();
+        if file.is_none() {
+            if !provider.can_save() {
+                return Err("This host has no save picker; save DesignerSession::document().source() through the host.".into());
+            }
+            let mut options = FilePickerSaveOptions::new();
+            options.set_title(Some("Save FerroUI XAML".into()));
+            options.set_default_extension(Some("xaml".into()));
+            options.set_suggested_file_name(Some("View.xaml".into()));
+            options.set_file_type_choices(Some(vec![xaml_type()]));
+            options.set_show_overwrite_prompt(Some(true));
+            file = provider
+                .save_file_picker_async(options)
+                .await
+                .map_err(|e| e.to_string())?;
+        }
+        let Some(file) = file else {
+            return Ok(false);
+        };
+        if existing {
+            let mut input = file.open_read_async().await.map_err(|e| e.to_string())?;
+            let mut external = String::new();
+            input
+                .read_to_string(&mut external)
+                .map_err(|e| e.to_string())?;
+            if external != *self.saved_source.borrow() {
+                return Err("The file changed outside the designer. Open the updated file or use Save as to preserve your changes.".into());
+            }
+        }
+        #[cfg(not(target_arch = "wasm32"))]
+        let local_path = {
+            let item: Rc<dyn ferroui_base::platform::storage::IStorageItem> = file.clone();
+            item.try_get_local_path()
+        };
+        #[cfg(target_arch = "wasm32")]
+        let local_path: Option<String> = None;
+        let source;
+        if let Some(path) = local_path {
+            source = self.session.borrow().document().source().to_owned();
+            write_local(
+                std::path::Path::new(&path),
+                existing
+                    .then(|| self.saved_source.borrow().clone())
+                    .as_deref(),
+                &source,
+            )
+            .map_err(|e| e.to_string())?;
+        } else {
+            let mut output = file.open_write_async().await.map_err(|e| e.to_string())?;
+            source = self.session.borrow().document().source().to_owned();
+            output
+                .write_all(source.as_bytes())
+                .and_then(|_| output.flush())
+                .map_err(|e| e.to_string())?;
+        }
+        *self.saved_source.borrow_mut() = source;
+        self.session.borrow_mut().mark_saved();
+        let path = file.path();
+        if path.is_absolute_uri() {
+            self.session
+                .borrow_mut()
+                .set_document_uri(path.absolute_uri().to_owned())?;
+        }
+        *self.file.borrow_mut() = Some(file);
+        self.refresh(true);
+        self.refresh_file_title();
+        Ok(true)
+    }
+}
+fn xaml_type() -> Rc<FilePickerFileType> {
+    FilePickerFileType::new(Some("FerroUI XAML")).with_patterns(&["*.xaml"])
+}
+
+// A local file is replaced only after its full candidate has reached storage. A failed write or
+// rename leaves the original intact; provider-owned streams remain the fallback for virtual files.
+fn write_local(
+    path: &std::path::Path,
+    expected: Option<&str>,
+    source: &str,
+) -> std::io::Result<()> {
+    use std::fs::{self, OpenOptions};
+    use std::sync::atomic::{AtomicU64, Ordering};
+    static NEXT_WRITE: AtomicU64 = AtomicU64::new(1);
+    let path = if fs::symlink_metadata(path).is_ok_and(|info| info.file_type().is_symlink()) {
+        fs::canonicalize(path)?
+    } else {
+        path.to_path_buf()
+    };
+    let directory = path
+        .parent()
+        .ok_or_else(|| std::io::Error::other("File has no parent directory"))?;
+    let mut candidate = None;
+    for _ in 0..32 {
+        let temp = directory.join(format!(
+            ".ferroui-designer-{}-{}.tmp",
+            std::process::id(),
+            NEXT_WRITE.fetch_add(1, Ordering::Relaxed)
+        ));
+        match OpenOptions::new().write(true).create_new(true).open(&temp) {
+            Ok(file) => {
+                candidate = Some((temp, file));
+                break;
+            }
+            Err(error) if error.kind() == std::io::ErrorKind::AlreadyExists => continue,
+            Err(error) => return Err(error),
+        }
+    }
+    let (temporary, mut file) =
+        candidate.ok_or_else(|| std::io::Error::other("Could not allocate a save candidate"))?;
+    let result = (|| {
+        if let Ok(metadata) = fs::metadata(&path) {
+            file.set_permissions(metadata.permissions())?;
+        }
+        file.write_all(source.as_bytes())?;
+        file.flush()?;
+        file.sync_all()?;
+        drop(file);
+        if let Some(expected) = expected {
+            if fs::read_to_string(&path)? != expected {
+                return Err(std::io::Error::other(
+                    "The file changed outside the designer; use Save as or reopen it",
+                ));
+            }
+        }
+        fs::rename(&temporary, &path)
+    })();
+    if result.is_err() {
+        let _ = fs::remove_file(&temporary);
+    }
+    result
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    #[test]
+    fn local_save_replaces_full_file_and_preserves_external_changes() {
+        let dir =
+            std::env::temp_dir().join(format!("ferroui-designer-save-test-{}", std::process::id()));
+        std::fs::create_dir_all(&dir).unwrap();
+        let path = dir.join("View.xaml");
+        std::fs::write(&path, "original").unwrap();
+        write_local(&path, Some("original"), "edited").unwrap();
+        assert_eq!(std::fs::read_to_string(&path).unwrap(), "edited");
+        assert!(write_local(&path, Some("original"), "stale").is_err());
+        assert_eq!(std::fs::read_to_string(&path).unwrap(), "edited");
+        assert_eq!(std::fs::read_dir(&dir).unwrap().count(), 1);
+        std::fs::remove_file(path).unwrap();
+        std::fs::remove_dir(dir).unwrap();
+    }
+}

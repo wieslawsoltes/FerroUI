@@ -1,0 +1,72 @@
+name: Visual designer
+
+on:
+  pull_request:
+    paths:
+      - 'src/FerroUI.Designer*/**'
+      - 'src/FerroUI.Mcp/**'
+      - 'src/FerroUI.HotReload/**'
+      - 'src/FerroUI.Inspect/**'
+      - 'src/FerroUI/Cargo.toml'
+      - 'src/FerroUI/lib.rs'
+      - 'samples/DesignerStudio/**'
+      - 'Cargo.toml'
+      - 'Cargo.lock'
+      - '.github/workflows/designer.yml'
+  workflow_dispatch:
+
+concurrency:
+  group: designer-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+env:
+  CARGO_TERM_COLOR: always
+  CARGO_INCREMENTAL: '0'
+  CARGO_PROFILE_DEV_DEBUG: '0'
+  CARGO_PROFILE_TEST_DEBUG: '0'
+  RUST_BACKTRACE: '1'
+
+jobs:
+  portable:
+    name: AST, layout, animation and collaboration
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: dtolnay/rust-toolchain@89b12181fb390509a0842a86cc55eeb8eb928c1d # stable
+      - name: Source preservation, transaction and convergence regressions
+        run: cargo test --locked -p ferroui-designer-core -p ferroui-designer-tools -p ferroui-designer-animation -p ferroui-designer-collaboration
+      - name: Portable public APIs are warning-free
+        run: cargo clippy --locked -p ferroui-designer-core -p ferroui-designer-tools -p ferroui-designer-animation -p ferroui-designer-collaboration --all-targets -- -D warnings
+
+  native:
+    name: Native workspace, hot reload and MCP
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: dtolnay/rust-toolchain@89b12181fb390509a0842a86cc55eeb8eb928c1d # stable
+      - name: Fonts for actual native rendering
+        run: sudo apt-get update && sudo apt-get install -y --no-install-recommends libfontconfig1-dev libfreetype6-dev fonts-dejavu-core
+      - name: Native source, preview, history and collaboration integration
+        env:
+          FERROUI_DESIGNER_RENDER_OUTPUT: ${{ github.workspace }}/designer-render
+        run: cargo test --locked -p ferroui-designer --features mcp,render-smoke --lib
+      - name: Existing MCP authentication, cancellation and extension isolation
+        run: cargo test --locked -p ferroui-mcp --lib
+      - name: Runnable headless sample host
+        run: cargo check --locked -p designer-studio --no-default-features --features headless,mcp
+      - name: Optional facade integration
+        run: cargo check --locked -p ferroui --no-default-features --features designer-mcp
+      - name: Release preview path without development hot reload
+        run: cargo check --locked -p ferroui-designer --features mcp --release
+      - name: Native workspace and animation render evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: designer-native-renders
+          path: designer-render
+          if-no-files-found: warn

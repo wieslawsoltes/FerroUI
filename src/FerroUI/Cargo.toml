@@ -35,6 +35,9 @@ treedatagrid = ["dep:ferroui-controls-treedatagrid", "dep:ferroui-treedatagrid-c
 dialogs = ["dep:ferroui-dialogs"]
 # The developer tools (F12 on a window or an application in debug builds).
 diagnostics = ["dep:ferroui-diagnostics"]
+# Native visual XAML authoring; backend and server startup stay under host control.
+designer = ["dep:ferroui-designer"]
+designer-mcp = ["designer", "ferroui-designer/mcp"]
 # Localhost CDP inspection and automation; no listener starts until explicitly requested.
 # The endpoint on native targets, the JavaScript bridge in the browser (each feature is gated to
 # its target inside the crate).
@@ -75,6 +78,7 @@ ferroui-controls-treedatagrid = { workspace = true, optional = true }
 ferroui-treedatagrid-core = { workspace = true, optional = true }
 ferroui-dialogs = { workspace = true, optional = true }
 ferroui-diagnostics = { workspace = true, optional = true }
+ferroui-designer = { workspace = true, optional = true }
 ferroui-devtools = { workspace = true, optional = true, features = ["server"] }
 ferroui-system = { workspace = true, optional = true }
 ferroui-reactive = { workspace = true, optional = true }

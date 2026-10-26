@@ -1,0 +1,45 @@
+[package]
+name = "ferroui-designer"
+description = "Embeddable FerroUI visual XAML designer with native workspace, transactional preview and timeline"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+homepage.workspace = true
+readme.workspace = true
+keywords.workspace = true
+categories.workspace = true
+
+[lib]
+path = "lib.rs"
+
+[features]
+default = []
+mcp = ["dep:ferroui-mcp"]
+render-smoke = ["dep:ferroui-vello", "dep:ferroui-harfbuzz", "dep:ferroui-themes-simple"]
+
+[dependencies]
+ferroui-designer-tools.workspace = true
+ferroui-vello = { workspace = true, optional = true }
+ferroui-harfbuzz = { workspace = true, optional = true }
+ferroui-themes-simple = { workspace = true, optional = true }
+ferroui-mcp = { workspace = true, optional = true }
+serde = "1"
+ferroui-base.workspace = true
+ferroui-controls.workspace = true
+ferroui-inspect.workspace = true
+ferroui-hot-reload.workspace = true
+ferroui-markup-xaml.workspace = true
+ferroui-markup-xaml-loader = { workspace = true, features = ["runtime"] }
+ferroui-designer-core = { version = "=0.4.0", path = "../FerroUI.Designer.Core" }
+ferroui-designer-animation = { version = "=0.4.0", path = "../FerroUI.Designer.Animation" }
+ferroui-designer-collaboration = { version = "=0.4.0", path = "../FerroUI.Designer.Collaboration" }
+serde_json = "1"
+
+[dev-dependencies]
+ferroui-base = { workspace = true, features = ["testing"] }
+ferroui-controls = { workspace = true, features = ["testing"] }
+
+[package.metadata.release]
+group = "tools"
