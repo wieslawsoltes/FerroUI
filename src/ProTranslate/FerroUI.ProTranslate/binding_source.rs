@@ -395,6 +395,12 @@ pub(crate) fn boxed_argument(value: Option<&BoxedValue>) -> Result<FormatArgumen
     if let Some(value) = value.downcast_ref::<time::OffsetDateTime>() {
         return Ok((*value).into());
     }
+    if let Some(value) = value.downcast_ref::<ferroui_protranslate_core::LocalizedNaiveDateTime>() {
+        return Ok((*value).into());
+    }
+    if let Some(value) = value.downcast_ref::<time::PrimitiveDateTime>() {
+        return Ok((*value).into());
+    }
     if let Some(v) = value.downcast_ref::<String>() {
         return Ok(v.clone().into());
     }
