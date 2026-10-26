@@ -206,10 +206,21 @@ impl ProjectWorkspace {
     }
     /// Record a successful host/provider save without IO or resetting tab history. The
     /// saved snapshot may predate current authored text after an asynchronous write.
-    pub fn acknowledge_saved(&mut self, uri: &str, expected_version: u64, saved_source: impl Into<String>) -> Result<()> {
+    pub fn acknowledge_saved(
+        &mut self,
+        uri: &str,
+        expected_version: u64,
+        saved_source: impl Into<String>,
+    ) -> Result<()> {
         let saved_source = saved_source.into();
-        require(saved_source.len() <= 16 * 1024 * 1024, "Document exceeds 16 MiB")?;
-        let buffer = self.buffers.get_mut(uri).ok_or_else(|| ProjectError("Document is not open".into()))?;
+        require(
+            saved_source.len() <= 16 * 1024 * 1024,
+            "Document exceeds 16 MiB",
+        )?;
+        let buffer = self
+            .buffers
+            .get_mut(uri)
+            .ok_or_else(|| ProjectError("Document is not open".into()))?;
         require(buffer.version == expected_version, "Buffer version changed")?;
         buffer.document.mark_saved_snapshot(saved_source.clone());
         buffer.saved_source = Some(saved_source);

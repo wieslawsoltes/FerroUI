@@ -1,1 +1,1 @@
-../../NOTICE-PROJECT.md
+../../NOTICE.md

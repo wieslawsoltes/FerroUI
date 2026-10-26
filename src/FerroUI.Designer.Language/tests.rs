@@ -168,6 +168,87 @@ fn schema_comes_from_framework_and_completion_inherits_properties_and_enums() {
     assert!(completions.iter().any(|c| c.label == "Horizontal"));
 }
 #[test]
+fn native_animation_programs_and_transition_objects_have_complete_schema_diagnostics() {
+    let source = format!(
+        r#"<StackPanel {NS}>
+  <StackPanel.Styles>
+    <Style Selector="Border">
+      <Style.Animations>
+        <Animation Duration="0:0:2" Delay="0:0:0.2" DelayBetweenIterations="0:0:0.1"
+                   IterationCount="2" PlaybackDirection="Alternate" PlaybackBehavior="Always"
+                   FillMode="Both" SpeedRatio="1.5">
+          <Animation.Easing><SplineEasing X1="0.2" Y1="0" X2="0.8" Y2="1"/></Animation.Easing>
+          <KeyFrame Cue="0%" KeySpline="0.2,0,0.8,1"><Setter Property="Opacity" Value="0"/></KeyFrame>
+          <KeyFrame KeyTime="0:0:2"><Setter Property="Opacity" Value="1"/></KeyFrame>
+        </Animation>
+      </Style.Animations>
+    </Style>
+  </StackPanel.Styles>
+  <Border>
+    <Border.Transitions>
+      <Transitions><DoubleTransition Property="Opacity" Duration="0:0:0.2" Delay="0:0:0.1" Easing="CubicEaseOut"/></Transitions>
+    </Border.Transitions>
+  </Border>
+</StackPanel>"#
+    );
+    let service = service(&source);
+    let diagnostics = service.diagnostics("file:///View.xaml").unwrap();
+    assert!(diagnostics.is_empty(), "{diagnostics:?}");
+    let invalid =
+        self::service(&source.replace("PlaybackBehavior=\"Always\"", "PlaybackBehavior=\"Never\""));
+    assert!(invalid
+        .diagnostics("file:///View.xaml")
+        .unwrap()
+        .iter()
+        .any(|diagnostic| diagnostic.code == "enum-value"));
+}
+#[test]
+fn animation_completion_uses_macro_properties_and_plain_markup_metadata() {
+    let schema = Schema::ferroui();
+    let properties = schema.properties("Animation", Some("using:FerroUI.Animation"));
+    for name in [
+        "Duration",
+        "Delay",
+        "DelayBetweenIterations",
+        "IterationCount",
+        "PlaybackDirection",
+        "PlaybackBehavior",
+        "FillMode",
+        "Easing",
+        "SpeedRatio",
+    ] {
+        assert!(properties.contains_key(name), "missing Animation.{name}");
+    }
+    assert!(schema
+        .properties("DoubleTransition", None)
+        .contains_key("Duration"));
+    assert!(schema.type_info("Setter", None).unwrap().constructible);
+    assert!(
+        schema
+            .type_info("SplineEasing", None)
+            .unwrap()
+            .constructible
+    );
+    let style = schema.properties("Style", None);
+    assert!(style["Animations"].read_only);
+    assert!(!style.contains_key("get") && !style.contains_key("try_set"));
+
+    let source = "<Animation PlaybackBehavior='A'/>";
+    let service = service(source);
+    let completions = service
+        .completions("file:///View.xaml", source.find("A'").unwrap() + 1)
+        .unwrap();
+    assert!(completions.iter().any(|item| item.label == "Always"));
+    let source = "<Animation DelayB";
+    let service = self::service(source);
+    let completions = service
+        .completions("file:///View.xaml", source.len())
+        .unwrap();
+    assert!(completions
+        .iter()
+        .any(|item| item.label == "DelayBetweenIterations"));
+}
+#[test]
 fn custom_schema_hover_and_value_diagnostics_resolve_xml_namespaces() {
     let mut service = service("<c:Widget xmlns:c='using:Custom' Mode='bad'/>");
     let mut properties = BTreeMap::new();

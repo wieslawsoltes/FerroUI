@@ -8,6 +8,41 @@
     "properties": {}
   },
   {
+    "name": "AccentColorConverter",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_controls_color_picker::primitives::converters::AccentColorConverter",
+    "base": null,
+    "constructible": true,
+    "properties": {}
+  },
+  {
+    "name": "AccessKeyEventArgs",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_base::input::AccessKeyEventArgs",
+    "base": null,
+    "constructible": false,
+    "properties": {
+      "IsMultiple": {
+        "name": "IsMultiple",
+        "type_name": "bool",
+        "documentation": "AccessKeyEventArgs.IsMultiple: bool",
+        "values": [
+          "True",
+          "False"
+        ],
+        "read_only": true
+      }
+    }
+  },
+  {
+    "name": "AccessKeyPressedEventArgs",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_base::input::AccessKeyPressedEventArgs",
+    "base": null,
+    "constructible": false,
+    "properties": {}
+  },
+  {
     "name": "AccessText",
     "namespace": "https://github.com/ferroui",
     "documentation": "ferroui_controls::primitives::AccessText",
@@ -126,10 +161,75 @@
         "values": [],
         "attached": false
       },
+      "Duration": {
+        "name": "Duration",
+        "type_name": "TimeSpan",
+        "documentation": "Animation.Duration: TimeSpan",
+        "values": [],
+        "read_only": false
+      },
+      "IterationCount": {
+        "name": "IterationCount",
+        "type_name": "IterationCount",
+        "documentation": "Animation.IterationCount: IterationCount",
+        "values": [],
+        "read_only": false
+      },
+      "PlaybackDirection": {
+        "name": "PlaybackDirection",
+        "type_name": "PlaybackDirection",
+        "documentation": "Animation.PlaybackDirection: PlaybackDirection",
+        "values": [
+          "Normal",
+          "Reverse",
+          "Alternate",
+          "AlternateReverse"
+        ],
+        "read_only": false
+      },
+      "PlaybackBehavior": {
+        "name": "PlaybackBehavior",
+        "type_name": "PlaybackBehavior",
+        "documentation": "Animation.PlaybackBehavior: PlaybackBehavior",
+        "values": [
+          "Auto",
+          "Always",
+          "OnlyIfVisible"
+        ],
+        "read_only": false
+      },
+      "FillMode": {
+        "name": "FillMode",
+        "type_name": "FillMode",
+        "documentation": "Animation.FillMode: FillMode",
+        "values": [
+          "None",
+          "Forward",
+          "Backward",
+          "Both"
+        ],
+        "read_only": false
+      },
+      "Delay": {
+        "name": "Delay",
+        "type_name": "TimeSpan",
+        "documentation": "Animation.Delay: TimeSpan",
+        "values": [],
+        "read_only": false
+      },
+      "DelayBetweenIterations": {
+        "name": "DelayBetweenIterations",
+        "type_name": "TimeSpan",
+        "documentation": "Animation.DelayBetweenIterations: TimeSpan",
+        "values": [],
+        "read_only": false
+      },
       "Children": {
         "name": "Children",
         "type_name": "KeyFrames",
-        "documentation": "Animation.Children: KeyFrames"
+        "documentation": "Animation.Children: KeyFrames",
+        "values": [],
+        "read_only": true
       }
     }
   },
@@ -150,12 +250,22 @@
       "FillBefore": {
         "name": "FillBefore",
         "type_name": "bool",
-        "documentation": "AnimatorKeyFrame.FillBefore: bool"
+        "documentation": "AnimatorKeyFrame.FillBefore: bool",
+        "values": [
+          "True",
+          "False"
+        ],
+        "read_only": false
       },
       "FillAfter": {
         "name": "FillAfter",
         "type_name": "bool",
-        "documentation": "AnimatorKeyFrame.FillAfter: bool"
+        "documentation": "AnimatorKeyFrame.FillAfter: bool",
+        "values": [
+          "True",
+          "False"
+        ],
+        "read_only": false
       }
     }
   },
@@ -197,32 +307,30 @@
       "Styles": {
         "name": "Styles",
         "type_name": "Ref<Styles>",
-        "documentation": "Application.Styles: Ref<Styles>"
+        "documentation": "Application.Styles: Ref<Styles>",
+        "values": [],
+        "read_only": true
       },
       "ApplicationLifetime": {
         "name": "ApplicationLifetime",
         "type_name": "Option<Rc<dyn IApplicationLifetime>>",
-        "documentation": "Application.ApplicationLifetime: Option<Rc<dyn IApplicationLifetime>>"
+        "documentation": "Application.ApplicationLifetime: Option<Rc<dyn IApplicationLifetime>>",
+        "values": [],
+        "read_only": false
       },
       "DataTemplates": {
         "name": "DataTemplates",
         "type_name": "DataTemplates",
-        "documentation": "Application.DataTemplates: DataTemplates"
+        "documentation": "Application.DataTemplates: DataTemplates",
+        "values": [],
+        "read_only": true
       },
       "Resources": {
         "name": "Resources",
         "type_name": "Rc<dyn IResourceDictionary>",
-        "documentation": "Application.Resources: Rc<dyn IResourceDictionary>"
-      },
-      "get": {
-        "name": "get",
-        "type_name": "|this: &Ref<Application>| -> Rc<dyn IResourceDictionary>",
-        "documentation": "Application.get: |this: &Ref<Application>| -> Rc<dyn IResourceDictionary>"
-      },
-      "try_set": {
-        "name": "try_set",
-        "type_name": "|this: &Ref<Application>, value: Rc<dyn IResourceDictionary>|",
-        "documentation": "Application.try_set: |this: &Ref<Application>, value: Rc<dyn IResourceDictionary>|"
+        "documentation": "Application.Resources: Rc<dyn IResourceDictionary>",
+        "values": [],
+        "read_only": false
       }
     }
   },
@@ -522,6 +630,30 @@
     "properties": {}
   },
   {
+    "name": "BackEaseIn",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_base::animation::easings::BackEaseIn",
+    "base": "Easing",
+    "constructible": true,
+    "properties": {}
+  },
+  {
+    "name": "BackEaseInOut",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_base::animation::easings::BackEaseInOut",
+    "base": "Easing",
+    "constructible": true,
+    "properties": {}
+  },
+  {
+    "name": "BackEaseOut",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_base::animation::easings::BackEaseOut",
+    "base": "Easing",
+    "constructible": true,
+    "properties": {}
+  },
+  {
     "name": "BezierSegment",
     "namespace": "https://github.com/ferroui",
     "documentation": "ferroui_base::media::BezierSegment",
@@ -566,6 +698,14 @@
         "attached": false
       }
     }
+  },
+  {
+    "name": "Bitmap",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_base::media::imaging::Bitmap",
+    "base": null,
+    "constructible": false,
+    "properties": {}
   },
   {
     "name": "BitmapCache",
@@ -628,6 +768,14 @@
     "properties": {}
   },
   {
+    "name": "BoolTransition",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_base::animation::BoolTransition",
+    "base": "TransitionBase",
+    "constructible": true,
+    "properties": {}
+  },
+  {
     "name": "Border",
     "namespace": "https://github.com/ferroui",
     "documentation": "ferroui_controls::Border",
@@ -683,6 +831,46 @@
     }
   },
   {
+    "name": "BorderGapMaskConverter",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_controls::converters::BorderGapMaskConverter",
+    "base": null,
+    "constructible": true,
+    "properties": {}
+  },
+  {
+    "name": "BounceEaseIn",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_base::animation::easings::BounceEaseIn",
+    "base": "Easing",
+    "constructible": true,
+    "properties": {}
+  },
+  {
+    "name": "BounceEaseInOut",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_base::animation::easings::BounceEaseInOut",
+    "base": "Easing",
+    "constructible": true,
+    "properties": {}
+  },
+  {
+    "name": "BounceEaseOut",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_base::animation::easings::BounceEaseOut",
+    "base": "Easing",
+    "constructible": true,
+    "properties": {}
+  },
+  {
+    "name": "BoxShadowsTransition",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_base::animation::BoxShadowsTransition",
+    "base": "TransitionBase",
+    "constructible": true,
+    "properties": {}
+  },
+  {
     "name": "Brush",
     "namespace": "https://github.com/ferroui",
     "documentation": "ferroui_base::media::Brush",
@@ -718,6 +906,14 @@
         "attached": false
       }
     }
+  },
+  {
+    "name": "BrushTransition",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_base::animation::BrushTransition",
+    "base": "TransitionBase",
+    "constructible": true,
+    "properties": {}
   },
   {
     "name": "Button",
@@ -971,12 +1167,16 @@
       "SelectedDates": {
         "name": "SelectedDates",
         "type_name": "SelectedDatesCollection",
-        "documentation": "Calendar.SelectedDates: SelectedDatesCollection"
+        "documentation": "Calendar.SelectedDates: SelectedDatesCollection",
+        "values": [],
+        "read_only": true
       },
       "BlackoutDates": {
         "name": "BlackoutDates",
         "type_name": "CalendarBlackoutDatesCollection",
-        "documentation": "Calendar.BlackoutDates: CalendarBlackoutDatesCollection"
+        "documentation": "Calendar.BlackoutDates: CalendarBlackoutDatesCollection",
+        "values": [],
+        "read_only": true
       }
     }
   },
@@ -1170,7 +1370,9 @@
       "BlackoutDates": {
         "name": "BlackoutDates",
         "type_name": "Option<CalendarBlackoutDatesCollection>",
-        "documentation": "CalendarDatePicker.BlackoutDates: Option<CalendarBlackoutDatesCollection>"
+        "documentation": "CalendarDatePicker.BlackoutDates: Option<CalendarBlackoutDatesCollection>",
+        "values": [],
+        "read_only": true
       }
     }
   },
@@ -1218,6 +1420,25 @@
         "documentation": "CalendarItem.DayTitleTemplate: Option<Rc<dyn ITemplateOf<Option<Ref<Control>>>>>",
         "values": [],
         "attached": false
+      }
+    }
+  },
+  {
+    "name": "CancelEventArgs",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_base::utilities::CancelEventArgs",
+    "base": "EventArgs",
+    "constructible": true,
+    "properties": {
+      "Cancel": {
+        "name": "Cancel",
+        "type_name": "bool",
+        "documentation": "CancelEventArgs.Cancel: bool",
+        "values": [
+          "True",
+          "False"
+        ],
+        "read_only": false
       }
     }
   },
@@ -1359,6 +1580,30 @@
     "properties": {}
   },
   {
+    "name": "CircularEaseIn",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_base::animation::easings::CircularEaseIn",
+    "base": "Easing",
+    "constructible": true,
+    "properties": {}
+  },
+  {
+    "name": "CircularEaseInOut",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_base::animation::easings::CircularEaseInOut",
+    "base": "Easing",
+    "constructible": true,
+    "properties": {}
+  },
+  {
+    "name": "CircularEaseOut",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_base::animation::easings::CircularEaseOut",
+    "base": "Easing",
+    "constructible": true,
+    "properties": {}
+  },
+  {
     "name": "Class1",
     "namespace": "https://github.com/ferroui",
     "documentation": "Class1",
@@ -1408,6 +1653,37 @@
     "namespace": "https://github.com/ferroui",
     "documentation": "Class3",
     "base": "Layoutable",
+    "constructible": false,
+    "properties": {}
+  },
+  {
+    "name": "Classes",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_base::controls::Classes",
+    "base": null,
+    "constructible": true,
+    "properties": {
+      "Capacity": {
+        "name": "Capacity",
+        "type_name": "i32",
+        "documentation": "Classes.Capacity: i32",
+        "values": [],
+        "read_only": false
+      },
+      "Count": {
+        "name": "Count",
+        "type_name": "i32",
+        "documentation": "Classes.Count: i32",
+        "values": [],
+        "read_only": true
+      }
+    }
+  },
+  {
+    "name": "ClrPropertyInfo",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_base::data::core::ClrPropertyInfo",
+    "base": null,
     "constructible": false,
     "properties": {}
   },
@@ -1654,6 +1930,51 @@
     "documentation": "ferroui_controls_color_picker::automation::peers::ColorSpectrumAutomationPeer",
     "base": "ControlAutomationPeer",
     "constructible": false,
+    "properties": {}
+  },
+  {
+    "name": "ColorToDisplayNameConverter",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_controls_color_picker::converters::ColorToDisplayNameConverter",
+    "base": null,
+    "constructible": true,
+    "properties": {}
+  },
+  {
+    "name": "ColorToHexConverter",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_controls_color_picker::converters::ColorToHexConverter",
+    "base": null,
+    "constructible": true,
+    "properties": {
+      "IsAlphaVisible": {
+        "name": "IsAlphaVisible",
+        "type_name": "bool",
+        "documentation": "ColorToHexConverter.IsAlphaVisible: bool",
+        "values": [
+          "True",
+          "False"
+        ],
+        "read_only": false
+      },
+      "AlphaPosition": {
+        "name": "AlphaPosition",
+        "type_name": "AlphaComponentPosition",
+        "documentation": "ColorToHexConverter.AlphaPosition: AlphaComponentPosition",
+        "values": [
+          "Leading",
+          "Trailing"
+        ],
+        "read_only": false
+      }
+    }
+  },
+  {
+    "name": "ColorTransition",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_base::animation::ColorTransition",
+    "base": "TransitionBase",
+    "constructible": true,
     "properties": {}
   },
   {
@@ -1944,6 +2265,14 @@
     }
   },
   {
+    "name": "ColumnDefinitions",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_controls::ColumnDefinitions",
+    "base": null,
+    "constructible": true,
+    "properties": {}
+  },
+  {
     "name": "CombinedGeometry",
     "namespace": "https://github.com/ferroui",
     "documentation": "ferroui_base::media::CombinedGeometry",
@@ -2186,12 +2515,16 @@
       "VisiblePrimaryCommands": {
         "name": "VisiblePrimaryCommands",
         "type_name": "CommandBarElementCollection",
-        "documentation": "CommandBar.VisiblePrimaryCommands: CommandBarElementCollection"
+        "documentation": "CommandBar.VisiblePrimaryCommands: CommandBarElementCollection",
+        "values": [],
+        "read_only": true
       },
       "OverflowItems": {
         "name": "OverflowItems",
         "type_name": "CommandBarElementCollection",
-        "documentation": "CommandBar.OverflowItems: CommandBarElementCollection"
+        "documentation": "CommandBar.OverflowItems: CommandBarElementCollection",
+        "values": [],
+        "read_only": true
       },
       "Opening": {
         "name": "Opening",
@@ -2371,6 +2704,142 @@
     }
   },
   {
+    "name": "CompiledBinding",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_base::data::CompiledBinding",
+    "base": null,
+    "constructible": true,
+    "properties": {
+      "Delay": {
+        "name": "Delay",
+        "type_name": "i32",
+        "documentation": "CompiledBinding.Delay: i32",
+        "values": [],
+        "read_only": false
+      },
+      "Converter": {
+        "name": "Converter",
+        "type_name": "Option<Rc<dyn IValueConverter>>",
+        "documentation": "CompiledBinding.Converter: Option<Rc<dyn IValueConverter>>",
+        "values": [],
+        "read_only": false
+      },
+      "ConverterCulture": {
+        "name": "ConverterCulture",
+        "type_name": "Option<CultureInfo>",
+        "documentation": "CompiledBinding.ConverterCulture: Option<CultureInfo>",
+        "values": [],
+        "read_only": false
+      },
+      "ConverterParameter": {
+        "name": "ConverterParameter",
+        "type_name": "Option<BoxedValue>",
+        "documentation": "CompiledBinding.ConverterParameter: Option<BoxedValue>",
+        "values": [],
+        "read_only": false
+      },
+      "FallbackValue": {
+        "name": "FallbackValue",
+        "type_name": "Option<BoxedValue>",
+        "documentation": "CompiledBinding.FallbackValue: Option<BoxedValue>",
+        "values": [],
+        "read_only": false
+      },
+      "Mode": {
+        "name": "Mode",
+        "type_name": "BindingMode",
+        "documentation": "CompiledBinding.Mode: BindingMode",
+        "values": [
+          "Default",
+          "OneWay",
+          "TwoWay",
+          "OneTime",
+          "OneWayToSource"
+        ],
+        "read_only": false
+      },
+      "Path": {
+        "name": "Path",
+        "type_name": "Option<CompiledBindingPath>",
+        "documentation": "CompiledBinding.Path: Option<CompiledBindingPath>",
+        "values": [],
+        "read_only": false
+      },
+      "Priority": {
+        "name": "Priority",
+        "type_name": "BindingPriority",
+        "documentation": "CompiledBinding.Priority: BindingPriority",
+        "values": [
+          "Animation",
+          "LocalValue",
+          "StyleTrigger",
+          "Template",
+          "Style",
+          "Inherited",
+          "Unset"
+        ],
+        "read_only": false
+      },
+      "Source": {
+        "name": "Source",
+        "type_name": "Option<BoxedValue>",
+        "documentation": "CompiledBinding.Source: Option<BoxedValue>",
+        "values": [],
+        "read_only": false
+      },
+      "StringFormat": {
+        "name": "StringFormat",
+        "type_name": "Option<String>",
+        "documentation": "CompiledBinding.StringFormat: Option<String>",
+        "values": [],
+        "read_only": false
+      },
+      "TargetNullValue": {
+        "name": "TargetNullValue",
+        "type_name": "Option<BoxedValue>",
+        "documentation": "CompiledBinding.TargetNullValue: Option<BoxedValue>",
+        "values": [],
+        "read_only": false
+      },
+      "UpdateSourceTrigger": {
+        "name": "UpdateSourceTrigger",
+        "type_name": "UpdateSourceTrigger",
+        "documentation": "CompiledBinding.UpdateSourceTrigger: UpdateSourceTrigger",
+        "values": [
+          "Default",
+          "PropertyChanged",
+          "LostFocus",
+          "Explicit"
+        ],
+        "read_only": false
+      }
+    }
+  },
+  {
+    "name": "CompiledBindingPath",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_base::data::CompiledBindingPath",
+    "base": null,
+    "constructible": true,
+    "properties": {}
+  },
+  {
+    "name": "CompiledBindingPathBuilder",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_base::data::CompiledBindingPathBuilder",
+    "base": null,
+    "constructible": true,
+    "properties": {}
+  },
+  {
+    "name": "CompositePageTransition",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_base::animation::CompositePageTransition",
+    "base": null,
+    "constructible": true,
+    "properties": {}
+  },
+  {
     "name": "ConicGradientBrush",
     "namespace": "https://github.com/ferroui",
     "documentation": "ferroui_base::media::ConicGradientBrush",
@@ -2419,12 +2888,16 @@
       "DefaultDuration": {
         "name": "DefaultDuration",
         "type_name": "TimeSpan",
-        "documentation": "ConnectedAnimationService.DefaultDuration: TimeSpan"
+        "documentation": "ConnectedAnimationService.DefaultDuration: TimeSpan",
+        "values": [],
+        "read_only": false
       },
       "DefaultEasingFunction": {
         "name": "DefaultEasingFunction",
         "type_name": "Option<Easing>",
-        "documentation": "ConnectedAnimationService.DefaultEasingFunction: Option<Easing>"
+        "documentation": "ConnectedAnimationService.DefaultEasingFunction: Option<Easing>",
+        "values": [],
+        "read_only": false
       }
     }
   },
@@ -2438,12 +2911,16 @@
       "Query": {
         "name": "Query",
         "type_name": "Option<StyleQuery>",
-        "documentation": "ContainerQuery.Query: Option<StyleQuery>"
+        "documentation": "ContainerQuery.Query: Option<StyleQuery>",
+        "values": [],
+        "read_only": false
       },
       "Name": {
         "name": "Name",
         "type_name": "Option<String>",
-        "documentation": "ContainerQuery.Name: Option<String>"
+        "documentation": "ContainerQuery.Name: Option<String>",
+        "values": [],
+        "read_only": false
       }
     }
   },
@@ -2901,6 +3378,30 @@
     }
   },
   {
+    "name": "ContextRequestedEventArgs",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_base::input::ContextRequestedEventArgs",
+    "base": null,
+    "constructible": false,
+    "properties": {}
+  },
+  {
+    "name": "ContrastBrushConverter",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_controls_color_picker::primitives::converters::ContrastBrushConverter",
+    "base": null,
+    "constructible": true,
+    "properties": {
+      "AlphaThreshold": {
+        "name": "AlphaThreshold",
+        "type_name": "u8",
+        "documentation": "ContrastBrushConverter.AlphaThreshold: u8",
+        "values": [],
+        "read_only": false
+      }
+    }
+  },
+  {
     "name": "Control",
     "namespace": "https://github.com/ferroui",
     "documentation": "ferroui_controls::Control",
@@ -2938,7 +3439,9 @@
       "DataTemplates": {
         "name": "DataTemplates",
         "type_name": "DataTemplates",
-        "documentation": "Control.DataTemplates: DataTemplates"
+        "documentation": "Control.DataTemplates: DataTemplates",
+        "values": [],
+        "read_only": true
       },
       "RequestBringIntoView": {
         "name": "RequestBringIntoView",
@@ -2984,14 +3487,26 @@
       "TargetType": {
         "name": "TargetType",
         "type_name": "Option<&'static TypeInfo>",
-        "documentation": "ControlTheme.TargetType: Option<&'static TypeInfo>"
+        "documentation": "ControlTheme.TargetType: Option<&'static TypeInfo>",
+        "values": [],
+        "read_only": false
       },
       "BasedOn": {
         "name": "BasedOn",
         "type_name": "Option<Ref<ControlTheme>>",
-        "documentation": "ControlTheme.BasedOn: Option<Ref<ControlTheme>>"
+        "documentation": "ControlTheme.BasedOn: Option<Ref<ControlTheme>>",
+        "values": [],
+        "read_only": false
       }
     }
+  },
+  {
+    "name": "Controls",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_controls::Controls",
+    "base": null,
+    "constructible": true,
+    "properties": {}
   },
   {
     "name": "ConvertedDerivedShape",
@@ -3007,6 +3522,61 @@
     "documentation": "ConvertedShape",
     "base": null,
     "constructible": false,
+    "properties": {}
+  },
+  {
+    "name": "ConvertedVm",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ConvertedVm",
+    "base": null,
+    "constructible": false,
+    "properties": {}
+  },
+  {
+    "name": "CornerRadiusFilterConverter",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_controls::converters::CornerRadiusFilterConverter",
+    "base": null,
+    "constructible": true,
+    "properties": {
+      "Filter": {
+        "name": "Filter",
+        "type_name": "Corners",
+        "documentation": "CornerRadiusFilterConverter.Filter: Corners",
+        "values": [],
+        "read_only": false
+      },
+      "Scale": {
+        "name": "Scale",
+        "type_name": "f64",
+        "documentation": "CornerRadiusFilterConverter.Scale: f64",
+        "values": [],
+        "read_only": false
+      }
+    }
+  },
+  {
+    "name": "CornerRadiusToDoubleConverter",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_controls::converters::CornerRadiusToDoubleConverter",
+    "base": null,
+    "constructible": true,
+    "properties": {
+      "Corner": {
+        "name": "Corner",
+        "type_name": "Corners",
+        "documentation": "CornerRadiusToDoubleConverter.Corner: Corners",
+        "values": [],
+        "read_only": false
+      }
+    }
+  },
+  {
+    "name": "CornerRadiusTransition",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_base::animation::CornerRadiusTransition",
+    "base": "TransitionBase",
+    "constructible": true,
     "properties": {}
   },
   {
@@ -3033,6 +3603,161 @@
     }
   },
   {
+    "name": "CrossFade",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_base::animation::CrossFade",
+    "base": null,
+    "constructible": true,
+    "properties": {
+      "Duration": {
+        "name": "Duration",
+        "type_name": "TimeSpan",
+        "documentation": "CrossFade.Duration: TimeSpan",
+        "values": [],
+        "read_only": false
+      },
+      "FadeInEasing": {
+        "name": "FadeInEasing",
+        "type_name": "Easing",
+        "documentation": "CrossFade.FadeInEasing: Easing",
+        "values": [],
+        "read_only": false
+      },
+      "FadeOutEasing": {
+        "name": "FadeOutEasing",
+        "type_name": "Easing",
+        "documentation": "CrossFade.FadeOutEasing: Easing",
+        "values": [],
+        "read_only": false
+      },
+      "FillMode": {
+        "name": "FillMode",
+        "type_name": "FillMode",
+        "documentation": "CrossFade.FillMode: FillMode",
+        "values": [
+          "None",
+          "Forward",
+          "Backward",
+          "Both"
+        ],
+        "read_only": false
+      }
+    }
+  },
+  {
+    "name": "CubicEaseIn",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_base::animation::easings::CubicEaseIn",
+    "base": "Easing",
+    "constructible": true,
+    "properties": {}
+  },
+  {
+    "name": "CubicEaseInOut",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_base::animation::easings::CubicEaseInOut",
+    "base": "Easing",
+    "constructible": true,
+    "properties": {}
+  },
+  {
+    "name": "CubicEaseOut",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_base::animation::easings::CubicEaseOut",
+    "base": "Easing",
+    "constructible": true,
+    "properties": {}
+  },
+  {
+    "name": "CultureInfo",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_base::utilities::CultureInfo",
+    "base": null,
+    "constructible": false,
+    "properties": {
+      "Name": {
+        "name": "Name",
+        "type_name": "String",
+        "documentation": "CultureInfo.Name: String",
+        "values": [],
+        "read_only": true
+      }
+    }
+  },
+  {
+    "name": "Cursor",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_base::input::Cursor",
+    "base": null,
+    "constructible": false,
+    "properties": {}
+  },
+  {
+    "name": "CustomPopupPlacement",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_controls::primitives::popup_positioning::CustomPopupPlacement",
+    "base": null,
+    "constructible": false,
+    "properties": {
+      "PopupSize": {
+        "name": "PopupSize",
+        "type_name": "Size",
+        "documentation": "CustomPopupPlacement.PopupSize: Size",
+        "values": [],
+        "read_only": true
+      },
+      "Deflate": {
+        "name": "Deflate",
+        "type_name": "Thickness",
+        "documentation": "CustomPopupPlacement.Deflate: Thickness",
+        "values": [],
+        "read_only": true
+      },
+      "Target": {
+        "name": "Target",
+        "type_name": "Ref<Visual>",
+        "documentation": "CustomPopupPlacement.Target: Ref<Visual>",
+        "values": [],
+        "read_only": true
+      },
+      "AnchorRectangle": {
+        "name": "AnchorRectangle",
+        "type_name": "Rect",
+        "documentation": "CustomPopupPlacement.AnchorRectangle: Rect",
+        "values": [],
+        "read_only": false
+      },
+      "Anchor": {
+        "name": "Anchor",
+        "type_name": "PopupAnchor",
+        "documentation": "CustomPopupPlacement.Anchor: PopupAnchor",
+        "values": [],
+        "read_only": false
+      },
+      "Gravity": {
+        "name": "Gravity",
+        "type_name": "PopupGravity",
+        "documentation": "CustomPopupPlacement.Gravity: PopupGravity",
+        "values": [],
+        "read_only": false
+      },
+      "ConstraintAdjustment": {
+        "name": "ConstraintAdjustment",
+        "type_name": "PopupPositionerConstraintAdjustment",
+        "documentation": "CustomPopupPlacement.ConstraintAdjustment: PopupPositionerConstraintAdjustment",
+        "values": [],
+        "read_only": false
+      },
+      "Offset": {
+        "name": "Offset",
+        "type_name": "Point",
+        "documentation": "CustomPopupPlacement.Offset: Point",
+        "values": [],
+        "read_only": false
+      }
+    }
+  },
+  {
     "name": "DashStyle",
     "namespace": "https://github.com/ferroui",
     "documentation": "ferroui_base::media::DashStyle",
@@ -3054,6 +3779,14 @@
         "attached": false
       }
     }
+  },
+  {
+    "name": "DataTemplates",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_controls::templates::DataTemplates",
+    "base": null,
+    "constructible": true,
+    "properties": {}
   },
   {
     "name": "DataValidationErrors",
@@ -3333,62 +4066,95 @@
       "MinimumValue": {
         "name": "MinimumValue",
         "type_name": "i32",
-        "documentation": "DateTimePickerPanel.MinimumValue: i32"
+        "documentation": "DateTimePickerPanel.MinimumValue: i32",
+        "values": [],
+        "read_only": false
       },
       "MaximumValue": {
         "name": "MaximumValue",
         "type_name": "i32",
-        "documentation": "DateTimePickerPanel.MaximumValue: i32"
+        "documentation": "DateTimePickerPanel.MaximumValue: i32",
+        "values": [],
+        "read_only": false
       },
       "SelectedValue": {
         "name": "SelectedValue",
         "type_name": "i32",
-        "documentation": "DateTimePickerPanel.SelectedValue: i32"
+        "documentation": "DateTimePickerPanel.SelectedValue: i32",
+        "values": [],
+        "read_only": false
       },
       "Increment": {
         "name": "Increment",
         "type_name": "i32",
-        "documentation": "DateTimePickerPanel.Increment: i32"
+        "documentation": "DateTimePickerPanel.Increment: i32",
+        "values": [],
+        "read_only": false
       },
       "Offset": {
         "name": "Offset",
         "type_name": "Vector",
-        "documentation": "DateTimePickerPanel.Offset: Vector"
+        "documentation": "DateTimePickerPanel.Offset: Vector",
+        "values": [],
+        "read_only": false
       },
       "CanHorizontallyScroll": {
         "name": "CanHorizontallyScroll",
         "type_name": "bool",
-        "documentation": "DateTimePickerPanel.CanHorizontallyScroll: bool"
+        "documentation": "DateTimePickerPanel.CanHorizontallyScroll: bool",
+        "values": [
+          "True",
+          "False"
+        ],
+        "read_only": false
       },
       "CanVerticallyScroll": {
         "name": "CanVerticallyScroll",
         "type_name": "bool",
-        "documentation": "DateTimePickerPanel.CanVerticallyScroll: bool"
+        "documentation": "DateTimePickerPanel.CanVerticallyScroll: bool",
+        "values": [
+          "True",
+          "False"
+        ],
+        "read_only": false
       },
       "IsLogicalScrollEnabled": {
         "name": "IsLogicalScrollEnabled",
         "type_name": "bool",
-        "documentation": "DateTimePickerPanel.IsLogicalScrollEnabled: bool"
+        "documentation": "DateTimePickerPanel.IsLogicalScrollEnabled: bool",
+        "values": [
+          "True",
+          "False"
+        ],
+        "read_only": true
       },
       "ScrollSize": {
         "name": "ScrollSize",
         "type_name": "Size",
-        "documentation": "DateTimePickerPanel.ScrollSize: Size"
+        "documentation": "DateTimePickerPanel.ScrollSize: Size",
+        "values": [],
+        "read_only": true
       },
       "PageScrollSize": {
         "name": "PageScrollSize",
         "type_name": "Size",
-        "documentation": "DateTimePickerPanel.PageScrollSize: Size"
+        "documentation": "DateTimePickerPanel.PageScrollSize: Size",
+        "values": [],
+        "read_only": true
       },
       "Extent": {
         "name": "Extent",
         "type_name": "Size",
-        "documentation": "DateTimePickerPanel.Extent: Size"
+        "documentation": "DateTimePickerPanel.Extent: Size",
+        "values": [],
+        "read_only": true
       },
       "Viewport": {
         "name": "Viewport",
         "type_name": "Size",
-        "documentation": "DateTimePickerPanel.Viewport: Size"
+        "documentation": "DateTimePickerPanel.Viewport: Size",
+        "values": [],
+        "read_only": true
       }
     }
   },
@@ -3424,6 +4190,14 @@
     }
   },
   {
+    "name": "DefaultValueConverter",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_base::data::converters::DefaultValueConverter",
+    "base": null,
+    "constructible": false,
+    "properties": {}
+  },
+  {
     "name": "DefinitionBase",
     "namespace": "https://github.com/ferroui",
     "documentation": "ferroui_controls::DefinitionBase",
@@ -3438,6 +4212,14 @@
         "attached": true
       }
     }
+  },
+  {
+    "name": "DoNothingForNullConverter",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_controls_color_picker::converters::DoNothingForNullConverter",
+    "base": null,
+    "constructible": true,
+    "properties": {}
   },
   {
     "name": "DockPanel",
@@ -3481,6 +4263,37 @@
         "documentation": "DockPanel.VerticalSpacing: f64",
         "values": [],
         "attached": false
+      }
+    }
+  },
+  {
+    "name": "DoubleTransition",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_base::animation::DoubleTransition",
+    "base": "TransitionBase",
+    "constructible": true,
+    "properties": {}
+  },
+  {
+    "name": "DragEventArgs",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_base::input::DragEventArgs",
+    "base": null,
+    "constructible": false,
+    "properties": {
+      "DragEffects": {
+        "name": "DragEffects",
+        "type_name": "DragDropEffects",
+        "documentation": "DragEventArgs.DragEffects: DragDropEffects",
+        "values": [],
+        "read_only": false
+      },
+      "KeyModifiers": {
+        "name": "KeyModifiers",
+        "type_name": "KeyModifiers",
+        "documentation": "DragEventArgs.KeyModifiers: KeyModifiers",
+        "values": [],
+        "read_only": true
       }
     }
   },
@@ -3769,6 +4582,14 @@
     }
   },
   {
+    "name": "DrawingCollection",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_base::media::DrawingCollection",
+    "base": null,
+    "constructible": true,
+    "properties": {}
+  },
+  {
     "name": "DrawingGroup",
     "namespace": "https://github.com/ferroui",
     "documentation": "ferroui_base::media::DrawingGroup",
@@ -3927,11 +4748,51 @@
     }
   },
   {
+    "name": "Easing",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_base::animation::easings::Easing",
+    "base": null,
+    "constructible": false,
+    "properties": {}
+  },
+  {
     "name": "Effect",
     "namespace": "https://github.com/ferroui",
     "documentation": "ferroui_base::media::Effect",
     "base": "Animatable",
     "constructible": false,
+    "properties": {}
+  },
+  {
+    "name": "EffectTransition",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_base::animation::EffectTransition",
+    "base": "TransitionBase",
+    "constructible": true,
+    "properties": {}
+  },
+  {
+    "name": "ElasticEaseIn",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_base::animation::easings::ElasticEaseIn",
+    "base": "Easing",
+    "constructible": true,
+    "properties": {}
+  },
+  {
+    "name": "ElasticEaseInOut",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_base::animation::easings::ElasticEaseInOut",
+    "base": "Easing",
+    "constructible": true,
+    "properties": {}
+  },
+  {
+    "name": "ElasticEaseOut",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_base::animation::easings::ElasticEaseOut",
+    "base": "Easing",
+    "constructible": true,
     "properties": {}
   },
   {
@@ -3993,6 +4854,22 @@
     "documentation": "ferroui_controls::automation::peers::EmbeddableControlRootAutomationPeer",
     "base": "ContentControlAutomationPeer",
     "constructible": false,
+    "properties": {}
+  },
+  {
+    "name": "EnumToBoolConverter",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_controls::converters::EnumToBoolConverter",
+    "base": null,
+    "constructible": true,
+    "properties": {}
+  },
+  {
+    "name": "EventArgs",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_base::utilities::EventArgs",
+    "base": null,
+    "constructible": true,
     "properties": {}
   },
   {
@@ -4143,11 +5020,66 @@
     }
   },
   {
+    "name": "ExponentialEaseIn",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_base::animation::easings::ExponentialEaseIn",
+    "base": "Easing",
+    "constructible": true,
+    "properties": {}
+  },
+  {
+    "name": "ExponentialEaseInOut",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_base::animation::easings::ExponentialEaseInOut",
+    "base": "Easing",
+    "constructible": true,
+    "properties": {}
+  },
+  {
+    "name": "ExponentialEaseOut",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_base::animation::easings::ExponentialEaseOut",
+    "base": "Easing",
+    "constructible": true,
+    "properties": {}
+  },
+  {
     "name": "FerroObject",
     "namespace": "https://github.com/ferroui",
     "documentation": "ferroui_base::FerroObject",
     "base": null,
     "constructible": false,
+    "properties": {}
+  },
+  {
+    "name": "FerroProperty",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_base::FerroProperty",
+    "base": null,
+    "constructible": false,
+    "properties": {
+      "Name": {
+        "name": "Name",
+        "type_name": "String",
+        "documentation": "FerroProperty.Name: String",
+        "values": [],
+        "read_only": true
+      },
+      "OwnerType": {
+        "name": "OwnerType",
+        "type_name": "&'static TypeInfo",
+        "documentation": "FerroProperty.OwnerType: &'static TypeInfo",
+        "values": [],
+        "read_only": true
+      }
+    }
+  },
+  {
+    "name": "FileSizeStringConverter",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_dialogs::internal::FileSizeStringConverter",
+    "base": null,
+    "constructible": true,
     "properties": {}
   },
   {
@@ -4238,6 +5170,14 @@
     }
   },
   {
+    "name": "FloatTransition",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_base::animation::FloatTransition",
+    "base": "TransitionBase",
+    "constructible": true,
+    "properties": {}
+  },
+  {
     "name": "Flyout",
     "namespace": "https://github.com/ferroui",
     "documentation": "ferroui_controls::Flyout",
@@ -4268,7 +5208,9 @@
       "FlyoutPresenterClasses": {
         "name": "FlyoutPresenterClasses",
         "type_name": "Classes",
-        "documentation": "Flyout.FlyoutPresenterClasses: Classes"
+        "documentation": "Flyout.FlyoutPresenterClasses: Classes",
+        "values": [],
+        "read_only": true
       }
     }
   },
@@ -4307,6 +5249,72 @@
     "properties": {}
   },
   {
+    "name": "FocusChangedEventArgs",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_base::input::FocusChangedEventArgs",
+    "base": null,
+    "constructible": false,
+    "properties": {}
+  },
+  {
+    "name": "FocusChangingEventArgs",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_base::input::FocusChangingEventArgs",
+    "base": null,
+    "constructible": false,
+    "properties": {
+      "NewFocusedElement": {
+        "name": "NewFocusedElement",
+        "type_name": "Option<Ref<InputElement>>",
+        "documentation": "FocusChangingEventArgs.NewFocusedElement: Option<Ref<InputElement>>",
+        "values": [],
+        "read_only": true
+      },
+      "Canceled": {
+        "name": "Canceled",
+        "type_name": "bool",
+        "documentation": "FocusChangingEventArgs.Canceled: bool",
+        "values": [
+          "True",
+          "False"
+        ],
+        "read_only": true
+      }
+    }
+  },
+  {
+    "name": "FontFamily",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_base::media::FontFamily",
+    "base": null,
+    "constructible": false,
+    "properties": {
+      "Name": {
+        "name": "Name",
+        "type_name": "String",
+        "documentation": "FontFamily.Name: String",
+        "values": [],
+        "read_only": true
+      }
+    }
+  },
+  {
+    "name": "FontFeature",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_base::media::FontFeature",
+    "base": null,
+    "constructible": false,
+    "properties": {}
+  },
+  {
+    "name": "FontFeatureCollection",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_base::media::FontFeatureCollection",
+    "base": null,
+    "constructible": true,
+    "properties": {}
+  },
+  {
     "name": "Geometry",
     "namespace": "https://github.com/ferroui",
     "documentation": "ferroui_base::media::Geometry",
@@ -4321,6 +5329,14 @@
         "attached": false
       }
     }
+  },
+  {
+    "name": "GeometryCollection",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_base::media::GeometryCollection",
+    "base": null,
+    "constructible": true,
+    "properties": {}
   },
   {
     "name": "GeometryDrawing",
@@ -4383,6 +5399,14 @@
     "namespace": "https://github.com/ferroui",
     "documentation": "ferroui_base::input::gesture_recognizers::GestureRecognizer",
     "base": "StyledElement",
+    "constructible": false,
+    "properties": {}
+  },
+  {
+    "name": "GestureRecognizerCollection",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_base::input::gesture_recognizers::GestureRecognizerCollection",
+    "base": null,
     "constructible": false,
     "properties": {}
   },
@@ -4460,6 +5484,14 @@
     }
   },
   {
+    "name": "GradientStops",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_base::media::GradientStops",
+    "base": null,
+    "constructible": true,
+    "properties": {}
+  },
+  {
     "name": "Grid",
     "namespace": "https://github.com/ferroui",
     "documentation": "ferroui_controls::Grid",
@@ -4531,12 +5563,16 @@
       "ColumnDefinitions": {
         "name": "ColumnDefinitions",
         "type_name": "ColumnDefinitions",
-        "documentation": "Grid.ColumnDefinitions: ColumnDefinitions"
+        "documentation": "Grid.ColumnDefinitions: ColumnDefinitions",
+        "values": [],
+        "read_only": false
       },
       "RowDefinitions": {
         "name": "RowDefinitions",
         "type_name": "RowDefinitions",
-        "documentation": "Grid.RowDefinitions: RowDefinitions"
+        "documentation": "Grid.RowDefinitions: RowDefinitions",
+        "values": [],
+        "read_only": false
       }
     }
   },
@@ -4685,6 +5721,44 @@
         "documentation": "HeaderedSelectingItemsControl.HeaderTemplate: Option<Rc<dyn IDataTemplate>>",
         "values": [],
         "attached": false
+      }
+    }
+  },
+  {
+    "name": "HoldingRoutedEventArgs",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_base::input::HoldingRoutedEventArgs",
+    "base": null,
+    "constructible": false,
+    "properties": {
+      "HoldingState": {
+        "name": "HoldingState",
+        "type_name": "HoldingState",
+        "documentation": "HoldingRoutedEventArgs.HoldingState: HoldingState",
+        "values": [
+          "Started",
+          "Completed",
+          "Canceled"
+        ],
+        "read_only": true
+      },
+      "Position": {
+        "name": "Position",
+        "type_name": "Point",
+        "documentation": "HoldingRoutedEventArgs.Position: Point",
+        "values": [],
+        "read_only": true
+      },
+      "PointerType": {
+        "name": "PointerType",
+        "type_name": "PointerType",
+        "documentation": "HoldingRoutedEventArgs.PointerType: PointerType",
+        "values": [
+          "Mouse",
+          "Touch",
+          "Pen"
+        ],
+        "read_only": true
       }
     }
   },
@@ -4853,6 +5927,22 @@
     "properties": {}
   },
   {
+    "name": "ImmutableSolidColorBrush",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_base::media::immutable::ImmutableSolidColorBrush",
+    "base": null,
+    "constructible": false,
+    "properties": {}
+  },
+  {
+    "name": "IndentConverter",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_controls_treedatagrid::converters::IndentConverter",
+    "base": null,
+    "constructible": true,
+    "properties": {}
+  },
+  {
     "name": "Inline",
     "namespace": "https://github.com/ferroui",
     "documentation": "ferroui_controls::documents::Inline",
@@ -4883,6 +5973,14 @@
         "attached": false
       }
     }
+  },
+  {
+    "name": "InlineCollection",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_controls::documents::InlineCollection",
+    "base": null,
+    "constructible": true,
+    "properties": {}
   },
   {
     "name": "InlineUIContainer",
@@ -4964,12 +6062,16 @@
       "KeyBindings": {
         "name": "KeyBindings",
         "type_name": "FerroList<Ref<KeyBinding>>",
-        "documentation": "InputElement.KeyBindings: FerroList<Ref<KeyBinding>>"
+        "documentation": "InputElement.KeyBindings: FerroList<Ref<KeyBinding>>",
+        "values": [],
+        "read_only": true
       },
       "GestureRecognizers": {
         "name": "GestureRecognizers",
         "type_name": "GestureRecognizerCollection",
-        "documentation": "InputElement.GestureRecognizers: GestureRecognizerCollection"
+        "documentation": "InputElement.GestureRecognizers: GestureRecognizerCollection",
+        "values": [],
+        "read_only": true
       },
       "GotFocus": {
         "name": "GotFocus",
@@ -5198,6 +6300,14 @@
     }
   },
   {
+    "name": "IntegerTransition",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_base::animation::IntegerTransition",
+    "base": "TransitionBase",
+    "constructible": true,
+    "properties": {}
+  },
+  {
     "name": "Interactive",
     "namespace": "https://github.com/ferroui",
     "documentation": "ferroui_base::interactivity::Interactive",
@@ -5219,6 +6329,14 @@
     "documentation": "ferroui_controls::documents::Italic",
     "base": "Span",
     "constructible": true,
+    "properties": {}
+  },
+  {
+    "name": "ItemCollection",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_controls::ItemCollection",
+    "base": null,
+    "constructible": false,
     "properties": {}
   },
   {
@@ -5266,7 +6384,9 @@
       "Items": {
         "name": "Items",
         "type_name": "ItemCollection",
-        "documentation": "ItemsControl.Items: ItemCollection"
+        "documentation": "ItemsControl.Items: ItemCollection",
+        "values": [],
+        "read_only": true
       }
     }
   },
@@ -5291,6 +6411,32 @@
         "documentation": "ItemsPresenter.ItemsPanel: Rc<dyn ITemplateOf<Option<Ref<Panel>>>>",
         "values": [],
         "attached": false
+      }
+    }
+  },
+  {
+    "name": "ItemsSourceView",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_controls::ItemsSourceView",
+    "base": null,
+    "constructible": false,
+    "properties": {
+      "Count": {
+        "name": "Count",
+        "type_name": "i32",
+        "documentation": "ItemsSourceView.Count: i32",
+        "values": [],
+        "read_only": true
+      },
+      "HasKeyIndexMapping": {
+        "name": "HasKeyIndexMapping",
+        "type_name": "bool",
+        "documentation": "ItemsSourceView.HasKeyIndexMapping: bool",
+        "values": [
+          "True",
+          "False"
+        ],
+        "read_only": true
       }
     }
   },
@@ -5325,6 +6471,14 @@
     }
   },
   {
+    "name": "KeyEventArgs",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_base::input::KeyEventArgs",
+    "base": null,
+    "constructible": false,
+    "properties": {}
+  },
+  {
     "name": "KeyFrame",
     "namespace": "https://github.com/ferroui",
     "documentation": "ferroui_base::animation::KeyFrame",
@@ -5334,22 +6488,256 @@
       "Setters": {
         "name": "Setters",
         "type_name": "FerroList<Rc<dyn IAnimationSetter>>",
-        "documentation": "KeyFrame.Setters: FerroList<Rc<dyn IAnimationSetter>>"
+        "documentation": "KeyFrame.Setters: FerroList<Rc<dyn IAnimationSetter>>",
+        "values": [],
+        "read_only": true
       },
       "KeyTime": {
         "name": "KeyTime",
         "type_name": "TimeSpan",
-        "documentation": "KeyFrame.KeyTime: TimeSpan"
+        "documentation": "KeyFrame.KeyTime: TimeSpan",
+        "values": [],
+        "read_only": false
       },
       "Cue": {
         "name": "Cue",
         "type_name": "Cue",
-        "documentation": "KeyFrame.Cue: Cue"
+        "documentation": "KeyFrame.Cue: Cue",
+        "values": [],
+        "read_only": false
       },
       "KeySpline": {
         "name": "KeySpline",
         "type_name": "Option<Ref<KeySpline>>",
-        "documentation": "KeyFrame.KeySpline: Option<Ref<KeySpline>>"
+        "documentation": "KeyFrame.KeySpline: Option<Ref<KeySpline>>",
+        "values": [],
+        "read_only": false
+      }
+    }
+  },
+  {
+    "name": "KeyFrames",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_base::animation::KeyFrames",
+    "base": null,
+    "constructible": true,
+    "properties": {}
+  },
+  {
+    "name": "KeyGesture",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_base::input::KeyGesture",
+    "base": null,
+    "constructible": false,
+    "properties": {
+      "Key": {
+        "name": "Key",
+        "type_name": "Key",
+        "documentation": "KeyGesture.Key: Key",
+        "values": [
+          "None",
+          "Cancel",
+          "Back",
+          "Tab",
+          "LineFeed",
+          "Clear",
+          "Return",
+          "Pause",
+          "CapsLock",
+          "HangulMode",
+          "JunjaMode",
+          "FinalMode",
+          "KanjiMode",
+          "Escape",
+          "ImeConvert",
+          "ImeNonConvert",
+          "ImeAccept",
+          "ImeModeChange",
+          "Space",
+          "PageUp",
+          "PageDown",
+          "End",
+          "Home",
+          "Left",
+          "Up",
+          "Right",
+          "Down",
+          "Select",
+          "Print",
+          "Execute",
+          "Snapshot",
+          "Insert",
+          "Delete",
+          "Help",
+          "D0",
+          "D1",
+          "D2",
+          "D3",
+          "D4",
+          "D5",
+          "D6",
+          "D7",
+          "D8",
+          "D9",
+          "A",
+          "B",
+          "C",
+          "D",
+          "E",
+          "F",
+          "G",
+          "H",
+          "I",
+          "J",
+          "K",
+          "L",
+          "M",
+          "N",
+          "O",
+          "P",
+          "Q",
+          "R",
+          "S",
+          "T",
+          "U",
+          "V",
+          "W",
+          "X",
+          "Y",
+          "Z",
+          "LWin",
+          "RWin",
+          "Apps",
+          "Sleep",
+          "NumPad0",
+          "NumPad1",
+          "NumPad2",
+          "NumPad3",
+          "NumPad4",
+          "NumPad5",
+          "NumPad6",
+          "NumPad7",
+          "NumPad8",
+          "NumPad9",
+          "Multiply",
+          "Add",
+          "Separator",
+          "Subtract",
+          "Decimal",
+          "Divide",
+          "F1",
+          "F2",
+          "F3",
+          "F4",
+          "F5",
+          "F6",
+          "F7",
+          "F8",
+          "F9",
+          "F10",
+          "F11",
+          "F12",
+          "F13",
+          "F14",
+          "F15",
+          "F16",
+          "F17",
+          "F18",
+          "F19",
+          "F20",
+          "F21",
+          "F22",
+          "F23",
+          "F24",
+          "NumLock",
+          "Scroll",
+          "LeftShift",
+          "RightShift",
+          "LeftCtrl",
+          "RightCtrl",
+          "LeftAlt",
+          "RightAlt",
+          "BrowserBack",
+          "BrowserForward",
+          "BrowserRefresh",
+          "BrowserStop",
+          "BrowserSearch",
+          "BrowserFavorites",
+          "BrowserHome",
+          "VolumeMute",
+          "VolumeDown",
+          "VolumeUp",
+          "MediaNextTrack",
+          "MediaPreviousTrack",
+          "MediaStop",
+          "MediaPlayPause",
+          "LaunchMail",
+          "SelectMedia",
+          "LaunchApplication1",
+          "LaunchApplication2",
+          "OemSemicolon",
+          "OemPlus",
+          "OemComma",
+          "OemMinus",
+          "OemPeriod",
+          "OemQuestion",
+          "OemTilde",
+          "AbntC1",
+          "AbntC2",
+          "OemOpenBrackets",
+          "OemPipe",
+          "OemCloseBrackets",
+          "OemQuotes",
+          "Oem8",
+          "OemBackslash",
+          "ImeProcessed",
+          "System",
+          "OemAttn",
+          "OemFinish",
+          "DbeHiragana",
+          "DbeSbcsChar",
+          "DbeDbcsChar",
+          "OemBackTab",
+          "DbeNoRoman",
+          "CrSel",
+          "ExSel",
+          "EraseEof",
+          "Play",
+          "DbeNoCodeInput",
+          "NoName",
+          "DbeEnterDialogConversionMode",
+          "OemClear",
+          "DeadCharProcessed",
+          "FnLeftArrow",
+          "FnRightArrow",
+          "FnUpArrow",
+          "FnDownArrow",
+          "MediaHome",
+          "MediaChannelList",
+          "MediaChannelRaise",
+          "MediaChannelLower",
+          "MediaRecord",
+          "MediaRed",
+          "MediaGreen",
+          "MediaYellow",
+          "MediaBlue",
+          "MediaMenu",
+          "MediaMore",
+          "MediaOption",
+          "MediaInfo",
+          "MediaSearch",
+          "MediaSubtitle",
+          "MediaTvGuide",
+          "MediaPreviousChannel"
+        ],
+        "read_only": true
+      },
+      "KeyModifiers": {
+        "name": "KeyModifiers",
+        "type_name": "KeyModifiers",
+        "documentation": "KeyGesture.KeyModifiers: KeyModifiers",
+        "values": [],
+        "read_only": true
       }
     }
   },
@@ -5363,22 +6751,30 @@
       "ControlPointX1": {
         "name": "ControlPointX1",
         "type_name": "f64",
-        "documentation": "KeySpline.ControlPointX1: f64"
+        "documentation": "KeySpline.ControlPointX1: f64",
+        "values": [],
+        "read_only": false
       },
       "ControlPointY1": {
         "name": "ControlPointY1",
         "type_name": "f64",
-        "documentation": "KeySpline.ControlPointY1: f64"
+        "documentation": "KeySpline.ControlPointY1: f64",
+        "values": [],
+        "read_only": false
       },
       "ControlPointX2": {
         "name": "ControlPointX2",
         "type_name": "f64",
-        "documentation": "KeySpline.ControlPointX2: f64"
+        "documentation": "KeySpline.ControlPointX2: f64",
+        "values": [],
+        "read_only": false
       },
       "ControlPointY2": {
         "name": "ControlPointY2",
         "type_name": "f64",
-        "documentation": "KeySpline.ControlPointY2: f64"
+        "documentation": "KeySpline.ControlPointY2: f64",
+        "values": [],
+        "read_only": false
       }
     }
   },
@@ -5627,6 +7023,14 @@
     }
   },
   {
+    "name": "LinearEasing",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_base::animation::easings::LinearEasing",
+    "base": "Easing",
+    "constructible": true,
+    "properties": {}
+  },
+  {
     "name": "LinearGradientBrush",
     "namespace": "https://github.com/ferroui",
     "documentation": "ferroui_base::media::LinearGradientBrush",
@@ -5701,6 +7105,84 @@
     "properties": {}
   },
   {
+    "name": "ManagedFileChooserFilterViewModel",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_dialogs::internal::ManagedFileChooserFilterViewModel",
+    "base": null,
+    "constructible": false,
+    "properties": {
+      "Name": {
+        "name": "Name",
+        "type_name": "String",
+        "documentation": "ManagedFileChooserFilterViewModel.Name: String",
+        "values": [],
+        "read_only": true
+      }
+    }
+  },
+  {
+    "name": "ManagedFileChooserItemViewModel",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_dialogs::internal::ManagedFileChooserItemViewModel",
+    "base": null,
+    "constructible": true,
+    "properties": {
+      "DisplayName": {
+        "name": "DisplayName",
+        "type_name": "Option<String>",
+        "documentation": "ManagedFileChooserItemViewModel.DisplayName: Option<String>",
+        "values": [],
+        "read_only": false
+      },
+      "Path": {
+        "name": "Path",
+        "type_name": "Option<String>",
+        "documentation": "ManagedFileChooserItemViewModel.Path: Option<String>",
+        "values": [],
+        "read_only": false
+      },
+      "Modified": {
+        "name": "Modified",
+        "type_name": "DateTime",
+        "documentation": "ManagedFileChooserItemViewModel.Modified: DateTime",
+        "values": [],
+        "read_only": false
+      },
+      "Type": {
+        "name": "Type",
+        "type_name": "Option<String>",
+        "documentation": "ManagedFileChooserItemViewModel.Type: Option<String>",
+        "values": [],
+        "read_only": false
+      },
+      "Size": {
+        "name": "Size",
+        "type_name": "i64",
+        "documentation": "ManagedFileChooserItemViewModel.Size: i64",
+        "values": [],
+        "read_only": false
+      },
+      "ItemType": {
+        "name": "ItemType",
+        "type_name": "ManagedFileChooserItemType",
+        "documentation": "ManagedFileChooserItemViewModel.ItemType: ManagedFileChooserItemType",
+        "values": [
+          "File",
+          "Folder",
+          "Volume"
+        ],
+        "read_only": false
+      },
+      "IconKey": {
+        "name": "IconKey",
+        "type_name": "String",
+        "documentation": "ManagedFileChooserItemViewModel.IconKey: String",
+        "values": [],
+        "read_only": true
+      }
+    }
+  },
+  {
     "name": "ManagedFileChooserOverwritePrompt",
     "namespace": "https://github.com/ferroui",
     "documentation": "ferroui_dialogs::ManagedFileChooserOverwritePrompt",
@@ -5713,6 +7195,171 @@
         "documentation": "ManagedFileChooserOverwritePrompt.FileName: String",
         "values": [],
         "attached": false
+      }
+    }
+  },
+  {
+    "name": "ManagedFileChooserViewModel",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_dialogs::internal::ManagedFileChooserViewModel",
+    "base": null,
+    "constructible": false,
+    "properties": {
+      "QuickLinks": {
+        "name": "QuickLinks",
+        "type_name": "FerroList<Rc<ManagedFileChooserItemViewModel>>",
+        "documentation": "ManagedFileChooserViewModel.QuickLinks: FerroList<Rc<ManagedFileChooserItemViewModel>>",
+        "values": [],
+        "read_only": true
+      },
+      "Items": {
+        "name": "Items",
+        "type_name": "FerroList<Rc<ManagedFileChooserItemViewModel>>",
+        "documentation": "ManagedFileChooserViewModel.Items: FerroList<Rc<ManagedFileChooserItemViewModel>>",
+        "values": [],
+        "read_only": true
+      },
+      "Filters": {
+        "name": "Filters",
+        "type_name": "FerroList<Rc<ManagedFileChooserFilterViewModel>>",
+        "documentation": "ManagedFileChooserViewModel.Filters: FerroList<Rc<ManagedFileChooserFilterViewModel>>",
+        "values": [],
+        "read_only": true
+      },
+      "SelectedItems": {
+        "name": "SelectedItems",
+        "type_name": "SelectedItemsList",
+        "documentation": "ManagedFileChooserViewModel.SelectedItems: SelectedItemsList",
+        "values": [],
+        "read_only": true
+      },
+      "Location": {
+        "name": "Location",
+        "type_name": "Option<String>",
+        "documentation": "ManagedFileChooserViewModel.Location: Option<String>",
+        "values": [],
+        "read_only": false
+      },
+      "FileName": {
+        "name": "FileName",
+        "type_name": "Option<String>",
+        "documentation": "ManagedFileChooserViewModel.FileName: Option<String>",
+        "values": [],
+        "read_only": false
+      },
+      "SelectingFolder": {
+        "name": "SelectingFolder",
+        "type_name": "bool",
+        "documentation": "ManagedFileChooserViewModel.SelectingFolder: bool",
+        "values": [
+          "True",
+          "False"
+        ],
+        "read_only": true
+      },
+      "ShowFilters": {
+        "name": "ShowFilters",
+        "type_name": "bool",
+        "documentation": "ManagedFileChooserViewModel.ShowFilters: bool",
+        "values": [
+          "True",
+          "False"
+        ],
+        "read_only": true
+      },
+      "SelectionMode": {
+        "name": "SelectionMode",
+        "type_name": "SelectionMode",
+        "documentation": "ManagedFileChooserViewModel.SelectionMode: SelectionMode",
+        "values": [],
+        "read_only": true
+      },
+      "Title": {
+        "name": "Title",
+        "type_name": "Option<String>",
+        "documentation": "ManagedFileChooserViewModel.Title: Option<String>",
+        "values": [],
+        "read_only": true
+      },
+      "QuickLinksSelectedIndex": {
+        "name": "QuickLinksSelectedIndex",
+        "type_name": "i32",
+        "documentation": "ManagedFileChooserViewModel.QuickLinksSelectedIndex: i32",
+        "values": [],
+        "read_only": false
+      },
+      "SelectedFilter": {
+        "name": "SelectedFilter",
+        "type_name": "Option<Rc<ManagedFileChooserFilterViewModel>>",
+        "documentation": "ManagedFileChooserViewModel.SelectedFilter: Option<Rc<ManagedFileChooserFilterViewModel>>",
+        "values": [],
+        "read_only": false
+      },
+      "ShowHiddenFiles": {
+        "name": "ShowHiddenFiles",
+        "type_name": "bool",
+        "documentation": "ManagedFileChooserViewModel.ShowHiddenFiles: bool",
+        "values": [
+          "True",
+          "False"
+        ],
+        "read_only": false
+      }
+    }
+  },
+  {
+    "name": "MarginMultiplierConverter",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_controls::converters::MarginMultiplierConverter",
+    "base": null,
+    "constructible": true,
+    "properties": {
+      "Indent": {
+        "name": "Indent",
+        "type_name": "f64",
+        "documentation": "MarginMultiplierConverter.Indent: f64",
+        "values": [],
+        "read_only": false
+      },
+      "Left": {
+        "name": "Left",
+        "type_name": "bool",
+        "documentation": "MarginMultiplierConverter.Left: bool",
+        "values": [
+          "True",
+          "False"
+        ],
+        "read_only": false
+      },
+      "Top": {
+        "name": "Top",
+        "type_name": "bool",
+        "documentation": "MarginMultiplierConverter.Top: bool",
+        "values": [
+          "True",
+          "False"
+        ],
+        "read_only": false
+      },
+      "Right": {
+        "name": "Right",
+        "type_name": "bool",
+        "documentation": "MarginMultiplierConverter.Right: bool",
+        "values": [
+          "True",
+          "False"
+        ],
+        "read_only": false
+      },
+      "Bottom": {
+        "name": "Bottom",
+        "type_name": "bool",
+        "documentation": "MarginMultiplierConverter.Bottom: bool",
+        "values": [
+          "True",
+          "False"
+        ],
+        "read_only": false
       }
     }
   },
@@ -5869,7 +7516,9 @@
       "Items": {
         "name": "Items",
         "type_name": "ItemCollection",
-        "documentation": "MenuFlyout.Items: ItemCollection"
+        "documentation": "MenuFlyout.Items: ItemCollection",
+        "values": [],
+        "read_only": true
       }
     }
   },
@@ -5974,7 +7623,12 @@
       "IsSelected": {
         "name": "IsSelected",
         "type_name": "bool",
-        "documentation": "MenuItem.IsSelected: bool"
+        "documentation": "MenuItem.IsSelected: bool",
+        "values": [
+          "True",
+          "False"
+        ],
+        "read_only": false
       },
       "Click": {
         "name": "Click",
@@ -6011,6 +7665,14 @@
     "properties": {}
   },
   {
+    "name": "MenuScrollingVisibilityConverter",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_controls::converters::MenuScrollingVisibilityConverter",
+    "base": null,
+    "constructible": true,
+    "properties": {}
+  },
+  {
     "name": "MockHostParent",
     "namespace": "https://github.com/ferroui",
     "documentation": "MockHostParent",
@@ -6025,6 +7687,99 @@
     "base": "Control",
     "constructible": false,
     "properties": {}
+  },
+  {
+    "name": "MultiBinding",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_base::data::MultiBinding",
+    "base": null,
+    "constructible": true,
+    "properties": {
+      "Bindings": {
+        "name": "Bindings",
+        "type_name": "FerroList<Rc<dyn BindingBase>>",
+        "documentation": "MultiBinding.Bindings: FerroList<Rc<dyn BindingBase>>",
+        "values": [],
+        "read_only": false
+      },
+      "Converter": {
+        "name": "Converter",
+        "type_name": "Option<Rc<dyn IMultiValueConverter>>",
+        "documentation": "MultiBinding.Converter: Option<Rc<dyn IMultiValueConverter>>",
+        "values": [],
+        "read_only": false
+      },
+      "ConverterCulture": {
+        "name": "ConverterCulture",
+        "type_name": "Option<CultureInfo>",
+        "documentation": "MultiBinding.ConverterCulture: Option<CultureInfo>",
+        "values": [],
+        "read_only": false
+      },
+      "ConverterParameter": {
+        "name": "ConverterParameter",
+        "type_name": "Option<BoxedValue>",
+        "documentation": "MultiBinding.ConverterParameter: Option<BoxedValue>",
+        "values": [],
+        "read_only": false
+      },
+      "FallbackValue": {
+        "name": "FallbackValue",
+        "type_name": "Option<BoxedValue>",
+        "documentation": "MultiBinding.FallbackValue: Option<BoxedValue>",
+        "values": [],
+        "read_only": false
+      },
+      "TargetNullValue": {
+        "name": "TargetNullValue",
+        "type_name": "Option<BoxedValue>",
+        "documentation": "MultiBinding.TargetNullValue: Option<BoxedValue>",
+        "values": [],
+        "read_only": false
+      },
+      "Mode": {
+        "name": "Mode",
+        "type_name": "BindingMode",
+        "documentation": "MultiBinding.Mode: BindingMode",
+        "values": [
+          "Default",
+          "OneWay",
+          "TwoWay",
+          "OneTime",
+          "OneWayToSource"
+        ],
+        "read_only": false
+      },
+      "Priority": {
+        "name": "Priority",
+        "type_name": "BindingPriority",
+        "documentation": "MultiBinding.Priority: BindingPriority",
+        "values": [
+          "Animation",
+          "LocalValue",
+          "StyleTrigger",
+          "Template",
+          "Style",
+          "Inherited",
+          "Unset"
+        ],
+        "read_only": false
+      },
+      "RelativeSource": {
+        "name": "RelativeSource",
+        "type_name": "Option<Rc<RelativeSource>>",
+        "documentation": "MultiBinding.RelativeSource: Option<Rc<RelativeSource>>",
+        "values": [],
+        "read_only": false
+      },
+      "StringFormat": {
+        "name": "StringFormat",
+        "type_name": "Option<String>",
+        "documentation": "MultiBinding.StringFormat: Option<String>",
+        "values": [],
+        "read_only": false
+      }
+    }
   },
   {
     "name": "MultiPage",
@@ -6082,7 +7837,9 @@
       "Items": {
         "name": "Items",
         "type_name": "FerroList<Ref<NativeMenuItemBase>>",
-        "documentation": "NativeMenu.Items: FerroList<Ref<NativeMenuItemBase>>"
+        "documentation": "NativeMenu.Items: FerroList<Ref<NativeMenuItemBase>>",
+        "values": [],
+        "read_only": true
       }
     }
   },
@@ -6429,6 +8186,71 @@
     }
   },
   {
+    "name": "NumberFormatInfo",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_base::utilities::NumberFormatInfo",
+    "base": null,
+    "constructible": true,
+    "properties": {
+      "CurrencyDecimalDigits": {
+        "name": "CurrencyDecimalDigits",
+        "type_name": "i32",
+        "documentation": "NumberFormatInfo.CurrencyDecimalDigits: i32",
+        "values": [],
+        "read_only": false
+      },
+      "CurrencyNegativePattern": {
+        "name": "CurrencyNegativePattern",
+        "type_name": "i32",
+        "documentation": "NumberFormatInfo.CurrencyNegativePattern: i32",
+        "values": [],
+        "read_only": false
+      },
+      "CurrencyPositivePattern": {
+        "name": "CurrencyPositivePattern",
+        "type_name": "i32",
+        "documentation": "NumberFormatInfo.CurrencyPositivePattern: i32",
+        "values": [],
+        "read_only": false
+      },
+      "NumberDecimalDigits": {
+        "name": "NumberDecimalDigits",
+        "type_name": "i32",
+        "documentation": "NumberFormatInfo.NumberDecimalDigits: i32",
+        "values": [],
+        "read_only": false
+      },
+      "NumberNegativePattern": {
+        "name": "NumberNegativePattern",
+        "type_name": "i32",
+        "documentation": "NumberFormatInfo.NumberNegativePattern: i32",
+        "values": [],
+        "read_only": false
+      },
+      "PercentDecimalDigits": {
+        "name": "PercentDecimalDigits",
+        "type_name": "i32",
+        "documentation": "NumberFormatInfo.PercentDecimalDigits: i32",
+        "values": [],
+        "read_only": false
+      },
+      "PercentNegativePattern": {
+        "name": "PercentNegativePattern",
+        "type_name": "i32",
+        "documentation": "NumberFormatInfo.PercentNegativePattern: i32",
+        "values": [],
+        "read_only": false
+      },
+      "PercentPositivePattern": {
+        "name": "PercentPositivePattern",
+        "type_name": "i32",
+        "documentation": "NumberFormatInfo.PercentPositivePattern: i32",
+        "values": [],
+        "read_only": false
+      }
+    }
+  },
+  {
     "name": "NumericUpDown",
     "namespace": "https://github.com/ferroui",
     "documentation": "ferroui_controls::NumericUpDown",
@@ -6754,6 +8576,81 @@
     }
   },
   {
+    "name": "PageSelectionChangedEventArgs",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_controls::PageSelectionChangedEventArgs",
+    "base": null,
+    "constructible": false,
+    "properties": {
+      "PreviousPage": {
+        "name": "PreviousPage",
+        "type_name": "Option<Ref<Page>>",
+        "documentation": "PageSelectionChangedEventArgs.PreviousPage: Option<Ref<Page>>",
+        "values": [],
+        "read_only": true
+      },
+      "CurrentPage": {
+        "name": "CurrentPage",
+        "type_name": "Option<Ref<Page>>",
+        "documentation": "PageSelectionChangedEventArgs.CurrentPage: Option<Ref<Page>>",
+        "values": [],
+        "read_only": true
+      }
+    }
+  },
+  {
+    "name": "PageSlide",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_base::animation::PageSlide",
+    "base": null,
+    "constructible": true,
+    "properties": {
+      "Duration": {
+        "name": "Duration",
+        "type_name": "TimeSpan",
+        "documentation": "PageSlide.Duration: TimeSpan",
+        "values": [],
+        "read_only": false
+      },
+      "Orientation": {
+        "name": "Orientation",
+        "type_name": "SlideAxis",
+        "documentation": "PageSlide.Orientation: SlideAxis",
+        "values": [
+          "Horizontal",
+          "Vertical"
+        ],
+        "read_only": false
+      },
+      "SlideInEasing": {
+        "name": "SlideInEasing",
+        "type_name": "Easing",
+        "documentation": "PageSlide.SlideInEasing: Easing",
+        "values": [],
+        "read_only": false
+      },
+      "SlideOutEasing": {
+        "name": "SlideOutEasing",
+        "type_name": "Easing",
+        "documentation": "PageSlide.SlideOutEasing: Easing",
+        "values": [],
+        "read_only": false
+      },
+      "FillMode": {
+        "name": "FillMode",
+        "type_name": "FillMode",
+        "documentation": "PageSlide.FillMode: FillMode",
+        "values": [
+          "None",
+          "Forward",
+          "Backward",
+          "Both"
+        ],
+        "read_only": false
+      }
+    }
+  },
+  {
     "name": "Painted",
     "namespace": "https://github.com/ferroui",
     "documentation": "Painted",
@@ -6778,7 +8675,9 @@
       "Children": {
         "name": "Children",
         "type_name": "Controls",
-        "documentation": "Panel.Children: Controls"
+        "documentation": "Panel.Children: Controls",
+        "values": [],
+        "read_only": true
       }
     }
   },
@@ -6842,6 +8741,14 @@
     }
   },
   {
+    "name": "PathFigures",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_base::media::PathFigures",
+    "base": null,
+    "constructible": true,
+    "properties": {}
+  },
+  {
     "name": "PathGeometry",
     "namespace": "https://github.com/ferroui",
     "documentation": "ferroui_base::media::PathGeometry",
@@ -6901,6 +8808,14 @@
         "attached": false
       }
     }
+  },
+  {
+    "name": "PathSegments",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_base::media::PathSegments",
+    "base": null,
+    "constructible": true,
+    "properties": {}
   },
   {
     "name": "Pen",
@@ -6968,6 +8883,51 @@
     "base": "TemplatedControl",
     "constructible": false,
     "properties": {}
+  },
+  {
+    "name": "PinchEndedEventArgs",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_base::input::PinchEndedEventArgs",
+    "base": null,
+    "constructible": false,
+    "properties": {}
+  },
+  {
+    "name": "PinchEventArgs",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_base::input::PinchEventArgs",
+    "base": null,
+    "constructible": false,
+    "properties": {
+      "Scale": {
+        "name": "Scale",
+        "type_name": "f64",
+        "documentation": "PinchEventArgs.Scale: f64",
+        "values": [],
+        "read_only": true
+      },
+      "ScaleOrigin": {
+        "name": "ScaleOrigin",
+        "type_name": "Point",
+        "documentation": "PinchEventArgs.ScaleOrigin: Point",
+        "values": [],
+        "read_only": true
+      },
+      "Angle": {
+        "name": "Angle",
+        "type_name": "f64",
+        "documentation": "PinchEventArgs.Angle: f64",
+        "values": [],
+        "read_only": true
+      },
+      "AngleDelta": {
+        "name": "AngleDelta",
+        "type_name": "f64",
+        "documentation": "PinchEventArgs.AngleDelta: f64",
+        "values": [],
+        "read_only": true
+      }
+    }
   },
   {
     "name": "PinchGestureRecognizer",
@@ -7079,6 +9039,117 @@
     "documentation": "ferroui_base::media::PlatformGeometry",
     "base": "Geometry",
     "constructible": false,
+    "properties": {}
+  },
+  {
+    "name": "PlatformKeyGestureConverter",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_controls::converters::PlatformKeyGestureConverter",
+    "base": null,
+    "constructible": true,
+    "properties": {}
+  },
+  {
+    "name": "PointTransition",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_base::animation::PointTransition",
+    "base": "TransitionBase",
+    "constructible": true,
+    "properties": {}
+  },
+  {
+    "name": "PointerCaptureLostEventArgs",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_base::input::PointerCaptureLostEventArgs",
+    "base": null,
+    "constructible": false,
+    "properties": {}
+  },
+  {
+    "name": "PointerDeltaEventArgs",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_base::input::PointerDeltaEventArgs",
+    "base": "PointerEventArgs",
+    "constructible": false,
+    "properties": {
+      "Delta": {
+        "name": "Delta",
+        "type_name": "Vector",
+        "documentation": "PointerDeltaEventArgs.Delta: Vector",
+        "values": [],
+        "read_only": true
+      }
+    }
+  },
+  {
+    "name": "PointerEventArgs",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_base::input::PointerEventArgs",
+    "base": null,
+    "constructible": false,
+    "properties": {
+      "Timestamp": {
+        "name": "Timestamp",
+        "type_name": "u64",
+        "documentation": "PointerEventArgs.Timestamp: u64",
+        "values": [],
+        "read_only": true
+      },
+      "KeyModifiers": {
+        "name": "KeyModifiers",
+        "type_name": "KeyModifiers",
+        "documentation": "PointerEventArgs.KeyModifiers: KeyModifiers",
+        "values": [],
+        "read_only": true
+      }
+    }
+  },
+  {
+    "name": "PointerPressedEventArgs",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_base::input::PointerPressedEventArgs",
+    "base": "PointerEventArgs",
+    "constructible": false,
+    "properties": {
+      "ClickCount": {
+        "name": "ClickCount",
+        "type_name": "i32",
+        "documentation": "PointerPressedEventArgs.ClickCount: i32",
+        "values": [],
+        "read_only": true
+      }
+    }
+  },
+  {
+    "name": "PointerReleasedEventArgs",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_base::input::PointerReleasedEventArgs",
+    "base": "PointerEventArgs",
+    "constructible": false,
+    "properties": {}
+  },
+  {
+    "name": "PointerWheelEventArgs",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_base::input::PointerWheelEventArgs",
+    "base": "PointerEventArgs",
+    "constructible": false,
+    "properties": {
+      "Delta": {
+        "name": "Delta",
+        "type_name": "Vector",
+        "documentation": "PointerWheelEventArgs.Delta: Vector",
+        "values": [],
+        "read_only": true
+      }
+    }
+  },
+  {
+    "name": "Points",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_base::media::Points",
+    "base": null,
+    "constructible": true,
     "properties": {}
   },
   {
@@ -7375,7 +9446,9 @@
       "DependencyResolver": {
         "name": "DependencyResolver",
         "type_name": "Option<Rc<dyn IFerroDependencyResolver>>",
-        "documentation": "Popup.DependencyResolver: Option<Rc<dyn IFerroDependencyResolver>>"
+        "documentation": "Popup.DependencyResolver: Option<Rc<dyn IFerroDependencyResolver>>",
+        "values": [],
+        "read_only": false
       }
     }
   },
@@ -7595,7 +9668,9 @@
       "TemplateSettings": {
         "name": "TemplateSettings",
         "type_name": "Ref<ProgressBarTemplateSettings>",
-        "documentation": "ProgressBar.TemplateSettings: Ref<ProgressBarTemplateSettings>"
+        "documentation": "ProgressBar.TemplateSettings: Ref<ProgressBarTemplateSettings>",
+        "values": [],
+        "read_only": true
       }
     }
   },
@@ -7673,6 +9748,69 @@
     }
   },
   {
+    "name": "PullGestureEndedEventArgs",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_base::input::PullGestureEndedEventArgs",
+    "base": null,
+    "constructible": false,
+    "properties": {
+      "Id": {
+        "name": "Id",
+        "type_name": "i32",
+        "documentation": "PullGestureEndedEventArgs.Id: i32",
+        "values": [],
+        "read_only": true
+      },
+      "PullDirection": {
+        "name": "PullDirection",
+        "type_name": "PullDirection",
+        "documentation": "PullGestureEndedEventArgs.PullDirection: PullDirection",
+        "values": [
+          "TopToBottom",
+          "BottomToTop",
+          "LeftToRight",
+          "RightToLeft"
+        ],
+        "read_only": true
+      }
+    }
+  },
+  {
+    "name": "PullGestureEventArgs",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_base::input::PullGestureEventArgs",
+    "base": null,
+    "constructible": false,
+    "properties": {
+      "Id": {
+        "name": "Id",
+        "type_name": "i32",
+        "documentation": "PullGestureEventArgs.Id: i32",
+        "values": [],
+        "read_only": true
+      },
+      "Delta": {
+        "name": "Delta",
+        "type_name": "Vector",
+        "documentation": "PullGestureEventArgs.Delta: Vector",
+        "values": [],
+        "read_only": true
+      },
+      "PullDirection": {
+        "name": "PullDirection",
+        "type_name": "PullDirection",
+        "documentation": "PullGestureEventArgs.PullDirection: PullDirection",
+        "values": [
+          "TopToBottom",
+          "BottomToTop",
+          "LeftToRight",
+          "RightToLeft"
+        ],
+        "read_only": true
+      }
+    }
+  },
+  {
     "name": "PullGestureRecognizer",
     "namespace": "https://github.com/ferroui",
     "documentation": "ferroui_base::input::gesture_recognizers::PullGestureRecognizer",
@@ -7715,6 +9853,78 @@
         "attached": false
       }
     }
+  },
+  {
+    "name": "QuadraticEaseIn",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_base::animation::easings::QuadraticEaseIn",
+    "base": "Easing",
+    "constructible": true,
+    "properties": {}
+  },
+  {
+    "name": "QuadraticEaseInOut",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_base::animation::easings::QuadraticEaseInOut",
+    "base": "Easing",
+    "constructible": true,
+    "properties": {}
+  },
+  {
+    "name": "QuadraticEaseOut",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_base::animation::easings::QuadraticEaseOut",
+    "base": "Easing",
+    "constructible": true,
+    "properties": {}
+  },
+  {
+    "name": "QuarticEaseIn",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_base::animation::easings::QuarticEaseIn",
+    "base": "Easing",
+    "constructible": true,
+    "properties": {}
+  },
+  {
+    "name": "QuarticEaseInOut",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_base::animation::easings::QuarticEaseInOut",
+    "base": "Easing",
+    "constructible": true,
+    "properties": {}
+  },
+  {
+    "name": "QuarticEaseOut",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_base::animation::easings::QuarticEaseOut",
+    "base": "Easing",
+    "constructible": true,
+    "properties": {}
+  },
+  {
+    "name": "QuinticEaseIn",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_base::animation::easings::QuinticEaseIn",
+    "base": "Easing",
+    "constructible": true,
+    "properties": {}
+  },
+  {
+    "name": "QuinticEaseInOut",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_base::animation::easings::QuinticEaseInOut",
+    "base": "Easing",
+    "constructible": true,
+    "properties": {}
+  },
+  {
+    "name": "QuinticEaseOut",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_base::animation::easings::QuinticEaseOut",
+    "base": "Easing",
+    "constructible": true,
+    "properties": {}
   },
   {
     "name": "RadialGradientBrush",
@@ -7836,6 +10046,29 @@
     "properties": {}
   },
   {
+    "name": "RangeBaseValueChangedEventArgs",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_controls::primitives::RangeBaseValueChangedEventArgs",
+    "base": null,
+    "constructible": false,
+    "properties": {
+      "OldValue": {
+        "name": "OldValue",
+        "type_name": "f64",
+        "documentation": "RangeBaseValueChangedEventArgs.OldValue: f64",
+        "values": [],
+        "read_only": true
+      },
+      "NewValue": {
+        "name": "NewValue",
+        "type_name": "f64",
+        "documentation": "RangeBaseValueChangedEventArgs.NewValue: f64",
+        "values": [],
+        "read_only": true
+      }
+    }
+  },
+  {
     "name": "ReactiveUserControlBase",
     "namespace": "https://github.com/ferroui",
     "documentation": "ferroui_reactiveui_controls::ReactiveUserControlBase",
@@ -7917,6 +10150,132 @@
         "documentation": "RectangleGeometry.Rect: Rect",
         "values": [],
         "attached": false
+      }
+    }
+  },
+  {
+    "name": "ReflectionBinding",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_base::data::ReflectionBinding",
+    "base": null,
+    "constructible": true,
+    "properties": {
+      "Delay": {
+        "name": "Delay",
+        "type_name": "i32",
+        "documentation": "ReflectionBinding.Delay: i32",
+        "values": [],
+        "read_only": false
+      },
+      "Converter": {
+        "name": "Converter",
+        "type_name": "Option<Rc<dyn IValueConverter>>",
+        "documentation": "ReflectionBinding.Converter: Option<Rc<dyn IValueConverter>>",
+        "values": [],
+        "read_only": false
+      },
+      "ConverterCulture": {
+        "name": "ConverterCulture",
+        "type_name": "Option<CultureInfo>",
+        "documentation": "ReflectionBinding.ConverterCulture: Option<CultureInfo>",
+        "values": [],
+        "read_only": false
+      },
+      "ConverterParameter": {
+        "name": "ConverterParameter",
+        "type_name": "Option<BoxedValue>",
+        "documentation": "ReflectionBinding.ConverterParameter: Option<BoxedValue>",
+        "values": [],
+        "read_only": false
+      },
+      "ElementName": {
+        "name": "ElementName",
+        "type_name": "Option<String>",
+        "documentation": "ReflectionBinding.ElementName: Option<String>",
+        "values": [],
+        "read_only": false
+      },
+      "FallbackValue": {
+        "name": "FallbackValue",
+        "type_name": "Option<BoxedValue>",
+        "documentation": "ReflectionBinding.FallbackValue: Option<BoxedValue>",
+        "values": [],
+        "read_only": false
+      },
+      "Mode": {
+        "name": "Mode",
+        "type_name": "BindingMode",
+        "documentation": "ReflectionBinding.Mode: BindingMode",
+        "values": [
+          "Default",
+          "OneWay",
+          "TwoWay",
+          "OneTime",
+          "OneWayToSource"
+        ],
+        "read_only": false
+      },
+      "Path": {
+        "name": "Path",
+        "type_name": "String",
+        "documentation": "ReflectionBinding.Path: String",
+        "values": [],
+        "read_only": false
+      },
+      "Priority": {
+        "name": "Priority",
+        "type_name": "BindingPriority",
+        "documentation": "ReflectionBinding.Priority: BindingPriority",
+        "values": [
+          "Animation",
+          "LocalValue",
+          "StyleTrigger",
+          "Template",
+          "Style",
+          "Inherited",
+          "Unset"
+        ],
+        "read_only": false
+      },
+      "RelativeSource": {
+        "name": "RelativeSource",
+        "type_name": "Option<Rc<RelativeSource>>",
+        "documentation": "ReflectionBinding.RelativeSource: Option<Rc<RelativeSource>>",
+        "values": [],
+        "read_only": false
+      },
+      "Source": {
+        "name": "Source",
+        "type_name": "Option<BoxedValue>",
+        "documentation": "ReflectionBinding.Source: Option<BoxedValue>",
+        "values": [],
+        "read_only": false
+      },
+      "StringFormat": {
+        "name": "StringFormat",
+        "type_name": "Option<String>",
+        "documentation": "ReflectionBinding.StringFormat: Option<String>",
+        "values": [],
+        "read_only": false
+      },
+      "TargetNullValue": {
+        "name": "TargetNullValue",
+        "type_name": "Option<BoxedValue>",
+        "documentation": "ReflectionBinding.TargetNullValue: Option<BoxedValue>",
+        "values": [],
+        "read_only": false
+      },
+      "UpdateSourceTrigger": {
+        "name": "UpdateSourceTrigger",
+        "type_name": "UpdateSourceTrigger",
+        "documentation": "ReflectionBinding.UpdateSourceTrigger: UpdateSourceTrigger",
+        "values": [
+          "Default",
+          "PropertyChanged",
+          "LostFocus",
+          "Explicit"
+        ],
+        "read_only": false
       }
     }
   },
@@ -8020,6 +10379,14 @@
         "event": true
       }
     }
+  },
+  {
+    "name": "RefreshRequestedEventArgs",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_controls::RefreshRequestedEventArgs",
+    "base": null,
+    "constructible": false,
+    "properties": {}
   },
   {
     "name": "RefreshVisualizer",
@@ -8188,6 +10555,59 @@
     }
   },
   {
+    "name": "RelativePointTransition",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_base::animation::RelativePointTransition",
+    "base": "TransitionBase",
+    "constructible": true,
+    "properties": {}
+  },
+  {
+    "name": "RelativeSource",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_base::data::RelativeSource",
+    "base": null,
+    "constructible": true,
+    "properties": {
+      "AncestorLevel": {
+        "name": "AncestorLevel",
+        "type_name": "i32",
+        "documentation": "RelativeSource.AncestorLevel: i32",
+        "values": [],
+        "read_only": false
+      },
+      "AncestorType": {
+        "name": "AncestorType",
+        "type_name": "Option<&'static TypeInfo>",
+        "documentation": "RelativeSource.AncestorType: Option<&'static TypeInfo>",
+        "values": [],
+        "read_only": false
+      },
+      "Mode": {
+        "name": "Mode",
+        "type_name": "RelativeSourceMode",
+        "documentation": "RelativeSource.Mode: RelativeSourceMode",
+        "values": [
+          "DataContext",
+          "TemplatedParent",
+          "SelfMode",
+          "FindAncestor"
+        ],
+        "read_only": false
+      },
+      "Tree": {
+        "name": "Tree",
+        "type_name": "TreeType",
+        "documentation": "RelativeSource.Tree: TreeType",
+        "values": [
+          "Visual",
+          "Logical"
+        ],
+        "read_only": false
+      }
+    }
+  },
+  {
     "name": "RemoteWidget",
     "namespace": "https://github.com/ferroui",
     "documentation": "RemoteWidget",
@@ -8219,6 +10639,22 @@
     }
   },
   {
+    "name": "RequestBringIntoViewEventArgs",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_controls::RequestBringIntoViewEventArgs",
+    "base": null,
+    "constructible": false,
+    "properties": {
+      "TargetRect": {
+        "name": "TargetRect",
+        "type_name": "Rect",
+        "documentation": "RequestBringIntoViewEventArgs.TargetRect: Rect",
+        "values": [],
+        "read_only": false
+      }
+    }
+  },
+  {
     "name": "ResizeGripLayer",
     "namespace": "https://github.com/ferroui",
     "documentation": "ResizeGripLayer",
@@ -8236,17 +10672,23 @@
       "Count": {
         "name": "Count",
         "type_name": "i32",
-        "documentation": "ResourceDictionary.Count: i32"
+        "documentation": "ResourceDictionary.Count: i32",
+        "values": [],
+        "read_only": true
       },
       "MergedDictionaries": {
         "name": "MergedDictionaries",
         "type_name": "FerroList<Rc<dyn IResourceProvider>>",
-        "documentation": "ResourceDictionary.MergedDictionaries: FerroList<Rc<dyn IResourceProvider>>"
+        "documentation": "ResourceDictionary.MergedDictionaries: FerroList<Rc<dyn IResourceProvider>>",
+        "values": [],
+        "read_only": true
       },
       "ThemeDictionaries": {
         "name": "ThemeDictionaries",
         "type_name": "FerroDictionary<ThemeVariant, Rc<dyn IThemeVariantProvider>>",
-        "documentation": "ResourceDictionary.ThemeDictionaries: FerroDictionary<ThemeVariant, Rc<dyn IThemeVariantProvider>>"
+        "documentation": "ResourceDictionary.ThemeDictionaries: FerroDictionary<ThemeVariant, Rc<dyn IThemeVariantProvider>>",
+        "values": [],
+        "read_only": true
       }
     }
   },
@@ -8344,6 +10786,65 @@
     }
   },
   {
+    "name": "Rotate3DTransition",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_base::animation::Rotate3DTransition",
+    "base": null,
+    "constructible": true,
+    "properties": {
+      "Depth": {
+        "name": "Depth",
+        "type_name": "Option<f64>",
+        "documentation": "Rotate3DTransition.Depth: Option<f64>",
+        "values": [],
+        "read_only": false
+      },
+      "Duration": {
+        "name": "Duration",
+        "type_name": "TimeSpan",
+        "documentation": "Rotate3DTransition.Duration: TimeSpan",
+        "values": [],
+        "read_only": false
+      },
+      "Orientation": {
+        "name": "Orientation",
+        "type_name": "SlideAxis",
+        "documentation": "Rotate3DTransition.Orientation: SlideAxis",
+        "values": [
+          "Horizontal",
+          "Vertical"
+        ],
+        "read_only": false
+      },
+      "SlideInEasing": {
+        "name": "SlideInEasing",
+        "type_name": "Easing",
+        "documentation": "Rotate3DTransition.SlideInEasing: Easing",
+        "values": [],
+        "read_only": false
+      },
+      "SlideOutEasing": {
+        "name": "SlideOutEasing",
+        "type_name": "Easing",
+        "documentation": "Rotate3DTransition.SlideOutEasing: Easing",
+        "values": [],
+        "read_only": false
+      },
+      "FillMode": {
+        "name": "FillMode",
+        "type_name": "FillMode",
+        "documentation": "Rotate3DTransition.FillMode: FillMode",
+        "values": [
+          "None",
+          "Forward",
+          "Backward",
+          "Both"
+        ],
+        "read_only": false
+      }
+    }
+  },
+  {
     "name": "RotateTransform",
     "namespace": "https://github.com/ferroui",
     "documentation": "ferroui_base::media::RotateTransform",
@@ -8432,6 +10933,14 @@
         "attached": false
       }
     }
+  },
+  {
+    "name": "RowDefinitions",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_controls::RowDefinitions",
+    "base": null,
+    "constructible": true,
+    "properties": {}
   },
   {
     "name": "Run",
@@ -8551,6 +11060,36 @@
     "properties": {}
   },
   {
+    "name": "ScrollChangedEventArgs",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_controls::ScrollChangedEventArgs",
+    "base": null,
+    "constructible": false,
+    "properties": {
+      "ExtentDelta": {
+        "name": "ExtentDelta",
+        "type_name": "Vector",
+        "documentation": "ScrollChangedEventArgs.ExtentDelta: Vector",
+        "values": [],
+        "read_only": true
+      },
+      "OffsetDelta": {
+        "name": "OffsetDelta",
+        "type_name": "Vector",
+        "documentation": "ScrollChangedEventArgs.OffsetDelta: Vector",
+        "values": [],
+        "read_only": true
+      },
+      "ViewportDelta": {
+        "name": "ViewportDelta",
+        "type_name": "Vector",
+        "documentation": "ScrollChangedEventArgs.ViewportDelta: Vector",
+        "values": [],
+        "read_only": true
+      }
+    }
+  },
+  {
     "name": "ScrollContentPresenter",
     "namespace": "https://github.com/ferroui",
     "documentation": "ferroui_controls::presenters::ScrollContentPresenter",
@@ -8651,6 +11190,78 @@
           "False"
         ],
         "attached": true
+      }
+    }
+  },
+  {
+    "name": "ScrollGestureEndedEventArgs",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_base::input::ScrollGestureEndedEventArgs",
+    "base": null,
+    "constructible": false,
+    "properties": {
+      "Id": {
+        "name": "Id",
+        "type_name": "i32",
+        "documentation": "ScrollGestureEndedEventArgs.Id: i32",
+        "values": [],
+        "read_only": true
+      }
+    }
+  },
+  {
+    "name": "ScrollGestureEventArgs",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_base::input::ScrollGestureEventArgs",
+    "base": null,
+    "constructible": false,
+    "properties": {
+      "Id": {
+        "name": "Id",
+        "type_name": "i32",
+        "documentation": "ScrollGestureEventArgs.Id: i32",
+        "values": [],
+        "read_only": true
+      },
+      "Delta": {
+        "name": "Delta",
+        "type_name": "Vector",
+        "documentation": "ScrollGestureEventArgs.Delta: Vector",
+        "values": [],
+        "read_only": true
+      },
+      "ShouldEndScrollGesture": {
+        "name": "ShouldEndScrollGesture",
+        "type_name": "bool",
+        "documentation": "ScrollGestureEventArgs.ShouldEndScrollGesture: bool",
+        "values": [
+          "True",
+          "False"
+        ],
+        "read_only": false
+      }
+    }
+  },
+  {
+    "name": "ScrollGestureInertiaStartingEventArgs",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_base::input::ScrollGestureInertiaStartingEventArgs",
+    "base": null,
+    "constructible": false,
+    "properties": {
+      "Id": {
+        "name": "Id",
+        "type_name": "i32",
+        "documentation": "ScrollGestureInertiaStartingEventArgs.Id: i32",
+        "values": [],
+        "read_only": true
+      },
+      "Inertia": {
+        "name": "Inertia",
+        "type_name": "Vector",
+        "documentation": "ScrollGestureInertiaStartingEventArgs.Inertia: Vector",
+        "values": [],
+        "read_only": true
       }
     }
   },
@@ -8901,7 +11512,12 @@
       "IsMouseEnabled": {
         "name": "IsMouseEnabled",
         "type_name": "bool",
-        "documentation": "ScrollablePullGestureRecognizer.IsMouseEnabled: bool"
+        "documentation": "ScrollablePullGestureRecognizer.IsMouseEnabled: bool",
+        "values": [
+          "True",
+          "False"
+        ],
+        "read_only": false
       }
     }
   },
@@ -9122,12 +11738,51 @@
     }
   },
   {
+    "name": "SelectionChangedEventArgs",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_controls::SelectionChangedEventArgs",
+    "base": null,
+    "constructible": false,
+    "properties": {}
+  },
+  {
+    "name": "Selector",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_base::styling::Selector",
+    "base": null,
+    "constructible": false,
+    "properties": {}
+  },
+  {
     "name": "Separator",
     "namespace": "https://github.com/ferroui",
     "documentation": "ferroui_controls::Separator",
     "base": "TemplatedControl",
     "constructible": true,
     "properties": {}
+  },
+  {
+    "name": "Setter",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_base::styling::Setter",
+    "base": null,
+    "constructible": true,
+    "properties": {
+      "Property": {
+        "name": "Property",
+        "type_name": "Option<&'static FerroProperty>",
+        "documentation": "Setter.Property: Option<&'static FerroProperty>",
+        "values": [],
+        "read_only": false
+      },
+      "Value": {
+        "name": "Value",
+        "type_name": "Option<BoxedValue>",
+        "documentation": "Setter.Value: Option<BoxedValue>",
+        "values": [],
+        "read_only": false
+      }
+    }
   },
   {
     "name": "Shape",
@@ -9213,6 +11868,81 @@
         "attached": false
       }
     }
+  },
+  {
+    "name": "SineEaseIn",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_base::animation::easings::SineEaseIn",
+    "base": "Easing",
+    "constructible": true,
+    "properties": {}
+  },
+  {
+    "name": "SineEaseInOut",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_base::animation::easings::SineEaseInOut",
+    "base": "Easing",
+    "constructible": true,
+    "properties": {}
+  },
+  {
+    "name": "SineEaseOut",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_base::animation::easings::SineEaseOut",
+    "base": "Easing",
+    "constructible": true,
+    "properties": {}
+  },
+  {
+    "name": "SizeChangedEventArgs",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_controls::SizeChangedEventArgs",
+    "base": null,
+    "constructible": false,
+    "properties": {
+      "HeightChanged": {
+        "name": "HeightChanged",
+        "type_name": "bool",
+        "documentation": "SizeChangedEventArgs.HeightChanged: bool",
+        "values": [
+          "True",
+          "False"
+        ],
+        "read_only": true
+      },
+      "NewSize": {
+        "name": "NewSize",
+        "type_name": "Size",
+        "documentation": "SizeChangedEventArgs.NewSize: Size",
+        "values": [],
+        "read_only": true
+      },
+      "PreviousSize": {
+        "name": "PreviousSize",
+        "type_name": "Size",
+        "documentation": "SizeChangedEventArgs.PreviousSize: Size",
+        "values": [],
+        "read_only": true
+      },
+      "WidthChanged": {
+        "name": "WidthChanged",
+        "type_name": "bool",
+        "documentation": "SizeChangedEventArgs.WidthChanged: bool",
+        "values": [
+          "True",
+          "False"
+        ],
+        "read_only": true
+      }
+    }
+  },
+  {
+    "name": "SizeTransition",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_base::animation::SizeTransition",
+    "base": "TransitionBase",
+    "constructible": true,
+    "properties": {}
   },
   {
     "name": "SkewTransform",
@@ -9343,6 +12073,25 @@
     }
   },
   {
+    "name": "SpinEventArgs",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_controls::SpinEventArgs",
+    "base": null,
+    "constructible": false,
+    "properties": {
+      "UsingMouseWheel": {
+        "name": "UsingMouseWheel",
+        "type_name": "bool",
+        "documentation": "SpinEventArgs.UsingMouseWheel: bool",
+        "values": [
+          "True",
+          "False"
+        ],
+        "read_only": true
+      }
+    }
+  },
+  {
     "name": "Spinner",
     "namespace": "https://github.com/ferroui",
     "documentation": "ferroui_controls::Spinner",
@@ -9361,6 +12110,43 @@
         "type_name": "SpinEventArgs",
         "documentation": "Spinner.Spin routed event",
         "event": true
+      }
+    }
+  },
+  {
+    "name": "SplineEasing",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_base::animation::easings::SplineEasing",
+    "base": "Easing",
+    "constructible": true,
+    "properties": {
+      "X1": {
+        "name": "X1",
+        "type_name": "f64",
+        "documentation": "SplineEasing.X1: f64",
+        "values": [],
+        "read_only": false
+      },
+      "Y1": {
+        "name": "Y1",
+        "type_name": "f64",
+        "documentation": "SplineEasing.Y1: f64",
+        "values": [],
+        "read_only": false
+      },
+      "X2": {
+        "name": "X2",
+        "type_name": "f64",
+        "documentation": "SplineEasing.X2: f64",
+        "values": [],
+        "read_only": false
+      },
+      "Y2": {
+        "name": "Y2",
+        "type_name": "f64",
+        "documentation": "SplineEasing.Y2: f64",
+        "values": [],
+        "read_only": false
       }
     }
   },
@@ -9565,6 +12351,43 @@
     }
   },
   {
+    "name": "SpringEasing",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_base::animation::easings::SpringEasing",
+    "base": "Easing",
+    "constructible": true,
+    "properties": {
+      "Mass": {
+        "name": "Mass",
+        "type_name": "f64",
+        "documentation": "SpringEasing.Mass: f64",
+        "values": [],
+        "read_only": false
+      },
+      "Stiffness": {
+        "name": "Stiffness",
+        "type_name": "f64",
+        "documentation": "SpringEasing.Stiffness: f64",
+        "values": [],
+        "read_only": false
+      },
+      "Damping": {
+        "name": "Damping",
+        "type_name": "f64",
+        "documentation": "SpringEasing.Damping: f64",
+        "values": [],
+        "read_only": false
+      },
+      "InitialVelocity": {
+        "name": "InitialVelocity",
+        "type_name": "f64",
+        "documentation": "SpringEasing.InitialVelocity: f64",
+        "values": [],
+        "read_only": false
+      }
+    }
+  },
+  {
     "name": "StackPanel",
     "namespace": "https://github.com/ferroui",
     "documentation": "ferroui_controls::StackPanel",
@@ -9631,6 +12454,60 @@
     "properties": {}
   },
   {
+    "name": "StringFormatConverter",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_controls::converters::StringFormatConverter",
+    "base": null,
+    "constructible": true,
+    "properties": {}
+  },
+  {
+    "name": "StringFormatMultiValueConverter",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_base::data::converters::StringFormatMultiValueConverter",
+    "base": null,
+    "constructible": false,
+    "properties": {
+      "Inner": {
+        "name": "Inner",
+        "type_name": "Option<Rc<dyn IMultiValueConverter>>",
+        "documentation": "StringFormatMultiValueConverter.Inner: Option<Rc<dyn IMultiValueConverter>>",
+        "values": [],
+        "read_only": true
+      },
+      "Format": {
+        "name": "Format",
+        "type_name": "String",
+        "documentation": "StringFormatMultiValueConverter.Format: String",
+        "values": [],
+        "read_only": true
+      }
+    }
+  },
+  {
+    "name": "StringFormatValueConverter",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_base::data::converters::StringFormatValueConverter",
+    "base": null,
+    "constructible": false,
+    "properties": {
+      "Inner": {
+        "name": "Inner",
+        "type_name": "Option<Rc<dyn IValueConverter>>",
+        "documentation": "StringFormatValueConverter.Inner: Option<Rc<dyn IValueConverter>>",
+        "values": [],
+        "read_only": true
+      },
+      "Format": {
+        "name": "Format",
+        "type_name": "String",
+        "documentation": "StringFormatValueConverter.Format: String",
+        "values": [],
+        "read_only": true
+      }
+    }
+  },
+  {
     "name": "Style",
     "namespace": "https://github.com/ferroui",
     "documentation": "ferroui_base::styling::Style",
@@ -9640,7 +12517,9 @@
       "Selector": {
         "name": "Selector",
         "type_name": "Option<Selector>",
-        "documentation": "Style.Selector: Option<Selector>"
+        "documentation": "Style.Selector: Option<Selector>",
+        "values": [],
+        "read_only": false
       }
     }
   },
@@ -9654,34 +12533,56 @@
       "Children": {
         "name": "Children",
         "type_name": "StyleChildren",
-        "documentation": "StyleBase.Children: StyleChildren"
+        "documentation": "StyleBase.Children: StyleChildren",
+        "values": [],
+        "read_only": true
       },
       "Resources": {
         "name": "Resources",
         "type_name": "Rc<dyn IResourceDictionary>",
-        "documentation": "StyleBase.Resources: Rc<dyn IResourceDictionary>"
-      },
-      "get": {
-        "name": "get",
-        "type_name": "|this: &Ref<StyleBase>| -> Rc<dyn IResourceDictionary>",
-        "documentation": "StyleBase.get: |this: &Ref<StyleBase>| -> Rc<dyn IResourceDictionary>"
-      },
-      "try_set": {
-        "name": "try_set",
-        "type_name": "|this: &Ref<StyleBase>, value: Rc<dyn IResourceDictionary>|",
-        "documentation": "StyleBase.try_set: |this: &Ref<StyleBase>, value: Rc<dyn IResourceDictionary>|"
+        "documentation": "StyleBase.Resources: Rc<dyn IResourceDictionary>",
+        "values": [],
+        "read_only": false
       },
       "Setters": {
         "name": "Setters",
         "type_name": "FerroList<Rc<dyn SetterBase>>",
-        "documentation": "StyleBase.Setters: FerroList<Rc<dyn SetterBase>>"
+        "documentation": "StyleBase.Setters: FerroList<Rc<dyn SetterBase>>",
+        "values": [],
+        "read_only": true
       },
       "Animations": {
         "name": "Animations",
         "type_name": "FerroList<Rc<dyn IAnimation>>",
-        "documentation": "StyleBase.Animations: FerroList<Rc<dyn IAnimation>>"
+        "documentation": "StyleBase.Animations: FerroList<Rc<dyn IAnimation>>",
+        "values": [],
+        "read_only": true
       }
     }
+  },
+  {
+    "name": "StyleChildren",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_base::styling::StyleChildren",
+    "base": null,
+    "constructible": false,
+    "properties": {
+      "Count": {
+        "name": "Count",
+        "type_name": "i32",
+        "documentation": "StyleChildren.Count: i32",
+        "values": [],
+        "read_only": true
+      }
+    }
+  },
+  {
+    "name": "StyleQuery",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_base::styling::StyleQuery",
+    "base": null,
+    "constructible": false,
+    "properties": {}
   },
   {
     "name": "StyledAsClass1",
@@ -9736,27 +12637,23 @@
       "Classes": {
         "name": "Classes",
         "type_name": "Classes",
-        "documentation": "StyledElement.Classes: Classes"
+        "documentation": "StyledElement.Classes: Classes",
+        "values": [],
+        "read_only": true
       },
       "Styles": {
         "name": "Styles",
         "type_name": "Ref<Styles>",
-        "documentation": "StyledElement.Styles: Ref<Styles>"
+        "documentation": "StyledElement.Styles: Ref<Styles>",
+        "values": [],
+        "read_only": true
       },
       "Resources": {
         "name": "Resources",
         "type_name": "Rc<dyn IResourceDictionary>",
-        "documentation": "StyledElement.Resources: Rc<dyn IResourceDictionary>"
-      },
-      "get": {
-        "name": "get",
-        "type_name": "|this: &Ref<StyledElement>| -> Rc<dyn IResourceDictionary>",
-        "documentation": "StyledElement.get: |this: &Ref<StyledElement>| -> Rc<dyn IResourceDictionary>"
-      },
-      "try_set": {
-        "name": "try_set",
-        "type_name": "|this: &Ref<StyledElement>, value: Rc<dyn IResourceDictionary>|",
-        "documentation": "StyledElement.try_set: |this: &Ref<StyledElement>, value: Rc<dyn IResourceDictionary>|"
+        "documentation": "StyledElement.Resources: Rc<dyn IResourceDictionary>",
+        "values": [],
+        "read_only": false
       }
     }
   },
@@ -9770,17 +12667,74 @@
       "Resources": {
         "name": "Resources",
         "type_name": "Rc<dyn IResourceDictionary>",
-        "documentation": "Styles.Resources: Rc<dyn IResourceDictionary>"
+        "documentation": "Styles.Resources: Rc<dyn IResourceDictionary>",
+        "values": [],
+        "read_only": false
+      }
+    }
+  },
+  {
+    "name": "SwipeGestureEndedEventArgs",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_base::input::SwipeGestureEndedEventArgs",
+    "base": null,
+    "constructible": false,
+    "properties": {
+      "Id": {
+        "name": "Id",
+        "type_name": "i32",
+        "documentation": "SwipeGestureEndedEventArgs.Id: i32",
+        "values": [],
+        "read_only": true
       },
-      "get": {
-        "name": "get",
-        "type_name": "|this: &Ref<Styles>| -> Rc<dyn IResourceDictionary>",
-        "documentation": "Styles.get: |this: &Ref<Styles>| -> Rc<dyn IResourceDictionary>"
+      "Velocity": {
+        "name": "Velocity",
+        "type_name": "Vector",
+        "documentation": "SwipeGestureEndedEventArgs.Velocity: Vector",
+        "values": [],
+        "read_only": true
+      }
+    }
+  },
+  {
+    "name": "SwipeGestureEventArgs",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_base::input::SwipeGestureEventArgs",
+    "base": null,
+    "constructible": false,
+    "properties": {
+      "Id": {
+        "name": "Id",
+        "type_name": "i32",
+        "documentation": "SwipeGestureEventArgs.Id: i32",
+        "values": [],
+        "read_only": true
       },
-      "try_set": {
-        "name": "try_set",
-        "type_name": "|this: &Ref<Styles>, value: Rc<dyn IResourceDictionary>|",
-        "documentation": "Styles.try_set: |this: &Ref<Styles>, value: Rc<dyn IResourceDictionary>|"
+      "Delta": {
+        "name": "Delta",
+        "type_name": "Vector",
+        "documentation": "SwipeGestureEventArgs.Delta: Vector",
+        "values": [],
+        "read_only": true
+      },
+      "Velocity": {
+        "name": "Velocity",
+        "type_name": "Vector",
+        "documentation": "SwipeGestureEventArgs.Velocity: Vector",
+        "values": [],
+        "read_only": true
+      },
+      "SwipeDirection": {
+        "name": "SwipeDirection",
+        "type_name": "SwipeDirection",
+        "documentation": "SwipeGestureEventArgs.SwipeDirection: SwipeDirection",
+        "values": [
+          "Left",
+          "Right",
+          "Up",
+          "Down"
+        ],
+        "read_only": true
       }
     }
   },
@@ -10063,12 +13017,16 @@
       "DisplayMemberBinding": {
         "name": "DisplayMemberBinding",
         "type_name": "Option<AssignedBinding>",
-        "documentation": "TableView.DisplayMemberBinding: Option<AssignedBinding>"
+        "documentation": "TableView.DisplayMemberBinding: Option<AssignedBinding>",
+        "values": [],
+        "read_only": false
       },
       "ItemTemplate": {
         "name": "ItemTemplate",
         "type_name": "Option<Rc<dyn IDataTemplate>>",
-        "documentation": "TableView.ItemTemplate: Option<Rc<dyn IDataTemplate>>"
+        "documentation": "TableView.ItemTemplate: Option<Rc<dyn IDataTemplate>>",
+        "values": [],
+        "read_only": false
       }
     }
   },
@@ -10198,6 +13156,87 @@
     "base": "ListBoxItem",
     "constructible": true,
     "properties": {}
+  },
+  {
+    "name": "TappedEventArgs",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_base::input::TappedEventArgs",
+    "base": null,
+    "constructible": false,
+    "properties": {
+      "KeyModifiers": {
+        "name": "KeyModifiers",
+        "type_name": "KeyModifiers",
+        "documentation": "TappedEventArgs.KeyModifiers: KeyModifiers",
+        "values": [],
+        "read_only": true
+      },
+      "Timestamp": {
+        "name": "Timestamp",
+        "type_name": "u64",
+        "documentation": "TappedEventArgs.Timestamp: u64",
+        "values": [],
+        "read_only": true
+      }
+    }
+  },
+  {
+    "name": "TemplateAppliedEventArgs",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_controls::primitives::TemplateAppliedEventArgs",
+    "base": null,
+    "constructible": false,
+    "properties": {}
+  },
+  {
+    "name": "TemplateBinding",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_base::data::TemplateBinding",
+    "base": null,
+    "constructible": true,
+    "properties": {
+      "Converter": {
+        "name": "Converter",
+        "type_name": "Option<Rc<dyn IValueConverter>>",
+        "documentation": "TemplateBinding.Converter: Option<Rc<dyn IValueConverter>>",
+        "values": [],
+        "read_only": false
+      },
+      "ConverterCulture": {
+        "name": "ConverterCulture",
+        "type_name": "Option<CultureInfo>",
+        "documentation": "TemplateBinding.ConverterCulture: Option<CultureInfo>",
+        "values": [],
+        "read_only": false
+      },
+      "ConverterParameter": {
+        "name": "ConverterParameter",
+        "type_name": "Option<BoxedValue>",
+        "documentation": "TemplateBinding.ConverterParameter: Option<BoxedValue>",
+        "values": [],
+        "read_only": false
+      },
+      "Mode": {
+        "name": "Mode",
+        "type_name": "BindingMode",
+        "documentation": "TemplateBinding.Mode: BindingMode",
+        "values": [
+          "Default",
+          "OneWay",
+          "TwoWay",
+          "OneTime",
+          "OneWayToSource"
+        ],
+        "read_only": false
+      },
+      "Property": {
+        "name": "Property",
+        "type_name": "Option<&'static FerroProperty>",
+        "documentation": "TemplateBinding.Property: Option<&'static FerroProperty>",
+        "values": [],
+        "read_only": false
+      }
+    }
   },
   {
     "name": "TemplatedControl",
@@ -10632,11 +13671,6 @@
         "documentation": "TextBlock.Inlines: Option<InlineCollection>",
         "values": [],
         "attached": false
-      },
-      "set": {
-        "name": "set",
-        "type_name": "|this: &Ref<TextBlock>, value: TextLineBounds|",
-        "documentation": "TextBlock.set: |this: &Ref<TextBlock>, value: TextLineBounds|"
       }
     }
   },
@@ -10921,7 +13955,9 @@
       "SelectedText": {
         "name": "SelectedText",
         "type_name": "String",
-        "documentation": "TextBox.SelectedText: String"
+        "documentation": "TextBox.SelectedText: String",
+        "values": [],
+        "read_only": false
       },
       "CopyingToClipboard": {
         "name": "CopyingToClipboard",
@@ -10960,6 +13996,22 @@
     "namespace": "https://github.com/ferroui",
     "documentation": "ferroui_controls::automation::peers::TextBoxAutomationPeer",
     "base": "ControlAutomationPeer",
+    "constructible": false,
+    "properties": {}
+  },
+  {
+    "name": "TextChangedEventArgs",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_controls::TextChangedEventArgs",
+    "base": null,
+    "constructible": false,
+    "properties": {}
+  },
+  {
+    "name": "TextChangingEventArgs",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_controls::TextChangingEventArgs",
+    "base": null,
     "constructible": false,
     "properties": {}
   },
@@ -11053,6 +14105,14 @@
     }
   },
   {
+    "name": "TextDecorationCollection",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_base::media::TextDecorationCollection",
+    "base": null,
+    "constructible": true,
+    "properties": {}
+  },
+  {
     "name": "TextElement",
     "namespace": "https://github.com/ferroui",
     "documentation": "ferroui_controls::documents::TextElement",
@@ -11137,6 +14197,30 @@
         "attached": true
       }
     }
+  },
+  {
+    "name": "TextInputEventArgs",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_base::input::TextInputEventArgs",
+    "base": null,
+    "constructible": false,
+    "properties": {}
+  },
+  {
+    "name": "TextInputMethodClientRequeryRequestedEventArgs",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_base::input::text_input::TextInputMethodClientRequeryRequestedEventArgs",
+    "base": null,
+    "constructible": false,
+    "properties": {}
+  },
+  {
+    "name": "TextInputMethodClientRequestedEventArgs",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_base::input::text_input::TextInputMethodClientRequestedEventArgs",
+    "base": null,
+    "constructible": false,
+    "properties": {}
   },
   {
     "name": "TextPresenter",
@@ -11292,37 +14376,65 @@
       "FontFamily": {
         "name": "FontFamily",
         "type_name": "FontFamily",
-        "documentation": "TextPresenter.FontFamily: FontFamily"
+        "documentation": "TextPresenter.FontFamily: FontFamily",
+        "values": [],
+        "read_only": false
       },
       "FontFeatures": {
         "name": "FontFeatures",
         "type_name": "Option<FontFeatureCollection>",
-        "documentation": "TextPresenter.FontFeatures: Option<FontFeatureCollection>"
+        "documentation": "TextPresenter.FontFeatures: Option<FontFeatureCollection>",
+        "values": [],
+        "read_only": false
       },
       "FontSize": {
         "name": "FontSize",
         "type_name": "f64",
-        "documentation": "TextPresenter.FontSize: f64"
+        "documentation": "TextPresenter.FontSize: f64",
+        "values": [],
+        "read_only": false
       },
       "FontStyle": {
         "name": "FontStyle",
         "type_name": "FontStyle",
-        "documentation": "TextPresenter.FontStyle: FontStyle"
+        "documentation": "TextPresenter.FontStyle: FontStyle",
+        "values": [
+          "Normal",
+          "Italic",
+          "Oblique"
+        ],
+        "read_only": false
       },
       "FontWeight": {
         "name": "FontWeight",
         "type_name": "FontWeight",
-        "documentation": "TextPresenter.FontWeight: FontWeight"
+        "documentation": "TextPresenter.FontWeight: FontWeight",
+        "values": [],
+        "read_only": false
       },
       "FontStretch": {
         "name": "FontStretch",
         "type_name": "FontStretch",
-        "documentation": "TextPresenter.FontStretch: FontStretch"
+        "documentation": "TextPresenter.FontStretch: FontStretch",
+        "values": [
+          "Normal",
+          "UltraCondensed",
+          "ExtraCondensed",
+          "Condensed",
+          "SemiCondensed",
+          "SemiExpanded",
+          "Expanded",
+          "ExtraExpanded",
+          "UltraExpanded"
+        ],
+        "read_only": false
       },
       "Foreground": {
         "name": "Foreground",
         "type_name": "Option<Rc<dyn IBrush>>",
-        "documentation": "TextPresenter.Foreground: Option<Rc<dyn IBrush>>"
+        "documentation": "TextPresenter.Foreground: Option<Rc<dyn IBrush>>",
+        "values": [],
+        "read_only": false
       }
     }
   },
@@ -11351,6 +14463,29 @@
     "properties": {}
   },
   {
+    "name": "ThemeVariant",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_base::styling::ThemeVariant",
+    "base": null,
+    "constructible": false,
+    "properties": {
+      "Key": {
+        "name": "Key",
+        "type_name": "Option<crate::BoxedValue>",
+        "documentation": "ThemeVariant.Key: Option<crate::BoxedValue>",
+        "values": [],
+        "read_only": true
+      },
+      "InheritVariant": {
+        "name": "InheritVariant",
+        "type_name": "Option<ThemeVariant>",
+        "documentation": "ThemeVariant.InheritVariant: Option<ThemeVariant>",
+        "values": [],
+        "read_only": true
+      }
+    }
+  },
+  {
     "name": "ThemeVariantScope",
     "namespace": "https://github.com/ferroui",
     "documentation": "ferroui_controls::ThemeVariantScope",
@@ -11372,6 +14507,14 @@
     "documentation": "ThemedControl2",
     "base": "TemplatedControl",
     "constructible": false,
+    "properties": {}
+  },
+  {
+    "name": "ThicknessTransition",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_base::animation::ThicknessTransition",
+    "base": "TransitionBase",
+    "constructible": true,
     "properties": {}
   },
   {
@@ -11491,6 +14634,14 @@
         "attached": false
       }
     }
+  },
+  {
+    "name": "TickList",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_controls::TickList",
+    "base": null,
+    "constructible": true,
+    "properties": {}
   },
   {
     "name": "TileBrush",
@@ -11675,6 +14826,22 @@
         "attached": false
       }
     }
+  },
+  {
+    "name": "ToBrushConverter",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_controls_color_picker::converters::ToBrushConverter",
+    "base": null,
+    "constructible": true,
+    "properties": {}
+  },
+  {
+    "name": "ToColorConverter",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_controls_color_picker::converters::ToColorConverter",
+    "base": null,
+    "constructible": true,
+    "properties": {}
   },
   {
     "name": "ToggleButton",
@@ -12128,6 +15295,48 @@
     }
   },
   {
+    "name": "TransformOperations",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_base::media::transformation::TransformOperations",
+    "base": null,
+    "constructible": false,
+    "properties": {
+      "IsIdentity": {
+        "name": "IsIdentity",
+        "type_name": "bool",
+        "documentation": "TransformOperations.IsIdentity: bool",
+        "values": [
+          "True",
+          "False"
+        ],
+        "read_only": true
+      },
+      "Value": {
+        "name": "Value",
+        "type_name": "crate::Matrix",
+        "documentation": "TransformOperations.Value: crate::Matrix",
+        "values": [],
+        "read_only": true
+      }
+    }
+  },
+  {
+    "name": "TransformOperationsTransition",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_base::animation::TransformOperationsTransition",
+    "base": "TransitionBase",
+    "constructible": true,
+    "properties": {}
+  },
+  {
+    "name": "Transforms",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_base::media::Transforms",
+    "base": null,
+    "constructible": true,
+    "properties": {}
+  },
+  {
     "name": "TransitionBase",
     "namespace": "https://github.com/ferroui",
     "documentation": "ferroui_base::animation::TransitionBase",
@@ -12165,6 +15374,25 @@
     }
   },
   {
+    "name": "TransitionCompletedEventArgs",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_controls::TransitionCompletedEventArgs",
+    "base": null,
+    "constructible": false,
+    "properties": {
+      "HasRunToCompletion": {
+        "name": "HasRunToCompletion",
+        "type_name": "bool",
+        "documentation": "TransitionCompletedEventArgs.HasRunToCompletion: bool",
+        "values": [
+          "True",
+          "False"
+        ],
+        "read_only": true
+      }
+    }
+  },
+  {
     "name": "TransitioningContentControl",
     "namespace": "https://github.com/ferroui",
     "documentation": "ferroui_controls::TransitioningContentControl",
@@ -12195,6 +15423,14 @@
         "event": true
       }
     }
+  },
+  {
+    "name": "Transitions",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_base::animation::Transitions",
+    "base": null,
+    "constructible": true,
+    "properties": {}
   },
   {
     "name": "TranslateTransform",
@@ -12279,6 +15515,14 @@
         "attached": false
       }
     }
+  },
+  {
+    "name": "TrayIcons",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_controls::TrayIcons",
+    "base": null,
+    "constructible": true,
+    "properties": {}
   },
   {
     "name": "TreeDataGrid",
@@ -12379,7 +15623,9 @@
       "ColumnDefinitions": {
         "name": "ColumnDefinitions",
         "type_name": "crate::TreeDataGridColumns",
-        "documentation": "TreeDataGrid.ColumnDefinitions: crate::TreeDataGridColumns"
+        "documentation": "TreeDataGrid.ColumnDefinitions: crate::TreeDataGridColumns",
+        "values": [],
+        "read_only": true
       },
       "RowDragStarted": {
         "name": "RowDragStarted",
@@ -12516,6 +15762,98 @@
     "properties": {}
   },
   {
+    "name": "TreeDataGridCheckBoxColumn",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_controls_treedatagrid::TreeDataGridCheckBoxColumn",
+    "base": null,
+    "constructible": true,
+    "properties": {
+      "Header": {
+        "name": "Header",
+        "type_name": "Option<BoxedValue>",
+        "documentation": "TreeDataGridCheckBoxColumn.Header: Option<BoxedValue>",
+        "values": [],
+        "read_only": false
+      },
+      "Width": {
+        "name": "Width",
+        "type_name": "GridLength",
+        "documentation": "TreeDataGridCheckBoxColumn.Width: GridLength",
+        "values": [],
+        "read_only": false
+      },
+      "CanUserResize": {
+        "name": "CanUserResize",
+        "type_name": "Option<bool>",
+        "documentation": "TreeDataGridCheckBoxColumn.CanUserResize: Option<bool>",
+        "values": [],
+        "read_only": false
+      },
+      "CanUserSortColumn": {
+        "name": "CanUserSortColumn",
+        "type_name": "Option<bool>",
+        "documentation": "TreeDataGridCheckBoxColumn.CanUserSortColumn: Option<bool>",
+        "values": [],
+        "read_only": false
+      },
+      "AllowTriStateSorting": {
+        "name": "AllowTriStateSorting",
+        "type_name": "bool",
+        "documentation": "TreeDataGridCheckBoxColumn.AllowTriStateSorting: bool",
+        "values": [
+          "True",
+          "False"
+        ],
+        "read_only": false
+      },
+      "MinWidth": {
+        "name": "MinWidth",
+        "type_name": "GridLength",
+        "documentation": "TreeDataGridCheckBoxColumn.MinWidth: GridLength",
+        "values": [],
+        "read_only": false
+      },
+      "MaxWidth": {
+        "name": "MaxWidth",
+        "type_name": "Option<GridLength>",
+        "documentation": "TreeDataGridCheckBoxColumn.MaxWidth: Option<GridLength>",
+        "values": [],
+        "read_only": false
+      },
+      "BeginEditGestures": {
+        "name": "BeginEditGestures",
+        "type_name": "BeginEditGestures",
+        "documentation": "TreeDataGridCheckBoxColumn.BeginEditGestures: BeginEditGestures",
+        "values": [],
+        "read_only": false
+      },
+      "Binding": {
+        "name": "Binding",
+        "type_name": "Option<AssignedBinding>",
+        "documentation": "TreeDataGridCheckBoxColumn.Binding: Option<AssignedBinding>",
+        "values": [],
+        "read_only": false
+      },
+      "IsReadOnly": {
+        "name": "IsReadOnly",
+        "type_name": "bool",
+        "documentation": "TreeDataGridCheckBoxColumn.IsReadOnly: bool",
+        "values": [
+          "True",
+          "False"
+        ],
+        "read_only": false
+      },
+      "IsThreeState": {
+        "name": "IsThreeState",
+        "type_name": "Option<bool>",
+        "documentation": "TreeDataGridCheckBoxColumn.IsThreeState: Option<bool>",
+        "values": [],
+        "read_only": false
+      }
+    }
+  },
+  {
     "name": "TreeDataGridColumnHeader",
     "namespace": "https://github.com/ferroui",
     "documentation": "ferroui_controls_treedatagrid::primitives::TreeDataGridColumnHeader",
@@ -12563,6 +15901,22 @@
     "properties": {}
   },
   {
+    "name": "TreeDataGridColumns",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_controls_treedatagrid::TreeDataGridColumns",
+    "base": null,
+    "constructible": true,
+    "properties": {
+      "Count": {
+        "name": "Count",
+        "type_name": "i32",
+        "documentation": "TreeDataGridColumns.Count: i32",
+        "values": [],
+        "read_only": true
+      }
+    }
+  },
+  {
     "name": "TreeDataGridExpanderCell",
     "namespace": "https://github.com/ferroui",
     "documentation": "ferroui_controls_treedatagrid::primitives::TreeDataGridExpanderCell",
@@ -12578,6 +15932,102 @@
           "False"
         ],
         "attached": false
+      }
+    }
+  },
+  {
+    "name": "TreeDataGridHierarchicalExpanderColumn",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_controls_treedatagrid::TreeDataGridHierarchicalExpanderColumn",
+    "base": null,
+    "constructible": true,
+    "properties": {
+      "Header": {
+        "name": "Header",
+        "type_name": "Option<BoxedValue>",
+        "documentation": "TreeDataGridHierarchicalExpanderColumn.Header: Option<BoxedValue>",
+        "values": [],
+        "read_only": false
+      },
+      "Width": {
+        "name": "Width",
+        "type_name": "GridLength",
+        "documentation": "TreeDataGridHierarchicalExpanderColumn.Width: GridLength",
+        "values": [],
+        "read_only": false
+      },
+      "CanUserResize": {
+        "name": "CanUserResize",
+        "type_name": "Option<bool>",
+        "documentation": "TreeDataGridHierarchicalExpanderColumn.CanUserResize: Option<bool>",
+        "values": [],
+        "read_only": false
+      },
+      "CanUserSortColumn": {
+        "name": "CanUserSortColumn",
+        "type_name": "Option<bool>",
+        "documentation": "TreeDataGridHierarchicalExpanderColumn.CanUserSortColumn: Option<bool>",
+        "values": [],
+        "read_only": false
+      },
+      "AllowTriStateSorting": {
+        "name": "AllowTriStateSorting",
+        "type_name": "bool",
+        "documentation": "TreeDataGridHierarchicalExpanderColumn.AllowTriStateSorting: bool",
+        "values": [
+          "True",
+          "False"
+        ],
+        "read_only": false
+      },
+      "MinWidth": {
+        "name": "MinWidth",
+        "type_name": "GridLength",
+        "documentation": "TreeDataGridHierarchicalExpanderColumn.MinWidth: GridLength",
+        "values": [],
+        "read_only": false
+      },
+      "MaxWidth": {
+        "name": "MaxWidth",
+        "type_name": "Option<GridLength>",
+        "documentation": "TreeDataGridHierarchicalExpanderColumn.MaxWidth: Option<GridLength>",
+        "values": [],
+        "read_only": false
+      },
+      "BeginEditGestures": {
+        "name": "BeginEditGestures",
+        "type_name": "BeginEditGestures",
+        "documentation": "TreeDataGridHierarchicalExpanderColumn.BeginEditGestures: BeginEditGestures",
+        "values": [],
+        "read_only": false
+      },
+      "ChildrenBinding": {
+        "name": "ChildrenBinding",
+        "type_name": "Option<AssignedBinding>",
+        "documentation": "TreeDataGridHierarchicalExpanderColumn.ChildrenBinding: Option<AssignedBinding>",
+        "values": [],
+        "read_only": false
+      },
+      "HasChildrenBinding": {
+        "name": "HasChildrenBinding",
+        "type_name": "Option<AssignedBinding>",
+        "documentation": "TreeDataGridHierarchicalExpanderColumn.HasChildrenBinding: Option<AssignedBinding>",
+        "values": [],
+        "read_only": false
+      },
+      "IsExpandedBinding": {
+        "name": "IsExpandedBinding",
+        "type_name": "Option<AssignedBinding>",
+        "documentation": "TreeDataGridHierarchicalExpanderColumn.IsExpandedBinding: Option<AssignedBinding>",
+        "values": [],
+        "read_only": false
+      },
+      "InnerColumn": {
+        "name": "InnerColumn",
+        "type_name": "Option<Rc<dyn TreeDataGridColumn>>",
+        "documentation": "TreeDataGridHierarchicalExpanderColumn.InnerColumn: Option<Rc<dyn TreeDataGridColumn>>",
+        "values": [],
+        "read_only": false
       }
     }
   },
@@ -12604,6 +16054,90 @@
     "base": "ControlAutomationPeer",
     "constructible": false,
     "properties": {}
+  },
+  {
+    "name": "TreeDataGridRowDragEventArgs",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_controls_treedatagrid::TreeDataGridRowDragEventArgs",
+    "base": null,
+    "constructible": false,
+    "properties": {}
+  },
+  {
+    "name": "TreeDataGridRowDragStartedEventArgs",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_controls_treedatagrid::TreeDataGridRowDragStartedEventArgs",
+    "base": null,
+    "constructible": false,
+    "properties": {}
+  },
+  {
+    "name": "TreeDataGridRowHeaderColumn",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_controls_treedatagrid::TreeDataGridRowHeaderColumn",
+    "base": null,
+    "constructible": true,
+    "properties": {
+      "Header": {
+        "name": "Header",
+        "type_name": "Option<BoxedValue>",
+        "documentation": "TreeDataGridRowHeaderColumn.Header: Option<BoxedValue>",
+        "values": [],
+        "read_only": false
+      },
+      "Width": {
+        "name": "Width",
+        "type_name": "GridLength",
+        "documentation": "TreeDataGridRowHeaderColumn.Width: GridLength",
+        "values": [],
+        "read_only": false
+      },
+      "CanUserResize": {
+        "name": "CanUserResize",
+        "type_name": "Option<bool>",
+        "documentation": "TreeDataGridRowHeaderColumn.CanUserResize: Option<bool>",
+        "values": [],
+        "read_only": false
+      },
+      "CanUserSortColumn": {
+        "name": "CanUserSortColumn",
+        "type_name": "Option<bool>",
+        "documentation": "TreeDataGridRowHeaderColumn.CanUserSortColumn: Option<bool>",
+        "values": [],
+        "read_only": false
+      },
+      "AllowTriStateSorting": {
+        "name": "AllowTriStateSorting",
+        "type_name": "bool",
+        "documentation": "TreeDataGridRowHeaderColumn.AllowTriStateSorting: bool",
+        "values": [
+          "True",
+          "False"
+        ],
+        "read_only": false
+      },
+      "MinWidth": {
+        "name": "MinWidth",
+        "type_name": "GridLength",
+        "documentation": "TreeDataGridRowHeaderColumn.MinWidth: GridLength",
+        "values": [],
+        "read_only": false
+      },
+      "MaxWidth": {
+        "name": "MaxWidth",
+        "type_name": "Option<GridLength>",
+        "documentation": "TreeDataGridRowHeaderColumn.MaxWidth: Option<GridLength>",
+        "values": [],
+        "read_only": false
+      },
+      "BeginEditGestures": {
+        "name": "BeginEditGestures",
+        "type_name": "BeginEditGestures",
+        "documentation": "TreeDataGridRowHeaderColumn.BeginEditGestures: BeginEditGestures",
+        "values": [],
+        "read_only": false
+      }
+    }
   },
   {
     "name": "TreeDataGridRowsPresenter",
@@ -12643,12 +16177,123 @@
     }
   },
   {
+    "name": "TreeDataGridSelectionChangedEventArgs",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_controls_treedatagrid::TreeDataGridSelectionChangedEventArgs",
+    "base": null,
+    "constructible": false,
+    "properties": {}
+  },
+  {
     "name": "TreeDataGridTemplateCell",
     "namespace": "https://github.com/ferroui",
     "documentation": "ferroui_controls_treedatagrid::primitives::TreeDataGridTemplateCell",
     "base": "TreeDataGridCell",
     "constructible": true,
     "properties": {}
+  },
+  {
+    "name": "TreeDataGridTemplateColumn",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_controls_treedatagrid::TreeDataGridTemplateColumn",
+    "base": null,
+    "constructible": true,
+    "properties": {
+      "Header": {
+        "name": "Header",
+        "type_name": "Option<BoxedValue>",
+        "documentation": "TreeDataGridTemplateColumn.Header: Option<BoxedValue>",
+        "values": [],
+        "read_only": false
+      },
+      "Width": {
+        "name": "Width",
+        "type_name": "GridLength",
+        "documentation": "TreeDataGridTemplateColumn.Width: GridLength",
+        "values": [],
+        "read_only": false
+      },
+      "CanUserResize": {
+        "name": "CanUserResize",
+        "type_name": "Option<bool>",
+        "documentation": "TreeDataGridTemplateColumn.CanUserResize: Option<bool>",
+        "values": [],
+        "read_only": false
+      },
+      "CanUserSortColumn": {
+        "name": "CanUserSortColumn",
+        "type_name": "Option<bool>",
+        "documentation": "TreeDataGridTemplateColumn.CanUserSortColumn: Option<bool>",
+        "values": [],
+        "read_only": false
+      },
+      "AllowTriStateSorting": {
+        "name": "AllowTriStateSorting",
+        "type_name": "bool",
+        "documentation": "TreeDataGridTemplateColumn.AllowTriStateSorting: bool",
+        "values": [
+          "True",
+          "False"
+        ],
+        "read_only": false
+      },
+      "MinWidth": {
+        "name": "MinWidth",
+        "type_name": "GridLength",
+        "documentation": "TreeDataGridTemplateColumn.MinWidth: GridLength",
+        "values": [],
+        "read_only": false
+      },
+      "MaxWidth": {
+        "name": "MaxWidth",
+        "type_name": "Option<GridLength>",
+        "documentation": "TreeDataGridTemplateColumn.MaxWidth: Option<GridLength>",
+        "values": [],
+        "read_only": false
+      },
+      "BeginEditGestures": {
+        "name": "BeginEditGestures",
+        "type_name": "BeginEditGestures",
+        "documentation": "TreeDataGridTemplateColumn.BeginEditGestures: BeginEditGestures",
+        "values": [],
+        "read_only": false
+      },
+      "CellTemplate": {
+        "name": "CellTemplate",
+        "type_name": "Option<Rc<dyn IDataTemplate>>",
+        "documentation": "TreeDataGridTemplateColumn.CellTemplate: Option<Rc<dyn IDataTemplate>>",
+        "values": [],
+        "read_only": false
+      },
+      "CellEditingTemplate": {
+        "name": "CellEditingTemplate",
+        "type_name": "Option<Rc<dyn IDataTemplate>>",
+        "documentation": "TreeDataGridTemplateColumn.CellEditingTemplate: Option<Rc<dyn IDataTemplate>>",
+        "values": [],
+        "read_only": false
+      },
+      "CellTemplateResourceKey": {
+        "name": "CellTemplateResourceKey",
+        "type_name": "Option<ResourceKey>",
+        "documentation": "TreeDataGridTemplateColumn.CellTemplateResourceKey: Option<ResourceKey>",
+        "values": [],
+        "read_only": false
+      },
+      "CellEditingTemplateResourceKey": {
+        "name": "CellEditingTemplateResourceKey",
+        "type_name": "Option<ResourceKey>",
+        "documentation": "TreeDataGridTemplateColumn.CellEditingTemplateResourceKey: Option<ResourceKey>",
+        "values": [],
+        "read_only": false
+      },
+      "TextSearchBinding": {
+        "name": "TextSearchBinding",
+        "type_name": "Option<AssignedBinding>",
+        "documentation": "TreeDataGridTemplateColumn.TextSearchBinding: Option<AssignedBinding>",
+        "values": [],
+        "read_only": false
+      }
+    }
   },
   {
     "name": "TreeDataGridTextCell",
@@ -12678,6 +16323,141 @@
           "Justify"
         ],
         "attached": false
+      }
+    }
+  },
+  {
+    "name": "TreeDataGridTextColumn",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_controls_treedatagrid::TreeDataGridTextColumn",
+    "base": null,
+    "constructible": true,
+    "properties": {
+      "Header": {
+        "name": "Header",
+        "type_name": "Option<BoxedValue>",
+        "documentation": "TreeDataGridTextColumn.Header: Option<BoxedValue>",
+        "values": [],
+        "read_only": false
+      },
+      "Width": {
+        "name": "Width",
+        "type_name": "GridLength",
+        "documentation": "TreeDataGridTextColumn.Width: GridLength",
+        "values": [],
+        "read_only": false
+      },
+      "CanUserResize": {
+        "name": "CanUserResize",
+        "type_name": "Option<bool>",
+        "documentation": "TreeDataGridTextColumn.CanUserResize: Option<bool>",
+        "values": [],
+        "read_only": false
+      },
+      "CanUserSortColumn": {
+        "name": "CanUserSortColumn",
+        "type_name": "Option<bool>",
+        "documentation": "TreeDataGridTextColumn.CanUserSortColumn: Option<bool>",
+        "values": [],
+        "read_only": false
+      },
+      "AllowTriStateSorting": {
+        "name": "AllowTriStateSorting",
+        "type_name": "bool",
+        "documentation": "TreeDataGridTextColumn.AllowTriStateSorting: bool",
+        "values": [
+          "True",
+          "False"
+        ],
+        "read_only": false
+      },
+      "MinWidth": {
+        "name": "MinWidth",
+        "type_name": "GridLength",
+        "documentation": "TreeDataGridTextColumn.MinWidth: GridLength",
+        "values": [],
+        "read_only": false
+      },
+      "MaxWidth": {
+        "name": "MaxWidth",
+        "type_name": "Option<GridLength>",
+        "documentation": "TreeDataGridTextColumn.MaxWidth: Option<GridLength>",
+        "values": [],
+        "read_only": false
+      },
+      "BeginEditGestures": {
+        "name": "BeginEditGestures",
+        "type_name": "BeginEditGestures",
+        "documentation": "TreeDataGridTextColumn.BeginEditGestures: BeginEditGestures",
+        "values": [],
+        "read_only": false
+      },
+      "Binding": {
+        "name": "Binding",
+        "type_name": "Option<AssignedBinding>",
+        "documentation": "TreeDataGridTextColumn.Binding: Option<AssignedBinding>",
+        "values": [],
+        "read_only": false
+      },
+      "IsReadOnly": {
+        "name": "IsReadOnly",
+        "type_name": "bool",
+        "documentation": "TreeDataGridTextColumn.IsReadOnly: bool",
+        "values": [
+          "True",
+          "False"
+        ],
+        "read_only": false
+      },
+      "IsTextSearchEnabled": {
+        "name": "IsTextSearchEnabled",
+        "type_name": "bool",
+        "documentation": "TreeDataGridTextColumn.IsTextSearchEnabled: bool",
+        "values": [
+          "True",
+          "False"
+        ],
+        "read_only": false
+      },
+      "StringFormat": {
+        "name": "StringFormat",
+        "type_name": "String",
+        "documentation": "TreeDataGridTextColumn.StringFormat: String",
+        "values": [],
+        "read_only": false
+      },
+      "TextAlignment": {
+        "name": "TextAlignment",
+        "type_name": "TextAlignment",
+        "documentation": "TreeDataGridTextColumn.TextAlignment: TextAlignment",
+        "values": [
+          "Left",
+          "Center",
+          "Right",
+          "Start",
+          "End",
+          "DetectFromContent",
+          "Justify"
+        ],
+        "read_only": false
+      },
+      "TextTrimming": {
+        "name": "TextTrimming",
+        "type_name": "Rc<dyn TextTrimming>",
+        "documentation": "TreeDataGridTextColumn.TextTrimming: Rc<dyn TextTrimming>",
+        "values": [],
+        "read_only": false
+      },
+      "TextWrapping": {
+        "name": "TextWrapping",
+        "type_name": "TextWrapping",
+        "documentation": "TreeDataGridTextColumn.TextWrapping: TextWrapping",
+        "values": [
+          "NoWrap",
+          "Wrap",
+          "WrapWithOverflow"
+        ],
+        "read_only": false
       }
     }
   },
@@ -12779,6 +16559,14 @@
     "properties": {}
   },
   {
+    "name": "TreeViewItemIndentConverter",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_controls::converters::TreeViewItemIndentConverter",
+    "base": null,
+    "constructible": true,
+    "properties": {}
+  },
+  {
     "name": "Underline",
     "namespace": "https://github.com/ferroui",
     "documentation": "ferroui_controls::documents::Underline",
@@ -12855,6 +16643,14 @@
     "properties": {}
   },
   {
+    "name": "Uri",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_base::utilities::Uri",
+    "base": null,
+    "constructible": false,
+    "properties": {}
+  },
+  {
     "name": "UserControl",
     "namespace": "https://github.com/ferroui",
     "documentation": "ferroui_controls::UserControl",
@@ -12868,6 +16664,14 @@
     "documentation": "ferroui_controls::automation::peers::UserControlAutomationPeer",
     "base": "ControlAutomationPeer",
     "constructible": false,
+    "properties": {}
+  },
+  {
+    "name": "VectorTransition",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_base::animation::VectorTransition",
+    "base": "TransitionBase",
+    "constructible": true,
     "properties": {}
   },
   {
@@ -13150,17 +16954,32 @@
       "EnableAdornerLayer": {
         "name": "EnableAdornerLayer",
         "type_name": "bool",
-        "documentation": "VisualLayerManager.EnableAdornerLayer: bool"
+        "documentation": "VisualLayerManager.EnableAdornerLayer: bool",
+        "values": [
+          "True",
+          "False"
+        ],
+        "read_only": false
       },
       "EnableOverlayLayer": {
         "name": "EnableOverlayLayer",
         "type_name": "bool",
-        "documentation": "VisualLayerManager.EnableOverlayLayer: bool"
+        "documentation": "VisualLayerManager.EnableOverlayLayer: bool",
+        "values": [
+          "True",
+          "False"
+        ],
+        "read_only": false
       },
       "EnableTextSelectorLayer": {
         "name": "EnableTextSelectorLayer",
         "type_name": "bool",
-        "documentation": "VisualLayerManager.EnableTextSelectorLayer: bool"
+        "documentation": "VisualLayerManager.EnableTextSelectorLayer: bool",
+        "values": [
+          "True",
+          "False"
+        ],
+        "read_only": false
       }
     }
   },
@@ -13313,12 +17132,20 @@
       "SystemDecorations": {
         "name": "SystemDecorations",
         "type_name": "WindowDecorations",
-        "documentation": "Window.SystemDecorations: WindowDecorations"
+        "documentation": "Window.SystemDecorations: WindowDecorations",
+        "values": [
+          "None",
+          "BorderOnly",
+          "Full"
+        ],
+        "read_only": false
       },
       "Position": {
         "name": "Position",
         "type_name": "PixelPoint",
-        "documentation": "Window.Position: PixelPoint"
+        "documentation": "Window.Position: PixelPoint",
+        "values": [],
+        "read_only": false
       },
       "WindowClosed": {
         "name": "WindowClosed",
@@ -13430,24 +17257,33 @@
       "Overlay": {
         "name": "Overlay",
         "type_name": "Option<Ref<Control>>",
-        "documentation": "WindowDrawnDecorationsContent.Overlay: Option<Ref<Control>>"
+        "documentation": "WindowDrawnDecorationsContent.Overlay: Option<Ref<Control>>",
+        "values": [],
+        "read_only": false
       },
       "Underlay": {
         "name": "Underlay",
         "type_name": "Option<Ref<Control>>",
-        "documentation": "WindowDrawnDecorationsContent.Underlay: Option<Ref<Control>>"
+        "documentation": "WindowDrawnDecorationsContent.Underlay: Option<Ref<Control>>",
+        "values": [],
+        "read_only": false
       },
       "FullscreenPopover": {
         "name": "FullscreenPopover",
         "type_name": "Option<Ref<Control>>",
-        "documentation": "WindowDrawnDecorationsContent.FullscreenPopover: Option<Ref<Control>>"
-      },
-      "set": {
-        "name": "set",
-        "type_name": "|content: &Ref<WindowDrawnDecorationsContent>, value: Option<Ref<Control>>|",
-        "documentation": "WindowDrawnDecorationsContent.set: |content: &Ref<WindowDrawnDecorationsContent>, value: Option<Ref<Control>>|"
+        "documentation": "WindowDrawnDecorationsContent.FullscreenPopover: Option<Ref<Control>>",
+        "values": [],
+        "read_only": false
       }
     }
+  },
+  {
+    "name": "WindowIcon",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_controls::WindowIcon",
+    "base": null,
+    "constructible": false,
+    "properties": {}
   },
   {
     "name": "WindowNotificationManager",
@@ -13478,6 +17314,14 @@
         "attached": false
       }
     }
+  },
+  {
+    "name": "WindowTransparencyLevelCollection",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_controls::WindowTransparencyLevelCollection",
+    "base": null,
+    "constructible": false,
+    "properties": {}
   },
   {
     "name": "WrapPanel",
