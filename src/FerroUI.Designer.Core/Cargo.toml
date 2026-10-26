@@ -1,0 +1,22 @@
+[package]
+name = "ferroui-designer-core"
+description = "Source-preserving XAML document, syntax, transactions and history for FerroUI visual designers"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+homepage.workspace = true
+readme.workspace = true
+keywords.workspace = true
+categories.workspace = true
+
+[lib]
+path = "lib.rs"
+
+[dependencies]
+roxmltree.workspace = true
+serde = { version = "1", features = ["derive"] }
+
+[package.metadata.release]
+group = "tools"
