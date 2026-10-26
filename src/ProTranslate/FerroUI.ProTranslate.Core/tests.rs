@@ -335,7 +335,7 @@ fn numeric_formats_preserve_large_integers_exact_decimals_and_rounding() {
             .unwrap()
             .format("N2", &en)
             .unwrap(),
-        "12,345,678,901,234,567,890.12"
+        "12,345,678,901,234,567,890.13"
     );
     assert_eq!(1.235f64.into_format("F2", &en), "1.24");
     assert_eq!(1234.5f64.into_format("E2", &en), "1.23E+003");
@@ -371,7 +371,7 @@ fn currency_percent_and_custom_fixed_patterns_use_cldr_affixes() {
 }
 #[test]
 fn unsupported_numeric_patterns_return_errors() {
-    for invalid in ["Q2", "N999999999", "F1025", "0.0.0", "#E0"] {
+    for invalid in ["Q2", "N999999999", "F1025"] {
         assert!(
             FormatArgument::from(1.0f64)
                 .format(invalid, &culture("en"))
@@ -678,8 +678,8 @@ fn custom_numeric_quotes_escapes_percent_and_scaling_are_semantic() {
     );
     assert_eq!(12.5f64.into_format("'USD;'0.0", &culture), "USD;12.5");
     assert_eq!(0.0f64.into_format("#.##", &culture), "");
-    assert_eq!(0.125f64.into_format("#.##", &culture), ".12");
-    for pattern in ["0'", "0\\", "00-00", "0.0,0", "0E+00"] {
+    assert_eq!(0.125f64.into_format("#.##", &culture), ".13");
+    for pattern in ["0'", "0\\"] {
         assert!(
             FormatArgument::Number(12.5)
                 .format(pattern, &culture)
@@ -687,6 +687,101 @@ fn custom_numeric_quotes_escapes_percent_and_scaling_are_semantic() {
             "{pattern}"
         );
     }
+}
+
+#[test]
+fn numeric_masks_and_rounding_match_reference_runtime_vectors() {
+    // Generated independently with Microsoft.NETCore.App 10.0.14. These cover
+    // source-runtime behaviors, not expectations derived from this formatter.
+    for line in include_str!("test_data/numeric-runtime.tsv")
+        .lines()
+        .filter(|line| !line.starts_with('#'))
+    {
+        let fields: Vec<_> = line.split('\t').collect();
+        assert_eq!(fields.len(), 4, "{line}");
+        let value = match fields[0] {
+            "double" => FormatArgument::from(fields[1].parse::<f64>().unwrap()),
+            "float" => FormatArgument::from(fields[1].parse::<f32>().unwrap()),
+            "decimal" => FormatArgument::decimal(fields[1]).unwrap(),
+            _ => panic!("unrecognized oracle type"),
+        };
+        assert_eq!(
+            value.format(fields[2], &Culture::invariant()).unwrap(),
+            fields[3].strip_prefix('=').unwrap(),
+            "type={} value={} format={}",
+            fields[0],
+            fields[1],
+            fields[2]
+        );
+    }
+}
+
+#[test]
+fn numeric_type_width_and_binary_precision_are_preserved() {
+    let invariant = Culture::invariant();
+    assert_eq!((-1i8).into_format("X", &invariant), "FF");
+    assert_eq!((-1i16).into_format("X", &invariant), "FFFF");
+    assert_eq!((-1i32).into_format("X", &invariant), "FFFFFFFF");
+    assert_eq!((-1i64).into_format("X", &invariant), "FFFFFFFFFFFFFFFF");
+    assert_eq!(
+        (-1i128).into_format("X", &invariant),
+        "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF"
+    );
+    assert_eq!((-1i8).into_format("B", &invariant), "11111111");
+    assert_eq!(
+        u128::MAX.into_format("G", &invariant),
+        u128::MAX.to_string()
+    );
+    assert_eq!(0.1f32.into_format("G", &invariant), "0.1");
+    assert_eq!(0.1f32.into_format("F10", &invariant), "0.1000000015");
+    assert_eq!(
+        0.1f64.into_format("F20", &invariant),
+        "0.10000000000000000555"
+    );
+    assert_eq!(2.675f64.into_format("F2", &invariant), "2.67");
+    assert_eq!(2.675f64.into_format("0.00", &invariant), "2.68");
+    assert_eq!(1e9f32.into_format("G", &invariant), "1E+09");
+    assert_eq!(1e9f64.into_format("G", &invariant), "1000000000");
+}
+
+#[test]
+fn localized_numeric_symbols_and_default_precision_follow_locale_data() {
+    assert_eq!(
+        f64::INFINITY.into_format("G", &Culture::invariant()),
+        "Infinity"
+    );
+    assert_eq!(
+        f64::NEG_INFINITY.into_format("G", &Culture::invariant()),
+        "-Infinity"
+    );
+    assert_eq!(f64::NAN.into_format("G", &culture("ru")), "не число");
+    assert_eq!(12.5f64.into_format("F", &culture("en-US")), "12.500");
+    assert_eq!(12.5f64.into_format("F", &Culture::invariant()), "12.50");
+    assert_eq!(0.001f64.into_format("0.0‰", &culture("ar-EG")), "١٫٠؉");
+    assert_eq!(
+        0.001f64.into_format("0.0‰", &culture("ar-u-nu-arab")),
+        "١٫٠؉"
+    );
+    assert_eq!(12f64.into_format("0E+0", &culture("sv")), "1E+1");
+    assert_eq!(0.12f64.into_format("0E+0", &culture("sv")), "1E−1");
+    assert_eq!(
+        1234.5f64.into_format("00-00.0", &culture("ar-EG")),
+        "١٢-٣٤٫٥"
+    );
+}
+
+#[test]
+fn typed_custom_format_arguments_compare_by_shared_identity() {
+    struct Value;
+    impl LocalizedFormat for Value {
+        fn format(&self, _: &str, _: &Culture) -> Result<String, TranslationError> {
+            Ok("value".into())
+        }
+    }
+    let value = FormatArgument::Custom(Rc::new(Value));
+    assert_eq!(value, value.clone());
+    assert_ne!(value, FormatArgument::Custom(Rc::new(Value)));
+    assert_ne!(FormatArgument::from(1i8), FormatArgument::from(1i64));
 }
 #[test]
 fn initial_observer_does_not_miss_reentrant_catalog_or_culture_refresh() {

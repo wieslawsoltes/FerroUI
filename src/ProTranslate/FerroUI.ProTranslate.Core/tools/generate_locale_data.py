@@ -71,5 +71,16 @@ for locale in locales:
     percent_sign = n.get('symbols-numberSystem-' + ns, n['symbols-numberSystem-latn'])['percentSign']
     lines.append('    (' + ', '.join(map(s, [locale, region, native, symbol, currency_pattern, percent_pattern, percent_sign])) + '),')
 lines.append('];')
+lines.extend(['', '#[rustfmt::skip]', 'pub(crate) static NUMERIC_SYMBOLS: &[(&str, &str, bool, crate::formatting::NumericSymbols)] = &['])
+for locale in locales:
+    n = main(numbers, locale, 'numbers.json')['numbers']
+    for key in sorted(k for k in n if k.startswith('symbols-numberSystem-')):
+        ns = key.removeprefix('symbols-numberSystem-')
+        symbols = n[key]
+        fields = [('nan', 'nan'), ('infinity', 'infinity'), ('percent', 'percentSign'),
+                  ('permille', 'perMille'), ('minus', 'minusSign'), ('plus', 'plusSign')]
+        value = 'crate::formatting::NumericSymbols { ' + ', '.join(name + ': ' + s(symbols[source]) for name, source in fields) + ' }'
+        lines.append('    (' + s(locale) + ', ' + s(ns) + ', ' + str(ns == n['defaultNumberingSystem']).lower() + ', ' + value + '),')
+lines.append('];')
 pathlib.Path(output).write_text('\n'.join(lines) + '\n')
 print(f'Generated {len(region_currencies)} regions and {len(locales)} locale profiles')
