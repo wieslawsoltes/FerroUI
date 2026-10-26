@@ -2,8 +2,17 @@ use ferroui_controls::AppBuilder;
 
 fn main() -> std::process::ExitCode {
     let args = std::env::args().skip(1).collect::<Vec<_>>();
+    if let Some(index) = args.iter().position(|arg| arg == "--project") {
+        let Some(path) = args.get(index + 1) else {
+            eprintln!("--project requires a folder or Cargo.toml path");
+            return std::process::ExitCode::FAILURE;
+        };
+        designer_studio::set_initial_project(path.into());
+    }
     if args.iter().any(|arg| arg == "--help" || arg == "-h") {
-        eprintln!("FerroUI Designer Studio\n  --file PATH        Open a XAML document\n  --mcp              Enable authenticated loopback MCP (read only)\n  --mcp-port PORT    Choose the MCP HTTP port (0 chooses a free port)\n  --mcp-stdio        Use the existing MCP stdio transport\n  --mcp-write        Allow document editing through MCP\n  --headless         Use the headless host (requires feature headless)");
+        eprintln!(
+            "FerroUI Designer Studio\n  --file PATH        Open a XAML document\n  --project PATH     Open a solution or project folder\n  --mcp              Enable authenticated loopback MCP (read only)\n  --mcp-port PORT    Choose the MCP HTTP port (0 chooses a free port)\n  --mcp-stdio        Use the existing MCP stdio transport\n  --mcp-write        Allow document editing through MCP\n  --mcp-input        Allow input simulation; with --mcp-write, allow behavior and process execution\n  --headless         Use the headless host (requires feature headless)"
+        );
         return std::process::ExitCode::SUCCESS;
     }
     #[cfg(feature = "mcp")]
@@ -113,20 +122,38 @@ fn platform(builder: AppBuilder) -> AppBuilder {
 
 #[cfg(feature = "mcp")]
 fn configure_mcp(args: &[String]) -> Result<(), String> {
+    let Some(mut options) = mcp_options(args)? else {
+        return Ok(());
+    };
+    if matches!(options.transport, ferroui_designer::mcp::Transport::Stdio) {
+        // Reserve protocol stdout before platform/theme initialization can write diagnostics.
+        options.stdio_output =
+            Some(ferroui_designer::mcp::reserve_stdout().map_err(|error| error.to_string())?);
+    }
+    designer_studio::set_mcp_options(options);
+    Ok(())
+}
+
+/// Parse transport and permission choices without starting a server or reserving stdout.
+#[cfg(feature = "mcp")]
+fn mcp_options(args: &[String]) -> Result<Option<ferroui_designer::mcp::Options>, String> {
     use ferroui_designer::mcp::{Options, Transport};
     let enabled = args
         .iter()
         .any(|arg| matches!(arg.as_str(), "--mcp" | "--mcp-port" | "--mcp-stdio"));
     let write = args.iter().any(|arg| arg == "--mcp-write");
+    let input = args.iter().any(|arg| arg == "--mcp-input");
     if !enabled {
-        if write {
-            return Err("--mcp-write requires --mcp, --mcp-port, or --mcp-stdio".into());
+        if write || input {
+            let flag = if write { "--mcp-write" } else { "--mcp-input" };
+            return Err(format!("{flag} requires --mcp, --mcp-port, or --mcp-stdio"));
         }
-        return Ok(());
+        return Ok(None);
     }
     let stdio = args.iter().any(|arg| arg == "--mcp-stdio");
     let mut options = Options::default();
     options.permissions.allow_property_writes = write;
+    options.permissions.allow_input = input;
     if let Some(index) = args.iter().position(|arg| arg == "--mcp-port") {
         if stdio {
             return Err("Choose either --mcp-port or --mcp-stdio".into());
@@ -140,12 +167,8 @@ fn configure_mcp(args: &[String]) -> Result<(), String> {
     }
     if stdio {
         options.transport = Transport::Stdio;
-        // Reserve protocol stdout before platform/theme initialization can write diagnostics.
-        options.stdio_output =
-            Some(ferroui_designer::mcp::reserve_stdout().map_err(|error| error.to_string())?);
     }
-    designer_studio::set_mcp_options(options);
-    Ok(())
+    Ok(Some(options))
 }
 
 #[cfg(test)]
@@ -212,5 +235,53 @@ mod tests {
         let uri = file_uri(path, false).unwrap();
         assert_eq!(uri, "file:///Designs/part%5C%255C%20%C5%BC.xaml");
         assert_eq!(Uri::absolute(&uri).unwrap().local_path(), path);
+    }
+
+    #[cfg(feature = "mcp")]
+    fn options(args: &[&str]) -> Result<Option<ferroui_designer::mcp::Options>, String> {
+        super::mcp_options(&args.iter().map(|arg| (*arg).to_owned()).collect::<Vec<_>>())
+    }
+
+    #[cfg(feature = "mcp")]
+    #[test]
+    fn mcp_execution_permissions_are_explicit_and_independent() {
+        assert!(options(&[]).unwrap().is_none());
+        for (flags, writes, input) in [
+            (vec!["--mcp"], false, false),
+            (vec!["--mcp", "--mcp-write"], true, false),
+            (vec!["--mcp", "--mcp-input"], false, true),
+            (vec!["--mcp", "--mcp-write", "--mcp-input"], true, true),
+        ] {
+            let options = options(&flags).unwrap().unwrap();
+            assert_eq!(options.permissions.allow_property_writes, writes);
+            assert_eq!(options.permissions.allow_input, input);
+            assert!(options.stdio_output.is_none());
+        }
+        for flag in ["--mcp-write", "--mcp-input"] {
+            assert!(options(&[flag]).err().unwrap().contains("requires --mcp"));
+        }
+    }
+
+    #[cfg(feature = "mcp")]
+    #[test]
+    fn mcp_input_opt_in_keeps_transport_validation_and_stdio_reservation_order() {
+        use ferroui_designer::mcp::Transport;
+        let http = options(&["--mcp-port", "0", "--mcp-input"])
+            .unwrap()
+            .unwrap();
+        assert!(
+            matches!(http.transport, Transport::Http(address) if address.ip().is_loopback() && address.port() == 0)
+        );
+        assert!(http.permissions.allow_input);
+        let stdio = options(&["--mcp-stdio", "--mcp-write", "--mcp-input"])
+            .unwrap()
+            .unwrap();
+        assert!(matches!(stdio.transport, Transport::Stdio));
+        assert!(stdio.permissions.allow_property_writes && stdio.permissions.allow_input);
+        // Parsing must not redirect the test runner or reserve process-wide protocol output.
+        assert!(stdio.stdio_output.is_none());
+        assert!(options(&["--mcp-stdio", "--mcp-port", "0", "--mcp-input"]).is_err());
+        assert!(options(&["--mcp-port", "--mcp-input"]).is_err());
+        assert!(options(&["--mcp-port", "65536", "--mcp-input"]).is_err());
     }
 }

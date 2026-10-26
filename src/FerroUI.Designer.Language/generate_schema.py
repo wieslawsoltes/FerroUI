@@ -30,8 +30,10 @@ def read_markup_properties(body, properties):
         while match:=re.search(r"\b([A-Z]\w*)\s*:\s*([^{}]+?)\s*\{",contents[position:]):
             start=position+match.end()-1
             end=framework.matching(contents,start,"{","}")
-            accessor=contents[start+1:end]
-            properties[match.group(1)]=(match.group(2).strip(),not re.search(r"\b(?:set|try_set)\s*:",accessor))
+            # A getter-only collection can still be writable in XAML through adders or a
+            # compiler transform (for example Classes). A missing Rust setter is therefore
+            # insufficient evidence for a language-service read-only diagnostic.
+            properties[match.group(1)]=match.group(2).strip()
             position=end+1
 
 enums={}
@@ -64,7 +66,7 @@ for directory,_ in crates:
             args=framework.split_top_level(text[match.end():end])
             owner,_=framework.owner_at(text,match.start())
             if owner and len(args)>=3 and re.fullmatch(r'"\w+"',args[1]):
-                extra.setdefault(owner,{})[json.loads(args[1])]=(args[2],False)
+                extra.setdefault(owner,{})[json.loads(args[1])]=args[2]
         for match in re.finditer(r"\bferro_transition_class!\s*\(\s*([A-Z]\w*)\s*:",text):
             model.bases[match.group(1)]="TransitionBase"
             model.creatable.add(match.group(1))
@@ -76,9 +78,9 @@ for name in sorted(set(model.bases)|model.creatable|set(extra)):
         label=pascal(prop)
         values=["True","False"] if value_type=="bool" else enums.get(value_type,[])
         properties[label]={"name":label,"type_name":value_type,"documentation":f"{name}.{label}: {value_type}","values":values,"attached":kind=="AttachedProperty"}
-    for label,(value_type,read_only) in extra.get(name,{}).items():
+    for label,value_type in extra.get(name,{}).items():
         values=["True","False"] if value_type=="bool" else enums.get(value_type,[])
-        properties.setdefault(label,{"name":label,"type_name":value_type,"documentation":f"{name}.{label}: {value_type}","values":values,"read_only":read_only})
+        properties.setdefault(label,{"name":label,"type_name":value_type,"documentation":f"{name}.{label}: {value_type}","values":values})
     for event,args in model.events.get(name,[]):
         label=pascal(event)
         properties[label]={"name":label,"type_name":args,"documentation":f"{name}.{label} routed event","event":True}

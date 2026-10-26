@@ -11,6 +11,82 @@ fn apply(document: &mut Document, bounds: &BTreeMap<u64, Rect>, action: LayoutAc
     document.apply("Tool", plan).unwrap();
 }
 #[test]
+fn resolved_panel_properties_drive_insertion_without_overwriting_bindings() {
+    let mut document=Document::new("<StackPanel Orientation='{Binding Axis}'><Button Name='a'/><Button Name='b'/></StackPanel>").unwrap();
+    let root = document.ast().root();
+    let a = id(&document, "a");
+    let b = id(&document, "b");
+    let bounds = BTreeMap::from([
+        (root, Rect::new(0.0, 0.0, 200.0, 50.0)),
+        (a, Rect::new(0.0, 0.0, 100.0, 50.0)),
+        (b, Rect::new(100.0, 0.0, 100.0, 50.0)),
+    ]);
+    let properties = BTreeMap::from([(
+        root,
+        BTreeMap::from([("Orientation".into(), "Horizontal".into())]),
+    )]);
+    let context = LayoutContext::new(&document, &bounds).with_resolved_properties(&properties);
+    let edits = LayoutRegistry::built_in()
+        .plan(
+            &context,
+            LayoutAction::Drop {
+                parent: root,
+                source: "<Button Name='new'/>".into(),
+                position: Point::new(75.0, 20.0),
+            },
+        )
+        .unwrap();
+    document.apply("Drop", edits).unwrap();
+    assert_eq!(
+        document.ast().element_children(root)[1],
+        id(&document, "new")
+    );
+    assert_eq!(
+        document.ast().node(root).unwrap().attribute("Orientation"),
+        Some("{Binding Axis}")
+    );
+}
+#[test]
+fn dropping_in_flex_preserves_live_order_bindings() {
+    let mut document=Document::new("<FlexPanel><Button Name='a' Flex.Order='{Binding First}'/><Button Name='b' Flex.Order='{Binding Second}'/></FlexPanel>").unwrap();
+    let root = document.ast().root();
+    let a = id(&document, "a");
+    let b = id(&document, "b");
+    let bounds = BTreeMap::from([
+        (root, Rect::new(0.0, 0.0, 200.0, 50.0)),
+        (a, Rect::new(0.0, 0.0, 100.0, 50.0)),
+        (b, Rect::new(100.0, 0.0, 100.0, 50.0)),
+    ]);
+    let properties = BTreeMap::from([
+        (root, BTreeMap::from([("Direction".into(), "Row".into())])),
+        (a, BTreeMap::from([("Flex.Order".into(), "10".into())])),
+        (b, BTreeMap::from([("Flex.Order".into(), "20".into())])),
+    ]);
+    let edits = LayoutRegistry::built_in()
+        .plan(
+            &LayoutContext::new(&document, &bounds).with_resolved_properties(&properties),
+            LayoutAction::Drop {
+                parent: root,
+                source: "<Button Name='new'/>".into(),
+                position: Point::new(75.0, 25.0),
+            },
+        )
+        .unwrap();
+    document.apply("Drop", edits).unwrap();
+    assert_eq!(
+        document.ast().node(a).unwrap().attribute("Flex.Order"),
+        Some("{Binding First}")
+    );
+    assert_eq!(
+        document
+            .ast()
+            .node(id(&document, "new"))
+            .unwrap()
+            .attribute("Flex.Order"),
+        Some("20")
+    );
+}
+#[test]
 fn canvas_movement_uses_measured_anchor_and_preserves_unrelated_source() {
     let mut document = Document::new(
         "<Canvas><!--keep--><Button Name='a' Canvas.Right='10' Width='20'/></Canvas>",
@@ -43,34 +119,40 @@ fn canvas_and_resize_do_not_overwrite_bound_values() {
     let bounds = BTreeMap::new();
     let context = LayoutContext::new(&document, &bounds);
     let registry = LayoutRegistry::built_in();
-    assert!(registry
-        .plan(
-            &context,
-            LayoutAction::Move {
-                node,
-                delta: Point::new(5.0, 0.0)
-            }
-        )
-        .is_err());
-    assert!(registry
-        .plan(
-            &context,
-            LayoutAction::Resize {
-                node,
-                before: Rect::new(0.0, 0.0, 10.0, 10.0),
-                after: Rect::new(0.0, 0.0, 20.0, 20.0)
-            }
-        )
-        .is_err());
-    assert!(registry
-        .plan(
-            &context,
-            LayoutAction::Move {
-                node,
-                delta: Point::new(f64::NAN, 0.0)
-            }
-        )
-        .is_err());
+    assert!(
+        registry
+            .plan(
+                &context,
+                LayoutAction::Move {
+                    node,
+                    delta: Point::new(5.0, 0.0)
+                }
+            )
+            .is_err()
+    );
+    assert!(
+        registry
+            .plan(
+                &context,
+                LayoutAction::Resize {
+                    node,
+                    before: Rect::new(0.0, 0.0, 10.0, 10.0),
+                    after: Rect::new(0.0, 0.0, 20.0, 20.0)
+                }
+            )
+            .is_err()
+    );
+    assert!(
+        registry
+            .plan(
+                &context,
+                LayoutAction::Move {
+                    node,
+                    delta: Point::new(f64::NAN, 0.0)
+                }
+            )
+            .is_err()
+    );
 }
 #[test]
 fn flow_panel_moves_preserve_the_opposite_margin_and_reorder_content_only() {
@@ -164,18 +246,20 @@ fn grid_cell_and_track_editing_preserve_constraints() {
         document.ast().node(node).unwrap().attribute("Grid.RowSpan"),
         Some("2")
     );
-    assert!(LayoutRegistry::built_in()
-        .plan(
-            &LayoutContext::new(&document, &BTreeMap::new()),
-            LayoutAction::GridCell {
-                node,
-                row: 1,
-                column: 1,
-                row_span: 2,
-                column_span: 1
-            }
-        )
-        .is_err());
+    assert!(
+        LayoutRegistry::built_in()
+            .plan(
+                &LayoutContext::new(&document, &BTreeMap::new()),
+                LayoutAction::GridCell {
+                    node,
+                    row: 1,
+                    column: 1,
+                    row_span: 2,
+                    column_span: 1
+                }
+            )
+            .is_err()
+    );
 }
 #[test]
 fn grid_drop_uses_native_tracks_and_requires_live_auto_boundaries() {
@@ -203,9 +287,11 @@ fn grid_drop_uses_native_tracks_and_requires_live_auto_boundaries() {
         source: "<Button/>".into(),
         position: Point::new(10.0, 80.0),
     };
-    assert!(LayoutRegistry::built_in()
-        .plan(&LayoutContext::new(&document, &bounds), action.clone())
-        .is_err());
+    assert!(
+        LayoutRegistry::built_in()
+            .plan(&LayoutContext::new(&document, &bounds), action.clone())
+            .is_err()
+    );
     let lines = BTreeMap::from([(
         root,
         GridLines {
@@ -213,12 +299,14 @@ fn grid_drop_uses_native_tracks_and_requires_live_auto_boundaries() {
             columns: vec![0.0, 300.0],
         },
     )]);
-    assert!(LayoutRegistry::built_in()
-        .plan(
-            &LayoutContext::new(&document, &bounds).with_grid_lines(&lines),
-            action
-        )
-        .is_ok());
+    assert!(
+        LayoutRegistry::built_in()
+            .plan(
+                &LayoutContext::new(&document, &bounds).with_grid_lines(&lines),
+                action
+            )
+            .is_ok()
+    );
 }
 #[test]
 fn drag_drop_preserves_inherited_namespaces_and_dock_fill_child() {
@@ -275,26 +363,30 @@ fn relative_constraints_reject_cycles_and_cross_panel_references() {
             target: Some(b),
         },
     );
-    assert!(LayoutRegistry::built_in()
-        .plan(
-            &LayoutContext::new(&document, &BTreeMap::new()),
-            LayoutAction::Relative {
-                node: a,
-                relation: RelativeRelation::LeftOf,
-                target: Some(c)
-            }
-        )
-        .is_err());
-    assert!(LayoutRegistry::built_in()
-        .plan(
-            &LayoutContext::new(&document, &BTreeMap::new()),
-            LayoutAction::Relative {
-                node: a,
-                relation: RelativeRelation::Below,
-                target: Some(a)
-            }
-        )
-        .is_err());
+    assert!(
+        LayoutRegistry::built_in()
+            .plan(
+                &LayoutContext::new(&document, &BTreeMap::new()),
+                LayoutAction::Relative {
+                    node: a,
+                    relation: RelativeRelation::LeftOf,
+                    target: Some(c)
+                }
+            )
+            .is_err()
+    );
+    assert!(
+        LayoutRegistry::built_in()
+            .plan(
+                &LayoutContext::new(&document, &BTreeMap::new()),
+                LayoutAction::Relative {
+                    node: a,
+                    relation: RelativeRelation::Below,
+                    target: Some(a)
+                }
+            )
+            .is_err()
+    );
 }
 #[test]
 fn all_panel_families_expose_capabilities_and_generated_containers_stay_owned() {
@@ -317,16 +409,18 @@ fn all_panel_families_expose_capabilities_and_generated_containers_stay_owned() 
         assert!(adapter.capabilities().generated_items);
         assert!(!adapter.capabilities().drop_items);
         let document = Document::new(format!("<{panel}/>")).unwrap();
-        assert!(registry
-            .plan(
-                &LayoutContext::new(&document, &BTreeMap::new()),
-                LayoutAction::Drop {
-                    parent: document.ast().root(),
-                    source: "<Button/>".into(),
-                    position: Point::default()
-                }
-            )
-            .is_err());
+        assert!(
+            registry
+                .plan(
+                    &LayoutContext::new(&document, &BTreeMap::new()),
+                    LayoutAction::Drop {
+                        parent: document.ast().root(),
+                        source: "<Button/>".into(),
+                        position: Point::default()
+                    }
+                )
+                .is_err()
+        );
     }
 }
 #[test]
@@ -336,42 +430,50 @@ fn property_metadata_validates_multi_edit_ranges_and_expressions() {
     let b = id(&document, "b");
     let registry = PropertyRegistry::built_in();
     assert!(registry.state(&document, &[a, b], "Opacity").unwrap().mixed);
-    assert!(registry
-        .plan(
-            &document,
-            &[a, b],
-            "Opacity",
-            Some("2"),
-            ExpressionPolicy::PreserveExpressions
-        )
-        .is_err());
-    assert!(registry
-        .plan(
-            &document,
-            &[b],
-            "Width",
-            Some("200"),
-            ExpressionPolicy::PreserveExpressions
-        )
-        .is_err());
-    assert!(registry
-        .plan(
-            &document,
-            &[b],
-            "Width",
-            Some("200"),
-            ExpressionPolicy::ReplaceExpressions
-        )
-        .is_ok());
-    assert!(registry
-        .plan(
-            &document,
-            &[a, b],
-            "Opacity",
-            Some("0.7"),
-            ExpressionPolicy::PreserveExpressions
-        )
-        .is_ok());
+    assert!(
+        registry
+            .plan(
+                &document,
+                &[a, b],
+                "Opacity",
+                Some("2"),
+                ExpressionPolicy::PreserveExpressions
+            )
+            .is_err()
+    );
+    assert!(
+        registry
+            .plan(
+                &document,
+                &[b],
+                "Width",
+                Some("200"),
+                ExpressionPolicy::PreserveExpressions
+            )
+            .is_err()
+    );
+    assert!(
+        registry
+            .plan(
+                &document,
+                &[b],
+                "Width",
+                Some("200"),
+                ExpressionPolicy::ReplaceExpressions
+            )
+            .is_ok()
+    );
+    assert!(
+        registry
+            .plan(
+                &document,
+                &[a, b],
+                "Opacity",
+                Some("0.7"),
+                ExpressionPolicy::PreserveExpressions
+            )
+            .is_ok()
+    );
 }
 #[test]
 fn geometry_snaps_aligns_and_distributes_with_finite_guards() {
@@ -390,12 +492,14 @@ fn geometry_snaps_aligns_and_distributes_with_finite_guards() {
     ];
     assert_eq!(align(&rects, Alignment::Left).unwrap()[&3].x, -100.0);
     assert_eq!(distribute(&rects, Axis::Horizontal).unwrap()[&2].x, 25.0);
-    assert!(SnapSettings {
-        grid: Some(0.0),
-        ..Default::default()
-    }
-    .snap(rects[0].1, &[])
-    .is_err());
+    assert!(
+        SnapSettings {
+            grid: Some(0.0),
+            ..Default::default()
+        }
+        .snap(rects[0].1, &[])
+        .is_err()
+    );
     let transform = Affine::rotation(90.0, Point::new(10.0, 10.0)).unwrap();
     let p = Point::new(20.0, 10.0);
     let rotated = transform.transform(p).unwrap();
@@ -403,10 +507,12 @@ fn geometry_snaps_aligns_and_distributes_with_finite_guards() {
     assert!((rotated.y - 20.0).abs() < 1e-10);
     let restored = transform.inverse().unwrap().transform(rotated).unwrap();
     assert!((restored.x - p.x).abs() < 1e-10);
-    assert!(Affine::scale(0.0, 1.0, Point::default())
-        .unwrap()
-        .inverse()
-        .is_err());
+    assert!(
+        Affine::scale(0.0, 1.0, Point::default())
+            .unwrap()
+            .inverse()
+            .is_err()
+    );
 }
 #[test]
 fn nested_selection_moves_once_and_stale_gestures_do_not_commit() {
@@ -454,13 +560,15 @@ fn nested_selection_moves_once_and_stale_gestures_do_not_commit() {
             }],
         )
         .unwrap();
-    assert!(gesture
-        .commit(
-            &LayoutContext::new(&document, &bounds),
-            &LayoutRegistry::built_in(),
-            Point::new(15.0, 20.0)
-        )
-        .is_err());
+    assert!(
+        gesture
+            .commit(
+                &LayoutContext::new(&document, &bounds),
+                &LayoutRegistry::built_in(),
+                Point::new(15.0, 20.0)
+            )
+            .is_err()
+    );
 }
 #[test]
 fn selection_hit_testing_respects_paint_order_lock_and_marquee() {
@@ -564,26 +672,30 @@ fn custom_property_editors_and_layout_adapters_are_replaceable() {
     editors.register(Box::new(TokenEditor));
     let document = Document::new("<Button/>").unwrap();
     let root = document.ast().root();
-    assert!(properties
-        .plan_with(
-            &document,
-            &[root],
-            "Token",
-            Some("invalid"),
-            ExpressionPolicy::ReplaceExpressions,
-            &editors
-        )
-        .is_err());
-    assert!(properties
-        .plan_with(
-            &document,
-            &[root],
-            "Token",
-            Some("app:ok"),
-            ExpressionPolicy::ReplaceExpressions,
-            &editors
-        )
-        .is_ok());
+    assert!(
+        properties
+            .plan_with(
+                &document,
+                &[root],
+                "Token",
+                Some("invalid"),
+                ExpressionPolicy::ReplaceExpressions,
+                &editors
+            )
+            .is_err()
+    );
+    assert!(
+        properties
+            .plan_with(
+                &document,
+                &[root],
+                "Token",
+                Some("app:ok"),
+                ExpressionPolicy::ReplaceExpressions,
+                &editors
+            )
+            .is_ok()
+    );
     struct CustomPanel;
     impl LayoutAdapter for CustomPanel {
         fn panel_type(&self) -> &str {
@@ -616,15 +728,17 @@ fn custom_property_editors_and_layout_adapters_are_replaceable() {
     let mut registry = LayoutRegistry::built_in();
     registry.register(Box::new(CustomPanel));
     let document = Document::new("<CustomPanel><Button Name='a'/></CustomPanel>").unwrap();
-    assert!(registry
-        .plan(
-            &LayoutContext::new(&document, &BTreeMap::new()),
-            LayoutAction::Move {
-                node: id(&document, "a"),
-                delta: Point::new(5.0, 0.0)
-            }
-        )
-        .is_ok());
+    assert!(
+        registry
+            .plan(
+                &LayoutContext::new(&document, &BTreeMap::new()),
+                LayoutAction::Move {
+                    node: id(&document, "a"),
+                    delta: Point::new(5.0, 0.0)
+                }
+            )
+            .is_ok()
+    );
 }
 #[test]
 fn empty_content_hosts_accept_one_drop_and_preserve_explicit_content_properties() {
@@ -647,9 +761,11 @@ fn empty_content_hosts_accept_one_drop_and_preserve_explicit_content_properties(
             position: Point::default(),
         };
         apply(&mut document, &BTreeMap::new(), action.clone());
-        assert!(LayoutRegistry::built_in()
-            .plan(&LayoutContext::new(&document, &BTreeMap::new()), action)
-            .is_err());
+        assert!(
+            LayoutRegistry::built_in()
+                .plan(&LayoutContext::new(&document, &BTreeMap::new()), action)
+                .is_err()
+        );
     }
     let mut document = Document::new("<Border><Border.Child/></Border>").unwrap();
     let root = document.ast().root();
@@ -669,16 +785,18 @@ fn empty_content_hosts_accept_one_drop_and_preserve_explicit_content_properties(
         "<Border Child='{Binding Child}'/>",
     ] {
         let document = Document::new(source).unwrap();
-        assert!(LayoutRegistry::built_in()
-            .plan(
-                &LayoutContext::new(&document, &BTreeMap::new()),
-                LayoutAction::Drop {
-                    parent: document.ast().root(),
-                    source: "<Grid/>".into(),
-                    position: Point::default()
-                }
-            )
-            .is_err());
+        assert!(
+            LayoutRegistry::built_in()
+                .plan(
+                    &LayoutContext::new(&document, &BTreeMap::new()),
+                    LayoutAction::Drop {
+                        parent: document.ast().root(),
+                        source: "<Grid/>".into(),
+                        position: Point::default()
+                    }
+                )
+                .is_err()
+        );
     }
 }
 
@@ -774,15 +892,17 @@ fn live_layout_preserves_styled_margins_and_exact_arrange_slots() {
             ..ResolvedLayout::default()
         },
     )]);
-    assert!(registry
-        .plan(
-            &LayoutContext::new(&document, &BTreeMap::new()).with_resolved_layout(&invalid),
-            LayoutAction::Move {
-                node,
-                delta: Point::new(1.0, 0.0)
-            },
-        )
-        .is_err());
+    assert!(
+        registry
+            .plan(
+                &LayoutContext::new(&document, &BTreeMap::new()).with_resolved_layout(&invalid),
+                LayoutAction::Move {
+                    node,
+                    delta: Point::new(1.0, 0.0)
+                },
+            )
+            .is_err()
+    );
 }
 
 #[test]
@@ -864,35 +984,63 @@ fn attached_property_elements_are_never_overwritten_by_layout_gestures() {
         let result = LayoutRegistry::built_in()
             .plan(&LayoutContext::new(&document, &BTreeMap::new()), action);
         assert!(result.unwrap_err().to_string().contains("property element"));
-        assert!(PropertyRegistry::built_in()
-            .plan(
-                &document,
-                &[node],
-                property,
-                Some("1"),
-                ExpressionPolicy::ReplaceExpressions
-            )
-            .unwrap_err()
-            .to_string()
-            .contains("property element"));
+        assert!(
+            PropertyRegistry::built_in()
+                .plan(
+                    &document,
+                    &[node],
+                    property,
+                    Some("1"),
+                    ExpressionPolicy::ReplaceExpressions
+                )
+                .unwrap_err()
+                .to_string()
+                .contains("property element")
+        );
     }
 }
 
 #[test]
 fn uniform_drop_matches_runtime_square_auto_spacing_first_column_and_visibility() {
     for (source, position, expected_index) in [
-        ("<UniformGrid><Button Name='a'/><Button Name='b'/><Button Name='c'/><Button Name='d'/></UniformGrid>", Point::new(10.0, 120.0), 3),
-        ("<UniformGrid Rows='2' Columns='2' FirstColumn='4'><Button Name='a'/><Button Name='b'/></UniformGrid>", Point::new(180.0, 10.0), 1),
-        ("<UniformGrid Rows='2' Columns='2' ColumnSpacing='100'><Button Name='a'/><Button Name='b'/></UniformGrid>", Point::new(180.0, 10.0), 0),
-        ("<UniformGrid Rows='2' Columns='2'><Button Name='hidden' IsVisible='False'/><Button Name='a'/><Button Name='b'/></UniformGrid>", Point::new(10.0, 180.0), 3),
+        (
+            "<UniformGrid><Button Name='a'/><Button Name='b'/><Button Name='c'/><Button Name='d'/></UniformGrid>",
+            Point::new(10.0, 120.0),
+            3,
+        ),
+        (
+            "<UniformGrid Rows='2' Columns='2' FirstColumn='4'><Button Name='a'/><Button Name='b'/></UniformGrid>",
+            Point::new(180.0, 10.0),
+            1,
+        ),
+        (
+            "<UniformGrid Rows='2' Columns='2' ColumnSpacing='100'><Button Name='a'/><Button Name='b'/></UniformGrid>",
+            Point::new(180.0, 10.0),
+            0,
+        ),
+        (
+            "<UniformGrid Rows='2' Columns='2'><Button Name='hidden' IsVisible='False'/><Button Name='a'/><Button Name='b'/></UniformGrid>",
+            Point::new(10.0, 180.0),
+            3,
+        ),
     ] {
         let mut document = Document::new(source).unwrap();
         let root = document.ast().root();
         let bounds = BTreeMap::from([(root, Rect::new(0.0, 0.0, 300.0, 300.0))]);
-        apply(&mut document, &bounds, LayoutAction::Drop {
-            parent: root, source: "<Button Name='new'/>".into(), position,
-        });
-        assert_eq!(document.ast().element_children(root)[expected_index], id(&document, "new"), "{source}");
+        apply(
+            &mut document,
+            &bounds,
+            LayoutAction::Drop {
+                parent: root,
+                source: "<Button Name='new'/>".into(),
+                position,
+            },
+        );
+        assert_eq!(
+            document.ast().element_children(root)[expected_index],
+            id(&document, "new"),
+            "{source}"
+        );
     }
     let mut document = Document::new("<UniformGrid Rows='2' Columns='2'><Button Name='hidden' IsVisible='{Binding Hidden}'/><Button Name='a'/><Button Name='b'/></UniformGrid>").unwrap();
     let root = document.ast().root();
@@ -911,9 +1059,11 @@ fn uniform_drop_matches_runtime_square_auto_spacing_first_column_and_visibility(
         position: Point::new(10.0, 180.0),
     };
     let registry = LayoutRegistry::built_in();
-    assert!(registry
-        .plan(&LayoutContext::new(&document, &bounds), action.clone())
-        .is_err());
+    assert!(
+        registry
+            .plan(&LayoutContext::new(&document, &bounds), action.clone())
+            .is_err()
+    );
     let edits = registry
         .plan(
             &LayoutContext::new(&document, &bounds).with_resolved_layout(&layout),
@@ -990,9 +1140,11 @@ fn batch_plans_validate_one_atomic_source_transaction_across_coordinate_spaces()
         .unwrap();
     let other = document.clone();
     let other_context = LayoutContext::new(&other, &second_bounds);
-    assert!(registry
-        .plan_batch([(&first, offset), (&other_context, namespace)])
-        .is_err());
+    assert!(
+        registry
+            .plan_batch([(&first, offset), (&other_context, namespace)])
+            .is_err()
+    );
     document.apply("Atomic custom layout", edits).unwrap();
     assert_eq!(
         document.ast().node(a).unwrap().attribute("layout:Offset"),
@@ -1048,11 +1200,13 @@ fn batch_rejects_combined_relative_cycles_conflicting_tracks_and_multiple_conten
     };
     assert!(registry.plan(&context, first.clone()).is_ok());
     assert!(registry.plan(&context, second.clone()).is_ok());
-    assert!(registry
-        .plan_many(&context, [first, second])
-        .unwrap_err()
-        .to_string()
-        .contains("cycle"));
+    assert!(
+        registry
+            .plan_many(&context, [first, second])
+            .unwrap_err()
+            .to_string()
+            .contains("cycle")
+    );
 
     let document = Document::new("<Grid RowDefinitions='*,*'/>").unwrap();
     let context = LayoutContext::new(&document, &bounds);
@@ -1062,11 +1216,13 @@ fn batch_rejects_combined_relative_cycles_conflicting_tracks_and_multiple_conten
         index,
         length: GridLength::Pixels(40.0),
     });
-    assert!(registry
-        .plan_many(&context, tracks)
-        .unwrap_err()
-        .to_string()
-        .contains("conflicting"));
+    assert!(
+        registry
+            .plan_many(&context, tracks)
+            .unwrap_err()
+            .to_string()
+            .contains("conflicting")
+    );
 
     let document = Document::new("<Border/>").unwrap();
     let context = LayoutContext::new(&document, &bounds);
@@ -1075,11 +1231,13 @@ fn batch_rejects_combined_relative_cycles_conflicting_tracks_and_multiple_conten
         source: source.into(),
         position: Point::default(),
     });
-    assert!(registry
-        .plan_many(&context, drops)
-        .unwrap_err()
-        .to_string()
-        .contains("multiple children"));
+    assert!(
+        registry
+            .plan_many(&context, drops)
+            .unwrap_err()
+            .to_string()
+            .contains("multiple children")
+    );
     assert_eq!(document.source(), "<Border/>");
 }
 
@@ -1104,9 +1262,11 @@ fn grid_cell_spans_use_effective_tracks_from_the_host() {
         row_span: 1,
         column_span: 2,
     };
-    assert!(registry
-        .plan(&LayoutContext::new(&document, &bounds), action.clone())
-        .is_err());
+    assert!(
+        registry
+            .plan(&LayoutContext::new(&document, &bounds), action.clone())
+            .is_err()
+    );
     let edits = registry
         .plan(
             &LayoutContext::new(&document, &bounds).with_grid_lines(&lines),
@@ -1117,10 +1277,12 @@ fn grid_cell_spans_use_effective_tracks_from_the_host() {
     let element = document.ast().node(node).unwrap();
     assert_eq!(element.attribute("Grid.Row"), Some("1"));
     assert_eq!(element.attribute("Grid.ColumnSpan"), Some("2"));
-    assert!(document
-        .ast()
-        .node(root)
-        .unwrap()
-        .attribute("RowDefinitions")
-        .is_none());
+    assert!(
+        document
+            .ast()
+            .node(root)
+            .unwrap()
+            .attribute("RowDefinitions")
+            .is_none()
+    );
 }

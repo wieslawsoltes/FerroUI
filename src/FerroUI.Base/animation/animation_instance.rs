@@ -1,10 +1,13 @@
 use crate::animation::animators::{interpolation_handler, Animator};
 use crate::animation::easings::Easing;
 use crate::animation::{
-    Animatable, Animation, Clock, FillMode, IClock, IterationType, PlayState, PlaybackDirection, TimeSpan,
+    Animatable, Animation, Clock, FillMode, IClock, IterationType, PlayState, PlaybackDirection,
+    TimeSpan,
 };
 use crate::data::BindingPriority;
-use crate::reactive::{SingleSubscriberObservableBase, IDisposable, IObservable, IObserver, ObservableError};
+use crate::reactive::{
+    IDisposable, IObservable, IObserver, ObservableError, SingleSubscriberObservableBase,
+};
 use crate::{Ref, Visual, WeakRef};
 use std::cell::{Cell, RefCell};
 use std::fmt;
@@ -48,6 +51,7 @@ pub(crate) struct AnimationInstance<A: Animator> {
     neutral_value: RefCell<A::Value>,
     fill_mode: Cell<FillMode>,
     is_first_frame: Cell<bool>,
+    preview_complete: Cell<bool>,
     is_in_first_initial_delay: Cell<bool>,
     last_interp_value: RefCell<A::Value>,
     initial_kf_value: RefCell<A::Value>,
@@ -108,6 +112,7 @@ impl<A: Animator> AnimationInstance<A> {
             neutral_value: RefCell::new(A::Value::default()),
             fill_mode: Cell::new(FillMode::None),
             is_first_frame: Cell::new(true),
+            preview_complete: Cell::new(false),
             is_in_first_initial_delay: Cell::new(true),
             last_interp_value: RefCell::new(A::Value::default()),
             initial_kf_value: RefCell::new(A::Value::default()),
@@ -140,25 +145,34 @@ impl<A: Animator> AnimationInstance<A> {
         self.speed_ratio.set(animation.speed_ratio());
 
         if self.speed_ratio.get() < 0.0 {
-            return Err(AnimationError("SpeedRatio value cannot be negative.".to_string()));
+            return Err(AnimationError(
+                "SpeedRatio value cannot be negative.".to_string(),
+            ));
         }
 
         self.initial_delay.set(animation.delay());
 
         if self.initial_delay.get() < TimeSpan::ZERO {
-            return Err(AnimationError("Delay value cannot be negative.".to_string()));
+            return Err(AnimationError(
+                "Delay value cannot be negative.".to_string(),
+            ));
         }
 
         self.duration.set(animation.duration());
 
         if self.duration.get() < TimeSpan::ZERO {
-            return Err(AnimationError("Duration value cannot be negative.".to_string()));
+            return Err(AnimationError(
+                "Duration value cannot be negative.".to_string(),
+            ));
         }
 
-        self.iteration_delay.set(animation.delay_between_iterations());
+        self.iteration_delay
+            .set(animation.delay_between_iterations());
 
         if self.iteration_delay.get() < TimeSpan::ZERO {
-            return Err(AnimationError("DelayBetweenIterations value cannot be negative.".to_string()));
+            return Err(AnimationError(
+                "DelayBetweenIterations value cannot be negative.".to_string(),
+            ));
         }
 
         let iteration_count = animation.iteration_count();
@@ -168,12 +182,14 @@ impl<A: Animator> AnimationInstance<A> {
                     "IterationCount value cannot be larger than long.MaxValue.".to_string(),
                 ));
             }
-            self.iteration_count.set(Some(iteration_count.value() as i64));
+            self.iteration_count
+                .set(Some(iteration_count.value() as i64));
         } else {
             self.iteration_count.set(None);
         }
 
-        self.playback_direction_prev.set(self.playback_direction.get());
+        self.playback_direction_prev
+            .set(self.playback_direction.get());
         self.playback_direction.set(animation.playback_direction());
         self.fill_mode.set(animation.fill_mode());
         Ok(())
@@ -187,7 +203,7 @@ impl<A: Animator> AnimationInstance<A> {
         let Some(timer_sub) = timer_sub else { return };
 
         // Animation may have been stopped before it has finished.
-        if self.can_apply_final_fill() {
+        if self.can_apply_final_fill() && !self.animation.is_preview() {
             let value = self.last_interp_value.borrow().clone();
             self.apply_final_fill(value);
         }
@@ -216,7 +232,9 @@ impl<A: Animator> AnimationInstance<A> {
     fn subscribed(&self) {
         let clock = Clock::with_parent(&self.base_clock);
         *self.clock.borrow_mut() = Some(clock.clone());
-        let Some(this) = self.this.upgrade() else { return };
+        let Some(this) = self.this.upgrade() else {
+            return;
+        };
         let timer_sub = clock.subscribe(Rc::new(StepObserver(this)));
         *self.timer_sub.borrow_mut() = Some(timer_sub);
 
@@ -225,7 +243,10 @@ impl<A: Animator> AnimationInstance<A> {
                 let weak_clock = Rc::downgrade(&clock);
                 let weak_visual = visual.downgrade();
                 let subscription = visual.is_effectively_visible_changed(move || {
-                    let (Some(clock), Some(visual)) = (weak_clock.upgrade(), weak_visual.upgrade()) else { return };
+                    let (Some(clock), Some(visual)) = (weak_clock.upgrade(), weak_visual.upgrade())
+                    else {
+                        return;
+                    };
                     if clock.play_state() == PlayState::Stop {
                         return;
                     }
@@ -271,7 +292,11 @@ impl<A: Animator> AnimationInstance<A> {
     }
 
     pub(crate) fn step(&self, frame_tick: TimeSpan) {
-        let paused = self.clock.borrow().as_ref().is_some_and(|clock| clock.play_state() == PlayState::Pause);
+        let paused = self
+            .clock
+            .borrow()
+            .as_ref()
+            .is_some_and(|clock| clock.play_state() == PlayState::Pause);
         if paused {
             return;
         }
@@ -301,6 +326,9 @@ impl<A: Animator> AnimationInstance<A> {
     }
 
     fn do_complete(&self, stop_as_is: bool) {
+        if self.animation.is_preview() && self.preview_complete.replace(true) {
+            return;
+        }
         if !stop_as_is {
             // Update the last value because the completion might perform the
             // final fill, and the filled value has to be snapped to the last
@@ -310,10 +338,22 @@ impl<A: Animator> AnimationInstance<A> {
                 self.is_alternating_playback_direction(),
                 self.iteration_count.get().map(|count| count + 1),
             );
-            let value = self.find_edge_value(self.is_anim_time_going_backwards(), is_iteration_reversed);
+            let value =
+                self.find_edge_value(self.is_anim_time_going_backwards(), is_iteration_reversed);
             *self.last_interp_value.borrow_mut() = value;
         }
 
+        if self.animation.is_preview() && self.can_apply_final_fill() {
+            // Keep the original binding/frame after the clock completes. Creating a new
+            // value frame here would incorrectly raise an older program above a newer one.
+            self.core
+                .publish_next(self.last_interp_value.borrow().clone());
+            self.unsubscribed();
+            if let Some(on_complete) = &self.on_complete_action {
+                on_complete();
+            }
+            return;
+        }
         if let Some(on_complete) = &self.on_complete_action {
             on_complete();
         }
@@ -321,7 +361,8 @@ impl<A: Animator> AnimationInstance<A> {
     }
 
     fn do_initial_delay(&self) {
-        if self.is_in_first_initial_delay.get() && !matches!(self.fill_mode.get(), FillMode::Backward | FillMode::Both)
+        if self.is_in_first_initial_delay.get()
+            && !matches!(self.fill_mode.get(), FillMode::Backward | FillMode::Both)
         {
             return;
         }
@@ -337,7 +378,11 @@ impl<A: Animator> AnimationInstance<A> {
     }
 
     fn do_play_states(&self) {
-        let clock_stopped = self.clock.borrow().as_ref().is_some_and(|clock| clock.play_state() == PlayState::Stop);
+        let clock_stopped = self
+            .clock
+            .borrow()
+            .as_ref()
+            .is_some_and(|clock| clock.play_state() == PlayState::Stop);
         if clock_stopped || self.base_clock.play_state() == PlayState::Stop {
             self.do_complete(true);
         }
@@ -345,13 +390,19 @@ impl<A: Animator> AnimationInstance<A> {
         if self.is_first_frame.get() {
             // In first frame of animation we determine the expected direction of time.
             let direction = self.animation.playback_direction();
-            self.time_moves_backwards
-                .set(matches!(direction, PlaybackDirection::Reverse | PlaybackDirection::AlternateReverse));
+            self.time_moves_backwards.set(matches!(
+                direction,
+                PlaybackDirection::Reverse | PlaybackDirection::AlternateReverse
+            ));
 
             let base = self.animator.base();
             let count = base.count();
             assert!(count != 0, "Sequence contains no elements");
-            let initial_key_frame = if self.time_moves_backwards.get() { base.get(count - 1) } else { base.get(0) };
+            let initial_key_frame = if self.time_moves_backwards.get() {
+                base.get(count - 1)
+            } else {
+                base.get(0)
+            };
             let initial_value = initial_key_frame
                 .with_value(|value| value.and_then(|value| self.animator.typed_value(value)))
                 .unwrap_or_else(|| self.neutral_value.borrow().clone());
@@ -361,7 +412,10 @@ impl<A: Animator> AnimationInstance<A> {
         }
     }
 
-    fn is_iteration_reversed(is_alternating_playback_direction: bool, iteration_index: Option<i64>) -> bool {
+    fn is_iteration_reversed(
+        is_alternating_playback_direction: bool,
+        iteration_index: Option<i64>,
+    ) -> bool {
         if is_alternating_playback_direction {
             // An unknown index (an infinite animation) compares unequal to
             // zero.
@@ -371,8 +425,16 @@ impl<A: Animator> AnimationInstance<A> {
         }
     }
 
-    fn find_edge_value(&self, is_anim_time_going_backwards: bool, is_iteration_reversed: bool) -> A::Value {
-        let final_ease_value = if is_anim_time_going_backwards ^ is_iteration_reversed { 0.0 } else { 1.0 };
+    fn find_edge_value(
+        &self,
+        is_anim_time_going_backwards: bool,
+        is_iteration_reversed: bool,
+    ) -> A::Value {
+        let final_ease_value = if is_anim_time_going_backwards ^ is_iteration_reversed {
+            0.0
+        } else {
+            1.0
+        };
         self.interpolate(final_ease_value)
     }
 
@@ -385,11 +447,17 @@ impl<A: Animator> AnimationInstance<A> {
     }
 
     fn is_anim_time_going_backwards(&self) -> bool {
-        matches!(self.playback_direction.get(), PlaybackDirection::Reverse | PlaybackDirection::AlternateReverse)
+        matches!(
+            self.playback_direction.get(),
+            PlaybackDirection::Reverse | PlaybackDirection::AlternateReverse
+        )
     }
 
     fn is_alternating_playback_direction(&self) -> bool {
-        matches!(self.playback_direction.get(), PlaybackDirection::Alternate | PlaybackDirection::AlternateReverse)
+        matches!(
+            self.playback_direction.get(),
+            PlaybackDirection::Alternate | PlaybackDirection::AlternateReverse
+        )
     }
 
     /// Handles all possible cases of applying the initial delay and
@@ -442,6 +510,9 @@ impl<A: Animator> AnimationInstance<A> {
 
     fn internal_step(&self, time: TimeSpan) -> Result<(), AnimationError> {
         self.do_play_states();
+        if self.preview_complete.get() {
+            return Ok(());
+        }
 
         self.fetch_properties()?;
 
@@ -458,7 +529,11 @@ impl<A: Animator> AnimationInstance<A> {
         let is_anim_time_going_backwards = self.is_anim_time_going_backwards();
 
         // Combine SpeedRatio and PlaybackDirection into a single signed speed ratio.
-        let speed_ratio = if is_anim_time_going_backwards { -self.speed_ratio.get() } else { self.speed_ratio.get() };
+        let speed_ratio = if is_anim_time_going_backwards {
+            -self.speed_ratio.get()
+        } else {
+            self.speed_ratio.get()
+        };
 
         // Calculate animation time. That's time that has passed inside
         // the animation since its beginning.
@@ -479,7 +554,11 @@ impl<A: Animator> AnimationInstance<A> {
 
         // Get animation time oriented in the direction of time. Animation running in
         // same direction as it was on first frame will always increase this variable.
-        let mut anim_time_positive = if self.time_moves_backwards.get() { -anim_time } else { anim_time };
+        let mut anim_time_positive = if self.time_moves_backwards.get() {
+            -anim_time
+        } else {
+            anim_time
+        };
 
         if self.initial_delay.get() > TimeSpan::ZERO {
             let is_currently_inside_delay = self.apply_initial_delay(&mut anim_time_positive);
@@ -519,7 +598,10 @@ impl<A: Animator> AnimationInstance<A> {
         }
 
         playback_reversed ^= self.time_moves_backwards.get()
-            ^ Self::is_iteration_reversed(self.is_alternating_playback_direction(), Some(iter_index));
+            ^ Self::is_iteration_reversed(
+                self.is_alternating_playback_direction(),
+                Some(iter_index),
+            );
 
         let iters_until_end = iteration_count.map(|count| count - iter_index);
 
@@ -553,7 +635,9 @@ impl<A: Animator> AnimationInstance<A> {
 
     fn update_neutral_value(&self) {
         let property = self.animator.base().styled_property::<A::Value>();
-        let Some(control) = self.target_control.upgrade() else { return };
+        let Some(control) = self.target_control.upgrade() else {
+            return;
+        };
 
         let value = match control.get_base_value(property) {
             Some(base_value) => base_value,
@@ -566,7 +650,9 @@ impl<A: Animator> AnimationInstance<A> {
 impl<A: Animator> IObservable<A::Value> for AnimationInstance<A> {
     fn subscribe(&self, observer: Rc<dyn IObserver<A::Value>>) -> Rc<dyn IDisposable> {
         self.core.subscribe(observer, || self.subscribed());
-        self.this.upgrade().expect("the instance is alive while it is being subscribed to")
+        self.this
+            .upgrade()
+            .expect("the instance is alive while it is being subscribed to")
     }
 }
 

@@ -915,9 +915,22 @@ pub(crate) fn insert_styles(document: &Document, owner: NodeId, source: &str) ->
             source,
         }])
     } else {
+        // Resource extensions resolve when the loader constructs each value. Preserve
+        // owner resource declarations before the generated styles that consume them.
+        let index = document
+            .ast()
+            .element_children(owner)
+            .iter()
+            .rposition(|id| {
+                document
+                    .ast()
+                    .node(*id)
+                    .is_some_and(|child| child.local_name().ends_with(".Resources"))
+            })
+            .map_or(0, |index| index + 1);
         Ok(vec![Edit::InsertChild {
             parent: owner,
-            index: 0,
+            index,
             source: format!("<{}.Styles>{source}</{}.Styles>", node.name, node.name),
         }])
     }

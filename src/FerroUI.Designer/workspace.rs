@@ -64,6 +64,12 @@ pub struct DesignerWorkspace {
     pending_open: RefCell<Option<files::PendingDocument>>,
     pending_close: RefCell<Option<Rc<dyn Fn()>>>,
     file_busy: Cell<bool>,
+    project: RefCell<project::ProjectUi>,
+    source_tools: RefCell<source_tools::SourceTools>,
+    authoring: RefCell<authoring::AuthoringUi>,
+    animation_program_ids: RefCell<Vec<u64>>,
+    sharing: RefCell<Option<Rc<crate::sharing::SharingController>>>,
+    sharing_panel: RefCell<Option<Rc<sharing::SharingPanel>>>,
 }
 
 impl DesignerWorkspace {
@@ -126,6 +132,12 @@ impl DesignerWorkspace {
             pending_open: RefCell::new(None),
             pending_close: RefCell::new(None),
             file_busy: Cell::new(false),
+            project: RefCell::new(Default::default()),
+            source_tools: RefCell::new(Default::default()),
+            authoring: RefCell::new(Default::default()),
+            animation_program_ids: RefCell::new(Vec::new()),
+            sharing: RefCell::new(None),
+            sharing_panel: RefCell::new(None),
         });
         this.connect();
         this.refresh(true);
@@ -192,6 +204,10 @@ impl DesignerWorkspace {
 
     fn connect(self: &Rc<Self>) {
         self.connect_file_commands();
+        self.connect_project();
+        self.connect_source_tools();
+        self.connect_authoring();
+        self.connect_sharing();
         for (name, action) in [
             ("Undo", Action::Undo),
             ("Redo", Action::Redo),
@@ -348,6 +364,8 @@ impl DesignerWorkspace {
                     return;
                 };
                 let now = Dispatcher::ui_thread().now();
+                this.poll_project();
+                this.tick_sharing();
                 let delta = (now - this.last_tick.replace(now)).max(0) as f64 / 1000.0;
                 if this.pending_source.get() && now - this.source_changed_at.get() >= 180 {
                     this.apply_source();
@@ -458,17 +476,19 @@ impl DesignerWorkspace {
                     let value = self
                         .session
                         .borrow()
-                        .document()
-                        .ast()
-                        .node(target)
-                        .and_then(|node| node.attribute("Opacity"))
-                        .and_then(|value| value.parse().ok())
-                        .unwrap_or(1.0);
-                    self.session.borrow_mut().record_keyframe(
-                        target,
-                        "Opacity",
-                        AnimationValue::Number(value),
-                    )
+                        .preview
+                        .visual(target)
+                        .map(|visual| visual.opacity())
+                        .ok_or_else(|| {
+                            "The selected element has no current live preview".to_owned()
+                        });
+                    value.and_then(|value| {
+                        self.session.borrow_mut().record_keyframe(
+                            target,
+                            "Opacity",
+                            AnimationValue::Number(value),
+                        )
+                    })
                 } else {
                     Err("Select an element to keyframe its opacity; Record also captures edited properties".into())
                 }
@@ -502,6 +522,7 @@ impl DesignerWorkspace {
         if !changed && !generation_changed {
             return;
         }
+        self.source.set_is_read_only(session.is_read_only());
         if changed && !self.pending_source.get() {
             let text = session.document().source();
             if self.source.text().as_deref() != Some(text) {
@@ -589,29 +610,69 @@ impl DesignerWorkspace {
             self.rebuild_outline();
             self.rebuild_properties();
             self.rebuild_tracks();
+            self.rebuild_document_tabs();
+            self.refresh_source_tools();
+            self.rebuild_authoring();
+            self.refresh_animation_programs();
         }
         self.surface.invalidate_visual();
     }
 
     fn build_assets(self: &Rc<Self>) {
         let assets = self.root.get_control::<WrapPanel>("Assets");
-        for (name,source) in [
-            ("Button","<Button Content=\"Button\" Width=\"120\" Height=\"36\" />"),
-            ("TextBlock","<TextBlock Text=\"Text\" FontSize=\"18\" />"),
-            ("TextBox","<TextBox Text=\"Edit me\" Width=\"180\" />"),
-            ("CheckBox","<CheckBox Content=\"Option\" />"),
-            ("Border","<Border Width=\"180\" Height=\"100\" Background=\"#FFE0E7FF\" CornerRadius=\"8\" />"),
-            ("Grid","<Grid Width=\"220\" Height=\"160\" Background=\"#FFF1F5F9\" RowDefinitions=\"*,*\" ColumnDefinitions=\"*,*\" />"),
-            ("StackPanel","<StackPanel Width=\"180\" Height=\"140\" Background=\"#FFF1F5F9\" Spacing=\"8\" />"),
-            ("Canvas","<Canvas Width=\"240\" Height=\"160\" Background=\"#FFF1F5F9\" />"),
-            ("WrapPanel","<WrapPanel Width=\"240\" Height=\"160\" Background=\"#FFF1F5F9\" />"),
-            ("DockPanel","<DockPanel Width=\"240\" Height=\"160\" Background=\"#FFF1F5F9\" />"),
-            ("Rectangle","<Rectangle Width=\"120\" Height=\"80\" Fill=\"#FF6D91FF\" />"),
-            ("Ellipse","<Ellipse Width=\"100\" Height=\"100\" Fill=\"#FFA78BFA\" />"),
+        for (name, source) in [
+            (
+                "Button",
+                "<Button Content=\"Button\" Width=\"120\" Height=\"36\" />",
+            ),
+            ("TextBlock", "<TextBlock Text=\"Text\" FontSize=\"18\" />"),
+            ("TextBox", "<TextBox Text=\"Edit me\" Width=\"180\" />"),
+            ("CheckBox", "<CheckBox Content=\"Option\" />"),
+            (
+                "Border",
+                "<Border Width=\"180\" Height=\"100\" Background=\"#FFE0E7FF\" CornerRadius=\"8\" />",
+            ),
+            (
+                "Grid",
+                "<Grid Width=\"220\" Height=\"160\" Background=\"#FFF1F5F9\" RowDefinitions=\"*,*\" ColumnDefinitions=\"*,*\" />",
+            ),
+            (
+                "StackPanel",
+                "<StackPanel Width=\"180\" Height=\"140\" Background=\"#FFF1F5F9\" Spacing=\"8\" />",
+            ),
+            (
+                "Canvas",
+                "<Canvas Width=\"240\" Height=\"160\" Background=\"#FFF1F5F9\" />",
+            ),
+            (
+                "WrapPanel",
+                "<WrapPanel Width=\"240\" Height=\"160\" Background=\"#FFF1F5F9\" />",
+            ),
+            (
+                "DockPanel",
+                "<DockPanel Width=\"240\" Height=\"160\" Background=\"#FFF1F5F9\" />",
+            ),
+            (
+                "Rectangle",
+                "<Rectangle Width=\"120\" Height=\"80\" Fill=\"#FF6D91FF\" />",
+            ),
+            (
+                "Ellipse",
+                "<Ellipse Width=\"100\" Height=\"100\" Fill=\"#FFA78BFA\" />",
+            ),
         ] {
-            let button=button(name);button.set_margin(Thickness::uniform(2.0));
-            let weak=Rc::downgrade(self);let source=source.to_owned();
-            button.add_handler(InputElement::pointer_pressed_event(),move |_,event|{if let Some(this)=weak.upgrade(){this.surface.begin_asset_drag(source.clone(),event);this.status.set_text(Some("Drag onto the artboard, or click a location to insert"));}});
+            let button = button(name);
+            button.set_margin(Thickness::uniform(2.0));
+            let weak = Rc::downgrade(self);
+            let source = source.to_owned();
+            button.add_handler(InputElement::pointer_pressed_event(), move |_, event| {
+                if let Some(this) = weak.upgrade() {
+                    this.surface.begin_asset_drag(source.clone(), event);
+                    this.status.set_text(Some(
+                        "Drag onto the artboard, or click a location to insert",
+                    ));
+                }
+            });
             assets.children().add(button.upcast::<Control>());
         }
     }
@@ -1024,13 +1085,26 @@ impl DesignerWorkspace {
             self.tracks.children().add(label.upcast::<Control>());
         }
         for track in tracks {
+            let target_name = self
+                .session
+                .borrow()
+                .document()
+                .ast()
+                .node(track.target)
+                .map(|node| {
+                    node.xaml_name()
+                        .unwrap_or_else(|| node.local_name())
+                        .to_owned()
+                })
+                .unwrap_or_else(|| "Missing target".into());
+            let track_title = format!("{} / {}", target_name, track.property);
             let plot = Grid::new();
             plot.set_column_definitions(
                 ferroui_controls::ColumnDefinitions::parse("170,*")
                     .expect("valid timeline columns"),
             );
             let name = TextBlock::new();
-            name.set_text(Some(&format!("{} / {}", track.target, track.property)));
+            name.set_text(Some(&track_title));
             name.set_font_size(11.0);
             name.set_foreground(Some(SolidColorBrush::from_uint32(0xffc4d1ec).into()));
             name.set_vertical_alignment(ferroui_base::layout::VerticalAlignment::Center);
@@ -1065,7 +1139,7 @@ impl DesignerWorkspace {
             row.set_orientation(Orientation::Horizontal);
             row.set_spacing(6.0);
             let title = TextBlock::new();
-            title.set_text(Some(&format!("{} / {}", track.target, track.property)));
+            title.set_text(Some(&track_title));
             title.set_width(170.0);
             title.set_foreground(Some(SolidColorBrush::from_uint32(0xffd0d9ed).into()));
             title.set_font_size(11.0);
@@ -1121,27 +1195,40 @@ impl DesignerWorkspace {
                     }
                 });
                 row.children().add(move_time.upcast::<Control>());
-                let easing = button("Ease");
+                let curve = TextBox::new();
+                curve.set_width(130.0);
+                curve.set_font_size(10.0);
+                curve.set_text(Some(&key.easing.to_xaml()));
+                let easing = button("Apply curve");
                 easing.set_font_size(10.0);
                 let weak = Rc::downgrade(self);
+                let weak_curve = curve.downgrade();
                 let easing_property = property.clone();
-                easing.click(move |_, _| {
-                    if let Some(this) = weak.upgrade() {
-                        let result = this.session.borrow_mut().set_keyframe_easing(
-                            target,
-                            &easing_property,
-                            time,
-                            Easing::CubicBezier {
-                                x1: 0.42,
-                                y1: 0.0,
-                                x2: 0.58,
-                                y2: 1.0,
-                            },
-                        );
+                let apply_curve: Rc<dyn Fn()> = Rc::new(move || {
+                    if let (Some(this), Some(input)) = (weak.upgrade(), weak_curve.upgrade()) {
+                        let result = Easing::parse(&input.text().unwrap_or_default())
+                            .map_err(|error| error.to_string())
+                            .and_then(|easing| {
+                                this.session.borrow_mut().set_keyframe_easing(
+                                    target,
+                                    &easing_property,
+                                    time,
+                                    easing,
+                                )
+                            });
                         this.refresh(true);
                         this.report(result);
                     }
                 });
+                let click_curve = apply_curve.clone();
+                easing.click(move |_, _| click_curve());
+                curve.add_handler(InputElement::key_down_event(), move |_, event| {
+                    if event.key == Key::Enter {
+                        apply_curve();
+                        event.set_handled(true);
+                    }
+                });
+                row.children().add(curve.upcast::<Control>());
                 row.children().add(easing.upcast::<Control>());
                 let remove = button("×");
                 remove.set_font_size(10.0);
@@ -1199,6 +1286,9 @@ impl DesignerWorkspace {
 }
 impl Drop for DesignerWorkspace {
     fn drop(&mut self) {
+        if let Some(controller) = self.sharing.get_mut().take() {
+            controller.disconnect();
+        }
         if let Some(timer) = self.timer.get_mut().take() {
             timer.stop();
         }
@@ -1231,8 +1321,16 @@ fn button(label: &str) -> Ref<Button> {
     button
 }
 
+#[path = "workspace_animation.rs"]
+mod authoring;
 #[path = "workspace_files.rs"]
 mod files;
+#[path = "workspace_project.rs"]
+mod project;
+#[path = "workspace_sharing.rs"]
+mod sharing;
+#[path = "source_editor.rs"]
+mod source_tools;
 
 fn property_rank(name: &str) -> usize {
     const COMMON: &[&str] = &[

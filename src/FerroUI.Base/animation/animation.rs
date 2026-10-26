@@ -1,21 +1,37 @@
 use crate::animation::cancellation::register_local;
 use crate::animation::easings::Easing;
+use crate::animation::i_page_transition::continuation_context;
 use crate::animation::key_frame::KeyFrameTimingMode;
 use crate::animation::{
-    Animatable, AnimationError, AnimationTask, AnimatorFactory, AnimatorKeyFrame, Cue, FillMode, IAnimator, IClock,
-    IterationCount, KeyFrames, PlaybackBehavior, PlaybackDirection, TimeSpan,
+    Animatable, AnimationError, AnimationTask, AnimatorFactory, AnimatorKeyFrame, Cue, FillMode,
+    IAnimator, IClock, IterationCount, KeyFrames, PlaybackBehavior, PlaybackDirection, TimeSpan,
 };
-use crate::data::BindingMode;
-use crate::reactive::{CompositeDisposable, IDisposable, IObservable, Observable};
-use crate::animation::i_page_transition::continuation_context;
+use crate::data::{BindingMode, BindingPriority};
+use crate::reactive::{CompositeDisposable, Disposable, IDisposable, IObservable, Observable};
 use crate::threading::CancellationToken;
 use crate::{
-    ferro_class, ferro_impl_classes, ferro_property, instantiate, DirectProperty, DirectPropertyMetadata, FerroObject,
-    FerroObjectImpl, FerroProperty, Ref, Visual,
+    ferro_class, ferro_impl_classes, ferro_property, instantiate, DirectProperty,
+    DirectPropertyMetadata, FerroObject, FerroObjectImpl, FerroProperty, Ref, Visual, WeakRef,
 };
 use std::any::TypeId;
 use std::cell::{Cell, RefCell};
-use std::rc::Rc;
+use std::rc::{Rc, Weak};
+
+struct PreviewTransform {
+    target: WeakRef<Visual>,
+    transform: Rc<dyn crate::media::ITransform>,
+    value: Rc<dyn IDisposable>,
+}
+impl Drop for PreviewTransform {
+    fn drop(&mut self) {
+        self.value.dispose();
+    }
+}
+crate::ferro_thread_local! {
+    // Weak entries allow separately applied preview programs to share a generated
+    // transform without extending the life of the target or any completed preview.
+    static PREVIEW_TRANSFORMS: RefCell<Vec<Weak<PreviewTransform>>> = RefCell::new(Vec::new());
+}
 
 /// Tracks the progress of an animation.
 #[repr(C)]
@@ -31,6 +47,7 @@ pub struct Animation {
     delay_between_iterations: Cell<TimeSpan>,
     speed_ratio: Cell<f64>,
     children: KeyFrames,
+    preview_values: RefCell<Option<Rc<CompositeDisposable>>>,
 }
 
 ferro_class!(Animation: FerroObject);
@@ -149,6 +166,7 @@ impl Animation {
             delay_between_iterations: Cell::new(TimeSpan::ZERO),
             speed_ratio: Cell::new(1.0),
             children: KeyFrames::new(),
+            preview_values: RefCell::new(None),
         }
     }
 
@@ -180,7 +198,10 @@ impl Animation {
     }
 
     #[allow(clippy::type_complexity)]
-    fn interpret_keyframes(&self, control: &Animatable) -> (Vec<Rc<dyn IAnimator>>, Vec<Rc<dyn IDisposable>>, bool) {
+    fn interpret_keyframes(
+        &self,
+        control: &Animatable,
+    ) -> (Vec<Rc<dyn IAnimator>>, Vec<Rc<dyn IDisposable>>, bool) {
         let mut handler_list: Vec<((TypeId, &'static FerroProperty), AnimatorFactory)> = Vec::new();
         let mut animator_key_frames: Vec<Ref<AnimatorKeyFrame>> = Vec::new();
         let mut subscriptions: Vec<Rc<dyn IDisposable>> = Vec::new();
@@ -196,7 +217,8 @@ impl Animation {
                     animates_visibility = true;
                 }
 
-                let handler = Animation::get_animator(setter).or_else(|| Animation::get_animator_type(property));
+                let handler = Animation::get_animator(setter)
+                    .or_else(|| Animation::get_animator_type(property));
 
                 let Some((type_, factory)) = handler else {
                     panic!(
@@ -204,19 +226,27 @@ impl Animation {
                     );
                 };
 
-                if !handler_list.iter().any(|((t, p), _)| *t == type_ && *p == property) {
+                if !handler_list
+                    .iter()
+                    .any(|((t, p), _)| *t == type_ && *p == property)
+                {
                     handler_list.push(((type_, property), factory.clone()));
                 }
 
                 let mut cue = keyframe.cue();
 
                 if keyframe.timing_mode() == KeyFrameTimingMode::TimeSpan {
-                    cue = Cue::new(keyframe.key_time().total_seconds() / self.duration().total_seconds());
+                    cue = Cue::new(
+                        keyframe.key_time().total_seconds() / self.duration().total_seconds(),
+                    );
                 }
 
-                let new_kf = AnimatorKeyFrame::new(Some(type_), Some(factory), cue, keyframe.key_spline());
+                let new_kf =
+                    AnimatorKeyFrame::new(Some(type_), Some(factory), cue, keyframe.key_spline());
 
-                subscriptions.push(new_kf.bind_setter(&**setter, control));
+                let subscription = new_kf.bind_setter(&**setter, control);
+                self.retain_preview_subscription(&subscription);
+                subscriptions.push(subscription);
 
                 animator_key_frames.push(new_kf);
             }
@@ -236,7 +266,10 @@ impl Animation {
         for keyframe in animator_key_frames {
             let animator = new_animator_instances
                 .iter()
-                .find(|a| Some(a.animator_type()) == keyframe.animator_type() && a.property() == keyframe.property())
+                .find(|a| {
+                    Some(a.animator_type()) == keyframe.animator_type()
+                        && a.property() == keyframe.property()
+                })
                 .expect("Sequence contains no matching element");
 
             if animator.count() == 0 && matches!(fill_mode, FillMode::Backward | FillMode::Both) {
@@ -290,6 +323,7 @@ impl Animation {
             );
 
             if let Some(subscription) = subscription {
+                self.retain_preview_subscription(&subscription);
                 subscriptions.push(subscription);
             }
         } else {
@@ -305,21 +339,22 @@ impl Animation {
             });
 
             for animator in &animators {
-                let animator_on_complete: Option<Rc<dyn Fn()>> = schedule_on_complete.as_ref().map(|schedule| {
-                    let schedule = schedule.clone();
-                    let remaining = remaining.clone();
-                    let completed = Cell::new(false);
-                    let action: Rc<dyn Fn()> = Rc::new(move || {
-                        if completed.replace(true) {
-                            return;
-                        }
-                        remaining.set(remaining.get() - 1);
-                        if remaining.get() == 0 {
-                            schedule();
-                        }
+                let animator_on_complete: Option<Rc<dyn Fn()>> =
+                    schedule_on_complete.as_ref().map(|schedule| {
+                        let schedule = schedule.clone();
+                        let remaining = remaining.clone();
+                        let completed = Cell::new(false);
+                        let action: Rc<dyn Fn()> = Rc::new(move || {
+                            if completed.replace(true) {
+                                return;
+                            }
+                            remaining.set(remaining.get() - 1);
+                            if remaining.get() == 0 {
+                                schedule();
+                            }
+                        });
+                        action
                     });
-                    action
-                });
 
                 let subscription = animator.clone().apply(
                     self,
@@ -331,6 +366,7 @@ impl Animation {
                 );
 
                 if let Some(subscription) = subscription {
+                    self.retain_preview_subscription(&subscription);
                     subscriptions.push(subscription);
                 }
             }
@@ -345,9 +381,154 @@ impl Animation {
         Rc::new(CompositeDisposable::from_disposables(subscriptions))
     }
 
+    /// Applies an isolated snapshot using the framework animators, retaining final fill
+    /// and automatically created transforms at animation priority. Disposing the result
+    /// restores the control's underlying values and bindings, including after completion.
+    /// This is intended for interactive authoring and inspection; ordinary `apply` retains
+    /// its application semantics, including committing forward fill to a local value.
+    pub fn apply_for_preview(
+        &self,
+        control: &Animatable,
+        clock: Option<Rc<dyn IClock>>,
+        on_complete: Option<Rc<dyn Fn()>>,
+    ) -> Rc<dyn IDisposable> {
+        let preview = Animation::new();
+        preview.set_duration(self.duration());
+        preview.set_iteration_count(self.iteration_count());
+        preview.set_playback_direction(self.playback_direction());
+        preview.set_playback_behavior(self.playback_behavior());
+        preview.set_fill_mode(self.fill_mode());
+        preview.set_easing(self.easing());
+        preview.set_delay(self.delay());
+        preview.set_delay_between_iterations(self.delay_between_iterations());
+        preview.set_speed_ratio(self.speed_ratio());
+        preview
+            .children()
+            .add_range(self.children().snapshot().iter().cloned());
+        let values = Rc::new(CompositeDisposable::new());
+        *preview.preview_values.borrow_mut() = Some(values.clone());
+        let applied = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
+            // The application transform animator currently returns an empty subscription
+            // for CSS operation lists. A designer must surface that capability boundary
+            // instead of presenting an apparently successful but motionless preview.
+            if let Some(visual) = control.downcast_ref::<Visual>() {
+                if visual.render_transform().is_some_and(|value| {
+                    value
+                        .as_any()
+                        .is::<crate::media::transformation::TransformOperations>()
+                }) {
+                    for keyframe in preview.children().snapshot().iter() {
+                        for setter in keyframe.setters().snapshot().iter() {
+                            let handler = Animation::get_animator(setter).or_else(|| {
+                                setter.property().and_then(Animation::get_animator_type)
+                            });
+                            if handler.is_some_and(|(kind, _)| kind == TypeId::of::<crate::animation::animators::TransformAnimator>()) {
+                                panic!("The native component animator cannot target an existing CSS TransformOperations value; use a native TransformGroup or a registered transform animator.");
+                            }
+                        }
+                    }
+                }
+            }
+            preview.apply(
+                control,
+                clock,
+                Observable::single_value(true),
+                on_complete,
+                true,
+            )
+        }));
+        let applied = match applied {
+            Ok(applied) => applied,
+            Err(error) => {
+                // A redirected transform can be created before a later animator validates
+                // its timing or target. Remove every completed setup step on failure.
+                values.dispose();
+                std::panic::resume_unwind(error);
+            }
+        };
+        Disposable::create(move || {
+            // Mark the scope disposed before unsubscribing: ordinary forward-fill teardown
+            // must not author a final value while a preview is being removed.
+            values.dispose();
+            applied.dispose();
+            drop(preview);
+        })
+    }
+
+    fn retain_preview_subscription(&self, subscription: &Rc<dyn IDisposable>) {
+        if let Some(values) = self.preview_values.borrow().clone() {
+            values.add(subscription.clone());
+        }
+    }
+
+    pub(crate) fn is_preview(&self) -> bool {
+        self.preview_values.borrow().is_some()
+    }
+
+    pub(crate) fn create_preview_transform(
+        &self,
+        target: &Visual,
+        transform: Rc<dyn crate::media::ITransform>,
+    ) -> bool {
+        let values = self.preview_values.borrow().clone();
+        if let Some(values) = values {
+            if !values.is_disposed() {
+                let value = target
+                    .set_value_with_priority(
+                        Visual::render_transform_property(),
+                        Some(transform.clone()),
+                        BindingPriority::Animation,
+                    )
+                    .expect("transform preview is an animation value");
+                let lease = Rc::new(PreviewTransform {
+                    target: target.to_ref().downgrade(),
+                    transform,
+                    value,
+                });
+                PREVIEW_TRANSFORMS.with(|entries| {
+                    let mut entries = entries.borrow_mut();
+                    entries.retain(|entry| entry.strong_count() > 0);
+                    entries.push(Rc::downgrade(&lease));
+                });
+                values.add(Disposable::create(move || drop(lease)));
+            }
+            true
+        } else {
+            false
+        }
+    }
+
+    pub(crate) fn retain_preview_transform(
+        &self,
+        target: &Visual,
+        transform: &Rc<dyn crate::media::ITransform>,
+    ) {
+        let Some(values) = self.preview_values.borrow().clone() else {
+            return;
+        };
+        let lease = PREVIEW_TRANSFORMS.with(|entries| {
+            let mut entries = entries.borrow_mut();
+            entries.retain(|entry| entry.strong_count() > 0);
+            entries.iter().filter_map(Weak::upgrade).find(|entry| {
+                Rc::ptr_eq(&entry.transform, transform)
+                    && entry
+                        .target
+                        .upgrade()
+                        .is_some_and(|owner| std::ptr::eq(&*owner, target))
+            })
+        });
+        if let Some(lease) = lease {
+            values.add(Disposable::create(move || drop(lease)));
+        }
+    }
+
     /// Starts the animation on `control` and returns a task that completes
     /// when it has ended or `cancellation_token` was cancelled.
-    pub fn run_async(&self, control: &Animatable, cancellation_token: CancellationToken) -> AnimationTask {
+    pub fn run_async(
+        &self,
+        control: &Animatable,
+        cancellation_token: CancellationToken,
+    ) -> AnimationTask {
         self.run_async_with_clock(control, None, cancellation_token)
     }
 
@@ -365,7 +546,9 @@ impl Animation {
         let run = AnimationTask::pending();
 
         if self.iteration_count() == IterationCount::INFINITE {
-            run.try_set(Err(AnimationError("Looping animations must not use the Run method.".to_string())));
+            run.try_set(Err(AnimationError(
+                "Looping animations must not use the Run method.".to_string(),
+            )));
         }
 
         let subscriptions: Rc<RefCell<Option<Rc<dyn IDisposable>>>> = Rc::new(RefCell::new(None));
@@ -381,15 +564,22 @@ impl Animation {
                 if let Some(subscriptions) = subscriptions {
                     subscriptions.dispose();
                 }
-                let cancellation: Option<crate::animation::cancellation::LocalCancellationRegistration> =
-                    cancellation.borrow_mut().take();
+                let cancellation: Option<
+                    crate::animation::cancellation::LocalCancellationRegistration,
+                > = cancellation.borrow_mut().take();
                 if let Some(cancellation) = cancellation {
                     cancellation.dispose();
                 }
             })
         };
 
-        let applied = self.apply(control, clock, Observable::return_(true), Some(finish.clone()), true);
+        let applied = self.apply(
+            control,
+            clock,
+            Observable::return_(true),
+            Some(finish.clone()),
+            true,
+        );
         // The animation may have completed while it was being applied, in
         // which case there is nothing left to dispose on cancellation.
         *subscriptions.borrow_mut() = Some(applied);

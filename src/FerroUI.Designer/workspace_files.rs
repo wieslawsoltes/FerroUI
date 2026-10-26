@@ -19,10 +19,12 @@ impl DesignerWorkspace {
         self.session.borrow().document().source() != self.saved_source.borrow().as_str()
     }
 
-    /// Explicit host operation. Clear current history and sharing and open source at its URI.
-    /// The built-in file command presents a save/discard/cancel prompt before calling this.
+    /// Open source at its URI, retaining the previous tab and its history. A newly opened
+    /// document starts its own history and is detached from the previous collaboration room.
     pub fn open_document(self: &Rc<Self>, source: String, uri: String) -> Result<(), String> {
+        self.capture_tab();
         self.pending_source.set(false);
+        self.disconnect_sharing();
         self.session
             .borrow_mut()
             .open_document(source.clone(), uri)?;
@@ -38,7 +40,14 @@ impl DesignerWorkspace {
     /// The host supplies a callback that performs the already-approved close without prompting again.
     pub fn request_close(self: &Rc<Self>, close: impl Fn() + 'static) -> bool {
         if !self.is_dirty() {
-            return false;
+            if let Some(uri) = self.inactive_dirty_document() {
+                if let Err(error) = self.activate_document(&uri) {
+                    self.report(Err(error));
+                    return true;
+                }
+            } else {
+                return false;
+            }
         }
         *self.pending_close.borrow_mut() = Some(Rc::new(close));
         self.pending_open.borrow_mut().take();
@@ -96,6 +105,11 @@ impl DesignerWorkspace {
                     "SaveFileAs" => this.request_save(true, false),
                     "SaveAndOpen" => this.request_save(false, true),
                     "DiscardAndOpen" => {
+                        if this.pending_close.borrow().is_some() {
+                            let saved = this.saved_source.borrow().clone();
+                            this.session.borrow_mut().update_source(saved);
+                            this.capture_tab();
+                        }
                         let result = this.complete_open();
                         this.report(result);
                     }
@@ -189,27 +203,12 @@ impl DesignerWorkspace {
                 file.name().replace(' ', "%20")
             )
         };
-        self.pending_close.borrow_mut().take();
-        *self.pending_open.borrow_mut() = Some(PendingDocument { source, uri, file });
-        self.root
-            .get_control::<TextBlock>("FilePromptTitle")
-            .set_text(Some("Open another document?"));
-        self.root
-            .get_control::<Button>("SaveAndOpen")
-            .set_content(Some(Rc::new("Save and open".to_owned())));
-        self.root
-            .get_control::<Button>("DiscardAndOpen")
-            .set_content(Some(Rc::new("Discard and open".to_owned())));
-        if self.is_dirty() || self.session.borrow().collaboration_version().is_some() {
-            self.root.get_control::<TextBlock>("FilePromptText").set_text(Some(if self.session.borrow().collaboration_version().is_some(){"Opening another file leaves the current collaboration session. Save the current document before continuing?"}else{"Save the current document before opening another file?"}));
-            self.root
-                .get_control::<Border>("FilePrompt")
-                .set_is_visible(true);
-            Ok(())
-        } else {
-            self.complete_open()
-        }
+        self.open_document(source, uri)?;
+        *self.file.borrow_mut() = Some(file);
+        self.rebuild_document_tabs();
+        Ok(())
     }
+
     fn complete_open(self: &Rc<Self>) -> Result<(), String> {
         let document = self.pending_open.borrow_mut().take();
         let Some(document) = document else {
@@ -218,7 +217,12 @@ impl DesignerWorkspace {
                 .get_control::<Border>("FilePrompt")
                 .set_is_visible(false);
             if let Some(close) = close {
-                close();
+                if let Some(uri) = self.inactive_dirty_document() {
+                    self.activate_document(&uri)?;
+                    self.request_close(move || close());
+                } else {
+                    close();
+                }
             }
             return Ok(());
         };
@@ -248,9 +252,10 @@ impl DesignerWorkspace {
             });
     }
     /// Save the authored buffer, including incomplete XAML. Returns false on picker cancellation.
-    /// Source is captured after all asynchronous operations, so a concurrent editor change is
-    /// never mistakenly marked saved. Existing files are checked for external changes first.
+    /// The saved snapshot is tracked independently of later editor changes, so a concurrent
+    /// change is never mistakenly marked saved. Existing files are checked for external changes.
     pub async fn save_file(self: &Rc<Self>, save_as: bool) -> Result<bool, String> {
+        let previous_uri = self.session.borrow().document_uri().to_owned();
         let top = TopLevel::get_top_level(Some(&self.root))
             .ok_or("The designer must be attached to a window to save files")?;
         let provider = top.storage_provider();
@@ -286,12 +291,28 @@ impl DesignerWorkspace {
         let Some(file) = file else {
             return Ok(false);
         };
+        self.ensure_save_document(&previous_uri)?;
+        let destination = file.path();
+        if destination.is_absolute_uri()
+            && destination.absolute_uri() != previous_uri
+            && self
+                .project
+                .borrow()
+                .tabs
+                .contains_key(destination.absolute_uri())
+        {
+            return Err(
+                "That destination is already open in another tab; close or save that tab first"
+                    .into(),
+            );
+        }
         if existing {
             let mut input = file.open_read_async().await.map_err(|e| e.to_string())?;
             let mut external = String::new();
             input
                 .read_to_string(&mut external)
                 .map_err(|e| e.to_string())?;
+            self.ensure_save_document(&previous_uri)?;
             if external != *self.saved_source.borrow() {
                 return Err("The file changed outside the designer. Open the updated file or use Save as to preserve your changes.".into());
             }
@@ -315,25 +336,56 @@ impl DesignerWorkspace {
             )
             .map_err(|e| e.to_string())?;
         } else {
-            let mut output = file.open_write_async().await.map_err(|e| e.to_string())?;
+            // Providers may truncate a file while asynchronously opening its write stream.
+            // Capture the intended document first; if the user switches tabs during the await,
+            // finish that save and update its retained tab rather than saving another buffer.
             source = self.session.borrow().document().source().to_owned();
+            let mut output = file.open_write_async().await.map_err(|e| e.to_string())?;
             output
                 .write_all(source.as_bytes())
                 .and_then(|_| output.flush())
                 .map_err(|e| e.to_string())?;
         }
-        *self.saved_source.borrow_mut() = source;
-        self.session.borrow_mut().mark_saved();
         let path = file.path();
-        if path.is_absolute_uri() {
+        let saved_uri = if path.is_absolute_uri() {
+            path.absolute_uri().to_owned()
+        } else {
+            previous_uri.clone()
+        };
+        if self.session.borrow().document_uri() == previous_uri {
+            *self.saved_source.borrow_mut() = source.clone();
             self.session
                 .borrow_mut()
-                .set_document_uri(path.absolute_uri().to_owned())?;
+                .document
+                .mark_saved_snapshot(source.clone());
+            if saved_uri != previous_uri {
+                self.session
+                    .borrow_mut()
+                    .set_document_uri(saved_uri.clone())?;
+                self.project.borrow_mut().tabs.remove(&previous_uri);
+            }
+            *self.file.borrow_mut() = Some(file);
+        } else {
+            let mut project = self.project.borrow_mut();
+            let mut tab = project
+                .tabs
+                .remove(&previous_uri)
+                .ok_or("The document was saved, but its tab was closed while storage was busy")?;
+            tab.saved = source.clone();
+            tab.file = Some(file);
+            tab.document.mark_saved_snapshot(source.clone());
+            project.tabs.insert(saved_uri.clone(), tab);
         }
-        *self.file.borrow_mut() = Some(file);
+        self.acknowledge_provider_save(&previous_uri, &saved_uri, &source)?;
         self.refresh(true);
         self.refresh_file_title();
         Ok(true)
+    }
+    fn ensure_save_document(&self, uri: &str) -> Result<(), String> {
+        if self.session.borrow().document_uri() != uri {
+            return Err("The active tab changed while the save dialog was open; return to the document and save again".into());
+        }
+        Ok(())
     }
 }
 fn xaml_type() -> Rc<FilePickerFileType> {
@@ -342,7 +394,7 @@ fn xaml_type() -> Rc<FilePickerFileType> {
 
 // A local file is replaced only after its full candidate has reached storage. A failed write or
 // rename leaves the original intact; provider-owned streams remain the fallback for virtual files.
-fn write_local(
+pub(super) fn write_local(
     path: &std::path::Path,
     expected: Option<&str>,
     source: &str,

@@ -3,8 +3,8 @@ use crate::animation::{Animatable, Animation, IAnimator, IClock};
 use crate::logging::{LogArea, LogEventLevel, Logger};
 use crate::media::transformation::TransformOperations;
 use crate::media::{
-    ITransform, RotateTransform, Rotate3DTransform, ScaleTransform, SkewTransform, Transform, TransformGroup,
-    TranslateTransform,
+    ITransform, Rotate3DTransform, RotateTransform, ScaleTransform, SkewTransform, Transform,
+    TransformGroup, TranslateTransform,
 };
 use crate::reactive::{Disposable, IDisposable, IObservable};
 use crate::{Ref, Visual};
@@ -43,7 +43,10 @@ impl Animator for TransformAnimator {
         should_pause_on_invisible: bool,
     ) -> Option<Rc<dyn IDisposable>> {
         let Some(ctrl) = control.downcast_ref::<Visual>() else {
-            panic!("Unable to cast object of type '{}' to type 'Visual'.", control.get_type());
+            panic!(
+                "Unable to cast object of type '{}' to type 'Visual'.",
+                control.get_type()
+            );
         };
 
         let Some(property) = this.base.property() else {
@@ -52,7 +55,10 @@ impl Animator for TransformAnimator {
 
         // Check if the Target Property is Transform derived.
         if Transform::TYPE.is_assignable_from(property.owner_type()) {
-            if ctrl.render_transform().is_some_and(|t| t.as_any().is::<TransformOperations>()) {
+            if ctrl
+                .render_transform()
+                .is_some_and(|t| t.as_any().is::<TransformOperations>())
+            {
                 // HACK: This animator cannot reasonably animate CSS transforms at the moment.
                 return Some(Disposable::empty());
             }
@@ -72,10 +78,13 @@ impl Animator for TransformAnimator {
                     children.add(Rotate3DTransform::new().upcast());
 
                     let render_transform: Rc<dyn ITransform> = normal_transform.into();
-                    ctrl.set_render_transform(Some(render_transform.clone()));
+                    if !animation.create_preview_transform(ctrl, render_transform.clone()) {
+                        ctrl.set_render_transform(Some(render_transform.clone()));
+                    }
                     render_transform
                 }
             };
+            animation.retain_preview_transform(ctrl, &render_transform);
 
             let double_animator = {
                 let mut double_animator = this.double_animator.borrow_mut();
@@ -97,8 +106,10 @@ impl Animator for TransformAnimator {
             if let Some(render_transform) = render_transform.as_object() {
                 // It's a transform object so let's target that.
                 if render_transform.get_type() == property.owner_type() {
-                    let target: Ref<Animatable> =
-                        render_transform.to_ref().cast().expect("a transform is an animatable");
+                    let target: Ref<Animatable> = render_transform
+                        .to_ref()
+                        .cast()
+                        .expect("a transform is an animatable");
                     return Some(apply_with_visual(
                         &double_animator,
                         animation,

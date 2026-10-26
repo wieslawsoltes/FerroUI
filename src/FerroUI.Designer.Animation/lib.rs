@@ -23,7 +23,7 @@ pub use timeline::{
     CompiledTimeline, FillMode, Keyframe, PlaybackBehavior, PlaybackDirection, Player, Repeat,
     Sample, Timeline, Track,
 };
-pub use value::{AnimationValue, ValueKind};
+pub use value::{AnimationValue, RelativeUnit, ValueKind};
 pub use xaml::{AnimationImport, ImportOptions};
 
 #[derive(Clone, Debug, PartialEq, Eq)]

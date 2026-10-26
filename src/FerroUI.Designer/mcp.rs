@@ -9,6 +9,16 @@ use serde_json::{json, Value};
 use std::cell::RefCell;
 use std::rc::{Rc, Weak};
 
+#[path = "mcp_authoring.rs"]
+mod authoring;
+#[cfg(test)]
+#[path = "mcp_automation_tests.rs"]
+mod automation_tests;
+#[path = "mcp_schema.rs"]
+mod schema;
+#[path = "mcp_workspace.rs"]
+mod workspace_tools;
+
 pub use ferroui_mcp::{
     reserve_stdout, Options, Permissions, Transport, UiServerHandle as ServerHandle,
 };
@@ -17,11 +27,20 @@ pub use ferroui_mcp::{
 /// alive. Read-only inspector tools remain available beside these document authoring tools.
 pub struct DesignerMcp {
     session: Weak<RefCell<DesignerSession>>,
+    workspace: Option<Weak<DesignerWorkspace>>,
 }
 impl DesignerMcp {
     pub fn new(session: &Rc<RefCell<DesignerSession>>) -> Self {
         Self {
             session: Rc::downgrade(session),
+            workspace: None,
+        }
+    }
+    /// Bind project/editor tools without keeping the workspace or its session alive.
+    pub fn with_workspace(workspace: &Rc<DesignerWorkspace>) -> Self {
+        Self {
+            session: Rc::downgrade(&workspace.session()),
+            workspace: Some(Rc::downgrade(workspace)),
         }
     }
     fn session(&self) -> Result<Rc<RefCell<DesignerSession>>, String> {
@@ -35,6 +54,10 @@ impl DesignerWorkspace {
     /// existing `allow_property_writes` permission; HTTP remains authenticated and loopback-only.
     pub fn serve_mcp(&self, options: Options) -> std::io::Result<ServerHandle> {
         ferroui_mcp::serve_with_tools(options, Rc::new(DesignerMcp::new(&self.session())))
+    }
+    /// Host all session tools plus project lifecycle and shared language-service operations.
+    pub fn serve_workspace_mcp(self: &Rc<Self>, options: Options) -> std::io::Result<ServerHandle> {
+        ferroui_mcp::serve_with_tools(options, Rc::new(DesignerMcp::with_workspace(self)))
     }
 }
 
@@ -119,7 +142,7 @@ impl UiToolProvider for DesignerMcp {
         let id = json!({"type":"integer","minimum":1});
         let string = json!({"type":"string","maxLength":1048576});
         let edits = json!({"type":"array","minItems":1,"maxItems":4096,"items":{"type":"object"}});
-        vec![
+        let mut tools = vec![
             definition("designer_document", "Read authored XAML, revision, diagnostics, selection and live-preview acceptance. Invalid authored XAML remains available.",json!({"include_source":{"type":"boolean"}}),&[],false),
             definition("designer_ast", "Read source-preserving AST nodes and UTF-8 spans. AST refers to last valid source when a draft is invalid.",json!({"node":id,"depth":{"type":"integer","minimum":0,"maximum":128}}),&[],false),
             definition("designer_apply", "Apply one atomic, undoable source transaction. Edits use externally tagged Rust enum JSON: {\"SetAttribute\":{\"node\":1,\"name\":\"Width\",\"value\":\"100\"}}; also RemoveAttribute, InsertChild, RemoveNode, MoveNode, ReplaceSource and Text. Node ids are document-local.",json!({"expected_revision":rev,"label":string,"edits":edits}),&["expected_revision","label","edits"],true),
@@ -133,7 +156,12 @@ impl UiToolProvider for DesignerMcp {
             definition("designer_collaboration_state", "Read collaboration version, conflicts, presence, optional snapshot and changes since a version vector. This does not consume outgoing operations.",json!({"snapshot":{"type":"boolean"},"since":{"type":"object"}}),&[],false),
             definition("designer_collaboration", "Start or join a collaboration session, merge an authenticated peer envelope, or explicitly discard/resolve a conflicting local draft. The host is responsible for peer identity and authorization.",json!({"expected_revision":rev,"action":{"enum":["start","join","merge","discard_draft","resolve_draft"]},"actor":string,"document_id":string,"snapshot":{"type":"object"},"message":{"type":"object"},"version":{"type":"object"},"source":string}),&["expected_revision","action"],true),
             definition("designer_presence", "Receive ephemeral peer presence, using the receiver's monotonic expiry clock. This changes no authored source.",json!({"presence":{"type":"object"}}),&["presence"],true),
-        ]
+        ];
+        tools.extend(authoring::tools());
+        if self.workspace.is_some() {
+            tools.extend(workspace_tools::tools());
+        }
+        tools
     }
 
     fn validate(&self, name: &str, args: &Value) -> Result<(), String> {
@@ -143,6 +171,9 @@ impl UiToolProvider for DesignerMcp {
             .into_iter()
             .find(|tool| tool["name"] == name)
             .ok_or("Unknown designer tool")?;
+        if authoring::handles(name) || workspace_tools::handles(name) {
+            return schema::validate(&definition["inputSchema"], args);
+        }
         for key in object.keys() {
             if definition["inputSchema"]["properties"].get(key).is_none() {
                 return Err(format!("Unknown argument: {key}"));
@@ -298,11 +329,42 @@ impl UiToolProvider for DesignerMcp {
             return Err("Designer authoring requires allow_property_writes".into());
         }
         let owner = self.session()?;
+        if workspace_tools::handles(name) {
+            let workspace = self
+                .workspace
+                .as_ref()
+                .and_then(Weak::upgrade)
+                .ok_or("Designer workspace has been closed")?;
+            {
+                let session = owner
+                    .try_borrow_mut()
+                    .map_err(|_| "Designer is already processing a transaction")?;
+                if args.get("expected_revision").is_some() {
+                    ensure_revision(&session, args)?;
+                }
+                if definition["annotations"]["readOnlyHint"] != true {
+                    session
+                        .ensure_writable()
+                        .map_err(|error| error.to_string())?;
+                }
+            }
+            drop(workspace.try_language_service()?);
+            if name == "designer_project_task"
+                && args["action"] != "cancel"
+                && !permissions.allow_input
+            {
+                return Err("Starting project processes requires allow_input".into());
+            }
+            return workspace_tools::call(&workspace, name, args);
+        }
         let mut session = owner
             .try_borrow_mut()
             .map_err(|_| "Designer is already processing a transaction")?;
         if args.get("expected_revision").is_some() {
             ensure_revision(&session, args)?;
+        }
+        if authoring::handles(name) {
+            return authoring::call(&mut session, name, args, permissions);
         }
         match name {
             "designer_document" => {

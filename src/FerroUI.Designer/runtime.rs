@@ -1,19 +1,15 @@
 use ferroui_base::animation::{IClock, PlayState, TimeSpan};
-use ferroui_base::data::core::{ValueType, ValueTypes};
 use ferroui_base::data::BindingPriority;
+use ferroui_base::data::core::{ValueType, ValueTypes};
 use ferroui_base::reactive::IDisposable;
 use ferroui_base::reactive::{Disposable, IObservable, IObserver};
-#[cfg(not(debug_assertions))]
-use ferroui_base::utilities::Uri;
 use ferroui_base::{BoxedValue, FerroObject, Rect, Ref, StyledElement, Visual, WeakRef};
 use ferroui_controls::{ContentControl, Control};
 use ferroui_designer_animation::Sample;
 use ferroui_designer_core::{Document, NodeId};
 use ferroui_inspect::{Inspector, TreeKind};
+use ferroui_markup_xaml::FromXamlObject;
 use ferroui_markup_xaml::diagnostics::XamlSourceInfo;
-#[cfg(not(debug_assertions))]
-use ferroui_markup_xaml::RuntimeXamlLoaderDocument;
-use ferroui_markup_xaml::{FromXamlObject, RuntimeXamlLoaderConfiguration};
 use ferroui_markup_xaml_loader::FerroRuntimeXamlLoader;
 use std::collections::{BTreeMap, BTreeSet};
 use std::rc::Rc;
@@ -41,8 +37,9 @@ pub struct RuntimeNode {
 pub(crate) struct RuntimePreview {
     pub host: Ref<ContentControl>,
     uri: String,
-    #[cfg(not(debug_assertions))]
-    configuration: RuntimeXamlLoaderConfiguration,
+    options: crate::preview_host::PreviewHostOptions,
+    native_window: Option<Ref<ferroui_controls::Window>>,
+    window_projection: bool,
     pub status: PreviewStatus,
     pub notices: Vec<String>,
     objects: BTreeMap<NodeId, WeakRef<Visual>>,
@@ -51,7 +48,9 @@ pub(crate) struct RuntimePreview {
     #[cfg(debug_assertions)]
     session: ferroui_hot_reload::HotReloadSession,
     #[cfg(debug_assertions)]
-    _target: Rc<dyn ferroui_hot_reload::ReloadTarget>,
+    target: Rc<crate::preview_host::FactoryReloadTarget>,
+    #[cfg(debug_assertions)]
+    use_factory: Rc<std::cell::Cell<bool>>,
 }
 
 impl RuntimePreview {
@@ -60,15 +59,25 @@ impl RuntimePreview {
         uri: String,
         document: &Document,
     ) -> Result<Self, String> {
+        Self::new_with_options(host, uri, document, Default::default())
+    }
+    pub fn new_with_options(
+        host: Ref<ContentControl>,
+        uri: String,
+        document: &Document,
+        mut options: crate::preview_host::PreviewHostOptions,
+    ) -> Result<Self, String> {
         FerroRuntimeXamlLoader::register();
         ferroui_markup_xaml::register_types();
+        for register in &options.register_types {
+            register();
+        }
+        options.configuration.design_mode = true;
+        options.configuration.set_create_source_info(true);
         host.set_clock(Some(Rc::new(DesignClock)));
-        let mut configuration = RuntimeXamlLoaderConfiguration::new();
-        configuration.design_mode = true;
-        configuration.set_create_source_info(true);
         #[cfg(debug_assertions)]
-        let (session, target) = {
-            let mut session = ferroui_hot_reload::HotReloadSession::new();
+        let (session, target, use_factory) = {
+            let mut session = ferroui_hot_reload::HotReloadSession::for_runtime_documents();
             session
                 .register_document(
                     uri.clone(),
@@ -77,21 +86,23 @@ impl RuntimePreview {
                         .unwrap_or_else(|_| document.valid_source().to_owned()),
                 )
                 .map_err(|error| format!("{error:?}"))?;
-            let target: Rc<dyn ferroui_hot_reload::ReloadTarget> =
-                Rc::new(ferroui_hot_reload::ContentReloadTarget::new(
-                    &host,
-                    uri.clone(),
-                    Vec::new(),
-                    configuration.clone(),
-                ));
-            session.register_target(&target);
-            (session, target)
+            let use_factory = Rc::new(std::cell::Cell::new(false));
+            let target = Rc::new(crate::preview_host::FactoryReloadTarget::new(
+                &host,
+                &uri,
+                options.clone(),
+                use_factory.clone(),
+            )?);
+            let registered: Rc<dyn ferroui_hot_reload::ReloadTarget> = target.clone();
+            session.register_target(&registered);
+            (session, target, use_factory)
         };
         let mut this = Self {
             host,
             uri,
-            #[cfg(not(debug_assertions))]
-            configuration,
+            options,
+            native_window: None,
+            window_projection: false,
             status: PreviewStatus::Ready { revision: 0 },
             notices: Vec::new(),
             objects: BTreeMap::new(),
@@ -100,24 +111,119 @@ impl RuntimePreview {
             #[cfg(debug_assertions)]
             session,
             #[cfg(debug_assertions)]
-            _target: target,
+            target,
+            #[cfg(debug_assertions)]
+            use_factory,
         };
-        this.reload(document);
+        this.reload_document(document, true);
         Ok(this)
     }
 
+    /// Change the host factory without registering a second owner for the same URI.
+    /// A failed factory leaves the accepted graph and previous factory configuration intact.
+    pub(crate) fn configure(
+        &mut self,
+        mut options: crate::preview_host::PreviewHostOptions,
+        document: &Document,
+    ) -> Result<(), String> {
+        for register in &options.register_types {
+            register();
+        }
+        options.configuration.design_mode = true;
+        options.configuration.set_create_source_info(true);
+        #[cfg(debug_assertions)]
+        let previous_target = self
+            .target
+            .replace_configuration(&self.host, options.clone());
+        let previous = std::mem::replace(&mut self.options, options);
+        self.reload_document(document, true);
+        if let PreviewStatus::Failed { message, .. } = &self.status {
+            let error = message.clone();
+            self.options = previous;
+            #[cfg(debug_assertions)]
+            self.target.restore_configuration(previous_target);
+            return Err(error);
+        }
+        Ok(())
+    }
+
+    pub(crate) fn replace_document(
+        &mut self,
+        uri: String,
+        document: &Document,
+    ) -> Result<(), String> {
+        let canonical = |value: &str| {
+            ferroui_base::utilities::Uri::absolute(value)
+                .map(|uri| uri.absolute_uri().to_owned())
+                .map_err(|error| error.to_string())
+        };
+        if canonical(&uri)? == canonical(&self.uri)? {
+            self.uri = uri;
+            self.reload_document(document, true);
+        } else {
+            let preview =
+                Self::new_with_options(self.host.clone(), uri, document, self.options.clone())?;
+            *self = preview;
+        }
+        Ok(())
+    }
+
     pub fn reload(&mut self, document: &Document) {
+        self.reload_document(document, false);
+    }
+
+    fn reload_document(&mut self, document: &Document, initialize: bool) {
         self.clear_animation();
-        if !document.diagnostics().is_empty() {
+        self.window_projection = document
+            .ast()
+            .node(document.ast().root())
+            .is_some_and(|node| {
+                node.local_name() == "Window"
+                    && node.namespace_uri.as_deref().is_some_and(|uri| {
+                        matches!(
+                            uri,
+                            "https://github.com/ferroui"
+                                | "using:FerroUI.Controls"
+                                | "clr-namespace:FerroUI.Controls;assembly=FerroUI.Controls"
+                        )
+                    })
+            });
+        let invalid = !document.diagnostics().is_empty();
+        if invalid && !initialize {
             self.status = PreviewStatus::InvalidSource {
                 revision: document.revision(),
             };
             return;
         }
-        let result = crate::preview_source::project(document).and_then(|projection| {
-            self.notices = projection.notices;
-            self.apply_source(&projection.source)
-        });
+        let actual_factory = self.options.factory(document).is_some() && !self.window_projection;
+        #[cfg(debug_assertions)]
+        self.use_factory.set(
+            actual_factory
+                || self.options.resource_factory.is_some()
+                || document
+                    .ast()
+                    .node(document.ast().root())
+                    .is_some_and(|node| {
+                        matches!(
+                            node.local_name(),
+                            "Styles"
+                                | "Style"
+                                | "ResourceDictionary"
+                                | "ControlTheme"
+                                | "Application"
+                                | "DataTemplate"
+                        )
+                    }),
+        );
+        let result = if actual_factory {
+            self.notices = vec!["Preview uses the registered application root factory".into()];
+            self.apply_source(document.valid_source())
+        } else {
+            crate::preview_source::project(document).and_then(|projection| {
+                self.notices = projection.notices;
+                self.apply_source(&projection.source)
+            })
+        };
         self.status = match result {
             Ok(()) => PreviewStatus::Ready {
                 revision: document.revision(),
@@ -130,6 +236,20 @@ impl RuntimePreview {
         if matches!(self.status, PreviewStatus::Ready { .. }) {
             self.host.update_layout();
             self.rebuild_map(document);
+            if self
+                .native_window
+                .as_ref()
+                .is_some_and(|window| window.is_visible())
+            {
+                if let Err(error) = self.open_native(document.valid_source().to_owned()) {
+                    self.notices.push(format!("Native preview: {error}"));
+                }
+            }
+            if invalid {
+                self.status = PreviewStatus::InvalidSource {
+                    revision: document.revision(),
+                };
+            }
         }
     }
 
@@ -150,16 +270,40 @@ impl RuntimePreview {
     // candidate before replacing content; they do not claim development state restoration.
     #[cfg(not(debug_assertions))]
     fn apply_source(&mut self, source: &str) -> Result<(), String> {
-        let uri = Uri::absolute(&self.uri).map_err(|error| error.to_string())?;
-        let document = RuntimeXamlLoaderDocument::with_base_uri(Some(uri), source);
-        let candidate =
-            FerroRuntimeXamlLoader::load_document(document, Some(self.configuration.clone()))
-                .map_err(|error| error.to_string())?;
-        if Ref::<Control>::from_xaml_object(&candidate).is_none() {
-            return Err("The artboard requires a Control root; use a preview document for resources or styles".into());
-        }
-        self.host.set_content(Some(candidate));
+        let candidate = self.options.control(source, &self.uri)?;
+        self.host.set_content(Some(Control::boxed(candidate)));
         Ok(())
+    }
+
+    pub fn options(&self) -> crate::preview_host::PreviewHostOptions {
+        self.options.clone()
+    }
+    pub fn is_window_projection(&self) -> bool {
+        self.window_projection
+    }
+    pub fn open_native(&mut self, source: String) -> Result<Ref<ferroui_controls::Window>, String> {
+        let loaded = self.options.load(&source, &self.uri)?;
+        let window =
+            if let Some(window) = Ref::<ferroui_controls::Window>::from_xaml_object(&loaded) {
+                window
+            } else {
+                let control = Ref::<Control>::from_xaml_object(&loaded)
+                    .or_else(|| self.options.control(&source, &self.uri).ok())
+                    .ok_or("The native preview requires a control or a configured resource view")?;
+                let window = ferroui_controls::Window::new();
+                window.set_content(Some(Control::boxed(control)));
+                window
+            };
+        window.show();
+        if let Some(previous) = self.native_window.replace(window.clone()) {
+            previous.close();
+        }
+        Ok(window)
+    }
+    pub fn close_native(&mut self) {
+        if let Some(window) = self.native_window.take() {
+            window.close();
+        }
     }
 
     pub fn uri(&self) -> &str {
@@ -240,11 +384,27 @@ impl RuntimePreview {
         let provenance = XamlSourceInfo::get_xaml_source_info(&root_value);
         let inspector = Inspector::shared();
         let root_id = inspector.borrow_mut().node_id(&root);
-        self.objects.insert(
-            document.ast().root(),
-            root.clone().upcast::<Visual>().downgrade(),
-        );
-        self.reverse_objects.insert(root_id, document.ast().root());
+        if !document
+            .ast()
+            .node(document.ast().root())
+            .is_some_and(|node| {
+                matches!(
+                    node.local_name(),
+                    "Styles"
+                        | "Style"
+                        | "ResourceDictionary"
+                        | "ControlTheme"
+                        | "Application"
+                        | "DataTemplate"
+                )
+            })
+        {
+            self.objects.insert(
+                document.ast().root(),
+                root.clone().upcast::<Visual>().downgrade(),
+            );
+            self.reverse_objects.insert(root_id, document.ast().root());
+        }
         let mut pending = vec![root.upcast::<FerroObject>()];
         let mut seen = BTreeSet::new();
         while let Some(object) = pending.pop() {
@@ -384,6 +544,7 @@ impl RuntimePreview {
 impl Drop for RuntimePreview {
     fn drop(&mut self) {
         self.clear_animation();
+        self.close_native();
     }
 }
 

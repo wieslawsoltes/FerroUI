@@ -20,6 +20,13 @@ mcp = ["dep:ferroui-mcp"]
 render-smoke = ["dep:ferroui-vello", "dep:ferroui-harfbuzz", "dep:ferroui-themes-simple"]
 
 [dependencies]
+ferroui-designer-project.workspace = true
+ferroui-designer-language.workspace = true
+ferroui-designer-collaboration-host = { workspace = true, features = ["client", "server"] }
+ferroui-xaml-interactivity.workspace = true
+ferroui-xaml-interactions.workspace = true
+ferroui-xaml-interactions-custom.workspace = true
+ferroui-markup.workspace = true
 ferroui-designer-tools.workspace = true
 ferroui-vello = { workspace = true, optional = true }
 ferroui-harfbuzz = { workspace = true, optional = true }

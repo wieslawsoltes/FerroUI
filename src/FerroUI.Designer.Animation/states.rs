@@ -6,7 +6,6 @@ use crate::programs::{
 };
 use crate::{
     require, AnimationError, AnimationValue, BehaviorAction, Easing, FillMode, Result, Timeline,
-    ValueKind,
 };
 use ferroui_designer_core::{Document, Edit, NodeId, NodeKind};
 use serde::{Deserialize, Serialize};
@@ -705,21 +704,7 @@ pub fn resolve_state_target(document: &Document, owner: NodeId, name: &str) -> R
 }
 
 pub fn state_value(property: &str, value: &str) -> Result<AnimationValue> {
-    let kind = if matches!(property, "Margin" | "Padding" | "BorderThickness") {
-        ValueKind::Thickness
-    } else if value.parse::<f64>().is_ok() {
-        ValueKind::Number
-    } else if value.starts_with('#') {
-        ValueKind::Color
-    } else if matches!(
-        property,
-        "RenderTransformOrigin" | "Center" | "StartPoint" | "EndPoint"
-    ) {
-        ValueKind::Point
-    } else {
-        ValueKind::Discrete
-    };
-    AnimationValue::parse(value, kind)
+    AnimationValue::parse(value, crate::xaml::infer_kind(property, value))
 }
 
 /// Update designer metadata after a scope-aware source rename/copy. Real named references
@@ -876,7 +861,9 @@ fn sync_transition(
     else {
         return;
     };
-    let Ok(easing) = Easing::parse(animation.attribute("Easing").unwrap_or("LinearEasing")) else {
+    let Ok(easing) = fragment(document, animation.id)
+        .and_then(|source| crate::xaml::easing_from_source(&source))
+    else {
         return;
     };
     if let Some(transition) = group
@@ -1396,12 +1383,39 @@ fn merge_state_animation(
         }
     }
     if reease {
+        for child in output
+            .ast()
+            .element_children(root)
+            .into_iter()
+            .filter_map(|id| output.ast().node(id))
+            .filter(|node| node.local_name() == "Animation.Easing")
+        {
+            edits.push(Edit::RemoveNode { node: child.id });
+        }
         if let Some(value) = desired_root.attribute("Easing") {
             edits.push(Edit::SetAttribute {
                 node: root,
                 name: "Easing".into(),
                 value: value.into(),
             });
+        } else {
+            edits.push(Edit::RemoveAttribute {
+                node: root,
+                name: "Easing".into(),
+            });
+            if let Some(child) = desired
+                .ast()
+                .element_children(desired_root.id)
+                .into_iter()
+                .filter_map(|id| desired.ast().node(id))
+                .find(|node| node.local_name() == "Animation.Easing")
+            {
+                edits.push(Edit::InsertChild {
+                    parent: root,
+                    index: 0,
+                    source: native_fragment(&output, root, &fragment(&desired, child.id)?)?,
+                });
+            }
         }
     }
     for (property, values) in &current {

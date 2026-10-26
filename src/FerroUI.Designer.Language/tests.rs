@@ -184,7 +184,7 @@ fn native_animation_programs_and_transition_objects_have_complete_schema_diagnos
       </Style.Animations>
     </Style>
   </StackPanel.Styles>
-  <Border>
+  <Border Classes="accent">
     <Border.Transitions>
       <Transitions><DoubleTransition Property="Opacity" Duration="0:0:0.2" Delay="0:0:0.1" Easing="CubicEaseOut"/></Transitions>
     </Border.Transitions>
@@ -230,7 +230,7 @@ fn animation_completion_uses_macro_properties_and_plain_markup_metadata() {
             .constructible
     );
     let style = schema.properties("Style", None);
-    assert!(style["Animations"].read_only);
+    assert!(style.contains_key("Animations"));
     assert!(!style.contains_key("get") && !style.contains_key("try_set"));
 
     let source = "<Animation PlaybackBehavior='A'/>";

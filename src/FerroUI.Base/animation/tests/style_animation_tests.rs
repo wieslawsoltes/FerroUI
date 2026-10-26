@@ -1,10 +1,10 @@
 use super::*;
 use crate::animation::{Animation, FillMode, KeyFrame};
-use crate::reactive::{LightweightSubject, Observable};
 use crate::controls::ResourceKey;
 use crate::data::core::Value;
 use crate::data::model::Model;
 use crate::data::{BindingBase, ReflectionBinding};
+use crate::reactive::{LightweightSubject, Observable};
 use crate::styling::{ControlTheme, Selectors, Setter, SetterValue, Style};
 
 fn create_opacity_animation(from: SetterValue, to: SetterValue) -> Ref<Animation> {
@@ -22,7 +22,233 @@ fn create_opacity_animation(from: SetterValue, to: SetterValue) -> Ref<Animation
     animation
 }
 
-fn create_root(animation: &Ref<Animation>, selector: crate::styling::Selector) -> (Ref<TestRoot>, Ref<Border>) {
+#[test]
+fn animation_preview_final_fill_preserves_live_binding_until_disposal() {
+    let animation = create_opacity_animation(
+        SetterValue::Value(Rc::new(1.0_f64)),
+        SetterValue::Value(Rc::new(0.0_f64)),
+    );
+    let target = Border::new();
+    let source = Rc::new(LightweightSubject::<f64>::new());
+    let binding = target.bind(
+        Visual::opacity_property(),
+        source.clone(),
+        crate::data::BindingPriority::LocalValue,
+    );
+    source.on_next(0.8);
+    let clock = TestClock::new();
+    let applied = animation.apply_for_preview(&target, Some(clock.as_clock()), None);
+    clock.step(TimeSpan::ZERO);
+    clock.step(seconds(1.0));
+    assert_eq!(target.opacity(), 0.0);
+    assert!(target.has_local_value_binding(Visual::opacity_property().as_property()));
+    source.on_next(0.6);
+    assert_eq!(
+        target.opacity(),
+        0.0,
+        "Forward fill remains a preview layer"
+    );
+    applied.dispose();
+    assert_eq!(target.opacity(), 0.6);
+    source.on_next(0.9);
+    assert_eq!(target.opacity(), 0.9, "Preview did not replace the binding");
+    applied.dispose();
+    assert_eq!(animation.fill_mode(), FillMode::Both);
+    binding.dispose();
+}
+
+#[test]
+fn animation_preview_midway_stop_restores_local_and_regular_apply_still_commits() {
+    let animation = create_opacity_animation(
+        SetterValue::Value(Rc::new(1.0_f64)),
+        SetterValue::Value(Rc::new(0.0_f64)),
+    );
+    let target = Border::new();
+    target.set_opacity(0.7);
+    let clock = TestClock::new();
+    let preview = animation.apply_for_preview(&target, Some(clock.as_clock()), None);
+    clock.step(TimeSpan::ZERO);
+    clock.step(seconds(0.5));
+    assert_eq!(target.opacity(), 0.5);
+    preview.dispose();
+    assert_eq!(target.opacity(), 0.7);
+    let clock = TestClock::new();
+    let ordinary = animation.apply(
+        &target,
+        Some(clock.as_clock()),
+        Observable::single_value(true),
+        None,
+        true,
+    );
+    clock.step(TimeSpan::ZERO);
+    clock.step(seconds(1.0));
+    ordinary.dispose();
+    assert_eq!(
+        target.opacity(),
+        0.0,
+        "Application fill semantics are unchanged"
+    );
+}
+
+#[test]
+fn animation_preview_generated_transform_is_removed_after_completion() {
+    let animation = Animation::new();
+    animation.set_duration(seconds(1.0));
+    animation.set_fill_mode(FillMode::Forward);
+    animation.children().add(KeyFrame::with_key_time(
+        seconds(0.0),
+        [Setter::new(crate::media::RotateTransform::angle_property(), 0.0) as _],
+    ));
+    animation.children().add(KeyFrame::with_key_time(
+        seconds(1.0),
+        [Setter::new(crate::media::RotateTransform::angle_property(), 90.0) as _],
+    ));
+    let target = Border::new();
+    assert!(target.render_transform().is_none());
+    let clock = TestClock::new();
+    let preview = animation.apply_for_preview(&target, Some(clock.as_clock()), None);
+    clock.step(TimeSpan::ZERO);
+    clock.step(seconds(1.0));
+    let group = target
+        .render_transform()
+        .unwrap()
+        .as_object()
+        .unwrap()
+        .downcast_ref::<crate::media::TransformGroup>()
+        .unwrap()
+        .to_ref();
+    let angle = group
+        .children()
+        .iter()
+        .find_map(|child| child.cast::<crate::media::RotateTransform>())
+        .unwrap();
+    assert_eq!(angle.angle(), 90.0);
+    preview.dispose();
+    assert!(target.render_transform().is_none());
+    assert_eq!(angle.angle(), 0.0);
+}
+
+#[test]
+fn animation_preview_failed_setup_removes_created_transform() {
+    let animation = Animation::new();
+    animation.set_duration(seconds(1.0));
+    animation.set_fill_mode(FillMode::Forward);
+    animation.set_speed_ratio(-1.0);
+    animation.children().add(KeyFrame::with_key_time(
+        seconds(1.0),
+        [Setter::new(crate::media::RotateTransform::angle_property(), 90.0) as _],
+    ));
+    let target = Border::new();
+    let clock = TestClock::new();
+    let rejected = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
+        animation.apply_for_preview(&target, Some(clock.as_clock()), None)
+    }));
+    assert!(rejected.is_err());
+    assert!(
+        target.render_transform().is_none(),
+        "Failed setup must remove its preview transform"
+    );
+    assert!(!target.is_animating(Visual::render_transform_property()));
+}
+
+#[test]
+fn animation_preview_completed_fill_keeps_original_program_precedence() {
+    let first = create_opacity_animation(
+        SetterValue::Value(Rc::new(1.0_f64)),
+        SetterValue::Value(Rc::new(0.0_f64)),
+    );
+    let later = create_opacity_animation(
+        SetterValue::Value(Rc::new(1.0_f64)),
+        SetterValue::Value(Rc::new(0.5_f64)),
+    );
+    later.set_duration(seconds(2.0));
+    later.children().get(1).set_key_time(seconds(2.0));
+    let target = Border::new();
+    target.set_opacity(0.8);
+    let first_clock = TestClock::new();
+    let later_clock = TestClock::new();
+    let first_run = first.apply_for_preview(&target, Some(first_clock.as_clock()), None);
+    let later_run = later.apply_for_preview(&target, Some(later_clock.as_clock()), None);
+    first_clock.step(TimeSpan::ZERO);
+    later_clock.step(TimeSpan::ZERO);
+    later_clock.step(seconds(1.0));
+    assert_eq!(target.opacity(), 0.75);
+    first_clock.step(seconds(1.0));
+    assert_eq!(
+        target.opacity(),
+        0.75,
+        "Completing an earlier program must not mask a later program"
+    );
+    later_clock.step(seconds(2.0));
+    assert_eq!(target.opacity(), 0.5);
+    later_run.dispose();
+    assert_eq!(
+        target.opacity(),
+        0.0,
+        "The earlier completed program remains underneath"
+    );
+    first_run.dispose();
+    assert_eq!(target.opacity(), 0.8);
+}
+
+#[test]
+fn animation_preview_shared_generated_transform_outlives_its_creator_run() {
+    let rotate = Animation::new();
+    rotate.set_duration(seconds(2.0));
+    rotate.set_fill_mode(FillMode::Forward);
+    rotate.children().add(KeyFrame::with_key_time(
+        seconds(0.0),
+        [Setter::new(crate::media::RotateTransform::angle_property(), 0.0) as _],
+    ));
+    rotate.children().add(KeyFrame::with_key_time(
+        seconds(2.0),
+        [Setter::new(crate::media::RotateTransform::angle_property(), 90.0) as _],
+    ));
+    let scale = Animation::new();
+    scale.set_duration(seconds(2.0));
+    scale.set_fill_mode(FillMode::Forward);
+    scale.children().add(KeyFrame::with_key_time(
+        seconds(0.0),
+        [Setter::new(crate::media::ScaleTransform::scale_x_property(), 1.0) as _],
+    ));
+    scale.children().add(KeyFrame::with_key_time(
+        seconds(2.0),
+        [Setter::new(crate::media::ScaleTransform::scale_x_property(), 2.0) as _],
+    ));
+    let target = Border::new();
+    let rotate_clock = TestClock::new();
+    let scale_clock = TestClock::new();
+    let rotate_run = rotate.apply_for_preview(&target, Some(rotate_clock.as_clock()), None);
+    let scale_run = scale.apply_for_preview(&target, Some(scale_clock.as_clock()), None);
+    rotate_clock.step(TimeSpan::ZERO);
+    scale_clock.step(TimeSpan::ZERO);
+    rotate_clock.step(seconds(1.0));
+    scale_clock.step(seconds(1.0));
+    rotate_run.dispose();
+    let group = target
+        .render_transform()
+        .expect("The later run still owns the shared transform")
+        .as_object()
+        .unwrap()
+        .downcast_ref::<crate::media::TransformGroup>()
+        .unwrap()
+        .to_ref();
+    let transform = group
+        .children()
+        .iter()
+        .find_map(|child| child.cast::<crate::media::ScaleTransform>())
+        .unwrap();
+    assert_eq!(transform.scale_x(), 1.5);
+    scale_clock.step(seconds(2.0));
+    assert_eq!(transform.scale_x(), 2.0);
+    scale_run.dispose();
+    assert!(target.render_transform().is_none());
+}
+
+fn create_root(
+    animation: &Ref<Animation>,
+    selector: crate::styling::Selector,
+) -> (Ref<TestRoot>, Ref<Border>) {
     let style = Style::with_selector(selector);
     style.add_animation(animation);
     let root = TestRoot::new();
@@ -39,7 +265,8 @@ fn create_themed_root(animation: &Ref<Animation>) -> (Ref<TestRoot>, Ref<Border>
     theme.add_animation(animation);
     let root = TestRoot::new();
     let theme: BoxedValue = Rc::new(theme);
-    root.resources().add(ResourceKey::Type(Border::TYPE), Some(theme));
+    root.resources()
+        .add(ResourceKey::Type(Border::TYPE), Some(theme));
     let target = Border::new();
     root.set_child(&target);
     (root, target)
@@ -48,8 +275,10 @@ fn create_themed_root(animation: &Ref<Animation>) -> (Ref<TestRoot>, Ref<Border>
 #[test]
 fn control_theme_applies_animation() {
     let clock = start();
-    let animation =
-        create_opacity_animation(SetterValue::Value(Rc::new(1.0_f64)), SetterValue::Value(Rc::new(0.0_f64)));
+    let animation = create_opacity_animation(
+        SetterValue::Value(Rc::new(1.0_f64)),
+        SetterValue::Value(Rc::new(0.0_f64)),
+    );
     let (_root, target) = create_themed_root(&animation);
 
     clock.pulse(TimeSpan::ZERO);
@@ -76,14 +305,17 @@ fn control_theme_applies_animation_with_bound_key_frame_values() {
     let clock = start();
     let from_binding: Rc<dyn BindingBase> = ReflectionBinding::new("From");
     let to_binding: Rc<dyn BindingBase> = ReflectionBinding::new("To");
-    let animation =
-        create_opacity_animation(SetterValue::BindingBase(from_binding), SetterValue::BindingBase(to_binding));
+    let animation = create_opacity_animation(
+        SetterValue::BindingBase(from_binding),
+        SetterValue::BindingBase(to_binding),
+    );
 
     let theme = ControlTheme::for_type::<Border>();
     theme.add_animation(&animation);
     let root = TestRoot::new();
     let theme: BoxedValue = Rc::new(theme);
-    root.resources().add(ResourceKey::Type(Border::TYPE), Some(theme));
+    root.resources()
+        .add(ResourceKey::Type(Border::TYPE), Some(theme));
     let target = Border::new();
     let values: BoxedValue = Model::new_model(KeyFrameValues { from: 1.0, to: 0.0 });
     target.set_data_context(Some(values));
@@ -102,8 +334,10 @@ fn control_theme_applies_animation_with_bound_key_frame_values() {
 #[test]
 fn style_applies_animation_with_observable_key_frame_values() {
     let clock = start();
-    let from: Rc<dyn crate::reactive::IObservable<BoxedValue>> = Observable::single_value(Rc::new(1.0_f64) as BoxedValue);
-    let to: Rc<dyn crate::reactive::IObservable<BoxedValue>> = Observable::single_value(Rc::new(0.0_f64) as BoxedValue);
+    let from: Rc<dyn crate::reactive::IObservable<BoxedValue>> =
+        Observable::single_value(Rc::new(1.0_f64) as BoxedValue);
+    let to: Rc<dyn crate::reactive::IObservable<BoxedValue>> =
+        Observable::single_value(Rc::new(0.0_f64) as BoxedValue);
     let animation = create_opacity_animation(SetterValue::Binding(from), SetterValue::Binding(to));
     let (_root, target) = create_root(&animation, Selectors::of_type::<Border>());
 
@@ -120,8 +354,10 @@ fn style_applies_animation_with_observable_key_frame_values() {
 #[test]
 fn style_applies_animation() {
     let clock = start();
-    let animation =
-        create_opacity_animation(SetterValue::Value(Rc::new(1.0_f64)), SetterValue::Value(Rc::new(0.0_f64)));
+    let animation = create_opacity_animation(
+        SetterValue::Value(Rc::new(1.0_f64)),
+        SetterValue::Value(Rc::new(0.0_f64)),
+    );
     let (_root, target) = create_root(&animation, Selectors::of_type::<Border>());
 
     clock.pulse(TimeSpan::ZERO);
@@ -159,8 +395,10 @@ fn bound_key_frame_value_follows_its_source() {
 #[test]
 fn animation_of_style_with_activator_runs_while_the_style_is_active() {
     let clock = start();
-    let animation =
-        create_opacity_animation(SetterValue::Value(Rc::new(1.0_f64)), SetterValue::Value(Rc::new(0.0_f64)));
+    let animation = create_opacity_animation(
+        SetterValue::Value(Rc::new(1.0_f64)),
+        SetterValue::Value(Rc::new(0.0_f64)),
+    );
     animation.set_fill_mode(FillMode::None);
     let (_root, target) = create_root(&animation, Selectors::of_type::<Border>().class("foo"));
 
@@ -185,8 +423,10 @@ fn animation_of_style_with_activator_runs_while_the_style_is_active() {
 #[test]
 fn animations_are_disposed_when_the_style_is_detached() {
     let clock = start();
-    let animation =
-        create_opacity_animation(SetterValue::Value(Rc::new(1.0_f64)), SetterValue::Value(Rc::new(0.0_f64)));
+    let animation = create_opacity_animation(
+        SetterValue::Value(Rc::new(1.0_f64)),
+        SetterValue::Value(Rc::new(0.0_f64)),
+    );
     animation.set_iteration_count(crate::animation::IterationCount::INFINITE);
     animation.set_fill_mode(FillMode::None);
     let (root, target) = create_root(&animation, Selectors::of_type::<Border>());
@@ -229,11 +469,14 @@ fn double_animation() -> Ref<Animation> {
     let animation = Animation::new();
     animation.set_duration(seconds(1.0));
     let first = KeyFrame::new();
-    first.setters().add(Setter::new(Class1::double_property(), 5.0) as _);
+    first
+        .setters()
+        .add(Setter::new(Class1::double_property(), 5.0) as _);
     animation.children().add(first);
-    animation
-        .children()
-        .add(KeyFrame::with_cue(Cue::new(1.0), [Setter::new(Class1::double_property(), 10.0) as _]));
+    animation.children().add(KeyFrame::with_cue(
+        Cue::new(1.0),
+        [Setter::new(Class1::double_property(), 10.0) as _],
+    ));
     animation
 }
 

@@ -13,6 +13,9 @@ pub struct ImportOptions {
     pub base_values: BTreeMap<String, AnimationValue>,
     /// Host-resolved literals, keyed by (property name, decoded literal text), e.g. named colors.
     pub literal_values: BTreeMap<(String, String), AnimationValue>,
+    /// Native value types that need a host animator instead of the portable literal codec.
+    /// Extension codecs may replace this entry when they implement that interpolation.
+    pub interpolation_errors: BTreeMap<String, String>,
     pub strict: bool,
 }
 impl Default for ImportOptions {
@@ -21,6 +24,7 @@ impl Default for ImportOptions {
             property_kinds: BTreeMap::new(),
             base_values: BTreeMap::new(),
             literal_values: BTreeMap::new(),
+            interpolation_errors: BTreeMap::new(),
             strict: true,
         }
     }
@@ -62,8 +66,14 @@ impl Timeline {
             Repeat::Count(n) => n.to_string(),
             Repeat::Infinite => "Infinite".into(),
         };
+        let easing_element = self.easing.property_element();
+        let easing_attribute = if easing_element.is_none() {
+            format!(" Easing=\"{}\"", escape(&self.easing.to_xaml()))
+        } else {
+            String::new()
+        };
         let mut result = format!(
-            "<Animation Duration=\"{}\" Delay=\"{}\" DelayBetweenIterations=\"{}\" PlaybackBehavior=\"{:?}\" SpeedRatio=\"{}\" IterationCount=\"{}\" PlaybackDirection=\"{:?}\" FillMode=\"{:?}\" Easing=\"{}\">\n",
+            "<Animation Duration=\"{}\" Delay=\"{}\" DelayBetweenIterations=\"{}\" PlaybackBehavior=\"{:?}\" SpeedRatio=\"{}\" IterationCount=\"{}\" PlaybackDirection=\"{:?}\" FillMode=\"{:?}\"{}>\n",
             time_string(self.duration),
             time_string(self.delay),
             time_string(self.delay_between_iterations),
@@ -72,8 +82,12 @@ impl Timeline {
             repeat,
             self.playback_direction,
             self.fill,
-            escape(&self.easing.to_xaml())
+            easing_attribute
         );
+        if let Some(element) = easing_element {
+            result.push_str(&element);
+            result.push('\n');
+        }
         let mut keys: Vec<(f64, &str, AnimationValue, Easing)> = vec![];
         for track in tracks {
             let first = &track.keyframes[0];
@@ -226,9 +240,14 @@ impl Timeline {
             "Both" => FillMode::Both,
             _ => return Err(AnimationError("Invalid FillMode".into())),
         };
-        timeline.easing = Easing::parse(root.attribute("Easing").unwrap_or("LinearEasing"))?;
+        timeline.easing = import_easing(root)?;
         let mut tracks: BTreeMap<String, Track> = BTreeMap::new();
         for node in root.children().filter(|n| n.is_element()) {
+            if node.tag_name().name() == "Animation.Easing"
+                && native_namespace(node.tag_name().namespace())
+            {
+                continue;
+            }
             require(
                 node.tag_name().name() == "KeyFrame" && native_namespace(node.tag_name().namespace()),
                 "Only literal KeyFrame children are supported; custom animation objects remain in source",
@@ -281,6 +300,9 @@ impl Timeline {
                 let property = setter
                     .attribute("Property")
                     .ok_or_else(|| AnimationError("Setter.Property is required".into()))?;
+                if let Some(reason) = options.interpolation_errors.get(property) {
+                    return Err(AnimationError(reason.clone()));
+                }
                 let source = setter
                     .attribute("Value")
                     .ok_or_else(|| AnimationError("Setter.Value is required".into()))?;
@@ -475,15 +497,24 @@ fn escape(text: &str) -> String {
         .replace('\n', "&#10;")
         .replace('\t', "&#9;")
 }
-fn infer_kind(property: &str, source: &str) -> ValueKind {
+pub(crate) fn infer_kind(property: &str, source: &str) -> ValueKind {
     let property = property.rsplit('.').next().unwrap_or(property);
     if matches!(property, "Margin" | "Padding" | "BorderThickness") {
         ValueKind::Thickness
-    } else if matches!(
-        property,
-        "RenderTransformOrigin" | "Center" | "StartPoint" | "EndPoint"
-    ) {
-        ValueKind::Point
+    } else if property == "CornerRadius" {
+        ValueKind::CornerRadius
+    } else if matches!(property, "RenderTransformOrigin") {
+        ValueKind::RelativePoint
+    } else if matches!(property, "Size" | "PageSize") {
+        ValueKind::Size
+    } else if matches!(property, "Rect" | "Bounds" | "Viewport") {
+        ValueKind::Rect
+    } else if matches!(property, "Center" | "StartPoint" | "EndPoint") {
+        if source.contains('%') {
+            ValueKind::RelativePoint
+        } else {
+            ValueKind::Point
+        }
     } else if source.starts_with('#') {
         ValueKind::Color
     } else if source.trim().parse::<f64>().is_ok() {
@@ -491,6 +522,95 @@ fn infer_kind(property: &str, source: &str) -> ValueKind {
     } else {
         ValueKind::Discrete
     }
+}
+
+pub(crate) fn import_easing(root: roxmltree::Node<'_, '_>) -> Result<Easing> {
+    let properties = root
+        .children()
+        .filter(|node| {
+            node.is_element()
+                && node.tag_name().name() == "Animation.Easing"
+                && native_namespace(node.tag_name().namespace())
+        })
+        .collect::<Vec<_>>();
+    require(
+        properties.len() <= 1 && !(root.attribute("Easing").is_some() && !properties.is_empty()),
+        "Animation easing must be declared once",
+    )?;
+    let Some(property) = properties.first() else {
+        return Easing::parse(root.attribute("Easing").unwrap_or("LinearEasing"));
+    };
+    require(
+        property.attributes().len() == 0,
+        "Unknown easing property attributes remain in source",
+    )?;
+    let children = property
+        .children()
+        .filter(|node| node.is_element())
+        .collect::<Vec<_>>();
+    require(
+        children.len() == 1,
+        "Animation.Easing requires one easing object",
+    )?;
+    let node = children[0];
+    require(
+        native_namespace(node.tag_name().namespace())
+            || node.tag_name().namespace().is_some_and(|namespace| {
+                matches!(
+                    namespace,
+                    "using:FerroUI.Animation.Easings"
+                        | "clr-namespace:FerroUI.Animation.Easings;assembly=FerroUI.Base"
+                )
+            }),
+        "Extension easing objects require an animation codec",
+    )?;
+    require(
+        !node.children().any(|child| {
+            child.is_element() || child.is_text() && !child.text().unwrap_or("").trim().is_empty()
+        }),
+        "Unknown easing payload remains in source",
+    )?;
+    let numeric = |name: &str, default: f64| {
+        node.attribute(name)
+            .map(parse_number)
+            .transpose()
+            .map(|value| value.unwrap_or(default))
+    };
+    let (result, allowed): (Easing, &[&str]) = match node.tag_name().name() {
+        "SpringEasing" => (
+            Easing::Spring {
+                mass: numeric("Mass", 0.0)?,
+                stiffness: numeric("Stiffness", 0.0)?,
+                damping: numeric("Damping", 0.0)?,
+                initial_velocity: numeric("InitialVelocity", 0.0)?,
+            },
+            &["Mass", "Stiffness", "Damping", "InitialVelocity"],
+        ),
+        "SplineEasing" => (
+            Easing::CubicBezier {
+                x1: numeric("X1", 0.0)?,
+                y1: numeric("Y1", 0.0)?,
+                x2: numeric("X2", 1.0)?,
+                y2: numeric("Y2", 1.0)?,
+            },
+            &["X1", "Y1", "X2", "Y2"],
+        ),
+        name => (Easing::parse(name)?, &[]),
+    };
+    require(
+        node.attributes().all(|attribute| {
+            attribute.namespace().is_none() && allowed.contains(&attribute.name())
+        }),
+        "Unknown easing object attributes remain in source",
+    )?;
+    result.validate()?;
+    Ok(result)
+}
+
+pub(crate) fn easing_from_source(source: &str) -> Result<Easing> {
+    let document =
+        roxmltree::Document::parse(source).map_err(|error| AnimationError(error.to_string()))?;
+    import_easing(document.root_element())
 }
 
 fn literal_value(value: &AnimationValue) -> String {

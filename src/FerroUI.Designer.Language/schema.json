@@ -29,8 +29,7 @@
         "values": [
           "True",
           "False"
-        ],
-        "read_only": true
+        ]
       }
     }
   },
@@ -165,15 +164,13 @@
         "name": "Duration",
         "type_name": "TimeSpan",
         "documentation": "Animation.Duration: TimeSpan",
-        "values": [],
-        "read_only": false
+        "values": []
       },
       "IterationCount": {
         "name": "IterationCount",
         "type_name": "IterationCount",
         "documentation": "Animation.IterationCount: IterationCount",
-        "values": [],
-        "read_only": false
+        "values": []
       },
       "PlaybackDirection": {
         "name": "PlaybackDirection",
@@ -184,8 +181,7 @@
           "Reverse",
           "Alternate",
           "AlternateReverse"
-        ],
-        "read_only": false
+        ]
       },
       "PlaybackBehavior": {
         "name": "PlaybackBehavior",
@@ -195,8 +191,7 @@
           "Auto",
           "Always",
           "OnlyIfVisible"
-        ],
-        "read_only": false
+        ]
       },
       "FillMode": {
         "name": "FillMode",
@@ -207,29 +202,25 @@
           "Forward",
           "Backward",
           "Both"
-        ],
-        "read_only": false
+        ]
       },
       "Delay": {
         "name": "Delay",
         "type_name": "TimeSpan",
         "documentation": "Animation.Delay: TimeSpan",
-        "values": [],
-        "read_only": false
+        "values": []
       },
       "DelayBetweenIterations": {
         "name": "DelayBetweenIterations",
         "type_name": "TimeSpan",
         "documentation": "Animation.DelayBetweenIterations: TimeSpan",
-        "values": [],
-        "read_only": false
+        "values": []
       },
       "Children": {
         "name": "Children",
         "type_name": "KeyFrames",
         "documentation": "Animation.Children: KeyFrames",
-        "values": [],
-        "read_only": true
+        "values": []
       }
     }
   },
@@ -254,8 +245,7 @@
         "values": [
           "True",
           "False"
-        ],
-        "read_only": false
+        ]
       },
       "FillAfter": {
         "name": "FillAfter",
@@ -264,8 +254,7 @@
         "values": [
           "True",
           "False"
-        ],
-        "read_only": false
+        ]
       }
     }
   },
@@ -308,29 +297,25 @@
         "name": "Styles",
         "type_name": "Ref<Styles>",
         "documentation": "Application.Styles: Ref<Styles>",
-        "values": [],
-        "read_only": true
+        "values": []
       },
       "ApplicationLifetime": {
         "name": "ApplicationLifetime",
         "type_name": "Option<Rc<dyn IApplicationLifetime>>",
         "documentation": "Application.ApplicationLifetime: Option<Rc<dyn IApplicationLifetime>>",
-        "values": [],
-        "read_only": false
+        "values": []
       },
       "DataTemplates": {
         "name": "DataTemplates",
         "type_name": "DataTemplates",
         "documentation": "Application.DataTemplates: DataTemplates",
-        "values": [],
-        "read_only": true
+        "values": []
       },
       "Resources": {
         "name": "Resources",
         "type_name": "Rc<dyn IResourceDictionary>",
         "documentation": "Application.Resources: Rc<dyn IResourceDictionary>",
-        "values": [],
-        "read_only": false
+        "values": []
       }
     }
   },
@@ -1168,15 +1153,13 @@
         "name": "SelectedDates",
         "type_name": "SelectedDatesCollection",
         "documentation": "Calendar.SelectedDates: SelectedDatesCollection",
-        "values": [],
-        "read_only": true
+        "values": []
       },
       "BlackoutDates": {
         "name": "BlackoutDates",
         "type_name": "CalendarBlackoutDatesCollection",
         "documentation": "Calendar.BlackoutDates: CalendarBlackoutDatesCollection",
-        "values": [],
-        "read_only": true
+        "values": []
       }
     }
   },
@@ -1371,8 +1354,7 @@
         "name": "BlackoutDates",
         "type_name": "Option<CalendarBlackoutDatesCollection>",
         "documentation": "CalendarDatePicker.BlackoutDates: Option<CalendarBlackoutDatesCollection>",
-        "values": [],
-        "read_only": true
+        "values": []
       }
     }
   },
@@ -1437,8 +1419,7 @@
         "values": [
           "True",
           "False"
-        ],
-        "read_only": false
+        ]
       }
     }
   },
@@ -1667,15 +1648,13 @@
         "name": "Capacity",
         "type_name": "i32",
         "documentation": "Classes.Capacity: i32",
-        "values": [],
-        "read_only": false
+        "values": []
       },
       "Count": {
         "name": "Count",
         "type_name": "i32",
         "documentation": "Classes.Count: i32",
-        "values": [],
-        "read_only": true
+        "values": []
       }
     }
   },
@@ -1954,8 +1933,7 @@
         "values": [
           "True",
           "False"
-        ],
-        "read_only": false
+        ]
       },
       "AlphaPosition": {
         "name": "AlphaPosition",
@@ -1964,8 +1942,7 @@
         "values": [
           "Leading",
           "Trailing"
-        ],
-        "read_only": false
+        ]
       }
     }
   },
@@ -2516,15 +2493,13 @@
         "name": "VisiblePrimaryCommands",
         "type_name": "CommandBarElementCollection",
         "documentation": "CommandBar.VisiblePrimaryCommands: CommandBarElementCollection",
-        "values": [],
-        "read_only": true
+        "values": []
       },
       "OverflowItems": {
         "name": "OverflowItems",
         "type_name": "CommandBarElementCollection",
         "documentation": "CommandBar.OverflowItems: CommandBarElementCollection",
-        "values": [],
-        "read_only": true
+        "values": []
       },
       "Opening": {
         "name": "Opening",
@@ -2714,36 +2689,31 @@
         "name": "Delay",
         "type_name": "i32",
         "documentation": "CompiledBinding.Delay: i32",
-        "values": [],
-        "read_only": false
+        "values": []
       },
       "Converter": {
         "name": "Converter",
         "type_name": "Option<Rc<dyn IValueConverter>>",
         "documentation": "CompiledBinding.Converter: Option<Rc<dyn IValueConverter>>",
-        "values": [],
-        "read_only": false
+        "values": []
       },
       "ConverterCulture": {
         "name": "ConverterCulture",
         "type_name": "Option<CultureInfo>",
         "documentation": "CompiledBinding.ConverterCulture: Option<CultureInfo>",
-        "values": [],
-        "read_only": false
+        "values": []
       },
       "ConverterParameter": {
         "name": "ConverterParameter",
         "type_name": "Option<BoxedValue>",
         "documentation": "CompiledBinding.ConverterParameter: Option<BoxedValue>",
-        "values": [],
-        "read_only": false
+        "values": []
       },
       "FallbackValue": {
         "name": "FallbackValue",
         "type_name": "Option<BoxedValue>",
         "documentation": "CompiledBinding.FallbackValue: Option<BoxedValue>",
-        "values": [],
-        "read_only": false
+        "values": []
       },
       "Mode": {
         "name": "Mode",
@@ -2755,15 +2725,13 @@
           "TwoWay",
           "OneTime",
           "OneWayToSource"
-        ],
-        "read_only": false
+        ]
       },
       "Path": {
         "name": "Path",
         "type_name": "Option<CompiledBindingPath>",
         "documentation": "CompiledBinding.Path: Option<CompiledBindingPath>",
-        "values": [],
-        "read_only": false
+        "values": []
       },
       "Priority": {
         "name": "Priority",
@@ -2777,29 +2745,25 @@
           "Style",
           "Inherited",
           "Unset"
-        ],
-        "read_only": false
+        ]
       },
       "Source": {
         "name": "Source",
         "type_name": "Option<BoxedValue>",
         "documentation": "CompiledBinding.Source: Option<BoxedValue>",
-        "values": [],
-        "read_only": false
+        "values": []
       },
       "StringFormat": {
         "name": "StringFormat",
         "type_name": "Option<String>",
         "documentation": "CompiledBinding.StringFormat: Option<String>",
-        "values": [],
-        "read_only": false
+        "values": []
       },
       "TargetNullValue": {
         "name": "TargetNullValue",
         "type_name": "Option<BoxedValue>",
         "documentation": "CompiledBinding.TargetNullValue: Option<BoxedValue>",
-        "values": [],
-        "read_only": false
+        "values": []
       },
       "UpdateSourceTrigger": {
         "name": "UpdateSourceTrigger",
@@ -2810,8 +2774,7 @@
           "PropertyChanged",
           "LostFocus",
           "Explicit"
-        ],
-        "read_only": false
+        ]
       }
     }
   },
@@ -2889,15 +2852,13 @@
         "name": "DefaultDuration",
         "type_name": "TimeSpan",
         "documentation": "ConnectedAnimationService.DefaultDuration: TimeSpan",
-        "values": [],
-        "read_only": false
+        "values": []
       },
       "DefaultEasingFunction": {
         "name": "DefaultEasingFunction",
         "type_name": "Option<Easing>",
         "documentation": "ConnectedAnimationService.DefaultEasingFunction: Option<Easing>",
-        "values": [],
-        "read_only": false
+        "values": []
       }
     }
   },
@@ -2912,15 +2873,13 @@
         "name": "Query",
         "type_name": "Option<StyleQuery>",
         "documentation": "ContainerQuery.Query: Option<StyleQuery>",
-        "values": [],
-        "read_only": false
+        "values": []
       },
       "Name": {
         "name": "Name",
         "type_name": "Option<String>",
         "documentation": "ContainerQuery.Name: Option<String>",
-        "values": [],
-        "read_only": false
+        "values": []
       }
     }
   },
@@ -3396,8 +3355,7 @@
         "name": "AlphaThreshold",
         "type_name": "u8",
         "documentation": "ContrastBrushConverter.AlphaThreshold: u8",
-        "values": [],
-        "read_only": false
+        "values": []
       }
     }
   },
@@ -3440,8 +3398,7 @@
         "name": "DataTemplates",
         "type_name": "DataTemplates",
         "documentation": "Control.DataTemplates: DataTemplates",
-        "values": [],
-        "read_only": true
+        "values": []
       },
       "RequestBringIntoView": {
         "name": "RequestBringIntoView",
@@ -3488,15 +3445,13 @@
         "name": "TargetType",
         "type_name": "Option<&'static TypeInfo>",
         "documentation": "ControlTheme.TargetType: Option<&'static TypeInfo>",
-        "values": [],
-        "read_only": false
+        "values": []
       },
       "BasedOn": {
         "name": "BasedOn",
         "type_name": "Option<Ref<ControlTheme>>",
         "documentation": "ControlTheme.BasedOn: Option<Ref<ControlTheme>>",
-        "values": [],
-        "read_only": false
+        "values": []
       }
     }
   },
@@ -3543,15 +3498,13 @@
         "name": "Filter",
         "type_name": "Corners",
         "documentation": "CornerRadiusFilterConverter.Filter: Corners",
-        "values": [],
-        "read_only": false
+        "values": []
       },
       "Scale": {
         "name": "Scale",
         "type_name": "f64",
         "documentation": "CornerRadiusFilterConverter.Scale: f64",
-        "values": [],
-        "read_only": false
+        "values": []
       }
     }
   },
@@ -3566,8 +3519,7 @@
         "name": "Corner",
         "type_name": "Corners",
         "documentation": "CornerRadiusToDoubleConverter.Corner: Corners",
-        "values": [],
-        "read_only": false
+        "values": []
       }
     }
   },
@@ -3613,22 +3565,19 @@
         "name": "Duration",
         "type_name": "TimeSpan",
         "documentation": "CrossFade.Duration: TimeSpan",
-        "values": [],
-        "read_only": false
+        "values": []
       },
       "FadeInEasing": {
         "name": "FadeInEasing",
         "type_name": "Easing",
         "documentation": "CrossFade.FadeInEasing: Easing",
-        "values": [],
-        "read_only": false
+        "values": []
       },
       "FadeOutEasing": {
         "name": "FadeOutEasing",
         "type_name": "Easing",
         "documentation": "CrossFade.FadeOutEasing: Easing",
-        "values": [],
-        "read_only": false
+        "values": []
       },
       "FillMode": {
         "name": "FillMode",
@@ -3639,8 +3588,7 @@
           "Forward",
           "Backward",
           "Both"
-        ],
-        "read_only": false
+        ]
       }
     }
   },
@@ -3679,8 +3627,7 @@
         "name": "Name",
         "type_name": "String",
         "documentation": "CultureInfo.Name: String",
-        "values": [],
-        "read_only": true
+        "values": []
       }
     }
   },
@@ -3703,57 +3650,49 @@
         "name": "PopupSize",
         "type_name": "Size",
         "documentation": "CustomPopupPlacement.PopupSize: Size",
-        "values": [],
-        "read_only": true
+        "values": []
       },
       "Deflate": {
         "name": "Deflate",
         "type_name": "Thickness",
         "documentation": "CustomPopupPlacement.Deflate: Thickness",
-        "values": [],
-        "read_only": true
+        "values": []
       },
       "Target": {
         "name": "Target",
         "type_name": "Ref<Visual>",
         "documentation": "CustomPopupPlacement.Target: Ref<Visual>",
-        "values": [],
-        "read_only": true
+        "values": []
       },
       "AnchorRectangle": {
         "name": "AnchorRectangle",
         "type_name": "Rect",
         "documentation": "CustomPopupPlacement.AnchorRectangle: Rect",
-        "values": [],
-        "read_only": false
+        "values": []
       },
       "Anchor": {
         "name": "Anchor",
         "type_name": "PopupAnchor",
         "documentation": "CustomPopupPlacement.Anchor: PopupAnchor",
-        "values": [],
-        "read_only": false
+        "values": []
       },
       "Gravity": {
         "name": "Gravity",
         "type_name": "PopupGravity",
         "documentation": "CustomPopupPlacement.Gravity: PopupGravity",
-        "values": [],
-        "read_only": false
+        "values": []
       },
       "ConstraintAdjustment": {
         "name": "ConstraintAdjustment",
         "type_name": "PopupPositionerConstraintAdjustment",
         "documentation": "CustomPopupPlacement.ConstraintAdjustment: PopupPositionerConstraintAdjustment",
-        "values": [],
-        "read_only": false
+        "values": []
       },
       "Offset": {
         "name": "Offset",
         "type_name": "Point",
         "documentation": "CustomPopupPlacement.Offset: Point",
-        "values": [],
-        "read_only": false
+        "values": []
       }
     }
   },
@@ -4067,36 +4006,31 @@
         "name": "MinimumValue",
         "type_name": "i32",
         "documentation": "DateTimePickerPanel.MinimumValue: i32",
-        "values": [],
-        "read_only": false
+        "values": []
       },
       "MaximumValue": {
         "name": "MaximumValue",
         "type_name": "i32",
         "documentation": "DateTimePickerPanel.MaximumValue: i32",
-        "values": [],
-        "read_only": false
+        "values": []
       },
       "SelectedValue": {
         "name": "SelectedValue",
         "type_name": "i32",
         "documentation": "DateTimePickerPanel.SelectedValue: i32",
-        "values": [],
-        "read_only": false
+        "values": []
       },
       "Increment": {
         "name": "Increment",
         "type_name": "i32",
         "documentation": "DateTimePickerPanel.Increment: i32",
-        "values": [],
-        "read_only": false
+        "values": []
       },
       "Offset": {
         "name": "Offset",
         "type_name": "Vector",
         "documentation": "DateTimePickerPanel.Offset: Vector",
-        "values": [],
-        "read_only": false
+        "values": []
       },
       "CanHorizontallyScroll": {
         "name": "CanHorizontallyScroll",
@@ -4105,8 +4039,7 @@
         "values": [
           "True",
           "False"
-        ],
-        "read_only": false
+        ]
       },
       "CanVerticallyScroll": {
         "name": "CanVerticallyScroll",
@@ -4115,8 +4048,7 @@
         "values": [
           "True",
           "False"
-        ],
-        "read_only": false
+        ]
       },
       "IsLogicalScrollEnabled": {
         "name": "IsLogicalScrollEnabled",
@@ -4125,36 +4057,31 @@
         "values": [
           "True",
           "False"
-        ],
-        "read_only": true
+        ]
       },
       "ScrollSize": {
         "name": "ScrollSize",
         "type_name": "Size",
         "documentation": "DateTimePickerPanel.ScrollSize: Size",
-        "values": [],
-        "read_only": true
+        "values": []
       },
       "PageScrollSize": {
         "name": "PageScrollSize",
         "type_name": "Size",
         "documentation": "DateTimePickerPanel.PageScrollSize: Size",
-        "values": [],
-        "read_only": true
+        "values": []
       },
       "Extent": {
         "name": "Extent",
         "type_name": "Size",
         "documentation": "DateTimePickerPanel.Extent: Size",
-        "values": [],
-        "read_only": true
+        "values": []
       },
       "Viewport": {
         "name": "Viewport",
         "type_name": "Size",
         "documentation": "DateTimePickerPanel.Viewport: Size",
-        "values": [],
-        "read_only": true
+        "values": []
       }
     }
   },
@@ -4285,15 +4212,13 @@
         "name": "DragEffects",
         "type_name": "DragDropEffects",
         "documentation": "DragEventArgs.DragEffects: DragDropEffects",
-        "values": [],
-        "read_only": false
+        "values": []
       },
       "KeyModifiers": {
         "name": "KeyModifiers",
         "type_name": "KeyModifiers",
         "documentation": "DragEventArgs.KeyModifiers: KeyModifiers",
-        "values": [],
-        "read_only": true
+        "values": []
       }
     }
   },
@@ -5062,15 +4987,13 @@
         "name": "Name",
         "type_name": "String",
         "documentation": "FerroProperty.Name: String",
-        "values": [],
-        "read_only": true
+        "values": []
       },
       "OwnerType": {
         "name": "OwnerType",
         "type_name": "&'static TypeInfo",
         "documentation": "FerroProperty.OwnerType: &'static TypeInfo",
-        "values": [],
-        "read_only": true
+        "values": []
       }
     }
   },
@@ -5209,8 +5132,7 @@
         "name": "FlyoutPresenterClasses",
         "type_name": "Classes",
         "documentation": "Flyout.FlyoutPresenterClasses: Classes",
-        "values": [],
-        "read_only": true
+        "values": []
       }
     }
   },
@@ -5267,8 +5189,7 @@
         "name": "NewFocusedElement",
         "type_name": "Option<Ref<InputElement>>",
         "documentation": "FocusChangingEventArgs.NewFocusedElement: Option<Ref<InputElement>>",
-        "values": [],
-        "read_only": true
+        "values": []
       },
       "Canceled": {
         "name": "Canceled",
@@ -5277,8 +5198,7 @@
         "values": [
           "True",
           "False"
-        ],
-        "read_only": true
+        ]
       }
     }
   },
@@ -5293,8 +5213,7 @@
         "name": "Name",
         "type_name": "String",
         "documentation": "FontFamily.Name: String",
-        "values": [],
-        "read_only": true
+        "values": []
       }
     }
   },
@@ -5564,15 +5483,13 @@
         "name": "ColumnDefinitions",
         "type_name": "ColumnDefinitions",
         "documentation": "Grid.ColumnDefinitions: ColumnDefinitions",
-        "values": [],
-        "read_only": false
+        "values": []
       },
       "RowDefinitions": {
         "name": "RowDefinitions",
         "type_name": "RowDefinitions",
         "documentation": "Grid.RowDefinitions: RowDefinitions",
-        "values": [],
-        "read_only": false
+        "values": []
       }
     }
   },
@@ -5739,15 +5656,13 @@
           "Started",
           "Completed",
           "Canceled"
-        ],
-        "read_only": true
+        ]
       },
       "Position": {
         "name": "Position",
         "type_name": "Point",
         "documentation": "HoldingRoutedEventArgs.Position: Point",
-        "values": [],
-        "read_only": true
+        "values": []
       },
       "PointerType": {
         "name": "PointerType",
@@ -5757,8 +5672,7 @@
           "Mouse",
           "Touch",
           "Pen"
-        ],
-        "read_only": true
+        ]
       }
     }
   },
@@ -6063,15 +5977,13 @@
         "name": "KeyBindings",
         "type_name": "FerroList<Ref<KeyBinding>>",
         "documentation": "InputElement.KeyBindings: FerroList<Ref<KeyBinding>>",
-        "values": [],
-        "read_only": true
+        "values": []
       },
       "GestureRecognizers": {
         "name": "GestureRecognizers",
         "type_name": "GestureRecognizerCollection",
         "documentation": "InputElement.GestureRecognizers: GestureRecognizerCollection",
-        "values": [],
-        "read_only": true
+        "values": []
       },
       "GotFocus": {
         "name": "GotFocus",
@@ -6385,8 +6297,7 @@
         "name": "Items",
         "type_name": "ItemCollection",
         "documentation": "ItemsControl.Items: ItemCollection",
-        "values": [],
-        "read_only": true
+        "values": []
       }
     }
   },
@@ -6425,8 +6336,7 @@
         "name": "Count",
         "type_name": "i32",
         "documentation": "ItemsSourceView.Count: i32",
-        "values": [],
-        "read_only": true
+        "values": []
       },
       "HasKeyIndexMapping": {
         "name": "HasKeyIndexMapping",
@@ -6435,8 +6345,7 @@
         "values": [
           "True",
           "False"
-        ],
-        "read_only": true
+        ]
       }
     }
   },
@@ -6489,29 +6398,25 @@
         "name": "Setters",
         "type_name": "FerroList<Rc<dyn IAnimationSetter>>",
         "documentation": "KeyFrame.Setters: FerroList<Rc<dyn IAnimationSetter>>",
-        "values": [],
-        "read_only": true
+        "values": []
       },
       "KeyTime": {
         "name": "KeyTime",
         "type_name": "TimeSpan",
         "documentation": "KeyFrame.KeyTime: TimeSpan",
-        "values": [],
-        "read_only": false
+        "values": []
       },
       "Cue": {
         "name": "Cue",
         "type_name": "Cue",
         "documentation": "KeyFrame.Cue: Cue",
-        "values": [],
-        "read_only": false
+        "values": []
       },
       "KeySpline": {
         "name": "KeySpline",
         "type_name": "Option<Ref<KeySpline>>",
         "documentation": "KeyFrame.KeySpline: Option<Ref<KeySpline>>",
-        "values": [],
-        "read_only": false
+        "values": []
       }
     }
   },
@@ -6729,15 +6634,13 @@
           "MediaSubtitle",
           "MediaTvGuide",
           "MediaPreviousChannel"
-        ],
-        "read_only": true
+        ]
       },
       "KeyModifiers": {
         "name": "KeyModifiers",
         "type_name": "KeyModifiers",
         "documentation": "KeyGesture.KeyModifiers: KeyModifiers",
-        "values": [],
-        "read_only": true
+        "values": []
       }
     }
   },
@@ -6752,29 +6655,25 @@
         "name": "ControlPointX1",
         "type_name": "f64",
         "documentation": "KeySpline.ControlPointX1: f64",
-        "values": [],
-        "read_only": false
+        "values": []
       },
       "ControlPointY1": {
         "name": "ControlPointY1",
         "type_name": "f64",
         "documentation": "KeySpline.ControlPointY1: f64",
-        "values": [],
-        "read_only": false
+        "values": []
       },
       "ControlPointX2": {
         "name": "ControlPointX2",
         "type_name": "f64",
         "documentation": "KeySpline.ControlPointX2: f64",
-        "values": [],
-        "read_only": false
+        "values": []
       },
       "ControlPointY2": {
         "name": "ControlPointY2",
         "type_name": "f64",
         "documentation": "KeySpline.ControlPointY2: f64",
-        "values": [],
-        "read_only": false
+        "values": []
       }
     }
   },
@@ -7115,8 +7014,7 @@
         "name": "Name",
         "type_name": "String",
         "documentation": "ManagedFileChooserFilterViewModel.Name: String",
-        "values": [],
-        "read_only": true
+        "values": []
       }
     }
   },
@@ -7131,36 +7029,31 @@
         "name": "DisplayName",
         "type_name": "Option<String>",
         "documentation": "ManagedFileChooserItemViewModel.DisplayName: Option<String>",
-        "values": [],
-        "read_only": false
+        "values": []
       },
       "Path": {
         "name": "Path",
         "type_name": "Option<String>",
         "documentation": "ManagedFileChooserItemViewModel.Path: Option<String>",
-        "values": [],
-        "read_only": false
+        "values": []
       },
       "Modified": {
         "name": "Modified",
         "type_name": "DateTime",
         "documentation": "ManagedFileChooserItemViewModel.Modified: DateTime",
-        "values": [],
-        "read_only": false
+        "values": []
       },
       "Type": {
         "name": "Type",
         "type_name": "Option<String>",
         "documentation": "ManagedFileChooserItemViewModel.Type: Option<String>",
-        "values": [],
-        "read_only": false
+        "values": []
       },
       "Size": {
         "name": "Size",
         "type_name": "i64",
         "documentation": "ManagedFileChooserItemViewModel.Size: i64",
-        "values": [],
-        "read_only": false
+        "values": []
       },
       "ItemType": {
         "name": "ItemType",
@@ -7170,15 +7063,13 @@
           "File",
           "Folder",
           "Volume"
-        ],
-        "read_only": false
+        ]
       },
       "IconKey": {
         "name": "IconKey",
         "type_name": "String",
         "documentation": "ManagedFileChooserItemViewModel.IconKey: String",
-        "values": [],
-        "read_only": true
+        "values": []
       }
     }
   },
@@ -7209,43 +7100,37 @@
         "name": "QuickLinks",
         "type_name": "FerroList<Rc<ManagedFileChooserItemViewModel>>",
         "documentation": "ManagedFileChooserViewModel.QuickLinks: FerroList<Rc<ManagedFileChooserItemViewModel>>",
-        "values": [],
-        "read_only": true
+        "values": []
       },
       "Items": {
         "name": "Items",
         "type_name": "FerroList<Rc<ManagedFileChooserItemViewModel>>",
         "documentation": "ManagedFileChooserViewModel.Items: FerroList<Rc<ManagedFileChooserItemViewModel>>",
-        "values": [],
-        "read_only": true
+        "values": []
       },
       "Filters": {
         "name": "Filters",
         "type_name": "FerroList<Rc<ManagedFileChooserFilterViewModel>>",
         "documentation": "ManagedFileChooserViewModel.Filters: FerroList<Rc<ManagedFileChooserFilterViewModel>>",
-        "values": [],
-        "read_only": true
+        "values": []
       },
       "SelectedItems": {
         "name": "SelectedItems",
         "type_name": "SelectedItemsList",
         "documentation": "ManagedFileChooserViewModel.SelectedItems: SelectedItemsList",
-        "values": [],
-        "read_only": true
+        "values": []
       },
       "Location": {
         "name": "Location",
         "type_name": "Option<String>",
         "documentation": "ManagedFileChooserViewModel.Location: Option<String>",
-        "values": [],
-        "read_only": false
+        "values": []
       },
       "FileName": {
         "name": "FileName",
         "type_name": "Option<String>",
         "documentation": "ManagedFileChooserViewModel.FileName: Option<String>",
-        "values": [],
-        "read_only": false
+        "values": []
       },
       "SelectingFolder": {
         "name": "SelectingFolder",
@@ -7254,8 +7139,7 @@
         "values": [
           "True",
           "False"
-        ],
-        "read_only": true
+        ]
       },
       "ShowFilters": {
         "name": "ShowFilters",
@@ -7264,36 +7148,31 @@
         "values": [
           "True",
           "False"
-        ],
-        "read_only": true
+        ]
       },
       "SelectionMode": {
         "name": "SelectionMode",
         "type_name": "SelectionMode",
         "documentation": "ManagedFileChooserViewModel.SelectionMode: SelectionMode",
-        "values": [],
-        "read_only": true
+        "values": []
       },
       "Title": {
         "name": "Title",
         "type_name": "Option<String>",
         "documentation": "ManagedFileChooserViewModel.Title: Option<String>",
-        "values": [],
-        "read_only": true
+        "values": []
       },
       "QuickLinksSelectedIndex": {
         "name": "QuickLinksSelectedIndex",
         "type_name": "i32",
         "documentation": "ManagedFileChooserViewModel.QuickLinksSelectedIndex: i32",
-        "values": [],
-        "read_only": false
+        "values": []
       },
       "SelectedFilter": {
         "name": "SelectedFilter",
         "type_name": "Option<Rc<ManagedFileChooserFilterViewModel>>",
         "documentation": "ManagedFileChooserViewModel.SelectedFilter: Option<Rc<ManagedFileChooserFilterViewModel>>",
-        "values": [],
-        "read_only": false
+        "values": []
       },
       "ShowHiddenFiles": {
         "name": "ShowHiddenFiles",
@@ -7302,8 +7181,7 @@
         "values": [
           "True",
           "False"
-        ],
-        "read_only": false
+        ]
       }
     }
   },
@@ -7318,8 +7196,7 @@
         "name": "Indent",
         "type_name": "f64",
         "documentation": "MarginMultiplierConverter.Indent: f64",
-        "values": [],
-        "read_only": false
+        "values": []
       },
       "Left": {
         "name": "Left",
@@ -7328,8 +7205,7 @@
         "values": [
           "True",
           "False"
-        ],
-        "read_only": false
+        ]
       },
       "Top": {
         "name": "Top",
@@ -7338,8 +7214,7 @@
         "values": [
           "True",
           "False"
-        ],
-        "read_only": false
+        ]
       },
       "Right": {
         "name": "Right",
@@ -7348,8 +7223,7 @@
         "values": [
           "True",
           "False"
-        ],
-        "read_only": false
+        ]
       },
       "Bottom": {
         "name": "Bottom",
@@ -7358,8 +7232,7 @@
         "values": [
           "True",
           "False"
-        ],
-        "read_only": false
+        ]
       }
     }
   },
@@ -7517,8 +7390,7 @@
         "name": "Items",
         "type_name": "ItemCollection",
         "documentation": "MenuFlyout.Items: ItemCollection",
-        "values": [],
-        "read_only": true
+        "values": []
       }
     }
   },
@@ -7627,8 +7499,7 @@
         "values": [
           "True",
           "False"
-        ],
-        "read_only": false
+        ]
       },
       "Click": {
         "name": "Click",
@@ -7699,43 +7570,37 @@
         "name": "Bindings",
         "type_name": "FerroList<Rc<dyn BindingBase>>",
         "documentation": "MultiBinding.Bindings: FerroList<Rc<dyn BindingBase>>",
-        "values": [],
-        "read_only": false
+        "values": []
       },
       "Converter": {
         "name": "Converter",
         "type_name": "Option<Rc<dyn IMultiValueConverter>>",
         "documentation": "MultiBinding.Converter: Option<Rc<dyn IMultiValueConverter>>",
-        "values": [],
-        "read_only": false
+        "values": []
       },
       "ConverterCulture": {
         "name": "ConverterCulture",
         "type_name": "Option<CultureInfo>",
         "documentation": "MultiBinding.ConverterCulture: Option<CultureInfo>",
-        "values": [],
-        "read_only": false
+        "values": []
       },
       "ConverterParameter": {
         "name": "ConverterParameter",
         "type_name": "Option<BoxedValue>",
         "documentation": "MultiBinding.ConverterParameter: Option<BoxedValue>",
-        "values": [],
-        "read_only": false
+        "values": []
       },
       "FallbackValue": {
         "name": "FallbackValue",
         "type_name": "Option<BoxedValue>",
         "documentation": "MultiBinding.FallbackValue: Option<BoxedValue>",
-        "values": [],
-        "read_only": false
+        "values": []
       },
       "TargetNullValue": {
         "name": "TargetNullValue",
         "type_name": "Option<BoxedValue>",
         "documentation": "MultiBinding.TargetNullValue: Option<BoxedValue>",
-        "values": [],
-        "read_only": false
+        "values": []
       },
       "Mode": {
         "name": "Mode",
@@ -7747,8 +7612,7 @@
           "TwoWay",
           "OneTime",
           "OneWayToSource"
-        ],
-        "read_only": false
+        ]
       },
       "Priority": {
         "name": "Priority",
@@ -7762,22 +7626,19 @@
           "Style",
           "Inherited",
           "Unset"
-        ],
-        "read_only": false
+        ]
       },
       "RelativeSource": {
         "name": "RelativeSource",
         "type_name": "Option<Rc<RelativeSource>>",
         "documentation": "MultiBinding.RelativeSource: Option<Rc<RelativeSource>>",
-        "values": [],
-        "read_only": false
+        "values": []
       },
       "StringFormat": {
         "name": "StringFormat",
         "type_name": "Option<String>",
         "documentation": "MultiBinding.StringFormat: Option<String>",
-        "values": [],
-        "read_only": false
+        "values": []
       }
     }
   },
@@ -7838,8 +7699,7 @@
         "name": "Items",
         "type_name": "FerroList<Ref<NativeMenuItemBase>>",
         "documentation": "NativeMenu.Items: FerroList<Ref<NativeMenuItemBase>>",
-        "values": [],
-        "read_only": true
+        "values": []
       }
     }
   },
@@ -8196,57 +8056,49 @@
         "name": "CurrencyDecimalDigits",
         "type_name": "i32",
         "documentation": "NumberFormatInfo.CurrencyDecimalDigits: i32",
-        "values": [],
-        "read_only": false
+        "values": []
       },
       "CurrencyNegativePattern": {
         "name": "CurrencyNegativePattern",
         "type_name": "i32",
         "documentation": "NumberFormatInfo.CurrencyNegativePattern: i32",
-        "values": [],
-        "read_only": false
+        "values": []
       },
       "CurrencyPositivePattern": {
         "name": "CurrencyPositivePattern",
         "type_name": "i32",
         "documentation": "NumberFormatInfo.CurrencyPositivePattern: i32",
-        "values": [],
-        "read_only": false
+        "values": []
       },
       "NumberDecimalDigits": {
         "name": "NumberDecimalDigits",
         "type_name": "i32",
         "documentation": "NumberFormatInfo.NumberDecimalDigits: i32",
-        "values": [],
-        "read_only": false
+        "values": []
       },
       "NumberNegativePattern": {
         "name": "NumberNegativePattern",
         "type_name": "i32",
         "documentation": "NumberFormatInfo.NumberNegativePattern: i32",
-        "values": [],
-        "read_only": false
+        "values": []
       },
       "PercentDecimalDigits": {
         "name": "PercentDecimalDigits",
         "type_name": "i32",
         "documentation": "NumberFormatInfo.PercentDecimalDigits: i32",
-        "values": [],
-        "read_only": false
+        "values": []
       },
       "PercentNegativePattern": {
         "name": "PercentNegativePattern",
         "type_name": "i32",
         "documentation": "NumberFormatInfo.PercentNegativePattern: i32",
-        "values": [],
-        "read_only": false
+        "values": []
       },
       "PercentPositivePattern": {
         "name": "PercentPositivePattern",
         "type_name": "i32",
         "documentation": "NumberFormatInfo.PercentPositivePattern: i32",
-        "values": [],
-        "read_only": false
+        "values": []
       }
     }
   },
@@ -8586,15 +8438,13 @@
         "name": "PreviousPage",
         "type_name": "Option<Ref<Page>>",
         "documentation": "PageSelectionChangedEventArgs.PreviousPage: Option<Ref<Page>>",
-        "values": [],
-        "read_only": true
+        "values": []
       },
       "CurrentPage": {
         "name": "CurrentPage",
         "type_name": "Option<Ref<Page>>",
         "documentation": "PageSelectionChangedEventArgs.CurrentPage: Option<Ref<Page>>",
-        "values": [],
-        "read_only": true
+        "values": []
       }
     }
   },
@@ -8609,8 +8459,7 @@
         "name": "Duration",
         "type_name": "TimeSpan",
         "documentation": "PageSlide.Duration: TimeSpan",
-        "values": [],
-        "read_only": false
+        "values": []
       },
       "Orientation": {
         "name": "Orientation",
@@ -8619,22 +8468,19 @@
         "values": [
           "Horizontal",
           "Vertical"
-        ],
-        "read_only": false
+        ]
       },
       "SlideInEasing": {
         "name": "SlideInEasing",
         "type_name": "Easing",
         "documentation": "PageSlide.SlideInEasing: Easing",
-        "values": [],
-        "read_only": false
+        "values": []
       },
       "SlideOutEasing": {
         "name": "SlideOutEasing",
         "type_name": "Easing",
         "documentation": "PageSlide.SlideOutEasing: Easing",
-        "values": [],
-        "read_only": false
+        "values": []
       },
       "FillMode": {
         "name": "FillMode",
@@ -8645,8 +8491,7 @@
           "Forward",
           "Backward",
           "Both"
-        ],
-        "read_only": false
+        ]
       }
     }
   },
@@ -8676,8 +8521,7 @@
         "name": "Children",
         "type_name": "Controls",
         "documentation": "Panel.Children: Controls",
-        "values": [],
-        "read_only": true
+        "values": []
       }
     }
   },
@@ -8903,29 +8747,25 @@
         "name": "Scale",
         "type_name": "f64",
         "documentation": "PinchEventArgs.Scale: f64",
-        "values": [],
-        "read_only": true
+        "values": []
       },
       "ScaleOrigin": {
         "name": "ScaleOrigin",
         "type_name": "Point",
         "documentation": "PinchEventArgs.ScaleOrigin: Point",
-        "values": [],
-        "read_only": true
+        "values": []
       },
       "Angle": {
         "name": "Angle",
         "type_name": "f64",
         "documentation": "PinchEventArgs.Angle: f64",
-        "values": [],
-        "read_only": true
+        "values": []
       },
       "AngleDelta": {
         "name": "AngleDelta",
         "type_name": "f64",
         "documentation": "PinchEventArgs.AngleDelta: f64",
-        "values": [],
-        "read_only": true
+        "values": []
       }
     }
   },
@@ -9076,8 +8916,7 @@
         "name": "Delta",
         "type_name": "Vector",
         "documentation": "PointerDeltaEventArgs.Delta: Vector",
-        "values": [],
-        "read_only": true
+        "values": []
       }
     }
   },
@@ -9092,15 +8931,13 @@
         "name": "Timestamp",
         "type_name": "u64",
         "documentation": "PointerEventArgs.Timestamp: u64",
-        "values": [],
-        "read_only": true
+        "values": []
       },
       "KeyModifiers": {
         "name": "KeyModifiers",
         "type_name": "KeyModifiers",
         "documentation": "PointerEventArgs.KeyModifiers: KeyModifiers",
-        "values": [],
-        "read_only": true
+        "values": []
       }
     }
   },
@@ -9115,8 +8952,7 @@
         "name": "ClickCount",
         "type_name": "i32",
         "documentation": "PointerPressedEventArgs.ClickCount: i32",
-        "values": [],
-        "read_only": true
+        "values": []
       }
     }
   },
@@ -9139,8 +8975,7 @@
         "name": "Delta",
         "type_name": "Vector",
         "documentation": "PointerWheelEventArgs.Delta: Vector",
-        "values": [],
-        "read_only": true
+        "values": []
       }
     }
   },
@@ -9447,8 +9282,7 @@
         "name": "DependencyResolver",
         "type_name": "Option<Rc<dyn IFerroDependencyResolver>>",
         "documentation": "Popup.DependencyResolver: Option<Rc<dyn IFerroDependencyResolver>>",
-        "values": [],
-        "read_only": false
+        "values": []
       }
     }
   },
@@ -9669,8 +9503,7 @@
         "name": "TemplateSettings",
         "type_name": "Ref<ProgressBarTemplateSettings>",
         "documentation": "ProgressBar.TemplateSettings: Ref<ProgressBarTemplateSettings>",
-        "values": [],
-        "read_only": true
+        "values": []
       }
     }
   },
@@ -9758,8 +9591,7 @@
         "name": "Id",
         "type_name": "i32",
         "documentation": "PullGestureEndedEventArgs.Id: i32",
-        "values": [],
-        "read_only": true
+        "values": []
       },
       "PullDirection": {
         "name": "PullDirection",
@@ -9770,8 +9602,7 @@
           "BottomToTop",
           "LeftToRight",
           "RightToLeft"
-        ],
-        "read_only": true
+        ]
       }
     }
   },
@@ -9786,15 +9617,13 @@
         "name": "Id",
         "type_name": "i32",
         "documentation": "PullGestureEventArgs.Id: i32",
-        "values": [],
-        "read_only": true
+        "values": []
       },
       "Delta": {
         "name": "Delta",
         "type_name": "Vector",
         "documentation": "PullGestureEventArgs.Delta: Vector",
-        "values": [],
-        "read_only": true
+        "values": []
       },
       "PullDirection": {
         "name": "PullDirection",
@@ -9805,8 +9634,7 @@
           "BottomToTop",
           "LeftToRight",
           "RightToLeft"
-        ],
-        "read_only": true
+        ]
       }
     }
   },
@@ -10056,15 +9884,13 @@
         "name": "OldValue",
         "type_name": "f64",
         "documentation": "RangeBaseValueChangedEventArgs.OldValue: f64",
-        "values": [],
-        "read_only": true
+        "values": []
       },
       "NewValue": {
         "name": "NewValue",
         "type_name": "f64",
         "documentation": "RangeBaseValueChangedEventArgs.NewValue: f64",
-        "values": [],
-        "read_only": true
+        "values": []
       }
     }
   },
@@ -10164,43 +9990,37 @@
         "name": "Delay",
         "type_name": "i32",
         "documentation": "ReflectionBinding.Delay: i32",
-        "values": [],
-        "read_only": false
+        "values": []
       },
       "Converter": {
         "name": "Converter",
         "type_name": "Option<Rc<dyn IValueConverter>>",
         "documentation": "ReflectionBinding.Converter: Option<Rc<dyn IValueConverter>>",
-        "values": [],
-        "read_only": false
+        "values": []
       },
       "ConverterCulture": {
         "name": "ConverterCulture",
         "type_name": "Option<CultureInfo>",
         "documentation": "ReflectionBinding.ConverterCulture: Option<CultureInfo>",
-        "values": [],
-        "read_only": false
+        "values": []
       },
       "ConverterParameter": {
         "name": "ConverterParameter",
         "type_name": "Option<BoxedValue>",
         "documentation": "ReflectionBinding.ConverterParameter: Option<BoxedValue>",
-        "values": [],
-        "read_only": false
+        "values": []
       },
       "ElementName": {
         "name": "ElementName",
         "type_name": "Option<String>",
         "documentation": "ReflectionBinding.ElementName: Option<String>",
-        "values": [],
-        "read_only": false
+        "values": []
       },
       "FallbackValue": {
         "name": "FallbackValue",
         "type_name": "Option<BoxedValue>",
         "documentation": "ReflectionBinding.FallbackValue: Option<BoxedValue>",
-        "values": [],
-        "read_only": false
+        "values": []
       },
       "Mode": {
         "name": "Mode",
@@ -10212,15 +10032,13 @@
           "TwoWay",
           "OneTime",
           "OneWayToSource"
-        ],
-        "read_only": false
+        ]
       },
       "Path": {
         "name": "Path",
         "type_name": "String",
         "documentation": "ReflectionBinding.Path: String",
-        "values": [],
-        "read_only": false
+        "values": []
       },
       "Priority": {
         "name": "Priority",
@@ -10234,36 +10052,31 @@
           "Style",
           "Inherited",
           "Unset"
-        ],
-        "read_only": false
+        ]
       },
       "RelativeSource": {
         "name": "RelativeSource",
         "type_name": "Option<Rc<RelativeSource>>",
         "documentation": "ReflectionBinding.RelativeSource: Option<Rc<RelativeSource>>",
-        "values": [],
-        "read_only": false
+        "values": []
       },
       "Source": {
         "name": "Source",
         "type_name": "Option<BoxedValue>",
         "documentation": "ReflectionBinding.Source: Option<BoxedValue>",
-        "values": [],
-        "read_only": false
+        "values": []
       },
       "StringFormat": {
         "name": "StringFormat",
         "type_name": "Option<String>",
         "documentation": "ReflectionBinding.StringFormat: Option<String>",
-        "values": [],
-        "read_only": false
+        "values": []
       },
       "TargetNullValue": {
         "name": "TargetNullValue",
         "type_name": "Option<BoxedValue>",
         "documentation": "ReflectionBinding.TargetNullValue: Option<BoxedValue>",
-        "values": [],
-        "read_only": false
+        "values": []
       },
       "UpdateSourceTrigger": {
         "name": "UpdateSourceTrigger",
@@ -10274,8 +10087,7 @@
           "PropertyChanged",
           "LostFocus",
           "Explicit"
-        ],
-        "read_only": false
+        ]
       }
     }
   },
@@ -10573,15 +10385,13 @@
         "name": "AncestorLevel",
         "type_name": "i32",
         "documentation": "RelativeSource.AncestorLevel: i32",
-        "values": [],
-        "read_only": false
+        "values": []
       },
       "AncestorType": {
         "name": "AncestorType",
         "type_name": "Option<&'static TypeInfo>",
         "documentation": "RelativeSource.AncestorType: Option<&'static TypeInfo>",
-        "values": [],
-        "read_only": false
+        "values": []
       },
       "Mode": {
         "name": "Mode",
@@ -10592,8 +10402,7 @@
           "TemplatedParent",
           "SelfMode",
           "FindAncestor"
-        ],
-        "read_only": false
+        ]
       },
       "Tree": {
         "name": "Tree",
@@ -10602,8 +10411,7 @@
         "values": [
           "Visual",
           "Logical"
-        ],
-        "read_only": false
+        ]
       }
     }
   },
@@ -10649,8 +10457,7 @@
         "name": "TargetRect",
         "type_name": "Rect",
         "documentation": "RequestBringIntoViewEventArgs.TargetRect: Rect",
-        "values": [],
-        "read_only": false
+        "values": []
       }
     }
   },
@@ -10673,22 +10480,19 @@
         "name": "Count",
         "type_name": "i32",
         "documentation": "ResourceDictionary.Count: i32",
-        "values": [],
-        "read_only": true
+        "values": []
       },
       "MergedDictionaries": {
         "name": "MergedDictionaries",
         "type_name": "FerroList<Rc<dyn IResourceProvider>>",
         "documentation": "ResourceDictionary.MergedDictionaries: FerroList<Rc<dyn IResourceProvider>>",
-        "values": [],
-        "read_only": true
+        "values": []
       },
       "ThemeDictionaries": {
         "name": "ThemeDictionaries",
         "type_name": "FerroDictionary<ThemeVariant, Rc<dyn IThemeVariantProvider>>",
         "documentation": "ResourceDictionary.ThemeDictionaries: FerroDictionary<ThemeVariant, Rc<dyn IThemeVariantProvider>>",
-        "values": [],
-        "read_only": true
+        "values": []
       }
     }
   },
@@ -10796,15 +10600,13 @@
         "name": "Depth",
         "type_name": "Option<f64>",
         "documentation": "Rotate3DTransition.Depth: Option<f64>",
-        "values": [],
-        "read_only": false
+        "values": []
       },
       "Duration": {
         "name": "Duration",
         "type_name": "TimeSpan",
         "documentation": "Rotate3DTransition.Duration: TimeSpan",
-        "values": [],
-        "read_only": false
+        "values": []
       },
       "Orientation": {
         "name": "Orientation",
@@ -10813,22 +10615,19 @@
         "values": [
           "Horizontal",
           "Vertical"
-        ],
-        "read_only": false
+        ]
       },
       "SlideInEasing": {
         "name": "SlideInEasing",
         "type_name": "Easing",
         "documentation": "Rotate3DTransition.SlideInEasing: Easing",
-        "values": [],
-        "read_only": false
+        "values": []
       },
       "SlideOutEasing": {
         "name": "SlideOutEasing",
         "type_name": "Easing",
         "documentation": "Rotate3DTransition.SlideOutEasing: Easing",
-        "values": [],
-        "read_only": false
+        "values": []
       },
       "FillMode": {
         "name": "FillMode",
@@ -10839,8 +10638,7 @@
           "Forward",
           "Backward",
           "Both"
-        ],
-        "read_only": false
+        ]
       }
     }
   },
@@ -11070,22 +10868,19 @@
         "name": "ExtentDelta",
         "type_name": "Vector",
         "documentation": "ScrollChangedEventArgs.ExtentDelta: Vector",
-        "values": [],
-        "read_only": true
+        "values": []
       },
       "OffsetDelta": {
         "name": "OffsetDelta",
         "type_name": "Vector",
         "documentation": "ScrollChangedEventArgs.OffsetDelta: Vector",
-        "values": [],
-        "read_only": true
+        "values": []
       },
       "ViewportDelta": {
         "name": "ViewportDelta",
         "type_name": "Vector",
         "documentation": "ScrollChangedEventArgs.ViewportDelta: Vector",
-        "values": [],
-        "read_only": true
+        "values": []
       }
     }
   },
@@ -11204,8 +10999,7 @@
         "name": "Id",
         "type_name": "i32",
         "documentation": "ScrollGestureEndedEventArgs.Id: i32",
-        "values": [],
-        "read_only": true
+        "values": []
       }
     }
   },
@@ -11220,15 +11014,13 @@
         "name": "Id",
         "type_name": "i32",
         "documentation": "ScrollGestureEventArgs.Id: i32",
-        "values": [],
-        "read_only": true
+        "values": []
       },
       "Delta": {
         "name": "Delta",
         "type_name": "Vector",
         "documentation": "ScrollGestureEventArgs.Delta: Vector",
-        "values": [],
-        "read_only": true
+        "values": []
       },
       "ShouldEndScrollGesture": {
         "name": "ShouldEndScrollGesture",
@@ -11237,8 +11029,7 @@
         "values": [
           "True",
           "False"
-        ],
-        "read_only": false
+        ]
       }
     }
   },
@@ -11253,15 +11044,13 @@
         "name": "Id",
         "type_name": "i32",
         "documentation": "ScrollGestureInertiaStartingEventArgs.Id: i32",
-        "values": [],
-        "read_only": true
+        "values": []
       },
       "Inertia": {
         "name": "Inertia",
         "type_name": "Vector",
         "documentation": "ScrollGestureInertiaStartingEventArgs.Inertia: Vector",
-        "values": [],
-        "read_only": true
+        "values": []
       }
     }
   },
@@ -11516,8 +11305,7 @@
         "values": [
           "True",
           "False"
-        ],
-        "read_only": false
+        ]
       }
     }
   },
@@ -11772,15 +11560,13 @@
         "name": "Property",
         "type_name": "Option<&'static FerroProperty>",
         "documentation": "Setter.Property: Option<&'static FerroProperty>",
-        "values": [],
-        "read_only": false
+        "values": []
       },
       "Value": {
         "name": "Value",
         "type_name": "Option<BoxedValue>",
         "documentation": "Setter.Value: Option<BoxedValue>",
-        "values": [],
-        "read_only": false
+        "values": []
       }
     }
   },
@@ -11907,22 +11693,19 @@
         "values": [
           "True",
           "False"
-        ],
-        "read_only": true
+        ]
       },
       "NewSize": {
         "name": "NewSize",
         "type_name": "Size",
         "documentation": "SizeChangedEventArgs.NewSize: Size",
-        "values": [],
-        "read_only": true
+        "values": []
       },
       "PreviousSize": {
         "name": "PreviousSize",
         "type_name": "Size",
         "documentation": "SizeChangedEventArgs.PreviousSize: Size",
-        "values": [],
-        "read_only": true
+        "values": []
       },
       "WidthChanged": {
         "name": "WidthChanged",
@@ -11931,8 +11714,7 @@
         "values": [
           "True",
           "False"
-        ],
-        "read_only": true
+        ]
       }
     }
   },
@@ -12086,8 +11868,7 @@
         "values": [
           "True",
           "False"
-        ],
-        "read_only": true
+        ]
       }
     }
   },
@@ -12124,29 +11905,25 @@
         "name": "X1",
         "type_name": "f64",
         "documentation": "SplineEasing.X1: f64",
-        "values": [],
-        "read_only": false
+        "values": []
       },
       "Y1": {
         "name": "Y1",
         "type_name": "f64",
         "documentation": "SplineEasing.Y1: f64",
-        "values": [],
-        "read_only": false
+        "values": []
       },
       "X2": {
         "name": "X2",
         "type_name": "f64",
         "documentation": "SplineEasing.X2: f64",
-        "values": [],
-        "read_only": false
+        "values": []
       },
       "Y2": {
         "name": "Y2",
         "type_name": "f64",
         "documentation": "SplineEasing.Y2: f64",
-        "values": [],
-        "read_only": false
+        "values": []
       }
     }
   },
@@ -12361,29 +12138,25 @@
         "name": "Mass",
         "type_name": "f64",
         "documentation": "SpringEasing.Mass: f64",
-        "values": [],
-        "read_only": false
+        "values": []
       },
       "Stiffness": {
         "name": "Stiffness",
         "type_name": "f64",
         "documentation": "SpringEasing.Stiffness: f64",
-        "values": [],
-        "read_only": false
+        "values": []
       },
       "Damping": {
         "name": "Damping",
         "type_name": "f64",
         "documentation": "SpringEasing.Damping: f64",
-        "values": [],
-        "read_only": false
+        "values": []
       },
       "InitialVelocity": {
         "name": "InitialVelocity",
         "type_name": "f64",
         "documentation": "SpringEasing.InitialVelocity: f64",
-        "values": [],
-        "read_only": false
+        "values": []
       }
     }
   },
@@ -12472,15 +12245,13 @@
         "name": "Inner",
         "type_name": "Option<Rc<dyn IMultiValueConverter>>",
         "documentation": "StringFormatMultiValueConverter.Inner: Option<Rc<dyn IMultiValueConverter>>",
-        "values": [],
-        "read_only": true
+        "values": []
       },
       "Format": {
         "name": "Format",
         "type_name": "String",
         "documentation": "StringFormatMultiValueConverter.Format: String",
-        "values": [],
-        "read_only": true
+        "values": []
       }
     }
   },
@@ -12495,15 +12266,13 @@
         "name": "Inner",
         "type_name": "Option<Rc<dyn IValueConverter>>",
         "documentation": "StringFormatValueConverter.Inner: Option<Rc<dyn IValueConverter>>",
-        "values": [],
-        "read_only": true
+        "values": []
       },
       "Format": {
         "name": "Format",
         "type_name": "String",
         "documentation": "StringFormatValueConverter.Format: String",
-        "values": [],
-        "read_only": true
+        "values": []
       }
     }
   },
@@ -12518,8 +12287,7 @@
         "name": "Selector",
         "type_name": "Option<Selector>",
         "documentation": "Style.Selector: Option<Selector>",
-        "values": [],
-        "read_only": false
+        "values": []
       }
     }
   },
@@ -12534,29 +12302,25 @@
         "name": "Children",
         "type_name": "StyleChildren",
         "documentation": "StyleBase.Children: StyleChildren",
-        "values": [],
-        "read_only": true
+        "values": []
       },
       "Resources": {
         "name": "Resources",
         "type_name": "Rc<dyn IResourceDictionary>",
         "documentation": "StyleBase.Resources: Rc<dyn IResourceDictionary>",
-        "values": [],
-        "read_only": false
+        "values": []
       },
       "Setters": {
         "name": "Setters",
         "type_name": "FerroList<Rc<dyn SetterBase>>",
         "documentation": "StyleBase.Setters: FerroList<Rc<dyn SetterBase>>",
-        "values": [],
-        "read_only": true
+        "values": []
       },
       "Animations": {
         "name": "Animations",
         "type_name": "FerroList<Rc<dyn IAnimation>>",
         "documentation": "StyleBase.Animations: FerroList<Rc<dyn IAnimation>>",
-        "values": [],
-        "read_only": true
+        "values": []
       }
     }
   },
@@ -12571,8 +12335,7 @@
         "name": "Count",
         "type_name": "i32",
         "documentation": "StyleChildren.Count: i32",
-        "values": [],
-        "read_only": true
+        "values": []
       }
     }
   },
@@ -12638,22 +12401,19 @@
         "name": "Classes",
         "type_name": "Classes",
         "documentation": "StyledElement.Classes: Classes",
-        "values": [],
-        "read_only": true
+        "values": []
       },
       "Styles": {
         "name": "Styles",
         "type_name": "Ref<Styles>",
         "documentation": "StyledElement.Styles: Ref<Styles>",
-        "values": [],
-        "read_only": true
+        "values": []
       },
       "Resources": {
         "name": "Resources",
         "type_name": "Rc<dyn IResourceDictionary>",
         "documentation": "StyledElement.Resources: Rc<dyn IResourceDictionary>",
-        "values": [],
-        "read_only": false
+        "values": []
       }
     }
   },
@@ -12668,8 +12428,7 @@
         "name": "Resources",
         "type_name": "Rc<dyn IResourceDictionary>",
         "documentation": "Styles.Resources: Rc<dyn IResourceDictionary>",
-        "values": [],
-        "read_only": false
+        "values": []
       }
     }
   },
@@ -12684,15 +12443,13 @@
         "name": "Id",
         "type_name": "i32",
         "documentation": "SwipeGestureEndedEventArgs.Id: i32",
-        "values": [],
-        "read_only": true
+        "values": []
       },
       "Velocity": {
         "name": "Velocity",
         "type_name": "Vector",
         "documentation": "SwipeGestureEndedEventArgs.Velocity: Vector",
-        "values": [],
-        "read_only": true
+        "values": []
       }
     }
   },
@@ -12707,22 +12464,19 @@
         "name": "Id",
         "type_name": "i32",
         "documentation": "SwipeGestureEventArgs.Id: i32",
-        "values": [],
-        "read_only": true
+        "values": []
       },
       "Delta": {
         "name": "Delta",
         "type_name": "Vector",
         "documentation": "SwipeGestureEventArgs.Delta: Vector",
-        "values": [],
-        "read_only": true
+        "values": []
       },
       "Velocity": {
         "name": "Velocity",
         "type_name": "Vector",
         "documentation": "SwipeGestureEventArgs.Velocity: Vector",
-        "values": [],
-        "read_only": true
+        "values": []
       },
       "SwipeDirection": {
         "name": "SwipeDirection",
@@ -12733,8 +12487,7 @@
           "Right",
           "Up",
           "Down"
-        ],
-        "read_only": true
+        ]
       }
     }
   },
@@ -13018,15 +12771,13 @@
         "name": "DisplayMemberBinding",
         "type_name": "Option<AssignedBinding>",
         "documentation": "TableView.DisplayMemberBinding: Option<AssignedBinding>",
-        "values": [],
-        "read_only": false
+        "values": []
       },
       "ItemTemplate": {
         "name": "ItemTemplate",
         "type_name": "Option<Rc<dyn IDataTemplate>>",
         "documentation": "TableView.ItemTemplate: Option<Rc<dyn IDataTemplate>>",
-        "values": [],
-        "read_only": false
+        "values": []
       }
     }
   },
@@ -13168,15 +12919,13 @@
         "name": "KeyModifiers",
         "type_name": "KeyModifiers",
         "documentation": "TappedEventArgs.KeyModifiers: KeyModifiers",
-        "values": [],
-        "read_only": true
+        "values": []
       },
       "Timestamp": {
         "name": "Timestamp",
         "type_name": "u64",
         "documentation": "TappedEventArgs.Timestamp: u64",
-        "values": [],
-        "read_only": true
+        "values": []
       }
     }
   },
@@ -13199,22 +12948,19 @@
         "name": "Converter",
         "type_name": "Option<Rc<dyn IValueConverter>>",
         "documentation": "TemplateBinding.Converter: Option<Rc<dyn IValueConverter>>",
-        "values": [],
-        "read_only": false
+        "values": []
       },
       "ConverterCulture": {
         "name": "ConverterCulture",
         "type_name": "Option<CultureInfo>",
         "documentation": "TemplateBinding.ConverterCulture: Option<CultureInfo>",
-        "values": [],
-        "read_only": false
+        "values": []
       },
       "ConverterParameter": {
         "name": "ConverterParameter",
         "type_name": "Option<BoxedValue>",
         "documentation": "TemplateBinding.ConverterParameter: Option<BoxedValue>",
-        "values": [],
-        "read_only": false
+        "values": []
       },
       "Mode": {
         "name": "Mode",
@@ -13226,15 +12972,13 @@
           "TwoWay",
           "OneTime",
           "OneWayToSource"
-        ],
-        "read_only": false
+        ]
       },
       "Property": {
         "name": "Property",
         "type_name": "Option<&'static FerroProperty>",
         "documentation": "TemplateBinding.Property: Option<&'static FerroProperty>",
-        "values": [],
-        "read_only": false
+        "values": []
       }
     }
   },
@@ -13956,8 +13700,7 @@
         "name": "SelectedText",
         "type_name": "String",
         "documentation": "TextBox.SelectedText: String",
-        "values": [],
-        "read_only": false
+        "values": []
       },
       "CopyingToClipboard": {
         "name": "CopyingToClipboard",
@@ -14377,22 +14120,19 @@
         "name": "FontFamily",
         "type_name": "FontFamily",
         "documentation": "TextPresenter.FontFamily: FontFamily",
-        "values": [],
-        "read_only": false
+        "values": []
       },
       "FontFeatures": {
         "name": "FontFeatures",
         "type_name": "Option<FontFeatureCollection>",
         "documentation": "TextPresenter.FontFeatures: Option<FontFeatureCollection>",
-        "values": [],
-        "read_only": false
+        "values": []
       },
       "FontSize": {
         "name": "FontSize",
         "type_name": "f64",
         "documentation": "TextPresenter.FontSize: f64",
-        "values": [],
-        "read_only": false
+        "values": []
       },
       "FontStyle": {
         "name": "FontStyle",
@@ -14402,15 +14142,13 @@
           "Normal",
           "Italic",
           "Oblique"
-        ],
-        "read_only": false
+        ]
       },
       "FontWeight": {
         "name": "FontWeight",
         "type_name": "FontWeight",
         "documentation": "TextPresenter.FontWeight: FontWeight",
-        "values": [],
-        "read_only": false
+        "values": []
       },
       "FontStretch": {
         "name": "FontStretch",
@@ -14426,15 +14164,13 @@
           "Expanded",
           "ExtraExpanded",
           "UltraExpanded"
-        ],
-        "read_only": false
+        ]
       },
       "Foreground": {
         "name": "Foreground",
         "type_name": "Option<Rc<dyn IBrush>>",
         "documentation": "TextPresenter.Foreground: Option<Rc<dyn IBrush>>",
-        "values": [],
-        "read_only": false
+        "values": []
       }
     }
   },
@@ -14473,15 +14209,13 @@
         "name": "Key",
         "type_name": "Option<crate::BoxedValue>",
         "documentation": "ThemeVariant.Key: Option<crate::BoxedValue>",
-        "values": [],
-        "read_only": true
+        "values": []
       },
       "InheritVariant": {
         "name": "InheritVariant",
         "type_name": "Option<ThemeVariant>",
         "documentation": "ThemeVariant.InheritVariant: Option<ThemeVariant>",
-        "values": [],
-        "read_only": true
+        "values": []
       }
     }
   },
@@ -15308,15 +15042,13 @@
         "values": [
           "True",
           "False"
-        ],
-        "read_only": true
+        ]
       },
       "Value": {
         "name": "Value",
         "type_name": "crate::Matrix",
         "documentation": "TransformOperations.Value: crate::Matrix",
-        "values": [],
-        "read_only": true
+        "values": []
       }
     }
   },
@@ -15387,8 +15119,7 @@
         "values": [
           "True",
           "False"
-        ],
-        "read_only": true
+        ]
       }
     }
   },
@@ -15624,8 +15355,7 @@
         "name": "ColumnDefinitions",
         "type_name": "crate::TreeDataGridColumns",
         "documentation": "TreeDataGrid.ColumnDefinitions: crate::TreeDataGridColumns",
-        "values": [],
-        "read_only": true
+        "values": []
       },
       "RowDragStarted": {
         "name": "RowDragStarted",
@@ -15772,29 +15502,25 @@
         "name": "Header",
         "type_name": "Option<BoxedValue>",
         "documentation": "TreeDataGridCheckBoxColumn.Header: Option<BoxedValue>",
-        "values": [],
-        "read_only": false
+        "values": []
       },
       "Width": {
         "name": "Width",
         "type_name": "GridLength",
         "documentation": "TreeDataGridCheckBoxColumn.Width: GridLength",
-        "values": [],
-        "read_only": false
+        "values": []
       },
       "CanUserResize": {
         "name": "CanUserResize",
         "type_name": "Option<bool>",
         "documentation": "TreeDataGridCheckBoxColumn.CanUserResize: Option<bool>",
-        "values": [],
-        "read_only": false
+        "values": []
       },
       "CanUserSortColumn": {
         "name": "CanUserSortColumn",
         "type_name": "Option<bool>",
         "documentation": "TreeDataGridCheckBoxColumn.CanUserSortColumn: Option<bool>",
-        "values": [],
-        "read_only": false
+        "values": []
       },
       "AllowTriStateSorting": {
         "name": "AllowTriStateSorting",
@@ -15803,36 +15529,31 @@
         "values": [
           "True",
           "False"
-        ],
-        "read_only": false
+        ]
       },
       "MinWidth": {
         "name": "MinWidth",
         "type_name": "GridLength",
         "documentation": "TreeDataGridCheckBoxColumn.MinWidth: GridLength",
-        "values": [],
-        "read_only": false
+        "values": []
       },
       "MaxWidth": {
         "name": "MaxWidth",
         "type_name": "Option<GridLength>",
         "documentation": "TreeDataGridCheckBoxColumn.MaxWidth: Option<GridLength>",
-        "values": [],
-        "read_only": false
+        "values": []
       },
       "BeginEditGestures": {
         "name": "BeginEditGestures",
         "type_name": "BeginEditGestures",
         "documentation": "TreeDataGridCheckBoxColumn.BeginEditGestures: BeginEditGestures",
-        "values": [],
-        "read_only": false
+        "values": []
       },
       "Binding": {
         "name": "Binding",
         "type_name": "Option<AssignedBinding>",
         "documentation": "TreeDataGridCheckBoxColumn.Binding: Option<AssignedBinding>",
-        "values": [],
-        "read_only": false
+        "values": []
       },
       "IsReadOnly": {
         "name": "IsReadOnly",
@@ -15841,15 +15562,13 @@
         "values": [
           "True",
           "False"
-        ],
-        "read_only": false
+        ]
       },
       "IsThreeState": {
         "name": "IsThreeState",
         "type_name": "Option<bool>",
         "documentation": "TreeDataGridCheckBoxColumn.IsThreeState: Option<bool>",
-        "values": [],
-        "read_only": false
+        "values": []
       }
     }
   },
@@ -15911,8 +15630,7 @@
         "name": "Count",
         "type_name": "i32",
         "documentation": "TreeDataGridColumns.Count: i32",
-        "values": [],
-        "read_only": true
+        "values": []
       }
     }
   },
@@ -15946,29 +15664,25 @@
         "name": "Header",
         "type_name": "Option<BoxedValue>",
         "documentation": "TreeDataGridHierarchicalExpanderColumn.Header: Option<BoxedValue>",
-        "values": [],
-        "read_only": false
+        "values": []
       },
       "Width": {
         "name": "Width",
         "type_name": "GridLength",
         "documentation": "TreeDataGridHierarchicalExpanderColumn.Width: GridLength",
-        "values": [],
-        "read_only": false
+        "values": []
       },
       "CanUserResize": {
         "name": "CanUserResize",
         "type_name": "Option<bool>",
         "documentation": "TreeDataGridHierarchicalExpanderColumn.CanUserResize: Option<bool>",
-        "values": [],
-        "read_only": false
+        "values": []
       },
       "CanUserSortColumn": {
         "name": "CanUserSortColumn",
         "type_name": "Option<bool>",
         "documentation": "TreeDataGridHierarchicalExpanderColumn.CanUserSortColumn: Option<bool>",
-        "values": [],
-        "read_only": false
+        "values": []
       },
       "AllowTriStateSorting": {
         "name": "AllowTriStateSorting",
@@ -15977,57 +15691,49 @@
         "values": [
           "True",
           "False"
-        ],
-        "read_only": false
+        ]
       },
       "MinWidth": {
         "name": "MinWidth",
         "type_name": "GridLength",
         "documentation": "TreeDataGridHierarchicalExpanderColumn.MinWidth: GridLength",
-        "values": [],
-        "read_only": false
+        "values": []
       },
       "MaxWidth": {
         "name": "MaxWidth",
         "type_name": "Option<GridLength>",
         "documentation": "TreeDataGridHierarchicalExpanderColumn.MaxWidth: Option<GridLength>",
-        "values": [],
-        "read_only": false
+        "values": []
       },
       "BeginEditGestures": {
         "name": "BeginEditGestures",
         "type_name": "BeginEditGestures",
         "documentation": "TreeDataGridHierarchicalExpanderColumn.BeginEditGestures: BeginEditGestures",
-        "values": [],
-        "read_only": false
+        "values": []
       },
       "ChildrenBinding": {
         "name": "ChildrenBinding",
         "type_name": "Option<AssignedBinding>",
         "documentation": "TreeDataGridHierarchicalExpanderColumn.ChildrenBinding: Option<AssignedBinding>",
-        "values": [],
-        "read_only": false
+        "values": []
       },
       "HasChildrenBinding": {
         "name": "HasChildrenBinding",
         "type_name": "Option<AssignedBinding>",
         "documentation": "TreeDataGridHierarchicalExpanderColumn.HasChildrenBinding: Option<AssignedBinding>",
-        "values": [],
-        "read_only": false
+        "values": []
       },
       "IsExpandedBinding": {
         "name": "IsExpandedBinding",
         "type_name": "Option<AssignedBinding>",
         "documentation": "TreeDataGridHierarchicalExpanderColumn.IsExpandedBinding: Option<AssignedBinding>",
-        "values": [],
-        "read_only": false
+        "values": []
       },
       "InnerColumn": {
         "name": "InnerColumn",
         "type_name": "Option<Rc<dyn TreeDataGridColumn>>",
         "documentation": "TreeDataGridHierarchicalExpanderColumn.InnerColumn: Option<Rc<dyn TreeDataGridColumn>>",
-        "values": [],
-        "read_only": false
+        "values": []
       }
     }
   },
@@ -16082,29 +15788,25 @@
         "name": "Header",
         "type_name": "Option<BoxedValue>",
         "documentation": "TreeDataGridRowHeaderColumn.Header: Option<BoxedValue>",
-        "values": [],
-        "read_only": false
+        "values": []
       },
       "Width": {
         "name": "Width",
         "type_name": "GridLength",
         "documentation": "TreeDataGridRowHeaderColumn.Width: GridLength",
-        "values": [],
-        "read_only": false
+        "values": []
       },
       "CanUserResize": {
         "name": "CanUserResize",
         "type_name": "Option<bool>",
         "documentation": "TreeDataGridRowHeaderColumn.CanUserResize: Option<bool>",
-        "values": [],
-        "read_only": false
+        "values": []
       },
       "CanUserSortColumn": {
         "name": "CanUserSortColumn",
         "type_name": "Option<bool>",
         "documentation": "TreeDataGridRowHeaderColumn.CanUserSortColumn: Option<bool>",
-        "values": [],
-        "read_only": false
+        "values": []
       },
       "AllowTriStateSorting": {
         "name": "AllowTriStateSorting",
@@ -16113,29 +15815,25 @@
         "values": [
           "True",
           "False"
-        ],
-        "read_only": false
+        ]
       },
       "MinWidth": {
         "name": "MinWidth",
         "type_name": "GridLength",
         "documentation": "TreeDataGridRowHeaderColumn.MinWidth: GridLength",
-        "values": [],
-        "read_only": false
+        "values": []
       },
       "MaxWidth": {
         "name": "MaxWidth",
         "type_name": "Option<GridLength>",
         "documentation": "TreeDataGridRowHeaderColumn.MaxWidth: Option<GridLength>",
-        "values": [],
-        "read_only": false
+        "values": []
       },
       "BeginEditGestures": {
         "name": "BeginEditGestures",
         "type_name": "BeginEditGestures",
         "documentation": "TreeDataGridRowHeaderColumn.BeginEditGestures: BeginEditGestures",
-        "values": [],
-        "read_only": false
+        "values": []
       }
     }
   },
@@ -16203,29 +15901,25 @@
         "name": "Header",
         "type_name": "Option<BoxedValue>",
         "documentation": "TreeDataGridTemplateColumn.Header: Option<BoxedValue>",
-        "values": [],
-        "read_only": false
+        "values": []
       },
       "Width": {
         "name": "Width",
         "type_name": "GridLength",
         "documentation": "TreeDataGridTemplateColumn.Width: GridLength",
-        "values": [],
-        "read_only": false
+        "values": []
       },
       "CanUserResize": {
         "name": "CanUserResize",
         "type_name": "Option<bool>",
         "documentation": "TreeDataGridTemplateColumn.CanUserResize: Option<bool>",
-        "values": [],
-        "read_only": false
+        "values": []
       },
       "CanUserSortColumn": {
         "name": "CanUserSortColumn",
         "type_name": "Option<bool>",
         "documentation": "TreeDataGridTemplateColumn.CanUserSortColumn: Option<bool>",
-        "values": [],
-        "read_only": false
+        "values": []
       },
       "AllowTriStateSorting": {
         "name": "AllowTriStateSorting",
@@ -16234,64 +15928,55 @@
         "values": [
           "True",
           "False"
-        ],
-        "read_only": false
+        ]
       },
       "MinWidth": {
         "name": "MinWidth",
         "type_name": "GridLength",
         "documentation": "TreeDataGridTemplateColumn.MinWidth: GridLength",
-        "values": [],
-        "read_only": false
+        "values": []
       },
       "MaxWidth": {
         "name": "MaxWidth",
         "type_name": "Option<GridLength>",
         "documentation": "TreeDataGridTemplateColumn.MaxWidth: Option<GridLength>",
-        "values": [],
-        "read_only": false
+        "values": []
       },
       "BeginEditGestures": {
         "name": "BeginEditGestures",
         "type_name": "BeginEditGestures",
         "documentation": "TreeDataGridTemplateColumn.BeginEditGestures: BeginEditGestures",
-        "values": [],
-        "read_only": false
+        "values": []
       },
       "CellTemplate": {
         "name": "CellTemplate",
         "type_name": "Option<Rc<dyn IDataTemplate>>",
         "documentation": "TreeDataGridTemplateColumn.CellTemplate: Option<Rc<dyn IDataTemplate>>",
-        "values": [],
-        "read_only": false
+        "values": []
       },
       "CellEditingTemplate": {
         "name": "CellEditingTemplate",
         "type_name": "Option<Rc<dyn IDataTemplate>>",
         "documentation": "TreeDataGridTemplateColumn.CellEditingTemplate: Option<Rc<dyn IDataTemplate>>",
-        "values": [],
-        "read_only": false
+        "values": []
       },
       "CellTemplateResourceKey": {
         "name": "CellTemplateResourceKey",
         "type_name": "Option<ResourceKey>",
         "documentation": "TreeDataGridTemplateColumn.CellTemplateResourceKey: Option<ResourceKey>",
-        "values": [],
-        "read_only": false
+        "values": []
       },
       "CellEditingTemplateResourceKey": {
         "name": "CellEditingTemplateResourceKey",
         "type_name": "Option<ResourceKey>",
         "documentation": "TreeDataGridTemplateColumn.CellEditingTemplateResourceKey: Option<ResourceKey>",
-        "values": [],
-        "read_only": false
+        "values": []
       },
       "TextSearchBinding": {
         "name": "TextSearchBinding",
         "type_name": "Option<AssignedBinding>",
         "documentation": "TreeDataGridTemplateColumn.TextSearchBinding: Option<AssignedBinding>",
-        "values": [],
-        "read_only": false
+        "values": []
       }
     }
   },
@@ -16337,29 +16022,25 @@
         "name": "Header",
         "type_name": "Option<BoxedValue>",
         "documentation": "TreeDataGridTextColumn.Header: Option<BoxedValue>",
-        "values": [],
-        "read_only": false
+        "values": []
       },
       "Width": {
         "name": "Width",
         "type_name": "GridLength",
         "documentation": "TreeDataGridTextColumn.Width: GridLength",
-        "values": [],
-        "read_only": false
+        "values": []
       },
       "CanUserResize": {
         "name": "CanUserResize",
         "type_name": "Option<bool>",
         "documentation": "TreeDataGridTextColumn.CanUserResize: Option<bool>",
-        "values": [],
-        "read_only": false
+        "values": []
       },
       "CanUserSortColumn": {
         "name": "CanUserSortColumn",
         "type_name": "Option<bool>",
         "documentation": "TreeDataGridTextColumn.CanUserSortColumn: Option<bool>",
-        "values": [],
-        "read_only": false
+        "values": []
       },
       "AllowTriStateSorting": {
         "name": "AllowTriStateSorting",
@@ -16368,36 +16049,31 @@
         "values": [
           "True",
           "False"
-        ],
-        "read_only": false
+        ]
       },
       "MinWidth": {
         "name": "MinWidth",
         "type_name": "GridLength",
         "documentation": "TreeDataGridTextColumn.MinWidth: GridLength",
-        "values": [],
-        "read_only": false
+        "values": []
       },
       "MaxWidth": {
         "name": "MaxWidth",
         "type_name": "Option<GridLength>",
         "documentation": "TreeDataGridTextColumn.MaxWidth: Option<GridLength>",
-        "values": [],
-        "read_only": false
+        "values": []
       },
       "BeginEditGestures": {
         "name": "BeginEditGestures",
         "type_name": "BeginEditGestures",
         "documentation": "TreeDataGridTextColumn.BeginEditGestures: BeginEditGestures",
-        "values": [],
-        "read_only": false
+        "values": []
       },
       "Binding": {
         "name": "Binding",
         "type_name": "Option<AssignedBinding>",
         "documentation": "TreeDataGridTextColumn.Binding: Option<AssignedBinding>",
-        "values": [],
-        "read_only": false
+        "values": []
       },
       "IsReadOnly": {
         "name": "IsReadOnly",
@@ -16406,8 +16082,7 @@
         "values": [
           "True",
           "False"
-        ],
-        "read_only": false
+        ]
       },
       "IsTextSearchEnabled": {
         "name": "IsTextSearchEnabled",
@@ -16416,15 +16091,13 @@
         "values": [
           "True",
           "False"
-        ],
-        "read_only": false
+        ]
       },
       "StringFormat": {
         "name": "StringFormat",
         "type_name": "String",
         "documentation": "TreeDataGridTextColumn.StringFormat: String",
-        "values": [],
-        "read_only": false
+        "values": []
       },
       "TextAlignment": {
         "name": "TextAlignment",
@@ -16438,15 +16111,13 @@
           "End",
           "DetectFromContent",
           "Justify"
-        ],
-        "read_only": false
+        ]
       },
       "TextTrimming": {
         "name": "TextTrimming",
         "type_name": "Rc<dyn TextTrimming>",
         "documentation": "TreeDataGridTextColumn.TextTrimming: Rc<dyn TextTrimming>",
-        "values": [],
-        "read_only": false
+        "values": []
       },
       "TextWrapping": {
         "name": "TextWrapping",
@@ -16456,8 +16127,7 @@
           "NoWrap",
           "Wrap",
           "WrapWithOverflow"
-        ],
-        "read_only": false
+        ]
       }
     }
   },
@@ -16958,8 +16628,7 @@
         "values": [
           "True",
           "False"
-        ],
-        "read_only": false
+        ]
       },
       "EnableOverlayLayer": {
         "name": "EnableOverlayLayer",
@@ -16968,8 +16637,7 @@
         "values": [
           "True",
           "False"
-        ],
-        "read_only": false
+        ]
       },
       "EnableTextSelectorLayer": {
         "name": "EnableTextSelectorLayer",
@@ -16978,8 +16646,7 @@
         "values": [
           "True",
           "False"
-        ],
-        "read_only": false
+        ]
       }
     }
   },
@@ -17137,15 +16804,13 @@
           "None",
           "BorderOnly",
           "Full"
-        ],
-        "read_only": false
+        ]
       },
       "Position": {
         "name": "Position",
         "type_name": "PixelPoint",
         "documentation": "Window.Position: PixelPoint",
-        "values": [],
-        "read_only": false
+        "values": []
       },
       "WindowClosed": {
         "name": "WindowClosed",
@@ -17258,22 +16923,19 @@
         "name": "Overlay",
         "type_name": "Option<Ref<Control>>",
         "documentation": "WindowDrawnDecorationsContent.Overlay: Option<Ref<Control>>",
-        "values": [],
-        "read_only": false
+        "values": []
       },
       "Underlay": {
         "name": "Underlay",
         "type_name": "Option<Ref<Control>>",
         "documentation": "WindowDrawnDecorationsContent.Underlay: Option<Ref<Control>>",
-        "values": [],
-        "read_only": false
+        "values": []
       },
       "FullscreenPopover": {
         "name": "FullscreenPopover",
         "type_name": "Option<Ref<Control>>",
         "documentation": "WindowDrawnDecorationsContent.FullscreenPopover: Option<Ref<Control>>",
-        "values": [],
-        "read_only": false
+        "values": []
       }
     }
   },

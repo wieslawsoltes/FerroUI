@@ -362,9 +362,21 @@ impl BehaviorModel {
                 self.owner,
                 &format!("<Interaction.Behaviors>{source}</Interaction.Behaviors>"),
             )?;
+            // Behavior parameters can use the owner's StaticResource values too.
+            let index = document
+                .ast()
+                .element_children(self.owner)
+                .iter()
+                .rposition(|id| {
+                    document
+                        .ast()
+                        .node(*id)
+                        .is_some_and(|child| child.local_name().ends_with(".Resources"))
+                })
+                .map_or(0, |index| index + 1);
             Ok(vec![Edit::InsertChild {
                 parent: self.owner,
-                index: 0,
+                index,
                 source,
             }])
         }

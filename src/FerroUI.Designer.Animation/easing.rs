@@ -15,6 +15,12 @@ pub enum Easing {
         x2: f64,
         y2: f64,
     },
+    Spring {
+        mass: f64,
+        stiffness: f64,
+        damping: f64,
+        initial_velocity: f64,
+    },
     Named(String),
 }
 impl Easing {
@@ -27,8 +33,14 @@ impl Easing {
                     && (0.0..=1.0).contains(x2),
                 "Bezier controls must be finite; X controls must be in [0,1]",
             ),
+            Self::Spring { mass, stiffness, damping, initial_velocity } => require(
+                [*mass, *stiffness, *damping, *initial_velocity].iter().all(|value| value.is_finite())
+                    && *mass > 0.0 && *stiffness > 0.0 && *damping >= 0.0
+                    && spring_progress(*mass, *stiffness, *damping, *initial_velocity, 0.5).is_finite(),
+                "Spring requires finite positive mass/stiffness, nonnegative damping and a finite initial velocity",
+            ),
             Self::Named(name) => require(
-                split_name(name).is_some(),
+                name == "SplineEasing" || split_name(name).is_some(),
                 format!("Unsupported easing: {name}"),
             ),
         }
@@ -38,11 +50,12 @@ impl Easing {
         require(progress.is_finite(), "Easing progress must be finite")?;
         let t = progress.clamp(0.0, 1.0);
         if (t == 0.0 || t == 1.0)
+            && !matches!(self, Self::Spring { .. })
             && !matches!(self, Self::Named(name) if name == "ExponentialEaseInOut")
         {
             return Ok(t);
         }
-        Ok(match self {
+        let value = match self {
             Self::Linear => t,
             Self::CubicBezier { x1, y1, x2, y2 } => {
                 let cubic = |u: f64, a: f64, b: f64| {
@@ -60,6 +73,13 @@ impl Easing {
                 }
                 cubic((low + high) * 0.5, *y1, *y2)
             }
+            Self::Spring {
+                mass,
+                stiffness,
+                damping,
+                initial_velocity,
+            } => spring_progress(*mass, *stiffness, *damping, *initial_velocity, t),
+            Self::Named(name) if name == "SplineEasing" => t,
             Self::Named(name) => {
                 let (family, mode) = split_name(name).expect("validated easing");
                 match mode {
@@ -74,11 +94,38 @@ impl Easing {
                     }
                 }
             }
-        })
+        };
+        require(value.is_finite(), "Easing produced a nonfinite value")?;
+        Ok(value)
     }
     pub fn parse(source: &str) -> Result<Self> {
         let source = source.trim();
-        let result = if source == "LinearEasing" || source.is_empty() {
+        let result = if let Some(parameters) = source
+            .strip_prefix("Spring(")
+            .and_then(|value| value.strip_suffix(')'))
+        {
+            let values = parameters
+                .split(',')
+                .map(|value| {
+                    value
+                        .trim()
+                        .parse::<f64>()
+                        .map_err(|_| AnimationError("Invalid spring parameter".into()))
+                })
+                .collect::<Result<Vec<_>>>()?;
+            require(
+                values.len() == 4,
+                "Spring requires mass, stiffness, damping and initial velocity",
+            )?;
+            Self::Spring {
+                mass: values[0],
+                stiffness: values[1],
+                damping: values[2],
+                initial_velocity: values[3],
+            }
+        } else if source == "SpringEasing" {
+            return Err(AnimationError("SpringEasing needs positive mass and stiffness; use Spring(mass,stiffness,damping,velocity) or a native SpringEasing property element".into()));
+        } else if source == "LinearEasing" || source.is_empty() {
             Self::Linear
         } else if source.contains(',') || source.chars().any(|ch| ch.is_ascii_whitespace()) {
             let values = source
@@ -107,8 +154,38 @@ impl Easing {
             Self::Linear => "LinearEasing".into(),
             Self::Named(name) => name.clone(),
             Self::CubicBezier { x1, y1, x2, y2 } => format!("{x1},{y1},{x2},{y2}"),
+            Self::Spring {
+                mass,
+                stiffness,
+                damping,
+                initial_velocity,
+            } => format!("Spring({mass},{stiffness},{damping},{initial_velocity})"),
         }
     }
+
+    pub(crate) fn property_element(&self) -> Option<String> {
+        match self {
+            Self::Spring { mass, stiffness, damping, initial_velocity } => Some(format!("<Animation.Easing><SpringEasing Mass=\"{mass}\" Stiffness=\"{stiffness}\" Damping=\"{damping}\" InitialVelocity=\"{initial_velocity}\"/></Animation.Easing>")),
+            _ => None,
+        }
+    }
+}
+
+// Match FerroUI's SpringSolver, including its critically damped treatment of the
+// overdamped case. The final sample remains the physical spring displacement.
+fn spring_progress(mass: f64, stiffness: f64, damping: f64, velocity: f64, time: f64) -> f64 {
+    let frequency = (stiffness / mass).sqrt();
+    let ratio = damping / (2.0 * (stiffness * mass).sqrt());
+    let displacement = if ratio < 1.0 {
+        let damped_frequency = frequency * (1.0 - ratio * ratio).sqrt();
+        let velocity_coefficient = (ratio * frequency - velocity) / damped_frequency;
+        (-time * ratio * frequency).exp()
+            * ((damped_frequency * time).cos()
+                + velocity_coefficient * (damped_frequency * time).sin())
+    } else {
+        (1.0 + (frequency - velocity) * time) * (-time * frequency).exp()
+    };
+    1.0 - displacement
 }
 fn split_name(name: &str) -> Option<(&str, &str)> {
     let (family, mode) = name.split_once("Ease")?;

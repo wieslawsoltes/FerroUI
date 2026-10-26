@@ -425,12 +425,16 @@ fn empty_values_reset_and_opening_another_document_preserve_revision_guards() {
 }
 
 #[test]
-fn unrepresented_animations_are_reported_and_source_is_preserved() {
+fn every_animation_program_is_imported_and_source_is_preserved() {
     let _app = UnitTestApplication::start(TestServices::styled_window());
     let source = r#"<Canvas xmlns="https://github.com/ferroui"><Button Name="Target" Width="100"><Button.Styles><Style Selector="Button#Target"><Style.Animations><Animation Duration="0:0:3"><KeyFrame Cue="0%"><Setter Property="Width" Value="100" /></KeyFrame><KeyFrame Cue="100%"><Setter Property="Width" Value="200" /></KeyFrame></Animation><Animation Duration="0:0:2"><KeyFrame Cue="0%"><Setter Property="Height" Value="20" /></KeyFrame><KeyFrame Cue="100%"><Setter Property="Height" Value="40" /></KeyFrame></Animation></Style.Animations></Style></Button.Styles></Button><Button><Button.Styles><Style Selector="Button"><Style.Animations><Animation Duration="0:0:1" /></Style.Animations></Style></Button.Styles></Button></Canvas>"#;
     let session = DesignerSession::new(source, ContentControl::new()).unwrap();
+    assert_eq!(session.animation_programs().len(), 3);
     assert!(
-        session.animation_warnings().len() >= 2,
+        session
+            .animation_programs()
+            .iter()
+            .all(|program| program.timeline.is_some()),
         "{:?}",
         session.animation_warnings()
     );
@@ -478,6 +482,47 @@ fn recording_in_a_prefixed_document_reuses_root_namespaces() {
         "{:?}",
         session.preview_status()
     );
-    assert_eq!(session.document().source().matches("xmlns:").count(), 1);
+    let ast = session.document().ast();
+    let root = ast.node(ast.root()).unwrap();
+    assert_eq!(
+        root.attribute("xmlns:ui"),
+        Some("https://github.com/ferroui")
+    );
+    let namespaces = ast
+        .elements()
+        .flat_map(|node| {
+            node.attributes
+                .iter()
+                .filter(|attribute| attribute.is_namespace())
+                .map(move |attribute| (node.id, attribute))
+        })
+        .collect::<Vec<_>>();
+    assert_eq!(
+        namespaces.len(),
+        2,
+        "reuse ui and declare the XAML annotation namespace once"
+    );
+    assert!(namespaces.iter().all(|(node, _)| *node == ast.root()));
+    assert_eq!(
+        namespaces
+            .iter()
+            .filter(|(_, attribute)| attribute.value == "https://github.com/ferroui")
+            .count(),
+        1
+    );
+    let xaml = namespaces
+        .iter()
+        .find(|(_, attribute)| attribute.value == "http://schemas.microsoft.com/winfx/2006/xaml")
+        .unwrap()
+        .1;
+    let prefix = xaml.name.strip_prefix("xmlns:").unwrap();
+    let animation = ast
+        .elements()
+        .find(|node| node.local_name() == "Animation")
+        .unwrap();
+    assert_eq!(
+        animation.attribute(&format!("{prefix}:SetterTargetType")),
+        Some("ui:Button")
+    );
     assert!(session.document().source().contains("<ui:Animation"));
 }

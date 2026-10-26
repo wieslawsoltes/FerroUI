@@ -31,13 +31,16 @@ per enabled track. `PlaybackBehavior` preserves the native Auto/Always/OnlyIfVis
 a control resumes at its previous position instead of jumping by the hidden time. An explicit
 `sample` or `scrub` remains independent of visibility.
 
-Tracks support numbers, colors, points, thicknesses and discrete values. RGB interpolation occurs
+Tracks support numbers, colors, points, vectors, sizes, rectangles, corner radii, relative
+points/scalars, thicknesses and discrete values. RGB interpolation occurs
 in linear light and alpha is linear, matching FerroUI's `ColorAnimator`. Cubic Bezier interpolation
 solves the X polynomial rather than treating the progress as the curve parameter. Thirty named
 easing variants match FerroUI's polynomial, sine, circular, exponential, back, bounce and elastic
-families. A keyframe's easing belongs to the incoming segment. Custom effects, brushes, geometry
-or arbitrary object values remain in the source editor; the portable timeline does not invent
-interpolation semantics for a runtime-specific animator.
+families. A keyframe's easing belongs to the incoming segment. Effects, gradient brushes,
+shadow collections, transform components and arbitrary object payloads remain available through
+source editing or extension codecs; their preview uses the native framework animator when
+running in the designer. The portable timeline does not invent interpolation semantics for
+runtime-specific values.
 
 ## Native XAML
 
@@ -109,6 +112,51 @@ source and a diagnostic; source editing and duplication stay available. A failed
 pretends to import a lossy timeline. A vendor element named `Animation` in a different namespace
 is not silently treated as the native type.
 
+The native designer also resolves accepted `Animation` objects from loaded styles, control
+themes and resource dictionaries using their source URI, line and column. When a selected
+program requires native interpolation, preview runs the whole selected batch through those
+framework animations on controlled clocks. This supports native shadow collections, gradient
+brushes, effects, integer interpolation, transform-component properties such as
+`RotateTransform.Angle`, bindings/resources and registered custom animators without converting
+them to discrete strings. Such programs remain selectable, playable, scrubbable and source
+editable even when no portable codec can decode them. Native previews use elapsed runtime
+time, including delays, easing, repeat and fill. Typed timeline scrubbing uses its iteration
+edit position as described above.
+
+`Animation::apply_for_preview` isolates playback metadata and retains native final fill and
+automatically created transforms at disposable animation priority. Stop, program selection,
+source reload and failed source acceptance dispose the runs and restore underlying values
+and bindings. Completed fill retains its original priority frame, and overlapping component
+programs share the lifetime of any temporary transform they create. Native clock errors are
+surfaced as diagnostics. A program must have a loaded
+source object and live preview targets; the designer never binds a program from another
+compiled source merely because its selector or resource name matches. Whole CSS
+`TransformOperations` keyframes are not a built-in native keyframe animator; use native
+transform-component properties or a registered animator for those values. The native component
+animator also cannot animate an existing CSS operation list; preview reports that limitation
+explicitly and permits a registered replacement animator.
+
+A standalone `ResourceDictionary` can use a resource preview factory that installs the loaded
+dictionary on a real control. An animation without authored targets then previews on that
+factory root after checking property-owner compatibility. The session reports this temporary
+target without assigning the resource dictionary a control identity or changing its source.
+Factories that synthesize a root in Rust retain authoritative URI/line/column identities on
+their loaded animations; no root source annotation is required.
+
+Native geometry values retain their actual kinds: `Vector`, `Size`, `Rect`, `CornerRadius`,
+`RelativePoint` and `RelativeScalar` accompany the number, color, point and thickness types.
+Corner-radius two-value shorthand means top/bottom. Relative values retain absolute or relative
+units; unlike-unit transitions switch at 50%, matching the native animators. The native session
+uses the live property's type metadata when selecting a value codec. Nonfinite components are
+rejected before preview or source changes.
+
+Global easing accepts native named curves, the default `SplineEasing`, spline property elements
+and parameterized `SpringEasing`. The editor syntax `Spring(mass,stiffness,damping,velocity)`
+exports an actual `Animation.Easing` / `SpringEasing` object. Spring interpolation matches the
+runtime solver's damping behavior and preserves its physical endpoint rather than forcing it
+to one. Native `KeySpline` remains linear or cubic Bezier. A zero-parameter SpringEasing is
+rejected because the runtime's zero mass/stiffness produce nonfinite motion.
+
 `animation_fragment` extracts any source subtree with its inherited namespace declarations.
 `native_fragment` composes generated native markup into either a default or prefixed namespace.
 Copying a larger control subtree should call `rekey_copied_programs` so copied programs receive
@@ -147,7 +195,8 @@ the actual `.Styles` parent when reading.
 The native session exposes `state_groups`, `upsert_state_group`, `remove_state_group`,
 `state_group_actions`, `preview_state`, `preview_state_at` and `advance_state_preview`. Preview
 uses the existing runtime animations and a controlled clock for binding/resource evaluation;
-literal endpoint samples also work on a disconnected artboard. Stop restores the authored
+transition sampling and resource/binding endpoints require a rooted logical tree. Literal
+endpoint samples also work on a disconnected artboard. Stop restores the authored
 preview, including local values and bindings. Trigger previews execute real application callbacks;
 changes to shared view models or external systems are outside that view reset.
 
@@ -164,5 +213,7 @@ wrappers. Namespace-qualified extension payloads survive editing an adjacent typ
 collection membership before deleting it. A bound behavior collection is not replaced by an
 unrelated local collection. The native session registers the existing interactivity/interactions
 libraries, exposes authoring APIs and previews a trigger by executing its real `IAction`
-collection with the existing name scopes and bindings. Other behavior lifecycle/event logic is
+collection with the existing name scopes and bindings. The preview host must be attached to a
+Window or another rooted logical tree so action styling, binding and lifecycle initialization
+have run; detached hosts receive a diagnostic before any action executes. Other behavior lifecycle/event logic is
 available through the interactive preview and custom preview host registrations.

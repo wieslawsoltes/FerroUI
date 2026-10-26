@@ -10,8 +10,10 @@ cargo run -p ferroui-designer-collaboration-host --features server --bin ferroui
 ```
 
 The storage directory is private and process-locked. Administrator, transport and member
-credentials are independent. Credential files use owner-only permissions; room files contain
-credential hashes. Keep endpoint/invitation strings private. The service reuses MCP's loopback
+credentials are independent. On Unix, directories use mode 0700 and credential files use mode
+0600; on Windows, files inherit the directory's ACL, so provision a directory restricted to the
+service account. Room files contain credential hashes. Keep endpoint/invitation strings private.
+The service reuses MCP's loopback
 binding, bearer authentication, Host/Origin validation, cancellation and bounded message handling.
 For remote teams, terminate HTTPS at a reverse proxy and pass `--public-url https://host/mcp`.
 The proxy must preserve Authorization/Mcp-Session-Id/MCP-Protocol-Version and set the upstream

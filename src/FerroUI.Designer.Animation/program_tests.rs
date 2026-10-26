@@ -255,6 +255,160 @@ fn state_groups_emit_real_styles_transitions_and_roundtrip_source_edits() {
     assert!(VisualStateGroup::read(&document).is_empty());
 }
 #[test]
+fn generated_styles_and_behaviors_follow_owner_resources() {
+    let mut document = programs(
+        "<Grid xmlns='https://github.com/ferroui' xmlns:x='http://schemas.microsoft.com/winfx/2006/xaml'><Grid.Resources><x:Double x:Key='MutedOpacity'>0.25</x:Double></Grid.Resources><Button Name='Target' Opacity='1'/></Grid>",
+    );
+    let owner = document.ast().root();
+    let mut state = group(owner);
+    state.states[1].setters[0].value = "{StaticResource MutedOpacity}".into();
+    document
+        .apply("Resource state", state.plan(&document).unwrap())
+        .unwrap();
+    let behaviors = BehaviorModel {
+        id: None,
+        owner,
+        trigger: BehaviorTrigger::Event {
+            event: "PointerPressed".into(),
+            source: None,
+        },
+        actions: vec![BehaviorAction::ChangeProperty {
+            target: Some("Target".into()),
+            property: "Opacity".into(),
+            value: "{StaticResource MutedOpacity}".into(),
+        }],
+    };
+    document
+        .apply("Resource action", behaviors.plan(&document).unwrap())
+        .unwrap();
+    let children = document.ast().element_children(owner);
+    let names = children
+        .iter()
+        .map(|id| document.ast().node(*id).unwrap().local_name())
+        .collect::<Vec<_>>();
+    assert_eq!(names[0], "Grid.Resources");
+    assert!(
+        names
+            .iter()
+            .position(|name| *name == "Grid.Styles")
+            .unwrap()
+            > 0
+    );
+    assert!(
+        names
+            .iter()
+            .position(|name| *name == "Interaction.Behaviors")
+            .unwrap()
+            > 0
+    );
+    assert_eq!(document.source().matches("x:Key='MutedOpacity'").count(), 1);
+}
+
+#[test]
+fn native_spring_and_property_element_easings_roundtrip_with_state_edits() {
+    for source in [
+        "<Animation Duration='0:0:1'><Animation.Easing><SpringEasing Mass='1' Stiffness='100' Damping='10' InitialVelocity='0'/></Animation.Easing><KeyFrame Cue='0%'><Setter Property='Width' Value='0'/></KeyFrame><KeyFrame Cue='100%'><Setter Property='Width' Value='100'/></KeyFrame></Animation>",
+        "<Animation Duration='0:0:1'><Animation.Easing><SplineEasing X1='.2' Y1='0' X2='.8' Y2='1'/></Animation.Easing><KeyFrame Cue='0%'><Setter Property='Width' Value='0'/></KeyFrame><KeyFrame Cue='100%'><Setter Property='Width' Value='100'/></KeyFrame></Animation>",
+        "<Animation Duration='0:0:1' Easing='SplineEasing'><KeyFrame Cue='100%'><Setter Property='Width' Value='100'/></KeyFrame></Animation>",
+    ] {
+        let mut options = ImportOptions::default();
+        options.base_values.insert("Width".into(), AnimationValue::Number(0.0));
+        let imported = Timeline::import_xaml(source, 1, &options).unwrap().timeline;
+        let output = imported.to_xaml(1).unwrap();
+        let restored = Timeline::import_xaml(&output, 1, &options).unwrap().timeline;
+        assert_eq!(restored, imported);
+        assert_eq!(restored.sample(0.45).unwrap(), imported.sample(0.45).unwrap());
+    }
+    let spring = Easing::parse("Spring(1,100,10,0)").unwrap();
+    assert!(spring.sample(0.5).unwrap() > 1.0);
+    assert_ne!(spring.sample(1.0).unwrap(), 1.0);
+    assert!(Easing::parse("Spring(0,100,10,0)").is_err());
+    let mut document =
+        programs("<Grid xmlns='https://github.com/ferroui'><Button Name='Target'/></Grid>");
+    let mut states = group(document.ast().root());
+    states.transitions[0].easing = spring.clone();
+    document
+        .apply("Spring state", states.plan(&document).unwrap())
+        .unwrap();
+    let mut states = VisualStateGroup::read(&document).remove(0);
+    assert_eq!(states.transitions[0].easing, spring);
+    states.transitions[0].easing = Easing::Linear;
+    document
+        .apply("Linear state", states.plan(&document).unwrap())
+        .unwrap();
+    assert!(!document.source().contains("SpringEasing"));
+    states.transitions[0].easing = spring;
+    document
+        .apply("Spring again", states.plan(&document).unwrap())
+        .unwrap();
+    assert_eq!(
+        VisualStateGroup::read(&document)[0].transitions[0].easing,
+        states.transitions[0].easing
+    );
+}
+
+#[test]
+fn geometry_values_preserve_units_corner_shorthand_and_native_interpolation() {
+    for (kind, before, after, midpoint) in [
+        (ValueKind::Vector, "-2,4", "6,12", "2,8"),
+        (ValueKind::Size, "10,20", "30,60", "20,40"),
+        (ValueKind::Rect, "1,2,10,20", "3,4,30,60", "2,3,20,40"),
+        (ValueKind::CornerRadius, "1,2", "5,6,7,8", "3,3.5,4.5,5"),
+        (ValueKind::RelativePoint, "0%,20%", "100%,60%", "50%,40%"),
+        (ValueKind::RelativeScalar, "10%", "90%", "50%"),
+    ] {
+        let before = AnimationValue::parse(before, kind).unwrap();
+        let after = AnimationValue::parse(after, kind).unwrap();
+        let expected = AnimationValue::parse(midpoint, kind).unwrap();
+        assert_eq!(before.interpolate(&after, 0.5).unwrap(), expected);
+        assert_eq!(
+            AnimationValue::parse(&expected.to_xaml(), kind).unwrap(),
+            expected
+        );
+        let mut timeline = Timeline::new(1.0).unwrap();
+        timeline.record(1, "CustomGeometry", 0.0, before).unwrap();
+        timeline.record(1, "CustomGeometry", 1.0, after).unwrap();
+        let mut options = ImportOptions::default();
+        options.property_kinds.insert("CustomGeometry".into(), kind);
+        let restored = Timeline::import_xaml(&timeline.to_xaml(1).unwrap(), 1, &options)
+            .unwrap()
+            .timeline;
+        assert_eq!(restored.sample(0.5).unwrap()[0].value, expected);
+    }
+    for kind in [ValueKind::RelativePoint, ValueKind::RelativeScalar] {
+        let (absolute, relative) = if kind == ValueKind::RelativePoint {
+            ("10,20", "10%,20%")
+        } else {
+            ("10", "10%")
+        };
+        let absolute = AnimationValue::parse(absolute, kind).unwrap();
+        let relative = AnimationValue::parse(relative, kind).unwrap();
+        assert_eq!(absolute.interpolate(&relative, 0.49).unwrap(), absolute);
+        assert_eq!(absolute.interpolate(&relative, 0.5).unwrap(), relative);
+    }
+    assert!(AnimationValue::parse("10%,20", ValueKind::RelativePoint).is_err());
+    assert!(AnimationValue::parse("NaN,2", ValueKind::Size).is_err());
+}
+
+#[test]
+fn host_native_interpolation_requirements_never_fall_back_to_discrete_values() {
+    let source = "<Animation Duration='0:0:1'><KeyFrame Cue='0%'><Setter Property='BoxShadow' Value='0 0 0 0 Red'/></KeyFrame><KeyFrame Cue='100%'><Setter Property='BoxShadow' Value='20 30 10 4 Blue'/></KeyFrame></Animation>";
+    let mut options = ImportOptions::default();
+    options.interpolation_errors.insert(
+        "BoxShadow".into(),
+        "Use the native BoxShadows animator".into(),
+    );
+    assert!(Timeline::import_xaml(source, 1, &options)
+        .unwrap_err()
+        .to_string()
+        .contains("native BoxShadows"));
+    let document = programs(source);
+    let mut program = AnimationPrograms::scan(&document).remove(0);
+    AnimationCodecRegistry::default().decode(&mut program, source, &options);
+    assert!(program.timeline.is_none());
+    assert_eq!(program.source, source);
+}
+#[test]
 fn state_validation_rejects_invalid_edges_and_nonfinite_durations() {
     let mut model = group(1);
     model.transitions[0].to = "Missing".into();

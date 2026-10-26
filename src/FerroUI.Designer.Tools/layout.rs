@@ -1,4 +1,4 @@
-use crate::{error, require, Axis, Point, PropertyRegistry, Rect, Result, ToolError};
+use crate::{Axis, Point, PropertyRegistry, Rect, Result, ToolError, error, require};
 use ferroui_designer_core::{Document, Edit, Node, NodeId, NodeKind};
 use serde::{Deserialize, Serialize};
 use std::collections::{BTreeMap, BTreeSet};
@@ -140,6 +140,7 @@ pub struct LayoutContext<'a> {
     pub bounds: &'a BTreeMap<NodeId, Rect>,
     grid_lines: Option<&'a BTreeMap<NodeId, GridLines>>,
     resolved_layout: Option<&'a BTreeMap<NodeId, ResolvedLayout>>,
+    resolved_properties: Option<&'a BTreeMap<NodeId, BTreeMap<String, String>>>,
 }
 impl<'a> LayoutContext<'a> {
     pub fn new(document: &'a Document, bounds: &'a BTreeMap<NodeId, Rect>) -> Self {
@@ -148,6 +149,7 @@ impl<'a> LayoutContext<'a> {
             bounds,
             grid_lines: None,
             resolved_layout: None,
+            resolved_properties: None,
         }
     }
     pub fn with_grid_lines(mut self, lines: &'a BTreeMap<NodeId, GridLines>) -> Self {
@@ -157,6 +159,38 @@ impl<'a> LayoutContext<'a> {
     pub fn with_resolved_layout(mut self, layout: &'a BTreeMap<NodeId, ResolvedLayout>) -> Self {
         self.resolved_layout = Some(layout);
         self
+    }
+    /// Effective runtime values used to interpret panel layout, including styles and bindings.
+    /// These values never replace authored expressions when an operation writes a property.
+    pub fn with_resolved_properties(
+        mut self,
+        values: &'a BTreeMap<NodeId, BTreeMap<String, String>>,
+    ) -> Self {
+        self.resolved_properties = Some(values);
+        self
+    }
+    pub fn property(&self, node: NodeId, name: &str) -> Option<&str> {
+        self.resolved_properties
+            .and_then(|values| values.get(&node))
+            .and_then(|values| values.get(name))
+            .map(String::as_str)
+            .or_else(|| {
+                self.document
+                    .ast()
+                    .node(node)
+                    .and_then(|node| node.attribute(name))
+            })
+    }
+    fn ensure_resolved(&self, node: NodeId, name: &str) -> Result<()> {
+        if self
+            .resolved_properties
+            .and_then(|values| values.get(&node))
+            .is_some_and(|values| values.contains_key(name))
+        {
+            Ok(())
+        } else {
+            ensure_literal(self, node, name)
+        }
     }
     pub fn bounds(&self, node: NodeId) -> Result<Rect> {
         let result = *self
@@ -334,13 +368,21 @@ impl LayoutRegistry {
             .insert(adapter.panel_type().to_owned(), adapter)
     }
     pub fn supports(&self, panel_type: &str) -> bool {
-        self.adapters.contains_key(local_name(panel_type))
+        self.adapter(panel_type).is_some()
     }
     pub fn panel_types(&self) -> impl Iterator<Item = &str> {
         self.adapters.keys().map(String::as_str)
     }
     pub fn adapter(&self, panel_type: &str) -> Option<&dyn LayoutAdapter> {
-        self.adapters.get(local_name(panel_type)).map(Box::as_ref)
+        self.adapters
+            .get(panel_type)
+            .or_else(|| self.adapters.get(local_name(panel_type)))
+            .map(Box::as_ref)
+    }
+    /// Exact lookup for application-qualified adapters without confusing an application type
+    /// with a built-in panel that happens to have the same local name.
+    pub fn adapter_exact(&self, panel_type: &str) -> Option<&dyn LayoutAdapter> {
+        self.adapters.get(panel_type).map(Box::as_ref)
     }
     pub fn plan(&self, context: &LayoutContext<'_>, action: LayoutAction) -> Result<Vec<Edit>> {
         self.plan_many(context, [action])
@@ -398,7 +440,10 @@ impl LayoutRegistry {
                 };
                 if let Some((key, value)) = attribute {
                     if let Some(previous) = attributes.insert(key, value.clone()) {
-                        require(previous == value, "Batch actions write conflicting values to the same property; combine them in one adapter action")?;
+                        require(
+                            previous == value,
+                            "Batch actions write conflicting values to the same property; combine them in one adapter action",
+                        )?;
                     }
                 }
                 edits.push(edit);
@@ -592,7 +637,10 @@ impl LayoutAdapter for BuiltIn {
                 crate::ExpressionPolicy::PreserveExpressions,
             );
         }
-        require(!self.managed(), "This panel owns generated runtime containers; edit its item source/template or panel properties")?;
+        require(
+            !self.managed(),
+            "This panel owns generated runtime containers; edit its item source/template or panel properties",
+        )?;
         match action {
             LayoutAction::Move { node, delta } => move_plan(context, *node, *delta, self.name),
             LayoutAction::Resize {
@@ -817,10 +865,7 @@ fn reorder_plan(
     if panel_type == "FlexPanel" {
         children.sort_by_key(|id| {
             context
-                .document
-                .ast()
-                .node(*id)
-                .and_then(|n| n.attribute("Flex.Order"))
+                .property(*id, "Flex.Order")
                 .and_then(|v| v.parse::<i64>().ok())
                 .unwrap_or(0)
         });
@@ -877,30 +922,30 @@ fn drop_plan(
                         .as_ref()
                         .is_some_and(|text| !text.trim().is_empty())
             });
-        require(children.is_empty() && !has_attribute && !has_text, "This host already has content; select its inner panel or remove the existing content before dropping")?;
+        require(
+            children.is_empty() && !has_attribute && !has_text,
+            "This host already has content; select its inner panel or remove the existing content before dropping",
+        )?;
     }
     if matches!(
         panel_type,
         "StackPanel" | "ReversibleStackPanel" | "WrapPanel"
     ) {
-        ensure_literal(context, parent, "Orientation")?;
+        context.ensure_resolved(parent, "Orientation")?;
         if panel_type == "ReversibleStackPanel" {
-            ensure_literal(context, parent, "ReverseOrder")?;
+            context.ensure_resolved(parent, "ReverseOrder")?;
         }
     }
     if panel_type == "FlexPanel" {
-        ensure_literal(context, parent, "Direction")?;
+        context.ensure_resolved(parent, "Direction")?;
         for child in &children {
-            ensure_literal(context, *child, "Flex.Order")?;
+            context.ensure_resolved(*child, "Flex.Order")?;
         }
     }
     if panel_type == "FlexPanel" {
         children.sort_by_key(|id| {
             context
-                .document
-                .ast()
-                .node(*id)
-                .and_then(|n| n.attribute("Flex.Order"))
+                .property(*id, "Flex.Order")
                 .and_then(|v| v.parse::<i64>().ok())
                 .unwrap_or(0)
         });
@@ -949,9 +994,9 @@ fn drop_plan(
                     }
                 }
                 children = visible;
-                let mut first = integer(panel.attribute("FirstColumn").unwrap_or("0"))?;
-                let mut rows = integer(panel.attribute("Rows").unwrap_or("0"))?;
-                let mut columns = integer(panel.attribute("Columns").unwrap_or("0"))?;
+                let mut first = integer(context.property(parent, "FirstColumn").unwrap_or("0"))?;
+                let mut rows = integer(context.property(parent, "Rows").unwrap_or("0"))?;
+                let mut columns = integer(context.property(parent, "Columns").unwrap_or("0"))?;
                 // Runtime resets FirstColumn before calculating automatic dimensions.
                 if first >= columns {
                     first = 0;
@@ -973,13 +1018,13 @@ fn drop_plan(
                     local.x,
                     bounds.width,
                     columns,
-                    number(panel.attribute("ColumnSpacing").unwrap_or("0"))?,
+                    number(context.property(parent, "ColumnSpacing").unwrap_or("0"))?,
                 )?;
                 let row = uniform_cell_at(
                     local.y,
                     bounds.height,
                     rows,
-                    number(panel.attribute("RowSpacing").unwrap_or("0"))?,
+                    number(context.property(parent, "RowSpacing").unwrap_or("0"))?,
                 )?;
                 index = row
                     .min(rows.saturating_sub(1))
@@ -997,8 +1042,8 @@ fn drop_plan(
                 ];
                 let side = sides.iter().min_by(|a, b| a.0.total_cmp(&b.0)).unwrap().1;
                 attrs.push(("DockPanel.Dock", format!("{side:?}")));
-                if panel
-                    .attribute("LastChildFill")
+                if context
+                    .property(parent, "LastChildFill")
                     .is_none_or(|v| !v.eq_ignore_ascii_case("False"))
                     && !children.is_empty()
                 {
@@ -1012,13 +1057,13 @@ fn drop_plan(
         "StackPanel" | "ReversibleStackPanel" | "WrapPanel" | "FlexPanel"
     ) {
         let horizontal = if panel_type == "FlexPanel" {
-            panel
-                .attribute("Direction")
+            context
+                .property(parent, "Direction")
                 .unwrap_or("Row")
                 .starts_with("Row")
         } else {
-            panel
-                .attribute("Orientation")
+            context
+                .property(parent, "Orientation")
                 .unwrap_or(if panel_type == "WrapPanel" {
                     "Horizontal"
                 } else {
@@ -1027,13 +1072,13 @@ fn drop_plan(
                 == "Horizontal"
         };
         let reversed = if panel_type == "FlexPanel" {
-            panel
-                .attribute("Direction")
+            context
+                .property(parent, "Direction")
                 .is_some_and(|v| v.ends_with("Reverse"))
         } else {
             panel_type == "ReversibleStackPanel"
-                && panel
-                    .attribute("ReverseOrder")
+                && context
+                    .property(parent, "ReverseOrder")
                     .is_some_and(|v| v.eq_ignore_ascii_case("True"))
         };
         let mut distance = f64::INFINITY;
@@ -1054,15 +1099,17 @@ fn drop_plan(
             }
         }
         if panel_type == "FlexPanel" {
-            attrs.push(("Flex.Order", index.to_string()));
-            for (i, child) in children.iter().enumerate() {
-                ensure_literal(context, *child, "Flex.Order")?;
-                extra.push(text_set(
-                    *child,
-                    "Flex.Order",
-                    (i + usize::from(i >= index)).to_string(),
-                ));
-            }
+            let order = children
+                .get(index)
+                .or_else(|| children.last())
+                .and_then(|child| context.property(*child, "Flex.Order"))
+                .unwrap_or("0");
+            let order = order
+                .parse::<i64>()
+                .map_err(|_| ToolError("Resolved Flex.Order must be an integer".into()))?;
+            // Equal-order items retain source order. Inserting next to the chosen neighbor
+            // needs no mutation of existing order bindings or style values.
+            attrs.push(("Flex.Order", order.to_string()));
         }
     }
     let source = position_fragment(context, parent, source, &attrs)?;
@@ -1347,7 +1394,10 @@ fn relative_plan(
             {
                 continue;
             }
-            require(!attribute.value.trim_start().starts_with('{'), "Resolve dynamic relative constraints in the live host before editing the static constraint graph")?;
+            require(
+                !attribute.value.trim_start().starts_with('{'),
+                "Resolve dynamic relative constraints in the live host before editing the static constraint graph",
+            )?;
             if let Some(other) = names.get(&attribute.value) {
                 edges.entry(id).or_default().push(*other);
             }

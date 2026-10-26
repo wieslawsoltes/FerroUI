@@ -9,10 +9,204 @@ use ferroui_designer_tools::{
 };
 use std::collections::{BTreeMap, BTreeSet};
 
+fn effective_properties(visual: &Visual) -> BTreeMap<String, String> {
+    ferroui_inspect::Inspector::properties(visual)
+        .into_iter()
+        .map(|info| (info.name, ferroui_inspect::display_value(Some(&info.value))))
+        .collect()
+}
+fn is_custom_panel(session: &DesignerSession, node: NodeId) -> bool {
+    let Some(element) = session.document().ast().node(node) else {
+        return false;
+    };
+    let Some(visual) = session.preview.visual(node) else {
+        return false;
+    };
+    let Some(panel) = visual.cast::<ferroui_controls::Panel>() else {
+        return false;
+    };
+    if panel.is_items_host() {
+        return false;
+    }
+    let qualified_custom = element.namespace_uri.as_deref().is_some_and(|uri| {
+        !matches!(
+            uri,
+            "https://github.com/ferroui"
+                | "using:FerroUI.Controls"
+                | "clr-namespace:FerroUI.Controls;assembly=FerroUI.Controls"
+        )
+    }) && session
+        .layout_tools()
+        .adapter_exact(&element.name)
+        .is_none()
+        && matches!(
+            element.local_name(),
+            "Panel"
+                | "Canvas"
+                | "Grid"
+                | "StackPanel"
+                | "WrapPanel"
+                | "DockPanel"
+                | "UniformGrid"
+                | "RelativePanel"
+                | "FlexPanel"
+        );
+    !session.layout_tools().supports(&element.name)
+        || qualified_custom
+        || visual.get_type().name() != element.local_name()
+}
+
+/// Discoverable native fallback: unknown Panel subclasses retain their layout algorithm;
+/// manipulation authors a render adjustment, while child insertion/order uses Panel.Children.
+impl DesignerSession {
+    pub fn runtime_layout_capabilities(
+        &self,
+        node: NodeId,
+    ) -> Option<ferroui_designer_tools::LayoutCapabilities> {
+        let element = self.document().ast().node(node)?;
+        if self
+            .preview
+            .visual(node)
+            .and_then(|visual| visual.cast::<ferroui_controls::Panel>())
+            .is_some_and(|panel| panel.is_items_host())
+        {
+            return Some(ferroui_designer_tools::LayoutCapabilities {
+                move_items: false,
+                resize_items: false,
+                reorder: false,
+                drop_items: false,
+                generated_items: true,
+            });
+        }
+        if is_custom_panel(self, node) {
+            return Some(ferroui_designer_tools::LayoutCapabilities {
+                move_items: true,
+                resize_items: true,
+                reorder: true,
+                drop_items: true,
+                generated_items: false,
+            });
+        }
+        self.layout_tools()
+            .adapter(&element.name)
+            .map(|adapter| adapter.capabilities())
+    }
+}
+
+fn visual_adjustment(
+    session: &DesignerSession,
+    node: NodeId,
+    adjustment: Matrix,
+) -> Result<Vec<Edit>, String> {
+    affine(adjustment)?;
+    let visual = session
+        .preview
+        .visual(node)
+        .ok_or("No live transform target")?;
+    let parent = visual
+        .visual_parent()
+        .ok_or("The root transform belongs to its preview host")?;
+    let to_artboard = crate::affine_manipulation::affine(
+        parent
+            .transform_to_visual(&session.preview.host)
+            .ok_or("Detached layout parent")?,
+    )
+    .ok_or("The ancestor transform must be affine")?;
+    let inverse = crate::affine_manipulation::inverse(to_artboard)
+        .ok_or("The ancestor transform is singular")?;
+    let local = crate::affine_manipulation::affine(
+        visual
+            .transform_to_visual(&parent)
+            .ok_or("Detached transform target")?,
+    )
+    .ok_or("The target transform must be affine")?;
+    let wanted = local * to_artboard * adjustment * inverse;
+    let render = crate::affine_manipulation::render_for_local(
+        wanted,
+        visual.bounds(),
+        visual.render_transform_origin(),
+        visual.has_mirror_transform(),
+    )
+    .ok_or("The target transform is singular")?;
+    transform_edits(
+        session.document(),
+        node,
+        visual
+            .render_transform()
+            .map(|t| t.value())
+            .unwrap_or(Matrix::IDENTITY),
+        render,
+    )
+}
+
+fn transform_edits(
+    document: &Document,
+    node: NodeId,
+    before: Matrix,
+    after: Matrix,
+) -> Result<Vec<Edit>, String> {
+    let element = document
+        .ast()
+        .node(node)
+        .ok_or("Unknown transform target")?;
+    let correction = crate::affine_manipulation::inverse(before).map(|inverse| inverse * after);
+    if let Some(property) = element
+        .children
+        .iter()
+        .filter_map(|id| document.ast().node(*id))
+        .find(|node| node.name.ends_with(".RenderTransform"))
+    {
+        let original = document
+            .ast()
+            .element_children(property.id)
+            .first()
+            .and_then(|id| document.ast().node(*id))
+            .ok_or("RenderTransform must contain a transform object")?;
+        let correction = correction.ok_or("Cannot compose a singular authored transform")?;
+        let original_source = &document.valid_source()[original.span.start..original.span.end];
+        let fragment = format!(
+            "<TransformGroup><!--designer-original--><MatrixTransform Matrix=\"{}\" /></TransformGroup>",
+            crate::affine_manipulation::matrix_text(correction)
+        );
+        let (fragment, declaration) =
+            crate::preview_source::embed_native_fragment(document, &fragment)?;
+        let fragment = fragment.replace("<!--designer-original-->", original_source);
+        let mut edits = declaration.into_iter().collect::<Vec<_>>();
+        edits.push(Edit::Text {
+            span: original.span,
+            replacement: fragment,
+        });
+        return Ok(edits);
+    }
+    let value = if let Some(original) = element.attribute("RenderTransform") {
+        if original.trim_start().starts_with('{') {
+            return Err("RenderTransform is bound. Use the property editor to author a local transform or adjust the binding source".into());
+        }
+        correction
+            .map(|correction| {
+                format!(
+                    "{original} matrix({})",
+                    crate::affine_manipulation::matrix_text(correction)
+                )
+            })
+            .unwrap_or_else(|| {
+                format!("matrix({})", crate::affine_manipulation::matrix_text(after))
+            })
+    } else {
+        format!("matrix({})", crate::affine_manipulation::matrix_text(after))
+    };
+    Ok(vec![Edit::SetAttribute {
+        node,
+        name: "RenderTransform".into(),
+        value,
+    }])
+}
+
 struct Measurement {
     bounds: BTreeMap<NodeId, Rect>,
     grid_lines: BTreeMap<NodeId, GridLines>,
     resolved: BTreeMap<NodeId, ResolvedLayout>,
+    properties: BTreeMap<NodeId, BTreeMap<String, String>>,
     to_artboard: Affine,
     to_parent: Affine,
     visual: Ref<Visual>,
@@ -22,6 +216,7 @@ impl Measurement {
         LayoutContext::new(document, &self.bounds)
             .with_grid_lines(&self.grid_lines)
             .with_resolved_layout(&self.resolved)
+            .with_resolved_properties(&self.properties)
     }
     fn delta(&self, delta: Point) -> Result<Point, String> {
         let origin = self
@@ -33,9 +228,8 @@ impl Measurement {
     }
 }
 fn affine(matrix: Matrix) -> Result<Affine, String> {
-    if matrix.m13 != 0.0 || matrix.m23 != 0.0 || matrix.m33 != 1.0 {
-        return Err("Perspective transforms require a custom layout adapter".into());
-    }
+    let matrix = crate::affine_manipulation::affine(matrix)
+        .ok_or("Perspective transforms require a custom layout adapter")?;
     let result = Affine {
         m11: matrix.m11,
         m12: matrix.m12,
@@ -102,6 +296,12 @@ fn measure(
     let authored = session.preview.visual(parent).ok_or(
         "The selected parent has no live layout; repair its preview or edit its template in source",
     )?;
+    if authored
+        .cast::<ferroui_controls::Panel>()
+        .is_some_and(|panel| panel.is_items_host())
+    {
+        return Err("Generated item layout is owned by its ItemsControl; edit its item template or source collection".into());
+    }
     // Margin and Width/Height are interpreted by the actual layout parent, which may be a
     // ContentPresenter inside the source parent's template or a scaled Viewbox container.
     let visual = child
@@ -117,12 +317,18 @@ fn measure(
     let to_parent = to_artboard.inverse().map_err(|e| e.to_string())?;
     let mut bounds = BTreeMap::new();
     let mut resolved = BTreeMap::new();
+    let mut properties = BTreeMap::new();
+    properties.insert(parent, effective_properties(&authored));
     let size = visual.bounds();
     bounds.insert(parent, Rect::new(0.0, 0.0, size.width, size.height));
     for id in children(session.document(), parent) {
         if let Some(control) = session.preview.visual(id) {
+            properties.insert(id, effective_properties(&control));
             let layout_parent = control.visual_parent().unwrap_or_else(|| visual.clone());
-            if let Some(transform) = layout_parent.transform_to_visual(&visual) {
+            if let Some(transform) = layout_parent
+                .transform_to_visual(&visual)
+                .and_then(crate::affine_manipulation::affine)
+            {
                 // Transform the layout rectangle from its parent, excluding its own
                 // RenderTransform while preserving presenter offsets and ancestor scaling.
                 let rect = control.bounds().transform_to_aabb(transform);
@@ -173,6 +379,7 @@ fn measure(
         bounds,
         grid_lines,
         resolved,
+        properties,
         to_artboard,
         to_parent,
         visual,
@@ -184,8 +391,17 @@ fn plan_moves(
 ) -> Result<Vec<Edit>, String> {
     let mut measured = BTreeMap::new();
     let mut actions = Vec::new();
+    let mut custom = Vec::new();
     for (node, delta) in deltas {
         let source_parent = parent(session, node)?;
+        if is_custom_panel(session, source_parent) {
+            custom.extend(visual_adjustment(
+                session,
+                node,
+                Matrix::create_translation(delta.x, delta.y),
+            )?);
+            continue;
+        }
         let visual = session
             .preview
             .visual(node)
@@ -205,17 +421,25 @@ fn plan_moves(
         .iter()
         .map(|(key, measurement)| (*key, measurement.context(session.document())))
         .collect::<BTreeMap<_, _>>();
-    session
+    let mut edits = session
         .layout_tools()
         .plan_batch(
             actions
                 .into_iter()
                 .map(|(key, action)| (&contexts[&key], action)),
         )
-        .map_err(|e| e.to_string())
+        .map_err(|e| e.to_string())?;
+    edits.extend(custom);
+    Ok(edits)
 }
 
 pub(crate) fn commit(session: &mut DesignerSession, gesture: DesignGesture) -> Result<(), String> {
+    if !session.can_manipulate() {
+        return Err(
+            "Visual manipulation requires a successful preview of the current source revision"
+                .into(),
+        );
+    }
     let mut edits = Vec::new();
     match gesture {
         DesignGesture::Move { nodes, delta } => {
@@ -252,7 +476,21 @@ pub(crate) fn commit(session: &mut DesignerSession, gesture: DesignGesture) -> R
                 || (own.m11 - 1.0).abs() > 1e-9
                 || (own.m22 - 1.0).abs() > 1e-9
             {
-                return Err("Resize rotated, skewed, mirrored or individually scaled controls through Width/Height and the transform editor".into());
+                if before.width <= 0.0
+                    || before.height <= 0.0
+                    || after.width <= 0.0
+                    || after.height <= 0.0
+                {
+                    return Err("Resize dimensions must be positive".into());
+                }
+                let adjustment = Matrix::create_translation(-before.x, -before.y)
+                    * Matrix::create_scale(
+                        after.width / before.width,
+                        after.height / before.height,
+                    )
+                    * Matrix::create_translation(after.x, after.y);
+                let edits = visual_adjustment(session, node, adjustment)?;
+                return session.apply_visual("Resize transformed selection", edits);
             }
             let original = *measured
                 .bounds
@@ -279,62 +517,92 @@ pub(crate) fn commit(session: &mut DesignerSession, gesture: DesignGesture) -> R
                     .map_err(|e| e.to_string())?,
             );
         }
-        DesignGesture::Rotate { node, degrees } => {
-            if !degrees.is_finite() {
-                return Err("Rotation must be finite".into());
+        DesignGesture::ResizeLocal { node, after } => {
+            Rect::new(after.x, after.y, after.width, after.height)
+                .validate()
+                .map_err(|error| error.to_string())?;
+            if after.width <= 0.0 || after.height <= 0.0 {
+                return Err("Resize dimensions must be positive".into());
             }
             let measured = measure(session, parent(session, node)?, Some(node))?;
             let visual = session
                 .preview
                 .visual(node)
-                .ok_or("No live rotation target")?;
-            let own = affine(
-                visual
-                    .transform_to_visual(&measured.visual)
-                    .ok_or("Detached rotation target")?,
-            )?;
-            let conformal = |matrix: Affine| {
-                let x = matrix.m11 * matrix.m11 + matrix.m12 * matrix.m12;
-                let y = matrix.m21 * matrix.m21 + matrix.m22 * matrix.m22;
-                matrix.m11 * matrix.m22 - matrix.m12 * matrix.m21 > 0.0
-                    && (x - y).abs() < 1e-7 * x.max(y).max(1.0)
-                    && (matrix.m11 * matrix.m21 + matrix.m12 * matrix.m22).abs()
-                        < 1e-7 * x.max(y).max(1.0)
-            };
-            let origin = visual
-                .render_transform_origin()
-                .to_pixels(visual.bounds().size());
-            if !conformal(measured.to_artboard)
-                || !conformal(own)
-                || (origin.x - visual.bounds().width * 0.5).abs() > 0.001
-                || (origin.y - visual.bounds().height * 0.5).abs() > 0.001
-            {
-                return Err("Use RenderTransform to rotate controls with a custom origin, mirroring, skew or nonuniform scaling".into());
-            }
-            let element = session
-                .document()
-                .ast()
-                .node(node)
-                .ok_or("Unknown element")?;
-            if element
-                .children
-                .iter()
-                .filter_map(|id| session.document().ast().node(*id))
-                .any(|node| node.name.ends_with(".RenderTransform"))
-            {
-                return Err("Edit the existing RenderTransform property element in XAML before adding a rotation".into());
-            }
-            let original = element.attribute("RenderTransform").unwrap_or("");
-            if original.starts_with('{') {
-                return Err(
-                    "The transform is bound; edit its binding or animate the bound value".into(),
+                .ok_or("No live resize target")?;
+            let render = visual
+                .render_transform()
+                .map(|t| t.value())
+                .unwrap_or(Matrix::IDENTITY);
+            let original = visual.bounds();
+            if is_custom_panel(session, parent(session, node)?) {
+                if original.width <= 0.0 || original.height <= 0.0 {
+                    return Err("The custom panel must arrange the target to a nonzero size before visual resize".into());
+                }
+                let geometry = crate::affine_manipulation::Geometry::capture(
+                    &visual,
+                    &session.preview.host.clone().upcast(),
+                )
+                .ok_or("The target transform is singular")?;
+                let local = Matrix::create_scale(
+                    after.width / original.width,
+                    after.height / original.height,
+                ) * Matrix::create_translation(after.x, after.y);
+                edits.extend(visual_adjustment(
+                    session,
+                    node,
+                    geometry.from_surface * local * geometry.to_surface,
+                )?);
+            } else {
+                let resized = crate::affine_manipulation::resized_layout(
+                    original,
+                    after,
+                    visual.render_transform_origin(),
+                    visual.has_mirror_transform(),
+                    render,
+                );
+                edits.extend(
+                    session
+                        .layout_tools()
+                        .plan(
+                            &measured.context(session.document()),
+                            LayoutAction::Resize {
+                                node,
+                                before: Rect::new(
+                                    original.x,
+                                    original.y,
+                                    original.width,
+                                    original.height,
+                                ),
+                                after: Rect::new(
+                                    resized.x,
+                                    resized.y,
+                                    resized.width,
+                                    resized.height,
+                                ),
+                            },
+                        )
+                        .map_err(|error| error.to_string())?,
                 );
             }
-            edits.push(Edit::SetAttribute {
+        }
+        DesignGesture::Rotate { node, degrees } => {
+            if !degrees.is_finite() {
+                return Err("Rotation must be finite".into());
+            }
+            let visual = session
+                .preview
+                .visual(node)
+                .ok_or("No live rotation target")?;
+            let geometry = crate::affine_manipulation::Geometry::capture(
+                &visual,
+                &session.preview.host.clone().upcast(),
+            )
+            .ok_or("The target transform is singular")?;
+            edits.extend(visual_adjustment(
+                session,
                 node,
-                name: "RenderTransform".into(),
-                value: format!("{original} rotate({degrees}deg)").trim().to_owned(),
-            });
+                Matrix::create_rotation_at(degrees.to_radians(), geometry.pivot),
+            )?);
         }
         DesignGesture::Insert { source, position } => {
             let (source, declaration) =
@@ -368,6 +636,20 @@ pub(crate) fn commit(session: &mut DesignerSession, gesture: DesignGesture) -> R
                     .ast()
                     .node(target)
                     .ok_or("Drop target no longer exists")?;
+                if is_custom_panel(session, target) {
+                    let container = element
+                        .children
+                        .iter()
+                        .filter_map(|id| session.document().ast().node(*id))
+                        .find(|node| node.name.ends_with(".Children"))
+                        .map_or(target, |node| node.id);
+                    edits.push(Edit::InsertChild {
+                        parent: container,
+                        index: session.document().ast().element_children(container).len(),
+                        source: source.clone(),
+                    });
+                    break;
+                }
                 if session.layout_tools().supports(&element.name) {
                     let plan = measure(session, target, None).and_then(|measured| {
                         let position = measured
@@ -404,6 +686,11 @@ pub(crate) fn commit(session: &mut DesignerSession, gesture: DesignGesture) -> R
     Ok(())
 }
 fn artboard_bounds(session: &DesignerSession) -> Result<Vec<(NodeId, Rect)>, String> {
+    if !session.can_manipulate() {
+        return Err(
+            "Alignment requires a successful preview of the current source revision".into(),
+        );
+    }
     let relative = session.preview.host.clone().upcast::<Visual>();
     outermost(session.document(), session.selection())
         .into_iter()
@@ -454,68 +741,198 @@ fn outermost(document: &Document, nodes: &[NodeId]) -> Vec<NodeId> {
 
 pub(crate) fn duplicate(session: &mut DesignerSession) -> Result<(), String> {
     let document = session.document();
+    let selected = outermost(document, session.selection());
     let mut edits = Vec::new();
-    let mut names = document
-        .ast()
-        .elements()
-        .filter_map(|node| node.attribute("Name").or_else(|| node.attribute("x:Name")))
-        .map(str::to_owned)
-        .collect::<BTreeSet<_>>();
-    for id in outermost(document, session.selection()) {
-        let node = document.ast().node(id).ok_or("Unknown selection")?;
-        let owner = self::parent(session, id)?;
-        let owner_type = document.ast().node(owner).ok_or("Missing parent")?;
+    for id in &selected {
+        let owner = parent(session, *id)?;
         if !session
-            .layout_tools()
-            .adapter(&owner_type.name)
-            .is_some_and(|adapter| adapter.capabilities().reorder)
+            .runtime_layout_capabilities(owner)
+            .is_some_and(|capabilities| capabilities.reorder)
         {
-            return Err("Duplicate requires a panel that accepts multiple authored children; place the control in a panel first".into());
+            return Err("Duplicate requires a panel accepting multiple authored children".into());
         }
+    }
+    for (id, source) in duplicate_sources(document, &selected)? {
+        let node = document.ast().node(id).ok_or("Unknown duplicate source")?;
         let parent = node
             .parent
             .ok_or("The document root cannot be duplicated")?;
-        let mut text = document.valid_source()[node.span.start..node.span.end].to_owned();
-        let mut patches = Vec::new();
-        for descendant in document
-            .ast()
-            .elements()
-            .filter(|item| item.span.start >= node.span.start && item.span.end <= node.span.end)
-        {
-            for attribute in descendant
-                .attributes
-                .iter()
-                .filter(|attribute| matches!(attribute.name.as_str(), "Name" | "x:Name"))
-            {
-                let mut suffix = 1;
-                let unique = loop {
-                    let candidate = format!("{}_Copy{suffix}", attribute.value);
-                    if names.insert(candidate.clone()) {
-                        break candidate;
-                    }
-                    suffix += 1;
-                };
-                patches.push((
-                    attribute.value_span.start - node.span.start,
-                    attribute.value_span.end - node.span.start,
-                    unique,
-                ));
-            }
-        }
-        patches.sort_by_key(|(start, _, _)| std::cmp::Reverse(*start));
-        for (start, end, replacement) in patches {
-            text.replace_range(start..end, &replacement);
-        }
         edits.push(Edit::InsertChild {
             parent,
             index: document.ast().element_children(parent).len(),
-            source: text,
+            source,
         });
     }
     session
         .apply("Duplicate selection", edits)
-        .map_err(|error| error.to_string())?;
+        .map_err(|e| e.to_string())?;
     Ok(())
+}
+fn duplicate_sources(
+    document: &Document,
+    selected: &[NodeId],
+) -> Result<Vec<(NodeId, String)>, String> {
+    let roots = selected
+        .iter()
+        .map(|id| document.ast().node(*id).ok_or("Unknown selection"))
+        .collect::<Result<Vec<_>, _>>()?;
+    let copied = |span: ferroui_designer_core::SourceSpan| {
+        roots
+            .iter()
+            .any(|root| span.start >= root.span.start && span.end <= root.span.end)
+    };
+    let occurrences = ferroui_designer_language::name_occurrences(document);
+    let mut names = occurrences
+        .iter()
+        .filter(|item| item.declaration)
+        .map(|item| item.name.clone())
+        .collect::<BTreeSet<_>>();
+    let mut replacements = BTreeMap::new();
+    for declaration in occurrences
+        .iter()
+        .filter(|item| item.declaration && copied(item.span))
+    {
+        let mut suffix = 1;
+        let unique = loop {
+            let value = format!("{}_Copy{suffix}", declaration.name);
+            if names.insert(value.clone()) {
+                break value;
+            }
+            suffix += 1;
+        };
+        replacements.insert((declaration.scope, declaration.name.clone()), unique);
+    }
+    let mut result = Vec::new();
+    for root in roots {
+        let mut source = document.valid_source()[root.span.start..root.span.end].to_owned();
+        let mut changes = Vec::new();
+        for occurrence in occurrences
+            .iter()
+            .filter(|item| item.span.start >= root.span.start && item.span.end <= root.span.end)
+        {
+            if let Some(name) = replacements.get(&(occurrence.scope, occurrence.name.clone())) {
+                changes.push((occurrence.span, name.clone()));
+            }
+        }
+        for comment in document.ast().nodes().filter(|node| {
+            node.kind == NodeKind::Comment
+                && node.span.start >= root.span.start
+                && node.span.end <= root.span.end
+        }) {
+            let scope = ferroui_designer_language::name_scope(document, comment.id);
+            let renames = replacements
+                .iter()
+                .filter(|((name_scope, _), _)| *name_scope == scope)
+                .map(|((_, original), copied)| (original.clone(), copied.clone()))
+                .collect::<BTreeMap<_, _>>();
+            let original = &document.valid_source()[comment.span.start..comment.span.end];
+            // Metadata contains no XML names; a standalone wrapper lets the shared codec
+            // rewrite this one comment without introducing inherited xmlns attributes.
+            let wrapper = format!("<Metadata>{original}</Metadata>");
+            let rewritten = ferroui_designer_animation::rewrite_design_metadata(&wrapper, &renames)
+                .map_err(|error| error.to_string())?;
+            let rewritten = ferroui_designer_animation::rekey_copied_programs(&rewritten)
+                .map_err(|error| error.to_string())?;
+            let rewritten = rewritten
+                .strip_prefix("<Metadata>")
+                .and_then(|source| source.strip_suffix("</Metadata>"))
+                .ok_or("The state metadata codec changed its XML wrapper")?;
+            if rewritten != original {
+                changes.push((comment.span, rewritten.into()));
+            }
+        }
+        changes.sort_by_key(|(span, _)| std::cmp::Reverse(span.start));
+        for (span, replacement) in changes {
+            source.replace_range(
+                span.start - root.span.start..span.end - root.span.start,
+                &replacement,
+            );
+        }
+        result.push((root.id, source));
+    }
+    Ok(result)
+}
+
+#[cfg(test)]
+mod duplicate_tests {
+    use super::*;
+    #[test]
+    fn duplicate_rewrites_internal_references_across_siblings_but_preserves_external_and_literals()
+    {
+        let document=Document::new(r##"<Canvas xmlns="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"><Button Name="External"/><Grid Name="Card"><Button Name="Target"/><TextBlock Text="{Binding ElementName=Target, Path=Content}" Tag="{x:Reference External}"/><Grid.Styles><Style Selector="#Target"><Setter Property="Tag" Value="Target"/></Style></Grid.Styles></Grid><Button Name="Peer" Tag="{Binding #Card.Tag}"/></Canvas>"##).unwrap();
+        let result = duplicate_sources(
+            &document,
+            &[
+                document.ast().find_name("Card").unwrap(),
+                document.ast().find_name("Peer").unwrap(),
+            ],
+        )
+        .unwrap();
+        assert!(result[0].1.contains(r#"Name="Target_Copy1""#));
+        assert!(result[0].1.contains("ElementName=Target_Copy1"));
+        assert!(result[0].1.contains(r##"Selector="#Target_Copy1""##));
+        assert!(result[0].1.contains("{x:Reference External}"));
+        assert!(result[0].1.contains(r#"Value="Target""#));
+        assert!(result[1].1.contains("#Card_Copy1.Tag"));
+    }
+    #[test]
+    fn duplicate_references_resolve_within_each_template_namescope() {
+        let document=Document::new(r##"<Grid xmlns="https://github.com/ferroui"><Button Name="Target"/><ContentControl Name="Copy"><ContentControl.Template><ControlTemplate><Grid><Button Name="Target"/><TextBlock Text="{Binding #Target.Content}"/></Grid></ControlTemplate></ContentControl.Template></ContentControl></Grid>"##).unwrap();
+        let result =
+            duplicate_sources(&document, &[document.ast().find_name("Copy").unwrap()]).unwrap();
+        assert!(result[0].1.contains("#Target_Copy1.Content"));
+    }
+    #[test]
+    fn duplicate_keeps_visual_state_metadata_targets_with_the_copied_controls() {
+        use ferroui_designer_animation::{StateSetter, VisualState, VisualStateGroup};
+        let mut document = Document::new(r#"<Canvas xmlns="https://github.com/ferroui"><Grid Name="Card"><Button Name="Target" /></Grid></Canvas>"#).unwrap();
+        let owner = document.ast().find_name("Card").unwrap();
+        let group = VisualStateGroup {
+            name: "Selection".into(),
+            owner,
+            states: vec![VisualState {
+                name: "Active".into(),
+                setters: vec![StateSetter {
+                    target: "Target".into(),
+                    property: "Opacity".into(),
+                    value: "0.5".into(),
+                }],
+            }],
+            transitions: vec![],
+        };
+        document
+            .apply("Create state group", group.plan(&document).unwrap())
+            .unwrap();
+        let source = duplicate_sources(&document, &[owner]).unwrap().remove(0).1;
+        document
+            .apply(
+                "Duplicate card",
+                vec![Edit::InsertChild {
+                    parent: document.ast().root(),
+                    index: 1,
+                    source,
+                }],
+            )
+            .unwrap();
+        let copied_owner = document.ast().find_name("Card_Copy1").unwrap();
+        let groups = VisualStateGroup::read(&document);
+        let copied_group = groups
+            .iter()
+            .find(|group| group.owner == copied_owner)
+            .unwrap();
+        assert_eq!(copied_group.states[0].setters[0].target, "Target_Copy1");
+        assert_eq!(
+            groups
+                .iter()
+                .find(|group| group.owner == owner)
+                .unwrap()
+                .states[0]
+                .setters[0]
+                .target,
+            "Target"
+        );
+        assert_eq!(document.source().matches("xmlns=").count(), 1);
+    }
 }
 
 pub(crate) fn delete(session: &mut DesignerSession) -> Result<(), String> {

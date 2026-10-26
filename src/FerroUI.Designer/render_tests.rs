@@ -26,6 +26,13 @@ fn capture(workspace: &Rc<DesignerWorkspace>, path: &Path) -> Vec<u8> {
         "Every rendered authoring step must have an accepted runtime preview: {:?}",
         workspace.session().borrow().preview_status()
     );
+    workspace.synchronize_language_service().unwrap();
+    let uri = workspace.session().borrow().document_uri().to_owned();
+    let diagnostics = workspace.try_language_service().unwrap().diagnostics(&uri).unwrap();
+    assert!(
+        diagnostics.iter().all(|diagnostic| diagnostic.severity > 2),
+        "Valid native render fixtures must also be accepted by the source language service: {diagnostics:?}"
+    );
     let control = workspace.control();
     let size = Size::new(1600.0, 1040.0);
     control.measure(size);

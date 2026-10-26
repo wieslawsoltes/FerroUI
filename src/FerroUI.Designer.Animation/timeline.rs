@@ -140,7 +140,7 @@ impl Track {
     pub fn set_easing(&mut self, time: f64, easing: Easing) -> Result<()> {
         easing.validate()?;
         require(
-            !matches!(easing, Easing::Named(_)),
+            matches!(easing, Easing::Linear | Easing::CubicBezier { .. }),
             "Per-keyframe easing must be Linear or CubicBezier; named easing belongs to the timeline",
         )?;
         let key = self
@@ -180,7 +180,7 @@ impl Track {
             key.value.validate()?;
             key.easing.validate()?;
             require(
-                !matches!(key.easing, Easing::Named(_)),
+                matches!(key.easing, Easing::Linear | Easing::CubicBezier { .. }),
                 "Only linear or cubic Bezier easing is valid on a keyframe",
             )?;
             if let Some(existing) = kind {

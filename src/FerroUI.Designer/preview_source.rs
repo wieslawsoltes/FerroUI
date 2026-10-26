@@ -14,14 +14,6 @@ pub(crate) fn project(document: &Document) -> Result<PreviewSource, String> {
         .ast()
         .node(document.ast().root())
         .ok_or("The document has no root")?;
-    if native(root)
-        && matches!(
-            root.local_name(),
-            "ResourceDictionary" | "Styles" | "Style" | "Application" | "ControlTheme"
-        )
-    {
-        return Err("Style, resource and application roots need a Control preview document that references them".into());
-    }
     let window = native(root) && root.local_name() == "Window";
     for node in document.ast().elements() {
         if node.id != root.id
@@ -192,7 +184,7 @@ fn chrome(name: &str) -> bool {
             | "Screens"
     )
 }
-fn replace_window_selector(
+pub(crate) fn replace_window_selector(
     source: &str,
     namespaces: &std::collections::BTreeMap<String, String>,
 ) -> String {
@@ -296,7 +288,7 @@ mod tests {
 
     #[test]
     fn window_projection_preserves_source_columns_and_the_authored_document() {
-        let source="<Window xmlns=\"https://github.com/ferroui\" xmlns:x=\"http://schemas.microsoft.com/winfx/2006/xaml\" x:Class=\"App.View\" Title=\"Café\"><Window.Content><Button Name=\"Target\" /></Window.Content></Window>";
+        let source = "<Window xmlns=\"https://github.com/ferroui\" xmlns:x=\"http://schemas.microsoft.com/winfx/2006/xaml\" x:Class=\"App.View\" Title=\"Café\"><Window.Content><Button Name=\"Target\" /></Window.Content></Window>";
         let original = Document::new(source).unwrap();
         let projected = project(&original).unwrap();
         let parsed = Document::new(projected.source.clone()).unwrap();
@@ -325,8 +317,8 @@ mod tests {
     }
 }
 
-/// Qualify newly generated native markup using a declaration on the authored document root.
-/// XamlX's runtime parser intentionally accepts namespace declarations only on that root.
+/// Reuse or declare a root alias so newly generated native markup stays compact.
+/// Authored nested and shadowed namespace declarations remain unchanged and are supported.
 pub(crate) fn embed_native_fragment(
     document: &Document,
     source: &str,

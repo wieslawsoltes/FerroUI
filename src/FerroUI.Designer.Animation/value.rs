@@ -6,8 +6,20 @@ pub enum ValueKind {
     Number,
     Color,
     Point,
+    Vector,
+    Size,
+    Rect,
+    CornerRadius,
+    RelativePoint,
+    RelativeScalar,
     Thickness,
     Discrete,
+}
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize)]
+pub enum RelativeUnit {
+    Absolute,
+    Relative,
 }
 
 /// Typed values preserve the difference between a point and a two-component thickness. Colors
@@ -27,6 +39,35 @@ pub enum AnimationValue {
         x: f64,
         y: f64,
     },
+    Vector {
+        x: f64,
+        y: f64,
+    },
+    Size {
+        width: f64,
+        height: f64,
+    },
+    Rect {
+        x: f64,
+        y: f64,
+        width: f64,
+        height: f64,
+    },
+    CornerRadius {
+        top_left: f64,
+        top_right: f64,
+        bottom_right: f64,
+        bottom_left: f64,
+    },
+    RelativePoint {
+        x: f64,
+        y: f64,
+        unit: RelativeUnit,
+    },
+    RelativeScalar {
+        scalar: f64,
+        unit: RelativeUnit,
+    },
     Thickness {
         left: f64,
         top: f64,
@@ -41,11 +82,38 @@ impl AnimationValue {
             Self::Number(_) => ValueKind::Number,
             Self::Color { .. } => ValueKind::Color,
             Self::Point { .. } => ValueKind::Point,
+            Self::Vector { .. } => ValueKind::Vector,
+            Self::Size { .. } => ValueKind::Size,
+            Self::Rect { .. } => ValueKind::Rect,
+            Self::CornerRadius { .. } => ValueKind::CornerRadius,
+            Self::RelativePoint { .. } => ValueKind::RelativePoint,
+            Self::RelativeScalar { .. } => ValueKind::RelativeScalar,
             Self::Thickness { .. } => ValueKind::Thickness,
             Self::Discrete(_) => ValueKind::Discrete,
         }
     }
     pub fn validate(&self) -> Result<()> {
+        if let Self::RelativePoint {
+            x,
+            y,
+            unit: RelativeUnit::Relative,
+        } = self
+        {
+            require(
+                (x * 100.0).is_finite() && (y * 100.0).is_finite(),
+                "Relative coordinates exceed finite percentage range",
+            )?;
+        }
+        if let Self::RelativeScalar {
+            scalar,
+            unit: RelativeUnit::Relative,
+        } = self
+        {
+            require(
+                (scalar * 100.0).is_finite(),
+                "Relative scalar exceeds finite percentage range",
+            )?;
+        }
         match self {
             Self::Number(value) => require(value.is_finite(), "Animation value must be finite"),
             Self::Color { a, r, g, b } => require(
@@ -54,7 +122,38 @@ impl AnimationValue {
                     .all(|n| n.is_finite() && (0.0..=1.0).contains(n)),
                 "Color channels must be finite and in [0,1]",
             ),
-            Self::Point { x, y } => require(x.is_finite() && y.is_finite(), "Point must be finite"),
+            Self::Point { x, y } | Self::Vector { x, y } | Self::RelativePoint { x, y, .. } => {
+                require(x.is_finite() && y.is_finite(), "Coordinates must be finite")
+            }
+            Self::Size { width, height } => require(
+                width.is_finite() && height.is_finite(),
+                "Size must be finite",
+            ),
+            Self::Rect {
+                x,
+                y,
+                width,
+                height,
+            } => require(
+                [*x, *y, *width, *height]
+                    .iter()
+                    .all(|value| value.is_finite()),
+                "Rectangle must be finite",
+            ),
+            Self::CornerRadius {
+                top_left,
+                top_right,
+                bottom_right,
+                bottom_left,
+            } => require(
+                [*top_left, *top_right, *bottom_right, *bottom_left]
+                    .iter()
+                    .all(|value| value.is_finite()),
+                "Corner radius must be finite",
+            ),
+            Self::RelativeScalar { scalar, .. } => {
+                require(scalar.is_finite(), "Scalar must be finite")
+            }
             Self::Thickness {
                 left,
                 top,
@@ -111,6 +210,100 @@ impl AnimationValue {
                 x: mix(*x, *x1),
                 y: mix(*y, *y1),
             },
+            (Self::Vector { x, y }, Self::Vector { x: x1, y: y1 }) => Self::Vector {
+                x: mix(*x, *x1),
+                y: mix(*y, *y1),
+            },
+            (
+                Self::Size { width, height },
+                Self::Size {
+                    width: w,
+                    height: h,
+                },
+            ) => Self::Size {
+                width: mix(*width, *w),
+                height: mix(*height, *h),
+            },
+            (
+                Self::Rect {
+                    x,
+                    y,
+                    width,
+                    height,
+                },
+                Self::Rect {
+                    x: x1,
+                    y: y1,
+                    width: w,
+                    height: h,
+                },
+            ) => Self::Rect {
+                x: mix(*x, *x1),
+                y: mix(*y, *y1),
+                width: mix(*width, *w),
+                height: mix(*height, *h),
+            },
+            (
+                Self::CornerRadius {
+                    top_left,
+                    top_right,
+                    bottom_right,
+                    bottom_left,
+                },
+                Self::CornerRadius {
+                    top_left: tl,
+                    top_right: tr,
+                    bottom_right: br,
+                    bottom_left: bl,
+                },
+            ) => Self::CornerRadius {
+                top_left: mix(*top_left, *tl),
+                top_right: mix(*top_right, *tr),
+                bottom_right: mix(*bottom_right, *br),
+                bottom_left: mix(*bottom_left, *bl),
+            },
+            (
+                Self::RelativePoint { x, y, unit },
+                Self::RelativePoint {
+                    x: x1,
+                    y: y1,
+                    unit: other,
+                },
+            ) => {
+                if unit != other {
+                    if progress >= 0.5 {
+                        to.clone()
+                    } else {
+                        self.clone()
+                    }
+                } else {
+                    Self::RelativePoint {
+                        x: mix(*x, *x1),
+                        y: mix(*y, *y1),
+                        unit: *unit,
+                    }
+                }
+            }
+            (
+                Self::RelativeScalar { scalar, unit },
+                Self::RelativeScalar {
+                    scalar: value,
+                    unit: other,
+                },
+            ) => {
+                if unit != other {
+                    if progress >= 0.5 {
+                        to.clone()
+                    } else {
+                        self.clone()
+                    }
+                } else {
+                    Self::RelativeScalar {
+                        scalar: mix(*scalar, *value),
+                        unit: *unit,
+                    }
+                }
+            }
             (
                 Self::Thickness {
                     left,
@@ -156,7 +349,28 @@ impl AnimationValue {
                 channel(*g),
                 channel(*b)
             ),
-            Self::Point { x, y } => format!("{x},{y}"),
+            Self::Point { x, y } | Self::Vector { x, y } => format!("{x},{y}"),
+            Self::Size { width, height } => format!("{width},{height}"),
+            Self::Rect {
+                x,
+                y,
+                width,
+                height,
+            } => format!("{x},{y},{width},{height}"),
+            Self::CornerRadius {
+                top_left,
+                top_right,
+                bottom_right,
+                bottom_left,
+            } => format!("{top_left},{top_right},{bottom_right},{bottom_left}"),
+            Self::RelativePoint { x, y, unit } => match unit {
+                RelativeUnit::Absolute => format!("{x},{y}"),
+                RelativeUnit::Relative => format!("{}%,{}%", x * 100.0, y * 100.0),
+            },
+            Self::RelativeScalar { scalar, unit } => match unit {
+                RelativeUnit::Absolute => scalar.to_string(),
+                RelativeUnit::Relative => format!("{}%", scalar * 100.0),
+            },
             Self::Thickness {
                 left,
                 top,
@@ -202,6 +416,86 @@ impl AnimationValue {
                 let v = values()?;
                 require(v.len() == 2, "Point requires exactly two components")?;
                 Self::Point { x: v[0], y: v[1] }
+            }
+            ValueKind::Vector => {
+                let v = values()?;
+                require(v.len() == 2, "Vector requires exactly two components")?;
+                Self::Vector { x: v[0], y: v[1] }
+            }
+            ValueKind::Size => {
+                let v = values()?;
+                require(v.len() == 2, "Size requires exactly two components")?;
+                Self::Size {
+                    width: v[0],
+                    height: v[1],
+                }
+            }
+            ValueKind::Rect => {
+                let v = values()?;
+                require(v.len() == 4, "Rectangle requires exactly four components")?;
+                Self::Rect {
+                    x: v[0],
+                    y: v[1],
+                    width: v[2],
+                    height: v[3],
+                }
+            }
+            ValueKind::CornerRadius => {
+                let v = values()?;
+                let (top_left, top_right, bottom_right, bottom_left) = match v.as_slice() {
+                    [all] => (*all, *all, *all, *all),
+                    [top, bottom] => (*top, *top, *bottom, *bottom),
+                    [tl, tr, br, bl] => (*tl, *tr, *br, *bl),
+                    _ => {
+                        return Err(AnimationError(
+                            "Corner radius requires one, two or four components".into(),
+                        ))
+                    }
+                };
+                Self::CornerRadius {
+                    top_left,
+                    top_right,
+                    bottom_right,
+                    bottom_left,
+                }
+            }
+            ValueKind::RelativePoint => {
+                let parts = source
+                    .split(|c: char| c == ',' || c.is_ascii_whitespace())
+                    .filter(|part| !part.is_empty())
+                    .collect::<Vec<_>>();
+                require(
+                    parts.len() == 2,
+                    "Relative point requires exactly two components",
+                )?;
+                let relative = parts[0].ends_with('%');
+                require(
+                    relative == parts[1].ends_with('%'),
+                    "Relative point coordinates must use the same unit",
+                )?;
+                let scale = if relative { 0.01 } else { 1.0 };
+                Self::RelativePoint {
+                    x: number(parts[0].strip_suffix('%').unwrap_or(parts[0]))? * scale,
+                    y: number(parts[1].strip_suffix('%').unwrap_or(parts[1]))? * scale,
+                    unit: if relative {
+                        RelativeUnit::Relative
+                    } else {
+                        RelativeUnit::Absolute
+                    },
+                }
+            }
+            ValueKind::RelativeScalar => {
+                let source = source.trim();
+                match source.strip_suffix('%') {
+                    Some(value) => Self::RelativeScalar {
+                        scalar: number(value)? * 0.01,
+                        unit: RelativeUnit::Relative,
+                    },
+                    None => Self::RelativeScalar {
+                        scalar: number(source)?,
+                        unit: RelativeUnit::Absolute,
+                    },
+                }
             }
             ValueKind::Thickness => {
                 let v = values()?;

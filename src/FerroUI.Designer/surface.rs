@@ -12,8 +12,8 @@ use ferroui_base::media::{
 };
 use ferroui_base::utilities::CultureInfo;
 use ferroui_base::{
-    ferro_class, ferro_class_info, ferro_impl_classes, instantiate, FerroObjectImpl, Point, Rect,
-    Ref, StyledElementImpl, Visual, VisualImpl,
+    FerroObjectImpl, Point, Rect, Ref, StyledElementImpl, Visual, VisualImpl, ferro_class,
+    ferro_class_info, ferro_impl_classes, instantiate,
 };
 use ferroui_controls::{Control, ControlImpl};
 use ferroui_designer_core::NodeId;
@@ -30,6 +30,11 @@ pub enum DesignGesture {
     Resize {
         node: NodeId,
         before: Rect,
+        after: Rect,
+    },
+    /// A rectangle in the target's original local coordinate space, used by oriented handles.
+    ResizeLocal {
+        node: NodeId,
         after: Rect,
     },
     Rotate {
@@ -55,6 +60,7 @@ struct Gesture {
     handle: Handle,
     rectangles: Vec<(NodeId, Rect)>,
     snap_bounds: Vec<ferroui_designer_tools::Rect>,
+    geometry: Option<crate::affine_manipulation::Geometry>,
 }
 
 /// Transparent native adorner for selecting, moving, resizing and rotating live controls.
@@ -74,6 +80,8 @@ pub struct DesignSurface {
     releasing_capture: Cell<bool>,
     zoom: Cell<f64>,
     snap_guides: RefCell<Vec<ferroui_designer_tools::SnapGuide>>,
+    cursor_position: Cell<Option<Point>>,
+    pointer_inside: Cell<bool>,
 }
 ferro_class!(DesignSurface: Control);
 ferro_class_info!(DesignSurface {
@@ -96,6 +104,8 @@ impl DesignSurface {
             releasing_capture: Cell::new(false),
             zoom: Cell::new(1.0),
             snap_guides: RefCell::new(Vec::new()),
+            cursor_position: Cell::new(None),
+            pointer_inside: Cell::new(false),
         });
         result.set_focusable(true);
         result
@@ -122,8 +132,30 @@ impl DesignSurface {
             session.borrow_mut().set_interactive(value);
         }
         self.interactive.set(value);
+        if value {
+            self.cursor_position.set(None);
+            self.pointer_inside.set(false);
+            self.gesture.borrow_mut().take();
+            self.insert.borrow_mut().take();
+            self.snap_guides.borrow_mut().clear();
+        }
         self.set_is_hit_test_visible(!value);
         self.invalidate_visual();
+    }
+    /// The local pointer in unsnapped artboard coordinates for collaboration presence.
+    pub fn cursor_position(&self) -> Option<Point> {
+        self.cursor_position.get()
+    }
+    fn track_cursor(&self, position: Point) {
+        let inside = Rect::from_size(self.bounds().size()).contains(position);
+        self.pointer_inside.set(inside);
+        self.cursor_position.set(
+            (!self.interactive.get()
+                && position.x.is_finite()
+                && position.y.is_finite()
+                && (inside || self.gesture.borrow().is_some() || self.insert.borrow().is_some()))
+            .then_some(position),
+        );
     }
     pub fn arm_insert(&self, source: String) {
         if let Some(session) = self.session() {
@@ -260,28 +292,24 @@ impl DesignSurface {
                     delta: Point::new(delta.x, delta.y),
                 })
             }
-            Handle::Resize(handle) if moved => {
-                gesture
-                    .rectangles
-                    .first()
-                    .map(|(node, before)| DesignGesture::Resize {
-                        node: *node,
-                        before: *before,
-                        after: resize(*before, delta.x, delta.y, handle),
-                    })
-            }
-            Handle::Rotate if moved => gesture.rectangles.first().map(|(node, rect)| {
-                let center = Point::new(rect.x + rect.width / 2.0, rect.y + rect.height / 2.0);
-                let from = (gesture.start.y - center.y).atan2(gesture.start.x - center.x);
-                let to = (gesture.current.y - center.y).atan2(gesture.current.x - center.x);
-                DesignGesture::Rotate {
+            Handle::Resize(handle) if moved => gesture.rectangles.first().and_then(|(node, _)| {
+                gesture.geometry.map(|geometry| DesignGesture::ResizeLocal {
                     node: *node,
-                    degrees: if modifiers.contains(KeyModifiers::SHIFT) {
-                        ((to - from).to_degrees() / 15.0).round() * 15.0
-                    } else {
-                        (to - from).to_degrees()
-                    },
-                }
+                    after: geometry.resize(gesture.start, gesture.current, handle),
+                })
+            }),
+            Handle::Rotate if moved => gesture.rectangles.first().and_then(|(node, _)| {
+                gesture.geometry.map(|geometry| {
+                    let degrees = geometry.rotation(gesture.start, gesture.current);
+                    DesignGesture::Rotate {
+                        node: *node,
+                        degrees: if modifiers.contains(KeyModifiers::SHIFT) {
+                            (degrees / 15.0).round() * 15.0
+                        } else {
+                            degrees
+                        },
+                    }
+                })
             }),
             Handle::Marquee => {
                 if let Some(session) = self.session() {
@@ -333,6 +361,7 @@ impl Default for DesignSurface {
 
 impl InputElementImpl for DesignSurface {
     fn on_pointer_pressed(this: &Self, event: &PointerPressedEventArgs) {
+        this.track_cursor(event.get_position(Some(this)));
         if !event.properties().is_left_button_pressed {
             return;
         }
@@ -348,17 +377,28 @@ impl InputElementImpl for DesignSurface {
         session.borrow_mut().refresh_runtime_mapping();
         let rectangles = this.rectangles();
         let mut handle = None;
+        let geometry = rectangles.first().and_then(|(node, _)| {
+            let session = session.borrow();
+            session.preview.visual(*node).and_then(|visual| {
+                crate::affine_manipulation::Geometry::capture(&visual, &this.to_ref().upcast())
+            })
+        });
         if rectangles.len() == 1 {
-            let rect = rectangles[0].1;
-            for (index, point) in handles(rect).iter().enumerate() {
-                if (point.x - position.x).abs() <= 7.0 && (point.y - position.y).abs() <= 7.0 {
-                    handle = Some(Handle::Resize(index as u8));
-                    break;
+            if let Some(geometry) = geometry {
+                for (index, point) in geometry.handles().iter().enumerate() {
+                    if (point.x - position.x).abs() <= 7.0 / this.zoom.get()
+                        && (point.y - position.y).abs() <= 7.0 / this.zoom.get()
+                    {
+                        handle = Some(Handle::Resize(index as u8));
+                        break;
+                    }
                 }
-            }
-            let rotate = Point::new(rect.x + rect.width / 2.0, rect.y - 24.0);
-            if (rotate.x - position.x).abs() <= 7.0 && (rotate.y - position.y).abs() <= 7.0 {
-                handle = Some(Handle::Rotate);
+                let rotate = geometry.rotation_handle(this.zoom.get());
+                if (rotate.x - position.x).abs() <= 7.0 / this.zoom.get()
+                    && (rotate.y - position.y).abs() <= 7.0 / this.zoom.get()
+                {
+                    handle = Some(Handle::Rotate);
+                }
             }
         }
         if handle.is_none() {
@@ -416,6 +456,13 @@ impl InputElementImpl for DesignSurface {
             handle: handle.unwrap_or(Handle::Move),
             rectangles: this.rectangles(),
             snap_bounds,
+            geometry: this
+                .rectangles()
+                .first()
+                .and_then(|(node, _)| session.borrow().preview.visual(*node))
+                .and_then(|visual| {
+                    crate::affine_manipulation::Geometry::capture(&visual, &this.to_ref().upcast())
+                }),
         });
         event
             .pointer()
@@ -425,6 +472,7 @@ impl InputElementImpl for DesignSurface {
         Self::parent_on_pointer_pressed(this, event);
     }
     fn on_pointer_moved(this: &Self, event: &PointerEventArgs) {
+        this.track_cursor(event.get_position(Some(this)));
         if let Some(gesture) = this.gesture.borrow_mut().as_mut() {
             gesture.current = this.snap_gesture(
                 gesture,
@@ -436,10 +484,12 @@ impl InputElementImpl for DesignSurface {
         Self::parent_on_pointer_moved(this, event);
     }
     fn on_pointer_released(this: &Self, event: &PointerReleasedEventArgs) {
-        this.finish(event.get_position(Some(this)), event.key_modifiers());
+        let position = event.get_position(Some(this));
+        this.finish(position, event.key_modifiers());
         this.releasing_capture.set(true);
         event.pointer().capture(None);
         this.releasing_capture.set(false);
+        this.track_cursor(position);
         event.set_handled(true);
         Self::parent_on_pointer_released(this, event);
     }
@@ -449,14 +499,31 @@ impl InputElementImpl for DesignSurface {
             this.insert.borrow_mut().take();
         }
         this.snap_guides.borrow_mut().clear();
+        if !this.pointer_inside.get() {
+            this.cursor_position.set(None);
+        }
         this.invalidate_visual();
         Self::parent_on_pointer_capture_lost(this, event);
+    }
+    fn on_pointer_entered(this: &Self, event: &PointerEventArgs) {
+        this.track_cursor(event.get_position(Some(this)));
+        Self::parent_on_pointer_entered(this, event);
+    }
+    fn on_pointer_exited(this: &Self, event: &PointerEventArgs) {
+        this.pointer_inside.set(false);
+        if this.gesture.borrow().is_none() && this.insert.borrow().is_none() {
+            this.cursor_position.set(None);
+        }
+        Self::parent_on_pointer_exited(this, event);
     }
     fn on_key_down(this: &Self, event: &KeyEventArgs) {
         if event.key == Key::Escape {
             this.gesture.borrow_mut().take();
             this.insert.borrow_mut().take();
             this.snap_guides.borrow_mut().clear();
+            if !this.pointer_inside.get() {
+                this.cursor_position.set(None);
+            }
             this.invalidate_visual();
             event.set_handled(true);
         }
@@ -580,38 +647,95 @@ impl VisualImpl for DesignSurface {
                 ),
             }
         }
-        for (_, rect) in &rectangles {
-            context.draw_rectangle(None, Some(&accent), *rect, 0.0, 0.0, &BoxShadows::default());
-            if rectangles.len() == 1 {
-                for point in handles(*rect) {
+        if rectangles.len() == 1 {
+            let geometry = gesture
+                .as_ref()
+                .and_then(|gesture| gesture.geometry)
+                .or_else(|| {
+                    this.session().and_then(|session| {
+                        let session = session.borrow();
+                        session.preview.visual(rectangles[0].0).and_then(|visual| {
+                            crate::affine_manipulation::Geometry::capture(
+                                &visual,
+                                &this.to_ref().upcast(),
+                            )
+                        })
+                    })
+                });
+            if let Some(geometry) = geometry {
+                let mut local = Rect::from_size(geometry.size);
+                let mut transform = geometry.to_surface;
+                if let Some(gesture) = gesture.as_ref() {
+                    match gesture.handle {
+                        Handle::Resize(handle) => {
+                            local = geometry.resize(gesture.start, gesture.current, handle)
+                        }
+                        Handle::Move => {
+                            let d = gesture.current - gesture.start;
+                            transform *= ferroui_base::Matrix::create_translation(d.x, d.y);
+                        }
+                        Handle::Rotate => {
+                            transform *= ferroui_base::Matrix::create_rotation_at(
+                                geometry
+                                    .rotation(gesture.start, gesture.current)
+                                    .to_radians(),
+                                geometry.pivot,
+                            )
+                        }
+                        _ => {}
+                    }
+                }
+                let points = crate::affine_manipulation::local_handles(local)
+                    .map(|point| point.transform(transform));
+                for (a, b) in [(0, 2), (2, 4), (4, 6), (6, 0)] {
+                    context.draw_line(&accent, points[a], points[b]);
+                }
+                for point in points {
+                    let radius = 3.5 / this.zoom.get();
                     context.draw_rectangle(
                         Some(&fill),
                         Some(&accent),
-                        Rect::new(point.x - 3.5, point.y - 3.5, 7.0, 7.0),
+                        Rect::new(
+                            point.x - radius,
+                            point.y - radius,
+                            radius * 2.0,
+                            radius * 2.0,
+                        ),
                         0.0,
                         0.0,
                         &BoxShadows::default(),
                     );
                 }
-                let top = Point::new(rect.x + rect.width / 2.0, rect.y);
-                let rotate = Point::new(top.x, top.y - 24.0);
-                context.draw_line(&accent, top, rotate);
-                context.draw_ellipse_at(Some(&fill), Some(&accent), rotate, 4.5, 4.5);
+                let rotate = geometry.rotation_handle(this.zoom.get());
+                context.draw_line(&accent, points[1], rotate);
+                context.draw_ellipse_at(
+                    Some(&fill),
+                    Some(&accent),
+                    rotate,
+                    4.5 / this.zoom.get(),
+                    4.5 / this.zoom.get(),
+                );
+                context.draw_ellipse_at(
+                    None,
+                    Some(&accent),
+                    geometry.pivot,
+                    3.0 / this.zoom.get(),
+                    3.0 / this.zoom.get(),
+                );
+            }
+        } else {
+            for (_, rect) in &rectangles {
+                context.draw_rectangle(
+                    None,
+                    Some(&accent),
+                    *rect,
+                    0.0,
+                    0.0,
+                    &BoxShadows::default(),
+                );
             }
         }
     }
-}
-fn handles(r: Rect) -> [Point; 8] {
-    [
-        Point::new(r.x, r.y),
-        Point::new(r.x + r.width / 2.0, r.y),
-        Point::new(r.x + r.width, r.y),
-        Point::new(r.x + r.width, r.y + r.height / 2.0),
-        Point::new(r.x + r.width, r.y + r.height),
-        Point::new(r.x + r.width / 2.0, r.y + r.height),
-        Point::new(r.x, r.y + r.height),
-        Point::new(r.x, r.y + r.height / 2.0),
-    ]
 }
 fn resize(before: Rect, dx: f64, dy: f64, handle: u8) -> Rect {
     let mut x = before.x;

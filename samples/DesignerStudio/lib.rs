@@ -1,6 +1,6 @@
 //! The sample host of the reusable native designer. UI, session, AST and tooling live in crates.
 use ferroui_base::{
-    ferro_class, ferro_class_info, ferro_impl_classes, instantiate, FerroObjectImpl, Ref,
+    FerroObjectImpl, Ref, ferro_class, ferro_class_info, ferro_impl_classes, instantiate,
 };
 use ferroui_controls::{Application, ApplicationImpl, ApplicationImplExt, NewApplication, Window};
 use ferroui_designer::DesignerWorkspace;
@@ -9,6 +9,15 @@ use std::rc::Rc;
 
 ferroui_base::ferro_thread_local! {
     static START_SOURCE:RefCell<Option<(String,Option<String>)>>=const{RefCell::new(None)};
+    static START_PROJECT:RefCell<Option<std::path::PathBuf>>=const{RefCell::new(None)};
+    static PREVIEW_OPTIONS:RefCell<Option<ferroui_designer::PreviewHostOptions>>=const{RefCell::new(None)};
+}
+pub fn set_initial_project(path: std::path::PathBuf) {
+    START_PROJECT.with(|value| *value.borrow_mut() = Some(path));
+}
+/// Register application metadata and real code-behind factories before starting the host.
+pub fn set_preview_options(options: ferroui_designer::PreviewHostOptions) {
+    PREVIEW_OPTIONS.with(|value| *value.borrow_mut() = Some(options));
 }
 #[cfg(feature = "mcp")]
 ferroui_base::ferro_thread_local! {
@@ -73,6 +82,16 @@ impl ApplicationImpl for App {
             None => DesignerWorkspace::new(source),
         }
         .unwrap_or_else(|error| panic!("Designer initialization: {error}"));
+        if let Some(options) = PREVIEW_OPTIONS.with(|value| value.borrow_mut().take()) {
+            if let Err(error) = workspace.session().borrow_mut().configure_preview(options) {
+                eprintln!("Designer preview: {error}");
+            }
+        }
+        if let Some(path) = START_PROJECT.with(|value| value.borrow_mut().take()) {
+            if let Err(error) = workspace.open_solution(path) {
+                eprintln!("Designer solution: {error}");
+            }
+        }
         if let Some(lifetime) = this.application_lifetime() {
             if let Some(desktop) = lifetime.as_classic_desktop_style_application_lifetime() {
                 let window = Window::new();
@@ -112,7 +131,7 @@ impl ApplicationImpl for App {
         }
         #[cfg(feature = "mcp")]
         if let Some(options) = MCP_OPTIONS.with(|value| value.borrow_mut().take()) {
-            match workspace.serve_mcp(options) {
+            match workspace.serve_workspace_mcp(options) {
                 Ok(server) => *this.mcp.borrow_mut() = Some(server),
                 Err(error) => eprintln!("Designer MCP: {error}"),
             }
