@@ -395,6 +395,7 @@ impl TranslationService {
     }
 }
 struct ObservableInner {
+    generation: Cell<u64>,
     service: TranslationService,
     key: String,
     arguments: RefCell<Vec<FormatArgument>>,
@@ -406,8 +407,8 @@ struct ObservableInner {
 pub struct ObservableLocalizedString(Rc<ObservableInner>);
 impl ObservableLocalizedString {
     fn new(service: TranslationService, key: String, arguments: Vec<FormatArgument>) -> Self {
-        let value = service.format(&key, &arguments);
-        Self(Rc::new_cyclic(|weak: &std::rc::Weak<ObservableInner>| {
+        let value = Err(TranslationError::InvalidKey);
+        let observable = Self(Rc::new_cyclic(|weak: &std::rc::Weak<ObservableInner>| {
             let weak = weak.clone();
             let subscription = service.subscribe(move |_| {
                 if let Some(inner) = weak.upgrade() {
@@ -415,6 +416,7 @@ impl ObservableLocalizedString {
                 }
             });
             ObservableInner {
+                generation: Cell::new(0),
                 service,
                 key,
                 arguments: RefCell::new(arguments),
@@ -422,7 +424,9 @@ impl ObservableLocalizedString {
                 changed: Event::default(),
                 _subscription: subscription,
             }
-        }))
+        }));
+        observable.refresh();
+        observable
     }
     pub fn key(&self) -> &str {
         &self.0.key
@@ -435,12 +439,16 @@ impl ObservableLocalizedString {
         self.refresh();
     }
     pub fn refresh(&self) {
+        let observation_generation = self.0.generation.get().wrapping_add(1);
+        self.0.generation.set(observation_generation);
         let arguments = self.0.arguments.borrow().clone();
         let generation = self.0.service.0.generation.get();
         let value = self.0.service.format(&self.0.key, &arguments);
         // Reentrant diagnostics may have requested a refresh or changed culture.
         // That event is already queued; it will compute the newest value.
-        if self.0.service.0.generation.get() != generation {
+        if self.0.service.0.generation.get() != generation
+            || self.0.generation.get() != observation_generation
+        {
             return;
         }
         let changed = {

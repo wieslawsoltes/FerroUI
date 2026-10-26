@@ -25,8 +25,12 @@ pub(crate) struct DateData {
     pub am: &'static str,
     pub pm: &'static str,
     pub eras: [&'static str; 2],
+    pub flexible_periods: &'static [(u16, u16, bool, &'static str)],
 }
 fn metadata(culture: &Culture) -> &'static DateData {
+    if culture.is_invariant() {
+        return &date_data::INVARIANT;
+    }
     let mut current = Some(culture.clone());
     while let Some(culture) = current {
         if let Ok(index) =
@@ -145,7 +149,11 @@ impl LocalizedDateTime {
             match token {
                 Token::Literal(value) => output.push_str(&value),
                 Token::Field(field, count) => {
-                    output.push_str(&self.field(field, count, culture, data, cldr, has_day)?)
+                    let formatted = self.field(field, count, culture, data, cldr, has_day)?;
+                    if !cldr && field == 'F' && formatted.is_empty() && output.ends_with('.') {
+                        output.pop();
+                    }
+                    output.push_str(&formatted);
                 }
             }
         }
@@ -231,7 +239,27 @@ impl LocalizedDateTime {
             ),
             'm' => number(date.minute() as i64, count),
             's' => number(date.second() as i64, count),
-            'a' | 'b' | 'B' if cldr => Ok(if date.hour() < 12 { data.am } else { data.pm }.into()),
+            'a' if cldr => Ok(if date.hour() < 12 { data.am } else { data.pm }.into()),
+            'b' | 'B' if cldr => {
+                let minute = u16::from(date.hour()) * 60 + u16::from(date.minute());
+                let period = data
+                    .flexible_periods
+                    .iter()
+                    .find(|(start, end, exact, _)| {
+                        if *exact {
+                            minute == *start && date.second() == 0 && date.nanosecond() == 0
+                        } else if field == 'b' {
+                            false
+                        } else if start < end {
+                            minute >= *start && minute < *end
+                        } else {
+                            minute >= *start || minute < *end
+                        }
+                    })
+                    .map(|(_, _, _, name)| *name)
+                    .unwrap_or(if date.hour() < 12 { data.am } else { data.pm });
+                Ok(period.into())
+            }
             't' if !cldr => {
                 let period = if date.hour() < 12 { data.am } else { data.pm };
                 Ok(if count == 1 {
@@ -281,6 +309,7 @@ impl LocalizedDateTime {
             'g' if !cldr => Ok(data.eras[usize::from(date.year() > 0)].into()),
             '/' if !cldr => Ok(separator(data.short_date, '/')),
             ':' if !cldr => Ok(separator(data.short_time, ':')),
+            _ if !cldr => Ok(std::iter::repeat_n(field, count).collect()),
             _ => Err(TranslationError::Format(format!(
                 "Unsupported date token '{field}'"
             ))),

@@ -371,7 +371,7 @@ fn currency_percent_and_custom_fixed_patterns_use_cldr_affixes() {
 }
 #[test]
 fn unsupported_numeric_patterns_return_errors() {
-    for invalid in ["Q2", "Nbad", "N999999999", "F1025", "0.0.0", "#E0"] {
+    for invalid in ["Q2", "N999999999", "F1025", "0.0.0", "#E0"] {
         assert!(
             FormatArgument::from(1.0f64)
                 .format(invalid, &culture("en"))
@@ -625,4 +625,135 @@ fn invalid_date_formats_and_timestamps_are_recoverable_errors() {
     }
     assert!(LocalizedDateTime::from_unix_timestamp(i64::MAX, 0).is_err());
     assert!(LocalizedDateTime::from_unix_timestamp(0, i32::MAX).is_err());
+}
+
+#[test]
+fn invariant_formats_are_deterministic_and_preserve_invariant_symbols() {
+    let invariant = Culture::invariant();
+    assert_eq!(12.5f64.into_format("C2", &invariant), "¤12.50");
+    assert_eq!((-12.5f64).into_format("C2", &invariant), "(¤12.50)");
+    assert_eq!(0.125f64.into_format("P2", &invariant), "12.50 %");
+    assert_eq!(date_value().format("d", &invariant).unwrap(), "10/26/2026");
+    assert_eq!(
+        date_value().format("G", &invariant).unwrap(),
+        "10/26/2026 15:30:45"
+    );
+}
+#[test]
+fn general_scientific_formats_trim_optional_zeros() {
+    let culture = culture("en");
+    assert_eq!(100000.0f64.into_format("G3", &culture), "1E+05");
+    assert_eq!(0.000000123f64.into_format("G3", &culture), "1.23E-07");
+    assert_eq!(1e100f64.into_format("G", &culture), "1E+100");
+    assert_eq!(1e-100f64.into_format("G", &culture), "1E-100");
+    assert_eq!(123.4f64.into_format("E3", &culture), "1.234E+002");
+}
+#[test]
+fn optional_date_fraction_removes_the_decimal_separator() {
+    let value = LocalizedDateTime::new(date_value().0.replace_nanosecond(0).unwrap());
+    assert_eq!(
+        value.format("HH:mm:ss.FFF", &culture("en")).unwrap(),
+        "15:30:45"
+    );
+    assert_eq!(
+        value.format("yyyy-MM-ddTHH:mm:ss", &culture("en")).unwrap(),
+        "2026-10-26T15:30:45"
+    );
+}
+
+#[test]
+fn custom_numeric_quotes_escapes_percent_and_scaling_are_semantic() {
+    let culture = culture("en");
+    assert_eq!(12.5f64.into_format("0.0'%'", &culture), "12.5%");
+    assert_eq!(12.5f64.into_format("0.0\\%", &culture), "12.5%");
+    assert_eq!(0.125f64.into_format("0.0%", &culture), "12.5%");
+    assert_eq!(0.125f64.into_format("0.0%%", &culture), "1250.0%%");
+    assert_eq!(0.125f64.into_format("0.0‰", &culture), "125.0‰");
+    assert_eq!(123456789.0f64.into_format("#,##0,,", &culture), "123");
+    assert_eq!(123456789.0f64.into_format("#,##0,,.00", &culture), "123.46");
+    assert_eq!(0.0f64.into_format("#;(#);zero", &culture), "zero");
+    assert_eq!(
+        (-0.0001f64).into_format("0.00;(0.00);zero", &culture),
+        "zero"
+    );
+    assert_eq!(12.5f64.into_format("'USD;'0.0", &culture), "USD;12.5");
+    assert_eq!(0.0f64.into_format("#.##", &culture), "");
+    assert_eq!(0.125f64.into_format("#.##", &culture), ".12");
+    for pattern in ["0'", "0\\", "00-00", "0.0,0", "0E+00"] {
+        assert!(
+            FormatArgument::Number(12.5)
+                .format(pattern, &culture)
+                .is_err(),
+            "{pattern}"
+        );
+    }
+}
+#[test]
+fn initial_observer_does_not_miss_reentrant_catalog_or_culture_refresh() {
+    let (provider, cultures, service) = setup();
+    let catalog = provider.clone();
+    let state = cultures.clone();
+    let once = Rc::new(Cell::new(false));
+    let changed = once.clone();
+    let _sub = service.subscribe_diagnostics(move |_| {
+        if !changed.replace(true) {
+            catalog.insert(culture("pl"), "Title", "Wczytano");
+            state.set_culture(culture("pl"));
+        }
+    });
+    let observer = service.observe("Title", vec![]);
+    assert_eq!(observer.value().unwrap(), "Wczytano");
+}
+
+#[test]
+fn cldr_flexible_day_periods_follow_locale_time_boundaries() {
+    let evening = LocalizedDateTime::new(date_value().0.replace_hour(21).unwrap());
+    let morning = LocalizedDateTime::new(date_value().0.replace_hour(6).unwrap());
+    assert_eq!(
+        evening.format("t", &culture("zh-Hant")).unwrap(),
+        "晚上9:30"
+    );
+    assert_eq!(
+        morning.format("t", &culture("zh-Hant")).unwrap(),
+        "清晨6:30"
+    );
+}
+#[test]
+fn region_failures_have_structured_diagnostics() {
+    let (_, cultures, translations) = setup();
+    let diagnostics = Rc::new(RefCell::new(Vec::new()));
+    let seen = diagnostics.clone();
+    let _sub = translations
+        .subscribe_diagnostics(move |diagnostic| seen.borrow_mut().push(diagnostic.kind));
+    let globalization = GlobalizationService::new(translations);
+    cultures.set_culture(culture("en-XX"));
+    assert!(globalization.region_profile().is_err());
+    assert_eq!(
+        *diagnostics.borrow(),
+        [ProTranslateDiagnosticKind::RegionProfileFailure]
+    );
+}
+
+#[test]
+fn nested_argument_refresh_cannot_overwrite_a_newer_observed_value() {
+    let (provider, _, service) = setup();
+    provider.insert(culture("en"), "Title", "{0}");
+    let observer = service.observe("Title", vec!["initial".into()]);
+    struct UpdatingFormat {
+        observer: ObservableLocalizedString,
+        once: Cell<bool>,
+    }
+    impl LocalizedFormat for UpdatingFormat {
+        fn format(&self, _: &str, _: &Culture) -> Result<String, TranslationError> {
+            if !self.once.replace(true) {
+                self.observer.set_arguments(vec!["new".into()]);
+            }
+            Ok("stale".into())
+        }
+    }
+    observer.set_arguments(vec![FormatArgument::Custom(Rc::new(UpdatingFormat {
+        observer: observer.clone(),
+        once: Cell::new(false),
+    }))]);
+    assert_eq!(observer.value().unwrap(), "new");
 }

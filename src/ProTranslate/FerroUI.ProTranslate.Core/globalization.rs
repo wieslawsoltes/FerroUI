@@ -77,16 +77,29 @@ impl GlobalizationService {
         self.0.translations.get_string(key)
     }
     pub fn region_profile(&self) -> Result<RegionProfile, TranslationError> {
-        self.0.region_provider.get_profile(
-            &self.current_culture(),
-            self.0.region_override.borrow().as_ref(),
-        )
+        let culture = self.current_culture();
+        let region_override = self.0.region_override.borrow().clone();
+        let result = self
+            .0
+            .region_provider
+            .get_profile(&culture, region_override.as_ref());
+        if let Err(error) = &result {
+            self.0.translations.report(ProTranslateDiagnostic {
+                kind: ProTranslateDiagnosticKind::RegionProfileFailure,
+                severity: ProTranslateDiagnosticSeverity::Error,
+                message: error.to_string(),
+                key: None,
+                culture: Some(culture),
+                provider_name: None,
+                error: Some(error.clone()),
+            });
+        }
+        result
     }
     pub fn measurement_system_profile(&self) -> Result<MeasurementSystemProfile, TranslationError> {
-        Ok(self.0.resolver.resolve(
-            &self.region_profile()?,
-            *self.0.measurement_override.borrow(),
-        ))
+        let region = self.region_profile()?;
+        let system = *self.0.measurement_override.borrow();
+        Ok(self.0.resolver.resolve(&region, system))
     }
     pub fn measurement_system(&self) -> Result<MeasurementSystem, TranslationError> {
         Ok(self.measurement_system_profile()?.system)

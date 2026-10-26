@@ -24,7 +24,7 @@ SOFTWARE.
 Unicode CLDR data
 =================
 
-The generated locale_data.rs contains data from Unicode CLDR 48.0.0.
+The generated locale_data.rs and date_data.rs contain data from Unicode CLDR 48.0.0.
 Source: https://github.com/unicode-org/cldr-json/tree/48.0.0
 The source archive hashes are recorded in locale_data.rs.
 
