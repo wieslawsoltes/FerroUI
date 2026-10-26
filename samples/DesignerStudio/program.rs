@@ -23,18 +23,13 @@ fn main() -> std::process::ExitCode {
         };
         match std::fs::read_to_string(path) {
             Ok(source) => match std::fs::canonicalize(path) {
-                Ok(path) => {
-                    let mut path = path.to_string_lossy().replace('\\', "/");
-                    if !path.starts_with('/') {
-                        path.insert(0, '/');
+                Ok(path) => match document_uri(&path) {
+                    Ok(uri) => designer_studio::set_initial_document(source, uri),
+                    Err(error) => {
+                        eprintln!("{}: {error}", path.display());
+                        return std::process::ExitCode::FAILURE;
                     }
-                    let path = path
-                        .replace('%', "%25")
-                        .replace(' ', "%20")
-                        .replace('#', "%23")
-                        .replace('?', "%3F");
-                    designer_studio::set_initial_document(source, format!("file://{path}"));
-                }
+                },
                 Err(error) => {
                     eprintln!("{path}: {error}");
                     return std::process::ExitCode::FAILURE;
@@ -61,6 +56,51 @@ fn main() -> std::process::ExitCode {
         .start_with_classic_desktop_lifetime(&args);
     std::process::ExitCode::from(code as u8)
 }
+
+fn document_uri(path: &std::path::Path) -> Result<String, &'static str> {
+    let path = path
+        .to_str()
+        .ok_or("The XAML path contains unsupported non-Unicode characters")?;
+    file_uri(path, cfg!(windows)).ok_or("The XAML path could not be represented as a file URI")
+}
+
+fn file_uri(path: &str, windows: bool) -> Option<String> {
+    use ferroui_base::platform::storage::file_io::StorageProviderHelpers;
+
+    let normalized_unc;
+    let path = if windows {
+        if let Some(unc) = path.strip_prefix(r"\\?\UNC\") {
+            normalized_unc = format!(r"\\{unc}");
+            &normalized_unc
+        } else {
+            path
+        }
+    } else {
+        path
+    };
+    if !windows && path.contains('\\') {
+        // Backslashes are literal filename characters on Unix. Escape each piece
+        // through the storage helper, which otherwise treats them as separators.
+        let mut pieces = path.split('\\');
+        let mut uri =
+            StorageProviderHelpers::try_get_uri_from_file_path(pieces.next()?, false)?.to_string();
+        for piece in pieces {
+            let encoded =
+                StorageProviderHelpers::try_get_uri_from_file_path(&format!("/{piece}"), false)?;
+            uri.push_str("%5C");
+            uri.push_str(encoded.absolute_path().strip_prefix('/')?);
+        }
+        return Some(uri);
+    }
+    let uri = StorageProviderHelpers::try_get_uri_from_file_path(path, false)?.to_string();
+    if windows && path.starts_with(r"\\") && !path.starts_with(r"\\?\") {
+        // Keep the UNC server in the authority so relative resource resolution
+        // cannot turn the network path into a local path.
+        return Some(format!("file://{}", uri.strip_prefix("file:////")?));
+    }
+    Some(uri)
+}
+
 #[cfg(feature = "desktop")]
 fn platform(builder: AppBuilder) -> AppBuilder {
     use ferroui_desktop::AppBuilderDesktopExtensions;
@@ -106,4 +146,71 @@ fn configure_mcp(args: &[String]) -> Result<(), String> {
     }
     designer_studio::set_mcp_options(options);
     Ok(())
+}
+
+#[cfg(test)]
+mod tests {
+    use super::file_uri;
+    use ferroui_base::utilities::{Uri, UriKind};
+
+    fn resolve_resource(base: &str) -> String {
+        Uri::combine(
+            &Uri::absolute(base).unwrap(),
+            &Uri::new("Assets/icon.png", UriKind::Relative).unwrap(),
+        )
+        .to_string()
+    }
+
+    #[test]
+    fn windows_drive_paths_keep_the_drive_and_resource_directory() {
+        for path in [
+            r"C:\Designer Studio\Main.xaml",
+            r"\\?\C:\Designer Studio\Main.xaml",
+        ] {
+            let uri = file_uri(path, true).unwrap();
+            assert_eq!(uri, "file:///C:/Designer%20Studio/Main.xaml");
+            assert_eq!(
+                resolve_resource(&uri),
+                "file:///C:/Designer%20Studio/Assets/icon.png"
+            );
+        }
+    }
+
+    #[test]
+    fn unc_paths_keep_the_network_authority_for_relative_resources() {
+        for path in [
+            r"\\server\share\Designer Studio\Main.xaml",
+            r"\\?\UNC\server\share\Designer Studio\Main.xaml",
+        ] {
+            let uri = file_uri(path, true).unwrap();
+            assert_eq!(uri, "file://server/share/Designer%20Studio/Main.xaml");
+            assert_eq!(
+                resolve_resource(&uri),
+                "file://server/share/Designer%20Studio/Assets/icon.png"
+            );
+        }
+    }
+
+    #[test]
+    fn file_paths_escape_literal_percent_unicode_and_uri_delimiters() {
+        for (path, windows, prefix) in [
+            (r"C:\Designs\żółć %20 [draft]#?.xaml", true, "file:///C:"),
+            ("/Designs/żółć %20 [draft]#?.xaml", false, "file://"),
+        ] {
+            assert_eq!(
+                file_uri(path, windows).unwrap(),
+                format!(
+                    "{prefix}/Designs/%C5%BC%C3%B3%C5%82%C4%87%20%2520%20%5Bdraft%5D%23%3F.xaml"
+                )
+            );
+        }
+    }
+
+    #[test]
+    fn unix_backslashes_remain_literal_filename_characters() {
+        let path = r"/Designs/part\%5C ż.xaml";
+        let uri = file_uri(path, false).unwrap();
+        assert_eq!(uri, "file:///Designs/part%5C%255C%20%C5%BC.xaml");
+        assert_eq!(Uri::absolute(&uri).unwrap().local_path(), path);
+    }
 }

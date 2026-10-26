@@ -57,8 +57,8 @@ jobs:
         run: cargo test --locked -p ferroui-designer --features mcp,render-smoke --lib -- --test-threads=1
       - name: Existing MCP authentication, cancellation and extension isolation
         run: cargo test --locked -p ferroui-mcp --lib -- --test-threads=1
-      - name: Runnable headless sample host
-        run: cargo check --locked -p designer-studio --no-default-features --features headless,mcp
+      - name: Sample CLI paths and headless host
+        run: cargo test --locked -p designer-studio --no-default-features --features headless,mcp --bin designer-studio
       - name: Headless application startup and clean shutdown
         env:
           FERROUI_SMOKE_EXIT_MS: '1500'
