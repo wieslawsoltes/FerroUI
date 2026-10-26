@@ -105,7 +105,7 @@ impl CollectionNodeBase {
             let token = inpc.property_changed().add(Rc::new(move |property_name: &str| {
                 let Some(node) = weak.upgrade() else { return };
                 let Some(source) = node.state().source() else { return };
-                if node.should_update(&source, property_name) {
+                if property_name.is_empty() || node.should_update(&source, property_name) {
                     Self::update_value_or_set_error(&*node, &source);
                 }
             }));

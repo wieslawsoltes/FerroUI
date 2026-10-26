@@ -775,6 +775,18 @@ fn indexer_errors_are_the_ones_of_the_managed_original() {
     Logger::set_thread_sink(None);
 }
 
+#[test]
+fn metadata_indexer_follows_all_properties_notification() {
+    let vm = MemberVm::new("Ann");
+    let target = target_for(&vm);
+    target.bind_binding(MemberTarget::text_property(), &ReflectionBinding::new("[1]"));
+    assert_eq!(target.text(), "one");
+
+    vm.items.borrow_mut()[1] = "changed".to_string();
+    vm.property_changed.raise("");
+    assert_eq!(target.text(), "changed");
+}
+
 // --- the default value converter: a delegate to a command ---------------------
 
 // The two tests of upstream's `DefaultValueConverterTests` that convert a delegate. Upstream's delegates are
