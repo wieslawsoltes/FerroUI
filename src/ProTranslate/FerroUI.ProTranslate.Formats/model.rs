@@ -38,7 +38,8 @@ impl TranslationFileFormat {
 }
 
 /// A normalized translation. Plurals use `key.category` and retain the category separately.
-#[derive(Clone, Debug, Default, Eq, PartialEq)]
+#[derive(Clone, Debug, Default, Eq, PartialEq, serde::Serialize, serde::Deserialize)]
+#[serde(default, rename_all = "camelCase")]
 pub struct TranslationCatalogEntry {
     pub key: String,
     pub culture: Option<String>,
@@ -75,11 +76,14 @@ impl TranslationCatalogEntry {
 }
 
 /// An ordered collection of normalized translations and its source language.
-#[derive(Clone, Debug, Default, Eq, PartialEq)]
+#[derive(Clone, Debug, Default, Eq, PartialEq, serde::Serialize, serde::Deserialize)]
+#[serde(default, rename_all = "camelCase")]
 pub struct TranslationCatalog {
     pub name: Option<String>,
     pub source_culture: Option<String>,
     pub entries: Vec<TranslationCatalogEntry>,
+    /// Format-specific document metadata, retained independently of its translations.
+    pub metadata: BTreeMap<String, String>,
 }
 
 impl TranslationCatalog {

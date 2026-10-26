@@ -10,11 +10,8 @@ pub(crate) fn import(
     path: Option<&str>,
     result: &mut TranslationFormatResult,
 ) -> Result<(), String> {
-    // Standard Apple DOCTYPE declarations are accepted. Custom entities are never resolved;
-    // roxmltree has no network/file resolver and a bounded node count limits allocation.
-    if content.contains("<!ENTITY") {
-        return Err("XML entity declarations are unsupported; use ordinary escaped text.".into());
-    }
+    // Standard doctypes and bounded internal entities are accepted. roxmltree never
+    // resolves network/file resources and rejects recursive/excessive entity expansion.
     let document = Document::parse_with_options(
         content,
         ParsingOptions {
@@ -75,7 +72,7 @@ fn import_resx(
         if data.attribute("mimetype").is_some()
             || data
                 .attribute("type")
-                .is_some_and(|kind| !kind.starts_with("System.String"))
+                .is_some_and(|kind| kind.split(',').next().unwrap_or("").trim() != "System.String")
         {
             result.diagnostics.push(TranslationFormatDiagnostic { key: Some(key.into()), culture: culture.clone(), ..TranslationFormatDiagnostic::new(Severity::Warning,"PTF131","Ignored non-string RESX resource; binary/file/type conversion resources are not localized strings.") });
             continue;
@@ -91,6 +88,7 @@ fn android_culture(path: Option<&str>) -> Option<String> {
     let path = path?;
     for part in path.split(['/', '\\']) {
         if let Some(locale) = part.strip_prefix("values-b+") {
+            let locale = locale.split('-').next()?;
             return Some(TranslationCatalog::normalize_culture_name(Some(
                 &locale.replace('+', "-"),
             )));
@@ -143,9 +141,7 @@ fn import_android(
                 let value = decode_android(&text(node))?;
                 let entry = result.catalog.add(name, culture.as_deref(), value);
                 for attr in ["translatable", "formatted"] {
-                    if let Some(v) = node.attribute(attr) {
-                        entry.metadata.insert(format!("android.{attr}"), v.into());
-                    }
+                    copy_android_flag(entry, node, attr)?;
                 }
             }
             "plurals" => {
@@ -165,6 +161,9 @@ fn import_android(
                         decode_android(&text(item))?,
                     );
                     entry.plural_category = Some(quantity.into());
+                    for attr in ["translatable", "formatted"] {
+                        copy_android_flag(entry, node, attr)?;
+                    }
                 }
             }
             "string-array" => {
@@ -183,6 +182,9 @@ fn import_android(
                     entry
                         .metadata
                         .insert("android.index".into(), index.to_string());
+                    for attr in ["translatable", "formatted"] {
+                        copy_android_flag(entry, node, attr)?;
+                    }
                 }
             }
             other => result.diagnostics.push(TranslationFormatDiagnostic::new(
@@ -195,14 +197,67 @@ fn import_android(
     Ok(())
 }
 
+fn copy_android_flag(
+    entry: &mut TranslationCatalogEntry,
+    node: Node<'_, '_>,
+    attr: &str,
+) -> Result<(), String> {
+    if let Some(value) = node.attribute(attr) {
+        if !matches!(value, "true" | "false") {
+            return Err(format!("Android {attr} must be true or false."));
+        }
+        entry
+            .metadata
+            .insert(format!("android.{attr}"), value.into());
+    }
+    Ok(())
+}
+
 fn decode_android(value: &str) -> Result<String, String> {
-    // XML entities have already been decoded. Android applies its own escape layer next.
-    let value = if value.starts_with('"') && value.ends_with('"') && value.len() >= 2 {
-        &value[1..value.len() - 1]
-    } else {
-        value
-    };
-    crate::text::decode_escapes(value, false)
+    // XML entities are decoded first. Quotes can delimit any region of an Android
+    // string, preserving whitespace only in that region; they are not literal text.
+    let mut input = value.chars().peekable();
+    let mut output = String::new();
+    let mut quoted = false;
+    let mut space = false;
+    while let Some(c) = input.next() {
+        if !quoted && c.is_whitespace() {
+            if !space {
+                output.push(' ');
+            }
+            space = true;
+            continue;
+        }
+        space = false;
+        match c {
+            '"' => quoted = !quoted,
+            '\'' if !quoted => return Err("Unescaped apostrophe in Android string.".into()),
+            '\\' => {
+                let next = input
+                    .next()
+                    .ok_or("Trailing backslash in Android string.")?;
+                match next {
+                    'n' => output.push('\n'),
+                    't' => output.push('\t'),
+                    'u' => {
+                        let mut escaped = String::from("\\u");
+                        escaped.extend(input.by_ref().take(4));
+                        if escaped.len() == 6
+                            && u16::from_str_radix(&escaped[2..], 16)
+                                .ok()
+                                .is_some_and(|code| (0xd800..=0xdbff).contains(&code))
+                        {
+                            escaped.extend(input.by_ref().take(6));
+                        }
+                        output.push_str(&crate::text::decode_escapes(&escaped, true)?);
+                    }
+                    _ => output.push(next),
+                }
+            }
+            _ => output.push(c),
+        }
+    }
+    Ok(output)
 }
 fn encode_android(value: &str) -> String {
     let mut result = String::new();
@@ -210,7 +265,7 @@ fn encode_android(value: &str) -> String {
         match c {
             '\\' => result.push_str("\\\\"),
             '\n' => result.push_str("\\n"),
-            '\r' => result.push_str("\\r"),
+            '\r' => result.push_str("\\u000D"),
             '\t' => result.push_str("\\t"),
             '\'' => result.push_str("\\'"),
             '"' => result.push_str("\\\""),
@@ -619,11 +674,7 @@ fn export_android(
             }
         } else {
             write!(output, "<string name=\"{}\"", escape(&entry.key)).unwrap();
-            for attr in ["translatable", "formatted"] {
-                if let Some(value) = entry.metadata.get(&format!("android.{attr}")) {
-                    write!(output, " {attr}=\"{}\"", escape(value)).unwrap();
-                }
-            }
+            android_flags(output, &[entry])?;
             writeln!(
                 output,
                 ">{}</string>",
@@ -633,7 +684,9 @@ fn export_android(
         }
     }
     for (name, items) in arrays {
-        writeln!(output, "<string-array name=\"{}\">", escape(name)).unwrap();
+        write!(output, "<string-array name=\"{}\"", escape(name)).unwrap();
+        android_flags(output, &items.values().copied().collect::<Vec<_>>())?;
+        output.push_str(">\n");
         for (expected, (index, entry)) in items.into_iter().enumerate() {
             if expected != index {
                 return Err(format!(
@@ -645,7 +698,9 @@ fn export_android(
         output.push_str("</string-array>\n");
     }
     for (name, entries) in plurals {
-        writeln!(output, "<plurals name=\"{}\">", escape(name)).unwrap();
+        write!(output, "<plurals name=\"{}\"", escape(name)).unwrap();
+        android_flags(output, &entries)?;
+        output.push_str(">\n");
         for entry in entries {
             let category = entry.plural_category.as_deref().unwrap();
             if !matches!(category, "zero" | "one" | "two" | "few" | "many" | "other") {
@@ -662,6 +717,29 @@ fn export_android(
         output.push_str("</plurals>\n");
     }
     output.push_str("</resources>\n");
+    Ok(())
+}
+
+fn android_flags(output: &mut String, entries: &[&TranslationCatalogEntry]) -> Result<(), String> {
+    for attr in ["translatable", "formatted"] {
+        let key = format!("android.{attr}");
+        let value = entries[0].metadata.get(&key);
+        if entries
+            .iter()
+            .any(|entry| entry.metadata.get(&key) != value)
+        {
+            return Err(format!(
+                "Android resource '{}' has conflicting {attr} flags.",
+                entries[0].base_key()
+            ));
+        }
+        if let Some(value) = value {
+            if !matches!(value.as_str(), "true" | "false") {
+                return Err(format!("Android {attr} must be true or false."));
+            }
+            write!(output, " {attr}=\"{value}\"").unwrap();
+        }
+    }
     Ok(())
 }
 

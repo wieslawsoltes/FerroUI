@@ -16,6 +16,7 @@ fn sample() -> TranslationCatalog {
         name: Some("Messages".into()),
         source_culture: Some("en".into()),
         entries: Vec::new(),
+        metadata: Default::default(),
     };
     catalog
         .add(
@@ -649,4 +650,195 @@ fn po_unrepresentable_workflow_state_is_reported() {
         .diagnostics
         .iter()
         .any(|d| d.code == "PTF202" && d.message.contains("state")));
+}
+
+#[test]
+fn normalized_catalog_json_preserves_metadata_and_reads_older_documents() {
+    let mut catalog = sample();
+    catalog
+        .metadata
+        .insert("vendor.document".into(), "retained".into());
+    catalog.entries[0]
+        .metadata
+        .insert("vendor.entry".into(), "retained too".into());
+    let json = serde_json::to_string(&catalog).unwrap();
+    assert!(json.contains("sourceCulture"));
+    assert_eq!(
+        serde_json::from_str::<TranslationCatalog>(&json).unwrap(),
+        catalog
+    );
+    let older: TranslationCatalog = serde_json::from_str(
+        r#"{"name":"Messages","sourceCulture":"en","entries":[{"key":"A","value":"B"}]}"#,
+    )
+    .unwrap();
+    assert!(older.metadata.is_empty());
+    assert!(older.entries[0].metadata.is_empty());
+    assert_eq!(older.entries[0].culture, None);
+}
+
+#[test]
+fn xml_accepts_literal_declaration_text_and_bounded_internal_entities() {
+    for content in [
+        r#"<root><!-- <!ENTITY is merely a comment --><data name="Text"><value><![CDATA[<!ENTITY literal>]]></value></data></root>"#,
+        r#"<!DOCTYPE root [<!ENTITY label "Safe text">]><root><data name="Text"><value>&label;</value></data></root>"#,
+    ] {
+        let result = read(content, TranslationFileFormat::Resx, "en");
+        assert_eq!(result.catalog.entries.len(), 1);
+        assert!(!result.catalog.entries[0].value.is_empty());
+    }
+    let recursive = r#"<!DOCTYPE root [<!ENTITY loop "&loop;">]><root><data name="Text"><value>&loop;</value></data></root>"#;
+    assert!(import(recursive, TranslationFileFormat::Resx, &options("en"), None).has_errors());
+    let typed = read(
+        r#"<root><data name="String" type="System.String, System.Private.CoreLib"><value>Text</value></data><data name="Builder" type="System.StringBuilder"><value>Not a string</value></data></root>"#,
+        TranslationFileFormat::Resx,
+        "en",
+    );
+    assert_eq!(typed.catalog.entries.len(), 1);
+    assert_eq!(typed.catalog.entries[0].key, "String");
+    assert!(typed.diagnostics.iter().any(|d| d.code == "PTF131"));
+}
+
+#[test]
+fn android_quoting_whitespace_and_group_flags_round_trip() {
+    let source = r#"<resources><string name="Mixed">before  "  quoted  "  after\n\u000D\uD83D\uDE42</string><string-array name="Planets" translatable="false" formatted="false"><item>Earth</item><item>Venus</item></string-array><plurals name="Count" translatable="false" formatted="false"><item quantity="one">One</item><item quantity="other">Many</item></plurals></resources>"#;
+    let imported = read(source, TranslationFileFormat::AndroidResources, "en");
+    assert_eq!(
+        imported.catalog.to_dictionary(Some("en"))["Mixed"],
+        "before   quoted   after\n\r🙂"
+    );
+    let exported = export(
+        &imported.catalog,
+        TranslationFileFormat::AndroidResources,
+        &options("en"),
+    );
+    assert!(!exported.has_errors(), "{:?}", exported.diagnostics);
+    assert!(exported.content.contains("\\u000D"));
+    let again = read(
+        &exported.content,
+        TranslationFileFormat::AndroidResources,
+        "en",
+    );
+    assert_eq!(
+        again.catalog.to_dictionary(Some("en")),
+        imported.catalog.to_dictionary(Some("en"))
+    );
+    for entry in again
+        .catalog
+        .entries
+        .iter()
+        .filter(|entry| entry.key != "Mixed")
+    {
+        assert_eq!(entry.metadata["android.translatable"], "false");
+        assert_eq!(entry.metadata["android.formatted"], "false");
+    }
+    let mut conflict = imported.catalog;
+    conflict
+        .entries
+        .iter_mut()
+        .find(|entry| entry.key == "Planets[1]")
+        .unwrap()
+        .metadata
+        .insert("android.formatted".into(), "true".into());
+    assert!(export(
+        &conflict,
+        TranslationFileFormat::AndroidResources,
+        &options("en")
+    )
+    .has_errors());
+}
+
+#[test]
+fn apple_filename_fallback_and_single_language_selection_are_consistent() {
+    for (path, format, content) in [
+        (
+            "Messages.pl-PL.STRINGS",
+            TranslationFileFormat::AppleStrings,
+            "\"Title\" = \"Tytuł\";",
+        ),
+        (
+            "Messages.pl-PL.RESX",
+            TranslationFileFormat::Resx,
+            "<root><data name=\"Title\"><value>Tytuł</value></data></root>",
+        ),
+        (
+            "res/values-b+sr+Latn+RS-night/strings.xml",
+            TranslationFileFormat::AndroidResources,
+            "<resources><string name=\"Title\">Title</string></resources>",
+        ),
+    ] {
+        let imported = import(content, format, &Default::default(), Some(path));
+        assert!(!imported.has_errors());
+        let expected = if format == TranslationFileFormat::AndroidResources {
+            "sr-Latn-RS"
+        } else {
+            "pl-PL"
+        };
+        assert_eq!(
+            imported.catalog.entries[0].culture.as_deref(),
+            Some(expected)
+        );
+    }
+    let mut catalog = TranslationCatalog::default();
+    catalog.add("A", Some("en"), "English");
+    catalog.add("B", Some("pl"), "Polish only");
+    let exported = export(
+        &catalog,
+        TranslationFileFormat::AppleStrings,
+        &Default::default(),
+    );
+    assert!(exported.diagnostics.iter().any(|d| d.code == "PTF200"));
+    let again = read(&exported.content, TranslationFileFormat::AppleStrings, "en");
+    assert_eq!(again.catalog.entries.len(), 1);
+    assert_eq!(again.catalog.entries[0].value, "English");
+}
+
+#[test]
+fn po_single_form_plurals_and_repeated_flags_survive_edits() {
+    let source = "msgid \"\"\nmsgstr \"\"\n\"Language: ja\\n\"\n\"Plural-Forms: nplurals=1; plural=0;\\n\"\n\n#, fuzzy\n#, c-format\nmsgid \"%d item\"\nmsgid_plural \"%d items\"\nmsgstr[0] \"%d 個\"\n";
+    let mut imported = read(source, TranslationFileFormat::GettextPo, "ja");
+    assert_eq!(imported.catalog.entries.len(), 1);
+    assert_eq!(
+        imported.catalog.entries[0].metadata["po.flags"],
+        "fuzzy, c-format"
+    );
+    let exported = export(
+        &imported.catalog,
+        TranslationFileFormat::GettextPo,
+        &options("ja"),
+    );
+    assert!(!exported.has_errors(), "{:?}", exported.diagnostics);
+    assert!(exported.content.contains("msgid_plural \"%d items\""));
+    assert!(exported.content.contains("#, fuzzy, c-format"));
+    let again = read(&exported.content, TranslationFileFormat::GettextPo, "ja");
+    assert_eq!(again.catalog.entries, imported.catalog.entries);
+    imported.catalog.entries[0].state = None;
+    let reviewed = export(
+        &imported.catalog,
+        TranslationFileFormat::GettextPo,
+        &options("ja"),
+    );
+    assert!(!reviewed.content.contains("fuzzy"));
+    assert!(reviewed.content.contains("#, c-format"));
+}
+
+#[test]
+fn po_rejects_incomplete_duplicate_and_mixed_directives_transactionally() {
+    for input in [
+        "msgid \"a\"\nmsgid_plural \"as\"\nmsgstr \"wrong shape\"",
+        "msgid \"a\"\nmsgid_plural \"as\"\nmsgid_plural \"other\"\nmsgstr[0] \"a\"",
+        "msgctxt \"one\"\nmsgctxt \"two\"\nmsgid \"a\"\nmsgstr \"a\"",
+        "msgctxt \"orphaned\"",
+        "msgid \"lost\"\nmsgid \"next\"\nmsgstr \"value\"",
+        "msgid \"a\"\nmsgid_plural \"as\"\nmsgstr[1] \"missing zero\"",
+        "msgid \"a\"\nmsgid_plural \"as\"\nmsgstr[0]\"missing space\"",
+    ] {
+        let result = import(
+            input,
+            TranslationFileFormat::GettextPo,
+            &Default::default(),
+            None,
+        );
+        assert!(result.has_errors(), "{input}");
+        assert!(result.catalog.entries.is_empty());
+    }
 }

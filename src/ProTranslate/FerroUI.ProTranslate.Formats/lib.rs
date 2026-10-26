@@ -76,6 +76,7 @@ pub fn import(
             }),
             source_culture: options.source_culture.clone(),
             entries: Vec::new(),
+            metadata: Default::default(),
         },
         diagnostics: Vec::new(),
     };
@@ -197,6 +198,7 @@ fn diagnose_losses(
             GettextPo => !matches!(
                 key.as_str(),
                 "po.index"
+                    | "po.msgid_plural"
                     | "po.plural_forms"
                     | "po.flags"
                     | "po.references"
@@ -248,7 +250,11 @@ fn diagnose_losses(
 
 pub(crate) fn infer_culture(path: Option<&str>, suffix: &str) -> Option<String> {
     let file = path?.rsplit(['/', '\\']).next()?;
-    let stem = file.strip_suffix(suffix)?;
+    let split = file.len().checked_sub(suffix.len())?;
+    if !file.get(split..)?.eq_ignore_ascii_case(suffix) {
+        return None;
+    }
+    let stem = &file[..split];
     let candidate = stem.rsplit('.').next()?;
     if candidate == stem
         && !candidate.contains('-')
@@ -264,10 +270,17 @@ pub(crate) fn infer_culture(path: Option<&str>, suffix: &str) -> Option<String> 
 }
 
 pub(crate) fn infer_apple_culture(path: Option<&str>) -> Option<String> {
-    path?
-        .split(['/', '\\'])
-        .find_map(|part| part.strip_suffix(".lproj"))
+    let path = path?;
+    path.split(['/', '\\'])
+        .find_map(|part| {
+            let split = part.len().checked_sub(6)?;
+            part.get(split..)?
+                .eq_ignore_ascii_case(".lproj")
+                .then(|| &part[..split])
+        })
         .map(|tag| TranslationCatalog::normalize_culture_name(Some(tag)))
+        .or_else(|| infer_culture(Some(path), ".strings"))
+        .or_else(|| infer_culture(Some(path), ".stringsdict"))
 }
 
 #[cfg(test)]

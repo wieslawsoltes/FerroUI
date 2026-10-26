@@ -107,7 +107,7 @@ fn escaped(value: &str) -> String {
             '\n' => output.push_str("\\n"),
             '\r' => output.push_str("\\r"),
             '\t' => output.push_str("\\t"),
-            c if c.is_control() => {
+            c if c.is_ascii_control() => {
                 write!(output, "\\{:03o}", c as u32).unwrap();
             }
             _ => output.push(c),
@@ -310,7 +310,12 @@ fn parse_po(
                 current.fuzzy |= flags.split(',').any(|f| f.trim() == "fuzzy");
                 current
                     .metadata
-                    .insert("po.flags".into(), flags.trim().into());
+                    .entry("po.flags".into())
+                    .and_modify(|value| {
+                        value.push_str(", ");
+                        value.push_str(flags.trim());
+                    })
+                    .or_insert_with(|| flags.trim().into());
             } else if let Some(reference) = line.strip_prefix("#:") {
                 current
                     .metadata
@@ -348,9 +353,18 @@ fn parse_po(
                 .map(str::trim_start)
         };
         let (field, token) = if let Some(token) = directive("msgid_plural") {
+            if current.plural.is_some()
+                || current.target.is_some()
+                || !current.translations.is_empty()
+            {
+                return Err("Duplicate or misplaced PO msgid_plural directive.".into());
+            }
             (PoField::Plural, token)
         } else if let Some(token) = directive("msgid") {
             if current.id.is_some() {
+                if !current.complete() {
+                    return Err("PO entry is missing msgstr before the next msgid.".into());
+                }
                 entries.push(std::mem::take(&mut current));
             }
             (PoField::Id, token)
@@ -358,11 +372,17 @@ fn parse_po(
             if current.complete() {
                 entries.push(std::mem::take(&mut current));
             }
+            if current.context.is_some() || current.id.is_some() {
+                return Err("Duplicate or misplaced PO msgctxt directive.".into());
+            }
             (PoField::Context, token)
         } else if let Some(token) = line.strip_prefix("msgstr[") {
             let (index, token) = token
                 .split_once(']')
                 .ok_or("Malformed indexed PO msgstr.")?;
+            if !token.starts_with(char::is_whitespace) {
+                return Err("Indexed PO msgstr must be followed by whitespace.".into());
+            }
             let index: usize = index
                 .parse()
                 .map_err(|_| "PO plural index must be a nonnegative integer.")?;
@@ -395,6 +415,8 @@ fn parse_po(
     }
     if current.id.is_some() {
         entries.push(current);
+    } else if current.context.is_some() {
+        return Err("PO context has no msgid.".into());
     }
     for entry in &entries {
         if entry.target.is_none() && entry.translations.is_empty() {
@@ -405,6 +427,18 @@ fn parse_po(
         }
         if !entry.translations.is_empty() && entry.target.is_some() {
             return Err("PO entry mixes singular and plural msgstr directives.".into());
+        }
+        if entry.plural.is_some() && entry.translations.is_empty() {
+            return Err("PO msgid_plural requires indexed msgstr directives.".into());
+        }
+        if entry
+            .translations
+            .keys()
+            .copied()
+            .enumerate()
+            .any(|(expected, actual)| expected != actual)
+        {
+            return Err("PO plural indices must start at zero and be consecutive.".into());
         }
     }
     Ok(entries)
@@ -465,6 +499,10 @@ fn import_po(
                 record.state = Some("fuzzy".into());
             }
         } else {
+            metadata.insert(
+                "po.msgid_plural".into(),
+                entry.plural.clone().unwrap_or_default(),
+            );
             if entry.translations.len() > 2 || header.contains_key("plural-forms") {
                 result.diagnostics.push(TranslationFormatDiagnostic::new(Severity::Warning,"PTF171",format!("PO plural indices for '{key}' are retained; plural formulas are not evaluated into CLDR categories.")));
             }
@@ -672,7 +710,11 @@ pub(crate) fn export(
     match format {
         TranslationFileFormat::AppleStrings => {
             let mut output = String::new();
-            for entry in select_entries(catalog, options.culture.as_deref()) {
+            let culture = options
+                .culture
+                .clone()
+                .or_else(|| catalog.cultures().into_iter().next());
+            for entry in select_entries(catalog, culture.as_deref()) {
                 if options.include_comments {
                     if let Some(comment) = &entry.comment {
                         for line in comment.split('\n') {
@@ -725,19 +767,16 @@ fn write_po_notes(
         .get("po.flags")
         .map(String::as_str)
         .unwrap_or("");
-    if entry.state.as_deref() == Some("fuzzy") && !flags.split(',').any(|f| f.trim() == "fuzzy") {
-        writeln!(
-            output,
-            "#, fuzzy{}",
-            if flags.is_empty() {
-                String::new()
-            } else {
-                format!(", {flags}")
-            }
-        )
-        .unwrap();
-    } else if !flags.is_empty() {
-        writeln!(output, "#, {flags}").unwrap();
+    let mut flags: Vec<_> = flags
+        .split(',')
+        .map(str::trim)
+        .filter(|flag| !flag.is_empty() && *flag != "fuzzy")
+        .collect();
+    if entry.state.as_deref() == Some("fuzzy") {
+        flags.insert(0, "fuzzy");
+    }
+    if !flags.is_empty() {
+        writeln!(output, "#, {}", flags.join(", ")).unwrap();
     }
     if let Some(context) = &entry.context {
         writeln!(output, "msgctxt \"{}\"", escaped(context)).unwrap();
@@ -807,6 +846,9 @@ fn export_po(
             } else {
                 match entry.plural_category.as_deref() { Some("one")=>0,Some("other")=>1,Some(category)=>return Err(format!("Cannot infer gettext index for CLDR category '{category}'; retain po.index and po.plural_forms metadata.")),None=>unreachable!() }
             };
+            if index > 65535 {
+                return Err("PO plural index is too large.".into());
+            }
             if indexed.insert(index, *entry).is_some() {
                 return Err(format!("Duplicate gettext plural index for '{key}'."));
             }
@@ -817,14 +859,25 @@ fn export_po(
         let plural = indexed
             .iter()
             .find(|(i, _)| **i > 0)
-            .map(|(_, entry)| *entry)
-            .ok_or_else(|| format!("PO plural '{key}' needs an additional plural record."))?;
+            .map(|(_, entry)| *entry);
+        let plural_id = singular.metadata.get("po.msgid_plural").map(String::as_str)
+            .or_else(|| plural.map(po_id))
+            .ok_or_else(|| format!("PO plural '{key}' needs retained po.msgid_plural or an additional plural record."))?;
+        if entries
+            .iter()
+            .filter_map(|entry| entry.metadata.get("po.msgid_plural"))
+            .any(|value| value != plural_id)
+        {
+            return Err(format!(
+                "PO plural '{key}' has conflicting source plural messages."
+            ));
+        }
         write_po_notes(&mut output, singular, options);
         writeln!(
             output,
             "msgid \"{}\"\nmsgid_plural \"{}\"",
             escaped(po_id(singular)),
-            escaped(po_id(plural))
+            escaped(plural_id)
         )
         .unwrap();
         for (expected, (index, entry)) in indexed.into_iter().enumerate() {

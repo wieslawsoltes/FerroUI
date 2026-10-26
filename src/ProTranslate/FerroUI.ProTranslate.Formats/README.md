@@ -38,6 +38,9 @@ println!("{}", exported.content);
 `TranslationCatalog` contains ordered `TranslationCatalogEntry` values. Each
 record contains the key, optional culture, localized value, source, comment,
 context, workflow state, plural category, format, and an ordered metadata map.
+The catalog has its own ordered metadata map for document-level information.
+Both types implement Serde serialization with camelCase field names and defaults
+for omitted fields, so a complete editing session can retain normalized data.
 `to_dictionary` selects an exact culture case-insensitively; repeated keys use
 the last record and are reported by `validate`. Export selection overlays exact
 culture records on neutral fallbacks independently of source order.
@@ -60,19 +63,20 @@ it for a multi-language catalog produces a diagnostic.
 | ProTranslate JSON / i18next JSON | Nested object import, flat-key deterministic export, Unicode strings, trailing commas compatible with the source parser | Non-string values are diagnosed. Duplicate JSON object members fail import. Interpolation expressions remain text. |
 | Flutter ARB | `@@locale`, values, descriptions, placeholder metadata stored under `metadata["arb"]` | ICU message expressions remain text; global metadata other than the locale is diagnosed. |
 | RESX | String resources, comments, filename culture inference, XML escaping | Binary, file-reference and typed non-string resources are skipped with diagnostics. |
-| Android resources | Strings, plural quantities, string arrays, escape layer, array order, `translatable` and `formatted`, Android locale-folder inference | Styled/inline XML is flattened with warnings. Plural selection is not performed by the converter. |
+| Android resources | Strings, plural quantities, string arrays, quoted whitespace regions, escape layer, array order, `translatable` and `formatted` on all resource groups, Android locale-folder inference | Styled/inline XML is flattened with warnings. Conflicting group flags fail export. Plural selection is not performed by the converter. |
 | Apple `.strings` | Quoted Unicode strings, C/octal/UTF-16 escapes, comments, locale-folder inference | Missing delimiters and malformed escapes fail import. |
 | Apple `.stringsdict` | Plural variables, categories, localized format and value type, standard plist doctype | Singular records cannot be exported to a plural dictionary. Unsupported rules are diagnosed. |
 | Apple `.xcstrings` | Multiple languages, comments, states, string units, plural variations | Device variations and substitution metadata are diagnosed. A key cannot export as both singular and plural for the same culture. |
-| gettext PO/POT | Headers, multiline literals, contexts, source text, plural indices, fuzzy flags, translator/developer comments, references | Plural formulas are retained, not evaluated. Indices 0/1 retain the source's `one`/`other` naming; additional indices use `indexN` and preserve `po.index`. Empty targets preserve untranslated status. |
+| gettext PO/POT | Headers, multiline literals, contexts, source text, single-form and multi-form plural catalogs, fuzzy flags, translator/developer comments, references | Plural formulas are retained, not evaluated. Indices 0/1 retain the source's `one`/`other` naming; additional indices use `indexN` and preserve `po.index`. Empty targets preserve untranslated status. Clearing `state = "fuzzy"` removes the fuzzy flag. |
 | XLIFF 1.2 | Source/target languages, unit identity, source/target text, state, notes and context | Inline codes are flattened and diagnosed; skeleton/phase data is not represented. |
 | XLIFF 2.0 / 2.1 | Unit and segment import, source/target text, state, notes and context; export writes version 2.1, matching upstream `Xliff20` | Multiple segments receive distinct `unit#segment` keys. Export creates separate units and reports retained segmentation metadata as a loss. Advanced modules are not implemented. |
 | CSV / TSV | Required key/value columns; culture/source/comment/context/state/plural/format; optional JSON metadata column; quoting, embedded CR/LF; custom CSV delimiter | Duplicate headers, inconsistent row sizes and malformed quoting fail import. Formula-looking text is retained and diagnosed. |
 
 The format layer never evaluates plural expressions, executes spreadsheet
 formulas, resolves external XML resources, or mutates runtime culture state.
-XML custom entity declarations are rejected; parsed XML has a bounded node
-count. XML export rejects characters that XML 1.0 cannot represent.
+XML internal entities use the parser's bounded expansion and recursion checks;
+external entities are never resolved, and parsed XML has a bounded node count.
+XML export rejects characters that XML 1.0 cannot represent.
 
 ## Normalized metadata
 
@@ -81,7 +85,7 @@ count. XML export rejects characters that XML 1.0 cannot represent.
   `android.formatted` preserve resource structure and flags.
 - Apple plurals: `apple.key`, `apple.variable`, `apple.localized_format`,
   `apple.value_type` preserve dictionary reconstruction.
-- gettext: `po.index`, `po.plural_forms`, `po.flags`, `po.references`,
+- gettext: `po.index`, `po.msgid_plural`, `po.plural_forms`, `po.flags`, `po.references`,
   `po.translator_comment`, `po.untranslated` preserve PO semantics.
 - XLIFF segmentation: `xliff.unit`, `xliff.segment` identify the source unit.
 
