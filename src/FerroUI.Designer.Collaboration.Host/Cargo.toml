@@ -22,7 +22,7 @@ required-features = ["server"]
 [features]
 default = []
 client = ["dep:ureq", "dep:url"]
-server = ["dep:ferroui-mcp"]
+server = ["dep:ferroui-mcp", "dep:url"]
 
 [dependencies]
 ferroui-designer-collaboration = { version = "=0.4.0", path = "../FerroUI.Designer.Collaboration" }

@@ -20,27 +20,7 @@ pub struct McpPeer {
 impl McpPeer {
     pub fn new(endpoint: Endpoint) -> Result<Self> {
         endpoint.bearer.validate()?;
-        let url = url::Url::parse(&endpoint.url).map_err(HostError::invalid)?;
-        let loopback = url.host_str().is_some_and(|host| {
-            host == "localhost"
-                || host
-                    .trim_matches(['[', ']'])
-                    .parse::<std::net::IpAddr>()
-                    .is_ok_and(|ip| ip.is_loopback())
-        });
-        ensure(
-            url.scheme() == "https" || (url.scheme() == "http" && loopback),
-            ErrorCode::Invalid,
-            "Remote collaboration requires HTTPS; HTTP is allowed only on loopback",
-        )?;
-        ensure(
-            url.username().is_empty()
-                && url.password().is_none()
-                && url.fragment().is_none()
-                && url.query().is_none(),
-            ErrorCode::Invalid,
-            "Endpoint must not contain URL credentials, query or fragment",
-        )?;
+        crate::validate_endpoint_url(&endpoint.url)?;
         Ok(Self {
             endpoint,
             agent: ureq::AgentBuilder::new()

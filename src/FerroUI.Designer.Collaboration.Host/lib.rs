@@ -7,6 +7,10 @@ mod storage;
 pub use model::*;
 pub use rooms::RoomStore;
 pub use storage::{load_private, save_private};
+#[cfg(any(feature = "client", feature = "server"))]
+mod endpoint;
+#[cfg(any(feature = "client", feature = "server"))]
+pub use endpoint::{validate_endpoint_url, validate_public_endpoint_url};
 #[cfg(feature = "client")]
 mod client;
 #[cfg(feature = "client")]
