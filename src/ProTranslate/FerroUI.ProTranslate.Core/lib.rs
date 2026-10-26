@@ -5,6 +5,7 @@
 //! Dropping a subscription disconnects it, and observable strings hold services
 //! without services retaining their observers.
 
+mod calendar;
 mod culture;
 mod date_data;
 mod datetime;
@@ -19,7 +20,7 @@ mod region;
 mod service;
 
 pub use culture::*;
-pub use datetime::LocalizedDateTime;
+pub use datetime::{LocalizedDateTime, LocalizedNaiveDateTime};
 pub use error::*;
 pub use event::Subscription;
 pub use formatting::*;

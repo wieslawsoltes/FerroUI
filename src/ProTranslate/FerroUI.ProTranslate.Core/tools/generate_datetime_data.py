@@ -49,9 +49,8 @@ for locale, record in sorted(records.items()):
     available = g['dateTimeFormats']['availableFormats']
     values = {
         'locale': s(locale), 'short_date': s(g['dateFormats']['short']),
-        'short_date_numbers': s(g['dateFormats']['short'].get('_numbers', '') if isinstance(g['dateFormats']['short'], dict) else ''),
         'long_date': s(g['dateFormats']['full']), 'short_time': s(g['timeFormats']['short']),
-        'long_time': s(g['timeFormats']['medium']), 'join': s(g['dateTimeFormats']['medium']),
+        'long_time': s(g['timeFormats']['medium']),
         'month_day': s(available.get('MMMMd', available.get('MMMd', 'MMMM d'))),
         'year_month': s(available.get('yMMMM', available.get('yMMM', 'MMMM y'))),
         'months': array([months['wide'][str(i)] for i in range(1, 13)]),
@@ -68,9 +67,9 @@ for locale, record in sorted(records.items()):
     lines.append('    crate::datetime::DateData { ' + ', '.join(key + ': ' + value for key, value in values.items()) + ' },')
 lines.append('];')
 invariant.update({key: s(value) for key, value in {
-    'locale': '', 'short_date': 'MM/dd/yyyy', 'short_date_numbers': '',
+    'locale': '', 'short_date': 'MM/dd/yyyy',
     'long_date': 'EEEE, dd MMMM yyyy', 'short_time': 'HH:mm', 'long_time': 'HH:mm:ss',
-    'join': '{1} {0}', 'month_day': 'MMMM dd', 'year_month': 'yyyy MMMM',
+    'month_day': 'MMMM dd', 'year_month': 'yyyy MMMM',
 }.items()})
 lines.extend(['', '#[rustfmt::skip]', 'pub(crate) static INVARIANT: crate::datetime::DateData = crate::datetime::DateData { ' + ', '.join(key + ': ' + value for key, value in invariant.items()) + ' };'])
 output.write_text('\n'.join(lines) + '\n')

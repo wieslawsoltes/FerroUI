@@ -26,6 +26,7 @@ pub enum FormatArgument {
     Decimal(Decimal),
     Custom(Rc<dyn LocalizedFormat>),
     DateTime(crate::LocalizedDateTime),
+    NaiveDateTime(crate::LocalizedNaiveDateTime),
 }
 impl fmt::Debug for FormatArgument {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
@@ -45,6 +46,7 @@ impl fmt::Debug for FormatArgument {
             Self::Decimal(v) => v.fmt(f),
             Self::Custom(_) => f.write_str("Custom(..)"),
             Self::DateTime(value) => value.fmt(f),
+            Self::NaiveDateTime(value) => value.fmt(f),
         }
     }
 }
@@ -65,6 +67,7 @@ impl PartialEq for FormatArgument {
             (Self::Null, Self::Null) => true,
             (Self::Decimal(a), Self::Decimal(b)) => a == b,
             (Self::DateTime(a), Self::DateTime(b)) => a == b,
+            (Self::NaiveDateTime(a), Self::NaiveDateTime(b)) => a == b,
             (Self::Custom(a), Self::Custom(b)) => Rc::ptr_eq(a, b),
             _ => false,
         }
@@ -139,6 +142,7 @@ impl FormatArgument {
             Self::Bool(value) => Ok(if *value { "True" } else { "False" }.into()),
             Self::Custom(value) => value.format(specifier, culture),
             Self::DateTime(value) => value.format(specifier, culture),
+            Self::NaiveDateTime(value) => value.format(specifier, culture),
             _ => self.format_number(specifier, culture),
         }
     }

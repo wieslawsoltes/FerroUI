@@ -550,7 +550,7 @@ fn typed_dates_use_localized_gregorian_names_and_patterns() {
         value.format("D", &culture("en-US")).unwrap(),
         "Monday, October 26, 2026"
     );
-    assert_eq!(value.format("d", &culture("de-DE")).unwrap(), "26.10.26");
+    assert_eq!(value.format("d", &culture("de-DE")).unwrap(), "26.10.2026");
     assert_eq!(
         value.format("HH:mm:ss", &culture("en")).unwrap(),
         "15:30:45"
@@ -560,7 +560,7 @@ fn typed_dates_use_localized_gregorian_names_and_patterns() {
         "26 października 2026"
     );
     assert_eq!(value.format("MMMM", &culture("pl")).unwrap(), "październik");
-    assert_eq!(value.format("d", &culture("haw")).unwrap(), "26/x/26");
+    assert_eq!(value.format("d", &culture("haw")).unwrap(), "26/10/2026");
 }
 #[test]
 fn typed_date_standard_machine_formats_preserve_offset_or_explicitly_use_utc() {
@@ -1067,4 +1067,199 @@ fn observable_format_errors_preserve_resolved_metadata_and_dispose_disconnects()
     cultures.set_culture(culture("fr"));
     observer.refresh();
     assert_eq!(observer.snapshot(), frozen);
+}
+
+#[test]
+fn locale_calendars_match_source_runtime_date_components() {
+    let date = date_value();
+    // Microsoft.NETCore.App 10.0.14 oracle: 2026-10-26 in each default calendar.
+    // Explicit latn only removes ICU's localized digit substitution from this
+    // calendar-component comparison; the reference runtime emits Latin digits.
+    for (locale, expected, short_year) in [
+        ("ar-SA-u-nu-latn", "1448-05-15", "48"),
+        ("th-TH", "2569-10-26", "69"),
+        ("fa-IR-u-nu-latn", "1405-08-04", "5"),
+    ] {
+        assert_eq!(
+            date.format("yyyy-MM-dd", &culture(locale)).unwrap(),
+            expected,
+            "{locale}"
+        );
+        assert_eq!(
+            date.format("%y", &culture(locale)).unwrap(),
+            short_year,
+            "{locale}"
+        );
+        assert!(
+            date.format("D", &culture(locale))
+                .unwrap()
+                .contains(&expected[..4]),
+            "{locale}"
+        );
+        assert_eq!(
+            date.format("O", &culture(locale)).unwrap(),
+            "2026-10-26T15:30:45.1234567+02:00"
+        );
+    }
+    assert_eq!(
+        date.format("yyyy-MM-dd", &culture("ar-SA-u-ca-gregory-nu-latn"))
+            .unwrap(),
+        "2026-10-26"
+    );
+}
+
+#[test]
+fn explicit_calendar_era_transitions_and_leap_months_are_preserved() {
+    let iso = |year, month, day| {
+        LocalizedDateTime::new(
+            time::Date::from_calendar_date(year, month, day)
+                .unwrap()
+                .midnight()
+                .assume_utc(),
+        )
+    };
+    let japanese = culture("ja-JP-u-ca-japanese");
+    assert_eq!(
+        iso(2019, time::Month::April, 30)
+            .format("gg yy-MM-dd", &japanese)
+            .unwrap(),
+        "平成 31-04-30"
+    );
+    assert_eq!(
+        iso(2019, time::Month::May, 1)
+            .format("gg yy-MM-dd", &japanese)
+            .unwrap(),
+        "令和 01-05-01"
+    );
+    let hebrew = culture("en-u-ca-hebrew");
+    assert_eq!(
+        iso(2024, time::Month::March, 24)
+            .format("yyyy-MM-dd", &hebrew)
+            .unwrap(),
+        "5784-07-14"
+    );
+    assert_eq!(
+        iso(2024, time::Month::March, 24)
+            .format("MMMM", &hebrew)
+            .unwrap(),
+        "Adar II"
+    );
+    assert_eq!(
+        iso(2024, time::Month::February, 29)
+            .format("yyyy-MM-dd", &culture("th-TH"))
+            .unwrap(),
+        "2567-02-29"
+    );
+    assert_eq!(
+        iso(2025, time::Month::March, 21)
+            .format("yyyy-MM-dd", &culture("fa-IR-u-nu-latn"))
+            .unwrap(),
+        "1404-01-01"
+    );
+    assert_eq!(
+        iso(2024, time::Month::February, 29)
+            .format("yyyy-MM-dd", &culture("en-u-ca-roc"))
+            .unwrap(),
+        "0113-02-29"
+    );
+}
+
+#[test]
+fn every_supported_calendar_has_localized_standard_and_custom_date_fields() {
+    for calendar in [
+        "buddhist",
+        "chinese",
+        "coptic",
+        "dangi",
+        "ethiopic",
+        "ethioaa",
+        "gregory",
+        "hebrew",
+        "indian",
+        "islamic-civil",
+        "islamic-tbla",
+        "islamic-umalqura",
+        "iso8601",
+        "japanese",
+        "persian",
+        "roc",
+    ] {
+        let locale = culture(&format!("en-u-ca-{calendar}"));
+        for specifier in ["d", "D", "M", "Y", "yyyy-MM-dd", "dd MMMM yyyy", "MMMM"] {
+            assert!(
+                !date_value().format(specifier, &locale).unwrap().is_empty(),
+                "{calendar} {specifier}"
+            );
+        }
+    }
+    assert!(date_value()
+        .format("yyyy", &culture("en-u-ca-unknown"))
+        .is_err());
+}
+
+#[test]
+fn offset_and_naive_date_values_preserve_their_zone_semantics() {
+    let offset = date_value();
+    let naive_value = time::PrimitiveDateTime::new(offset.0.date(), offset.0.time());
+    let naive = LocalizedNaiveDateTime::new(naive_value);
+    let utc = LocalizedNaiveDateTime::utc(naive_value);
+    let invariant = Culture::invariant();
+    assert_eq!(
+        offset.format("", &invariant).unwrap(),
+        "10/26/2026 15:30:45 +02:00"
+    );
+    assert_eq!(
+        offset.format("G", &invariant).unwrap(),
+        "10/26/2026 15:30:45"
+    );
+    assert_eq!(naive.format("", &invariant).unwrap(), "10/26/2026 15:30:45");
+    assert_eq!(
+        naive.format("O", &invariant).unwrap(),
+        "2026-10-26T15:30:45.1234567"
+    );
+    assert_eq!(
+        utc.format("O", &invariant).unwrap(),
+        "2026-10-26T15:30:45.1234567Z"
+    );
+    assert_eq!(offset.format("%K", &invariant).unwrap(), "+02:00");
+    assert_eq!(
+        LocalizedDateTime(offset.0.to_offset(time::UtcOffset::UTC))
+            .format("%K", &invariant)
+            .unwrap(),
+        "+00:00"
+    );
+    assert_eq!(naive.format("%K", &invariant).unwrap(), "");
+    assert_eq!(utc.format("%K", &invariant).unwrap(), "Z");
+    assert_eq!(utc.format("zzz", &invariant).unwrap(), "+00:00");
+    assert!(naive.format("zzz", &invariant).is_err());
+    assert!(naive.format("U", &invariant).is_err());
+    assert!(offset.format("U", &invariant).is_err());
+    assert_eq!(
+        utc.format("U", &invariant).unwrap(),
+        "Monday, 26 October 2026 15:30:45"
+    );
+    assert_eq!(
+        FormatArgument::from(naive_value)
+            .format("O", &invariant)
+            .unwrap(),
+        naive.format("O", &invariant).unwrap()
+    );
+}
+
+#[test]
+fn custom_date_tokens_and_standard_joins_follow_source_rules() {
+    let date = date_value();
+    let en = culture("en-US");
+    assert_eq!(
+        date.format("f", &en).unwrap(),
+        "Monday, October 26, 2026 3:30\u{202f}PM"
+    );
+    assert_eq!(date.format("g", &en).unwrap(), "10/26/2026 3:30\u{202f}PM");
+    assert_eq!(date.format("%y", &en).unwrap(), "26");
+    assert_eq!(date.format("yyyy''MM", &en).unwrap(), "202610");
+    assert_eq!(date.format("'a''b'yyyy", &en).unwrap(), "ab2026");
+    assert_eq!(
+        date.format("HHHH:mmmm:ssss hhhhh", &en).unwrap(),
+        "15:30:45 03"
+    );
 }

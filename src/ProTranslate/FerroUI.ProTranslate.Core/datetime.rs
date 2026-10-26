@@ -1,19 +1,35 @@
-//! Typed Gregorian date/time formatting backed by Unicode CLDR data.
+//! Typed date/time formatting backed by ICU calendars and Unicode CLDR data.
 //!
 //! Values carry an explicit UTC offset. Formatting never reads a host time zone,
-//! applies an IANA zone rule, or changes calendar. Standard localized forms use
-//! CLDR Gregorian conventions; custom forms accept the common .NET date tokens.
-use crate::{date_data, Culture, FormatArgument, LocalizedFormat, TranslationError};
-use time::{OffsetDateTime, UtcOffset};
+//! or applies an IANA zone rule. The culture selects the display calendar; a
+//! Unicode `u-ca` extension selects an explicit calendar. Custom forms accept
+//! the source date tokens, with nanosecond fractions available as an extension.
+use crate::{
+    calendar::CalendarDate, date_data, Culture, FormatArgument, LocalizedFormat, TranslationError,
+};
+use time::{OffsetDateTime, PrimitiveDateTime, UtcOffset};
+
+#[derive(Clone, Copy, PartialEq, Eq)]
+enum DateTimeKind {
+    Offset,
+    Unspecified,
+    Utc,
+}
+struct DateFormatContext<'a> {
+    culture: &'a Culture,
+    data: &'a DateData,
+    cldr: bool,
+    has_day: bool,
+    calendar: &'a CalendarDate,
+    kind: DateTimeKind,
+}
 
 pub(crate) struct DateData {
     pub locale: &'static str,
     pub short_date: &'static str,
-    pub short_date_numbers: &'static str,
     pub long_date: &'static str,
     pub short_time: &'static str,
     pub long_time: &'static str,
-    pub join: &'static str,
     pub month_day: &'static str,
     pub year_month: &'static str,
     pub months: [&'static str; 12],
@@ -68,54 +84,92 @@ impl LocalizedDateTime {
         Ok(Self(instant.to_offset(offset)))
     }
     pub fn format(&self, format: &str, culture: &Culture) -> Result<String, TranslationError> {
+        self.format_kind(format, culture, DateTimeKind::Offset)
+    }
+    fn format_kind(
+        &self,
+        format: &str,
+        culture: &Culture,
+        kind: DateTimeKind,
+    ) -> Result<String, TranslationError> {
         let data = metadata(culture);
-        let format = if format.is_empty() { "G" } else { format };
+        if format.is_empty() {
+            let general = self.format_kind("G", culture, kind)?;
+            return Ok(if kind == DateTimeKind::Offset {
+                format!("{general} {}", self.offset(true, false))
+            } else {
+                general
+            });
+        }
         if format.chars().count() != 1 {
-            return self.pattern(format, culture, data, false);
+            return self.pattern(format, culture, data, false, kind);
         }
         let standard = format.chars().next().expect("format is nonempty");
-        let cldr = |pattern| self.pattern(pattern, culture, data, true);
-        let join = |date, time| -> Result<String, TranslationError> {
-            Ok(data
-                .join
-                .replace("{1}", &cldr(date)?)
-                .replace("{0}", &cldr(time)?))
+        let cldr = |pattern| self.pattern(pattern, culture, data, true, kind);
+        let date = |specifier, pattern| -> Result<String, TranslationError> {
+            let calendar = CalendarDate::new(self.0, culture)?;
+            if calendar.is_gregorian() {
+                cldr(pattern)
+            } else {
+                calendar.standard(specifier)
+            }
         };
+        let join =
+            |date_specifier, date_pattern, time_pattern| -> Result<String, TranslationError> {
+                Ok(format!(
+                    "{} {}",
+                    date(date_specifier, date_pattern)?,
+                    cldr(time_pattern)?
+                ))
+            };
+        let invariant = Culture::invariant();
+        let invariant_data = metadata(&invariant);
         match standard {
-            'd' => cldr(data.short_date),
-            'D' => cldr(data.long_date),
+            'd' => date('d', data.short_date),
+            'D' => date('D', data.long_date),
             't' => cldr(data.short_time),
             'T' => cldr(data.long_time),
-            'f' => join(data.long_date, data.short_time),
-            'F' => join(data.long_date, data.long_time),
-            'g' => join(data.short_date, data.short_time),
-            'G' => join(data.short_date, data.long_time),
-            'M' | 'm' => cldr(data.month_day),
-            'Y' | 'y' => cldr(data.year_month),
+            'f' => join('D', data.long_date, data.short_time),
+            'F' => join('D', data.long_date, data.long_time),
+            'g' => join('d', data.short_date, data.short_time),
+            'G' => join('d', data.short_date, data.long_time),
+            'M' | 'm' => date('M', data.month_day),
+            'Y' | 'y' => date('Y', data.year_month),
             'O' | 'o' => self.pattern(
-                "yyyy-MM-dd'T'HH:mm:ss.fffffffzzz",
-                &Culture::invariant(),
-                metadata(&Culture::invariant()),
+                if kind == DateTimeKind::Offset {
+                    "yyyy-MM-dd'T'HH:mm:ss.fffffffzzz"
+                } else {
+                    "yyyy-MM-dd'T'HH:mm:ss.fffffffK"
+                },
+                &invariant,
+                invariant_data,
                 false,
+                kind,
             ),
             's' => self.pattern(
                 "yyyy-MM-dd'T'HH:mm:ss",
-                &Culture::invariant(),
-                metadata(&Culture::invariant()),
+                &invariant,
+                invariant_data,
                 false,
+                kind,
             ),
             'u' => Self(self.0.to_offset(UtcOffset::UTC)).pattern(
                 "yyyy-MM-dd HH:mm:ss'Z'",
-                &Culture::invariant(),
-                metadata(&Culture::invariant()),
+                &invariant,
+                invariant_data,
                 false,
+                kind,
             ),
-            'U' => Self(self.0.to_offset(UtcOffset::UTC)).format("F", culture),
+            'U' if kind == DateTimeKind::Utc => self.format_kind("F", culture, kind),
+            'U' => Err(TranslationError::Format(
+                "Universal full formatting requires an explicitly UTC date/time".into(),
+            )),
             'r' | 'R' => Self(self.0.to_offset(UtcOffset::UTC)).pattern(
                 "ddd, dd MMM yyyy HH:mm:ss 'GMT'",
-                &Culture::invariant(),
-                metadata(&Culture::invariant()),
+                &invariant,
+                invariant_data,
                 false,
+                kind,
             ),
             _ => Err(TranslationError::Format(format!(
                 "Unsupported standard date format '{standard}'"
@@ -128,28 +182,32 @@ impl LocalizedDateTime {
         culture: &Culture,
         data: &DateData,
         cldr: bool,
+        kind: DateTimeKind,
     ) -> Result<String, TranslationError> {
-        let adapted;
-        let pattern =
-            if cldr && pattern == data.short_date && data.short_date_numbers == "M=romanlow" {
-                let roman = [
-                    "i", "ii", "iii", "iv", "v", "vi", "vii", "viii", "ix", "x", "xi", "xii",
-                ][self.0.month() as usize - 1];
-                adapted = pattern.replace('M', &format!("'{roman}'"));
-                &adapted
-            } else {
-                pattern
-            };
         let tokens = tokenize(pattern, cldr)?;
         let has_day = tokens
             .iter()
             .any(|token| matches!(token, Token::Field('d', 1 | 2)));
+        let calendar = CalendarDate::new(self.0, culture)?;
+        let context = DateFormatContext {
+            culture,
+            data,
+            cldr,
+            has_day,
+            calendar: &calendar,
+            kind,
+        };
         let mut output = String::new();
         for token in tokens {
             match token {
                 Token::Literal(value) => output.push_str(&value),
                 Token::Field(field, count) => {
-                    let formatted = self.field(field, count, culture, data, cldr, has_day)?;
+                    let count = if cldr && field == 'y' && count < 4 {
+                        4
+                    } else {
+                        count
+                    };
+                    let formatted = self.field(field, count, &context)?;
                     if !cldr && field == 'F' && formatted.is_empty() && output.ends_with('.') {
                         output.pop();
                     }
@@ -163,11 +221,16 @@ impl LocalizedDateTime {
         &self,
         field: char,
         count: usize,
-        culture: &Culture,
-        data: &DateData,
-        cldr: bool,
-        has_day: bool,
+        context: &DateFormatContext<'_>,
     ) -> Result<String, TranslationError> {
+        let DateFormatContext {
+            culture,
+            data,
+            cldr,
+            has_day,
+            calendar,
+            kind,
+        } = *context;
         let date = self.0;
         let number = |value: i64, digits: usize| {
             FormatArgument::Integer(value).format(&format!("D{digits}"), culture)
@@ -176,21 +239,21 @@ impl LocalizedDateTime {
         let weekday = date.weekday().number_days_from_sunday() as usize;
         match field {
             'y' => {
-                let year = if date.year() <= 0 {
-                    1 - date.year()
-                } else {
-                    date.year()
-                };
+                let year = calendar.year();
+                let short = if cldr { count == 2 } else { count <= 2 };
                 number(
-                    if count == 2 { year % 100 } else { year } as i64,
+                    if short { year % 100 } else { year } as i64,
                     if count == 1 { 0 } else { count },
                 )
             }
             'M' | 'L' if cldr || field == 'M' => {
                 if count < 3 {
-                    number(month as i64 + 1, count)
+                    number(calendar.month() as i64, count)
                 } else {
                     let standalone = field == 'L' || (!cldr && !has_day);
+                    if !calendar.is_gregorian() {
+                        return calendar.month_name(count == 3, standalone);
+                    }
                     let name = if count == 3 {
                         if standalone {
                             data.standalone_short_months[month]
@@ -209,7 +272,7 @@ impl LocalizedDateTime {
                     })
                 }
             }
-            'd' if cldr || count < 3 => number(date.day() as i64, count),
+            'd' if cldr || count < 3 => number(calendar.day() as i64, count.min(2)),
             'd' => Ok(if count == 3 {
                 data.short_days[weekday]
             } else {
@@ -223,22 +286,22 @@ impl LocalizedDateTime {
             } else {
                 data.days[weekday].into()
             }),
-            'H' => number(date.hour() as i64, count),
+            'H' => number(date.hour() as i64, count.min(2)),
             'h' => number(
                 if date.hour().is_multiple_of(12) {
                     12
                 } else {
                     date.hour() % 12
                 } as i64,
-                count,
+                count.min(2),
             ),
             'K' if cldr => number((date.hour() % 12) as i64, count),
             'k' if cldr => number(
                 if date.hour() == 0 { 24 } else { date.hour() } as i64,
                 count,
             ),
-            'm' => number(date.minute() as i64, count),
-            's' => number(date.second() as i64, count),
+            'm' => number(date.minute() as i64, count.min(2)),
+            's' => number(date.second() as i64, count.min(2)),
             'a' if cldr => Ok(if date.hour() < 12 { data.am } else { data.pm }.into()),
             'b' | 'B' if cldr => {
                 let minute = u16::from(date.hour()) * 60 + u16::from(date.minute());
@@ -293,6 +356,9 @@ impl LocalizedDateTime {
             }
             'z' | 'Z' | 'O' | 'v' | 'V' | 'X' | 'x' if cldr => Ok(self.offset(true, false)),
             'z' if !cldr => {
+                if kind == DateTimeKind::Unspecified {
+                    return Err(TranslationError::Format("An unspecified date/time has no UTC offset; supply an explicit offset value".into()));
+                }
                 let offset = date.offset().whole_seconds();
                 let sign = if offset < 0 { '-' } else { '+' };
                 let hours = offset.unsigned_abs() / 3600;
@@ -304,9 +370,25 @@ impl LocalizedDateTime {
                     self.offset(true, false)
                 })
             }
-            'K' if !cldr => Ok(self.offset(true, true)),
-            'G' if cldr => Ok(data.eras[usize::from(date.year() > 0)].into()),
-            'g' if !cldr => Ok(data.eras[usize::from(date.year() > 0)].into()),
+            'K' if !cldr => Ok(match kind {
+                DateTimeKind::Offset => self.offset(true, false),
+                DateTimeKind::Utc => "Z".into(),
+                DateTimeKind::Unspecified => String::new(),
+            }),
+            'G' if cldr => {
+                if calendar.is_gregorian() {
+                    Ok(data.eras[usize::from(date.year() > 0)].into())
+                } else {
+                    calendar.era_name()
+                }
+            }
+            'g' if !cldr => {
+                if calendar.is_gregorian() {
+                    Ok(data.eras[usize::from(date.year() > 0)].into())
+                } else {
+                    calendar.era_name()
+                }
+            }
             '/' if !cldr => Ok(separator(data.short_date, '/')),
             ':' if !cldr => Ok(separator(data.short_time, ':')),
             _ if !cldr => Ok(std::iter::repeat_n(field, count).collect()),
@@ -350,6 +432,61 @@ impl From<OffsetDateTime> for FormatArgument {
         Self::DateTime(LocalizedDateTime(value))
     }
 }
+/// A wall-clock date/time with no inferred machine time zone. `new` preserves an
+/// unspecified value; `utc` explicitly identifies the value as UTC.
+///
+/// Round-trip `O` and custom `K` retain that distinction. `z` and universal `U`
+/// require an explicit UTC or offset value instead of assuming a host time zone.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct LocalizedNaiveDateTime {
+    value: PrimitiveDateTime,
+    utc: bool,
+}
+impl LocalizedNaiveDateTime {
+    pub fn new(value: PrimitiveDateTime) -> Self {
+        Self { value, utc: false }
+    }
+    pub fn utc(value: PrimitiveDateTime) -> Self {
+        Self { value, utc: true }
+    }
+    pub fn value(self) -> PrimitiveDateTime {
+        self.value
+    }
+    pub fn is_utc(self) -> bool {
+        self.utc
+    }
+    pub fn format(&self, format: &str, culture: &Culture) -> Result<String, TranslationError> {
+        LocalizedDateTime(self.value.assume_utc()).format_kind(
+            format,
+            culture,
+            if self.utc {
+                DateTimeKind::Utc
+            } else {
+                DateTimeKind::Unspecified
+            },
+        )
+    }
+}
+impl LocalizedFormat for LocalizedNaiveDateTime {
+    fn format(&self, format: &str, culture: &Culture) -> Result<String, TranslationError> {
+        self.format(format, culture)
+    }
+}
+impl From<PrimitiveDateTime> for LocalizedNaiveDateTime {
+    fn from(value: PrimitiveDateTime) -> Self {
+        Self::new(value)
+    }
+}
+impl From<LocalizedNaiveDateTime> for FormatArgument {
+    fn from(value: LocalizedNaiveDateTime) -> Self {
+        Self::NaiveDateTime(value)
+    }
+}
+impl From<PrimitiveDateTime> for FormatArgument {
+    fn from(value: PrimitiveDateTime) -> Self {
+        Self::NaiveDateTime(value.into())
+    }
+}
 fn separator(pattern: &str, fallback: char) -> String {
     pattern
         .chars()
@@ -376,14 +513,14 @@ fn tokenize(pattern: &str, cldr: bool) -> Result<Vec<Token>, TranslationError> {
             let quote = ch;
             let mut literal = String::new();
             let mut closed = false;
-            if chars.peek() == Some(&quote) {
+            if cldr && chars.peek() == Some(&quote) {
                 chars.next();
                 literal.push(quote);
                 closed = true;
             } else {
                 while let Some(ch) = chars.next() {
                     if ch == quote {
-                        if chars.peek() == Some(&quote) {
+                        if cldr && chars.peek() == Some(&quote) {
                             chars.next();
                             literal.push(quote);
                         } else {
