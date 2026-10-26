@@ -16,7 +16,10 @@ path = "lib.rs"
 
 [dependencies]
 serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+uuid = { version = "1", features = ["v4"] }
 roxmltree.workspace = true
+ferroui-designer-core = { version = "=0.4.0", path = "../FerroUI.Designer.Core" }
 
 [package.metadata.release]
 group = "tools"

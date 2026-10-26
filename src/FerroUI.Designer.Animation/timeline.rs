@@ -10,6 +10,15 @@ pub enum PlaybackDirection {
     Alternate,
     AlternateReverse,
 }
+/// Native visibility policy. Explicit timeline seeks are independent of visibility;
+/// a stateful player uses this policy when advancing its clock.
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq, Serialize, Deserialize)]
+pub enum PlaybackBehavior {
+    #[default]
+    Auto,
+    Always,
+    OnlyIfVisible,
+}
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize)]
 pub enum Repeat {
     Count(u64),
@@ -130,7 +139,10 @@ impl Track {
     }
     pub fn set_easing(&mut self, time: f64, easing: Easing) -> Result<()> {
         easing.validate()?;
-        require(!matches!(easing,Easing::Named(_)),"Per-keyframe easing must be Linear or CubicBezier; named easing belongs to the timeline")?;
+        require(
+            !matches!(easing, Easing::Named(_)),
+            "Per-keyframe easing must be Linear or CubicBezier; named easing belongs to the timeline",
+        )?;
         let key = self
             .keyframes
             .iter_mut()
@@ -251,6 +263,10 @@ impl Track {
 pub struct Timeline {
     pub duration: f64,
     pub delay: f64,
+    #[serde(default)]
+    pub delay_between_iterations: f64,
+    #[serde(default)]
+    pub playback_behavior: PlaybackBehavior,
     pub speed_ratio: f64,
     pub repeat: Repeat,
     pub playback_direction: PlaybackDirection,
@@ -270,6 +286,8 @@ impl Timeline {
         let result = Self {
             duration,
             delay: 0.0,
+            delay_between_iterations: 0.0,
+            playback_behavior: PlaybackBehavior::Auto,
             speed_ratio: 1.0,
             repeat: Repeat::default(),
             playback_direction: PlaybackDirection::Normal,
@@ -290,6 +308,12 @@ impl Timeline {
             "Timeline delay must be finite and nonnegative",
         )?;
         require(
+            self.delay_between_iterations.is_finite()
+                && self.delay_between_iterations >= 0.0
+                && (self.duration + self.delay_between_iterations).is_finite(),
+            "Delay between iterations must be finite, nonnegative and fit the clock range",
+        )?;
+        require(
             self.speed_ratio.is_finite() && self.speed_ratio > 0.0,
             "Playback speed must be finite and positive",
         )?;
@@ -297,7 +321,11 @@ impl Timeline {
             require(
                 count > 0
                     && count <= i64::MAX as u64
-                    && ((self.duration * count as f64 + self.delay) / self.speed_ratio).is_finite(),
+                    && ((self.duration * count as f64
+                        + self.delay_between_iterations * (count - 1) as f64
+                        + self.delay)
+                        / self.speed_ratio)
+                        .is_finite(),
                 "Repeat count must fit native Int64 with a finite total playback duration",
             )?;
         }
@@ -376,11 +404,28 @@ impl Timeline {
         require(time.is_finite(), "Scrub time must be finite")?;
         self.sample_tracks(time.clamp(0.0, self.duration))
     }
+    /// Whether the running clock pauses for an effectively invisible target.
+    pub fn pauses_when_hidden(&self, manually_started: bool) -> bool {
+        match self.playback_behavior {
+            PlaybackBehavior::Always => false,
+            PlaybackBehavior::OnlyIfVisible => true,
+            PlaybackBehavior::Auto => {
+                !manually_started
+                    && !self
+                        .tracks
+                        .iter()
+                        .any(|track| !track.muted && track.property == "IsVisible")
+            }
+        }
+    }
     pub fn total_duration(&self) -> Option<f64> {
         match self.repeat {
-            Repeat::Count(count) => {
-                Some((self.delay + self.duration * count as f64) / self.speed_ratio)
-            }
+            Repeat::Count(count) => Some(
+                (self.delay
+                    + self.duration * count as f64
+                    + self.delay_between_iterations * (count - 1) as f64)
+                    / self.speed_ratio,
+            ),
             Repeat::Infinite => None,
         }
     }
@@ -419,8 +464,10 @@ impl Timeline {
                 })
                 .collect());
         }
+        let cycle = self.duration + self.delay_between_iterations;
         let (iteration, progress) = if let Repeat::Count(count) = self.repeat {
-            let end = self.duration * count as f64;
+            let end =
+                self.duration * count as f64 + self.delay_between_iterations * (count - 1) as f64;
             if elapsed >= end {
                 if !matches!(self.fill, FillMode::Forward | FillMode::Both) {
                     return Ok(vec![]);
@@ -428,17 +475,20 @@ impl Timeline {
                 (count - 1, 1.0)
             } else {
                 (
-                    (elapsed / self.duration).floor() as u64,
-                    (elapsed % self.duration) / self.duration,
+                    (elapsed / cycle).floor() as u64,
+                    ((elapsed % cycle) / self.duration).min(1.0),
                 )
             }
         } else {
-            let iteration = (elapsed / self.duration).floor();
+            let iteration = (elapsed / cycle).floor();
             require(
                 iteration.is_finite() && iteration < u64::MAX as f64,
                 "Playback iteration exceeds the clock index range",
             )?;
-            (iteration as u64, (elapsed % self.duration) / self.duration)
+            (
+                iteration as u64,
+                ((elapsed % cycle) / self.duration).min(1.0),
+            )
         };
         let reverse = match self.playback_direction {
             PlaybackDirection::Normal => false,
@@ -518,6 +568,28 @@ impl Player {
         )?;
         self.time = time;
         Ok(())
+    }
+    /// Advance without charging hidden time to policies that pause when invisible.
+    /// This preserves the elapsed position and resumes without a catch-up jump.
+    pub fn advance_with_visibility(
+        &mut self,
+        delta: f64,
+        timeline: &Timeline,
+        visible: bool,
+        manually_started: bool,
+    ) -> Result<Vec<Sample>> {
+        require(
+            delta.is_finite() && delta >= 0.0,
+            "Clock delta must be finite and nonnegative",
+        )?;
+        self.advance(
+            if !visible && timeline.pauses_when_hidden(manually_started) {
+                0.0
+            } else {
+                delta
+            },
+            timeline,
+        )
     }
     pub fn advance(&mut self, delta: f64, timeline: &Timeline) -> Result<Vec<Sample>> {
         require(

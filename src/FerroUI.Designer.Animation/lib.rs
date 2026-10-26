@@ -2,14 +2,26 @@
 //! Samples can be applied to a live preview without modifying authored XAML, and recording adds
 //! keyframes rather than baking transient preview values into document attributes.
 mod easing;
+mod interactions;
+mod programs;
+mod states;
 mod timeline;
 mod value;
 mod xaml;
 
 pub use easing::Easing;
+pub use interactions::{BehaviorAction, BehaviorModel, BehaviorTrigger};
+pub use programs::{
+    fragment as animation_fragment, native_fragment, rekey_copied_programs, AnimationCodec,
+    AnimationCodecRegistry, AnimationProgram, AnimationPrograms,
+};
+pub use states::{
+    resolve_state_target, rewrite_design_metadata, state_value, StateSetter, StateTransition,
+    VisualState, VisualStateGroup,
+};
 pub use timeline::{
-    CompiledTimeline, FillMode, Keyframe, PlaybackDirection, Player, Repeat, Sample, Timeline,
-    Track,
+    CompiledTimeline, FillMode, Keyframe, PlaybackBehavior, PlaybackDirection, Player, Repeat,
+    Sample, Timeline, Track,
 };
 pub use value::{AnimationValue, ValueKind};
 pub use xaml::{AnimationImport, ImportOptions};
@@ -34,3 +46,6 @@ pub(crate) fn require(condition: bool, message: impl Into<String>) -> Result<()>
 
 #[cfg(test)]
 mod tests;
+
+#[cfg(test)]
+mod program_tests;

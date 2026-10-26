@@ -1,6 +1,6 @@
 use crate::{
-    require, AnimationError, AnimationValue, Easing, FillMode, Keyframe, PlaybackDirection, Repeat,
-    Result, Timeline, Track, ValueKind,
+    require, AnimationError, AnimationValue, Easing, FillMode, Keyframe, PlaybackBehavior,
+    PlaybackDirection, Repeat, Result, Timeline, Track, ValueKind,
 };
 use std::collections::BTreeMap;
 
@@ -11,6 +11,8 @@ use std::collections::BTreeMap;
 pub struct ImportOptions {
     pub property_kinds: BTreeMap<String, ValueKind>,
     pub base_values: BTreeMap<String, AnimationValue>,
+    /// Host-resolved literals, keyed by (property name, decoded literal text), e.g. named colors.
+    pub literal_values: BTreeMap<(String, String), AnimationValue>,
     pub strict: bool,
 }
 impl Default for ImportOptions {
@@ -18,6 +20,7 @@ impl Default for ImportOptions {
         Self {
             property_kinds: BTreeMap::new(),
             base_values: BTreeMap::new(),
+            literal_values: BTreeMap::new(),
             strict: true,
         }
     }
@@ -41,17 +44,36 @@ impl Timeline {
             "Native animation duration must be at least one 100 ns tick",
         )?;
         native_ticks(self.delay)?;
+        native_ticks(self.delay_between_iterations)?;
         let tracks = self
             .tracks
             .iter()
             .filter(|t| t.target == target && !t.muted && !t.keyframes.is_empty())
             .collect::<Vec<_>>();
-        require(!tracks.is_empty(), "No enabled tracks for this target")?;
+        require(
+            !tracks.is_empty()
+                || self
+                    .tracks
+                    .iter()
+                    .all(|track| track.muted || track.keyframes.is_empty()),
+            "No enabled tracks for this target",
+        )?;
         let repeat = match self.repeat {
             Repeat::Count(n) => n.to_string(),
             Repeat::Infinite => "Infinite".into(),
         };
-        let mut result=format!("<Animation Duration=\"{}\" Delay=\"{}\" SpeedRatio=\"{}\" IterationCount=\"{}\" PlaybackDirection=\"{:?}\" FillMode=\"{:?}\" Easing=\"{}\">\n",time_string(self.duration),time_string(self.delay),self.speed_ratio,repeat,self.playback_direction,self.fill,escape(&self.easing.to_xaml()));
+        let mut result = format!(
+            "<Animation Duration=\"{}\" Delay=\"{}\" DelayBetweenIterations=\"{}\" PlaybackBehavior=\"{:?}\" SpeedRatio=\"{}\" IterationCount=\"{}\" PlaybackDirection=\"{:?}\" FillMode=\"{:?}\" Easing=\"{}\">\n",
+            time_string(self.duration),
+            time_string(self.delay),
+            time_string(self.delay_between_iterations),
+            self.playback_behavior,
+            self.speed_ratio,
+            repeat,
+            self.playback_direction,
+            self.fill,
+            escape(&self.easing.to_xaml())
+        );
         let mut keys: Vec<(f64, &str, AnimationValue, Easing)> = vec![];
         for track in tracks {
             let first = &track.keyframes[0];
@@ -138,21 +160,24 @@ impl Timeline {
             roxmltree::Document::parse(source).map_err(|e| AnimationError(e.to_string()))?;
         let root = document.root_element();
         require(
-            root.tag_name().name() == "Animation",
+            root.tag_name().name() == "Animation" && native_namespace(root.tag_name().namespace()),
             "Expected an Animation root element",
         )?;
         for attr in root.attributes() {
             require(
-                matches!(
-                    attr.name(),
-                    "Duration"
-                        | "Delay"
-                        | "SpeedRatio"
-                        | "IterationCount"
-                        | "PlaybackDirection"
-                        | "FillMode"
-                        | "Easing"
-                ),
+                attr.namespace().is_none()
+                    && matches!(
+                        attr.name(),
+                        "Duration"
+                            | "Delay"
+                            | "DelayBetweenIterations"
+                            | "PlaybackBehavior"
+                            | "SpeedRatio"
+                            | "IterationCount"
+                            | "PlaybackDirection"
+                            | "FillMode"
+                            | "Easing"
+                    ),
                 format!(
                     "Unsupported Animation attribute {}; retain it in the source editor",
                     attr.name()
@@ -166,6 +191,15 @@ impl Timeline {
         if let Some(value) = root.attribute("Delay") {
             timeline.delay = parse_time(value)?;
         }
+        if let Some(value) = root.attribute("DelayBetweenIterations") {
+            timeline.delay_between_iterations = parse_time(value)?;
+        }
+        timeline.playback_behavior = match root.attribute("PlaybackBehavior").unwrap_or("Auto") {
+            "Auto" => PlaybackBehavior::Auto,
+            "Always" => PlaybackBehavior::Always,
+            "OnlyIfVisible" => PlaybackBehavior::OnlyIfVisible,
+            _ => return Err(AnimationError("Invalid PlaybackBehavior".into())),
+        };
         if let Some(value) = root.attribute("SpeedRatio") {
             timeline.speed_ratio = parse_number(value)?;
         }
@@ -195,10 +229,14 @@ impl Timeline {
         timeline.easing = Easing::parse(root.attribute("Easing").unwrap_or("LinearEasing"))?;
         let mut tracks: BTreeMap<String, Track> = BTreeMap::new();
         for node in root.children().filter(|n| n.is_element()) {
-            require(node.tag_name().name()=="KeyFrame","Only literal KeyFrame children are supported; custom animation objects remain in source")?;
+            require(
+                node.tag_name().name() == "KeyFrame" && native_namespace(node.tag_name().namespace()),
+                "Only literal KeyFrame children are supported; custom animation objects remain in source",
+            )?;
             for attr in node.attributes() {
                 require(
-                    matches!(attr.name(), "Cue" | "KeyTime" | "KeySpline"),
+                    attr.namespace().is_none()
+                        && matches!(attr.name(), "Cue" | "KeyTime" | "KeySpline"),
                     format!("Unsupported KeyFrame attribute {}", attr.name()),
                 )?;
             }
@@ -229,10 +267,14 @@ impl Timeline {
                 "KeySpline must specify four Bezier controls",
             )?;
             for setter in node.children().filter(|n| n.is_element()) {
-                require(setter.tag_name().name()=="Setter"&&setter.children().all(|n|!n.is_element()),"Only literal Setter attributes can be imported; custom or binding objects remain in source")?;
+                require(
+                    setter.tag_name().name() == "Setter" && native_namespace(setter.tag_name().namespace())
+                        && setter.children().all(|n| !n.is_element()),
+                    "Only literal Setter attributes can be imported; custom or binding objects remain in source",
+                )?;
                 for attr in setter.attributes() {
                     require(
-                        matches!(attr.name(), "Property" | "Value"),
+                        attr.namespace().is_none() && matches!(attr.name(), "Property" | "Value"),
                         format!("Unsupported Setter attribute {}", attr.name()),
                     )?;
                 }
@@ -245,16 +287,37 @@ impl Timeline {
                 let source = if let Some(literal) = source.strip_prefix("{}") {
                     literal
                 } else {
-                    require(!source.starts_with('{'), "Resolve animation binding/resource values through the host before importing into a typed timeline")?;
+                    require(
+                        !source.starts_with('{'),
+                        "Resolve animation binding/resource values through the host before importing into a typed timeline",
+                    )?;
                     source
                 };
                 let kind = options
                     .property_kinds
                     .get(property)
                     .copied()
+                    .or_else(|| {
+                        options
+                            .literal_values
+                            .get(&(property.to_owned(), source.to_owned()))
+                            .map(AnimationValue::kind)
+                    })
                     .or_else(|| options.base_values.get(property).map(AnimationValue::kind))
                     .unwrap_or_else(|| infer_kind(property, source));
-                let value = AnimationValue::parse(source, kind)?;
+                let value = if let Some(value) = options
+                    .literal_values
+                    .get(&(property.to_owned(), source.to_owned()))
+                {
+                    value.validate()?;
+                    require(
+                        value.kind() == kind,
+                        "Resolved literal differs from the property type",
+                    )?;
+                    value.clone()
+                } else {
+                    AnimationValue::parse(source, kind)?
+                };
                 let track = tracks
                     .entry(property.into())
                     .or_insert_with(|| Track::new(target, property));
@@ -306,7 +369,7 @@ fn parse_number(source: &str) -> Result<f64> {
 }
 // Keep the native invariant TimeSpan grammar. A bare integer means DAYS,
 // not seconds; fractional seconds require the hh:mm:ss.fffffff form.
-fn parse_time(source: &str) -> Result<f64> {
+pub(crate) fn parse_time(source: &str) -> Result<f64> {
     let invalid = || AnimationError(format!("Invalid native TimeSpan: {source}"));
     let number = |part: &str| -> Result<u64> {
         require(
@@ -377,7 +440,7 @@ fn parse_time(source: &str) -> Result<f64> {
     native_ticks(result)?;
     Ok(result)
 }
-fn native_ticks(time: f64) -> Result<u64> {
+pub(crate) fn native_ticks(time: f64) -> Result<u64> {
     let ticks = time * 10_000_000.0;
     require(
         time.is_finite() && time >= 0.0 && ticks < i64::MAX as f64,
@@ -385,7 +448,7 @@ fn native_ticks(time: f64) -> Result<u64> {
     )?;
     Ok(ticks.round_ties_even() as u64)
 }
-fn time_string(time: f64) -> String {
+pub(crate) fn time_string(time: f64) -> String {
     let ticks = native_ticks(time).expect("validated native duration");
     let days = ticks / 864_000_000_000;
     let hours = ticks / 36_000_000_000 % 24;
@@ -437,4 +500,17 @@ fn literal_value(value: &AnimationValue) -> String {
     } else {
         source
     }
+}
+
+pub(crate) fn native_namespace(namespace: Option<&str>) -> bool {
+    namespace.is_none_or(|namespace| {
+        matches!(
+            namespace,
+            "https://github.com/ferroui"
+                | "using:FerroUI.Animation"
+                | "using:FerroUI.Styling"
+                | "clr-namespace:FerroUI.Animation;assembly=FerroUI.Base"
+                | "clr-namespace:FerroUI.Styling;assembly=FerroUI.Base"
+        )
+    })
 }

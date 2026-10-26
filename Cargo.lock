@@ -1334,8 +1334,11 @@ dependencies = [
 name = "ferroui-designer-animation"
 version = "0.4.0"
 dependencies = [
+ "ferroui-designer-core",
  "roxmltree 0.20.0",
  "serde",
+ "serde_json",
+ "uuid",
 ]
 
 [[package]]
