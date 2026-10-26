@@ -1,9 +1,9 @@
 use super::{
-    impl_untyped_binding_expression, IBindingExpressionSink, Publish, SinkRef, UntypedBindingExpression,
+    impl_untyped_binding_expression, ExpressionError, IBindingExpressionSink, Publish, SinkRef, UntypedBindingExpression,
     UntypedBindingExpressionBase, ValueTypes,
 };
 use crate::data::converters::IMultiValueConverter;
-use crate::data::{BindingBase, BindingExpressionBase, BindingNotification, BindingOperations, BindingPriority};
+use crate::data::{BindingBase, BindingErrorType, BindingExpressionBase, BindingNotification, BindingOperations, BindingPriority};
 use crate::utilities::CultureInfo;
 use crate::{BoxedValue, FerroProperty};
 use std::cell::RefCell;
@@ -76,11 +76,17 @@ impl MultiBindingExpression {
         match &self.converter {
             Some(converter) => {
                 let culture = self.converter_culture.clone().unwrap_or_else(CultureInfo::current_culture);
-                let converted = match converter.convert(&values, target_type, self.converter_parameter.as_ref(), &culture)
+                let (converted, mut error) = match converter.convert(&values, target_type, self.converter_parameter.as_ref(), &culture)
                 {
-                    Ok(v) => v,
-                    Err(_) => Some(FerroProperty::unset_value()),
+                    Ok(v) => (v, None),
+                    Err(error) => (
+                        Some(FerroProperty::unset_value()),
+                        Some(ExpressionError::new(error, BindingErrorType::Error)),
+                    ),
                 };
+                if let Some(notification) = converted.as_ref().and_then(|value| value.downcast_ref::<BindingNotification>()) {
+                    error = notification.error().map(|error| ExpressionError::new(error, notification.error_type()));
+                }
                 let mut converted = BindingNotification::extract_value(converted.as_ref());
                 if BindingOperations::is_do_nothing(converted.as_ref()) {
                     return;
@@ -95,7 +101,7 @@ impl MultiBindingExpression {
                     converted = ValueTypes::try_convert(converted.as_ref(), target_type)
                         .unwrap_or_else(|| Some(FerroProperty::unset_value()));
                 }
-                self.base.publish_value(Publish::Value(converted), None, false);
+                self.base.publish_value(Publish::Value(converted), error, false);
             }
             None => {
                 let list: BoxedValue = Rc::new(values);

@@ -5,9 +5,10 @@
 
 use super::*;
 use crate::data::converters::{FuncMultiValueConverter, IMultiValueConverter};
-use crate::data::core::ValueTypes;
-use crate::data::MultiBinding;
+use crate::data::core::{ValueType, ValueTypes};
+use crate::data::{BindingError, BindingErrorType, BindingNotification, MultiBinding};
 use crate::ferro_object_extensions::to_binding;
+use crate::utilities::CultureInfo;
 use crate::*;
 
 #[repr(C)]
@@ -125,4 +126,73 @@ fn should_update_when_null_value_in_bindings_with_string_format() {
     assert_eq!(Some(s("Converted: Foo")), target.foo());
     b.on_next(None);
     assert_eq!(Some(s("Converted: ")), target.foo());
+}
+
+struct FallibleConverter;
+
+impl IMultiValueConverter for FallibleConverter {
+    fn convert(
+        &self,
+        values: &[Option<BoxedValue>],
+        _target_type: ValueType,
+        _parameter: Option<&BoxedValue>,
+        _culture: &CultureInfo,
+    ) -> Result<Option<BoxedValue>, BindingError> {
+        let value = ValueTypes::to_display_string(values.first().and_then(Option::as_ref));
+        match value.as_str() {
+            "error" => Err(BindingError::message("converter failure")),
+            "notification" => Ok(Some(Rc::new(BindingNotification::with_error_and_fallback(
+                BindingError::message("validation failure"),
+                BindingErrorType::DataValidationError,
+                object("notification fallback"),
+            )))),
+            _ => Ok(object(&value)),
+        }
+    }
+}
+
+#[test]
+fn converter_error_preserves_diagnostic_uses_typed_fallback_and_recovers() {
+    let target = Class1::new();
+    let source = Subject::<Option<BoxedValue>>::behavior(object("error"));
+    let binding = MultiBinding::new()
+        .with_converter(Rc::new(FallibleConverter))
+        .with_bindings(vec![to_binding(source.observable())])
+        .with_fallback_value(object("binding fallback"));
+    let expression = target.bind_binding(Class1::foo_property(), &binding);
+    let base = expression.as_untyped().unwrap().base();
+
+    assert_eq!(target.foo().as_deref(), Some("binding fallback"));
+    assert_eq!(base.error_type(), BindingErrorType::Error);
+    assert_eq!(
+        base.error().unwrap().exception.to_string(),
+        "converter failure"
+    );
+
+    source.on_next(object("recovered"));
+    assert_eq!(target.foo().as_deref(), Some("recovered"));
+    assert_eq!(base.error_type(), BindingErrorType::None);
+}
+
+#[test]
+fn converter_notification_preserves_its_error_kind_and_value() {
+    let target = Class1::new();
+    let source = Subject::<Option<BoxedValue>>::behavior(object("notification"));
+    let binding = MultiBinding::new()
+        .with_converter(Rc::new(FallibleConverter))
+        .with_bindings(vec![to_binding(source.observable())])
+        .with_fallback_value(object("binding fallback"));
+    let expression = target.bind_binding(Class1::foo_property(), &binding);
+    let base = expression.as_untyped().unwrap().base();
+
+    assert_eq!(target.foo().as_deref(), Some("notification fallback"));
+    assert_eq!(base.error_type(), BindingErrorType::DataValidationError);
+    assert_eq!(
+        base.error().unwrap().exception.to_string(),
+        "validation failure"
+    );
+
+    source.on_next(object("recovered"));
+    assert_eq!(target.foo().as_deref(), Some("recovered"));
+    assert_eq!(base.error_type(), BindingErrorType::None);
 }
