@@ -15,7 +15,7 @@ use crate::ast::{
     IXamlAstNode, IXamlAstTypeReference, IXamlAstValueNode, IXamlLineInfo,
     XamlAstNamePropertyReference, XamlAstNodeExtensions, XamlAstObjectNode, XamlAstTextNode,
     XamlAstXamlPropertyValueNode, XamlAstXmlDirective, XamlAstXmlTypeReference, XamlDocument,
-    XamlLineInfo,
+    XamlLineInfo, XamlNamespaceScope,
 };
 use crate::exceptions::{XamlError, XamlResult};
 use crate::xaml_namespaces::XamlNamespaces;
@@ -278,8 +278,7 @@ struct VisibleAttribute<'a, 'input> {
 }
 
 enum ElementAttribute<'a, 'input> {
-    /// An `xmlns`/`xmlns:prefix` declaration at the given position.
-    NamespaceDeclaration(XamlLineInfo),
+    NamespaceDeclaration,
     Attribute(VisibleAttribute<'a, 'input>),
 }
 
@@ -293,6 +292,7 @@ struct ParserContext<'input> {
     lines: LineIndex<'input>,
     source: &'input str,
     compat: RefCell<CompatibleXmlReader>,
+    namespace_scopes: RefCell<Vec<Rc<XamlNamespaceScope>>>,
 }
 
 fn lookup_raw_namespace<'a>(el: XmlNode<'a, '_>, prefix: &str) -> Option<&'a str> {
@@ -308,7 +308,9 @@ impl<'input> ParserContext<'input> {
     fn li(&self, node: XmlNode<'_, 'input>) -> XamlLineInfo {
         // Elements are positioned at their name (after '<'), other nodes at their first character.
         let offset = node.range().start + usize::from(node.is_element());
-        self.lines.line_info(offset)
+        self.lines
+            .line_info(offset)
+            .with_namespace_scope(self.namespace_scopes.borrow().last().cloned())
     }
 
     fn mapped(&self, ns: &str) -> String {
@@ -376,14 +378,15 @@ impl<'input> ParserContext<'input> {
         let raw_attributes = scan_start_tag(self.source, el.range().start);
         let mut xml_attributes = el.attributes();
         let mut attributes = Vec::with_capacity(raw_attributes.len());
+        let mut declarations = HashMap::new();
         for raw in raw_attributes {
             let line_info = self.lines.line_info(raw.offset);
             if let Some(prefix) = raw.declared_prefix() {
                 // Reading the declaration's value maps the declared namespace.
                 if let Some(ns) = lookup_raw_namespace(el, prefix) {
-                    self.mapped(ns);
+                    declarations.insert(prefix.to_owned(), self.mapped(ns));
                 }
-                attributes.push(ElementAttribute::NamespaceDeclaration(line_info));
+                attributes.push(ElementAttribute::NamespaceDeclaration);
                 continue;
             }
 
@@ -403,6 +406,18 @@ impl<'input> ParserContext<'input> {
             }));
         }
 
+        let scope =
+            XamlNamespaceScope::new(self.namespace_scopes.borrow().last().cloned(), declarations);
+        for attribute in &mut attributes {
+            if let ElementAttribute::Attribute(attribute) = attribute {
+                attribute.line_info = attribute
+                    .line_info
+                    .clone()
+                    .with_namespace_scope(Some(scope.clone()));
+            }
+        }
+        self.namespace_scopes.borrow_mut().push(scope);
+
         EnteredElement {
             namespace,
             attributes,
@@ -411,6 +426,7 @@ impl<'input> ParserContext<'input> {
     }
 
     fn leave_element(&self, entered: &EnteredElement<'_, 'input>) {
+        self.namespace_scopes.borrow_mut().pop();
         if entered.pushed_scope {
             self.compat.borrow_mut().pop_scope();
         }
@@ -609,12 +625,12 @@ impl<'input> ParserContext<'input> {
     fn parse_new_instance(
         &self,
         el: XmlNode<'_, 'input>,
-        root: bool,
+        _root: bool,
         space_mode: XmlSpace,
         depth: usize,
     ) -> XamlResult<Rc<XamlAstObjectNode>> {
         let entered = self.enter_element(el);
-        let result = self.parse_new_instance_core(el, &entered, root, space_mode, depth);
+        let result = self.parse_new_instance_core(el, &entered, space_mode, depth);
         self.leave_element(&entered);
         result
     }
@@ -623,7 +639,6 @@ impl<'input> ParserContext<'input> {
         &self,
         el: XmlNode<'_, 'input>,
         entered: &EnteredElement<'_, 'input>,
-        root: bool,
         space_mode: XmlSpace,
         depth: usize,
     ) -> XamlResult<Rc<XamlAstObjectNode>> {
@@ -652,15 +667,7 @@ impl<'input> ParserContext<'input> {
         let i = XamlAstObjectNode::new(&el_li, type_.clone());
         for attr in &entered.attributes {
             let attr = match attr {
-                ElementAttribute::NamespaceDeclaration(line_info) => {
-                    if !root {
-                        return Err(XamlError::parse_exception(
-                            "xmlns declarations are only allowed on the root element to preserve memory",
-                            Some(line_info),
-                        ));
-                    }
-                    continue;
-                }
+                ElementAttribute::NamespaceDeclaration => continue,
                 ElementAttribute::Attribute(attr) => attr,
             };
 
@@ -723,39 +730,43 @@ impl<'input> ParserContext<'input> {
                 let node_local_name = node.tag_name().name();
                 if let Some((type_name, property_name)) = node_local_name.split_once('.') {
                     let node_entered = self.enter_element(node);
-                    let result = (|| -> XamlResult<Rc<XamlAstXamlPropertyValueNode>> {
-                        if !node_entered.attributes.is_empty() {
-                            return Err(XamlError::parse_exception(
-                                "Attributes aren't allowed on element properties",
-                                Some(&self.li(node)),
-                            ));
-                        }
+                    let result =
+                        (|| -> XamlResult<Rc<XamlAstXamlPropertyValueNode>> {
+                            let node_li = self.li(node);
+                            if node_entered.attributes.iter().any(|attribute| {
+                                matches!(attribute, ElementAttribute::Attribute(_))
+                            }) {
+                                return Err(XamlError::parse_exception(
+                                    "Attributes aren't allowed on element properties",
+                                    Some(&self.li(node)),
+                                ));
+                            }
 
-                        let declaring_type: Rc<dyn IXamlAstTypeReference> = if type_name
-                            == type_.name()
-                            && Some(node_entered.namespace.as_str())
-                                == type_.xml_namespace().as_deref()
-                        {
-                            type_.clone()
-                        } else {
-                            XamlAstXmlTypeReference::new(
-                                &el_li,
-                                Some(&node_entered.namespace),
-                                type_name,
-                            )
-                        };
-                        Ok(XamlAstXamlPropertyValueNode::with_values(
-                            &el_li,
-                            XamlAstNamePropertyReference::new(
-                                &el_li,
-                                declaring_type,
-                                property_name,
-                                type_.clone(),
-                            ),
-                            self.parse_value_node_children(node, space_mode, depth + 1)?,
-                            false,
-                        ))
-                    })();
+                            let declaring_type: Rc<dyn IXamlAstTypeReference> = if type_name
+                                == type_.name()
+                                && Some(node_entered.namespace.as_str())
+                                    == type_.xml_namespace().as_deref()
+                            {
+                                type_.clone()
+                            } else {
+                                XamlAstXmlTypeReference::new(
+                                    &node_li,
+                                    Some(&node_entered.namespace),
+                                    type_name,
+                                )
+                            };
+                            Ok(XamlAstXamlPropertyValueNode::with_values(
+                                &node_li,
+                                XamlAstNamePropertyReference::new(
+                                    &node_li,
+                                    declaring_type,
+                                    property_name,
+                                    type_.clone(),
+                                ),
+                                self.parse_value_node_children(node, space_mode, depth + 1)?,
+                                false,
+                            ))
+                        })();
                     self.leave_element(&node_entered);
                     i.children.borrow_mut().push(result?);
                     continue;
@@ -864,6 +875,7 @@ impl XDocumentXamlParser {
             lines,
             source: xml_text,
             compat: RefCell::new(CompatibleXmlReader::new(compatibility_mappings)),
+            namespace_scopes: RefCell::new(Vec::new()),
         };
 
         let root = xml.root_element();

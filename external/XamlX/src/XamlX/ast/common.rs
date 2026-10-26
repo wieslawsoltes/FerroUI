@@ -14,7 +14,7 @@ use crate::exceptions::{XamlError, XamlResult};
 use crate::type_system::{IXamlType, XamlPseudoType};
 
 use super::{
-    XamlAstClrProperty, XamlAstClrTypeReference, XamlMethodCallBaseNode,
+    XamlAstClrProperty, XamlAstClrTypeReference, XamlMethodCallBaseNode, XamlNamespaceScope,
     XamlValueWithManipulationNode, XamlValueWithSideEffectNodeBase,
 };
 
@@ -23,6 +23,11 @@ pub trait IXamlLineInfo {
     fn position(&self) -> i32;
     fn set_line(&self, value: i32);
     fn set_position(&self, value: i32);
+    /// Lexical XML namespaces of this source occurrence. Synthetic or host-defined nodes
+    /// without a scope continue to use the document-level namespace fallback.
+    fn namespace_scope(&self) -> Option<Rc<XamlNamespaceScope>> {
+        None
+    }
 }
 
 /// A plain line/position pair.
@@ -30,6 +35,7 @@ pub trait IXamlLineInfo {
 pub struct XamlLineInfo {
     line: Cell<i32>,
     position: Cell<i32>,
+    namespace_scope: Option<Rc<XamlNamespaceScope>>,
 }
 
 impl XamlLineInfo {
@@ -37,7 +43,12 @@ impl XamlLineInfo {
         Self {
             line: Cell::new(line),
             position: Cell::new(position),
+            namespace_scope: None,
         }
+    }
+    pub fn with_namespace_scope(mut self, scope: Option<Rc<XamlNamespaceScope>>) -> Self {
+        self.namespace_scope = scope;
+        self
     }
 }
 
@@ -53,6 +64,9 @@ impl IXamlLineInfo for XamlLineInfo {
     }
     fn set_position(&self, value: i32) {
         self.position.set(value)
+    }
+    fn namespace_scope(&self) -> Option<Rc<XamlNamespaceScope>> {
+        self.namespace_scope.clone()
     }
 }
 
@@ -228,6 +242,9 @@ macro_rules! xaml_line_info_impl {
             fn set_position(&self, value: i32) {
                 $crate::ast::IXamlLineInfo::set_position(&self.$($field)+, value)
             }
+            fn namespace_scope(&self) -> Option<::std::rc::Rc<$crate::ast::XamlNamespaceScope>> {
+                $crate::ast::IXamlLineInfo::namespace_scope(&self.$($field)+)
+            }
         }
     };
 }
@@ -237,6 +254,7 @@ macro_rules! xaml_line_info_impl {
 pub struct XamlAstNode {
     line: Cell<i32>,
     position: Cell<i32>,
+    namespace_scope: Option<Rc<XamlNamespaceScope>>,
 }
 
 impl XamlAstNode {
@@ -244,6 +262,7 @@ impl XamlAstNode {
         Self {
             line: Cell::new(line_info.line()),
             position: Cell::new(line_info.position()),
+            namespace_scope: line_info.namespace_scope(),
         }
     }
 }
@@ -260,6 +279,9 @@ impl IXamlLineInfo for XamlAstNode {
     }
     fn set_position(&self, value: i32) {
         self.position.set(value)
+    }
+    fn namespace_scope(&self) -> Option<Rc<XamlNamespaceScope>> {
+        self.namespace_scope.clone()
     }
 }
 

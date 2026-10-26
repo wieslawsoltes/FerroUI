@@ -29,7 +29,9 @@ use ferroui_base::BoxedValue;
 use crate::converters::ITypeDescriptorContext;
 use crate::{IProvideValueTarget, IRootObjectProvider, IUriContext, ServiceProviderExtensions};
 
-use super::{IFerroXamlIlEagerParentStackProvider, IFerroXamlIlParentStackProvider, XamlIlRuntimeHelpers};
+use super::{
+    IFerroXamlIlEagerParentStackProvider, IFerroXamlIlParentStackProvider, XamlIlRuntimeHelpers,
+};
 
 /// The services a context provides itself, in the order they are checked.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
@@ -66,10 +68,22 @@ impl XamlIlContextDefinition {
     /// are checked.
     pub fn own_services(&self) -> impl Iterator<Item = XamlIlContextService> {
         [
-            (self.root_object_provider, XamlIlContextService::RootObjectProvider),
-            (self.parent_stack_provider, XamlIlContextService::ParentStackProvider),
-            (self.type_descriptor_context, XamlIlContextService::TypeDescriptorContext),
-            (self.provide_value_target, XamlIlContextService::ProvideValueTarget),
+            (
+                self.root_object_provider,
+                XamlIlContextService::RootObjectProvider,
+            ),
+            (
+                self.parent_stack_provider,
+                XamlIlContextService::ParentStackProvider,
+            ),
+            (
+                self.type_descriptor_context,
+                XamlIlContextService::TypeDescriptorContext,
+            ),
+            (
+                self.provide_value_target,
+                XamlIlContextService::ProvideValueTarget,
+            ),
             (self.uri_context_provider, XamlIlContextService::UriContext),
         ]
         .into_iter()
@@ -110,6 +124,32 @@ pub trait IStaticServiceProvider: 'static {
     fn get_static_service(&self, service_type: TypeId) -> Option<Rc<dyn Any>>;
 }
 
+struct ScopedStaticProvider {
+    token: Rc<()>,
+    provider: Rc<dyn IStaticServiceProvider>,
+}
+
+/// Restores the previous lexical service scope on normal return, errors and unwinding.
+#[must_use = "Keep this guard alive for the lexical service scope"]
+pub struct XamlStaticProviderScope {
+    context: Weak<XamlIlContext>,
+    token: Rc<()>,
+}
+
+impl Drop for XamlStaticProviderScope {
+    fn drop(&mut self) {
+        if let Some(context) = self.context.upgrade() {
+            let mut providers = context.scoped_static_providers.borrow_mut();
+            if let Some(index) = providers
+                .iter()
+                .rposition(|entry| Rc::ptr_eq(&entry.token, &self.token))
+            {
+                providers.remove(index);
+            }
+        }
+    }
+}
+
 /// The run-time context: the state of one `Build`, `Populate` or deferred
 /// content build, and the service provider handed to user code during it.
 pub struct XamlIlContext {
@@ -122,6 +162,7 @@ pub struct XamlIlContext {
     parent_service_provider: Option<Rc<dyn IServiceProvider>>,
     inner_service_provider: RefCell<Option<Rc<dyn IServiceProvider>>>,
     static_providers: Rc<[Rc<dyn IStaticServiceProvider>]>,
+    scoped_static_providers: RefCell<Vec<ScopedStaticProvider>>,
     target_object: RefCell<MarkupValue>,
     target_property: RefCell<MarkupValue>,
     base_uri: RefCell<Option<Uri>>,
@@ -148,15 +189,39 @@ impl XamlIlContext {
             parent_service_provider,
             inner_service_provider: RefCell::new(None),
             static_providers,
+            scoped_static_providers: RefCell::new(Vec::new()),
             target_object: RefCell::new(None),
             target_property: RefCell::new(None),
-            base_uri: RefCell::new(if definition.uri_context_provider { base_uri } else { None }),
+            base_uri: RefCell::new(if definition.uri_context_provider {
+                base_uri
+            } else {
+                None
+            }),
             extensions: RefCell::new(HashMap::new()),
         })
     }
 
     pub fn definition(&self) -> XamlIlContextDefinition {
         self.definition
+    }
+
+    /// Override document services within a lexical scope, such as a nested XML namespace
+    /// declaration. Own context services retain precedence and sibling scopes are isolated.
+    pub fn push_static_provider(
+        self: &Rc<Self>,
+        provider: Rc<dyn IStaticServiceProvider>,
+    ) -> XamlStaticProviderScope {
+        let token = Rc::new(());
+        self.scoped_static_providers
+            .borrow_mut()
+            .push(ScopedStaticProvider {
+                token: token.clone(),
+                provider,
+            });
+        XamlStaticProviderScope {
+            context: Rc::downgrade(self),
+            token,
+        }
     }
 
     /// The `RootObject` field.
@@ -284,16 +349,24 @@ impl XamlIlContext {
     /// State a language attaches to the context (the fields its context
     /// type builder callback adds to the generated class).
     pub fn extension<T: 'static>(&self) -> Option<Rc<T>> {
-        self.extensions.borrow().get(&TypeId::of::<T>()).cloned().and_then(|e| e.downcast::<T>().ok())
+        self.extensions
+            .borrow()
+            .get(&TypeId::of::<T>())
+            .cloned()
+            .and_then(|e| e.downcast::<T>().ok())
     }
 
     pub fn set_extension<T: 'static>(&self, extension: Rc<T>) {
-        self.extensions.borrow_mut().insert(TypeId::of::<T>(), extension);
+        self.extensions
+            .borrow_mut()
+            .insert(TypeId::of::<T>(), extension);
     }
 
     /// This context as a service provider handle.
     pub fn as_service_provider(&self) -> Option<Rc<dyn IServiceProvider>> {
-        self.this.upgrade().map(|this| this as Rc<dyn IServiceProvider>)
+        self.this
+            .upgrade()
+            .map(|this| this as Rc<dyn IServiceProvider>)
     }
 
     /// The services of the context without the ones of its inner service
@@ -301,7 +374,9 @@ impl XamlIlContext {
     pub fn get_service_below_inner(&self, service_type: TypeId) -> Option<Rc<dyn Any>> {
         #[cfg(all(feature = "hot-reload", debug_assertions))]
         if let Some(generation) = self.extension::<crate::reload_events::EventGeneration>() {
-            if let Some(value) = service(service_type, || generation) { return Some(value); }
+            if let Some(value) = service(service_type, || generation) {
+                return Some(value);
+            }
         }
         if let Some(this) = self.this.upgrade() {
             for own in self.definition.own_services() {
@@ -310,12 +385,28 @@ impl XamlIlContext {
                 }
             }
         }
+        // Release the collection borrow before calling host code, which may create nested
+        // markup scopes or resolve other services reentrantly.
+        let scoped = self
+            .scoped_static_providers
+            .borrow()
+            .iter()
+            .rev()
+            .map(|entry| entry.provider.clone())
+            .collect::<Vec<_>>();
+        for provider in scoped {
+            if let Some(service) = provider.get_static_service(service_type) {
+                return Some(service);
+            }
+        }
         for provider in self.static_providers.iter() {
             if let Some(service) = provider.get_static_service(service_type) {
                 return Some(service);
             }
         }
-        self.parent_service_provider.as_ref()?.get_service(service_type)
+        self.parent_service_provider
+            .as_ref()?
+            .get_service(service_type)
     }
 }
 
@@ -384,7 +475,9 @@ impl IFerroXamlIlParentStackProvider for XamlIlContext {
         XamlIlContext::parents(self).into_iter().flatten().collect()
     }
 
-    fn as_eager_parent_stack_provider(self: Rc<Self>) -> Option<Rc<dyn IFerroXamlIlEagerParentStackProvider>> {
+    fn as_eager_parent_stack_provider(
+        self: Rc<Self>,
+    ) -> Option<Rc<dyn IFerroXamlIlEagerParentStackProvider>> {
         Some(self)
     }
 }
@@ -402,7 +495,9 @@ impl IFerroXamlIlEagerParentStackProvider for XamlIlContext {
     fn parent_provider(&self) -> Option<Rc<dyn IFerroXamlIlEagerParentStackProvider>> {
         let parent = self.parent_service_provider()?;
         let provider = parent.get_service_of::<Rc<dyn IFerroXamlIlParentStackProvider>>()?;
-        Some(XamlIlRuntimeHelpers::as_eager_parent_stack_provider(provider))
+        Some(XamlIlRuntimeHelpers::as_eager_parent_stack_provider(
+            provider,
+        ))
     }
 }
 
@@ -420,24 +515,28 @@ impl IXamlIlContextServices for FrameworkContextServices {
         service_type: TypeId,
     ) -> Option<Rc<dyn Any>> {
         match own {
-            XamlIlContextService::RootObjectProvider => {
-                service(service_type, || context.clone() as Rc<dyn IRootObjectProvider>)
+            XamlIlContextService::RootObjectProvider => service(service_type, || {
+                context.clone() as Rc<dyn IRootObjectProvider>
+            }),
+            XamlIlContextService::ParentStackProvider => service(service_type, || {
+                context.clone() as Rc<dyn IFerroXamlIlParentStackProvider>
+            }),
+            XamlIlContextService::TypeDescriptorContext => service(service_type, || {
+                context.clone() as Rc<dyn ITypeDescriptorContext>
+            }),
+            XamlIlContextService::ProvideValueTarget => service(service_type, || {
+                context.clone() as Rc<dyn IProvideValueTarget>
+            }),
+            XamlIlContextService::UriContext => {
+                service(service_type, || context.clone() as Rc<dyn IUriContext>)
             }
-            XamlIlContextService::ParentStackProvider => {
-                service(service_type, || context.clone() as Rc<dyn IFerroXamlIlParentStackProvider>)
-            }
-            XamlIlContextService::TypeDescriptorContext => {
-                service(service_type, || context.clone() as Rc<dyn ITypeDescriptorContext>)
-            }
-            XamlIlContextService::ProvideValueTarget => {
-                service(service_type, || context.clone() as Rc<dyn IProvideValueTarget>)
-            }
-            XamlIlContextService::UriContext => service(service_type, || context.clone() as Rc<dyn IUriContext>),
         }
     }
 
     fn get_parent_root_object(&self, parent: &Rc<dyn IServiceProvider>) -> Option<MarkupValue> {
-        parent.get_service_of::<Rc<dyn IRootObjectProvider>>().map(|provider| provider.root_object())
+        parent
+            .get_service_of::<Rc<dyn IRootObjectProvider>>()
+            .map(|provider| provider.root_object())
     }
 
     fn get_parent_stack(&self, parent: &Rc<dyn IServiceProvider>) -> Option<Vec<MarkupValue>> {
@@ -457,12 +556,15 @@ impl XamlIlContext {
     /// Fills the name scope field from the parent service provider: what the
     /// constructor of the context class of the framework language does.
     pub fn initialize_name_scope_field(&self) {
-        let scope = self.parent_service_provider().and_then(|parent| parent.get_name_scope());
+        let scope = self
+            .parent_service_provider()
+            .and_then(|parent| parent.get_name_scope());
         self.set_extension(Rc::new(FerroXamlIlContextNameScopeField(scope)));
     }
 
     /// The value of the name scope field; `None` before it is filled.
     pub fn name_scope_field(&self) -> Option<Rc<dyn INameScope>> {
-        self.extension::<FerroXamlIlContextNameScopeField>().and_then(|field| field.0.clone())
+        self.extension::<FerroXamlIlContextNameScopeField>()
+            .and_then(|field| field.0.clone())
     }
 }

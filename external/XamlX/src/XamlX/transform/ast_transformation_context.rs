@@ -7,9 +7,9 @@ use std::rc::Rc;
 
 use crate::ast::IXamlAstTypeReference;
 use crate::ast::{
-    visit_node, IXamlAstNode, IXamlAstValueNode, IXamlAstVisitor,
+    visit_node, IXamlAstNode, IXamlAstValueNode, IXamlAstVisitor, IXamlLineInfo,
     SkipXamlValueWithManipulationNode, XamlAstClrTypeReference, XamlAstNodeExtensions,
-    XamlDocument,
+    XamlDocument, XamlNamespaceScope,
 };
 use crate::diagnostics::{exception_to_diagnostic, XamlDiagnostic, XamlDiagnosticSeverity};
 use crate::exceptions::{XamlError, XamlResult};
@@ -24,6 +24,7 @@ pub struct AstTransformationContext {
     /// See [`AstTransformationContext::set_document_override`].
     document_override: RefCell<Option<Option<String>>>,
     pub namespace_aliases: RefCell<HashMap<String, String>>,
+    current_namespace_scope: RefCell<Option<Rc<XamlNamespaceScope>>>,
     configuration: Rc<TransformerConfiguration>,
 }
 
@@ -51,6 +52,7 @@ impl AstTransformationContext {
                     .map(|d| d.namespace_aliases.clone())
                     .unwrap_or_default(),
             ),
+            current_namespace_scope: RefCell::new(None),
             configuration,
         }
     }
@@ -92,7 +94,27 @@ impl AstTransformationContext {
 
     /// `NamespaceAliases.TryGetValue`.
     pub fn try_get_namespace_alias(&self, alias: &str) -> Option<String> {
-        self.namespace_aliases.borrow().get(alias).cloned()
+        self.current_namespace_scope
+            .borrow()
+            .as_ref()
+            .and_then(|scope| scope.lookup(alias).map(str::to_owned))
+            .or_else(|| self.namespace_aliases.borrow().get(alias).cloned())
+    }
+
+    /// Resolve a prefix at a source occurrence even when a transformer examines a child
+    /// before visiting it or retains a type name for a later pass.
+    pub fn try_get_namespace_alias_at(
+        &self,
+        alias: &str,
+        info: &dyn IXamlLineInfo,
+    ) -> Option<String> {
+        match info.namespace_scope() {
+            Some(scope) => scope
+                .lookup(alias)
+                .map(str::to_owned)
+                .or_else(|| self.namespace_aliases.borrow().get(alias).cloned()),
+            None => self.try_get_namespace_alias(alias),
+        }
     }
 
     /// Reports a diagnostic to the configured handler and returns the resulting severity.
@@ -205,7 +227,24 @@ impl<'a, C: IContextXamlAstVisitorCore> ContextXamlAstVisitor<'a, C> {
 
 impl<C: IContextXamlAstVisitorCore> IXamlAstVisitor for ContextXamlAstVisitor<'_, C> {
     fn visit(&mut self, node: Rc<dyn IXamlAstNode>) -> XamlResult<Rc<dyn IXamlAstNode>> {
-        match self.core.visit_core(self.context, node.clone()) {
+        let inherited = self
+            .context
+            .current_namespace_scope
+            .borrow()
+            .clone()
+            .or_else(|| {
+                self.context
+                    .parent_nodes()
+                    .iter()
+                    .find_map(|parent| parent.namespace_scope())
+            });
+        let previous = self
+            .context
+            .current_namespace_scope
+            .replace(node.namespace_scope().or(inherited));
+        let result = self.core.visit_core(self.context, node.clone());
+        self.context.current_namespace_scope.replace(previous);
+        match result {
             Ok(output_node) => Ok(output_node),
             Err(e) => self.exception_handler(e, &node),
         }

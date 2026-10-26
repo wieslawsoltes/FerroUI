@@ -27,9 +27,21 @@ pub struct XmlNamespaceInfoProvider {
 
 impl XmlNamespaceInfoProvider {
     pub fn new(configuration: Rc<TransformerConfiguration>, document: &XamlDocument) -> Rc<Self> {
+        Self::from_aliases(configuration, &document.namespace_aliases)
+    }
+
+    /// Resolve exactly the aliases visible at an AST source occurrence. This is shared by
+    /// interpreted markup and emitted Rust so local prefix shadowing has identical meaning.
+    pub fn from_aliases(
+        configuration: Rc<TransformerConfiguration>,
+        aliases: &HashMap<String, String>,
+    ) -> Rc<Self> {
         Rc::new(Self {
             configuration,
-            aliases: document.namespace_aliases.iter().map(|(k, v)| (k.clone(), v.clone())).collect(),
+            aliases: aliases
+                .iter()
+                .map(|(k, v)| (k.clone(), v.clone()))
+                .collect(),
             namespaces: OnceCell::new(),
         })
     }
@@ -40,11 +52,15 @@ impl XmlNamespaceInfoProvider {
             .get_or_init(|| {
                 let mut namespaces = HashMap::with_capacity(self.aliases.len());
                 for (alias, xmlns) in &self.aliases {
-                    let resolved = NamespaceInfoHelper::try_resolve(&self.configuration, Some(xmlns.as_str())).unwrap_or_default();
+                    let resolved =
+                        NamespaceInfoHelper::try_resolve(&self.configuration, Some(xmlns.as_str()))
+                            .unwrap_or_default();
                     let infos = resolved
                         .into_iter()
                         .map(|r| XamlXmlNamespaceInfo {
-                            clr_assembly_name: r.assembly_name.or_else(|| r.assembly.map(|a| a.name())),
+                            clr_assembly_name: r
+                                .assembly_name
+                                .or_else(|| r.assembly.map(|a| a.name())),
                             clr_namespace: r.clr_namespace,
                         })
                         .collect();

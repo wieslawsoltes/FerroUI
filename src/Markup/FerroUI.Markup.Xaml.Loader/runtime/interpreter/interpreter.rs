@@ -16,12 +16,15 @@ use std::rc::Rc;
 use ferroui_base::metadata::{IServiceProvider, MarkupInvokeError, MarkupValue};
 use ferroui_base::utilities::Uri;
 use xamlx::ast::{
-    visit_node, IXamlAstNode, IXamlAstVisitor, IXamlAstValueNode, IXamlLineInfo, IXamlPropertySetter,
-    IXamlWrappedMethod, XamlAstClrProperty, XamlAstExtensions, XamlAstNewClrObjectNode, XamlAstNodeExtensions,
-    XamlDocument, XamlMethodWithCasts,
+    visit_node, IXamlAstNode, IXamlAstValueNode, IXamlAstVisitor, IXamlLineInfo,
+    IXamlPropertySetter, IXamlWrappedMethod, XamlAstClrProperty, XamlAstExtensions,
+    XamlAstNewClrObjectNode, XamlAstNodeExtensions, XamlDocument, XamlMethodWithCasts,
+    XamlNamespaceScope,
 };
 use xamlx::exceptions::{XamlError, XamlResult};
-use xamlx::extensions::{query_node_interface, query_property_setter_interface, query_wrapped_method_interface};
+use xamlx::extensions::{
+    query_node_interface, query_property_setter_interface, query_wrapped_method_interface,
+};
 use xamlx::transform::TransformerConfiguration;
 use xamlx::type_system::{IXamlConstructor, IXamlMethod, IXamlType, XamlPseudoType};
 
@@ -29,8 +32,8 @@ use crate::runtime::type_system::{RuntimeConstructor, RuntimeMethod, RuntimeType
 
 use super::evaluators;
 use super::runtime_context::{
-    namespace_info_static_provider, IRuntimeContextServices, IStaticServiceProvider, RuntimeContext,
-    RuntimeContextDefinition, XmlNamespaceInfoProvider,
+    namespace_info_static_provider, IRuntimeContextServices, IStaticServiceProvider,
+    RuntimeContext, RuntimeContextDefinition, XmlNamespaceInfoProvider,
 };
 use super::services::DefaultRuntimeContextServices;
 
@@ -46,12 +49,18 @@ pub struct EvalResult {
 impl EvalResult {
     /// The result of a node that yields nothing.
     pub fn void() -> Self {
-        Self { return_type: None, value: None }
+        Self {
+            return_type: None,
+            value: None,
+        }
     }
 
     /// The result of a value node.
     pub fn value(return_type: Rc<dyn IXamlType>, value: MarkupValue) -> Self {
-        Self { return_type: Some(return_type), value }
+        Self {
+            return_type: Some(return_type),
+            value,
+        }
     }
 }
 
@@ -60,7 +69,11 @@ impl EvalResult {
 ///
 /// A manipulation node manipulates [`EvalContext::target`].
 pub trait IXamlNodeEvaluator {
-    fn evaluate(&self, node: &Rc<dyn IXamlAstNode>, context: &mut EvalContext<'_>) -> Option<XamlResult<EvalResult>>;
+    fn evaluate(
+        &self,
+        node: &Rc<dyn IXamlAstNode>,
+        context: &mut EvalContext<'_>,
+    ) -> Option<XamlResult<EvalResult>>;
 }
 
 /// A node that evaluates itself; exposed by a node through
@@ -101,8 +114,12 @@ pub trait IXamlSetterEvaluator {
 /// A property setter that performs itself; exposed by a setter through
 /// `IXamlPropertySetter::query_interface`.
 pub trait IXamlEvaluablePropertySetter {
-    fn evaluate(&self, context: &mut EvalContext<'_>, target: &MarkupValue, arguments: &[MarkupValue])
-        -> XamlResult<()>;
+    fn evaluate(
+        &self,
+        context: &mut EvalContext<'_>,
+        target: &MarkupValue,
+        arguments: &[MarkupValue],
+    ) -> XamlResult<()>;
 }
 
 /// Calls methods that are not methods of the run-time type system: the
@@ -144,7 +161,11 @@ pub trait IXamlWrappedMethodEvaluator {
 /// A wrapped method that calls itself; exposed by a wrapped method through
 /// `IXamlWrappedMethod::query_interface`.
 pub trait IXamlEvaluableWrappedMethod {
-    fn invoke(&self, context: &mut EvalContext<'_>, arguments: &[MarkupValue]) -> XamlResult<MarkupValue>;
+    fn invoke(
+        &self,
+        context: &mut EvalContext<'_>,
+        arguments: &[MarkupValue],
+    ) -> XamlResult<MarkupValue>;
 }
 
 /// Evaluates the provide-value target property descriptor of a property
@@ -159,19 +180,29 @@ pub type RuntimeContextCallback = Rc<dyn Fn(&Rc<RuntimeContext>) -> XamlResult<(
 /// An error raised by evaluated code: the equivalent of an exception of the
 /// managed runtime (`kind` is its type name), with the position of the node
 /// being evaluated.
-pub fn runtime_error(kind: &'static str, message: impl Into<String>, line_info: &dyn IXamlLineInfo) -> XamlError {
+pub fn runtime_error(
+    kind: &'static str,
+    message: impl Into<String>,
+    line_info: &dyn IXamlLineInfo,
+) -> XamlError {
     XamlError::load_exception(message, Some(line_info)).with_derived_type_name(kind)
 }
 
 fn invoke_error(error: MarkupInvokeError, what: &str, line_info: &dyn IXamlLineInfo) -> XamlError {
     match error {
-        MarkupInvokeError::Argument { .. } => {
-            runtime_error("InvalidCastException", format!("{what}: {error}"), line_info)
+        MarkupInvokeError::Argument { .. } => runtime_error(
+            "InvalidCastException",
+            format!("{what}: {error}"),
+            line_info,
+        ),
+        MarkupInvokeError::ArgumentCount { .. } => runtime_error(
+            "InvalidOperationException",
+            format!("{what}: {error}"),
+            line_info,
+        ),
+        MarkupInvokeError::Failed(message) => {
+            runtime_error("TargetInvocationException", message, line_info)
         }
-        MarkupInvokeError::ArgumentCount { .. } => {
-            runtime_error("InvalidOperationException", format!("{what}: {error}"), line_info)
-        }
-        MarkupInvokeError::Failed(message) => runtime_error("TargetInvocationException", message, line_info),
     }
 }
 
@@ -189,6 +220,13 @@ pub struct RuntimeDocument {
     root: Option<Rc<dyn IXamlAstNode>>,
     parent_stack_caches: RefCell<HashMap<usize, ParentStackCache>>,
     assignment_plans: RefCell<HashMap<usize, Rc<evaluators::AssignmentPlan>>>,
+    namespace_providers: RefCell<HashMap<usize, ScopedNamespaceProvider>>,
+}
+
+struct ScopedNamespaceProvider {
+    // Retain the scope whose address is the cache key, including for host-created AST nodes.
+    _scope: Rc<XamlNamespaceScope>,
+    provider: Rc<dyn IStaticServiceProvider>,
 }
 
 impl RuntimeDocument {
@@ -205,6 +243,7 @@ impl RuntimeDocument {
             root,
             parent_stack_caches: RefCell::new(HashMap::new()),
             assignment_plans: RefCell::new(HashMap::new()),
+            namespace_providers: RefCell::new(HashMap::new()),
         })
     }
 
@@ -218,8 +257,38 @@ impl RuntimeDocument {
         self.root.as_ref()
     }
 
+    fn namespace_provider(
+        &self,
+        interpreter: &Interpreter,
+        scope: &Rc<XamlNamespaceScope>,
+    ) -> Rc<dyn IStaticServiceProvider> {
+        let key = Rc::as_ptr(scope) as usize;
+        if let Some(cached) = self.namespace_providers.borrow().get(&key) {
+            return cached.provider.clone();
+        }
+        let provider = namespace_info_static_provider(
+            XmlNamespaceInfoProvider::from_aliases(
+                interpreter.configuration.clone(),
+                scope.aliases(),
+            ),
+            interpreter.services.clone(),
+        );
+        self.namespace_providers.borrow_mut().insert(
+            key,
+            ScopedNamespaceProvider {
+                _scope: scope.clone(),
+                provider: provider.clone(),
+            },
+        );
+        provider
+    }
+
     fn parent_stack_cache(&self, scope: usize) -> ParentStackCache {
-        self.parent_stack_caches.borrow_mut().entry(scope).or_default().clone()
+        self.parent_stack_caches
+            .borrow_mut()
+            .entry(scope)
+            .or_default()
+            .clone()
     }
 
     pub(crate) fn assignment_plan(
@@ -231,7 +300,9 @@ impl RuntimeDocument {
             return Ok(plan.clone());
         }
         let plan = Rc::new(create()?);
-        self.assignment_plans.borrow_mut().insert(node, plan.clone());
+        self.assignment_plans
+            .borrow_mut()
+            .insert(node, plan.clone());
         Ok(plan)
     }
 }
@@ -268,7 +339,10 @@ impl Interpreter {
     /// An interpreter with the standard evaluators and the default service
     /// contracts. Add evaluators to the lists, then share the interpreter
     /// with `Rc::new`.
-    pub fn new(configuration: Rc<TransformerConfiguration>, type_system: Rc<RuntimeTypeSystem>) -> Self {
+    pub fn new(
+        configuration: Rc<TransformerConfiguration>,
+        type_system: Rc<RuntimeTypeSystem>,
+    ) -> Self {
         let definition = super::runtime_context::context_definition(&configuration);
         Self {
             configuration,
@@ -294,10 +368,17 @@ impl Interpreter {
     /// What a parsed document adds to its contexts: the base URI and, if
     /// the language maps a namespace information provider, the namespace
     /// information of the document.
-    pub fn document(&self, document: &XamlDocument, base_uri: Option<&str>) -> XamlResult<Rc<RuntimeDocument>> {
+    pub fn document(
+        &self,
+        document: &XamlDocument,
+        base_uri: Option<&str>,
+    ) -> XamlResult<Rc<RuntimeDocument>> {
         let base_uri = match base_uri {
             Some(base_uri) => Some(Uri::absolute(base_uri).map_err(|e| {
-                XamlError::internal("UriFormatException", format!("Invalid base URI '{base_uri}': {e}"))
+                XamlError::internal(
+                    "UriFormatException",
+                    format!("Invalid base URI '{base_uri}': {e}"),
+                )
             })?),
             None => None,
         };
@@ -308,7 +389,11 @@ impl Interpreter {
                 self.services.clone(),
             ));
         }
-        Ok(RuntimeDocument::new(base_uri, static_providers, document.root().ok()))
+        Ok(RuntimeDocument::new(
+            base_uri,
+            static_providers,
+            document.root().ok(),
+        ))
     }
 
     /// The context factory: creates the context of a `Build`, `Populate` or
@@ -319,18 +404,34 @@ impl Interpreter {
         document: &RuntimeDocument,
         line_info: &dyn IXamlLineInfo,
     ) -> XamlResult<Rc<RuntimeContext>> {
+        let static_providers = if self.definition.xml_namespace_info_provider {
+            if let Some(scope) = line_info.namespace_scope() {
+                let mut providers = Vec::with_capacity(document.static_providers.len() + 1);
+                providers.push(document.namespace_provider(self, &scope));
+                providers.extend(document.static_providers.iter().cloned());
+                Rc::from(providers)
+            } else {
+                document.static_providers.clone()
+            }
+        } else {
+            document.static_providers.clone()
+        };
         let context = RuntimeContext::new(
             self.definition,
             self.services.clone(),
             parent,
-            document.static_providers.clone(),
+            static_providers,
             document.base_uri.clone(),
         );
         for initializer in &self.context_initializers {
             initializer(&context)?;
         }
         // Last, so that the own services of the context are ready.
-        if let Some(factory) = &self.configuration.type_mappings.inner_service_provider_factory_method {
+        if let Some(factory) = &self
+            .configuration
+            .type_mappings
+            .inner_service_provider_factory_method
+        {
             let mut eval = EvalContext::new(self, None, RuntimeDocument::empty(), 0);
             // The inner provider is owned by the context and is given the context it is
             // built on: a strong reference would be a cycle nothing collects.
@@ -339,15 +440,16 @@ impl Interpreter {
             let inner = eval.call_method(factory, &[provider], line_info)?;
             let inner = match &inner {
                 None => None,
-                Some(_) => Some(ferroui_base::metadata::from_markup_value::<Rc<dyn IServiceProvider>>(&inner).ok_or_else(
-                    || {
+                Some(_) => Some(
+                    ferroui_base::metadata::from_markup_value::<Rc<dyn IServiceProvider>>(&inner)
+                        .ok_or_else(|| {
                         runtime_error(
                             "InvalidCastException",
                             "The inner service provider factory didn't return a service provider",
                             line_info,
                         )
-                    },
-                )?),
+                    })?,
+                ),
             };
             context.set_inner_service_provider(inner);
         }
@@ -359,7 +461,10 @@ impl Interpreter {
 
     fn root_group(
         root: &Rc<dyn IXamlAstNode>,
-    ) -> XamlResult<(Rc<dyn IXamlAstValueNode>, Rc<dyn xamlx::ast::IXamlAstManipulationNode>)> {
+    ) -> XamlResult<(
+        Rc<dyn IXamlAstValueNode>,
+        Rc<dyn xamlx::ast::IXamlAstManipulationNode>,
+    )> {
         let group = root.as_value_with_manipulation_node().ok_or_else(|| {
             XamlError::invalid_cast(format!(
                 "Unable to cast object of type '{}' to type 'XamlValueWithManipulationNode'.",
@@ -367,7 +472,10 @@ impl Interpreter {
             ))
         })?;
         let manipulation = group.manipulation().ok_or_else(|| {
-            XamlError::internal("NullReferenceException", "The root node doesn't have a manipulation")
+            XamlError::internal(
+                "NullReferenceException",
+                "The root node doesn't have a manipulation",
+            )
         })?;
         Ok((group.value(), manipulation))
     }
@@ -389,11 +497,17 @@ impl Interpreter {
                 argument_names.push(argument.type_().get_clr_type()?.get_full_name());
             }
             if let [argument] = arguments.as_slice() {
-                need_context_local =
-                    argument.type_().get_clr_type()?.equals(&*self.configuration.type_mappings.service_provider()?);
+                need_context_local = argument
+                    .type_()
+                    .get_clr_type()?
+                    .equals(&*self.configuration.type_mappings.service_provider()?);
             }
-            let parameter_names: Vec<String> =
-                new_object.constructor.parameters().iter().map(|p| p.get_full_name()).collect();
+            let parameter_names: Vec<String> = new_object
+                .constructor
+                .parameters()
+                .iter()
+                .map(|p| p.get_full_name())
+                .collect();
             // Deviation (DEVIATIONS.md, Run-time type system of markup): the metadata declares the
             // public constructors only, so the parameters of a constructor that is not public
             // are not known; a root whose only constructor is not public is refused as one
@@ -408,7 +522,11 @@ impl Interpreter {
             }
         }
         let context = match need_context_local {
-            true => Some(self.create_context(parent_service_provider.clone(), document, &*root_value)?),
+            true => Some(self.create_context(
+                parent_service_provider.clone(),
+                document,
+                &*root_value,
+            )?),
             false => None,
         };
         let scope = Rc::as_ptr(&root_value) as *const () as usize;
@@ -421,9 +539,16 @@ impl Interpreter {
             use ferroui_markup_xaml::FromXamlObject;
             // Linked includes call this same build path after their wrapper has
             // been optimized away. Retain provenance, never the resource graph.
-            if Rc::<dyn ferroui_base::controls::IResourceProvider>::from_xaml_object(value).is_some() {
-                if let Some(root) = ferroui_base::Ref::<ferroui_base::FerroObject>::from_xaml_object(value) {
-                    ferroui_base::controls::resource_provenance::register(&root, uri.absolute_uri().to_owned());
+            if Rc::<dyn ferroui_base::controls::IResourceProvider>::from_xaml_object(value)
+                .is_some()
+            {
+                if let Some(root) =
+                    ferroui_base::Ref::<ferroui_base::FerroObject>::from_xaml_object(value)
+                {
+                    ferroui_base::controls::resource_provenance::register(
+                        &root,
+                        uri.absolute_uri().to_owned(),
+                    );
                 }
             }
         }
@@ -470,7 +595,10 @@ impl IXamlAstVisitor for ParentStackVisitor<'_> {
         if cache.contains_key(&address) {
             return Ok(node);
         }
-        if node.as_needs_parent_stack().is_some_and(|n| n.needs_parent_stack()) {
+        if node
+            .as_needs_parent_stack()
+            .is_some_and(|n| n.needs_parent_stack())
+        {
             cache.insert(address, true);
             for parent in &self.parents {
                 cache.insert(*parent, true);
@@ -498,6 +626,7 @@ pub struct EvalContext<'a> {
     scope: usize,
     parent_nodes: Vec<Rc<dyn IXamlAstNode>>,
     current_node: Option<Rc<dyn IXamlAstNode>>,
+    namespace_scope: Option<Rc<XamlNamespaceScope>>,
     targets: Vec<MarkupValue>,
     locals: Vec<(usize, MarkupValue)>,
     parent_stack_cache: Option<ParentStackCache>,
@@ -520,6 +649,7 @@ impl<'a> EvalContext<'a> {
             scope,
             parent_nodes: Vec::new(),
             current_node: None,
+            namespace_scope: None,
             targets: Vec::new(),
             locals: Vec::new(),
             parent_stack_cache: None,
@@ -546,14 +676,18 @@ impl<'a> EvalContext<'a> {
     /// The run-time context of this evaluation (the context local).
     pub fn runtime_context(&self) -> XamlResult<&Rc<RuntimeContext>> {
         self.runtime_context.as_ref().ok_or_else(|| {
-            XamlError::invalid_operation("The current emit context doesn't supply a runtime context")
+            XamlError::invalid_operation(
+                "The current emit context doesn't supply a runtime context",
+            )
         })
     }
 
     /// The run-time context as a value of the type `type_`.
     pub fn context_value(&self, type_: &dyn IXamlType) -> XamlResult<MarkupValue> {
         let context = self.runtime_context()?;
-        Ok(Some(self.interpreter.services.context_value(context, type_)))
+        Ok(Some(
+            self.interpreter.services.context_value(context, type_),
+        ))
     }
 
     /// The nodes around the node being evaluated, nearest first.
@@ -564,7 +698,9 @@ impl<'a> EvalContext<'a> {
     /// The value the manipulation node being evaluated manipulates.
     pub fn target(&self) -> XamlResult<MarkupValue> {
         self.targets.last().cloned().ok_or_else(|| {
-            XamlError::invalid_operation("A manipulation node was evaluated without a value to manipulate")
+            XamlError::invalid_operation(
+                "A manipulation node was evaluated without a value to manipulate",
+            )
         })
     }
 
@@ -585,6 +721,22 @@ impl<'a> EvalContext<'a> {
         node: &Rc<dyn IXamlAstNode>,
         expected_type: Option<&Rc<dyn IXamlType>>,
     ) -> XamlResult<EvalResult> {
+        let previous_scope = self.namespace_scope.clone();
+        let scope = node.namespace_scope().or_else(|| previous_scope.clone());
+        let namespace_guard = match (&scope, &self.runtime_context) {
+            (Some(scope), Some(context))
+                if self.interpreter.definition.xml_namespace_info_provider
+                    && !previous_scope
+                        .as_ref()
+                        .is_some_and(|previous| Rc::ptr_eq(previous, scope)) =>
+            {
+                Some(context.push_static_provider(
+                    self.document.namespace_provider(self.interpreter, scope),
+                ))
+            }
+            _ => None,
+        };
+        self.namespace_scope = scope;
         let pushed = match self.current_node.replace(node.clone()) {
             Some(current) => {
                 self.parent_nodes.push(current);
@@ -593,12 +745,22 @@ impl<'a> EvalContext<'a> {
             None => false,
         };
         let result = self.evaluate_core(node, expected_type);
-        self.current_node = if pushed { self.parent_nodes.pop() } else { None };
+        self.current_node = if pushed {
+            self.parent_nodes.pop()
+        } else {
+            None
+        };
+        self.namespace_scope = previous_scope;
+        drop(namespace_guard);
         result
     }
 
     /// Evaluates a manipulation node on `target`.
-    pub fn manipulate(&mut self, node: &Rc<dyn IXamlAstNode>, target: &MarkupValue) -> XamlResult<()> {
+    pub fn manipulate(
+        &mut self,
+        node: &Rc<dyn IXamlAstNode>,
+        target: &MarkupValue,
+    ) -> XamlResult<()> {
         self.targets.push(target.clone());
         let result = self.evaluate_typed(node, None);
         self.targets.pop();
@@ -662,7 +824,10 @@ impl<'a> EvalContext<'a> {
             return result;
         }
         Err(XamlError::load_exception(
-            format!("Unable to find evaluator for node type: {}", node.type_name()),
+            format!(
+                "Unable to find evaluator for node type: {}",
+                node.type_name()
+            ),
             Some(&**node),
         ))
     }
@@ -771,13 +936,18 @@ impl<'a> EvalContext<'a> {
             // it was held in (a control read from an untyped property is held as the
             // control base class): members of the target type take it through the
             // registered upcasts.
-            return Ok(Some(crate::runtime::type_system::normalize_object(boxed.clone())));
+            return Ok(Some(crate::runtime::type_system::normalize_object(
+                boxed.clone(),
+            )));
         }
         Err(runtime_error(
             "InvalidCastException",
             format!(
                 "Unable to cast object of type '{}' to type '{}'.",
-                self.interpreter.type_system.runtime_type_of(boxed).full_name(),
+                self.interpreter
+                    .type_system
+                    .runtime_type_of(boxed)
+                    .full_name(),
                 to.full_name()
             ),
             line_info,
@@ -801,7 +971,11 @@ impl<'a> EvalContext<'a> {
         let any = method.as_any();
         if let Some(runtime) = any.downcast_ref::<RuntimeMethod>() {
             return runtime.invoke(arguments).map_err(|e| {
-                invoke_error(e, &format!("{}.{}", method.declaring_type().full_name(), method.name()), line_info)
+                invoke_error(
+                    e,
+                    &format!("{}.{}", method.declaring_type().full_name(), method.name()),
+                    line_info,
+                )
             });
         }
         if let Some(with_casts) = any.downcast_ref::<XamlMethodWithCasts>() {
@@ -809,13 +983,15 @@ impl<'a> EvalContext<'a> {
             // type of the wrapped method are cast to it.
             let base_parameters = with_casts.base_parameters_with_this();
             let parameters = method.parameters();
-            let first_cast = (0..parameters.len()).find(|&c| !base_parameters[c].equals(&*parameters[c]));
+            let first_cast =
+                (0..parameters.len()).find(|&c| !base_parameters[c].equals(&*parameters[c]));
             let Some(first_cast) = first_cast else {
                 return self.call_method(with_casts.method(), arguments, line_info);
             };
             let mut cast_arguments = arguments.to_vec();
             for c in (first_cast..parameters.len().min(arguments.len())).rev() {
-                cast_arguments[c] = self.cast(line_info, arguments[c].clone(), &base_parameters[c])?;
+                cast_arguments[c] =
+                    self.cast(line_info, arguments[c].clone(), &base_parameters[c])?;
             }
             return self.call_method(with_casts.method(), &cast_arguments, line_info);
         }
@@ -869,10 +1045,14 @@ impl<'a> EvalContext<'a> {
                 return result;
             }
         }
-        if let Some(evaluable) = query_wrapped_method_interface::<dyn IXamlEvaluableWrappedMethod>(method) {
+        if let Some(evaluable) =
+            query_wrapped_method_interface::<dyn IXamlEvaluableWrappedMethod>(method)
+        {
             return evaluable.invoke(self, arguments);
         }
-        if let Some(result) = evaluators::call_standard_wrapped_method(method, self, arguments, line_info) {
+        if let Some(result) =
+            evaluators::call_standard_wrapped_method(method, self, arguments, line_info)
+        {
             return result;
         }
         Err(XamlError::invalid_operation(format!(
@@ -895,10 +1075,14 @@ impl<'a> EvalContext<'a> {
                 return result;
             }
         }
-        if let Some(evaluable) = query_property_setter_interface::<dyn IXamlEvaluablePropertySetter>(setter) {
+        if let Some(evaluable) =
+            query_property_setter_interface::<dyn IXamlEvaluablePropertySetter>(setter)
+        {
             return evaluable.evaluate(self, target, arguments);
         }
-        if let Some(result) = evaluators::call_standard_setter(setter, self, target, arguments, line_info) {
+        if let Some(result) =
+            evaluators::call_standard_setter(setter, self, target, arguments, line_info)
+        {
             return result;
         }
         Err(XamlError::invalid_operation(format!(
@@ -910,9 +1094,17 @@ impl<'a> EvalContext<'a> {
     /// The value of a compiler local.
     pub fn local(&self, node: &Rc<dyn IXamlAstNode>) -> XamlResult<MarkupValue> {
         let address = node_address(node);
-        self.locals.iter().rev().find(|(local, _)| *local == address).map(|(_, value)| value.clone()).ok_or_else(
-            || XamlError::load_exception("Attempt to read uninitialized local variable", Some(&**node)),
-        )
+        self.locals
+            .iter()
+            .rev()
+            .find(|(local, _)| *local == address)
+            .map(|(_, value)| value.clone())
+            .ok_or_else(|| {
+                XamlError::load_exception(
+                    "Attempt to read uninitialized local variable",
+                    Some(&**node),
+                )
+            })
     }
 
     /// Stores the value of a compiler local.
@@ -929,12 +1121,21 @@ impl<'a> EvalContext<'a> {
     pub fn needs_parent_stack(&mut self, node: &Rc<dyn IXamlAstNode>) -> XamlResult<bool> {
         let scope = self.scope;
         let document = &self.document;
-        let cache = self.parent_stack_cache.get_or_insert_with(|| document.parent_stack_cache(scope)).clone();
+        let cache = self
+            .parent_stack_cache
+            .get_or_insert_with(|| document.parent_stack_cache(scope))
+            .clone();
         let address = node_address(node);
         if let Some(known) = cache.borrow().get(&address) {
             return Ok(*known);
         }
-        visit_node(node, &mut ParentStackVisitor { cache: &cache, parents: Vec::new() })?;
+        visit_node(
+            node,
+            &mut ParentStackVisitor {
+                cache: &cache,
+                parents: Vec::new(),
+            },
+        )?;
         let known = cache.borrow().get(&address).copied();
         Ok(known.unwrap_or(false))
     }
@@ -944,10 +1145,12 @@ impl<'a> EvalContext<'a> {
     /// of any object initialisation that could have provided the stack.
     pub fn verify_parent_stack(&self, node: &Rc<dyn IXamlAstNode>) -> XamlResult<()> {
         match &self.parent_stack_cache {
-            Some(cache) if !cache.borrow().contains_key(&node_address(node)) => Err(XamlError::load_exception(
-                "Node needs parent stack, but one doesn't seem to be provided",
-                Some(&**node),
-            )),
+            Some(cache) if !cache.borrow().contains_key(&node_address(node)) => {
+                Err(XamlError::load_exception(
+                    "Node needs parent stack, but one doesn't seem to be provided",
+                    Some(&**node),
+                ))
+            }
             _ => Ok(()),
         }
     }

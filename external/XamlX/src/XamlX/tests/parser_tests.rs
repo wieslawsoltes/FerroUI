@@ -576,24 +576,119 @@ fn line_info_counts_utf16_units_and_all_line_endings() {
 }
 
 #[test]
-fn xmlns_declarations_are_only_allowed_on_the_root_element() {
-    let error = parse_error("<Root xmlns='rootns'>\n  <Child a='1' xmlns:t='testns'/>\n</Root>");
-    match error {
-        XamlError::Parse(e) => {
-            assert_eq!(
-                e.title,
-                "xmlns declarations are only allowed on the root element to preserve memory"
-            );
-            assert_eq!((e.line_number, e.line_position), (2, 16));
-        }
-        other => panic!("Unexpected error {other}"),
-    }
-
-    // Redeclaring an identical namespace is rejected as well.
-    assert!(matches!(
-        parse_error("<Root xmlns='rootns'><Child xmlns='rootns'/></Root>"),
-        XamlError::Parse(_)
+fn nested_namespace_declarations_are_lexical_and_shared_with_inheriting_nodes() {
+    let doc = parse("<Root xmlns='rootns' xmlns:t='outer'><Child xmlns='inner' xmlns:t='shadow' Prop='{t:Extension Value=1}'><Leaf/></Child><Sibling/></Root>");
+    let root = root_object(&doc);
+    let children = root.children.borrow();
+    let child = children[0].cast::<XamlAstObjectNode>().unwrap();
+    let sibling = children[1].cast::<XamlAstObjectNode>().unwrap();
+    let root_scope = root.namespace_scope().unwrap();
+    let child_scope = child.namespace_scope().unwrap();
+    assert_eq!(root_scope.lookup("t"), Some("outer"));
+    assert_eq!(child_scope.lookup("t"), Some("shadow"));
+    assert_eq!(child_scope.lookup(""), Some("inner"));
+    assert_eq!(doc.namespace_aliases["t"], "outer");
+    assert!(Rc::ptr_eq(&sibling.namespace_scope().unwrap(), &root_scope));
+    let child_children = child.children.borrow();
+    let property = child_children[0]
+        .cast::<XamlAstXamlPropertyValueNode>()
+        .unwrap();
+    let extension = property.values.borrow()[0]
+        .cast::<XamlAstObjectNode>()
+        .unwrap();
+    assert_eq!(
+        extension
+            .type_()
+            .cast::<XamlAstXmlTypeReference>()
+            .unwrap()
+            .xml_namespace()
+            .as_deref(),
+        Some("shadow")
+    );
+    assert!(Rc::ptr_eq(
+        &extension.namespace_scope().unwrap(),
+        &child_scope
     ));
+    let member = extension.children.borrow()[0]
+        .cast::<XamlAstXamlPropertyValueNode>()
+        .unwrap();
+    assert!(Rc::ptr_eq(
+        &member.property().namespace_scope().unwrap(),
+        &child_scope
+    ));
+    assert!(Rc::ptr_eq(
+        &child_children[1].namespace_scope().unwrap(),
+        &child_scope
+    ));
+    assert_eq!(
+        child
+            .type_()
+            .cast::<XamlAstXmlTypeReference>()
+            .unwrap()
+            .xml_namespace()
+            .as_deref(),
+        Some("inner")
+    );
+    parse("<Root xmlns='rootns'><Child xmlns='rootns'/></Root>");
+}
+
+#[test]
+fn property_elements_carry_local_namespace_scopes_without_changing_source_positions() {
+    let source = "<Root xmlns='rootns' xmlns:t='outer'>\n  <Root.Prop xmlns:t='property'><t:Child Prop='{t:Extension}'/></Root.Prop>\n  <t:Child/>\n</Root>";
+    let root = root_object(&parse(source));
+    let property = root
+        .children
+        .borrow()
+        .iter()
+        .find_map(|node| node.cast::<XamlAstXamlPropertyValueNode>())
+        .unwrap();
+    assert_eq!(
+        property.namespace_scope().unwrap().lookup("t"),
+        Some("property")
+    );
+    assert_eq!((property.line(), property.position()), (2, 4));
+    let child = property.values.borrow()[0]
+        .cast::<XamlAstObjectNode>()
+        .unwrap();
+    assert_eq!(
+        child
+            .type_()
+            .cast::<XamlAstXmlTypeReference>()
+            .unwrap()
+            .xml_namespace()
+            .as_deref(),
+        Some("property")
+    );
+    let sibling = root
+        .children
+        .borrow()
+        .iter()
+        .find_map(|node| node.cast::<XamlAstObjectNode>())
+        .unwrap();
+    assert_eq!(
+        sibling.namespace_scope().unwrap().lookup("t"),
+        Some("outer")
+    );
+}
+
+#[test]
+fn default_namespace_undeclaration_and_compatibility_mappings_are_scoped() {
+    let mappings = HashMap::from([("old".to_owned(), "mapped".to_owned())]);
+    let doc = XDocumentXamlParser::parse(
+        "<Root xmlns='rootns'><Child xmlns='' xmlns:t='old'><Leaf/></Child><Sibling/></Root>",
+        Some(&mappings),
+    )
+    .unwrap();
+    let root = root_object(&doc);
+    let children = root.children.borrow();
+    let child = children[0].cast::<XamlAstObjectNode>().unwrap();
+    assert_eq!(child.namespace_scope().unwrap().lookup(""), Some(""));
+    assert_eq!(child.namespace_scope().unwrap().lookup("t"), Some("mapped"));
+    assert_eq!(
+        children[1].namespace_scope().unwrap().lookup(""),
+        Some("rootns")
+    );
+    assert!(children[1].namespace_scope().unwrap().lookup("t").is_none());
 }
 
 #[test]

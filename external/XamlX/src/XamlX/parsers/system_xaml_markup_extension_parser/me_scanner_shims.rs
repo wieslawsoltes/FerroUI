@@ -22,7 +22,8 @@ impl<'a> MeScannerContext<'a> {
     pub fn new(type_resolver: MeScannerTypeResolver<'a>, line_info: &dyn IXamlLineInfo) -> Self {
         Self {
             type_resolver,
-            line_info: XamlLineInfo::new(line_info.line(), line_info.position()),
+            line_info: XamlLineInfo::new(line_info.line(), line_info.position())
+                .with_namespace_scope(line_info.namespace_scope()),
             current_bracket_mode_parse_parameters: MeScannerBracketModeParseParameters::default(),
             current_type: MeScannerTypeName::new(XamlAstXmlTypeReference::new(
                 line_info,
