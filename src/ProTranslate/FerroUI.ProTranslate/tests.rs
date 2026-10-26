@@ -1,7 +1,7 @@
 use super::*;
-use ferroui_base::Ref;
 use ferroui_base::data::{BindingBase, BindingMode, IndexerBinding};
 use ferroui_base::media::FlowDirection;
+use ferroui_base::Ref;
 use ferroui_controls::testing::{TestServices, UnitTestApplication, UnitTestApplicationScope};
 use ferroui_controls::{Border, Button, Control, StackPanel, TextBlock, TextBox};
 use ferroui_markup_xaml::FromXamlObject;
@@ -65,8 +65,8 @@ fn binding_source_metadata_notifies_indexer_and_distinct_cultures() {
 
 #[test]
 fn binding_source_native_culture_setter_and_explicit_disposal() {
-    use ferroui_base::data::ReflectionBinding;
     use ferroui_base::data::model::INotifyPropertyChanged;
+    use ferroui_base::data::ReflectionBinding;
     let _app = start();
     let source = source();
     let service = source.service();
@@ -425,7 +425,7 @@ fn native_binding_preserves_strict_format_diagnostics_and_typed_fallback() {
 #[test]
 fn native_format_arguments_preserve_decimal_and_offset_date_types() {
     use crate::binding_source::boxed_argument;
-    use ferroui_protranslate_core::{FormatArgument, format_composite};
+    use ferroui_protranslate_core::{format_composite, FormatArgument};
     let value: ferroui_base::BoxedValue =
         Rc::new(rust_decimal::Decimal::from_str_exact("12345678901234567890.25").unwrap());
     let value = boxed_argument(Some(&value)).unwrap();

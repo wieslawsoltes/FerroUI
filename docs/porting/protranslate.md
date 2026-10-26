@@ -16,6 +16,8 @@ FerroUI adapter rather than retained as foreign-runtime dependencies.
 - `ferroui-protranslate`: native FerroUI bindings, attached properties, XAML integration,
   and culture-driven target refresh.
 - `ferroui-protranslate-build`: deterministic typed catalog generation and validation.
+- `ferroui-protranslate-studio`: portable catalog editing, review, persistence,
+  formatting assistance and AI request/suggestion orchestration.
 - A runnable sample, public API documentation, port mapping, and focused CI validation.
 
 ## Behavioral requirements
@@ -46,7 +48,7 @@ generated code, native binding updates, and subscription/target lifetime behavio
 | `DefaultMeasurementSystemResolver` | Same Rust type and `MeasurementSystemResolver` | US/LR/MM, GB, metric and custom profiles follow the source policy |
 | `DefaultUnitConversionService` | Same Rust type and `UnitConversionService` | All 31 source units, category checks, affine temperature conversion and profile conversion |
 | `DefaultLocalizedUnitFormatter` | Same Rust type and `LocalizedUnitFormatter` | Localized numeric text with the source unit-symbol contract |
-| .NET `string.Format` boundary | `FormatArgument`, `format_composite`, `LocalizedFormat`, `LocalizedDateTime` | Indexed placeholders, braces, alignment, typed numeric/date values and an explicit custom formatter extension point |
+| .NET `string.Format` boundary | `FormatArgument`, `format_composite`, `LocalizedFormat`, `LocalizedDateTime`, `LocalizedNaiveDateTime` | Indexed placeholders, braces, alignment, original numeric widths, custom/scientific masks, culture-selected calendars, explicit offset/unspecified/UTC kinds and custom formatter traits |
 | `ProTranslate.Formats` | `ferroui-protranslate-formats` | All 13 format variants, normalized entry metadata, import/export, validation and loss diagnostics |
 | `ProTranslate.SourceGenerator` | `ferroui-protranslate-build` | Explicit Cargo inputs, typed key/accessor generation, static binary-search provider and reproducible manifest |
 | Generated `ProTranslateStrings` | Generated Rust `ProTranslateStrings` | Typed get/value/format/observe methods; optional native `INotifyPropertyChanged` surface with shared identity and automatic unsubscribe |
@@ -55,10 +57,16 @@ generated code, native binding updates, and subscription/target lifetime behavio
 | `ProTranslate.Wpf`, `.Maui`, `.WinUI`, `.Uno` | One native FerroUI adapter | Their framework-specific dispatchers, dependency objects and CLR metadata are replaced by FerroUI's cross-platform APIs |
 | `ProTranslate.ResourceManager` | RESX catalog import/generation and `CallbackTranslationProvider` | Runtime .NET resource-manager/assembly loading is a host bridge; `.resx` data can be compiled into a Rust provider |
 | `ProTranslate.MicrosoftExtensions` | Optional adapter `dependency-injection` feature | Native `ServiceCollection`/`ServiceProvider` helpers; `IStringLocalizer` hosts adapt through `TranslationProvider`/callback providers |
+| Translation Studio document/view-model policies | `ferroui-protranslate-studio::StudioDocument` | Full catalog metadata, stable entry identity/revisions, text/notes/review edits, filtering, coverage, culture selection, bounded undo/redo and atomic batch edits |
+| Translation Studio import/export helpers | `CatalogGateway` | All format variants, explicit storage/text inputs, diagnostic-preserving import and loss-aware export |
+| Translation Studio session/settings/backup services | `SessionService`, `SettingsService`, `StudioStorage`, `AutoSaveScheduler` | Versioned records, explicit storage/time, atomic filesystem replacement, create-if-absent backups, rotation, recovery and host-driven scheduling |
+| Translation Studio AI services and provider manager | `AiTranslationManager`, `AiTransport`, `TranslationPlan` | Three provider wire protocols, explicit configuration/model discovery, cancellable batches/progress, strict response decoding, stale-result rejection and undoable acceptance |
+| Translation Studio format helpers | Placeholder validation, snippet, completion and preview APIs | Composite/i18next/named/ICU/printf authoring assistance; composite previews use the runtime core |
 | Demonstration applications | `samples/ProTranslateDemo` | Compiled native XAML, generated English/Polish/Arabic catalogs, language switching, dynamic number formatting, RTL and region/measurement displays |
 
 The core depends on ICU4X, fixed decimal and `time`, with no rendering or UI
-dependency. The format and build crates remain independent of the desktop stack.
+dependency. The format, build and Studio crates remain independent of the desktop
+stack.
 The adapter uses the actual native binding expression, multi-binding, attached
 property, dependency-injection and XAML metadata APIs. No special-case change to
 FerroUI's XAML loader is required.
@@ -67,10 +75,13 @@ FerroUI's XAML loader is required.
 
 Catalog generation is explicit and deterministic. Every file participates in
 Cargo invalidation. Generated runtime tables contain literals and perform exact
-culture/key binary searches; the shared service owns fallback. Typed format
-accessors use compile-time array lengths when the catalog determines arity. A
+culture/key binary searches with neutral defaults; the shared service owns culture
+fallback. Typed format accessors use compile-time array lengths when the catalog
+determines arity. A
 key-only declaration retains variable arguments because its arity is unknown.
-The generator emits a manifest of keys, cultures, source files and placeholders.
+The generator emits static and JSON manifests of keys, cultures, source files,
+key declarations, placeholder indices and format validity. Generated extension
+accessors can also operate directly on a translation service.
 
 Core services use application-thread `Rc` handles. Culture and metadata changes
 publish snapshots after mutation. Event sources retain callbacks weakly; an RAII
@@ -99,6 +110,14 @@ These scripts use explicit archive inputs and never read a machine's installed
 locale database. Generated tables do not need to be downloaded or regenerated
 during application builds.
 
+ICU4X calendar and datetime data select and format non-Gregorian display calendars.
+The culture's `u-ca` extension is honored; source-compatible default policies
+include Thai Buddhist, Persian and Saudi Um Al Qura calendars. Date tests exercise
+16 calendar families, including eras and leap months. The numeric fixture
+generator records 1,404 invariant cases from .NET 10.0.14 so binary/decimal rounding,
+integer widths, custom masks and exceptional values can be checked independently
+of the Rust implementation.
+
 ## Deliberate differences and format boundaries
 
 | Area | Rust behavior and reason |
@@ -107,34 +126,41 @@ during application builds.
 | Thread ownership | Services and UI bindings are application-thread scoped. Cross-thread producers dispatch work to that thread; no UI object is made `Send`/`Sync`. |
 | Culture identifiers | Validated BCP-47 text replaces managed `CultureInfo` objects. Attached `Culture` is text so XAML can construct it directly. |
 | Invariant and locale data | Invariant behavior is deterministic; regional formatting uses pinned Unicode data and can differ from a particular OS/.NET ICU or NLS data version. |
-| Dates/calendars | Built-in dates are Gregorian values with explicit UTC offsets. Non-Gregorian calendars and IANA zone conversion use application policy/custom formatters; they are not silently inferred. |
+| Dates/calendars | Gregorian input values are rendered in the culture-selected calendar, with `u-ca` overrides. Offset values, unspecified naive values and explicitly UTC values retain their kinds. IANA zone conversion and the host's local time zone remain explicit host policies. |
 | Custom values and formats | Rust values implement `LocalizedFormat` explicitly. Unsupported numeric masks return structured format failures; there is no reflection-driven `IFormattable` discovery. |
 | Compiler analysis | Generated typed methods are compiler checked. The optional source scanner has explicitly selected receivers and a syntax model, not Roslyn/rustc semantic type information or arbitrary macro expansion. |
 | Runtime .NET integrations | `.resources` assembly discovery, `ResourceManager` and `IStringLocalizer` implementations remain outside the Rust process unless a host provides a callback bridge. RESX catalogs are supported directly. |
 | ICU/i18next/ARB expressions | Preserved as catalog text. This port does not invent an ICU MessageFormat evaluator or automatic plural-selection runtime; the source service formats .NET-style indexed arguments. |
 | Gettext plurals | Formulas and indices are retained without evaluating them. Extra plural indices are kept distinct instead of being collapsed. |
-| XLIFF | Inline codes are flattened with diagnostics, and multiple segments get distinct `unit#segment` keys. Advanced XLIFF modules and reconstruction of original inline/segmentation structure are outside the normalized source model. |
+| XLIFF | Distinct segment keys retain their original unit/segment identity and order. Inline XML, notes, unit attributes, original data and ignorable content round-trip through metadata. Malformed edited inline structure is rejected; unsupported target-format metadata is diagnosed. |
 | XLIFF version name | The source enum's `Xliff20` export produces XLIFF 2.1; the port preserves that convention. |
-| Apple plural catalogs | `.stringsdict` exports plural records; singular records are rejected with diagnostics instead of being silently discarded. |
+| Apple variation catalogs | Nested device/plural/width structures and substitution metadata are retained. Records that a destination cannot represent produce conversion diagnostics. |
+| Studio host integration | Document/editing, persistence and AI orchestration are portable. Windows, file pickers, clipboard, timers and HTTP execution are supplied by a FerroUI or web host. |
+| AI providers | Live discovery and explicit model IDs replace implicit historical model defaults. Credentials, HTTP transport and scheduling belong to the host; the library performs no automatic network calls. |
 
 ## Validation
 
 The focused workflow `.github/workflows/protranslate.yml` covers:
 
-1. Core, all format converters and build tooling on Linux, macOS and Windows.
+1. Core, all format converters, build tooling and Studio on Linux, macOS and Windows.
 2. Real native property/binding tests, runtime XAML aliases, scoped sources,
    dependency injection, failure diagnostics, and subscription/target lifetimes.
-3. The compiled XAML sample and generated notifying model through a typed compiled
-   property binding, including live culture changes and final release.
+3. The compiled XAML sample and generated notifying model through actual
+   `CompiledBinding` view-model properties, including overrides and final release.
 4. The desktop sample entry point.
-5. Core and catalog crates compiled for `wasm32-unknown-unknown`.
-6. Formatting and strict lint checks for the independent libraries.
+5. Core, catalog and Studio crates compiled for `wasm32-unknown-unknown` with
+   the optional filesystem feature disabled.
+6. Formatting and strict lint checks for the selected libraries and native sample.
+7. Generic multi-binding diagnostics and all-property indexer notification regressions.
 
 Regression cases cover separate UI/format cultures, empty values, deterministic
 fallback, failed providers, malformed composite formats, reentrant callbacks,
 cache generations, all unit pairs within compatible categories, catalog escaping
 and round trips, malformed transactional imports, duplicate catalog members,
-generated-code compilation/execution and literal/constant key diagnostics.
+generated-code compilation/execution and literal/constant key diagnostics. Studio
+regressions cover metadata-preserving edits, failed-save atomicity, disjoint paths,
+backup collision/rotation, corrupt records, cancellation, three provider wire
+protocols, live model pagination and stale suggestion rejection.
 
 Run commands and public usage are in the [guide](../protranslate.md). Existing
 workspace packaging validates release metadata, exact internal dependency pins,

@@ -6,6 +6,8 @@ on:
     paths:
       - 'src/ProTranslate/**'
       - 'samples/ProTranslateDemo/**'
+      - 'src/FerroUI.Base/data/core/multi_binding_expression.rs'
+      - 'src/FerroUI.Base/data/core/expression_nodes/collection_node_base.rs'
       - 'Cargo.toml'
       - 'Cargo.lock'
       - '.github/workflows/protranslate.yml'
@@ -13,6 +15,8 @@ on:
     paths:
       - 'src/ProTranslate/**'
       - 'samples/ProTranslateDemo/**'
+      - 'src/FerroUI.Base/data/core/multi_binding_expression.rs'
+      - 'src/FerroUI.Base/data/core/expression_nodes/collection_node_base.rs'
       - 'Cargo.toml'
       - 'Cargo.lock'
       - '.github/workflows/protranslate.yml'
@@ -34,7 +38,7 @@ env:
 
 jobs:
   services:
-    name: Catalogs and globalization (${{ matrix.os }})
+    name: Catalogs, globalization and Studio (${{ matrix.os }})
     strategy:
       fail-fast: false
       matrix:
@@ -51,10 +55,10 @@ jobs:
           key: protranslate-services-${{ matrix.os }}
           save-if: ${{ github.ref == 'refs/heads/main' }}
           cache-on-failure: true
-      - name: Core behavior, all catalog formats and generator diagnostics
-        run: cargo test --locked -p ferroui-protranslate-core -p ferroui-protranslate-formats -p ferroui-protranslate-build
+      - name: Core, catalog formats, generator diagnostics and portable Studio
+        run: cargo test --locked -p ferroui-protranslate-core -p ferroui-protranslate-formats -p ferroui-protranslate-build -p ferroui-protranslate-studio
       - name: Library lint checks
-        run: cargo clippy --locked -p ferroui-protranslate-core -p ferroui-protranslate-formats -p ferroui-protranslate-build --all-targets --no-deps -- -D warnings
+        run: cargo clippy --locked -p ferroui-protranslate-core -p ferroui-protranslate-formats -p ferroui-protranslate-build -p ferroui-protranslate-studio --all-targets --no-deps -- -D warnings
 
   integration:
     name: Native bindings and compiled XAML
@@ -66,7 +70,7 @@ jobs:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
       - uses: dtolnay/rust-toolchain@89b12181fb390509a0842a86cc55eeb8eb928c1d # stable
         with:
-          components: rustfmt
+          components: rustfmt, clippy
       - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2
         with:
           key: protranslate-native
@@ -80,8 +84,14 @@ jobs:
         run: cargo test --locked -p ferroui-protranslate -p sample-protranslate-demo --features ferroui-protranslate/dependency-injection --lib
       - name: Desktop entry point
         run: cargo check --locked -p sample-protranslate-demo --bin sample-protranslate-demo
+      - name: Native port lint checks
+        run: cargo clippy --locked -p ferroui-protranslate -p sample-protranslate-demo --all-targets --features ferroui-protranslate/dependency-injection --no-deps -- -D warnings
+      - name: Binding engine regressions
+        run: |
+          cargo test --locked -p ferroui-base --lib -- ferro_object_tests_multi_binding
+          cargo test --locked -p ferroui-base --lib -- metadata_indexer_follows_all_properties_notification
       - name: Port formatting
-        run: cargo fmt --check -p ferroui-protranslate-core -p ferroui-protranslate-formats -p ferroui-protranslate-build -p ferroui-protranslate -p sample-protranslate-demo
+        run: cargo fmt --check -p ferroui-protranslate-core -p ferroui-protranslate-formats -p ferroui-protranslate-build -p ferroui-protranslate-studio -p ferroui-protranslate -p sample-protranslate-demo
 
   wasm:
     name: Portable services compile for WebAssembly
@@ -97,5 +107,5 @@ jobs:
           key: protranslate-wasm
           save-if: ${{ github.ref == 'refs/heads/main' }}
           cache-on-failure: true
-      - name: Locale data, translation services and converters have no desktop dependency
-        run: cargo check --locked -p ferroui-protranslate-core -p ferroui-protranslate-formats --target wasm32-unknown-unknown
+      - name: Locale data, converters and authoring engine have no desktop dependency
+        run: cargo check --locked -p ferroui-protranslate-core -p ferroui-protranslate-formats -p ferroui-protranslate-studio --no-default-features --target wasm32-unknown-unknown

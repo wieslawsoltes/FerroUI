@@ -1,6 +1,6 @@
 # ProTranslate localization and globalization
 
-ProTranslate is available as four workspace crates. The core can be used without
+ProTranslate is available as five workspace crates. The core can be used without
 FerroUI, a desktop backend, a renderer, or a process-global locale. The native
 adapter turns its services into FerroUI bindings and attached properties.
 
@@ -10,6 +10,7 @@ adapter turns its services into FerroUI bindings and attached properties.
 | `ferroui-protranslate-formats` | Normalized catalogs, 13 import/export formats, validation and diagnostics for data that a target format cannot preserve |
 | `ferroui-protranslate-build` | Catalog validation, deterministic static providers, typed accessors, observable accessors and opt-in Rust source diagnostics |
 | `ferroui-protranslate` | Native bindings, markup extensions, inherited attached properties and UI target lifetime management |
+| `ferroui-protranslate-studio` | Portable catalog editing/review, undo/redo, session/settings/recovery/backup persistence, format helpers and AI translation orchestration |
 
 These packages join the workspace's version and release process. Until this port
 is released, use the workspace or the PR branch; the existing `0.4.0` release does
@@ -23,9 +24,10 @@ cargo run -p sample-protranslate-demo
 ```
 
 The sample uses the WinUI theme and compiled XAML. Its English, Polish and Arabic
-catalogs are compiled into a generated provider. Language buttons refresh text,
-number formatting, region metadata, measurements and flow direction. A slider
-changes the value used by a native `Format` multi-binding.
+catalogs are compiled into a generated provider and a notifying strings model.
+Actual `CompiledBinding` properties on the view model refresh text, number
+formatting, region metadata, measurements and flow direction. Controls also
+exercise region/measurement overrides and a dynamic native `Format` multi-binding.
 
 ## Generate catalogs at build time
 
@@ -112,6 +114,19 @@ Key-only `.protranslate.keys.txt` files generate accessors without inventing
 translations. Their format/observe methods accept slices/vectors because the
 argument count is not known until the application provides a catalog.
 
+Import `generated::ProTranslateAccessors` to use the same generated accessors
+directly on `TranslationService`. `ProTranslateProviderManifest` exposes static
+keys, cultures, source files, entry placeholder information and key-declaration
+provenance alongside the JSON manifest. `GeneratedTranslationProvider::with_name`
+creates a provider with an explicit identity. Neutral entries provide a default
+for any culture; an exact culture entry takes precedence.
+
+Culture inference recognizes `Strings.<culture>` files, Android `values-*`
+directories and Apple `<culture>.lproj` directories. `Base.lproj` is neutral.
+Use `catalog_for_culture` or `catalog_with_options` when the source layout needs
+an explicit culture or format. Declared empty catalogs still participate in
+coverage checks.
+
 For a model used by FerroUI compiled bindings, enable
 `Builder::notify_properties(true)` and add `ferroui-system` as a dependency.
 The generated `ProTranslateStrings` then implements the framework's
@@ -158,6 +173,9 @@ The optional `dependency-injection` feature provides
 `ProTranslateServiceProviderExtensions::use_protranslate` for the native FerroUI
 container. Registration shares culture, provider, translation and globalization
 services; the explicit bootstrap call configures the XAML default source.
+Registration is lazy and idempotent, preserves custom registrations and resolves
+factories through the same service provider. Disabling automatic flow direction
+removes its value; an explicit local `FlowDirection` continues to take precedence.
 
 ## Culture, providers and fallback
 
@@ -202,7 +220,8 @@ Core services are cloneable `Rc` handles scoped to one application thread.
 Callbacks run synchronously after state mutation, outside internal borrows.
 Subscriptions disconnect on drop; event sources keep callbacks weakly.
 Observable strings hold their service, while the service does not retain its
-observable strings. Native targets hold their subscriptions and are referenced
+observable strings. They expose resolved value/culture metadata even when only
+the metadata changes, and can disconnect explicitly. Native targets hold their subscriptions and are referenced
 weakly by refresh callbacks. Cross-thread producers post work to the UI dispatcher
 before changing UI-owned services. No process/thread locale is mutated implicitly.
 
@@ -211,12 +230,22 @@ before changing UI-owned services. No process/thread locale is mutated implicitl
 Composite formatting supports indexed arguments, escaped braces, alignment and
 numeric format specifiers. `FormatArgument` supports strings, booleans, signed and
 unsigned integers, floating-point numbers, null, exact decimals, and application
-types implementing `LocalizedFormat`. `LocalizedDateTime` and
-`time::OffsetDateTime` convert to format arguments for localized Gregorian dates
-and times. Values carry an explicit UTC offset; no IANA time-zone conversion is
-implied. Standard localized date/time forms and common .NET custom date tokens
-use the pinned CLDR data. Exact decimals avoid coercing currency or
-large integer data through `f64`.
+types implementing `LocalizedFormat`. Original integer widths and `f32`/`f64`
+precision are retained. Standard numeric formats and custom masks include
+scientific notation, interleaved literals/digits, sections, scaling and exact
+binary/decimal rounding. Culture-specific grouping, signs and symbols use the
+pinned locale data. The regression suite includes 1,404 cases recorded from
+.NET 10.0.14 by the shipped fixture generator.
+
+`LocalizedDateTime` and `time::OffsetDateTime` carry an explicit UTC offset.
+`LocalizedNaiveDateTime` and `time::PrimitiveDateTime` retain unspecified date/time
+semantics; the wrapper can also represent UTC explicitly. The formatting culture
+selects the calendar, and a Unicode `u-ca` extension can override it. ICU calendar
+conversion covers Gregorian, Buddhist, Chinese/Dangi, Coptic, Ethiopian, Hebrew,
+Indian, several Islamic calendars, Japanese, Persian and ROC calendars. Standard
+and custom date tokens preserve the appropriate era/year/month, including leap
+months. IANA time-zone conversion remains an explicit host policy. Exact decimals
+avoid coercing currency or large integer data through `f64`.
 
 `GlobalizationService` combines the same culture/translation source with
 replaceable region, measurement resolver, conversion and unit formatting services.
@@ -278,6 +307,76 @@ preserved where representable, with explicit diagnostics when flattening or a
 target format loses information. This layer does not add ICU MessageFormat
 evaluation or automatic plural selection to runtime translation lookup.
 
+Same-format round trips retain ARB document attributes, Android resource flags,
+gettext headers/previous/obsolete entries, nested Apple plural/device variations
+and substitutions, and XLIFF segments, inline codes and notes. Edited XLIFF inline
+structure is validated before export. The serialized normalized catalog includes
+document metadata, so saving a Studio session does not discard it.
+
+## Portable Translation Studio engine
+
+`ferroui-protranslate-studio` extracts the reusable authoring behavior from the
+upstream Translation Studio sample. A host supplies the window/view models,
+clipboard/file picker integration, storage location, time and network transport.
+
+```rust
+use std::rc::Rc;
+use ferroui_protranslate_studio::{
+    CatalogGateway, EntryFilter, MemoryStudioStorage, SessionService,
+    StudioDocument, StudioPaths,
+    formats::{TranslationFileFormat, TranslationFormatOptions},
+};
+
+let imported = CatalogGateway::import(
+    r#"{"Hello":"Witaj"}"#,
+    TranslationFileFormat::ProTranslateJson,
+    &TranslationFormatOptions { culture: Some("pl-PL".into()), ..Default::default() },
+    "Strings.pl-PL.json",
+    "pl-PL",
+)?;
+let mut document = StudioDocument::new("project-polish", imported, 0)?;
+let id = document.filtered_ids(&EntryFilter::default())[0];
+document.set_target(id, "Witaj, świecie!")?;
+document.undo()?;
+document.redo()?;
+
+let storage = Rc::new(MemoryStudioStorage::default());
+let paths = StudioPaths::new("sessions", "recovery.json", "backups", "settings.json")?;
+let sessions = SessionService::new(storage, paths);
+let saved = sessions.save_session(&mut document, None, 1)?;
+assert!(saved.document_is_clean);
+```
+
+The document preserves the full catalog and uses stable entry identities, so
+duplicate keys/cultures remain distinct. Text, notes, review status, additions,
+deletion and batch edits support bounded undo/redo. Filtering, measured coverage,
+placeholder validation, snippet completion and format previews are reusable APIs.
+Composite previews call the core formatter with explicit culture/date inputs;
+other expression previews are editor illustrations.
+
+Session, recovery, settings and backup services share an explicit `StudioStorage`
+contract. Native `FileStudioStorage` uses atomic replacement; backups use atomic
+create-if-absent and rotate only after a successful new save. Failed saves retain
+the previous file and dirty state. Corrupt records return diagnostics. Storage
+namespaces cannot overlap. `AutoSaveScheduler::tick` lets the host schedule
+snapshots on its owning thread. The in-memory engine can be used on WebAssembly
+with default features disabled.
+
+`AiTranslationManager` provides OpenAI Chat Completions, Anthropic Messages and
+Gemini generateContent adapters through an injected `AiTransport`. It supports
+explicit connection tests, paginated model discovery, single/batch translation,
+progress and cancellation. Hosts supply credentials and select a model returned
+by discovery or provide an explicit model ID. No historical model is selected
+automatically, and discovery failures remain errors. Tests use fake transports.
+
+Capture a `TranslationPlan` before awaiting a request and turn its result into
+suggestions afterward. Suggestions track the source/target text, culture, notes,
+review state and entry/document revision. Accepting a stale result fails instead
+of overwriting newer work; accepting a batch is one undoable transaction.
+Settings omit credentials by default and provide an explicit persistence policy
+for hosts that need it. See the [Studio crate guide](../src/ProTranslate/FerroUI.ProTranslate.Studio/README.md)
+for provider protocol references and the full host contract.
+
 ## Build diagnostics
 
 | Code | Meaning |
@@ -305,20 +404,27 @@ Builder::new()
 ```
 
 The syntax scanner handles literal keys, supported local string constants,
-generated constants and statically sized argument arrays. It does not pretend to
-replace rustc's semantic model or inspect arbitrary macro expansion. Consumers
+generated constants and statically sized argument arrays. Selected receiver paths
+also support static facade calls; generated accessor scanning is opt-in through
+`generated_accessors(true)`. Ambiguous/shadowed/conditional constants remain
+unknown. The scanner does not replace rustc's semantic model or inspect arbitrary macro expansion. Consumers
 with semantic information can submit resolved `KeyUsage` records directly.
 Typed generated methods provide the primary compiler-checked API.
 
 ## Validate
 
 ```sh
-cargo test -p ferroui-protranslate-core -p ferroui-protranslate-formats \
-  -p ferroui-protranslate-build
-cargo test -p ferroui-protranslate -p sample-protranslate-demo --lib
-cargo check -p sample-protranslate-demo --bin sample-protranslate-demo
+cargo test --locked -p ferroui-protranslate-core -p ferroui-protranslate-formats \
+  -p ferroui-protranslate-build -p ferroui-protranslate-studio
+cargo test --locked -p ferroui-protranslate -p sample-protranslate-demo \
+  --features ferroui-protranslate/dependency-injection --lib
+cargo check --locked -p sample-protranslate-demo --bin sample-protranslate-demo
+cargo check --locked -p ferroui-protranslate-core -p ferroui-protranslate-formats \
+  -p ferroui-protranslate-studio --no-default-features --target wasm32-unknown-unknown
 ```
 
 The focused workflow runs service tests on Linux, macOS and Windows, native binding
 and compiled XAML tests on Linux, and a WebAssembly compilation of the independent
-service/catalog crates. The workspace's package checks include the four libraries.
+service/catalog/authoring crates. The workspace's package checks include all five
+libraries. The [review record](porting/protranslate-review.md) describes the
+correctness audit and its regression coverage.
