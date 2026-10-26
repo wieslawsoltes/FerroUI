@@ -737,10 +737,16 @@ fn patched_source(
     }
     let mut result = String::with_capacity(source.len());
     let mut cursor = 0;
+    let mut prefix_deltas = Vec::with_capacity(patches.len() + 1);
+    prefix_deltas.push(0i128);
     for patch in &patches {
         result.push_str(&source[cursor..patch.span.start]);
         result.push_str(&patch.replacement);
         cursor = patch.span.end;
+        prefix_deltas.push(
+            prefix_deltas.last().unwrap() + patch.replacement.len() as i128
+                - patch.span.len() as i128,
+        );
     }
     result.push_str(&source[cursor..]);
     let explicitly_pinned: BTreeSet<_> = extra_pins.iter().map(|(_, id)| *id).collect();
@@ -750,18 +756,18 @@ fn patched_source(
             continue;
         }
         let old_offset = node.span.start;
+        // Validated nonoverlapping patches also have nondecreasing ends. The first patch
+        // ending after this node is the only one that could replace its start. Include empty
+        // insertions at the node boundary in the preceding prefix so surviving nodes move
+        // after their inserted siblings. One search replaces two scans per node in a batch.
+        let preceding = patches.partition_point(|patch| patch.span.end <= old_offset);
         if patches
-            .iter()
-            .any(|p| p.span.start <= old_offset && old_offset < p.span.end)
+            .get(preceding)
+            .is_some_and(|patch| patch.span.start <= old_offset)
         {
             continue;
         }
-        let mut offset = old_offset as i128;
-        for patch in &patches {
-            if patch.span.end <= old_offset {
-                offset += patch.replacement.len() as i128 - patch.span.len() as i128;
-            }
-        }
+        let offset = old_offset as i128 + prefix_deltas[preceding];
         if offset >= 0 {
             pins.push((offset as usize, node.id));
         }

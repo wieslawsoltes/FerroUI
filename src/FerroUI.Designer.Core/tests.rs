@@ -689,6 +689,122 @@ fn large_document_edits_preserve_ids_and_have_bounded_patch_output() {
 }
 
 #[test]
+fn large_multiselection_tracks_mixed_patch_deltas_and_preserves_syntax_identities() {
+    let mut source = String::from("<Canvas><!-- 🦀 layout -->\n");
+    for index in 0..4096 {
+        source.push_str(&format!(
+            "  <Button Width='{index}' Height='100' Tag='{{Binding Résumé}}'/>\n"
+        ));
+    }
+    source.push_str("</Canvas>");
+    let mut doc = Document::new(source.clone()).unwrap();
+    let root = doc.ast().root();
+    let children = doc.ast().element_children(root);
+    let syntax_ids: Vec<_> = doc.ast().nodes().map(|node| node.id).collect();
+    let mut edits = Vec::new();
+    for (index, &id) in children.iter().enumerate() {
+        edits.push(set(
+            id,
+            "Width",
+            if index % 2 == 0 { "7" } else { "123456.5" },
+        ));
+        if index % 3 == 0 {
+            edits.push(Edit::RemoveAttribute {
+                node: id,
+                name: "Height".into(),
+            });
+        } else {
+            edits.push(set(id, "Opacity", "0.75"));
+        }
+    }
+    let change = doc.apply("Resize multiselection", edits).unwrap();
+    assert_eq!(doc.revision(), 1);
+    assert!(change.inserted.is_empty() && change.removed.is_empty());
+    assert_eq!(
+        doc.ast().nodes().map(|node| node.id).collect::<Vec<_>>(),
+        syntax_ids
+    );
+    assert_eq!(doc.ast().element_children(root), children);
+    assert!(doc.source().contains("<!-- 🦀 layout -->"));
+    for (index, &id) in children.iter().enumerate() {
+        let node = doc.ast().node(id).unwrap();
+        assert_eq!(
+            node.attribute("Width"),
+            Some(if index % 2 == 0 { "7" } else { "123456.5" })
+        );
+        assert_eq!(node.attribute("Height"), (index % 3 != 0).then_some("100"));
+        assert_eq!(
+            node.attribute("Opacity"),
+            (index % 3 != 0).then_some("0.75")
+        );
+        assert_eq!(node.attribute("Tag"), Some("{Binding Résumé}"));
+        assert_eq!(node.attribute_info("Width").unwrap().quote, '\'');
+    }
+    doc.undo().unwrap();
+    assert_eq!(doc.source(), source);
+    doc.redo().unwrap();
+    assert_eq!(
+        doc.ast().nodes().map(|node| node.id).collect::<Vec<_>>(),
+        syntax_ids
+    );
+}
+
+#[test]
+fn source_patch_pins_respect_empty_insertions_and_adjacent_replacement_boundaries() {
+    let mut doc =
+        Document::new("<Canvas><Button/><Button/><Button/><Button/><Button/></Canvas>").unwrap();
+    let root = doc.ast().root();
+    let original = doc.ast().element_children(root);
+    let spans: Vec<_> = original
+        .iter()
+        .map(|id| doc.ast().node(*id).unwrap().span)
+        .collect();
+    // Deliberately unordered. An insertion and a replacement may share their start, while
+    // the preceding deletion ends at exactly that boundary. Unnamed duplicate siblings must
+    // still keep the identities of every surviving original node.
+    doc.apply_text_patches(
+        0,
+        "Patch sibling boundaries",
+        vec![
+            TextPatch {
+                span: SourceSpan::new(spans[4].end, spans[4].end),
+                replacement: "<Button/>".into(),
+            },
+            TextPatch {
+                span: spans[2],
+                replacement: "<Border/>".into(),
+            },
+            TextPatch {
+                span: SourceSpan::new(spans[0].start, spans[0].start),
+                replacement: "<Button/>".into(),
+            },
+            TextPatch {
+                span: spans[1],
+                replacement: String::new(),
+            },
+            TextPatch {
+                span: SourceSpan::new(spans[2].start, spans[2].start),
+                replacement: "<Button/>".into(),
+            },
+        ],
+    )
+    .unwrap();
+    assert_eq!(
+        doc.source(),
+        "<Canvas><Button/><Button/><Button/><Border/><Button/><Button/><Button/></Canvas>"
+    );
+    let actual = doc.ast().element_children(root);
+    assert_eq!(actual[1], original[0]);
+    assert_eq!(actual[4], original[3]);
+    assert_eq!(actual[5], original[4]);
+    assert_eq!(doc.ast().node(actual[3]).unwrap().name, "Border");
+    doc.undo().unwrap();
+    assert_eq!(doc.ast().element_children(root), original);
+    doc.redo().unwrap();
+    assert_eq!(doc.ast().element_children(root), actual);
+}
+
+#[test]
 fn namespace_and_prefixed_attribute_can_be_added_in_one_atomic_batch() {
     let mut doc = Document::new("<Button/>").unwrap();
     let root = doc.ast().root();

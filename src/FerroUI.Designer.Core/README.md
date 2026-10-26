@@ -28,7 +28,7 @@ document.redo()?;
 # Ok::<(), ferroui_designer_core::DesignerError>(())
 ```
 
-Every mutation validates a private candidate before changing the accepted source, syntax, revision or history. `apply_at` rejects a stale revision. Attribute-only batches are coalesced and parsed once, including namespace declarations and multi-selection edits. Mixed structural commands run sequentially against the candidate and commit as one history item.
+Every mutation validates a private candidate before changing the accepted source, syntax, revision or history. `apply_at` rejects a stale revision. Attribute-only batches are coalesced and parsed once, including namespace declarations and multi-selection edits. Source patches use prefix byte-offset deltas and binary searches to preserve node identities in O(nodes × log(patches)) mapping work, avoiding a complete patch scan for every node. Mixed structural commands run sequentially against the candidate and commit as one history item.
 
 `InsertChild` and `MoveNode` indices count element children, excluding comments and whitespace. A move index denotes the destination list **after** removing the moving element. Moving an element into another namespace scope adds the declarations needed to preserve its resolved element and attribute names. Ancestor cycles and removal/movement of the document root are rejected.
 
@@ -58,4 +58,4 @@ Run:
 cargo test -p ferroui-designer-core
 ```
 
-Tests cover exact-source retention, Unicode/entity escaping, comments and CDATA, namespace scope and prefix changes, atomic rollback, stale revisions, invalid editor buffers, undo/redo, non-reused IDs, duplicate sibling moves, namespace-preserving reparenting, source patch boundaries, nested markup extensions, DTD rejection and a 10,000-element edit/reconciliation scenario. XML parsing is bounded to one million syntax nodes and DTD processing is disabled.
+Tests cover exact-source retention, Unicode/entity escaping, comments and CDATA, namespace scope and prefix changes, atomic rollback, stale revisions, invalid editor buffers, undo/redo, non-reused IDs, duplicate sibling moves, namespace-preserving reparenting, adjacent and zero-width source patch boundaries, nested markup extensions, DTD rejection, a 10,000-element edit/reconciliation scenario, and 4,096 selected elements edited in one mixed attribute batch. XML parsing is bounded to one million syntax nodes and DTD processing is disabled.
