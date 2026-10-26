@@ -70,9 +70,27 @@ impl NativeAnimations {
         }
         let Some(root) = preview.root() else { return };
         let root_value: BoxedValue = Rc::new(root.clone());
-        let source_uri = XamlSourceInfo::get_xaml_source_info(&root_value)
+        let source_uris = XamlSourceInfo::get_xaml_source_info(&root_value)
             .and_then(|provenance| provenance.source_uri().cloned())
-            .or_else(|| ferroui_base::utilities::Uri::absolute(preview.uri()).ok());
+            .map(|uri| vec![uri])
+            .unwrap_or_else(|| {
+                // SourceInfo treats the loader's Document argument as a file path, even
+                // when a host identifies that document with an absolute resource URI.
+                // Debug reload canonicalizes URI authority before supplying Document;
+                // direct release factories can retain the original spelling. Compare
+                // only those two exact identities, preserving path case and provenance.
+                let canonical = ferroui_base::utilities::Uri::absolute(preview.uri())
+                    .map(|uri| uri.absolute_uri().to_owned())
+                    .unwrap_or_else(|_| preview.uri().to_owned());
+                [preview.uri(), canonical.as_str()]
+                    .into_iter()
+                    .filter_map(|document| {
+                        XamlSourceInfo::new(1, 1, Some(document))
+                            .source_uri()
+                            .cloned()
+                    })
+                    .collect::<Vec<_>>()
+            });
         let mut positions = BTreeMap::<usize, Vec<(usize, NodeId)>>::new();
         let mut previous = 0;
         let (mut line, mut column) = (1, 1);
@@ -129,7 +147,7 @@ impl NativeAnimations {
                 }
             }
         }
-        let mut animations = Vec::<Rc<dyn IAnimation>>::new();
+        let mut animations = Vec::<(Rc<dyn IAnimation>, Option<XamlSourceInfo>)>::new();
         seen.clear();
         while let Some(style) = styles.pop() {
             if let Some(object) = style.as_object() {
@@ -137,7 +155,12 @@ impl NativeAnimations {
                     continue;
                 }
                 if let Some(base) = object.downcast_ref::<StyleBase>() {
-                    animations.extend(base.animations().snapshot().iter().cloned());
+                    animations.extend(
+                        base.animations()
+                            .snapshot()
+                            .iter()
+                            .map(|animation| (animation.clone(), None)),
+                    );
                     dictionaries.push(base.resources());
                 } else if let Some(collection) = object.downcast_ref::<Styles>() {
                     dictionaries.push(collection.resources());
@@ -155,15 +178,19 @@ impl NativeAnimations {
                 key.as_str()
                     .is_some_and(|name| resource_names.contains(name))
             }) {
+                let source_info = XamlSourceInfo::get_xaml_source_info_for_key(
+                    &(dictionary.clone().into()),
+                    key.clone(),
+                );
                 let value =
                     std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| dictionary.get(&key)))
                         .ok()
                         .flatten();
                 if let Some(value) = value {
                     if let Some(animation) = Ref::<Animation>::from_xaml_object(&value) {
-                        animations.push(animation.into());
+                        animations.push((animation.into(), source_info));
                     } else if let Some(animation) = value.downcast_ref::<Rc<dyn IAnimation>>() {
-                        animations.push(animation.clone());
+                        animations.push((animation.clone(), source_info));
                     }
                 }
             }
@@ -184,15 +211,18 @@ impl NativeAnimations {
                 }
             }
         }
-        for animation in animations {
+        for (animation, keyed_info) in animations {
             let Some(object) = animation.as_object() else {
                 continue;
             };
             let value: BoxedValue = Rc::new(object);
-            let Some(info) = XamlSourceInfo::get_xaml_source_info(&value) else {
+            let Some(info) = XamlSourceInfo::get_xaml_source_info(&value).or(keyed_info) else {
                 continue;
             };
-            if info.source_uri() != source_uri.as_ref() || source_uri.is_none() {
+            if !info
+                .source_uri()
+                .is_some_and(|uri| source_uris.contains(uri))
+            {
                 continue;
             }
             let Some(candidates) = positions.get(&(info.line_number().max(1) as usize)) else {

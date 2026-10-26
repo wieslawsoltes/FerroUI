@@ -1471,6 +1471,9 @@ mod tests {
             Command::Stop(None)
         ));
 
+        // These are independent ownership scenarios. Release the first preview's hot-reload
+        // registration before the next fixture opens the same document URI.
+        drop(old);
         let pending = fixture();
         let reviewed = review_pending(pending.controller.active.borrow_mut().take().unwrap());
         let revision = pending.session.borrow().document().revision();

@@ -275,9 +275,6 @@ impl RuntimePreview {
         Ok(())
     }
 
-    pub fn options(&self) -> crate::preview_host::PreviewHostOptions {
-        self.options.clone()
-    }
     pub fn is_window_projection(&self) -> bool {
         self.window_projection
     }

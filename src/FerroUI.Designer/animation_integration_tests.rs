@@ -884,9 +884,9 @@ fn native_resource_program_keeps_provenance_when_factory_root_is_created_in_rust
             )
             .ok_or("Expected a loaded Border")?;
             let root = ferroui_controls::Border::new();
-            root.resources()
-                .merged_dictionaries()
-                .add(loaded.resources().into());
+            let resources = loaded.resources();
+            loaded.set_resources(ferroui_base::controls::ResourceDictionary::new());
+            root.resources().merged_dictionaries().add(resources.into());
             Ok(std::rc::Rc::new(root) as ferroui_base::BoxedValue)
         }),
     );
