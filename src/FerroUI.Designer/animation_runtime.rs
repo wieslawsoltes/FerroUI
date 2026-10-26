@@ -5,7 +5,7 @@ use ferroui_base::animation::{Animatable, Animation, IAnimation, IClock, PlaySta
 use ferroui_base::controls::ResourceDictionary;
 use ferroui_base::reactive::{IDisposable, IObservable, IObserver, LightweightSubject};
 use ferroui_base::styling::{IStyle, StyleBase, Styles};
-use ferroui_base::{BoxedValue, FerroObject, Ref, StyledElement, TypeInfo};
+use ferroui_base::{BoxedValue, FerroObject, Ref, StyledElement};
 use ferroui_designer_animation::AnimationProgram;
 use ferroui_designer_core::{Document, NodeId};
 use ferroui_markup_xaml::diagnostics::XamlSourceInfo;
@@ -71,8 +71,8 @@ impl NativeAnimations {
         let Some(root) = preview.root() else { return };
         let root_value: BoxedValue = Rc::new(root.clone());
         let source_uri = XamlSourceInfo::get_xaml_source_info(&root_value)
-            .map(|provenance| provenance.source_uri().to_owned())
-            .unwrap_or_else(|| preview.uri().to_owned());
+            .and_then(|provenance| provenance.source_uri().cloned())
+            .or_else(|| ferroui_base::utilities::Uri::absolute(preview.uri()).ok());
         let mut positions = BTreeMap::<usize, Vec<(usize, NodeId)>>::new();
         let mut previous = 0;
         let (mut line, mut column) = (1, 1);
@@ -192,7 +192,7 @@ impl NativeAnimations {
             let Some(info) = XamlSourceInfo::get_xaml_source_info(&value) else {
                 continue;
             };
-            if info.source_uri() != source_uri {
+            if info.source_uri() != source_uri.as_ref() || source_uri.is_none() {
                 continue;
             }
             let Some(candidates) = positions.get(&(info.line_number().max(1) as usize)) else {
@@ -238,6 +238,9 @@ impl NativeAnimations {
         validate_time(elapsed)?;
         let mut pending = Vec::new();
         for program in programs {
+            if program.targets.is_empty() && !self.factory_programs.contains(&program.id) {
+                continue;
+            }
             let animation = self.objects.get(&program.id).ok_or_else(|| format!("Native program '{}' is not available in the accepted preview; load its defining style/resource and select preview targets", program.name))?.as_object().and_then(|animation| animation.cast::<Animation>()).ok_or("The source program has no preview-capable native Animation object")?;
             if program.targets.is_empty() && self.factory_programs.contains(&program.id) {
                 let target = preview

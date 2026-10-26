@@ -644,7 +644,12 @@ impl SharingController {
             let mut changed = false;
             for event in self.events.borrow().try_iter() {
                 if let Event::Stopped(result) = event {
-                    self.status.borrow_mut().message=match result{Ok(())=>"Sharing stopped. The final offline checkpoint is saved.".into(),Err(error)=>format!("Sharing stopped, but saving the final checkpoint failed: {error}. Save the current document.")};
+                    self.status.borrow_mut().message = match result {
+                        Ok(()) => "Sharing stopped. The final offline checkpoint is saved.".into(),
+                        Err(error) => format!(
+                            "Sharing stopped, but saving the final checkpoint failed: {error}. Save the current document."
+                        ),
+                    };
                     changed = true;
                 }
             }
@@ -1266,8 +1271,8 @@ fn client_lock(directory: &Path) -> host::Result<std::fs::File> {
 mod tests {
     use super::*;
     use ferroui_controls::{
-        testing::{TestServices, UnitTestApplication},
         ContentControl,
+        testing::{TestServices, UnitTestApplication},
     };
     use host::Endpoint;
     const SOURCE: &str = r#"<Canvas xmlns="https://github.com/ferroui"><Button Name="Target" Width="100" /></Canvas>"#;
@@ -1477,10 +1482,12 @@ mod tests {
                 .unwrap();
             session.set_read_only(true);
         }
-        assert!(pending
-            .controller
-            .attach(reviewed, revision, false)
-            .is_err());
+        assert!(
+            pending
+                .controller
+                .attach(reviewed, revision, false)
+                .is_err()
+        );
         assert_eq!(
             pending.session.borrow().collaboration_actor(),
             Some("actor-c")
@@ -1722,7 +1729,7 @@ mod tests {
         fixture
             .session
             .borrow_mut()
-            .update_source("<Canvas><Button".into());
+            .update_source("<Canvas><Button");
         let previous = fixture.controller.capture_checkpoint().unwrap();
         fixture
             .events
@@ -1755,14 +1762,16 @@ mod tests {
         );
         let path = temporary_directory();
         host::save_private(&path.join("peer.json"), &previous).unwrap();
-        assert!(prepare_accept(
-            pending.clone(),
-            previous.source.clone(),
-            None,
-            previous.uri.clone(),
-            &path
-        )
-        .is_err());
+        assert!(
+            prepare_accept(
+                pending.clone(),
+                previous.source.clone(),
+                None,
+                previous.uri.clone(),
+                &path
+            )
+            .is_err()
+        );
         let accepted = prepare_accept(
             pending,
             previous.source.clone(),
@@ -1909,9 +1918,7 @@ mod tests {
             .borrow_mut()
             .set_property(&[guest_target], "Width", "225")
             .unwrap();
-        guest_session
-            .borrow_mut()
-            .update_source("<Canvas><Button".into());
+        guest_session.borrow_mut().update_source("<Canvas><Button");
         owner
             .set_member(guest_actor.clone(), Role::Viewer, false)
             .unwrap();
@@ -1937,10 +1944,12 @@ mod tests {
             guest.pending_local_source().as_deref(),
             Some("<Canvas><Button")
         );
-        assert!(guest_session
-            .borrow_mut()
-            .set_property(&[guest_target], "Width", "999")
-            .is_err());
+        assert!(
+            guest_session
+                .borrow_mut()
+                .set_property(&[guest_target], "Width", "999")
+                .is_err()
+        );
         guest
             .accept_snapshot(
                 guest_session.borrow().document().revision(),

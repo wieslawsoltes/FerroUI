@@ -245,6 +245,65 @@ fn animation_preview_shared_generated_transform_outlives_its_creator_run() {
     assert!(target.render_transform().is_none());
 }
 
+#[test]
+fn animation_preview_reentrant_transform_user_retains_published_lease() {
+    let rotate = Animation::new();
+    rotate.set_duration(seconds(2.0));
+    rotate.children().add(KeyFrame::with_key_time(
+        seconds(2.0),
+        [Setter::new(crate::media::RotateTransform::angle_property(), 90.0) as _],
+    ));
+    let scale = Animation::new();
+    scale.set_duration(seconds(2.0));
+    scale.children().add(KeyFrame::with_key_time(
+        seconds(2.0),
+        [Setter::new(crate::media::ScaleTransform::scale_x_property(), 2.0) as _],
+    ));
+    let target = Border::new();
+    let rotate_clock = TestClock::new();
+    let scale_clock = TestClock::new();
+    let second: Rc<RefCell<Option<Rc<dyn IDisposable>>>> = Rc::new(RefCell::new(None));
+    let capture = second.clone();
+    let other_clock = scale_clock.clone();
+    let weak_target = target.downgrade();
+    let entered = Cell::new(false);
+    let handler = target.property_changed(move |event| {
+        if event.property() == Visual::render_transform_property().as_property()
+            && !entered.replace(true)
+        {
+            let target = weak_target.upgrade().unwrap();
+            *capture.borrow_mut() =
+                Some(scale.apply_for_preview(&target, Some(other_clock.as_clock()), None));
+        }
+    });
+    let first = rotate.apply_for_preview(&target, Some(rotate_clock.as_clock()), None);
+    assert!(second.borrow().is_some());
+    first.dispose();
+    assert!(
+        target.render_transform().is_some(),
+        "The callback's preview retains the generated transform"
+    );
+    scale_clock.step(TimeSpan::ZERO);
+    scale_clock.step(seconds(1.0));
+    let group = target
+        .render_transform()
+        .unwrap()
+        .as_object()
+        .unwrap()
+        .downcast_ref::<crate::media::TransformGroup>()
+        .unwrap()
+        .to_ref();
+    let transform = group
+        .children()
+        .iter()
+        .find_map(|child| child.cast::<crate::media::ScaleTransform>())
+        .unwrap();
+    assert_eq!(transform.scale_x(), 1.5);
+    second.borrow_mut().take().unwrap().dispose();
+    assert!(target.render_transform().is_none());
+    handler.dispose();
+}
+
 fn create_root(
     animation: &Ref<Animation>,
     selector: crate::styling::Selector,

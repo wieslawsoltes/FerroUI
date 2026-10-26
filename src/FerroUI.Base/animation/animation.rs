@@ -7,7 +7,9 @@ use crate::animation::{
     IAnimator, IClock, IterationCount, KeyFrames, PlaybackBehavior, PlaybackDirection, TimeSpan,
 };
 use crate::data::{BindingMode, BindingPriority};
-use crate::reactive::{CompositeDisposable, Disposable, IDisposable, IObservable, Observable};
+use crate::reactive::{
+    CompositeDisposable, Disposable, IDisposable, IObservable, Observable, SerialDisposable,
+};
 use crate::threading::CancellationToken;
 use crate::{
     ferro_class, ferro_impl_classes, ferro_property, instantiate, DirectProperty,
@@ -20,7 +22,7 @@ use std::rc::{Rc, Weak};
 struct PreviewTransform {
     target: WeakRef<Visual>,
     transform: Rc<dyn crate::media::ITransform>,
-    value: Rc<dyn IDisposable>,
+    value: SerialDisposable,
 }
 impl Drop for PreviewTransform {
     fn drop(&mut self) {
@@ -455,7 +457,7 @@ impl Animation {
         })
     }
 
-    fn retain_preview_subscription(&self, subscription: &Rc<dyn IDisposable>) {
+    pub(crate) fn retain_preview_subscription(&self, subscription: &Rc<dyn IDisposable>) {
         if let Some(values) = self.preview_values.borrow().clone() {
             values.add(subscription.clone());
         }
@@ -473,24 +475,25 @@ impl Animation {
         let values = self.preview_values.borrow().clone();
         if let Some(values) = values {
             if !values.is_disposed() {
-                let value = target
-                    .set_value_with_priority(
-                        Visual::render_transform_property(),
-                        Some(transform.clone()),
-                        BindingPriority::Animation,
-                    )
-                    .expect("transform preview is an animation value");
                 let lease = Rc::new(PreviewTransform {
                     target: target.to_ref().downgrade(),
-                    transform,
-                    value,
+                    transform: transform.clone(),
+                    value: SerialDisposable::new(),
                 });
                 PREVIEW_TRANSFORMS.with(|entries| {
                     let mut entries = entries.borrow_mut();
                     entries.retain(|entry| entry.strong_count() > 0);
                     entries.push(Rc::downgrade(&lease));
                 });
-                values.add(Disposable::create(move || drop(lease)));
+                // Publishing the lease precedes the property notification: a callback
+                // may synchronously start another preview that reuses this transform.
+                let retained = lease.clone();
+                values.add(Disposable::create(move || drop(retained)));
+                lease.value.set(target.set_value_with_priority(
+                    Visual::render_transform_property(),
+                    Some(transform),
+                    BindingPriority::Animation,
+                ));
             }
             true
         } else {

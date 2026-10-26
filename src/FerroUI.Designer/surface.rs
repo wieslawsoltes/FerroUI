@@ -91,22 +91,7 @@ ferro_impl_classes!(DesignSurface: FerroObjectImpl, StyledElementImpl, Layoutabl
 
 impl DesignSurface {
     pub fn new() -> Ref<Self> {
-        let result = instantiate(Self {
-            base: Control::construct(),
-            session: RefCell::new(None),
-            commit: RefCell::new(None),
-            changed: RefCell::new(None),
-            gesture: RefCell::new(None),
-            insert: RefCell::new(None),
-            grid: Cell::new(8.0),
-            interactive: Cell::new(false),
-            gesture_revision: Cell::new(0),
-            releasing_capture: Cell::new(false),
-            zoom: Cell::new(1.0),
-            snap_guides: RefCell::new(Vec::new()),
-            cursor_position: Cell::new(None),
-            pointer_inside: Cell::new(false),
-        });
+        let result = instantiate(Self::default());
         result.set_focusable(true);
         result
     }
@@ -354,6 +339,8 @@ impl Default for DesignSurface {
             gesture_revision: Cell::new(0),
             releasing_capture: Cell::new(false),
             zoom: Cell::new(1.0),
+            cursor_position: Cell::new(None),
+            pointer_inside: Cell::new(false),
             snap_guides: RefCell::new(Vec::new()),
         }
     }

@@ -996,3 +996,33 @@ fn native_component_preview_reports_unsupported_css_transform_target() {
         .contains("CSS TransformOperations"));
     assert_eq!(session.document().source(), source);
 }
+
+#[test]
+fn native_play_all_skips_deferred_programs_without_live_targets() {
+    let _app = UnitTestApplication::start(TestServices::styled_window());
+    let source = r#"<Border xmlns="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Name="A">
+<Border.Resources><DataTemplate x:Key="Unused"><Border><Border.Styles><Style Selector="Border"><Style.Animations><Animation Duration="0:0:2"><KeyFrame Cue="100%"><Setter Property="BoxShadow" Value="40 30 10 4 Blue"/></KeyFrame></Animation></Style.Animations></Style></Border.Styles></Border></DataTemplate></Border.Resources>
+<Border.Styles><Style Selector="Border#A"><Style.Animations><Animation Duration="0:0:2" FillMode="Forward"><KeyFrame Cue="0%"><Setter Property="BoxShadow" Value="0 0 0 0 Red"/></KeyFrame><KeyFrame Cue="100%"><Setter Property="BoxShadow" Value="20 30 10 4 Blue"/></KeyFrame></Animation></Style.Animations></Style></Border.Styles></Border>"#;
+    let mut session = DesignerSession::new(source, ContentControl::new()).unwrap();
+    assert!(
+        matches!(session.preview_status(), PreviewStatus::Ready { .. }),
+        "{:?}",
+        session.preview_status()
+    );
+    assert_eq!(session.animation_programs().len(), 2);
+    assert!(session
+        .animation_programs()
+        .iter()
+        .any(|program| program.targets.is_empty()));
+    session.play_all_animation_programs();
+    session.advance(1.0).unwrap();
+    let border = session
+        .preview
+        .root()
+        .unwrap()
+        .cast::<ferroui_controls::Border>()
+        .unwrap();
+    assert!((border.box_shadow().get(0).offset_x - 10.0).abs() < 1e-6);
+    session.stop();
+    assert_eq!(border.box_shadow().count(), 0);
+}

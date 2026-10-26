@@ -1,9 +1,12 @@
 use crate::animation::{
-    Animatable, Animation, AnimationInstance, AnimatorKeyFrame, Clock, DisposeAnimationInstanceSubject, IAnimator,
-    IClock, KeySpline,
+    Animatable, Animation, AnimationInstance, AnimatorKeyFrame, Clock,
+    DisposeAnimationInstanceSubject, IAnimator, IClock, KeySpline,
 };
 use crate::data::BindingPriority;
-use crate::reactive::{CompositeDisposable, IDisposable, IObservable};
+use crate::reactive::{
+    CompositeDisposable, Disposable, IDisposable, IObservable, IObserver, LightweightSubject,
+    ObservableError,
+};
 use crate::{AnyValue, FerroProperty, PropertyValue, Ref, StyledProperty, Visual};
 use std::any::TypeId;
 use std::cell::{Cell, RefCell};
@@ -84,7 +87,12 @@ pub trait Animator: Sized + 'static {
     fn base(&self) -> &AnimatorBase;
 
     /// Interpolates between two values using the specified progress.
-    fn interpolate(&self, progress: f64, old_value: &Self::Value, new_value: &Self::Value) -> Self::Value;
+    fn interpolate(
+        &self,
+        progress: f64,
+        old_value: &Self::Value,
+        new_value: &Self::Value,
+    ) -> Self::Value;
 
     /// Reads a key frame value; `None` when it is not a value this animator
     /// can animate, in which case the neutral value is used in its place.
@@ -98,8 +106,16 @@ pub trait Animator: Sized + 'static {
 
     /// Binds the values a running animation produces to the target property
     /// of the control, at animation priority.
-    fn bind_animation(&self, control: &Animatable, instance: Rc<dyn IObservable<Self::Value>>) -> Rc<dyn IDisposable> {
-        control.bind(self.base().styled_property::<Self::Value>(), instance, BindingPriority::Animation)
+    fn bind_animation(
+        &self,
+        control: &Animatable,
+        instance: Rc<dyn IObservable<Self::Value>>,
+    ) -> Rc<dyn IDisposable> {
+        control.bind(
+            self.base().styled_property::<Self::Value>(),
+            instance,
+            BindingPriority::Animation,
+        )
     }
 
     /// Applies the animation to `control`: it runs while `match_` is true.
@@ -150,7 +166,10 @@ pub(crate) fn apply_with_visual<A: Animator>(
     ));
     let subscription = match_.subscribe(subject.clone());
     let subject: Rc<dyn IDisposable> = subject;
-    Rc::new(CompositeDisposable::from_disposables([subscription, subject]))
+    Rc::new(CompositeDisposable::from_disposables([
+        subscription,
+        subject,
+    ]))
 }
 
 /// Runs the animation once: creates the instance that produces the values
@@ -164,7 +183,9 @@ pub(crate) fn run<A: Animator>(
     should_pause_on_invisible: bool,
     visual_target: Option<&Ref<Visual>>,
 ) -> Rc<dyn IDisposable> {
-    let base_clock = clock.or_else(|| control.clock()).unwrap_or_else(Clock::global_clock);
+    let base_clock = clock
+        .or_else(|| control.clock())
+        .unwrap_or_else(Clock::global_clock);
     let instance = AnimationInstance::new(
         animation.clone(),
         control,
@@ -174,7 +195,66 @@ pub(crate) fn run<A: Animator>(
         should_pause_on_invisible,
         visual_target,
     );
-    animator.bind_animation(control, instance)
+    if animation.is_preview() {
+        // Value-store frames subscribe lazily, and stop a hidden binding. Preview clocks
+        // must keep advancing even below another program, so retain one eager producer
+        // and replay its latest value when this original property frame becomes visible.
+        let values = Rc::new(PreviewValue {
+            value: RefCell::new(None),
+            subject: LightweightSubject::new(),
+            complete: Cell::new(false),
+            error: RefCell::new(None),
+        });
+        let producer = instance.subscribe(values.clone());
+        animation.retain_preview_subscription(&producer);
+        let binding = animator.bind_animation(control, values);
+        Rc::new(CompositeDisposable::from_disposables([producer, binding]))
+    } else {
+        animator.bind_animation(control, instance)
+    }
+}
+
+struct PreviewValue<T> {
+    value: RefCell<Option<T>>,
+    subject: LightweightSubject<T>,
+    complete: Cell<bool>,
+    error: RefCell<Option<ObservableError>>,
+}
+impl<T: Clone + 'static> IObservable<T> for PreviewValue<T> {
+    fn subscribe(&self, observer: Rc<dyn IObserver<T>>) -> Rc<dyn IDisposable> {
+        if self.complete.get() {
+            let error = self.error.borrow().clone();
+            if let Some(error) = error {
+                observer.on_error(error);
+            } else {
+                observer.on_completed();
+            }
+            return Disposable::empty();
+        }
+        let subscription = self.subject.subscribe(observer.clone());
+        let value = self.value.borrow().clone();
+        if let Some(value) = value {
+            observer.on_next(value);
+        }
+        subscription
+    }
+}
+impl<T: Clone> IObserver<T> for PreviewValue<T> {
+    fn on_next(&self, value: T) {
+        if !self.complete.get() {
+            self.value.replace(Some(value.clone()));
+            self.subject.on_next(value);
+        }
+    }
+    fn on_error(&self, error: ObservableError) {
+        self.complete.set(true);
+        self.error.replace(Some(error.clone()));
+        self.subject.on_error(error);
+    }
+    fn on_completed(&self) {
+        self.complete.set(true);
+        self.subject.on_completed();
+    }
 }
 
 struct KeyFrameInfo<T> {
@@ -184,7 +264,11 @@ struct KeyFrameInfo<T> {
 }
 
 impl<T: Clone> KeyFrameInfo<T> {
-    fn from_key_frame<A: Animator<Value = T>>(animator: &A, source: &AnimatorKeyFrame, neutral_value: &T) -> Self {
+    fn from_key_frame<A: Animator<Value = T>>(
+        animator: &A,
+        source: &AnimatorKeyFrame,
+        neutral_value: &T,
+    ) -> Self {
         Self {
             time: source.cue().cue_value(),
             value: get_typed_value(animator, source, neutral_value),
@@ -194,7 +278,11 @@ impl<T: Clone> KeyFrameInfo<T> {
 }
 
 #[inline]
-fn get_typed_value<A: Animator>(animator: &A, frame: &AnimatorKeyFrame, neutral_value: &A::Value) -> A::Value {
+fn get_typed_value<A: Animator>(
+    animator: &A,
+    frame: &AnimatorKeyFrame,
+    neutral_value: &A::Value,
+) -> A::Value {
     frame
         .with_value(|value| value.and_then(|value| animator.typed_value(value)))
         .unwrap_or_else(|| neutral_value.clone())
@@ -203,7 +291,11 @@ fn get_typed_value<A: Animator>(animator: &A, frame: &AnimatorKeyFrame, neutral_
 /// Computes the value of the animation at `animation_time`, the eased
 /// position within an iteration. `neutral_value` stands in for the parts of
 /// the iteration that no key frame covers.
-pub(crate) fn interpolation_handler<A: Animator>(animator: &A, animation_time: f64, neutral_value: &A::Value) -> A::Value {
+pub(crate) fn interpolation_handler<A: Animator>(
+    animator: &A,
+    animation_time: f64,
+    neutral_value: &A::Value,
+) -> A::Value {
     let (from, to) = {
         let key_frames = animator.base().key_frames.borrow();
         if key_frames.is_empty() {
@@ -240,7 +332,11 @@ fn get_key_frames<A: Animator>(
             neutral_value.clone()
         };
         return (
-            KeyFrameInfo { time: 0.0, value: before_value, key_spline: first_frame.key_spline().cloned() },
+            KeyFrameInfo {
+                time: 0.0,
+                value: before_value,
+                key_spline: first_frame.key_spline().cloned(),
+            },
             KeyFrameInfo::from_key_frame(animator, first_frame, neutral_value),
         );
     }
@@ -266,7 +362,11 @@ fn get_key_frames<A: Animator>(
                 neutral_value.clone()
             };
             return (
-                KeyFrameInfo { time: 0.0, value: before_value, key_spline: last_frame.key_spline().cloned() },
+                KeyFrameInfo {
+                    time: 0.0,
+                    value: before_value,
+                    key_spline: last_frame.key_spline().cloned(),
+                },
                 KeyFrameInfo::from_key_frame(animator, last_frame, neutral_value),
             );
         }
@@ -285,7 +385,11 @@ fn get_key_frames<A: Animator>(
     };
     (
         KeyFrameInfo::from_key_frame(animator, last_frame, neutral_value),
-        KeyFrameInfo { time: 1.0, value: after_value, key_spline: last_frame.key_spline().cloned() },
+        KeyFrameInfo {
+            time: 1.0,
+            value: after_value,
+            key_spline: last_frame.key_spline().cloned(),
+        },
     )
 }
 
@@ -324,6 +428,14 @@ impl<A: Animator> IAnimator for A {
         on_complete: Option<Rc<dyn Fn()>>,
         should_pause_on_invisible: bool,
     ) -> Option<Rc<dyn IDisposable>> {
-        <A as Animator>::apply(&self, animation, control, clock, match_, on_complete, should_pause_on_invisible)
+        <A as Animator>::apply(
+            &self,
+            animation,
+            control,
+            clock,
+            match_,
+            on_complete,
+            should_pause_on_invisible,
+        )
     }
 }
