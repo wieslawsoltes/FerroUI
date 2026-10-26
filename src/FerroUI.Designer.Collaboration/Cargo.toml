@@ -1,0 +1,24 @@
+[package]
+name = "ferroui-designer-collaboration"
+description = "Transport-independent replicated XAML designer model, synchronization and presence"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+homepage.workspace = true
+readme = "README.md"
+keywords.workspace = true
+categories.workspace = true
+
+[lib]
+path = "lib.rs"
+
+[dependencies]
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+sha2 = "0.11"
+ferroui-designer-core = { version = "=0.4.0", path = "../FerroUI.Designer.Core" }
+
+[package.metadata.release]
+group = "tools"

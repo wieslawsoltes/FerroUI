@@ -2,6 +2,8 @@
 resolver = "2"
 members = [
     "src/FerroUI.Designer.Core",
+    "src/FerroUI.Designer.Animation",
+    "src/FerroUI.Designer.Collaboration",
     "samples/HotReload",
     "src/FerroUI.HotReload",
     "src/FerroUI.HotPatch",
@@ -185,6 +187,8 @@ categories = ["gui"]
 # `scripts/release/set-version.sh <version>` writes the version above and these keys.
 [workspace.dependencies]
 ferroui-designer-core = { version = "=0.4.0", path = "src/FerroUI.Designer.Core" }
+ferroui-designer-animation = { version = "=0.4.0", path = "src/FerroUI.Designer.Animation" }
+ferroui-designer-collaboration = { version = "=0.4.0", path = "src/FerroUI.Designer.Collaboration" }
 ferroui-hot-reload = { version = "=0.4.0", path = "src/FerroUI.HotReload" }
 ferroui-hot-patch = { version = "=0.4.0", path = "src/FerroUI.HotPatch" }
 ferroui-inspect = { version = "=0.4.0", path = "src/FerroUI.Inspect" }
