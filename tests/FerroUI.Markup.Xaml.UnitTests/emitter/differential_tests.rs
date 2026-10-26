@@ -38,6 +38,29 @@ const POSITION_MAP_PATH: &str = concat!(env!("CARGO_MANIFEST_DIR"), "/emitter/ge
 /// what the marker hides may differ.
 const UNREADABLE: &str = "<unreadable: ";
 
+#[test]
+fn scoped_reflection_bindings_keep_their_namespace_in_immediate_and_deferred_generated_content() {
+    use ferroui_controls::{Button, StackPanel, TextBlock};
+    let _app = xaml_test_base();
+    let name = "scoped_namespace_bindings.xaml";
+    let source = DOCUMENTS.iter().find(|document| document.0 == name).unwrap().1;
+    let read = |value: BoxedValue| {
+        let panel = ValueTypes::as_object(&*value).and_then(|object| object.cast::<StackPanel>()).unwrap();
+        let children = panel.children().to_vec();
+        let first = children[0].cast::<TextBlock>().unwrap();
+        let button = children[1].cast::<Button>().unwrap();
+        let built = button.template().unwrap()
+            .build(button.upcast_ref::<ferroui_controls::primitives::TemplatedControl>()).unwrap();
+        let (content, _) = built.deconstruct();
+        let deferred = content.cast::<TextBlock>().unwrap();
+        (first.text(), deferred.text())
+    };
+    let interpreted = read(try_load(source).expect("scoped reflection binding loads"));
+    let emitted = read(build_generated(name).expect("scoped binding was emitted").expect("generated binding builds"));
+    assert_eq!(interpreted, (Some("7".into()), Some("11".into())));
+    assert_eq!(emitted, interpreted);
+}
+
 /// A value the dump cannot read, in display form: [`UNREADABLE`] and why.
 fn unreadable(why: impl std::fmt::Display) -> String {
     format!("{UNREADABLE}{why}>")

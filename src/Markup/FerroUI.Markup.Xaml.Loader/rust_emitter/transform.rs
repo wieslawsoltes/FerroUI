@@ -395,3 +395,23 @@ pub fn namespace_table(configuration: &Rc<TransformerConfiguration>, document: &
         .collect();
     format!("&[\n{}]", entries.concat())
 }
+
+/// The same static table for a lexical element scope. Prefix meanings are resolved by the
+/// compiler's namespace helper, exactly as the runtime namespace information provider does.
+pub(crate) fn namespace_table_for_aliases(
+    configuration: &TransformerConfiguration,
+    aliases: &std::collections::HashMap<String, String>,
+) -> String {
+    let mut prefixes: Vec<_> = aliases.keys().collect();
+    prefixes.sort();
+    let entries: Vec<_> = prefixes.into_iter().map(|prefix| {
+        let resolved = xamlx::transform::NamespaceInfoHelper::try_resolve(configuration, Some(&aliases[prefix]))
+            .unwrap_or_default();
+        let infos: Vec<_> = resolved.into_iter().map(|info| {
+            let assembly = info.assembly_name.or_else(|| info.assembly.map(|assembly| assembly.name())).unwrap_or_default();
+            format!("({}, {})", rust_string_literal(&info.clr_namespace), rust_string_literal(&assembly))
+        }).collect();
+        format!("    ({}, &[{}]),\n", rust_string_literal(prefix), infos.join(", "))
+    }).collect();
+    format!("&[\n{}]", entries.concat())
+}

@@ -143,6 +143,8 @@ pub const DOCUMENTS: &[(&str, &str)] = &[
     ("method_command.xaml", "<StackPanel xmlns='https://github.com/ferroui' xmlns:x='http://schemas.microsoft.com/winfx/2006/xaml'\n            xmlns:t='clr-namespace:FerroUI.Markup.Xaml.UnitTests;assembly=FerroUI.Markup.Xaml.UnitTests'\n            x:DataType='t:Desk' x:CompileBindings='True'>\n  <Button Command='{Binding Save}'/>\n  <Button Command='{Binding Rename}' CommandParameter='draft'/>\n  <Button Command='{Binding Fire}' CommandParameter='now'/>\n  <TextBox Name='box' Text='selected'/>\n  <Button Command='{Binding #box.SelectAll}'/>\n</StackPanel>\n"),
     ("container_query.xaml", "<StackPanel xmlns='https://github.com/ferroui' xmlns:x='http://schemas.microsoft.com/winfx/2006/xaml'>\n  <StackPanel.Styles>\n    <ContainerQuery Name='Host' Query='max-width:400'>\n      <Style Selector='Border'>\n        <Setter Property='Opacity' Value='0.5'/>\n      </Style>\n    </ContainerQuery>\n    <ContainerQuery Name='Host' Query='min-width:400 and max-height:120, height:1'>\n      <Style Selector='Border'>\n        <Setter Property='Opacity' Value='0.25'/>\n      </Style>\n    </ContainerQuery>\n    <ContainerQuery Name='Host' Query='width:800, height:600'>\n      <Style Selector='Border'>\n        <Setter Property='Opacity' Value='0.75'/>\n      </Style>\n    </ContainerQuery>\n  </StackPanel.Styles>\n  <Border Name='Host'/>\n</StackPanel>\n"),
     ("static_resource_element.xaml", "<StackPanel xmlns='https://github.com/ferroui' xmlns:x='http://schemas.microsoft.com/winfx/2006/xaml'>\n  <StackPanel.Resources>\n    <ControlTheme x:Key='Plain' TargetType='Button'>\n      <Setter Property='Opacity' Value='0.5'/>\n    </ControlTheme>\n    <SolidColorBrush x:Key='Accent' Color='Blue'/>\n  </StackPanel.Resources>\n  <Button>\n    <Button.Theme>\n      <StaticResource ResourceKey='Plain'/>\n    </Button.Theme>\n  </Button>\n  <Border>\n    <Border.Background>\n      <StaticResource ResourceKey='Accent'/>\n    </Border.Background>\n  </Border>\n</StackPanel>\n"),
+    ("scoped_namespace_types.xaml", r#"<StackPanel xmlns="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:p="clr-namespace:FerroUI.Controls;assembly=FerroUI.Controls"><Border xmlns:p="clr-namespace:FerroUI.Media;assembly=FerroUI.Base" Tag="{x:Type p:SolidColorBrush}"/><Border Tag="{x:Type p:Button}"/></StackPanel>"#),
+    ("scoped_namespace_bindings.xaml", r#"<StackPanel xmlns="https://github.com/ferroui" xmlns:p="clr-namespace:Wrong.Scope"><TextBlock xmlns:p="clr-namespace:FerroUI.Controls;assembly=FerroUI.Controls" Grid.Row="7" Text="{Binding (p:Grid.Row), RelativeSource={RelativeSource Self}}"/><Button><Button.Template><ControlTemplate xmlns:p="clr-namespace:FerroUI.Controls;assembly=FerroUI.Controls"><TextBlock Name="PART_Value" Grid.Row="11" Text="{Binding (p:Grid.Row), RelativeSource={RelativeSource Self}}"/></ControlTemplate></Button.Template></Button></StackPanel>"#),
 ];
 
 /// The documents that must be eligible for emission.
@@ -274,6 +276,8 @@ pub const EXPECTED_ELIGIBLE: &[&str] = &[
     "method_command.xaml",
     "container_query.xaml",
     "static_resource_element.xaml",
+    "scoped_namespace_types.xaml",
+    "scoped_namespace_bindings.xaml",
 ];
 
 /// The documents whose values depend on the base URI of the document or on a service of

@@ -653,6 +653,10 @@ struct Emitter<'a> {
     /// an object created with its default constructor): what a part of a
     /// split function can be passed ([`split_into_parts`]).
     local_types: HashMap<String, String>,
+    /// Lexical namespace meanings currently installed by generated RAII guards. Root-only
+    /// documents emit exactly the existing fast path without additional context operations.
+    namespace_aliases: HashMap<String, String>,
+    root_namespace_aliases: HashMap<String, String>,
 }
 
 fn node_address<T: ?Sized>(node: &Rc<T>) -> usize {
@@ -716,6 +720,37 @@ impl<'a> Emitter<'a> {
     // --- values -------------------------------------------------------------
 
     fn value(&mut self, node: &Rc<dyn IXamlAstNode>) -> EmitResult<Typed<'a>> {
+        let scope = self.enter_namespace_scope(node);
+        let result = self.value_scoped(node);
+        let result = match (&scope, result) {
+            // Expressions must be evaluated while the lexical provider is still installed.
+            (Some(_), Ok(value)) if matches!(value.kind, Kind::Class(_) | Kind::Exact { .. }) => {
+                Ok(self.bind(&value, "scoped_value"))
+            }
+            (_, result) => result,
+        };
+        self.leave_namespace_scope(scope);
+        result
+    }
+    fn enter_namespace_scope(&mut self, node: &Rc<dyn IXamlAstNode>) -> Option<(String, HashMap<String, String>)> {
+        let scope = node.namespace_scope()?;
+        if scope.aliases() == &self.namespace_aliases {
+            return None;
+        }
+        let previous = std::mem::replace(&mut self.namespace_aliases, scope.aliases().clone());
+        let guard = self.local_named("namespace_scope");
+        let table = super::transform::namespace_table_for_aliases(self.configuration, scope.aliases());
+        self.uses_context = true;
+        self.line(format!("let {guard} = rt::push_namespace_scope(&context, {table});"));
+        Some((guard, previous))
+    }
+    fn leave_namespace_scope(&mut self, scope: Option<(String, HashMap<String, String>)>) {
+        if let Some((guard, previous)) = scope {
+            self.line(format!("::core::mem::drop({guard});"));
+            self.namespace_aliases = previous;
+        }
+    }
+    fn value_scoped(&mut self, node: &Rc<dyn IXamlAstNode>) -> EmitResult<Typed<'a>> {
         if let Some(group) = node.as_value_with_manipulation_node() {
             // `value_with_manipulation`: the value, then its manipulation unless it is an empty group.
             let created = self.value(&group.value().as_node())?;
@@ -1500,6 +1535,12 @@ impl<'a> Emitter<'a> {
     // --- manipulations ------------------------------------------------------
 
     fn manipulation(&mut self, node: &Rc<dyn IXamlAstNode>, target: &Typed<'a>) -> EmitResult<()> {
+        let scope = self.enter_namespace_scope(node);
+        let result = self.manipulation_scoped(node, target);
+        self.leave_namespace_scope(scope);
+        result
+    }
+    fn manipulation_scoped(&mut self, node: &Rc<dyn IXamlAstNode>, target: &Typed<'a>) -> EmitResult<()> {
         if let Some(n) = node.cast::<XamlObjectInitializationNode>() {
             return self.object_initialization(node, &n, target);
         }
@@ -2444,7 +2485,11 @@ impl<'a> Emitter<'a> {
         // around it.
         let outer_names = std::mem::take(&mut self.local_names);
         let outer_uses = (std::mem::take(&mut self.uses_context), std::mem::take(&mut self.uses_name_scope));
+        let declaration_aliases = node.namespace_scope().map(|scope| scope.aliases().clone())
+            .unwrap_or_else(|| self.namespace_aliases.clone());
+        let outer_aliases = std::mem::replace(&mut self.namespace_aliases, declaration_aliases.clone());
         let body = self.deferred_body(deferred);
+        self.namespace_aliases = outer_aliases;
         let body_lines = std::mem::replace(&mut self.lines, outer_lines);
         self.assignments = outer_assignments;
         self.local_names = outer_names;
@@ -2465,7 +2510,11 @@ impl<'a> Emitter<'a> {
         text.push_str(
             ") -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {\n",
         );
-        match fused_static_resource_content(self.types, &body_lines, &returned, &self.document) {
+        let scoped_declaration = declaration_aliases != self.root_namespace_aliases;
+        let fused = if scoped_declaration { None } else {
+            fused_static_resource_content(self.types, &body_lines, &returned, &self.document)
+        };
+        match fused {
             Some(fused) if !uses_name_scope => {
                 for line in fused {
                     text.push_str(&line);
@@ -2473,10 +2522,11 @@ impl<'a> Emitter<'a> {
                 }
             }
             _ => {
-                text.push_str(&format!(
-                    "    let {context_name} = rt::deferred_context(service_provider, &{});\n",
-                    self.document
-                ));
+                let document_info = if scoped_declaration {
+                    format!("&rt::DocumentInfo {{ base_uri: {}.base_uri, namespaces: {} }}", self.document,
+                        super::transform::namespace_table_for_aliases(self.configuration, &declaration_aliases))
+                } else { format!("&{}", self.document) };
+                text.push_str(&format!("    let {context_name} = rt::deferred_context(service_provider, {document_info});\n"));
                 if uses_name_scope {
                     text.push_str("    let name_scope = context.name_scope_field();\n");
                 }
@@ -3887,6 +3937,8 @@ pub fn emit_function<'a>(
         function_name,
         deferred_functions: Vec::new(),
         local_types: HashMap::new(),
+        namespace_aliases: root.namespace_scope().or_else(|| root_value.namespace_scope()).map(|scope| scope.aliases().clone()).unwrap_or_default(),
+        root_namespace_aliases: root.namespace_scope().or_else(|| root_value.namespace_scope()).map(|scope| scope.aliases().clone()).unwrap_or_default(),
     };
     // `Build`: the root object, then `Populate` with a context of its own (its name
     // scope field is filled from the parent service provider) whose root object is

@@ -57,6 +57,49 @@ fn the_namespace_information_is_the_table_of_the_document() {
 }
 
 #[test]
+fn compiled_namespace_scopes_shadow_restore_and_keep_captured_tables_stable() {
+    use super::compiled::push_namespace_scope;
+    let context = create_context(None, None, NAMESPACES);
+    let provider: Rc<dyn IServiceProvider> = context.clone();
+    let namespaces = || provider.get_service_of::<Rc<dyn IFerroXamlIlXmlNamespaceInfoProvider>>().unwrap().xml_namespaces();
+    let outer = push_namespace_scope(&context, &[("p", &[("Outer.Views", "App")])]);
+    let captured = namespaces();
+    assert_eq!(captured["p"][0].clr_namespace(), "Outer.Views");
+    let inner = push_namespace_scope(&context, &[("p", &[("Inner.Views", "App")])]);
+    assert_eq!(namespaces()["p"][0].clr_namespace(), "Inner.Views");
+    // Out-of-order cleanup must not expose a dropped outer scope underneath the active one.
+    drop(outer);
+    assert_eq!(namespaces()["p"][0].clr_namespace(), "Inner.Views");
+    drop(inner);
+    assert!(!namespaces().contains_key("p"));
+    assert!(namespaces().contains_key(""));
+    assert_eq!(captured["p"][0].clr_namespace(), "Outer.Views");
+    let failed = (|| -> Result<(), ()> {
+        let _guard = push_namespace_scope(&context, &[("p", &[("Failed.Views", "App")])]);
+        Err(())
+    })();
+    assert!(failed.is_err());
+    assert!(!namespaces().contains_key("p"));
+}
+
+#[test]
+fn emitted_deferred_context_uses_declaration_namespaces_after_parent_scope_ends() {
+    use super::compiled::{deferred_context, push_namespace_scope};
+    let context = create_context(None, None, NAMESPACES);
+    let declaration: XmlNamespaceTable = &[("local", &[("Inner.Views", "App")])];
+    let guard = push_namespace_scope(&context, declaration);
+    let provider: Rc<dyn IServiceProvider> = context;
+    drop(guard);
+    let deferred = deferred_context(&provider, &DocumentInfo {
+        base_uri: Some("ferres://App/Template.xaml"), namespaces: declaration,
+    });
+    let deferred_provider: Rc<dyn IServiceProvider> = deferred;
+    let info = deferred_provider.get_service_of::<Rc<dyn IFerroXamlIlXmlNamespaceInfoProvider>>().unwrap();
+    assert_eq!(info.xml_namespaces()["local"][0].clr_namespace(), "Inner.Views");
+    assert!(!provider.get_service_of::<Rc<dyn IFerroXamlIlXmlNamespaceInfoProvider>>().unwrap().xml_namespaces().contains_key("local"));
+}
+
+#[test]
 fn the_name_scope_field_is_the_scope_of_the_parent() {
     let scope = NameScopeRef::new(NameScope::new());
     let parent = TestServiceProvider::new().with_name_scope(scope.clone()).sp();
