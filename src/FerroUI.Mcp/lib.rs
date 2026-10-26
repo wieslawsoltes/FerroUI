@@ -6,15 +6,15 @@
 //! the one the Chrome DevTools Protocol endpoint uses too: node IDs are the same for both, and a
 //! custom lifetime registers its top levels there (`register_root`).
 mod extensions;
-mod services;
 mod protocol;
+mod services;
 mod transport;
 pub use extensions::UiToolProvider;
-pub use services::{RequestContext, ServiceToolProvider};
 use ferroui_base::threading::{Dispatcher, DispatcherPriority};
 use ferroui_inspect::LogCapture;
 pub use ferroui_inspect::Permissions;
 use serde_json::Value;
+pub use services::{RequestContext, ServiceToolProvider};
 use std::{
     io,
     net::{IpAddr, Ipv4Addr, SocketAddr},
@@ -134,10 +134,13 @@ pub fn serve_service_with_token(
     bearer: String,
 ) -> io::Result<ServerHandle> {
     if bearer.len() != 64 || !bearer.bytes().all(|byte| byte.is_ascii_hexdigit()) {
-        return Err(io::Error::new(io::ErrorKind::InvalidInput,"Service bearer must be 256-bit hexadecimal"));
+        return Err(io::Error::new(
+            io::ErrorKind::InvalidInput,
+            "Service bearer must be 256-bit hexadecimal",
+        ));
     }
-    let service=services::ServiceCatalog::new(provider)?;
-    serve_registered(options,None,Some(service),Some(bearer))
+    let service = services::ServiceCatalog::new(provider)?;
+    serve_registered(options, None, Some(service), Some(bearer))
 }
 
 fn serve_registered(
@@ -191,7 +194,8 @@ fn start(
             let address = server.local_addr()?;
             let mut bytes = [0u8; 32];
             getrandom::fill(&mut bytes).map_err(|e| io::Error::other(e.to_string()))?;
-            let token = bearer.unwrap_or_else(||bytes.iter().map(|b| format!("{b:02x}")).collect::<String>());
+            let token = bearer
+                .unwrap_or_else(|| bytes.iter().map(|b| format!("{b:02x}")).collect::<String>());
             (Some(server), Some(address), Some(token))
         }
         Transport::Stdio => (None, None, None),
@@ -205,7 +209,7 @@ fn start(
         None
     };
     let log_guard = (options.capture_logs && service.is_none()).then(LogCapture::install);
-    let is_service=service.is_some();
+    let is_service = service.is_some();
     let client = Client {
         dispatcher,
         extension,
@@ -277,11 +281,17 @@ impl Client {
     fn call(&self, name: &str, args: Value, cancel: &Arc<AtomicBool>) -> Result<Value, String> {
         self.validate(name, &args)?;
         if let Some(service) = &self.service {
-            let context = RequestContext::new(self.permissions, cancel.clone(), self.stop.clone(), self.timeout);
+            let context = RequestContext::new(
+                self.permissions,
+                cancel.clone(),
+                self.stop.clone(),
+                self.timeout,
+            );
             context.check_cancelled()?;
             return std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
                 service.execute(name, &args, &context)
-            })).unwrap_or_else(|_| Err("Service operation panicked".into()));
+            }))
+            .unwrap_or_else(|_| Err("Service operation panicked".into()));
         }
         // Only the built-in wait tool owns timeout_ms. In particular, application tools may
         // use that argument independently, and adding an arbitrary duration to Instant can
@@ -304,26 +314,29 @@ impl Client {
             let stop = self.stop.clone();
             let pending = Arc::new(AtomicBool::new(true));
             let queued = pending.clone();
-            self.dispatcher.as_ref().expect("UI client owns a dispatcher").post(
-                move || {
-                    if !queued.swap(false, Ordering::AcqRel)
-                        || cancelled.load(Ordering::Acquire)
-                        || stop.load(Ordering::Acquire)
-                    {
-                        return;
-                    }
-                    let result = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
-                        if let Some(extension) = extension {
-                            extension.execute(&tool, &args, permissions)
-                        } else {
-                            ferroui_inspect::execute(&tool, &args, permissions)
+            self.dispatcher
+                .as_ref()
+                .expect("UI client owns a dispatcher")
+                .post(
+                    move || {
+                        if !queued.swap(false, Ordering::AcqRel)
+                            || cancelled.load(Ordering::Acquire)
+                            || stop.load(Ordering::Acquire)
+                        {
+                            return;
                         }
-                    }))
-                    .unwrap_or_else(|_| Err("UI operation panicked".into()));
-                    let _ = tx.send(result);
-                },
-                DispatcherPriority::BACKGROUND,
-            );
+                        let result = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
+                            if let Some(extension) = extension {
+                                extension.execute(&tool, &args, permissions)
+                            } else {
+                                ferroui_inspect::execute(&tool, &args, permissions)
+                            }
+                        }))
+                        .unwrap_or_else(|_| Err("UI operation panicked".into()));
+                        let _ = tx.send(result);
+                    },
+                    DispatcherPriority::BACKGROUND,
+                );
             let queued_at = Instant::now();
             let result = loop {
                 if self.stop.load(Ordering::Acquire) || cancel.load(Ordering::Acquire) {

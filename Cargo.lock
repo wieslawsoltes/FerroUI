@@ -1352,6 +1352,21 @@ dependencies = [
 ]
 
 [[package]]
+name = "ferroui-designer-collaboration-host"
+version = "0.4.0"
+dependencies = [
+ "ferroui-designer-collaboration",
+ "ferroui-designer-core",
+ "ferroui-mcp",
+ "getrandom 0.4.3",
+ "serde",
+ "serde_json",
+ "sha2",
+ "ureq",
+ "url",
+]
+
+[[package]]
 name = "ferroui-designer-core"
 version = "0.4.0"
 dependencies = [

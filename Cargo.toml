@@ -7,6 +7,7 @@ members = [
     "src/FerroUI.Designer.Language",
     "src/FerroUI.Designer.Animation",
     "src/FerroUI.Designer.Collaboration",
+    "src/FerroUI.Designer.Collaboration.Host",
     "src/FerroUI.Designer",
     "samples/DesignerStudio",
     "samples/HotReload",
@@ -195,6 +196,7 @@ ferroui-designer-tools = { version = "=0.4.0", path = "src/FerroUI.Designer.Tool
 ferroui-designer-core = { version = "=0.4.0", path = "src/FerroUI.Designer.Core" }
 ferroui-designer-project = { version = "=0.4.0", path = "src/FerroUI.Designer.Project" }
 ferroui-designer-language = { version = "=0.4.0", path = "src/FerroUI.Designer.Language" }
+ferroui-designer-collaboration-host = { version = "=0.4.0", path = "src/FerroUI.Designer.Collaboration.Host" }
 ferroui-designer-animation = { version = "=0.4.0", path = "src/FerroUI.Designer.Animation" }
 ferroui-designer-collaboration = { version = "=0.4.0", path = "src/FerroUI.Designer.Collaboration" }
 ferroui-designer = { version = "=0.4.0", path = "src/FerroUI.Designer" }
