@@ -11,6 +11,7 @@ pub mod generated {
 
 mod app;
 mod main_window;
+mod main_window_view_model;
 pub mod markup;
 mod register_types;
 
@@ -25,6 +26,7 @@ pub use compiled_xaml::*;
 
 pub use app::App;
 pub use main_window::MainWindow;
+pub use main_window_view_model::MainWindowViewModel;
 pub use markup::SAMPLE;
 pub use register_types::{register_types, ASSEMBLY};
 

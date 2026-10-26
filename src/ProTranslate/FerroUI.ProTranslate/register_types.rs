@@ -1,6 +1,6 @@
 use crate::{
     FExtension, FormatExtension, TExtension, TranslateExtension, Translation,
-    TranslationBindingSource,
+    TranslationBindingSource, TranslationService,
 };
 use ferroui_base::data::core::ValueTypes;
 use ferroui_base::metadata::{
@@ -29,9 +29,10 @@ pub static ASSEMBLY: MarkupAssembly = MarkupAssembly {
     metadata: &[],
 };
 
-const TYPES: &[&TypeInfo] = &[Translation::TYPE];
+const TYPES: &[&TypeInfo] = &[Translation::TYPE, TranslationService::TYPE];
 const MARKUP_TYPES: &[&MarkupType] = &[
     <Translation as MarkupTyped>::MARKUP,
+    <TranslationService as MarkupTyped>::MARKUP,
     <TranslateExtension as MarkupTyped>::MARKUP,
     <TExtension as MarkupTyped>::MARKUP,
     <FormatExtension as MarkupTyped>::MARKUP,

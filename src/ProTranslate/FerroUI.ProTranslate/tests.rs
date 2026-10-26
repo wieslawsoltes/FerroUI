@@ -27,6 +27,68 @@ fn source() -> TranslationBindingSource {
         CultureService::new(culture("en-US")),
     ))
 }
+
+#[test]
+fn binding_source_metadata_notifies_indexer_and_distinct_cultures() {
+    use ferroui_base::data::ReflectionBinding;
+    let _app = start();
+    let source = source();
+    let title = TextBlock::new();
+    let ui = TextBlock::new();
+    let formatting = TextBlock::new();
+    for target in [&title, &ui, &formatting] {
+        target.set_data_context(Some(Rc::new(source.clone())));
+    }
+    title.bind_binding(
+        TextBlock::text_property(),
+        &ReflectionBinding::new("[Title]"),
+    );
+    ui.bind_binding(
+        TextBlock::text_property(),
+        &ReflectionBinding::new("Culture"),
+    );
+    formatting.bind_binding(
+        TextBlock::text_property(),
+        &ReflectionBinding::new("FormattingCulture"),
+    );
+    assert_eq!(title.text().as_deref(), Some("Hello"));
+    source.set_cultures(culture("pl-PL"), culture("ar-SA"));
+    assert_eq!(title.text().as_deref(), Some("مرحبا"));
+    assert_eq!(ui.text().as_deref(), Some("ar-SA"));
+    assert_eq!(formatting.text().as_deref(), Some("pl-PL"));
+    assert_eq!(source.translate("Price", &[12.5.into()]).unwrap(), "12,50");
+    assert!(ferroui_base::data::BindingOperations::is_unset(
+        source.get_value("Missing").unwrap().as_ref()
+    ));
+    assert_eq!(source.translate("Missing", &[]).unwrap(), "Missing");
+}
+
+#[test]
+fn binding_source_native_culture_setter_and_explicit_disposal() {
+    use ferroui_base::data::model::INotifyPropertyChanged;
+    use ferroui_base::data::ReflectionBinding;
+    let _app = start();
+    let source = source();
+    let service = source.service();
+    let editor = TextBox::new();
+    editor.set_data_context(Some(Rc::new(source.clone())));
+    editor.bind_binding(
+        TextBox::text_property(),
+        &ReflectionBinding::new("Culture").with_mode(BindingMode::TwoWay),
+    );
+    editor.set_text(Some("pl-PL"));
+    assert_eq!(source.culture().name(), "pl-PL");
+    assert_eq!(source.formatting_culture().name(), "pl-PL");
+    let count = service.subscriber_count();
+    assert!(source.property_changed().has_handlers());
+    source.dispose();
+    source.dispose();
+    assert!(source.is_disposed());
+    assert_eq!(service.subscriber_count(), count - 1);
+    assert!(!source.property_changed().has_handlers());
+    service.cultures().set_culture(culture("ar-SA"));
+    assert_eq!(editor.text().as_deref(), Some("pl-PL"));
+}
 fn start() -> UnitTestApplicationScope {
     register_types();
     UnitTestApplication::start(TestServices::styled_window())
@@ -100,6 +162,52 @@ fn attached_targets_include_editors_and_content_controls() {
             .as_deref(),
         Some("Cześć")
     );
+}
+
+#[test]
+fn attached_translation_targets_header_without_replacing_body_content() {
+    use ferroui_base::data::core::ValueTypes;
+    use ferroui_controls::Expander;
+    let _app = start();
+    let source = source();
+    let target = Expander::new();
+    let body: ferroui_base::BoxedValue = Rc::new("Body content".to_string());
+    target.set_content(Some(body.clone()));
+    Translation::set_source(&target, Some(source.clone()));
+    Translation::set_key(&target, Some("Title".into()));
+    assert_eq!(
+        ValueTypes::to_display_string(target.header().as_ref()),
+        "Hello"
+    );
+    source.set_culture(culture("pl-PL"));
+    assert_eq!(
+        ValueTypes::to_display_string(target.header().as_ref()),
+        "Cześć"
+    );
+    assert!(Rc::ptr_eq(&target.content().unwrap(), &body));
+}
+
+#[test]
+fn runtime_xaml_facade_source_supports_indexers_and_explicit_extension_sources() {
+    let _app = start();
+    let previous = TranslationBindingSource::default_source();
+    let source = source();
+    crate::TranslationService::use_source(source.clone());
+    let indexed = load_text(
+        r#"<TextBlock xmlns="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:pt="https://github.com/protranslate/xaml" Text="{Binding [Title], Source={x:Static pt:TranslationService.Source}}" />"#,
+    );
+    let explicit = load_text(
+        r#"<TextBlock xmlns="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:pt="https://github.com/protranslate/xaml" Text="{pt:T Title, Source={x:Static pt:TranslationService.Source}}" />"#,
+    );
+    source.set_culture(culture("pl-PL"));
+    assert_eq!(indexed.text().as_deref(), Some("Cześć"));
+    assert_eq!(explicit.text().as_deref(), Some("Cześć"));
+    crate::TranslationService::use_source(self::source());
+    assert_eq!(indexed.text().as_deref(), Some("Cześć"));
+    assert_eq!(explicit.text().as_deref(), Some("Cześć"));
+    drop((indexed, explicit));
+    assert_eq!(source.subscriber_count(), 0);
+    crate::TranslationService::use_source(previous);
 }
 
 #[test]
@@ -331,6 +439,54 @@ fn native_format_arguments_preserve_decimal_and_offset_date_types() {
         boxed_argument(Some(&value)).unwrap(),
         FormatArgument::DateTime(_)
     ));
+    let value: ferroui_base::BoxedValue = Rc::new(0.1_f32);
+    assert_eq!(
+        format_composite(
+            "{0:G}",
+            &[boxed_argument(Some(&value)).unwrap()],
+            &culture("en-US")
+        )
+        .unwrap(),
+        "0.1"
+    );
+    let value: ferroui_base::BoxedValue = Rc::new(-1_i8);
+    assert_eq!(
+        format_composite(
+            "{0:X}",
+            &[boxed_argument(Some(&value)).unwrap()],
+            &culture("en-US")
+        )
+        .unwrap(),
+        "FF"
+    );
+}
+
+#[test]
+fn native_format_binding_accepts_application_defined_formattable_values() {
+    use ferroui_protranslate_core::{FormatArgument, LocalizedFormat, TranslationError};
+    struct DomainValue;
+    impl LocalizedFormat for DomainValue {
+        fn format(&self, specifier: &str, culture: &Culture) -> Result<String, TranslationError> {
+            Ok(format!("{specifier}/{}", culture.name()))
+        }
+    }
+    let _app = start();
+    let provider = Rc::new(InMemoryTranslationProvider::new("Custom"));
+    for culture_name in ["en-US", "pl-PL"] {
+        provider.insert(culture(culture_name), "Value", "{0:domain}");
+    }
+    let source = TranslationBindingSource::new(TranslationService::new(
+        provider,
+        CultureService::new(culture("en-US")),
+    ));
+    let formatted = FormatExtension::with_key("Value");
+    formatted.set_source(Some(source.clone()));
+    formatted.set_value(Some(Rc::new(FormatArgument::Custom(Rc::new(DomainValue)))));
+    let target = TextBlock::new();
+    target.bind_binding(TextBlock::text_property(), &formatted);
+    assert_eq!(target.text().as_deref(), Some("domain/en-US"));
+    source.set_culture(culture("pl-PL"));
+    assert_eq!(target.text().as_deref(), Some("domain/pl-PL"));
 }
 
 #[test]
@@ -383,4 +539,192 @@ fn object_fallback_preserves_content_identity_and_formats_numeric_text() {
     Translation::set_string_format(&text, Some("{0:N1}".into()));
     source.set_culture(culture("pl-PL"));
     assert_eq!(text.text().as_deref(), Some("42,0"));
+}
+
+#[test]
+fn missing_markup_values_use_final_fallback_and_preserve_lower_priority_values() {
+    use ferroui_base::data::BindingPriority;
+    let _app = start();
+    let source = source();
+    let target = TextBlock::new();
+    target.set_value_with_priority(
+        TextBlock::text_property(),
+        Some("Styled".into()),
+        BindingPriority::Style,
+    );
+    let missing = TranslateExtension::with_key("Missing");
+    missing.set_source(Some(source.clone()));
+    target.bind_binding(TextBlock::text_property(), &missing);
+    assert_eq!(target.text().as_deref(), Some("Styled"));
+
+    let formatted = FormatExtension::with_key("Missing");
+    formatted.set_source(Some(source.clone()));
+    formatted.set_value(Some(Rc::new(12_i32)));
+    formatted.set_fallback_text(Some("Fallback {0}".into()));
+    formatted.set_string_format(Some("Outer [{0}]".into()));
+    target.bind_binding(TextBlock::text_property(), &formatted);
+    assert_eq!(target.text().as_deref(), Some("Fallback {0}"));
+}
+
+#[test]
+fn format_binding_reports_strict_errors_and_recovers_after_catalog_refresh() {
+    use ferroui_base::data::BindingErrorType;
+    use ferroui_protranslate_core::TranslationFormatFailureBehavior;
+    let _app = start();
+    let provider = Rc::new(InMemoryTranslationProvider::new("Strict"));
+    provider.insert(culture("en-US"), "Value", "{3}");
+    let service = TranslationService::new(provider.clone(), CultureService::new(culture("en-US")));
+    let mut options = service.options();
+    options.format_failure_behavior = TranslationFormatFailureBehavior::ReportAndReturnError;
+    service.set_options(options);
+    let source = TranslationBindingSource::new(service);
+    let target = TextBlock::new();
+    let formatted = FormatExtension::with_key("Value");
+    formatted.set_source(Some(source.clone()));
+    formatted.set_value(Some(Rc::new(12_i32)));
+    formatted.set_fallback_text(Some("Unavailable".into()));
+    let expression = target.bind_binding(TextBlock::text_property(), &formatted);
+    assert_eq!(target.text().as_deref(), Some("Unavailable"));
+    assert_eq!(
+        expression.as_untyped().unwrap().base().error_type(),
+        BindingErrorType::Error
+    );
+    provider.insert(culture("en-US"), "Value", "Value: {0}");
+    source.refresh();
+    assert_eq!(target.text().as_deref(), Some("Value: 12"));
+    assert_eq!(
+        expression.as_untyped().unwrap().base().error_type(),
+        BindingErrorType::None
+    );
+}
+
+#[test]
+fn replacing_ambient_source_reconnects_consumers_and_clearing_scope_restores_it() {
+    let _app = start();
+    let previous = TranslationBindingSource::default_source();
+    let english = source();
+    let polish = source();
+    polish.set_culture(culture("pl-PL"));
+    crate::TranslationService::use_source(english.clone());
+    let bound = TextBlock::new();
+    bound.bind_binding(
+        TextBlock::text_property(),
+        &TranslateExtension::with_key("Title"),
+    );
+    let attached = TextBlock::new();
+    Translation::set_key(&attached, Some("Title".into()));
+    let scoped = TextBlock::new();
+    Translation::set_source(&scoped, Some(english.clone()));
+    scoped.bind_binding(
+        TextBlock::text_property(),
+        &TranslateExtension::with_key("Title"),
+    );
+    crate::TranslationService::use_source(polish.clone());
+    assert_eq!(bound.text().as_deref(), Some("Cześć"));
+    assert_eq!(attached.text().as_deref(), Some("Cześć"));
+    assert_eq!(scoped.text().as_deref(), Some("Hello"));
+    assert_eq!(english.subscriber_count(), 1);
+    assert_eq!(polish.subscriber_count(), 2);
+    scoped.clear_value(Translation::source_property());
+    assert_eq!(scoped.text().as_deref(), Some("Cześć"));
+    assert_eq!(english.subscriber_count(), 0);
+    assert_eq!(polish.subscriber_count(), 3);
+    drop((bound, attached, scoped));
+    assert_eq!(polish.subscriber_count(), 0);
+    crate::TranslationService::use_source(previous);
+}
+
+#[test]
+fn installing_an_ambient_source_refreshes_application_owned_provider_data() {
+    use ferroui_protranslate_core::CallbackTranslationProvider;
+    use std::cell::RefCell;
+    let _app = start();
+    let previous = TranslationBindingSource::default_source();
+    let text = Rc::new(RefCell::new("Before".to_string()));
+    let provider_text = text.clone();
+    let provider = Rc::new(CallbackTranslationProvider::new(
+        "Host",
+        move |_: &str, _: &Culture| Ok(Some(provider_text.borrow().clone())),
+    ));
+    let source = TranslationBindingSource::new(TranslationService::new(
+        provider,
+        CultureService::new(culture("en-US")),
+    ));
+    assert_eq!(source.translate("Title", &[]).unwrap(), "Before");
+    *text.borrow_mut() = "After".into();
+    crate::TranslationService::use_source(source);
+    assert_eq!(crate::TranslationService::t("Title").unwrap(), "After");
+    crate::TranslationService::use_source(previous);
+}
+
+#[test]
+fn attached_culture_selects_service_without_freezing_future_ui_culture() {
+    let _app = start();
+    let source = source();
+    let target = TextBlock::new();
+    Translation::set_source(&target, Some(source.clone()));
+    Translation::set_culture(&target, Some("ar-SA".into()));
+    Translation::set_auto_flow_direction(&target, true);
+    Translation::set_key(&target, Some("Title".into()));
+    source.set_cultures(culture("ar-SA"), culture("pl-PL"));
+    assert_eq!(target.text().as_deref(), Some("Cześć"));
+    assert_eq!(target.flow_direction(), FlowDirection::LeftToRight);
+    assert_eq!(source.formatting_culture().name(), "ar-SA");
+}
+
+#[test]
+fn automatic_direction_respects_local_values_and_restores_inheritance_when_unset() {
+    use ferroui_base::Visual;
+    let _app = start();
+    let source = source();
+    let parent = StackPanel::new();
+    parent.set_flow_direction(FlowDirection::RightToLeft);
+    let target = TextBlock::new();
+    parent.children().add(target.clone().upcast::<Control>());
+    Translation::set_source(&target, Some(source.clone()));
+    Translation::set_auto_flow_direction(&target, true);
+    assert_eq!(target.flow_direction(), FlowDirection::LeftToRight);
+    target.set_flow_direction(FlowDirection::LeftToRight);
+    source.set_culture(culture("ar-SA"));
+    assert_eq!(target.flow_direction(), FlowDirection::LeftToRight);
+    target.clear_value(Visual::flow_direction_property());
+    assert_eq!(target.flow_direction(), FlowDirection::RightToLeft);
+    target.clear_value(Translation::auto_flow_direction_property());
+    parent.set_flow_direction(FlowDirection::LeftToRight);
+    assert_eq!(target.flow_direction(), FlowDirection::LeftToRight);
+    assert_eq!(source.subscriber_count(), 0);
+}
+
+#[test]
+fn attached_refresh_allows_reentrant_culture_changes_and_unsetting_key_clears_error() {
+    use ferroui_base::Visual;
+    use ferroui_protranslate_core::TranslationFormatFailureBehavior;
+    let _app = start();
+    let source = source();
+    let target = TextBlock::new();
+    Translation::set_source(&target, Some(source.clone()));
+    Translation::set_key(&target, Some("Title".into()));
+    Translation::set_auto_flow_direction(&target, true);
+    let update_source = source.clone();
+    let subscription = target.property_changed(move |change| {
+        if change.property() == Visual::flow_direction_property().as_property()
+            && update_source.culture().name() == "ar-SA"
+        {
+            update_source.set_culture(culture("en-US"));
+        }
+    });
+    source.set_culture(culture("ar-SA"));
+    assert_eq!(target.text().as_deref(), Some("Hello"));
+    assert_eq!(target.flow_direction(), FlowDirection::LeftToRight);
+    subscription.dispose();
+    let mut options = source.service().options();
+    options.format_failure_behavior = TranslationFormatFailureBehavior::ReportAndReturnError;
+    source.service().set_options(options);
+    Translation::set_string_format(&target, Some("{5}".into()));
+    assert!(target.get_value(Translation::error_property()).is_some());
+    target.clear_value(Translation::key_property());
+    assert!(target.get_value(Translation::error_property()).is_none());
+    assert_eq!(source.subscriber_count(), 1);
+    Translation::set_auto_flow_direction(&target, false);
+    assert_eq!(source.subscriber_count(), 0);
 }

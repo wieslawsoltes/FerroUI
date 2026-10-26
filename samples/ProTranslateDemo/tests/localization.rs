@@ -43,8 +43,10 @@ fn closing_window_releases_translation_consumers() {
     let _app = start_application();
     let source = TranslationBindingSource::default_source();
     let before = source.subscriber_count();
+    let service_before = source.service().subscriber_count();
     let window = MainWindow::new();
     let weak = window.downgrade();
+    let weak_view_model = std::rc::Rc::downgrade(&window.view_model());
     assert!(source.subscriber_count() > before);
     window.show();
     window.close();
@@ -55,7 +57,28 @@ fn closing_window_releases_translation_consumers() {
         .run_jobs(Some(ferroui_base::threading::DispatcherPriority::LOADED));
     ferroui_base::threading::Dispatcher::ui_thread().run_jobs(None);
     assert!(weak.upgrade().is_none());
+    assert!(weak_view_model.upgrade().is_none());
     assert_eq!(source.subscriber_count(), before);
+    assert_eq!(source.service().subscriber_count(), service_before);
+}
+
+#[test]
+fn compiled_measurement_properties_follow_overrides_without_a_culture_change() {
+    use ferroui_protranslate_core::{MeasurementSystem, RegionProfile};
+    let _app = start_application();
+    let window = MainWindow::new();
+    let measurements = window.find_control::<TextBlock>("Measurements").unwrap();
+    let region = window.find_control::<TextBlock>("RegionDetails").unwrap();
+    let globalization = window.view_model().globalization();
+    let initial = measurements.text();
+    globalization.set_measurement_system_override(MeasurementSystem::Metric);
+    assert_ne!(measurements.text(), initial);
+    assert!(measurements.text().unwrap().contains("°C"));
+    globalization.set_region_override(
+        RegionProfile::for_region("PL", &Culture::parse("en-US").unwrap()).unwrap(),
+    );
+    assert!(region.text().unwrap().contains("PL"));
+    assert_eq!(globalization.current_culture().name(), "en-US");
 }
 
 #[test]

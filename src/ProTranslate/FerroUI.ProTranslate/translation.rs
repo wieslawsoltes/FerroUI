@@ -1,13 +1,17 @@
+use crate::source_observation::SourceObservation;
 use crate::TranslationBindingSource;
 use ferroui_base::data::core::ValueTypes;
+use ferroui_base::data::BindingPriority;
 use ferroui_base::media::FlowDirection;
 use ferroui_base::reactive::IDisposable;
 use ferroui_base::{
     ferro_markup_type, ferro_properties, ferro_static_type, AttachedProperty, BoxedValue,
     FerroObject, FerroProperty, FerroPropertyChangedEventArgs, Ref, StyledPropertyOptions, Visual,
 };
+use ferroui_controls::primitives::HeaderedContentControl;
 use ferroui_controls::{ContentControl, TextBlock, TextBox};
 use ferroui_protranslate_core::{Culture, TextFlowDirection, TranslationService};
+use std::cell::Cell;
 use std::rc::Rc;
 
 /// Native attached localization properties. Culture and direction inherit
@@ -70,21 +74,49 @@ ferro_properties! {
         fn subscription_property() -> AttachedProperty<Option<AttachedSubscription>> {
             FerroProperty::register_attached::<AttachedState, FerroObject, _>("TranslationSubscription", None)
         }
+        fn flow_override_property() -> AttachedProperty<Option<FlowOverride>> {
+            FerroProperty::register_attached::<AttachedState, FerroObject, _>("TranslationFlowOverride", None)
+        }
     }
 }
 
 #[derive(Clone)]
-struct AttachedSubscription(Rc<dyn IDisposable>);
+struct AttachedSubscription(Rc<SourceObservation>);
 impl PartialEq for AttachedSubscription {
     fn eq(&self, other: &Self) -> bool {
         Rc::ptr_eq(&self.0, &other.0)
     }
 }
 
+#[derive(Clone)]
+struct FlowOverride(Rc<FlowOverrideInner>);
+struct FlowOverrideInner {
+    value: FlowDirection,
+    entry: Rc<dyn IDisposable>,
+    disposed: Cell<bool>,
+}
+impl PartialEq for FlowOverride {
+    fn eq(&self, other: &Self) -> bool {
+        Rc::ptr_eq(&self.0, &other.0)
+    }
+}
+impl FlowOverrideInner {
+    fn dispose(&self) {
+        if !self.disposed.replace(true) {
+            self.entry.dispose();
+        }
+    }
+}
+impl Drop for FlowOverrideInner {
+    fn drop(&mut self) {
+        self.dispose();
+    }
+}
+
 impl Translation {
     /// Configures the default source without invalidating already-created bindings.
     pub fn set_service(service: TranslationService) {
-        TranslationBindingSource::default_source().set_service(service);
+        crate::TranslationService::use_service(service);
     }
 
     pub fn get_source(target: &FerroObject) -> TranslationBindingSource {
@@ -150,44 +182,82 @@ impl Translation {
     fn changed(change: &FerroPropertyChangedEventArgs<'_>) {
         let target = change.sender();
         let previous = target.get_value(AttachedState::subscription_property());
-        if let Some(previous) = previous {
-            previous.0.dispose();
-        }
         let requires = Self::get_key(target).is_some_and(|key| !key.trim().is_empty())
             || Self::get_auto_flow_direction(target);
-        let subscription = requires.then(|| {
-            let target = target.to_weak();
-            AttachedSubscription(Self::get_source(change.sender()).subscribe(move || {
-                if let Some(target) = target.upgrade() {
-                    Self::refresh(&target);
+        match (requires, previous) {
+            (true, Some(previous)) => previous.0.refresh(),
+            (true, None) => {
+                let weak = target.to_weak();
+                let update_target = weak.clone();
+                let subscription = SourceObservation::start(
+                    weak,
+                    None,
+                    Rc::new(move || {
+                        if let Some(target) = update_target.upgrade() {
+                            Self::refresh(&target);
+                        }
+                    }),
+                );
+                target.set_value(
+                    AttachedState::subscription_property(),
+                    Some(AttachedSubscription(subscription.clone())),
+                );
+                subscription.refresh();
+            }
+            (false, previous) => {
+                if let Some(previous) = previous {
+                    previous.0.dispose();
                 }
-            }))
-        });
-        target.set_value(AttachedState::subscription_property(), subscription);
-        Self::refresh(target);
+                target.set_value(AttachedState::subscription_property(), None);
+                target.set_value(Self::error_property(), None);
+                Self::clear_flow_override(target);
+            }
+        }
     }
 
     fn refresh(target: &FerroObject) {
         let source = Self::get_source(target);
-        let culture = Self::get_culture(target).and_then(|name| Culture::parse(&name).ok());
         if Self::get_auto_flow_direction(target) {
             if let Some(visual) = target.downcast_ref::<Visual>() {
-                let culture = culture
-                    .clone()
-                    .unwrap_or_else(|| source.service().cultures().current_ui_culture());
-                visual.set_current_value(
-                    Visual::flow_direction_property(),
-                    Self::to_flow_direction(&culture),
-                );
+                let value = Self::to_flow_direction(&source.culture());
+                let previous = target.get_value(AttachedState::flow_override_property());
+                if previous
+                    .as_ref()
+                    .is_none_or(|previous| previous.0.value != value)
+                {
+                    // A removable style entry respects explicit local direction and
+                    // restores inheritance when automatic direction is disabled.
+                    let entry = visual
+                        .set_value_with_priority(
+                            Visual::flow_direction_property(),
+                            value,
+                            BindingPriority::StyleTrigger,
+                        )
+                        .expect("a styled direction has a removable value entry");
+                    target.set_value(
+                        AttachedState::flow_override_property(),
+                        Some(FlowOverride(Rc::new(FlowOverrideInner {
+                            value,
+                            entry,
+                            disposed: Cell::new(false),
+                        }))),
+                    );
+                    if let Some(previous) = previous {
+                        previous.0.dispose();
+                    }
+                }
             }
+        } else {
+            Self::clear_flow_override(target);
         }
         let Some(key) = Self::get_key(target).filter(|key| !key.trim().is_empty()) else {
+            target.set_value(Self::error_property(), None);
             return;
         };
         match source.render_value(
             &key,
             &[],
-            culture.as_ref(),
+            None,
             Self::get_fallback_value(target).as_ref(),
             Self::get_string_format(target).as_deref(),
         ) {
@@ -203,6 +273,9 @@ impl Translation {
                         TextBox::text_property(),
                         Some(ValueTypes::to_display_string(Some(&value))),
                     );
+                } else if let Some(headered) = target.downcast_ref::<HeaderedContentControl>() {
+                    headered
+                        .set_current_value(HeaderedContentControl::header_property(), Some(value));
                 } else if let Some(content) = target.downcast_ref::<ContentControl>() {
                     content.set_current_value(ContentControl::content_property(), Some(value));
                 }
@@ -210,6 +283,16 @@ impl Translation {
             Err(error) => {
                 target.set_value(Self::error_property(), Some(error.to_string()));
             }
+        }
+    }
+
+    fn clear_flow_override(target: &FerroObject) {
+        let previous = target.get_value(AttachedState::flow_override_property());
+        target.clear_value(AttachedState::flow_override_property());
+        // Remove the native frame after the attached-property write has released
+        // the property store, so the resulting flow notification may be reentrant.
+        if let Some(previous) = previous {
+            previous.0.dispose();
         }
     }
 }

@@ -1,4 +1,5 @@
 use crate::binding_source::boxed_argument;
+use crate::source_observation::SourceObservation;
 use crate::{Translation, TranslationBindingSource};
 use ferroui_base::data::converters::IMultiValueConverter;
 use ferroui_base::data::core::{UntypedObservableBindingExpression, ValueType, ValueTypes};
@@ -7,7 +8,7 @@ use ferroui_base::data::{
     BindingOperations, BindingPriority, MultiBinding,
 };
 use ferroui_base::metadata::IServiceProvider;
-use ferroui_base::reactive::{IDisposable, Observable};
+use ferroui_base::reactive::Observable;
 use ferroui_base::utilities::CultureInfo;
 use ferroui_base::{ferro_markup_type, BoxedValue, FerroObject, FerroProperty, Ref, WeakRef};
 use ferroui_markup_xaml::ServiceProviderExtensions;
@@ -63,6 +64,9 @@ impl TranslateExtension {
     pub fn set_source(&self, value: Option<TranslationBindingSource>) {
         self.source.replace(value);
     }
+    pub fn source(&self) -> Option<TranslationBindingSource> {
+        self.source.borrow().clone()
+    }
     pub fn provide_value(
         self: &Rc<Self>,
         service_provider: &Rc<dyn IServiceProvider>,
@@ -110,115 +114,72 @@ impl TranslationOptions {
             .unwrap_or_else(TranslationBindingSource::default_source)
     }
     fn render(&self, arguments: &[FormatArgument]) -> Result<BoxedValue, BindingError> {
-        self.source()
-            .render_value(
-                &self.key,
-                arguments,
-                None,
-                self.fallback.as_ref(),
-                self.string_format.as_deref(),
-            )
-            .map_err(BindingError::new)
+        let service = self.source().service();
+        let localized = service.get_string(&self.key).map_err(BindingError::new)?;
+        if localized.resource_not_found {
+            // FallbackValue is the final binding fallback, not a replacement
+            // format template. Attached text retains its separate text semantics.
+            return Ok(self
+                .fallback
+                .clone()
+                .unwrap_or_else(FerroProperty::unset_value));
+        }
+        let culture = service.cultures().current_culture();
+        let value = if arguments.is_empty() {
+            localized.value
+        } else {
+            service
+                .format_localized(localized, arguments, &culture)
+                .map_err(BindingError::new)?
+        };
+        let value = match self.string_format.as_deref() {
+            Some(format) => service
+                .format_value(&self.key, format, &[value.into()], &culture)
+                .map_err(BindingError::new)?,
+            None => value,
+        };
+        Ok(Rc::new(value))
     }
     fn boxed(
         &self,
         arguments: &[FormatArgument],
         target_type: Option<ValueType>,
     ) -> Option<BoxedValue> {
-        let convert = |value: Option<BoxedValue>| match target_type {
-            Some(target_type) => ValueTypes::try_convert(value.as_ref(), target_type)
-                .unwrap_or_else(|| Some(FerroProperty::unset_value())),
-            None => value,
+        let convert = |value: Option<BoxedValue>| {
+            if BindingOperations::is_unset(value.as_ref()) {
+                return Ok(value);
+            }
+            match target_type {
+                Some(target_type) => ValueTypes::try_convert(value.as_ref(), target_type)
+                    .ok_or_else(|| {
+                        BindingError::message(format!(
+                            "Cannot convert translation '{}' to {}",
+                            self.key,
+                            target_type.name()
+                        ))
+                    }),
+                None => Ok(value),
+            }
         };
-        Some(match self.render(arguments) {
-            Ok(value) => return convert(Some(value)),
-            Err(error) => Rc::new(BindingNotification::with_error_and_fallback(
-                error,
-                BindingErrorType::Error,
-                self.fallback.as_ref().map_or_else(
-                    || Some(FerroProperty::unset_value()),
-                    |value| convert(Some(value.clone())),
-                ),
-            )),
-        })
-    }
-}
-
-/// One expression's observation of its current inherited source. Reparenting or
-/// replacing Translation.Source reconnects atomically; neither event retains the
-/// target or this subscription.
-struct SourceObservation {
-    options: TranslationOptions,
-    update: Rc<dyn Fn()>,
-    source_subscription: RefCell<Option<Rc<dyn IDisposable>>>,
-    target_subscription: RefCell<Option<Rc<dyn IDisposable>>>,
-    disposed: Cell<bool>,
-}
-
-impl SourceObservation {
-    fn start(options: TranslationOptions, update: Rc<dyn Fn()>) -> Rc<dyn IDisposable> {
-        let this = Rc::new(Self {
-            options,
-            update,
-            source_subscription: RefCell::new(None),
-            target_subscription: RefCell::new(None),
-            disposed: Cell::new(false),
-        });
-        this.reconnect();
-        if this.options.source.is_none() {
-            if let Some(target) = this.options.target.upgrade() {
-                let weak = Rc::downgrade(&this);
-                let subscription = target.property_changed(move |change| {
-                    if change.property() == Translation::source_property().as_property() {
-                        if let Some(this) = weak.upgrade() {
-                            this.reconnect();
-                            (this.update)();
-                        }
-                    }
-                });
-                this.target_subscription.replace(Some(subscription));
-            }
-        }
-        (this.update)();
-        this
-    }
-    fn reconnect(self: &Rc<Self>) {
-        if self.disposed.get() {
-            return;
-        }
-        let old = self.source_subscription.borrow_mut().take();
-        if let Some(old) = old {
-            old.dispose();
-        }
-        let weak = Rc::downgrade(self);
-        let subscription = self.options.source().subscribe(move || {
-            if let Some(this) = weak.upgrade() {
-                if !this.disposed.get() {
-                    (this.update)();
-                }
-            }
-        });
-        self.source_subscription.replace(Some(subscription));
-    }
-}
-impl IDisposable for SourceObservation {
-    fn dispose(&self) {
-        if self.disposed.replace(true) {
-            return;
-        }
-        let source = self.source_subscription.borrow_mut().take();
-        let target = self.target_subscription.borrow_mut().take();
-        if let Some(source) = source {
-            source.dispose();
-        }
-        if let Some(target) = target {
-            target.dispose();
-        }
-    }
-}
-impl Drop for SourceObservation {
-    fn drop(&mut self) {
-        self.dispose();
+        Some(
+            match self
+                .render(arguments)
+                .and_then(|value| convert(Some(value)))
+            {
+                Ok(value) => return value,
+                Err(error) => Rc::new(BindingNotification::with_error_and_fallback(
+                    error,
+                    BindingErrorType::Error,
+                    self.fallback.as_ref().map_or_else(
+                        || Some(FerroProperty::unset_value()),
+                        |value| {
+                            convert(Some(value.clone()))
+                                .unwrap_or_else(|_| Some(FerroProperty::unset_value()))
+                        },
+                    ),
+                )),
+            },
+        )
     }
 }
 
@@ -236,7 +197,10 @@ impl BindingBase for TranslateExtension {
         let observable = Observable::create(move |observer| {
             let evaluation = options.clone();
             let update = Rc::new(move || observer.on_next(evaluation.boxed(&[], target_type)));
-            SourceObservation::start(options.clone(), update)
+            let observation =
+                SourceObservation::start(options.target.clone(), options.source.clone(), update);
+            observation.refresh();
+            observation
         });
         UntypedObservableBindingExpression::new(observable, self.priority.get())
     }
@@ -312,7 +276,13 @@ impl BindingBase for FormatExtension {
                 revision.set(revision.get().wrapping_add(1));
                 observer.on_next(revision.get());
             });
-            SourceObservation::start(pulse_options.clone(), update)
+            let observation = SourceObservation::start(
+                pulse_options.target.clone(),
+                pulse_options.source.clone(),
+                update,
+            );
+            observation.refresh();
+            observation
         });
         let value_binding =
             ValueTypes::try_convert(Some(&value), ValueType::of::<Rc<dyn BindingBase>>())
@@ -436,6 +406,7 @@ ferro_markup_type!(class TranslateExtension {
         Path: String { get: TranslateExtension::key, set: TranslateExtension::set_key },
         FallbackValue: Option<BoxedValue> { get: TranslateExtension::fallback_value, set: TranslateExtension::set_fallback_value },
         StringFormat: Option<String> { get: TranslateExtension::string_format, set: TranslateExtension::set_string_format },
+        Source: Option<TranslationBindingSource> { get: TranslateExtension::source, set: TranslateExtension::set_source },
     ],
     methods: [fn ProvideValue(Rc<dyn IServiceProvider>) -> Rc<dyn BindingBase> => |this: &Rc<TranslateExtension>, services: Rc<dyn IServiceProvider>| this.provide_value(&services)],
 });

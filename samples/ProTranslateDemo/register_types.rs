@@ -2,8 +2,9 @@
 //! markup, its embedded assets and the loader table of its compiled markup.
 
 use crate::markup::XamlClass;
-use crate::{App, MainWindow};
-use ferroui_base::metadata::MarkupAssembly;
+use crate::{App, MainWindow, MainWindowViewModel};
+use ferroui_base::data::core::ValueTypes;
+use ferroui_base::metadata::{MarkupAssembly, MarkupType, MarkupTyped};
 use ferroui_base::TypeInfo;
 
 /// The dotted namespaces of the modules of this crate.
@@ -36,6 +37,8 @@ pub fn register_types() {
         ferroui_protranslate::register_types();
         TypeInfo::register_namespaces(NAMESPACES);
         TypeInfo::register_all(TYPES);
+        MarkupType::register_all(&[<MainWindowViewModel as MarkupTyped>::MARKUP]);
+        ValueTypes::register_global(ValueTypes::register_reference::<MainWindowViewModel>);
         MarkupAssembly::register(&ASSEMBLY);
         crate::SAMPLE.register_assets();
         // The loader table of the compiled markup, which the build of the crate generates.

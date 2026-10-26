@@ -13,7 +13,9 @@ mod dependency_injection;
 mod extensions;
 mod register_types;
 mod rust_paths;
+mod source_observation;
 mod translation;
+mod translation_service;
 
 pub use binding_source::TranslationBindingSource;
 #[cfg(feature = "dependency-injection")]
@@ -23,6 +25,7 @@ pub use dependency_injection::{
 pub use extensions::{FExtension, FormatExtension, TExtension, TranslateExtension};
 pub use register_types::{register_types, ASSEMBLY};
 pub use translation::Translation;
+pub use translation_service::TranslationService;
 
 #[cfg(test)]
 mod tests;
