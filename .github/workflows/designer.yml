@@ -54,11 +54,15 @@ jobs:
       - name: Native source, preview, history and collaboration integration
         env:
           FERROUI_DESIGNER_RENDER_OUTPUT: ${{ github.workspace }}/designer-render
-        run: cargo test --locked -p ferroui-designer --features mcp,render-smoke --lib
+        run: cargo test --locked -p ferroui-designer --features mcp,render-smoke --lib -- --test-threads=1
       - name: Existing MCP authentication, cancellation and extension isolation
-        run: cargo test --locked -p ferroui-mcp --lib
+        run: cargo test --locked -p ferroui-mcp --lib -- --test-threads=1
       - name: Runnable headless sample host
         run: cargo check --locked -p designer-studio --no-default-features --features headless,mcp
+      - name: Headless application startup and clean shutdown
+        env:
+          FERROUI_SMOKE_EXIT_MS: '1500'
+        run: cargo run --locked -p designer-studio --no-default-features --features headless,mcp -- --headless
       - name: Optional facade integration
         run: cargo check --locked -p ferroui --no-default-features --features designer-mcp
       - name: Release preview path without development hot reload

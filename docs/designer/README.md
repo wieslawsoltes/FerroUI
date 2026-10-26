@@ -5,6 +5,12 @@ The workspace combines an artboard, synchronized source editor, object hierarchy
 logical trees, properties, layout manipulation, and animation tracks. All authored changes pass
 through a document transaction; the artboard renders actual FerroUI controls.
 
+![Native workspace with a recorded Width animation at 1.5 seconds](images/designer-animation.png)
+
+This image is captured from the native Vello/HarfBuzz rendering test. The property inspector shows
+the authored Width of 656 and its animated value of 608 while the source retains the base value.
+The [initial workspace capture](images/designer-workspace.png) shows the same document before edits.
+
 ## Run
 
 From the repository root:
@@ -158,6 +164,12 @@ including operations spanning different layout parents. The registry recognizes 
 panel, content-host and framework-layer names; generated containers expose ownership restrictions
 instead of accepting edits that their item generator would overwrite.
 
+Resize and rotation gestures reject transforms they cannot faithfully translate, with a message
+directing the user to property/source editing. Custom panel semantics and layout values supplied
+implicitly by styles can require a host adapter. Duplicate gives copied controls unique names and
+refuses occupied single-content hosts; binding/reference expressions are copied verbatim and may
+need review when they refer to another control inside the copied subtree.
+
 ## Animation authoring
 
 The animation model uses FerroUI's native `Animation`, `KeyFrame` and `Setter` markup. It does not
@@ -301,17 +313,17 @@ The dedicated [Visual designer workflow](../../.github/workflows/designer.yml) c
 - Native property edits, preview retention, Window/UserControl roots, history and collaboration.
 - Existing MCP authentication/cancellation plus provider isolation and designer commands.
 - Actual Vello/HarfBuzz workspace and animation PNG rendering.
-- Headless sample compilation and the separate release preview code path.
+- Headless sample compilation, application startup/shutdown, and the separate release preview code path.
 
 Local commands:
 
 ```sh
 cargo test -p ferroui-designer-core -p ferroui-designer-tools \
   -p ferroui-designer-animation -p ferroui-designer-collaboration
-cargo test -p ferroui-designer --features mcp --lib
-cargo test -p ferroui-mcp --lib
+cargo test -p ferroui-designer --features mcp --lib -- --test-threads=1
+cargo test -p ferroui-mcp --lib -- --test-threads=1
 FERROUI_DESIGNER_RENDER_OUTPUT=/tmp/designer-renders \
-  cargo test -p ferroui-designer --features mcp,render-smoke --lib render_tests:: -- --nocapture
+  cargo test -p ferroui-designer --features mcp,render-smoke --lib render_tests:: -- --test-threads=1 --nocapture
 cargo check -p ferroui-designer --features mcp --release
 ```
 
