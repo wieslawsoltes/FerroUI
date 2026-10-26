@@ -842,3 +842,222 @@ fn po_rejects_incomplete_duplicate_and_mixed_directives_transactionally() {
         assert!(result.catalog.entries.is_empty());
     }
 }
+
+#[test]
+fn arb_document_metadata_and_comment_removal_round_trip() {
+    let source = r#"{"@@locale":"en","@@context":"Application","@@last_modified":"2026-10-26","Title":"Title","@Title":{"description":"Old note","placeholders":{"user":{"type":"String"}}},"@Untranslated":{"description":"Pending"}}"#;
+    let mut imported = read(source, TranslationFileFormat::FlutterArb, "en");
+    assert!(imported.catalog.metadata.contains_key("arb.globals"));
+    assert!(imported
+        .catalog
+        .metadata
+        .contains_key("arb.orphan_metadata"));
+    assert!(!imported
+        .diagnostics
+        .iter()
+        .any(|diagnostic| diagnostic.code == "PTF102"));
+    imported.catalog.entries[0].comment = None;
+    let exported = export(
+        &imported.catalog,
+        TranslationFileFormat::FlutterArb,
+        &options("en"),
+    );
+    assert!(!exported.has_errors(), "{:?}", exported.diagnostics);
+    let value: serde_json::Value = serde_json::from_str(&exported.content).unwrap();
+    assert_eq!(value["@@context"], "Application");
+    assert_eq!(value["@Untranslated"]["description"], "Pending");
+    assert!(value["@Title"].get("description").is_none());
+    assert_eq!(value["@Title"]["placeholders"]["user"]["type"], "String");
+    let again = read(&exported.content, TranslationFileFormat::FlutterArb, "en");
+    assert_eq!(again.catalog.metadata, imported.catalog.metadata);
+    let lossy = export(
+        &imported.catalog,
+        TranslationFileFormat::ProTranslateJson,
+        &options("en"),
+    );
+    assert!(lossy
+        .diagnostics
+        .iter()
+        .any(|diagnostic| diagnostic.code == "PTF204"));
+    imported
+        .catalog
+        .add("@Reserved", Some("en"), "Not a message key");
+    assert!(export(
+        &imported.catalog,
+        TranslationFileFormat::FlutterArb,
+        &options("en")
+    )
+    .has_errors());
+}
+
+#[test]
+fn csv_preserves_complete_document_metadata_with_or_without_entries() {
+    for format in [TranslationFileFormat::Csv, TranslationFileFormat::Tsv] {
+        for empty in [false, true] {
+            let mut catalog = sample();
+            if empty {
+                catalog.entries.clear();
+            }
+            catalog.metadata.insert(
+                "vendor.document".into(),
+                "retained\nmultiline, data\t".into(),
+            );
+            let exported = export(&catalog, format, &Default::default());
+            assert!(!exported.has_errors());
+            let imported = read(&exported.content, format, "pl-PL");
+            assert_eq!(imported.catalog.name, catalog.name);
+            assert_eq!(imported.catalog.source_culture, catalog.source_culture);
+            assert_eq!(imported.catalog.metadata, catalog.metadata);
+            assert_eq!(
+                imported.catalog.to_dictionary(Some("pl-PL")),
+                catalog.to_dictionary(Some("pl-PL"))
+            );
+            assert!(!imported
+                .diagnostics
+                .iter()
+                .any(|diagnostic| diagnostic.code == "PTF191" || diagnostic.code == "PTF193"));
+        }
+    }
+    let duplicated = "key,value,metadata\nA,B,\"{\"\"a\"\":\"\"one\"\",\"\"a\"\":\"\"two\"\"}\"\n";
+    assert!(import(
+        duplicated,
+        TranslationFileFormat::Csv,
+        &Default::default(),
+        None
+    )
+    .has_errors());
+}
+
+#[test]
+fn po_c_byte_escapes_preserve_utf8_and_literal_boundaries() {
+    let source = "msgid \"Greeting\"\nmsgstr \"\\303\"\n\"\\251 \\xC3\\xA9 \\x41\"\n\"B\"\n";
+    let imported = read(source, TranslationFileFormat::GettextPo, "en");
+    assert_eq!(imported.catalog.entries[0].value, "é é AB");
+    let exported = export(
+        &imported.catalog,
+        TranslationFileFormat::GettextPo,
+        &options("en"),
+    );
+    assert!(!exported.has_errors());
+    assert_eq!(
+        read(&exported.content, TranslationFileFormat::GettextPo, "en")
+            .catalog
+            .entries,
+        imported.catalog.entries
+    );
+    for source in [
+        r#"msgid "a"
+msgstr "\u0041""#,
+        r#"msgid "a"
+msgstr "\400""#,
+        r#"msgid "a"
+msgstr "\x""#,
+        r#"msgid "a"
+msgstr "\xFF""#,
+    ] {
+        assert!(import(
+            source,
+            TranslationFileFormat::GettextPo,
+            &Default::default(),
+            None
+        )
+        .has_errors());
+    }
+}
+
+#[test]
+fn po_header_previous_messages_new_flag_prefix_and_obsolete_records_survive() {
+    let source = "# Copyright example\nmsgid \"\"\nmsgstr \"\"\n\"Project-Id-Version: Example 1\\n\"\n\"Language: en\\n\"\n\"X-Team: Localization\\n\"\n\n#= fuzzy, rust-format\n#| msgid \"Previous\"\nmsgid \"Current\"\nmsgstr \"Value\"\n\n#~ msgid \"Removed\"\n#~ msgstr \"Old\"\n";
+    let imported = read(source, TranslationFileFormat::GettextPo, "en");
+    let exported = export(
+        &imported.catalog,
+        TranslationFileFormat::GettextPo,
+        &options("en"),
+    );
+    assert!(!exported.has_errors(), "{:?}", exported.diagnostics);
+    for retained in [
+        "# Copyright example",
+        "Project-Id-Version: Example 1",
+        "X-Team: Localization",
+        "#= fuzzy, rust-format",
+        "#| msgid \"Previous\"",
+        "#~ msgid \"Removed\"",
+    ] {
+        assert!(
+            exported.content.contains(retained),
+            "missing {retained}: {}",
+            exported.content
+        );
+    }
+    let again = read(&exported.content, TranslationFileFormat::GettextPo, "en");
+    assert_eq!(again.catalog.entries, imported.catalog.entries);
+    let empty = read(
+        "msgid \"\"\nmsgstr \"Project-Id-Version: Empty catalog\\n\"\n",
+        TranslationFileFormat::GettextPo,
+        "en",
+    );
+    assert!(empty.catalog.entries.is_empty());
+    assert!(export(
+        &empty.catalog,
+        TranslationFileFormat::GettextPo,
+        &options("en")
+    )
+    .content
+    .contains("Empty catalog"));
+}
+
+#[test]
+fn po_checks_shared_plural_metadata_and_native_message_identity() {
+    let mut catalog = TranslationCatalog::default();
+    catalog.add("Count.one", Some("en"), "One").plural_category = Some("one".into());
+    catalog
+        .add("Count.other", Some("en"), "Many")
+        .plural_category = Some("other".into());
+    let exported = export(&catalog, TranslationFileFormat::GettextPo, &options("en"));
+    assert!(!exported.has_errors());
+    assert_eq!(
+        read(&exported.content, TranslationFileFormat::GettextPo, "en")
+            .catalog
+            .to_dictionary(Some("en")),
+        catalog.to_dictionary(Some("en"))
+    );
+    catalog.entries[1].state = Some("fuzzy".into());
+    assert!(export(&catalog, TranslationFileFormat::GettextPo, &options("en")).has_errors());
+    let mut duplicate = TranslationCatalog::default();
+    duplicate.add("A", Some("en"), "A").source = Some("Same source".into());
+    duplicate.add("B", Some("en"), "B").source = Some("Same source".into());
+    assert!(export(&duplicate, TranslationFileFormat::GettextPo, &options("en")).has_errors());
+    let inconsistent = "msgid \"\"\nmsgstr \"Plural-Forms: nplurals=2; plural=n != 1;\\n\"\n\nmsgid \"a\"\nmsgid_plural \"as\"\nmsgstr[0] \"a\"\n";
+    assert!(import(
+        inconsistent,
+        TranslationFileFormat::GettextPo,
+        &Default::default(),
+        None
+    )
+    .has_errors());
+}
+
+#[test]
+fn metadata_loss_diagnostics_only_describe_selected_records() {
+    let mut catalog = TranslationCatalog::default();
+    catalog.add("A", Some("en"), "English");
+    catalog
+        .add("B", Some("pl"), "Polski")
+        .metadata
+        .insert("vendor".into(), "data".into());
+    let result = export(
+        &catalog,
+        TranslationFileFormat::ProTranslateJson,
+        &options("en"),
+    );
+    assert!(!result
+        .diagnostics
+        .iter()
+        .any(|diagnostic| diagnostic.code == "PTF202"));
+    let imported = read(
+        r#"{"":{"Title":"Retain the empty path segment"}}"#,
+        TranslationFileFormat::I18NextJson,
+        "en",
+    );
+    assert_eq!(imported.catalog.entries[0].key, ".Title");
+}

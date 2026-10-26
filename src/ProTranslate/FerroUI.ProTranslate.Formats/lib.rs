@@ -150,7 +150,50 @@ fn diagnose_losses(
     if !multi && options.culture.is_none() && catalog.cultures().len() > 1 {
         diagnostics.push(TranslationFormatDiagnostic::new(Severity::Warning,"PTF200","The target has one language per file; pass an explicit culture to avoid ambiguous selection."));
     }
-    for entry in &catalog.entries {
+    let lost_document_metadata: Vec<_> = catalog
+        .metadata
+        .keys()
+        .filter(|key| match format {
+            Csv | Tsv => false,
+            FlutterArb => !matches!(key.as_str(), "arb.globals" | "arb.orphan_metadata"),
+            GettextPo => !matches!(key.as_str(), "po.header_entry" | "po.obsolete"),
+            AppleXcstrings => key.as_str() != "xcstrings.root",
+            _ => true,
+        })
+        .map(String::as_str)
+        .collect();
+    if !lost_document_metadata.is_empty() {
+        diagnostics.push(TranslationFormatDiagnostic::new(
+            Severity::Warning,
+            "PTF204",
+            format!(
+                "Target cannot preserve document metadata: {}.",
+                lost_document_metadata.join(", ")
+            ),
+        ));
+    }
+    let selected = options.culture.clone().or_else(|| {
+        (!multi)
+            .then(|| catalog.cultures().into_iter().next())
+            .flatten()
+    });
+    let entries: Vec<_> = if multi {
+        catalog
+            .entries
+            .iter()
+            .filter(|entry| {
+                selected.as_deref().is_none_or(|culture| {
+                    entry
+                        .culture
+                        .as_deref()
+                        .is_none_or(|tag| tag.eq_ignore_ascii_case(culture))
+                })
+            })
+            .collect()
+    } else {
+        model::select_entries(catalog, selected.as_deref())
+    };
+    for entry in entries {
         let mut losses = Vec::new();
         if entry.comment.is_some()
             && (!options.include_comments
@@ -201,6 +244,8 @@ fn diagnose_losses(
                     | "po.msgid_plural"
                     | "po.plural_forms"
                     | "po.flags"
+                    | "po.flags_prefix"
+                    | "po.previous"
                     | "po.references"
                     | "po.translator_comment"
                     | "po.untranslated"

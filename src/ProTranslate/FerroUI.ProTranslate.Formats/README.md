@@ -61,16 +61,16 @@ it for a multi-language catalog produces a diagnostic.
 | Format | Implemented behavior | Explicit boundaries |
 | --- | --- | --- |
 | ProTranslate JSON / i18next JSON | Nested object import, flat-key deterministic export, Unicode strings, trailing commas compatible with the source parser | Non-string values are diagnosed. Duplicate JSON object members fail import. Interpolation expressions remain text. |
-| Flutter ARB | `@@locale`, values, descriptions, placeholder metadata stored under `metadata["arb"]` | ICU message expressions remain text; global metadata other than the locale is diagnosed. |
+| Flutter ARB | `@@locale`, values, descriptions, placeholders, global metadata and metadata for untranslated messages | ICU message expressions remain text. Translation keys using the reserved `@` prefix fail export. Clearing an entry comment removes its description. |
 | RESX | String resources, comments, filename culture inference, XML escaping | Binary, file-reference and typed non-string resources are skipped with diagnostics. |
 | Android resources | Strings, plural quantities, string arrays, quoted whitespace regions, escape layer, array order, `translatable` and `formatted` on all resource groups, Android locale-folder inference | Styled/inline XML is flattened with warnings. Conflicting group flags fail export. Plural selection is not performed by the converter. |
 | Apple `.strings` | Quoted Unicode strings, C/octal/UTF-16 escapes, comments, locale-folder inference | Missing delimiters and malformed escapes fail import. |
 | Apple `.stringsdict` | Plural variables, categories, localized format and value type, standard plist doctype | Singular records cannot be exported to a plural dictionary. Unsupported rules are diagnosed. |
 | Apple `.xcstrings` | Multiple languages, comments, states, string units, plural variations | Device variations and substitution metadata are diagnosed. A key cannot export as both singular and plural for the same culture. |
-| gettext PO/POT | Headers, multiline literals, contexts, source text, single-form and multi-form plural catalogs, fuzzy flags, translator/developer comments, references | Plural formulas are retained, not evaluated. Indices 0/1 retain the source's `one`/`other` naming; additional indices use `indexN` and preserve `po.index`. Empty targets preserve untranslated status. Clearing `state = "fuzzy"` removes the fuzzy flag. |
+| gettext PO/POT | Complete headers, C byte escapes, multiline literals, contexts, source text, single-form and multi-form plurals, fuzzy flags, previous source messages, comments, references and obsolete records | Plural formulas are retained, not evaluated; the declared form count is validated. Indices 0/1 retain the source's `one`/`other` naming; additional indices use `indexN` and preserve `po.index`. Empty targets preserve untranslated status. Clearing `state = "fuzzy"` removes the fuzzy flag. Conflicting shared plural metadata fails export. |
 | XLIFF 1.2 | Source/target languages, unit identity, source/target text, state, notes and context | Inline codes are flattened and diagnosed; skeleton/phase data is not represented. |
 | XLIFF 2.0 / 2.1 | Unit and segment import, source/target text, state, notes and context; export writes version 2.1, matching upstream `Xliff20` | Multiple segments receive distinct `unit#segment` keys. Export creates separate units and reports retained segmentation metadata as a loss. Advanced modules are not implemented. |
-| CSV / TSV | Required key/value columns; culture/source/comment/context/state/plural/format; optional JSON metadata column; quoting, embedded CR/LF; custom CSV delimiter | Duplicate headers, inconsistent row sizes and malformed quoting fail import. Formula-looking text is retained and diagnosed. |
+| CSV / TSV | Required key/value columns; culture/source/comment/context/state/plural/format; optional JSON metadata and catalogMetadata columns; quoting, embedded CR/LF; custom CSV delimiter | Document name, source culture and metadata are retained, including empty catalogs. Duplicate headers/JSON metadata keys, inconsistent row sizes and malformed quoting fail import. Formula-looking text is retained and diagnosed. |
 
 The format layer never evaluates plural expressions, executes spreadsheet
 formulas, resolves external XML resources, or mutates runtime culture state.
@@ -80,19 +80,29 @@ XML export rejects characters that XML 1.0 cannot represent.
 
 ## Normalized metadata
 
-- ARB: `arb` contains the per-message JSON object.
+- ARB: entry `arb` contains the per-message JSON object. Catalog `arb.globals`
+  and `arb.orphan_metadata` retain document fields and unattached message metadata.
 - Android: `android.array`, `android.index`, `android.translatable`,
   `android.formatted` preserve resource structure and flags.
 - Apple plurals: `apple.key`, `apple.variable`, `apple.localized_format`,
   `apple.value_type` preserve dictionary reconstruction.
-- gettext: `po.index`, `po.msgid_plural`, `po.plural_forms`, `po.flags`, `po.references`,
-  `po.translator_comment`, `po.untranslated` preserve PO semantics.
+- gettext: entry `po.index`, `po.msgid_plural`, `po.plural_forms`, `po.flags`,
+  `po.flags_prefix`, `po.previous`, `po.references`, `po.translator_comment` and
+  `po.untranslated` preserve message semantics. Catalog `po.header_entry` and
+  `po.obsolete` preserve header information and obsolete records.
 - XLIFF segmentation: `xliff.unit`, `xliff.segment` identify the source unit.
 
 CSV/TSV metadata cells round-trip arbitrary string metadata. Other exporters
 report metadata they cannot represent. Culture name normalization in this crate
 only standardizes common tag spelling; locale validation and localization data
 belong to `ferroui-protranslate-core`.
+
+PO octal and hexadecimal escapes are decoded as bytes across continuation
+literals, then validated as UTF-8. As specified by the
+[GNU PO grammar](https://www.gnu.org/software/gettext/manual/html_node/More-Details.html),
+universal `\u`/`\U` escapes are rejected; literal Unicode is supported. The exporter
+writes UTF-8 headers. Android escaping and quoted whitespace regions follow the
+[Android string resource rules](https://developer.android.com/guide/topics/resources/string-resource).
 
 ## Validation
 

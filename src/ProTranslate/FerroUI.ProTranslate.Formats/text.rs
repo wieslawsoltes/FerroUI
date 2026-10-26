@@ -1,5 +1,5 @@
 use crate::{model::select_entries, *};
-use std::collections::BTreeMap;
+use std::collections::{BTreeMap, BTreeSet};
 use std::fmt::Write;
 
 pub(crate) fn import(
@@ -224,7 +224,8 @@ fn import_apple(
     }
 }
 
-#[derive(Default)]
+#[derive(Default, serde::Serialize, serde::Deserialize)]
+#[serde(default)]
 struct PoEntry {
     id: Option<String>,
     plural: Option<String>,
@@ -273,7 +274,54 @@ fn po_token(token: &str) -> Result<String, String> {
             return Err("Unescaped quotation mark in PO token.".into());
         }
     }
-    decode_escapes(inner, true)
+    // Keep literal boundaries until all continuation lines have been collected:
+    // an escaped UTF-8 sequence may span adjacent literals, while a hex escape
+    // must stop at the closing quote rather than absorb the next literal.
+    Ok(token.into())
+}
+
+fn decode_po_literals(literals: &str) -> Result<String, String> {
+    let mut output = Vec::new();
+    for literal in literals.split('\n') {
+        let inner = literal
+            .strip_prefix('"')
+            .and_then(|value| value.strip_suffix('"'))
+            .ok_or("PO values must be quoted strings.")?;
+        let mut bytes = inner.bytes().peekable();
+        while let Some(byte) = bytes.next() {
+            if byte != b'\\' {
+                output.push(byte);
+                continue;
+            }
+            let escaped = bytes.next().ok_or("Trailing backslash in PO string.")?;
+            output.push(match escaped {
+                b'a' => 7, b'b' => 8, b't' => 9, b'n' => 10, b'v' => 11, b'f' => 12, b'r' => 13,
+                b'\\' | b'"' | b'\'' | b'?' => escaped,
+                b'0'..=b'7' => {
+                    let mut value = u32::from(escaped - b'0');
+                    for _ in 0..2 {
+                        if let Some(next) = bytes.peek().copied().filter(|value| matches!(value, b'0'..=b'7')) {
+                            bytes.next(); value = value * 8 + u32::from(next - b'0');
+                        } else { break; }
+                    }
+                    u8::try_from(value).map_err(|_| "PO octal escape exceeds one byte.")?
+                }
+                b'x' => {
+                    let mut value = 0u32;
+                    let mut count = 0;
+                    while let Some(next) = bytes.peek().copied().filter(u8::is_ascii_hexdigit) {
+                        bytes.next(); count += 1;
+                        value = value.checked_mul(16).and_then(|value| value.checked_add((next as char).to_digit(16).unwrap())).ok_or("PO hex escape exceeds one byte.")?;
+                    }
+                    if count == 0 { return Err("PO hex escape requires a hexadecimal digit.".into()); }
+                    u8::try_from(value).map_err(|_| "PO hex escape exceeds one byte.")?
+                }
+                b'u' | b'U' => return Err("PO syntax does not support universal Unicode escapes; use UTF-8 text or byte escapes.".into()),
+                _ => return Err(format!("Unsupported PO escape '\\{}'.", escaped as char)),
+            });
+        }
+    }
+    String::from_utf8(output).map_err(|_| "PO string escapes do not form valid UTF-8; decode the source encoding before importing.".into())
 }
 fn parse_po(
     content: &str,
@@ -306,7 +354,13 @@ fn parse_po(
             }
             if let Some(comment) = line.strip_prefix("#.") {
                 append(&mut current.comment, comment.trim());
-            } else if let Some(flags) = line.strip_prefix("#,") {
+            } else if let Some(flags) = line.strip_prefix("#,").or_else(|| line.strip_prefix("#="))
+            {
+                if line.starts_with("#=") {
+                    current
+                        .metadata
+                        .insert("po.flags_prefix".into(), "=".into());
+                }
                 current.fuzzy |= flags.split(',').any(|f| f.trim() == "fuzzy");
                 current
                     .metadata
@@ -316,6 +370,15 @@ fn parse_po(
                         value.push_str(flags.trim());
                     })
                     .or_insert_with(|| flags.trim().into());
+            } else if let Some(previous) = line.strip_prefix("#|") {
+                current
+                    .metadata
+                    .entry("po.previous".into())
+                    .and_modify(|value| {
+                        value.push('\n');
+                        value.push_str(previous.trim());
+                    })
+                    .or_insert_with(|| previous.trim().into());
             } else if let Some(reference) = line.strip_prefix("#:") {
                 current
                     .metadata
@@ -344,7 +407,9 @@ fn parse_po(
                     line_index + 1
                 )
             })?;
-            current.active(field).push_str(&po_token(line)?);
+            let token = po_token(line)?;
+            current.active(field).push('\n');
+            current.active(field).push_str(&token);
             continue;
         }
         let directive = |name: &str| {
@@ -418,7 +483,7 @@ fn parse_po(
     } else if current.context.is_some() {
         return Err("PO context has no msgid.".into());
     }
-    for entry in &entries {
+    for entry in &mut entries {
         if entry.target.is_none() && entry.translations.is_empty() {
             return Err("PO entry is missing msgstr.".into());
         }
@@ -440,6 +505,18 @@ fn parse_po(
         {
             return Err("PO plural indices must start at zero and be consecutive.".into());
         }
+        for value in [
+            &mut entry.id,
+            &mut entry.plural,
+            &mut entry.target,
+            &mut entry.context,
+        ]
+        .into_iter()
+        .flatten()
+        .chain(entry.translations.values_mut())
+        {
+            *value = decode_po_literals(value)?;
+        }
     }
     Ok(entries)
 }
@@ -459,6 +536,16 @@ fn import_po(
     let mut header = BTreeMap::new();
     for entry in &entries {
         if entry.id.as_deref() == Some("") && entry.context.is_none() {
+            if result.catalog.metadata.contains_key("po.header_entry") {
+                return Err("PO catalog contains multiple header entries.".into());
+            }
+            if entry.plural.is_some() {
+                return Err("PO header cannot contain plural forms.".into());
+            }
+            result.catalog.metadata.insert(
+                "po.header_entry".into(),
+                serde_json::to_string(entry).map_err(|e| e.to_string())?,
+            );
             for line in entry.target.as_deref().unwrap_or("").lines() {
                 if let Some((key, value)) = line.split_once(':') {
                     header.insert(key.trim().to_ascii_lowercase(), value.trim().to_owned());
@@ -466,9 +553,24 @@ fn import_po(
             }
         }
     }
+    let obsolete = content
+        .lines()
+        .filter(|line| line.trim_start().starts_with("#~"))
+        .collect::<Vec<_>>()
+        .join("\n");
+    if !obsolete.is_empty() {
+        result
+            .catalog
+            .metadata
+            .insert("po.obsolete".into(), obsolete);
+    }
     if let Some(language) = header.get("language").filter(|s| !s.is_empty()) {
         culture = Some(TranslationCatalog::normalize_culture_name(Some(language)));
     }
+    let plural_count = header
+        .get("plural-forms")
+        .map(|forms| po_plural_count(forms))
+        .transpose()?;
     for entry in entries {
         let id = entry.id.as_deref().unwrap_or("");
         if id.is_empty() && entry.context.is_none() {
@@ -499,6 +601,13 @@ fn import_po(
                 record.state = Some("fuzzy".into());
             }
         } else {
+            if plural_count.is_some_and(|count| entry.translations.len() != count) {
+                return Err(format!(
+                    "PO plural '{key}' has {} translations but Plural-Forms requires {}.",
+                    entry.translations.len(),
+                    plural_count.unwrap()
+                ));
+            }
             metadata.insert(
                 "po.msgid_plural".into(),
                 entry.plural.clone().unwrap_or_default(),
@@ -603,6 +712,14 @@ fn formula(value: &str) -> bool {
     value.starts_with(['=', '+', '-', '@', '\t', '\r'])
 }
 
+#[derive(Default, PartialEq, serde::Serialize, serde::Deserialize)]
+#[serde(default, rename_all = "camelCase")]
+struct CatalogProperties {
+    name: Option<String>,
+    source_culture: Option<String>,
+    metadata: BTreeMap<String, String>,
+}
+
 fn import_delimited(
     content: &str,
     delimiter: char,
@@ -630,6 +747,7 @@ fn import_delimited(
         ));
         return Ok(());
     }
+    let mut properties = None;
     for (row_index, row) in rows.iter().enumerate().skip(1) {
         if row.iter().all(|field| field.is_empty()) {
             continue;
@@ -649,7 +767,37 @@ fn import_delimited(
                 .map(String::as_str)
         };
         let key = get("key").unwrap_or("");
+        let retained = get("catalogmetadata").filter(|value| !value.is_empty());
+        if let Some(value) = retained {
+            let value = crate::json::parse_checked(value)?;
+            let next: CatalogProperties = serde_json::from_value(value)
+                .map_err(|e| format!("Invalid catalog metadata in row {}: {e}", row_index + 1))?;
+            if properties
+                .as_ref()
+                .is_some_and(|properties| properties != &next)
+            {
+                return Err("Delimited rows have conflicting catalog metadata.".into());
+            }
+            if options.name.is_none() {
+                result.catalog.name = next.name.clone().or(result.catalog.name.clone());
+            }
+            if options.source_culture.is_none() {
+                result.catalog.source_culture = next
+                    .source_culture
+                    .clone()
+                    .or(result.catalog.source_culture.clone());
+            }
+            result.catalog.metadata = next.metadata.clone();
+            properties = Some(next);
+        }
         if key.trim().is_empty() {
+            if retained.is_some()
+                && row.iter().enumerate().all(|(index, value)| {
+                    Some(&index) == columns.get("catalogmetadata") || value.is_empty()
+                })
+            {
+                continue;
+            }
             result.diagnostics.push(TranslationFormatDiagnostic::new(
                 Severity::Warning,
                 "PTF191",
@@ -671,7 +819,7 @@ fn import_delimited(
         entry.plural_category = get("plural").filter(|s| !s.is_empty()).map(str::to_owned);
         entry.format = get("format").filter(|s| !s.is_empty()).map(str::to_owned);
         if let Some(metadata) = get("metadata").filter(|s| !s.is_empty()) {
-            entry.metadata = serde_json::from_str(metadata)
+            entry.metadata = serde_json::from_value(crate::json::parse_checked(metadata)?)
                 .map_err(|e| format!("Invalid metadata JSON in row {}: {e}", row_index + 1))?;
         }
         if row.iter().any(|value| formula(value)) {
@@ -691,6 +839,7 @@ fn import_delimited(
                 | "plural"
                 | "format"
                 | "metadata"
+                | "catalogmetadata"
         )
     }) {
         result.diagnostics.push(TranslationFormatDiagnostic::new(
@@ -776,20 +925,56 @@ fn write_po_notes(
         flags.insert(0, "fuzzy");
     }
     if !flags.is_empty() {
-        writeln!(output, "#, {}", flags.join(", ")).unwrap();
+        let prefix = if entry
+            .metadata
+            .get("po.flags_prefix")
+            .is_some_and(|value| value == "=")
+        {
+            "="
+        } else {
+            ","
+        };
+        writeln!(output, "#{prefix} {}", flags.join(", ")).unwrap();
     }
-    if let Some(context) = &entry.context {
+    if let Some(previous) = entry.metadata.get("po.previous") {
+        for line in previous.lines() {
+            writeln!(output, "#| {line}").unwrap();
+        }
+    }
+    if let Some(context) = po_context(entry) {
         writeln!(output, "msgctxt \"{}\"", escaped(context)).unwrap();
     }
 }
 fn po_id(entry: &TranslationCatalogEntry) -> &str {
     entry.source.as_deref().unwrap_or_else(|| {
         entry
-            .key
+            .base_key()
             .split_once('\u{4}')
             .map(|(_, key)| key)
-            .unwrap_or(&entry.key)
+            .unwrap_or_else(|| entry.base_key())
     })
+}
+fn po_context(entry: &TranslationCatalogEntry) -> Option<&str> {
+    entry
+        .context
+        .as_deref()
+        .or_else(|| entry.key.split_once('\u{4}').map(|(context, _)| context))
+}
+fn po_plural_count(forms: &str) -> Result<usize, String> {
+    let mut values = forms
+        .split(';')
+        .filter_map(|field| field.split_once('='))
+        .filter(|(name, _)| name.trim() == "nplurals")
+        .map(|(_, value)| value.trim());
+    let count = values
+        .next()
+        .ok_or("PO Plural-Forms requires nplurals.")?
+        .parse::<usize>()
+        .map_err(|_| "PO nplurals must be an integer.")?;
+    if count == 0 || count > 65536 || values.next().is_some() {
+        return Err("PO nplurals must occur once and be between 1 and 65536.".into());
+    }
+    Ok(count)
 }
 fn export_po(
     catalog: &TranslationCatalog,
@@ -800,11 +985,12 @@ fn export_po(
         .clone()
         .or_else(|| catalog.cultures().into_iter().next());
     let entries = select_entries(catalog, culture.as_deref());
-    let mut output =
-        String::from("msgid \"\"\nmsgstr \"\"\n\"Content-Type: text/plain; charset=UTF-8\\n\"\n");
-    if let Some(culture) = &culture {
-        writeln!(output, "\"Language: {}\\n\"", escaped(culture)).unwrap();
-    }
+    let retained_header: PoEntry = match catalog.metadata.get("po.header_entry") {
+        Some(value) => serde_json::from_value(crate::json::parse_checked(value)?)
+            .map_err(|e| format!("Invalid retained PO header: {e}"))?,
+        None => PoEntry::default(),
+    };
+    let header = retained_header.target.as_deref().unwrap_or("");
     let forms: Vec<_> = entries
         .iter()
         .filter_map(|entry| entry.metadata.get("po.plural_forms"))
@@ -813,14 +999,60 @@ fn export_po(
         if forms.iter().any(|forms| *forms != *first) {
             return Err("PO entries disagree on Plural-Forms header.".into());
         }
-        writeln!(output, "\"Plural-Forms: {}\\n\"", escaped(first)).unwrap();
+    }
+    let forms = forms.first().map(|forms| forms.as_str()).or_else(|| {
+        header
+            .lines()
+            .filter_map(|line| line.split_once(':'))
+            .find(|(name, _)| name.trim().eq_ignore_ascii_case("plural-forms"))
+            .map(|(_, value)| value.trim())
+    });
+    let plural_count = forms.map(po_plural_count).transpose()?;
+    let mut output = String::new();
+    write_po_notes(
+        &mut output,
+        &TranslationCatalogEntry {
+            comment: retained_header.comment,
+            metadata: retained_header.metadata,
+            state: retained_header.fuzzy.then(|| "fuzzy".into()),
+            ..Default::default()
+        },
+        options,
+    );
+    output.push_str("msgid \"\"\nmsgstr \"\"\n");
+    for line in header.lines().filter(|line| {
+        !line.split_once(':').is_some_and(|(name, _)| {
+            matches!(
+                name.trim().to_ascii_lowercase().as_str(),
+                "content-type" | "language" | "plural-forms"
+            )
+        })
+    }) {
+        writeln!(output, "\"{}\\n\"", escaped(line)).unwrap();
+    }
+    output.push_str("\"Content-Type: text/plain; charset=UTF-8\\n\"\n");
+    if let Some(culture) = &culture {
+        writeln!(output, "\"Language: {}\\n\"", escaped(culture)).unwrap();
+    }
+    if let Some(forms) = forms {
+        writeln!(output, "\"Plural-Forms: {}\\n\"", escaped(forms)).unwrap();
     }
     output.push('\n');
+    let mut identities = BTreeSet::new();
     let mut plurals = BTreeMap::<&str, Vec<&TranslationCatalogEntry>>::new();
     for entry in entries {
         if entry.plural_category.is_some() {
             plurals.entry(entry.base_key()).or_default().push(entry);
             continue;
+        }
+        if po_id(entry).is_empty() && po_context(entry).is_none() {
+            return Err("The empty gettext msgid is reserved for the header.".into());
+        }
+        if !identities.insert((po_context(entry), po_id(entry))) {
+            return Err(format!(
+                "Multiple records export to the same gettext context/msgid '{}'.",
+                po_id(entry)
+            ));
         }
         write_po_notes(&mut output, entry, options);
         writeln!(output, "msgid \"{}\"", escaped(po_id(entry))).unwrap();
@@ -856,6 +1088,38 @@ fn export_po(
         let singular = indexed
             .get(&0)
             .ok_or_else(|| format!("PO plural '{key}' needs an index zero / one record."))?;
+        if plural_count.is_some_and(|count| indexed.len() != count) {
+            return Err(format!(
+                "PO plural '{key}' does not match the nplurals header."
+            ));
+        }
+        if po_id(singular).is_empty() && po_context(singular).is_none() {
+            return Err("The empty gettext msgid is reserved for the header.".into());
+        }
+        if !identities.insert((po_context(singular), po_id(singular))) {
+            return Err(format!(
+                "Multiple records export to the same gettext context/msgid '{}'.",
+                po_id(singular)
+            ));
+        }
+        if entries.iter().any(|entry| {
+            po_context(entry) != po_context(singular)
+                || entry.comment != singular.comment
+                || entry.state != singular.state
+                || [
+                    "po.flags",
+                    "po.flags_prefix",
+                    "po.references",
+                    "po.translator_comment",
+                    "po.previous",
+                ]
+                .iter()
+                .any(|key| entry.metadata.get(*key) != singular.metadata.get(*key))
+        }) {
+            return Err(format!(
+                "PO plural '{key}' has conflicting shared context, comments, or flags."
+            ));
+        }
         let plural = indexed
             .iter()
             .find(|(i, _)| **i > 0)
@@ -886,6 +1150,16 @@ fn export_po(
             }
             writeln!(output, "msgstr[{index}] \"{}\"", escaped(&entry.value)).unwrap();
         }
+        output.push('\n');
+    }
+    if let Some(obsolete) = catalog.metadata.get("po.obsolete") {
+        if obsolete
+            .lines()
+            .any(|line| !line.trim_start().starts_with("#~"))
+        {
+            return Err("Retained obsolete PO content must contain only #~ lines.".into());
+        }
+        output.push_str(obsolete);
         output.push('\n');
     }
     Ok(output)
@@ -921,6 +1195,17 @@ fn export_delimited(
     if has_metadata {
         header.push("metadata");
     }
+    let properties = CatalogProperties {
+        name: catalog.name.clone(),
+        source_culture: catalog.source_culture.clone(),
+        metadata: catalog.metadata.clone(),
+    };
+    let properties = if properties != CatalogProperties::default() {
+        header.push("catalogMetadata");
+        Some(serde_json::to_string(&properties).map_err(|e| e.to_string())?)
+    } else {
+        None
+    };
     let mut output = String::new();
     append_row(&mut output, &header, delimiter);
     let mut entries: Vec<_> = catalog
@@ -944,7 +1229,14 @@ fn export_delimited(
                 .cmp(&b.culture.as_deref().unwrap_or("").to_ascii_lowercase())
         })
     });
-    for entry in entries {
+    if entries.is_empty() {
+        if let Some(properties) = &properties {
+            let mut fields = vec![""; header.len()];
+            fields[header.len() - 1] = properties;
+            append_row(&mut output, &fields, delimiter);
+        }
+    }
+    for (index, entry) in entries.into_iter().enumerate() {
         let metadata = if entry.metadata.is_empty() {
             String::new()
         } else {
@@ -967,6 +1259,9 @@ fn export_delimited(
         ];
         if has_metadata {
             fields.push(&metadata);
+        }
+        if let Some(properties) = &properties {
+            fields.push(if index == 0 { properties } else { "" });
         }
         append_row(&mut output, &fields, delimiter);
     }

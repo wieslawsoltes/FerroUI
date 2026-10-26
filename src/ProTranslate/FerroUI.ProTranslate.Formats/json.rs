@@ -11,9 +11,7 @@ pub(crate) fn import(
     // The source accepts trailing commas. The scanner only removes delimiter tokens outside
     // strings, and leaves all other syntax validation to serde_json.
     let normalized = without_trailing_commas(content);
-    let root = serde_json::from_str::<CheckedJson>(&normalized)
-        .map_err(|e| e.to_string())?
-        .0;
+    let root = parse_checked(&normalized)?;
     let root = root
         .as_object()
         .ok_or("JSON translation catalog root must be an object.")?;
@@ -21,6 +19,13 @@ pub(crate) fn import(
         return import_xcstrings(root, result);
     }
     let arb = format == TranslationFileFormat::FlutterArb;
+    if arb
+        && root
+            .get("@@locale")
+            .is_some_and(|locale| !locale.is_string())
+    {
+        return Err("ARB @@locale must be a string.".into());
+    }
     let culture = if arb {
         root.get("@@locale")
             .and_then(Value::as_str)
@@ -29,8 +34,42 @@ pub(crate) fn import(
     } else {
         options.culture.clone()
     };
-    flatten(root, "", culture.as_deref(), arb, result);
+    flatten(root, None, culture.as_deref(), arb, result);
     if arb {
+        let globals: Map<_, _> = root
+            .iter()
+            .filter(|(key, _)| key.starts_with("@@") && *key != "@@locale")
+            .map(|(key, value)| (key.clone(), value.clone()))
+            .collect();
+        if !globals.is_empty() {
+            result
+                .catalog
+                .metadata
+                .insert("arb.globals".into(), Value::Object(globals).to_string());
+        }
+        let mut orphan_metadata = Map::new();
+        for (key, value) in root
+            .iter()
+            .filter(|(key, _)| key.starts_with('@') && !key.starts_with("@@"))
+        {
+            if !value.is_object() {
+                return Err(format!("ARB message metadata '{key}' must be an object."));
+            }
+            if !result
+                .catalog
+                .entries
+                .iter()
+                .any(|entry| key[1..] == entry.key)
+            {
+                orphan_metadata.insert(key.clone(), value.clone());
+            }
+        }
+        if !orphan_metadata.is_empty() {
+            result.catalog.metadata.insert(
+                "arb.orphan_metadata".into(),
+                Value::Object(orphan_metadata).to_string(),
+            );
+        }
         for entry in &mut result.catalog.entries {
             if let Some(metadata) = root
                 .get(&format!("@{}", entry.key))
@@ -42,16 +81,6 @@ pub(crate) fn import(
                     .map(str::to_owned);
                 entry.metadata.insert("arb".into(), metadata.to_string());
             }
-        }
-        if root
-            .keys()
-            .any(|key| key.starts_with("@@") && key != "@@locale")
-        {
-            result.diagnostics.push(TranslationFormatDiagnostic::new(
-                Severity::Warning,
-                "PTF102",
-                "ARB global metadata other than @@locale is not represented by the catalog model.",
-            ));
         }
     }
     Ok(())
@@ -97,7 +126,7 @@ fn without_trailing_commas(content: &str) -> String {
 
 fn flatten(
     object: &Map<String, Value>,
-    prefix: &str,
+    prefix: Option<&str>,
     culture: Option<&str>,
     arb: bool,
     result: &mut TranslationFormatResult,
@@ -106,16 +135,12 @@ fn flatten(
         if arb && name.starts_with('@') {
             continue;
         }
-        let key = if prefix.is_empty() {
-            name.clone()
-        } else {
-            format!("{prefix}.{name}")
-        };
+        let key = prefix.map_or_else(|| name.clone(), |prefix| format!("{prefix}.{name}"));
         match value {
             Value::String(value) => {
                 result.catalog.add(key, culture, value.clone());
             }
-            Value::Object(object) => flatten(object, &key, culture, arb, result),
+            Value::Object(object) => flatten(object, Some(&key), culture, arb, result),
             _ => result.diagnostics.push(TranslationFormatDiagnostic {
                 key: Some(key.clone()),
                 culture: culture.map(str::to_owned),
@@ -231,26 +256,47 @@ pub(crate) fn export(
     let arb = format == TranslationFileFormat::FlutterArb;
     let mut root = Map::new();
     if arb {
+        for (metadata_key, global) in [("arb.globals", true), ("arb.orphan_metadata", false)] {
+            if let Some(value) = catalog.metadata.get(metadata_key) {
+                let object = parse_object(value)?;
+                for (key, value) in object {
+                    if key == "@@locale"
+                        || if global {
+                            !key.starts_with("@@")
+                        } else {
+                            !key.starts_with('@') || key.starts_with("@@") || !value.is_object()
+                        }
+                    {
+                        return Err(format!("Invalid reserved ARB metadata key '{key}'."));
+                    }
+                    root.insert(key, value);
+                }
+            }
+        }
         if let Some(culture) = &culture {
             root.insert("@@locale".into(), Value::String(culture.clone()));
         }
     }
     for entry in select_entries(catalog, culture.as_deref()) {
+        if arb && entry.key.starts_with('@') {
+            return Err(format!(
+                "ARB translation key '{}' uses the reserved @ metadata prefix.",
+                entry.key
+            ));
+        }
         root.insert(entry.key.clone(), Value::String(entry.value.clone()));
         if arb {
             let mut metadata = match entry.metadata.get("arb") {
-                Some(metadata) => serde_json::from_str::<Value>(metadata)
-                    .map_err(|e| format!("Invalid retained ARB metadata for '{}': {e}", entry.key))?
-                    .as_object()
-                    .cloned()
-                    .ok_or_else(|| {
-                        format!("ARB metadata for '{}' must be an object.", entry.key)
-                    })?,
+                Some(metadata) => parse_object(metadata).map_err(|e| {
+                    format!("Invalid retained ARB metadata for '{}': {e}", entry.key)
+                })?,
                 None => Map::new(),
             };
             if options.include_comments {
                 if let Some(comment) = &entry.comment {
                     metadata.insert("description".into(), Value::String(comment.clone()));
+                } else {
+                    metadata.remove("description");
                 }
             } else {
                 metadata.remove("description");
@@ -261,6 +307,19 @@ pub(crate) fn export(
         }
     }
     serde_json::to_string_pretty(&Value::Object(root)).map_err(|e| e.to_string())
+}
+
+pub(crate) fn parse_checked(content: &str) -> Result<Value, String> {
+    serde_json::from_str::<CheckedJson>(content)
+        .map(|value| value.0)
+        .map_err(|e| e.to_string())
+}
+
+pub(crate) fn parse_object(content: &str) -> Result<Map<String, Value>, String> {
+    parse_checked(content)?
+        .as_object()
+        .cloned()
+        .ok_or_else(|| "Expected a JSON object.".into())
 }
 
 fn export_xcstrings(
