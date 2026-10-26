@@ -102,6 +102,13 @@ struct Entry {
     format_valid: bool,
 }
 
+#[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
+struct KeyDeclaration {
+    key: String,
+    file: String,
+    line: usize,
+}
+
 /// Framework-independent compiler usable in build scripts, editors and CI tools.
 #[derive(Clone, Debug, Default)]
 pub struct CatalogCompiler {
@@ -166,6 +173,7 @@ impl CatalogCompiler {
         let mut keys = BTreeSet::<String>::new();
         let mut sources = BTreeSet::<String>::new();
         let mut cultures = BTreeSet::<String>::new();
+        let mut key_declarations = Vec::new();
         let mut catalogs = self.catalogs.iter().collect::<Vec<_>>();
         catalogs.sort_by(|a, b| {
             a.name
@@ -301,6 +309,11 @@ impl CatalogCompiler {
                 if key.is_empty() || key.starts_with('#') {
                     continue;
                 }
+                key_declarations.push(KeyDeclaration {
+                    key: key.to_owned(),
+                    file: file.clone(),
+                    line: line + 1,
+                });
                 if !seen.insert(key) {
                     let mut d = diagnostic(
                         DiagnosticSeverity::Warning,
@@ -315,6 +328,7 @@ impl CatalogCompiler {
                 keys.insert(key.to_owned());
             }
         }
+        key_declarations.sort();
 
         let mut arities = BTreeMap::<String, usize>::new();
         let mut placeholder_sets = BTreeMap::<String, Vec<usize>>::new();
@@ -423,6 +437,11 @@ impl CatalogCompiler {
             "keys": keys,
             "cultures": cultures,
             "source_files": sources,
+            "key_declarations": key_declarations.iter().map(|declaration| serde_json::json!({
+                "key": declaration.key,
+                "source_file": declaration.file,
+                "line": declaration.line,
+            })).collect::<Vec<_>>(),
             "entries": entries.values().map(|e| serde_json::json!({
                 "key": e.key, "culture": e.culture, "source_file": e.file,
                 "placeholder_indexes": e.placeholders,
@@ -436,6 +455,7 @@ impl CatalogCompiler {
                 &arities,
                 &sources,
                 &cultures,
+                &key_declarations,
                 self.notify_properties,
             ),
             manifest_json: serde_json::to_string_pretty(&manifest).expect("serializable manifest")
@@ -501,6 +521,7 @@ fn render(
     arities: &BTreeMap<String, usize>,
     sources: &BTreeSet<String>,
     cultures: &BTreeSet<String>,
+    key_declarations: &[KeyDeclaration],
     notify_properties: bool,
 ) -> String {
     let mut out = String::from(
@@ -566,6 +587,12 @@ pub struct ProTranslateProviderManifestEntry {
     pub placeholder_indexes: &'static [usize],
     pub format_valid: bool,
 }
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub struct ProTranslateKeyDeclaration {
+    pub key: &'static str,
+    pub source_file: &'static str,
+    pub line: usize,
+}
 pub struct ProTranslateProviderManifest;
 impl ProTranslateProviderManifest {
     pub const SOURCE_FILES: &'static [&'static str] = PROTRANSLATE_SOURCE_FILES;
@@ -584,6 +611,17 @@ impl ProTranslateProviderManifest {
     for entry in entries.values() {
         let culture = (!entry.culture.is_empty()).then_some(entry.culture.as_str());
         writeln!(out, "        ProTranslateProviderManifestEntry {{ key: {:?}, culture: {:?}, source_file: {:?}, placeholder_indexes: &{:?}, format_valid: {} }},", entry.key, culture, entry.file, entry.placeholders, entry.format_valid).unwrap();
+    }
+    out.push_str(
+        "    ];\n    pub const KEY_DECLARATIONS: &'static [ProTranslateKeyDeclaration] = &[\n",
+    );
+    for declaration in key_declarations {
+        writeln!(
+            out,
+            "        ProTranslateKeyDeclaration {{ key: {:?}, source_file: {:?}, line: {} }},",
+            declaration.key, declaration.file, declaration.line
+        )
+        .unwrap();
     }
     out.push_str("    ];\n}\n\n");
     if notify_properties {
@@ -673,8 +711,15 @@ fn infer_culture(path: &str) -> Option<String> {
                         && !matches!(**part, "car" | "desk")
                 }) {
                     let mut culture = (*language).to_owned();
-                    if let Some(region) =
-                        parts.get(index + 1).and_then(|part| part.strip_prefix('r'))
+                    let mut next = index + 1;
+                    if let Some(script) = parts.get(next).filter(|part| is_android_script(part)) {
+                        culture.push('-');
+                        culture.push_str(script);
+                        next += 1;
+                    }
+                    if let Some(region) = parts
+                        .get(next)
+                        .and_then(|part| part.strip_prefix(['r', 'R']))
                     {
                         if (region.len() == 2 && region.bytes().all(|c| c.is_ascii_alphabetic()))
                             || (region.len() == 3 && region.bytes().all(|c| c.is_ascii_digit()))
@@ -727,6 +772,19 @@ fn infer_culture(path: &str) -> Option<String> {
     Culture::parse(candidate)
         .ok()
         .map(|culture| culture.name().to_owned())
+}
+
+fn is_android_script(value: &str) -> bool {
+    // Legacy catalog paths may spell out an ISO 15924 script before the region.
+    // Four-letter Android configuration qualifiers are not script subtags.
+    value.len() == 4
+        && value
+            .bytes()
+            .all(|character| character.is_ascii_alphabetic())
+        && !matches!(
+            value.to_ascii_lowercase().as_str(),
+            "land" | "port" | "long" | "desk" | "dpad" | "ldpi" | "mdpi" | "hdpi"
+        )
 }
 
 /// Build-script failure, including all source diagnostics when generation was rejected.

@@ -41,6 +41,12 @@ static `KEYS`, `CULTURES`, `SOURCE_FILES` and `ENTRIES`, including source filena
 placeholder indices and whether each format contract was validated. These tables
 are available at runtime without parsing the JSON manifest.
 
+`KEY_DECLARATIONS` preserves every key-list declaration with its key, source
+filename and one-based line number, including repeated declarations. The JSON
+manifest exposes the same records as `key_declarations`, sorted by key, source
+filename and line. Key declarations contribute typed keys and accessors; only
+catalog values contribute provider entries.
+
 Direct generated-provider lookups validate keys. Neutral catalog entries are
 defaults for every requested culture, as in the source generator; a culture-specific
 entry takes precedence. `GeneratedTranslationProvider::with_name` supplies a
@@ -79,8 +85,11 @@ empty catalogs. `CatalogInput::with_culture` supplies an explicit culture for ot
 naming conventions. Catalog formats with native locale metadata use their imported
 record cultures. Duplicate canonical `(culture, key)` records are errors.
 
-Android `values-pl-rPL` / `values-b+zh+Hant+TW` directories and Apple `.lproj`
+Android `values-pl-rPL`, legacy `values-sr-Latn-rRS`, and `values-b+zh+Hant+TW`
+directories and Apple `.lproj`
 directories infer their locale, including Windows paths. `Base.lproj` is neutral.
+Android layout, orientation and density qualifiers such as `land` remain
+configuration qualifiers and are excluded from the inferred script.
 Declared cultures remain in the manifest and coverage checks even when their
 catalog is empty. The file builder accepts `catalog_for_culture` and
 `catalog_with_options(CatalogFileOptions)` for explicit culture/format overrides.
@@ -88,7 +97,8 @@ Dependency tracking rejects non-UTF-8 or multiline paths rather than registering
 a different filename through lossy conversion.
 
 Generated output and manifests are ordered deterministically. The manifest includes
-keys, cultures, catalog filenames, placeholder indices, and notification mode.
+keys, cultures, catalog filenames, key-list source lines, placeholder indices, and
+notification mode.
 Build scripts emit `rerun-if-changed` for every supplied input and write outputs
 only when their bytes change. Errors prevent output generation; `.deny_warnings(true)`
 can enforce a stricter project policy.
@@ -121,6 +131,12 @@ let result = ferroui_protranslate_build::Builder::new()
 The scanner inspects only explicitly named receiver expressions. It recognizes
 literal keys, unambiguous string constants, generated constants, and array or
 `vec!` argument counts for lookup/format/observe calls, including `format_for`.
+Selected type paths also enable static facade calls such as
+`TranslationService::t` and `TranslationService::format`. Opting into
+`SourceAnalysisOptions::generated_accessors(true)` checks generated extension
+methods on the selected receivers. Imports, conditional or duplicate constants,
+and unresolved module names remain dynamic instead of being incorrectly accepted
+as a different known key. Literal block constants are resolved within nested modules.
 Function parameters, closures, loop and match bindings, conditional patterns, and
 local variables conservatively shadow file-level constants.
 

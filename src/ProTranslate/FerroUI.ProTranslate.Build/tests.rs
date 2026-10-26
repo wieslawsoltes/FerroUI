@@ -90,6 +90,44 @@ fn keys_only_catalogs_generate_accessors_without_fabricated_translations() {
 }
 
 #[test]
+fn key_list_manifest_preserves_each_source_and_one_based_line_deterministically() {
+    let source = "\u{feff}# declarations\r\n Shared \r\nSecond\r\nShared\r\n";
+    let mut first = CatalogCompiler::new();
+    first.add_key_list("z.protranslate.keys.txt", source);
+    first.add_key_list("a.protranslate.keys.txt", "\nShared\n");
+    first.add_catalog(catalog("Strings.en.json", r#"{"Shared":"translated"}"#));
+    let mut second = CatalogCompiler::new();
+    second.add_catalog(catalog("Strings.en.json", r#"{"Shared":"translated"}"#));
+    second.add_key_list("a.protranslate.keys.txt", "\nShared\n");
+    second.add_key_list("z.protranslate.keys.txt", source);
+    let first = first.compile();
+    let second = second.compile();
+    assert_eq!(first.manifest_json, second.manifest_json);
+    assert_eq!(first.rust_source, second.rust_source);
+    assert!(!first.has_errors());
+    let manifest: serde_json::Value = serde_json::from_str(&first.manifest_json).unwrap();
+    assert_eq!(manifest["keys"], serde_json::json!(["Second", "Shared"]));
+    assert_eq!(
+        manifest["key_declarations"],
+        serde_json::json!([
+            {"key":"Second", "source_file":"z.protranslate.keys.txt", "line":3},
+            {"key":"Shared", "source_file":"a.protranslate.keys.txt", "line":2},
+            {"key":"Shared", "source_file":"z.protranslate.keys.txt", "line":2},
+            {"key":"Shared", "source_file":"z.protranslate.keys.txt", "line":4}
+        ])
+    );
+    assert_eq!(manifest["entries"].as_array().unwrap().len(), 1);
+    assert_eq!(manifest["entries"][0]["key"], "Shared");
+    assert_eq!(manifest["entries"][0]["source_file"], "Strings.en.json");
+    assert!(first
+        .diagnostics
+        .iter()
+        .any(|diagnostic| diagnostic.code == "PTSG002"
+            && diagnostic.file.as_deref() == Some("z.protranslate.keys.txt")
+            && diagnostic.line == Some(4)));
+}
+
+#[test]
 fn syntax_analysis_is_scoped_and_handles_raw_strings_constants_and_arrays() {
     let source = r###"
         const KEY: &str = "Hello";
@@ -448,7 +486,10 @@ fn generated_providers_and_notification_handles_compile_and_run() {
             .to_string(),
     ));
     compiler.add_catalog(catalog("Strings.json", r#"{"Shared":"neutral"}"#));
-    compiler.add_key_list("keys.protranslate.keys.txt", "Dynamic");
+    compiler.add_key_list(
+        "keys.protranslate.keys.txt",
+        "# declarations\n\nDynamic\nGreeting\n",
+    );
     let plain = compiler.compile();
     assert!(!plain.has_errors());
     compiler.notify_properties(true);
@@ -489,6 +530,15 @@ fn generated_providers_and_notification_handles_compile_and_run() {
             assert_eq!(manifest_entry.source_file, "Strings.en-US.json");
             assert_eq!(manifest_entry.placeholder_indexes, &[0]);
             assert!(manifest_entry.format_valid);
+            let declarations = plain::ProTranslateProviderManifest::KEY_DECLARATIONS;
+            assert_eq!(declarations.len(), 2);
+            assert_eq!(declarations[0], plain::ProTranslateKeyDeclaration {
+                key: "Dynamic", source_file: "keys.protranslate.keys.txt", line: 3,
+            });
+            assert_eq!(declarations[1].key, "Greeting");
+            assert_eq!(declarations[1].line, 4);
+            assert!(!plain::ProTranslateProviderManifest::ENTRIES.iter().any(|entry| entry.key == "Dynamic"));
+            assert!(plain::GeneratedTranslationProvider.get_string("Dynamic", &Culture::parse("en-US").unwrap()).unwrap().resource_not_found);
             assert!(plain::GeneratedTranslationProvider.get_string("Missing", &Culture::parse("en-US").unwrap()).unwrap().resource_not_found);
             let observed = strings.observe_greeting(["Ada".into()]);
             cultures.set_culture(Culture::parse("pl-PL").unwrap());
@@ -591,6 +641,10 @@ fn generated_providers_and_notification_handles_compile_and_run() {
 fn platform_catalog_directories_select_the_actual_resource_culture() {
     for (name, expected) in [
         ("res/values-en-rUS/strings.xml", "en-US"),
+        ("res/values-sr-Latn-rRS/strings.xml", "sr-Latn-RS"),
+        ("res/values-sr-latn-rRS-night/strings.xml", "sr-Latn-RS"),
+        ("res/values-sr-Cyrl-RRS-land/strings.xml", "sr-Cyrl-RS"),
+        ("res/values-sr-Latn/strings.xml", "sr-Latn"),
         ("res/values-mcc310-mnc004-pl-rPL-night/strings.xml", "pl-PL"),
         ("res/values-b+zh+Hant+TW-night/strings.xml", "zh-Hant-TW"),
         (r"C:\project\res\values-es-r419\strings.xml", "es-419"),
@@ -631,6 +685,12 @@ fn platform_catalog_directories_select_the_actual_resource_culture() {
     assert!(CatalogInput::new("res/values-car/strings.xml", "")
         .culture
         .is_none());
+    for qualifier in [
+        "land", "port", "long", "desk", "dpad", "ldpi", "mdpi", "hdpi",
+    ] {
+        let input = CatalogInput::new(format!("res/values-sr-{qualifier}/strings.xml"), "");
+        assert_eq!(input.culture.as_deref(), Some("sr"), "{qualifier}");
+    }
 }
 
 #[test]
@@ -709,4 +769,130 @@ fn builder_rejects_non_utf8_tracking_paths_without_lossy_aliases() {
     assert!(
         matches!(Builder::new().catalog(path).generate_to(&directory.0.join("out")), Err(BuildError::Io { source, .. }) if source.kind() == std::io::ErrorKind::InvalidInput)
     );
+}
+
+#[test]
+fn scanner_does_not_resolve_imports_or_conditional_constants_as_known_keys() {
+    let source = r#"
+        const KEY: &str = "Global";
+        #[cfg(first)] const CONDITIONAL: &str = "First";
+        #[cfg(second)] const CONDITIONAL: &str = "Second";
+        fn run() {
+            { use dependency::KEY; translations.get_string(KEY); }
+            { use dependency::SOME_NAME as KEY; translations.get_string(KEY); }
+            { use dependency::*; translations.get_string(KEY); }
+            translations.get_string(CONDITIONAL);
+            translations.get_string(KEY);
+        }
+    "#;
+    let analysis = analyze_rust_source(
+        "app.rs",
+        source,
+        &SourceAnalysisOptions::default().receiver("translations"),
+    );
+    assert_eq!(analysis.usages.len(), 5);
+    assert!(analysis.usages[..4].iter().all(|usage| usage.key.is_none()));
+    assert_eq!(analysis.usages[4].key.as_deref(), Some("Global"));
+}
+
+#[test]
+fn scanner_resolves_block_constants_in_nested_modules_without_outer_name_leakage() {
+    let source = r#"
+        const KEY: &str = "Outer";
+        mod nested {
+            fn run() {
+                const LOCAL: &str = "Inner";
+                translations.get_string(LOCAL);
+                translations.get_string(KEY);
+            }
+        }
+    "#;
+    let analysis = analyze_rust_source(
+        "app.rs",
+        source,
+        &SourceAnalysisOptions::default().receiver("translations"),
+    );
+    assert_eq!(analysis.usages[0].key.as_deref(), Some("Inner"));
+    assert!(analysis.usages[1].key.is_none());
+}
+
+#[test]
+fn modules_inside_blocks_do_not_capture_outer_local_constants() {
+    let source = r#"
+        const KEY: &str = "Crate";
+        fn run() {
+            const KEY: &str = "Block";
+            mod inner {
+                use super::KEY;
+                fn run() {
+                    translations.get_string(KEY);
+                    const LOCAL: &str = "Inner";
+                    translations.get_string(LOCAL);
+                }
+            }
+            translations.get_string(KEY);
+        }
+        fn after() { translations.get_string(KEY); }
+    "#;
+    let analysis = analyze_rust_source(
+        "app.rs",
+        source,
+        &SourceAnalysisOptions::default().receiver("translations"),
+    );
+    assert_eq!(analysis.usages.len(), 4);
+    assert!(analysis.usages[0].key.is_none());
+    assert_eq!(analysis.usages[1].key.as_deref(), Some("Inner"));
+    assert_eq!(analysis.usages[2].key.as_deref(), Some("Block"));
+    assert_eq!(analysis.usages[3].key.as_deref(), Some("Crate"));
+}
+
+#[test]
+fn scanner_checks_explicit_static_facades_and_generated_extension_calls() {
+    let source = r#"
+        fn run() {
+            ui::TranslationService::t("Missing");
+            ui::TranslationService::format("Hello", &[1.into(), 2.into()]);
+            unrelated::TranslationService::t("Ignored");
+            translations.format_hello([1.into()]);
+            translations.value_unknown();
+            self.r#translations.translate("Hello", &[1.into()]);
+            translations.observe("Hello", vec![]);
+        }
+    "#;
+    let options = SourceAnalysisOptions::default()
+        .receiver("ui::TranslationService")
+        .receiver("translations")
+        .receiver("self.translations")
+        .generated_accessors(true);
+    let analysis = analyze_rust_source("app.rs", source, &options);
+    assert_eq!(analysis.usages.len(), 6);
+    assert_eq!(
+        analysis.usages[2].generated_constant.as_deref(),
+        Some("HELLO")
+    );
+    assert_eq!(analysis.usages[2].argument_count, Some(1));
+    assert_eq!(analysis.usages[4].key.as_deref(), Some("Hello"));
+    assert_eq!(analysis.usages[4].argument_count, Some(1));
+    assert_eq!(analysis.usages[5].argument_count, None);
+    let mut compiler = CatalogCompiler::new();
+    compiler.add_catalog(CatalogInput::new("Strings.en.json", r#"{"Hello":"{0}"}"#));
+    compiler.add_rust_source("app.rs", source, &options);
+    let diagnostics = compiler.compile().diagnostics;
+    assert_eq!(
+        diagnostics
+            .iter()
+            .filter(|diagnostic| diagnostic.code == "PTA001")
+            .count(),
+        2
+    );
+    assert_eq!(
+        diagnostics
+            .iter()
+            .filter(|diagnostic| diagnostic.code == "PTA002")
+            .count(),
+        1
+    );
+    assert!(!diagnostics
+        .iter()
+        .any(|diagnostic| diagnostic.code == "PTA004"));
 }

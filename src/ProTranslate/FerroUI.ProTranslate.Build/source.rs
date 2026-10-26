@@ -41,11 +41,18 @@ impl KeyUsage {
 #[derive(Clone, Debug, Default)]
 pub struct SourceAnalysisOptions {
     pub receivers: BTreeSet<String>,
+    /// Inspect generated get/value/format/observe methods on selected receivers.
+    pub generated_accessors: bool,
 }
 
 impl SourceAnalysisOptions {
     pub fn receiver(mut self, expression: impl Into<String>) -> Self {
         self.receivers.insert(expression.into());
+        self
+    }
+
+    pub fn generated_accessors(mut self, enabled: bool) -> Self {
+        self.generated_accessors = enabled;
         self
     }
 }
@@ -83,16 +90,12 @@ pub fn analyze_rust_source(
     };
     // Resolve only unambiguous file-level constants. Local scopes and shadowed
     // names require rustc's semantic model and remain dynamic here.
-    let constants = file
-        .items
-        .iter()
-        .filter_map(|item| match item {
-            syn::Item::Const(value) => {
-                literal_string(&value.expr).map(|text| (value.ident.unraw().to_string(), text))
-            }
-            _ => None,
-        })
-        .collect();
+    let mut constants = BTreeMap::new();
+    for item in &file.items {
+        if let syn::Item::Const(value) = item {
+            insert_constant(&mut constants, value);
+        }
+    }
     let mut visitor = UsageVisitor {
         file: name,
         options,
@@ -111,13 +114,97 @@ pub fn analyze_rust_source(
 struct UsageVisitor<'a> {
     file: &'a str,
     options: &'a SourceAnalysisOptions,
-    constants: BTreeMap<String, String>,
+    constants: BTreeMap<String, Option<String>>,
     usages: Vec<KeyUsage>,
     nested_module: usize,
     local_names: Vec<BTreeMap<String, Option<String>>>,
 }
 
 impl UsageVisitor<'_> {
+    fn record_call(
+        &mut self,
+        method: &str,
+        arguments: &syn::punctuated::Punctuated<syn::Expr, syn::Token![,]>,
+        line: usize,
+    ) {
+        if matches!(
+            method,
+            "get_string"
+                | "get_string_for"
+                | "format"
+                | "format_for"
+                | "observe"
+                | "translate"
+                | "t"
+        ) {
+            let Some(expression) = arguments.first() else {
+                return;
+            };
+            let mut key = literal_string(expression);
+            let mut generated_constant = None;
+            if let syn::Expr::Path(path) = unwrap_expression(expression) {
+                let parts = path
+                    .path
+                    .segments
+                    .iter()
+                    .map(|part| part.ident.unraw().to_string())
+                    .collect::<Vec<_>>();
+                if parts.len() >= 2 && parts[parts.len() - 2] == "ProTranslateKeys" {
+                    generated_constant = parts.last().cloned();
+                } else if parts.len() == 1 {
+                    key = match self
+                        .local_names
+                        .iter()
+                        .rev()
+                        .find_map(|names| names.get(&parts[0]))
+                    {
+                        Some(value) => value.clone(),
+                        None if self.nested_module == 0 => {
+                            self.constants.get(&parts[0]).cloned().flatten()
+                        }
+                        None => None,
+                    };
+                }
+            }
+            self.usages.push(KeyUsage {
+                key,
+                generated_constant,
+                argument_count: if matches!(
+                    method,
+                    "format" | "format_for" | "observe" | "translate"
+                ) {
+                    arguments
+                        .iter()
+                        .nth(1)
+                        .and_then(array_length)
+                        .filter(|count| *count != 0 || !matches!(method, "observe" | "translate"))
+                } else {
+                    None
+                },
+                file: self.file.into(),
+                line: Some(expression.span().start().line),
+            });
+        } else if self.options.generated_accessors {
+            let Some((prefix, name)) = method.split_once('_') else {
+                return;
+            };
+            if !matches!(prefix, "get" | "value" | "format" | "observe") || name.is_empty() {
+                return;
+            }
+            self.usages.push(KeyUsage {
+                key: None,
+                generated_constant: Some(name.to_ascii_uppercase()),
+                argument_count: if matches!(prefix, "format" | "observe") {
+                    arguments.first().and_then(array_length)
+                } else {
+                    None
+                },
+                file: self.file.into(),
+                line: Some(line),
+            });
+        }
+    }
+
     fn push_patterns<'a>(&mut self, patterns: impl IntoIterator<Item = &'a syn::Pat>) {
         let mut bindings = PatternBindings::default();
         for pattern in patterns {
@@ -223,9 +310,23 @@ impl<'ast> Visit<'ast> for UsageVisitor<'_> {
         for statement in &block.stmts {
             match statement {
                 syn::Stmt::Item(syn::Item::Const(value)) => {
-                    names
-                        .entry(value.ident.unraw().to_string())
-                        .or_insert_with(|| literal_string(&value.expr));
+                    insert_constant(&mut names, value);
+                }
+                syn::Stmt::Item(syn::Item::Use(value)) => {
+                    let mut imports = ImportBindings::default();
+                    imports.visit_use_tree(&value.tree);
+                    for name in imports.names {
+                        names.insert(name, None);
+                    }
+                    if imports.glob {
+                        for name in self
+                            .constants
+                            .keys()
+                            .chain(self.local_names.iter().flat_map(|scope| scope.keys()))
+                        {
+                            names.insert(name.clone(), None);
+                        }
+                    }
                 }
                 syn::Stmt::Local(local) => {
                     let mut bindings = PatternBindings::default();
@@ -245,62 +346,77 @@ impl<'ast> Visit<'ast> for UsageVisitor<'_> {
     }
 
     fn visit_item_mod(&mut self, item: &'ast syn::ItemMod) {
+        // Modules have their own lexical namespace, including when declared
+        // inside a function. They do not inherit that function's block bindings.
+        let outer_scopes = std::mem::take(&mut self.local_names);
         self.nested_module += 1;
         syn::visit::visit_item_mod(self, item);
         self.nested_module -= 1;
+        self.local_names = outer_scopes;
     }
 
     fn visit_expr_method_call(&mut self, call: &'ast syn::ExprMethodCall) {
-        let method = call.method.to_string();
         let selected = receiver_name(&call.receiver)
             .is_some_and(|receiver| self.options.receivers.contains(&receiver));
-        if selected
-            && matches!(
-                method.as_str(),
-                "get_string" | "get_string_for" | "format" | "format_for" | "observe"
-            )
-        {
-            if let Some(expression) = call.args.first() {
-                let mut key = literal_string(expression);
-                let mut generated_constant = None;
-                if let syn::Expr::Path(path) = unwrap_expression(expression) {
-                    let parts = path
-                        .path
-                        .segments
-                        .iter()
-                        .map(|s| s.ident.unraw().to_string())
-                        .collect::<Vec<_>>();
-                    if parts.len() >= 2 && parts[parts.len() - 2] == "ProTranslateKeys" {
-                        generated_constant = parts.last().cloned();
-                    } else if self.nested_module == 0 && parts.len() == 1 {
-                        key = match self
-                            .local_names
-                            .iter()
-                            .rev()
-                            .find_map(|names| names.get(&parts[0]))
-                        {
-                            Some(value) => value.clone(),
-                            None => self.constants.get(&parts[0]).cloned(),
-                        };
-                    }
-                }
-                self.usages.push(KeyUsage {
-                    key,
-                    generated_constant,
-                    argument_count: if matches!(
-                        method.as_str(),
-                        "format" | "format_for" | "observe"
-                    ) {
-                        call.args.iter().nth(1).and_then(array_length)
-                    } else {
-                        None
-                    },
-                    file: self.file.into(),
-                    line: Some(expression.span().start().line),
-                });
-            }
+        if selected {
+            self.record_call(
+                &call.method.unraw().to_string(),
+                &call.args,
+                call.span().start().line,
+            );
         }
         syn::visit::visit_expr_method_call(self, call);
+    }
+
+    fn visit_expr_call(&mut self, call: &'ast syn::ExprCall) {
+        if let syn::Expr::Path(path) = unwrap_expression(&call.func) {
+            if path.qself.is_none() {
+                let parts = path
+                    .path
+                    .segments
+                    .iter()
+                    .map(|part| part.ident.unraw().to_string())
+                    .collect::<Vec<_>>();
+                if let Some((method, owner)) = parts.split_last() {
+                    if self.options.receivers.contains(&owner.join("::")) {
+                        self.record_call(method, &call.args, call.span().start().line);
+                    }
+                }
+            }
+        }
+        syn::visit::visit_expr_call(self, call);
+    }
+}
+
+fn insert_constant(names: &mut BTreeMap<String, Option<String>>, value: &syn::ItemConst) {
+    let text =
+        if value.attrs.iter().any(|attribute| {
+            attribute.path().is_ident("cfg") || attribute.path().is_ident("cfg_attr")
+        }) {
+            None
+        } else {
+            literal_string(&value.expr)
+        };
+    names
+        .entry(value.ident.unraw().to_string())
+        .and_modify(|value| *value = None)
+        .or_insert(text);
+}
+
+#[derive(Default)]
+struct ImportBindings {
+    names: Vec<String>,
+    glob: bool,
+}
+impl<'ast> Visit<'ast> for ImportBindings {
+    fn visit_use_name(&mut self, name: &'ast syn::UseName) {
+        self.names.push(name.ident.unraw().to_string());
+    }
+    fn visit_use_rename(&mut self, name: &'ast syn::UseRename) {
+        self.names.push(name.rename.unraw().to_string());
+    }
+    fn visit_use_glob(&mut self, _: &'ast syn::UseGlob) {
+        self.glob = true;
     }
 }
 
@@ -346,7 +462,9 @@ fn receiver_name(expression: &syn::Expr) -> Option<String> {
                 .join("::"),
         ),
         syn::Expr::Field(field) => match &field.member {
-            syn::Member::Named(name) => Some(format!("{}.{name}", receiver_name(&field.base)?)),
+            syn::Member::Named(name) => {
+                Some(format!("{}.{}", receiver_name(&field.base)?, name.unraw()))
+            }
             _ => None,
         },
         _ => None,
