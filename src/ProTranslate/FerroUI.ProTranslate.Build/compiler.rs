@@ -99,6 +99,7 @@ struct Entry {
     value: String,
     file: String,
     placeholders: Vec<usize>,
+    format_valid: bool,
 }
 
 /// Framework-independent compiler usable in build scripts, editors and CI tools.
@@ -164,6 +165,7 @@ impl CatalogCompiler {
         let mut entries = BTreeMap::<(String, String), Entry>::new();
         let mut keys = BTreeSet::<String>::new();
         let mut sources = BTreeSet::<String>::new();
+        let mut cultures = BTreeSet::<String>::new();
         let mut catalogs = self.catalogs.iter().collect::<Vec<_>>();
         catalogs.sort_by(|a, b| {
             a.name
@@ -176,17 +178,22 @@ impl CatalogCompiler {
         for input in catalogs {
             sources.insert(input.name.clone());
             if let Some(culture) = &input.culture {
-                if let Err(error) = Culture::parse(culture) {
-                    let mut invalid = diagnostic(
-                        DiagnosticSeverity::Error,
-                        "PTA005",
-                        format!("Invalid culture '{culture}': {error}"),
-                        &input.name,
-                        None,
-                    );
-                    invalid.culture = Some(culture.clone());
-                    diagnostics.push(invalid);
-                    continue;
+                match Culture::parse(culture) {
+                    Ok(culture) => {
+                        cultures.insert(culture.name().to_owned());
+                    }
+                    Err(error) => {
+                        let mut invalid = diagnostic(
+                            DiagnosticSeverity::Error,
+                            "PTA005",
+                            format!("Invalid culture '{culture}': {error}"),
+                            &input.name,
+                            None,
+                        );
+                        invalid.culture = Some(culture.clone());
+                        diagnostics.push(invalid);
+                        continue;
+                    }
                 }
             }
             let options = TranslationFormatOptions {
@@ -228,6 +235,7 @@ impl CatalogCompiler {
                         continue;
                     }
                 };
+                cultures.insert(culture.clone());
                 if entry.key.trim().is_empty() {
                     diagnostics.push(diagnostic(
                         DiagnosticSeverity::Error,
@@ -239,8 +247,8 @@ impl CatalogCompiler {
                     continue;
                 }
                 keys.insert(entry.key.clone());
-                let placeholders = match placeholder_indexes(&entry.value) {
-                    Ok(indexes) => indexes,
+                let (placeholders, format_valid) = match placeholder_indexes(&entry.value) {
+                    Ok(indexes) => (indexes, true),
                     Err(error) => {
                         diagnostics.push(diagnostic(
                             DiagnosticSeverity::Warning,
@@ -249,7 +257,7 @@ impl CatalogCompiler {
                             &input.name,
                             Some(&entry.key),
                         ));
-                        Vec::new()
+                        (Vec::new(), false)
                     }
                 };
                 let identity = (culture.clone(), entry.key.clone());
@@ -274,6 +282,7 @@ impl CatalogCompiler {
                         value: entry.value,
                         file: input.name.clone(),
                         placeholders,
+                        format_valid,
                     },
                 );
             }
@@ -307,13 +316,14 @@ impl CatalogCompiler {
             }
         }
 
-        let cultures = entries
-            .keys()
-            .map(|(c, _)| c.clone())
-            .collect::<BTreeSet<_>>();
         let mut arities = BTreeMap::<String, usize>::new();
         let mut placeholder_sets = BTreeMap::<String, Vec<usize>>::new();
+        let mut unknown_arities = BTreeSet::new();
         for entry in entries.values() {
+            if !entry.format_valid {
+                unknown_arities.insert(entry.key.clone());
+                continue;
+            }
             let arity = entry.placeholders.last().map_or(0, |i| i + 1);
             arities.entry(entry.key.clone()).or_insert(arity);
             if let Some(previous) = placeholder_sets.get(&entry.key) {
@@ -332,6 +342,9 @@ impl CatalogCompiler {
             } else {
                 placeholder_sets.insert(entry.key.clone(), entry.placeholders.clone());
             }
+        }
+        for key in unknown_arities {
+            arities.remove(&key);
         }
         for culture in &cultures {
             for key in &keys {
@@ -413,6 +426,7 @@ impl CatalogCompiler {
             "entries": entries.values().map(|e| serde_json::json!({
                 "key": e.key, "culture": e.culture, "source_file": e.file,
                 "placeholder_indexes": e.placeholders,
+                "format_valid": e.format_valid,
             })).collect::<Vec<_>>()
         });
         Compilation {
@@ -421,6 +435,7 @@ impl CatalogCompiler {
                 &identifiers,
                 &arities,
                 &sources,
+                &cultures,
                 self.notify_properties,
             ),
             manifest_json: serde_json::to_string_pretty(&manifest).expect("serializable manifest")
@@ -485,6 +500,7 @@ fn render(
     identifiers: &BTreeMap<String, String>,
     arities: &BTreeMap<String, usize>,
     sources: &BTreeSet<String>,
+    cultures: &BTreeSet<String>,
     notify_properties: bool,
 ) -> String {
     let mut out = String::from(
@@ -507,7 +523,7 @@ fn render(
     out.push_str("impl ::ferroui_protranslate_core::TranslationProvider for GeneratedTranslationProvider {\n");
     out.push_str("    fn name(&self) -> &str { \"ProTranslate.Generated\" }\n");
     out.push_str("    fn get_string(&self, key: &str, culture: &::ferroui_protranslate_core::Culture) -> Result<::ferroui_protranslate_core::LocalizedString, ::ferroui_protranslate_core::TranslationError> {\n");
-    out.push_str("        let identity = (culture.name(), key);\n        Ok(match PROTRANSLATE_ENTRIES.binary_search_by(|entry| (entry.0, entry.1).cmp(&identity)) {\n");
+    out.push_str("        ::ferroui_protranslate_core::validate_translation_key(key)?;\n        let identity = (culture.name(), key);\n        Ok(match PROTRANSLATE_ENTRIES.binary_search_by(|entry| (entry.0, entry.1).cmp(&identity)).or_else(|_| PROTRANSLATE_ENTRIES.binary_search_by(|entry| (entry.0, entry.1).cmp(&(\"\", key)))) {\n");
     out.push_str("            Ok(index) => ::ferroui_protranslate_core::LocalizedString::found(key, PROTRANSLATE_ENTRIES[index].2, culture.clone(), self.name()),\n");
     out.push_str("            Err(_) => ::ferroui_protranslate_core::LocalizedString::missing(key, culture.clone(), self.name()),\n        })\n    }\n}\n\n");
     out.push_str("pub static PROTRANSLATE_ENTRIES: &[(&str, &str, &str)] = &[\n");
@@ -524,6 +540,52 @@ fn render(
         writeln!(out, "    {source:?},").unwrap();
     }
     out.push_str("];\n\n");
+    out.push_str(r#"#[derive(Clone, Debug)]
+pub struct NamedGeneratedTranslationProvider { name: String }
+impl GeneratedTranslationProvider {
+    pub fn with_name(name: impl Into<String>) -> Result<NamedGeneratedTranslationProvider, ::ferroui_protranslate_core::TranslationError> {
+        let name = name.into();
+        if name.trim().is_empty() { return Err(::ferroui_protranslate_core::TranslationError::InvalidProviderName); }
+        Ok(NamedGeneratedTranslationProvider { name })
+    }
+}
+impl ::ferroui_protranslate_core::TranslationProvider for NamedGeneratedTranslationProvider {
+    fn name(&self) -> &str { &self.name }
+    fn get_string(&self, key: &str, culture: &::ferroui_protranslate_core::Culture) -> Result<::ferroui_protranslate_core::LocalizedString, ::ferroui_protranslate_core::TranslationError> {
+        let mut value = ::ferroui_protranslate_core::TranslationProvider::get_string(&GeneratedTranslationProvider, key, culture)?;
+        value.provider_name = self.name.clone();
+        Ok(value)
+    }
+}
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub struct ProTranslateProviderManifestEntry {
+    pub key: &'static str,
+    pub culture: Option<&'static str>,
+    pub source_file: &'static str,
+    pub placeholder_indexes: &'static [usize],
+    pub format_valid: bool,
+}
+pub struct ProTranslateProviderManifest;
+impl ProTranslateProviderManifest {
+    pub const SOURCE_FILES: &'static [&'static str] = PROTRANSLATE_SOURCE_FILES;
+    pub const KEYS: &'static [&'static str] = &[
+"#);
+    for key in identifiers.keys() {
+        writeln!(out, "        {key:?},").unwrap();
+    }
+    out.push_str("    ];\n    pub const CULTURES: &'static [&'static str] = &[\n");
+    for culture in cultures {
+        writeln!(out, "        {culture:?},").unwrap();
+    }
+    out.push_str(
+        "    ];\n    pub const ENTRIES: &'static [ProTranslateProviderManifestEntry] = &[\n",
+    );
+    for entry in entries.values() {
+        let culture = (!entry.culture.is_empty()).then_some(entry.culture.as_str());
+        writeln!(out, "        ProTranslateProviderManifestEntry {{ key: {:?}, culture: {:?}, source_file: {:?}, placeholder_indexes: &{:?}, format_valid: {} }},", entry.key, culture, entry.file, entry.placeholders, entry.format_valid).unwrap();
+    }
+    out.push_str("    ];\n}\n\n");
     if notify_properties {
         out.push_str(r#"struct ProTranslateStringsState {
     translations: ::ferroui_protranslate_core::TranslationService,
@@ -561,25 +623,83 @@ impl ProTranslateStrings {
     }
     out.push_str("    pub fn culture(&self) -> ::ferroui_protranslate_core::Culture { self.translations().current_culture() }\n");
     out.push_str("    pub fn ui_culture(&self) -> ::ferroui_protranslate_core::Culture { self.translations().current_ui_culture() }\n");
-    for (key, identifier) in identifiers {
-        let arity = arities.get(key).copied();
-        writeln!(out, "    pub fn get_{identifier}(&self) -> Result<::ferroui_protranslate_core::LocalizedString, ::ferroui_protranslate_core::TranslationError> {{ self.translations().get_string({key:?}) }}").unwrap();
-        writeln!(out, "    pub fn value_{identifier}(&self) -> Result<String, ::ferroui_protranslate_core::TranslationError> {{ self.get_{identifier}().map(|value| value.value) }}").unwrap();
-        if let Some(arity) = arity {
-            writeln!(out, "    pub fn format_{identifier}(&self, arguments: [::ferroui_protranslate_core::FormatArgument; {arity}]) -> Result<String, ::ferroui_protranslate_core::TranslationError> {{ self.translations().format({key:?}, &arguments) }}").unwrap();
-            writeln!(out, "    pub fn observe_{identifier}(&self, arguments: [::ferroui_protranslate_core::FormatArgument; {arity}]) -> ::ferroui_protranslate_core::ObservableLocalizedString {{ self.translations().observe({key:?}, arguments.into()) }}").unwrap();
-        } else {
-            // Key-only inputs have no format contract. A zero-length array would
-            // incorrectly forbid formatting a value supplied by another provider.
-            writeln!(out, "    pub fn format_{identifier}(&self, arguments: &[::ferroui_protranslate_core::FormatArgument]) -> Result<String, ::ferroui_protranslate_core::TranslationError> {{ self.translations().format({key:?}, arguments) }}").unwrap();
-            writeln!(out, "    pub fn observe_{identifier}(&self, arguments: Vec<::ferroui_protranslate_core::FormatArgument>) -> ::ferroui_protranslate_core::ObservableLocalizedString {{ self.translations().observe({key:?}, arguments) }}").unwrap();
-        }
-    }
-    out.push_str("}\n");
+    render_accessor_methods(&mut out, identifiers, arities, "pub ");
+    out.push_str("}\n\npub trait ProTranslateAccessors {\n    fn translations(&self) -> &::ferroui_protranslate_core::TranslationService;\n");
+    render_accessor_methods(&mut out, identifiers, arities, "");
+    out.push_str("}\nimpl ProTranslateAccessors for ::ferroui_protranslate_core::TranslationService {\n    fn translations(&self) -> &::ferroui_protranslate_core::TranslationService { self }\n}\n");
     out
 }
 
+fn render_accessor_methods(
+    out: &mut String,
+    identifiers: &BTreeMap<String, String>,
+    arities: &BTreeMap<String, usize>,
+    visibility: &str,
+) {
+    for (key, identifier) in identifiers {
+        let arity = arities.get(key).copied();
+        writeln!(out, "    {visibility}fn get_{identifier}(&self) -> Result<::ferroui_protranslate_core::LocalizedString, ::ferroui_protranslate_core::TranslationError> {{ self.translations().get_string({key:?}) }}").unwrap();
+        writeln!(out, "    {visibility}fn value_{identifier}(&self) -> Result<String, ::ferroui_protranslate_core::TranslationError> {{ self.get_{identifier}().map(|value| value.value) }}").unwrap();
+        if let Some(arity) = arity {
+            writeln!(out, "    {visibility}fn format_{identifier}(&self, arguments: [::ferroui_protranslate_core::FormatArgument; {arity}]) -> Result<String, ::ferroui_protranslate_core::TranslationError> {{ self.translations().format({key:?}, &arguments) }}").unwrap();
+            writeln!(out, "    {visibility}fn observe_{identifier}(&self, arguments: [::ferroui_protranslate_core::FormatArgument; {arity}]) -> ::ferroui_protranslate_core::ObservableLocalizedString {{ self.translations().observe({key:?}, arguments.into()) }}").unwrap();
+        } else {
+            // Key-only inputs have no format contract. A zero-length array would
+            // incorrectly forbid formatting a value supplied by another provider.
+            writeln!(out, "    {visibility}fn format_{identifier}(&self, arguments: &[::ferroui_protranslate_core::FormatArgument]) -> Result<String, ::ferroui_protranslate_core::TranslationError> {{ self.translations().format({key:?}, arguments) }}").unwrap();
+            writeln!(out, "    {visibility}fn observe_{identifier}(&self, arguments: Vec<::ferroui_protranslate_core::FormatArgument>) -> ::ferroui_protranslate_core::ObservableLocalizedString {{ self.translations().observe({key:?}, arguments) }}").unwrap();
+        }
+    }
+}
+
 fn infer_culture(path: &str) -> Option<String> {
+    let normalized = path.replace('\\', "/");
+    let parent = normalized
+        .rsplit_once('/')
+        .and_then(|(parent, _)| parent.rsplit('/').next());
+    let format = TranslationCatalogConverter::detect_format(path);
+    if let Some(parent) = parent {
+        if format == TranslationFileFormat::AndroidResources {
+            if let Some(qualifiers) = parent.strip_prefix("values-") {
+                // Android configuration qualifiers can follow the locale; they are
+                // not part of BCP-47. Other configuration-only folders are neutral.
+                let parts: Vec<_> = qualifiers.split('-').collect();
+                if let Some(bcp47) = parts.iter().find_map(|part| part.strip_prefix("b+")) {
+                    return Some(bcp47.replace('+', "-"));
+                }
+                if let Some((index, language)) = parts.iter().enumerate().find(|(_, part)| {
+                    (part.len() == 2 || part.len() == 3)
+                        && part.bytes().all(|c| c.is_ascii_alphabetic())
+                        && !matches!(**part, "car" | "desk")
+                }) {
+                    let mut culture = (*language).to_owned();
+                    if let Some(region) =
+                        parts.get(index + 1).and_then(|part| part.strip_prefix('r'))
+                    {
+                        if (region.len() == 2 && region.bytes().all(|c| c.is_ascii_alphabetic()))
+                            || (region.len() == 3 && region.bytes().all(|c| c.is_ascii_digit()))
+                        {
+                            culture.push('-');
+                            culture.push_str(region);
+                        }
+                    }
+                    return Some(culture);
+                }
+            }
+        }
+        if matches!(
+            format,
+            TranslationFileFormat::AppleStrings | TranslationFileFormat::AppleStringsdict
+        ) {
+            if let Some(culture) = parent.strip_suffix(".lproj") {
+                return Some(if culture.eq_ignore_ascii_case("Base") {
+                    String::new()
+                } else {
+                    culture.replace('_', "-")
+                });
+            }
+        }
+    }
     let name = path.rsplit(['/', '\\']).next()?;
     let lower = name.to_ascii_lowercase();
     let stem = [
@@ -648,11 +768,20 @@ impl std::error::Error for BuildError {
     }
 }
 
-/// Cargo build-script entry point. Files are explicit, ordered deterministically, and
-/// tracked with `rerun-if-changed`. Only changed output bytes are written.
+/// Explicit format and culture overrides for one build-script catalog file.
+#[derive(Clone, Debug, Default, PartialEq, Eq)]
+pub struct CatalogFileOptions {
+    /// Overrides filename inference. An empty string selects the neutral catalog.
+    pub culture: Option<String>,
+    /// Overrides extension detection for catalogs with application-specific names.
+    pub format: Option<TranslationFileFormat>,
+}
+
+/// Cargo build-script entry point. Files are explicit and tracked with
+/// `rerun-if-changed`. Only changed output bytes are written.
 #[derive(Clone, Debug, Default)]
 pub struct Builder {
-    catalogs: Vec<PathBuf>,
+    catalogs: Vec<(PathBuf, CatalogFileOptions)>,
     sources: Vec<(PathBuf, SourceAnalysisOptions)>,
     deny_warnings: bool,
     notify_properties: bool,
@@ -664,8 +793,28 @@ impl Builder {
     }
 
     pub fn catalog(mut self, path: impl Into<PathBuf>) -> Self {
-        self.catalogs.push(path.into());
+        self.catalogs
+            .push((path.into(), CatalogFileOptions::default()));
         self
+    }
+
+    pub fn catalog_with_options(
+        mut self,
+        path: impl Into<PathBuf>,
+        options: CatalogFileOptions,
+    ) -> Self {
+        self.catalogs.push((path.into(), options));
+        self
+    }
+
+    pub fn catalog_for_culture(self, path: impl Into<PathBuf>, culture: impl Into<String>) -> Self {
+        self.catalog_with_options(
+            path,
+            CatalogFileOptions {
+                culture: Some(culture.into()),
+                ..Default::default()
+            },
+        )
     }
 
     pub fn source(mut self, path: impl Into<PathBuf>, options: SourceAnalysisOptions) -> Self {
@@ -694,16 +843,23 @@ impl Builder {
         let mut compiler = CatalogCompiler::new();
         compiler.notify_properties(self.notify_properties);
         let mut paths = self.catalogs;
-        paths.sort();
+        paths.sort_by(|a, b| a.0.cmp(&b.0));
         paths.dedup();
-        for path in paths {
+        for (path, options) in paths {
             let content = read(&path)?;
             let name = tracked_name(&path)?;
             println!("cargo:rerun-if-changed={name}");
             if name.ends_with(".protranslate.keys.txt") {
                 compiler.add_key_list(name, content);
             } else {
-                compiler.add_catalog(CatalogInput::new(name, content));
+                let mut input = CatalogInput::new(name, content);
+                if let Some(culture) = options.culture {
+                    input.culture = Some(culture);
+                }
+                if let Some(format) = options.format {
+                    input.format = format;
+                }
+                compiler.add_catalog(input);
             }
         }
         for (path, options) in self.sources {
@@ -737,7 +893,18 @@ impl Builder {
 }
 
 fn tracked_name(path: &Path) -> Result<String, BuildError> {
-    let name = path.to_string_lossy().replace('\\', "/");
+    let name = path.to_str().ok_or_else(|| BuildError::Io {
+        path: path.to_owned(),
+        source: std::io::Error::new(
+            std::io::ErrorKind::InvalidInput,
+            "Cargo dependency paths must be UTF-8",
+        ),
+    })?;
+    let name = if cfg!(windows) {
+        name.replace('\\', "/")
+    } else {
+        name.to_owned()
+    };
     if name.contains(['\n', '\r']) {
         return Err(BuildError::Io {
             path: path.to_owned(),

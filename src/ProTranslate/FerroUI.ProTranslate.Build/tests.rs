@@ -461,6 +461,7 @@ fn generated_providers_and_notification_handles_compile_and_run() {
     program.push_str(&format!("const EXPECTED_ESCAPED: &str = {dangerous:?};\n"));
     program.push_str(r#"
         use ferroui_protranslate_core::*;
+        use plain::ProTranslateAccessors;
         use std::{rc::Rc, cell::Cell};
         fn main() {
             let cultures = CultureService::new(Culture::parse("EN-us").unwrap());
@@ -472,6 +473,22 @@ fn generated_providers_and_notification_handles_compile_and_run() {
             assert_eq!(strings.value_dangerous_key().unwrap(), EXPECTED_ESCAPED);
             assert_eq!(strings.value_shared().unwrap(), "neutral");
             assert_eq!(strings.format_greeting(["Ada".into()]).unwrap(), "Hello Ada");
+            assert_eq!(translations.format_greeting(["Ada".into()]).unwrap(), "Hello Ada");
+            assert_eq!(translations.value_empty().unwrap(), "");
+            assert!(matches!(plain::GeneratedTranslationProvider.get_string(" \t", &Culture::parse("en").unwrap()), Err(TranslationError::InvalidKey)));
+            let neutral = plain::GeneratedTranslationProvider.get_string("Shared", &Culture::parse("fr").unwrap()).unwrap();
+            assert_eq!(neutral.value, "neutral");
+            assert_eq!(neutral.culture.name(), "fr");
+            assert!(!neutral.resource_not_found);
+            assert!(plain::GeneratedTranslationProvider::with_name("  ").is_err());
+            let named = plain::GeneratedTranslationProvider::with_name("Application resources").unwrap();
+            assert_eq!(named.get_string("Shared", &Culture::parse("de").unwrap()).unwrap().provider_name, "Application resources");
+            assert!(plain::ProTranslateProviderManifest::KEYS.contains(&"Greeting"));
+            assert!(plain::ProTranslateProviderManifest::CULTURES.contains(&"pl-PL"));
+            let manifest_entry = plain::ProTranslateProviderManifest::ENTRIES.iter().find(|entry| entry.key == "Greeting" && entry.culture == Some("en-US")).unwrap();
+            assert_eq!(manifest_entry.source_file, "Strings.en-US.json");
+            assert_eq!(manifest_entry.placeholder_indexes, &[0]);
+            assert!(manifest_entry.format_valid);
             assert!(plain::GeneratedTranslationProvider.get_string("Missing", &Culture::parse("en-US").unwrap()).unwrap().resource_not_found);
             let observed = strings.observe_greeting(["Ada".into()]);
             cultures.set_culture(Culture::parse("pl-PL").unwrap());
@@ -567,5 +584,129 @@ fn generated_providers_and_notification_handles_compile_and_run() {
         executed.status.success(),
         "Generated provider runtime assertions failed:\n{}",
         String::from_utf8_lossy(&executed.stderr)
+    );
+}
+
+#[test]
+fn platform_catalog_directories_select_the_actual_resource_culture() {
+    for (name, expected) in [
+        ("res/values-en-rUS/strings.xml", "en-US"),
+        ("res/values-mcc310-mnc004-pl-rPL-night/strings.xml", "pl-PL"),
+        ("res/values-b+zh+Hant+TW-night/strings.xml", "zh-Hant-TW"),
+        (r"C:\project\res\values-es-r419\strings.xml", "es-419"),
+    ] {
+        let mut compiler = CatalogCompiler::new();
+        compiler.add_catalog(CatalogInput::new(
+            name,
+            "<resources><string name=\"Hello\">Hello</string></resources>",
+        ));
+        let result = compiler.compile();
+        assert!(!result.has_errors(), "{name}: {:?}", result.diagnostics);
+        let manifest: serde_json::Value = serde_json::from_str(&result.manifest_json).unwrap();
+        assert_eq!(
+            manifest["cultures"],
+            serde_json::json!([expected]),
+            "{name}"
+        );
+    }
+    for (name, expected) in [
+        ("Resources/pl.lproj/Localizable.strings", "pl"),
+        (r"C:\Resources\en_US.lproj\Localizable.strings", "en-US"),
+        ("Resources/Base.lproj/Localizable.strings", ""),
+    ] {
+        let mut compiler = CatalogCompiler::new();
+        compiler.add_catalog(CatalogInput::new(name, "\"Hello\" = \"Hello\";"));
+        let result = compiler.compile();
+        assert!(!result.has_errors(), "{name}: {:?}", result.diagnostics);
+        let manifest: serde_json::Value = serde_json::from_str(&result.manifest_json).unwrap();
+        assert_eq!(
+            manifest["cultures"],
+            serde_json::json!([expected]),
+            "{name}"
+        );
+    }
+    assert!(CatalogInput::new("res/values-night/strings.xml", "")
+        .culture
+        .is_none());
+    assert!(CatalogInput::new("res/values-car/strings.xml", "")
+        .culture
+        .is_none());
+}
+
+#[test]
+fn empty_declared_cultures_participate_in_coverage_and_manifest() {
+    let mut compiler = CatalogCompiler::new();
+    compiler.add_catalog(CatalogInput::new(
+        "Strings.en-US.json",
+        r#"{"Hello":"Hello"}"#,
+    ));
+    compiler.add_catalog(CatalogInput::new("Strings.pl-PL.json", "{}"));
+    let result = compiler.compile();
+    assert!(result
+        .diagnostics
+        .iter()
+        .any(|diagnostic| diagnostic.code == "PTA003"
+            && diagnostic.key.as_deref() == Some("Hello")
+            && diagnostic.culture.as_deref() == Some("pl-PL")));
+    let manifest: serde_json::Value = serde_json::from_str(&result.manifest_json).unwrap();
+    assert_eq!(manifest["cultures"], serde_json::json!(["en-US", "pl-PL"]));
+}
+
+#[test]
+fn invalid_format_does_not_invent_a_zero_argument_contract() {
+    let mut compiler = CatalogCompiler::new();
+    compiler.add_catalog(CatalogInput::new(
+        "Strings.en.json",
+        r#"{"Message":"{name}"}"#,
+    ));
+    compiler.add_catalog(CatalogInput::new("Strings.pl.json", r#"{"Message":"{0}"}"#));
+    let result = compiler.compile();
+    assert!(!result.has_errors(), "{:?}", result.diagnostics);
+    assert!(result
+        .diagnostics
+        .iter()
+        .any(|diagnostic| diagnostic.code == "PTSG003"));
+    assert!(result.rust_source.contains(
+        "fn format_message(&self, arguments: &[::ferroui_protranslate_core::FormatArgument])"
+    ));
+    let manifest: serde_json::Value = serde_json::from_str(&result.manifest_json).unwrap();
+    assert_eq!(manifest["entries"][0]["format_valid"], false);
+}
+
+#[test]
+fn builder_allows_explicit_culture_and_format_for_named_inputs() {
+    let directory = TestDirectory::new();
+    let path = directory.0.join("application.catalog");
+    std::fs::write(
+        &path,
+        "<root><data name=\"Hello\"><value>Witaj</value></data></root>",
+    )
+    .unwrap();
+    let result = Builder::new()
+        .catalog_with_options(
+            &path,
+            CatalogFileOptions {
+                culture: Some("pl-PL".into()),
+                format: Some(ferroui_protranslate_formats::TranslationFileFormat::Resx),
+            },
+        )
+        .generate_to(&directory.0.join("out"))
+        .unwrap();
+    let manifest: serde_json::Value = serde_json::from_str(&result.manifest_json).unwrap();
+    assert_eq!(manifest["cultures"], serde_json::json!(["pl-PL"]));
+    assert!(result.rust_source.contains("Witaj"));
+}
+
+#[cfg(unix)]
+#[test]
+fn builder_rejects_non_utf8_tracking_paths_without_lossy_aliases() {
+    use std::os::unix::ffi::OsStringExt;
+    let directory = TestDirectory::new();
+    let path = directory
+        .0
+        .join(std::ffi::OsString::from_vec(b"catalog\xff.json".to_vec()));
+    std::fs::write(&path, "{}").unwrap();
+    assert!(
+        matches!(Builder::new().catalog(path).generate_to(&directory.0.join("out")), Err(BuildError::Io { source, .. }) if source.kind() == std::io::ErrorKind::InvalidInput)
     );
 }

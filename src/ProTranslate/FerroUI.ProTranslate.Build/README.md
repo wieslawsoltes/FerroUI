@@ -34,11 +34,25 @@ suffixes. `ProTranslateStrings::new(service)` stores an application-scoped
 `TranslationService`, and `culture()` / `ui_culture()` expose its current cultures.
 Value accessors return `Result`, preserving the configured provider failure policy.
 
+The generated `ProTranslateAccessors` trait exposes the same get/value/format/observe
+methods directly on `TranslationService`. Import the trait for extension-style
+calls without allocating a strings model. `ProTranslateProviderManifest` exposes
+static `KEYS`, `CULTURES`, `SOURCE_FILES` and `ENTRIES`, including source filenames,
+placeholder indices and whether each format contract was validated. These tables
+are available at runtime without parsing the JSON manifest.
+
+Direct generated-provider lookups validate keys. Neutral catalog entries are
+defaults for every requested culture, as in the source generator; a culture-specific
+entry takes precedence. `GeneratedTranslationProvider::with_name` supplies a
+validated custom provider identity while the default unit provider remains usable.
+
 For catalog values with a known composite format, formatting and observation
 methods accept `[FormatArgument; N]`, where `N` is the largest distinct placeholder
 index plus one. Repeated placeholders do not increase the argument count. Key-only
 files provide no format contract, so their formatting methods accept slices and
 observation methods accept vectors rather than inventing a zero-argument limit.
+Malformed composite text likewise retains an unknown argument contract and its
+diagnostic, rather than generating a misleading fixed zero-argument accessor.
 
 ## Native typed binding notifications
 
@@ -64,6 +78,14 @@ filename. Invalid tags in that explicit convention produce errors, including for
 empty catalogs. `CatalogInput::with_culture` supplies an explicit culture for other
 naming conventions. Catalog formats with native locale metadata use their imported
 record cultures. Duplicate canonical `(culture, key)` records are errors.
+
+Android `values-pl-rPL` / `values-b+zh+Hant+TW` directories and Apple `.lproj`
+directories infer their locale, including Windows paths. `Base.lproj` is neutral.
+Declared cultures remain in the manifest and coverage checks even when their
+catalog is empty. The file builder accepts `catalog_for_culture` and
+`catalog_with_options(CatalogFileOptions)` for explicit culture/format overrides.
+Dependency tracking rejects non-UTF-8 or multiline paths rather than registering
+a different filename through lossy conversion.
 
 Generated output and manifests are ordered deterministically. The manifest includes
 keys, cultures, catalog filenames, placeholder indices, and notification mode.
