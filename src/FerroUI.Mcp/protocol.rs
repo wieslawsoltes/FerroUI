@@ -127,15 +127,19 @@ impl Session {
                     VERSION
                 };
                 *self.version.lock().unwrap() = Some(version.to_owned());
+                if client.service.is_some() {
+                    return Some(json!({"jsonrpc":"2.0","id":id,"result":{"protocolVersion":version,"capabilities":{"tools":{}},"serverInfo":{"name":"ferroui-mcp-service","version":env!("CARGO_PKG_VERSION")},"instructions":"Application service. Only its advertised tools are available; each service validates its own identities and access policies."}}));
+                }
                 json!({"protocolVersion":version,"capabilities":{"tools":{},"resources":{"subscribe":false,"listChanged":false},"logging":{}},"serverInfo":{"name":"ferroui-mcp","version":env!("CARGO_PKG_VERSION")},"instructions":"Inspect a running FerroUI application. Property writes and input require explicit application permissions. IDs expire when their objects are destroyed."})
             }
             "ping" => json!({}),
             "tools/list" => json!({"tools":client.tools()}),
             "resources/list" => {
-                json!({"resources":[{"uri":TREE_URI,"name":"Current visual tree","mimeType":"application/json"},{"uri":LOG_URI,"name":"Diagnostic log","mimeType":"application/json"}]})
+                if client.service.is_some() { json!({"resources":[]}) } else { json!({"resources":[{"uri":TREE_URI,"name":"Current visual tree","mimeType":"application/json"},{"uri":LOG_URI,"name":"Diagnostic log","mimeType":"application/json"}]}) }
             }
             "resources/templates/list" => json!({"resourceTemplates":[]}),
             "logging/setLevel" => {
+                if client.service.is_some() { return Some(error(id, -32601, "Logging is not exposed by this application service")); }
                 let Some(level) = params["level"].as_str().filter(|s| {
                     [
                         "debug",
@@ -160,6 +164,7 @@ impl Session {
             }
             "tools/call" | "resources/read" => {
                 let (tool, args, uri) = if method == "resources/read" {
+                    if client.service.is_some() { return Some(error(id, -32002, "Unknown resource")); }
                     let uri = params["uri"].as_str().unwrap_or("");
                     let tool = match uri {
                         TREE_URI => "get_tree",
@@ -210,7 +215,7 @@ impl Session {
                     Ok(value) => {
                         if let Some(uri) = uri {
                             json!({"contents":[{"uri":uri,"mimeType":"application/json","text":value.to_string()}]})
-                        } else if tool == "screenshot" {
+                        } else if tool == "screenshot" && client.service.is_none() {
                             json!({"content":[{"type":"image","mimeType":"image/png","data":value["data"]}],"isError":false})
                         } else {
                             json!({"content":[{"type":"text","text":value.to_string()}],"isError":false})

@@ -6,9 +6,11 @@
 //! the one the Chrome DevTools Protocol endpoint uses too: node IDs are the same for both, and a
 //! custom lifetime registers its top levels there (`register_root`).
 mod extensions;
+mod services;
 mod protocol;
 mod transport;
 pub use extensions::UiToolProvider;
+pub use services::{RequestContext, ServiceToolProvider};
 use ferroui_base::threading::{Dispatcher, DispatcherPriority};
 use ferroui_inspect::LogCapture;
 pub use ferroui_inspect::Permissions;
@@ -94,7 +96,7 @@ impl std::ops::Deref for UiServerHandle {
 
 /// Start the server on the UI thread. The returned handle is the lifetime of the service.
 pub fn serve(options: Options) -> io::Result<ServerHandle> {
-    serve_registered(options, None)
+    serve_registered(options, None, None, None)
 }
 
 /// Serve inspector tools and application tools through the same transport, permissions,
@@ -104,19 +106,51 @@ pub fn serve_with_tools(
     provider: std::rc::Rc<dyn UiToolProvider>,
 ) -> io::Result<UiServerHandle> {
     let registration = extensions::Registration::new(provider)?;
-    let server = serve_registered(options, Some(registration.catalog.clone()))?;
+    let server = serve_registered(options, Some(registration.catalog.clone()), None, None)?;
     Ok(UiServerHandle {
         server,
         _registration: registration,
     })
 }
 
+/// Host an isolated, thread-safe application service through the existing MCP protocol.
+///
+/// Only the provider's tools are exposed: no inspector, input, logs or UI objects are
+/// reachable through this server. Calls run on transport workers and receive cooperative
+/// cancellation and deadlines. This mode requires no application or UI message loop.
+pub fn serve_service(
+    options: Options,
+    provider: Arc<dyn ServiceToolProvider>,
+) -> io::Result<ServerHandle> {
+    let service = services::ServiceCatalog::new(provider)?;
+    serve_registered(options, None, Some(service), None)
+}
+
+/// Use a securely persisted 256-bit bearer for a durable service, so restarting the process
+/// does not invalidate peers' endpoints. Inspector servers continue generating fresh tokens.
+pub fn serve_service_with_token(
+    options: Options,
+    provider: Arc<dyn ServiceToolProvider>,
+    bearer: String,
+) -> io::Result<ServerHandle> {
+    if bearer.len() != 64 || !bearer.bytes().all(|byte| byte.is_ascii_hexdigit()) {
+        return Err(io::Error::new(io::ErrorKind::InvalidInput,"Service bearer must be 256-bit hexadecimal"));
+    }
+    let service=services::ServiceCatalog::new(provider)?;
+    serve_registered(options,None,Some(service),Some(bearer))
+}
+
 fn serve_registered(
     options: Options,
     extension: Option<extensions::Catalog>,
+    service: Option<services::ServiceCatalog>,
+    bearer: Option<String>,
 ) -> io::Result<ServerHandle> {
-    let dispatcher = Dispatcher::ui_thread();
-    dispatcher.verify_access();
+    let dispatcher = service.is_none().then(|| {
+        let dispatcher = Dispatcher::ui_thread();
+        dispatcher.verify_access();
+        dispatcher
+    });
     if options.dispatch_timeout.is_zero() {
         return Err(io::Error::new(
             io::ErrorKind::InvalidInput,
@@ -131,7 +165,7 @@ fn serve_registered(
         ));
     }
     // A server that fails to start leaves stdio free for another attempt.
-    let result = start(options, dispatcher, extension);
+    let result = start(options, dispatcher, extension, service, bearer);
     if stdio && result.is_err() {
         STDIO_STARTED.store(false, Ordering::Release);
     }
@@ -140,8 +174,10 @@ fn serve_registered(
 
 fn start(
     options: Options,
-    dispatcher: Arc<Dispatcher>,
+    dispatcher: Option<Arc<Dispatcher>>,
     extension: Option<extensions::Catalog>,
+    service: Option<services::ServiceCatalog>,
+    bearer: Option<String>,
 ) -> io::Result<ServerHandle> {
     let (http, address, token) = match &options.transport {
         Transport::Http(address) => {
@@ -155,7 +191,7 @@ fn start(
             let address = server.local_addr()?;
             let mut bytes = [0u8; 32];
             getrandom::fill(&mut bytes).map_err(|e| io::Error::other(e.to_string()))?;
-            let token = bytes.iter().map(|b| format!("{b:02x}")).collect::<String>();
+            let token = bearer.unwrap_or_else(||bytes.iter().map(|b| format!("{b:02x}")).collect::<String>());
             (Some(server), Some(address), Some(token))
         }
         Transport::Stdio => (None, None, None),
@@ -168,10 +204,12 @@ fn start(
     } else {
         None
     };
-    let log_guard = options.capture_logs.then(LogCapture::install);
+    let log_guard = (options.capture_logs && service.is_none()).then(LogCapture::install);
+    let is_service=service.is_some();
     let client = Client {
         dispatcher,
         extension,
+        service,
         permissions: options.permissions,
         timeout: options.dispatch_timeout,
         stop: Arc::new(AtomicBool::new(false)),
@@ -194,22 +232,28 @@ fn start(
     std::thread::Builder::new()
         .name("FerroUI MCP".into())
         .spawn(task)?;
-    if let (Some(address), Some(token)) = (handle.address, &handle.token) {
-        eprintln!("FerroUI MCP: http://{address}/mcp\nAuthorization: Bearer {token}");
+    if !is_service {
+        if let (Some(address), Some(token)) = (handle.address, &handle.token) {
+            eprintln!("FerroUI MCP: http://{address}/mcp\nAuthorization: Bearer {token}");
+        }
     }
     Ok(handle)
 }
 
 #[derive(Clone)]
 pub(crate) struct Client {
-    dispatcher: Arc<Dispatcher>,
+    dispatcher: Option<Arc<Dispatcher>>,
     extension: Option<extensions::Catalog>,
+    service: Option<services::ServiceCatalog>,
     permissions: Permissions,
     timeout: Duration,
     stop: Arc<AtomicBool>,
 }
 impl Client {
     fn tools(&self) -> Vec<Value> {
+        if let Some(service) = &self.service {
+            return service.tools().to_vec();
+        }
         let mut tools = ferroui_inspect::tools();
         if let Some(extension) = &self.extension {
             tools.extend(extension.tools.iter().cloned());
@@ -217,6 +261,9 @@ impl Client {
         tools
     }
     fn validate(&self, name: &str, args: &Value) -> Result<(), String> {
+        if let Some(service) = &self.service {
+            return service.validate(name, args);
+        }
         if let Some(extension) = self
             .extension
             .as_ref()
@@ -229,6 +276,13 @@ impl Client {
     }
     fn call(&self, name: &str, args: Value, cancel: &Arc<AtomicBool>) -> Result<Value, String> {
         self.validate(name, &args)?;
+        if let Some(service) = &self.service {
+            let context = RequestContext::new(self.permissions, cancel.clone(), self.stop.clone(), self.timeout);
+            context.check_cancelled()?;
+            return std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
+                service.execute(name, &args, &context)
+            })).unwrap_or_else(|_| Err("Service operation panicked".into()));
+        }
         // Only the built-in wait tool owns timeout_ms. In particular, application tools may
         // use that argument independently, and adding an arbitrary duration to Instant can
         // overflow on some platforms. Elapsed-time comparison also keeps wait_for portable.
@@ -250,7 +304,7 @@ impl Client {
             let stop = self.stop.clone();
             let pending = Arc::new(AtomicBool::new(true));
             let queued = pending.clone();
-            self.dispatcher.post(
+            self.dispatcher.as_ref().expect("UI client owns a dispatcher").post(
                 move || {
                     if !queued.swap(false, Ordering::AcqRel)
                         || cancelled.load(Ordering::Acquire)
