@@ -2,6 +2,7 @@ use crate::{region::locale_metadata, Culture, RegionProfile, TranslationError};
 use fixed_decimal::{Decimal, FloatPrecision, Sign, SignedRoundingMode, UnsignedRoundingMode};
 use icu_decimal::{options::GroupingStrategy, DecimalFormatter};
 use std::{collections::BTreeSet, fmt, rc::Rc};
+use writeable::{Part as FormattedPart, PartsWrite, Writeable};
 
 /// Extension point for application values (including dates, money, and domain
 /// types). It preserves typed formatting without reflection or string coercion.
@@ -201,6 +202,7 @@ impl FormatArgument {
             });
         }
         let mut decimal = self.decimal_value()?;
+        let specifier = specifier.split('\0').next().unwrap_or_default();
         let specifier = if specifier.is_empty() { "G" } else { specifier };
         let first = specifier.as_bytes()[0];
         if !first.is_ascii_alphabetic() || !specifier.as_bytes()[1..].iter().all(u8::is_ascii_digit)
@@ -287,10 +289,9 @@ impl FormatArgument {
                         })
                 });
                 if code == b'P' {
-                    decimal.multiply_pow10(2);
-                    decimal.trim_start();
+                    scale_decimal(&mut decimal, 2)?;
                 }
-                decimal.round_with_mode(-(digits as i16), SignedRoundingMode::Unsigned(rounding));
+                round_decimal(&mut decimal, -(digits as i32), rounding)?;
                 decimal.pad_end(-(digits as i16));
                 if floating.is_none() && decimal.is_zero() {
                     decimal.set_sign(Sign::None);
@@ -334,11 +335,8 @@ impl FormatArgument {
             ),
             b'G' | b'R' => {
                 if let Some(digits) = precision.filter(|digits| *digits > 0) {
-                    let magnitude = decimal.nonzero_magnitude_start();
-                    decimal.round_with_mode(
-                        magnitude - digits as i16 + 1,
-                        SignedRoundingMode::Unsigned(rounding),
-                    );
+                    let magnitude = i32::from(decimal.nonzero_magnitude_start());
+                    round_decimal(&mut decimal, magnitude - digits as i32 + 1, rounding)?;
                     decimal.trim_end();
                     let magnitude = decimal.nonzero_magnitude_start();
                     if magnitude < -4 || magnitude >= digits as i16 {
@@ -389,6 +387,9 @@ pub(crate) struct NumericSymbols {
     pub permille: &'static str,
     pub minus: &'static str,
     pub plus: &'static str,
+    pub group: &'static str,
+    pub primary_group: u8,
+    pub secondary_group: u8,
 }
 fn numeric_symbols(culture: &Culture) -> &'static NumericSymbols {
     const INVARIANT: NumericSymbols = NumericSymbols {
@@ -398,6 +399,9 @@ fn numeric_symbols(culture: &Culture) -> &'static NumericSymbols {
         permille: "‰",
         minus: "-",
         plus: "+",
+        group: ",",
+        primary_group: 3,
+        secondary_group: 3,
     };
     if culture.is_invariant() {
         return &INVARIANT;
@@ -446,17 +450,67 @@ fn render_decimal(
     culture: &Culture,
     grouping: bool,
 ) -> Result<String, TranslationError> {
-    let formatter = DecimalFormatter::try_new(
-        culture.locale().into(),
-        if grouping {
-            GroupingStrategy::Always
-        } else {
-            GroupingStrategy::Never
+    let formatter =
+        DecimalFormatter::try_new(culture.locale().into(), GroupingStrategy::Never.into())
+            .map_err(|error| TranslationError::Format(error.to_string()))?;
+    if !grouping {
+        return Ok(formatter.format_to_string(value));
+    }
+    // ICU's Always option still honors CLDR minimumGroupingDigits, whereas
+    // source N/C/P and custom comma masks group every eligible integer.
+    let mut writer = GroupedDecimalWriter {
+        output: String::new(),
+        integer: false,
+        remaining: usize::from(*value.magnitude_range().end() as u16) + 1,
+        symbols: numeric_symbols(culture),
+    };
+    formatter
+        .format(value)
+        .write_to_parts(&mut writer)
+        .map_err(|error| TranslationError::Format(error.to_string()))?;
+    Ok(writer.output)
+}
+struct GroupedDecimalWriter {
+    output: String,
+    integer: bool,
+    remaining: usize,
+    symbols: &'static NumericSymbols,
+}
+impl fmt::Write for GroupedDecimalWriter {
+    fn write_str(&mut self, value: &str) -> fmt::Result {
+        if !self.integer {
+            self.output.push_str(value);
+            return Ok(());
         }
-        .into(),
-    )
-    .map_err(|error| TranslationError::Format(error.to_string()))?;
-    Ok(formatter.format_to_string(value))
+        for digit in value.chars() {
+            self.output.push(digit);
+            self.remaining -= 1;
+            let primary = usize::from(self.symbols.primary_group);
+            let secondary = usize::from(self.symbols.secondary_group);
+            if primary != 0
+                && secondary != 0
+                && self.remaining >= primary
+                && (self.remaining - primary).is_multiple_of(secondary)
+            {
+                self.output.push_str(self.symbols.group);
+            }
+        }
+        Ok(())
+    }
+}
+impl PartsWrite for GroupedDecimalWriter {
+    type SubPartsWrite = Self;
+    fn with_part(
+        &mut self,
+        part: FormattedPart,
+        mut write: impl FnMut(&mut Self) -> fmt::Result,
+    ) -> fmt::Result {
+        let integer = self.integer;
+        self.integer |= part == icu_decimal::parts::INTEGER;
+        let result = write(self);
+        self.integer = integer;
+        result
+    }
 }
 fn scientific(
     mut decimal: Decimal,
@@ -466,10 +520,10 @@ fn scientific(
     exponent_width: usize,
     rounding: UnsignedRoundingMode,
 ) -> Result<String, TranslationError> {
-    let mut exponent = decimal.nonzero_magnitude_start();
-    decimal.multiply_pow10(-exponent);
+    let mut exponent = i32::from(decimal.nonzero_magnitude_start());
+    scale_decimal(&mut decimal, -exponent)?;
     if let Some(digits) = digits {
-        decimal.round_with_mode(-(digits as i16), SignedRoundingMode::Unsigned(rounding));
+        round_decimal(&mut decimal, -(digits as i32), rounding)?;
     }
     if decimal.nonzero_magnitude_start() > 0 {
         decimal.multiply_pow10(-1);
@@ -572,29 +626,22 @@ fn custom_sections(pattern: &str) -> Result<Vec<Vec<NumericToken>>, TranslationE
         let token = match ch {
             ';' => {
                 if sections.len() == 3 {
-                    return Err(error("numeric custom format has more than three sections"));
+                    break;
                 }
                 sections.push(Vec::new());
                 continue;
             }
-            '\\' => NumericToken::Literal(
-                chars
-                    .next()
-                    .ok_or_else(|| error("trailing custom numeric escape"))?
-                    .to_string(),
-            ),
+            '\\' => match chars.next() {
+                Some(next) => NumericToken::Literal(next.to_string()),
+                None => break,
+            },
             '\'' | '"' => {
                 let mut literal = String::new();
-                let mut closed = false;
                 for next in chars.by_ref() {
                     if next == ch {
-                        closed = true;
                         break;
                     }
                     literal.push(next);
-                }
-                if !closed {
-                    return Err(error("unclosed numeric format quote"));
                 }
                 NumericToken::Literal(literal)
             }
@@ -744,12 +791,7 @@ fn render_custom(
     } else {
         -(fractions as i32)
     };
-    let position = i16::try_from(position)
-        .map_err(|_| error("custom numeric rounding exceeds supported magnitude"))?;
-    decimal.round_with_mode(
-        position,
-        SignedRoundingMode::Unsigned(UnsignedRoundingMode::HalfExpand),
-    );
+    round_decimal(&mut decimal, position, UnsignedRoundingMode::HalfExpand)?;
     decimal.trim_end();
     if decimal.is_zero() {
         if !floating {
@@ -896,17 +938,39 @@ fn render_custom(
     }
     Ok(output)
 }
-fn scale_decimal(decimal: &mut Decimal, scale: i32) -> Result<(), TranslationError> {
-    let scale =
-        i16::try_from(scale).map_err(|_| error("numeric scaling exceeds supported magnitude"))?;
+fn round_decimal(
+    decimal: &mut Decimal,
+    position: i32,
+    rounding: UnsignedRoundingMode,
+) -> Result<(), TranslationError> {
+    // A precision beyond the stored fractional range cannot change the value.
+    let position = i16::try_from(position.max(i32::from(i16::MIN)))
+        .map_err(|_| error("numeric rounding exceeds supported magnitude"))?;
+    let can_become_zero = decimal.is_zero() || position > decimal.nonzero_magnitude_start();
+    decimal.round_with_mode(position, SignedRoundingMode::Unsigned(rounding));
+    if !can_become_zero && decimal.is_zero() {
+        // fixed_decimal represents a carry beyond its magnitude range as zero;
+        // expose that boundary as an error instead of publishing a wrong value.
+        return Err(error("numeric rounding exceeds supported magnitude"));
+    }
+    Ok(())
+}
+fn scale_decimal(decimal: &mut Decimal, mut scale: i32) -> Result<(), TranslationError> {
     if !decimal.is_zero()
-        && (i32::from(decimal.nonzero_magnitude_start()) + i32::from(scale) > i32::from(i16::MAX)
-            || i32::from(decimal.nonzero_magnitude_end()) + i32::from(scale) < i32::from(i16::MIN))
+        && (i32::from(decimal.nonzero_magnitude_start()) + scale > i32::from(i16::MAX)
+            || i32::from(decimal.nonzero_magnitude_end()) + scale < i32::from(i16::MIN))
     {
         return Err(error("numeric scaling exceeds supported magnitude"));
     }
-    decimal.multiply_pow10(scale);
     decimal.trim_start();
+    decimal.trim_end();
+    while scale != 0 {
+        let step = scale.clamp(i32::from(i16::MIN), i32::from(i16::MAX)) as i16;
+        decimal.multiply_pow10(step);
+        decimal.trim_start();
+        decimal.trim_end();
+        scale -= i32::from(step);
+    }
     Ok(())
 }
 

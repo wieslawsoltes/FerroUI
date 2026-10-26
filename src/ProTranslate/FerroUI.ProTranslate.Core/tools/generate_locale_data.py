@@ -78,8 +78,13 @@ for locale in locales:
         ns = key.removeprefix('symbols-numberSystem-')
         symbols = n[key]
         fields = [('nan', 'nan'), ('infinity', 'infinity'), ('percent', 'percentSign'),
-                  ('permille', 'perMille'), ('minus', 'minusSign'), ('plus', 'plusSign')]
-        value = 'crate::formatting::NumericSymbols { ' + ', '.join(name + ': ' + s(symbols[source]) for name, source in fields) + ' }'
+                  ('permille', 'perMille'), ('minus', 'minusSign'), ('plus', 'plusSign'), ('group', 'group')]
+        pattern = n.get('decimalFormats-numberSystem-' + ns, n['decimalFormats-numberSystem-latn'])['standard']
+        groups = pattern.split('.')[0].split(',')
+        primary = sum(ch in '#0' for ch in groups[-1]) if len(groups) > 1 else 0
+        secondary = sum(ch in '#0' for ch in groups[-2]) if len(groups) > 2 else primary
+        value = ('crate::formatting::NumericSymbols { ' + ', '.join(name + ': ' + s(symbols[source]) for name, source in fields)
+                 + f', primary_group: {primary}, secondary_group: {secondary}' + ' }')
         lines.append('    (' + s(locale) + ', ' + s(ns) + ', ' + str(ns == n['defaultNumberingSystem']).lower() + ', ' + value + '),')
 lines.append('];')
 pathlib.Path(output).write_text('\n'.join(lines) + '\n')

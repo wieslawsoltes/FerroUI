@@ -374,7 +374,8 @@ impl LocalizedDateTime {
                 DateTimeKind::Offset => self.offset(true, false),
                 DateTimeKind::Utc => "Z".into(),
                 DateTimeKind::Unspecified => String::new(),
-            }),
+            }
+            .repeat(count)),
             'G' if cldr => {
                 if calendar.is_gregorian() {
                     Ok(data.eras[usize::from(date.year() > 0)].into())
@@ -389,8 +390,8 @@ impl LocalizedDateTime {
                     calendar.era_name()
                 }
             }
-            '/' if !cldr => Ok(separator(data.short_date, '/')),
-            ':' if !cldr => Ok(separator(data.short_time, ':')),
+            '/' if !cldr => Ok(separator(data.short_date, '/').repeat(count)),
+            ':' if !cldr => Ok(separator(data.short_time, ':').repeat(count)),
             _ if !cldr => Ok(std::iter::repeat_n(field, count).collect()),
             _ => Err(TranslationError::Format(format!(
                 "Unsupported date token '{field}'"
@@ -546,7 +547,7 @@ fn tokenize(pattern: &str, cldr: bool) -> Result<Vec<Token>, TranslationError> {
             let field = chars
                 .next()
                 .ok_or_else(|| TranslationError::Format("Trailing date-format percent".into()))?;
-            if field == '%' {
+            if matches!(field, '%' | '\'' | '"' | '\\') {
                 return Err(TranslationError::Format(
                     "Invalid percent date escape".into(),
                 ));

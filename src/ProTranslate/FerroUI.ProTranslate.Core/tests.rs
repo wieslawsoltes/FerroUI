@@ -265,7 +265,7 @@ fn format_uses_format_culture_and_ui_template_separately() {
     cultures.set_cultures(culture("pl-PL"), culture("en"));
     assert_eq!(
         service.format("Amount", &[1234.5.into()]).unwrap(),
-        "Amount: 1234,50"
+        "Amount: 1\u{a0}234,50"
     );
 }
 #[test]
@@ -679,14 +679,11 @@ fn custom_numeric_quotes_escapes_percent_and_scaling_are_semantic() {
     assert_eq!(12.5f64.into_format("'USD;'0.0", &culture), "USD;12.5");
     assert_eq!(0.0f64.into_format("#.##", &culture), "");
     assert_eq!(0.125f64.into_format("#.##", &culture), ".13");
-    for pattern in ["0'", "0\\"] {
-        assert!(
-            FormatArgument::Number(12.5)
-                .format(pattern, &culture)
-                .is_err(),
-            "{pattern}"
-        );
+    for pattern in ["0'", "0\\", "0\0ignored"] {
+        assert_eq!(12.5f64.into_format(pattern, &culture), "13");
     }
+    assert_eq!(12.5f64.into_format("'unclosed", &culture), "unclosed");
+    assert_eq!(12.5f64.into_format("F2\0ignored", &culture), "12.50");
 }
 
 #[test]
@@ -1262,4 +1259,126 @@ fn custom_date_tokens_and_standard_joins_follow_source_rules() {
         date.format("HHHH:mmmm:ssss hhhhh", &en).unwrap(),
         "15:30:45 03"
     );
+    assert_eq!(date.format("yyyy//MM", &en).unwrap(), "2026//10");
+    assert_eq!(date.format("HH::mm", &en).unwrap(), "15::30");
+    assert_eq!(date.format("KKK", &en).unwrap(), "+02:00+02:00+02:00");
+    for invalid in ["%'", "%\\", "%\"", "%%"] {
+        assert!(date.format(invalid, &en).is_err(), "{invalid}");
+    }
+}
+
+#[test]
+fn extended_decimal_magnitudes_are_checked_without_wrapping_or_becoming_zero() {
+    let invariant = Culture::invariant();
+    let tiny = FormatArgument::Decimal("1e-32768".parse().unwrap());
+    assert_eq!(tiny.format("E2", &invariant).unwrap(), "1.00E-32768");
+    assert_eq!(tiny.format("G3", &invariant).unwrap(), "1E-32768");
+    let huge = FormatArgument::Decimal("1e32767".parse().unwrap());
+    assert_eq!(huge.format("E2", &invariant).unwrap(), "1.00E+32767");
+    assert!(huge.format("P2", &invariant).is_err());
+    let carry = FormatArgument::Decimal("9.99e32767".parse().unwrap());
+    assert_eq!(carry.format("E0", &invariant).unwrap(), "1E+32768");
+    assert!(carry.format("G1", &invariant).is_err());
+    assert!(carry.format("0E0", &invariant).is_err());
+}
+
+#[test]
+fn numeric_grouping_preserves_source_group_sizes_without_cldr_minimum_suppression() {
+    for (locale, expected) in [
+        ("pl-PL", "1\u{a0}234,50"),
+        ("es-ES", "1.234,50"),
+        ("fr-FR", "1\u{202f}234,50"),
+        ("hi-IN", "1,234.50"),
+    ] {
+        let locale = culture(locale);
+        assert_eq!(1234.5f64.into_format("N2", &locale), expected);
+        assert_eq!(1234.5f64.into_format("#,##0.00", &locale), expected);
+    }
+    assert_eq!(
+        12345678u64.into_format("N0", &culture("hi-IN")),
+        "1,23,45,678"
+    );
+    assert_eq!(1234u64.into_format("N0", &culture("th-u-nu-thai")), "๑,๒๓๔");
+    assert_eq!(
+        (-1234.5f64).into_format("N2", &culture("pl-PL")),
+        "-1\u{a0}234,50"
+    );
+    assert_eq!(1234.5f64.into_format("F2", &culture("pl-PL")), "1234,50");
+}
+
+#[test]
+fn globalization_captures_culture_and_overrides_before_host_callbacks() {
+    struct ReentrantRegionProvider(Rc<RefCell<Option<GlobalizationService>>>);
+    impl RegionProfileProvider for ReentrantRegionProvider {
+        fn get_profile(
+            &self,
+            culture: &Culture,
+            region_override: Option<&RegionProfile>,
+        ) -> Result<RegionProfile, TranslationError> {
+            let callback = self.0.borrow_mut().take();
+            if let Some(globalization) = callback {
+                globalization.set_culture(super::Culture::parse("pl-PL").unwrap());
+                globalization.set_region_override(
+                    RegionProfile::for_culture(&super::Culture::parse("en-GB").unwrap()).unwrap(),
+                );
+                globalization.set_measurement_system_override(MeasurementSystem::Metric);
+            }
+            DefaultRegionProfileProvider.get_profile(culture, region_override)
+        }
+    }
+    let (_, _, translations) = setup();
+    let callback = Rc::new(RefCell::new(None));
+    let converter: Rc<dyn UnitConversionService> = Rc::new(DefaultUnitConversionService);
+    let formatter: Rc<dyn LocalizedUnitFormatter> = Rc::new(DefaultLocalizedUnitFormatter);
+    let globalization = GlobalizationService::with_services(
+        translations,
+        Rc::new(ReentrantRegionProvider(callback.clone())),
+        Rc::new(DefaultMeasurementSystemResolver),
+        converter.clone(),
+        formatter.clone(),
+    );
+    *callback.borrow_mut() = Some(globalization.clone());
+    assert_eq!(
+        globalization
+            .format_measurement_for_profile(1.0, MeasurementUnit::Meter, Some("F2"))
+            .unwrap(),
+        "3.28 ft"
+    );
+    assert_eq!(
+        globalization
+            .format_measurement_for_profile(1.0, MeasurementUnit::Meter, Some("F2"))
+            .unwrap(),
+        "1,00 m"
+    );
+    assert!(Rc::ptr_eq(&globalization.unit_converter(), &converter));
+    assert!(Rc::ptr_eq(&globalization.unit_formatter(), &formatter));
+    assert_eq!(
+        globalization
+            .unit_converter()
+            .get_category(MeasurementUnit::Celsius),
+        MeasurementUnitCategory::Temperature
+    );
+}
+
+#[test]
+fn diagnostic_callbacks_cannot_change_the_inflight_format_failure_policy() {
+    let (provider, _, service) = setup();
+    provider.insert(culture("en"), "Bad", "{2}");
+    let callback_service = service.clone();
+    let _subscription = service.subscribe_diagnostics(move |diagnostic| {
+        if diagnostic.kind == ProTranslateDiagnosticKind::FormatFailure {
+            let mut options = callback_service.options();
+            options.format_failure_behavior = match options.format_failure_behavior {
+                TranslationFormatFailureBehavior::ReportAndReturnError => {
+                    TranslationFormatFailureBehavior::ReportAndReturnUnformatted
+                }
+                TranslationFormatFailureBehavior::ReportAndReturnUnformatted => {
+                    TranslationFormatFailureBehavior::ReportAndReturnError
+                }
+            };
+            callback_service.set_options(options);
+        }
+    });
+    assert_eq!(service.format("Bad", &[1.into()]).unwrap(), "{2}");
+    assert!(service.format("Bad", &[1.into()]).is_err());
 }

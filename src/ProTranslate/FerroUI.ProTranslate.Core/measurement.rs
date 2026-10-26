@@ -155,6 +155,9 @@ impl MeasurementSystemResolver for DefaultMeasurementSystemResolver {
     }
 }
 pub trait UnitConversionService {
+    fn get_category(&self, unit: MeasurementUnit) -> MeasurementUnitCategory {
+        unit.category()
+    }
     fn convert(
         &self,
         value: f64,
@@ -167,7 +170,7 @@ pub trait UnitConversionService {
         from: MeasurementUnit,
         profile: &MeasurementSystemProfile,
     ) -> Result<MeasurementValue, TranslationError> {
-        let unit = profile.unit_for(from.category())?;
+        let unit = profile.unit_for(self.get_category(from))?;
         Ok(MeasurementValue {
             value: self.convert(value, from, unit)?,
             unit,

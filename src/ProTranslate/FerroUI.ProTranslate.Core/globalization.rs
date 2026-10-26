@@ -64,6 +64,12 @@ impl GlobalizationService {
     pub fn translations(&self) -> TranslationService {
         self.0.translations.clone()
     }
+    pub fn unit_converter(&self) -> Rc<dyn UnitConversionService> {
+        self.0.converter.clone()
+    }
+    pub fn unit_formatter(&self) -> Rc<dyn LocalizedUnitFormatter> {
+        self.0.formatter.clone()
+    }
     pub fn current_culture(&self) -> Culture {
         self.0.cultures.current_culture()
     }
@@ -79,17 +85,21 @@ impl GlobalizationService {
     pub fn region_profile(&self) -> Result<RegionProfile, TranslationError> {
         let culture = self.current_culture();
         let region_override = self.0.region_override.borrow().clone();
-        let result = self
-            .0
-            .region_provider
-            .get_profile(&culture, region_override.as_ref());
+        self.region_profile_for(&culture, region_override.as_ref())
+    }
+    fn region_profile_for(
+        &self,
+        culture: &Culture,
+        region_override: Option<&RegionProfile>,
+    ) -> Result<RegionProfile, TranslationError> {
+        let result = self.0.region_provider.get_profile(culture, region_override);
         if let Err(error) = &result {
             self.0.translations.report(ProTranslateDiagnostic {
                 kind: ProTranslateDiagnosticKind::RegionProfileFailure,
                 severity: ProTranslateDiagnosticSeverity::Error,
                 message: error.to_string(),
                 key: None,
-                culture: Some(culture),
+                culture: Some(culture.clone()),
                 provider_name: None,
                 error: Some(error.clone()),
             });
@@ -97,8 +107,17 @@ impl GlobalizationService {
         result
     }
     pub fn measurement_system_profile(&self) -> Result<MeasurementSystemProfile, TranslationError> {
-        let region = self.region_profile()?;
+        self.measurement_system_profile_for(&self.current_culture())
+    }
+    fn measurement_system_profile_for(
+        &self,
+        culture: &Culture,
+    ) -> Result<MeasurementSystemProfile, TranslationError> {
+        // Capture overrides before entering host callbacks: a provider may
+        // change them or the culture while resolving this operation's region.
+        let region_override = self.0.region_override.borrow().clone();
         let system = *self.0.measurement_override.borrow();
+        let region = self.region_profile_for(culture, region_override.as_ref())?;
         Ok(self.0.resolver.resolve(&region, system))
     }
     pub fn measurement_system(&self) -> Result<MeasurementSystem, TranslationError> {
@@ -164,11 +183,13 @@ impl GlobalizationService {
         source: MeasurementUnit,
         format: Option<&str>,
     ) -> Result<String, TranslationError> {
-        self.0.formatter.format(
-            self.convert_measurement(value, source)?,
-            &self.current_culture(),
-            format,
-        )
+        let culture = self.current_culture();
+        let profile = self.measurement_system_profile_for(&culture)?;
+        let value = self
+            .0
+            .converter
+            .convert_to_profile(value, source, &profile)?;
+        self.0.formatter.format(value, &culture, format)
     }
     pub fn subscribe(&self, callback: impl Fn(&CultureChangedEventArgs) + 'static) -> Subscription {
         self.0.changed.subscribe(callback)

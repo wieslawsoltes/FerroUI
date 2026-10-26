@@ -355,6 +355,7 @@ impl TranslationService {
         arguments: &[FormatArgument],
         culture: &Culture,
     ) -> Result<String, TranslationError> {
+        let failure_behavior = self.options().format_failure_behavior;
         match format_composite(&localized.value, arguments, culture) {
             Ok(value) => Ok(value),
             Err(error) => {
@@ -370,9 +371,7 @@ impl TranslationService {
                     provider_name: Some(localized.provider_name),
                     error: Some(error.clone()),
                 });
-                if self.options().format_failure_behavior
-                    == TranslationFormatFailureBehavior::ReportAndReturnError
-                {
+                if failure_behavior == TranslationFormatFailureBehavior::ReportAndReturnError {
                     Err(error)
                 } else {
                     Ok(localized.value)
