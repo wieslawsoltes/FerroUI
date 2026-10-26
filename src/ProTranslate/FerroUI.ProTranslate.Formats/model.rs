@@ -1,7 +1,8 @@
 use std::collections::{BTreeMap, BTreeSet};
 
 /// A format supported by the catalog conversion layer.
-#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+#[derive(Clone, Copy, Debug, Eq, PartialEq, serde::Serialize, serde::Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub enum TranslationFileFormat {
     ProTranslateJson,
     I18NextJson,
@@ -173,7 +174,8 @@ impl TranslationCatalog {
     }
 }
 
-#[derive(Clone, Debug, Eq, PartialEq)]
+#[derive(Clone, Debug, Eq, PartialEq, serde::Serialize, serde::Deserialize)]
+#[serde(default, rename_all = "camelCase")]
 pub struct TranslationFormatOptions {
     pub culture: Option<String>,
     pub source_culture: Option<String>,
@@ -195,7 +197,8 @@ impl Default for TranslationFormatOptions {
     }
 }
 
-#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+#[derive(Clone, Copy, Debug, Eq, PartialEq, serde::Serialize, serde::Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub enum TranslationFormatDiagnosticSeverity {
     Info,
     Warning,
@@ -203,7 +206,8 @@ pub enum TranslationFormatDiagnosticSeverity {
 }
 pub type Severity = TranslationFormatDiagnosticSeverity;
 
-#[derive(Clone, Debug, Eq, PartialEq)]
+#[derive(Clone, Debug, Eq, PartialEq, serde::Serialize, serde::Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct TranslationFormatDiagnostic {
     pub severity: Severity,
     pub code: String,
@@ -236,7 +240,8 @@ impl TranslationFormatDiagnostic {
     }
 }
 
-#[derive(Clone, Debug, Default)]
+#[derive(Clone, Debug, Default, serde::Serialize, serde::Deserialize)]
+#[serde(default, rename_all = "camelCase")]
 pub struct TranslationFormatResult {
     pub catalog: TranslationCatalog,
     pub diagnostics: Vec<TranslationFormatDiagnostic>,
@@ -250,7 +255,8 @@ impl TranslationFormatResult {
 }
 
 /// Exported text plus diagnostics describing information the target format cannot retain.
-#[derive(Clone, Debug, Default)]
+#[derive(Clone, Debug, Default, serde::Serialize, serde::Deserialize)]
+#[serde(default, rename_all = "camelCase")]
 pub struct TranslationExportResult {
     pub content: String,
     pub diagnostics: Vec<TranslationFormatDiagnostic>,

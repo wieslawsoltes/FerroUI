@@ -1,6 +1,5 @@
 use crate::{model::select_entries, *};
-use serde_json::{json, Map, Value};
-use std::collections::BTreeMap;
+use serde_json::{Map, Value};
 
 pub(crate) fn import(
     content: &str,
@@ -16,7 +15,7 @@ pub(crate) fn import(
         .as_object()
         .ok_or("JSON translation catalog root must be an object.")?;
     if format == TranslationFileFormat::AppleXcstrings {
-        return import_xcstrings(root, result);
+        return crate::xcstrings::import(root, result);
     }
     let arb = format == TranslationFileFormat::FlutterArb;
     if arb
@@ -154,100 +153,13 @@ fn flatten(
     }
 }
 
-fn import_xcstrings(
-    root: &Map<String, Value>,
-    result: &mut TranslationFormatResult,
-) -> Result<(), String> {
-    let strings = root
-        .get("strings")
-        .and_then(Value::as_object)
-        .ok_or("Apple .xcstrings root must contain a 'strings' object.")?;
-    if let Some(source) = root.get("sourceLanguage").and_then(Value::as_str) {
-        result.catalog.source_culture = Some(source.into());
-    }
-    for (key, record) in strings {
-        let Some(record) = record.as_object() else {
-            result.diagnostics.push(TranslationFormatDiagnostic::new(
-                Severity::Warning,
-                "PTF120",
-                format!("Skipped non-object .xcstrings record '{key}'."),
-            ));
-            continue;
-        };
-        let comment = record.get("comment").and_then(Value::as_str);
-        if record
-            .keys()
-            .any(|key| !matches!(key.as_str(), "localizations" | "comment"))
-        {
-            result.diagnostics.push(TranslationFormatDiagnostic::new(
-                Severity::Warning,
-                "PTF121",
-                format!("Additional .xcstrings metadata for '{key}' is not represented."),
-            ));
-        }
-        let Some(localizations) = record.get("localizations").and_then(Value::as_object) else {
-            continue;
-        };
-        for (culture, localization) in localizations {
-            if localization.as_object().is_some_and(|object| {
-                object
-                    .keys()
-                    .any(|key| !matches!(key.as_str(), "stringUnit" | "variations"))
-            }) || localization
-                .get("variations")
-                .and_then(Value::as_object)
-                .is_some_and(|object| object.keys().any(|key| key != "plural"))
-            {
-                result.diagnostics.push(TranslationFormatDiagnostic::new(Severity::Warning,"PTF121",format!("Additional localization variations or substitution metadata for '{key}' ({culture}) are not represented.")));
-            }
-            if let Some((value, state)) = string_unit(localization) {
-                let entry = result.catalog.add(key, Some(culture), value);
-                entry.state = state.map(str::to_owned);
-                entry.comment = comment.map(str::to_owned);
-            } else if let Some(plurals) = localization
-                .pointer("/variations/plural")
-                .and_then(Value::as_object)
-            {
-                for (category, unit) in plurals {
-                    if let Some((value, state)) = string_unit(unit) {
-                        let entry =
-                            result
-                                .catalog
-                                .add(format!("{key}.{category}"), Some(culture), value);
-                        entry.state = state.map(str::to_owned);
-                        entry.comment = comment.map(str::to_owned);
-                        entry.plural_category = Some(category.into());
-                    } else {
-                        result.diagnostics.push(TranslationFormatDiagnostic::new(Severity::Warning,"PTF120",format!("Unsupported plural variation '{key}.{category}' ({culture}) was skipped.")));
-                    }
-                }
-            } else {
-                result.diagnostics.push(TranslationFormatDiagnostic::new(
-                    Severity::Warning,
-                    "PTF120",
-                    format!("Unsupported .xcstrings variation '{key}' ({culture}) was skipped."),
-                ));
-            }
-        }
-    }
-    Ok(())
-}
-
-fn string_unit(value: &Value) -> Option<(&str, Option<&str>)> {
-    let unit = value.get("stringUnit")?;
-    Some((
-        unit.get("value")?.as_str()?,
-        unit.get("state").and_then(Value::as_str),
-    ))
-}
-
 pub(crate) fn export(
     catalog: &TranslationCatalog,
     format: TranslationFileFormat,
     options: &TranslationFormatOptions,
 ) -> Result<String, String> {
     if format == TranslationFileFormat::AppleXcstrings {
-        return export_xcstrings(catalog, options);
+        return crate::xcstrings::export(catalog, options);
     }
     let culture = options
         .culture
@@ -320,73 +232,6 @@ pub(crate) fn parse_object(content: &str) -> Result<Map<String, Value>, String> 
         .as_object()
         .cloned()
         .ok_or_else(|| "Expected a JSON object.".into())
-}
-
-fn export_xcstrings(
-    catalog: &TranslationCatalog,
-    options: &TranslationFormatOptions,
-) -> Result<String, String> {
-    let mut groups = BTreeMap::<&str, BTreeMap<&str, Vec<&TranslationCatalogEntry>>>::new();
-    for entry in &catalog.entries {
-        let Some(culture) = entry.culture.as_deref() else {
-            continue;
-        };
-        if options
-            .culture
-            .as_deref()
-            .is_some_and(|selected| !selected.eq_ignore_ascii_case(culture))
-        {
-            continue;
-        }
-        groups
-            .entry(entry.base_key())
-            .or_default()
-            .entry(culture)
-            .or_default()
-            .push(entry);
-    }
-    let mut strings = Map::new();
-    for (key, cultures) in groups {
-        let comment = cultures
-            .values()
-            .flatten()
-            .find_map(|entry| entry.comment.as_ref());
-        let mut record = Map::new();
-        if options.include_comments {
-            if let Some(comment) = comment {
-                record.insert("comment".into(), Value::String(comment.clone()));
-            }
-        }
-        let mut localizations = Map::new();
-        for (culture, entries) in &cultures {
-            let plurals: Map<String, Value> = entries
-                .iter()
-                .filter_map(|entry| {
-                    entry
-                        .plural_category
-                        .as_ref()
-                        .map(|category| (category.clone(), unit(entry)))
-                })
-                .collect();
-            if !plurals.is_empty() && entries.iter().any(|entry| entry.plural_category.is_none()) {
-                return Err(format!(
-                    ".xcstrings key '{key}' ({culture}) contains both singular and plural records."
-                ));
-            }
-            let value = if !plurals.is_empty() {
-                json!({"variations":{"plural":plurals}})
-            } else {
-                unit(entries.last().expect("group is nonempty"))
-            };
-            localizations.insert((*culture).into(), value);
-        }
-        record.insert("localizations".into(), Value::Object(localizations));
-        strings.insert(key.into(), Value::Object(record));
-    }
-    serde_json::to_string_pretty(&json!({"sourceLanguage":options.source_culture.as_deref().or(catalog.source_culture.as_deref()).unwrap_or("en"),"strings":strings,"version":"1.0"})).map_err(|e| e.to_string())
-}
-fn unit(entry: &TranslationCatalogEntry) -> Value {
-    json!({"stringUnit":{"state":entry.state.as_deref().unwrap_or("translated"),"value":entry.value}})
 }
 
 // Reject duplicate JSON object members instead of silently losing earlier values in a map.

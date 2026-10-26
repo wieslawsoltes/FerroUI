@@ -8,6 +8,7 @@
 mod json;
 mod model;
 mod text;
+mod xcstrings;
 mod xml;
 pub use model::*;
 
@@ -157,7 +158,7 @@ fn diagnose_losses(
             Csv | Tsv => false,
             FlutterArb => !matches!(key.as_str(), "arb.globals" | "arb.orphan_metadata"),
             GettextPo => !matches!(key.as_str(), "po.header_entry" | "po.obsolete"),
-            AppleXcstrings => key.as_str() != "xcstrings.root",
+            AppleXcstrings => !matches!(key.as_str(), "xcstrings.root" | "xcstrings.untranslated"),
             _ => true,
         })
         .map(String::as_str)
@@ -238,6 +239,34 @@ fn diagnose_losses(
         let unknown_metadata = entry.metadata.keys().any(|key| match format {
             Csv | Tsv => false,
             FlutterArb => key != "arb",
+            AppleXcstrings => !matches!(
+                key.as_str(),
+                "xcstrings.path" | "xcstrings.localization" | "xcstrings.record" | "xcstrings.unit"
+            ),
+            Xliff12 | Xliff20 => {
+                let compatible = entry
+                    .metadata
+                    .get("xliff.version")
+                    .is_some_and(|version| version == if format == Xliff12 { "1" } else { "2" });
+                !compatible
+                    || !matches!(
+                        key.as_str(),
+                        "xliff.version"
+                            | "xliff.unit"
+                            | "xliff.unit_id"
+                            | "xliff.unit_attributes"
+                            | "xliff.segment"
+                            | "xliff.segment_id"
+                            | "xliff.segment_order"
+                            | "xliff.segment_attributes"
+                            | "xliff.source_xml"
+                            | "xliff.target_xml"
+                            | "xliff.notes"
+                            | "xliff.extras"
+                            | "xliff.extra_positions"
+                            | "xliff.untranslated"
+                    )
+            }
             GettextPo => !matches!(
                 key.as_str(),
                 "po.index"
@@ -252,7 +281,12 @@ fn diagnose_losses(
             ),
             AppleStringsdict => !matches!(
                 key.as_str(),
-                "apple.key" | "apple.variable" | "apple.localized_format" | "apple.value_type"
+                "apple.key"
+                    | "apple.variable"
+                    | "apple.localized_format"
+                    | "apple.value_type"
+                    | "apple.rule"
+                    | "apple.variant"
             ),
             AndroidResources => !matches!(
                 key.as_str(),

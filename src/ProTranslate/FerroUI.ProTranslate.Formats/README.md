@@ -39,8 +39,9 @@ println!("{}", exported.content);
 record contains the key, optional culture, localized value, source, comment,
 context, workflow state, plural category, format, and an ordered metadata map.
 The catalog has its own ordered metadata map for document-level information.
-Both types implement Serde serialization with camelCase field names and defaults
-for omitted fields, so a complete editing session can retain normalized data.
+Catalogs, entries, options, formats, diagnostics and conversion results implement
+Serde serialization with camelCase names. Catalogs, entries, options and results
+default omitted fields, so complete editing sessions retain normalized data.
 `to_dictionary` selects an exact culture case-insensitively; repeated keys use
 the last record and are reported by `validate`. Export selection overlays exact
 culture records on neutral fallbacks independently of source order.
@@ -65,11 +66,11 @@ it for a multi-language catalog produces a diagnostic.
 | RESX | String resources, comments, filename culture inference, XML escaping | Binary, file-reference and typed non-string resources are skipped with diagnostics. |
 | Android resources | Strings, plural quantities, string arrays, quoted whitespace regions, escape layer, array order, `translatable` and `formatted` on all resource groups, Android locale-folder inference | Styled/inline XML is flattened with warnings. Conflicting group flags fail export. Plural selection is not performed by the converter. |
 | Apple `.strings` | Quoted Unicode strings, C/octal/UTF-16 escapes, comments, locale-folder inference | Missing delimiters and malformed escapes fail import. |
-| Apple `.stringsdict` | Plural variables, categories, localized format and value type, standard plist doctype | Singular records cannot be exported to a plural dictionary. Unsupported rules are diagnosed. |
-| Apple `.xcstrings` | Multiple languages, comments, states, string units, plural variations | Device variations and substitution metadata are diagnosed. A key cannot export as both singular and plural for the same culture. |
+| Apple `.stringsdict` | Plural variables, categories, localized format and value type, device and width variants, standard plist doctype | Ordinary singular records need `.strings`; device/width variants retain their native rule metadata. Conflicting shared formats, value types or plural categories fail export. Unknown rules are diagnosed. |
+| Apple `.xcstrings` | Multiple languages, comments, states, nested device/plural variations, pluralized substitutions, root/record/string-unit metadata, untranslated records | Runtime device selection and substitution evaluation belong to platform consumers. Shared comments and structural metadata must agree; ambiguous manual singular/plural mixtures fail export. |
 | gettext PO/POT | Complete headers, C byte escapes, multiline literals, contexts, source text, single-form and multi-form plurals, fuzzy flags, previous source messages, comments, references and obsolete records | Plural formulas are retained, not evaluated; the declared form count is validated. Indices 0/1 retain the source's `one`/`other` naming; additional indices use `indexN` and preserve `po.index`. Empty targets preserve untranslated status. Clearing `state = "fuzzy"` removes the fuzzy flag. Conflicting shared plural metadata fails export. |
-| XLIFF 1.2 | Source/target languages, unit identity, source/target text, state, notes and context | Inline codes are flattened and diagnosed; skeleton/phase data is not represented. |
-| XLIFF 2.0 / 2.1 | Unit and segment import, source/target text, state, notes and context; export writes version 2.1, matching upstream `Xliff20` | Multiple segments receive distinct `unit#segment` keys. Export creates separate units and reports retained segmentation metadata as a loss. Advanced modules are not implemented. |
+| XLIFF 1.2 | Source/target languages, unit identity/attributes, source/target text and inline XML, state, all notes/context, segmentation and unit metadata | Normalized values contain plain text. Changing text with retained inline codes requires updating its XML or explicitly removing that metadata. File skeleton/phase data is diagnosed. |
+| XLIFF 2.0 / 2.1 | Unit/segment reconstruction, segment order and attributes, inline XML, originalData/ignorable content, all notes/context, untranslated-target status; export writes version 2.1, matching upstream `Xliff20` | Multiple segments receive distinct `unit#segment` keys. Native unit metadata is restored when exporting the same XLIFF family; conversions across families report metadata loss. XLIFF 2 workflow states must be initial/translated/reviewed/final. |
 | CSV / TSV | Required key/value columns; culture/source/comment/context/state/plural/format; optional JSON metadata and catalogMetadata columns; quoting, embedded CR/LF; custom CSV delimiter | Document name, source culture and metadata are retained, including empty catalogs. Duplicate headers/JSON metadata keys, inconsistent row sizes and malformed quoting fail import. Formula-looking text is retained and diagnosed. |
 
 The format layer never evaluates plural expressions, executes spreadsheet
@@ -85,12 +86,25 @@ XML export rejects characters that XML 1.0 cannot represent.
 - Android: `android.array`, `android.index`, `android.translatable`,
   `android.formatted` preserve resource structure and flags.
 - Apple plurals: `apple.key`, `apple.variable`, `apple.localized_format`,
-  `apple.value_type` preserve dictionary reconstruction.
+  `apple.value_type` preserve dictionary reconstruction. `apple.rule` and
+  `apple.variant` identify width/device variants.
+- Apple string catalogs: `xcstrings.path`, `xcstrings.localization`,
+  `xcstrings.record`, and `xcstrings.unit` retain variation and substitution
+  structure. Catalog `xcstrings.root` and `xcstrings.untranslated` preserve
+  document fields and records without translated string units. Device variants
+  normalize to `key.device.variant`; substitutions to
+  `key.substitutions.variable.category`. Ordinary plurals remain `key.category`.
 - gettext: entry `po.index`, `po.msgid_plural`, `po.plural_forms`, `po.flags`,
   `po.flags_prefix`, `po.previous`, `po.references`, `po.translator_comment` and
   `po.untranslated` preserve message semantics. Catalog `po.header_entry` and
   `po.obsolete` preserve header information and obsolete records.
-- XLIFF segmentation: `xliff.unit`, `xliff.segment` identify the source unit.
+- XLIFF: `xliff.version`, `xliff.unit_id`, `xliff.unit_attributes`,
+  `xliff.segment`, `xliff.segment_id`, `xliff.segment_order`,
+  `xliff.segment_attributes`, `xliff.source_xml`, `xliff.target_xml`,
+  `xliff.notes`, `xliff.extras`, `xliff.extra_positions` and
+  `xliff.untranslated` retain unit structure. `xliff.unit` records the original
+  group name for multi-segment records. XML fragments retain namespace bindings;
+  they are parsed and validated before export.
 
 CSV/TSV metadata cells round-trip arbitrary string metadata. Other exporters
 report metadata they cannot represent. Culture name normalization in this crate

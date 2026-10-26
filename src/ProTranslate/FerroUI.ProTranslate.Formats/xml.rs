@@ -1,6 +1,6 @@
 use crate::{model::select_entries, *};
 use roxmltree::{Document, Node, ParsingOptions};
-use std::collections::BTreeMap;
+use std::collections::{BTreeMap, BTreeSet};
 use std::fmt::Write;
 
 pub(crate) fn import(
@@ -25,7 +25,7 @@ pub(crate) fn import(
         TranslationFileFormat::Resx => import_resx(root, options, path, result),
         TranslationFileFormat::AndroidResources => import_android(root, options, path, result),
         TranslationFileFormat::AppleStringsdict => import_stringsdict(root, options, path, result),
-        _ => import_xliff(root, result),
+        _ => import_xliff(root, options, result),
     }
 }
 
@@ -312,6 +312,57 @@ fn import_stringsdict(
         .or_else(|| infer_apple_culture(path));
     for (key, node) in top {
         let fields = plist_dict(node)?;
+        let native_rules: Vec<_> = [
+            "NSStringDeviceSpecificRuleType",
+            "NSStringVariableWidthRuleType",
+        ]
+        .into_iter()
+        .filter_map(|rule| fields.get(rule).map(|node| (rule, *node)))
+        .collect();
+        if !native_rules.is_empty() {
+            if native_rules.len() > 1 || fields.contains_key("NSStringLocalizedFormatKey") {
+                return Err(format!(
+                    "Stringsdict '{key}' mixes incompatible variation rules."
+                ));
+            }
+            let (rule, variants) = native_rules[0];
+            let axis = if rule == "NSStringDeviceSpecificRuleType" {
+                "device"
+            } else {
+                "width"
+            };
+            for (variant, value) in plist_dict(variants)? {
+                if !value.has_tag_name("string") {
+                    return Err(format!(
+                        "Stringsdict '{key}.{axis}.{variant}' must be a string."
+                    ));
+                }
+                let entry = result.catalog.add(
+                    format!("{key}.{axis}.{variant}"),
+                    culture.as_deref(),
+                    text(value),
+                );
+                entry.metadata.insert("apple.key".into(), key.clone());
+                entry.metadata.insert("apple.rule".into(), rule.into());
+                entry.metadata.insert("apple.variant".into(), variant);
+            }
+            if fields.len() > 1 {
+                result.diagnostics.push(TranslationFormatDiagnostic::new(
+                    Severity::Warning,
+                    "PTF163",
+                    format!("Additional stringsdict fields in '{key}' were skipped."),
+                ));
+            }
+            continue;
+        }
+        if fields
+            .get("NSStringLocalizedFormatKey")
+            .is_some_and(|node| !node.has_tag_name("string"))
+        {
+            return Err(format!(
+                "Stringsdict '{key}' localized format must be a string."
+            ));
+        }
         let format = fields.get("NSStringLocalizedFormatKey").map(|n| text(*n));
         let variables: Vec<_> = fields
             .iter()
@@ -319,6 +370,14 @@ fn import_stringsdict(
             .collect();
         for (variable, dict) in &variables {
             let plural = plist_dict(**dict)?;
+            if plural
+                .get("NSStringFormatValueTypeKey")
+                .is_some_and(|node| !node.has_tag_name("string"))
+            {
+                return Err(format!(
+                    "Stringsdict '{key}.{variable}' value type must be a string."
+                ));
+            }
             if plural
                 .get("NSStringFormatSpecTypeKey")
                 .map(|n| text(*n))
@@ -402,7 +461,11 @@ fn import_stringsdict(
     Ok(())
 }
 
-fn import_xliff(root: Node<'_, '_>, result: &mut TranslationFormatResult) -> Result<(), String> {
+fn import_xliff(
+    root: Node<'_, '_>,
+    options: &TranslationFormatOptions,
+    result: &mut TranslationFormatResult,
+) -> Result<(), String> {
     if root.tag_name().name() != "xliff" {
         return Err("XLIFF requires an xliff root.".into());
     }
@@ -427,7 +490,8 @@ fn import_xliff(root: Node<'_, '_>, result: &mut TranslationFormatResult) -> Res
             file.attribute("target-language")
         } else {
             root.attribute("trgLang")
-        };
+        }
+        .or(options.culture.as_deref());
         if old {
             result.catalog.source_culture = result
                 .catalog
@@ -468,6 +532,51 @@ fn import_xliff(root: Node<'_, '_>, result: &mut TranslationFormatResult) -> Res
                                 && n.attribute("category") == Some("context")))
                 })
                 .map(text);
+            let notes: Vec<_> = if old {
+                unit.children()
+                    .filter(|node| {
+                        node.is_element()
+                            && matches!(node.tag_name().name(), "note" | "context-group")
+                    })
+                    .map(node_xml)
+                    .collect()
+            } else {
+                child(unit, "notes")
+                    .into_iter()
+                    .flat_map(|notes| notes.children())
+                    .filter(|node| node.is_element())
+                    .map(node_xml)
+                    .collect()
+            };
+            let extras: Vec<_> = unit
+                .children()
+                .filter(|node| {
+                    node.is_element()
+                        && !matches!(
+                            node.tag_name().name(),
+                            "notes" | "note" | "context-group" | "source" | "target" | "segment"
+                        )
+                })
+                .map(node_xml)
+                .collect();
+            let mut preceding_segments = 0;
+            let extra_positions: Vec<_> = unit
+                .children()
+                .filter(|node| node.is_element())
+                .filter_map(|node| {
+                    if node.tag_name().name() == "segment" {
+                        preceding_segments += 1;
+                        None
+                    } else if !matches!(
+                        node.tag_name().name(),
+                        "notes" | "note" | "context-group" | "source" | "target"
+                    ) {
+                        Some(preceding_segments)
+                    } else {
+                        None
+                    }
+                })
+                .collect();
             let segments: Vec<_> = if old {
                 vec![unit]
             } else {
@@ -476,6 +585,7 @@ fn import_xliff(root: Node<'_, '_>, result: &mut TranslationFormatResult) -> Res
                     .collect()
             };
             let multiple = segments.len() > 1;
+            let mut segment_ids = BTreeSet::new();
             if multiple {
                 result.diagnostics.push(TranslationFormatDiagnostic::new(Severity::Warning,"PTF183",format!("Unit '{key}' has multiple segments; normalized keys include each segment identifier.")));
             }
@@ -483,8 +593,11 @@ fn import_xliff(root: Node<'_, '_>, result: &mut TranslationFormatResult) -> Res
                 let source = child(segment, "source");
                 let target = child(segment, "target");
                 for node in [source, target].into_iter().flatten() {
-                    inline_warning(node, key, result);
+                    if node.children().any(|node| node.is_element()) {
+                        result.diagnostics.push(TranslationFormatDiagnostic::new(Severity::Info, "PTF181", format!("Inline XML for '{key}' is retained in metadata; normalized text excludes markup.")));
+                    }
                 }
+                let source_xml = source.map(node_xml);
                 let source = source.map(text);
                 let entry_key = if multiple {
                     format!(
@@ -514,6 +627,64 @@ fn import_xliff(root: Node<'_, '_>, result: &mut TranslationFormatResult) -> Res
                     segment.attribute("state")
                 }
                 .map(str::to_owned);
+                entry
+                    .metadata
+                    .insert("xliff.version".into(), if old { "1" } else { "2" }.into());
+                let mut unit_attributes = String::new();
+                write_node(
+                    &mut unit_attributes,
+                    unit,
+                    Some((unit.id(), "")),
+                    None,
+                    None,
+                );
+                entry
+                    .metadata
+                    .insert("xliff.unit_attributes".into(), unit_attributes);
+                if !old {
+                    let mut segment_attributes = String::new();
+                    write_node(
+                        &mut segment_attributes,
+                        segment,
+                        Some((segment.id(), "")),
+                        None,
+                        None,
+                    );
+                    entry
+                        .metadata
+                        .insert("xliff.segment_attributes".into(), segment_attributes);
+                }
+                if let Some(id) = unit.attribute("id") {
+                    entry.metadata.insert("xliff.unit_id".into(), id.into());
+                }
+                if let Some(source_xml) = source_xml {
+                    entry.metadata.insert("xliff.source_xml".into(), source_xml);
+                }
+                if let Some(target) = target {
+                    entry
+                        .metadata
+                        .insert("xliff.target_xml".into(), node_xml(target));
+                } else {
+                    entry
+                        .metadata
+                        .insert("xliff.untranslated".into(), "true".into());
+                }
+                if !notes.is_empty() {
+                    entry.metadata.insert(
+                        "xliff.notes".into(),
+                        serde_json::to_string(&notes).map_err(|e| e.to_string())?,
+                    );
+                }
+                if !extras.is_empty() {
+                    entry.metadata.insert(
+                        "xliff.extras".into(),
+                        serde_json::to_string(&extras).map_err(|e| e.to_string())?,
+                    );
+                    entry.metadata.insert(
+                        "xliff.extra_positions".into(),
+                        serde_json::to_string(&extra_positions).map_err(|e| e.to_string())?,
+                    );
+                }
                 if multiple {
                     entry.metadata.insert("xliff.unit".into(), key.into());
                     entry.metadata.insert(
@@ -523,18 +694,26 @@ fn import_xliff(root: Node<'_, '_>, result: &mut TranslationFormatResult) -> Res
                             .map(str::to_owned)
                             .unwrap_or_else(|| (index + 1).to_string()),
                     );
+                    entry
+                        .metadata
+                        .insert("xliff.segment_order".into(), index.to_string());
+                    if !segment_ids.insert(entry.metadata["xliff.segment"].clone()) {
+                        return Err(format!(
+                            "XLIFF unit '{key}' has duplicate segment identifiers."
+                        ));
+                    }
+                } else if !old {
+                    if let Some(id) = segment.attribute("id") {
+                        entry.metadata.insert("xliff.segment_id".into(), id.into());
+                    }
                 }
             }
         }
     }
     if root.descendants().any(|n| {
-        n.is_element()
-            && matches!(
-                n.tag_name().name(),
-                "skl" | "skeleton" | "phase-group" | "ignorable"
-            )
+        n.is_element() && matches!(n.tag_name().name(), "skl" | "skeleton" | "phase-group")
     }) {
-        result.diagnostics.push(TranslationFormatDiagnostic::new(Severity::Warning,"PTF184","XLIFF skeleton, phase, or ignorable content is not represented in the normalized catalog."));
+        result.diagnostics.push(TranslationFormatDiagnostic::new(Severity::Warning,"PTF184","XLIFF file skeleton or phase information is not represented in the normalized catalog."));
     }
     if result.catalog.entries.is_empty() {
         result.diagnostics.push(TranslationFormatDiagnostic::new(
@@ -568,6 +747,123 @@ fn valid_xml(value: &str) -> bool {
 }
 fn element(output: &mut String, name: &str, value: &str) {
     writeln!(output, "<{name}>{}</{name}>", escape(value)).unwrap();
+}
+
+fn node_xml(node: Node<'_, '_>) -> String {
+    let mut output = String::new();
+    write_node(&mut output, node, None, None, None);
+    output
+}
+
+fn qualified_name(
+    node: Node<'_, '_>,
+    namespace: Option<&str>,
+    name: &str,
+    attribute: bool,
+) -> String {
+    let Some(namespace) = namespace else {
+        return name.into();
+    };
+    if namespace == "http://www.w3.org/XML/1998/namespace" {
+        return format!("xml:{name}");
+    }
+    match node
+        .namespaces()
+        .find(|item| item.uri() == namespace && (!attribute || item.name().is_some()))
+        .and_then(|item| item.name())
+    {
+        Some(prefix) => format!("{prefix}:{name}"),
+        None => name.into(),
+    }
+}
+
+fn write_node(
+    output: &mut String,
+    node: Node<'_, '_>,
+    text_override: Option<(roxmltree::NodeId, &str)>,
+    root_attribute: Option<(&str, Option<&str>)>,
+    xliff_namespace: Option<&str>,
+) {
+    if node.is_text() {
+        output.push_str(&escape(node.text().unwrap_or("")));
+    } else if node.is_comment() {
+        write!(output, "<!--{}-->", node.text().unwrap_or("")).unwrap();
+    } else if let Some(pi) = node.pi() {
+        write!(
+            output,
+            "<?{}{}?>",
+            pi.target,
+            pi.value
+                .map(|value| format!(" {value}"))
+                .unwrap_or_default()
+        )
+        .unwrap();
+    } else if node.is_element() {
+        let native = xliff_namespace.is_some()
+            && node.tag_name().namespace().is_none_or(|namespace| {
+                namespace.is_empty() || namespace.starts_with("urn:oasis:names:tc:xliff:document:")
+            });
+        let name = if native {
+            node.tag_name().name().into()
+        } else {
+            qualified_name(
+                node,
+                node.tag_name().namespace(),
+                node.tag_name().name(),
+                false,
+            )
+        };
+        write!(output, "<{name}").unwrap();
+        for namespace in node
+            .namespaces()
+            .filter(|namespace| namespace.name() != Some("xml"))
+        {
+            let uri = if namespace
+                .uri()
+                .starts_with("urn:oasis:names:tc:xliff:document:")
+            {
+                xliff_namespace.unwrap_or(namespace.uri())
+            } else {
+                namespace.uri()
+            };
+            match namespace.name() {
+                Some(prefix) => write!(output, " xmlns:{prefix}=\"{}\"", escape(uri)).unwrap(),
+                None if !native => write!(output, " xmlns=\"{}\"", escape(uri)).unwrap(),
+                None => {}
+            }
+        }
+        // A fragment with no default namespace must remain unqualified when embedded.
+        if native {
+            write!(output, " xmlns=\"{}\"", xliff_namespace.unwrap()).unwrap();
+        } else if node.tag_name().namespace().is_none()
+            && !node
+                .namespaces()
+                .any(|namespace| namespace.name().is_none())
+        {
+            output.push_str(" xmlns=\"\"");
+        }
+        for attribute in node.attributes() {
+            if root_attribute.is_some_and(|(name, _)| {
+                attribute.namespace().is_none() && attribute.name() == name
+            }) {
+                continue;
+            }
+            let name = qualified_name(node, attribute.namespace(), attribute.name(), true);
+            write!(output, " {name}=\"{}\"", escape(attribute.value())).unwrap();
+        }
+        if let Some((name, Some(value))) = root_attribute {
+            write!(output, " {name}=\"{}\"", escape(value)).unwrap();
+        }
+        output.push('>');
+        if let Some((_, value)) = text_override.filter(|(id, _)| *id == node.id()) {
+            output.push_str(&escape(value));
+        } else {
+            for child in node.children() {
+                write_node(output, child, text_override, None, xliff_namespace);
+            }
+        }
+        write!(output, "</{name}>").unwrap();
+    }
 }
 
 pub(crate) fn export(
@@ -640,8 +936,8 @@ pub(crate) fn export(
         }
         TranslationFileFormat::AndroidResources => export_android(entries, &mut output)?,
         TranslationFileFormat::AppleStringsdict => export_stringsdict(entries, &mut output)?,
-        TranslationFileFormat::Xliff12 => export_xliff(catalog, options, true, &mut output),
-        TranslationFileFormat::Xliff20 => export_xliff(catalog, options, false, &mut output),
+        TranslationFileFormat::Xliff12 => export_xliff(catalog, options, true, &mut output)?,
+        TranslationFileFormat::Xliff20 => export_xliff(catalog, options, false, &mut output)?,
         _ => unreachable!(),
     }
     Ok(output)
@@ -748,7 +1044,36 @@ fn export_stringsdict(
     output: &mut String,
 ) -> Result<(), String> {
     let mut groups = BTreeMap::<&str, BTreeMap<&str, Vec<&TranslationCatalogEntry>>>::new();
+    let mut variants = BTreeMap::<&str, (&str, BTreeMap<&str, &TranslationCatalogEntry>)>::new();
     for entry in entries {
+        if let Some(rule) = entry.metadata.get("apple.rule") {
+            if entry.plural_category.is_some()
+                || !matches!(
+                    rule.as_str(),
+                    "NSStringDeviceSpecificRuleType" | "NSStringVariableWidthRuleType"
+                )
+            {
+                return Err(format!(
+                    "Unsupported or conflicting stringsdict rule for '{}'.",
+                    entry.key
+                ));
+            }
+            let key = entry
+                .metadata
+                .get("apple.key")
+                .ok_or("Stringsdict variant is missing apple.key.")?;
+            let variant = entry
+                .metadata
+                .get("apple.variant")
+                .ok_or("Stringsdict variant is missing apple.variant.")?;
+            let group = variants
+                .entry(key)
+                .or_insert_with(|| (rule, BTreeMap::new()));
+            if group.0 != rule || group.1.insert(variant, entry).is_some() {
+                return Err(format!("Conflicting stringsdict variants for '{key}'."));
+            }
+            continue;
+        }
         if entry.plural_category.is_none() {
             return Err(format!(
                 ".stringsdict cannot represent singular record '{}'; export it as .strings.",
@@ -765,6 +1090,9 @@ fn export_stringsdict(
             .get("apple.variable")
             .map(String::as_str)
             .unwrap_or("value");
+        if variable == "NSStringLocalizedFormatKey" || variable.is_empty() {
+            return Err("Stringsdict plural variable uses a reserved or empty name.".into());
+        }
         groups
             .entry(key)
             .or_default()
@@ -772,7 +1100,21 @@ fn export_stringsdict(
             .or_default()
             .push(entry);
     }
+    if groups.keys().any(|key| variants.contains_key(key)) {
+        return Err("A stringsdict key mixes plural and device/width rules.".into());
+    }
     output.push_str("<plist version=\"1.0\"><dict>\n");
+    for (key, (rule, variants)) in variants {
+        element(output, "key", key);
+        output.push_str("<dict>\n");
+        element(output, "key", rule);
+        output.push_str("<dict>\n");
+        for (variant, entry) in variants {
+            element(output, "key", variant);
+            element(output, "string", &entry.value);
+        }
+        output.push_str("</dict></dict>\n");
+    }
     for (key, variables) in groups {
         element(output, "key", key);
         output.push_str("<dict>\n");
@@ -782,6 +1124,14 @@ fn export_stringsdict(
             .flatten()
             .next()
             .expect("group is not empty");
+        if variables.values().flatten().any(|entry| {
+            entry.metadata.get("apple.localized_format")
+                != first.metadata.get("apple.localized_format")
+        }) {
+            return Err(format!(
+                "Stringsdict '{key}' has conflicting localized format strings."
+            ));
+        }
         let default_format = variables
             .keys()
             .map(|variable| format!("%#@{variable}@"))
@@ -797,6 +1147,23 @@ fn export_stringsdict(
                 .unwrap_or(&default_format),
         );
         for (variable, entries) in variables {
+            if entries.iter().any(|entry| {
+                entry.metadata.get("apple.value_type")
+                    != entries[0].metadata.get("apple.value_type")
+            }) {
+                return Err(format!(
+                    "Stringsdict '{key}.{variable}' has conflicting value types."
+                ));
+            }
+            let mut categories = BTreeSet::new();
+            for entry in &entries {
+                let category = entry.plural_category.as_deref().unwrap();
+                if !matches!(category, "zero" | "one" | "two" | "few" | "many" | "other")
+                    || !categories.insert(category)
+                {
+                    return Err(format!("Stringsdict '{key}.{variable}' has an invalid or duplicate plural category."));
+                }
+            }
             element(output, "key", variable);
             output.push_str("<dict>\n");
             element(output, "key", "NSStringFormatSpecTypeKey");
@@ -823,12 +1190,227 @@ fn export_stringsdict(
     Ok(())
 }
 
+fn xliff_metadata(entry: &TranslationCatalogEntry, old: bool) -> bool {
+    entry
+        .metadata
+        .get("xliff.version")
+        .is_some_and(|version| version == if old { "1" } else { "2" })
+}
+fn xliff_namespace(old: bool) -> &'static str {
+    if old {
+        "urn:oasis:names:tc:xliff:document:1.2"
+    } else {
+        "urn:oasis:names:tc:xliff:document:2.0"
+    }
+}
+fn retained_list(
+    entry: &TranslationCatalogEntry,
+    key: &str,
+    old: bool,
+) -> Result<Vec<String>, String> {
+    if !xliff_metadata(entry, old) {
+        return Ok(Vec::new());
+    }
+    entry
+        .metadata
+        .get(key)
+        .map(|value| {
+            serde_json::from_value(crate::json::parse_checked(value)?)
+                .map_err(|e| format!("Invalid {key} metadata: {e}"))
+        })
+        .transpose()
+        .map(|value| value.unwrap_or_default())
+}
+fn write_xliff_field(
+    output: &mut String,
+    entry: &TranslationCatalogEntry,
+    field: &str,
+    value: &str,
+    old: bool,
+) -> Result<(), String> {
+    if field == "target"
+        && xliff_metadata(entry, old)
+        && entry
+            .metadata
+            .get("xliff.untranslated")
+            .is_some_and(|value| value == "true")
+        && entry.value == entry.source.as_deref().unwrap_or("")
+    {
+        return Ok(());
+    }
+    let state = (old && field == "target").then_some(("state", entry.state.as_deref()));
+    if let Some(retained) = entry
+        .metadata
+        .get(&format!("xliff.{field}_xml"))
+        .filter(|_| xliff_metadata(entry, old))
+    {
+        let document = Document::parse(retained)
+            .map_err(|e| format!("Invalid retained XLIFF {field}: {e}"))?;
+        let node = document.root_element();
+        if node.tag_name().name() != field {
+            return Err(format!(
+                "Retained XLIFF {field} has the wrong root element."
+            ));
+        }
+        let changed = text(node) != value;
+        if changed && node.children().any(|node| node.is_element()) {
+            return Err(format!("XLIFF {field} for '{}' contains inline codes. Update its retained XML together with the text, or remove xliff.{field}_xml to explicitly flatten it.", entry.key));
+        }
+        write_node(
+            output,
+            node,
+            changed.then_some((node.id(), value)),
+            state,
+            Some(xliff_namespace(old)),
+        );
+        output.push('\n');
+    } else {
+        write!(output, "<{field}").unwrap();
+        if let Some((name, Some(value))) = state {
+            write!(output, " {name}=\"{}\"", escape(value)).unwrap();
+        }
+        writeln!(output, ">{}</{field}>", escape(value)).unwrap();
+    }
+    Ok(())
+}
+fn write_xliff_notes(
+    output: &mut String,
+    entry: &TranslationCatalogEntry,
+    old: bool,
+    options: &TranslationFormatOptions,
+) -> Result<(), String> {
+    let mut notes = String::new();
+    let mut comment_written = false;
+    let mut context_written = false;
+    for retained in retained_list(entry, "xliff.notes", old)? {
+        let document =
+            Document::parse(&retained).map_err(|e| format!("Invalid retained XLIFF note: {e}"))?;
+        let node = document.root_element();
+        let context = node.tag_name().name() == "context-group"
+            || node.attribute("category") == Some("context");
+        let value = if context {
+            entry.context.as_deref()
+        } else {
+            options
+                .include_comments
+                .then_some(entry.comment.as_deref())
+                .flatten()
+        };
+        let Some(value) = value else {
+            continue;
+        };
+        let written = if context {
+            &mut context_written
+        } else {
+            &mut comment_written
+        };
+        let target = if context && node.tag_name().name() == "context-group" {
+            node.descendants()
+                .find(|node| node.is_element() && node.tag_name().name() == "context")
+                .unwrap_or(node)
+        } else {
+            node
+        };
+        let changed = !*written && text(target) != value;
+        if changed && target.children().any(|node| node.is_element()) {
+            return Err(format!("A retained XLIFF note for '{}' contains inline content; update or remove xliff.notes before replacing it.", entry.key));
+        }
+        write_node(
+            &mut notes,
+            node,
+            changed.then_some((target.id(), value)),
+            None,
+            Some(xliff_namespace(old)),
+        );
+        notes.push('\n');
+        *written = true;
+    }
+    if !comment_written && options.include_comments {
+        if let Some(comment) = &entry.comment {
+            element(&mut notes, "note", comment);
+        }
+    }
+    if !context_written {
+        if let Some(context) = &entry.context {
+            if old {
+                writeln!(notes, "<context-group><context context-type=\"x-protranslate\">{}</context></context-group>", escape(context)).unwrap();
+            } else {
+                writeln!(
+                    notes,
+                    "<note category=\"context\">{}</note>",
+                    escape(context)
+                )
+                .unwrap();
+            }
+        }
+    }
+    if !old && !notes.is_empty() {
+        output.push_str("<notes>\n");
+    }
+    output.push_str(&notes);
+    if !old && !notes.is_empty() {
+        output.push_str("</notes>\n");
+    }
+    Ok(())
+}
+fn write_xliff_extra(output: &mut String, extra: &str, old: bool) -> Result<(), String> {
+    let document =
+        Document::parse(extra).map_err(|e| format!("Invalid retained XLIFF unit metadata: {e}"))?;
+    write_node(
+        output,
+        document.root_element(),
+        None,
+        None,
+        Some(xliff_namespace(old)),
+    );
+    output.push('\n');
+    Ok(())
+}
+
+fn write_xliff_attributes(
+    output: &mut String,
+    entry: &TranslationCatalogEntry,
+    metadata_key: &str,
+    excluded: &[&str],
+    old: bool,
+) -> Result<(), String> {
+    if !xliff_metadata(entry, old) {
+        return Ok(());
+    }
+    if let Some(value) = entry.metadata.get(metadata_key) {
+        let document = Document::parse(value)
+            .map_err(|e| format!("Invalid retained XLIFF attributes: {e}"))?;
+        let node = document.root_element();
+        for namespace in node.namespaces() {
+            if let Some(prefix) = namespace.name().filter(|prefix| *prefix != "xml") {
+                let uri = if namespace
+                    .uri()
+                    .starts_with("urn:oasis:names:tc:xliff:document:")
+                {
+                    xliff_namespace(old)
+                } else {
+                    namespace.uri()
+                };
+                write!(output, " xmlns:{prefix}=\"{}\"", escape(uri)).unwrap();
+            }
+        }
+        for attribute in node.attributes() {
+            if attribute.namespace().is_none() && excluded.contains(&attribute.name()) {
+                continue;
+            }
+            let name = qualified_name(node, attribute.namespace(), attribute.name(), true);
+            write!(output, " {name}=\"{}\"", escape(attribute.value())).unwrap();
+        }
+    }
+    Ok(())
+}
+
 fn export_xliff(
     catalog: &TranslationCatalog,
     options: &TranslationFormatOptions,
     old: bool,
     output: &mut String,
-) {
+) -> Result<(), String> {
     let source = options
         .source_culture
         .as_deref()
@@ -854,76 +1436,232 @@ fn export_xliff(
         output
             .push_str("<xliff xmlns=\"urn:oasis:names:tc:xliff:document:1.2\" version=\"1.2\">\n");
     } else {
-        writeln!(output,"<xliff xmlns=\"urn:oasis:names:tc:xliff:document:2.0\" version=\"2.1\" srcLang=\"{}\" trgLang=\"{}\">",escape(source),escape(&cultures[0])).unwrap();
+        writeln!(output, "<xliff xmlns=\"urn:oasis:names:tc:xliff:document:2.0\" version=\"2.1\" srcLang=\"{}\" trgLang=\"{}\">", escape(source), escape(&cultures[0])).unwrap();
     }
     for (file_index, culture) in cultures.iter().enumerate() {
         if old {
-            writeln!(output,"<file source-language=\"{}\" target-language=\"{}\" datatype=\"plaintext\" original=\"{}\"><body>",escape(source),escape(culture),escape(catalog.name.as_deref().unwrap_or("ProTranslate"))).unwrap();
+            writeln!(output, "<file source-language=\"{}\" target-language=\"{}\" datatype=\"plaintext\" original=\"{}\"><body>", escape(source), escape(culture), escape(options.name.as_deref().or(catalog.name.as_deref()).unwrap_or("ProTranslate"))).unwrap();
         } else {
             writeln!(
                 output,
                 "<file id=\"f{}\" original=\"{}\">",
                 file_index + 1,
-                escape(catalog.name.as_deref().unwrap_or("ProTranslate"))
+                escape(
+                    options
+                        .name
+                        .as_deref()
+                        .or(catalog.name.as_deref())
+                        .unwrap_or("ProTranslate")
+                )
             )
             .unwrap();
         }
-        for (unit_index, entry) in select_entries(catalog, Some(culture)).iter().enumerate() {
+        let mut units = BTreeMap::<&str, Vec<&TranslationCatalogEntry>>::new();
+        for entry in select_entries(catalog, Some(culture)) {
+            let key = if !old && xliff_metadata(entry, false) {
+                entry
+                    .metadata
+                    .get("xliff.segment")
+                    .and_then(|id| entry.key.strip_suffix(&format!("#{id}")))
+                    .unwrap_or(&entry.key)
+            } else {
+                &entry.key
+            };
+            units.entry(key).or_default().push(entry);
+        }
+        let mut used_ids = BTreeSet::new();
+        for group in units.values() {
+            if let Some(id) = group[0]
+                .metadata
+                .get("xliff.unit_id")
+                .filter(|_| xliff_metadata(group[0], old))
+            {
+                if id.is_empty() || !used_ids.insert(id.clone()) {
+                    return Err("XLIFF file contains empty or duplicate unit identifiers.".into());
+                }
+            }
+        }
+        let mut generated_id = 1;
+        for (key, mut entries) in units {
+            let first = entries[0];
+            if entries.iter().any(|entry| {
+                entry.comment != first.comment
+                    || entry.context != first.context
+                    || [
+                        "xliff.unit_id",
+                        "xliff.unit_attributes",
+                        "xliff.notes",
+                        "xliff.extras",
+                        "xliff.extra_positions",
+                    ]
+                    .iter()
+                    .any(|key| entry.metadata.get(*key) != first.metadata.get(*key))
+            }) {
+                return Err(format!(
+                    "XLIFF unit '{key}' has conflicting shared notes or metadata."
+                ));
+            }
+            let mut orders = BTreeSet::new();
+            for entry in &entries {
+                if let Some(order) = entry.metadata.get("xliff.segment_order") {
+                    let order = order
+                        .parse::<usize>()
+                        .map_err(|_| "Invalid retained XLIFF segment order.")?;
+                    if !orders.insert(order) {
+                        return Err(format!(
+                            "XLIFF unit '{key}' has duplicate segment positions."
+                        ));
+                    }
+                }
+            }
+            entries.sort_by_key(|entry| {
+                entry
+                    .metadata
+                    .get("xliff.segment_order")
+                    .and_then(|value| value.parse::<usize>().ok())
+                    .unwrap_or(0)
+            });
+            let id = if let Some(id) = first
+                .metadata
+                .get("xliff.unit_id")
+                .filter(|_| xliff_metadata(first, old))
+            {
+                id.clone()
+            } else {
+                loop {
+                    let id = format!("u{generated_id}");
+                    generated_id += 1;
+                    if used_ids.insert(id.clone()) {
+                        break id;
+                    }
+                }
+            };
             let unit_tag = if old { "trans-unit" } else { "unit" };
-            let key_attr = if old { "resname" } else { "name" };
-            writeln!(
+            let key_attribute = if old { "resname" } else { "name" };
+            write!(
                 output,
-                "<{unit_tag} id=\"u{}\" {key_attr}=\"{}\">",
-                unit_index + 1,
-                escape(&entry.key)
+                "<{unit_tag} id=\"{}\" {key_attribute}=\"{}\"",
+                escape(&id),
+                escape(key)
             )
             .unwrap();
-            let comment = if options.include_comments {
-                entry.comment.as_deref()
-            } else {
-                None
-            };
-            if !old && (comment.is_some() || entry.context.is_some()) {
-                output.push_str("<notes>\n");
-            }
-            if let Some(comment) = comment {
-                element(output, "note", comment);
-            }
-            if let Some(context) = &entry.context {
-                if old {
-                    output.push_str("<context-group><context context-type=\"x-protranslate\">");
-                    output.push_str(&escape(context));
-                    output.push_str("</context></context-group>\n");
-                } else {
-                    output.push_str("<note category=\"context\">");
-                    output.push_str(&escape(context));
-                    output.push_str("</note>\n");
-                }
-            }
-            if !old && (comment.is_some() || entry.context.is_some()) {
-                output.push_str("</notes>\n");
-            }
-            if !old {
-                write!(output, "<segment").unwrap();
-                if let Some(state) = &entry.state {
-                    write!(output, " state=\"{}\"", escape(state)).unwrap();
-                }
-                output.push_str(">\n");
-            }
-            element(
+            write_xliff_attributes(
                 output,
-                "source",
-                entry.source.as_deref().unwrap_or(&entry.key),
-            );
-            output.push_str("<target");
+                first,
+                "xliff.unit_attributes",
+                &["id", "name", "resname"],
+                old,
+            )?;
+            output.push_str(">\n");
+            let extras = retained_list(first, "xliff.extras", old)?;
             if old {
-                if let Some(state) = &entry.state {
-                    write!(output, " state=\"{}\"", escape(state)).unwrap();
+                write_xliff_field(
+                    output,
+                    first,
+                    "source",
+                    first.source.as_deref().unwrap_or(key),
+                    true,
+                )?;
+                for extra in &extras {
+                    let document = Document::parse(extra).map_err(|e| e.to_string())?;
+                    if document.root_element().tag_name().name() == "seg-source" {
+                        if first
+                            .metadata
+                            .get("xliff.source_xml")
+                            .is_some_and(|source| {
+                                Document::parse(source).ok().is_some_and(|source| {
+                                    text(source.root_element())
+                                        != first.source.as_deref().unwrap_or(key)
+                                })
+                            })
+                        {
+                            return Err(format!("XLIFF unit '{key}' source changed while retained segmentation still describes the previous source."));
+                        }
+                        write_xliff_extra(output, extra, true)?;
+                    }
                 }
-            }
-            writeln!(output, ">{}</target>", escape(&entry.value)).unwrap();
-            if !old {
-                output.push_str("</segment>\n");
+                write_xliff_field(output, first, "target", &first.value, true)?;
+                write_xliff_notes(output, first, true, options)?;
+                for extra in &extras {
+                    let document = Document::parse(extra).map_err(|e| e.to_string())?;
+                    if document.root_element().tag_name().name() != "seg-source" {
+                        write_xliff_extra(output, extra, true)?;
+                    }
+                }
+            } else {
+                write_xliff_notes(output, first, false, options)?;
+                let positions: Vec<usize> = first
+                    .metadata
+                    .get("xliff.extra_positions")
+                    .map(|value| {
+                        serde_json::from_value(crate::json::parse_checked(value)?)
+                            .map_err(|e| format!("Invalid XLIFF extra positions: {e}"))
+                    })
+                    .transpose()?
+                    .unwrap_or_else(|| vec![0; extras.len()]);
+                if positions.len() != extras.len()
+                    || positions.windows(2).any(|pair| pair[0] > pair[1])
+                {
+                    return Err("Invalid XLIFF unit metadata ordering.".into());
+                }
+                let mut extra_index = 0;
+                let mut segment_ids = BTreeSet::new();
+                for entry in entries {
+                    let order = entry
+                        .metadata
+                        .get("xliff.segment_order")
+                        .and_then(|value| value.parse::<usize>().ok())
+                        .unwrap_or(0);
+                    while extra_index < extras.len() && positions[extra_index] <= order {
+                        write_xliff_extra(output, &extras[extra_index], false)?;
+                        extra_index += 1;
+                    }
+                    output.push_str("<segment");
+                    write_xliff_attributes(
+                        output,
+                        entry,
+                        "xliff.segment_attributes",
+                        &["id", "state"],
+                        false,
+                    )?;
+                    if let Some(id) = entry
+                        .metadata
+                        .get("xliff.segment")
+                        .or_else(|| entry.metadata.get("xliff.segment_id"))
+                    {
+                        if id.is_empty() || !segment_ids.insert(id) {
+                            return Err(format!(
+                                "XLIFF unit '{key}' has empty or duplicate segment identifiers."
+                            ));
+                        }
+                        write!(output, " id=\"{}\"", escape(id)).unwrap();
+                    }
+                    if let Some(state) = &entry.state {
+                        if !matches!(
+                            state.as_str(),
+                            "initial" | "translated" | "reviewed" | "final"
+                        ) {
+                            return Err(format!(
+                                "State '{state}' is not representable as an XLIFF 2 segment state."
+                            ));
+                        }
+                        write!(output, " state=\"{}\"", escape(state)).unwrap();
+                    }
+                    output.push_str(">\n");
+                    write_xliff_field(
+                        output,
+                        entry,
+                        "source",
+                        entry.source.as_deref().unwrap_or(&entry.key),
+                        false,
+                    )?;
+                    write_xliff_field(output, entry, "target", &entry.value, false)?;
+                    output.push_str("</segment>\n");
+                }
+                while extra_index < extras.len() {
+                    write_xliff_extra(output, &extras[extra_index], false)?;
+                    extra_index += 1;
+                }
             }
             writeln!(output, "</{unit_tag}>").unwrap();
         }
@@ -933,4 +1671,5 @@ fn export_xliff(
         output.push_str("</file>\n");
     }
     output.push_str("</xliff>\n");
+    Ok(())
 }
