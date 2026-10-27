@@ -1,5 +1,6 @@
 //! Schema-aware XAML text editing, navigation, refactoring and stdio LSP.
 mod binding;
+mod design_support;
 mod formatting;
 mod line_index;
 pub mod lsp;
@@ -40,5 +41,7 @@ fn require(value: bool, message: impl Into<String>) -> Result<()> {
 }
 #[cfg(test)]
 mod component_schema_tests;
+#[cfg(test)]
+mod design_time_tests;
 #[cfg(test)]
 mod tests;

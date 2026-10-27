@@ -46,6 +46,41 @@
     ]
   },
   {
+    "name": "AccessKeyHandler",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_base::input::AccessKeyHandler",
+    "base": null,
+    "constructible": false,
+    "properties": {
+      "ShowAccessKey": {
+        "name": "ShowAccessKey",
+        "type_name": "bool",
+        "documentation": "AccessKeyHandler.ShowAccessKey: bool",
+        "values": [
+          "True",
+          "False"
+        ],
+        "attached": true
+      },
+      "AccessKey": {
+        "name": "AccessKey",
+        "type_name": "AccessKeyEventArgs",
+        "documentation": "AccessKeyHandler.AccessKey routed event",
+        "event": true
+      },
+      "AccessKeyPressed": {
+        "name": "AccessKeyPressed",
+        "type_name": "AccessKeyPressedEventArgs",
+        "documentation": "AccessKeyHandler.AccessKeyPressed routed event",
+        "event": true
+      }
+    },
+    "namespace_aliases": [
+      "using:FerroUI.Input",
+      "clr-namespace:FerroUI.Input;assembly=FerroUI.Base"
+    ]
+  },
+  {
     "name": "AccessKeyPressedEventArgs",
     "namespace": "https://github.com/ferroui",
     "documentation": "ferroui_base::input::AccessKeyPressedEventArgs",
@@ -680,6 +715,189 @@
     "namespace_aliases": [
       "using:FerroUI.Automation.Peers",
       "clr-namespace:FerroUI.Automation.Peers;assembly=FerroUI.Controls"
+    ]
+  },
+  {
+    "name": "AutomationProperties",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_controls::automation::AutomationProperties",
+    "base": null,
+    "constructible": false,
+    "properties": {
+      "AcceleratorKey": {
+        "name": "AcceleratorKey",
+        "type_name": "Option<String>",
+        "documentation": "AutomationProperties.AcceleratorKey: Option<String>",
+        "values": [],
+        "attached": true
+      },
+      "AccessibilityView": {
+        "name": "AccessibilityView",
+        "type_name": "AccessibilityView",
+        "documentation": "AutomationProperties.AccessibilityView: AccessibilityView",
+        "values": [
+          "Default",
+          "Raw",
+          "Control",
+          "Content"
+        ],
+        "attached": true
+      },
+      "AccessKey": {
+        "name": "AccessKey",
+        "type_name": "Option<String>",
+        "documentation": "AutomationProperties.AccessKey: Option<String>",
+        "values": [],
+        "attached": true
+      },
+      "AutomationId": {
+        "name": "AutomationId",
+        "type_name": "Option<String>",
+        "documentation": "AutomationProperties.AutomationId: Option<String>",
+        "values": [],
+        "attached": true
+      },
+      "ControlTypeOverride": {
+        "name": "ControlTypeOverride",
+        "type_name": "Option<AutomationControlType>",
+        "documentation": "AutomationProperties.ControlTypeOverride: Option<AutomationControlType>",
+        "values": [],
+        "attached": true
+      },
+      "ClassNameOverride": {
+        "name": "ClassNameOverride",
+        "type_name": "Option<String>",
+        "documentation": "AutomationProperties.ClassNameOverride: Option<String>",
+        "values": [],
+        "attached": true
+      },
+      "IsControlElementOverride": {
+        "name": "IsControlElementOverride",
+        "type_name": "Option<bool>",
+        "documentation": "AutomationProperties.IsControlElementOverride: Option<bool>",
+        "values": [],
+        "attached": true
+      },
+      "HelpText": {
+        "name": "HelpText",
+        "type_name": "Option<String>",
+        "documentation": "AutomationProperties.HelpText: Option<String>",
+        "values": [],
+        "attached": true
+      },
+      "LandmarkType": {
+        "name": "LandmarkType",
+        "type_name": "Option<AutomationLandmarkType>",
+        "documentation": "AutomationProperties.LandmarkType: Option<AutomationLandmarkType>",
+        "values": [],
+        "attached": true
+      },
+      "HeadingLevel": {
+        "name": "HeadingLevel",
+        "type_name": "i32",
+        "documentation": "AutomationProperties.HeadingLevel: i32",
+        "values": [],
+        "attached": true
+      },
+      "IsColumnHeader": {
+        "name": "IsColumnHeader",
+        "type_name": "bool",
+        "documentation": "AutomationProperties.IsColumnHeader: bool",
+        "values": [
+          "True",
+          "False"
+        ],
+        "attached": true
+      },
+      "IsRequiredForForm": {
+        "name": "IsRequiredForForm",
+        "type_name": "bool",
+        "documentation": "AutomationProperties.IsRequiredForForm: bool",
+        "values": [
+          "True",
+          "False"
+        ],
+        "attached": true
+      },
+      "IsRowHeader": {
+        "name": "IsRowHeader",
+        "type_name": "bool",
+        "documentation": "AutomationProperties.IsRowHeader: bool",
+        "values": [
+          "True",
+          "False"
+        ],
+        "attached": true
+      },
+      "IsOffscreenBehavior": {
+        "name": "IsOffscreenBehavior",
+        "type_name": "IsOffscreenBehavior",
+        "documentation": "AutomationProperties.IsOffscreenBehavior: IsOffscreenBehavior",
+        "values": [
+          "Default",
+          "Onscreen",
+          "Offscreen",
+          "FromClip"
+        ],
+        "attached": true
+      },
+      "ItemStatus": {
+        "name": "ItemStatus",
+        "type_name": "Option<String>",
+        "documentation": "AutomationProperties.ItemStatus: Option<String>",
+        "values": [],
+        "attached": true
+      },
+      "ItemType": {
+        "name": "ItemType",
+        "type_name": "Option<String>",
+        "documentation": "AutomationProperties.ItemType: Option<String>",
+        "values": [],
+        "attached": true
+      },
+      "LabeledBy": {
+        "name": "LabeledBy",
+        "type_name": "Option<ElementRef<Control>>",
+        "documentation": "AutomationProperties.LabeledBy: Option<ElementRef<Control>>",
+        "values": [],
+        "attached": true
+      },
+      "LiveSetting": {
+        "name": "LiveSetting",
+        "type_name": "AutomationLiveSetting",
+        "documentation": "AutomationProperties.LiveSetting: AutomationLiveSetting",
+        "values": [
+          "Off",
+          "Polite",
+          "Assertive"
+        ],
+        "attached": true
+      },
+      "Name": {
+        "name": "Name",
+        "type_name": "Option<String>",
+        "documentation": "AutomationProperties.Name: Option<String>",
+        "values": [],
+        "attached": true
+      },
+      "PositionInSet": {
+        "name": "PositionInSet",
+        "type_name": "i32",
+        "documentation": "AutomationProperties.PositionInSet: i32",
+        "values": [],
+        "attached": true
+      },
+      "SizeOfSet": {
+        "name": "SizeOfSet",
+        "type_name": "i32",
+        "documentation": "AutomationProperties.SizeOfSet: i32",
+        "values": [],
+        "attached": true
+      }
+    },
+    "namespace_aliases": [
+      "using:FerroUI.Automation",
+      "clr-namespace:FerroUI.Automation;assembly=FerroUI.Controls"
     ]
   },
   {
@@ -3246,6 +3464,38 @@
     ]
   },
   {
+    "name": "Container",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_base::styling::Container",
+    "base": null,
+    "constructible": false,
+    "properties": {
+      "Name": {
+        "name": "Name",
+        "type_name": "Option<String>",
+        "documentation": "Container.Name: Option<String>",
+        "values": [],
+        "attached": true
+      },
+      "Sizing": {
+        "name": "Sizing",
+        "type_name": "ContainerSizing",
+        "documentation": "Container.Sizing: ContainerSizing",
+        "values": [
+          "Normal",
+          "Width",
+          "Height",
+          "WidthAndHeight"
+        ],
+        "attached": true
+      }
+    },
+    "namespace_aliases": [
+      "using:FerroUI.Styling",
+      "clr-namespace:FerroUI.Styling;assembly=FerroUI.Base"
+    ]
+  },
+  {
     "name": "ContainerQuery",
     "namespace": "https://github.com/ferroui",
     "documentation": "ferroui_base::styling::ContainerQuery",
@@ -4762,6 +5012,54 @@
     ]
   },
   {
+    "name": "Design",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_controls::Design",
+    "base": null,
+    "constructible": false,
+    "properties": {
+      "Height": {
+        "name": "Height",
+        "type_name": "f64",
+        "documentation": "Design.Height: f64",
+        "values": [],
+        "attached": true
+      },
+      "Width": {
+        "name": "Width",
+        "type_name": "f64",
+        "documentation": "Design.Width: f64",
+        "values": [],
+        "attached": true
+      },
+      "DataContext": {
+        "name": "DataContext",
+        "type_name": "Option<BoxedValue>",
+        "documentation": "Design.DataContext: Option<BoxedValue>",
+        "values": [],
+        "attached": true
+      },
+      "PreviewWith": {
+        "name": "PreviewWith",
+        "type_name": "Option<Ref<Control>>",
+        "documentation": "Design.PreviewWith: Option<Ref<Control>>",
+        "values": [],
+        "attached": true
+      },
+      "DesignStyle": {
+        "name": "DesignStyle",
+        "type_name": "Option<DesignStyleValue>",
+        "documentation": "Design.DesignStyle: Option<DesignStyleValue>",
+        "values": [],
+        "attached": true
+      }
+    },
+    "namespace_aliases": [
+      "using:FerroUI.Controls",
+      "clr-namespace:FerroUI.Controls;assembly=FerroUI.Controls"
+    ]
+  },
+  {
     "name": "DoNothingForNullConverter",
     "namespace": "https://github.com/ferroui",
     "documentation": "ferroui_controls_color_picker::converters::DoNothingForNullConverter",
@@ -4832,6 +5130,53 @@
     "namespace_aliases": [
       "using:FerroUI.Animation",
       "clr-namespace:FerroUI.Animation;assembly=FerroUI.Base"
+    ]
+  },
+  {
+    "name": "DragDrop",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_base::input::DragDrop",
+    "base": null,
+    "constructible": false,
+    "properties": {
+      "AllowDrop": {
+        "name": "AllowDrop",
+        "type_name": "bool",
+        "documentation": "DragDrop.AllowDrop: bool",
+        "values": [
+          "True",
+          "False"
+        ],
+        "attached": true
+      },
+      "DragEnter": {
+        "name": "DragEnter",
+        "type_name": "DragEventArgs",
+        "documentation": "DragDrop.DragEnter routed event",
+        "event": true
+      },
+      "DragLeave": {
+        "name": "DragLeave",
+        "type_name": "DragEventArgs",
+        "documentation": "DragDrop.DragLeave routed event",
+        "event": true
+      },
+      "DragOver": {
+        "name": "DragOver",
+        "type_name": "DragEventArgs",
+        "documentation": "DragDrop.DragOver routed event",
+        "event": true
+      },
+      "Drop": {
+        "name": "Drop",
+        "type_name": "DragEventArgs",
+        "documentation": "DragDrop.Drop routed event",
+        "event": true
+      }
+    },
+    "namespace_aliases": [
+      "using:FerroUI.Input",
+      "clr-namespace:FerroUI.Input;assembly=FerroUI.Base"
     ]
   },
   {
@@ -5870,6 +6215,54 @@
     ]
   },
   {
+    "name": "Flex",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_controls::Flex",
+    "base": null,
+    "constructible": false,
+    "properties": {
+      "AlignSelf": {
+        "name": "AlignSelf",
+        "type_name": "Option<FlexAlignItems>",
+        "documentation": "Flex.AlignSelf: Option<FlexAlignItems>",
+        "values": [],
+        "attached": true
+      },
+      "Order": {
+        "name": "Order",
+        "type_name": "i32",
+        "documentation": "Flex.Order: i32",
+        "values": [],
+        "attached": true
+      },
+      "Basis": {
+        "name": "Basis",
+        "type_name": "FlexBasis",
+        "documentation": "Flex.Basis: FlexBasis",
+        "values": [],
+        "attached": true
+      },
+      "Shrink": {
+        "name": "Shrink",
+        "type_name": "f64",
+        "documentation": "Flex.Shrink: f64",
+        "values": [],
+        "attached": true
+      },
+      "Grow": {
+        "name": "Grow",
+        "type_name": "f64",
+        "documentation": "Flex.Grow: f64",
+        "values": [],
+        "attached": true
+      }
+    },
+    "namespace_aliases": [
+      "using:FerroUI.Controls",
+      "clr-namespace:FerroUI.Controls;assembly=FerroUI.Controls"
+    ]
+  },
+  {
     "name": "FlexPanel",
     "namespace": "https://github.com/ferroui",
     "documentation": "ferroui_controls::FlexPanel",
@@ -6107,6 +6500,18 @@
     ]
   },
   {
+    "name": "FocusManager",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_base::input::FocusManager",
+    "base": null,
+    "constructible": false,
+    "properties": {},
+    "namespace_aliases": [
+      "using:FerroUI.Input",
+      "clr-namespace:FerroUI.Input;assembly=FerroUI.Base"
+    ]
+  },
+  {
     "name": "FontFamily",
     "namespace": "https://github.com/ferroui",
     "documentation": "ferroui_base::media::FontFamily",
@@ -6267,6 +6672,18 @@
     "namespace_aliases": [
       "using:FerroUI.Input.GestureRecognizers",
       "clr-namespace:FerroUI.Input.GestureRecognizers;assembly=FerroUI.Base"
+    ]
+  },
+  {
+    "name": "Gestures",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_base::input::Gestures",
+    "base": null,
+    "constructible": false,
+    "properties": {},
+    "namespace_aliases": [
+      "using:FerroUI.Input",
+      "clr-namespace:FerroUI.Input;assembly=FerroUI.Base"
     ]
   },
   {
@@ -6662,6 +7079,26 @@
     "namespace_aliases": [
       "using:FerroUI.Input",
       "clr-namespace:FerroUI.Input;assembly=FerroUI.Base"
+    ]
+  },
+  {
+    "name": "HotKeyManager",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_controls::HotKeyManager",
+    "base": null,
+    "constructible": false,
+    "properties": {
+      "HotKey": {
+        "name": "HotKey",
+        "type_name": "Option<KeyGesture>",
+        "documentation": "HotKeyManager.HotKey: Option<KeyGesture>",
+        "values": [],
+        "attached": true
+      }
+    },
+    "namespace_aliases": [
+      "using:FerroUI.Controls",
+      "clr-namespace:FerroUI.Controls;assembly=FerroUI.Controls"
     ]
   },
   {
@@ -7224,6 +7661,29 @@
         "type_name": "TappedEventArgs",
         "documentation": "InputElement.DoubleTapped routed event",
         "event": true
+      }
+    },
+    "namespace_aliases": [
+      "using:FerroUI.Input",
+      "clr-namespace:FerroUI.Input;assembly=FerroUI.Base"
+    ]
+  },
+  {
+    "name": "InputMethod",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_base::input::InputMethod",
+    "base": null,
+    "constructible": false,
+    "properties": {
+      "IsInputMethodEnabled": {
+        "name": "IsInputMethodEnabled",
+        "type_name": "bool",
+        "documentation": "InputMethod.IsInputMethodEnabled: bool",
+        "values": [
+          "True",
+          "False"
+        ],
+        "attached": true
       }
     },
     "namespace_aliases": [
@@ -7801,6 +8261,57 @@
     ]
   },
   {
+    "name": "KeyboardNavigation",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_base::input::KeyboardNavigation",
+    "base": null,
+    "constructible": false,
+    "properties": {
+      "TabIndex": {
+        "name": "TabIndex",
+        "type_name": "i32",
+        "documentation": "KeyboardNavigation.TabIndex: i32",
+        "values": [],
+        "attached": true
+      },
+      "TabNavigation": {
+        "name": "TabNavigation",
+        "type_name": "KeyboardNavigationMode",
+        "documentation": "KeyboardNavigation.TabNavigation: KeyboardNavigationMode",
+        "values": [
+          "Continue",
+          "Cycle",
+          "Contained",
+          "Once",
+          "None",
+          "Local"
+        ],
+        "attached": true
+      },
+      "TabOnceActiveElement": {
+        "name": "TabOnceActiveElement",
+        "type_name": "Option<Ref<InputElement>>",
+        "documentation": "KeyboardNavigation.TabOnceActiveElement: Option<Ref<InputElement>>",
+        "values": [],
+        "attached": true
+      },
+      "IsTabStop": {
+        "name": "IsTabStop",
+        "type_name": "bool",
+        "documentation": "KeyboardNavigation.IsTabStop: bool",
+        "values": [
+          "True",
+          "False"
+        ],
+        "attached": true
+      }
+    },
+    "namespace_aliases": [
+      "using:FerroUI.Input",
+      "clr-namespace:FerroUI.Input;assembly=FerroUI.Base"
+    ]
+  },
+  {
     "name": "Label",
     "namespace": "https://github.com/ferroui",
     "documentation": "ferroui_controls::Label",
@@ -8188,6 +8699,29 @@
     "namespace_aliases": [
       "using:FerroUI.Automation.Peers",
       "clr-namespace:FerroUI.Automation.Peers;assembly=FerroUI.Controls"
+    ]
+  },
+  {
+    "name": "MacOSProperties",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_controls::MacOSProperties",
+    "base": null,
+    "constructible": false,
+    "properties": {
+      "IsTemplateIcon": {
+        "name": "IsTemplateIcon",
+        "type_name": "bool",
+        "documentation": "MacOSProperties.IsTemplateIcon: bool",
+        "values": [
+          "True",
+          "False"
+        ],
+        "attached": true
+      }
+    },
+    "namespace_aliases": [
+      "using:FerroUI.Controls",
+      "clr-namespace:FerroUI.Controls;assembly=FerroUI.Controls"
     ]
   },
   {
@@ -8956,6 +9490,26 @@
     ]
   },
   {
+    "name": "NameScope",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_base::controls::NameScope",
+    "base": null,
+    "constructible": false,
+    "properties": {
+      "NameScope": {
+        "name": "NameScope",
+        "type_name": "Option<NameScopeRef>",
+        "documentation": "NameScope.NameScope: Option<NameScopeRef>",
+        "values": [],
+        "attached": true
+      }
+    },
+    "namespace_aliases": [
+      "using:FerroUI.Controls",
+      "clr-namespace:FerroUI.Controls;assembly=FerroUI.Base"
+    ]
+  },
+  {
     "name": "NativeControlHost",
     "namespace": "https://github.com/ferroui",
     "documentation": "ferroui_controls::NativeControlHost",
@@ -8977,6 +9531,26 @@
     "namespace_aliases": [
       "using:FerroUI.Controls.Automation.Peers",
       "clr-namespace:FerroUI.Controls.Automation.Peers;assembly=FerroUI.Controls"
+    ]
+  },
+  {
+    "name": "NativeDock",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_controls::NativeDock",
+    "base": null,
+    "constructible": false,
+    "properties": {
+      "Menu": {
+        "name": "Menu",
+        "type_name": "Option<Ref<NativeMenu>>",
+        "documentation": "NativeDock.Menu: Option<Ref<NativeMenu>>",
+        "values": [],
+        "attached": true
+      }
+    },
+    "namespace_aliases": [
+      "using:FerroUI.Controls",
+      "clr-namespace:FerroUI.Controls;assembly=FerroUI.Controls"
     ]
   },
   {
@@ -10030,6 +10604,18 @@
     ]
   },
   {
+    "name": "PanelContainerGenerator",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "PanelContainerGenerator",
+    "base": null,
+    "constructible": false,
+    "properties": {},
+    "namespace_aliases": [
+      "using:FerroUI.Controls.Presenters",
+      "clr-namespace:FerroUI.Controls.Presenters;assembly=FerroUI.Controls"
+    ]
+  },
+  {
     "name": "Path",
     "namespace": "https://github.com/ferroui",
     "documentation": "ferroui_controls::shapes::Path",
@@ -10435,6 +11021,31 @@
     "namespace_aliases": [
       "using:FerroUI.Controls.Primitives",
       "clr-namespace:FerroUI.Controls.Primitives;assembly=FerroUI.Controls"
+    ]
+  },
+  {
+    "name": "PlatformFeedback",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_controls::PlatformFeedback",
+    "base": null,
+    "constructible": false,
+    "properties": {
+      "FeedbackType": {
+        "name": "FeedbackType",
+        "type_name": "FeedbackType",
+        "documentation": "PlatformFeedback.FeedbackType: FeedbackType",
+        "values": [
+          "None",
+          "Auto",
+          "Sound",
+          "Haptic"
+        ],
+        "attached": true
+      }
+    },
+    "namespace_aliases": [
+      "using:FerroUI.Controls",
+      "clr-namespace:FerroUI.Controls;assembly=FerroUI.Controls"
     ]
   },
   {
@@ -16405,6 +17016,118 @@
     ]
   },
   {
+    "name": "TextInputOptions",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_base::input::text_input::TextInputOptions",
+    "base": null,
+    "constructible": false,
+    "properties": {
+      "ContentType": {
+        "name": "ContentType",
+        "type_name": "TextInputContentType",
+        "documentation": "TextInputOptions.ContentType: TextInputContentType",
+        "values": [
+          "Normal",
+          "Alpha",
+          "Digits",
+          "Pin",
+          "Number",
+          "Email",
+          "Url",
+          "Name",
+          "Password",
+          "Social",
+          "Search"
+        ],
+        "attached": true
+      },
+      "ReturnKeyType": {
+        "name": "ReturnKeyType",
+        "type_name": "TextInputReturnKeyType",
+        "documentation": "TextInputOptions.ReturnKeyType: TextInputReturnKeyType",
+        "values": [
+          "Default",
+          "Return",
+          "Done",
+          "Go",
+          "Send",
+          "Search",
+          "Next",
+          "Previous"
+        ],
+        "attached": true
+      },
+      "Multiline": {
+        "name": "Multiline",
+        "type_name": "bool",
+        "documentation": "TextInputOptions.Multiline: bool",
+        "values": [
+          "True",
+          "False"
+        ],
+        "attached": true
+      },
+      "Lowercase": {
+        "name": "Lowercase",
+        "type_name": "bool",
+        "documentation": "TextInputOptions.Lowercase: bool",
+        "values": [
+          "True",
+          "False"
+        ],
+        "attached": true
+      },
+      "Uppercase": {
+        "name": "Uppercase",
+        "type_name": "bool",
+        "documentation": "TextInputOptions.Uppercase: bool",
+        "values": [
+          "True",
+          "False"
+        ],
+        "attached": true
+      },
+      "AutoCapitalization": {
+        "name": "AutoCapitalization",
+        "type_name": "bool",
+        "documentation": "TextInputOptions.AutoCapitalization: bool",
+        "values": [
+          "True",
+          "False"
+        ],
+        "attached": true
+      },
+      "IsSensitive": {
+        "name": "IsSensitive",
+        "type_name": "bool",
+        "documentation": "TextInputOptions.IsSensitive: bool",
+        "values": [
+          "True",
+          "False"
+        ],
+        "attached": true
+      },
+      "ShowSuggestions": {
+        "name": "ShowSuggestions",
+        "type_name": "Option<bool>",
+        "documentation": "TextInputOptions.ShowSuggestions: Option<bool>",
+        "values": [],
+        "attached": true
+      },
+      "LocaleHints": {
+        "name": "LocaleHints",
+        "type_name": "Option<Rc<[String]>>",
+        "documentation": "TextInputOptions.LocaleHints: Option<Rc<[String]>>",
+        "values": [],
+        "attached": true
+      }
+    },
+    "namespace_aliases": [
+      "using:FerroUI.Input.TextInput",
+      "clr-namespace:FerroUI.Input.TextInput;assembly=FerroUI.Base"
+    ]
+  },
+  {
     "name": "TextPresenter",
     "namespace": "https://github.com/ferroui",
     "documentation": "ferroui_controls::presenters::TextPresenter",
@@ -16615,6 +17338,33 @@
     "namespace_aliases": [
       "using:FerroUI.Controls.Presenters",
       "clr-namespace:FerroUI.Controls.Presenters;assembly=FerroUI.Controls"
+    ]
+  },
+  {
+    "name": "TextSearch",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_controls::primitives::TextSearch",
+    "base": null,
+    "constructible": false,
+    "properties": {
+      "Text": {
+        "name": "Text",
+        "type_name": "Option<String>",
+        "documentation": "TextSearch.Text: Option<String>",
+        "values": [],
+        "attached": true
+      },
+      "TextBinding": {
+        "name": "TextBinding",
+        "type_name": "Option<AssignedBinding>",
+        "documentation": "TextSearch.TextBinding: Option<AssignedBinding>",
+        "values": [],
+        "attached": true
+      }
+    },
+    "namespace_aliases": [
+      "using:FerroUI.Controls.Primitives",
+      "clr-namespace:FerroUI.Controls.Primitives;assembly=FerroUI.Controls"
     ]
   },
   {
@@ -19534,6 +20284,73 @@
     ]
   },
   {
+    "name": "WaylandProperties",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "WaylandProperties",
+    "base": null,
+    "constructible": false,
+    "properties": {
+      "AppId": {
+        "name": "AppId",
+        "type_name": "Option<String>",
+        "documentation": "WaylandProperties.AppId: Option<String>",
+        "values": [],
+        "attached": true
+      }
+    },
+    "namespace_aliases": [
+      "using:FerroUI.Controls.Platform",
+      "clr-namespace:FerroUI.Controls.Platform;assembly=FerroUI.Controls"
+    ]
+  },
+  {
+    "name": "Win32Properties",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_controls::Win32Properties",
+    "base": null,
+    "constructible": false,
+    "properties": {
+      "NonClientHitTestResult": {
+        "name": "NonClientHitTestResult",
+        "type_name": "Win32HitTestValue",
+        "documentation": "Win32Properties.NonClientHitTestResult: Win32HitTestValue",
+        "values": [
+          "Nowhere",
+          "Client",
+          "Caption",
+          "MinButton",
+          "MaxButton",
+          "Left",
+          "Right",
+          "Top",
+          "TopLeft",
+          "TopRight",
+          "Bottom",
+          "BottomLeft",
+          "BottomRight",
+          "Close"
+        ],
+        "attached": true
+      },
+      "WindowCornerPreference": {
+        "name": "WindowCornerPreference",
+        "type_name": "WindowCornerPreference",
+        "documentation": "Win32Properties.WindowCornerPreference: WindowCornerPreference",
+        "values": [
+          "Default",
+          "DoNotRound",
+          "Round",
+          "RoundSmall"
+        ],
+        "attached": true
+      }
+    },
+    "namespace_aliases": [
+      "using:FerroUI.Controls",
+      "clr-namespace:FerroUI.Controls;assembly=FerroUI.Controls"
+    ]
+  },
+  {
     "name": "Window",
     "namespace": "https://github.com/ferroui",
     "documentation": "ferroui_controls::Window",
@@ -19758,6 +20575,43 @@
     "namespace_aliases": [
       "using:FerroUI.Automation.Peers",
       "clr-namespace:FerroUI.Automation.Peers;assembly=FerroUI.Controls"
+    ]
+  },
+  {
+    "name": "WindowDecorationProperties",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_controls::chrome::WindowDecorationProperties",
+    "base": null,
+    "constructible": false,
+    "properties": {
+      "ElementRole": {
+        "name": "ElementRole",
+        "type_name": "WindowDecorationsElementRole",
+        "documentation": "WindowDecorationProperties.ElementRole: WindowDecorationsElementRole",
+        "values": [
+          "None",
+          "DecorationsElement",
+          "User",
+          "TitleBar",
+          "ResizeN",
+          "ResizeS",
+          "ResizeE",
+          "ResizeW",
+          "ResizeNE",
+          "ResizeNW",
+          "ResizeSE",
+          "ResizeSW",
+          "CloseButton",
+          "MinimizeButton",
+          "MaximizeButton",
+          "FullScreenButton"
+        ],
+        "attached": true
+      }
+    },
+    "namespace_aliases": [
+      "using:FerroUI.Controls.Chrome",
+      "clr-namespace:FerroUI.Controls.Chrome;assembly=FerroUI.Controls"
     ]
   },
   {
@@ -19986,6 +20840,62 @@
     "namespace_aliases": [
       "using:FerroUI.Controls",
       "clr-namespace:FerroUI.Controls;assembly=FerroUI.Controls"
+    ]
+  },
+  {
+    "name": "X11Properties",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_controls::X11Properties",
+    "base": null,
+    "constructible": false,
+    "properties": {
+      "NetWmWindowType": {
+        "name": "NetWmWindowType",
+        "type_name": "X11NetWmWindowType",
+        "documentation": "X11Properties.NetWmWindowType: X11NetWmWindowType",
+        "values": [
+          "Normal",
+          "Dialog",
+          "Utility",
+          "Menu",
+          "Toolbar",
+          "Splash",
+          "Dock",
+          "Desktop"
+        ],
+        "attached": true
+      },
+      "WmClass": {
+        "name": "WmClass",
+        "type_name": "Option<String>",
+        "documentation": "X11Properties.WmClass: Option<String>",
+        "values": [],
+        "attached": true
+      }
+    },
+    "namespace_aliases": [
+      "using:FerroUI.Controls",
+      "clr-namespace:FerroUI.Controls;assembly=FerroUI.Controls"
+    ]
+  },
+  {
+    "name": "XYFocus",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_base::input::XYFocus",
+    "base": null,
+    "constructible": false,
+    "properties": {
+      "NavigationModes": {
+        "name": "NavigationModes",
+        "type_name": "XYFocusNavigationModes",
+        "documentation": "XYFocus.NavigationModes: XYFocusNavigationModes",
+        "values": [],
+        "attached": true
+      }
+    },
+    "namespace_aliases": [
+      "using:FerroUI.Input",
+      "clr-namespace:FerroUI.Input;assembly=FerroUI.Base"
     ]
   },
   {

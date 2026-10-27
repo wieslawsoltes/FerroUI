@@ -171,6 +171,34 @@ fn source_type<'a>(
                     == Some("http://schemas.microsoft.com/winfx/2006/xaml")
         }) {
             return type_reference(schema, document, id, &data_type.value);
+        } else if let Some(context) = ancestor
+            .children
+            .iter()
+            .filter_map(|id| document.ast().node(*id))
+            .find(|child| {
+                child.namespace_uri.as_deref() == Some(crate::design_support::DESIGN_NAMESPACE)
+                    && crate::design_support::property_element(schema, document, child)
+                        .is_some_and(|property| property.name == "DataContext")
+                    || child.name == "Design.DataContext"
+                        && child
+                            .namespace_uri
+                            .as_deref()
+                            .is_none_or(|namespace| namespace == crate::schema::FRAMEWORK_NAMESPACE)
+            })
+        {
+            // A concrete design-time data object gives binding IntelliSense a real source
+            // type. Do not infer arbitrary object/markup values or leak an outer context
+            // through an unresolved explicit design context.
+            let mut objects = context
+                .children
+                .iter()
+                .filter_map(|id| document.ast().node(*id))
+                .filter(|node| node.kind == ferroui_designer_core::NodeKind::Element);
+            let object = objects.next()?;
+            if objects.next().is_some() {
+                return None;
+            }
+            return schema.type_info(&object.name, object.namespace_uri.as_deref());
         } else if matches!(native_type, Some("DataTemplate" | "TreeDataTemplate")) {
             if let Some(data_type) = ancestor.attributes.iter().find(|attribute| {
                 schema

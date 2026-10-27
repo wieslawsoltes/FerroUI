@@ -42,6 +42,7 @@ def read_markup_properties(body, properties):
 enums={}
 extra={}
 aliases={}
+static_types=set()
 for directory,crate in crates:
     registration=framework.read(ROOT/directory/"register_types.rs")
     mappings=re.findall(r'\(\s*"([\w:]+)"\s*,\s*"([\w.]+)"\s*\)',registration)
@@ -66,6 +67,11 @@ for directory,crate in crates:
             body=text[match.end():framework.matching(text,match.end()-1,"{","}")]
             enums[match.group(1)]=re.findall(r"(?m)^\s*([A-Z]\w*)\s*(?:,|=)",body)
         for match in re.finditer(r"ferro_class!\s*[({]\s*([A-Z]\w*)\s*:",text):
+            register_aliases(match.group(1),path,"")
+        # Static owners register real attached properties (KeyboardNavigation, Design,
+        # ToolTip, etc.) without deriving from or constructing a framework object.
+        for match in re.finditer(r"\bferro_static_type!\s*\(\s*([A-Z]\w*)\s*\)",text):
+            static_types.add(match.group(1))
             register_aliases(match.group(1),path,"")
         for match in re.finditer(r"ferro_class_info!\s*\(\s*(\w+)\s*\{",text):
             body=text[match.end():framework.matching(text,match.end()-1,"{","}")]
@@ -103,7 +109,7 @@ for directory,crate in crates:
             register_aliases(match.group(1),path,"")
 
 types=[]
-for name in sorted(set(model.bases)|model.creatable|set(extra)):
+for name in sorted(set(model.bases)|model.creatable|set(extra)|static_types):
     properties={}
     for kind,prop,value_type,_,_ in model.properties.get(name,[]):
         label=pascal(prop)

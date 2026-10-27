@@ -161,6 +161,11 @@ impl Schema {
     }
     pub fn type_info(&self, name: &str, namespace: Option<&str>) -> Option<&TypeInfo> {
         let namespace = namespace.unwrap_or(FRAMEWORK_NAMESPACE);
+        let namespace = if namespace == crate::design_support::DESIGN_NAMESPACE {
+            FRAMEWORK_NAMESPACE
+        } else {
+            namespace
+        };
         let name = name.rsplit(':').next().unwrap_or(name);
         let resolve = |name: &str| {
             let key = format!("{namespace}|{name}");
@@ -212,6 +217,12 @@ impl Schema {
         node: &ferroui_designer_core::Node,
         attribute: &ferroui_designer_core::Attribute,
     ) -> Option<PropertyInfo> {
+        if attribute.namespace_uri.as_deref()
+            == Some(crate::design_support::COMPATIBILITY_NAMESPACE)
+            && attribute.name.rsplit(':').next() == Some("Ignorable")
+        {
+            return Some(crate::design_support::ignorable_property());
+        }
         let namespaces = document.ast().namespaces(node.id);
         let member_namespace = if attribute.name.contains(':') {
             attribute.namespace_uri.as_deref()
@@ -237,6 +248,28 @@ impl Schema {
         name: &str,
         member_namespace: Option<&str>,
     ) -> Option<PropertyInfo> {
+        if member_namespace == Some(crate::design_support::DESIGN_NAMESPACE) {
+            if name.contains(':')
+                && matches!(
+                    name.rsplit(':').next(),
+                    Some("Name" | "Class" | "Key" | "Ignorable")
+                )
+            {
+                return None;
+            }
+            return crate::design_support::property(
+                self,
+                owner,
+                owner_namespace,
+                name.rsplit(':').next().unwrap_or(name),
+            );
+        }
+        if let Some(name) = name.strip_prefix("Design.") {
+            if matches!(name, "Name" | "Class" | "Key" | "Ignorable") {
+                return None;
+            }
+            return crate::design_support::property(self, owner, owner_namespace, name);
+        }
         if let Some((declaring, property)) = name.rsplit_once('.') {
             let declaring = self.type_info(declaring, member_namespace)?;
             let property = self

@@ -360,6 +360,20 @@ impl LanguageService {
         }
         for node in state.document.ast().elements() {
             if node.kind == NodeKind::PropertyElement {
+                if node.namespace_uri.as_deref() == Some(crate::design_support::DESIGN_NAMESPACE) {
+                    if crate::design_support::property_element(&self.schema, &state.document, node)
+                        .is_none()
+                    {
+                        out.push(diagnostic_at(
+                            state,
+                            node.name_span,
+                            2,
+                            "unknown-property",
+                            &format!("Unknown design-time property element {}", node.name),
+                        )?);
+                    }
+                    continue;
+                }
                 if let Some((owner, property)) = node.local_name().split_once('.') {
                     if self
                         .schema
@@ -420,6 +434,17 @@ impl LanguageService {
                             &error,
                         )?);
                     }
+                    if let Some(message) =
+                        crate::design_support::sample_diagnostic(&state.document, node, attribute)
+                    {
+                        out.push(diagnostic_at(
+                            state,
+                            attribute.value_span,
+                            1,
+                            "sample-data",
+                            &message,
+                        )?);
+                    }
                 }
                 if let Some(property) =
                     self.schema
@@ -465,7 +490,11 @@ impl LanguageService {
                             "Property cannot be assigned",
                         )?);
                     }
-                } else if known && !attribute.name.contains(':') {
+                } else if known
+                    && (!attribute.name.contains(':')
+                        || attribute.namespace_uri.as_deref()
+                            == Some(crate::design_support::DESIGN_NAMESPACE))
+                {
                     out.push(diagnostic_at(
                         state,
                         attribute.name_span,
@@ -576,12 +605,35 @@ impl LanguageService {
                                 ),
                             );
                         }
+                        if let Some((design_prefix, _)) = extension.split_once(':') {
+                            let extension_namespace =
+                                completion_namespace(state, extension, open.unwrap(), offset);
+                            if let Some(info) = crate::design_support::extension(
+                                "SampleData",
+                                extension_namespace.as_deref(),
+                            ) {
+                                let name = format!("{design_prefix}:{}", info.name);
+                                proposals.insert(
+                                    name.clone(),
+                                    (
+                                        "Markup extension".into(),
+                                        info.documentation.clone(),
+                                        3,
+                                        name,
+                                    ),
+                                );
+                            }
+                        }
                     } else {
                         let name = extension
                             .split(|c: char| c.is_whitespace() || c == ',')
                             .next()
                             .unwrap_or("");
-                        if let Some(info) = self.schema.extensions.get(name) {
+                        let extension_namespace =
+                            completion_namespace(state, name, open.unwrap(), offset);
+                        if let Some(info) = self.schema.extensions.get(name).or_else(|| {
+                            crate::design_support::extension(name, extension_namespace.as_deref())
+                        }) {
                             for parameter in &info.parameters {
                                 proposals.insert(
                                     parameter.clone(),
@@ -752,7 +804,125 @@ impl LanguageService {
                         ),
                     );
                 }
+                if let Some((member_prefix, _)) = prefix.split_once(':') {
+                    let member_namespace =
+                        completion_namespace(state, prefix, open.unwrap(), offset);
+                    if member_namespace.as_deref() == Some(crate::design_support::DESIGN_NAMESPACE)
+                    {
+                        let mut properties = self.schema.properties(tag_name, namespace.as_deref());
+                        for (alias, native) in
+                            [("DesignWidth", "Width"), ("DesignHeight", "Height")]
+                        {
+                            if let Some(mut property) = properties.get(native).cloned() {
+                                property.name = alias.into();
+                                properties.insert(alias.into(), property);
+                            }
+                        }
+                        for member in ["PreviewWith", "DesignStyle"] {
+                            if let Some(property) = crate::design_support::property(
+                                &self.schema,
+                                tag_name,
+                                namespace.as_deref(),
+                                member,
+                            ) {
+                                properties.insert(member.into(), property);
+                            }
+                        }
+                        for info in self
+                            .schema
+                            .types
+                            .values()
+                            .filter(|info| info.namespace == crate::schema::FRAMEWORK_NAMESPACE)
+                        {
+                            for property in info
+                                .properties
+                                .values()
+                                .filter(|property| property.attached)
+                            {
+                                let mut property = property.clone();
+                                property.name = format!("{}.{}", info.name, property.name);
+                                properties.insert(property.name.clone(), property);
+                            }
+                        }
+                        for property in properties.values().filter(|property| {
+                            !property.read_only
+                                && !property.event
+                                && !matches!(
+                                    property.name.as_str(),
+                                    "Name" | "Class" | "Key" | "Ignorable"
+                                )
+                        }) {
+                            let label = format!("{member_prefix}:{}", property.name);
+                            proposals.insert(
+                                label.clone(),
+                                (
+                                    property.type_name.clone(),
+                                    property.documentation.clone(),
+                                    10,
+                                    format!("{label}=\"\""),
+                                ),
+                            );
+                        }
+                    } else if member_namespace.as_deref()
+                        == Some(crate::design_support::COMPATIBILITY_NAMESPACE)
+                    {
+                        let info = crate::design_support::ignorable_property();
+                        let label = format!("{member_prefix}:Ignorable");
+                        proposals.insert(
+                            label.clone(),
+                            (
+                                info.type_name,
+                                info.documentation,
+                                14,
+                                format!("{label}=\"\""),
+                            ),
+                        );
+                    }
+                }
             } else {
+                if let Some((owner, _)) = tag_name.rsplit_once('.') {
+                    let owner_namespace = if namespace.as_deref()
+                        == Some(crate::design_support::DESIGN_NAMESPACE)
+                    {
+                        // A design property element on a custom control keeps that owner's
+                        // namespace, while ordinary d:Control elements use native types.
+                        state
+                            .document
+                            .ast()
+                            .element_at(open.unwrap())
+                            .and_then(|id| state.document.ast().node(id))
+                            .and_then(|node| {
+                                let parent = if node.kind == NodeKind::PropertyElement {
+                                    state.document.ast().node(node.parent?)?
+                                } else {
+                                    node
+                                };
+                                (parent.local_name() == owner.rsplit(':').next().unwrap_or(owner))
+                                    .then(|| parent.namespace_uri.clone())
+                                    .flatten()
+                            })
+                            .or_else(|| namespace.clone())
+                    } else {
+                        namespace.clone()
+                    };
+                    for property in self
+                        .schema
+                        .properties(owner, owner_namespace.as_deref())
+                        .values()
+                        .filter(|property| !property.read_only && !property.event)
+                    {
+                        let label = format!("{owner}.{}", property.name);
+                        proposals.insert(
+                            label.clone(),
+                            (
+                                property.type_name.clone(),
+                                property.documentation.clone(),
+                                10,
+                                label,
+                            ),
+                        );
+                    }
+                }
                 for info in self.schema.types.values().filter(|t| {
                     t.constructible
                         && namespace.as_deref().is_none_or(|ns| {
@@ -867,7 +1037,14 @@ impl LanguageService {
             return Ok(None);
         };
         let name = active_extension.name;
-        let Some(info) = self.schema.extensions.get(&name) else {
+        let open = state.index.source()[..offset].rfind('<').unwrap_or(0);
+        let namespace = completion_namespace(state, &name, open, offset);
+        let Some(info) = self
+            .schema
+            .extensions
+            .get(&name)
+            .or_else(|| crate::design_support::extension(&name, namespace.as_deref()))
+        else {
             return Ok(None);
         };
         let active = active_extension
