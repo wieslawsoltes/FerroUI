@@ -33,7 +33,17 @@ pub enum AssetIcon {
     Text,
     Input,
     Toggle,
+    Radio,
+    Switch,
+    Combo,
+    Progress,
     Panel,
+    Dock,
+    Wrap,
+    Uniform,
+    Frame,
+    Viewbox,
+    Scroll,
     Stack,
     Canvas,
     Rectangle,
@@ -50,7 +60,33 @@ impl AssetIcon {
             Self::Text => "M3 4H21V7H14V21H10V7H3Z",
             Self::Input => "M2 5H22V19H2Z M4 7V17H20V7Z M7 8H13V10H11V14H13V16H7V14H9V10H7Z",
             Self::Toggle => "M3 3H21V21H3Z M5 5V19H19V5Z M7 11L10 14L17 7L18.5 8.5L10 17L5.5 12.5Z",
-            Self::Panel => "M3 3H10V10H3Z M14 3H21V10H14Z M3 14H10V21H3Z M14 14H21V21H14Z",
+            Self::Radio => {
+                "M12 2A10 10 0 1 1 12 22A10 10 0 1 1 12 2Z M12 4A8 8 0 1 0 12 20A8 8 0 1 0 12 4Z M12 8A4 4 0 1 1 12 16A4 4 0 1 1 12 8Z"
+            }
+            Self::Switch => {
+                "M8 5H16A7 7 0 0 1 16 19H8A7 7 0 0 1 8 5Z M8 7A5 5 0 0 0 8 17H16A5 5 0 0 0 16 7Z M16 9A3 3 0 1 1 16 15A3 3 0 1 1 16 9Z"
+            }
+            Self::Combo => {
+                "M2 5H22V19H2Z M4 7V17H20V7Z M6 10H11V12H6Z M14 10L17 13L20 10L18.5 8.5L17 10L15.5 8.5Z"
+            }
+            Self::Progress => "M2 7H22V17H2Z M4 9V15H20V9Z M5 10H14V14H5Z",
+            Self::Panel => "M3 3H21V21H3Z M5 5V19H19V5Z M3 9H21V11H3Z M10 3H12V21H10Z",
+            Self::Dock => "M3 3H21V21H3Z M5 9V19H19V9Z M5 5V7H19V5Z M10 9H12V21H10Z",
+            Self::Wrap => {
+                "M3 4H15V8H3Z M17 4H21V8H17Z M3 10H9V14H3Z M11 10H21V14H11Z M3 16H15V20H3Z"
+            }
+            Self::Uniform => {
+                "M3 3H10V10H3Z M5 5V8H8V5Z M14 3H21V10H14Z M16 5V8H19V5Z M3 14H10V21H3Z M5 16V19H8V16Z M14 14H21V21H14Z M16 16V19H19V16Z"
+            }
+            Self::Frame => {
+                "M7 3H17Q21 3 21 7V17Q21 21 17 21H7Q3 21 3 17V7Q3 3 7 3Z M7 5Q5 5 5 7V17Q5 19 7 19H17Q19 19 19 17V7Q19 5 17 5Z"
+            }
+            Self::Viewbox => {
+                "M3 3H10V5H5V10H3Z M14 3H21V10H19V5H14Z M3 14H5V19H10V21H3Z M19 14H21V21H14V19H19Z M8 8H16V16H8Z M10 10V14H14V10Z"
+            }
+            Self::Scroll => {
+                "M3 3H21V21H3Z M5 5V19H19V5Z M16 7H18V13H16Z M7 7H13V9H7Z M7 11H13V13H7Z M7 15H13V17H7Z"
+            }
             Self::Stack => "M3 3H21V7H3Z M3 10H21V14H3Z M3 17H21V21H3Z",
             Self::Canvas => "M3 3H5V19H21V21H3Z M8 5H17V12H8Z M12 14H21V17H12Z",
             Self::Rectangle => "M3 5H21V19H3Z M5 7V17H19V7Z",
@@ -538,7 +574,7 @@ fn asset_content(asset: &DesignerAsset, mode: AssetViewMode) -> Ref<Control> {
     } else {
         let content = Grid::new();
         content.set_column_definitions(ColumnDefinitions::parse("28,*").unwrap());
-        content.set_min_height(42.0);
+        content.set_min_height(36.0);
         content.set_margin(Thickness::new(7.0, 3.0, 6.0, 3.0));
         icon.set_horizontal_alignment(HorizontalAlignment::Left);
         content.children().add(icon.upcast::<Control>());
@@ -591,20 +627,20 @@ pub fn default_designer_assets() -> Vec<DesignerAsset> {
         ("TextBlock", "Controls", "Display text and headings", "<TextBlock Text=\"Text\" FontSize=\"18\" />", Text),
         ("TextBox", "Controls", "Editable text input", "<TextBox Text=\"Edit me\" Width=\"180\" />", Input),
         ("CheckBox", "Controls", "An independent selection", "<CheckBox Content=\"Option\" />", Toggle),
-        ("RadioButton", "Controls", "Choose one option", "<RadioButton Content=\"Option\" />", Toggle),
-        ("ToggleSwitch", "Controls", "An on/off setting", "<ToggleSwitch OnContent=\"On\" OffContent=\"Off\" />", Toggle),
+        ("RadioButton", "Controls", "Choose one option", "<RadioButton Content=\"Option\" />", Radio),
+        ("ToggleSwitch", "Controls", "An on/off setting", "<ToggleSwitch OnContent=\"On\" OffContent=\"Off\" />", Switch),
         ("Slider", "Controls", "Choose a numeric value", "<Slider Width=\"180\" Minimum=\"0\" Maximum=\"100\" Value=\"40\" />", Value),
-        ("ProgressBar", "Controls", "Display progress", "<ProgressBar Width=\"180\" Height=\"6\" Value=\"60\" />", Value),
-        ("ComboBox", "Controls", "A compact choice list", "<ComboBox Width=\"160\" PlaceholderText=\"Choose an option\" />", Input),
-        ("Border", "Layout", "Decorate and frame content", "<Border Width=\"180\" Height=\"100\" Background=\"#FFE0E7FF\" CornerRadius=\"8\" />", Rectangle),
+        ("ProgressBar", "Controls", "Display progress", "<ProgressBar Width=\"180\" Height=\"6\" Value=\"60\" />", Progress),
+        ("ComboBox", "Controls", "A compact choice list", "<ComboBox Width=\"160\" PlaceholderText=\"Choose an option\" />", Combo),
+        ("Border", "Layout", "Decorate and frame content", "<Border Width=\"180\" Height=\"100\" Background=\"#FFE0E7FF\" CornerRadius=\"8\" />", Frame),
         ("Grid", "Layout", "Arrange rows and columns", "<Grid Width=\"220\" Height=\"160\" Background=\"#FFF1F5F9\" RowDefinitions=\"*,*\" ColumnDefinitions=\"*,*\" />", Panel),
         ("StackPanel", "Layout", "Arrange a vertical stack", "<StackPanel Width=\"180\" Height=\"140\" Background=\"#FFF1F5F9\" Spacing=\"8\" />", Stack),
         ("Canvas", "Layout", "Position content precisely", "<Canvas Width=\"240\" Height=\"160\" Background=\"#FFF1F5F9\" />", Canvas),
-        ("WrapPanel", "Layout", "Flow content into new rows", "<WrapPanel Width=\"240\" Height=\"160\" Background=\"#FFF1F5F9\" />", Panel),
-        ("DockPanel", "Layout", "Dock content to edges", "<DockPanel Width=\"240\" Height=\"160\" Background=\"#FFF1F5F9\" />", Panel),
-        ("UniformGrid", "Layout", "Arrange equal-size cells", "<UniformGrid Width=\"240\" Height=\"160\" Rows=\"2\" Columns=\"2\" />", Panel),
-        ("Viewbox", "Layout", "Scale content to fit", "<Viewbox Width=\"160\" Height=\"120\"><TextBlock Text=\"Scale\" /></Viewbox>", Content),
-        ("ScrollViewer", "Layout", "A scrollable content viewport", "<ScrollViewer Width=\"220\" Height=\"160\"><TextBlock Text=\"Scrollable content\" /></ScrollViewer>", Content),
+        ("WrapPanel", "Layout", "Flow content into new rows", "<WrapPanel Width=\"240\" Height=\"160\" Background=\"#FFF1F5F9\" />", Wrap),
+        ("DockPanel", "Layout", "Dock content to edges", "<DockPanel Width=\"240\" Height=\"160\" Background=\"#FFF1F5F9\" />", Dock),
+        ("UniformGrid", "Layout", "Arrange equal-size cells", "<UniformGrid Width=\"240\" Height=\"160\" Rows=\"2\" Columns=\"2\" />", Uniform),
+        ("Viewbox", "Layout", "Scale content to fit", "<Viewbox Width=\"160\" Height=\"120\"><TextBlock Text=\"Scale\" /></Viewbox>", Viewbox),
+        ("ScrollViewer", "Layout", "A scrollable content viewport", "<ScrollViewer Width=\"220\" Height=\"160\"><TextBlock Text=\"Scrollable content\" /></ScrollViewer>", Scroll),
         ("Rectangle", "Shapes", "A rectangle or card background", "<Rectangle Width=\"120\" Height=\"80\" Fill=\"#FF60CDFF\" />", Rectangle),
         ("Ellipse", "Shapes", "A circle or ellipse", "<Ellipse Width=\"100\" Height=\"100\" Fill=\"#FFA78BFA\" />", Ellipse),
     ].into_iter().map(|(title, category, description, source, icon)| DesignerAsset {
