@@ -64,25 +64,54 @@ impl PretextShapedRun {
         advance_y: f64,
     ) -> Self {
         let has_missing_glyphs = glyphs.iter().any(|glyph| glyph.glyph_id == 0);
-        Self { kind, glyphs, font_runs, advance_x, advance_y, has_missing_glyphs }
+        Self {
+            kind,
+            glyphs,
+            font_runs,
+            advance_x,
+            advance_y,
+            has_missing_glyphs,
+        }
     }
 
-    pub fn kind(&self) -> PretextGlyphRunKind { self.kind }
-    pub fn glyphs(&self) -> &[PretextShapedGlyph] { &self.glyphs }
-    pub fn font_runs(&self) -> &[PretextShapedFontRun] { &self.font_runs }
-    pub fn advance_x(&self) -> f64 { self.advance_x }
-    pub fn advance_y(&self) -> f64 { self.advance_y }
-    pub fn has_missing_glyphs(&self) -> bool { self.has_missing_glyphs }
-    pub fn is_shaped(&self) -> bool { self.kind == PretextGlyphRunKind::Shaped }
+    pub fn kind(&self) -> PretextGlyphRunKind {
+        self.kind
+    }
+    pub fn glyphs(&self) -> &[PretextShapedGlyph] {
+        &self.glyphs
+    }
+    pub fn font_runs(&self) -> &[PretextShapedFontRun] {
+        &self.font_runs
+    }
+    pub fn advance_x(&self) -> f64 {
+        self.advance_x
+    }
+    pub fn advance_y(&self) -> f64 {
+        self.advance_y
+    }
+    pub fn has_missing_glyphs(&self) -> bool {
+        self.has_missing_glyphs
+    }
+    pub fn is_shaped(&self) -> bool {
+        self.kind == PretextGlyphRunKind::Shaped
+    }
 }
 
 pub trait IPretextTextShaper {
-    fn shape_text(&self, text: &str, options: PretextShapeOptions) -> Result<PretextShapedRun, PretextError>;
+    fn shape_text(
+        &self,
+        text: &str,
+        options: PretextShapeOptions,
+    ) -> Result<PretextShapedRun, PretextError>;
 }
 
 pub trait IPretextTextShaperFactory {
     fn name(&self) -> &str;
-    fn is_supported(&self) -> bool { true }
-    fn priority(&self) -> i32 { 0 }
+    fn is_supported(&self) -> bool {
+        true
+    }
+    fn priority(&self) -> i32 {
+        0
+    }
     fn create_shaper(&self, font: &str) -> Result<Rc<dyn IPretextTextShaper>, PretextError>;
 }

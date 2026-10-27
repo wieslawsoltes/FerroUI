@@ -26,14 +26,14 @@ pub use pretext_layout_rich_inline::*;
 pub use pretext_layout_shaping::*;
 
 #[cfg(test)]
-mod test_support;
+mod layout_tests;
 #[cfg(test)]
 mod preparation_tests;
 #[cfg(test)]
-mod layout_tests;
+mod reference_tests;
 #[cfg(test)]
 mod rich_inline_tests;
 #[cfg(test)]
 mod shaping_tests;
 #[cfg(test)]
-mod reference_tests;
+mod test_support;

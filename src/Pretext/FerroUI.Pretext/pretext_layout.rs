@@ -42,7 +42,10 @@ pub struct LayoutCursor {
 
 impl LayoutCursor {
     pub const fn new(segment_index: usize, grapheme_index: usize) -> Self {
-        Self { segment_index, grapheme_index }
+        Self {
+            segment_index,
+            grapheme_index,
+        }
     }
 }
 
@@ -115,18 +118,42 @@ pub struct PreparedText {
 }
 
 impl PreparedText {
-    pub fn font(&self) -> &str { &self.font }
-    pub fn white_space(&self) -> WhiteSpaceMode { self.white_space }
-    pub fn discretionary_hyphen_width(&self) -> f64 { self.discretionary_hyphen_width }
-    pub fn tab_stop_advance(&self) -> f64 { self.tab_stop_advance }
-    pub fn widths(&self) -> &[f64] { &self.widths }
-    pub fn line_end_fit_advances(&self) -> &[f64] { &self.line_end_fit_advances }
-    pub fn line_end_paint_advances(&self) -> &[f64] { &self.line_end_paint_advances }
-    pub fn kinds(&self) -> &[SegmentBreakKind] { &self.kinds }
-    pub fn breakable_widths(&self) -> &[Option<Vec<f64>>] { &self.breakable_widths }
-    pub fn breakable_prefix_widths(&self) -> &[Option<Vec<f64>>] { &self.breakable_prefix_widths }
-    pub fn chunks(&self) -> &[PreparedLineChunk] { &self.chunks }
-    pub fn simple_line_walk_fast_path(&self) -> bool { self.simple_line_walk_fast_path }
+    pub fn font(&self) -> &str {
+        &self.font
+    }
+    pub fn white_space(&self) -> WhiteSpaceMode {
+        self.white_space
+    }
+    pub fn discretionary_hyphen_width(&self) -> f64 {
+        self.discretionary_hyphen_width
+    }
+    pub fn tab_stop_advance(&self) -> f64 {
+        self.tab_stop_advance
+    }
+    pub fn widths(&self) -> &[f64] {
+        &self.widths
+    }
+    pub fn line_end_fit_advances(&self) -> &[f64] {
+        &self.line_end_fit_advances
+    }
+    pub fn line_end_paint_advances(&self) -> &[f64] {
+        &self.line_end_paint_advances
+    }
+    pub fn kinds(&self) -> &[SegmentBreakKind] {
+        &self.kinds
+    }
+    pub fn breakable_widths(&self) -> &[Option<Vec<f64>>] {
+        &self.breakable_widths
+    }
+    pub fn breakable_prefix_widths(&self) -> &[Option<Vec<f64>>] {
+        &self.breakable_prefix_widths
+    }
+    pub fn chunks(&self) -> &[PreparedLineChunk] {
+        &self.chunks
+    }
+    pub fn simple_line_walk_fast_path(&self) -> bool {
+        self.simple_line_walk_fast_path
+    }
 }
 
 /// Prepared metrics with source segments for lazy text and glyph materialization.
@@ -139,12 +166,18 @@ pub struct PreparedTextWithSegments {
 }
 
 impl PreparedTextWithSegments {
-    pub fn segments(&self) -> &[String] { &self.segments }
-    pub fn segment_levels(&self) -> Option<&[i8]> { self.segment_levels.as_deref() }
+    pub fn segments(&self) -> &[String] {
+        &self.segments
+    }
+    pub fn segment_levels(&self) -> Option<&[i8]> {
+        self.segment_levels.as_deref()
+    }
 }
 
 impl Deref for PreparedTextWithSegments {
     type Target = PreparedText;
 
-    fn deref(&self) -> &Self::Target { &self.base }
+    fn deref(&self) -> &Self::Target {
+        &self.base
+    }
 }

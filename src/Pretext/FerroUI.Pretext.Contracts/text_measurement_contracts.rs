@@ -34,7 +34,9 @@ pub struct DelegateTextMeasurerFactory<F> {
 
 impl<F: Fn(&str, &str) -> f64 + 'static> DelegateTextMeasurerFactory<F> {
     pub fn new(measure: F) -> Self {
-        Self { measure: Rc::new(measure) }
+        Self {
+            measure: Rc::new(measure),
+        }
     }
 }
 
@@ -43,13 +45,18 @@ struct DelegateTextMeasurer<F> {
     measure: Rc<F>,
 }
 
-impl<F: Fn(&str, &str) -> f64 + 'static> IPretextTextMeasurerFactory for DelegateTextMeasurerFactory<F> {
+impl<F: Fn(&str, &str) -> f64 + 'static> IPretextTextMeasurerFactory
+    for DelegateTextMeasurerFactory<F>
+{
     fn name(&self) -> &str {
         "Delegate"
     }
 
     fn create(&self, font: &str) -> Result<Rc<dyn IPretextTextMeasurer>, PretextError> {
-        Ok(Rc::new(DelegateTextMeasurer { font: font.into(), measure: self.measure.clone() }))
+        Ok(Rc::new(DelegateTextMeasurer {
+            font: font.into(),
+            measure: self.measure.clone(),
+        }))
     }
 }
 

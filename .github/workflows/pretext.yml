@@ -4,6 +4,8 @@ on:
   pull_request:
     paths:
       - 'src/Pretext/**'
+      - 'src/FerroUI/Cargo.toml'
+      - 'src/FerroUI/lib.rs'
       - 'src/FerroUI.Base/media/**'
       - 'src/FerroUI.Base/platform/**'
       - 'src/Headless/FerroUI.Headless/**'
@@ -17,6 +19,8 @@ on:
     branches: [main]
     paths:
       - 'src/Pretext/**'
+      - 'src/FerroUI/Cargo.toml'
+      - 'src/FerroUI/lib.rs'
       - 'src/FerroUI.Base/media/**'
       - 'src/FerroUI.Base/platform/**'
       - 'src/Headless/FerroUI.Headless/**'
@@ -75,7 +79,7 @@ jobs:
           -p ferroui-pretext-media
       - name: Clippy for libraries, tests and examples
         run: >-
-          cargo clippy --locked --all-targets
+          cargo clippy --locked --all-targets --no-deps
           -p ferroui-pretext-contracts
           -p ferroui-pretext
           -p ferroui-pretext-layout
@@ -92,9 +96,13 @@ jobs:
           -p ferroui-pretext-media
       - name: Prepared text and obstacle-flow example
         run: cargo run --locked -p ferroui-pretext-layout --example editorial
+      - name: Native glyph drawing example
+        run: cargo run --locked -p ferroui-pretext-media --example prepared_labels
+      - name: Optional facade integration
+        run: cargo check --locked -p ferroui --no-default-features --features pretext
 
   wasm:
-    name: Portable engine (wasm32)
+    name: All packages (wasm32)
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
@@ -106,9 +114,10 @@ jobs:
         with:
           key: pretext-wasm
           save-if: ${{ github.ref == 'refs/heads/main' }}
-      - name: Core packages compile without native services or a WASI host
+      - name: Packages compile without a WASI host
         run: >-
           cargo check --locked --target wasm32-unknown-unknown
           -p ferroui-pretext-contracts
           -p ferroui-pretext
           -p ferroui-pretext-layout
+          -p ferroui-pretext-media

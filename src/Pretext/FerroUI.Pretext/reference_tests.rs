@@ -20,8 +20,16 @@ fn actual_case(expected: &Value) -> Value {
     let width = input["width"].as_f64().unwrap();
     let line_height = input["lineHeight"].as_f64().unwrap();
     let options = PrepareOptions {
-        white_space: if input["whiteSpace"] == "PreWrap" { WhiteSpaceMode::PreWrap } else { WhiteSpaceMode::Normal },
-        word_break: if input["wordBreak"] == "KeepAll" { WordBreakMode::KeepAll } else { WordBreakMode::Normal },
+        white_space: if input["whiteSpace"] == "PreWrap" {
+            WhiteSpaceMode::PreWrap
+        } else {
+            WhiteSpaceMode::Normal
+        },
+        word_break: if input["wordBreak"] == "KeepAll" {
+            WordBreakMode::KeepAll
+        } else {
+            WordBreakMode::Normal
+        },
     };
     let engine = engine();
     engine.set_locale(input["locale"].as_str());
@@ -35,16 +43,26 @@ fn actual_case(expected: &Value) -> Value {
     while let Some(range) = PretextLayout::layout_next_line_range(&prepared, start, width) {
         assert!(range.end > start, "cursor must advance for {text:?}");
         let materialized = PretextLayout::materialize_line_range(&prepared, &range);
-        assert_eq!(Some(materialized.clone()), PretextLayout::layout_next_line(&prepared, start, width));
+        assert_eq!(
+            Some(materialized.clone()),
+            PretextLayout::layout_next_line(&prepared, start, width)
+        );
         reconstructed.push_str(&slice_prepared_text(&prepared, start, range.end));
         start = range.end;
         streamed.push(line(&materialized));
     }
     // Source range cursors include skipped separators, even when painting omits
     // them. This verifies that the streaming API neither duplicates nor loses text.
-    assert_eq!(reconstructed, prepared.segments().concat(), "range reconstruction for {text:?}");
+    assert_eq!(
+        reconstructed,
+        prepared.segments().concat(),
+        "range reconstruction for {text:?}"
+    );
     let metrics_only = engine.prepare(text, font, options).unwrap();
-    assert_eq!(metrics, PretextLayout::layout(&metrics_only, width, line_height));
+    assert_eq!(
+        metrics,
+        PretextLayout::layout(&metrics_only, width, line_height)
+    );
     json!({
         "input": input,
         "segments": prepared.segments(),
@@ -81,12 +99,21 @@ fn compare(actual: &Value, expected: &Value, path: &str, differences: &mut Vec<S
             }
         }
         (Value::Array(actual), Value::Array(expected)) if actual.len() == expected.len() => {
-            for (index, (actual, expected)) in actual.iter().zip(expected).enumerate() { compare(actual, expected, &format!("{path}[{index}]"), differences); }
+            for (index, (actual, expected)) in actual.iter().zip(expected).enumerate() {
+                compare(actual, expected, &format!("{path}[{index}]"), differences);
+            }
         }
         (Value::Object(actual), Value::Object(expected)) if actual.len() == expected.len() => {
-            for (key, expected) in expected { compare(actual.get(key).unwrap_or(&Value::Null), expected, &format!("{path}.{key}"), differences); }
+            for (key, expected) in expected {
+                compare(
+                    actual.get(key).unwrap_or(&Value::Null),
+                    expected,
+                    &format!("{path}.{key}"),
+                    differences,
+                );
+            }
         }
-        _ if actual == expected => {},
+        _ if actual == expected => {}
         _ => differences.push(format!("{path}: {actual} != {expected}")),
     }
 }
@@ -94,16 +121,30 @@ fn compare(actual: &Value, expected: &Value, path: &str, differences: &mut Vec<S
 #[test]
 fn unchanged_source_reference_corpus_matches_all_prepared_and_layout_outputs() {
     let fixture: Value = serde_json::from_str(include_str!("fixtures/reference.json")).unwrap();
-    assert_eq!(fixture["sourceCommit"], "e70a544e43f7ecffee76d2d22a0224213d7fbba3");
+    assert_eq!(
+        fixture["sourceCommit"],
+        "e70a544e43f7ecffee76d2d22a0224213d7fbba3"
+    );
     let cases = fixture["cases"].as_array().unwrap();
     assert_eq!(cases.len(), 240);
     let mut differences = Vec::new();
     for (index, expected) in cases.iter().enumerate() {
-        let actual = actual_case(expected);
-        if actual["segments"] != expected["segments"] || actual["breakableWidths"] != expected["breakableWidths"] {
-            eprintln!("PREP_DIAG case={index} input={} actual={} expected={} aw={} ew={}", expected["input"], actual["segments"], expected["segments"], actual["breakableWidths"], expected["breakableWidths"]);
-        }
-        compare(&actual, expected, &format!("case[{index}]"), &mut differences);
+        compare(
+            &actual_case(expected),
+            expected,
+            &format!("case[{index}]"),
+            &mut differences,
+        );
     }
-    assert!(differences.is_empty(), "{} mismatches:\n{}", differences.len(), differences.iter().take(40).cloned().collect::<Vec<_>>().join("\n"));
+    assert!(
+        differences.is_empty(),
+        "{} mismatches:\n{}",
+        differences.len(),
+        differences
+            .iter()
+            .take(40)
+            .cloned()
+            .collect::<Vec<_>>()
+            .join("\n")
+    );
 }

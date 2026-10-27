@@ -610,3 +610,72 @@ fn reentrant_backend_replacement_does_not_repopulate_old_font_cache() {
         1
     );
 }
+
+#[test]
+fn recursive_font_creation_drops_displaced_backend_outside_cache_borrow() {
+    use std::cell::Cell;
+    use std::rc::Weak;
+
+    struct Measurer {
+        layout: Option<Weak<PretextLayout>>,
+        drops: Rc<Cell<usize>>,
+    }
+    impl IPretextTextMeasurer for Measurer {
+        fn measure_text(&self, text: &str) -> f64 {
+            text.chars().count() as f64
+        }
+    }
+    impl Drop for Measurer {
+        fn drop(&mut self) {
+            if let Some(layout) = self.layout.as_ref().and_then(Weak::upgrade) {
+                self.drops.set(self.drops.get() + 1);
+                assert_eq!(
+                    layout
+                        .prepare("probe", FONT, PrepareOptions::default())
+                        .unwrap()
+                        .widths(),
+                    &[5.0],
+                );
+            }
+        }
+    }
+    struct Factory {
+        layout: Weak<PretextLayout>,
+        entered: Cell<bool>,
+        drops: Rc<Cell<usize>>,
+    }
+    impl IPretextTextMeasurerFactory for Factory {
+        fn name(&self) -> &str {
+            "Recursive"
+        }
+        fn create(&self, font: &str) -> Result<Rc<dyn IPretextTextMeasurer>, PretextError> {
+            let recursive = self.entered.replace(true);
+            if !recursive {
+                self.layout
+                    .upgrade()
+                    .unwrap()
+                    .prepare("inner", font, PrepareOptions::default())?;
+            }
+            Ok(Rc::new(Measurer {
+                layout: recursive.then(|| self.layout.clone()),
+                drops: self.drops.clone(),
+            }))
+        }
+    }
+
+    let layout = Rc::new(engine());
+    let drops = Rc::new(Cell::new(0));
+    layout.set_text_measurer_factory(Rc::new(Factory {
+        layout: Rc::downgrade(&layout),
+        entered: Cell::new(false),
+        drops: drops.clone(),
+    }));
+    assert_eq!(
+        layout
+            .prepare("outer", FONT, PrepareOptions::default())
+            .unwrap()
+            .widths(),
+        &[5.0],
+    );
+    assert_eq!(drops.get(), 1);
+}

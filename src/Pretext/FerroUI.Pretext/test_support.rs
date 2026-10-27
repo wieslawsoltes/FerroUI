@@ -3,14 +3,17 @@
 
 use std::rc::Rc;
 
-use unicode_general_category::{get_general_category, GeneralCategory};
 use crate::pretext_layout_measurement::text_elements;
+use unicode_general_category::{get_general_category, GeneralCategory};
 
 use crate::*;
 
 pub const FONT: &str = "16px Test Sans";
 pub const LINE_HEIGHT: f64 = 19.0;
-pub const PRE_WRAP: PrepareOptions = PrepareOptions { white_space: WhiteSpaceMode::PreWrap, word_break: WordBreakMode::Normal };
+pub const PRE_WRAP: PrepareOptions = PrepareOptions {
+    white_space: WhiteSpaceMode::PreWrap,
+    word_break: WordBreakMode::Normal,
+};
 
 pub fn engine() -> PretextLayout {
     PretextLayout::new(Rc::new(DelegateTextMeasurerFactory::new(measure_width)))
@@ -42,13 +45,32 @@ pub fn is_wide_character(ch: char) -> bool {
         0xac00..=0xd7af | 0xff00..=0xffef)
 }
 
-pub fn slice_prepared_text(prepared: &PreparedTextWithSegments, start: LayoutCursor, end: LayoutCursor) -> String {
+pub fn slice_prepared_text(
+    prepared: &PreparedTextWithSegments,
+    start: LayoutCursor,
+    end: LayoutCursor,
+) -> String {
     let mut result = String::new();
     for index in start.segment_index..=end.segment_index.min(prepared.segments().len()) {
-        let Some(segment) = prepared.segments().get(index) else { break };
-        let from = if index == start.segment_index { start.grapheme_index } else { 0 };
-        let to = if index == end.segment_index { end.grapheme_index } else { usize::MAX };
-        for grapheme in text_elements(segment).skip(from).take(to.saturating_sub(from)) { result.push_str(grapheme); }
+        let Some(segment) = prepared.segments().get(index) else {
+            break;
+        };
+        let from = if index == start.segment_index {
+            start.grapheme_index
+        } else {
+            0
+        };
+        let to = if index == end.segment_index {
+            end.grapheme_index
+        } else {
+            usize::MAX
+        };
+        for grapheme in text_elements(segment)
+            .skip(from)
+            .take(to.saturating_sub(from))
+        {
+            result.push_str(grapheme);
+        }
     }
     result
 }

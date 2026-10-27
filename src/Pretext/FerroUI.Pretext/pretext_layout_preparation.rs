@@ -211,9 +211,13 @@ impl PretextLayout {
         // The current preparation owns its snapshot, but must not repopulate a
         // newer generation with a stale backend.
         if self.cache_generation.get() == generation {
-            self.font_states
+            let displaced = self
+                .font_states
                 .borrow_mut()
                 .insert(font.to_owned(), state.clone());
+            // A reentrant factory may have populated this same font. Release
+            // the cache borrow before the displaced backend's destructor runs.
+            drop(displaced);
         }
         Ok(state)
     }

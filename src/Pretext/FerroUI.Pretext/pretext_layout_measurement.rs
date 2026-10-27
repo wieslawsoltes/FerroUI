@@ -272,3 +272,26 @@ fn validate_measurement(width: f64) -> Result<f64, PretextError> {
         ))
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn text_elements_preserve_source_conjunct_cursor_boundaries() {
+        for (text, expected) in [
+            ("हिन्दी।भारत", vec!["हि", "न्", "दी", "।", "भा", "र", "त"]),
+            ("नमस्ते।", vec!["न", "म", "स्", "ते", "।"]),
+            ("क्‍ष", vec!["क्‍", "ष"]),
+            ("ক্ষ", vec!["ক্", "ষ"]),
+            ("က္က", vec!["က္", "က"]),
+            ("ക്‍ഷ", vec!["ക്‍", "ഷ"]),
+            ("👨‍👩‍👧‍👦", vec!["👨‍👩‍👧‍👦"]),
+            ("e\u{301}\u{1f1fa}\u{1f1f8}", vec!["e\u{301}", "🇺🇸"]),
+            ("각", vec!["각"]),
+            ("", vec![]),
+        ] {
+            assert_eq!(get_text_elements(text), expected, "{text}");
+        }
+    }
+}
