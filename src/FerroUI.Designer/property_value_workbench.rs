@@ -1016,6 +1016,13 @@ mod tests {
     use ferroui_base::interactivity::RoutedEventArgs;
     use ferroui_controls::testing::{TestServices, UnitTestApplication};
 
+    fn named<T: ferroui_base::ObjectType>(root: &Control, name: &str) -> Ref<T> {
+        root.get_logical_descendants()
+            .find(|control| control.name().as_deref() == Some(name))
+            .and_then(|control| control.cast::<T>())
+            .unwrap_or_else(|| panic!("Missing authored editor control {name}"))
+    }
+
     fn click(root: &Control, title: &str) {
         let button = root
             .get_logical_descendants()
@@ -1051,19 +1058,15 @@ mod tests {
             Ok(())
         }));
         let body = build(&context, &metadata, &Flyout::new());
-        body.get_control::<ComboBox>("PropertyObjectNodes")
-            .set_selected_index(1);
-        body.get_control::<TextBox>("PropertyObjectAttributeName")
-            .set_text(Some("Color"));
-        body.get_control::<TextBox>("PropertyObjectAttributeValue")
-            .set_text(Some("Green"));
+        named::<ComboBox>(&body, "PropertyObjectNodes").set_selected_index(1);
+        named::<TextBox>(&body, "PropertyObjectAttributeName").set_text(Some("Color"));
+        named::<TextBox>(&body, "PropertyObjectAttributeValue").set_text(Some("Green"));
         click(&body, "Set");
         assert!(
             seen.borrow().is_empty(),
             "Structured edits only change the local draft"
         );
-        let source = body
-            .get_control::<TextBox>("PropertyObjectSource")
+        let source = named::<TextBox>(&body, "PropertyObjectSource")
             .text()
             .unwrap();
         assert!(source.contains("Color='Green'"));
@@ -1087,7 +1090,7 @@ mod tests {
         metadata.commit = Some(Rc::new(|_| Err("The document changed".into())));
         let body = build(&context, &metadata, &Flyout::new());
         assert_eq!(
-            body.get_control::<TextBox>("PropertyExpression").text(),
+            named::<TextBox>(&body, "PropertyExpression").text(),
             context.value
         );
         click(&body, "Apply value");
@@ -1097,7 +1100,7 @@ mod tests {
                 .any(|text| text.text().as_deref() == Some("The document changed"))
         );
         assert_eq!(
-            body.get_control::<TextBox>("PropertyExpression").text(),
+            named::<TextBox>(&body, "PropertyExpression").text(),
             context.value
         );
     }
@@ -1184,19 +1187,15 @@ mod tests {
             Ok(())
         }));
         let body = build(&context, &metadata, &Flyout::new());
-        body.get_control::<ComboBox>("PropertyValueSourceMode")
-            .set_selected_index(2);
-        body.get_control::<TextBox>("PropertyLiteralValue")
-            .set_text(Some("Blue"));
+        named::<ComboBox>(&body, "PropertyValueSourceMode").set_selected_index(2);
+        named::<TextBox>(&body, "PropertyLiteralValue").set_text(Some("Blue"));
         click(&body, "Create resource");
         assert!(
             seen.borrow().is_empty(),
             "Empty resource keys cannot be committed"
         );
-        body.get_control::<TextBox>("PropertyResourceKey")
-            .set_text(Some("Accent"));
-        body.get_control::<ComboBox>("PropertyResourceOwner")
-            .set_selected_index(1);
+        named::<TextBox>(&body, "PropertyResourceKey").set_text(Some("Accent"));
+        named::<ComboBox>(&body, "PropertyResourceOwner").set_selected_index(1);
         assert!(seen.borrow().is_empty());
         click(&body, "Create resource");
         assert_eq!(
@@ -1222,13 +1221,12 @@ mod tests {
         let metadata = PropertyEditorMetadata::new(PropertyEditorKind::Text);
         let body = build(&context, &metadata, &Flyout::new());
         assert_eq!(
-            body.get_control::<TextBox>("PropertyExpression").text(),
+            named::<TextBox>(&body, "PropertyExpression").text(),
             context.value
         );
         click(&body, "Update binding expression");
         let MarkupValue::Extension(binding) = MarkupValue::parse(
-            &body
-                .get_control::<TextBox>("PropertyExpression")
+            &named::<TextBox>(&body, "PropertyExpression")
                 .text()
                 .unwrap(),
         )
@@ -1320,13 +1318,11 @@ mod tests {
         }));
         let body =
             build_with_factories(&context, &metadata, &Flyout::new(), &[Rc::new(StopEditor)]);
-        body.get_control::<ComboBox>("PropertyObjectNodes")
-            .set_selected_index(1);
-        body.get_control::<Button>("CustomStopOffset")
+        named::<ComboBox>(&body, "PropertyObjectNodes").set_selected_index(1);
+        named::<Button>(&body, "CustomStopOffset")
             .raise_event(&RoutedEventArgs::with_event(Button::click_event()));
         assert!(seen.borrow().is_empty());
-        let source = body
-            .get_control::<TextBox>("PropertyObjectSource")
+        let source = named::<TextBox>(&body, "PropertyObjectSource")
             .text()
             .unwrap();
         assert!(source.contains("Offset='0.25'"));
@@ -1394,8 +1390,7 @@ mod tests {
                 .any(|name| name == "ui:SolidColorBrush.Color")
         );
         click(&body, "Set color through alias");
-        let source = body
-            .get_control::<TextBox>("PropertyObjectSource")
+        let source = named::<TextBox>(&body, "PropertyObjectSource")
             .text()
             .unwrap();
         assert!(source.contains("ui:SolidColorBrush.Color='Blue'"));
@@ -1429,18 +1424,15 @@ mod tests {
         ];
         let body = build(&context, &metadata, &Flyout::new());
         assert_eq!(
-            body.get_control::<ComboBox>("PropertyValueSourceMode")
-                .selected_index(),
+            named::<ComboBox>(&body, "PropertyValueSourceMode").selected_index(),
             2
         );
         assert_eq!(
-            body.get_control::<ComboBox>("PropertyResourceChoice")
-                .selected_index(),
+            named::<ComboBox>(&body, "PropertyResourceChoice").selected_index(),
             1
         );
         assert_eq!(
-            body.get_control::<ComboBox>("PropertyResourceLookup")
-                .selected_index(),
+            named::<ComboBox>(&body, "PropertyResourceLookup").selected_index(),
             1
         );
     }

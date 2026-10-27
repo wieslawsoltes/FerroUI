@@ -345,7 +345,7 @@ fn resource_filter_uses_registered_types_and_leaves_custom_conversions_to_the_ho
 fn native_property_validation_checks_layout_constraints_before_source_commit() {
     let _app = UnitTestApplication::start(TestServices::styled_window());
     ferroui_base::register_types();
-    let property = ferroui_controls::Border::width_property().as_property();
+    let property = ferroui_base::layout::Layoutable::width_property().as_property();
     let context = context("Width", property.property_type_name(), None);
     let metadata = resolve_property_editor_metadata(&context, Some(property));
     assert!(metadata.validate("180").is_ok());

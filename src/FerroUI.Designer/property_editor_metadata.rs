@@ -145,6 +145,10 @@ impl PropertyEditorMetadata {
                 .map_err(|error| error.to_string()),
             PropertyEditorKind::Transform => ferroui_base::Matrix::parse(value)
                 .map(|_| ())
+                .or_else(|_| {
+                    ferroui_base::media::transformation::TransformOperations::parse(value)
+                        .map(|_| ())
+                })
                 .map_err(|error| error.to_string()),
             PropertyEditorKind::TimeSpan => ferroui_base::animation::TimeSpan::parse(value)
                 .map(|_| ())
@@ -226,16 +230,20 @@ pub fn resolve_property_editor_metadata(
         .map(FerroProperty::property_type_name)
         .or(context.runtime_type.as_deref())
         .unwrap_or("");
+    let native_class = property.and_then(|property| {
+        ferroui_base::TypeInfo::find_by_handle(property.property_type()).map(|(type_, _)| type_)
+    });
     let markup = property
         .and_then(|property| {
             MarkupType::find_by_handle(property.property_type())
                 .or_else(|| MarkupType::find_by_nullable_handle(property.property_type()))
         })
+        .or_else(|| native_class.and_then(MarkupType::find_by_type_info))
         .or_else(|| {
             // Use a unique fully qualified runtime identity. A short custom type name must
             // not accidentally inherit another library's editor or parser.
             let unwrapped = type_identity(runtime_type);
-            let matches = MarkupType::registered_types()
+            let matches = registered_markup_types()
                 .into_iter()
                 .filter(|metadata| {
                     format!("{}::{}", metadata.module_path, metadata.name) == unwrapped
@@ -348,12 +356,14 @@ pub fn resolve_property_editor_metadata(
             _ if runtime_type.is_empty() && context.property == "RenderTransformOrigin" => {
                 PropertyEditorKind::Components(PropertyValueShape::RelativePoint)
             }
-            _ if markup.is_some_and(|metadata| {
-                matches!(
-                    metadata.kind,
-                    MarkupTypeKind::Class | MarkupTypeKind::Interface
-                )
-            }) && !matches!(leaf, "String" | "str") =>
+            _ if (native_class.is_some()
+                || markup.is_some_and(|metadata| {
+                    matches!(
+                        metadata.kind,
+                        MarkupTypeKind::Class | MarkupTypeKind::Interface
+                    )
+                }))
+                && !matches!(leaf, "String" | "str") =>
             {
                 PropertyEditorKind::Object
             }
@@ -478,9 +488,32 @@ fn framework_type(metadata: &MarkupType) -> bool {
 pub(crate) fn resource_is_compatible(property: &FerroProperty, resource: &Node) -> Option<bool> {
     let resource_type = markup_type_for_node(resource)?;
     let target = ValueType::new(property.property_type(), property.property_type_name());
-    let source = resource_type.handle()?;
-    if ValueTypes::is_assignable(source, target) {
+    let source = resource_type.handle().or_else(|| {
+        resource_type
+            .type_info
+            .and_then(|type_| type_().handle())
+            .map(|handle| ValueType::new(handle, resource_type.name))
+    });
+    if source.is_some_and(|source| ValueTypes::is_assignable(source, target)) {
         return Some(true);
+    }
+    if let Some(class) = resource_type.type_info.map(|type_| type_()) {
+        if let Some((target_class, _)) = ferroui_base::TypeInfo::find_by_handle(target.id()) {
+            return Some(target_class.is_assignable_from(class));
+        }
+        // A resource type may not have been instantiated yet. Its declared interfaces
+        // are already inspectable without running class initialization or constructors.
+        let mut current = Some(class);
+        while let Some(class) = current {
+            if class
+                .interfaces()
+                .iter()
+                .any(|interface| ValueTypes::is_assignable(interface(), target))
+            {
+                return Some(true);
+            }
+            current = class.base_type();
+        }
     }
     let target_metadata = MarkupType::find_by_handle(target.id())
         .or_else(|| MarkupType::find_by_nullable_handle(target.id()));
@@ -568,7 +601,7 @@ pub(super) fn object_property_types(node: &Node) -> Vec<ObjectPropertyType> {
 
 fn markup_type_for_node(node: &Node) -> Option<&'static MarkupType> {
     let namespace = node.namespace_uri.as_deref()?;
-    let candidates = MarkupType::registered_types()
+    let candidates = registered_markup_types()
         .into_iter()
         .filter(|type_| {
             type_.name == node.local_name() && markup_namespace_matches(type_, namespace)
@@ -578,6 +611,21 @@ fn markup_type_for_node(node: &Node) -> Option<&'static MarkupType> {
         return None;
     };
     Some(*resource_type)
+}
+
+fn registered_markup_types() -> Vec<&'static MarkupType> {
+    // Native classes expose their metadata through TypeInfo; the MarkupType table
+    // also includes independent value/contract types. Neither table subsumes the other.
+    let mut seen = std::collections::BTreeSet::new();
+    MarkupType::registered_types()
+        .into_iter()
+        .chain(
+            ferroui_base::TypeInfo::registered_types()
+                .into_iter()
+                .filter_map(MarkupType::find_by_type_info),
+        )
+        .filter(|type_| seen.insert(*type_ as *const MarkupType as usize))
+        .collect()
 }
 
 fn markup_namespace_matches(type_: &MarkupType, namespace: &str) -> bool {
