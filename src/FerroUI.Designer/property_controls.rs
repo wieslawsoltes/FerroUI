@@ -324,7 +324,9 @@ impl VisualImpl for PropertyNumberScrubber {
             &label,
             CultureInfo::current_culture(),
             FlowDirection::LeftToRight,
-            Typeface::default(),
+            Typeface::new(ferroui_controls::documents::TextElement::get_font_family(
+                this,
+            )),
             11.0,
             Some(
                 SolidColorBrush::from_uint32(if dragging.is_some() {
@@ -381,13 +383,53 @@ impl PropertyComponentsKind {
     }
 }
 struct ComponentsState {
+    root: WeakRef<Grid>,
     fields: [WeakRef<TextBox>; 4],
+    kind: PropertyComponentsKind,
     original: Cell<Option<[f64; 4]>>,
     linked: Cell<bool>,
     non_negative: bool,
     commit: RefCell<Option<ComponentsAction>>,
 }
 impl ComponentsState {
+    fn refresh_layout(&self) {
+        let linked = self.linked.get();
+        if let Some(root) = self.root.upgrade() {
+            root.set_row_definitions(
+                RowDefinitions::parse(if linked { "28,0" } else { "28,28" }).unwrap(),
+            );
+            for control in root.children().to_vec() {
+                if control.classes().contains("property-link") {
+                    Grid::set_row_span(&control, if linked { 1 } else { 2 });
+                }
+            }
+        }
+        for (index, field) in self.fields.iter().enumerate() {
+            if let Some(field) = field.upgrade() {
+                field.set_is_visible(!linked || index == 0);
+                Grid::set_column_span(&field, if linked && index == 0 { 2 } else { 1 });
+                if let Some(label) = field
+                    .inner_left_content()
+                    .and_then(|content| Control::from_boxed(&content))
+                    .and_then(|control| control.cast::<TextBlock>())
+                {
+                    label.set_text(Some(if linked && index == 0 {
+                        "All"
+                    } else {
+                        self.kind.labels()[index]
+                    }));
+                }
+                AutomationProperties::set_name(
+                    &field,
+                    Some(if linked {
+                        "All components"
+                    } else {
+                        self.kind.descriptions()[index]
+                    }),
+                );
+            }
+        }
+    }
     fn restore(&self) {
         for (index, weak) in self.fields.iter().enumerate() {
             if let Some(field) = weak.upgrade() {
@@ -446,8 +488,8 @@ impl ComponentsState {
     }
 }
 
-/// A compact 2 × 2 editor for Margin, Padding, BorderThickness or CornerRadius. All
-/// four fields are committed together on Enter; Escape restores the accepted value.
+/// A linked value or compact 2 × 2 editor for Margin, Padding, BorderThickness or
+/// CornerRadius. All fields commit together on Enter; Escape restores the accepted value.
 /// A linked edit deliberately sets every component and is also valid for mixed selections.
 pub struct PropertyComponentsEditor {
     root: Ref<Grid>,
@@ -492,7 +534,9 @@ impl PropertyComponentsEditor {
             field
         });
         let state = Rc::new(ComponentsState {
+            root: root.downgrade(),
             fields: std::array::from_fn(|index| fields[index].downgrade()),
+            kind,
             original: Cell::new(None),
             linked: Cell::new(false),
             non_negative,
@@ -556,6 +600,7 @@ impl PropertyComponentsEditor {
         let linked = state.clone();
         link.click(move |_, _| {
             linked.linked.set(!linked.linked.get());
+            linked.refresh_layout();
             if let Some(link) = weak.upgrade() {
                 update_link(&link, linked.linked.get());
             }
@@ -583,6 +628,7 @@ impl PropertyComponentsEditor {
     }
     pub fn set_linked(&self, linked: bool) {
         self.state.linked.set(linked);
+        self.state.refresh_layout();
         update_link(&self.link, linked);
     }
     pub fn is_linked(&self) -> bool {

@@ -95,6 +95,11 @@ pub(crate) fn built_in(context: &PropertyEditorContext) -> Ref<Control> {
                     context.property != "Margin",
                 );
                 if editor.configure(values).is_ok() {
+                    // Uniform authored/effective values occupy one field. Expanding the
+                    // chain reveals individual sides without creating a source edit.
+                    if values.is_some_and(|values| values.iter().all(|value| *value == values[0])) {
+                        editor.set_linked(true);
+                    }
                     let apply = context.apply.clone();
                     editor.on_commit(move |values| {
                         apply(Some(crate::property_controls::components_text(values)))
@@ -107,6 +112,9 @@ pub(crate) fn built_in(context: &PropertyEditorContext) -> Ref<Control> {
             return editor;
         }
         if let Some(editor) = alignment_editor(context) {
+            return editor;
+        }
+        if let Some(editor) = orientation_editor(context) {
             return editor;
         }
         let values: &[&str] = match context.property.as_str() {
@@ -228,7 +236,7 @@ fn alignment_editor(context: &PropertyEditorContext) -> Option<Ref<Control>> {
                 "Left",
             ),
             (
-                "M7.25,1 L8.75,1 8.75,15 7.25,15 Z M2,4 L14,4 14,7 2,7 Z M4,9 L12,9 12,12 4,12 Z",
+                "M7.25,1 L8.75,1 8.75,3 7.25,3 Z M7.25,7.5 L8.75,7.5 8.75,8.5 7.25,8.5 Z M7.25,13 L8.75,13 8.75,15 7.25,15 Z M2,4 L14,4 14,6.5 2,6.5 Z M4,9.5 L12,9.5 12,12 4,12 Z",
                 "Center",
             ),
             (
@@ -246,7 +254,7 @@ fn alignment_editor(context: &PropertyEditorContext) -> Option<Ref<Control>> {
                 "Top",
             ),
             (
-                "M1,7.25 L15,7.25 15,8.75 1,8.75 Z M4,2 L7,2 7,14 4,14 Z M9,4 L12,4 12,12 9,12 Z",
+                "M1,7.25 L3,7.25 3,8.75 1,8.75 Z M7.5,7.25 L8.5,7.25 8.5,8.75 7.5,8.75 Z M13,7.25 L15,7.25 15,8.75 13,8.75 Z M4,2 L6.5,2 6.5,14 4,14 Z M9.5,4 L12,4 12,12 9.5,12 Z",
                 "Center",
             ),
             (
@@ -319,6 +327,55 @@ fn alignment_editor(context: &PropertyEditorContext) -> Option<Ref<Control>> {
             Some(Rc::new(format!("{}: {value}", context.property))),
         );
         AutomationProperties::set_name(&button, Some(&format!("{}: {value}", context.property)));
+        let apply = context.apply.clone();
+        button.click(move |_, _| apply(Some(value.to_owned())));
+        Grid::set_column(&button, index as i32);
+        root.children().add(button.upcast::<Control>());
+    }
+    Some(root.upcast::<Control>())
+}
+
+fn orientation_editor(context: &PropertyEditorContext) -> Option<Ref<Control>> {
+    if context.property != "Orientation" {
+        return None;
+    }
+    let root = Grid::new();
+    root.classes().add("property-choice");
+    root.set_column_definitions(ColumnDefinitions::parse("*,*").unwrap());
+    for (index, (path, value)) in [
+        (
+            "M1,3 L5,3 5,13 1,13 Z M6,3 L10,3 10,13 6,13 Z M11,3 L15,3 15,13 11,13 Z",
+            "Horizontal",
+        ),
+        (
+            "M3,1 L13,1 13,5 3,5 Z M3,6 L13,6 13,10 3,10 Z M3,11 L13,11 13,15 3,15 Z",
+            "Vertical",
+        ),
+    ]
+    .into_iter()
+    .enumerate()
+    {
+        let button = Button::new();
+        button.classes().add("property-choice-item");
+        button.classes().set(
+            "active",
+            !context.mixed
+                && context
+                    .value
+                    .as_ref()
+                    .is_some_and(|current| current.eq_ignore_ascii_case(value)),
+        );
+        let icon = crate::property_controls::property_icon(path, 14.0);
+        button.set_content(Some(Control::boxed(&icon)));
+        button.set_min_width(0.0);
+        button.set_min_height(26.0);
+        button.set_padding(Thickness::uniform(3.0));
+        button.set_margin(Thickness::new(0.0, 1.0, 2.0, 1.0));
+        button.set_horizontal_alignment(ferroui_base::layout::HorizontalAlignment::Stretch);
+        button.set_horizontal_content_alignment(ferroui_base::layout::HorizontalAlignment::Center);
+        let help = format!("{value} layout flow");
+        ToolTip::set_tip(&button, Some(Rc::new(help.clone())));
+        ferroui_controls::automation::AutomationProperties::set_name(&button, Some(&help));
         let apply = context.apply.clone();
         button.click(move |_, _| apply(Some(value.to_owned())));
         Grid::set_column(&button, index as i32);

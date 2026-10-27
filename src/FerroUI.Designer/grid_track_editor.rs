@@ -39,7 +39,7 @@ impl GridTrackEditor {
             Axis::Horizontal => "Columns",
         };
         let root = Grid::new();
-        root.set_column_definitions(ColumnDefinitions::parse("20,84,*,72,24,24").unwrap());
+        root.set_column_definitions(ColumnDefinitions::parse("20,84,*,84,24,24").unwrap());
         root.set_row_definitions(RowDefinitions::parse("Auto,Auto").unwrap());
         root.classes().add("grid-track-editor");
         let axis_icon = crate::property_controls::property_icon(

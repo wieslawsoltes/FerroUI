@@ -236,3 +236,39 @@ fn component_editor_requires_explicit_values_for_mixed_selection_and_validates_b
     assert!(editor.configure(Some([-1.0; 4])).is_err());
     assert!(editor.configure(Some([f64::NAN; 4])).is_err());
 }
+
+#[test]
+fn linked_components_disclose_individual_sides_without_authoring() {
+    let _app = UnitTestApplication::start(TestServices::styled_window());
+    let editor = PropertyComponentsEditor::new(PropertyComponentsKind::Thickness, false);
+    editor.configure(Some([8.0; 4])).unwrap();
+    let values = Rc::new(RefCell::new(Vec::new()));
+    let seen = values.clone();
+    editor.on_commit(move |value| seen.borrow_mut().push(value));
+    editor.set_linked(true);
+    assert!(values.borrow().is_empty());
+    assert!(editor.state.fields[0].upgrade().unwrap().is_visible());
+    assert!(!editor.state.fields[1].upgrade().unwrap().is_visible());
+    let field = editor.state.fields[0].upgrade().unwrap();
+    field.set_text(Some("12"));
+    key(&field, Key::Enter, KeyModifiers::NONE);
+    assert_eq!(*values.borrow(), [[12.0; 4]]);
+    editor.configure(Some([12.0; 4])).unwrap();
+    editor.set_linked(false);
+    assert!(
+        editor
+            .state
+            .fields
+            .iter()
+            .all(|field| field.upgrade().unwrap().is_visible())
+    );
+    assert_eq!(
+        values.borrow().len(),
+        1,
+        "view expansion does not author a value"
+    );
+    let top = editor.state.fields[1].upgrade().unwrap();
+    top.set_text(Some("24"));
+    key(&top, Key::Enter, KeyModifiers::NONE);
+    assert_eq!(*values.borrow(), [[12.0; 4], [12.0, 24.0, 12.0, 12.0]]);
+}
