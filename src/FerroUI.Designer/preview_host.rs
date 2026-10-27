@@ -22,12 +22,15 @@ pub type ResourcePreviewFactory = Rc<dyn Fn(BoxedValue) -> Result<Ref<Control>, 
 /// registered code-behind class and call `populate` to apply XAML before wiring its handlers.
 pub struct PreviewRequest {
     pub source: String,
+    /// Designer-only loading source. Factories continue to inspect the exact authored
+    /// `source`; `populate` loads this projection when design-time overrides are present.
+    pub preview_source: Option<String>,
     pub uri: String,
     pub configuration: RuntimeXamlLoaderConfiguration,
 }
 impl PreviewRequest {
     pub fn populate(&self, root: Option<BoxedValue>) -> Result<BoxedValue, String> {
-        let mut source = self.source.clone();
+        let mut source = self.preview_source.as_ref().unwrap_or(&self.source).clone();
         if root.is_some() {
             // The supplied root IS the code-behind class. x:Class is a compiler directive,
             // so leave its source coordinates intact while the runtime populates that instance.
@@ -81,6 +84,9 @@ pub struct PreviewHostOptions {
     /// can use a host-chosen artboard view. The actual Window remains available in native preview.
     pub resource_factory: Option<ResourcePreviewFactory>,
     pub configuration: RuntimeXamlLoaderConfiguration,
+    /// Show authored d: values and sample data in this designer host. This option is
+    /// independent from the normal runtime loader and never changes saved XAML.
+    pub design_time_data: bool,
 }
 impl Default for PreviewHostOptions {
     fn default() -> Self {
@@ -92,6 +98,7 @@ impl Default for PreviewHostOptions {
             root_factories: BTreeMap::new(),
             resource_factory: None,
             configuration,
+            design_time_data: true,
         }
     }
 }
@@ -121,6 +128,8 @@ impl PreviewHostOptions {
         let document = Document::new(source).map_err(|e| e.to_string())?;
         let request = PreviewRequest {
             source: source.into(),
+            preview_source: crate::design_time::project(&document, source, self.design_time_data)?
+                .map(|projection| projection.document.source().to_owned()),
             uri: uri.into(),
             configuration: self.configuration.clone(),
         };
@@ -184,6 +193,7 @@ impl crate::DesignerSession {
         self.forget_interaction_preview();
         self.import_animations();
         self.generation += 1;
+        self.refresh_layer_visuals();
         Ok(())
     }
     /// Opens the actual platform Window, including native decorations and registered class

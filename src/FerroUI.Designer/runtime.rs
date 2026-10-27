@@ -42,6 +42,7 @@ pub(crate) struct RuntimePreview {
     window_projection: bool,
     pub(crate) definition_scope: Option<crate::DefinitionScope>,
     definition_projection: Option<crate::definition_projection::DefinitionProjection>,
+    design_projection: Option<crate::design_time::DesignTimeProjection>,
     pub status: PreviewStatus,
     pub notices: Vec<String>,
     objects: BTreeMap<NodeId, WeakRef<Visual>>,
@@ -107,6 +108,7 @@ impl RuntimePreview {
             window_projection: false,
             definition_scope: None,
             definition_projection: None,
+            design_projection: None,
             status: PreviewStatus::Ready { revision: 0 },
             notices: Vec::new(),
             objects: BTreeMap::new(),
@@ -176,6 +178,30 @@ impl RuntimePreview {
 
     pub fn reload(&mut self, document: &Document) {
         self.reload_document(document, false);
+    }
+
+    pub(crate) fn design_time_enabled(&self) -> bool {
+        self.options.design_time_data
+    }
+
+    pub(crate) fn set_design_time_enabled(
+        &mut self,
+        enabled: bool,
+        document: &Document,
+    ) -> Result<(), String> {
+        if enabled == self.options.design_time_data {
+            return Ok(());
+        }
+        let status = self.status.clone();
+        let notices = self.notices.clone();
+        let mut options = self.options.clone();
+        options.design_time_data = enabled;
+        if let Err(error) = self.configure(options, document) {
+            self.status = status;
+            self.notices = notices;
+            return Err(error);
+        }
+        Ok(())
     }
 
     /// A scope change is presentation state. A rejected projection keeps both the last
@@ -271,25 +297,74 @@ impl RuntimePreview {
                         })),
         );
         let mut candidate_definition = None;
+        let mut candidate_design = None;
         let result = if let Some(scope) = self.definition_scope.as_ref().filter(|_| synthetic_scope)
         {
             crate::definition_projection::project(document, scope).and_then(|projection| {
-                self.apply_source(projection.document.valid_source(), false)?;
+                let design = crate::design_time::project(
+                    &projection.document,
+                    projection.document.valid_source(),
+                    self.options.design_time_data,
+                )?;
+                self.apply_source(
+                    design
+                        .as_ref()
+                        .map_or(projection.document.valid_source(), |design| {
+                            design.document.valid_source()
+                        }),
+                    false,
+                )?;
                 self.notices = projection.notices.clone();
+                if let Some(design) = &design {
+                    self.notices.extend(design.notices.clone());
+                }
+                candidate_design = design;
                 candidate_definition = Some(projection);
                 Ok(())
             })
         } else if actual_factory {
             self.notices = vec!["Preview uses the registered application root factory".into()];
-            self.apply_source(document.valid_source(), true)
+            crate::design_time::project(
+                document,
+                document.valid_source(),
+                self.options.design_time_data,
+            )
+            .and_then(|design| {
+                // The factory receives exact authored source. PreviewRequest::populate
+                // loads the same projection used here to map its native result.
+                self.apply_source(document.valid_source(), true)?;
+                if let Some(design) = &design {
+                    self.notices.extend(design.notices.clone());
+                }
+                candidate_design = design;
+                Ok(())
+            })
         } else {
             crate::preview_source::project(document).and_then(|projection| {
                 self.notices = projection.notices;
-                self.apply_source(&projection.source, true)
+                let design = crate::design_time::project(
+                    document,
+                    &projection.source,
+                    self.options.design_time_data,
+                )?;
+                self.apply_source(
+                    design
+                        .as_ref()
+                        .map_or(projection.source.as_str(), |design| {
+                            design.document.valid_source()
+                        }),
+                    true,
+                )?;
+                if let Some(design) = &design {
+                    self.notices.extend(design.notices.clone());
+                }
+                candidate_design = design;
+                Ok(())
             })
         };
         if result.is_ok() {
             self.definition_projection = candidate_definition;
+            self.design_projection = candidate_design;
             if root_control_scope {
                 if let Some(scope) = &self.definition_scope {
                     self.notices.push(format!(
@@ -309,6 +384,9 @@ impl RuntimePreview {
             },
         };
         if matches!(self.status, PreviewStatus::Ready { .. }) {
+            self.host.update_layout();
+            self.rebuild_map(document);
+            self.apply_design_samples();
             self.host.update_layout();
             self.rebuild_map(document);
             if self
@@ -431,10 +509,14 @@ impl RuntimePreview {
         // One scan of source positions, followed by indexed lookup for each runtime object.
         let mut names = BTreeMap::new();
         let mut locations: BTreeMap<(String, usize), Vec<(usize, NodeId)>> = BTreeMap::new();
-        let source_document = self
-            .definition_projection
-            .as_ref()
-            .map_or(document, |projection| &projection.document);
+        let source_document = self.design_projection.as_ref().map_or_else(
+            || {
+                self.definition_projection
+                    .as_ref()
+                    .map_or(document, |projection| &projection.document)
+            },
+            |projection| &projection.document,
+        );
         let mut elements = source_document.ast().elements().collect::<Vec<_>>();
         elements.sort_by_key(|node| node.span.start);
         let source = source_document.valid_source();
@@ -470,6 +552,10 @@ impl RuntimePreview {
         let inspector = Inspector::shared();
         let root_id = inspector.borrow_mut().node_id(&root);
         if self.definition_projection.is_none()
+            && self.design_projection.as_ref().is_none_or(|projection| {
+                projection.identities.get(&projection.document.ast().root())
+                    == Some(&document.ast().root())
+            })
             && !document
                 .ast()
                 .node(document.ast().root())
@@ -538,8 +624,9 @@ impl RuntimePreview {
             // Names repeat in template namescopes. Generated preview locations are the
             // authoritative mapping; a synthetic sample control must never claim a
             // definition owner or a same-named part in another resource.
-            let source = if let Some(projection) = self.definition_projection.as_ref() {
-                located().and_then(|source| projection.identities.get(&source).copied())
+            let source = if self.design_projection.is_some() || self.definition_projection.is_some()
+            {
+                located().and_then(|source| self.authored_identity(source))
             } else {
                 located().or(named)
             };
@@ -548,6 +635,34 @@ impl RuntimePreview {
                     .entry(source)
                     .or_insert_with(|| visual.downgrade());
                 self.reverse_objects.insert(id, source);
+            }
+        }
+    }
+
+    fn authored_identity(&self, mut node: NodeId) -> Option<NodeId> {
+        if let Some(projection) = &self.design_projection {
+            node = *projection.identities.get(&node)?;
+        }
+        if let Some(projection) = &self.definition_projection {
+            node = *projection.identities.get(&node)?;
+        }
+        Some(node)
+    }
+
+    fn apply_design_samples(&mut self) {
+        let Some(projection) = &self.design_projection else {
+            return;
+        };
+        let samples = projection.samples.clone();
+        for sample in samples {
+            let Some(node) = self.authored_identity(sample.node) else {
+                continue;
+            };
+            let Some(visual) = self.visual(node) else {
+                continue;
+            };
+            if let Err(error) = crate::design_time_samples::apply(&visual, &sample) {
+                self.notices.push(error);
             }
         }
     }
