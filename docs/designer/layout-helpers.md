@@ -206,6 +206,12 @@ An embeddable host can obtain `selection_layout_helpers()` or
 a viewport and hovered/active handle indices. `hit_test_layout_handle` uses the
 same transformed, screen-sized hit targets as the renderer.
 
+For keyboard or accessibility increments, use
+`snapshot.handle_delta_to_artboard(index, delta)` to convert a handle's authored
+units into an artboard displacement. A child margin can belong to a different
+layout frame inside a Viewbox or control template; its numeric value must not be
+scaled merely because its guides are painted in the outer panel's scene.
+
 `LayoutHelperSnapshot::new(scene, to_artboard)` creates a render-only snapshot for
 an independent host. It cannot be submitted as a guarded authoring snapshot to a
 session. `preview_layout_move`, `preview_layout_insert` and
