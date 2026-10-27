@@ -5,10 +5,31 @@ use ferroui_base::interactivity::RoutingStrategies;
 use ferroui_base::utilities::Decimal;
 use ferroui_base::{Ref, Thickness};
 use ferroui_controls::{
-    Button, CheckBox, ColumnDefinitions, ComboBox, Control, Grid, NumericUpDown, TextBox, ToolTip,
+    Button, CheckBox, ColumnDefinitions, Control, Grid, NumericUpDown, TextBox, ToolTip,
 };
 use ferroui_designer_core::NodeId;
 use std::rc::Rc;
+
+#[path = "property_editor_metadata.rs"]
+mod metadata;
+#[path = "property_object_draft.rs"]
+mod object_draft;
+#[path = "property_typed_editors.rs"]
+mod typed;
+#[path = "property_value_workbench.rs"]
+mod workbench;
+pub(crate) use metadata::resource_is_compatible;
+pub use metadata::{
+    PropertyEditorKind, PropertyEditorMetadata, PropertyLiteralValidator, PropertyResourceChoice,
+    PropertyValueCommit, PropertyValueEdit, PropertyValueSource, resolve_property_editor_metadata,
+};
+pub use object_draft::PropertyObjectDraft;
+pub use typed::PropertyVectorEditor;
+pub use workbench::binding_expression;
+
+#[cfg(test)]
+#[path = "property_editor_system_tests.rs"]
+mod tests;
 
 #[derive(Clone)]
 pub struct PropertyEditorContext {
@@ -24,20 +45,159 @@ pub struct PropertyEditorContext {
 /// Return a native control when this factory handles the property; otherwise let the next
 /// factory try. Hosts register factories in priority order on [`crate::DesignerWorkspace`].
 pub trait PropertyEditorFactory {
-    fn create(&self, context: &PropertyEditorContext) -> Option<Ref<Control>>;
+    fn create(&self, _context: &PropertyEditorContext) -> Option<Ref<Control>> {
+        None
+    }
+    /// Metadata-aware factories can inspect real enum members, source origin, resource
+    /// scope and an object draft. Existing factories continue to receive guarded values.
+    fn create_with_metadata(
+        &self,
+        context: &PropertyEditorContext,
+        _metadata: &PropertyEditorMetadata,
+    ) -> Option<Ref<Control>> {
+        self.create(context)
+    }
+}
+
+/// Shared inspector/definition-editor pipeline. First matching registered factory wins;
+/// built-ins and a source-safe fallback follow. Hosts supply a revision-bound commit.
+pub fn create_property_editor(
+    context: &PropertyEditorContext,
+    metadata: &PropertyEditorMetadata,
+    factories: &[Rc<dyn PropertyEditorFactory>],
+) -> Ref<Control> {
+    let inline = factories
+        .iter()
+        .find_map(|factory| factory.create_with_metadata(context, metadata))
+        .unwrap_or_else(|| typed_builtin(context, metadata));
+    workbench::attach(context, metadata, inline, factories)
 }
 
 pub(crate) fn built_in(context: &PropertyEditorContext) -> Ref<Control> {
+    typed_builtin(context, &resolve_property_editor_metadata(context, None))
+}
+
+pub(super) fn typed_builtin(
+    context: &PropertyEditorContext,
+    metadata: &PropertyEditorMetadata,
+) -> Ref<Control> {
+    if metadata.object_source.is_some() {
+        let field = TextBox::new();
+        field.classes().add("designer-property-field");
+        field.set_is_read_only(true);
+        let title = metadata
+            .object_source
+            .as_deref()
+            .and_then(|source| PropertyObjectDraft::new(source).ok())
+            .and_then(|draft| {
+                draft
+                    .nodes()
+                    .first()
+                    .and_then(|id| draft.document().ast().node(*id))
+                    .map(|node| node.local_name().to_owned())
+            })
+            .unwrap_or_else(|| "Object / collection".into());
+        field.set_text(Some(&title));
+        return field.upcast();
+    }
+    if context
+        .value
+        .as_deref()
+        .is_some_and(metadata::is_expression)
+    {
+        return typed::text(context, metadata);
+    }
+    match &metadata.kind {
+        PropertyEditorKind::Components(shape)
+            if context
+                .value
+                .as_deref()
+                .is_none_or(|value| shape.parse_components(value).is_ok()) =>
+        {
+            return PropertyVectorEditor::new(context, metadata, *shape).control();
+        }
+        PropertyEditorKind::Enumeration {
+            values,
+            flags: false,
+        } => {
+            // Preserve the compact native alignment/flow affordances for standard controls.
+            if !uses_compact_enum_editor(context, values) {
+                return typed::enumeration(context, metadata, values);
+            }
+        }
+        PropertyEditorKind::Enumeration { flags: true, .. } => {
+            return typed::text(context, metadata);
+        }
+        PropertyEditorKind::GridLength => return typed::grid_length(context, metadata),
+        PropertyEditorKind::FontFamily | PropertyEditorKind::FontWeight => {
+            return typed::font(context, metadata);
+        }
+        PropertyEditorKind::TimeSpan
+        | PropertyEditorKind::Duration
+        | PropertyEditorKind::Object
+        | PropertyEditorKind::Transform
+        | PropertyEditorKind::Text => return typed::text(context, metadata),
+        _ => {}
+    }
+    let kind = metadata.kind.clone();
+    let feedback = Rc::new(std::cell::RefCell::new(
+        None::<ferroui_base::WeakRef<Control>>,
+    ));
+    let mut guarded = context.clone();
+    let original = context.clone();
+    let metadata = metadata.clone();
+    let errors = feedback.clone();
+    guarded.apply = Rc::new(move |value| {
+        let edit = match value {
+            Some(value) if metadata::is_expression(&value) => PropertyValueEdit::Expression(value),
+            Some(value) => PropertyValueEdit::Literal(value),
+            None => PropertyValueEdit::Reset,
+        };
+        let result = metadata.apply(&original, edit);
+        if let Some(control) = errors.borrow().as_ref().and_then(|weak| weak.upgrade()) {
+            match result {
+                Ok(()) => ferroui_controls::DataValidationErrors::clear_errors(&control),
+                Err(message) => ferroui_controls::DataValidationErrors::set_errors(
+                    &control,
+                    Some(vec![Rc::new(message)]),
+                ),
+            }
+        }
+    });
+    let editor = legacy_built_in(&guarded, &kind);
+    *feedback.borrow_mut() = Some(editor.downgrade());
+    editor
+}
+
+fn uses_compact_enum_editor(context: &PropertyEditorContext, values: &[String]) -> bool {
+    let expected: &[&str] = match context.property.as_str() {
+        "HorizontalAlignment" | "HorizontalContentAlignment" => {
+            &["Left", "Center", "Right", "Stretch"]
+        }
+        "VerticalAlignment" | "VerticalContentAlignment" => &["Top", "Center", "Bottom", "Stretch"],
+        "TextAlignment" => &["Left", "Center", "Right", "Justify"],
+        "Orientation" => &["Horizontal", "Vertical"],
+        _ => return false,
+    };
+    // Standard-looking property names can belong to a completely different enum in
+    // application controls. Preserve its reflected members and unknown source values.
+    values.len() == expected.len()
+        && expected
+            .iter()
+            .all(|name| values.iter().any(|value| value == name))
+        && context.value.as_deref().is_none_or(|current| {
+            expected
+                .iter()
+                .any(|name| current.eq_ignore_ascii_case(name))
+        })
+}
+
+fn legacy_built_in(context: &PropertyEditorContext, kind: &PropertyEditorKind) -> Ref<Control> {
     let expression = context
         .value
         .as_ref()
-        .is_some_and(|value| value.starts_with('{'));
-    if !expression
-        && context
-            .runtime_type
-            .as_ref()
-            .is_some_and(|name| name == "bool" || name.ends_with("Option<bool>"))
-    {
+        .is_some_and(|value| metadata::is_expression(value));
+    if !expression && *kind == PropertyEditorKind::Boolean {
         let editor = CheckBox::new();
         editor.classes().add("property-boolean");
         editor.set_is_three_state(true);
@@ -67,10 +227,14 @@ pub(crate) fn built_in(context: &PropertyEditorContext) -> Ref<Control> {
         return editor.upcast::<Control>();
     }
     if !expression {
-        if let Some(editor) = color_editor(context) {
-            return editor;
+        if matches!(kind, PropertyEditorKind::Color | PropertyEditorKind::Brush) {
+            if let Some(editor) = color_editor(context) {
+                return editor;
+            }
         }
-        if let Some(kind) = components_kind(context) {
+        if let Some(kind) = (*kind == PropertyEditorKind::Thickness)
+            .then_some(crate::property_controls::PropertyComponentsKind::Thickness)
+        {
             let values = match context.value.as_deref() {
                 Some(value) => kind.parse(value).map(Some),
                 None => Some(None),
@@ -78,7 +242,7 @@ pub(crate) fn built_in(context: &PropertyEditorContext) -> Ref<Control> {
             if let Some(values) = values {
                 let editor = crate::property_controls::PropertyComponentsEditor::new(
                     kind,
-                    context.property != "Margin",
+                    matches!(context.property.as_str(), "Padding" | "BorderThickness"),
                 );
                 if editor.configure(values).is_ok() {
                     // Uniform authored/effective values occupy one field. Expanding the
@@ -94,70 +258,18 @@ pub(crate) fn built_in(context: &PropertyEditorContext) -> Ref<Control> {
                 }
             }
         }
-        if let Some(editor) = numeric_editor(context) {
-            return editor;
-        }
-        if let Some(editor) = alignment_editor(context) {
-            return editor;
-        }
-        if let Some(editor) = orientation_editor(context) {
-            return editor;
-        }
-        let values: &[&str] = match context.property.as_str() {
-            "Orientation" => &["Horizontal", "Vertical"],
-            "DockPanel.Dock" => &["Left", "Top", "Right", "Bottom"],
-            "TextWrapping" => &["NoWrap", "Wrap", "WrapWithOverflow"],
-            "Stretch" => &["None", "Fill", "Uniform", "UniformToFill"],
-            "FlowDirection" => &["LeftToRight", "RightToLeft"],
-            _ => &[],
-        };
-        if !values.is_empty() {
-            let editor = ComboBox::new();
-            editor.classes().add("designer-property-field");
-            let offset = if context.mixed {
-                editor
-                    .items()
-                    .add(Some(Rc::new("(multiple values)".to_owned())));
-                2
-            } else {
-                1
-            };
-            editor.items().add(Some(Rc::new("(inherited)".to_owned())));
-            for value in values {
-                editor.items().add(Some(Rc::new((*value).to_owned())));
+        if *kind == PropertyEditorKind::Number {
+            if let Some(editor) = numeric_editor(context) {
+                return editor;
             }
-            editor.set_selected_index(
-                context
-                    .value
-                    .as_deref()
-                    .and_then(|current| {
-                        values
-                            .iter()
-                            .position(|value| value.eq_ignore_ascii_case(current))
-                    })
-                    .map(|index| index as i32 + offset)
-                    .unwrap_or(0),
-            );
-            let weak = editor.downgrade();
-            let values = values
-                .iter()
-                .map(|value| (*value).to_owned())
-                .collect::<Vec<_>>();
-            let apply = context.apply.clone();
-            editor.selection_changed(move |_, _| {
-                if let Some(editor) = weak.upgrade() {
-                    let index = editor.selected_index();
-                    if offset == 2 && index == 0 {
-                        return;
-                    }
-                    apply(if index < offset {
-                        None
-                    } else {
-                        values.get((index - offset) as usize).cloned()
-                    });
-                }
-            });
-            return editor.upcast::<Control>();
+        }
+        if matches!(kind, PropertyEditorKind::Enumeration { .. }) {
+            if let Some(editor) = alignment_editor(context) {
+                return editor;
+            }
+            if let Some(editor) = orientation_editor(context) {
+                return editor;
+            }
         }
     }
     let editor = TextBox::new();
@@ -212,11 +324,10 @@ pub(crate) fn is_color_property(context: &PropertyEditorContext) -> bool {
 }
 
 fn color_editor(context: &PropertyEditorContext) -> Option<Ref<Control>> {
-    if !is_color_property(context)
-        || context
-            .value
-            .as_deref()
-            .is_some_and(|value| ferroui_base::media::Color::parse(value.trim()).is_err())
+    if context
+        .value
+        .as_deref()
+        .is_some_and(|value| ferroui_base::media::Color::parse(value.trim()).is_err())
     {
         return None;
     }
@@ -472,37 +583,25 @@ fn numeric_editor(context: &PropertyEditorContext) -> Option<Ref<Control>> {
     Some(editor.upcast::<Control>())
 }
 
-pub(crate) fn components_kind(
-    context: &PropertyEditorContext,
-) -> Option<crate::property_controls::PropertyComponentsKind> {
-    use crate::property_controls::PropertyComponentsKind;
-    if context.property == "CornerRadius"
-        || context
-            .runtime_type
-            .as_ref()
-            .is_some_and(|name| name.ends_with("CornerRadius"))
-    {
-        Some(PropertyComponentsKind::CornerRadius)
-    } else if matches!(
-        context.property.as_str(),
-        "Margin" | "Padding" | "BorderThickness"
-    ) || context
-        .runtime_type
-        .as_ref()
-        .is_some_and(|name| name.ends_with("Thickness"))
-    {
-        Some(PropertyComponentsKind::Thickness)
-    } else {
-        None
-    }
-}
-
 pub(crate) fn numeric_options(
     context: &PropertyEditorContext,
 ) -> Option<crate::property_controls::PropertyNumberOptions> {
     let numeric = matches!(
-        context.runtime_type.as_deref(),
-        Some("f32" | "f64" | "i16" | "i32" | "i64" | "u16" | "u32" | "u64" | "usize")
+        context.runtime_type.as_deref().map(metadata::type_leaf),
+        Some(
+            "f32"
+                | "f64"
+                | "i8"
+                | "i16"
+                | "i32"
+                | "i64"
+                | "isize"
+                | "u8"
+                | "u16"
+                | "u32"
+                | "u64"
+                | "usize"
+        )
     ) || matches!(
         context.property.as_str(),
         "Canvas.Left"
@@ -519,14 +618,25 @@ pub(crate) fn numeric_options(
     }
     let mut options = crate::property_controls::PropertyNumberOptions {
         integer: matches!(
-            context.runtime_type.as_deref(),
-            Some("i16" | "i32" | "i64" | "u16" | "u32" | "u64" | "usize")
+            context.runtime_type.as_deref().map(metadata::type_leaf),
+            Some("i8" | "i16" | "i32" | "i64" | "isize" | "u8" | "u16" | "u32" | "u64" | "usize")
         ) || matches!(
             context.property.as_str(),
             "Grid.Row" | "Grid.Column" | "Grid.RowSpan" | "Grid.ColumnSpan"
         ),
         ..Default::default()
     };
+    // NumericUpDown and scrubbing currently use f64 for relative movement. Values
+    // outside its exact integer range stay in a validated source field.
+    if options.integer
+        && context
+            .value
+            .as_deref()
+            .and_then(|value| value.parse::<i128>().ok())
+            .is_some_and(|value| value.unsigned_abs() > 9_007_199_254_740_991)
+    {
+        return None;
+    }
     match context.property.as_str() {
         "Opacity" => {
             options.minimum = 0.0;
@@ -541,8 +651,8 @@ pub(crate) fn numeric_options(
         _ => {}
     }
     if matches!(
-        context.runtime_type.as_deref(),
-        Some("u16" | "u32" | "u64" | "usize")
+        context.runtime_type.as_deref().map(metadata::type_leaf),
+        Some("u8" | "u16" | "u32" | "u64" | "usize")
     ) {
         options.minimum = 0.0;
     }
