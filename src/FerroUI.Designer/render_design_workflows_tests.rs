@@ -1,6 +1,6 @@
 //! Native evidence for design data, keyboard navigation, local layers and responsive previews.
 use super::*;
-use ferroui_controls::{Flyout, ListBox, TextBox};
+use ferroui_controls::{ComboBox, Flyout, ListBox, TextBox};
 
 const SOURCE: &str = include_str!("../../docs/designer/samples/DesignWorkflows.xaml");
 
@@ -167,6 +167,22 @@ fn native_design_workflows_render_data_focus_layers_and_preview_environment() {
     );
     flyout.hide();
     let flyout = open(&workspace, &window, &clock, "FocusOrder");
+    let group_index = session
+        .borrow()
+        .focus_order_catalog()
+        .unwrap()
+        .scopes
+        .iter()
+        .position(|scope| scope.node == Some(preferences))
+        .unwrap();
+    Control::from_boxed(&flyout.content().unwrap())
+        .unwrap()
+        .get_logical_descendants()
+        .find(|control| control.name().as_deref() == Some("FocusOrderScope"))
+        .unwrap()
+        .cast::<ComboBox>()
+        .unwrap()
+        .set_selected_index(group_index as i32);
     popup_capture(&window, &clock, &directory.join("designer-focus-order.png"));
     flyout.hide();
     session.borrow_mut().select([preferences]);
