@@ -1,7 +1,11 @@
-use crate::{error, require, GridLength, Result, ToolError};
+use crate::{GridLength, Result, ToolError, error, require};
 use ferroui_designer_core::{Document, Edit, MarkupValue, NodeId};
 use serde::{Deserialize, Serialize};
 use std::collections::{BTreeMap, BTreeSet};
+
+#[path = "property_values.rs"]
+mod values;
+pub use values::PropertyValueShape;
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub enum PropertyKind {
@@ -17,6 +21,8 @@ pub enum PropertyKind {
         maximum: i64,
     },
     Enum(Vec<String>),
+    Flags(Vec<String>),
+    Typed(PropertyValueShape),
     Thickness,
     Color,
     GridLength,
@@ -518,7 +524,17 @@ impl PropertyRegistry {
                     "{property} is an expression; explicitly opt into replacing it"
                 )));
             }
-            require(!element.children.iter().filter_map(|id|document.ast().node(*id)).any(|n|n.name.rsplit(':').next() == Some(property) || n.name.ends_with(&format!(".{property}"))),"Property is authored as a property element; edit that node to preserve its object graph")?;
+            require(
+                !element
+                    .children
+                    .iter()
+                    .filter_map(|id| document.ast().node(*id))
+                    .any(|n| {
+                        n.name.rsplit(':').next() == Some(property)
+                            || n.name.ends_with(&format!(".{property}"))
+                    }),
+                "Property is authored as a property element; edit that node to preserve its object graph",
+            )?;
             if let Some(value) = value {
                 editors.validate(&descriptor, value)?;
                 edits.push(Edit::SetAttribute {
@@ -584,6 +600,15 @@ impl ValueEditor for BuiltinEditor {
                 values.iter().any(|v| v == literal),
                 format!("Choose one of {}", values.join(", ")),
             ),
+            PropertyKind::Flags(values) => require(
+                literal.split(',').all(|part| {
+                    values
+                        .iter()
+                        .any(|value| value.eq_ignore_ascii_case(part.trim()))
+                }),
+                format!("Choose flags from {}", values.join(", ")),
+            ),
+            PropertyKind::Typed(shape) => shape.validate(literal),
             PropertyKind::Thickness => {
                 crate::layout::thickness(literal)?;
                 Ok(())
