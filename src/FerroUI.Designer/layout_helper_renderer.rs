@@ -227,6 +227,25 @@ pub fn hit_test_layout_handle(
     point: Point,
     zoom: f64,
 ) -> Option<usize> {
+    probe_layout_handle(snapshot, point, zoom, true)
+}
+
+/// Find the nearest visible grip for hover feedback, including disabled grips so
+/// their reason can be explained. Use hit_test_layout_handle to begin an edit.
+pub fn hover_layout_handle(
+    snapshot: &LayoutHelperSnapshot,
+    point: Point,
+    zoom: f64,
+) -> Option<usize> {
+    probe_layout_handle(snapshot, point, zoom, false)
+}
+
+fn probe_layout_handle(
+    snapshot: &LayoutHelperSnapshot,
+    point: Point,
+    zoom: f64,
+    editable_only: bool,
+) -> Option<usize> {
     let scale = inverse_zoom(zoom)?;
     snapshot.to_artboard.inverse().ok()?;
     if !point.x.is_finite() || !point.y.is_finite() {
@@ -238,7 +257,7 @@ pub fn hit_test_layout_handle(
         .handles
         .iter()
         .enumerate()
-        .filter(|(_, handle)| handle.disabled_reason.is_none())
+        .filter(|(_, handle)| !editable_only || handle.disabled_reason.is_none())
         .filter_map(|(index, handle)| {
             let anchor = transform_point(handle.position, snapshot.to_artboard)?;
             let dx = point.x - anchor.x;

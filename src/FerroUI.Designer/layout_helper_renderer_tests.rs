@@ -92,6 +92,16 @@ fn handle_hit_targets_use_screen_space_after_affine_transform_and_exclude_disabl
     );
     snapshot.scene.handles[0].disabled_reason = Some("Spacing comes from a binding".into());
     assert_eq!(hit_test_layout_handle(&snapshot, center, 1.0), None);
+    assert_eq!(
+        hover_layout_handle(&snapshot, center, 1.0),
+        Some(0),
+        "disabled grips explain their reason on hover without becoming editable"
+    );
+    assert_eq!(
+        hover_layout_handle(&snapshot, Point::new(center.x + 4.1, center.y), 2.0),
+        None,
+        "hover uses the same screen-size target as pressing"
+    );
     snapshot.scene.handles[0].disabled_reason = None;
     snapshot.to_artboard.m22 = 0.0625;
     assert_eq!(
