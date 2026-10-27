@@ -26,10 +26,28 @@ const INSET: f64 = 12.0;
 const MIN_DURATION: f64 = 0.0000001;
 type TimeAction = Rc<dyn Fn(f64)>;
 type MoveAction = Rc<dyn Fn(f64, f64)>;
+type SelectionAction = Rc<dyn Fn(Vec<f64>, Option<f64>, bool)>;
+type BatchMoveAction = Rc<dyn Fn(Vec<f64>, f64)>;
+type BatchAction = Rc<dyn Fn(Vec<f64>)>;
 
-#[derive(Clone, Copy)]
+#[derive(Clone)]
 enum Drag {
-    Key { from: f64, to: f64, start_x: f64 },
+    Key {
+        from: f64,
+        to: f64,
+        start_x: f64,
+        keys: Vec<f64>,
+        additive: bool,
+    },
+    Marquee {
+        from: f64,
+        to: f64,
+        start_x: f64,
+        base: Vec<f64>,
+        previous: Vec<f64>,
+        previous_primary: Option<f64>,
+        additive: bool,
+    },
     Scrub,
 }
 #[repr(C)]
@@ -45,6 +63,13 @@ pub struct TimelineLane {
     drag: RefCell<Option<Drag>>,
     pointer: RefCell<Option<Rc<dyn IPointer>>>,
     selected: Cell<Option<f64>>,
+    selected_keys: RefCell<Vec<f64>>,
+    selection_anchor: Cell<Option<f64>>,
+    frame_rate: Cell<Option<u32>>,
+    selection_changed: RefCell<Option<SelectionAction>>,
+    move_selection: RefCell<Option<BatchMoveAction>>,
+    remove_selection: RefCell<Option<BatchAction>>,
+    duplicate_selection: RefCell<Option<BatchMoveAction>>,
     hover: Cell<Option<f64>>,
     activate: RefCell<Option<TimeAction>>,
     move_key: RefCell<Option<MoveAction>>,
@@ -72,6 +97,13 @@ impl TimelineLane {
             drag: RefCell::new(None),
             pointer: RefCell::new(None),
             selected: Cell::new(None),
+            selected_keys: RefCell::new(Vec::new()),
+            selection_anchor: Cell::new(None),
+            frame_rate: Cell::new(None),
+            selection_changed: RefCell::new(None),
+            move_selection: RefCell::new(None),
+            remove_selection: RefCell::new(None),
+            duplicate_selection: RefCell::new(None),
             hover: Cell::new(None),
             activate: RefCell::new(None),
             move_key: RefCell::new(None),
@@ -80,11 +112,11 @@ impl TimelineLane {
             zoom: RefCell::new(None),
             pan: RefCell::new(None),
         });
-        this.set_height(34.0);
+        this.set_height(28.0);
         this.set_min_width(120.0);
         this.set_focusable(true);
         AutomationProperties::set_name(&this, Some("Animation keyframe track"));
-        ToolTip::set_tip(&this, Some(Rc::new("Drag keyframes to retime. Double-click to add. Arrow keys nudge; Shift for larger steps, Ctrl for precision. Delete removes a key. Ctrl+wheel zooms; Shift+wheel pans.".to_owned())));
+        ToolTip::set_tip(&this, Some(Rc::new("Drag selected keys to retime together. Ctrl+click toggles; Shift+click selects a range. Drag empty space to box-select. Double-click adds a key. Arrows nudge; Delete removes; Ctrl+D duplicates; Ctrl+A selects all. Ctrl+wheel zooms; Shift+wheel pans.".to_owned())));
         this
     }
     pub fn ruler() -> Ref<Self> {
@@ -103,6 +135,7 @@ impl TimelineLane {
         (self.view_start.get(), self.view_end.get())
     }
     pub fn configure(&self, duration: f64, mut keys: Vec<f64>) {
+        self.cancel_drag();
         let duration = if duration.is_finite() {
             duration.max(MIN_DURATION)
         } else {
@@ -116,8 +149,15 @@ impl TimelineLane {
         self.view_end.set(duration);
         self.selected
             .set(self.selected.get().filter(|time| keys.contains(time)));
+        self.selected_keys
+            .borrow_mut()
+            .retain(|time| keys.contains(time));
+        self.selection_anchor.set(
+            self.selection_anchor
+                .get()
+                .filter(|time| keys.contains(time)),
+        );
         *self.keys.borrow_mut() = keys;
-        self.cancel_drag();
         self.set_playhead(self.playhead.get());
         self.invalidate_visual();
     }
@@ -144,9 +184,51 @@ impl TimelineLane {
         }
     }
     pub fn set_selected(&self, time: Option<f64>) {
-        self.selected
-            .set(time.filter(|time| self.keys.borrow().contains(time)));
+        self.set_selected_keys(time.into_iter().collect(), time);
+    }
+    /// Accepts a host selection. Times not present in this lane are discarded.
+    /// The primary key is used for keyboard navigation and the contextual editor.
+    pub fn set_selected_keys(&self, mut times: Vec<f64>, primary: Option<f64>) {
+        let keys = self.keys.borrow();
+        times.retain(|time| keys.binary_search_by(|key| key.total_cmp(time)).is_ok());
+        times.sort_by(f64::total_cmp);
+        times.dedup();
+        self.selected.set(
+            primary
+                .filter(|time| times.contains(time))
+                .or_else(|| times.last().copied()),
+        );
+        self.selection_anchor.set(self.selected.get());
+        *self.selected_keys.borrow_mut() = times;
         self.invalidate_visual();
+    }
+    pub fn selected_keys(&self) -> Vec<f64> {
+        self.selected_keys.borrow().clone()
+    }
+    /// Sets frame snapping and frame labels, or restores adaptive seconds snapping.
+    /// Supported rates are 1–1000 fps; invalid values restore seconds mode.
+    pub fn set_frame_rate(&self, frames_per_second: Option<u32>) {
+        self.frame_rate
+            .set(frames_per_second.filter(|rate| (1..=1000).contains(rate)));
+        self.invalidate_visual();
+    }
+    pub fn frame_rate(&self) -> Option<u32> {
+        self.frame_rate.get()
+    }
+    /// Reports a completed local selection. `additive` preserves selections in other lanes.
+    /// No callback is emitted during a pointer gesture, so hosts may rebuild on completion.
+    pub fn on_selection_changed(&self, callback: impl Fn(Vec<f64>, Option<f64>, bool) + 'static) {
+        *self.selection_changed.borrow_mut() = Some(Rc::new(callback));
+    }
+    /// Reports one delta for all selected keys. The host commits it atomically.
+    pub fn on_move_selection(&self, callback: impl Fn(Vec<f64>, f64) + 'static) {
+        *self.move_selection.borrow_mut() = Some(Rc::new(callback));
+    }
+    pub fn on_remove_selection(&self, callback: impl Fn(Vec<f64>) + 'static) {
+        *self.remove_selection.borrow_mut() = Some(Rc::new(callback));
+    }
+    pub fn on_duplicate_selection(&self, callback: impl Fn(Vec<f64>, f64) + 'static) {
+        *self.duplicate_selection.borrow_mut() = Some(Rc::new(callback));
     }
     pub fn set_highlighted(&self, highlighted: bool) {
         self.highlighted.set(highlighted);
@@ -183,7 +265,9 @@ impl TimelineLane {
     fn time(&self, x: f64, modifiers: KeyModifiers) -> f64 {
         let value = (self.view_start.get() + (x - INSET) / self.plot_width() * self.span())
             .clamp(0.0, self.duration.get());
-        let quantum = if modifiers.contains(KeyModifiers::CONTROL) {
+        let quantum = if let Some(rate) = self.frame_rate.get() {
+            1.0 / f64::from(rate)
+        } else if modifiers.contains(KeyModifiers::CONTROL) {
             0.01f64.min(self.span() / 100.0)
         } else {
             0.1f64.min(self.span() / 10.0)
@@ -200,6 +284,101 @@ impl TimelineLane {
             }
         }
         .clamp(0.0, self.duration.get())
+    }
+    fn keyboard_step(&self, modifiers: KeyModifiers) -> f64 {
+        if let Some(rate) = self.frame_rate.get() {
+            (if modifiers.contains(KeyModifiers::SHIFT) {
+                10.0
+            } else {
+                1.0
+            }) / f64::from(rate)
+        } else if modifiers.contains(KeyModifiers::SHIFT) {
+            1.0
+        } else if modifiers.contains(KeyModifiers::CONTROL) {
+            0.01
+        } else {
+            0.1
+        }
+    }
+    fn select_key(&self, time: f64, modifiers: KeyModifiers) {
+        let mut selected = self.selected_keys.borrow_mut();
+        if modifiers.contains(KeyModifiers::SHIFT) {
+            let anchor = self.selection_anchor.get().unwrap_or(time);
+            let (start, end) = (anchor.min(time), anchor.max(time));
+            if !modifiers.contains(KeyModifiers::CONTROL) {
+                selected.clear();
+            }
+            selected.extend(
+                self.keys
+                    .borrow()
+                    .iter()
+                    .copied()
+                    .filter(|key| *key >= start && *key <= end),
+            );
+            selected.sort_by(f64::total_cmp);
+            selected.dedup();
+        } else if modifiers.contains(KeyModifiers::CONTROL) {
+            if let Some(index) = selected.iter().position(|key| *key == time) {
+                selected.remove(index);
+            } else {
+                selected.push(time);
+                selected.sort_by(f64::total_cmp);
+            }
+            self.selection_anchor.set(Some(time));
+        } else {
+            if !selected.contains(&time) {
+                *selected = vec![time];
+            }
+            self.selection_anchor.set(Some(time));
+        }
+        self.selected.set(
+            selected
+                .contains(&time)
+                .then_some(time)
+                .or_else(|| selected.last().copied()),
+        );
+    }
+    fn publish_selection(&self, additive: bool) {
+        let callback = self.selection_changed.borrow().clone();
+        if let Some(callback) = callback {
+            callback(self.selected_keys(), self.selected.get(), additive);
+        } else if let Some(time) = self.selected.get() {
+            self.activate_time(time);
+        }
+    }
+    fn move_selected(&self, keys: Vec<f64>, delta: f64) {
+        if keys.is_empty() || !delta.is_finite() {
+            return;
+        }
+        let minimum = keys.iter().copied().fold(f64::INFINITY, f64::min);
+        let maximum = keys.iter().copied().fold(f64::NEG_INFINITY, f64::max);
+        let delta = delta.clamp(-minimum, self.duration.get() - maximum);
+        if delta.abs() <= MIN_DURATION {
+            return;
+        }
+        let batch = self.move_selection.borrow().clone();
+        if let Some(callback) = batch {
+            callback(keys, delta);
+        } else if keys.len() == 1 {
+            let callback = self.move_key.borrow().clone();
+            if let Some(callback) = callback {
+                callback(keys[0], keys[0] + delta);
+            }
+        }
+    }
+    fn remove_selected(&self) {
+        let keys = self.selected_keys();
+        let batch = self.remove_selection.borrow().clone();
+        if let Some(callback) = batch {
+            if !keys.is_empty() {
+                callback(keys);
+            }
+        } else if keys.len() == 1 {
+            let callback = self.remove_key.borrow().clone();
+            if let Some(callback) = callback {
+                callback(keys[0]);
+            }
+        }
     }
     fn key_at(&self, x: f64) -> Option<f64> {
         let time = self.time(x, KeyModifiers::ALT);
@@ -238,7 +417,15 @@ impl TimelineLane {
         pointer.capture(Some(&self.to_ref().upcast::<InputElement>()));
     }
     fn cancel_drag(&self) {
-        self.drag.borrow_mut().take();
+        if let Some(Drag::Marquee {
+            previous,
+            previous_primary,
+            ..
+        }) = self.drag.borrow_mut().take()
+        {
+            *self.selected_keys.borrow_mut() = previous;
+            self.selected.set(previous_primary);
+        }
         let pointer = self.pointer.borrow_mut().take();
         if let Some(pointer) = pointer {
             if pointer.captured().as_ref() == Some(&self.to_ref().upcast::<InputElement>()) {
@@ -266,12 +453,22 @@ impl InputElementImpl for TimelineLane {
             this.capture_drag(Drag::Scrub, event.pointer());
             this.activate_time(time);
         } else if let Some(from) = this.key_at(x) {
-            this.selected.set(Some(from));
+            this.select_key(from, event.key_modifiers());
+            let keys = this.selected_keys();
+            let keys = if keys.contains(&from) {
+                keys
+            } else {
+                Vec::new()
+            };
             this.capture_drag(
                 Drag::Key {
                     from,
                     to: from,
                     start_x: x,
+                    keys,
+                    additive: event
+                        .key_modifiers()
+                        .intersects(KeyModifiers::CONTROL | KeyModifiers::SHIFT),
                 },
                 event.pointer(),
             );
@@ -281,7 +478,26 @@ impl InputElementImpl for TimelineLane {
                 callback(time);
             }
         } else {
-            this.activate_time(time);
+            let additive = event
+                .key_modifiers()
+                .intersects(KeyModifiers::CONTROL | KeyModifiers::SHIFT);
+            let base = if additive {
+                this.selected_keys()
+            } else {
+                Vec::new()
+            };
+            this.capture_drag(
+                Drag::Marquee {
+                    from: time,
+                    to: time,
+                    start_x: x,
+                    base,
+                    previous: this.selected_keys(),
+                    previous_primary: this.selected.get(),
+                    additive,
+                },
+                event.pointer(),
+            );
         }
         this.invalidate_visual();
         Self::parent_on_pointer_pressed(this, event);
@@ -295,6 +511,23 @@ impl InputElementImpl for TimelineLane {
             match drag.as_mut().filter(|_| this.owns_pointer(event.pointer())) {
                 Some(Drag::Key { to, .. }) => {
                     *to = time;
+                    false
+                }
+                Some(Drag::Marquee { from, to, base, .. }) => {
+                    *to = time;
+                    let (start, end) = (from.min(time), from.max(time));
+                    let mut keys = base.clone();
+                    keys.extend(
+                        this.keys
+                            .borrow()
+                            .iter()
+                            .copied()
+                            .filter(|key| *key >= start && *key <= end),
+                    );
+                    keys.sort_by(f64::total_cmp);
+                    keys.dedup();
+                    this.selected.set(keys.last().copied());
+                    *this.selected_keys.borrow_mut() = keys;
                     false
                 }
                 Some(Drag::Scrub) => true,
@@ -317,19 +550,38 @@ impl InputElementImpl for TimelineLane {
         let drag = this.drag.borrow_mut().take();
         this.cancel_drag();
         event.set_handled(true);
-        if let Some(Drag::Key { from, start_x, .. }) = drag {
-            let x = event.get_position(Some(this)).x;
-            let to = this.time(x, event.key_modifiers());
-            if (x - start_x).abs() > 2.0 && (to - from).abs() > MIN_DURATION {
-                let callback = this.move_key.borrow().clone();
-                if let Some(callback) = callback {
-                    callback(from, to);
+        match drag {
+            Some(Drag::Key {
+                from,
+                start_x,
+                keys,
+                additive,
+                ..
+            }) => {
+                let x = event.get_position(Some(this)).x;
+                let to = this.time(x, event.key_modifiers());
+                if (x - start_x).abs() > 2.0 && (to - from).abs() > MIN_DURATION && !keys.is_empty()
+                {
+                    this.move_selected(keys, to - from);
+                } else {
+                    this.publish_selection(additive);
                 }
-            } else {
-                this.activate_time(from);
             }
-        } else if matches!(drag, Some(Drag::Scrub)) {
-            this.activate_time(this.time(event.get_position(Some(this)).x, event.key_modifiers()));
+            Some(Drag::Marquee {
+                from,
+                start_x,
+                additive,
+                ..
+            }) => {
+                if (event.get_position(Some(this)).x - start_x).abs() > 2.0 {
+                    this.publish_selection(additive);
+                } else {
+                    this.activate_time(from);
+                }
+            }
+            Some(Drag::Scrub) => this
+                .activate_time(this.time(event.get_position(Some(this)).x, event.key_modifiers())),
+            None => {}
         }
         this.invalidate_visual();
         Self::parent_on_pointer_released(this, event);
@@ -337,7 +589,7 @@ impl InputElementImpl for TimelineLane {
     fn on_pointer_capture_lost(this: &Self, event: &PointerCaptureLostEventArgs) {
         if this.owns_pointer(event.pointer()) {
             this.pointer.borrow_mut().take();
-            this.drag.borrow_mut().take();
+            this.cancel_drag();
         }
         this.invalidate_visual();
         Self::parent_on_pointer_capture_lost(this, event);
@@ -372,32 +624,55 @@ impl InputElementImpl for TimelineLane {
                 this.cancel_drag();
                 event.set_handled(true);
             }
+            Key::A if event.key_modifiers.contains(KeyModifiers::CONTROL) && !this.ruler.get() => {
+                event.set_handled(true);
+                this.set_selected_keys(this.keys.borrow().clone(), this.selected.get());
+                this.publish_selection(false);
+            }
+            Key::D if event.key_modifiers.contains(KeyModifiers::CONTROL) && !this.ruler.get() => {
+                event.set_handled(true);
+                let callback = this.duplicate_selection.borrow().clone();
+                let keys = this.selected_keys();
+                if let Some(callback) = callback {
+                    if let (Some(first), Some(last)) = (keys.first(), keys.last()) {
+                        let delta = last - first + this.keyboard_step(KeyModifiers::NONE);
+                        callback(keys, delta);
+                    }
+                }
+            }
             Key::Delete | Key::Back => {
                 event.set_handled(true);
-                let callback = this.remove_key.borrow().clone();
-                if let (Some(callback), Some(time)) = (callback, this.selected.get()) {
-                    callback(time);
-                }
+                this.remove_selected();
             }
             Key::Left | Key::Right => {
                 event.set_handled(true);
-                let step = if event.key_modifiers.contains(KeyModifiers::SHIFT) {
-                    1.0
-                } else if event.key_modifiers.contains(KeyModifiers::CONTROL) {
-                    0.01
-                } else {
-                    0.1
-                };
-                let from = this.selected.get().unwrap_or(this.playhead.get());
-                let to = (from + if event.key == Key::Left { -step } else { step })
-                    .clamp(0.0, this.duration.get());
-                if this.selected.get().is_some() && (from - to).abs() > MIN_DURATION {
-                    let callback = this.move_key.borrow().clone();
-                    if let Some(callback) = callback {
-                        callback(from, to);
+                let backwards = event.key == Key::Left;
+                if event.key_modifiers.contains(KeyModifiers::ALT) {
+                    let time = this.playhead.get();
+                    let keys = this.keys.borrow();
+                    let next = if backwards {
+                        keys.iter()
+                            .rev()
+                            .copied()
+                            .find(|key| *key < time - MIN_DURATION)
+                    } else {
+                        keys.iter().copied().find(|key| *key > time + MIN_DURATION)
+                    };
+                    if let Some(time) = next {
+                        drop(keys);
+                        this.activate_time(time);
                     }
                 } else {
-                    this.activate_time(to);
+                    let delta = this.keyboard_step(event.key_modifiers)
+                        * if backwards { -1.0 } else { 1.0 };
+                    let keys = this.selected_keys();
+                    if keys.is_empty() {
+                        this.activate_time(
+                            (this.playhead.get() + delta).clamp(0.0, this.duration.get()),
+                        );
+                    } else {
+                        this.move_selected(keys, delta);
+                    }
                 }
             }
             Key::Home => {
@@ -445,8 +720,13 @@ impl VisualImpl for TimelineLane {
             &BoxShadows::default(),
         );
         let clip = context.push_clip(bounds);
-        let major = tick_interval(this.span(), this.plot_width());
-        let minor = major / 5.0;
+        let interval = tick_interval(this.span(), this.plot_width());
+        let major = this.frame_rate.get().map_or(interval, |rate| {
+            (interval * f64::from(rate)).ceil().max(1.0) / f64::from(rate)
+        });
+        let minor = this.frame_rate.get().map_or(major / 5.0, |rate| {
+            (major * f64::from(rate) / 5.0).ceil().max(1.0) / f64::from(rate)
+        });
         let first = (this.view_start.get() / minor).ceil() * minor;
         let count = ((this.view_end.get() - first) / minor)
             .ceil()
@@ -471,7 +751,11 @@ impl VisualImpl for TimelineLane {
                 Point::new(x, bounds.height),
             );
             if this.ruler.get() && is_major {
-                let text = text(&format_time(time, major), 10.0, 0xffb8b8b8);
+                let caption = this.frame_rate.get().map_or_else(
+                    || format_time(time, major),
+                    |rate| format!("{}f", (time * f64::from(rate)).round() as u64),
+                );
+                let text = text(&caption, 10.0, 0xffb8b8b8);
                 let origin = (x - text.width() * 0.5)
                     .clamp(2.0, (bounds.width - text.width() - 2.0).max(2.0));
                 context.draw_text(&text, Point::new(origin, 2.0));
@@ -482,10 +766,28 @@ impl VisualImpl for TimelineLane {
             let keys = this.keys.borrow();
             let start = keys.partition_point(|key| *key < this.view_start.get());
             let end = keys.partition_point(|key| *key <= this.view_end.get());
-            let drag = *this.drag.borrow();
+            let drag = this.drag.borrow().clone();
+            let selected_keys = this.selected_keys.borrow();
+            if let Some(Drag::Marquee { from, to, .. }) = &drag {
+                let fill = brush(0x334fc3ff);
+                let outline: Rc<dyn IPen> = Pen::from_uint32(0xff60cdff, 1.0).into();
+                let left = this.x(from.min(*to));
+                let right = this.x(from.max(*to));
+                context.draw_rectangle(
+                    Some(&fill),
+                    Some(&outline),
+                    Rect::new(left, 1.0, right - left, (bounds.height - 2.0).max(0.0)),
+                    1.0,
+                    1.0,
+                    &BoxShadows::default(),
+                );
+            }
             for time in &keys[start..end] {
-                let selected = this.selected.get() == Some(*time);
-                let color = if matches!(drag, Some(Drag::Key { from, .. }) if from == *time) {
+                let selected = selected_keys
+                    .binary_search_by(|key| key.total_cmp(time))
+                    .is_ok();
+                let color = if matches!(&drag, Some(Drag::Key { keys, .. }) if keys.contains(time))
+                {
                     0xff50616a
                 } else if selected
                     || this
@@ -505,9 +807,19 @@ impl VisualImpl for TimelineLane {
                     color,
                 );
             }
-            if let Some(Drag::Key { to, .. }) = drag {
-                diamond(context, this.x(to), center, 6.0, 0xff60cdff);
-                let text = text(&format!("{to:.2}s"), 10.0, 0xffffffff);
+            if let Some(Drag::Key { from, to, keys, .. }) = drag {
+                let minimum = keys.iter().copied().fold(f64::INFINITY, f64::min);
+                let maximum = keys.iter().copied().fold(f64::NEG_INFINITY, f64::max);
+                let delta = if keys.is_empty() {
+                    0.0
+                } else {
+                    (to - from).clamp(-minimum, this.duration.get() - maximum)
+                };
+                for key in &keys {
+                    diamond(context, this.x(*key + delta), center, 6.0, 0xff60cdff);
+                }
+                let to = from + delta;
+                let text = text(&format!("{to:.3}s"), 10.0, 0xffffffff);
                 context.draw_text(
                     &text,
                     Point::new(

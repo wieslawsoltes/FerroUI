@@ -41,6 +41,9 @@ impl PointerDriver {
             .unwrap()
     }
     fn press(&self, time: f64, count: i32) {
+        self.press_with_modifiers(time, count, KeyModifiers::NONE);
+    }
+    fn press_with_modifiers(&self, time: f64, count: i32, modifiers: KeyModifiers) {
         self.lane.raise_event(&PointerPressedEventArgs::new(
             self.lane.to_ref(),
             self.pointer.clone(),
@@ -51,7 +54,7 @@ impl PointerDriver {
                 RawInputModifiers::LEFT_MOUSE_BUTTON,
                 PointerUpdateKind::LeftButtonPressed,
             ),
-            KeyModifiers::NONE,
+            modifiers,
             count,
         ));
     }
@@ -244,4 +247,120 @@ fn ruler_scrubs_continuously_and_double_clicking_a_track_requests_a_keyframe() {
     driver.press(2.0, 2);
     assert_eq!(*inserts.borrow(), [2.0]);
     assert!(driver.pointer.captured().is_none());
+}
+
+#[test]
+fn toggle_range_and_marquee_selection_report_one_completed_intent() {
+    let _app = UnitTestApplication::start(TestServices::styled_window());
+    let lane = TimelineLane::new();
+    lane.configure(6.0, vec![1.0, 2.0, 3.0, 5.0]);
+    let selections = Rc::new(RefCell::new(Vec::new()));
+    let observed = selections.clone();
+    lane.on_selection_changed(move |times, primary, additive| {
+        observed.borrow_mut().push((times, primary, additive))
+    });
+    let driver = PointerDriver::new(lane);
+    driver.press(1.0, 1);
+    assert!(selections.borrow().is_empty());
+    driver.release(1.0);
+    assert_eq!(driver.lane.selected_keys(), [1.0]);
+    driver.press_with_modifiers(3.0, 1, KeyModifiers::SHIFT);
+    driver.release(3.0);
+    assert_eq!(driver.lane.selected_keys(), [1.0, 2.0, 3.0]);
+    driver.press_with_modifiers(2.0, 1, KeyModifiers::CONTROL);
+    driver.release(2.0);
+    assert_eq!(driver.lane.selected_keys(), [1.0, 3.0]);
+    assert_eq!(selections.borrow().len(), 3);
+    assert!(selections.borrow()[2].2);
+    driver.press(0.4, 1);
+    driver.move_to(2.6);
+    assert_eq!(driver.lane.selected_keys(), [1.0, 2.0]);
+    assert_eq!(
+        selections.borrow().len(),
+        3,
+        "Marquee feedback does not publish until release"
+    );
+    driver.release(2.6);
+    assert_eq!(selections.borrow().len(), 4);
+    assert!(!selections.borrow()[3].2);
+    assert_eq!(selections.borrow()[3].0, [1.0, 2.0]);
+    driver.press(2.6, 1);
+    driver.move_to(5.6);
+    assert_eq!(driver.lane.selected_keys(), [3.0, 5.0]);
+    key(&driver.lane, Key::Escape, KeyModifiers::NONE);
+    assert_eq!(
+        driver.lane.selected_keys(),
+        [1.0, 2.0],
+        "Escape restores the accepted selection"
+    );
+    assert_eq!(selections.borrow().len(), 4);
+}
+
+#[test]
+fn group_drag_clamps_one_common_delta_and_cancel_does_not_commit() {
+    let _app = UnitTestApplication::start(TestServices::styled_window());
+    let lane = TimelineLane::new();
+    lane.configure(6.0, vec![1.0, 2.0, 3.0, 5.0]);
+    lane.set_selected_keys(vec![1.0, 3.0, 5.0], Some(3.0));
+    let moves = Rc::new(RefCell::new(Vec::new()));
+    let observed = moves.clone();
+    lane.on_move_selection(move |times, delta| observed.borrow_mut().push((times, delta)));
+    let driver = PointerDriver::new(lane);
+    driver.press(3.0, 1);
+    driver.move_to(5.0);
+    assert!(moves.borrow().is_empty());
+    driver.release(5.0);
+    assert_eq!(
+        *moves.borrow(),
+        [(vec![1.0, 3.0, 5.0], 1.0)],
+        "The group preserves relative spacing at the end boundary"
+    );
+    driver.press(3.0, 1);
+    driver.move_to(1.0);
+    driver.pointer.platform_capture_lost();
+    driver.release(1.0);
+    assert_eq!(moves.borrow().len(), 1);
+    let deletes = Rc::new(RefCell::new(Vec::new()));
+    let observed = deletes.clone();
+    driver
+        .lane
+        .on_remove_selection(move |times| observed.borrow_mut().push(times));
+    key(&driver.lane, Key::Delete, KeyModifiers::NONE);
+    assert_eq!(*deletes.borrow(), [vec![1.0, 3.0, 5.0]]);
+    let duplicates = Rc::new(RefCell::new(Vec::new()));
+    let observed = duplicates.clone();
+    driver
+        .lane
+        .on_duplicate_selection(move |times, delta| observed.borrow_mut().push((times, delta)));
+    key(&driver.lane, Key::D, KeyModifiers::CONTROL);
+    assert_eq!(*duplicates.borrow(), [(vec![1.0, 3.0, 5.0], 4.1)]);
+}
+
+#[test]
+fn frame_snapping_keyboard_and_previous_next_navigation_share_the_time_axis() {
+    let _app = UnitTestApplication::start(TestServices::styled_window());
+    let lane = TimelineLane::new();
+    lane.configure(6.0, vec![1.0, 2.0, 3.0]);
+    lane.set_frame_rate(Some(30));
+    lane.measure(Size::new(424.0, 28.0));
+    lane.arrange(Rect::new(0.0, 0.0, 424.0, 28.0));
+    assert!((lane.time(lane.x(1.084), KeyModifiers::NONE) - 1.1).abs() < 1e-9);
+    assert!((lane.time(lane.x(1.084), KeyModifiers::ALT) - 1.084).abs() < 1e-9);
+    lane.set_selected_keys(vec![1.0, 2.0], Some(2.0));
+    let moves = Rc::new(RefCell::new(Vec::new()));
+    let observed = moves.clone();
+    lane.on_move_selection(move |keys, delta| observed.borrow_mut().push((keys, delta)));
+    key(&lane, Key::Right, KeyModifiers::NONE);
+    key(&lane, Key::Left, KeyModifiers::SHIFT);
+    assert_eq!(moves.borrow()[0], (vec![1.0, 2.0], 1.0 / 30.0));
+    assert_eq!(moves.borrow()[1], (vec![1.0, 2.0], -10.0 / 30.0));
+    let seeks = Rc::new(RefCell::new(Vec::new()));
+    let observed = seeks.clone();
+    lane.on_activate(move |time| observed.borrow_mut().push(time));
+    lane.set_playhead(2.0);
+    key(&lane, Key::Left, KeyModifiers::ALT);
+    key(&lane, Key::Right, KeyModifiers::ALT);
+    assert_eq!(*seeks.borrow(), [1.0, 3.0]);
+    lane.set_frame_rate(Some(0));
+    assert_eq!(lane.frame_rate(), None);
 }
