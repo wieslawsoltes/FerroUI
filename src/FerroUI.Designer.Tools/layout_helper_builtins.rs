@@ -275,7 +275,7 @@ fn thickness_helpers(
     Ok(())
 }
 
-fn margin_helpers(
+pub(super) fn margin_helpers(
     context: &LayoutContext<'_>,
     scene: &mut LayoutHelperScene,
     node: NodeId,

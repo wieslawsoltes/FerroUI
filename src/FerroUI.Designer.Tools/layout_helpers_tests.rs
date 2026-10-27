@@ -401,6 +401,63 @@ fn dedicated_uniform_dock_relative_helpers_expose_their_layout_semantics() {
         assert_eq!((owner, index), (placement.container, placement.index));
     }
 }
+#[test]
+fn uniform_grid_preview_follows_effective_insertion_slot_and_reserved_columns() {
+    for (first, count, position, expected_index, expected_bounds, caption) in [
+        (
+            0,
+            3,
+            Point::new(150.0, 150.0),
+            3,
+            Rect::new(0.0, 100.0, 100.0, 100.0),
+            "row 2  column 1",
+        ),
+        (
+            1,
+            2,
+            Point::new(10.0, 10.0),
+            0,
+            Rect::new(100.0, 0.0, 100.0, 100.0),
+            "row 1  column 2",
+        ),
+        (
+            1,
+            2,
+            Point::new(250.0, 150.0),
+            2,
+            Rect::new(0.0, 100.0, 100.0, 100.0),
+            "row 2  column 1",
+        ),
+    ] {
+        let document = Document::new(format!(
+            "<UniformGrid Rows='2' Columns='3' FirstColumn='{first}'>{}</UniformGrid>",
+            "<Button/>".repeat(count)
+        ))
+        .unwrap();
+        let panel = document.ast().root();
+        let bounds = BTreeMap::from([(panel, Rect::new(0.0, 0.0, 300.0, 200.0))]);
+        let context = LayoutContext::new(&document, &bounds);
+        let registry = LayoutRegistry::built_in();
+        let placement = registry
+            .placement(&context, panel, position, &[])
+            .unwrap()
+            .unwrap();
+        assert_eq!(placement.index, expected_index);
+        assert_eq!(placement.bounds, expected_bounds);
+        assert!(placement.description.ends_with(caption));
+        let edits = registry
+            .plan(
+                &context,
+                LayoutAction::Drop {
+                    parent: panel,
+                    source: "<Button/>".into(),
+                    position,
+                },
+            )
+            .unwrap();
+        assert_eq!(inserted(&edits).1, expected_index);
+    }
+}
 struct CustomProvider;
 impl LayoutAdapter for CustomProvider {
     fn panel_type(&self) -> &str {

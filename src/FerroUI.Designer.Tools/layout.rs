@@ -1299,19 +1299,25 @@ pub(crate) fn built_in_placement(
                 let cell_height = ((bounds.height - rows.saturating_sub(1) as f64 * gap_y)
                     / rows.max(1) as f64)
                     .max(0.0);
-                preview = Rect::new(
-                    bounds.x + column.min(columns.saturating_sub(1)) as f64 * (cell_width + gap_x),
-                    bounds.y + row.min(rows.saturating_sub(1)) as f64 * (cell_height + gap_y),
-                    cell_width,
-                    cell_height,
-                );
-                description = format!("Uniform grid · row {}  column {}", row + 1, column + 1);
                 index = row
                     .min(rows.saturating_sub(1))
                     .saturating_mul(columns)
                     .saturating_add(column.min(columns.saturating_sub(1)))
                     .saturating_sub(first)
                     .min(children.len());
+                // Empty cells beyond the current content append to the next available
+                // slot; reserved leading cells insert at FirstColumn. Preview the exact
+                // effective insertion slot rather than the unfillable hovered cell.
+                let slot = index + first;
+                let row = slot / columns.max(1);
+                let column = slot % columns.max(1);
+                preview = Rect::new(
+                    bounds.x + column as f64 * (cell_width + gap_x),
+                    bounds.y + row as f64 * (cell_height + gap_y),
+                    cell_width,
+                    cell_height,
+                );
+                description = format!("Uniform grid · row {}  column {}", row + 1, column + 1);
             }
             "DockPanel" => {
                 let sides = [

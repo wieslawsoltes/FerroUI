@@ -162,6 +162,20 @@ pub struct LayoutHelperScene {
     pub placement: Option<LayoutPlacement>,
 }
 impl LayoutHelperScene {
+    /// Append a direct child's margin guides in this context's measured coordinate space.
+    /// Native hosts with transformed internal presenters can compose this small scene into
+    /// the panel scene while retaining the child's authored units for handle gestures.
+    pub fn append_margin_helpers(
+        &mut self,
+        context: &LayoutContext<'_>,
+        node: NodeId,
+    ) -> Result<()> {
+        require(
+            context.parent(node)? == self.panel,
+            "Margin helpers require a direct layout child",
+        )?;
+        builtins::margin_helpers(context, self, node, context.bounds(node)?)
+    }
     pub fn generic(context: &LayoutContext<'_>, request: &LayoutHelperRequest) -> Result<Self> {
         let element = context.element(request.panel)?;
         let title = element.xaml_name().map_or_else(
