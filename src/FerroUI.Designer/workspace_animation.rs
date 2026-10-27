@@ -1,6 +1,8 @@
 //! Native program, visual-state and behavior authoring panels.
 use super::*;
-use ferroui_controls::ComboBox;
+use ferroui_base::media::{FontWeight, TextWrapping};
+use ferroui_controls::automation::AutomationProperties;
+use ferroui_controls::{ColumnDefinitions, ComboBox, ScrollViewer, ToolTip};
 use ferroui_designer_animation::{
     BehaviorAction, BehaviorModel, BehaviorTrigger, FillMode, PlaybackDirection, Repeat,
     StateSetter, StateTransition, VisualState, VisualStateGroup,
@@ -13,13 +15,97 @@ pub(super) struct AuthoringUi {
     state: String,
 }
 fn field(panel: &StackPanel, label: &str, value: &str) -> Ref<TextBox> {
+    let row = Grid::new();
+    row.set_column_definitions(ColumnDefinitions::parse("104,*").unwrap());
     let title = TextBlock::new();
-    title.set_text(Some(label));
-    title.set_foreground(Some(SolidColorBrush::from_uint32(0xffaebbd3).into()));
+    let caption = label.split(" (").next().unwrap_or(label);
+    title.set_text(Some(caption));
+    title.set_foreground(Some(SolidColorBrush::from_uint32(0xffa9adba).into()));
     title.set_font_size(11.0);
-    panel.children().add(title.upcast::<Control>());
+    title.set_vertical_alignment(ferroui_base::layout::VerticalAlignment::Center);
+    title.set_text_wrapping(TextWrapping::Wrap);
+    title.set_margin(Thickness::new(0.0, 0.0, 8.0, 0.0));
+    row.children().add(title.upcast::<Control>());
     let text = TextBox::new();
     text.set_text(Some(value));
+    text.classes().add("designer-field");
+    text.set_min_width(0.0);
+    AutomationProperties::set_name(&text, Some(label));
+    ToolTip::set_tip(&text, Some(Rc::new(label.to_owned())));
+    Grid::set_column(&text, 1);
+    row.children().add(text.clone().upcast::<Control>());
+    panel.children().add(row.upcast::<Control>());
+    text
+}
+fn choice_field(panel: &StackPanel, label: &str, value: &str, choices: &[&str]) -> Ref<ComboBox> {
+    let row = Grid::new();
+    row.set_column_definitions(ColumnDefinitions::parse("104,*").unwrap());
+    let title = TextBlock::new();
+    title.set_text(Some(label));
+    title.set_font_size(11.0);
+    title.set_foreground(Some(SolidColorBrush::from_uint32(0xffa9adba).into()));
+    title.set_vertical_alignment(ferroui_base::layout::VerticalAlignment::Center);
+    row.children().add(title.upcast::<Control>());
+    let picker = ComboBox::new();
+    picker.classes().add("designer-field");
+    picker.set_horizontal_alignment(HorizontalAlignment::Stretch);
+    for choice in choices {
+        picker.items().add(Some(Rc::new((*choice).to_owned())));
+    }
+    picker.set_selected_index(
+        choices
+            .iter()
+            .position(|choice| *choice == value)
+            .map_or(-1, |index| index as i32),
+    );
+    AutomationProperties::set_name(&picker, Some(label));
+    Grid::set_column(&picker, 1);
+    row.children().add(picker.clone().upcast::<Control>());
+    panel.children().add(row.upcast::<Control>());
+    picker
+}
+fn choice(picker: &ComboBox) -> String {
+    picker
+        .selected_item()
+        .and_then(|value| value.downcast_ref::<String>().cloned())
+        .unwrap_or_default()
+}
+fn section(panel: &StackPanel, title: &str) {
+    let label = TextBlock::new();
+    label.set_text(Some(title));
+    label.set_font_size(11.0);
+    label.set_font_weight(FontWeight::SemiBold);
+    label.set_margin(Thickness::new(
+        0.0,
+        if panel.children().is_empty() {
+            2.0
+        } else {
+            12.0
+        },
+        0.0,
+        2.0,
+    ));
+    panel.children().add(label.upcast::<Control>());
+}
+fn description(panel: &StackPanel, value: &str) {
+    let label = TextBlock::new();
+    label.set_text(Some(value));
+    label.set_font_size(11.0);
+    label.set_foreground(Some(SolidColorBrush::from_uint32(0xffa9adba).into()));
+    label.set_text_wrapping(TextWrapping::Wrap);
+    label.set_margin(Thickness::new(0.0, 0.0, 0.0, 6.0));
+    panel.children().add(label.upcast::<Control>());
+}
+fn code_field(panel: &StackPanel, label: &str, value: &str) -> Ref<TextBox> {
+    section(panel, label);
+    let text = TextBox::new();
+    text.set_text(Some(value));
+    text.classes().add("designer-field");
+    text.set_font_family(ferroui_base::media::FontFamily::from("monospace"));
+    text.set_font_size(11.0);
+    text.set_accepts_return(true);
+    text.set_min_height(112.0);
+    AutomationProperties::set_name(&text, Some(label));
     panel.children().add(text.clone().upcast::<Control>());
     text
 }
@@ -30,6 +116,14 @@ fn action(
     run: impl Fn(&Rc<DesignerWorkspace>) -> Result<(), String> + 'static,
 ) {
     let row = button(title);
+    row.classes().add("designer-authoring-action");
+    if title.starts_with("Apply") || title.starts_with("Attach") {
+        row.classes().add("designer-motion");
+    } else {
+        row.classes().add("nav");
+    }
+    row.set_horizontal_alignment(HorizontalAlignment::Stretch);
+    row.set_horizontal_content_alignment(HorizontalAlignment::Left);
     let weak = Rc::downgrade(workspace);
     row.click(move |_, _| {
         if let Some(this) = weak.upgrade() {
@@ -216,10 +310,8 @@ impl DesignerWorkspace {
         for program in session.animation_programs() {
             ids.push(program.id);
             picker.items().add(Some(Rc::new(format!(
-                "{} · {} target{}{}",
+                "{}{}",
                 program.name,
-                program.targets.len(),
-                if program.targets.len() == 1 { "" } else { "s" },
                 if program.timeline.is_none() {
                     " · source"
                 } else {
@@ -238,6 +330,16 @@ impl DesignerWorkspace {
             .iter()
             .find(|program| Some(program.id) == session.active_animation_program())
         {
+            ToolTip::set_tip(
+                &picker,
+                Some(Rc::new(format!(
+                    "{}\n{} target{} · {}\nSelect the animation to edit and preview",
+                    program.name,
+                    program.targets.len(),
+                    if program.targets.len() == 1 { "" } else { "s" },
+                    program.selector,
+                ))),
+            );
             let name = self.root.get_control::<TextBox>("AnimationName");
             if !name.is_focused() {
                 name.set_text(Some(&program.name));
@@ -246,6 +348,13 @@ impl DesignerWorkspace {
             if !selector.is_focused() {
                 selector.set_text(Some(&program.selector));
             }
+        } else {
+            ToolTip::set_tip(
+                &picker,
+                Some(Rc::new(
+                    "Create an animation or add a keyframe to the selected object".to_owned(),
+                )),
+            );
         }
         *self.animation_program_ids.borrow_mut() = ids;
         self.guard.set(previous);
@@ -253,7 +362,32 @@ impl DesignerWorkspace {
     pub(super) fn rebuild_authoring(self: &Rc<Self>) {
         let panel = self.root.get_control::<StackPanel>("AuthoringPanel");
         panel.children().clear();
+        panel.set_spacing(8.0);
         let mode = self.authoring.borrow().mode;
+        self.root
+            .get_control::<Grid>("InspectorDesignPane")
+            .set_is_visible(mode == 0);
+        self.root
+            .get_control::<ScrollViewer>("AuthoringScroll")
+            .set_is_visible(mode != 0);
+        for (name, active) in [
+            ("CloseAuthoring", 0),
+            ("StatesMode", 1),
+            ("BehaviorsMode", 2),
+        ] {
+            self.root
+                .get_control::<Button>(name)
+                .classes()
+                .set("active", mode == active);
+        }
+        if let Some(title) = self.root.find_control::<TextBlock>("InspectorModeTitle") {
+            title.set_text(Some(match mode {
+                1 => "Visual states",
+                2 => "Behaviors",
+                3 => "Animation settings",
+                _ => "Properties",
+            }));
+        }
         let owner = self
             .session
             .borrow()
@@ -273,17 +407,24 @@ impl DesignerWorkspace {
             return;
         };
         let timeline = self.session.borrow().timeline().clone();
+        section(panel, "Timing");
+        description(
+            panel,
+            "Control the selected animation. Duration changes scale every keyframe together.",
+        );
         let duration = field(panel, "Duration (seconds)", &timeline.duration.to_string());
         let delay = field(panel, "Delay (seconds)", &timeline.delay.to_string());
         let iteration_delay = field(
             panel,
-            "Delay between iterations (seconds)",
+            "Repeat delay (seconds)",
             &timeline.delay_between_iterations.to_string(),
         );
-        let playback = field(
+        section(panel, "Playback");
+        let playback = choice_field(
             panel,
-            "Playback: Auto / Always / OnlyIfVisible",
+            "Behavior",
             &format!("{:?}", timeline.playback_behavior),
+            &["Auto", "Always", "OnlyIfVisible"],
         );
         let speed = field(panel, "Playback speed", &timeline.speed_ratio.to_string());
         let repeat = field(
@@ -294,15 +435,17 @@ impl DesignerWorkspace {
                 Repeat::Infinite => "Infinite".into(),
             },
         );
-        let direction = field(
+        let direction = choice_field(
             panel,
-            "Direction: Normal / Reverse / Alternate / AlternateReverse",
+            "Direction",
             &format!("{:?}", timeline.playback_direction),
+            &["Normal", "Reverse", "Alternate", "AlternateReverse"],
         );
-        let fill = field(
+        let fill = choice_field(
             panel,
-            "Fill: None / Forward / Backward / Both",
+            "Fill mode",
             &format!("{:?}", timeline.fill),
+            &["None", "Forward", "Backward", "Both"],
         );
         let easing = field(
             panel,
@@ -326,7 +469,7 @@ impl DesignerWorkspace {
             timeline.delay_between_iterations = text(&iteration_delay)
                 .parse()
                 .map_err(|_| "Invalid iteration delay")?;
-            timeline.playback_behavior = match text(&playback).as_str() {
+            timeline.playback_behavior = match choice(&playback).as_str() {
                 "Auto" => ferroui_designer_animation::PlaybackBehavior::Auto,
                 "Always" => ferroui_designer_animation::PlaybackBehavior::Always,
                 "OnlyIfVisible" => ferroui_designer_animation::PlaybackBehavior::OnlyIfVisible,
@@ -338,14 +481,14 @@ impl DesignerWorkspace {
             } else {
                 Repeat::Count(text(&repeat).parse().map_err(|_| "Invalid repeat count")?)
             };
-            timeline.playback_direction = match text(&direction).as_str() {
+            timeline.playback_direction = match choice(&direction).as_str() {
                 "Normal" => PlaybackDirection::Normal,
                 "Reverse" => PlaybackDirection::Reverse,
                 "Alternate" => PlaybackDirection::Alternate,
                 "AlternateReverse" => PlaybackDirection::AlternateReverse,
                 _ => return Err("Invalid playback direction".into()),
             };
-            timeline.fill = match text(&fill).as_str() {
+            timeline.fill = match choice(&fill).as_str() {
                 "None" => FillMode::None,
                 "Forward" => FillMode::Forward,
                 "Backward" => FillMode::Backward,
@@ -357,6 +500,7 @@ impl DesignerWorkspace {
                 .borrow_mut()
                 .update_animation_program(id, timeline)
         });
+        section(panel, "Preview targets");
         action(panel, "Preview on current selection", self, move |this| {
             let targets = this.session.borrow().selection().to_vec();
             this.session
@@ -383,9 +527,7 @@ impl DesignerWorkspace {
                 self.session.borrow().document().source()[node.span.start..node.span.end].to_owned()
             })
             .unwrap_or_default();
-        let editor = field(panel, "Animation XAML (including custom payload)", &source);
-        editor.set_accepts_return(true);
-        editor.set_min_height(100.0);
+        let editor = code_field(panel, "Animation XAML", &source);
         action(panel, "Apply animation XAML", self, move |this| {
             this.session
                 .borrow_mut()
@@ -393,6 +535,11 @@ impl DesignerWorkspace {
         });
     }
     fn build_state_panel(self: &Rc<Self>, panel: &StackPanel, owner: NodeId) {
+        section(panel, "State groups");
+        description(
+            panel,
+            "Define how the selected element changes for an interaction. Choose a state to preview its property overrides.",
+        );
         let groups = self
             .session
             .borrow()
@@ -431,6 +578,7 @@ impl DesignerWorkspace {
         let Some(group) = group else {
             return;
         };
+        section(panel, &format!("{} states", group.name));
         let group_key = group.name.clone();
         let remove_name = group.name.clone();
         action(panel, "Delete group", self, move |this| {
@@ -474,6 +622,7 @@ impl DesignerWorkspace {
         let Some(state) = state else {
             return;
         };
+        section(panel, &format!("{} overrides", state.name));
         let state_key = state.name.clone();
         let key = group_key.clone();
         let state_name = state_key.clone();
@@ -521,9 +670,10 @@ impl DesignerWorkspace {
                 this.session.borrow_mut().upsert_state_group(group)
             });
         }
-        let target = field(panel, "New setter target", "");
-        let property = field(panel, "New setter property", "Opacity");
-        let value = field(panel, "New setter value", "0.5");
+        section(panel, "New property override");
+        let target = field(panel, "Target (empty = selected object)", "");
+        let property = field(panel, "Property", "Opacity");
+        let value = field(panel, "Value", "0.5");
         let key = group_key.clone();
         let name = state_key.clone();
         action(panel, "Add setter", self, move |this| {
@@ -541,6 +691,7 @@ impl DesignerWorkspace {
                 });
             this.session.borrow_mut().upsert_state_group(group)
         });
+        section(panel, "Transitions");
         for (index, transition) in group.transitions.iter().enumerate() {
             let key = group_key.clone();
             action(
@@ -576,7 +727,8 @@ impl DesignerWorkspace {
             });
             this.session.borrow_mut().upsert_state_group(group)
         });
-        let event = field(panel, "Trigger this state from event", "Click");
+        section(panel, "Event trigger");
+        let event = field(panel, "Event", "Click");
         let key = group_key;
         let state = state_key;
         action(panel, "Attach state event trigger", self, move |this| {
@@ -607,24 +759,34 @@ impl DesignerWorkspace {
             .ok_or_else(|| "State group changed".into())
     }
     fn build_behavior_panel(self: &Rc<Self>, panel: &StackPanel, owner: NodeId) {
-        let trigger = field(panel, "New trigger: Event / Data / custom type", "Event");
+        section(panel, "Trigger");
+        description(
+            panel,
+            "Connect an event or condition to an action. Custom trigger and action types remain editable by name.",
+        );
+        let trigger = field(panel, "Type (Event, Data or custom type)", "Event");
         let event = field(
             panel,
-            "Event name / binding / custom properties JSON",
+            "Source (event name, binding or custom properties JSON)",
             "Click",
         );
         let comparison = field(panel, "Data comparison", "Equal");
-        let compare_value = field(panel, "Data comparison value", "True");
+        let compare_value = field(panel, "Compare value", "True");
+        section(panel, "Action");
         let kind = field(
             panel,
-            "Action: ChangeProperty / InvokeCommand / CallMethod / AddClass / RemoveClass / custom type",
+            "Type (ChangeProperty, InvokeCommand, CallMethod, AddClass, RemoveClass or custom type)",
             "ChangeProperty",
         );
-        let target = field(panel, "Action target (Name or binding)", "");
-        let property = field(panel, "Property / method / class / command", "Opacity");
+        let target = field(panel, "Target (Name or binding)", "");
+        let property = field(
+            panel,
+            "Member (property, method, class or command)",
+            "Opacity",
+        );
         let value = field(
             panel,
-            "Value / command parameter / custom properties JSON",
+            "Value (value, command parameter or custom properties JSON)",
             "0.5",
         );
         action(panel, "Attach behavior", self, move |this| {
@@ -683,14 +845,29 @@ impl DesignerWorkspace {
                 })
                 .map(|_| ())
         });
-        for model in self.session.borrow().behaviors(owner) {
+        let behaviors = self.session.borrow().behaviors(owner);
+        if !behaviors.is_empty() {
+            section(panel, "Attached behaviors");
+        }
+        for model in behaviors {
             let Some(id) = model.id else {
                 continue;
             };
-            let title = format!("{:?} · {} actions", model.trigger, model.actions.len());
+            let trigger = match &model.trigger {
+                BehaviorTrigger::Event { event, .. } => format!("On {event}"),
+                BehaviorTrigger::Data { binding, .. } => format!("When {binding}"),
+                BehaviorTrigger::Custom { type_name, .. } => type_name.clone(),
+            };
+            let title = format!(
+                "{trigger} · {} action{}",
+                model.actions.len(),
+                if model.actions.len() == 1 { "" } else { "s" }
+            );
             let label = TextBlock::new();
             label.set_text(Some(&title));
             label.set_font_size(11.0);
+            label.set_font_weight(FontWeight::SemiBold);
+            label.set_text_wrapping(TextWrapping::Wrap);
             panel.children().add(label.upcast::<Control>());
             action(panel, "Preview actions", self, move |this| {
                 this.session.borrow_mut().preview_behavior(id)
@@ -699,13 +876,7 @@ impl DesignerWorkspace {
                 this.session.borrow_mut().remove_behavior(id)
             });
             let source = model.to_xaml().unwrap_or_default();
-            let editor = field(
-                panel,
-                "Behavior XAML (all triggers, actions and custom payload)",
-                &source,
-            );
-            editor.set_accepts_return(true);
-            editor.set_min_height(110.0);
+            let editor = code_field(panel, "Behavior XAML", &source);
             action(panel, "Apply behavior XAML", self, move |this| {
                 this.session
                     .borrow_mut()

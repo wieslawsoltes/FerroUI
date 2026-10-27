@@ -3,7 +3,7 @@ use crate::{DesignerWorkspace, PreviewStatus};
 use ferroui_base::Ref;
 use ferroui_base::interactivity::RoutedEventArgs;
 use ferroui_controls::testing::{TestServices, UnitTestApplication};
-use ferroui_controls::{Button, Grid, StackPanel, TextBlock, TextBox};
+use ferroui_controls::{Button, ContentControl, Control, Grid, StackPanel, TextBlock, TextBox};
 use ferroui_designer_animation::{AnimationValue, Easing};
 
 fn click(button: &Button) {
@@ -16,23 +16,12 @@ fn caption(button: &Button) -> Option<String> {
 }
 
 fn keyframe_editor(workspace: &DesignerWorkspace) -> Ref<StackPanel> {
-    let editors: Vec<_> = workspace
+    let host = workspace
         .control()
-        .get_control::<StackPanel>("Tracks")
-        .children()
-        .to_vec()
-        .into_iter()
-        .filter_map(|control| control.cast::<StackPanel>())
-        .filter(|row| {
-            row.children()
-                .to_vec()
-                .iter()
-                .filter_map(|control| control.cast::<Button>())
-                .any(|button| caption(&button).as_deref() == Some("Apply keyframe"))
-        })
-        .collect();
-    assert_eq!(editors.len(), 1, "Only the selected keyframe has an editor");
-    editors[0].clone()
+        .get_control::<ContentControl>("TimelineInspectorHost");
+    Control::from_boxed(&host.content().expect("A selected key has an inspector"))
+        .and_then(|control| control.cast::<StackPanel>())
+        .expect("The contextual inspector is a compact field row")
 }
 fn keyframe_input(editor: &StackPanel, name: &str) -> Ref<TextBox> {
     editor
@@ -54,14 +43,16 @@ fn apply_keyframe(editor: &StackPanel) {
     click(&apply);
 }
 fn timeline_ruler(workspace: &DesignerWorkspace) -> Ref<crate::TimelineLane> {
-    workspace
+    let host = workspace
         .control()
-        .get_control::<StackPanel>("Tracks")
+        .get_control::<ContentControl>("TimelineRulerHost");
+    Control::from_boxed(&host.content().unwrap())
+        .unwrap()
+        .cast::<Grid>()
+        .unwrap()
         .children()
         .to_vec()
-        .iter()
-        .filter_map(|control| control.cast::<Grid>())
-        .flat_map(|grid| grid.children().to_vec())
+        .into_iter()
         .filter_map(|control| control.cast::<crate::TimelineLane>())
         .find(|lane| lane.is_ruler())
         .unwrap()
@@ -126,12 +117,23 @@ fn native_timeline_controls_record_scrubbed_values_rescale_keys_and_author_curve
         .get_control::<StackPanel>("AuthoringPanel");
     let children = panel.children().to_vec();
     let duration = children
-        .windows(2)
-        .find_map(|pair| {
-            pair[0]
-                .cast::<TextBlock>()
-                .filter(|label| label.text().as_deref() == Some("Duration (seconds)"))
-                .and_then(|_| pair[1].cast::<TextBox>())
+        .iter()
+        .filter_map(|control| control.cast::<Grid>())
+        .find_map(|row| {
+            let children = row.children().to_vec();
+            children
+                .iter()
+                .any(|control| {
+                    control
+                        .cast::<TextBlock>()
+                        .is_some_and(|label| label.text().as_deref() == Some("Duration"))
+                })
+                .then(|| {
+                    children
+                        .iter()
+                        .find_map(|control| control.cast::<TextBox>())
+                })
+                .flatten()
         })
         .expect("Duration editor");
     duration.set_text(Some("2"));
@@ -155,20 +157,7 @@ fn native_timeline_controls_record_scrubbed_values_rescale_keys_and_author_curve
         vec![0.0, 1.0, 2.0]
     );
 
-    let tracks = workspace.control().get_control::<StackPanel>("Tracks");
-    let row = tracks
-        .children()
-        .to_vec()
-        .into_iter()
-        .filter_map(|control| control.cast::<StackPanel>())
-        .find(|row| {
-            row.children()
-                .to_vec()
-                .iter()
-                .filter_map(|control| control.cast::<Button>())
-                .any(|button| caption(&button).as_deref() == Some("Apply keyframe"))
-        })
-        .unwrap();
+    let row = keyframe_editor(&workspace);
     let children = row.children().to_vec();
     let curve = children
         .iter()
