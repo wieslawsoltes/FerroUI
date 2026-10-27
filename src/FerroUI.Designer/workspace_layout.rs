@@ -205,7 +205,10 @@ impl DesignerWorkspace {
         let Some(node) = session.document().ast().node(panel) else {
             return;
         };
-        let Some(adapter) = session.layout_tools().adapter(&node.name) else {
+        let Some(adapter) = session
+            .layout_tools()
+            .adapter_for(session.document(), node.id)
+        else {
             return;
         };
         let name = node.xaml_name().unwrap_or(node.local_name()).to_owned();

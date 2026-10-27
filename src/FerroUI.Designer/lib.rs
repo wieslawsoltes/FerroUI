@@ -12,6 +12,7 @@ mod collaboration;
 mod editors;
 mod grid_track_editor;
 mod interaction_session;
+mod layout_helper_renderer;
 mod preview_host;
 mod preview_source;
 mod property_color_editor;
@@ -55,9 +56,16 @@ mod native_extensions_tests;
 mod tests;
 #[cfg(test)]
 mod workspace_authoring_tests;
+mod workspace_layout_helpers;
 #[cfg(test)]
 mod workspace_shell_tests;
 mod workspace_tools;
+
+pub use layout_helper_renderer::{
+    DragVisualGhost, LayoutHelperRenderState, hit_test_layout_handle, render_layout_helpers,
+    render_layout_helpers_with_state, render_manipulation_metrics,
+};
+pub use workspace_layout_helpers::{LayoutEditPreview, LayoutHelperSnapshot};
 
 #[cfg(feature = "mcp")]
 pub mod mcp;

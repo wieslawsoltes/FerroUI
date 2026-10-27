@@ -57,6 +57,19 @@ impl Default for WorkspaceShell {
 }
 
 impl DesignerWorkspace {
+    pub fn layout_helpers_visible(&self) -> bool {
+        self.surface.layout_helpers_visible()
+    }
+
+    /// Show panel-specific canvas features without changing the authored document.
+    pub fn set_layout_helpers_visible(&self, visible: bool) {
+        self.surface.set_layout_helpers_visible(visible);
+        self.root
+            .get_control::<Button>("LayoutHelpersToggle")
+            .classes()
+            .set("active", visible);
+    }
+
     pub fn view_mode(&self) -> WorkspaceViewMode {
         self.shell.view.get()
     }
@@ -256,6 +269,10 @@ impl DesignerWorkspace {
             ("DeleteAnimation", "Delete animation program"),
             ("FocusCanvas", "Focus canvas and restore panels"),
             (
+                "LayoutHelpersToggle",
+                "Show layout helpers. H toggles; F8 selects handles; arrows adjust.",
+            ),
+            (
                 "CollapseLayers",
                 "Collapse layers, keeping selected paths visible",
             ),
@@ -349,6 +366,14 @@ impl DesignerWorkspace {
             .click(move |_, _| {
                 if let Some(this) = weak.upgrade() {
                     this.collapse_outline();
+                }
+            });
+        let weak = Rc::downgrade(self);
+        self.root
+            .get_control::<Button>("LayoutHelpersToggle")
+            .click(move |_, _| {
+                if let Some(this) = weak.upgrade() {
+                    this.set_layout_helpers_visible(!this.layout_helpers_visible());
                 }
             });
         let weak = Rc::downgrade(self);

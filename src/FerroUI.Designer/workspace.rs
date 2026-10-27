@@ -389,6 +389,11 @@ impl DesignerWorkspace {
                 if this.text_input_focused() {
                     return;
                 }
+                if event.key == Key::H && event.key_modifiers.is_empty() {
+                    this.set_layout_helpers_visible(!this.layout_helpers_visible());
+                    event.set_handled(true);
+                    return;
+                }
                 let action = match (
                     event.key,
                     control,
@@ -666,6 +671,7 @@ impl DesignerWorkspace {
             self.rebuild_authoring();
             self.refresh_animation_programs();
         }
+        self.surface.invalidate_layout_helpers();
         self.surface.invalidate_visual();
     }
 

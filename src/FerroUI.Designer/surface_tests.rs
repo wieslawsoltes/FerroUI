@@ -18,10 +18,13 @@ struct SurfaceFixture {
 }
 impl SurfaceFixture {
     fn new() -> Self {
+        Self::with_source(SOURCE)
+    }
+    fn with_source(source: &str) -> Self {
         let preview = ContentControl::new();
         let session = Rc::new(RefCell::new(
             DesignerSession::with_uri(
-                SOURCE,
+                source,
                 preview.clone(),
                 "ferres://FerroUI.Designer/Surface.xaml".into(),
             )
@@ -80,6 +83,9 @@ impl SurfaceFixture {
         ));
     }
     fn move_to(&self, point: Point) {
+        self.move_to_with(point, KeyModifiers::ALT);
+    }
+    fn move_to_with(&self, point: Point, modifiers: KeyModifiers) {
         self.surface.raise_event(&PointerEventArgs::new(
             Some(InputElement::pointer_moved_event()),
             self.surface.to_ref(),
@@ -91,7 +97,7 @@ impl SurfaceFixture {
                 RawInputModifiers::LEFT_MOUSE_BUTTON,
                 PointerUpdateKind::Other,
             ),
-            KeyModifiers::ALT,
+            modifiers,
         ));
     }
     fn release(&self, point: Point) {
@@ -169,6 +175,13 @@ impl SurfaceFixture {
     fn source(&self) -> String {
         self.session.borrow().document().source().to_owned()
     }
+    fn key(&self, key: Key, modifiers: KeyModifiers) {
+        let mut event = KeyEventArgs::new();
+        event.key = key;
+        event.key_modifiers = modifiers;
+        event.set_routed_event(Some(InputElement::key_down_event()));
+        self.surface.raise_event(&event);
+    }
 }
 impl Drop for SurfaceFixture {
     fn drop(&mut self) {
@@ -176,6 +189,202 @@ impl Drop for SurfaceFixture {
         self.window.close();
     }
 }
+
+const LAYOUT_SOURCE: &str = r##"<Canvas xmlns="https://github.com/ferroui" Width="400" Height="240" Background="White">
+  <StackPanel Name="Left" Canvas.Left="20" Canvas.Top="20" Width="140" Height="180" Spacing="12" Background="#FFEFF3F8">
+    <Border Name="A" Width="90" Height="32" Background="Red" />
+    <Border Name="B" Width="90" Height="32" Background="Blue" />
+  </StackPanel>
+  <StackPanel Name="Right" Canvas.Left="220" Canvas.Top="20" Width="140" Height="130" Spacing="12" Background="#FFEFF3F8">
+    <Border Name="C" Width="90" Height="32" Background="Green" />
+  </StackPanel>
+  <Border Name="Occupied" Canvas.Left="220" Canvas.Top="170" Width="140" Height="40" Background="Silver"><TextBlock Text="Existing content" /></Border>
+</Canvas>"##;
+
+#[test]
+fn native_pointer_previews_cross_panel_placement_and_commits_once_on_release() {
+    let _app = UnitTestApplication::start(TestServices::styled_window());
+    let fixture = SurfaceFixture::with_source(LAYOUT_SOURCE);
+    let (a, right) = {
+        let session = fixture.session.borrow();
+        (
+            session.document().ast().find_name("A").unwrap(),
+            session.document().ast().find_name("Right").unwrap(),
+        )
+    };
+    fixture.press_with(Point::new(80.0, 36.0), KeyModifiers::NONE);
+    fixture.move_to_with(Point::new(280.0, 100.0), KeyModifiers::NONE);
+    let preview = fixture
+        .surface
+        .layout_edit_preview()
+        .expect("A native drag supplies placement feedback");
+    assert!(preview.is_accepted(), "{:?}", preview.rejection());
+    assert_eq!(preview.target(), right);
+    assert_eq!(
+        fixture.source(),
+        LAYOUT_SOURCE,
+        "Pointer motion is an uncommitted draft"
+    );
+    fixture.release_with(Point::new(280.0, 100.0), KeyModifiers::NONE);
+    assert_eq!(fixture.commits.borrow().len(), 1);
+    assert!(matches!(
+        fixture.commits.borrow()[0],
+        DesignGesture::LayoutEdit { .. }
+    ));
+    assert_eq!(
+        fixture
+            .session
+            .borrow()
+            .document()
+            .ast()
+            .node(a)
+            .unwrap()
+            .parent,
+        Some(right)
+    );
+    fixture.session.borrow_mut().undo().unwrap();
+    assert_eq!(fixture.source(), LAYOUT_SOURCE);
+    assert!(fixture.surface.layout_edit_preview().is_none());
+}
+
+#[test]
+fn native_occupied_content_drop_is_rejected_without_falling_through_to_canvas() {
+    let _app = UnitTestApplication::start(TestServices::styled_window());
+    let fixture = SurfaceFixture::with_source(LAYOUT_SOURCE);
+    let occupied = fixture
+        .session
+        .borrow()
+        .document()
+        .ast()
+        .find_name("Occupied")
+        .unwrap();
+    fixture.press_with(Point::new(80.0, 36.0), KeyModifiers::NONE);
+    fixture.move_to_with(Point::new(280.0, 190.0), KeyModifiers::NONE);
+    let preview = fixture
+        .surface
+        .layout_edit_preview()
+        .expect("Rejected targets retain visible feedback");
+    assert_eq!(preview.target(), occupied);
+    assert!(!preview.is_accepted());
+    fixture.release_with(Point::new(280.0, 190.0), KeyModifiers::NONE);
+    assert!(fixture.commits.borrow().is_empty());
+    assert_eq!(fixture.source(), LAYOUT_SOURCE);
+}
+
+#[test]
+fn native_gap_handle_drag_and_keyboard_edits_are_staged_cancellable_and_undoable() {
+    let _app = UnitTestApplication::start(TestServices::styled_window());
+    let fixture = SurfaceFixture::with_source(LAYOUT_SOURCE);
+    let left = fixture
+        .session
+        .borrow()
+        .document()
+        .ast()
+        .find_name("Left")
+        .unwrap();
+    fixture.session.borrow_mut().select([left]);
+    let snapshot = fixture.surface.layout_helper_snapshot().unwrap();
+    let handle = snapshot
+        .scene
+        .handles
+        .iter()
+        .find(|handle| handle.id == "Spacing")
+        .unwrap();
+    let point = snapshot.to_artboard.transform(handle.position).unwrap();
+    let point = Point::new(point.x, point.y);
+    let moved = Point::new(point.x, point.y + 8.0);
+    fixture.press_with(point, KeyModifiers::NONE);
+    fixture.move_to_with(moved, KeyModifiers::NONE);
+    assert_eq!(fixture.source(), LAYOUT_SOURCE);
+    fixture.key(Key::Escape, KeyModifiers::NONE);
+    fixture.release_with(moved, KeyModifiers::NONE);
+    assert!(fixture.commits.borrow().is_empty());
+    fixture.press_with(point, KeyModifiers::NONE);
+    fixture.move_to_with(moved, KeyModifiers::NONE);
+    fixture.release_with(moved, KeyModifiers::NONE);
+    assert_eq!(
+        fixture
+            .session
+            .borrow()
+            .document()
+            .ast()
+            .node(left)
+            .unwrap()
+            .attribute("Spacing"),
+        Some("20")
+    );
+    assert_eq!(fixture.commits.borrow().len(), 1);
+    fixture.window.update_layout();
+    fixture.surface.helper_focus.set(None);
+    fixture.key(Key::F8, KeyModifiers::NONE);
+    fixture.key(Key::Right, KeyModifiers::CONTROL);
+    let value = fixture
+        .session
+        .borrow()
+        .document()
+        .ast()
+        .node(left)
+        .unwrap()
+        .attribute("Spacing")
+        .unwrap()
+        .parse::<f64>()
+        .unwrap();
+    assert!((value - 20.1).abs() < 1e-9);
+    fixture.session.borrow_mut().undo().unwrap();
+    fixture.session.borrow_mut().undo().unwrap();
+    assert_eq!(fixture.source(), LAYOUT_SOURCE);
+}
+
+#[test]
+fn hiding_helpers_cancels_a_drag_and_leaves_source_and_history_untouched() {
+    let _app = UnitTestApplication::start(TestServices::styled_window());
+    let fixture = SurfaceFixture::with_source(LAYOUT_SOURCE);
+    fixture.press_with(Point::new(80.0, 36.0), KeyModifiers::NONE);
+    fixture.move_to_with(Point::new(280.0, 100.0), KeyModifiers::NONE);
+    assert!(fixture.surface.layout_edit_preview().is_some());
+    fixture.surface.set_layout_helpers_visible(false);
+    fixture.release_with(Point::new(280.0, 100.0), KeyModifiers::NONE);
+    assert!(fixture.surface.layout_edit_preview().is_none());
+    assert!(fixture.commits.borrow().is_empty());
+    assert_eq!(fixture.source(), LAYOUT_SOURCE);
+    assert!(!fixture.session.borrow().can_undo());
+}
+
+#[test]
+fn helper_release_cannot_rebind_a_drag_after_selection_or_animation_context_changes() {
+    let _app = UnitTestApplication::start(TestServices::styled_window());
+    for insertion in [false, true] {
+        for animation_change in [false, true] {
+            let fixture = SurfaceFixture::with_source(LAYOUT_SOURCE);
+            if insertion {
+                fixture.surface.arm_insert(INSERT.into());
+            }
+            fixture.press_with(Point::new(80.0, 36.0), KeyModifiers::NONE);
+            fixture.move_to_with(Point::new(280.0, 100.0), KeyModifiers::NONE);
+            assert!(fixture.surface.layout_edit_preview().is_some());
+            if animation_change {
+                fixture.session.borrow_mut().set_recording(true);
+            } else {
+                let b = fixture
+                    .session
+                    .borrow()
+                    .document()
+                    .ast()
+                    .find_name("B")
+                    .unwrap();
+                fixture.session.borrow_mut().select([b]);
+            }
+            // No intervening pointer move: release itself must reject the original
+            // context before asking the provider to calculate a fresh proposal.
+            fixture.release_with(Point::new(280.0, 100.0), KeyModifiers::NONE);
+            assert!(fixture.commits.borrow().is_empty());
+            assert_eq!(fixture.source(), LAYOUT_SOURCE);
+            assert!(!fixture.session.borrow().can_undo());
+            assert!(fixture.surface.layout_edit_preview().is_none());
+        }
+    }
+}
+
 #[derive(Clone, Copy, Debug)]
 enum Change {
     Source,

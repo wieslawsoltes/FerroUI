@@ -112,6 +112,22 @@ definition metadata and comments survive the operation. Effective styled cell pl
 preserved; bound placements and externally supplied definition collections are protected.
 See the [Grid layout capture](images/designer-grid-layout.png).
 
+The **Helpers** canvas command adds panel-specific layout visualization and direct editing.
+Grid exposes measured cells and track grips; Stack, Wrap and Flex expose flow, gaps and insertion
+boundaries; Dock and UniformGrid show the destination the native layout will use. Content holders
+show available slots and explain rejected occupied slots. Selected children expose margin grips,
+and supported containers expose padding. Dragging between panels previews the actual source move,
+including Grid/Dock attached values and affine Canvas placement, before one undoable commit.
+Native control ghosts, bounded alignment guides, neighboring distances and size labels provide
+feedback while the accepted document remains unchanged.
+
+Press **H** to toggle helpers, **F8** or **Shift+F8** to cycle grips, and use arrows to adjust the
+focused value (Shift: ten units; Ctrl: one tenth). Escape cancels; Alt retains free manipulation.
+See the [layout helper architecture and extension guide](layout-helpers.md) for the portable
+provider contract, coordinate frames, guarded transactions and namespace-stable custom panel
+registration. The [layout playground](samples/LayoutHelpers.xaml) can be opened with
+`designer-studio --file docs/designer/samples/LayoutHelpers.xaml`.
+
 The canvas **Arrange** menu exposes alignment, equal-gap distribution, source ordering and
 nesting through the existing panel layout adapters. Layers supports Alt+Up/Down to reorder,
 Alt+Home/End to move first/last, and Alt+Right/Left to nest/unnest. Canvas arrows nudge by one
