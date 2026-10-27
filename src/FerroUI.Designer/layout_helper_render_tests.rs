@@ -130,7 +130,9 @@ fn native_affine_helpers_and_cached_control_ghost_render_without_runtime_mutatio
         "final semantic placement replaces stale provider placement rectangles and labels"
     );
     let distinct = pixels
-        .chunks_exact(4)
+        .as_chunks::<4>()
+        .0
+        .iter()
         .map(|pixel| (pixel[0], pixel[1], pixel[2]))
         .collect::<std::collections::BTreeSet<_>>();
     assert!(
