@@ -25,7 +25,10 @@ source or undo history. A collaboration viewer can switch that preview but canno
 ```
 
 The **Preview Environment** editor's **Use design size** action reads the root's design width
-and height. User-selected environment sizes are retained while ordinary properties are edited.
+and height. Root `d:DesignWidth`/`d:DesignHeight` and legacy `Design.Width`/`Design.Height` are
+host hints, so they do not fix the native root's Width/Height or prevent responsive resizing.
+Explicit `d:Width`/`d:Height` remain actual property overrides. User-selected environment sizes
+are retained while ordinary properties are edited.
 
 ## Source semantics
 
@@ -33,8 +36,8 @@ The implementation resolves the design namespace URI, so aliases such as `previe
 An application namespace that happens to use the prefix `d` remains an application namespace.
 The source planner chooses an available prefix and adds `mc:Ignorable` without removing existing
 compatibility tokens. Scalar and object forms of one design property replace each other
-atomically. Conflicting effective overrides, such as both `d:Width` and `d:DesignWidth`, report a
-preview diagnostic.
+atomically. Conflicting effective overrides report a preview diagnostic; root host-size hints
+can coexist with explicit root property overrides.
 
 Generic design attributes override their application property in the temporary loading source.
 Design property elements are supported as well:
@@ -131,6 +134,12 @@ factories receive the exact authored document in `PreviewRequest::source`; the o
 `PreviewRequest::preview_source` contains the projected loading form. `populate` uses that form
 while still populating the application's chosen native root. The normal application XAML loader
 and build-time compiler are unchanged.
+
+Factories, native loading and initial template realization observe `Design::is_design_mode()`
+through a scoped guard using the loader configuration. The guard restores the host application's
+previous flag after success, an error or stack unwinding; it also composes correctly with nested
+preview loads. The normal designer defaults to design mode, while standalone loading requests
+that explicitly disable it retain that choice.
 
 ## References and verification
 

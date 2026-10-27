@@ -18,6 +18,22 @@ use std::rc::Rc;
 pub type PreviewFactory = Rc<dyn Fn(&PreviewRequest) -> Result<BoxedValue, String>>;
 pub type ResourcePreviewFactory = Rc<dyn Fn(BoxedValue) -> Result<Ref<Control>, String>>;
 
+/// Preview construction is scoped inside an ordinary host application. Nested loads
+/// and failing factories restore the surrounding framework design-mode flag.
+pub(crate) struct DesignModeGuard(bool);
+impl DesignModeGuard {
+    pub(crate) fn new(enabled: bool) -> Self {
+        let previous = Design::is_design_mode();
+        Design::set_is_design_mode(enabled);
+        Self(previous)
+    }
+}
+impl Drop for DesignModeGuard {
+    fn drop(&mut self) {
+        Design::set_is_design_mode(self.0);
+    }
+}
+
 /// A factory receives the actual authored document and base URI. It may instantiate a real
 /// registered code-behind class and call `populate` to apply XAML before wiring its handlers.
 pub struct PreviewRequest {
@@ -30,6 +46,7 @@ pub struct PreviewRequest {
 }
 impl PreviewRequest {
     pub fn populate(&self, root: Option<BoxedValue>) -> Result<BoxedValue, String> {
+        let _design_mode = DesignModeGuard::new(self.configuration.design_mode);
         let mut source = self.preview_source.as_ref().unwrap_or(&self.source).clone();
         if root.is_some() {
             // The supplied root IS the code-behind class. x:Class is a compiler directive,
@@ -125,11 +142,16 @@ impl PreviewHostOptions {
             })
     }
     pub(crate) fn load(&self, source: &str, uri: &str) -> Result<BoxedValue, String> {
+        let _design_mode = DesignModeGuard::new(self.configuration.design_mode);
         let document = Document::new(source).map_err(|e| e.to_string())?;
         let request = PreviewRequest {
             source: source.into(),
-            preview_source: crate::design_time::project(&document, source, self.design_time_data)?
-                .map(|projection| projection.document.source().to_owned()),
+            preview_source: crate::design_time::project(
+                &document,
+                source,
+                self.design_time_data && self.configuration.design_mode,
+            )?
+            .map(|projection| projection.document.source().to_owned()),
             uri: uri.into(),
             configuration: self.configuration.clone(),
         };

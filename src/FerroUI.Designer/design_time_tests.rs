@@ -155,7 +155,7 @@ fn design_projection_overrides_property_elements_and_can_disable_all_design_valu
 
 #[test]
 fn design_projection_rejects_duplicate_effective_properties_and_fake_sample_extensions() {
-    let source = format!("<Border {NS} d:DesignWidth='200' d:Width='300'/>");
+    let source = format!("<Grid {NS}><Border d:DesignWidth='200' d:Width='300'/></Grid>");
     let document = Document::new(&source).unwrap();
     assert!(
         project(&document, &source, true)
@@ -216,7 +216,7 @@ fn design_object_authoring_and_reset_leave_runtime_property_elements_intact() {
 fn native_design_values_toggle_without_source_history_changes_and_keep_mapping() {
     let _app = UnitTestApplication::start(TestServices::styled_window());
     let source = format!(
-        "<TextBlock {NS} Name='Title' Text='Application' d:Text='Preview' d:DesignWidth='420'/>"
+        "<TextBlock {NS} Name='Title' Text='Application' d:Text='Preview' d:Width='420' d:DesignWidth='760'/>"
     );
     let mut session = DesignerSession::new(source.clone(), ContentControl::new()).unwrap();
     let root = session.document().ast().root();
@@ -233,7 +233,7 @@ fn native_design_values_toggle_without_source_history_changes_and_keep_mapping()
         .unwrap();
     assert_eq!(preview.text().as_deref(), Some("Preview"));
     assert_eq!(preview.width(), 420.0);
-    assert_eq!(session.design_preview_size(), (Some(420.0), None));
+    assert_eq!(session.design_preview_size(), (Some(760.0), None));
     let revision = session.document().revision();
     session.set_design_time_enabled(false).unwrap();
     assert_eq!(
@@ -446,4 +446,67 @@ fn native_top_level_preview_uses_the_same_sample_data_as_the_artboard() {
     assert_eq!(items.items_source().unwrap().count(), 4);
     assert_eq!(session.document().source(), source);
     session.close_native_preview();
+}
+
+#[test]
+fn root_design_size_hints_do_not_fix_native_root_layout_dimensions() {
+    let _app = UnitTestApplication::start(TestServices::styled_window());
+    let source = format!("<Border {NS} d:DesignWidth='760' d:DesignHeight='480'/>");
+    let session = DesignerSession::new(source, ContentControl::new()).unwrap();
+    assert_eq!(session.design_preview_size(), (Some(760.0), Some(480.0)));
+    let root = session
+        .preview
+        .visual(session.document().ast().root())
+        .unwrap()
+        .cast::<Control>()
+        .unwrap();
+    assert!(root.width().is_nan());
+    assert!(root.height().is_nan());
+}
+
+#[test]
+fn preview_factories_observe_scoped_design_mode_and_restore_on_failure() {
+    use ferroui_controls::Design;
+    let _app = UnitTestApplication::start(TestServices::styled_window());
+    Design::set_is_design_mode(false);
+    let source = "<TextBlock xmlns='https://github.com/ferroui' Text='Preview'/>";
+    let mut options = crate::PreviewHostOptions::default();
+    options.register_root(
+        "TextBlock",
+        Rc::new(|request| {
+            assert!(Design::is_design_mode());
+            request.populate(Some(Control::boxed(TextBlock::new())))
+        }),
+    );
+    options
+        .load(source, "ferres://Preview/DesignMode.xaml")
+        .unwrap();
+    assert!(!Design::is_design_mode());
+    options.register_root(
+        "TextBlock",
+        Rc::new(|_| {
+            assert!(Design::is_design_mode());
+            Err("Factory intentionally rejected".into())
+        }),
+    );
+    assert!(
+        options
+            .load(source, "ferres://Preview/DesignMode.xaml")
+            .is_err()
+    );
+    assert!(!Design::is_design_mode());
+    Design::set_is_design_mode(true);
+    options.configuration.design_mode = false;
+    options.register_root(
+        "TextBlock",
+        Rc::new(|request| {
+            assert!(!Design::is_design_mode());
+            request.populate(Some(Control::boxed(TextBlock::new())))
+        }),
+    );
+    options
+        .load(source, "ferres://Preview/DesignMode.xaml")
+        .unwrap();
+    assert!(Design::is_design_mode());
+    Design::set_is_design_mode(false);
 }

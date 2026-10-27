@@ -234,6 +234,8 @@ impl RuntimePreview {
     }
 
     fn reload_document(&mut self, document: &Document, initialize: bool) {
+        let _design_mode =
+            crate::preview_host::DesignModeGuard::new(self.options.configuration.design_mode);
         self.clear_animation();
         if self
             .definition_scope
@@ -436,6 +438,8 @@ impl RuntimePreview {
         self.window_projection
     }
     pub fn open_native(&mut self, source: String) -> Result<Ref<ferroui_controls::Window>, String> {
+        let _design_mode =
+            crate::preview_host::DesignModeGuard::new(self.options.configuration.design_mode);
         let document = Document::new(&source).map_err(|error| error.to_string())?;
         let design =
             crate::design_time::project(&document, &source, self.options.design_time_data)?;
@@ -510,6 +514,8 @@ impl RuntimePreview {
     }
 
     pub fn rebuild_map(&mut self, document: &Document) {
+        let _design_mode =
+            crate::preview_host::DesignModeGuard::new(self.options.configuration.design_mode);
         if !matches!(self.status, PreviewStatus::Ready { revision } if revision == document.revision())
         {
             return;

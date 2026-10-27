@@ -119,7 +119,7 @@ impl DesignerSession {
     }
 
     /// The author-provided design size, independent from explicit environment presets.
-    /// Invalid/nonliteral values return None; loading the preview reports their diagnostic.
+    /// Invalid/nonliteral hints return None. Explicit d:Width/Height remain control values.
     pub fn design_preview_size(&self) -> (Option<f64>, Option<f64>) {
         if !self.design_time_enabled() {
             return (None, None);
@@ -133,9 +133,17 @@ impl DesignerSession {
                 .and_then(|property| property.value.parse::<f64>().ok())
                 .filter(|value| value.is_finite() && *value > 0.0)
         };
+        let legacy = |name| {
+            self.document
+                .ast()
+                .node(self.document.ast().root())
+                .and_then(|root| root.attribute(name))
+                .and_then(|value| value.parse::<f64>().ok())
+                .filter(|value| value.is_finite() && *value > 0.0)
+        };
         (
-            dimension(&["DesignWidth", "Width"]),
-            dimension(&["DesignHeight", "Height"]),
+            dimension(&["DesignWidth", "Width"]).or_else(|| legacy("Design.Width")),
+            dimension(&["DesignHeight", "Height"]).or_else(|| legacy("Design.Height")),
         )
     }
 }
@@ -448,6 +456,9 @@ pub(crate) fn project(
                 .attributes
                 .iter()
                 .filter_map(|attribute| {
+                    if node.id == base.ast().root() && root_size_hint(attribute) {
+                        return None;
+                    }
                     if attribute.namespace_uri.as_deref() == Some(DESIGN_NAMESPACE) {
                         Some(local(&attribute.name))
                     } else if attribute.namespace_uri.is_none() {
@@ -462,6 +473,12 @@ pub(crate) fn project(
                         .into_iter()
                         .filter_map(|id| {
                             let child = base.ast().node(id)?;
+                            if node.id == base.ast().root()
+                                && attached_design_element(child)
+                                && matches!(child.local_name(), "Design.Width" | "Design.Height")
+                            {
+                                return None;
+                            }
                             (child.namespace_uri.as_deref() == Some(DESIGN_NAMESPACE)
                                 || attached_design_element(child))
                             .then(|| {
@@ -500,6 +517,13 @@ pub(crate) fn project(
                         .parent
                         .and_then(|id| base.ast().node(id))
                         .ok_or("A design-time property requires an owner.")?;
+                    if parent.id == base.ast().root()
+                        && attached_design_element(node)
+                        && matches!(property, "Width" | "Height")
+                    {
+                        mask(&mut patches, node.span, base_source);
+                        continue;
+                    }
                     suppress_runtime_value(&base, parent, property, Some(node.id), &mut patches);
                     if matches!(property, "PreviewWith" | "DesignStyle") {
                         continue;
@@ -528,6 +552,12 @@ pub(crate) fn project(
             let attached =
                 attribute.namespace_uri.is_none() && attribute.name.starts_with("Design.");
             if !design && !attached {
+                continue;
+            }
+            if node.id == base.ast().root() && root_size_hint(attribute) {
+                // Root design sizes are host hints. Explicit d:Width/d:Height are
+                // overrides; choosing an environment preset must remain responsive.
+                mask(&mut patches, attribute.span, base_source);
                 continue;
             }
             let original = if attached {
@@ -647,6 +677,12 @@ pub(crate) fn project(
 
 fn local(name: &str) -> &str {
     name.rsplit(':').next().unwrap_or(name)
+}
+fn root_size_hint(attribute: &ferroui_designer_core::Attribute) -> bool {
+    attribute.namespace_uri.as_deref() == Some(DESIGN_NAMESPACE)
+        && matches!(local(&attribute.name), "DesignWidth" | "DesignHeight")
+        || attribute.namespace_uri.is_none()
+            && matches!(attribute.name.as_str(), "Design.Width" | "Design.Height")
 }
 fn attached_design_element(node: &Node) -> bool {
     node.local_name().starts_with("Design.")
