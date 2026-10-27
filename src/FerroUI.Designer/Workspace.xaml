@@ -68,6 +68,7 @@
           <StackPanel Orientation="Horizontal" Spacing="2" Margin="8,0">
             <Button Name="LayersTab" Classes="panel-tab active" Content="Layers" />
             <Button Name="AssetsTab" Classes="panel-tab" Content="Assets" />
+            <Button Name="LibraryTab" Classes="panel-tab" Content="Library" ToolTip.Tip="Components, templates, themes and resources" />
             <Button Name="ProjectTab" Classes="panel-tab" Content="Project" />
           </StackPanel>
         </Border>
@@ -90,6 +91,9 @@
         </Grid>
         <ContentControl Name="AssetsPane" Grid.Row="1" IsVisible="False" HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch">
           <ContentControl Name="AssetHost" HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch" Margin="12,8,12,8" />
+        </ContentControl>
+        <ContentControl Name="LibraryPane" Grid.Row="1" IsVisible="False" HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch">
+          <ContentControl Name="ComponentLibraryHost" HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch" />
         </ContentControl>
         <Grid Name="ProjectPane" Grid.Row="1" IsVisible="False" RowDefinitions="Auto,Auto,*" Margin="12,12,12,8">
           <StackPanel Spacing="8">
@@ -132,8 +136,15 @@
           </StackPanel>
         </Grid>
       </Border>
-      <Grid Name="CanvasViewport" Grid.Row="2" Background="{DynamicResource DesignerCanvasBrush}">
-        <ScrollViewer Name="ArtboardScroll" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto">
+      <Grid Name="CanvasViewport" Grid.Row="2" RowDefinitions="Auto,*" Background="{DynamicResource DesignerCanvasBrush}">
+        <Border Name="ComponentScopeBar" Classes="designer-chrome" IsVisible="False" Background="#FF302A40" BorderBrush="#FF594C73" BorderThickness="0,0,0,1" Padding="10,4">
+          <Grid ColumnDefinitions="Auto,*,Auto">
+            <Button Name="ComponentScopeBack" Classes="nav" Content="← Document" ToolTip.Tip="Return to the document and its previous selection" />
+            <TextBlock Name="ComponentScopeTitle" Grid.Column="1" Foreground="#FFD2C4F5" FontSize="11" FontWeight="SemiBold" VerticalAlignment="Center" Margin="10,0" TextTrimming="CharacterEllipsis" />
+            <Button Name="ComponentScopeDefinition" Grid.Column="2" Classes="nav" Content="Definition" ToolTip.Tip="Inspect the active definition" />
+          </Grid>
+        </Border>
+        <ScrollViewer Name="ArtboardScroll" Grid.Row="1" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto">
           <Border Padding="40,28,40,66" HorizontalAlignment="Center" VerticalAlignment="Center">
             <StackPanel Spacing="8">
               <TextBlock Name="ArtboardTitle" Text="Artboard" Foreground="{DynamicResource DesignerMutedBrush}" FontFamily="Segoe UI, Noto Sans, DejaVu Sans, sans-serif" FontSize="11" />
@@ -149,7 +160,7 @@
             </StackPanel>
           </Border>
         </ScrollViewer>
-        <Border Classes="designer-chrome" Background="{DynamicResource DesignerPanelBrush}" BorderBrush="{DynamicResource DesignerBorderBrush}" BorderThickness="1" CornerRadius="8" Padding="5" BoxShadow="0 4 14 0 #66000000" HorizontalAlignment="Center" VerticalAlignment="Bottom" Margin="12,0,12,14">
+        <Border Grid.Row="1" Classes="designer-chrome" Background="{DynamicResource DesignerPanelBrush}" BorderBrush="{DynamicResource DesignerBorderBrush}" BorderThickness="1" CornerRadius="8" Padding="5" BoxShadow="0 4 14 0 #66000000" HorizontalAlignment="Center" VerticalAlignment="Bottom" Margin="12,0,12,14">
           <StackPanel Orientation="Horizontal" Spacing="3">
             <Button Name="SelectTool" Classes="icon active" Width="32" Height="30" ToolTip.Tip="Move and select · V">
               <PathIcon Width="16" Height="16" Data="M3,1 L17,12 11,13 8,19 Z M6,5 L9,14 10,11 13,11 Z" />
@@ -217,9 +228,10 @@
             <Button Name="CloseAuthoring" Classes="panel-tab active" Content="Design" ToolTip.Tip="Properties and layout" />
             <Button Name="StatesMode" Classes="panel-tab" Content="States" ToolTip.Tip="Visual states and transitions" />
             <Button Name="BehaviorsMode" Classes="panel-tab" Content="Behaviors" ToolTip.Tip="Triggers and actions" />
+            <Button Name="DefinitionMode" Classes="panel-tab" Content="Definition" ToolTip.Tip="Inspect the selected component or resource" />
           </StackPanel>
         </Border>
-        <Grid Name="InspectorDesignPane" Grid.Row="1" RowDefinitions="54,38,Auto,*">
+        <Grid Name="InspectorDesignPane" Grid.Row="1" RowDefinitions="54,Auto,38,Auto,*">
           <Grid ColumnDefinitions="24,*" Margin="12,10,12,6">
             <PathIcon Name="SelectionIcon" Width="16" Height="16" VerticalAlignment="Top" Margin="0,3,0,0" Foreground="{DynamicResource DesignerAccentBrush}" Data="M1,1 L17,1 17,17 1,17 Z M3,3 L3,15 15,15 15,3 Z" />
             <StackPanel Grid.Column="1" Spacing="2">
@@ -227,11 +239,12 @@
               <TextBlock Name="SelectionType" Text="Select on the canvas or in Layers" Foreground="{DynamicResource DesignerMutedBrush}" FontSize="11" TextTrimming="CharacterEllipsis" />
             </StackPanel>
           </Grid>
-          <TextBox Name="PropertySearch" Grid.Row="1" PlaceholderText="Search properties" Margin="12,3,12,8" ToolTip.Tip="Filter properties · @modified for authored values">
+          <ContentControl Name="ComponentInstanceHost" Grid.Row="1" HorizontalContentAlignment="Stretch" Margin="12,0,12,8" IsVisible="False" />
+          <TextBox Name="PropertySearch" Grid.Row="2" PlaceholderText="Search properties" Margin="12,3,12,8" ToolTip.Tip="Filter properties · @modified for authored values">
             <TextBox.InnerLeftContent><PathIcon Width="12" Height="12" Margin="7,0,0,0" Foreground="{DynamicResource DesignerMutedBrush}" Data="M7,1 A6,6 0 1 1 3,12 L0,15 1,16 4,13 A6,6 0 0 1 7,1 M7,3 A4,4 0 1 0 7,11 A4,4 0 1 0 7,3 Z" /></TextBox.InnerLeftContent>
           </TextBox>
-          <ContentControl Name="LayoutHost" Grid.Row="2" HorizontalContentAlignment="Stretch" Margin="8,0,8,6" />
-          <ContentControl Name="PropertyHost" Grid.Row="3" HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch" Margin="8,0,8,4" />
+          <ContentControl Name="LayoutHost" Grid.Row="3" HorizontalContentAlignment="Stretch" Margin="8,0,8,6" />
+          <ContentControl Name="PropertyHost" Grid.Row="4" HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch" Margin="8,0,8,4" />
         </Grid>
         <ScrollViewer Name="AuthoringScroll" Grid.Row="1" IsVisible="False" Margin="12,12,12,8">
           <StackPanel Spacing="12">
@@ -239,6 +252,9 @@
             <StackPanel Name="AuthoringPanel" Spacing="7" />
           </StackPanel>
         </ScrollViewer>
+        <ContentControl Name="ComponentInspectorPane" Grid.Row="1" IsVisible="False" HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch">
+          <ContentControl Name="ComponentDefinitionHost" HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch" />
+        </ContentControl>
       </Grid>
     </Border>
   </Grid>

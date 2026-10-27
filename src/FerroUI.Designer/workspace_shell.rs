@@ -23,6 +23,7 @@ pub enum NavigationPane {
     #[default]
     Layers,
     Assets,
+    Library,
     Project,
 }
 
@@ -137,6 +138,7 @@ impl DesignerWorkspace {
         for (tab, content, candidate) in [
             ("LayersTab", "LayersPane", NavigationPane::Layers),
             ("AssetsTab", "AssetsPane", NavigationPane::Assets),
+            ("LibraryTab", "LibraryPane", NavigationPane::Library),
             ("ProjectTab", "ProjectPane", NavigationPane::Project),
         ] {
             let selected = candidate == pane;
@@ -343,6 +345,7 @@ impl DesignerWorkspace {
         for (name, pane) in [
             ("LayersTab", NavigationPane::Layers),
             ("AssetsTab", NavigationPane::Assets),
+            ("LibraryTab", NavigationPane::Library),
             ("ProjectTab", NavigationPane::Project),
         ] {
             let weak = Rc::downgrade(self);
