@@ -872,3 +872,130 @@ fn escaped_resource_keys_and_custom_extensions_are_never_confused() {
     );
     assert!(d.source().contains("c:StaticResource"));
 }
+
+#[test]
+fn resource_object_reference_aliases_are_indexed_renamed_and_preserved() {
+    let mut d = document(
+        r#"<Grid.Resources><Color x:Key="Accent">Red</Color></Grid.Resources><Button><Button.Background><m:StaticResourceExtension xmlns:m="using:FerroUI.Markup.Xaml.MarkupExtensions" xmlns:alias="https://github.com/ferroui" xmlns:app="urn:application" alias:StaticResourceExtension.ResourceKey="Accent" app:ResourceKey="Accent"/></Button.Background></Button>"#,
+    );
+    let original = d.source().to_owned();
+    let resource = keyed(&d, "Accent");
+    let references = component_resource_references(&d, resource).unwrap();
+    assert_eq!(references.len(), 1);
+    assert_eq!(
+        references[0].property,
+        "alias:StaticResourceExtension.ResourceKey"
+    );
+    assert!(plan_component_action(&d, &ComponentAction::RemoveResource { resource }).is_err());
+    apply(
+        &mut d,
+        ComponentAction::RenameResource {
+            resource,
+            key: "Primary".into(),
+        },
+    );
+    assert!(
+        d.source()
+            .contains("alias:StaticResourceExtension.ResourceKey=\"Primary\"")
+    );
+    assert!(d.source().contains("app:ResourceKey=\"Accent\""));
+    assert_eq!(
+        component_resource_references(&d, resource).unwrap().len(),
+        1
+    );
+    d.undo().unwrap();
+    assert_eq!(d.source(), original);
+}
+
+#[test]
+fn external_dictionary_source_aliases_and_object_values_are_not_editable_local_scopes() {
+    for source in [
+        r#"<ResourceDictionary xmlns:r="using:FerroUI.Controls" r:ResourceDictionary.Source="Other.xaml"/>"#,
+        r#"<ResourceDictionary><ResourceDictionary.Source><x:String>Other.xaml</x:String></ResourceDictionary.Source></ResourceDictionary>"#,
+    ] {
+        let d = document(&format!(
+            r#"<Grid.Resources><Color x:Key="Accent">Red</Color></Grid.Resources><Border Name="Scope"><Border.Resources>{source}</Border.Resources><Button Name="Target"/></Border>"#,
+        ));
+        assert_eq!(
+            resolve_component_resource(&d, named(&d, "Target"), "Accent"),
+            None
+        );
+        assert!(
+            plan_component_action(
+                &d,
+                &ComponentAction::CreateResource {
+                    owner: named(&d, "Scope"),
+                    key: "New".into(),
+                    source: "<Color>Blue</Color>".into(),
+                }
+            )
+            .is_err()
+        );
+    }
+}
+
+#[test]
+fn copying_templates_rejects_shadowed_missing_and_newly_captured_dependencies() {
+    for (reference, original_resource, destination_resource) in [
+        (
+            "Accent",
+            r#"<Color x:Key="Accent">Red</Color>"#,
+            r#"<Color x:Key="Accent">Blue</Color>"#,
+        ),
+        ("Private", r#"<Color x:Key="Private">Red</Color>"#, ""),
+        ("Unknown", "", r#"<Color x:Key="Unknown">Blue</Color>"#),
+    ] {
+        let d = document(&format!(
+            r#"<Border Name="Origin"><Border.Resources>{original_resource}<ControlTemplate x:Key="Original"><Border Background="{{StaticResource {reference}}}"/></ControlTemplate></Border.Resources></Border><Border Name="Destination"><Border.Resources>{destination_resource}</Border.Resources></Border>"#,
+        ));
+        let source = d.source().to_owned();
+        let error = plan_component_action(
+            &d,
+            &ComponentAction::CopyTemplate {
+                template: keyed(&d, "Original"),
+                owner: named(&d, "Destination"),
+                key: "Copy".into(),
+            },
+        )
+        .unwrap_err();
+        assert!(
+            error.to_string().contains("would change the resource"),
+            "{error}"
+        );
+        assert_eq!(d.source(), source);
+    }
+}
+
+#[test]
+fn copying_templates_preserves_external_dependencies_and_remaps_copied_local_resources() {
+    let mut d = document(
+        r#"<Grid.Resources><Color x:Key="Accent">Red</Color><ControlTemplate x:Key="Original"><Border Background="{StaticResource Accent}"><Border.Resources><Color x:Key="Local">Green</Color></Border.Resources><ContentPresenter Background="{StaticResource Local}"/></Border></ControlTemplate></Grid.Resources><Border Name="Destination"/>"#,
+    );
+    let original = d.source().to_owned();
+    let template = keyed(&d, "Original");
+    let destination = named(&d, "Destination");
+    apply(
+        &mut d,
+        ComponentAction::CopyTemplate {
+            template,
+            owner: destination,
+            key: "Copy".into(),
+        },
+    );
+    let copied = keyed(&d, "Copy");
+    let inner = d
+        .ast()
+        .subtree(copied)
+        .find(|node| node.local_name() == "ContentPresenter")
+        .unwrap();
+    let local = resolve_component_resource(&d, inner.id, "Local").unwrap();
+    assert!(d.ast().subtree(copied).any(|node| node.id == local));
+    assert_eq!(
+        component_resource_references(&d, keyed(&d, "Accent"))
+            .unwrap()
+            .len(),
+        2
+    );
+    d.undo().unwrap();
+    assert_eq!(d.source(), original);
+}

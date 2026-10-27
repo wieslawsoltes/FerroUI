@@ -179,12 +179,31 @@ pub fn plan_component_action(document: &Document, action: &ComponentAction) -> R
                 )?;
                 templates[0].id
             };
-            create_resource(
+            let edits = create_resource(
                 document,
                 *owner,
                 key,
                 &component_fragment(document, template)?,
-            )?
+            )?;
+            let mut candidate = document.clone();
+            candidate
+                .apply("Validate template copy", edits.clone())
+                .map_err(error)?;
+            let container = resource_container(&candidate, *owner)?
+                .ok_or_else(|| ToolError("Missing copied template dictionary".into()))?;
+            let copied = candidate
+                .ast()
+                .element_children(container)
+                .into_iter()
+                .find(|id| {
+                    candidate
+                        .ast()
+                        .node(*id)
+                        .is_some_and(|node| literal_key(node).as_deref() == Some(key))
+                })
+                .ok_or_else(|| ToolError("Missing copied template".into()))?;
+            references::validate_copied_references(document, template, &candidate, copied)?;
+            edits
         }
         ComponentAction::ExtractProperty {
             node,
@@ -245,7 +264,7 @@ fn resource_container(document: &Document, owner: NodeId) -> Result<Option<NodeI
     let node = element(document, owner)?;
     if framework(node) && node.local_name() == "ResourceDictionary" {
         require(
-            node.attribute("Source").is_none(),
+            !external_dictionary(document, node),
             "Open the external dictionary before editing its resources",
         )?;
         return Ok(Some(owner));
@@ -292,7 +311,7 @@ fn dictionary_container(document: &Document, node: &Node) -> Result<Option<NodeI
             "The Resources property mixes a dictionary object with resource entries",
         )?;
         require(
-            dictionary.attribute("Source").is_none(),
+            !external_dictionary(document, dictionary),
             "Open the external dictionary before editing its resources",
         )?;
         Ok(Some(dictionary.id))

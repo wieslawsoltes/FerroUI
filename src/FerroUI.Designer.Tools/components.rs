@@ -399,6 +399,15 @@ pub(crate) fn literal_key(node: &Node) -> Option<String> {
         _ => None,
     }
 }
+/// An external dictionary cannot be inspected through its local syntax. Qualified
+/// Source aliases and object-form Source values carry the same uncertainty.
+pub(crate) fn external_dictionary(document: &Document, node: &Node) -> bool {
+    !matches!(
+        component_property_attribute(document, node.id, "Source"),
+        Ok(None)
+    ) || !matches!(property_elements(document, node, "Source"), Ok(values) if values.is_empty())
+}
+
 pub(crate) fn resource_owner(document: &Document, node: NodeId) -> Option<NodeId> {
     let parent = document
         .ast()

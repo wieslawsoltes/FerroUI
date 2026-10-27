@@ -42,7 +42,7 @@ fn lookup_scope(
         return Lookup::Missing;
     }
     if framework(owner) && owner.local_name() == "ResourceDictionary" {
-        if owner.attribute("Source").is_some() {
+        if external_dictionary(document, owner) {
             return Lookup::External;
         }
         return lookup_children(document, &owner.children, key, seen);
@@ -110,7 +110,7 @@ fn lookup_children(
         {
             if framework(child)
                 && child.local_name() == "ResourceDictionary"
-                && child.attribute("Source").is_none()
+                && !external_dictionary(document, child)
             {
                 match lookup_scope(document, child, key, seen) {
                     Lookup::Missing => {}
@@ -144,55 +144,109 @@ pub fn component_resource_references(
 pub(crate) fn all_references(document: &Document) -> Result<Vec<(NodeId, String, bool, NodeId)>> {
     let mut result = Vec::new();
     for node in document.ast().elements() {
-        if framework(node)
-            && matches!(
-                node.local_name(),
-                "StaticResource"
-                    | "DynamicResource"
-                    | "StaticResourceExtension"
-                    | "DynamicResourceExtension"
-            )
-        {
-            if let Some(key) = object_resource_key(node) {
-                if let Some(target) = resolve_component_resource(document, node.id, &key) {
-                    result.push((
-                        node.id,
-                        "ResourceKey".into(),
-                        matches!(
-                            node.local_name(),
-                            "DynamicResource" | "DynamicResourceExtension"
-                        ),
-                        target,
-                    ));
-                }
+        for (property, dynamic, key) in resource_uses(document, node)? {
+            if let Some(target) = resolve_component_resource(document, node.id, &key) {
+                result.push((node.id, property, dynamic, target));
             }
-        }
-        for attribute in &node.attributes {
-            if attribute.is_namespace() || !attribute.value.starts_with('{') {
-                continue;
-            }
-            let value = attribute.markup().map_err(ToolError)?;
-            visit_resources(document, node.id, &value, &mut |key, dynamic| {
-                if let Some(target) = resolve_component_resource(document, node.id, key) {
-                    result.push((node.id, attribute.name.clone(), dynamic, target));
-                }
-            });
         }
     }
     Ok(result)
 }
 
-fn object_resource_key(node: &Node) -> Option<String> {
-    match node
-        .attributes
-        .iter()
-        .find(|attribute| attribute.name == "ResourceKey")?
-        .markup()
-        .ok()?
+/// Keep unresolved uses as well as resolved ones: moving/copying a definition can
+/// capture a previously unknown key in its new lexical resource scope.
+fn resource_uses(document: &Document, node: &Node) -> Result<Vec<(String, bool, String)>> {
+    let mut result = Vec::new();
+    if framework(node)
+        && matches!(
+            node.local_name(),
+            "StaticResource"
+                | "DynamicResource"
+                | "StaticResourceExtension"
+                | "DynamicResourceExtension"
+        )
     {
-        MarkupValue::Literal(key) => Some(key),
-        _ => None,
+        if let Some((property, key)) = object_resource_key(document, node)? {
+            result.push((
+                property,
+                matches!(
+                    node.local_name(),
+                    "DynamicResource" | "DynamicResourceExtension"
+                ),
+                key,
+            ));
+        }
     }
+    for attribute in &node.attributes {
+        if attribute.is_namespace() || !attribute.value.starts_with('{') {
+            continue;
+        }
+        let value = attribute.markup().map_err(ToolError)?;
+        visit_resources(document, node.id, &value, &mut |key, dynamic| {
+            result.push((attribute.name.clone(), dynamic, key.into()));
+        });
+    }
+    Ok(result)
+}
+
+fn object_resource_key(document: &Document, node: &Node) -> Result<Option<(String, String)>> {
+    let Some(attribute) = component_property_attribute(document, node.id, "ResourceKey")? else {
+        return Ok(None);
+    };
+    Ok(match attribute.markup().map_err(ToolError)? {
+        MarkupValue::Literal(key) => Some((attribute.name.clone(), key)),
+        _ => None,
+    })
+}
+
+/// A copied definition retains the meaning of every locally resolvable reference.
+/// References to resources inside the copied subtree follow their corresponding copy;
+/// references outside it must still resolve to the original declaration. External
+/// dictionaries are intentionally left unresolved, as in the catalog's lookup contract.
+pub(crate) fn validate_copied_references(
+    document: &Document,
+    original: NodeId,
+    candidate: &Document,
+    copied: NodeId,
+) -> Result<()> {
+    let before = document
+        .ast()
+        .subtree(original)
+        .filter(|node| node.is_element())
+        .collect::<Vec<_>>();
+    let after = candidate
+        .ast()
+        .subtree(copied)
+        .filter(|node| node.is_element())
+        .collect::<Vec<_>>();
+    require(
+        before.len() == after.len(),
+        "The copied definition changed its object structure",
+    )?;
+    let copies = before
+        .iter()
+        .zip(&after)
+        .map(|(a, b)| (a.id, b.id))
+        .collect::<BTreeMap<_, _>>();
+    for (before, after) in before.into_iter().zip(after) {
+        let original_uses = resource_uses(document, before)?;
+        let copied_uses = resource_uses(candidate, after)?;
+        require(
+            original_uses == copied_uses,
+            "The copied definition changed its resource expressions",
+        )?;
+        for (_, _, key) in original_uses {
+            let expected = resolve_component_resource(document, before.id, &key)
+                .map(|resource| copies.get(&resource).copied().unwrap_or(resource));
+            require(
+                resolve_component_resource(candidate, after.id, &key) == expected,
+                format!(
+                    "Copying this definition would change the resource '{key}'; choose a scope that preserves its dependencies"
+                ),
+            )?;
+        }
+    }
+    Ok(())
 }
 
 fn extension_kind(document: &Document, node: NodeId, name: &str) -> Option<bool> {
@@ -271,14 +325,18 @@ pub(crate) fn rename_resource(
                     | "StaticResourceExtension"
                     | "DynamicResourceExtension"
             )
-            && object_resource_key(element).as_deref() == Some(&old)
-            && resolve_component_resource(document, element.id, &old) == Some(resource)
         {
-            edits.push(Edit::SetAttribute {
-                node: element.id,
-                name: "ResourceKey".into(),
-                value: escaped_literal(key),
-            });
+            if let Some((property, object_key)) = object_resource_key(document, element)? {
+                if object_key == old
+                    && resolve_component_resource(document, element.id, &old) == Some(resource)
+                {
+                    edits.push(Edit::SetAttribute {
+                        node: element.id,
+                        name: property,
+                        value: escaped_literal(key),
+                    });
+                }
+            }
         }
         for attribute in &element.attributes {
             if attribute.is_namespace() || !attribute.value.starts_with('{') {
