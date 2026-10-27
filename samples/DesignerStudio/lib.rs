@@ -68,9 +68,9 @@ impl NewApplication for App {
 impl ApplicationImpl for App {
     fn initialize(this: &Self) {
         ferroui_markup_xaml::register_types();
-        ferroui_themes_simple::register_types();
+        ferroui_themes_winui::register_types();
         this.styles()
-            .add(ferroui_themes_simple::SimpleTheme::new().as_style());
+            .add(ferroui_themes_winui::WinUITheme::new().as_style());
         this.set_requested_theme_variant(Some(ferroui_base::styling::ThemeVariant::dark()));
     }
     fn on_framework_initialization_completed(this: &Self) {
@@ -96,10 +96,10 @@ impl ApplicationImpl for App {
             if let Some(desktop) = lifetime.as_classic_desktop_style_application_lifetime() {
                 let window = Window::new();
                 window.set_title(Some("FerroUI Designer Studio".into()));
-                window.set_width(1440.0);
-                window.set_height(960.0);
-                window.set_min_width(960.0);
-                window.set_min_height(640.0);
+                window.set_width(1600.0);
+                window.set_height(1040.0);
+                window.set_min_width(1120.0);
+                window.set_min_height(720.0);
                 window.set_content(Some(Rc::new(workspace.control())));
                 let close_approved = Rc::new(std::cell::Cell::new(false));
                 let weak_workspace = Rc::downgrade(&workspace);

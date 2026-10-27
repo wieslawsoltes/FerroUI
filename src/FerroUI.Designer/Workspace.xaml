@@ -1,154 +1,343 @@
 <Grid xmlns="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-      RowDefinitions="48,40,*,5,220,26" Background="#FF1E2028">
+      Name="WorkspaceRoot" RowDefinitions="48,48,*,1,220,28" Background="#FF202020">
   <Grid.Styles>
+    <StyleInclude Source="ferres://FerroUI.Controls.TreeDataGrid/Themes/Generic.xaml" />
+    <Style Selector=".designer-chrome TextBlock">
+      <Setter Property="FontFamily" Value="Segoe UI Variable Text, Segoe UI, Noto Sans, DejaVu Sans, sans-serif" />
+      <Setter Property="Foreground" Value="#FFE5E5E5" />
+      <Setter Property="FontSize" Value="12" />
+    </Style>
     <Style Selector=".designer-chrome Button">
-      <Setter Property="Background" Value="#FF303746" />
-      <Setter Property="Foreground" Value="#FFE1E8F6" />
-      <Setter Property="BorderBrush" Value="#FF424D64" />
-      <Setter Property="BorderThickness" Value="1" />
+      <Setter Property="MinHeight" Value="30" />
+      <Setter Property="FontSize" Value="12" />
       <Setter Property="CornerRadius" Value="4" />
       <Setter Property="Padding" Value="10,5" />
-      <Setter Property="FontSize" Value="11" />
+    </Style>
+    <Style Selector=".designer-chrome Button.nav">
+      <Setter Property="Background" Value="Transparent" />
+      <Setter Property="BorderThickness" Value="0" />
+      <Setter Property="Foreground" Value="#FFB8B8B8" />
+      <Setter Property="Padding" Value="12,7" />
+    </Style>
+    <Style Selector=".designer-chrome Button.active /template/ ContentPresenter#PART_ContentPresenter">
+      <Setter Property="Background" Value="#FF35474E" />
+      <Setter Property="Foreground" Value="#FF99E1FF" />
+      <Setter Property="BorderBrush" Value="#FF537780" />
+    </Style>
+    <Style Selector=".designer-chrome Button.icon">
+      <Setter Property="Width" Value="32" />
+      <Setter Property="Height" Value="32" />
+      <Setter Property="Padding" Value="8" />
+      <Setter Property="Background" Value="Transparent" />
+      <Setter Property="BorderThickness" Value="0" />
+    </Style>
+    <Style Selector=".designer-chrome Button.document-tab">
+      <Setter Property="MinHeight" Value="32" />
+      <Setter Property="Padding" Value="14,6" />
+      <Setter Property="CornerRadius" Value="5,5,0,0" />
+      <Setter Property="Background" Value="Transparent" />
+      <Setter Property="BorderThickness" Value="0" />
     </Style>
     <Style Selector=".designer-chrome TextBox">
-      <Setter Property="Background" Value="#FF1A1F2B" />
-      <Setter Property="Foreground" Value="#FFE1E8F6" />
-      <Setter Property="BorderBrush" Value="#FF3B465C" />
-      <Setter Property="BorderThickness" Value="1" />
+      <Setter Property="FontSize" Value="12" />
+      <Setter Property="MinHeight" Value="30" />
+      <Setter Property="Padding" Value="9,5" />
       <Setter Property="CornerRadius" Value="4" />
-      <Setter Property="Padding" Value="7,4" />
     </Style>
     <Style Selector=".designer-chrome ComboBox">
-      <Setter Property="Background" Value="#FF1A1F2B" />
-      <Setter Property="Foreground" Value="#FFE1E8F6" />
-      <Setter Property="BorderBrush" Value="#FF3B465C" />
-      <Setter Property="Padding" Value="7,4" />
+      <Setter Property="FontSize" Value="12" />
+      <Setter Property="MinHeight" Value="30" />
+      <Setter Property="Padding" Value="9,5" />
     </Style>
-    <Style Selector=".designer-chrome CheckBox">
-      <Setter Property="Foreground" Value="#FFE1E8F6" />
+    <Style Selector=".designer-chrome TreeDataGrid">
+      <Setter Property="Background" Value="Transparent" />
+      <Setter Property="Foreground" Value="#FFE5E5E5" />
+      <Setter Property="FontSize" Value="12" />
+      <Setter Property="BorderThickness" Value="0" />
+    </Style>
+    <Style Selector=".designer-chrome TreeDataGridRow">
+      <Setter Property="MinHeight" Value="30" />
+    </Style>
+    <Style Selector=".designer-chrome TreeDataGridColumnHeader">
+      <Setter Property="MinHeight" Value="28" />
+      <Setter Property="Foreground" Value="#FFAFAFAF" />
+      <Setter Property="FontSize" Value="11" />
+      <Setter Property="Padding" Value="8,4" />
+    </Style>
+    <Style Selector="GridSplitter:pointerover">
+      <Setter Property="Background" Value="#FF60CDFF" />
     </Style>
   </Grid.Styles>
-  <Border Background="#FF191B22" Padding="16,8">
+
+  <Border Classes="designer-chrome" Background="#FF202020" Padding="16,8">
     <Grid ColumnDefinitions="Auto,*,Auto">
-      <StackPanel Orientation="Horizontal" Spacing="14" VerticalAlignment="Center">
-        <TextBlock Text="F" FontSize="24" FontWeight="Bold" Foreground="#FF8CA9FF" />
-        <TextBlock Text="FerroUI  /  Designer Studio" FontSize="17" Foreground="#FFF0F2F8" VerticalAlignment="Center" />
+      <StackPanel Orientation="Horizontal" Spacing="12" VerticalAlignment="Center">
+        <Border Width="28" Height="28" CornerRadius="7" Background="#FF60CDFF">
+          <TextBlock Text="F" FontSize="19" FontWeight="Bold" Foreground="#FF14242B" HorizontalAlignment="Center" VerticalAlignment="Center" />
+        </Border>
+        <TextBlock Text="FerroUI" FontSize="15" FontWeight="Normal" VerticalAlignment="Center" />
+        <TextBlock Text="Designer Studio" Foreground="#FF9C9C9C" FontSize="13" VerticalAlignment="Center" />
       </StackPanel>
-      <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="18" VerticalAlignment="Center">
-        <TextBlock Name="PeerCount" Text="" Foreground="#FF9DBAD1" FontSize="11" />
-        <TextBlock Name="DocumentTitle" Text="Untitled.xaml" Foreground="#FF9AA4B9" FontSize="11" />
+      <TextBlock Name="DocumentTitle" Grid.Column="1" Text="Untitled.xaml" Foreground="#FFB3B3B3" HorizontalAlignment="Center" VerticalAlignment="Center" />
+      <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="14" VerticalAlignment="Center">
+        <TextBlock Name="PeerCount" Text="" Foreground="#FF94DDFB" VerticalAlignment="Center" />
+        <Button Name="Share" Content="Share" Classes="accent" Padding="18,4" ToolTip.Tip="Collaborate on this document" />
       </StackPanel>
     </Grid>
   </Border>
-  <Border Classes="designer-chrome" Grid.Row="1" Background="#FF252832" Padding="10,4">
-    <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Disabled"><StackPanel Orientation="Horizontal" Spacing="6">
-      <Button Name="OpenFile" Content="Open" />
-      <Button Name="OpenProject" Content="Solution" />
-      <Button Name="SaveAll" Content="Save all" />
-      <Button Name="Share" Content="Share" />
-      <Button Name="SaveFile" Content="Save" />
-      <Button Name="SaveFileAs" Content="Save as" />
-      <Button Name="Undo" Content="Undo" />
-      <Button Name="Redo" Content="Redo" />
-      <Button Name="Delete" Content="Delete" />
-      <Button Name="Duplicate" Content="Duplicate" />
-      <Button Name="ZoomOut" Content="−" />
-      <Button Name="ZoomReset" Content="100%" />
-      <Button Name="ZoomIn" Content="+" />
-      <Button Name="SelectTool" Content="Select" />
-      <Button Name="PreviewTool" Content="Interact" />
-      <Button Name="ApplySource" Content="Apply XAML" />
-      <Button Name="SourceMode" Content="Source tree" />
-      <Button Name="VisualMode" Content="Visual tree" />
-      <Button Name="LogicalMode" Content="Logical tree" />
-      <Button Name="PreviewTheme" Content="Light preview" />
-      <Button Name="NativePreview" Content="Native window" />
-    </StackPanel></ScrollViewer>
-  </Border>
-  <Grid Grid.Row="2" ColumnDefinitions="226,5,*,5,292">
-    <Grid Classes="designer-chrome" RowDefinitions="Auto,128,Auto,*,Auto,170" Margin="8">
-      <TextBlock Text="ASSETS" Foreground="#FF9AA4B9" Margin="6,10" FontSize="11" />
-      <ScrollViewer Grid.Row="1"><WrapPanel Name="Assets" ItemWidth="92" ItemHeight="34" /></ScrollViewer>
-      <TextBlock Grid.Row="2" Text="OBJECTS AND HIERARCHY" Foreground="#FF9AA4B9" Margin="6,12" FontSize="11" />
-      <ScrollViewer Grid.Row="3"><StackPanel Name="Outline" Spacing="2" /></ScrollViewer>
-      <StackPanel Grid.Row="4" Spacing="4" Margin="0,6">
-        <TextBlock Text="SOLUTION" Foreground="#FF9AA4B9" FontSize="11" />
-        <TextBox Name="ProjectPath" PlaceholderText="Folder or Cargo.toml path" />
-        <WrapPanel><Button Name="CheckProject" Content="Check" /><Button Name="BuildProject" Content="Build" /><Button Name="RunProject" Content="Run" /><Button Name="CancelBuild" Content="Stop" /></WrapPanel>
-        <ComboBox Name="RunTarget" PlaceholderText="Binary target" />
+
+  <Border Classes="designer-chrome" Grid.Row="1" Background="#FF272727" BorderBrush="#FF383838" BorderThickness="0,0,0,1" Padding="10,0">
+    <Grid ColumnDefinitions="*,Auto,*">
+      <CommandBar DefaultLabelPosition="Right" Background="Transparent" HorizontalAlignment="Left" IsDynamicOverflowEnabled="True">
+        <CommandBar.PrimaryCommands>
+          <CommandBarButton Name="OpenFile" Label="Open" ToolTip.Tip="Open XAML · Ctrl+O">
+            <CommandBarButton.Icon><PathIcon Width="16" Height="16" Data="M1,4 L7,4 9,6 19,6 19,16 1,16 Z M2,7 L2,15 18,15 18,7 Z" /></CommandBarButton.Icon>
+          </CommandBarButton>
+          <CommandBarButton Name="SaveFile" Label="Save" ToolTip.Tip="Save · Ctrl+S">
+            <CommandBarButton.Icon><PathIcon Width="16" Height="16" Data="M2,1 L15,1 19,5 19,19 1,19 1,1 Z M4,2 L4,8 14,8 14,2 Z M5,12 L5,18 15,18 15,12 Z" /></CommandBarButton.Icon>
+          </CommandBarButton>
+          <CommandBarSeparator />
+          <CommandBarButton Name="Undo" Label="Undo" ToolTip.Tip="Undo · Ctrl+Z">
+            <CommandBarButton.Icon><PathIcon Width="16" Height="16" Data="M7,2 L1,8 7,14 7,10 12,10 Q17,10 17,16 L19,16 Q19,8 12,8 L7,8 Z" /></CommandBarButton.Icon>
+          </CommandBarButton>
+          <CommandBarButton Name="Redo" Label="Redo" ToolTip.Tip="Redo · Ctrl+Shift+Z">
+            <CommandBarButton.Icon><PathIcon Width="16" Height="16" Data="M13,2 L19,8 13,14 13,10 8,10 Q3,10 3,16 L1,16 Q1,8 8,8 L13,8 Z" /></CommandBarButton.Icon>
+          </CommandBarButton>
+        </CommandBar.PrimaryCommands>
+        <CommandBar.SecondaryCommands>
+          <CommandBarButton Name="OpenProject" Label="Open solution…" />
+          <CommandBarButton Name="SaveAll" Label="Save all documents" />
+          <CommandBarButton Name="SaveFileAs" Label="Save as…" />
+          <CommandBarSeparator />
+          <CommandBarButton Name="Duplicate" Label="Duplicate selection" ToolTip.Tip="Duplicate · Ctrl+D" />
+          <CommandBarButton Name="Delete" Label="Delete selection" ToolTip.Tip="Delete" />
+        </CommandBar.SecondaryCommands>
+      </CommandBar>
+      <Border Grid.Column="1" Background="#FF202020" CornerRadius="5" Padding="3" VerticalAlignment="Center">
+        <StackPanel Orientation="Horizontal" Spacing="2">
+          <Button Name="DesignView" Classes="nav active" Content="Design" ToolTip.Tip="Design canvas · F6" />
+          <Button Name="SplitView" Classes="nav" Content="Split" ToolTip.Tip="Design and XAML · F6" />
+          <Button Name="CodeView" Classes="nav" Content="XAML" ToolTip.Tip="Source editor · F6" />
+        </StackPanel>
+      </Border>
+      <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="8" HorizontalAlignment="Right" VerticalAlignment="Center">
+        <Button Name="TimelineToggle" Classes="nav active" Content="Timeline" ToolTip.Tip="Show or hide the animation timeline" />
+        <Button Name="NativePreview" Content="Run preview" ToolTip.Tip="Open an interactive native preview window" />
       </StackPanel>
-      <ScrollViewer Grid.Row="5"><StackPanel Name="ProjectTree" Spacing="2" /></ScrollViewer>
     </Grid>
-    <GridSplitter Grid.Column="1" Width="5" Background="#FF353947" />
-    <Grid Grid.Column="2" RowDefinitions="30,*,5,245">
-      <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Disabled"><StackPanel Name="DocumentTabs" Classes="designer-chrome" Orientation="Horizontal" Spacing="4" /></ScrollViewer>
-      <ScrollViewer Grid.Row="1" Name="ArtboardScroll" Background="#FF15171E" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto">
-        <Border Padding="32"><LayoutTransformControl Name="ArtboardTransform"><Grid Name="Artboard" Width="800" Height="520" Background="White">
-          <ThemeVariantScope Name="PreviewThemeScope" RequestedThemeVariant="Light"><ContentControl Name="Preview" HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch" /></ThemeVariantScope>
-        </Grid></LayoutTransformControl></Border>
+  </Border>
+
+  <Grid Name="MainLayout" Grid.Row="2" ColumnDefinitions="260,1,*,1,328">
+    <Border Classes="designer-chrome" Background="#FF272727">
+      <Grid RowDefinitions="48,*">
+        <StackPanel Orientation="Horizontal" Spacing="3" Margin="10,8">
+          <Button Name="LayersTab" Classes="nav active" Content="Layers" />
+          <Button Name="AssetsTab" Classes="nav" Content="Assets" />
+          <Button Name="ProjectTab" Classes="nav" Content="Project" />
+        </StackPanel>
+        <Grid Name="LayersPane" Grid.Row="1" RowDefinitions="36,44,*">
+          <StackPanel Orientation="Horizontal" Spacing="2" Margin="12,0">
+            <Button Name="SourceMode" Classes="nav active" Content="Source" Padding="10,4" />
+            <Button Name="VisualMode" Classes="nav" Content="Visual" Padding="10,4" />
+            <Button Name="LogicalMode" Classes="nav" Content="Logical" Padding="10,4" />
+          </StackPanel>
+          <TextBox Name="OutlineSearch" Grid.Row="1" PlaceholderText="Find an element…" Margin="12,4,12,8" />
+          <ContentControl Name="OutlineHost" Grid.Row="2" HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch" Margin="6,0,6,8" />
+        </Grid>
+        <ContentControl Name="AssetsPane" Grid.Row="1" IsVisible="False" HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch">
+          <ContentControl Name="AssetHost" HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch" Margin="12,0,12,8" />
+        </ContentControl>
+        <Grid Name="ProjectPane" Grid.Row="1" IsVisible="False" RowDefinitions="Auto,Auto,*" Margin="12,0,12,8">
+          <StackPanel Spacing="8">
+            <TextBlock Text="SOLUTION EXPLORER" FontSize="11" Foreground="#FF9C9C9C" />
+            <TextBox Name="ProjectPath" PlaceholderText="Folder or Cargo.toml path" ToolTip.Tip="Enter a path and choose Check to load the solution" />
+            <ComboBox Name="RunTarget" PlaceholderText="Choose a binary target" HorizontalAlignment="Stretch" />
+          </StackPanel>
+          <WrapPanel Grid.Row="1" Margin="0,8,0,10">
+            <Button Name="CheckProject" Content="Check" Margin="0,0,4,4" />
+            <Button Name="BuildProject" Content="Build" Margin="0,0,4,4" />
+            <Button Name="RunProject" Content="Run" Margin="0,0,4,4" />
+            <Button Name="CancelBuild" Content="Stop" Margin="0,0,0,4" />
+          </WrapPanel>
+          <ContentControl Name="ProjectTreeHost" Grid.Row="2" HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch" />
+        </Grid>
+      </Grid>
+    </Border>
+    <GridSplitter Grid.Column="1" Width="5" Background="#FF383838" />
+
+    <Grid Name="DocumentLayout" Grid.Column="2" RowDefinitions="36,44,*,0,0">
+      <Border Classes="designer-chrome" Background="#FF202020" Padding="8,4,8,0">
+        <ScrollViewer HorizontalScrollBarVisibility="Hidden" VerticalScrollBarVisibility="Disabled">
+          <StackPanel Name="DocumentTabs" Orientation="Horizontal" Spacing="2" />
+        </ScrollViewer>
+      </Border>
+      <Border Name="CanvasToolbar" Classes="designer-chrome" Grid.Row="1" Background="#FF292929" BorderBrush="#FF383838" BorderThickness="0,0,0,1" Padding="12,6">
+        <Grid ColumnDefinitions="Auto,*,Auto">
+          <StackPanel Orientation="Horizontal" Spacing="3">
+            <Button Name="SelectTool" Classes="icon active" ToolTip.Tip="Select and manipulate elements">
+              <PathIcon Width="16" Height="16" Data="M3,1 L17,12 11,13 8,19 3,1 Z M6,5 L9,14 10,11 13,11 Z" />
+            </Button>
+            <Button Name="PreviewTool" Classes="icon" ToolTip.Tip="Interact with the preview controls">
+              <PathIcon Width="16" Height="16" Data="M4,2 L18,10 4,18 Z M6,5 L6,15 14,10 Z" />
+            </Button>
+            <Border Width="1" Height="18" Background="#FF454545" Margin="8,0" />
+            <TextBlock Name="CanvasSize" Text="800 × 520" Foreground="#FFA4A4A4" VerticalAlignment="Center" />
+            <Button Name="ArrangeSelection" Classes="nav" Content="Arrange" Margin="10,0,0,0" ToolTip.Tip="Align or distribute selected elements">
+              <Button.Flyout>
+                <MenuFlyout>
+                  <MenuItem Name="AlignLeft" Header="Align left" />
+                  <MenuItem Name="AlignCenter" Header="Align horizontal centers" />
+                  <MenuItem Name="AlignRight" Header="Align right" />
+                  <Separator />
+                  <MenuItem Name="AlignTop" Header="Align top" />
+                  <MenuItem Name="AlignMiddle" Header="Align vertical centers" />
+                  <MenuItem Name="AlignBottom" Header="Align bottom" />
+                  <Separator />
+                  <MenuItem Name="DistributeHorizontal" Header="Distribute horizontally" />
+                  <MenuItem Name="DistributeVertical" Header="Distribute vertically" />
+                </MenuFlyout>
+              </Button.Flyout>
+            </Button>
+          </StackPanel>
+          <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="3">
+            <Button Name="PreviewTheme" Classes="nav" Content="Light preview" Padding="8,4" />
+            <Border Width="1" Height="18" Background="#FF454545" Margin="8,0" />
+            <Button Name="ZoomOut" Classes="icon" Content="−" ToolTip.Tip="Zoom out" />
+            <Button Name="ZoomReset" Classes="nav" Content="100%" Width="60" Padding="6,4" ToolTip.Tip="Reset zoom to 100%" />
+            <Button Name="ZoomIn" Classes="icon" Content="+" ToolTip.Tip="Zoom in" />
+            <Button Name="ZoomFit" Classes="nav" Content="Fit" ToolTip.Tip="Fit the artboard in the canvas" />
+          </StackPanel>
+        </Grid>
+      </Border>
+      <ScrollViewer Grid.Row="2" Name="ArtboardScroll" Background="#FF181818" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto">
+        <Border Padding="40" HorizontalAlignment="Center" VerticalAlignment="Center">
+          <LayoutTransformControl Name="ArtboardTransform">
+            <Grid Name="Artboard" Width="800" Height="520" Background="White">
+              <ThemeVariantScope Name="PreviewThemeScope" RequestedThemeVariant="Light">
+                <ContentControl Name="Preview" HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch" />
+              </ThemeVariantScope>
+            </Grid>
+          </LayoutTransformControl>
+        </Border>
       </ScrollViewer>
-      <GridSplitter Grid.Row="2" Height="5" Background="#FF353947" />
-      <Grid Classes="designer-chrome" Grid.Row="3" RowDefinitions="30,*,Auto">
-        <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Disabled"><StackPanel Orientation="Horizontal" Spacing="4">
-          <TextBlock Name="SourcePosition" Text="XAML" Foreground="#FF9AA4B9" VerticalAlignment="Center" Margin="8,0" />
-          <Button Name="CompleteSource" Content="Complete" /><Button Name="SourceDefinition" Content="Definition" /><Button Name="SourceReferences" Content="References" /><Button Name="SourceDiagnostics" Content="Problems" /><Button Name="FormatSource" Content="Format" />
-          <TextBox Name="RenameSymbol" Width="110" PlaceholderText="New name" /><Button Name="RenameSource" Content="Rename" />
-        </StackPanel></ScrollViewer>
-        <TextBox Name="Source" Grid.Row="1" AcceptsReturn="True" AcceptsTab="True"
-                 FontFamily="monospace" FontSize="12" TextWrapping="NoWrap"
-                 Background="#FF191B22" Foreground="#FFDBE5FA" BorderThickness="0" />
-        <ScrollViewer Grid.Row="2" MaxHeight="110"><StackPanel Name="LanguageResults" Spacing="2" /></ScrollViewer>
+      <GridSplitter Name="SourceDivider" Grid.Row="3" IsVisible="False" Height="5" Background="#FF383838" />
+      <Grid Name="SourcePane" Classes="designer-chrome" Grid.Row="4" IsVisible="False" RowDefinitions="Auto,*,Auto" Background="#FF1F1F1F">
+        <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Disabled">
+          <StackPanel Orientation="Horizontal" Spacing="4" Margin="8,6">
+            <TextBlock Name="SourcePosition" Text="XAML" Foreground="#FFA9A9A9" VerticalAlignment="Center" Margin="2,0,8,0" />
+            <Button Name="CompleteSource" Classes="nav" Content="Complete" />
+            <Button Name="SourceDefinition" Classes="nav" Content="Definition" />
+            <Button Name="SourceReferences" Classes="nav" Content="References" />
+            <Button Name="SourceDiagnostics" Classes="nav" Content="Problems" />
+            <Button Name="FormatSource" Classes="nav" Content="Format" />
+            <TextBox Name="RenameSymbol" Width="108" PlaceholderText="New name" />
+            <Button Name="RenameSource" Classes="nav" Content="Rename" />
+            <Button Name="ApplySource" Content="Apply XAML" />
+          </StackPanel>
+        </ScrollViewer>
+        <TextBox Name="Source" Grid.Row="1" AcceptsReturn="True" AcceptsTab="True" FontFamily="monospace" FontSize="12" TextWrapping="NoWrap" Padding="16,12" Background="#FF1F1F1F" Foreground="#FFDFE8EE" BorderThickness="0" />
+        <ScrollViewer Grid.Row="2" MaxHeight="130"><StackPanel Name="LanguageResults" Spacing="2" /></ScrollViewer>
       </Grid>
     </Grid>
-    <GridSplitter Grid.Column="3" Width="5" Background="#FF353947" />
-    <Grid Classes="designer-chrome" Grid.Column="4" RowDefinitions="Auto,Auto,Auto,*,Auto,Auto" Margin="10">
-      <TextBlock Text="PROPERTIES" Foreground="#FF9AA4B9" Margin="4,10" FontSize="11" />
-      <TextBlock Name="SelectionTitle" Grid.Row="1" Text="Select an element" Foreground="#FFDFE6F5" FontSize="15" Margin="4,4,4,12" />
-      <TextBox Name="PropertySearch" Grid.Row="2" PlaceholderText="Search properties" Margin="2,0,2,10" />
-      <ScrollViewer Grid.Row="3"><StackPanel Name="Properties" Spacing="7" /></ScrollViewer>
-      <StackPanel Grid.Row="4" Orientation="Horizontal" Spacing="4"><Button Name="StatesMode" Content="States" /><Button Name="BehaviorsMode" Content="Behaviors" /><Button Name="CloseAuthoring" Content="Hide" /></StackPanel>
-      <ScrollViewer Grid.Row="5" MaxHeight="300"><StackPanel Name="AuthoringPanel" Spacing="5" /></ScrollViewer>
+    <GridSplitter Grid.Column="3" Width="5" Background="#FF383838" />
+
+    <Border Classes="designer-chrome" Grid.Column="4" Background="#FF272727">
+      <Grid RowDefinitions="48,Auto,44,*,Auto,Auto">
+        <Grid ColumnDefinitions="*,Auto" Margin="16,8">
+          <TextBlock Text="Properties" FontSize="15" FontWeight="Normal" VerticalAlignment="Center" />
+          <Border Grid.Column="1" Background="#FF333333" CornerRadius="4" Padding="7,3" VerticalAlignment="Center">
+            <TextBlock Text="INSPECTOR" FontSize="10" Foreground="#FFADADAD" />
+          </Border>
+        </Grid>
+        <TextBlock Name="SelectionTitle" Grid.Row="1" Text="Select an element" Foreground="#FF60CDFF" FontSize="16" Margin="16,4,16,8" TextTrimming="CharacterEllipsis" />
+        <TextBox Name="PropertySearch" Grid.Row="2" PlaceholderText="Search properties…" Margin="12,2,12,10" />
+        <ContentControl Name="PropertyHost" Grid.Row="3" HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch" Margin="6,0" />
+        <Border Grid.Row="4" BorderBrush="#FF383838" BorderThickness="0,1,0,0" Padding="10,6">
+          <StackPanel Orientation="Horizontal" Spacing="4">
+            <Button Name="StatesMode" Classes="nav" Content="States" />
+            <Button Name="BehaviorsMode" Classes="nav" Content="Behaviors" />
+            <Button Name="CloseAuthoring" Classes="nav" Content="Close editor" />
+          </StackPanel>
+        </Border>
+        <ScrollViewer Grid.Row="5" MaxHeight="310" Margin="12,0"><StackPanel Name="AuthoringPanel" Spacing="7" /></ScrollViewer>
+      </Grid>
+    </Border>
+  </Grid>
+
+  <GridSplitter Name="TimelineDivider" Grid.Row="3" Height="5" Background="#FF383838" />
+  <Grid Name="TimelinePane" Classes="designer-chrome" Grid.Row="4" RowDefinitions="42,40,*,Auto" Background="#FF232323">
+    <Border Background="#FF292929" BorderBrush="#FF383838" BorderThickness="0,0,0,1" Padding="14,5">
+      <Grid ColumnDefinitions="Auto,*,Auto">
+        <StackPanel Orientation="Horizontal" Spacing="8">
+          <TextBlock Text="TIMELINE" Foreground="#FFA8A8A8" FontSize="11" FontWeight="Normal" VerticalAlignment="Center" Margin="0,0,12,0" />
+          <ComboBox Name="AnimationPrograms" Width="225" />
+          <Button Name="NewAnimation" Classes="icon" Content="+" ToolTip.Tip="New animation program" />
+          <Button Name="DuplicateAnimation" Classes="icon" ToolTip.Tip="Duplicate animation program">
+            <PathIcon Width="14" Height="14" Data="M1,1 L13,1 13,3 3,3 3,13 1,13 Z M5,5 L19,5 19,19 5,19 Z M7,7 L7,17 17,17 17,7 Z" />
+          </Button>
+          <Button Name="DeleteAnimation" Classes="icon" ToolTip.Tip="Delete animation program">
+            <PathIcon Width="14" Height="14" Data="M6,1 L14,1 14,3 19,3 19,5 1,5 1,3 6,3 Z M3,7 L17,7 16,19 4,19 Z M6,9 L7,17 8,17 7,9 Z M12,9 L11,17 13,17 14,9 Z" />
+          </Button>
+        </StackPanel>
+        <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="4">
+          <Button Name="TimelineDetails" Classes="nav" Content="Name &amp; target" />
+          <Button Name="AnimationSource" Classes="nav" Content="View XAML" />
+          <Button Name="AnimationSettings" Classes="nav" Content="Settings" />
+        </StackPanel>
+      </Grid>
+    </Border>
+    <Grid Grid.Row="1" ColumnDefinitions="Auto,*,Auto" Margin="14,4">
+      <StackPanel Orientation="Horizontal" Spacing="5">
+        <Button Name="Play" Content="Play" MinWidth="64" />
+        <Button Name="Stop" Content="Stop" />
+        <Button Name="PlayAll" Classes="nav" Content="Play all" />
+        <Border Width="1" Height="18" Background="#FF454545" Margin="7,0" />
+        <Button Name="Record" Content="Record off" MinWidth="100" />
+        <Button Name="Keyframe" Classes="nav" Content="+ Keyframe" />
+        <Button Name="CommitAnimation" Classes="nav" Content="Save animation" ToolTip.Tip="Write the active animation to the document XAML" />
+      </StackPanel>
+      <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="8">
+        <TextBlock Text="Time" Foreground="#FF999999" VerticalAlignment="Center" />
+        <TextBox Name="Time" Text="0" Width="64" ToolTip.Tip="Playhead in seconds · Enter to seek" />
+        <TextBlock Text="/" Foreground="#FF777777" VerticalAlignment="Center" />
+        <TextBox Name="Duration" Text="3" Width="64" ToolTip.Tip="Animation duration in seconds · Enter to apply" />
+        <TextBlock Text="s" Foreground="#FF999999" VerticalAlignment="Center" Margin="0,0,4,0" />
+      </StackPanel>
     </Grid>
+    <Slider Name="Scrubber" IsVisible="False" Minimum="0" Maximum="3" Value="0" TickFrequency="0.1" IsSnapToTickEnabled="True" />
+    <ScrollViewer Grid.Row="2" HorizontalScrollBarVisibility="Disabled"><StackPanel Name="Tracks" Spacing="1" Margin="12,0,12,8" /></ScrollViewer>
+    <Border Name="AnimationDetails" Grid.Row="3" IsVisible="False" Background="#FF2C2C2C" Padding="14,8" BorderBrush="#FF383838" BorderThickness="0,1,0,0">
+      <StackPanel Orientation="Horizontal" Spacing="8">
+        <TextBlock Text="Name" Foreground="#FF999999" VerticalAlignment="Center" />
+        <TextBox Name="AnimationName" Width="200" PlaceholderText="Animation name" />
+        <Button Name="RenameAnimation" Content="Rename" />
+        <TextBlock Text="Target" Foreground="#FF999999" VerticalAlignment="Center" Margin="12,0,0,0" />
+        <TextBox Name="AnimationSelector" Width="250" PlaceholderText="Type#Name selector" />
+        <Button Name="SetAnimationSelector" Content="Apply target" />
+      </StackPanel>
+    </Border>
   </Grid>
-  <GridSplitter Grid.Row="3" Height="5" Background="#FF353947" />
-  <Grid Classes="designer-chrome" Grid.Row="4" RowDefinitions="30,36,28,*" Margin="12,4">
-    <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Disabled"><StackPanel Orientation="Horizontal" Spacing="5">
-      <TextBlock Text="ANIMATIONS" Foreground="#FF9AA4B9" VerticalAlignment="Center" />
-      <ComboBox Name="AnimationPrograms" Width="210" />
-      <TextBox Name="AnimationName" Width="130" PlaceholderText="Program name" />
-      <TextBox Name="AnimationSelector" Width="130" PlaceholderText="Selector" />
-      <Button Name="NewAnimation" Content="New" /><Button Name="RenameAnimation" Content="Rename" /><Button Name="DuplicateAnimation" Content="Duplicate" /><Button Name="DeleteAnimation" Content="Delete" /><Button Name="SetAnimationSelector" Content="Target" />
-      <Button Name="AnimationSource" Content="Source" /><Button Name="AnimationSettings" Content="Settings" />
-    </StackPanel></ScrollViewer>
-    <ScrollViewer Grid.Row="1" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Disabled"><StackPanel Orientation="Horizontal" Spacing="6">
-      <TextBlock Text="ANIMATION TIMELINE" Foreground="#FF9AA4B9" FontSize="11" VerticalAlignment="Center" Margin="0,0,14,0" />
-      <Button Name="Play" Content="Play" /><Button Name="PlayAll" Content="Play all" />
-      <Button Name="Stop" Content="Stop" />
-      <Button Name="Record" Content="Record off" />
-      <Button Name="Keyframe" Content="Add keyframe" />
-      <Button Name="CommitAnimation" Content="Write animation to XAML" />
-      <TextBlock Text="Time" Foreground="#FF9AA4B9" VerticalAlignment="Center" />
-      <TextBox Name="Time" Text="0" Width="70" />
-      <TextBlock Text="Duration" Foreground="#FF9AA4B9" VerticalAlignment="Center" />
-      <TextBox Name="Duration" Text="3" Width="70" />
-    </StackPanel></ScrollViewer>
-    <Slider Name="Scrubber" Grid.Row="2" Minimum="0" Maximum="3" Value="0" TickFrequency="0.1" IsSnapToTickEnabled="True" />
-    <ScrollViewer Grid.Row="3"><StackPanel Name="Tracks" Spacing="4" /></ScrollViewer>
-  </Grid>
+
   <ContentControl Name="SharingHost" Grid.Row="1" Grid.RowSpan="4" IsVisible="False" HorizontalAlignment="Center" VerticalAlignment="Center" />
-  <Border Classes="designer-chrome" Name="BuildDrawer" Grid.Row="2" Grid.RowSpan="3" IsVisible="False" VerticalAlignment="Bottom" Height="210" Background="#FF171D29" Padding="10">
-    <Grid RowDefinitions="28,*"><StackPanel Orientation="Horizontal" Spacing="8"><TextBlock Name="BuildStatus" Foreground="#FFDCE5F6" Text="Build output" /><Button Name="HideBuildOutput" Content="Hide output" /></StackPanel><TextBox Name="BuildOutput" Grid.Row="1" IsReadOnly="True" AcceptsReturn="True" FontFamily="monospace" FontSize="11" /></Grid>
+  <Border Classes="designer-chrome" Name="BuildDrawer" Grid.Row="2" Grid.RowSpan="3" IsVisible="False" VerticalAlignment="Bottom" Height="240" Background="#FF202020" BorderBrush="#FF454545" BorderThickness="0,1,0,0" Padding="14,8">
+    <Grid RowDefinitions="36,*">
+      <Grid ColumnDefinitions="*,Auto"><TextBlock Name="BuildStatus" Text="Build output" FontSize="13" VerticalAlignment="Center" /><Button Name="HideBuildOutput" Grid.Column="1" Classes="nav" Content="Close output" /></Grid>
+      <TextBox Name="BuildOutput" Grid.Row="1" IsReadOnly="True" AcceptsReturn="True" FontFamily="monospace" FontSize="11" BorderThickness="0" Background="#FF181818" />
+    </Grid>
   </Border>
-  <Border Grid.Row="5" Background="#FF272F47" Padding="12,4">
-    <TextBlock Name="Status" Text="Ready" Foreground="#FFD9E2FF" FontSize="11" />
+  <Border Grid.Row="5" Background="#FF202020" BorderBrush="#FF383838" BorderThickness="0,1,0,0" Padding="14,5">
+    <Grid ColumnDefinitions="*,Auto">
+      <TextBlock Name="Status" Text="Ready" Foreground="#FFAAAAAA" FontSize="11" TextTrimming="CharacterEllipsis" />
+      <TextBlock Grid.Column="1" Text="FerroUI Designer" Foreground="#FF777777" FontSize="11" Margin="12,0,0,0" />
+    </Grid>
   </Border>
   <Border Classes="designer-chrome" Name="FilePrompt" Grid.RowSpan="6" Background="#A0000000" IsVisible="False">
-    <Border Width="460" VerticalAlignment="Center" HorizontalAlignment="Center" Background="#FF252832" Padding="24" CornerRadius="8">
-      <StackPanel Spacing="16">
-        <TextBlock Name="FilePromptTitle" Text="Open another document?" FontSize="20" Foreground="White" />
-        <TextBlock Name="FilePromptText" Text="Save the current document before opening another file." TextWrapping="Wrap" Foreground="#FFD0D9ED" />
-        <StackPanel Orientation="Horizontal" Spacing="8">
-          <Button Name="SaveAndOpen" Content="Save and open" />
+    <Border Width="480" VerticalAlignment="Center" HorizontalAlignment="Center" Background="#FF2B2B2B" BorderBrush="#FF494949" BorderThickness="1" Padding="24" CornerRadius="8">
+      <StackPanel Spacing="18">
+        <TextBlock Name="FilePromptTitle" Text="Open another document?" FontSize="20" FontWeight="Normal" />
+        <TextBlock Name="FilePromptText" Text="Save the current document before opening another file." TextWrapping="Wrap" Foreground="#FFC6C6C6" />
+        <StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Right">
+          <Button Name="SaveAndOpen" Classes="accent" Content="Save and open" />
           <Button Name="DiscardAndOpen" Content="Discard and open" />
           <Button Name="CancelOpen" Content="Cancel" />
         </StackPanel>

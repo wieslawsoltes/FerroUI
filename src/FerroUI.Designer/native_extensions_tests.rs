@@ -155,12 +155,10 @@ fn rotation_preserves_property_element_transform_and_namespace_inheritance() {
         },
     )
     .unwrap();
-    assert!(
-        session
-            .document()
-            .source()
-            .contains("<ScaleTransform ScaleX=\"2\"")
-    );
+    assert!(session
+        .document()
+        .source()
+        .contains("<ScaleTransform ScaleX=\"2\""));
     assert!(session.document().source().contains("<TransformGroup>"));
     assert_eq!(session.document().source().matches("xmlns=").count(), 1);
     assert!(
@@ -231,12 +229,10 @@ fn registered_root_factory_populates_real_instances_and_survives_document_switch
         "Example.RealView",
         Rc::new(|_| Err("factory rejected".into())),
     );
-    assert!(
-        session
-            .configure_preview(rejected)
-            .unwrap_err()
-            .contains("factory rejected")
-    );
+    assert!(session
+        .configure_preview(rejected)
+        .unwrap_err()
+        .contains("factory rejected"));
     assert!(std::ptr::eq(&*accepted, &*session.preview.root().unwrap()));
     let id = session.document().ast().find_name("Target").unwrap();
     session.set_property(&[id], "Content", "Recovered").unwrap();
@@ -244,14 +240,12 @@ fn registered_root_factory_populates_real_instances_and_survives_document_switch
         session.preview_status(),
         PreviewStatus::Ready { .. }
     ));
-    assert!(
-        session
-            .preview
-            .root()
-            .unwrap()
-            .cast::<UserControl>()
-            .is_some()
-    );
+    assert!(session
+        .preview
+        .root()
+        .unwrap()
+        .cast::<UserControl>()
+        .is_some());
 }
 
 #[test]
@@ -365,13 +359,11 @@ fn project_tabs_retain_history_and_source_completion_is_registered() {
     );
     let mut language = workspace.language_service();
     language.open("untitled:completion", "<But", 1).unwrap();
-    assert!(
-        language
-            .completions("untitled:completion", 4)
-            .unwrap()
-            .iter()
-            .any(|item| item.label == "Button")
-    );
+    assert!(language
+        .completions("untitled:completion", 4)
+        .unwrap()
+        .iter()
+        .any(|item| item.label == "Button"));
     drop(language);
     drop(workspace);
     std::fs::remove_dir_all(path).unwrap();
@@ -392,22 +384,18 @@ fn source_completion_handles_invalid_drafts_and_rejects_stale_or_read_only_edits
         .unwrap();
     assert_eq!(workspace.session().borrow().document().source(), "<Button");
     assert!(!workspace.session().borrow().document().is_valid());
-    assert!(
-        workspace
-            .apply_source_completion(revision, ferroui_designer_core::SourceSpan::new(0, 0), "x")
-            .is_err()
-    );
+    assert!(workspace
+        .apply_source_completion(revision, ferroui_designer_core::SourceSpan::new(0, 0), "x")
+        .is_err());
     let revision = workspace.session().borrow().document().revision();
     workspace.session().borrow_mut().set_read_only(true);
-    assert!(
-        workspace
-            .apply_source_completion(
-                revision,
-                ferroui_designer_core::SourceSpan::new(7, 7),
-                " />"
-            )
-            .is_err()
-    );
+    assert!(workspace
+        .apply_source_completion(
+            revision,
+            ferroui_designer_core::SourceSpan::new(7, 7),
+            " />"
+        )
+        .is_err());
     assert_eq!(workspace.session().borrow().document().source(), "<Button");
 }
 
@@ -477,14 +465,12 @@ fn workspace_refactoring_rejects_stale_buffers_atomically_and_close_restores_dis
         !workspace.document_uris().contains(&b_uri),
         "A rejected refactoring must not open its candidate tabs"
     );
-    assert!(
-        workspace
-            .session()
-            .borrow()
-            .document()
-            .source()
-            .contains("Width=\"200\"")
-    );
+    assert!(workspace
+        .session()
+        .borrow()
+        .document()
+        .source()
+        .contains("Width=\"200\""));
     assert_eq!(
         workspace
             .language_service()
@@ -513,6 +499,126 @@ fn workspace_refactoring_rejects_stale_buffers_atomically_and_close_restores_dis
         workspace
             .language_service()
             .document(&b_uri)
+            .unwrap()
+            .source(),
+        source
+    );
+    drop(workspace);
+    std::fs::remove_dir_all(directory).unwrap();
+}
+
+#[cfg(unix)]
+#[test]
+fn native_tabs_and_refactorings_share_one_identity_for_symlink_aliases() {
+    use ferroui_designer_language::WorkspaceEdit;
+    use ferroui_designer_project::{file_uri, Solution};
+    let _app = UnitTestApplication::start(TestServices::styled_window());
+    let directory =
+        std::env::temp_dir().join(format!("ferroui-designer-tab-alias-{}", std::process::id()));
+    std::fs::create_dir_all(&directory).unwrap();
+    let directory = directory.canonicalize().unwrap();
+    let alias_root = directory.join("alias");
+    std::os::unix::fs::symlink(&directory, &alias_root).unwrap();
+    let source = r#"<Button xmlns="https://github.com/ferroui" Name="Target" Width="100" />"#;
+    std::fs::write(directory.join("View.xaml"), source).unwrap();
+    std::fs::write(directory.join("Other.xaml"), source).unwrap();
+    let uri = file_uri(directory.join("View.xaml")).unwrap();
+    let alias = file_uri(alias_root.join("View.xaml")).unwrap();
+    let other = file_uri(directory.join("Other.xaml")).unwrap();
+    let workspace = DesignerWorkspace::new(STARTER_XAML).unwrap();
+    workspace
+        .set_solution(Solution::discover(&directory).unwrap())
+        .unwrap();
+    workspace.activate_document(&alias).unwrap();
+    assert_eq!(workspace.session().borrow().document_uri(), uri);
+    let target = workspace
+        .session()
+        .borrow()
+        .document()
+        .ast()
+        .find_name("Target")
+        .unwrap();
+    workspace
+        .session()
+        .borrow_mut()
+        .set_property(&[target], "Width", "200")
+        .unwrap();
+    let revision = workspace.session().borrow().document().revision();
+    workspace.activate_document(&uri).unwrap();
+    workspace.activate_document(&alias).unwrap();
+    assert_eq!(workspace.session().borrow().document().revision(), revision);
+    assert_eq!(
+        workspace
+            .document_uris()
+            .iter()
+            .filter(|candidate| *candidate == &uri)
+            .count(),
+        1
+    );
+    assert!(!workspace.document_uris().contains(&alias));
+    workspace.synchronize_language_service().unwrap();
+    let offset = workspace
+        .session()
+        .borrow()
+        .document()
+        .source()
+        .find("Target")
+        .unwrap();
+    let rename = workspace
+        .language_service()
+        .rename(&alias, offset, "Renamed")
+        .unwrap();
+    let canonical_edit = rename.document_changes[0].clone();
+    let mut alias_edit = canonical_edit.clone();
+    alias_edit.uri = alias.clone();
+    assert!(workspace
+        .apply_language_edits(WorkspaceEdit {
+            document_changes: vec![canonical_edit, alias_edit.clone()],
+        })
+        .is_err());
+    assert_eq!(workspace.session().borrow().document().revision(), revision);
+    assert!(workspace
+        .session()
+        .borrow()
+        .document()
+        .ast()
+        .find_name("Target")
+        .is_some());
+    workspace
+        .apply_language_edits(WorkspaceEdit {
+            document_changes: vec![alias_edit],
+        })
+        .unwrap();
+    assert!(workspace
+        .session()
+        .borrow()
+        .document()
+        .ast()
+        .find_name("Renamed")
+        .is_some());
+    workspace.activate_document(&other).unwrap();
+    workspace.activate_document(&alias).unwrap();
+    workspace.session().borrow_mut().undo().unwrap();
+    assert!(workspace
+        .session()
+        .borrow()
+        .document()
+        .ast()
+        .find_name("Target")
+        .is_some());
+    assert!(workspace
+        .session()
+        .borrow()
+        .document()
+        .source()
+        .contains("Width=\"200\""));
+    assert!(workspace.close_document(&alias, false).is_err());
+    workspace.close_document(&alias, true).unwrap();
+    assert!(!workspace.document_uris().contains(&uri));
+    assert_eq!(
+        workspace
+            .language_service()
+            .document(&alias)
             .unwrap()
             .source(),
         source

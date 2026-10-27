@@ -16,7 +16,10 @@ fn main() {
     let prepared = settings.prepare(black_box(&peers)).unwrap();
     let prepare = start.elapsed();
     for rect in &queries {
-        assert_eq!(prepared.snap(*rect).unwrap(), settings.snap(*rect, &peers).unwrap());
+        assert_eq!(
+            prepared.snap(*rect).unwrap(),
+            settings.snap(*rect, &peers).unwrap()
+        );
     }
     println!("case,peers,queries,microseconds");
     println!("prepare,{},1,{}", peers.len(), prepare.as_micros());
@@ -25,11 +28,21 @@ fn main() {
         for rect in &queries {
             black_box(settings.snap(black_box(*rect), black_box(&peers)).unwrap());
         }
-        println!("one_off,{},{},{}", peers.len(), queries.len(), start.elapsed().as_micros());
+        println!(
+            "one_off,{},{},{}",
+            peers.len(),
+            queries.len(),
+            start.elapsed().as_micros()
+        );
         let start = Instant::now();
         for rect in &queries {
             black_box(prepared.snap(black_box(*rect)).unwrap());
         }
-        println!("prepared,{},{},{}", peers.len(), queries.len(), start.elapsed().as_micros());
+        println!(
+            "prepared,{},{},{}",
+            peers.len(),
+            queries.len(),
+            start.elapsed().as_micros()
+        );
     }
 }

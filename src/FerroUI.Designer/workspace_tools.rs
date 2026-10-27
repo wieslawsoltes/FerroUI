@@ -7,7 +7,7 @@ use ferroui_designer_core::{Document, Edit, NodeId, NodeKind};
 use ferroui_designer_tools::{
     Affine, Alignment, Axis, GridLines, LayoutAction, LayoutContext, Point, Rect, ResolvedLayout,
 };
-use std::collections::{BTreeMap, BTreeSet};
+use std::collections::{BTreeMap, BTreeSet, btree_map::Entry};
 
 fn effective_properties(visual: &Visual) -> BTreeMap<String, String> {
     ferroui_inspect::Inspector::properties(visual)
@@ -411,10 +411,11 @@ fn plan_moves(
             .borrow_mut()
             .node_id(&visual);
         let key = (source_parent, runtime_parent);
-        if !measured.contains_key(&key) {
-            measured.insert(key, measure(session, source_parent, Some(node))?);
-        }
-        let delta = measured[&key].delta(delta)?;
+        let measurement = match measured.entry(key) {
+            Entry::Vacant(entry) => entry.insert(measure(session, source_parent, Some(node))?),
+            Entry::Occupied(entry) => entry.into_mut(),
+        };
+        let delta = measurement.delta(delta)?;
         actions.push((key, LayoutAction::Move { node, delta }));
     }
     let contexts = measured
@@ -853,6 +854,18 @@ fn duplicate_sources(
     Ok(result)
 }
 
+pub(crate) fn delete(session: &mut DesignerSession) -> Result<(), String> {
+    let root = session.document().ast().root();
+    let ids = outermost(session.document(), session.selection())
+        .into_iter()
+        .filter(|id| *id != root);
+    let edits = ids.map(|node| Edit::RemoveNode { node }).collect();
+    session
+        .apply("Delete selection", edits)
+        .map_err(|error| error.to_string())?;
+    Ok(())
+}
+
 #[cfg(test)]
 mod duplicate_tests {
     use super::*;
@@ -933,16 +946,4 @@ mod duplicate_tests {
         );
         assert_eq!(document.source().matches("xmlns=").count(), 1);
     }
-}
-
-pub(crate) fn delete(session: &mut DesignerSession) -> Result<(), String> {
-    let root = session.document().ast().root();
-    let ids = outermost(session.document(), session.selection())
-        .into_iter()
-        .filter(|id| *id != root);
-    let edits = ids.map(|node| Edit::RemoveNode { node }).collect();
-    session
-        .apply("Delete selection", edits)
-        .map_err(|error| error.to_string())?;
-    Ok(())
 }

@@ -1,8 +1,10 @@
 //! Extensible native property editors. Factories create controls and send semantic values to the
 //! host callback; they never mutate a runtime object behind the source document.
 use ferroui_base::input::{InputElement, Key};
+use ferroui_base::interactivity::RoutingStrategies;
+use ferroui_base::utilities::Decimal;
 use ferroui_base::Ref;
-use ferroui_controls::{CheckBox, ComboBox, Control, TextBox};
+use ferroui_controls::{CheckBox, ComboBox, Control, NumericUpDown, TextBox};
 use ferroui_designer_core::NodeId;
 use std::rc::Rc;
 
@@ -62,6 +64,9 @@ pub(crate) fn built_in(context: &PropertyEditorContext) -> Ref<Control> {
         return editor.upcast();
     }
     if !expression {
+        if let Some(editor) = numeric_editor(context) {
+            return editor;
+        }
         let values: &[&str] = match context.property.as_str() {
             "HorizontalAlignment" | "HorizontalContentAlignment" => {
                 &["Left", "Center", "Right", "Stretch"]
@@ -78,6 +83,14 @@ pub(crate) fn built_in(context: &PropertyEditorContext) -> Ref<Control> {
         };
         if !values.is_empty() {
             let editor = ComboBox::new();
+            let offset = if context.mixed {
+                editor
+                    .items()
+                    .add(Some(Rc::new("(multiple values)".to_owned())));
+                2
+            } else {
+                1
+            };
             editor.items().add(Some(Rc::new("(inherited)".to_owned())));
             for value in values {
                 editor.items().add(Some(Rc::new((*value).to_owned())));
@@ -86,8 +99,12 @@ pub(crate) fn built_in(context: &PropertyEditorContext) -> Ref<Control> {
                 context
                     .value
                     .as_deref()
-                    .and_then(|current| values.iter().position(|value| *value == current))
-                    .map(|index| index as i32 + 1)
+                    .and_then(|current| {
+                        values
+                            .iter()
+                            .position(|value| value.eq_ignore_ascii_case(current))
+                    })
+                    .map(|index| index as i32 + offset)
                     .unwrap_or(0),
             );
             let weak = editor.downgrade();
@@ -99,10 +116,13 @@ pub(crate) fn built_in(context: &PropertyEditorContext) -> Ref<Control> {
             editor.selection_changed(move |_, _| {
                 if let Some(editor) = weak.upgrade() {
                     let index = editor.selected_index();
-                    apply(if index <= 0 {
+                    if offset == 2 && index == 0 {
+                        return;
+                    }
+                    apply(if index < offset {
                         None
                     } else {
-                        values.get(index as usize - 1).cloned()
+                        values.get((index - offset) as usize).cloned()
                     });
                 }
             });
@@ -131,4 +151,83 @@ pub(crate) fn built_in(context: &PropertyEditorContext) -> Ref<Control> {
         }
     });
     editor.upcast()
+}
+
+/// Numeric values retain native keyboard/spinner behavior. Special XAML values such as Auto,
+/// NaN and expressions deliberately use the source editor, preserving their lexical meaning.
+fn numeric_editor(context: &PropertyEditorContext) -> Option<Ref<Control>> {
+    let numeric = matches!(
+        context.runtime_type.as_deref(),
+        Some("f32" | "f64" | "i16" | "i32" | "i64" | "u16" | "u32" | "u64" | "usize")
+    ) || matches!(
+        context.property.as_str(),
+        "Canvas.Left"
+            | "Canvas.Top"
+            | "Canvas.Right"
+            | "Canvas.Bottom"
+            | "Grid.Row"
+            | "Grid.Column"
+            | "Grid.RowSpan"
+            | "Grid.ColumnSpan"
+    );
+    if !numeric {
+        return None;
+    }
+    let value = match context.value.as_deref() {
+        Some(value) => Some(Decimal::parse(value).ok()?),
+        None => None,
+    };
+    let editor = NumericUpDown::new();
+    match context.property.as_str() {
+        "Opacity" => {
+            editor.set_minimum(Decimal::ZERO);
+            editor.set_maximum(Decimal::ONE);
+        }
+        "Grid.RowSpan" | "Grid.ColumnSpan" => editor.set_minimum(Decimal::ONE),
+        "Width" | "Height" | "MinWidth" | "MinHeight" | "MaxWidth" | "MaxHeight" | "FontSize"
+        | "Grid.Row" | "Grid.Column" | "Rows" | "Columns" | "FirstColumn" => {
+            editor.set_minimum(Decimal::ZERO)
+        }
+        _ => {}
+    }
+    editor.set_numeric_value(value);
+    editor.set_increment(if context.property == "Opacity" {
+        Decimal::parse("0.05").unwrap()
+    } else {
+        Decimal::ONE
+    });
+    editor.set_placeholder_text(Some(if context.mixed {
+        "Multiple values"
+    } else {
+        "Inherited"
+    }));
+    // Typing is committed with Enter; the native spinner also produces an explicit commit.
+    // Replacing a row on each intermediate numeric value would steal keyboard focus.
+    let weak = editor.downgrade();
+    let apply = context.apply.clone();
+    editor.add_handler_with(
+        InputElement::key_down_event(),
+        move |_, event| {
+            if event.key == Key::Enter {
+                if let Some(editor) = weak.upgrade() {
+                    // Auto and markup expressions are valid XAML, even though the native
+                    // decimal editor marks Enter handled. The source validator owns acceptance.
+                    apply(Some(editor.text().unwrap_or_default()));
+                    event.set_handled(true);
+                }
+            }
+        },
+        RoutingStrategies::BUBBLE,
+        true,
+    );
+    let weak = editor.downgrade();
+    let apply = context.apply.clone();
+    editor.spinned(move |_| {
+        if let Some(editor) = weak.upgrade() {
+            if let Some(value) = editor.value() {
+                apply(Some(value.to_string()));
+            }
+        }
+    });
+    Some(editor.upcast())
 }

@@ -22,6 +22,7 @@ impl DesignerWorkspace {
     /// Open source at its URI, retaining the previous tab and its history. A newly opened
     /// document starts its own history and is detached from the previous collaboration room.
     pub fn open_document(self: &Rc<Self>, source: String, uri: String) -> Result<(), String> {
+        let uri = super::project::document_identity(&uri)?;
         self.capture_tab();
         self.pending_source.set(false);
         self.disconnect_sharing();
@@ -203,7 +204,14 @@ impl DesignerWorkspace {
                 file.name().replace(' ', "%20")
             )
         };
-        self.open_document(source, uri)?;
+        let uri = super::project::document_identity(&uri)?;
+        let already_open = self.session.borrow().document_uri() == uri
+            || self.project.borrow().tabs.contains_key(&uri);
+        if already_open {
+            self.activate_document(&uri)?;
+        } else {
+            self.open_document(source, uri)?;
+        }
         *self.file.borrow_mut() = Some(file);
         self.rebuild_document_tabs();
         Ok(())
@@ -255,7 +263,7 @@ impl DesignerWorkspace {
     /// The saved snapshot is tracked independently of later editor changes, so a concurrent
     /// change is never mistakenly marked saved. Existing files are checked for external changes.
     pub async fn save_file(self: &Rc<Self>, save_as: bool) -> Result<bool, String> {
-        let previous_uri = self.session.borrow().document_uri().to_owned();
+        let previous_uri = super::project::document_identity(self.session.borrow().document_uri())?;
         let top = TopLevel::get_top_level(Some(&self.root))
             .ok_or("The designer must be attached to a window to save files")?;
         let provider = top.storage_provider();
@@ -293,14 +301,12 @@ impl DesignerWorkspace {
         };
         self.ensure_save_document(&previous_uri)?;
         let destination = file.path();
-        if destination.is_absolute_uri()
-            && destination.absolute_uri() != previous_uri
-            && self
-                .project
-                .borrow()
-                .tabs
-                .contains_key(destination.absolute_uri())
-        {
+        let saved_uri = if destination.is_absolute_uri() {
+            super::project::document_identity(destination.absolute_uri())?
+        } else {
+            previous_uri.clone()
+        };
+        if saved_uri != previous_uri && self.project.borrow().tabs.contains_key(&saved_uri) {
             return Err(
                 "That destination is already open in another tab; close or save that tab first"
                     .into(),
@@ -346,13 +352,8 @@ impl DesignerWorkspace {
                 .and_then(|_| output.flush())
                 .map_err(|e| e.to_string())?;
         }
-        let path = file.path();
-        let saved_uri = if path.is_absolute_uri() {
-            path.absolute_uri().to_owned()
-        } else {
-            previous_uri.clone()
-        };
-        if self.session.borrow().document_uri() == previous_uri {
+        if super::project::document_identity(self.session.borrow().document_uri())? == previous_uri
+        {
             *self.saved_source.borrow_mut() = source.clone();
             self.session
                 .borrow_mut()
@@ -382,7 +383,7 @@ impl DesignerWorkspace {
         Ok(true)
     }
     fn ensure_save_document(&self, uri: &str) -> Result<(), String> {
-        if self.session.borrow().document_uri() != uri {
+        if super::project::document_identity(self.session.borrow().document_uri())? != uri {
             return Err("The active tab changed while the save dialog was open; return to the document and save again".into());
         }
         Ok(())

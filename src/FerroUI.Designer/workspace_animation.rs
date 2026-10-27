@@ -106,7 +106,35 @@ impl DesignerWorkspace {
         let active = self.session.borrow().active_animation_program();
         match command {
             "NewAnimation" => {
-                let duration = self.session.borrow().timeline().duration;
+                let session = self.session.borrow();
+                let programs = session.animation_programs();
+                let active = programs.iter().find(|program| Some(program.id) == active);
+                let name = if name.trim().is_empty()
+                    || programs.iter().any(|program| program.name == name)
+                {
+                    (1..)
+                        .map(|index| format!("Animation {index}"))
+                        .find(|name| programs.iter().all(|program| program.name != *name))
+                        .expect("a finite document has an available animation name")
+                } else {
+                    name
+                };
+                let selector = if selector.trim().is_empty()
+                    || active.is_some_and(|program| program.selector == selector)
+                {
+                    let node = session
+                        .document()
+                        .ast()
+                        .node(owner)
+                        .ok_or("Select an animation owner")?;
+                    let type_name = node.name.replace(':', "|");
+                    node.xaml_name()
+                        .map_or(type_name.clone(), |name| format!("{type_name}#{name}"))
+                } else {
+                    selector
+                };
+                let duration = session.timeline().duration;
+                drop(session);
                 self.session
                     .borrow_mut()
                     .create_animation_program(&name, owner, &selector, duration)
@@ -116,11 +144,31 @@ impl DesignerWorkspace {
                 .session
                 .borrow_mut()
                 .rename_animation_program(active.ok_or("Choose an animation")?, &name),
-            "DuplicateAnimation" => self
-                .session
-                .borrow_mut()
-                .duplicate_animation_program(active.ok_or("Choose an animation")?, &name)
-                .map(|_| ()),
+            "DuplicateAnimation" => {
+                let id = active.ok_or("Choose an animation")?;
+                let session = self.session.borrow();
+                let programs = session.animation_programs();
+                let name = if name.trim().is_empty()
+                    || programs.iter().any(|program| program.name == name)
+                {
+                    let original = programs
+                        .iter()
+                        .find(|program| program.id == id)
+                        .ok_or("Choose an animation")?;
+                    let base = format!("{} copy", original.name);
+                    std::iter::once(base.clone())
+                        .chain((2..).map(|index| format!("{base} {index}")))
+                        .find(|name| programs.iter().all(|program| program.name != *name))
+                        .expect("a finite document has an available animation name")
+                } else {
+                    name
+                };
+                drop(session);
+                self.session
+                    .borrow_mut()
+                    .duplicate_animation_program(id, &name)
+                    .map(|_| ())
+            }
             "DeleteAnimation" => self
                 .session
                 .borrow_mut()
@@ -130,6 +178,9 @@ impl DesignerWorkspace {
                 .borrow_mut()
                 .set_animation_program_selector(active.ok_or("Choose an animation")?, &selector),
             "AnimationSource" => {
+                if self.view_mode() == crate::WorkspaceViewMode::Design {
+                    self.set_view_mode(crate::WorkspaceViewMode::Split);
+                }
                 self.reveal_source(active.ok_or("Choose an animation")?);
                 Ok(())
             }

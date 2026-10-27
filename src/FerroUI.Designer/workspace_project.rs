@@ -7,6 +7,16 @@ use ferroui_designer_project::{
 };
 use std::collections::BTreeMap;
 
+/// File tabs use physical identity across symlink/localhost URI aliases. Other
+/// storage-provider and resource schemes retain the host's exact URI semantics.
+pub(super) fn document_identity(uri: &str) -> Result<String, String> {
+    if uri.starts_with("file://") {
+        ferroui_designer_project::canonical_file_uri(uri).map_err(|error| error.to_string())
+    } else {
+        Ok(uri.into())
+    }
+}
+
 #[derive(Clone)]
 pub(super) struct Tab {
     pub(super) document: Document,
@@ -91,7 +101,9 @@ impl DesignerWorkspace {
             .keys()
             .cloned()
             .collect::<Vec<_>>();
-        let active = self.session.borrow().document_uri().to_owned();
+        let session = self.session.borrow();
+        let active = document_identity(session.document_uri())
+            .unwrap_or_else(|_| session.document_uri().to_owned());
         if !result.contains(&active) {
             result.push(active);
         }
@@ -99,7 +111,8 @@ impl DesignerWorkspace {
     }
     pub(super) fn capture_tab(&self) {
         let session = self.session.borrow();
-        let uri = session.document_uri().to_owned();
+        let uri = document_identity(session.document_uri())
+            .unwrap_or_else(|_| session.document_uri().to_owned());
         let mut state = self.project.borrow_mut();
         if let Some(workspace) = state.workspace.as_mut() {
             if let Some(buffer) = workspace.buffer(&uri) {
@@ -117,7 +130,9 @@ impl DesignerWorkspace {
         );
     }
     pub fn activate_document(self: &Rc<Self>, uri: &str) -> Result<(), String> {
-        if self.session.borrow().document_uri() == uri {
+        let uri = document_identity(uri)?;
+        let uri = uri.as_str();
+        if document_identity(self.session.borrow().document_uri())? == uri {
             return Ok(());
         }
         if self.pending_source.get() {
@@ -160,8 +175,13 @@ impl DesignerWorkspace {
         Ok(())
     }
     pub fn close_document(self: &Rc<Self>, uri: &str, discard: bool) -> Result<(), String> {
+        let uri = document_identity(uri)?;
+        let uri = uri.as_str();
+        if self.pending_source.get() {
+            self.apply_source();
+        }
         self.capture_tab();
-        let active = self.session.borrow().document_uri().to_owned();
+        let active = document_identity(self.session.borrow().document_uri())?;
         let next = {
             let state = self.project.borrow();
             let tab = state.tabs.get(uri).ok_or("Document is not open")?;
@@ -193,7 +213,9 @@ impl DesignerWorkspace {
         Ok(())
     }
     pub(super) fn inactive_dirty_document(&self) -> Option<String> {
-        let active = self.session.borrow().document_uri().to_owned();
+        let session = self.session.borrow();
+        let active = document_identity(session.document_uri())
+            .unwrap_or_else(|_| session.document_uri().to_owned());
         self.project
             .borrow()
             .tabs
@@ -206,6 +228,7 @@ impl DesignerWorkspace {
             self.apply_source();
         }
         self.capture_tab();
+        let active = document_identity(self.session.borrow().document_uri())?;
         let mut state = self.project.borrow_mut();
         // Check every destination before writing the first file.
         let mut files = Vec::new();
@@ -236,7 +259,7 @@ impl DesignerWorkspace {
             let tab = state.tabs.get_mut(&uri).unwrap();
             tab.saved = tab.document.source().into();
             tab.document.mark_saved();
-            if uri == self.session.borrow().document_uri() {
+            if uri == active {
                 *self.saved_source.borrow_mut() = tab.saved.clone();
                 self.session.borrow_mut().mark_saved();
             }
@@ -252,8 +275,12 @@ impl DesignerWorkspace {
         uri: &str,
         source: &str,
     ) -> Result<(), String> {
-        let active_uri = self.session.borrow().document_uri().to_owned();
-        let document = if self.session.borrow().document_uri() == uri {
+        let previous_uri = document_identity(previous_uri)?;
+        let previous_uri = previous_uri.as_str();
+        let uri = document_identity(uri)?;
+        let uri = uri.as_str();
+        let active_uri = document_identity(self.session.borrow().document_uri())?;
+        let document = if active_uri == uri {
             self.session.borrow().document().clone()
         } else {
             self.project
@@ -471,56 +498,72 @@ impl DesignerWorkspace {
         }
     }
     fn rebuild_project_tree(self: &Rc<Self>) {
-        let panel = self.root.get_control::<StackPanel>("ProjectTree");
-        panel.children().clear();
+        use ferroui_designer_project::DocumentKind;
         let projects = self
             .project
             .borrow()
             .workspace
             .as_ref()
-            .map(|w| w.solution.projects.clone())
+            .map(|workspace| workspace.solution.projects.clone())
             .unwrap_or_default();
+        let mut rows = Vec::new();
         for (index, project) in projects.iter().enumerate() {
-            let heading = button(&project.name);
-            let weak = Rc::downgrade(self);
-            heading.click(move |_, _| {
-                if let Some(this) = weak.upgrade() {
-                    this.project.borrow_mut().selected = index;
-                    this.refresh_run_targets();
-                }
+            let root_key = format!("project:{}", project.id);
+            rows.push(inspectors::TreeEntry {
+                key: root_key.clone(),
+                label: project.name.clone(),
+                name: "Project".into(),
+                project: Some(index),
+                ..Default::default()
             });
-            panel.children().add(heading.upcast::<Control>());
-            for entry in &project.documents {
-                if !matches!(
-                    entry.kind,
-                    ferroui_designer_project::DocumentKind::Xaml
-                        | ferroui_designer_project::DocumentKind::Rust
-                        | ferroui_designer_project::DocumentKind::Manifest
-                ) {
-                    continue;
-                }
-                let name = entry
+            let mut folders = BTreeSet::new();
+            let mut documents = project.documents.iter().collect::<Vec<_>>();
+            documents.sort_by(|a, b| a.path.cmp(&b.path));
+            for entry in documents {
+                let relative = entry
                     .path
                     .strip_prefix(&project.root)
-                    .unwrap_or(&entry.path)
-                    .display()
-                    .to_string();
-                let row = button(&name);
-                row.set_margin(Thickness::new(12.0, 0.0, 0.0, 0.0));
-                row.set_horizontal_content_alignment(HorizontalAlignment::Left);
-                let uri = entry.uri.clone();
-                let weak = Rc::downgrade(self);
-                row.click(move |_, _| {
-                    if let Some(this) = weak.upgrade() {
-                        this.project.borrow_mut().selected = index;
-                        this.refresh_run_targets();
-                        let result = this.activate_document(&uri);
-                        this.report(result);
+                    .unwrap_or(&entry.path);
+                let mut parent = root_key.clone();
+                let mut path = std::path::PathBuf::new();
+                if let Some(directory) = relative.parent() {
+                    for component in directory.components() {
+                        path.push(component.as_os_str());
+                        let key = format!("{root_key}/{}", path.display());
+                        if folders.insert(key.clone()) {
+                            rows.push(inspectors::TreeEntry {
+                                key: key.clone(),
+                                parent: Some(parent.clone()),
+                                label: component.as_os_str().to_string_lossy().into_owned(),
+                                name: "Folder".into(),
+                                project: Some(index),
+                                ..Default::default()
+                            });
+                        }
+                        parent = key;
                     }
+                }
+                rows.push(inspectors::TreeEntry {
+                    key: entry.uri.clone(),
+                    parent: Some(parent),
+                    label: relative
+                        .file_name()
+                        .map(|name| name.to_string_lossy().into_owned())
+                        .unwrap_or_else(|| relative.display().to_string()),
+                    name: match entry.kind {
+                        DocumentKind::Xaml => "XAML",
+                        DocumentKind::Rust => "Rust",
+                        DocumentKind::Manifest => "Manifest",
+                        DocumentKind::Asset => "Asset",
+                    }
+                    .into(),
+                    project: Some(index),
+                    uri: (!matches!(entry.kind, DocumentKind::Asset)).then(|| entry.uri.clone()),
+                    ..Default::default()
                 });
-                panel.children().add(row.upcast::<Control>());
             }
         }
+        self.inspectors.replace_project(rows);
         self.refresh_run_targets();
     }
     fn refresh_run_targets(&self) {
@@ -542,7 +585,11 @@ impl DesignerWorkspace {
     }
     pub(super) fn rebuild_document_tabs(self: &Rc<Self>) {
         self.capture_tab();
-        let active = self.session.borrow().document_uri().to_owned();
+        let active = {
+            let session = self.session.borrow();
+            document_identity(session.document_uri())
+                .unwrap_or_else(|_| session.document_uri().to_owned())
+        };
         let rows = self
             .project
             .borrow()
@@ -555,12 +602,20 @@ impl DesignerWorkspace {
         for (uri, dirty) in rows {
             let close_uri = uri.clone();
             let group = StackPanel::new();
+            group.classes().add("document-tab-group");
             group.set_orientation(Orientation::Horizontal);
-            let name = uri.rsplit('/').next().unwrap_or(&uri);
+            let name = uri.rsplit('/').next().unwrap_or(&uri).to_owned();
             let row = button(&format!("{name}{}", if dirty { " •" } else { "" }));
-            if uri == active {
-                row.set_background(Some(SolidColorBrush::from_uint32(0xff334568).into()));
-            }
+            row.classes().add("document-tab");
+            row.classes().set("active", uri == active);
+            ferroui_controls::automation::AutomationProperties::set_name(
+                &row,
+                Some(&format!(
+                    "{name}{}",
+                    if dirty { ", unsaved changes" } else { "" }
+                )),
+            );
+            ferroui_controls::ToolTip::set_tip(&row, Some(Rc::new(uri.clone())));
             let weak = Rc::downgrade(self);
             row.click(move |_, _| {
                 if let Some(this) = weak.upgrade() {
@@ -570,6 +625,15 @@ impl DesignerWorkspace {
             });
             group.children().add(row.upcast::<Control>());
             let close = button("×");
+            close.classes().add("document-tab-close");
+            close.classes().set("active", close_uri == active);
+            close.set_min_width(24.0);
+            close.set_padding(Thickness::new(4.0, 2.0, 4.0, 2.0));
+            ferroui_controls::automation::AutomationProperties::set_name(
+                &close,
+                Some(&format!("Close {name}")),
+            );
+            ferroui_controls::ToolTip::set_tip(&close, Some(Rc::new(format!("Close {name}"))));
             let weak = Rc::downgrade(self);
             close.click(move |_, _| {
                 if let Some(this) = weak.upgrade() {

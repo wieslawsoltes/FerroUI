@@ -4,6 +4,7 @@
 //! visual tools and automation. [`DesignerWorkspace`] is an optional embeddable view
 //! of that session. Neither starts a window, server or background transport.
 mod affine_manipulation;
+mod asset_toolbox;
 mod animation_session;
 mod animation_runtime;
 mod collaboration;
@@ -19,6 +20,7 @@ mod timeline_lane;
 mod workspace;
 
 pub use editors::{PropertyEditorContext, PropertyEditorFactory};
+pub use asset_toolbox::{AssetIcon, AssetToolbox, DesignerAsset, default_designer_assets};
 pub use ferroui_designer_core::{Document, Edit, NodeId};
 pub use ferroui_designer_tools as tools;
 pub use preview_host::{
@@ -27,7 +29,9 @@ pub use preview_host::{
 pub use runtime::{PreviewStatus, RuntimeNode};
 pub use session::DesignerSession;
 pub use surface::{DesignGesture, DesignSurface};
+pub use timeline_lane::TimelineLane;
 pub use workspace::{DesignerWorkspace, OutlineMode};
+pub use workspace::shell::{NavigationPane, WorkspaceViewMode};
 
 /// The self-contained example opened by Designer Studio and usable by hosts.
 pub const STARTER_XAML: &str = include_str!("Starter.xaml");
@@ -36,6 +40,8 @@ pub const STARTER_XAML: &str = include_str!("Starter.xaml");
 mod native_extensions_tests;
 #[cfg(test)]
 mod workspace_authoring_tests;
+#[cfg(test)]
+mod workspace_shell_tests;
 #[cfg(test)]
 mod tests;
 mod workspace_tools;

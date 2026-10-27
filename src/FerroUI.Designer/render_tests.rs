@@ -1,7 +1,9 @@
 //! Native rendering evidence through FerroUI's Vello CPU backend and HarfBuzz shaping.
-use crate::{DesignerWorkspace, PreviewStatus, STARTER_XAML};
+use crate::{DesignerWorkspace, NavigationPane, PreviewStatus, WorkspaceViewMode, STARTER_XAML};
+use ferroui_base::animation::{IClock, IGlobalClock, PlayState, TimeSpan};
 use ferroui_base::media::imaging::{PngBitmapEncoderOptions, RenderTargetBitmap};
 use ferroui_base::platform::{IFontManagerImpl, IPlatformRenderInterface, ITextShaperImpl};
+use ferroui_base::reactive::{IDisposable, IObservable, IObserver, LightweightSubject};
 use ferroui_base::threading::Dispatcher;
 use ferroui_base::{FerroLocator, LocatorExtensions, PixelRect, PixelSize, Rect, Size};
 use ferroui_controls::platform::{IScreenImpl, ITopLevelImpl};
@@ -13,10 +15,49 @@ use ferroui_controls::{Control, Window};
 use ferroui_designer_animation::AnimationValue;
 use ferroui_harfbuzz::HarfBuzzTextShaper;
 use ferroui_vello::{VelloOptions, VelloPlatform, VelloRenderingMode};
+use std::cell::Cell;
 use std::path::Path;
 use std::rc::Rc;
 
-fn capture(workspace: &Rc<DesignerWorkspace>, path: &Path) -> Vec<u8> {
+// WinUI control transitions require the same global clock service as a running application.
+// Keep theme transitions deterministic; document animation uses its own seekable native clocks.
+struct RenderClock {
+    subject: LightweightSubject<TimeSpan>,
+    state: Cell<PlayState>,
+    now: Cell<f64>,
+}
+impl RenderClock {
+    fn pulse(&self) {
+        let now = self.now.get() + 1.0;
+        self.now.set(now);
+        self.subject.on_next(TimeSpan::from_seconds(now));
+    }
+}
+impl IObservable<TimeSpan> for RenderClock {
+    fn subscribe(&self, observer: Rc<dyn IObserver<TimeSpan>>) -> Rc<dyn IDisposable> {
+        self.subject.subscribe(observer)
+    }
+}
+impl IClock for RenderClock {
+    fn play_state(&self) -> PlayState {
+        self.state.get()
+    }
+    fn set_play_state(&self, state: PlayState) {
+        self.state.set(state);
+    }
+}
+impl IGlobalClock for RenderClock {}
+
+fn capture(workspace: &Rc<DesignerWorkspace>, clock: &RenderClock, path: &Path) -> Vec<u8> {
+    capture_at(workspace, clock, path, Size::new(1600.0, 1040.0))
+}
+
+fn capture_at(
+    workspace: &Rc<DesignerWorkspace>,
+    clock: &RenderClock,
+    path: &Path,
+    size: Size,
+) -> Vec<u8> {
     workspace.refresh(true);
     assert!(
         matches!(
@@ -28,28 +69,45 @@ fn capture(workspace: &Rc<DesignerWorkspace>, path: &Path) -> Vec<u8> {
     );
     workspace.synchronize_language_service().unwrap();
     let uri = workspace.session().borrow().document_uri().to_owned();
-    let diagnostics = workspace.try_language_service().unwrap().diagnostics(&uri).unwrap();
+    let diagnostics = workspace
+        .try_language_service()
+        .unwrap()
+        .diagnostics(&uri)
+        .unwrap();
     assert!(
         diagnostics.iter().all(|diagnostic| diagnostic.severity > 2),
         "Valid native render fixtures must also be accepted by the source language service: {diagnostics:?}"
     );
     let control = workspace.control();
-    let size = Size::new(1600.0, 1040.0);
     control.measure(size);
     control.arrange(Rect::from_size(size));
     control.update_layout();
+    // Let WinUI brush/opacity transitions reach their final values without wall-clock sleeps.
+    // The first tick establishes a transition origin; subsequent ticks settle styles created
+    // by layout and queued control events. Document animations retain their explicit seek time.
+    for _ in 0..3 {
+        Dispatcher::ui_thread().run_jobs(None);
+        clock.pulse();
+        control.update_layout();
+    }
     Dispatcher::ui_thread().run_jobs(None);
     assert_eq!(
         control.bounds().size(),
         size,
         "The attached workspace must occupy the full render surface"
     );
-    let bitmap = RenderTargetBitmap::new(PixelSize::new(1600, 1040));
+    let width = size.width as i32;
+    let height = size.height as i32;
+    let bitmap = RenderTargetBitmap::new(PixelSize::new(width, height));
     bitmap.render(&control.upcast());
-    let mut pixels = vec![0; 1600 * 1040 * 4];
-    bitmap.copy_pixels(PixelRect::new(0, 0, 1600, 1040), &mut pixels, 1600 * 4);
-    let distinct: std::collections::BTreeSet<_> =
-        pixels.chunks_exact(4).map(|p| (p[0], p[1], p[2])).collect();
+    let mut pixels = vec![0; width as usize * height as usize * 4];
+    bitmap.copy_pixels(PixelRect::new(0, 0, width, height), &mut pixels, width * 4);
+    let distinct: std::collections::BTreeSet<_> = pixels
+        .as_chunks::<4>()
+        .0
+        .iter()
+        .map(|p| (p[0], p[1], p[2]))
+        .collect();
     assert!(
         distinct.len() > 128,
         "Native workspace should contain text, controls and antialiasing, not a blank bitmap"
@@ -74,6 +132,12 @@ fn native_workspace_renders_design_manipulation_and_animation() {
         .bind::<dyn ITextShaperImpl>()
         .to_constant(Rc::new(HarfBuzzTextShaper::new()));
     let mut services = TestServices::styled_window();
+    let clock = Rc::new(RenderClock {
+        subject: LightweightSubject::new(),
+        state: Cell::new(PlayState::Run),
+        now: Cell::new(0.0),
+    });
+    services.global_clock = Some(clock.clone());
     services.windowing_platform = Some(MockWindowingPlatform::with_window_impl(|| {
         let native_window = MockWindowImpl::window(1600.0, 1040.0);
         native_window
@@ -98,20 +162,36 @@ fn native_workspace_renders_design_manipulation_and_animation() {
     services.font_manager_impl = FerroLocator::current().get_service::<dyn IFontManagerImpl>();
     services.text_shaper_impl = FerroLocator::current().get_service::<dyn ITextShaperImpl>();
     services.theme = Some(Rc::new(|| {
-        ferroui_themes_simple::SimpleTheme::new().as_style()
+        ferroui_themes_winui::WinUITheme::new().as_style()
     }));
     let app = UnitTestApplication::start(services);
-    ferroui_themes_simple::register_types();
+    ferroui_themes_winui::register_types();
     if let Some(application) = ferroui_controls::Application::current() {
         application.set_requested_theme_variant(Some(ferroui_base::styling::ThemeVariant::dark()));
+        // UnitTestApplication installs global styles but does not register the application
+        // theme host. Mirror the real host so top levels inherit the requested dark variant.
+        FerroLocator::current_mutable()
+            .bind::<dyn ferroui_base::styling::IThemeVariantHost>()
+            .to_constant(application.as_theme_variant_host());
     }
     let workspace = DesignerWorkspace::new(STARTER_XAML).unwrap();
     let window = Window::new();
     window.set_width(1600.0);
     window.set_height(1040.0);
-    window.set_content(Some(Control::boxed(&workspace.control())));
+    window.set_content(Some(Control::boxed(workspace.control())));
     window.show();
     window.update_layout();
+    assert_eq!(
+        window.actual_theme_variant(),
+        Some(ferroui_base::styling::ThemeVariant::dark())
+    );
+    assert_eq!(
+        workspace
+            .control()
+            .get_control::<Control>("PreviewThemeScope")
+            .actual_theme_variant(),
+        Some(ferroui_base::styling::ThemeVariant::light())
+    );
     let session = workspace.session();
     let target = session.borrow().document().ast().find_name("Card").unwrap();
     session.borrow_mut().select([target]);
@@ -123,12 +203,48 @@ fn native_workspace_renders_design_manipulation_and_animation() {
         .map(std::path::PathBuf::from)
         .unwrap_or_else(|| std::env::temp_dir().join("ferroui-designer-renders"));
     std::fs::create_dir_all(&directory).unwrap();
-    let before = capture(&workspace, &directory.join("designer-workspace.png"));
+    let before = capture(
+        &workspace,
+        &clock,
+        &directory.join("designer-workspace.png"),
+    );
+    assert_eq!(workspace.view_mode(), WorkspaceViewMode::Design);
+    let canvas = workspace.control().get_control::<Control>("ArtboardScroll");
+    assert!(
+        canvas.bounds().height > 580.0,
+        "Design mode must leave room for the artboard"
+    );
+    workspace.set_navigation_pane(NavigationPane::Assets);
+    let assets = capture(&workspace, &clock, &directory.join("designer-assets.png"));
+    assert_ne!(
+        before, assets,
+        "The assets tab must expose the native toolbox"
+    );
+    workspace.set_navigation_pane(NavigationPane::Layers);
+    workspace.set_view_mode(WorkspaceViewMode::Split);
+    window.update_layout();
+    workspace.fit_artboard().unwrap();
+    let split = capture(&workspace, &clock, &directory.join("designer-split.png"));
+    assert_ne!(before, split);
+    assert!(
+        workspace
+            .control()
+            .get_control::<Control>("SourcePane")
+            .bounds()
+            .height
+            >= 200.0
+    );
+    workspace.set_view_mode(WorkspaceViewMode::Design);
+    workspace.set_zoom(1.0);
     session
         .borrow_mut()
         .set_property(&[target], "Canvas.Left", "96")
         .unwrap();
-    let after = capture(&workspace, &directory.join("designer-manipulated.png"));
+    let after = capture(
+        &workspace,
+        &clock,
+        &directory.join("designer-manipulated.png"),
+    );
     assert_ne!(
         before, after,
         "A source transaction must change actual native rendered pixels"
@@ -143,7 +259,11 @@ fn native_workspace_renders_design_manipulation_and_animation() {
         .record_keyframe(target, "Width", AnimationValue::Number(560.0))
         .unwrap();
     session.borrow_mut().seek(1.5).unwrap();
-    let animated = capture(&workspace, &directory.join("designer-animation.png"));
+    let animated = capture(
+        &workspace,
+        &clock,
+        &directory.join("designer-animation.png"),
+    );
     assert_ne!(
         after, animated,
         "Animation scrubbing must change actual native rendered pixels"
@@ -159,6 +279,20 @@ fn native_workspace_renders_design_manipulation_and_animation() {
         Some("656"),
         "Preview layers must not overwrite authored values"
     );
+    window.set_width(1280.0);
+    window.set_height(820.0);
+    window.update_layout();
+    workspace.fit_artboard().unwrap();
+    capture_at(
+        &workspace,
+        &clock,
+        &directory.join("designer-compact.png"),
+        Size::new(1280.0, 820.0),
+    );
+    assert!(
+        workspace.zoom() < 1.0,
+        "Fit must use the smaller measured viewport"
+    );
     println!("Designer native render evidence: {}", directory.display());
     window.close();
     drop(window);
@@ -170,12 +304,18 @@ fn native_workspace_renders_design_manipulation_and_animation() {
     let window = Window::new();
     window.set_width(1600.0);
     window.set_height(1040.0);
-    window.set_content(Some(Control::boxed(&workspace.control())));
+    window.set_content(Some(Control::boxed(workspace.control())));
     window.show();
     window.update_layout();
-    let pixels = capture(&workspace, &directory.join("designer-window-root.png"));
+    let pixels = capture(
+        &workspace,
+        &clock,
+        &directory.join("designer-window-root.png"),
+    );
     let accent = pixels
-        .chunks_exact(4)
+        .as_chunks::<4>()
+        .0
+        .iter()
         .filter(|p| p[1] < 100 && ((p[0] > 210 && p[2] > 100) || (p[2] > 210 && p[0] > 100)))
         .count();
     assert!(accent>10000,"A Window-root preview must actually paint its authored 160x90 accent rectangle ({accent} pixels)");

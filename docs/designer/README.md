@@ -7,8 +7,10 @@ through a document transaction; the artboard renders actual FerroUI controls.
 
 ![Native workspace with a recorded Width animation at 1.5 seconds](images/designer-animation.png)
 
-This image is captured from the native Vello/HarfBuzz rendering test. The property inspector shows
-the authored Width of 656 and its animated value of 608 while the source retains the base value.
+This image is captured from the native Vello/HarfBuzz rendering test using the WinUI theme.
+The property inspector retains the authored Width of 656 while animation previews 608 at the
+playhead; the source retains the base value. Effective values and value origins are available in
+property-cell tooltips.
 The [initial workspace capture](images/designer-workspace.png) shows the same document before edits.
 
 ## Run
@@ -35,7 +37,7 @@ application does. Use `DesignerWorkspace::with_uri` when relative includes and r
 original document location. A raw resource dictionary or style document needs a host that supplies
 an appropriate preview control; it is not a standalone control artboard.
 
-The **Native window** command opens the actual platform Window, including decorations, sizing and
+The **Run preview** command opens the actual platform Window, including decorations, sizing and
 registered code-behind behavior. Its lifetime is owned by the preview and follows accepted source
 changes. The inline artboard retains a content projection for selection and geometry editing.
 `PreviewHostOptions` registers metadata callbacks, application root factories keyed by `x:Class`
@@ -50,6 +52,64 @@ document presents a save/discard/cancel choice. Local saves write a temporary si
 the destination, checking that an existing file has not changed externally. Virtual storage files
 use their provider's stream API. The workspace tracks the exact saved source so subsequent edits
 remain dirty.
+
+## Native workspace
+
+Designer Studio uses the repository's WinUI theme, including its native button, text, numeric,
+menu, focus and disabled states. The workspace starts in **Design** mode with a large artboard.
+**Split** exposes the synchronized XAML editor, and **XAML** gives it the entire document area.
+F6 cycles these views without reloading the document or discarding partially typed source.
+**Fit** uses the measured canvas viewport. The **Timeline** command releases its working space
+when hidden and restores its resized height when reopened.
+
+The left dock switches between **Layers**, **Assets** and **Project**:
+
+- **Layers** uses a virtualized TreeDataGrid for source, visual and logical trees. Expansion and
+  selection are retained across refreshes. Search keeps matching ancestors visible and does not
+  modify document selection. Authored source rows support ordered multi-selection drag and drop
+  before, after or inside compatible containers. Drops use one source transaction and one undo
+  step; generated runtime rows, stale drags, cycles and occupied single-content hosts are rejected.
+- **Assets** is a reusable searchable catalog with categories, vector icons, native keyboard
+  activation and drag-to-place behavior. Hosts can register their own snippets and icons with
+  `DesignerWorkspace::register_asset` or use `AssetToolbox` independently.
+- **Project** uses a hierarchical TreeDataGrid for project folders, XAML documents and assets.
+  File activation shares the same canonical URI identity as tabs, language edits and saves.
+
+The property dock is a TreeDataGrid with lazily created value editors. It supports native numeric
+spinners, tri-state booleans, enum pickers, expressions, mixed selections and extension factories.
+Enter commits typed text or numbers; spinner and picker actions commit explicitly. The reset
+button removes the authored value. Object-valued property elements can be revealed in XAML
+and reset without flattening their object graph. Tooltips read the current runtime type, effective
+value and priority when opened, so animation sampling does not replace the editor or its draft.
+An editor retained across a document switch or revision change cannot write to the new document.
+Runtime-only objects remain inspectable without receiving invented source IDs.
+
+The canvas **Arrange** menu exposes alignment and equal-gap distribution through the existing
+panel layout adapters. Canvas selection, hierarchy selection and properties refer to the same
+session. The select and interact tools switch between source manipulation and live control input.
+The top command bar keeps document/history actions visible and moves secondary file/edit actions
+into its native overflow menu.
+
+The animation editor has a labelled time ruler, one lane per object/property and one contextual
+keyframe editor. Select or drag a diamond, double-click a lane to record, or use arrow keys to
+nudge the selected key. Escape and lost pointer capture cancel a drag without authoring it.
+Ctrl+wheel or +/- zooms the timeline; Shift+wheel or PageUp/PageDown pans the visible range.
+The contextual editor validates time, value and easing together before one undoable transaction.
+**+ Keyframe** records the selected track's live property value, with Opacity as the initial
+fallback for an object without a track. **Name & target** reveals program details; creating or
+duplicating programs allocates useful unique defaults even when those details are closed.
+
+Reusable public controls and workspace APIs include `AssetToolbox`, `DesignerAsset`, `AssetIcon`,
+`TimelineLane`, `WorkspaceViewMode`, `NavigationPane`, the inspection-grid accessors and
+`DesignerWorkspace::select_keyframe`. These controls send semantic actions through the session;
+they do not modify runtime controls behind the document authority. The
+[native controls guide](native-controls.md) includes host integration examples and the complete
+asset and timeline interaction contract.
+
+Native rendering also covers the [asset catalog](images/designer-assets.png),
+[split view](images/designer-split.png) and [compact workspace](images/designer-compact.png).
+The [engine performance report](performance.md) records controlled workloads, raw measurements,
+reproduction commands and the initial-index tradeoff separately from UI verification.
 
 ## Crates and ownership
 
@@ -455,7 +515,9 @@ The dedicated [Visual designer workflow](../../.github/workflows/designer.yml) c
 - Project buffers, safe saves, shell-free build/cancel tasks, typed language services and the actual stdio LSP lifecycle.
 - Authenticated rooms, role changes, durable restart, offline/outbox recovery, checkpoint review and real two-peer MCP transfer.
 - Existing MCP authentication/cancellation plus provider isolation and designer commands.
-- Actual Vello/HarfBuzz workspace and animation PNG rendering.
+- WinUI workspace navigation, measured fit, source preservation, native toolbox and keyframe gestures.
+- Virtualized TreeDataGrid cells, hierarchy drops, typed property commits and stale-editor guards.
+- Actual Vello/HarfBuzz Design, Split, Assets, compact workspace and animation PNG rendering.
 - Lexical namespace scopes, deferred templates and interpreted/compiled reflection-binding parity.
 - Runtime-only structural hot reload with unchanged compiled-application contract checks.
 - Native animation final fill, live binding preservation, generated transforms and failed-setup cleanup.

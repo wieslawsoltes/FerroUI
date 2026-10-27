@@ -66,7 +66,7 @@ impl Geometry {
         if matches!(handle, 0 | 6 | 7) {
             result.x += result.width - width;
         }
-        if matches!(handle, 0 | 1 | 2) {
+        if matches!(handle, 0..=2) {
             result.y += result.height - height;
         }
         result.width = width;
@@ -119,13 +119,13 @@ pub(crate) fn resize(before: Rect, dx: f64, dy: f64, handle: u8) -> Rect {
     if matches!(handle, 0 | 6 | 7) {
         left = (left + dx).min(right - 1.0);
     }
-    if matches!(handle, 2 | 3 | 4) {
+    if matches!(handle, 2..=4) {
         right = (right + dx).max(left + 1.0);
     }
-    if matches!(handle, 0 | 1 | 2) {
+    if matches!(handle, 0..=2) {
         top = (top + dy).min(bottom - 1.0);
     }
-    if matches!(handle, 4 | 5 | 6) {
+    if matches!(handle, 4..=6) {
         bottom = (bottom + dy).max(top + 1.0);
     }
     Rect::new(left, top, right - left, bottom - top)

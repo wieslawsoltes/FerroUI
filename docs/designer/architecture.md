@@ -10,7 +10,7 @@ The visual designer is a reusable Rust editing system with a FerroUI workspace. 
 - **Collaboration:** replicated document operations, deterministic conflict resolution, causal identity, presence and transport-independent synchronization.
 - **Collaboration hosting:** private durable rooms, actor-bound member roles, invitations, epoch checkpoints, offline outboxes and a background service over the existing isolated MCP transport. Network and disk work stay on workers; source acceptance stays on the UI thread.
 - **Projects and language:** Cargo/loose solutions, versioned multi-document buffers, resource mapping, shell-free cancellable tasks, runtime-derived schema and shared editor/LSP semantics. Cross-document edits pin every affected version.
-- **Workspace:** FerroUI controls for the tool palette, object tree, properties, XAML editor, artboard and timeline. The workspace is embeddable; the sample is a host of the same components.
+- **Workspace:** a WinUI-themed native shell with independently reusable asset catalog and timeline controls, TreeDataGrid hierarchy/project/property inspectors, XAML editor and artboard. View/navigation state is separate from document state; virtual cells and drag gestures pin their source context before writing. The workspace is embeddable; the sample is a host of the same components.
 - **Runtime integration:** reuse FerroUI.Inspect for visual/logical inspection, FerroUI.HotReload for accepted debug preview transactions, and FerroUI.Mcp for authenticated transport and UI-thread dispatch. Release builds stage a runtime XAML load before replacing accepted preview content.
 - **Preview hosting:** actual platform Windows, registered application root factories and resource/design-preview factories retain the real runtime and source URI. Affine tools consume measured native geometry and effective layout properties.
 
@@ -26,6 +26,23 @@ The visual designer is a reusable Rust editing system with a FerroUI workspace. 
 8. Room acknowledgements follow file synchronization and atomic replacement, plus parent-directory synchronization on Unix. An indeterminate commit fences the store until restart. A resumed peer never promotes unacknowledged local operations into the server version. Native disconnect queues its final checkpoint write; its completion status is the durability confirmation.
 9. Tab/source revisions and room actor identity fence asynchronous results. Joining/checkpoint rebasing requires explicit source review and saves the previous document and offline state. A prepared resolution becomes the saved peer only after UI acceptance succeeds and the worker commits it; a stale acceptance preserves the original remote review.
 10. Generated animation/state ownership is explicit; unrelated programs, complex payloads, namespaces and application-defined semantics survive edits.
+11. Pointer snapping prepares peer geometry once per gesture. Gesture commits require their original immutable AST identity and revision; equal numeric node IDs in another document do not establish identity.
+12. Hierarchy drops, property cells and keyframe editors produce session transactions. UI virtualization, filtering and view switches cannot silently mutate the document or discard pending source text. Retained editors, outline models and gestures pin the document URI, revision and shared AST allocation, so reopening the same URI cannot reuse a stale authoring context.
+
+## Internal implementation
+
+| Module | Responsibility |
+| --- | --- |
+| Core `ast/parser`, `ast/reconciliation`, `ast/validation` | Lossless XML syntax, identity matching and validated snapshot deserialization |
+| Core `document/editing`, `document/changes` | Validated patches/structural edits and ordered change classification |
+| `workspace_shell` | Design/Split/XAML, navigation, measured zoom, pane sizing and layout commands |
+| `inspector_controls` | TreeDataGrid row models, selection/expansion, lazy typed property cells and stale-write guards |
+| `inspector_drag` | Authored hierarchy drop planning, source identity guards, native row events and atomic reparenting |
+| `asset_toolbox` | Extensible catalog, filtering, vector tiles and host-owned activation/placement |
+| `timeline_lane`, `workspace_timeline` | Ruler/keys, pointer and keyboard interaction, timeline view state and contextual editing |
+| Project `uri/windows`, `workspace/storage` | Platform file-URI rules and owned atomic-save candidates |
+
+The measured changes and benchmark tradeoffs are recorded in [performance evidence](performance.md).
 
 ## Reference workflows
 

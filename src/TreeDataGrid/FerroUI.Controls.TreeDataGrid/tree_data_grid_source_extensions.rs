@@ -306,12 +306,8 @@ fn add_hierarchical_expander_text_column<M: TreeModel, V: Clone + PartialEq + Pa
 ) {
     let mut options = HierarchicalExpanderColumnCreateOptions::<M>::default();
     configure(&mut options);
-    let inner_options = TextColumnCreateOptions::<M> {
-        common: ColumnCreateOptions { width: options.width, ..ColumnCreateOptions::default() },
-        ..TextColumnCreateOptions::default()
-    };
     let internal_options = TextColumnOptions::<M>::new();
-    apply_common_options(&internal_options, &inner_options);
+    apply_common_options(&internal_options, &options);
     let inner_header = header_or_member(header, &getter);
     let inner = TextColumn::new(inner_header, getter, Some(options.width), Some(Rc::new(internal_options)));
     columns.add(HierarchicalExpanderColumn::new(
@@ -454,3 +450,42 @@ pub trait HierarchicalTreeDataGridSourceExtensions<M: TreeModel>: TreeDataGridSo
 }
 
 impl<M: TreeModel> HierarchicalTreeDataGridSourceExtensions<M> for Rc<HierarchicalTreeDataGridSource<M>> {}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::models::IColumn;
+    use ferroui_treedatagrid_core::models::ListSortDirection;
+
+    #[test]
+    fn hierarchical_text_column_preserves_configured_layout_editing_and_comparisons() {
+        let source = HierarchicalTreeDataGridSource::new(Rc::new(vec![Rc::new(1_i32)]))
+            .with_hierarchical_expander_text_column(
+                None,
+                Accessor::member("Value", |value: &Rc<i32>| **value),
+                |_| None,
+                |options| {
+                    options.width = GridLength::new(2.0, GridUnitType::Star);
+                    options.min_width = GridLength::from_pixels(105.0);
+                    options.max_width = Some(GridLength::from_pixels(300.0));
+                    options.can_user_resize = Some(false);
+                    options.can_user_sort_column = Some(false);
+                    options.begin_edit_gestures = BeginEditGestures::NONE;
+                    options.compare_ascending = Some(Rc::new(|a, b| b.cmp(a)));
+                },
+            );
+        let column = source.columns().get(0);
+        let expander = column.as_any().downcast_ref::<HierarchicalExpanderColumn<i32>>().unwrap();
+        assert_eq!(IColumn::width(expander), GridLength::new(2.0, GridUnitType::Star));
+        assert_eq!(IColumn::can_user_resize(expander), Some(false));
+        let inner = IColumn::as_any(&**expander.inner()).downcast_ref::<TextColumn<i32, i32>>().unwrap();
+        let options = inner.options();
+        assert_eq!(options.min_width(), GridLength::from_pixels(105.0));
+        assert_eq!(options.max_width(), Some(GridLength::from_pixels(300.0)));
+        assert_eq!(options.can_user_sort_column(), Some(false));
+        assert_eq!(options.begin_edit_gestures(), BeginEditGestures::NONE);
+        assert!(column.get_comparison(ListSortDirection::Ascending).is_none());
+        let compare = options.compare_ascending().unwrap();
+        assert_eq!(compare(&Rc::new(1), &Rc::new(2)), std::cmp::Ordering::Greater);
+    }
+}

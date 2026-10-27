@@ -286,14 +286,18 @@ fn state_event_actions_route_the_current_from_state_through_existing_conditional
     session
         .preview_state(owner, "Interaction", Some("Normal"))
         .unwrap();
-    assert!(session
-        .preview_state_at(owner, "Interaction", Some("Muted"), Some(0.2))
-        .unwrap_err()
-        .contains("rooted logical tree"));
-    assert!(session
-        .preview_behavior(id)
-        .unwrap_err()
-        .contains("rooted logical tree"));
+    assert!(
+        session
+            .preview_state_at(owner, "Interaction", Some("Muted"), Some(0.2))
+            .unwrap_err()
+            .contains("rooted logical tree")
+    );
+    assert!(
+        session
+            .preview_behavior(id)
+            .unwrap_err()
+            .contains("rooted logical tree")
+    );
     let window = attach_preview(&session);
     session.preview_behavior(id).unwrap();
     let classes = session
@@ -322,24 +326,28 @@ fn viewer_sessions_reject_all_authored_edits_and_leave_restores_editing() {
     session.set_read_only(true);
     session.select([a]);
     session.seek(0.0).unwrap();
-    assert!(session
-        .apply(
-            "Forbidden",
-            vec![Edit::SetAttribute {
-                node: a,
-                name: "Width".into(),
-                value: "200".into()
-            }]
-        )
-        .is_err());
+    assert!(
+        session
+            .apply(
+                "Forbidden",
+                vec![Edit::SetAttribute {
+                    node: a,
+                    name: "Width".into(),
+                    value: "200".into()
+                }]
+            )
+            .is_err()
+    );
     assert!(session.apply_at(revision, "Forbidden", vec![]).is_err());
     assert!(session.undo().is_err());
     assert!(session.redo().is_err());
     assert!(!session.update_source("<Grid/>").valid);
     assert!(!session.stage_source("<Border/>").valid);
-    assert!(session
-        .record_keyframe(a, "Width", AnimationValue::Number(200.0))
-        .is_err());
+    assert!(
+        session
+            .record_keyframe(a, "Width", AnimationValue::Number(200.0))
+            .is_err()
+    );
     assert!(session.commit_animation().is_err());
     session.set_recording(true);
     assert!(!session.recording());
@@ -931,26 +939,30 @@ fn standalone_resource_animation_targets_factory_root_without_authored_control_i
 <Animation x:Key="Shadow" x:SetterTargetType="Border" Duration="0:0:2" FillMode="Forward"><KeyFrame Cue="0%"><Setter Property="BoxShadow" Value="0 0 0 0 Red"/></KeyFrame><KeyFrame Cue="100%"><Setter Property="BoxShadow" Value="20 30 10 4 Blue"/></KeyFrame></Animation>
 </ResourceDictionary>"#;
     let mut session = DesignerSession::new(source, ContentControl::new()).unwrap();
-    let mut options = crate::PreviewHostOptions::default();
-    options.resource_factory = Some(std::rc::Rc::new(|loaded| {
-        let dictionary =
-            ferroui_base::Ref::<ferroui_base::controls::ResourceDictionary>::from_xaml_object(
-                &loaded,
-            )
-            .ok_or("Expected resource dictionary")?;
-        let root = ferroui_controls::Border::new();
-        root.set_resources(dictionary);
-        Ok(root.upcast())
-    }));
+    let options = crate::PreviewHostOptions {
+        resource_factory: Some(std::rc::Rc::new(|loaded| {
+            let dictionary =
+                ferroui_base::Ref::<ferroui_base::controls::ResourceDictionary>::from_xaml_object(
+                    &loaded,
+                )
+                .ok_or("Expected resource dictionary")?;
+            let root = ferroui_controls::Border::new();
+            root.set_resources(dictionary);
+            Ok(root.upcast())
+        })),
+        ..Default::default()
+    };
     session.configure_preview(options).unwrap();
     assert!(matches!(
         session.preview_status(),
         PreviewStatus::Ready { .. }
     ));
-    assert!(session
-        .preview
-        .visual(session.document().ast().root())
-        .is_none());
+    assert!(
+        session
+            .preview
+            .visual(session.document().ast().root())
+            .is_none()
+    );
     assert!(session.animation_programs()[0].targets.is_empty());
     session.seek(1.0).unwrap();
     let border = session
@@ -963,22 +975,26 @@ fn standalone_resource_animation_targets_factory_root_without_authored_control_i
     session.stop();
     assert_eq!(border.box_shadow().count(), 0);
     assert_eq!(session.document().source(), source);
-    let mut incompatible = crate::PreviewHostOptions::default();
-    incompatible.resource_factory = Some(std::rc::Rc::new(|loaded| {
-        let dictionary =
-            ferroui_base::Ref::<ferroui_base::controls::ResourceDictionary>::from_xaml_object(
-                &loaded,
-            )
-            .ok_or("Expected resource dictionary")?;
-        let root = ferroui_controls::Canvas::new();
-        root.set_resources(dictionary);
-        Ok(root.upcast())
-    }));
+    let incompatible = crate::PreviewHostOptions {
+        resource_factory: Some(std::rc::Rc::new(|loaded| {
+            let dictionary =
+                ferroui_base::Ref::<ferroui_base::controls::ResourceDictionary>::from_xaml_object(
+                    &loaded,
+                )
+                .ok_or("Expected resource dictionary")?;
+            let root = ferroui_controls::Canvas::new();
+            root.set_resources(dictionary);
+            Ok(root.upcast())
+        })),
+        ..Default::default()
+    };
     session.configure_preview(incompatible).unwrap();
-    assert!(session
-        .seek(1.0)
-        .unwrap_err()
-        .contains("incompatible with factory preview root"));
+    assert!(
+        session
+            .seek(1.0)
+            .unwrap_err()
+            .contains("incompatible with factory preview root")
+    );
 }
 
 #[test]
@@ -990,10 +1006,12 @@ fn native_component_preview_reports_unsupported_css_transform_target() {
         session.preview_status(),
         PreviewStatus::Ready { .. }
     ));
-    assert!(session
-        .seek(1.0)
-        .unwrap_err()
-        .contains("CSS TransformOperations"));
+    assert!(
+        session
+            .seek(1.0)
+            .unwrap_err()
+            .contains("CSS TransformOperations")
+    );
     assert_eq!(session.document().source(), source);
 }
 
@@ -1010,10 +1028,12 @@ fn native_play_all_skips_deferred_programs_without_live_targets() {
         session.preview_status()
     );
     assert_eq!(session.animation_programs().len(), 2);
-    assert!(session
-        .animation_programs()
-        .iter()
-        .any(|program| program.targets.is_empty()));
+    assert!(
+        session
+            .animation_programs()
+            .iter()
+            .any(|program| program.targets.is_empty())
+    );
     session.play_all_animation_programs();
     session.advance(1.0).unwrap();
     let border = session

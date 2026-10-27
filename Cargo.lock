@@ -817,7 +817,7 @@ dependencies = [
  "ferroui-desktop",
  "ferroui-headless",
  "ferroui-markup-xaml",
- "ferroui-themes-simple",
+ "ferroui-themes-winui",
  "sample-support",
 ]
 
@@ -1314,6 +1314,7 @@ version = "0.4.0"
 dependencies = [
  "ferroui-base",
  "ferroui-controls",
+ "ferroui-controls-treedatagrid",
  "ferroui-designer-animation",
  "ferroui-designer-collaboration",
  "ferroui-designer-collaboration-host",
@@ -1328,7 +1329,8 @@ dependencies = [
  "ferroui-markup-xaml",
  "ferroui-markup-xaml-loader",
  "ferroui-mcp",
- "ferroui-themes-simple",
+ "ferroui-themes-winui",
+ "ferroui-treedatagrid-core",
  "ferroui-vello",
  "ferroui-xaml-interactions",
  "ferroui-xaml-interactions-custom",

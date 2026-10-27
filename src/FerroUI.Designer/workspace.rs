@@ -4,12 +4,12 @@ use crate::{
 };
 use ferroui_base::input::{InputElement, Key, KeyModifiers};
 use ferroui_base::layout::{HorizontalAlignment, Orientation};
-use ferroui_base::media::{Brushes, MatrixTransform, SolidColorBrush};
+use ferroui_base::media::{MatrixTransform, SolidColorBrush};
 use ferroui_base::threading::{Dispatcher, DispatcherPriority, DispatcherTimer};
 use ferroui_base::{Matrix, Ref, Thickness, WeakRef};
 use ferroui_controls::{
     Button, ContentControl, Control, Grid, LayoutTransformControl, Slider, StackPanel, TextBlock,
-    TextBox, WrapPanel,
+    TextBox,
 };
 use ferroui_designer_animation::{AnimationValue, Easing};
 use ferroui_designer_core::NodeId;
@@ -20,6 +20,9 @@ use std::cell::{Cell, RefCell};
 use std::collections::BTreeSet;
 use std::rc::Rc;
 use std::time::Duration;
+
+#[path = "workspace_shell.rs"]
+pub(crate) mod shell;
 
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
 pub enum OutlineMode {
@@ -38,8 +41,7 @@ pub struct DesignerWorkspace {
     artboard: Ref<Grid>,
     artboard_transform: Ref<LayoutTransformControl>,
     source: Ref<TextBox>,
-    outline: Ref<StackPanel>,
-    properties: Ref<StackPanel>,
+    inspectors: inspectors::InspectorControls,
     tracks: Ref<StackPanel>,
     status: Ref<TextBlock>,
     selection_title: Ref<TextBlock>,
@@ -59,6 +61,8 @@ pub struct DesignerWorkspace {
     timer: RefCell<Option<Rc<DispatcherTimer>>>,
     property_editors: RefCell<Vec<Rc<dyn PropertyEditorFactory>>>,
     timeline_lanes: RefCell<Vec<WeakRef<crate::timeline_lane::TimelineLane>>>,
+    toolbox: RefCell<Option<Rc<crate::asset_toolbox::AssetToolbox>>>,
+    timeline_ui: RefCell<timeline::TimelineUi>,
     file: RefCell<Option<Rc<dyn ferroui_base::platform::storage::IStorageFile>>>,
     saved_source: RefCell<String>,
     pending_open: RefCell<Option<files::PendingDocument>>,
@@ -70,6 +74,7 @@ pub struct DesignerWorkspace {
     animation_program_ids: RefCell<Vec<u64>>,
     sharing: RefCell<Option<Rc<crate::sharing::SharingController>>>,
     sharing_panel: RefCell<Option<Rc<sharing::SharingPanel>>>,
+    shell: shell::WorkspaceShell,
 }
 
 impl DesignerWorkspace {
@@ -83,6 +88,7 @@ impl DesignerWorkspace {
     fn create(source: String, uri: Option<String>) -> Result<Rc<Self>, String> {
         FerroRuntimeXamlLoader::register();
         ferroui_markup_xaml::register_types();
+        ferroui_controls_treedatagrid::register_types();
         let loaded =
             FerroRuntimeXamlLoader::load(include_str!("Workspace.xaml"), None, None, None, false)
                 .map_err(|error| error.to_string())?;
@@ -101,8 +107,7 @@ impl DesignerWorkspace {
         let saved_source = session.borrow().document().source().to_owned();
         let this = Rc::new(Self {
             source: root.get_control("Source"),
-            outline: root.get_control("Outline"),
-            properties: root.get_control("Properties"),
+            inspectors: inspectors::InspectorControls::new(&root),
             tracks: root.get_control("Tracks"),
             status: root.get_control("Status"),
             selection_title: root.get_control("SelectionTitle"),
@@ -127,6 +132,8 @@ impl DesignerWorkspace {
             timer: RefCell::new(None),
             property_editors: RefCell::new(Vec::new()),
             timeline_lanes: RefCell::new(Vec::new()),
+            toolbox: RefCell::new(None),
+            timeline_ui: RefCell::new(Default::default()),
             file: RefCell::new(None),
             saved_source: RefCell::new(saved_source),
             pending_open: RefCell::new(None),
@@ -138,8 +145,11 @@ impl DesignerWorkspace {
             animation_program_ids: RefCell::new(Vec::new()),
             sharing: RefCell::new(None),
             sharing_panel: RefCell::new(None),
+            shell: shell::WorkspaceShell::default(),
         });
         this.connect();
+        this.connect_inspectors();
+        this.connect_inspector_drag();
         this.refresh(true);
         Ok(this)
     }
@@ -170,6 +180,7 @@ impl DesignerWorkspace {
         }
         self.rebuild_outline();
         self.rebuild_properties();
+        self.refresh_shell();
     }
     pub fn artboard_size(&self) -> (f64, f64) {
         (self.artboard.width(), self.artboard.height())
@@ -180,6 +191,7 @@ impl DesignerWorkspace {
         }
         self.artboard.set_width(width);
         self.artboard.set_height(height);
+        self.refresh_shell();
         Ok(())
     }
     pub fn zoom(&self) -> f64 {
@@ -203,6 +215,7 @@ impl DesignerWorkspace {
     }
 
     fn connect(self: &Rc<Self>) {
+        self.connect_shell();
         self.connect_file_commands();
         self.connect_project();
         self.connect_source_tools();
@@ -243,10 +256,52 @@ impl DesignerWorkspace {
                     this.rebuild_properties();
                 }
             });
+        // Synchronize role changes before TextBox's native edit handlers run. Its
+        // keyboard handler still allows caret navigation and selection while read-only.
+        let weak = Rc::downgrade(self);
+        self.source.add_handler_with(
+            InputElement::key_down_event(),
+            move |_, _| {
+                if let Some(this) = weak.upgrade() {
+                    this.source
+                        .set_is_read_only(this.session.borrow().is_read_only());
+                }
+            },
+            ferroui_base::interactivity::RoutingStrategies::TUNNEL,
+            false,
+        );
+        let weak = Rc::downgrade(self);
+        self.source.add_handler_with(
+            InputElement::text_input_event(),
+            move |_, _| {
+                if let Some(this) = weak.upgrade() {
+                    this.source
+                        .set_is_read_only(this.session.borrow().is_read_only());
+                }
+            },
+            ferroui_base::interactivity::RoutingStrategies::TUNNEL,
+            false,
+        );
         let weak = Rc::downgrade(self);
         self.source.text_changing(move |_, _| {
             if let Some(this) = weak.upgrade() {
                 if !this.guard.get() {
+                    let retained_source = {
+                        let session = this.session.borrow();
+                        session
+                            .is_read_only()
+                            .then(|| session.document().source().to_owned())
+                    };
+                    if let Some(source) = retained_source {
+                        // A role change can precede the next UI refresh; programmatic text
+                        // replacement also bypasses TextBox.IsReadOnly. Preserve the accepted
+                        // source/draft and pending state without creating an authored edit.
+                        this.guard.set(true);
+                        this.source.set_is_read_only(true);
+                        this.source.set_text(Some(&source));
+                        this.guard.set(false);
+                        return;
+                    }
                     this.pending_source.set(true);
                     this.session
                         .borrow_mut()
@@ -470,29 +525,7 @@ impl DesignerWorkspace {
                 session.set_recording(value);
                 Ok(())
             }
-            Action::Keyframe => {
-                let target = self.session.borrow().selection().first().copied();
-                if let Some(target) = target {
-                    let value = self
-                        .session
-                        .borrow()
-                        .preview
-                        .visual(target)
-                        .map(|visual| visual.opacity())
-                        .ok_or_else(|| {
-                            "The selected element has no current live preview".to_owned()
-                        });
-                    value.and_then(|value| {
-                        self.session.borrow_mut().record_keyframe(
-                            target,
-                            "Opacity",
-                            AnimationValue::Number(value),
-                        )
-                    })
-                } else {
-                    Err("Select an element to keyframe its opacity; Record also captures edited properties".into())
-                }
-            }
+            Action::Keyframe => self.record_selected_keyframe(),
             Action::CommitAnimation => self.session.borrow_mut().commit_animation(),
         };
         self.refresh(true);
@@ -556,7 +589,7 @@ impl DesignerWorkspace {
             .set_content(Some(Rc::new(if session.recording() {
                 "● Recording".to_owned()
             } else {
-                "Record off".to_owned()
+                "Record".to_owned()
             })));
         self.root
             .get_control::<Button>("Play")
@@ -601,6 +634,7 @@ impl DesignerWorkspace {
             .map(|error| format!("{status}  ·  {error}"))
             .unwrap_or(status);
         self.status.set_text(Some(&status));
+        self.refresh_shell();
         self.last_revision.set(revision);
         self.last_generation.set(generation);
         *self.last_selection.borrow_mut() = selected;
@@ -619,151 +653,43 @@ impl DesignerWorkspace {
     }
 
     fn build_assets(self: &Rc<Self>) {
-        let assets = self.root.get_control::<WrapPanel>("Assets");
-        for (name, source) in [
-            (
-                "Button",
-                "<Button Content=\"Button\" Width=\"120\" Height=\"36\" />",
-            ),
-            ("TextBlock", "<TextBlock Text=\"Text\" FontSize=\"18\" />"),
-            ("TextBox", "<TextBox Text=\"Edit me\" Width=\"180\" />"),
-            ("CheckBox", "<CheckBox Content=\"Option\" />"),
-            (
-                "Border",
-                "<Border Width=\"180\" Height=\"100\" Background=\"#FFE0E7FF\" CornerRadius=\"8\" />",
-            ),
-            (
-                "Grid",
-                "<Grid Width=\"220\" Height=\"160\" Background=\"#FFF1F5F9\" RowDefinitions=\"*,*\" ColumnDefinitions=\"*,*\" />",
-            ),
-            (
-                "StackPanel",
-                "<StackPanel Width=\"180\" Height=\"140\" Background=\"#FFF1F5F9\" Spacing=\"8\" />",
-            ),
-            (
-                "Canvas",
-                "<Canvas Width=\"240\" Height=\"160\" Background=\"#FFF1F5F9\" />",
-            ),
-            (
-                "WrapPanel",
-                "<WrapPanel Width=\"240\" Height=\"160\" Background=\"#FFF1F5F9\" />",
-            ),
-            (
-                "DockPanel",
-                "<DockPanel Width=\"240\" Height=\"160\" Background=\"#FFF1F5F9\" />",
-            ),
-            (
-                "Rectangle",
-                "<Rectangle Width=\"120\" Height=\"80\" Fill=\"#FF6D91FF\" />",
-            ),
-            (
-                "Ellipse",
-                "<Ellipse Width=\"100\" Height=\"100\" Fill=\"#FFA78BFA\" />",
-            ),
-        ] {
-            let button = button(name);
-            button.set_margin(Thickness::uniform(2.0));
-            let weak = Rc::downgrade(self);
-            let source = source.to_owned();
-            button.add_handler(InputElement::pointer_pressed_event(), move |_, event| {
-                if let Some(this) = weak.upgrade() {
-                    this.surface.begin_asset_drag(source.clone(), event);
-                    this.status.set_text(Some(
-                        "Drag onto the artboard, or click a location to insert",
-                    ));
-                }
-            });
-            assets.children().add(button.upcast::<Control>());
-        }
+        let toolbox = crate::asset_toolbox::AssetToolbox::new(
+            crate::asset_toolbox::default_designer_assets(),
+        );
+        let weak = Rc::downgrade(self);
+        toolbox.on_begin_drag(move |asset, event| {
+            if let Some(this) = weak.upgrade() {
+                this.surface.begin_asset_drag(asset.source.clone(), event);
+                this.status
+                    .set_text(Some(&format!("Drag {} onto the artboard", asset.title)));
+            }
+        });
+        let weak = Rc::downgrade(self);
+        toolbox.on_activate(move |asset| {
+            if let Some(this) = weak.upgrade() {
+                this.surface.arm_insert(asset.source.clone());
+                this.status.set_text(Some(&format!(
+                    "Click the artboard to place {}",
+                    asset.title
+                )));
+            }
+        });
+        self.root
+            .get_control::<ContentControl>("AssetHost")
+            .set_content(Some(Control::boxed(toolbox.control())));
+        *self.toolbox.borrow_mut() = Some(toolbox);
     }
 
-    fn rebuild_outline(self: &Rc<Self>) {
-        self.outline.children().clear();
-        let session = self.session.borrow();
-        let selected = session.selection().to_vec();
-        let rows = match self.outline_mode.get() {
-            OutlineMode::Source => {
-                let mut elements = session.document().ast().elements().collect::<Vec<_>>();
-                elements.sort_by_key(|node| node.span.start);
-                elements
-                    .into_iter()
-                    .map(|node| {
-                        let mut depth = 0;
-                        let mut parent = node.parent;
-                        while let Some(id) = parent {
-                            depth += 1;
-                            parent = session
-                                .document()
-                                .ast()
-                                .node(id)
-                                .and_then(|node| node.parent);
-                        }
-                        (
-                            Some(node.id),
-                            None,
-                            depth,
-                            format!(
-                                "{}{}",
-                                node.name,
-                                node.xaml_name()
-                                    .map(|name| format!("  {name}"))
-                                    .unwrap_or_default()
-                            ),
-                        )
-                    })
-                    .collect::<Vec<_>>()
-            }
-            mode => session
-                .runtime_tree(if mode == OutlineMode::Visual {
-                    TreeKind::Visual
-                } else {
-                    TreeKind::Logical
-                })
-                .into_iter()
-                .map(|row| {
-                    (
-                        row.source_id,
-                        Some(row.inspector_id),
-                        row.depth,
-                        format!(
-                            "{}{}{}",
-                            row.type_name,
-                            row.name.map(|name| format!("  {name}")).unwrap_or_default(),
-                            if row.source_id.is_none() {
-                                "  [runtime]"
-                            } else {
-                                ""
-                            }
-                        ),
-                    )
-                })
-                .collect(),
-        };
-        drop(session);
-        for (id, runtime, depth, title) in rows {
-            let row = button(&title);
-            row.set_horizontal_alignment(HorizontalAlignment::Stretch);
-            row.set_horizontal_content_alignment(HorizontalAlignment::Left);
-            row.set_margin(Thickness::new((depth * 12).min(100) as f64, 0.0, 0.0, 0.0));
-            row.set_font_size(11.0);
-            if id.is_some_and(|id| selected.contains(&id))
-                || (runtime.is_some() && runtime == self.runtime_selection.get())
-            {
-                row.set_background(Some(SolidColorBrush::from_uint32(0xff334568).into()));
-            }
-            let weak = Rc::downgrade(self);
-            row.click(move |_, _| {
-                if let Some(this) = weak.upgrade() {
-                    this.runtime_selection.set(runtime);
-                    if let Some(id) = id {
-                        this.session.borrow_mut().select([id]);
-                        this.reveal_source(id);
-                    }
-                    this.refresh(true);
-                }
-            });
-            self.outline.children().add(row.upcast::<Control>());
-        }
+    /// Register project-specific controls in the native searchable asset catalog.
+    pub fn register_asset(
+        self: &Rc<Self>,
+        asset: crate::asset_toolbox::DesignerAsset,
+    ) -> Result<(), String> {
+        self.toolbox
+            .borrow()
+            .as_ref()
+            .ok_or("The asset toolbox is not initialized")?
+            .register(asset)
     }
 
     fn reveal_source(&self, id: NodeId) {
@@ -777,482 +703,6 @@ impl DesignerWorkspace {
             let end = source[..node.span.end].encode_utf16().count() as i32;
             self.source.set_selection_start(begin);
             self.source.set_selection_end(end);
-        }
-    }
-
-    fn rebuild_properties(self: &Rc<Self>) {
-        self.properties.children().clear();
-        if let Some(id) = self.runtime_selection.get() {
-            if self.rebuild_runtime_properties(id) {
-                return;
-            }
-            self.runtime_selection.set(None);
-        }
-        let session = self.session.borrow();
-        let selected = session.selection().to_vec();
-        let Some(first) = selected
-            .first()
-            .and_then(|id| session.document().ast().node(*id))
-        else {
-            self.selection_title.set_text(Some("Select an element"));
-            return;
-        };
-        self.selection_title.set_text(Some(&if selected.len() == 1 {
-            first.name.clone()
-        } else {
-            format!("{} elements", selected.len())
-        }));
-        let mut properties = vec![
-            "Name",
-            "Width",
-            "Height",
-            "MinWidth",
-            "MinHeight",
-            "Margin",
-            "Padding",
-            "HorizontalAlignment",
-            "VerticalAlignment",
-            "Opacity",
-            "Background",
-            "Foreground",
-            "Text",
-            "Content",
-            "FontSize",
-        ]
-        .into_iter()
-        .map(str::to_owned)
-        .collect::<Vec<_>>();
-        properties.extend(
-            first
-                .attributes
-                .iter()
-                .filter(|attribute| !attribute.name.starts_with("xmlns"))
-                .map(|attribute| attribute.name.clone()),
-        );
-        if let Some(parent) = first
-            .parent
-            .and_then(|id| session.document().ast().node(id))
-        {
-            match parent.name.rsplit(':').next().unwrap_or_default() {
-                "Canvas" => properties.extend(
-                    ["Canvas.Left", "Canvas.Top", "Canvas.Right", "Canvas.Bottom"]
-                        .map(str::to_owned),
-                ),
-                "Grid" => properties.extend(
-                    ["Grid.Row", "Grid.Column", "Grid.RowSpan", "Grid.ColumnSpan"]
-                        .map(str::to_owned),
-                ),
-                "DockPanel" => properties.push("DockPanel.Dock".into()),
-                _ => {}
-            }
-        }
-        match first.name.rsplit(':').next().unwrap_or_default() {
-            "Grid" => properties.extend(["RowDefinitions", "ColumnDefinitions"].map(str::to_owned)),
-            "StackPanel" | "WrapPanel" => {
-                properties.extend(["Orientation", "Spacing"].map(str::to_owned))
-            }
-            "UniformGrid" => {
-                properties.extend(["Rows", "Columns", "FirstColumn"].map(str::to_owned))
-            }
-            "DockPanel" => properties.push("LastChildFill".into()),
-            _ => {}
-        }
-        let live = session.preview.visual(first.id);
-        let infos = live
-            .as_ref()
-            .map(|object| Inspector::properties(object))
-            .unwrap_or_default();
-        let known = live.as_ref().map(|_| {
-            infos
-                .iter()
-                .filter(|info| !info.read_only)
-                .map(|info| info.name.clone())
-                .collect::<BTreeSet<_>>()
-        });
-        if let Some(known) = &known {
-            properties.extend(known.iter().cloned());
-        }
-        let effective = infos
-            .iter()
-            .map(|info| {
-                (
-                    info.name.clone(),
-                    (
-                        ferroui_inspect::display_value(Some(&info.value)),
-                        format!(
-                            "{}{}",
-                            info.priority_name(),
-                            if info.has_binding { " · binding" } else { "" }
-                        ),
-                    ),
-                )
-            })
-            .collect::<std::collections::BTreeMap<_, _>>();
-        properties.sort();
-        properties.dedup();
-        properties.sort_by(|a, b| property_rank(a).cmp(&property_rank(b)).then(a.cmp(b)));
-        let runtime_types = infos
-            .iter()
-            .map(|info| {
-                (
-                    info.name.clone(),
-                    info.property.property_type_name().to_owned(),
-                )
-            })
-            .collect::<std::collections::BTreeMap<_, _>>();
-        let filter = self
-            .root
-            .get_control::<TextBox>("PropertySearch")
-            .text()
-            .unwrap_or_default()
-            .to_ascii_lowercase();
-        let rows = properties
-            .into_iter()
-            .filter(|name| {
-                first.attribute(name).is_some()
-                    || name.contains('.')
-                    || name == "Name"
-                    || known.as_ref().is_none_or(|known| known.contains(name))
-            })
-            .filter(|name| filter.is_empty() || name.to_ascii_lowercase().contains(&filter))
-            .map(|name| {
-                let first_value = first.attribute(&name).map(str::to_owned);
-                let mixed = selected.iter().skip(1).any(|id| {
-                    session
-                        .document()
-                        .ast()
-                        .node(*id)
-                        .and_then(|node| node.attribute(&name))
-                        != first_value.as_deref()
-                });
-                (name, if mixed { None } else { first_value }, mixed)
-            })
-            .collect::<Vec<_>>();
-        drop(session);
-        for (name, value, mixed) in rows {
-            let panel = StackPanel::new();
-            panel.set_spacing(3.0);
-            let label = TextBlock::new();
-            label.set_text(Some(&name));
-            label.set_font_size(11.0);
-            label.set_foreground(Some(SolidColorBrush::from_uint32(0xffaebbd3).into()));
-            let weak = Rc::downgrade(self);
-            let property = name.clone();
-            let ids = selected.clone();
-            let context = PropertyEditorContext {
-                property: name.clone(),
-                targets: selected.clone(),
-                value,
-                mixed,
-                runtime_type: runtime_types.get(&name).cloned(),
-                apply: Rc::new(move |value| {
-                    let Some(this) = weak.upgrade() else {
-                        return;
-                    };
-                    if this.pending_source.get() {
-                        this.apply_source();
-                    }
-                    let result = match value {
-                        None => this.session.borrow_mut().reset_property(&ids, &property),
-                        Some(value) => this
-                            .session
-                            .borrow_mut()
-                            .set_property(&ids, &property, &value),
-                    };
-                    this.refresh(true);
-                    this.report(result);
-                }),
-            };
-            let factories = self.property_editors.borrow().clone();
-            let editor = factories
-                .iter()
-                .find_map(|factory| factory.create(&context))
-                .unwrap_or_else(|| crate::editors::built_in(&context));
-            let heading = StackPanel::new();
-            heading.set_orientation(Orientation::Horizontal);
-            heading.set_spacing(8.0);
-            heading.children().add(label.upcast::<Control>());
-            let reset = button("Reset");
-            reset.set_font_size(9.0);
-            reset.set_padding(Thickness::new(5.0, 1.0, 5.0, 1.0));
-            let apply = context.apply.clone();
-            reset.click(move |_, _| apply(None));
-            heading.children().add(reset.upcast::<Control>());
-            panel.children().add(heading.upcast::<Control>());
-            panel.children().add(editor);
-            if let Some((value, origin)) = effective.get(&name) {
-                let detail = TextBlock::new();
-                detail.set_text(Some(&format!("{origin}  ·  {value}")));
-                detail.set_font_size(9.0);
-                detail.set_foreground(Some(Brushes::gray()));
-                panel.children().add(detail.upcast::<Control>());
-            }
-            self.properties.children().add(panel.upcast::<Control>());
-        }
-        let hint = TextBlock::new();
-        hint.set_text(Some(
-            "Enter applies • Reset inherits • Record creates keyframes",
-        ));
-        hint.set_font_size(10.0);
-        hint.set_foreground(Some(Brushes::gray()));
-        self.properties.children().add(hint.upcast::<Control>());
-    }
-
-    fn rebuild_runtime_properties(self: &Rc<Self>, id: u64) -> bool {
-        let Ok(object) = Inspector::shared().borrow().resolve(id) else {
-            return false;
-        };
-        self.selection_title.set_text(Some(&format!(
-            "{}  ·  runtime #{id}",
-            object.get_type().name()
-        )));
-        if !self.session.borrow().selection().is_empty() {
-            let edit = button("Edit authored properties");
-            let weak = Rc::downgrade(self);
-            edit.click(move |_, _| {
-                if let Some(this) = weak.upgrade() {
-                    this.runtime_selection.set(None);
-                    this.rebuild_properties();
-                }
-            });
-            self.properties.children().add(edit.upcast::<Control>());
-        }
-        let filter = self
-            .root
-            .get_control::<TextBox>("PropertySearch")
-            .text()
-            .unwrap_or_default()
-            .to_ascii_lowercase();
-        for info in Inspector::properties(&object)
-            .into_iter()
-            .filter(|info| filter.is_empty() || info.name.to_ascii_lowercase().contains(&filter))
-        {
-            let row = StackPanel::new();
-            row.set_spacing(2.0);
-            let label = TextBlock::new();
-            label.set_text(Some(&info.name));
-            label.set_font_size(11.0);
-            label.set_foreground(Some(SolidColorBrush::from_uint32(0xffaebbd3).into()));
-            let value = TextBox::new();
-            value.set_text(Some(&ferroui_inspect::display_value(Some(&info.value))));
-            value.set_is_read_only(true);
-            value.set_font_size(11.0);
-            let origin = TextBlock::new();
-            origin.set_text(Some(&format!(
-                "{}{}{}",
-                info.priority_name(),
-                if info.has_binding { " · binding" } else { "" },
-                if info.read_only { " · read only" } else { "" }
-            )));
-            origin.set_font_size(10.0);
-            origin.set_foreground(Some(Brushes::gray()));
-            row.children().add(label.upcast::<Control>());
-            row.children().add(value.upcast::<Control>());
-            row.children().add(origin.upcast::<Control>());
-            self.properties.children().add(row.upcast::<Control>());
-        }
-        for frame in Inspector::styles(&object) {
-            let text = TextBlock::new();
-            text.set_text(Some(&format!(
-                "{}: {} · {}",
-                frame.kind,
-                frame.selector.unwrap_or_default(),
-                if frame.active { "active" } else { "inactive" }
-            )));
-            text.set_font_size(10.0);
-            text.set_foreground(Some(Brushes::gray()));
-            self.properties.children().add(text.upcast::<Control>());
-        }
-        true
-    }
-
-    fn rebuild_tracks(self: &Rc<Self>) {
-        self.tracks.children().clear();
-        self.timeline_lanes.borrow_mut().clear();
-        let session = self.session.borrow();
-        let tracks = session.timeline().tracks.clone();
-        let warnings = session.animation_warnings().to_vec();
-        let duration = session.timeline().duration;
-        let revision = session.document().revision();
-        let playhead = session.time();
-        drop(session);
-        for warning in warnings {
-            let label = TextBlock::new();
-            label.set_text(Some(&warning));
-            label.set_font_size(10.0);
-            label.set_foreground(Some(SolidColorBrush::from_uint32(0xffe3b879).into()));
-            label.set_text_wrapping(ferroui_base::media::TextWrapping::Wrap);
-            self.tracks.children().add(label.upcast::<Control>());
-        }
-        for track in tracks {
-            let target_name = self
-                .session
-                .borrow()
-                .document()
-                .ast()
-                .node(track.target)
-                .map(|node| {
-                    node.xaml_name()
-                        .unwrap_or_else(|| node.local_name())
-                        .to_owned()
-                })
-                .unwrap_or_else(|| "Missing target".into());
-            let track_title = format!("{} / {}", target_name, track.property);
-            let plot = Grid::new();
-            plot.set_column_definitions(
-                ferroui_controls::ColumnDefinitions::parse("170,*")
-                    .expect("valid timeline columns"),
-            );
-            let name = TextBlock::new();
-            name.set_text(Some(&track_title));
-            name.set_font_size(11.0);
-            name.set_foreground(Some(SolidColorBrush::from_uint32(0xffc4d1ec).into()));
-            name.set_vertical_alignment(ferroui_base::layout::VerticalAlignment::Center);
-            plot.children().add(name.upcast::<Control>());
-            let lane = crate::timeline_lane::TimelineLane::new();
-            lane.configure(
-                duration,
-                track.keyframes.iter().map(|key| key.time).collect(),
-            );
-            lane.set_playhead(playhead);
-            let weak = Rc::downgrade(self);
-            let target = track.target;
-            lane.on_activate(move |time| {
-                if let Some(this) = weak.upgrade() {
-                    this.session.borrow_mut().select([target]);
-                    let result = this.session.borrow_mut().seek(time);
-                    this.refresh(true);
-                    this.report(result);
-                }
-            });
-            let weak = Rc::downgrade(self);
-            let property = track.property.clone();
-            lane.on_move(move |from,to| {if let Some(this)=weak.upgrade(){
-                let result=if this.session.borrow().document().revision()!=revision {Err("The timeline changed during the drag; retry with the current keyframes".into())}else{this.session.borrow_mut().move_keyframe(target,&property,from,to)};
-                this.refresh(true);this.report(result);
-            }});
-            self.timeline_lanes.borrow_mut().push(lane.downgrade());
-            Grid::set_column(&lane, 1);
-            plot.children().add(lane.upcast::<Control>());
-            self.tracks.children().add(plot.upcast::<Control>());
-            let row = StackPanel::new();
-            row.set_orientation(Orientation::Horizontal);
-            row.set_spacing(6.0);
-            let title = TextBlock::new();
-            title.set_text(Some(&track_title));
-            title.set_width(170.0);
-            title.set_foreground(Some(SolidColorBrush::from_uint32(0xffd0d9ed).into()));
-            title.set_font_size(11.0);
-            row.children().add(title.upcast::<Control>());
-            for key in track.keyframes {
-                let key_button = button(&format!("◆ {:.2}s", key.time));
-                key_button.set_font_size(11.0);
-                let weak = Rc::downgrade(self);
-                let target = track.target;
-                let property = track.property.clone();
-                let time = key.time;
-                key_button.click(move |_, _| {
-                    if let Some(this) = weak.upgrade() {
-                        this.session.borrow_mut().select([target]);
-                        let result = this.session.borrow_mut().seek(time);
-                        this.report(result);
-                        this.refresh(true);
-                    }
-                });
-                row.children().add(key_button.upcast::<Control>());
-                let move_time = TextBox::new();
-                move_time.set_width(58.0);
-                move_time.set_text(Some(&key.time.to_string()));
-                move_time.set_font_size(10.0);
-                let weak = Rc::downgrade(self);
-                let weak_time = move_time.downgrade();
-                let move_property = property.clone();
-                move_time.add_handler(InputElement::key_down_event(), move |_, event| {
-                    if event.key != Key::Enter {
-                        return;
-                    }
-                    if let (Some(this), Some(input)) = (weak.upgrade(), weak_time.upgrade()) {
-                        let result = input
-                            .text()
-                            .unwrap_or_default()
-                            .parse::<f64>()
-                            .map_err(|_| "Invalid keyframe time".to_owned())
-                            .and_then(|to| {
-                                if (0.0..=duration).contains(&to) {
-                                    this.session.borrow_mut().move_keyframe(
-                                        target,
-                                        &move_property,
-                                        time,
-                                        to,
-                                    )
-                                } else {
-                                    Err("Keyframe is outside the timeline".into())
-                                }
-                            });
-                        this.refresh(true);
-                        this.report(result);
-                        event.set_handled(true);
-                    }
-                });
-                row.children().add(move_time.upcast::<Control>());
-                let curve = TextBox::new();
-                curve.set_width(130.0);
-                curve.set_font_size(10.0);
-                curve.set_text(Some(&key.easing.to_xaml()));
-                let easing = button("Apply curve");
-                easing.set_font_size(10.0);
-                let weak = Rc::downgrade(self);
-                let weak_curve = curve.downgrade();
-                let easing_property = property.clone();
-                let apply_curve: Rc<dyn Fn()> = Rc::new(move || {
-                    if let (Some(this), Some(input)) = (weak.upgrade(), weak_curve.upgrade()) {
-                        let result = Easing::parse(&input.text().unwrap_or_default())
-                            .map_err(|error| error.to_string())
-                            .and_then(|easing| {
-                                this.session.borrow_mut().set_keyframe_easing(
-                                    target,
-                                    &easing_property,
-                                    time,
-                                    easing,
-                                )
-                            });
-                        this.refresh(true);
-                        this.report(result);
-                    }
-                });
-                let click_curve = apply_curve.clone();
-                easing.click(move |_, _| click_curve());
-                curve.add_handler(InputElement::key_down_event(), move |_, event| {
-                    if event.key == Key::Enter {
-                        apply_curve();
-                        event.set_handled(true);
-                    }
-                });
-                row.children().add(curve.upcast::<Control>());
-                row.children().add(easing.upcast::<Control>());
-                let remove = button("×");
-                remove.set_font_size(10.0);
-                let weak = Rc::downgrade(self);
-                remove.click(move |_, _| {
-                    if let Some(this) = weak.upgrade() {
-                        let result = this
-                            .session
-                            .borrow_mut()
-                            .remove_keyframe(target, &property, time);
-                        this.refresh(true);
-                        this.report(result);
-                    }
-                });
-                row.children().add(remove.upcast::<Control>());
-            }
-            self.tracks.children().add(row.upcast::<Control>());
-        }
-        if self.tracks.children().is_empty() {
-            let hint = TextBlock::new();
-            hint.set_text(Some("Select an element, enable Record, then edit a property at different times. Keyframes are saved as native FerroUI XAML."));
-            hint.set_foreground(Some(SolidColorBrush::from_uint32(0xff9aa4b9).into()));
-            hint.set_font_size(12.0);
-            self.tracks.children().add(hint.upcast::<Control>());
         }
     }
 
@@ -1325,12 +775,18 @@ fn button(label: &str) -> Ref<Button> {
 mod authoring;
 #[path = "workspace_files.rs"]
 mod files;
+#[path = "inspector_drag.rs"]
+mod inspector_drag;
+#[path = "inspector_controls.rs"]
+mod inspectors;
 #[path = "workspace_project.rs"]
 mod project;
 #[path = "workspace_sharing.rs"]
 mod sharing;
 #[path = "source_editor.rs"]
 mod source_tools;
+#[path = "workspace_timeline.rs"]
+mod timeline;
 
 fn property_rank(name: &str) -> usize {
     const COMMON: &[&str] = &[

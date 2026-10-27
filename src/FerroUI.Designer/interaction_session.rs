@@ -203,11 +203,9 @@ impl DesignerSession {
                 classes.add(&group.transition_class(&from, &state.name));
             }
             classes.add(&group.class_name(&state.name));
-        } else {
-            if let Some(original) = self.interactions.original_classes.remove(&key) {
-                for class in original {
-                    classes.add(&class);
-                }
+        } else if let Some(original) = self.interactions.original_classes.remove(&key) {
+            for class in original {
+                classes.add(&class);
             }
         }
         self.interactions.active_states = next;

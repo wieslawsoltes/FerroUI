@@ -17,7 +17,7 @@ path = "lib.rs"
 [features]
 default = []
 mcp = ["dep:ferroui-mcp"]
-render-smoke = ["dep:ferroui-vello", "dep:ferroui-harfbuzz", "dep:ferroui-themes-simple"]
+render-smoke = ["dep:ferroui-vello", "dep:ferroui-harfbuzz", "dep:ferroui-themes-winui"]
 
 [dependencies]
 ferroui-designer-project.workspace = true
@@ -30,11 +30,13 @@ ferroui-markup.workspace = true
 ferroui-designer-tools.workspace = true
 ferroui-vello = { workspace = true, optional = true }
 ferroui-harfbuzz = { workspace = true, optional = true }
-ferroui-themes-simple = { workspace = true, optional = true }
+ferroui-themes-winui = { workspace = true, optional = true }
 ferroui-mcp = { workspace = true, optional = true }
 serde = "1"
 ferroui-base.workspace = true
 ferroui-controls.workspace = true
+ferroui-controls-treedatagrid = { workspace = true, features = ["document-assets"] }
+ferroui-treedatagrid-core.workspace = true
 ferroui-inspect.workspace = true
 ferroui-hot-reload.workspace = true
 ferroui-markup-xaml.workspace = true

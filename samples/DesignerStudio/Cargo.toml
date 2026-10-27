@@ -26,7 +26,7 @@ ferroui-base.workspace = true
 ferroui-controls.workspace = true
 ferroui-designer = { version = "=0.4.0", path = "../../src/FerroUI.Designer" }
 ferroui-markup-xaml.workspace = true
-ferroui-themes-simple.workspace = true
+ferroui-themes-winui.workspace = true
 ferroui-desktop = { workspace = true, optional = true }
 ferroui-headless = { workspace = true, optional = true }
 sample-support = { path = "../SampleSupport" }

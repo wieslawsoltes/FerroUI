@@ -260,63 +260,6 @@ pub(crate) fn replace_window_selector(
     }
     result
 }
-#[cfg(test)]
-mod tests {
-    use super::*;
-    #[test]
-    fn window_selector_projection_changes_only_native_type_tokens() {
-        let namespaces = std::collections::BTreeMap::from([
-            (String::new(), "https://github.com/ferroui".into()),
-            ("ui".into(), "https://github.com/ferroui".into()),
-            ("custom".into(), "using:Application.Controls".into()),
-        ]);
-        assert_eq!(
-            replace_window_selector(
-                "Window#Window.Window:Window[Tag=Window], ui|Window > Window:not(.Window)",
-                &namespaces
-            ),
-            "Border#Window.Window:Window[Tag=Window], ui|Border > Border:not(.Window)"
-        );
-        assert_eq!(
-            replace_window_selector(
-                ":is(Window, ui|Window, custom|Window)[Tag='Window']",
-                &namespaces
-            ),
-            ":is(Border, ui|Border, custom|Window)[Tag='Window']"
-        );
-    }
-
-    #[test]
-    fn window_projection_preserves_source_columns_and_the_authored_document() {
-        let source = "<Window xmlns=\"https://github.com/ferroui\" xmlns:x=\"http://schemas.microsoft.com/winfx/2006/xaml\" x:Class=\"App.View\" Title=\"Café\"><Window.Content><Button Name=\"Target\" /></Window.Content></Window>";
-        let original = Document::new(source).unwrap();
-        let projected = project(&original).unwrap();
-        let parsed = Document::new(projected.source.clone()).unwrap();
-        let before = source[..original
-            .ast()
-            .node(original.ast().find_name("Target").unwrap())
-            .unwrap()
-            .span
-            .start]
-            .chars()
-            .count();
-        let after = projected.source[..parsed
-            .ast()
-            .node(parsed.ast().find_name("Target").unwrap())
-            .unwrap()
-            .span
-            .start]
-            .chars()
-            .count();
-        assert_eq!(before, after);
-        assert_eq!(original.source(), source);
-        assert_eq!(
-            parsed.ast().node(parsed.ast().root()).unwrap().local_name(),
-            "Border"
-        );
-    }
-}
-
 /// Reuse or declare a root alias so newly generated native markup stays compact.
 /// Authored nested and shadowed namespace declarations remain unchanged and are supported.
 pub(crate) fn embed_native_fragment(
@@ -373,4 +316,61 @@ pub(crate) fn embed_native_fragment(
         result.replace_range(span.start..span.end, &text);
     }
     Ok((result, declaration))
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    #[test]
+    fn window_selector_projection_changes_only_native_type_tokens() {
+        let namespaces = std::collections::BTreeMap::from([
+            (String::new(), "https://github.com/ferroui".into()),
+            ("ui".into(), "https://github.com/ferroui".into()),
+            ("custom".into(), "using:Application.Controls".into()),
+        ]);
+        assert_eq!(
+            replace_window_selector(
+                "Window#Window.Window:Window[Tag=Window], ui|Window > Window:not(.Window)",
+                &namespaces
+            ),
+            "Border#Window.Window:Window[Tag=Window], ui|Border > Border:not(.Window)"
+        );
+        assert_eq!(
+            replace_window_selector(
+                ":is(Window, ui|Window, custom|Window)[Tag='Window']",
+                &namespaces
+            ),
+            ":is(Border, ui|Border, custom|Window)[Tag='Window']"
+        );
+    }
+
+    #[test]
+    fn window_projection_preserves_source_columns_and_the_authored_document() {
+        let source = "<Window xmlns=\"https://github.com/ferroui\" xmlns:x=\"http://schemas.microsoft.com/winfx/2006/xaml\" x:Class=\"App.View\" Title=\"Café\"><Window.Content><Button Name=\"Target\" /></Window.Content></Window>";
+        let original = Document::new(source).unwrap();
+        let projected = project(&original).unwrap();
+        let parsed = Document::new(projected.source.clone()).unwrap();
+        let before = source[..original
+            .ast()
+            .node(original.ast().find_name("Target").unwrap())
+            .unwrap()
+            .span
+            .start]
+            .chars()
+            .count();
+        let after = projected.source[..parsed
+            .ast()
+            .node(parsed.ast().find_name("Target").unwrap())
+            .unwrap()
+            .span
+            .start]
+            .chars()
+            .count();
+        assert_eq!(before, after);
+        assert_eq!(original.source(), source);
+        assert_eq!(
+            parsed.ast().node(parsed.ast().root()).unwrap().local_name(),
+            "Border"
+        );
+    }
 }

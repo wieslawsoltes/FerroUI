@@ -4,7 +4,7 @@ use ferroui_designer_core::{Edit, SourceSpan};
 use ferroui_designer_language::{
     FormattingOptions, LanguageService, LineIndex, Location, Schema, TextEdit, WorkspaceEdit,
 };
-use std::collections::BTreeMap;
+use std::collections::{BTreeMap, BTreeSet};
 
 pub(super) struct SourceTools {
     pub service: LanguageService,
@@ -107,7 +107,8 @@ impl DesignerWorkspace {
         let (uri, source, revision) = {
             let session = self.session.borrow();
             (
-                session.document_uri().to_owned(),
+                super::project::document_identity(session.document_uri())
+                    .unwrap_or_else(|_| session.document_uri().to_owned()),
                 session.document().source().to_owned(),
                 session.document().revision(),
             )
@@ -165,6 +166,9 @@ impl DesignerWorkspace {
         }
     }
     pub fn select_source_span(&self, span: SourceSpan) {
+        if self.view_mode() == super::shell::WorkspaceViewMode::Design {
+            self.set_view_mode(super::shell::WorkspaceViewMode::Split);
+        }
         let source = self.source.text().unwrap_or_default();
         self.source
             .set_selection_start(utf16_from_byte(&source, span.start));
@@ -179,7 +183,7 @@ impl DesignerWorkspace {
         let (uri, source, revision) = {
             let session = self.session.borrow();
             (
-                session.document_uri().to_owned(),
+                super::project::document_identity(session.document_uri())?,
                 session.document().source().to_owned(),
                 session.document().revision(),
             )
@@ -331,10 +335,18 @@ impl DesignerWorkspace {
             .borrow()
             .ensure_writable()
             .map_err(|error| error.to_string())?;
+        let mut changes = edit.document_changes;
+        let mut documents = BTreeSet::new();
+        for change in &mut changes {
+            change.uri = super::project::document_identity(&change.uri)?;
+            if !documents.insert(change.uri.clone()) {
+                return Err("A workspace edit contains duplicate document identities".into());
+            }
+        }
         let (active, expected_revision, active_document) = {
             let session = self.session.borrow();
             (
-                session.document_uri().to_owned(),
+                super::project::document_identity(session.document_uri())?,
                 session.document().revision(),
                 session.document().clone(),
             )
@@ -353,7 +365,7 @@ impl DesignerWorkspace {
                 file: self.file.borrow().clone(),
             },
         );
-        for change in edit.document_changes {
+        for change in changes {
             if language.version(&change.uri) != Some(change.version) {
                 return Err(format!(
                     "{} changed since the refactoring was prepared",
@@ -454,6 +466,8 @@ impl DesignerWorkspace {
         Ok(())
     }
     pub(super) fn close_language_document(&self, uri: &str) -> Result<(), String> {
+        let uri = super::project::document_identity(uri)?;
+        let uri = uri.as_str();
         let mut tools = self.source_tools.borrow_mut();
         if tools.service.document(uri).is_some() {
             tools
