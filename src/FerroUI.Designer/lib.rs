@@ -62,8 +62,8 @@ mod workspace_shell_tests;
 mod workspace_tools;
 
 pub use layout_helper_renderer::{
-    DragVisualGhost, LayoutHelperRenderState, hit_test_layout_handle, render_layout_helpers,
-    render_layout_helpers_with_state, render_manipulation_metrics,
+    DragVisualGhost, LayoutHelperRenderState, hit_test_layout_handle, hover_layout_handle,
+    render_layout_helpers, render_layout_helpers_with_state, render_manipulation_metrics,
 };
 pub use workspace_layout_helpers::{LayoutEditPreview, LayoutHelperSnapshot};
 

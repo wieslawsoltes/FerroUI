@@ -155,9 +155,9 @@ impl DesignSurface {
         if self.gesture.borrow().is_some() || self.insert.borrow().is_some() {
             return;
         }
-        let hover = self.layout_helper_snapshot().and_then(|snapshot| {
-            crate::layout_helper_renderer::hover_layout_handle(&snapshot, position, self.zoom.get())
-        });
+        let hover = self
+            .layout_helper_snapshot()
+            .and_then(|snapshot| crate::hover_layout_handle(&snapshot, position, self.zoom.get()));
         if self.helper_hover.replace(hover) != hover {
             self.invalidate_visual();
         }

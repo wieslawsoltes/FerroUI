@@ -205,6 +205,9 @@ An embeddable host can obtain `selection_layout_helpers()` or
 `render_layout_helpers`. `render_layout_helpers_with_state` additionally accepts
 a viewport and hovered/active handle indices. `hit_test_layout_handle` uses the
 same transformed, screen-sized hit targets as the renderer.
+Use `hover_layout_handle` for hover feedback: it also includes disabled grips so the
+renderer can explain why a bound or protected property cannot be dragged. The
+press hit test continues to return only editable handles.
 
 For keyboard or accessibility increments, use
 `snapshot.handle_delta_to_artboard(index, delta)` to convert a handle's authored
