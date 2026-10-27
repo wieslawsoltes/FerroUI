@@ -214,6 +214,16 @@ impl TimelineLane {
     pub fn set_frame_rate(&self, frames_per_second: Option<u32>) {
         self.frame_rate
             .set(frames_per_second.filter(|rate| (1..=1000).contains(rate)));
+        if self.ruler.get() {
+            let units = self.frame_rate.get().map_or_else(
+                || "seconds".to_owned(),
+                |rate| format!("{rate} frames per second"),
+            );
+            AutomationProperties::set_name(
+                self,
+                Some(&format!("Animation timeline ruler, {units}")),
+            );
+        }
         self.invalidate_visual();
     }
     pub fn frame_rate(&self) -> Option<u32> {

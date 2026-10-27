@@ -314,7 +314,7 @@ impl DesignerWorkspace {
             title.set_font_size(11.0);
             title.set_height(36.0);
             title.set_horizontal_alignment(HorizontalAlignment::Stretch);
-            title.set_horizontal_content_alignment(HorizontalAlignment::Left);
+            title.set_horizontal_content_alignment(HorizontalAlignment::Stretch);
             title.set_padding(Thickness::symmetric(10.0, 2.0));
             ToolTip::set_tip(
                 &title,
@@ -1324,7 +1324,7 @@ fn track_header(target: &str, property: &str, key_count: usize, selected: bool) 
     let count = TextBlock::new();
     count.set_text(Some(&key_count.to_string()));
     count.set_font_size(10.0);
-    count.set_foreground(Some(SolidColorBrush::from_uint32(0xff828795).into()));
+    count.set_foreground(Some(SolidColorBrush::from_uint32(0xff979caa).into()));
     count.set_vertical_alignment(ferroui_base::layout::VerticalAlignment::Center);
     count.set_margin(Thickness::new(8.0, 0.0, 0.0, 0.0));
     Grid::set_column(&count, 2);

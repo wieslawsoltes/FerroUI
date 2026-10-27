@@ -3,8 +3,10 @@ use crate::{DesignerWorkspace, PreviewStatus};
 use ferroui_base::Ref;
 use ferroui_base::interactivity::RoutedEventArgs;
 use ferroui_controls::testing::{TestServices, UnitTestApplication};
-use ferroui_controls::{Button, ContentControl, Control, Grid, StackPanel, TextBlock, TextBox};
-use ferroui_designer_animation::{AnimationValue, Easing};
+use ferroui_controls::{
+    Button, ComboBox, ContentControl, Control, Grid, ScrollViewer, StackPanel, TextBlock, TextBox,
+};
+use ferroui_designer_animation::{AnimationValue, BehaviorAction, BehaviorTrigger, Easing};
 
 fn click(button: &Button) {
     button.raise_event(&RoutedEventArgs::with_event(Button::click_event()));
@@ -63,6 +65,127 @@ fn timeline_key(lane: &crate::TimelineLane, key: ferroui_base::input::Key) {
     event.set_routed_event(Some(ferroui_base::input::InputElement::key_down_event()));
     lane.raise_event(&event);
     assert!(event.handled());
+}
+
+fn authoring_row(workspace: &DesignerWorkspace, name: &str) -> Ref<Grid> {
+    workspace
+        .control()
+        .get_control::<StackPanel>("AuthoringPanel")
+        .children()
+        .to_vec()
+        .into_iter()
+        .filter_map(|control| control.cast::<Grid>())
+        .find(|row| {
+            row.children()
+                .to_vec()
+                .iter()
+                .any(|control| control.name().as_deref() == Some(name))
+        })
+        .unwrap()
+}
+
+#[test]
+fn behavior_pickers_reveal_relevant_fields_and_attach_one_undoable_action() {
+    let _app = UnitTestApplication::start(TestServices::styled_window());
+    let workspace = DesignerWorkspace::new(
+        r#"<Canvas xmlns="https://github.com/ferroui"><Button Name="Target" /></Canvas>"#,
+    )
+    .unwrap();
+    let session = workspace.session();
+    let target = session
+        .borrow()
+        .document()
+        .ast()
+        .find_name("Target")
+        .unwrap();
+    session.borrow_mut().select([target]);
+    workspace.refresh(true);
+    click(&workspace.control().get_control::<Button>("BehaviorsMode"));
+    assert!(
+        !workspace
+            .control()
+            .get_control::<Grid>("InspectorDesignPane")
+            .is_visible()
+    );
+    assert!(
+        workspace
+            .control()
+            .get_control::<ScrollViewer>("AuthoringScroll")
+            .is_visible()
+    );
+    let input = |name: &str| {
+        authoring_row(&workspace, name)
+            .children()
+            .to_vec()
+            .into_iter()
+            .find_map(|control| control.cast::<TextBox>())
+            .unwrap()
+    };
+    let picker = |name: &str| {
+        authoring_row(&workspace, name)
+            .children()
+            .to_vec()
+            .into_iter()
+            .find_map(|control| control.cast::<ComboBox>())
+            .unwrap()
+    };
+    let original = session.borrow().document().source().to_owned();
+    assert!(!authoring_row(&workspace, "BehaviorComparison").is_visible());
+    picker("BehaviorTriggerKind").set_selected_index(1);
+    assert!(authoring_row(&workspace, "BehaviorComparison").is_visible());
+    assert!(!authoring_row(&workspace, "BehaviorTriggerType").is_visible());
+    input("BehaviorTriggerSource").set_text(Some("{Binding IsEnabled}"));
+    picker("BehaviorActionKind").set_selected_index(3);
+    assert!(!authoring_row(&workspace, "BehaviorActionValue").is_visible());
+    input("BehaviorActionMember").set_text(Some("active"));
+    assert_eq!(
+        session.borrow().document().source(),
+        original,
+        "Picker and field edits remain staged until Attach"
+    );
+    let attach = workspace
+        .control()
+        .get_control::<StackPanel>("AuthoringPanel")
+        .children()
+        .to_vec()
+        .into_iter()
+        .filter_map(|control| control.cast::<Button>())
+        .find(|button| caption(button).as_deref() == Some("Attach behavior"))
+        .unwrap();
+    click(&attach);
+    let behaviors = session.borrow().behaviors(target);
+    assert_eq!(behaviors.len(), 1);
+    assert_eq!(
+        behaviors[0].trigger,
+        BehaviorTrigger::Data {
+            binding: "{Binding IsEnabled}".to_owned(),
+            comparison: "Equal".to_owned(),
+            value: "True".to_owned(),
+            revert_on_false: false,
+        }
+    );
+    assert_eq!(
+        behaviors[0].actions,
+        [BehaviorAction::AddClass {
+            target: None,
+            class: "active".to_owned()
+        }]
+    );
+    session.borrow_mut().undo().unwrap();
+    assert_eq!(session.borrow().document().source(), original);
+    click(&workspace.control().get_control::<Button>("CloseAuthoring"));
+    assert!(
+        workspace
+            .control()
+            .get_control::<Grid>("InspectorDesignPane")
+            .is_visible()
+    );
+    assert!(
+        !workspace
+            .control()
+            .get_control::<ScrollViewer>("AuthoringScroll")
+            .is_visible()
+    );
 }
 
 #[test]
@@ -126,7 +249,7 @@ fn native_timeline_controls_record_scrubbed_values_rescale_keys_and_author_curve
                 .any(|control| {
                     control
                         .cast::<TextBlock>()
-                        .is_some_and(|label| label.text().as_deref() == Some("Duration"))
+                        .is_some_and(|label| label.text().as_deref() == Some("Duration, s"))
                 })
                 .then(|| {
                     children

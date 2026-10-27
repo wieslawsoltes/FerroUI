@@ -14,18 +14,28 @@ pub(super) struct AuthoringUi {
     group: String,
     state: String,
 }
-fn field(panel: &StackPanel, label: &str, value: &str) -> Ref<TextBox> {
+struct AuthoringField {
+    row: Ref<Grid>,
+    label: Ref<TextBlock>,
+    input: Ref<TextBox>,
+}
+fn labeled_field(panel: &StackPanel, label: &str, value: &str) -> AuthoringField {
     let row = Grid::new();
     row.set_column_definitions(ColumnDefinitions::parse("104,*").unwrap());
     let title = TextBlock::new();
     let caption = label.split(" (").next().unwrap_or(label);
-    title.set_text(Some(caption));
+    let caption = if label.contains("(seconds)") {
+        format!("{caption}, s")
+    } else {
+        caption.to_owned()
+    };
+    title.set_text(Some(&caption));
     title.set_foreground(Some(SolidColorBrush::from_uint32(0xffa9adba).into()));
     title.set_font_size(11.0);
     title.set_vertical_alignment(ferroui_base::layout::VerticalAlignment::Center);
     title.set_text_wrapping(TextWrapping::Wrap);
     title.set_margin(Thickness::new(0.0, 0.0, 8.0, 0.0));
-    row.children().add(title.upcast::<Control>());
+    row.children().add(title.clone().upcast::<Control>());
     let text = TextBox::new();
     text.set_text(Some(value));
     text.classes().add("designer-field");
@@ -34,8 +44,15 @@ fn field(panel: &StackPanel, label: &str, value: &str) -> Ref<TextBox> {
     ToolTip::set_tip(&text, Some(Rc::new(label.to_owned())));
     Grid::set_column(&text, 1);
     row.children().add(text.clone().upcast::<Control>());
-    panel.children().add(row.upcast::<Control>());
-    text
+    panel.children().add(row.clone().upcast::<Control>());
+    AuthoringField {
+        row,
+        label: title,
+        input: text,
+    }
+}
+fn field(panel: &StackPanel, label: &str, value: &str) -> Ref<TextBox> {
+    labeled_field(panel, label, value).input
 }
 fn choice_field(panel: &StackPanel, label: &str, value: &str, choices: &[&str]) -> Ref<ComboBox> {
     let row = Grid::new();
@@ -305,6 +322,7 @@ impl DesignerWorkspace {
         let session = self.session.borrow();
         let picker = self.root.get_control::<ComboBox>("AnimationPrograms");
         let previous = self.guard.replace(true);
+        picker.set_placeholder_text(Some("No animation".into()));
         picker.items().clear();
         let mut ids = Vec::new();
         for program in session.animation_programs() {
@@ -325,6 +343,7 @@ impl DesignerWorkspace {
                 .and_then(|id| ids.iter().position(|candidate| *candidate == id))
                 .map_or(-1, |index| index as i32),
         );
+        picker.set_is_enabled(!ids.is_empty());
         if let Some(program) = session
             .animation_programs()
             .iter()
@@ -547,7 +566,7 @@ impl DesignerWorkspace {
             .into_iter()
             .filter(|group| group.owner == owner)
             .collect::<Vec<_>>();
-        let group_name = field(panel, "New state group", "Common");
+        let group_name = field(panel, "Group name", "Common");
         action(panel, "Add group", self, move |this| {
             let name = text(&group_name);
             this.authoring.borrow_mut().group = name.clone();
@@ -586,7 +605,7 @@ impl DesignerWorkspace {
                 .borrow_mut()
                 .remove_state_group(owner, &remove_name)
         });
-        let new_state = field(panel, "New state name", "Active");
+        let new_state = field(panel, "State name", "Active");
         let key = group_key.clone();
         action(panel, "Add state", self, move |this| {
             let mut group = this.state_group(owner, &key)?;
@@ -635,7 +654,7 @@ impl DesignerWorkspace {
             this.session.borrow_mut().upsert_state_group(group)
         });
         for (index, setter) in state.setters.iter().enumerate() {
-            let target = field(panel, "Target Name (empty = owner)", &setter.target);
+            let target = field(panel, "Target (Name; empty = owner)", &setter.target);
             let property = field(panel, "Property", &setter.property);
             let value = field(panel, "State value", &setter.value);
             let key = group_key.clone();
@@ -712,10 +731,10 @@ impl DesignerWorkspace {
                 },
             );
         }
-        let from = field(panel, "Transition from (empty = any)", "");
-        let to = field(panel, "Transition to", &state_key);
-        let seconds = field(panel, "Transition duration", "0.3");
-        let easing = field(panel, "Transition easing", "LinearEasing");
+        let from = field(panel, "From (empty = any)", "");
+        let to = field(panel, "To", &state_key);
+        let seconds = field(panel, "Duration (seconds)", "0.3");
+        let easing = field(panel, "Easing", "LinearEasing");
         let key = group_key.clone();
         action(panel, "Add transition", self, move |this| {
             let mut group = this.state_group(owner, &key)?;
@@ -764,76 +783,168 @@ impl DesignerWorkspace {
             panel,
             "Connect an event or condition to an action. Custom trigger and action types remain editable by name.",
         );
-        let trigger = field(panel, "Type (Event, Data or custom type)", "Event");
-        let event = field(
+        let trigger = choice_field(
             panel,
-            "Source (event name, binding or custom properties JSON)",
-            "Click",
+            "When",
+            "Event",
+            &["Event", "Data condition", "Custom"],
         );
-        let comparison = field(panel, "Data comparison", "Equal");
-        let compare_value = field(panel, "Compare value", "True");
+        trigger.set_name(Some("BehaviorTriggerKind".into()));
+        let custom_trigger = labeled_field(panel, "Trigger type", "");
+        custom_trigger
+            .input
+            .set_name(Some("BehaviorTriggerType".into()));
+        custom_trigger
+            .input
+            .set_placeholder_text(Some("CustomTrigger"));
+        custom_trigger.row.set_is_visible(false);
+        let event = labeled_field(panel, "Event", "Click");
+        event.input.set_name(Some("BehaviorTriggerSource".into()));
+        let comparison = labeled_field(panel, "Comparison", "Equal");
+        comparison.input.set_name(Some("BehaviorComparison".into()));
+        comparison.row.set_is_visible(false);
+        let compare_value = labeled_field(panel, "Compare value", "True");
+        compare_value
+            .input
+            .set_name(Some("BehaviorComparisonValue".into()));
+        compare_value.row.set_is_visible(false);
+        let weak_trigger = trigger.downgrade();
+        let source_label = event.label.clone();
+        let source_input = event.input.clone();
+        let custom_trigger_row = custom_trigger.row.clone();
+        let comparison_row = comparison.row.clone();
+        let compare_value_row = compare_value.row.clone();
+        trigger.selection_changed(move |_, _| {
+            if let Some(trigger) = weak_trigger.upgrade() {
+                let selected = choice(&trigger);
+                let label = match selected.as_str() {
+                    "Data condition" => "Binding",
+                    "Custom" => "Properties JSON",
+                    _ => "Event",
+                };
+                source_label.set_text(Some(label));
+                AutomationProperties::set_name(&source_input, Some(label));
+                custom_trigger_row.set_is_visible(selected == "Custom");
+                comparison_row.set_is_visible(selected == "Data condition");
+                compare_value_row.set_is_visible(selected == "Data condition");
+            }
+        });
         section(panel, "Action");
-        let kind = field(
+        let kind = choice_field(
             panel,
-            "Type (ChangeProperty, InvokeCommand, CallMethod, AddClass, RemoveClass or custom type)",
-            "ChangeProperty",
+            "Do",
+            "Change property",
+            &[
+                "Change property",
+                "Invoke command",
+                "Call method",
+                "Add class",
+                "Remove class",
+                "Custom",
+            ],
         );
-        let target = field(panel, "Target (Name or binding)", "");
-        let property = field(
-            panel,
-            "Member (property, method, class or command)",
-            "Opacity",
-        );
-        let value = field(
-            panel,
-            "Value (value, command parameter or custom properties JSON)",
-            "0.5",
-        );
+        kind.set_name(Some("BehaviorActionKind".into()));
+        let custom_action = labeled_field(panel, "Action type", "");
+        custom_action
+            .input
+            .set_name(Some("BehaviorActionType".into()));
+        custom_action
+            .input
+            .set_placeholder_text(Some("CustomAction"));
+        custom_action.row.set_is_visible(false);
+        let target = labeled_field(panel, "Target (Name or binding)", "");
+        target.input.set_name(Some("BehaviorActionTarget".into()));
+        target.input.set_placeholder_text(Some("Selected object"));
+        let property = labeled_field(panel, "Property", "Opacity");
+        property.input.set_name(Some("BehaviorActionMember".into()));
+        let value = labeled_field(panel, "Value", "0.5");
+        value.input.set_name(Some("BehaviorActionValue".into()));
+        let weak_kind = kind.downgrade();
+        let custom_action_row = custom_action.row.clone();
+        let target_row = target.row.clone();
+        let property_row = property.row.clone();
+        let property_label = property.label.clone();
+        let property_input = property.input.clone();
+        let value_row = value.row.clone();
+        let value_label = value.label.clone();
+        let value_input = value.input.clone();
+        kind.selection_changed(move |_, _| {
+            if let Some(kind) = weak_kind.upgrade() {
+                let selected = choice(&kind);
+                custom_action_row.set_is_visible(selected == "Custom");
+                target_row
+                    .set_is_visible(!matches!(selected.as_str(), "Invoke command" | "Custom"));
+                property_row.set_is_visible(selected != "Custom");
+                let member = match selected.as_str() {
+                    "Invoke command" => "Command",
+                    "Call method" => "Method",
+                    "Add class" | "Remove class" => "Class",
+                    _ => "Property",
+                };
+                property_label.set_text(Some(member));
+                AutomationProperties::set_name(&property_input, Some(member));
+                value_row.set_is_visible(matches!(
+                    selected.as_str(),
+                    "Change property" | "Invoke command" | "Custom"
+                ));
+                let value = match selected.as_str() {
+                    "Invoke command" => "Parameter",
+                    "Custom" => "Properties JSON",
+                    _ => "Value",
+                };
+                value_label.set_text(Some(value));
+                AutomationProperties::set_name(&value_input, Some(value));
+            }
+        });
         action(panel, "Attach behavior", self, move |this| {
-            let trigger = match text(&trigger).as_str() {
+            let trigger = match choice(&trigger).as_str() {
                 "Event" => BehaviorTrigger::Event {
-                    event: text(&event),
+                    event: text(&event.input),
                     source: None,
                 },
-                "Data" => BehaviorTrigger::Data {
-                    binding: text(&event),
-                    comparison: text(&comparison),
-                    value: text(&compare_value),
+                "Data condition" => BehaviorTrigger::Data {
+                    binding: text(&event.input),
+                    comparison: text(&comparison.input),
+                    value: text(&compare_value.input),
                     revert_on_false: false,
                 },
-                name => BehaviorTrigger::Custom {
-                    type_name: name.into(),
-                    properties: serde_json::from_str(&text(&event)).map_err(|e| e.to_string())?,
+                "Custom" => BehaviorTrigger::Custom {
+                    type_name: text(&custom_trigger.input),
+                    properties: serde_json::from_str(&text(&event.input))
+                        .map_err(|e| e.to_string())?,
                 },
+                _ => return Err("Choose a trigger".into()),
             };
-            let target = optional(&target);
-            let action = match text(&kind).as_str() {
-                "ChangeProperty" => BehaviorAction::ChangeProperty {
+            let target = optional(&target.input);
+            let action = match choice(&kind).as_str() {
+                "Change property" => BehaviorAction::ChangeProperty {
                     target,
-                    property: text(&property),
-                    value: text(&value),
+                    property: text(&property.input),
+                    value: text(&value.input),
                 },
-                "InvokeCommand" => BehaviorAction::InvokeCommand {
-                    command: text(&property),
-                    parameter: optional(&value),
+                "Invoke command" => BehaviorAction::InvokeCommand {
+                    command: text(&property.input),
+                    parameter: optional(&value.input),
                 },
-                "CallMethod" => BehaviorAction::CallMethod {
+                "Call method" => BehaviorAction::CallMethod {
                     target,
-                    method: text(&property),
+                    method: text(&property.input),
                 },
-                "AddClass" => BehaviorAction::AddClass {
+                "Add class" => BehaviorAction::AddClass {
                     target,
-                    class: text(&property),
+                    class: text(&property.input),
                 },
-                "RemoveClass" => BehaviorAction::RemoveClass {
+                "Remove class" => BehaviorAction::RemoveClass {
                     target,
-                    class: text(&property),
+                    class: text(&property.input),
                 },
-                name => BehaviorAction::Custom {
-                    type_name: name.into(),
-                    properties: serde_json::from_str(&text(&value)).map_err(|e| e.to_string())?,
+                "Custom" => BehaviorAction::Custom {
+                    type_name: text(&custom_action.input),
+                    properties: serde_json::from_str(&text(&value.input))
+                        .map_err(|e| e.to_string())?,
                     children: String::new(),
                 },
+                _ => return Err("Choose an action".into()),
             };
             this.session
                 .borrow_mut()
