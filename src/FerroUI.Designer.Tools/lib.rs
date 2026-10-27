@@ -1,5 +1,6 @@
 //! Portable editor tools that produce source transactions. A host supplies measured geometry;
 //! layout, property and selection commands never mutate preview objects directly.
+mod components;
 mod geometry;
 mod grid_tracks;
 mod layout;
@@ -8,6 +9,12 @@ mod layout_helpers;
 mod properties;
 mod selection;
 
+pub use components::{
+    ComponentAction, ComponentCatalog, ComponentEntry, ComponentKind, ComponentReference,
+    component_fragment, component_property_object, component_resource_expression,
+    component_resource_references, plan_component_action, plan_property_object,
+    resolve_component_resource, visible_component_resources,
+};
 pub use geometry::{
     Affine, Alignment, Axis, Point, Rect, SnapGuide, SnapIndex, SnapResult, SnapSettings, align,
     distribute,
@@ -27,7 +34,7 @@ pub use layout_helpers::{
 };
 pub use properties::{
     EditorRegistry, ExpressionPolicy, PropertyDescriptor, PropertyKind, PropertyRegistry,
-    PropertyState, ValueEditor,
+    PropertyState, PropertyValueShape, ValueEditor,
 };
 pub use selection::{MoveGesture, Selection, SelectionMode, outermost};
 
