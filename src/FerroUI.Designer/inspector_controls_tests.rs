@@ -1245,7 +1245,7 @@ fn layer_resource_identity_keeps_alias_keys_searchable_without_renaming_source()
     let (key_only, named, unnamed) = {
         let session = workspace.session.borrow();
         let ast = session.document().ast();
-        (
+        let ids = (
             ast.nodes()
                 .find(|node| resource_key(node) == Some("AccentBrush"))
                 .unwrap()
@@ -1255,7 +1255,8 @@ fn layer_resource_identity_keeps_alias_keys_searchable_without_renaming_source()
                 .find(|node| node.local_name() == "Border")
                 .unwrap()
                 .id,
-        )
+        );
+        ids
     };
     let entry = |id| {
         workspace
