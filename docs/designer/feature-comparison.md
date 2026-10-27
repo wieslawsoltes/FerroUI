@@ -187,11 +187,11 @@ available to viewers and preserve pending source text, undo, selection and colla
 | `designer_focus_order` | Read the native groups/labels and an ephemeral model token |
 | `designer_focus_edit` | Apply an order, reset, focus/tab-stop/navigation change or label target against the accepted model |
 | `designer_layers` | Read local layer flags, isolation and epoch |
-| `designer_layer` | Change local presentation or hierarchy selection against the accepted layer epoch |
+| `designer_layer` | Change local presentation or hierarchy selection against the accepted layer and preview-scope epochs |
 
 All actions have strict schemas and the existing tool write permission. Authored commands
 also enforce document revision and collaboration roles. Focus edits require the current
-native model token; layer edits require the current presentation epoch. The tokens are
+native model token; layer edits require the current presentation and preview-scope epochs. The tokens are
 concurrency checks, not authentication credentials. Preview-only changes do not create
 source history.
 

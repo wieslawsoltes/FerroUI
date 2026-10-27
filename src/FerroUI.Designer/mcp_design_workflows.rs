@@ -29,8 +29,10 @@ pub(super) fn tools() -> Vec<Value> {
     };
     let layer_action = |name: &str, mut properties: Value, required: &[&str]| {
         properties["expected_layer_epoch"] = s::revision();
+        properties["expected_scope_epoch"] = s::revision();
         let mut required = required.to_vec();
         required.push("expected_layer_epoch");
+        required.push("expected_scope_epoch");
         s::action(name, properties, &required, true)
     };
     vec![
@@ -118,7 +120,7 @@ pub(super) fn tools() -> Vec<Value> {
         ),
         s::actions(
             "designer_layer",
-            "Change local layer presentation or hierarchy selection. Requires the epoch from designer_layers and current document revision; view-only commands remain available to collaboration viewers with tool write permission. Hidden layers retain layout and authored property values.",
+            "Change local layer presentation or hierarchy selection. Requires layer_epoch and scope_epoch from designer_layers and current document revision; view-only commands remain available to collaboration viewers with tool write permission. Hidden layers retain layout and authored property values.",
             vec![
                 layer_action(
                     "set_locked",
@@ -279,8 +281,13 @@ pub(super) fn call(
         }
         "designer_layers" => Ok(layers(session)),
         "designer_layer" => {
-            if integer(args, "expected_layer_epoch")? != session.layer_view_epoch() {
-                return Err("Layer presentation changed; read designer_layers again".into());
+            if integer(args, "expected_layer_epoch")? != session.layer_view_epoch()
+                || integer(args, "expected_scope_epoch")? != session.definition_scope_epoch()
+            {
+                return Err(
+                    "Layer presentation or preview scope changed; read designer_layers again"
+                        .into(),
+                );
             }
             match text(args, "action")?.as_str() {
                 "set_locked" => {

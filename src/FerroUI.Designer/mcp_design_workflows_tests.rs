@@ -51,6 +51,10 @@ fn workflow_schemas_reject_mixed_actions_out_of_range_data_and_unchecked_models(
             "designer_layer",
             json!({"expected_revision":0,"expected_layer_epoch":0,"action":"set_locked","nodes":[0],"locked":true}),
         ),
+        (
+            "designer_layer",
+            json!({"expected_revision":0,"expected_layer_epoch":0,"action":"exit_isolation"}),
+        ),
     ] {
         assert!(provider.validate(name, &args).is_err(), "{name} {args}");
     }
@@ -76,7 +80,8 @@ fn workflow_reads_and_layer_edits_preserve_source_and_reject_stale_epochs() {
         provider.call(name, &json!({}), permissions(false)).unwrap();
     }
     let epoch = session.borrow().layer_view_epoch();
-    let args = json!({"expected_revision":revision,"expected_layer_epoch":epoch,"action":"set_hidden","nodes":[input],"hidden":true});
+    let scope_epoch = session.borrow().definition_scope_epoch();
+    let args = json!({"expected_revision":revision,"expected_layer_epoch":epoch,"expected_scope_epoch":scope_epoch,"action":"set_hidden","nodes":[input],"hidden":true});
     assert!(
         provider
             .call("designer_layer", &args, permissions(false))
@@ -94,6 +99,54 @@ fn workflow_reads_and_layer_edits_preserve_source_and_reject_stale_epochs() {
     );
     assert_eq!(session.borrow().document().source(), SOURCE);
     assert_eq!(session.borrow().document().revision(), revision);
+    assert!(!session.borrow().can_undo());
+}
+
+#[test]
+fn layer_tools_reject_scope_switches_even_when_source_and_layer_flags_are_unchanged() {
+    let _app = UnitTestApplication::start(TestServices::styled_window());
+    let source = r#"<StackPanel xmlns="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"><StackPanel.Resources><ControlTemplate x:Key="First" TargetType="Button"><Border Name="FirstPart"/></ControlTemplate><ControlTemplate x:Key="Second" TargetType="Button"><Border Name="SecondPart"/></ControlTemplate></StackPanel.Resources><Button/></StackPanel>"#;
+    let session = Rc::new(RefCell::new(
+        DesignerSession::new(source, ContentControl::new()).unwrap(),
+    ));
+    let provider = DesignerMcp::new(&session);
+    let definition = |key: &str| {
+        session
+            .borrow()
+            .document()
+            .ast()
+            .elements()
+            .find(|node| node.attribute("x:Key") == Some(key))
+            .unwrap()
+            .id
+    };
+    let first = definition("First");
+    let second = definition("Second");
+    let part = session
+        .borrow()
+        .document()
+        .ast()
+        .find_name("SecondPart")
+        .unwrap();
+    session.borrow_mut().enter_definition_scope(second).unwrap();
+    session.borrow_mut().isolate_layers(&[part]).unwrap();
+    session.borrow_mut().enter_definition_scope(first).unwrap();
+    let accepted = provider
+        .call("designer_layers", &json!({}), permissions(false))
+        .unwrap();
+    let args = json!({"expected_revision":accepted["revision"],"expected_layer_epoch":accepted["layer_epoch"],"expected_scope_epoch":accepted["scope_epoch"],"action":"exit_isolation"});
+    session.borrow_mut().enter_definition_scope(second).unwrap();
+    assert_eq!(
+        json!(session.borrow().layer_view_epoch()),
+        accepted["layer_epoch"]
+    );
+    assert!(
+        provider
+            .call("designer_layer", &args, permissions(true))
+            .is_err()
+    );
+    assert_eq!(session.borrow().layer_isolation(), &[part]);
+    assert_eq!(session.borrow().document().source(), source);
     assert!(!session.borrow().can_undo());
 }
 
