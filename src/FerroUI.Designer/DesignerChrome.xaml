@@ -188,8 +188,8 @@
     <Setter Property="MinHeight" Value="26" />
     <Setter Property="MinWidth" Value="0" />
   </Style>
-  <Style Selector=".designer-chrome ComboBox /template/ Grid#LayoutRoot">
-    <Setter Property="ColumnDefinitions" Value="*,24" />
+  <Style Selector=".designer-chrome ComboBox /template/ ContentControl#ContentPresenter">
+    <Setter Property="Margin" Value="4,0" />
   </Style>
   <Style Selector=".designer-chrome ComboBox:pointerover /template/ Border#Background">
     <Setter Property="Background" Value="{DynamicResource DesignerHoverBrush}" />
@@ -254,6 +254,11 @@
     <Setter Property="CornerRadius" Value="0" />
     <Setter Property="BorderThickness" Value="0" />
     <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+  </Style>
+  <Style Selector=".designer-chrome Button.designer-track-header.active /template/ ContentPresenter#PART_ContentPresenter">
+    <Setter Property="Background" Value="#FF2B2C3B" />
+    <Setter Property="Foreground" Value="{DynamicResource DesignerTextBrush}" />
+    <Setter Property="BorderBrush" Value="#FF303239" />
   </Style>
   <Style Selector=".designer-chrome Button.designer-timeline-tool">
     <Setter Property="Background" Value="Transparent" />

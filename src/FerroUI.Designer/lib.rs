@@ -23,7 +23,9 @@ mod surface;
 mod timeline_lane;
 mod workspace;
 
-pub use asset_toolbox::{AssetIcon, AssetToolbox, AssetViewMode, DesignerAsset, default_designer_assets};
+pub use asset_toolbox::{
+    AssetIcon, AssetToolbox, AssetViewMode, DesignerAsset, default_designer_assets,
+};
 pub use chrome::designer_chrome_style;
 pub use editors::{PropertyEditorContext, PropertyEditorFactory};
 pub use ferroui_designer_core::{Document, Edit, NodeId};

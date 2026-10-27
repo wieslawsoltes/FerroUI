@@ -398,8 +398,12 @@ impl DesignerWorkspace {
                     (Key::Z, true, true) | (Key::Y, true, _) => Some(Action::Redo),
                     (Key::Delete, false, _) => Some(Action::Delete),
                     (Key::D, true, _) => Some(Action::Duplicate),
-                    (Key::V, false, false) if event.key_modifiers.is_empty() => Some(Action::Select),
-                    (Key::I, false, false) if event.key_modifiers.is_empty() => Some(Action::Interact),
+                    (Key::V, false, false) if event.key_modifiers.is_empty() => {
+                        Some(Action::Select)
+                    }
+                    (Key::I, false, false) if event.key_modifiers.is_empty() => {
+                        Some(Action::Interact)
+                    }
                     (Key::O, true, _) => {
                         this.request_open();
                         event.set_handled(true);
@@ -593,12 +597,23 @@ impl DesignerWorkspace {
                 .set_text(Some(&format!("{}", session.timeline().duration)));
         }
         self.guard.set(false);
-        self.root.get_control::<TextBlock>("RecordLabel").set_text(Some(
-            if session.recording() { "Recording" } else { "Record" },
-        ));
-        self.root.get_control::<Button>("Record").classes().set("recording", session.recording());
-        self.root.get_control::<Control>("PlayIcon").set_is_visible(!session.is_playing());
-        self.root.get_control::<Control>("PauseIcon").set_is_visible(session.is_playing());
+        self.root
+            .get_control::<TextBlock>("RecordLabel")
+            .set_text(Some(if session.recording() {
+                "Recording"
+            } else {
+                "Record"
+            }));
+        self.root
+            .get_control::<Button>("Record")
+            .classes()
+            .set("recording", session.recording());
+        self.root
+            .get_control::<Control>("PlayIcon")
+            .set_is_visible(!session.is_playing());
+        self.root
+            .get_control::<Control>("PauseIcon")
+            .set_is_visible(session.is_playing());
         self.root
             .get_control::<Button>("Undo")
             .set_is_enabled(session.can_undo());

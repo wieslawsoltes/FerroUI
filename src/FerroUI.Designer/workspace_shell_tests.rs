@@ -1,5 +1,5 @@
 //! Native shell commands must preserve authoring state and expose usable workspace space.
-use crate::{DesignerWorkspace, NavigationPane, WorkspaceViewMode, STARTER_XAML};
+use crate::{DesignerWorkspace, NavigationPane, STARTER_XAML, WorkspaceViewMode};
 use ferroui_base::interactivity::RoutedEventArgs;
 use ferroui_base::{Rect, Size};
 use ferroui_controls::testing::{TestServices, UnitTestApplication};
@@ -23,10 +23,12 @@ fn workspace_modes_and_navigation_preserve_pending_text_and_document_identity() 
     let revision = session.borrow().document().revision();
     let generation = session.borrow().generation();
     assert_eq!(workspace.view_mode(), WorkspaceViewMode::Design);
-    assert!(!workspace
-        .control()
-        .get_control::<Control>("SourcePane")
-        .is_visible());
+    assert!(
+        !workspace
+            .control()
+            .get_control::<Control>("SourcePane")
+            .is_visible()
+    );
     for (button, mode, canvas, code) in [
         ("SplitView", WorkspaceViewMode::Split, true, true),
         ("CodeView", WorkspaceViewMode::Xaml, false, true),
@@ -48,11 +50,13 @@ fn workspace_modes_and_navigation_preserve_pending_text_and_document_identity() 
                 .is_visible(),
             code
         );
-        assert!(workspace
-            .control()
-            .get_control::<Button>(button)
-            .classes()
-            .contains("active"));
+        assert!(
+            workspace
+                .control()
+                .get_control::<Button>(button)
+                .classes()
+                .contains("active")
+        );
     }
     for (button, pane, content) in [
         ("AssetsTab", NavigationPane::Assets, "AssetsPane"),
@@ -61,10 +65,12 @@ fn workspace_modes_and_navigation_preserve_pending_text_and_document_identity() 
     ] {
         click(&workspace, button);
         assert_eq!(workspace.navigation_pane(), pane);
-        assert!(workspace
-            .control()
-            .get_control::<Control>(content)
-            .is_visible());
+        assert!(
+            workspace
+                .control()
+                .get_control::<Control>(content)
+                .is_visible()
+        );
     }
     assert_eq!(
         workspace.source_editor().text().as_deref(),
@@ -114,13 +120,17 @@ fn fit_and_timeline_commands_use_the_actual_workspace_geometry() {
         timeline_height
     );
     click(&workspace, "TimelineDetails");
-    assert!(control
-        .get_control::<Control>("AnimationDetails")
-        .is_visible());
+    assert!(
+        control
+            .get_control::<Control>("AnimationDetails")
+            .is_visible()
+    );
     click(&workspace, "TimelineDetails");
-    assert!(!control
-        .get_control::<Control>("AnimationDetails")
-        .is_visible());
+    assert!(
+        !control
+            .get_control::<Control>("AnimationDetails")
+            .is_visible()
+    );
 }
 
 #[test]
@@ -129,8 +139,14 @@ fn canvas_focus_restores_resized_docks_timeline_and_pending_authoring_state() {
     let workspace = DesignerWorkspace::new(STARTER_XAML).unwrap();
     let root = workspace.control();
     let layout = root.get_control::<Grid>("MainLayout");
-    layout.column_definitions().get(0).set_width(ferroui_controls::GridLength::from_pixels(280.0));
-    layout.column_definitions().get(4).set_width(ferroui_controls::GridLength::from_pixels(360.0));
+    layout
+        .column_definitions()
+        .get(0)
+        .set_width(ferroui_controls::GridLength::from_pixels(280.0));
+    layout
+        .column_definitions()
+        .get(4)
+        .set_width(ferroui_controls::GridLength::from_pixels(360.0));
     let size = Size::new(1600.0, 1040.0);
     root.measure(size);
     root.arrange(Rect::from_size(size));
@@ -142,7 +158,12 @@ fn canvas_focus_restores_resized_docks_timeline_and_pending_authoring_state() {
     click(&workspace, "FocusCanvas");
     assert!(workspace.canvas_focused());
     assert!(!workspace.timeline_visible());
-    for name in ["NavigationDock", "InspectorDock", "NavigationDivider", "InspectorDivider"] {
+    for name in [
+        "NavigationDock",
+        "InspectorDock",
+        "NavigationDivider",
+        "InspectorDivider",
+    ] {
         assert!(!root.get_control::<Control>(name).is_visible());
     }
     click(&workspace, "FocusCanvas");
@@ -154,14 +175,20 @@ fn canvas_focus_restores_resized_docks_timeline_and_pending_authoring_state() {
     assert_eq!(layout.column_definitions().get(0).actual_width(), 280.0);
     assert_eq!(layout.column_definitions().get(4).actual_width(), 360.0);
     assert_eq!(workspace.navigation_pane(), NavigationPane::Assets);
-    assert_eq!(workspace.source_editor().text().as_deref(), Some("<Canvas>"));
+    assert_eq!(
+        workspace.source_editor().text().as_deref(),
+        Some("<Canvas>")
+    );
     assert_eq!(workspace.session().borrow().document().revision(), revision);
 
     workspace.set_timeline_visible(false);
     workspace.set_canvas_focused(true);
     workspace.set_canvas_focused(true);
     workspace.set_canvas_focused(false);
-    assert!(!workspace.timeline_visible(), "a previously hidden timeline stays hidden");
+    assert!(
+        !workspace.timeline_visible(),
+        "a previously hidden timeline stays hidden"
+    );
 }
 
 #[test]

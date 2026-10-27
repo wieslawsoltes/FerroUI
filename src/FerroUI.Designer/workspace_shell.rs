@@ -165,20 +165,34 @@ impl DesignerWorkspace {
                 if left >= 120.0 { left } else { current.0 },
                 if right >= 160.0 { right } else { current.1 },
             ));
-            self.shell.focused_timeline_was_visible.set(self.timeline_visible());
+            self.shell
+                .focused_timeline_was_visible
+                .set(self.timeline_visible());
             self.set_timeline_visible(false);
         } else {
             self.set_timeline_visible(self.shell.focused_timeline_was_visible.get());
         }
         let (left, right) = self.shell.dock_widths.get();
         for (index, width) in [(0, left), (1, 1.0), (3, 1.0), (4, right)] {
-            columns.get(index).set_width(GridLength::from_pixels(if focused { 0.0 } else { width }));
+            columns
+                .get(index)
+                .set_width(GridLength::from_pixels(if focused { 0.0 } else { width }));
         }
-        for name in ["NavigationDock", "NavigationDivider", "InspectorDock", "InspectorDivider"] {
-            self.root.get_control::<Control>(name).set_is_visible(!focused);
+        for name in [
+            "NavigationDock",
+            "NavigationDivider",
+            "InspectorDock",
+            "InspectorDivider",
+        ] {
+            self.root
+                .get_control::<Control>(name)
+                .set_is_visible(!focused);
         }
         self.shell.canvas_focus.set(focused);
-        self.root.get_control::<Button>("FocusCanvas").classes().set("active", focused);
+        self.root
+            .get_control::<Button>("FocusCanvas")
+            .classes()
+            .set("active", focused);
     }
 
     /// Restores a user's resized timeline height when reopening the pane.
@@ -241,7 +255,10 @@ impl DesignerWorkspace {
             ("DuplicateAnimation", "Duplicate animation program"),
             ("DeleteAnimation", "Delete animation program"),
             ("FocusCanvas", "Focus canvas and restore panels"),
-            ("CollapseLayers", "Collapse layers, keeping selected paths visible"),
+            (
+                "CollapseLayers",
+                "Collapse layers, keeping selected paths visible",
+            ),
             ("Play", "Play or pause animation"),
             ("Stop", "Stop animation and rewind"),
             ("PlayAll", "Play all animation programs"),
@@ -327,17 +344,21 @@ impl DesignerWorkspace {
                 }
             });
         let weak = Rc::downgrade(self);
-        self.root.get_control::<Button>("CollapseLayers").click(move |_, _| {
-            if let Some(this) = weak.upgrade() {
-                this.collapse_outline();
-            }
-        });
+        self.root
+            .get_control::<Button>("CollapseLayers")
+            .click(move |_, _| {
+                if let Some(this) = weak.upgrade() {
+                    this.collapse_outline();
+                }
+            });
         let weak = Rc::downgrade(self);
-        self.root.get_control::<Button>("FocusCanvas").click(move |_, _| {
-            if let Some(this) = weak.upgrade() {
-                this.set_canvas_focused(!this.canvas_focused());
-            }
-        });
+        self.root
+            .get_control::<Button>("FocusCanvas")
+            .click(move |_, _| {
+                if let Some(this) = weak.upgrade() {
+                    this.set_canvas_focused(!this.canvas_focused());
+                }
+            });
         let weak = Rc::downgrade(self);
         self.root
             .get_control::<Button>("ZoomFit")
@@ -380,7 +401,9 @@ impl DesignerWorkspace {
         self.root
             .add_handler(InputElement::key_down_event(), move |_, event| {
                 if event.key == Key::F
-                    && event.key_modifiers.intersects(KeyModifiers::CONTROL | KeyModifiers::META)
+                    && event
+                        .key_modifiers
+                        .intersects(KeyModifiers::CONTROL | KeyModifiers::META)
                     && event.key_modifiers.contains(KeyModifiers::SHIFT)
                 {
                     if let Some(this) = weak.upgrade() {
@@ -477,16 +500,21 @@ impl DesignerWorkspace {
             .set_text(Some(&format!("{width} × {height}")));
         let session = self.session.borrow();
         let uri = session.document_uri();
-        self.root.get_control::<TextBlock>("ArtboardTitle").set_text(Some(
-            uri.rsplit('/').next().filter(|name| !name.is_empty()).unwrap_or("Artboard"),
-        ));
-        self.root.get_control::<TextBlock>("OutlineHint").set_text(Some(
-            if self.outline_mode() == OutlineMode::Source {
+        self.root
+            .get_control::<TextBlock>("ArtboardTitle")
+            .set_text(Some(
+                uri.rsplit('/')
+                    .next()
+                    .filter(|name| !name.is_empty())
+                    .unwrap_or("Artboard"),
+            ));
+        self.root
+            .get_control::<TextBlock>("OutlineHint")
+            .set_text(Some(if self.outline_mode() == OutlineMode::Source {
                 "Drag to reorder · Alt + arrows to nest"
             } else {
                 "Live inspection · select to reveal source"
-            },
-        ));
+            }));
     }
 }
 
