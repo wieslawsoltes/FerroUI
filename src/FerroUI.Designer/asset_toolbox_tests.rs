@@ -76,7 +76,7 @@ fn native_asset_buttons_accept_keyboard_activation_and_handled_pointer_drags() {
     let drags = Rc::new(RefCell::new(Vec::new()));
     let observed = drags.clone();
     toolbox.on_begin_drag(move |asset, _| observed.borrow_mut().push(asset.source.clone()));
-    let tile = toolbox.tiles.children().get(0).cast::<Button>().unwrap();
+    let tile = toolbox.buttons.borrow()[0].clone();
     let mut enter = KeyEventArgs::new();
     enter.key = Key::Enter;
     enter.set_routed_event(Some(InputElement::key_down_event()));
@@ -109,6 +109,33 @@ fn native_asset_buttons_accept_keyboard_activation_and_handled_pointer_drags() {
         1,
         "Dragging must not also activate the asset"
     );
+}
+
+#[test]
+fn asset_list_view_preserves_filtering_and_native_insertion() {
+    let _app = UnitTestApplication::start(TestServices::styled_window());
+    let toolbox = AssetToolbox::new(default_designer_assets());
+    toolbox.register(custom_asset()).unwrap();
+    assert!(toolbox.set_category(Some("Project")));
+    toolbox.set_query("monthly revenue");
+    let catalog = toolbox.assets();
+    let inserted = Rc::new(RefCell::new(Vec::new()));
+    let observed = inserted.clone();
+    toolbox.on_activate(move |asset| observed.borrow_mut().push(asset.source.clone()));
+    toolbox.set_view_mode(AssetViewMode::List);
+    assert_eq!(toolbox.view_mode(), AssetViewMode::List);
+    assert_eq!(toolbox.query(), "monthly revenue");
+    assert_eq!(toolbox.selected_category().as_deref(), Some("Project"));
+    assert_eq!(toolbox.visible_asset_ids(), ["Project.Chart"]);
+    let mut enter = KeyEventArgs::new();
+    enter.key = Key::Enter;
+    enter.set_routed_event(Some(InputElement::key_down_event()));
+    toolbox.buttons.borrow()[0].raise_event(&enter);
+    assert!(enter.handled());
+    assert_eq!(*inserted.borrow(), [custom_asset().source]);
+    toolbox.set_view_mode(AssetViewMode::Grid);
+    assert_eq!(toolbox.visible_asset_ids(), ["Project.Chart"]);
+    assert_eq!(toolbox.assets(), catalog);
 }
 
 #[test]

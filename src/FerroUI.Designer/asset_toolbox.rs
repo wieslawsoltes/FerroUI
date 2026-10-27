@@ -3,16 +3,16 @@
 use ferroui_base::input::{InputElement, PointerPressedEventArgs};
 use ferroui_base::interactivity::RoutingStrategies;
 use ferroui_base::layout::{HorizontalAlignment, VerticalAlignment};
-use ferroui_base::media::{Geometry, SolidColorBrush, TextTrimming};
-use ferroui_base::{Ref, Thickness};
+use ferroui_base::media::{FontWeight, Geometry, SolidColorBrush, TextTrimming, TextWrapping};
+use ferroui_base::{CornerRadius, Ref, Thickness};
 use ferroui_controls::automation::AutomationProperties;
 use ferroui_controls::primitives::ScrollBarVisibility;
 use ferroui_controls::{
-    Button, ComboBox, Control, Grid, PathIcon, RowDefinitions, ScrollViewer, StackPanel, TextBlock,
-    TextBox, ToolTip, WrapPanel,
+    Border, Button, ColumnDefinitions, ComboBox, Control, Grid, PathIcon, RowDefinitions,
+    ScrollViewer, StackPanel, TextBlock, TextBox, ToolTip, WrapPanel,
 };
 use std::cell::{Cell, RefCell};
-use std::collections::BTreeSet;
+use std::collections::{BTreeMap, BTreeSet};
 use std::rc::Rc;
 
 /// A source snippet available to a designer host. Custom controls can register
@@ -66,6 +66,16 @@ impl AssetIcon {
     }
 }
 
+/// The asset library keeps the same filtering and insertion semantics in both presentations.
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
+pub enum AssetViewMode {
+    /// Visual cards for browsing shapes and controls.
+    #[default]
+    Grid,
+    /// Compact rows with descriptions for name-led browsing.
+    List,
+}
+
 type Activate = Rc<dyn Fn(&DesignerAsset)>;
 type BeginDrag = Rc<dyn Fn(&DesignerAsset, &PointerPressedEventArgs)>;
 
@@ -74,7 +84,11 @@ pub struct AssetToolbox {
     search: Ref<TextBox>,
     category: Ref<ComboBox>,
     categories: RefCell<Vec<String>>,
-    tiles: Ref<WrapPanel>,
+    groups: Ref<StackPanel>,
+    buttons: RefCell<Vec<Ref<Button>>>,
+    grid_view: Ref<Button>,
+    list_view: Ref<Button>,
+    view_mode: Cell<AssetViewMode>,
     count: Ref<TextBlock>,
     catalog: RefCell<Vec<DesignerAsset>>,
     visible: RefCell<Vec<String>>,
@@ -89,39 +103,78 @@ impl AssetToolbox {
         root.classes().add("designer-assets");
         let search = TextBox::new();
         search.set_name(Some("AssetSearch".into()));
-        search.set_placeholder_text(Some("Search controls"));
+        search.classes().add("designer-search");
+        search.set_placeholder_text(Some("Search assets"));
         search.set_margin(Thickness::new(0.0, 0.0, 0.0, 8.0));
+        let search_icon = toolbox_icon(
+            "M10 2A8 8 0 1 1 5 16.25A8 8 0 0 1 10 2Z M10 4A6 6 0 1 0 10 16A6 6 0 1 0 10 4Z M15.5 14L22 20.5L20.5 22L14 15.5Z",
+            14.0,
+            0xff828795,
+        );
+        search_icon.set_margin(Thickness::new(7.0, 0.0, 1.0, 0.0));
+        search.set_inner_left_content(Some(Control::boxed(&search_icon)));
         AutomationProperties::set_name(&search, Some("Search assets"));
         root.children().add(search.clone().upcast::<Control>());
+        let filters = Grid::new();
+        filters.set_column_definitions(ColumnDefinitions::parse("*,30,30").unwrap());
+        filters.set_margin(Thickness::new(0.0, 0.0, 0.0, 12.0));
         let category = ComboBox::new();
         category.set_name(Some("AssetCategory".into()));
         category.set_horizontal_alignment(HorizontalAlignment::Stretch);
-        category.set_margin(Thickness::new(0.0, 0.0, 0.0, 10.0));
+        category.set_margin(Thickness::new(0.0, 0.0, 6.0, 0.0));
         AutomationProperties::set_name(&category, Some("Asset category"));
-        Grid::set_row(&category, 1);
-        root.children().add(category.clone().upcast::<Control>());
+        filters.children().add(category.clone().upcast::<Control>());
+        let grid_view = view_button(
+            "Grid view",
+            "M3 3H10V10H3Z M5 5V8H8V5Z M14 3H21V10H14Z M16 5V8H19V5Z M3 14H10V21H3Z M5 16V19H8V16Z M14 14H21V21H14Z M16 16V19H19V16Z",
+        );
+        grid_view.classes().add("active");
+        Grid::set_column(&grid_view, 1);
+        filters
+            .children()
+            .add(grid_view.clone().upcast::<Control>());
+        let list_view = view_button(
+            "List view",
+            "M3 4H7V8H3Z M10 5H21V7H10Z M3 10H7V14H3Z M10 11H21V13H10Z M3 16H7V20H3Z M10 17H21V19H10Z",
+        );
+        Grid::set_column(&list_view, 2);
+        filters
+            .children()
+            .add(list_view.clone().upcast::<Control>());
+        Grid::set_row(&filters, 1);
+        root.children().add(filters.upcast::<Control>());
         let scroll = ScrollViewer::new();
         scroll.set_horizontal_scroll_bar_visibility(ScrollBarVisibility::Disabled);
         scroll.set_vertical_scroll_bar_visibility(ScrollBarVisibility::Auto);
-        let tiles = WrapPanel::new();
-        tiles.set_item_width(104.0);
-        tiles.set_item_height(78.0);
-        tiles.set_item_spacing(4.0);
-        scroll.set_content(Some(Control::boxed(&tiles)));
+        let groups = StackPanel::new();
+        groups.set_spacing(14.0);
+        scroll.set_content(Some(Control::boxed(&groups)));
         Grid::set_row(&scroll, 2);
         root.children().add(scroll.upcast::<Control>());
+        let footer = StackPanel::new();
+        footer.set_spacing(4.0);
+        footer.set_margin(Thickness::new(0.0, 10.0, 0.0, 4.0));
         let count = TextBlock::new();
         count.set_font_size(11.0);
-        count.set_opacity(0.62);
-        count.set_margin(Thickness::new(2.0, 8.0, 0.0, 0.0));
-        Grid::set_row(&count, 3);
-        root.children().add(count.clone().upcast::<Control>());
+        count.set_foreground(Some(SolidColorBrush::from_uint32(0xffa9adba).into()));
+        footer.children().add(count.clone().upcast::<Control>());
+        let hint = TextBlock::new();
+        hint.set_text(Some("Drag to canvas · Enter to insert"));
+        hint.set_font_size(10.0);
+        hint.set_foreground(Some(SolidColorBrush::from_uint32(0xff828795).into()));
+        footer.children().add(hint.upcast::<Control>());
+        Grid::set_row(&footer, 3);
+        root.children().add(footer.upcast::<Control>());
         let this = Rc::new(Self {
             root,
             search,
             category,
             categories: RefCell::new(Vec::new()),
-            tiles,
+            groups,
+            buttons: RefCell::new(Vec::new()),
+            grid_view,
+            list_view,
+            view_mode: Cell::new(AssetViewMode::Grid),
             count,
             catalog: RefCell::new(Vec::new()),
             visible: RefCell::new(Vec::new()),
@@ -148,12 +201,43 @@ impl AssetToolbox {
                 }
             }
         });
+        for (button, mode) in [
+            (&this.grid_view, AssetViewMode::Grid),
+            (&this.list_view, AssetViewMode::List),
+        ] {
+            let weak = Rc::downgrade(&this);
+            button.click(move |_, _| {
+                if let Some(this) = weak.upgrade() {
+                    this.set_view_mode(mode);
+                }
+            });
+        }
         this.refresh_tiles();
         this
     }
 
     pub fn control(&self) -> Ref<Control> {
         self.root.clone().upcast()
+    }
+    pub fn view_mode(&self) -> AssetViewMode {
+        self.view_mode.get()
+    }
+    /// Switch presentation without changing the category, search or registered catalog.
+    pub fn set_view_mode(self: &Rc<Self>, mode: AssetViewMode) {
+        if self.view_mode.replace(mode) == mode {
+            return;
+        }
+        for (button, candidate) in [
+            (&self.grid_view, AssetViewMode::Grid),
+            (&self.list_view, AssetViewMode::List),
+        ] {
+            if mode == candidate {
+                button.classes().add("active");
+            } else {
+                button.classes().remove("active");
+            }
+        }
+        self.refresh_tiles();
     }
     pub fn query(&self) -> String {
         self.search.text().unwrap_or_default()
@@ -269,81 +353,233 @@ impl AssetToolbox {
             })
             .cloned()
             .collect();
-        self.tiles.children().clear();
+        self.groups.children().clear();
+        self.buttons.borrow_mut().clear();
         *self.visible.borrow_mut() = assets.iter().map(|asset| asset.id.clone()).collect();
         self.count.set_text(Some(&if assets.is_empty() {
             "No matching controls".to_owned()
         } else {
-            format!("{} controls · drag to the artboard", assets.len())
+            format!("{} controls", assets.len())
         }));
+        if assets.is_empty() {
+            self.groups.children().add(empty_assets());
+            return;
+        }
+        let mut sections = BTreeMap::<String, Vec<DesignerAsset>>::new();
         for asset in assets {
-            let tile = Button::new();
-            tile.classes().add("asset-tile");
-            tile.set_margin(Thickness::uniform(2.0));
-            tile.set_padding(Thickness::symmetric(4.0, 6.0));
-            tile.set_horizontal_alignment(HorizontalAlignment::Stretch);
-            tile.set_vertical_alignment(VerticalAlignment::Stretch);
-            tile.set_horizontal_content_alignment(HorizontalAlignment::Stretch);
-            tile.set_vertical_content_alignment(VerticalAlignment::Center);
-            AutomationProperties::set_name(&tile, Some(&format!("Insert {}", asset.title)));
-            AutomationProperties::set_automation_id(&tile, Some(&format!("Asset.{}", asset.id)));
-            AutomationProperties::set_help_text(&tile, Some(&asset.description));
-            ToolTip::set_tip(
-                &tile,
-                Some(Rc::new(format!(
-                    "{}\n{}\nDrag to place, or press Enter to choose a location",
-                    asset.title, asset.description
-                ))),
-            );
-            let content = StackPanel::new();
-            content.set_spacing(7.0);
-            let icon = PathIcon::new();
-            icon.set_width(22.0);
-            icon.set_height(22.0);
-            icon.set_horizontal_alignment(HorizontalAlignment::Center);
-            icon.set_foreground(Some(SolidColorBrush::from_uint32(0xff99d8ff).into()));
-            icon.set_data(Geometry::parse(asset.icon.path()).unwrap_or_else(|_| {
-                Geometry::parse(AssetIcon::Control.path()).expect("built-in asset vector")
-            }));
-            content.children().add(icon.upcast::<Control>());
+            sections
+                .entry(asset.category.clone())
+                .or_default()
+                .push(asset);
+        }
+        for (name, assets) in sections {
+            let section = StackPanel::new();
+            section.set_spacing(6.0);
+            let heading = Grid::new();
+            heading.set_column_definitions(ColumnDefinitions::parse("*,Auto").unwrap());
+            heading.set_margin(Thickness::new(2.0, 0.0, 4.0, 0.0));
             let title = TextBlock::new();
-            title.set_text(Some(&asset.title));
+            title.set_text(Some(&name));
             title.set_font_size(11.0);
-            title.set_horizontal_alignment(HorizontalAlignment::Center);
-            title.set_text_trimming(<dyn TextTrimming>::character_ellipsis());
-            content.children().add(title.upcast::<Control>());
-            tile.set_content(Some(Control::boxed(&content)));
-            let weak = Rc::downgrade(self);
-            let drag_asset = asset.clone();
-            // Button handles pointer presses in its class handler. Observe the
-            // handled bubble event so native drag initiation still reaches the host.
-            tile.add_handler_with(
-                InputElement::pointer_pressed_event(),
-                move |_, event| {
-                    if event.properties().is_left_button_pressed {
-                        if let Some(this) = weak.upgrade() {
-                            let callback = this.begin_drag.borrow().clone();
-                            if let Some(callback) = callback {
-                                callback(&drag_asset, event);
+            title.set_font_weight(FontWeight::SemiBold);
+            title.set_foreground(Some(SolidColorBrush::from_uint32(0xffb8becc).into()));
+            heading.children().add(title.upcast::<Control>());
+            let count = TextBlock::new();
+            count.set_text(Some(&assets.len().to_string()));
+            count.set_font_size(10.0);
+            count.set_foreground(Some(SolidColorBrush::from_uint32(0xff828795).into()));
+            Grid::set_column(&count, 1);
+            heading.children().add(count.upcast::<Control>());
+            section.children().add(heading.upcast::<Control>());
+            let grid = WrapPanel::new();
+            grid.set_item_width(104.0);
+            grid.set_item_height(80.0);
+            grid.set_item_spacing(4.0);
+            grid.set_line_spacing(4.0);
+            let list = StackPanel::new();
+            list.set_spacing(3.0);
+            let container = if self.view_mode.get() == AssetViewMode::Grid {
+                grid.clone().upcast::<Control>()
+            } else {
+                list.clone().upcast::<Control>()
+            };
+            section.children().add(container);
+            for asset in assets {
+                let tile = Button::new();
+                tile.classes()
+                    .add(if self.view_mode.get() == AssetViewMode::Grid {
+                        "asset-tile"
+                    } else {
+                        "asset-row"
+                    });
+                tile.set_padding(Thickness::uniform(0.0));
+                tile.set_margin(Thickness::uniform(0.0));
+                tile.set_horizontal_alignment(HorizontalAlignment::Stretch);
+                tile.set_vertical_alignment(VerticalAlignment::Stretch);
+                tile.set_horizontal_content_alignment(HorizontalAlignment::Stretch);
+                tile.set_vertical_content_alignment(VerticalAlignment::Stretch);
+                AutomationProperties::set_name(&tile, Some(&format!("Insert {}", asset.title)));
+                AutomationProperties::set_automation_id(
+                    &tile,
+                    Some(&format!("Asset.{}", asset.id)),
+                );
+                AutomationProperties::set_help_text(&tile, Some(&asset.description));
+                ToolTip::set_tip(
+                    &tile,
+                    Some(Rc::new(format!(
+                        "{}\n{}\nDrag to place, or press Enter to choose a location",
+                        asset.title, asset.description
+                    ))),
+                );
+                let content = asset_content(&asset, self.view_mode.get());
+                tile.set_content(Some(Control::boxed(&content)));
+                let weak = Rc::downgrade(self);
+                let drag_asset = asset.clone();
+                // Button handles pointer presses in its class handler. Observe the
+                // handled bubble event so native drag initiation still reaches the host.
+                tile.add_handler_with(
+                    InputElement::pointer_pressed_event(),
+                    move |_, event| {
+                        if event.properties().is_left_button_pressed {
+                            if let Some(this) = weak.upgrade() {
+                                let callback = this.begin_drag.borrow().clone();
+                                if let Some(callback) = callback {
+                                    callback(&drag_asset, event);
+                                }
                             }
                         }
+                    },
+                    RoutingStrategies::BUBBLE,
+                    true,
+                );
+                let weak = Rc::downgrade(self);
+                tile.click(move |_, _| {
+                    if let Some(this) = weak.upgrade() {
+                        let callback = this.activate.borrow().clone();
+                        if let Some(callback) = callback {
+                            callback(&asset);
+                        }
                     }
-                },
-                RoutingStrategies::BUBBLE,
-                true,
-            );
-            let weak = Rc::downgrade(self);
-            tile.click(move |_, _| {
-                if let Some(this) = weak.upgrade() {
-                    let callback = this.activate.borrow().clone();
-                    if let Some(callback) = callback {
-                        callback(&asset);
-                    }
+                });
+                self.buttons.borrow_mut().push(tile.clone());
+                if self.view_mode.get() == AssetViewMode::Grid {
+                    grid.children().add(tile.upcast::<Control>());
+                } else {
+                    list.children().add(tile.upcast::<Control>());
                 }
-            });
-            self.tiles.children().add(tile.upcast::<Control>());
+            }
+            self.groups.children().add(section.upcast::<Control>());
         }
     }
+}
+
+fn toolbox_icon(path: &str, size: f64, color: u32) -> Ref<PathIcon> {
+    let icon = PathIcon::new();
+    icon.set_width(size);
+    icon.set_height(size);
+    icon.set_vertical_alignment(VerticalAlignment::Center);
+    icon.set_foreground(Some(SolidColorBrush::from_uint32(color).into()));
+    icon.set_data(Geometry::parse(path).unwrap_or_else(|_| {
+        Geometry::parse(AssetIcon::Control.path()).expect("built-in asset vector")
+    }));
+    icon
+}
+
+fn view_button(name: &str, path: &str) -> Ref<Button> {
+    let button = Button::new();
+    button.classes().add("icon");
+    button.classes().add("asset-view");
+    button.set_width(28.0);
+    button.set_height(26.0);
+    button.set_padding(Thickness::uniform(6.0));
+    button.set_content(Some(Control::boxed(&toolbox_icon(path, 14.0, 0xffb8becc))));
+    AutomationProperties::set_name(&button, Some(name));
+    ToolTip::set_tip(&button, Some(Rc::new(name.to_owned())));
+    button
+}
+
+fn asset_content(asset: &DesignerAsset, mode: AssetViewMode) -> Ref<Control> {
+    let color = match asset.category.as_str() {
+        "Layout" => 0xff9caecb,
+        "Shapes" => 0xffb6a2f6,
+        "Controls" => 0xffb8becc,
+        _ => 0xffa4c5b7,
+    };
+    let icon = toolbox_icon(
+        asset.icon.path(),
+        if mode == AssetViewMode::Grid {
+            24.0
+        } else {
+            18.0
+        },
+        color,
+    );
+    let title = TextBlock::new();
+    title.set_text(Some(&asset.title));
+    title.set_font_size(11.0);
+    title.set_text_trimming(<dyn TextTrimming>::character_ellipsis());
+    title.set_foreground(Some(SolidColorBrush::from_uint32(0xffe1e4eb).into()));
+    if mode == AssetViewMode::Grid {
+        let content = Grid::new();
+        content.set_row_definitions(RowDefinitions::parse("*,25").unwrap());
+        let preview = Border::new();
+        preview.set_margin(Thickness::new(4.0, 4.0, 4.0, 0.0));
+        preview.set_background(Some(SolidColorBrush::from_uint32(0xff202126).into()));
+        preview.set_corner_radius(CornerRadius::uniform(3.0));
+        icon.set_horizontal_alignment(HorizontalAlignment::Center);
+        preview.set_child(Some(icon.upcast::<Control>()));
+        content.children().add(preview.upcast::<Control>());
+        title.set_vertical_alignment(VerticalAlignment::Center);
+        title.set_horizontal_alignment(HorizontalAlignment::Center);
+        title.set_margin(Thickness::symmetric(6.0, 0.0));
+        Grid::set_row(&title, 1);
+        content.children().add(title.upcast::<Control>());
+        content.upcast()
+    } else {
+        let content = Grid::new();
+        content.set_column_definitions(ColumnDefinitions::parse("28,*").unwrap());
+        content.set_min_height(42.0);
+        content.set_margin(Thickness::new(7.0, 3.0, 6.0, 3.0));
+        icon.set_horizontal_alignment(HorizontalAlignment::Left);
+        content.children().add(icon.upcast::<Control>());
+        let labels = StackPanel::new();
+        labels.set_spacing(2.0);
+        labels.set_vertical_alignment(VerticalAlignment::Center);
+        labels.children().add(title.upcast::<Control>());
+        let description = TextBlock::new();
+        description.set_text(Some(&asset.description));
+        description.set_font_size(10.0);
+        description.set_foreground(Some(SolidColorBrush::from_uint32(0xff9299aa).into()));
+        description.set_text_trimming(<dyn TextTrimming>::character_ellipsis());
+        labels.children().add(description.upcast::<Control>());
+        Grid::set_column(&labels, 1);
+        content.children().add(labels.upcast::<Control>());
+        content.upcast()
+    }
+}
+
+fn empty_assets() -> Ref<Control> {
+    let state = StackPanel::new();
+    state.set_spacing(8.0);
+    state.set_margin(Thickness::new(8.0, 24.0, 8.0, 24.0));
+    state.set_horizontal_alignment(HorizontalAlignment::Center);
+    let icon = toolbox_icon(AssetIcon::Panel.path(), 26.0, 0xff697184);
+    icon.set_horizontal_alignment(HorizontalAlignment::Center);
+    state.children().add(icon.upcast::<Control>());
+    let title = TextBlock::new();
+    title.set_text(Some("No assets found"));
+    title.set_font_size(12.0);
+    title.set_horizontal_alignment(HorizontalAlignment::Center);
+    title.set_foreground(Some(SolidColorBrush::from_uint32(0xffb8becc).into()));
+    state.children().add(title.upcast::<Control>());
+    let hint = TextBlock::new();
+    hint.set_text(Some("Try another name or category."));
+    hint.set_font_size(11.0);
+    hint.set_text_wrapping(TextWrapping::Wrap);
+    hint.set_foreground(Some(SolidColorBrush::from_uint32(0xff828795).into()));
+    hint.set_horizontal_alignment(HorizontalAlignment::Center);
+    state.children().add(hint.upcast::<Control>());
+    state.upcast()
 }
 
 /// Practical defaults rather than runtime-only infrastructure types. Hosts may
