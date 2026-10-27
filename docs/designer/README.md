@@ -69,7 +69,7 @@ when hidden and restores its resized height when reopened.
 state. Use the canvas shelf or Ctrl+Shift+F / Cmd+Shift+F to restore them. `V` selects objects;
 `I` interacts with the native preview when no text editor owns input.
 
-The left dock switches between **Layers**, **Assets** and **Project**:
+The left dock switches between **Layers**, **Assets**, **Library** and **Project**:
 
 - **Layers** uses a virtualized TreeDataGrid for source, visual and logical trees. Expansion and
   selection are retained across refreshes. One column shows semantic kind icons and authored
@@ -84,6 +84,11 @@ The left dock switches between **Layers**, **Assets** and **Project**:
   `DesignerWorkspace::register_asset` or use `AssetToolbox` independently.
 - **Project** uses a hierarchical TreeDataGrid for project folders, XAML documents and assets.
   File activation shares the same canonical URI identity as tabs, language edits and saves.
+- **Library** catalogs authored controls, templates, themes, styles and resources, together with
+  source-backed project and host libraries. Instance links expose **Edit current** and **Edit a
+  copy**; a definition canvas retains original source identities and a return path to the instance.
+  See [components, themes and resource scopes](components.md) for the reusable catalog, native
+  inspectors, project registration and atomic dependency-copy contracts.
 
 The property dock is a TreeDataGrid with collapsible categories and lazily created value editors.
 It includes scrubbable numeric labels, visual alignment/flow choices, linked spacing/corner
@@ -98,6 +103,10 @@ button removes the authored value. Object-valued property elements can be reveal
 and reset without flattening their object graph. Tooltips read the current runtime type, effective
 value and priority when opened, so animation sampling does not replace the editor or its draft.
 An editor retained across a document switch or revision change cannot write to the new document.
+The shared [typed property editor pipeline](property-editors.md) also supplies compound values,
+reflected enums/flags, font and time values, structured bindings, theme-aware resource choices,
+resource extraction, and staged object/collection editing. The same metadata-aware factories
+serve instance properties, theme setters, resource objects and nested object drafts.
 Runtime-only objects remain inspectable without receiving invented source IDs.
 
 Drop a value onto a property cell to validate and apply it to the selection. Drag a keyed resource
@@ -544,6 +553,9 @@ The additional tools are:
 | `designer_states` / `designer_state` / `designer_state_actions` | State groups, setters, transitions and native actions |
 | `designer_behaviors` / `designer_behavior` | Behavior/trigger/action authoring and explicit native execution |
 | `designer_properties` / `designer_property` | Runtime-derived property schemas, typed values and transactional edits |
+| `designer_components` / `designer_component` | Component catalog and transactional resource/template/theme authoring |
+| `designer_component_resources` / `designer_component_references` | Theme-aware visible resources and authored reference analysis |
+| `designer_definition_scope` / `designer_definition` | Native definition preview, sample host options and guarded scope navigation |
 | `designer_project` / `designer_project_edit` | Solution, tab, save and document lifecycle |
 | `designer_build_plan` / `designer_project_task` | Reviewable process plans and explicit build/run/cancel |
 | `designer_language` / `designer_language_apply` | Semantic queries and versioned cross-document refactoring |
