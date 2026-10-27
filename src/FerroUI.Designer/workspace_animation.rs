@@ -19,7 +19,12 @@ struct AuthoringField {
     label: Ref<TextBlock>,
     input: Ref<TextBox>,
 }
-fn labeled_field(panel: &StackPanel, label: &str, value: &str) -> AuthoringField {
+fn labeled_field(
+    panel: &StackPanel,
+    name: Option<&str>,
+    label: &str,
+    value: &str,
+) -> AuthoringField {
     let row = Grid::new();
     row.set_column_definitions(ColumnDefinitions::parse("104,*").unwrap());
     let title = TextBlock::new();
@@ -37,6 +42,7 @@ fn labeled_field(panel: &StackPanel, label: &str, value: &str) -> AuthoringField
     title.set_margin(Thickness::new(0.0, 0.0, 8.0, 0.0));
     row.children().add(title.clone().upcast::<Control>());
     let text = TextBox::new();
+    text.set_name(name.map(str::to_owned));
     text.set_text(Some(value));
     text.classes().add("designer-field");
     text.set_min_width(0.0);
@@ -52,9 +58,15 @@ fn labeled_field(panel: &StackPanel, label: &str, value: &str) -> AuthoringField
     }
 }
 fn field(panel: &StackPanel, label: &str, value: &str) -> Ref<TextBox> {
-    labeled_field(panel, label, value).input
+    labeled_field(panel, None, label, value).input
 }
-fn choice_field(panel: &StackPanel, label: &str, value: &str, choices: &[&str]) -> Ref<ComboBox> {
+fn choice_field(
+    panel: &StackPanel,
+    name: Option<&str>,
+    label: &str,
+    value: &str,
+    choices: &[&str],
+) -> Ref<ComboBox> {
     let row = Grid::new();
     row.set_column_definitions(ColumnDefinitions::parse("104,*").unwrap());
     let title = TextBlock::new();
@@ -64,6 +76,7 @@ fn choice_field(panel: &StackPanel, label: &str, value: &str, choices: &[&str]) 
     title.set_vertical_alignment(ferroui_base::layout::VerticalAlignment::Center);
     row.children().add(title.upcast::<Control>());
     let picker = ComboBox::new();
+    picker.set_name(name.map(str::to_owned));
     picker.classes().add("designer-field");
     picker.set_horizontal_alignment(HorizontalAlignment::Stretch);
     for choice in choices {
@@ -441,6 +454,7 @@ impl DesignerWorkspace {
         section(panel, "Playback");
         let playback = choice_field(
             panel,
+            None,
             "Behavior",
             &format!("{:?}", timeline.playback_behavior),
             &["Auto", "Always", "OnlyIfVisible"],
@@ -456,12 +470,14 @@ impl DesignerWorkspace {
         );
         let direction = choice_field(
             panel,
+            None,
             "Direction",
             &format!("{:?}", timeline.playback_direction),
             &["Normal", "Reverse", "Alternate", "AlternateReverse"],
         );
         let fill = choice_field(
             panel,
+            None,
             "Fill mode",
             &format!("{:?}", timeline.fill),
             &["None", "Forward", "Backward", "Both"],
@@ -785,28 +801,25 @@ impl DesignerWorkspace {
         );
         let trigger = choice_field(
             panel,
+            Some("BehaviorTriggerKind"),
             "When",
             "Event",
             &["Event", "Data condition", "Custom"],
         );
-        trigger.set_name(Some("BehaviorTriggerKind".into()));
-        let custom_trigger = labeled_field(panel, "Trigger type", "");
-        custom_trigger
-            .input
-            .set_name(Some("BehaviorTriggerType".into()));
+        let custom_trigger = labeled_field(panel, Some("BehaviorTriggerType"), "Trigger type", "");
         custom_trigger
             .input
             .set_placeholder_text(Some("CustomTrigger"));
         custom_trigger.row.set_is_visible(false);
-        let event = labeled_field(panel, "Event", "Click");
-        event.input.set_name(Some("BehaviorTriggerSource".into()));
-        let comparison = labeled_field(panel, "Comparison", "Equal");
-        comparison.input.set_name(Some("BehaviorComparison".into()));
+        let event = labeled_field(panel, Some("BehaviorTriggerSource"), "Event", "Click");
+        let comparison = labeled_field(panel, Some("BehaviorComparison"), "Comparison", "Equal");
         comparison.row.set_is_visible(false);
-        let compare_value = labeled_field(panel, "Compare value", "True");
-        compare_value
-            .input
-            .set_name(Some("BehaviorComparisonValue".into()));
+        let compare_value = labeled_field(
+            panel,
+            Some("BehaviorComparisonValue"),
+            "Compare value",
+            "True",
+        );
         compare_value.row.set_is_visible(false);
         let weak_trigger = trigger.downgrade();
         let source_label = event.label.clone();
@@ -832,6 +845,7 @@ impl DesignerWorkspace {
         section(panel, "Action");
         let kind = choice_field(
             panel,
+            Some("BehaviorActionKind"),
             "Do",
             "Change property",
             &[
@@ -843,22 +857,20 @@ impl DesignerWorkspace {
                 "Custom",
             ],
         );
-        kind.set_name(Some("BehaviorActionKind".into()));
-        let custom_action = labeled_field(panel, "Action type", "");
-        custom_action
-            .input
-            .set_name(Some("BehaviorActionType".into()));
+        let custom_action = labeled_field(panel, Some("BehaviorActionType"), "Action type", "");
         custom_action
             .input
             .set_placeholder_text(Some("CustomAction"));
         custom_action.row.set_is_visible(false);
-        let target = labeled_field(panel, "Target (Name or binding)", "");
-        target.input.set_name(Some("BehaviorActionTarget".into()));
+        let target = labeled_field(
+            panel,
+            Some("BehaviorActionTarget"),
+            "Target (Name or binding)",
+            "",
+        );
         target.input.set_placeholder_text(Some("Selected object"));
-        let property = labeled_field(panel, "Property", "Opacity");
-        property.input.set_name(Some("BehaviorActionMember".into()));
-        let value = labeled_field(panel, "Value", "0.5");
-        value.input.set_name(Some("BehaviorActionValue".into()));
+        let property = labeled_field(panel, Some("BehaviorActionMember"), "Property", "Opacity");
+        let value = labeled_field(panel, Some("BehaviorActionValue"), "Value", "0.5");
         let weak_kind = kind.downgrade();
         let custom_action_row = custom_action.row.clone();
         let target_row = target.row.clone();

@@ -100,6 +100,14 @@ fn behavior_pickers_reveal_relevant_fields_and_attach_one_undoable_action() {
         .unwrap();
     session.borrow_mut().select([target]);
     workspace.refresh(true);
+    // Show the workspace before entering the mode: controls become styled as soon
+    // as their rows attach, so names must already be assigned at construction.
+    let window = ferroui_controls::Window::new();
+    window.set_width(1280.0);
+    window.set_height(820.0);
+    window.set_content(Some(Control::boxed(workspace.control())));
+    window.show();
+    window.update_layout();
     click(&workspace.control().get_control::<Button>("BehaviorsMode"));
     assert!(
         !workspace
@@ -186,6 +194,7 @@ fn behavior_pickers_reveal_relevant_fields_and_attach_one_undoable_action() {
             .get_control::<ScrollViewer>("AuthoringScroll")
             .is_visible()
     );
+    window.close();
 }
 
 #[test]
