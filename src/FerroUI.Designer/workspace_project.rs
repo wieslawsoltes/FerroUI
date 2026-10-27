@@ -22,6 +22,7 @@ pub(super) struct Tab {
     pub(super) document: Document,
     pub(super) saved: String,
     pub(super) file: Option<Rc<dyn ferroui_base::platform::storage::IStorageFile>>,
+    pub(super) layers: Option<crate::LayerViewSnapshot>,
 }
 #[derive(Default)]
 pub(super) struct ProjectUi {
@@ -127,6 +128,7 @@ impl DesignerWorkspace {
                 document: session.document().clone(),
                 saved: self.saved_source.borrow().clone(),
                 file: self.file.borrow().clone(),
+                layers: Some(session.layer_view_snapshot()),
             },
         );
     }
@@ -140,7 +142,7 @@ impl DesignerWorkspace {
             self.apply_source();
         }
         self.capture_tab();
-        let (document, saved, file) = {
+        let (document, saved, file, layers) = {
             let mut state = self.project.borrow_mut();
             if !state.tabs.contains_key(uri) {
                 let workspace = state
@@ -152,16 +154,25 @@ impl DesignerWorkspace {
                     document: buffer.document().clone(),
                     saved: buffer.saved_source().unwrap_or("").into(),
                     file: None,
+                    layers: None,
                 };
                 state.tabs.insert(uri.into(), tab);
             }
             let tab = &state.tabs[uri];
-            (tab.document.clone(), tab.saved.clone(), tab.file.clone())
+            (
+                tab.document.clone(),
+                tab.saved.clone(),
+                tab.file.clone(),
+                tab.layers.clone(),
+            )
         };
         self.disconnect_sharing();
         self.session
             .borrow_mut()
             .restore_document(document, uri.to_owned())?;
+        if let Some(snapshot) = layers {
+            self.session.borrow_mut().restore_layer_view(&snapshot);
+        }
         if let Some(workspace) = self.project.borrow_mut().workspace.as_mut() {
             if workspace.buffer(uri).is_some() {
                 workspace.activate(uri).map_err(|e| e.to_string())?;

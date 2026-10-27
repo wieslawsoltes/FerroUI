@@ -79,6 +79,7 @@ pub struct DesignerWorkspace {
     sharing: RefCell<Option<Rc<crate::sharing::SharingController>>>,
     sharing_panel: RefCell<Option<Rc<sharing::SharingPanel>>>,
     shell: shell::WorkspaceShell,
+    preview_environment: RefCell<preview_environment::PreviewEnvironmentUi>,
 }
 
 impl DesignerWorkspace {
@@ -153,11 +154,16 @@ impl DesignerWorkspace {
             sharing: RefCell::new(None),
             sharing_panel: RefCell::new(None),
             shell: shell::WorkspaceShell::default(),
+            preview_environment: RefCell::new(Default::default()),
         });
         this.connect();
         this.connect_inspectors();
         this.connect_inspector_drag();
         this.connect_components();
+        this.connect_preview_environment();
+        this.connect_layer_commands();
+        this.connect_focus_order_commands();
+        this.connect_design_time_commands();
         this.refresh(true);
         Ok(this)
     }
@@ -196,13 +202,11 @@ impl DesignerWorkspace {
         (self.artboard.width(), self.artboard.height())
     }
     pub fn set_artboard_size(&self, width: f64, height: f64) -> Result<(), String> {
-        if !width.is_finite() || !height.is_finite() || width <= 0.0 || height <= 0.0 {
-            return Err("Artboard dimensions must be finite and positive".into());
-        }
-        self.artboard.set_width(width);
-        self.artboard.set_height(height);
-        self.refresh_shell();
-        Ok(())
+        self.set_preview_environment(crate::PreviewEnvironment {
+            width,
+            height,
+            ..self.preview_environment()
+        })
     }
     pub fn zoom(&self) -> f64 {
         self.zoom.get()
@@ -663,9 +667,12 @@ impl DesignerWorkspace {
         self.last_generation.set(generation);
         *self.last_selection.borrow_mut() = selected;
         drop(session);
+        self.refresh_layer_commands();
         self.refresh_file_title();
-        if changed {
+        if changed || generation_changed {
             self.rebuild_outline();
+        }
+        if changed {
             self.rebuild_properties();
             self.rebuild_layout();
             self.rebuild_tracks();
@@ -809,14 +816,22 @@ mod authoring;
 #[path = "workspace_components.rs"]
 mod components;
 pub use components::DesignerDefinitionAsset;
+#[path = "workspace_design_time.rs"]
+mod design_time;
 #[path = "workspace_files.rs"]
 mod files;
+#[path = "workspace_focus_order.rs"]
+mod focus_order;
 #[path = "inspector_drag.rs"]
 mod inspector_drag;
 #[path = "inspector_controls.rs"]
 mod inspectors;
+#[path = "workspace_layers.rs"]
+mod layer_commands;
 #[path = "workspace_layout.rs"]
 mod layout;
+#[path = "workspace_preview_environment.rs"]
+mod preview_environment;
 #[path = "workspace_project.rs"]
 mod project;
 #[path = "workspace_sharing.rs"]

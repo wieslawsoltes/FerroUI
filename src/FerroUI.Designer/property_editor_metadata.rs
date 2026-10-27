@@ -599,7 +599,7 @@ pub(super) fn object_property_types(node: &Node) -> Vec<ObjectPropertyType> {
     values.into_values().collect()
 }
 
-fn markup_type_for_node(node: &Node) -> Option<&'static MarkupType> {
+pub(crate) fn markup_type_for_node(node: &Node) -> Option<&'static MarkupType> {
     let namespace = node.namespace_uri.as_deref()?;
     let candidates = registered_markup_types()
         .into_iter()

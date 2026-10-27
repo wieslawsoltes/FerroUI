@@ -364,6 +364,7 @@ impl DesignerWorkspace {
                 document: active_document,
                 saved: self.saved_source.borrow().clone(),
                 file: self.file.borrow().clone(),
+                layers: Some(self.session.borrow().layer_view_snapshot()),
             },
         );
         for change in changes {
@@ -382,6 +383,7 @@ impl DesignerWorkspace {
                     document: buffer.document().clone(),
                     saved: buffer.saved_source().unwrap_or("").into(),
                     file: None,
+                    layers: None,
                 };
                 tabs.insert(change.uri.clone(), tab);
             }

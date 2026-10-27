@@ -34,6 +34,13 @@ pub(super) struct TreeEntry {
     pub project: Option<usize>,
     pub uri: Option<String>,
     pub initially_expanded: Option<bool>,
+    pub(super) layer_actions: Option<LayerRowActions>,
+}
+
+#[derive(Clone)]
+pub(super) struct LayerRowActions {
+    state: crate::LayerState,
+    invoke: Rc<dyn Fn(crate::LayerCommand)>,
 }
 
 pub(super) struct TreeRow {
@@ -323,7 +330,14 @@ fn hierarchy_cell(row: &TreeRow, project: bool) -> Ref<Control> {
 
     let root = Grid::new();
     root.classes().add("designer-layer-cell");
-    root.set_column_definitions(ColumnDefinitions::parse("22,*").unwrap());
+    root.set_column_definitions(
+        ColumnDefinitions::parse(if row.entry.layer_actions.is_some() {
+            "22,*,22,22"
+        } else {
+            "22,*"
+        })
+        .unwrap(),
+    );
     root.set_min_height(28.0);
     root.set_margin(Thickness::new(0.0, 0.0, 6.0, 0.0));
     let (path, color, metadata) = hierarchy_icon(&row.entry, project);
@@ -348,7 +362,78 @@ fn hierarchy_cell(row: &TreeRow, project: bool) -> Ref<Control> {
     name.set_text_trimming(<dyn TextTrimming>::character_ellipsis());
     name.set_vertical_alignment(VerticalAlignment::Center);
     Grid::set_column(&name, 1);
+    if row
+        .entry
+        .layer_actions
+        .as_ref()
+        .is_some_and(|actions| actions.state.is_hidden() || actions.state.outside_isolation)
+    {
+        name.set_opacity(0.5);
+    }
     root.children().add(name.upcast::<Control>());
+    if let Some(actions) = &row.entry.layer_actions {
+        for (column, command, active, inherited, title, path) in [
+            (
+                2,
+                crate::LayerCommand::ToggleLock,
+                actions.state.locked,
+                actions.state.inherited_locked,
+                if actions.state.locked {
+                    "Unlock in editor"
+                } else if actions.state.inherited_locked {
+                    "Locked by an ancestor"
+                } else {
+                    "Lock in editor"
+                },
+                if actions.state.is_locked() {
+                    "M5 9V6A5 5 0 0 1 15 6V9H17V19H3V9Z M7 9H13V6A3 3 0 0 0 7 6Z M9 12H11V16H9Z"
+                } else {
+                    "M5 9V6A5 5 0 0 1 14 3L12.5 4.5A3 3 0 0 0 7 6V9H17V19H3V9Z M9 12H11V16H9Z"
+                },
+            ),
+            (
+                3,
+                crate::LayerCommand::ToggleHidden,
+                actions.state.hidden,
+                actions.state.inherited_hidden,
+                if actions.state.hidden {
+                    "Show in editor"
+                } else if actions.state.inherited_hidden {
+                    "Hidden by an ancestor"
+                } else {
+                    "Hide in editor"
+                },
+                if actions.state.is_hidden() {
+                    "M2 1L19 18L18 19L1 2Z M1 10Q4 3 10 3Q16 3 19 10L17 12L15.5 10.5L17 10Q14 5 10 5L8 5.5L6.5 4Z M3 7L5 9L3 10Q6 15 10 15L12 14.5L14 16Q7 20 1 10Z"
+                } else {
+                    "M1 10Q5 3 10 3Q15 3 19 10Q15 17 10 17Q5 17 1 10Z M3 10Q6 15 10 15Q14 15 17 10Q14 5 10 5Q6 5 3 10Z M10 7A3 3 0 1 1 10 13A3 3 0 1 1 10 7Z"
+                },
+            ),
+        ] {
+            let button = Button::new();
+            button.classes().add("icon");
+            button.set_min_width(0.0);
+            button.set_width(21.0);
+            button.set_height(24.0);
+            button.set_padding(Thickness::uniform(3.0));
+            button.set_is_enabled(active || !inherited);
+            button.classes().set("active", active);
+            AutomationProperties::set_name(&button, Some(title));
+            ToolTip::set_tip(&button, Some(Rc::new(title.to_owned())));
+            let icon = PathIcon::new();
+            icon.set_width(13.0);
+            icon.set_height(13.0);
+            icon.set_data(Geometry::parse(path).expect("layer action vector"));
+            button.set_content(Some(Control::boxed(&icon)));
+            let invoke = actions.invoke.clone();
+            button.click(move |_, event| {
+                invoke(command);
+                event.set_handled(true);
+            });
+            Grid::set_column(&button, column);
+            root.children().add(button.upcast::<Control>());
+        }
+    }
     root.upcast()
 }
 
@@ -475,6 +560,8 @@ struct OutlineSnapshot {
     mode: OutlineMode,
     filter: String,
     scope: Option<NodeId>,
+    layer_epoch: u64,
+    scope_epoch: u64,
 }
 
 impl OutlineSnapshot {
@@ -483,6 +570,7 @@ impl OutlineSnapshot {
             && self.revision == session.document().revision()
             && std::ptr::eq(self.ast.as_ref(), session.document().ast())
             && self.scope == session.definition_scope().map(|scope| scope.node)
+            && self.scope_epoch == session.definition_scope_epoch()
     }
 }
 
@@ -495,6 +583,8 @@ impl PartialEq for OutlineSnapshot {
             && self.mode == other.mode
             && self.filter == other.filter
             && self.scope == other.scope
+            && self.layer_epoch == other.layer_epoch
+            && self.scope_epoch == other.scope_epoch
     }
 }
 
@@ -1186,6 +1276,8 @@ impl DesignerWorkspace {
             },
             mode: self.outline_mode.get(),
             scope: session.definition_scope().map(|scope| scope.node),
+            layer_epoch: session.layer_view_epoch(),
+            scope_epoch: session.definition_scope_epoch(),
             filter: self
                 .root
                 .get_control::<TextBox>("OutlineSearch")
@@ -1220,6 +1312,23 @@ impl DesignerWorkspace {
                     })
                     .map(|node| {
                         let resource = resource_key(node);
+                        let layer_actions =
+                            session.capture_layer_edit(&[node.id]).ok().map(|snapshot| {
+                                let weak = Rc::downgrade(self);
+                                LayerRowActions {
+                                    state: session.layer_state(node.id),
+                                    invoke: Rc::new(move |command| {
+                                        if let Some(this) = weak.upgrade() {
+                                            let result = this
+                                                .session
+                                                .borrow_mut()
+                                                .apply_layer_edit(&snapshot, command);
+                                            this.refresh(true);
+                                            this.report(result);
+                                        }
+                                    }),
+                                }
+                            });
                         TreeEntry {
                             key: format!("source:{}", node.id),
                             parent: (snapshot.scope != Some(node.id))
@@ -1233,6 +1342,7 @@ impl DesignerWorkspace {
                                 |key| format!("XAML · Resource key: {key}"),
                             ),
                             source: Some(node.id),
+                            layer_actions,
                             initially_expanded: Some(
                                 snapshot.scope == Some(node.id) || !is_metadata_container(node),
                             ),

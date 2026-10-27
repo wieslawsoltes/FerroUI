@@ -70,20 +70,16 @@ impl DesignerWorkspace {
         true
     }
     pub fn set_preview_dark(&self, dark: bool) {
-        self.root
-            .get_control::<ThemeVariantScope>("PreviewThemeScope")
-            .set_requested_theme_variant(Some(if dark {
-                ferroui_base::styling::ThemeVariant::dark()
+        // The legacy toggle and the staged environment editor share one state model.
+        let value = crate::PreviewEnvironment {
+            theme: if dark {
+                crate::PreviewTheme::Dark
             } else {
-                ferroui_base::styling::ThemeVariant::light()
-            }));
-        self.root
-            .get_control::<Button>("PreviewTheme")
-            .set_content(Some(Rc::new(if dark {
-                "Dark preview".to_owned()
-            } else {
-                "Light preview".to_owned()
-            })));
+                crate::PreviewTheme::Light
+            },
+            ..self.preview_environment()
+        };
+        let _ = self.set_preview_environment(value);
     }
     pub(super) fn connect_file_commands(self: &Rc<Self>) {
         for name in [

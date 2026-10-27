@@ -30,6 +30,7 @@ impl DesignerSession {
         self.preview
             .set_definition_scope(Some(scope), &self.document)?;
         self.definition_scope_epoch = self.definition_scope_epoch.wrapping_add(1);
+        self.refresh_layer_visuals();
         let first_visual = self
             .document
             .ast()
@@ -51,6 +52,7 @@ impl DesignerSession {
         self.stop_definition_preview();
         self.preview.set_definition_scope(None, &self.document)?;
         self.definition_scope_epoch = self.definition_scope_epoch.wrapping_add(1);
+        self.refresh_layer_visuals();
         self.select(selection);
         Ok(())
     }
@@ -59,8 +61,9 @@ impl DesignerSession {
         self.preview.definition_scope.as_ref()
     }
 
-    /// Changes after every accepted preview-scope transition, including returning to
-    /// the same definition. Source revisions alone cannot retire a retained editor.
+    /// Changes after accepted scope, design-data and preview-environment transitions,
+    /// including returning to the same definition. Source revisions alone cannot retire
+    /// an editor or spatial gesture when native preview conditions change.
     pub fn definition_scope_epoch(&self) -> u64 {
         self.definition_scope_epoch
     }

@@ -927,6 +927,10 @@ fn application_layout_factory_uses_runtime_fallback_for_move_resize_and_drop() {
         Rc::new(|request| {
             let request = PreviewRequest {
                 source: request.source.replace("app:Flow", "StackPanel"),
+                preview_source: request
+                    .preview_source
+                    .as_ref()
+                    .map(|source| source.replace("app:Flow", "StackPanel")),
                 uri: request.uri.clone(),
                 configuration: request.configuration.clone(),
             };

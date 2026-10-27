@@ -14,10 +14,16 @@ mod component_session;
 mod definition_manipulation;
 mod definition_projection;
 mod definition_session;
+mod design_time;
+mod design_time_samples;
 mod editors;
+mod focus_order;
+mod focus_order_editor;
 mod grid_track_editor;
 mod interaction_session;
+mod layer_state;
 mod layout_helper_renderer;
+mod preview_environment;
 mod preview_host;
 mod preview_source;
 mod property_color_editor;
@@ -37,6 +43,10 @@ pub use chrome::designer_chrome_style;
 pub use component_browser::{ComponentLibrary, ComponentLibraryFilter, ComponentLibraryItem};
 pub use component_session::ComponentEditPreview;
 pub use definition_projection::{DefinitionPreviewOptions, DefinitionScope};
+pub use design_time::{
+    DesignTimeEdit, DesignTimeEditor, DesignTimeEditorModel, DesignTimeProperty,
+    DesignTimeSnapshot, plan_design_time_edits,
+};
 pub use editors::{
     PropertyEditorContext, PropertyEditorFactory, PropertyEditorKind, PropertyEditorMetadata,
     PropertyLiteralValidator, PropertyObjectDraft, PropertyResourceChoice, PropertyValueCommit,
@@ -45,7 +55,17 @@ pub use editors::{
 };
 pub use ferroui_designer_core::{Document, Edit, NodeId};
 pub use ferroui_designer_tools as tools;
+pub use focus_order::{
+    FocusLabelAssociation, FocusLabelTarget, FocusOrderCatalog, FocusOrderEdit, FocusOrderItem,
+    FocusOrderScope, FocusOrderSnapshot, navigation_mode_name,
+};
+pub use focus_order_editor::FocusOrderEditor;
 pub use grid_track_editor::GridTrackEditor;
+pub use layer_state::{LayerCommand, LayerEditSnapshot, LayerState, LayerViewSnapshot};
+pub use preview_environment::{
+    PREVIEW_SIZE_PRESETS, PreviewEnvironment, PreviewEnvironmentEditor, PreviewFlowDirection,
+    PreviewSizePreset, PreviewTheme,
+};
 pub use preview_host::{
     PreviewFactory, PreviewHostOptions, PreviewRequest, ResourcePreviewFactory,
 };
@@ -69,6 +89,8 @@ pub use workspace::{DesignerDefinitionAsset, DesignerWorkspace, OutlineCommand, 
 /// The self-contained example opened by Designer Studio and usable by hosts.
 pub const STARTER_XAML: &str = include_str!("Starter.xaml");
 
+#[cfg(test)]
+mod layer_state_tests;
 #[cfg(test)]
 mod native_extensions_tests;
 #[cfg(test)]

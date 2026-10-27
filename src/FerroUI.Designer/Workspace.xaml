@@ -83,6 +83,24 @@
             <Button Name="SourceMode" Classes="nav active" Content="Source" FontSize="11" Padding="8,3" ToolTip.Tip="Authored XAML hierarchy · drag to reorder or nest" />
             <Button Name="VisualMode" Classes="nav" Content="Visual" FontSize="11" Padding="8,3" ToolTip.Tip="Inspect the live visual tree" />
             <Button Name="LogicalMode" Classes="nav" Content="Logical" FontSize="11" Padding="8,3" ToolTip.Tip="Inspect the live logical tree" />
+            <Button Name="LayerActions" Classes="icon" Width="24" Height="26" Content="⋯" ToolTip.Tip="Layer visibility, locking, isolation and selection">
+              <Button.Flyout>
+                <MenuFlyout>
+                  <MenuItem Name="LayerToggleLock" Header="Lock / unlock in editor" />
+                  <MenuItem Name="LayerToggleHidden" Header="Hide / show in editor" />
+                  <MenuItem Name="LayerIsolate" Header="Isolate selection" />
+                  <MenuItem Name="LayerExitIsolation" Header="Exit isolation" />
+                  <Separator />
+                  <MenuItem Name="LayerUnlockAll" Header="Unlock all layers" />
+                  <MenuItem Name="LayerShowAll" Header="Show all layers" />
+                  <Separator />
+                  <MenuItem Name="LayerSelectParent" Header="Select parent" />
+                  <MenuItem Name="LayerSelectChildren" Header="Select children" />
+                  <MenuItem Name="LayerSelectNext" Header="Select next sibling" />
+                  <MenuItem Name="LayerSelectPrevious" Header="Select previous sibling" />
+                </MenuFlyout>
+              </Button.Flyout>
+            </Button>
           </StackPanel>
           <ContentControl Name="OutlineHost" Grid.Row="2" HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch" Margin="4,2,4,4" />
           <Border Grid.Row="3" BorderBrush="{DynamicResource DesignerBorderBrush}" BorderThickness="0,1,0,0" Padding="12,5">
@@ -124,6 +142,7 @@
           <StackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
             <PathIcon Width="13" Height="13" Foreground="{DynamicResource DesignerMutedBrush}" Data="M2,0 L4,0 4,2 14,2 14,0 16,0 16,2 18,2 18,4 16,4 16,14 18,14 18,16 16,16 16,18 14,18 14,16 4,16 4,18 2,18 2,16 0,16 0,14 2,14 2,4 0,4 0,2 2,2 Z M4,4 L4,14 14,14 14,4 Z" />
             <TextBlock Name="CanvasSize" Text="800 × 520" Foreground="{DynamicResource DesignerSecondaryBrush}" FontSize="11" VerticalAlignment="Center" />
+            <Button Name="PreviewEnvironment" Classes="icon" Width="24" Height="26" Content="⋯" ToolTip.Tip="Preview environment · size presets, orientation, theme and reading direction" />
           </StackPanel>
           <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="2">
             <Button Name="LayoutHelpersToggle" Classes="nav active" Content="Helpers" FontSize="11" Padding="7,3" ToolTip.Tip="Layout helpers · H. Drag gaps, margins and Grid tracks. F8 cycles handles; arrows adjust. Hold Alt for free movement." />
@@ -137,6 +156,7 @@
         </Grid>
       </Border>
       <Grid Name="CanvasViewport" Grid.Row="2" RowDefinitions="Auto,*" Background="{DynamicResource DesignerCanvasBrush}">
+        <StackPanel>
         <Border Name="ComponentScopeBar" Classes="designer-chrome" IsVisible="False" Background="#FF302A40" BorderBrush="#FF594C73" BorderThickness="0,0,0,1" Padding="10,4">
           <Grid ColumnDefinitions="Auto,*,Auto">
             <Button Name="ComponentScopeBack" Classes="nav" Content="← Document" ToolTip.Tip="Return to the document and its previous selection" />
@@ -144,6 +164,13 @@
             <Button Name="ComponentScopeDefinition" Grid.Column="2" Classes="nav" Content="Definition" ToolTip.Tip="Inspect the active definition" />
           </Grid>
         </Border>
+        <Border Name="LayerIsolationBanner" Classes="designer-chrome" IsVisible="False" Background="{DynamicResource DesignerPanelBrush}" BorderBrush="{DynamicResource DesignerBorderBrush}" BorderThickness="0,0,0,1" Padding="12,4">
+          <Grid ColumnDefinitions="*,Auto">
+            <TextBlock Name="LayerIsolationText" Text="Isolated layers" Foreground="{DynamicResource DesignerAccentBrush}" FontSize="11" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" />
+            <Button Name="LayerIsolationExit" Grid.Column="1" Classes="nav" Content="Exit isolation" />
+          </Grid>
+        </Border>
+        </StackPanel>
         <ScrollViewer Name="ArtboardScroll" Grid.Row="1" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto">
           <Border Padding="40,28,40,66" HorizontalAlignment="Center" VerticalAlignment="Center">
             <StackPanel Spacing="8">
@@ -197,6 +224,9 @@
             <Button Name="FocusCanvas" Classes="icon" ToolTip.Tip="Focus canvas · hide side panels · Ctrl+Shift+F">
               <PathIcon Width="15" Height="15" Data="M0,0 L7,0 7,2 2,2 2,7 0,7 Z M11,0 L18,0 18,7 16,7 16,2 11,2 Z M0,11 L2,11 2,16 7,16 7,18 0,18 Z M16,11 L18,11 18,18 11,18 11,16 16,16 Z" />
             </Button>
+            <Border Width="1" Height="20" Background="{DynamicResource DesignerBorderBrush}" Margin="5,0" />
+            <Button Name="DesignData" Classes="nav" Content="Data" ToolTip.Tip="Design-time property overrides and sample data" />
+            <Button Name="FocusOrder" Classes="nav" Content="Focus" ToolTip.Tip="Keyboard tab order and label targets" />
           </StackPanel>
         </Border>
       </Grid>
