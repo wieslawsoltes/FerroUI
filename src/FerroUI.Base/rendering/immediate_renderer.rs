@@ -37,7 +37,7 @@ impl ImmediateRenderer {
     ) {
         let opacity = visual.opacity();
         // NaN opacity is not rendered either (`Opacity is not > 0`).
-        if !visual.is_visible() || !(opacity > 0.0) {
+        if !visual.is_visible() || visual.is_render_suppressed() || !(opacity > 0.0) {
             return;
         }
 

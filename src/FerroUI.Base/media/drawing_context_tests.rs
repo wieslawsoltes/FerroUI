@@ -309,6 +309,33 @@ fn immediate_renderer_skips_transparent_visuals() {
     assert!(render_tree(&root).iter().all(|e| !e.starts_with("DrawRectangle")));
 }
 
+#[test]
+fn immediate_renderer_honors_counted_render_suppression_but_captures_composition_hidden_visuals() {
+    let root = Painted::new(Rect::new(0.0, 0.0, 100.0, 100.0));
+    let child = Painted::new(Rect::new(0.0, 0.0, 40.0, 40.0));
+    let nested = Painted::new(Rect::new(0.0, 0.0, 10.0, 10.0));
+    root.visual_children().add(child.clone().upcast());
+    child.visual_children().add(nested.clone().upcast());
+    child.set_opacity(0.4);
+    let draws = || render_tree(&root).iter().filter(|entry| entry.starts_with("DrawRectangle")).count();
+    assert_eq!(draws(), 3);
+    child.add_composition_hide_request();
+    assert_eq!(draws(), 3, "connected-animation sources remain capturable");
+    child.add_render_suppression_request();
+    child.add_render_suppression_request();
+    assert_eq!(draws(), 1, "suppression excludes the complete subtree");
+    assert!(child.is_visible());
+    assert_eq!(child.opacity(), 0.4);
+    child.remove_render_suppression_request();
+    assert_eq!(draws(), 1, "the other presentation owner still suppresses it");
+    child.remove_render_suppression_request();
+    assert_eq!(draws(), 3);
+    assert!(child.is_hidden_by_composition(), "composition state is independent");
+    child.remove_render_suppression_request();
+    assert_eq!(draws(), 3, "unbalanced release cannot underflow");
+    child.remove_composition_hide_request();
+}
+
 // --- images, drawings, effects, acrylic --------------------------------------
 
 use crate::media::effects::{BlurEffect, EffectExtensions, IEffect};

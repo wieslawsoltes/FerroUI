@@ -64,6 +64,9 @@ struct CompositionExtras {
     /// The number of outstanding requests to hide the composition visual (a connected animation
     /// shows the element through a visual surface while it flies).
     hide_requests: u32,
+    /// Source-free presentation suppression honored by both the compositor and immediate
+    /// rendering. Unlike composition hiding, bitmap/visual-brush captures also omit it.
+    render_suppression_requests: u32,
     /// The number of outstanding requests to keep the composition visual visible although the
     /// visual is not (an implicit hide animation runs).
     show_requests: u32,
@@ -474,7 +477,11 @@ impl VisualImpl for Visual {
         // TODO: Introduce a dirty mask like WPF has, so we don't overwrite properties every time
         comp.set_offset(crate::Vector3D::new(bounds.x, bounds.y, 0.0));
         comp.set_size(crate::Vector::new(bounds.width, bounds.height));
-        comp.set_visible((this.is_visible() || this.is_shown_by_composition()) && !this.is_hidden_by_composition());
+        comp.set_visible(
+            (this.is_visible() || this.is_shown_by_composition())
+                && !this.is_hidden_by_composition()
+                && !this.is_render_suppressed(),
+        );
         comp.set_opacity(this.opacity() as f32);
         comp.set_clip_to_bounds(this.clip_to_bounds());
         comp.set_clip(this.clip().and_then(|clip| clip.platform_impl()));
@@ -1065,6 +1072,46 @@ impl Visual {
     pub fn remove_composition_hide_request(&self) {
         self.with_composition_extras(|extras| extras.hide_requests = extras.hide_requests.saturating_sub(1));
         self.invalidate_visual();
+    }
+
+    /// Whether presentation owners have suppressed this visual and its descendants in all
+    /// render paths. Suppression changes no styled property, layout or logical visibility.
+    /// It also applies to immediate bitmap and visual-brush captures; composition-only
+    /// hiding remains independently capturable for connected animations.
+    pub fn is_render_suppressed(&self) -> bool {
+        self.read_composition_extras(|extras| extras.render_suppression_requests > 0)
+            .unwrap_or(false)
+    }
+
+    /// Suppresses drawing until a matching remove request. Independent owners may hold
+    /// requests concurrently. Input behavior is deliberately separate: editors that suppress
+    /// presentation may additionally install their own temporary hit-test policy.
+    pub fn add_render_suppression_request(&self) {
+        let changed = self.with_composition_extras(|extras| {
+            let previous = extras.render_suppression_requests;
+            extras.render_suppression_requests = previous
+                .checked_add(1)
+                .expect("Render suppression request count exhausted");
+            previous == 0
+        });
+        if changed {
+            self.invalidate_visual();
+        }
+    }
+
+    /// Releases one request without changing another owner's suppression or authored values.
+    /// Removing a request when none is active is harmless.
+    pub fn remove_render_suppression_request(&self) {
+        if !self.is_render_suppressed() {
+            return;
+        }
+        let changed = self.with_composition_extras(|extras| {
+            extras.render_suppression_requests -= 1;
+            extras.render_suppression_requests == 0
+        });
+        if changed {
+            self.invalidate_visual();
+        }
     }
 
     /// Whether the composition visual of the visual is kept visible by requests of the
