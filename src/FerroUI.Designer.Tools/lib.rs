@@ -3,6 +3,7 @@
 mod geometry;
 mod grid_tracks;
 mod layout;
+mod layout_helpers;
 mod properties;
 mod selection;
 
@@ -17,6 +18,10 @@ pub use grid_tracks::{
 pub use layout::{
     DockSide, GridLength, GridLines, LayoutAction, LayoutAdapter, LayoutCapabilities,
     LayoutContext, LayoutRegistry, RelativeRelation, ResolvedLayout,
+};
+pub use layout_helpers::{
+    LayoutGuide, LayoutGuideGeometry, LayoutGuideRole, LayoutHandle, LayoutHandleAction,
+    LayoutHelperRequest, LayoutHelperScene, LayoutPlacement,
 };
 pub use properties::{
     EditorRegistry, ExpressionPolicy, PropertyDescriptor, PropertyKind, PropertyRegistry,

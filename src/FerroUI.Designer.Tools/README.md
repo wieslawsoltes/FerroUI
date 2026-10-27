@@ -111,3 +111,61 @@ grid lengths/definitions, text, object references and transforms. Multi-selectio
 values and creates one validated command batch. Binding and markup-expression syntax is parsed
 through the existing core engine. The workspace can associate an editor ID with a native
 FerroUI control without introducing UI dependencies into this crate.
+
+## Extensible layout helpers
+
+`LayoutAdapter` also supplies renderer-independent design-time features. Existing adapters
+remain compatible because the new methods have defaults:
+
+- `design_helpers(context, request)` returns a `LayoutHelperScene`: semantic guide primitives,
+  measured handles and optional placement. The default provides a container outline.
+- `placement(context, panel, position, dragged)` returns an optional `LayoutPlacement` with
+  the actual AST content container, source insertion boundary, child attributes, visual bounds
+  and an explicit rejection reason. The default returns `None`.
+- `plan_helper(context, action, value)` plans one handle edit. Standard intents reuse the
+  source planners; applications override `LayoutHandleAction::Custom` for additional tools.
+
+The registry exposes corresponding methods, validates returned scene geometry and transactions,
+and publishes `revision()` so hosts can invalidate an in-flight gesture when a provider changes.
+Register providers using canonical names such as `{urn:my-controls}OrbitPanel`. `adapter_for`
+resolves namespace URI plus local name, so changing `app:` to another XAML prefix retains the
+same feature provider. Lexical and unqualified registrations remain supported. An unknown
+application type named `Grid` or `StackPanel` does not silently inherit framework semantics.
+
+`LayoutHelperRequest::new(panel)` defaults to no pointer, selection or dragged nodes. Set
+`selected_nodes` to show direct-child margins and `dragged_nodes` to exclude moved items from
+placement calculations. Layout coordinates use the measured context's space; the native host
+owns panel/artboard transforms, zoom, screen-sized handles, hit testing and gesture lifetime.
+Labels use a center anchor. Roles distinguish container/content geometry, grid tracks, flow,
+spacing, padding, relations, placement, rejection and measurements without prescribing colors.
+
+Built-in features include:
+
+| Layout | Design-time features |
+| --- | --- |
+| Canvas | Local-axis/origin guides, pointer coordinates and position preview. |
+| Grid | Actual track boundaries, lexical units, cell preview, row/column sizing and spacing handles. |
+| Stack / ReversibleStack | Direction arrow, measured gaps, spacing handle and orientation/reversal-aware insertion. |
+| Wrap / Flex | Measured line gaps, item/line spacing, direction/reversal and visual-order-aware insertion. |
+| UniformGrid | Measured cells, first-column reservation, row/column spacing and capacity-aware cell insertion. |
+| Dock | Dock-order labels, remaining fill identification, spacing and edge placement previews. |
+| RelativePanel | Resolved sibling constraint connectors and relationship labels. |
+| Content hosts | Content bounds, supported padding handles and explicit occupied-content rejection. |
+| Generated panels | Informational outline and rejection; no direct item-editing handles. |
+
+The native Drop authoring path and built-in placement visualization consume the same placement
+calculation. Placement indices refer to the original AST element sequence, including explicit
+`Children`/`Content`/`Child` containers; a host moving existing nodes removes their earlier
+source ranks when applying that boundary. Previewing does not create a document transaction.
+
+Handle values represent logical measured lengths. Dragging a star Grid track scales its weight
+by `new_extent / measured_extent`; dragging Auto deliberately authors pixels. Definition
+metadata, comments and namespaces are preserved by the existing Grid transaction planner.
+Bound/object-valued properties expose a disabled reason and remain protected at commit.
+Signed margins preserve negative values and the full precision of untouched components.
+`value_after_delta` applies axis, direction and range constraints without authoring source.
+
+Custom provider, namespace-alias, source-preservation and shared-placement examples are exercised
+in `layout_helpers_tests.rs`. Scene validation rejects nonfinite geometry, duplicate handle IDs
+and unbounded output. A native host should capture source/AST/URI identity and registry revision
+at gesture start, preview immutable plans, and commit one validated transaction on release.

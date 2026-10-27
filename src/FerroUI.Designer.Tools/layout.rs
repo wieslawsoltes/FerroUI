@@ -1,3 +1,6 @@
+use crate::layout_helpers::{
+    LayoutHandleAction, LayoutHelperRequest, LayoutHelperScene, LayoutPlacement,
+};
 use crate::{Axis, Point, PropertyRegistry, Rect, Result, ToolError, error, require};
 use ferroui_designer_core::{Document, Edit, Node, NodeId, NodeKind};
 use serde::{Deserialize, Serialize};
@@ -92,7 +95,7 @@ pub struct GridLines {
     pub columns: Vec<f64>,
 }
 impl GridLines {
-    fn validate(&self) -> Result<()> {
+    pub fn validate(&self) -> Result<()> {
         for lines in [&self.rows, &self.columns] {
             require(
                 lines.len() >= 2
@@ -181,6 +184,40 @@ impl<'a> LayoutContext<'a> {
                     .and_then(|node| node.attribute(name))
             })
     }
+    /// The authored children, preserving their source order and explicit content slot.
+    pub fn children(&self, panel: NodeId) -> Result<Vec<NodeId>> {
+        authored_children(self, panel)
+    }
+    /// The AST owner of the panel's content, including explicit Children/Content/Child elements.
+    pub fn content_container(&self, panel: NodeId) -> Result<NodeId> {
+        child_container(self, panel)
+    }
+    /// Resolved allocation before margin/alignment/render transforms, if supplied by the host.
+    pub fn resolved_layout(&self, node: NodeId) -> Result<ResolvedLayout> {
+        self.layout(node)
+    }
+    pub fn is_visible(&self, node: NodeId) -> Result<bool> {
+        self.visible(node)
+    }
+    /// Actual Grid track boundaries. A portable fallback resolves unconstrained pixel/star tracks.
+    pub fn grid_boundaries(&self, panel: NodeId) -> Result<GridLines> {
+        if let Some(lines) = self.grid_lines.and_then(|all| all.get(&panel)) {
+            lines.validate()?;
+            return Ok(lines.clone());
+        }
+        require_plain_grid(self, panel)?;
+        let bounds = self.bounds(panel)?;
+        Ok(GridLines {
+            rows: resolved_lines(
+                &grid_definitions(self, panel, Axis::Vertical)?,
+                bounds.height,
+            )?,
+            columns: resolved_lines(
+                &grid_definitions(self, panel, Axis::Horizontal)?,
+                bounds.width,
+            )?,
+        })
+    }
     fn ensure_resolved(&self, node: NodeId, name: &str) -> Result<()> {
         if self
             .resolved_properties
@@ -200,7 +237,7 @@ impl<'a> LayoutContext<'a> {
         result.validate()?;
         Ok(result)
     }
-    fn element(&self, node: NodeId) -> Result<&Node> {
+    pub(crate) fn element(&self, node: NodeId) -> Result<&Node> {
         let n = self
             .document
             .ast()
@@ -209,7 +246,7 @@ impl<'a> LayoutContext<'a> {
         require(n.is_element(), "Layout tools require an element")?;
         Ok(n)
     }
-    fn layout(&self, node: NodeId) -> Result<ResolvedLayout> {
+    pub(crate) fn layout(&self, node: NodeId) -> Result<ResolvedLayout> {
         let result = if let Some(layout) = self.resolved_layout.and_then(|map| map.get(&node)) {
             *layout
         } else {
@@ -222,7 +259,7 @@ impl<'a> LayoutContext<'a> {
         result.validate()?;
         Ok(result)
     }
-    fn visible(&self, node: NodeId) -> Result<bool> {
+    pub(crate) fn visible(&self, node: NodeId) -> Result<bool> {
         if let Some(layout) = self.resolved_layout.and_then(|map| map.get(&node)) {
             return Ok(layout.visible);
         }
@@ -234,7 +271,7 @@ impl<'a> LayoutContext<'a> {
         )?;
         Ok(value.eq_ignore_ascii_case("true"))
     }
-    fn parent(&self, node: NodeId) -> Result<NodeId> {
+    pub(crate) fn parent(&self, node: NodeId) -> Result<NodeId> {
         let mut parent = self.element(node)?.parent;
         while let Some(id) = parent {
             let n = self.element(id)?;
@@ -310,9 +347,40 @@ pub trait LayoutAdapter {
     fn capabilities(&self) -> LayoutCapabilities;
     fn panel_properties(&self) -> &[&str];
     fn plan(&self, context: &LayoutContext<'_>, action: &LayoutAction) -> Result<Vec<Edit>>;
+    /// Optional design-time feature provider. The default draws only a generic container outline.
+    fn design_helpers(
+        &self,
+        context: &LayoutContext<'_>,
+        request: &LayoutHelperRequest,
+    ) -> Result<LayoutHelperScene> {
+        LayoutHelperScene::generic(context, request)
+    }
+    /// Optional semantic placement provider. Indices always reference the original AST snapshot.
+    fn placement(
+        &self,
+        _context: &LayoutContext<'_>,
+        _panel: NodeId,
+        _position: Point,
+        _dragged: &[NodeId],
+    ) -> Result<Option<LayoutPlacement>> {
+        Ok(None)
+    }
+    /// Override to implement Custom helper intents. Standard actions share existing source planners.
+    fn plan_helper(
+        &self,
+        context: &LayoutContext<'_>,
+        action: &LayoutHandleAction,
+        value: f64,
+    ) -> Result<Vec<Edit>> {
+        crate::layout_helpers::plan_standard_helper(context, action, value, |action| {
+            self.plan(context, action)
+        })
+    }
 }
 pub struct LayoutRegistry {
     adapters: BTreeMap<String, Box<dyn LayoutAdapter>>,
+    revision: u64,
+    builtin_names: BTreeSet<String>,
 }
 impl Default for LayoutRegistry {
     fn default() -> Self {
@@ -323,6 +391,8 @@ impl LayoutRegistry {
     pub fn new() -> Self {
         Self {
             adapters: BTreeMap::new(),
+            revision: 0,
+            builtin_names: BTreeSet::new(),
         }
     }
     pub fn built_in() -> Self {
@@ -360,18 +430,149 @@ impl LayoutRegistry {
             "ToggleButton",
         ] {
             registry.register(Box::new(BuiltIn { name }));
+            registry.builtin_names.insert(name.to_owned());
         }
         registry
     }
     pub fn register(&mut self, adapter: Box<dyn LayoutAdapter>) -> Option<Box<dyn LayoutAdapter>> {
+        self.revision = self.revision.wrapping_add(1);
+        self.builtin_names.remove(adapter.panel_type());
         self.adapters
             .insert(adapter.panel_type().to_owned(), adapter)
+    }
+    /// Changes whenever a provider is registered/replaced; hosts capture it in active gestures.
+    pub fn revision(&self) -> u64 {
+        self.revision
+    }
+    pub fn design_helpers(
+        &self,
+        context: &LayoutContext<'_>,
+        request: &LayoutHelperRequest,
+    ) -> Result<LayoutHelperScene> {
+        require(
+            context.document.is_valid(),
+            "Layout helpers require valid source",
+        )?;
+        let panel = context.element(request.panel)?;
+        let adapter = self
+            .adapter_for(context.document, panel.id)
+            .ok_or_else(|| ToolError(format!("Register a layout adapter for {}", panel.name)))?;
+        let mut scene = adapter.design_helpers(context, request)?;
+        if !adapter.capabilities().resize_items || adapter.capabilities().generated_items {
+            for handle in &mut scene.handles {
+                handle.disabled_reason =
+                    Some("This panel owns generated or read-only layout".into());
+            }
+        }
+        scene.validate()?;
+        Ok(scene)
+    }
+    pub fn placement(
+        &self,
+        context: &LayoutContext<'_>,
+        panel: NodeId,
+        position: Point,
+        dragged: &[NodeId],
+    ) -> Result<Option<LayoutPlacement>> {
+        position.validate()?;
+        let element = context.element(panel)?;
+        let adapter = self
+            .adapter_for(context.document, element.id)
+            .ok_or_else(|| ToolError(format!("Register a layout adapter for {}", element.name)))?;
+        let capabilities = adapter.capabilities();
+        if !capabilities.drop_items || capabilities.generated_items {
+            return Ok(Some(LayoutPlacement::rejected(
+                context,
+                panel,
+                "This panel owns generated runtime content",
+            )?));
+        }
+        let placement = adapter.placement(context, panel, position, dragged)?;
+        if let Some(placement) = &placement {
+            placement.validate()?;
+        }
+        Ok(placement)
+    }
+    pub fn plan_helper(
+        &self,
+        context: &LayoutContext<'_>,
+        panel: NodeId,
+        action: &LayoutHandleAction,
+        value: f64,
+    ) -> Result<Vec<Edit>> {
+        require(value.is_finite(), "Helper values must be finite")?;
+        require(
+            context.document.is_valid(),
+            "Layout helper edits require valid source",
+        )?;
+        match action {
+            LayoutHandleAction::PanelProperty { panel: owner, .. }
+            | LayoutHandleAction::GridTrack { panel: owner, .. } => {
+                require(*owner == panel, "The helper belongs to a different panel")?;
+            }
+            LayoutHandleAction::ThicknessSide { node, .. } => {
+                require(
+                    *node == panel || context.parent(*node)? == panel,
+                    "The thickness helper belongs to a different layout",
+                )?;
+            }
+            LayoutHandleAction::Custom { .. } => {}
+        }
+        let element = context.element(panel)?;
+        let adapter = self
+            .adapter_for(context.document, element.id)
+            .ok_or_else(|| ToolError(format!("Register a layout adapter for {}", element.name)))?;
+        require(
+            adapter.capabilities().resize_items && !adapter.capabilities().generated_items,
+            "This panel does not permit helper edits",
+        )?;
+        let edits = adapter.plan_helper(context, action, value)?;
+        let mut candidate = context.document.clone();
+        candidate
+            .apply("Validate layout helper", edits.clone())
+            .map_err(error)?;
+        Ok(edits)
     }
     pub fn supports(&self, panel_type: &str) -> bool {
         self.adapter(panel_type).is_some()
     }
     pub fn panel_types(&self) -> impl Iterator<Item = &str> {
         self.adapters.keys().map(String::as_str)
+    }
+    /// Resolve canonical XAML type identity before legacy lexical names. A custom namespace
+    /// with a built-in local name never silently inherits that framework panel's semantics.
+    pub fn adapter_for(&self, document: &Document, node: NodeId) -> Option<&dyn LayoutAdapter> {
+        let element = document.ast().node(node)?;
+        if let Some(uri) = element.namespace_uri.as_deref() {
+            if let Some(adapter) = self
+                .adapters
+                .get(&format!("{{{uri}}}{}", element.local_name()))
+            {
+                return Some(adapter.as_ref());
+            }
+        }
+        let framework = matches!(
+            element.namespace_uri.as_deref(),
+            None | Some(
+                "https://github.com/ferroui"
+                    | "using:FerroUI.Controls"
+                    | "clr-namespace:FerroUI.Controls;assembly=FerroUI.Controls"
+            )
+        );
+        if framework || !self.builtin_names.contains(&element.name) {
+            if let Some(adapter) = self.adapters.get(&element.name) {
+                return Some(adapter.as_ref());
+            }
+        }
+        if framework || !self.builtin_names.contains(element.local_name()) {
+            return self.adapters.get(element.local_name()).map(Box::as_ref);
+        }
+        None
+    }
+    /// Whether canonical resolution selected an unchanged framework provider.
+    pub fn is_builtin_adapter_for(&self, document: &Document, node: NodeId) -> bool {
+        self.adapter_for(document, node)
+            .is_some_and(|adapter| self.builtin_names.contains(adapter.panel_type()))
     }
     pub fn adapter(&self, panel_type: &str) -> Option<&dyn LayoutAdapter> {
         self.adapters
@@ -491,7 +692,7 @@ impl LayoutRegistry {
         };
         let panel = context.element(parent)?;
         let adapter = self
-            .adapter(&panel.name)
+            .adapter_for(context.document, panel.id)
             .ok_or_else(|| ToolError(format!("Register a layout adapter for {}", panel.name)))?;
         adapter.plan(context, action)
     }
@@ -621,6 +822,31 @@ impl LayoutAdapter for BuiltIn {
             "DateTimePickerPanel" => &["ItemHeight", "PanelType", "ItemFormat", "ShouldLoop"],
             _ => &[],
         }
+    }
+    fn design_helpers(
+        &self,
+        context: &LayoutContext<'_>,
+        request: &LayoutHelperRequest,
+    ) -> Result<LayoutHelperScene> {
+        crate::layout_helpers::built_in_helpers(context, request, self.name, self.managed())
+    }
+    fn placement(
+        &self,
+        context: &LayoutContext<'_>,
+        panel: NodeId,
+        position: Point,
+        dragged: &[NodeId],
+    ) -> Result<Option<LayoutPlacement>> {
+        if self.managed() {
+            return Ok(Some(LayoutPlacement::rejected(
+                context,
+                panel,
+                "This panel owns generated runtime content",
+            )?));
+        }
+        built_in_placement(context, panel, position, self.name, dragged)
+            .or_else(|reason| LayoutPlacement::rejected(context, panel, reason.to_string()))
+            .map(Some)
     }
     fn plan(&self, context: &LayoutContext<'_>, action: &LayoutAction) -> Result<Vec<Edit>> {
         if let LayoutAction::PanelProperty { panel, name, value } = action {
@@ -902,10 +1128,41 @@ fn drop_plan(
     position: Point,
     panel_type: &str,
 ) -> Result<Vec<Edit>> {
+    let placement = built_in_placement(context, parent, position, panel_type, &[])?;
+    if let Some(reason) = placement.rejection {
+        return Err(ToolError(reason));
+    }
+    let attributes = placement
+        .attributes
+        .iter()
+        .map(|(name, value)| (name.as_str(), value.clone()))
+        .collect::<Vec<_>>();
+    let source = position_fragment(context, parent, source, &attributes)?;
+    Ok(vec![Edit::InsertChild {
+        parent: placement.container,
+        index: placement.index,
+        source,
+    }])
+}
+
+pub(crate) fn built_in_placement(
+    context: &LayoutContext<'_>,
+    parent: NodeId,
+    position: Point,
+    panel_type: &str,
+    dragged: &[NodeId],
+) -> Result<LayoutPlacement> {
     position.validate()?;
     let container = child_container(context, parent)?;
     let panel = context.element(parent)?;
     let mut children = authored_children(context, parent)?;
+    children.retain(|id| !dragged.contains(id));
+    // Source-only drop planners historically work without panel measurements for flow/content
+    // hosts. Native helper scenes still require actual bounds through their generic outline.
+    let bounds = context.bounds.get(&parent).copied().unwrap_or_default();
+    bounds.validate()?;
+    let mut preview = bounds;
+    let mut description = format!("Place in {panel_type}");
     if single_content(panel_type) {
         let has_attribute = ["Content", "Child"]
             .iter()
@@ -951,7 +1208,6 @@ fn drop_plan(
         });
     }
     let mut attrs = vec![];
-    let mut extra = vec![];
     let mut index = children.len();
     if matches!(panel_type, "Canvas" | "Grid" | "UniformGrid" | "DockPanel") {
         let bounds = context.bounds(parent)?;
@@ -960,25 +1216,20 @@ fn drop_plan(
             "Canvas" => {
                 attrs.push(("Canvas.Left", local.x.to_string()));
                 attrs.push(("Canvas.Top", local.y.to_string()));
+                preview = Rect::new(position.x, position.y, 32.0, 24.0);
+                description = format!("Canvas · x {}  y {}", compact(local.x), compact(local.y));
             }
             "Grid" => {
-                let lines = if let Some(lines) = context.grid_lines.and_then(|all| all.get(&parent))
-                {
-                    lines.validate()?;
-                    lines.clone()
-                } else {
-                    require_plain_grid(context, parent)?;
-                    GridLines {
-                        rows: resolved_lines(
-                            &grid_definitions(context, parent, Axis::Vertical)?,
-                            bounds.height,
-                        )?,
-                        columns: resolved_lines(
-                            &grid_definitions(context, parent, Axis::Horizontal)?,
-                            bounds.width,
-                        )?,
-                    }
-                };
+                let lines = context.grid_boundaries(parent)?;
+                let row = cell_at(&lines.rows, local.y);
+                let column = cell_at(&lines.columns, local.x);
+                preview = Rect::new(
+                    bounds.x + lines.columns[column],
+                    bounds.y + lines.rows[row],
+                    lines.columns[column + 1] - lines.columns[column],
+                    lines.rows[row + 1] - lines.rows[row],
+                );
+                description = format!("Grid · row {}  column {}", row + 1, column + 1);
                 attrs.push(("Grid.Row", cell_at(&lines.rows, local.y).to_string()));
                 attrs.push(("Grid.Column", cell_at(&lines.columns, local.x).to_string()));
             }
@@ -1026,6 +1277,21 @@ fn drop_plan(
                     rows,
                     number(context.property(parent, "RowSpacing").unwrap_or("0"))?,
                 )?;
+                let gap_x = number(context.property(parent, "ColumnSpacing").unwrap_or("0"))?;
+                let gap_y = number(context.property(parent, "RowSpacing").unwrap_or("0"))?;
+                let cell_width = ((bounds.width - columns.saturating_sub(1) as f64 * gap_x)
+                    / columns.max(1) as f64)
+                    .max(0.0);
+                let cell_height = ((bounds.height - rows.saturating_sub(1) as f64 * gap_y)
+                    / rows.max(1) as f64)
+                    .max(0.0);
+                preview = Rect::new(
+                    bounds.x + column.min(columns.saturating_sub(1)) as f64 * (cell_width + gap_x),
+                    bounds.y + row.min(rows.saturating_sub(1)) as f64 * (cell_height + gap_y),
+                    cell_width,
+                    cell_height,
+                );
+                description = format!("Uniform grid · row {}  column {}", row + 1, column + 1);
                 index = row
                     .min(rows.saturating_sub(1))
                     .saturating_mul(columns)
@@ -1042,6 +1308,27 @@ fn drop_plan(
                 ];
                 let side = sides.iter().min_by(|a, b| a.0.total_cmp(&b.0)).unwrap().1;
                 attrs.push(("DockPanel.Dock", format!("{side:?}")));
+                preview = match side {
+                    DockSide::Left => {
+                        Rect::new(bounds.x, bounds.y, bounds.width * 0.25, bounds.height)
+                    }
+                    DockSide::Right => Rect::new(
+                        bounds.x + bounds.width * 0.75,
+                        bounds.y,
+                        bounds.width * 0.25,
+                        bounds.height,
+                    ),
+                    DockSide::Top => {
+                        Rect::new(bounds.x, bounds.y, bounds.width, bounds.height * 0.25)
+                    }
+                    DockSide::Bottom => Rect::new(
+                        bounds.x,
+                        bounds.y + bounds.height * 0.75,
+                        bounds.width,
+                        bounds.height * 0.25,
+                    ),
+                };
+                description = format!("Dock · {side:?}");
                 if context
                     .property(parent, "LastChildFill")
                     .is_none_or(|v| !v.eq_ignore_ascii_case("False"))
@@ -1095,6 +1382,26 @@ fn drop_plan(
                         position.y > c.y
                     };
                     index = i + usize::from(after != reversed);
+                    preview = if horizontal {
+                        Rect::new(
+                            if after { rect.right() } else { rect.x },
+                            rect.y,
+                            0.0,
+                            rect.height,
+                        )
+                    } else {
+                        Rect::new(
+                            rect.x,
+                            if after { rect.bottom() } else { rect.y },
+                            rect.width,
+                            0.0,
+                        )
+                    };
+                    description = format!(
+                        "Insert {} item {}",
+                        if after { "after" } else { "before" },
+                        i + 1
+                    );
                 }
             }
         }
@@ -1112,19 +1419,24 @@ fn drop_plan(
             attrs.push(("Flex.Order", order.to_string()));
         }
     }
-    let source = position_fragment(context, parent, source, &attrs)?;
     let raw = context.document.ast().element_children(container);
     let raw_index = children
         .get(index)
         .and_then(|next| raw.iter().position(|id| id == next))
         .unwrap_or(raw.len());
-    extra.push(Edit::InsertChild {
-        parent: container,
+    Ok(LayoutPlacement {
+        container,
         index: raw_index,
-        source,
-    });
-    Ok(extra)
+        attributes: attrs
+            .into_iter()
+            .map(|(name, value)| (name.to_owned(), value))
+            .collect(),
+        bounds: preview,
+        description,
+        rejection: None,
+    })
 }
+
 fn uniform_cell_at(position: f64, extent: f64, count: usize, spacing: f64) -> Result<usize> {
     require(spacing >= 0.0, "UniformGrid spacing must be nonnegative")?;
     let gaps = count.saturating_sub(1) as f64 * spacing;
@@ -1227,7 +1539,7 @@ fn grid_track_plan(
             .join(","),
     )])
 }
-fn grid_definitions(
+pub(crate) fn grid_definitions(
     context: &LayoutContext<'_>,
     panel: NodeId,
     axis: Axis,
@@ -1414,7 +1726,7 @@ fn relative_plan(
     }
     Ok(vec![text_set(node, property, name.to_owned())])
 }
-fn child_container(context: &LayoutContext<'_>, panel: NodeId) -> Result<NodeId> {
+pub(crate) fn child_container(context: &LayoutContext<'_>, panel: NodeId) -> Result<NodeId> {
     let element = context.element(panel)?;
     Ok(element
         .children
@@ -1430,7 +1742,7 @@ fn child_container(context: &LayoutContext<'_>, panel: NodeId) -> Result<NodeId>
         })
         .map_or(panel, |n| n.id))
 }
-fn authored_children(context: &LayoutContext<'_>, panel: NodeId) -> Result<Vec<NodeId>> {
+pub(crate) fn authored_children(context: &LayoutContext<'_>, panel: NodeId) -> Result<Vec<NodeId>> {
     Ok(context
         .document
         .ast()
@@ -1445,7 +1757,7 @@ fn authored_children(context: &LayoutContext<'_>, panel: NodeId) -> Result<Vec<N
         })
         .collect())
 }
-fn ensure_literal_attribute(node: &Node, property: &str) -> Result<()> {
+pub(crate) fn ensure_literal_attribute(node: &Node, property: &str) -> Result<()> {
     require(
         !node
             .attribute(property)
@@ -1453,7 +1765,11 @@ fn ensure_literal_attribute(node: &Node, property: &str) -> Result<()> {
         format!("{property} is an expression; edit it explicitly instead of overwriting it"),
     )
 }
-fn ensure_literal(context: &LayoutContext<'_>, node: NodeId, property: &str) -> Result<()> {
+pub(crate) fn ensure_literal(
+    context: &LayoutContext<'_>,
+    node: NodeId,
+    property: &str,
+) -> Result<()> {
     let element = context.element(node)?;
     ensure_literal_attribute(element, property)?;
     require(
@@ -1490,7 +1806,7 @@ pub(crate) fn number(source: &str) -> Result<f64> {
     require(number.is_finite(), "Numeric values must be finite")?;
     Ok(number)
 }
-fn integer(source: &str) -> Result<usize> {
+pub(crate) fn integer(source: &str) -> Result<usize> {
     source
         .parse()
         .map_err(|_| ToolError("Expected a nonnegative integer".into()))
@@ -1515,7 +1831,7 @@ fn escape(source: &str) -> String {
         .replace('"', "&quot;")
 }
 
-fn single_content(name: &str) -> bool {
+pub(crate) fn single_content(name: &str) -> bool {
     matches!(
         name,
         "Border"
@@ -1528,4 +1844,8 @@ fn single_content(name: &str) -> bool {
             | "Button"
             | "ToggleButton"
     )
+}
+
+fn compact(value: f64) -> String {
+    crate::layout_helpers::compact(value)
 }
