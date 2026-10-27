@@ -48,17 +48,50 @@ fn scoped_reflection_bindings_keep_their_namespace_in_immediate_and_deferred_gen
         let panel = ValueTypes::as_object(&*value).and_then(|object| object.cast::<StackPanel>()).unwrap();
         let children = panel.children().to_vec();
         let first = children[0].cast::<TextBlock>().unwrap();
-        let button = children[1].cast::<Button>().unwrap();
+        let second = children[1].cast::<TextBlock>().unwrap();
+        let button = children[2].cast::<Button>().unwrap();
         let built = button.template().unwrap()
             .build(button.upcast_ref::<ferroui_controls::primitives::TemplatedControl>()).unwrap();
         let (content, _) = built.deconstruct();
         let deferred = content.cast::<TextBlock>().unwrap();
-        (first.text(), deferred.text())
+        (first.text(), second.text(), deferred.text())
     };
     let interpreted = read(try_load(source).expect("scoped reflection binding loads"));
     let emitted = read(build_generated(name).expect("scoped binding was emitted").expect("generated binding builds"));
-    assert_eq!(interpreted, (Some("7".into()), Some("11".into())));
+    assert_eq!(interpreted, (Some("7".into()), Some("9".into()), Some("11".into())));
     assert_eq!(emitted, interpreted);
+}
+
+#[test]
+fn identical_lexical_scopes_share_guards_and_deferred_namespace_tables() {
+    let _app = xaml_test_base();
+    let document = DOCUMENTS.iter().find(|document| document.0 == "scoped_namespace_bindings.xaml").unwrap();
+    let generated = generate_file(
+        generated::ASSEMBLY_NAME, generated::ROOT_URI, &[*document],
+        &RuntimeXamlLoaderConfiguration::new(), &[],
+    );
+    assert!(generated.documents.iter().all(|(_, error)| error.is_none()), "{:?}", generated.documents);
+    let source = generated.source;
+    assert_eq!(source.matches("rt::push_namespace_scope(").count(), 2,
+        "adjacent bindings share one guard, and the separately scoped template uses another");
+    assert_eq!(source.matches("const BUILD_SCOPED_NAMESPACE_BINDINGS_XAML_XML_NAMESPACES_0:").count(), 1);
+    assert!(!source.contains("BUILD_SCOPED_NAMESPACE_BINDINGS_XAML_XML_NAMESPACES_1"));
+    assert!(source.contains("namespaces: BUILD_SCOPED_NAMESPACE_BINDINGS_XAML_XML_NAMESPACES_0"),
+        "the deferred factory uses the same interned lexical table after its declaring guard ends");
+}
+
+#[test]
+fn scoped_resource_alias_keeps_the_fused_factory_and_its_declaration_table() {
+    let _app = xaml_test_base();
+    let document = DOCUMENTS.iter().find(|document| document.0 == "static_resource_local.xaml").unwrap();
+    let generated = generate_file(
+        generated::ASSEMBLY_NAME, generated::ROOT_URI, &[*document],
+        &RuntimeXamlLoaderConfiguration::new(), &[],
+    );
+    assert!(generated.documents.iter().all(|(_, error)| error.is_none()), "{:?}", generated.documents);
+    assert!(generated.source.contains(
+        "rt::static_resource_content(service_provider, &rt::DocumentInfo { base_uri: BUILD_STATIC_RESOURCE_LOCAL_XAML_DOCUMENT.base_uri, namespaces: BUILD_STATIC_RESOURCE_LOCAL_XAML_XML_NAMESPACES_0 }, \"Accent\""
+    ), "the fused resource factory must retain its scoped namespace provider");
 }
 
 /// A value the dump cannot read, in display form: [`UNREADABLE`] and why.
