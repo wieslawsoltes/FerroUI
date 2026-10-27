@@ -226,6 +226,9 @@ pub(crate) fn validate_copied_references(
     let copies = before
         .iter()
         .zip(&after)
+        // The root receives a new resource key. A reference to the old root key
+        // continues to refer to the original definition, unlike nested resources.
+        .filter(|(a, b)| literal_key(a) == literal_key(b))
         .map(|(a, b)| (a.id, b.id))
         .collect::<BTreeMap<_, _>>();
     for (before, after) in before.into_iter().zip(after) {

@@ -585,6 +585,20 @@ fn setters(document: &Document, owner: NodeId) -> Result<(NodeId, Vec<NodeId>)> 
         "Setters belong to an authored ControlTheme or Style",
     )?;
     let containers = property_elements(document, owner, "Setters")?;
+    require(
+        containers.is_empty()
+            || !document
+                .ast()
+                .element_children(owner.id)
+                .into_iter()
+                .any(|id| {
+                    document
+                        .ast()
+                        .node(id)
+                        .is_some_and(|node| framework(node) && node.local_name() == "Setter")
+                }),
+        "The definition has both implicit and explicit setters; resolve the ambiguous containers in source",
+    )?;
     let container = containers.first().map_or(owner.id, |node| node.id);
     Ok((
         container,
@@ -611,12 +625,24 @@ fn setter(
 ) -> Result<Vec<Edit>> {
     property_name(property)?;
     let (container, setters) = setters(document, owner)?;
+    let requested = setter_property_identity(document, owner, owner, property)?;
     let mut matching = Vec::new();
     for id in setters {
-        if component_property_attribute(document, id, "Property")?
-            .is_some_and(|attribute| attribute.value == property)
-        {
-            matching.push(id);
+        if let Some(attribute) = component_property_attribute(document, id, "Property")? {
+            let existing = setter_property_identity(document, owner, id, &attribute.value)?;
+            if requested.member == existing.member
+                && requested.owner == existing.owner
+                && match requested.owner.as_deref() {
+                    Some(owner) => same_owner_namespace(
+                        owner,
+                        requested.namespace.as_deref(),
+                        existing.namespace.as_deref(),
+                    ),
+                    None => requested.namespace == existing.namespace,
+                }
+            {
+                matching.push(id);
+            }
         }
     }
     require(
@@ -665,6 +691,59 @@ fn setter(
         index: document.ast().element_children(container).len(),
         source,
     }])
+}
+
+/// Setter property paths are interpreted in each declaration's namespace scope. An
+/// unqualified theme member belongs to its TargetType; attached members keep their
+/// explicitly named owner. This prevents alias spelling from creating duplicate setters.
+fn setter_property_identity(
+    document: &Document,
+    owner: NodeId,
+    at: NodeId,
+    property: &str,
+) -> Result<PropertyIdentity> {
+    let mut identity = PropertyIdentity::query(document, at, property)?;
+    if identity.owner.is_some() || identity.namespace.is_some() {
+        return Ok(identity);
+    }
+    let Some(target) = component_property_attribute(document, owner, "TargetType")? else {
+        return Ok(identity);
+    };
+    let target = match target.markup().map_err(ToolError)? {
+        MarkupValue::Literal(name) => name,
+        MarkupValue::Extension(extension) => {
+            let (prefix, name) = extension
+                .name
+                .rsplit_once(':')
+                .unwrap_or(("", &extension.name));
+            if name != "Type"
+                || document
+                    .ast()
+                    .namespaces(owner)
+                    .get(prefix)
+                    .map(String::as_str)
+                    != Some(XAML)
+                || extension.arguments.len() != 1
+                || !matches!(
+                    extension.arguments[0].name.as_deref(),
+                    None | Some("TypeName")
+                )
+            {
+                return Ok(identity);
+            }
+            let MarkupValue::Literal(name) = &extension.arguments[0].value else {
+                return Ok(identity);
+            };
+            name.clone()
+        }
+    };
+    let (prefix, name) = target.rsplit_once(':').unwrap_or(("", &target));
+    let Some(namespace) = document.ast().namespaces(owner).get(prefix).cloned() else {
+        return Ok(identity);
+    };
+    identity.owner = Some(name.into());
+    identity.namespace = Some(namespace);
+    Ok(identity)
 }
 
 fn resource_value(document: &Document, resource: NodeId, value: &str) -> Result<Vec<Edit>> {

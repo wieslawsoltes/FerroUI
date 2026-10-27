@@ -999,3 +999,141 @@ fn copying_templates_preserves_external_dependencies_and_remaps_copied_local_res
     d.undo().unwrap();
     assert_eq!(d.source(), original);
 }
+
+#[test]
+fn theme_setter_members_resolve_owner_and_attached_aliases_without_duplicate_writes() {
+    let mut d = document(
+        r#"<Grid.Resources><ControlTheme xmlns:c="using:FerroUI.Controls" xmlns:one="urn:application" xmlns:two="urn:application" x:Key="Theme" TargetType="{x:Type c:Button}"><Setter Property="c:Button.Background" Value="Red"/><Setter Property="two:Layout.Mode" Value="First"/><Setter xmlns:two="urn:other" Property="two:Layout.Mode" Value="Separate"/></ControlTheme></Grid.Resources>"#,
+    );
+    let theme = keyed(&d, "Theme");
+    apply(
+        &mut d,
+        ComponentAction::SetSetter {
+            owner: theme,
+            property: "Background".into(),
+            value: Some("Blue".into()),
+        },
+    );
+    apply(
+        &mut d,
+        ComponentAction::SetSetter {
+            owner: theme,
+            property: "one:Layout.Mode".into(),
+            value: Some("Second".into()),
+        },
+    );
+    let setters = d
+        .ast()
+        .subtree(theme)
+        .filter(|node| node.local_name() == "Setter")
+        .collect::<Vec<_>>();
+    assert_eq!(setters.len(), 3);
+    assert_eq!(
+        setters[0].attribute("Property"),
+        Some("c:Button.Background")
+    );
+    assert_eq!(setters[0].attribute("Value"), Some("Blue"));
+    assert_eq!(setters[1].attribute("Property"), Some("two:Layout.Mode"));
+    assert_eq!(setters[1].attribute("Value"), Some("Second"));
+    assert_eq!(setters[2].attribute("Value"), Some("Separate"));
+    apply(
+        &mut d,
+        ComponentAction::SetSetter {
+            owner: theme,
+            property: "Button.Background".into(),
+            value: None,
+        },
+    );
+    assert_eq!(
+        d.ast()
+            .subtree(theme)
+            .filter(|node| node.local_name() == "Setter")
+            .count(),
+        2
+    );
+}
+
+#[test]
+fn theme_setter_alias_duplicates_and_mixed_containers_are_rejected_atomically() {
+    for setters in [
+        r#"<Setter Property="Background" Value="Red"/><Setter Property="Button.Background" Value="Blue"/>"#,
+        r#"<Setter Property="Background" Value="Red"/><ControlTheme.Setters><Setter Property="Padding" Value="8"/></ControlTheme.Setters>"#,
+    ] {
+        let d = document(&format!(
+            r#"<Grid.Resources><ControlTheme x:Key="Theme" TargetType="Button">{setters}</ControlTheme></Grid.Resources>"#
+        ));
+        let source = d.source().to_owned();
+        assert!(
+            plan_component_action(
+                &d,
+                &ComponentAction::SetSetter {
+                    owner: keyed(&d, "Theme"),
+                    property: "Background".into(),
+                    value: Some("Green".into()),
+                }
+            )
+            .is_err()
+        );
+        assert_eq!(d.source(), source);
+    }
+}
+
+#[test]
+fn qualified_setter_value_replaces_implicit_object_and_preserves_custom_values() {
+    let mut d = document(
+        r#"<Grid.Resources><ControlTheme x:Key="Theme" TargetType="Button"><Setter xmlns:s="using:FerroUI.Styling" xmlns:app="urn:application" Property="Template" app:Value="keep"><ControlTemplate><Border/></ControlTemplate></Setter></ControlTheme></Grid.Resources>"#,
+    );
+    let setter = d
+        .ast()
+        .elements()
+        .find(|node| node.local_name() == "Setter")
+        .unwrap()
+        .id;
+    assert!(
+        component_property_object(&d, setter, "s:Setter.Value")
+            .unwrap()
+            .unwrap()
+            .contains("ControlTemplate")
+    );
+    apply(
+        &mut d,
+        ComponentAction::SetProperty {
+            node: setter,
+            property: "s:Setter.Value".into(),
+            value: Some("{StaticResource New}".into()),
+        },
+    );
+    assert!(d.ast().element_children(setter).is_empty());
+    assert_eq!(
+        d.ast().node(setter).unwrap().attribute("app:Value"),
+        Some("keep")
+    );
+    assert_eq!(
+        component_property_attribute(&d, setter, "Value")
+            .unwrap()
+            .unwrap()
+            .value,
+        "{StaticResource New}"
+    );
+}
+
+#[test]
+fn copying_a_template_keeps_explicit_references_to_the_original_resource_key() {
+    let mut d = document(
+        r#"<Grid.Resources><ControlTemplate x:Key="Original"><ContentPresenter ContentTemplate="{StaticResource Original}"/></ControlTemplate></Grid.Resources>"#,
+    );
+    let template = keyed(&d, "Original");
+    let owner = d.ast().root();
+    apply(
+        &mut d,
+        ComponentAction::CopyTemplate {
+            template,
+            owner,
+            key: "Copy".into(),
+        },
+    );
+    assert_eq!(
+        component_resource_references(&d, template).unwrap().len(),
+        2
+    );
+}

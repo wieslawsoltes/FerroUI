@@ -293,7 +293,23 @@ pub(crate) fn implicit_property_children<'a>(
     node: &Node,
     property: &str,
 ) -> Vec<&'a Node> {
-    if property != "Value" || !framework(node) || node.local_name() != "Setter" {
+    if !framework(node) || node.local_name() != "Setter" {
+        return Vec::new();
+    }
+    let Ok(identity) = PropertyIdentity::query(document, node.id, property) else {
+        return Vec::new();
+    };
+    let native_value = identity.member == "Value"
+        && match identity.owner.as_deref() {
+            Some("Setter") => same_owner_namespace(
+                "Setter",
+                identity.namespace.as_deref(),
+                node.namespace_uri.as_deref(),
+            ),
+            None => identity.namespace.is_none(),
+            _ => false,
+        };
+    if !native_value {
         return Vec::new();
     }
     document
