@@ -1,5 +1,5 @@
 //! Native rendering evidence through FerroUI's Vello CPU backend and HarfBuzz shaping.
-use crate::{DesignerWorkspace, NavigationPane, PreviewStatus, WorkspaceViewMode, STARTER_XAML};
+use crate::{DesignerWorkspace, NavigationPane, PreviewStatus, STARTER_XAML, WorkspaceViewMode};
 use ferroui_base::animation::{IClock, IGlobalClock, PlayState, TimeSpan};
 use ferroui_base::media::imaging::{PngBitmapEncoderOptions, RenderTargetBitmap};
 use ferroui_base::platform::{IFontManagerImpl, IPlatformRenderInterface, ITextShaperImpl};
@@ -8,8 +8,8 @@ use ferroui_base::threading::Dispatcher;
 use ferroui_base::{FerroLocator, LocatorExtensions, PixelRect, PixelSize, Rect, Size};
 use ferroui_controls::platform::{IScreenImpl, ITopLevelImpl};
 use ferroui_controls::testing::{
-    mock_screen, MockScreenImpl, MockWindowImpl, MockWindowingPlatform, TestServices,
-    UnitTestApplication,
+    MockScreenImpl, MockWindowImpl, MockWindowingPlatform, TestServices, UnitTestApplication,
+    mock_screen,
 };
 use ferroui_controls::{Control, Window};
 use ferroui_designer_animation::AnimationValue;
@@ -236,6 +236,22 @@ fn native_workspace_renders_design_manipulation_and_animation() {
     );
     workspace.set_view_mode(WorkspaceViewMode::Design);
     workspace.set_zoom(1.0);
+    let layout = session
+        .borrow()
+        .document()
+        .ast()
+        .elements()
+        .find(|node| node.local_name() == "Grid")
+        .unwrap()
+        .id;
+    session.borrow_mut().select([layout]);
+    capture(
+        &workspace,
+        &clock,
+        &directory.join("designer-grid-layout.png"),
+    );
+    assert_eq!(workspace.grid_track_editors().len(), 2);
+    session.borrow_mut().select([target]);
     session
         .borrow_mut()
         .set_property(&[target], "Canvas.Left", "96")
@@ -279,6 +295,21 @@ fn native_workspace_renders_design_manipulation_and_animation() {
         Some("656"),
         "Preview layers must not overwrite authored values"
     );
+    let authored = session.borrow().document().source().to_owned();
+    workspace.set_timeline_frame_rate(Some(30));
+    workspace
+        .select_keyframes(&[(target, "Width".into(), 0.0), (target, "Width".into(), 3.0)])
+        .unwrap();
+    capture(
+        &workspace,
+        &clock,
+        &directory.join("designer-timeline-selection.png"),
+    );
+    assert_eq!(
+        session.borrow().document().source(),
+        authored,
+        "Timeline selection and frame-grid UI must remain view state"
+    );
     window.set_width(1280.0);
     window.set_height(820.0);
     window.update_layout();
@@ -318,7 +349,10 @@ fn native_workspace_renders_design_manipulation_and_animation() {
         .iter()
         .filter(|p| p[1] < 100 && ((p[0] > 210 && p[2] > 100) || (p[2] > 210 && p[0] > 100)))
         .count();
-    assert!(accent>10000,"A Window-root preview must actually paint its authored 160x90 accent rectangle ({accent} pixels)");
+    assert!(
+        accent > 10000,
+        "A Window-root preview must actually paint its authored 160x90 accent rectangle ({accent} pixels)"
+    );
     window.close();
     drop(window);
     drop(workspace);

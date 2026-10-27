@@ -513,8 +513,14 @@ fn native_tabs_and_refactorings_share_one_identity_for_symlink_aliases() {
     use ferroui_designer_language::WorkspaceEdit;
     use ferroui_designer_project::{file_uri, Solution};
     let _app = UnitTestApplication::start(TestServices::styled_window());
-    let directory =
-        std::env::temp_dir().join(format!("ferroui-designer-tab-alias-{}", std::process::id()));
+    let unique = std::time::SystemTime::now()
+        .duration_since(std::time::UNIX_EPOCH)
+        .unwrap()
+        .as_nanos();
+    let directory = std::env::temp_dir().join(format!(
+        "ferroui-designer-tab-alias-{}-{unique}",
+        std::process::id()
+    ));
     std::fs::create_dir_all(&directory).unwrap();
     let directory = directory.canonicalize().unwrap();
     let alias_root = directory.join("alias");
