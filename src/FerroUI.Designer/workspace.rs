@@ -74,6 +74,7 @@ pub struct DesignerWorkspace {
     project: RefCell<project::ProjectUi>,
     source_tools: RefCell<source_tools::SourceTools>,
     authoring: RefCell<authoring::AuthoringUi>,
+    components: RefCell<components::ComponentUi>,
     animation_program_ids: RefCell<Vec<u64>>,
     sharing: RefCell<Option<Rc<crate::sharing::SharingController>>>,
     sharing_panel: RefCell<Option<Rc<sharing::SharingPanel>>>,
@@ -147,6 +148,7 @@ impl DesignerWorkspace {
             project: RefCell::new(Default::default()),
             source_tools: RefCell::new(Default::default()),
             authoring: RefCell::new(Default::default()),
+            components: RefCell::new(Default::default()),
             animation_program_ids: RefCell::new(Vec::new()),
             sharing: RefCell::new(None),
             sharing_panel: RefCell::new(None),
@@ -155,6 +157,7 @@ impl DesignerWorkspace {
         this.connect();
         this.connect_inspectors();
         this.connect_inspector_drag();
+        this.connect_components();
         this.refresh(true);
         Ok(this)
     }
@@ -669,6 +672,7 @@ impl DesignerWorkspace {
             self.rebuild_document_tabs();
             self.refresh_source_tools();
             self.rebuild_authoring();
+            self.refresh_components();
             self.refresh_animation_programs();
         }
         self.surface.invalidate_layout_helpers();
@@ -802,6 +806,9 @@ fn button(label: &str) -> Ref<Button> {
 
 #[path = "workspace_animation.rs"]
 mod authoring;
+#[path = "workspace_components.rs"]
+mod components;
+pub use components::DesignerDefinitionAsset;
 #[path = "workspace_files.rs"]
 mod files;
 #[path = "inspector_drag.rs"]

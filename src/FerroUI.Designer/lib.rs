@@ -9,6 +9,11 @@ mod animation_session;
 mod asset_toolbox;
 mod chrome;
 mod collaboration;
+mod component_browser;
+mod component_session;
+mod definition_manipulation;
+mod definition_projection;
+mod definition_session;
 mod editors;
 mod grid_track_editor;
 mod interaction_session;
@@ -17,6 +22,7 @@ mod preview_host;
 mod preview_source;
 mod property_color_editor;
 mod property_controls;
+mod resource_editor;
 mod runtime;
 mod session;
 pub mod sharing;
@@ -28,7 +34,15 @@ pub use asset_toolbox::{
     AssetIcon, AssetToolbox, AssetViewMode, DesignerAsset, default_designer_assets,
 };
 pub use chrome::designer_chrome_style;
-pub use editors::{PropertyEditorContext, PropertyEditorFactory};
+pub use component_browser::{ComponentLibrary, ComponentLibraryFilter, ComponentLibraryItem};
+pub use component_session::ComponentEditPreview;
+pub use definition_projection::{DefinitionPreviewOptions, DefinitionScope};
+pub use editors::{
+    PropertyEditorContext, PropertyEditorFactory, PropertyEditorKind, PropertyEditorMetadata,
+    PropertyLiteralValidator, PropertyObjectDraft, PropertyResourceChoice, PropertyValueCommit,
+    PropertyValueEdit, PropertyValueSource, PropertyVectorEditor, binding_expression,
+    create_property_editor, resolve_property_editor_metadata,
+};
 pub use ferroui_designer_core::{Document, Edit, NodeId};
 pub use ferroui_designer_tools as tools;
 pub use grid_track_editor::GridTrackEditor;
@@ -40,12 +54,17 @@ pub use property_controls::{
     PropertyComponentsEditor, PropertyComponentsKind, PropertyNumberOptions,
     PropertyNumberScrubber, property_value_data_format,
 };
+pub use resource_editor::{
+    DefinitionCreationKind, DefinitionEditorCommand, DefinitionPreviewSettings,
+    DefinitionPropertyField, DefinitionReference, ResourceDefinitionEditor,
+    ResourceDefinitionModel,
+};
 pub use runtime::{PreviewStatus, RuntimeNode};
 pub use session::DesignerSession;
 pub use surface::{DesignGesture, DesignSurface};
 pub use timeline_lane::{EasingPreview, TimelineLane};
 pub use workspace::shell::{NavigationPane, WorkspaceViewMode};
-pub use workspace::{DesignerWorkspace, OutlineCommand, OutlineMode};
+pub use workspace::{DesignerDefinitionAsset, DesignerWorkspace, OutlineCommand, OutlineMode};
 
 /// The self-contained example opened by Designer Studio and usable by hosts.
 pub const STARTER_XAML: &str = include_str!("Starter.xaml");

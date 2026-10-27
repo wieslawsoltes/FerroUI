@@ -433,6 +433,7 @@ pub(super) struct PropertyRow {
     pub runtime_type: String,
     pub context: Option<PropertyEditorContext>,
     pub factories: Rc<Vec<Rc<dyn PropertyEditorFactory>>>,
+    pub metadata: Option<crate::editors::PropertyEditorMetadata>,
     pub can_reset: bool,
     pub reveal: Option<Rc<dyn Fn()>>,
     validate_drop: Option<PropertyDropValidator>,
@@ -473,6 +474,7 @@ struct OutlineSnapshot {
     generation: u64,
     mode: OutlineMode,
     filter: String,
+    scope: Option<NodeId>,
 }
 
 impl OutlineSnapshot {
@@ -480,6 +482,7 @@ impl OutlineSnapshot {
         self.uri == session.document_uri()
             && self.revision == session.document().revision()
             && std::ptr::eq(self.ast.as_ref(), session.document().ast())
+            && self.scope == session.definition_scope().map(|scope| scope.node)
     }
 }
 
@@ -491,6 +494,7 @@ impl PartialEq for OutlineSnapshot {
             && self.generation == other.generation
             && self.mode == other.mode
             && self.filter == other.filter
+            && self.scope == other.scope
     }
 }
 
@@ -655,41 +659,29 @@ fn property_cell(row: &PropertyRow) -> Ref<Control> {
         if let Some(validate) = &row.validate_drop {
             connect_property_drop(&cell, context.apply.clone(), validate.clone());
         }
-        let editor = if let Some(reveal) = &row.reveal {
-            property_source_link("Edit XAML…", reveal)
-        } else {
-            row.factories
-                .iter()
-                .find_map(|factory| factory.create(context))
-                .unwrap_or_else(|| {
-                    // Typed editors start from the accepted effective value when inherited.
-                    // Initialization never calls the revision-bound authoring callback.
-                    let mut effective_context = context.clone();
-                    if context.value.is_none()
-                        && !context.mixed
-                        && (crate::editors::components_kind(context).is_some()
-                            || (crate::editors::is_color_property(context)
-                                && ferroui_base::media::Color::parse(&row.effective).is_ok())
-                            || matches!(
-                                context.property.as_str(),
-                                "HorizontalAlignment"
-                                    | "VerticalAlignment"
-                                    | "HorizontalContentAlignment"
-                                    | "VerticalContentAlignment"
-                                    | "TextAlignment"
-                            )
-                            || matches!(context.runtime_type.as_deref(), Some("bool"))
-                            || (crate::editors::numeric_options(context).is_some()
-                                && row
-                                    .effective
-                                    .parse::<f64>()
-                                    .is_ok_and(|value| value.is_finite())))
-                    {
-                        effective_context.value = Some(row.effective.clone());
-                    }
-                    crate::editors::built_in(&effective_context)
-                })
-        };
+        let metadata = row
+            .metadata
+            .clone()
+            .unwrap_or_else(|| crate::editors::resolve_property_editor_metadata(context, None));
+        let mut effective_context = context.clone();
+        // Materialize inherited values only inside the field draft. Opening an inspector
+        // never authors an attribute or erases a binding/property element.
+        if context.value.is_none()
+            && !context.mixed
+            && metadata.object_source.is_none()
+            && !row.effective.is_empty()
+            && metadata.validate(&row.effective).is_ok()
+            && !matches!(
+                metadata.kind,
+                crate::editors::PropertyEditorKind::Object
+                    | crate::editors::PropertyEditorKind::Transform
+                    | crate::editors::PropertyEditorKind::Text
+            )
+        {
+            effective_context.value = Some(row.effective.clone());
+        }
+        let editor =
+            crate::editors::create_property_editor(&effective_context, &metadata, &row.factories);
         if context.value.is_none() && !context.mixed {
             if let Some(text) = editor.cast::<TextBox>() {
                 text.set_placeholder_text(Some(&row.effective));
@@ -1032,17 +1024,21 @@ fn property_element<'a>(
     node: &ferroui_designer_core::Node,
     property: &str,
 ) -> Option<&'a ferroui_designer_core::Node> {
-    node.children
-        .iter()
-        .filter_map(|id| document.ast().node(*id))
-        .find(|child| {
-            child.kind == ferroui_designer_core::NodeKind::PropertyElement
-                && (child.local_name() == property
-                    || child
-                        .local_name()
-                        .strip_suffix(property)
-                        .is_some_and(|prefix| prefix.ends_with('.')))
-        })
+    let id = ferroui_designer_tools::component_property_elements(document, node.id, property)
+        .ok()?
+        .into_iter()
+        .next()?;
+    document.ast().node(id)
+}
+
+fn property_attribute<'a>(
+    document: &'a ferroui_designer_core::Document,
+    node: &ferroui_designer_core::Node,
+    property: &str,
+) -> Option<&'a str> {
+    ferroui_designer_tools::component_property_attribute(document, node.id, property)
+        .ok()?
+        .map(|attribute| attribute.value.as_str())
 }
 
 fn is_metadata_container(node: &ferroui_designer_core::Node) -> bool {
@@ -1189,6 +1185,7 @@ impl DesignerWorkspace {
                 session.generation()
             },
             mode: self.outline_mode.get(),
+            scope: session.definition_scope().map(|scope| scope.node),
             filter: self
                 .root
                 .get_control::<TextBox>("OutlineSearch")
@@ -1204,7 +1201,7 @@ impl DesignerWorkspace {
                 .outline_snapshot
                 .borrow()
                 .as_ref()
-                .is_some_and(|old| old.uri != snapshot.uri)
+                .is_some_and(|old| old.uri != snapshot.uri || old.scope != snapshot.scope)
             {
                 self.inspectors.outline.expansion.borrow_mut().clear();
                 self.inspectors.outline.paths.borrow_mut().clear();
@@ -1215,11 +1212,20 @@ impl DesignerWorkspace {
                     .ast()
                     .nodes_in_source_order()
                     .filter(|node| node.is_element())
+                    .filter(|node| {
+                        snapshot.scope.is_none_or(|scope| {
+                            node.id == scope
+                                || session.document().ast().is_descendant_of(node.id, scope)
+                        })
+                    })
                     .map(|node| {
                         let resource = resource_key(node);
                         TreeEntry {
                             key: format!("source:{}", node.id),
-                            parent: node.parent.map(|id| format!("source:{id}")),
+                            parent: (snapshot.scope != Some(node.id))
+                                .then_some(node.parent)
+                                .flatten()
+                                .map(|id| format!("source:{id}")),
                             label: node.name.clone(),
                             name: node.xaml_name().or(resource).unwrap_or_default().to_owned(),
                             detail: resource.map_or_else(
@@ -1227,7 +1233,9 @@ impl DesignerWorkspace {
                                 |key| format!("XAML · Resource key: {key}"),
                             ),
                             source: Some(node.id),
-                            initially_expanded: Some(!is_metadata_container(node)),
+                            initially_expanded: Some(
+                                snapshot.scope == Some(node.id) || !is_metadata_container(node),
+                            ),
                             ..Default::default()
                         }
                     })
@@ -1270,6 +1278,119 @@ impl DesignerWorkspace {
             }
         });
         self.inspectors.guard.set(previous);
+    }
+}
+
+/// Every editor modality enters the same source transaction boundary. Replacing an
+/// existing graph is explicit, validated against a private candidate, and undoable once.
+fn apply_property_value(
+    session: &mut DesignerSession,
+    targets: &[NodeId],
+    property: &str,
+    edit: crate::editors::PropertyValueEdit,
+) -> Result<(), String> {
+    use crate::editors::PropertyValueEdit;
+    let expression = matches!(&edit, PropertyValueEdit::Expression(_));
+    match edit {
+        PropertyValueEdit::Reset => {
+            let mut edits = Vec::new();
+            for node in targets {
+                edits.extend(
+                    ferroui_designer_tools::plan_component_action(
+                        session.document(),
+                        &ferroui_designer_tools::ComponentAction::SetProperty {
+                            node: *node,
+                            property: property.into(),
+                            value: None,
+                        },
+                    )
+                    .map_err(|error| error.to_string())?,
+                );
+            }
+            session
+                .apply(format!("Reset {property}"), edits)
+                .map(|_| ())
+                .map_err(|error| error.to_string())
+        }
+        PropertyValueEdit::Object(source) => {
+            session.set_property_object_source(targets, property, Some(&source))
+        }
+        PropertyValueEdit::Resource { node, dynamic } => {
+            session.edit_component(ferroui_designer_tools::ComponentAction::ApplyResource {
+                resource: node,
+                targets: targets.to_vec(),
+                property: property.to_owned(),
+                dynamic,
+            })
+        }
+        PropertyValueEdit::ExtractResource { owner, key } => {
+            let [node] = targets else {
+                return Err("Select one authored property value to create a resource".into());
+            };
+            session.edit_component(ferroui_designer_tools::ComponentAction::ExtractProperty {
+                node: *node,
+                property: property.to_owned(),
+                owner,
+                key,
+            })
+        }
+        PropertyValueEdit::Literal(value) | PropertyValueEdit::Expression(value) => {
+            let graph = targets
+                .iter()
+                .filter_map(|id| session.document().ast().node(*id))
+                .any(|node| property_element(session.document(), node, property).is_some());
+            if !graph {
+                if expression {
+                    let edits = session
+                        .property_tools()
+                        .plan(
+                            session.document(),
+                            targets,
+                            property,
+                            Some(&value),
+                            ferroui_designer_tools::ExpressionPolicy::ReplaceExpressions,
+                        )
+                        .map_err(|error| error.to_string())?;
+                    return session
+                        .apply(format!("Set {property} expression"), edits)
+                        .map(|_| ())
+                        .map_err(|error| error.to_string());
+                }
+                return session.set_property(targets, property, &value);
+            }
+            let mut edits = Vec::new();
+            for node in targets {
+                edits.extend(
+                    ferroui_designer_tools::plan_component_action(
+                        session.document(),
+                        &ferroui_designer_tools::ComponentAction::SetProperty {
+                            node: *node,
+                            property: property.to_owned(),
+                            value: Some(value.clone()),
+                        },
+                    )
+                    .map_err(|error| error.to_string())?,
+                );
+            }
+            let mut candidate = session.document().clone();
+            candidate
+                .apply("Validate property replacement", edits.clone())
+                .map_err(|error| error.to_string())?;
+            session
+                .property_tools()
+                .plan(
+                    &candidate,
+                    targets,
+                    property,
+                    Some(&value),
+                    ferroui_designer_tools::ExpressionPolicy::ReplaceExpressions,
+                )
+                .map_err(|error| error.to_string())?;
+            session
+                .apply(format!("Replace {property} value"), edits)
+                .map(|_| ())
+                .map_err(|error| error.to_string())
+        }
     }
 }
 
@@ -1420,12 +1541,10 @@ impl DesignerWorkspace {
             if child.kind != ferroui_designer_core::NodeKind::PropertyElement {
                 continue;
             }
-            let qualified = child.local_name();
+            let qualified = child.name.as_str();
             let short = qualified.rsplit('.').next().unwrap_or(qualified);
-            let property = if properties.iter().any(|property| property == qualified) {
-                qualified
-            } else if qualified.split('.').next() == Some(first.local_name())
-                || known.as_ref().is_some_and(|known| known.contains(short))
+            let property = if property_element(session.document(), first, short)
+                .is_some_and(|matched| matched.id == child.id)
             {
                 short
             } else {
@@ -1444,6 +1563,25 @@ impl DesignerWorkspace {
             .collect::<std::collections::BTreeMap<_, _>>();
         properties.sort();
         properties.dedup();
+        // A namespace alias of an ordinary property must not create a second row.
+        // Prefer the runtime property name; keep unrelated attached owners distinct.
+        properties.sort_by_key(|property| {
+            (
+                known.as_ref().is_none_or(|known| !known.contains(property)),
+                property.clone(),
+            )
+        });
+        let mut authored_attributes = BTreeSet::new();
+        properties.retain(|property| {
+            ferroui_designer_tools::component_property_attribute(
+                session.document(),
+                first.id,
+                property,
+            )
+            .ok()
+            .flatten()
+            .is_none_or(|attribute| authored_attributes.insert(attribute.span.start))
+        });
         properties.sort_by(|a, b| property_rank(a).cmp(&property_rank(b)).then(a.cmp(b)));
         let runtime_types = infos
             .iter()
@@ -1463,7 +1601,7 @@ impl DesignerWorkspace {
         let rows = properties
             .into_iter()
             .filter(|name| {
-                first.attribute(name).is_some()
+                property_attribute(session.document(), first, name).is_some()
                     || name.contains('.')
                     || name == "Name"
                     || property_element(session.document(), first, name).is_some()
@@ -1472,7 +1610,7 @@ impl DesignerWorkspace {
             .filter(|name| {
                 selected.iter().any(|id| {
                     session.document().ast().node(*id).is_some_and(|node| {
-                        node.attribute(name).is_some()
+                        property_attribute(session.document(), node, name).is_some()
                             || property_element(session.document(), node, name).is_some()
                     })
                 }) || selected
@@ -1485,7 +1623,7 @@ impl DesignerWorkspace {
                     &filter,
                     selected.iter().any(|id| {
                         session.document().ast().node(*id).is_some_and(|node| {
-                            node.attribute(name).is_some()
+                            property_attribute(session.document(), node, name).is_some()
                                 || property_element(session.document(), node, name).is_some()
                         })
                     }),
@@ -1493,7 +1631,7 @@ impl DesignerWorkspace {
             })
             .map(|name| {
                 let document = session.document();
-                let first_value = first.attribute(&name).map(str::to_owned);
+                let first_value = property_attribute(document, first, &name).map(str::to_owned);
                 let first_content = property_element_content(document, first, &name);
                 let graph = selected
                     .iter()
@@ -1501,7 +1639,7 @@ impl DesignerWorkspace {
                     .find_map(|node| property_element(document, node, &name).map(|node| node.id));
                 let mixed = selected.iter().skip(1).any(|id| {
                     document.ast().node(*id).is_some_and(|node| {
-                        node.attribute(&name) != first_value.as_deref()
+                        property_attribute(document, node, &name) != first_value.as_deref()
                             || property_element_content(document, node, &name) != first_content
                     })
                 });
@@ -1511,22 +1649,73 @@ impl DesignerWorkspace {
                         document
                             .ast()
                             .node(*id)
-                            .is_some_and(|node| node.attribute(&name).is_some())
+                            .is_some_and(|node| property_attribute(document, node, &name).is_some())
                     });
                 (
-                    name,
+                    name.clone(),
                     if mixed { None } else { first_value },
                     mixed,
                     can_reset,
                     graph,
+                    if mixed {
+                        None
+                    } else {
+                        ferroui_designer_tools::component_property_object(document, first.id, &name)
+                            .ok()
+                            .flatten()
+                    },
                 )
             })
             .collect::<Vec<_>>();
+        let scope = session.definition_scope().map(|scope| scope.node);
+        let scope_epoch = session.definition_scope_epoch();
+        let name_scope = session.document().ast().name_scope(first.id);
+        let named_elements = session
+            .document()
+            .ast()
+            .nodes_in_source_order()
+            .filter(|node| session.document().ast().name_scope(node.id) == name_scope)
+            .filter_map(|node| node.xaml_name().map(str::to_owned))
+            .collect::<Vec<_>>();
+        let resources = session
+            .visible_component_resources(first.id)
+            .unwrap_or_default()
+            .into_iter()
+            .filter(|resource| {
+                selected.iter().all(|target| {
+                    session
+                        .visible_component_resources(*target)
+                        .is_ok_and(|resources| {
+                            resources
+                                .iter()
+                                .any(|candidate| candidate.node == resource.node)
+                        })
+                })
+            })
+            .filter_map(|resource| {
+                resource
+                    .key
+                    .map(|key| crate::editors::PropertyResourceChoice {
+                        node: resource.node,
+                        label: format!(
+                            "{} · {}",
+                            key,
+                            resource
+                                .type_name
+                                .rsplit('}')
+                                .next()
+                                .unwrap_or(&resource.type_name)
+                        ),
+                        key,
+                    })
+            })
+            .collect::<Vec<_>>();
         drop(session);
+        let resource_owners = self.component_owners();
         let factories = Rc::new(self.property_editors.borrow().clone());
         let rows = rows
             .into_iter()
-            .map(|(name, value, mixed, can_reset, graph)| {
+            .map(|(name, value, mixed, can_reset, graph, object_source)| {
                 let weak = Rc::downgrade(self);
                 let property = name.clone();
                 let ids = selected.clone();
@@ -1556,6 +1745,7 @@ impl DesignerWorkspace {
                     value.clone().unwrap_or_else(|| displayed.clone())
                 };
                 let runtime_type = runtime_types.get(&name).cloned();
+                let native_property = infos.iter().find(|info| info.name == name).map(|info| info.property);
                 let tooltip = {
                     let weak = weak.clone();
                     let uri = uri.clone();
@@ -1637,43 +1827,65 @@ impl DesignerWorkspace {
                         accepted
                     }) as PropertyDropValidator
                 });
-                let context = (!read_only).then(|| PropertyEditorContext {
-                    property: name.clone(),
-                    targets: selected.clone(),
-                    value,
-                    mixed,
-                    runtime_type: runtime_type.clone(),
-                    apply: Rc::new(move |value| {
-                        let Some(this) = weak.upgrade() else { return };
-                        if this.pending_source.get() {
-                            this.apply_source();
-                        }
-                        // A recycled editor or extension must never apply a stale row to another
-                        // tab or to a document changed by source editing/collaboration.
-                        let session = this.session.borrow();
-                        if session.document_uri() != uri
-                            || session.document().revision() != revision
-                            || session.selection() != ids.as_slice()
-                            || !std::ptr::eq(ast_snapshot.as_ref(), session.document().ast())
-                        {
-                            drop(session);
-                            this.rebuild_properties();
-                            this.report(Err(
-                                "The document changed; edit the refreshed property value".into(),
-                            ));
-                            return;
-                        }
+                let row_read_only = read_only || infos.iter().any(|info| info.name == name && info.read_only);
+                let commit: crate::editors::PropertyValueCommit = Rc::new(move |edit| {
+                    let this = weak.upgrade().ok_or("The designer was closed")?;
+                    if this.pending_source.get() { this.apply_source(); }
+                    let session = this.session.borrow();
+                    if session.document_uri() != uri || session.document().revision() != revision
+                        || session.selection() != ids.as_slice()
+                        || !std::ptr::eq(ast_snapshot.as_ref(), session.document().ast())
+                        || session.definition_scope().map(|scope| scope.node) != scope
+                        || session.definition_scope_epoch() != scope_epoch
+                        || this.runtime_selection.get().is_some()
+                    {
                         drop(session);
-                        let result = match value {
-                            None => this.session.borrow_mut().reset_property(&ids, &property),
-                            Some(value) => this
-                                .session
-                                .borrow_mut()
-                                .set_property(&ids, &property, &value),
-                        };
-                        this.refresh(true);
-                        this.report(result);
-                    }),
+                        this.rebuild_properties();
+                        return Err("The document, selection or definition scope changed; reopen this property editor".into());
+                    }
+                    if session.is_read_only() || row_read_only { return Err("This property is read only".into()); }
+                    if let crate::editors::PropertyValueEdit::Resource { node, .. } = &edit {
+                        if native_property.is_some_and(|property| {
+                            session.document().ast().node(*node).is_some_and(|resource| {
+                                crate::editors::resource_is_compatible(property, resource) == Some(false)
+                            })
+                        }) {
+                            return Err("The selected resource type is not compatible with this property".into());
+                        }
+                    }
+                    drop(session);
+                    let result = apply_property_value(&mut this.session.borrow_mut(), &ids, &property, edit);
+                    this.refresh(true);
+                    this.report(result.clone());
+                    result
+                });
+                let context = (!row_read_only).then(|| PropertyEditorContext {
+                    property: name.clone(), targets: selected.clone(), value, mixed,
+                    runtime_type: runtime_type.clone(),
+                    apply: { let commit = commit.clone(); Rc::new(move |value| { let edit = match value { Some(value) if value.trim_start().starts_with('{') && !value.trim_start().starts_with("{}") => crate::editors::PropertyValueEdit::Expression(value), Some(value) => crate::editors::PropertyValueEdit::Literal(value), None => crate::editors::PropertyValueEdit::Reset }; let _ = commit(edit); }) },
+                });
+                let metadata = context.as_ref().map(|context| {
+                    let mut metadata = crate::editors::resolve_property_editor_metadata(context, native_property);
+                    metadata.object_source = object_source;
+                    if graph.is_some() && !mixed { metadata.source = crate::editors::PropertyValueSource::Object; }
+                    metadata.resources = resources.iter().filter(|resource| {
+                        native_property.is_none_or(|property| {
+                            self.session.borrow().document().ast().node(resource.node).is_none_or(|resource| {
+                                crate::editors::resource_is_compatible(property, resource) != Some(false)
+                            })
+                        })
+                    }).cloned().collect();
+                    metadata.named_elements = named_elements.clone();
+                    metadata.binding_extension = crate::component_session::property_binding_extension(
+                        self.session.borrow().document(), selected[0], context.value.as_deref(),
+                    );
+                    if selected.len() == 1 && !mixed && can_reset
+                        && matches!(metadata.source, crate::editors::PropertyValueSource::Local | crate::editors::PropertyValueSource::Object)
+                    {
+                        metadata.resource_owners = resource_owners.clone();
+                    }
+                    metadata.commit = Some(commit);
+                    metadata
                 });
                 Rc::new(PropertyRow {
                     category: None,
@@ -1683,6 +1895,7 @@ impl DesignerWorkspace {
                     origin,
                     runtime_type: runtime_type.unwrap_or_else(|| "XAML".into()),
                     context,
+                    metadata,
                     factories: factories.clone(),
                     can_reset,
                     reveal,
@@ -1736,6 +1949,7 @@ impl DesignerWorkspace {
                     ),
                     runtime_type: info.property.property_type_name().to_owned(),
                     context: None,
+                    metadata: None,
                     factories: factories.clone(),
                     can_reset: false,
                     reveal: None,
@@ -1809,6 +2023,7 @@ impl DesignerWorkspace {
                 origin: String::new(),
                 runtime_type: String::new(),
                 context: None,
+                metadata: None,
                 factories: Rc::new(Vec::new()),
                 can_reset: false,
                 reveal: None,
@@ -2027,3 +2242,7 @@ fn property_reference_applies(
 #[cfg(test)]
 #[path = "inspector_controls_tests.rs"]
 mod tests;
+
+#[cfg(test)]
+#[path = "inspector_property_editor_tests.rs"]
+mod property_editor_tests;

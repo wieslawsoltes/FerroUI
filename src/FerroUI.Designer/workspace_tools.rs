@@ -587,9 +587,13 @@ pub(crate) fn measure(
     parent: NodeId,
     child: Option<NodeId>,
 ) -> Result<Measurement, String> {
-    let authored = session.preview.visual(parent).ok_or(
-        "The selected parent has no live layout; repair its preview or edit its template in source",
-    )?;
+    let authored = session
+        .preview
+        .visual(parent)
+        .or_else(|| crate::definition_manipulation::native_layout_parent(session, parent, child))
+        .ok_or(
+            "The selected parent has no live layout; open its definition or repair the preview",
+        )?;
     if authored
         .cast::<ferroui_controls::Panel>()
         .is_some_and(|panel| panel.is_items_host())
