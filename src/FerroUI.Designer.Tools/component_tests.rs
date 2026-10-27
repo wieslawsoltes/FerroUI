@@ -165,6 +165,173 @@ fn resource_reference_generation_uses_registered_markup_extension_namespace_with
 }
 
 #[test]
+fn property_replacement_preserves_same_member_names_in_other_namespaces_and_owners() {
+    let source = r#"<Border xmlns="https://github.com/ferroui" xmlns:n="using:FerroUI.Controls" xmlns:a="urn:application" a:Background="CustomScalar"><a:Border.Background><!-- custom graph --><a:Brush Value="keep"/></a:Border.Background><n:Border.Background><SolidColorBrush Color="Red"/></n:Border.Background><a:Other.Background><a:Brush Value="also keep"/></a:Other.Background></Border>"#;
+    let mut document = Document::new(source).unwrap();
+    let root = document.ast().root();
+    let object = component_property_object(&document, root, "Background")
+        .unwrap()
+        .unwrap();
+    assert!(object.contains("SolidColorBrush"));
+    assert!(!object.contains("CustomScalar"));
+    assert_eq!(
+        component_property_elements(&document, root, "Background")
+            .unwrap()
+            .len(),
+        1
+    );
+    assert!(
+        component_property_attribute(&document, root, "Background")
+            .unwrap()
+            .is_none()
+    );
+    apply(
+        &mut document,
+        ComponentAction::SetProperty {
+            node: root,
+            property: "Background".into(),
+            value: Some("Blue".into()),
+        },
+    );
+    assert!(document.source().contains("a:Background=\"CustomScalar\""));
+    assert!(document.source().contains(
+        "<a:Border.Background><!-- custom graph --><a:Brush Value=\"keep\"/></a:Border.Background>"
+    ));
+    assert!(
+        document
+            .source()
+            .contains("<a:Other.Background><a:Brush Value=\"also keep\"/></a:Other.Background>")
+    );
+    assert!(!document.source().contains("n:Border.Background"));
+    assert_eq!(
+        component_property_attribute(&document, root, "Background")
+            .unwrap()
+            .unwrap()
+            .value,
+        "Blue"
+    );
+    document.undo().unwrap();
+    assert_eq!(document.source(), source);
+    apply(
+        &mut document,
+        ComponentAction::SetObjectProperty {
+            node: root,
+            property: "a:Border.Background".into(),
+            source: Some("<a:Brush Value=\"updated\"/>".into()),
+        },
+    );
+    assert!(
+        document.source().contains(
+            "<n:Border.Background><SolidColorBrush Color=\"Red\"/></n:Border.Background>"
+        )
+    );
+    assert!(
+        document
+            .source()
+            .contains("<a:Other.Background><a:Brush Value=\"also keep\"/></a:Other.Background>")
+    );
+    assert!(document.source().contains("<a:Brush Value=\"updated\"/>"));
+}
+
+#[test]
+fn scalar_property_namespace_aliases_preserve_original_prefix_and_reject_duplicate_identities() {
+    let mut document = Document::new(r#"<Border xmlns="https://github.com/ferroui" xmlns:a="urn:application" xmlns:b="urn:application" b:Mode="Original" Mode="Native"/>"#).unwrap();
+    let root = document.ast().root();
+    assert_eq!(
+        component_property_attribute(&document, root, "a:Mode")
+            .unwrap()
+            .unwrap()
+            .name,
+        "b:Mode"
+    );
+    apply(
+        &mut document,
+        ComponentAction::SetProperty {
+            node: root,
+            property: "a:Mode".into(),
+            value: Some("Changed".into()),
+        },
+    );
+    assert!(document.source().contains("b:Mode=\"Changed\""));
+    assert_eq!(
+        component_property_attribute(&document, root, "Mode")
+            .unwrap()
+            .unwrap()
+            .value,
+        "Native"
+    );
+    assert!(Document::new(r#"<Border xmlns="https://github.com/ferroui" xmlns:a="urn:application" xmlns:b="urn:application" a:Mode="First" b:Mode="Second"/>"#).is_err());
+}
+
+#[test]
+fn native_setter_value_replacement_keeps_application_value_attribute_and_object_graph() {
+    let mut document = document(
+        r#"<Grid.Resources><ControlTheme x:Key="Card" TargetType="Button"><Setter xmlns:a="urn:application" Property="Background" a:Value="Custom"><a:Setter.Value><a:Brush Value="keep"/></a:Setter.Value><Setter.Value><SolidColorBrush Color="Red"/></Setter.Value></Setter></ControlTheme></Grid.Resources>"#,
+    );
+    let owner = keyed(&document, "Card");
+    apply(
+        &mut document,
+        ComponentAction::SetSetter {
+            owner,
+            property: "Background".into(),
+            value: Some("Blue".into()),
+        },
+    );
+    assert!(document.source().contains("a:Value=\"Custom\""));
+    assert!(
+        document
+            .source()
+            .contains("<a:Setter.Value><a:Brush Value=\"keep\"/></a:Setter.Value>")
+    );
+    assert!(!document.source().contains("<Setter.Value>"));
+    assert!(document.source().contains("Value=\"Blue\""));
+}
+
+#[test]
+fn custom_resources_properties_do_not_capture_native_scope_or_references() {
+    let mut document = document(
+        r#"<Grid.Resources><Color x:Key="Accent" Name="Native">Red</Color></Grid.Resources><a:Grid.Resources xmlns:a="urn:application"><Color x:Key="Accent" Name="Custom">Blue</Color></a:Grid.Resources><Button Name="Target" Background="{StaticResource Accent}"/>"#,
+    );
+    let target = named(&document, "Target");
+    let native = named(&document, "Native");
+    let custom = named(&document, "Custom");
+    assert_eq!(
+        resolve_component_resource(&document, target, "Accent"),
+        Some(native)
+    );
+    let catalog = ComponentCatalog::from_document(&document).unwrap();
+    assert!(
+        catalog
+            .entries
+            .iter()
+            .find(|entry| entry.node == custom)
+            .unwrap()
+            .owner
+            .is_none()
+    );
+    apply(
+        &mut document,
+        ComponentAction::RenameResource {
+            resource: native,
+            key: "Primary".into(),
+        },
+    );
+    assert_eq!(
+        literal_key(document.ast().node(custom).unwrap()).as_deref(),
+        Some("Accent")
+    );
+    assert!(
+        document
+            .ast()
+            .node(target)
+            .unwrap()
+            .attribute("Background")
+            .unwrap()
+            .contains("Primary")
+    );
+}
+
+#[test]
 fn resource_lookup_preserves_local_shadowing_merge_order_and_external_uncertainty() {
     let d = document(r#"<Grid.Resources><ResourceDictionary><ResourceDictionary.MergedDictionaries><ResourceDictionary><Color x:Key="Merged" Name="First">Red</Color></ResourceDictionary><ResourceDictionary><Color x:Key="Merged" Name="Last">Blue</Color></ResourceDictionary></ResourceDictionary.MergedDictionaries><Color x:Key="Local" Name="Outer">Red</Color></ResourceDictionary></Grid.Resources><Border Name="Inner"><Border.Resources><Color x:Key="Local" Name="Shadow">Green</Color></Border.Resources><Button Name="Child" /></Border><Button Name="Sibling"/></Grid>"#.trim_end_matches("</Grid>"));
     assert_eq!(

@@ -11,9 +11,10 @@ mod selection;
 
 pub use components::{
     ComponentAction, ComponentCatalog, ComponentEntry, ComponentKind, ComponentReference,
-    component_fragment, component_property_object, component_resource_expression,
-    component_resource_references, plan_component_action, plan_property_object,
-    resolve_component_resource, visible_component_resources,
+    component_fragment, component_property_attribute, component_property_elements,
+    component_property_object, component_resource_expression, component_resource_references,
+    plan_component_action, plan_property_object, resolve_component_resource,
+    visible_component_resources,
 };
 pub use geometry::{
     Affine, Alignment, Axis, Point, Rect, SnapGuide, SnapIndex, SnapResult, SnapSettings, align,

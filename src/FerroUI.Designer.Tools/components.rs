@@ -406,7 +406,12 @@ pub(crate) fn resource_owner(document: &Document, node: NodeId) -> Option<NodeId
         return Some(parent.id);
     }
     if parent.kind == NodeKind::PropertyElement && parent.local_name().ends_with(".Resources") {
-        return parent.parent;
+        let owner = document.ast().node(parent.parent?)?;
+        return property_elements(document, owner, "Resources")
+            .ok()?
+            .iter()
+            .any(|property| property.id == parent.id)
+            .then_some(owner.id);
     }
     None
 }
@@ -433,15 +438,14 @@ pub(crate) fn property_elements<'a>(
     property: &str,
 ) -> Result<Vec<&'a Node>> {
     property_name(property)?;
-    let member = property.rsplit('.').next().unwrap_or(property);
+    let query = PropertyIdentity::query(document, node.id, property)?;
     let result = document
         .ast()
         .element_children(node.id)
         .into_iter()
         .filter_map(|id| document.ast().node(id))
         .filter(|child| {
-            child.kind == NodeKind::PropertyElement
-                && child.local_name().rsplit('.').next() == Some(member)
+            child.kind == NodeKind::PropertyElement && query.matches_element(node, child)
         })
         .collect::<Vec<_>>();
     require(
@@ -451,16 +455,17 @@ pub(crate) fn property_elements<'a>(
     Ok(result)
 }
 pub(crate) fn attributes_for<'a>(
+    document: &Document,
     node: &'a Node,
     property: &str,
 ) -> Result<Vec<&'a ferroui_designer_core::Attribute>> {
     property_name(property)?;
-    let local = property.rsplit(':').next().unwrap_or(property);
+    let query = PropertyIdentity::query(document, node.id, property)?;
     let values = node
         .attributes
         .iter()
         .filter(|attribute| {
-            attribute.name == property || attribute.name.rsplit(':').next() == Some(local)
+            !attribute.is_namespace() && query.matches_attribute(document, node.id, attribute)
         })
         .collect::<Vec<_>>();
     require(
@@ -468,6 +473,130 @@ pub(crate) fn attributes_for<'a>(
         "The property has duplicate namespace aliases",
     )?;
     Ok(values)
+}
+
+/// Resolve a property's authored object container by its expanded owner/member identity.
+/// Different application namespaces and attached-property owners remain independent.
+pub fn component_property_elements(
+    document: &Document,
+    node: NodeId,
+    property: &str,
+) -> Result<Vec<NodeId>> {
+    valid_document(document)?;
+    property_elements(document, element(document, node)?, property)
+        .map(|nodes| nodes.into_iter().map(|node| node.id).collect())
+}
+
+/// Read the authored scalar/expression while preserving a qualified attribute's prefix.
+pub fn component_property_attribute<'a>(
+    document: &'a Document,
+    node: NodeId,
+    property: &str,
+) -> Result<Option<&'a ferroui_designer_core::Attribute>> {
+    valid_document(document)?;
+    attributes_for(document, element(document, node)?, property)
+        .map(|values| values.first().copied())
+}
+
+struct PropertyIdentity {
+    namespace: Option<String>,
+    owner: Option<String>,
+    member: String,
+}
+impl PropertyIdentity {
+    fn query(document: &Document, node: NodeId, property: &str) -> Result<Self> {
+        property_name(property)?;
+        let (prefix, local) = property
+            .split_once(':')
+            .map_or((None, property), |(prefix, local)| (Some(prefix), local));
+        let (owner, member) = local
+            .rsplit_once('.')
+            .map_or((None, local), |(owner, member)| {
+                (Some(owner.to_owned()), member)
+            });
+        let namespace = if prefix.is_some() || owner.is_some() {
+            let namespaces = document.ast().namespaces(node);
+            match namespaces.get(prefix.unwrap_or("")) {
+                Some(namespace) => Some(namespace.clone()),
+                None if prefix.is_none() => None,
+                None => {
+                    return Err(ToolError(
+                        "The property namespace prefix is not declared".into(),
+                    ));
+                }
+            }
+        } else {
+            None
+        };
+        Ok(Self {
+            namespace,
+            owner,
+            member: member.into(),
+        })
+    }
+    fn matches_attribute(
+        &self,
+        document: &Document,
+        node: NodeId,
+        attribute: &ferroui_designer_core::Attribute,
+    ) -> bool {
+        let Ok(other) = Self::query(document, node, &attribute.name) else {
+            return false;
+        };
+        self.member == other.member
+            && self.owner == other.owner
+            && match self.owner.as_deref() {
+                Some(owner) => same_owner_namespace(
+                    owner,
+                    self.namespace.as_deref(),
+                    other.namespace.as_deref(),
+                ),
+                None => self.namespace == other.namespace,
+            }
+    }
+    fn matches_element(&self, target: &Node, candidate: &Node) -> bool {
+        let Some((owner, member)) = candidate.local_name().rsplit_once('.') else {
+            return false;
+        };
+        if member != self.member {
+            return false;
+        }
+        let expected_owner = self.owner.as_deref().unwrap_or(target.local_name());
+        let namespace = if self.owner.is_some() || self.namespace.is_some() {
+            self.namespace.as_deref()
+        } else {
+            target.namespace_uri.as_deref()
+        };
+        expected_owner == owner
+            && same_owner_namespace(owner, namespace, candidate.namespace_uri.as_deref())
+    }
+}
+
+fn same_owner_namespace(owner: &str, left: Option<&str>, right: Option<&str>) -> bool {
+    if left == right {
+        return true;
+    }
+    let native = |namespace: Option<&str>| {
+        namespace.is_some_and(|namespace| {
+            framework_type_namespace(owner, namespace)
+                || matches!(
+                    namespace,
+                    "using:FerroUI.Controls"
+                        | "using:FerroUI.Controls.Primitives"
+                        | "clr-namespace:FerroUI.Controls;assembly=FerroUI.Controls"
+                        | "clr-namespace:FerroUI.Controls.Primitives;assembly=FerroUI.Controls"
+                        | "using:FerroUI"
+                        | "using:FerroUI.Layout"
+                        | "using:FerroUI.Input"
+                        | "using:FerroUI.Media"
+                        | "clr-namespace:FerroUI;assembly=FerroUI.Base"
+                        | "clr-namespace:FerroUI.Layout;assembly=FerroUI.Base"
+                        | "clr-namespace:FerroUI.Input;assembly=FerroUI.Base"
+                        | "clr-namespace:FerroUI.Media;assembly=FerroUI.Base"
+                )
+        })
+    };
+    native(left) && native(right)
 }
 pub(crate) fn validated(document: &Document, edits: Vec<Edit>) -> Result<Vec<Edit>> {
     valid_document(document)?;

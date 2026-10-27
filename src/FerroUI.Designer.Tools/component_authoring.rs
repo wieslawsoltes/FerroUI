@@ -251,6 +251,16 @@ fn resource_container(document: &Document, owner: NodeId) -> Result<Option<NodeI
         return Ok(Some(owner));
     }
     if node.kind == NodeKind::PropertyElement && node.local_name().ends_with(".Resources") {
+        let owner = node
+            .parent
+            .and_then(|id| document.ast().node(id))
+            .ok_or_else(|| ToolError("The resource property has no owner".into()))?;
+        require(
+            property_elements(document, owner, "Resources")?
+                .iter()
+                .any(|property| property.id == node.id),
+            "Select the owner's Resources property or a ResourceDictionary",
+        )?;
         return dictionary_container(document, node);
     }
     let resources = property_elements(document, node, "Resources")?;
@@ -412,7 +422,7 @@ fn scalar_property(
             || property.rsplit(':').next() == Some("Key") && property.contains(':')),
         "Use resource rename to change a key; namespace declarations are edited in source",
     )?;
-    let attributes = attributes_for(element, property)?;
+    let attributes = attributes_for(document, element, property)?;
     let objects = property_elements(document, element, property)?;
     let implicit = implicit_property_children(document, element, property);
     let mut edits = Vec::new();
@@ -464,7 +474,7 @@ fn object_properties(
     let mut edits = Vec::new();
     for node in unique_targets(document, nodes)? {
         let element = element(document, node)?;
-        let attributes = attributes_for(element, property)?;
+        let attributes = attributes_for(document, element, property)?;
         let objects = property_elements(document, element, property)?;
         let implicit = implicit_property_children(document, element, property);
         let index = objects
@@ -730,7 +740,7 @@ fn extract_property(
     let source = if let Some(source) = object {
         source
     } else {
-        let attributes = attributes_for(element, property)?;
+        let attributes = attributes_for(document, element, property)?;
         let attribute = attributes.first().ok_or_else(|| {
             ToolError("Extracting a resource requires an authored property value".into())
         })?;

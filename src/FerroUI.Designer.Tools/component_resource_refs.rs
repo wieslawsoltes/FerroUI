@@ -47,13 +47,11 @@ fn lookup_scope(
         }
         return lookup_children(document, &owner.children, key, seen);
     }
-    let children = owner
-        .children
-        .iter()
-        .filter_map(|id| document.ast().node(*id))
-        .filter(|node| {
-            node.kind == NodeKind::PropertyElement && node.local_name().ends_with(".Resources")
-        })
+    let Ok(resources) = property_elements(document, owner, "Resources") else {
+        return Lookup::External;
+    };
+    let children = resources
+        .into_iter()
         .flat_map(|node| node.children.iter().copied())
         .collect::<Vec<_>>();
     lookup_children(document, &children, key, seen)
@@ -94,6 +92,15 @@ fn lookup_children(
     for merged in nodes.iter().rev().filter(|node| {
         node.kind == NodeKind::PropertyElement && node.local_name().ends_with(".MergedDictionaries")
     }) {
+        let Some(owner) = merged.parent.and_then(|id| document.ast().node(id)) else {
+            continue;
+        };
+        let Ok(properties) = property_elements(document, owner, "MergedDictionaries") else {
+            return Lookup::External;
+        };
+        if !properties.iter().any(|property| property.id == merged.id) {
+            continue;
+        }
         for child in merged
             .children
             .iter()
