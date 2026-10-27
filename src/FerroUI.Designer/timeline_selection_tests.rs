@@ -334,3 +334,70 @@ fn easing_presets_stage_the_curve_then_apply_in_one_undo_step() {
     workspace.session.borrow_mut().undo().unwrap();
     assert_eq!(workspace.session.borrow().document().source(), original);
 }
+
+#[test]
+fn applying_a_keyframe_from_the_keyboard_restores_focus_to_the_replacement_field() {
+    use ferroui_base::input::{IKeyboardDevice, KeyboardDevice};
+    use ferroui_controls::Window;
+    let _app = UnitTestApplication::start(
+        TestServices::styled_window()
+            .with_keyboard_device(|| Some(KeyboardDevice::new() as Rc<dyn IKeyboardDevice>)),
+    );
+    let (workspace, target) = workspace();
+    let window = Window::new();
+    window.set_width(1280.0);
+    window.set_height(820.0);
+    window.set_content(Some(Control::boxed(&workspace.control())));
+    window.show();
+    workspace.select_keyframe(target, "Opacity", 1.0).unwrap();
+    window.update_layout();
+    let value_field = || {
+        workspace
+            .tracks
+            .children()
+            .to_vec()
+            .into_iter()
+            .filter_map(|control| control.cast::<StackPanel>())
+            .flat_map(|row| row.children().to_vec())
+            .filter_map(|control| control.cast::<TextBox>())
+            .find(|input| input.name().as_deref() == Some("KeyframeValue"))
+            .unwrap()
+    };
+    let previous = value_field();
+    assert!(previous.focus());
+    previous.set_text(Some("0.35"));
+    previous.set_selection_start(1);
+    previous.set_selection_end(4);
+    let original = workspace.session.borrow().document().source().to_owned();
+    let mut event = KeyEventArgs::new();
+    event.key = Key::Enter;
+    event.set_routed_event(Some(InputElement::key_down_event()));
+    previous.raise_event(&event);
+    assert!(event.handled());
+    window.update_layout();
+    let current = value_field();
+    assert!(!std::ptr::eq(&*previous, &*current));
+    assert!(
+        current.is_focused(),
+        "Accepted keyframe edits retain the active field for consecutive keyboard editing"
+    );
+    assert_eq!(current.selection_start(), 1);
+    assert_eq!(current.selection_end(), 4);
+    assert_eq!(
+        workspace
+            .session
+            .borrow()
+            .timeline()
+            .track(target, "Opacity")
+            .unwrap()
+            .keyframes
+            .iter()
+            .find(|key| key.time == 1.0)
+            .unwrap()
+            .value,
+        AnimationValue::Number(0.35)
+    );
+    workspace.session.borrow_mut().undo().unwrap();
+    assert_eq!(workspace.session.borrow().document().source(), original);
+    window.close();
+}

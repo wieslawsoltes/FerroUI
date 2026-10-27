@@ -66,6 +66,20 @@ impl DesignerWorkspace {
             .iter()
             .filter_map(WeakRef::upgrade)
             .any(|lane| lane.is_focused() && !lane.is_ruler());
+        let focused_field = self
+            .tracks
+            .children()
+            .to_vec()
+            .into_iter()
+            .filter_map(|control| control.cast::<StackPanel>())
+            .flat_map(|row| row.children().to_vec())
+            .filter_map(|control| control.cast::<TextBox>())
+            .find(|input| input.is_focused())
+            .and_then(|input| {
+                input
+                    .name()
+                    .map(|name| (name, input.selection_start(), input.selection_end()))
+            });
         self.tracks.children().clear();
         self.timeline_lanes.borrow_mut().clear();
         let session = self.session.borrow();
@@ -440,6 +454,22 @@ impl DesignerWorkspace {
             hint.set_margin(Thickness::symmetric(12.0, 18.0));
             hint.set_text_wrapping(ferroui_base::media::TextWrapping::Wrap);
             self.tracks.children().add(hint.upcast::<Control>());
+        }
+        if let Some((name, start, end)) = focused_field {
+            if let Some(input) = self
+                .tracks
+                .children()
+                .to_vec()
+                .into_iter()
+                .filter_map(|control| control.cast::<StackPanel>())
+                .flat_map(|row| row.children().to_vec())
+                .filter_map(|control| control.cast::<TextBox>())
+                .find(|input| input.name().as_deref() == Some(name.as_str()))
+            {
+                input.focus();
+                input.set_selection_start(start);
+                input.set_selection_end(end);
+            }
         }
     }
     fn connect_timeline_zoom(self: &Rc<Self>, lane: &TimelineLane) {
