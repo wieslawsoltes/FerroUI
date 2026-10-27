@@ -24,6 +24,10 @@ pub fn plan_component_action(document: &Document, action: &ComponentAction) -> R
         }
         ComponentAction::RemoveResource { resource } => {
             require(
+                literal_key(element(document, *resource)?).is_some(),
+                "Select an explicit string-key resource; dictionary containers and implicit or typed-key resources must be edited in source",
+            )?;
+            require(
                 resource_owner(document, *resource).is_some(),
                 "Select an authored resource entry",
             )?;
@@ -38,7 +42,7 @@ pub fn plan_component_action(document: &Document, action: &ComponentAction) -> R
             targets,
             property,
             dynamic,
-        } => apply_resource(document, *resource, targets, property, *dynamic)?,
+        } => apply_resource(document, *resource, targets, property, *dynamic, None)?,
         ComponentAction::SetProperty {
             node,
             property,
@@ -213,6 +217,38 @@ pub fn plan_component_action(document: &Document, action: &ComponentAction) -> R
         } => extract_property(document, *node, property, *owner, key)?,
     };
     validated(document, edits)
+}
+
+/// Plan resource application against an explicit runtime theme. All other actions,
+/// especially rename and deletion, retain conservative cross-theme reference checks.
+/// A host must revalidate the targets' actual theme context before committing this plan.
+pub fn plan_component_action_in_context(
+    document: &Document,
+    action: &ComponentAction,
+    context: &ComponentResourceContext,
+) -> Result<Vec<Edit>> {
+    if let ComponentAction::ApplyResource {
+        resource,
+        targets,
+        property,
+        dynamic,
+    } = action
+    {
+        valid_document(document)?;
+        validated(
+            document,
+            apply_resource(
+                document,
+                *resource,
+                targets,
+                property,
+                *dynamic,
+                Some(context),
+            )?,
+        )
+    } else {
+        plan_component_action(document, action)
+    }
 }
 
 /// Replace/reset a single object or collection property across a selection atomically.
@@ -555,6 +591,7 @@ fn apply_resource(
     targets: &[NodeId],
     property: &str,
     dynamic: bool,
+    context: Option<&ComponentResourceContext>,
 ) -> Result<Vec<Edit>> {
     let resource_node = element(document, resource)?;
     let key = literal_key(resource_node)
@@ -562,7 +599,8 @@ fn apply_resource(
     let mut edits = Vec::new();
     for target in unique_targets(document, targets)? {
         require(
-            resolve_component_resource(document, target, &key) == Some(resource),
+            component_resource_resolution(document, target, &key, context)?.resolved()
+                == Some(resource),
             "The selected resource is hidden, ambiguous or outside the target's scope",
         )?;
         // Resource application is explicit replacement, including an existing object graph.

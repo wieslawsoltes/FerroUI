@@ -9,8 +9,14 @@ use std::collections::{BTreeMap, BTreeSet};
 mod authoring;
 #[path = "component_resource_refs.rs"]
 mod references;
-pub use authoring::{plan_component_action, plan_property_object};
-pub use references::{component_resource_references, resolve_component_resource};
+pub use authoring::{
+    plan_component_action, plan_component_action_in_context, plan_property_object,
+};
+pub use references::{
+    ComponentResourceContext, ComponentResourceResolution, component_resource_references,
+    component_resource_resolution, resolve_component_resource,
+    resolve_component_resource_in_context,
+};
 
 /// Build a scope-qualified StaticResource/DynamicResource expression without treating
 /// punctuation, quotes or a leading brace in the key as markup syntax.
@@ -54,7 +60,8 @@ pub struct ComponentEntry {
     /// The nearest resource owner when this is a resource entry.
     pub owner: Option<NodeId>,
     pub scope: NodeId,
-    /// Resolved references in this document. External documents are indexed by the host.
+    /// Possible references in this document, including theme-dependent uses. External
+    /// documents themselves are indexed by the host.
     pub usages: usize,
 }
 
@@ -338,6 +345,27 @@ pub fn visible_component_resources(
         .collect())
 }
 
+/// Visible string-key resources for one concrete runtime theme, using the same
+/// resolution contract as `plan_component_action_in_context` resource application.
+pub fn visible_component_resources_in_context(
+    document: &Document,
+    target: NodeId,
+    context: &ComponentResourceContext,
+) -> Result<Vec<ComponentEntry>> {
+    element(document, target)?;
+    let mut entries = Vec::new();
+    for entry in ComponentCatalog::from_document(document)?.entries {
+        if let Some(key) = entry.key.as_deref() {
+            if component_resource_resolution(document, target, key, Some(context))?.resolved()
+                == Some(entry.node)
+            {
+                entries.push(entry);
+            }
+        }
+    }
+    Ok(entries)
+}
+
 pub(crate) fn element(document: &Document, node: NodeId) -> Result<&Node> {
     document
         .ast()
@@ -367,7 +395,9 @@ pub(crate) fn framework_type_namespace(name: &str, namespace: &str) -> bool {
     let (expected_namespace, assembly) = match name {
         "UserControl" => ("FerroUI.Controls", "FerroUI.Controls"),
         "ResourceDictionary" => ("FerroUI.Controls", "FerroUI.Base"),
-        "ControlTheme" | "Style" | "Styles" | "Setter" => ("FerroUI.Styling", "FerroUI.Base"),
+        "ControlTheme" | "Style" | "Styles" | "Setter" | "ThemeVariant" => {
+            ("FerroUI.Styling", "FerroUI.Base")
+        }
         "ControlTemplate" | "DataTemplate" | "TreeDataTemplate" => {
             ("FerroUI.Markup.Xaml.Templates", "FerroUI.Markup.Xaml")
         }
@@ -667,3 +697,7 @@ pub(crate) fn unique_targets(document: &Document, nodes: &[NodeId]) -> Result<Ve
 #[cfg(test)]
 #[path = "component_tests.rs"]
 mod tests;
+
+#[cfg(test)]
+#[path = "component_theme_tests.rs"]
+mod theme_tests;

@@ -175,3 +175,40 @@ native placement attributes. It retains existing framework namespace aliases, re
 aliases and expressions/property elements, and qualifies new attached properties when the
 current default namespace belongs to the application. Adapter callers validate semantic values
 before calling it. The candidate attribute batch is validated atomically before returning edits.
+
+## Component resources and theme variants
+
+`component_resource_resolution(document, target, key, context)` returns a
+`ComponentResourceResolution`: candidate declaration IDs, `may_be_missing`, and `external`
+uncertainty. Its `resolved()` method yields an ID only when every applicable lookup path
+selects the same declaration. The existing `resolve_component_resource` and
+`visible_component_resources` APIs pass no context and conservatively consider all authored
+theme variants. They do not guess the host's current light/dark theme.
+
+For a live preview, supply `ComponentResourceContext { theme, inherited_themes }` with the
+actual runtime theme key and its full inheritance chain, nearest inherited variant first.
+`None` or `Default` as the theme consults the Default dictionary before merged dictionaries;
+it does not mean an unknown theme. Lookup follows the framework order: local entries,
+selected variant, inherited variants, Default variant, merged dictionaries in reverse order,
+then outer resource scopes. Built-in `x:Static ThemeVariant.Light/Dark/Default` keys and
+namespace aliases are understood. External providers and other expression keys remain
+explicitly uncertain.
+
+`resolve_component_resource_in_context` and `visible_component_resources_in_context` expose
+that concrete lookup. Pair the latter with `plan_component_action_in_context` for
+`ComponentAction::ApplyResource`; the picker and commit use identical resolution rules.
+The host must verify the actual theme and document/selection snapshot again before applying
+the returned transaction. Targets with different active themes require their own context.
+All other component commands retain the normal conservative checks even through this API.
+
+Catalog usage counts and `component_resource_references` include possible uses across
+variants and fallbacks behind external providers. Deletion cannot discard a resource merely
+because no single active variant was selected. Renaming one member of a resource family is
+rejected when a shared reference can select other declarations; edit the whole family in
+source in that case. Template copies compare possible dependencies as well as unique
+resolutions. The portable engine never loads external dictionaries or executes arbitrary
+key expressions while performing these checks.
+
+Resource deletion is limited to explicit string-key entries. It does not remove an entire
+unkeyed dictionary container or infer that an implicit/type-keyed resource is unused; those
+structural operations remain source edits until the host supplies their complete references.
