@@ -573,6 +573,14 @@ pub(crate) fn project(
             }
         }
     }
+    for sample in &samples {
+        for (span, value) in &sample.binding_replacements {
+            patches.push(Patch {
+                span: *span,
+                replacement: value.clone(),
+            });
+        }
+    }
     // Parent suppression owns every nested patch. This is essential when a d:Content
     // replacement hides an application subtree that itself contains design directives.
     patches.sort_by_key(|patch| (patch.span.start, std::cmp::Reverse(patch.span.end)));

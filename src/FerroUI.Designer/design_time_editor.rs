@@ -96,9 +96,10 @@ impl DesignTimeEditor {
             value.set_min_height(if property.object { 76.0 } else { 30.0 });
             value.set_is_enabled(model.writable && active);
             let weak = value.downgrade();
-            checked.is_checked_changed(move |owner, _| {
-                if let Some(value) = weak.upgrade() {
-                    value.set_is_enabled(owner.is_checked() == Some(true));
+            let checked_weak = checked.downgrade();
+            checked.is_checked_changed(move |_, _| {
+                if let (Some(value), Some(checked)) = (weak.upgrade(), checked_weak.upgrade()) {
+                    value.set_is_enabled(checked.is_checked() == Some(true));
                 }
             });
             fields.children().add(checked.clone().upcast::<Control>());
@@ -110,7 +111,7 @@ impl DesignTimeEditor {
         fields.children().add(add.upcast::<Control>());
         let property = text("", "Design property name");
         property.set_name(Some("DesignNewProperty".into()));
-        property.set_watermark(Some("Text, Content, DataContext, Background…"));
+        property.set_placeholder_text(Some("Text, Content, DataContext, Background…"));
         property.set_is_enabled(model.writable);
         fields.children().add(property.clone().upcast::<Control>());
         let value = text("", "New design property value");

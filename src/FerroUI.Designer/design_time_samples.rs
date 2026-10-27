@@ -6,10 +6,15 @@ use ferroui_base::data::core::plugins::{
 use ferroui_base::data::core::{ValueType, ValueTypes, WeakValue};
 use ferroui_base::data::{BindingError, BindingPriority};
 use ferroui_base::reactive::IDisposable;
-use ferroui_base::{AnyValue, BoxedValue, FerroPropertyRegistry, Ref, StyledElement, Visual};
-use ferroui_designer_core::{Document, MarkupValue, Node, NodeId};
+use ferroui_base::{
+    AnyValue, BoxedValue, FerroObject, FerroPropertyRegistry, Ref, StyledElement, Visual,
+};
+use ferroui_controls::Control;
+use ferroui_designer_core::{Document, MarkupValue, Node, NodeId, SourceSpan};
+use ferroui_inspect::{Inspector, TreeKind};
+use ferroui_markup_xaml::diagnostics::XamlSourceInfo;
 use std::cell::RefCell;
-use std::collections::BTreeMap;
+use std::collections::{BTreeMap, BTreeSet};
 use std::rc::Rc;
 
 pub const MAX_SAMPLE_ITEMS: usize = 200;
@@ -29,6 +34,9 @@ pub(crate) struct SampleRequest {
     pub property: String,
     pub count: usize,
     fields: BTreeMap<String, SampleKind>,
+    /// Anonymous records have runtime members. The application retains its compiled
+    /// bindings; only the temporary sample-data projection uses reflection access.
+    pub binding_replacements: Vec<(SourceSpan, String)>,
 }
 
 pub(crate) fn sample_count(
@@ -80,6 +88,7 @@ pub(crate) fn request(
     notices: &mut Vec<String>,
 ) -> SampleRequest {
     let mut fields = BTreeMap::new();
+    let mut binding_replacements = Vec::new();
     let owner = document.ast().node(node).unwrap();
     let mut roots = vec![node];
     if property == "ItemsSource" {
@@ -134,7 +143,7 @@ pub(crate) fn request(
                     .name
                     .split_once(':')
                     .unwrap_or(("", &extension.name));
-                if !matches!(name, "Binding" | "ReflectionBinding")
+                if !matches!(name, "Binding" | "ReflectionBinding" | "CompiledBinding")
                     || document
                         .ast()
                         .namespaces(element.id)
@@ -150,6 +159,23 @@ pub(crate) fn request(
                     )
                 }) {
                     continue;
+                }
+                if name != "ReflectionBinding" {
+                    let qualified = if prefix.is_empty() {
+                        "ReflectionBinding".to_owned()
+                    } else {
+                        format!("{prefix}:ReflectionBinding")
+                    };
+                    let tail = attribute.value[1..].trim_start();
+                    let expression = format!("{{{qualified}{}", &tail[extension.name.len()..]);
+                    binding_replacements.push((
+                        attribute.value_span,
+                        expression
+                            .replace('&', "&amp;")
+                            .replace('<', "&lt;")
+                            .replace('"', "&quot;")
+                            .replace('\'', "&apos;"),
+                    ));
                 }
                 let Some(MarkupValue::Literal(path)) = extension
                     .arguments
@@ -184,6 +210,7 @@ pub(crate) fn request(
         property: property.into(),
         count,
         fields,
+        binding_replacements,
     }
 }
 
@@ -338,6 +365,159 @@ pub(crate) fn apply(visual: &Ref<Visual>, sample: &SampleRequest) -> Result<(), 
         })?;
     visual.set_value_untyped(property, converted.as_any(), BindingPriority::LocalValue);
     Ok(())
+}
+
+/// State belongs to one accepted native graph. Newly realized template instances are
+/// sampled once when the designer refreshes its runtime map; existing instances keep
+/// their temporary interaction state. The global budget also bounds nested collections.
+pub(crate) struct SampleState {
+    applied: BTreeSet<(u64, usize)>,
+    remaining: usize,
+    budget_notice: bool,
+}
+impl Default for SampleState {
+    fn default() -> Self {
+        Self {
+            applied: BTreeSet::new(),
+            remaining: 4096,
+            budget_notice: false,
+        }
+    }
+}
+
+pub(crate) fn apply_projection(
+    root: &Ref<Control>,
+    projection: &crate::design_time::DesignTimeProjection,
+    state: &mut SampleState,
+) -> Vec<String> {
+    if projection.samples.is_empty() {
+        return Vec::new();
+    }
+    let root_value: BoxedValue = Rc::new(root.clone());
+    let provenance = XamlSourceInfo::get_xaml_source_info(&root_value);
+    let mut targets = BTreeMap::<(String, usize), Vec<(usize, NodeId)>>::new();
+    let mut positions = projection
+        .document
+        .ast()
+        .elements()
+        .map(|node| (node.span.start, node.id, node.local_name().to_owned()))
+        .collect::<Vec<_>>();
+    let mut by_node = BTreeMap::<NodeId, Vec<usize>>::new();
+    for (index, sample) in projection.samples.iter().enumerate() {
+        by_node.entry(sample.node).or_default().push(index);
+    }
+    positions.sort_by_key(|(offset, _, _)| *offset);
+    let (mut offset, mut line, mut column) = (0usize, 1usize, 1usize);
+    for (start, index, type_name) in positions {
+        for character in projection.document.valid_source()[offset..start].chars() {
+            if character == '\n' {
+                line += 1;
+                column = 1;
+            } else {
+                column += 1;
+            }
+        }
+        offset = start;
+        targets
+            .entry((type_name, line))
+            .or_default()
+            .push((column, index));
+    }
+    let mut notices = Vec::new();
+    let inspector = Inspector::shared();
+    let root_id = inspector.borrow_mut().node_id(root);
+    for _ in 0..16 {
+        let mut pending = vec![root.clone().upcast::<FerroObject>()];
+        let mut visited = BTreeSet::new();
+        let mut changed = false;
+        while let Some(object) = pending.pop() {
+            let object_id = inspector.borrow_mut().node_id(&object);
+            if !visited.insert(object_id) {
+                continue;
+            }
+            for tree in [TreeKind::Logical, TreeKind::Visual] {
+                pending.extend(inspector.borrow().children(&object, tree));
+            }
+            let Some(visual) = object.cast::<Visual>() else {
+                continue;
+            };
+            let value: BoxedValue = Rc::new(object.clone());
+            let info = XamlSourceInfo::get_xaml_source_info(&value);
+            if info
+                .as_ref()
+                .zip(provenance.as_ref())
+                .is_some_and(|(info, root)| info.source_uri() != root.source_uri())
+            {
+                continue;
+            }
+            let indices = if object_id == root_id {
+                projection
+                    .samples
+                    .iter()
+                    .enumerate()
+                    .filter_map(|(index, sample)| {
+                        (sample.node == projection.document.ast().root()).then_some(index)
+                    })
+                    .collect::<Vec<_>>()
+            } else if let Some(info) = info {
+                targets
+                    .get(&(
+                        object.get_type().name().to_owned(),
+                        info.line_number().max(1) as usize,
+                    ))
+                    .map(|candidates| {
+                        let nearest = candidates
+                            .iter()
+                            .map(|(column, _)| {
+                                column.abs_diff(info.line_position().max(1) as usize)
+                            })
+                            .min();
+                        candidates
+                            .iter()
+                            .filter(|(column, _)| {
+                                Some(column.abs_diff(info.line_position().max(1) as usize))
+                                    == nearest
+                            })
+                            .flat_map(|(_, node)| by_node.get(node).into_iter().flatten().copied())
+                            .collect()
+                    })
+                    .unwrap_or_default()
+            } else {
+                Vec::new()
+            };
+            for index in indices {
+                if !state.applied.insert((object_id, index)) {
+                    continue;
+                }
+                let mut sample = projection.samples[index].clone();
+                let requested = if sample.property == "DataContext" {
+                    1
+                } else {
+                    sample.count
+                };
+                if requested > state.remaining {
+                    if !state.budget_notice {
+                        notices.push("Nested sample data reached the 4096-record preview limit; remaining collections are truncated.".into());
+                        state.budget_notice = true;
+                    }
+                    if sample.property == "DataContext" {
+                        continue;
+                    }
+                    sample.count = state.remaining;
+                }
+                state.remaining = state.remaining.saturating_sub(requested);
+                if let Err(error) = apply(&visual, &sample) {
+                    notices.push(error);
+                }
+                changed = true;
+            }
+        }
+        if !changed {
+            break;
+        }
+        root.update_layout();
+    }
+    notices
 }
 fn display_name(name: &str) -> String {
     let mut result = String::new();

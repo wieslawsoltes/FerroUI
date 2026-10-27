@@ -43,6 +43,7 @@ pub(crate) struct RuntimePreview {
     pub(crate) definition_scope: Option<crate::DefinitionScope>,
     definition_projection: Option<crate::definition_projection::DefinitionProjection>,
     design_projection: Option<crate::design_time::DesignTimeProjection>,
+    design_samples: crate::design_time_samples::SampleState,
     pub status: PreviewStatus,
     pub notices: Vec<String>,
     objects: BTreeMap<NodeId, WeakRef<Visual>>,
@@ -109,6 +110,7 @@ impl RuntimePreview {
             definition_scope: None,
             definition_projection: None,
             design_projection: None,
+            design_samples: Default::default(),
             status: PreviewStatus::Ready { revision: 0 },
             notices: Vec::new(),
             objects: BTreeMap::new(),
@@ -365,6 +367,7 @@ impl RuntimePreview {
         if result.is_ok() {
             self.definition_projection = candidate_definition;
             self.design_projection = candidate_design;
+            self.design_samples = Default::default();
             if root_control_scope {
                 if let Some(scope) = &self.definition_scope {
                     self.notices.push(format!(
@@ -384,9 +387,6 @@ impl RuntimePreview {
             },
         };
         if matches!(self.status, PreviewStatus::Ready { .. }) {
-            self.host.update_layout();
-            self.rebuild_map(document);
-            self.apply_design_samples();
             self.host.update_layout();
             self.rebuild_map(document);
             if self
@@ -436,7 +436,11 @@ impl RuntimePreview {
         self.window_projection
     }
     pub fn open_native(&mut self, source: String) -> Result<Ref<ferroui_controls::Window>, String> {
+        let document = Document::new(&source).map_err(|error| error.to_string())?;
+        let design =
+            crate::design_time::project(&document, &source, self.options.design_time_data)?;
         let loaded = self.options.load(&source, &self.uri)?;
+        let sample_root = Ref::<Control>::from_xaml_object(&loaded);
         let window =
             if let Some(window) = Ref::<ferroui_controls::Window>::from_xaml_object(&loaded) {
                 window
@@ -449,6 +453,15 @@ impl RuntimePreview {
                 window
             };
         window.show();
+        if let (Some(root), Some(projection)) = (sample_root, design) {
+            let mut state = crate::design_time_samples::SampleState::default();
+            self.notices
+                .extend(crate::design_time_samples::apply_projection(
+                    &root,
+                    &projection,
+                    &mut state,
+                ));
+        }
         if let Some(previous) = self.native_window.replace(window.clone()) {
             previous.close();
         }
@@ -506,6 +519,14 @@ impl RuntimePreview {
         let Some(root) = self.root() else {
             return;
         };
+        if let Some(projection) = &self.design_projection {
+            self.notices
+                .extend(crate::design_time_samples::apply_projection(
+                    &root,
+                    projection,
+                    &mut self.design_samples,
+                ));
+        }
         // One scan of source positions, followed by indexed lookup for each runtime object.
         let mut names = BTreeMap::new();
         let mut locations: BTreeMap<(String, usize), Vec<(usize, NodeId)>> = BTreeMap::new();
@@ -647,24 +668,6 @@ impl RuntimePreview {
             node = *projection.identities.get(&node)?;
         }
         Some(node)
-    }
-
-    fn apply_design_samples(&mut self) {
-        let Some(projection) = &self.design_projection else {
-            return;
-        };
-        let samples = projection.samples.clone();
-        for sample in samples {
-            let Some(node) = self.authored_identity(sample.node) else {
-                continue;
-            };
-            let Some(visual) = self.visual(node) else {
-                continue;
-            };
-            if let Err(error) = crate::design_time_samples::apply(&visual, &sample) {
-                self.notices.push(error);
-            }
-        }
     }
 
     pub fn tree(&self, kind: TreeKind) -> Vec<RuntimeNode> {

@@ -318,6 +318,13 @@ fn design_data_drafts_reject_source_selection_scope_and_permission_changes() {
     let node = session.document().ast().root();
     session.select([node]);
     let snapshot = DesignTimeSnapshot::capture(&session);
+    session.select([]);
+    session.select([node]);
+    assert!(
+        !snapshot.is_current(&session),
+        "A selection round trip retires the draft."
+    );
+    let snapshot = DesignTimeSnapshot::capture(&session);
     session.set_design_time_enabled(false).unwrap();
     assert!(!snapshot.is_current(&session));
     let snapshot = DesignTimeSnapshot::capture(&session);
@@ -374,4 +381,69 @@ fn registered_factory_receives_authored_source_and_populates_projected_values() 
         Some("Preview")
     );
     assert_eq!(session.document().source(), source);
+}
+
+#[test]
+fn native_sample_data_uses_reflection_only_in_the_generated_preview_scope() {
+    let _app = UnitTestApplication::start(TestServices::styled_window());
+    let source = format!(
+        "<StackPanel {NS} xmlns:x='http://schemas.microsoft.com/winfx/2006/xaml' x:CompileBindings='True' x:DataType='TextBlock' d:DataContext='{{d:SampleData}}'><TextBlock Name='Title' Text='{{Binding Text}}'/></StackPanel>"
+    );
+    let session = DesignerSession::new(source.clone(), ContentControl::new()).unwrap();
+    assert!(
+        matches!(session.preview_status(), crate::PreviewStatus::Ready { .. }),
+        "{:?}",
+        session.preview_status()
+    );
+    let text = session
+        .preview
+        .visual(named(session.document(), "Title"))
+        .unwrap()
+        .cast::<TextBlock>()
+        .unwrap();
+    assert_eq!(text.text().as_deref(), Some("Text 1"));
+    assert_eq!(session.document().source(), source);
+    assert!(!source.contains("ReflectionBinding"));
+}
+
+#[test]
+fn native_sample_assignment_does_not_touch_a_same_line_sibling() {
+    let _app = UnitTestApplication::start(TestServices::styled_window());
+    let source = format!(
+        "<StackPanel {NS}><StackPanel Name='Sample' d:DataContext='{{d:SampleData}}'><TextBlock Name='First' Text='{{Binding Name}}'/></StackPanel><StackPanel Name='Untouched'><TextBlock Name='Second' Text='{{Binding Name}}'/></StackPanel></StackPanel>"
+    );
+    let session = DesignerSession::new(source, ContentControl::new()).unwrap();
+    assert!(
+        matches!(session.preview_status(), crate::PreviewStatus::Ready { .. }),
+        "{:?}",
+        session.preview_status()
+    );
+    let first = session
+        .preview
+        .visual(named(session.document(), "First"))
+        .unwrap()
+        .cast::<TextBlock>()
+        .unwrap();
+    assert_eq!(first.text().as_deref(), Some("Name 1"));
+    let untouched = session
+        .preview
+        .visual(named(session.document(), "Untouched"))
+        .unwrap()
+        .cast::<ferroui_base::StyledElement>()
+        .unwrap();
+    assert!(untouched.data_context().is_none());
+}
+
+#[test]
+fn native_top_level_preview_uses_the_same_sample_data_as_the_artboard() {
+    use ferroui_markup_xaml::FromXamlObject;
+    let _app = UnitTestApplication::start(TestServices::styled_window());
+    let source = format!("<ItemsControl {NS} d:ItemsSource='{{d:SampleData ItemCount=4}}'/>");
+    let mut session = DesignerSession::new(source.clone(), ContentControl::new()).unwrap();
+    let window = session.open_native_preview().unwrap();
+    let content = window.content().unwrap();
+    let items = ferroui_base::Ref::<ItemsControl>::from_xaml_object(&content).unwrap();
+    assert_eq!(items.items_source().unwrap().count(), 4);
+    assert_eq!(session.document().source(), source);
+    session.close_native_preview();
 }
