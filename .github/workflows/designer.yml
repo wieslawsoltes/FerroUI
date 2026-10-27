@@ -91,7 +91,8 @@ jobs:
       - name: Native designer APIs and controls are warning-free
         run: cargo clippy --locked -p ferroui-designer -p designer-studio --no-default-features --features ferroui-designer/mcp,ferroui-designer/render-smoke,designer-studio/headless,designer-studio/mcp --all-targets --no-deps -- -D warnings
       - name: TreeDataGrid hierarchical column extension contracts
-        run: cargo test --locked -p ferroui-controls-treedatagrid tree_data_grid_source_extensions::tests:: -- --test-threads=1
+        run: |
+          cargo test --locked -p ferroui-controls-treedatagrid tree_data_grid_source_extensions::tests:: -- --test-threads=1
       - name: Headless application startup and clean shutdown
         env:
           FERROUI_SMOKE_EXIT_MS: '1500'
