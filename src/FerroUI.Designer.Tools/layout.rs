@@ -1237,15 +1237,33 @@ pub(crate) fn built_in_placement(
                 let lines = context.grid_boundaries(parent)?;
                 let row = cell_at(&lines.rows, local.y);
                 let column = cell_at(&lines.columns, local.x);
+                let row_gap = number(context.property(parent, "RowSpacing").unwrap_or("0"))?;
+                let column_gap = number(context.property(parent, "ColumnSpacing").unwrap_or("0"))?;
+                // Boundaries are track starts plus the final content edge. Nonfinal
+                // strides include one following gutter, which is outside the cell.
+                let width = lines.columns[column + 1]
+                    - lines.columns[column]
+                    - if column + 2 < lines.columns.len() {
+                        column_gap
+                    } else {
+                        0.0
+                    };
+                let height = lines.rows[row + 1]
+                    - lines.rows[row]
+                    - if row + 2 < lines.rows.len() {
+                        row_gap
+                    } else {
+                        0.0
+                    };
                 preview = Rect::new(
                     bounds.x + lines.columns[column],
                     bounds.y + lines.rows[row],
-                    lines.columns[column + 1] - lines.columns[column],
-                    lines.rows[row + 1] - lines.rows[row],
+                    width.max(0.0),
+                    height.max(0.0),
                 );
                 description = format!("Grid · row {}  column {}", row + 1, column + 1);
-                attrs.push(("Grid.Row", cell_at(&lines.rows, local.y).to_string()));
-                attrs.push(("Grid.Column", cell_at(&lines.columns, local.x).to_string()));
+                attrs.push(("Grid.Row", row.to_string()));
+                attrs.push(("Grid.Column", column.to_string()));
             }
             "UniformGrid" => {
                 require(

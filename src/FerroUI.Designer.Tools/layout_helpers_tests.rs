@@ -221,6 +221,92 @@ fn grid_helpers_use_measured_tracks_and_preserve_star_units_and_definition_metad
     );
 }
 #[test]
+fn grid_placement_highlights_content_cells_without_following_gutters() {
+    for (rows, columns, row_gap, column_gap) in [
+        (vec![(0.0, 128.0)], vec![(0.0, 260.0)], 12, 8),
+        (
+            vec![(0.0, 40.0), (52.0, 76.0)],
+            vec![(0.0, 80.0), (88.0, 92.0), (188.0, 72.0)],
+            12,
+            8,
+        ),
+        (
+            vec![(0.0, 64.0), (64.0, 64.0)],
+            vec![(0.0, 130.0), (130.0, 130.0)],
+            0,
+            0,
+        ),
+    ] {
+        let lengths = |tracks: &[(f64, f64)]| {
+            tracks
+                .iter()
+                .map(|(_, size)| size.to_string())
+                .collect::<Vec<_>>()
+                .join(",")
+        };
+        let boundaries = |tracks: &[(f64, f64)]| {
+            tracks
+                .iter()
+                .map(|(start, _)| *start)
+                .chain(tracks.last().map(|(start, size)| start + size))
+                .collect::<Vec<_>>()
+        };
+        let document=Document::new(format!("<Grid RowDefinitions='{}' ColumnDefinitions='{}' RowSpacing='{row_gap}' ColumnSpacing='{column_gap}'/>", lengths(&rows), lengths(&columns))).unwrap();
+        let panel = document.ast().root();
+        let bounds = BTreeMap::from([(panel, Rect::new(10.0, 20.0, 260.0, 128.0))]);
+        let measured = BTreeMap::from([(
+            panel,
+            crate::GridLines {
+                rows: boundaries(&rows),
+                columns: boundaries(&columns),
+            },
+        )]);
+        let context = LayoutContext::new(&document, &bounds).with_grid_lines(&measured);
+        let registry = LayoutRegistry::built_in();
+        let scene = registry
+            .design_helpers(&context, &LayoutHelperRequest::new(panel))
+            .unwrap();
+        for (row, (top, height)) in rows.iter().enumerate() {
+            for (column, (left, width)) in columns.iter().enumerate() {
+                let expected = Rect::new(10.0 + left, 20.0 + top, *width, *height);
+                let placement = registry
+                    .placement(&context, panel, expected.center(), &[])
+                    .unwrap()
+                    .unwrap();
+                assert_eq!(placement.bounds, expected);
+                assert!(
+                    placement
+                        .attributes
+                        .contains(&("Grid.Row".into(), row.to_string()))
+                );
+                assert!(
+                    placement
+                        .attributes
+                        .contains(&("Grid.Column".into(), column.to_string()))
+                );
+                assert_eq!(
+                    scene
+                        .handles
+                        .iter()
+                        .find(|handle| handle.id == format!("C{column}"))
+                        .unwrap()
+                        .value,
+                    *width
+                );
+                assert_eq!(
+                    scene
+                        .handles
+                        .iter()
+                        .find(|handle| handle.id == format!("R{row}"))
+                        .unwrap()
+                        .value,
+                    *height
+                );
+            }
+        }
+    }
+}
+#[test]
 fn single_content_rejection_and_excluded_self_are_explicit() {
     for source in [
         "<Border><Button Name='old'/></Border>",
