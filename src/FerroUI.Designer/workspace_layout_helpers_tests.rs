@@ -670,3 +670,106 @@ fn overriding_canvas_provider_controls_same_parent_and_cross_parent_placement() 
         assert_eq!(fixture.session.document().source(), CUSTOM);
     }
 }
+
+#[test]
+fn native_grid_helpers_match_arranged_cells_without_counting_spacing_twice() {
+    use ferroui_designer_tools::LayoutHandleAction;
+
+    let _app = UnitTestApplication::start(TestServices::styled_window());
+    for (rows, columns, row_gap, column_gap) in [
+        (vec!["*"], vec!["*"], 8, 11),
+        (vec!["*", "*"], vec!["*", "*"], 8, 8),
+        (vec!["31", "*", "2*"], vec!["41", "2*", "*"], 13, 7),
+        (vec!["*", "*"], vec!["*", "*", "*"], 0, 0),
+    ] {
+        let mut source = format!(
+            r#"<Canvas xmlns="https://github.com/ferroui" Width="720" Height="420" UseLayoutRounding="False"><Grid Name="MeasuredGrid" Canvas.Left="60" Canvas.Top="40" Width="232" Height="158" RowDefinitions="{}" ColumnDefinitions="{}" RowSpacing="{row_gap}" ColumnSpacing="{column_gap}" RenderTransform="scale(1.1)">"#,
+            rows.join(","),
+            columns.join(",")
+        );
+        for row in 0..rows.len() {
+            for column in 0..columns.len() {
+                source.push_str(&format!(
+                    r#"<Border Name="Cell{row}_{column}" Grid.Row="{row}" Grid.Column="{column}" />"#
+                ));
+            }
+        }
+        source.push_str("</Grid></Canvas>");
+        let mut fixture = Fixture::new(&source);
+        let grid = fixture.id("MeasuredGrid");
+        fixture.session.select([grid]);
+        let native_grid = fixture.session.preview.visual(grid).unwrap().bounds();
+        for row in 0..rows.len() {
+            for column in 0..columns.len() {
+                let cell_name = format!("Cell{row}_{column}");
+                let native_cell = fixture
+                    .session
+                    .preview
+                    .visual(fixture.id(&cell_name))
+                    .unwrap()
+                    .bounds();
+                let snapshot = fixture
+                    .session
+                    .layout_helper_snapshot(grid, Some(fixture.center(&cell_name)), &[])
+                    .unwrap();
+                let placement = snapshot.scene.placement.as_ref().unwrap();
+                assert!(placement.rejection.is_none());
+                assert!(
+                    placement
+                        .attributes
+                        .contains(&("Grid.Row".into(), row.to_string()))
+                );
+                assert!(
+                    placement
+                        .attributes
+                        .contains(&("Grid.Column".into(), column.to_string()))
+                );
+                for error in [
+                    placement.bounds.x - native_cell.x,
+                    placement.bounds.y - native_cell.y,
+                    placement.bounds.width - native_cell.width,
+                    placement.bounds.height - native_cell.height,
+                ] {
+                    assert!(
+                        error.abs() < 1e-7,
+                        "Cell {row}/{column}: native {native_cell:?}, helper {:?}",
+                        placement.bounds
+                    );
+                }
+                for (axis, index, extent) in [
+                    (Axis::Horizontal, column, native_cell.width),
+                    (Axis::Vertical, row, native_cell.height),
+                ] {
+                    let handle = snapshot.scene.handles.iter().find(|handle| matches!(
+                        handle.action,
+                        LayoutHandleAction::GridTrack { axis: actual_axis, index: actual_index, .. }
+                            if actual_axis == axis && actual_index == index
+                    )).unwrap();
+                    assert!(
+                        (handle.value - extent).abs() < 1e-7,
+                        "{axis:?} track {index} includes a gutter: {} vs {extent}",
+                        handle.value
+                    );
+                }
+                for guide in &snapshot.scene.primitives {
+                    if guide.role == LayoutGuideRole::Track {
+                        if let LayoutGuideGeometry::Line { start, end } = guide.geometry {
+                            for point in [start, end] {
+                                assert!(
+                                    point.x >= -1e-7 && point.x <= native_grid.width + 1e-7,
+                                    "Grid track exceeds native width: {point:?} / {native_grid:?}"
+                                );
+                                assert!(
+                                    point.y >= -1e-7 && point.y <= native_grid.height + 1e-7,
+                                    "Grid track exceeds native height: {point:?} / {native_grid:?}"
+                                );
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        assert_eq!(fixture.session.document().source(), source);
+        assert!(!fixture.session.can_undo());
+    }
+}

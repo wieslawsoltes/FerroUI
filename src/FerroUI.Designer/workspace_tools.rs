@@ -543,17 +543,25 @@ pub(crate) fn parent(session: &DesignerSession, node: NodeId) -> Result<NodeId, 
     }
     Err("The root is positioned by the artboard; select a child to move".into())
 }
-fn boundaries(lengths: impl Iterator<Item = f64>, spacing: f64, extent: f64) -> Vec<f64> {
-    let lengths = lengths.collect::<Vec<_>>();
-    if lengths.is_empty() {
+/// Native definition ActualWidth/ActualHeight are final-offset differences, so they
+/// already include the following gap. The final definition includes a trailing gap too,
+/// which Grid excludes when arranging its last child. Preserve track starts and strip
+/// only that last gap rather than adding spacing a second time.
+fn grid_boundaries_from_strides(
+    strides: impl Iterator<Item = f64>,
+    spacing: f64,
+    extent: f64,
+) -> Vec<f64> {
+    let strides = strides.collect::<Vec<_>>();
+    if strides.is_empty() {
         return vec![0.0, extent.max(0.0)];
     }
     let mut result = vec![0.0];
     let mut offset = 0.0;
-    for (i, length) in lengths.iter().enumerate() {
-        offset += *length;
-        if i + 1 < lengths.len() {
-            offset += spacing;
+    for (index, stride) in strides.iter().enumerate() {
+        offset += *stride;
+        if index + 1 == strides.len() {
+            offset = (offset - spacing).max(0.0);
         }
         result.push(offset);
     }
@@ -642,7 +650,7 @@ pub(crate) fn measure(
         grid_lines.insert(
             parent,
             GridLines {
-                rows: boundaries(
+                rows: grid_boundaries_from_strides(
                     grid.row_definitions()
                         .snapshot()
                         .iter()
@@ -650,7 +658,7 @@ pub(crate) fn measure(
                     grid.row_spacing(),
                     grid.bounds().height,
                 ),
-                columns: boundaries(
+                columns: grid_boundaries_from_strides(
                     grid.column_definitions()
                         .snapshot()
                         .iter()
