@@ -157,25 +157,54 @@ impl OutlineDrag {
         }
         host.validate_capacity(document, &selected)?;
 
-        // MoveNode indices address the list after removing that one node. Work from the
-        // original ranks and count removals before the insertion boundary; no per-node
-        // document clone, reparsing, or repeated scan of a large sibling list is needed.
         let children = document.ast().element_children(host.container);
-        let ranks = children
-            .iter()
-            .enumerate()
-            .map(|(index, id)| (*id, index))
-            .collect::<BTreeMap<_, _>>();
         let boundary = match anchor {
             Some(anchor) => {
-                ranks
-                    .get(&anchor)
-                    .copied()
+                children
+                    .iter()
+                    .position(|id| *id == anchor)
                     .ok_or("The target is no longer a content child")?
                     + usize::from(position == DropPosition::After)
             }
             None => children.len(),
         };
+        self.plan_boundary(
+            session,
+            &host,
+            boundary,
+            ferroui_designer_tools::Point::new(0.0, 0.0),
+        )
+    }
+
+    /// Shared source-order planner for tree drops and measured canvas insertion boundaries.
+    fn plan_boundary(
+        &self,
+        session: &DesignerSession,
+        host: &ContentHost,
+        boundary: usize,
+        canvas_delta: ferroui_designer_tools::Point,
+    ) -> Result<Vec<Edit>, String> {
+        self.validate(session)?;
+        let document = session.document();
+        let selected = self.nodes.iter().copied().collect::<BTreeSet<_>>();
+        if selected.contains(&host.container)
+            || has_selected_ancestor(document.ast(), host.container, &selected)
+        {
+            return Err("An element cannot become a child of its own subtree".into());
+        }
+        host.validate_capacity(document, &selected)?;
+        let children = document.ast().element_children(host.container);
+        if boundary > children.len() {
+            return Err("The insertion boundary is outside the content collection".into());
+        }
+        // MoveNode indices address the list after removing that one node. Work from the
+        // original ranks and count removals before the insertion boundary; no per-node
+        // document clone, reparsing, or repeated scan of a large sibling list is needed.
+        let ranks = children
+            .iter()
+            .enumerate()
+            .map(|(index, id)| (*id, index))
+            .collect::<BTreeMap<_, _>>();
         let mut remaining = children
             .iter()
             .copied()
@@ -197,8 +226,12 @@ impl OutlineDrag {
             return Err("This content host does not support sibling reordering".into());
         }
         let mut removed_before = 0;
-        let mut edits =
-            crate::workspace_tools::canvas_reparent_edits(session, &self.nodes, host.owner)?;
+        let mut edits = crate::workspace_tools::canvas_reparent_edits(
+            session,
+            &self.nodes,
+            host.owner,
+            canvas_delta,
+        )?;
         edits.extend(
             self.nodes
                 .iter()
@@ -331,6 +364,29 @@ impl OutlineDrag {
 }
 
 impl DesignerSession {
+    pub(crate) fn content_target_container(&self, owner: NodeId) -> Result<NodeId, String> {
+        ContentHost::of_owner(self, owner).map(|host| host.container)
+    }
+
+    pub(crate) fn validate_content_insertion(&self, owner: NodeId) -> Result<(), String> {
+        let host = ContentHost::of_owner(self, owner)?;
+        host.validate_capacity_with_count(self.document(), &BTreeSet::new(), 1)
+    }
+
+    /// Plans identity-preserving content movement at a boundary in the original AST child
+    /// list. Canvas placement and outline drags share slot, capacity, cycle and order rules.
+    pub(crate) fn plan_content_move(
+        &self,
+        nodes: &[NodeId],
+        owner: NodeId,
+        boundary: usize,
+        canvas_delta: ferroui_designer_tools::Point,
+    ) -> Result<Vec<Edit>, String> {
+        let snapshot = OutlineDrag::capture(self, nodes.iter().copied())?;
+        let host = ContentHost::of_owner(self, owner)?;
+        snapshot.plan_boundary(self, &host, boundary, canvas_delta)
+    }
+
     /// Tests whether a structural command can change the current authored selection.
     pub fn can_edit_outline(&self, command: OutlineCommand) -> bool {
         OutlineDrag::capture(self, self.selection().iter().copied())
@@ -465,6 +521,15 @@ impl ContentHost {
         document: &Document,
         moving: &BTreeSet<NodeId>,
     ) -> Result<(), String> {
+        self.validate_capacity_with_count(document, moving, moving.len())
+    }
+
+    fn validate_capacity_with_count(
+        &self,
+        document: &Document,
+        moving: &BTreeSet<NodeId>,
+        incoming: usize,
+    ) -> Result<(), String> {
         if self.multiple {
             return Ok(());
         }
@@ -493,7 +558,7 @@ impl ContentHost {
                     .as_ref()
                     .is_some_and(|text| !text.trim().is_empty());
         }
-        if existing + moving.len() > 1 || has_attribute || has_text {
+        if existing + incoming > 1 || has_attribute || has_text {
             return Err(
                 "This host accepts one child and already has content; select an inner panel".into(),
             );

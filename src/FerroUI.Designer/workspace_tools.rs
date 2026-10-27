@@ -9,13 +9,13 @@ use ferroui_designer_tools::{
 };
 use std::collections::{BTreeMap, BTreeSet, btree_map::Entry};
 
-fn effective_properties(visual: &Visual) -> BTreeMap<String, String> {
+pub(crate) fn effective_properties(visual: &Visual) -> BTreeMap<String, String> {
     ferroui_inspect::Inspector::properties(visual)
         .into_iter()
         .map(|info| (info.name, ferroui_inspect::display_value(Some(&info.value))))
         .collect()
 }
-fn is_custom_panel(session: &DesignerSession, node: NodeId) -> bool {
+pub(crate) fn is_custom_panel(session: &DesignerSession, node: NodeId) -> bool {
     let Some(element) = session.document().ast().node(node) else {
         return false;
     };
@@ -28,32 +28,14 @@ fn is_custom_panel(session: &DesignerSession, node: NodeId) -> bool {
     if panel.is_items_host() {
         return false;
     }
-    let qualified_custom = element.namespace_uri.as_deref().is_some_and(|uri| {
-        !matches!(
-            uri,
-            "https://github.com/ferroui"
-                | "using:FerroUI.Controls"
-                | "clr-namespace:FerroUI.Controls;assembly=FerroUI.Controls"
-        )
-    }) && session
+    session
         .layout_tools()
-        .adapter_exact(&element.name)
+        .adapter_for(session.document(), node)
         .is_none()
-        && matches!(
-            element.local_name(),
-            "Panel"
-                | "Canvas"
-                | "Grid"
-                | "StackPanel"
-                | "WrapPanel"
-                | "DockPanel"
-                | "UniformGrid"
-                | "RelativePanel"
-                | "FlexPanel"
-        );
-    !session.layout_tools().supports(&element.name)
-        || qualified_custom
-        || visual.get_type().name() != element.local_name()
+        || (session
+            .layout_tools()
+            .is_builtin_adapter_for(session.document(), node)
+            && visual.get_type().name() != element.local_name())
 }
 
 /// Discoverable native fallback: unknown Panel subclasses retain their layout algorithm;
@@ -98,7 +80,7 @@ impl DesignerSession {
         &self,
         node: NodeId,
     ) -> Option<ferroui_designer_tools::LayoutCapabilities> {
-        let element = self.document().ast().node(node)?;
+        self.document().ast().node(node)?;
         if self
             .preview
             .visual(node)
@@ -123,7 +105,7 @@ impl DesignerSession {
             });
         }
         self.layout_tools()
-            .adapter(&element.name)
+            .adapter_for(self.document(), node)
             .map(|adapter| adapter.capabilities())
     }
 }
@@ -257,7 +239,11 @@ pub(crate) fn canvas_reparent_edits(
     session: &DesignerSession,
     nodes: &[NodeId],
     destination: NodeId,
+    destination_delta: Point,
 ) -> Result<Vec<Edit>, String> {
+    destination_delta
+        .validate()
+        .map_err(|error| error.to_string())?;
     let Some(canvas) = session
         .preview
         .visual(destination)
@@ -265,7 +251,11 @@ pub(crate) fn canvas_reparent_edits(
     else {
         return Ok(Vec::new());
     };
-    if is_custom_panel(session, destination) {
+    if is_custom_panel(session, destination)
+        || !session
+            .layout_tools()
+            .is_builtin_adapter_for(session.document(), destination)
+    {
         return Ok(Vec::new());
     }
     let canvas = canvas.upcast::<Visual>();
@@ -278,7 +268,8 @@ pub(crate) fn canvas_reparent_edits(
         .ok_or("The new Canvas must have an invertible affine transform to the artboard")?;
     let mut edits = Vec::new();
     for node in nodes {
-        if parent(session, *node)? == destination {
+        let already_parent = parent(session, *node)? == destination;
+        if already_parent && destination_delta == Point::new(0.0, 0.0) {
             continue;
         }
         let visual = session
@@ -316,8 +307,8 @@ pub(crate) fn canvas_reparent_edits(
         )
         .ok_or("The dragged element's transform is singular")?;
         let margin = layout.margin();
-        let left = position.x - margin.left;
-        let top = position.y - margin.top;
+        let left = position.x - margin.left + destination_delta.x;
+        let top = position.y - margin.top + destination_delta.y;
         if ![
             left,
             top,
@@ -362,7 +353,7 @@ pub(crate) fn canvas_reparent_edits(
             ("Width", layout.width().is_nan(), bounds.width),
             ("Height", layout.height().is_nan(), bounds.height),
         ] {
-            if automatic {
+            if automatic && !already_parent {
                 ensure_literal_property(session.document(), *node, name)?;
                 edits.push(Edit::SetAttribute {
                     node: *node,
@@ -389,13 +380,74 @@ pub(crate) fn canvas_reparent_edits(
             edits.extend(transform_edits(session.document(), *node, before, render)?);
         }
     }
-    Ok(snapshot_edits_first(edits))
+    normalize_native_layout_attributes(session.document(), edits)
+}
+
+/// Native Canvas reparenting may cross lexical namespace scopes. Preserve existing attached
+/// aliases and qualify new framework owners without touching unrelated application owners.
+fn normalize_native_layout_attributes(
+    document: &Document,
+    edits: Vec<Edit>,
+) -> Result<Vec<Edit>, String> {
+    let mut setters = BTreeMap::<NodeId, Vec<(String, String)>>::new();
+    let mut result = Vec::new();
+    for edit in edits {
+        match edit {
+            Edit::SetAttribute { node, name, value } => {
+                setters.entry(node).or_default().push((name, value))
+            }
+            Edit::RemoveAttribute { node, name } => {
+                let element = document.ast().node(node).ok_or("Unknown layout target")?;
+                let namespaces = document.ast().namespaces(node);
+                let native = |uri: Option<&str>| {
+                    matches!(
+                        uri,
+                        None | Some(
+                            "https://github.com/ferroui"
+                                | "using:FerroUI.Controls"
+                                | "clr-namespace:FerroUI.Controls;assembly=FerroUI.Controls"
+                        )
+                    )
+                };
+                for attribute in element.attributes.iter().filter(|attribute| {
+                    attribute.name.rsplit(':').next() == Some(name.as_str())
+                        && if name.contains('.') && !attribute.name.contains(':') {
+                            native(namespaces.get("").map(String::as_str))
+                        } else {
+                            native(attribute.namespace_uri.as_deref())
+                        }
+                }) {
+                    // Validation also protects bound aliases before removing opposite anchors.
+                    ferroui_designer_tools::plan_layout_attributes(
+                        document,
+                        node,
+                        &[(name.clone(), attribute.value.clone())],
+                    )
+                    .map_err(|error| error.to_string())?;
+                    result.push(Edit::RemoveAttribute {
+                        node,
+                        name: attribute.name.clone(),
+                    });
+                }
+            }
+            other => result.push(other),
+        }
+    }
+    let mut attributes = Vec::new();
+    for (node, setters) in setters {
+        attributes.extend(
+            ferroui_designer_tools::plan_layout_attributes(document, node, &setters)
+                .map_err(|error| error.to_string())?,
+        );
+    }
+    attributes.extend(result);
+    Ok(snapshot_edits_first(attributes))
 }
 
 /// Raw source spans address the planning snapshot. Apply disjoint replacements from the
 /// end before identity-based attributes or structure can move those spans. Visual planners
 /// only replace transforms of outermost selected nodes, so these intervals do not overlap.
-fn snapshot_edits_first(edits: Vec<Edit>) -> Vec<Edit> {
+pub(crate) fn snapshot_edits_first(edits: Vec<Edit>) -> Vec<Edit> {
     let (mut source, semantic): (Vec<_>, Vec<_>) = edits
         .into_iter()
         .partition(|edit| matches!(edit, Edit::Text { .. }));
@@ -407,7 +459,11 @@ fn snapshot_edits_first(edits: Vec<Edit>) -> Vec<Edit> {
     source
 }
 
-fn ensure_literal_property(document: &Document, node: NodeId, name: &str) -> Result<(), String> {
+pub(crate) fn ensure_literal_property(
+    document: &Document,
+    node: NodeId,
+    name: &str,
+) -> Result<(), String> {
     let element = document.ast().node(node).ok_or("Unknown layout target")?;
     if element.attribute(name).is_some_and(|value| {
         value.trim_start().starts_with('{') && !value.trim_start().starts_with("{}")
@@ -432,23 +488,23 @@ fn ensure_literal_property(document: &Document, node: NodeId, name: &str) -> Res
     Ok(())
 }
 
-struct Measurement {
-    bounds: BTreeMap<NodeId, Rect>,
-    grid_lines: BTreeMap<NodeId, GridLines>,
-    resolved: BTreeMap<NodeId, ResolvedLayout>,
-    properties: BTreeMap<NodeId, BTreeMap<String, String>>,
-    to_artboard: Affine,
-    to_parent: Affine,
-    visual: Ref<Visual>,
+pub(crate) struct Measurement {
+    pub(crate) bounds: BTreeMap<NodeId, Rect>,
+    pub(crate) grid_lines: BTreeMap<NodeId, GridLines>,
+    pub(crate) resolved: BTreeMap<NodeId, ResolvedLayout>,
+    pub(crate) properties: BTreeMap<NodeId, BTreeMap<String, String>>,
+    pub(crate) to_artboard: Affine,
+    pub(crate) to_parent: Affine,
+    pub(crate) visual: Ref<Visual>,
 }
 impl Measurement {
-    fn context<'a>(&'a self, document: &'a Document) -> LayoutContext<'a> {
+    pub(crate) fn context<'a>(&'a self, document: &'a Document) -> LayoutContext<'a> {
         LayoutContext::new(document, &self.bounds)
             .with_grid_lines(&self.grid_lines)
             .with_resolved_layout(&self.resolved)
             .with_resolved_properties(&self.properties)
     }
-    fn delta(&self, delta: Point) -> Result<Point, String> {
+    pub(crate) fn delta(&self, delta: Point) -> Result<Point, String> {
         let origin = self
             .to_parent
             .transform(Point::new(0.0, 0.0))
@@ -471,7 +527,7 @@ fn affine(matrix: Matrix) -> Result<Affine, String> {
     result.validate().map_err(|e| e.to_string())?;
     Ok(result)
 }
-fn parent(session: &DesignerSession, node: NodeId) -> Result<NodeId, String> {
+pub(crate) fn parent(session: &DesignerSession, node: NodeId) -> Result<NodeId, String> {
     let mut parent = session
         .document()
         .ast()
@@ -518,7 +574,7 @@ fn children(document: &Document, parent: NodeId) -> Vec<NodeId> {
     }
     result
 }
-fn measure(
+pub(crate) fn measure(
     session: &DesignerSession,
     parent: NodeId,
     child: Option<NodeId>,
@@ -673,6 +729,9 @@ pub(crate) fn commit(session: &mut DesignerSession, gesture: DesignGesture) -> R
     }
     let mut edits = Vec::new();
     match gesture {
+        DesignGesture::LayoutEdit { preview } => {
+            return session.commit_layout_preview(&preview);
+        }
         DesignGesture::Move { nodes, delta } => {
             edits.extend(plan_moves(
                 session,
@@ -881,7 +940,11 @@ pub(crate) fn commit(session: &mut DesignerSession, gesture: DesignGesture) -> R
                     });
                     break;
                 }
-                if session.layout_tools().supports(&element.name) {
+                if session
+                    .layout_tools()
+                    .adapter_for(session.document(), target)
+                    .is_some()
+                {
                     let plan = measure(session, target, None).and_then(|measured| {
                         let position = measured
                             .to_parent
