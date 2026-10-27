@@ -452,7 +452,10 @@ impl PropertyRegistry {
                 .ast()
                 .node(*node)
                 .ok_or_else(|| ToolError("Unknown property target".into()))?;
-            let value = node.attribute(property).map(str::to_owned);
+            let value = crate::components::attributes_for(document, node, property)?
+                .into_iter()
+                .next()
+                .map(|attribute| attribute.value.clone());
             if !initial {
                 result.value = value.clone();
                 initial = true;
@@ -516,36 +519,36 @@ impl PropertyRegistry {
                 .find(|p| p.name == property)
                 .unwrap_or_else(|| PropertyDescriptor::new(property, "Custom", PropertyKind::Text));
             require(!descriptor.read_only, format!("{property} is read-only"))?;
+            let attribute = crate::components::attributes_for(document, element, property)?
+                .into_iter()
+                .next();
             if policy == ExpressionPolicy::PreserveExpressions
-                && element.attribute(property).is_some_and(is_expression)
-                && element.attribute(property) != value
+                && attribute.is_some_and(|attribute| is_expression(&attribute.value))
+                && attribute.map(|attribute| attribute.value.as_str()) != value
             {
                 return Err(ToolError(format!(
                     "{property} is an expression; explicitly opt into replacing it"
                 )));
             }
             require(
-                !element
-                    .children
-                    .iter()
-                    .filter_map(|id| document.ast().node(*id))
-                    .any(|n| {
-                        n.name.rsplit(':').next() == Some(property)
-                            || n.name.ends_with(&format!(".{property}"))
-                    }),
+                crate::components::property_elements(document, element, property)?.is_empty(),
                 "Property is authored as a property element; edit that node to preserve its object graph",
             )?;
             if let Some(value) = value {
                 editors.validate(&descriptor, value)?;
                 edits.push(Edit::SetAttribute {
                     node: *id,
-                    name: property.into(),
+                    name: attribute
+                        .map_or(property, |attribute| attribute.name.as_str())
+                        .into(),
                     value: value.into(),
                 });
             } else {
                 edits.push(Edit::RemoveAttribute {
                     node: *id,
-                    name: property.into(),
+                    name: attribute
+                        .map_or(property, |attribute| attribute.name.as_str())
+                        .into(),
                 });
             }
         }
@@ -668,3 +671,7 @@ fn is_expression(source: &str) -> bool {
     let source = source.trim_start();
     source.starts_with('{') && !source.starts_with("{}")
 }
+
+#[cfg(test)]
+#[path = "property_identity_tests.rs"]
+mod identity_tests;
