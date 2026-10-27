@@ -220,6 +220,21 @@ aliases, projection identity, factories, samples, roles, stale models, source pr
 undo, layer visibility restoration and preview inheritance. The PR validation section
 records the exact completed test runs and CI status.
 
+## Native render examples
+
+These captures come from the real WinUI-themed FerroUI workspace, shaped with HarfBuzz
+and rendered through Vello's CPU backend. The fixture checks native preview readiness,
+source-language diagnostics, generated records and source/history preservation.
+
+![Design-time values alongside the original runtime binding](images/designer-design-data-preview.png)
+
+![Native navigation group, order editor and canvas badges](images/designer-focus-order.png)
+
+Additional views: [Design Data editor](images/designer-design-data-editor.png),
+[layer isolation](images/designer-layer-isolation.png),
+[preview environment editor](images/designer-preview-environment.png), and
+[dark, right-to-left landscape preview](images/designer-responsive-rtl-preview.png).
+
 ## Primary references
 
 - [Visual Studio design-time data](https://learn.microsoft.com/en-us/visualstudio/xaml-tools/xaml-designtime-data?view=visualstudio)
