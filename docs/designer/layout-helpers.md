@@ -109,7 +109,7 @@ screen-sized end caps.
 | FlexPanel | Measured line/direction presentation, wrapping and row/column spacing. Source placement follows the native adapter's ordering policy. |
 | RelativePanel | Named relation lines between participating children and container bounds. |
 | Border / Decorator / content holders | Actual child/content area, supported padding edges and explicit rejection of an occupied single-content slot. |
-| Framework-generated panels | Inspection hints without writable placement/resize handles; edit the item source/template instead. |
+| Framework-generated panels | Writable placement and resize helpers are withheld; edit the owning item source/template. |
 
 Effective runtime values drive these helpers, including properties inherited from
 styles or bindings. A visible effective value does not authorize replacing its
@@ -299,3 +299,22 @@ The `render-smoke` fixture `designer-layout-overlay-affine.png` is real native
 renderer evidence for extension-provided geometry, transformed panels, insertion
 and rejection feedback, and a cached native control ghost. Workspace captures
 exercise the same renderer through actual editor gestures.
+
+### Verified checkpoint
+
+The 2026-10-27 implementation was checked with Rust 1.89.0 and locked, offline
+dependencies on Linux:
+
+| Gate | Result |
+| --- | --- |
+| Portable `ferroui-designer-tools` suite | 52 passed; no failures. |
+| Full native `ferroui-designer` suite with `mcp,render-smoke` | 199 passed; no failures. Includes loopback MCP/collaboration transport and the existing animation, tree, property and hot-reload regressions. |
+| Portable Tools all-target Clippy | Passed with `-D warnings`. |
+| Designer and DesignerStudio all-target Clippy | Passed with `--no-deps -- -D warnings` and the headless/MCP/render feature combination. |
+| Headless DesignerStudio startup/shutdown | Passed; the real application opened and closed its main window after the configured 1500 ms smoke interval. |
+| New native render evidence | Nine PNGs verified and copied byte-for-byte from the passing native fixtures. |
+
+The native suite compares Grid cells and track grips with actual arranged children,
+including nonzero gaps and scaled panels. It also verifies child margin units through
+a scaled Viewbox, custom-provider overrides, namespace aliases, occupied content,
+one-step undo, source immutability during drafts and rejection of stale gestures.
