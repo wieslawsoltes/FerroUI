@@ -169,3 +169,9 @@ Custom provider, namespace-alias, source-preservation and shared-placement examp
 in `layout_helpers_tests.rs`. Scene validation rejects nonfinite geometry, duplicate handle IDs
 and unbounded output. A native host should capture source/AST/URI identity and registry revision
 at gesture start, preview immutable plans, and commit one validated transaction on release.
+
+`plan_layout_attributes(document, node, attributes)` is the shared source-safe boundary for
+native placement attributes. It retains existing framework namespace aliases, rejects duplicate
+aliases and expressions/property elements, and qualifies new attached properties when the
+current default namespace belongs to the application. Adapter callers validate semantic values
+before calling it. The candidate attribute batch is validated atomically before returning edits.

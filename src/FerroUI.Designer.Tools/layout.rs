@@ -181,7 +181,12 @@ impl<'a> LayoutContext<'a> {
                 self.document
                     .ast()
                     .node(node)
-                    .and_then(|node| node.attribute(name))
+                    .and_then(|node| {
+                        crate::layout_attributes::layout_attribute(self.document, node, name)
+                            .ok()
+                            .flatten()
+                    })
+                    .map(|attribute| attribute.value.as_str())
             })
     }
     /// The authored children, preserving their source order and explicit content slot.
@@ -458,6 +463,10 @@ impl LayoutRegistry {
             .adapter_for(context.document, panel.id)
             .ok_or_else(|| ToolError(format!("Register a layout adapter for {}", panel.name)))?;
         let mut scene = adapter.design_helpers(context, request)?;
+        require(
+            scene.panel == request.panel,
+            "The feature provider returned a different panel",
+        )?;
         if !adapter.capabilities().resize_items || adapter.capabilities().generated_items {
             for handle in &mut scene.handles {
                 handle.disabled_reason =
@@ -855,12 +864,17 @@ impl LayoutAdapter for BuiltIn {
                 format!("{} is not a layout property of {}", name, self.name),
             )?;
             ensure_literal(context, *panel, name)?;
-            return PropertyRegistry::built_in().plan(
+            PropertyRegistry::built_in().plan(
                 context.document,
                 &[*panel],
                 name,
                 Some(value),
                 crate::ExpressionPolicy::PreserveExpressions,
+            )?;
+            return crate::plan_layout_attributes(
+                context.document,
+                *panel,
+                &[(name.clone(), value.clone())],
             );
         }
         require(
@@ -1476,12 +1490,11 @@ fn position_fragment(
     let elements = fragment.ast().element_children(wrapper);
     require(elements.len() == 1, "Drop one control subtree at a time")?;
     let root = elements[0];
-    let mut edits = vec![];
-    for (name, value) in attributes {
-        let ctx = LayoutContext::new(&fragment, context.bounds);
-        ensure_literal(&ctx, root, name)?;
-        edits.push(text_set(root, name, value.clone()));
-    }
+    let values = attributes
+        .iter()
+        .map(|(name, value)| ((*name).to_owned(), value.clone()))
+        .collect::<Vec<_>>();
+    let edits = crate::plan_layout_attributes(&fragment, root, &values)?;
     fragment
         .apply("Position dropped control", edits)
         .map_err(error)?;
@@ -1770,19 +1783,13 @@ pub(crate) fn ensure_literal(
     node: NodeId,
     property: &str,
 ) -> Result<()> {
-    let element = context.element(node)?;
-    ensure_literal_attribute(element, property)?;
-    require(
-        !element
-            .children
-            .iter()
-            .filter_map(|id| context.document.ast().node(*id))
-            .any(|child| {
-                local_name(&child.name) == property || child.name.ends_with(&format!(".{property}"))
-            }),
-        format!("{property} is authored as a property element; edit its value explicitly"),
+    crate::layout_attributes::ensure_layout_literal(
+        context.document,
+        context.element(node)?,
+        property,
     )
 }
+
 pub(crate) fn thickness(source: &str) -> Result<[f64; 4]> {
     let values = source
         .split(|c: char| c == ',' || c.is_ascii_whitespace())

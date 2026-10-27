@@ -1,6 +1,7 @@
 use super::*;
 use crate::{LayoutAdapter, LayoutCapabilities, LayoutRegistry};
 use ferroui_designer_core::Document;
+use std::collections::BTreeMap;
 
 fn request(panel: NodeId, pointer: Point) -> LayoutHelperRequest {
     let mut request = LayoutHelperRequest::new(panel);
@@ -417,8 +418,38 @@ impl LayoutAdapter for CustomProvider {
     fn panel_properties(&self) -> &[&str] {
         &[]
     }
-    fn plan(&self, _: &LayoutContext<'_>, _: &LayoutAction) -> Result<Vec<Edit>> {
-        Ok(Vec::new())
+    fn plan(&self, context: &LayoutContext<'_>, action: &LayoutAction) -> Result<Vec<Edit>> {
+        let LayoutAction::Drop {
+            parent,
+            source,
+            position,
+        } = action
+        else {
+            return Err(ToolError("Unsupported custom action".into()));
+        };
+        let placement = self.placement(context, *parent, *position, &[])?.unwrap();
+        Ok(vec![Edit::InsertChild {
+            parent: placement.container,
+            index: placement.index,
+            source: source.clone(),
+        }])
+    }
+    fn placement(
+        &self,
+        context: &LayoutContext<'_>,
+        panel: NodeId,
+        _position: Point,
+        _dragged: &[NodeId],
+    ) -> Result<Option<LayoutPlacement>> {
+        let container = context.content_container(panel)?;
+        Ok(Some(LayoutPlacement {
+            container,
+            index: context.document.ast().element_children(container).len(),
+            attributes: Vec::new(),
+            bounds: context.bounds(panel)?,
+            description: "Append to radial layout".into(),
+            rejection: None,
+        }))
     }
     fn design_helpers(
         &self,
@@ -427,6 +458,20 @@ impl LayoutAdapter for CustomProvider {
     ) -> Result<LayoutHelperScene> {
         let mut scene = LayoutHelperScene::generic(context, request)?;
         scene.title = "Custom radial layout".into();
+        scene.handles.push(LayoutHandle {
+            id: "radius".into(),
+            label: "Radius".into(),
+            position: Point::new(24.0, 24.0),
+            axis: Axis::Horizontal,
+            value: 24.0,
+            minimum: 0.0,
+            maximum: None,
+            direction: 1.0,
+            action: LayoutHandleAction::Custom {
+                key: "Radius".into(),
+            },
+            disabled_reason: None,
+        });
         scene.line(
             Point::new(0.0, 0.0),
             Point::new(10.0, 10.0),
@@ -441,6 +486,21 @@ impl LayoutAdapter for CustomProvider {
         value: f64,
     ) -> Result<Vec<Edit>> {
         if let LayoutHandleAction::Custom { key } = action {
+            require(
+                key == "Radius" && value >= 0.0,
+                "Unsupported radial layout value",
+            )?;
+            let owner = context
+                .document
+                .ast()
+                .node(context.document.ast().root())
+                .unwrap();
+            require(
+                !owner
+                    .attribute(key)
+                    .is_some_and(|text| text.trim_start().starts_with('{')),
+                "Bound Radius must be edited at its source",
+            )?;
             Ok(vec![Edit::SetAttribute {
                 node: context.document.ast().root(),
                 name: key.clone(),
@@ -522,4 +582,72 @@ fn helper_scene_validation_rejects_nonfinite_geometry_and_duplicate_handle_ident
         LayoutGuideRole::Track,
     );
     assert!(scene.validate().is_err());
+}
+
+#[test]
+fn placement_attributes_preserve_native_aliases_and_protect_bound_or_object_values() {
+    use crate::plan_layout_attributes;
+    let mut document=Document::new("<Grid xmlns='https://github.com/ferroui' xmlns:ui='https://github.com/ferroui'><Button Name='a' ui:Grid.Row='0' ui:Grid.Column='1'/></Grid>").unwrap();
+    let child = node(&document, "a");
+    let edits = plan_layout_attributes(
+        &document,
+        child,
+        &[
+            ("Grid.Row".into(), "2".into()),
+            ("Grid.Column".into(), "3".into()),
+        ],
+    )
+    .unwrap();
+    document.apply("Place", edits).unwrap();
+    let child = document.ast().node(child).unwrap();
+    assert_eq!(child.attribute("ui:Grid.Row"), Some("2"));
+    assert_eq!(child.attribute("Grid.Row"), None);
+    for source in [
+        "<Grid xmlns='https://github.com/ferroui' xmlns:ui='https://github.com/ferroui'><Button Name='a' ui:Grid.Row='{Binding Row}'/></Grid>",
+        "<Grid xmlns='https://github.com/ferroui' xmlns:ui='https://github.com/ferroui'><Button Name='a'><ui:Grid.Row><Binding Path='Row'/></ui:Grid.Row></Button></Grid>",
+        "<Grid xmlns='https://github.com/ferroui' xmlns:ui='https://github.com/ferroui'><Button Name='a' ui:Grid.Row='0' Grid.Row='1'/></Grid>",
+    ] {
+        let document = Document::new(source).unwrap();
+        assert!(
+            plan_layout_attributes(
+                &document,
+                node(&document, "a"),
+                &[("Grid.Row".into(), "2".into())]
+            )
+            .is_err()
+        );
+    }
+}
+#[test]
+fn new_attached_values_keep_framework_identity_under_custom_default_namespaces() {
+    for source in [
+        "<Widget xmlns='urn:custom'/>",
+        "<Widget xmlns='urn:custom' xmlns:ui='https://github.com/ferroui'/>",
+    ] {
+        let mut document = Document::new(source).unwrap();
+        let target = document.ast().root();
+        let edits = crate::plan_layout_attributes(
+            &document,
+            target,
+            &[
+                ("Canvas.Left".into(), "12".into()),
+                ("Canvas.Top".into(), "24".into()),
+            ],
+        )
+        .unwrap();
+        document.apply("Place", edits).unwrap();
+        let element = document.ast().node(target).unwrap();
+        for name in ["Canvas.Left", "Canvas.Top"] {
+            let attr = element
+                .attributes
+                .iter()
+                .find(|attribute| attribute.name.rsplit(':').next() == Some(name))
+                .unwrap();
+            assert_eq!(
+                attr.namespace_uri.as_deref(),
+                Some("https://github.com/ferroui")
+            );
+            assert!(attr.name.contains(':'));
+        }
+    }
 }
