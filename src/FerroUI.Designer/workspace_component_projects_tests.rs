@@ -87,6 +87,74 @@ fn indexed_project_definitions_appear_without_reopening_files_or_rebuilding_unch
 }
 
 #[test]
+fn keyed_untyped_templates_are_discovered_and_imported_without_exporting_inline_implementation_templates()
+ {
+    let _app = UnitTestApplication::start(TestServices::styled_window());
+    let files = ProjectFiles::new();
+    let source = r#"<ResourceDictionary xmlns="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"><ControlTemplate x:Key="SharedFrame"><Border Padding="9"/></ControlTemplate><ControlTheme x:Key="HostedTheme" TargetType="Button"><Setter Property="Template"><ControlTemplate><Border Padding="3"/></ControlTemplate></Setter></ControlTheme></ResourceDictionary>"#;
+    std::fs::write(files.0.join("Templates.xaml"), source).unwrap();
+    let workspace = DesignerWorkspace::with_uri(MAIN, "memory://main.xaml".into()).unwrap();
+    workspace
+        .set_solution(Solution::discover(&files.0).unwrap())
+        .unwrap();
+    let templates = exported(&workspace, &files.uri("Templates.xaml"))
+        .into_iter()
+        .filter(|asset| asset.kind == ComponentKind::ControlTemplate)
+        .collect::<Vec<_>>();
+    assert_eq!(
+        templates.len(),
+        1,
+        "Anonymous untyped implementation templates stay private"
+    );
+    let template = &templates[0];
+    assert_eq!(template.label, "SharedFrame");
+    assert_eq!(template.target_type, None);
+    assert!(
+        workspace
+            .component_library()
+            .unwrap()
+            .visible_items()
+            .iter()
+            .any(|item| item.id == format!("definition:{}", template.id))
+    );
+    let owner = workspace.session.borrow().document().ast().root();
+    let copied = workspace
+        .copy_component_definition(&template.id, owner, "LocalFrame")
+        .unwrap();
+    let session = workspace.session.borrow();
+    let entry = session
+        .component_catalog()
+        .unwrap()
+        .entries
+        .into_iter()
+        .find(|entry| entry.node == copied)
+        .unwrap();
+    assert_eq!(entry.kind, ComponentKind::ControlTemplate);
+    assert_eq!(entry.key.as_deref(), Some("LocalFrame"));
+    assert_eq!(
+        entry.target_type, None,
+        "Import preserves the authored template target semantics"
+    );
+    assert!(
+        session
+            .document()
+            .ast()
+            .subtree(copied)
+            .any(|node| node.local_name() == "Border" && node.attribute("Padding") == Some("9"))
+    );
+    drop(session);
+    assert_eq!(
+        workspace.components.borrow().sources[&template.id]
+            .document
+            .source(),
+        source
+    );
+    workspace.session.borrow_mut().undo().unwrap();
+    assert_eq!(workspace.session.borrow().document().source(), MAIN);
+    assert!(!workspace.session.borrow().can_undo());
+}
+
+#[test]
 fn retained_dirty_and_invalid_tabs_override_the_disk_index_without_losing_user_edits() {
     let _app = UnitTestApplication::start(TestServices::styled_window());
     let files = ProjectFiles::new();

@@ -67,7 +67,7 @@ pub(super) fn prepare_component_document(
                 entry.node == document.ast().root()
             }
             ComponentKind::ControlTheme | ComponentKind::DataTemplate => true,
-            ComponentKind::ControlTemplate => entry.target_type.is_some(),
+            ComponentKind::ControlTemplate => entry.target_type.is_some() || entry.key.is_some(),
             ComponentKind::Style => entry
                 .target_type
                 .as_deref()
