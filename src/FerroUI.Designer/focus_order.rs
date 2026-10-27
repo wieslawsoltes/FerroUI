@@ -4,9 +4,7 @@
 //! controls remain visible in the catalog, but cannot become authored targets.
 use crate::{DesignerSession, PreviewStatus};
 use ferroui_base::controls::NameScopeExtensions;
-use ferroui_base::input::{
-    InputElement, InputElementImplExt, KeyboardNavigation, KeyboardNavigationMode,
-};
+use ferroui_base::input::{InputElement, KeyboardNavigation, KeyboardNavigationMode};
 use ferroui_base::{Ref, Visual};
 use ferroui_controls::Label;
 use ferroui_designer_core::{Ast, Attribute, Document, Edit, Node, NodeId, NodeKind};
@@ -56,7 +54,14 @@ pub struct FocusOrderScope {
 }
 impl FocusOrderScope {
     pub fn can_reorder(&self) -> bool {
-        self.items.len() > 1 && self.items.iter().all(|item| item.node.is_some())
+        self.items.len() > 1
+            && self
+                .items
+                .iter()
+                .filter_map(|item| item.node)
+                .collect::<BTreeSet<_>>()
+                .len()
+                == self.items.len()
     }
     pub fn mode_description(&self) -> &'static str {
         match self.mode {
@@ -157,7 +162,7 @@ impl DesignerSession {
         let inspector = Inspector::shared();
         let root_id = inspector.borrow_mut().node_id(&root);
         let root_mode = KeyboardNavigation::get_tab_navigation(&root);
-        let root_source = self.preview.source_id(&root);
+        let root_source = editable_source(self, &root);
         let mut scopes = vec![FocusOrderScope {
             id: root_id,
             node: root_source,
@@ -176,7 +181,7 @@ impl DesignerSession {
             if !seen.insert(runtime_id) {
                 continue;
             }
-            let source = self.preview.source_id(&input);
+            let source = editable_source(self, &input);
             let mode = KeyboardNavigation::get_tab_navigation(&input);
             let is_group = !is_root && mode != KeyboardNavigationMode::Continue;
             let visible = ancestors_visible && input.is_visible();
@@ -250,6 +255,26 @@ impl DesignerSession {
                     .map(|child| (child, scope, visible, child_blocked, false)),
             );
         }
+        // One source part can instantiate repeatedly. Its native instances remain
+        // inspectable, but an instance-specific ordering cannot write that shared
+        // source identity. The dedicated definition scope supplies one sample.
+        let mut instances = BTreeMap::<NodeId, usize>::new();
+        for (node, _) in &inputs {
+            *instances.entry(*node).or_default() += 1;
+        }
+        let duplicated = |node: NodeId| instances.get(&node).is_some_and(|count| *count > 1);
+        inputs.retain(|(node, _)| !duplicated(*node));
+        for scope in &mut scopes {
+            if scope.node.is_some_and(duplicated) {
+                scope.node = None;
+            }
+            for item in &mut scope.items {
+                if item.node.is_some_and(duplicated) {
+                    item.node = None;
+                    item.label.push_str(" (repeated template instance)");
+                }
+            }
+        }
         // Stable sorting preserves the runtime child order for equal TabIndex values,
         // including custom InputElement child-order overrides.
         for scope in &mut scopes {
@@ -282,7 +307,7 @@ impl DesignerSession {
                     }
                     let candidate_scope = NameScopeExtensions::find_name_scope(candidate);
                     let same_scope = match (&label_scope, &candidate_scope) {
-                        (Some(a), Some(b)) => std::rc::Rc::ptr_eq(a, b),
+                        (Some(a), Some(b)) => a == b,
                         _ => false,
                     };
                     same_scope.then(|| FocusLabelTarget {
@@ -362,6 +387,41 @@ fn element_label(element: &InputElement, source: Option<NodeId>, document: &Docu
     } else {
         label
     }
+}
+
+fn editable_source(session: &DesignerSession, input: &InputElement) -> Option<NodeId> {
+    let id = session.preview.source_id(input)?;
+    let ast = session.document().ast();
+    if let Some(scope) = session.definition_scope() {
+        return (id == scope.node || ast.is_descendant_of(id, scope.node)).then_some(id);
+    }
+    if input.templated_parent().is_some() {
+        return None;
+    }
+    let mut current = Some(id);
+    while let Some(node) = current.and_then(|id| ast.node(id)) {
+        let template = matches!(
+            node.local_name(),
+            "ControlTemplate" | "DataTemplate" | "TreeDataTemplate"
+        ) && matches!(
+            node.namespace_uri.as_deref(),
+            Some(
+                FRAMEWORK
+                    | "using:FerroUI.Markup.Xaml.Templates"
+                    | "clr-namespace:FerroUI.Markup.Xaml.Templates;assembly=FerroUI.Markup.Xaml"
+            )
+        );
+        let keyed = node.attributes.iter().any(|attribute| {
+            attribute.name.rsplit(':').next() == Some("Key")
+                && attribute.namespace_uri.as_deref()
+                    == Some("http://schemas.microsoft.com/winfx/2006/xaml")
+        });
+        if template || keyed {
+            return None;
+        }
+        current = node.parent;
+    }
+    Some(id)
 }
 
 fn plan_focus_edit(

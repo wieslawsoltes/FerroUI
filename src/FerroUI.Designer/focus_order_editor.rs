@@ -6,7 +6,7 @@ use ferroui_base::media::{SolidColorBrush, TextWrapping};
 use ferroui_base::{Ref, Thickness};
 use ferroui_controls::automation::AutomationProperties;
 use ferroui_controls::{
-    Button, CheckBox, ComboBox, Control, ListBox, StackPanel, TextBlock, ToolTip,
+    Button, CheckBox, ComboBox, Control, ListBox, ScrollViewer, StackPanel, TextBlock, ToolTip,
 };
 use ferroui_designer_core::NodeId;
 use std::cell::{Cell, RefCell};
@@ -28,6 +28,7 @@ const MODES: [KeyboardNavigationMode; 6] = [
 /// Every command is submitted together on Apply; Cancel discards the complete draft.
 pub struct FocusOrderEditor {
     root: Ref<StackPanel>,
+    scroll: Ref<ScrollViewer>,
     scope: Ref<ComboBox>,
     description: Ref<TextBlock>,
     entries: Ref<ListBox>,
@@ -75,7 +76,7 @@ impl FocusOrderEditor {
         description.set_text_wrapping(TextWrapping::Wrap);
         root.children().add(description.clone().upcast::<Control>());
         let entries = ListBox::new();
-        entries.set_name(Some("FocusOrderEntries"));
+        entries.set_name(Some("FocusOrderEntries".into()));
         entries.set_height(164.0);
         entries.set_horizontal_alignment(HorizontalAlignment::Stretch);
         AutomationProperties::set_name(&entries, Some("Controls in native tab-index order"));
@@ -161,8 +162,15 @@ impl FocusOrderEditor {
         footer.children().add(cancel.clone().upcast::<Control>());
         footer.children().add(apply.clone().upcast::<Control>());
         root.children().add(footer.upcast::<Control>());
+        let scroll = ScrollViewer::new();
+        scroll.set_max_height(680.0);
+        scroll.set_horizontal_scroll_bar_visibility(
+            ferroui_controls::primitives::ScrollBarVisibility::Disabled,
+        );
+        scroll.set_content(Some(Control::boxed(&root)));
         let this = Rc::new(Self {
             root,
+            scroll,
             scope,
             description,
             entries,
@@ -322,7 +330,7 @@ impl FocusOrderEditor {
         this
     }
     pub fn control(&self) -> Ref<Control> {
-        self.root.clone().upcast()
+        self.scroll.clone().upcast()
     }
     pub fn on_apply(&self, handler: impl Fn(Vec<FocusOrderEdit>) -> Result<(), String> + 'static) {
         self.handler.replace(Some(Rc::new(handler)));
@@ -496,8 +504,13 @@ impl FocusOrderEditor {
             } else {
                 " Equal indices follow the native child order."
             };
+            let reset = if self.reset_orders.borrow().contains(&scope.id) {
+                " Authored indices will be reset; inherited/default order is evaluated on Apply."
+            } else {
+                ""
+            };
             self.description
-                .set_text(Some(&format!("{}{extra}", scope.mode_description())));
+                .set_text(Some(&format!("{}{extra}{reset}", scope.mode_description())));
             let mode = scope
                 .node
                 .and_then(|node| self.modes.borrow().get(&node).copied())
@@ -613,9 +626,7 @@ impl FocusOrderEditor {
         let Some(scope) = self.selected_scope() else {
             return;
         };
-        let mut items = scope.items;
-        items.sort_by_key(|item| item.tree_order);
-        self.orders.borrow_mut().insert(scope.id, items);
+        self.orders.borrow_mut().remove(&scope.id);
         self.reset_orders.borrow_mut().insert(scope.id);
         self.refresh_scope();
     }
@@ -647,7 +658,7 @@ fn text(value: &str, size: f64) -> Ref<TextBlock> {
 }
 fn choices(name: &str, help: &str) -> Ref<ComboBox> {
     let field = ComboBox::new();
-    field.set_name(Some(name));
+    field.set_name(Some(name.to_owned()));
     field.classes().add("designer-property-field");
     field.set_horizontal_alignment(HorizontalAlignment::Stretch);
     field.set_min_height(28.0);
@@ -657,7 +668,7 @@ fn choices(name: &str, help: &str) -> Ref<ComboBox> {
 }
 fn action(name: &str, label: &str, help: &str) -> Ref<Button> {
     let button = Button::new();
-    button.set_name(Some(name));
+    button.set_name(Some(name.to_owned()));
     button.set_content(Some(Rc::new(label.to_owned())));
     button.set_min_height(28.0);
     button.set_padding(Thickness::symmetric(9.0, 4.0));
@@ -667,7 +678,7 @@ fn action(name: &str, label: &str, help: &str) -> Ref<Button> {
 }
 fn check(name: &str, label: &str) -> Ref<CheckBox> {
     let field = CheckBox::new();
-    field.set_name(Some(name));
+    field.set_name(Some(name.to_owned()));
     field.set_content(Some(Rc::new(label.to_owned())));
     AutomationProperties::set_name(&field, Some(label));
     field

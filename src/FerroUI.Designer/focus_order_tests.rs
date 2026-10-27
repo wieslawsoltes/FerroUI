@@ -319,3 +319,46 @@ fn focus_snapshot_retires_after_definition_scope_round_trip_without_source_edits
     assert_eq!(session.document().source(), source);
     window.close();
 }
+
+#[test]
+fn repeated_template_parts_are_read_only_until_the_definition_is_opened() {
+    let _app = UnitTestApplication::start(TestServices::styled_window());
+    let source = r#"<StackPanel xmlns="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"><StackPanel.Resources><ControlTemplate x:Key="Editor" TargetType="Button"><TextBox Name="SharedInput"/></ControlTemplate></StackPanel.Resources><Button Name="First" Template="{StaticResource Editor}"/><Button Name="Second" Template="{StaticResource Editor}"/></StackPanel>"#;
+    let (mut session, window) = shown(source);
+    let input = named(&session, "SharedInput");
+    let catalog = session.focus_order_catalog().unwrap();
+    assert!(
+        !catalog
+            .scopes
+            .iter()
+            .flat_map(|scope| &scope.items)
+            .any(|item| item.node == Some(input))
+    );
+    assert!(
+        catalog
+            .scopes
+            .iter()
+            .flat_map(|scope| &scope.items)
+            .any(|item| item.node.is_none() && item.label.contains("TextBox"))
+    );
+    let template = session
+        .document()
+        .ast()
+        .elements()
+        .find(|node| node.local_name() == "ControlTemplate")
+        .unwrap()
+        .id;
+    session.enter_definition_scope(template).unwrap();
+    window.update_layout();
+    session.preview.rebuild_map(&session.document);
+    let catalog = session.focus_order_catalog().unwrap();
+    assert!(
+        catalog
+            .scopes
+            .iter()
+            .flat_map(|scope| &scope.items)
+            .any(|item| item.node == Some(input))
+    );
+    assert_eq!(session.document().source(), source);
+    window.close();
+}
