@@ -1215,15 +1215,21 @@ impl DesignerWorkspace {
                     .ast()
                     .nodes_in_source_order()
                     .filter(|node| node.is_element())
-                    .map(|node| TreeEntry {
-                        key: format!("source:{}", node.id),
-                        parent: node.parent.map(|id| format!("source:{id}")),
-                        label: node.name.clone(),
-                        name: node.xaml_name().unwrap_or_default().to_owned(),
-                        detail: "XAML".into(),
-                        source: Some(node.id),
-                        initially_expanded: Some(!is_metadata_container(node)),
-                        ..Default::default()
+                    .map(|node| {
+                        let resource = resource_key(node);
+                        TreeEntry {
+                            key: format!("source:{}", node.id),
+                            parent: node.parent.map(|id| format!("source:{id}")),
+                            label: node.name.clone(),
+                            name: node.xaml_name().or(resource).unwrap_or_default().to_owned(),
+                            detail: resource.map_or_else(
+                                || "XAML".into(),
+                                |key| format!("XAML · Resource key: {key}"),
+                            ),
+                            source: Some(node.id),
+                            initially_expanded: Some(!is_metadata_container(node)),
+                            ..Default::default()
+                        }
                     })
                     .collect()
             } else {

@@ -1237,6 +1237,85 @@ fn inspector_tooltip_samples_animation_without_replacing_the_editor_or_authored_
 }
 
 #[test]
+fn layer_resource_identity_keeps_alias_keys_searchable_without_renaming_source() {
+    let _app = UnitTestApplication::start(TestServices::styled_window());
+    let source = r#"<StackPanel xmlns="https://github.com/ferroui" xmlns:lang="http://schemas.microsoft.com/winfx/2006/xaml"><StackPanel.Resources><SolidColorBrush lang:Key="AccentBrush" Color="Red"/><SolidColorBrush lang:Name="NamedAccent" lang:Key="SecondaryBrush" Color="Blue"/></StackPanel.Resources><Border/></StackPanel>"#;
+    let workspace = DesignerWorkspace::new(source).unwrap();
+    let revision = workspace.session.borrow().document().revision();
+    let (key_only, named, unnamed) = {
+        let session = workspace.session.borrow();
+        let ast = session.document().ast();
+        (
+            ast.nodes()
+                .find(|node| resource_key(node) == Some("AccentBrush"))
+                .unwrap()
+                .id,
+            ast.find_name("NamedAccent").unwrap(),
+            ast.nodes()
+                .find(|node| node.local_name() == "Border")
+                .unwrap()
+                .id,
+        )
+    };
+    let entry = |id| {
+        workspace
+            .inspectors
+            .outline
+            .paths
+            .borrow()
+            .iter()
+            .find(|(row, _)| row.entry.source == Some(id))
+            .unwrap()
+            .0
+            .entry
+            .clone()
+    };
+    assert_eq!(hierarchy_name(&entry(key_only), false), "AccentBrush");
+    assert_eq!(hierarchy_name(&entry(named), false), "NamedAccent");
+    assert_eq!(hierarchy_name(&entry(unnamed), false), "Border");
+    assert!(entry(named).detail.contains("Resource key: SecondaryBrush"));
+
+    let search = workspace.root.get_control::<TextBox>("OutlineSearch");
+    for (query, id, title) in [
+        ("ACCENTBRUSH", key_only, "AccentBrush"),
+        ("secondarybrush", named, "NamedAccent"),
+        ("NamedAccent", named, "NamedAccent"),
+    ] {
+        search.set_text(Some(query));
+        workspace.rebuild_outline();
+        let rows = workspace.inspectors.outline.paths.borrow();
+        assert_eq!(rows.len(), 3, "a match retains only its ancestor path");
+        let (row, _) = rows.last().unwrap();
+        assert_eq!(row.entry.source, Some(id));
+        assert_eq!(row.entry.key, format!("source:{id}"));
+        assert_eq!(hierarchy_name(&row.entry, false), title);
+    }
+    let path = workspace
+        .inspectors
+        .outline
+        .paths
+        .borrow()
+        .last()
+        .unwrap()
+        .1
+        .clone();
+    workspace
+        .inspectors
+        .outline
+        .source
+        .row_selection()
+        .unwrap()
+        .base()
+        .set_selected_index(path);
+    assert_eq!(workspace.session.borrow().selection(), &[named]);
+    search.set_text(Some(""));
+    workspace.rebuild_outline();
+    assert_eq!(workspace.session.borrow().selection(), &[named]);
+    assert_eq!(workspace.session.borrow().document().revision(), revision);
+    assert_eq!(workspace.session.borrow().document().source(), source);
+}
+
+#[test]
 fn layer_template_keeps_native_type_ahead_selection() {
     use ferroui_base::input::TextInputEventArgs;
     let _app = UnitTestApplication::start(TestServices::styled_window());
