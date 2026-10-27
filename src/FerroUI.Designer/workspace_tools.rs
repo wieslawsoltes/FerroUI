@@ -59,6 +59,41 @@ fn is_custom_panel(session: &DesignerSession, node: NodeId) -> bool {
 /// Discoverable native fallback: unknown Panel subclasses retain their layout algorithm;
 /// manipulation authors a render adjustment, while child insertion/order uses Panel.Children.
 impl DesignerSession {
+    /// Plans a panel-specific edit against the current, measured native preview.
+    /// The returned edits share the same coordinate and expression rules as pointer tools.
+    pub fn plan_layout_action(&self, action: LayoutAction) -> Result<Vec<Edit>, String> {
+        self.ensure_writable().map_err(|error| error.to_string())?;
+        if !self.can_manipulate() {
+            return Err("Layout editing requires a successful preview of the current XAML".into());
+        }
+        let (owner, child) = match &action {
+            LayoutAction::GridTrack { panel, .. } | LayoutAction::PanelProperty { panel, .. } => {
+                (*panel, None)
+            }
+            LayoutAction::Drop { parent, .. } => (*parent, None),
+            LayoutAction::Move { node, .. }
+            | LayoutAction::Resize { node, .. }
+            | LayoutAction::Reorder { node, .. }
+            | LayoutAction::GridCell { node, .. }
+            | LayoutAction::Dock { node, .. }
+            | LayoutAction::Relative { node, .. } => (parent(self, *node)?, Some(*node)),
+        };
+        let measurement = measure(self, owner, child)?;
+        self.layout_tools()
+            .plan(&measurement.context(self.document()), action)
+            .map_err(|error| error.to_string())
+    }
+
+    /// Applies one measured layout operation as one undoable transaction. Hosts can use this
+    /// boundary for track/cell editors, docking pickers and registered panel property tools.
+    pub fn apply_layout_action(&mut self, action: LayoutAction, label: &str) -> Result<(), String> {
+        let edits = self.plan_layout_action(action)?;
+        if edits.is_empty() {
+            return Ok(());
+        }
+        self.apply_visual(label, edits)
+    }
+
     pub fn runtime_layout_capabilities(
         &self,
         node: NodeId,

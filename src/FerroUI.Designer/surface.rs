@@ -51,6 +51,7 @@ pub enum DesignGesture {
 #[derive(Clone, Copy, Debug)]
 enum Handle {
     Move,
+    Selection,
     Resize(u8),
     Rotate,
     Marquee,
@@ -63,6 +64,8 @@ struct Gesture {
     selection_bounds: Option<ferroui_designer_tools::Rect>,
     snap_index: Option<ferroui_designer_tools::SnapIndex>,
     geometry: Option<crate::affine_manipulation::Geometry>,
+    initial_selection: Vec<NodeId>,
+    selection_modifiers: KeyModifiers,
 }
 
 type CommitGesture = Rc<dyn Fn(DesignGesture)>;
@@ -193,10 +196,20 @@ impl DesignSurface {
         })
     }
     fn clear_pending(&self) {
-        self.gesture.borrow_mut().take();
+        self.cancel_gesture();
         self.insert.borrow_mut().take();
         self.gesture_context.borrow_mut().take();
         self.snap_guides.borrow_mut().clear();
+    }
+    fn cancel_gesture(&self) {
+        let gesture = self.gesture.borrow_mut().take();
+        if let Some(gesture) = gesture.filter(|gesture| matches!(gesture.handle, Handle::Marquee)) {
+            if self.pending_is_current() {
+                if let Some(session) = self.session() {
+                    session.borrow_mut().select(gesture.initial_selection);
+                }
+            }
+        }
     }
     fn snapped(&self, point: Point, modifiers: KeyModifiers) -> Point {
         let grid = self.grid.get();
@@ -211,6 +224,22 @@ impl DesignSurface {
     }
     fn snap_gesture(&self, gesture: &Gesture, position: Point, modifiers: KeyModifiers) -> Point {
         self.snap_guides.borrow_mut().clear();
+        let (position, axis) =
+            if matches!(gesture.handle, Handle::Move) && modifiers.contains(KeyModifiers::SHIFT) {
+                if (position.x - gesture.start.x).abs() >= (position.y - gesture.start.y).abs() {
+                    (
+                        Point::new(position.x, gesture.start.y),
+                        Some(ferroui_designer_tools::Axis::Horizontal),
+                    )
+                } else {
+                    (
+                        Point::new(gesture.start.x, position.y),
+                        Some(ferroui_designer_tools::Axis::Vertical),
+                    )
+                }
+            } else {
+                (position, None)
+            };
         if modifiers.contains(KeyModifiers::ALT) {
             return position;
         }
@@ -239,8 +268,25 @@ impl DesignSurface {
             6.0 / self.zoom.get(),
         ) {
             Ok(snapped) => {
-                *self.snap_guides.borrow_mut() = snapped.guides;
-                Point::new(position.x + snapped.delta.x, position.y + snapped.delta.y)
+                *self.snap_guides.borrow_mut() = snapped
+                    .guides
+                    .into_iter()
+                    .filter(|guide| axis.is_none_or(|axis| guide.axis == axis))
+                    .collect();
+                Point::new(
+                    position.x
+                        + if axis == Some(ferroui_designer_tools::Axis::Vertical) {
+                            0.0
+                        } else {
+                            snapped.delta.x
+                        },
+                    position.y
+                        + if axis == Some(ferroui_designer_tools::Axis::Horizontal) {
+                            0.0
+                        } else {
+                            snapped.delta.y
+                        },
+                )
             }
             Err(_) => position,
         }
@@ -299,8 +345,9 @@ impl DesignSurface {
         let Some(mut gesture) = self.gesture.borrow_mut().take() else {
             return;
         };
-        let moved =
-            (position.x - gesture.start.x).abs() + (position.y - gesture.start.y).abs() > 3.0;
+        let moved = ((position.x - gesture.start.x).abs() + (position.y - gesture.start.y).abs())
+            * self.zoom.get()
+            > 3.0;
         gesture.current = self.snap_gesture(&gesture, position, modifiers);
         let delta = gesture.current - gesture.start;
         let commit = match gesture.handle {
@@ -333,19 +380,32 @@ impl DesignSurface {
                 if let Some(session) = self.session() {
                     let rect = marquee(gesture.start, gesture.current);
                     let mut session = session.borrow_mut();
+                    let crossing = gesture.current.x < gesture.start.x;
+                    let root = session.document().ast().root();
                     let ids = session
                         .document()
                         .ast()
                         .elements()
+                        .filter(|node| node.id != root)
                         .filter_map(|node| {
                             session
                                 .preview
                                 .bounds(node.id, &self.to_ref().upcast())
-                                .filter(|bounds| rect.contains_rect(*bounds))
+                                .filter(|bounds| {
+                                    if crossing {
+                                        rect.intersects(*bounds)
+                                    } else {
+                                        rect.contains_rect(*bounds)
+                                    }
+                                })
                                 .map(|_| node.id)
                         })
                         .collect::<Vec<_>>();
-                    session.select(ids);
+                    session.select(marquee_selection(
+                        &gesture.initial_selection,
+                        ids,
+                        gesture.selection_modifiers,
+                    ));
                 }
                 None
             }
@@ -394,6 +454,7 @@ impl InputElementImpl for DesignSurface {
             this.clear_pending();
             return;
         }
+        this.focus();
         if this.insert.borrow().is_some() {
             // A palette or keyboard command may have armed insertion before this
             // press. Never rebind that intent to a newly opened document.
@@ -411,6 +472,7 @@ impl InputElementImpl for DesignSurface {
         }
         *this.gesture_context.borrow_mut() = Some(GestureContext::capture(&session.borrow()));
         session.borrow_mut().refresh_runtime_mapping();
+        let initial_selection = session.borrow().selection().to_vec();
         let rectangles = this.rectangles();
         let mut handle = None;
         let geometry = rectangles.first().and_then(|(node, _)| {
@@ -447,6 +509,7 @@ impl InputElementImpl for DesignSurface {
                 if event.key_modifiers().contains(KeyModifiers::SHIFT) {
                     if let Some(index) = selected.iter().position(|selected| *selected == id) {
                         selected.remove(index);
+                        handle = Some(Handle::Selection);
                     } else {
                         selected.push(id);
                     }
@@ -454,9 +517,14 @@ impl InputElementImpl for DesignSurface {
                     selected = vec![id];
                 }
                 session.select(selected);
-                handle = Some(Handle::Move);
+                handle.get_or_insert(Handle::Move);
             } else {
-                session.borrow_mut().select([]);
+                if !event
+                    .key_modifiers()
+                    .intersects(KeyModifiers::SHIFT | KeyModifiers::CONTROL)
+                {
+                    session.borrow_mut().select([]);
+                }
                 handle = Some(Handle::Marquee);
             }
         }
@@ -500,6 +568,8 @@ impl InputElementImpl for DesignSurface {
             selection_bounds,
             snap_index,
             geometry,
+            initial_selection,
+            selection_modifiers: event.key_modifiers(),
         });
         event
             .pointer()
@@ -546,7 +616,7 @@ impl InputElementImpl for DesignSurface {
         Self::parent_on_pointer_released(this, event);
     }
     fn on_pointer_capture_lost(this: &Self, event: &PointerCaptureLostEventArgs) {
-        this.gesture.borrow_mut().take();
+        this.cancel_gesture();
         if !this.releasing_capture.get() {
             this.insert.borrow_mut().take();
         }
@@ -557,7 +627,7 @@ impl InputElementImpl for DesignSurface {
         if !this.pointer_inside.get() {
             this.cursor_position.set(None);
         }
-        this.invalidate_visual();
+        this.notify();
         Self::parent_on_pointer_capture_lost(this, event);
     }
     fn on_pointer_entered(this: &Self, event: &PointerEventArgs) {
@@ -577,8 +647,41 @@ impl InputElementImpl for DesignSurface {
             if !this.pointer_inside.get() {
                 this.cursor_position.set(None);
             }
-            this.invalidate_visual();
+            this.notify();
             event.set_handled(true);
+        } else if !this.interactive.get()
+            && this.gesture.borrow().is_none()
+            && this.insert.borrow().is_none()
+            && !event.key_modifiers.contains(KeyModifiers::ALT)
+        {
+            let step = if event.key_modifiers.contains(KeyModifiers::SHIFT) {
+                10.0
+            } else if event.key_modifiers.contains(KeyModifiers::CONTROL) {
+                0.1
+            } else {
+                1.0
+            };
+            let delta = match event.key {
+                Key::Left => Some(Point::new(-step, 0.0)),
+                Key::Right => Some(Point::new(step, 0.0)),
+                Key::Up => Some(Point::new(0.0, -step)),
+                Key::Down => Some(Point::new(0.0, step)),
+                _ => None,
+            };
+            if let Some(delta) = delta {
+                let nodes = this.session().and_then(|session| {
+                    let session = session.borrow();
+                    (session.can_manipulate() && !session.selection().is_empty())
+                        .then(|| session.selection().to_vec())
+                });
+                if let Some(nodes) = nodes {
+                    if let Some(commit) = this.commit.borrow().as_ref().cloned() {
+                        commit(DesignGesture::Move { nodes, delta });
+                        this.notify();
+                        event.set_handled(true);
+                    }
+                }
+            }
         }
         Self::parent_on_key_down(this, event);
     }
@@ -816,6 +919,35 @@ fn marquee(a: Point, b: Point) -> Rect {
         (a.x - b.x).abs(),
         (a.y - b.y).abs(),
     )
+}
+
+fn marquee_selection(
+    initial: &[NodeId],
+    hits: Vec<NodeId>,
+    modifiers: KeyModifiers,
+) -> Vec<NodeId> {
+    let control = modifiers.contains(KeyModifiers::CONTROL);
+    let shift = modifiers.contains(KeyModifiers::SHIFT);
+    if !control && !shift {
+        return hits;
+    }
+    let hit_set = hits
+        .iter()
+        .copied()
+        .collect::<std::collections::BTreeSet<_>>();
+    let initial_set = initial
+        .iter()
+        .copied()
+        .collect::<std::collections::BTreeSet<_>>();
+    let mut result = initial
+        .iter()
+        .copied()
+        .filter(|id| !control || !hit_set.contains(id))
+        .collect::<Vec<_>>();
+    if !control || !shift {
+        result.extend(hits.into_iter().filter(|id| !initial_set.contains(id)));
+    }
+    result
 }
 
 #[cfg(test)]

@@ -62,6 +62,9 @@ impl SurfaceFixture {
         self.surface.translate_point(point, &self.window).unwrap()
     }
     fn press(&self, point: Point) {
+        self.press_with(point, KeyModifiers::ALT);
+    }
+    fn press_with(&self, point: Point, modifiers: KeyModifiers) {
         self.surface.raise_event(&PointerPressedEventArgs::new(
             self.surface.to_ref(),
             self.pointer.clone(),
@@ -72,7 +75,7 @@ impl SurfaceFixture {
                 RawInputModifiers::LEFT_MOUSE_BUTTON,
                 PointerUpdateKind::LeftButtonPressed,
             ),
-            KeyModifiers::ALT,
+            modifiers,
             1,
         ));
     }
@@ -92,6 +95,9 @@ impl SurfaceFixture {
         ));
     }
     fn release(&self, point: Point) {
+        self.release_with(point, KeyModifiers::ALT);
+    }
+    fn release_with(&self, point: Point, modifiers: KeyModifiers) {
         self.surface.raise_event(&PointerReleasedEventArgs::new(
             self.surface.to_ref(),
             self.pointer.clone(),
@@ -102,7 +108,7 @@ impl SurfaceFixture {
                 RawInputModifiers::NONE,
                 PointerUpdateKind::LeftButtonReleased,
             ),
-            KeyModifiers::ALT,
+            modifiers,
             MouseButton::Left,
         ));
     }
@@ -286,4 +292,173 @@ fn moving_a_selection_rejects_same_uri_same_revision_replacement_on_move_and_rel
         assert!(fixture.commits.borrow().is_empty());
         assert_eq!(fixture.source(), source);
     }
+}
+
+#[test]
+fn surface_keyboard_nudges_use_native_layout_transactions_and_respect_precision_and_permissions() {
+    let _app = UnitTestApplication::start(TestServices::styled_window());
+    let fixture = SurfaceFixture::new();
+    let target = fixture
+        .session
+        .borrow()
+        .document()
+        .ast()
+        .find_name("Target")
+        .unwrap();
+    fixture.session.borrow_mut().select([target]);
+    for (key, modifiers, expected) in [
+        (Key::Right, KeyModifiers::NONE, (21.0, 20.0)),
+        (Key::Down, KeyModifiers::SHIFT, (21.0, 30.0)),
+        (Key::Left, KeyModifiers::CONTROL, (20.9, 30.0)),
+    ] {
+        let mut event = KeyEventArgs::new();
+        event.key = key;
+        event.key_modifiers = modifiers;
+        event.set_routed_event(Some(InputElement::key_down_event()));
+        fixture.surface.raise_event(&event);
+        assert!(event.handled());
+        let session = fixture.session.borrow();
+        let node = session.document().ast().node(target).unwrap();
+        assert!(
+            (node
+                .attribute("Canvas.Left")
+                .unwrap()
+                .parse::<f64>()
+                .unwrap()
+                - expected.0)
+                .abs()
+                < 1e-9
+        );
+        assert!(
+            (node
+                .attribute("Canvas.Top")
+                .unwrap()
+                .parse::<f64>()
+                .unwrap()
+                - expected.1)
+                .abs()
+                < 1e-9
+        );
+    }
+    assert_eq!(fixture.commits.borrow().len(), 3);
+    fixture.session.borrow_mut().undo().unwrap();
+    fixture.session.borrow_mut().undo().unwrap();
+    fixture.session.borrow_mut().undo().unwrap();
+    assert_eq!(fixture.source(), SOURCE);
+    fixture.session.borrow_mut().set_read_only(true);
+    let mut event = KeyEventArgs::new();
+    event.key = Key::Right;
+    event.set_routed_event(Some(InputElement::key_down_event()));
+    fixture.surface.raise_event(&event);
+    assert!(!event.handled());
+    assert_eq!(fixture.commits.borrow().len(), 3);
+    assert_eq!(fixture.source(), SOURCE);
+}
+
+#[test]
+fn shift_move_locks_the_dominant_axis_even_with_snapping_or_alt_precision() {
+    let _app = UnitTestApplication::start(TestServices::styled_window());
+    for (end, expected, modifiers) in [
+        (
+            Point::new(92.0, 45.0),
+            (52.0, 20.0),
+            KeyModifiers::SHIFT | KeyModifiers::ALT,
+        ),
+        (
+            Point::new(63.0, 72.0),
+            (20.0, 52.0),
+            KeyModifiers::SHIFT | KeyModifiers::ALT,
+        ),
+        (Point::new(92.0, 45.0), (52.0, 20.0), KeyModifiers::SHIFT),
+    ] {
+        let fixture = SurfaceFixture::new();
+        fixture.press(Point::new(60.0, 40.0));
+        fixture.release_with(end, modifiers);
+        assert_eq!(fixture.commits.borrow().len(), 1);
+        let session = fixture.session.borrow();
+        let node = session
+            .document()
+            .ast()
+            .node(session.selection()[0])
+            .unwrap();
+        assert_eq!(
+            node.attribute("Canvas.Left")
+                .unwrap()
+                .parse::<f64>()
+                .unwrap(),
+            expected.0
+        );
+        assert_eq!(
+            node.attribute("Canvas.Top")
+                .unwrap()
+                .parse::<f64>()
+                .unwrap(),
+            expected.1
+        );
+    }
+}
+
+#[test]
+fn marquee_selects_by_direction_supports_set_operations_and_restores_selection_on_escape() {
+    let _app = UnitTestApplication::start(TestServices::styled_window());
+    let fixture = SurfaceFixture::new();
+    let target = fixture
+        .session
+        .borrow()
+        .document()
+        .ast()
+        .find_name("Target")
+        .unwrap();
+    // A left-to-right rectangle must contain the whole control.
+    fixture.press_with(Point::new(10.0, 10.0), KeyModifiers::NONE);
+    fixture.release_with(Point::new(60.0, 80.0), KeyModifiers::NONE);
+    assert!(fixture.session.borrow().selection().is_empty());
+    // A right-to-left rectangle picks a partial intersection.
+    fixture.press_with(Point::new(120.0, 10.0), KeyModifiers::NONE);
+    fixture.release_with(Point::new(60.0, 80.0), KeyModifiers::NONE);
+    assert_eq!(fixture.session.borrow().selection(), [target]);
+    // Ctrl+Shift subtracts; Ctrl toggles; Shift extends the original selection.
+    fixture.press_with(
+        Point::new(120.0, 10.0),
+        KeyModifiers::CONTROL | KeyModifiers::SHIFT,
+    );
+    fixture.release_with(Point::new(60.0, 80.0), KeyModifiers::NONE);
+    assert!(fixture.session.borrow().selection().is_empty());
+    fixture.press_with(Point::new(120.0, 10.0), KeyModifiers::SHIFT);
+    fixture.release_with(Point::new(60.0, 80.0), KeyModifiers::NONE);
+    assert_eq!(fixture.session.borrow().selection(), [target]);
+    fixture.press_with(Point::new(120.0, 10.0), KeyModifiers::CONTROL);
+    fixture.release_with(Point::new(60.0, 80.0), KeyModifiers::NONE);
+    assert!(fixture.session.borrow().selection().is_empty());
+    fixture.session.borrow_mut().select([target]);
+    fixture.press_with(Point::new(200.0, 100.0), KeyModifiers::NONE);
+    assert!(fixture.session.borrow().selection().is_empty());
+    let mut cancel = KeyEventArgs::new();
+    cancel.key = Key::Escape;
+    cancel.set_routed_event(Some(InputElement::key_down_event()));
+    fixture.surface.raise_event(&cancel);
+    assert_eq!(fixture.session.borrow().selection(), [target]);
+    fixture.release(Point::new(250.0, 140.0));
+    assert_eq!(fixture.session.borrow().selection(), [target]);
+    assert!(fixture.commits.borrow().is_empty());
+    assert_eq!(fixture.source(), SOURCE);
+}
+
+#[test]
+fn shift_deselect_is_not_accidentally_a_drag_of_the_remaining_selection() {
+    let _app = UnitTestApplication::start(TestServices::styled_window());
+    let fixture = SurfaceFixture::new();
+    let target = fixture
+        .session
+        .borrow()
+        .document()
+        .ast()
+        .find_name("Target")
+        .unwrap();
+    fixture.session.borrow_mut().select([target]);
+    fixture.press_with(Point::new(60.0, 40.0), KeyModifiers::SHIFT);
+    fixture.release_with(Point::new(100.0, 80.0), KeyModifiers::SHIFT);
+    assert!(fixture.session.borrow().selection().is_empty());
+    assert!(fixture.commits.borrow().is_empty());
+    assert_eq!(fixture.source(), SOURCE);
 }

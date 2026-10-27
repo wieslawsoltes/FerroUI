@@ -2,16 +2,46 @@
 //! hit testing and adorners; its automatic row-model mutation is always intercepted.
 use super::inspectors::TreeRow;
 use super::{DesignerSession, DesignerWorkspace, OutlineMode};
-use ferroui_base::input::DragDropEffects;
+use ferroui_base::input::{DragDrop, DragDropEffects, InputElement, Key, KeyModifiers};
+use ferroui_base::interactivity::RoutingStrategies;
+use ferroui_base::reactive::IDisposable;
+use ferroui_base::threading::{DispatcherPriority, DispatcherTimer};
 use ferroui_controls_treedatagrid::{
     TreeDataGridRowDragEventArgs, TreeDataGridRowDropPosition as DropPosition,
 };
 use ferroui_designer_core::{Ast, Document, Edit, NodeId, NodeKind};
 use ferroui_designer_tools::LayoutCapabilities;
+use ferroui_treedatagrid_core::IndexPath;
 use std::cell::{Cell, RefCell};
 use std::collections::{BTreeMap, BTreeSet};
 use std::rc::Rc;
 use std::sync::Arc;
+use std::time::Duration;
+
+/// Structural edits in source order. Commands operate on the outermost selected elements,
+/// preserve their identities, and reject partial moves across incompatible content hosts.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum OutlineCommand {
+    MoveUp,
+    MoveDown,
+    MoveFirst,
+    MoveLast,
+    Indent,
+    Outdent,
+}
+
+impl OutlineCommand {
+    fn label(self) -> &'static str {
+        match self {
+            Self::MoveUp => "Move outline selection up",
+            Self::MoveDown => "Move outline selection down",
+            Self::MoveFirst => "Move outline selection first",
+            Self::MoveLast => "Move outline selection last",
+            Self::Indent => "Indent outline selection",
+            Self::Outdent => "Outdent outline selection",
+        }
+    }
+}
 
 /// An immutable gesture snapshot. A revision alone cannot distinguish two independently
 /// created documents whose local node IDs happen to match.
@@ -110,7 +140,7 @@ impl OutlineDrag {
                 (host, Some(target))
             }
             DropPosition::None => {
-                return Err("Choose a position inside, before or after an element".into())
+                return Err("Choose a position inside, before or after an element".into());
             }
         };
         if selected.contains(&host.container)
@@ -190,6 +220,124 @@ impl OutlineDrag {
                 .apply_at(self.revision, "Move outline selection", edits)
                 .map_err(|error| error.to_string())?;
             session.select(self.nodes.iter().copied());
+        }
+        Ok(())
+    }
+
+    fn plan_command(
+        &self,
+        session: &DesignerSession,
+        command: OutlineCommand,
+    ) -> Result<Vec<Edit>, String> {
+        self.validate(session)?;
+        let first = *self.nodes.first().ok_or("Select an element to arrange")?;
+        let host = ContentHost::of_child(session, first)?;
+        for node in &self.nodes {
+            if ContentHost::of_child(session, *node)?.container != host.container {
+                return Err("Select sibling elements for structural keyboard commands".into());
+            }
+        }
+        let document = session.document();
+        let selected = self.nodes.iter().copied().collect::<BTreeSet<_>>();
+        let mut children = document.ast().element_children(host.container);
+        let is_content = |id: NodeId| {
+            document
+                .ast()
+                .node(id)
+                .is_some_and(|node| node.kind == NodeKind::Element)
+        };
+        if command == OutlineCommand::Outdent {
+            return self.plan(session, host.owner, DropPosition::After);
+        }
+        if command == OutlineCommand::Indent {
+            let index = children.iter().position(|id| *id == first).unwrap();
+            let previous = children[..index]
+                .iter()
+                .rev()
+                .find(|id| is_content(**id))
+                .copied()
+                .ok_or("No preceding sibling accepts this selection")?;
+            return self.plan(session, previous, DropPosition::Inside);
+        }
+        if !host.capabilities.reorder {
+            return Err("This content host does not support sibling reordering".into());
+        }
+        if matches!(
+            command,
+            OutlineCommand::MoveFirst | OutlineCommand::MoveLast
+        ) {
+            let remaining = children
+                .iter()
+                .copied()
+                .filter(|id| !selected.contains(id) && is_content(*id))
+                .collect::<Vec<_>>();
+            let Some(anchor) = (if command == OutlineCommand::MoveFirst {
+                remaining.first()
+            } else {
+                remaining.last()
+            }) else {
+                return Ok(Vec::new());
+            };
+            return self.plan(
+                session,
+                *anchor,
+                if command == OutlineCommand::MoveFirst {
+                    DropPosition::Before
+                } else {
+                    DropPosition::After
+                },
+            );
+        }
+        // Each contiguous selected block advances one sibling, retaining gaps between
+        // disjoint blocks. The simulated ordering supplies post-removal MoveNode indices.
+        let order = if command == OutlineCommand::MoveUp {
+            self.nodes.clone()
+        } else {
+            self.nodes.iter().rev().copied().collect()
+        };
+        let mut edits = Vec::new();
+        for node in order {
+            let current = children.iter().position(|id| *id == node).unwrap();
+            let neighbour = if command == OutlineCommand::MoveUp {
+                (0..current)
+                    .rev()
+                    .find(|index| is_content(children[*index]))
+            } else {
+                (current + 1..children.len()).find(|index| is_content(children[*index]))
+            };
+            let Some(neighbour) = neighbour else { continue };
+            if selected.contains(&children[neighbour]) {
+                continue;
+            }
+            children.remove(current);
+            children.insert(neighbour, node);
+            edits.push(Edit::MoveNode {
+                node,
+                parent: host.container,
+                index: neighbour,
+            });
+        }
+        Ok(edits)
+    }
+}
+
+impl DesignerSession {
+    /// Tests whether a structural command can change the current authored selection.
+    pub fn can_edit_outline(&self, command: OutlineCommand) -> bool {
+        OutlineDrag::capture(self, self.selection().iter().copied())
+            .and_then(|snapshot| snapshot.plan_command(self, command))
+            .is_ok_and(|edits| !edits.is_empty())
+    }
+
+    /// Applies a tree structural command in one source/undo transaction. A boundary no-op
+    /// leaves revision/history untouched, and rejected selections are never partly moved.
+    pub fn edit_outline(&mut self, command: OutlineCommand) -> Result<(), String> {
+        let snapshot = OutlineDrag::capture(self, self.selection().iter().copied())?;
+        let edits = snapshot.plan_command(self, command)?;
+        if !edits.is_empty() {
+            self.apply_at(snapshot.revision, command.label(), edits)
+                .map_err(|error| error.to_string())?;
+            self.select(snapshot.nodes);
         }
         Ok(())
     }
@@ -356,14 +504,95 @@ fn target(event: &TreeDataGridRowDragEventArgs) -> Result<NodeId, String> {
         .ok_or_else(|| "Choose an authored source row".into())
 }
 
+#[derive(Default)]
+struct OutlineHover {
+    target: Cell<Option<NodeId>>,
+    timer: RefCell<Option<Rc<dyn IDisposable>>>,
+}
+
+impl OutlineHover {
+    fn cancel(&self) {
+        self.target.set(None);
+        if let Some(timer) = self.timer.borrow_mut().take() {
+            timer.dispose();
+        }
+    }
+}
+
+impl Drop for OutlineHover {
+    fn drop(&mut self) {
+        self.cancel();
+    }
+}
+
+/// Resolve the path again at timer delivery. A recycled row or a newer hierarchy must
+/// never expand an unrelated node simply because it occupies the old row index.
+fn expand_hover_target(
+    workspace: &DesignerWorkspace,
+    drag: &RefCell<Option<OutlineDrag>>,
+    target: NodeId,
+    path: &IndexPath,
+) -> bool {
+    if workspace.ensure_outline_drag_view().is_err()
+        || !drag.borrow().as_ref().is_some_and(|snapshot| {
+            snapshot.can_drop(&workspace.session.borrow(), target, DropPosition::Inside)
+        })
+    {
+        return false;
+    }
+    let source = &workspace.inspectors.outline.source;
+    let current = source.try_get_model_at(path);
+    if !current
+        .as_ref()
+        .and_then(|model| model.downcast_ref::<TreeRow>())
+        .is_some_and(|row| row.entry.source == Some(target) && row.entry.runtime.is_none())
+    {
+        return false;
+    }
+    source.expand(path);
+    true
+}
+
 impl DesignerWorkspace {
     pub(super) fn connect_inspector_drag(self: &Rc<Self>) {
         let grid = self.outline_grid();
         grid.set_auto_drag_drop_rows(true);
+        let weak = Rc::downgrade(self);
+        grid.add_handler_with(
+            InputElement::key_down_event(),
+            move |_, event| {
+                if event.key_modifiers != KeyModifiers::ALT {
+                    return;
+                }
+                let command = match event.key {
+                    Key::Up => OutlineCommand::MoveUp,
+                    Key::Down => OutlineCommand::MoveDown,
+                    Key::Home => OutlineCommand::MoveFirst,
+                    Key::End => OutlineCommand::MoveLast,
+                    Key::Right => OutlineCommand::Indent,
+                    Key::Left => OutlineCommand::Outdent,
+                    _ => return,
+                };
+                let Some(this) = weak.upgrade() else { return };
+                if this.text_input_focused() {
+                    return;
+                }
+                event.set_handled(true);
+                let result = this.edit_outline(command);
+                this.report(result);
+            },
+            RoutingStrategies::TUNNEL,
+            false,
+        );
         let drag = Rc::new(RefCell::new(None::<OutlineDrag>));
+        let hover = Rc::new(OutlineHover::default());
+        let leave = hover.clone();
+        grid.add_handler(DragDrop::drag_leave_event(), move |_, _| leave.cancel());
         let weak = Rc::downgrade(self);
         let state = drag.clone();
+        let start_hover = hover.clone();
         grid.row_drag_started(move |_, event| {
+            start_hover.cancel();
             state.borrow_mut().take();
             event.set_allowed_effects(DragDropEffects::NONE);
             let Some(this) = weak.upgrade() else { return };
@@ -393,8 +622,10 @@ impl DesignerWorkspace {
         });
         let weak = Rc::downgrade(self);
         let state = drag.clone();
+        let over_hover = hover.clone();
         grid.row_drag_over(move |_, event| {
-            let allowed = weak.upgrade().is_some_and(|this| {
+            let this = weak.upgrade();
+            let allowed = this.as_ref().is_some_and(|this| {
                 this.ensure_outline_drag_view().is_ok()
                     && state.borrow().as_ref().is_some_and(|snapshot| {
                         target(event).is_ok_and(|target| {
@@ -410,9 +641,48 @@ impl DesignerWorkspace {
             if !allowed {
                 event.set_position(DropPosition::None);
             }
+            let expandable = allowed
+                .then(|| target(event).ok())
+                .flatten()
+                .filter(|_| event.position() == DropPosition::Inside);
+            if over_hover.target.get() == expandable {
+                return;
+            }
+            over_hover.cancel();
+            let Some(target) = expandable else { return };
+            let Some(this) = this else { return };
+            let Some(row) = event.target_row() else {
+                return;
+            };
+            let Some(rows) = this.outline_grid().rows() else {
+                return;
+            };
+            let path = rows.row_index_to_model_index(row.row_index());
+            if path.is_empty() {
+                return;
+            }
+            over_hover.target.set(Some(target));
+            let weak = Rc::downgrade(&this);
+            let state = Rc::downgrade(&state);
+            let hover = Rc::downgrade(&over_hover);
+            *over_hover.timer.borrow_mut() = Some(DispatcherTimer::run_once(
+                move || {
+                    let (Some(this), Some(state), Some(hover)) =
+                        (weak.upgrade(), state.upgrade(), hover.upgrade())
+                    else {
+                        return;
+                    };
+                    if hover.target.get() == Some(target) {
+                        expand_hover_target(&this, &state, target, &path);
+                    }
+                },
+                Duration::from_millis(600),
+                DispatcherPriority::BACKGROUND,
+            ));
         });
         let weak = Rc::downgrade(self);
         grid.row_drop(move |_, event| {
+            hover.cancel();
             // TreeDataGrid must never move its immutable view models directly, even on a
             // rejected or foreign drag. Rebuilding from the committed AST is the only update.
             event.set_handled(true);
@@ -433,6 +703,15 @@ impl DesignerWorkspace {
             this.refresh(true);
             this.report(result);
         });
+    }
+
+    /// Runs a structural tree command after validating that the visible source hierarchy
+    /// still describes the current document. The native grid retains/reveals selection.
+    pub fn edit_outline(self: &Rc<Self>, command: OutlineCommand) -> Result<(), String> {
+        self.ensure_outline_drag_view()?;
+        self.session.borrow_mut().edit_outline(command)?;
+        self.refresh(true);
+        Ok(())
     }
 
     fn ensure_outline_drag_view(&self) -> Result<(), String> {

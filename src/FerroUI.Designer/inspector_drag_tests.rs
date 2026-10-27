@@ -68,10 +68,12 @@ fn outline_reparent_preserves_source_order_namespace_identity_preview_and_single
             .as_deref(),
         Some("clr-namespace:FerroUI.Controls;assembly=FerroUI.Controls")
     );
-    assert!(session
-        .document()
-        .source()
-        .contains("<!-- authored comment -->"));
+    assert!(
+        session
+            .document()
+            .source()
+            .contains("<!-- authored comment -->")
+    );
     assert!(session.can_manipulate());
     let preview = session
         .preview
@@ -196,22 +198,28 @@ fn outline_drag_checks_single_content_hosts_generated_panels_and_current_write_a
     );
     let single = OutlineDrag::capture(&session, [a]).unwrap();
     assert!(single.can_drop(&session, empty, DropPosition::Inside));
-    assert!(single
-        .plan(&session, occupied, DropPosition::Inside)
-        .is_err());
+    assert!(
+        single
+            .plan(&session, occupied, DropPosition::Inside)
+            .is_err()
+    );
     assert!(single.plan(&session, text, DropPosition::Inside).is_err());
-    assert!(OutlineDrag::capture(&session, [a, b])
-        .unwrap()
-        .plan(&session, empty, DropPosition::Inside)
-        .is_err());
+    assert!(
+        OutlineDrag::capture(&session, [a, b])
+            .unwrap()
+            .plan(&session, empty, DropPosition::Inside)
+            .is_err()
+    );
     session.set_read_only(true);
     assert!(
         !single.can_drop(&session, empty, DropPosition::Inside),
         "a cached hover must not bypass a changed collaboration role"
     );
-    assert!(single
-        .commit(&mut session, empty, DropPosition::Inside)
-        .is_err());
+    assert!(
+        single
+            .commit(&mut session, empty, DropPosition::Inside)
+            .is_err()
+    );
     assert!(OutlineDrag::capture(&session, [a]).is_err());
     assert_eq!(session.document().source(), SOURCE);
     session.set_read_only(false);
@@ -224,13 +232,14 @@ fn outline_drag_checks_single_content_hosts_generated_panels_and_current_write_a
         r#"<StackPanel xmlns="https://github.com/ferroui"><VirtualizingStackPanel Name="Generated"/><Button Name="A"/></StackPanel>"#,
     );
     let drag = OutlineDrag::capture(&generated, [named(&generated, "A")]).unwrap();
-    assert!(drag
-        .plan(
+    assert!(
+        drag.plan(
             &generated,
             named(&generated, "Generated"),
             DropPosition::Inside
         )
-        .is_err());
+        .is_err()
+    );
 }
 
 #[test]
@@ -293,23 +302,26 @@ fn outline_drag_rejects_changed_and_independent_documents_even_when_node_ids_mat
     let mut independent = DesignerSession::with_uri(SOURCE, ContentControl::new(), uri).unwrap();
     assert_eq!(revision, independent.document().revision());
     assert_eq!(named(&independent, "A"), a);
-    assert!(drag
-        .commit(&mut independent, right, DropPosition::Inside)
-        .is_err());
+    assert!(
+        drag.commit(&mut independent, right, DropPosition::Inside)
+            .is_err()
+    );
     assert_eq!(independent.document().source(), SOURCE);
     let mut original = independent;
     let drag = OutlineDrag::capture(&original, [a]).unwrap();
     original.set_property(&[a], "Width", "123").unwrap();
     let edited = original.document().source().to_owned();
-    assert!(drag
-        .commit(&mut original, right, DropPosition::Inside)
-        .is_err());
+    assert!(
+        drag.commit(&mut original, right, DropPosition::Inside)
+            .is_err()
+    );
     assert_eq!(original.document().source(), edited);
     let drag = OutlineDrag::capture(&original, [a]).unwrap();
     original.stage_source("<StackPanel");
-    assert!(drag
-        .commit(&mut original, right, DropPosition::Inside)
-        .is_err());
+    assert!(
+        drag.commit(&mut original, right, DropPosition::Inside)
+            .is_err()
+    );
     assert_eq!(original.document().source(), "<StackPanel");
 }
 
@@ -408,4 +420,157 @@ fn native_outline_row_events_commit_ast_moves_and_block_stale_runtime_and_foreig
     let runtime = TreeDataGridRowDragStartedEventArgs::new(vec![Some(runtime)]);
     grid.raise_event(&runtime);
     assert_eq!(runtime.allowed_effects(), DragDropEffects::NONE);
+}
+
+#[test]
+fn structural_commands_preserve_disjoint_blocks_and_use_one_undo_transaction() {
+    let _app = UnitTestApplication::start(TestServices::styled_window());
+    const SOURCE: &str = r#"<StackPanel xmlns="https://github.com/ferroui"><Button Name="A"/><Button Name="B"/><Button Name="C"/><Button Name="D"/><Button Name="E"/><Button Name="F"/></StackPanel>"#;
+    let mut session = new_session(SOURCE);
+    let ids = ["A", "B", "C", "D", "E", "F"].map(|name| named(&session, name));
+    let root = session.document().ast().root();
+    session.select([ids[4], ids[2], ids[1]]);
+    session.edit_outline(OutlineCommand::MoveUp).unwrap();
+    assert_eq!(
+        content_children(&session, root),
+        [ids[1], ids[2], ids[0], ids[4], ids[3], ids[5]]
+    );
+    assert_eq!(session.selection(), [ids[1], ids[2], ids[4]]);
+    assert_eq!(session.document().revision(), 1);
+    session.undo().unwrap();
+    assert_eq!(session.document().source(), SOURCE);
+    session.edit_outline(OutlineCommand::MoveDown).unwrap();
+    assert_eq!(
+        content_children(&session, root),
+        [ids[0], ids[3], ids[1], ids[2], ids[5], ids[4]]
+    );
+    session.undo().unwrap();
+    session.edit_outline(OutlineCommand::MoveFirst).unwrap();
+    assert_eq!(
+        content_children(&session, root),
+        [ids[1], ids[2], ids[4], ids[0], ids[3], ids[5]]
+    );
+    session.undo().unwrap();
+    session.edit_outline(OutlineCommand::MoveLast).unwrap();
+    assert_eq!(
+        content_children(&session, root),
+        [ids[0], ids[3], ids[5], ids[1], ids[2], ids[4]]
+    );
+    session.undo().unwrap();
+    session.select([ids[0], ids[1]]);
+    let revision = session.document().revision();
+    assert!(!session.can_edit_outline(OutlineCommand::MoveUp));
+    session.edit_outline(OutlineCommand::MoveUp).unwrap();
+    assert_eq!(session.document().revision(), revision);
+    assert!(!session.can_undo());
+}
+
+#[test]
+fn indent_and_outdent_preserve_explicit_content_slots_and_reject_incompatible_selections() {
+    let _app = UnitTestApplication::start(TestServices::styled_window());
+    const SOURCE: &str = r#"<StackPanel xmlns="https://github.com/ferroui"><StackPanel Name="Group"><StackPanel.Children><Button Name="Existing"/></StackPanel.Children></StackPanel><Button Name="A" Content="Occupied"/><Button Name="B"/><Border Name="Empty"/></StackPanel>"#;
+    let mut session = new_session(SOURCE);
+    let (group, existing, a, b, empty) = (
+        named(&session, "Group"),
+        named(&session, "Existing"),
+        named(&session, "A"),
+        named(&session, "B"),
+        named(&session, "Empty"),
+    );
+    let root = session.document().ast().root();
+    session.select([b, a]);
+    assert!(session.can_edit_outline(OutlineCommand::Indent));
+    session.edit_outline(OutlineCommand::Indent).unwrap();
+    assert_eq!(content_children(&session, group), [existing, a, b]);
+    assert_eq!(content_children(&session, root), [group, empty]);
+    assert!(session.can_edit_outline(OutlineCommand::Outdent));
+    session.edit_outline(OutlineCommand::Outdent).unwrap();
+    assert_eq!(content_children(&session, root), [group, a, b, empty]);
+    assert_eq!(content_children(&session, group), [existing]);
+    session.undo().unwrap();
+    session.undo().unwrap();
+    assert_eq!(session.document().source(), SOURCE);
+    session.select([existing, a]);
+    assert!(session.edit_outline(OutlineCommand::MoveDown).is_err());
+    assert_eq!(session.document().source(), SOURCE);
+    session.select([b]);
+    assert!(
+        session.edit_outline(OutlineCommand::Indent).is_err(),
+        "an occupied content slot cannot accept another child"
+    );
+    session.select([group]);
+    assert!(session.edit_outline(OutlineCommand::Outdent).is_err());
+    session.set_read_only(true);
+    session.select([a]);
+    assert!(!session.can_edit_outline(OutlineCommand::MoveUp));
+    assert!(session.edit_outline(OutlineCommand::MoveUp).is_err());
+    assert_eq!(session.document().source(), SOURCE);
+}
+
+#[test]
+fn outline_keyboard_commands_update_source_and_decline_pending_and_runtime_hierarchies() {
+    use ferroui_base::input::KeyEventArgs;
+    let _app = UnitTestApplication::start(TestServices::styled_window());
+    let workspace = DesignerWorkspace::new(SOURCE).unwrap();
+    let (a, b, left) = {
+        let session = workspace.session.borrow();
+        (
+            named(&session, "A"),
+            named(&session, "B"),
+            named(&session, "Left"),
+        )
+    };
+    workspace.session.borrow_mut().select([b]);
+    workspace.refresh(true);
+    let mut event = KeyEventArgs::new();
+    event.key = Key::Up;
+    event.key_modifiers = KeyModifiers::ALT;
+    event.set_routed_event(Some(InputElement::key_down_event()));
+    workspace.outline_grid().raise_event(&event);
+    assert!(event.handled());
+    assert_eq!(content_children(&workspace.session.borrow(), left), [b, a]);
+    assert_eq!(
+        workspace.source.text().as_deref(),
+        Some(workspace.session.borrow().document().source())
+    );
+    let authored = workspace.session.borrow().document().source().to_owned();
+    workspace.set_outline_mode(OutlineMode::Visual);
+    assert!(workspace.edit_outline(OutlineCommand::MoveDown).is_err());
+    workspace.set_outline_mode(OutlineMode::Source);
+    workspace.source.set_text(Some("<StackPanel"));
+    assert!(workspace.edit_outline(OutlineCommand::MoveDown).is_err());
+    assert_eq!(workspace.session.borrow().document().source(), authored);
+}
+
+#[test]
+fn delayed_outline_hover_expands_only_a_current_authored_drop_target() {
+    let _app = UnitTestApplication::start(TestServices::styled_window());
+    let workspace = DesignerWorkspace::new(SOURCE).unwrap();
+    let (a, right) = {
+        let session = workspace.session.borrow();
+        (named(&session, "A"), named(&session, "Right"))
+    };
+    let drag = RefCell::new(Some(
+        OutlineDrag::capture(&workspace.session.borrow(), [a]).unwrap(),
+    ));
+    let path = IndexPath::from_indexes(&[0, 1]);
+    let source = &workspace.inspectors.outline.source;
+    source.collapse(&path);
+    let expanded = Rc::new(Cell::new(0));
+    let count = expanded.clone();
+    source.add_row_expanded(Rc::new(move |_| count.set(count.get() + 1)));
+    assert!(expand_hover_target(&workspace, &drag, right, &path));
+    assert_eq!(expanded.get(), 1);
+    source.collapse(&path);
+    assert!(
+        !expand_hover_target(&workspace, &drag, a, &path),
+        "recycled paths cannot expand another row"
+    );
+    workspace
+        .session
+        .borrow_mut()
+        .set_property(&[a], "Width", "130")
+        .unwrap();
+    assert!(!expand_hover_target(&workspace, &drag, right, &path));
+    assert_eq!(expanded.get(), 1);
 }
