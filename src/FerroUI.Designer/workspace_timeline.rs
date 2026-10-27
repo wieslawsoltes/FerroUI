@@ -1088,6 +1088,7 @@ impl DesignerWorkspace {
                         .set_easing(time, easing)
                         .map_err(|error| error.to_string())?;
                     session.update_animation_program(id, timeline)?;
+                    drop(session);
                     this.remember_keyframe(SelectedKey {
                         target,
                         property: property.clone(),
