@@ -246,6 +246,26 @@ fn selection_and_frame_grid_changes_do_not_author_source() {
             .filter_map(WeakRef::upgrade)
             .all(|lane| lane.frame_rate() == Some(60))
     );
+    workspace.set_timeline_frame_rate(Some(120));
+    let picker = workspace
+        .timeline_ui
+        .borrow()
+        .snap_picker
+        .as_ref()
+        .and_then(WeakRef::upgrade)
+        .unwrap();
+    assert_eq!(
+        picker
+            .selected_item()
+            .and_then(|item| item.downcast_ref::<String>().cloned())
+            .as_deref(),
+        Some("120 fps")
+    );
+    picker.set_selected_index(0);
+    assert_eq!(workspace.timeline_frame_rate(), None);
+    let custom_index = picker.items().count() as i32 - 1;
+    picker.set_selected_index(custom_index);
+    assert_eq!(workspace.timeline_frame_rate(), Some(120));
     workspace.set_timeline_frame_rate(Some(0));
     assert_eq!(workspace.timeline_frame_rate(), None);
     workspace.select_keyframes(&[]).unwrap();

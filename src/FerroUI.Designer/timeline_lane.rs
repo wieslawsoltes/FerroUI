@@ -37,6 +37,8 @@ enum Drag {
         to: f64,
         start_x: f64,
         keys: Vec<f64>,
+        previous: Vec<f64>,
+        previous_primary: Option<f64>,
         additive: bool,
     },
     Marquee {
@@ -151,7 +153,7 @@ impl TimelineLane {
             .set(self.selected.get().filter(|time| keys.contains(time)));
         self.selected_keys
             .borrow_mut()
-            .retain(|time| keys.contains(time));
+            .retain(|time| keys.binary_search_by(|key| key.total_cmp(time)).is_ok());
         self.selection_anchor.set(
             self.selection_anchor
                 .get()
@@ -189,6 +191,7 @@ impl TimelineLane {
     /// Accepts a host selection. Times not present in this lane are discarded.
     /// The primary key is used for keyboard navigation and the contextual editor.
     pub fn set_selected_keys(&self, mut times: Vec<f64>, primary: Option<f64>) {
+        self.cancel_drag();
         let keys = self.keys.borrow();
         times.retain(|time| keys.binary_search_by(|key| key.total_cmp(time)).is_ok());
         times.sort_by(f64::total_cmp);
@@ -350,8 +353,8 @@ impl TimelineLane {
         if keys.is_empty() || !delta.is_finite() {
             return;
         }
-        let minimum = keys.iter().copied().fold(f64::INFINITY, f64::min);
-        let maximum = keys.iter().copied().fold(f64::NEG_INFINITY, f64::max);
+        let minimum = keys[0];
+        let maximum = keys[keys.len() - 1];
         let delta = delta.clamp(-minimum, self.duration.get() - maximum);
         if delta.abs() <= MIN_DURATION {
             return;
@@ -417,11 +420,18 @@ impl TimelineLane {
         pointer.capture(Some(&self.to_ref().upcast::<InputElement>()));
     }
     fn cancel_drag(&self) {
-        if let Some(Drag::Marquee {
-            previous,
-            previous_primary,
-            ..
-        }) = self.drag.borrow_mut().take()
+        if let Some(
+            Drag::Marquee {
+                previous,
+                previous_primary,
+                ..
+            }
+            | Drag::Key {
+                previous,
+                previous_primary,
+                ..
+            },
+        ) = self.drag.borrow_mut().take()
         {
             *self.selected_keys.borrow_mut() = previous;
             self.selected.set(previous_primary);
@@ -453,6 +463,8 @@ impl InputElementImpl for TimelineLane {
             this.capture_drag(Drag::Scrub, event.pointer());
             this.activate_time(time);
         } else if let Some(from) = this.key_at(x) {
+            let previous = this.selected_keys();
+            let previous_primary = this.selected.get();
             this.select_key(from, event.key_modifiers());
             let keys = this.selected_keys();
             let keys = if keys.contains(&from) {
@@ -466,6 +478,8 @@ impl InputElementImpl for TimelineLane {
                     to: from,
                     start_x: x,
                     keys,
+                    previous,
+                    previous_primary,
                     additive: event
                         .key_modifiers()
                         .intersects(KeyModifiers::CONTROL | KeyModifiers::SHIFT),
@@ -766,9 +780,9 @@ impl VisualImpl for TimelineLane {
             let keys = this.keys.borrow();
             let start = keys.partition_point(|key| *key < this.view_start.get());
             let end = keys.partition_point(|key| *key <= this.view_end.get());
-            let drag = this.drag.borrow().clone();
+            let drag = this.drag.borrow();
             let selected_keys = this.selected_keys.borrow();
-            if let Some(Drag::Marquee { from, to, .. }) = &drag {
+            if let Some(Drag::Marquee { from, to, .. }) = drag.as_ref() {
                 let fill = brush(0x334fc3ff);
                 let outline: Rc<dyn IPen> = Pen::from_uint32(0xff60cdff, 1.0).into();
                 let left = this.x(from.min(*to));
@@ -786,7 +800,7 @@ impl VisualImpl for TimelineLane {
                 let selected = selected_keys
                     .binary_search_by(|key| key.total_cmp(time))
                     .is_ok();
-                let color = if matches!(&drag, Some(Drag::Key { keys, .. }) if keys.contains(time))
+                let color = if matches!(drag.as_ref(), Some(Drag::Key { keys, .. }) if keys.binary_search_by(|key| key.total_cmp(time)).is_ok())
                 {
                     0xff50616a
                 } else if selected
@@ -807,15 +821,17 @@ impl VisualImpl for TimelineLane {
                     color,
                 );
             }
-            if let Some(Drag::Key { from, to, keys, .. }) = drag {
-                let minimum = keys.iter().copied().fold(f64::INFINITY, f64::min);
-                let maximum = keys.iter().copied().fold(f64::NEG_INFINITY, f64::max);
+            if let Some(Drag::Key { from, to, keys, .. }) = drag.as_ref() {
+                let minimum = keys.first().copied().unwrap_or(0.0);
+                let maximum = keys.last().copied().unwrap_or(0.0);
                 let delta = if keys.is_empty() {
                     0.0
                 } else {
                     (to - from).clamp(-minimum, this.duration.get() - maximum)
                 };
-                for key in &keys {
+                let start = keys.partition_point(|key| *key + delta < this.view_start.get());
+                let end = keys.partition_point(|key| *key + delta <= this.view_end.get());
+                for key in &keys[start..end] {
                     diamond(context, this.x(*key + delta), center, 6.0, 0xff60cdff);
                 }
                 let to = from + delta;

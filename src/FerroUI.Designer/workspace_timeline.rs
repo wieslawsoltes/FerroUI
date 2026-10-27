@@ -20,6 +20,7 @@ pub(super) struct TimelineUi {
     selection: Vec<SelectedKey>,
     selection_explicit: bool,
     frame_rate: Option<u32>,
+    snap_picker: Option<WeakRef<ComboBox>>,
     view: Option<(f64, f64)>,
 }
 #[derive(Clone)]
@@ -135,13 +136,13 @@ impl DesignerWorkspace {
         );
         let header = StackPanel::new();
         header.set_orientation(Orientation::Horizontal);
-        header.set_spacing(4.0);
+        header.set_spacing(3.0);
         let caption = TextBlock::new();
         caption.set_text(Some("TRACKS"));
         caption.set_font_size(10.0);
         caption.set_opacity(0.65);
         caption.set_vertical_alignment(ferroui_base::layout::VerticalAlignment::Center);
-        caption.set_margin(Thickness::new(6.0, 0.0, 6.0, 0.0));
+        caption.set_margin(Thickness::new(4.0, 0.0, 4.0, 0.0));
         header.children().add(caption.upcast::<Control>());
         for (label, help, factor) in [
             ("−", "Zoom out timeline", 0.8),
@@ -174,16 +175,22 @@ impl DesignerWorkspace {
         snap.set_height(26.0);
         snap.set_font_size(10.0);
         snap.set_padding(Thickness::symmetric(5.0, 2.0));
-        for label in ["Seconds", "24 fps", "30 fps", "60 fps"] {
-            snap.items().add(Some(Rc::new(label.to_owned())));
+        let mut rates = vec![None, Some(24), Some(30), Some(60)];
+        if !rates.contains(&frame_rate) {
+            rates.push(frame_rate);
         }
-        let rates = [None, Some(24), Some(30), Some(60)];
+        for rate in &rates {
+            snap.items().add(Some(Rc::new(
+                rate.map_or_else(|| "Seconds".to_owned(), |rate| format!("{rate} fps")),
+            )));
+        }
         snap.set_selected_index(
             rates
                 .iter()
                 .position(|rate| *rate == frame_rate)
                 .unwrap_or(0) as i32,
         );
+        self.timeline_ui.borrow_mut().snap_picker = Some(snap.downgrade());
         AutomationProperties::set_name(&snap, Some("Timeline snap unit"));
         ToolTip::set_tip(
             &snap,
@@ -196,8 +203,18 @@ impl DesignerWorkspace {
         let weak_snap = snap.downgrade();
         snap.selection_changed(move |_, _| {
             if let (Some(this), Some(snap)) = (weak.upgrade(), weak_snap.upgrade()) {
-                if let Some(rate) = rates.get(snap.selected_index().max(0) as usize) {
-                    this.set_timeline_frame_rate(*rate);
+                if let Some(label) = snap
+                    .selected_item()
+                    .and_then(|item| item.downcast_ref::<String>().cloned())
+                {
+                    if label == "Seconds" {
+                        this.set_timeline_frame_rate(None);
+                    } else if let Some(rate) = label
+                        .strip_suffix(" fps")
+                        .and_then(|rate| rate.parse().ok())
+                    {
+                        this.set_timeline_frame_rate(Some(rate));
+                    }
                 }
             }
         });
@@ -605,7 +622,30 @@ impl DesignerWorkspace {
     /// Changes only the editing grid; authored seconds and the running animation are unchanged.
     pub fn set_timeline_frame_rate(&self, rate: Option<u32>) {
         let rate = rate.filter(|rate| (1..=1000).contains(rate));
-        self.timeline_ui.borrow_mut().frame_rate = rate;
+        let picker = {
+            let mut ui = self.timeline_ui.borrow_mut();
+            ui.frame_rate = rate;
+            ui.snap_picker.as_ref().and_then(WeakRef::upgrade)
+        };
+        if let Some(picker) = picker {
+            let label = rate.map_or_else(|| "Seconds".to_owned(), |rate| format!("{rate} fps"));
+            let found = (0..picker.items().count()).find(|index| {
+                picker
+                    .items()
+                    .get_at(*index)
+                    .and_then(|item| item.downcast_ref::<String>().cloned())
+                    .as_deref()
+                    == Some(label.as_str())
+            });
+            let index = found.unwrap_or_else(|| {
+                let index = picker.items().count();
+                picker.items().add(Some(Rc::new(label)));
+                index
+            });
+            if picker.selected_index() != index as i32 {
+                picker.set_selected_index(index as i32);
+            }
+        }
         for lane in self
             .timeline_lanes
             .borrow()
