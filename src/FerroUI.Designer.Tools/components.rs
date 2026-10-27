@@ -333,7 +333,47 @@ pub(crate) fn valid_document(document: &Document) -> Result<()> {
     )
 }
 pub(crate) fn framework(node: &Node) -> bool {
-    node.namespace_uri.as_deref() == Some(FRAMEWORK)
+    node.namespace_uri
+        .as_deref()
+        .is_some_and(|namespace| framework_type_namespace(node.local_name(), namespace))
+}
+
+/// Match concrete framework type identities, not local names or arbitrary namespaces
+/// that happen to start with FerroUI. This permits using:/CLR aliases without claiming
+/// an application's similarly named template, theme or resource extension.
+pub(crate) fn framework_type_namespace(name: &str, namespace: &str) -> bool {
+    if namespace == FRAMEWORK {
+        return true;
+    }
+    let (expected_namespace, assembly) = match name {
+        "UserControl" => ("FerroUI.Controls", "FerroUI.Controls"),
+        "ResourceDictionary" => ("FerroUI.Controls", "FerroUI.Base"),
+        "ControlTheme" | "Style" | "Styles" | "Setter" => ("FerroUI.Styling", "FerroUI.Base"),
+        "ControlTemplate" | "DataTemplate" | "TreeDataTemplate" => {
+            ("FerroUI.Markup.Xaml.Templates", "FerroUI.Markup.Xaml")
+        }
+        "StaticResource"
+        | "DynamicResource"
+        | "StaticResourceExtension"
+        | "DynamicResourceExtension" => (
+            "FerroUI.Markup.Xaml.MarkupExtensions",
+            "FerroUI.Markup.Xaml",
+        ),
+        "ResourceInclude" | "MergeResourceInclude" | "StyleInclude" => {
+            ("FerroUI.Markup.Xaml.Styling", "FerroUI.Markup.Xaml")
+        }
+        _ => return false,
+    };
+    namespace.strip_prefix("using:") == Some(expected_namespace)
+        || namespace
+            .strip_prefix("clr-namespace:")
+            .is_some_and(|value| {
+                value
+                    .split_once(";assembly=")
+                    .is_some_and(|(name, actual_assembly)| {
+                        name == expected_namespace && actual_assembly == assembly
+                    })
+            })
 }
 pub(crate) fn directive<'a>(node: &'a Node, name: &str) -> Option<&'a str> {
     node.attributes

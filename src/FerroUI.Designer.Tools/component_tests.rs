@@ -67,6 +67,104 @@ fn catalog_reports_definitions_custom_types_scopes_and_resolved_usages() {
 }
 
 #[test]
+fn namespace_qualified_definitions_and_resource_extensions_keep_concrete_type_identity() {
+    let source = r#"<c:UserControl xmlns:c="using:FerroUI.Controls" xmlns:r="clr-namespace:FerroUI.Controls;assembly=FerroUI.Base" xmlns:s="clr-namespace:FerroUI.Styling;assembly=FerroUI.Base" xmlns:t="using:FerroUI.Markup.Xaml.Templates" xmlns:m="using:FerroUI.Markup.Xaml.MarkupExtensions" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:app="urn:application" xmlns="https://github.com/ferroui"><c:UserControl.Resources><r:ResourceDictionary><Color x:Key="Accent">Blue</Color><s:ControlTheme x:Key="Card" TargetType="c:Button"><s:Setter Property="Template"><t:ControlTemplate><Border Background="{m:StaticResource Accent}"/></t:ControlTemplate></s:Setter></s:ControlTheme><t:TreeDataTemplate x:Key="Item"><TextBlock/></t:TreeDataTemplate></r:ResourceDictionary></c:UserControl.Resources><StackPanel><Button Name="Target" Theme="{m:StaticResource Card}"><Button.Background><m:DynamicResourceExtension ResourceKey="Accent"/></Button.Background></Button><app:ControlTemplate/><app:ControlTheme/><app:StaticResource ResourceKey="Accent"/></StackPanel></c:UserControl>"#;
+    let mut document = Document::new(source).unwrap();
+    let catalog = ComponentCatalog::from_document(&document).unwrap();
+    assert_eq!(
+        catalog
+            .entries
+            .iter()
+            .find(|entry| entry.node == document.ast().root())
+            .unwrap()
+            .kind,
+        ComponentKind::UserControl
+    );
+    assert_eq!(
+        catalog
+            .entries
+            .iter()
+            .find(|entry| entry.key.as_deref() == Some("Card"))
+            .unwrap()
+            .kind,
+        ComponentKind::ControlTheme
+    );
+    assert_eq!(
+        catalog
+            .entries
+            .iter()
+            .find(|entry| entry.key.as_deref() == Some("Item"))
+            .unwrap()
+            .kind,
+        ComponentKind::DataTemplate
+    );
+    assert!(
+        catalog
+            .entries
+            .iter()
+            .any(|entry| entry.kind == ComponentKind::ControlTemplate)
+    );
+    assert_eq!(
+        catalog
+            .entries
+            .iter()
+            .filter(|entry| entry.kind == ComponentKind::CustomControl
+                && entry.type_name.starts_with("{urn:application}"))
+            .count(),
+        2
+    );
+    let accent = keyed(&document, "Accent");
+    assert_eq!(
+        component_resource_references(&document, accent)
+            .unwrap()
+            .len(),
+        2
+    );
+    apply(
+        &mut document,
+        ComponentAction::RenameResource {
+            resource: accent,
+            key: "Primary".into(),
+        },
+    );
+    assert!(document.source().contains("{m:StaticResource 'Primary'}"));
+    assert!(
+        document
+            .source()
+            .contains("<m:DynamicResourceExtension ResourceKey=\"Primary\"")
+    );
+    assert!(
+        document
+            .source()
+            .contains("<app:StaticResource ResourceKey=\"Accent\"")
+    );
+    document.undo().unwrap();
+    assert_eq!(document.source(), source);
+}
+
+#[test]
+fn resource_reference_generation_uses_registered_markup_extension_namespace_without_default_alias()
+{
+    let document = Document::new(r#"<c:Button xmlns:c="using:FerroUI.Controls" xmlns:m="clr-namespace:FerroUI.Markup.Xaml.MarkupExtensions;assembly=FerroUI.Markup.Xaml"/>"#).unwrap();
+    assert_eq!(
+        component_resource_expression(&document, document.ast().root(), "Accent", false).unwrap(),
+        "{m:StaticResource 'Accent'}"
+    );
+    assert_eq!(
+        component_resource_expression(&document, document.ast().root(), "Accent", true).unwrap(),
+        "{m:DynamicResource 'Accent'}"
+    );
+    assert!(!framework_type_namespace(
+        "ControlTheme",
+        "clr-namespace:FerroUI.Styling;assembly=Application"
+    ));
+    assert!(!framework_type_namespace(
+        "ControlTemplate",
+        "using:FerroUI.Controls"
+    ));
+}
+
+#[test]
 fn resource_lookup_preserves_local_shadowing_merge_order_and_external_uncertainty() {
     let d = document(r#"<Grid.Resources><ResourceDictionary><ResourceDictionary.MergedDictionaries><ResourceDictionary><Color x:Key="Merged" Name="First">Red</Color></ResourceDictionary><ResourceDictionary><Color x:Key="Merged" Name="Last">Blue</Color></ResourceDictionary></ResourceDictionary.MergedDictionaries><Color x:Key="Local" Name="Outer">Red</Color></ResourceDictionary></Grid.Resources><Border Name="Inner"><Border.Resources><Color x:Key="Local" Name="Shadow">Green</Color></Border.Resources><Button Name="Child" /></Border><Button Name="Sibling"/></Grid>"#.trim_end_matches("</Grid>"));
     assert_eq!(

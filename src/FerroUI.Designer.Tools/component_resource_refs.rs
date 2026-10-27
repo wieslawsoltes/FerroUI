@@ -137,13 +137,24 @@ pub fn component_resource_references(
 pub(crate) fn all_references(document: &Document) -> Result<Vec<(NodeId, String, bool, NodeId)>> {
     let mut result = Vec::new();
     for node in document.ast().elements() {
-        if framework(node) && matches!(node.local_name(), "StaticResource" | "DynamicResource") {
+        if framework(node)
+            && matches!(
+                node.local_name(),
+                "StaticResource"
+                    | "DynamicResource"
+                    | "StaticResourceExtension"
+                    | "DynamicResourceExtension"
+            )
+        {
             if let Some(key) = object_resource_key(node) {
                 if let Some(target) = resolve_component_resource(document, node.id, &key) {
                     result.push((
                         node.id,
                         "ResourceKey".into(),
-                        node.local_name() == "DynamicResource",
+                        matches!(
+                            node.local_name(),
+                            "DynamicResource" | "DynamicResourceExtension"
+                        ),
                         target,
                     ));
                 }
@@ -179,18 +190,17 @@ fn object_resource_key(node: &Node) -> Option<String> {
 
 fn extension_kind(document: &Document, node: NodeId, name: &str) -> Option<bool> {
     let (prefix, local) = name.rsplit_once(':').unwrap_or(("", name));
-    if document
+    if !document
         .ast()
         .namespaces(node)
         .get(prefix)
-        .map(String::as_str)
-        != Some(FRAMEWORK)
+        .is_some_and(|namespace| framework_type_namespace(local, namespace))
     {
         return None;
     }
     match local {
-        "StaticResource" => Some(false),
-        "DynamicResource" => Some(true),
+        "StaticResource" | "StaticResourceExtension" => Some(false),
+        "DynamicResource" | "DynamicResourceExtension" => Some(true),
         _ => None,
     }
 }
@@ -247,7 +257,13 @@ pub(crate) fn rename_resource(
     let mut edits = Vec::new();
     for element in document.ast().elements() {
         if framework(element)
-            && matches!(element.local_name(), "StaticResource" | "DynamicResource")
+            && matches!(
+                element.local_name(),
+                "StaticResource"
+                    | "DynamicResource"
+                    | "StaticResourceExtension"
+                    | "DynamicResourceExtension"
+            )
             && object_resource_key(element).as_deref() == Some(&old)
             && resolve_component_resource(document, element.id, &old) == Some(resource)
         {
@@ -365,7 +381,7 @@ pub(crate) fn reference_expression(
     let namespaces = document.ast().namespaces(node);
     let prefix = namespaces
         .iter()
-        .find(|(_, uri)| uri.as_str() == FRAMEWORK)
+        .find(|(_, uri)| framework_type_namespace("StaticResource", uri))
         .map(|(prefix, _)| prefix)
         .ok_or_else(|| {
             ToolError("A FerroUI namespace is required to apply a resource reference".into())
