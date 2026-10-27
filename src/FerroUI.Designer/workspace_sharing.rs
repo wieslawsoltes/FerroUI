@@ -1,7 +1,7 @@
 //! Native sharing controls. Transport, authentication and persistence belong to SharingController.
 use super::*;
 use crate::sharing::{SharingController, SharingOptions, SharingPhase, SharingStatus};
-use ferroui_controls::{Border, ScrollViewer};
+use ferroui_controls::{Border, ColumnDefinitions, Expander, ScrollViewer};
 use ferroui_designer_collaboration_host::Role;
 
 pub(super) struct SharingPanel {
@@ -22,21 +22,44 @@ pub(super) struct SharingPanel {
     fingerprint: RefCell<String>,
     start_buttons: Vec<Ref<Button>>,
     owner_buttons: Vec<Ref<Button>>,
+    session_details: Ref<StackPanel>,
 }
 fn label(panel: &StackPanel, text: &str) -> Ref<TextBlock> {
     let label = TextBlock::new();
     label.set_text(Some(text));
-    label.set_foreground(Some(SolidColorBrush::from_uint32(0xffdce5f6).into()));
+    label.set_foreground(Some(SolidColorBrush::from_uint32(0xffa9adba).into()));
+    label.set_font_size(12.0);
     label.set_text_wrapping(ferroui_base::media::TextWrapping::Wrap);
     panel.children().add(label.clone().upcast::<Control>());
     label
 }
 fn field(panel: &StackPanel, title: &str, text: &str) -> Ref<TextBox> {
-    label(panel, title);
+    let row = Grid::new();
+    row.set_column_definitions(ColumnDefinitions::parse("146,*").unwrap());
+    let title_control = TextBlock::new();
+    title_control.set_text(Some(title));
+    title_control.set_font_size(11.0);
+    title_control.set_foreground(Some(SolidColorBrush::from_uint32(0xffa9adba).into()));
+    title_control.set_vertical_alignment(ferroui_base::layout::VerticalAlignment::Center);
+    title_control.set_margin(Thickness::new(0.0, 0.0, 10.0, 0.0));
+    row.children().add(title_control.upcast::<Control>());
     let field = TextBox::new();
     field.set_text(Some(text));
-    panel.children().add(field.clone().upcast::<Control>());
+    ferroui_controls::automation::AutomationProperties::set_name(&field, Some(title));
+    Grid::set_column(&field, 1);
+    row.children().add(field.clone().upcast::<Control>());
+    panel.children().add(row.upcast::<Control>());
     field
+}
+fn section(panel: &StackPanel, title: &str) -> Ref<StackPanel> {
+    let section = StackPanel::new();
+    section.set_spacing(8.0);
+    let heading = label(&section, title);
+    heading.set_font_weight(ferroui_base::media::FontWeight::SemiBold);
+    heading.set_foreground(Some(SolidColorBrush::from_uint32(0xfff2f3f5).into()));
+    heading.set_margin(Thickness::new(0.0, 5.0, 0.0, 3.0));
+    panel.children().add(section.clone().upcast::<Control>());
+    section
 }
 fn row(panel: &StackPanel) -> Ref<StackPanel> {
     let row = StackPanel::new();
@@ -153,25 +176,37 @@ impl DesignerWorkspace {
         if self.sharing_panel.borrow().is_none() {
             let options = SharingOptions::default();
             let body = StackPanel::new();
-            body.set_spacing(8.0);
-            label(&body, "SHARE DESIGNER DOCUMENT").set_font_size(19.0);
+            body.set_spacing(12.0);
+            let title = label(&body, "Share document");
+            title.set_font_size(19.0);
+            title.set_font_weight(ferroui_base::media::FontWeight::SemiBold);
+            title.set_foreground(Some(SolidColorBrush::from_uint32(0xfff2f3f5).into()));
             let status = label(&body, "Disconnected");
             let display_name = field(&body, "Display name", &options.display_name);
+            let advanced = StackPanel::new();
+            advanced.set_spacing(8.0);
+            advanced.set_margin(Thickness::new(0.0, 8.0, 0.0, 8.0));
             let directory = field(
-                &body,
-                "Session storage directory",
+                &advanced,
+                "Session storage",
                 &options.directory.display().to_string(),
             );
-            let bind = field(
-                &body,
-                "Host address (empty uses loopback with an available port)",
-                "",
-            );
-            let public_url = field(&body, "Public HTTPS endpoint (optional)", "");
-            let join = field(&body, "Invitation to join", "");
+            let bind = field(&advanced, "Host address", "");
+            bind.set_placeholder_text(Some("Automatic · loopback with an available port"));
+            let public_url = field(&advanced, "Public endpoint", "");
+            public_url.set_placeholder_text(Some("Optional HTTPS endpoint"));
+            let connection = Expander::new();
+            connection.set_header(Some(Rc::new("Connection options".to_owned())));
+            connection.set_content(Some(Control::boxed(advanced)));
+            connection.set_horizontal_alignment(HorizontalAlignment::Stretch);
+            connection.set_horizontal_content_alignment(HorizontalAlignment::Stretch);
+            body.children().add(connection.upcast::<Control>());
+            let start = section(&body, "Start or join a session");
+            let join = field(&start, "Invitation", "");
+            join.set_placeholder_text(Some("Paste an invitation to join a document"));
             join.set_accepts_return(true);
             join.set_max_height(90.0);
-            let commands = row(&body);
+            let commands = row(&start);
             let start_buttons = vec![
                 action(&commands, self, "Host document", |workspace| {
                     let panel = workspace
@@ -198,7 +233,10 @@ impl DesignerWorkspace {
                     workspace.resume_sharing(panel.options()?)
                 }),
             ];
-            let controls = row(&body);
+            start_buttons[0].classes().add("primary");
+            let session_details = section(&body, "Session access");
+            session_details.set_is_visible(false);
+            let controls = row(&session_details);
             let owner_buttons = vec![
                 action(&controls, self, "Invite editor", |workspace| {
                     workspace
@@ -230,40 +268,38 @@ impl DesignerWorkspace {
                 Ok(())
             });
             label(
-                &body,
-                "Checkpoint adopts the current source as a new room baseline after synchronizing pending edits.",
-            );
-            let invitation = field(
-                &body,
-                "Created invitation — select and copy to a collaborator",
-                "",
-            );
+                &session_details,
+                "Checkpoint saves a shared baseline after pending edits synchronize.",
+            )
+            .set_font_size(11.0);
+            let invitation = field(&session_details, "Share invitation", "");
+            invitation
+                .set_placeholder_text(Some("Create an editor or viewer invitation, then copy it"));
             invitation.set_is_read_only(true);
             invitation.set_accepts_return(true);
             invitation.set_max_height(90.0);
-            label(&body, "ROOM MEMBERS");
+            label(&session_details, "People")
+                .set_font_weight(ferroui_base::media::FontWeight::SemiBold);
             let members = StackPanel::new();
             members.set_spacing(5.0);
-            body.children().add(members.clone().upcast::<Control>());
+            session_details
+                .children()
+                .add(members.clone().upcast::<Control>());
             let review = StackPanel::new();
             review.set_spacing(6.0);
             review.set_is_visible(false);
             body.children().add(review.clone().upcast::<Control>());
-            label(&review, "REVIEW INCOMING DOCUMENT").set_font_size(15.0);
+            label(&review, "Review incoming document").set_font_size(15.0);
             label(
                 &review,
                 "Review the remote snapshot and your local source. Acceptance checks the captured local revision and creates a durable backup.",
             );
-            let remote = field(&review, "Remote source", "");
+            let remote = field(&review, "Incoming XAML", "");
             remote.set_is_read_only(true);
             remote.set_accepts_return(true);
             remote.set_height(140.0);
             remote.set_font_family(ferroui_base::media::FontFamily::new("monospace"));
-            let resolved = field(
-                &review,
-                "Resolved source — starts with your local or resumed draft",
-                "",
-            );
+            let resolved = field(&review, "Merged XAML", "");
             resolved.set_accepts_return(true);
             resolved.set_height(140.0);
             let review_actions = row(&review);
@@ -320,20 +356,25 @@ impl DesignerWorkspace {
                 panel.resolved.set_text(Some(session.document().source()));
                 Ok(())
             });
-            action(&body, self, "Close panel", |workspace| {
+            let close = action(&body, self, "Close panel", |workspace| {
                 workspace
                     .root
                     .get_control::<ContentControl>("SharingHost")
                     .set_is_visible(false);
                 Ok(())
             });
+            close.classes().add("nav");
+            close.set_horizontal_alignment(HorizontalAlignment::Right);
             let scroll = ScrollViewer::new();
             scroll.set_max_height(650.0);
             scroll.set_content(Some(Control::boxed(body)));
             let frame = Border::new();
-            frame.set_width(760.0);
-            frame.set_padding(Thickness::uniform(18.0));
-            frame.set_background(Some(SolidColorBrush::from_uint32(0xff252d3d).into()));
+            frame.set_width(672.0);
+            frame.set_padding(Thickness::uniform(20.0));
+            frame.set_background(Some(SolidColorBrush::from_uint32(0xff25262b).into()));
+            frame.set_border_brush(Some(SolidColorBrush::from_uint32(0xff3b3d46).into()));
+            frame.set_border_thickness(Thickness::uniform(1.0));
+            frame.set_corner_radius(ferroui_base::CornerRadius::uniform(8.0));
             frame.classes().add("designer-chrome");
             frame.set_child(Some(scroll.upcast::<Control>()));
             host.set_content(Some(Control::boxed(frame)));
@@ -355,6 +396,7 @@ impl DesignerWorkspace {
                 fingerprint: RefCell::new(String::new()),
                 start_buttons,
                 owner_buttons,
+                session_details,
             }));
         }
         host.set_is_visible(true);
@@ -388,6 +430,7 @@ impl DesignerWorkspace {
         };
         let Some(controller) = self.sharing_controller() else {
             panel.status.set_text(Some("Disconnected"));
+            panel.session_details.set_is_visible(false);
             for button in &panel.owner_buttons {
                 button.set_is_enabled(false);
             }
@@ -397,14 +440,31 @@ impl DesignerWorkspace {
             return;
         };
         let status = controller.status();
+        panel
+            .session_details
+            .set_is_visible(status.phase != SharingPhase::Disconnected);
         let fingerprint = format!("{:?}", status);
         if *panel.fingerprint.borrow() != fingerprint {
             *panel.fingerprint.borrow_mut() = fingerprint;
+            let phase = match status.phase {
+                SharingPhase::Connecting => "Connecting",
+                SharingPhase::AwaitingReview => "Review incoming document",
+                SharingPhase::Connected => "Connected",
+                SharingPhase::Reconnecting => "Reconnecting",
+                SharingPhase::Conflict => "Review conflicting edits",
+                SharingPhase::Disconnected => "Disconnected",
+            };
+            let role = status
+                .role
+                .map(|role| format!(" · {}", role_label(role)))
+                .unwrap_or_default();
+            let edits = if status.pending_operations == 0 {
+                String::new()
+            } else {
+                format!(" · {} pending edits", status.pending_operations)
+            };
             panel.status.set_text(Some(&format!(
-                "{:?} · {:?} · {} pending operations\n{}{}",
-                status.phase,
-                status.role,
-                status.pending_operations,
+                "{phase}{role}{edits}\n{}{}",
                 status.message,
                 status
                     .backup_path
@@ -428,9 +488,9 @@ impl DesignerWorkspace {
                 label(
                     &member_row,
                     &format!(
-                        "{} · {:?}{}",
+                        "{} · {}{}",
                         member.display_name,
-                        member.role,
+                        role_label(member.role),
                         if member.revoked { " · revoked" } else { "" }
                     ),
                 );
@@ -485,5 +545,13 @@ impl DesignerWorkspace {
                 ));
             }
         }
+    }
+}
+
+fn role_label(role: Role) -> &'static str {
+    match role {
+        Role::Owner => "Owner",
+        Role::Editor => "Editor",
+        Role::Viewer => "Viewer",
     }
 }
