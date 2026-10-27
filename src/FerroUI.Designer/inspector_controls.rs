@@ -367,6 +367,17 @@ fn hierarchy_icon(entry: &TreeEntry, project: bool) -> (&'static str, u32, bool)
     const TOGGLE: &str = "M3 3H21V21H3Z M5 5V19H19V5Z M7 11L10 14L17 7L18.5 8.5L10 17L5.5 12.5Z";
     const CIRCLE: &str =
         "M12 2A10 10 0 1 1 12 22A10 10 0 1 1 12 2Z M12 4A8 8 0 1 0 12 20A8 8 0 1 0 12 4Z";
+    const CANVAS: &str = "M3 3H5V19H21V21H3Z M8 5H17V12H8Z M12 14H21V17H12Z";
+    const BUTTON: &str = "M3 5H21V19H3Z M5 7V17H19V7Z M7 10H17V14H7Z";
+    const COMBO: &str =
+        "M2 5H22V19H2Z M4 7V17H20V7Z M6 10H11V12H6Z M14 10L17 13L20 10L18.5 8.5L17 10L15.5 8.5Z";
+    const RADIO: &str = "M12 2A10 10 0 1 1 12 22A10 10 0 1 1 12 2Z M12 4A8 8 0 1 0 12 20A8 8 0 1 0 12 4Z M12 8A4 4 0 1 1 12 16A4 4 0 1 1 12 8Z";
+    const SWITCH: &str = "M8 5H16A7 7 0 0 1 16 19H8A7 7 0 0 1 8 5Z M8 7A5 5 0 0 0 8 17H16A5 5 0 0 0 16 7Z M16 9A3 3 0 1 1 16 15A3 3 0 1 1 16 9Z";
+    const DOCK: &str = "M3 3H21V21H3Z M5 9V19H19V9Z M5 5V7H19V5Z M10 9H12V21H10Z";
+    const WRAP: &str = "M3 4H15V8H3Z M17 4H21V8H17Z M3 10H9V14H3Z M11 10H21V14H11Z M3 16H15V20H3Z";
+    const UNIFORM: &str = "M3 3H10V10H3Z M5 5V8H8V5Z M14 3H21V10H14Z M16 5V8H19V5Z M3 14H10V21H3Z M5 16V19H8V16Z M14 14H21V21H14Z M16 16V19H19V16Z";
+    const SLIDER: &str = "M2 11H7V13H2Z M13 11H22V13H13Z M8 5H12V19H8Z";
+    const PROGRESS: &str = "M2 7H22V17H2Z M4 9V15H20V9Z M5 10H14V14H5Z";
     const IMAGE: &str =
         "M3 3H21V21H3Z M5 5V19H19V5Z M6 16L10 11L13 14L16 10L19 17H6Z M7 7H10V10H7Z";
     if project {
@@ -389,17 +400,25 @@ fn hierarchy_icon(entry: &TreeEntry, project: bool) -> (&'static str, u32, bool)
         return (META, 0xffa195c8, true);
     }
     let (path, color) = match kind {
-        "Grid" | "Canvas" | "UniformGrid" | "DockPanel" | "WrapPanel" | "FlexPanel" => {
-            (FRAME, 0xff9caecb)
-        }
+        "Grid" | "FlexPanel" => (FRAME, 0xff9caecb),
+        "Canvas" => (CANVAS, 0xff9caecb),
+        "UniformGrid" => (UNIFORM, 0xff9caecb),
+        "DockPanel" => (DOCK, 0xff9caecb),
+        "WrapPanel" => (WRAP, 0xff9caecb),
         "StackPanel" => (STACK, 0xff9caecb),
         "TextBlock" | "Run" | "Span" | "Label" => (TEXT, 0xffa9adba),
-        "TextBox" | "ComboBox" | "NumericUpDown" => (INPUT, 0xffa9adba),
-        "CheckBox" | "RadioButton" | "ToggleSwitch" | "ToggleButton" => (TOGGLE, 0xffa9adba),
+        "TextBox" | "NumericUpDown" => (INPUT, 0xffa9adba),
+        "ComboBox" => (COMBO, 0xffa9adba),
+        "CheckBox" | "ToggleButton" => (TOGGLE, 0xffa9adba),
+        "RadioButton" => (RADIO, 0xffa9adba),
+        "ToggleSwitch" => (SWITCH, 0xffa9adba),
+        "Slider" => (SLIDER, 0xffa9adba),
+        "ProgressBar" => (PROGRESS, 0xffa9adba),
         "Ellipse" => (CIRCLE, 0xffb6a2f6),
-        "Border" | "Rectangle" | "Window" => (RECT, 0xff9caecb),
+        "Rectangle" => (RECT, 0xffb6a2f6),
+        "Border" | "Window" => (RECT, 0xff9caecb),
         "Image" | "Viewbox" => (IMAGE, 0xffa4c5b7),
-        "Button" | "ContentControl" | "UserControl" => (RECT, 0xffa9adba),
+        "Button" => (BUTTON, 0xffa9adba),
         _ => (COMPONENT, 0xffa9adba),
     };
     (path, color, false)
