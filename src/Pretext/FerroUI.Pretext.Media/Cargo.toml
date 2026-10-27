@@ -1,0 +1,25 @@
+[package]
+name = "ferroui-pretext-media"
+description = "FerroUI font and shaping services for prepared text"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+homepage.workspace = true
+readme = "README.md"
+keywords.workspace = true
+categories.workspace = true
+
+[lib]
+path = "lib.rs"
+
+[package.metadata.release]
+group = "rendering"
+
+[dependencies]
+ferroui-pretext.workspace = true
+ferroui-base.workspace = true
+
+[dev-dependencies]
+ferroui-base = { workspace = true, features = ["testing"] }

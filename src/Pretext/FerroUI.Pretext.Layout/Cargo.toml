@@ -1,0 +1,21 @@
+[package]
+name = "ferroui-pretext-layout"
+description = "Platform-neutral wrap metrics and obstacle-aware column flow for prepared text"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+homepage.workspace = true
+readme = "README.md"
+keywords.workspace = true
+categories.workspace = true
+
+[lib]
+path = "lib.rs"
+
+[dependencies]
+ferroui-pretext.workspace = true
+
+[package.metadata.release]
+group = "rendering"
