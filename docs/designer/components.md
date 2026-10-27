@@ -244,6 +244,32 @@ registration, dependency-preserving copy, real WinUI theme source and one-step u
 Vello/HarfBuzz rendering fixture captures the actual Library, typed theme setters, object-value
 workbench, resource inspector and template canvas before and after an authored change.
 
+## Native render evidence
+
+These captures come from the attached native workspace using WinUI templates, HarfBuzz and
+Vello's CPU renderer. The template captures turn off optional layout helpers so the
+content-occupancy badge does not cover the centered sample text. Selection adorners remain
+visible, and the sample retains native Light-theme colors. A direct native regression verifies
+the sample host, ContentPresenter, generated text, foreground/background brushes and template
+bindings without adding presentation values to authored source.
+
+![Component Library and typed control-theme inspector](images/designer-component-library.png)
+
+![Staged gradient object and collection editing](images/designer-property-object-workbench.png)
+
+![Native template definition canvas](images/designer-template-canvas.png)
+
+| Capture | Workflow |
+| --- | --- |
+| [Component Library](images/designer-component-library.png) | Inspect a shared theme while preserving its selected instance. |
+| [Object-valued setter](images/designer-theme-object-setter.png) | Edit a gradient brush inherited through a derived theme. |
+| [Object workbench](images/designer-property-object-workbench.png) | Stage typed gradient-stop and XAML changes before Apply. |
+| [Resource inspector](images/designer-resource-editor.png) | Inspect a brush, its identity, reflected properties and references. |
+| [Template canvas](images/designer-template-canvas.png) | Select the original template part inside a native sample host. |
+| [Edited template](images/designer-template-edited.png) | Author CornerRadius on the original part. |
+| [Updated instances](images/designer-component-instances.png) | Return to the document and inspect the shared result. |
+| [Registered source library](images/designer-definition-library-sources.png) | Filter source-backed and document-local templates with distinct provenance. |
+
 ## Reference analysis and ownership decisions
 
 | Reference | Adopted design decision |

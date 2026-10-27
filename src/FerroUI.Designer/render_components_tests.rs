@@ -181,6 +181,9 @@ fn native_component_library_theme_editor_and_template_scope_render_authored_chan
         .unwrap()
         .id;
     session.borrow_mut().select([frame]);
+    // Inspect the actual template rendering without the optional content-occupancy
+    // helper covering the sample's centered text. Selection adorners remain visible.
+    workspace.set_layout_helpers_visible(false);
     let scoped = capture(
         &workspace,
         &clock,
@@ -207,6 +210,7 @@ fn native_component_library_theme_editor_and_template_scope_render_authored_chan
         Some("24")
     );
     workspace.return_to_document().unwrap();
+    workspace.set_layout_helpers_visible(true);
     assert_eq!(session.borrow().selection(), &[instance]);
     workspace.inspect_component(theme).unwrap();
     capture(

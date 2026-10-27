@@ -69,12 +69,10 @@ fn dictionary_preview_does_not_sample_resources_private_to_a_theme() {
             .contains("Text=\"PrivateBrush\""),
         "A private key is not a top-level gallery item"
     );
-    assert!(
-        projection
-            .document
-            .source()
-            .contains("Text=\"PublicBrush\"")
-    );
+    assert!(projection
+        .document
+        .source()
+        .contains("Text=\"PublicBrush\""));
 }
 
 #[test]
@@ -128,12 +126,10 @@ fn definition_projection_closes_namespaces_and_keeps_only_original_scope_identit
     let scope = scope_for(&document, node, Default::default(), vec![]).unwrap();
     let projection = project(&document, &scope).unwrap();
     assert!(projection.document.is_valid());
-    assert!(
-        projection
-            .document
-            .source()
-            .contains("__FerroDesignerDefinition")
-    );
+    assert!(projection
+        .document
+        .source()
+        .contains("__FerroDesignerDefinition"));
     assert_eq!(document.source(), SOURCE);
     assert!(!projection.identities.is_empty());
     for original in projection.identities.values() {
@@ -269,6 +265,171 @@ fn native_template_and_data_template_scopes_render_actual_parts_without_changing
     window.close();
 }
 
+#[cfg(feature = "render-smoke")]
+#[test]
+fn standalone_template_sample_keeps_content_and_light_theme_brushes_in_a_dark_workspace() {
+    use ferroui_base::animation::{IClock, IGlobalClock, PlayState, TimeSpan};
+    use ferroui_base::data::core::ValueTypes;
+    use ferroui_base::media::Color;
+    use ferroui_base::reactive::{IDisposable, IObservable, IObserver, LightweightSubject};
+    use ferroui_base::styling::{IThemeVariantHost, ThemeVariant};
+    use ferroui_base::FerroLocator;
+    use ferroui_controls::presenters::ContentPresenter;
+    use ferroui_controls::{Application, Button, TextBlock};
+    use std::cell::Cell;
+    use std::rc::Rc;
+
+    struct PreviewClock {
+        subject: LightweightSubject<TimeSpan>,
+        state: Cell<PlayState>,
+    }
+    impl IObservable<TimeSpan> for PreviewClock {
+        fn subscribe(&self, observer: Rc<dyn IObserver<TimeSpan>>) -> Rc<dyn IDisposable> {
+            self.subject.subscribe(observer)
+        }
+    }
+    impl IClock for PreviewClock {
+        fn play_state(&self) -> PlayState {
+            self.state.get()
+        }
+        fn set_play_state(&self, state: PlayState) {
+            self.state.set(state);
+        }
+    }
+    impl IGlobalClock for PreviewClock {}
+
+    const SAMPLE: &str = include_str!("../../docs/designer/samples/ComponentsAndThemes.xaml");
+    const CONTENT: &str = "Preview your component";
+    let clock = Rc::new(PreviewClock {
+        subject: LightweightSubject::new(),
+        state: Cell::new(PlayState::Run),
+    });
+    let _app = UnitTestApplication::start(
+        TestServices::styled_window()
+            .with_global_clock(clock.clone())
+            .with_theme(|| ferroui_themes_winui::WinUITheme::new().as_style()),
+    );
+    ferroui_themes_winui::register_types();
+    let application = Application::current().unwrap();
+    application.set_requested_theme_variant(Some(ThemeVariant::dark()));
+    FerroLocator::current_mutable()
+        .bind::<dyn IThemeVariantHost>()
+        .to_constant(application.as_theme_variant_host());
+    let workspace =
+        crate::DesignerWorkspace::with_uri(SAMPLE, "file:///ComponentsAndThemes.xaml".into())
+            .unwrap();
+    let window = Window::new();
+    window.set_width(1600.0);
+    window.set_height(1040.0);
+    window.set_content(Some(Control::boxed(workspace.control())));
+    window.show();
+    window.update_layout();
+    let session = workspace.session();
+    let (template, frame, presenter) = {
+        let session = session.borrow();
+        (
+            definition(session.document(), "ActionButtonTemplate"),
+            session.document().ast().find_name("ButtonFrame").unwrap(),
+            session.document().ast().find_name("ButtonContent").unwrap(),
+        )
+    };
+    session
+        .borrow_mut()
+        .enter_definition_scope_with_options(
+            template,
+            DefinitionPreviewOptions {
+                sample_content: CONTENT.into(),
+                width: 420.0,
+                height: 180.0,
+                ..Default::default()
+            },
+        )
+        .unwrap();
+    workspace.refresh(true);
+    for tick in 1..=3 {
+        ferroui_base::threading::Dispatcher::ui_thread().run_jobs(None);
+        clock
+            .subject
+            .on_next(TimeSpan::from_seconds(f64::from(tick)));
+        window.update_layout();
+    }
+    {
+        let mut session = session.borrow_mut();
+        let document = session.document().clone();
+        session.preview.rebuild_map(&document);
+    }
+    let session = session.borrow();
+    assert!(matches!(
+        session.preview_status(),
+        PreviewStatus::Ready { .. }
+    ));
+    let frame = session
+        .preview
+        .visual(frame)
+        .unwrap()
+        .cast::<Border>()
+        .unwrap();
+    let presenter = session
+        .preview
+        .visual(presenter)
+        .unwrap()
+        .cast::<ContentPresenter>()
+        .unwrap();
+    let sample = presenter
+        .templated_parent()
+        .unwrap()
+        .cast::<Button>()
+        .expect("The template binds to its synthetic Button host");
+    assert_eq!(
+        ValueTypes::to_display_string(sample.content().as_ref()),
+        CONTENT
+    );
+    assert_eq!(
+        ValueTypes::to_display_string(presenter.content().as_ref()),
+        CONTENT
+    );
+    let text = presenter
+        .child()
+        .expect("The bound sample content must build a visual child")
+        .cast::<TextBlock>()
+        .unwrap();
+    assert_eq!(text.text().as_deref(), Some(CONTENT));
+    assert!(text.is_visible() && text.bounds().width > 0.0 && text.bounds().height > 0.0);
+    assert_eq!(sample.actual_theme_variant(), Some(ThemeVariant::light()));
+    assert!(
+        sample.theme().is_none(),
+        "No authored theme is guessed for a standalone template"
+    );
+
+    // WinUI's native Light defaults: white translucent control fill and dark text.
+    // These distinguish an overlay hiding centered text from broken TemplateBinding
+    // or accidental inheritance of the dark editor's foreground.
+    let fill = Color::parse("#B3FFFFFF").unwrap();
+    let foreground = Color::parse("#E4000000").unwrap();
+    for brush in [sample.background(), frame.background()] {
+        let brush = brush.expect("The native theme must supply the template's background");
+        assert_eq!(brush.as_solid_color_brush().unwrap().color(), fill);
+        assert!(brush.opacity() > 0.0);
+    }
+    for brush in [
+        sample.foreground(),
+        presenter.foreground(),
+        text.foreground(),
+    ] {
+        let brush = brush.expect("Text must retain an effective foreground");
+        assert_eq!(brush.as_solid_color_brush().unwrap().color(), foreground);
+        assert!(brush.opacity() > 0.0);
+    }
+    assert_eq!(frame.border_thickness(), sample.border_thickness());
+    assert_eq!(session.document().source(), SAMPLE);
+    assert!(
+        !session.can_undo(),
+        "Sample properties never become authored edits"
+    );
+    drop(session);
+    window.close();
+}
+
 #[test]
 fn failed_definition_preview_keeps_accepted_scope_and_read_only_scope_is_inspectable() {
     let _app = UnitTestApplication::start(TestServices::styled_window());
@@ -281,11 +442,9 @@ fn failed_definition_preview_keeps_accepted_scope_and_read_only_scope_is_inspect
         target_type: Some("MissingPreviewTarget".into()),
         ..Default::default()
     };
-    assert!(
-        session
-            .enter_definition_scope_with_options(theme, options)
-            .is_err()
-    );
+    assert!(session
+        .enter_definition_scope_with_options(theme, options)
+        .is_err());
     assert_eq!(session.definition_scope(), Some(&scope));
     assert!(std::ptr::eq(&*previous, &*session.preview.root().unwrap()));
     assert!(matches!(
