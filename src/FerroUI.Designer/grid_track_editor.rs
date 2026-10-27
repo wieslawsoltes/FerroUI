@@ -1,6 +1,6 @@
 //! A compact native Grid axis editor. The host owns document mutations and history.
 use ferroui_base::input::{InputElement, Key};
-use ferroui_base::layout::{HorizontalAlignment, VerticalAlignment};
+use ferroui_base::layout::HorizontalAlignment;
 use ferroui_base::media::SolidColorBrush;
 use ferroui_base::{Ref, Thickness};
 use ferroui_controls::automation::AutomationProperties;
@@ -39,15 +39,25 @@ impl GridTrackEditor {
             Axis::Horizontal => "Columns",
         };
         let root = Grid::new();
-        root.set_column_definitions(ColumnDefinitions::parse("48,*,53,84,26,26").unwrap());
+        root.set_column_definitions(ColumnDefinitions::parse("20,84,*,72,24,24").unwrap());
         root.set_row_definitions(RowDefinitions::parse("Auto,Auto").unwrap());
         root.classes().add("grid-track-editor");
-        let label = TextBlock::new();
-        label.set_text(Some(title));
-        label.set_font_size(11.0);
-        label.set_vertical_alignment(VerticalAlignment::Center);
-        root.children().add(label.upcast::<Control>());
+        let axis_icon = crate::property_controls::property_icon(
+            match axis {
+                Axis::Vertical => {
+                    "M1,1 L15,1 15,15 1,15 Z M2.5,2.5 L2.5,5 13.5,5 13.5,2.5 Z M2.5,6.5 L2.5,9.5 13.5,9.5 13.5,6.5 Z M2.5,11 L2.5,13.5 13.5,13.5 13.5,11 Z"
+                }
+                Axis::Horizontal => {
+                    "M1,1 L15,1 15,15 1,15 Z M2.5,2.5 L2.5,13.5 5,13.5 5,2.5 Z M6.5,2.5 L6.5,13.5 9.5,13.5 9.5,2.5 Z M11,2.5 L11,13.5 13.5,13.5 13.5,2.5 Z"
+                }
+            },
+            13.0,
+        );
+        ToolTip::set_tip(&axis_icon, Some(Rc::new(format!("Grid {title}"))));
+        root.children().add(axis_icon);
         let track = ComboBox::new();
+        track.classes().add("designer-property-field");
+        track.set_font_size(11.0);
         track.set_min_width(0.0);
         track.set_horizontal_alignment(HorizontalAlignment::Stretch);
         track.set_padding(Thickness::symmetric(5.0, 2.0));
@@ -55,8 +65,16 @@ impl GridTrackEditor {
         track.set_min_height(26.0);
         Grid::set_column(&track, 1);
         AutomationProperties::set_name(&track, Some(&format!("{title} selected track")));
+        ToolTip::set_tip(
+            &track,
+            Some(Rc::new(format!(
+                "Select a {title} track by its zero-based XAML index"
+            ))),
+        );
         root.children().add(track.clone().upcast::<Control>());
         let value = TextBox::new();
+        value.classes().add("designer-property-field");
+        value.set_font_size(11.0);
         value.set_min_width(0.0);
         value.set_min_height(26.0);
         value.set_padding(Thickness::symmetric(5.0, 3.0));
@@ -71,6 +89,7 @@ impl GridTrackEditor {
         );
         root.children().add(value.clone().upcast::<Control>());
         let unit = ComboBox::new();
+        unit.classes().add("designer-property-field");
         unit.set_font_size(11.0);
         unit.set_min_width(0.0);
         unit.set_min_height(26.0);
@@ -82,30 +101,41 @@ impl GridTrackEditor {
         }
         Grid::set_column(&unit, 3);
         AutomationProperties::set_name(&unit, Some(&format!("{title} sizing unit")));
+        ToolTip::set_tip(
+            &unit,
+            Some(Rc::new(
+                "* · proportion of available space\npx · fixed size\nAuto · fit content".to_owned(),
+            )),
+        );
         root.children().add(unit.clone().upcast::<Control>());
-        let make_button = |text: &str, help: &str, column: i32| {
+        let make_button = |path: &str, help: &str, column: i32| {
             let button = Button::new();
-            button.set_content(Some(Rc::new(text.to_owned())));
-            button.set_width(25.0);
+            let icon = crate::property_controls::property_icon(path, 12.0);
+            button.set_content(Some(Control::boxed(&icon)));
+            button.set_width(24.0);
             button.set_min_width(0.0);
             button.set_min_height(26.0);
             button.set_padding(Thickness::uniform(2.0));
-            button.classes().add("nav");
+            button.classes().add("property-track-command");
             Grid::set_column(&button, column);
             AutomationProperties::set_name(&button, Some(help));
             ToolTip::set_tip(&button, Some(Rc::new(help.to_owned())));
             root.children().add(button.clone().upcast::<Control>());
             button
         };
-        let add = make_button("+", &format!("Insert {title} track after selection"), 4);
+        let add = make_button(
+            "M7,1 L9,1 9,7 15,7 15,9 9,9 9,15 7,15 7,9 1,9 1,7 7,7 Z",
+            &format!("Insert {title} track after selection"),
+            4,
+        );
         let remove = make_button(
-            "−",
+            "M1,7 L15,7 15,9 1,9 Z",
             &format!("Remove selected {title} track and preserve child cells"),
             5,
         );
         let error = TextBlock::new();
         error.set_font_size(10.0);
-        error.set_foreground(Some(SolidColorBrush::from_uint32(0xffffb3b3).into()));
+        error.set_foreground(Some(SolidColorBrush::from_uint32(0xfff29c9c).into()));
         error.set_text_wrapping(ferroui_base::media::TextWrapping::Wrap);
         error.set_is_visible(false);
         Grid::set_row(&error, 1);
@@ -219,10 +249,14 @@ impl GridTrackEditor {
         }
         self.guard.set(true);
         self.track.items().clear();
-        for (index, value) in values.iter().enumerate() {
-            self.track
-                .items()
-                .add(Some(Rc::new(format!("{index} · {value}"))));
+        for index in 0..values.len() {
+            self.track.items().add(Some(Rc::new(format!(
+                "{} {index}",
+                match self.axis {
+                    Axis::Vertical => "Row",
+                    Axis::Horizontal => "Col",
+                }
+            ))));
         }
         self.track
             .set_selected_index(selected.min(values.len() - 1) as i32);

@@ -239,23 +239,46 @@ impl DesignerWorkspace {
         let expanded = ui.expanded;
         drop(ui);
         let root = StackPanel::new();
-        root.set_spacing(3.0);
+        root.classes().add("designer-layout-card");
+        root.set_spacing(6.0);
         let header = Grid::new();
         header.set_column_definitions(ColumnDefinitions::parse("*,Auto").unwrap());
-        let toggle = button(&format!(
-            "{}  Layout · {name}",
-            if expanded { "▾" } else { "▸" }
-        ));
-        toggle.classes().add("nav");
+        let has_settings = kind == "Grid" || !properties.is_empty();
+        let title = if panel == first {
+            format!("{kind} layout")
+        } else {
+            format!("Parent · {kind}")
+        };
+        let toggle = button("");
+        toggle.set_content(Some(Control::boxed(layout_header(
+            &title,
+            expanded,
+            has_settings,
+        ))));
+        toggle.classes().add("property-category");
         toggle.set_font_size(11.0);
-        toggle.set_padding(Thickness::symmetric(4.0, 2.0));
+        toggle.set_padding(Thickness::symmetric(0.0, 2.0));
         toggle.set_horizontal_content_alignment(HorizontalAlignment::Left);
+        ToolTip::set_tip(
+            &toggle,
+            Some(Rc::new(format!("{name} · {kind} container layout"))),
+        );
         header.children().add(toggle.clone().upcast::<Control>());
         if panel != first {
-            let parent = button("Select parent");
-            parent.classes().add("nav");
+            let parent = button("");
+            let icon = crate::property_controls::property_icon(
+                "M2,8 L7,3 12,8 10.8,9.2 7.8,6.2 7.8,12 14,12 14,13.5 6.2,13.5 6.2,6.2 3.2,9.2 Z",
+                13.0,
+            );
+            parent.set_content(Some(Control::boxed(&icon)));
+            parent.classes().add("property-track-command");
             parent.set_font_size(10.0);
-            parent.set_padding(Thickness::symmetric(5.0, 2.0));
+            parent.set_width(26.0);
+            parent.set_padding(Thickness::symmetric(4.0, 2.0));
+            ferroui_controls::automation::AutomationProperties::set_name(
+                &parent,
+                Some("Select parent container"),
+            );
             Grid::set_column(&parent, 1);
             ToolTip::set_tip(
                 &parent,
@@ -281,20 +304,24 @@ impl DesignerWorkspace {
         }
         root.children().add(header.upcast::<Control>());
         let body = StackPanel::new();
-        body.set_spacing(3.0);
+        body.set_spacing(5.0);
         body.set_is_visible(expanded);
         let weak_body = body.downgrade();
         let weak = Rc::downgrade(self);
         let weak_toggle = toggle.downgrade();
         toggle.click(move |_, _| {
+            if !has_settings {
+                return;
+            }
             if let Some((this, body)) = weak.upgrade().zip(weak_body.upgrade()) {
                 let expanded = !this.layout.borrow().expanded;
                 this.layout.borrow_mut().expanded = expanded;
                 body.set_is_visible(expanded);
                 if let Some(toggle) = weak_toggle.upgrade() {
-                    toggle.set_content(Some(Rc::new(format!(
-                        "{}  Layout · {name}",
-                        if expanded { "▾" } else { "▸" }
+                    toggle.set_content(Some(Control::boxed(layout_header(
+                        &title,
+                        expanded,
+                        has_settings,
                     ))));
                 }
             }
@@ -438,10 +465,15 @@ impl DesignerWorkspace {
                 .filter(|property| properties.iter().any(|candidate| candidate == property))
             {
                 let row = Grid::new();
-                row.set_column_definitions(ColumnDefinitions::parse("92,*").unwrap());
+                row.set_column_definitions(ColumnDefinitions::parse("84,*").unwrap());
                 let label = TextBlock::new();
-                label.set_text(Some(property));
+                label.set_text(Some(match property {
+                    "Spacing" | "ItemSpacing" => "Gap",
+                    "LastChildFill" => "Fill last child",
+                    _ => property,
+                }));
                 label.set_font_size(11.0);
+                label.set_foreground(Some(SolidColorBrush::from_uint32(0xffa9adba).into()));
                 label.set_vertical_alignment(VerticalAlignment::Center);
                 row.children().add(label.upcast::<Control>());
                 let visual = session.preview.visual(panel).unwrap();
@@ -508,9 +540,47 @@ impl DesignerWorkspace {
         }
         drop(session);
         root.children().add(body.upcast::<Control>());
-        host.set_content(Some(Control::boxed(&root)));
+        let frame = ferroui_controls::Border::new();
+        frame.classes().add("designer-layout-frame");
+        frame.set_border_brush(Some(SolidColorBrush::from_uint32(0xff3b3d46).into()));
+        frame.set_border_thickness(Thickness::uniform(1.0));
+        frame.set_corner_radius(ferroui_base::CornerRadius::uniform(5.0));
+        frame.set_padding(Thickness::new(
+            8.0,
+            3.0,
+            8.0,
+            if expanded && has_settings { 8.0 } else { 3.0 },
+        ));
+        frame.set_child(Some(root.upcast::<Control>()));
+        host.set_content(Some(Control::boxed(&frame)));
         host.set_is_visible(true);
     }
+}
+
+fn layout_header(title: &str, expanded: bool, expandable: bool) -> Ref<Control> {
+    let content = Grid::new();
+    content.set_column_definitions(ColumnDefinitions::parse("16,*").unwrap());
+    let icon = crate::property_controls::property_icon(
+        if expandable {
+            if expanded {
+                crate::property_controls::CHEVRON_DOWN_ICON
+            } else {
+                crate::property_controls::CHEVRON_RIGHT_ICON
+            }
+        } else {
+            "M1,1 L15,1 15,15 1,15 Z M2.5,2.5 L2.5,13.5 13.5,13.5 13.5,2.5 Z"
+        },
+        if expandable { 8.0 } else { 11.0 },
+    );
+    content.children().add(icon);
+    let label = TextBlock::new();
+    label.set_text(Some(title));
+    label.set_font_size(11.0);
+    label.set_font_weight(ferroui_base::media::FontWeight::SemiBold);
+    label.set_vertical_alignment(VerticalAlignment::Center);
+    Grid::set_column(&label, 1);
+    content.children().add(label.upcast::<Control>());
+    content.upcast::<Control>()
 }
 
 #[cfg(test)]

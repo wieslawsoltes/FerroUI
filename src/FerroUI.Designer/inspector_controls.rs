@@ -238,6 +238,40 @@ impl HierarchyGrid {
         self.source.set_items(Rc::new(roots));
     }
 
+    fn collapse_to_selection(&self) {
+        let paths = self
+            .source
+            .row_selection()
+            .unwrap()
+            .base()
+            .selected_indexes()
+            .to_vec();
+        self.source.collapse_all();
+        // Reopen ancestors from root to leaf so every selected row remains reachable,
+        // including a multi-selection spread across otherwise collapsed branches.
+        for path in &paths {
+            let mut ancestors = Vec::new();
+            let mut parent = path.parent();
+            while !parent.is_empty() {
+                ancestors.push(parent.clone());
+                parent = parent.parent();
+            }
+            for parent in ancestors.into_iter().rev() {
+                self.source.expand(&parent);
+            }
+        }
+        if let (Some(path), Some(rows), Some(presenter)) = (
+            paths.first(),
+            self.control.rows(),
+            self.control.rows_presenter(),
+        ) {
+            let index = rows.model_index_to_row_index(path);
+            if index >= 0 {
+                presenter.bring_into_view(index, None);
+            }
+        }
+    }
+
     fn selected(&self) -> Vec<Rc<TreeRow>> {
         self.source
             .row_selection()
@@ -311,16 +345,6 @@ fn hierarchy_cell(row: &TreeRow, project: bool) -> Ref<Control> {
     });
     name.set_text(Some(hierarchy_name(&row.entry, project)));
     name.set_font_size(12.0);
-    name.set_foreground(Some(
-        SolidColorBrush::from_uint32(if metadata {
-            0xff9299aa
-        } else if row.entry.name.is_empty() && !project {
-            0xffb8becc
-        } else {
-            0xfff2f3f5
-        })
-        .into(),
-    ));
     name.set_text_trimming(<dyn TextTrimming>::character_ellipsis());
     name.set_vertical_alignment(VerticalAlignment::Center);
     Grid::set_column(&name, 1);
@@ -489,7 +513,7 @@ impl InspectorControls {
                 ),
                 None,
                 |options| {
-                    options.width = GridLength::new(110.0, GridUnitType::Pixel);
+                    options.width = GridLength::new(102.0, GridUnitType::Pixel);
                     options.min_width = GridLength::new(80.0, GridUnitType::Pixel);
                     options.can_user_sort_column = Some(false);
                 },
@@ -578,16 +602,18 @@ fn property_cell(row: &PropertyRow) -> Ref<Control> {
         let count = TextBlock::new();
         count.set_text(Some(&format!("{}", category.count)));
         count.set_font_size(10.0);
-        count.set_foreground(Some(SolidColorBrush::from_uint32(0xff999999).into()));
-        count.set_margin(Thickness::new(6.0, 0.0, 6.0, 0.0));
+        count.set_foreground(Some(SolidColorBrush::from_uint32(0xff979caa).into()));
+        count.set_margin(Thickness::new(6.0, 0.0, 23.0, 0.0));
+        count.set_min_height(26.0);
         count.set_vertical_alignment(VerticalAlignment::Center);
         count.set_horizontal_alignment(HorizontalAlignment::Right);
-        return count.upcast::<Control>();
+        return property_section_border(count.upcast::<Control>());
     }
     let cell = Grid::new();
     cell.classes().add("property-value-cell");
-    cell.set_column_definitions(ColumnDefinitions::parse("*,Auto").unwrap());
-    cell.set_min_height(26.0);
+    cell.set_column_definitions(ColumnDefinitions::parse("*,22").unwrap());
+    cell.set_min_height(28.0);
+    cell.set_margin(Thickness::new(0.0, 1.0, 0.0, 1.0));
     ToolTip::set_tip(
         &cell,
         Some(Rc::new(format!(
@@ -623,6 +649,17 @@ fn property_cell(row: &PropertyRow) -> Ref<Control> {
                     if context.value.is_none()
                         && !context.mixed
                         && (crate::editors::components_kind(context).is_some()
+                            || (crate::editors::is_color_property(context)
+                                && ferroui_base::media::Color::parse(&row.effective).is_ok())
+                            || matches!(
+                                context.property.as_str(),
+                                "HorizontalAlignment"
+                                    | "VerticalAlignment"
+                                    | "HorizontalContentAlignment"
+                                    | "VerticalContentAlignment"
+                                    | "TextAlignment"
+                            )
+                            || matches!(context.runtime_type.as_deref(), Some("bool"))
                             || (crate::editors::numeric_options(context).is_some()
                                 && row
                                     .effective
@@ -657,12 +694,19 @@ fn property_cell(row: &PropertyRow) -> Ref<Control> {
         editor.classes().add("property-editor");
         AutomationProperties::set_name(&editor, Some(&format!("{} value", row.name)));
         cell.children().add(editor);
-        let reset = button("↺");
+        let reset = button("");
+        let icon =
+            crate::property_controls::property_icon(crate::property_controls::RESET_ICON, 12.0);
+        reset.set_content(Some(Control::boxed(&icon)));
         reset.classes().add("property-reset");
         reset.set_width(20.0);
         reset.set_min_width(0.0);
         reset.set_padding(Thickness::new(2.0, 2.0, 2.0, 2.0));
         reset.set_is_enabled(row.can_reset);
+        // Keep the value column aligned while eliminating a disabled reset button on every
+        // inherited property. The command remains in the same place for authored values.
+        reset.set_opacity(if row.can_reset { 0.7 } else { 0.0 });
+        reset.set_is_hit_test_visible(row.can_reset);
         AutomationProperties::set_name(
             &reset,
             Some(&format!("Reset {} to inherited value", row.name)),
@@ -718,7 +762,7 @@ fn connect_property_drop(
         if let Some(cell) = weak.upgrade() {
             cell.classes().set("property-drop-target", accepted);
             cell.set_background(Some(
-                SolidColorBrush::from_uint32(if accepted { 0xff35474e } else { 0x00000000 }).into(),
+                SolidColorBrush::from_uint32(if accepted { 0xff2d4061 } else { 0x00000000 }).into(),
             ));
         }
         event.set_handled(true);
@@ -753,16 +797,32 @@ fn connect_property_drop(
 
 fn property_label(row: &PropertyRow) -> Ref<Control> {
     if let Some(category) = &row.category {
-        let label = button(&format!(
-            "{} {}",
-            if category.expanded { "⌄" } else { "›" },
-            row.name
-        ));
+        let label = button("");
+        let content = Grid::new();
+        content.set_column_definitions(ColumnDefinitions::parse("14,*").unwrap());
+        let chevron = crate::property_controls::property_icon(
+            if category.expanded {
+                crate::property_controls::CHEVRON_DOWN_ICON
+            } else {
+                crate::property_controls::CHEVRON_RIGHT_ICON
+            },
+            8.0,
+        );
+        content.children().add(chevron);
+        let text = TextBlock::new();
+        text.set_text(Some(&row.name));
+        text.set_font_size(11.0);
+        text.set_font_weight(ferroui_base::media::FontWeight::SemiBold);
+        text.set_foreground(Some(SolidColorBrush::from_uint32(0xfff2f3f5).into()));
+        text.set_vertical_alignment(VerticalAlignment::Center);
+        Grid::set_column(&text, 1);
+        content.children().add(text.upcast::<Control>());
+        label.set_content(Some(Control::boxed(&content)));
         label.classes().add("property-category");
         label.set_min_height(26.0);
         label.set_min_width(0.0);
         label.set_font_size(11.0);
-        label.set_padding(Thickness::new(2.0, 3.0, 0.0, 3.0));
+        label.set_padding(Thickness::new(0.0, 3.0, 0.0, 3.0));
         label.set_horizontal_content_alignment(HorizontalAlignment::Left);
         label.set_background(Some(SolidColorBrush::from_uint32(0x00000000).into()));
         label.set_border_thickness(Thickness::uniform(0.0));
@@ -780,9 +840,11 @@ fn property_label(row: &PropertyRow) -> Ref<Control> {
         );
         let toggle = category.toggle.clone();
         label.click(move |_, _| toggle());
-        return label.upcast::<Control>();
+        return property_section_border(label.upcast::<Control>());
     }
     let root = Grid::new();
+    root.classes().add("property-name-cell");
+    root.set_min_height(28.0);
     root.set_column_definitions(ColumnDefinitions::parse("7,*").unwrap());
     let state = TextBlock::new();
     state.set_text(Some(if row.origin == "Expression" {
@@ -795,9 +857,9 @@ fn property_label(row: &PropertyRow) -> Ref<Control> {
     state.set_font_size(9.0);
     state.set_foreground(Some(
         SolidColorBrush::from_uint32(if row.origin == "Expression" {
-            0xffc6a7ef
+            0xffb6a2f6
         } else {
-            0xff60cdff
+            0xff79a8ff
         })
         .into(),
     ));
@@ -831,6 +893,7 @@ fn property_label(row: &PropertyRow) -> Ref<Control> {
         let label = TextBlock::new();
         label.set_text(Some(property_label_text(&row.name)));
         label.set_font_size(11.0);
+        label.set_foreground(Some(SolidColorBrush::from_uint32(0xffa9adba).into()));
         label.set_vertical_alignment(VerticalAlignment::Center);
         label.set_text_trimming(<dyn ferroui_base::media::TextTrimming>::character_ellipsis());
         label.upcast::<Control>()
@@ -852,6 +915,17 @@ fn property_label(row: &PropertyRow) -> Ref<Control> {
     Grid::set_column(&label, 1);
     root.children().add(label);
     root.upcast::<Control>()
+}
+
+fn property_section_border(content: Ref<Control>) -> Ref<Control> {
+    let border = ferroui_controls::Border::new();
+    border.classes().add("property-section");
+    border.set_border_brush(Some(SolidColorBrush::from_uint32(0xff3b3d46).into()));
+    border.set_border_thickness(Thickness::new(0.0, 1.0, 0.0, 0.0));
+    border.set_padding(Thickness::new(0.0, 5.0, 0.0, 2.0));
+    border.set_margin(Thickness::new(0.0, 6.0, 0.0, 2.0));
+    border.set_child(Some(content));
+    border.upcast::<Control>()
 }
 
 fn property_label_text(name: &str) -> &str {
@@ -882,6 +956,17 @@ fn property_label_text(name: &str) -> &str {
         "FontWeight" => "Font weight",
         "TextWrapping" => "Text wrapping",
         "TextAlignment" => "Text alignment",
+        "RowDefinitions" => "Row tracks",
+        "ColumnDefinitions" => "Column tracks",
+        "ColumnSpacing" => "Column gap",
+        "RowSpacing" => "Row gap",
+        "Spacing" => "Gap",
+        "IsVisible" => "Visible",
+        "ClipToBounds" => "Clip content",
+        "IsEnabled" => "Enabled",
+        "IsHitTestVisible" => "Hit testing",
+        "LastChildFill" => "Fill last child",
+        "FlowDirection" => "Text direction",
         _ => name,
     }
 }
@@ -973,6 +1058,14 @@ fn property_element_content<'a>(
 impl DesignerWorkspace {
     pub fn outline_grid(&self) -> Ref<TreeDataGrid> {
         self.inspectors.outline.control.clone()
+    }
+
+    /// Collapse the current source or runtime hierarchy while retaining the ancestors
+    /// of the current selection. This is view state and creates no document edit.
+    pub fn collapse_outline(&self) {
+        let previous = self.inspectors.guard.replace(true);
+        self.inspectors.outline.collapse_to_selection();
+        self.inspectors.guard.set(previous);
     }
 
     pub fn property_grid(&self) -> Ref<TreeDataGrid> {
@@ -1173,17 +1266,57 @@ impl DesignerWorkspace {
             .first()
             .and_then(|id| session.document().ast().node(*id))
         else {
-            self.selection_title.set_text(Some("Select an element"));
+            self.selection_title.set_text(Some("Nothing selected"));
+            if let Some(label) = self.root.find_control::<TextBlock>("SelectionType") {
+                label.set_text(Some("Select a layer on the canvas"));
+            }
             self.inspectors
                 .property_source
                 .set_items(Rc::new(Vec::new()));
             return;
         };
         self.selection_title.set_text(Some(&if selected.len() == 1 {
-            first.name.clone()
+            first.xaml_name().unwrap_or(first.local_name()).to_owned()
         } else {
-            format!("{} elements", selected.len())
+            format!("{} layers selected", selected.len())
         }));
+        if let Some(label) = self.root.find_control::<TextBlock>("SelectionType") {
+            let description = if selected.len() == 1 {
+                format!(
+                    "{}{}",
+                    first.name,
+                    if read_only { " · read only" } else { "" }
+                )
+            } else {
+                let same_type = selected.iter().all(|id| {
+                    session
+                        .document()
+                        .ast()
+                        .node(*id)
+                        .is_some_and(|node| node.name == first.name)
+                });
+                if same_type {
+                    format!("{} · shared properties", first.local_name())
+                } else {
+                    "Mixed selection · shared properties".to_owned()
+                }
+            };
+            label.set_text(Some(&description));
+        }
+        if let Some(icon) = self
+            .root
+            .find_control::<ferroui_controls::PathIcon>("SelectionIcon")
+        {
+            let entry = TreeEntry {
+                label: first.name.clone(),
+                ..TreeEntry::default()
+            };
+            let (path, color, _) = hierarchy_icon(&entry, false);
+            icon.set_data(
+                ferroui_base::media::Geometry::parse(path).expect("designer selection icon"),
+            );
+            icon.set_foreground(Some(SolidColorBrush::from_uint32(color).into()));
+        }
         let mut properties = vec![
             "Name",
             "Width",
@@ -1541,7 +1674,10 @@ impl DesignerWorkspace {
             return false;
         };
         self.selection_title
-            .set_text(Some(&format!("{} · runtime", object.get_type().name())));
+            .set_text(Some(object.get_type().name()));
+        if let Some(label) = self.root.find_control::<TextBlock>("SelectionType") {
+            label.set_text(Some("Runtime object · read only"));
+        }
         let filter = self
             .root
             .get_control::<TextBox>("PropertySearch")

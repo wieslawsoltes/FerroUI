@@ -39,6 +39,7 @@ pub(crate) fn built_in(context: &PropertyEditorContext) -> Ref<Control> {
             .is_some_and(|name| name == "bool" || name.ends_with("Option<bool>"))
     {
         let editor = CheckBox::new();
+        editor.classes().add("property-boolean");
         editor.set_is_three_state(true);
         editor.set_is_checked(if context.mixed {
             None
@@ -66,6 +67,23 @@ pub(crate) fn built_in(context: &PropertyEditorContext) -> Ref<Control> {
         return editor.upcast::<Control>();
     }
     if !expression {
+        if is_color_property(context)
+            && context
+                .value
+                .as_deref()
+                .is_none_or(|value| ferroui_base::media::Color::parse(value.trim()).is_ok())
+        {
+            if let Ok(editor) = crate::PropertyColorEditor::new() {
+                if editor
+                    .configure(context.value.as_deref(), context.mixed)
+                    .is_ok()
+                {
+                    let apply = context.apply.clone();
+                    editor.on_commit(move |value| apply(Some(value)));
+                    return editor.control();
+                }
+            }
+        }
         if let Some(kind) = components_kind(context) {
             let values = match context.value.as_deref() {
                 Some(value) => kind.parse(value).map(Some),
@@ -101,6 +119,7 @@ pub(crate) fn built_in(context: &PropertyEditorContext) -> Ref<Control> {
         };
         if !values.is_empty() {
             let editor = ComboBox::new();
+            editor.classes().add("designer-property-field");
             let offset = if context.mixed {
                 editor
                     .items()
@@ -148,6 +167,8 @@ pub(crate) fn built_in(context: &PropertyEditorContext) -> Ref<Control> {
         }
     }
     let editor = TextBox::new();
+    editor.classes().add("designer-property-field");
+    editor.classes().set("property-expression", expression);
     editor.set_text(context.value.as_deref());
     editor.set_font_size(12.0);
     editor.set_placeholder_text(Some(if context.mixed {
@@ -178,22 +199,82 @@ pub(crate) fn built_in(context: &PropertyEditorContext) -> Ref<Control> {
     editor.upcast::<Control>()
 }
 
+pub(crate) fn is_color_property(context: &PropertyEditorContext) -> bool {
+    matches!(
+        context.property.as_str(),
+        "Background"
+            | "Foreground"
+            | "BorderBrush"
+            | "Fill"
+            | "Stroke"
+            | "Color"
+            | "CaretBrush"
+            | "SelectionBrush"
+            | "SelectionForegroundBrush"
+    ) || context
+        .runtime_type
+        .as_deref()
+        .is_some_and(|name| name.ends_with("::Color"))
+}
+
 /// Native buttons provide focus, keyboard activation and accessibility for the frequently
 /// used alignment choices. Local/expressed state and reset remain owned by the row.
 fn alignment_editor(context: &PropertyEditorContext) -> Option<Ref<Control>> {
     use ferroui_controls::automation::AutomationProperties;
     let choices = match context.property.as_str() {
         "HorizontalAlignment" | "HorizontalContentAlignment" => [
-            ("L", "Left"),
-            ("C", "Center"),
-            ("R", "Right"),
-            ("↔", "Stretch"),
+            (
+                "M2,1 L3.5,1 3.5,15 2,15 Z M5,4 L14,4 14,7 5,7 Z M5,9 L11,9 11,12 5,12 Z",
+                "Left",
+            ),
+            (
+                "M7.25,1 L8.75,1 8.75,15 7.25,15 Z M2,4 L14,4 14,7 2,7 Z M4,9 L12,9 12,12 4,12 Z",
+                "Center",
+            ),
+            (
+                "M12.5,1 L14,1 14,15 12.5,15 Z M2,4 L11,4 11,7 2,7 Z M5,9 L11,9 11,12 5,12 Z",
+                "Right",
+            ),
+            (
+                "M1,1 L2.5,1 2.5,15 1,15 Z M13.5,1 L15,1 15,15 13.5,15 Z M4,4 L12,4 12,7 4,7 Z M4,9 L12,9 12,12 4,12 Z",
+                "Stretch",
+            ),
         ],
         "VerticalAlignment" | "VerticalContentAlignment" => [
-            ("T", "Top"),
-            ("C", "Center"),
-            ("B", "Bottom"),
-            ("↕", "Stretch"),
+            (
+                "M1,2 L15,2 15,3.5 1,3.5 Z M4,5 L7,5 7,14 4,14 Z M9,5 L12,5 12,11 9,11 Z",
+                "Top",
+            ),
+            (
+                "M1,7.25 L15,7.25 15,8.75 1,8.75 Z M4,2 L7,2 7,14 4,14 Z M9,4 L12,4 12,12 9,12 Z",
+                "Center",
+            ),
+            (
+                "M1,12.5 L15,12.5 15,14 1,14 Z M4,2 L7,2 7,11 4,11 Z M9,5 L12,5 12,11 9,11 Z",
+                "Bottom",
+            ),
+            (
+                "M1,1 L15,1 15,2.5 1,2.5 Z M1,13.5 L15,13.5 15,15 1,15 Z M4,4 L7,4 7,12 4,12 Z M9,4 L12,4 12,12 9,12 Z",
+                "Stretch",
+            ),
+        ],
+        "TextAlignment" => [
+            (
+                "M2,2 L14,2 14,3.5 2,3.5 Z M2,5.5 L10,5.5 10,7 2,7 Z M2,9 L14,9 14,10.5 2,10.5 Z M2,12.5 L10,12.5 10,14 2,14 Z",
+                "Left",
+            ),
+            (
+                "M2,2 L14,2 14,3.5 2,3.5 Z M4,5.5 L12,5.5 12,7 4,7 Z M2,9 L14,9 14,10.5 2,10.5 Z M4,12.5 L12,12.5 12,14 4,14 Z",
+                "Center",
+            ),
+            (
+                "M2,2 L14,2 14,3.5 2,3.5 Z M6,5.5 L14,5.5 14,7 6,7 Z M2,9 L14,9 14,10.5 2,10.5 Z M6,12.5 L14,12.5 14,14 6,14 Z",
+                "Right",
+            ),
+            (
+                "M2,2 L14,2 14,3.5 2,3.5 Z M2,5.5 L14,5.5 14,7 2,7 Z M2,9 L14,9 14,10.5 2,10.5 Z M2,12.5 L14,12.5 14,14 2,14 Z",
+                "Justify",
+            ),
         ],
         _ => return None,
     };
@@ -213,7 +294,7 @@ fn alignment_editor(context: &PropertyEditorContext) -> Option<Ref<Control>> {
             .to_owned(),
         )),
     );
-    for (index, (label, value)) in choices.into_iter().enumerate() {
+    for (index, (path, value)) in choices.into_iter().enumerate() {
         let button = Button::new();
         button.classes().add("property-choice-item");
         button.classes().set(
@@ -224,11 +305,12 @@ fn alignment_editor(context: &PropertyEditorContext) -> Option<Ref<Control>> {
                     .as_ref()
                     .is_some_and(|current| current.eq_ignore_ascii_case(value)),
         );
-        button.set_content(Some(Rc::new(label.to_owned())));
+        let icon = crate::property_controls::property_icon(path, 14.0);
+        button.set_content(Some(Control::boxed(&icon)));
         button.set_min_width(0.0);
         button.set_min_height(26.0);
         button.set_padding(Thickness::new(2.0, 3.0, 2.0, 3.0));
-        button.set_margin(Thickness::new(0.0, 0.0, 1.0, 0.0));
+        button.set_margin(Thickness::new(0.0, 1.0, 2.0, 1.0));
         button.set_font_size(11.0);
         button.set_horizontal_alignment(ferroui_base::layout::HorizontalAlignment::Stretch);
         button.set_horizontal_content_alignment(ferroui_base::layout::HorizontalAlignment::Center);
@@ -254,6 +336,7 @@ fn numeric_editor(context: &PropertyEditorContext) -> Option<Ref<Control>> {
         None => None,
     };
     let editor = NumericUpDown::new();
+    editor.classes().add("designer-property-field");
     editor.set_show_button_spinner(false);
     editor.set_min_height(26.0);
     editor.set_padding(Thickness::new(7.0, 3.0, 5.0, 3.0));

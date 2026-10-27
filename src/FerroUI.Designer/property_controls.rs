@@ -8,7 +8,8 @@ use ferroui_base::input::{
 use ferroui_base::interactivity::InteractiveImpl;
 use ferroui_base::layout::{HorizontalAlignment, LayoutableImpl, VerticalAlignment};
 use ferroui_base::media::{
-    BoxShadows, DrawingContext, FlowDirection, FormattedText, IBrush, SolidColorBrush, Typeface,
+    BoxShadows, DrawingContext, FlowDirection, FormattedText, Geometry, IBrush, SolidColorBrush,
+    Typeface,
 };
 use ferroui_base::utilities::CultureInfo;
 use ferroui_base::{
@@ -17,8 +18,8 @@ use ferroui_base::{
 };
 use ferroui_controls::automation::AutomationProperties;
 use ferroui_controls::{
-    Button, ColumnDefinitions, Control, ControlImpl, DataValidationErrors, Grid, RowDefinitions,
-    TextBlock, TextBox, ToolTip,
+    Button, ColumnDefinitions, Control, ControlImpl, DataValidationErrors, Grid, PathIcon,
+    RowDefinitions, TextBlock, TextBox, ToolTip,
 };
 use std::cell::{Cell, RefCell};
 use std::rc::Rc;
@@ -26,6 +27,22 @@ use std::sync::Arc;
 
 type NumberAction = Rc<dyn Fn(f64)>;
 type ComponentsAction = Rc<dyn Fn([f64; 4])>;
+
+/// Small filled vectors keep the inspector independent of symbol fonts and platform glyphs.
+pub(crate) fn property_icon(data: &str, size: f64) -> Ref<Control> {
+    let icon = PathIcon::new();
+    icon.set_data(Geometry::parse(data).expect("valid designer property icon"));
+    icon.set_width(size);
+    icon.set_height(size);
+    icon.set_horizontal_alignment(HorizontalAlignment::Center);
+    icon.set_vertical_alignment(VerticalAlignment::Center);
+    icon.set_is_hit_test_visible(false);
+    icon.upcast::<Control>()
+}
+
+pub(crate) const RESET_ICON: &str = "M4,2 L4,5.2 A5,5 0 1 1 3.2,9 L1.7,9 A6.5,6.5 0 1 0 4,3.2 L4,2 Z M1,2 L6,2 6,3.5 2.5,3.5 2.5,7 1,7 Z";
+pub(crate) const CHEVRON_DOWN_ICON: &str = "M2,5 L8,11 14,5 12.8,3.8 8,8.6 3.2,3.8 Z";
+pub(crate) const CHEVRON_RIGHT_ICON: &str = "M5,2 L11,8 5,14 3.8,12.8 8.6,8 3.8,3.2 Z";
 
 /// Cross-process native drag format for a single XAML property value, such as a color,
 /// resource expression or binding. Targets still validate against their active document.
@@ -292,7 +309,7 @@ impl VisualImpl for PropertyNumberScrubber {
         let clip = context.push_clip(bounds);
         let dragging = this.drag.get();
         let fill: Rc<dyn IBrush> = SolidColorBrush::from_uint32(if dragging.is_some() {
-            0xff35474e
+            0xff2d4061
         } else {
             0x00000000
         })
@@ -311,9 +328,9 @@ impl VisualImpl for PropertyNumberScrubber {
             11.0,
             Some(
                 SolidColorBrush::from_uint32(if dragging.is_some() {
-                    0xff99e1ff
+                    0xffa8c7ff
                 } else {
-                    0xffdedede
+                    0xffa9adba
                 })
                 .into(),
             ),
@@ -354,6 +371,12 @@ impl PropertyComponentsKind {
         match self {
             Self::Thickness => ["L", "T", "R", "B"],
             Self::CornerRadius => ["TL", "TR", "BR", "BL"],
+        }
+    }
+    fn descriptions(self) -> [&'static str; 4] {
+        match self {
+            Self::Thickness => ["Left", "Top", "Right", "Bottom"],
+            Self::CornerRadius => ["Top left", "Top right", "Bottom right", "Bottom left"],
         }
     }
 }
@@ -435,38 +458,37 @@ impl PropertyComponentsEditor {
     pub fn new(kind: PropertyComponentsKind, non_negative: bool) -> Self {
         let root = Grid::new();
         root.classes().add("property-components");
-        root.set_column_definitions(ColumnDefinitions::parse("*,*,22").unwrap());
-        root.set_row_definitions(RowDefinitions::parse("26,26").unwrap());
+        root.set_column_definitions(ColumnDefinitions::parse("*,*,24").unwrap());
+        root.set_row_definitions(RowDefinitions::parse("28,28").unwrap());
         let fields: [Ref<TextBox>; 4] = std::array::from_fn(|index| {
-            let container = Grid::new();
-            container.set_column_definitions(ColumnDefinitions::parse("20,*").unwrap());
             let label = TextBlock::new();
             label.set_text(Some(kind.labels()[index]));
             label.set_font_size(9.0);
-            label.set_foreground(Some(SolidColorBrush::from_uint32(0xffa5a5a5).into()));
+            label.set_foreground(Some(SolidColorBrush::from_uint32(0xff979caa).into()));
+            label.set_width(21.0);
             label.set_vertical_alignment(VerticalAlignment::Center);
             label.set_horizontal_alignment(HorizontalAlignment::Center);
-            container.children().add(label.upcast::<Control>());
             let field = TextBox::new();
+            field.classes().add("designer-property-field");
+            field.classes().add("property-component-field");
+            field.set_inner_left_content(Some(Control::boxed(&label)));
             field.set_font_size(11.0);
-            field.set_min_height(24.0);
+            field.set_min_height(26.0);
             field.set_min_width(20.0);
-            field.set_padding(Thickness::new(4.0, 3.0, 3.0, 3.0));
-            field.set_margin(Thickness::new(0.0, 1.0, 2.0, 1.0));
+            field.set_padding(Thickness::new(2.0, 3.0, 5.0, 3.0));
+            field.set_margin(Thickness::new(0.0, 1.0, 3.0, 1.0));
             field.set_placeholder_text(Some("—"));
-            AutomationProperties::set_name(&field, Some(kind.labels()[index]));
+            AutomationProperties::set_name(&field, Some(kind.descriptions()[index]));
             ToolTip::set_tip(
                 &field,
                 Some(Rc::new(format!(
                     "{} · Enter applies all components; Escape restores; Up/Down nudges (Shift ×10, Ctrl ÷10)",
-                    kind.labels()[index]
+                    kind.descriptions()[index]
                 ))),
             );
-            Grid::set_column(&field, 1);
-            container.children().add(field.clone().upcast::<Control>());
-            Grid::set_row(&container, (index / 2) as i32);
-            Grid::set_column(&container, (index % 2) as i32);
-            root.children().add(container.upcast::<Control>());
+            Grid::set_row(&field, (index / 2) as i32);
+            Grid::set_column(&field, (index % 2) as i32);
+            root.children().add(field.clone().upcast::<Control>());
             field
         });
         let state = Rc::new(ComponentsState {
@@ -518,8 +540,12 @@ impl PropertyComponentsEditor {
         }
         let link = Button::new();
         link.classes().add("property-link");
-        link.set_content(Some(Rc::new("↔".to_owned())));
-        link.set_width(22.0);
+        let icon = property_icon(
+            "M5.5,3 L7,3 7,4.5 5.5,4.5 A3.5,3.5 0 0 0 5.5,11.5 L7,11.5 7,13 5.5,13 A5,5 0 0 1 5.5,3 Z M9,3 L10.5,3 A5,5 0 0 1 10.5,13 L9,13 9,11.5 10.5,11.5 A3.5,3.5 0 0 0 10.5,4.5 L9,4.5 Z M5,7.25 L11,7.25 11,8.75 5,8.75 Z",
+            14.0,
+        );
+        link.set_content(Some(Control::boxed(&icon)));
+        link.set_width(24.0);
         link.set_min_width(0.0);
         link.set_min_height(24.0);
         link.set_padding(Thickness::uniform(1.0));

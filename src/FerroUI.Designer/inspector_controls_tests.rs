@@ -401,7 +401,8 @@ fn inspector_outline_is_hierarchical_and_selection_synchronizes_without_rebuildi
     assert_eq!(roots.count(), 1);
     assert_eq!(roots.get(0).children.len(), 1);
     assert_eq!(roots.get(0).children[0].children.len(), 2);
-    assert_eq!(workspace.outline_grid().columns().unwrap().count(), 2);
+    assert_eq!(workspace.outline_grid().columns().unwrap().count(), 1);
+    assert!(!workspace.outline_grid().show_column_headers());
 
     let selection = source.row_selection().unwrap();
     selection
@@ -1233,4 +1234,55 @@ fn inspector_tooltip_samples_animation_without_replacing_the_editor_or_authored_
         "an old cell must not describe a different selection"
     );
     window.close();
+}
+
+#[test]
+fn layer_template_keeps_native_type_ahead_selection() {
+    use ferroui_base::input::TextInputEventArgs;
+    let _app = UnitTestApplication::start(TestServices::styled_window());
+    let workspace = DesignerWorkspace::new(DOCUMENT).unwrap();
+    select_named(&workspace, &["First"]);
+    let second = workspace
+        .session
+        .borrow()
+        .document()
+        .ast()
+        .find_name("Second")
+        .unwrap();
+    let mut input = TextInputEventArgs::new();
+    input.set_routed_event(Some(InputElement::text_input_event()));
+    input.text = Some("s".into());
+    workspace.outline_grid().raise_event(&input);
+    assert_eq!(workspace.session.borrow().selection(), &[second]);
+    assert_eq!(
+        workspace.inspectors.outline.selected()[0].entry.name,
+        "Second"
+    );
+}
+
+#[test]
+fn collapse_layers_keeps_selection_visible_and_never_edits_the_document() {
+    let _app = UnitTestApplication::start(TestServices::styled_window());
+    let source = r#"<Canvas xmlns="https://github.com/ferroui" Name="Root"><StackPanel Name="Group"><Button Name="First"/><StackPanel Name="Nested"><Button Name="Deep"/></StackPanel></StackPanel><StackPanel Name="Other"><Button Name="Third"/></StackPanel></Canvas>"#;
+    let workspace = DesignerWorkspace::new(source).unwrap();
+    let ids = select_named(&workspace, &["First"]);
+    let revision = workspace.session.borrow().document().revision();
+    let roots = workspace.inspectors.outline.source.items();
+    workspace.collapse_outline();
+    assert_eq!(workspace.session.borrow().selection(), ids);
+    assert_eq!(workspace.outline_grid().rows().unwrap().count(), 5);
+    assert!(Rc::ptr_eq(
+        &roots.get(0),
+        &workspace.inspectors.outline.source.items().get(0)
+    ));
+    let ids = select_named(&workspace, &["Deep", "Third"]);
+    workspace.collapse_outline();
+    assert_eq!(workspace.session.borrow().selection(), ids);
+    assert_eq!(workspace.outline_grid().rows().unwrap().count(), 7);
+    workspace.session.borrow_mut().select([]);
+    workspace.refresh(true);
+    workspace.collapse_outline();
+    assert_eq!(workspace.outline_grid().rows().unwrap().count(), 1);
+    assert_eq!(workspace.session.borrow().document().revision(), revision);
+    assert_eq!(workspace.session.borrow().document().source(), source);
 }
