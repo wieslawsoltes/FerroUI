@@ -140,6 +140,9 @@ fn capture_current_at(
 #[path = "render_layout_helpers_tests.rs"]
 mod layout_helpers;
 
+#[path = "render_components_tests.rs"]
+mod components;
+
 #[test]
 fn native_workspace_renders_design_manipulation_and_animation() {
     let locator = FerroLocator::enter_scope();

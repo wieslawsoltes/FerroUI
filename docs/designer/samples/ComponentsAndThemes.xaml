@@ -1,0 +1,85 @@
+<UserControl xmlns="https://github.com/ferroui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             x:Name="ComponentLibraryDemo" Width="800" Height="620">
+  <UserControl.Resources>
+    <SolidColorBrush x:Key="BrandAccent" Color="#FF6C57D8" />
+    <SolidColorBrush x:Key="BrandInk" Color="#FF252438" />
+    <SolidColorBrush x:Key="QuietText" Color="#FF747389" />
+    <SolidColorBrush x:Key="PanelSurface" Color="#FFFFFFFF" />
+    <ControlTemplate x:Key="ActionButtonTemplate" TargetType="Button">
+      <Border x:Name="ButtonFrame" Background="{TemplateBinding Background}"
+              BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}"
+              CornerRadius="10" Padding="{TemplateBinding Padding}">
+        <ContentPresenter x:Name="ButtonContent" Content="{TemplateBinding Content}"
+                          ContentTemplate="{TemplateBinding ContentTemplate}"
+                          HorizontalContentAlignment="Center" VerticalContentAlignment="Center" />
+      </Border>
+    </ControlTemplate>
+    <ControlTheme x:Key="PrimaryAction" TargetType="Button">
+      <Setter Property="Background" Value="{StaticResource BrandAccent}" />
+      <Setter Property="Foreground" Value="White" />
+      <Setter Property="BorderThickness" Value="0" />
+      <Setter Property="Padding" Value="18,11" />
+      <Setter Property="FontWeight" Value="SemiBold" />
+      <Setter Property="FontSize" Value="13" />
+      <Setter Property="Template" Value="{StaticResource ActionButtonTemplate}" />
+    </ControlTheme>
+    <ControlTheme x:Key="QuietAction" TargetType="Button" BasedOn="{StaticResource PrimaryAction}">
+      <Setter Property="Background">
+        <LinearGradientBrush StartPoint="0%,0%" EndPoint="100%,0%">
+          <GradientStop Offset="0" Color="#FFF0EDF9" />
+          <GradientStop Offset="1" Color="#FFE6E0F6" />
+        </LinearGradientBrush>
+      </Setter>
+      <Setter Property="Foreground" Value="{StaticResource BrandAccent}" />
+    </ControlTheme>
+    <DataTemplate x:Key="StatusTemplate">
+      <Border Background="#FFEAF5EE" CornerRadius="6" Padding="12,9">
+        <StackPanel Orientation="Horizontal" Spacing="8">
+          <Ellipse Width="6" Height="6" Fill="#FF418D62" VerticalAlignment="Center" />
+          <TextBlock Text="{Binding}" Foreground="#FF33734F" FontSize="12" />
+        </StackPanel>
+      </Border>
+    </DataTemplate>
+  </UserControl.Resources>
+  <Canvas Background="#FFF4F3F8">
+    <TextBlock Canvas.Left="34" Canvas.Top="28" Text="WORKSPACE / COMPONENTS" FontSize="10" FontWeight="SemiBold" Foreground="{StaticResource QuietText}" />
+    <TextBlock Canvas.Left="34" Canvas.Top="52" Text="Design system" FontSize="30" FontWeight="SemiBold" Foreground="{StaticResource BrandInk}" />
+    <TextBlock Canvas.Left="34" Canvas.Top="96" Text="Reusable definitions. Consistent instances. One source of truth." FontSize="13" Foreground="{StaticResource QuietText}" />
+
+    <Border Canvas.Left="34" Canvas.Top="142" Width="462" Height="258" Background="{StaticResource PanelSurface}" CornerRadius="12" Padding="24">
+      <StackPanel Spacing="16">
+        <TextBlock Text="Your next release" FontSize="20" FontWeight="SemiBold" Foreground="{StaticResource BrandInk}" />
+        <TextBlock Text="Keep every screen connected to the same visual language. Update a theme or template and inspect its instances." FontSize="13" Foreground="{StaticResource QuietText}" TextWrapping="Wrap" />
+        <ContentControl Content="All component changes are saved" ContentTemplate="{StaticResource StatusTemplate}" HorizontalContentAlignment="Stretch" />
+        <StackPanel Orientation="Horizontal" Spacing="10">
+          <Button x:Name="PublishAction" Content="Publish release" Theme="{StaticResource PrimaryAction}" />
+          <Button x:Name="ReviewAction" Content="Review changes" Theme="{StaticResource QuietAction}" />
+        </StackPanel>
+      </StackPanel>
+    </Border>
+
+    <Border Canvas.Left="518" Canvas.Top="142" Width="248" Height="258" Background="{StaticResource PanelSurface}" CornerRadius="12" Padding="22">
+      <StackPanel Spacing="14">
+        <TextBlock Text="Library health" FontSize="17" FontWeight="SemiBold" Foreground="{StaticResource BrandInk}" />
+        <TextBlock Text="24" FontSize="40" FontWeight="SemiBold" Foreground="{StaticResource BrandAccent}" />
+        <TextBlock Text="Connected components" FontSize="12" Foreground="{StaticResource QuietText}" />
+        <Border Height="1" Background="#FFEEEAF5" />
+        <TextBlock Text="Templates, themes and tokens are ready to use across your project." FontSize="12" Foreground="{StaticResource QuietText}" TextWrapping="Wrap" />
+      </StackPanel>
+    </Border>
+
+    <Border Canvas.Left="34" Canvas.Top="422" Width="732" Height="162" Background="{StaticResource PanelSurface}" CornerRadius="12" Padding="24">
+      <Grid ColumnDefinitions="*,260" ColumnSpacing="24">
+        <StackPanel Spacing="10">
+          <TextBlock Text="Build with your own controls" FontSize="17" FontWeight="SemiBold" Foreground="{StaticResource BrandInk}" />
+          <TextBlock Text="Register native controls, typed properties and exact definition sources. The designer uses the same metadata in every editor." FontSize="12" Foreground="{StaticResource QuietText}" TextWrapping="Wrap" />
+        </StackPanel>
+        <StackPanel Grid.Column="1" Spacing="10">
+          <TextBox x:Name="ProjectName" Text="FerroUI design library" PlaceholderText="Project name" />
+          <Button x:Name="CreateAction" Content="Create component" Theme="{StaticResource PrimaryAction}" HorizontalAlignment="Stretch" />
+        </StackPanel>
+      </Grid>
+    </Border>
+  </Canvas>
+</UserControl>
