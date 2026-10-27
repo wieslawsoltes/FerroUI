@@ -179,3 +179,137 @@ fn inherited_preview_theme_keeps_the_artboard_backing_in_sync() {
         ferroui_base::media::Color::parse("#FFFFFFFF").unwrap()
     );
 }
+
+#[test]
+fn inherited_preview_conditions_retire_layout_and_editor_snapshots_after_round_trips() {
+    use crate::{DesignTimeSnapshot, LayerCommand};
+    use ferroui_controls::{Control, Window};
+
+    let _app = UnitTestApplication::start(TestServices::styled_window());
+    let source = r#"<StackPanel xmlns="https://github.com/ferroui"><Button Name="Target" Content="Sample" Width="100" Height="30"/></StackPanel>"#;
+    let workspace = DesignerWorkspace::new(source).unwrap();
+    let parent = ThemeVariantScope::new();
+    parent.set_requested_theme_variant(Some(ThemeVariant::light()));
+    parent.set_child(Some(workspace.control()));
+    let window = Window::new();
+    window.set_width(1400.0);
+    window.set_height(900.0);
+    window.set_content(Some(Control::boxed(parent.clone())));
+    window.show();
+    workspace
+        .set_preview_environment(PreviewEnvironment {
+            theme: PreviewTheme::Inherit,
+            ..Default::default()
+        })
+        .unwrap();
+    window.update_layout();
+    let session = workspace.session();
+    session.borrow_mut().refresh_runtime_mapping();
+    let root = session.borrow().document().ast().root();
+    let target = session
+        .borrow()
+        .document()
+        .ast()
+        .find_name("Target")
+        .unwrap();
+    session.borrow_mut().select([target]);
+    let layout = session
+        .borrow()
+        .layout_helper_snapshot(root, None, &[])
+        .unwrap();
+    let data = DesignTimeSnapshot::capture(&session.borrow());
+    let focus = session.borrow().focus_order_snapshot().unwrap();
+    let layer = session.borrow().capture_layer_edit(&[target]).unwrap();
+    let epoch = session.borrow().definition_scope_epoch();
+    let revision = session.borrow().document().revision();
+    assert!(layout.is_current(&session.borrow()));
+    assert!(data.is_current(&session.borrow()));
+    assert!(focus.is_current(&session.borrow()));
+
+    parent.set_flow_direction(FlowDirection::RightToLeft);
+    parent.set_flow_direction(FlowDirection::LeftToRight);
+    parent.set_requested_theme_variant(Some(ThemeVariant::dark()));
+    parent.set_requested_theme_variant(Some(ThemeVariant::light()));
+
+    assert!(session.borrow().definition_scope_epoch() > epoch);
+    assert!(!layout.is_current(&session.borrow()));
+    assert!(!data.is_current(&session.borrow()));
+    assert!(!focus.is_current(&session.borrow()));
+    assert!(
+        session
+            .borrow_mut()
+            .apply_layer_edit(&layer, LayerCommand::ToggleLock)
+            .is_err()
+    );
+    assert_eq!(session.borrow().document().source(), source);
+    assert_eq!(session.borrow().document().revision(), revision);
+    assert!(!session.borrow().can_undo());
+
+    let epoch = session.borrow().definition_scope_epoch();
+    parent.set_flow_direction(FlowDirection::LeftToRight);
+    parent.set_requested_theme_variant(Some(ThemeVariant::light()));
+    assert_eq!(session.borrow().definition_scope_epoch(), epoch);
+    window.close();
+}
+
+#[test]
+fn explicit_preview_conditions_retire_once_and_mask_unrelated_inherited_changes() {
+    let _app = UnitTestApplication::start(TestServices::styled_window());
+    let workspace = DesignerWorkspace::new(crate::STARTER_XAML).unwrap();
+    let parent = ThemeVariantScope::new();
+    parent.set_requested_theme_variant(Some(ThemeVariant::light()));
+    parent.set_child(Some(workspace.control()));
+    let session = workspace.session();
+    let epoch = session.borrow().definition_scope_epoch();
+    let environment = PreviewEnvironment {
+        width: 390.0,
+        height: 844.0,
+        theme: PreviewTheme::Dark,
+        flow_direction: PreviewFlowDirection::RightToLeft,
+    };
+    workspace.set_preview_environment(environment).unwrap();
+    assert_eq!(session.borrow().definition_scope_epoch(), epoch + 1);
+    workspace.set_preview_environment(environment).unwrap();
+    assert_eq!(session.borrow().definition_scope_epoch(), epoch + 1);
+
+    parent.set_requested_theme_variant(Some(ThemeVariant::dark()));
+    parent.set_flow_direction(FlowDirection::RightToLeft);
+    parent.set_requested_theme_variant(Some(ThemeVariant::light()));
+    parent.set_flow_direction(FlowDirection::LeftToRight);
+    assert_eq!(session.borrow().definition_scope_epoch(), epoch + 1);
+    assert_eq!(session.borrow().document().source(), crate::STARTER_XAML);
+    assert!(!session.borrow().can_undo());
+}
+
+#[test]
+fn inherited_preview_invalidation_defers_safely_while_the_session_is_borrowed() {
+    use crate::DesignTimeSnapshot;
+    use ferroui_base::threading::{Dispatcher, DispatcherPriority};
+
+    let _app = UnitTestApplication::start(TestServices::styled_window());
+    let workspace = DesignerWorkspace::new(crate::STARTER_XAML).unwrap();
+    let parent = ThemeVariantScope::new();
+    parent.set_requested_theme_variant(Some(ThemeVariant::light()));
+    parent.set_child(Some(workspace.control()));
+    workspace
+        .set_preview_environment(PreviewEnvironment {
+            theme: PreviewTheme::Inherit,
+            ..Default::default()
+        })
+        .unwrap();
+    let session = workspace.session();
+    let snapshot = DesignTimeSnapshot::capture(&session.borrow());
+    let epoch = session.borrow().definition_scope_epoch();
+    let held = session.borrow_mut();
+    parent.set_requested_theme_variant(Some(ThemeVariant::dark()));
+    parent.set_flow_direction(FlowDirection::RightToLeft);
+    parent.set_requested_theme_variant(Some(ThemeVariant::light()));
+    parent.set_flow_direction(FlowDirection::LeftToRight);
+    assert_eq!(held.definition_scope_epoch(), epoch);
+    drop(held);
+    Dispatcher::ui_thread().run_jobs(Some(DispatcherPriority::SEND));
+    assert_eq!(session.borrow().definition_scope_epoch(), epoch + 1);
+    assert!(!snapshot.is_current(&session.borrow()));
+    assert_eq!(session.borrow().document().source(), crate::STARTER_XAML);
+    assert!(!session.borrow().can_undo());
+}
