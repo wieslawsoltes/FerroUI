@@ -7,12 +7,14 @@ mod affine_manipulation;
 mod animation_runtime;
 mod animation_session;
 mod asset_toolbox;
+mod chrome;
 mod collaboration;
 mod editors;
 mod grid_track_editor;
 mod interaction_session;
 mod preview_host;
 mod preview_source;
+mod property_color_editor;
 mod property_controls;
 mod runtime;
 mod session;
@@ -21,7 +23,8 @@ mod surface;
 mod timeline_lane;
 mod workspace;
 
-pub use asset_toolbox::{AssetIcon, AssetToolbox, DesignerAsset, default_designer_assets};
+pub use asset_toolbox::{AssetIcon, AssetToolbox, AssetViewMode, DesignerAsset, default_designer_assets};
+pub use chrome::designer_chrome_style;
 pub use editors::{PropertyEditorContext, PropertyEditorFactory};
 pub use ferroui_designer_core::{Document, Edit, NodeId};
 pub use ferroui_designer_tools as tools;
@@ -29,6 +32,7 @@ pub use grid_track_editor::GridTrackEditor;
 pub use preview_host::{
     PreviewFactory, PreviewHostOptions, PreviewRequest, ResourcePreviewFactory,
 };
+pub use property_color_editor::PropertyColorEditor;
 pub use property_controls::{
     PropertyComponentsEditor, PropertyComponentsKind, PropertyNumberOptions,
     PropertyNumberScrubber, property_value_data_format,
@@ -36,7 +40,7 @@ pub use property_controls::{
 pub use runtime::{PreviewStatus, RuntimeNode};
 pub use session::DesignerSession;
 pub use surface::{DesignGesture, DesignSurface};
-pub use timeline_lane::TimelineLane;
+pub use timeline_lane::{EasingPreview, TimelineLane};
 pub use workspace::shell::{NavigationPane, WorkspaceViewMode};
 pub use workspace::{DesignerWorkspace, OutlineCommand, OutlineMode};
 

@@ -1,0 +1,304 @@
+<Styles xmlns="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+  <!-- Semantic tokens are deliberately private to the editor; no application-theme
+       resource is overridden, including inside the live preview. -->
+  <Styles.Resources>
+    <SolidColorBrush x:Key="DesignerCanvasBrush" Color="#17181C" />
+    <SolidColorBrush x:Key="DesignerChromeBrush" Color="#202126" />
+    <SolidColorBrush x:Key="DesignerPanelBrush" Color="#25262B" />
+    <SolidColorBrush x:Key="DesignerFieldBrush" Color="#303138" />
+    <SolidColorBrush x:Key="DesignerHoverBrush" Color="#393B44" />
+    <SolidColorBrush x:Key="DesignerBorderBrush" Color="#3B3D46" />
+    <SolidColorBrush x:Key="DesignerTextBrush" Color="#F2F3F5" />
+    <SolidColorBrush x:Key="DesignerSecondaryBrush" Color="#A9ADBA" />
+    <SolidColorBrush x:Key="DesignerMutedBrush" Color="#979CAA" />
+    <SolidColorBrush x:Key="DesignerAccentBrush" Color="#79A8FF" />
+    <SolidColorBrush x:Key="DesignerSelectionBrush" Color="#2D4061" />
+    <SolidColorBrush x:Key="DesignerMotionBrush" Color="#B6A2F6" />
+    <SolidColorBrush x:Key="DesignerRecordingBrush" Color="#F48B95" />
+    <SolidColorBrush x:Key="DesignerSuccessBrush" Color="#8CC6AF" />
+  </Styles.Resources>
+  <Style Selector=":is(Control).designer-chrome">
+    <Setter Property="TextElement.Foreground" Value="{DynamicResource DesignerTextBrush}" />
+    <Setter Property="TextElement.FontFamily" Value="Segoe UI Variable Text, Segoe UI, Noto Sans, DejaVu Sans, sans-serif" />
+    <Setter Property="TextElement.FontSize" Value="12" />
+  </Style>
+  <Style Selector=".designer-chrome TextBlock">
+    <Setter Property="FontSize" Value="12" />
+    <Setter Property="FontFamily" Value="Segoe UI Variable Text, Segoe UI, Noto Sans, DejaVu Sans, sans-serif" />
+  </Style>
+  <Style Selector=".designer-chrome TextBlock.designer-muted">
+    <Setter Property="Foreground" Value="{DynamicResource DesignerMutedBrush}" />
+    <Setter Property="FontSize" Value="11" />
+  </Style>
+  <Style Selector=".designer-chrome TextBlock.designer-section-title">
+    <Setter Property="Foreground" Value="{DynamicResource DesignerSecondaryBrush}" />
+    <Setter Property="FontSize" Value="11" />
+    <Setter Property="FontWeight" Value="SemiBold" />
+  </Style>
+  <Style Selector=".designer-chrome Button">
+    <Setter Property="MinHeight" Value="26" />
+    <Setter Property="FontSize" Value="12" />
+    <Setter Property="CornerRadius" Value="4" />
+    <Setter Property="Padding" Value="8,3" />
+    <Setter Property="Background" Value="{DynamicResource DesignerFieldBrush}" />
+    <Setter Property="Foreground" Value="{DynamicResource DesignerTextBrush}" />
+    <Setter Property="BorderBrush" Value="Transparent" />
+    <Setter Property="BorderThickness" Value="1" />
+  </Style>
+  <Style Selector=".designer-chrome Button:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+    <Setter Property="Background" Value="{DynamicResource DesignerHoverBrush}" />
+    <Setter Property="BorderBrush" Value="Transparent" />
+    <Setter Property="Foreground" Value="{DynamicResource DesignerTextBrush}" />
+  </Style>
+  <Style Selector=".designer-chrome Button:pressed /template/ ContentPresenter#PART_ContentPresenter">
+    <Setter Property="Background" Value="{DynamicResource DesignerBorderBrush}" />
+    <Setter Property="Foreground" Value="{DynamicResource DesignerTextBrush}" />
+  </Style>
+  <Style Selector=".designer-chrome Button:disabled /template/ ContentPresenter#PART_ContentPresenter">
+    <Setter Property="Background" Value="Transparent" />
+    <Setter Property="Foreground" Value="{DynamicResource DesignerMutedBrush}" />
+    <Setter Property="BorderBrush" Value="Transparent" />
+    <Setter Property="Opacity" Value="0.5" />
+  </Style>
+  <Style Selector=".designer-chrome Button.nav">
+    <Setter Property="Background" Value="Transparent" />
+    <Setter Property="Foreground" Value="{DynamicResource DesignerSecondaryBrush}" />
+    <Setter Property="Padding" Value="8,4" />
+  </Style>
+  <Style Selector=".designer-chrome Button.icon">
+    <Setter Property="Width" Value="28" />
+    <Setter Property="Height" Value="28" />
+    <Setter Property="Padding" Value="6" />
+    <Setter Property="Background" Value="Transparent" />
+    <Setter Property="Foreground" Value="{DynamicResource DesignerSecondaryBrush}" />
+  </Style>
+  <Style Selector=".designer-chrome Button.active /template/ ContentPresenter#PART_ContentPresenter">
+    <Setter Property="Background" Value="{DynamicResource DesignerSelectionBrush}" />
+    <Setter Property="Foreground" Value="{DynamicResource DesignerAccentBrush}" />
+    <Setter Property="BorderBrush" Value="Transparent" />
+  </Style>
+  <Style Selector=".designer-chrome Button.active">
+    <Setter Property="Foreground" Value="{DynamicResource DesignerAccentBrush}" />
+  </Style>
+  <Style Selector=".designer-chrome Button.primary /template/ ContentPresenter#PART_ContentPresenter">
+    <Setter Property="Background" Value="{DynamicResource DesignerAccentBrush}" />
+    <Setter Property="Foreground" Value="#FF14233D" />
+    <Setter Property="BorderBrush" Value="Transparent" />
+  </Style>
+  <Style Selector=".designer-chrome Button.primary:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+    <Setter Property="Background" Value="#FF9DBFFF" />
+  </Style>
+  <Style Selector=".designer-chrome Button.recording /template/ ContentPresenter#PART_ContentPresenter">
+    <Setter Property="Background" Value="#FF4B2D39" />
+    <Setter Property="Foreground" Value="{DynamicResource DesignerRecordingBrush}" />
+  </Style>
+  <Style Selector=".designer-chrome Button.panel-tab">
+    <Setter Property="Background" Value="Transparent" />
+    <Setter Property="Foreground" Value="{DynamicResource DesignerSecondaryBrush}" />
+    <Setter Property="CornerRadius" Value="0" />
+    <Setter Property="Padding" Value="10,9" />
+    <Setter Property="BorderThickness" Value="0,0,0,2" />
+  </Style>
+  <Style Selector=".designer-chrome Button.panel-tab.active /template/ ContentPresenter#PART_ContentPresenter">
+    <Setter Property="Background" Value="Transparent" />
+    <Setter Property="Foreground" Value="{DynamicResource DesignerTextBrush}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource DesignerAccentBrush}" />
+  </Style>
+  <Style Selector=".designer-chrome Button.document-tab">
+    <Setter Property="MinHeight" Value="30" />
+    <Setter Property="Padding" Value="12,5,8,5" />
+    <Setter Property="CornerRadius" Value="4,0,0,0" />
+    <Setter Property="Background" Value="Transparent" />
+    <Setter Property="Foreground" Value="{DynamicResource DesignerSecondaryBrush}" />
+    <Setter Property="BorderThickness" Value="0" />
+  </Style>
+  <Style Selector=".designer-chrome Button.document-tab-close">
+    <Setter Property="MinHeight" Value="30" />
+    <Setter Property="CornerRadius" Value="0,4,0,0" />
+    <Setter Property="Background" Value="Transparent" />
+    <Setter Property="BorderThickness" Value="0" />
+    <Setter Property="Foreground" Value="{DynamicResource DesignerSecondaryBrush}" />
+  </Style>
+  <Style Selector=".designer-chrome Button.document-tab.active /template/ ContentPresenter#PART_ContentPresenter">
+    <Setter Property="Background" Value="{DynamicResource DesignerPanelBrush}" />
+    <Setter Property="Foreground" Value="{DynamicResource DesignerTextBrush}" />
+  </Style>
+  <Style Selector=".designer-chrome Button.document-tab-close.active /template/ ContentPresenter#PART_ContentPresenter">
+    <Setter Property="Background" Value="{DynamicResource DesignerPanelBrush}" />
+    <Setter Property="Foreground" Value="{DynamicResource DesignerSecondaryBrush}" />
+  </Style>
+  <!-- Inset inputs have an even outline. The native underline is inappropriate in
+       dense editing grids; full focus outlines preserve a clear keyboard affordance. -->
+  <Style Selector=".designer-chrome TextBox">
+    <Setter Property="FontSize" Value="12" />
+    <Setter Property="MinHeight" Value="26" />
+    <Setter Property="Padding" Value="7,3" />
+    <Setter Property="CornerRadius" Value="4" />
+    <Setter Property="Background" Value="{DynamicResource DesignerFieldBrush}" />
+    <Setter Property="Foreground" Value="{DynamicResource DesignerTextBrush}" />
+    <Setter Property="PlaceholderForeground" Value="{DynamicResource DesignerMutedBrush}" />
+    <Setter Property="BorderBrush" Value="Transparent" />
+    <Setter Property="BorderThickness" Value="1" />
+    <Setter Property="SelectionBrush" Value="{DynamicResource DesignerSelectionBrush}" />
+    <Setter Property="CaretBrush" Value="{DynamicResource DesignerAccentBrush}" />
+  </Style>
+  <Style Selector=".designer-chrome TextBox:pointerover /template/ Border#BorderElement">
+    <Setter Property="Background" Value="{DynamicResource DesignerFieldBrush}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource DesignerBorderBrush}" />
+    <Setter Property="BorderThickness" Value="1" />
+  </Style>
+  <Style Selector=".designer-chrome TextBox:focus /template/ Border#BorderElement">
+    <Setter Property="Background" Value="{DynamicResource DesignerChromeBrush}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource DesignerAccentBrush}" />
+    <Setter Property="BorderThickness" Value="1" />
+  </Style>
+  <Style Selector=".designer-chrome TextBox:disabled /template/ Border#BorderElement">
+    <Setter Property="Background" Value="{DynamicResource DesignerChromeBrush}" />
+    <Setter Property="BorderBrush" Value="Transparent" />
+  </Style>
+  <Style Selector=".designer-chrome TextBox:focus /template/ ScrollViewer#PART_ScrollViewer">
+    <Setter Property="Foreground" Value="{DynamicResource DesignerTextBrush}" />
+  </Style>
+  <Style Selector=".designer-chrome TextBox:pointerover /template/ ScrollViewer#PART_ScrollViewer">
+    <Setter Property="Foreground" Value="{DynamicResource DesignerTextBrush}" />
+  </Style>
+  <Style Selector=".designer-chrome TextBox /template/ Button#DeleteButton">
+    <Setter Property="IsVisible" Value="False" />
+  </Style>
+  <Style Selector=".designer-chrome NumericUpDown">
+    <Setter Property="MinHeight" Value="26" />
+    <Setter Property="FontSize" Value="12" />
+    <Setter Property="Padding" Value="6,3" />
+    <Setter Property="Background" Value="{DynamicResource DesignerFieldBrush}" />
+    <Setter Property="Foreground" Value="{DynamicResource DesignerTextBrush}" />
+    <Setter Property="BorderBrush" Value="Transparent" />
+    <Setter Property="BorderThickness" Value="1" />
+  </Style>
+  <Style Selector=".designer-chrome ComboBox">
+    <Setter Property="FontSize" Value="12" />
+    <Setter Property="MinHeight" Value="26" />
+    <Setter Property="Padding" Value="7,3" />
+    <Setter Property="CornerRadius" Value="4" />
+    <Setter Property="Background" Value="{DynamicResource DesignerFieldBrush}" />
+    <Setter Property="Foreground" Value="{DynamicResource DesignerTextBrush}" />
+    <Setter Property="BorderBrush" Value="Transparent" />
+    <Setter Property="BorderThickness" Value="1" />
+  </Style>
+  <Style Selector=".designer-chrome ComboBox /template/ Border#Background">
+    <Setter Property="MinHeight" Value="26" />
+    <Setter Property="MinWidth" Value="0" />
+  </Style>
+  <Style Selector=".designer-chrome ComboBox /template/ Grid#LayoutRoot">
+    <Setter Property="ColumnDefinitions" Value="*,24" />
+  </Style>
+  <Style Selector=".designer-chrome ComboBox:pointerover /template/ Border#Background">
+    <Setter Property="Background" Value="{DynamicResource DesignerHoverBrush}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource DesignerBorderBrush}" />
+  </Style>
+  <Style Selector=".designer-chrome ComboBox:focus-visible /template/ Border#Background">
+    <Setter Property="BorderBrush" Value="{DynamicResource DesignerAccentBrush}" />
+  </Style>
+  <Style Selector=".designer-chrome CommandBar">
+    <Setter Property="MinHeight" Value="30" />
+    <Setter Property="Background" Value="Transparent" />
+  </Style>
+  <Style Selector=".designer-chrome Button.property-category">
+    <Setter Property="MinHeight" Value="32" />
+    <Setter Property="Background" Value="Transparent" />
+    <Setter Property="CornerRadius" Value="0" />
+    <Setter Property="FontWeight" Value="SemiBold" />
+    <Setter Property="FontSize" Value="11" />
+  </Style>
+  <Style Selector=".designer-chrome Button.property-reset">
+    <Setter Property="Background" Value="Transparent" />
+    <Setter Property="Foreground" Value="{DynamicResource DesignerMutedBrush}" />
+    <Setter Property="BorderThickness" Value="0" />
+  </Style>
+  <Style Selector=".designer-chrome Button.property-choice-item">
+    <Setter Property="Background" Value="Transparent" />
+    <Setter Property="BorderThickness" Value="0" />
+  </Style>
+  <Style Selector=".designer-chrome Button.property-link">
+    <Setter Property="Background" Value="Transparent" />
+    <Setter Property="Foreground" Value="{DynamicResource DesignerSecondaryBrush}" />
+    <Setter Property="BorderThickness" Value="0" />
+  </Style>
+  <Style Selector=".designer-chrome Button.property-track-command">
+    <Setter Property="Background" Value="Transparent" />
+    <Setter Property="Foreground" Value="{DynamicResource DesignerSecondaryBrush}" />
+    <Setter Property="BorderThickness" Value="0" />
+  </Style>
+  <Style Selector=".designer-chrome TextBox.property-expression">
+    <Setter Property="Foreground" Value="{DynamicResource DesignerMotionBrush}" />
+  </Style>
+  <Style Selector=".designer-chrome TextBox.property-expression /template/ ScrollViewer#PART_ScrollViewer">
+    <Setter Property="Foreground" Value="{DynamicResource DesignerMotionBrush}" />
+  </Style>
+  <Style Selector=".designer-chrome TreeDataGrid">
+    <Setter Property="Background" Value="Transparent" />
+    <Setter Property="Foreground" Value="{DynamicResource DesignerTextBrush}" />
+    <Setter Property="FontSize" Value="12" />
+    <Setter Property="BorderThickness" Value="0" />
+  </Style>
+  <Style Selector=".designer-chrome TreeDataGridRow">
+    <Setter Property="MinHeight" Value="28" />
+  </Style>
+  <Style Selector=".designer-chrome TreeDataGridColumnHeader">
+    <Setter Property="MinHeight" Value="26" />
+    <Setter Property="Foreground" Value="{DynamicResource DesignerSecondaryBrush}" />
+    <Setter Property="FontSize" Value="11" />
+    <Setter Property="Padding" Value="8,4" />
+  </Style>
+  <Style Selector=".designer-chrome Button.designer-track-header">
+    <Setter Property="Background" Value="Transparent" />
+    <Setter Property="CornerRadius" Value="0" />
+    <Setter Property="BorderThickness" Value="0" />
+    <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+  </Style>
+  <Style Selector=".designer-chrome Button.designer-timeline-tool">
+    <Setter Property="Background" Value="Transparent" />
+    <Setter Property="Padding" Value="5,3" />
+  </Style>
+  <Style Selector=".designer-chrome TextBlock.designer-motion">
+    <Setter Property="Foreground" Value="{DynamicResource DesignerMotionBrush}" />
+  </Style>
+  <Style Selector=".designer-chrome Button.designer-motion /template/ ContentPresenter#PART_ContentPresenter">
+    <Setter Property="Background" Value="#FF3D344F" />
+    <Setter Property="Foreground" Value="#FFD6C8FF" />
+    <Setter Property="BorderBrush" Value="Transparent" />
+  </Style>
+  <Style Selector=".designer-chrome Button.designer-motion:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+    <Setter Property="Background" Value="#FF4A3E63" />
+  </Style>
+  <Style Selector=".designer-chrome TextBlock.layer-name">
+    <Setter Property="Foreground" Value="{DynamicResource DesignerTextBrush}" />
+  </Style>
+  <Style Selector=".designer-chrome TextBlock.layer-type">
+    <Setter Property="Foreground" Value="{DynamicResource DesignerSecondaryBrush}" />
+  </Style>
+  <Style Selector=".designer-chrome TextBlock.layer-metadata">
+    <Setter Property="Foreground" Value="{DynamicResource DesignerMutedBrush}" />
+  </Style>
+  <Style Selector=".designer-chrome .designer-layer-tree TreeDataGridRow:selected TextBlock">
+    <Setter Property="Foreground" Value="{DynamicResource DesignerTextBrush}" />
+  </Style>
+  <Style Selector=".designer-chrome .designer-project-tree TreeDataGridRow:selected TextBlock">
+    <Setter Property="Foreground" Value="{DynamicResource DesignerTextBrush}" />
+  </Style>
+  <Style Selector=".designer-chrome Button.asset-tile">
+    <Setter Property="Background" Value="#FF2C2D34" />
+    <Setter Property="BorderBrush" Value="#FF363842" />
+    <Setter Property="CornerRadius" Value="4" />
+  </Style>
+  <Style Selector=".designer-chrome Button.asset-tile:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+    <Setter Property="Background" Value="#FF343741" />
+    <Setter Property="BorderBrush" Value="#FF4B5060" />
+  </Style>
+  <Style Selector=".designer-chrome Button.asset-row">
+    <Setter Property="Background" Value="Transparent" />
+    <Setter Property="BorderBrush" Value="Transparent" />
+  </Style>
+  <Style Selector="GridSplitter.designer-splitter:pointerover">
+    <Setter Property="Background" Value="{DynamicResource DesignerAccentBrush}" />
+  </Style>
+</Styles>

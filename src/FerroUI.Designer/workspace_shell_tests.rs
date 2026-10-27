@@ -124,6 +124,47 @@ fn fit_and_timeline_commands_use_the_actual_workspace_geometry() {
 }
 
 #[test]
+fn canvas_focus_restores_resized_docks_timeline_and_pending_authoring_state() {
+    let _app = UnitTestApplication::start(TestServices::styled_window());
+    let workspace = DesignerWorkspace::new(STARTER_XAML).unwrap();
+    let root = workspace.control();
+    let layout = root.get_control::<Grid>("MainLayout");
+    layout.column_definitions().get(0).set_width(ferroui_controls::GridLength::from_pixels(280.0));
+    layout.column_definitions().get(4).set_width(ferroui_controls::GridLength::from_pixels(360.0));
+    let size = Size::new(1600.0, 1040.0);
+    root.measure(size);
+    root.arrange(Rect::from_size(size));
+    root.update_layout();
+    workspace.set_navigation_pane(NavigationPane::Assets);
+    workspace.source_editor().set_text(Some("<Canvas>"));
+    let revision = workspace.session().borrow().document().revision();
+
+    click(&workspace, "FocusCanvas");
+    assert!(workspace.canvas_focused());
+    assert!(!workspace.timeline_visible());
+    for name in ["NavigationDock", "InspectorDock", "NavigationDivider", "InspectorDivider"] {
+        assert!(!root.get_control::<Control>(name).is_visible());
+    }
+    click(&workspace, "FocusCanvas");
+    root.measure(size);
+    root.arrange(Rect::from_size(size));
+    root.update_layout();
+    assert!(!workspace.canvas_focused());
+    assert!(workspace.timeline_visible());
+    assert_eq!(layout.column_definitions().get(0).actual_width(), 280.0);
+    assert_eq!(layout.column_definitions().get(4).actual_width(), 360.0);
+    assert_eq!(workspace.navigation_pane(), NavigationPane::Assets);
+    assert_eq!(workspace.source_editor().text().as_deref(), Some("<Canvas>"));
+    assert_eq!(workspace.session().borrow().document().revision(), revision);
+
+    workspace.set_timeline_visible(false);
+    workspace.set_canvas_focused(true);
+    workspace.set_canvas_focused(true);
+    workspace.set_canvas_focused(false);
+    assert!(!workspace.timeline_visible(), "a previously hidden timeline stays hidden");
+}
+
+#[test]
 fn read_only_source_input_restores_the_buffer_without_staging_or_changing_history() {
     use ferroui_base::input::{DragDropEffects, InputElement, TextInputEventArgs};
     use ferroui_controls_treedatagrid::TreeDataGridRowDragStartedEventArgs;

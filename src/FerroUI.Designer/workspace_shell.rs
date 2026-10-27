@@ -1,7 +1,7 @@
 //! Shell navigation is independent of document edits and runtime inspection.
 //! Hiding a pane keeps its control, selection, pending text and scroll state alive.
 use super::{DesignerWorkspace, OutlineCommand, OutlineMode};
-use ferroui_base::input::{InputElement, Key};
+use ferroui_base::input::{InputElement, Key, KeyModifiers};
 use ferroui_controls::{
     Border, Button, Control, Grid, GridLength, MenuItem, ScrollViewer, TextBlock,
 };
@@ -31,6 +31,9 @@ pub(super) struct WorkspaceShell {
     navigation: Cell<NavigationPane>,
     split_height: Cell<f64>,
     timeline_height: Cell<f64>,
+    canvas_focus: Cell<bool>,
+    dock_widths: Cell<(f64, f64)>,
+    focused_timeline_was_visible: Cell<bool>,
     arrange_ast: RefCell<Option<Arc<ferroui_designer_core::Ast>>>,
     arrange_selection: RefCell<Vec<ferroui_designer_core::NodeId>>,
     arrange_enabled: Cell<bool>,
@@ -42,7 +45,10 @@ impl Default for WorkspaceShell {
             view: Cell::new(WorkspaceViewMode::Design),
             navigation: Cell::new(NavigationPane::Layers),
             split_height: Cell::new(260.0),
-            timeline_height: Cell::new(196.0),
+            timeline_height: Cell::new(220.0),
+            canvas_focus: Cell::new(false),
+            dock_widths: Cell::new((248.0, 320.0)),
+            focused_timeline_was_visible: Cell::new(true),
             arrange_ast: RefCell::new(None),
             arrange_selection: RefCell::new(Vec::new()),
             arrange_enabled: Cell::new(false),
@@ -75,12 +81,15 @@ impl DesignerWorkspace {
             .get_control::<Control>("ArtboardScroll")
             .set_is_visible(canvas);
         self.root
+            .get_control::<Control>("CanvasViewport")
+            .set_is_visible(canvas);
+        self.root
             .get_control::<Control>("SourceDivider")
             .set_is_visible(split);
         source.set_is_visible(code);
         let rows = layout.row_definitions();
         rows.get(1)
-            .set_height(GridLength::from_pixels(if canvas { 34.0 } else { 0.0 }));
+            .set_height(GridLength::from_pixels(if canvas { 32.0 } else { 0.0 }));
         rows.get(2).set_height(if canvas {
             GridLength::STAR
         } else {
@@ -134,6 +143,44 @@ impl DesignerWorkspace {
             .is_visible()
     }
 
+    /// Whether the workspace is temporarily giving its side docks and timeline to the canvas.
+    pub fn canvas_focused(&self) -> bool {
+        self.shell.canvas_focus.get()
+    }
+
+    /// Temporarily hide the side docks and timeline without rebuilding their controls.
+    /// Returning restores their measured widths, timeline height and previous visibility.
+    /// Document selection, pending source, panel modes and scroll positions stay intact.
+    pub fn set_canvas_focused(&self, focused: bool) {
+        if focused == self.canvas_focused() {
+            return;
+        }
+        let layout = self.root.get_control::<Grid>("MainLayout");
+        let columns = layout.column_definitions();
+        if focused {
+            let current = self.shell.dock_widths.get();
+            let left = columns.get(0).actual_width();
+            let right = columns.get(4).actual_width();
+            self.shell.dock_widths.set((
+                if left >= 120.0 { left } else { current.0 },
+                if right >= 160.0 { right } else { current.1 },
+            ));
+            self.shell.focused_timeline_was_visible.set(self.timeline_visible());
+            self.set_timeline_visible(false);
+        } else {
+            self.set_timeline_visible(self.shell.focused_timeline_was_visible.get());
+        }
+        let (left, right) = self.shell.dock_widths.get();
+        for (index, width) in [(0, left), (1, 1.0), (3, 1.0), (4, right)] {
+            columns.get(index).set_width(GridLength::from_pixels(if focused { 0.0 } else { width }));
+        }
+        for name in ["NavigationDock", "NavigationDivider", "InspectorDock", "InspectorDivider"] {
+            self.root.get_control::<Control>(name).set_is_visible(!focused);
+        }
+        self.shell.canvas_focus.set(focused);
+        self.root.get_control::<Button>("FocusCanvas").classes().set("active", focused);
+    }
+
     /// Restores a user's resized timeline height when reopening the pane.
     pub fn set_timeline_visible(&self, visible: bool) {
         let timeline = self.root.get_control::<Control>("TimelinePane");
@@ -165,11 +212,11 @@ impl DesignerWorkspace {
     pub fn fit_artboard(&self) -> Result<(), String> {
         let viewport = self.root.get_control::<ScrollViewer>("ArtboardScroll");
         let size = viewport.bounds().size();
-        if !viewport.is_visible() || size.width <= 80.0 || size.height <= 80.0 {
+        if !viewport.is_visible() || size.width <= 80.0 || size.height <= 116.0 {
             return Err("Show and arrange the design canvas before fitting the artboard".into());
         }
         let (width, height) = self.artboard_size();
-        self.set_zoom(((size.width - 80.0) / width).min((size.height - 80.0) / height));
+        self.set_zoom(((size.width - 80.0) / width).min((size.height - 116.0) / height));
         Ok(())
     }
 
@@ -193,6 +240,18 @@ impl DesignerWorkspace {
             ("NewAnimation", "New animation program"),
             ("DuplicateAnimation", "Duplicate animation program"),
             ("DeleteAnimation", "Delete animation program"),
+            ("FocusCanvas", "Focus canvas and restore panels"),
+            ("CollapseLayers", "Collapse layers, keeping selected paths visible"),
+            ("Play", "Play or pause animation"),
+            ("Stop", "Stop animation and rewind"),
+            ("PlayAll", "Play all animation programs"),
+            ("Record", "Toggle keyframe recording"),
+            ("Keyframe", "Add keyframe at playhead"),
+            ("CommitAnimation", "Save animation to XAML"),
+            ("TimelineToggle", "Show or hide timeline"),
+            ("TimelineDetails", "Animation name and target"),
+            ("AnimationSource", "Reveal animation XAML"),
+            ("AnimationSettings", "Animation settings"),
         ] {
             ferroui_controls::automation::AutomationProperties::set_name(
                 &self.root.get_control::<Button>(name),
@@ -268,6 +327,18 @@ impl DesignerWorkspace {
                 }
             });
         let weak = Rc::downgrade(self);
+        self.root.get_control::<Button>("CollapseLayers").click(move |_, _| {
+            if let Some(this) = weak.upgrade() {
+                this.collapse_outline();
+            }
+        });
+        let weak = Rc::downgrade(self);
+        self.root.get_control::<Button>("FocusCanvas").click(move |_, _| {
+            if let Some(this) = weak.upgrade() {
+                this.set_canvas_focused(!this.canvas_focused());
+            }
+        });
+        let weak = Rc::downgrade(self);
         self.root
             .get_control::<Button>("ZoomFit")
             .click(move |_, _| {
@@ -308,6 +379,16 @@ impl DesignerWorkspace {
         let weak = Rc::downgrade(self);
         self.root
             .add_handler(InputElement::key_down_event(), move |_, event| {
+                if event.key == Key::F
+                    && event.key_modifiers.intersects(KeyModifiers::CONTROL | KeyModifiers::META)
+                    && event.key_modifiers.contains(KeyModifiers::SHIFT)
+                {
+                    if let Some(this) = weak.upgrade() {
+                        this.set_canvas_focused(!this.canvas_focused());
+                        event.set_handled(true);
+                    }
+                    return;
+                }
                 if event.key == Key::F6 {
                     if let Some(this) = weak.upgrade() {
                         this.set_view_mode(match this.view_mode() {
@@ -394,6 +475,18 @@ impl DesignerWorkspace {
         self.root
             .get_control::<TextBlock>("CanvasSize")
             .set_text(Some(&format!("{width} × {height}")));
+        let session = self.session.borrow();
+        let uri = session.document_uri();
+        self.root.get_control::<TextBlock>("ArtboardTitle").set_text(Some(
+            uri.rsplit('/').next().filter(|name| !name.is_empty()).unwrap_or("Artboard"),
+        ));
+        self.root.get_control::<TextBlock>("OutlineHint").set_text(Some(
+            if self.outline_mode() == OutlineMode::Source {
+                "Drag to reorder · Alt + arrows to nest"
+            } else {
+                "Live inspection · select to reveal source"
+            },
+        ));
     }
 }
 

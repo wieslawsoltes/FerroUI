@@ -97,6 +97,7 @@ impl DesignerWorkspace {
                 .map_err(|error| error.to_string())?;
         let root = Ref::<Control>::from_xaml_object(&loaded)
             .ok_or("Designer shell did not load a control")?;
+        root.styles().add(crate::designer_chrome_style()?);
         let preview = root.get_control::<ContentControl>("Preview");
         let session = Rc::new(RefCell::new(match uri {
             Some(uri) => DesignerSession::with_uri(source, preview, uri)?,
@@ -397,6 +398,8 @@ impl DesignerWorkspace {
                     (Key::Z, true, true) | (Key::Y, true, _) => Some(Action::Redo),
                     (Key::Delete, false, _) => Some(Action::Delete),
                     (Key::D, true, _) => Some(Action::Duplicate),
+                    (Key::V, false, false) if event.key_modifiers.is_empty() => Some(Action::Select),
+                    (Key::I, false, false) if event.key_modifiers.is_empty() => Some(Action::Interact),
                     (Key::O, true, _) => {
                         this.request_open();
                         event.set_handled(true);
@@ -590,20 +593,12 @@ impl DesignerWorkspace {
                 .set_text(Some(&format!("{}", session.timeline().duration)));
         }
         self.guard.set(false);
-        self.root
-            .get_control::<Button>("Record")
-            .set_content(Some(Rc::new(if session.recording() {
-                "● Recording".to_owned()
-            } else {
-                "Record".to_owned()
-            })));
-        self.root
-            .get_control::<Button>("Play")
-            .set_content(Some(Rc::new(if session.is_playing() {
-                "Pause".to_owned()
-            } else {
-                "Play".to_owned()
-            })));
+        self.root.get_control::<TextBlock>("RecordLabel").set_text(Some(
+            if session.recording() { "Recording" } else { "Record" },
+        ));
+        self.root.get_control::<Button>("Record").classes().set("recording", session.recording());
+        self.root.get_control::<Control>("PlayIcon").set_is_visible(!session.is_playing());
+        self.root.get_control::<Control>("PauseIcon").set_is_visible(session.is_playing());
         self.root
             .get_control::<Button>("Undo")
             .set_is_enabled(session.can_undo());
