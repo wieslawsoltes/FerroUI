@@ -24,6 +24,8 @@ use std::time::Duration;
 #[path = "workspace_shell.rs"]
 pub(crate) mod shell;
 
+pub use inspector_drag::OutlineCommand;
+
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
 pub enum OutlineMode {
     #[default]
@@ -63,6 +65,7 @@ pub struct DesignerWorkspace {
     timeline_lanes: RefCell<Vec<WeakRef<crate::timeline_lane::TimelineLane>>>,
     toolbox: RefCell<Option<Rc<crate::asset_toolbox::AssetToolbox>>>,
     timeline_ui: RefCell<timeline::TimelineUi>,
+    layout: RefCell<layout::LayoutUi>,
     file: RefCell<Option<Rc<dyn ferroui_base::platform::storage::IStorageFile>>>,
     saved_source: RefCell<String>,
     pending_open: RefCell<Option<files::PendingDocument>>,
@@ -134,6 +137,7 @@ impl DesignerWorkspace {
             timeline_lanes: RefCell::new(Vec::new()),
             toolbox: RefCell::new(None),
             timeline_ui: RefCell::new(Default::default()),
+            layout: RefCell::new(Default::default()),
             file: RefCell::new(None),
             saved_source: RefCell::new(saved_source),
             pending_open: RefCell::new(None),
@@ -157,6 +161,7 @@ impl DesignerWorkspace {
     pub fn register_property_editor(self: &Rc<Self>, editor: Rc<dyn PropertyEditorFactory>) {
         self.property_editors.borrow_mut().insert(0, editor);
         self.rebuild_properties();
+        self.rebuild_layout();
     }
     pub fn control(&self) -> Ref<Control> {
         self.root.clone()
@@ -180,6 +185,7 @@ impl DesignerWorkspace {
         }
         self.rebuild_outline();
         self.rebuild_properties();
+        self.rebuild_layout();
         self.refresh_shell();
     }
     pub fn artboard_size(&self) -> (f64, f64) {
@@ -643,6 +649,7 @@ impl DesignerWorkspace {
         if changed {
             self.rebuild_outline();
             self.rebuild_properties();
+            self.rebuild_layout();
             self.rebuild_tracks();
             self.rebuild_document_tabs();
             self.refresh_source_tools();
@@ -779,6 +786,8 @@ mod files;
 mod inspector_drag;
 #[path = "inspector_controls.rs"]
 mod inspectors;
+#[path = "workspace_layout.rs"]
+mod layout;
 #[path = "workspace_project.rs"]
 mod project;
 #[path = "workspace_sharing.rs"]

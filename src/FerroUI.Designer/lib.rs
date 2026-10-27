@@ -4,34 +4,41 @@
 //! visual tools and automation. [`DesignerWorkspace`] is an optional embeddable view
 //! of that session. Neither starts a window, server or background transport.
 mod affine_manipulation;
-mod asset_toolbox;
-mod animation_session;
 mod animation_runtime;
+mod animation_session;
+mod asset_toolbox;
 mod collaboration;
-pub mod sharing;
 mod editors;
+mod grid_track_editor;
 mod interaction_session;
 mod preview_host;
 mod preview_source;
+mod property_controls;
 mod runtime;
 mod session;
+pub mod sharing;
 mod surface;
 mod timeline_lane;
 mod workspace;
 
-pub use editors::{PropertyEditorContext, PropertyEditorFactory};
 pub use asset_toolbox::{AssetIcon, AssetToolbox, DesignerAsset, default_designer_assets};
+pub use editors::{PropertyEditorContext, PropertyEditorFactory};
 pub use ferroui_designer_core::{Document, Edit, NodeId};
 pub use ferroui_designer_tools as tools;
+pub use grid_track_editor::GridTrackEditor;
 pub use preview_host::{
     PreviewFactory, PreviewHostOptions, PreviewRequest, ResourcePreviewFactory,
+};
+pub use property_controls::{
+    PropertyComponentsEditor, PropertyComponentsKind, PropertyNumberOptions,
+    PropertyNumberScrubber, property_value_data_format,
 };
 pub use runtime::{PreviewStatus, RuntimeNode};
 pub use session::DesignerSession;
 pub use surface::{DesignGesture, DesignSurface};
 pub use timeline_lane::TimelineLane;
-pub use workspace::{DesignerWorkspace, OutlineMode};
 pub use workspace::shell::{NavigationPane, WorkspaceViewMode};
+pub use workspace::{DesignerWorkspace, OutlineCommand, OutlineMode};
 
 /// The self-contained example opened by Designer Studio and usable by hosts.
 pub const STARTER_XAML: &str = include_str!("Starter.xaml");
@@ -39,11 +46,11 @@ pub const STARTER_XAML: &str = include_str!("Starter.xaml");
 #[cfg(test)]
 mod native_extensions_tests;
 #[cfg(test)]
+mod tests;
+#[cfg(test)]
 mod workspace_authoring_tests;
 #[cfg(test)]
 mod workspace_shell_tests;
-#[cfg(test)]
-mod tests;
 mod workspace_tools;
 
 #[cfg(feature = "mcp")]

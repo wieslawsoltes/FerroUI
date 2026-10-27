@@ -1,5 +1,5 @@
 <Grid xmlns="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-      Name="WorkspaceRoot" RowDefinitions="48,48,*,1,220,28" Background="#FF202020">
+      Name="WorkspaceRoot" RowDefinitions="36,38,*,1,196,24" Background="#FF202020">
   <Grid.Styles>
     <StyleInclude Source="ferres://FerroUI.Controls.TreeDataGrid/Themes/Generic.xaml" />
     <Style Selector=".designer-chrome TextBlock">
@@ -8,16 +8,16 @@
       <Setter Property="FontSize" Value="12" />
     </Style>
     <Style Selector=".designer-chrome Button">
-      <Setter Property="MinHeight" Value="30" />
+      <Setter Property="MinHeight" Value="26" />
       <Setter Property="FontSize" Value="12" />
       <Setter Property="CornerRadius" Value="4" />
-      <Setter Property="Padding" Value="10,5" />
+      <Setter Property="Padding" Value="8,3" />
     </Style>
     <Style Selector=".designer-chrome Button.nav">
       <Setter Property="Background" Value="Transparent" />
       <Setter Property="BorderThickness" Value="0" />
       <Setter Property="Foreground" Value="#FFB8B8B8" />
-      <Setter Property="Padding" Value="12,7" />
+      <Setter Property="Padding" Value="9,4" />
     </Style>
     <Style Selector=".designer-chrome Button.active /template/ ContentPresenter#PART_ContentPresenter">
       <Setter Property="Background" Value="#FF35474E" />
@@ -25,29 +25,40 @@
       <Setter Property="BorderBrush" Value="#FF537780" />
     </Style>
     <Style Selector=".designer-chrome Button.icon">
-      <Setter Property="Width" Value="32" />
-      <Setter Property="Height" Value="32" />
-      <Setter Property="Padding" Value="8" />
+      <Setter Property="Width" Value="28" />
+      <Setter Property="Height" Value="28" />
+      <Setter Property="Padding" Value="6" />
       <Setter Property="Background" Value="Transparent" />
       <Setter Property="BorderThickness" Value="0" />
     </Style>
     <Style Selector=".designer-chrome Button.document-tab">
-      <Setter Property="MinHeight" Value="32" />
-      <Setter Property="Padding" Value="14,6" />
+      <Setter Property="MinHeight" Value="26" />
+      <Setter Property="Padding" Value="11,4" />
       <Setter Property="CornerRadius" Value="5,5,0,0" />
       <Setter Property="Background" Value="Transparent" />
       <Setter Property="BorderThickness" Value="0" />
     </Style>
     <Style Selector=".designer-chrome TextBox">
       <Setter Property="FontSize" Value="12" />
-      <Setter Property="MinHeight" Value="30" />
-      <Setter Property="Padding" Value="9,5" />
+      <Setter Property="MinHeight" Value="26" />
+      <Setter Property="Padding" Value="7,3" />
       <Setter Property="CornerRadius" Value="4" />
     </Style>
     <Style Selector=".designer-chrome ComboBox">
       <Setter Property="FontSize" Value="12" />
+      <Setter Property="MinHeight" Value="26" />
+      <Setter Property="Padding" Value="7,3" />
+    </Style>
+    <Style Selector=".designer-chrome CommandBar">
       <Setter Property="MinHeight" Value="30" />
-      <Setter Property="Padding" Value="9,5" />
+    </Style>
+    <Style Selector=".designer-chrome NumericUpDown">
+      <Setter Property="MinHeight" Value="26" />
+      <Setter Property="FontSize" Value="12" />
+      <Setter Property="Padding" Value="6,2" />
+    </Style>
+    <Style Selector=".designer-chrome Button.property-category">
+      <Setter Property="MinHeight" Value="25" />
     </Style>
     <Style Selector=".designer-chrome TreeDataGrid">
       <Setter Property="Background" Value="Transparent" />
@@ -56,10 +67,10 @@
       <Setter Property="BorderThickness" Value="0" />
     </Style>
     <Style Selector=".designer-chrome TreeDataGridRow">
-      <Setter Property="MinHeight" Value="30" />
+      <Setter Property="MinHeight" Value="26" />
     </Style>
     <Style Selector=".designer-chrome TreeDataGridColumnHeader">
-      <Setter Property="MinHeight" Value="28" />
+      <Setter Property="MinHeight" Value="26" />
       <Setter Property="Foreground" Value="#FFAFAFAF" />
       <Setter Property="FontSize" Value="11" />
       <Setter Property="Padding" Value="8,4" />
@@ -69,14 +80,14 @@
     </Style>
   </Grid.Styles>
 
-  <Border Classes="designer-chrome" Background="#FF202020" Padding="16,8">
+  <Border Classes="designer-chrome" Background="#FF202020" Padding="12,4">
     <Grid ColumnDefinitions="Auto,*,Auto">
-      <StackPanel Orientation="Horizontal" Spacing="12" VerticalAlignment="Center">
-        <Border Width="28" Height="28" CornerRadius="7" Background="#FF60CDFF">
-          <TextBlock Text="F" FontSize="19" FontWeight="Bold" Foreground="#FF14242B" HorizontalAlignment="Center" VerticalAlignment="Center" />
+      <StackPanel Orientation="Horizontal" Spacing="9" VerticalAlignment="Center">
+        <Border Width="23" Height="23" CornerRadius="5" Background="#FF60CDFF">
+          <TextBlock Text="F" FontSize="16" FontWeight="Bold" Foreground="#FF14242B" HorizontalAlignment="Center" VerticalAlignment="Center" />
         </Border>
-        <TextBlock Text="FerroUI" FontSize="15" FontWeight="Normal" VerticalAlignment="Center" />
-        <TextBlock Text="Designer Studio" Foreground="#FF9C9C9C" FontSize="13" VerticalAlignment="Center" />
+        <TextBlock Text="FerroUI" FontSize="13" FontWeight="Normal" VerticalAlignment="Center" />
+        <TextBlock Text="Designer Studio" Foreground="#FF9C9C9C" FontSize="12" VerticalAlignment="Center" />
       </StackPanel>
       <TextBlock Name="DocumentTitle" Grid.Column="1" Text="Untitled.xaml" Foreground="#FFB3B3B3" HorizontalAlignment="Center" VerticalAlignment="Center" />
       <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="14" VerticalAlignment="Center">
@@ -127,21 +138,21 @@
     </Grid>
   </Border>
 
-  <Grid Name="MainLayout" Grid.Row="2" ColumnDefinitions="260,1,*,1,328">
+  <Grid Name="MainLayout" Grid.Row="2" ColumnDefinitions="240,1,*,1,340">
     <Border Classes="designer-chrome" Background="#FF272727">
-      <Grid RowDefinitions="48,*">
-        <StackPanel Orientation="Horizontal" Spacing="3" Margin="10,8">
+      <Grid RowDefinitions="36,*">
+        <StackPanel Orientation="Horizontal" Spacing="3" Margin="8,4">
           <Button Name="LayersTab" Classes="nav active" Content="Layers" />
           <Button Name="AssetsTab" Classes="nav" Content="Assets" />
           <Button Name="ProjectTab" Classes="nav" Content="Project" />
         </StackPanel>
-        <Grid Name="LayersPane" Grid.Row="1" RowDefinitions="36,44,*">
-          <StackPanel Orientation="Horizontal" Spacing="2" Margin="12,0">
+        <Grid Name="LayersPane" Grid.Row="1" RowDefinitions="30,36,*">
+          <StackPanel Orientation="Horizontal" Spacing="2" Margin="8,0">
             <Button Name="SourceMode" Classes="nav active" Content="Source" Padding="10,4" />
             <Button Name="VisualMode" Classes="nav" Content="Visual" Padding="10,4" />
             <Button Name="LogicalMode" Classes="nav" Content="Logical" Padding="10,4" />
           </StackPanel>
-          <TextBox Name="OutlineSearch" Grid.Row="1" PlaceholderText="Find an element…" Margin="12,4,12,8" />
+          <TextBox Name="OutlineSearch" Grid.Row="1" PlaceholderText="Find an element…" Margin="8,3,8,6" />
           <ContentControl Name="OutlineHost" Grid.Row="2" HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch" Margin="6,0,6,8" />
         </Grid>
         <ContentControl Name="AssetsPane" Grid.Row="1" IsVisible="False" HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch">
@@ -165,13 +176,13 @@
     </Border>
     <GridSplitter Grid.Column="1" Width="5" Background="#FF383838" />
 
-    <Grid Name="DocumentLayout" Grid.Column="2" RowDefinitions="36,44,*,0,0">
+    <Grid Name="DocumentLayout" Grid.Column="2" RowDefinitions="28,34,*,0,0">
       <Border Classes="designer-chrome" Background="#FF202020" Padding="8,4,8,0">
         <ScrollViewer HorizontalScrollBarVisibility="Hidden" VerticalScrollBarVisibility="Disabled">
           <StackPanel Name="DocumentTabs" Orientation="Horizontal" Spacing="2" />
         </ScrollViewer>
       </Border>
-      <Border Name="CanvasToolbar" Classes="designer-chrome" Grid.Row="1" Background="#FF292929" BorderBrush="#FF383838" BorderThickness="0,0,0,1" Padding="12,6">
+      <Border Name="CanvasToolbar" Classes="designer-chrome" Grid.Row="1" Background="#FF292929" BorderBrush="#FF383838" BorderThickness="0,0,0,1" Padding="8,3">
         <Grid ColumnDefinitions="Auto,*,Auto">
           <StackPanel Orientation="Horizontal" Spacing="3">
             <Button Name="SelectTool" Classes="icon active" ToolTip.Tip="Select and manipulate elements">
@@ -195,6 +206,14 @@
                   <Separator />
                   <MenuItem Name="DistributeHorizontal" Header="Distribute horizontally" />
                   <MenuItem Name="DistributeVertical" Header="Distribute vertically" />
+                  <Separator />
+                  <MenuItem Name="OutlineMoveFirst" Header="Send to back" InputGesture="Alt+Home" />
+                  <MenuItem Name="OutlineMoveLast" Header="Bring to front" InputGesture="Alt+End" />
+                  <MenuItem Name="OutlineMoveUp" Header="Move earlier" InputGesture="Alt+Up" />
+                  <MenuItem Name="OutlineMoveDown" Header="Move later" InputGesture="Alt+Down" />
+                  <Separator />
+                  <MenuItem Name="OutlineIndent" Header="Nest in previous container" InputGesture="Alt+Right" />
+                  <MenuItem Name="OutlineOutdent" Header="Move to parent container" InputGesture="Alt+Left" />
                 </MenuFlyout>
               </Button.Flyout>
             </Button>
@@ -242,35 +261,36 @@
     <GridSplitter Grid.Column="3" Width="5" Background="#FF383838" />
 
     <Border Classes="designer-chrome" Grid.Column="4" Background="#FF272727">
-      <Grid RowDefinitions="48,Auto,44,*,Auto,Auto">
-        <Grid ColumnDefinitions="*,Auto" Margin="16,8">
-          <TextBlock Text="Properties" FontSize="15" FontWeight="Normal" VerticalAlignment="Center" />
+      <Grid RowDefinitions="32,Auto,34,Auto,*,Auto,Auto">
+        <Grid ColumnDefinitions="*,Auto" Margin="12,3">
+          <TextBlock Text="Properties" FontSize="13" FontWeight="Normal" VerticalAlignment="Center" />
           <Border Grid.Column="1" Background="#FF333333" CornerRadius="4" Padding="7,3" VerticalAlignment="Center">
-            <TextBlock Text="INSPECTOR" FontSize="10" Foreground="#FFADADAD" />
+            <TextBlock Text="DESIGN" FontSize="10" Foreground="#FFADADAD" />
           </Border>
         </Grid>
-        <TextBlock Name="SelectionTitle" Grid.Row="1" Text="Select an element" Foreground="#FF60CDFF" FontSize="16" Margin="16,4,16,8" TextTrimming="CharacterEllipsis" />
-        <TextBox Name="PropertySearch" Grid.Row="2" PlaceholderText="Search properties…" Margin="12,2,12,10" />
-        <ContentControl Name="PropertyHost" Grid.Row="3" HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch" Margin="6,0" />
-        <Border Grid.Row="4" BorderBrush="#FF383838" BorderThickness="0,1,0,0" Padding="10,6">
+        <TextBlock Name="SelectionTitle" Grid.Row="1" Text="Select an element" Foreground="#FF60CDFF" FontSize="13" Margin="12,2,12,4" TextTrimming="CharacterEllipsis" />
+        <TextBox Name="PropertySearch" Grid.Row="2" PlaceholderText="Search properties · @modified" Margin="8,2,8,5" />
+        <ContentControl Name="LayoutHost" Grid.Row="3" HorizontalContentAlignment="Stretch" Margin="8,0,8,4" />
+        <ContentControl Name="PropertyHost" Grid.Row="4" HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch" Margin="6,0" />
+        <Border Grid.Row="5" BorderBrush="#FF383838" BorderThickness="0,1,0,0" Padding="8,3">
           <StackPanel Orientation="Horizontal" Spacing="4">
             <Button Name="StatesMode" Classes="nav" Content="States" />
             <Button Name="BehaviorsMode" Classes="nav" Content="Behaviors" />
             <Button Name="CloseAuthoring" Classes="nav" Content="Close editor" />
           </StackPanel>
         </Border>
-        <ScrollViewer Grid.Row="5" MaxHeight="310" Margin="12,0"><StackPanel Name="AuthoringPanel" Spacing="7" /></ScrollViewer>
+        <ScrollViewer Grid.Row="6" MaxHeight="310" Margin="8,0"><StackPanel Name="AuthoringPanel" Spacing="7" /></ScrollViewer>
       </Grid>
     </Border>
   </Grid>
 
   <GridSplitter Name="TimelineDivider" Grid.Row="3" Height="5" Background="#FF383838" />
-  <Grid Name="TimelinePane" Classes="designer-chrome" Grid.Row="4" RowDefinitions="42,40,*,Auto" Background="#FF232323">
-    <Border Background="#FF292929" BorderBrush="#FF383838" BorderThickness="0,0,0,1" Padding="14,5">
+  <Grid Name="TimelinePane" Classes="designer-chrome" Grid.Row="4" RowDefinitions="34,34,*,Auto" Background="#FF232323">
+    <Border Background="#FF292929" BorderBrush="#FF383838" BorderThickness="0,0,0,1" Padding="10,3">
       <Grid ColumnDefinitions="Auto,*,Auto">
         <StackPanel Orientation="Horizontal" Spacing="8">
           <TextBlock Text="TIMELINE" Foreground="#FFA8A8A8" FontSize="11" FontWeight="Normal" VerticalAlignment="Center" Margin="0,0,12,0" />
-          <ComboBox Name="AnimationPrograms" Width="225" />
+          <ComboBox Name="AnimationPrograms" Width="210" />
           <Button Name="NewAnimation" Classes="icon" Content="+" ToolTip.Tip="New animation program" />
           <Button Name="DuplicateAnimation" Classes="icon" ToolTip.Tip="Duplicate animation program">
             <PathIcon Width="14" Height="14" Data="M1,1 L13,1 13,3 3,3 3,13 1,13 Z M5,5 L19,5 19,19 5,19 Z M7,7 L7,17 17,17 17,7 Z" />
@@ -286,13 +306,13 @@
         </StackPanel>
       </Grid>
     </Border>
-    <Grid Grid.Row="1" ColumnDefinitions="Auto,*,Auto" Margin="14,4">
+    <Grid Grid.Row="1" ColumnDefinitions="Auto,*,Auto" Margin="10,3">
       <StackPanel Orientation="Horizontal" Spacing="5">
-        <Button Name="Play" Content="Play" MinWidth="64" />
+        <Button Name="Play" Content="Play" MinWidth="52" />
         <Button Name="Stop" Content="Stop" />
         <Button Name="PlayAll" Classes="nav" Content="Play all" />
         <Border Width="1" Height="18" Background="#FF454545" Margin="7,0" />
-        <Button Name="Record" Content="Record off" MinWidth="100" />
+        <Button Name="Record" Content="Record off" MinWidth="78" />
         <Button Name="Keyframe" Classes="nav" Content="+ Keyframe" />
         <Button Name="CommitAnimation" Classes="nav" Content="Save animation" ToolTip.Tip="Write the active animation to the document XAML" />
       </StackPanel>
@@ -305,8 +325,8 @@
       </StackPanel>
     </Grid>
     <Slider Name="Scrubber" IsVisible="False" Minimum="0" Maximum="3" Value="0" TickFrequency="0.1" IsSnapToTickEnabled="True" />
-    <ScrollViewer Grid.Row="2" HorizontalScrollBarVisibility="Disabled"><StackPanel Name="Tracks" Spacing="1" Margin="12,0,12,8" /></ScrollViewer>
-    <Border Name="AnimationDetails" Grid.Row="3" IsVisible="False" Background="#FF2C2C2C" Padding="14,8" BorderBrush="#FF383838" BorderThickness="0,1,0,0">
+    <ScrollViewer Grid.Row="2" HorizontalScrollBarVisibility="Disabled"><StackPanel Name="Tracks" Spacing="1" Margin="8,0,8,4" /></ScrollViewer>
+    <Border Name="AnimationDetails" Grid.Row="3" IsVisible="False" Background="#FF2C2C2C" Padding="10,6" BorderBrush="#FF383838" BorderThickness="0,1,0,0">
       <StackPanel Orientation="Horizontal" Spacing="8">
         <TextBlock Text="Name" Foreground="#FF999999" VerticalAlignment="Center" />
         <TextBox Name="AnimationName" Width="200" PlaceholderText="Animation name" />
@@ -319,13 +339,13 @@
   </Grid>
 
   <ContentControl Name="SharingHost" Grid.Row="1" Grid.RowSpan="4" IsVisible="False" HorizontalAlignment="Center" VerticalAlignment="Center" />
-  <Border Classes="designer-chrome" Name="BuildDrawer" Grid.Row="2" Grid.RowSpan="3" IsVisible="False" VerticalAlignment="Bottom" Height="240" Background="#FF202020" BorderBrush="#FF454545" BorderThickness="0,1,0,0" Padding="14,8">
+  <Border Classes="designer-chrome" Name="BuildDrawer" Grid.Row="2" Grid.RowSpan="3" IsVisible="False" VerticalAlignment="Bottom" Height="240" Background="#FF202020" BorderBrush="#FF454545" BorderThickness="0,1,0,0" Padding="10,6">
     <Grid RowDefinitions="36,*">
       <Grid ColumnDefinitions="*,Auto"><TextBlock Name="BuildStatus" Text="Build output" FontSize="13" VerticalAlignment="Center" /><Button Name="HideBuildOutput" Grid.Column="1" Classes="nav" Content="Close output" /></Grid>
       <TextBox Name="BuildOutput" Grid.Row="1" IsReadOnly="True" AcceptsReturn="True" FontFamily="monospace" FontSize="11" BorderThickness="0" Background="#FF181818" />
     </Grid>
   </Border>
-  <Border Grid.Row="5" Background="#FF202020" BorderBrush="#FF383838" BorderThickness="0,1,0,0" Padding="14,5">
+  <Border Grid.Row="5" Background="#FF202020" BorderBrush="#FF383838" BorderThickness="0,1,0,0" Padding="10,3">
     <Grid ColumnDefinitions="*,Auto">
       <TextBlock Name="Status" Text="Ready" Foreground="#FFAAAAAA" FontSize="11" TextTrimming="CharacterEllipsis" />
       <TextBlock Grid.Column="1" Text="FerroUI Designer" Foreground="#FF777777" FontSize="11" Margin="12,0,0,0" />

@@ -1,13 +1,14 @@
 //! Shell navigation is independent of document edits and runtime inspection.
 //! Hiding a pane keeps its control, selection, pending text and scroll state alive.
-use super::{DesignerWorkspace, OutlineMode};
+use super::{DesignerWorkspace, OutlineCommand, OutlineMode};
 use ferroui_base::input::{InputElement, Key};
 use ferroui_controls::{
     Border, Button, Control, Grid, GridLength, MenuItem, ScrollViewer, TextBlock,
 };
 use ferroui_designer_tools::{Alignment, Axis};
-use std::cell::Cell;
+use std::cell::{Cell, RefCell};
 use std::rc::Rc;
+use std::sync::Arc;
 
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
 pub enum WorkspaceViewMode {
@@ -30,6 +31,9 @@ pub(super) struct WorkspaceShell {
     navigation: Cell<NavigationPane>,
     split_height: Cell<f64>,
     timeline_height: Cell<f64>,
+    arrange_ast: RefCell<Option<Arc<ferroui_designer_core::Ast>>>,
+    arrange_selection: RefCell<Vec<ferroui_designer_core::NodeId>>,
+    arrange_enabled: Cell<bool>,
 }
 
 impl Default for WorkspaceShell {
@@ -38,7 +42,10 @@ impl Default for WorkspaceShell {
             view: Cell::new(WorkspaceViewMode::Design),
             navigation: Cell::new(NavigationPane::Layers),
             split_height: Cell::new(260.0),
-            timeline_height: Cell::new(220.0),
+            timeline_height: Cell::new(196.0),
+            arrange_ast: RefCell::new(None),
+            arrange_selection: RefCell::new(Vec::new()),
+            arrange_enabled: Cell::new(false),
         }
     }
 }
@@ -73,7 +80,7 @@ impl DesignerWorkspace {
         source.set_is_visible(code);
         let rows = layout.row_definitions();
         rows.get(1)
-            .set_height(GridLength::from_pixels(if canvas { 44.0 } else { 0.0 }));
+            .set_height(GridLength::from_pixels(if canvas { 34.0 } else { 0.0 }));
         rows.get(2).set_height(if canvas {
             GridLength::STAR
         } else {
@@ -167,6 +174,15 @@ impl DesignerWorkspace {
     }
 
     pub(super) fn connect_shell(self: &Rc<Self>) {
+        for (name, command) in outline_commands() {
+            let weak = Rc::downgrade(self);
+            self.root.get_control::<MenuItem>(name).click(move |_, _| {
+                if let Some(this) = weak.upgrade() {
+                    let result = this.edit_outline(command);
+                    this.report(result);
+                }
+            });
+        }
         for (name, label) in [
             ("SelectTool", "Select and manipulate elements"),
             ("PreviewTool", "Interact with the preview"),
@@ -327,10 +343,47 @@ impl DesignerWorkspace {
             .classes()
             .set("active", !selecting);
         let session = self.session.borrow();
-        let can_arrange = session.can_manipulate() && session.selection().len() > 1;
+        let can_arrange = session.can_manipulate() && !session.selection().is_empty();
         self.root
             .get_control::<Button>("ArrangeSelection")
             .set_is_enabled(can_arrange);
+        for name in [
+            "AlignLeft",
+            "AlignCenter",
+            "AlignRight",
+            "AlignTop",
+            "AlignMiddle",
+            "AlignBottom",
+        ] {
+            self.root
+                .get_control::<MenuItem>(name)
+                .set_is_enabled(can_arrange && session.selection().len() > 1);
+        }
+        // Playback updates shell status each frame. Structural command planning depends on
+        // authored state/selection/access, so it must not walk the AST at animation frequency.
+        let ast = session.document().ast_snapshot();
+        let can_edit = can_arrange
+            && !session.is_read_only()
+            && !self.pending_source.get()
+            && self.outline_mode() == OutlineMode::Source;
+        let commands_changed = self.shell.arrange_enabled.get() != can_edit
+            || self.shell.arrange_selection.borrow().as_slice() != session.selection()
+            || !self
+                .shell
+                .arrange_ast
+                .borrow()
+                .as_ref()
+                .is_some_and(|old| Arc::ptr_eq(old, &ast));
+        if commands_changed {
+            for (name, command) in outline_commands() {
+                self.root
+                    .get_control::<MenuItem>(name)
+                    .set_is_enabled(can_edit && session.can_edit_outline(command));
+            }
+            *self.shell.arrange_ast.borrow_mut() = Some(ast);
+            *self.shell.arrange_selection.borrow_mut() = session.selection().to_vec();
+            self.shell.arrange_enabled.set(can_edit);
+        }
         for name in ["DistributeHorizontal", "DistributeVertical"] {
             self.root
                 .get_control::<MenuItem>(name)
@@ -342,4 +395,15 @@ impl DesignerWorkspace {
             .get_control::<TextBlock>("CanvasSize")
             .set_text(Some(&format!("{width} × {height}")));
     }
+}
+
+fn outline_commands() -> [(&'static str, OutlineCommand); 6] {
+    [
+        ("OutlineMoveFirst", OutlineCommand::MoveFirst),
+        ("OutlineMoveLast", OutlineCommand::MoveLast),
+        ("OutlineMoveUp", OutlineCommand::MoveUp),
+        ("OutlineMoveDown", OutlineCommand::MoveDown),
+        ("OutlineIndent", OutlineCommand::Indent),
+        ("OutlineOutdent", OutlineCommand::Outdent),
+    ]
 }
