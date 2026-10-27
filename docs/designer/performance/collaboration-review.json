@@ -1,0 +1,45 @@
+{
+  "baseline_commit": "0ca7b20386d60c8f0a1847e96326e419713b98d6",
+  "core_dependency": "same reviewed Core for both variants",
+  "compiler": "rustc 1.89.0 (29483883e), x86_64-unknown-linux-gnu, LLVM 20.1.7",
+  "profile": "one comparison binary; release opt-level=3, LTO=false, codegen-units=16; empty rustflags",
+  "method": "three alternating baseline/current samples in one process",
+  "milliseconds": {
+    "merge_4000_writers": {
+      "baseline": [
+        95.55,
+        92.175,
+        97.89
+      ],
+      "review": [
+        9.442,
+        10.82,
+        9.23
+      ]
+    },
+    "version_vector_2000_reads_4000_operations": {
+      "baseline": [
+        675.277,
+        689.632,
+        644.49
+      ],
+      "review": [
+        0.129,
+        0.146,
+        0.125
+      ]
+    },
+    "local_500_edits_100_controls": {
+      "baseline": [
+        169.159,
+        159.211,
+        144.859
+      ],
+      "review": [
+        65.878,
+        74.809,
+        67.853
+      ]
+    }
+  }
+}

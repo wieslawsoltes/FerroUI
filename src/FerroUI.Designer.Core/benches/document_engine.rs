@@ -103,5 +103,5 @@ fn measure(name: &str, operations: usize, samples: usize, mut operation: impl Fn
     let mut sorted = elapsed.clone();
     sorted.sort_unstable();
     let median = sorted[sorted.len() / 2];
-    println!("{name},{operations},{median},{elapsed:?}");
+    println!("{name},{operations},{median},\"{elapsed:?}\"");
 }

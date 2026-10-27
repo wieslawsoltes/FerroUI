@@ -262,34 +262,63 @@ pub struct SnapResult {
     pub bounds: Rect,
     pub guides: Vec<SnapGuide>,
 }
+
+/// Immutable, sorted guide geometry for repeated pointer updates. Prepare once
+/// when a gesture begins; each query examines only the nearest two guides for
+/// each anchor, independent of the number of objects on the artboard.
+#[derive(Clone, Debug)]
+pub struct SnapIndex {
+    grid: Option<f64>,
+    tolerance: f64,
+    x: Vec<f64>,
+    y: Vec<f64>,
+}
+impl SnapIndex {
+    pub fn snap(&self, moving: Rect) -> Result<SnapResult> {
+        self.snap_with(moving, self.grid, self.tolerance)
+    }
+
+    /// Reuse the measured geometry after zoom or grid settings change.
+    pub fn snap_with(&self, moving: Rect, grid: Option<f64>, tolerance: f64) -> Result<SnapResult> {
+        moving.validate()?;
+        validate_snap_options(grid, tolerance)?;
+        let (dx, gx) = nearest_axis(
+            [moving.x, moving.center().x, moving.right()],
+            &self.x,
+            grid,
+            tolerance,
+        );
+        let (dy, gy) = nearest_axis(
+            [moving.y, moving.center().y, moving.bottom()],
+            &self.y,
+            grid,
+            tolerance,
+        );
+        snap_result(moving, Point::new(dx, dy), gx, gy)
+    }
+}
+
 impl SnapSettings {
+    pub fn prepare(&self, others: &[Rect]) -> Result<SnapIndex> {
+        validate_snap_options(self.grid, self.tolerance)?;
+        let (mut x, mut y) = self.guide_coordinates(others)?;
+        for axis in [&mut x, &mut y] {
+            axis.sort_by(f64::total_cmp);
+            axis.dedup_by(|a, b| *a == *b);
+        }
+        Ok(SnapIndex {
+            grid: self.grid,
+            tolerance: self.tolerance,
+            x,
+            y,
+        })
+    }
+
     /// All geometry is in document units. Convert a desired screen tolerance by the zoom factor.
     pub fn snap(&self, moving: Rect, others: &[Rect]) -> Result<SnapResult> {
         moving.validate()?;
-        require(
-            self.tolerance.is_finite() && self.tolerance >= 0.0,
-            "Snap tolerance must be finite and nonnegative",
-        )?;
-        if let Some(grid) = self.grid {
-            require(
-                grid.is_finite() && grid > 0.0,
-                "Grid size must be finite and positive",
-            )?;
-        }
-        require(
-            self.guides_x
-                .iter()
-                .chain(&self.guides_y)
-                .all(|v| v.is_finite()),
-            "Guides must be finite",
-        )?;
-        let mut x = self.guides_x.clone();
-        let mut y = self.guides_y.clone();
-        for rect in others {
-            rect.validate()?;
-            x.extend([rect.x, rect.center().x, rect.right()]);
-            y.extend([rect.y, rect.center().y, rect.bottom()]);
-        }
+        validate_snap_options(self.grid, self.tolerance)?;
+        let (x, y) = self.guide_coordinates(others)?;
         let (dx, gx) = snap_axis(
             [moving.x, moving.center().x, moving.right()],
             &x,
@@ -302,28 +331,90 @@ impl SnapSettings {
             self.grid,
             self.tolerance,
         );
-        let delta = Point { x: dx, y: dy };
-        let bounds = moving.translated(delta)?;
-        let mut guides = vec![];
-        if let Some(position) = gx {
-            guides.push(SnapGuide {
-                axis: Axis::Horizontal,
-                position,
-            });
+        snap_result(moving, Point::new(dx, dy), gx, gy)
+    }
+
+    fn guide_coordinates(&self, others: &[Rect]) -> Result<(Vec<f64>, Vec<f64>)> {
+        require(
+            self.guides_x
+                .iter()
+                .chain(&self.guides_y)
+                .all(|v| v.is_finite()),
+            "Guides must be finite",
+        )?;
+        let mut x = Vec::with_capacity(self.guides_x.len() + 3 * others.len());
+        let mut y = Vec::with_capacity(self.guides_y.len() + 3 * others.len());
+        x.extend_from_slice(&self.guides_x);
+        y.extend_from_slice(&self.guides_y);
+        for rect in others {
+            rect.validate()?;
+            x.extend([rect.x, rect.center().x, rect.right()]);
+            y.extend([rect.y, rect.center().y, rect.bottom()]);
         }
-        if let Some(position) = gy {
-            guides.push(SnapGuide {
-                axis: Axis::Vertical,
-                position,
-            });
-        }
-        Ok(SnapResult {
-            delta,
-            bounds,
-            guides,
-        })
+        Ok((x, y))
     }
 }
+
+fn validate_snap_options(grid: Option<f64>, tolerance: f64) -> Result<()> {
+    require(
+        tolerance.is_finite() && tolerance >= 0.0,
+        "Snap tolerance must be finite and nonnegative",
+    )?;
+    if let Some(grid) = grid {
+        require(
+            grid.is_finite() && grid > 0.0,
+            "Grid size must be finite and positive",
+        )?;
+    }
+    Ok(())
+}
+
+fn snap_result(moving: Rect, delta: Point, gx: Option<f64>, gy: Option<f64>) -> Result<SnapResult> {
+    let bounds = moving.translated(delta)?;
+    let mut guides = Vec::with_capacity(usize::from(gx.is_some()) + usize::from(gy.is_some()));
+    if let Some(position) = gx {
+        guides.push(SnapGuide {
+            axis: Axis::Horizontal,
+            position,
+        });
+    }
+    if let Some(position) = gy {
+        guides.push(SnapGuide {
+            axis: Axis::Vertical,
+            position,
+        });
+    }
+    Ok(SnapResult {
+        delta,
+        bounds,
+        guides,
+    })
+}
+
+fn nearest_axis(
+    anchors: [f64; 3],
+    sorted: &[f64],
+    grid: Option<f64>,
+    tolerance: f64,
+) -> (f64, Option<f64>) {
+    let mut neighbors = [0.0; 6];
+    let mut count = 0;
+    for anchor in anchors {
+        let index = sorted.partition_point(|guide| *guide < anchor);
+        if index > 0 {
+            neighbors[count] = sorted[index - 1];
+            count += 1;
+        }
+        if let Some(&guide) = sorted.get(index) {
+            neighbors[count] = guide;
+            count += 1;
+        }
+    }
+    // Keep exactly the same distance, explicit-guide and coordinate tie rules
+    // as a one-off query. No candidate outside these neighbors can be closer.
+    snap_axis(anchors, &neighbors[..count], grid, tolerance)
+}
+
 fn snap_axis(
     anchors: [f64; 3],
     guides: &[f64],

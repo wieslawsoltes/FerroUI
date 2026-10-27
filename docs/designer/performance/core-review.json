@@ -1,0 +1,136 @@
+{
+  "baseline": "0ca7b20386d60c8f0a1847e96326e419713b98d6",
+  "harness_sha256": "ce22d2b7cbaa2baeaca7ed8a71c777a3b890a4b688ffe92ba405a03d5b6f690f",
+  "nodes": 20000,
+  "samples": 5,
+  "cpu_affinity": [
+    0
+  ],
+  "started_utc": "2026-10-27T06:19:13.130595+00:00",
+  "rustc": "rustc 1.89.0 (29483883e 2025-08-04)\nbinary: rustc\ncommit-hash: 29483883eed69d5fb4db01964cdf2af4d86e9cb2\ncommit-date: 2025-08-04\nhost: x86_64-unknown-linux-gnu\nrelease: 1.89.0\nLLVM version: 20.1.7\n",
+  "profile": "bench inherits release opt-level=3, thin LTO, default16codegen-units, debug=0, incremental=false; exact pinned baseline dependencies",
+  "variants": {
+    "baseline": {
+      "parse_and_drop": {
+        "operations_per_sample": 3,
+        "median_ns_per_operation": 52308499,
+        "sample_ns_per_operation": [
+          53481442,
+          52308499,
+          51489485,
+          52005164,
+          59988667
+        ]
+      },
+      "attribute_edit": {
+        "operations_per_sample": 5,
+        "median_ns_per_operation": 163562277,
+        "sample_ns_per_operation": [
+          166272001,
+          164056794,
+          162123250,
+          160238117,
+          163562277
+        ]
+      },
+      "unchanged_source": {
+        "operations_per_sample": 10,
+        "median_ns_per_operation": 175756138,
+        "sample_ns_per_operation": [
+          173644217,
+          172491172,
+          175756138,
+          194716412,
+          189635427
+        ]
+      },
+      "source_hit_test": {
+        "operations_per_sample": 4096,
+        "median_ns_per_operation": 280566,
+        "sample_ns_per_operation": [
+          280566,
+          279517,
+          302119,
+          285120,
+          278707
+        ]
+      },
+      "markup_2000_arguments": {
+        "operations_per_sample": 3,
+        "median_ns_per_operation": 3336015,
+        "sample_ns_per_operation": [
+          3203955,
+          3246265,
+          3395807,
+          3551331,
+          3336015
+        ]
+      }
+    },
+    "current": {
+      "parse_and_drop": {
+        "operations_per_sample": 3,
+        "median_ns_per_operation": 41715568,
+        "sample_ns_per_operation": [
+          41715568,
+          40738229,
+          41673963,
+          44189781,
+          46392343
+        ]
+      },
+      "attribute_edit": {
+        "operations_per_sample": 5,
+        "median_ns_per_operation": 89490513,
+        "sample_ns_per_operation": [
+          99275557,
+          106598946,
+          89490513,
+          87128605,
+          84207620
+        ]
+      },
+      "unchanged_source": {
+        "operations_per_sample": 10,
+        "median_ns_per_operation": 53611,
+        "sample_ns_per_operation": [
+          54582,
+          53683,
+          52094,
+          53611,
+          52499
+        ]
+      },
+      "source_hit_test": {
+        "operations_per_sample": 4096,
+        "median_ns_per_operation": 1714,
+        "sample_ns_per_operation": [
+          2075,
+          1590,
+          1695,
+          1849,
+          1714
+        ]
+      },
+      "markup_2000_arguments": {
+        "operations_per_sample": 3,
+        "median_ns_per_operation": 518256,
+        "sample_ns_per_operation": [
+          517345,
+          528769,
+          518256,
+          511450,
+          526926
+        ]
+      }
+    }
+  },
+  "ratios": {
+    "parse_and_drop": 1.2539323209023547,
+    "attribute_edit": 1.8277052116127661,
+    "unchanged_source": 3278.3596276883477,
+    "source_hit_test": 163.69078179696615,
+    "markup_2000_arguments": 6.437002176530518
+  },
+  "finished_utc": "2026-10-27T06:19:36.912232+00:00"
+}

@@ -64,6 +64,10 @@ object elements. The property editor exposes an explicit replacement policy for 
 
 `SnapSettings` snaps edges and centers against explicit guides, nearby object bounds and a grid.
 Tolerance is in document units; a host converts its desired screen tolerance using the zoom.
+For a drag, call `SnapSettings::prepare(&peers)` once and retain its `SnapIndex`. Queries inspect
+only the neighboring sorted guides for each anchor. `snap_with` accepts an updated grid size and
+tolerance without rebuilding geometry. The one-off `snap` API remains available for callers
+that do not reuse a peer snapshot. Both paths have the same tie-breaking and finite-value checks.
 Alignment and equal-gap distribution return per-node deltas, allowing each parent adapter to
 choose the proper authored property representation. `Affine` provides composition, inversion,
 rotation/scaling around a pivot and transformed bounds.
@@ -71,7 +75,13 @@ rotation/scaling around a pivot and transformed bounds.
 `Selection` provides hit testing in paint order, marquee selection, add/toggle/subtract modes,
 locked/hidden exclusions and pruning after document edits. `outermost` removes selected
 descendants so moving a group does not move a child twice. `MoveGesture` snapshots the start
-revision and pure preview geometry; a stale gesture cannot commit over a concurrent edit.
+revision, immutable syntax identity and pure preview geometry; a stale gesture cannot commit
+over a concurrent edit or into a different document with coincidentally equal IDs/revisions.
+The selection bounds and peer guide index are computed once. Duplicate runtime bounds cannot
+toggle the same authored node twice during marquee selection.
+
+See the [performance evidence](../../docs/designer/performance.md) and run
+`cargo bench -p ferroui-designer-tools --bench snapping` to compare one-off and prepared queries.
 
 ## Property metadata and editors
 

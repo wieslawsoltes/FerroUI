@@ -6,7 +6,8 @@ mod properties;
 mod selection;
 
 pub use geometry::{
-    align, distribute, Affine, Alignment, Axis, Point, Rect, SnapGuide, SnapResult, SnapSettings,
+    align, distribute, Affine, Alignment, Axis, Point, Rect, SnapGuide, SnapIndex, SnapResult,
+    SnapSettings,
 };
 pub use layout::{
     DockSide, GridLength, GridLines, LayoutAction, LayoutAdapter, LayoutCapabilities,

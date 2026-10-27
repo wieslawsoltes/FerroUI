@@ -1,9 +1,10 @@
 use crate::{
-    require, LayoutContext, LayoutRegistry, Point, Rect, Result, SnapResult, SnapSettings,
-    ToolError,
+    require, LayoutContext, LayoutRegistry, Point, Rect, Result, SnapIndex, SnapResult,
+    SnapSettings, ToolError,
 };
-use ferroui_designer_core::{Document, Edit, NodeId};
+use ferroui_designer_core::{Ast, Document, Edit, NodeId};
 use std::collections::{BTreeMap, BTreeSet};
+use std::sync::Arc;
 
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
 pub enum SelectionMode {
@@ -106,6 +107,7 @@ impl Selection {
     ) -> Result<()> {
         bounds.validate()?;
         let mut nodes = vec![];
+        let mut seen = BTreeSet::new();
         for (node, rect) in paint_order {
             rect.validate()?;
             let hit = if fully_contained {
@@ -114,7 +116,7 @@ impl Selection {
             } else {
                 bounds.intersects(*rect)
             };
-            if hit && self.selectable(document, *node) {
+            if hit && self.selectable(document, *node) && seen.insert(*node) {
                 nodes.push(*node);
             }
         }
@@ -192,11 +194,11 @@ pub fn outermost(document: &Document, nodes: &[NodeId]) -> Result<Vec<NodeId>> {
 /// gesture after source or collaboration edits have changed the authored revision.
 pub struct MoveGesture {
     revision: u64,
+    syntax: Arc<Ast>,
     nodes: Vec<NodeId>,
     start: Point,
     bounds: Rect,
-    peers: Vec<Rect>,
-    snap: SnapSettings,
+    snap: SnapIndex,
 }
 impl MoveGesture {
     pub fn begin(
@@ -207,6 +209,10 @@ impl MoveGesture {
         snap: SnapSettings,
     ) -> Result<Self> {
         start.validate()?;
+        require(
+            document.is_valid(),
+            "A move gesture requires valid authored XAML",
+        )?;
         let nodes = outermost(document, nodes)?;
         require(!nodes.is_empty(), "A move gesture requires a selection")?;
         let mut bounds = None;
@@ -217,22 +223,25 @@ impl MoveGesture {
             rect.validate()?;
             bounds = Some(bounds.map_or(rect, |b: Rect| b.union(rect)));
         }
-        let peers = measurements
+        let bounds = bounds.unwrap();
+        bounds.validate()?;
+        let moving: BTreeSet<_> = nodes
             .iter()
-            .filter(|(id, _)| {
-                !nodes
-                    .iter()
-                    .any(|node| node == *id || document.ast().is_descendant_of(**id, *node))
-            })
+            .flat_map(|node| document.ast().subtree(*node))
+            .map(|node| node.id)
+            .collect();
+        let peers: Vec<_> = measurements
+            .iter()
+            .filter(|(id, _)| !moving.contains(*id))
             .map(|(_, rect)| *rect)
             .collect();
         Ok(Self {
             revision: document.revision(),
+            syntax: document.ast_snapshot(),
             nodes,
             start,
-            bounds: bounds.unwrap(),
-            peers,
-            snap,
+            bounds,
+            snap: snap.prepare(&peers)?,
         })
     }
     pub fn preview(&self, pointer: Point) -> Result<SnapResult> {
@@ -241,7 +250,7 @@ impl MoveGesture {
             pointer.x - self.start.x,
             pointer.y - self.start.y,
         ))?;
-        self.snap.snap(moving, &self.peers)
+        self.snap.snap(moving)
     }
     pub fn commit(
         &self,
@@ -250,7 +259,8 @@ impl MoveGesture {
         pointer: Point,
     ) -> Result<Vec<Edit>> {
         require(
-            context.document.revision() == self.revision,
+            context.document.revision() == self.revision
+                && std::ptr::eq(context.document.ast(), self.syntax.as_ref()),
             "Document changed during the gesture; restart the drag",
         )?;
         let preview = self.preview(pointer)?;

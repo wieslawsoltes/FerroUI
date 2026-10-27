@@ -229,6 +229,13 @@ impl Document {
     pub fn ast(&self) -> &Ast {
         &self.current.ast
     }
+    /// Share the exact immutable syntax snapshot without copying its nodes.
+    /// A gesture can retain this handle together with a revision to reject a
+    /// command prepared for a different document, even if its local IDs match.
+    /// Invalid source returns the last-valid syntax, like `ast()`.
+    pub fn ast_snapshot(&self) -> Arc<Ast> {
+        self.current.ast.clone()
+    }
     pub fn diagnostics(&self) -> &[Diagnostic] {
         &self.current.diagnostics
     }

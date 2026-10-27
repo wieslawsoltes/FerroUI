@@ -1,0 +1,255 @@
+{
+  "baseline_commit": "0ca7b20386d60c8f0a1847e96326e419713b98d6",
+  "rust_version": "1.89.0",
+  "profile": "release with thin LTO for both binaries",
+  "measurements": "microseconds, median of five process runs",
+  "workload": "Repeated a\u03b1\ud83e\udd80 single line; two coordinate queries and one replacement per three Unicode scalars",
+  "before": {
+    "runs": [
+      [
+        {
+          "scalars": 3000,
+          "index_us": 5,
+          "coordinate_queries_us": 3706,
+          "batch_edits_us": 4264
+        },
+        {
+          "scalars": 12000,
+          "index_us": 23,
+          "coordinate_queries_us": 58316,
+          "batch_edits_us": 66771
+        },
+        {
+          "scalars": 48000,
+          "index_us": 96,
+          "coordinate_queries_us": 926523,
+          "batch_edits_us": 1078364
+        }
+      ],
+      [
+        {
+          "scalars": 3000,
+          "index_us": 5,
+          "coordinate_queries_us": 3663,
+          "batch_edits_us": 4050
+        },
+        {
+          "scalars": 12000,
+          "index_us": 76,
+          "coordinate_queries_us": 60911,
+          "batch_edits_us": 67090
+        },
+        {
+          "scalars": 48000,
+          "index_us": 97,
+          "coordinate_queries_us": 955448,
+          "batch_edits_us": 1033595
+        }
+      ],
+      [
+        {
+          "scalars": 3000,
+          "index_us": 5,
+          "coordinate_queries_us": 3848,
+          "batch_edits_us": 4548
+        },
+        {
+          "scalars": 12000,
+          "index_us": 40,
+          "coordinate_queries_us": 57741,
+          "batch_edits_us": 64639
+        },
+        {
+          "scalars": 48000,
+          "index_us": 165,
+          "coordinate_queries_us": 932279,
+          "batch_edits_us": 985162
+        }
+      ],
+      [
+        {
+          "scalars": 3000,
+          "index_us": 6,
+          "coordinate_queries_us": 3449,
+          "batch_edits_us": 3772
+        },
+        {
+          "scalars": 12000,
+          "index_us": 24,
+          "coordinate_queries_us": 55632,
+          "batch_edits_us": 61895
+        },
+        {
+          "scalars": 48000,
+          "index_us": 96,
+          "coordinate_queries_us": 921348,
+          "batch_edits_us": 1050069
+        }
+      ],
+      [
+        {
+          "scalars": 3000,
+          "index_us": 5,
+          "coordinate_queries_us": 3253,
+          "batch_edits_us": 3824
+        },
+        {
+          "scalars": 12000,
+          "index_us": 72,
+          "coordinate_queries_us": 55958,
+          "batch_edits_us": 61092
+        },
+        {
+          "scalars": 48000,
+          "index_us": 94,
+          "coordinate_queries_us": 868612,
+          "batch_edits_us": 953544
+        }
+      ]
+    ],
+    "medians": [
+      {
+        "scalars": 3000,
+        "index_us": 5,
+        "coordinate_queries_us": 3663,
+        "batch_edits_us": 4050
+      },
+      {
+        "scalars": 12000,
+        "index_us": 40,
+        "coordinate_queries_us": 57741,
+        "batch_edits_us": 64639
+      },
+      {
+        "scalars": 48000,
+        "index_us": 96,
+        "coordinate_queries_us": 926523,
+        "batch_edits_us": 1033595
+      }
+    ]
+  },
+  "after": {
+    "runs": [
+      [
+        {
+          "scalars": 3000,
+          "index_us": 13,
+          "coordinate_queries_us": 171,
+          "batch_edits_us": 318
+        },
+        {
+          "scalars": 12000,
+          "index_us": 50,
+          "coordinate_queries_us": 808,
+          "batch_edits_us": 1260
+        },
+        {
+          "scalars": 48000,
+          "index_us": 245,
+          "coordinate_queries_us": 3612,
+          "batch_edits_us": 4789
+        }
+      ],
+      [
+        {
+          "scalars": 3000,
+          "index_us": 13,
+          "coordinate_queries_us": 193,
+          "batch_edits_us": 289
+        },
+        {
+          "scalars": 12000,
+          "index_us": 49,
+          "coordinate_queries_us": 777,
+          "batch_edits_us": 1293
+        },
+        {
+          "scalars": 48000,
+          "index_us": 255,
+          "coordinate_queries_us": 3553,
+          "batch_edits_us": 4152
+        }
+      ],
+      [
+        {
+          "scalars": 3000,
+          "index_us": 14,
+          "coordinate_queries_us": 233,
+          "batch_edits_us": 231
+        },
+        {
+          "scalars": 12000,
+          "index_us": 49,
+          "coordinate_queries_us": 758,
+          "batch_edits_us": 1386
+        },
+        {
+          "scalars": 48000,
+          "index_us": 441,
+          "coordinate_queries_us": 4401,
+          "batch_edits_us": 4465
+        }
+      ],
+      [
+        {
+          "scalars": 3000,
+          "index_us": 12,
+          "coordinate_queries_us": 185,
+          "batch_edits_us": 233
+        },
+        {
+          "scalars": 12000,
+          "index_us": 61,
+          "coordinate_queries_us": 1009,
+          "batch_edits_us": 1169
+        },
+        {
+          "scalars": 48000,
+          "index_us": 335,
+          "coordinate_queries_us": 3354,
+          "batch_edits_us": 4900
+        }
+      ],
+      [
+        {
+          "scalars": 3000,
+          "index_us": 13,
+          "coordinate_queries_us": 171,
+          "batch_edits_us": 234
+        },
+        {
+          "scalars": 12000,
+          "index_us": 48,
+          "coordinate_queries_us": 1049,
+          "batch_edits_us": 1116
+        },
+        {
+          "scalars": 48000,
+          "index_us": 197,
+          "coordinate_queries_us": 3816,
+          "batch_edits_us": 4469
+        }
+      ]
+    ],
+    "medians": [
+      {
+        "scalars": 3000,
+        "index_us": 13,
+        "coordinate_queries_us": 185,
+        "batch_edits_us": 234
+      },
+      {
+        "scalars": 12000,
+        "index_us": 49,
+        "coordinate_queries_us": 808,
+        "batch_edits_us": 1260
+      },
+      {
+        "scalars": 48000,
+        "index_us": 255,
+        "coordinate_queries_us": 3612,
+        "batch_edits_us": 4469
+      }
+    ]
+  }
+}

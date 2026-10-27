@@ -253,3 +253,75 @@ fn serialized_ast_rejects_cycles_missing_links_and_unordered_intervals() {
         assert!(serde_json::from_value::<super::Ast>(invalid).is_err());
     }
 }
+
+#[test]
+fn initial_and_noninitial_allocations_preserve_structure_and_advance_the_counter() {
+    let source = "<?xml version='1.0'?><Grid><!--keep--><Border><Button/></Border></Grid>";
+    let parsed = super::Ast::parse(source).unwrap();
+    let count = parsed.nodes().count() as NodeId;
+    let mut initial = parsed.clone();
+    let mut next_id = 1;
+    initial.allocate(&mut next_id);
+    assert_eq!(initial, parsed);
+    assert_eq!(next_id, count + 1);
+
+    let mut additional = parsed.clone();
+    let start = 1_000;
+    next_id = start;
+    additional.allocate(&mut next_id);
+    assert_eq!(next_id, start + count);
+    assert_eq!(additional.root(), parsed.root() + start - 1);
+    for original in parsed.nodes() {
+        let allocated = additional.node(original.id + start - 1).unwrap();
+        assert_eq!(allocated.span, original.span);
+        assert_eq!(allocated.name, original.name);
+        assert_eq!(allocated.parent, original.parent.map(|id| id + start - 1));
+        assert_eq!(
+            allocated.children,
+            original
+                .children
+                .iter()
+                .map(|id| id + start - 1)
+                .collect::<Vec<_>>()
+        );
+    }
+    for offset in 0..source.len() {
+        assert_eq!(
+            additional.node_at(offset),
+            parsed.node_at(offset).map(|id| id + start - 1)
+        );
+    }
+}
+
+#[test]
+fn fully_pinned_removal_keeps_the_identity_allocation_high_water_mark() {
+    let mut document = Document::new(
+        "<Grid><Border><Button/></Border><!--keep--><TextBlock Name='Retained'/></Grid>",
+    )
+    .unwrap();
+    let root = document.ast().root();
+    let remove = document.ast().element_children(root)[0];
+    let retained = document.ast().find_name("Retained").unwrap();
+    let greatest_published_id = document.ast().nodes().map(|node| node.id).max().unwrap();
+    let removed_ids: Vec<_> = document.ast().subtree(remove).map(|node| node.id).collect();
+    let change = document
+        .apply(
+            "Remove subtree",
+            vec![crate::Edit::RemoveNode { node: remove }],
+        )
+        .unwrap();
+    assert_eq!(change.removed, removed_ids);
+    assert_eq!(document.ast().find_name("Retained"), Some(retained));
+    let change = document
+        .apply(
+            "Insert",
+            vec![crate::Edit::InsertChild {
+                parent: root,
+                index: 0,
+                source: "<Button/>".into(),
+            }],
+        )
+        .unwrap();
+    assert!(change.inserted.iter().all(|id| *id > greatest_published_id));
+    assert_eq!(document.ast().find_name("Retained"), Some(retained));
+}

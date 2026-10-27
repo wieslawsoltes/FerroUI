@@ -32,6 +32,15 @@ impl Ast {
                 }
             }
         }
+        // Property edits and many structural edits already pin every surviving
+        // token. Compatibility and one-to-one ownership were checked above, so
+        // no semantic candidate search or subtree fingerprinting is needed.
+        // Still remap: moving identical siblings can reorder IDs without
+        // changing the source bytes or allocating any new identities.
+        if mapped.len() == self.nodes.len() {
+            self.remap(&mapped);
+            return;
+        }
         let old_named = names_by_scope(old);
         let new_named = names_by_scope(self);
         // Document roots represent the same outer name scope even if their
@@ -105,6 +114,19 @@ impl Ast {
         self.remap(&mapped);
     }
     pub(crate) fn allocate(&mut self, next_id: &mut NodeId) {
+        // Fresh parsing assigns exactly 1..=N. The first document allocation
+        // can keep that index directly rather than rebuilding it unchanged.
+        // Noninitial counters must retain the ordinary allocation path.
+        if *next_id == 1
+            && self.nodes.first_key_value().is_some_and(|(&id, _)| id == 1)
+            && self
+                .nodes
+                .last_key_value()
+                .is_some_and(|(&id, _)| id == self.nodes.len() as NodeId)
+        {
+            *next_id += self.nodes.len() as NodeId;
+            return;
+        }
         let map = self
             .nodes
             .keys()
