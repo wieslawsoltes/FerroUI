@@ -345,7 +345,7 @@ impl SampleRequest {
         for (path, kind) in &self.fields {
             let parts = path.split('.').collect::<Vec<_>>();
             let value = match kind {
-                SampleKind::Boolean => SampleValue::Boolean(row % 2 == 0),
+                SampleKind::Boolean => SampleValue::Boolean(row.is_multiple_of(2)),
                 SampleKind::Number => SampleValue::Number((row + 1) as f64 * 10.0),
                 SampleKind::Text => SampleValue::Text(format!(
                     "{} {}",
