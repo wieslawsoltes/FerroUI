@@ -39,7 +39,7 @@ impl GridTrackEditor {
             Axis::Horizontal => "Columns",
         };
         let root = Grid::new();
-        root.set_column_definitions(ColumnDefinitions::parse("48,*,53,74,26,26").unwrap());
+        root.set_column_definitions(ColumnDefinitions::parse("48,*,53,84,26,26").unwrap());
         root.set_row_definitions(RowDefinitions::parse("Auto,Auto").unwrap());
         root.classes().add("grid-track-editor");
         let label = TextBlock::new();
@@ -71,6 +71,7 @@ impl GridTrackEditor {
         );
         root.children().add(value.clone().upcast::<Control>());
         let unit = ComboBox::new();
+        unit.set_font_size(11.0);
         unit.set_min_width(0.0);
         unit.set_min_height(26.0);
         unit.set_padding(Thickness::symmetric(4.0, 2.0));

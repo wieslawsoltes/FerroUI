@@ -75,36 +75,62 @@ The left dock switches between **Layers**, **Assets** and **Project**:
 - **Project** uses a hierarchical TreeDataGrid for project folders, XAML documents and assets.
   File activation shares the same canonical URI identity as tabs, language edits and saves.
 
-The property dock is a TreeDataGrid with lazily created value editors. It supports native numeric
-spinners, tri-state booleans, enum pickers, expressions, mixed selections and extension factories.
-Enter commits typed text or numbers; spinner and picker actions commit explicitly. The reset
+The property dock is a TreeDataGrid with collapsible categories and lazily created value editors.
+It includes scrubbable numeric labels, direct alignment choices, linked four-component editors
+for spacing/corner radii, tri-state booleans, enum pickers, expressions and mixed selections.
+Search supports multiple terms and `@modified` / `@local` filters. Enter commits typed text or
+numbers; a scrub commits once on release and cancels with Escape. Custom editor factories take
+precedence over the built-ins. The reset
 button removes the authored value. Object-valued property elements can be revealed in XAML
 and reset without flattening their object graph. Tooltips read the current runtime type, effective
 value and priority when opened, so animation sampling does not replace the editor or its draft.
 An editor retained across a document switch or revision change cannot write to the new document.
 Runtime-only objects remain inspectable without receiving invented source IDs.
 
-The canvas **Arrange** menu exposes alignment and equal-gap distribution through the existing
-panel layout adapters. Canvas selection, hierarchy selection and properties refer to the same
+Drop a value onto a property cell to validate and apply it to the selection. Drag a keyed resource
+from Layers for a static resource reference, Shift-drag for a dynamic reference, or Alt-drag a
+named element for an ElementName binding. The destination object stays selected throughout the
+gesture. Internal reference drops check source identity and destination scope before authoring.
+
+The contextual **Layout** section exposes common settings for the selected panel or the common
+parent of selected children. Grid row/column editors support pixel, star and Auto lengths, plus
+insertion/removal that updates child indices and spans in the same transaction. Explicit
+definition metadata and comments survive the operation. Effective styled cell placements are
+preserved; bound placements and externally supplied definition collections are protected.
+See the [Grid layout capture](images/designer-grid-layout.png).
+
+The canvas **Arrange** menu exposes alignment, equal-gap distribution, source ordering and
+nesting through the existing panel layout adapters. Layers supports Alt+Up/Down to reorder,
+Alt+Home/End to move first/last, and Alt+Right/Left to nest/unnest. Canvas arrows nudge by one
+unit (Shift: ten; Ctrl: one tenth); Shift-drag locks to the dominant axis. Directional marquees
+select contained objects left-to-right and intersecting objects right-to-left. Canvas selection,
+hierarchy selection and properties refer to the same
 session. The select and interact tools switch between source manipulation and live control input.
 The top command bar keeps document/history actions visible and moves secondary file/edit actions
 into its native overflow menu.
 
-The animation editor has a labelled time ruler, one lane per object/property and one contextual
-keyframe editor. Select or drag a diamond, double-click a lane to record, or use arrow keys to
-nudge the selected key. Escape and lost pointer capture cancel a drag without authoring it.
+The animation editor has a labelled time ruler, compact object/property lanes and a contextual
+keyframe editor. Ctrl-click toggles keys, Shift-click selects ranges, and dragging empty lane
+space selects a marquee. Move, duplicate or delete groups across tracks in one undoable source
+transaction. Selected keys keep their relative offsets, values and easing; collisions reject the
+entire edit. Choose seconds or 24/30/60 fps snapping. Double-click a lane to record, or use arrow
+keys to nudge selected keys. Escape and lost pointer capture cancel a drag without authoring it.
 Ctrl+wheel or +/- zooms the timeline; Shift+wheel or PageUp/PageDown pans the visible range.
 The contextual editor validates time, value and easing together before one undoable transaction.
 **+ Keyframe** records the selected track's live property value, with Opacity as the initial
 fallback for an object without a track. **Name & target** reveals program details; creating or
 duplicating programs allocates useful unique defaults even when those details are closed.
+Keyboard focus follows accepted timeline and Grid edits so repeated edits stay in the same
+control. The [multi-key timeline capture](images/designer-timeline-selection.png) shows group
+selection with frame snapping enabled.
 
 Reusable public controls and workspace APIs include `AssetToolbox`, `DesignerAsset`, `AssetIcon`,
-`TimelineLane`, `WorkspaceViewMode`, `NavigationPane`, the inspection-grid accessors and
-`DesignerWorkspace::select_keyframe`. These controls send semantic actions through the session;
+`TimelineLane`, `PropertyNumberScrubber`, `PropertyComponentsEditor`, `GridTrackEditor`,
+`OutlineCommand`, `WorkspaceViewMode`, `NavigationPane`, inspection-grid accessors and the
+workspace's single/group keyframe APIs. These controls send semantic actions through the session;
 they do not modify runtime controls behind the document authority. The
 [native controls guide](native-controls.md) includes host integration examples and the complete
-asset and timeline interaction contract.
+property, layout, hierarchy, asset and timeline interaction contracts.
 
 Native rendering also covers the [asset catalog](images/designer-assets.png),
 [split view](images/designer-split.png) and [compact workspace](images/designer-compact.png).
@@ -517,7 +543,10 @@ The dedicated [Visual designer workflow](../../.github/workflows/designer.yml) c
 - Existing MCP authentication/cancellation plus provider isolation and designer commands.
 - WinUI workspace navigation, measured fit, source preservation, native toolbox and keyframe gestures.
 - Virtualized TreeDataGrid cells, hierarchy drops, typed property commits and stale-editor guards.
-- Actual Vello/HarfBuzz Design, Split, Assets, compact workspace and animation PNG rendering.
+- Numeric scrubbing, linked spacing editors, category search and native resource/name reference drops.
+- Atomic Grid track structure, inherited cells, namespaces and retained keyboard focus.
+- Multi-track key selection/retiming, collision rollback, frame precision and fractional-time source roundtrips.
+- Actual Vello/HarfBuzz Design, Split, Assets, Grid layout, compact workspace and animation PNG rendering.
 - Lexical namespace scopes, deferred templates and interpreted/compiled reflection-binding parity.
 - Runtime-only structural hot reload with unchanged compiled-application contract checks.
 - Native animation final fill, live binding preservation, generated transforms and failed-setup cleanup.
@@ -532,6 +561,7 @@ cargo test -p ferroui-designer-core -p ferroui-designer-tools \
   -p ferroui-designer-collaboration-host --features ferroui-designer-collaboration-host/client
 cargo test -p ferroui-designer --features mcp --lib -- --test-threads=1
 cargo test -p ferroui-mcp --lib -- --test-threads=1
+cargo test -p ferroui-controls-treedatagrid row_drag_ --lib -- --test-threads=1
 FERROUI_DESIGNER_RENDER_OUTPUT=/tmp/designer-renders \
   cargo test -p ferroui-designer --features mcp,render-smoke --lib render_tests:: -- --test-threads=1 --nocapture
 cargo check -p ferroui-designer --features mcp --release
