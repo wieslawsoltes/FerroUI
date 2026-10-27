@@ -194,7 +194,7 @@ fn inspector_native_property_drop_validates_before_copy_and_rejects_retired_or_r
             DragDrop::drag_over_event()
         };
         let event = DragEventArgs::new(
-            Some(&routed),
+            Some(routed),
             data,
             cell.clone().upcast::<Interactive>(),
             ferroui_base::Point::new(2.0, 2.0),

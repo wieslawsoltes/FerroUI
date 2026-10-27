@@ -373,14 +373,16 @@ pub(crate) fn numeric_options(
     if !numeric {
         return None;
     }
-    let mut options = crate::property_controls::PropertyNumberOptions::default();
-    options.integer = matches!(
-        context.runtime_type.as_deref(),
-        Some("i16" | "i32" | "i64" | "u16" | "u32" | "u64" | "usize")
-    ) || matches!(
-        context.property.as_str(),
-        "Grid.Row" | "Grid.Column" | "Grid.RowSpan" | "Grid.ColumnSpan"
-    );
+    let mut options = crate::property_controls::PropertyNumberOptions {
+        integer: matches!(
+            context.runtime_type.as_deref(),
+            Some("i16" | "i32" | "i64" | "u16" | "u32" | "u64" | "usize")
+        ) || matches!(
+            context.property.as_str(),
+            "Grid.Row" | "Grid.Column" | "Grid.RowSpan" | "Grid.ColumnSpan"
+        ),
+        ..Default::default()
+    };
     match context.property.as_str() {
         "Opacity" => {
             options.minimum = 0.0;
