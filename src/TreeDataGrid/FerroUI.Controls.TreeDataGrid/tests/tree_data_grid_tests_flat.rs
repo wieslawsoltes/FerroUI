@@ -878,6 +878,79 @@ fn auto_drag_drop_rows_should_raise_row_drag_started_when_row_is_dragged() {
 }
 
 #[test]
+fn row_drag_payloads_and_press_modifiers_reach_the_native_drag_without_replacing_row_identity() {
+    use crate::models::DragInfo;
+    use ferroui_base::input::platform::IPlatformDragSource;
+    use ferroui_base::input::{DataFormat, DataTransferExtensions, DataTransferItem, DataTransferItemExtensions, IDataTransfer, LocalBoxFuture};
+    use ferroui_base::FerroLocator;
+
+    #[derive(Default)]
+    struct Capture {
+        data: RefCell<Option<Rc<dyn IDataTransfer>>>,
+        effects: Cell<DragDropEffects>,
+    }
+    impl IPlatformDragSource for Capture {
+        fn do_drag_drop_async(
+            &self,
+            _: &PointerPressedEventArgs,
+            data: Rc<dyn IDataTransfer>,
+            effects: DragDropEffects,
+        ) -> LocalBoxFuture<DragDropEffects> {
+            *self.data.borrow_mut() = Some(data);
+            self.effects.set(effects);
+            Box::pin(std::future::ready(DragDropEffects::COPY))
+        }
+    }
+
+    let _app = start_app();
+    let t = create_target();
+    let platform = Rc::new(Capture::default());
+    FerroLocator::current_mutable().bind::<dyn IPlatformDragSource>().to_constant(platform.clone());
+    let format = DataFormat::create_string_application_format("Test.TreeReference");
+    let event_seen = Rc::new(Cell::new(false));
+    let seen = event_seen.clone();
+    let payload_format = format.clone();
+    t.target.set_auto_drag_drop_rows(true);
+    t.row_selection().select(&IndexPath::new(0));
+    t.target.row_drag_started(move |_, event| {
+        assert_eq!(event.key_modifiers(), KeyModifiers::ALT | KeyModifiers::SHIFT);
+        assert_eq!(event.models().len(), 1);
+        assert_eq!(event.allowed_effects(), DragDropEffects::MOVE);
+        let shared = event.clone();
+        shared.data_transfer().add(DataTransferItem::create(&payload_format, Some("reference".into())));
+        // A contributed payload cannot shadow the grid's token, even if an application
+        // accidentally reuses the reserved internal format.
+        shared.data_transfer().add(DataTransferItem::create(&DragInfo::data_format(), Some("foreign".into())));
+        assert_eq!(event.data_transfer().try_get_value(&payload_format).as_deref(), Some("reference"));
+        event.set_allowed_effects(DragDropEffects::COPY);
+        assert_eq!(shared.allowed_effects(), DragDropEffects::COPY);
+        seen.set(true);
+    });
+    let pointer = Pointer::new(0, PointerType::Mouse, true);
+    let trigger = PointerPressedEventArgs::new(
+        &t.target,
+        pointer,
+        &t.target,
+        Point::new(1.0, 1.0),
+        1,
+        PointerPointProperties::new(RawInputModifiers::LEFT_MOUSE_BUTTON, PointerUpdateKind::LeftButtonPressed),
+        KeyModifiers::ALT | KeyModifiers::SHIFT,
+        1,
+    );
+    t.target.raise_row_drag_started(&trigger);
+    assert!(event_seen.get());
+    assert_eq!(platform.effects.get(), DragDropEffects::COPY);
+    let data = platform.data.borrow().clone().expect("the native drag was started");
+    assert_eq!(data.try_get_value(&format).as_deref(), Some("reference"));
+    let token = data.try_get_value(&DragInfo::data_format()).unwrap();
+    assert_eq!(token.len(), 32);
+    assert_ne!(token, "foreign");
+    assert!(data.items()[0].contains(&format));
+    assert!(data.items()[0].contains(&DragInfo::data_format()));
+    run_jobs();
+}
+
+#[test]
 fn desired_width_should_be_total_of_fixed_width_columns() {
     let _app = start_app();
     let t = create_target_with_columns(vec![
