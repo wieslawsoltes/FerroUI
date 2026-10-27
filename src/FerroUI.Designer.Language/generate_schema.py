@@ -12,6 +12,9 @@ framework=importlib.util.module_from_spec(spec)
 spec.loader.exec_module(framework)
 model=framework.Model()
 crates=list(framework.CRATES)
+# Templates, resource includes and markup extensions are declared by the XAML runtime,
+# not by the native view-builder crates. Read their real metadata through the same scanner.
+crates.append(("src/Markup/FerroUI.Markup.Xaml", "ferroui_markup_xaml"))
 for _,_,group,_ in framework.GROUPS:
     crates.extend(group)
 for directory,crate in crates:
@@ -27,7 +30,7 @@ def read_markup_properties(body, properties):
     for block in re.finditer(r"\bproperties:\s*\[",body):
         contents=body[block.end():framework.matching(body,block.end()-1,"[","]")]
         position=0
-        while match:=re.search(r"\b([A-Z]\w*)\s*:\s*([^{}]+?)\s*\{",contents[position:]):
+        while match:=re.search(r"\b([A-Za-z_]\w*)\s*:\s*([^{}]+?)\s*\{",contents[position:]):
             start=position+match.end()-1
             end=framework.matching(contents,start,"{","}")
             # A getter-only collection can still be writable in XAML through adders or a
@@ -38,26 +41,53 @@ def read_markup_properties(body, properties):
 
 enums={}
 extra={}
-for directory,_ in crates:
+aliases={}
+for directory,crate in crates:
+    registration=framework.read(ROOT/directory/"register_types.rs")
+    mappings=re.findall(r'\(\s*"([\w:]+)"\s*,\s*"([\w.]+)"\s*\)',registration)
+    assembly=re.search(r'\bname:\s*"([^"]+)"',registration).group(1)
+    def register_aliases(name,path,body):
+        explicit=re.search(r'\bnamespace:\s*"([^"]+)"',body)
+        relative=pathlib.Path(path).relative_to(ROOT/directory).with_suffix("")
+        modules=list(relative.parts)
+        if modules[-1] in ("mod","lib"):
+            modules.pop()
+        module="::".join([crate]+modules)
+        candidates=[(prefix,namespace) for prefix,namespace in mappings if module==prefix or module.startswith(prefix+"::")]
+        inferred=max(candidates,key=lambda entry:len(entry[0]))[1] if candidates else None
+        namespace=explicit.group(1) if explicit else inferred
+        if namespace:
+            # Explicit markup namespaces override a helper module's inferred namespace.
+            if name not in aliases or explicit:
+                aliases[name]=[f"using:{namespace}",f"clr-namespace:{namespace};assembly={assembly}"]
     for path in framework.rust_files(str(ROOT/directory)):
         text=framework.strip_comments(framework.read(path))
         for match in re.finditer(r"pub enum (\w+)\s*\{",text):
             body=text[match.end():framework.matching(text,match.end()-1,"{","}")]
             enums[match.group(1)]=re.findall(r"(?m)^\s*([A-Z]\w*)\s*(?:,|=)",body)
+        for match in re.finditer(r"ferro_class!\s*[({]\s*([A-Z]\w*)\s*:",text):
+            register_aliases(match.group(1),path,"")
         for match in re.finditer(r"ferro_class_info!\s*\(\s*(\w+)\s*\{",text):
             body=text[match.end():framework.matching(text,match.end()-1,"{","}")]
             properties=extra.setdefault(match.group(1),{})
             read_markup_properties(body,properties)
+            register_aliases(match.group(1),path,body)
         # Plain runtime markup classes include Setter and easing objects. They use the same
         # property table as object-model classes, but are not ferro_class! declarations.
-        for match in re.finditer(r"ferro_markup_type!\s*\(\s*(?:class|value)\s+([A-Z]\w*)\s*\{",text):
-            name=match.group(1)
+        for match in re.finditer(r'ferro_markup_type!\s*\(\s*(?:class|value)\s+([A-Z]\w*)(?:\s+as\s+"([A-Z]\w*)")?\s*\{' ,text):
+            name=match.group(2) or match.group(1)
+            if name!=match.group(1) and match.group(1) in model.paths:
+                model.paths[name]=model.paths[match.group(1)]
             body=text[match.end():framework.matching(text,match.end()-1,"{","}")]
             read_markup_properties(body,extra.setdefault(name,{}))
-            if re.search(r"\bconstructors:\s*\[\s*\(\s*\)\s*=>",body):
+            register_aliases(name,path,body)
+            # XAML also supplies IServiceProvider constructor arguments itself.
+            constructors=re.search(r"\bconstructors:\s*\[",body)
+            constructor_body=body[constructors.end():framework.matching(body,constructors.end()-1,"[","]")] if constructors else ""
+            if re.search(r"\(\s*(?:Rc\s*<\s*dyn\s+IServiceProvider\s*>)?\s*\)\s*=>",constructor_body):
                 model.creatable.add(name)
-            if base:=re.search(r"\bbase:\s*([A-Z]\w*)\s*,",body):
-                model.bases[name]=base.group(1)
+            if base:=re.search(r"\bbase:\s*((?:(?:Rc|Ref|Option)\s*<\s*)*(?:dyn\s+)?([A-Z]\w*)\s*>*)\s*,",body):
+                model.bases[name]=base.group(2)
         # These framework macros emit real direct properties and derived transition classes.
         # Read their invocation arguments so timing members and new transitions follow source
         # changes automatically, rather than copying a second list of animation properties.
@@ -70,6 +100,7 @@ for directory,_ in crates:
         for match in re.finditer(r"\bferro_transition_class!\s*\(\s*([A-Z]\w*)\s*:",text):
             model.bases[match.group(1)]="TransitionBase"
             model.creatable.add(match.group(1))
+            register_aliases(match.group(1),path,"")
 
 types=[]
 for name in sorted(set(model.bases)|model.creatable|set(extra)):
@@ -84,7 +115,7 @@ for name in sorted(set(model.bases)|model.creatable|set(extra)):
     for event,args in model.events.get(name,[]):
         label=pascal(event)
         properties[label]={"name":label,"type_name":args,"documentation":f"{name}.{label} routed event","event":True}
-    types.append({"name":name,"namespace":"https://github.com/ferroui","documentation":model.paths.get(name,name),"base":model.bases.get(name),"constructible":name in model.creatable,"properties":properties})
+    types.append({"name":name,"namespace":"https://github.com/ferroui","documentation":model.paths.get(name,name),"base":model.bases.get(name),"constructible":name in model.creatable,"properties":properties,"namespace_aliases":aliases.get(name,[])})
 output=pathlib.Path(__file__).with_name("schema.json")
 content=json.dumps(types,ensure_ascii=False,indent=2)+"\n"
 if "--check" in sys.argv:

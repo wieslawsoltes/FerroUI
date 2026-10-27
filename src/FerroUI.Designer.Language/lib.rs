@@ -8,7 +8,7 @@ mod schema;
 mod service;
 pub use formatting::FormattingOptions;
 pub use line_index::{LineIndex, Position, Range, TextChange, TextEdit};
-pub use references::{name_occurrences, rewrite_names, scope_of as name_scope, NameOccurrence};
+pub use references::{NameOccurrence, name_occurrences, rewrite_names, scope_of as name_scope};
 pub use schema::{ExtensionInfo, PropertyInfo, Schema, TypeInfo};
 pub use service::*;
 use std::fmt;
@@ -38,5 +38,7 @@ fn require(value: bool, message: impl Into<String>) -> Result<()> {
         Err(LanguageError(message.into()))
     }
 }
+#[cfg(test)]
+mod component_schema_tests;
 #[cfg(test)]
 mod tests;

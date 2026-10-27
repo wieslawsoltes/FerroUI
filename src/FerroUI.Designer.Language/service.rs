@@ -1,6 +1,6 @@
 use crate::{
-    require, FormattingOptions, LanguageError, LineIndex, Range, Result, Schema, TextChange,
-    TextEdit,
+    FormattingOptions, LanguageError, LineIndex, Range, Result, Schema, TextChange, TextEdit,
+    require,
 };
 use ferroui_designer_core::{Document, NodeKind, SourceSpan};
 use serde::{Deserialize, Serialize};
@@ -421,14 +421,10 @@ impl LanguageService {
                         )?);
                     }
                 }
-                if let Some(property) = self.schema.property(
-                    &node.name,
-                    attribute
-                        .namespace_uri
-                        .as_deref()
-                        .or(node.namespace_uri.as_deref()),
-                    &attribute.name,
-                ) {
+                if let Some(property) =
+                    self.schema
+                        .attribute_property(&state.document, node, attribute)
+                {
                     if !expression
                         && !property.values.is_empty()
                         && !property
@@ -678,10 +674,17 @@ impl LanguageService {
                             }
                         }
                     }
-                } else if let Some(info) =
-                    self.schema
-                        .property(tag_name, namespace.as_deref(), property)
-                {
+                } else if let Some(info) = self.schema.property_in_context(
+                    tag_name,
+                    namespace.as_deref(),
+                    property,
+                    if property.contains(['.', ':']) {
+                        completion_namespace(state, property, open.unwrap(), offset)
+                    } else {
+                        namespace.clone()
+                    }
+                    .as_deref(),
+                ) {
                     for value in info.values {
                         proposals.insert(
                             value.clone(),
@@ -752,10 +755,10 @@ impl LanguageService {
             } else {
                 for info in self.schema.types.values().filter(|t| {
                     t.constructible
-                        && namespace.as_ref().is_none_or(|ns| {
-                            ns == &t.namespace
-                                || ns.starts_with("using:FerroUI")
-                                || ns.starts_with("clr-namespace:FerroUI")
+                        && namespace.as_deref().is_none_or(|ns| {
+                            self.schema
+                                .type_info(&t.name, Some(ns))
+                                .is_some_and(|resolved| resolved.namespace == t.namespace)
                         })
                 }) {
                     let label = tag_name.split_once(':').map_or_else(
@@ -828,11 +831,10 @@ impl LanguageService {
         {
             for attribute in &node.attributes {
                 if attribute.span.contains(offset) {
-                    if let Some(info) = self.schema.property(
-                        &node.name,
-                        node.namespace_uri.as_deref(),
-                        &attribute.name,
-                    ) {
+                    if let Some(info) =
+                        self.schema
+                            .attribute_property(&state.document, node, attribute)
+                    {
                         return Ok(Some(Hover {
                             contents: format!(
                                 "{}: {}\n\n{}",
@@ -924,14 +926,7 @@ impl LanguageService {
                     if attribute.name_span.contains(offset) {
                         return Ok(self
                             .schema
-                            .property(
-                                &node.name,
-                                attribute
-                                    .namespace_uri
-                                    .as_deref()
-                                    .or(node.namespace_uri.as_deref()),
-                                &attribute.name,
-                            )
+                            .attribute_property(&state.document, node, attribute)
                             .and_then(|property| property.definition)
                             .into_iter()
                             .collect());

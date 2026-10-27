@@ -1,6 +1,6 @@
 //! Binding paths share schema metadata with ordinary property editing. Resolution uses the
 //! explicit source, a named element, template target, or nearest x:DataType in that order.
-use crate::references::{markup_arguments, Argument};
+use crate::references::{Argument, markup_arguments};
 use crate::{PropertyInfo, Schema, TypeInfo};
 use ferroui_designer_core::{Document, MarkupValue, NodeId, SourceSpan};
 use std::collections::BTreeMap;
@@ -149,11 +149,21 @@ fn source_type<'a>(
     let mut current = Some(node);
     while let Some(id) = current {
         let ancestor = document.ast().node(id)?;
+        let native_type = schema
+            .type_info(&ancestor.name, ancestor.namespace_uri.as_deref())
+            .filter(|info| info.namespace == crate::schema::FRAMEWORK_NAMESPACE)
+            .map(|info| info.name.as_str());
         if expression.starts_with("{TemplateBinding") || expression.contains("TemplatedParent") {
-            if ancestor.local_name() == "ControlTemplate" {
+            if native_type == Some("ControlTemplate") {
                 return ancestor
-                    .attribute("TargetType")
-                    .and_then(|name| type_reference(schema, document, id, name));
+                    .attributes
+                    .iter()
+                    .find(|attribute| {
+                        schema
+                            .attribute_property(document, ancestor, attribute)
+                            .is_some_and(|property| property.name == "TargetType")
+                    })
+                    .and_then(|attribute| type_reference(schema, document, id, &attribute.value));
             }
         } else if let Some(data_type) = ancestor.attributes.iter().find(|attribute| {
             attribute.name.rsplit(':').next() == Some("DataType")
@@ -161,6 +171,14 @@ fn source_type<'a>(
                     == Some("http://schemas.microsoft.com/winfx/2006/xaml")
         }) {
             return type_reference(schema, document, id, &data_type.value);
+        } else if matches!(native_type, Some("DataTemplate" | "TreeDataTemplate")) {
+            if let Some(data_type) = ancestor.attributes.iter().find(|attribute| {
+                schema
+                    .attribute_property(document, ancestor, attribute)
+                    .is_some_and(|property| property.name == "DataType")
+            }) {
+                return type_reference(schema, document, id, &data_type.value);
+            }
         }
         current = ancestor.parent;
     }
@@ -172,8 +190,21 @@ fn type_reference<'a>(
     node: NodeId,
     reference: &str,
 ) -> Option<&'a TypeInfo> {
+    let namespaces = document.ast().namespaces(node);
     let reference = if let Ok(MarkupValue::Extension(extension)) = MarkupValue::parse(reference) {
-        if extension.name.rsplit(':').next() != Some("Type") {
+        let (prefix, name) = extension
+            .name
+            .split_once(':')
+            .unwrap_or(("", &extension.name));
+        if name != "Type"
+            || namespaces.get(prefix).map(String::as_str)
+                != Some("http://schemas.microsoft.com/winfx/2006/xaml")
+            || extension.arguments.len() != 1
+            || extension.arguments[0]
+                .name
+                .as_deref()
+                .is_some_and(|name| name != "TypeName")
+        {
             return None;
         }
         match extension.arguments.first()?.value.clone() {
@@ -183,7 +214,6 @@ fn type_reference<'a>(
     } else {
         reference.to_owned()
     };
-    let namespaces = document.ast().namespaces(node);
     let namespace = reference
         .split_once(':')
         .map(|(prefix, _)| prefix)
