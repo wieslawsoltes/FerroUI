@@ -1314,6 +1314,7 @@ version = "0.4.0"
 dependencies = [
  "ferroui-base",
  "ferroui-controls",
+ "ferroui-controls-color-picker",
  "ferroui-controls-treedatagrid",
  "ferroui-designer-animation",
  "ferroui-designer-collaboration",
