@@ -256,6 +256,35 @@ FERROUI_DESIGNER_RENDER_OUTPUT=/tmp/designer-renders \
   native_workspace_renders_layout_helper_interactions -- --test-threads=1 --nocapture
 ```
 
+### Native gallery
+
+These captures use the real WinUI workspace, Vello CPU rendering and HarfBuzz
+text shaping. Each workspace image shows an uncommitted pointer draft; the test
+then releases or cancels the gesture and checks the resulting source/history.
+
+**Measured Grid tracks and cell placement.** The target uses actual native track
+extents and excludes the gutter from the selected cell.
+
+![Native workspace with measured Grid tracks and a second-row, second-column placement target](images/designer-helper-grid-cell.png)
+
+**Wrap insertion with a cached native control ghost.** The original component
+remains in place while its native pixels follow the pointer. The insertion caret
+and caption describe the proposed order; release reparents it in one transaction.
+
+![Native workspace with a coral control ghost moving into WrapPanel and an insertion caption below the target](images/designer-helper-wrap-reparent.png)
+
+| Capture | Interaction shown |
+| --- | --- |
+| [Grid cell](images/designer-helper-grid-cell.png) | Measured tracks, explicit cell highlight and row/column placement. |
+| [Stack gap](images/designer-helper-stack-gap.png) | Shared spacing staged from 12 to 24; the source and inspector retain 12 until release. |
+| [Wrap reparent](images/designer-helper-wrap-reparent.png) | A native visual ghost, row-aware insertion and a cross-container move. |
+| [Dock edge](images/designer-helper-dock-edge.png) | Existing dock regions and an accepted right-edge placement. |
+| [Uniform cell](images/designer-helper-uniform-cell.png) | Equal cells and the effective insertion slot when later empty cells are hovered. |
+| [Flex insertion](images/designer-helper-flex-insertion.png) | Main-axis direction, item/line gaps and source-order insertion. |
+| [Available content](images/designer-helper-content-slot.png) | A content holder's padding and accepted content placement. |
+| [Occupied content](images/designer-helper-content-rejected.png) | A rejected drop with an explanation while existing content remains intact. |
+| [Affine renderer fixture](images/designer-layout-overlay-affine.png) | Extension-provided transformed geometry, placement/rejection feedback and equal-gap measurements. |
+
 ### Coverage
 
 Portable tests cover each layout family, placement/planner agreement, effective
