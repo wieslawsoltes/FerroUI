@@ -94,10 +94,14 @@ jobs:
         run: |
           cargo test --locked -p ferroui-controls-treedatagrid tree_data_grid_source_extensions::tests:: -- --test-threads=1
           cargo test --locked -p ferroui-controls-treedatagrid row_drag_ --lib -- --test-threads=1
+      - name: Layer visibility in live composition and exported renders
+        run: cargo test --locked -p ferroui-base --lib render_suppression -- --test-threads=1
       - name: Headless application startup and clean shutdown
         env:
           FERROUI_SMOKE_EXIT_MS: '1500'
-        run: cargo run --locked -p designer-studio --no-default-features --features headless,mcp -- --headless
+        run: |
+          cargo run --locked -p designer-studio --no-default-features --features headless,mcp -- --headless
+          cargo run --locked -p designer-studio --no-default-features --features headless,mcp -- --headless --file docs/designer/samples/DesignWorkflows.xaml
       - name: Optional facade integration
         run: cargo check --locked -p ferroui --no-default-features --features designer-mcp
       - name: Release preview path without development hot reload

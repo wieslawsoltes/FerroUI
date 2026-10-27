@@ -16,6 +16,12 @@ playhead; the source retains the base value. Effective values and value origins 
 property-cell tooltips.
 The [compact workspace](images/designer-compact.png) demonstrates the same controls at 1280 × 820.
 
+The [Visual Studio/Blend, Figma and Qt workflow comparison](feature-comparison.md) records
+the existing coverage and the latest additions: [design-time values and sample data](design-time-data.md),
+local layer locking/hiding/isolation, native keyboard-order and label-target authoring, and
+responsive preview environments. Open the [workflow sample](samples/DesignWorkflows.xaml)
+to exercise them together.
+
 ## Run
 
 From the repository root:
@@ -23,6 +29,7 @@ From the repository root:
 ```sh
 cargo run -p designer-studio
 cargo run -p designer-studio -- --file /absolute/path/to/MainWindow.xaml
+cargo run -p designer-studio -- --file docs/designer/samples/DesignWorkflows.xaml
 cargo run -p designer-studio -- --project /absolute/path/to/solution
 ```
 
@@ -68,6 +75,10 @@ when hidden and restores its resized height when reopened.
 **Focus canvas** temporarily hides both docks and the timeline, preserving their sizes and view
 state. Use the canvas shelf or Ctrl+Shift+F / Cmd+Shift+F to restore them. `V` selects objects;
 `I` interacts with the native preview when no text editor owns input.
+**Data** opens design-only property/sample authoring. **Focus** opens the scoped tab-order
+and label-target editor with native canvas badges. The **…** action beside the canvas
+dimensions opens size presets, orientation, theme and reading direction. Layers rows and
+their action menu expose local lock/hide/isolation without changing application visibility.
 
 The left dock switches between **Layers**, **Assets**, **Library** and **Project**:
 

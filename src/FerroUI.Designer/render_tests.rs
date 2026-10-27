@@ -142,6 +142,8 @@ mod layout_helpers;
 
 #[path = "render_components_tests.rs"]
 mod components;
+#[path = "render_design_workflows_tests.rs"]
+mod design_workflows;
 
 #[test]
 fn native_workspace_renders_design_manipulation_and_animation() {
