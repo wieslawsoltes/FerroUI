@@ -528,7 +528,7 @@ fn view_button(name: &str, path: &str) -> Ref<Button> {
     button.set_width(28.0);
     button.set_height(26.0);
     button.set_padding(Thickness::uniform(6.0));
-    button.set_content(Some(Control::boxed(&toolbox_icon(path, 14.0, 0xffb8becc))));
+    button.set_content(Some(Control::boxed(toolbox_icon(path, 14.0, 0xffb8becc))));
     AutomationProperties::set_name(&button, Some(name));
     ToolTip::set_tip(&button, Some(Rc::new(name.to_owned())));
     button
