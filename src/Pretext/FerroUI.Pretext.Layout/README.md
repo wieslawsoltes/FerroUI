@@ -10,7 +10,7 @@ native backend, thread, clock or file dependency.
 | --- | --- |
 | `PreparedTextMetrics::measure_max_line_width` | Measure genuinely unwrapped text, honoring preserved hard breaks. |
 | `PreparedTextMetrics::collect_wrap_metrics` | Measure count, height and widest painted line without materializing strings. |
-| `PreparedTextMetrics::find_tight_wrap_metrics` | Find the smallest integral width preserving the original line count. |
+| `PreparedTextMetrics::find_tight_wrap_metrics` | Find the smallest integral width without increasing the original line count. |
 | `ObstacleLayoutHelper::carve_text_line_slots` | Subtract overlapping intervals from an available horizontal line slot. |
 | `ObstacleLayoutHelper::circle_interval_for_band` | Compute circle exclusion over an entire text band. |
 | `ObstacleLayoutHelper::ellipse_interval_for_band` | Compute ellipse exclusion with independent radii and padding. |

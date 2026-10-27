@@ -131,3 +131,13 @@ Rust dependencies are used under their own licenses as declared in their crate m
 The Vello render backend (`src/Vello/FerroUI.Vello`) links crates of the Vello project and their companions: `kurbo`, `peniko`, `vello_cpu` (with `vello_common`), `linesweeper` and `png`, each under the Apache License 2.0 or the MIT license at the choice of the user. The versions, what each is used for and the copyright lines are in `src/Vello/FerroUI.Vello/NOTICE.md`.
 
 The Vulkan platform contracts (`src/FerroUI.Vulkan`) use `ash` 0.38.0 (MIT OR Apache-2.0, Copyright (c) 2016 ASH contributors) for the types, constants and function tables of Vulkan, with `libloading` (ISC) to open the Vulkan loader of the system at run time.
+
+## Pretext text preparation and layout
+
+The crates under `src/Pretext/` derive from
+[PretextSharp](https://github.com/wieslawsoltes/PretextSharp), commit
+`e70a544e43f7ecffee76d2d22a0224213d7fbba3`, copyright (c) 2026 Wiesław Šoltés,
+licensed under MIT. The source project credits Cheng Lou's original
+[pretext](https://github.com/chenglou/pretext). Each Pretext crate includes the
+full source MIT notice in its own `NOTICE.md`. Source mappings, native service
+adaptations and validation are documented in `docs/porting/pretext.md`.
