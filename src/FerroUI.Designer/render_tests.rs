@@ -63,6 +63,17 @@ fn capture_at(
     size: Size,
 ) -> Vec<u8> {
     workspace.refresh(true);
+    capture_current_at(workspace, clock, path, size)
+}
+
+// A pointer draft belongs to the live measured tree. Capture it without rebuilding the
+// inspector or refreshing the selection while the pointer is captured.
+fn capture_current_at(
+    workspace: &Rc<DesignerWorkspace>,
+    clock: &RenderClock,
+    path: &Path,
+    size: Size,
+) -> Vec<u8> {
     assert!(
         matches!(
             workspace.session().borrow().preview_status(),
@@ -125,6 +136,9 @@ fn capture_at(
     bitmap.dispose();
     pixels
 }
+
+#[path = "render_layout_helpers_tests.rs"]
+mod layout_helpers;
 
 #[test]
 fn native_workspace_renders_design_manipulation_and_animation() {

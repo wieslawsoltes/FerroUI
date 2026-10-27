@@ -1,0 +1,66 @@
+<Canvas xmlns="https://github.com/ferroui"
+        Name="LayoutPlayground" Width="880" Height="720" Background="#FFF4F6FA">
+  <TextBlock Canvas.Left="24" Canvas.Top="22" Text="Layout playground" FontSize="26" FontWeight="SemiBold" Foreground="#FF17243B" />
+  <TextBlock Canvas.Left="24" Canvas.Top="60" Text="Select a layout, adjust its guides, or drag a control into another container." FontSize="13" Foreground="#FF65738A" />
+
+  <Border Canvas.Left="24" Canvas.Top="104" Width="264" Height="224" Background="White" BorderBrush="#FFDCE2EC" BorderThickness="1" CornerRadius="8" />
+  <TextBlock Canvas.Left="40" Canvas.Top="118" Text="GRID  /  TRACKS + CELLS" FontSize="11" FontWeight="SemiBold" Foreground="#FF65738A" />
+  <Grid Name="GridLayout" Canvas.Left="40" Canvas.Top="150" Width="232" Height="158" RowDefinitions="48,*" ColumnDefinitions="88,*" RowSpacing="8" ColumnSpacing="8" Background="#FFF0F4FA">
+    <Border Name="GridHeading" Grid.ColumnSpan="2" Background="#FFDDE9FF" CornerRadius="4" Padding="12">
+      <TextBlock Text="Project overview" Foreground="#FF285AA3" VerticalAlignment="Center" />
+    </Border>
+    <Border Name="GridSidebar" Grid.Row="1" Background="#FFE6EBF3" CornerRadius="4" Padding="10">
+      <TextBlock Text="Details" Foreground="#FF65738A" />
+    </Border>
+  </Grid>
+
+  <Border Canvas.Left="308" Canvas.Top="104" Width="264" Height="224" Background="White" BorderBrush="#FFDCE2EC" BorderThickness="1" CornerRadius="8" />
+  <TextBlock Canvas.Left="324" Canvas.Top="118" Text="STACK  /  SHARED SPACING" FontSize="11" FontWeight="SemiBold" Foreground="#FF65738A" />
+  <StackPanel Name="StackLayout" Canvas.Left="324" Canvas.Top="150" Width="232" Height="158" Spacing="12" Background="#FFF0F4FA">
+    <Border Name="StackFirst" Height="38" Background="#FFE2E8F4" CornerRadius="4" Padding="12,8"><TextBlock Text="Design tokens" Foreground="#FF32445F" /></Border>
+    <Border Name="StackSecond" Height="38" Background="#FFE2E8F4" CornerRadius="4" Padding="12,8"><TextBlock Text="Component library" Foreground="#FF32445F" /></Border>
+    <Border Name="StackThird" Height="38" Background="#FFE2E8F4" CornerRadius="4" Padding="12,8"><TextBlock Text="Release notes" Foreground="#FF32445F" /></Border>
+  </StackPanel>
+
+  <Border Canvas.Left="592" Canvas.Top="104" Width="264" Height="224" Background="White" BorderBrush="#FFDCE2EC" BorderThickness="1" CornerRadius="8" />
+  <TextBlock Canvas.Left="608" Canvas.Top="118" Text="WRAP  /  ROW INSERTION" FontSize="11" FontWeight="SemiBold" Foreground="#FF65738A" />
+  <WrapPanel Name="WrapLayout" Canvas.Left="608" Canvas.Top="150" Width="232" Height="158" ItemSpacing="12" LineSpacing="12" Background="#FFF0F4FA">
+    <Border Name="WrapFirst" Width="104" Height="38" Background="#FFE8E0FA" CornerRadius="4" Padding="10,8"><TextBlock Text="Research" Foreground="#FF5A4082" /></Border>
+    <Border Name="WrapSecond" Width="104" Height="38" Background="#FFE8E0FA" CornerRadius="4" Padding="10,8"><TextBlock Text="Prototype" Foreground="#FF5A4082" /></Border>
+    <Border Name="WrapThird" Width="104" Height="38" Background="#FFE8E0FA" CornerRadius="4" Padding="10,8"><TextBlock Text="Review" Foreground="#FF5A4082" /></Border>
+  </WrapPanel>
+
+  <Border Canvas.Left="24" Canvas.Top="348" Width="264" Height="224" Background="White" BorderBrush="#FFDCE2EC" BorderThickness="1" CornerRadius="8" />
+  <TextBlock Canvas.Left="40" Canvas.Top="362" Text="DOCK  /  EDGE REGIONS" FontSize="11" FontWeight="SemiBold" Foreground="#FF65738A" />
+  <DockPanel Name="DockLayout" Canvas.Left="40" Canvas.Top="394" Width="232" Height="158" LastChildFill="False" HorizontalSpacing="8" VerticalSpacing="8" Background="#FFF0F4FA">
+    <Border Name="DockToolbar" DockPanel.Dock="Top" Height="34" Background="#FFDCEFEA" CornerRadius="4" Padding="10,7"><TextBlock Text="Toolbar" Foreground="#FF286658" /></Border>
+    <Border Name="DockNavigation" DockPanel.Dock="Left" Width="76" Background="#FFE3ECE9" CornerRadius="4" Padding="10"><TextBlock Text="Pages" Foreground="#FF486B60" /></Border>
+  </DockPanel>
+
+  <Border Canvas.Left="308" Canvas.Top="348" Width="264" Height="224" Background="White" BorderBrush="#FFDCE2EC" BorderThickness="1" CornerRadius="8" />
+  <TextBlock Canvas.Left="324" Canvas.Top="362" Text="UNIFORM  /  EQUAL CELLS" FontSize="11" FontWeight="SemiBold" Foreground="#FF65738A" />
+  <UniformGrid Name="UniformLayout" Canvas.Left="324" Canvas.Top="394" Width="232" Height="158" Rows="2" Columns="3" Background="#FFF0F4FA">
+    <Border Name="UniformFirst" Margin="4" Background="#FFFFE7C9" CornerRadius="4"><TextBlock Text="01" HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="#FF986129" /></Border>
+    <Border Name="UniformSecond" Margin="4" Background="#FFFFE7C9" CornerRadius="4"><TextBlock Text="02" HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="#FF986129" /></Border>
+    <Border Name="UniformThird" Margin="4" Background="#FFFFE7C9" CornerRadius="4"><TextBlock Text="03" HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="#FF986129" /></Border>
+  </UniformGrid>
+
+  <Border Canvas.Left="592" Canvas.Top="348" Width="264" Height="224" Background="White" BorderBrush="#FFDCE2EC" BorderThickness="1" CornerRadius="8" />
+  <TextBlock Canvas.Left="608" Canvas.Top="362" Text="FLEX  /  FLOW + GAPS" FontSize="11" FontWeight="SemiBold" Foreground="#FF65738A" />
+  <FlexPanel Name="FlexLayout" Canvas.Left="608" Canvas.Top="394" Width="232" Height="158" Direction="Row" Wrap="Wrap" ColumnSpacing="12" RowSpacing="12" AlignItems="FlexStart" AlignContent="FlexStart" Background="#FFF0F4FA">
+    <Border Name="FlexFirst" Width="74" Height="38" Background="#FFDFEAF9" CornerRadius="4" Padding="9,8"><TextBlock Text="Draft" Foreground="#FF315D93" /></Border>
+    <Border Name="FlexSecond" Width="110" Height="38" Background="#FFDFEAF9" CornerRadius="4" Padding="9,8"><TextBlock Text="In progress" Foreground="#FF315D93" /></Border>
+    <Border Name="FlexThird" Width="90" Height="38" Background="#FFDFEAF9" CornerRadius="4" Padding="9,8"><TextBlock Text="Complete" Foreground="#FF315D93" /></Border>
+  </FlexPanel>
+
+  <TextBlock Canvas.Left="24" Canvas.Top="594" Text="DRAG BETWEEN CONTAINERS" FontSize="11" FontWeight="SemiBold" Foreground="#FF65738A" />
+  <Border Name="MovingCard" Canvas.Left="24" Canvas.Top="626" Width="212" Height="46" Background="#FFED653D" CornerRadius="6" Padding="12">
+    <TextBlock Text="Drag this component" Foreground="White" FontWeight="SemiBold" VerticalAlignment="Center" />
+  </Border>
+  <TextBlock Canvas.Left="308" Canvas.Top="594" Text="CONTENT  /  AVAILABLE SLOT" FontSize="11" FontWeight="SemiBold" Foreground="#FF65738A" />
+  <Border Name="EmptyContent" Canvas.Left="308" Canvas.Top="626" Width="264" Height="58" Padding="10" Background="#FFE3F0ED" BorderBrush="#FFACCEC4" BorderThickness="1" CornerRadius="6" />
+  <TextBlock Canvas.Left="592" Canvas.Top="594" Text="CONTENT  /  OCCUPIED SLOT" FontSize="11" FontWeight="SemiBold" Foreground="#FF65738A" />
+  <Border Name="OccupiedContent" Canvas.Left="592" Canvas.Top="626" Width="264" Height="58" Padding="10" Background="#FFE9EDF4" BorderBrush="#FFCDD5E2" BorderThickness="1" CornerRadius="6">
+    <TextBlock Text="Existing content stays protected" Foreground="#FF516078" VerticalAlignment="Center" />
+  </Border>
+</Canvas>

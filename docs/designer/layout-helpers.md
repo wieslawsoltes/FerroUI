@@ -220,6 +220,35 @@ owns capture lifetime and its aggregate bitmap budget.
 
 ## Verification
 
+### Native playground
+
+Open the checked-in [LayoutHelpers.xaml](samples/LayoutHelpers.xaml) sample in the
+native designer to try the same layout scenarios used by the render fixture:
+
+```sh
+cargo run -p designer-studio -- --file docs/designer/samples/LayoutHelpers.xaml
+```
+
+The sample has named Grid, Stack, Wrap, Dock, UniformGrid and Flex layouts, a
+movable component, and available/occupied content holders. Hide the timeline and
+fit the artboard to make all containers visible. Select a layout to expose its
+own handles; drag the coral component between containers to inspect placement
+and the native visual ghost.
+
+The native workspace test writes eight captures through actual DesignSurface
+pointer events. It checks Grid cell attributes, a staged Stack gap, Wrap
+reparenting and cached control pixels, Dock edge attachment, UniformGrid/Flex
+insertion, and accepted/rejected content targeting. Source remains unchanged
+while each draft is visible; accepted releases restore with one undo.
+
+```sh
+FERROUI_DESIGNER_RENDER_OUTPUT=/tmp/designer-renders \
+  cargo test -p ferroui-designer --features mcp,render-smoke --lib \
+  native_workspace_renders_layout_helper_interactions -- --test-threads=1 --nocapture
+```
+
+### Coverage
+
 Portable tests cover each layout family, placement/planner agreement, effective
 properties, protected expressions, custom provider identity and scene validation.
 Native bridge and pointer tests cover accepted/rejected reparenting, helper
