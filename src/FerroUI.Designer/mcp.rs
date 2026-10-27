@@ -14,6 +14,11 @@ mod authoring;
 #[cfg(test)]
 #[path = "mcp_automation_tests.rs"]
 mod automation_tests;
+#[path = "mcp_components.rs"]
+mod components;
+#[cfg(test)]
+#[path = "mcp_components_tests.rs"]
+mod components_tests;
 #[path = "mcp_schema.rs"]
 mod schema;
 #[path = "mcp_workspace.rs"]
@@ -158,6 +163,7 @@ impl UiToolProvider for DesignerMcp {
             definition("designer_presence", "Receive ephemeral peer presence, using the receiver's monotonic expiry clock. This changes no authored source.",json!({"presence":{"type":"object"}}),&["presence"],true),
         ];
         tools.extend(authoring::tools());
+        tools.extend(components::tools());
         if self.workspace.is_some() {
             tools.extend(workspace_tools::tools());
         }
@@ -171,7 +177,7 @@ impl UiToolProvider for DesignerMcp {
             .into_iter()
             .find(|tool| tool["name"] == name)
             .ok_or("Unknown designer tool")?;
-        if authoring::handles(name) || workspace_tools::handles(name) {
+        if authoring::handles(name) || components::handles(name) || workspace_tools::handles(name) {
             return schema::validate(&definition["inputSchema"], args);
         }
         for key in object.keys() {
@@ -365,6 +371,9 @@ impl UiToolProvider for DesignerMcp {
         }
         if authoring::handles(name) {
             return authoring::call(&mut session, name, args, permissions);
+        }
+        if components::handles(name) {
+            return components::call(&mut session, name, args);
         }
         match name {
             "designer_document" => {
