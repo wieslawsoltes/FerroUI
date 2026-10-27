@@ -269,7 +269,7 @@ impl DesignerWorkspace {
                     flyout.hide();
                 }
             });
-            flyout.set_content(Some(Control::boxed(&editor.control())));
+            flyout.set_content(Some(Control::boxed(editor.control())));
             this.preview_environment.borrow_mut().editor = Some(editor);
         });
         let weak = Rc::downgrade(self);
