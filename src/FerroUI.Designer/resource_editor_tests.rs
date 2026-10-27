@@ -1,12 +1,18 @@
 use super::*;
+use ferroui_base::ObjectType;
 use ferroui_base::interactivity::RoutedEventArgs;
 use ferroui_controls::testing::{TestServices, UnitTestApplication};
 
-fn click(editor: &ResourceDefinitionEditor, name: &str) {
+fn named<T: ObjectType>(editor: &ResourceDefinitionEditor, name: &str) -> Ref<T> {
     editor
         .control()
-        .get_control::<Button>(name)
-        .raise_event(&RoutedEventArgs::with_event(Button::click_event()));
+        .get_logical_descendants()
+        .find(|control| control.name().as_deref() == Some(name))
+        .and_then(|control| control.cast::<T>())
+        .unwrap_or_else(|| panic!("Missing native definition editor control {name}"))
+}
+fn click(editor: &ResourceDefinitionEditor, name: &str) {
+    named::<Button>(editor, name).raise_event(&RoutedEventArgs::with_event(Button::click_event()));
 }
 fn model() -> ResourceDefinitionModel {
     ResourceDefinitionModel {
@@ -40,13 +46,8 @@ fn definition_drafts_remain_local_until_an_explicit_semantic_commit() {
         Ok(())
     });
     editor.configure(model());
-    editor
-        .control()
-        .get_control::<TextBox>("DefinitionResourceKey")
-        .set_text(Some("BrandAccent"));
-    editor
-        .control()
-        .get_control::<TextBox>("DefinitionSourceDraft")
+    named::<TextBox>(&editor, "DefinitionResourceKey").set_text(Some("BrandAccent"));
+    named::<TextBox>(&editor, "DefinitionSourceDraft")
         .set_text(Some("<SolidColorBrush Color=\"Blue\" />"));
     assert!(commands.borrow().is_empty());
     click(&editor, "DefinitionRename");
@@ -73,17 +74,11 @@ fn definition_preview_rejects_invalid_sizes_and_reports_host_errors_inline() {
         *captured.borrow_mut() += 1;
         Err("Target type is not registered".into())
     });
-    editor
-        .control()
-        .get_control::<TextBox>("DefinitionPreviewWidth")
-        .set_text(Some("NaN"));
+    named::<TextBox>(&editor, "DefinitionPreviewWidth").set_text(Some("NaN"));
     click(&editor, "DefinitionEditCanvas");
     assert_eq!(*calls.borrow(), 0);
     assert!(editor.error.is_visible());
-    editor
-        .control()
-        .get_control::<TextBox>("DefinitionPreviewWidth")
-        .set_text(Some("360"));
+    named::<TextBox>(&editor, "DefinitionPreviewWidth").set_text(Some("360"));
     click(&editor, "DefinitionEditCanvas");
     assert_eq!(*calls.borrow(), 1);
     assert_eq!(
@@ -103,12 +98,8 @@ fn retired_definition_controls_cannot_apply_to_the_next_definition() {
         Ok(())
     });
     editor.configure(model());
-    let previous_apply = editor
-        .control()
-        .get_control::<Button>("DefinitionApplySource");
-    let previous_source = editor
-        .control()
-        .get_control::<TextBox>("DefinitionSourceDraft");
+    let previous_apply = named::<Button>(&editor, "DefinitionApplySource");
+    let previous_source = named::<TextBox>(&editor, "DefinitionSourceDraft");
     previous_source.set_text(Some("<SolidColorBrush Color=\"Blue\" />"));
     editor.configure(model());
     previous_apply.raise_event(&RoutedEventArgs::with_event(Button::click_event()));

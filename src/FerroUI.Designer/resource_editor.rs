@@ -2,7 +2,7 @@
 //! semantic commands to a document-owning host; this view never edits XAML itself.
 use ferroui_base::input::{InputElement, Key};
 use ferroui_base::layout::{HorizontalAlignment, VerticalAlignment};
-use ferroui_base::media::{FontWeight, SolidColorBrush, TextWrapping};
+use ferroui_base::media::{FontWeight, SolidColorBrush, TextTrimming, TextWrapping};
 use ferroui_base::{Ref, Thickness};
 use ferroui_controls::automation::AutomationProperties;
 use ferroui_controls::{
@@ -725,10 +725,12 @@ fn label(text: &str, size: f64, color: u32) -> Ref<TextBlock> {
 }
 fn property_row(panel: &StackPanel, property: DefinitionPropertyField, writable: bool) {
     let row = Grid::new();
-    row.set_column_definitions(ColumnDefinitions::parse("92,*").unwrap());
-    let title = label(&property.name, 11.0, 0xffa9adba);
+    row.set_column_definitions(ColumnDefinitions::parse("96,*").unwrap());
+    let title = label(&property_title(&property.name), 11.0, 0xffa9adba);
     title.set_vertical_alignment(VerticalAlignment::Center);
-    title.set_text_wrapping(TextWrapping::Wrap);
+    title.set_text_wrapping(TextWrapping::NoWrap);
+    title.set_text_trimming(<dyn TextTrimming>::word_ellipsis());
+    ToolTip::set_tip(&title, Some(Rc::new(property.name.clone())));
     title.set_margin(Thickness::new(0.0, 0.0, 7.0, 0.0));
     row.children().add(title.upcast::<Control>());
     // The editor factory may already have disabled a read-only or unsupported
@@ -742,6 +744,42 @@ fn property_row(panel: &StackPanel, property: DefinitionPropertyField, writable:
         ToolTip::set_tip(&row, Some(Rc::new(description)));
     }
     panel.children().add(row.upcast::<Control>());
+}
+
+fn property_title(name: &str) -> String {
+    let characters = name.chars().collect::<Vec<_>>();
+    let mut words = Vec::new();
+    let mut word = String::new();
+    for (index, ch) in characters.iter().copied().enumerate() {
+        let boundary = index > 0
+            && ch.is_uppercase()
+            && (characters[index - 1].is_lowercase()
+                || characters[index - 1].is_numeric()
+                || characters
+                    .get(index + 1)
+                    .is_some_and(|next| next.is_lowercase())
+                    && characters[index - 1].is_uppercase());
+        if ch == '_' || ch == '.' || boundary {
+            if !word.is_empty() {
+                words.push(std::mem::take(&mut word));
+            }
+            if ch == '.' {
+                words.push("·".into());
+            }
+        }
+        if ch != '_' && ch != '.' {
+            word.push(ch);
+        }
+    }
+    if !word.is_empty() {
+        words.push(word);
+    }
+    for word in words.iter_mut().skip(1) {
+        if word.chars().any(char::is_lowercase) {
+            *word = word.to_lowercase();
+        }
+    }
+    words.join(" ")
 }
 fn description(text: &str) -> Ref<TextBlock> {
     let label = label(text, 11.0, 0xffa9adba);

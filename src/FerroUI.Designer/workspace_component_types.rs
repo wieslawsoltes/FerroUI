@@ -1,7 +1,7 @@
 //! Source-backed control definitions and instance snippets are distinct objects.
 use super::{DesignerDefinitionAsset, DesignerWorkspace, type_token};
-use ferroui_base::metadata::MarkupAssembly;
 use ferroui_base::TypeInfo;
+use ferroui_base::metadata::MarkupAssembly;
 use ferroui_controls::Control;
 use ferroui_designer_core::{Document, Edit, Node, NodeId};
 use std::rc::Rc;
@@ -64,9 +64,21 @@ pub(super) fn definition_control_type(
     asset: &DesignerDefinitionAsset,
 ) -> Option<&'static TypeInfo> {
     let document = Document::new(&asset.source).ok()?;
-    let root = document.ast().node(document.ast().root())?;
-    if let Some(target) = asset.target_type.as_deref().and_then(type_token) {
-        if let Some(type_) = registered_type(&document, root.id, &target) {
+    definition_type_in_document(
+        &document,
+        document.ast().root(),
+        asset.target_type.as_deref(),
+    )
+}
+
+pub(super) fn definition_type_in_document(
+    document: &Document,
+    node: NodeId,
+    target_type: Option<&str>,
+) -> Option<&'static TypeInfo> {
+    let root = document.ast().node(node)?;
+    if let Some(target) = target_type.and_then(type_token) {
+        if let Some(type_) = registered_type(document, root.id, &target) {
             return Some(type_);
         }
     }
@@ -74,7 +86,7 @@ pub(super) fn definition_control_type(
         let (namespace, name) = class.rsplit_once('.')?;
         return TypeInfo::find(namespace, name);
     }
-    registered_type(&document, root.id, &root.name)
+    registered_type(document, root.id, &root.name)
 }
 
 pub(super) fn registered_type(
