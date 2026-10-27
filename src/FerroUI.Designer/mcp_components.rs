@@ -31,7 +31,7 @@ pub(super) fn tools() -> Vec<Value> {
     );
     let mut component = s::actions(
         "designer_component",
-        "Author reusable components and resources through one atomic, undoable session transaction. Rename updates resolved references; removal refuses resources still in use; applying resources validates visibility for every target. Null property/setter values reset authored values. XAML object sources retain namespace scope. copy_definition_for_instance creates and applies a private template/theme copy in the same transaction. Every action checks expected_revision.",
+        "Author reusable components and resources through one atomic, undoable session transaction. Rename updates resolved references; removal refuses resources still in use; applying resources validates visibility for every target. Null property/setter values reset authored values. XAML object sources retain namespace scope. copy_definition_for_instance creates and applies a private template/theme copy in the same transaction. Every action checks expected_revision. Accepted edits return document state and the updated catalog; catalog_error reports a separate inspection problem without misreporting a committed edit as failed.",
         vec![
             s::action(
                 "create_resource",
@@ -230,11 +230,18 @@ pub(super) fn call(
                 session.edit_component(component_action(args)?)?;
                 None
             };
+            // Source repair remains possible when a separate definition has ambiguous
+            // metadata. A catalog read error must not hide an already accepted edit.
+            let (components, catalog_error) = match session.component_catalog() {
+                Ok(catalog) => (Some(catalog.entries), None),
+                Err(error) => (None, Some(error)),
+            };
             Ok(json!({
                 "document":state(session),
                 "scope":scope_state(session),
                 "created":created,
-                "components":session.component_catalog()?.entries
+                "components":components,
+                "catalog_error":catalog_error
             }))
         }
         "designer_definition_scope" => {

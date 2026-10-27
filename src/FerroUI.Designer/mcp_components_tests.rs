@@ -62,6 +62,20 @@ fn attribute(session: &Rc<RefCell<DesignerSession>>, node: u64, name: &str) -> O
         .map(str::to_owned)
 }
 
+fn assert_expression(
+    session: &Rc<RefCell<DesignerSession>>,
+    node: u64,
+    property: &str,
+    expected: &str,
+) {
+    use ferroui_designer_core::MarkupValue;
+    let actual = attribute(session, node, property).expect("An authored expression");
+    assert_eq!(
+        MarkupValue::parse(&actual).unwrap(),
+        MarkupValue::parse(expected).unwrap()
+    );
+}
+
 #[test]
 fn component_action_schemas_reject_cross_action_arguments_and_invalid_reset_values() {
     let _app = UnitTestApplication::start(TestServices::styled_window());
@@ -142,10 +156,7 @@ fn component_writes_check_permissions_revision_read_only_and_atomic_dependencies
     provider
         .call("designer_component", &rename, write())
         .unwrap();
-    assert_eq!(
-        attribute(&session, first, "Background").as_deref(),
-        Some("{StaticResource Primary}")
-    );
+    assert_expression(&session, first, "Background", "{StaticResource Primary}");
     assert_eq!(session.borrow().document().revision(), 1);
     assert!(
         provider
@@ -266,10 +277,7 @@ fn component_reads_preserve_namespace_sources_references_and_native_theme_visibi
         &provider,
         json!({"action":"apply_resource","resource":dark,"targets":[target],"property":"Background","dynamic":true}),
     );
-    assert_eq!(
-        attribute(&session, target, "Background").as_deref(),
-        Some("{DynamicResource Accent}")
-    );
+    assert_expression(&session, target, "Background", "{DynamicResource Accent}");
 }
 
 #[test]
@@ -499,10 +507,7 @@ fn extraction_and_instance_copy_are_atomic_and_restore_both_ends_on_undo() {
     );
     assert_eq!(session.borrow().document().revision(), revision + 1);
     assert_eq!(copied["created"], resource(&session, "PrivateAction"));
-    assert_eq!(
-        attribute(&session, first, "Theme").as_deref(),
-        Some("{StaticResource PrivateAction}")
-    );
+    assert_expression(&session, first, "Theme", "{StaticResource PrivateAction}");
     assert_eq!(
         attribute(&session, second, "Theme").as_deref(),
         Some("{StaticResource Action}")
@@ -580,4 +585,29 @@ fn definition_navigation_uses_native_scopes_without_source_edits_and_guards_stal
     assert_eq!(session.borrow().document().source(), SOURCE);
     assert_eq!(session.borrow().document().revision(), 0);
     assert!(!session.borrow().can_undo());
+}
+
+#[test]
+fn accepted_component_edits_report_catalog_diagnostics_without_false_transaction_failure() {
+    let _app = UnitTestApplication::start(TestServices::styled_window());
+    let (session, provider) = fixture(SOURCE);
+    let ambiguous = SOURCE.replace(
+        "<ControlTheme x:Key=\"Action\" TargetType=\"Button\"",
+        "<ControlTheme x:Key=\"Action\" TargetType=\"Button\" ControlTheme.TargetType=\"TextBox\"",
+    );
+    assert!(session.borrow_mut().update_source(&ambiguous).valid);
+    assert!(session.borrow().component_catalog().is_err());
+    let first = named(&session, "First");
+    let revision = session.borrow().document().revision();
+    let result = edit(
+        &session,
+        &provider,
+        json!({"action":"set_property","node":first,"property":"Width","value":"160"}),
+    );
+    assert_eq!(result["document"]["revision"], revision + 1);
+    assert!(result["components"].is_null());
+    assert!(result["catalog_error"].is_string());
+    assert_eq!(attribute(&session, first, "Width").as_deref(), Some("160"));
+    call_edit(&session, &provider, "designer_undo", json!({}));
+    assert_eq!(session.borrow().document().source(), ambiguous);
 }
