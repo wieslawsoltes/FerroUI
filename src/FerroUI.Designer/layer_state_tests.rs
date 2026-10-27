@@ -264,3 +264,201 @@ fn layer_hidden_flags_survive_source_undo_without_becoming_undo_operations() {
             .is_err()
     );
 }
+
+#[test]
+fn layer_protection_applies_to_drop_planners_and_handle_actions_before_a_preview_is_accepted() {
+    let _app = UnitTestApplication::start(TestServices::styled_window());
+    let mut fixture = Fixture::new();
+    let group = fixture.id("Group");
+    let first = fixture.id("First");
+    let peer = fixture.id("Peer");
+    let revision = fixture.session.document().revision();
+    fixture.session.select([first]);
+    fixture.session.set_layers_locked(&[group], true).unwrap();
+    assert!(fixture.session.validate_content_insertion(group).is_err());
+    assert!(
+        fixture
+            .session
+            .plan_content_move(
+                &[peer],
+                group,
+                0,
+                ferroui_designer_tools::Point::new(0.0, 0.0)
+            )
+            .is_err()
+    );
+    let snapshot = fixture
+        .session
+        .layout_helper_snapshot(group, None, &[])
+        .unwrap();
+    let index = snapshot.scene.handles.iter().position(|handle| {
+        matches!(&handle.action, ferroui_designer_tools::LayoutHandleAction::PanelProperty { panel, .. } if *panel == group)
+    }).expect("StackPanel spacing handle");
+    assert!(snapshot.scene.handles[index].disabled_reason.is_some());
+    assert!(
+        fixture
+            .session
+            .preview_layout_handle(&snapshot, index, ferroui_base::Point::new(0.0, 5.0))
+            .is_err()
+    );
+    let root = fixture.session.document().ast().root();
+    fixture.session.set_layers_locked(&[root], true).unwrap();
+    assert!(
+        fixture
+            .session
+            .preview_layout_insert("<Button/>", ferroui_base::Point::new(40.0, 40.0))
+            .is_err()
+    );
+    assert_eq!(fixture.session.document().revision(), revision);
+    assert_eq!(fixture.session.document().source(), SOURCE);
+}
+
+#[test]
+fn layer_isolation_keeps_child_margin_and_same_parent_reorder_context_but_blocks_parent_edits() {
+    let _app = UnitTestApplication::start(TestServices::styled_window());
+    let mut fixture = Fixture::new();
+    let group = fixture.id("Group");
+    let first = fixture.id("First");
+    let peer = fixture.id("Peer");
+    fixture.session.select([first]);
+    fixture.session.isolate_layers(&[first]).unwrap();
+    assert!(fixture.session.ensure_layer_manipulable(group).is_err());
+    assert!(
+        fixture
+            .session
+            .ensure_layer_container_context(group, &[first])
+            .is_ok()
+    );
+    assert!(fixture.session.validate_content_insertion(group).is_err());
+    assert!(
+        fixture
+            .session
+            .plan_content_move(
+                &[first],
+                group,
+                2,
+                ferroui_designer_tools::Point::new(0.0, 0.0)
+            )
+            .is_ok()
+    );
+    assert!(
+        fixture
+            .session
+            .plan_content_move(
+                &[peer],
+                group,
+                0,
+                ferroui_designer_tools::Point::new(0.0, 0.0)
+            )
+            .is_err()
+    );
+    let snapshot = fixture.session.selection_layout_helpers().unwrap();
+    assert_eq!(snapshot.scene.panel, group);
+    let margin = snapshot.scene.handles.iter().position(|handle| {
+        matches!(&handle.action, ferroui_designer_tools::LayoutHandleAction::ThicknessSide { node, property, .. } if *node == first && property == "Margin")
+    }).expect("isolated child's native margin handle");
+    assert!(snapshot.scene.handles[margin].disabled_reason.is_none());
+    let preview = fixture
+        .session
+        .preview_layout_handle(&snapshot, margin, ferroui_base::Point::new(5.0, 5.0))
+        .unwrap();
+    assert!(preview.is_accepted());
+    fixture.session.commit_layout_preview(&preview).unwrap();
+    assert!(
+        fixture
+            .session
+            .document()
+            .ast()
+            .node(first)
+            .unwrap()
+            .attribute("Margin")
+            .is_some()
+    );
+    assert_eq!(
+        fixture
+            .session
+            .document()
+            .ast()
+            .node(group)
+            .unwrap()
+            .attribute("Spacing"),
+        Some("10")
+    );
+}
+
+#[test]
+fn layer_locked_siblings_remain_valid_positional_anchors_for_outline_ordering() {
+    let _app = UnitTestApplication::start(TestServices::styled_window());
+    let mut fixture = Fixture::new();
+    let group = fixture.id("Group");
+    let first = fixture.id("First");
+    let second = fixture.id("Second");
+    fixture.session.set_layers_locked(&[second], true).unwrap();
+    fixture.session.select([first]);
+    fixture
+        .session
+        .edit_outline(crate::OutlineCommand::MoveLast)
+        .unwrap();
+    assert_eq!(
+        fixture.session.document().ast().element_children(group),
+        vec![second, first]
+    );
+    assert!(fixture.session.layer_state(second).locked);
+    fixture.session.undo().unwrap();
+    fixture
+        .session
+        .edit_outline(crate::OutlineCommand::MoveDown)
+        .unwrap();
+    assert_eq!(
+        fixture.session.document().ast().element_children(group),
+        vec![second, first]
+    );
+}
+
+#[test]
+fn layer_workspace_tabs_restore_their_own_view_without_leaking_reused_node_ids() {
+    let _app = UnitTestApplication::start(TestServices::styled_window());
+    let workspace = crate::DesignerWorkspace::with_uri(SOURCE, URI.into()).unwrap();
+    let session = workspace.session();
+    let first = session
+        .borrow()
+        .document()
+        .ast()
+        .find_name("First")
+        .unwrap();
+    let group = session
+        .borrow()
+        .document()
+        .ast()
+        .find_name("Group")
+        .unwrap();
+    session
+        .borrow_mut()
+        .set_layers_locked(&[first], true)
+        .unwrap();
+    session
+        .borrow_mut()
+        .set_layers_hidden(&[first], true)
+        .unwrap();
+    session.borrow_mut().isolate_layers(&[group]).unwrap();
+    workspace
+        .open_document(
+            SOURCE.replace("Content=\"One\"", "Content=\"Other tab\""),
+            "ferres://FerroUI.Designer/OtherLayers.xaml".into(),
+        )
+        .unwrap();
+    assert!(!session.borrow().layer_state(first).hidden);
+    assert!(!session.borrow().layer_state(first).locked);
+    assert!(session.borrow().layer_isolation().is_empty());
+    workspace.activate_document(URI).unwrap();
+    assert!(session.borrow().layer_state(first).hidden);
+    assert!(session.borrow().layer_state(first).locked);
+    assert_eq!(session.borrow().layer_isolation(), &[group]);
+    assert_eq!(session.borrow().document().source(), SOURCE);
+    assert!(!session.borrow().can_undo());
+    workspace
+        .activate_document("ferres://FerroUI.Designer/OtherLayers.xaml")
+        .unwrap();
+    assert!(!session.borrow().layer_state(first).hidden);
+    assert!(session.borrow().layer_isolation().is_empty());
+}

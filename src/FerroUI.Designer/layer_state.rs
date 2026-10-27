@@ -222,6 +222,31 @@ impl DesignerSession {
         Ok(())
     }
 
+    /// Existing isolated children still use their original parent's coordinate space and
+    /// insertion boundaries. That context does not grant permission to insert new content
+    /// or reparent another branch into an owner outside the isolation/definition scope.
+    pub(crate) fn ensure_layer_container_context(
+        &self,
+        owner: NodeId,
+        moving: &[NodeId],
+    ) -> Result<(), String> {
+        if self.ensure_layer_manipulable(owner).is_ok() {
+            return Ok(());
+        }
+        let state = self.layer_state(owner);
+        if !state.is_locked()
+            && !state.is_hidden()
+            && !moving.is_empty()
+            && moving.iter().all(|node| {
+                self.ensure_layer_manipulable(*node).is_ok()
+                    && crate::workspace_tools::parent(self, *node).ok() == Some(owner)
+            })
+        {
+            return Ok(());
+        }
+        self.ensure_layer_manipulable(owner)
+    }
+
     pub fn set_layers_locked(&mut self, nodes: &[NodeId], locked: bool) -> Result<(), String> {
         self.validate_layer_targets(nodes)?;
         let mut changed = false;

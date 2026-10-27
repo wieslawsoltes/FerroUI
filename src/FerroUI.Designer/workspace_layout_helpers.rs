@@ -23,6 +23,8 @@ struct LayoutGuard {
     selection: Vec<NodeId>,
     generation: u64,
     providers: u64,
+    layer_epoch: u64,
+    scope_epoch: u64,
 }
 impl LayoutGuard {
     fn capture(session: &DesignerSession) -> Self {
@@ -33,6 +35,8 @@ impl LayoutGuard {
             selection: session.selection().to_vec(),
             generation: session.generation(),
             providers: session.layout_tools().revision(),
+            layer_epoch: session.layer_view_epoch(),
+            scope_epoch: session.definition_scope_epoch(),
         }
     }
     fn validate(&self, session: &DesignerSession) -> Result<(), String> {
@@ -46,6 +50,8 @@ impl LayoutGuard {
             || self.selection != session.selection()
             || self.generation != session.generation()
             || self.providers != session.layout_tools().revision()
+            || self.layer_epoch != session.layer_view_epoch()
+            || self.scope_epoch != session.definition_scope_epoch()
         {
             return Err(
                 "The document, selection or layout provider changed; restart the layout gesture"
@@ -206,9 +212,13 @@ impl DesignerSession {
         if nodes.is_empty() {
             return Ok(None);
         }
+        for node in &nodes {
+            self.ensure_layer_manipulable(*node)?;
+        }
         let Some(target) = layout_target(self, position, &nodes) else {
             return Ok(None);
         };
+        self.ensure_layer_container_context(target, &nodes)?;
         let same_parent = nodes
             .iter()
             .all(|node| parent(self, *node).ok() == Some(target));
@@ -364,6 +374,7 @@ impl DesignerSession {
         point(position)?;
         let target = layout_target(self, position, &[])
             .ok_or("Choose a content holder or panel inside the artboard")?;
+        self.ensure_layer_manipulable(target)?;
         let measured = measure(self, target, None)?;
         let helpers = snapshot(self, target, Some(position), &[], &measured)?;
         let placement = helpers
@@ -465,6 +476,7 @@ impl DesignerSession {
         if let Some(reason) = &handle.disabled_reason {
             return Err(reason.clone());
         }
+        ensure_helper_layer_target(self, snapshot.scene.panel, &handle.action)?;
         let frame = snapshot.handle_frames.get(&handle.id);
         let inverse = frame
             .map_or(snapshot.to_artboard, |frame| frame.to_artboard)
@@ -538,6 +550,25 @@ impl DesignerSession {
         preview.guard.validate(self)?;
         if let Some(reason) = &preview.rejection {
             return Err(reason.clone());
+        }
+        match &preview.intent {
+            PreviewIntent::Move(nodes) => {
+                for node in nodes {
+                    self.ensure_layer_manipulable(*node)?;
+                }
+                self.ensure_layer_container_context(preview.target(), nodes)?;
+            }
+            PreviewIntent::Insert(_) => self.ensure_layer_manipulable(preview.target())?,
+            PreviewIntent::Handle(id) => {
+                let handle = preview
+                    .helpers
+                    .scene
+                    .handles
+                    .iter()
+                    .find(|handle| &handle.id == id)
+                    .ok_or("The layout handle is no longer available")?;
+                ensure_helper_layer_target(self, preview.target(), &handle.action)?;
+            }
         }
         if preview.edits.is_empty() {
             return Ok(());
@@ -701,6 +732,12 @@ fn snapshot(
                 Some("This native panel does not permit layout editing".into());
         }
     }
+    for handle in &mut scene.handles {
+        if handle.disabled_reason.is_none() {
+            handle.disabled_reason =
+                ensure_helper_layer_target(session, panel, &handle.action).err();
+        }
+    }
     scene.validate().map_err(|error| error.to_string())?;
     Ok(LayoutHelperSnapshot {
         scene,
@@ -708,6 +745,21 @@ fn snapshot(
         guard: Some(LayoutGuard::capture(session)),
         handle_frames,
     })
+}
+
+fn ensure_helper_layer_target(
+    session: &DesignerSession,
+    panel: NodeId,
+    action: &ferroui_designer_tools::LayoutHandleAction,
+) -> Result<(), String> {
+    use ferroui_designer_tools::LayoutHandleAction;
+    let target = match action {
+        LayoutHandleAction::PanelProperty { panel, .. }
+        | LayoutHandleAction::GridTrack { panel, .. } => *panel,
+        LayoutHandleAction::ThicknessSide { node, .. } => *node,
+        LayoutHandleAction::Custom { .. } => panel,
+    };
+    session.ensure_layer_manipulable(target)
 }
 
 fn writable(session: &DesignerSession) -> Result<(), String> {
@@ -828,13 +880,14 @@ fn reusable_placement(
 
 /// Hit test measured authored content rather than painted pixels. Empty/transparent panels
 /// are valid destinations. A pruned dragged subtree cannot intercept its future parent.
-fn layout_target(
+pub(crate) fn layout_target(
     session: &DesignerSession,
     position: Point,
     excluded: &[NodeId],
 ) -> Option<NodeId> {
     let root = session.preview.root()?.upcast::<Visual>();
     let artboard = session.preview.host.clone().upcast::<Visual>();
+    let moving = excluded;
     let excluded = excluded.iter().copied().collect::<BTreeSet<_>>();
     fn visit(
         session: &DesignerSession,
@@ -842,12 +895,19 @@ fn layout_target(
         artboard: &Ref<Visual>,
         position: Point,
         excluded: &BTreeSet<NodeId>,
+        moving: &[NodeId],
     ) -> Option<NodeId> {
         if !visual.is_visible() {
             return None;
         }
         let source = session.preview.source_id(visual);
         if source.is_some_and(|id| excluded.contains(&id)) {
+            return None;
+        }
+        if source.is_some_and(|node| {
+            let state = session.layer_state(node);
+            state.is_locked() || state.is_hidden() || state.outside_isolation
+        }) {
             return None;
         }
         let local = artboard.translate_point(position, visual)?;
@@ -858,6 +918,11 @@ fn layout_target(
         if inside {
             if let Some(flow) = source
                 .and_then(|source| flow_edge_parent(session, source, visual, artboard, position))
+                .filter(|owner| {
+                    session
+                        .ensure_layer_container_context(*owner, moving)
+                        .is_ok()
+                })
             {
                 return Some(flow);
             }
@@ -871,24 +936,25 @@ fn layout_target(
             .collect::<Vec<_>>();
         children.sort_by_key(|(index, child)| (child.z_index(), *index));
         for (_, child) in children.iter().rev() {
-            if let Some(target) = visit(session, child, artboard, position, excluded) {
+            if let Some(target) = visit(session, child, artboard, position, excluded, moving) {
                 return Some(target);
             }
         }
         if inside {
             if let Some(source) = source.filter(|id| {
-                session
-                    .runtime_layout_capabilities(*id)
-                    .is_some_and(|capabilities| {
-                        capabilities.drop_items && !capabilities.generated_items
-                    })
+                session.ensure_layer_container_context(*id, moving).is_ok()
+                    && session
+                        .runtime_layout_capabilities(*id)
+                        .is_some_and(|capabilities| {
+                            capabilities.drop_items && !capabilities.generated_items
+                        })
             }) {
                 return Some(source);
             }
         }
         None
     }
-    visit(session, &root, &artboard, position, &excluded)
+    visit(session, &root, &artboard, position, &excluded, moving)
 }
 
 /// A six-screen-DIP edge band makes zero-gap flow layouts insertable between children.

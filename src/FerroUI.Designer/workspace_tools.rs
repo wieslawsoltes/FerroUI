@@ -60,6 +60,7 @@ impl DesignerSession {
             | LayoutAction::Dock { node, .. }
             | LayoutAction::Relative { node, .. } => (parent(self, *node)?, Some(*node)),
         };
+        self.ensure_layer_manipulable(child.unwrap_or(owner))?;
         let measurement = measure(self, owner, child)?;
         self.layout_tools()
             .plan(&measurement.context(self.document()), action)
@@ -691,6 +692,7 @@ fn plan_moves(
     let mut actions = Vec::new();
     let mut custom = Vec::new();
     for (node, delta) in deltas {
+        session.ensure_layer_manipulable(node)?;
         let source_parent = parent(session, node)?;
         if is_custom_panel(session, source_parent) {
             custom.extend(visual_adjustment(
@@ -758,6 +760,7 @@ pub(crate) fn commit(session: &mut DesignerSession, gesture: DesignGesture) -> R
             before,
             after,
         } => {
+            session.ensure_layer_manipulable(node)?;
             let measured = measure(session, parent(session, node)?, Some(node))?;
             let transform = measured.to_artboard;
             let visual = session
@@ -820,6 +823,7 @@ pub(crate) fn commit(session: &mut DesignerSession, gesture: DesignGesture) -> R
             );
         }
         DesignGesture::ResizeLocal { node, after } => {
+            session.ensure_layer_manipulable(node)?;
             Rect::new(after.x, after.y, after.width, after.height)
                 .validate()
                 .map_err(|error| error.to_string())?;
@@ -888,6 +892,7 @@ pub(crate) fn commit(session: &mut DesignerSession, gesture: DesignGesture) -> R
             }
         }
         DesignGesture::Rotate { node, degrees } => {
+            session.ensure_layer_manipulable(node)?;
             if !degrees.is_finite() {
                 return Err("Rotation must be finite".into());
             }
@@ -916,23 +921,11 @@ pub(crate) fn commit(session: &mut DesignerSession, gesture: DesignGesture) -> R
                     .map_err(|error| error.to_string())?;
                 edits.push(declaration);
             }
-            let mut target = None;
-            if let Some(root) = session.preview.root() {
-                let host = session.preview.host.clone().upcast::<Visual>();
-                if let Some(point) = host.translate_point(position, &root) {
-                    let mut visual = root.get_visual_at(point);
-                    while let Some(current) = visual {
-                        if let Some(id) = session.preview.source_id(&current) {
-                            target = Some(id);
-                            break;
-                        }
-                        visual = current.visual_parent();
-                    }
-                }
-            }
-            let mut target = target.unwrap_or(session.document().ast().root());
+            let mut target = crate::workspace_layout_helpers::layout_target(session, position, &[])
+                .ok_or("No eligible drop target exists at this point")?;
             let mut error = "No eligible drop target exists at this point".to_owned();
             loop {
+                session.ensure_layer_manipulable(target)?;
                 let element = session
                     .document()
                     .ast()
@@ -1001,6 +994,7 @@ fn artboard_bounds(session: &DesignerSession) -> Result<Vec<(NodeId, Rect)>, Str
     outermost(session.document(), session.selection())
         .into_iter()
         .map(|node| {
+            session.ensure_layer_manipulable(node)?;
             let rect = session
                 .preview
                 .bounds(node, &relative)

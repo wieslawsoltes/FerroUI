@@ -53,6 +53,8 @@ struct OutlineDrag {
     uri: String,
     revision: u64,
     ast: Arc<Ast>,
+    layer_epoch: u64,
+    scope_epoch: u64,
     nodes: Vec<NodeId>,
     hover: Cell<Option<(NodeId, DropPosition, bool)>>,
 }
@@ -69,6 +71,7 @@ impl OutlineDrag {
             return Err("Select an authored element to move".into());
         }
         for node in &selected {
+            session.ensure_layer_manipulable(*node)?;
             let element = document
                 .ast()
                 .node(*node)
@@ -92,6 +95,8 @@ impl OutlineDrag {
             uri: session.document_uri().to_owned(),
             revision: document.revision(),
             ast: document.ast_snapshot(),
+            layer_epoch: session.layer_view_epoch(),
+            scope_epoch: session.definition_scope_epoch(),
             nodes,
             hover: Cell::new(None),
         })
@@ -116,8 +121,13 @@ impl OutlineDrag {
         if self.uri != session.document_uri()
             || self.revision != session.document().revision()
             || !Arc::ptr_eq(&self.ast, &session.document().ast_snapshot())
+            || self.layer_epoch != session.layer_view_epoch()
+            || self.scope_epoch != session.definition_scope_epoch()
         {
             return Err("The document changed during the drag; start the move again".into());
+        }
+        for node in &self.nodes {
+            session.ensure_layer_manipulable(*node)?;
         }
         Ok(())
     }
@@ -185,6 +195,7 @@ impl OutlineDrag {
         canvas_delta: ferroui_designer_tools::Point,
     ) -> Result<Vec<Edit>, String> {
         self.validate(session)?;
+        session.ensure_layer_container_context(host.owner, &self.nodes)?;
         let document = session.document();
         let selected = self.nodes.iter().copied().collect::<BTreeSet<_>>();
         if selected.contains(&host.container)
@@ -369,6 +380,7 @@ impl DesignerSession {
     }
 
     pub(crate) fn validate_content_insertion(&self, owner: NodeId) -> Result<(), String> {
+        self.ensure_layer_manipulable(owner)?;
         let host = ContentHost::of_owner(self, owner)?;
         host.validate_capacity_with_count(self.document(), &BTreeSet::new(), 1)
     }
