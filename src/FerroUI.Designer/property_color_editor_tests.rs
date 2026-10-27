@@ -94,4 +94,13 @@ fn color_editor_preserves_named_colors_expressions_and_explicit_mixed_values() {
         *seen.borrow(),
         ["Red", "{DynamicResource Accent}", "#FFFFFFFF"]
     );
+    editor.configure(Some(" Red "), false).unwrap();
+    editor.color_view().set_color(Color::parse("Red").unwrap());
+    click(&popup_button(&editor, "Apply color"));
+    assert_eq!(
+        seen.borrow().last().map(String::as_str),
+        Some(" Red "),
+        "confirming an unchanged color preserves surrounding source whitespace"
+    );
+    assert_eq!(editor.text_editor().text().as_deref(), Some(" Red "));
 }

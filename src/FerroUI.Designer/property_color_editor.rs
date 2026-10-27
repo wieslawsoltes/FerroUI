@@ -75,7 +75,7 @@ impl ColorEditorState {
                 .original
                 .borrow()
                 .as_deref()
-                .and_then(|text| Color::parse(text).ok())
+                .and_then(|text| Color::parse(text.trim()).ok())
                 == Some(color);
         let value = if preserve_spelling {
             self.original.borrow().clone().unwrap()
