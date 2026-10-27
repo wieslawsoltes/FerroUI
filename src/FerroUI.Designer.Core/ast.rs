@@ -1,7 +1,15 @@
-use crate::{DesignerError, MarkupValue};
+use crate::MarkupValue;
 use serde::{Deserialize, Serialize};
-use std::collections::{BTreeMap, HashMap, HashSet, VecDeque};
-use std::hash::{Hash, Hasher};
+use std::collections::BTreeMap;
+
+mod parser;
+mod reconciliation;
+mod validation;
+
+pub(crate) use parser::validate_xml;
+
+#[cfg(test)]
+mod tests;
 
 /// Stable document-local identity. IDs are never reused, including after undo.
 pub type NodeId = u64;
@@ -113,7 +121,7 @@ impl Node {
 
 /// Lossless syntax index. Serialization is the owning document's source string,
 /// rather than a pretty printer that would erase syntax trivia.
-#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Clone, Debug, PartialEq, Eq, Serialize)]
 pub struct Ast {
     root: NodeId,
     roots: Vec<NodeId>,
@@ -134,6 +142,41 @@ impl Ast {
     }
     pub fn elements(&self) -> impl Iterator<Item = &Node> {
         self.nodes.values().filter(|n| n.is_element())
+    }
+    /// Visit syntax nodes in lexical order, independently of stable node IDs.
+    /// Moving an element changes this order without changing its identity.
+    pub fn nodes_in_source_order(&self) -> impl Iterator<Item = &Node> {
+        self.walk(self.roots.iter().rev().copied().collect())
+    }
+    /// Visit syntax nodes and their containing XAML name scopes in source order.
+    /// Scope propagation visits each node once instead of walking its ancestors
+    /// for every name or reference in a language-service indexing pass.
+    pub fn nodes_with_name_scopes(&self) -> impl Iterator<Item = (&Node, NodeId)> {
+        let mut pending: Vec<_> = self.roots.iter().rev().map(|id| (*id, self.root)).collect();
+        std::iter::from_fn(move || {
+            let (id, scope) = pending.pop()?;
+            let node = self.node(id)?;
+            let child_scope = if defines_name_scope(node) { id } else { scope };
+            pending.extend(
+                node.children
+                    .iter()
+                    .rev()
+                    .map(|child| (*child, child_scope)),
+            );
+            Some((node, scope))
+        })
+    }
+    /// Visit a node and all its syntax descendants in source order. An unknown
+    /// root produces an empty iterator; unrelated document nodes are not visited.
+    pub fn subtree(&self, root: NodeId) -> impl Iterator<Item = &Node> {
+        self.walk(self.node(root).map(|_| vec![root]).unwrap_or_default())
+    }
+    fn walk(&self, mut pending: Vec<NodeId>) -> impl Iterator<Item = &Node> {
+        std::iter::from_fn(move || {
+            let node = self.node(pending.pop()?)?;
+            pending.extend(node.children.iter().rev().copied());
+            Some(node)
+        })
     }
     pub fn element_children(&self, parent: NodeId) -> Vec<NodeId> {
         self.node(parent)
@@ -160,10 +203,7 @@ impl Ast {
             let Some(ancestor) = self.node(id) else {
                 break;
             };
-            if matches!(
-                ancestor.local_name(),
-                "ControlTemplate" | "DataTemplate" | "ItemsPanelTemplate" | "FuncTemplate"
-            ) {
+            if defines_name_scope(ancestor) {
                 return id;
             }
             current = ancestor.parent;
@@ -171,16 +211,32 @@ impl Ast {
         self.root()
     }
     pub fn node_at(&self, byte_offset: usize) -> Option<NodeId> {
-        self.nodes()
-            .filter(|n| n.span.contains(byte_offset))
-            .min_by_key(|n| n.span.len())
-            .map(|n| n.id)
+        self.containing_node(byte_offset, false)
     }
     pub fn element_at(&self, byte_offset: usize) -> Option<NodeId> {
-        self.elements()
-            .filter(|n| n.span.contains(byte_offset))
-            .min_by_key(|n| n.span.len())
-            .map(|n| n.id)
+        self.containing_node(byte_offset, true)
+    }
+    /// Siblings are ordered, non-overlapping source intervals. Descend only the
+    /// containing branch, using binary search at each level instead of scanning
+    /// the entire document on every caret or pointer movement.
+    fn containing_node(&self, byte_offset: usize, elements_only: bool) -> Option<NodeId> {
+        let mut siblings = self.roots.as_slice();
+        let mut result = None;
+        loop {
+            let end = siblings.partition_point(|id| self.nodes[id].span.start <= byte_offset);
+            let Some(id) = end.checked_sub(1).and_then(|index| siblings.get(index)) else {
+                break;
+            };
+            let node = &self.nodes[id];
+            if !node.span.contains(byte_offset) {
+                break;
+            }
+            if !elements_only || node.is_element() {
+                result = Some(node.id);
+            }
+            siblings = &node.children;
+        }
+        result
     }
     pub fn is_descendant_of(&self, node: NodeId, ancestor: NodeId) -> bool {
         let mut current = self.node(node).and_then(|n| n.parent);
@@ -218,509 +274,11 @@ impl Ast {
             .or_insert_with(|| "http://www.w3.org/XML/1998/namespace".into());
         result
     }
-
-    pub(crate) fn parse(source: &str) -> Result<Self, DesignerError> {
-        let options = roxmltree::ParsingOptions {
-            allow_dtd: false,
-            nodes_limit: 1_000_000,
-        };
-        roxmltree::Document::parse_with_options(source, options).map_err(|error| {
-            let pos = error.pos();
-            DesignerError::Parse {
-                message: error.to_string(),
-                line: pos.row,
-                column: pos.col,
-            }
-        })?;
-        let mut ast = Self {
-            root: 0,
-            roots: Vec::new(),
-            nodes: BTreeMap::new(),
-        };
-        let mut stack = Vec::<NodeId>::new();
-        let mut namespace_scope = HashMap::from([(
-            "xml".to_owned(),
-            "http://www.w3.org/XML/1998/namespace".to_owned(),
-        )]);
-        let mut namespace_stack = Vec::<Vec<(String, Option<String>)>>::new();
-        let mut offset = 0;
-        let mut id = 1;
-        while offset < source.len() {
-            let remaining = &source[offset..];
-            if remaining.starts_with("</") {
-                let end = offset + remaining.find('>').expect("validated XML closing tag") + 1;
-                let node_id = stack.pop().expect("validated XML closing element");
-                let node = ast.nodes.get_mut(&node_id).unwrap();
-                node.closing_span = Some(SourceSpan::new(offset, end));
-                node.span.end = end;
-                for (prefix, previous) in namespace_stack.pop().unwrap().into_iter().rev() {
-                    if let Some(uri) = previous {
-                        namespace_scope.insert(prefix, uri);
-                    } else {
-                        namespace_scope.remove(&prefix);
-                    }
-                }
-                offset = end;
-                continue;
-            }
-            let parent = stack.last().copied();
-            let (kind, end, content) = if remaining.starts_with("<!--") {
-                let end = offset + remaining.find("-->").unwrap() + 3;
-                (
-                    NodeKind::Comment,
-                    end,
-                    Some(source[offset + 4..end - 3].to_owned()),
-                )
-            } else if remaining.starts_with("<![CDATA[") {
-                let end = offset + remaining.find("]]>").unwrap() + 3;
-                (
-                    NodeKind::CData,
-                    end,
-                    Some(source[offset + 9..end - 3].to_owned()),
-                )
-            } else if remaining.starts_with("<?") {
-                let end = offset + remaining.find("?>").unwrap() + 2;
-                (
-                    NodeKind::ProcessingInstruction,
-                    end,
-                    Some(source[offset + 2..end - 2].to_owned()),
-                )
-            } else if remaining.starts_with('<') {
-                (NodeKind::Element, tag_end(source, offset), None)
-            } else {
-                let end = offset + remaining.find('<').unwrap_or(remaining.len());
-                (
-                    NodeKind::Text,
-                    end,
-                    Some(decode_xml(&source[offset..end], false)),
-                )
-            };
-            let mut node = Node {
-                id,
-                kind,
-                name: String::new(),
-                namespace_uri: None,
-                parent,
-                children: Vec::new(),
-                attributes: Vec::new(),
-                span: SourceSpan::new(offset, end),
-                name_span: SourceSpan::default(),
-                opening_span: SourceSpan::new(offset, end),
-                closing_span: None,
-                self_closing: false,
-                text: content,
-            };
-            if kind == NodeKind::Element {
-                let mut cursor = offset + 1;
-                let name_start = cursor;
-                while cursor < end
-                    && !is_space(source.as_bytes()[cursor])
-                    && !matches!(source.as_bytes()[cursor], b'/' | b'>')
-                {
-                    cursor += 1;
-                }
-                node.name = source[name_start..cursor].to_owned();
-                node.name_span = SourceSpan::new(name_start, cursor);
-                if node.local_name().contains('.') {
-                    node.kind = NodeKind::PropertyElement;
-                }
-                node.self_closing = source.as_bytes()[end - 2] == b'/';
-                while cursor < end {
-                    while cursor < end && is_space(source.as_bytes()[cursor]) {
-                        cursor += 1;
-                    }
-                    if cursor >= end || matches!(source.as_bytes()[cursor], b'/' | b'>') {
-                        break;
-                    }
-                    let name_start = cursor;
-                    while !is_space(source.as_bytes()[cursor]) && source.as_bytes()[cursor] != b'='
-                    {
-                        cursor += 1;
-                    }
-                    let name_end = cursor;
-                    while is_space(source.as_bytes()[cursor]) {
-                        cursor += 1;
-                    }
-                    cursor += 1; // equals
-                    while is_space(source.as_bytes()[cursor]) {
-                        cursor += 1;
-                    }
-                    let quote = source.as_bytes()[cursor];
-                    cursor += 1;
-                    let value_start = cursor;
-                    while source.as_bytes()[cursor] != quote {
-                        cursor += 1;
-                    }
-                    let value_end = cursor;
-                    cursor += 1;
-                    node.attributes.push(Attribute {
-                        name: source[name_start..name_end].to_owned(),
-                        value: decode_xml(&source[value_start..value_end], true),
-                        namespace_uri: None,
-                        span: SourceSpan::new(name_start, cursor),
-                        name_span: SourceSpan::new(name_start, name_end),
-                        value_span: SourceSpan::new(value_start, value_end),
-                        quote: quote as char,
-                    });
-                }
-                let mut changes = Vec::new();
-                for attr in &node.attributes {
-                    let prefix = if attr.name == "xmlns" {
-                        Some("")
-                    } else {
-                        attr.name.strip_prefix("xmlns:")
-                    };
-                    if let Some(prefix) = prefix {
-                        let previous = namespace_scope.insert(prefix.into(), attr.value.clone());
-                        changes.push((prefix.to_owned(), previous));
-                    }
-                }
-                let prefix = node.name.split_once(':').map_or("", |(prefix, _)| prefix);
-                node.namespace_uri = namespace_scope
-                    .get(prefix)
-                    .filter(|uri| !uri.is_empty())
-                    .cloned();
-                for attr in &mut node.attributes {
-                    attr.namespace_uri = if attr.is_namespace() {
-                        Some("http://www.w3.org/2000/xmlns/".into())
-                    } else {
-                        attr.name
-                            .split_once(':')
-                            .and_then(|(prefix, _)| namespace_scope.get(prefix))
-                            .cloned()
-                    };
-                }
-                if node.self_closing {
-                    for (prefix, previous) in changes.into_iter().rev() {
-                        if let Some(uri) = previous {
-                            namespace_scope.insert(prefix, uri);
-                        } else {
-                            namespace_scope.remove(&prefix);
-                        }
-                    }
-                } else {
-                    namespace_stack.push(changes);
-                }
-                if ast.root == 0 {
-                    ast.root = id;
-                }
-            }
-            if let Some(parent) = parent {
-                ast.nodes.get_mut(&parent).unwrap().children.push(id);
-            } else {
-                ast.roots.push(id);
-            }
-            let is_open = node.is_element() && !node.self_closing;
-            ast.nodes.insert(id, node);
-            if is_open {
-                stack.push(id);
-            }
-            id += 1;
-            offset = end;
-        }
-        Ok(ast)
-    }
-
-    /// Match named nodes globally, then unchanged subtree fingerprints, then
-    /// sibling position under matched parents. Explicit edits may pin identities
-    /// by source offsets, preventing ambiguity when duplicate siblings move.
-    pub(crate) fn reconcile(
-        &mut self,
-        old: &Ast,
-        old_source: &str,
-        source: &str,
-        next_id: &mut NodeId,
-        pins: &[(usize, NodeId)],
-    ) {
-        let mut mapped = HashMap::<NodeId, NodeId>::new();
-        let mut used = HashSet::new();
-        let by_offset: HashMap<_, _> = self
-            .nodes()
-            .map(|node| (node.span.start, node.id))
-            .collect();
-        for &(offset, old_id) in pins {
-            if let (Some(old_node), Some(&new_id)) = (old.node(old_id), by_offset.get(&offset)) {
-                let node = self.node(new_id).unwrap();
-                if compatible(node, old_node)
-                    && !mapped.contains_key(&new_id)
-                    && used.insert(old_id)
-                {
-                    mapped.insert(new_id, old_id);
-                }
-            }
-        }
-        let mut old_named = HashMap::<(Option<String>, String, String), Vec<NodeId>>::new();
-        let mut new_named = HashMap::<(Option<String>, String, String), Vec<NodeId>>::new();
-        for node in old.elements() {
-            if let Some(name) = node.xaml_name() {
-                old_named
-                    .entry((
-                        node.namespace_uri.clone(),
-                        node.local_name().into(),
-                        name.into(),
-                    ))
-                    .or_default()
-                    .push(node.id);
-            }
-        }
-        for node in self.elements() {
-            if let Some(name) = node.xaml_name() {
-                new_named
-                    .entry((
-                        node.namespace_uri.clone(),
-                        node.local_name().into(),
-                        name.into(),
-                    ))
-                    .or_default()
-                    .push(node.id);
-            }
-        }
-        for (key, new_ids) in new_named {
-            if let Some(old_ids) = old_named.get(&key) {
-                if new_ids.len() == 1
-                    && old_ids.len() == 1
-                    && !mapped.contains_key(&new_ids[0])
-                    && used.insert(old_ids[0])
-                {
-                    mapped.insert(new_ids[0], old_ids[0]);
-                }
-            }
-        }
-        if !mapped.contains_key(&self.root)
-            && compatible(self.node(self.root).unwrap(), old.node(old.root).unwrap())
-            && used.insert(old.root)
-        {
-            mapped.insert(self.root, old.root);
-        }
-        // Match sibling groups in source order. Fingerprints are assembled bottom
-        // up from each token exactly once; even deeply nested source has linear
-        // hashing cost. They only select identity candidates, never validate XML.
-        let old_fingerprints = fingerprints(old, old_source);
-        let new_fingerprints = fingerprints(self, source);
-        reconcile_siblings(
-            &self.roots,
-            &old.roots,
-            self,
-            old,
-            &new_fingerprints,
-            &old_fingerprints,
-            &mut mapped,
-            &mut used,
-            next_id,
-        );
-        let mut parents: Vec<_> = self
-            .elements()
-            .map(|node| (node.span.start, node.id))
-            .collect();
-        parents.sort_unstable();
-        for (_, parent) in parents {
-            let new_children = &self.node(parent).unwrap().children;
-            let old_children = mapped
-                .get(&parent)
-                .and_then(|id| old.node(*id))
-                .map(|node| node.children.as_slice())
-                .unwrap_or(&[]);
-            reconcile_siblings(
-                new_children,
-                old_children,
-                self,
-                old,
-                &new_fingerprints,
-                &old_fingerprints,
-                &mut mapped,
-                &mut used,
-                next_id,
-            );
-        }
-        self.remap(&mapped);
-    }
-    pub(crate) fn allocate(&mut self, next_id: &mut NodeId) {
-        let map = self
-            .nodes
-            .keys()
-            .map(|old| {
-                let id = *next_id;
-                *next_id += 1;
-                (*old, id)
-            })
-            .collect();
-        self.remap(&map);
-    }
-    fn remap(&mut self, map: &HashMap<NodeId, NodeId>) {
-        self.root = map[&self.root];
-        self.roots.iter_mut().for_each(|id| *id = map[id]);
-        self.nodes = std::mem::take(&mut self.nodes)
-            .into_values()
-            .map(|mut node| {
-                node.id = map[&node.id];
-                node.parent = node.parent.map(|id| map[&id]);
-                node.children.iter_mut().for_each(|id| *id = map[id]);
-                (node.id, node)
-            })
-            .collect();
-    }
 }
 
-fn compatible(a: &Node, b: &Node) -> bool {
-    a.kind == b.kind && a.local_name() == b.local_name() && a.namespace_uri == b.namespace_uri
-}
-fn is_space(byte: u8) -> bool {
-    matches!(byte, b' ' | b'\t' | b'\r' | b'\n')
-}
-fn tag_end(source: &str, start: usize) -> usize {
-    let mut quote = None;
-    for (offset, byte) in source.as_bytes()[start + 1..].iter().enumerate() {
-        if let Some(q) = quote {
-            if *byte == q {
-                quote = None;
-            }
-        } else if matches!(*byte, b'\'' | b'"') {
-            quote = Some(*byte);
-        } else if *byte == b'>' {
-            return start + 1 + offset + 1;
-        }
-    }
-    unreachable!("validated XML opening tag")
-}
-
-pub(crate) fn decode_xml(source: &str, attribute: bool) -> String {
-    let mut out = String::with_capacity(source.len());
-    let mut cursor = 0;
-    while cursor < source.len() {
-        let remaining = &source[cursor..];
-        if remaining.starts_with('&') {
-            let end = remaining.find(';').expect("validated XML reference");
-            let name = &remaining[1..end];
-            let ch = match name {
-                "amp" => '&',
-                "lt" => '<',
-                "gt" => '>',
-                "quot" => '"',
-                "apos" => '\'',
-                _ if name.starts_with("#x") => {
-                    char::from_u32(u32::from_str_radix(&name[2..], 16).unwrap()).unwrap()
-                }
-                _ if name.starts_with('#') => char::from_u32(name[1..].parse().unwrap()).unwrap(),
-                _ => unreachable!("DTD is disabled"),
-            };
-            out.push(ch);
-            cursor += end + 1;
-        } else {
-            let ch = remaining.chars().next().unwrap();
-            if ch == '\r' {
-                cursor += 1;
-                if source.as_bytes().get(cursor) == Some(&b'\n') {
-                    cursor += 1;
-                }
-                out.push(if attribute { ' ' } else { '\n' });
-            } else {
-                cursor += ch.len_utf8();
-                out.push(if attribute && matches!(ch, '\n' | '\t') {
-                    ' '
-                } else {
-                    ch
-                });
-            }
-        }
-    }
-    out
-}
-
-// A matching key is semantic with respect to namespace prefix spelling. Renaming
-// a prefix does not change the object that the editor selected.
-type MatchKey = (NodeKind, Option<String>, String);
-fn match_key(node: &Node) -> MatchKey {
-    (
-        node.kind,
-        node.namespace_uri.clone(),
-        node.local_name().into(),
+fn defines_name_scope(node: &Node) -> bool {
+    matches!(
+        node.local_name(),
+        "ControlTemplate" | "DataTemplate" | "ItemsPanelTemplate" | "FuncTemplate"
     )
-}
-
-#[allow(clippy::too_many_arguments)]
-fn reconcile_siblings(
-    new_children: &[NodeId],
-    old_children: &[NodeId],
-    new: &Ast,
-    old: &Ast,
-    new_hashes: &HashMap<NodeId, u64>,
-    old_hashes: &HashMap<NodeId, u64>,
-    mapped: &mut HashMap<NodeId, NodeId>,
-    used: &mut HashSet<NodeId>,
-    next_id: &mut NodeId,
-) {
-    let mut exact = HashMap::<u64, VecDeque<NodeId>>::new();
-    let mut kinds = HashMap::<MatchKey, VecDeque<NodeId>>::new();
-    for &id in old_children {
-        if used.contains(&id) {
-            continue;
-        }
-        exact.entry(old_hashes[&id]).or_default().push_back(id);
-        kinds
-            .entry(match_key(old.node(id).unwrap()))
-            .or_default()
-            .push_back(id);
-    }
-    // First reserve every unchanged sibling before assigning changed siblings,
-    // so an insertion cannot steal an existing sibling's identity.
-    for &id in new_children {
-        if mapped.contains_key(&id) {
-            continue;
-        }
-        if let Some(candidates) = exact.get_mut(&new_hashes[&id]) {
-            while let Some(old_id) = candidates.pop_front() {
-                if !used.contains(&old_id)
-                    && compatible(new.node(id).unwrap(), old.node(old_id).unwrap())
-                {
-                    mapped.insert(id, old_id);
-                    used.insert(old_id);
-                    break;
-                }
-            }
-        }
-    }
-    for &id in new_children {
-        if mapped.contains_key(&id) {
-            continue;
-        }
-        if let Some(candidates) = kinds.get_mut(&match_key(new.node(id).unwrap())) {
-            while let Some(old_id) = candidates.pop_front() {
-                if used.insert(old_id) {
-                    mapped.insert(id, old_id);
-                    break;
-                }
-            }
-        }
-        mapped.entry(id).or_insert_with(|| {
-            let id = *next_id;
-            *next_id += 1;
-            id
-        });
-    }
-}
-
-fn fingerprints(ast: &Ast, source: &str) -> HashMap<NodeId, u64> {
-    let mut order: Vec<_> = ast.nodes().map(|node| (node.span.start, node.id)).collect();
-    order.sort_unstable_by(|a, b| b.cmp(a));
-    let mut hashes = HashMap::<NodeId, u64>::with_capacity(order.len());
-    for (_, id) in order {
-        let node = ast.node(id).unwrap();
-        let mut hash = std::collections::hash_map::DefaultHasher::new();
-        node.kind.hash(&mut hash);
-        node.namespace_uri.hash(&mut hash);
-        node.local_name().hash(&mut hash);
-        if node.is_element() {
-            source[node.opening_span.range()].hash(&mut hash);
-            for child in &node.children {
-                hashes[child].hash(&mut hash);
-            }
-            if let Some(closing) = node.closing_span {
-                source[closing.range()].hash(&mut hash);
-            }
-        } else {
-            source[node.span.range()].hash(&mut hash);
-        }
-        hashes.insert(id, hash.finish());
-    }
-    hashes
 }
