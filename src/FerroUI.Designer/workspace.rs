@@ -709,6 +709,12 @@ impl DesignerWorkspace {
             .register(asset)
     }
 
+    /// Access the reusable catalog to choose Grid/List presentation or configure filtering.
+    /// Browsing state is independent of the authored document and its undo history.
+    pub fn asset_toolbox(&self) -> Option<Rc<crate::AssetToolbox>> {
+        self.toolbox.borrow().clone()
+    }
+
     fn reveal_source(&self, id: NodeId) {
         let session = self.session.borrow();
         if !session.document().diagnostics().is_empty() {

@@ -1,6 +1,10 @@
 //! Native rendering evidence through FerroUI's Vello CPU backend and HarfBuzz shaping.
-use crate::{DesignerWorkspace, NavigationPane, PreviewStatus, STARTER_XAML, WorkspaceViewMode};
+use crate::{
+    AssetViewMode, DesignerWorkspace, NavigationPane, PreviewStatus, STARTER_XAML,
+    WorkspaceViewMode,
+};
 use ferroui_base::animation::{IClock, IGlobalClock, PlayState, TimeSpan};
+use ferroui_base::interactivity::RoutedEventArgs;
 use ferroui_base::media::imaging::{PngBitmapEncoderOptions, RenderTargetBitmap};
 use ferroui_base::platform::{IFontManagerImpl, IPlatformRenderInterface, ITextShaperImpl};
 use ferroui_base::reactive::{IDisposable, IObservable, IObserver, LightweightSubject};
@@ -11,8 +15,8 @@ use ferroui_controls::testing::{
     MockScreenImpl, MockWindowImpl, MockWindowingPlatform, TestServices, UnitTestApplication,
     mock_screen,
 };
-use ferroui_controls::{Control, Window};
-use ferroui_designer_animation::AnimationValue;
+use ferroui_controls::{Button, Control, Grid, GridLength, Window};
+use ferroui_designer_animation::{AnimationValue, Easing};
 use ferroui_harfbuzz::HarfBuzzTextShaper;
 use ferroui_vello::{VelloOptions, VelloPlatform, VelloRenderingMode};
 use std::cell::Cell;
@@ -220,7 +224,22 @@ fn native_workspace_renders_design_manipulation_and_animation() {
         before, assets,
         "The assets tab must expose the native toolbox"
     );
+    let toolbox = workspace.asset_toolbox().unwrap();
+    toolbox.set_view_mode(AssetViewMode::List);
+    capture(
+        &workspace,
+        &clock,
+        &directory.join("designer-assets-list.png"),
+    );
+    toolbox.set_view_mode(AssetViewMode::Grid);
     workspace.set_navigation_pane(NavigationPane::Layers);
+    workspace.set_canvas_focused(true);
+    capture(
+        &workspace,
+        &clock,
+        &directory.join("designer-canvas-focus.png"),
+    );
+    workspace.set_canvas_focused(false);
     workspace.set_view_mode(WorkspaceViewMode::Split);
     window.update_layout();
     workspace.fit_artboard().unwrap();
@@ -252,6 +271,20 @@ fn native_workspace_renders_design_manipulation_and_animation() {
     );
     assert_eq!(workspace.grid_track_editors().len(), 2);
     session.borrow_mut().select([target]);
+    for (button, filename) in [
+        ("StatesMode", "designer-states.png"),
+        ("BehaviorsMode", "designer-behaviors.png"),
+    ] {
+        workspace
+            .control()
+            .get_control::<Button>(button)
+            .raise_event(&RoutedEventArgs::with_event(Button::click_event()));
+        capture(&workspace, &clock, &directory.join(filename));
+    }
+    workspace
+        .control()
+        .get_control::<Button>("CloseAuthoring")
+        .raise_event(&RoutedEventArgs::with_event(Button::click_event()));
     session
         .borrow_mut()
         .set_property(&[target], "Canvas.Left", "96")
@@ -324,6 +357,68 @@ fn native_workspace_renders_design_manipulation_and_animation() {
         workspace.zoom() < 1.0,
         "Fit must use the smaller measured viewport"
     );
+    // A real multi-property program exposes the professional motion workflow: lanes,
+    // fixed ruler, selected key fields and the sampled easing preview in one native view.
+    window.set_width(1600.0);
+    window.set_height(1040.0);
+    workspace
+        .control()
+        .cast::<Grid>()
+        .unwrap()
+        .row_definitions()
+        .get(4)
+        .set_height(GridLength::from_pixels(264.0));
+    for (property, start, end) in [("Height", 352.0, 320.0), ("Opacity", 1.0, 0.85)] {
+        session.borrow_mut().seek(0.0).unwrap();
+        session
+            .borrow_mut()
+            .record_keyframe(target, property, AnimationValue::Number(start))
+            .unwrap();
+        session.borrow_mut().seek(3.0).unwrap();
+        session
+            .borrow_mut()
+            .record_keyframe(target, property, AnimationValue::Number(end))
+            .unwrap();
+    }
+    session
+        .borrow_mut()
+        .set_keyframe_easing(
+            target,
+            "Width",
+            3.0,
+            Easing::CubicBezier {
+                x1: 0.2,
+                y1: 0.0,
+                x2: 0.2,
+                y2: 1.0,
+            },
+        )
+        .unwrap();
+    workspace
+        .select_keyframes(&[(target, "Width".into(), 3.0)])
+        .unwrap();
+    window.update_layout();
+    workspace.fit_artboard().unwrap();
+    capture(
+        &workspace,
+        &clock,
+        &directory.join("designer-motion-editor.png"),
+    );
+    workspace
+        .control()
+        .get_control::<Button>("AnimationSettings")
+        .raise_event(&RoutedEventArgs::with_event(Button::click_event()));
+    capture(
+        &workspace,
+        &clock,
+        &directory.join("designer-animation-settings.png"),
+    );
+    workspace
+        .control()
+        .get_control::<Button>("CloseAuthoring")
+        .raise_event(&RoutedEventArgs::with_event(Button::click_event()));
+    workspace.show_sharing();
+    capture(&workspace, &clock, &directory.join("designer-sharing.png"));
     println!("Designer native render evidence: {}", directory.display());
     window.close();
     drop(window);
