@@ -230,3 +230,51 @@ fn unrelated_bound_definition_survives_insertion_and_noop_does_not_write() {
         ["{Binding Height}", "Auto", "*"]
     );
 }
+
+#[test]
+fn new_attached_properties_resolve_in_each_childs_lexical_framework_scope() {
+    let source = r#"<f:Grid xmlns:f="https://github.com/ferroui" xmlns="urn:project" RowDefinitions="*,*"><f:Button Name="A" Grid.Row="17" /><f:Button xmlns:f="urn:shadow" xmlns:n="https://github.com/ferroui" Name="Unused" /></f:Grid>"#;
+    // A non-framework attached property is independent of the framework cell position.
+    let mut document = Document::new(source).unwrap();
+    apply(
+        &mut document,
+        Axis::Vertical,
+        GridTrackChange::Insert {
+            index: 0,
+            length: GridLength::Auto,
+        },
+    );
+    assert_eq!(value(&document, "A", "Grid.Row"), Some("17"));
+    assert_eq!(value(&document, "A", "f:Grid.Row"), Some("1"));
+    assert_eq!(value(&document, "Unused", "n:Grid.Row"), Some("1"));
+    document.undo().unwrap();
+    assert_eq!(document.source(), source);
+}
+
+#[test]
+fn resolved_cells_preserve_style_positions_and_both_content_representations() {
+    let source = r#"<Grid RowDefinitions="*,*"><Grid.Children><Button Name="A" /></Grid.Children><Button Name="B" /></Grid>"#;
+    let mut document = Document::new(source).unwrap();
+    let a = document.ast().find_name("A").unwrap();
+    let b = document.ast().find_name("B").unwrap();
+    let placements = BTreeMap::from([
+        (a, GridTrackPlacement { index: 1, span: 1 }),
+        (b, GridTrackPlacement { index: 0, span: 2 }),
+    ]);
+    let edits = plan_grid_track_change_with_placements(
+        &document,
+        document.ast().root(),
+        Axis::Vertical,
+        GridTrackChange::Insert {
+            index: 1,
+            length: GridLength::Auto,
+        },
+        &placements,
+    )
+    .unwrap();
+    document.apply("Insert resolved track", edits).unwrap();
+    assert_eq!(value(&document, "A", "Grid.Row"), Some("2"));
+    assert_eq!(value(&document, "B", "Grid.RowSpan"), Some("3"));
+    document.undo().unwrap();
+    assert_eq!(document.source(), source);
+}

@@ -2,6 +2,7 @@
 //! A host can preview these commands without mutating either the document or live controls.
 use crate::{Axis, GridLength, Result, ToolError, error, require};
 use ferroui_designer_core::{Document, Edit, Node, NodeId, NodeKind};
+use std::collections::BTreeMap;
 
 /// Indices refer to the current axis. Insertion is before `index`, including `len()` to append.
 #[derive(Clone, Debug, PartialEq)]
@@ -9,6 +10,13 @@ pub enum GridTrackChange {
     Set { index: usize, length: GridLength },
     Insert { index: usize, length: GridLength },
     Remove { index: usize },
+}
+
+/// Effective placement along one axis, supplied by a native host after resolving styles.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub struct GridTrackPlacement {
+    pub index: usize,
+    pub span: usize,
 }
 
 struct AxisInfo {
@@ -60,12 +68,23 @@ fn framework_namespace(namespace: Option<&str>) -> bool {
 }
 
 fn attribute<'a>(
+    document: &Document,
     node: &'a Node,
     name: &str,
 ) -> Result<Option<&'a ferroui_designer_core::Attribute>> {
     let mut attributes = node.attributes.iter().filter(|attribute| {
         attribute.name.rsplit(':').next() == Some(name)
-            && framework_namespace(attribute.namespace_uri.as_deref())
+            && if name.contains('.') && !attribute.name.contains(':') {
+                framework_namespace(
+                    document
+                        .ast()
+                        .namespaces(node.id)
+                        .get("")
+                        .map(String::as_str),
+                )
+            } else {
+                framework_namespace(attribute.namespace_uri.as_deref())
+            }
     });
     let result = attributes.next();
     require(
@@ -101,10 +120,10 @@ fn definitions<'a>(
         owner.local_name() == "Grid" && framework_namespace(owner.namespace_uri.as_deref()),
         "This editor accepts framework Grid definitions; register an adapter for a custom panel",
     )?;
-    let authored = attribute(owner, axis.collection)?;
+    let authored = attribute(document, owner, axis.collection)?;
     let collections = property_elements(document, owner, axis.collection);
     require(
-        collections.len() <= 1 && !(authored.is_some() && !collections.is_empty()),
+        collections.len() <= 1 && (authored.is_none() || collections.is_empty()),
         "Grid definitions have more than one source; resolve the XAML before editing",
     )?;
     let collection = collections.first().copied();
@@ -139,7 +158,7 @@ fn definitions<'a>(
                 if !property_elements(document, node, axis.length).is_empty() {
                     Ok("(object value)".to_owned())
                 } else {
-                    Ok(attribute(node, axis.length)?
+                    Ok(attribute(document, node, axis.length)?
                         .map_or("*", |value| value.value.as_str())
                         .to_owned())
                 }
@@ -175,6 +194,28 @@ pub fn plan_grid_track_change(
     panel: NodeId,
     axis: Axis,
     change: GridTrackChange,
+) -> Result<Vec<Edit>> {
+    plan_change(document, panel, axis, change, None)
+}
+
+/// Native variant: every authored child must have a measured placement. Hosts must reject
+/// active bindings before supplying these values, as a new local value would detach them.
+pub fn plan_grid_track_change_with_placements(
+    document: &Document,
+    panel: NodeId,
+    axis: Axis,
+    change: GridTrackChange,
+    placements: &BTreeMap<NodeId, GridTrackPlacement>,
+) -> Result<Vec<Edit>> {
+    plan_change(document, panel, axis, change, Some(placements))
+}
+
+fn plan_change(
+    document: &Document,
+    panel: NodeId,
+    axis: Axis,
+    change: GridTrackChange,
+    placements: Option<&BTreeMap<NodeId, GridTrackPlacement>>,
 ) -> Result<Vec<Edit>> {
     let info = AxisInfo::new(axis);
     let definitions = definitions(document, panel, &info)?;
@@ -233,7 +274,7 @@ pub fn plan_grid_track_change(
                     )?;
                     edits.push(Edit::SetAttribute {
                         node: node.id,
-                        name: attribute(node, info.length)?
+                        name: attribute(document, node, info.length)?
                             .map_or_else(|| info.length.to_owned(), |value| value.name.clone()),
                         value: length.unwrap().to_xaml(),
                     });
@@ -261,8 +302,16 @@ pub fn plan_grid_track_change(
     }
     if let Some(insert) = insertion {
         for child in content_children(document, definitions.owner)? {
-            let position = integer_property(document, child, info.position, 0)?;
-            let span = integer_property(document, child, info.span, 1)?;
+            let authored_position = integer_property(document, child, info.position, 0)?;
+            let authored_span = integer_property(document, child, info.span, 1)?;
+            let (position, span) = if let Some(placements) = placements {
+                let resolved = placements
+                    .get(&child.id)
+                    .ok_or_else(|| error("A Grid child has no resolved placement"))?;
+                (resolved.index, resolved.span)
+            } else {
+                (authored_position, authored_span)
+            };
             require(span > 0, "Grid spans must be positive")?;
             // Native Grid clamps out-of-range positions/spans; preserve those effective cells.
             let start = position.min(count - 1);
@@ -284,10 +333,10 @@ pub fn plan_grid_track_change(
                 (info.span, span, new_span),
             ] {
                 if old != new {
+                    let name = attached_name(document, child, property, &mut edits)?;
                     edits.push(Edit::SetAttribute {
                         node: child.id,
-                        name: attribute(child, property)?
-                            .map_or_else(|| property.to_owned(), |value| value.name.clone()),
+                        name,
                         value: new.to_string(),
                     });
                 }
@@ -299,6 +348,38 @@ pub fn plan_grid_track_change(
         .apply("Validate Grid track change", edits.clone())
         .map_err(error)?;
     Ok(edits)
+}
+
+fn attached_name(
+    document: &Document,
+    node: &Node,
+    property: &str,
+    edits: &mut Vec<Edit>,
+) -> Result<String> {
+    if let Some(value) = attribute(document, node, property)? {
+        return Ok(value.name.clone());
+    }
+    let namespaces = document.ast().namespaces(node.id);
+    if framework_namespace(namespaces.get("").map(String::as_str)) {
+        return Ok(property.to_owned());
+    }
+    if let Some((prefix, _)) = namespaces
+        .iter()
+        .find(|(prefix, uri)| !prefix.is_empty() && framework_namespace(Some(uri.as_str())))
+    {
+        return Ok(format!("{prefix}:{property}"));
+    }
+    let mut prefix = "ui".to_owned();
+    let mut suffix = 1;
+    while namespaces.contains_key(&prefix) {
+        prefix = format!("ui{suffix}");
+        suffix += 1;
+    }
+    let name = format!("xmlns:{prefix}");
+    if !edits.iter().any(|edit| matches!(edit, Edit::SetAttribute { node: id, name: existing, .. } if *id == node.id && existing == &name)) {
+        edits.push(Edit::SetAttribute { node: node.id, name, value: "https://github.com/ferroui".into() });
+    }
+    Ok(format!("{prefix}:{property}"))
 }
 
 fn definition_source(definitions: &Definitions<'_>, info: &AxisInfo, value: &str) -> String {
@@ -321,14 +402,27 @@ fn content_children<'a>(document: &'a Document, grid: &Node) -> Result<Vec<&'a N
         collections.len() <= 1,
         "The Grid has more than one Children collection",
     )?;
-    let parent = collections.first().map_or(grid.id, |node| node.id);
-    Ok(document
-        .ast()
-        .element_children(parent)
-        .into_iter()
-        .filter_map(|id| document.ast().node(id))
-        .filter(|node| node.kind == NodeKind::Element)
-        .collect())
+    let mut children = Vec::new();
+    for id in document.ast().element_children(grid.id) {
+        if let Some(node) = document.ast().node(id) {
+            if node.kind == NodeKind::Element {
+                children.push(node);
+            } else if collections
+                .first()
+                .is_some_and(|collection| collection.id == id)
+            {
+                children.extend(
+                    document
+                        .ast()
+                        .element_children(id)
+                        .into_iter()
+                        .filter_map(|id| document.ast().node(id))
+                        .filter(|node| node.kind == NodeKind::Element),
+                );
+            }
+        }
+    }
+    Ok(children)
 }
 
 fn integer_property(document: &Document, node: &Node, name: &str, default: usize) -> Result<usize> {
@@ -336,7 +430,7 @@ fn integer_property(document: &Document, node: &Node, name: &str, default: usize
         property_elements(document, node, name).is_empty(),
         format!("{name} has an object value; edit its source before changing tracks"),
     )?;
-    match attribute(node, name)? {
+    match attribute(document, node, name)? {
         None => Ok(default),
         Some(value) => value.value.trim().parse().map_err(|_| {
             ToolError(format!(

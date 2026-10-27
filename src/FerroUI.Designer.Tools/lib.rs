@@ -7,10 +7,13 @@ mod properties;
 mod selection;
 
 pub use geometry::{
-    align, distribute, Affine, Alignment, Axis, Point, Rect, SnapGuide, SnapIndex, SnapResult,
-    SnapSettings,
+    Affine, Alignment, Axis, Point, Rect, SnapGuide, SnapIndex, SnapResult, SnapSettings, align,
+    distribute,
 };
-pub use grid_tracks::{grid_track_values, plan_grid_track_change, GridTrackChange};
+pub use grid_tracks::{
+    GridTrackChange, GridTrackPlacement, grid_track_values, plan_grid_track_change,
+    plan_grid_track_change_with_placements,
+};
 pub use layout::{
     DockSide, GridLength, GridLines, LayoutAction, LayoutAdapter, LayoutCapabilities,
     LayoutContext, LayoutRegistry, RelativeRelation, ResolvedLayout,
@@ -19,7 +22,7 @@ pub use properties::{
     EditorRegistry, ExpressionPolicy, PropertyDescriptor, PropertyKind, PropertyRegistry,
     PropertyState, ValueEditor,
 };
-pub use selection::{outermost, MoveGesture, Selection, SelectionMode};
+pub use selection::{MoveGesture, Selection, SelectionMode, outermost};
 
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct ToolError(pub String);

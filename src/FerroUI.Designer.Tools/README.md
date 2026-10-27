@@ -44,6 +44,21 @@ property elements remain property elements, and their min/max or shared-size att
 track edits. The adapter recognizes explicit `.Children` collections and preserves other property
 elements when changing child order.
 
+`grid_track_values` reads authored row/column lengths, including explicit definition elements.
+`plan_grid_track_change` accepts `GridTrackChange::{Set, Insert, Remove}` and produces one
+validated edit batch. Insertion shifts later cells and expands spans that cross the new track;
+removal shifts or clamps cells and shrinks affected spans. The axis always retains at least one
+track. Compact attributes remain compact, while definition elements retain their names,
+namespaces, min/max/shared-size metadata and surrounding comments. Explicit `.Children`
+collections and local namespace changes are supported.
+
+Native hosts use `plan_grid_track_change_with_placements` with a `GridTrackPlacement` map for
+effective styled child indices and spans. The host must supply every authored child's placement
+and reject active bound coordinates before planning. Without that map the portable engine uses
+literal source values. Bound/object-valued placement and unsupported definition expressions are
+rejected; the planner never evaluates bindings or guesses style state. The native workspace
+also protects definition collections supplied entirely by a style or preview factory.
+
 `LayoutContext::with_resolved_layout` accepts effective margins, visibility and optional arrange
 slots from the native host. This preserves styled margins, avoids adding margins twice when
 converting Canvas anchors, and lets UniformGrid account for bound or styled visibility. Without
