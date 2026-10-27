@@ -1,0 +1,114 @@
+name: Pretext port
+
+on:
+  pull_request:
+    paths:
+      - 'src/Pretext/**'
+      - 'src/FerroUI.Base/media/**'
+      - 'src/FerroUI.Base/platform/**'
+      - 'src/Headless/FerroUI.Headless/**'
+      - 'docs/porting/pretext.md'
+      - 'docs/porting/data/pretext/**'
+      - 'scripts/pretext/**'
+      - 'Cargo.toml'
+      - 'Cargo.lock'
+      - '.github/workflows/pretext.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'src/Pretext/**'
+      - 'src/FerroUI.Base/media/**'
+      - 'src/FerroUI.Base/platform/**'
+      - 'src/Headless/FerroUI.Headless/**'
+      - 'scripts/pretext/**'
+      - 'Cargo.toml'
+      - 'Cargo.lock'
+      - '.github/workflows/pretext.yml'
+  workflow_dispatch:
+
+concurrency:
+  group: pretext-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+env:
+  CARGO_TERM_COLOR: always
+  CARGO_INCREMENTAL: 0
+  CARGO_PROFILE_DEV_DEBUG: 0
+  CARGO_PROFILE_TEST_DEBUG: 0
+  RUST_BACKTRACE: 1
+
+jobs:
+  native:
+    name: Native tests (${{ matrix.rust }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        rust: ['1.89.0', stable]
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: dtolnay/rust-toolchain@89b12181fb390509a0842a86cc55eeb8eb928c1d # stable
+        with:
+          toolchain: ${{ matrix.rust }}
+          components: clippy,rustfmt
+      - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2
+        with:
+          key: pretext-${{ matrix.rust }}
+          save-if: ${{ github.ref == 'refs/heads/main' }}
+      - name: Format ported crates
+        run: >-
+          cargo fmt --check
+          -p ferroui-pretext-contracts
+          -p ferroui-pretext
+          -p ferroui-pretext-layout
+          -p ferroui-pretext-media
+      - name: Portable behavior and native service adapter tests
+        run: >-
+          cargo test --locked
+          -p ferroui-pretext-contracts
+          -p ferroui-pretext
+          -p ferroui-pretext-layout
+          -p ferroui-pretext-media
+      - name: Clippy for libraries, tests and examples
+        run: >-
+          cargo clippy --locked --all-targets
+          -p ferroui-pretext-contracts
+          -p ferroui-pretext
+          -p ferroui-pretext-layout
+          -p ferroui-pretext-media
+          -- -D warnings
+      - name: Public API documentation
+        env:
+          RUSTDOCFLAGS: -D warnings
+        run: >-
+          cargo doc --locked --no-deps
+          -p ferroui-pretext-contracts
+          -p ferroui-pretext
+          -p ferroui-pretext-layout
+          -p ferroui-pretext-media
+      - name: Prepared text and obstacle-flow example
+        run: cargo run --locked -p ferroui-pretext-layout --example editorial
+
+  wasm:
+    name: Portable engine (wasm32)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: dtolnay/rust-toolchain@89b12181fb390509a0842a86cc55eeb8eb928c1d # stable
+        with:
+          targets: wasm32-unknown-unknown
+      - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2
+        with:
+          key: pretext-wasm
+          save-if: ${{ github.ref == 'refs/heads/main' }}
+      - name: Core packages compile without native services or a WASI host
+        run: >-
+          cargo check --locked --target wasm32-unknown-unknown
+          -p ferroui-pretext-contracts
+          -p ferroui-pretext
+          -p ferroui-pretext-layout

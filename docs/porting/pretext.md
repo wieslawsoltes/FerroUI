@@ -46,3 +46,12 @@ these exercise the platform-neutral engine. Add focused tests for encoding
 boundaries, cursor progress, prepared-object lifetime, backend replacement and
 geometry-only layout. Run the relevant Rust tests, Clippy, formatting, naming and
 packaging checks, plus the CI workflow on the PR.
+
+## Implementation checkpoint
+
+The portable crates, native service adapter, source tests and reference generator
+are implemented. The native adapter and platform-neutral helpers are committed
+separately. The core's 128 behavioral tests, 14 native service tests and 15 layout
+helper tests have passed locally. An additional 240-case unchanged-C# reference
+corpus is being used to resolve Unicode-service differences before this draft is
+ready for review; the corpus is not yet reported as passing.

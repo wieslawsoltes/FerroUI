@@ -1,0 +1,2162 @@
+[
+  {
+    "text": "hello world",
+    "font": "16px Test Sans",
+    "whiteSpace": "PreWrap",
+    "wordBreak": "Normal",
+    "locale": "en",
+    "width": 0.0,
+    "lineHeight": 19.0
+  },
+  {
+    "text": "hello world",
+    "font": "16px Test Sans",
+    "whiteSpace": "PreWrap",
+    "wordBreak": "Normal",
+    "locale": "en",
+    "width": 31.0,
+    "lineHeight": 19.0
+  },
+  {
+    "text": "hello world",
+    "font": "16px Test Sans",
+    "whiteSpace": "PreWrap",
+    "wordBreak": "Normal",
+    "locale": "en",
+    "width": 80.0,
+    "lineHeight": 19.0
+  },
+  {
+    "text": "hello world",
+    "font": "16px Test Sans",
+    "whiteSpace": "PreWrap",
+    "wordBreak": "Normal",
+    "locale": "en",
+    "width": 170.0,
+    "lineHeight": 19.0
+  },
+  {
+    "text": "foo trans­atlantic",
+    "font": "16px Test Sans",
+    "whiteSpace": "Normal",
+    "wordBreak": "Normal",
+    "locale": "en",
+    "width": 0.0,
+    "lineHeight": 19.0
+  },
+  {
+    "text": "foo trans­atlantic",
+    "font": "16px Test Sans",
+    "whiteSpace": "Normal",
+    "wordBreak": "Normal",
+    "locale": "en",
+    "width": 31.0,
+    "lineHeight": 19.0
+  },
+  {
+    "text": "foo trans­atlantic",
+    "font": "16px Test Sans",
+    "whiteSpace": "Normal",
+    "wordBreak": "Normal",
+    "locale": "en",
+    "width": 80.0,
+    "lineHeight": 19.0
+  },
+  {
+    "text": "foo trans­atlantic",
+    "font": "16px Test Sans",
+    "whiteSpace": "Normal",
+    "wordBreak": "Normal",
+    "locale": "en",
+    "width": 170.0,
+    "lineHeight": 19.0
+  },
+  {
+    "text": "some​where",
+    "font": "16px Test Sans",
+    "whiteSpace": "PreWrap",
+    "wordBreak": "Normal",
+    "locale": "en",
+    "width": 0.0,
+    "lineHeight": 19.0
+  },
+  {
+    "text": "some​where",
+    "font": "16px Test Sans",
+    "whiteSpace": "PreWrap",
+    "wordBreak": "Normal",
+    "locale": "en",
+    "width": 31.0,
+    "lineHeight": 19.0
+  },
+  {
+    "text": "some​where",
+    "font": "16px Test Sans",
+    "whiteSpace": "PreWrap",
+    "wordBreak": "Normal",
+    "locale": "en",
+    "width": 80.0,
+    "lineHeight": 19.0
+  },
+  {
+    "text": "some​where",
+    "font": "16px Test Sans",
+    "whiteSpace": "PreWrap",
+    "wordBreak": "Normal",
+    "locale": "en",
+    "width": 170.0,
+    "lineHeight": 19.0
+  },
+  {
+    "text": "a😀b",
+    "font": "16px Test Sans",
+    "whiteSpace": "Normal",
+    "wordBreak": "Normal",
+    "locale": "en",
+    "width": 0.0,
+    "lineHeight": 19.0
+  },
+  {
+    "text": "a😀b",
+    "font": "16px Test Sans",
+    "whiteSpace": "Normal",
+    "wordBreak": "Normal",
+    "locale": "en",
+    "width": 31.0,
+    "lineHeight": 19.0
+  },
+  {
+    "text": "a😀b",
+    "font": "16px Test Sans",
+    "whiteSpace": "Normal",
+    "wordBreak": "Normal",
+    "locale": "en",
+    "width": 80.0,
+    "lineHeight": 19.0
+  },
+  {
+    "text": "a😀b",
+    "font": "16px Test Sans",
+    "whiteSpace": "Normal",
+    "wordBreak": "Normal",
+    "locale": "en",
+    "width": 170.0,
+    "lineHeight": 19.0
+  },
+  {
+    "text": "👨‍👩‍👧‍👦 together",
+    "font": "16px Test Sans",
+    "whiteSpace": "PreWrap",
+    "wordBreak": "Normal",
+    "locale": "en",
+    "width": 0.0,
+    "lineHeight": 19.0
+  },
+  {
+    "text": "👨‍👩‍👧‍👦 together",
+    "font": "16px Test Sans",
+    "whiteSpace": "PreWrap",
+    "wordBreak": "Normal",
+    "locale": "en",
+    "width": 31.0,
+    "lineHeight": 19.0
+  },
+  {
+    "text": "👨‍👩‍👧‍👦 together",
+    "font": "16px Test Sans",
+    "whiteSpace": "PreWrap",
+    "wordBreak": "Normal",
+    "locale": "en",
+    "width": 80.0,
+    "lineHeight": 19.0
+  },
+  {
+    "text": "👨‍👩‍👧‍👦 together",
+    "font": "16px Test Sans",
+    "whiteSpace": "PreWrap",
+    "wordBreak": "Normal",
+    "locale": "en",
+    "width": 170.0,
+    "lineHeight": 19.0
+  },
+  {
+    "text": "élan",
+    "font": "16px Test Sans",
+    "whiteSpace": "Normal",
+    "wordBreak": "Normal",
+    "locale": "en",
+    "width": 0.0,
+    "lineHeight": 19.0
+  },
+  {
+    "text": "élan",
+    "font": "16px Test Sans",
+    "whiteSpace": "Normal",
+    "wordBreak": "Normal",
+    "locale": "en",
+    "width": 31.0,
+    "lineHeight": 19.0
+  },
+  {
+    "text": "élan",
+    "font": "16px Test Sans",
+    "whiteSpace": "Normal",
+    "wordBreak": "Normal",
+    "locale": "en",
+    "width": 80.0,
+    "lineHeight": 19.0
+  },
+  {
+    "text": "élan",
+    "font": "16px Test Sans",
+    "whiteSpace": "Normal",
+    "wordBreak": "Normal",
+    "locale": "en",
+    "width": 170.0,
+    "lineHeight": 19.0
+  },
+  {
+    "text": "日本語foo-bar",
+    "font": "16px Test Sans",
+    "whiteSpace": "PreWrap",
+    "wordBreak": "Normal",
+    "locale": "en",
+    "width": 0.0,
+    "lineHeight": 19.0
+  },
+  {
+    "text": "日本語foo-bar",
+    "font": "16px Test Sans",
+    "whiteSpace": "PreWrap",
+    "wordBreak": "Normal",
+    "locale": "en",
+    "width": 31.0,
+    "lineHeight": 19.0
+  },
+  {
+    "text": "日本語foo-bar",
+    "font": "16px Test Sans",
+    "whiteSpace": "PreWrap",
+    "wordBreak": "Normal",
+    "locale": "en",
+    "width": 80.0,
+    "lineHeight": 19.0
+  },
+  {
+    "text": "日本語foo-bar",
+    "font": "16px Test Sans",
+    "whiteSpace": "PreWrap",
+    "wordBreak": "Normal",
+    "locale": "en",
+    "width": 170.0,
+    "lineHeight": 19.0
+  },
+  {
+    "text": "「東京」大阪",
+    "font": "16px Test Sans",
+    "whiteSpace": "Normal",
+    "wordBreak": "Normal",
+    "locale": "en",
+    "width": 0.0,
+    "lineHeight": 19.0
+  },
+  {
+    "text": "「東京」大阪",
+    "font": "16px Test Sans",
+    "whiteSpace": "Normal",
+    "wordBreak": "Normal",
+    "locale": "en",
+    "width": 31.0,
+    "lineHeight": 19.0
+  },
+  {
+    "text": "「東京」大阪",
+    "font": "16px Test Sans",
+    "whiteSpace": "Normal",
+    "wordBreak": "Normal",
+    "locale": "en",
+    "width": 80.0,
+    "lineHeight": 19.0
+  },
+  {
+    "text": "「東京」大阪",
+    "font": "16px Test Sans",
+    "whiteSpace": "Normal",
+    "wordBreak": "Normal",
+    "locale": "en",
+    "width": 170.0,
+    "lineHeight": 19.0
+  },
+  {
+    "text": "אבג def 123",
+    "font": "16px Test Sans",
+    "whiteSpace": "PreWrap",
+    "wordBreak": "Normal",
+    "locale": "en",
+    "width": 0.0,
+    "lineHeight": 19.0
+  },
+  {
+    "text": "אבג def 123",
+    "font": "16px Test Sans",
+    "whiteSpace": "PreWrap",
+    "wordBreak": "Normal",
+    "locale": "en",
+    "width": 31.0,
+    "lineHeight": 19.0
+  },
+  {
+    "text": "אבג def 123",
+    "font": "16px Test Sans",
+    "whiteSpace": "PreWrap",
+    "wordBreak": "Normal",
+    "locale": "en",
+    "width": 80.0,
+    "lineHeight": 19.0
+  },
+  {
+    "text": "אבג def 123",
+    "font": "16px Test Sans",
+    "whiteSpace": "PreWrap",
+    "wordBreak": "Normal",
+    "locale": "en",
+    "width": 170.0,
+    "lineHeight": 19.0
+  },
+  {
+    "text": "مرحبا بالعالم",
+    "font": "16px Test Sans",
+    "whiteSpace": "Normal",
+    "wordBreak": "Normal",
+    "locale": "en",
+    "width": 0.0,
+    "lineHeight": 19.0
+  },
+  {
+    "text": "مرحبا بالعالم",
+    "font": "16px Test Sans",
+    "whiteSpace": "Normal",
+    "wordBreak": "Normal",
+    "locale": "en",
+    "width": 31.0,
+    "lineHeight": 19.0
+  },
+  {
+    "text": "مرحبا بالعالم",
+    "font": "16px Test Sans",
+    "whiteSpace": "Normal",
+    "wordBreak": "Normal",
+    "locale": "en",
+    "width": 80.0,
+    "lineHeight": 19.0
+  },
+  {
+    "text": "مرحبا بالعالم",
+    "font": "16px Test Sans",
+    "whiteSpace": "Normal",
+    "wordBreak": "Normal",
+    "locale": "en",
+    "width": 170.0,
+    "lineHeight": 19.0
+  },
+  {
+    "text": "foo\tbar\nbaz",
+    "font": "16px Test Sans",
+    "whiteSpace": "PreWrap",
+    "wordBreak": "Normal",
+    "locale": "en",
+    "width": 0.0,
+    "lineHeight": 19.0
+  },
+  {
+    "text": "foo\tbar\nbaz",
+    "font": "16px Test Sans",
+    "whiteSpace": "PreWrap",
+    "wordBreak": "Normal",
+    "locale": "en",
+    "width": 31.0,
+    "lineHeight": 19.0
+  },
+  {
+    "text": "foo\tbar\nbaz",
+    "font": "16px Test Sans",
+    "whiteSpace": "PreWrap",
+    "wordBreak": "Normal",
+    "locale": "en",
+    "width": 80.0,
+    "lineHeight": 19.0
+  },
+  {
+    "text": "foo\tbar\nbaz",
+    "font": "16px Test Sans",
+    "whiteSpace": "PreWrap",
+    "wordBreak": "Normal",
+    "locale": "en",
+    "width": 170.0,
+    "lineHeight": 19.0
+  },
+  {
+    "text": "  foo   bar  ",
+    "font": "16px Test Sans",
+    "whiteSpace": "Normal",
+    "wordBreak": "Normal",
+    "locale": "en",
+    "width": 0.0,
+    "lineHeight": 19.0
+  },
+  {
+    "text": "  foo   bar  ",
+    "font": "16px Test Sans",
+    "whiteSpace": "Normal",
+    "wordBreak": "Normal",
+    "locale": "en",
+    "width": 31.0,
+    "lineHeight": 19.0
+  },
+  {
+    "text": "  foo   bar  ",
+    "font": "16px Test Sans",
+    "whiteSpace": "Normal",
+    "wordBreak": "Normal",
+    "locale": "en",
+    "width": 80.0,
+    "lineHeight": 19.0
+  },
+  {
+    "text": "  foo   bar  ",
+    "font": "16px Test Sans",
+    "whiteSpace": "Normal",
+    "wordBreak": "Normal",
+    "locale": "en",
+    "width": 170.0,
+    "lineHeight": 19.0
+  },
+  {
+    "text": "\n\n",
+    "font": "16px Test Sans",
+    "whiteSpace": "PreWrap",
+    "wordBreak": "Normal",
+    "locale": "en",
+    "width": 0.0,
+    "lineHeight": 19.0
+  },
+  {
+    "text": "\n\n",
+    "font": "16px Test Sans",
+    "whiteSpace": "PreWrap",
+    "wordBreak": "Normal",
+    "locale": "en",
+    "width": 31.0,
+    "lineHeight": 19.0
+  },
+  {
+    "text": "\n\n",
+    "font": "16px Test Sans",
+    "whiteSpace": "PreWrap",
+    "wordBreak": "Normal",
+    "locale": "en",
+    "width": 80.0,
+    "lineHeight": 19.0
+  },
+  {
+    "text": "\n\n",
+    "font": "16px Test Sans",
+    "whiteSpace": "PreWrap",
+    "wordBreak": "Normal",
+    "locale": "en",
+    "width": 170.0,
+    "lineHeight": 19.0
+  },
+  {
+    "text": "\r\n x\r y\f z",
+    "font": "16px Test Sans",
+    "whiteSpace": "Normal",
+    "wordBreak": "Normal",
+    "locale": "en",
+    "width": 0.0,
+    "lineHeight": 19.0
+  },
+  {
+    "text": "\r\n x\r y\f z",
+    "font": "16px Test Sans",
+    "whiteSpace": "Normal",
+    "wordBreak": "Normal",
+    "locale": "en",
+    "width": 31.0,
+    "lineHeight": 19.0
+  },
+  {
+    "text": "\r\n x\r y\f z",
+    "font": "16px Test Sans",
+    "whiteSpace": "Normal",
+    "wordBreak": "Normal",
+    "locale": "en",
+    "width": 80.0,
+    "lineHeight": 19.0
+  },
+  {
+    "text": "\r\n x\r y\f z",
+    "font": "16px Test Sans",
+    "whiteSpace": "Normal",
+    "wordBreak": "Normal",
+    "locale": "en",
+    "width": 170.0,
+    "lineHeight": 19.0
+  },
+  {
+    "text": "http://example.com/foo?x=10",
+    "font": "16px Test Sans",
+    "whiteSpace": "PreWrap",
+    "wordBreak": "Normal",
+    "locale": "en",
+    "width": 0.0,
+    "lineHeight": 19.0
+  },
+  {
+    "text": "http://example.com/foo?x=10",
+    "font": "16px Test Sans",
+    "whiteSpace": "PreWrap",
+    "wordBreak": "Normal",
+    "locale": "en",
+    "width": 31.0,
+    "lineHeight": 19.0
+  },
+  {
+    "text": "http://example.com/foo?x=10",
+    "font": "16px Test Sans",
+    "whiteSpace": "PreWrap",
+    "wordBreak": "Normal",
+    "locale": "en",
+    "width": 80.0,
+    "lineHeight": 19.0
+  },
+  {
+    "text": "http://example.com/foo?x=10",
+    "font": "16px Test Sans",
+    "whiteSpace": "PreWrap",
+    "wordBreak": "Normal",
+    "locale": "en",
+    "width": 170.0,
+    "lineHeight": 19.0
+  },
+  {
+    "text": "10:30-12:00",
+    "font": "16px Test Sans",
+    "whiteSpace": "Normal",
+    "wordBreak": "Normal",
+    "locale": "en",
+    "width": 0.0,
+    "lineHeight": 19.0
+  },
+  {
+    "text": "10:30-12:00",
+    "font": "16px Test Sans",
+    "whiteSpace": "Normal",
+    "wordBreak": "Normal",
+    "locale": "en",
+    "width": 31.0,
+    "lineHeight": 19.0
+  },
+  {
+    "text": "10:30-12:00",
+    "font": "16px Test Sans",
+    "whiteSpace": "Normal",
+    "wordBreak": "Normal",
+    "locale": "en",
+    "width": 80.0,
+    "lineHeight": 19.0
+  },
+  {
+    "text": "10:30-12:00",
+    "font": "16px Test Sans",
+    "whiteSpace": "Normal",
+    "wordBreak": "Normal",
+    "locale": "en",
+    "width": 170.0,
+    "lineHeight": 19.0
+  },
+  {
+    "text": "12,345.67",
+    "font": "16px Test Sans",
+    "whiteSpace": "PreWrap",
+    "wordBreak": "Normal",
+    "locale": "en",
+    "width": 0.0,
+    "lineHeight": 19.0
+  },
+  {
+    "text": "12,345.67",
+    "font": "16px Test Sans",
+    "whiteSpace": "PreWrap",
+    "wordBreak": "Normal",
+    "locale": "en",
+    "width": 31.0,
+    "lineHeight": 19.0
+  },
+  {
+    "text": "12,345.67",
+    "font": "16px Test Sans",
+    "whiteSpace": "PreWrap",
+    "wordBreak": "Normal",
+    "locale": "en",
+    "width": 80.0,
+    "lineHeight": 19.0
+  },
+  {
+    "text": "12,345.67",
+    "font": "16px Test Sans",
+    "whiteSpace": "PreWrap",
+    "wordBreak": "Normal",
+    "locale": "en",
+    "width": 170.0,
+    "lineHeight": 19.0
+  },
+  {
+    "text": "well-known-name",
+    "font": "16px Test Sans",
+    "whiteSpace": "Normal",
+    "wordBreak": "Normal",
+    "locale": "en",
+    "width": 0.0,
+    "lineHeight": 19.0
+  },
+  {
+    "text": "well-known-name",
+    "font": "16px Test Sans",
+    "whiteSpace": "Normal",
+    "wordBreak": "Normal",
+    "locale": "en",
+    "width": 31.0,
+    "lineHeight": 19.0
+  },
+  {
+    "text": "well-known-name",
+    "font": "16px Test Sans",
+    "whiteSpace": "Normal",
+    "wordBreak": "Normal",
+    "locale": "en",
+    "width": 80.0,
+    "lineHeight": 19.0
+  },
+  {
+    "text": "well-known-name",
+    "font": "16px Test Sans",
+    "whiteSpace": "Normal",
+    "wordBreak": "Normal",
+    "locale": "en",
+    "width": 170.0,
+    "lineHeight": 19.0
+  },
+  {
+    "text": "a b",
+    "font": "16px Test Sans",
+    "whiteSpace": "PreWrap",
+    "wordBreak": "Normal",
+    "locale": "en",
+    "width": 0.0,
+    "lineHeight": 19.0
+  },
+  {
+    "text": "a b",
+    "font": "16px Test Sans",
+    "whiteSpace": "PreWrap",
+    "wordBreak": "Normal",
+    "locale": "en",
+    "width": 31.0,
+    "lineHeight": 19.0
+  },
+  {
+    "text": "a b",
+    "font": "16px Test Sans",
+    "whiteSpace": "PreWrap",
+    "wordBreak": "Normal",
+    "locale": "en",
+    "width": 80.0,
+    "lineHeight": 19.0
+  },
+  {
+    "text": "a b",
+    "font": "16px Test Sans",
+    "whiteSpace": "PreWrap",
+    "wordBreak": "Normal",
+    "locale": "en",
+    "width": 170.0,
+    "lineHeight": 19.0
+  },
+  {
+    "text": "a b",
+    "font": "16px Test Sans",
+    "whiteSpace": "Normal",
+    "wordBreak": "Normal",
+    "locale": "en",
+    "width": 0.0,
+    "lineHeight": 19.0
+  },
+  {
+    "text": "a b",
+    "font": "16px Test Sans",
+    "whiteSpace": "Normal",
+    "wordBreak": "Normal",
+    "locale": "en",
+    "width": 31.0,
+    "lineHeight": 19.0
+  },
+  {
+    "text": "a b",
+    "font": "16px Test Sans",
+    "whiteSpace": "Normal",
+    "wordBreak": "Normal",
+    "locale": "en",
+    "width": 80.0,
+    "lineHeight": 19.0
+  },
+  {
+    "text": "a b",
+    "font": "16px Test Sans",
+    "whiteSpace": "Normal",
+    "wordBreak": "Normal",
+    "locale": "en",
+    "width": 170.0,
+    "lineHeight": 19.0
+  },
+  {
+    "text": "a⁠b",
+    "font": "16px Test Sans",
+    "whiteSpace": "PreWrap",
+    "wordBreak": "Normal",
+    "locale": "en",
+    "width": 0.0,
+    "lineHeight": 19.0
+  },
+  {
+    "text": "a⁠b",
+    "font": "16px Test Sans",
+    "whiteSpace": "PreWrap",
+    "wordBreak": "Normal",
+    "locale": "en",
+    "width": 31.0,
+    "lineHeight": 19.0
+  },
+  {
+    "text": "a⁠b",
+    "font": "16px Test Sans",
+    "whiteSpace": "PreWrap",
+    "wordBreak": "Normal",
+    "locale": "en",
+    "width": 80.0,
+    "lineHeight": 19.0
+  },
+  {
+    "text": "a⁠b",
+    "font": "16px Test Sans",
+    "whiteSpace": "PreWrap",
+    "wordBreak": "Normal",
+    "locale": "en",
+    "width": 170.0,
+    "lineHeight": 19.0
+  },
+  {
+    "text": "a﻿b",
+    "font": "16px Test Sans",
+    "whiteSpace": "Normal",
+    "wordBreak": "Normal",
+    "locale": "en",
+    "width": 0.0,
+    "lineHeight": 19.0
+  },
+  {
+    "text": "a﻿b",
+    "font": "16px Test Sans",
+    "whiteSpace": "Normal",
+    "wordBreak": "Normal",
+    "locale": "en",
+    "width": 31.0,
+    "lineHeight": 19.0
+  },
+  {
+    "text": "a﻿b",
+    "font": "16px Test Sans",
+    "whiteSpace": "Normal",
+    "wordBreak": "Normal",
+    "locale": "en",
+    "width": 80.0,
+    "lineHeight": 19.0
+  },
+  {
+    "text": "a﻿b",
+    "font": "16px Test Sans",
+    "whiteSpace": "Normal",
+    "wordBreak": "Normal",
+    "locale": "en",
+    "width": 170.0,
+    "lineHeight": 19.0
+  },
+  {
+    "text": "A,B.C!?D",
+    "font": "16px Test Sans",
+    "whiteSpace": "PreWrap",
+    "wordBreak": "Normal",
+    "locale": "en",
+    "width": 0.0,
+    "lineHeight": 19.0
+  },
+  {
+    "text": "A,B.C!?D",
+    "font": "16px Test Sans",
+    "whiteSpace": "PreWrap",
+    "wordBreak": "Normal",
+    "locale": "en",
+    "width": 31.0,
+    "lineHeight": 19.0
+  },
+  {
+    "text": "A,B.C!?D",
+    "font": "16px Test Sans",
+    "whiteSpace": "PreWrap",
+    "wordBreak": "Normal",
+    "locale": "en",
+    "width": 80.0,
+    "lineHeight": 19.0
+  },
+  {
+    "text": "A,B.C!?D",
+    "font": "16px Test Sans",
+    "whiteSpace": "PreWrap",
+    "wordBreak": "Normal",
+    "locale": "en",
+    "width": 170.0,
+    "lineHeight": 19.0
+  },
+  {
+    "text": "「あ」「い」",
+    "font": "16px Test Sans",
+    "whiteSpace": "Normal",
+    "wordBreak": "Normal",
+    "locale": "en",
+    "width": 0.0,
+    "lineHeight": 19.0
+  },
+  {
+    "text": "「あ」「い」",
+    "font": "16px Test Sans",
+    "whiteSpace": "Normal",
+    "wordBreak": "Normal",
+    "locale": "en",
+    "width": 31.0,
+    "lineHeight": 19.0
+  },
+  {
+    "text": "「あ」「い」",
+    "font": "16px Test Sans",
+    "whiteSpace": "Normal",
+    "wordBreak": "Normal",
+    "locale": "en",
+    "width": 80.0,
+    "lineHeight": 19.0
+  },
+  {
+    "text": "「あ」「い」",
+    "font": "16px Test Sans",
+    "whiteSpace": "Normal",
+    "wordBreak": "Normal",
+    "locale": "en",
+    "width": 170.0,
+    "lineHeight": 19.0
+  },
+  {
+    "text": "々〻ゝゞヽヾ",
+    "font": "16px Test Sans",
+    "whiteSpace": "PreWrap",
+    "wordBreak": "Normal",
+    "locale": "en",
+    "width": 0.0,
+    "lineHeight": 19.0
+  },
+  {
+    "text": "々〻ゝゞヽヾ",
+    "font": "16px Test Sans",
+    "whiteSpace": "PreWrap",
+    "wordBreak": "Normal",
+    "locale": "en",
+    "width": 31.0,
+    "lineHeight": 19.0
+  },
+  {
+    "text": "々〻ゝゞヽヾ",
+    "font": "16px Test Sans",
+    "whiteSpace": "PreWrap",
+    "wordBreak": "Normal",
+    "locale": "en",
+    "width": 80.0,
+    "lineHeight": 19.0
+  },
+  {
+    "text": "々〻ゝゞヽヾ",
+    "font": "16px Test Sans",
+    "whiteSpace": "PreWrap",
+    "wordBreak": "Normal",
+    "locale": "en",
+    "width": 170.0,
+    "lineHeight": 19.0
+  },
+  {
+    "text": "हिन्दी।भारत",
+    "font": "16px Test Sans",
+    "whiteSpace": "Normal",
+    "wordBreak": "Normal",
+    "locale": "en",
+    "width": 0.0,
+    "lineHeight": 19.0
+  },
+  {
+    "text": "हिन्दी।भारत",
+    "font": "16px Test Sans",
+    "whiteSpace": "Normal",
+    "wordBreak": "Normal",
+    "locale": "en",
+    "width": 31.0,
+    "lineHeight": 19.0
+  },
+  {
+    "text": "हिन्दी।भारत",
+    "font": "16px Test Sans",
+    "whiteSpace": "Normal",
+    "wordBreak": "Normal",
+    "locale": "en",
+    "width": 80.0,
+    "lineHeight": 19.0
+  },
+  {
+    "text": "हिन्दी।भारत",
+    "font": "16px Test Sans",
+    "whiteSpace": "Normal",
+    "wordBreak": "Normal",
+    "locale": "en",
+    "width": 170.0,
+    "lineHeight": 19.0
+  },
+  {
+    "text": "မြန်မာ၊စာ",
+    "font": "16px Test Sans",
+    "whiteSpace": "PreWrap",
+    "wordBreak": "Normal",
+    "locale": "en",
+    "width": 0.0,
+    "lineHeight": 19.0
+  },
+  {
+    "text": "မြန်မာ၊စာ",
+    "font": "16px Test Sans",
+    "whiteSpace": "PreWrap",
+    "wordBreak": "Normal",
+    "locale": "en",
+    "width": 31.0,
+    "lineHeight": 19.0
+  },
+  {
+    "text": "မြန်မာ၊စာ",
+    "font": "16px Test Sans",
+    "whiteSpace": "PreWrap",
+    "wordBreak": "Normal",
+    "locale": "en",
+    "width": 80.0,
+    "lineHeight": 19.0
+  },
+  {
+    "text": "မြန်မာ၊စာ",
+    "font": "16px Test Sans",
+    "whiteSpace": "PreWrap",
+    "wordBreak": "Normal",
+    "locale": "en",
+    "width": 170.0,
+    "lineHeight": 19.0
+  },
+  {
+    "text": "ทุกสองสัปดาห์",
+    "font": "16px Test Sans",
+    "whiteSpace": "Normal",
+    "wordBreak": "Normal",
+    "locale": "en",
+    "width": 0.0,
+    "lineHeight": 19.0
+  },
+  {
+    "text": "ทุกสองสัปดาห์",
+    "font": "16px Test Sans",
+    "whiteSpace": "Normal",
+    "wordBreak": "Normal",
+    "locale": "en",
+    "width": 31.0,
+    "lineHeight": 19.0
+  },
+  {
+    "text": "ทุกสองสัปดาห์",
+    "font": "16px Test Sans",
+    "whiteSpace": "Normal",
+    "wordBreak": "Normal",
+    "locale": "en",
+    "width": 80.0,
+    "lineHeight": 19.0
+  },
+  {
+    "text": "ทุกสองสัปดาห์",
+    "font": "16px Test Sans",
+    "whiteSpace": "Normal",
+    "wordBreak": "Normal",
+    "locale": "en",
+    "width": 170.0,
+    "lineHeight": 19.0
+  },
+  {
+    "text": "中文测试",
+    "font": "16px Test Sans",
+    "whiteSpace": "PreWrap",
+    "wordBreak": "Normal",
+    "locale": "en",
+    "width": 0.0,
+    "lineHeight": 19.0
+  },
+  {
+    "text": "中文测试",
+    "font": "16px Test Sans",
+    "whiteSpace": "PreWrap",
+    "wordBreak": "Normal",
+    "locale": "en",
+    "width": 31.0,
+    "lineHeight": 19.0
+  },
+  {
+    "text": "中文测试",
+    "font": "16px Test Sans",
+    "whiteSpace": "PreWrap",
+    "wordBreak": "Normal",
+    "locale": "en",
+    "width": 80.0,
+    "lineHeight": 19.0
+  },
+  {
+    "text": "中文测试",
+    "font": "16px Test Sans",
+    "whiteSpace": "PreWrap",
+    "wordBreak": "Normal",
+    "locale": "en",
+    "width": 170.0,
+    "lineHeight": 19.0
+  },
+  {
+    "text": "カタカナ",
+    "font": "16px Test Sans",
+    "whiteSpace": "Normal",
+    "wordBreak": "Normal",
+    "locale": "en",
+    "width": 0.0,
+    "lineHeight": 19.0
+  },
+  {
+    "text": "カタカナ",
+    "font": "16px Test Sans",
+    "whiteSpace": "Normal",
+    "wordBreak": "Normal",
+    "locale": "en",
+    "width": 31.0,
+    "lineHeight": 19.0
+  },
+  {
+    "text": "カタカナ",
+    "font": "16px Test Sans",
+    "whiteSpace": "Normal",
+    "wordBreak": "Normal",
+    "locale": "en",
+    "width": 80.0,
+    "lineHeight": 19.0
+  },
+  {
+    "text": "カタカナ",
+    "font": "16px Test Sans",
+    "whiteSpace": "Normal",
+    "wordBreak": "Normal",
+    "locale": "en",
+    "width": 170.0,
+    "lineHeight": 19.0
+  },
+  {
+    "text": "한글 테스트",
+    "font": "16px Test Sans",
+    "whiteSpace": "PreWrap",
+    "wordBreak": "Normal",
+    "locale": "en",
+    "width": 0.0,
+    "lineHeight": 19.0
+  },
+  {
+    "text": "한글 테스트",
+    "font": "16px Test Sans",
+    "whiteSpace": "PreWrap",
+    "wordBreak": "Normal",
+    "locale": "en",
+    "width": 31.0,
+    "lineHeight": 19.0
+  },
+  {
+    "text": "한글 테스트",
+    "font": "16px Test Sans",
+    "whiteSpace": "PreWrap",
+    "wordBreak": "Normal",
+    "locale": "en",
+    "width": 80.0,
+    "lineHeight": 19.0
+  },
+  {
+    "text": "한글 테스트",
+    "font": "16px Test Sans",
+    "whiteSpace": "PreWrap",
+    "wordBreak": "Normal",
+    "locale": "en",
+    "width": 170.0,
+    "lineHeight": 19.0
+  },
+  {
+    "text": "𠀀𰀀中文",
+    "font": "16px Test Sans",
+    "whiteSpace": "Normal",
+    "wordBreak": "Normal",
+    "locale": "en",
+    "width": 0.0,
+    "lineHeight": 19.0
+  },
+  {
+    "text": "𠀀𰀀中文",
+    "font": "16px Test Sans",
+    "whiteSpace": "Normal",
+    "wordBreak": "Normal",
+    "locale": "en",
+    "width": 31.0,
+    "lineHeight": 19.0
+  },
+  {
+    "text": "𠀀𰀀中文",
+    "font": "16px Test Sans",
+    "whiteSpace": "Normal",
+    "wordBreak": "Normal",
+    "locale": "en",
+    "width": 80.0,
+    "lineHeight": 19.0
+  },
+  {
+    "text": "𠀀𰀀中文",
+    "font": "16px Test Sans",
+    "whiteSpace": "Normal",
+    "wordBreak": "Normal",
+    "locale": "en",
+    "width": 170.0,
+    "lineHeight": 19.0
+  },
+  {
+    "text": "\t\talpha",
+    "font": "16px Test Sans",
+    "whiteSpace": "PreWrap",
+    "wordBreak": "Normal",
+    "locale": "en",
+    "width": 0.0,
+    "lineHeight": 19.0
+  },
+  {
+    "text": "\t\talpha",
+    "font": "16px Test Sans",
+    "whiteSpace": "PreWrap",
+    "wordBreak": "Normal",
+    "locale": "en",
+    "width": 31.0,
+    "lineHeight": 19.0
+  },
+  {
+    "text": "\t\talpha",
+    "font": "16px Test Sans",
+    "whiteSpace": "PreWrap",
+    "wordBreak": "Normal",
+    "locale": "en",
+    "width": 80.0,
+    "lineHeight": 19.0
+  },
+  {
+    "text": "\t\talpha",
+    "font": "16px Test Sans",
+    "whiteSpace": "PreWrap",
+    "wordBreak": "Normal",
+    "locale": "en",
+    "width": 170.0,
+    "lineHeight": 19.0
+  },
+  {
+    "text": "spaces   \t",
+    "font": "16px Test Sans",
+    "whiteSpace": "Normal",
+    "wordBreak": "Normal",
+    "locale": "en",
+    "width": 0.0,
+    "lineHeight": 19.0
+  },
+  {
+    "text": "spaces   \t",
+    "font": "16px Test Sans",
+    "whiteSpace": "Normal",
+    "wordBreak": "Normal",
+    "locale": "en",
+    "width": 31.0,
+    "lineHeight": 19.0
+  },
+  {
+    "text": "spaces   \t",
+    "font": "16px Test Sans",
+    "whiteSpace": "Normal",
+    "wordBreak": "Normal",
+    "locale": "en",
+    "width": 80.0,
+    "lineHeight": 19.0
+  },
+  {
+    "text": "spaces   \t",
+    "font": "16px Test Sans",
+    "whiteSpace": "Normal",
+    "wordBreak": "Normal",
+    "locale": "en",
+    "width": 170.0,
+    "lineHeight": 19.0
+  },
+  {
+    "text": "x\ny\n",
+    "font": "16px Test Sans",
+    "whiteSpace": "PreWrap",
+    "wordBreak": "Normal",
+    "locale": "en",
+    "width": 0.0,
+    "lineHeight": 19.0
+  },
+  {
+    "text": "x\ny\n",
+    "font": "16px Test Sans",
+    "whiteSpace": "PreWrap",
+    "wordBreak": "Normal",
+    "locale": "en",
+    "width": 31.0,
+    "lineHeight": 19.0
+  },
+  {
+    "text": "x\ny\n",
+    "font": "16px Test Sans",
+    "whiteSpace": "PreWrap",
+    "wordBreak": "Normal",
+    "locale": "en",
+    "width": 80.0,
+    "lineHeight": 19.0
+  },
+  {
+    "text": "x\ny\n",
+    "font": "16px Test Sans",
+    "whiteSpace": "PreWrap",
+    "wordBreak": "Normal",
+    "locale": "en",
+    "width": 170.0,
+    "lineHeight": 19.0
+  },
+  {
+    "text": "trans­mission",
+    "font": "16px Test Sans",
+    "whiteSpace": "Normal",
+    "wordBreak": "Normal",
+    "locale": "en",
+    "width": 0.0,
+    "lineHeight": 19.0
+  },
+  {
+    "text": "trans­mission",
+    "font": "16px Test Sans",
+    "whiteSpace": "Normal",
+    "wordBreak": "Normal",
+    "locale": "en",
+    "width": 31.0,
+    "lineHeight": 19.0
+  },
+  {
+    "text": "trans­mission",
+    "font": "16px Test Sans",
+    "whiteSpace": "Normal",
+    "wordBreak": "Normal",
+    "locale": "en",
+    "width": 80.0,
+    "lineHeight": 19.0
+  },
+  {
+    "text": "trans­mission",
+    "font": "16px Test Sans",
+    "whiteSpace": "Normal",
+    "wordBreak": "Normal",
+    "locale": "en",
+    "width": 170.0,
+    "lineHeight": 19.0
+  },
+  {
+    "text": "مرحبا:بكم",
+    "font": "16px Test Sans",
+    "whiteSpace": "PreWrap",
+    "wordBreak": "Normal",
+    "locale": "en",
+    "width": 0.0,
+    "lineHeight": 19.0
+  },
+  {
+    "text": "مرحبا:بكم",
+    "font": "16px Test Sans",
+    "whiteSpace": "PreWrap",
+    "wordBreak": "Normal",
+    "locale": "en",
+    "width": 31.0,
+    "lineHeight": 19.0
+  },
+  {
+    "text": "مرحبا:بكم",
+    "font": "16px Test Sans",
+    "whiteSpace": "PreWrap",
+    "wordBreak": "Normal",
+    "locale": "en",
+    "width": 80.0,
+    "lineHeight": 19.0
+  },
+  {
+    "text": "مرحبا:بكم",
+    "font": "16px Test Sans",
+    "whiteSpace": "PreWrap",
+    "wordBreak": "Normal",
+    "locale": "en",
+    "width": 170.0,
+    "lineHeight": 19.0
+  },
+  {
+    "text": "foo \"bar\" baz",
+    "font": "16px Test Sans",
+    "whiteSpace": "Normal",
+    "wordBreak": "Normal",
+    "locale": "en",
+    "width": 0.0,
+    "lineHeight": 19.0
+  },
+  {
+    "text": "foo \"bar\" baz",
+    "font": "16px Test Sans",
+    "whiteSpace": "Normal",
+    "wordBreak": "Normal",
+    "locale": "en",
+    "width": 31.0,
+    "lineHeight": 19.0
+  },
+  {
+    "text": "foo \"bar\" baz",
+    "font": "16px Test Sans",
+    "whiteSpace": "Normal",
+    "wordBreak": "Normal",
+    "locale": "en",
+    "width": 80.0,
+    "lineHeight": 19.0
+  },
+  {
+    "text": "foo \"bar\" baz",
+    "font": "16px Test Sans",
+    "whiteSpace": "Normal",
+    "wordBreak": "Normal",
+    "locale": "en",
+    "width": 170.0,
+    "lineHeight": 19.0
+  },
+  {
+    "text": "a‍ b",
+    "font": "16px Test Sans",
+    "whiteSpace": "PreWrap",
+    "wordBreak": "Normal",
+    "locale": "en",
+    "width": 0.0,
+    "lineHeight": 19.0
+  },
+  {
+    "text": "a‍ b",
+    "font": "16px Test Sans",
+    "whiteSpace": "PreWrap",
+    "wordBreak": "Normal",
+    "locale": "en",
+    "width": 31.0,
+    "lineHeight": 19.0
+  },
+  {
+    "text": "a‍ b",
+    "font": "16px Test Sans",
+    "whiteSpace": "PreWrap",
+    "wordBreak": "Normal",
+    "locale": "en",
+    "width": 80.0,
+    "lineHeight": 19.0
+  },
+  {
+    "text": "a‍ b",
+    "font": "16px Test Sans",
+    "whiteSpace": "PreWrap",
+    "wordBreak": "Normal",
+    "locale": "en",
+    "width": 170.0,
+    "lineHeight": 19.0
+  },
+  {
+    "text": "123٤٥٦",
+    "font": "16px Test Sans",
+    "whiteSpace": "Normal",
+    "wordBreak": "Normal",
+    "locale": "en",
+    "width": 0.0,
+    "lineHeight": 19.0
+  },
+  {
+    "text": "123٤٥٦",
+    "font": "16px Test Sans",
+    "whiteSpace": "Normal",
+    "wordBreak": "Normal",
+    "locale": "en",
+    "width": 31.0,
+    "lineHeight": 19.0
+  },
+  {
+    "text": "123٤٥٦",
+    "font": "16px Test Sans",
+    "whiteSpace": "Normal",
+    "wordBreak": "Normal",
+    "locale": "en",
+    "width": 80.0,
+    "lineHeight": 19.0
+  },
+  {
+    "text": "123٤٥٦",
+    "font": "16px Test Sans",
+    "whiteSpace": "Normal",
+    "wordBreak": "Normal",
+    "locale": "en",
+    "width": 170.0,
+    "lineHeight": 19.0
+  },
+  {
+    "text": "မြန်မာ၊စာ\t",
+    "font": "16px Test Sans",
+    "whiteSpace": "Normal",
+    "wordBreak": "Normal",
+    "locale": "en",
+    "width": 70.0,
+    "lineHeight": 19.0
+  },
+  {
+    "text": "「あ」「い」\n\r\n x\r y\f ztrans­mission\thello world\t「あ」「い」\t",
+    "font": "12px Test Sans",
+    "whiteSpace": "PreWrap",
+    "wordBreak": "KeepAll",
+    "locale": "en",
+    "width": 250.0,
+    "lineHeight": 19.0
+  },
+  {
+    "text": "हिन्दी।भारत مرحبا:بكم ",
+    "font": "bold 20px Test Sans",
+    "whiteSpace": "Normal",
+    "wordBreak": "KeepAll",
+    "locale": "en",
+    "width": 250.0,
+    "lineHeight": 19.0
+  },
+  {
+    "text": "a b\nhello world\nمرحبا:بكم\tfoo \"bar\" baz\tမြန်မာ၊စာ\t",
+    "font": "12px Test Sans",
+    "whiteSpace": "Normal",
+    "wordBreak": "Normal",
+    "locale": "en",
+    "width": 70.0,
+    "lineHeight": 19.0
+  },
+  {
+    "text": "「東京」大阪  foo   bar  \ta b\t日本語foo-bar\t",
+    "font": "16px Test Sans",
+    "whiteSpace": "PreWrap",
+    "wordBreak": "KeepAll",
+    "locale": "en",
+    "width": 250.0,
+    "lineHeight": 19.0
+  },
+  {
+    "text": "中文测试a⁠b a😀b\ta😀b\n",
+    "font": "12px Test Sans",
+    "whiteSpace": "PreWrap",
+    "wordBreak": "Normal",
+    "locale": "en",
+    "width": 250.0,
+    "lineHeight": 19.0
+  },
+  {
+    "text": "trans­mission\t中文测试",
+    "font": "12px Test Sans",
+    "whiteSpace": "PreWrap",
+    "wordBreak": "KeepAll",
+    "locale": "en",
+    "width": 250.0,
+    "lineHeight": 19.0
+  },
+  {
+    "text": "a‍ b 12,345.67\t日本語foo-bar 한글 테스트\nمرحبا:بكم ",
+    "font": "bold 20px Test Sans",
+    "whiteSpace": "PreWrap",
+    "wordBreak": "KeepAll",
+    "locale": "en",
+    "width": 8.0,
+    "lineHeight": 19.0
+  },
+  {
+    "text": "123٤٥٦\twell-known-name",
+    "font": "16px Test Sans",
+    "whiteSpace": "Normal",
+    "wordBreak": "KeepAll",
+    "locale": "en",
+    "width": 120.0,
+    "lineHeight": 19.0
+  },
+  {
+    "text": "\t\talpha\nทุกสองสัปดาห์\n𠀀𰀀中文\t",
+    "font": "16px Test Sans",
+    "whiteSpace": "Normal",
+    "wordBreak": "Normal",
+    "locale": "en",
+    "width": 70.0,
+    "lineHeight": 19.0
+  },
+  {
+    "text": "  foo   bar  \n12,345.67",
+    "font": "bold 20px Test Sans",
+    "whiteSpace": "Normal",
+    "wordBreak": "Normal",
+    "locale": "en",
+    "width": 120.0,
+    "lineHeight": 19.0
+  },
+  {
+    "text": "A,B.C!?D\t",
+    "font": "bold 20px Test Sans",
+    "whiteSpace": "PreWrap",
+    "wordBreak": "KeepAll",
+    "locale": "en",
+    "width": 8.0,
+    "lineHeight": 19.0
+  },
+  {
+    "text": "  foo   bar  \ta😀b 日本語foo-bar\n",
+    "font": "16px Test Sans",
+    "whiteSpace": "Normal",
+    "wordBreak": "Normal",
+    "locale": "en",
+    "width": 250.0,
+    "lineHeight": 19.0
+  },
+  {
+    "text": "𠀀𰀀中文 ",
+    "font": "bold 20px Test Sans",
+    "whiteSpace": "Normal",
+    "wordBreak": "KeepAll",
+    "locale": "en",
+    "width": 70.0,
+    "lineHeight": 19.0
+  },
+  {
+    "text": "「東京」大阪 foo \"bar\" bazمرحبا:بكم\n  foo   bar   ",
+    "font": "12px Test Sans",
+    "whiteSpace": "Normal",
+    "wordBreak": "Normal",
+    "locale": "en",
+    "width": 70.0,
+    "lineHeight": 19.0
+  },
+  {
+    "text": "हिन्दी।भारत\ta﻿b\tspaces   \t",
+    "font": "bold 20px Test Sans",
+    "whiteSpace": "PreWrap",
+    "wordBreak": "KeepAll",
+    "locale": "en",
+    "width": 250.0,
+    "lineHeight": 19.0
+  },
+  {
+    "text": "カタカナ\nمرحبا:بكم\tsome​wherehello world\n10:30-12:00\t",
+    "font": "16px Test Sans",
+    "whiteSpace": "PreWrap",
+    "wordBreak": "KeepAll",
+    "locale": "en",
+    "width": 70.0,
+    "lineHeight": 19.0
+  },
+  {
+    "text": "trans­mission\nカタカナ\t",
+    "font": "16px Test Sans",
+    "whiteSpace": "Normal",
+    "wordBreak": "Normal",
+    "locale": "en",
+    "width": 250.0,
+    "lineHeight": 19.0
+  },
+  {
+    "text": "မြန်မာ၊စာ 々〻ゝゞヽヾ\tทุกสองสัปดาห์\tsome​where ",
+    "font": "12px Test Sans",
+    "whiteSpace": "Normal",
+    "wordBreak": "KeepAll",
+    "locale": "en",
+    "width": 70.0,
+    "lineHeight": 19.0
+  },
+  {
+    "text": "  foo   bar   אבג def 123trans­mission ",
+    "font": "bold 20px Test Sans",
+    "whiteSpace": "Normal",
+    "wordBreak": "Normal",
+    "locale": "en",
+    "width": 120.0,
+    "lineHeight": 19.0
+  },
+  {
+    "text": "a﻿b\t  foo   bar  \n\r\n x\r y\f z",
+    "font": "12px Test Sans",
+    "whiteSpace": "Normal",
+    "wordBreak": "KeepAll",
+    "locale": "en",
+    "width": 70.0,
+    "lineHeight": 19.0
+  },
+  {
+    "text": "مرحبا بالعالم\t々〻ゝゞヽヾ\nمرحبا:بكم\tمرحبا بالعالم10:30-12:00\n",
+    "font": "12px Test Sans",
+    "whiteSpace": "Normal",
+    "wordBreak": "Normal",
+    "locale": "en",
+    "width": 70.0,
+    "lineHeight": 19.0
+  },
+  {
+    "text": "a‍ b\tمرحبا:بكم a‍ b\tカタカナ\n",
+    "font": "16px Test Sans",
+    "whiteSpace": "PreWrap",
+    "wordBreak": "Normal",
+    "locale": "en",
+    "width": 35.0,
+    "lineHeight": 19.0
+  },
+  {
+    "text": "trans­mission\nမြန်မာ၊စာ\t\r\n x\r y\f z\n「東京」大阪\n👨‍👩‍👧‍👦 together\n",
+    "font": "12px Test Sans",
+    "whiteSpace": "Normal",
+    "wordBreak": "KeepAll",
+    "locale": "en",
+    "width": 35.0,
+    "lineHeight": 19.0
+  },
+  {
+    "text": "spaces   \t\t한글 테스트\n",
+    "font": "bold 20px Test Sans",
+    "whiteSpace": "Normal",
+    "wordBreak": "KeepAll",
+    "locale": "en",
+    "width": 120.0,
+    "lineHeight": 19.0
+  },
+  {
+    "text": "a⁠b\n日本語foo-bar\ta b\n\n\tאבג def 123\t",
+    "font": "16px Test Sans",
+    "whiteSpace": "PreWrap",
+    "wordBreak": "KeepAll",
+    "locale": "en",
+    "width": 35.0,
+    "lineHeight": 19.0
+  },
+  {
+    "text": "x\ny\n\ta b\n𠀀𰀀中文 々〻ゝゞヽヾ ",
+    "font": "16px Test Sans",
+    "whiteSpace": "Normal",
+    "wordBreak": "Normal",
+    "locale": "en",
+    "width": 35.0,
+    "lineHeight": 19.0
+  },
+  {
+    "text": "a b\n\n",
+    "font": "16px Test Sans",
+    "whiteSpace": "Normal",
+    "wordBreak": "KeepAll",
+    "locale": "en",
+    "width": 8.0,
+    "lineHeight": 19.0
+  },
+  {
+    "text": "ทุกสองสัปดาห์\nhttp://example.com/foo?x=10\thello world ทุกสองสัปดาห์\tA,B.C!?D",
+    "font": "bold 20px Test Sans",
+    "whiteSpace": "Normal",
+    "wordBreak": "KeepAll",
+    "locale": "en",
+    "width": 8.0,
+    "lineHeight": 19.0
+  },
+  {
+    "text": "「あ」「い」\nfoo \"bar\" baz A,B.C!?D \t\talpha\t",
+    "font": "12px Test Sans",
+    "whiteSpace": "PreWrap",
+    "wordBreak": "Normal",
+    "locale": "en",
+    "width": 120.0,
+    "lineHeight": 19.0
+  },
+  {
+    "text": "trans­mission\n日本語foo-bar\t",
+    "font": "bold 20px Test Sans",
+    "whiteSpace": "Normal",
+    "wordBreak": "Normal",
+    "locale": "en",
+    "width": 8.0,
+    "lineHeight": 19.0
+  },
+  {
+    "text": "A,B.C!?D 한글 테스트\t",
+    "font": "16px Test Sans",
+    "whiteSpace": "PreWrap",
+    "wordBreak": "Normal",
+    "locale": "en",
+    "width": 120.0,
+    "lineHeight": 19.0
+  },
+  {
+    "text": "foo\tbar\nbaz\nspaces   \t\tمرحبا بالعالم\tA,B.C!?D ",
+    "font": "bold 20px Test Sans",
+    "whiteSpace": "Normal",
+    "wordBreak": "KeepAll",
+    "locale": "en",
+    "width": 70.0,
+    "lineHeight": 19.0
+  },
+  {
+    "text": "spaces   \t\n10:30-12:00\tမြန်မာ၊စာ\nA,B.C!?D",
+    "font": "16px Test Sans",
+    "whiteSpace": "PreWrap",
+    "wordBreak": "KeepAll",
+    "locale": "en",
+    "width": 8.0,
+    "lineHeight": 19.0
+  },
+  {
+    "text": "a😀b\tمرحبا بالعالم\n「あ」「い」 👨‍👩‍👧‍👦 together\nhttp://example.com/foo?x=10",
+    "font": "12px Test Sans",
+    "whiteSpace": "Normal",
+    "wordBreak": "KeepAll",
+    "locale": "en",
+    "width": 8.0,
+    "lineHeight": 19.0
+  },
+  {
+    "text": "a b\na⁠b\nאבג def 123a😀b\tfoo \"bar\" baz\t",
+    "font": "bold 20px Test Sans",
+    "whiteSpace": "PreWrap",
+    "wordBreak": "Normal",
+    "locale": "en",
+    "width": 250.0,
+    "lineHeight": 19.0
+  },
+  {
+    "text": "ทุกสองสัปดาห์\nمرحبا:بكم\ta b\t々〻ゝゞヽヾ\n",
+    "font": "16px Test Sans",
+    "whiteSpace": "PreWrap",
+    "wordBreak": "KeepAll",
+    "locale": "en",
+    "width": 70.0,
+    "lineHeight": 19.0
+  },
+  {
+    "text": "مرحبا بالعالممرحبا بالعالم",
+    "font": "16px Test Sans",
+    "whiteSpace": "Normal",
+    "wordBreak": "KeepAll",
+    "locale": "en",
+    "width": 35.0,
+    "lineHeight": 19.0
+  },
+  {
+    "text": "\n\n\tspaces   \t\t",
+    "font": "bold 20px Test Sans",
+    "whiteSpace": "PreWrap",
+    "wordBreak": "KeepAll",
+    "locale": "en",
+    "width": 35.0,
+    "lineHeight": 19.0
+  },
+  {
+    "text": "a b 中文测试\nمرحبا:بكم   foo   bar   ",
+    "font": "12px Test Sans",
+    "whiteSpace": "Normal",
+    "wordBreak": "Normal",
+    "locale": "en",
+    "width": 8.0,
+    "lineHeight": 19.0
+  },
+  {
+    "text": "カタカナa ba﻿b\tsome​where",
+    "font": "bold 20px Test Sans",
+    "whiteSpace": "Normal",
+    "wordBreak": "KeepAll",
+    "locale": "en",
+    "width": 120.0,
+    "lineHeight": 19.0
+  },
+  {
+    "text": "a⁠b\n\t\talpha foo trans­atlantic\t",
+    "font": "12px Test Sans",
+    "whiteSpace": "Normal",
+    "wordBreak": "KeepAll",
+    "locale": "en",
+    "width": 120.0,
+    "lineHeight": 19.0
+  },
+  {
+    "text": "123٤٥٦foo\tbar\nbaz\r\n x\r y\f z\n",
+    "font": "12px Test Sans",
+    "whiteSpace": "Normal",
+    "wordBreak": "Normal",
+    "locale": "en",
+    "width": 120.0,
+    "lineHeight": 19.0
+  },
+  {
+    "text": "A,B.C!?Dhttp://example.com/foo?x=10 hello world a b foo \"bar\" baz ",
+    "font": "bold 20px Test Sans",
+    "whiteSpace": "Normal",
+    "wordBreak": "KeepAll",
+    "locale": "en",
+    "width": 8.0,
+    "lineHeight": 19.0
+  },
+  {
+    "text": "élanカタカナ日本語foo-bar\ta ba‍ b ",
+    "font": "16px Test Sans",
+    "whiteSpace": "Normal",
+    "wordBreak": "Normal",
+    "locale": "en",
+    "width": 120.0,
+    "lineHeight": 19.0
+  },
+  {
+    "text": "「東京」大阪مرحبا:بكم\n",
+    "font": "12px Test Sans",
+    "whiteSpace": "Normal",
+    "wordBreak": "Normal",
+    "locale": "en",
+    "width": 35.0,
+    "lineHeight": 19.0
+  },
+  {
+    "text": "A,B.C!?Dfoo trans­atlantic\t\r\n x\r y\f z\t",
+    "font": "16px Test Sans",
+    "whiteSpace": "Normal",
+    "wordBreak": "KeepAll",
+    "locale": "en",
+    "width": 250.0,
+    "lineHeight": 19.0
+  },
+  {
+    "text": "אבג def 123\n",
+    "font": "12px Test Sans",
+    "whiteSpace": "Normal",
+    "wordBreak": "Normal",
+    "locale": "en",
+    "width": 120.0,
+    "lineHeight": 19.0
+  },
+  {
+    "text": "a😀ba b\tA,B.C!?D",
+    "font": "12px Test Sans",
+    "whiteSpace": "Normal",
+    "wordBreak": "KeepAll",
+    "locale": "en",
+    "width": 120.0,
+    "lineHeight": 19.0
+  },
+  {
+    "text": "foo \"bar\" baz 々〻ゝゞヽヾ\nทุกสองสัปดาห์\na﻿b\n",
+    "font": "12px Test Sans",
+    "whiteSpace": "Normal",
+    "wordBreak": "KeepAll",
+    "locale": "en",
+    "width": 70.0,
+    "lineHeight": 19.0
+  },
+  {
+    "text": "http://example.com/foo?x=10hello worldမြန်မာ၊စာ\tspaces   \t\n",
+    "font": "12px Test Sans",
+    "whiteSpace": "PreWrap",
+    "wordBreak": "KeepAll",
+    "locale": "en",
+    "width": 120.0,
+    "lineHeight": 19.0
+  },
+  {
+    "text": "𠀀𰀀中文\ntrans­mission a⁠ba‍ b한글 테스트\t",
+    "font": "16px Test Sans",
+    "whiteSpace": "Normal",
+    "wordBreak": "Normal",
+    "locale": "en",
+    "width": 120.0,
+    "lineHeight": 19.0
+  },
+  {
+    "text": "👨‍👩‍👧‍👦 together\tsome​where\r\n x\r y\f z12,345.67\tx\ny\n\n",
+    "font": "bold 20px Test Sans",
+    "whiteSpace": "PreWrap",
+    "wordBreak": "KeepAll",
+    "locale": "en",
+    "width": 35.0,
+    "lineHeight": 19.0
+  },
+  {
+    "text": "👨‍👩‍👧‍👦 together 「あ」「い」\n",
+    "font": "bold 20px Test Sans",
+    "whiteSpace": "Normal",
+    "wordBreak": "KeepAll",
+    "locale": "en",
+    "width": 70.0,
+    "lineHeight": 19.0
+  },
+  {
+    "text": "123٤٥٦\tA,B.C!?D http://example.com/foo?x=10「あ」「い」\n\r\n x\r y\f z\n",
+    "font": "16px Test Sans",
+    "whiteSpace": "Normal",
+    "wordBreak": "Normal",
+    "locale": "en",
+    "width": 8.0,
+    "lineHeight": 19.0
+  },
+  {
+    "text": "हिन्दी।भारत مرحبا:بكم\tspaces   \t אבג def 123\n",
+    "font": "16px Test Sans",
+    "whiteSpace": "PreWrap",
+    "wordBreak": "Normal",
+    "locale": "en",
+    "width": 70.0,
+    "lineHeight": 19.0
+  },
+  {
+    "text": "\t\talpha123٤٥٦\t",
+    "font": "12px Test Sans",
+    "whiteSpace": "Normal",
+    "wordBreak": "Normal",
+    "locale": "en",
+    "width": 70.0,
+    "lineHeight": 19.0
+  },
+  {
+    "text": "हिन्दी।भारत\t々〻ゝゞヽヾ\t𠀀𰀀中文",
+    "font": "12px Test Sans",
+    "whiteSpace": "PreWrap",
+    "wordBreak": "KeepAll",
+    "locale": "en",
+    "width": 35.0,
+    "lineHeight": 19.0
+  },
+  {
+    "text": "http://example.com/foo?x=10\t",
+    "font": "16px Test Sans",
+    "whiteSpace": "PreWrap",
+    "wordBreak": "KeepAll",
+    "locale": "en",
+    "width": 70.0,
+    "lineHeight": 19.0
+  },
+  {
+    "text": "日本語foo-bar\tمرحبا بالعالم\n",
+    "font": "12px Test Sans",
+    "whiteSpace": "PreWrap",
+    "wordBreak": "Normal",
+    "locale": "en",
+    "width": 8.0,
+    "lineHeight": 19.0
+  },
+  {
+    "text": "ทุกสองสัปดาห์\t「東京」大阪\nfoo \"bar\" bazမြန်မာ၊စာ",
+    "font": "12px Test Sans",
+    "whiteSpace": "Normal",
+    "wordBreak": "KeepAll",
+    "locale": "en",
+    "width": 250.0,
+    "lineHeight": 19.0
+  },
+  {
+    "text": "a﻿b\ta b\tfoo \"bar\" baz\n10:30-12:00\twell-known-name",
+    "font": "bold 20px Test Sans",
+    "whiteSpace": "PreWrap",
+    "wordBreak": "KeepAll",
+    "locale": "en",
+    "width": 8.0,
+    "lineHeight": 19.0
+  },
+  {
+    "text": "http://example.com/foo?x=10 日本語foo-bar\nहिन्दी।भारत",
+    "font": "12px Test Sans",
+    "whiteSpace": "Normal",
+    "wordBreak": "Normal",
+    "locale": "en",
+    "width": 250.0,
+    "lineHeight": 19.0
+  },
+  {
+    "text": "foo\tbar\nbaz12,345.67 trans­mission\ttrans­mission",
+    "font": "16px Test Sans",
+    "whiteSpace": "Normal",
+    "wordBreak": "KeepAll",
+    "locale": "en",
+    "width": 250.0,
+    "lineHeight": 19.0
+  },
+  {
+    "text": "한글 테스트\ta bspaces   \t",
+    "font": "16px Test Sans",
+    "whiteSpace": "Normal",
+    "wordBreak": "KeepAll",
+    "locale": "en",
+    "width": 70.0,
+    "lineHeight": 19.0
+  },
+  {
+    "text": "some​where\t日本語foo-bar\tทุกสองสัปดาห์\n𠀀𰀀中文\n",
+    "font": "bold 20px Test Sans",
+    "whiteSpace": "PreWrap",
+    "wordBreak": "KeepAll",
+    "locale": "en",
+    "width": 35.0,
+    "lineHeight": 19.0
+  },
+  {
+    "text": "مرحبا بالعالم\n\n\n مرحبا بالعالم\n",
+    "font": "16px Test Sans",
+    "whiteSpace": "PreWrap",
+    "wordBreak": "Normal",
+    "locale": "en",
+    "width": 120.0,
+    "lineHeight": 19.0
+  },
+  {
+    "text": "A,B.C!?D مرحبا:بكمa﻿b 10:30-12:00 foo trans­atlantic ",
+    "font": "12px Test Sans",
+    "whiteSpace": "Normal",
+    "wordBreak": "Normal",
+    "locale": "en",
+    "width": 8.0,
+    "lineHeight": 19.0
+  },
+  {
+    "text": "well-known-name ทุกสองสัปดาห์12,345.67a‍ b\nאבג def 123",
+    "font": "12px Test Sans",
+    "whiteSpace": "Normal",
+    "wordBreak": "Normal",
+    "locale": "en",
+    "width": 250.0,
+    "lineHeight": 19.0
+  },
+  {
+    "text": "hello world\na b\na😀b123٤٥٦",
+    "font": "bold 20px Test Sans",
+    "whiteSpace": "PreWrap",
+    "wordBreak": "KeepAll",
+    "locale": "en",
+    "width": 8.0,
+    "lineHeight": 19.0
+  },
+  {
+    "text": "foo\tbar\nbaz\r\n x\r y\f z a﻿b\t",
+    "font": "12px Test Sans",
+    "whiteSpace": "PreWrap",
+    "wordBreak": "KeepAll",
+    "locale": "en",
+    "width": 35.0,
+    "lineHeight": 19.0
+  },
+  {
+    "text": "hello world\na😀b\tfoo\tbar\nbaz\na‍ b\t",
+    "font": "12px Test Sans",
+    "whiteSpace": "PreWrap",
+    "wordBreak": "KeepAll",
+    "locale": "en",
+    "width": 70.0,
+    "lineHeight": 19.0
+  },
+  {
+    "text": "well-known-name   foo   bar  \n",
+    "font": "bold 20px Test Sans",
+    "whiteSpace": "PreWrap",
+    "wordBreak": "Normal",
+    "locale": "en",
+    "width": 70.0,
+    "lineHeight": 19.0
+  },
+  {
+    "text": "日本語foo-bar\nfoo \"bar\" baz\thello world ",
+    "font": "12px Test Sans",
+    "whiteSpace": "Normal",
+    "wordBreak": "KeepAll",
+    "locale": "en",
+    "width": 8.0,
+    "lineHeight": 19.0
+  },
+  {
+    "text": "a⁠b foo \"bar\" baz\n10:30-12:00\tfoo\tbar\nbaz",
+    "font": "bold 20px Test Sans",
+    "whiteSpace": "PreWrap",
+    "wordBreak": "KeepAll",
+    "locale": "en",
+    "width": 120.0,
+    "lineHeight": 19.0
+  },
+  {
+    "text": "हिन्दी।भारत\t한글 테스트hello world\nhello world\n",
+    "font": "12px Test Sans",
+    "whiteSpace": "PreWrap",
+    "wordBreak": "Normal",
+    "locale": "en",
+    "width": 120.0,
+    "lineHeight": 19.0
+  },
+  {
+    "text": "👨‍👩‍👧‍👦 together မြန်မာ၊စာ \r\n x\r y\f z\n",
+    "font": "12px Test Sans",
+    "whiteSpace": "PreWrap",
+    "wordBreak": "Normal",
+    "locale": "en",
+    "width": 120.0,
+    "lineHeight": 19.0
+  },
+  {
+    "text": "a‍ b123٤٥٦ 日本語foo-bar\thello world\t",
+    "font": "12px Test Sans",
+    "whiteSpace": "PreWrap",
+    "wordBreak": "Normal",
+    "locale": "en",
+    "width": 70.0,
+    "lineHeight": 19.0
+  },
+  {
+    "text": "trans­mission foo \"bar\" baz\t",
+    "font": "12px Test Sans",
+    "whiteSpace": "PreWrap",
+    "wordBreak": "Normal",
+    "locale": "en",
+    "width": 70.0,
+    "lineHeight": 19.0
+  },
+  {
+    "text": "a‍ b ",
+    "font": "12px Test Sans",
+    "whiteSpace": "PreWrap",
+    "wordBreak": "Normal",
+    "locale": "en",
+    "width": 120.0,
+    "lineHeight": 19.0
+  }
+]

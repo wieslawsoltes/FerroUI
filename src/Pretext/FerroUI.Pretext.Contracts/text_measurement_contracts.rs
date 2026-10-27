@@ -32,7 +32,7 @@ pub struct DelegateTextMeasurerFactory<F> {
     measure: Rc<F>,
 }
 
-impl<F> DelegateTextMeasurerFactory<F> {
+impl<F: Fn(&str, &str) -> f64 + 'static> DelegateTextMeasurerFactory<F> {
     pub fn new(measure: F) -> Self {
         Self { measure: Rc::new(measure) }
     }

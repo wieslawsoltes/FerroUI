@@ -1,6 +1,10 @@
 [workspace]
 resolver = "2"
 members = [
+    "src/Pretext/FerroUI.Pretext.Contracts",
+    "src/Pretext/FerroUI.Pretext",
+    "src/Pretext/FerroUI.Pretext.Layout",
+    "src/Pretext/FerroUI.Pretext.Media",
     "samples/HotReload",
     "src/FerroUI.HotReload",
     "src/FerroUI.HotPatch",
@@ -183,6 +187,10 @@ categories = ["gui"]
 # that the crates of a release are only ever resolved together (docs/release.md, "Version scheme").
 # `scripts/release/set-version.sh <version>` writes the version above and these keys.
 [workspace.dependencies]
+ferroui-pretext-contracts = { version = "=0.4.0", path = "src/Pretext/FerroUI.Pretext.Contracts" }
+ferroui-pretext = { version = "=0.4.0", path = "src/Pretext/FerroUI.Pretext" }
+ferroui-pretext-layout = { version = "=0.4.0", path = "src/Pretext/FerroUI.Pretext.Layout" }
+ferroui-pretext-media = { version = "=0.4.0", path = "src/Pretext/FerroUI.Pretext.Media" }
 ferroui-hot-reload = { version = "=0.4.0", path = "src/FerroUI.HotReload" }
 ferroui-hot-patch = { version = "=0.4.0", path = "src/FerroUI.HotPatch" }
 ferroui-inspect = { version = "=0.4.0", path = "src/FerroUI.Inspect" }

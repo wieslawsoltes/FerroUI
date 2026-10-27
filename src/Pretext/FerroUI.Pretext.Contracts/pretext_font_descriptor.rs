@@ -37,7 +37,10 @@ impl PretextFontParser {
                 while index < bytes.len() && bytes[index].is_ascii_digit() { index += 1; }
             }
             let number_end = index;
-            while index < bytes.len() && bytes[index].is_ascii_whitespace() { index += 1; }
+            while let Some(ch) = font[index..].chars().next() {
+                if !ch.is_whitespace() { break; }
+                index += ch.len_utf8();
+            }
             if bytes.get(index..index + 2) != Some(b"px") { continue; }
             let Ok(size) = font[start..number_end].parse::<f64>() else { return PretextFontDescriptor::default(); };
             let mut family = font[index + 2..].trim();
@@ -51,12 +54,15 @@ impl PretextFontParser {
                     italic = true;
                 } else if token.eq_ignore_ascii_case("bold") {
                     weight = 700;
-                } else if let Ok(value) = token.parse::<i32>() {
+                } else if let Ok(value) = token.trim().parse::<i32>() {
                     weight = value;
                     break;
                 }
             }
-            let family = family.split(',').next().unwrap_or("").trim().trim_matches(['\'', '"']);
+            let mut family = family.split(',').next().unwrap_or("").trim();
+            if family.len() >= 2 && ((family.starts_with('"') && family.ends_with('"')) || (family.starts_with('\'') && family.ends_with('\''))) {
+                family = family[1..family.len() - 1].trim();
+            }
             return PretextFontDescriptor::new(size, family, weight, italic);
         }
         PretextFontDescriptor::default()
@@ -67,7 +73,7 @@ impl PretextFontParser {
             sans_serif_fallback
         } else if primary_family.eq_ignore_ascii_case("serif") {
             serif_fallback
-        } else if primary_family.eq_ignore_ascii_case("monospace") {
+        } else if primary_family.eq_ignore_ascii_case("monospace") || primary_family.eq_ignore_ascii_case("ui-monospace") {
             monospace_fallback
         } else {
             primary_family
@@ -94,5 +100,14 @@ mod tests {
     fn preserves_source_numeric_weight_token_order() {
         assert!(!PretextFontParser::parse("700 italic 16px Inter").italic);
         assert!(PretextFontParser::parse("italic 700 16px Inter").italic);
+    }
+
+    #[test]
+    fn preserves_balanced_quotes_and_unicode_size_whitespace() {
+        assert_eq!(PretextFontParser::parse("22\u{a0}px \"  Inter  \"").primary_family, "Inter");
+        assert_eq!(PretextFontParser::parse("22\u{a0}px Inter").size, 22.0);
+        assert_eq!(PretextFontParser::parse("16px \"Inter'").primary_family, "\"Inter'");
+        assert_eq!(PretextFontParser::parse("700\t16px Inter").weight, 700);
+        assert_eq!(PretextFontParser::map_generic_family("ui-monospace", "sans", "serif", "mono"), "mono");
     }
 }

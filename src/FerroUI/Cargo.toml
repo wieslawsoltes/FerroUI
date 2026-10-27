@@ -31,6 +31,7 @@ xaml = ["dep:ferroui-markup-xaml", "dep:ferroui-markup-xaml-loader"]
 # The libraries of controls beside the control set.
 color-picker = ["dep:ferroui-controls-color-picker"]
 charts = ["dep:ferroui-controls-charts"]
+pretext = ["dep:ferroui-pretext", "dep:ferroui-pretext-layout", "dep:ferroui-pretext-media"]
 treedatagrid = ["dep:ferroui-controls-treedatagrid", "dep:ferroui-treedatagrid-core"]
 dialogs = ["dep:ferroui-dialogs"]
 # The developer tools (F12 on a window or an application in debug builds).
@@ -71,6 +72,9 @@ ferroui-markup-xaml = { workspace = true, optional = true }
 ferroui-markup-xaml-loader = { workspace = true, optional = true, features = ["runtime"] }
 ferroui-controls-color-picker = { workspace = true, optional = true }
 ferroui-controls-charts = { workspace = true, optional = true }
+ferroui-pretext = { workspace = true, optional = true }
+ferroui-pretext-layout = { workspace = true, optional = true }
+ferroui-pretext-media = { workspace = true, optional = true }
 ferroui-controls-treedatagrid = { workspace = true, optional = true }
 ferroui-treedatagrid-core = { workspace = true, optional = true }
 ferroui-dialogs = { workspace = true, optional = true }
