@@ -1,11 +1,12 @@
 //! Compact object/property lanes and a single contextual keyframe inspector.
 use super::*;
-use crate::timeline_lane::TimelineLane;
+use crate::timeline_lane::{EasingPreview, TimelineLane};
+use ferroui_base::media::{FontWeight, Geometry, TextTrimming};
 use ferroui_controls::automation::AutomationProperties;
-use ferroui_controls::{ColumnDefinitions, ComboBox, ToolTip};
+use ferroui_controls::{ColumnDefinitions, ComboBox, PathIcon, ToolTip};
 use ferroui_designer_animation::{Keyframe, Timeline, Track};
 
-const TRACK_HEADER: f64 = 210.0;
+const TRACK_HEADER: f64 = 240.0;
 #[derive(Clone, Debug, PartialEq)]
 pub(super) struct SelectedKey {
     target: NodeId,
@@ -53,6 +54,14 @@ impl TimelineContext {
     }
 }
 impl DesignerWorkspace {
+    fn timeline_inspector(&self) -> Option<Ref<StackPanel>> {
+        self.root
+            .get_control::<ContentControl>("TimelineInspectorHost")
+            .content()
+            .as_ref()
+            .and_then(Control::from_boxed)
+            .and_then(|control| control.cast::<StackPanel>())
+    }
     pub(super) fn rebuild_tracks(self: &Rc<Self>) {
         let focus_was_ruler = self
             .timeline_lanes
@@ -67,11 +76,8 @@ impl DesignerWorkspace {
             .filter_map(WeakRef::upgrade)
             .any(|lane| lane.is_focused() && !lane.is_ruler());
         let focused_field = self
-            .tracks
-            .children()
-            .to_vec()
+            .timeline_inspector()
             .into_iter()
-            .filter_map(|control| control.cast::<StackPanel>())
             .flat_map(|row| row.children().to_vec())
             .filter_map(|control| control.cast::<TextBox>())
             .find(|input| input.is_focused())
@@ -81,6 +87,9 @@ impl DesignerWorkspace {
                     .map(|name| (name, input.selection_start(), input.selection_end()))
             });
         self.tracks.children().clear();
+        self.root
+            .get_control::<ContentControl>("TimelineInspectorHost")
+            .set_content(None);
         self.timeline_lanes.borrow_mut().clear();
         let session = self.session.borrow();
         let tracks = session.timeline().tracks.clone();
@@ -150,11 +159,12 @@ impl DesignerWorkspace {
         );
         let header = StackPanel::new();
         header.set_orientation(Orientation::Horizontal);
-        header.set_spacing(3.0);
+        header.set_spacing(4.0);
+        header.set_vertical_alignment(ferroui_base::layout::VerticalAlignment::Center);
         let caption = TextBlock::new();
-        caption.set_text(Some("TRACKS"));
+        caption.set_text(Some("Tracks"));
         caption.set_font_size(10.0);
-        caption.set_opacity(0.65);
+        caption.set_foreground(Some(SolidColorBrush::from_uint32(0xffa9adba).into()));
         caption.set_vertical_alignment(ferroui_base::layout::VerticalAlignment::Center);
         caption.set_margin(Thickness::new(4.0, 0.0, 4.0, 0.0));
         header.children().add(caption.upcast::<Control>());
@@ -164,8 +174,10 @@ impl DesignerWorkspace {
             ("Fit", "Fit complete animation", 0.0),
         ] {
             let control = button(label);
+            control.classes().add("designer-timeline-tool");
+            control.classes().add("nav");
             control.set_padding(Thickness::symmetric(5.0, 2.0));
-            control.set_min_width(22.0);
+            control.set_min_width(24.0);
             control.set_font_size(10.0);
             AutomationProperties::set_name(&control, Some(help));
             ToolTip::set_tip(&control, Some(Rc::new(help.to_owned())));
@@ -184,7 +196,8 @@ impl DesignerWorkspace {
         }
         let snap = ComboBox::new();
         snap.set_name(Some("TimelineSnap".into()));
-        snap.set_width(82.0);
+        snap.set_width(86.0);
+        snap.classes().add("designer-field");
         snap.set_min_height(26.0);
         snap.set_height(26.0);
         snap.set_font_size(10.0);
@@ -257,7 +270,9 @@ impl DesignerWorkspace {
         self.timeline_lanes.borrow_mut().push(ruler.downgrade());
         Grid::set_column(&ruler, 1);
         ruler_row.children().add(ruler.clone().upcast::<Control>());
-        self.tracks.children().add(ruler_row.upcast::<Control>());
+        self.root
+            .get_control::<ContentControl>("TimelineRulerHost")
+            .set_content(Some(Control::boxed(&ruler_row)));
         if focus_was_ruler {
             ruler.focus();
         }
@@ -290,16 +305,17 @@ impl DesignerWorkspace {
             plot.set_column_definitions(
                 ColumnDefinitions::parse(&format!("{TRACK_HEADER},*")).unwrap(),
             );
-            let title = button(&format!("{}  ·  {}", target_name, track.property));
+            let title = track_header(
+                &target_name,
+                &track.property,
+                track.keyframes.len(),
+                is_selected,
+            );
             title.set_font_size(11.0);
-            title.set_height(28.0);
+            title.set_height(36.0);
             title.set_horizontal_alignment(HorizontalAlignment::Stretch);
             title.set_horizontal_content_alignment(HorizontalAlignment::Left);
-            title.set_padding(Thickness::symmetric(8.0, 3.0));
-            title.set_background(Some(
-                SolidColorBrush::from_uint32(if is_selected { 0xff263943 } else { 0xff262626 })
-                    .into(),
-            ));
+            title.set_padding(Thickness::symmetric(10.0, 2.0));
             ToolTip::set_tip(
                 &title,
                 Some(Rc::new(format!(
@@ -447,21 +463,12 @@ impl DesignerWorkspace {
             }
         }
         if tracks.is_empty() {
-            let hint = TextBlock::new();
-            hint.set_text(Some("Build motion with keyframes\nSelect an object, enable Record, then edit a property at different times."));
-            hint.set_opacity(0.65);
-            hint.set_font_size(12.0);
-            hint.set_margin(Thickness::symmetric(12.0, 18.0));
-            hint.set_text_wrapping(ferroui_base::media::TextWrapping::Wrap);
-            self.tracks.children().add(hint.upcast::<Control>());
+            self.build_timeline_empty_state();
         }
         if let Some((name, start, end)) = focused_field {
             if let Some(input) = self
-                .tracks
-                .children()
-                .to_vec()
+                .timeline_inspector()
                 .into_iter()
-                .filter_map(|control| control.cast::<StackPanel>())
                 .flat_map(|row| row.children().to_vec())
                 .filter_map(|control| control.cast::<TextBox>())
                 .find(|input| input.name().as_deref() == Some(name.as_str()))
@@ -471,6 +478,53 @@ impl DesignerWorkspace {
                 input.set_selection_end(end);
             }
         }
+    }
+    fn build_timeline_empty_state(self: &Rc<Self>) {
+        let row = Grid::new();
+        row.set_column_definitions(ColumnDefinitions::parse("48,*,Auto").unwrap());
+        row.set_margin(Thickness::new(14.0, 18.0, 18.0, 14.0));
+        let icon = timeline_icon(
+            "M2,8 L8,2 14,8 8,14 Z M18,8 L24,2 30,8 24,14 Z M13,7 L19,7 19,9 13,9 Z",
+            0xffb6a2f6,
+        );
+        icon.set_width(30.0);
+        icon.set_height(20.0);
+        icon.set_vertical_alignment(ferroui_base::layout::VerticalAlignment::Center);
+        row.children().add(icon.upcast::<Control>());
+        let copy = StackPanel::new();
+        copy.set_spacing(4.0);
+        let title = TextBlock::new();
+        title.set_text(Some("Bring your interface to life"));
+        title.set_font_size(12.0);
+        title.set_font_weight(FontWeight::SemiBold);
+        copy.children().add(title.upcast::<Control>());
+        let hint = TextBlock::new();
+        hint.set_text(Some(
+            "Select an object and add a keyframe, or turn on Record to capture property changes.",
+        ));
+        hint.set_font_size(11.0);
+        hint.set_foreground(Some(SolidColorBrush::from_uint32(0xffa9adba).into()));
+        hint.set_text_wrapping(ferroui_base::media::TextWrapping::Wrap);
+        copy.children().add(hint.upcast::<Control>());
+        Grid::set_column(&copy, 1);
+        row.children().add(copy.upcast::<Control>());
+        let create = button("Add first keyframe");
+        create.classes().add("designer-motion");
+        create.set_vertical_alignment(ferroui_base::layout::VerticalAlignment::Center);
+        create.set_margin(Thickness::new(18.0, 0.0, 0.0, 0.0));
+        create.set_is_enabled(!self.session.borrow().selection().is_empty());
+        ToolTip::set_tip(&create, Some(Rc::new("Record the selected object's current value at the playhead. The first track uses Opacity.".to_owned())));
+        let weak = Rc::downgrade(self);
+        create.click(move |_, _| {
+            if let Some(this) = weak.upgrade() {
+                let result = this.record_selected_keyframe();
+                this.refresh(true);
+                this.report(result);
+            }
+        });
+        Grid::set_column(&create, 2);
+        row.children().add(create.upcast::<Control>());
+        self.tracks.children().add(row.upcast::<Control>());
     }
     fn connect_timeline_zoom(self: &Rc<Self>, lane: &TimelineLane) {
         let weak = Rc::downgrade(self);
@@ -854,13 +908,10 @@ impl DesignerWorkspace {
         let row = StackPanel::new();
         row.set_orientation(Orientation::Horizontal);
         row.set_spacing(6.0);
-        row.set_margin(Thickness::new(6.0, 5.0, 0.0, 2.0));
-        let caption = TextBlock::new();
-        caption.set_text(Some(&format!("◆ {count} keyframes selected")));
-        caption.set_width(TRACK_HEADER - 12.0);
-        caption.set_vertical_alignment(ferroui_base::layout::VerticalAlignment::Center);
-        caption.set_font_size(11.0);
-        row.children().add(caption.upcast::<Control>());
+        row.classes().add("designer-key-inspector");
+        row.set_margin(Thickness::new(4.0, 6.0, 0.0, 6.0));
+        row.children()
+            .add(key_caption(&format!("{count} keyframes selected")).upcast::<Control>());
         let offset = key_field(&row, "Offset", "KeyframeOffset", "0.1", 64.0);
         for (name, label) in [
             ("MoveKeyframes", "Move"),
@@ -868,6 +919,12 @@ impl DesignerWorkspace {
             ("RemoveKeyframes", "Delete"),
         ] {
             let control = button(label);
+            control.classes().add("designer-timeline-tool");
+            if name == "MoveKeyframes" {
+                control.classes().add("designer-motion");
+            } else {
+                control.classes().add("nav");
+            }
             control.set_name(Some(name.into()));
             control.set_min_height(26.0);
             control.set_font_size(11.0);
@@ -903,7 +960,9 @@ impl DesignerWorkspace {
             });
             row.children().add(control.upcast::<Control>());
         }
-        self.tracks.children().add(row.upcast::<Control>());
+        self.root
+            .get_control::<ContentControl>("TimelineInspectorHost")
+            .set_content(Some(Control::boxed(&row)));
     }
     pub(super) fn record_selected_keyframe(&self) -> Result<(), String> {
         let session = self.session.borrow();
@@ -977,20 +1036,29 @@ impl DesignerWorkspace {
     ) {
         let row = StackPanel::new();
         row.set_orientation(Orientation::Horizontal);
-        row.set_spacing(7.0);
-        row.set_margin(Thickness::new(6.0, 8.0, 0.0, 2.0));
-        let caption = TextBlock::new();
-        caption.set_text(Some(&format!("◆ {}", selected.property)));
-        caption.set_font_size(11.0);
-        caption.set_width(TRACK_HEADER - 13.0);
-        caption.set_vertical_alignment(ferroui_base::layout::VerticalAlignment::Center);
-        row.children().add(caption.upcast::<Control>());
+        row.set_spacing(6.0);
+        row.classes().add("designer-key-inspector");
+        row.set_margin(Thickness::new(4.0, 6.0, 0.0, 6.0));
+        row.children()
+            .add(key_caption(&format!("{} keyframe", selected.property)).upcast::<Control>());
         let time = key_field(&row, "Time", "KeyframeTime", &key.time.to_string(), 65.0);
-        let value = key_field(&row, "Value", "KeyframeValue", &key.value.to_xaml(), 140.0);
-        let curve = key_field(&row, "Curve", "KeyframeCurve", &key.easing.to_xaml(), 124.0);
+        let value = key_field(&row, "Value", "KeyframeValue", &key.value.to_xaml(), 104.0);
+        let curve = key_field(&row, "Curve", "KeyframeCurve", &key.easing.to_xaml(), 112.0);
+        let preview = EasingPreview::new();
+        preview.set_name(Some("KeyframeEasingPreview".into()));
+        preview.set_easing(Some(key.easing.clone()));
+        row.children().add(preview.clone().upcast::<Control>());
+        let weak_preview = preview.downgrade();
+        let weak_curve = curve.downgrade();
+        curve.text_changing(move |_, _| {
+            if let (Some(preview), Some(curve)) = (weak_preview.upgrade(), weak_curve.upgrade()) {
+                preview.set_easing(Easing::parse(&curve.text().unwrap_or_default()).ok());
+            }
+        });
         let preset = ComboBox::new();
         preset.set_name(Some("KeyframeEasingPreset".into()));
-        preset.set_width(112.0);
+        preset.set_width(108.0);
+        preset.classes().add("designer-field");
         preset.set_min_height(26.0);
         preset.set_font_size(11.0);
         let presets = [
@@ -1039,6 +1107,7 @@ impl DesignerWorkspace {
             )),
         );
         let apply = button("Apply keyframe");
+        apply.classes().add("designer-motion");
         apply.set_name(Some("ApplyKeyframe".into()));
         apply.set_font_size(11.0);
         apply.set_min_height(26.0);
@@ -1123,10 +1192,18 @@ impl DesignerWorkspace {
         }
         row.children().add(apply.upcast::<Control>());
         let remove = button("Remove");
+        remove.classes().add("nav");
+        remove.classes().add("designer-timeline-tool");
+        remove.set_content(Some(Control::boxed(timeline_icon("M5,2 L11,2 11,4 14,4 14,5.5 2,5.5 2,4 5,4 Z M4,7 L12,7 11.2,14 4.8,14 Z M6,8 L6.5,12.5 7.5,12.5 7,8 Z M9,8 L8.5,12.5 9.5,12.5 10,8 Z", 0xffa9adba))));
+        remove.set_width(28.0);
         remove.set_font_size(11.0);
         remove.set_min_height(26.0);
         remove.set_padding(Thickness::symmetric(8.0, 3.0));
         AutomationProperties::set_name(&remove, Some("Remove selected keyframe"));
+        ToolTip::set_tip(
+            &remove,
+            Some(Rc::new("Remove selected keyframe · Delete".to_owned())),
+        );
         let weak = Rc::downgrade(self);
         remove.click(move |_, _| {
             if let Some(this) = weak.upgrade() {
@@ -1142,7 +1219,9 @@ impl DesignerWorkspace {
             }
         });
         row.children().add(remove.upcast::<Control>());
-        self.tracks.children().add(row.upcast::<Control>());
+        self.root
+            .get_control::<ContentControl>("TimelineInspectorHost")
+            .set_content(Some(Control::boxed(&row)));
     }
 }
 // Native KeyTime uses 100 ns ticks. Match accepted source times after every
@@ -1183,6 +1262,80 @@ fn nearest_key(track: &Track, time: f64) -> Option<SelectedKey> {
             time: key.time,
         })
 }
+fn timeline_icon(path: &str, color: u32) -> Ref<PathIcon> {
+    let icon = PathIcon::new();
+    icon.set_width(14.0);
+    icon.set_height(14.0);
+    icon.set_data(Geometry::parse(path).expect("built-in timeline vector"));
+    icon.set_foreground(Some(SolidColorBrush::from_uint32(color).into()));
+    icon
+}
+fn key_caption(value: &str) -> Ref<StackPanel> {
+    let caption = StackPanel::new();
+    caption.set_orientation(Orientation::Horizontal);
+    caption.set_spacing(8.0);
+    caption.set_width(TRACK_HEADER - 10.0);
+    caption.set_vertical_alignment(ferroui_base::layout::VerticalAlignment::Center);
+    let icon = timeline_icon("M8,1 L15,8 8,15 1,8 Z M8,4 L4,8 8,12 12,8 Z", 0xffb6a2f6);
+    caption.children().add(icon.upcast::<Control>());
+    let label = TextBlock::new();
+    label.set_text(Some(value));
+    label.set_font_size(11.0);
+    label.set_font_weight(FontWeight::SemiBold);
+    label.set_text_trimming(<dyn TextTrimming>::character_ellipsis());
+    label.set_max_width(TRACK_HEADER - 40.0);
+    caption.children().add(label.upcast::<Control>());
+    caption
+}
+fn track_header(target: &str, property: &str, key_count: usize, selected: bool) -> Ref<Button> {
+    let title = Button::new();
+    title.classes().add("designer-track-header");
+    title.classes().set("active", selected);
+    title.set_border_thickness(Thickness::new(0.0, 0.0, 1.0, 1.0));
+    title.set_border_brush(Some(SolidColorBrush::from_uint32(0xff303239).into()));
+    title.set_background(Some(
+        SolidColorBrush::from_uint32(if selected { 0xff2b2c3b } else { 0xff25262b }).into(),
+    ));
+    let content = Grid::new();
+    content.set_column_definitions(ColumnDefinitions::parse("22,*,Auto").unwrap());
+    let icon = timeline_icon(
+        "M2,2 L14,2 14,14 2,14 Z M3.5,3.5 L3.5,12.5 12.5,12.5 12.5,3.5 Z M6,6 L10,6 10,10 6,10 Z",
+        0xffb6a2f6,
+    );
+    icon.set_vertical_alignment(ferroui_base::layout::VerticalAlignment::Center);
+    content.children().add(icon.upcast::<Control>());
+    let labels = StackPanel::new();
+    labels.set_spacing(0.0);
+    labels.set_vertical_alignment(ferroui_base::layout::VerticalAlignment::Center);
+    let name = TextBlock::new();
+    name.set_text(Some(target));
+    name.set_font_size(11.0);
+    name.set_font_weight(FontWeight::SemiBold);
+    name.set_text_trimming(<dyn TextTrimming>::character_ellipsis());
+    labels.children().add(name.upcast::<Control>());
+    let detail = TextBlock::new();
+    detail.set_text(Some(property));
+    detail.set_font_size(10.0);
+    detail.set_foreground(Some(SolidColorBrush::from_uint32(0xffa9adba).into()));
+    detail.set_text_trimming(<dyn TextTrimming>::character_ellipsis());
+    labels.children().add(detail.upcast::<Control>());
+    Grid::set_column(&labels, 1);
+    content.children().add(labels.upcast::<Control>());
+    let count = TextBlock::new();
+    count.set_text(Some(&key_count.to_string()));
+    count.set_font_size(10.0);
+    count.set_foreground(Some(SolidColorBrush::from_uint32(0xff828795).into()));
+    count.set_vertical_alignment(ferroui_base::layout::VerticalAlignment::Center);
+    count.set_margin(Thickness::new(8.0, 0.0, 0.0, 0.0));
+    Grid::set_column(&count, 2);
+    content.children().add(count.upcast::<Control>());
+    title.set_content(Some(Control::boxed(&content)));
+    AutomationProperties::set_name(
+        &title,
+        Some(&format!("{target}, {property}, {key_count} keyframes")),
+    );
+    title
+}
 fn key_field(
     panel: &StackPanel,
     caption: &str,
@@ -1193,10 +1346,11 @@ fn key_field(
     let label = TextBlock::new();
     label.set_text(Some(caption));
     label.set_font_size(10.0);
-    label.set_opacity(0.65);
+    label.set_foreground(Some(SolidColorBrush::from_uint32(0xffa9adba).into()));
     label.set_vertical_alignment(ferroui_base::layout::VerticalAlignment::Center);
     panel.children().add(label.upcast::<Control>());
     let input = TextBox::new();
+    input.classes().add("designer-field");
     input.set_name(Some(name.into()));
     input.set_text(Some(value));
     input.set_width(width);

@@ -19,6 +19,7 @@ use ferroui_base::{
 };
 use ferroui_controls::automation::AutomationProperties;
 use ferroui_controls::{Control, ControlImpl, ToolTip};
+use ferroui_designer_animation::Easing;
 use std::cell::{Cell, RefCell};
 use std::rc::Rc;
 
@@ -114,7 +115,7 @@ impl TimelineLane {
             zoom: RefCell::new(None),
             pan: RefCell::new(None),
         });
-        this.set_height(28.0);
+        this.set_height(36.0);
         this.set_min_width(120.0);
         this.set_focusable(true);
         AutomationProperties::set_name(&this, Some("Animation keyframe track"));
@@ -719,18 +720,18 @@ impl VisualImpl for TimelineLane {
     fn render(this: &Self, context: &mut DrawingContext) {
         let bounds = Rect::from_size(this.bounds().size());
         let background = brush(if this.ruler.get() {
-            0xff292929
+            0xff202126
         } else if this.highlighted.get() {
-            0xff263943
+            0xff2b2c3b
         } else {
-            0xff242424
+            0xff25262b
         });
         context.draw_rectangle(
             Some(&background),
             None,
             bounds,
-            3.0,
-            3.0,
+            0.0,
+            0.0,
             &BoxShadows::default(),
         );
         let clip = context.push_clip(bounds);
@@ -745,31 +746,41 @@ impl VisualImpl for TimelineLane {
         let count = ((this.view_end.get() - first) / minor)
             .ceil()
             .clamp(0.0, 4096.0) as usize;
-        let major_pen: Rc<dyn IPen> = Pen::from_uint32(0xff454545, 1.0).into();
-        let minor_pen: Rc<dyn IPen> = Pen::from_uint32(0xff303030, 1.0).into();
+        let major_pen: Rc<dyn IPen> = Pen::from_uint32(0xff3b3d46, 1.0).into();
+        let minor_pen: Rc<dyn IPen> = Pen::from_uint32(0xff303239, 1.0).into();
+        let baseline: Rc<dyn IPen> = Pen::from_uint32(0xff303239, 1.0).into();
+        context.draw_line(
+            &baseline,
+            Point::new(0.0, bounds.height - 0.5),
+            Point::new(bounds.width, bounds.height - 0.5),
+        );
         for index in 0..=count {
             let time = first + index as f64 * minor;
             if time > this.view_end.get() + minor * 0.01 {
                 break;
             }
-            let x = this.x(time);
+            let x = this.x(time).round() + 0.5;
             let is_major = (time / major - (time / major).round()).abs() < 0.00001;
             let y = if this.ruler.get() {
                 if is_major { 21.0 } else { 27.0 }
             } else {
                 0.0
             };
-            context.draw_line(
-                if is_major { &major_pen } else { &minor_pen },
-                Point::new(x, y),
-                Point::new(x, bounds.height),
-            );
+            // Minor ticks belong to the ruler. Repeating them through every lane
+            // creates a striped wall that competes with the authored keys.
+            if this.ruler.get() || is_major {
+                context.draw_line(
+                    if is_major { &major_pen } else { &minor_pen },
+                    Point::new(x, y),
+                    Point::new(x, bounds.height),
+                );
+            }
             if this.ruler.get() && is_major {
                 let caption = this.frame_rate.get().map_or_else(
                     || format_time(time, major),
                     |rate| format!("{}f", (time * f64::from(rate)).round() as u64),
                 );
-                let text = text(&caption, 10.0, 0xffb8b8b8);
+                let text = text(&caption, 10.0, 0xffa9adba);
                 let origin = (x - text.width() * 0.5)
                     .clamp(2.0, (bounds.width - text.width() - 2.0).max(2.0));
                 context.draw_text(&text, Point::new(origin, 2.0));
@@ -782,9 +793,28 @@ impl VisualImpl for TimelineLane {
             let end = keys.partition_point(|key| *key <= this.view_end.get());
             let drag = this.drag.borrow();
             let selected_keys = this.selected_keys.borrow();
+            if let (Some(first), Some(last)) = (keys.first(), keys.last()) {
+                let left = this.x(*first).max(INSET);
+                let right = this.x(*last).min(bounds.width - INSET);
+                if right > left {
+                    let range = brush(if this.highlighted.get() {
+                        0xff514565
+                    } else {
+                        0xff3b354b
+                    });
+                    context.draw_rectangle(
+                        Some(&range),
+                        None,
+                        Rect::new(left, center - 2.0, right - left, 4.0),
+                        2.0,
+                        2.0,
+                        &BoxShadows::default(),
+                    );
+                }
+            }
             if let Some(Drag::Marquee { from, to, .. }) = drag.as_ref() {
-                let fill = brush(0x334fc3ff);
-                let outline: Rc<dyn IPen> = Pen::from_uint32(0xff60cdff, 1.0).into();
+                let fill = brush(0x3379a8ff);
+                let outline: Rc<dyn IPen> = Pen::from_uint32(0xff79a8ff, 1.0).into();
                 let left = this.x(from.min(*to));
                 let right = this.x(from.max(*to));
                 context.draw_rectangle(
@@ -802,7 +832,7 @@ impl VisualImpl for TimelineLane {
                     .is_ok();
                 let color = if matches!(drag.as_ref(), Some(Drag::Key { keys, .. }) if keys.binary_search_by(|key| key.total_cmp(time)).is_ok())
                 {
-                    0xff50616a
+                    0xff5b526c
                 } else if selected
                     || this
                         .hover
@@ -811,8 +841,15 @@ impl VisualImpl for TimelineLane {
                 {
                     0xffffffff
                 } else {
-                    0xff7ccfff
+                    0xffb6a2f6
                 };
+                diamond(
+                    context,
+                    this.x(*time),
+                    center,
+                    if selected { 7.0 } else { 5.5 },
+                    0xff202126,
+                );
                 diamond(
                     context,
                     this.x(*time),
@@ -832,7 +869,8 @@ impl VisualImpl for TimelineLane {
                 let start = keys.partition_point(|key| *key + delta < this.view_start.get());
                 let end = keys.partition_point(|key| *key + delta <= this.view_end.get());
                 for key in &keys[start..end] {
-                    diamond(context, this.x(*key + delta), center, 6.0, 0xff60cdff);
+                    diamond(context, this.x(*key + delta), center, 7.0, 0xff202126);
+                    diamond(context, this.x(*key + delta), center, 6.0, 0xffcabaf8);
                 }
                 let to = from + delta;
                 let text = text(&format!("{to:.3}s"), 10.0, 0xffffffff);
@@ -847,22 +885,136 @@ impl VisualImpl for TimelineLane {
         }
         let playhead = this.playhead.get();
         if (this.view_start.get()..=this.view_end.get()).contains(&playhead) {
-            let x = this.x(playhead);
-            let pen: Rc<dyn IPen> = Pen::from_uint32(0xff60cdff, 1.5).into();
+            let x = this.x(playhead).round() + 0.5;
+            let pen: Rc<dyn IPen> = Pen::from_uint32(0xff79a8ff, 1.0).into();
             context.draw_line(&pen, Point::new(x, 0.0), Point::new(x, bounds.height));
             if this.ruler.get() {
-                let accent = brush(0xff60cdff);
+                let accent = brush(0xff79a8ff);
+                let caption = this.frame_rate.get().map_or_else(
+                    || format!("{playhead:.2}s"),
+                    |rate| format!("{}f", (playhead * f64::from(rate)).round() as u64),
+                );
+                let label = text(&caption, 10.0, 0xff14213a);
+                let width = (label.width() + 12.0).max(30.0);
+                let left = (x - width * 0.5).clamp(0.0, (bounds.width - width).max(0.0));
                 context.draw_rectangle(
                     Some(&accent),
                     None,
-                    Rect::new(x - 4.0, 22.0, 8.0, 11.0),
-                    2.0,
-                    2.0,
+                    Rect::new(left, 0.0, width, 19.0),
+                    3.0,
+                    3.0,
                     &BoxShadows::default(),
                 );
+                context.draw_text(
+                    &label,
+                    Point::new(left + (width - label.width()) * 0.5, 2.0),
+                );
+                diamond(context, x, 19.0, 3.5, 0xff79a8ff);
             }
         }
         context.pop(clip);
+    }
+}
+
+/// A small native graph of the incoming keyframe easing. Hosts can embed it beside
+/// their own editor; sampling follows the animation engine, including overshoot.
+#[repr(C)]
+pub struct EasingPreview {
+    base: Control,
+    easing: RefCell<Option<Easing>>,
+    samples: RefCell<Vec<f64>>,
+}
+ferro_class!(EasingPreview:Control);
+ferro_class_info!(EasingPreview {
+    new: EasingPreview::new
+});
+ferro_impl_classes!(EasingPreview:FerroObjectImpl,StyledElementImpl,LayoutableImpl,InteractiveImpl,InputElementImpl,ControlImpl);
+impl EasingPreview {
+    pub fn new() -> Ref<Self> {
+        let this = instantiate(Self {
+            base: Control::construct(),
+            easing: RefCell::new(None),
+            samples: RefCell::new(Vec::new()),
+        });
+        this.set_width(48.0);
+        this.set_height(26.0);
+        this.set_easing(Some(Easing::Linear));
+        this
+    }
+    /// `None` represents an invalid draft and clears the curve, without touching
+    /// the document or silently displaying the previously accepted easing.
+    pub fn set_easing(&self, easing: Option<Easing>) {
+        let sampled = easing.as_ref().and_then(|curve| {
+            (0..=32)
+                .map(|index| curve.sample(f64::from(index) / 32.0))
+                .collect::<Result<Vec<_>, _>>()
+                .ok()
+        });
+        let valid = sampled.is_some();
+        *self.samples.borrow_mut() = sampled.unwrap_or_default();
+        let description = easing.as_ref().filter(|_| valid).map_or_else(
+            || "Invalid easing curve".to_owned(),
+            |curve| format!("Incoming easing: {}", curve.to_xaml()),
+        );
+        *self.easing.borrow_mut() = easing.filter(|_| valid);
+        AutomationProperties::set_name(self, Some(&description));
+        ToolTip::set_tip(self, Some(Rc::new(description)));
+        self.invalidate_visual();
+    }
+    pub fn easing(&self) -> Option<Easing> {
+        self.easing.borrow().clone()
+    }
+}
+impl VisualImpl for EasingPreview {
+    fn render(this: &Self, context: &mut DrawingContext) {
+        let bounds = Rect::from_size(this.bounds().size());
+        let fill = brush(0xff303138);
+        let border: Rc<dyn IPen> = Pen::from_uint32(0xff3b3d46, 1.0).into();
+        context.draw_rectangle(
+            Some(&fill),
+            Some(&border),
+            bounds.deflate(0.5),
+            4.0,
+            4.0,
+            &BoxShadows::default(),
+        );
+        let samples = this.samples.borrow();
+        let left = 5.0;
+        let top = 4.0;
+        let width = (bounds.width - 10.0).max(0.0);
+        let height = (bounds.height - 8.0).max(0.0);
+        if samples.is_empty() {
+            let invalid: Rc<dyn IPen> = Pen::from_uint32(0xffe89595, 1.0).into();
+            context.draw_line(
+                &invalid,
+                Point::new(left, top),
+                Point::new(left + width, top + height),
+            );
+            context.draw_line(
+                &invalid,
+                Point::new(left, top + height),
+                Point::new(left + width, top),
+            );
+            return;
+        }
+        let minimum = samples.iter().copied().fold(0.0, f64::min);
+        let maximum = samples.iter().copied().fold(1.0, f64::max);
+        let point = |index: usize, value: f64| {
+            Point::new(
+                left + width * index as f64 / (samples.len() - 1) as f64,
+                top + height * (1.0 - (value - minimum) / (maximum - minimum)),
+            )
+        };
+        let guide: Rc<dyn IPen> = Pen::from_uint32(0xff575465, 1.0).into();
+        context.draw_line(&guide, point(0, 0.0), point(samples.len() - 1, 1.0));
+        let curve: Rc<dyn IPen> = Pen::from_uint32(0xffb6a2f6, 1.5).into();
+        for index in 1..samples.len() {
+            context.draw_line(
+                &curve,
+                point(index - 1, samples[index - 1]),
+                point(index, samples[index]),
+            );
+        }
     }
 }
 fn brush(color: u32) -> Rc<dyn IBrush> {

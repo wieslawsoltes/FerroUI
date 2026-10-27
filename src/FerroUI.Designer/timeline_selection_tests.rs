@@ -280,19 +280,7 @@ fn easing_presets_stage_the_curve_then_apply_in_one_undo_step() {
     let _app = UnitTestApplication::start(TestServices::styled_window());
     let (workspace, target) = workspace();
     workspace.select_keyframe(target, "Opacity", 1.0).unwrap();
-    let editor = workspace
-        .tracks
-        .children()
-        .to_vec()
-        .iter()
-        .filter_map(|control| control.cast::<StackPanel>())
-        .find(|row| {
-            row.children()
-                .to_vec()
-                .iter()
-                .any(|control| control.name().as_deref() == Some("KeyframeEasingPreset"))
-        })
-        .unwrap();
+    let editor = workspace.timeline_inspector().unwrap();
     let children = editor.children().to_vec();
     let preset = children
         .iter()
@@ -304,8 +292,34 @@ fn easing_presets_stage_the_curve_then_apply_in_one_undo_step() {
         .filter_map(|control| control.cast::<Button>())
         .find(|control| control.name().as_deref() == Some("ApplyKeyframe"))
         .unwrap();
+    let curve = children
+        .iter()
+        .filter_map(|control| control.cast::<TextBox>())
+        .find(|control| control.name().as_deref() == Some("KeyframeCurve"))
+        .unwrap();
+    let preview = children
+        .iter()
+        .filter_map(|control| control.cast::<EasingPreview>())
+        .next()
+        .unwrap();
     let original = workspace.session.borrow().document().source().to_owned();
+    curve.set_text(Some("invalid curve"));
+    assert_eq!(
+        preview.easing(),
+        None,
+        "An invalid draft must not show a stale curve"
+    );
     preset.set_selected_index(2);
+    assert_eq!(
+        preview.easing(),
+        Some(Easing::CubicBezier {
+            x1: 0.0,
+            y1: 0.0,
+            x2: 0.58,
+            y2: 1.0
+        }),
+        "The graph follows the staged easing preset"
+    );
     assert_eq!(
         workspace.session.borrow().document().source(),
         original,
@@ -353,11 +367,8 @@ fn applying_a_keyframe_from_the_keyboard_restores_focus_to_the_replacement_field
     window.update_layout();
     let value_field = || {
         workspace
-            .tracks
-            .children()
-            .to_vec()
+            .timeline_inspector()
             .into_iter()
-            .filter_map(|control| control.cast::<StackPanel>())
             .flat_map(|row| row.children().to_vec())
             .filter_map(|control| control.cast::<TextBox>())
             .find(|input| input.name().as_deref() == Some("KeyframeValue"))
@@ -437,11 +448,8 @@ fn recording_and_applying_fractional_frame_times_keep_the_accepted_key_selected(
             "Selection must use the key's accepted source time"
         );
         let time = workspace
-            .tracks
-            .children()
-            .to_vec()
+            .timeline_inspector()
             .into_iter()
-            .filter_map(|control| control.cast::<StackPanel>())
             .flat_map(|row| row.children().to_vec())
             .filter_map(|control| control.cast::<TextBox>())
             .find(|input| input.name().as_deref() == Some("KeyframeTime"))
@@ -454,11 +462,8 @@ fn recording_and_applying_fractional_frame_times_keep_the_accepted_key_selected(
     let edited_time = 1.0 / 60.0;
     time.set_text(Some(&edited_time.to_string()));
     let apply = workspace
-        .tracks
-        .children()
-        .to_vec()
+        .timeline_inspector()
         .into_iter()
-        .filter_map(|control| control.cast::<StackPanel>())
         .flat_map(|row| row.children().to_vec())
         .filter_map(|control| control.cast::<Button>())
         .find(|input| input.name().as_deref() == Some("ApplyKeyframe"))
