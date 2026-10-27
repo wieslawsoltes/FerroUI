@@ -73,16 +73,16 @@ pub struct LayerEditSnapshot {
     nodes: Vec<NodeId>,
 }
 
-/// A counted composition suppression leaves layout and every authored property intact.
+/// A counted render suppression leaves layout and every authored property intact.
 /// Weak references let replaced native trees die immediately. Drop balances our request
-/// without releasing another subsystem's connected-animation suppression.
+/// without releasing another presentation owner's suppression.
 struct LayerVisualMask {
     visual: WeakRef<Visual>,
     hit_test: Option<Rc<dyn IDisposable>>,
 }
 impl LayerVisualMask {
     fn new(visual: &Ref<Visual>) -> Self {
-        visual.add_composition_hide_request();
+        visual.add_render_suppression_request();
         let hit_test = visual.cast::<InputElement>().and_then(|input| {
             input.set_value_with_priority(
                 InputElement::is_hit_test_visible_property(),
@@ -99,7 +99,7 @@ impl LayerVisualMask {
 impl Drop for LayerVisualMask {
     fn drop(&mut self) {
         if let Some(visual) = self.visual.upgrade() {
-            visual.remove_composition_hide_request();
+            visual.remove_render_suppression_request();
         }
         if let Some(binding) = self.hit_test.take() {
             binding.dispose();

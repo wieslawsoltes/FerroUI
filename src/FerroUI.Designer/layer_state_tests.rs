@@ -40,7 +40,7 @@ impl Fixture {
 }
 
 #[test]
-fn layer_visibility_is_counted_composition_state_and_preserves_layout_properties_and_history() {
+fn layer_visibility_is_counted_render_state_and_preserves_layout_properties_and_history() {
     let _app = UnitTestApplication::start(TestServices::styled_window());
     let mut fixture = Fixture::new();
     let group = fixture.id("Group");
@@ -55,11 +55,11 @@ fn layer_visibility_is_counted_composition_state_and_preserves_layout_properties
         .enable_collaboration("writer", "layers")
         .unwrap();
     let version = fixture.session.collaboration_version().unwrap();
-    visual.add_composition_hide_request();
+    visual.add_render_suppression_request();
     fixture.session.set_layers_hidden(&[group], true).unwrap();
     assert!(fixture.session.layer_state(first).inherited_hidden);
-    assert!(fixture.visual("Group").is_hidden_by_composition());
-    assert!(visual.is_hidden_by_composition());
+    assert!(fixture.visual("Group").is_render_suppressed());
+    assert!(visual.is_render_suppressed());
     assert!(visual.is_visible());
     assert_eq!(visual.opacity(), 0.4);
     assert!(!input.is_hit_test_visible());
@@ -69,14 +69,14 @@ fn layer_visibility_is_counted_composition_state_and_preserves_layout_properties
         fixture.session.refresh_runtime_mapping();
     }
     fixture.session.set_layers_hidden(&[group], false).unwrap();
-    assert!(!fixture.visual("Group").is_hidden_by_composition());
+    assert!(!fixture.visual("Group").is_render_suppressed());
     assert!(
-        visual.is_hidden_by_composition(),
-        "another compositor owner still hides it"
+        visual.is_render_suppressed(),
+        "another presentation owner still hides it"
     );
-    visual.remove_composition_hide_request();
+    visual.remove_render_suppression_request();
     assert!(
-        !visual.is_hidden_by_composition(),
+        !visual.is_render_suppressed(),
         "refresh did not stack requests"
     );
     assert!(input.is_hit_test_visible());
@@ -144,16 +144,16 @@ fn layer_isolation_preserves_ancestors_and_layout_and_retires_after_root_deletio
     fixture.session.isolate_layers(&[first]).unwrap();
     assert_eq!(fixture.session.layer_isolation(), &[first]);
     assert!(!fixture.session.layer_state(group).outside_isolation);
-    assert!(!fixture.visual("Group").is_hidden_by_composition());
-    assert!(!fixture.visual("First").is_hidden_by_composition());
-    assert!(fixture.visual("Second").is_hidden_by_composition());
-    assert!(fixture.visual("Peer").is_hidden_by_composition());
+    assert!(!fixture.visual("Group").is_render_suppressed());
+    assert!(!fixture.visual("First").is_render_suppressed());
+    assert!(fixture.visual("Second").is_render_suppressed());
+    assert!(fixture.visual("Peer").is_render_suppressed());
     assert!(fixture.session.can_canvas_select(first));
     assert!(!fixture.session.can_canvas_select(group));
     assert!(!fixture.session.can_canvas_select(second));
     assert!(!fixture.session.can_canvas_select(peer));
     fixture.session.clear_layer_isolation();
-    assert!(!fixture.visual("Peer").is_hidden_by_composition());
+    assert!(!fixture.visual("Peer").is_render_suppressed());
     fixture.session.isolate_layers(&[group, first]).unwrap();
     assert_eq!(fixture.session.layer_isolation(), &[group]);
     assert!(fixture.session.can_canvas_select(first));
@@ -165,7 +165,7 @@ fn layer_isolation_preserves_ancestors_and_layout_and_retires_after_root_deletio
         )
         .unwrap();
     assert!(fixture.session.layer_isolation().is_empty());
-    assert!(!fixture.visual("Peer").is_hidden_by_composition());
+    assert!(!fixture.visual("Peer").is_render_suppressed());
 }
 
 #[test]
@@ -219,7 +219,7 @@ fn layer_tab_snapshots_restore_only_the_exact_document_and_mask_guards_restore_o
         .session
         .open_document(SOURCE.into(), "ferres://FerroUI.Designer/Other.xaml".into())
         .unwrap();
-    assert!(!old.is_hidden_by_composition());
+    assert!(!old.is_render_suppressed());
     assert!(!fixture.session.restore_layer_view(&snapshot));
     fixture
         .session
@@ -228,7 +228,7 @@ fn layer_tab_snapshots_restore_only_the_exact_document_and_mask_guards_restore_o
     assert!(fixture.session.restore_layer_view(&snapshot));
     assert!(fixture.session.layer_state(first).hidden);
     assert!(fixture.session.layer_state(first).locked);
-    assert!(fixture.visual("First").is_hidden_by_composition());
+    assert!(fixture.visual("First").is_render_suppressed());
     fixture
         .session
         .restore_document(Document::new(SOURCE).unwrap(), URI.into())
@@ -252,11 +252,11 @@ fn layer_hidden_flags_survive_source_undo_without_becoming_undo_operations() {
     fixture.session.undo().unwrap();
     assert_eq!(fixture.id("First"), first);
     assert!(fixture.session.layer_state(first).hidden);
-    assert!(fixture.visual("First").is_hidden_by_composition());
+    assert!(fixture.visual("First").is_render_suppressed());
     assert!(!fixture.session.can_undo());
     fixture.session.set_read_only(true);
     fixture.session.set_layers_hidden(&[first], false).unwrap();
-    assert!(!fixture.visual("First").is_hidden_by_composition());
+    assert!(!fixture.visual("First").is_render_suppressed());
     assert!(
         fixture
             .session
