@@ -95,7 +95,7 @@ impl ComponentLibrary {
         search.set_placeholder_text(Some("Search definitions and resources"));
         search.set_margin(Thickness::new(0.0, 0.0, 4.0, 0.0));
         AutomationProperties::set_name(&search, Some("Search component library"));
-        header.children().add(search.clone().upcast());
+        header.children().add(search.clone().upcast::<Control>());
         let create = Button::new();
         create.set_name(Some("NewComponentResource".into()));
         create.classes().add("icon");
@@ -107,8 +107,8 @@ impl ComponentLibrary {
         );
         AutomationProperties::set_name(&create, Some("Create resource or definition"));
         Grid::set_column(&create, 1);
-        header.children().add(create.clone().upcast());
-        root.children().add(header.upcast());
+        header.children().add(create.clone().upcast::<Control>());
+        root.children().add(header.upcast::<Control>());
         let filter = ComboBox::new();
         filter.set_name(Some("ComponentLibraryFilter".into()));
         filter.set_horizontal_alignment(HorizontalAlignment::Stretch);
@@ -119,15 +119,15 @@ impl ComponentLibrary {
         }
         filter.set_selected_index(0);
         Grid::set_row(&filter, 1);
-        root.children().add(filter.clone().upcast());
+        root.children().add(filter.clone().upcast::<Control>());
         let list = ListBox::new();
         list.set_name(Some("ComponentLibraryList".into()));
         list.classes().add("designer-library-list");
         list.set_background(Some(SolidColorBrush::from_uint32(0x0025262b).into()));
-        list.set_border_thickness(Thickness::ZERO);
-        list.set_padding(Thickness::ZERO);
+        list.set_border_thickness(Thickness::uniform(0.0));
+        list.set_padding(Thickness::uniform(0.0));
         Grid::set_row(&list, 2);
-        root.children().add(list.clone().upcast());
+        root.children().add(list.clone().upcast::<Control>());
         let empty = TextBlock::new();
         empty.set_text(Some(
             "No matching definitions.\nCreate a resource or register a custom control asset.",
@@ -139,22 +139,22 @@ impl ComponentLibrary {
         empty.set_is_hit_test_visible(false);
         empty.set_vertical_alignment(VerticalAlignment::Top);
         Grid::set_row(&empty, 2);
-        root.children().add(empty.clone().upcast());
+        root.children().add(empty.clone().upcast::<Control>());
         let footer = StackPanel::new();
         footer.set_spacing(4.0);
         footer.set_margin(Thickness::new(4.0, 8.0, 4.0, 2.0));
         let count = TextBlock::new();
         count.set_font_size(11.0);
         count.set_foreground(Some(SolidColorBrush::from_uint32(0xffa9adba).into()));
-        footer.children().add(count.clone().upcast());
+        footer.children().add(count.clone().upcast::<Control>());
         let hint = TextBlock::new();
         hint.set_text(Some("Enter to edit · Drag resources to properties"));
         hint.set_text_wrapping(ferroui_base::media::TextWrapping::Wrap);
         hint.set_font_size(10.0);
         hint.set_foreground(Some(SolidColorBrush::from_uint32(0xff979caa).into()));
-        footer.children().add(hint.upcast());
+        footer.children().add(hint.upcast::<Control>());
         Grid::set_row(&footer, 3);
-        root.children().add(footer.upcast());
+        root.children().add(footer.upcast::<Control>());
         let this = Rc::new(Self {
             root,
             search,
@@ -203,7 +203,8 @@ impl ComponentLibrary {
                 .and_then(|item| item.downcast_ref::<ComponentLibraryItem>().cloned());
             *this.selected.borrow_mut() = item.as_ref().map(|item| item.id.clone());
             if let Some(item) = item {
-                if let Some(callback) = this.select.borrow().clone() {
+                let callback = this.select.borrow().clone();
+                if let Some(callback) = callback {
                     callback(&item);
                 }
             }
@@ -216,20 +217,22 @@ impl ComponentLibrary {
                 };
                 if event.key == Key::Enter {
                     if let Some(item) = this.selected_item() {
-                        if let Some(callback) = this.activate.borrow().clone() {
+                        let callback = this.activate.borrow().clone();
+                        if let Some(callback) = callback {
                             callback(&item);
                             event.set_handled(true);
                         }
                     }
                 }
                 if event.key == Key::Escape {
-                    this.press.borrow_mut().take();
+                    this.cancel_pending_drag();
                 }
             });
         let weak = Rc::downgrade(&this);
         create.click(move |_, _| {
             if let Some(this) = weak.upgrade() {
-                if let Some(callback) = this.create.borrow().clone() {
+                let callback = this.create.borrow().clone();
+                if let Some(callback) = callback {
                     callback();
                 }
             }
@@ -239,7 +242,7 @@ impl ComponentLibrary {
     }
 
     pub fn control(&self) -> Ref<Control> {
-        self.root.clone().upcast()
+        self.root.clone().upcast::<Control>()
     }
     pub fn list(&self) -> Ref<ListBox> {
         self.list.clone()
@@ -258,6 +261,20 @@ impl ComponentLibrary {
     }
     pub fn on_create(&self, callback: impl Fn() + 'static) {
         *self.create.borrow_mut() = Some(Rc::new(callback));
+    }
+    /// Retire an in-progress pointer gesture when the host changes document,
+    /// revision, scope or editing permissions without replacing the catalog.
+    pub fn cancel_pending_drag(&self) {
+        let press = self.press.borrow_mut().take();
+        if let Some((_, event, _)) = press {
+            if event
+                .pointer()
+                .captured()
+                .is_some_and(|captured| self.root.is_visual_ancestor_of(&captured))
+            {
+                event.pointer().capture(None);
+            }
+        }
     }
     pub fn set_query(&self, query: &str) {
         self.search.set_text(Some(query));
@@ -300,11 +317,12 @@ impl ComponentLibrary {
         if *self.items.borrow() == items {
             return;
         }
-        self.press.borrow_mut().take();
+        self.cancel_pending_drag();
         *self.items.borrow_mut() = items;
         self.refresh();
     }
     fn refresh(&self) {
+        self.cancel_pending_drag();
         let query = self.search.text().unwrap_or_default().to_lowercase();
         let terms = query.split_whitespace().collect::<Vec<_>>();
         let filter = FILTERS
@@ -366,7 +384,7 @@ impl ComponentLibrary {
             square.set_height(14.0);
             square.set_corner_radius(CornerRadius::uniform(3.0));
             square.set_background(Some(SolidColorBrush::with_color(swatch).into()));
-            square.upcast()
+            square.upcast::<Control>()
         } else {
             let icon = PathIcon::new();
             icon.set_width(14.0);
@@ -379,7 +397,7 @@ impl ComponentLibrary {
                 ComponentLibraryFilter::Dictionaries => "M1,2 L7,2 9,4 15,4 15,15 1,15 Z M3,6 L3,13 13,13 13,6 Z",
                 _ => "M1,1 L15,1 15,15 1,15 Z M3,3 L3,13 13,13 13,3 Z M5,5 L11,5 11,11 5,11 Z",
             }).unwrap());
-            icon.upcast()
+            icon.upcast::<Control>()
         };
         icon.set_vertical_alignment(VerticalAlignment::Center);
         row.children().add(icon);
@@ -390,16 +408,16 @@ impl ComponentLibrary {
         title.set_text(Some(&item.title));
         title.set_font_size(12.0);
         title.set_font_weight(FontWeight::SemiBold);
-        title.set_text_trimming(TextTrimming::CharacterEllipsis);
-        labels.children().add(title.upcast());
+        title.set_text_trimming(<dyn TextTrimming>::character_ellipsis());
+        labels.children().add(title.upcast::<Control>());
         let detail = TextBlock::new();
         detail.set_text(Some(&item.kind));
         detail.set_font_size(10.0);
         detail.set_foreground(Some(SolidColorBrush::from_uint32(0xffa9adba).into()));
-        detail.set_text_trimming(TextTrimming::CharacterEllipsis);
-        labels.children().add(detail.upcast());
+        detail.set_text_trimming(<dyn TextTrimming>::character_ellipsis());
+        labels.children().add(detail.upcast::<Control>());
         Grid::set_column(&labels, 1);
-        row.children().add(labels.upcast());
+        row.children().add(labels.upcast::<Control>());
         if item.usages > 0 {
             let count = TextBlock::new();
             count.set_text(Some(&item.usages.to_string()));
@@ -408,7 +426,7 @@ impl ComponentLibrary {
             count.set_margin(Thickness::new(5.0, 0.0, 0.0, 0.0));
             count.set_vertical_alignment(VerticalAlignment::Center);
             Grid::set_column(&count, 2);
-            row.children().add(count.upcast());
+            row.children().add(count.upcast::<Control>());
         }
         let description = format!(
             "{} · {} · {} · {} references",
@@ -417,20 +435,26 @@ impl ComponentLibrary {
         ToolTip::set_tip(&row, Some(Rc::new(description.clone())));
         AutomationProperties::set_name(&row, Some(&description));
         let weak = Rc::downgrade(self);
+        let pressed_row = row.downgrade();
         let item = item.clone();
-        row.add_handler_with_options(
+        row.add_handler_with(
             InputElement::pointer_pressed_event(),
             move |_, event| {
                 if !event.properties().is_left_button_pressed {
                     return;
                 }
                 if let Some(this) = weak.upgrade() {
+                    this.cancel_pending_drag();
                     if event.click_count() == 2 {
-                        if let Some(callback) = this.activate.borrow().clone() {
+                        let callback = this.activate.borrow().clone();
+                        if let Some(callback) = callback {
                             callback(&item);
                             event.set_handled(true);
                         }
                     } else {
+                        if let Some(row) = pressed_row.upgrade() {
+                            event.pointer().capture(Some(&row.upcast::<InputElement>()));
+                        }
                         *this.press.borrow_mut() = Some((
                             item.clone(),
                             event.clone(),
@@ -447,27 +471,78 @@ impl ComponentLibrary {
             let Some(this) = weak.upgrade() else {
                 return;
             };
-            let moved = this.press.borrow().as_ref().is_some_and(|(_, _, point)| {
-                let current = event.get_position(Some(&this.list));
-                (current.x - point.x).abs() + (current.y - point.y).abs() > 6.0
-            });
-            if moved && event.properties().is_left_button_pressed {
+            if !event.properties().is_left_button_pressed {
+                if this
+                    .press
+                    .borrow()
+                    .as_ref()
+                    .is_some_and(|(_, press, _)| press.pointer().id() == event.pointer().id())
+                {
+                    this.cancel_pending_drag();
+                }
+                return;
+            }
+            let moved = this
+                .press
+                .borrow()
+                .as_ref()
+                .is_some_and(|(_, press, point)| {
+                    if press.pointer().id() != event.pointer().id() {
+                        return false;
+                    }
+                    let current = event.get_position(Some(&this.list));
+                    (current.x - point.x).abs() + (current.y - point.y).abs() > 6.0
+                });
+            if moved {
                 let press = this.press.borrow_mut().take();
                 if let Some((item, press, _)) = press {
-                    if let Some(callback) = this.drag.borrow().clone() {
+                    let callback = this.drag.borrow().clone();
+                    if let Some(callback) = callback {
                         callback(&item, &press);
                         event.set_handled(true);
+                    }
+                    // Native drag/drop and the design surface transfer capture to
+                    // their own control. If no host accepted the drag, release ours.
+                    if press
+                        .pointer()
+                        .captured()
+                        .is_some_and(|captured| this.root.is_visual_ancestor_of(&captured))
+                    {
+                        press.pointer().capture(None);
                     }
                 }
             }
         });
         let weak = Rc::downgrade(self);
-        row.add_handler(InputElement::pointer_released_event(), move |_, _| {
+        row.add_handler(InputElement::pointer_released_event(), move |_, event| {
             if let Some(this) = weak.upgrade() {
-                this.press.borrow_mut().take();
+                if this
+                    .press
+                    .borrow()
+                    .as_ref()
+                    .is_some_and(|(_, press, _)| press.pointer().id() == event.pointer().id())
+                {
+                    this.cancel_pending_drag();
+                }
             }
         });
-        row.upcast()
+        let weak = Rc::downgrade(self);
+        row.add_handler(
+            InputElement::pointer_capture_lost_event(),
+            move |_, event| {
+                if let Some(this) = weak.upgrade() {
+                    if this
+                        .press
+                        .borrow()
+                        .as_ref()
+                        .is_some_and(|(_, press, _)| press.pointer().id() == event.pointer().id())
+                    {
+                        this.press.borrow_mut().take();
+                    }
+                }
+            },
+        );
+        row.upcast::<Control>()
     }
 }
 

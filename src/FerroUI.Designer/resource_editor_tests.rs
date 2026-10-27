@@ -22,6 +22,7 @@ fn model() -> ResourceDefinitionModel {
         preview: Default::default(),
         apply_property: "Background".into(),
         properties: Vec::new(),
+        definition_properties: Vec::new(),
         references: Vec::new(),
         primitive_value: None,
         setter_properties: Vec::new(),
@@ -88,5 +89,72 @@ fn definition_preview_rejects_invalid_sizes_and_reports_host_errors_inline() {
     assert_eq!(
         editor.error.text().as_deref(),
         Some("Target type is not registered")
+    );
+}
+
+#[test]
+fn retired_definition_controls_cannot_apply_to_the_next_definition() {
+    let _app = UnitTestApplication::start(TestServices::styled_window());
+    let editor = ResourceDefinitionEditor::new();
+    let calls = Rc::new(Cell::new(0));
+    let observed = calls.clone();
+    editor.on_command(move |_| {
+        observed.set(observed.get() + 1);
+        Ok(())
+    });
+    editor.configure(model());
+    let previous_apply = editor
+        .control()
+        .get_control::<Button>("DefinitionApplySource");
+    let previous_source = editor
+        .control()
+        .get_control::<TextBox>("DefinitionSourceDraft");
+    previous_source.set_text(Some("<SolidColorBrush Color=\"Blue\" />"));
+    editor.configure(model());
+    previous_apply.raise_event(&RoutedEventArgs::with_event(Button::click_event()));
+    assert_eq!(
+        calls.get(),
+        0,
+        "A retained retired row cannot author the current definition"
+    );
+    click(&editor, "DefinitionApplySource");
+    assert_eq!(calls.get(), 1);
+}
+
+#[test]
+fn navigation_does_not_overwrite_the_replacement_editors_status() {
+    let _app = UnitTestApplication::start(TestServices::styled_window());
+    let editor = ResourceDefinitionEditor::new();
+    editor.configure(model());
+    let weak = Rc::downgrade(&editor);
+    editor.on_command(move |_| {
+        let editor = weak.upgrade().unwrap();
+        editor.configure(model());
+        editor.show_error(Some("Current definition status"));
+        Err("The retired definition failed".into())
+    });
+    click(&editor, "DefinitionShowSource");
+    assert_eq!(
+        editor.error.text().as_deref(),
+        Some("Current definition status")
+    );
+}
+
+#[test]
+fn writable_definition_retains_editor_factory_read_only_state() {
+    let _app = UnitTestApplication::start(TestServices::styled_window());
+    let editor = ResourceDefinitionEditor::new();
+    let field = TextBox::new();
+    field.set_is_enabled(false);
+    let mut model = model();
+    model.properties.push(DefinitionPropertyField {
+        name: "ComputedValue".into(),
+        editor: field.clone().upcast::<Control>(),
+        description: None,
+    });
+    editor.configure(model);
+    assert!(
+        !field.is_enabled(),
+        "Writable source does not make a computed property writable"
     );
 }

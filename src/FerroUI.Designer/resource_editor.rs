@@ -59,6 +59,7 @@ pub struct ResourceDefinitionModel {
     pub preview: DefinitionPreviewSettings,
     pub apply_property: String,
     pub properties: Vec<DefinitionPropertyField>,
+    pub definition_properties: Vec<DefinitionPropertyField>,
     pub references: Vec<DefinitionReference>,
     pub primitive_value: Option<String>,
     pub setter_properties: Vec<String>,
@@ -88,6 +89,7 @@ pub enum DefinitionEditorCommand {
         key: String,
     },
     InsertControl,
+    OpenProvidedSource,
     Create {
         owner: NodeId,
         key: String,
@@ -139,7 +141,7 @@ impl ResourceDefinitionEditor {
         panel.set_spacing(8.0);
         panel.set_margin(Thickness::new(12.0, 12.0, 12.0, 14.0));
         scroll.set_content(Some(Control::boxed(&panel)));
-        root.children().add(scroll.upcast());
+        root.children().add(scroll.upcast::<Control>());
         let error = TextBlock::new();
         error.set_name(Some("DefinitionEditorError".into()));
         error.set_font_size(11.0);
@@ -149,7 +151,7 @@ impl ResourceDefinitionEditor {
         error.set_is_visible(false);
         AutomationProperties::set_name(&error, Some("Definition editing status"));
         Grid::set_row(&error, 1);
-        root.children().add(error.clone().upcast());
+        root.children().add(error.clone().upcast::<Control>());
         Rc::new(Self {
             root,
             panel,
@@ -165,7 +167,7 @@ impl ResourceDefinitionEditor {
         }
     }
     pub fn control(&self) -> Ref<Control> {
-        self.root.clone().upcast()
+        self.root.clone().upcast::<Control>()
     }
     pub fn on_command(
         &self,
@@ -179,12 +181,17 @@ impl ResourceDefinitionEditor {
             .set_is_visible(error.is_some_and(|error| !error.is_empty()));
     }
     fn invoke(&self, command: DefinitionEditorCommand) {
+        let generation = self.generation.get();
         let callback = self.command.borrow().clone();
         let result = callback.map_or_else(
             || Err("The definition editor has no document host".into()),
             |callback| callback(command),
         );
-        self.show_error(result.as_ref().err().map(String::as_str));
+        // A successful navigation or edit may synchronously configure a different
+        // definition. A retired command must not overwrite its new editor's status.
+        if self.generation.get() == generation {
+            self.show_error(result.as_ref().err().map(String::as_str));
+        }
     }
 
     pub fn configure(self: &Rc<Self>, model: ResourceDefinitionModel) {
@@ -193,20 +200,26 @@ impl ResourceDefinitionEditor {
         self.show_error(None);
         let category = label(kind_title(model.kind), 10.0, 0xffb6a2f6);
         category.set_font_weight(FontWeight::SemiBold);
-        self.panel.children().add(category.upcast());
+        self.panel.children().add(category.upcast::<Control>());
         let title = label(&model.title, 18.0, 0xffe8eaf0);
         title.set_font_weight(FontWeight::SemiBold);
         title.set_text_wrapping(TextWrapping::Wrap);
-        self.panel.children().add(title.upcast());
-        self.panel
-            .children()
-            .add(description(&format!("{} · {}", model.type_name, model.scope)).upcast());
+        self.panel.children().add(title.upcast::<Control>());
+        self.panel.children().add(
+            description(&format!("{} · {}", model.type_name, model.scope)).upcast::<Control>(),
+        );
 
         if !model.writable {
             self.panel.children().add(
                 description("Read-only document. Preview and navigation remain available.")
-                    .upcast(),
+                    .upcast::<Control>(),
             );
+        }
+        if !model.definition_properties.is_empty() {
+            section(&self.panel, "Definition");
+            for property in model.definition_properties {
+                property_row(&self.panel, property, model.writable);
+            }
         }
         if !model.properties.is_empty() {
             section(
@@ -221,20 +234,7 @@ impl ResourceDefinitionEditor {
                 },
             );
             for property in model.properties {
-                let row = Grid::new();
-                row.set_column_definitions(ColumnDefinitions::parse("92,*").unwrap());
-                let title = label(&property.name, 11.0, 0xffa9adba);
-                title.set_vertical_alignment(VerticalAlignment::Center);
-                title.set_text_wrapping(TextWrapping::Wrap);
-                title.set_margin(Thickness::new(0.0, 0.0, 7.0, 0.0));
-                row.children().add(title.upcast());
-                property.editor.set_is_enabled(model.writable);
-                Grid::set_column(&property.editor, 1);
-                row.children().add(property.editor);
-                if let Some(description) = property.description {
-                    ToolTip::set_tip(&row, Some(Rc::new(description)));
-                }
-                self.panel.children().add(row.upcast());
+                property_row(&self.panel, property, model.writable);
             }
         }
 
@@ -252,7 +252,7 @@ impl ResourceDefinitionEditor {
                     ));
                 }
             });
-            self.panel.children().add(save.upcast());
+            self.panel.children().add(save.upcast::<Control>());
         }
 
         if matches!(
@@ -286,7 +286,7 @@ impl ResourceDefinitionEditor {
                     });
                 }
             });
-            self.panel.children().add(add.upcast());
+            self.panel.children().add(add.upcast::<Control>());
         }
 
         if let Some(key) = &model.key {
@@ -340,7 +340,7 @@ impl ResourceDefinitionEditor {
                     },
                 );
             }
-            self.panel.children().add(row.upcast());
+            self.panel.children().add(row.upcast::<Control>());
 
             section(&self.panel, "Apply to selection");
             let property = field(
@@ -372,7 +372,7 @@ impl ResourceDefinitionEditor {
                     });
                 }
             });
-            self.panel.children().add(apply.upcast());
+            self.panel.children().add(apply.upcast::<Control>());
         }
 
         if model.can_preview {
@@ -403,10 +403,12 @@ impl ResourceDefinitionEditor {
             height.set_text(Some(&model.preview.height.to_string()));
             height.set_placeholder_text(Some("Height"));
             AutomationProperties::set_name(&height, Some("Preview height"));
-            dimensions.children().add(width.clone().upcast());
+            dimensions.children().add(width.clone().upcast::<Control>());
             Grid::set_column(&height, 2);
-            dimensions.children().add(height.clone().upcast());
-            self.panel.children().add(dimensions.upcast());
+            dimensions
+                .children()
+                .add(height.clone().upcast::<Control>());
+            self.panel.children().add(dimensions.upcast::<Control>());
             let edit = button("Edit on canvas", "DefinitionEditCanvas", true);
             edit.classes().add("primary");
             let weak = self.command_target();
@@ -417,9 +419,10 @@ impl ResourceDefinitionEditor {
                 let size = width
                     .text()
                     .unwrap_or_default()
+                    .trim()
                     .parse::<f64>()
                     .ok()
-                    .zip(height.text().unwrap_or_default().parse::<f64>().ok());
+                    .zip(height.text().unwrap_or_default().trim().parse::<f64>().ok());
                 let Some((width, height)) = size.filter(|(width, height)| {
                     width.is_finite() && height.is_finite() && *width > 0.0 && *height > 0.0
                 }) else {
@@ -438,7 +441,7 @@ impl ResourceDefinitionEditor {
                     },
                 ));
             });
-            self.panel.children().add(edit.upcast());
+            self.panel.children().add(edit.upcast::<Control>());
         }
 
         section(
@@ -448,7 +451,7 @@ impl ResourceDefinitionEditor {
         if model.references.is_empty() {
             self.panel
                 .children()
-                .add(description("No references in this document.").upcast());
+                .add(description("No references in this document.").upcast::<Control>());
         }
         for reference in model.references {
             let target = button(
@@ -464,7 +467,7 @@ impl ResourceDefinitionEditor {
                     this.invoke(DefinitionEditorCommand::SelectReference(reference.node));
                 }
             });
-            self.panel.children().add(target.upcast());
+            self.panel.children().add(target.upcast::<Control>());
         }
 
         section(&self.panel, "Definition source");
@@ -512,7 +515,7 @@ impl ResourceDefinitionEditor {
                 },
             );
         }
-        self.panel.children().add(actions.upcast());
+        self.panel.children().add(actions.upcast::<Control>());
     }
 
     pub fn configure_create(self: &Rc<Self>, owners: Vec<(NodeId, String)>, writable: bool) {
@@ -521,10 +524,10 @@ impl ResourceDefinitionEditor {
         self.show_error(None);
         let title = label("New definition", 18.0, 0xffe8eaf0);
         title.set_font_weight(FontWeight::SemiBold);
-        self.panel.children().add(title.upcast());
+        self.panel.children().add(title.upcast::<Control>());
         self.panel.children().add(
             description("Choose its scope and key. Creation is one undoable document edit.")
-                .upcast(),
+                .upcast::<Control>(),
         );
         let names = owners
             .iter()
@@ -549,7 +552,7 @@ impl ResourceDefinitionEditor {
         let help = description(
             "Resource: provide one XAML object. Templates: provide the visual content. Themes: add setters after creation.",
         );
-        self.panel.children().add(help.upcast());
+        self.panel.children().add(help.upcast::<Control>());
         let source = source_field(
             &self.panel,
             "NewDefinitionSource",
@@ -597,7 +600,7 @@ impl ResourceDefinitionEditor {
                 source: source.text().unwrap_or_default(),
             });
         });
-        self.panel.children().add(create.upcast());
+        self.panel.children().add(create.upcast::<Control>());
     }
 
     /// Registered library sources are immutable. Copying creates an authored resource
@@ -616,19 +619,19 @@ impl ResourceDefinitionEditor {
         self.show_error(None);
         self.panel
             .children()
-            .add(label(kind_title(kind), 10.0, 0xffb6a2f6).upcast());
+            .add(label(kind_title(kind), 10.0, 0xffb6a2f6).upcast::<Control>());
         let heading = label(title, 18.0, 0xffe8eaf0);
         heading.set_font_weight(FontWeight::SemiBold);
         heading.set_text_wrapping(TextWrapping::Wrap);
-        self.panel.children().add(heading.upcast());
+        self.panel.children().add(heading.upcast::<Control>());
         self.panel
             .children()
-            .add(description(origin.unwrap_or("Registered component library")).upcast());
+            .add(description(origin.unwrap_or("Registered component library")).upcast::<Control>());
         if matches!(
             kind,
             ComponentKind::UserControl | ComponentKind::CustomControl
         ) {
-            self.panel.children().add(description("Place an instance on the canvas. Registered templates and themes appear separately in the library for source editing.").upcast());
+            self.panel.children().add(description("Place an instance on the canvas. Registered templates and themes appear separately in the library for source editing.").upcast::<Control>());
             let insert = button("Place on canvas", "DefinitionInsertControl", writable);
             insert.classes().add("primary");
             let weak = self.command_target();
@@ -637,12 +640,24 @@ impl ResourceDefinitionEditor {
                     this.invoke(DefinitionEditorCommand::InsertControl);
                 }
             });
-            self.panel.children().add(insert.upcast());
+            self.panel.children().add(insert.upcast::<Control>());
+            let open = button(
+                "Open definition document",
+                "DefinitionOpenProvidedSource",
+                origin.is_some(),
+            );
+            let weak = self.command_target();
+            open.click(move |_, _| {
+                if let Some(this) = weak.upgrade() {
+                    this.invoke(DefinitionEditorCommand::OpenProvidedSource);
+                }
+            });
+            self.panel.children().add(open.upcast::<Control>());
             section(&self.panel, "Instance source");
             source_field(&self.panel, "ProvidedDefinitionSource", source).set_is_read_only(true);
             return;
         }
-        self.panel.children().add(description("Create an editable copy in this document to customize the definition and its canvas. The library source stays linked to its provider.").upcast());
+        self.panel.children().add(description("Create an editable copy in this document to customize the definition and its canvas. Required local resources receive independent keys; application resources keep their references.").upcast::<Control>());
         section(&self.panel, "Copy into document");
         let names = owners
             .iter()
@@ -683,7 +698,7 @@ impl ResourceDefinitionEditor {
                 }
             }
         });
-        self.panel.children().add(copy.upcast());
+        self.panel.children().add(copy.upcast::<Control>());
         section(&self.panel, "Library source");
         source_field(&self.panel, "ProvidedDefinitionSource", source).set_is_read_only(true);
     }
@@ -708,6 +723,26 @@ fn label(text: &str, size: f64, color: u32) -> Ref<TextBlock> {
     label.set_foreground(Some(SolidColorBrush::from_uint32(color).into()));
     label
 }
+fn property_row(panel: &StackPanel, property: DefinitionPropertyField, writable: bool) {
+    let row = Grid::new();
+    row.set_column_definitions(ColumnDefinitions::parse("92,*").unwrap());
+    let title = label(&property.name, 11.0, 0xffa9adba);
+    title.set_vertical_alignment(VerticalAlignment::Center);
+    title.set_text_wrapping(TextWrapping::Wrap);
+    title.set_margin(Thickness::new(0.0, 0.0, 7.0, 0.0));
+    row.children().add(title.upcast::<Control>());
+    // The editor factory may already have disabled a read-only or unsupported
+    // property. Document permissions can restrict it further, never re-enable it.
+    if !writable {
+        property.editor.set_is_enabled(false);
+    }
+    Grid::set_column(&property.editor, 1);
+    row.children().add(property.editor);
+    if let Some(description) = property.description {
+        ToolTip::set_tip(&row, Some(Rc::new(description)));
+    }
+    panel.children().add(row.upcast::<Control>());
+}
 fn description(text: &str) -> Ref<TextBlock> {
     let label = label(text, 11.0, 0xffa9adba);
     label.set_text_wrapping(TextWrapping::Wrap);
@@ -721,23 +756,23 @@ fn section(panel: &StackPanel, title: &str) {
     border.set_padding(Thickness::new(0.0, 10.0, 0.0, 1.0));
     let text = label(title, 11.0, 0xffe8eaf0);
     text.set_font_weight(FontWeight::SemiBold);
-    border.set_child(Some(text.upcast()));
-    panel.children().add(border.upcast());
+    border.set_child(Some(text.upcast::<Control>()));
+    panel.children().add(border.upcast::<Control>());
 }
 fn field(panel: &StackPanel, name: &str, title: &str, value: &str) -> Ref<TextBox> {
     let row = Grid::new();
     row.set_column_definitions(ColumnDefinitions::parse("72,*").unwrap());
     let text = label(title, 11.0, 0xffa9adba);
     text.set_vertical_alignment(VerticalAlignment::Center);
-    row.children().add(text.upcast());
+    row.children().add(text.upcast::<Control>());
     let input = TextBox::new();
     input.set_name(Some(name.into()));
     input.set_text(Some(value));
     input.set_min_width(0.0);
     AutomationProperties::set_name(&input, Some(title));
     Grid::set_column(&input, 1);
-    row.children().add(input.clone().upcast());
-    panel.children().add(row.upcast());
+    row.children().add(input.clone().upcast::<Control>());
+    panel.children().add(row.upcast::<Control>());
     input
 }
 fn choice_field(
@@ -751,7 +786,7 @@ fn choice_field(
     row.set_column_definitions(ColumnDefinitions::parse("72,*").unwrap());
     let text = label(title, 11.0, 0xffa9adba);
     text.set_vertical_alignment(VerticalAlignment::Center);
-    row.children().add(text.upcast());
+    row.children().add(text.upcast::<Control>());
     let picker = ComboBox::new();
     picker.set_name(Some(name.into()));
     picker.set_horizontal_alignment(HorizontalAlignment::Stretch);
@@ -761,8 +796,8 @@ fn choice_field(
     picker.set_selected_index(index);
     AutomationProperties::set_name(&picker, Some(title));
     Grid::set_column(&picker, 1);
-    row.children().add(picker.clone().upcast());
-    panel.children().add(row.upcast());
+    row.children().add(picker.clone().upcast::<Control>());
+    panel.children().add(row.upcast::<Control>());
     picker
 }
 fn button(title: &str, name: &str, enabled: bool) -> Ref<Button> {
@@ -785,7 +820,7 @@ fn command_button(
     let button = button(title, name, enabled);
     button.set_margin(Thickness::new(0.0, 0.0, 4.0, 4.0));
     button.click(move |_, _| action());
-    panel.children().add(button.upcast());
+    panel.children().add(button.upcast::<Control>());
 }
 fn source_field(panel: &StackPanel, name: &str, value: &str) -> Ref<TextBox> {
     let input = TextBox::new();
@@ -809,7 +844,7 @@ fn source_field(panel: &StackPanel, name: &str, value: &str) -> Ref<TextBox> {
             }
         }
     });
-    panel.children().add(input.clone().upcast());
+    panel.children().add(input.clone().upcast::<Control>());
     input
 }
 
