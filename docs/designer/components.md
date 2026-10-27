@@ -229,7 +229,7 @@ The optional MCP provider exposes the same session model:
 Document writes require the existing property-write permission and `expected_revision`.
 `copy_definition_for_instance` creates the resource and retargets only that instance in one
 transaction. Tool schemas reject fields unrelated to the selected action. Source operations
-retain read-only, dependency, native-type and undo checks from the UI/session implementation.
+retain read-only, dependency and undo checks from the shared session implementation.
 
 Scope navigation changes presentation, not source or history. It requires MCP write permission
 and `expected_revision`, and accepts `expected_scope_epoch` to reject an outdated navigation
