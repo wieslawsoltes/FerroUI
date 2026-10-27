@@ -125,14 +125,15 @@ pub fn render_layout_helpers_with_state(
             );
         }
     }
-    if let Some(bounds) = snapshot.scene.primitives.iter().find_map(|guide| {
+    let container_bounds = snapshot.scene.primitives.iter().find_map(|guide| {
         if guide.role == LayoutGuideRole::Container {
             if let LayoutGuideGeometry::Rectangle { bounds, .. } = guide.geometry {
                 return transformed_rect(bounds, snapshot.to_artboard).map(quad_bounds);
             }
         }
         None
-    }) {
+    });
+    if let Some(bounds) = container_bounds {
         badge(
             context,
             &snapshot.scene.title,
@@ -145,17 +146,27 @@ pub fn render_layout_helpers_with_state(
         );
     }
     if let Some(placement) = placement {
-        if let Some(anchor) = transform_point(placement.bounds.center(), snapshot.to_artboard) {
+        if let Some(bounds) =
+            transformed_rect(placement.bounds, snapshot.to_artboard).map(quad_bounds)
+        {
             let rejected = placement.rejection.as_deref();
             let role = if rejected.is_some() {
                 LayoutGuideRole::Rejected
             } else {
                 LayoutGuideRole::Placement
             };
+            // Keep insertion/rejection captions out of the authored control content and
+            // away from flow-gap badges. Prefer the container's lower edge when visible;
+            // full-artboard containers retain feedback beside the actual placement.
+            let caption_bounds = container_bounds
+                .filter(|container| {
+                    viewport.is_none_or(|view| container.bottom() + 24.0 * scale <= view.bottom())
+                })
+                .unwrap_or(bounds);
             badge(
                 context,
                 rejected.unwrap_or(&placement.description),
-                Point::new(anchor.x, anchor.y - 16.0 * scale),
+                Point::new(bounds.center().x, caption_bounds.bottom() + 13.0 * scale),
                 role,
                 scale,
                 viewport,
@@ -165,6 +176,11 @@ pub fn render_layout_helpers_with_state(
         }
     }
     for (index, handle) in snapshot.scene.handles.iter().enumerate() {
+        // A captured placement gesture cannot edit target spacing at the same time.
+        // Retain measured gap regions but avoid stacking idle grips over its caret.
+        if placement.is_some() && state.active_handle.is_none() {
+            continue;
+        }
         let Some(point) = transform_point(handle.position, snapshot.to_artboard) else {
             continue;
         };

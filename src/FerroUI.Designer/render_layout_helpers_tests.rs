@@ -336,6 +336,7 @@ fn native_workspace_renders_layout_helper_interactions() {
     fixture.select("MovingCard");
     let original = fixture.visual("MovingCard");
     let original_bounds = original.bounds();
+    let original_origin = fixture.at("MovingCard", 0.0, 0.0);
     // Use the authored Border's padding, away from resize/padding handles and its TextBlock.
     let start = fixture.at("MovingCard", 201.0, 36.0);
     let end = fixture.at("WrapLayout", 110.0, 19.0);
@@ -357,17 +358,24 @@ fn native_workspace_renders_layout_helper_interactions() {
         original_bounds,
         "A drag ghost must not move the runtime control"
     );
-    // A patch inside the translated coral control proves native pixels are present in the
-    // drag image; the source remains in its original bottom-row slot throughout the draft.
+    // The control's top padding proves native pixels are present in the translated drag
+    // image. Sample a broad band outside text/caption geometry; antialiased glyphs and
+    // insertion adorners legitimately covered the old tiny patch beside the pointer.
+    // The original control remains in its bottom-row slot throughout the draft.
     let ghost_patch = fixture
         .surface
         .translate_point(
-            Point::new(end.x - 12.0, end.y - 16.0),
+            Point::new(
+                original_origin.x + end.x - start.x + 12.0,
+                original_origin.y + end.y - start.y + 4.0,
+            ),
             &fixture.workspace.control(),
         )
         .unwrap();
-    let coral = (-3..=3)
-        .flat_map(|dy| (-3..=3).map(move |dx| (dx, dy)))
+    assert!(ghost_patch.x >= 0.0 && ghost_patch.x + 72.0 < SIZE.width);
+    assert!(ghost_patch.y >= 0.0 && ghost_patch.y + 8.0 < SIZE.height);
+    let coral = (0..8)
+        .flat_map(|dy| (0..72).map(move |dx| (dx, dy)))
         .filter(|(dx, dy)| {
             let x = ghost_patch.x.round() as i32 + dx;
             let y = ghost_patch.y.round() as i32 + dy;
@@ -377,7 +385,7 @@ fn native_workspace_renders_layout_helper_interactions() {
         })
         .count();
     assert!(
-        coral > 12,
+        coral > 288,
         "The drag must paint a cached native control, not just an outline ({coral} coral pixels)"
     );
     fixture.release(end);
