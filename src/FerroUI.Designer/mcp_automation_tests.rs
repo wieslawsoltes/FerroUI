@@ -586,7 +586,7 @@ impl Files {
             NEXT.fetch_add(1, Ordering::Relaxed)
         ));
         std::fs::create_dir_all(&path).unwrap();
-        Self(path)
+        Self(path.canonicalize().unwrap())
     }
     fn write(&self, name: &str, source: &str) -> String {
         let path = self.0.join(name);

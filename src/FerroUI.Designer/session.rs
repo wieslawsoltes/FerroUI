@@ -486,6 +486,36 @@ impl DesignerSession {
             .replica
             .changes_since(version))
     }
+    /// Page only this writer's outbox, keeping offline uploads within the collaboration wire
+    /// budget without allowing other actors' operation payloads to consume the page.
+    pub fn collaboration_outbox_page(
+        &self,
+        version: &VersionVector,
+    ) -> Result<SyncMessage, String> {
+        let replica = &self
+            .collaboration
+            .as_ref()
+            .ok_or("Collaboration is not enabled")?
+            .replica;
+        replica
+            .changes_since_bounded(
+                version,
+                Some(replica.actor()),
+                ferroui_designer_collaboration::MAX_MESSAGE_BYTES,
+            )
+            .map_err(|error| error.to_string())
+    }
+    pub fn collaboration_pending_operations(
+        &self,
+        version: &VersionVector,
+    ) -> Result<usize, String> {
+        let replica = &self
+            .collaboration
+            .as_ref()
+            .ok_or("Collaboration is not enabled")?
+            .replica;
+        Ok(replica.pending_operation_count(version, replica.actor()))
+    }
     pub fn take_collaboration_changes(&mut self) -> Result<SyncMessage, String> {
         let state = self
             .collaboration

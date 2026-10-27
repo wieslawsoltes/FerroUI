@@ -119,15 +119,15 @@ enum Command {
 }
 enum Event {
     Ready {
-        pending: Pending,
+        pending: Box<Pending>,
         automatic: bool,
     },
     Synced(ExchangeReply),
     Invited(String),
     State(RoomState),
     Accepted {
-        pending: Pending,
-        reviewed: Pending,
+        pending: Box<Pending>,
+        reviewed: Box<Pending>,
         revision: u64,
     },
     AcceptedCommitted,
@@ -152,6 +152,7 @@ pub struct SharingController {
     next_sync: Cell<Instant>,
     failures: Cell<u32>,
     authorization_blocked: Cell<bool>,
+    durability_blocked: Cell<bool>,
     disconnect_requested: Cell<bool>,
     display_name: String,
     bound_uri: String,
@@ -240,6 +241,7 @@ impl SharingController {
             next_sync: Cell::new(Instant::now()),
             failures: Cell::new(0),
             authorization_blocked: Cell::new(false),
+            durability_blocked: Cell::new(false),
             disconnect_requested: Cell::new(false),
             display_name: options.display_name,
             bound_uri: uri,
@@ -331,6 +333,9 @@ impl SharingController {
         self.send(command)
     }
     fn send(&self, command: Command) -> Result<(), String> {
+        if self.durability_blocked.get() {
+            return Err("Sharing durability is uncertain; stop and resume the saved session before continuing".into());
+        }
         if self.busy.get() {
             return Err("A sharing operation is already in progress".into());
         }
@@ -427,6 +432,9 @@ impl SharingController {
             }
     }
     fn checkpoint_for_session(&self, session: &DesignerSession) -> Option<NativeCheckpoint> {
+        if self.durability_blocked.get() {
+            return None;
+        }
         let mut checkpoint = self.active.borrow().clone()?;
         if !self.owns_session(session) {
             return None;
@@ -552,10 +560,8 @@ impl SharingController {
         )
         .map_err(|error| error.to_string())?;
         let unsent = local
-            .changes_since(&active.peer.server_version)
-            .operations
-            .iter()
-            .any(|operation| operation.id.actor == active.peer.credentials.actor);
+            .pending_operation_count(&active.peer.server_version, &active.peer.credentials.actor)
+            > 0;
         let draft = checkpoint.source != local.source();
         let review = state.epoch != active.peer.epoch
             || self.pending.borrow().is_some()
@@ -592,6 +598,9 @@ impl SharingController {
         Ok(())
     }
     fn receive_error(&self, error: host::HostError) {
+        if error.code == host::ErrorCode::Indeterminate {
+            self.durability_blocked.set(true);
+        }
         self.failures.set(self.failures.get().saturating_add(1));
         self.next_sync.set(
             Instant::now()
@@ -602,11 +611,14 @@ impl SharingController {
             host::ErrorCode::Unauthorized
                 | host::ErrorCode::Forbidden
                 | host::ErrorCode::EpochChanged
+                | host::ErrorCode::Indeterminate
         ) {
             self.authorization_blocked.set(true);
             if matches!(
                 error.code,
-                host::ErrorCode::Unauthorized | host::ErrorCode::Forbidden
+                host::ErrorCode::Unauthorized
+                    | host::ErrorCode::Forbidden
+                    | host::ErrorCode::Indeterminate
             ) {
                 if let Some(session) = self.session.upgrade() {
                     if let Ok(mut session) = session.try_borrow_mut() {
@@ -626,6 +638,7 @@ impl SharingController {
                 | host::ErrorCode::Forbidden
                 | host::ErrorCode::EpochChanged
                 | host::ErrorCode::Conflict
+                | host::ErrorCode::Indeterminate
         ) {
             SharingPhase::Conflict
         } else {
@@ -677,7 +690,7 @@ impl SharingController {
                 Event::Ready { pending, automatic } => {
                     if automatic && session.borrow().document().revision() == self.starting_revision
                     {
-                        self.attach(pending, self.starting_revision, false)?;
+                        self.attach(*pending, self.starting_revision, false)?;
                     } else {
                         let mut status = self.status.borrow_mut();
                         status.phase = SharingPhase::AwaitingReview;
@@ -685,7 +698,7 @@ impl SharingController {
                         status.members = pending.joined.state.members.clone();
                         status.message="Review the room source before opening it. Your local document has been backed up.".into();
                         status.backup_path = Some(self.directory.join("previous-document.json"));
-                        *self.pending.borrow_mut() = Some(pending);
+                        *self.pending.borrow_mut() = Some(*pending);
                     }
                 }
                 Event::Accepted {
@@ -693,8 +706,8 @@ impl SharingController {
                     reviewed,
                     revision,
                 } => {
-                    *self.pending.borrow_mut() = Some(reviewed);
-                    self.attach(pending, revision, true)?;
+                    *self.pending.borrow_mut() = Some(*reviewed);
+                    self.attach(*pending, revision, true)?;
                     let checkpoint = self.active.borrow().clone().ok_or("Sharing detached")?;
                     self.send(Command::CommitAccept(checkpoint))?;
                     let mut status = self.status.borrow_mut();
@@ -776,7 +789,8 @@ impl SharingController {
                 return Ok(true);
             }
         }
-        if !self.busy.get()
+        if !self.durability_blocked.get()
+            && !self.busy.get()
             && self.pending.borrow().is_none()
             && self.active.borrow().is_some()
             && Instant::now() >= self.next_sync.get()
@@ -787,12 +801,9 @@ impl SharingController {
             }
             let mut session = session.borrow_mut();
             let mut checkpoint = self.active.borrow().clone().unwrap();
-            let mut message =
-                session.collaboration_changes_since(&checkpoint.peer.server_version)?;
-            message
-                .operations
-                .retain(|op| op.id.actor == checkpoint.peer.credentials.actor);
-            self.status.borrow_mut().pending_operations = message.operations.len();
+            let message = session.collaboration_outbox_page(&checkpoint.peer.server_version)?;
+            self.status.borrow_mut().pending_operations =
+                session.collaboration_pending_operations(&checkpoint.peer.server_version)?;
             checkpoint.peer.snapshot = session.collaboration_snapshot()?;
             checkpoint.source = session.document().source().into();
             let known = session.collaboration_version().ok_or("Sharing detached")?;
@@ -1104,7 +1115,13 @@ fn worker(
             return;
         }
     };
-    if events.send(Event::Ready { pending, automatic }).is_err() {
+    if events
+        .send(Event::Ready {
+            pending: Box::new(pending),
+            automatic,
+        })
+        .is_err()
+    {
         return;
     }
     while let Ok(command) = commands.recv() {
@@ -1193,8 +1210,8 @@ fn worker(
                     let pending =
                         prepare_accept(pending, local_source, resolved, uri, &options.directory)?;
                     Ok(Event::Accepted {
-                        pending,
-                        reviewed,
+                        pending: Box::new(pending),
+                        reviewed: Box::new(reviewed),
                         revision,
                     })
                 }
@@ -1213,6 +1230,9 @@ fn worker(
                 }
             }
             Err(error) => {
+                // A rename may already have replaced peer.json. Do not let a queued sync,
+                // acceptance or final-stop checkpoint overwrite that uncertain durable state.
+                let terminal = error.code == host::ErrorCode::Indeterminate;
                 // Keep the operation busy until its authority refresh finishes. One event
                 // prevents an intervening poll from queuing another rejected editor outbox.
                 let state = if matches!(
@@ -1231,7 +1251,7 @@ fn worker(
                 } else {
                     None
                 };
-                if events.send(Event::Error { error, state }).is_err() {
+                if events.send(Event::Error { error, state }).is_err() || terminal {
                     break;
                 }
             }
@@ -1271,8 +1291,8 @@ fn client_lock(directory: &Path) -> host::Result<std::fs::File> {
 mod tests {
     use super::*;
     use ferroui_controls::{
-        ContentControl,
         testing::{TestServices, UnitTestApplication},
+        ContentControl,
     };
     use host::Endpoint;
     const SOURCE: &str = r#"<Canvas xmlns="https://github.com/ferroui"><Button Name="Target" Width="100" /></Canvas>"#;
@@ -1337,6 +1357,7 @@ mod tests {
             next_sync: Cell::new(Instant::now() + Duration::from_secs(60)),
             failures: Cell::new(0),
             authorization_blocked: Cell::new(false),
+            durability_blocked: Cell::new(false),
             disconnect_requested: Cell::new(false),
             display_name: "Owner".into(),
             bound_uri: "file:///Main.xaml".into(),
@@ -1374,6 +1395,47 @@ mod tests {
             std::env::temp_dir().join(format!("ferroui-sharing-{}", Secret::generate().unwrap().0));
         private_directory(&path).unwrap();
         path
+    }
+    #[test]
+    fn indeterminate_durability_blocks_edits_retries_and_final_checkpoint_replacement() {
+        let _app = UnitTestApplication::start(TestServices::styled_window());
+        let fixture = fixture();
+        fixture.controller.next_sync.set(Instant::now());
+        fixture
+            .events
+            .send(Event::Error {
+                error: host::HostError::new(
+                    host::ErrorCode::Indeterminate,
+                    "Directory sync failed after replacing peer.json",
+                ),
+                state: None,
+            })
+            .unwrap();
+        assert!(fixture.controller.poll().unwrap());
+        assert_eq!(fixture.controller.status().phase, SharingPhase::Conflict);
+        assert!(fixture.session.borrow().is_read_only());
+        let id = fixture
+            .session
+            .borrow()
+            .document()
+            .ast()
+            .find_name("Target")
+            .unwrap();
+        assert!(fixture
+            .session
+            .borrow_mut()
+            .set_property(&[id], "Width", "999")
+            .is_err());
+        assert!(fixture.controller.invite(Role::Editor).is_err());
+        assert!(fixture.commands.try_recv().is_err());
+        assert!(fixture.controller.capture_checkpoint().is_none());
+        assert!(!fixture.controller.poll().unwrap());
+        fixture.controller.disconnect();
+        assert!(matches!(
+            fixture.commands.try_recv().unwrap(),
+            Command::Stop(None)
+        ));
+        assert!(!fixture.session.borrow().is_read_only());
     }
     #[test]
     fn save_as_disconnect_captures_latest_outbox_and_clears_owned_viewer_guard() {
@@ -1485,12 +1547,10 @@ mod tests {
                 .unwrap();
             session.set_read_only(true);
         }
-        assert!(
-            pending
-                .controller
-                .attach(reviewed, revision, false)
-                .is_err()
-        );
+        assert!(pending
+            .controller
+            .attach(reviewed, revision, false)
+            .is_err());
         assert_eq!(
             pending.session.borrow().collaboration_actor(),
             Some("actor-c")
@@ -1630,8 +1690,8 @@ mod tests {
         fixture
             .events
             .send(Event::Accepted {
-                reviewed,
-                pending,
+                reviewed: Box::new(reviewed),
+                pending: Box::new(pending),
                 revision,
             })
             .unwrap();
@@ -1676,8 +1736,8 @@ mod tests {
         fixture
             .events
             .send(Event::Accepted {
-                pending: prepared,
-                reviewed,
+                pending: Box::new(prepared),
+                reviewed: Box::new(reviewed),
                 revision,
             })
             .unwrap();
@@ -1765,16 +1825,14 @@ mod tests {
         );
         let path = temporary_directory();
         host::save_private(&path.join("peer.json"), &previous).unwrap();
-        assert!(
-            prepare_accept(
-                pending.clone(),
-                previous.source.clone(),
-                None,
-                previous.uri.clone(),
-                &path
-            )
-            .is_err()
-        );
+        assert!(prepare_accept(
+            pending.clone(),
+            previous.source.clone(),
+            None,
+            previous.uri.clone(),
+            &path
+        )
+        .is_err());
         let accepted = prepare_accept(
             pending,
             previous.source.clone(),
@@ -1947,12 +2005,10 @@ mod tests {
             guest.pending_local_source().as_deref(),
             Some("<Canvas><Button")
         );
-        assert!(
-            guest_session
-                .borrow_mut()
-                .set_property(&[guest_target], "Width", "999")
-                .is_err()
-        );
+        assert!(guest_session
+            .borrow_mut()
+            .set_property(&[guest_target], "Width", "999")
+            .is_err());
         guest
             .accept_snapshot(
                 guest_session.borrow().document().revision(),
