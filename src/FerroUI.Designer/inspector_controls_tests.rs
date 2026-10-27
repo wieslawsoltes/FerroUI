@@ -1,6 +1,6 @@
 use super::*;
 use ferroui_controls::testing::{TestServices, UnitTestApplication};
-use ferroui_controls::{CheckBox, ComboBox, NumericUpDown, Window};
+use ferroui_controls::{CheckBox, NumericUpDown, Window};
 
 const DOCUMENT: &str = r#"<Canvas xmlns="https://github.com/ferroui" Width="400" Height="300"><StackPanel Name="Group"><Button Name="First" Width="80" Content="First" /><Button Name="Second" Width="100" Content="Second" /></StackPanel></Canvas>"#;
 
@@ -13,6 +13,358 @@ fn property(workspace: &DesignerWorkspace, name: &str) -> Rc<PropertyRow> {
         .into_iter()
         .find(|row| row.name == name)
         .unwrap_or_else(|| panic!("missing {name}"))
+}
+
+#[test]
+fn inspector_categories_restore_expansion_after_search_and_filter_authored_values() {
+    let _app = UnitTestApplication::start(TestServices::styled_window());
+    let workspace = DesignerWorkspace::new(DOCUMENT).unwrap();
+    select_named(&workspace, &["First"]);
+    let layout = property(&workspace, "Layout");
+    assert!(layout.category.as_ref().unwrap().expanded);
+    (layout.category.as_ref().unwrap().toggle)();
+    assert!(
+        !property(&workspace, "Layout")
+            .category
+            .as_ref()
+            .unwrap()
+            .expanded
+    );
+    assert!(
+        !workspace
+            .inspectors
+            .property_source
+            .items()
+            .to_vec()
+            .iter()
+            .any(|row| row.name == "Width")
+    );
+    let search = workspace.root.get_control::<TextBox>("PropertySearch");
+    search.set_text(Some("width"));
+    workspace.rebuild_properties();
+    assert!(
+        property(&workspace, "Layout")
+            .category
+            .as_ref()
+            .unwrap()
+            .expanded
+    );
+    assert!(property(&workspace, "Width").context.is_some());
+    search.set_text(Some(""));
+    workspace.rebuild_properties();
+    assert!(
+        !property(&workspace, "Layout")
+            .category
+            .as_ref()
+            .unwrap()
+            .expanded
+    );
+    search.set_text(Some("@modified"));
+    workspace.rebuild_properties();
+    let rows = workspace.inspectors.property_source.items().to_vec();
+    assert!(rows.iter().any(|row| row.name == "Width"));
+    assert!(
+        rows.iter()
+            .filter(|row| row.category.is_none())
+            .all(|row| row.can_reset)
+    );
+    search.set_text(Some("appearance opacity"));
+    workspace.rebuild_properties();
+    assert!(property(&workspace, "Opacity").context.is_some());
+}
+
+#[test]
+fn inspector_layout_attached_properties_follow_parent_and_keep_explicit_overrides() {
+    let _app = UnitTestApplication::start(TestServices::styled_window());
+    let source = r#"<Grid xmlns="https://github.com/ferroui"><Grid.Children><Button Name="GridChild" /><Canvas><Button Name="CanvasChild" Grid.Row="2" /></Canvas></Grid.Children></Grid>"#;
+    let workspace = DesignerWorkspace::new(source).unwrap();
+    select_named(&workspace, &["GridChild"]);
+    let names = || {
+        workspace
+            .inspectors
+            .property_source
+            .items()
+            .to_vec()
+            .into_iter()
+            .map(|row| row.name.clone())
+            .collect::<BTreeSet<_>>()
+    };
+    assert!(names().contains("Grid.Row"));
+    assert!(!names().contains("Canvas.Left"));
+    select_named(&workspace, &["CanvasChild"]);
+    assert!(names().contains("Canvas.Left"));
+    assert!(
+        names().contains("Grid.Row"),
+        "an existing override is never hidden after reparenting"
+    );
+    assert!(!names().contains("Grid.Column"));
+}
+
+#[test]
+fn inspector_compound_edit_is_one_undoable_transaction_and_retired_editor_cannot_write() {
+    use ferroui_base::input::KeyEventArgs;
+    let _app = UnitTestApplication::start(TestServices::styled_window());
+    let workspace = DesignerWorkspace::new(
+        r#"<Border xmlns="https://github.com/ferroui" Name="Card" Margin="1,2,3,4" />"#,
+    )
+    .unwrap();
+    let id = select_named(&workspace, &["Card"])[0];
+    let row = property(&workspace, "Margin");
+    let cell = property_cell(&row);
+    let editor = cell;
+    let window = Window::new();
+    window.set_content(Some(Control::boxed(&editor)));
+    window.show();
+    window.update_layout();
+    let fields = editor
+        .get_visual_descendants()
+        .filter_map(|visual| visual.cast::<TextBox>())
+        .collect::<Vec<_>>();
+    assert_eq!(fields.len(), 4);
+    fields[0].set_text(Some("12"));
+    fields[1].set_text(Some("24"));
+    let mut enter = KeyEventArgs::new();
+    enter.key = Key::Enter;
+    enter.set_routed_event(Some(InputElement::key_down_event()));
+    fields[1].raise_event(&enter);
+    assert_eq!(
+        workspace
+            .session
+            .borrow()
+            .document()
+            .ast()
+            .node(id)
+            .unwrap()
+            .attribute("Margin"),
+        Some("12,24,3,4")
+    );
+    fields[0].set_text(Some("999"));
+    enter.set_handled(false);
+    fields[0].raise_event(&enter);
+    assert_eq!(
+        workspace
+            .session
+            .borrow()
+            .document()
+            .ast()
+            .node(id)
+            .unwrap()
+            .attribute("Margin"),
+        Some("12,24,3,4")
+    );
+    workspace.session.borrow_mut().undo().unwrap();
+    assert_eq!(
+        workspace
+            .session
+            .borrow()
+            .document()
+            .ast()
+            .node(id)
+            .unwrap()
+            .attribute("Margin"),
+        Some("1,2,3,4")
+    );
+    window.close();
+}
+
+#[test]
+fn inspector_native_property_drop_validates_before_copy_and_rejects_retired_or_read_only_rows() {
+    use ferroui_base::input::{DataTransfer, DataTransferItem, DragEventArgs};
+    use ferroui_base::interactivity::Interactive;
+    let _app = UnitTestApplication::start(TestServices::styled_window());
+    let workspace = DesignerWorkspace::new(DOCUMENT).unwrap();
+    let id = select_named(&workspace, &["First"])[0];
+    let cell = property_cell(&property(&workspace, "Width"));
+    let transfer = |text: &str, typed: Option<&str>| {
+        let data = DataTransfer::new();
+        let item = DataTransferItem::create_text(Some(text));
+        if let Some(typed) = typed {
+            item.set(
+                &crate::property_controls::property_value_data_format(),
+                Some(typed.to_owned()),
+            );
+        }
+        data.add(item);
+        data
+    };
+    let raise = |cell: &Ref<Control>, data: Rc<DataTransfer>, drop: bool| {
+        let routed = if drop {
+            DragDrop::drop_event()
+        } else {
+            DragDrop::drag_over_event()
+        };
+        let event = DragEventArgs::new(
+            Some(&routed),
+            data,
+            cell.clone().upcast::<Interactive>(),
+            ferroui_base::Point::new(2.0, 2.0),
+            KeyModifiers::NONE,
+        );
+        event.set_drag_effects(DragDropEffects::COPY);
+        cell.raise_event(&event);
+        event
+    };
+    let rejected = raise(&cell, transfer("not a number", None), false);
+    assert_eq!(rejected.drag_effects(), DragDropEffects::NONE);
+    assert!(rejected.handled());
+    assert_eq!(workspace.session.borrow().document().source(), DOCUMENT);
+    let hover = raise(&cell, transfer("999", Some("123")), false);
+    assert_eq!(hover.drag_effects(), DragDropEffects::COPY);
+    assert!(cell.classes().contains("property-drop-target"));
+    let accepted = raise(&cell, transfer("999", Some("123")), true);
+    assert_eq!(accepted.drag_effects(), DragDropEffects::COPY);
+    assert!(!cell.classes().contains("property-drop-target"));
+    assert_eq!(
+        workspace
+            .session
+            .borrow()
+            .document()
+            .ast()
+            .node(id)
+            .unwrap()
+            .attribute("Width"),
+        Some("123")
+    );
+    let stale = raise(&cell, transfer("999", None), true);
+    assert_eq!(stale.drag_effects(), DragDropEffects::NONE);
+    assert_eq!(
+        workspace
+            .session
+            .borrow()
+            .document()
+            .ast()
+            .node(id)
+            .unwrap()
+            .attribute("Width"),
+        Some("123")
+    );
+    workspace.session.borrow_mut().undo().unwrap();
+    workspace.refresh(true);
+    assert_eq!(
+        workspace
+            .session
+            .borrow()
+            .document()
+            .ast()
+            .node(id)
+            .unwrap()
+            .attribute("Width"),
+        Some("80")
+    );
+    let current = property_cell(&property(&workspace, "Width"));
+    workspace.session.borrow_mut().set_read_only(true);
+    assert_eq!(
+        raise(&current, transfer("321", None), true).drag_effects(),
+        DragDropEffects::NONE
+    );
+    assert_eq!(
+        workspace
+            .session
+            .borrow()
+            .document()
+            .ast()
+            .node(id)
+            .unwrap()
+            .attribute("Width"),
+        Some("80")
+    );
+}
+
+#[test]
+fn inspector_reference_drops_keep_ast_identity_namescopes_and_resource_shadowing() {
+    use crate::property_controls::{PropertyReference, PropertyReferenceKind};
+    let _app = UnitTestApplication::start(TestServices::styled_window());
+    let source = r#"<StackPanel xmlns="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"><StackPanel.Resources><SolidColorBrush x:Key="Accent" Color="Red" /></StackPanel.Resources><Border Name="Outer" /><StackPanel><StackPanel.Resources><SolidColorBrush x:Key="Accent" Color="Blue" /></StackPanel.Resources><Border Name="Inner" /></StackPanel><Button><Button.Template><ControlTemplate><Border Name="TemplatePart" /></ControlTemplate></Button.Template></Button></StackPanel>"#;
+    let session = DesignerSession::new(source, ContentControl::new()).unwrap();
+    let ast = session.document().ast();
+    let outer = ast.find_name("Outer").unwrap();
+    let inner = ast.find_name("Inner").unwrap();
+    let template = ast.find_name("TemplatePart").unwrap();
+    let resources = ast
+        .nodes_in_source_order()
+        .filter(|node| resource_key(node) == Some("Accent"))
+        .map(|node| node.id)
+        .collect::<Vec<_>>();
+    let reference = |node, kind| PropertyReference {
+        document_uri: session.document_uri().to_owned(),
+        revision: session.document().revision(),
+        ast: session.document().ast_snapshot(),
+        node,
+        kind,
+    };
+    assert!(property_reference_applies(
+        &reference(outer, PropertyReferenceKind::Element),
+        &session,
+        &[inner]
+    ));
+    assert!(!property_reference_applies(
+        &reference(outer, PropertyReferenceKind::Element),
+        &session,
+        &[template]
+    ));
+    assert!(property_reference_applies(
+        &reference(resources[0], PropertyReferenceKind::Resource),
+        &session,
+        &[outer]
+    ));
+    assert!(
+        !property_reference_applies(
+            &reference(resources[0], PropertyReferenceKind::Resource),
+            &session,
+            &[inner]
+        ),
+        "a shadowed key must not silently reference a different resource"
+    );
+    assert!(property_reference_applies(
+        &reference(resources[1], PropertyReferenceKind::Resource),
+        &session,
+        &[inner]
+    ));
+    assert!(!property_reference_applies(
+        &reference(resources[1], PropertyReferenceKind::Resource),
+        &session,
+        &[outer]
+    ));
+    let mut stale = reference(outer, PropertyReferenceKind::Element);
+    stale.ast = ferroui_designer_core::Document::new(source)
+        .unwrap()
+        .ast_snapshot();
+    assert!(
+        !property_reference_applies(&stale, &session, &[inner]),
+        "matching node IDs, URI and revision cannot substitute another AST identity"
+    );
+}
+
+#[test]
+fn inspector_resource_drop_lookup_prefers_local_values_then_last_merged_dictionary() {
+    let source = r#"<ResourceDictionary xmlns="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"><ResourceDictionary.MergedDictionaries><ResourceDictionary><SolidColorBrush x:Key="Accent" Color="Red" /></ResourceDictionary><ResourceDictionary><SolidColorBrush x:Key="Accent" Color="Blue" /></ResourceDictionary></ResourceDictionary.MergedDictionaries><SolidColorBrush x:Key="Accent" Color="Green" /></ResourceDictionary>"#;
+    let mut document = ferroui_designer_core::Document::new(source).unwrap();
+    let local = document
+        .ast()
+        .nodes()
+        .find(|node| node.attribute("Color") == Some("Green"))
+        .unwrap()
+        .id;
+    let merged = document
+        .ast()
+        .nodes()
+        .find(|node| node.attribute("Color") == Some("Blue"))
+        .unwrap()
+        .id;
+    assert_eq!(
+        scoped_resource(document.ast(), document.ast().root(), "Accent"),
+        Some(local)
+    );
+    document
+        .apply(
+            "Remove local resource",
+            vec![ferroui_designer_core::Edit::RemoveNode { node: local }],
+        )
+        .unwrap();
+    assert_eq!(
+        scoped_resource(document.ast(), document.ast().root(), "Accent"),
+        Some(merged)
+    );
 }
 
 fn select_named(workspace: &Rc<DesignerWorkspace>, names: &[&str]) -> Vec<NodeId> {
@@ -145,15 +497,17 @@ fn inspector_property_transactions_preserve_mixed_expression_reset_and_stale_edi
     );
     let width = property(&workspace, "Width");
     (width.context.as_ref().unwrap().apply)(None);
-    assert!(ids.iter().all(|id| workspace
-        .session
-        .borrow()
-        .document()
-        .ast()
-        .node(*id)
-        .unwrap()
-        .attribute("Width")
-        .is_none()));
+    assert!(ids.iter().all(|id| {
+        workspace
+            .session
+            .borrow()
+            .document()
+            .ast()
+            .node(*id)
+            .unwrap()
+            .attribute("Width")
+            .is_none()
+    }));
 
     select_named(&workspace, &["First"]);
     let content = property(&workspace, "Content");
@@ -207,9 +561,11 @@ fn inspector_stale_property_context_cannot_target_a_different_document_or_read_o
     replacement.select(ids.iter().copied());
     assert_eq!(replacement.document().revision(), revision);
     *workspace.session.borrow_mut() = replacement;
-    assert!(!workspace
-        .inspectors
-        .source_outline_is_current(&workspace.session.borrow()));
+    assert!(
+        !workspace
+            .inspectors
+            .source_outline_is_current(&workspace.session.borrow())
+    );
     workspace
         .inspectors
         .outline
@@ -226,9 +582,11 @@ fn inspector_stale_property_context_cannot_target_a_different_document_or_read_o
     (stale.apply)(Some("999".into()));
     assert_eq!(workspace.session.borrow().document().source(), DOCUMENT);
     workspace.rebuild_outline();
-    assert!(workspace
-        .inspectors
-        .source_outline_is_current(&workspace.session.borrow()));
+    assert!(
+        workspace
+            .inspectors
+            .source_outline_is_current(&workspace.session.borrow())
+    );
     assert!(
         !Rc::ptr_eq(
             &stale_root,
@@ -352,9 +710,18 @@ fn inspector_property_factories_and_tree_rows_are_virtualized_in_a_constrained_d
     assert!(
         created.get() > 0 && created.get() < property_count,
         "created {} of {property_count} property editors; window {:?}, property grid {:?}, presenter {:?}, rows {}",
-        created.get(), window.bounds(), workspace.property_grid().bounds(),
-        workspace.property_grid().rows_presenter().map(|presenter| (presenter.bounds(), presenter.viewport())),
-        workspace.property_grid().rows_presenter().map(|presenter| presenter.realized_elements().into_iter().flatten().count()).unwrap_or(0),
+        created.get(),
+        window.bounds(),
+        workspace.property_grid().bounds(),
+        workspace
+            .property_grid()
+            .rows_presenter()
+            .map(|presenter| (presenter.bounds(), presenter.viewport())),
+        workspace
+            .property_grid()
+            .rows_presenter()
+            .map(|presenter| presenter.realized_elements().into_iter().flatten().count())
+            .unwrap_or(0),
     );
     assert_eq!(workspace.property_grid().columns().unwrap().count(), 2);
     window.close();
@@ -410,18 +777,24 @@ fn inspector_builtin_editors_use_native_types_and_keep_special_values_as_source(
         runtime_type: Some("f64".into()),
         apply: Rc::new(|_| {}),
     };
-    assert!(crate::editors::built_in(&context)
-        .cast::<NumericUpDown>()
-        .is_some());
+    assert!(
+        crate::editors::built_in(&context)
+            .cast::<NumericUpDown>()
+            .is_some()
+    );
     let mut special = context.clone();
     special.value = Some("Auto".into());
-    assert!(crate::editors::built_in(&special)
-        .cast::<TextBox>()
-        .is_some());
+    assert!(
+        crate::editors::built_in(&special)
+            .cast::<TextBox>()
+            .is_some()
+    );
     special.value = Some("{Binding Size}".into());
-    assert!(crate::editors::built_in(&special)
-        .cast::<TextBox>()
-        .is_some());
+    assert!(
+        crate::editors::built_in(&special)
+            .cast::<TextBox>()
+            .is_some()
+    );
     let boolean = PropertyEditorContext {
         property: "IsVisible".into(),
         runtime_type: Some("bool".into()),
@@ -442,14 +815,21 @@ fn inspector_builtin_editors_use_native_types_and_keep_special_values_as_source(
         mixed: true,
         ..context
     };
-    let combo = crate::editors::built_in(&enumeration)
-        .cast::<ComboBox>()
+    let choices = crate::editors::built_in(&enumeration)
+        .cast::<Grid>()
         .unwrap();
-    assert_eq!(combo.selected_index(), 0);
     assert_eq!(
-        combo.items().count(),
-        6,
-        "mixed placeholder, inherited, four enum values"
+        choices.children().count(),
+        4,
+        "four keyboard-accessible alignment choices"
+    );
+    assert!(
+        choices
+            .children()
+            .to_vec()
+            .iter()
+            .all(|child| !child.classes().contains("active")),
+        "a mixed value must not choose an arbitrary alignment"
     );
 }
 
@@ -727,18 +1107,22 @@ fn inspector_property_elements_reveal_source_reset_atomically_and_keep_metadata_
         .as_ref()
         .unwrap()
         .apply)(None);
-    assert!(!workspace
-        .session
-        .borrow()
-        .document()
-        .source()
-        .contains("Button.Background"));
-    assert!(workspace
-        .session
-        .borrow()
-        .document()
-        .source()
-        .contains("Button.Styles"));
+    assert!(
+        !workspace
+            .session
+            .borrow()
+            .document()
+            .source()
+            .contains("Button.Background")
+    );
+    assert!(
+        workspace
+            .session
+            .borrow()
+            .document()
+            .source()
+            .contains("Button.Styles")
+    );
     workspace.session.borrow_mut().undo().unwrap();
     assert_eq!(workspace.session.borrow().document().source(), source);
 }
@@ -791,7 +1175,10 @@ fn inspector_tooltip_samples_animation_without_replacing_the_editor_or_authored_
         .property_grid()
         .get_visual_descendants()
         .filter_map(|visual| visual.cast::<Control>())
-        .find(|control| tooltip(control).starts_with("Opacity ·"))
+        .find(|control| {
+            control.classes().contains("property-value-cell")
+                && tooltip(control).starts_with("Opacity ·")
+        })
         .expect("realized Opacity value cell");
     let editor = cell
         .get_visual_descendants()
@@ -810,10 +1197,11 @@ fn inspector_tooltip_samples_animation_without_replacing_the_editor_or_authored_
     assert!(tip.contains("Runtime origin: Animation"), "{tip}");
     assert!(tip.contains("Authored value: Local value"), "{tip}");
     assert!(Rc::ptr_eq(&row, &property(&workspace, "Opacity")));
-    assert!(cell
-        .get_visual_descendants()
-        .filter_map(|visual| visual.cast::<NumericUpDown>())
-        .any(|current| current.ptr_eq(&editor)));
+    assert!(
+        cell.get_visual_descendants()
+            .filter_map(|visual| visual.cast::<NumericUpDown>())
+            .any(|current| current.ptr_eq(&editor))
+    );
     assert_eq!(editor.text().as_deref(), Some("0.37"));
     assert_eq!(
         workspace

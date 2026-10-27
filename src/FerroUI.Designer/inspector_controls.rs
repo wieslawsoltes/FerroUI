@@ -3,6 +3,7 @@
 use super::*;
 use ferroui_base::data::BindingOperations;
 use ferroui_base::diagnostics::FerroObjectDiagnosticExtensions;
+use ferroui_base::input::{DataTransferExtensions, DragDrop, DragDropEffects, IDataTransfer};
 use ferroui_base::layout::VerticalAlignment;
 use ferroui_base::{BoxedValue, FerroObject};
 use ferroui_controls::automation::AutomationProperties;
@@ -60,7 +61,13 @@ impl HierarchyGrid {
         let source = HierarchicalTreeDataGridSource::new(Rc::new(Vec::<Rc<TreeRow>>::new()))
             .with_hierarchical_expander_text_column(
                 heading(if project { "Project / file" } else { "Element" }),
-                Accessor::member("Label", |row: &Rc<TreeRow>| row.entry.label.clone()),
+                Accessor::member("Label", move |row: &Rc<TreeRow>| {
+                    if !project && !row.entry.name.is_empty() {
+                        row.entry.name.clone()
+                    } else {
+                        row.entry.label.clone()
+                    }
+                }),
                 |row| Some(row.children.clone() as Models<TreeRow>),
                 |options| {
                     options.width = GridLength::new(1.0, GridUnitType::Star);
@@ -77,11 +84,19 @@ impl HierarchyGrid {
                 },
             )
             .with_text_column(
-                heading(if project { "Kind" } else { "Name" }),
-                Accessor::member("Name", |row: &Rc<TreeRow>| row.entry.name.clone()),
+                heading(if project { "Kind" } else { "Type" }),
+                Accessor::member("Name", move |row: &Rc<TreeRow>| {
+                    if project {
+                        row.entry.name.clone()
+                    } else if row.entry.name.is_empty() {
+                        String::new()
+                    } else {
+                        row.entry.label.clone()
+                    }
+                }),
                 |options| {
                     options.width =
-                        GridLength::new(if project { 70.0 } else { 85.0 }, GridUnitType::Pixel);
+                        GridLength::new(if project { 70.0 } else { 68.0 }, GridUnitType::Pixel);
                     options.is_read_only = true;
                     options.can_user_sort_column = Some(false);
                 },
@@ -257,6 +272,7 @@ impl HierarchyGrid {
 }
 
 pub(super) struct PropertyRow {
+    category: Option<PropertyCategoryHeader>,
     pub name: String,
     pub display_value: String,
     pub effective: String,
@@ -266,9 +282,27 @@ pub(super) struct PropertyRow {
     pub factories: Rc<Vec<Rc<dyn PropertyEditorFactory>>>,
     pub can_reset: bool,
     pub reveal: Option<Rc<dyn Fn()>>,
+    validate_drop: Option<PropertyDropValidator>,
     // Resolve on hover so animations can update diagnostics without replacing an editor
     // or changing the authored value while the user is typing.
     tooltip: Rc<dyn Fn() -> Option<String>>,
+}
+
+struct PropertyCategoryHeader {
+    count: usize,
+    expanded: bool,
+    toggle: Rc<dyn Fn()>,
+}
+
+type PropertyDropValidator = Rc<dyn Fn(&PropertyDropPayload) -> bool>;
+struct PropertyDropPayload {
+    value: String,
+    reference: Option<crate::property_controls::PropertyReference>,
+}
+struct CachedPropertyDrop {
+    value: String,
+    reference: Option<(NodeId, crate::property_controls::PropertyReferenceKind)>,
+    accepted: bool,
 }
 
 impl PartialEq for PropertyRow {
@@ -316,9 +350,14 @@ pub(super) struct InspectorControls {
     pub property_source: Rc<FlatTreeDataGridSource<PropertyRow>>,
     guard: Cell<bool>,
     outline_snapshot: RefCell<Option<OutlineSnapshot>>,
+    property_expansion: RefCell<BTreeMap<&'static str, bool>>,
 }
 
 impl InspectorControls {
+    pub(super) fn replace_selection_guard(&self, guarded: bool) -> bool {
+        self.guard.replace(guarded)
+    }
+
     pub(super) fn source_outline_is_current(&self, session: &DesignerSession) -> bool {
         self.outline_snapshot
             .borrow()
@@ -332,12 +371,16 @@ impl InspectorControls {
         let outline = HierarchyGrid::new("Objects and document hierarchy", false);
         let project = HierarchyGrid::new("Solution explorer", true);
         let property_source = FlatTreeDataGridSource::new(Rc::new(Vec::<Rc<PropertyRow>>::new()))
-            .with_text_column(
+            .with_template_column(
                 heading("Property"),
-                Accessor::member("Property", |row: &Rc<PropertyRow>| row.name.clone()),
+                FuncDataTemplate::for_type::<PropertyRow>(
+                    |row, _| Some(property_label(row)),
+                    false,
+                ),
+                None,
                 |options| {
-                    options.width = GridLength::new(115.0, GridUnitType::Pixel);
-                    options.is_read_only = true;
+                    options.width = GridLength::new(110.0, GridUnitType::Pixel);
+                    options.min_width = GridLength::new(80.0, GridUnitType::Pixel);
                     options.can_user_sort_column = Some(false);
                 },
             )
@@ -353,6 +396,7 @@ impl InspectorControls {
             );
         let properties = make_grid("Property inspector");
         properties.classes().add("property-inspector");
+        properties.set_show_column_headers(false);
         properties.set_source(Some(TreeDataGridSourceRef::of::<PropertyRow, _>(
             property_source.clone(),
         )));
@@ -371,6 +415,7 @@ impl InspectorControls {
             property_source,
             guard: Cell::new(false),
             outline_snapshot: RefCell::new(None),
+            property_expansion: RefCell::new(BTreeMap::new()),
         }
     }
 
@@ -419,9 +464,20 @@ fn make_grid(name: &str) -> Ref<TreeDataGrid> {
 }
 
 fn property_cell(row: &PropertyRow) -> Ref<Control> {
+    if let Some(category) = &row.category {
+        let count = TextBlock::new();
+        count.set_text(Some(&format!("{}", category.count)));
+        count.set_font_size(10.0);
+        count.set_foreground(Some(SolidColorBrush::from_uint32(0xff999999).into()));
+        count.set_margin(Thickness::new(6.0, 0.0, 6.0, 0.0));
+        count.set_vertical_alignment(VerticalAlignment::Center);
+        count.set_horizontal_alignment(HorizontalAlignment::Right);
+        return count.upcast::<Control>();
+    }
     let cell = Grid::new();
+    cell.classes().add("property-value-cell");
     cell.set_column_definitions(ColumnDefinitions::parse("*,Auto").unwrap());
-    cell.set_min_height(30.0);
+    cell.set_min_height(26.0);
     ToolTip::set_tip(
         &cell,
         Some(Rc::new(format!(
@@ -441,13 +497,32 @@ fn property_cell(row: &PropertyRow) -> Ref<Control> {
         }
     });
     if let Some(context) = &row.context {
+        if let Some(validate) = &row.validate_drop {
+            connect_property_drop(&cell, context.apply.clone(), validate.clone());
+        }
         let editor = if let Some(reveal) = &row.reveal {
             property_source_link("Edit XAML…", reveal)
         } else {
             row.factories
                 .iter()
                 .find_map(|factory| factory.create(context))
-                .unwrap_or_else(|| crate::editors::built_in(context))
+                .unwrap_or_else(|| {
+                    // Typed editors start from the accepted effective value when inherited.
+                    // Initialization never calls the revision-bound authoring callback.
+                    let mut effective_context = context.clone();
+                    if context.value.is_none()
+                        && !context.mixed
+                        && (crate::editors::components_kind(context).is_some()
+                            || (crate::editors::numeric_options(context).is_some()
+                                && row
+                                    .effective
+                                    .parse::<f64>()
+                                    .is_ok_and(|value| value.is_finite())))
+                    {
+                        effective_context.value = Some(row.effective.clone());
+                    }
+                    crate::editors::built_in(&effective_context)
+                })
         };
         if context.value.is_none() && !context.mixed {
             if let Some(text) = editor.cast::<TextBox>() {
@@ -467,14 +542,14 @@ fn property_cell(row: &PropertyRow) -> Ref<Control> {
                 }
             }
         }
-        editor.set_min_height(28.0);
+        editor.set_min_height(26.0);
         editor.set_vertical_alignment(VerticalAlignment::Center);
         editor.classes().add("property-editor");
         AutomationProperties::set_name(&editor, Some(&format!("{} value", row.name)));
         cell.children().add(editor);
         let reset = button("↺");
         reset.classes().add("property-reset");
-        reset.set_width(26.0);
+        reset.set_width(20.0);
         reset.set_min_width(0.0);
         reset.set_padding(Thickness::new(2.0, 2.0, 2.0, 2.0));
         reset.set_is_enabled(row.can_reset);
@@ -494,12 +569,211 @@ fn property_cell(row: &PropertyRow) -> Ref<Control> {
         let value = TextBox::new();
         value.set_text(Some(&row.display_value));
         value.set_is_read_only(true);
-        value.set_min_height(28.0);
+        value.set_min_height(26.0);
         value.set_font_size(12.0);
         AutomationProperties::set_name(&value, Some(&format!("{} read only value", row.name)));
         cell.children().add(value.upcast::<Control>());
     }
-    cell.upcast()
+    cell.upcast::<Control>()
+}
+
+fn dropped_property_value(data: &dyn IDataTransfer) -> Option<PropertyDropPayload> {
+    Some(PropertyDropPayload {
+        value: data
+            .try_get_value(&crate::property_controls::property_value_data_format())
+            .or_else(|| data.try_get_text())?,
+        reference: data.try_get_value(&crate::property_controls::property_reference_data_format()),
+    })
+}
+
+/// Native drops use the same validation and revision-bound commit as typing. Marking the
+/// event handled keeps TreeDataGrid's row-reorder machinery out of a property-value edit.
+fn connect_property_drop(
+    cell: &Ref<Grid>,
+    apply: Rc<dyn Fn(Option<String>)>,
+    validate: PropertyDropValidator,
+) {
+    DragDrop::set_allow_drop(cell, true);
+    let accepts = validate.clone();
+    let weak = cell.downgrade();
+    DragDrop::add_drag_over_handler(cell, move |_, event| {
+        let accepted = event.drag_effects().contains(DragDropEffects::COPY)
+            && dropped_property_value(event.data_transfer().as_ref())
+                .is_some_and(|value| accepts(&value));
+        event.set_drag_effects(if accepted {
+            DragDropEffects::COPY
+        } else {
+            DragDropEffects::NONE
+        });
+        if let Some(cell) = weak.upgrade() {
+            cell.classes().set("property-drop-target", accepted);
+            cell.set_background(Some(
+                SolidColorBrush::from_uint32(if accepted { 0xff35474e } else { 0x00000000 }).into(),
+            ));
+        }
+        event.set_handled(true);
+    });
+    let weak = cell.downgrade();
+    DragDrop::add_drag_leave_handler(cell, move |_, _| {
+        if let Some(cell) = weak.upgrade() {
+            cell.classes().remove("property-drop-target");
+            cell.set_background(Some(SolidColorBrush::from_uint32(0x00000000).into()));
+        }
+    });
+    let weak = cell.downgrade();
+    DragDrop::add_drop_handler(cell, move |_, event| {
+        if let Some(cell) = weak.upgrade() {
+            cell.classes().remove("property-drop-target");
+            cell.set_background(Some(SolidColorBrush::from_uint32(0x00000000).into()));
+        }
+        let value = dropped_property_value(event.data_transfer().as_ref()).filter(|value| {
+            event.drag_effects().contains(DragDropEffects::COPY) && validate(value)
+        });
+        event.set_drag_effects(if value.is_some() {
+            DragDropEffects::COPY
+        } else {
+            DragDropEffects::NONE
+        });
+        event.set_handled(true);
+        if let Some(value) = value {
+            apply(Some(value.value));
+        }
+    });
+}
+
+fn property_label(row: &PropertyRow) -> Ref<Control> {
+    if let Some(category) = &row.category {
+        let label = button(&format!(
+            "{} {}",
+            if category.expanded { "⌄" } else { "›" },
+            row.name
+        ));
+        label.classes().add("property-category");
+        label.set_min_height(26.0);
+        label.set_min_width(0.0);
+        label.set_font_size(11.0);
+        label.set_padding(Thickness::new(2.0, 3.0, 0.0, 3.0));
+        label.set_horizontal_content_alignment(HorizontalAlignment::Left);
+        label.set_background(Some(SolidColorBrush::from_uint32(0x00000000).into()));
+        label.set_border_thickness(Thickness::uniform(0.0));
+        AutomationProperties::set_name(
+            &label,
+            Some(&format!(
+                "{} {} properties",
+                if category.expanded {
+                    "Collapse"
+                } else {
+                    "Expand"
+                },
+                row.name
+            )),
+        );
+        let toggle = category.toggle.clone();
+        label.click(move |_, _| toggle());
+        return label.upcast::<Control>();
+    }
+    let root = Grid::new();
+    root.set_column_definitions(ColumnDefinitions::parse("7,*").unwrap());
+    let state = TextBlock::new();
+    state.set_text(Some(if row.origin == "Expression" {
+        "◆"
+    } else if row.can_reset {
+        "•"
+    } else {
+        ""
+    }));
+    state.set_font_size(9.0);
+    state.set_foreground(Some(
+        SolidColorBrush::from_uint32(if row.origin == "Expression" {
+            0xffc6a7ef
+        } else {
+            0xff60cdff
+        })
+        .into(),
+    ));
+    state.set_vertical_alignment(VerticalAlignment::Center);
+    root.children().add(state.upcast::<Control>());
+    let scrubber = row
+        .context
+        .as_ref()
+        .filter(|context| !context.mixed && row.reveal.is_none())
+        .and_then(|context| {
+            let options = crate::editors::numeric_options(context)?;
+            let value = context
+                .value
+                .as_deref()
+                .unwrap_or(&row.effective)
+                .trim()
+                .parse::<f64>()
+                .ok()
+                .filter(|value| value.is_finite())?;
+            let scrubber = crate::PropertyNumberScrubber::new();
+            scrubber
+                .configure(property_label_text(&row.name), value, options)
+                .ok()?;
+            AutomationProperties::set_name(&scrubber, Some(&format!("Adjust {}", row.name)));
+            let apply = context.apply.clone();
+            scrubber
+                .on_commit(move |value| apply(Some(crate::property_controls::number_text(value))));
+            Some(scrubber.upcast::<Control>())
+        });
+    let label = scrubber.unwrap_or_else(|| {
+        let label = TextBlock::new();
+        label.set_text(Some(property_label_text(&row.name)));
+        label.set_font_size(11.0);
+        label.set_vertical_alignment(VerticalAlignment::Center);
+        label.set_text_trimming(<dyn ferroui_base::media::TextTrimming>::character_ellipsis());
+        label.upcast::<Control>()
+    });
+    ToolTip::set_tip(
+        &label,
+        Some(Rc::new(format!(
+            "{} · {}\n{}{}",
+            row.name,
+            row.runtime_type,
+            row.origin,
+            if label.cast::<crate::PropertyNumberScrubber>().is_some() {
+                "\nDrag to adjust · Shift ×10 · Ctrl ÷10 · Escape cancels"
+            } else {
+                ""
+            }
+        ))),
+    );
+    Grid::set_column(&label, 1);
+    root.children().add(label);
+    root.upcast::<Control>()
+}
+
+fn property_label_text(name: &str) -> &str {
+    match name {
+        "HorizontalAlignment" => "Horizontal",
+        "VerticalAlignment" => "Vertical",
+        "HorizontalContentAlignment" => "Content H align",
+        "VerticalContentAlignment" => "Content V align",
+        "Canvas.Left" => "X",
+        "Canvas.Top" => "Y",
+        "Canvas.Right" => "Right edge",
+        "Canvas.Bottom" => "Bottom edge",
+        "Grid.Row" => "Row",
+        "Grid.Column" => "Column",
+        "Grid.RowSpan" => "Row span",
+        "Grid.ColumnSpan" => "Column span",
+        "MinWidth" => "Min width",
+        "MaxWidth" => "Max width",
+        "MinHeight" => "Min height",
+        "MaxHeight" => "Max height",
+        "BorderBrush" => "Border color",
+        "BorderThickness" => "Border width",
+        "CornerRadius" => "Corner radius",
+        "RenderTransform" => "Transform",
+        "RenderTransformOrigin" => "Transform origin",
+        "FontFamily" => "Font family",
+        "FontSize" => "Font size",
+        "FontWeight" => "Font weight",
+        "TextWrapping" => "Text wrapping",
+        "TextAlignment" => "Text alignment",
+        _ => name,
+    }
 }
 
 fn property_source_link(label: &str, reveal: &Rc<dyn Fn()>) -> Ref<Control> {
@@ -508,7 +782,7 @@ fn property_source_link(label: &str, reveal: &Rc<dyn Fn()>) -> Ref<Control> {
     link.set_horizontal_content_alignment(HorizontalAlignment::Left);
     let reveal = reveal.clone();
     link.click(move |_, _| reveal());
-    link.upcast()
+    link.upcast::<Control>()
 }
 
 fn live_property_tooltip(object: &FerroObject, name: &str, origin: &str) -> Option<String> {
@@ -927,7 +1201,28 @@ impl DesignerWorkspace {
                     || property_element(session.document(), first, name).is_some()
                     || known.as_ref().is_none_or(|known| known.contains(name))
             })
-            .filter(|name| filter.is_empty() || name.to_ascii_lowercase().contains(&filter))
+            .filter(|name| {
+                selected.iter().any(|id| {
+                    session.document().ast().node(*id).is_some_and(|node| {
+                        node.attribute(name).is_some()
+                            || property_element(session.document(), node, name).is_some()
+                    })
+                }) || selected
+                    .iter()
+                    .all(|id| attached_layout_property_applies(session.document(), *id, name))
+            })
+            .filter(|name| {
+                property_matches_filter(
+                    name,
+                    &filter,
+                    selected.iter().any(|id| {
+                        session.document().ast().node(*id).is_some_and(|node| {
+                            node.attribute(name).is_some()
+                                || property_element(session.document(), node, name).is_some()
+                        })
+                    }),
+                )
+            })
             .map(|name| {
                 let document = session.document();
                 let first_value = first.attribute(&name).map(str::to_owned);
@@ -1044,6 +1339,36 @@ impl DesignerWorkspace {
                         }
                     }) as Rc<dyn Fn()>
                 });
+                let validate_drop = (!read_only && graph.is_none()).then(|| {
+                    let weak = weak.clone();
+                    let uri = uri.clone();
+                    let ast_snapshot = ast_snapshot.clone();
+                    let ids = ids.clone();
+                    let property = property.clone();
+                    let cached = RefCell::<Option<CachedPropertyDrop>>::new(None);
+                    Rc::new(move |payload: &PropertyDropPayload| {
+                        let Some(this) = weak.upgrade() else { return false; };
+                        let Ok(session) = this.session.try_borrow() else { return false; };
+                        if this.pending_source.get() || this.runtime_selection.get().is_some()
+                            || session.is_read_only() || session.document_uri() != uri
+                            || session.document().revision() != revision
+                            || session.selection() != ids.as_slice()
+                            || !std::ptr::eq(ast_snapshot.as_ref(), session.document().ast()) {
+                            return false;
+                        }
+                        if payload.reference.as_ref().is_some_and(|reference| !property_reference_is_current(reference, &session)) {
+                            return false;
+                        }
+                        let value = payload.value.as_str();
+                        let reference = payload.reference.as_ref().map(|reference| (reference.node, reference.kind));
+                        if let Some(previous) = cached.borrow().as_ref() {
+                            if previous.value == value && previous.reference == reference { return previous.accepted; }
+                        }
+                        let accepted = payload.reference.as_ref().is_none_or(|reference| property_reference_applies(reference, &session, &ids)) && session.property_tools().plan(session.document(), &ids, &property, Some(value), ferroui_designer_tools::ExpressionPolicy::ReplaceExpressions).is_ok();
+                        *cached.borrow_mut() = Some(CachedPropertyDrop { value: value.to_owned(), reference, accepted });
+                        accepted
+                    }) as PropertyDropValidator
+                });
                 let context = (!read_only).then(|| PropertyEditorContext {
                     property: name.clone(),
                     targets: selected.clone(),
@@ -1083,6 +1408,7 @@ impl DesignerWorkspace {
                     }),
                 });
                 Rc::new(PropertyRow {
+                    category: None,
                     name,
                     display_value,
                     effective: displayed,
@@ -1092,11 +1418,12 @@ impl DesignerWorkspace {
                     factories: factories.clone(),
                     can_reset,
                     reveal,
+                    validate_drop,
                     tooltip,
                 })
             })
             .collect::<Vec<_>>();
-        self.inspectors.property_source.set_items(Rc::new(rows));
+        self.set_property_rows(rows, !filter.trim().is_empty());
     }
 
     fn rebuild_runtime_properties(self: &Rc<Self>, id: u64) -> bool {
@@ -1120,13 +1447,14 @@ impl DesignerWorkspace {
         drop(session);
         let mut rows = Inspector::properties(&object)
             .into_iter()
-            .filter(|info| filter.is_empty() || info.name.to_lowercase().contains(&filter))
+            .filter(|info| property_matches_filter(&info.name, &filter, false))
             .map(|info| {
                 let weak = Rc::downgrade(self);
                 let uri = uri.clone();
                 let ast_snapshot = ast_snapshot.clone();
                 let name = info.name.clone();
                 Rc::new(PropertyRow {
+                    category: None,
                     name: info.name.clone(),
                     display_value: ferroui_inspect::display_value(Some(&info.value)),
                     effective: ferroui_inspect::display_value(Some(&info.value)),
@@ -1140,6 +1468,7 @@ impl DesignerWorkspace {
                     factories: factories.clone(),
                     can_reset: false,
                     reveal: None,
+                    validate_drop: None,
                     tooltip: Rc::new(move || {
                         let this = weak.upgrade()?;
                         let session = this.session.borrow();
@@ -1162,8 +1491,265 @@ impl DesignerWorkspace {
                 .cmp(&property_rank(&b.name))
                 .then(a.name.cmp(&b.name))
         });
-        self.inspectors.property_source.set_items(Rc::new(rows));
+        self.set_property_rows(rows, !filter.trim().is_empty());
         true
+    }
+
+    fn set_property_rows(self: &Rc<Self>, rows: Vec<Rc<PropertyRow>>, filtering: bool) {
+        let mut groups = BTreeMap::<(usize, &'static str), Vec<Rc<PropertyRow>>>::new();
+        for row in rows {
+            groups
+                .entry(property_category(&row.name))
+                .or_default()
+                .push(row);
+        }
+        let mut visible = Vec::new();
+        for ((_, name), rows) in groups {
+            let expanded = filtering
+                || self
+                    .inspectors
+                    .property_expansion
+                    .borrow()
+                    .get(name)
+                    .copied()
+                    .unwrap_or(name != "Advanced");
+            let weak = Rc::downgrade(self);
+            visible.push(Rc::new(PropertyRow {
+                name: name.to_owned(),
+                category: Some(PropertyCategoryHeader {
+                    count: rows.len(),
+                    expanded,
+                    toggle: Rc::new(move || {
+                        let Some(this) = weak.upgrade() else {
+                            return;
+                        };
+                        if filtering {
+                            return;
+                        }
+                        this.inspectors
+                            .property_expansion
+                            .borrow_mut()
+                            .insert(name, !expanded);
+                        this.rebuild_properties();
+                    }),
+                }),
+                display_value: String::new(),
+                effective: String::new(),
+                origin: String::new(),
+                runtime_type: String::new(),
+                context: None,
+                factories: Rc::new(Vec::new()),
+                can_reset: false,
+                reveal: None,
+                validate_drop: None,
+                tooltip: Rc::new(|| None),
+            }));
+            if expanded {
+                visible.extend(rows);
+            }
+        }
+        self.inspectors.property_source.set_items(Rc::new(visible));
+    }
+}
+
+fn property_category(name: &str) -> (usize, &'static str) {
+    match name {
+        "Name"
+        | "x:Name"
+        | "Width"
+        | "Height"
+        | "Margin"
+        | "Padding"
+        | "HorizontalAlignment"
+        | "VerticalAlignment"
+        | "HorizontalContentAlignment"
+        | "VerticalContentAlignment"
+        | "RowDefinitions"
+        | "ColumnDefinitions"
+        | "Rows"
+        | "Columns"
+        | "Orientation"
+        | "Spacing"
+        | "RowSpacing"
+        | "ColumnSpacing"
+        | "FirstColumn"
+        | "LastChildFill" => (0, "Layout"),
+        "Background" | "Foreground" | "BorderBrush" | "BorderThickness" | "CornerRadius"
+        | "Opacity" | "IsVisible" | "ClipToBounds" | "BoxShadow" => (1, "Appearance"),
+        "Text" | "Content" | "Header" | "PlaceholderText" | "Watermark" | "TextAlignment"
+        | "TextWrapping" | "TextTrimming" | "LineHeight" | "LetterSpacing" | "FlowDirection" => {
+            (2, "Content & text")
+        }
+        "RenderTransform" | "RenderTransformOrigin" | "ZIndex" => (3, "Transform"),
+        "IsEnabled" | "IsHitTestVisible" | "Focusable" | "IsTabStop" | "TabIndex"
+        | "IsReadOnly" | "IsChecked" | "IsSelected" | "IsExpanded" | "Cursor" => (4, "Interaction"),
+        name if name.starts_with("Canvas.")
+            || name.starts_with("Grid.")
+            || name.starts_with("DockPanel.")
+            || name.starts_with("RelativePanel.")
+            || name.starts_with("FlexPanel.") =>
+        {
+            (0, "Layout")
+        }
+        name if name.starts_with("Font") => (2, "Content & text"),
+        _ => (5, "Advanced"),
+    }
+}
+
+fn property_matches_filter(name: &str, filter: &str, modified: bool) -> bool {
+    let haystack = format!(
+        "{} {}",
+        name.to_lowercase(),
+        property_category(name).1.to_lowercase()
+    );
+    filter.split_whitespace().all(|term| {
+        if matches!(term, "@modified" | "@local") {
+            modified
+        } else {
+            haystack.contains(term)
+        }
+    })
+}
+
+/// Layout attached values are offered only for their actual parent panel. Authored values
+/// are retained by the caller so moving an element never conceals an existing override.
+fn attached_layout_property_applies(
+    document: &ferroui_designer_core::Document,
+    node: NodeId,
+    property: &str,
+) -> bool {
+    let Some((owner, _)) = property.split_once('.') else {
+        return true;
+    };
+    if !matches!(
+        owner,
+        "Canvas" | "Grid" | "DockPanel" | "RelativePanel" | "FlexPanel"
+    ) {
+        return true;
+    }
+    let mut parent = document.ast().node(node).and_then(|node| node.parent);
+    while let Some(id) = parent {
+        let Some(node) = document.ast().node(id) else {
+            return false;
+        };
+        if node.kind != ferroui_designer_core::NodeKind::PropertyElement {
+            return node.local_name() == owner;
+        }
+        parent = node.parent;
+    }
+    false
+}
+
+fn resource_key(node: &ferroui_designer_core::Node) -> Option<&str> {
+    node.attributes
+        .iter()
+        .find(|attribute| {
+            attribute.name.rsplit(':').next() == Some("Key")
+                && attribute.namespace_uri.as_deref()
+                    == Some("http://schemas.microsoft.com/winfx/2006/xaml")
+        })
+        .map(|attribute| attribute.value.as_str())
+}
+
+/// Finds a key only in this resource scope, descending through anonymous/merged
+/// dictionaries but never into a resource object's nested content or Resources.
+fn scoped_resource(ast: &ferroui_designer_core::Ast, owner: NodeId, key: &str) -> Option<NodeId> {
+    let owner = ast.node(owner)?;
+    let children = if owner.local_name() == "ResourceDictionary" {
+        owner.children.clone()
+    } else {
+        owner
+            .children
+            .iter()
+            .filter_map(|id| ast.node(*id))
+            .filter(|node| {
+                node.kind == ferroui_designer_core::NodeKind::PropertyElement
+                    && node.local_name().ends_with(".Resources")
+            })
+            .flat_map(|node| node.children.iter().copied())
+            .collect()
+    };
+    let mut scopes = vec![children];
+    while let Some(children) = scopes.pop() {
+        // Local entries override merged dictionaries independently of their source order.
+        for id in &children {
+            if ast
+                .node(*id)
+                .is_some_and(|node| resource_key(node) == Some(key))
+            {
+                return Some(*id);
+            }
+        }
+        // Stack order visits the last merged dictionary first, matching resource lookup.
+        for node in children.iter().filter_map(|id| ast.node(*id)) {
+            if node.local_name().ends_with(".MergedDictionaries") {
+                for dictionary in node
+                    .children
+                    .iter()
+                    .filter_map(|id| ast.node(*id))
+                    .filter(|node| node.local_name() == "ResourceDictionary")
+                {
+                    scopes.push(dictionary.children.clone());
+                }
+            }
+        }
+        for node in children.iter().rev().filter_map(|id| ast.node(*id)) {
+            if node.local_name() == "ResourceDictionary" && resource_key(node).is_none() {
+                scopes.push(node.children.clone());
+            }
+        }
+    }
+    None
+}
+
+fn property_reference_is_current(
+    reference: &crate::property_controls::PropertyReference,
+    session: &DesignerSession,
+) -> bool {
+    reference.document_uri == session.document_uri()
+        && reference.revision == session.document().revision()
+        && std::ptr::eq(reference.ast.as_ref(), session.document().ast())
+        && session.document().ast().node(reference.node).is_some()
+}
+
+fn property_reference_applies(
+    reference: &crate::property_controls::PropertyReference,
+    session: &DesignerSession,
+    targets: &[NodeId],
+) -> bool {
+    use crate::property_controls::PropertyReferenceKind;
+    let ast = session.document().ast();
+    if !property_reference_is_current(reference, session) {
+        return false;
+    }
+    let Some(source) = ast.node(reference.node) else {
+        return false;
+    };
+    match reference.kind {
+        PropertyReferenceKind::Element => {
+            source.xaml_name().is_some()
+                && targets
+                    .iter()
+                    .all(|target| ast.name_scope(*target) == ast.name_scope(source.id))
+        }
+        PropertyReferenceKind::Resource => {
+            let Some(key) = resource_key(source) else {
+                return false;
+            };
+            targets.iter().all(|target| {
+                let mut ancestor = Some(*target);
+                while let Some(id) = ancestor {
+                    let Some(node) = ast.node(id) else {
+                        return false;
+                    };
+                    if let Some(found) = scoped_resource(ast, id, key) {
+                        return found == source.id;
+                    }
+                    ancestor = node.parent;
+                }
+                false
+            })
+        }
     }
 }
 
