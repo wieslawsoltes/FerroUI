@@ -316,6 +316,7 @@ fn surface_keyboard_nudges_use_native_layout_transactions_and_respect_precision_
         event.key_modifiers = modifiers;
         event.set_routed_event(Some(InputElement::key_down_event()));
         fixture.surface.raise_event(&event);
+        fixture.window.update_layout();
         assert!(event.handled());
         let session = fixture.session.borrow();
         let node = session.document().ast().node(target).unwrap();

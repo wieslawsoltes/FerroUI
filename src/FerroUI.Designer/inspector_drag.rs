@@ -2,14 +2,18 @@
 //! hit testing and adorners; its automatic row-model mutation is always intercepted.
 use super::inspectors::TreeRow;
 use super::{DesignerSession, DesignerWorkspace, OutlineMode};
-use ferroui_base::input::{DragDrop, DragDropEffects, InputElement, Key, KeyModifiers};
+use ferroui_base::input::{
+    DataFormat, DataTransferItem, DragDrop, DragDropEffects, InputElement, Key, KeyModifiers,
+    PointerType,
+};
 use ferroui_base::interactivity::RoutingStrategies;
 use ferroui_base::reactive::IDisposable;
 use ferroui_base::threading::{DispatcherPriority, DispatcherTimer};
+use ferroui_controls::Control;
 use ferroui_controls_treedatagrid::{
     TreeDataGridRowDragEventArgs, TreeDataGridRowDropPosition as DropPosition,
 };
-use ferroui_designer_core::{Ast, Document, Edit, NodeId, NodeKind};
+use ferroui_designer_core::{Ast, Document, Edit, MarkupValue, NodeId, NodeKind};
 use ferroui_designer_tools::LayoutCapabilities;
 use ferroui_treedatagrid_core::IndexPath;
 use std::cell::{Cell, RefCell};
@@ -193,19 +197,24 @@ impl OutlineDrag {
             return Err("This content host does not support sibling reordering".into());
         }
         let mut removed_before = 0;
-        Ok(self
-            .nodes
-            .iter()
-            .enumerate()
-            .map(|(offset, node)| {
-                removed_before += usize::from(ranks.get(node).is_some_and(|rank| *rank < boundary));
-                Edit::MoveNode {
-                    node: *node,
-                    parent: host.container,
-                    index: boundary + offset - removed_before,
-                }
-            })
-            .collect())
+        let mut edits =
+            crate::workspace_tools::canvas_reparent_edits(session, &self.nodes, host.owner)?;
+        edits.extend(
+            self.nodes
+                .iter()
+                .enumerate()
+                .map(|(offset, node)| {
+                    removed_before +=
+                        usize::from(ranks.get(node).is_some_and(|rank| *rank < boundary));
+                    Edit::MoveNode {
+                        node: *node,
+                        parent: host.container,
+                        index: boundary + offset - removed_before,
+                    }
+                })
+                .collect::<Vec<_>>(),
+        );
+        Ok(edits)
     }
 
     fn commit(
@@ -504,6 +513,96 @@ fn target(event: &TreeDataGridRowDragEventArgs) -> Result<NodeId, String> {
         .ok_or_else(|| "Choose an authored source row".into())
 }
 
+enum OutlinePayload {
+    Move(OutlineDrag),
+    Reference(String, crate::property_controls::PropertyReference),
+}
+
+struct ReferencePress {
+    value: String,
+    reference: crate::property_controls::PropertyReference,
+    started: bool,
+    cancelled: bool,
+}
+
+impl ReferencePress {
+    fn validate(&self, session: &DesignerSession) -> Result<(), String> {
+        if self.cancelled {
+            return Err("Reference drag cancelled".into());
+        }
+        if self.reference.document_uri != session.document_uri()
+            || self.reference.revision != session.document().revision()
+            || !Arc::ptr_eq(&self.reference.ast, &session.document().ast_snapshot())
+        {
+            return Err("The document changed during the reference drag; start again".into());
+        }
+        Ok(())
+    }
+}
+
+/// Quote a literal argument without changing strings beginning with a markup-extension
+/// brace. XML escaping is performed later by the document's attribute edit serializer.
+fn markup_argument(value: &str) -> String {
+    let escaped = value.replace('\\', "\\\\").replace('\'', "\\'");
+    format!(
+        "'{}{escaped}'",
+        if value.starts_with('{') { "{}" } else { "" }
+    )
+}
+
+fn outline_reference(
+    session: &DesignerSession,
+    node: NodeId,
+    modifiers: KeyModifiers,
+) -> Result<Option<OutlinePayload>, String> {
+    use crate::property_controls::{PropertyReference, PropertyReferenceKind};
+    let document = session.document();
+    let element = document
+        .ast()
+        .node(node)
+        .ok_or("The dragged source no longer exists")?;
+    let key = element.attributes.iter().find(|attribute| {
+        attribute.name.rsplit(':').next() == Some("Key")
+            && attribute.namespace_uri.as_deref()
+                == Some("http://schemas.microsoft.com/winfx/2006/xaml")
+    });
+    let (value, kind) = if let Some(key) = key {
+        let MarkupValue::Literal(key) = key.markup()? else {
+            return Err("Resource reference drags require a string key".into());
+        };
+        let extension = if modifiers.contains(KeyModifiers::SHIFT) {
+            "DynamicResource"
+        } else {
+            "StaticResource"
+        };
+        (
+            format!("{{{extension} {}}}", markup_argument(&key)),
+            PropertyReferenceKind::Resource,
+        )
+    } else if modifiers.contains(KeyModifiers::ALT) {
+        let name = element
+            .xaml_name()
+            .filter(|name| !name.is_empty())
+            .ok_or("Alt-drag references require a named element")?;
+        (
+            format!("{{Binding ElementName={}}}", markup_argument(name)),
+            PropertyReferenceKind::Element,
+        )
+    } else {
+        return Ok(None);
+    };
+    Ok(Some(OutlinePayload::Reference(
+        value,
+        PropertyReference {
+            document_uri: session.document_uri().to_owned(),
+            revision: document.revision(),
+            ast: document.ast_snapshot(),
+            node,
+            kind,
+        },
+    )))
+}
+
 #[derive(Default)]
 struct OutlineHover {
     target: Cell<Option<NodeId>>,
@@ -544,7 +643,6 @@ fn expand_hover_target(
     let current = source.try_get_model_at(path);
     if !current
         .as_ref()
-        .and_then(|model| model.downcast_ref::<TreeRow>())
         .is_some_and(|row| row.entry.source == Some(target) && row.entry.runtime.is_none())
     {
         return false;
@@ -554,9 +652,116 @@ fn expand_hover_target(
 }
 
 impl DesignerWorkspace {
+    fn connect_outline_reference_press(
+        self: &Rc<Self>,
+        gesture: Rc<RefCell<Option<ReferencePress>>>,
+    ) {
+        let grid = self.outline_grid();
+        let weak = Rc::downgrade(self);
+        let press = gesture.clone();
+        grid.add_handler_with(
+            InputElement::pointer_pressed_event(),
+            move |_, event| {
+                let Some(this) = weak.upgrade() else { return };
+                if press.borrow_mut().take().is_some() {
+                    this.rebuild_outline();
+                }
+                let point = event.get_current_point(None);
+                let primary = match event.pointer().type_() {
+                    PointerType::Mouse => point.properties.is_left_button_pressed,
+                    PointerType::Pen => point.properties.is_right_button_pressed,
+                    _ => false,
+                };
+                if !primary || this.ensure_outline_drag_view().is_err() {
+                    return;
+                }
+                let grid = this.outline_grid();
+                let Some(source) = event.source().and_then(|source| source.cast::<Control>())
+                else {
+                    return;
+                };
+                let Some(row) = grid.try_get_row_of(Some(&source)) else {
+                    return;
+                };
+                let Some(rows) = grid.rows() else { return };
+                let path = rows.row_index_to_model_index(row.row_index());
+                let Some(model) = this.inspectors.outline.source.try_get_model_at(&path) else {
+                    return;
+                };
+                let Some(node) = model.entry.source.filter(|_| model.entry.runtime.is_none())
+                else {
+                    return;
+                };
+                let Ok(Some(OutlinePayload::Reference(value, reference))) =
+                    outline_reference(&this.session.borrow(), node, event.key_modifiers())
+                else {
+                    return;
+                };
+
+                // Keep the inspector's destination selected while the native grid tracks the
+                // reference source. Preselecting also defers native click selection until
+                // release and prevents Shift-resource drags from selecting a range of rows.
+                let previous = this.inspectors.replace_selection_guard(true);
+                let selection = this.inspectors.outline.source.row_selection().unwrap();
+                let selection = selection.base();
+                selection.begin_batch_update();
+                selection.clear();
+                selection.select(&path);
+                selection.end_batch_update();
+                this.inspectors.replace_selection_guard(previous);
+                *press.borrow_mut() = Some(ReferencePress {
+                    value,
+                    reference,
+                    started: false,
+                    cancelled: false,
+                });
+            },
+            RoutingStrategies::TUNNEL,
+            false,
+        );
+        let weak = Rc::downgrade(self);
+        let release = gesture.clone();
+        grid.add_handler_with(
+            InputElement::pointer_released_event(),
+            move |_, event| {
+                let Some(this) = weak.upgrade() else { return };
+                let Some(press) = release.borrow_mut().take() else {
+                    return;
+                };
+                // A click still selects the clicked row normally; a completed or cancelled
+                // reference drag cannot replace the destination after the native drag exits.
+                if press.started || press.validate(&this.session.borrow()).is_err() {
+                    event.set_handled(true);
+                }
+                this.rebuild_outline();
+            },
+            RoutingStrategies::TUNNEL,
+            true,
+        );
+        let weak = Rc::downgrade(self);
+        grid.add_handler_with(
+            InputElement::key_down_event(),
+            move |_, event| {
+                if event.key == Key::Escape && gesture.borrow().is_some() {
+                    if let Some(press) = gesture.borrow_mut().as_mut() {
+                        press.cancelled = true;
+                    }
+                    if let Some(this) = weak.upgrade() {
+                        this.rebuild_outline();
+                    }
+                    event.set_handled(true);
+                }
+            },
+            RoutingStrategies::TUNNEL,
+            false,
+        );
+    }
+
     pub(super) fn connect_inspector_drag(self: &Rc<Self>) {
         let grid = self.outline_grid();
         grid.set_auto_drag_drop_rows(true);
+        let reference_press = Rc::new(RefCell::new(None::<ReferencePress>));
+        self.connect_outline_reference_press(reference_press.clone());
         let weak = Rc::downgrade(self);
         grid.add_handler_with(
             InputElement::key_down_event(),
@@ -596,6 +801,7 @@ impl DesignerWorkspace {
             state.borrow_mut().take();
             event.set_allowed_effects(DragDropEffects::NONE);
             let Some(this) = weak.upgrade() else { return };
+            let has_reference_press = reference_press.borrow().is_some();
             let result = (|| {
                 this.ensure_outline_drag_view()?;
                 let nodes = event
@@ -610,12 +816,39 @@ impl DesignerWorkspace {
                             .ok_or_else(|| "Only authored source rows can be moved".to_owned())
                     })
                     .collect::<Result<Vec<_>, _>>()?;
-                OutlineDrag::capture(&this.session.borrow(), nodes)
+                let session = this.session.borrow();
+                if let Some(press) = reference_press.borrow_mut().as_mut() {
+                    press.started = true;
+                    press.validate(&session)?;
+                    if nodes != [press.reference.node] {
+                        return Err("The reference source selection changed during the drag".into());
+                    }
+                    return Ok(OutlinePayload::Reference(press.value.clone(), press.reference.clone()));
+                }
+                if nodes.len() == 1 {
+                    if let Some(payload) = outline_reference(&session, nodes[0], event.key_modifiers())? {
+                        return Ok(payload);
+                    }
+                } else if event.key_modifiers().contains(KeyModifiers::ALT) {
+                    return Err("Drag one named element to create a property reference".into());
+                }
+                OutlineDrag::capture(&session, nodes).map(OutlinePayload::Move)
             })();
+            if has_reference_press {
+                this.rebuild_outline();
+            }
             match result {
-                Ok(snapshot) => {
+                Ok(OutlinePayload::Move(snapshot)) => {
                     *state.borrow_mut() = Some(snapshot);
                     event.set_allowed_effects(DragDropEffects::MOVE);
+                }
+                Ok(OutlinePayload::Reference(value, reference)) => {
+                    let item = DataTransferItem::create(&crate::property_controls::property_value_data_format(), Some(value.clone()));
+                    item.set(&crate::property_controls::property_reference_data_format(), Some(reference));
+                    item.set(&DataFormat::text(), Some(value));
+                    event.data_transfer().add(item);
+                    event.set_allowed_effects(DragDropEffects::COPY);
+                    this.status.set_text(Some("Drop the reference on a property value; Shift-drag resources for a dynamic reference"));
                 }
                 Err(error) => this.status.set_text(Some(&error)),
             }

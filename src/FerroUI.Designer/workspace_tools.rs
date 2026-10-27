@@ -199,19 +199,32 @@ fn transform_edits(
             .ok_or("RenderTransform must contain a transform object")?;
         let correction = correction.ok_or("Cannot compose a singular authored transform")?;
         let original_source = &document.valid_source()[original.span.start..original.span.end];
+        // The wrapper lives at this transform's lexical scope, which can differ from
+        // the document root. An unused prefix keeps the original subtree's default
+        // namespace intact and avoids a separate root edit invalidating the text span.
+        const NS: &str = "https://github.com/ferroui";
+        let namespaces = document.ast().namespaces(property.id);
+        let (prefix, declaration) = if namespaces.get("").is_some_and(|uri| uri == NS) {
+            (String::new(), String::new())
+        } else if let Some((prefix, _)) = namespaces.iter().find(|(_, uri)| uri.as_str() == NS) {
+            (format!("{prefix}:"), String::new())
+        } else {
+            let mut prefix = "designTransform".to_owned();
+            let mut suffix = 1;
+            while namespaces.contains_key(&prefix) {
+                prefix = format!("designTransform{suffix}");
+                suffix += 1;
+            }
+            (format!("{prefix}:"), format!(" xmlns:{prefix}=\"{NS}\""))
+        };
         let fragment = format!(
-            "<TransformGroup><!--designer-original--><MatrixTransform Matrix=\"{}\" /></TransformGroup>",
+            "<{prefix}TransformGroup{declaration}>{original_source}<{prefix}MatrixTransform Matrix=\"{}\" /></{prefix}TransformGroup>",
             crate::affine_manipulation::matrix_text(correction)
         );
-        let (fragment, declaration) =
-            crate::preview_source::embed_native_fragment(document, &fragment)?;
-        let fragment = fragment.replace("<!--designer-original-->", original_source);
-        let mut edits = declaration.into_iter().collect::<Vec<_>>();
-        edits.push(Edit::Text {
+        return Ok(vec![Edit::Text {
             span: original.span,
             replacement: fragment,
-        });
-        return Ok(edits);
+        }]);
     }
     let value = if let Some(original) = element.attribute("RenderTransform") {
         if original.trim_start().starts_with('{') {
@@ -235,6 +248,188 @@ fn transform_edits(
         name: "RenderTransform".into(),
         value,
     }])
+}
+
+/// Keep the visible rectangle/transform when a tree move changes a native Canvas parent.
+/// Flow panels continue to own their children's layout. Canvas positions are normalized to
+/// leading anchors; automatic dimensions are materialized from the accepted native layout.
+pub(crate) fn canvas_reparent_edits(
+    session: &DesignerSession,
+    nodes: &[NodeId],
+    destination: NodeId,
+) -> Result<Vec<Edit>, String> {
+    let Some(canvas) = session
+        .preview
+        .visual(destination)
+        .and_then(|visual| visual.cast::<ferroui_controls::Canvas>())
+    else {
+        return Ok(Vec::new());
+    };
+    if is_custom_panel(session, destination) {
+        return Ok(Vec::new());
+    }
+    let canvas = canvas.upcast::<Visual>();
+    let artboard = session.preview.host.clone().upcast::<Visual>();
+    // Compose through the common ancestor explicitly. Matrix order matters for sibling
+    // parents with rotation, shear or reflection; translations alone hide this error.
+    let artboard_to_canvas = canvas
+        .transform_to_visual(&artboard)
+        .and_then(crate::affine_manipulation::inverse)
+        .ok_or("The new Canvas must have an invertible affine transform to the artboard")?;
+    let mut edits = Vec::new();
+    for node in nodes {
+        if parent(session, *node)? == destination {
+            continue;
+        }
+        let visual = session
+            .preview
+            .visual(*node)
+            .ok_or("The dragged element has no live layout")?;
+        let layout = visual
+            .cast::<ferroui_base::layout::Layoutable>()
+            .ok_or("The dragged element has no native layout properties")?;
+        let bounds = visual.bounds();
+        if bounds.width <= 0.0 || bounds.height <= 0.0 {
+            return Err("Measure the artboard before moving this element to a Canvas".into());
+        }
+        let layout_parent = visual
+            .visual_parent()
+            .ok_or("The dragged element is detached")?;
+        let parent_transform = layout_parent
+            .transform_to_visual(&artboard)
+            .and_then(crate::affine_manipulation::affine)
+            .map(|matrix| matrix * artboard_to_canvas)
+            .ok_or("The new Canvas must share an affine visual root with the selection")?;
+        let wanted = visual
+            .transform_to_visual(&artboard)
+            .and_then(crate::affine_manipulation::affine)
+            .map(|matrix| matrix * artboard_to_canvas)
+            .ok_or("The dragged element must have an affine transform")?;
+        let position = ferroui_base::Point::new(bounds.x, bounds.y).transform(parent_transform);
+        let next_bounds =
+            ferroui_base::Rect::new(position.x, position.y, bounds.width, bounds.height);
+        let render = crate::affine_manipulation::render_for_local(
+            wanted,
+            next_bounds,
+            visual.render_transform_origin(),
+            visual.has_mirror_transform(),
+        )
+        .ok_or("The dragged element's transform is singular")?;
+        let margin = layout.margin();
+        let left = position.x - margin.left;
+        let top = position.y - margin.top;
+        if ![
+            left,
+            top,
+            bounds.width,
+            bounds.height,
+            render.m11,
+            render.m12,
+            render.m21,
+            render.m22,
+            render.m31,
+            render.m32,
+        ]
+        .iter()
+        .all(|value| value.is_finite())
+        {
+            return Err("The new Canvas position must have finite geometry".into());
+        }
+        for name in ["Canvas.Left", "Canvas.Top", "Canvas.Right", "Canvas.Bottom"] {
+            ensure_literal_property(session.document(), *node, name)?;
+        }
+        edits.extend([
+            Edit::SetAttribute {
+                node: *node,
+                name: "Canvas.Left".into(),
+                value: left.to_string(),
+            },
+            Edit::SetAttribute {
+                node: *node,
+                name: "Canvas.Top".into(),
+                value: top.to_string(),
+            },
+            Edit::RemoveAttribute {
+                node: *node,
+                name: "Canvas.Right".into(),
+            },
+            Edit::RemoveAttribute {
+                node: *node,
+                name: "Canvas.Bottom".into(),
+            },
+        ]);
+        for (name, automatic, size) in [
+            ("Width", layout.width().is_nan(), bounds.width),
+            ("Height", layout.height().is_nan(), bounds.height),
+        ] {
+            if automatic {
+                ensure_literal_property(session.document(), *node, name)?;
+                edits.push(Edit::SetAttribute {
+                    node: *node,
+                    name: name.into(),
+                    value: size.to_string(),
+                });
+            }
+        }
+        let before = visual
+            .render_transform()
+            .map_or(Matrix::IDENTITY, |transform| transform.value());
+        // Translation-only parent changes do not introduce redundant transform attributes.
+        let unchanged = [
+            before.m11 - render.m11,
+            before.m12 - render.m12,
+            before.m21 - render.m21,
+            before.m22 - render.m22,
+            before.m31 - render.m31,
+            before.m32 - render.m32,
+        ]
+        .iter()
+        .all(|difference| difference.abs() < 1e-9);
+        if !unchanged {
+            edits.extend(transform_edits(session.document(), *node, before, render)?);
+        }
+    }
+    Ok(snapshot_edits_first(edits))
+}
+
+/// Raw source spans address the planning snapshot. Apply disjoint replacements from the
+/// end before identity-based attributes or structure can move those spans. Visual planners
+/// only replace transforms of outermost selected nodes, so these intervals do not overlap.
+fn snapshot_edits_first(edits: Vec<Edit>) -> Vec<Edit> {
+    let (mut source, semantic): (Vec<_>, Vec<_>) = edits
+        .into_iter()
+        .partition(|edit| matches!(edit, Edit::Text { .. }));
+    source.sort_by_key(|edit| match edit {
+        Edit::Text { span, .. } => std::cmp::Reverse(span.start),
+        _ => unreachable!(),
+    });
+    source.extend(semantic);
+    source
+}
+
+fn ensure_literal_property(document: &Document, node: NodeId, name: &str) -> Result<(), String> {
+    let element = document.ast().node(node).ok_or("Unknown layout target")?;
+    if element.attribute(name).is_some_and(|value| {
+        value.trim_start().starts_with('{') && !value.trim_start().starts_with("{}")
+    }) {
+        return Err(format!(
+            "{name} is an expression; edit it explicitly before reparenting to a Canvas"
+        ));
+    }
+    if element
+        .children
+        .iter()
+        .filter_map(|id| document.ast().node(*id))
+        .any(|child| {
+            child.kind == NodeKind::PropertyElement
+                && (child.local_name() == name || child.local_name().ends_with(&format!(".{name}")))
+        })
+    {
+        return Err(format!(
+            "{name} is a property element; edit it explicitly before reparenting to a Canvas"
+        ));
+    }
+    Ok(())
 }
 
 struct Measurement {
@@ -466,7 +661,7 @@ fn plan_moves(
         )
         .map_err(|e| e.to_string())?;
     edits.extend(custom);
-    Ok(edits)
+    Ok(snapshot_edits_first(edits))
 }
 
 pub(crate) fn commit(session: &mut DesignerSession, gesture: DesignGesture) -> Result<(), String> {

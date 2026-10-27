@@ -3,7 +3,7 @@ use ferroui_base::input::{DataTransfer, DragEventArgs, KeyModifiers};
 use ferroui_base::interactivity::Interactive;
 use ferroui_base::{BoxedValue, Point};
 use ferroui_controls::testing::{TestServices, UnitTestApplication};
-use ferroui_controls::{ContentControl, StackPanel};
+use ferroui_controls::{ContentControl, Control, StackPanel, Window};
 use ferroui_controls_treedatagrid::primitives::TreeDataGridRow;
 use ferroui_controls_treedatagrid::{TreeDataGrid, TreeDataGridRowDragStartedEventArgs};
 use ferroui_treedatagrid_core::IndexPath;
@@ -423,6 +423,315 @@ fn native_outline_row_events_commit_ast_moves_and_block_stale_runtime_and_foreig
 }
 
 #[test]
+fn resource_and_named_reference_drags_preserve_the_inspector_destination_and_cancel_cleanly() {
+    use ferroui_base::input::platform::IPlatformDragSource;
+    use ferroui_base::input::{
+        DataTransferExtensions, IDataTransfer, KeyEventArgs, LocalBoxFuture, MouseButton, Pointer,
+        PointerEventArgs, PointerPointProperties, PointerPressedEventArgs,
+        PointerReleasedEventArgs, PointerUpdateKind, RawInputModifiers,
+    };
+    use ferroui_base::{FerroLocator, Ref};
+    use ferroui_controls::{TextBox, ToolTip};
+
+    #[derive(Default)]
+    struct Capture {
+        data: RefCell<Option<Rc<dyn IDataTransfer>>>,
+        effects: Cell<DragDropEffects>,
+    }
+    impl IPlatformDragSource for Capture {
+        fn do_drag_drop_async(
+            &self,
+            _: &PointerPressedEventArgs,
+            data: Rc<dyn IDataTransfer>,
+            effects: DragDropEffects,
+        ) -> LocalBoxFuture<DragDropEffects> {
+            *self.data.borrow_mut() = Some(data);
+            self.effects.set(effects);
+            Box::pin(std::future::ready(DragDropEffects::NONE))
+        }
+    }
+    fn native_row(workspace: &DesignerWorkspace, node: NodeId) -> Ref<TreeDataGridRow> {
+        workspace
+            .outline_grid()
+            .get_visual_descendants()
+            .filter_map(|visual| visual.cast::<TreeDataGridRow>())
+            .find(|row| {
+                row.model()
+                    .as_ref()
+                    .and_then(|model| model.downcast_ref::<TreeRow>())
+                    .is_some_and(|row| row.entry.source == Some(node))
+            })
+            .expect("realized authored source row")
+    }
+    fn press(row: &TreeDataGridRow, modifiers: KeyModifiers) -> PointerPressedEventArgs {
+        let event = PointerPressedEventArgs::new(
+            row.to_ref(),
+            Pointer::new(Pointer::get_next_free_id(), PointerType::Mouse, true),
+            row,
+            Point::new(1.0, 1.0),
+            1,
+            PointerPointProperties::new(
+                RawInputModifiers::LEFT_MOUSE_BUTTON,
+                PointerUpdateKind::LeftButtonPressed,
+            ),
+            modifiers,
+            1,
+        );
+        row.raise_event(&event);
+        event
+    }
+    fn move_pointer(row: &TreeDataGridRow, press: &PointerPressedEventArgs) {
+        row.raise_event(&PointerEventArgs::new(
+            Some(InputElement::pointer_moved_event()),
+            row.to_ref(),
+            press.pointer().clone(),
+            Some(row),
+            Point::new(18.0, 18.0),
+            2,
+            PointerPointProperties::new(
+                RawInputModifiers::LEFT_MOUSE_BUTTON,
+                PointerUpdateKind::Other,
+            ),
+            press.key_modifiers(),
+        ));
+    }
+    fn release(row: &TreeDataGridRow, press: &PointerPressedEventArgs) {
+        row.raise_event(&PointerReleasedEventArgs::new(
+            row.to_ref(),
+            press.pointer().clone(),
+            row,
+            Point::new(1.0, 1.0),
+            3,
+            PointerPointProperties::new(
+                RawInputModifiers::NONE,
+                PointerUpdateKind::LeftButtonReleased,
+            ),
+            press.key_modifiers(),
+            MouseButton::Left,
+        ));
+    }
+
+    let _app = UnitTestApplication::start(TestServices::styled_window());
+    const SOURCE: &str = r#"<StackPanel xmlns="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"><StackPanel.Resources><SolidColorBrush x:Key="Accent" Color="Red"/></StackPanel.Resources><Button Name="Source" Content="Reference"/><Border Name="Target" Height="40" Background="Blue"/></StackPanel>"#;
+    let workspace = DesignerWorkspace::new(SOURCE).unwrap();
+    let window = Window::new();
+    window.set_width(1600.0);
+    window.set_height(1000.0);
+    window.set_content(Some(Control::boxed(workspace.control())));
+    window.show();
+    window.update_layout();
+    let platform = Rc::new(Capture::default());
+    FerroLocator::current_mutable()
+        .bind::<dyn IPlatformDragSource>()
+        .to_constant(platform.clone());
+    let (target, named_source, resource) = {
+        let session = workspace.session.borrow();
+        let resource = session
+            .document()
+            .ast()
+            .nodes_in_source_order()
+            .find(|node| node.attribute("x:Key") == Some("Accent"))
+            .unwrap()
+            .id;
+        (
+            named(&session, "Target"),
+            named(&session, "Source"),
+            resource,
+        )
+    };
+    workspace
+        .inspectors
+        .outline
+        .source
+        .expand(&IndexPath::from_indexes(&[0, 0]));
+    let mut resource_data = None;
+    for (source, modifiers, value) in [
+        (resource, KeyModifiers::NONE, "{StaticResource 'Accent'}"),
+        (resource, KeyModifiers::SHIFT, "{DynamicResource 'Accent'}"),
+        (
+            named_source,
+            KeyModifiers::ALT,
+            "{Binding ElementName='Source'}",
+        ),
+    ] {
+        workspace.session.borrow_mut().select([target]);
+        workspace.refresh(true);
+        window.update_layout();
+        let row = native_row(&workspace, source);
+        let pressed = press(&row, modifiers);
+        assert_eq!(
+            workspace.session.borrow().selection(),
+            &[target],
+            "press must keep property targets"
+        );
+        move_pointer(&row, &pressed);
+        assert_eq!(platform.effects.get(), DragDropEffects::COPY);
+        let data = platform
+            .data
+            .borrow_mut()
+            .take()
+            .expect("native reference drag");
+        assert_eq!(
+            data.try_get_value(&crate::property_controls::property_value_data_format())
+                .as_deref(),
+            Some(value)
+        );
+        assert_eq!(
+            data.try_get_value(&DataFormat::text()).as_deref(),
+            Some(value)
+        );
+        let metadata = data
+            .try_get_value(&crate::property_controls::property_reference_data_format())
+            .unwrap();
+        if modifiers == KeyModifiers::NONE {
+            resource_data = Some(data.clone());
+        }
+        assert_eq!(metadata.node, source);
+        assert_eq!(
+            metadata.document_uri,
+            workspace.session.borrow().document_uri()
+        );
+        assert!(Arc::ptr_eq(
+            &metadata.ast,
+            &workspace.session.borrow().document().ast_snapshot()
+        ));
+        release(&row, &pressed);
+        assert_eq!(
+            workspace.session.borrow().selection(),
+            &[target],
+            "cancelled native copy must keep property targets"
+        );
+        assert_eq!(workspace.session.borrow().document().source(), SOURCE);
+        assert!(!workspace.session.borrow().can_undo());
+    }
+
+    // Send the actual native payload to a realized destination value cell. This checks
+    // the complete source-selection / reference-identity / property transaction path.
+    workspace
+        .root
+        .get_control::<TextBox>("PropertySearch")
+        .set_text(Some("Background"));
+    ferroui_base::threading::Dispatcher::ui_thread().run_jobs(None);
+    window.update_layout();
+    let cell = workspace
+        .property_grid()
+        .get_visual_descendants()
+        .filter_map(|visual| visual.cast::<Control>())
+        .find(|control| {
+            control.classes().contains("property-value-cell")
+                && ToolTip::get_tip(control)
+                    .and_then(|tip| tip.downcast_ref::<String>().cloned())
+                    .is_some_and(|tip| tip.starts_with("Background ·"))
+        })
+        .expect("realized Background value cell");
+    let dropped = DragEventArgs::new(
+        Some(DragDrop::drop_event()),
+        resource_data.unwrap(),
+        cell.clone().upcast::<Interactive>(),
+        Point::default(),
+        KeyModifiers::NONE,
+    );
+    dropped.set_drag_effects(DragDropEffects::COPY);
+    cell.raise_event(&dropped);
+    assert!(dropped.handled());
+    assert_eq!(dropped.drag_effects(), DragDropEffects::COPY);
+    assert_eq!(
+        workspace
+            .session
+            .borrow()
+            .document()
+            .ast()
+            .node(target)
+            .unwrap()
+            .attribute("Background"),
+        Some("{StaticResource 'Accent'}")
+    );
+    assert_eq!(workspace.session.borrow().selection(), &[target]);
+    assert_eq!(workspace.session.borrow().document().revision(), 1);
+    assert!(
+        workspace.session.borrow().can_manipulate(),
+        "{:?}",
+        workspace.session.borrow().preview_status()
+    );
+    workspace.session.borrow_mut().undo().unwrap();
+    workspace.refresh(true);
+    assert_eq!(workspace.session.borrow().document().source(), SOURCE);
+    workspace
+        .root
+        .get_control::<TextBox>("PropertySearch")
+        .set_text(None);
+    ferroui_base::threading::Dispatcher::ui_thread().run_jobs(None);
+    window.update_layout();
+
+    // Normal resource clicks still select the resource for inspection.
+    let row = native_row(&workspace, resource);
+    let pressed = press(&row, KeyModifiers::NONE);
+    assert_eq!(workspace.session.borrow().selection(), &[target]);
+    release(&row, &pressed);
+    assert_eq!(workspace.session.borrow().selection(), &[resource]);
+
+    // Escape cancels even before the native threshold; a later pointer movement must
+    // not become a structural move of the original inspector destination.
+    workspace.session.borrow_mut().select([target]);
+    workspace.refresh(true);
+    window.update_layout();
+    let row = native_row(&workspace, resource);
+    let pressed = press(&row, KeyModifiers::NONE);
+    let mut escape = KeyEventArgs::new();
+    escape.key = Key::Escape;
+    escape.set_routed_event(Some(InputElement::key_down_event()));
+    workspace.outline_grid().raise_event(&escape);
+    assert!(escape.handled());
+    move_pointer(&row, &pressed);
+    assert!(platform.data.borrow().is_none());
+    release(&row, &pressed);
+    assert_eq!(workspace.session.borrow().selection(), &[target]);
+
+    // A document change between press and drag cannot emit a fresh reference for an
+    // old row or silently reinterpret the gesture against the replacement hierarchy.
+    let pressed = press(&row, KeyModifiers::ALT);
+    let revision = workspace.session.borrow().document().revision();
+    workspace
+        .session
+        .borrow_mut()
+        .set_property(&[target], "Width", "120")
+        .unwrap();
+    workspace.refresh(true);
+    workspace.outline_grid().raise_row_drag_started(&pressed);
+    assert!(platform.data.borrow().is_none());
+    release(&row, &pressed);
+    assert_eq!(workspace.session.borrow().selection(), &[target]);
+    assert_eq!(
+        workspace.session.borrow().document().revision(),
+        revision + 1
+    );
+    window.close();
+}
+
+#[test]
+fn reference_arguments_preserve_quotes_backslashes_and_literal_markup_braces() {
+    for value in [
+        "Accent",
+        "accent, secondary",
+        "owner's color",
+        r"folder\key",
+        "{literal}",
+        "a=b",
+    ] {
+        let serialized = format!("{{StaticResource {}}}", markup_argument(value));
+        let MarkupValue::Extension(extension) = MarkupValue::parse(&serialized).unwrap() else {
+            panic!("extension")
+        };
+        assert_eq!(extension.name, "StaticResource");
+        assert_eq!(extension.arguments.len(), 1);
+        assert_eq!(
+            extension.arguments[0].value,
+            MarkupValue::Literal(value.into())
+        );
+    }
+}
+
+#[test]
 fn structural_commands_preserve_disjoint_blocks_and_use_one_undo_transaction() {
     let _app = UnitTestApplication::start(TestServices::styled_window());
     const SOURCE: &str = r#"<StackPanel xmlns="https://github.com/ferroui"><Button Name="A"/><Button Name="B"/><Button Name="C"/><Button Name="D"/><Button Name="E"/><Button Name="F"/></StackPanel>"#;
@@ -538,8 +847,15 @@ fn outline_keyboard_commands_update_source_and_decline_pending_and_runtime_hiera
     assert!(workspace.edit_outline(OutlineCommand::MoveDown).is_err());
     workspace.set_outline_mode(OutlineMode::Source);
     workspace.source.set_text(Some("<StackPanel"));
+    let staged = workspace.session.borrow().document().source().to_owned();
+    let revision = workspace.session.borrow().document().revision();
     assert!(workspace.edit_outline(OutlineCommand::MoveDown).is_err());
-    assert_eq!(workspace.session.borrow().document().source(), authored);
+    assert_eq!(workspace.session.borrow().document().source(), staged);
+    assert_eq!(
+        workspace.session.borrow().document().valid_source(),
+        authored
+    );
+    assert_eq!(workspace.session.borrow().document().revision(), revision);
 }
 
 #[test]
@@ -573,4 +889,135 @@ fn delayed_outline_hover_expands_only_a_current_authored_drop_target() {
         .unwrap();
     assert!(!expand_hover_target(&workspace, &drag, right, &path));
     assert_eq!(expanded.get(), 1);
+}
+
+#[test]
+fn canvas_reparent_preserves_affine_world_geometry_margin_and_authored_transform_graph() {
+    let _app = UnitTestApplication::start(TestServices::styled_window());
+    let source = r#"<Canvas xmlns="https://github.com/ferroui" Width="700" Height="500" UseLayoutRounding="False">
+      <Canvas Name="Old" Canvas.Left="280" Canvas.Top="70" Width="240" Height="200" RenderTransformOrigin="0,0" RenderTransform="matrix(-1.3,0.35,0.6,0.9,0,0)">
+        <Border Name="Target" Width="80" Height="50" Canvas.Right="35" Canvas.Bottom="20" Margin="3,4,5,6" RenderTransformOrigin="20%,80%">
+          <Border.RenderTransform><RotateTransform Angle="17"/></Border.RenderTransform>
+        </Border>
+      </Canvas>
+      <Canvas Name="New" Canvas.Left="430" Canvas.Top="140" Width="200" Height="220" RenderTransformOrigin="0,0" RenderTransform="matrix(0.8,-0.15,0.2,1.2,0,0)"/>
+    </Canvas>"#;
+    let host = ContentControl::new();
+    let mut session = DesignerSession::new(source, host.clone()).unwrap();
+    let window = Window::new();
+    window.set_width(700.0);
+    window.set_height(500.0);
+    window.set_content(Some(Control::boxed(&host)));
+    window.show();
+    window.update_layout();
+    let (target, destination) = (named(&session, "Target"), named(&session, "New"));
+    let old = session.preview.visual(target).unwrap();
+    let old_size = old.bounds().size();
+    let before = old.transform_to_visual(&host).unwrap();
+    let drag = OutlineDrag::capture(&session, [target]).unwrap();
+    drag.commit(&mut session, destination, DropPosition::Inside)
+        .unwrap();
+    window.update_layout();
+    assert!(session.can_manipulate(), "{:?}", session.preview_status());
+    let visual = session.preview.visual(target).unwrap();
+    assert_eq!(visual.bounds().size(), old_size);
+    let after = visual.transform_to_visual(&host).unwrap();
+    for point in [
+        Point::default(),
+        Point::new(80.0, 0.0),
+        Point::new(0.0, 50.0),
+        Point::new(37.0, 28.0),
+    ] {
+        let expected = point.transform(before);
+        let actual = point.transform(after);
+        assert!(
+            (actual.x - expected.x).abs() < 1e-5 && (actual.y - expected.y).abs() < 1e-5,
+            "{actual:?} != {expected:?}; bounds={:?}; before={before:?}; after={after:?}; render={:?}; source={}",
+            visual.bounds(),
+            visual.render_transform().map(|transform| transform.value()),
+            session.document().source()
+        );
+    }
+    let authored = session.document().ast().node(target).unwrap();
+    assert_eq!(authored.attribute("Margin"), Some("3,4,5,6"));
+    assert!(authored.attribute("Canvas.Right").is_none());
+    assert!(authored.attribute("Canvas.Bottom").is_none());
+    assert!(authored.attribute("RenderTransform").is_none());
+    assert!(
+        session
+            .document()
+            .source()
+            .contains("<RotateTransform Angle=\"17\"/>")
+    );
+    assert_eq!(session.document().revision(), 1);
+    session.undo().unwrap();
+    assert_eq!(session.document().source(), source);
+    window.close();
+}
+
+#[test]
+fn canvas_reparent_materializes_stretched_size_without_redundant_transform_attributes() {
+    let _app = UnitTestApplication::start(TestServices::styled_window());
+    let source = r#"<Canvas xmlns="https://github.com/ferroui" Width="600" Height="300" UseLayoutRounding="False"><Grid Name="Old" Width="180" Height="120" Canvas.Left="20" Canvas.Top="30"><Border Name="Target" Margin="2"/></Grid><Canvas Name="New" Canvas.Left="250" Canvas.Top="30" Width="200" Height="200"/></Canvas>"#;
+    let host = ContentControl::new();
+    let mut session = DesignerSession::new(source, host.clone()).unwrap();
+    let window = Window::new();
+    window.set_width(600.0);
+    window.set_height(300.0);
+    window.set_content(Some(Control::boxed(&host)));
+    window.show();
+    window.update_layout();
+    let (target, destination) = (named(&session, "Target"), named(&session, "New"));
+    let before = session.preview.visual(target).unwrap();
+    let size = before.bounds().size();
+    let origin = Point::default().transform(before.transform_to_visual(&host).unwrap());
+    OutlineDrag::capture(&session, [target])
+        .unwrap()
+        .commit(&mut session, destination, DropPosition::Inside)
+        .unwrap();
+    window.update_layout();
+    let after = session.preview.visual(target).unwrap();
+    assert_eq!(after.bounds().size(), size);
+    assert_eq!(
+        Point::default().transform(after.transform_to_visual(&host).unwrap()),
+        origin
+    );
+    let node = session.document().ast().node(target).unwrap();
+    assert_eq!(
+        node.attribute("Width").unwrap().parse::<f64>().unwrap(),
+        size.width
+    );
+    assert_eq!(
+        node.attribute("Height").unwrap().parse::<f64>().unwrap(),
+        size.height
+    );
+    assert!(node.attribute("RenderTransform").is_none());
+    session.undo().unwrap();
+    assert_eq!(session.document().source(), source);
+    window.close();
+}
+
+#[test]
+fn canvas_reparent_rejects_authored_anchor_expressions_without_partial_moves() {
+    let _app = UnitTestApplication::start(TestServices::styled_window());
+    let source = r#"<Canvas xmlns="https://github.com/ferroui" Width="600" Height="300"><Canvas Name="Old" Width="180" Height="120"><Border Name="Target" Width="80" Height="40" Canvas.Left="{Binding X}"/></Canvas><Canvas Name="New" Width="180" Height="120" Canvas.Left="250"/></Canvas>"#;
+    let host = ContentControl::new();
+    let mut session = DesignerSession::new(source, host.clone()).unwrap();
+    let window = Window::new();
+    window.set_width(600.0);
+    window.set_height(300.0);
+    window.set_content(Some(Control::boxed(&host)));
+    window.show();
+    window.update_layout();
+    let (target, destination) = (named(&session, "Target"), named(&session, "New"));
+    let result = OutlineDrag::capture(&session, [target]).unwrap().commit(
+        &mut session,
+        destination,
+        DropPosition::Inside,
+    );
+    assert!(result.unwrap_err().contains("Canvas.Left is an expression"));
+    assert_eq!(session.document().source(), source);
+    assert_eq!(session.document().revision(), 0);
+    assert!(!session.can_undo());
+    window.close();
 }
