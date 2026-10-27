@@ -3,7 +3,7 @@ use super::*;
 use crate::timeline_lane::TimelineLane;
 use ferroui_controls::automation::AutomationProperties;
 use ferroui_controls::{ColumnDefinitions, ComboBox, ToolTip};
-use ferroui_designer_animation::{Keyframe, Track};
+use ferroui_designer_animation::{Keyframe, Timeline, Track};
 
 const TRACK_HEADER: f64 = 210.0;
 #[derive(Clone, Debug, PartialEq)]
@@ -833,33 +833,8 @@ impl DesignerWorkspace {
         timeline.tracks.retain(|track| !track.keyframes.is_empty());
         timeline.validate().map_err(|error| error.to_string())?;
         session.update_animation_program(id, timeline)?;
-        // Native KeyTime uses 100 ns ticks. Reconcile selection with accepted
-        // keys so frame steps such as 1/30 second retain focus after serialization.
         for key in &mut changed {
-            if let Some(accepted) = session
-                .timeline()
-                .track(key.target, &key.property)
-                .and_then(|track| {
-                    let index = track
-                        .keyframes
-                        .partition_point(|candidate| candidate.time < key.time);
-                    [
-                        index.checked_sub(1),
-                        (index < track.keyframes.len()).then_some(index),
-                    ]
-                    .into_iter()
-                    .flatten()
-                    .map(|index| &track.keyframes[index])
-                    .min_by(|left, right| {
-                        (left.time - key.time)
-                            .abs()
-                            .total_cmp(&(right.time - key.time).abs())
-                    })
-                })
-                .filter(|accepted| (accepted.time - key.time).abs() <= 0.0000001)
-            {
-                key.time = accepted.time;
-            }
+            reconcile_keyframe_time(session.timeline(), key);
         }
         drop(session);
         let mut ui = self.timeline_ui.borrow_mut();
@@ -963,8 +938,9 @@ impl DesignerWorkspace {
         });
         Ok(())
     }
-    fn remember_keyframe(&self, selected: SelectedKey) {
+    fn remember_keyframe(&self, mut selected: SelectedKey) {
         let session = self.session.borrow();
+        reconcile_keyframe_time(session.timeline(), &mut selected);
         let mut ui = self.timeline_ui.borrow_mut();
         if ui.document != session.document_uri() || ui.program != session.active_animation_program()
         {
@@ -1167,6 +1143,33 @@ impl DesignerWorkspace {
         });
         row.children().add(remove.upcast::<Control>());
         self.tracks.children().add(row.upcast::<Control>());
+    }
+}
+// Native KeyTime uses 100 ns ticks. Match accepted source times after every
+// authoring path so fractional frame times retain their selection and editor.
+fn reconcile_keyframe_time(timeline: &Timeline, key: &mut SelectedKey) {
+    if let Some(accepted) = timeline
+        .track(key.target, &key.property)
+        .and_then(|track| {
+            let index = track
+                .keyframes
+                .partition_point(|candidate| candidate.time < key.time);
+            [
+                index.checked_sub(1),
+                (index < track.keyframes.len()).then_some(index),
+            ]
+            .into_iter()
+            .flatten()
+            .map(|index| &track.keyframes[index])
+            .min_by(|left, right| {
+                (left.time - key.time)
+                    .abs()
+                    .total_cmp(&(right.time - key.time).abs())
+            })
+        })
+        .filter(|accepted| (accepted.time - key.time).abs() <= 0.0000001)
+    {
+        key.time = accepted.time;
     }
 }
 fn nearest_key(track: &Track, time: f64) -> Option<SelectedKey> {

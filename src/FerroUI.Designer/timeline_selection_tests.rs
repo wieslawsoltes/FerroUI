@@ -347,7 +347,7 @@ fn applying_a_keyframe_from_the_keyboard_restores_focus_to_the_replacement_field
     let window = Window::new();
     window.set_width(1280.0);
     window.set_height(820.0);
-    window.set_content(Some(Control::boxed(&workspace.control())));
+    window.set_content(Some(Control::boxed(workspace.control())));
     window.show();
     workspace.select_keyframe(target, "Opacity", 1.0).unwrap();
     window.update_layout();
@@ -400,4 +400,73 @@ fn applying_a_keyframe_from_the_keyboard_restores_focus_to_the_replacement_field
     workspace.session.borrow_mut().undo().unwrap();
     assert_eq!(workspace.session.borrow().document().source(), original);
     window.close();
+}
+
+#[test]
+fn recording_and_applying_fractional_frame_times_keep_the_accepted_key_selected() {
+    use ferroui_base::interactivity::RoutedEventArgs;
+    let _app = UnitTestApplication::start(TestServices::styled_window());
+    let (workspace, target) = workspace();
+    workspace.select_keyframe(target, "Opacity", 1.0).unwrap();
+    workspace.set_timeline_frame_rate(Some(30));
+    let original = workspace.session.borrow().document().source().to_owned();
+    let requested = 1.0 / 30.0;
+    workspace.session.borrow_mut().seek(requested).unwrap();
+    workspace.record_selected_keyframe().unwrap();
+    workspace.refresh(true);
+
+    let assert_selected = |requested: f64| {
+        let session = workspace.session.borrow();
+        let accepted = session
+            .timeline()
+            .track(target, "Opacity")
+            .unwrap()
+            .keyframes
+            .iter()
+            .find(|key| (key.time - requested).abs() < 0.0000001)
+            .unwrap()
+            .time;
+        assert_ne!(
+            accepted, requested,
+            "The source clock rounds fractional frames"
+        );
+        drop(session);
+        assert_eq!(
+            workspace.selected_keyframes(),
+            [(target, "Opacity".to_owned(), accepted)],
+            "Selection must use the key's accepted source time"
+        );
+        let time = workspace
+            .tracks
+            .children()
+            .to_vec()
+            .into_iter()
+            .filter_map(|control| control.cast::<StackPanel>())
+            .flat_map(|row| row.children().to_vec())
+            .filter_map(|control| control.cast::<TextBox>())
+            .find(|input| input.name().as_deref() == Some("KeyframeTime"))
+            .expect("The accepted key keeps its contextual editor");
+        assert_eq!(time.text().unwrap().parse::<f64>().unwrap(), accepted);
+        time
+    };
+    let time = assert_selected(requested);
+    let recorded = workspace.session.borrow().document().source().to_owned();
+    let edited_time = 1.0 / 60.0;
+    time.set_text(Some(&edited_time.to_string()));
+    let apply = workspace
+        .tracks
+        .children()
+        .to_vec()
+        .into_iter()
+        .filter_map(|control| control.cast::<StackPanel>())
+        .flat_map(|row| row.children().to_vec())
+        .filter_map(|control| control.cast::<Button>())
+        .find(|input| input.name().as_deref() == Some("ApplyKeyframe"))
+        .unwrap();
+    apply.raise_event(&RoutedEventArgs::with_event(Button::click_event()));
+    assert_selected(edited_time);
+    workspace.session.borrow_mut().undo().unwrap();
+    assert_eq!(workspace.session.borrow().document().source(), recorded);
+    workspace.session.borrow_mut().undo().unwrap();
+    assert_eq!(workspace.session.borrow().document().source(), original);
 }
