@@ -96,11 +96,14 @@ impl ComponentCatalog {
             };
             let Some(kind) = kind else { continue };
             let owner = resource_owner(document, node.id);
-            let target_type = node
-                .attribute("TargetType")
-                .or_else(|| node.attribute("DataType"))
-                .or_else(|| node.attribute("Selector"))
-                .map(str::to_owned);
+            let mut target_type = None;
+            for property in ["TargetType", "DataType", "Selector"] {
+                if let Some(attribute) = component_property_attribute(document, node.id, property)?
+                {
+                    target_type = Some(attribute.value.clone());
+                    break;
+                }
+            }
             let display_name = key
                 .as_deref()
                 .or_else(|| node.xaml_name())
@@ -465,7 +468,7 @@ pub(crate) fn attributes_for<'a>(
         .attributes
         .iter()
         .filter(|attribute| {
-            !attribute.is_namespace() && query.matches_attribute(document, node.id, attribute)
+            !attribute.is_namespace() && query.matches_attribute(document, node, attribute)
         })
         .collect::<Vec<_>>();
     require(
@@ -537,21 +540,41 @@ impl PropertyIdentity {
     fn matches_attribute(
         &self,
         document: &Document,
-        node: NodeId,
+        node: &Node,
         attribute: &ferroui_designer_core::Attribute,
     ) -> bool {
-        let Ok(other) = Self::query(document, node, &attribute.name) else {
+        let Ok(other) = Self::query(document, node.id, &attribute.name) else {
             return false;
         };
         self.member == other.member
-            && self.owner == other.owner
-            && match self.owner.as_deref() {
-                Some(owner) => same_owner_namespace(
-                    owner,
-                    self.namespace.as_deref(),
-                    other.namespace.as_deref(),
-                ),
-                None => self.namespace == other.namespace,
+            && match (self.owner.as_deref(), other.owner.as_deref()) {
+                (Some(left), Some(right)) => {
+                    left == right
+                        && same_owner_namespace(
+                            left,
+                            self.namespace.as_deref(),
+                            other.namespace.as_deref(),
+                        )
+                }
+                (None, None) => self.namespace == other.namespace,
+                (None, Some(owner)) => {
+                    self.namespace.is_none()
+                        && owner == node.local_name()
+                        && same_owner_namespace(
+                            owner,
+                            node.namespace_uri.as_deref(),
+                            other.namespace.as_deref(),
+                        )
+                }
+                (Some(owner), None) => {
+                    other.namespace.is_none()
+                        && owner == node.local_name()
+                        && same_owner_namespace(
+                            owner,
+                            self.namespace.as_deref(),
+                            node.namespace_uri.as_deref(),
+                        )
+                }
             }
     }
     fn matches_element(&self, target: &Node, candidate: &Node) -> bool {

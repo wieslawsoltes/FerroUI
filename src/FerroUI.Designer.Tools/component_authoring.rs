@@ -592,16 +592,14 @@ fn setter(
 ) -> Result<Vec<Edit>> {
     property_name(property)?;
     let (container, setters) = setters(document, owner)?;
-    let matching = setters
-        .into_iter()
-        .filter(|id| {
-            document
-                .ast()
-                .node(*id)
-                .and_then(|node| node.attribute("Property"))
-                == Some(property)
-        })
-        .collect::<Vec<_>>();
+    let mut matching = Vec::new();
+    for id in setters {
+        if component_property_attribute(document, id, "Property")?
+            .is_some_and(|attribute| attribute.value == property)
+        {
+            matching.push(id);
+        }
+    }
     require(
         matching.len() <= 1,
         "Multiple setters target this property; edit the ambiguous declarations in source",

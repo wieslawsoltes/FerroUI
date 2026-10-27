@@ -288,6 +288,43 @@ fn native_setter_value_replacement_keeps_application_value_attribute_and_object_
 }
 
 #[test]
+fn same_owner_qualified_attributes_are_editable_without_creating_duplicate_members() {
+    let mut document = document(
+        r#"<Grid.Resources><ControlTheme xmlns:s="using:FerroUI.Styling" x:Key="Card" s:ControlTheme.TargetType="Button"><Setter s:Setter.Property="Background" s:Setter.Value="Red"/></ControlTheme></Grid.Resources>"#,
+    );
+    let owner = keyed(&document, "Card");
+    assert_eq!(
+        ComponentCatalog::from_document(&document)
+            .unwrap()
+            .entries
+            .into_iter()
+            .find(|entry| entry.node == owner)
+            .unwrap()
+            .target_type
+            .as_deref(),
+        Some("Button")
+    );
+    apply(
+        &mut document,
+        ComponentAction::SetSetter {
+            owner,
+            property: "Background".into(),
+            value: Some("Blue".into()),
+        },
+    );
+    assert!(document.source().contains("s:Setter.Value=\"Blue\""));
+    assert_eq!(
+        document
+            .ast()
+            .elements()
+            .filter(|node| node.local_name() == "Setter")
+            .count(),
+        1
+    );
+    assert!(!document.source().contains(" Value="));
+}
+
+#[test]
 fn custom_resources_properties_do_not_capture_native_scope_or_references() {
     let mut document = document(
         r#"<Grid.Resources><Color x:Key="Accent" Name="Native">Red</Color></Grid.Resources><a:Grid.Resources xmlns:a="urn:application"><Color x:Key="Accent" Name="Custom">Blue</Color></a:Grid.Resources><Button Name="Target" Background="{StaticResource Accent}"/>"#,
