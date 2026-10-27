@@ -181,7 +181,7 @@ impl DesignerWorkspace {
         }
         for rate in &rates {
             snap.items().add(Some(Rc::new(
-                rate.map_or_else(|| "Seconds".to_owned(), |rate| format!("{rate} fps")),
+                rate.map_or_else(|| "Sec".to_owned(), |rate| format!("{rate} fps")),
             )));
         }
         snap.set_selected_index(
@@ -207,7 +207,7 @@ impl DesignerWorkspace {
                     .selected_item()
                     .and_then(|item| item.downcast_ref::<String>().cloned())
                 {
-                    if label == "Seconds" {
+                    if label == "Sec" {
                         this.set_timeline_frame_rate(None);
                     } else if let Some(rate) = label
                         .strip_suffix(" fps")
@@ -628,7 +628,7 @@ impl DesignerWorkspace {
             ui.snap_picker.as_ref().and_then(WeakRef::upgrade)
         };
         if let Some(picker) = picker {
-            let label = rate.map_or_else(|| "Seconds".to_owned(), |rate| format!("{rate} fps"));
+            let label = rate.map_or_else(|| "Sec".to_owned(), |rate| format!("{rate} fps"));
             let found = (0..picker.items().count()).find(|index| {
                 picker
                     .items()
