@@ -10,7 +10,10 @@ on:
       - 'src/FerroUI.Base/**'
       - 'src/FerroUI.Controls/**'
       - 'src/FerroUI.Controls.ColorPicker/**'
-      - 'src/TreeDataGrid/FerroUI.Controls.TreeDataGrid/**'
+      - 'src/TreeDataGrid/**'
+      - 'src/FerroUI.Themes.Simple/**'
+      - 'src/FerroUI.Themes.Fluent/**'
+      - 'src/FerroUI.Themes.WinUI/**'
       - 'src/FerroUI.Dialogs/**'
       - 'src/FerroUI.ReactiveUI.Controls/**'
       - 'scripts/generate_view_builders.py'
@@ -42,12 +45,27 @@ env:
 
 jobs:
   portable:
-    name: AST, layout, animation, projects, language and durable rooms
-    runs-on: ubuntu-latest
+    name: Portable engines (${{ matrix.os }}, Rust ${{ matrix.rust }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-latest
+            rust: stable
+          - os: ubuntu-latest
+            rust: '1.89.0'
+          - os: macos-latest
+            rust: stable
+          - os: windows-latest
+            rust: stable
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
       - uses: dtolnay/rust-toolchain@89b12181fb390509a0842a86cc55eeb8eb928c1d # stable
+        with:
+          toolchain: ${{ matrix.rust }}
+          components: clippy
       - name: Source preservation, transaction and convergence regressions
         run: cargo test --locked -p ferroui-designer-core -p ferroui-designer-tools -p ferroui-designer-animation -p ferroui-designer-collaboration -p ferroui-designer-project -p ferroui-designer-language -p ferroui-designer-collaboration-host --features ferroui-designer-collaboration-host/client
       - name: Portable public APIs are warning-free
@@ -62,12 +80,16 @@ jobs:
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
       - uses: dtolnay/rust-toolchain@89b12181fb390509a0842a86cc55eeb8eb928c1d # stable
+        with:
+          components: clippy
       - name: Fonts for actual native rendering
         run: sudo apt-get update && sudo apt-get install -y --no-install-recommends libfontconfig1-dev libfreetype6-dev fonts-dejavu-core
       - name: Native authoring, MCP, hosted peer transport and sample integration
         env:
           FERROUI_DESIGNER_RENDER_OUTPUT: ${{ github.workspace }}/designer-render
         run: cargo test --locked -p ferroui-designer -p designer-studio -p ferroui-mcp -p ferroui-hot-reload -p ferroui-designer-collaboration-host --no-default-features --features ferroui-designer/mcp,ferroui-designer/render-smoke,designer-studio/headless,designer-studio/mcp,ferroui-designer-collaboration-host/client,ferroui-designer-collaboration-host/server -- --test-threads=1
+      - name: Native designer APIs and controls are warning-free
+        run: cargo clippy --locked -p ferroui-designer -p designer-studio --no-default-features --features ferroui-designer/mcp,ferroui-designer/render-smoke,designer-studio/headless,designer-studio/mcp --all-targets --no-deps -- -D warnings
       - name: Headless application startup and clean shutdown
         env:
           FERROUI_SMOKE_EXIT_MS: '1500'
@@ -91,8 +113,12 @@ jobs:
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
       - uses: dtolnay/rust-toolchain@89b12181fb390509a0842a86cc55eeb8eb928c1d # stable
+      - name: Native theme test dependencies
+        run: sudo apt-get update && sudo apt-get install -y --no-install-recommends libfontconfig1-dev libfreetype6-dev
       - name: Parser, transforms, runtime providers and generated code
         run: cargo test --locked -p xamlx -p ferroui-markup-xaml -p ferroui-markup-xaml-loader -p ferroui-markup-xaml-tests -- --test-threads=1
+      - name: Generated theme references match build-time and runtime emitters
+        run: cargo test --locked -p ferroui-themes-simple -p ferroui-themes-fluent -p ferroui-themes-winui compiled_xaml -- --test-threads=1
 
   animation-runtime:
     name: Native animation preview and application semantics

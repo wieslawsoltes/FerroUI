@@ -534,7 +534,7 @@ pub(crate) fn import_easing(root: roxmltree::Node<'_, '_>) -> Result<Easing> {
         })
         .collect::<Vec<_>>();
     require(
-        properties.len() <= 1 && !(root.attribute("Easing").is_some() && !properties.is_empty()),
+        properties.len() <= 1 && (root.attribute("Easing").is_none() || properties.is_empty()),
         "Animation easing must be declared once",
     )?;
     let Some(property) = properties.first() else {
