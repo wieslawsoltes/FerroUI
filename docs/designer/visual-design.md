@@ -26,6 +26,10 @@ logical trees remain separate inspection modes. Animation editing still writes n
 XAML through the transaction engine, and the property editor still respects expressions,
 mixed values, custom factories and effective runtime values.
 
+The sharing dialog follows the same hierarchy: identity, start/join actions, then session
+access. Connection settings are disclosed separately, and member/invitation controls appear
+when a session exists. Merely opening the dialog starts no transport and changes no source.
+
 ## Hierarchy and workspace
 
 The application bar holds file/history commands, Design/Split/XAML modes, preview and
@@ -65,9 +69,9 @@ resources use the `Designer` prefix; no application-theme resource is replaced.
 | Motion authoring | `DesignerMotionBrush` | `#B6A2F6` |
 | Recording | `DesignerRecordingBrush` | `#F48B95` |
 
-Body text is 12 px; section labels and supporting text use 11 px. Inspector inputs are
-26 px high, toolbar targets are usually 28–32 px, and layer rows are 28 px. Field corners
-use 4 px; the canvas shelf uses 8 px. Eight- and twelve-pixel gutters establish consistent
+Body text is 12 px; section labels and supporting text use 11 px. Inspector inputs use a
+26 px minimum height, toolbar targets are usually 28–32 px, and layer rows have a 28 px minimum.
+Field corners use 4 px; the canvas shelf uses 8 px. Eight- and twelve-pixel gutters establish consistent
 spacing. Supporting text has a calculated contrast ratio of 5.50:1 on the panel surface
 and 4.72:1 on the field surface. State meaning also appears in labels, geometry and
 tooltips, rather than depending on color alone.
@@ -75,9 +79,9 @@ tooltips, rather than depending on color alone.
 Inputs use an even outline, a restrained hover border and a full blue keyboard-focus
 border. Reset appears for authored values. Alignment uses vector controls. Uniform
 spacing can use one linked value; nonuniform and mixed values retain explicit components.
-Solid colors use a swatch and native color view. Spectrum changes remain a local draft
-until Apply, so a continuous color drag produces one authored transaction. Expressions
-and richer brushes retain their source representation.
+Solid colors use a swatch and native color view. Picker changes remain a local draft
+until Apply, so a continuous color drag produces one authored transaction. Typed source
+values commit with Enter. Expressions and richer brushes retain their source representation.
 
 ## Motion presentation
 

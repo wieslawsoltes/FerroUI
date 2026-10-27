@@ -1,32 +1,47 @@
 # Native designer controls and interaction guide
 
 The designer workspace composes ordinary FerroUI controls with reusable `AssetToolbox`,
-`TimelineLane`, `PropertyNumberScrubber`, `PropertyComponentsEditor` and `GridTrackEditor`
+`TimelineLane`, `EasingPreview`, `PropertyNumberScrubber`, `PropertyComponentsEditor`,
+`PropertyColorEditor` and `GridTrackEditor`
 components. Hosts can use these without loading the workspace shell. They do not own a
 document, start a window, or create an undo
 stack; their callbacks let the host apply changes through its existing transaction boundary.
+
+## Shared chrome and embedding
+
+`designer_chrome_style()` returns the reusable style collection from `DesignerChrome.xaml`.
+Add it to a host's styles and apply `designer-chrome` to editor containers. The loader registers
+the types referenced by its selectors. All semantic color resources have a `Designer` prefix;
+they do not replace application-theme keys or recolor the preview. The
+[visual design guide](visual-design.md) lists tokens, metrics and reference decisions.
 
 ## Compact property inspector
 
 Properties are grouped into collapsible categories. Common geometry stays in Layout; minimum
 and maximum dimensions are available under Advanced. Search matches every term and supports
-`@modified` and its alias `@local` for authored overrides, including expressions. A value-origin dot and
-native tooltip distinguish authored values, expressions and runtime effective values. Changing
+`@modified` and its alias `@local` for authored overrides, including expressions. A dot marks
+authored overrides, a diamond identifies an expression, and inherited values have no marker.
+Native tooltips include the effective value and its runtime origin. Changing
 the filter does not author source or discard the document selection.
 
-Numeric property names are `PropertyNumberScrubber` controls. Drag a label horizontally to
-adjust its draft, then release to commit one transaction. Shift multiplies the configured step
+Eligible numeric property names are `PropertyNumberScrubber` controls; mixed selections,
+expressions, object-valued properties and unavailable numeric values retain ordinary labels.
+Drag a scrubber label horizontally to adjust its draft, then release to commit one transaction.
+Shift multiplies the configured step
 by ten; Ctrl divides it by ten. Arrow keys use the same policy. Escape, lost pointer capture,
 or reconfiguration cancels a drag. `PropertyNumberOptions` sets minimum, maximum, step and
 integer rounding. Native numeric value fields remain directly editable; Enter commits text.
 
 `PropertyComponentsEditor` presents Margin/Padding/BorderThickness as L/T/R/B and CornerRadius as
 TL/TR/BR/BL. The link button switches between a common value and independent components.
+Built-in editors initially link uniform values and show one **All** field. Mixed or nonuniform
+values retain explicit components. Toggling the chain is view state and does not author values.
 Enter validates and commits the four values together; Escape restores the accepted values.
 A mixed selection starts with empty components rather than inventing zeros. In unlinked mode,
 all four values must be explicit before committing a mixed edit; linked mode applies one explicit
 value to all four. Padding, border thickness and corner radii enforce nonnegative values;
-margins may be negative. Alignment editors provide four directly accessible choices.
+margins may be negative. Alignment editors provide four vector choices with native keyboard
+activation and automation names; orientation uses explicit horizontal/vertical flow icons.
 
 Custom hosts construct a scrubber with `PropertyNumberScrubber::new()`, call `configure`
 with an accepted label/value/options, and handle `on_commit`. Construct a compound editor
@@ -35,6 +50,24 @@ with `PropertyComponentsEditor::new(PropertyComponentsKind::Thickness, false)`, 
 the view without generating an authoring callback. `control()` embeds a compound editor in
 another view; a scrubber is itself a native control. Existing `PropertyEditorFactory` extension
 points take precedence over built-ins and are used by the contextual panel editors too.
+
+### Solid color editor
+
+`PropertyColorEditor::new() -> Result<Self, String>` creates a swatch, source field and native
+ColorView flyout. `configure(Option<&str>, bool) -> Result<(), String>` updates accepted state
+without committing. Its first argument accepts a literal solid color or `None`; the second
+indicates a mixed selection. An expression, complex brush or invalid color returns `Err` and
+leaves the accepted state unchanged. The workspace's built-in factory uses ordinary source
+editing for those values; standalone hosts provide their own fallback. `on_commit` receives a
+source value only after Enter or explicit Apply. Spectrum, palette and component adjustments
+remain drafts while the popup is open; Cancel and dismissal discard them. Named colors retain
+their spelling when confirmed unchanged, and explicit confirmation can materialize an inherited
+effective color. Mixed selection requires an explicit value.
+
+`control`, `text_editor`, `swatch_button`, `color_view` and `flyout` expose the native components.
+The popup scopes the ColorView library's compatibility resources locally so its spectrum,
+palette, components and alpha controls work under the WinUI host. Expressions and complex
+brushes retain source editing; the solid picker does not flatten them.
 
 ### Dropping values and references
 
@@ -85,6 +118,16 @@ entirely by a style or factory are rejected rather than flattened. Structural Gr
 ordinary source edits even when animation recording is enabled.
 
 ## Hierarchy and artboard
+
+Layer rows use a single virtualized template column with semantic icons and name/key/type
+identity. Complete type/context remains in tooltips and automation names. Native type-ahead
+search is forwarded through hierarchical expanders, including custom template text selectors.
+`DesignerWorkspace::collapse_outline()` collapses unrelated branches and retains the selected
+ancestor paths without touching source or undo history.
+
+`canvas_focused()` and `set_canvas_focused(bool)` provide the temporary canvas-focused workspace.
+The side widths, prior timeline visibility/height, source draft and panel modes survive the
+round trip. The toolbar command and Ctrl+Shift+F / Cmd+Shift+F share this API.
 
 Source hierarchy drags preserve source order and selected subtrees. Hovering over a compatible
 collapsed container expands it; native TreeDataGrid scrolling and drop adorners stay active.
@@ -149,7 +192,17 @@ For a separate host, construct `AssetToolbox::new(default_designer_assets())`, e
 `set_category`, `visible_asset_ids`, `assets`, and `register` methods also support a host's
 own catalog UI or integration tests.
 
+`set_view_mode(AssetViewMode::Grid)` uses category cards; `AssetViewMode::List` uses compact
+name/description rows. `view_mode()` reports the current presentation. Switching views preserves
+the query, category, catalog and placement callbacks. `DesignerWorkspace::asset_toolbox()`
+returns `Option<Rc<AssetToolbox>>` for hosts that need these browsing controls.
+
 ## Timeline tracks and ruler
+
+The workspace uses separate fixed hosts for the ruler and keyframe inspector; only the track
+list scrolls. Two-line track headers distinguish the target and property, with a separate key
+count. Violet ranges/diamonds represent authored animation; the blue time flag identifies the
+playhead and stays inside the viewport at both endpoints.
 
 `TimelineLane::new()` creates a keyframe lane. `TimelineLane::ruler()` creates a time ruler.
 Configure both with the same duration and visible interval to align ticks, diamonds, and
@@ -202,6 +255,12 @@ at close zoom levels; Alt disables snapping. Tick labels adapt to the visible sc
 including millisecond precision. Keys are sorted once during configuration, hit testing uses
 binary search, and rendering visits only keys inside the visible interval.
 
+`EasingPreview::new()` creates the small native graph used beside the keyframe's curve field.
+`set_easing(Some(easing))` samples the actual animation engine, including overshoot.
+`set_easing(None)` clears the preview and shows an invalid-draft marker; `easing()` returns the
+accepted display value. The graph never authors a keyframe. The workspace updates it while
+typing or choosing a preset, and commits only when the keyframe editor's Apply action succeeds.
+
 The workspace offers seconds or 24/30/60 fps snapping. A host can use
 `set_frame_rate(Some(fps))` for any integer rate from 1 through 1,000, or `None` for seconds.
 In frame mode arrows move by one frame, Shift by ten frames, and Ctrl retains whole-frame
@@ -228,8 +287,9 @@ Zoom, pan, and Fit update existing lanes without rebuilding keyframe editors. Th
 native focus and unfinished input while changing the viewport. Shortening an animation
 resets an interval that no longer fits its duration.
 
-`+ Keyframe` records the currently selected track's property when it belongs to the selected
-object; otherwise it records that object's opacity. Values come from the accepted live
+The **Add a keyframe at the playhead** icon command records the currently selected track's
+property when it belongs to the selected object; otherwise it records that object's opacity.
+Values come from the accepted live
 preview at the playhead, including interpolation. Record mode continues to capture supported
 property edits through the existing session recording pipeline.
 

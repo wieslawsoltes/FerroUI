@@ -5,13 +5,16 @@ The workspace combines an artboard, synchronized source editor, object hierarchy
 logical trees, properties, layout manipulation, and animation tracks. All authored changes pass
 through a document transaction; the artboard renders actual FerroUI controls.
 
-![Native workspace with a recorded Width animation at 1.5 seconds](images/designer-animation.png)
+![Native designer with scoped studio chrome, semantic layers and contextual properties](images/designer-workspace.png)
 
-This image is captured from the native Vello/HarfBuzz rendering test using the WinUI theme.
-The property inspector retains the authored Width of 656 while animation previews 608 at the
+This image is captured from the native Vello/HarfBuzz rendering test using WinUI controls and
+the designer's scoped visual language. The [design study and token guide](visual-design.md)
+explains the Blend, Figma and Penpot patterns applied throughout the workspace.
+In the [animation capture](images/designer-animation.png), the property inspector retains
+the authored Width of 656 while animation previews 608 at the
 playhead; the source retains the base value. Effective values and value origins are available in
 property-cell tooltips.
-The [initial workspace capture](images/designer-workspace.png) shows the same document before edits.
+The [compact workspace](images/designer-compact.png) demonstrates the same controls at 1280 × 820.
 
 ## Run
 
@@ -37,7 +40,7 @@ application does. Use `DesignerWorkspace::with_uri` when relative includes and r
 original document location. A raw resource dictionary or style document needs a host that supplies
 an appropriate preview control; it is not a standalone control artboard.
 
-The **Run preview** command opens the actual platform Window, including decorations, sizing and
+The **Preview** command opens the actual platform Window, including decorations, sizing and
 registered code-behind behavior. Its lifetime is owned by the preview and follows accepted source
 changes. The inline artboard retains a content projection for selection and geometry editing.
 `PreviewHostOptions` registers metadata callbacks, application root factories keyed by `x:Class`
@@ -55,29 +58,39 @@ remain dirty.
 
 ## Native workspace
 
-Designer Studio uses the repository's WinUI theme, including its native button, text, numeric,
-menu, focus and disabled states. The workspace starts in **Design** mode with a large artboard.
+Designer Studio uses native WinUI controls with reusable scoped chrome: semantic color resources,
+inset fields, full keyboard-focus outlines, quiet dock tabs and consistent vector commands.
+The preview keeps its own application theme. The workspace starts in **Design** mode with a large artboard.
 **Split** exposes the synchronized XAML editor, and **XAML** gives it the entire document area.
 F6 cycles these views without reloading the document or discarding partially typed source.
 **Fit** uses the measured canvas viewport. The **Timeline** command releases its working space
 when hidden and restores its resized height when reopened.
+**Focus canvas** temporarily hides both docks and the timeline, preserving their sizes and view
+state. Use the canvas shelf or Ctrl+Shift+F / Cmd+Shift+F to restore them. `V` selects objects;
+`I` interacts with the native preview when no text editor owns input.
 
 The left dock switches between **Layers**, **Assets** and **Project**:
 
 - **Layers** uses a virtualized TreeDataGrid for source, visual and logical trees. Expansion and
-  selection are retained across refreshes. Search keeps matching ancestors visible and does not
+  selection are retained across refreshes. One column shows semantic kind icons and authored
+  names or resource keys; tooltips retain full type information. Native type-ahead and the
+  selection-preserving Collapse layers command help navigate deep trees. Search keeps matching ancestors visible and does not
   modify document selection. Authored source rows support ordered multi-selection drag and drop
   before, after or inside compatible containers. Drops use one source transaction and one undo
   step; generated runtime rows, stale drags, cycles and occupied single-content hosts are rejected.
 - **Assets** is a reusable searchable catalog with categories, vector icons, native keyboard
-  activation and drag-to-place behavior. Hosts can register their own snippets and icons with
+  activation and drag-to-place behavior. Switch between visual Grid cards and a compact List with
+  descriptions without losing filters. Hosts can register their own snippets and icons with
   `DesignerWorkspace::register_asset` or use `AssetToolbox` independently.
 - **Project** uses a hierarchical TreeDataGrid for project folders, XAML documents and assets.
   File activation shares the same canonical URI identity as tabs, language edits and saves.
 
 The property dock is a TreeDataGrid with collapsible categories and lazily created value editors.
-It includes scrubbable numeric labels, direct alignment choices, linked four-component editors
-for spacing/corner radii, tri-state booleans, enum pickers, expressions and mixed selections.
+It includes scrubbable numeric labels, visual alignment/flow choices, linked spacing/corner
+radii, solid-color swatches, tri-state booleans, enum pickers, expressions and mixed selections.
+Uniform components use one **All** field; the chain control reveals the independent sides.
+The color flyout reuses native ColorView spectrum, palette, components and alpha controls.
+Picker changes remain drafts until Apply and create one undoable source transaction.
 Search supports multiple terms and `@modified` / `@local` filters. Enter commits typed text or
 numbers; a scrub commits once on release and cancels with Escape. Custom editor factories take
 precedence over the built-ins. The reset
@@ -109,31 +122,43 @@ session. The select and interact tools switch between source manipulation and li
 The top command bar keeps document/history actions visible and moves secondary file/edit actions
 into its native overflow menu.
 
-The animation editor has a labelled time ruler, compact object/property lanes and a contextual
-keyframe editor. Ctrl-click toggles keys, Shift-click selects ranges, and dragging empty lane
-space selects a marquee. Move, duplicate or delete groups across tracks in one undoable source
-transaction. Selected keys keep their relative offsets, values and easing; collisions reject the
+The animation editor has a fixed time ruler, two-line object/property headers, violet keys and
+authored ranges, a blue playhead, and a fixed contextual keyframe editor. The ruler and editor
+stay available while tracks scroll. A sampled easing preview follows the actual engine curve,
+including overshoot; invalid drafts clear the graph. Ctrl-click toggles keys, Shift-click
+selects ranges, and dragging empty lane space selects a marquee. Move, duplicate or delete
+groups across tracks in one undoable source transaction. Selected keys keep their relative
+offsets, values and easing; collisions reject the
 entire edit. Choose seconds or 24/30/60 fps snapping. Double-click a lane to record, or use arrow
 keys to nudge selected keys. Escape and lost pointer capture cancel a drag without authoring it.
 Ctrl+wheel or +/- zooms the timeline; Shift+wheel or PageUp/PageDown pans the visible range.
 The contextual editor validates time, value and easing together before one undoable transaction.
-**+ Keyframe** records the selected track's live property value, with Opacity as the initial
-fallback for an object without a track. **Name & target** reveals program details; creating or
-duplicating programs allocates useful unique defaults even when those details are closed.
+The **Add a keyframe at the playhead** icon command records the selected track's live property
+value, with Opacity as the initial fallback for an object without a track. The **Animation name
+and target** icon command reveals program details; creating or duplicating programs allocates
+useful unique defaults even when those details are closed.
 Keyboard focus follows accepted timeline and Grid edits so repeated edits stay in the same
 control. The [multi-key timeline capture](images/designer-timeline-selection.png) shows group
 selection with frame snapping enabled.
+The [motion editor capture](images/designer-motion-editor.png) shows multiple property tracks
+and the live easing graph. **States** and **Behaviors** use the full inspector height;
+behavior pickers reveal the fields relevant to the chosen trigger and action.
 
-Reusable public controls and workspace APIs include `AssetToolbox`, `DesignerAsset`, `AssetIcon`,
-`TimelineLane`, `PropertyNumberScrubber`, `PropertyComponentsEditor`, `GridTrackEditor`,
+Reusable public controls and workspace APIs include `designer_chrome_style`, `AssetToolbox`,
+`AssetViewMode`, `DesignerAsset`, `AssetIcon`, `TimelineLane`, `EasingPreview`,
+`PropertyNumberScrubber`, `PropertyComponentsEditor`, `PropertyColorEditor`, `GridTrackEditor`,
 `OutlineCommand`, `WorkspaceViewMode`, `NavigationPane`, inspection-grid accessors and the
-workspace's single/group keyframe APIs. These controls send semantic actions through the session;
-they do not modify runtime controls behind the document authority. The
+workspace's single/group keyframe APIs. The workspace routes authoring callbacks through its
+session; standalone hosts supply their own transaction callbacks. The controls do not modify
+runtime controls behind the document authority. The
 [native controls guide](native-controls.md) includes host integration examples and the complete
 property, layout, hierarchy, asset and timeline interaction contracts.
 
 Native rendering also covers the [asset catalog](images/designer-assets.png),
-[split view](images/designer-split.png) and [compact workspace](images/designer-compact.png).
+[asset list](images/designer-assets-list.png), [split view](images/designer-split.png),
+[canvas focus](images/designer-canvas-focus.png), [color popup](images/designer-color-editor.png),
+[states](images/designer-states.png), [behaviors](images/designer-behaviors.png),
+[animation settings](images/designer-animation-settings.png) and [sharing](images/designer-sharing.png).
 The [engine performance report](performance.md) records controlled workloads, raw measurements,
 reproduction commands and the initial-index tradeoff separately from UI verification.
 
