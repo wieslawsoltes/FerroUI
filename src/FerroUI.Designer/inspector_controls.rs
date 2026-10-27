@@ -9,9 +9,11 @@ use ferroui_base::{BoxedValue, FerroObject};
 use ferroui_controls::automation::AutomationProperties;
 use ferroui_controls::templates::FuncDataTemplate;
 use ferroui_controls::{ColumnDefinitions, GridLength, GridUnitType, ToolTip};
+use ferroui_controls_treedatagrid::models::{
+    BeginEditGestures, HierarchicalExpanderColumn, TemplateColumn, TemplateColumnOptions,
+};
 use ferroui_controls_treedatagrid::{
-    HierarchicalTreeDataGridSourceExtensions, TreeDataGrid, TreeDataGridSourceExtensions,
-    TreeDataGridSourceRef,
+    TreeDataGrid, TreeDataGridSourceExtensions, TreeDataGridSourceRef,
 };
 use ferroui_treedatagrid_core::selection::IReadOnlyList;
 use ferroui_treedatagrid_core::{
@@ -58,73 +60,75 @@ pub(super) struct HierarchyGrid {
 
 impl HierarchyGrid {
     fn new(name: &str, project: bool) -> Self {
+        // The outline is a layer navigator, not a spreadsheet. A single native template
+        // column keeps its expander, row selection and drag/drop contracts while giving the
+        // name all available width. Type information lives in the icon and accessible tooltip.
+        let options = Rc::new(TemplateColumnOptions::<TreeRow>::new());
+        options.set_min_width(GridLength::from_pixels(105.0));
+        options.set_can_user_resize_column(Some(false));
+        options.set_can_user_sort_column(Some(false));
+        options.set_begin_edit_gestures(BeginEditGestures::NONE);
+        options.set_is_text_search_enabled(true);
+        options.set_text_search_value_selector(Some(Rc::new(move |row| {
+            Some(hierarchy_name(&row.entry, project).to_owned())
+        })));
+        let inner = TemplateColumn::new(
+            heading(if project { "Project / file" } else { "Element" }),
+            FuncDataTemplate::for_type::<TreeRow>(
+                move |row, _| Some(hierarchy_cell(row, project)),
+                false,
+            ),
+            None,
+            Some(GridLength::new(1.0, GridUnitType::Star)),
+            Some(options),
+        );
         let source = HierarchicalTreeDataGridSource::new(Rc::new(Vec::<Rc<TreeRow>>::new()))
-            .with_hierarchical_expander_text_column(
-                heading(if project { "Project / file" } else { "Element" }),
-                Accessor::member("Label", move |row: &Rc<TreeRow>| {
-                    if !project && !row.entry.name.is_empty() {
-                        row.entry.name.clone()
-                    } else {
-                        row.entry.label.clone()
-                    }
-                }),
+            .with_column(HierarchicalExpanderColumn::new(
+                inner,
                 |row| Some(row.children.clone() as Models<TreeRow>),
-                |options| {
-                    options.width = GridLength::new(1.0, GridUnitType::Star);
-                    options.min_width = GridLength::new(105.0, GridUnitType::Pixel);
-                    options.can_user_sort_column = Some(false);
-                    options.has_children =
-                        Some(Accessor::member("HasChildren", |row: &Rc<TreeRow>| {
-                            !row.children.is_empty()
-                        }));
-                    options.is_expanded = Some(
-                        Accessor::member("IsExpanded", |row: &Rc<TreeRow>| row.expanded.get())
-                            .with_setter(|row, value| row.expanded.set(value)),
-                    );
-                },
-            )
-            .with_text_column(
-                heading(if project { "Kind" } else { "Type" }),
-                Accessor::member("Name", move |row: &Rc<TreeRow>| {
-                    if project {
-                        row.entry.name.clone()
-                    } else if row.entry.name.is_empty() {
-                        String::new()
-                    } else {
-                        row.entry.label.clone()
-                    }
-                }),
-                |options| {
-                    options.width =
-                        GridLength::new(if project { 70.0 } else { 68.0 }, GridUnitType::Pixel);
-                    options.is_read_only = true;
-                    options.can_user_sort_column = Some(false);
-                },
-            );
+                Some(Accessor::member("HasChildren", |row: &Rc<TreeRow>| {
+                    !row.children.is_empty()
+                })),
+                Some(
+                    Accessor::member("IsExpanded", |row: &Rc<TreeRow>| row.expanded.get())
+                        .with_setter(|row, value| row.expanded.set(value)),
+                ),
+            ));
         source
             .row_selection()
             .unwrap()
             .base()
             .set_single_select(project);
         let control = make_grid(name);
+        control.classes().add(if project {
+            "designer-project-tree"
+        } else {
+            "designer-layer-tree"
+        });
+        control.set_show_column_headers(false);
         control.set_source(Some(TreeDataGridSourceRef::of::<TreeRow, _>(
             source.clone(),
         )));
-        control.row_prepared(|event| {
+        control.row_prepared(move |event| {
             let model = event.row().model();
             if let Some(row) = model
                 .as_ref()
                 .and_then(|model| model.downcast_ref::<TreeRow>())
             {
-                ToolTip::set_tip(
-                    event.row(),
-                    Some(Rc::new(format!(
-                        "{} {}\n{}",
-                        row.entry.label,
-                        row.entry.name,
-                        row.entry.uri.as_deref().unwrap_or(&row.entry.detail),
-                    ))),
-                );
+                let name = hierarchy_name(&row.entry, project);
+                let kind = if project {
+                    &row.entry.name
+                } else {
+                    &row.entry.label
+                };
+                let context = row.entry.uri.as_deref().unwrap_or(&row.entry.detail);
+                let description = if name == kind {
+                    format!("{name}\n{context}")
+                } else {
+                    format!("{name} · {kind}\n{context}")
+                };
+                AutomationProperties::set_name(event.row(), Some(&description));
+                ToolTip::set_tip(event.row(), Some(Rc::new(description)));
             }
         });
         Self {
@@ -269,6 +273,112 @@ impl HierarchyGrid {
         }
         selection.end_batch_update();
     }
+}
+
+fn hierarchy_name(entry: &TreeEntry, project: bool) -> &str {
+    if !project && !entry.name.is_empty() {
+        &entry.name
+    } else {
+        &entry.label
+    }
+}
+
+fn hierarchy_cell(row: &TreeRow, project: bool) -> Ref<Control> {
+    use ferroui_base::media::{Geometry, TextTrimming};
+    use ferroui_controls::PathIcon;
+
+    let root = Grid::new();
+    root.classes().add("designer-layer-cell");
+    root.set_column_definitions(ColumnDefinitions::parse("22,*").unwrap());
+    root.set_min_height(28.0);
+    root.set_margin(Thickness::new(0.0, 0.0, 6.0, 0.0));
+    let (path, color, metadata) = hierarchy_icon(&row.entry, project);
+    let icon = PathIcon::new();
+    icon.set_width(14.0);
+    icon.set_height(14.0);
+    icon.set_horizontal_alignment(HorizontalAlignment::Left);
+    icon.set_vertical_alignment(VerticalAlignment::Center);
+    icon.set_foreground(Some(SolidColorBrush::from_uint32(color).into()));
+    icon.set_data(Geometry::parse(path).expect("designer layer vector"));
+    root.children().add(icon.upcast::<Control>());
+    let name = TextBlock::new();
+    name.classes().add(if metadata {
+        "layer-metadata"
+    } else if row.entry.name.is_empty() && !project {
+        "layer-type"
+    } else {
+        "layer-name"
+    });
+    name.set_text(Some(hierarchy_name(&row.entry, project)));
+    name.set_font_size(12.0);
+    name.set_foreground(Some(
+        SolidColorBrush::from_uint32(if metadata {
+            0xff9299aa
+        } else if row.entry.name.is_empty() && !project {
+            0xffb8becc
+        } else {
+            0xfff2f3f5
+        })
+        .into(),
+    ));
+    name.set_text_trimming(<dyn TextTrimming>::character_ellipsis());
+    name.set_vertical_alignment(VerticalAlignment::Center);
+    Grid::set_column(&name, 1);
+    root.children().add(name.upcast::<Control>());
+    root.upcast()
+}
+
+/// Stable semantic glyphs for both authored and live trees. Unknown project controls
+/// retain the neutral component glyph; property elements stay visibly distinct.
+fn hierarchy_icon(entry: &TreeEntry, project: bool) -> (&'static str, u32, bool) {
+    const FRAME: &str = "M3 3H21V21H3Z M5 5V19H19V5Z M8 3H10V21H8Z M3 8H21V10H3Z";
+    const COMPONENT: &str = "M12 2L22 12L12 22L2 12Z M12 5L5 12L12 19L19 12Z";
+    const TEXT: &str = "M3 4H21V6H13V21H11V6H3Z";
+    const FOLDER: &str = "M2 5H10L12 7H22V20H2Z M4 7V18H20V9H11L9 7Z";
+    const FILE: &str = "M5 2H14L20 8V22H5Z M7 4V20H18V9H13V4Z M15 5V7H17Z";
+    const META: &str = "M4 6H10V8H4Z M14 6H20V8H14Z M4 11H20V13H4Z M4 16H10V18H4Z M14 16H20V18H14Z";
+    const RECT: &str = "M3 4H21V20H3Z M5 6V18H19V6Z";
+    const STACK: &str = "M3 3H21V7H3Z M5 5H19V5H5Z M3 10H21V14H3Z M3 17H21V21H3Z";
+    const INPUT: &str = "M2 5H22V19H2Z M4 7V17H20V7Z M8 8H12V10H11V14H12V16H8V14H9V10H8Z";
+    const TOGGLE: &str = "M3 3H21V21H3Z M5 5V19H19V5Z M7 11L10 14L17 7L18.5 8.5L10 17L5.5 12.5Z";
+    const CIRCLE: &str =
+        "M12 2A10 10 0 1 1 12 22A10 10 0 1 1 12 2Z M12 4A8 8 0 1 0 12 20A8 8 0 1 0 12 4Z";
+    const IMAGE: &str =
+        "M3 3H21V21H3Z M5 5V19H19V5Z M6 16L10 11L13 14L16 10L19 17H6Z M7 7H10V10H7Z";
+    if project {
+        return match entry.name.as_str() {
+            "Project" => (COMPONENT, 0xffb6a2f6, false),
+            "Folder" => (FOLDER, 0xff9caecb, false),
+            "XAML" => (FILE, 0xff79a8ff, false),
+            "Rust" => (FILE, 0xffd5ad8f, false),
+            "Asset" => (IMAGE, 0xffa4c5b7, false),
+            _ => (FILE, 0xffa9adba, false),
+        };
+    }
+    let kind = entry.label.rsplit(':').next().unwrap_or(&entry.label);
+    if kind.contains('.')
+        || matches!(
+            kind,
+            "Style" | "Setter" | "ControlTheme" | "ResourceDictionary"
+        )
+    {
+        return (META, 0xffa195c8, true);
+    }
+    let (path, color) = match kind {
+        "Grid" | "Canvas" | "UniformGrid" | "DockPanel" | "WrapPanel" | "FlexPanel" => {
+            (FRAME, 0xff9caecb)
+        }
+        "StackPanel" => (STACK, 0xff9caecb),
+        "TextBlock" | "Run" | "Span" | "Label" => (TEXT, 0xffa9adba),
+        "TextBox" | "ComboBox" | "NumericUpDown" => (INPUT, 0xffa9adba),
+        "CheckBox" | "RadioButton" | "ToggleSwitch" | "ToggleButton" => (TOGGLE, 0xffa9adba),
+        "Ellipse" => (CIRCLE, 0xffb6a2f6),
+        "Border" | "Rectangle" | "Window" => (RECT, 0xff9caecb),
+        "Image" | "Viewbox" => (IMAGE, 0xffa4c5b7),
+        "Button" | "ContentControl" | "UserControl" => (RECT, 0xffa9adba),
+        _ => (COMPONENT, 0xffa9adba),
+    };
+    (path, color, false)
 }
 
 pub(super) struct PropertyRow {
@@ -443,10 +553,10 @@ fn make_grid(name: &str) -> Ref<TreeDataGrid> {
     // Designer chrome owns its palette. A workspace-level override would also recolor
     // authored TreeDataGrids on the artboard, bypassing their Light/Dark theme resources.
     for (key, color) in [
-        ("TreeDataGridGridLinesBrush", 0xff343434),
-        ("TreeDataGridSelectedCellBackgroundBrush", 0xff35474e),
-        ("TreeDataGridHeaderBackgroundPointerOverBrush", 0xff373737),
-        ("TreeDataGridHeaderBackgroundPressedBrush", 0xff404040),
+        ("TreeDataGridGridLinesBrush", 0x003b3d46),
+        ("TreeDataGridSelectedCellBackgroundBrush", 0xff2d4061),
+        ("TreeDataGridHeaderBackgroundPointerOverBrush", 0xff303138),
+        ("TreeDataGridHeaderBackgroundPressedBrush", 0xff3b3d46),
         ("TreeDataGridHeaderBorderBrushPointerOverBrush", 0x00ffffff),
         ("TreeDataGridHeaderBorderBrushPressedBrush", 0x00ffffff),
         ("TreeDataGridHeaderForegroundPointerOverBrush", 0xfff5f5f5),
