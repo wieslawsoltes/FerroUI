@@ -13,19 +13,14 @@ pub const DESIGN_NAMESPACE: &str = "http://schemas.microsoft.com/expression/blen
 const COMPATIBILITY_NAMESPACE: &str = "http://schemas.openxmlformats.org/markup-compatibility/2006";
 const FRAMEWORK: &str = "https://github.com/ferroui";
 
-/// `ferro_class_info!` metadata is owned by TypeInfo and need not carry a reciprocal
-/// type_info callback. Resolve that ownership instead of treating such classes as opaque.
+/// Native classes can inherit all properties without declaring any own MarkupType.
+/// Resolve the registered class identity before looking up inherited property metadata.
 pub(crate) fn native_type_for_node(node: &Node) -> Option<&'static ferroui_base::TypeInfo> {
-    let metadata = crate::editors::markup_type_for_node(node)?;
-    metadata.type_info.map(|type_| type_()).or_else(|| {
-        ferroui_base::TypeInfo::registered_types()
-            .into_iter()
-            .find(|type_| {
-                type_
-                    .markup()
-                    .is_some_and(|candidate| std::ptr::eq(candidate, metadata))
-            })
-    })
+    let namespace = match node.namespace_uri.as_deref()? {
+        DESIGN_NAMESPACE => FRAMEWORK,
+        namespace => namespace,
+    };
+    crate::native_types::registered_xml_type(namespace, node.local_name())
 }
 
 #[derive(Clone, Debug, PartialEq, Eq)]

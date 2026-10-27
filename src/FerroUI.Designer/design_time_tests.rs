@@ -255,8 +255,26 @@ fn native_design_values_toggle_without_source_history_changes_and_keep_mapping()
 fn native_sample_records_feed_nested_bindings_and_leave_application_source_unchanged() {
     let _app = UnitTestApplication::start(TestServices::styled_window());
     let source = format!(
-        "<StackPanel {NS} d:DataContext='{{d:SampleData}}'><TextBlock Name='Name' Text='{{Binding Person.FirstName}}' Grid.Row='{{Binding Row}}'/><CheckBox Name='Active' IsChecked='{{Binding IsActive}}'/><Slider Name='Amount' Value='{{Binding Amount}}'/></StackPanel>"
+        "<StackPanel {NS} d:DataContext='{{d:SampleData}}'><TextBlock Name='Name' Text='{{Binding Person.FirstName}}' Grid.Row='{{Binding Row}}'/><CheckBox Name='Active' IsChecked='{{Binding IsActive}}'/><d:CheckBox Name='PreviewActive' IsChecked='{{Binding IsPreviewActive}}'/><Slider Name='Amount' Value='{{Binding Amount}}'/></StackPanel>"
     );
+    // Resolve inherited properties before constructing or loading a CheckBox. It
+    // declares a constructor without its own MarkupType; that is a valid native class.
+    ferroui_markup_xaml::register_types();
+    let document = Document::new(&source).unwrap();
+    let check_node = document.ast().node(named(&document, "Active")).unwrap();
+    assert!(std::ptr::eq(
+        native_type_for_node(check_node).unwrap(),
+        ferroui_controls::CheckBox::TYPE
+    ));
+    let mut qualified = check_node.clone();
+    qualified.namespace_uri =
+        Some("clr-namespace:FerroUI.Controls;assembly=FerroUI.Controls".into());
+    assert!(std::ptr::eq(
+        native_type_for_node(&qualified).unwrap(),
+        ferroui_controls::CheckBox::TYPE
+    ));
+    qualified.namespace_uri = Some("clr-namespace:FerroUI.Controls;assembly=Other".into());
+    assert!(native_type_for_node(&qualified).is_none());
     let session = DesignerSession::new(source.clone(), ContentControl::new()).unwrap();
     assert!(
         matches!(session.preview_status(), crate::PreviewStatus::Ready { .. }),
@@ -277,6 +295,13 @@ fn native_sample_records_feed_nested_bindings_and_leave_application_source_uncha
         .cast::<ferroui_controls::CheckBox>()
         .unwrap();
     assert_eq!(check.is_checked(), Some(true));
+    let placeholder = session
+        .preview
+        .visual(named(session.document(), "PreviewActive"))
+        .unwrap()
+        .cast::<ferroui_controls::CheckBox>()
+        .unwrap();
+    assert_eq!(placeholder.is_checked(), Some(true));
     assert_eq!(ferroui_controls::Grid::get_row(&text), 10);
     let amount = session
         .preview

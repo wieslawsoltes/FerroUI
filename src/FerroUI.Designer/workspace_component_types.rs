@@ -1,10 +1,11 @@
 //! Source-backed control definitions and instance snippets are distinct objects.
 use super::{DesignerDefinitionAsset, DesignerWorkspace, type_token};
 use ferroui_base::TypeInfo;
-use ferroui_base::metadata::MarkupAssembly;
 use ferroui_controls::Control;
 use ferroui_designer_core::{Document, Edit, Node, NodeId};
 use std::rc::Rc;
+
+pub(super) use crate::native_types::registered_xml_type;
 
 pub(super) fn class_name(node: &Node) -> Option<&str> {
     node.attributes
@@ -98,40 +99,6 @@ pub(super) fn registered_type(
     let (prefix, name) = token.split_once(':').unwrap_or(("", token));
     let uri = namespaces.get(prefix)?;
     registered_xml_type(uri, name)
-}
-
-/// Resolve the same registered XML namespace mappings used by the runtime loader.
-/// A short-name search is insufficient: an application's Button must not make the
-/// framework Button ambiguous, and libraries can declare their own XML namespaces.
-pub(super) fn registered_xml_type(uri: &str, name: &str) -> Option<&'static TypeInfo> {
-    if let Some(namespace) = uri
-        .strip_prefix("using:")
-        .or_else(|| uri.strip_prefix("clr-namespace:"))
-    {
-        let mut parts = namespace.split(';');
-        let type_ = TypeInfo::find(parts.next()?, name)?;
-        for part in parts {
-            let assembly = part.strip_prefix("assembly=")?;
-            if MarkupAssembly::of_module(type_.module_path())?.name != assembly {
-                return None;
-            }
-        }
-        return Some(type_);
-    }
-    let mut resolved: Option<&'static TypeInfo> = None;
-    for definition in MarkupAssembly::registered_assemblies()
-        .into_iter()
-        .flat_map(|assembly| assembly.xmlns_definitions)
-        .filter(|definition| definition.xml_namespace == uri)
-    {
-        if let Some(candidate) = TypeInfo::find(definition.namespace, name) {
-            if resolved.is_some_and(|previous| !std::ptr::eq(previous, candidate)) {
-                return None;
-            }
-            resolved = Some(candidate);
-        }
-    }
-    resolved
 }
 
 impl DesignerWorkspace {

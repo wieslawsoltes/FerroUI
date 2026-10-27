@@ -15,6 +15,7 @@ mod definition_manipulation;
 mod definition_projection;
 mod definition_session;
 mod design_time;
+mod native_types;
 mod design_time_samples;
 mod editors;
 mod focus_order;
