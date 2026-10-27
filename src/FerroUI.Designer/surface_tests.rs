@@ -672,3 +672,113 @@ fn shift_deselect_is_not_accidentally_a_drag_of_the_remaining_selection() {
     assert!(fixture.commits.borrow().is_empty());
     assert_eq!(fixture.source(), SOURCE);
 }
+
+#[test]
+fn canvas_layer_filters_reveal_overlaps_and_cycle_without_starting_source_gestures() {
+    let _app = UnitTestApplication::start(TestServices::styled_window());
+    let source = r#"<Canvas xmlns="https://github.com/ferroui" Width="400" Height="240" Background="White"><Button Name="Back" Canvas.Left="20" Canvas.Top="20" Width="100" Height="50"/><Button Name="Front" Canvas.Left="20" Canvas.Top="20" Width="100" Height="50"/></Canvas>"#;
+    let fixture = SurfaceFixture::with_source(source);
+    let (back, front) = {
+        let session = fixture.session.borrow();
+        (
+            session.document().ast().find_name("Back").unwrap(),
+            session.document().ast().find_name("Front").unwrap(),
+        )
+    };
+    let point = Point::new(60.0, 40.0);
+    let hits = fixture.surface.hit_stack(point);
+    assert_eq!(hits.first(), Some(&front));
+    assert!(hits.contains(&back));
+    fixture.press_with(point, KeyModifiers::CONTROL | KeyModifiers::ALT);
+    assert_eq!(fixture.session.borrow().selection(), &[front]);
+    fixture.press_with(point, KeyModifiers::CONTROL | KeyModifiers::ALT);
+    assert_eq!(fixture.session.borrow().selection(), &[back]);
+    assert!(fixture.commits.borrow().is_empty());
+    fixture
+        .session
+        .borrow_mut()
+        .set_layers_locked(&[front], true)
+        .unwrap();
+    assert_eq!(fixture.surface.hit_stack(point).first(), Some(&back));
+    fixture
+        .session
+        .borrow_mut()
+        .set_layers_hidden(&[back], true)
+        .unwrap();
+    assert!(!fixture.surface.hit_stack(point).contains(&back));
+    assert!(!fixture.surface.hit_stack(point).contains(&front));
+    fixture.press_with(Point::new(10.0, 10.0), KeyModifiers::NONE);
+    fixture.release_with(Point::new(150.0, 90.0), KeyModifiers::NONE);
+    assert!(fixture.session.borrow().selection().is_empty());
+    assert_eq!(fixture.source(), source);
+}
+
+#[test]
+fn canvas_layer_epoch_retires_a_drag_after_lock_unlock_without_source_changes() {
+    let _app = UnitTestApplication::start(TestServices::styled_window());
+    let fixture = SurfaceFixture::new();
+    let target = fixture
+        .session
+        .borrow()
+        .document()
+        .ast()
+        .find_name("Target")
+        .unwrap();
+    fixture.press(Point::new(60.0, 40.0));
+    fixture
+        .session
+        .borrow_mut()
+        .set_layers_locked(&[target], true)
+        .unwrap();
+    fixture
+        .session
+        .borrow_mut()
+        .set_layers_locked(&[target], false)
+        .unwrap();
+    fixture.move_to(Point::new(110.0, 70.0));
+    fixture.release(Point::new(110.0, 70.0));
+    assert!(fixture.commits.borrow().is_empty());
+    assert_eq!(fixture.source(), SOURCE);
+    fixture.session.borrow_mut().select([target]);
+    fixture
+        .session
+        .borrow_mut()
+        .set_layers_locked(&[target], true)
+        .unwrap();
+    fixture.key(Key::Right, KeyModifiers::NONE);
+    assert!(fixture.commits.borrow().is_empty());
+    assert_eq!(fixture.source(), SOURCE);
+}
+
+#[test]
+fn canvas_hierarchy_navigation_and_isolation_escape_are_source_free() {
+    let _app = UnitTestApplication::start(TestServices::styled_window());
+    let source = r#"<Canvas xmlns="https://github.com/ferroui" Width="400" Height="240" Background="White"><StackPanel Name="Group" Width="200"><Button Name="First" Width="80" Height="30"/><Button Name="Second" Width="80" Height="30"/></StackPanel></Canvas>"#;
+    let fixture = SurfaceFixture::with_source(source);
+    let (group, first, second) = {
+        let session = fixture.session.borrow();
+        (
+            session.document().ast().find_name("Group").unwrap(),
+            session.document().ast().find_name("First").unwrap(),
+            session.document().ast().find_name("Second").unwrap(),
+        )
+    };
+    fixture.session.borrow_mut().select([group]);
+    fixture.key(Key::Enter, KeyModifiers::NONE);
+    assert_eq!(fixture.session.borrow().selection(), &[first, second]);
+    fixture.key(Key::Tab, KeyModifiers::NONE);
+    assert_eq!(fixture.session.borrow().selection(), &[second]);
+    fixture.key(Key::Tab, KeyModifiers::SHIFT);
+    assert_eq!(fixture.session.borrow().selection(), &[first]);
+    fixture.key(Key::Enter, KeyModifiers::SHIFT);
+    assert_eq!(fixture.session.borrow().selection(), &[group]);
+    fixture
+        .session
+        .borrow_mut()
+        .isolate_layers(&[first])
+        .unwrap();
+    fixture.key(Key::Escape, KeyModifiers::NONE);
+    assert!(fixture.session.borrow().layer_isolation().is_empty());
+    assert!(fixture.commits.borrow().is_empty());
+    assert_eq!(fixture.source(), source);
+}

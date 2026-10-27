@@ -43,7 +43,12 @@ impl DesignSurface {
         }
         let session = self.session()?;
         let session = session.try_borrow().ok()?;
-        if !session.can_manipulate() {
+        if !session.can_manipulate()
+            || session
+                .selection()
+                .iter()
+                .any(|node| session.ensure_layer_manipulable(*node).is_err())
+        {
             return None;
         }
         let registry = session.layout_tools().revision();

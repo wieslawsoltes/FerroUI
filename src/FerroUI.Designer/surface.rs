@@ -86,6 +86,8 @@ struct GestureContext {
     revision: u64,
     syntax: Arc<Ast>,
     providers: u64,
+    layer_epoch: u64,
+    scope_epoch: u64,
     selection: Vec<NodeId>,
     animation: (Option<NodeId>, f64, bool, bool),
 }
@@ -96,6 +98,8 @@ impl GestureContext {
             revision: session.document().revision(),
             syntax: session.document().ast_snapshot(),
             providers: session.layout_tools().revision(),
+            layer_epoch: session.layer_view_epoch(),
+            scope_epoch: session.definition_scope_epoch(),
             selection: session.selection().to_vec(),
             animation: (
                 session.active_animation_program(),
@@ -111,6 +115,8 @@ impl GestureContext {
             && session.document().revision() == self.revision
             && std::ptr::eq(session.document().ast(), self.syntax.as_ref())
             && session.layout_tools().revision() == self.providers
+            && session.layer_view_epoch() == self.layer_epoch
+            && session.definition_scope_epoch() == self.scope_epoch
             && session.selection() == self.selection
             && self.animation
                 == (
@@ -142,6 +148,7 @@ pub struct DesignSurface {
     cursor_position: Cell<Option<Point>>,
     pointer_inside: Cell<bool>,
     helpers_visible: Cell<bool>,
+    focus_order_visible: Cell<bool>,
     helper_epoch: Cell<u64>,
     helper_cache: RefCell<Option<helpers::HelperCache>>,
     helper_preview: RefCell<Option<Rc<crate::LayoutEditPreview>>>,
@@ -192,6 +199,14 @@ impl DesignSurface {
     pub fn set_grid(&self, size: f64) {
         self.grid
             .set(if size.is_finite() { size.max(0.0) } else { 0.0 });
+    }
+    pub fn focus_order_visible(&self) -> bool {
+        self.focus_order_visible.get()
+    }
+    /// Shows native keyboard-navigation diagnostics without changing source or history.
+    pub fn set_focus_order_visible(&self, visible: bool) {
+        self.focus_order_visible.set(visible);
+        self.invalidate_visual();
     }
     pub fn set_interactive(&self, value: bool) {
         if let Some(session) = self.session() {
@@ -352,25 +367,48 @@ impl DesignSurface {
     }
     fn rectangles(&self) -> Vec<(NodeId, Rect)> {
         self.session()
-            .map(|session| session.borrow().selection_bounds(&self.to_ref().upcast()))
+            .map(|session| {
+                let session = session.borrow();
+                session
+                    .selection_bounds(&self.to_ref().upcast())
+                    .into_iter()
+                    .filter(|(node, _)| session.can_canvas_select(*node))
+                    .collect()
+            })
             .unwrap_or_default()
     }
-    fn pick(&self, position: Point) -> Option<NodeId> {
-        let session = self.session()?;
+    /// Authored controls beneath an artboard point in native front-to-back paint order.
+    /// Generated template visuals map back to their authored owner; duplicates, locked,
+    /// hidden and out-of-scope layers are omitted. Hosts may use this for a Select Layer menu.
+    pub fn hit_stack(&self, position: Point) -> Vec<NodeId> {
+        let Some(session) = self.session() else {
+            return Vec::new();
+        };
         let session = session.borrow();
-        let root = session.preview.root()?;
-        let point = self.translate_point(position, &root)?;
-        let mut hit = root.get_visual_at(point);
-        while let Some(visual) = hit {
-            if let Some(id) = session.preview.source_id(&visual) {
-                return Some(id);
+        let Some(root) = session.preview.root() else {
+            return Vec::new();
+        };
+        let Some(point) = self.translate_point(position, &root) else {
+            return Vec::new();
+        };
+        let mut result = Vec::new();
+        let mut seen = std::collections::BTreeSet::new();
+        for visual in root.get_visuals_at(point) {
+            let mut current = Some(visual);
+            while let Some(visual) = current {
+                if let Some(id) = session.preview.source_id(&visual) {
+                    if session.can_canvas_select(id) && seen.insert(id) {
+                        result.push(id);
+                    }
+                    break;
+                }
+                current = visual.visual_parent();
             }
-            if std::ptr::eq::<Visual>(&*visual, &*root.clone().upcast::<Visual>()) {
-                break;
-            }
-            hit = visual.visual_parent();
         }
-        None
+        result
+    }
+    fn pick(&self, position: Point) -> Option<NodeId> {
+        self.hit_stack(position).into_iter().next()
     }
     fn finish(&self, position: Point, modifiers: KeyModifiers) {
         if !self.pending_is_current() {
@@ -469,6 +507,7 @@ impl DesignSurface {
                         .ast()
                         .elements()
                         .filter(|node| node.id != root)
+                        .filter(|node| session.can_canvas_select(node.id))
                         .filter_map(|node| {
                             session
                                 .preview
@@ -520,6 +559,7 @@ impl Default for DesignSurface {
             pointer_inside: Cell::new(false),
             snap_guides: RefCell::new(Vec::new()),
             helpers_visible: Cell::new(true),
+            focus_order_visible: Cell::new(false),
             helper_epoch: Cell::new(0),
             helper_cache: RefCell::new(None),
             helper_preview: RefCell::new(None),
@@ -563,6 +603,30 @@ impl InputElementImpl for DesignSurface {
             return;
         }
         session.borrow_mut().refresh_runtime_mapping();
+        // Ctrl+Alt-click cycles overlapping authored controls without arming a drag.
+        // Ctrl-drag keeps its existing subtract-marquee meaning.
+        if event
+            .key_modifiers()
+            .contains(KeyModifiers::CONTROL | KeyModifiers::ALT)
+        {
+            this.clear_pending();
+            let root = session.borrow().document().ast().root();
+            let hits = this
+                .hit_stack(position)
+                .into_iter()
+                .filter(|node| *node != root)
+                .collect::<Vec<_>>();
+            if !hits.is_empty() {
+                let current = session.borrow().selection().first().copied();
+                let next = current
+                    .and_then(|current| hits.iter().position(|node| *node == current))
+                    .map_or(0, |index| (index + 1) % hits.len());
+                session.borrow_mut().select([hits[next]]);
+            }
+            event.set_handled(true);
+            this.notify();
+            return;
+        }
         let initial_selection = session.borrow().selection().to_vec();
         let rectangles = this.rectangles();
         let mut handle = None;
@@ -646,6 +710,10 @@ impl InputElementImpl for DesignSurface {
                 .ast()
                 .elements()
                 .filter(|node| !moving.contains(&node.id))
+                .filter(|node| {
+                    let state = session.layer_state(node.id);
+                    !state.is_hidden() && !state.outside_isolation
+                })
                 .filter_map(|node| session.preview.bounds(node.id, &this.to_ref().upcast()))
                 .map(|r| ferroui_designer_tools::Rect::new(r.x, r.y, r.width, r.height))
                 .collect()
@@ -769,8 +837,14 @@ impl InputElementImpl for DesignSurface {
             return;
         }
         if event.key == Key::Escape {
+            let had_pending = this.gesture.borrow().is_some() || this.insert.borrow().is_some();
             this.clear_pending();
             this.helper_focus.set(None);
+            if !had_pending {
+                if let Some(session) = this.session() {
+                    session.borrow_mut().clear_layer_isolation();
+                }
+            }
             if !this.pointer_inside.get() {
                 this.cursor_position.set(None);
             }
@@ -781,6 +855,26 @@ impl InputElementImpl for DesignSurface {
             && this.insert.borrow().is_none()
             && !event.key_modifiers.contains(KeyModifiers::ALT)
         {
+            if !event
+                .key_modifiers
+                .intersects(KeyModifiers::CONTROL | KeyModifiers::META)
+            {
+                let command = match (event.key, event.key_modifiers.contains(KeyModifiers::SHIFT)) {
+                    (Key::Enter, false) => Some(crate::LayerCommand::SelectChildren),
+                    (Key::Enter, true) => Some(crate::LayerCommand::SelectParent),
+                    (Key::Tab, false) => Some(crate::LayerCommand::SelectNextSibling),
+                    (Key::Tab, true) => Some(crate::LayerCommand::SelectPreviousSibling),
+                    _ => None,
+                };
+                if let Some(command) = command {
+                    if let Some(session) = this.session() {
+                        let _ = session.borrow_mut().apply_layer_command(command);
+                    }
+                    this.notify();
+                    event.set_handled(true);
+                    return;
+                }
+            }
             let step = if event.key_modifiers.contains(KeyModifiers::SHIFT) {
                 10.0
             } else if event.key_modifiers.contains(KeyModifiers::CONTROL) {
@@ -798,8 +892,13 @@ impl InputElementImpl for DesignSurface {
             if let Some(delta) = delta {
                 let nodes = this.session().and_then(|session| {
                     let session = session.borrow();
-                    (session.can_manipulate() && !session.selection().is_empty())
-                        .then(|| session.selection().to_vec())
+                    (session.can_manipulate()
+                        && !session.selection().is_empty()
+                        && session
+                            .selection()
+                            .iter()
+                            .all(|id| session.can_canvas_select(*id)))
+                    .then(|| session.selection().to_vec())
                 });
                 if let Some(nodes) = nodes {
                     if let Some(commit) = this.commit.borrow().as_ref().cloned() {
@@ -1045,6 +1144,16 @@ impl VisualImpl for DesignSurface {
                     0.0,
                     0.0,
                     &BoxShadows::default(),
+                );
+            }
+        }
+        if this.focus_order_visible.get() {
+            if let Some(session) = this.session() {
+                crate::focus_order::render_focus_order(
+                    context,
+                    &session.borrow(),
+                    &this.to_ref().upcast::<Visual>(),
+                    this.zoom.get(),
                 );
             }
         }

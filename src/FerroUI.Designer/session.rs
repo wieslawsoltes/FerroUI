@@ -24,6 +24,7 @@ pub struct DesignerSession {
     pub(crate) interactions: crate::interaction_session::InteractionSession,
     pub(crate) generation: u64,
     pub(crate) definition_scope_epoch: u64,
+    pub(crate) layers: crate::layer_state::LayerView,
     collaboration: Option<SessionCollaboration>,
     read_only: bool,
     layout_tools: ferroui_designer_tools::LayoutRegistry,
@@ -71,6 +72,7 @@ impl DesignerSession {
             interactions: crate::interaction_session::InteractionSession::default(),
             generation: 0,
             definition_scope_epoch: 0,
+            layers: crate::layer_state::LayerView::default(),
             collaboration: None,
             read_only: false,
             layout_tools: crate::definition_manipulation::layout_registry(),
@@ -129,6 +131,7 @@ impl DesignerSession {
         self.animation.player.stop();
         self.forget_interaction_preview();
         self.import_animations();
+        self.refresh_layer_visuals();
         self.generation += 1;
         Ok(())
     }
@@ -144,6 +147,7 @@ impl DesignerSession {
         self.preview.clear_animation();
         self.animation.native.clear();
         self.preview.replace_document(uri, &candidate)?;
+        self.layers.reset();
         self.document = candidate;
         self.selection.clear();
         self.collaboration = None;
@@ -170,6 +174,7 @@ impl DesignerSession {
         self.preview.clear_animation();
         self.animation.native.clear();
         self.preview.replace_document(uri, &document)?;
+        self.layers.reset();
         self.document = document;
         self.selection.clear();
         self.collaboration = None;
@@ -842,6 +847,7 @@ impl DesignerSession {
         if import_animation {
             self.import_animations();
         }
+        self.refresh_layer_visuals();
         self.generation += 1;
     }
 
@@ -983,5 +989,6 @@ impl DesignerSession {
     }
     pub fn refresh_runtime_mapping(&mut self) {
         self.preview.rebuild_map(&self.document);
+        self.refresh_layer_visuals();
     }
 }
