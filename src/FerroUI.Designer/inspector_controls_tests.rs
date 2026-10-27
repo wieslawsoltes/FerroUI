@@ -1241,6 +1241,12 @@ fn layer_template_keeps_native_type_ahead_selection() {
     use ferroui_base::input::TextInputEventArgs;
     let _app = UnitTestApplication::start(TestServices::styled_window());
     let workspace = DesignerWorkspace::new(DOCUMENT).unwrap();
+    let window = Window::new();
+    window.set_width(1280.0);
+    window.set_height(800.0);
+    window.set_content(Some(Control::boxed(workspace.control())));
+    window.show();
+    window.update_layout();
     select_named(&workspace, &["First"]);
     let second = workspace
         .session
@@ -1258,6 +1264,7 @@ fn layer_template_keeps_native_type_ahead_selection() {
         workspace.inspectors.outline.selected()[0].entry.name,
         "Second"
     );
+    window.close();
 }
 
 #[test]
