@@ -70,6 +70,7 @@ impl DesignerWorkspace {
         self.project.borrow_mut().workspace = Some(ProjectWorkspace::new(solution));
         self.project.borrow_mut().selected = 0;
         self.rebuild_project_tree();
+        self.refresh_components();
         Ok(())
     }
     pub fn select_project(&self, index: usize) -> Result<(), String> {
@@ -210,6 +211,7 @@ impl DesignerWorkspace {
         }
         drop(state);
         self.rebuild_document_tabs();
+        self.refresh_components();
         Ok(())
     }
     pub(super) fn inactive_dirty_document(&self) -> Option<String> {
@@ -467,6 +469,7 @@ impl DesignerWorkspace {
                     self.project.borrow_mut().workspace = Some(ProjectWorkspace::new(solution));
                     self.project.borrow_mut().selected = 0;
                     self.rebuild_project_tree();
+                    self.refresh_components();
                     self.status.set_text(Some("Solution loaded"));
                 }
                 Err(error) => self.report(Err(error)),

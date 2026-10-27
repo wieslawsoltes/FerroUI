@@ -58,6 +58,7 @@ impl DesignerWorkspace {
                 .map_err(|_| "The designer session is busy")?,
         );
         self.refresh_source_tools();
+        self.refresh_components();
         Ok(())
     }
     pub(super) fn connect_source_tools(self: &Rc<Self>) {

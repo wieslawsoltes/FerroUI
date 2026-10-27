@@ -82,6 +82,11 @@ impl ApplicationImpl for App {
             None => DesignerWorkspace::new(source),
         }
         .unwrap_or_else(|error| panic!("Designer initialization: {error}"));
+        if let Err(error) = workspace.register_component_documents(
+            ferroui_themes_winui::designer_documents().iter().copied(),
+        ) {
+            eprintln!("Designer component sources: {error}");
+        }
         if let Some(options) = PREVIEW_OPTIONS.with(|value| value.borrow_mut().take()) {
             if let Err(error) = workspace.session().borrow_mut().configure_preview(options) {
                 eprintln!("Designer preview: {error}");
