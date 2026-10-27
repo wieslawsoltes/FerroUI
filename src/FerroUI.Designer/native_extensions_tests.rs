@@ -155,10 +155,12 @@ fn rotation_preserves_property_element_transform_and_namespace_inheritance() {
         },
     )
     .unwrap();
-    assert!(session
-        .document()
-        .source()
-        .contains("<ScaleTransform ScaleX=\"2\""));
+    assert!(
+        session
+            .document()
+            .source()
+            .contains("<ScaleTransform ScaleX=\"2\"")
+    );
     assert!(session.document().source().contains("<TransformGroup>"));
     assert_eq!(session.document().source().matches("xmlns=").count(), 1);
     assert!(
@@ -229,10 +231,12 @@ fn registered_root_factory_populates_real_instances_and_survives_document_switch
         "Example.RealView",
         Rc::new(|_| Err("factory rejected".into())),
     );
-    assert!(session
-        .configure_preview(rejected)
-        .unwrap_err()
-        .contains("factory rejected"));
+    assert!(
+        session
+            .configure_preview(rejected)
+            .unwrap_err()
+            .contains("factory rejected")
+    );
     assert!(std::ptr::eq(&*accepted, &*session.preview.root().unwrap()));
     let id = session.document().ast().find_name("Target").unwrap();
     session.set_property(&[id], "Content", "Recovered").unwrap();
@@ -240,12 +244,197 @@ fn registered_root_factory_populates_real_instances_and_survives_document_switch
         session.preview_status(),
         PreviewStatus::Ready { .. }
     ));
-    assert!(session
-        .preview
-        .root()
+    assert!(
+        session
+            .preview
+            .root()
+            .unwrap()
+            .cast::<UserControl>()
+            .is_some()
+    );
+}
+
+#[test]
+fn authored_template_parts_with_repeated_names_keep_source_identity_after_scope_navigation() {
+    use ferroui_controls::Border;
+    let _app = UnitTestApplication::start(TestServices::styled_window());
+    // Keep both declarations on one line to cover source-column disambiguation too.
+    let source = r#"<UserControl xmlns="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"><UserControl.Resources><ControlTemplate x:Key="First"><Border Name="PART_Root" Padding="3"><ContentPresenter Name="PART_ContentPresenter" Content="{TemplateBinding Content}"/></Border></ControlTemplate><ControlTemplate x:Key="Second"><Border Name="PART_Root" Padding="13"><ContentPresenter Name="PART_ContentPresenter" Content="{TemplateBinding Content}"/></Border></ControlTemplate></UserControl.Resources><StackPanel><Button Name="FirstInstance" Content="One" Template="{StaticResource First}"/><Button Name="SecondInstance" Content="Two" Template="{StaticResource Second}"/></StackPanel></UserControl>"#;
+    let host = ContentControl::new();
+    let mut session = DesignerSession::new(source, host.clone()).unwrap();
+    let window = Window::new();
+    window.set_content(Some(Control::boxed(&host)));
+    window.show();
+    window.update_layout();
+    let template = |key: &str| {
+        session
+            .document()
+            .ast()
+            .elements()
+            .find(|node| node.attribute("x:Key") == Some(key))
+            .unwrap()
+            .id
+    };
+    let first_template = template("First");
+    let second_template = template("Second");
+    let part = |template, name| {
+        session
+            .document()
+            .ast()
+            .subtree(template)
+            .find(|node| node.xaml_name() == Some(name))
+            .unwrap()
+            .id
+    };
+    let first = part(first_template, "PART_Root");
+    let second = part(second_template, "PART_Root");
+    let first_presenter = part(first_template, "PART_ContentPresenter");
+    let second_presenter = part(second_template, "PART_ContentPresenter");
+    let assert_parts = |session: &mut DesignerSession| {
+        session.preview.rebuild_map(&session.document);
+        for (id, padding) in [(first, 3.0), (second, 13.0)] {
+            let visual = session
+                .preview
+                .visual(id)
+                .expect("Each template has its own authored part");
+            assert_eq!(visual.cast::<Border>().unwrap().padding().left, padding);
+            assert_eq!(session.preview.source_id(&visual), Some(id));
+        }
+        for id in [first_presenter, second_presenter] {
+            let visual = session
+                .preview
+                .visual(id)
+                .expect("Presenters retain their containing namescope's identity");
+            assert_eq!(session.preview.source_id(&visual), Some(id));
+        }
+    };
+    assert_parts(&mut session);
+    session.enter_definition_scope(second_template).unwrap();
+    window.update_layout();
+    session.preview.rebuild_map(&session.document);
+    assert!(session.preview.visual(first).is_none());
+    assert!(session.preview.visual(second).is_some());
+    session.exit_definition_scope().unwrap();
+    window.update_layout();
+    assert_parts(&mut session);
+    assert_eq!(session.document().source(), source);
+    assert!(!session.can_undo());
+    window.close();
+}
+
+#[test]
+fn root_definition_scope_preserves_registered_factories_and_rolls_back_rejected_navigation() {
+    use std::cell::Cell;
+    let _app = UnitTestApplication::start(TestServices::styled_window());
+    let source = r#"<UserControl xmlns="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" x:Class="Example.DefinitionRoot"><UserControl.Resources><ControlTemplate x:Key="Card"><Border Name="TemplatePart" Padding="8"/></ControlTemplate></UserControl.Resources><Button Name="Target" Content="Factory-owned view"/></UserControl>"#;
+    let host = ContentControl::new();
+    let mut session = DesignerSession::new(source, host.clone()).unwrap();
+    let calls = Rc::new(Cell::new(0));
+    let fail = Rc::new(Cell::new(false));
+    let clicks = Rc::new(Cell::new(0));
+    let observed_calls = calls.clone();
+    let should_fail = fail.clone();
+    let observed_clicks = clicks.clone();
+    let mut options = PreviewHostOptions::default();
+    options.register_root(
+        "Example.DefinitionRoot",
+        Rc::new(move |request| {
+            observed_calls.set(observed_calls.get() + 1);
+            if should_fail.get() {
+                return Err("Definition root factory rejected the candidate".into());
+            }
+            let root = UserControl::new();
+            let loaded = request.populate(Some(Control::boxed(root.clone())))?;
+            let clicks = observed_clicks.clone();
+            root.get_control::<ferroui_controls::Button>("Target")
+                .click(move |_, _| clicks.set(clicks.get() + 1));
+            Ok(loaded)
+        }),
+    );
+    session.configure_preview(options).unwrap();
+    let window = Window::new();
+    window.set_content(Some(Control::boxed(&host)));
+    window.show();
+    window.update_layout();
+    let root = session.document().ast().root();
+    let target = session.document().ast().find_name("Target").unwrap();
+    let template = session
+        .document()
+        .ast()
+        .elements()
+        .find(|node| node.attribute("x:Key") == Some("Card"))
         .unwrap()
-        .cast::<UserControl>()
-        .is_some());
+        .id;
+    let revision = session.document().revision();
+    session.select([target]);
+    let before_calls = calls.get();
+    session.enter_definition_scope(root).unwrap();
+    window.update_layout();
+    assert!(
+        calls.get() > before_calls,
+        "Root definition mode must use its registered constructor"
+    );
+    assert!(
+        session
+            .preview
+            .root()
+            .unwrap()
+            .cast::<UserControl>()
+            .is_some()
+    );
+    session
+        .preview
+        .visual(target)
+        .unwrap()
+        .cast::<ferroui_controls::Button>()
+        .unwrap()
+        .raise_event(&ferroui_base::interactivity::RoutedEventArgs::with_event(
+            ferroui_controls::Button::click_event(),
+        ));
+    assert_eq!(
+        clicks.get(),
+        1,
+        "Code-behind handlers survive root definition navigation"
+    );
+    let before_calls = calls.get();
+    session.enter_definition_scope(template).unwrap();
+    assert_eq!(
+        calls.get(),
+        before_calls,
+        "Nested definitions use a synthetic sample host"
+    );
+    let previous_scope = session.definition_scope().cloned().unwrap();
+    let previous_epoch = session.definition_scope_epoch();
+    let previous_root = session.preview.root().unwrap();
+    fail.set(true);
+    assert!(
+        session
+            .enter_definition_scope(root)
+            .unwrap_err()
+            .contains("rejected")
+    );
+    assert_eq!(session.definition_scope(), Some(&previous_scope));
+    assert_eq!(session.definition_scope_epoch(), previous_epoch);
+    assert!(previous_root.ptr_eq(&session.preview.root().unwrap()));
+    assert!(matches!(
+        session.preview_status(),
+        PreviewStatus::Ready { .. }
+    ));
+    fail.set(false);
+    session.set_read_only(true);
+    session.enter_definition_scope(root).unwrap();
+    assert!(!session.can_manipulate());
+    assert!(
+        session
+            .set_property(&[target], "Content", "Forbidden")
+            .is_err()
+    );
+    session.exit_definition_scope().unwrap();
+    assert_eq!(session.selection(), &[target]);
+    assert_eq!(session.document().source(), source);
+    assert_eq!(session.document().revision(), revision);
+    assert!(!session.can_undo());
+    window.close();
 }
 
 #[test]
@@ -359,11 +548,13 @@ fn project_tabs_retain_history_and_source_completion_is_registered() {
     );
     let mut language = workspace.language_service();
     language.open("untitled:completion", "<But", 1).unwrap();
-    assert!(language
-        .completions("untitled:completion", 4)
-        .unwrap()
-        .iter()
-        .any(|item| item.label == "Button"));
+    assert!(
+        language
+            .completions("untitled:completion", 4)
+            .unwrap()
+            .iter()
+            .any(|item| item.label == "Button")
+    );
     drop(language);
     drop(workspace);
     std::fs::remove_dir_all(path).unwrap();
@@ -384,18 +575,22 @@ fn source_completion_handles_invalid_drafts_and_rejects_stale_or_read_only_edits
         .unwrap();
     assert_eq!(workspace.session().borrow().document().source(), "<Button");
     assert!(!workspace.session().borrow().document().is_valid());
-    assert!(workspace
-        .apply_source_completion(revision, ferroui_designer_core::SourceSpan::new(0, 0), "x")
-        .is_err());
+    assert!(
+        workspace
+            .apply_source_completion(revision, ferroui_designer_core::SourceSpan::new(0, 0), "x")
+            .is_err()
+    );
     let revision = workspace.session().borrow().document().revision();
     workspace.session().borrow_mut().set_read_only(true);
-    assert!(workspace
-        .apply_source_completion(
-            revision,
-            ferroui_designer_core::SourceSpan::new(7, 7),
-            " />"
-        )
-        .is_err());
+    assert!(
+        workspace
+            .apply_source_completion(
+                revision,
+                ferroui_designer_core::SourceSpan::new(7, 7),
+                " />"
+            )
+            .is_err()
+    );
     assert_eq!(workspace.session().borrow().document().source(), "<Button");
 }
 
@@ -465,12 +660,14 @@ fn workspace_refactoring_rejects_stale_buffers_atomically_and_close_restores_dis
         !workspace.document_uris().contains(&b_uri),
         "A rejected refactoring must not open its candidate tabs"
     );
-    assert!(workspace
-        .session()
-        .borrow()
-        .document()
-        .source()
-        .contains("Width=\"200\""));
+    assert!(
+        workspace
+            .session()
+            .borrow()
+            .document()
+            .source()
+            .contains("Width=\"200\"")
+    );
     assert_eq!(
         workspace
             .language_service()
@@ -511,7 +708,7 @@ fn workspace_refactoring_rejects_stale_buffers_atomically_and_close_restores_dis
 #[test]
 fn native_tabs_and_refactorings_share_one_identity_for_symlink_aliases() {
     use ferroui_designer_language::WorkspaceEdit;
-    use ferroui_designer_project::{file_uri, Solution};
+    use ferroui_designer_project::{Solution, file_uri};
     let _app = UnitTestApplication::start(TestServices::styled_window());
     let unique = std::time::SystemTime::now()
         .duration_since(std::time::UNIX_EPOCH)
@@ -577,47 +774,57 @@ fn native_tabs_and_refactorings_share_one_identity_for_symlink_aliases() {
     let canonical_edit = rename.document_changes[0].clone();
     let mut alias_edit = canonical_edit.clone();
     alias_edit.uri = alias.clone();
-    assert!(workspace
-        .apply_language_edits(WorkspaceEdit {
-            document_changes: vec![canonical_edit, alias_edit.clone()],
-        })
-        .is_err());
+    assert!(
+        workspace
+            .apply_language_edits(WorkspaceEdit {
+                document_changes: vec![canonical_edit, alias_edit.clone()],
+            })
+            .is_err()
+    );
     assert_eq!(workspace.session().borrow().document().revision(), revision);
-    assert!(workspace
-        .session()
-        .borrow()
-        .document()
-        .ast()
-        .find_name("Target")
-        .is_some());
+    assert!(
+        workspace
+            .session()
+            .borrow()
+            .document()
+            .ast()
+            .find_name("Target")
+            .is_some()
+    );
     workspace
         .apply_language_edits(WorkspaceEdit {
             document_changes: vec![alias_edit],
         })
         .unwrap();
-    assert!(workspace
-        .session()
-        .borrow()
-        .document()
-        .ast()
-        .find_name("Renamed")
-        .is_some());
+    assert!(
+        workspace
+            .session()
+            .borrow()
+            .document()
+            .ast()
+            .find_name("Renamed")
+            .is_some()
+    );
     workspace.activate_document(&other).unwrap();
     workspace.activate_document(&alias).unwrap();
     workspace.session().borrow_mut().undo().unwrap();
-    assert!(workspace
-        .session()
-        .borrow()
-        .document()
-        .ast()
-        .find_name("Target")
-        .is_some());
-    assert!(workspace
-        .session()
-        .borrow()
-        .document()
-        .source()
-        .contains("Width=\"200\""));
+    assert!(
+        workspace
+            .session()
+            .borrow()
+            .document()
+            .ast()
+            .find_name("Target")
+            .is_some()
+    );
+    assert!(
+        workspace
+            .session()
+            .borrow()
+            .document()
+            .source()
+            .contains("Width=\"200\"")
+    );
     assert!(workspace.close_document(&alias, false).is_err());
     workspace.close_document(&alias, true).unwrap();
     assert!(!workspace.document_uris().contains(&uri));

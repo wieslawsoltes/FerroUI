@@ -40,6 +40,8 @@ pub(crate) struct RuntimePreview {
     options: crate::preview_host::PreviewHostOptions,
     native_window: Option<Ref<ferroui_controls::Window>>,
     window_projection: bool,
+    pub(crate) definition_scope: Option<crate::DefinitionScope>,
+    definition_projection: Option<crate::definition_projection::DefinitionProjection>,
     pub status: PreviewStatus,
     pub notices: Vec<String>,
     objects: BTreeMap<NodeId, WeakRef<Visual>>,
@@ -103,6 +105,8 @@ impl RuntimePreview {
             options,
             native_window: None,
             window_projection: false,
+            definition_scope: None,
+            definition_projection: None,
             status: PreviewStatus::Ready { revision: 0 },
             notices: Vec::new(),
             objects: BTreeMap::new(),
@@ -159,6 +163,8 @@ impl RuntimePreview {
         };
         if canonical(&uri)? == canonical(&self.uri)? {
             self.uri = uri;
+            self.definition_scope = None;
+            self.definition_projection = None;
             self.reload_document(document, true);
         } else {
             let preview =
@@ -172,22 +178,69 @@ impl RuntimePreview {
         self.reload_document(document, false);
     }
 
+    /// A scope change is presentation state. A rejected projection keeps both the last
+    /// accepted native tree and its original-source identity map intact.
+    pub(crate) fn set_definition_scope(
+        &mut self,
+        scope: Option<crate::DefinitionScope>,
+        document: &Document,
+    ) -> Result<(), String> {
+        let previous_scope = std::mem::replace(&mut self.definition_scope, scope);
+        let previous_status = self.status.clone();
+        let previous_notices = self.notices.clone();
+        let previous_window = self.window_projection;
+        #[cfg(debug_assertions)]
+        let previous_factory = self.use_factory.get();
+        self.reload_document(document, true);
+        if let PreviewStatus::Failed { message, .. } = &self.status {
+            let message = message.clone();
+            self.definition_scope = previous_scope;
+            self.status = previous_status;
+            self.notices = previous_notices;
+            self.window_projection = previous_window;
+            #[cfg(debug_assertions)]
+            self.use_factory.set(previous_factory);
+            return Err(message);
+        }
+        Ok(())
+    }
+
     fn reload_document(&mut self, document: &Document, initialize: bool) {
         self.clear_animation();
-        self.window_projection = document
-            .ast()
-            .node(document.ast().root())
-            .is_some_and(|node| {
-                node.local_name() == "Window"
-                    && node.namespace_uri.as_deref().is_some_and(|uri| {
-                        matches!(
-                            uri,
-                            "https://github.com/ferroui"
-                                | "using:FerroUI.Controls"
-                                | "clr-namespace:FerroUI.Controls;assembly=FerroUI.Controls"
-                        )
-                    })
-            });
+        if self
+            .definition_scope
+            .as_ref()
+            .is_some_and(|scope| document.ast().node(scope.node).is_none())
+        {
+            self.definition_scope = None;
+        }
+        // A root control definition is already an independently loadable document.
+        // Keep its application-owned constructor/code-behind and source coordinates;
+        // only nested definitions need the synthetic sample host.
+        let root_control_scope = self.definition_scope.as_ref().is_some_and(|scope| {
+            scope.node == document.ast().root()
+                && matches!(
+                    scope.kind,
+                    ferroui_designer_tools::ComponentKind::UserControl
+                        | ferroui_designer_tools::ComponentKind::CustomControl
+                )
+        });
+        let synthetic_scope = self.definition_scope.is_some() && !root_control_scope;
+        self.window_projection = !synthetic_scope
+            && document
+                .ast()
+                .node(document.ast().root())
+                .is_some_and(|node| {
+                    node.local_name() == "Window"
+                        && node.namespace_uri.as_deref().is_some_and(|uri| {
+                            matches!(
+                                uri,
+                                "https://github.com/ferroui"
+                                    | "using:FerroUI.Controls"
+                                    | "clr-namespace:FerroUI.Controls;assembly=FerroUI.Controls"
+                            )
+                        })
+                });
         let invalid = !document.diagnostics().is_empty();
         if invalid && !initialize {
             self.status = PreviewStatus::InvalidSource {
@@ -195,35 +248,57 @@ impl RuntimePreview {
             };
             return;
         }
-        let actual_factory = self.options.factory(document).is_some() && !self.window_projection;
+        let actual_factory =
+            !synthetic_scope && self.options.factory(document).is_some() && !self.window_projection;
         #[cfg(debug_assertions)]
         self.use_factory.set(
-            actual_factory
-                || self.options.resource_factory.is_some()
-                || document
-                    .ast()
-                    .node(document.ast().root())
-                    .is_some_and(|node| {
-                        matches!(
-                            node.local_name(),
-                            "Styles"
-                                | "Style"
-                                | "ResourceDictionary"
-                                | "ControlTheme"
-                                | "Application"
-                                | "DataTemplate"
-                        )
-                    }),
+            !synthetic_scope
+                && (actual_factory
+                    || self.options.resource_factory.is_some()
+                    || document
+                        .ast()
+                        .node(document.ast().root())
+                        .is_some_and(|node| {
+                            matches!(
+                                node.local_name(),
+                                "Styles"
+                                    | "Style"
+                                    | "ResourceDictionary"
+                                    | "ControlTheme"
+                                    | "Application"
+                                    | "DataTemplate"
+                            )
+                        })),
         );
-        let result = if actual_factory {
+        let mut candidate_definition = None;
+        let result = if let Some(scope) = self.definition_scope.as_ref().filter(|_| synthetic_scope)
+        {
+            crate::definition_projection::project(document, scope).and_then(|projection| {
+                self.apply_source(projection.document.valid_source(), false)?;
+                self.notices = projection.notices.clone();
+                candidate_definition = Some(projection);
+                Ok(())
+            })
+        } else if actual_factory {
             self.notices = vec!["Preview uses the registered application root factory".into()];
-            self.apply_source(document.valid_source())
+            self.apply_source(document.valid_source(), true)
         } else {
             crate::preview_source::project(document).and_then(|projection| {
                 self.notices = projection.notices;
-                self.apply_source(&projection.source)
+                self.apply_source(&projection.source, true)
             })
         };
+        if result.is_ok() {
+            self.definition_projection = candidate_definition;
+            if root_control_scope {
+                if let Some(scope) = &self.definition_scope {
+                    self.notices.push(format!(
+                        "Editing definition: {}. Changes author the original document.",
+                        scope.title
+                    ));
+                }
+            }
+        }
         self.status = match result {
             Ok(()) => PreviewStatus::Ready {
                 revision: document.revision(),
@@ -254,7 +329,7 @@ impl RuntimePreview {
     }
 
     #[cfg(debug_assertions)]
-    fn apply_source(&mut self, source: &str) -> Result<(), String> {
+    fn apply_source(&mut self, source: &str, _allow_root_factories: bool) -> Result<(), String> {
         self.session.submit(self.uri.clone(), source.to_owned());
         if let Some(outcome) = self.session.apply_pending() {
             if outcome.status != ferroui_hot_reload::ReloadStatus::Applied {
@@ -269,8 +344,12 @@ impl RuntimePreview {
     // The existing hot reload crate is development-only. Release hosts still stage a complete
     // candidate before replacing content; they do not claim development state restoration.
     #[cfg(not(debug_assertions))]
-    fn apply_source(&mut self, source: &str) -> Result<(), String> {
-        let candidate = self.options.control(source, &self.uri)?;
+    fn apply_source(&mut self, source: &str, allow_root_factories: bool) -> Result<(), String> {
+        let mut options = self.options.clone();
+        if !allow_root_factories {
+            options.root_factories.clear();
+        }
+        let candidate = options.control(source, &self.uri)?;
         self.host.set_content(Some(Control::boxed(candidate)));
         Ok(())
     }
@@ -352,9 +431,13 @@ impl RuntimePreview {
         // One scan of source positions, followed by indexed lookup for each runtime object.
         let mut names = BTreeMap::new();
         let mut locations: BTreeMap<(String, usize), Vec<(usize, NodeId)>> = BTreeMap::new();
-        let mut elements = document.ast().elements().collect::<Vec<_>>();
+        let source_document = self
+            .definition_projection
+            .as_ref()
+            .map_or(document, |projection| &projection.document);
+        let mut elements = source_document.ast().elements().collect::<Vec<_>>();
         elements.sort_by_key(|node| node.span.start);
-        let source = document.valid_source();
+        let source = source_document.valid_source();
         let (mut offset, mut line, mut column) = (0usize, 1usize, 1usize);
         for node in elements {
             for character in source[offset..node.span.start].chars() {
@@ -367,7 +450,12 @@ impl RuntimePreview {
             }
             offset = node.span.start;
             if let Some(name) = node.xaml_name() {
-                names.entry(name.to_owned()).or_insert(node.id);
+                // Template and component namescopes can repeat names in the same
+                // source document. Such a name is never a safe fallback identity.
+                names
+                    .entry(name.to_owned())
+                    .and_modify(|identity| *identity = None)
+                    .or_insert(Some(node.id));
             }
             locations
                 .entry((node.local_name().to_owned(), line))
@@ -381,20 +469,21 @@ impl RuntimePreview {
         let provenance = XamlSourceInfo::get_xaml_source_info(&root_value);
         let inspector = Inspector::shared();
         let root_id = inspector.borrow_mut().node_id(&root);
-        if !document
-            .ast()
-            .node(document.ast().root())
-            .is_some_and(|node| {
-                matches!(
-                    node.local_name(),
-                    "Styles"
-                        | "Style"
-                        | "ResourceDictionary"
-                        | "ControlTheme"
-                        | "Application"
-                        | "DataTemplate"
-                )
-            })
+        if self.definition_projection.is_none()
+            && !document
+                .ast()
+                .node(document.ast().root())
+                .is_some_and(|node| {
+                    matches!(
+                        node.local_name(),
+                        "Styles"
+                            | "Style"
+                            | "ResourceDictionary"
+                            | "ControlTheme"
+                            | "Application"
+                            | "DataTemplate"
+                    )
+                })
         {
             self.objects.insert(
                 document.ast().root(),
@@ -428,8 +517,10 @@ impl RuntimePreview {
             let name = object
                 .cast::<StyledElement>()
                 .and_then(|element| element.name());
-            let named = name.as_ref().and_then(|name| names.get(name).copied());
-            let source = named.or_else(|| {
+            let named = name
+                .as_ref()
+                .and_then(|name| names.get(name).copied().flatten());
+            let located = || {
                 locations
                     .get(&(
                         object.get_type().name().to_owned(),
@@ -443,7 +534,15 @@ impl RuntimePreview {
                             })
                             .map(|(_, id)| *id)
                     })
-            });
+            };
+            // Names repeat in template namescopes. Generated preview locations are the
+            // authoritative mapping; a synthetic sample control must never claim a
+            // definition owner or a same-named part in another resource.
+            let source = if let Some(projection) = self.definition_projection.as_ref() {
+                located().and_then(|source| projection.identities.get(&source).copied())
+            } else {
+                located().or(named)
+            };
             if let Some(source) = source {
                 self.objects
                     .entry(source)
