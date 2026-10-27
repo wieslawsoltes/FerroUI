@@ -1,6 +1,7 @@
 //! Portable editor tools that produce source transactions. A host supplies measured geometry;
 //! layout, property and selection commands never mutate preview objects directly.
 mod geometry;
+mod grid_tracks;
 mod layout;
 mod properties;
 mod selection;
@@ -9,6 +10,7 @@ pub use geometry::{
     align, distribute, Affine, Alignment, Axis, Point, Rect, SnapGuide, SnapIndex, SnapResult,
     SnapSettings,
 };
+pub use grid_tracks::{grid_track_values, plan_grid_track_change, GridTrackChange};
 pub use layout::{
     DockSide, GridLength, GridLines, LayoutAction, LayoutAdapter, LayoutCapabilities,
     LayoutContext, LayoutRegistry, RelativeRelation, ResolvedLayout,
