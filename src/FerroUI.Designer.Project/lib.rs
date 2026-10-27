@@ -7,7 +7,7 @@ mod workspace;
 pub use discovery::{CargoTarget, DocumentEntry, DocumentKind, ProjectDescriptor, Solution};
 use std::fmt;
 pub use tasks::{BuildTask, OutputStream, TaskHandle, TaskKind, TaskOutput, TaskStatus};
-pub use uri::{file_path, file_uri, resolve_uri};
+pub use uri::{canonical_file_uri, file_path, file_uri, resolve_uri};
 pub use workspace::{Buffer, BufferUpdate, ProjectWorkspace, SavePolicy};
 
 #[derive(Clone, Debug, PartialEq, Eq)]

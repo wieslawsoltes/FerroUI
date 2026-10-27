@@ -4,6 +4,7 @@ use crate::{
 };
 use ferroui_designer_core::{Document, NodeKind, SourceSpan};
 use serde::{Deserialize, Serialize};
+use std::borrow::Cow;
 use std::collections::{BTreeMap, BTreeSet};
 
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
@@ -94,6 +95,23 @@ struct State {
     version: i64,
     opened: bool,
 }
+impl State {
+    /// Retain the document snapshot but rebuild semantic indexes from the new
+    /// syntax. Cloning the old occurrence/edge collections would only allocate
+    /// data that is immediately discarded after every keystroke.
+    fn with_text(&self, index: LineIndex, version: i64, label: &str) -> Self {
+        let mut document = self.document.clone();
+        document.update_source(label, index.source());
+        Self {
+            symbols: occurrences(&document),
+            resource_edges: resource_edges(&document),
+            document,
+            index,
+            version,
+            opened: self.opened,
+        }
+    }
+}
 #[derive(Clone)]
 pub struct LanguageService {
     schema: Schema,
@@ -136,10 +154,10 @@ impl LanguageService {
         &mut self.schema
     }
     pub fn document(&self, uri: &str) -> Option<&Document> {
-        self.documents.get(uri).map(|s| &s.document)
+        self.state(uri).ok().map(|s| &s.document)
     }
     pub fn version(&self, uri: &str) -> Option<i64> {
-        self.documents.get(uri).map(|s| s.version)
+        self.state(uri).ok().map(|s| s.version)
     }
     pub fn index(&self, uri: &str) -> Result<&LineIndex> {
         Ok(&self.state(uri)?.index)
@@ -154,6 +172,7 @@ impl LanguageService {
         version: i64,
     ) -> Result<()> {
         let uri = uri.into();
+        let uri = self.document_uri(&uri)?.into_owned();
         let source = source.into();
         require(source.len() <= 16 * 1024 * 1024, "Document exceeds 16 MiB")?;
         if let Some(old) = self.documents.get(&uri) {
@@ -187,13 +206,18 @@ impl LanguageService {
         Ok(())
     }
     pub fn close(&mut self, uri: &str) -> Result<()> {
+        let uri = self.document_uri(uri)?.into_owned();
+        let uri = uri.as_str();
         require(self.documents.contains_key(uri), "Document is not indexed")?;
         let project_entry = self
             .workspaces
             .values()
             .flat_map(|workspace| &workspace.solution.projects)
             .flat_map(|project| &project.documents)
-            .find(|entry| entry.uri == uri)
+            .find(|entry| {
+                self.document_uri(&entry.uri)
+                    .is_ok_and(|entry_uri| entry_uri == uri)
+            })
             .cloned();
         let snapshot = project_entry
             .filter(|entry| entry.path.is_file())
@@ -227,19 +251,17 @@ impl LanguageService {
         )
     }
     pub fn change(&mut self, uri: &str, version: i64, changes: &[TextChange]) -> Result<()> {
-        let mut state = self.state(uri)?.clone();
+        let uri = self.document_uri(uri)?.into_owned();
+        let uri = uri.as_str();
+        let state = self.state(uri)?;
         require(version > state.version, "Document version must increase")?;
         require(changes.len() <= 4096, "Too many text changes")?;
+        let mut index = state.index.clone();
         for change in changes {
-            state.index.apply(change)?;
+            index.apply(change)?;
         }
-        state
-            .document
-            .update_source("Incremental text edits", state.index.source());
-        state.version = version;
+        let mut state = state.with_text(index, version, "Incremental text edits");
         state.opened = true;
-        state.symbols = occurrences(&state.document);
-        state.resource_edges = resource_edges(&state.document);
         self.set_state(uri.into(), Some(state));
         Ok(())
     }
@@ -248,36 +270,44 @@ impl LanguageService {
         solution: &ferroui_designer_project::Solution,
     ) -> Result<usize> {
         let mut added = 0;
-        let mut staged = Vec::new();
+        let mut staged = BTreeMap::new();
+        let root = solution
+            .root
+            .canonicalize()
+            .map_err(|error| LanguageError(error.to_string()))?;
+        let workspace = ferroui_designer_project::ProjectWorkspace::new(solution.clone());
         for entry in solution
             .projects
             .iter()
             .flat_map(|p| &p.documents)
             .filter(|d| d.kind == ferroui_designer_project::DocumentKind::Xaml)
         {
-            if self.documents.get(&entry.uri).is_some_and(|s| s.opened) {
+            let uri = self.document_uri(&entry.uri)?.into_owned();
+            if staged.contains_key(&uri) || self.documents.get(&uri).is_some_and(|s| s.opened) {
                 continue;
             }
+            let path = workspace.resolve_path(&uri)?;
             require(
-                std::fs::metadata(&entry.path)
+                std::fs::metadata(&path)
                     .map_err(|e| LanguageError(e.to_string()))?
                     .len()
                     <= 16 * 1024 * 1024,
                 "Indexed file exceeds 16 MiB",
             )?;
             let source =
-                std::fs::read_to_string(&entry.path).map_err(|e| LanguageError(e.to_string()))?;
-            staged.push((entry.uri.clone(), source));
+                std::fs::read_to_string(&path).map_err(|e| LanguageError(e.to_string()))?;
+            require(
+                source.len() <= 16 * 1024 * 1024,
+                "Indexed file exceeds 16 MiB",
+            )?;
+            staged.insert(uri, source);
         }
         for (uri, source) in staged {
             self.open(&uri, source, -1)?;
             self.documents.get_mut(&uri).unwrap().opened = false;
             added += 1;
         }
-        self.workspaces.insert(
-            solution.root.clone(),
-            ferroui_designer_project::ProjectWorkspace::new(solution.clone()),
-        );
+        self.workspaces.insert(root, workspace);
         Ok(added)
     }
     /// Remove a workspace's disk snapshots while preserving open buffers and shared roots.
@@ -294,21 +324,18 @@ impl LanguageService {
             .values()
             .flat_map(|workspace| &workspace.solution.projects)
             .flat_map(|project| &project.documents)
-            .map(|entry| entry.uri.as_str())
+            .filter_map(|entry| self.document_uri(&entry.uri).ok().map(Cow::into_owned))
             .collect();
         let obsolete: BTreeSet<_> = removed
             .solution
             .projects
             .iter()
             .flat_map(|project| &project.documents)
-            .filter(|entry| {
-                !retained.contains(entry.uri.as_str())
-                    && self
-                        .documents
-                        .get(&entry.uri)
-                        .is_some_and(|state| !state.opened)
+            .filter_map(|entry| self.document_uri(&entry.uri).ok().map(Cow::into_owned))
+            .filter(|uri| {
+                !retained.contains(uri.as_str())
+                    && self.documents.get(uri).is_some_and(|state| !state.opened)
             })
-            .map(|entry| entry.uri.clone())
             .collect();
         let count = obsolete.len();
         for uri in obsolete {
@@ -491,6 +518,8 @@ impl LanguageService {
         Ok(out)
     }
     pub fn completions(&self, uri: &str, offset: usize) -> Result<Vec<Completion>> {
+        let uri = self.document_uri(uri)?;
+        let uri = uri.as_ref();
         let state = self.state(uri)?;
         let source = state.index.source();
         state.index.position(offset)?;
@@ -1036,21 +1065,17 @@ impl LanguageService {
         let mut staged = Vec::new();
         let mut seen = BTreeSet::new();
         for changes in &edit.document_changes {
-            require(seen.insert(changes.uri.clone()), "Duplicate document edit")?;
-            let mut state = self.state(&changes.uri)?.clone();
+            let uri = self.document_uri(&changes.uri)?.into_owned();
+            require(seen.insert(uri.clone()), "Duplicate document edit")?;
+            let state = self.state(&uri)?;
             require(state.version == changes.version, "Workspace edit is stale")?;
             let source = apply_text_edits(state.index.source(), &changes.edits)?;
-            state
-                .document
-                .update_source("Workspace refactoring", &source);
-            state.index = LineIndex::new(&source);
-            state.symbols = occurrences(&state.document);
-            state.resource_edges = resource_edges(&state.document);
-            state.version = state
+            let version = state
                 .version
                 .checked_add(1)
                 .ok_or_else(|| LanguageError("Version exhausted".into()))?;
-            staged.push((changes.uri.clone(), state));
+            let state = state.with_text(LineIndex::new(&source), version, "Workspace refactoring");
+            staged.push((uri, state));
         }
         for (uri, state) in staged {
             self.set_state(uri, Some(state));
@@ -1163,7 +1188,7 @@ impl LanguageService {
         let mut tokens = Vec::new();
         for (span, kind) in spans {
             let mut start = span.start;
-            for part in state.index.source()[span.range()].split_inclusive('\n') {
+            for part in state.index.source()[span.range()].split_inclusive(['\r', '\n']) {
                 let text = part.trim_end_matches(['\r', '\n']);
                 if !text.is_empty() {
                     let position = state.index.position(start)?;
@@ -1183,11 +1208,12 @@ impl LanguageService {
     }
     pub fn workspace_symbols(&self, query: &str) -> Result<Vec<(String, DocumentSymbol)>> {
         let mut out = Vec::new();
+        let query = query.to_lowercase();
         for uri in self.documents.keys() {
             let mut pending = self.symbols(uri)?;
             while let Some(symbol) = pending.pop() {
                 pending.extend(symbol.children.clone());
-                if symbol.name.to_lowercase().contains(&query.to_lowercase()) {
+                if symbol.name.to_lowercase().contains(&query) {
                     out.push((uri.clone(), symbol));
                 }
             }
@@ -1211,7 +1237,7 @@ impl LanguageService {
                 return Ok(uri);
             }
         }
-        Ok(resolved)
+        Ok(self.document_uri(&resolved)?.into_owned())
     }
     pub fn prepare_rename(&self, uri: &str, offset: usize) -> Result<Option<(Range, String)>> {
         let state = self.state(uri)?;
@@ -1229,9 +1255,10 @@ impl LanguageService {
         }
     }
     pub fn mark_saved(&mut self, uri: &str, text: Option<&str>) -> Result<()> {
+        let uri = self.document_uri(uri)?.into_owned();
         let state = self
             .documents
-            .get_mut(uri)
+            .get_mut(&uri)
             .ok_or_else(|| LanguageError("Document is not indexed".into()))?;
         require(
             text.is_none_or(|text| text == state.document.source()),
@@ -1241,30 +1268,62 @@ impl LanguageService {
         Ok(())
     }
     pub fn rename_uri(&mut self, old: &str, new: &str) -> Result<()> {
-        require(
-            !self.documents.contains_key(new),
-            "Rename destination is already indexed",
-        )?;
-        if let Some(state) = self.documents.get(old).cloned() {
-            self.set_state(old.into(), None);
-            self.set_state(new.into(), Some(state));
+        self.rename_uris(&[(old.into(), new.into())])
+    }
+    /// Validate an entire client rename notification before moving any indexed
+    /// state. A swap is legal; overwriting an unrelated document is not.
+    pub fn rename_uris(&mut self, renames: &[(String, String)]) -> Result<()> {
+        let mut mapping = BTreeMap::new();
+        let mut destinations = BTreeSet::new();
+        for (old, new) in renames {
+            let old = self.document_uri(old)?.into_owned();
+            let new = self.document_uri(new)?.into_owned();
+            require(
+                mapping.insert(old, new.clone()).is_none(),
+                "Duplicate rename source",
+            )?;
+            require(destinations.insert(new), "Duplicate rename destination")?;
         }
-        if let Ok(path) = ferroui_designer_project::file_path(new) {
-            for entry in self
-                .workspaces
-                .values_mut()
-                .flat_map(|workspace| &mut workspace.solution.projects)
-                .flat_map(|project| &mut project.documents)
-            {
-                if entry.uri == old {
-                    entry.uri = new.into();
-                    entry.path = path.clone();
+        for new in mapping.values() {
+            require(
+                !self.documents.contains_key(new) || mapping.contains_key(new),
+                "Rename destination is already indexed",
+            )?;
+        }
+        let staged: Vec<_> = mapping
+            .iter()
+            .filter_map(|(old, new)| {
+                self.documents
+                    .get(old)
+                    .cloned()
+                    .map(|state| (new.clone(), state))
+            })
+            .collect();
+        for old in mapping.keys() {
+            self.set_state(old.clone(), None);
+        }
+        for (new, state) in staged {
+            self.set_state(new, Some(state));
+        }
+        for entry in self
+            .workspaces
+            .values_mut()
+            .flat_map(|workspace| &mut workspace.solution.projects)
+            .flat_map(|project| &mut project.documents)
+        {
+            let identity = ferroui_designer_project::canonical_file_uri(&entry.uri)
+                .unwrap_or_else(|_| entry.uri.clone());
+            if let Some(new) = mapping.get(&identity) {
+                entry.uri = new.clone();
+                if let Ok(path) = ferroui_designer_project::file_path(new) {
+                    entry.path = path;
                 }
             }
         }
         Ok(())
     }
     pub fn file_rename_edits(&self, old: &str, new: &str) -> Result<WorkspaceEdit> {
+        let old = self.document_uri(old)?;
         let mut result = WorkspaceEdit::default();
         for (uri, state) in &self.documents {
             if !state.document.is_valid() {
@@ -1300,8 +1359,17 @@ impl LanguageService {
     }
     fn state(&self, uri: &str) -> Result<&State> {
         self.documents
-            .get(uri)
+            .get(self.document_uri(uri)?.as_ref())
             .ok_or_else(|| LanguageError(format!("Document is not indexed: {uri}")))
+    }
+    fn document_uri<'a>(&self, uri: &'a str) -> Result<Cow<'a, str>> {
+        if self.documents.contains_key(uri) || !uri.starts_with("file://") {
+            Ok(Cow::Borrowed(uri))
+        } else {
+            Ok(Cow::Owned(ferroui_designer_project::canonical_file_uri(
+                uri,
+            )?))
+        }
     }
     fn location(&self, uri: &str, span: SourceSpan) -> Result<Location> {
         Ok(Location {
@@ -1327,6 +1395,10 @@ impl LanguageService {
         Ok((targets.len() == 1).then(|| targets[0].clone()))
     }
     fn resolve(&self, uri: &str, reference: &Occurrence) -> Vec<(String, Occurrence)> {
+        let Ok(uri) = self.document_uri(uri) else {
+            return Vec::new();
+        };
+        let uri = uri.as_ref();
         if reference.declaration {
             return vec![(uri.into(), reference.clone())];
         }
@@ -1609,11 +1681,24 @@ pub fn apply_text_edits(source: &str, edits: &[TextEdit]) -> Result<String> {
             "Text edits overlap",
         )?;
     }
-    let mut output = source.to_owned();
-    for (span, text) in patches.into_iter().rev() {
-        output.replace_range(span.range(), text);
+    let mut length = source.len();
+    for (span, text) in &patches {
+        length = length
+            .checked_sub(span.len())
+            .and_then(|length| length.checked_add(text.len()))
+            .ok_or_else(|| LanguageError("Document size overflow".into()))?;
     }
-    require(output.len() <= 16 * 1024 * 1024, "Document exceeds 16 MiB")?;
+    require(length <= 16 * 1024 * 1024, "Document exceeds 16 MiB")?;
+    // Emit untouched slices once. Repeated replace_range calls shift the entire
+    // remaining document for every edit and turn large renames into quadratic work.
+    let mut output = String::with_capacity(length);
+    let mut previous = 0;
+    for (span, text) in patches {
+        output.push_str(&source[previous..span.start]);
+        output.push_str(text);
+        previous = span.end;
+    }
+    output.push_str(&source[previous..]);
     Ok(output)
 }
 fn completion_namespace(state: &State, name: &str, open: usize, offset: usize) -> Option<String> {

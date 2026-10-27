@@ -11,7 +11,7 @@ impl Fixture {
             NEXT.fetch_add(1, Ordering::Relaxed)
         ));
         std::fs::create_dir_all(&path).unwrap();
-        Self(path)
+        Self(path.canonicalize().unwrap())
     }
     fn write(&self, name: &str, text: &str) -> String {
         let path = self.0.join(name);
@@ -40,6 +40,7 @@ fn paths_roundtrip_unicode_reserved_characters_and_relative_resources() {
         "ferres://app/Assets/Brush.xaml"
     );
     assert!(resolve_uri("ferres://app/Page.xaml", "../../secret").is_err());
+    #[cfg(not(windows))]
     assert!(file_path("file://remote/a").is_err());
     assert!(file_path("file:///bad%00name").is_err());
 }
@@ -254,6 +255,114 @@ fn buffer_uri_aliases_cannot_create_duplicate_open_documents() {
     assert_eq!(workspace.buffer(&created).unwrap().source(), "<Grid/>");
 }
 
+#[cfg(unix)]
+#[test]
+fn every_buffer_operation_uses_one_identity_for_symlink_uri_aliases() {
+    let fixture = Fixture::new();
+    let uri = fixture.write("View.xaml", "<Grid/>");
+    let alias_root = fixture.0.join("alias");
+    std::os::unix::fs::symlink(&fixture.0, &alias_root).unwrap();
+    let alias = file_uri(alias_root.join("View.xaml")).unwrap();
+    assert_ne!(alias, uri);
+    assert_eq!(canonical_file_uri(&alias).unwrap(), uri);
+    let mut workspace = fixture.workspace();
+    workspace.open(&alias).unwrap();
+    assert_eq!(workspace.buffer(&alias).unwrap().uri(), uri);
+    workspace.activate(&alias).unwrap();
+    assert_eq!(workspace.active_uri(), Some(uri.as_str()));
+    workspace.update_source(&alias, 0, "<Button/>").unwrap();
+    workspace.acknowledge_saved(&alias, 1, "<Grid/>").unwrap();
+    let document = workspace.buffer(&alias).unwrap().document().clone();
+    workspace.store_document(&alias, 1, document).unwrap();
+    workspace.save(&alias).unwrap();
+    workspace.reload(&alias, false).unwrap();
+    let version = workspace.buffer(&uri).unwrap().version();
+    assert!(workspace
+        .apply_updates(vec![
+            BufferUpdate {
+                uri: uri.clone(),
+                expected_version: version,
+                source: "<Border/>".into()
+            },
+            BufferUpdate {
+                uri: alias.clone(),
+                expected_version: version,
+                source: "<Canvas/>".into()
+            },
+        ])
+        .is_err());
+    assert_eq!(workspace.buffer(&alias).unwrap().source(), "<Button/>");
+    assert_eq!(workspace.buffer(&uri).unwrap().version(), version);
+    workspace.close(&alias, false).unwrap();
+    assert!(workspace.buffer(&uri).is_none());
+
+    let new_alias = file_uri(alias_root.join("New.xaml")).unwrap();
+    let new_uri = file_uri(fixture.0.join("New.xaml")).unwrap();
+    assert_eq!(canonical_file_uri(&new_alias).unwrap(), new_uri);
+    workspace.create(&new_alias, "<Grid/>").unwrap();
+    workspace.save(&new_alias).unwrap();
+    assert_eq!(workspace.buffer(&new_uri).unwrap().uri(), new_uri);
+    let saved = workspace
+        .save_as(&new_alias, alias_root.join("Copy.xaml"))
+        .unwrap();
+    assert_eq!(saved, file_uri(fixture.0.join("Copy.xaml")).unwrap());
+}
+
+#[cfg(unix)]
+#[test]
+fn missing_parent_identity_keeps_workspace_boundaries_and_rejects_dangling_links() {
+    let fixture = Fixture::new();
+    let outside = Fixture::new();
+    std::os::unix::fs::symlink(outside.0.join("missing"), fixture.0.join("broken")).unwrap();
+    let broken = file_uri(fixture.0.join("broken")).unwrap();
+    let broken_child = file_uri(fixture.0.join("broken/View.xaml")).unwrap();
+    assert!(canonical_file_uri(&broken).is_err());
+    assert!(canonical_file_uri(&broken_child).is_err());
+    let mut workspace = fixture.workspace();
+    assert!(workspace.create(&broken, "<Grid/>").is_err());
+    assert!(workspace.create(&broken_child, "<Grid/>").is_err());
+
+    let new_uri = file_uri(fixture.0.join("new/sub/View.xaml")).unwrap();
+    assert_eq!(canonical_file_uri(&new_uri).unwrap(), new_uri);
+    workspace.create(&new_uri, "<Grid/>").unwrap();
+    std::os::unix::fs::symlink(&outside.0, fixture.0.join("new")).unwrap();
+    assert!(workspace.save(&new_uri).is_err());
+    assert!(workspace.resolve_path(&new_uri).is_err());
+    assert!(!outside.0.join("sub/View.xaml").exists());
+    assert!(workspace.buffer(&new_uri).unwrap().is_dirty());
+}
+
+#[cfg(windows)]
+#[test]
+fn canonical_windows_files_and_new_files_use_conventional_drive_uris() {
+    let fixture = Fixture::new();
+    let uri = fixture.write("Views/Água #% 🦀.xaml", "<Grid/>");
+    assert!(uri.starts_with("file:///") && !uri.contains("%3F"), "{uri}");
+    assert!(uri.as_bytes().get(8).is_some_and(u8::is_ascii_alphabetic));
+    assert_eq!(&uri[9..11], ":/");
+    let path = file_path(&uri).unwrap();
+    assert_eq!(
+        path.canonicalize().unwrap(),
+        fixture.0.join("Views/Água #% 🦀.xaml")
+    );
+    assert_eq!(file_uri(&path).unwrap(), uri);
+    assert_eq!(canonical_file_uri(&uri).unwrap(), uri);
+    let new_uri = file_uri(fixture.0.join("New.xaml")).unwrap();
+    assert_eq!(canonical_file_uri(&new_uri).unwrap(), new_uri);
+    let mut workspace = fixture.workspace();
+    workspace.open(&uri).unwrap();
+    workspace.create(&new_uri, "<Border/>").unwrap();
+    workspace.save(&new_uri).unwrap();
+    assert_eq!(workspace.buffer(&new_uri).unwrap().source(), "<Border/>");
+    assert!(file_path("file:///root-relative.xaml").is_err());
+    assert!(file_uri(r"C:drive-relative.xaml").is_err());
+    assert!(file_uri(r"\root-relative.xaml").is_err());
+    assert_eq!(
+        file_path("file://server/share/View.xaml").unwrap(),
+        PathBuf::from(r"\\?\UNC\server\share\View.xaml")
+    );
+}
+
 #[test]
 fn custom_embedded_resource_mappings_still_enforce_workspace_boundaries() {
     let fixture = Fixture::new();
@@ -284,6 +393,39 @@ fn relative_uri_resolution_encodes_literal_unicode_spaces_and_canonical_escapes(
         let path = std::path::Path::new("/tmp/literal\\backslash.xaml");
         assert_eq!(file_path(&file_uri(path).unwrap()).unwrap(), path);
     }
+}
+
+#[test]
+fn resource_uri_references_preserve_base_file_queries_and_directory_semantics() {
+    let base = "ferres://app/Views/View.xaml?theme=dark#part";
+    assert_eq!(
+        resolve_uri(base, "").unwrap(),
+        "ferres://app/Views/View.xaml?theme=dark"
+    );
+    assert_eq!(
+        resolve_uri(base, "?theme=light").unwrap(),
+        "ferres://app/Views/View.xaml?theme=light"
+    );
+    assert_eq!(
+        resolve_uri(base, "#other").unwrap(),
+        "ferres://app/Views/View.xaml?theme=dark#other"
+    );
+    assert_eq!(
+        resolve_uri(base, "//shared/Assets/Brush.xaml").unwrap(),
+        "ferres://shared/Assets/Brush.xaml"
+    );
+    let directory = resolve_uri(base, "../Assets/").unwrap();
+    assert_eq!(directory, "ferres://app/Assets/");
+    assert_eq!(
+        resolve_uri(&directory, "Brush.xaml").unwrap(),
+        "ferres://app/Assets/Brush.xaml"
+    );
+    assert_eq!(resolve_uri(base, "../Assets/./").unwrap(), directory);
+    assert_eq!(resolve_uri(base, "../Assets/Color/..").unwrap(), directory);
+    assert_eq!(
+        resolve_uri("ferres://app?theme=dark", "Brush.xaml").unwrap(),
+        "ferres://app/Brush.xaml"
+    );
 }
 
 #[test]

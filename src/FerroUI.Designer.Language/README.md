@@ -34,3 +34,7 @@ language.apply_workspace_edit(&edits)?;
 ```
 
 `LineIndex` supports LF, CRLF and CR without normalizing authored bytes. Surrogate splits, invalid UTF-8 offsets, stale versions, overlapping edits and mismatched LSP `rangeLength` values are errors. Formatting preserves mixed content and inherited `xml:space`; it changes layout whitespace without serializing the XML tree. The service's analysis snapshots do not retain a second undo stack alongside the designer's document history.
+
+Byte/UTF-16 conversions use sparse Unicode checkpoints and binary searches instead of rescanning each line. Incremental changes splice the affected checkpoints and shift the unchanged suffix; ASCII text needs no Unicode entries. Refactoring batches validate all ranges and the final size before allocating one output buffer, then copy unchanged slices once. Run the repeatable long-line workload with `cargo run --release -p ferroui-designer-language --example source_engine_benchmark`; it reports indexing, coordinate queries and batch-edit timings for increasing document sizes.
+
+File documents use canonical filesystem identity, including symlink and `localhost` aliases and not-yet-created files under an existing parent. Query/edit entry points accept the original URI spelling; returned file locations use canonical URIs. LSP file-rename notifications validate their complete mapping before changing the index, support swaps, and reject duplicate or conflicting destinations without partially moving documents.

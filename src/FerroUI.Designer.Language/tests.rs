@@ -2,11 +2,12 @@ use crate::*;
 use serde_json::json;
 use std::collections::BTreeMap;
 
+// In-memory language fixtures use virtual URIs; filesystem tests below use file_uri.
 const NS: &str =
     "xmlns='https://github.com/ferroui' xmlns:x='http://schemas.microsoft.com/winfx/2006/xaml'";
 fn service(source: &str) -> LanguageService {
     let mut service = LanguageService::default();
-    service.open("file:///View.xaml", source, 1).unwrap();
+    service.open("untitled:/View.xaml", source, 1).unwrap();
     service
 }
 #[test]
@@ -93,17 +94,203 @@ fn incremental_line_index_matches_fresh_indices_after_multiline_and_unicode_edit
         2
     );
 }
+
+#[test]
+fn sparse_utf16_index_matches_a_character_walk_after_repeated_edits() {
+    fn check(index: &LineIndex) {
+        let source = index.source();
+        let mut starts = vec![0];
+        for (offset, byte) in source.bytes().enumerate() {
+            if byte == b'\n' || byte == b'\r' && source.as_bytes().get(offset + 1) != Some(&b'\n') {
+                starts.push(offset + 1);
+            }
+        }
+        assert_eq!(index.line_count(), starts.len());
+        for (line, start) in starts.iter().copied().enumerate() {
+            let end = starts.get(line + 1).copied().unwrap_or(source.len());
+            let text = source[start..end].trim_end_matches(['\r', '\n']);
+            let mut units = 0;
+            for (offset, ch) in text.char_indices() {
+                let position = Position {
+                    line: line as u32,
+                    character: units,
+                };
+                assert_eq!(index.position(start + offset).unwrap(), position);
+                assert_eq!(index.offset(position).unwrap(), start + offset);
+                if ch.len_utf16() == 2 {
+                    assert!(index
+                        .offset(Position {
+                            character: units + 1,
+                            ..position
+                        })
+                        .is_err());
+                }
+                units += ch.len_utf16() as u32;
+            }
+            let position = Position {
+                line: line as u32,
+                character: units,
+            };
+            assert_eq!(index.offset(position).unwrap(), start + text.len());
+            assert_eq!(index.position(start + text.len()).unwrap(), position);
+            assert!(index
+                .offset(Position {
+                    character: units + 1,
+                    ..position
+                })
+                .is_err());
+        }
+    }
+    let mut index = LineIndex::new("ASCII α🦀\r\n漢字\r🙂\nlast");
+    let replacements = ["", "x", "🦀", "é漢", "\r", "\n", "\r\n", "🙂\ra\nβ"];
+    let mut random = 0x91a2_b3c4_u64;
+    for _ in 0..512 {
+        check(&index);
+        let positions: Vec<_> = (0..=index.source().len())
+            .filter(|offset| index.source().is_char_boundary(*offset))
+            .filter_map(|offset| {
+                let position = index.position(offset).unwrap();
+                (index.offset(position).unwrap() == offset).then_some((offset, position))
+            })
+            .collect();
+        let mut next = |bound: usize| {
+            random = random.wrapping_mul(6364136223846793005).wrapping_add(1);
+            (random >> 32) as usize % bound
+        };
+        let mut start = next(positions.len());
+        let mut end = next(positions.len());
+        if start > end {
+            std::mem::swap(&mut start, &mut end);
+        }
+        let text = replacements[next(replacements.len())];
+        let range_length = index.source()[positions[start].0..positions[end].0]
+            .encode_utf16()
+            .count() as u32;
+        let mut expected = index.source().to_owned();
+        expected.replace_range(positions[start].0..positions[end].0, text);
+        index
+            .apply(&TextChange {
+                range: Some(Range {
+                    start: positions[start].1,
+                    end: positions[end].1,
+                }),
+                range_length: Some(range_length),
+                text: text.into(),
+            })
+            .unwrap();
+        assert_eq!(index.source(), expected);
+    }
+    check(&index);
+    assert!(index
+        .range(ferroui_designer_core::SourceSpan::new(1, 0))
+        .is_err());
+}
+
+#[test]
+fn large_text_edit_batches_preserve_order_and_validate_before_emission() {
+    let source = "α🦀x".repeat(10_000);
+    let edits: Vec<_> = (0..10_000)
+        .rev()
+        .map(|i| TextEdit {
+            range: Range {
+                start: Position {
+                    line: 0,
+                    character: i * 4 + 1,
+                },
+                end: Position {
+                    line: 0,
+                    character: i * 4 + 3,
+                },
+            },
+            new_text: "漢".into(),
+        })
+        .collect();
+    assert_eq!(
+        apply_text_edits(&source, &edits).unwrap(),
+        "α漢x".repeat(10_000)
+    );
+    let oversized = TextEdit {
+        range: Range::default(),
+        new_text: "x".repeat(16 * 1024 * 1024),
+    };
+    assert!(apply_text_edits("x", &[oversized]).is_err());
+}
+
+#[test]
+fn unicode_index_splices_partial_blocks_and_shifts_distant_suffixes() {
+    let mut index = LineIndex::new(&"aα🦀\r\n".repeat(1_000));
+    for (line, count, text) in [
+        (0, 0, "界"),
+        (100, 4, "🙂"),
+        (3, 2, "\n漢\r"),
+        (999, 0, "🦀"),
+    ] {
+        index
+            .apply(&TextChange {
+                range: Some(Range {
+                    start: Position { line, character: 0 },
+                    end: Position {
+                        line,
+                        character: count,
+                    },
+                }),
+                range_length: None,
+                text: text.into(),
+            })
+            .unwrap();
+        let fresh = LineIndex::new(index.source());
+        for offset in 0..=index.source().len() {
+            if index.source().is_char_boundary(offset) {
+                let expected = fresh.position(offset).unwrap();
+                assert_eq!(index.position(offset).unwrap(), expected);
+                assert_eq!(index.offset(expected), fresh.offset(expected));
+            }
+        }
+    }
+    assert!(index
+        .offset(Position {
+            line: 1,
+            character: u32::MAX
+        })
+        .is_err());
+}
+
+#[test]
+fn semantic_tokens_split_cr_crlf_and_lf_without_spanning_lines() {
+    let source = "<Grid><!-- α\r🦀\r\n漢\nend --><Button Content='one\rtwo'/></Grid>";
+    let service = service(source);
+    let index = service.index("untitled:/View.xaml").unwrap();
+    let tokens = service.semantic_tokens("untitled:/View.xaml").unwrap();
+    assert!(tokens
+        .iter()
+        .any(|token| token.line == 1 && token.length == 2));
+    for token in tokens {
+        let start = index
+            .offset(Position {
+                line: token.line,
+                character: token.start,
+            })
+            .unwrap();
+        let end = index
+            .offset(Position {
+                line: token.line,
+                character: token.start + token.length,
+            })
+            .unwrap();
+        assert!(!source[start..end].contains(['\r', '\n']));
+    }
+}
 #[test]
 fn incremental_changes_are_atomic_versioned_and_retain_invalid_drafts() {
     let mut service = service("<Button Content='🦀'/>");
     let source = service
-        .document("file:///View.xaml")
+        .document("untitled:/View.xaml")
         .unwrap()
         .source()
         .to_owned();
     let offset = source.find('🦀').unwrap();
     let position = service
-        .index("file:///View.xaml")
+        .index("untitled:/View.xaml")
         .unwrap()
         .position(offset)
         .unwrap();
@@ -131,21 +318,23 @@ fn incremental_changes_are_atomic_versioned_and_retain_invalid_drafts() {
             text: "x".into(),
         },
     ];
-    assert!(service.change("file:///View.xaml", 2, &changes).is_err());
-    assert_eq!(service.version("file:///View.xaml"), Some(1));
+    assert!(service.change("untitled:/View.xaml", 2, &changes).is_err());
+    assert_eq!(service.version("untitled:/View.xaml"), Some(1));
     assert_eq!(
-        service.document("file:///View.xaml").unwrap().source(),
+        service.document("untitled:/View.xaml").unwrap().source(),
         source
     );
-    service.replace("file:///View.xaml", "<Bu", 2).unwrap();
-    assert!(!service.document("file:///View.xaml").unwrap().is_valid());
+    service.replace("untitled:/View.xaml", "<Bu", 2).unwrap();
+    assert!(!service.document("untitled:/View.xaml").unwrap().is_valid());
     assert_eq!(
-        service.diagnostics("file:///View.xaml").unwrap()[0].code,
+        service.diagnostics("untitled:/View.xaml").unwrap()[0].code,
         "xml"
     );
-    assert!(service.replace("file:///View.xaml", "<Grid/>", 2).is_err());
     assert!(service
-        .completions("file:///View.xaml", 3)
+        .replace("untitled:/View.xaml", "<Grid/>", 2)
+        .is_err());
+    assert!(service
+        .completions("untitled:/View.xaml", 3)
         .unwrap()
         .iter()
         .any(|c| c.label == "Button"));
@@ -156,14 +345,14 @@ fn schema_comes_from_framework_and_completion_inherits_properties_and_enums() {
     assert!(schema.types.len() > 300);
     assert!(schema.properties("Button", None).contains_key("Width"));
     let service = service("<Button W");
-    let completions = service.completions("file:///View.xaml", 9).unwrap();
+    let completions = service.completions("untitled:/View.xaml", 9).unwrap();
     assert!(completions
         .iter()
         .any(|c| c.label == "Width" && c.insert_text == "Width=\"\""));
     let source = "<StackPanel Orientation='H'/>";
     let service = self::service(source);
     let completions = service
-        .completions("file:///View.xaml", source.find("H'").unwrap() + 1)
+        .completions("untitled:/View.xaml", source.find("H'").unwrap() + 1)
         .unwrap();
     assert!(completions.iter().any(|c| c.label == "Horizontal"));
 }
@@ -192,12 +381,12 @@ fn native_animation_programs_and_transition_objects_have_complete_schema_diagnos
 </StackPanel>"#
     );
     let service = service(&source);
-    let diagnostics = service.diagnostics("file:///View.xaml").unwrap();
+    let diagnostics = service.diagnostics("untitled:/View.xaml").unwrap();
     assert!(diagnostics.is_empty(), "{diagnostics:?}");
     let invalid =
         self::service(&source.replace("PlaybackBehavior=\"Always\"", "PlaybackBehavior=\"Never\""));
     assert!(invalid
-        .diagnostics("file:///View.xaml")
+        .diagnostics("untitled:/View.xaml")
         .unwrap()
         .iter()
         .any(|diagnostic| diagnostic.code == "enum-value"));
@@ -236,13 +425,13 @@ fn animation_completion_uses_macro_properties_and_plain_markup_metadata() {
     let source = "<Animation PlaybackBehavior='A'/>";
     let service = service(source);
     let completions = service
-        .completions("file:///View.xaml", source.find("A'").unwrap() + 1)
+        .completions("untitled:/View.xaml", source.find("A'").unwrap() + 1)
         .unwrap();
     assert!(completions.iter().any(|item| item.label == "Always"));
     let source = "<Animation DelayB";
     let service = self::service(source);
     let completions = service
-        .completions("file:///View.xaml", source.len())
+        .completions("untitled:/View.xaml", source.len())
         .unwrap();
     assert!(completions
         .iter()
@@ -270,13 +459,13 @@ fn custom_schema_hover_and_value_diagnostics_resolve_xml_namespaces() {
         ..Default::default()
     });
     assert!(service
-        .diagnostics("file:///View.xaml")
+        .diagnostics("untitled:/View.xaml")
         .unwrap()
         .iter()
         .any(|d| d.code == "enum-value"));
-    let source = service.document("file:///View.xaml").unwrap().source();
+    let source = service.document("untitled:/View.xaml").unwrap().source();
     let hover = service
-        .hover("file:///View.xaml", source.find("Mode").unwrap())
+        .hover("untitled:/View.xaml", source.find("Mode").unwrap())
         .unwrap()
         .unwrap();
     assert!(hover.contents.contains("Pick a mode"));
@@ -286,7 +475,7 @@ fn semantic_diagnostics_cover_types_properties_values_and_markup() {
     let source=format!("<StackPanel {NS} Orientation='Diagonal'><Button Opacity='bad' Nope='1' Content='{{Binding'/><Missing/></StackPanel>");
     let service = service(&source);
     let codes: Vec<_> = service
-        .diagnostics("file:///View.xaml")
+        .diagnostics("untitled:/View.xaml")
         .unwrap()
         .into_iter()
         .map(|d| d.code)
@@ -307,12 +496,12 @@ fn name_rename_rewrites_actual_references_but_not_strings_or_other_namescopes() 
     let mut service = service(&source);
     let offset = source.find("Name='Target'").unwrap() + 6;
     let edit = service
-        .rename("file:///View.xaml", offset, "Renamed")
+        .rename("untitled:/View.xaml", offset, "Renamed")
         .unwrap();
     assert_eq!(edit.document_changes.len(), 1);
     assert_eq!(edit.document_changes[0].edits.len(), 6);
     service.apply_workspace_edit(&edit).unwrap();
-    let renamed = service.document("file:///View.xaml").unwrap().source();
+    let renamed = service.document("untitled:/View.xaml").unwrap().source();
     assert!(renamed.contains("Content='Target'"));
     assert!(renamed.contains("<Border Name='Target'/>"));
     assert!(renamed.contains("#Renamed.Width"));
@@ -336,32 +525,32 @@ fn resource_definitions_references_and_rename_cross_documents_atomically() {
     let usage = format!("<Button {NS} Background='{{StaticResource Accent}}'/>");
     let mut service = LanguageService::default();
     service
-        .open("file:///Resources.xaml", &resources, 3)
+        .open("untitled:/Resources.xaml", &resources, 3)
         .unwrap();
-    service.open("file:///View.xaml", &usage, 7).unwrap();
+    service.open("untitled:/View.xaml", &usage, 7).unwrap();
     let offset = usage.find("Accent").unwrap();
-    let definition = service.definitions("file:///View.xaml", offset).unwrap();
+    let definition = service.definitions("untitled:/View.xaml", offset).unwrap();
     assert_eq!(definition.len(), 1);
-    assert_eq!(definition[0].uri, "file:///Resources.xaml");
+    assert_eq!(definition[0].uri, "untitled:/Resources.xaml");
     assert_eq!(
         service
-            .references("file:///View.xaml", offset)
+            .references("untitled:/View.xaml", offset)
             .unwrap()
             .len(),
         2
     );
     let edit = service
-        .rename("file:///View.xaml", offset, "Primary")
+        .rename("untitled:/View.xaml", offset, "Primary")
         .unwrap();
     assert_eq!(edit.document_changes.len(), 2);
     service.apply_workspace_edit(&edit).unwrap();
     assert!(service
-        .document("file:///Resources.xaml")
+        .document("untitled:/Resources.xaml")
         .unwrap()
         .source()
         .contains("x:Key='Primary'"));
     assert!(service
-        .document("file:///View.xaml")
+        .document("untitled:/View.xaml")
         .unwrap()
         .source()
         .contains("StaticResource Primary"));
@@ -375,14 +564,14 @@ fn resources_shadow_ancestor_resources_without_duplicate_scope_diagnostics() {
         .map(|(i, _)| i + 15)
         .collect();
     let inner = service
-        .definitions("file:///View.xaml", references[0])
+        .definitions("untitled:/View.xaml", references[0])
         .unwrap();
     let outer = service
-        .definitions("file:///View.xaml", references[1])
+        .definitions("untitled:/View.xaml", references[1])
         .unwrap();
     assert_ne!(inner, outer);
     assert!(!service
-        .diagnostics("file:///View.xaml")
+        .diagnostics("untitled:/View.xaml")
         .unwrap()
         .iter()
         .any(|d| d.code == "duplicate-symbol"));
@@ -392,7 +581,7 @@ fn markup_signature_reports_named_parameter() {
     let source = "<Button Content='{Binding Path=Title, ElementName=Target}'/>";
     let service = service(source);
     let help = service
-        .signature_help("file:///View.xaml", source.find("Target").unwrap() + 6)
+        .signature_help("untitled:/View.xaml", source.find("Target").unwrap() + 6)
         .unwrap()
         .unwrap();
     assert_eq!(help.active_parameter, 1);
@@ -405,16 +594,18 @@ fn formatting_preserves_quotes_comments_mixed_content_and_xml_space() {
     let source="<Grid><!-- keep --><TextBlock Text = 'x'/><TextBlock>hello <Run Text='world'/> !</TextBlock><Border xml:space='preserve'>  <Button/>  </Border></Grid>";
     let mut service = service(source);
     let edits = service
-        .format("file:///View.xaml", FormattingOptions::default())
+        .format("untitled:/View.xaml", FormattingOptions::default())
         .unwrap();
     let formatted = apply_text_edits(source, &edits).unwrap();
     assert!(formatted.contains("\n    <!-- keep -->"));
     assert!(formatted.contains("Text = 'x'"));
     assert!(formatted.contains("hello <Run Text='world'/> !"));
     assert!(formatted.contains("preserve'>  <Button/>  </Border>"));
-    service.replace("file:///View.xaml", &formatted, 2).unwrap();
+    service
+        .replace("untitled:/View.xaml", &formatted, 2)
+        .unwrap();
     assert!(service
-        .format("file:///View.xaml", FormattingOptions::default())
+        .format("untitled:/View.xaml", FormattingOptions::default())
         .unwrap()
         .is_empty());
 }
@@ -423,11 +614,11 @@ fn symbols_folding_and_tokens_have_valid_utf16_positions() {
     let source = format!("<Grid {NS}>\n <!-- 🦀 -->\n <Button Name='Action' Width='10'/>\n</Grid>");
     let service = service(&source);
     assert_eq!(
-        service.symbols("file:///View.xaml").unwrap()[0].children[0].name,
+        service.symbols("untitled:/View.xaml").unwrap()[0].children[0].name,
         "Action"
     );
-    assert!(!service.folding("file:///View.xaml").unwrap().is_empty());
-    let tokens = service.semantic_tokens("file:///View.xaml").unwrap();
+    assert!(!service.folding("untitled:/View.xaml").unwrap().is_empty());
+    let tokens = service.semantic_tokens("untitled:/View.xaml").unwrap();
     assert!(tokens.iter().any(|t| t.token_type == 3));
     assert!(tokens.iter().any(|t| t.token_type == 6));
     for pair in tokens.windows(2) {
@@ -439,15 +630,17 @@ fn symbols_folding_and_tokens_have_valid_utf16_positions() {
 #[test]
 fn cross_document_edits_fail_atomically_when_one_version_is_stale() {
     let mut service = service("<Grid/>");
-    service.open("file:///Other.xaml", "<Border/>", 3).unwrap();
+    service
+        .open("untitled:/Other.xaml", "<Border/>", 3)
+        .unwrap();
     let edit = WorkspaceEdit {
         document_changes: vec![
             DocumentEdits {
-                uri: "file:///View.xaml".into(),
+                uri: "untitled:/View.xaml".into(),
                 version: 1,
                 edits: vec![TextEdit {
                     range: service
-                        .index("file:///View.xaml")
+                        .index("untitled:/View.xaml")
                         .unwrap()
                         .range(ferroui_designer_core::SourceSpan::new(0, 7))
                         .unwrap(),
@@ -455,7 +648,7 @@ fn cross_document_edits_fail_atomically_when_one_version_is_stale() {
                 }],
             },
             DocumentEdits {
-                uri: "file:///Other.xaml".into(),
+                uri: "untitled:/Other.xaml".into(),
                 version: 2,
                 edits: vec![],
             },
@@ -463,7 +656,7 @@ fn cross_document_edits_fail_atomically_when_one_version_is_stale() {
     };
     assert!(service.apply_workspace_edit(&edit).is_err());
     assert_eq!(
-        service.document("file:///View.xaml").unwrap().source(),
+        service.document("untitled:/View.xaml").unwrap().source(),
         "<Grid/>"
     );
 }
@@ -475,18 +668,18 @@ fn lsp_initialization_incremental_sync_completion_and_shutdown_use_real_service(
         init[0]["result"]["capabilities"]["textDocumentSync"]["change"],
         2
     );
-    let published=server.handle(json!({"jsonrpc":"2.0","method":"textDocument/didOpen","params":{"textDocument":{"uri":"file:///V.xaml","languageId":"xaml","version":1,"text":"<Bu"}}}));
+    let published=server.handle(json!({"jsonrpc":"2.0","method":"textDocument/didOpen","params":{"textDocument":{"uri":"untitled:/V.xaml","languageId":"xaml","version":1,"text":"<Bu"}}}));
     assert_eq!(published[0]["method"], "textDocument/publishDiagnostics");
-    let completion=server.handle(json!({"jsonrpc":"2.0","id":2,"method":"textDocument/completion","params":{"textDocument":{"uri":"file:///V.xaml"},"position":{"line":0,"character":3}}}));
+    let completion=server.handle(json!({"jsonrpc":"2.0","id":2,"method":"textDocument/completion","params":{"textDocument":{"uri":"untitled:/V.xaml"},"position":{"line":0,"character":3}}}));
     assert!(completion[0]["result"]
         .as_array()
         .unwrap()
         .iter()
         .any(|c| c["label"] == "Button"));
-    server.handle(json!({"jsonrpc":"2.0","method":"textDocument/didChange","params":{"textDocument":{"uri":"file:///V.xaml","version":2},"contentChanges":[{"text":"<Button/>"}]}}));
+    server.handle(json!({"jsonrpc":"2.0","method":"textDocument/didChange","params":{"textDocument":{"uri":"untitled:/V.xaml","version":2},"contentChanges":[{"text":"<Button/>"}]}}));
     assert!(server
         .service
-        .document("file:///V.xaml")
+        .document("untitled:/V.xaml")
         .unwrap()
         .is_valid());
     assert!(
@@ -557,17 +750,17 @@ fn nested_markup_arguments_cannot_steal_sibling_resource_keys_or_string_literals
     );
     let mut service = service(&source);
     let first = source.find("First'").unwrap();
-    let references = service.references("file:///View.xaml", first).unwrap();
+    let references = service.references("untitled:/View.xaml", first).unwrap();
     assert_eq!(references.len(), 2);
     let edit = service
-        .rename("file:///View.xaml", first, "Renamed")
+        .rename("untitled:/View.xaml", first, "Renamed")
         .unwrap();
     service.apply_workspace_edit(&edit).unwrap();
-    let changed = service.document("file:///View.xaml").unwrap().source();
+    let changed = service.document("untitled:/View.xaml").unwrap().source();
     assert!(changed.contains("StaticResource Renamed}"));
     assert!(changed.contains("ResourceKey=Second}"));
     assert!(
-        !name_occurrences(service.document("file:///View.xaml").unwrap())
+        !name_occurrences(service.document("untitled:/View.xaml").unwrap())
             .iter()
             .any(|reference| matches!(reference.name.as_str(), "External" | "Ghost"))
     );
@@ -581,20 +774,20 @@ fn quoted_resource_keys_preserve_raw_entity_spans_and_rename_safely() {
     let mut service = service(&source);
     let at = source.find("A&amp;B'").unwrap();
     assert_eq!(
-        service.references("file:///View.xaml", at).unwrap().len(),
+        service.references("untitled:/View.xaml", at).unwrap().len(),
         3
     );
     let edit = service
-        .rename("file:///View.xaml", at, "Hot 'pink' & 🦀")
+        .rename("untitled:/View.xaml", at, "Hot 'pink' & 🦀")
         .unwrap();
     service.apply_workspace_edit(&edit).unwrap();
-    assert!(service.document("file:///View.xaml").unwrap().is_valid());
+    assert!(service.document("untitled:/View.xaml").unwrap().is_valid());
     assert_eq!(
-        service.references("file:///View.xaml", at).unwrap().len(),
+        service.references("untitled:/View.xaml", at).unwrap().len(),
         3
     );
     assert!(!service
-        .diagnostics("file:///View.xaml")
+        .diagnostics("untitled:/View.xaml")
         .unwrap()
         .iter()
         .any(|diagnostic| matches!(diagnostic.code.as_str(), "unresolved-reference" | "markup")));
@@ -604,20 +797,27 @@ fn quoted_resource_keys_preserve_raw_entity_spans_and_rename_safely() {
 fn rename_does_not_guess_which_ambiguous_resource_a_reference_uses() {
     let mut service = service("<Button Background='{StaticResource Shared}'/>");
     let first = format!("<ResourceDictionary {NS}><Color x:Key='Shared'/></ResourceDictionary>");
-    service.open("file:///A.xaml", &first, 1).unwrap();
-    service.open("file:///B.xaml", &first, 1).unwrap();
+    service.open("untitled:/A.xaml", &first, 1).unwrap();
+    service.open("untitled:/B.xaml", &first, 1).unwrap();
     assert_eq!(
-        service.definitions("file:///View.xaml", 37).unwrap().len(),
+        service
+            .definitions("untitled:/View.xaml", 37)
+            .unwrap()
+            .len(),
         2
     );
     assert!(service
-        .rename("file:///View.xaml", 37, "Different")
+        .rename("untitled:/View.xaml", 37, "Different")
         .is_err());
     let edit = service
-        .rename("file:///A.xaml", first.find("Shared").unwrap(), "Different")
+        .rename(
+            "untitled:/A.xaml",
+            first.find("Shared").unwrap(),
+            "Different",
+        )
         .unwrap();
     assert_eq!(edit.document_changes.len(), 1);
-    assert_eq!(edit.document_changes[0].uri, "file:///A.xaml");
+    assert_eq!(edit.document_changes[0].uri, "untitled:/A.xaml");
 }
 
 #[test]
@@ -625,17 +825,17 @@ fn imported_resources_resolve_in_merge_order_and_cycles_terminate() {
     let first = format!("<ResourceDictionary {NS}><Color x:Key='Shared'/></ResourceDictionary>");
     let view = "<Grid><Grid.Resources><ResourceDictionary><ResourceDictionary.MergedDictionaries><ResourceInclude Source='A.xaml'/><ResourceInclude Source='B.xaml'/></ResourceDictionary.MergedDictionaries></ResourceDictionary></Grid.Resources><Button Background='{StaticResource Shared}'/></Grid>";
     let mut service = service(view);
-    service.open("file:///A.xaml", &first, 1).unwrap();
-    service.open("file:///B.xaml", &first, 1).unwrap();
+    service.open("untitled:/A.xaml", &first, 1).unwrap();
+    service.open("untitled:/B.xaml", &first, 1).unwrap();
     let definitions = service
-        .definitions("file:///View.xaml", view.find("Shared").unwrap())
+        .definitions("untitled:/View.xaml", view.find("Shared").unwrap())
         .unwrap();
     assert_eq!(definitions.len(), 1);
-    assert_eq!(definitions[0].uri, "file:///B.xaml");
-    service.replace("file:///B.xaml", "<ResourceDictionary><ResourceDictionary.MergedDictionaries><ResourceInclude Source='A.xaml'/></ResourceDictionary.MergedDictionaries></ResourceDictionary>", 2).unwrap();
-    service.replace("file:///A.xaml", "<ResourceDictionary><ResourceDictionary.MergedDictionaries><ResourceInclude Source='B.xaml'/></ResourceDictionary.MergedDictionaries></ResourceDictionary>", 2).unwrap();
+    assert_eq!(definitions[0].uri, "untitled:/B.xaml");
+    service.replace("untitled:/B.xaml", "<ResourceDictionary><ResourceDictionary.MergedDictionaries><ResourceInclude Source='A.xaml'/></ResourceDictionary.MergedDictionaries></ResourceDictionary>", 2).unwrap();
+    service.replace("untitled:/A.xaml", "<ResourceDictionary><ResourceDictionary.MergedDictionaries><ResourceInclude Source='B.xaml'/></ResourceDictionary.MergedDictionaries></ResourceDictionary>", 2).unwrap();
     assert!(service
-        .definitions("file:///View.xaml", view.find("Shared").unwrap())
+        .definitions("untitled:/View.xaml", view.find("Shared").unwrap())
         .unwrap()
         .is_empty());
 }
@@ -644,9 +844,9 @@ fn imported_resources_resolve_in_merge_order_and_cycles_terminate() {
 fn private_control_resources_are_not_visible_in_other_documents() {
     let source = format!("<Grid {NS}><Border><Border.Resources><Color x:Key='Private'/></Border.Resources></Border></Grid>");
     let mut service = service("<Button Background='{StaticResource Private}'/>");
-    service.open("file:///Other.xaml", &source, 1).unwrap();
+    service.open("untitled:/Other.xaml", &source, 1).unwrap();
     assert!(service
-        .definitions("file:///View.xaml", 37)
+        .definitions("untitled:/View.xaml", 37)
         .unwrap()
         .is_empty());
 }
@@ -663,9 +863,9 @@ fn qualified_custom_type_completion_and_builtin_base_members_share_namespace_rul
     });
     let items = service
         .completions(
-            "file:///View.xaml",
+            "untitled:/View.xaml",
             service
-                .document("file:///View.xaml")
+                .document("untitled:/View.xaml")
                 .unwrap()
                 .source()
                 .len(),
@@ -680,13 +880,13 @@ fn qualified_custom_type_completion_and_builtin_base_members_share_namespace_rul
     );
     service
         .replace(
-            "file:///View.xaml",
+            "untitled:/View.xaml",
             "<c:Widget xmlns:c='using:Custom' Wid",
             2,
         )
         .unwrap();
     assert!(service
-        .completions("file:///View.xaml", 36)
+        .completions("untitled:/View.xaml", 36)
         .unwrap()
         .iter()
         .any(|item| item.label == "Width"));
@@ -694,7 +894,7 @@ fn qualified_custom_type_completion_and_builtin_base_members_share_namespace_rul
 
 fn binding_schema(service: &mut LanguageService) -> Location {
     let location = Location {
-        uri: "file:///ViewModel.rs".into(),
+        uri: "untitled:/ViewModel.rs".into(),
         range: Range {
             start: Position {
                 line: 8,
@@ -746,20 +946,20 @@ fn typed_binding_completion_hover_and_definitions_follow_nested_property_types()
     let location = binding_schema(&mut service);
     let at = source.find("Customer.Title").unwrap() + "Customer.Ti".len();
     let completion = service
-        .completions("file:///View.xaml", at)
+        .completions("untitled:/View.xaml", at)
         .unwrap()
         .into_iter()
         .find(|item| item.label == "Title")
         .unwrap();
     assert_eq!(&source[completion.span.range()], "Ti");
     assert!(service
-        .hover("file:///View.xaml", at)
+        .hover("untitled:/View.xaml", at)
         .unwrap()
         .unwrap()
         .contents
         .contains("Customer display name"));
     assert_eq!(
-        service.definitions("file:///View.xaml", at).unwrap(),
+        service.definitions("untitled:/View.xaml", at).unwrap(),
         vec![location]
     );
 }
@@ -771,7 +971,7 @@ fn named_element_binding_completion_uses_actual_control_type() {
     let service = service(source);
     let items = service
         .completions(
-            "file:///View.xaml",
+            "untitled:/View.xaml",
             source.find("Binding Te").unwrap() + "Binding Te".len(),
         )
         .unwrap();
@@ -785,12 +985,12 @@ fn lsp_file_rename_groups_edits_for_multiple_imports_in_one_document() {
     server
         .service
         .open(
-            "file:///View.xaml",
+            "untitled:/View.xaml",
             "<Grid><ResourceInclude Source='A.xaml'/><ResourceInclude Source='B.xaml'/></Grid>",
             1,
         )
         .unwrap();
-    let reply = server.handle(json!({"jsonrpc":"2.0","id":2,"method":"workspace/willRenameFiles","params":{"files":[{"oldUri":"file:///A.xaml","newUri":"file:///NewA.xaml"},{"oldUri":"file:///B.xaml","newUri":"file:///NewB.xaml"}]}}));
+    let reply = server.handle(json!({"jsonrpc":"2.0","id":2,"method":"workspace/willRenameFiles","params":{"files":[{"oldUri":"untitled:/A.xaml","newUri":"untitled:/NewA.xaml"},{"oldUri":"untitled:/B.xaml","newUri":"untitled:/NewB.xaml"}]}}));
     let changes = reply[0]["result"]["documentChanges"].as_array().unwrap();
     assert_eq!(changes.len(), 1);
     assert_eq!(changes[0]["edits"].as_array().unwrap().len(), 2);
@@ -804,6 +1004,7 @@ fn indexed_projects_survive_close_and_support_multiple_workspace_roots() {
     let _ = std::fs::remove_dir_all(&directory);
     std::fs::create_dir_all(directory.join("one")).unwrap();
     std::fs::create_dir_all(directory.join("two")).unwrap();
+    let directory = directory.canonicalize().unwrap();
     let first = format!("<ResourceDictionary {NS}><Color x:Key='Saved'/></ResourceDictionary>");
     std::fs::write(directory.join("one/Colors.xaml"), &first).unwrap();
     std::fs::write(directory.join("two/View.xaml"), "<Grid/>").unwrap();
@@ -834,21 +1035,142 @@ fn indexed_projects_survive_close_and_support_multiple_workspace_roots() {
     std::fs::remove_dir_all(directory).unwrap();
 }
 
+#[cfg(unix)]
+#[test]
+fn symlink_document_aliases_share_versions_symbols_and_project_snapshots() {
+    use ferroui_designer_project::{file_uri, Solution};
+    let directory =
+        std::env::temp_dir().join(format!("ferroui-language-alias-{}", std::process::id()));
+    let _ = std::fs::remove_dir_all(&directory);
+    std::fs::create_dir_all(&directory).unwrap();
+    let directory = directory.canonicalize().unwrap();
+    let alias_root = directory.join("alias");
+    std::os::unix::fs::symlink(&directory, &alias_root).unwrap();
+    let source =
+        "<Grid><Button Name='Target'/><TextBlock Text='{Binding ElementName=Target}'/></Grid>";
+    std::fs::write(directory.join("View.xaml"), source).unwrap();
+    let uri = file_uri(directory.join("View.xaml")).unwrap();
+    let alias = file_uri(alias_root.join("View.xaml")).unwrap();
+    let mut solution = Solution::discover(&directory).unwrap();
+    // Descriptors can retain the user's root spelling instead of discovery's
+    // canonical path, as on macOS /var versus /private/var.
+    solution.root = alias_root.clone();
+    for project in &mut solution.projects {
+        project.root = alias_root.clone();
+        project.manifest_path = alias_root.join("Cargo.toml");
+        for entry in &mut project.documents {
+            entry.path = alias_root.join(entry.path.file_name().unwrap());
+            entry.uri = file_uri(&entry.path).unwrap();
+        }
+    }
+    let mut service = LanguageService::default();
+    service.index_solution(&solution).unwrap();
+    service.open(&alias, source, 1).unwrap();
+    assert_eq!(service.uris().collect::<Vec<_>>(), vec![uri.as_str()]);
+    assert_eq!(service.version(&uri), Some(1));
+    assert!(!service
+        .diagnostics(&alias)
+        .unwrap()
+        .iter()
+        .any(|d| d.code == "unresolved-reference"));
+    let offset = source.rfind("Target").unwrap();
+    assert_eq!(service.definitions(&alias, offset).unwrap()[0].uri, uri);
+    assert_eq!(service.references(&alias, offset).unwrap().len(), 2);
+    let edit = service.rename(&alias, offset, "Renamed").unwrap();
+    assert_eq!(edit.document_changes[0].uri, uri);
+    let mut duplicate = edit.clone();
+    duplicate.document_changes.push(DocumentEdits {
+        uri: alias.clone(),
+        ..edit.document_changes[0].clone()
+    });
+    assert!(service.apply_workspace_edit(&duplicate).is_err());
+    assert_eq!(service.version(&alias), Some(1));
+    service.apply_workspace_edit(&edit).unwrap();
+    assert!(service
+        .document(&alias)
+        .unwrap()
+        .source()
+        .contains("Renamed"));
+    service.mark_saved(&alias, None).unwrap();
+    service.replace(&alias, "<Grid/>", 3).unwrap();
+    service.close(&alias).unwrap();
+    assert_eq!(service.document(&alias).unwrap().source(), source);
+    assert_eq!(service.version(&alias), Some(-1));
+    assert_eq!(service.remove_solution(&directory), 1);
+    assert!(service.document(&uri).is_none());
+    std::fs::remove_dir_all(directory).unwrap();
+}
+
+#[test]
+fn file_rename_notifications_validate_whole_batches_and_support_swaps() {
+    let mut server = lsp::LspServer::default();
+    server.handle(json!({"jsonrpc":"2.0","id":1,"method":"initialize","params":{}}));
+    server
+        .service
+        .open("untitled:/A.xaml", "<Button/>", 1)
+        .unwrap();
+    server
+        .service
+        .open("untitled:/B.xaml", "<Border/>", 2)
+        .unwrap();
+    for files in [
+        json!([{ "oldUri":"untitled:/A.xaml", "newUri":"untitled:/Moved.xaml" }, { "oldUri":"untitled:/B.xaml" }]),
+        json!([{ "oldUri":"untitled:/A.xaml", "newUri":"untitled:/Moved.xaml" }, { "oldUri":"untitled:/B.xaml", "newUri":"untitled:/Moved.xaml" }]),
+    ] {
+        let messages = server.handle(
+            json!({"jsonrpc":"2.0","method":"workspace/didRenameFiles","params":{"files":files}}),
+        );
+        assert_eq!(messages[0]["method"], "window/logMessage");
+        assert!(server.service.document("untitled:/Moved.xaml").is_none());
+        assert_eq!(server.service.version("untitled:/A.xaml"), Some(1));
+        assert_eq!(server.service.version("untitled:/B.xaml"), Some(2));
+    }
+    server
+        .service
+        .rename_uris(&[
+            ("untitled:/A.xaml".into(), "untitled:/B.xaml".into()),
+            ("untitled:/B.xaml".into(), "untitled:/A.xaml".into()),
+        ])
+        .unwrap();
+    assert_eq!(
+        server
+            .service
+            .document("untitled:/A.xaml")
+            .unwrap()
+            .source(),
+        "<Border/>"
+    );
+    assert_eq!(
+        server
+            .service
+            .document("untitled:/B.xaml")
+            .unwrap()
+            .source(),
+        "<Button/>"
+    );
+    server
+        .service
+        .rename_uri("untitled:/A.xaml", "untitled:/A.xaml")
+        .unwrap();
+}
+
 #[test]
 fn inline_merged_dictionaries_have_independent_keys_and_last_dictionary_wins() {
     let source = format!("<Grid {NS}><Grid.Resources><ResourceDictionary><ResourceDictionary.MergedDictionaries><ResourceDictionary><Color x:Key='Shared'/></ResourceDictionary><ResourceDictionary><Color x:Key='Shared'/></ResourceDictionary></ResourceDictionary.MergedDictionaries></ResourceDictionary></Grid.Resources><Button Background='{{StaticResource Shared}}'/></Grid>");
     let service = service(&source);
     assert!(!service
-        .diagnostics("file:///View.xaml")
+        .diagnostics("untitled:/View.xaml")
         .unwrap()
         .iter()
         .any(|diagnostic| diagnostic.code == "duplicate-symbol"));
     let reference = source.rfind("Shared").unwrap();
-    let definition = service.definitions("file:///View.xaml", reference).unwrap();
+    let definition = service
+        .definitions("untitled:/View.xaml", reference)
+        .unwrap();
     assert_eq!(definition.len(), 1);
     assert_eq!(
         service
-            .index("file:///View.xaml")
+            .index("untitled:/View.xaml")
             .unwrap()
             .span(definition[0].range)
             .unwrap()
@@ -954,21 +1276,21 @@ fn signatures_follow_nested_extensions_and_stop_after_the_closing_brace() {
         "<Button Content=\"{Binding Path=Name, Converter={StaticResource Key}, Mode=OneWay}\"/>";
     let service = service(source);
     let nested = service
-        .signature_help("file:///View.xaml", source.find("Key}").unwrap() + 3)
+        .signature_help("untitled:/View.xaml", source.find("Key}").unwrap() + 3)
         .unwrap()
         .unwrap();
     assert!(nested.signatures[0].label.starts_with("{StaticResource"));
     let parent = service
-        .signature_help("file:///View.xaml", source.find("OneWay}").unwrap() + 6)
+        .signature_help("untitled:/View.xaml", source.find("OneWay}").unwrap() + 6)
         .unwrap()
         .unwrap();
     assert_eq!(parent.active_parameter, 4);
     assert!(service
-        .signature_help("file:///View.xaml", source.find("OneWay}").unwrap() + 7)
+        .signature_help("untitled:/View.xaml", source.find("OneWay}").unwrap() + 7)
         .unwrap()
         .is_none());
     assert!(service
-        .signature_help("file:///View.xaml", source.len())
+        .signature_help("untitled:/View.xaml", source.len())
         .unwrap()
         .is_none());
 }
@@ -977,7 +1299,7 @@ fn signatures_follow_nested_extensions_and_stop_after_the_closing_brace() {
 fn binding_assignments_still_validate_property_spelling() {
     let service = service("<Button Widht='{Binding Size}'/>");
     assert!(service
-        .diagnostics("file:///View.xaml")
+        .diagnostics("untitled:/View.xaml")
         .unwrap()
         .iter()
         .any(|diagnostic| diagnostic.code == "unknown-property"));

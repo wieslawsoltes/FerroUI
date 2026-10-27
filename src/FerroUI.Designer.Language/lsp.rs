@@ -274,13 +274,13 @@ impl LspServer {
             }
             "workspace/willRenameFiles" => self.will_rename_files(params),
             "workspace/didRenameFiles" => {
-                for file in params["files"]
+                let files = params["files"]
                     .as_array()
                     .ok_or_else(|| LanguageError("files array required".into()))?
-                {
-                    self.service
-                        .rename_uri(text(file, "oldUri")?, text(file, "newUri")?)?;
-                }
+                    .iter()
+                    .map(|file| Ok((text(file, "oldUri")?.into(), text(file, "newUri")?.into())))
+                    .collect::<Result<Vec<_>>>()?;
+                self.service.rename_uris(&files)?;
                 Ok(Value::Null)
             }
             "$/setTrace" => Ok(Value::Null),

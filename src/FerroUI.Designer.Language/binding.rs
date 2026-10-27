@@ -56,7 +56,7 @@ pub(crate) fn at(
         let raw = &document.source()[attribute.value_span.range()];
         for argument in markup_arguments(raw) {
             if !is_binding(&argument.extension)
-                || !argument.name.as_deref().is_none_or(|name| name == "Path")
+                || argument.name.as_deref().is_some_and(|name| name != "Path")
             {
                 continue;
             }

@@ -4,9 +4,11 @@ use crate::{
 use ferroui_designer_core::Document;
 use serde::{Deserialize, Serialize};
 use std::collections::{BTreeMap, BTreeSet};
-use std::io::Write;
 use std::path::{Path, PathBuf};
-use std::sync::atomic::{AtomicU64, Ordering};
+
+mod storage;
+use storage::atomic_create;
+pub(crate) use storage::atomic_write;
 
 #[derive(Clone)]
 pub struct Buffer {
@@ -70,14 +72,17 @@ impl ProjectWorkspace {
         self.buffers.values()
     }
     pub fn buffer(&self, uri: &str) -> Option<&Buffer> {
-        self.buffers.get(uri)
+        self.buffers
+            .get(uri)
+            .or_else(|| self.buffers.get(&self.buffer_uri(uri).ok()?))
     }
     pub fn active_uri(&self) -> Option<&str> {
         self.active.as_deref()
     }
     pub fn activate(&mut self, uri: &str) -> Result<()> {
-        require(self.buffers.contains_key(uri), "Document is not open")?;
-        self.active = Some(uri.into());
+        let uri = self.buffer_uri(uri)?;
+        require(self.buffers.contains_key(&uri), "Document is not open")?;
+        self.active = Some(uri);
         Ok(())
     }
     pub fn open(&mut self, uri: &str) -> Result<&Buffer> {
@@ -150,8 +155,9 @@ impl ProjectWorkspace {
         let mut seen = BTreeSet::new();
         let mut staged = Vec::new();
         for update in updates {
+            let uri = self.buffer_uri(&update.uri)?;
             require(
-                seen.insert(update.uri.clone()),
+                seen.insert(uri.clone()),
                 "Duplicate document in workspace edit",
             )?;
             require(
@@ -160,7 +166,7 @@ impl ProjectWorkspace {
             )?;
             let mut buffer = self
                 .buffers
-                .get(&update.uri)
+                .get(&uri)
                 .ok_or_else(|| ProjectError("Document is not open".into()))?
                 .clone();
             require(
@@ -188,9 +194,10 @@ impl ProjectWorkspace {
         expected_version: u64,
         document: Document,
     ) -> Result<()> {
+        let uri = self.buffer_uri(uri)?;
         let buffer = self
             .buffers
-            .get_mut(uri)
+            .get_mut(&uri)
             .ok_or_else(|| ProjectError("Document is not open".into()))?;
         require(buffer.version == expected_version, "Buffer version changed")?;
         let version = buffer
@@ -212,6 +219,7 @@ impl ProjectWorkspace {
         expected_version: u64,
         saved_source: impl Into<String>,
     ) -> Result<()> {
+        let uri = self.buffer_uri(uri)?;
         let saved_source = saved_source.into();
         require(
             saved_source.len() <= 16 * 1024 * 1024,
@@ -219,7 +227,7 @@ impl ProjectWorkspace {
         )?;
         let buffer = self
             .buffers
-            .get_mut(uri)
+            .get_mut(&uri)
             .ok_or_else(|| ProjectError("Document is not open".into()))?;
         require(buffer.version == expected_version, "Buffer version changed")?;
         buffer.document.mark_saved_snapshot(saved_source.clone());
@@ -227,9 +235,10 @@ impl ProjectWorkspace {
         Ok(())
     }
     pub fn save_with_policy(&mut self, uri: &str, policy: SavePolicy) -> Result<()> {
+        let uri = self.buffer_uri(uri)?;
         let buffer = self
             .buffers
-            .get(uri)
+            .get(&uri)
             .ok_or_else(|| ProjectError("Document is not open".into()))?;
         let path = self.checked_path(
             buffer
@@ -247,13 +256,18 @@ impl ProjectWorkspace {
                 "File changed outside the designer; reload or explicitly overwrite",
             )?;
         }
-        atomic_write(&path, buffer.source())?;
-        let buffer = self.buffers.get_mut(uri).unwrap();
+        if policy == SavePolicy::CheckExternalChanges && buffer.saved_source.is_none() {
+            atomic_create(&path, buffer.source())?;
+        } else {
+            atomic_write(&path, buffer.source())?;
+        }
+        let buffer = self.buffers.get_mut(&uri).unwrap();
         buffer.saved_source = Some(buffer.source().into());
         buffer.document.mark_saved();
         Ok(())
     }
     pub fn save_as(&mut self, uri: &str, path: impl AsRef<Path>) -> Result<String> {
+        let uri = self.buffer_uri(uri)?;
         let path = self.checked_path(path.as_ref())?;
         let next = file_uri(&path)?;
         require(
@@ -262,41 +276,43 @@ impl ProjectWorkspace {
         )?;
         let mut buffer = self
             .buffers
-            .get(uri)
+            .get(&uri)
             .ok_or_else(|| ProjectError("Document is not open".into()))?
             .clone();
-        atomic_write(&path, buffer.source())?;
+        atomic_create(&path, buffer.source())?;
         buffer.uri = next.clone();
         buffer.path = Some(path);
         buffer.saved_source = Some(buffer.source().into());
         buffer.document.mark_saved();
-        self.buffers.remove(uri);
+        self.buffers.remove(&uri);
         self.buffers.insert(next.clone(), buffer);
-        if self.active.as_deref() == Some(uri) {
+        if self.active.as_deref() == Some(&uri) {
             self.active = Some(next.clone());
         }
         self.add_entry(&next)?;
         Ok(next)
     }
     pub fn close(&mut self, uri: &str, discard: bool) -> Result<()> {
+        let uri = self.buffer_uri(uri)?;
         let buffer = self
             .buffers
-            .get(uri)
+            .get(&uri)
             .ok_or_else(|| ProjectError("Document is not open".into()))?;
         require(
             discard || !buffer.is_dirty(),
             "Document has unsaved changes",
         )?;
-        self.buffers.remove(uri);
-        if self.active.as_deref() == Some(uri) {
+        self.buffers.remove(&uri);
+        if self.active.as_deref() == Some(&uri) {
             self.active = self.buffers.keys().next().cloned();
         }
         Ok(())
     }
     pub fn reload(&mut self, uri: &str, discard: bool) -> Result<()> {
+        let uri = self.buffer_uri(uri)?;
         let buffer = self
             .buffers
-            .get(uri)
+            .get(&uri)
             .ok_or_else(|| ProjectError("Document is not open".into()))?;
         require(
             discard || !buffer.is_dirty(),
@@ -309,8 +325,8 @@ impl ProjectWorkspace {
         )?;
         let source = std::fs::read_to_string(path)?;
         let version = buffer.version();
-        self.update_source(uri, version, source.clone())?;
-        let buffer = self.buffers.get_mut(uri).unwrap();
+        self.update_source(&uri, version, source.clone())?;
+        let buffer = self.buffers.get_mut(&uri).unwrap();
         buffer.saved_source = Some(source);
         buffer.document.mark_saved();
         Ok(())
@@ -423,25 +439,22 @@ impl ProjectWorkspace {
         };
         self.checked_path(&path)
     }
+    /// Stored keys are canonical file URIs. Resolve aliases at every public
+    /// boundary, not only open(), so callers can keep their original URI.
+    fn buffer_uri(&self, uri: &str) -> Result<String> {
+        if self.buffers.contains_key(uri) || uri.starts_with("untitled:") {
+            Ok(uri.into())
+        } else {
+            file_uri(self.resolve_path(uri)?)
+        }
+    }
     fn checked_path(&self, path: &Path) -> Result<PathBuf> {
         let absolute = if path.is_absolute() {
             path.to_path_buf()
         } else {
             self.solution.root.join(path)
         };
-        let path = absolute.as_path();
-        let path = if path.exists() {
-            path.canonicalize()?
-        } else {
-            let parent = path
-                .parent()
-                .ok_or_else(|| ProjectError("Path has no parent".into()))?
-                .canonicalize()?;
-            parent.join(
-                path.file_name()
-                    .ok_or_else(|| ProjectError("Path has no filename".into()))?,
-            )
-        };
+        let path = crate::uri::canonical_path(&absolute)?;
         require(
             path.starts_with(self.solution.root.canonicalize()?)
                 || self.solution.projects.iter().any(|p| {
@@ -494,33 +507,4 @@ fn source_document(source: &str) -> Result<Document> {
     };
     document.mark_saved();
     Ok(document)
-}
-static NEXT_TEMP: AtomicU64 = AtomicU64::new(1);
-pub(crate) fn atomic_write(path: &Path, source: &str) -> Result<()> {
-    let parent = path
-        .parent()
-        .ok_or_else(|| ProjectError("File has no parent".into()))?;
-    let temporary = parent.join(format!(
-        ".designer-{}-{}.tmp",
-        std::process::id(),
-        NEXT_TEMP.fetch_add(1, Ordering::Relaxed)
-    ));
-    let result = (|| -> Result<()> {
-        let mut file = std::fs::OpenOptions::new()
-            .write(true)
-            .create_new(true)
-            .open(&temporary)?;
-        file.write_all(source.as_bytes())?;
-        if let Ok(metadata) = std::fs::metadata(path) {
-            file.set_permissions(metadata.permissions())?;
-        }
-        file.sync_all()?;
-        drop(file);
-        std::fs::rename(&temporary, path)?;
-        Ok(())
-    })();
-    if result.is_err() {
-        let _ = std::fs::remove_file(&temporary);
-    }
-    result
 }

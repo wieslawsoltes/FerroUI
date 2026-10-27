@@ -16,8 +16,11 @@ pub fn name_occurrences(document: &Document) -> Vec<NameOccurrence> {
         return Vec::new();
     }
     let mut occurrences = Vec::new();
-    for node in document.ast().elements() {
-        let scope = scope_of(document, node.id);
+    for (node, scope) in document
+        .ast()
+        .nodes_with_name_scopes()
+        .filter(|(node, _)| node.is_element())
+    {
         for attribute in &node.attributes {
             let raw = &document.source()[attribute.value_span.range()];
             let offset = attribute.value_span.start;
