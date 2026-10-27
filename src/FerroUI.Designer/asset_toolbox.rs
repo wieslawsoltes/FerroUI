@@ -161,7 +161,7 @@ impl AssetToolbox {
         let hint = TextBlock::new();
         hint.set_text(Some("Drag to canvas · Enter to insert"));
         hint.set_font_size(10.0);
-        hint.set_foreground(Some(SolidColorBrush::from_uint32(0xff828795).into()));
+        hint.set_foreground(Some(SolidColorBrush::from_uint32(0xff979caa).into()));
         footer.children().add(hint.upcast::<Control>());
         Grid::set_row(&footer, 3);
         root.children().add(footer.upcast::<Control>());
@@ -387,7 +387,7 @@ impl AssetToolbox {
             let count = TextBlock::new();
             count.set_text(Some(&assets.len().to_string()));
             count.set_font_size(10.0);
-            count.set_foreground(Some(SolidColorBrush::from_uint32(0xff828795).into()));
+            count.set_foreground(Some(SolidColorBrush::from_uint32(0xff979caa).into()));
             Grid::set_column(&count, 1);
             heading.children().add(count.upcast::<Control>());
             section.children().add(heading.upcast::<Control>());
@@ -549,7 +549,7 @@ fn asset_content(asset: &DesignerAsset, mode: AssetViewMode) -> Ref<Control> {
         let description = TextBlock::new();
         description.set_text(Some(&asset.description));
         description.set_font_size(10.0);
-        description.set_foreground(Some(SolidColorBrush::from_uint32(0xff9299aa).into()));
+        description.set_foreground(Some(SolidColorBrush::from_uint32(0xffa9adba).into()));
         description.set_text_trimming(<dyn TextTrimming>::character_ellipsis());
         labels.children().add(description.upcast::<Control>());
         Grid::set_column(&labels, 1);
@@ -576,7 +576,7 @@ fn empty_assets() -> Ref<Control> {
     hint.set_text(Some("Try another name or category."));
     hint.set_font_size(11.0);
     hint.set_text_wrapping(TextWrapping::Wrap);
-    hint.set_foreground(Some(SolidColorBrush::from_uint32(0xff828795).into()));
+    hint.set_foreground(Some(SolidColorBrush::from_uint32(0xff979caa).into()));
     hint.set_horizontal_alignment(HorizontalAlignment::Center);
     state.children().add(hint.upcast::<Control>());
     state.upcast()
