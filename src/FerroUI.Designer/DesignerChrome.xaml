@@ -201,6 +201,40 @@
   <Style Selector=".designer-chrome CommandBar">
     <Setter Property="MinHeight" Value="30" />
     <Setter Property="Background" Value="Transparent" />
+    <Setter Property="VerticalAlignment" Value="Center" />
+    <Setter Property="ItemWidthCollapsed" Value="32" />
+  </Style>
+  <Style Selector=".designer-chrome CommandBar /template/ Border#ContentRoot">
+    <Setter Property="MinHeight" Value="30" />
+  </Style>
+  <Style Selector=".designer-chrome CommandBar /template/ ItemsControl#PrimaryItemsControl">
+    <Setter Property="MinHeight" Value="30" />
+  </Style>
+  <Style Selector=".designer-chrome CommandBarButton[LabelPosition=Collapsed][IsInOverflow=False]">
+    <Setter Property="Width" Value="32" />
+    <Setter Property="VerticalAlignment" Value="Center" />
+    <Setter Property="Foreground" Value="{DynamicResource DesignerSecondaryBrush}" />
+  </Style>
+  <Style Selector=".designer-chrome CommandBarButton[LabelPosition=Collapsed][IsInOverflow=False] /template/ Grid#ContentRoot">
+    <Setter Property="MinHeight" Value="30" />
+  </Style>
+  <Style Selector=".designer-chrome CommandBarButton[LabelPosition=Collapsed][IsInOverflow=False] /template/ Viewbox#ContentViewbox">
+    <Setter Property="Height" Value="16" />
+    <Setter Property="Margin" Value="0" />
+    <Setter Property="VerticalAlignment" Value="Center" />
+  </Style>
+  <Style Selector=".designer-chrome CommandBarButton[LabelPosition=Collapsed][IsInOverflow=False] /template/ Border#AppBarButtonInnerBorder">
+    <Setter Property="Margin" Value="2,1" />
+  </Style>
+  <Style Selector=".designer-chrome CommandBar /template/ Button#PART_OverflowButton">
+    <Setter Property="Width" Value="30" />
+    <Setter Property="MinHeight" Value="30" />
+    <Setter Property="Height" Value="30" />
+    <Setter Property="Background" Value="Transparent" />
+  </Style>
+  <Style Selector=".designer-chrome CommandBar /template/ Button#PART_OverflowButton /template/ ContentPresenter#PART_ContentPresenter">
+    <Setter Property="Margin" Value="1" />
+    <Setter Property="Background" Value="Transparent" />
   </Style>
   <Style Selector=".designer-chrome Button.property-category">
     <Setter Property="MinHeight" Value="32" />
