@@ -58,28 +58,30 @@ impl ColorEditorState {
     }
 
     fn request(&self, value: String) {
-        if self.mixed.get() || self.original.borrow().as_ref() != Some(&value) {
-            let callback = self.commit.borrow().clone();
-            if let Some(callback) = callback {
-                callback(value);
-            }
+        // Explicit confirmation can materialize an inherited effective value even when
+        // its pixels are unchanged. The document transaction decides whether an authored
+        // equal value is a no-op; the reusable control does not know its value's origin.
+        let callback = self.commit.borrow().clone();
+        if let Some(callback) = callback {
+            callback(value);
         }
     }
 
     fn request_color(&self, color: Color) {
         // Preserve the authored spelling of unchanged named/hex colors. A mixed selection
         // still requires one explicit value even when it happens to equal the picker seed.
-        if !self.mixed.get()
+        let preserve_spelling = !self.mixed.get()
             && self
                 .original
                 .borrow()
                 .as_deref()
                 .and_then(|text| Color::parse(text).ok())
-                == Some(color)
-        {
-            return;
-        }
-        let value = format!("#{:08X}", color.to_uint32());
+                == Some(color);
+        let value = if preserve_spelling {
+            self.original.borrow().clone().unwrap()
+        } else {
+            format!("#{:08X}", color.to_uint32())
+        };
         if let Some(text) = self.text.upgrade() {
             text.set_text(Some(&value));
         }
@@ -193,6 +195,7 @@ impl PropertyColorEditor {
         body.classes().add("designer-color-popup");
         body.set_spacing(8.0);
         body.set_width(350.0);
+        install_color_popup_palette(&body);
         // Library control themes are scoped to this popup, leaving authored colors and
         // ColorView controls on the artboard under their application's own theme.
         let uri = Uri::absolute("ferres://FerroUI.Controls.ColorPicker/Themes/Fluent/Fluent.xaml")
@@ -209,6 +212,51 @@ impl PropertyColorEditor {
         let view = ColorView::new();
         view.set_hex_input_alpha_position(AlphaComponentPosition::Leading);
         view.set_is_accent_colors_visible(false);
+        // Keep all editing behavior in ColorView while presenting its three native pages
+        // as clear, compact inspector tabs. These parts belong to the scoped library theme.
+        view.template_applied(|_, event| {
+            if let Some(tabs) = event
+                .name_scope()
+                .find_as::<ferroui_controls::TabControl>("PART_TabControl")
+            {
+                tabs.set_height(322.0);
+                for (item, title) in
+                    tabs.items()
+                        .to_vec()
+                        .into_iter()
+                        .zip(["Spectrum", "Palette", "Components"])
+                {
+                    let Some(tab) = item
+                        .as_ref()
+                        .and_then(Control::from_boxed)
+                        .and_then(|control| control.cast::<ferroui_controls::TabItem>())
+                    else {
+                        continue;
+                    };
+                    let caption = TextBlock::new();
+                    caption.set_text(Some(title));
+                    caption.set_font_size(11.0);
+                    caption.set_font_weight(FontWeight::SemiBold);
+                    caption.set_vertical_alignment(ferroui_base::layout::VerticalAlignment::Center);
+                    tab.set_header(Some(Control::boxed(&caption)));
+                    tab.set_min_height(32.0);
+                    tab.set_height(32.0);
+                    // Leave the host TabControl's scroll padding inside the fixed native
+                    // color panel width; filling all 350 px would trigger overflow arrows.
+                    tab.set_width(100.0);
+                    AutomationProperties::set_name(&tab, Some(title));
+                }
+            }
+            if let Some(background) = event.name_scope().find_as::<Border>("TabBackgroundBorder") {
+                background.set_height(32.0);
+            }
+            if let Some(background) = event
+                .name_scope()
+                .find_as::<Border>("ContentBackgroundBorder")
+            {
+                background.set_margin(Thickness::new(0.0, 32.0, 0.0, 0.0));
+            }
+        });
         body.children().add(view.clone().upcast::<Control>());
         let actions = StackPanel::new();
         actions.set_orientation(Orientation::Horizontal);
@@ -218,6 +266,7 @@ impl PropertyColorEditor {
         cancel.set_content(Some(Rc::new("Cancel".to_owned())));
         let apply = Button::new();
         apply.classes().add("accent");
+        apply.classes().add("primary");
         apply.set_content(Some(Rc::new("Apply color".to_owned())));
         actions.children().add(cancel.clone().upcast::<Control>());
         actions.children().add(apply.clone().upcast::<Control>());
@@ -308,6 +357,42 @@ impl PropertyColorEditor {
     }
 }
 
+fn install_color_popup_palette(body: &StackPanel) {
+    // ColorView's reusable library theme uses Fluent tab resource names. WinUI hosts do
+    // not define those keys, so provide the bridge only inside the popup's resource scope.
+    for (key, color) in [
+        ("SystemControlBackgroundBaseLowBrush", 0xff202126),
+        ("ColorViewContentBackgroundBrush", 0xff25262b),
+        ("ColorViewContentBorderBrush", 0xff3b3d46),
+        ("TabItemHeaderBackgroundUnselected", 0x00202126),
+        ("TabItemHeaderBackgroundSelected", 0xff2d4061),
+        ("TabItemHeaderBackgroundUnselectedPointerOver", 0xff393b44),
+        ("TabItemHeaderBackgroundSelectedPointerOver", 0xff354d75),
+        ("TabItemHeaderBackgroundUnselectedPressed", 0xff3b3d46),
+        ("TabItemHeaderBackgroundSelectedPressed", 0xff2d4061),
+        ("TabItemHeaderForegroundUnselected", 0xffa9adba),
+        ("TabItemHeaderForegroundSelected", 0xffa8c7ff),
+        ("TabItemHeaderForegroundUnselectedPointerOver", 0xfff2f3f5),
+        ("TabItemHeaderForegroundSelectedPointerOver", 0xffc2d7ff),
+        ("TabItemHeaderForegroundUnselectedPressed", 0xfff2f3f5),
+        ("TabItemHeaderForegroundSelectedPressed", 0xffa8c7ff),
+        ("TabItemHeaderSelectedPipeFill", 0xff79a8ff),
+    ] {
+        body.resources().add_value(
+            key,
+            SolidColorBrush::from_uint32(color).upcast::<ferroui_base::FerroObject>(),
+        );
+    }
+    body.resources().add_value("TabItemPipeThickness", 2.0f64);
+    body.resources().add_value("TabItemHeaderFontSize", 11.0f64);
+    body.resources()
+        .add_value("TabItemHeaderThemeFontWeight", FontWeight::SemiBold);
+}
+
 #[cfg(test)]
 #[path = "property_color_editor_tests.rs"]
 mod tests;
+
+#[cfg(all(test, feature = "render-smoke"))]
+#[path = "color_render_tests.rs"]
+mod render_tests;

@@ -306,4 +306,12 @@
   <Style Selector="GridSplitter.designer-splitter:pointerover">
     <Setter Property="Background" Value="{DynamicResource DesignerAccentBrush}" />
   </Style>
+  <Style Selector="FlyoutPresenter.designer-color-flyout">
+    <Setter Property="Background" Value="{DynamicResource DesignerPanelBrush}" />
+    <Setter Property="Foreground" Value="{DynamicResource DesignerTextBrush}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource DesignerBorderBrush}" />
+    <Setter Property="BorderThickness" Value="1" />
+    <Setter Property="CornerRadius" Value="8" />
+    <Setter Property="Padding" Value="12" />
+  </Style>
 </Styles>

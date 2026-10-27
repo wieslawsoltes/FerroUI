@@ -67,22 +67,8 @@ pub(crate) fn built_in(context: &PropertyEditorContext) -> Ref<Control> {
         return editor.upcast::<Control>();
     }
     if !expression {
-        if is_color_property(context)
-            && context
-                .value
-                .as_deref()
-                .is_none_or(|value| ferroui_base::media::Color::parse(value.trim()).is_ok())
-        {
-            if let Ok(editor) = crate::PropertyColorEditor::new() {
-                if editor
-                    .configure(context.value.as_deref(), context.mixed)
-                    .is_ok()
-                {
-                    let apply = context.apply.clone();
-                    editor.on_commit(move |value| apply(Some(value)));
-                    return editor.control();
-                }
-            }
+        if let Some(editor) = color_editor(context) {
+            return editor;
         }
         if let Some(kind) = components_kind(context) {
             let values = match context.value.as_deref() {
@@ -223,6 +209,24 @@ pub(crate) fn is_color_property(context: &PropertyEditorContext) -> bool {
         .runtime_type
         .as_deref()
         .is_some_and(|name| name.ends_with("::Color"))
+}
+
+fn color_editor(context: &PropertyEditorContext) -> Option<Ref<Control>> {
+    if !is_color_property(context)
+        || context
+            .value
+            .as_deref()
+            .is_some_and(|value| ferroui_base::media::Color::parse(value.trim()).is_err())
+    {
+        return None;
+    }
+    let editor = crate::PropertyColorEditor::new().ok()?;
+    editor
+        .configure(context.value.as_deref(), context.mixed)
+        .ok()?;
+    let apply = context.apply.clone();
+    editor.on_commit(move |value| apply(Some(value)));
+    Some(editor.control())
 }
 
 /// Native buttons provide focus, keyboard activation and accessibility for the frequently

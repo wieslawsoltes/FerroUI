@@ -15,6 +15,7 @@ use std::rc::Rc;
 pub fn designer_chrome_style() -> Result<Rc<dyn IStyle>, String> {
     FerroRuntimeXamlLoader::register();
     ferroui_markup_xaml::register_types();
+    ferroui_controls_treedatagrid::register_types();
     let loaded =
         FerroRuntimeXamlLoader::load(include_str!("DesignerChrome.xaml"), None, None, None, false)
             .map_err(|error| error.to_string())?;

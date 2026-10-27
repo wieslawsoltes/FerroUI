@@ -66,9 +66,10 @@ fn color_editor_preserves_named_colors_expressions_and_explicit_mixed_values() {
     editor.configure(Some("Red"), false).unwrap();
     editor.color_view().set_color(Color::parse("Red").unwrap());
     click(&popup_button(&editor, "Apply color"));
-    assert!(
-        seen.borrow().is_empty(),
-        "the same color preserves named source spelling"
+    assert_eq!(
+        *seen.borrow(),
+        ["Red"],
+        "the same color preserves named source spelling; explicit confirmation can materialize an inherited value"
     );
     editor
         .text_editor()
@@ -78,7 +79,7 @@ fn color_editor_preserves_named_colors_expressions_and_explicit_mixed_values() {
         "expressions are never flattened by the picker"
     );
     key(&editor.text_editor(), Key::Enter);
-    assert_eq!(*seen.borrow(), ["{DynamicResource Accent}"]);
+    assert_eq!(*seen.borrow(), ["Red", "{DynamicResource Accent}"]);
     key(&editor.text_editor(), Key::Escape);
     assert_eq!(editor.text_editor().text().as_deref(), Some("Red"));
     assert!(editor.swatch_button().is_enabled());
@@ -89,5 +90,8 @@ fn color_editor_preserves_named_colors_expressions_and_explicit_mixed_values() {
         .color_view()
         .set_color(Color::from_rgb(255, 255, 255));
     click(&popup_button(&editor, "Apply color"));
-    assert_eq!(*seen.borrow(), ["{DynamicResource Accent}", "#FFFFFFFF"]);
+    assert_eq!(
+        *seen.borrow(),
+        ["Red", "{DynamicResource Accent}", "#FFFFFFFF"]
+    );
 }
