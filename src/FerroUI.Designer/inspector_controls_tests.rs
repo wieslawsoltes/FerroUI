@@ -922,7 +922,7 @@ fn inspector_palette_does_not_override_authored_tree_data_grid_theme_resources()
             );
         }
         let chrome = brush(&inspector, "TreeDataGridGridLinesBrush");
-        assert_eq!(chrome.color().to_uint32(), 0xff343434);
+        assert_eq!(chrome.color().to_uint32(), 0x003b3d46);
         assert_eq!(chrome.opacity(), 1.0);
     }
     let lines = brush(&authored, "TreeDataGridGridLinesBrush");

@@ -488,4 +488,39 @@ mod tests {
         let compare = options.compare_ascending().unwrap();
         assert_eq!(compare(&Rc::new(1), &Rc::new(2)), std::cmp::Ordering::Greater);
     }
+
+    #[test]
+    fn native_expander_preserves_text_type_ahead_and_disabled_state() {
+        use crate::models::ICellColumn;
+        let options = Rc::new(TextColumnOptions::<String>::new());
+        options.set_is_text_search_enabled(true);
+        let inner = TextColumn::new(
+            None, Accessor::member("Name", |row: &Rc<String>| row.as_ref().clone()),
+            None, Some(options.clone()),
+        );
+        let expander = HierarchicalExpanderColumn::new(inner, |_| None, None, None);
+        let model = Rc::new("Named layer".to_owned()) as BoxedValue;
+        assert!(expander.is_text_search_enabled());
+        assert_eq!(expander.select_value(&model).as_deref(), Some("Named layer"));
+        options.set_is_text_search_enabled(false);
+        assert!(!expander.is_text_search_enabled());
+    }
+
+    #[test]
+    fn native_expander_preserves_template_type_ahead_selector() {
+        use crate::models::ICellColumn;
+        use ferroui_controls::templates::FuncDataTemplate;
+        let options = Rc::new(TemplateColumnOptions::<String>::new());
+        options.set_is_text_search_enabled(true);
+        options.set_text_search_value_selector(Some(Rc::new(|row| Some(format!("Layer {row}")))));
+        let inner = TemplateColumn::new(
+            None, FuncDataTemplate::for_type::<String>(|_, _| None, false),
+            None, None, Some(options),
+        );
+        let expander = HierarchicalExpanderColumn::new(inner, |_| None, None, None);
+        let model = Rc::new("Card".to_owned()) as BoxedValue;
+        assert!(expander.is_text_search_enabled());
+        assert_eq!(expander.select_value(&model).as_deref(), Some("Layer Card"));
+    }
+
 }
