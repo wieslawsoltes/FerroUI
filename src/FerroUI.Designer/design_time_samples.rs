@@ -197,10 +197,7 @@ pub(crate) fn request(
                 if fields.len() >= MAX_FIELDS {
                     continue;
                 }
-                let kind = property_kind(
-                    element,
-                    attribute.name.rsplit(':').next().unwrap_or(&attribute.name),
-                );
+                let kind = property_kind(document, element, attribute);
                 fields.entry(path.clone()).or_insert(kind);
             }
         }
@@ -226,28 +223,54 @@ fn simple_path(path: &str) -> bool {
         })
 }
 
-fn property_kind(node: &Node, property: &str) -> SampleKind {
-    let native = crate::editors::markup_type_for_node(node)
-        .and_then(|type_| type_.type_info)
-        .map(|type_| type_())
-        .and_then(|type_| FerroPropertyRegistry::instance().find_registered(type_, property));
-    let name = native.map_or("", |property| property.property_type_name());
-    if name == "bool" || name.ends_with("Option<bool>") {
+fn property_kind(
+    document: &Document,
+    node: &Node,
+    attribute: &ferroui_designer_core::Attribute,
+) -> SampleKind {
+    let property = attribute.name.rsplit(':').next().unwrap_or(&attribute.name);
+    let native = if let Some((owner, property)) = property.split_once('.') {
+        let mut declared = node.clone();
+        declared.name = owner.into();
+        declared.namespace_uri = attribute
+            .namespace_uri
+            .clone()
+            .or_else(|| document.ast().namespaces(node.id).get("").cloned());
+        crate::design_time::native_type_for_node(&declared).and_then(|type_| {
+            let registry = FerroPropertyRegistry::instance();
+            let ordinary = registry.get_registered(type_);
+            let attached = registry.get_registered_attached(type_);
+            ordinary
+                .iter()
+                .chain(attached.iter())
+                .copied()
+                .find(|candidate| candidate.name() == property)
+        })
+    } else {
+        crate::design_time::native_type_for_node(node)
+            .and_then(|type_| FerroPropertyRegistry::instance().find_registered(type_, property))
+    };
+    let type_id = native.map(|property| property.property_type());
+    let is = |type_| type_id == Some(type_);
+    if is(std::any::TypeId::of::<bool>()) || is(std::any::TypeId::of::<Option<bool>>()) {
         SampleKind::Boolean
-    } else if matches!(
-        name,
-        "u8" | "u16"
-            | "u32"
-            | "u64"
-            | "i8"
-            | "i16"
-            | "i32"
-            | "i64"
-            | "f32"
-            | "f64"
-            | "usize"
-            | "isize"
-    ) {
+    } else if [
+        std::any::TypeId::of::<u8>(),
+        std::any::TypeId::of::<u16>(),
+        std::any::TypeId::of::<u32>(),
+        std::any::TypeId::of::<u64>(),
+        std::any::TypeId::of::<i8>(),
+        std::any::TypeId::of::<i16>(),
+        std::any::TypeId::of::<i32>(),
+        std::any::TypeId::of::<i64>(),
+        std::any::TypeId::of::<f32>(),
+        std::any::TypeId::of::<f64>(),
+        std::any::TypeId::of::<usize>(),
+        std::any::TypeId::of::<isize>(),
+    ]
+    .into_iter()
+    .any(is)
+    {
         SampleKind::Number
     } else {
         SampleKind::Text

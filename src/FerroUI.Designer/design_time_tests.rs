@@ -255,7 +255,7 @@ fn native_design_values_toggle_without_source_history_changes_and_keep_mapping()
 fn native_sample_records_feed_nested_bindings_and_leave_application_source_unchanged() {
     let _app = UnitTestApplication::start(TestServices::styled_window());
     let source = format!(
-        "<StackPanel {NS} d:DataContext='{{d:SampleData}}'><TextBlock Name='Name' Text='{{Binding Person.FirstName}}'/><CheckBox Name='Active' IsChecked='{{Binding IsActive}}'/></StackPanel>"
+        "<StackPanel {NS} d:DataContext='{{d:SampleData}}'><TextBlock Name='Name' Text='{{Binding Person.FirstName}}' Grid.Row='{{Binding Row}}'/><CheckBox Name='Active' IsChecked='{{Binding IsActive}}'/><Slider Name='Amount' Value='{{Binding Amount}}'/></StackPanel>"
     );
     let session = DesignerSession::new(source.clone(), ContentControl::new()).unwrap();
     assert!(
@@ -277,6 +277,14 @@ fn native_sample_records_feed_nested_bindings_and_leave_application_source_uncha
         .cast::<ferroui_controls::CheckBox>()
         .unwrap();
     assert_eq!(check.is_checked(), Some(true));
+    assert_eq!(ferroui_controls::Grid::get_row(&text), 10);
+    let amount = session
+        .preview
+        .visual(named(session.document(), "Amount"))
+        .unwrap()
+        .cast::<ferroui_controls::Slider>()
+        .unwrap();
+    assert_eq!(amount.value(), 10.0);
     assert_eq!(session.document().source(), source);
 }
 

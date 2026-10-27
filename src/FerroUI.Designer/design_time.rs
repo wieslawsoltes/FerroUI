@@ -13,6 +13,21 @@ pub const DESIGN_NAMESPACE: &str = "http://schemas.microsoft.com/expression/blen
 const COMPATIBILITY_NAMESPACE: &str = "http://schemas.openxmlformats.org/markup-compatibility/2006";
 const FRAMEWORK: &str = "https://github.com/ferroui";
 
+/// `ferro_class_info!` metadata is owned by TypeInfo and need not carry a reciprocal
+/// type_info callback. Resolve that ownership instead of treating such classes as opaque.
+pub(crate) fn native_type_for_node(node: &Node) -> Option<&'static ferroui_base::TypeInfo> {
+    let metadata = crate::editors::markup_type_for_node(node)?;
+    metadata.type_info.map(|type_| type_()).or_else(|| {
+        ferroui_base::TypeInfo::registered_types()
+            .into_iter()
+            .find(|type_| {
+                type_
+                    .markup()
+                    .is_some_and(|candidate| std::ptr::eq(candidate, metadata))
+            })
+    })
+}
+
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct DesignTimeProperty {
     pub name: String,
@@ -771,16 +786,20 @@ fn suppress_runtime_value(
             mask(patches, attribute.span, document.valid_source());
         }
     }
-    let content = crate::editors::markup_type_for_node(owner).and_then(|type_| {
-        let mut current = Some(type_);
-        while let Some(type_) = current {
-            if type_.content_property.is_some() {
-                return type_.content_property;
-            }
-            current = type_.base_type();
-        }
-        None
-    });
+    let content = native_type_for_node(owner)
+        .and_then(|type_| type_.content_property())
+        .or_else(|| {
+            crate::editors::markup_type_for_node(owner).and_then(|type_| {
+                let mut current = Some(type_);
+                while let Some(type_) = current {
+                    if type_.content_property.is_some() {
+                        return type_.content_property;
+                    }
+                    current = type_.base_type();
+                }
+                None
+            })
+        });
     for id in &owner.children {
         if Some(*id) == keep {
             continue;
