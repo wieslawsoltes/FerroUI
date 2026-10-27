@@ -3,8 +3,10 @@
 use ferroui_base::input::{InputElement, Key};
 use ferroui_base::interactivity::RoutingStrategies;
 use ferroui_base::utilities::Decimal;
-use ferroui_base::Ref;
-use ferroui_controls::{CheckBox, ComboBox, Control, NumericUpDown, TextBox};
+use ferroui_base::{Ref, Thickness};
+use ferroui_controls::{
+    Button, CheckBox, ColumnDefinitions, ComboBox, Control, Grid, NumericUpDown, TextBox, ToolTip,
+};
 use ferroui_designer_core::NodeId;
 use std::rc::Rc;
 
@@ -61,19 +63,35 @@ pub(crate) fn built_in(context: &PropertyEditorContext) -> Ref<Control> {
                 );
             }
         });
-        return editor.upcast();
+        return editor.upcast::<Control>();
     }
     if !expression {
+        if let Some(kind) = components_kind(context) {
+            let values = match context.value.as_deref() {
+                Some(value) => kind.parse(value).map(Some),
+                None => Some(None),
+            };
+            if let Some(values) = values {
+                let editor = crate::property_controls::PropertyComponentsEditor::new(
+                    kind,
+                    context.property != "Margin",
+                );
+                if editor.configure(values).is_ok() {
+                    let apply = context.apply.clone();
+                    editor.on_commit(move |values| {
+                        apply(Some(crate::property_controls::components_text(values)))
+                    });
+                    return editor.control();
+                }
+            }
+        }
         if let Some(editor) = numeric_editor(context) {
             return editor;
         }
+        if let Some(editor) = alignment_editor(context) {
+            return editor;
+        }
         let values: &[&str] = match context.property.as_str() {
-            "HorizontalAlignment" | "HorizontalContentAlignment" => {
-                &["Left", "Center", "Right", "Stretch"]
-            }
-            "VerticalAlignment" | "VerticalContentAlignment" => {
-                &["Top", "Center", "Bottom", "Stretch"]
-            }
             "Orientation" => &["Horizontal", "Vertical"],
             "DockPanel.Dock" => &["Left", "Top", "Right", "Bottom"],
             "TextWrapping" => &["NoWrap", "Wrap", "WrapWithOverflow"],
@@ -126,7 +144,7 @@ pub(crate) fn built_in(context: &PropertyEditorContext) -> Ref<Control> {
                     });
                 }
             });
-            return editor.upcast();
+            return editor.upcast::<Control>();
         }
     }
     let editor = TextBox::new();
@@ -139,23 +157,205 @@ pub(crate) fn built_in(context: &PropertyEditorContext) -> Ref<Control> {
     }));
     let weak = editor.downgrade();
     let apply = context.apply.clone();
+    let original = context.value.clone();
     editor.add_handler(InputElement::key_down_event(), move |_, event| {
-        if event.key != Key::Enter {
-            return;
-        }
         if let Some(editor) = weak.upgrade() {
-            let value = editor.text().unwrap_or_default();
-            // Empty text is an authored empty value. Reset is a separate action.
-            apply(Some(value));
-            event.set_handled(true);
+            match event.key {
+                Key::Enter => {
+                    let value = editor.text().unwrap_or_default();
+                    // Empty text is an authored empty value. Reset is a separate action.
+                    apply(Some(value));
+                    event.set_handled(true);
+                }
+                Key::Escape => {
+                    editor.set_text(original.as_deref());
+                    event.set_handled(true);
+                }
+                _ => {}
+            }
         }
     });
-    editor.upcast()
+    editor.upcast::<Control>()
+}
+
+/// Native buttons provide focus, keyboard activation and accessibility for the frequently
+/// used alignment choices. Local/expressed state and reset remain owned by the row.
+fn alignment_editor(context: &PropertyEditorContext) -> Option<Ref<Control>> {
+    use ferroui_controls::automation::AutomationProperties;
+    let choices = match context.property.as_str() {
+        "HorizontalAlignment" | "HorizontalContentAlignment" => [
+            ("L", "Left"),
+            ("C", "Center"),
+            ("R", "Right"),
+            ("↔", "Stretch"),
+        ],
+        "VerticalAlignment" | "VerticalContentAlignment" => [
+            ("T", "Top"),
+            ("C", "Center"),
+            ("B", "Bottom"),
+            ("↕", "Stretch"),
+        ],
+        _ => return None,
+    };
+    let root = Grid::new();
+    root.classes().add("property-choice");
+    root.set_column_definitions(ColumnDefinitions::parse("*,*,*,*").unwrap());
+    ToolTip::set_tip(
+        &root,
+        Some(Rc::new(
+            if context.mixed {
+                "Multiple values"
+            } else if context.value.is_none() {
+                "Inherited alignment"
+            } else {
+                "Local alignment"
+            }
+            .to_owned(),
+        )),
+    );
+    for (index, (label, value)) in choices.into_iter().enumerate() {
+        let button = Button::new();
+        button.classes().add("property-choice-item");
+        button.classes().set(
+            "active",
+            !context.mixed
+                && context
+                    .value
+                    .as_ref()
+                    .is_some_and(|current| current.eq_ignore_ascii_case(value)),
+        );
+        button.set_content(Some(Rc::new(label.to_owned())));
+        button.set_min_width(0.0);
+        button.set_min_height(26.0);
+        button.set_padding(Thickness::new(2.0, 3.0, 2.0, 3.0));
+        button.set_margin(Thickness::new(0.0, 0.0, 1.0, 0.0));
+        button.set_font_size(11.0);
+        button.set_horizontal_alignment(ferroui_base::layout::HorizontalAlignment::Stretch);
+        button.set_horizontal_content_alignment(ferroui_base::layout::HorizontalAlignment::Center);
+        ToolTip::set_tip(
+            &button,
+            Some(Rc::new(format!("{}: {value}", context.property))),
+        );
+        AutomationProperties::set_name(&button, Some(&format!("{}: {value}", context.property)));
+        let apply = context.apply.clone();
+        button.click(move |_, _| apply(Some(value.to_owned())));
+        Grid::set_column(&button, index as i32);
+        root.children().add(button.upcast::<Control>());
+    }
+    Some(root.upcast::<Control>())
 }
 
 /// Numeric values retain native keyboard/spinner behavior. Special XAML values such as Auto,
 /// NaN and expressions deliberately use the source editor, preserving their lexical meaning.
 fn numeric_editor(context: &PropertyEditorContext) -> Option<Ref<Control>> {
+    let options = numeric_options(context)?;
+    let value = match context.value.as_deref() {
+        Some(value) => Some(Decimal::parse(value).ok()?),
+        None => None,
+    };
+    let editor = NumericUpDown::new();
+    editor.set_show_button_spinner(false);
+    editor.set_min_height(26.0);
+    editor.set_padding(Thickness::new(7.0, 3.0, 5.0, 3.0));
+    if options.minimum != -f64::MAX {
+        editor.set_minimum(Decimal::parse(&options.minimum.to_string()).ok()?);
+    }
+    if options.maximum != f64::MAX {
+        editor.set_maximum(Decimal::parse(&options.maximum.to_string()).ok()?);
+    }
+    editor.set_numeric_value(value);
+    editor.set_increment(Decimal::parse(&options.step.to_string()).ok()?);
+    editor.set_placeholder_text(Some(if context.mixed {
+        "Multiple values"
+    } else {
+        "Inherited"
+    }));
+    // Typing is committed with Enter; scrubbing the label and modifier arrow keys each
+    // request one transaction. Draft text never refreshes or replaces the focused row.
+    let weak = editor.downgrade();
+    let apply = context.apply.clone();
+    editor.add_handler_with(
+        InputElement::key_down_event(),
+        move |_, event| {
+            if event.key == Key::Enter {
+                if let Some(editor) = weak.upgrade() {
+                    apply(Some(editor.text().unwrap_or_default()));
+                    event.set_handled(true);
+                }
+            }
+        },
+        RoutingStrategies::BUBBLE,
+        true,
+    );
+    let weak = editor.downgrade();
+    let original = context.value.clone();
+    let apply = context.apply.clone();
+    editor.add_handler_with(
+        InputElement::key_down_event(),
+        move |_, event| {
+            let Some(editor) = weak.upgrade() else {
+                return;
+            };
+            if event.key == Key::Escape {
+                editor.set_text(original.as_deref());
+                event.set_handled(true);
+            } else if matches!(event.key, Key::Up | Key::Down) {
+                let Some(value) = editor
+                    .text()
+                    .and_then(|text| text.parse::<f64>().ok())
+                    .filter(|value| value.is_finite())
+                else {
+                    return;
+                };
+                let step = if event.key == Key::Up { 1.0 } else { -1.0 };
+                let value = options.adjusted(value, step, event.key_modifiers);
+                apply(Some(crate::property_controls::number_text(value)));
+                event.set_handled(true);
+            }
+        },
+        RoutingStrategies::TUNNEL,
+        false,
+    );
+    let weak = editor.downgrade();
+    let apply = context.apply.clone();
+    editor.spinned(move |_| {
+        if let Some(editor) = weak.upgrade() {
+            if let Some(value) = editor.value() {
+                apply(Some(value.to_string()));
+            }
+        }
+    });
+    Some(editor.upcast::<Control>())
+}
+
+pub(crate) fn components_kind(
+    context: &PropertyEditorContext,
+) -> Option<crate::property_controls::PropertyComponentsKind> {
+    use crate::property_controls::PropertyComponentsKind;
+    if context.property == "CornerRadius"
+        || context
+            .runtime_type
+            .as_ref()
+            .is_some_and(|name| name.ends_with("CornerRadius"))
+    {
+        Some(PropertyComponentsKind::CornerRadius)
+    } else if matches!(
+        context.property.as_str(),
+        "Margin" | "Padding" | "BorderThickness"
+    ) || context
+        .runtime_type
+        .as_ref()
+        .is_some_and(|name| name.ends_with("Thickness"))
+    {
+        Some(PropertyComponentsKind::Thickness)
+    } else {
+        None
+    }
+}
+
+pub(crate) fn numeric_options(
+    context: &PropertyEditorContext,
+) -> Option<crate::property_controls::PropertyNumberOptions> {
     let numeric = matches!(
         context.runtime_type.as_deref(),
         Some("f32" | "f64" | "i16" | "i32" | "i64" | "u16" | "u32" | "u64" | "usize")
@@ -173,61 +373,32 @@ fn numeric_editor(context: &PropertyEditorContext) -> Option<Ref<Control>> {
     if !numeric {
         return None;
     }
-    let value = match context.value.as_deref() {
-        Some(value) => Some(Decimal::parse(value).ok()?),
-        None => None,
-    };
-    let editor = NumericUpDown::new();
+    let mut options = crate::property_controls::PropertyNumberOptions::default();
+    options.integer = matches!(
+        context.runtime_type.as_deref(),
+        Some("i16" | "i32" | "i64" | "u16" | "u32" | "u64" | "usize")
+    ) || matches!(
+        context.property.as_str(),
+        "Grid.Row" | "Grid.Column" | "Grid.RowSpan" | "Grid.ColumnSpan"
+    );
     match context.property.as_str() {
         "Opacity" => {
-            editor.set_minimum(Decimal::ZERO);
-            editor.set_maximum(Decimal::ONE);
+            options.minimum = 0.0;
+            options.maximum = 1.0;
+            options.step = 0.05;
         }
-        "Grid.RowSpan" | "Grid.ColumnSpan" => editor.set_minimum(Decimal::ONE),
+        "Grid.RowSpan" | "Grid.ColumnSpan" => options.minimum = 1.0,
         "Width" | "Height" | "MinWidth" | "MinHeight" | "MaxWidth" | "MaxHeight" | "FontSize"
         | "Grid.Row" | "Grid.Column" | "Rows" | "Columns" | "FirstColumn" => {
-            editor.set_minimum(Decimal::ZERO)
+            options.minimum = 0.0;
         }
         _ => {}
     }
-    editor.set_numeric_value(value);
-    editor.set_increment(if context.property == "Opacity" {
-        Decimal::parse("0.05").unwrap()
-    } else {
-        Decimal::ONE
-    });
-    editor.set_placeholder_text(Some(if context.mixed {
-        "Multiple values"
-    } else {
-        "Inherited"
-    }));
-    // Typing is committed with Enter; the native spinner also produces an explicit commit.
-    // Replacing a row on each intermediate numeric value would steal keyboard focus.
-    let weak = editor.downgrade();
-    let apply = context.apply.clone();
-    editor.add_handler_with(
-        InputElement::key_down_event(),
-        move |_, event| {
-            if event.key == Key::Enter {
-                if let Some(editor) = weak.upgrade() {
-                    // Auto and markup expressions are valid XAML, even though the native
-                    // decimal editor marks Enter handled. The source validator owns acceptance.
-                    apply(Some(editor.text().unwrap_or_default()));
-                    event.set_handled(true);
-                }
-            }
-        },
-        RoutingStrategies::BUBBLE,
-        true,
-    );
-    let weak = editor.downgrade();
-    let apply = context.apply.clone();
-    editor.spinned(move |_| {
-        if let Some(editor) = weak.upgrade() {
-            if let Some(value) = editor.value() {
-                apply(Some(value.to_string()));
-            }
-        }
-    });
-    Some(editor.upcast())
+    if matches!(
+        context.runtime_type.as_deref(),
+        Some("u16" | "u32" | "u64" | "usize")
+    ) {
+        options.minimum = 0.0;
+    }
+    Some(options)
 }
