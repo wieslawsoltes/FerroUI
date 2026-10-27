@@ -1,5 +1,5 @@
 use crate::model::*;
-use ferroui_designer_collaboration::{DocumentReplica, Presence, SharedEdit};
+use ferroui_designer_collaboration::{DocumentReplica, Presence, SharedEdit, MAX_MESSAGE_BYTES};
 use serde_json::{json, Value};
 use std::io::Read;
 use std::path::Path;
@@ -283,6 +283,7 @@ pub struct ReconnectingPeer {
     failures: u32,
     last_error: Option<HostError>,
     checkpoint_path: Option<std::path::PathBuf>,
+    indeterminate: bool,
 }
 impl ReconnectingPeer {
     pub fn new(endpoint: Endpoint, joined: JoinedRoom) -> Result<Self> {
@@ -311,6 +312,7 @@ impl ReconnectingPeer {
             failures: 0,
             last_error: None,
             checkpoint_path: None,
+            indeterminate: false,
         })
     }
     pub fn restore(path: impl AsRef<Path>) -> Result<Self> {
@@ -337,11 +339,17 @@ impl ReconnectingPeer {
             failures: 0,
             last_error: None,
             checkpoint_path: Some(path.as_ref().into()),
+            indeterminate: false,
         })
     }
     pub fn set_checkpoint_path(&mut self, path: impl AsRef<Path>) -> Result<()> {
-        self.checkpoint_path = Some(path.as_ref().into());
-        self.persist()
+        self.check_available()?;
+        let previous = self.checkpoint_path.replace(path.as_ref().into());
+        if let Err(error) = self.persist() {
+            self.checkpoint_path = previous;
+            return Err(error);
+        }
+        Ok(())
     }
     pub fn checkpoint(&self) -> PeerCheckpoint {
         PeerCheckpoint {
@@ -354,9 +362,21 @@ impl ReconnectingPeer {
             role: self.role,
         }
     }
-    fn persist(&self) -> Result<()> {
+    fn check_available(&self) -> Result<()> {
+        ensure(
+            !self.indeterminate,
+            ErrorCode::Indeterminate,
+            "Checkpoint durability was indeterminate; restore the saved peer before continuing",
+        )
+    }
+    fn persist(&mut self) -> Result<()> {
+        self.check_available()?;
         if let Some(path) = &self.checkpoint_path {
-            crate::save_private(path, &self.checkpoint())?;
+            if let Err(error) = crate::save_private(path, &self.checkpoint()) {
+                self.indeterminate = error.code == ErrorCode::Indeterminate;
+                self.last_error = Some(error.clone());
+                return Err(error);
+            }
         }
         Ok(())
     }
@@ -368,16 +388,13 @@ impl ReconnectingPeer {
     }
     pub fn pending_operations(&self) -> usize {
         self.replica
-            .changes_since(&self.server_version)
-            .operations
-            .iter()
-            .filter(|op| op.id.actor == self.credentials.actor)
-            .count()
+            .pending_operation_count(&self.server_version, &self.credentials.actor)
     }
     pub fn last_error(&self) -> Option<&HostError> {
         self.last_error.as_ref()
     }
     pub fn submit(&mut self, label: impl Into<String>, edits: Vec<SharedEdit>) -> Result<()> {
+        self.check_available()?;
         ensure(
             self.role != Role::Viewer,
             ErrorCode::Forbidden,
@@ -395,10 +412,11 @@ impl ReconnectingPeer {
     }
     pub fn sync(&mut self, presence: Option<Presence>) -> Result<ExchangeReply> {
         self.persist()?;
-        let mut message = self.replica.changes_since(&self.server_version);
-        message
-            .operations
-            .retain(|operation| operation.id.actor == self.credentials.actor);
+        let message = self.replica.changes_since_bounded(
+            &self.server_version,
+            Some(&self.credentials.actor),
+            MAX_MESSAGE_BYTES,
+        )?;
         let request = Request::Exchange {
             credentials: self.credentials.clone(),
             exchange: Exchange {
@@ -462,6 +480,7 @@ impl ReconnectingPeer {
         expected_remote: &str,
         resolved: &str,
     ) -> Result<()> {
+        self.check_available()?;
         ensure(
             state.room == self.credentials.room,
             ErrorCode::Invalid,

@@ -3,8 +3,12 @@ use serde::{Deserialize, Serialize};
 use std::collections::BTreeMap;
 
 pub const PROTOCOL_VERSION: u32 = 1;
+pub const MAX_DOCUMENT_BYTES: usize = 16 * 1024 * 1024;
 pub const MAX_MESSAGE_BYTES: usize = 32 * 1024 * 1024;
+/// Checkpoints retain several wire batches, without allowing an unbounded operation log.
+pub const MAX_SNAPSHOT_BYTES: usize = 64 * 1024 * 1024;
 pub const MAX_OPERATIONS: usize = 100_000;
+pub const MAX_PRESENCE_ACTORS: usize = 1024;
 
 /// A causal Lamport timestamp with deterministic actor/sequence tie-breaking. Actor identifiers
 /// must be unique per durable writer; persist a writer's sequence or use a new actor after restart.
@@ -100,6 +104,10 @@ impl SyncMessage {
             "Synchronization message exceeds the size limit",
         )?;
         serde_json::from_str(source).map_err(|e| CollaborationError(e.to_string()))
+    }
+
+    pub(crate) fn validate_size(&self) -> Result<()> {
+        serialized_size(self, MAX_MESSAGE_BYTES).map(|_| ())
     }
 }
 /// A complete transport-independent checkpoint. Exact baseline comparison prevents a snapshot
@@ -229,7 +237,7 @@ pub(crate) fn validate_operation(operation: &Operation) -> Result<()> {
         "Transaction text exceeds the size limit",
     )
 }
-fn validate_node(node: &SharedNodeId) -> Result<()> {
+pub(crate) fn validate_node(node: &SharedNodeId) -> Result<()> {
     match node {
         SharedNodeId::Baseline(id) => ensure(*id > 0, "Baseline node must be nonzero"),
         SharedNodeId::Inserted {
@@ -245,4 +253,32 @@ fn validate_node(node: &SharedNodeId) -> Result<()> {
             )
         }
     }
+}
+
+/// Measure the actual wire representation, including JSON escapes, without allocating a second
+/// copy of a potentially large document. Stop serialization as soon as the limit is exceeded.
+pub(crate) fn serialized_size(value: &impl Serialize, limit: usize) -> Result<usize> {
+    struct Counter {
+        bytes: usize,
+        limit: usize,
+    }
+    impl std::io::Write for Counter {
+        fn write(&mut self, bytes: &[u8]) -> std::io::Result<usize> {
+            self.bytes = self.bytes.saturating_add(bytes.len());
+            if self.bytes > self.limit {
+                return Err(std::io::Error::new(
+                    std::io::ErrorKind::InvalidData,
+                    "Serialized collaboration data exceeds the size limit",
+                ));
+            }
+            Ok(bytes.len())
+        }
+        fn flush(&mut self) -> std::io::Result<()> {
+            Ok(())
+        }
+    }
+    let mut counter = Counter { bytes: 0, limit };
+    serde_json::to_writer(&mut counter, value)
+        .map_err(|error| CollaborationError(error.to_string()))?;
+    Ok(counter.bytes)
 }

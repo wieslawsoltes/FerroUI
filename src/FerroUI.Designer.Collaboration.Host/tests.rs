@@ -15,6 +15,9 @@ impl Fixture {
             std::env::temp_dir().join(format!("ferroui-rooms-{}", Secret::generate().unwrap().0));
         let admin = Secret::generate().unwrap();
         let store = Arc::new(RoomStore::open(&path, &admin).unwrap());
+        // Match RoomStore's canonical path on platforms where the temporary directory's parent
+        // is an alias (for example /var -> /private/var on macOS).
+        let path = std::fs::canonicalize(path).unwrap();
         let owner = store
             .create(CreateRequest {
                 admin: admin.clone(),
@@ -207,6 +210,89 @@ fn durable_acknowledgements_survive_restart_and_duplicate_exchange() {
     drop(restarted);
     std::fs::remove_dir_all(copy).unwrap();
 }
+
+#[test]
+fn multi_batch_room_log_can_restart_and_download_in_bounded_pages() {
+    use ferroui_designer_collaboration::{Operation, OperationId, SharedNodeId, MAX_MESSAGE_BYTES};
+    let fixture = Fixture::new();
+    let mut snapshot = fixture.owner.state.snapshot.clone();
+    let payload = "x".repeat(4 * 1024 * 1024);
+    for sequence in 1..=9 {
+        snapshot.operations.push(Operation {
+            id: OperationId {
+                actor: fixture.owner.credentials.actor.clone(),
+                lamport: sequence,
+                sequence,
+            },
+            document_id: snapshot.document_id.clone(),
+            label: "Durable conflict".into(),
+            edits: vec![SharedEdit::SetAttribute {
+                node: SharedNodeId::Baseline(999_999),
+                name: "Text".into(),
+                value: payload.clone(),
+            }],
+        });
+    }
+    let local =
+        DocumentReplica::from_snapshot(fixture.owner.credentials.actor.clone(), snapshot).unwrap();
+    let mut acknowledged = VersionVector::new();
+    let mut uploads = 0;
+    while acknowledged != local.version() {
+        let page = local
+            .changes_since_bounded(&acknowledged, Some(local.actor()), MAX_MESSAGE_BYTES)
+            .unwrap();
+        let reply = fixture
+            .store
+            .exchange(
+                &fixture.owner.credentials,
+                Exchange {
+                    epoch: 1,
+                    known: local.version(),
+                    message: page,
+                    presence: None,
+                },
+            )
+            .unwrap();
+        acknowledged = reply.version;
+        uploads += 1;
+        assert!(uploads <= 2);
+    }
+    assert_eq!(uploads, 2);
+    let copy = fixture.path.with_extension("large-restart");
+    std::fs::create_dir(&copy).unwrap();
+    for entry in std::fs::read_dir(&fixture.path).unwrap() {
+        let entry = entry.unwrap();
+        if entry.file_name() != "server.lock" {
+            std::fs::copy(entry.path(), copy.join(entry.file_name())).unwrap();
+        }
+    }
+    let restarted = RoomStore::open(&copy, &fixture.admin).unwrap();
+    let mut receiver = DocumentReplica::new(
+        "receiver",
+        local.document_id(),
+        &fixture.owner.state.snapshot.baseline,
+    )
+    .unwrap();
+    for _ in 0..2 {
+        let reply = restarted
+            .exchange(
+                &fixture.owner.credentials,
+                Exchange {
+                    epoch: 1,
+                    known: receiver.version(),
+                    message: receiver.message(Vec::new()),
+                    presence: None,
+                },
+            )
+            .unwrap();
+        assert!(reply.message.to_json().unwrap().len() <= MAX_MESSAGE_BYTES);
+        assert!(receiver.merge(reply.message).unwrap().received > 0);
+    }
+    assert_eq!(receiver.version(), acknowledged);
+    assert_eq!(receiver.conflicts(), local.conflicts());
+    drop(restarted);
+    std::fs::remove_dir_all(copy).unwrap();
+}
 #[test]
 fn cancelled_commit_changes_neither_memory_nor_disk() {
     let fixture = Fixture::new();
@@ -308,6 +394,59 @@ fn checkpoint_requires_exact_version_and_fences_old_offline_peers() {
         ErrorCode::EpochChanged
     );
     assert!(offline.source().contains("55"));
+}
+
+#[test]
+fn checkpoint_cannot_discard_unseen_operations_beyond_a_sequence_hole() {
+    let fixture = Fixture::new();
+    let mut local = replica(&fixture.owner);
+    let first = local.set_attribute(local.root(), "Width", "10").unwrap();
+    let second = local.set_attribute(local.root(), "Width", "20").unwrap();
+    let third = local.set_attribute(local.root(), "Width", "30").unwrap();
+    let send = |operations| {
+        fixture
+            .store
+            .exchange(
+                &fixture.owner.credentials,
+                Exchange {
+                    epoch: 1,
+                    known: VersionVector::new(),
+                    message: local.message(operations),
+                    presence: None,
+                },
+            )
+            .unwrap()
+    };
+    let observed = send(vec![first]);
+    let with_hole = send(vec![third]);
+    assert_eq!(
+        observed.version, with_hole.version,
+        "the contiguous vector cannot reveal sequence 3"
+    );
+    assert_eq!(
+        fixture
+            .store
+            .checkpoint(&fixture.owner.credentials, 1, &observed.version)
+            .unwrap_err()
+            .code,
+        ErrorCode::Conflict
+    );
+    assert_eq!(
+        fixture
+            .store
+            .checkpoint_resolved(&fixture.owner.credentials, 1, &observed.version, "<Panel/>")
+            .unwrap_err()
+            .code,
+        ErrorCode::Conflict
+    );
+    let complete = send(vec![second]);
+    assert_eq!(complete.version[&fixture.owner.credentials.actor], 3);
+    let state = fixture
+        .store
+        .checkpoint(&fixture.owner.credentials, 1, &complete.version)
+        .unwrap();
+    assert_eq!(state.epoch, 2);
+    assert!(state.snapshot.baseline.contains("30"));
 }
 
 #[test]
@@ -430,7 +569,7 @@ fn indeterminate_post_rename_durability_blocks_stale_memory_writes() {
     let fixture = Fixture::new();
     let mut local = replica(&fixture.owner);
     local.set_attribute(local.root(), "Width", "99").unwrap();
-    *crate::storage::FAIL_DIRECTORY_SYNC.lock().unwrap() = Some(fixture.path.join(format!(
+    crate::storage::fail_next_directory_sync(fixture.path.join(format!(
         "room-{}.json",
         crate::model::hash(fixture.owner.credentials.room.as_bytes())
     )));
@@ -553,6 +692,55 @@ mod peer_tests {
                 .len(),
             1
         );
+    }
+    #[test]
+    fn indeterminate_outbox_commit_fences_the_peer_until_restored() {
+        let fixture = Fixture::new();
+        let joined = fixture.join(Role::Editor);
+        let mut peer = ReconnectingPeer::with_transport(
+            Endpoint {
+                url: "http://127.0.0.1:1/mcp".into(),
+                bearer: Secret::generate().unwrap(),
+            },
+            joined,
+            Box::new(Transport {
+                store: fixture.store.clone(),
+                lose_ack: Arc::new(AtomicBool::new(false)),
+            }),
+        )
+        .unwrap();
+        let path = fixture.path.join("peer.json");
+        peer.set_checkpoint_path(&path).unwrap();
+        let edit = SharedEdit::SetAttribute {
+            node: peer.document().root(),
+            name: "Width".into(),
+            value: "99".into(),
+        };
+        crate::storage::fail_next_directory_sync(path.clone());
+        assert_eq!(
+            peer.submit("Uncertain durability", vec![edit.clone()])
+                .unwrap_err()
+                .code,
+            ErrorCode::Indeterminate
+        );
+        let replaced = std::fs::read(&path).unwrap();
+        assert_eq!(peer.sync(None).unwrap_err().code, ErrorCode::Indeterminate);
+        assert_eq!(
+            peer.submit("Must not overwrite", vec![edit])
+                .unwrap_err()
+                .code,
+            ErrorCode::Indeterminate
+        );
+        assert_eq!(
+            peer.set_checkpoint_path(fixture.path.join("other.json"))
+                .unwrap_err()
+                .code,
+            ErrorCode::Indeterminate
+        );
+        assert_eq!(std::fs::read(&path).unwrap(), replaced);
+        let restored = ReconnectingPeer::restore(&path).unwrap();
+        assert!(restored.document().source().contains("99"));
+        assert_eq!(restored.pending_operations(), 1);
     }
     #[test]
     fn stale_epoch_rebase_keeps_offline_changes_until_explicit_resolution() {
@@ -691,6 +879,52 @@ mod network_tests {
         one.sync(None).unwrap();
         assert_eq!(one.document().source(), two.document().source());
         assert!(one.document().source().contains("800") && one.document().source().contains("600"));
+        // Exercise pagination over the real MCP transport with a deliberately small wire page.
+        // The final reply must acknowledge only received writes; a lost/partial outbox cannot
+        // be mistaken for the complete local operation set.
+        let mut paged = DocumentReplica::from_snapshot(
+            owner.credentials.actor.clone(),
+            one.document().snapshot(),
+        )
+        .unwrap();
+        let mut known = one.document().version();
+        for index in 0..6 {
+            paged
+                .set_attribute(
+                    paged.root(),
+                    "Tag",
+                    format!("{index}: {}", "\"界\\".repeat(20)),
+                )
+                .unwrap();
+        }
+        let mut pages = 0;
+        while paged.pending_operation_count(&known, paged.actor()) > 0 {
+            let message = paged
+                .changes_since_bounded(&known, Some(paged.actor()), 1200)
+                .unwrap();
+            assert!(message.to_json().unwrap().len() <= 1200);
+            let reply: ExchangeReply = serde_json::from_value(
+                owner_transport
+                    .request(Request::Exchange {
+                        credentials: owner.credentials.clone(),
+                        exchange: Exchange {
+                            epoch: owner.state.epoch,
+                            known: paged.version(),
+                            message,
+                            presence: None,
+                        },
+                    })
+                    .unwrap(),
+            )
+            .unwrap();
+            assert!(reply.version[&owner.credentials.actor] > known[&owner.credentials.actor]);
+            known = reply.version;
+            pages += 1;
+            assert!(pages <= 6);
+        }
+        assert!(pages > 1);
+        two.sync(None).unwrap();
+        assert_eq!(two.document().source(), paged.source());
         let old_endpoint = host.endpoint();
         drop(host);
         std::thread::sleep(std::time::Duration::from_millis(100));
@@ -704,7 +938,7 @@ mod network_tests {
                 .snapshot
                 .operations
                 .len(),
-            2
+            8
         );
         drop(restarted);
         let _ = std::fs::remove_dir_all(path);

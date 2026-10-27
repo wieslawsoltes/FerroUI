@@ -1,6 +1,6 @@
 use crate::model::*;
 use crate::storage;
-use ferroui_designer_collaboration::{DocumentReplica, VersionVector};
+use ferroui_designer_collaboration::{DocumentReplica, VersionVector, MAX_MESSAGE_BYTES};
 use std::collections::BTreeMap;
 use std::fs::File;
 use std::path::{Path, PathBuf};
@@ -435,7 +435,11 @@ impl RoomStore {
         let mut state = self.lock()?;
         let room = Self::room(&state, &credentials.room)?;
         let role = Self::authenticate(&room.saved, credentials)?.role;
-        ensure(room.saved.epoch==exchange.epoch,ErrorCode::EpochChanged,"Room was checkpointed; fetch the new snapshot and explicitly resolve unsent edits before rejoining")?;
+        ensure(
+            room.saved.epoch == exchange.epoch,
+            ErrorCode::EpochChanged,
+            "Room was checkpointed; fetch the new snapshot and review unsent edits before rejoining",
+        )?;
         ensure(
             exchange.known.len() <= 256,
             ErrorCode::Limit,
@@ -481,7 +485,11 @@ impl RoomStore {
         Ok(ExchangeReply {
             epoch: room.saved.epoch,
             version: room.replica.version(),
-            message: room.replica.changes_since(&exchange.known),
+            message: room.replica.changes_since_bounded(
+                &exchange.known,
+                None,
+                MAX_MESSAGE_BYTES,
+            )?,
             conflicts: room.replica.conflicts().to_vec(),
             presence: room
                 .replica
@@ -547,6 +555,11 @@ impl RoomStore {
             room.saved.epoch == epoch && room.replica.version() == *expected,
             ErrorCode::Conflict,
             "Room advanced; synchronize before checkpointing",
+        )?;
+        ensure(
+            !room.replica.has_sequence_gaps(),
+            ErrorCode::Conflict,
+            "Room history has sequence gaps; receive missing operations before checkpointing",
         )?;
         ensure(
             room.replica.conflicts().is_empty() || resolved_source.is_some(),

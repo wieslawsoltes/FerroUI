@@ -1,12 +1,16 @@
-use crate::model::{ensure, identifier, validate_operation, PresenceEntry};
+use crate::model::{
+    ensure, identifier, serialized_size, validate_node, validate_operation, PresenceEntry,
+};
 use crate::{
     CollaborationError, Conflict, MergeReport, Operation, OperationId, Presence, Result,
-    SharedEdit, SharedNodeId, Snapshot, SyncMessage, VersionVector, MAX_OPERATIONS,
-    PROTOCOL_VERSION,
+    SharedEdit, SharedNodeId, Snapshot, SyncMessage, VersionVector, MAX_DOCUMENT_BYTES,
+    MAX_MESSAGE_BYTES, MAX_OPERATIONS, MAX_PRESENCE_ACTORS, MAX_SNAPSHOT_BYTES, PROTOCOL_VERSION,
 };
 use ferroui_designer_core::{Document, Edit, NodeId};
+use serde::Serialize;
 use sha2::{Digest, Sha256};
-use std::collections::{BTreeMap, BTreeSet};
+use std::collections::BTreeMap;
+use std::ops::Bound::{Excluded, Included, Unbounded};
 
 #[derive(Clone, Default)]
 struct WriterState {
@@ -48,6 +52,10 @@ pub struct DocumentReplica {
     baseline_hash: String,
     operations: BTreeMap<OperationId, Operation>,
     identities: BTreeMap<(String, u64), OperationId>,
+    version: VersionVector,
+    /// Sum of the contiguous actor prefixes. Equality to the log length means no sequence holes.
+    contiguous_operations: usize,
+    snapshot_bytes: usize,
     clock: u64,
     sequence: u64,
     document: Document,
@@ -69,8 +77,24 @@ impl DocumentReplica {
         identifier(&actor)?;
         identifier(&document_id)?;
         ensure(
-            baseline.len() <= 16 * 1024 * 1024,
+            baseline.len() <= MAX_DOCUMENT_BYTES,
             "Baseline exceeds the document size limit",
+        )?;
+        #[derive(Serialize)]
+        struct EmptySnapshot<'a> {
+            protocol: u32,
+            document_id: &'a str,
+            baseline: &'a str,
+            operations: &'a [Operation],
+        }
+        let snapshot_bytes = serialized_size(
+            &EmptySnapshot {
+                protocol: PROTOCOL_VERSION,
+                document_id: &document_id,
+                baseline: &baseline,
+                operations: &[],
+            },
+            MAX_SNAPSHOT_BYTES,
         )?;
         let mut document = Document::new(baseline.clone()).map_err(error)?;
         document.set_history_limit(0);
@@ -87,6 +111,9 @@ impl DocumentReplica {
             baseline_hash,
             operations: BTreeMap::new(),
             identities: BTreeMap::new(),
+            version: VersionVector::new(),
+            contiguous_operations: 0,
+            snapshot_bytes,
             clock: 0,
             sequence: 0,
             document,
@@ -142,20 +169,23 @@ impl DocumentReplica {
             .expect("root has a shared identity")
     }
     pub fn version(&self) -> VersionVector {
-        let mut sequences: BTreeMap<&str, BTreeSet<u64>> = BTreeMap::new();
-        for id in self.operations.keys() {
-            sequences.entry(&id.actor).or_default().insert(id.sequence);
-        }
-        sequences
-            .into_iter()
-            .map(|(actor, sequences)| {
-                let mut contiguous = 0;
-                while contiguous < u64::MAX && sequences.contains(&(contiguous + 1)) {
-                    contiguous += 1;
-                }
-                (actor.to_owned(), contiguous)
-            })
-            .collect()
+        self.version.clone()
+    }
+    /// A contiguous vector is a complete checkpoint precondition only when every received
+    /// operation is represented by it. A later operation beyond a hole must never be discarded
+    /// merely because the visible contiguous prefix has not advanced.
+    pub fn has_sequence_gaps(&self) -> bool {
+        self.contiguous_operations != self.operations.len()
+    }
+    /// Count an actor's outstanding writes without cloning source payloads into a wire message.
+    pub fn pending_operation_count(&self, version: &VersionVector, actor: &str) -> usize {
+        let sequence = version.get(actor).copied().unwrap_or(0);
+        self.identities
+            .range((
+                Excluded((actor.to_owned(), sequence)),
+                Included((actor.to_owned(), u64::MAX)),
+            ))
+            .count()
     }
     pub fn changes_since(&self, version: &VersionVector) -> SyncMessage {
         SyncMessage {
@@ -170,6 +200,39 @@ impl DocumentReplica {
                 .collect(),
         }
     }
+    /// Return one wire-sized page. Filter the writer before paging when uploading an outbox;
+    /// otherwise other actors' already-acknowledged operations could consume the page. Continue
+    /// with the receiving replica's updated version until no new operations remain. Only complete
+    /// sender prefixes are paged: repeatedly sending a sequence beyond a hole could otherwise
+    /// fill every page without advancing the receiver's vector.
+    pub fn changes_since_bounded(
+        &self,
+        version: &VersionVector,
+        actor: Option<&str>,
+        max_bytes: usize,
+    ) -> Result<SyncMessage> {
+        let limit = max_bytes.min(MAX_MESSAGE_BYTES);
+        let mut message = self.message(Vec::new());
+        let mut bytes = serialized_size(&message, limit)?;
+        for operation in self.operations.values().filter(|operation| {
+            actor.is_none_or(|actor| operation.id.actor == actor)
+                && operation.id.sequence > version.get(&operation.id.actor).copied().unwrap_or(0)
+                && operation.id.sequence <= self.version[&operation.id.actor]
+        }) {
+            let length = serialized_size(operation, MAX_MESSAGE_BYTES)?;
+            let separator = usize::from(!message.operations.is_empty());
+            if length.saturating_add(separator) > limit - bytes {
+                ensure(
+                    !message.operations.is_empty(),
+                    "One operation exceeds the synchronization page limit",
+                )?;
+                break;
+            }
+            bytes += length + separator;
+            message.operations.push(operation.clone());
+        }
+        Ok(message)
+    }
     pub fn snapshot(&self) -> Snapshot {
         Snapshot {
             protocol: PROTOCOL_VERSION,
@@ -183,23 +246,22 @@ impl DocumentReplica {
             snapshot.protocol == PROTOCOL_VERSION,
             "Unsupported collaboration protocol",
         )?;
+        serialized_size(&snapshot, MAX_SNAPSHOT_BYTES)?;
         let mut replica = Self::new(actor, snapshot.document_id.clone(), snapshot.baseline)?;
-        replica.merge(SyncMessage {
-            protocol: snapshot.protocol,
-            document_id: snapshot.document_id,
-            baseline_hash: replica.baseline_hash.clone(),
-            operations: snapshot.operations,
-        })?;
+        replica.merge_operations(snapshot.operations, false)?;
         Ok(replica)
     }
     pub fn merge_snapshot(&mut self, snapshot: Snapshot) -> Result<MergeReport> {
-        ensure(snapshot.baseline==self.baseline,"Snapshot baseline differs; begin a new collaboration session or resolve the source difference explicitly")?;
-        self.merge(SyncMessage {
-            protocol: snapshot.protocol,
-            document_id: snapshot.document_id,
-            baseline_hash: self.baseline_hash.clone(),
-            operations: snapshot.operations,
-        })
+        ensure(
+            snapshot.protocol == PROTOCOL_VERSION && snapshot.document_id == self.document_id,
+            "Snapshot protocol or document does not match",
+        )?;
+        ensure(
+            snapshot.baseline == self.baseline,
+            "Snapshot baseline differs; begin a new session or resolve the source difference",
+        )?;
+        serialized_size(&snapshot, MAX_SNAPSHOT_BYTES)?;
+        self.merge_operations(snapshot.operations, false)
     }
     /// Submit an atomic local transaction, rejecting edits that cannot currently be applied.
     /// Hosts broadcast the returned operation; the new source is available via source().
@@ -208,6 +270,10 @@ impl DocumentReplica {
         label: impl Into<String>,
         edits: Vec<SharedEdit>,
     ) -> Result<Operation> {
+        ensure(
+            self.version.get(&self.actor).copied().unwrap_or(0) == self.sequence,
+            "Local writer history has sequence gaps; synchronize before authoring more operations",
+        )?;
         let operation = Operation {
             id: OperationId {
                 lamport: self
@@ -224,19 +290,12 @@ impl DocumentReplica {
             label: label.into(),
             edits,
         };
-        validate_operation(&operation)?;
-        // Validate locally before publishing a durable operation. Remote operations may arrive
-        // before dependencies, so merge retains those as visible conflicts for later replay.
-        let mut document = self.document.clone();
-        let mut aliases = self.aliases.clone();
-        let mut writers = self.writers.clone();
-        apply_operation(&mut document, &mut aliases, &mut writers, &operation)?;
-        self.merge(SyncMessage {
-            protocol: PROTOCOL_VERSION,
-            document_id: self.document_id.clone(),
-            baseline_hash: self.baseline_hash.clone(),
-            operations: vec![operation.clone()],
-        })?;
+        // The local operation is later than every received Lamport timestamp. Validate and
+        // project it once, rejecting any conflict before publishing counters or log entries.
+        // Remote operations instead retain conflicts for deterministic dependency replay.
+        let message = self.message(vec![operation.clone()]);
+        message.validate_size()?;
+        self.merge_operations(message.operations, true)?;
         Ok(operation)
     }
     pub fn set_attribute(
@@ -265,11 +324,11 @@ impl DocumentReplica {
             .ast()
             .node(node)
             .ok_or_else(|| CollaborationError("Unknown host document node".into()))?;
-        let local = self
-            .document
-            .ast()
-            .elements()
-            .find(|candidate| candidate.span == node.span && candidate.name == node.name)
+        let local_ast = self.document.ast();
+        let local = local_ast
+            .element_at(node.span.start)
+            .and_then(|id| local_ast.node(id))
+            .filter(|candidate| candidate.span == node.span && candidate.name == node.name)
             .ok_or_else(|| {
                 CollaborationError("Host node has no matching collaboration node".into())
             })?;
@@ -424,14 +483,26 @@ impl DocumentReplica {
             message.baseline_hash == self.baseline_hash,
             "Synchronization baseline differs; exchange a snapshot or start a new session",
         )?;
+        message.validate_size()?;
+        self.merge_operations(message.operations, false)
+    }
+
+    /// Checkpoint replay uses the larger retained-log budget, not the per-message wire budget.
+    /// All validation happens before replacing any document, counter or operation-set state.
+    fn merge_operations(
+        &mut self,
+        operations: Vec<Operation>,
+        reject_conflicts: bool,
+    ) -> Result<MergeReport> {
         ensure(
-            message.operations.len() <= MAX_OPERATIONS,
-            "Too many operations in a message",
+            operations.len() <= MAX_OPERATIONS,
+            "Too many operations in a batch",
         )?;
-        message.to_json()?;
         let mut pending: BTreeMap<OperationId, Operation> = BTreeMap::new();
         let mut pending_ids: BTreeMap<(String, u64), OperationId> = BTreeMap::new();
-        for operation in message.operations {
+        let envelope_bytes = serialized_size(&self.message(Vec::new()), MAX_MESSAGE_BYTES)?;
+        let mut snapshot_bytes = self.snapshot_bytes;
+        for operation in operations {
             validate_operation(&operation)?;
             ensure(
                 operation.document_id == self.document_id,
@@ -459,6 +530,13 @@ impl DocumentReplica {
                 )?;
                 continue;
             }
+            let operation_bytes = serialized_size(&operation, MAX_MESSAGE_BYTES - envelope_bytes)?;
+            let separator = usize::from(!self.operations.is_empty() || !pending.is_empty());
+            snapshot_bytes = snapshot_bytes.saturating_add(operation_bytes + separator);
+            ensure(
+                snapshot_bytes <= MAX_SNAPSHOT_BYTES,
+                "Session snapshot size limit reached; checkpoint and start a new session",
+            )?;
             pending_ids.insert(actor_key, operation.id.clone());
             pending.insert(operation.id.clone(), operation);
         }
@@ -466,30 +544,9 @@ impl DocumentReplica {
             self.operations.len().saturating_add(pending.len()) <= MAX_OPERATIONS,
             "Session operation limit reached; checkpoint and start a new session",
         )?;
-        let actors = pending
-            .keys()
-            .map(|id| id.actor.clone())
-            .collect::<BTreeSet<_>>();
-        for actor in actors {
-            let mut actor_ids = self
-                .identities
-                .range((actor.clone(), 0)..=(actor.clone(), u64::MAX))
-                .map(|((_, sequence), id)| (*sequence, id.lamport))
-                .collect::<BTreeMap<_, _>>();
-            actor_ids.extend(
-                pending
-                    .keys()
-                    .filter(|id| id.actor == actor)
-                    .map(|id| (id.sequence, id.lamport)),
-            );
-            let mut previous = 0;
-            for lamport in actor_ids.values() {
-                ensure(
-                    *lamport > previous,
-                    "Actor timestamps do not respect sequence order",
-                )?;
-                previous = *lamport;
-            }
+        for (key, id) in &pending_ids {
+            validate_neighbors(&self.identities, key, id)?;
+            validate_neighbors(&pending_ids, key, id)?;
         }
 
         let received = pending.len();
@@ -519,17 +576,31 @@ impl DocumentReplica {
             let (document, aliases) = self.fresh_document()?;
             (document, aliases, WriterState::default(), vec![], 0)
         };
-        let all = if append_only {
-            BTreeMap::new()
+        // Merge the ordered borrowed streams. Out-of-order delivery must replay old operations,
+        // but does not need another allocation/copy of every retained source payload.
+        let replay_count = if append_only {
+            0
         } else {
-            let mut all = self.operations.clone();
-            all.extend(pending.clone());
-            all
+            self.operations.len()
         };
-        let to_apply = if append_only { &pending } else { &all };
-        for operation in to_apply.values() {
-            match apply_operation(&mut document, &mut aliases, &mut writers, operation) {
+        let mut previous = self.operations.values().take(replay_count).peekable();
+        let mut incoming = pending.values().peekable();
+        let ordered = std::iter::from_fn(|| match (previous.peek(), incoming.peek()) {
+            (Some(left), Some(right)) if left.id < right.id => previous.next(),
+            (_, Some(_)) => incoming.next(),
+            _ => previous.next(),
+        });
+        for operation in ordered {
+            let result = if reject_conflicts {
+                // A failed local projection discards this whole candidate; no nested rollback
+                // copy is needed. Remote batches must retain earlier successful operations.
+                apply_to_projection(&mut document, &mut aliases, &mut writers, operation)
+            } else {
+                apply_operation(&mut document, &mut aliases, &mut writers, operation)
+            };
+            match result {
                 Ok(()) => applied += 1,
+                Err(err) if reject_conflicts => return Err(err),
                 Err(err) => conflicts.push(Conflict {
                     operation: operation.id.clone(),
                     reason: err.0,
@@ -550,7 +621,31 @@ impl DocumentReplica {
             .unwrap_or(0)
             .max(self.sequence);
         self.operations.extend(pending);
-        self.identities.extend(pending_ids);
+        self.identities.extend(
+            pending_ids
+                .iter()
+                .map(|(key, id)| (key.clone(), id.clone())),
+        );
+        // Each sequence joins its contiguous prefix at most once over the session lifetime.
+        // Inspect each changed actor once, rather than sorting the entire log for every poll.
+        let mut previous_actor: Option<&str> = None;
+        for (actor, _) in pending_ids.keys() {
+            if previous_actor == Some(actor) {
+                continue;
+            }
+            previous_actor = Some(actor);
+            let contiguous = self.version.entry(actor.clone()).or_default();
+            let mut next = (actor.clone(), *contiguous);
+            while let Some(sequence) = next.1.checked_add(1) {
+                next.1 = sequence;
+                if !self.identities.contains_key(&next) {
+                    break;
+                }
+                *contiguous = sequence;
+                self.contiguous_operations += 1;
+            }
+        }
+        self.snapshot_bytes = snapshot_bytes;
         self.clock = clock;
         self.sequence = sequence;
         self.document = document;
@@ -572,6 +667,9 @@ impl DocumentReplica {
                 && presence.selection.len() <= 1024,
             "Invalid presence update",
         )?;
+        for node in &presence.selection {
+            validate_node(node)?;
+        }
         if let Some(cursor) = &presence.cursor {
             ensure(
                 cursor.x.is_finite() && cursor.y.is_finite(),
@@ -585,6 +683,11 @@ impl DocumentReplica {
         {
             return Ok(false);
         }
+        ensure(
+            self.presence.contains_key(&presence.actor)
+                || self.presence.len() < MAX_PRESENCE_ACTORS,
+            "Presence actor limit reached; prune expired entries before admitting more peers",
+        )?;
         self.presence.insert(
             presence.actor.clone(),
             PresenceEntry {
@@ -617,6 +720,38 @@ impl DocumentReplica {
         Ok((document, aliases))
     }
 }
+
+/// Existing and incoming identities are independently ordered by actor and sequence. Checking
+/// each insertion's immediate neighbors is sufficient to validate their merged order, and costs
+/// O(new operations * log(retained operations)) rather than rescanning every actor's full log.
+fn validate_neighbors(
+    identities: &BTreeMap<(String, u64), OperationId>,
+    key: &(String, u64),
+    id: &OperationId,
+) -> Result<()> {
+    let previous = identities
+        .range(..key.clone())
+        .next_back()
+        .map(|(_, previous)| previous)
+        .filter(|previous| previous.actor == id.actor);
+    let next = identities
+        .range((Excluded(key.clone()), Unbounded))
+        .next()
+        .map(|(_, next)| next)
+        .filter(|next| next.actor == id.actor);
+    for (earlier, later) in previous
+        .into_iter()
+        .map(|previous| (previous, id))
+        .chain(next.into_iter().map(|next| (id, next)))
+    {
+        ensure(
+            later.lamport.saturating_sub(earlier.lamport) >= later.sequence - earlier.sequence,
+            "Actor timestamps do not leave causal space for every sequence",
+        )?;
+    }
+    Ok(())
+}
+
 fn apply_operation(
     document: &mut Document,
     aliases: &mut BTreeMap<SharedNodeId, NodeId>,
@@ -626,155 +761,158 @@ fn apply_operation(
     let mut candidate = document.clone();
     let mut mapped = aliases.clone();
     let mut candidate_writers = writers.clone();
-    // Namespace/name changes form a single syntax boundary: an intermediate prefix can be
-    // unbound even when the complete attribute transaction is valid.
-    if operation.edits.iter().all(|edit| {
-        matches!(
-            edit,
-            SharedEdit::SetAttribute { .. }
-                | SharedEdit::RemoveAttribute { .. }
-                | SharedEdit::UndoAttribute { .. }
-        )
-    }) {
-        let mut edits = Vec::with_capacity(operation.edits.len());
-        for edit in &operation.edits {
-            let resolve = |node: &SharedNodeId| {
-                mapped
-                    .get(node)
-                    .copied()
-                    .filter(|id| candidate.ast().node(*id).is_some())
-                    .ok_or_else(|| CollaborationError(format!("Missing or deleted node {node:?}")))
-            };
-            edits.push(match edit {
-                SharedEdit::SetAttribute { node, name, value } => Edit::SetAttribute {
-                    node: resolve(node)?,
-                    name: name.clone(),
-                    value: value.clone(),
-                },
-                SharedEdit::RemoveAttribute { node, name } => Edit::RemoveAttribute {
-                    node: resolve(node)?,
-                    name: name.clone(),
-                },
-                SharedEdit::UndoAttribute {
-                    node,
-                    name,
-                    expected_writer,
-                    value,
-                } => {
-                    ensure(
-                        candidate_writers.last(node, name) == Some(expected_writer),
-                        "Concurrent property writer: conditional undo was not applied",
-                    )?;
-                    if let Some(value) = value {
-                        Edit::SetAttribute {
-                            node: resolve(node)?,
-                            name: name.clone(),
-                            value: value.clone(),
-                        }
-                    } else {
-                        Edit::RemoveAttribute {
-                            node: resolve(node)?,
-                            name: name.clone(),
-                        }
-                    }
-                }
-                _ => unreachable!("attribute-only transaction"),
-            });
-        }
-        let change = candidate
-            .apply(operation.label.clone(), edits)
-            .map_err(error)?;
-        register_inserted(&candidate, &mut mapped, operation, 0, &change.inserted);
-        for edit in &operation.edits {
-            candidate_writers.record(edit, &operation.id);
-        }
-        *document = candidate;
-        *aliases = mapped;
-        *writers = candidate_writers;
-        return Ok(());
-    }
-    for (index, edit) in operation.edits.iter().enumerate() {
-        let resolve = |node: &SharedNodeId| {
-            mapped.get(node).copied().filter(|id|candidate.ast().node(*id).is_some()).ok_or_else(||CollaborationError(format!("Missing or deleted node {node:?}; the operation is retained for deterministic replay")))
-        };
-        let local = match edit {
-            SharedEdit::SetAttribute { node, name, value } => Edit::SetAttribute {
-                node: resolve(node)?,
-                name: name.clone(),
-                value: value.clone(),
-            },
-            SharedEdit::RemoveAttribute { node, name } => Edit::RemoveAttribute {
-                node: resolve(node)?,
-                name: name.clone(),
-            },
-            SharedEdit::UndoAttribute {
-                node,
-                name,
-                expected_writer,
-                value,
-            } => {
-                ensure(
-                    candidate_writers.last(node, name) == Some(expected_writer),
-                    "Concurrent property writer: conditional undo was not applied",
-                )?;
-                if let Some(value) = value {
-                    Edit::SetAttribute {
-                        node: resolve(node)?,
-                        name: name.clone(),
-                        value: value.clone(),
-                    }
-                } else {
-                    Edit::RemoveAttribute {
-                        node: resolve(node)?,
-                        name: name.clone(),
-                    }
-                }
-            }
-            SharedEdit::InsertChild {
-                parent,
-                index,
-                source,
-            } => Edit::InsertChild {
-                parent: resolve(parent)?,
-                index: *index,
-                source: source.clone(),
-            },
-            SharedEdit::RemoveNode { node } => Edit::RemoveNode {
-                node: resolve(node)?,
-            },
-            SharedEdit::MoveNode {
-                node,
-                parent,
-                index,
-            } => Edit::MoveNode {
-                node: resolve(node)?,
-                parent: resolve(parent)?,
-                index: *index,
-            },
-            SharedEdit::ReplaceSource {
-                expected_source,
-                source,
-            } => {
-                ensure(
-                    candidate.source() == expected_source,
-                    "Concurrent source change: source replacement precondition does not match",
-                )?;
-                Edit::ReplaceSource {
-                    source: source.clone(),
-                }
-            }
-        };
-        let change = candidate
-            .apply(operation.label.clone(), vec![local])
-            .map_err(error)?;
-        register_inserted(&candidate, &mut mapped, operation, index, &change.inserted);
-        candidate_writers.record(edit, &operation.id);
-    }
+    apply_to_projection(
+        &mut candidate,
+        &mut mapped,
+        &mut candidate_writers,
+        operation,
+    )?;
     *document = candidate;
     *aliases = mapped;
     *writers = candidate_writers;
     Ok(())
 }
+
+/// Mutate an isolated projection. The caller either commits all of it or discards it on error.
+fn apply_to_projection(
+    document: &mut Document,
+    aliases: &mut BTreeMap<SharedNodeId, NodeId>,
+    writers: &mut WriterState,
+    operation: &Operation,
+) -> Result<()> {
+    let mut index = 0;
+    while index < operation.edits.len() {
+        let remaining = &operation.edits[index..];
+        // Match Document's transaction boundaries, including attribute runs between structural
+        // edits. A namespace declaration may follow its first use within the same atomic run.
+        let count = if is_attribute_edit(&remaining[0]) {
+            remaining
+                .iter()
+                .take_while(|edit| is_attribute_edit(edit))
+                .count()
+        } else {
+            1
+        };
+        let shared = &remaining[..count];
+        let edits = shared
+            .iter()
+            .map(|edit| local_edit(document, aliases, writers, edit))
+            .collect::<Result<Vec<_>>>()?;
+        let change = document
+            .apply(operation.label.clone(), edits)
+            .map_err(error)?;
+        register_inserted(document, aliases, operation, index, &change.inserted);
+        for edit in shared {
+            writers.record(edit, &operation.id);
+        }
+        index += count;
+    }
+    validate_document_size(document)
+}
+
+fn is_attribute_edit(edit: &SharedEdit) -> bool {
+    matches!(
+        edit,
+        SharedEdit::SetAttribute { .. }
+            | SharedEdit::RemoveAttribute { .. }
+            | SharedEdit::UndoAttribute { .. }
+    )
+}
+
+/// Translate shared identities and conditional writer preconditions at one syntax boundary.
+fn local_edit(
+    document: &Document,
+    aliases: &BTreeMap<SharedNodeId, NodeId>,
+    writers: &WriterState,
+    edit: &SharedEdit,
+) -> Result<Edit> {
+    let resolve = |node: &SharedNodeId| {
+        aliases
+            .get(node)
+            .copied()
+            .filter(|id| document.ast().node(*id).is_some())
+            .ok_or_else(|| {
+                CollaborationError(format!(
+                    "Missing or deleted node {node:?}; retained for deterministic replay",
+                ))
+            })
+    };
+    Ok(match edit {
+        SharedEdit::SetAttribute { node, name, value } => Edit::SetAttribute {
+            node: resolve(node)?,
+            name: name.clone(),
+            value: value.clone(),
+        },
+        SharedEdit::RemoveAttribute { node, name } => Edit::RemoveAttribute {
+            node: resolve(node)?,
+            name: name.clone(),
+        },
+        SharedEdit::UndoAttribute {
+            node,
+            name,
+            expected_writer,
+            value,
+        } => {
+            ensure(
+                writers.last(node, name) == Some(expected_writer),
+                "Concurrent property writer: conditional undo was not applied",
+            )?;
+            if let Some(value) = value {
+                Edit::SetAttribute {
+                    node: resolve(node)?,
+                    name: name.clone(),
+                    value: value.clone(),
+                }
+            } else {
+                Edit::RemoveAttribute {
+                    node: resolve(node)?,
+                    name: name.clone(),
+                }
+            }
+        }
+        SharedEdit::InsertChild {
+            parent,
+            index,
+            source,
+        } => Edit::InsertChild {
+            parent: resolve(parent)?,
+            index: *index,
+            source: source.clone(),
+        },
+        SharedEdit::RemoveNode { node } => Edit::RemoveNode {
+            node: resolve(node)?,
+        },
+        SharedEdit::MoveNode {
+            node,
+            parent,
+            index,
+        } => Edit::MoveNode {
+            node: resolve(node)?,
+            parent: resolve(parent)?,
+            index: *index,
+        },
+        SharedEdit::ReplaceSource {
+            expected_source,
+            source,
+        } => {
+            ensure(
+                document.source() == expected_source,
+                "Concurrent source change: source replacement precondition does not match",
+            )?;
+            Edit::ReplaceSource {
+                source: source.clone(),
+            }
+        }
+    })
+}
+
+fn validate_document_size(document: &Document) -> Result<()> {
+    ensure(
+        document.source().len() <= MAX_DOCUMENT_BYTES,
+        "Edited document exceeds the document size limit",
+    )
+}
+
 fn register_inserted(
     document: &Document,
     aliases: &mut BTreeMap<SharedNodeId, NodeId>,

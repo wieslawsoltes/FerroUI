@@ -129,6 +129,43 @@ fn remote_transaction_is_atomic_when_a_later_edit_conflicts() {
     assert_eq!(remote.source(), SOURCE);
     assert_eq!(remote.conflicts().len(), 1);
 }
+
+#[test]
+fn failed_local_projection_does_not_publish_partial_source_identities_or_counters() {
+    let mut local = replica("local");
+    let before = local.snapshot();
+    assert!(local
+        .submit(
+            "Rejected insertion",
+            vec![
+                SharedEdit::InsertChild {
+                    parent: local.root(),
+                    index: 0,
+                    source: "<TextBlock Name='temporary'/>".into()
+                },
+                SharedEdit::SetAttribute {
+                    node: named(&local, "a"),
+                    name: "Width".into(),
+                    value: "900".into()
+                },
+                SharedEdit::RemoveNode {
+                    node: SharedNodeId::Baseline(999_999)
+                },
+            ]
+        )
+        .is_err());
+    assert_eq!(local.source(), SOURCE);
+    assert_eq!(local.snapshot(), before);
+    assert!(local.version().is_empty());
+    assert!(local.document().ast().find_name("temporary").is_none());
+    let valid = local
+        .set_attribute(named(&local, "a"), "Width", "22")
+        .unwrap();
+    assert_eq!(valid.id.sequence, 1);
+    assert_eq!(valid.id.lamport, 1);
+    local.undo_property(&valid.id).unwrap();
+    assert_eq!(local.source(), SOURCE);
+}
 #[test]
 fn equivocation_rejects_the_entire_batch() {
     let mut author = replica("author");
@@ -322,6 +359,47 @@ fn namespace_and_prefixed_attribute_are_one_atomic_syntax_boundary() {
 }
 
 #[test]
+fn mixed_structural_transactions_batch_namespace_attributes_like_the_host_document() {
+    use ferroui_designer_core::{Document, Edit};
+    let mut host = Document::new("<Panel><Button Name='a'/><Button Name='b'/></Panel>").unwrap();
+    let root = host.ast().root();
+    let a = host.ast().find_name("a").unwrap();
+    let mut author = DocumentReplica::new("author", "mixed-namespace", host.source()).unwrap();
+    let baseline = author.snapshot();
+    let edits = vec![
+        Edit::InsertChild {
+            parent: root,
+            index: 0,
+            source: "<TextBlock/>".into(),
+        },
+        Edit::SetAttribute {
+            node: a,
+            name: "q:Flag".into(),
+            value: "on".into(),
+        },
+        Edit::SetAttribute {
+            node: a,
+            name: "xmlns:q".into(),
+            value: "urn:custom".into(),
+        },
+        Edit::MoveNode {
+            node: a,
+            parent: root,
+            index: 0,
+        },
+    ];
+    let operation = author
+        .submit_document_edits(&host, "Insert, configure and move", edits.clone())
+        .unwrap();
+    host.apply("Insert, configure and move", edits).unwrap();
+    assert_eq!(author.source(), host.source());
+    let mut remote = DocumentReplica::from_snapshot("remote", baseline).unwrap();
+    remote.merge(author.message(vec![operation])).unwrap();
+    assert_eq!(remote.source(), host.source());
+    assert!(remote.conflicts().is_empty());
+}
+
+#[test]
 fn undo_replay_preserves_unseen_concurrent_same_value_writer() {
     let mut a = replica("a");
     let mut b = replica("b");
@@ -400,4 +478,233 @@ fn namespace_property_replacements_receive_shared_identities() {
     assert_eq!(b.source(), a.source());
     assert_eq!(b.root(), new_root);
     assert!(b.conflicts().is_empty());
+}
+
+#[test]
+fn cached_vectors_track_gaps_replays_duplicates_and_snapshot_restore() {
+    let mut author = replica("author");
+    let mut operations = Vec::new();
+    for width in 1..=6 {
+        operations.push(
+            author
+                .set_attribute(named(&author, "a"), "Width", width.to_string())
+                .unwrap(),
+        );
+    }
+    let mut peer = replica("peer");
+    for (index, contiguous) in [(5, 0), (2, 0), (0, 1), (1, 3), (4, 3), (3, 6)] {
+        peer.merge(message(vec![operations[index].clone()]))
+            .unwrap();
+        assert_eq!(peer.version()["author"], contiguous);
+        assert_eq!(
+            peer.has_sequence_gaps(),
+            contiguous != peer.operations().count() as u64
+        );
+        assert_eq!(
+            peer.pending_operation_count(&VersionVector::from([("author".into(), 2)]), "author"),
+            peer.operations()
+                .filter(|operation| operation.id.sequence > 2)
+                .count(),
+        );
+    }
+    peer.merge(message(operations)).unwrap();
+    let restored = DocumentReplica::from_snapshot("peer", peer.snapshot()).unwrap();
+    assert_eq!(restored.version(), peer.version());
+    assert!(!restored.has_sequence_gaps());
+    assert_eq!(restored.source(), author.source());
+}
+
+#[test]
+fn actor_timestamps_must_leave_room_for_missing_sequences() {
+    let mut author = replica("author");
+    let mut first = author
+        .set_attribute(named(&author, "a"), "Width", "20")
+        .unwrap();
+    first.id.lamport = 100;
+    let mut third = first.clone();
+    third.id.sequence = 3;
+    third.id.lamport = 101;
+    for operations in [
+        vec![first.clone(), third.clone()],
+        vec![third.clone(), first.clone()],
+    ] {
+        let mut peer = replica("peer");
+        assert!(peer.merge(message(operations)).is_err());
+        assert_eq!(peer.source(), SOURCE);
+        assert!(peer.version().is_empty());
+    }
+    for (accepted, rejected) in [(first.clone(), third.clone()), (third, first)] {
+        let mut peer = replica("peer");
+        peer.merge(message(vec![accepted])).unwrap();
+        let before = peer.snapshot();
+        assert!(peer.merge(message(vec![rejected])).is_err());
+        assert_eq!(peer.snapshot(), before);
+    }
+}
+
+#[test]
+fn resumed_writer_waits_for_missing_local_history() {
+    let mut author = replica("author");
+    let first = author
+        .set_attribute(named(&author, "a"), "Width", "20")
+        .unwrap();
+    let second = author
+        .set_attribute(named(&author, "a"), "Width", "30")
+        .unwrap();
+    let mut resumed = replica("author");
+    resumed.merge(message(vec![second])).unwrap();
+    assert!(resumed
+        .set_attribute(named(&resumed, "a"), "Height", "40")
+        .is_err());
+    resumed.merge(message(vec![first])).unwrap();
+    let next = resumed
+        .set_attribute(named(&resumed, "a"), "Height", "40")
+        .unwrap();
+    assert_eq!(next.id.sequence, 3);
+}
+
+#[test]
+fn bounded_sync_pages_measure_escaped_bytes_and_converge() {
+    let mut author = replica("author");
+    for index in 0..12 {
+        author
+            .set_attribute(
+                named(&author, "a"),
+                "Text",
+                format!("{index}: {}", "\"\\\n𝄞".repeat(35)),
+            )
+            .unwrap();
+    }
+    let mut peer = replica("peer");
+    let mut pages = 0;
+    loop {
+        let page = author
+            .changes_since_bounded(&peer.version(), None, 1600)
+            .unwrap();
+        assert!(page.to_json().unwrap().len() <= 1600);
+        if page.operations.is_empty() {
+            break;
+        }
+        let report = peer.merge(page).unwrap();
+        assert!(
+            report.received > 0,
+            "each page must advance its receiving vector"
+        );
+        pages += 1;
+        assert!(pages <= 12);
+    }
+    assert!(pages > 1);
+    assert_eq!(peer.version(), author.version());
+    assert_eq!(peer.source(), author.source());
+    assert!(author
+        .changes_since_bounded(&VersionVector::new(), None, 10)
+        .is_err());
+    assert!(author
+        .changes_since_bounded(&VersionVector::new(), None, 300)
+        .is_err());
+}
+
+#[test]
+fn bounded_pages_filter_writers_and_do_not_stall_behind_sequence_holes() {
+    let mut a = replica("a");
+    let first = a.set_attribute(named(&a, "a"), "Width", "20").unwrap();
+    let second = a.set_attribute(named(&a, "a"), "Width", "30").unwrap();
+    let mut b = replica("b");
+    let other = b.set_attribute(named(&b, "b"), "Height", "50").unwrap();
+    let mut host = replica("host");
+    host.merge(message(vec![second, other.clone()])).unwrap();
+    let page = host
+        .changes_since_bounded(&VersionVector::new(), None, 1000)
+        .unwrap();
+    assert_eq!(page.operations, vec![other]);
+    host.merge(message(vec![first])).unwrap();
+    let page = host
+        .changes_since_bounded(&VersionVector::new(), Some("a"), 1000)
+        .unwrap();
+    assert_eq!(page.operations.len(), 2);
+    assert!(page
+        .operations
+        .iter()
+        .all(|operation| operation.id.actor == "a"));
+}
+
+#[test]
+fn retained_checkpoints_can_span_multiple_wire_batches() {
+    let mut snapshot = replica("author").snapshot();
+    let payload = "x".repeat(4 * 1024 * 1024);
+    for sequence in 1..=9 {
+        snapshot.operations.push(Operation {
+            id: OperationId {
+                actor: "author".into(),
+                lamport: sequence,
+                sequence,
+            },
+            document_id: snapshot.document_id.clone(),
+            label: "Missing-node conflict remains durable".into(),
+            edits: vec![SharedEdit::SetAttribute {
+                node: SharedNodeId::Baseline(999_999),
+                name: "Text".into(),
+                value: payload.clone(),
+            }],
+        });
+    }
+    let restored = DocumentReplica::from_snapshot("reader", snapshot).unwrap();
+    assert_eq!(restored.operations().count(), 9);
+    assert_eq!(restored.conflicts().len(), 9);
+    assert!(restored
+        .changes_since(&VersionVector::new())
+        .to_json()
+        .is_err());
+    let mut peer = replica("peer");
+    let page = restored
+        .changes_since_bounded(&peer.version(), None, MAX_MESSAGE_BYTES)
+        .unwrap();
+    assert!(page.operations.len() < 9);
+    peer.merge(page).unwrap();
+    peer.merge(
+        restored
+            .changes_since_bounded(&peer.version(), None, MAX_MESSAGE_BYTES)
+            .unwrap(),
+    )
+    .unwrap();
+    assert_eq!(peer.version(), restored.version());
+    assert_eq!(peer.conflicts(), restored.conflicts());
+    let mut snapshot_peer = replica("snapshot-peer");
+    snapshot_peer.merge_snapshot(restored.snapshot()).unwrap();
+    assert_eq!(snapshot_peer.version(), restored.version());
+    let mut another = restored.snapshot();
+    for operation in &mut another.operations {
+        operation.id.actor = "another".into();
+    }
+    let previous = snapshot_peer.version();
+    assert!(
+        snapshot_peer.merge_snapshot(another).is_err(),
+        "two individually valid checkpoints must still obey the combined retained-log limit"
+    );
+    assert_eq!(snapshot_peer.version(), previous);
+    assert_eq!(snapshot_peer.operations().count(), 9);
+}
+
+#[test]
+fn presence_validates_node_identities_and_bounds_retained_actors() {
+    let mut peer = replica("peer");
+    let mut presence = Presence {
+        actor: "writer".into(),
+        sequence: 1,
+        display_name: "Writer".into(),
+        selection: vec![SharedNodeId::Baseline(0)],
+        cursor: None,
+    };
+    assert!(peer.receive_presence(presence.clone(), 0).is_err());
+    presence.selection.clear();
+    for index in 0..MAX_PRESENCE_ACTORS {
+        presence.actor = format!("writer-{index}");
+        peer.receive_presence(presence.clone(), 0).unwrap();
+    }
+    presence.sequence += 1;
+    peer.receive_presence(presence.clone(), 1).unwrap();
+    presence.actor = "one-too-many".into();
+    assert!(peer.receive_presence(presence.clone(), 1).is_err());
+    peer.prune_presence(100, 10);
+    assert!(peer.receive_presence(presence, 100).unwrap());
 }

@@ -4,8 +4,13 @@ use std::fs::{self, File, OpenOptions};
 use std::io::{Read, Write};
 use std::path::{Path, PathBuf};
 #[cfg(test)]
-pub(crate) static FAIL_DIRECTORY_SYNC: std::sync::Mutex<Option<PathBuf>> =
-    std::sync::Mutex::new(None);
+static FAIL_DIRECTORY_SYNC: std::sync::Mutex<std::collections::BTreeSet<PathBuf>> =
+    std::sync::Mutex::new(std::collections::BTreeSet::new());
+
+#[cfg(test)]
+pub(crate) fn fail_next_directory_sync(path: PathBuf) {
+    FAIL_DIRECTORY_SYNC.lock().unwrap().insert(path);
+}
 
 #[derive(Serialize, Deserialize)]
 struct Envelope {
@@ -13,6 +18,11 @@ struct Envelope {
     checksum: String,
     payload: String,
 }
+
+// The payload is itself JSON, so escaping its quotes/backslashes can double its size. Include
+// the outer version/checksum/property names as well; files written at the payload limit must
+// remain readable after restart.
+const MAX_ENVELOPE_BYTES: usize = MAX_ROOM_BYTES * 2 + 256;
 
 pub(crate) fn private_file(path: &Path) -> std::io::Result<File> {
     let mut options = OpenOptions::new();
@@ -32,22 +42,27 @@ pub(crate) fn read<T: DeserializeOwned>(path: &Path) -> Result<T> {
         "State path must be a regular file",
     )?;
     ensure(
-        metadata.len() <= MAX_ROOM_BYTES as u64 * 2,
+        metadata.len() <= MAX_ENVELOPE_BYTES as u64,
         ErrorCode::Limit,
         "State file exceeds the room limit",
     )?;
     let mut bytes = Vec::new();
     File::open(path)
         .map_err(HostError::storage)?
-        .take(MAX_ROOM_BYTES as u64 * 2 + 1)
+        .take(MAX_ENVELOPE_BYTES as u64 + 1)
         .read_to_end(&mut bytes)
         .map_err(HostError::storage)?;
     ensure(
-        bytes.len() <= MAX_ROOM_BYTES * 2,
+        bytes.len() <= MAX_ENVELOPE_BYTES,
         ErrorCode::Limit,
         "State file exceeds the room limit",
     )?;
     let envelope: Envelope = serde_json::from_slice(&bytes).map_err(HostError::storage)?;
+    ensure(
+        envelope.payload.len() <= MAX_ROOM_BYTES,
+        ErrorCode::Limit,
+        "State payload exceeds the room limit",
+    )?;
     ensure(
         envelope.version == HOST_PROTOCOL
             && equal_secret(&envelope.checksum, &hash(envelope.payload.as_bytes())),
@@ -80,15 +95,7 @@ pub(crate) fn write<T: Serialize>(path: &Path, value: &T, fence: &dyn CommitFenc
         fence.check()?;
         fs::rename(&temporary, path).map_err(HostError::storage)?;
         #[cfg(test)]
-        let injected_fault = {
-            let mut fault = FAIL_DIRECTORY_SYNC.lock().unwrap();
-            if fault.as_deref() == Some(path) {
-                fault.take();
-                true
-            } else {
-                false
-            }
-        };
+        let injected_fault = FAIL_DIRECTORY_SYNC.lock().unwrap().remove(path);
         #[cfg(test)]
         if injected_fault {
             return Err(HostError::new(

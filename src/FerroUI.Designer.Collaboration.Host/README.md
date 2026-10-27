@@ -21,12 +21,21 @@ Host to the loopback address. Stable transport credentials survive server restar
 
 Calls acknowledge only after an atomic durable room write. Peer snapshots retain unacknowledged
 operations and the last server version; lost responses can be retried. Checkpointing starts a
-new epoch with an exact version precondition. Offline peers retain their old drafts and explicitly
-resolve/rebase them before joining the new epoch. Source replacements use the core engine's CAS
+new epoch with an exact version precondition and no unresolved sequence holes. An operation beyond
+a hole cannot be erased using a vector that still describes an earlier observed prefix.
+Offline peers retain their old drafts and explicitly resolve/rebase them before joining the new
+epoch. Source replacements use the core engine's CAS
 conflict semantics. Presence is transient and expires on the receiving server's monotonic clock.
+If an outbox's post-rename directory sync fails, `ReconnectingPeer` blocks further writes and sync
+until restored from its saved checkpoint, preventing rolled-back memory from overwriting a file
+whose replacement may already be durable.
+The native sharing worker also stops, blocks editing/retries, and suppresses a final checkpoint
+replacement until the user detaches and resumes the saved session.
 
 Large requests and responses use authenticated, checksummed, expiring 64 KiB transfers rather
-than changing MCP's request limit. Native UI code performs network and persistence work on a
-worker thread. `PeerTransport` permits alternative transports without changing replica semantics.
+than changing MCP's request limit. Operation exchange additionally uses pages bounded to 32 MiB of
+JSON; a retained 64 MiB checkpoint can span several exchanges and survive restart. Native UI code
+performs network and persistence work on a worker thread. `PeerTransport` permits alternative
+transports without changing replica semantics.
 
 See [the designer guide](../../docs/designer/README.md) for native sharing and deployment.
