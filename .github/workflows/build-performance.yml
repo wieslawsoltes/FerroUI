@@ -43,6 +43,12 @@ env:
   CARGO_PROFILE_TEST_DEBUG: 0
   RUST_BACKTRACE: 1
 
+# PRs may intentionally change the Cargo graph and generated XAML. The catalog,
+# sample and cold compiler lanes therefore use independent checkouts of the same
+# PR revision: strict reproducibility/freshness controls, plus the disclosed
+# build-tool profile experiment. Manual dispatch keeps the requested cross-ref
+# baseline. The scanner can compare revisions because both binaries scan the
+# same candidate source tree. No benchmark equivalence guard is relaxed.
 jobs:
   catalog-freshness:
     name: Catalog first repeat and generated asset bytes
@@ -56,7 +62,29 @@ jobs:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
           path: baseline
-          ref: ${{ github.event.pull_request.base.sha || inputs.baseline || 'main' }}
+          ref: ${{ github.event.pull_request.head.sha || inputs.baseline || 'main' }}
+      - name: Record the comparison context
+        shell: bash
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+        run: |
+          baseline_sha=$(git -C baseline rev-parse HEAD)
+          candidate_sha=$(git -C candidate rev-parse HEAD)
+          if [ "$EVENT_NAME" = pull_request ]; then test "$baseline_sha" = "$candidate_sha"; fi
+          mkdir -p results
+          {
+            echo "## Catalog freshness comparison context"
+            echo
+            if [ "$EVENT_NAME" = pull_request ]; then
+              echo "PR reproducibility/freshness control: two independent checkouts of the same PR head."
+              echo "Ratios describe repeated builds of this revision; they do not measure a speedup over main."
+            else
+              echo "Manual revision comparison: the baseline is the requested baseline ref."
+            fi
+            printf '\nBaseline: `%s`\n\nCandidate: `%s`\n' "$baseline_sha" "$candidate_sha"
+            echo
+            echo "Both legs use the same build configuration. All source, graph, output and freshness checks apply."
+          } | tee results/comparison-context.md >> "$GITHUB_STEP_SUMMARY"
       - uses: dtolnay/rust-toolchain@89b12181fb390509a0842a86cc55eeb8eb928c1d # stable action
         with:
           toolchain: '1.99.1'
@@ -93,7 +121,29 @@ jobs:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
           path: baseline
-          ref: ${{ github.event.pull_request.base.sha || inputs.baseline || 'main' }}
+          ref: ${{ github.event.pull_request.head.sha || inputs.baseline || 'main' }}
+      - name: Record the comparison context
+        shell: bash
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+        run: |
+          baseline_sha=$(git -C baseline rev-parse HEAD)
+          candidate_sha=$(git -C candidate rev-parse HEAD)
+          if [ "$EVENT_NAME" = pull_request ]; then test "$baseline_sha" = "$candidate_sha"; fi
+          mkdir -p results
+          {
+            echo "## Sample freshness comparison context"
+            echo
+            if [ "$EVENT_NAME" = pull_request ]; then
+              echo "PR reproducibility/freshness control: two independent checkouts of the same PR head."
+              echo "Ratios describe repeated builds of this revision; they do not measure a speedup over main."
+            else
+              echo "Manual revision comparison: the baseline is the requested baseline ref."
+            fi
+            printf '\nBaseline: `%s`\n\nCandidate: `%s`\n' "$baseline_sha" "$candidate_sha"
+            echo
+            echo "Both legs use the same build configuration. All graph, output and input-invalidation checks apply."
+          } | tee results/comparison-context.md >> "$GITHUB_STEP_SUMMARY"
       - uses: dtolnay/rust-toolchain@89b12181fb390509a0842a86cc55eeb8eb928c1d # stable action
         with:
           toolchain: '1.99.1'
@@ -107,7 +157,9 @@ jobs:
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: sample-freshness-evidence
-          path: results/sample-freshness
+          path: |
+            results/sample-freshness
+            results/comparison-context.md
           if-no-files-found: error
 
   compiler:
@@ -126,7 +178,35 @@ jobs:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
           path: baseline
-          ref: ${{ github.event.pull_request.base.sha || inputs.baseline || 'main' }}
+          ref: ${{ github.event.pull_request.head.sha || inputs.baseline || 'main' }}
+      - name: Record the comparison context
+        shell: bash
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          MODE: ${{ matrix.mode }}
+        run: |
+          baseline_sha=$(git -C baseline rev-parse HEAD)
+          candidate_sha=$(git -C candidate rev-parse HEAD)
+          if [ "$EVENT_NAME" = pull_request ]; then test "$baseline_sha" = "$candidate_sha"; fi
+          mkdir -p results
+          {
+            echo "## Cold compiler comparison context"
+            echo
+            if [ "$EVENT_NAME" = pull_request ]; then
+              echo "PR reproducibility control: two independent checkouts of the same PR head."
+              echo "These timings do not measure a speedup over main."
+            else
+              echo "Manual revision comparison: the baseline is the requested baseline ref."
+            fi
+            printf '\nBaseline: `%s`\n\nCandidate: `%s`\n' "$baseline_sha" "$candidate_sha"
+            echo
+            if [ "$MODE" = optimized-build-tools ]; then
+              echo 'Candidate alone uses .cargo/build-tools.toml; only the four documented build-tool opt levels may differ.'
+            else
+              echo "Both legs use the same build configuration."
+            fi
+            echo "All cold-build, graph, feature, profile and generated-output checks apply."
+          } | tee results/comparison-context.md >> "$GITHUB_STEP_SUMMARY"
       - uses: dtolnay/rust-toolchain@89b12181fb390509a0842a86cc55eeb8eb928c1d # stable action
         with:
           toolchain: '1.99.1'

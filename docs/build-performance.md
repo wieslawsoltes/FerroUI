@@ -214,6 +214,25 @@ The regular CI workflow remains responsible for full platform/browser behavior.
 The Python evidence tests require Python 3.11 or newer to verify the selected TOML
 configuration against the benchmark's permitted profile difference.
 
+On pull requests, the cold compiler, catalog freshness and sample freshness lanes
+use two independent checkouts of the same PR head. They validate cold-build
+reproducibility, unchanged-build freshness, input invalidation and identical
+generated output for that revision. This keeps the comparison meaningful when a
+feature change intentionally adds Cargo dependencies or changes generated XAML.
+The compiler's `optimized-build-tools` variant additionally compares the disclosed
+build-tool opt levels against the default configuration on that same source.
+The job summary and each artifact's `comparison-context.md` identify this mode and
+record both actual commit SHAs. These PR controls do not establish a speedup over
+`main`.
+
+Manual `workflow_dispatch` runs retain the requested `baseline` ref (default
+`main`) for comparisons between revisions. Choose revisions with equivalent
+workloads: all manifest, graph, feature, profile, generated-output and freshness
+guards remain enforced, with only the documented build-tool opt-level exception.
+The scanner lane still compares the actual base and candidate scanner libraries
+over identical candidate source files. Compiler-cache, browser-tooling and native
+correctness lanes keep their existing workloads and thresholds.
+
 ```sh
 # Separate clean checkouts: BASELINE and CANDIDATE.
 # Fetch is outside the timer; every measured command is --locked --offline.
