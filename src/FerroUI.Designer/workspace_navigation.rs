@@ -371,6 +371,12 @@ impl DesignerWorkspace {
         self.navigation.space.get()
     }
 
+    pub(super) fn canvas_navigation_active(&self) -> bool {
+        self.navigation.pan.borrow().is_some()
+            || self.canvas_space_pan_active()
+            || self.canvas_pan_tool()
+    }
+
     fn refresh_canvas_cursor(&self) {
         let canvas = self.root.get_control::<Control>("ArtboardScroll");
         canvas.set_cursor(if self.navigation.pan.borrow().is_some() {

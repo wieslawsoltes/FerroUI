@@ -8,6 +8,28 @@ use ferroui_markup_xaml::FromXamlObject;
 use ferroui_markup_xaml_loader::FerroRuntimeXamlLoader;
 use std::rc::Rc;
 
+/// Give an editor-owned menu host local native theme aliases. Installing these on
+/// the button (for flyouts) or ContextMenu also covers native submenu popups while
+/// keeping the application's preview resources and control themes independent.
+pub(crate) fn apply_designer_menu_resources(
+    host: &ferroui_controls::Control,
+    palette: &ferroui_controls::Control,
+) {
+    use ferroui_base::controls::ResourceDictionary;
+    use ferroui_base::metadata::from_markup_value;
+    use ferroui_base::Ref;
+
+    let Some(value) = palette.try_find_resource(&"DesignerMenuResources".into(), None) else {
+        return;
+    };
+    let Some(resources) = from_markup_value::<Ref<ResourceDictionary>>(&value) else {
+        return;
+    };
+    for key in resources.keys() {
+        host.resources().set(key.clone(), resources.get(&key));
+    }
+}
+
 /// Load the reusable, scoped designer chrome styles and semantic color resources.
 ///
 /// Add the returned style to the host's styles collection and mark only its tool

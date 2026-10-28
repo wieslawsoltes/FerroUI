@@ -36,8 +36,11 @@ mod property_color_editor;
 mod property_controls;
 mod property_inspector_view;
 mod property_literals;
+mod property_transfer;
+mod property_transfer_editor;
 mod resource_editor;
 mod runtime;
+mod selection_layout;
 mod session;
 pub mod sharing;
 mod surface;
@@ -91,18 +94,27 @@ pub use property_controls::{
 pub use property_inspector_view::{
     PropertyInspectorFilter, PropertyInspectorSort, PropertyInspectorView,
 };
+pub use property_transfer::{
+    CopiedProperty, CopiedPropertyKind, PropertyClipboard, PropertyPasteChange,
+    PropertyPastePreview, PropertyTransferIssue,
+};
+pub use property_transfer_editor::PropertyTransferEditor;
 pub use resource_editor::{
     DefinitionCreationKind, DefinitionEditorCommand, DefinitionPreviewSettings,
     DefinitionPropertyField, DefinitionReference, ResourceDefinitionEditor,
     ResourceDefinitionModel,
 };
 pub use runtime::{PreviewStatus, RuntimeNode};
+pub use selection_layout::{LayoutMatch, LayoutReset};
 pub use session::DesignerSession;
 pub use surface::{DesignGesture, DesignSurface};
 pub use timeline_lane::{EasingPreview, TimelineLane};
 pub use viewport::{CanvasViewport, CanvasWheelMode};
 pub use workspace::shell::{NavigationPane, WorkspaceViewMode};
-pub use workspace::{DesignerDefinitionAsset, DesignerWorkspace, OutlineCommand, OutlineMode};
+pub use workspace::{
+    CanvasLayerChoice, CanvasSelectionSnapshot, DesignerDefinitionAsset, DesignerWorkspace,
+    OutlineCommand, OutlineMode,
+};
 
 /// The self-contained example opened by Designer Studio and usable by hosts.
 pub const STARTER_XAML: &str = include_str!("Starter.xaml");

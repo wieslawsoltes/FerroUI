@@ -23,6 +23,10 @@ responsive preview environments. Open the [workflow sample](samples/DesignWorkfl
 to exercise them together.
 The [canvas navigation and icon guide](canvas-navigation.md) covers mouse-wheel modes,
 pointer-anchored zoom, hand panning, fit selection, per-tab cameras and compact vector icons.
+The [selection and appearance guide](selection-workflows.md) covers selective property copy/paste,
+layout resets, size matching, overlapping-layer menus and exact control-type selection.
+Open the [selection workflow sample](samples/SelectionWorkflows.xaml) to try these commands
+with a gradient source card, independent destinations and overlapping layers.
 
 ## Run
 
@@ -32,6 +36,7 @@ From the repository root:
 cargo run -p designer-studio
 cargo run -p designer-studio -- --file /absolute/path/to/MainWindow.xaml
 cargo run -p designer-studio -- --file docs/designer/samples/DesignWorkflows.xaml
+cargo run -p designer-studio -- --file docs/designer/samples/SelectionWorkflows.xaml
 cargo run -p designer-studio -- --project /absolute/path/to/solution
 ```
 
@@ -572,6 +577,9 @@ The additional tools are:
 | `designer_states` / `designer_state` / `designer_state_actions` | State groups, setters, transitions and native actions |
 | `designer_behaviors` / `designer_behavior` | Behavior/trigger/action authoring and explicit native execution |
 | `designer_properties` / `designer_property` | Runtime-derived property schemas, typed values and transactional edits |
+| `designer_layers` / `designer_layer` | Local layer presentation, hierarchy navigation and exact control-type selection with scope/epoch guards |
+| `designer_selection_layout` / `designer_selection_layout_edit` | Inspect exact reset/size-match edits and apply the accepted plan in one transaction |
+| `designer_property_transfer` / `designer_property_transfer_edit` | Inspect authored appearance, compatible destination edits and skipped values, then apply the accepted transfer |
 | `designer_components` / `designer_component` | Component catalog and transactional resource/template/theme authoring |
 | `designer_component_resources` / `designer_component_references` | Theme-aware visible resources and authored reference analysis |
 | `designer_definition_scope` / `designer_definition` | Native definition preview, sample host options and guarded scope navigation |
@@ -609,6 +617,7 @@ The dedicated [Visual designer workflow](../../.github/workflows/designer.yml) c
 - Replication delivery order, duplicates, missing dependencies, identity equivocation, baseline
   mismatch, source conflicts, compensation and presence expiry.
 - Native property edits, preview retention, Window/UserControl roots, history and collaboration.
+- Authored appearance transfer, selective layout resets, logical size matching, guarded overlap picking and exact control-type selection.
 - Actual affine manipulation, registered code-behind factories and native Window settings.
 - Project buffers, safe saves, shell-free build/cancel tasks, typed language services and the actual stdio LSP lifecycle.
 - Authenticated rooms, role changes, durable restart, offline/outbox recovery, checkpoint review and real two-peer MCP transfer.

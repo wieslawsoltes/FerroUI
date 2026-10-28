@@ -24,6 +24,7 @@ use std::time::Duration;
 pub(crate) mod shell;
 
 pub use inspector_drag::OutlineCommand;
+pub use selection_tools::{CanvasLayerChoice, CanvasSelectionSnapshot};
 
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
 pub enum OutlineMode {
@@ -62,6 +63,7 @@ pub struct DesignerWorkspace {
     guides: guides::GuidesUi,
     timer: RefCell<Option<Rc<DispatcherTimer>>>,
     property_editors: RefCell<Vec<Rc<dyn PropertyEditorFactory>>>,
+    property_transfer: property_transfer::PropertyTransferUi,
     timeline_lanes: RefCell<Vec<WeakRef<crate::timeline_lane::TimelineLane>>>,
     toolbox: RefCell<Option<Rc<crate::asset_toolbox::AssetToolbox>>>,
     timeline_ui: RefCell<timeline::TimelineUi>,
@@ -138,6 +140,7 @@ impl DesignerWorkspace {
             guides: guides::GuidesUi::default(),
             timer: RefCell::new(None),
             property_editors: RefCell::new(Vec::new()),
+            property_transfer: property_transfer::PropertyTransferUi::default(),
             timeline_lanes: RefCell::new(Vec::new()),
             toolbox: RefCell::new(None),
             timeline_ui: RefCell::new(Default::default()),
@@ -163,6 +166,9 @@ impl DesignerWorkspace {
         this.connect_components();
         this.connect_preview_environment();
         this.connect_layer_commands();
+        this.connect_selection_tools();
+        this.connect_selection_layout();
+        this.connect_property_transfer_commands();
         this.connect_focus_order_commands();
         this.connect_design_time_commands();
         this.refresh(true);
@@ -185,6 +191,19 @@ impl DesignerWorkspace {
     }
     pub fn source_editor(&self) -> Ref<TextBox> {
         self.source.clone()
+    }
+
+    /// Shared ownership guard for workspace-bound selection authoring automation.
+    /// A session-only host has no source-editor draft or runtime-inspection selection.
+    #[cfg(feature = "mcp")]
+    pub(crate) fn ensure_selection_workflow_context(&self) -> Result<(), String> {
+        if self.pending_source.get() {
+            return Err("Apply or cancel the XAML draft before using selection authoring tools".into());
+        }
+        if self.runtime_selection.get().is_some() {
+            return Err("Select authored control layers before using selection authoring tools".into());
+        }
+        Ok(())
     }
     pub fn outline_mode(&self) -> OutlineMode {
         self.outline_mode.get()
@@ -695,6 +714,9 @@ impl DesignerWorkspace {
         *self.last_selection.borrow_mut() = selected;
         drop(session);
         self.refresh_layer_commands();
+        self.refresh_selection_tools();
+        self.refresh_selection_layout();
+        self.refresh_property_transfer_commands();
         self.refresh_file_title();
         if changed || generation_changed {
             self.rebuild_outline();
@@ -856,6 +878,12 @@ mod inspector_drag;
 mod inspectors;
 #[path = "workspace_layers.rs"]
 mod layer_commands;
+#[path = "workspace_selection_tools.rs"]
+mod selection_tools;
+#[path = "workspace_selection_layout.rs"]
+mod selection_layout;
+#[path = "workspace_property_transfer.rs"]
+mod property_transfer;
 #[path = "workspace_layout.rs"]
 mod layout;
 #[path = "workspace_navigation.rs"]

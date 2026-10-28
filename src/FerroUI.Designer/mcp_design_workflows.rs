@@ -139,6 +139,7 @@ pub(super) fn tools() -> Vec<Value> {
                 layer_action("select_children", json!({}), &[]),
                 layer_action("select_next", json!({}), &[]),
                 layer_action("select_previous", json!({}), &[]),
+                layer_action("select_matching_type", json!({}), &[]),
             ],
             true,
         ),
@@ -305,6 +306,7 @@ pub(super) fn call(
                 "select_previous" => {
                     session.apply_layer_command(LayerCommand::SelectPreviousSibling)?
                 }
+                "select_matching_type" => session.select_matching_native_type()?,
                 _ => return Err("Unknown layer action".into()),
             }
             Ok(layers(session))

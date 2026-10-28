@@ -26,6 +26,8 @@ mod design_workflows;
 mod design_workflows_tests;
 #[path = "mcp_schema.rs"]
 mod schema;
+#[path = "mcp_selection_workflows.rs"]
+mod selection_workflows;
 #[path = "mcp_workspace.rs"]
 mod workspace_tools;
 
@@ -248,6 +250,7 @@ impl UiToolProvider for DesignerMcp {
         tools.extend(authoring::tools());
         tools.extend(components::tools());
         tools.extend(design_workflows::tools());
+        tools.extend(selection_workflows::tools());
         if self.workspace.is_some() {
             tools.extend(workspace_tools::tools());
         }
@@ -265,6 +268,7 @@ impl UiToolProvider for DesignerMcp {
             || components::handles(name)
             || workspace_tools::handles(name)
             || design_workflows::handles(name)
+            || selection_workflows::handles(name)
         {
             return schema::validate(&definition["inputSchema"], args);
         }
@@ -423,6 +427,16 @@ impl UiToolProvider for DesignerMcp {
             return Err("Designer authoring requires allow_property_writes".into());
         }
         let owner = self.session()?;
+        if selection_workflows::handles(name)
+            || (name == "designer_layer" && args["action"] == "select_matching_type")
+        {
+            if let Some(workspace) = &self.workspace {
+                workspace
+                    .upgrade()
+                    .ok_or("Designer workspace has been closed")?
+                    .ensure_selection_workflow_context()?;
+            }
+        }
         if workspace_tools::handles(name) {
             let workspace = self
                 .workspace
@@ -465,6 +479,9 @@ impl UiToolProvider for DesignerMcp {
         }
         if design_workflows::handles(name) {
             return design_workflows::call(&mut session, name, args);
+        }
+        if selection_workflows::handles(name) {
+            return selection_workflows::call(&mut session, name, args);
         }
         match name {
             "designer_document" => {

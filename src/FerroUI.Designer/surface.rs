@@ -203,9 +203,14 @@ impl DesignSurface {
             1.0
         });
     }
+    /// Whether a source-editing gesture or insertion currently owns canvas input.
+    pub(crate) fn has_pending_interaction(&self) -> bool {
+        self.gesture.borrow().is_some() || self.insert.borrow().is_some()
+    }
+
     /// A camera change cancels pending authored geometry rather than committing stale coordinates.
     pub(crate) fn cancel_for_navigation(&self) {
-        let pending = self.gesture.borrow().is_some() || self.insert.borrow().is_some();
+        let pending = self.has_pending_interaction();
         if pending {
             self.clear_pending();
             self.notify();

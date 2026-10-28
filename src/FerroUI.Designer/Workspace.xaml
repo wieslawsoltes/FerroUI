@@ -98,6 +98,7 @@
                   <MenuItem Name="LayerSelectChildren" Header="Select children" />
                   <MenuItem Name="LayerSelectNext" Header="Select next sibling" />
                   <MenuItem Name="LayerSelectPrevious" Header="Select previous sibling" />
+                  <MenuItem Name="LayerSelectMatchingType" Header="Select same control type" />
                 </MenuFlyout>
               </Button.Flyout>
             </Button>
@@ -230,6 +231,21 @@
                   <MenuItem Name="DistributeHorizontal" Header="Distribute horizontally" />
                   <MenuItem Name="DistributeVertical" Header="Distribute vertically" />
                   <Separator />
+                  <MenuItem Name="LayoutMatchMenu" Header="Match first selected">
+                    <MenuItem Name="LayoutMatchWidth" Header="Width" />
+                    <MenuItem Name="LayoutMatchHeight" Header="Height" />
+                    <MenuItem Name="LayoutMatchSize" Header="Width and height" />
+                  </MenuItem>
+                  <MenuItem Name="LayoutResetMenu" Header="Reset size and alignment">
+                    <MenuItem Name="LayoutResetMargin" Header="Margin" />
+                    <MenuItem Name="LayoutResetAlignment" Header="Alignment" />
+                    <MenuItem Name="LayoutResetWidth" Header="Width" />
+                    <MenuItem Name="LayoutResetHeight" Header="Height" />
+                    <MenuItem Name="LayoutResetSize" Header="Width and height" />
+                    <Separator />
+                    <MenuItem Name="LayoutResetAll" Header="All sizes, constraints, margin and alignment" />
+                  </MenuItem>
+                  <Separator />
                   <MenuItem Name="OutlineMoveFirst" Header="Send to back" InputGesture="Alt+Home" />
                   <MenuItem Name="OutlineMoveLast" Header="Bring to front" InputGesture="Alt+End" />
                   <MenuItem Name="OutlineMoveUp" Header="Move earlier" InputGesture="Alt+Up" />
@@ -289,7 +305,7 @@
             </StackPanel>
           </Grid>
           <ContentControl Name="ComponentInstanceHost" Grid.Row="1" HorizontalContentAlignment="Stretch" Margin="12,0,12,8" IsVisible="False" />
-          <Grid Grid.Row="2" ColumnDefinitions="*,Auto" ColumnSpacing="4" Margin="12,3,12,8">
+          <Grid Grid.Row="2" ColumnDefinitions="*,Auto,Auto" ColumnSpacing="4" Margin="12,3,12,8">
             <TextBox Name="PropertySearch" PlaceholderText="Search properties" ToolTip.Tip="Filter properties · @modified @binding @resource @object @mixed @default @expression">
               <TextBox.InnerLeftContent><PathIcon Classes="designer-icon" Width="12" Height="12" Margin="7,0,0,0" Foreground="{DynamicResource DesignerMutedBrush}" Data="F1 M8 1A7 7 0 1 1 8 15A7 7 0 1 1 8 1Z M8 3A5 5 0 1 0 8 13A5 5 0 1 0 8 3Z M12 11L19 18L17.6 19.4L10.6 12.4Z" /></TextBox.InnerLeftContent>
             </TextBox>
@@ -319,6 +335,14 @@
                     <TextBlock Text="Search also accepts @modified, @binding, @resource, @object, @mixed, @default and @expression. Right-click a property name to inspect its XAML or referenced definition." TextWrapping="Wrap" FontSize="11" />
                   </StackPanel>
                 </Flyout>
+              </Button.Flyout>
+            </Button>
+            <Button Name="PropertyTransferOptions" Grid.Column="2" Classes="nav" Content="Transfer" FontSize="11" Padding="7,2" ToolTip.Tip="Copy appearance properties and choose compatible values to paste">
+              <Button.Flyout>
+                <MenuFlyout>
+                  <MenuItem Name="PropertyCopyAppearance" Header="Copy appearance properties" InputGesture="Ctrl+Alt+C" />
+                  <MenuItem Name="PropertyPasteAppearance" Header="Paste appearance properties…" InputGesture="Ctrl+Alt+V" />
+                </MenuFlyout>
               </Button.Flyout>
             </Button>
           </Grid>

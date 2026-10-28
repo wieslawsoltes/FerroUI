@@ -16,6 +16,41 @@
     <SolidColorBrush x:Key="DesignerMotionBrush" Color="#B6A2F6" />
     <SolidColorBrush x:Key="DesignerRecordingBrush" Color="#F48B95" />
     <SolidColorBrush x:Key="DesignerSuccessBrush" Color="#8CC6AF" />
+    <!-- Installed only on editor menu hosts, never merged into the workspace or
+         application resources. Native submenu popups inherit these local aliases.
+         WinUI's transparent desktop acrylic placeholder has no backdrop here. -->
+    <ResourceDictionary x:Key="DesignerMenuResources">
+      <StaticResource x:Key="MenuFlyoutPresenterBackground" ResourceKey="DesignerPanelBrush" />
+      <StaticResource x:Key="MenuFlyoutPresenterBorderBrush" ResourceKey="DesignerBorderBrush" />
+      <StaticResource x:Key="MenuFlyoutSeparatorBackground" ResourceKey="DesignerBorderBrush" />
+      <StaticResource x:Key="MenuFlyoutItemForeground" ResourceKey="DesignerTextBrush" />
+      <StaticResource x:Key="MenuFlyoutItemForegroundPointerOver" ResourceKey="DesignerTextBrush" />
+      <StaticResource x:Key="MenuFlyoutItemForegroundPressed" ResourceKey="DesignerTextBrush" />
+      <StaticResource x:Key="MenuFlyoutItemForegroundDisabled" ResourceKey="DesignerMutedBrush" />
+      <StaticResource x:Key="MenuFlyoutItemBackgroundPointerOver" ResourceKey="DesignerHoverBrush" />
+      <StaticResource x:Key="MenuFlyoutItemBackgroundPressed" ResourceKey="DesignerFieldBrush" />
+      <StaticResource x:Key="MenuFlyoutSubItemForeground" ResourceKey="DesignerTextBrush" />
+      <StaticResource x:Key="MenuFlyoutSubItemForegroundPointerOver" ResourceKey="DesignerTextBrush" />
+      <StaticResource x:Key="MenuFlyoutSubItemForegroundPressed" ResourceKey="DesignerTextBrush" />
+      <StaticResource x:Key="MenuFlyoutSubItemForegroundSubMenuOpened" ResourceKey="DesignerTextBrush" />
+      <StaticResource x:Key="MenuFlyoutSubItemForegroundDisabled" ResourceKey="DesignerMutedBrush" />
+      <StaticResource x:Key="MenuFlyoutSubItemBackgroundPointerOver" ResourceKey="DesignerHoverBrush" />
+      <StaticResource x:Key="MenuFlyoutSubItemBackgroundPressed" ResourceKey="DesignerFieldBrush" />
+      <StaticResource x:Key="MenuFlyoutSubItemBackgroundSubMenuOpened" ResourceKey="DesignerHoverBrush" />
+      <StaticResource x:Key="MenuFlyoutSubItemChevron" ResourceKey="DesignerSecondaryBrush" />
+      <StaticResource x:Key="MenuFlyoutSubItemChevronPointerOver" ResourceKey="DesignerSecondaryBrush" />
+      <StaticResource x:Key="MenuFlyoutSubItemChevronPressed" ResourceKey="DesignerSecondaryBrush" />
+      <StaticResource x:Key="MenuFlyoutSubItemChevronSubMenuOpened" ResourceKey="DesignerSecondaryBrush" />
+      <StaticResource x:Key="MenuFlyoutSubItemChevronDisabled" ResourceKey="DesignerMutedBrush" />
+      <StaticResource x:Key="MenuFlyoutItemKeyboardAcceleratorTextForeground" ResourceKey="DesignerSecondaryBrush" />
+      <StaticResource x:Key="MenuFlyoutItemKeyboardAcceleratorTextForegroundPointerOver" ResourceKey="DesignerSecondaryBrush" />
+      <StaticResource x:Key="MenuFlyoutItemKeyboardAcceleratorTextForegroundPressed" ResourceKey="DesignerSecondaryBrush" />
+      <StaticResource x:Key="MenuFlyoutItemKeyboardAcceleratorTextForegroundDisabled" ResourceKey="DesignerMutedBrush" />
+      <StaticResource x:Key="ToggleMenuFlyoutItemKeyboardAcceleratorTextForeground" ResourceKey="DesignerSecondaryBrush" />
+      <StaticResource x:Key="ToggleMenuFlyoutItemKeyboardAcceleratorTextForegroundPointerOver" ResourceKey="DesignerSecondaryBrush" />
+      <StaticResource x:Key="ToggleMenuFlyoutItemKeyboardAcceleratorTextForegroundPressed" ResourceKey="DesignerSecondaryBrush" />
+      <StaticResource x:Key="ToggleMenuFlyoutItemKeyboardAcceleratorTextForegroundDisabled" ResourceKey="DesignerMutedBrush" />
+    </ResourceDictionary>
   </Styles.Resources>
   <Style Selector=":is(Control).designer-chrome">
     <Setter Property="TextElement.Foreground" Value="{DynamicResource DesignerTextBrush}" />
@@ -396,5 +431,17 @@
     <Setter Property="BorderThickness" Value="1" />
     <Setter Property="CornerRadius" Value="8" />
     <Setter Property="Padding" Value="12" />
+  </Style>
+  <Style Selector="FlyoutPresenter.designer-property-transfer-flyout">
+    <Setter Property="Background" Value="{DynamicResource DesignerPanelBrush}" />
+    <Setter Property="Foreground" Value="{DynamicResource DesignerTextBrush}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource DesignerBorderBrush}" />
+    <Setter Property="BorderThickness" Value="1" />
+    <Setter Property="CornerRadius" Value="8" />
+    <Setter Property="Padding" Value="12" />
+    <!-- Include both the 450px content and its padding/border in the presenter.
+         A constrained host wraps the body instead of scrolling Apply offscreen. -->
+    <Setter Property="MaxWidth" Value="476" />
+    <Setter Property="ScrollViewer.HorizontalScrollBarVisibility" Value="Disabled" />
   </Style>
 </Styles>

@@ -521,12 +521,12 @@ impl DesignerWorkspace {
             move |_, event| {
                 let Some(this) = weak.upgrade() else { return };
                 if event.initial_press_mouse_button() != MouseButton::Left
-                    || !this
+                    || this
                         .guides
                         .drag
                         .borrow()
                         .as_ref()
-                        .is_some_and(|drag| drag.pointer.id() == event.pointer().id())
+                        .is_none_or(|drag| drag.pointer.id() != event.pointer().id())
                 {
                     return;
                 }

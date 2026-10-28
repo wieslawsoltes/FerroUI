@@ -7,6 +7,12 @@ adapters. It does not add a second document model or another rendering stack.
 
 ## Findings
 
+The [selection and appearance review](selection-workflows.md) adds compatible authored-property
+transfer, grouped layout reset, measured size matching, an explicit overlap picker and exact
+native-type selection. It also makes the shared resize planner preserve untouched dimensions,
+bindings and aliased Canvas anchors. Existing outline range selection remains provided by the
+native TreeDataGrid.
+
 The further [binding, inspector and precision-layout review](authoring-workflows.md) adds
 structured binding sources/options, inspector arrangements and value-source filters, source
 navigation, native ruler guides with configurable snapping, and reference-aware element naming.
@@ -18,6 +24,9 @@ These extend the earlier workflow results below.
 | Layout manipulation | Figma alignment/distribution; Blend and Qt container-aware layout editing | Multi-selection, affine movement/resize, alignment/distribution, source order, nesting and panel-specific helpers | Layer locks/isolation now guard these existing paths, including cached drops and tree drags |
 | Shared definitions and instances | Blend template/style scopes; Figma component/instance ownership | Component Library, template/theme scopes, edit-current/edit-copy, resource dependencies | Existing workflows retained; generated template controls are explicitly distinguished in focus editing |
 | Typed and extensible property editing | Blend inline/extended editors; Qt property-sheet extensions | Shared native typed fields, staged values/bindings/resources/objects, custom factories | New preview and navigation editors use the same session ownership and snapshot rules |
+| Authored appearance transfer | Figma compatible property paste; Qt editing shared properties across selected objects | Typed property editing, resources and reusable definitions | Added a workspace appearance clipboard, selective staged paste, native destination compatibility and one source transaction |
+| Selection layout commands | Blend selective layout reset; Figma dimension editing and Qt shared-property editing | Individual property resets and native panel-aware resizing | Added grouped resets and matching to the primary control's logical size, preserving untouched bindings and parent layout semantics |
+| Explicit and matching selection | Figma under-cursor layer menus and matching-object/property selection | Native overlap cycling, hierarchy navigation and outline range selection | Added a named overlap menu and exact control-type selection within the active authored scope |
 | Animation and interaction | Blend timelines/states/behaviors; Figma prototype transitions; Qt connections | Native animation tracks, states/transitions, behavior event/data triggers and actions | Existing native authoring remains the application-behavior model |
 | Design-time values and sample data | Visual Studio's ignorable `d:` properties, controls and generated `SampleData` | Loader recognized selected design directives, but no connected designer projection/editor | Added namespace-aware design projection, staged Design Data editor, bounded anonymous sample records and native source mapping |
 | Layer lock/visibility and selection depth | Figma lock, hide and nested layer selection | Portable selection flags existed but were not connected to the native surface | Added native row/menu actions, local visibility masks, isolation, hierarchy navigation and overlap cycling |
@@ -126,6 +135,8 @@ inspectable so a hidden or locked control can be deliberately edited or restored
 | Ctrl/Cmd+Shift+L | Toggle the selected layers' locks |
 | Ctrl/Cmd+Shift+H | Toggle selected layers' editor visibility |
 | Ctrl+Alt+click | Cycle the front-to-back authored hit stack |
+| Right-click → Select layer | Choose an authored layer from the native hit stack without changing selection when the menu opens |
+| Layers → … → Select same control type | Select visible, unlocked controls with the primary selection's exact native type in the active authored scope |
 | Enter / Shift+Enter on the canvas | Select children / parent |
 | Tab / Shift+Tab on the canvas | Select next / previous authored sibling |
 | Escape | Cancel an active gesture, or exit isolation |
@@ -147,6 +158,8 @@ returns to the previous visible state.
 are reusable by hosts. `DesignSurface::hit_stack` exposes the actual authored overlap stack
 for alternative selection UIs. Geometry planners, layout helpers and outline drops enforce
 the same presentation restrictions before committing.
+The [selection workflow guide](selection-workflows.md#select-an-overlapping-layer) describes
+the explicit picker's retained-context guards and the scope of control-type matching.
 
 ## Keyboard navigation and label targets
 
