@@ -9,24 +9,24 @@
     <Grid ColumnDefinitions="Auto,*,Auto">
       <StackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
         <Border Width="26" Height="26" CornerRadius="6" Background="{DynamicResource DesignerAccentBrush}">
-          <PathIcon Width="14" Height="16" Foreground="#FF14233D" Data="M1,0 L15,0 15,3 4,3 4,7 12,7 12,10 4,10 4,17 1,17 Z" />
+          <PathIcon Classes="designer-icon" Width="14" Height="16" Foreground="#FF14233D" Data="F1 M1,0 L15,0 15,3 4,3 4,7 12,7 12,10 4,10 4,17 1,17 Z" />
         </Border>
         <TextBlock Text="FerroUI" FontWeight="SemiBold" FontSize="13" VerticalAlignment="Center" Margin="0,0,8,0" />
         <Border Width="1" Height="20" Background="{DynamicResource DesignerBorderBrush}" Margin="0,0,4,0" />
         <CommandBar DefaultLabelPosition="Collapsed" Background="Transparent" IsDynamicOverflowEnabled="True" ToolTip.Tip="File and edit commands">
         <CommandBar.PrimaryCommands>
           <CommandBarButton Name="OpenFile" Label="Open" ToolTip.Tip="Open XAML · Ctrl+O">
-            <CommandBarButton.Icon><PathIcon Width="16" Height="16" Data="M1,4 L7,4 9,6 19,6 19,16 1,16 Z M2,7 L2,15 18,15 18,7 Z" /></CommandBarButton.Icon>
+            <CommandBarButton.Icon><PathIcon Classes="designer-icon" Width="16" Height="16" Data="F1 M1,4 L7,4 9,6 19,6 19,16 1,16 Z M2,7 L2,15 18,15 18,7 Z" /></CommandBarButton.Icon>
           </CommandBarButton>
           <CommandBarButton Name="SaveFile" Label="Save" ToolTip.Tip="Save · Ctrl+S">
-            <CommandBarButton.Icon><PathIcon Width="16" Height="16" Data="M2,1 L15,1 19,5 19,19 1,19 1,1 Z M4,2 L4,8 14,8 14,2 Z M5,12 L5,18 15,18 15,12 Z" /></CommandBarButton.Icon>
+            <CommandBarButton.Icon><PathIcon Classes="designer-icon" Width="16" Height="16" Data="F1 M2,1 L15,1 19,5 19,19 1,19 1,1 Z M4,2 L4,8 14,8 14,2 Z M5,12 L5,18 15,18 15,12 Z" /></CommandBarButton.Icon>
           </CommandBarButton>
           <CommandBarSeparator />
           <CommandBarButton Name="Undo" Label="Undo" ToolTip.Tip="Undo · Ctrl+Z">
-            <CommandBarButton.Icon><PathIcon Width="16" Height="16" Data="M7,2 L1,8 7,14 7,10 12,10 Q17,10 17,16 L19,16 Q19,8 12,8 L7,8 Z" /></CommandBarButton.Icon>
+            <CommandBarButton.Icon><PathIcon Classes="designer-icon" Width="16" Height="16" Data="F1 M7,2 L1,8 7,14 7,10 12,10 Q17,10 17,16 L19,16 Q19,8 12,8 L7,8 Z" /></CommandBarButton.Icon>
           </CommandBarButton>
           <CommandBarButton Name="Redo" Label="Redo" ToolTip.Tip="Redo · Ctrl+Shift+Z">
-            <CommandBarButton.Icon><PathIcon Width="16" Height="16" Data="M13,2 L19,8 13,14 13,10 8,10 Q3,10 3,16 L1,16 Q1,8 8,8 L13,8 Z" /></CommandBarButton.Icon>
+            <CommandBarButton.Icon><PathIcon Classes="designer-icon" Width="16" Height="16" Data="F1 M13,2 L19,8 13,14 13,10 8,10 Q3,10 3,16 L1,16 Q1,8 8,8 L13,8 Z" /></CommandBarButton.Icon>
           </CommandBarButton>
         </CommandBar.PrimaryCommands>
         <CommandBar.SecondaryCommands>
@@ -50,10 +50,10 @@
           </StackPanel>
         </Border>
         <Button Name="TimelineToggle" Classes="icon active" ToolTip.Tip="Show or hide the animation timeline">
-          <PathIcon Width="16" Height="16" Data="M1,2 L19,2 19,4 1,4 Z M1,8 L4,8 4,10 1,10 Z M1,14 L4,14 4,16 1,16 Z M8,6 L11,9 8,12 5,9 Z M15,12 L18,15 15,18 12,15 Z" />
+          <PathIcon Classes="designer-icon" Width="16" Height="16" Data="F1 M1,2 L19,2 19,4 1,4 Z M1,8 L4,8 4,10 1,10 Z M1,14 L4,14 4,16 1,16 Z M8,6 L11,9 8,12 5,9 Z M15,12 L18,15 15,18 12,15 Z" />
         </Button>
         <Button Name="NativePreview" Classes="nav" ToolTip.Tip="Open an interactive native preview window">
-          <StackPanel Orientation="Horizontal" Spacing="6"><PathIcon Width="12" Height="12" Data="M4,2 L17,10 4,18 Z" /><TextBlock Text="Preview" /></StackPanel>
+          <StackPanel Orientation="Horizontal" Spacing="6"><PathIcon Classes="designer-icon" Width="12" Height="12" Data="F1 M4,2 L17,10 4,18 Z" /><TextBlock Text="Preview" /></StackPanel>
         </Button>
         <TextBlock Name="PeerCount" Text="" Foreground="{DynamicResource DesignerAccentBrush}" VerticalAlignment="Center" />
         <Button Name="Share" Content="Share" Classes="primary" Padding="16,4" ToolTip.Tip="Collaborate on this document" />
@@ -75,15 +75,15 @@
         <Grid Name="LayersPane" Grid.Row="1" RowDefinitions="36,32,*,28">
           <Grid ColumnDefinitions="*,28" Margin="12,7,8,3">
             <TextBox Name="OutlineSearch" PlaceholderText="Search layers" Margin="0,0,4,0" ToolTip.Tip="Filter by name, type or resource key">
-              <TextBox.InnerLeftContent><PathIcon Width="12" Height="12" Margin="7,0,0,0" Foreground="{DynamicResource DesignerMutedBrush}" Data="M7,1 A6,6 0 1 1 3,12 L0,15 1,16 4,13 A6,6 0 0 1 7,1 M7,3 A4,4 0 1 0 7,11 A4,4 0 1 0 7,3 Z" /></TextBox.InnerLeftContent>
+              <TextBox.InnerLeftContent><PathIcon Classes="designer-icon" Width="12" Height="12" Margin="7,0,0,0" Foreground="{DynamicResource DesignerMutedBrush}" Data="F1 M8 1A7 7 0 1 1 8 15A7 7 0 1 1 8 1Z M8 3A5 5 0 1 0 8 13A5 5 0 1 0 8 3Z M12 11L19 18L17.6 19.4L10.6 12.4Z" /></TextBox.InnerLeftContent>
             </TextBox>
-            <Button Name="CollapseLayers" Grid.Column="1" Classes="icon" Height="26" ToolTip.Tip="Collapse layers · keep the selected paths visible"><PathIcon Width="14" Height="14" Data="M2,1 L8,7 14,1 15,2 8,9 1,2 Z M2,17 L8,11 14,17 15,16 8,9 1,16 Z" /></Button>
+            <Button Name="CollapseLayers" Grid.Column="1" Classes="icon" Height="26" ToolTip.Tip="Collapse layers · keep the selected paths visible"><PathIcon Classes="designer-icon" Width="14" Height="14" Data="F1 M2,1 L8,7 14,1 15,2 8,9 1,2 Z M2,17 L8,11 14,17 15,16 8,9 1,16 Z" /></Button>
           </Grid>
           <StackPanel Grid.Row="1" Orientation="Horizontal" Spacing="3" Margin="10,2,10,4">
             <Button Name="SourceMode" Classes="nav active" Content="Source" FontSize="11" Padding="8,3" ToolTip.Tip="Authored XAML hierarchy · drag to reorder or nest" />
             <Button Name="VisualMode" Classes="nav" Content="Visual" FontSize="11" Padding="8,3" ToolTip.Tip="Inspect the live visual tree" />
             <Button Name="LogicalMode" Classes="nav" Content="Logical" FontSize="11" Padding="8,3" ToolTip.Tip="Inspect the live logical tree" />
-            <Button Name="LayerActions" Classes="icon" Width="24" Height="26" Content="⋯" ToolTip.Tip="Layer visibility, locking, isolation and selection">
+            <Button Name="LayerActions" Classes="icon" Width="24" Height="26" ToolTip.Tip="Layer visibility, locking, isolation and selection"><PathIcon Classes="designer-icon" Width="14" Height="14" Data="F1 M2 7A1 1 0 1 1 2 9A1 1 0 1 1 2 7Z M8 7A1 1 0 1 1 8 9A1 1 0 1 1 8 7Z M14 7A1 1 0 1 1 14 9A1 1 0 1 1 14 7Z" />
               <Button.Flyout>
                 <MenuFlyout>
                   <MenuItem Name="LayerToggleLock" Header="Lock / unlock in editor" />
@@ -140,18 +140,39 @@
       <Border Name="CanvasToolbar" Classes="designer-chrome" Grid.Row="1" Background="{DynamicResource DesignerPanelBrush}" BorderBrush="{DynamicResource DesignerBorderBrush}" BorderThickness="0,0,0,1" Padding="12,2">
         <Grid ColumnDefinitions="*,Auto">
           <StackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
-            <PathIcon Width="13" Height="13" Foreground="{DynamicResource DesignerMutedBrush}" Data="M2,0 L4,0 4,2 14,2 14,0 16,0 16,2 18,2 18,4 16,4 16,14 18,14 18,16 16,16 16,18 14,18 14,16 4,16 4,18 2,18 2,16 0,16 0,14 2,14 2,4 0,4 0,2 2,2 Z M4,4 L4,14 14,14 14,4 Z" />
+            <PathIcon Classes="designer-icon" Width="13" Height="13" Foreground="{DynamicResource DesignerMutedBrush}" Data="F1 M2,0 L4,0 4,2 14,2 14,0 16,0 16,2 18,2 18,4 16,4 16,14 18,14 18,16 16,16 16,18 14,18 14,16 4,16 4,18 2,18 2,16 0,16 0,14 2,14 2,4 0,4 0,2 2,2 Z M4,4 L4,14 14,14 14,4 Z" />
             <TextBlock Name="CanvasSize" Text="800 × 520" Foreground="{DynamicResource DesignerSecondaryBrush}" FontSize="11" VerticalAlignment="Center" />
-            <Button Name="PreviewEnvironment" Classes="icon" Width="24" Height="26" Content="⋯" ToolTip.Tip="Preview environment · size presets, orientation, theme and reading direction" />
+            <Button Name="PreviewEnvironment" Classes="icon" Width="24" Height="26" ToolTip.Tip="Preview environment · size presets, orientation, theme and reading direction"><PathIcon Classes="designer-icon" Width="14" Height="14" Data="F1 M2 7A1 1 0 1 1 2 9A1 1 0 1 1 2 7Z M8 7A1 1 0 1 1 8 9A1 1 0 1 1 8 7Z M14 7A1 1 0 1 1 14 9A1 1 0 1 1 14 7Z" /></Button>
           </StackPanel>
           <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="2">
             <Button Name="LayoutHelpersToggle" Classes="nav active" Content="Helpers" FontSize="11" Padding="7,3" ToolTip.Tip="Layout helpers · H. Drag gaps, margins and Grid tracks. F8 cycles handles; arrows adjust. Hold Alt for free movement." />
             <Button Name="PreviewTheme" Classes="nav" Content="Light preview" FontSize="11" Padding="6,3" ToolTip.Tip="Switch only the document preview theme" />
             <Border Width="1" Height="16" Background="{DynamicResource DesignerBorderBrush}" Margin="7,0" />
-            <Button Name="ZoomOut" Classes="icon" Width="24" Height="26" Content="−" ToolTip.Tip="Zoom out" />
-            <Button Name="ZoomReset" Classes="nav" Content="100%" Width="48" Padding="4,3" FontSize="11" ToolTip.Tip="Reset zoom to 100%" />
-            <Button Name="ZoomIn" Classes="icon" Width="24" Height="26" Content="+" ToolTip.Tip="Zoom in" />
+            <Button Name="ZoomOut" Classes="icon" Width="24" Height="26" ToolTip.Tip="Zoom out"><PathIcon Classes="designer-icon" Width="14" Height="14" Data="F1 M1 7H15V9H1Z" /></Button>
+            <Button Name="ZoomReset" Classes="nav" Content="100%" Width="64" Padding="4,3" FontSize="11" ToolTip.Tip="Reset zoom to 100%" />
+            <Button Name="ZoomIn" Classes="icon" Width="24" Height="26" ToolTip.Tip="Zoom in"><PathIcon Classes="designer-icon" Width="14" Height="14" Data="F1 M7 1H9V7H15V9H9V15H7V9H1V7H7Z" /></Button>
             <Button Name="ZoomFit" Classes="nav" Content="Fit" FontSize="11" ToolTip.Tip="Fit the artboard in the canvas" />
+            <Button Name="ZoomOptions" Classes="icon" Width="24" Height="26" ToolTip.Tip="Zoom percentage, fit selection and wheel options"><PathIcon Classes="designer-icon" Width="14" Height="14" Data="F1 M2 7A1 1 0 1 1 2 9A1 1 0 1 1 2 7Z M8 7A1 1 0 1 1 8 9A1 1 0 1 1 8 7Z M14 7A1 1 0 1 1 14 9A1 1 0 1 1 14 7Z" />
+              <Button.Flyout>
+                <Flyout>
+                  <StackPanel Width="256" Spacing="8">
+                    <TextBlock Text="Canvas navigation" FontWeight="SemiBold" />
+                    <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
+                      <TextBox Name="ZoomPercent" Text="100" Watermark="Zoom percentage" AutomationProperties.Name="Zoom percentage from 1 to 1600" />
+                      <Button Name="ZoomApply" Grid.Column="1" Content="Apply %" />
+                    </Grid>
+                    <TextBlock Name="ZoomError" Foreground="#FFFF8C86" FontSize="11" TextWrapping="Wrap" />
+                    <Button Name="ZoomActualSize" Content="Actual size · Ctrl/Cmd+0" HorizontalAlignment="Stretch" />
+                    <Button Name="ZoomFitMenu" Content="Fit artboard · Shift+1" HorizontalAlignment="Stretch" />
+                    <Button Name="ZoomSelection" Content="Fit selection · Shift+2" HorizontalAlignment="Stretch" />
+                    <TextBlock Text="Mouse wheel" FontWeight="SemiBold" Margin="0,4,0,0" />
+                    <Button Name="WheelPan" Classes="nav active" Content="Pan · Ctrl/Cmd to zoom" HorizontalAlignment="Stretch" />
+                    <Button Name="WheelZoom" Classes="nav" Content="Zoom · Ctrl/Cmd to pan" HorizontalAlignment="Stretch" />
+                    <TextBlock Text="Shift+wheel pans horizontally. Middle-drag or Space+drag pans the canvas." FontSize="11" TextWrapping="Wrap" />
+                  </StackPanel>
+                </Flyout>
+              </Button.Flyout>
+            </Button>
           </StackPanel>
         </Grid>
       </Border>
@@ -159,7 +180,7 @@
         <StackPanel>
         <Border Name="ComponentScopeBar" Classes="designer-chrome" IsVisible="False" Background="#FF302A40" BorderBrush="#FF594C73" BorderThickness="0,0,0,1" Padding="10,4">
           <Grid ColumnDefinitions="Auto,*,Auto">
-            <Button Name="ComponentScopeBack" Classes="nav" Content="← Document" ToolTip.Tip="Return to the document and its previous selection" />
+            <Button Name="ComponentScopeBack" Classes="nav" ToolTip.Tip="Return to the document and its previous selection"><StackPanel Orientation="Horizontal" Spacing="6"><PathIcon Classes="designer-icon" Width="14" Height="14" Data="F1 M8 1L9.4 2.4L4.8 7H15V9H4.8L9.4 13.6L8 15L1 8Z" /><TextBlock Text="Document" /></StackPanel></Button>
             <TextBlock Name="ComponentScopeTitle" Grid.Column="1" Foreground="#FFD2C4F5" FontSize="11" FontWeight="SemiBold" VerticalAlignment="Center" Margin="10,0" TextTrimming="CharacterEllipsis" />
             <Button Name="ComponentScopeDefinition" Grid.Column="2" Classes="nav" Content="Definition" ToolTip.Tip="Inspect the active definition" />
           </Grid>
@@ -171,33 +192,30 @@
           </Grid>
         </Border>
         </StackPanel>
-        <ScrollViewer Name="ArtboardScroll" Grid.Row="1" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto">
-          <Border Padding="40,28,40,66" HorizontalAlignment="Center" VerticalAlignment="Center">
-            <StackPanel Spacing="8">
-              <TextBlock Name="ArtboardTitle" Text="Artboard" Foreground="{DynamicResource DesignerMutedBrush}" FontFamily="Segoe UI, Noto Sans, DejaVu Sans, sans-serif" FontSize="11" />
-              <Border BoxShadow="0 4 24 0 #66000000">
-                <LayoutTransformControl Name="ArtboardTransform">
+        <Grid Name="ArtboardScroll" Grid.Row="1" ClipToBounds="True" Background="Transparent" Focusable="True">
+          <Canvas Name="ArtboardPlane">
+                <Border Name="ArtboardTransform" RenderTransformOrigin="0,0" BoxShadow="0 4 24 0 #66000000">
                   <Grid Name="Artboard" Width="800" Height="520" Background="White">
                     <ThemeVariantScope Name="PreviewThemeScope" RequestedThemeVariant="Light">
                       <ContentControl Name="Preview" HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch" />
                     </ThemeVariantScope>
                   </Grid>
-                </LayoutTransformControl>
-              </Border>
-            </StackPanel>
-          </Border>
-        </ScrollViewer>
+                </Border>
+              <TextBlock Name="ArtboardTitle" Text="Artboard" IsHitTestVisible="False" Foreground="{DynamicResource DesignerMutedBrush}" FontFamily="Segoe UI, Noto Sans, DejaVu Sans, sans-serif" FontSize="11" />
+          </Canvas>
+        </Grid>
         <Border Grid.Row="1" Classes="designer-chrome" Background="{DynamicResource DesignerPanelBrush}" BorderBrush="{DynamicResource DesignerBorderBrush}" BorderThickness="1" CornerRadius="8" Padding="5" BoxShadow="0 4 14 0 #66000000" HorizontalAlignment="Center" VerticalAlignment="Bottom" Margin="12,0,12,14">
           <StackPanel Orientation="Horizontal" Spacing="3">
             <Button Name="SelectTool" Classes="icon active" Width="32" Height="30" ToolTip.Tip="Move and select · V">
-              <PathIcon Width="16" Height="16" Data="M3,1 L17,12 11,13 8,19 Z M6,5 L9,14 10,11 13,11 Z" />
+              <PathIcon Classes="designer-icon" Width="16" Height="16" Data="F1 M3,1 L17,12 11,13 8,19 Z M6,5 L9,14 10,11 13,11 Z" />
             </Button>
             <Button Name="PreviewTool" Classes="icon" Width="32" Height="30" ToolTip.Tip="Interact with preview controls · I">
-              <PathIcon Width="16" Height="16" Data="M8,1 Q6,1 6,3 L6,9 5,8 Q3,6 2,8 L6,16 Q7,18 10,18 L14,18 Q17,18 17,15 L17,7 Q17,5 15,6 Q14,3 12,5 Q10,2 9,4 L9,3 Q9,1 8,1 Z" />
+              <PathIcon Classes="designer-icon" Width="16" Height="16" Data="F1 M8,1 Q6,1 6,3 L6,9 5,8 Q3,6 2,8 L6,16 Q7,18 10,18 L14,18 Q17,18 17,15 L17,7 Q17,5 15,6 Q14,3 12,5 Q10,2 9,4 L9,3 Q9,1 8,1 Z" />
             </Button>
+            <Button Name="PanTool" Classes="nav" Content="Pan" ToolTip.Tip="Pan the canvas · middle-drag or Space+drag" />
             <Border Width="1" Height="20" Background="{DynamicResource DesignerBorderBrush}" Margin="5,0" />
             <Button Name="ArrangeSelection" Classes="nav" ToolTip.Tip="Align, distribute, reorder or nest selected elements">
-              <StackPanel Orientation="Horizontal" Spacing="7"><PathIcon Width="14" Height="14" Data="M1,0 L3,0 3,18 1,18 Z M5,3 L17,3 17,7 5,7 Z M5,11 L12,11 12,15 5,15 Z" /><TextBlock Text="Arrange" /></StackPanel>
+              <StackPanel Orientation="Horizontal" Spacing="7"><PathIcon Classes="designer-icon" Width="14" Height="14" Data="F1 M1,0 L3,0 3,18 1,18 Z M5,3 L17,3 17,7 5,7 Z M5,11 L12,11 12,15 5,15 Z" /><TextBlock Text="Arrange" /></StackPanel>
               <Button.Flyout>
                 <MenuFlyout>
                   <MenuItem Name="AlignLeft" Header="Align left" />
@@ -222,7 +240,7 @@
               </Button.Flyout>
             </Button>
             <Button Name="FocusCanvas" Classes="icon" ToolTip.Tip="Focus canvas · hide side panels · Ctrl+Shift+F">
-              <PathIcon Width="15" Height="15" Data="M0,0 L7,0 7,2 2,2 2,7 0,7 Z M11,0 L18,0 18,7 16,7 16,2 11,2 Z M0,11 L2,11 2,16 7,16 7,18 0,18 Z M16,11 L18,11 18,18 11,18 11,16 16,16 Z" />
+              <PathIcon Classes="designer-icon" Width="15" Height="15" Data="F1 M0,0 L7,0 7,2 2,2 2,7 0,7 Z M11,0 L18,0 18,7 16,7 16,2 11,2 Z M0,11 L2,11 2,16 7,16 7,18 0,18 Z M16,11 L18,11 18,18 11,18 11,16 16,16 Z" />
             </Button>
             <Border Width="1" Height="20" Background="{DynamicResource DesignerBorderBrush}" Margin="5,0" />
             <Button Name="DesignData" Classes="nav" Content="Data" ToolTip.Tip="Design-time property overrides and sample data" />
@@ -263,7 +281,7 @@
         </Border>
         <Grid Name="InspectorDesignPane" Grid.Row="1" RowDefinitions="54,Auto,38,Auto,*">
           <Grid ColumnDefinitions="24,*" Margin="12,10,12,6">
-            <PathIcon Name="SelectionIcon" Width="16" Height="16" VerticalAlignment="Top" Margin="0,3,0,0" Foreground="{DynamicResource DesignerAccentBrush}" Data="M1,1 L17,1 17,17 1,17 Z M3,3 L3,15 15,15 15,3 Z" />
+            <PathIcon Classes="designer-icon" Name="SelectionIcon" Width="16" Height="16" VerticalAlignment="Top" Margin="0,3,0,0" Foreground="{DynamicResource DesignerAccentBrush}" Data="F1 M1,1 L17,1 17,17 1,17 Z M3,3 L3,15 15,15 15,3 Z" />
             <StackPanel Grid.Column="1" Spacing="2">
               <TextBlock Name="SelectionTitle" Text="Select an element" FontSize="13" FontWeight="SemiBold" TextTrimming="CharacterEllipsis" />
               <TextBlock Name="SelectionType" Text="Select on the canvas or in Layers" Foreground="{DynamicResource DesignerMutedBrush}" FontSize="11" TextTrimming="CharacterEllipsis" />
@@ -271,7 +289,7 @@
           </Grid>
           <ContentControl Name="ComponentInstanceHost" Grid.Row="1" HorizontalContentAlignment="Stretch" Margin="12,0,12,8" IsVisible="False" />
           <TextBox Name="PropertySearch" Grid.Row="2" PlaceholderText="Search properties" Margin="12,3,12,8" ToolTip.Tip="Filter properties · @modified for authored values">
-            <TextBox.InnerLeftContent><PathIcon Width="12" Height="12" Margin="7,0,0,0" Foreground="{DynamicResource DesignerMutedBrush}" Data="M7,1 A6,6 0 1 1 3,12 L0,15 1,16 4,13 A6,6 0 0 1 7,1 M7,3 A4,4 0 1 0 7,11 A4,4 0 1 0 7,3 Z" /></TextBox.InnerLeftContent>
+            <TextBox.InnerLeftContent><PathIcon Classes="designer-icon" Width="12" Height="12" Margin="7,0,0,0" Foreground="{DynamicResource DesignerMutedBrush}" Data="F1 M8 1A7 7 0 1 1 8 15A7 7 0 1 1 8 1Z M8 3A5 5 0 1 0 8 13A5 5 0 1 0 8 3Z M12 11L19 18L17.6 19.4L10.6 12.4Z" /></TextBox.InnerLeftContent>
           </TextBox>
           <ContentControl Name="LayoutHost" Grid.Row="3" HorizontalContentAlignment="Stretch" Margin="8,0,8,6" />
           <ContentControl Name="PropertyHost" Grid.Row="4" HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch" Margin="8,0,8,4" />
@@ -294,35 +312,35 @@
     <Border Background="{DynamicResource DesignerPanelBrush}" BorderBrush="{DynamicResource DesignerBorderBrush}" BorderThickness="0,0,0,1" Padding="10,6">
       <Grid ColumnDefinitions="Auto,*,Auto">
         <StackPanel Orientation="Horizontal" Spacing="5" VerticalAlignment="Center">
-          <PathIcon Width="14" Height="14" Foreground="{DynamicResource DesignerMotionBrush}" Margin="2,0,4,0" Data="M9,0 L18,9 9,18 0,9 Z M9,3 L3,9 9,15 15,9 Z" />
+          <PathIcon Classes="designer-icon" Width="14" Height="14" Foreground="{DynamicResource DesignerMotionBrush}" Margin="2,0,4,0" Data="F1 M9,0 L18,9 9,18 0,9 Z M9,3 L3,9 9,15 15,9 Z" />
           <ComboBox Name="AnimationPrograms" Width="184" ToolTip.Tip="Active animation program" />
-          <Button Name="NewAnimation" Classes="icon" Content="+" ToolTip.Tip="New animation program" />
+          <Button Name="NewAnimation" Classes="icon" ToolTip.Tip="New animation program"><PathIcon Classes="designer-icon" Width="14" Height="14" Data="F1 M7 1H9V7H15V9H9V15H7V9H1V7H7Z" /></Button>
           <Button Name="DuplicateAnimation" Classes="icon" ToolTip.Tip="Duplicate animation program">
-            <PathIcon Width="14" Height="14" Data="M1,1 L13,1 13,3 3,3 3,13 1,13 Z M5,5 L19,5 19,19 5,19 Z M7,7 L7,17 17,17 17,7 Z" />
+            <PathIcon Classes="designer-icon" Width="14" Height="14" Data="F1 M1,1 L13,1 13,3 3,3 3,13 1,13 Z M5,5 L19,5 19,19 5,19 Z M7,7 L7,17 17,17 17,7 Z" />
           </Button>
           <Button Name="DeleteAnimation" Classes="icon" ToolTip.Tip="Delete animation program">
-            <PathIcon Width="14" Height="14" Data="M6,1 L14,1 14,3 19,3 19,5 1,5 1,3 6,3 Z M3,7 L17,7 16,19 4,19 Z M6,9 L7,17 8,17 7,9 Z M12,9 L11,17 13,17 14,9 Z" />
+            <PathIcon Classes="designer-icon" Width="14" Height="14" Data="F1 M6,1 L14,1 14,3 19,3 19,5 1,5 1,3 6,3 Z M3,7 L17,7 16,19 4,19 Z M6,9 L7,17 8,17 7,9 Z M12,9 L11,17 13,17 14,9 Z" />
           </Button>
         </StackPanel>
         <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="4" HorizontalAlignment="Center" VerticalAlignment="Center">
-          <Button Name="Play" Classes="icon" ToolTip.Tip="Play or pause the active animation"><Grid><PathIcon Name="PlayIcon" Width="14" Height="14" Data="M4,2 L17,10 4,18 Z" /><PathIcon Name="PauseIcon" Width="14" Height="14" IsVisible="False" Data="M3,2 L7,2 7,18 3,18 Z M11,2 L15,2 15,18 11,18 Z" /></Grid></Button>
-          <Button Name="Stop" Classes="icon" ToolTip.Tip="Stop playback and rewind"><PathIcon Width="12" Height="12" Data="M2,2 L16,2 16,16 2,16 Z" /></Button>
-          <Button Name="PlayAll" Classes="icon" ToolTip.Tip="Play all animation programs"><PathIcon Width="15" Height="15" Data="M0,2 L10,9 0,16 Z M10,2 L20,9 10,16 Z" /></Button>
+          <Button Name="Play" Classes="icon" ToolTip.Tip="Play or pause the active animation"><Grid><PathIcon Classes="designer-icon" Name="PlayIcon" Width="14" Height="14" Data="F1 M4,2 L17,10 4,18 Z" /><PathIcon Classes="designer-icon" Name="PauseIcon" Width="14" Height="14" IsVisible="False" Data="F1 M3,2 L7,2 7,18 3,18 Z M11,2 L15,2 15,18 11,18 Z" /></Grid></Button>
+          <Button Name="Stop" Classes="icon" ToolTip.Tip="Stop playback and rewind"><PathIcon Classes="designer-icon" Width="12" Height="12" Data="F1 M2,2 L16,2 16,16 2,16 Z" /></Button>
+          <Button Name="PlayAll" Classes="icon" ToolTip.Tip="Play all animation programs"><PathIcon Classes="designer-icon" Width="15" Height="15" Data="F1 M0,2 L10,9 0,16 Z M10,2 L20,9 10,16 Z" /></Button>
           <Border Width="1" Height="18" Background="{DynamicResource DesignerBorderBrush}" Margin="5,0" />
           <Button Name="Record" Classes="nav" ToolTip.Tip="Record property edits as keyframes">
             <StackPanel Orientation="Horizontal" Spacing="6"><Ellipse Width="7" Height="7" Fill="{DynamicResource DesignerRecordingBrush}" VerticalAlignment="Center" /><TextBlock Name="RecordLabel" Text="Record" FontSize="11" /></StackPanel>
           </Button>
-          <Button Name="Keyframe" Classes="icon" ToolTip.Tip="Add a keyframe at the playhead"><PathIcon Width="16" Height="16" Foreground="{DynamicResource DesignerMotionBrush}" Data="M7,0 L14,7 7,14 0,7 Z M7,3 L3,7 7,11 11,7 Z M15,10 L17,10 17,13 20,13 20,15 17,15 17,18 15,18 15,15 12,15 12,13 15,13 Z" /></Button>
-          <Button Name="CommitAnimation" Classes="icon" ToolTip.Tip="Write active animation to document XAML"><PathIcon Width="14" Height="14" Data="M2,1 L15,1 19,5 19,19 1,19 1,1 Z M4,2 L4,8 14,8 14,2 Z M5,12 L5,18 15,18 15,12 Z" /></Button>
+          <Button Name="Keyframe" Classes="icon" ToolTip.Tip="Add a keyframe at the playhead"><PathIcon Classes="designer-icon" Width="16" Height="16" Foreground="{DynamicResource DesignerMotionBrush}" Data="F1 M7,0 L14,7 7,14 0,7 Z M7,3 L3,7 7,11 11,7 Z M15,10 L17,10 17,13 20,13 20,15 17,15 17,18 15,18 15,15 12,15 12,13 15,13 Z" /></Button>
+          <Button Name="CommitAnimation" Classes="icon" ToolTip.Tip="Write active animation to document XAML"><PathIcon Classes="designer-icon" Width="14" Height="14" Data="F1 M2,1 L15,1 19,5 19,19 1,19 1,1 Z M4,2 L4,8 14,8 14,2 Z M5,12 L5,18 15,18 15,12 Z" /></Button>
         </StackPanel>
         <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="4" VerticalAlignment="Center">
           <TextBox Name="Time" Classes="designer-clock" Text="0.00" Width="64" FontFamily="monospace" ToolTip.Tip="Playhead in seconds · Enter to seek" />
           <TextBlock Text="/" Classes="designer-muted" VerticalAlignment="Center" Margin="2,0" />
           <TextBox Name="Duration" Text="3" Width="48" ToolTip.Tip="Duration in seconds · Enter to apply" />
           <TextBlock Text="s" Classes="designer-muted" VerticalAlignment="Center" Margin="0,0,4,0" />
-          <Button Name="TimelineDetails" Classes="icon" ToolTip.Tip="Animation name and target"><PathIcon Width="14" Height="14" Data="M2,3 L18,3 18,5 2,5 Z M2,9 L13,9 13,11 2,11 Z M2,15 L10,15 10,17 2,17 Z M14,12 L16,14 12,18 10,18 10,16 Z" /></Button>
-          <Button Name="AnimationSource" Classes="icon" ToolTip.Tip="Reveal the animation XAML"><PathIcon Width="15" Height="13" Data="M6,1 L0,7 6,13 7,12 2,7 7,2 Z M14,1 L13,2 18,7 13,12 14,13 20,7 Z M11,0 L8,14 10,14 13,0 Z" /></Button>
-          <Button Name="AnimationSettings" Classes="icon" ToolTip.Tip="Animation timing, repeat and direction"><PathIcon Width="15" Height="15" Data="M0,4 L20,4 20,6 0,6 Z M0,14 L20,14 20,16 0,16 Z M4,1 L8,1 8,9 4,9 Z M12,11 L16,11 16,19 12,19 Z" /></Button>
+          <Button Name="TimelineDetails" Classes="icon" ToolTip.Tip="Animation name and target"><PathIcon Classes="designer-icon" Width="14" Height="14" Data="F1 M2,3 L18,3 18,5 2,5 Z M2,9 L13,9 13,11 2,11 Z M2,15 L10,15 10,17 2,17 Z M14,12 L16,14 12,18 10,18 10,16 Z" /></Button>
+          <Button Name="AnimationSource" Classes="icon" ToolTip.Tip="Reveal the animation XAML"><PathIcon Classes="designer-icon" Width="15" Height="13" Data="F1 M6,1 L0,7 6,13 7,12 2,7 7,2 Z M14,1 L13,2 18,7 13,12 14,13 20,7 Z M11,0 L8,14 10,14 13,0 Z" /></Button>
+          <Button Name="AnimationSettings" Classes="icon" ToolTip.Tip="Animation timing, repeat and direction"><PathIcon Classes="designer-icon" Width="15" Height="15" Data="F1 M0,4 L20,4 20,6 0,6 Z M0,14 L20,14 20,16 0,16 Z M4,1 L8,1 8,9 4,9 Z M12,11 L16,11 16,19 12,19 Z" /></Button>
         </StackPanel>
       </Grid>
     </Border>

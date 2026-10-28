@@ -36,6 +36,7 @@ mod session;
 pub mod sharing;
 mod surface;
 mod timeline_lane;
+mod viewport;
 mod workspace;
 
 pub use asset_toolbox::{
@@ -85,6 +86,7 @@ pub use runtime::{PreviewStatus, RuntimeNode};
 pub use session::DesignerSession;
 pub use surface::{DesignGesture, DesignSurface};
 pub use timeline_lane::{EasingPreview, TimelineLane};
+pub use viewport::{CanvasViewport, CanvasWheelMode};
 pub use workspace::shell::{NavigationPane, WorkspaceViewMode};
 pub use workspace::{DesignerDefinitionAsset, DesignerWorkspace, OutlineCommand, OutlineMode};
 
@@ -102,6 +104,10 @@ mod workspace_authoring_tests;
 mod workspace_layout_helpers;
 #[cfg(test)]
 mod workspace_shell_tests;
+#[cfg(test)]
+mod workspace_navigation_tests;
+#[cfg(test)]
+mod workspace_navigation_file_tests;
 mod workspace_tools;
 
 pub use layout_helper_renderer::{

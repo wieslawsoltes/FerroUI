@@ -23,6 +23,7 @@ pub(super) struct Tab {
     pub(super) saved: String,
     pub(super) file: Option<Rc<dyn ferroui_base::platform::storage::IStorageFile>>,
     pub(super) layers: Option<crate::LayerViewSnapshot>,
+    pub(super) viewport: Option<super::navigation::RetainedCanvasViewport>,
 }
 #[derive(Default)]
 pub(super) struct ProjectUi {
@@ -129,6 +130,7 @@ impl DesignerWorkspace {
                 saved: self.saved_source.borrow().clone(),
                 file: self.file.borrow().clone(),
                 layers: Some(session.layer_view_snapshot()),
+                viewport: self.document_canvas_viewport(),
             },
         );
     }
@@ -142,7 +144,7 @@ impl DesignerWorkspace {
             self.apply_source();
         }
         self.capture_tab();
-        let (document, saved, file, layers) = {
+        let (document, saved, file, layers, viewport) = {
             let mut state = self.project.borrow_mut();
             if !state.tabs.contains_key(uri) {
                 let workspace = state
@@ -155,6 +157,7 @@ impl DesignerWorkspace {
                     saved: buffer.saved_source().unwrap_or("").into(),
                     file: None,
                     layers: None,
+                    viewport: None,
                 };
                 state.tabs.insert(uri.into(), tab);
             }
@@ -164,6 +167,7 @@ impl DesignerWorkspace {
                 tab.saved.clone(),
                 tab.file.clone(),
                 tab.layers.clone(),
+                tab.viewport,
             )
         };
         self.disconnect_sharing();
@@ -183,6 +187,7 @@ impl DesignerWorkspace {
         self.pending_source.set(false);
         self.runtime_selection.set(None);
         self.refresh(true);
+        self.restore_canvas_viewport(viewport);
         self.rebuild_document_tabs();
         Ok(())
     }
@@ -638,7 +643,11 @@ impl DesignerWorkspace {
                 }
             });
             group.children().add(row.upcast::<Control>());
-            let close = button("×");
+            let close = button("");
+            close.set_content(Some(Control::boxed(crate::icons::vector_icon(
+                crate::icons::CLOSE,
+                12.0,
+            ))));
             close.classes().add("document-tab-close");
             close.classes().set("active", close_uri == active);
             close.set_min_width(24.0);
