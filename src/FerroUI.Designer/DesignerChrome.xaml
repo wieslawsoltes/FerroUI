@@ -45,10 +45,13 @@
     <Setter Property="IsHitTestVisible" Value="False" />
     <Setter Property="Template">
       <ControlTemplate>
-        <Border Background="{TemplateBinding Background}" Padding="1">
+        <!-- Keep the outer icon/button pixel-aligned, but do not ceil a non-square
+             path's desired width before centering it: its actual uniform geometry
+             still has a fractional width and would otherwise shift toward the left. -->
+        <Border Background="{TemplateBinding Background}" Padding="1" UseLayoutRounding="False">
           <Path Name="DesignerIconPath" Data="{TemplateBinding Data}"
                 Fill="{TemplateBinding Foreground}" Stretch="Uniform"
-                HorizontalAlignment="Center" VerticalAlignment="Center" />
+                HorizontalAlignment="Center" VerticalAlignment="Center" UseLayoutRounding="False" />
         </Border>
       </ControlTemplate>
     </Setter>
