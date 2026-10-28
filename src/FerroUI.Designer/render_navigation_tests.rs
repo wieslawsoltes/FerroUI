@@ -218,11 +218,27 @@ fn native_canvas_navigation_renders_and_preserves_pointer_anchor_and_source_draf
     bitmap.dispose();
     flyout.hide();
 
+    assert_eq!(session.borrow().document().revision(), revision);
+    assert_eq!(session.borrow().document().source(), source);
+    assert!(std::sync::Arc::ptr_eq(
+        &session.borrow().document().ast_snapshot(),
+        &ast
+    ));
+    assert_eq!(session.borrow().selection(), &[card_id]);
+    assert!(!session.borrow().can_undo());
+
     // Toolbar commands and wheel navigation must never apply or discard a dirty XAML draft.
     workspace
         .source_editor()
         .set_text(Some("<Canvas unfinished"));
     let generation = session.borrow().generation();
+    // Text entry itself stages a source transaction. Navigation must preserve that draft
+    // and the last accepted native preview, rather than comparing to the pre-typing source.
+    let draft_revision = session.borrow().document().revision();
+    let draft_source = session.borrow().document().source().to_owned();
+    let draft_ast = session.borrow().document().ast_snapshot();
+    let draft_selection = session.borrow().selection().to_vec();
+    let draft_undo = session.borrow().can_undo();
     let anchor = center_in(&card, &window);
     wheel(
         &workspace,
@@ -243,14 +259,14 @@ fn native_canvas_navigation_renders_and_preserves_pointer_anchor_and_source_draf
         Some("<Canvas unfinished")
     );
     assert_eq!(session.borrow().generation(), generation);
-    assert_eq!(session.borrow().document().revision(), revision);
-    assert_eq!(session.borrow().document().source(), source);
+    assert_eq!(session.borrow().document().revision(), draft_revision);
+    assert_eq!(session.borrow().document().source(), draft_source);
     assert!(std::sync::Arc::ptr_eq(
         &session.borrow().document().ast_snapshot(),
-        &ast
+        &draft_ast
     ));
-    assert_eq!(session.borrow().selection(), &[card_id]);
-    assert!(!session.borrow().can_undo());
+    assert_eq!(session.borrow().selection(), draft_selection.as_slice());
+    assert_eq!(session.borrow().can_undo(), draft_undo);
     window.close();
     drop(flyout);
     drop(options);
