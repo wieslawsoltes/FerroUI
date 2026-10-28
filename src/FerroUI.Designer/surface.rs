@@ -193,8 +193,23 @@ impl DesignSurface {
         *self.changed.borrow_mut() = Some(Rc::new(callback));
     }
     pub fn set_zoom(&self, zoom: f64) {
-        self.zoom
-            .set(if zoom.is_finite() { zoom.max(0.1) } else { 1.0 });
+        self.zoom.set(if zoom.is_finite() {
+            zoom.clamp(
+                crate::CanvasViewport::MIN_ZOOM,
+                crate::CanvasViewport::MAX_ZOOM,
+            )
+        } else {
+            1.0
+        });
+    }
+    /// A camera change cancels pending authored geometry rather than committing stale coordinates.
+    pub(crate) fn cancel_for_navigation(&self) {
+        let pending = self.gesture.borrow().is_some() || self.insert.borrow().is_some();
+        if pending {
+            self.clear_pending();
+            self.notify();
+        }
+        self.invalidate_visual();
     }
     pub fn set_grid(&self, size: f64) {
         self.grid

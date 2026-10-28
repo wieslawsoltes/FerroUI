@@ -365,6 +365,7 @@ impl DesignerWorkspace {
                 saved: self.saved_source.borrow().clone(),
                 file: self.file.borrow().clone(),
                 layers: Some(self.session.borrow().layer_view_snapshot()),
+                viewport: self.document_canvas_viewport(),
             },
         );
         for change in changes {
@@ -384,6 +385,7 @@ impl DesignerWorkspace {
                     saved: buffer.saved_source().unwrap_or("").into(),
                     file: None,
                     layers: None,
+                    viewport: None,
                 };
                 tabs.insert(change.uri.clone(), tab);
             }

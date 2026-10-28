@@ -6,10 +6,9 @@ use ferroui_base::input::{InputElement, Key, KeyModifiers};
 use ferroui_base::layout::{HorizontalAlignment, Orientation};
 use ferroui_base::media::{MatrixTransform, SolidColorBrush};
 use ferroui_base::threading::{Dispatcher, DispatcherPriority, DispatcherTimer};
-use ferroui_base::{Matrix, Ref, Thickness, WeakRef};
+use ferroui_base::{Ref, Thickness, WeakRef};
 use ferroui_controls::{
-    Button, ContentControl, Control, Grid, LayoutTransformControl, Slider, StackPanel, TextBlock,
-    TextBox,
+    Button, ContentControl, Control, Grid, Slider, StackPanel, TextBlock, TextBox,
 };
 use ferroui_designer_animation::{AnimationValue, Easing};
 use ferroui_designer_core::NodeId;
@@ -41,7 +40,7 @@ pub struct DesignerWorkspace {
     session: Rc<RefCell<DesignerSession>>,
     surface: Ref<DesignSurface>,
     artboard: Ref<Grid>,
-    artboard_transform: Ref<LayoutTransformControl>,
+    artboard_transform: Ref<Control>,
     source: Ref<TextBox>,
     inspectors: inspectors::InspectorControls,
     tracks: Ref<StackPanel>,
@@ -59,7 +58,7 @@ pub struct DesignerWorkspace {
     last_generation: Cell<u64>,
     outline_mode: Cell<OutlineMode>,
     runtime_selection: Cell<Option<u64>>,
-    zoom: Cell<f64>,
+    navigation: navigation::NavigationUi,
     timer: RefCell<Option<Rc<DispatcherTimer>>>,
     property_editors: RefCell<Vec<Rc<dyn PropertyEditorFactory>>>,
     timeline_lanes: RefCell<Vec<WeakRef<crate::timeline_lane::TimelineLane>>>,
@@ -134,7 +133,7 @@ impl DesignerWorkspace {
             last_generation: Cell::new(u64::MAX),
             outline_mode: Cell::new(OutlineMode::Source),
             runtime_selection: Cell::new(None),
-            zoom: Cell::new(1.0),
+            navigation: navigation::NavigationUi::default(),
             timer: RefCell::new(None),
             property_editors: RefCell::new(Vec::new()),
             timeline_lanes: RefCell::new(Vec::new()),
@@ -209,27 +208,31 @@ impl DesignerWorkspace {
         })
     }
     pub fn zoom(&self) -> f64 {
-        self.zoom.get()
+        self.canvas_viewport().zoom()
     }
     pub fn set_zoom(&self, zoom: f64) {
         let zoom = if zoom.is_finite() {
-            zoom.clamp(0.1, 4.0)
+            zoom.max(crate::CanvasViewport::MIN_ZOOM)
         } else {
             1.0
         };
-        self.zoom.set(zoom);
-        self.surface.set_zoom(zoom);
-        self.artboard_transform.set_layout_transform(Some(
-            MatrixTransform::with_matrix(Matrix::create_scale(zoom, zoom)).into(),
-        ));
-        self.root
-            .get_control::<Button>("ZoomReset")
-            .set_content(Some(Rc::new(format!("{}%", (zoom * 100.0).round() as i32))));
-        self.surface.invalidate_visual();
+        if self.set_unmeasured_canvas_zoom(zoom) {
+            return;
+        }
+        let canvas = self
+            .root
+            .get_control::<Control>("ArtboardScroll")
+            .bounds()
+            .size();
+        let _ = self.zoom_canvas_at(
+            zoom,
+            ferroui_base::Point::new(canvas.width / 2.0, canvas.height / 2.0),
+        );
     }
 
     fn connect(self: &Rc<Self>) {
         self.connect_shell();
+        self.connect_canvas_navigation();
         self.connect_file_commands();
         self.connect_project();
         self.connect_source_tools();
@@ -244,6 +247,7 @@ impl DesignerWorkspace {
             ("ZoomIn", Action::ZoomIn),
             ("ZoomReset", Action::ZoomReset),
             ("SelectTool", Action::Select),
+            ("PanTool", Action::Pan),
             ("PreviewTool", Action::Interact),
             ("ApplySource", Action::Apply),
             ("SourceMode", Action::Source),
@@ -477,7 +481,19 @@ impl DesignerWorkspace {
     }
 
     fn perform(self: &Rc<Self>, action: Action) {
-        if self.pending_source.get() {
+        let view_only = matches!(
+            action,
+            Action::ZoomOut
+                | Action::ZoomIn
+                | Action::ZoomReset
+                | Action::Select
+                | Action::Pan
+                | Action::Interact
+                | Action::Source
+                | Action::Visual
+                | Action::Logical
+        );
+        if self.pending_source.get() && !view_only {
             self.apply_source();
         }
         let result = match action {
@@ -508,10 +524,16 @@ impl DesignerWorkspace {
                 Ok(())
             }
             Action::Select => {
+                self.set_canvas_pan_tool(false);
                 self.surface.set_interactive(false);
                 Ok(())
             }
+            Action::Pan => {
+                self.set_canvas_pan_tool(true);
+                Ok(())
+            }
             Action::Interact => {
+                self.set_canvas_pan_tool(false);
                 self.surface.set_interactive(true);
                 Ok(())
             }
@@ -569,6 +591,7 @@ impl DesignerWorkspace {
     }
 
     pub fn refresh(self: &Rc<Self>, force: bool) {
+        self.refresh_canvas_navigation();
         let session = self.session.borrow();
         let revision = session.document().revision();
         let generation = session.generation();
@@ -794,6 +817,7 @@ enum Action {
     ZoomIn,
     ZoomReset,
     Select,
+    Pan,
     Interact,
     Apply,
     Source,
@@ -830,6 +854,8 @@ mod inspectors;
 mod layer_commands;
 #[path = "workspace_layout.rs"]
 mod layout;
+#[path = "workspace_navigation.rs"]
+mod navigation;
 #[path = "workspace_preview_environment.rs"]
 mod preview_environment;
 #[path = "workspace_project.rs"]

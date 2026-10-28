@@ -2,9 +2,7 @@
 //! Hiding a pane keeps its control, selection, pending text and scroll state alive.
 use super::{DesignerWorkspace, OutlineCommand, OutlineMode};
 use ferroui_base::input::{InputElement, Key, KeyModifiers};
-use ferroui_controls::{
-    Border, Button, Control, Grid, GridLength, MenuItem, ScrollViewer, TextBlock,
-};
+use ferroui_controls::{Border, Button, Control, Grid, GridLength, MenuItem, TextBlock};
 use ferroui_designer_tools::{Alignment, Axis};
 use std::cell::{Cell, RefCell};
 use std::rc::Rc;
@@ -77,6 +75,9 @@ impl DesignerWorkspace {
 
     /// Switches the visible editor without reloading the document or applying pending text.
     pub fn set_view_mode(&self, mode: WorkspaceViewMode) {
+        if mode != self.view_mode() {
+            self.cancel_canvas_navigation();
+        }
         let layout = self.root.get_control::<Grid>("DocumentLayout");
         let source = self.root.get_control::<Grid>("SourcePane");
         if self.view_mode() == WorkspaceViewMode::Split {
@@ -239,14 +240,8 @@ impl DesignerWorkspace {
 
     /// Fits the whole artboard using the measured viewport and the canvas padding.
     pub fn fit_artboard(&self) -> Result<(), String> {
-        let viewport = self.root.get_control::<ScrollViewer>("ArtboardScroll");
-        let size = viewport.bounds().size();
-        if !viewport.is_visible() || size.width <= 80.0 || size.height <= 116.0 {
-            return Err("Show and arrange the design canvas before fitting the artboard".into());
-        }
         let (width, height) = self.artboard_size();
-        self.set_zoom(((size.width - 80.0) / width).min((size.height - 116.0) / height));
-        Ok(())
+        self.fit_canvas_bounds(ferroui_base::Rect::new(0.0, 0.0, width, height))
     }
 
     pub(super) fn connect_shell(self: &Rc<Self>) {
@@ -261,11 +256,19 @@ impl DesignerWorkspace {
         }
         for (name, label) in [
             ("SelectTool", "Select and manipulate elements"),
+            (
+                "PanTool",
+                "Pan the design canvas. Middle-drag or hold Space and drag.",
+            ),
             ("PreviewTool", "Interact with the preview"),
             ("ZoomOut", "Zoom out"),
             ("ZoomIn", "Zoom in"),
             ("ZoomReset", "Reset zoom to 100 percent"),
             ("ZoomFit", "Fit artboard"),
+            (
+                "ZoomOptions",
+                "Zoom percentage, fit selection and mouse wheel behavior",
+            ),
             ("NewAnimation", "New animation program"),
             ("DuplicateAnimation", "Duplicate animation program"),
             ("DeleteAnimation", "Delete animation program"),
@@ -469,7 +472,11 @@ impl DesignerWorkspace {
         self.root
             .get_control::<Button>("SelectTool")
             .classes()
-            .set("active", selecting);
+            .set("active", selecting && !self.canvas_pan_tool());
+        self.root
+            .get_control::<Button>("PanTool")
+            .classes()
+            .set("active", self.canvas_pan_tool());
         self.root
             .get_control::<Button>("PreviewTool")
             .classes()

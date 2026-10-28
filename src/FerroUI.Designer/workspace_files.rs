@@ -359,6 +359,7 @@ impl DesignerWorkspace {
                 self.session
                     .borrow_mut()
                     .set_document_uri(saved_uri.clone())?;
+                self.rebind_canvas_document_uri();
                 self.project.borrow_mut().tabs.remove(&previous_uri);
             }
             *self.file.borrow_mut() = Some(file);
