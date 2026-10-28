@@ -19,12 +19,33 @@ adapters. It does not add a second document model or another rendering stack.
 | Tab order | Qt numbered tab-order mode | `TabIndex` was editable as a scalar; no navigation model/editor | Added native navigation-group catalog, staged order editor, mode editing and canvas badges |
 | Label/input associations | Qt buddy connections | Native `Label.Target` existed without designer authoring | Added namescope-correct target picker, connection overlay and atomic target-name/binding creation |
 | Preview environment | Figma device sizes/orientation; Qt form previews; native theme scopes | Artboard-size API and a binary theme toggle | Added staged size presets, custom dimensions, orientation, inherited/light/dark theme and reading direction |
+| Canvas navigation and framing | Figma pointer-anchored zoom, fit selection and file-local views; Blend wheel zoom and Space panning | Zoom buttons and a centered scroll container; no independent camera or fit-selection command | Added a finite native viewport, wheel-mode choice, middle/Space/hand-tool panning, percentage editing, selection framing and retained tab cameras |
+| Compact command icons | Visual Studio's centered, padded and consistently weighted icon frames | Mixed compact paths and symbol-font glyphs under application command templates | Designer-scoped vector normalization fits complete geometry, reserves padding and follows themed foreground |
 
 The comparison maps concepts to FerroUI's native contracts. Figma variables map to existing
 resource/theme authoring, and application interaction uses native bindings, behaviors,
 states and navigation. Qt's C++ signal/slot syntax and Figma's scene-file format are not
 introduced into XAML. Foreign plugin ABIs, operating-system emulation and arbitrary Rust
 code generation are separate concerns from this authoring layer.
+
+## Canvas navigation and compact icons
+
+The canvas now uses a single finite render transform with reusable artboard/viewport
+coordinate conversion. Wheel input pans by default; Ctrl/Cmd+wheel zooms around the pointer.
+The zoom options also offer Blend-style plain-wheel zoom. Middle drag, temporary
+Space+left drag and the persistent Pan tool share the same camera. Shift+1 fits the artboard,
+Shift+2 fits the native selection, and Ctrl/Cmd+0 restores actual size. The options flyout
+accepts custom percentages from 1% to 1600% and exposes both wheel modes.
+
+Document tabs retain independent views, and returning from a definition scope restores the
+document camera. Unmodified wheel input reaches application controls in Interact mode.
+Camera changes leave source, undo and collaboration edits untouched and retire unfinished
+authored canvas gestures before changing their coordinate frame.
+
+Designer icons use a scoped vector template that fits their complete geometry uniformly,
+centers it with a logical-pixel gutter, and follows themed foreground. Application preview
+icons keep their own theme semantics. See [canvas navigation and designer icons](canvas-navigation.md)
+for the input contract, public APIs, icon treatment and primary reference comparison.
 
 ## Design-time data
 
@@ -240,6 +261,10 @@ Additional views: [Design Data editor](images/designer-design-data-editor.png),
 - [Visual Studio design-time data](https://learn.microsoft.com/en-us/visualstudio/xaml-tools/xaml-designtime-data?view=visualstudio)
 - [Visual Studio generated sample data](https://learn.microsoft.com/en-us/visualstudio/xaml-tools/xaml-design-time-sample-data?view=visualstudio)
 - [Blend styles, templates and resource scopes](https://learn.microsoft.com/en-us/visualstudio/xaml-tools/modify-the-style-of-objects-in-blend?view=visualstudio)
+- [Blend artboard navigation shortcuts](https://learn.microsoft.com/en-us/visualstudio/xaml-tools/keyboard-shortcuts-in-blend?view=visualstudio)
+- [Visual Studio icon layout and compact-size guidance](https://learn.microsoft.com/en-us/visualstudio/extensibility/ux-guidelines/images-and-icons-for-visual-studio?view=visualstudio)
+- [Figma zoom, fit selection and file-tab-local view settings](https://help.figma.com/hc/en-us/articles/360041065034-Adjust-your-zoom-and-view-options)
+- [Figma canvas panning](https://help.figma.com/hc/en-us/articles/30925881896727-FD4B-Navigate-Figma-Design-files)
 - [Figma lock and unlock layers](https://help.figma.com/hc/en-us/articles/360041596573-Lock-and-unlock-layers)
 - [Figma layer visibility](https://help.figma.com/hc/en-us/articles/360041112614-Toggle-visibility-to-hide-layers)
 - [Figma device and orientation settings](https://help.figma.com/hc/en-us/articles/21158597546391-Set-prototype-device-and-background-settings)

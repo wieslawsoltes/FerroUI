@@ -36,6 +36,10 @@ by both the runtime loader and compiled XAML pipeline.
 
 ## Visual editing
 
+- Pan with the wheel, middle drag or Space+left drag; Ctrl/Cmd+wheel zooms around the pointer.
+  **Pan** selects the persistent hand tool. The zoom **…** menu provides percentages, fit
+  selection and the alternate Blend wheel mode. Each tab retains its camera. See the
+  [canvas navigation guide](../../docs/designer/canvas-navigation.md) for the complete input contract.
 - Drag an asset onto a panel or pick an asset and click an insertion location.
 - Select in the artboard or source hierarchy; Shift selects multiple controls. Drag the selection,
   use the eight size handles, or rotate around its actual transform origin. Affine manipulation

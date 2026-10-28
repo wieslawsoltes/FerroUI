@@ -21,6 +21,8 @@ the existing coverage and the latest additions: [design-time values and sample d
 local layer locking/hiding/isolation, native keyboard-order and label-target authoring, and
 responsive preview environments. Open the [workflow sample](samples/DesignWorkflows.xaml)
 to exercise them together.
+The [canvas navigation and icon guide](canvas-navigation.md) covers mouse-wheel modes,
+pointer-anchored zoom, hand panning, fit selection, per-tab cameras and compact vector icons.
 
 ## Run
 
@@ -70,7 +72,13 @@ inset fields, full keyboard-focus outlines, quiet dock tabs and consistent vecto
 The preview keeps its own application theme. The workspace starts in **Design** mode with a large artboard.
 **Split** exposes the synchronized XAML editor, and **XAML** gives it the entire document area.
 F6 cycles these views without reloading the document or discarding partially typed source.
-**Fit** uses the measured canvas viewport. The **Timeline** command releases its working space
+**Fit** uses the measured canvas viewport. Wheel input pans; Ctrl/Cmd+wheel zooms around the
+pointer. Shift+wheel pans horizontally, and middle drag or Space+left drag pans freely.
+The **Pan** tool retains hand mode until Select or Interact is chosen. Open **…** beside
+**Fit** for an editable percentage, fit selection, actual size and the alternate Blend wheel
+mode. Shift+1 fits the artboard; Shift+2 fits the selection. Each retained document tab keeps
+its view. See [canvas navigation](canvas-navigation.md) for input routing and host APIs.
+The **Timeline** command releases its working space
 when hidden and restores its resized height when reopened.
 **Focus canvas** temporarily hides both docks and the timeline, preserving their sizes and view
 state. Use the canvas shelf or Ctrl+Shift+F / Cmd+Shift+F to restore them. `V` selects objects;
