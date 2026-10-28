@@ -1,7 +1,7 @@
 use crate::layout_helpers::{
     LayoutHandleAction, LayoutHelperRequest, LayoutHelperScene, LayoutPlacement,
 };
-use crate::{Axis, Point, PropertyRegistry, Rect, Result, ToolError, error, require};
+use crate::{error, require, Axis, Point, PropertyRegistry, Rect, Result, ToolError};
 use ferroui_designer_core::{Document, Edit, Node, NodeId, NodeKind};
 use serde::{Deserialize, Serialize};
 use std::collections::{BTreeMap, BTreeSet};
@@ -897,13 +897,25 @@ impl LayoutAdapter for BuiltIn {
                 if before == after {
                     return Ok(vec![]);
                 }
-                ensure_literal(context, *node, "Width")?;
-                ensure_literal(context, *node, "Height")?;
+                let width_changed = before.width != after.width;
+                let height_changed = before.height != after.height;
+                if width_changed {
+                    ensure_literal(context, *node, "Width")?;
+                }
+                if height_changed {
+                    ensure_literal(context, *node, "Height")?;
+                }
                 let delta = Point::new(after.x - before.x, after.y - before.y);
                 let mut edits = if self.name == "Canvas" {
-                    // Normalize right/bottom anchors even when the leading edge did not move.
-                    // Otherwise changing Width/Height moves the opposite anchored edge.
-                    canvas_position_plan(context, *node, delta)?
+                    // Normalize only the resized axes. Bindings and automatic dimensions
+                    // on the untouched axis remain owned by their original source.
+                    canvas_position_plan(
+                        context,
+                        *node,
+                        delta,
+                        width_changed || delta.x != 0.0,
+                        height_changed || delta.y != 0.0,
+                    )?
                 } else {
                     ensure_literal(context, *node, "Margin")?;
                     let mut margin = context.layout(*node)?.margin;
@@ -916,10 +928,12 @@ impl LayoutAdapter for BuiltIn {
                     // changing sibling slots in size-to-content flow panels.
                     vec![margin_edit(*node, margin)?]
                 };
-                edits.extend([
-                    set(*node, "Width", after.width),
-                    set(*node, "Height", after.height),
-                ]);
+                if width_changed {
+                    edits.push(set(*node, "Width", after.width));
+                }
+                if height_changed {
+                    edits.push(set(*node, "Height", after.height));
+                }
                 Ok(edits)
             }
             LayoutAction::Reorder { node, index } => {
@@ -1014,7 +1028,7 @@ fn move_plan(
         return Ok(vec![]);
     }
     if panel == "Canvas" {
-        canvas_position_plan(context, node, delta)
+        canvas_position_plan(context, node, delta, true, true)
     } else {
         ensure_literal(context, node, "Margin")?;
         let mut margin = context.layout(node)?.margin;
@@ -1037,15 +1051,41 @@ fn canvas_position_plan(
     context: &LayoutContext<'_>,
     node: NodeId,
     delta: Point,
+    horizontal: bool,
+    vertical: bool,
 ) -> Result<Vec<Edit>> {
     delta.validate()?;
     let element = context.element(node)?;
-    for property in ["Canvas.Left", "Canvas.Top", "Canvas.Right", "Canvas.Bottom"] {
-        ensure_literal(context, node, property)?;
+    for (leading, trailing, active) in [
+        ("Canvas.Left", "Canvas.Right", horizontal),
+        ("Canvas.Top", "Canvas.Bottom", vertical),
+    ] {
+        if active {
+            ensure_literal(context, node, leading)?;
+            ensure_literal(context, node, trailing)?;
+        }
     }
-    let measured = if element.attribute("Canvas.Left").is_none()
-        || element.attribute("Canvas.Top").is_none()
-    {
+    // Native defaults expose NaN for absent anchors. Alias-aware context lookup also
+    // reads effective styled anchors supplied by a live host, without losing their source.
+    let anchor = |name: &str, active: bool| -> Result<Option<f64>> {
+        if !active {
+            return Ok(None);
+        }
+        context
+            .property(node, name)
+            .map(|value| {
+                if value.trim().parse::<f64>().is_ok_and(f64::is_nan) {
+                    Ok(None)
+                } else {
+                    number(value).map(Some)
+                }
+            })
+            .transpose()
+            .map(Option::flatten)
+    };
+    let x = anchor("Canvas.Left", horizontal)?;
+    let y = anchor("Canvas.Top", vertical)?;
+    let measured = if (horizontal && x.is_none()) || (vertical && y.is_none()) {
         let layout = context.layout(node)?;
         let p = context.bounds(context.parent(node)?)?;
         let position = if let Some(slot) = layout.slot {
@@ -1061,27 +1101,37 @@ fn canvas_position_plan(
     } else {
         None
     };
-    let x = element
-        .attribute("Canvas.Left")
-        .map(number)
-        .transpose()?
-        .unwrap_or_else(|| measured.unwrap().x);
-    let y = element
-        .attribute("Canvas.Top")
-        .map(number)
-        .transpose()?
-        .unwrap_or_else(|| measured.unwrap().y);
-    let position = Point::new(x + delta.x, y + delta.y);
+    let position = Point::new(
+        if horizontal {
+            x.unwrap_or_else(|| measured.unwrap().x) + delta.x
+        } else {
+            0.0
+        },
+        if vertical {
+            y.unwrap_or_else(|| measured.unwrap().y) + delta.y
+        } else {
+            0.0
+        },
+    );
     position.validate()?;
-    let mut edits = vec![
-        set(node, "Canvas.Left", position.x),
-        set(node, "Canvas.Top", position.y),
-    ];
-    for name in ["Canvas.Right", "Canvas.Bottom"] {
-        if element.attribute(name).is_some() {
+    let mut attributes = Vec::new();
+    if horizontal {
+        attributes.push(("Canvas.Left".into(), position.x.to_string()));
+    }
+    if vertical {
+        attributes.push(("Canvas.Top".into(), position.y.to_string()));
+    }
+    let mut edits = crate::plan_layout_attributes(context.document, node, &attributes)?;
+    for (name, active) in [("Canvas.Right", horizontal), ("Canvas.Bottom", vertical)] {
+        if !active {
+            continue;
+        }
+        if let Some(attribute) =
+            crate::layout_attributes::layout_attribute(context.document, element, name)?
+        {
             edits.push(Edit::RemoveAttribute {
                 node,
-                name: name.into(),
+                name: attribute.name.clone(),
             });
         }
     }
@@ -1880,3 +1930,7 @@ pub(crate) fn single_content(name: &str) -> bool {
 fn compact(value: f64) -> String {
     crate::layout_helpers::compact(value)
 }
+
+#[cfg(test)]
+#[path = "layout_resize_tests.rs"]
+mod resize_tests;
