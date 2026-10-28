@@ -8,8 +8,7 @@ use ferroui_base::input::{
 use ferroui_base::interactivity::InteractiveImpl;
 use ferroui_base::layout::{HorizontalAlignment, LayoutableImpl, VerticalAlignment};
 use ferroui_base::media::{
-    BoxShadows, DrawingContext, FlowDirection, FormattedText, Geometry, IBrush, SolidColorBrush,
-    Typeface,
+    BoxShadows, DrawingContext, FlowDirection, FormattedText, IBrush, SolidColorBrush, Typeface,
 };
 use ferroui_base::utilities::CultureInfo;
 use ferroui_base::{
@@ -18,8 +17,8 @@ use ferroui_base::{
 };
 use ferroui_controls::automation::AutomationProperties;
 use ferroui_controls::{
-    Button, ColumnDefinitions, Control, ControlImpl, DataValidationErrors, Grid, PathIcon,
-    RowDefinitions, TextBlock, TextBox, ToolTip,
+    Button, ColumnDefinitions, Control, ControlImpl, DataValidationErrors, Grid, RowDefinitions,
+    TextBlock, TextBox, ToolTip,
 };
 use std::cell::{Cell, RefCell};
 use std::rc::Rc;
@@ -30,19 +29,12 @@ type ComponentsAction = Rc<dyn Fn([f64; 4])>;
 
 /// Small filled vectors keep the inspector independent of symbol fonts and platform glyphs.
 pub(crate) fn property_icon(data: &str, size: f64) -> Ref<Control> {
-    let icon = PathIcon::new();
-    icon.set_data(Geometry::parse(data).expect("valid designer property icon"));
-    icon.set_width(size);
-    icon.set_height(size);
-    icon.set_horizontal_alignment(HorizontalAlignment::Center);
-    icon.set_vertical_alignment(VerticalAlignment::Center);
-    icon.set_is_hit_test_visible(false);
-    icon.upcast::<Control>()
+    crate::icons::vector_icon(data, size).upcast::<Control>()
 }
 
-pub(crate) const RESET_ICON: &str = "M4,2 L4,5.2 A5,5 0 1 1 3.2,9 L1.7,9 A6.5,6.5 0 1 0 4,3.2 L4,2 Z M1,2 L6,2 6,3.5 2.5,3.5 2.5,7 1,7 Z";
-pub(crate) const CHEVRON_DOWN_ICON: &str = "M2,5 L8,11 14,5 12.8,3.8 8,8.6 3.2,3.8 Z";
-pub(crate) const CHEVRON_RIGHT_ICON: &str = "M5,2 L11,8 5,14 3.8,12.8 8.6,8 3.8,3.2 Z";
+pub(crate) const RESET_ICON: &str = "F1 M4,2 L4,5.2 A5,5 0 1 1 3.2,9 L1.7,9 A6.5,6.5 0 1 0 4,3.2 L4,2 Z M1,2 L6,2 6,3.5 2.5,3.5 2.5,7 1,7 Z";
+pub(crate) const CHEVRON_DOWN_ICON: &str = "F1 M2,5 L8,11 14,5 12.8,3.8 8,8.6 3.2,3.8 Z";
+pub(crate) const CHEVRON_RIGHT_ICON: &str = "F1 M5,2 L11,8 5,14 3.8,12.8 8.6,8 3.8,3.2 Z";
 
 /// Cross-process native drag format for a single XAML property value, such as a color,
 /// resource expression or binding. Targets still validate against their active document.
@@ -585,7 +577,7 @@ impl PropertyComponentsEditor {
         let link = Button::new();
         link.classes().add("property-link");
         let icon = property_icon(
-            "M5.5,3 L7,3 7,4.5 5.5,4.5 A3.5,3.5 0 0 0 5.5,11.5 L7,11.5 7,13 5.5,13 A5,5 0 0 1 5.5,3 Z M9,3 L10.5,3 A5,5 0 0 1 10.5,13 L9,13 9,11.5 10.5,11.5 A3.5,3.5 0 0 0 10.5,4.5 L9,4.5 Z M5,7.25 L11,7.25 11,8.75 5,8.75 Z",
+            "F1 M5.5,3 L7,3 7,4.5 5.5,4.5 A3.5,3.5 0 0 0 5.5,11.5 L7,11.5 7,13 5.5,13 A5,5 0 0 1 5.5,3 Z M9,3 L10.5,3 A5,5 0 0 1 10.5,13 L9,13 9,11.5 10.5,11.5 A3.5,3.5 0 0 0 10.5,4.5 L9,4.5 Z M5,7.25 L11,7.25 11,8.75 5,8.75 Z",
             14.0,
         );
         link.set_content(Some(Control::boxed(&icon)));

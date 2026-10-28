@@ -3,12 +3,12 @@
 use ferroui_base::input::{InputElement, Key, PointerPressedEventArgs};
 use ferroui_base::interactivity::RoutingStrategies;
 use ferroui_base::layout::{HorizontalAlignment, VerticalAlignment};
-use ferroui_base::media::{FontWeight, Geometry, SolidColorBrush, TextTrimming};
+use ferroui_base::media::{FontWeight, SolidColorBrush, TextTrimming};
 use ferroui_base::{CornerRadius, Point, Ref, Thickness};
 use ferroui_controls::automation::AutomationProperties;
 use ferroui_controls::templates::FuncDataTemplate;
 use ferroui_controls::{
-    Border, Button, ColumnDefinitions, ComboBox, Control, Grid, ListBox, PathIcon, RowDefinitions,
+    Border, Button, ColumnDefinitions, ComboBox, Control, Grid, ListBox, RowDefinitions,
     StackPanel, TextBlock, TextBox, ToolTip,
 };
 use ferroui_designer_core::NodeId;
@@ -99,7 +99,10 @@ impl ComponentLibrary {
         let create = Button::new();
         create.set_name(Some("NewComponentResource".into()));
         create.classes().add("icon");
-        create.set_content(Some(Rc::new("+".to_owned())));
+        create.set_content(Some(Control::boxed(crate::icons::vector_icon(
+            crate::icons::ADD,
+            14.0,
+        ))));
         create.set_height(26.0);
         ToolTip::set_tip(
             &create,
@@ -386,17 +389,25 @@ impl ComponentLibrary {
             square.set_background(Some(SolidColorBrush::with_color(swatch).into()));
             square.upcast::<Control>()
         } else {
-            let icon = PathIcon::new();
-            icon.set_width(14.0);
-            icon.set_height(14.0);
+            let icon = crate::icons::vector_icon(
+                match item.filter {
+                    ComponentLibraryFilter::Components => {
+                        "F1 M8,0 L16,8 8,16 0,8 Z M8,3 L3,8 8,13 13,8 Z"
+                    }
+                    ComponentLibraryFilter::Templates => {
+                        "F1 M1,1 L15,1 15,15 1,15 Z M3,3 L3,13 13,13 13,3 Z M5,5 L11,5 11,7 5,7 Z M5,9 L9,9 9,11 5,11 Z"
+                    }
+                    ComponentLibraryFilter::Themes => "F1 M8,0 L16,8 8,16 0,8 Z M8,3 L3,8 8,13 Z",
+                    ComponentLibraryFilter::Dictionaries => {
+                        "F1 M1,2 L7,2 9,4 15,4 15,15 1,15 Z M3,6 L3,13 13,13 13,6 Z"
+                    }
+                    _ => {
+                        "F1 M1,1 L15,1 15,15 1,15 Z M3,3 L3,13 13,13 13,3 Z M5,5 L11,5 11,11 5,11 Z"
+                    }
+                },
+                14.0,
+            );
             icon.set_foreground(Some(SolidColorBrush::from_uint32(color).into()));
-            icon.set_data(Geometry::parse(match item.filter {
-                ComponentLibraryFilter::Components => "M8,0 L16,8 8,16 0,8 Z M8,3 L3,8 8,13 13,8 Z",
-                ComponentLibraryFilter::Templates => "M1,1 L15,1 15,15 1,15 Z M3,3 L3,13 13,13 13,3 Z M5,5 L11,5 11,7 5,7 Z M5,9 L9,9 9,11 5,11 Z",
-                ComponentLibraryFilter::Themes => "M8,0 L16,8 8,16 0,8 Z M8,3 L3,8 8,13 Z",
-                ComponentLibraryFilter::Dictionaries => "M1,2 L7,2 9,4 15,4 15,15 1,15 Z M3,6 L3,13 13,13 13,6 Z",
-                _ => "M1,1 L15,1 15,15 1,15 Z M3,3 L3,13 13,13 13,3 Z M5,5 L11,5 11,11 5,11 Z",
-            }).unwrap());
             icon.upcast::<Control>()
         };
         icon.set_vertical_alignment(VerticalAlignment::Center);

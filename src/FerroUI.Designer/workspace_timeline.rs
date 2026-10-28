@@ -1,7 +1,7 @@
 //! Compact object/property lanes and a single contextual keyframe inspector.
 use super::*;
 use crate::timeline_lane::{EasingPreview, TimelineLane};
-use ferroui_base::media::{FontWeight, Geometry, TextTrimming};
+use ferroui_base::media::{FontWeight, TextTrimming};
 use ferroui_controls::automation::AutomationProperties;
 use ferroui_controls::{ColumnDefinitions, ComboBox, PathIcon, ToolTip};
 use ferroui_designer_animation::{Keyframe, Timeline, Track};
@@ -168,12 +168,15 @@ impl DesignerWorkspace {
         caption.set_vertical_alignment(ferroui_base::layout::VerticalAlignment::Center);
         caption.set_margin(Thickness::new(4.0, 0.0, 4.0, 0.0));
         header.children().add(caption.upcast::<Control>());
-        for (label, help, factor) in [
-            ("−", "Zoom out timeline", 0.8),
-            ("+", "Zoom in timeline", 1.25),
-            ("Fit", "Fit complete animation", 0.0),
+        for (label, path, help, factor) in [
+            ("", Some(crate::icons::REMOVE), "Zoom out timeline", 0.8),
+            ("", Some(crate::icons::ADD), "Zoom in timeline", 1.25),
+            ("Fit", None, "Fit complete animation", 0.0),
         ] {
             let control = button(label);
+            if let Some(path) = path {
+                control.set_content(Some(Control::boxed(crate::icons::vector_icon(path, 12.0))));
+            }
             control.classes().add("designer-timeline-tool");
             control.classes().add("nav");
             control.set_padding(Thickness::symmetric(5.0, 2.0));
@@ -484,7 +487,7 @@ impl DesignerWorkspace {
         row.set_column_definitions(ColumnDefinitions::parse("48,*,Auto").unwrap());
         row.set_margin(Thickness::new(14.0, 18.0, 18.0, 14.0));
         let icon = timeline_icon(
-            "M2,8 L8,2 14,8 8,14 Z M18,8 L24,2 30,8 24,14 Z M13,7 L19,7 19,9 13,9 Z",
+            "F1 M2,8 L8,2 14,8 8,14 Z M18,8 L24,2 30,8 24,14 Z M13,7 L19,7 19,9 13,9 Z",
             0xffb6a2f6,
         );
         icon.set_width(30.0);
@@ -1194,7 +1197,7 @@ impl DesignerWorkspace {
         let remove = button("Remove");
         remove.classes().add("nav");
         remove.classes().add("designer-timeline-tool");
-        remove.set_content(Some(Control::boxed(timeline_icon("M5,2 L11,2 11,4 14,4 14,5.5 2,5.5 2,4 5,4 Z M4,7 L12,7 11.2,14 4.8,14 Z M6,8 L6.5,12.5 7.5,12.5 7,8 Z M9,8 L8.5,12.5 9.5,12.5 10,8 Z", 0xffa9adba))));
+        remove.set_content(Some(Control::boxed(timeline_icon("F1 M5,2 L11,2 11,4 14,4 14,5.5 2,5.5 2,4 5,4 Z M4,7 L12,7 11.2,14 4.8,14 Z M6,8 L6.5,12.5 7.5,12.5 7,8 Z M9,8 L8.5,12.5 9.5,12.5 10,8 Z", 0xffa9adba))));
         remove.set_width(28.0);
         remove.set_font_size(11.0);
         remove.set_min_height(26.0);
@@ -1263,10 +1266,7 @@ fn nearest_key(track: &Track, time: f64) -> Option<SelectedKey> {
         })
 }
 fn timeline_icon(path: &str, color: u32) -> Ref<PathIcon> {
-    let icon = PathIcon::new();
-    icon.set_width(14.0);
-    icon.set_height(14.0);
-    icon.set_data(Geometry::parse(path).expect("built-in timeline vector"));
+    let icon = crate::icons::vector_icon(path, 14.0);
     icon.set_foreground(Some(SolidColorBrush::from_uint32(color).into()));
     icon
 }
@@ -1276,7 +1276,7 @@ fn key_caption(value: &str) -> Ref<StackPanel> {
     caption.set_spacing(8.0);
     caption.set_width(TRACK_HEADER - 10.0);
     caption.set_vertical_alignment(ferroui_base::layout::VerticalAlignment::Center);
-    let icon = timeline_icon("M8,1 L15,8 8,15 1,8 Z M8,4 L4,8 8,12 12,8 Z", 0xffb6a2f6);
+    let icon = timeline_icon("F1 M8,1 L15,8 8,15 1,8 Z M8,4 L4,8 8,12 12,8 Z", 0xffb6a2f6);
     caption.children().add(icon.upcast::<Control>());
     let label = TextBlock::new();
     label.set_text(Some(value));
@@ -1299,7 +1299,7 @@ fn track_header(target: &str, property: &str, key_count: usize, selected: bool) 
     let content = Grid::new();
     content.set_column_definitions(ColumnDefinitions::parse("22,*,Auto").unwrap());
     let icon = timeline_icon(
-        "M2,2 L14,2 14,14 2,14 Z M3.5,3.5 L3.5,12.5 12.5,12.5 12.5,3.5 Z M6,6 L10,6 10,10 6,10 Z",
+        "F1 M2,2 L14,2 14,14 2,14 Z M3.5,3.5 L3.5,12.5 12.5,12.5 12.5,3.5 Z M6,6 L10,6 10,10 6,10 Z",
         0xffb6a2f6,
     );
     icon.set_vertical_alignment(ferroui_base::layout::VerticalAlignment::Center);

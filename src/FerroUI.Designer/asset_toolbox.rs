@@ -56,46 +56,48 @@ pub enum AssetIcon {
 impl AssetIcon {
     fn path(&self) -> &str {
         match self {
-            Self::Control => "M3 5H21V19H3Z M5 7V17H19V7Z M7 10H17V14H7Z",
-            Self::Text => "M3 4H21V7H14V21H10V7H3Z",
-            Self::Input => "M2 5H22V19H2Z M4 7V17H20V7Z M7 8H13V10H11V14H13V16H7V14H9V10H7Z",
-            Self::Toggle => "M3 3H21V21H3Z M5 5V19H19V5Z M7 11L10 14L17 7L18.5 8.5L10 17L5.5 12.5Z",
+            Self::Control => "F1 M3 5H21V19H3Z M5 7V17H19V7Z M7 10H17V14H7Z",
+            Self::Text => "F1 M3 4H21V7H14V21H10V7H3Z",
+            Self::Input => "F1 M2 5H22V19H2Z M4 7V17H20V7Z M7 8H13V10H11V14H13V16H7V14H9V10H7Z",
+            Self::Toggle => {
+                "F1 M3 3H21V21H3Z M5 5V19H19V5Z M7 11L10 14L17 7L18.5 8.5L10 17L5.5 12.5Z"
+            }
             Self::Radio => {
-                "M12 2A10 10 0 1 1 12 22A10 10 0 1 1 12 2Z M12 4A8 8 0 1 0 12 20A8 8 0 1 0 12 4Z M12 8A4 4 0 1 1 12 16A4 4 0 1 1 12 8Z"
+                "F1 M12 2A10 10 0 1 1 12 22A10 10 0 1 1 12 2Z M12 4A8 8 0 1 0 12 20A8 8 0 1 0 12 4Z M12 8A4 4 0 1 1 12 16A4 4 0 1 1 12 8Z"
             }
             Self::Switch => {
-                "M8 5H16A7 7 0 0 1 16 19H8A7 7 0 0 1 8 5Z M8 7A5 5 0 0 0 8 17H16A5 5 0 0 0 16 7Z M16 9A3 3 0 1 1 16 15A3 3 0 1 1 16 9Z"
+                "F1 M8 5H16A7 7 0 0 1 16 19H8A7 7 0 0 1 8 5Z M8 7A5 5 0 0 0 8 17H16A5 5 0 0 0 16 7Z M16 9A3 3 0 1 1 16 15A3 3 0 1 1 16 9Z"
             }
             Self::Combo => {
-                "M2 5H22V19H2Z M4 7V17H20V7Z M6 10H11V12H6Z M14 10L17 13L20 10L18.5 8.5L17 10L15.5 8.5Z"
+                "F1 M2 5H22V19H2Z M4 7V17H20V7Z M6 10H11V12H6Z M14 10L17 13L20 10L18.5 8.5L17 10L15.5 8.5Z"
             }
-            Self::Progress => "M2 7H22V17H2Z M4 9V15H20V9Z M5 10H14V14H5Z",
-            Self::Panel => "M3 3H21V21H3Z M5 5V19H19V5Z M3 9H21V11H3Z M10 3H12V21H10Z",
-            Self::Dock => "M3 3H21V21H3Z M5 9V19H19V9Z M5 5V7H19V5Z M10 9H12V21H10Z",
+            Self::Progress => "F1 M2 7H22V17H2Z M4 9V15H20V9Z M5 10H14V14H5Z",
+            Self::Panel => "F1 M3 3H21V21H3Z M5 5V19H19V5Z M3 9H21V11H3Z M10 3H12V21H10Z",
+            Self::Dock => "F1 M3 3H21V21H3Z M5 9V19H19V9Z M5 5V7H19V5Z M10 9H12V21H10Z",
             Self::Wrap => {
-                "M3 4H15V8H3Z M17 4H21V8H17Z M3 10H9V14H3Z M11 10H21V14H11Z M3 16H15V20H3Z"
+                "F1 M3 4H15V8H3Z M17 4H21V8H17Z M3 10H9V14H3Z M11 10H21V14H11Z M3 16H15V20H3Z"
             }
             Self::Uniform => {
-                "M3 3H10V10H3Z M5 5V8H8V5Z M14 3H21V10H14Z M16 5V8H19V5Z M3 14H10V21H3Z M5 16V19H8V16Z M14 14H21V21H14Z M16 16V19H19V16Z"
+                "F1 M3 3H10V10H3Z M5 5V8H8V5Z M14 3H21V10H14Z M16 5V8H19V5Z M3 14H10V21H3Z M5 16V19H8V16Z M14 14H21V21H14Z M16 16V19H19V16Z"
             }
             Self::Frame => {
-                "M7 3H17Q21 3 21 7V17Q21 21 17 21H7Q3 21 3 17V7Q3 3 7 3Z M7 5Q5 5 5 7V17Q5 19 7 19H17Q19 19 19 17V7Q19 5 17 5Z"
+                "F1 M7 3H17Q21 3 21 7V17Q21 21 17 21H7Q3 21 3 17V7Q3 3 7 3Z M7 5Q5 5 5 7V17Q5 19 7 19H17Q19 19 19 17V7Q19 5 17 5Z"
             }
             Self::Viewbox => {
-                "M3 3H10V5H5V10H3Z M14 3H21V10H19V5H14Z M3 14H5V19H10V21H3Z M19 14H21V21H14V19H19Z M8 8H16V16H8Z M10 10V14H14V10Z"
+                "F1 M3 3H10V5H5V10H3Z M14 3H21V10H19V5H14Z M3 14H5V19H10V21H3Z M19 14H21V21H14V19H19Z M8 8H16V16H8Z M10 10V14H14V10Z"
             }
             Self::Scroll => {
-                "M3 3H21V21H3Z M5 5V19H19V5Z M16 7H18V13H16Z M7 7H13V9H7Z M7 11H13V13H7Z M7 15H13V17H7Z"
+                "F1 M3 3H21V21H3Z M5 5V19H19V5Z M16 7H18V13H16Z M7 7H13V9H7Z M7 11H13V13H7Z M7 15H13V17H7Z"
             }
-            Self::Stack => "M3 3H21V7H3Z M3 10H21V14H3Z M3 17H21V21H3Z",
-            Self::Canvas => "M3 3H5V19H21V21H3Z M8 5H17V12H8Z M12 14H21V17H12Z",
-            Self::Rectangle => "M3 5H21V19H3Z M5 7V17H19V7Z",
+            Self::Stack => "F1 M3 3H21V7H3Z M3 10H21V14H3Z M3 17H21V21H3Z",
+            Self::Canvas => "F1 M3 3H5V19H21V21H3Z M8 5H17V12H8Z M12 14H21V17H12Z",
+            Self::Rectangle => "F1 M3 5H21V19H3Z M5 7V17H19V7Z",
             Self::Ellipse => {
-                "M12 2A10 10 0 1 1 12 22A10 10 0 1 1 12 2Z M12 4A8 8 0 1 0 12 20A8 8 0 1 0 12 4Z"
+                "F1 M12 2A10 10 0 1 1 12 22A10 10 0 1 1 12 2Z M12 4A8 8 0 1 0 12 20A8 8 0 1 0 12 4Z"
             }
-            Self::Value => "M2 11H7V13H2Z M13 11H22V13H13Z M8 5H12V19H8Z",
+            Self::Value => "F1 M2 11H7V13H2Z M13 11H22V13H13Z M8 5H12V19H8Z",
             Self::Content => {
-                "M3 3H21V21H3Z M5 5V19H19V5Z M6 16L10 11L13 14L16 10L19 17H6Z M7 7H10V10H7Z"
+                "F1 M3 3H21V21H3Z M5 5V19H19V5Z M6 16L10 11L13 14L16 10L19 17H6Z M7 7H10V10H7Z"
             }
             Self::CustomPath(path) => path,
         }
@@ -143,7 +145,7 @@ impl AssetToolbox {
         search.set_placeholder_text(Some("Search assets"));
         search.set_margin(Thickness::new(0.0, 0.0, 0.0, 8.0));
         let search_icon = toolbox_icon(
-            "M10 2A8 8 0 1 1 5 16.25A8 8 0 0 1 10 2Z M10 4A6 6 0 1 0 10 16A6 6 0 1 0 10 4Z M15.5 14L22 20.5L20.5 22L14 15.5Z",
+            "F1 M10 2A8 8 0 1 1 5 16.25A8 8 0 0 1 10 2Z M10 4A6 6 0 1 0 10 16A6 6 0 1 0 10 4Z M15.5 14L22 20.5L20.5 22L14 15.5Z",
             14.0,
             0xff828795,
         );
@@ -162,7 +164,7 @@ impl AssetToolbox {
         filters.children().add(category.clone().upcast::<Control>());
         let grid_view = view_button(
             "Grid view",
-            "M3 3H10V10H3Z M5 5V8H8V5Z M14 3H21V10H14Z M16 5V8H19V5Z M3 14H10V21H3Z M5 16V19H8V16Z M14 14H21V21H14Z M16 16V19H19V16Z",
+            "F1 M3 3H10V10H3Z M5 5V8H8V5Z M14 3H21V10H14Z M16 5V8H19V5Z M3 14H10V21H3Z M5 16V19H8V16Z M14 14H21V21H14Z M16 16V19H19V16Z",
         );
         grid_view.classes().add("active");
         Grid::set_column(&grid_view, 1);
@@ -171,7 +173,7 @@ impl AssetToolbox {
             .add(grid_view.clone().upcast::<Control>());
         let list_view = view_button(
             "List view",
-            "M3 4H7V8H3Z M10 5H21V7H10Z M3 10H7V14H3Z M10 11H21V13H10Z M3 16H7V20H3Z M10 17H21V19H10Z",
+            "F1 M3 4H7V8H3Z M10 5H21V7H10Z M3 10H7V14H3Z M10 11H21V13H10Z M3 16H7V20H3Z M10 17H21V19H10Z",
         );
         Grid::set_column(&list_view, 2);
         filters
@@ -510,14 +512,11 @@ impl AssetToolbox {
 }
 
 fn toolbox_icon(path: &str, size: f64, color: u32) -> Ref<PathIcon> {
-    let icon = PathIcon::new();
-    icon.set_width(size);
-    icon.set_height(size);
-    icon.set_vertical_alignment(VerticalAlignment::Center);
-    icon.set_foreground(Some(SolidColorBrush::from_uint32(color).into()));
-    icon.set_data(Geometry::parse(path).unwrap_or_else(|_| {
+    let geometry = Geometry::parse(path).unwrap_or_else(|_| {
         Geometry::parse(AssetIcon::Control.path()).expect("built-in asset vector")
-    }));
+    });
+    let icon = crate::icons::geometry_icon(geometry, size);
+    icon.set_foreground(Some(SolidColorBrush::from_uint32(color).into()));
     icon
 }
 
@@ -527,7 +526,7 @@ fn view_button(name: &str, path: &str) -> Ref<Button> {
     button.classes().add("asset-view");
     button.set_width(28.0);
     button.set_height(26.0);
-    button.set_padding(Thickness::uniform(6.0));
+    button.set_padding(Thickness::uniform(2.0));
     button.set_content(Some(Control::boxed(toolbox_icon(path, 14.0, 0xffb8becc))));
     AutomationProperties::set_name(&button, Some(name));
     ToolTip::set_tip(&button, Some(Rc::new(name.to_owned())));

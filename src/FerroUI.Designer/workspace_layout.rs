@@ -270,7 +270,7 @@ impl DesignerWorkspace {
         if panel != first {
             let parent = button("");
             let icon = crate::property_controls::property_icon(
-                "M2,8 L7,3 12,8 10.8,9.2 7.8,6.2 7.8,12 14,12 14,13.5 6.2,13.5 6.2,6.2 3.2,9.2 Z",
+                "F1 M2,8 L7,3 12,8 10.8,9.2 7.8,6.2 7.8,12 14,12 14,13.5 6.2,13.5 6.2,6.2 3.2,9.2 Z",
                 13.0,
             );
             parent.set_content(Some(Control::boxed(&icon)));
@@ -571,7 +571,7 @@ fn layout_header(title: &str, expanded: bool, expandable: bool) -> Ref<Control> 
                 crate::property_controls::CHEVRON_RIGHT_ICON
             }
         } else {
-            "M1,1 L15,1 15,15 1,15 Z M2.5,2.5 L2.5,13.5 13.5,13.5 13.5,2.5 Z"
+            "F1 M1,1 L15,1 15,15 1,15 Z M2.5,2.5 L2.5,13.5 13.5,13.5 13.5,2.5 Z"
         },
         if expandable { 8.0 } else { 11.0 },
     );

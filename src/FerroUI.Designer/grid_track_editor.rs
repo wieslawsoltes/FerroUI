@@ -45,10 +45,10 @@ impl GridTrackEditor {
         let axis_icon = crate::property_controls::property_icon(
             match axis {
                 Axis::Vertical => {
-                    "M1,1 L15,1 15,15 1,15 Z M2.5,2.5 L2.5,5 13.5,5 13.5,2.5 Z M2.5,6.5 L2.5,9.5 13.5,9.5 13.5,6.5 Z M2.5,11 L2.5,13.5 13.5,13.5 13.5,11 Z"
+                    "F1 M1,1 L15,1 15,15 1,15 Z M2.5,2.5 L2.5,5 13.5,5 13.5,2.5 Z M2.5,6.5 L2.5,9.5 13.5,9.5 13.5,6.5 Z M2.5,11 L2.5,13.5 13.5,13.5 13.5,11 Z"
                 }
                 Axis::Horizontal => {
-                    "M1,1 L15,1 15,15 1,15 Z M2.5,2.5 L2.5,13.5 5,13.5 5,2.5 Z M6.5,2.5 L6.5,13.5 9.5,13.5 9.5,2.5 Z M11,2.5 L11,13.5 13.5,13.5 13.5,2.5 Z"
+                    "F1 M1,1 L15,1 15,15 1,15 Z M2.5,2.5 L2.5,13.5 5,13.5 5,2.5 Z M6.5,2.5 L6.5,13.5 9.5,13.5 9.5,2.5 Z M11,2.5 L11,13.5 13.5,13.5 13.5,2.5 Z"
                 }
             },
             13.0,
@@ -124,12 +124,12 @@ impl GridTrackEditor {
             button
         };
         let add = make_button(
-            "M7,1 L9,1 9,7 15,7 15,9 9,9 9,15 7,15 7,9 1,9 1,7 7,7 Z",
+            "F1 M7,1 L9,1 9,7 15,7 15,9 9,9 9,15 7,15 7,9 1,9 1,7 7,7 Z",
             &format!("Insert {title} track after selection"),
             4,
         );
         let remove = make_button(
-            "M1,7 L15,7 15,9 1,9 Z",
+            "F1 M1,7 L15,7 15,9 1,9 Z",
             &format!("Remove selected {title} track and preserve child cells"),
             5,
         );

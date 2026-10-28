@@ -21,6 +21,7 @@ mod editors;
 mod focus_order;
 mod focus_order_editor;
 mod grid_track_editor;
+mod icons;
 mod interaction_session;
 mod layer_state;
 mod layout_helper_renderer;

@@ -325,8 +325,7 @@ fn hierarchy_name(entry: &TreeEntry, project: bool) -> &str {
 }
 
 fn hierarchy_cell(row: &TreeRow, project: bool) -> Ref<Control> {
-    use ferroui_base::media::{Geometry, TextTrimming};
-    use ferroui_controls::PathIcon;
+    use ferroui_base::media::TextTrimming;
 
     let root = Grid::new();
     root.classes().add("designer-layer-cell");
@@ -341,13 +340,10 @@ fn hierarchy_cell(row: &TreeRow, project: bool) -> Ref<Control> {
     root.set_min_height(28.0);
     root.set_margin(Thickness::new(0.0, 0.0, 6.0, 0.0));
     let (path, color, metadata) = hierarchy_icon(&row.entry, project);
-    let icon = PathIcon::new();
-    icon.set_width(14.0);
-    icon.set_height(14.0);
+    let icon = crate::icons::vector_icon(path, 14.0);
     icon.set_horizontal_alignment(HorizontalAlignment::Left);
     icon.set_vertical_alignment(VerticalAlignment::Center);
     icon.set_foreground(Some(SolidColorBrush::from_uint32(color).into()));
-    icon.set_data(Geometry::parse(path).expect("designer layer vector"));
     root.children().add(icon.upcast::<Control>());
     let name = TextBlock::new();
     name.classes().add(if metadata {
@@ -386,9 +382,9 @@ fn hierarchy_cell(row: &TreeRow, project: bool) -> Ref<Control> {
                     "Lock in editor"
                 },
                 if actions.state.is_locked() {
-                    "M5 9V6A5 5 0 0 1 15 6V9H17V19H3V9Z M7 9H13V6A3 3 0 0 0 7 6Z M9 12H11V16H9Z"
+                    "F1 M5 9V6A5 5 0 0 1 15 6V9H17V19H3V9Z M7 9H13V6A3 3 0 0 0 7 6Z M9 12H11V16H9Z"
                 } else {
-                    "M5 9V6A5 5 0 0 1 14 3L12.5 4.5A3 3 0 0 0 7 6V9H17V19H3V9Z M9 12H11V16H9Z"
+                    "F1 M5 9V6A5 5 0 0 1 14 3L12.5 4.5A3 3 0 0 0 7 6V9H17V19H3V9Z M9 12H11V16H9Z"
                 },
             ),
             (
@@ -404,9 +400,9 @@ fn hierarchy_cell(row: &TreeRow, project: bool) -> Ref<Control> {
                     "Hide in editor"
                 },
                 if actions.state.is_hidden() {
-                    "M2 1L19 18L18 19L1 2Z M1 10Q4 3 10 3Q16 3 19 10L17 12L15.5 10.5L17 10Q14 5 10 5L8 5.5L6.5 4Z M3 7L5 9L3 10Q6 15 10 15L12 14.5L14 16Q7 20 1 10Z"
+                    "F1 M2 1L19 18L18 19L1 2Z M1 10Q4 3 10 3Q16 3 19 10L17 12L15.5 10.5L17 10Q14 5 10 5L8 5.5L6.5 4Z M3 7L5 9L3 10Q6 15 10 15L12 14.5L14 16Q7 20 1 10Z"
                 } else {
-                    "M1 10Q5 3 10 3Q15 3 19 10Q15 17 10 17Q5 17 1 10Z M3 10Q6 15 10 15Q14 15 17 10Q14 5 10 5Q6 5 3 10Z M10 7A3 3 0 1 1 10 13A3 3 0 1 1 10 7Z"
+                    "F1 M1 10Q5 3 10 3Q15 3 19 10Q15 17 10 17Q5 17 1 10Z M3 10Q6 15 10 15Q14 15 17 10Q14 5 10 5Q6 5 3 10Z M10 7A3 3 0 1 1 10 13A3 3 0 1 1 10 7Z"
                 },
             ),
         ] {
@@ -420,10 +416,7 @@ fn hierarchy_cell(row: &TreeRow, project: bool) -> Ref<Control> {
             button.classes().set("active", active);
             AutomationProperties::set_name(&button, Some(title));
             ToolTip::set_tip(&button, Some(Rc::new(title.to_owned())));
-            let icon = PathIcon::new();
-            icon.set_width(13.0);
-            icon.set_height(13.0);
-            icon.set_data(Geometry::parse(path).expect("layer action vector"));
+            let icon = crate::icons::vector_icon(path, 13.0);
             button.set_content(Some(Control::boxed(&icon)));
             let invoke = actions.invoke.clone();
             button.click(move |_, event| {
@@ -440,31 +433,33 @@ fn hierarchy_cell(row: &TreeRow, project: bool) -> Ref<Control> {
 /// Stable semantic glyphs for both authored and live trees. Unknown project controls
 /// retain the neutral component glyph; property elements stay visibly distinct.
 fn hierarchy_icon(entry: &TreeEntry, project: bool) -> (&'static str, u32, bool) {
-    const FRAME: &str = "M3 3H21V21H3Z M5 5V19H19V5Z M8 3H10V21H8Z M3 8H21V10H3Z";
-    const COMPONENT: &str = "M12 2L22 12L12 22L2 12Z M12 5L5 12L12 19L19 12Z";
-    const TEXT: &str = "M3 4H21V6H13V21H11V6H3Z";
-    const FOLDER: &str = "M2 5H10L12 7H22V20H2Z M4 7V18H20V9H11L9 7Z";
-    const FILE: &str = "M5 2H14L20 8V22H5Z M7 4V20H18V9H13V4Z M15 5V7H17Z";
-    const META: &str = "M4 6H10V8H4Z M14 6H20V8H14Z M4 11H20V13H4Z M4 16H10V18H4Z M14 16H20V18H14Z";
-    const RECT: &str = "M3 4H21V20H3Z M5 6V18H19V6Z";
-    const STACK: &str = "M3 3H21V7H3Z M5 5H19V5H5Z M3 10H21V14H3Z M3 17H21V21H3Z";
-    const INPUT: &str = "M2 5H22V19H2Z M4 7V17H20V7Z M8 8H12V10H11V14H12V16H8V14H9V10H8Z";
-    const TOGGLE: &str = "M3 3H21V21H3Z M5 5V19H19V5Z M7 11L10 14L17 7L18.5 8.5L10 17L5.5 12.5Z";
+    const FRAME: &str = "F1 M3 3H21V21H3Z M5 5V19H19V5Z M8 3H10V21H8Z M3 8H21V10H3Z";
+    const COMPONENT: &str = "F1 M12 2L22 12L12 22L2 12Z M12 5L5 12L12 19L19 12Z";
+    const TEXT: &str = "F1 M3 4H21V6H13V21H11V6H3Z";
+    const FOLDER: &str = "F1 M2 5H10L12 7H22V20H2Z M4 7V18H20V9H11L9 7Z";
+    const FILE: &str = "F1 M5 2H14L20 8V22H5Z M7 4V20H18V9H13V4Z M15 5V7H17Z";
+    const META: &str =
+        "F1 M4 6H10V8H4Z M14 6H20V8H14Z M4 11H20V13H4Z M4 16H10V18H4Z M14 16H20V18H14Z";
+    const RECT: &str = "F1 M3 4H21V20H3Z M5 6V18H19V6Z";
+    const STACK: &str = "F1 M3 3H21V7H3Z M5 5H19V5H5Z M3 10H21V14H3Z M3 17H21V21H3Z";
+    const INPUT: &str = "F1 M2 5H22V19H2Z M4 7V17H20V7Z M8 8H12V10H11V14H12V16H8V14H9V10H8Z";
+    const TOGGLE: &str = "F1 M3 3H21V21H3Z M5 5V19H19V5Z M7 11L10 14L17 7L18.5 8.5L10 17L5.5 12.5Z";
     const CIRCLE: &str =
-        "M12 2A10 10 0 1 1 12 22A10 10 0 1 1 12 2Z M12 4A8 8 0 1 0 12 20A8 8 0 1 0 12 4Z";
-    const CANVAS: &str = "M3 3H5V19H21V21H3Z M8 5H17V12H8Z M12 14H21V17H12Z";
-    const BUTTON: &str = "M3 5H21V19H3Z M5 7V17H19V7Z M7 10H17V14H7Z";
+        "F1 M12 2A10 10 0 1 1 12 22A10 10 0 1 1 12 2Z M12 4A8 8 0 1 0 12 20A8 8 0 1 0 12 4Z";
+    const CANVAS: &str = "F1 M3 3H5V19H21V21H3Z M8 5H17V12H8Z M12 14H21V17H12Z";
+    const BUTTON: &str = "F1 M3 5H21V19H3Z M5 7V17H19V7Z M7 10H17V14H7Z";
     const COMBO: &str =
-        "M2 5H22V19H2Z M4 7V17H20V7Z M6 10H11V12H6Z M14 10L17 13L20 10L18.5 8.5L17 10L15.5 8.5Z";
-    const RADIO: &str = "M12 2A10 10 0 1 1 12 22A10 10 0 1 1 12 2Z M12 4A8 8 0 1 0 12 20A8 8 0 1 0 12 4Z M12 8A4 4 0 1 1 12 16A4 4 0 1 1 12 8Z";
-    const SWITCH: &str = "M8 5H16A7 7 0 0 1 16 19H8A7 7 0 0 1 8 5Z M8 7A5 5 0 0 0 8 17H16A5 5 0 0 0 16 7Z M16 9A3 3 0 1 1 16 15A3 3 0 1 1 16 9Z";
-    const DOCK: &str = "M3 3H21V21H3Z M5 9V19H19V9Z M5 5V7H19V5Z M10 9H12V21H10Z";
-    const WRAP: &str = "M3 4H15V8H3Z M17 4H21V8H17Z M3 10H9V14H3Z M11 10H21V14H11Z M3 16H15V20H3Z";
-    const UNIFORM: &str = "M3 3H10V10H3Z M5 5V8H8V5Z M14 3H21V10H14Z M16 5V8H19V5Z M3 14H10V21H3Z M5 16V19H8V16Z M14 14H21V21H14Z M16 16V19H19V16Z";
-    const SLIDER: &str = "M2 11H7V13H2Z M13 11H22V13H13Z M8 5H12V19H8Z";
-    const PROGRESS: &str = "M2 7H22V17H2Z M4 9V15H20V9Z M5 10H14V14H5Z";
+        "F1 M2 5H22V19H2Z M4 7V17H20V7Z M6 10H11V12H6Z M14 10L17 13L20 10L18.5 8.5L17 10L15.5 8.5Z";
+    const RADIO: &str = "F1 M12 2A10 10 0 1 1 12 22A10 10 0 1 1 12 2Z M12 4A8 8 0 1 0 12 20A8 8 0 1 0 12 4Z M12 8A4 4 0 1 1 12 16A4 4 0 1 1 12 8Z";
+    const SWITCH: &str = "F1 M8 5H16A7 7 0 0 1 16 19H8A7 7 0 0 1 8 5Z M8 7A5 5 0 0 0 8 17H16A5 5 0 0 0 16 7Z M16 9A3 3 0 1 1 16 15A3 3 0 1 1 16 9Z";
+    const DOCK: &str = "F1 M3 3H21V21H3Z M5 9V19H19V9Z M5 5V7H19V5Z M10 9H12V21H10Z";
+    const WRAP: &str =
+        "F1 M3 4H15V8H3Z M17 4H21V8H17Z M3 10H9V14H3Z M11 10H21V14H11Z M3 16H15V20H3Z";
+    const UNIFORM: &str = "F1 M3 3H10V10H3Z M5 5V8H8V5Z M14 3H21V10H14Z M16 5V8H19V5Z M3 14H10V21H3Z M5 16V19H8V16Z M14 14H21V21H14Z M16 16V19H19V16Z";
+    const SLIDER: &str = "F1 M2 11H7V13H2Z M13 11H22V13H13Z M8 5H12V19H8Z";
+    const PROGRESS: &str = "F1 M2 7H22V17H2Z M4 9V15H20V9Z M5 10H14V14H5Z";
     const IMAGE: &str =
-        "M3 3H21V21H3Z M5 5V19H19V5Z M6 16L10 11L13 14L16 10L19 17H6Z M7 7H10V10H7Z";
+        "F1 M3 3H21V21H3Z M5 5V19H19V5Z M6 16L10 11L13 14L16 10L19 17H6Z M7 7H10V10H7Z";
     if project {
         return match entry.name.as_str() {
             "Project" => (COMPONENT, 0xffb6a2f6, false),
@@ -947,15 +942,15 @@ fn property_label(row: &PropertyRow) -> Ref<Control> {
     root.classes().add("property-name-cell");
     root.set_min_height(28.0);
     root.set_column_definitions(ColumnDefinitions::parse("7,*").unwrap());
-    let state = TextBlock::new();
-    state.set_text(Some(if row.origin == "Expression" {
-        "◆"
-    } else if row.can_reset {
-        "•"
-    } else {
-        ""
-    }));
-    state.set_font_size(9.0);
+    let state = crate::icons::vector_icon(
+        if row.origin == "Expression" {
+            crate::icons::EXPRESSION
+        } else {
+            crate::icons::LOCAL_VALUE
+        },
+        if row.origin == "Expression" { 7.0 } else { 5.0 },
+    );
+    state.set_is_visible(row.origin == "Expression" || row.can_reset);
     state.set_foreground(Some(
         SolidColorBrush::from_uint32(if row.origin == "Expression" {
             0xffb6a2f6

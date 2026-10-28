@@ -25,7 +25,10 @@ pub(super) fn attach(
     let root = Grid::new();
     root.set_column_definitions(ColumnDefinitions::parse("*,22").unwrap());
     root.children().add(inline);
-    let button = action("⋯", "Edit value, binding, resource or object");
+    let button = icon_action(
+        crate::icons::MORE,
+        "Edit value, binding, resource or object",
+    );
     button.classes().add("property-value-actions");
     button.set_min_width(0.0);
     button.set_width(21.0);
@@ -56,6 +59,13 @@ fn action(label: &str, help: &str) -> Ref<Button> {
     button.set_min_height(26.0);
     AutomationProperties::set_name(&button, Some(help));
     ToolTip::set_tip(&button, Some(Rc::new(help.to_owned())));
+    button
+}
+fn icon_action(path: &str, help: &str) -> Ref<Button> {
+    let button = action("", help);
+    button.classes().add("icon");
+    button.set_width(24.0);
+    button.set_content(Some(Control::boxed(crate::icons::vector_icon(path, 14.0))));
     button
 }
 fn label(value: &str) -> Ref<TextBlock> {
@@ -688,8 +698,8 @@ fn object_editor(
         "Add the selected type to the selected object or collection",
     );
     let remove = action("Remove", "Remove the selected object from this draft");
-    let up = action("↑", "Move object earlier");
-    let down = action("↓", "Move object later");
+    let up = icon_action(crate::icons::MOVE_UP, "Move object earlier");
+    let down = icon_action(crate::icons::MOVE_DOWN, "Move object later");
     for button in [&add, &remove, &up, &down] {
         tools.children().add(button.clone().upcast::<Control>());
     }

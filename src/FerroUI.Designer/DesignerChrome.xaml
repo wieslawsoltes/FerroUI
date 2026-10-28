@@ -35,6 +35,24 @@
     <Setter Property="FontSize" Value="11" />
     <Setter Property="FontWeight" Value="SemiBold" />
   </Style>
+  <!-- An application's command/menu presenters may deliberately switch PathIcon to
+       unscaled native geometry. Designer glyphs have explicit compact drawing boxes:
+       normalize their complete bounds once, center, and preserve an optical gutter.
+       The class makes this independent from preview/theme-owned PathIcon templates. -->
+  <Style Selector=".designer-chrome PathIcon.designer-icon">
+    <Setter Property="HorizontalAlignment" Value="Center" />
+    <Setter Property="VerticalAlignment" Value="Center" />
+    <Setter Property="IsHitTestVisible" Value="False" />
+    <Setter Property="Template">
+      <ControlTemplate>
+        <Border Background="{TemplateBinding Background}" Padding="1">
+          <Path Name="DesignerIconPath" Data="{TemplateBinding Data}"
+                Fill="{TemplateBinding Foreground}" Stretch="Uniform"
+                HorizontalAlignment="Center" VerticalAlignment="Center" />
+        </Border>
+      </ControlTemplate>
+    </Setter>
+  </Style>
   <Style Selector=".designer-chrome Button">
     <Setter Property="MinHeight" Value="26" />
     <Setter Property="FontSize" Value="12" />
@@ -68,7 +86,12 @@
   <Style Selector=".designer-chrome Button.icon">
     <Setter Property="Width" Value="28" />
     <Setter Property="Height" Value="28" />
-    <Setter Property="Padding" Value="6" />
+    <!-- 24px compact buttons must still contain a 16px glyph plus their border. -->
+    <Setter Property="MinWidth" Value="0" />
+    <Setter Property="MinHeight" Value="0" />
+    <Setter Property="Padding" Value="2" />
+    <Setter Property="HorizontalContentAlignment" Value="Center" />
+    <Setter Property="VerticalContentAlignment" Value="Center" />
     <Setter Property="Background" Value="Transparent" />
     <Setter Property="Foreground" Value="{DynamicResource DesignerSecondaryBrush}" />
   </Style>
