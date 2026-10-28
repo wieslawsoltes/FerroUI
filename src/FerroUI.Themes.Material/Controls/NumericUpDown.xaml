@@ -1,0 +1,157 @@
+<!--
+  Android Material 3 Expressive visual system (AndroidX Material3 1.5.0-beta02,
+  e4d933c98df7baa7ea2b83eea6e086915961e0ff), adapted to FerroUI control contracts.
+  Derived structural templates: FerroUI WinUI theme, Copyright (c) Microsoft
+  Corporation, MIT; retained notices in NOTICE.md. See docs/porting/material-theme.md.
+-->
+<ResourceDictionary xmlns="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" x:ClassModifier="internal">
+  <Design.PreviewWith>
+    <Border Padding="20">
+      <StackPanel Spacing="20" Width="220">
+        <NumericUpDown Value="42" Minimum="0" Maximum="100"/>
+        <NumericUpDown PlaceholderText="Enter a number"/>
+        <NumericUpDown ButtonSpinnerLocation="Left" Value="1"/>
+        <NumericUpDown Value="42" IsEnabled="False"/>
+      </StackPanel>
+    </Border>
+  </Design.PreviewWith>
+  <ControlTheme x:Key="NumberBoxSpinButtonStyle" TargetType="RepeatButton" BasedOn="{StaticResource DefaultRepeatButtonStyle}">
+    <Setter Property="IsTabStop" Value="False"/>
+    <Setter Property="Focusable" Value="False"/>
+    <Setter Property="MinWidth" Value="48"/>
+    <Setter Property="Padding" Value="0"/>
+    <Setter Property="VerticalAlignment" Value="Stretch"/>
+    <Setter Property="BorderThickness" Value="0"/>
+    <Setter Property="FontSize" Value="12"/>
+  </ControlTheme>
+  <ControlTheme x:Key="NumberBoxPopupSpinButtonStyle" TargetType="RepeatButton" BasedOn="{StaticResource DefaultRepeatButtonStyle}">
+    <Setter Property="IsTabStop" Value="False"/>
+    <Setter Property="Focusable" Value="False"/>
+    <Setter Property="Width" Value="48"/>
+    <Setter Property="Height" Value="48"/>
+    <Setter Property="Padding" Value="0"/>
+    <Setter Property="BorderThickness" Value="0"/>
+    <Setter Property="FontSize" Value="16"/>
+    <Setter Property="CornerRadius" Value="{DynamicResource ControlCornerRadius}"/>
+  </ControlTheme>
+  <ControlTheme x:Key="NumericUpDownSpinButtonStyle" TargetType="RepeatButton" BasedOn="{StaticResource NumberBoxSpinButtonStyle}">
+    <Setter Property="Background" Value="Transparent"/>
+    <Setter Property="Foreground" Value="{DynamicResource MaterialOnSurfaceVariantBrush}"/>
+    <Setter Property="BorderBrush" Value="Transparent"/>
+    <Style Selector="^:pointerover">
+      <Setter Property="Foreground" Value="{DynamicResource MaterialOnSurfaceVariantBrush}"/>
+      <Style Selector="^ /template/ ContentPresenter#PART_ContentPresenter">
+        <Setter Property="Background" Value="{DynamicResource MaterialOnSurfaceHoverBrush}"/>
+        <Setter Property="BorderBrush" Value="Transparent"/>
+        <Setter Property="Foreground" Value="{DynamicResource MaterialOnSurfaceVariantBrush}"/>
+      </Style>
+    </Style>
+    <Style Selector="^:pressed">
+      <Setter Property="Foreground" Value="{DynamicResource MaterialOnSurfaceVariantBrush}"/>
+      <Style Selector="^ /template/ ContentPresenter#PART_ContentPresenter">
+        <Setter Property="Background" Value="{DynamicResource MaterialOnSurfacePressedBrush}"/>
+        <Setter Property="BorderBrush" Value="Transparent"/>
+        <Setter Property="Foreground" Value="{DynamicResource MaterialOnSurfaceVariantBrush}"/>
+      </Style>
+    </Style>
+    <Style Selector="^:disabled">
+      <Setter Property="Foreground" Value="{DynamicResource RepeatButtonForegroundDisabled}"/>
+      <Style Selector="^ /template/ ContentPresenter#PART_ContentPresenter">
+        <Setter Property="BorderBrush" Value="Transparent"/>
+      </Style>
+    </Style>
+  </ControlTheme>
+  <ControlTheme x:Key="NumberBoxTextBoxStyle" TargetType="TextBox" BasedOn="{StaticResource DefaultTextBoxStyle}">
+    <Setter Property="Template">
+      <ControlTemplate>
+        <Grid ColumnDefinitions="Auto,Auto,*,Auto,Auto,Auto">
+          <Border x:Name="BorderElement" Grid.Column="0" Grid.ColumnSpan="6" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BackgroundSizing="InnerBorderEdge" BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="{TemplateBinding CornerRadius}" MinWidth="{TemplateBinding MinWidth}" MinHeight="{TemplateBinding MinHeight}"/>
+          <Border x:Name="SpinButtonsSpaceLeft" Grid.Column="0" Width="96" IsVisible="False"/>
+          <ContentPresenter x:Name="InnerLeftContentPresenter" IsVisible="{TemplateBinding InnerLeftContent, Converter={x:Static ObjectConverters.IsNotNull}}" Grid.Column="1" Margin="{TemplateBinding BorderThickness}" VerticalContentAlignment="{TemplateBinding VerticalContentAlignment}" Content="{TemplateBinding InnerLeftContent}"/>
+          <ScrollViewer x:Name="PART_ScrollViewer" Grid.Column="2" HorizontalScrollBarVisibility="{TemplateBinding (ScrollViewer.HorizontalScrollBarVisibility)}" VerticalScrollBarVisibility="{TemplateBinding (ScrollViewer.VerticalScrollBarVisibility)}" IsDeferredScrollingEnabled="{TemplateBinding (ScrollViewer.IsDeferredScrollingEnabled)}" Margin="{TemplateBinding BorderThickness}" Padding="{TemplateBinding Padding}" Foreground="{TemplateBinding Foreground}" Focusable="False">
+            <TextPresenter x:Name="PART_TextPresenter" Text="{TemplateBinding Text, Mode=TwoWay}" CaretBlinkInterval="{TemplateBinding CaretBlinkInterval}" CaretIndex="{TemplateBinding CaretIndex}" SelectionStart="{TemplateBinding SelectionStart}" SelectionEnd="{TemplateBinding SelectionEnd}" TextAlignment="{TemplateBinding TextAlignment}" TextWrapping="{TemplateBinding TextWrapping}" LineHeight="{TemplateBinding LineHeight}" LetterSpacing="{TemplateBinding LetterSpacing}" PasswordChar="{TemplateBinding PasswordChar}" RevealPassword="{TemplateBinding RevealPassword}" SelectionBrush="{TemplateBinding SelectionBrush}" SelectionForegroundBrush="{TemplateBinding SelectionForegroundBrush}" CaretBrush="{TemplateBinding CaretBrush}" HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}" VerticalAlignment="{TemplateBinding VerticalContentAlignment}"/>
+            <ScrollViewer.Styles>
+              <Style Selector="ScrollContentPresenter#PART_ContentPresenter">
+                <Setter Property="Cursor" Value="IBeam"/>
+              </Style>
+            </ScrollViewer.Styles>
+          </ScrollViewer>
+          <TextBlock x:Name="PlaceholderTextContentPresenter" Grid.Column="2" Grid.ColumnSpan="3" Foreground="{TemplateBinding PlaceholderForeground}" Margin="{TemplateBinding BorderThickness}" Padding="{TemplateBinding Padding}" Text="{TemplateBinding PlaceholderText}" TextAlignment="{TemplateBinding TextAlignment}" TextWrapping="{TemplateBinding TextWrapping}" IsHitTestVisible="False">
+            <TextBlock.IsVisible>
+              <MultiBinding Converter="{x:Static BoolConverters.And}">
+                <Binding ElementName="PART_TextPresenter" Path="PreeditText" Converter="{x:Static StringConverters.IsNullOrEmpty}"/>
+                <Binding RelativeSource="{RelativeSource TemplatedParent}" Path="Text" Converter="{x:Static StringConverters.IsNullOrEmpty}"/>
+              </MultiBinding>
+            </TextBlock.IsVisible>
+          </TextBlock>
+          <ContentPresenter x:Name="InnerRightContentPresenter" IsVisible="{TemplateBinding InnerRightContent, Converter={x:Static ObjectConverters.IsNotNull}}" Grid.Column="3" Margin="{TemplateBinding BorderThickness}" VerticalContentAlignment="{TemplateBinding VerticalContentAlignment}" Content="{TemplateBinding InnerRightContent}"/>
+          <Button x:Name="DeleteButton" Grid.Column="4" Theme="{StaticResource TextBoxDeleteButtonStyle}" Command="{Binding $parent[TextBox].Clear}" BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="{TemplateBinding CornerRadius}" Padding="{DynamicResource HelperButtonThemePadding}" Focusable="False" IsVisible="False" FontSize="{TemplateBinding FontSize}" HorizontalAlignment="Right" MinWidth="40" VerticalAlignment="Stretch"/>
+          <Border x:Name="SpinButtonsSpace" Grid.Column="5" Width="96" IsVisible="False"/>
+          <Path x:Name="PopupIndicator" Grid.Column="5" IsVisible="False" Margin="{StaticResource NumberBoxPopupIndicatorMargin}" Data="{StaticResource GlyphGeometryEC8F}" Fill="{DynamicResource NumberBoxPopupIndicatorForeground}" Stretch="Uniform" Width="10" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+        </Grid>
+      </ControlTemplate>
+    </Setter>
+    <Style Selector="^[Tag=SpinButtonsVisible] /template/ Border#SpinButtonsSpace">
+      <Setter Property="IsVisible" Value="True"/>
+    </Style>
+    <Style Selector="^[Tag=SpinButtonsVisibleLeft] /template/ Border#SpinButtonsSpaceLeft">
+      <Setter Property="IsVisible" Value="True"/>
+    </Style>
+    <Style Selector="^[Tag=SpinButtonsPopup] /template/ Path#PopupIndicator">
+      <Setter Property="IsVisible" Value="True"/>
+    </Style>
+  </ControlTheme>
+  <ControlTheme x:Key="NumericUpDownButtonSpinnerStyle" TargetType="ButtonSpinner">
+    <Setter Property="Focusable" Value="False"/>
+    <Setter Property="IsTabStop" Value="False"/>
+    <Setter Property="Template">
+      <ControlTemplate>
+        <Grid>
+          <ContentPresenter x:Name="PART_ContentPresenter" Content="{TemplateBinding Content}" ContentTemplate="{TemplateBinding ContentTemplate}" HorizontalContentAlignment="{TemplateBinding HorizontalContentAlignment}" VerticalContentAlignment="{TemplateBinding VerticalContentAlignment}"/>
+          <StackPanel x:Name="SpinButtons" Orientation="Horizontal" HorizontalAlignment="Right" IsVisible="{TemplateBinding ShowButtonSpinner}">
+            <RepeatButton x:Name="PART_IncreaseButton" Theme="{StaticResource NumericUpDownSpinButtonStyle}" Margin="4" CornerRadius="{TemplateBinding CornerRadius}">
+              <Path Data="{StaticResource GlyphGeometryE70E}" Fill="{Binding $parent[RepeatButton].Foreground}" Stretch="Uniform" Width="12" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+            </RepeatButton>
+            <RepeatButton x:Name="PART_DecreaseButton" Theme="{StaticResource NumericUpDownSpinButtonStyle}" Margin="0,4,4,4" CornerRadius="{TemplateBinding CornerRadius}">
+              <Path Data="{StaticResource GlyphGeometryE70D}" Fill="{Binding $parent[RepeatButton].Foreground}" Stretch="Uniform" Width="12" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+            </RepeatButton>
+          </StackPanel>
+        </Grid>
+      </ControlTemplate>
+    </Setter>
+    <Style Selector="^:left /template/ StackPanel#SpinButtons">
+      <Setter Property="HorizontalAlignment" Value="Left"/>
+    </Style>
+  </ControlTheme>
+  <ControlTheme x:Key="{x:Type NumericUpDown}" TargetType="NumericUpDown">
+    <Setter Property="FontSize" Value="16"/>
+    <Setter Property="MinHeight" Value="56"/>
+    <Setter Property="IsTabStop" Value="False"/>
+    <Setter Property="CornerRadius" Value="4"/>
+    <Setter Property="Background" Value="{DynamicResource MaterialSurfaceContainerHighestBrush}"/>
+    <Setter Property="BorderThickness" Value="0,0,0,1"/>
+    <Setter Property="BorderBrush" Value="{DynamicResource MaterialOnSurfaceVariantBrush}"/>
+    <Setter Property="Foreground" Value="{DynamicResource MaterialOnSurfaceBrush}"/>
+    <Setter Property="Padding" Value="16,16"/>
+    <Setter Property="PlaceholderForeground" Value="{DynamicResource MaterialOnSurfaceVariantBrush}"/>
+    <Setter Property="Template">
+      <ControlTemplate>
+        <DataValidationErrors>
+          <ButtonSpinner x:Name="PART_Spinner" Theme="{StaticResource NumericUpDownButtonSpinnerStyle}" CornerRadius="{TemplateBinding CornerRadius}" AllowSpin="{TemplateBinding AllowSpin}" ShowButtonSpinner="{TemplateBinding ShowButtonSpinner}" ButtonSpinnerLocation="{TemplateBinding ButtonSpinnerLocation}" HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch">
+            <TextBox x:Name="PART_TextBox" Theme="{StaticResource NumberBoxTextBoxStyle}" FontSize="{TemplateBinding FontSize}" FontWeight="{TemplateBinding FontWeight}" FontFamily="{TemplateBinding FontFamily}" Background="{TemplateBinding Background}" BorderThickness="{TemplateBinding BorderThickness}" BorderBrush="{TemplateBinding BorderBrush}" Padding="{TemplateBinding Padding}" Foreground="{TemplateBinding Foreground}" TextAlignment="{TemplateBinding TextAlignment}" CornerRadius="{TemplateBinding CornerRadius}" PlaceholderText="{TemplateBinding PlaceholderText}" PlaceholderForeground="{TemplateBinding PlaceholderForeground}" IsReadOnly="{TemplateBinding IsReadOnly}" Text="{TemplateBinding Text}" HorizontalContentAlignment="{TemplateBinding HorizontalContentAlignment}" VerticalContentAlignment="{TemplateBinding VerticalContentAlignment}" AcceptsReturn="False" TextWrapping="NoWrap" InnerLeftContent="{Binding InnerLeftContent, RelativeSource={RelativeSource TemplatedParent}}" InnerRightContent="{Binding InnerRightContent, RelativeSource={RelativeSource TemplatedParent}}"/>
+          </ButtonSpinner>
+        </DataValidationErrors>
+      </ControlTemplate>
+    </Setter>
+    <Style Selector="^[ShowButtonSpinner=True] /template/ TextBox#PART_TextBox">
+      <Setter Property="MinWidth" Value="{StaticResource NumberBoxMinWidth}"/>
+      <Setter Property="Tag" Value="SpinButtonsVisible"/>
+    </Style>
+    <Style Selector="^[ShowButtonSpinner=True][ButtonSpinnerLocation=Left] /template/ TextBox#PART_TextBox">
+      <Setter Property="Tag" Value="SpinButtonsVisibleLeft"/>
+    </Style>
+    <Style Selector="^:error /template/ TextBox#PART_TextBox">
+      <Setter Property="BorderBrush" Value="{DynamicResource SystemFillColorCriticalBrush}"/>
+    </Style>
+  </ControlTheme>
+</ResourceDictionary>

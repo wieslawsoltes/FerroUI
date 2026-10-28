@@ -63,6 +63,369 @@ fn runtime_id(board: &PreviewStageBoard, stage: PreviewStageId, node: NodeId) ->
         .node_id(&visual(board, stage, node))
 }
 
+fn sync_documents(board: &mut PreviewStageBoard, documents: &[(&str, &Document, bool)]) {
+    board
+        .sync_sources(
+            URI,
+            documents
+                .iter()
+                .map(|(uri, document, pending)| source(document, uri, *pending))
+                .collect(),
+            PreviewHostOptions::default(),
+            1,
+        )
+        .unwrap();
+}
+
+#[test]
+fn transitive_resource_and_style_dependencies_refresh_only_their_native_stages() {
+    let _app = UnitTestApplication::start(TestServices::styled_window());
+    const OUTER: &str = "ferres://FerroUI.Designer.Tests/Outer.xaml";
+    const VALUES: &str = "ferres://FerroUI.Designer.Tests/Values.xaml";
+    const STYLES: &str = "ferres://FerroUI.Designer.Tests/Styles.xaml";
+    let document = Document::new(r#"<StackPanel xmlns="https://github.com/ferroui"><StackPanel.Resources><ResourceDictionary><ResourceDictionary.MergedDictionaries><ResourceInclude Source="Outer.xaml"/></ResourceDictionary.MergedDictionaries></ResourceDictionary></StackPanel.Resources><StackPanel.Styles><StyleInclude Source="Styles.xaml"/></StackPanel.Styles><TextBox Name="Input" Width="{StaticResource width}" Text="Initial"/></StackPanel>"#).unwrap();
+    let outer = Document::new(r#"<ResourceDictionary xmlns="https://github.com/ferroui"><ResourceDictionary.MergedDictionaries><ResourceInclude Source="Values.xaml"/></ResourceDictionary.MergedDictionaries></ResourceDictionary>"#).unwrap();
+    let mut values = Document::new(r#"<ResourceDictionary xmlns="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"><x:Double x:Key="width">70</x:Double></ResourceDictionary>"#).unwrap();
+    let mut styles = Document::new(r#"<Styles xmlns="https://github.com/ferroui"><Style Selector="TextBox"><Setter Property="Height" Value="32"/></Style></Styles>"#).unwrap();
+    let unrelated =
+        Document::new(r#"<TextBox xmlns="https://github.com/ferroui" Text="Other initial"/>"#)
+            .unwrap();
+    let input = document.ast().find_name("Input").unwrap();
+    let mut board = PreviewStageBoard::new();
+    sync_documents(
+        &mut board,
+        &[
+            (URI, &document, false),
+            (OUTER, &outer, false),
+            (VALUES, &values, false),
+            (STYLES, &styles, false),
+            (OTHER, &unrelated, false),
+        ],
+    );
+    let dependent = board.add(config("Included resources")).unwrap();
+    let mut other_config = PreviewStageConfiguration::new(
+        "Independent live input",
+        OTHER,
+        PreviewEnvironment::default(),
+    );
+    other_config.mode = PreviewStageMode::Live;
+    let independent = board.add(other_config).unwrap();
+    let window = attach(&board);
+    assert!(board.refresh_all().is_empty(), "{:?}", board.stages());
+    let old_input = visual(&board, dependent, input).cast::<TextBox>().unwrap();
+    let other_input = visual(&board, independent, unrelated.ast().root())
+        .cast::<TextBox>()
+        .unwrap();
+    other_input.set_text(Some("Keep this live state"));
+    assert_eq!(old_input.width(), 70.0);
+    assert_eq!(old_input.height(), 32.0);
+    let token = board
+        .selection_token(dependent, runtime_id(&board, dependent, input))
+        .unwrap();
+    values.update_source(
+        "Change included width",
+        values.source().replace(">70<", ">92<"),
+    );
+    let fresh = vec![
+        source(&document, URI, false),
+        source(&outer, OUTER, false),
+        source(&values, VALUES, false),
+        source(&styles, STYLES, false),
+        source(&unrelated, OTHER, false),
+    ];
+    assert!(
+        !board.dependencies_are_current(dependent, &fresh),
+        "read-only validation must reject a pre-sync dependency edit"
+    );
+    assert!(board.dependencies_are_current(independent, &fresh));
+    sync_documents(
+        &mut board,
+        &[
+            (URI, &document, false),
+            (OUTER, &outer, false),
+            (VALUES, &values, false),
+            (STYLES, &styles, false),
+            (OTHER, &unrelated, false),
+        ],
+    );
+    let changed = visual(&board, dependent, input).cast::<TextBox>().unwrap();
+    assert_ne!(old_input, changed);
+    assert_eq!(changed.width(), 92.0);
+    assert!(board.resolve_selection(&token).is_err());
+    assert_eq!(
+        visual(&board, independent, unrelated.ast().root())
+            .cast::<TextBox>()
+            .unwrap(),
+        other_input
+    );
+    assert_eq!(other_input.text().as_deref(), Some("Keep this live state"));
+    styles.update_source(
+        "Change included style",
+        styles.source().replace("Value=\"32\"", "Value=\"48\""),
+    );
+    sync_documents(
+        &mut board,
+        &[
+            (URI, &document, false),
+            (OUTER, &outer, false),
+            (VALUES, &values, false),
+            (STYLES, &styles, false),
+            (OTHER, &unrelated, false),
+        ],
+    );
+    assert_eq!(
+        visual(&board, dependent, input)
+            .cast::<TextBox>()
+            .unwrap()
+            .height(),
+        48.0
+    );
+    assert_eq!(
+        visual(&board, independent, unrelated.ast().root())
+            .cast::<TextBox>()
+            .unwrap(),
+        other_input
+    );
+    assert_eq!(other_input.text().as_deref(), Some("Keep this live state"));
+    assert_eq!(document.revision(), 0);
+    assert!(!document.can_undo());
+    window.close();
+}
+
+#[test]
+fn included_drafts_errors_and_late_open_documents_keep_the_last_graph_and_retire_source_tokens() {
+    let _app = UnitTestApplication::start(TestServices::styled_window());
+    const VALUES: &str = "ferres://FerroUI.Designer.Tests/MissingValues.xaml";
+    let document = Document::new(r#"<StackPanel xmlns="https://github.com/ferroui"><StackPanel.Resources><ResourceDictionary><ResourceDictionary.MergedDictionaries><ResourceInclude Source="MissingValues.xaml"/></ResourceDictionary.MergedDictionaries></ResourceDictionary></StackPanel.Resources><TextBox Name="Input" Width="{StaticResource width}"/></StackPanel>"#).unwrap();
+    let node = document.ast().find_name("Input").unwrap();
+    let valid = r#"<ResourceDictionary xmlns="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"><x:Double x:Key="width">61</x:Double></ResourceDictionary>"#;
+    let mut values = Document::new(valid).unwrap();
+    let mut board = PreviewStageBoard::new();
+    sync(&mut board, &document, false);
+    let stage = board.add(config("Late include")).unwrap();
+    assert!(matches!(
+        board.stage(stage).unwrap().status,
+        PreviewStageStatus::Failed { .. }
+    ));
+    sync_documents(
+        &mut board,
+        &[(URI, &document, false), (VALUES, &values, false)],
+    );
+    assert!(
+        matches!(
+            board.stage(stage).unwrap().status,
+            PreviewStageStatus::Ready { .. }
+        ),
+        "{:?}",
+        board.stage(stage)
+    );
+    let accepted = visual(&board, stage, node).cast::<TextBox>().unwrap();
+    assert_eq!(accepted.width(), 61.0);
+    let token = board
+        .selection_token(stage, runtime_id(&board, stage, node))
+        .unwrap();
+    values.update_source("Pending width", valid.replace(">61<", ">82<"));
+    sync_documents(
+        &mut board,
+        &[(URI, &document, false), (VALUES, &values, true)],
+    );
+    assert!(matches!(
+        board.stage(stage).unwrap().status,
+        PreviewStageStatus::PendingSource { .. }
+    ));
+    assert_eq!(
+        visual(&board, stage, node).cast::<TextBox>().unwrap(),
+        accepted
+    );
+    assert_eq!(accepted.width(), 61.0);
+    assert!(board.resolve_selection(&token).is_err());
+    let epoch = board.epoch();
+    sync_documents(
+        &mut board,
+        &[(URI, &document, false), (VALUES, &values, true)],
+    );
+    assert_eq!(
+        board.epoch(),
+        epoch,
+        "an unchanged unavailable include must not retry every refresh"
+    );
+    values.update_source("Invalid included source", "<ResourceDictionary");
+    sync_documents(
+        &mut board,
+        &[(URI, &document, false), (VALUES, &values, false)],
+    );
+    assert!(matches!(
+        board.stage(stage).unwrap().status,
+        PreviewStageStatus::InvalidSource { .. }
+    ));
+    assert_eq!(
+        visual(&board, stage, node).cast::<TextBox>().unwrap(),
+        accepted
+    );
+    values.update_source(
+        "Invalid native resource",
+        "<DoesNotExist xmlns='https://github.com/ferroui'/>",
+    );
+    sync_documents(
+        &mut board,
+        &[(URI, &document, false), (VALUES, &values, false)],
+    );
+    assert!(matches!(
+        board.stage(stage).unwrap().status,
+        PreviewStageStatus::Failed { .. }
+    ));
+    assert_eq!(
+        visual(&board, stage, node).cast::<TextBox>().unwrap(),
+        accepted
+    );
+    values.update_source("Repair resource", valid.replace(">61<", ">94<"));
+    sync_documents(
+        &mut board,
+        &[(URI, &document, false), (VALUES, &values, false)],
+    );
+    assert_eq!(
+        visual(&board, stage, node)
+            .cast::<TextBox>()
+            .unwrap()
+            .width(),
+        94.0
+    );
+    assert!(matches!(
+        board.stage(stage).unwrap().status,
+        PreviewStageStatus::Ready { .. }
+    ));
+    assert_eq!(document.revision(), 0);
+}
+
+#[test]
+fn deferred_include_discovery_uses_the_graphs_accepted_source_stamps_and_snapshot() {
+    use ferroui_base::metadata::IServiceProvider;
+    use ferroui_markup_xaml::xaml_il::runtime::{
+        DeferredContentBuilder, FrameworkContextServices, XamlIlContext, XamlIlContextDefinition,
+        XamlIlRuntimeHelpers,
+    };
+    use ferroui_markup_xaml::{styling::ResourceInclude, templates::DataTemplate};
+
+    // A host factory may supply deferred native content whose include is created
+    // only when the template is invoked. Interpreted XAML eagerly discovers its
+    // static include paths during compilation, so use the same native builder API
+    // as compiled/custom templates to exercise genuinely late discovery.
+    fn template(
+        board: &PreviewStageBoard,
+        stage: PreviewStageId,
+        root: &Ref<StackPanel>,
+    ) -> Rc<DataTemplate> {
+        let snapshot = board.stages[board.index(stage).unwrap()]
+            .rendered
+            .as_ref()
+            .unwrap()
+            .source_snapshot
+            .clone();
+        let context = XamlIlContext::new(
+            XamlIlContextDefinition {
+                root_object_provider: true,
+                parent_stack_provider: true,
+                ..Default::default()
+            },
+            Rc::new(FrameworkContextServices),
+            None,
+            Rc::from([]),
+            Some(Uri::absolute(URI).unwrap()),
+        );
+        context.set_root_object(Some(Control::boxed(root.clone())));
+        context.push_parent(Some(Control::boxed(root.clone())));
+        let provider: Rc<dyn IServiceProvider> = context;
+        snapshot.run(|| {
+            let builder = DeferredContentBuilder::try_new(|_| {
+                let include = ResourceInclude::new(Some(Uri::absolute(URI).unwrap()));
+                include.set_source(Uri::try_create(
+                    "DeferredValues.xaml",
+                    UriKind::RelativeOrAbsolute,
+                ));
+                let dictionary = include.try_loaded()?;
+                let width = dictionary.try_get_value(&"width".into()).flatten().unwrap();
+                let child = TextBox::new();
+                child.set_width(*width.downcast_ref::<f64>().unwrap());
+                let border = Border::new();
+                border.set_child(Some(child.upcast()));
+                Ok(Some(Control::boxed(border)))
+            });
+            let content = XamlIlRuntimeHelpers::deferred_transformation_factory_v3::<Ref<Control>>(
+                builder, &provider,
+            );
+            let template = DataTemplate::new();
+            template.set_content(Some(content));
+            template
+        })
+    }
+    let _app = UnitTestApplication::start(TestServices::styled_window());
+    const VALUES: &str = "ferres://FerroUI.Designer.Tests/DeferredValues.xaml";
+    let document = Document::new(r#"<StackPanel xmlns="https://github.com/ferroui"><TextBox Name="Input" Text="Retain until dependency is discovered"/></StackPanel>"#).unwrap();
+    let mut values = Document::new(r#"<ResourceDictionary xmlns="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"><x:Double x:Key="width">51</x:Double></ResourceDictionary>"#).unwrap();
+    let mut board = PreviewStageBoard::new();
+    sync_documents(
+        &mut board,
+        &[(URI, &document, false), (VALUES, &values, false)],
+    );
+    let stage = board.add(config("Deferred sources")).unwrap();
+    assert!(
+        matches!(
+            board.stage(stage).unwrap().status,
+            PreviewStageStatus::Ready { .. }
+        ),
+        "{:?}",
+        board.stage(stage)
+    );
+    let accepted = visual(&board, stage, document.ast().root())
+        .cast::<StackPanel>()
+        .unwrap();
+    let deferred = template(&board, stage, &accepted);
+    assert!(!board.stages[board.index(stage).unwrap()]
+        .rendered
+        .as_ref()
+        .unwrap()
+        .source_snapshot
+        .requested_uris()
+        .contains(&native_source_uri(VALUES).unwrap()));
+    values.update_source(
+        "Edit before first template realization",
+        values.source().replace(">51<", ">89<"),
+    );
+    sync_documents(
+        &mut board,
+        &[(URI, &document, false), (VALUES, &values, false)],
+    );
+    assert_eq!(
+        visual(&board, stage, document.ast().root())
+            .cast::<StackPanel>()
+            .unwrap(),
+        accepted,
+        "an unconsumed resource cannot restart unrelated native content"
+    );
+    let built = deferred.build(None).unwrap().cast::<Border>().unwrap();
+    assert_eq!(
+        built.child().unwrap().width(),
+        51.0,
+        "a retained deferred template must use its accepted source snapshot"
+    );
+    assert!(!board.source_is_current(stage, URI, &document, false, 1));
+    sync_documents(
+        &mut board,
+        &[(URI, &document, false), (VALUES, &values, false)],
+    );
+    let refreshed = visual(&board, stage, document.ast().root())
+        .cast::<StackPanel>()
+        .unwrap();
+    assert_ne!(
+        refreshed, accepted,
+        "late discovery must compare with construction-time stamps"
+    );
+    let deferred = template(&board, stage, &refreshed);
+    let built = deferred.build(None).unwrap().cast::<Border>().unwrap();
+    assert_eq!(built.child().unwrap().width(), 89.0);
+    assert_eq!(document.revision(), 0);
+}
+
 #[test]
 fn same_source_has_multiple_independent_native_environments_without_reload_ownership_conflicts() {
     let _app = UnitTestApplication::start(TestServices::styled_window());

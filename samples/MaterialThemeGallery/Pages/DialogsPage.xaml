@@ -1,0 +1,17 @@
+<UserControl xmlns="https://github.com/ferroui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:dialogs="using:FerroUI.Dialogs"
+             x:Class="MaterialThemeGallery.Pages.DialogsPage">
+  <!-- The managed file chooser of the dialogs (ManagedFileChooser): the quick links, the bar with
+       the location, the columns of the entries, the file name, the filters and the buttons. It
+       has no view model here, so its lists are empty and the picture does not depend on the
+       files of the machine. The native counterpart (DialogsPage.winui.xml) is composed of the
+       WinUI controls with the same layout: WinUI has no file chooser of its own (an application
+       shows the one of the system). -->
+  <StackPanel Margin="24" Spacing="12">
+    <TextBlock Text="Dialogs" FontSize="28" FontWeight="SemiBold" />
+
+    <TextBlock Text="ManagedFileChooser" FontSize="14" FontWeight="SemiBold" Margin="0,8,0,0" />
+    <dialogs:ManagedFileChooser Width="640" Height="420" HorizontalAlignment="Left" />
+  </StackPanel>
+</UserControl>

@@ -26,7 +26,10 @@ autoexamples = false
 path = "lib.rs"
 
 [features]
-hot-reload = ["runtime-populate", "ferroui-base/hot-reload", "ferroui-markup/hot-reload"]
+hot-reload = ["runtime-populate", "source-overlays", "ferroui-base/hot-reload", "ferroui-markup/hot-reload"]
+# Explicit, UI-thread source snapshots used by embedded designers in every build profile.
+# Global reload-session publication remains a development-only facility.
+source-overlays = []
 # Constructor-scoped overrides are only needed when an interpreter is linked.
 runtime-populate = []
 # The performance counters of the base crate, which the counting site of this crate (dynamic

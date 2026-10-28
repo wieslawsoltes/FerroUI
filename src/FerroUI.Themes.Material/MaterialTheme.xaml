@@ -1,0 +1,95 @@
+<!-- Android Material 3 Expressive theme; pinned source and licenses in NOTICE.md.
+     Inherited WinUI template-contract resources are separate merged dictionaries.
+     Material role, typography and metric overrides are direct resources, so they
+     take precedence without flattening duplicate legacy keys into one dictionary. -->
+<Styles x:Class="FerroUI.Themes.Material.MaterialTheme"
+        xmlns="https://github.com/ferroui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+  <Styles.Resources>
+    <ResourceDictionary>
+      <ResourceDictionary.MergedDictionaries>
+
+        <!-- Inherited template-contract resources. -->
+        <ResourceInclude Source="/Resources/SystemResources.xaml" />
+        <ResourceInclude Source="/Resources/Generic.xaml" />
+        <ResourceInclude Source="/Resources/Common_themeresources.xaml" />
+        <ResourceInclude Source="/Resources/Common_themeresources_any.xaml" />
+        <ResourceInclude Source="/Resources/Deprecated_themeresources_any.xaml" />
+        <ResourceInclude Source="/Resources/PasswordBox_themeresources.xaml" />
+        <ResourceInclude Source="/Resources/TextBox_themeresources.xaml" />
+        <ResourceInclude Source="/Resources/MenuFlyout_themeresources.xaml" />
+        <ResourceInclude Source="/Resources/AcrylicBrush_themeresources.xaml" />
+        <ResourceInclude Source="/Resources/RevealBrush_themeresources.xaml" />
+        <ResourceInclude Source="/Resources/Deprecated_themeresources.xaml" />
+        <ResourceInclude Source="/Resources/Hyperlink_themeresources.xaml" />
+        <ResourceInclude Source="/Resources/HyperlinkButton_themeresources.xaml" />
+        <ResourceInclude Source="/Resources/RadioButton_themeresources.xaml" />
+        <ResourceInclude Source="/Resources/AppBarButton_themeresources.xaml" />
+        <ResourceInclude Source="/Resources/AppBarSeparator_themeresources.xaml" />
+        <ResourceInclude Source="/Resources/AppBarToggleButton_themeresources.xaml" />
+        <ResourceInclude Source="/Resources/ListBox_themeresources.xaml" />
+        <ResourceInclude Source="/Resources/ToggleSwitch_themeresources.xaml" />
+        <ResourceInclude Source="/Resources/CommandBar_themeresources.xaml" />
+        <ResourceInclude Source="/Resources/ListViewItem_themeresources.xaml" />
+        <ResourceInclude Source="/Resources/TextBlock_themeresources.xaml" />
+        <ResourceInclude Source="/Resources/TextBlock_themeresources_v2.5.xaml" />
+        <ResourceInclude Source="/Resources/FlyoutPresenter_themeresources.xaml" />
+        <ResourceInclude Source="/Resources/Button_themeresources.xaml" />
+        <ResourceInclude Source="/Resources/ToggleButton_themeresources.xaml" />
+        <ResourceInclude Source="/Resources/CornerRadius_themeresources.xaml" />
+        <ResourceInclude Source="/Resources/RepeatButton_themeresources.xaml" />
+        <ResourceInclude Source="/Resources/CalendarDatePicker_themeresources.xaml" />
+        <ResourceInclude Source="/Resources/CalendarView_themeresources.xaml" />
+        <ResourceInclude Source="/Resources/CheckBox_themeresources.xaml" />
+        <ResourceInclude Source="/Resources/ContentDialog_themeresources.xaml" />
+        <ResourceInclude Source="/Resources/DatePicker_themeresources.xaml" />
+        <ResourceInclude Source="/Resources/DateTimePickerFlyout_themeresources.xaml" />
+        <ResourceInclude Source="/Resources/FlipView_themeresources.xaml" />
+        <ResourceInclude Source="/Resources/FlipViewItem_themeresources.xaml" />
+        <ResourceInclude Source="/Resources/ScrollBar_themeresources.xaml" />
+        <ResourceInclude Source="/Resources/ScrollViewer_themeresources.xaml" />
+        <ResourceInclude Source="/Resources/Slider_themeresources.xaml" />
+        <ResourceInclude Source="/Resources/TimePicker_themeresources.xaml" />
+        <ResourceInclude Source="/Resources/ToolTip_themeresources.xaml" />
+        <ResourceInclude Source="/Resources/NavigationView_themeresources.xaml" />
+        <ResourceInclude Source="/Resources/NavigationBackButton_themeresources.xaml" />
+        <ResourceInclude Source="/Resources/RefreshContainer_themeresources.xaml" />
+        <ResourceInclude Source="/Resources/RefreshVisualizer_themeresources.xaml" />
+        <ResourceInclude Source="/Resources/MenuBar_themeresources.xaml" />
+        <ResourceInclude Source="/Resources/TreeView_themeresources.xaml" />
+        <ResourceInclude Source="/Resources/SplitButton_themeresources.xaml" />
+        <ResourceInclude Source="/Resources/DropDownButton_themeresources.xaml" />
+        <ResourceInclude Source="/Resources/TabView_themeresources.xaml" />
+        <ResourceInclude Source="/Resources/AutoSuggestBox_themeresources.xaml" />
+        <ResourceInclude Source="/Resources/ComboBox_themeresources.xaml" />
+        <ResourceInclude Source="/Resources/SplitView_themeresources.xaml" />
+        <ResourceInclude Source="/Resources/ProgressBar_themeresources.xaml" />
+        <ResourceInclude Source="/Resources/NumberBox_themeresources.xaml" />
+        <ResourceInclude Source="/Resources/Expander_themeresources.xaml" />
+        <ResourceInclude Source="/Resources/InfoBar_themeresources.xaml" />
+        <ResourceInclude Source="/Resources/PipsPager_themeresources.xaml" />
+        <ResourceInclude Source="/Resources/SelectorBar_themeresources.xaml" />
+        <ResourceInclude Source="/Resources/TitleBar_themeresources.xaml" />
+        <ResourceInclude Source="/Resources/TabularSurfaces_themeresources.xaml" />
+        <ResourceInclude Source="/Resources/TableView_themeresources.xaml" />
+        <ResourceInclude Source="/Resources/ResizeGripper_themeresources.xaml" />
+        <ResourceInclude Source="/Resources/ThemeShadows.xaml" />
+        <ResourceInclude Source="/Resources/Glyphs.xaml" />
+        <MergeResourceInclude Source="/Resources/MaterialColors.xaml" />
+        <MergeResourceInclude Source="/Resources/MaterialTypography.xaml" />
+        <MergeResourceInclude Source="/Resources/MaterialMetrics.xaml" />
+        <MergeResourceInclude Source="/Resources/MaterialCompatibility.xaml" />
+
+
+        <!-- The labels of the commands of the context flyout of the text controls (not part of the
+             WinUI theme: WinUI takes them from the resources of the framework). -->
+        <MergeResourceInclude Source="/Strings/InvariantResources.xaml" />
+      </ResourceDictionary.MergedDictionaries>
+
+      <!-- Not part of the merged dictionaries: the theme looks it up first when its density style is compact. -->
+      <ResourceInclude x:Key="CompactStyles" Source="/DensityStyles/Compact.xaml" />
+    </ResourceDictionary>
+  </Styles.Resources>
+
+  <StyleInclude Source="/Controls/MaterialControls.xaml" />
+</Styles>

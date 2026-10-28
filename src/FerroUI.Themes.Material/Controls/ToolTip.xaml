@@ -1,0 +1,44 @@
+<!--
+  Android Material 3 Expressive, pinned to AndroidX Compose Material3 1.5.0-beta02,
+  revision e4d933c98df7baa7ea2b83eea6e086915961e0ff. Geometry and color roles follow
+  androidx/compose/material3/tokens; FerroUI template contracts are retained from
+  its WinUI theme (Microsoft copyright, MIT; see NOTICE.md).
+  Material design/source references: https://developer.android.com/develop/ui/compose/designsystems/material3
+  See docs/porting/material-theme.md for measured fidelity and platform differences.
+-->
+<ResourceDictionary xmlns="https://github.com/ferroui" xmlns:material="using:FerroUI.Themes.Material"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    x:ClassModifier="internal">
+  <ControlTheme x:Key="DefaultToolTipStyle" TargetType="ToolTip">
+    <Setter Property="Foreground" Value="{DynamicResource MaterialInverseOnSurfaceBrush}" />
+    <Setter Property="Background" Value="{DynamicResource MaterialInverseSurfaceBrush}" />
+    <Setter Property="BorderThickness" Value="0" />
+    <Setter Property="FontFamily" Value="{DynamicResource ContentControlThemeFontFamily}" />
+    <Setter Property="FontSize" Value="12" />
+    <Setter Property="MinHeight" Value="24" />
+    <Setter Property="Padding" Value="8,4" />
+    <Setter Property="MaxWidth" Value="200" />
+    <Setter Property="CornerRadius" Value="4" />
+    <Setter Property="Opacity" Value="0" />
+    <Setter Property="Transitions"><Transitions><material:MaterialDoubleTransition Property="Opacity" Duration="{DynamicResource MaterialMotionFastEffectsDuration}" Easing="{DynamicResource MaterialMotionFastEffectsEasing}" /></Transitions></Setter>
+    <Setter Property="Template">
+      <ControlTemplate>
+        <ContentPresenter x:Name="PART_ContentPresenter" Background="{TemplateBinding Background}" Foreground="{TemplateBinding Foreground}"
+                          Content="{TemplateBinding Content}" ContentTemplate="{TemplateBinding ContentTemplate}"
+                          Padding="{TemplateBinding Padding}" CornerRadius="{TemplateBinding CornerRadius}" TextWrapping="Wrap"
+                          HorizontalContentAlignment="{TemplateBinding HorizontalContentAlignment}" VerticalContentAlignment="Center" />
+      </ControlTemplate>
+    </Setter>
+    <Style Selector="^:open"><Setter Property="Opacity" Value="1" /></Style>
+  </ControlTheme>
+  <ControlTheme x:Key="{x:Type ToolTip}" TargetType="ToolTip" BasedOn="{StaticResource DefaultToolTipStyle}" />
+  <ControlTheme x:Key="MaterialRichTooltip" TargetType="ToolTip" BasedOn="{StaticResource DefaultToolTipStyle}">
+    <Setter Property="Background" Value="{DynamicResource MaterialSurfaceContainerBrush}" />
+    <Setter Property="Foreground" Value="{DynamicResource MaterialOnSurfaceVariantBrush}" />
+    <Setter Property="CornerRadius" Value="12" />
+    <Setter Property="Padding" Value="16,12" />
+    <Setter Property="MaxWidth" Value="320" />
+    <Setter Property="FontSize" Value="14" />
+  </ControlTheme>
+
+</ResourceDictionary>

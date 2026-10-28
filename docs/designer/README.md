@@ -595,6 +595,7 @@ The additional tools are:
 | `designer_components` / `designer_component` | Component catalog and transactional resource/template/theme authoring |
 | `designer_component_resources` / `designer_component_references` | Theme-aware visible resources and authored reference analysis |
 | `designer_definition_scope` / `designer_definition` | Native definition preview, sample host options and guarded scope navigation |
+| `designer_preview_stages` / `designer_preview_stage` | Inspect native preview stages; configure views, variants and manifests using the current model token |
 | `designer_project` / `designer_project_edit` | Solution, tab, save and document lifecycle |
 | `designer_build_plan` / `designer_project_task` | Reviewable process plans and explicit build/run/cancel |
 | `designer_language` / `designer_language_apply` | Semantic queries and versioned cross-document refactoring |

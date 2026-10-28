@@ -1,0 +1,219 @@
+<!--
+  Ported from microsoft-ui-xaml (https://github.com/microsoft/microsoft-ui-xaml),
+  commit 7e4b0c2096be402f51cc8f7d203ebf67cff183d0:
+    controls/dev/InfoBar/InfoBar.xaml (the implicit InfoBar style)
+    controls/dev/InfoBar/InfoBar_themeresources.xaml (InfoBarCloseButtonStyle; its resources are
+    Resources/InfoBar_themeresources.xaml)
+  Copyright (c) Microsoft Corporation. Licensed under the MIT License (see NOTICE.md of the crate).
+
+  NotificationCard is FerroUI's notification, the counterpart of WinUI's InfoBar: the template is
+  the one of InfoBar, open, with the standard icon of its severity and its close button.
+  Translation notes (docs/porting/winui-theme.md, section 4):
+  - SeverityLevels (Informational, Error, Warning, Success) are the pseudo-classes of the type of
+    the notification (the base, :error, :warning, :success); :information is the base.
+  - The icon of the severity is two glyphs of the symbol font on top of each other
+    (InfoBarIconBackgroundGlyph F136 in the icon background of the severity, the symbol of the
+    severity F13F, F13D, F13C or F13E in its icon foreground) at InfoBarIconFontSize: two paths of
+    the geometries GlyphGeometry<code point> centred in a box of 16 x 16. The user icon of InfoBar
+    (IconSource, UserIconBox) and IsIconVisible have no counterpart: the standard icon is always
+    shown (StandardIconVisible).
+  - The title, the message and the action button of InfoBar (the InfoBarPanel) are the content of
+    the card, presented where InfoBar has its InfoBarPanel (InfoBarPanelMargin). A notification
+    shown by WindowNotificationManager is presented with the title and the message of InfoBar in
+    the InfoBarPanel of the theme (Primitives/info_bar_panel.rs), on one line when they fit
+    (WindowNotificationManager.xaml). ContentArea, the second
+    row for the Content of InfoBar, has no counterpart (NoBannerContent).
+  - The close button is the CloseButton of InfoBar with InfoBarCloseButtonStyle; it closes the card
+    with NotificationCard.CloseOnClick (CloseButtonCommand). IsClosable has no counterpart: the
+    button is always shown (CloseButtonVisible). The SymbolIcon of InfoBarCloseButtonSymbol (Cancel)
+    in a Viewbox of InfoBarCloseButtonGlyphSize is the path of GlyphGeometryE711 at the size of the
+    ink WinUI draws: the SymbolIcon is 20 x 20 (font size 20), the Viewbox of 16 scales it by 0.8,
+    and the ink of the Cancel glyph, 12.5 wide at 20, is 10 wide (measured against native WinUI 3,
+    which also gives its strokes the width of one pixel). The AppBarButton
+    brushes the template gives the close button through Button.Resources are the brushes of
+    InfoBarCloseButtonStyle.
+  - InfoBarVisibility (IsOpen) is the closing of the card: a closing card (IsClosing) fades out over
+    ControlFasterAnimationDuration (83 ms) and is then closed (IsClosed), which removes it from
+    WindowNotificationManager; InfoBar hides at once. ForegroundSet is the inherited foreground of
+    the content. AutomationProperties (LandmarkType, IsDialog) are left out.
+  WinUI: InfoBarCloseButtonSymbol
+-->
+<ResourceDictionary xmlns="https://github.com/ferroui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    x:ClassModifier="internal">
+  <Design.PreviewWith>
+    <Border Padding="20" Width="400">
+      <StackPanel Spacing="12">
+        <NotificationCard NotificationType="Information" Content="Information" />
+        <NotificationCard NotificationType="Success" Content="Success" />
+        <NotificationCard NotificationType="Warning" Content="Warning" />
+        <NotificationCard NotificationType="Error" Content="Error" />
+      </StackPanel>
+    </Border>
+  </Design.PreviewWith>
+
+  <!-- InfoBarCloseButtonStyle (InfoBar_themeresources.xaml), with the AppBarButton brushes the
+       InfoBar template gives its close button. -->
+  <ControlTheme x:Key="InfoBarCloseButtonStyle" TargetType="Button" BasedOn="{StaticResource DefaultButtonStyle}">
+    <Setter Property="Width" Value="{StaticResource InfoBarCloseButtonSize}" />
+    <Setter Property="Height" Value="{StaticResource InfoBarCloseButtonSize}" />
+    <Setter Property="VerticalAlignment" Value="Top" />
+    <Setter Property="Margin" Value="5" />
+    <Setter Property="Background" Value="{DynamicResource AppBarButtonBackground}" />
+    <Setter Property="Foreground" Value="{DynamicResource AppBarButtonForeground}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource AppBarButtonBorderBrush}" />
+
+    <!-- PointerOver -->
+    <Style Selector="^:pointerover">
+      <Setter Property="Foreground" Value="{DynamicResource AppBarButtonForegroundPointerOver}" />
+      <Style Selector="^ /template/ ContentPresenter#PART_ContentPresenter">
+        <Setter Property="Background" Value="{DynamicResource AppBarButtonBackgroundPointerOver}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource AppBarButtonBorderBrushPointerOver}" />
+        <Setter Property="Foreground" Value="{DynamicResource AppBarButtonForegroundPointerOver}" />
+      </Style>
+    </Style>
+    <!-- Pressed -->
+    <Style Selector="^:pressed">
+      <Setter Property="Foreground" Value="{DynamicResource AppBarButtonForegroundPressed}" />
+      <Style Selector="^ /template/ ContentPresenter#PART_ContentPresenter">
+        <Setter Property="Background" Value="{DynamicResource AppBarButtonBackgroundPressed}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource AppBarButtonBorderBrushPressed}" />
+        <Setter Property="Foreground" Value="{DynamicResource AppBarButtonForegroundPressed}" />
+      </Style>
+    </Style>
+    <!-- Disabled -->
+    <Style Selector="^:disabled">
+      <Setter Property="Foreground" Value="{DynamicResource AppBarButtonForegroundDisabled}" />
+      <Style Selector="^ /template/ ContentPresenter#PART_ContentPresenter">
+        <Setter Property="Background" Value="{DynamicResource AppBarButtonBackgroundDisabled}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource AppBarButtonBorderBrushDisabled}" />
+        <Setter Property="Foreground" Value="{DynamicResource AppBarButtonForegroundDisabled}" />
+      </Style>
+    </Style>
+  </ControlTheme>
+
+  <ControlTheme x:Key="{x:Type NotificationCard}" TargetType="NotificationCard">
+    <Setter Property="IsTabStop" Value="False" />
+    <Setter Property="Background" Value="Transparent" />
+    <Setter Property="BorderBrush" Value="{DynamicResource InfoBarBorderBrush}" />
+    <Setter Property="BorderThickness" Value="{DynamicResource InfoBarBorderThickness}" />
+    <Setter Property="CornerRadius" Value="{DynamicResource ControlCornerRadius}" />
+    <!-- The text of the content: the message of InfoBar (InfoBarMessageForeground). -->
+    <Setter Property="Foreground" Value="{DynamicResource InfoBarMessageForeground}" />
+    <Setter Property="FontSize" Value="{StaticResource InfoBarMessageFontSize}" />
+    <Setter Property="Template">
+      <ControlTemplate>
+        <Border x:Name="ContentRoot"
+                VerticalAlignment="Top"
+                Background="{DynamicResource InfoBarInformationalSeverityBackgroundBrush}"
+                BorderBrush="{TemplateBinding BorderBrush}"
+                BackgroundSizing="InnerBorderEdge"
+                BorderThickness="{TemplateBinding BorderThickness}"
+                CornerRadius="{TemplateBinding CornerRadius}">
+          <Border.Transitions>
+            <Transitions>
+              <DoubleTransition Property="Opacity" Duration="{DynamicResource MacOSMotionFastDuration}" />
+            </Transitions>
+          </Border.Transitions>
+          <!-- The background of the card over the background of the severity. -->
+          <Border HorizontalAlignment="Stretch"
+                  MinHeight="{DynamicResource InfoBarMinHeight}"
+                  Background="{TemplateBinding Background}"
+                  CornerRadius="{TemplateBinding CornerRadius}"
+                  Padding="{StaticResource InfoBarContentRootPadding}">
+            <Grid ColumnDefinitions="Auto,*,Auto">
+              <Panel x:Name="StandardIconArea"
+                     Width="{StaticResource InfoBarIconFontSize}"
+                     Height="{StaticResource InfoBarIconFontSize}"
+                     VerticalAlignment="Top"
+                     Margin="{StaticResource InfoBarIconMargin}">
+                <Path x:Name="IconBackground"
+                      Data="{StaticResource GlyphGeometryF136}"
+                      Fill="{DynamicResource InfoBarInformationalSeverityIconBackground}"
+                      Stretch="Uniform"
+                      Width="16"
+                      HorizontalAlignment="Center"
+                      VerticalAlignment="Center" />
+                <Path x:Name="StandardIcon"
+                      Data="{StaticResource GlyphGeometryF13F}"
+                      Fill="{DynamicResource InfoBarInformationalSeverityIconForeground}"
+                      Stretch="Uniform"
+                      Height="8"
+                      HorizontalAlignment="Center"
+                      VerticalAlignment="Center" />
+              </Panel>
+              <ContentPresenter x:Name="PART_ContentPresenter"
+                                Grid.Column="1"
+                                Margin="{StaticResource InfoBarPanelMargin}"
+                                Content="{TemplateBinding Content}"
+                                ContentTemplate="{TemplateBinding ContentTemplate}"
+                                HorizontalContentAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                VerticalContentAlignment="{TemplateBinding VerticalContentAlignment}" />
+              <Button x:Name="CloseButton"
+                      Grid.Column="2"
+                      Theme="{StaticResource InfoBarCloseButtonStyle}"
+                      NotificationCard.CloseOnClick="True">
+                <Path Data="{StaticResource GlyphGeometryE711}"
+                      Fill="{Binding $parent[Button].Foreground}"
+                      Stretch="Uniform"
+                      Width="10"
+                      HorizontalAlignment="Center"
+                      VerticalAlignment="Center" />
+              </Button>
+            </Grid>
+          </Border>
+        </Border>
+      </ControlTemplate>
+    </Setter>
+
+    <!-- Error -->
+    <Style Selector="^:error /template/ Border#ContentRoot">
+      <Setter Property="Background" Value="{DynamicResource InfoBarErrorSeverityBackgroundBrush}" />
+    </Style>
+    <Style Selector="^:error /template/ Path#IconBackground">
+      <Setter Property="Fill" Value="{DynamicResource InfoBarErrorSeverityIconBackground}" />
+    </Style>
+    <Style Selector="^:error /template/ Path#StandardIcon">
+      <Setter Property="Data" Value="{StaticResource GlyphGeometryF13D}" />
+      <Setter Property="Height" Value="6" />
+      <Setter Property="Fill" Value="{DynamicResource InfoBarErrorSeverityIconForeground}" />
+    </Style>
+    <!-- Warning -->
+    <Style Selector="^:warning /template/ Border#ContentRoot">
+      <Setter Property="Background" Value="{DynamicResource InfoBarWarningSeverityBackgroundBrush}" />
+    </Style>
+    <Style Selector="^:warning /template/ Path#IconBackground">
+      <Setter Property="Fill" Value="{DynamicResource InfoBarWarningSeverityIconBackground}" />
+    </Style>
+    <Style Selector="^:warning /template/ Path#StandardIcon">
+      <Setter Property="Data" Value="{StaticResource GlyphGeometryF13C}" />
+      <Setter Property="Fill" Value="{DynamicResource InfoBarWarningSeverityIconForeground}" />
+    </Style>
+    <!-- Success -->
+    <Style Selector="^:success /template/ Border#ContentRoot">
+      <Setter Property="Background" Value="{DynamicResource InfoBarSuccessSeverityBackgroundBrush}" />
+    </Style>
+    <Style Selector="^:success /template/ Path#IconBackground">
+      <Setter Property="Fill" Value="{DynamicResource InfoBarSuccessSeverityIconBackground}" />
+    </Style>
+    <Style Selector="^:success /template/ Path#StandardIcon">
+      <Setter Property="Data" Value="{StaticResource GlyphGeometryF13E}" />
+      <Setter Property="Height" Value="6.5" />
+      <Setter Property="Fill" Value="{DynamicResource InfoBarSuccessSeverityIconForeground}" />
+    </Style>
+
+    <!-- InfoBarCollapsed: the closing card fades out and is then closed. -->
+    <Style Selector="^[IsClosing=true] /template/ Border#ContentRoot">
+      <Setter Property="Opacity" Value="0" />
+    </Style>
+    <Style Selector="^[IsClosing=true]">
+      <Style.Animations>
+        <Animation Duration="{DynamicResource MacOSMotionFastDuration}" FillMode="Forward">
+          <KeyFrame Cue="100%">
+            <Setter Property="IsClosed" Value="True" />
+          </KeyFrame>
+        </Animation>
+      </Style.Animations>
+    </Style>
+  </ControlTheme>
+</ResourceDictionary>

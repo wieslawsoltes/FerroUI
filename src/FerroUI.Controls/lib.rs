@@ -664,7 +664,7 @@ pub use pull_to_refresh::{
 mod calendar;
 mod calendar_date_picker;
 pub use calendar::{
-    Calendar, CalendarDateChangedEventArgs, CalendarDateRange, CalendarMode, CalendarModeChangedEventArgs,
+    Calendar, CalendarBlackoutDatesCollection, CalendarDateChangedEventArgs, CalendarDateRange, CalendarMode, CalendarModeChangedEventArgs,
     CalendarSelectionMode,
 };
 pub use calendar_date_picker::{

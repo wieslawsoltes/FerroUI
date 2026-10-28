@@ -170,10 +170,13 @@ impl FerroXamlLoader {
             }
         };
 
-        // A development revision must win over compiled assets, including lazy includes.
-        // An invalid draft is an error, never permission to fall back to the old document.
-        #[cfg(all(feature = "hot-reload", debug_assertions))]
-        if let Some(source) = crate::source_overlay::source(absolute_uri.absolute_uri()) {
+        // Explicit designer snapshots (and development revisions) win over compiled
+        // assets, including lazy includes. An unavailable draft must never fall back
+        // to the old document. Scoped snapshots also work in release designers.
+        #[cfg(feature = "source-overlays")]
+        if let Some(source) = crate::source_overlay::try_source(absolute_uri.absolute_uri())
+            .map_err(XamlLoadException::with_message)?
+        {
             let runtime = FerroLocator::current().get_service::<dyn IRuntimeXamlLoader>()
                 .ok_or_else(|| XamlLoadException::with_message("A source overlay requires the runtime XAML loader"))?;
             let mut document = RuntimeXamlLoaderDocument::with_base_uri(Some(absolute_uri), &source);

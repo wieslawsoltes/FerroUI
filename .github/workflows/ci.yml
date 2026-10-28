@@ -1633,3 +1633,7 @@ jobs:
         run: |
           . scripts/android/env.sh
           cargo check --locked -p control-catalog-android --target aarch64-linux-android
+      - name: Material system colors compile against the Android platform
+        run: |
+          . scripts/android/env.sh
+          cargo check --locked -p ferroui-themes-material --features android-dynamic-color --target aarch64-linux-android

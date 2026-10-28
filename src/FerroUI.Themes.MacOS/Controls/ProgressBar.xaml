@@ -1,0 +1,135 @@
+<!-- macOS 26 adaptation; see docs/porting/macos26-theme.md.
+     Derived from FerroUI WinUI templates and microsoft-ui-xaml commit
+     7e4b0c2096be402f51cc8f7d203ebf67cff183d0. Copyright (c) Microsoft Corporation.
+     Licensed under the MIT License; see NOTICE.md.
+     Acrylic backing is the portable fallback for native Liquid Glass. -->
+<ResourceDictionary xmlns="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:converters="using:FerroUI.Controls.Converters" x:ClassModifier="internal">
+
+  <Design.PreviewWith>
+    <Border Padding="20">
+      <StackPanel Orientation="Horizontal" Spacing="20">
+        <StackPanel Spacing="20" Width="200">
+          <ProgressBar Value="0"/>
+          <ProgressBar Value="40"/>
+          <ProgressBar Value="100"/>
+          <ProgressBar IsIndeterminate="True"/>
+          <ProgressBar ShowProgressText="True" Value="40"/>
+        </StackPanel>
+        <ProgressBar Orientation="Vertical" Value="40" Height="200"/>
+        <ProgressBar Orientation="Vertical" IsIndeterminate="True" Height="200"/>
+      </StackPanel>
+    </Border>
+  </Design.PreviewWith>
+  <converters:StringFormatConverter x:Key="ProgressBarTextFormatConverter"/>
+  <ControlTheme x:Key="DefaultProgressBarStyle" TargetType="ProgressBar">
+    <Setter Property="Foreground" Value="{DynamicResource ProgressBarForeground}"/>
+    <Setter Property="Background" Value="{DynamicResource ProgressBarBackground}"/>
+    <Setter Property="BorderThickness" Value="{DynamicResource ProgressBarBorderThemeThickness}"/>
+    <Setter Property="BorderBrush" Value="{DynamicResource ProgressBarBorderBrush}"/>
+    <Setter Property="MinHeight" Value="4"/>
+    <Setter Property="Maximum" Value="100"/>
+    <Setter Property="IsTabStop" Value="False"/>
+    <Setter Property="VerticalAlignment" Value="Center"/>
+    <Setter Property="CornerRadius" Value="2"/>
+    <Setter Property="Template">
+      <ControlTemplate>
+        <Grid x:Name="LayoutRoot" ColumnDefinitions="*,Auto" RowDefinitions="*,Auto">
+          <Border x:Name="ProgressBarRoot" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" Padding="{TemplateBinding Padding}" CornerRadius="{TemplateBinding CornerRadius}">
+            <Border x:Name="ProgressBarClip" ClipToBounds="True" CornerRadius="{TemplateBinding CornerRadius}">
+              <Grid x:Name="ProgressBarGrid">
+                <Border x:Name="ProgressBarTrack" Background="{TemplateBinding Background}" CornerRadius="2"/>
+                <Border x:Name="PART_Indicator" Background="{TemplateBinding Foreground}" CornerRadius="{TemplateBinding CornerRadius}"/>
+                <Border x:Name="MacOSIndeterminateFill" Background="{TemplateBinding Foreground}" CornerRadius="{TemplateBinding CornerRadius}" Opacity="0" IsHitTestVisible="False"
+                        IsVisible="{DynamicResource MacOSAnimationsEnabled}"/>
+                <Border x:Name="MacOSIndeterminateStaticFill" Background="{TemplateBinding Foreground}" CornerRadius="{TemplateBinding CornerRadius}" Opacity="0" IsHitTestVisible="False"
+                        IsVisible="{DynamicResource MacOSReduceMotion}"/>
+              </Grid>
+            </Border>
+          </Border>
+          <LayoutTransformControl x:Name="ProgressTextRoot" Grid.Column="1" Margin="8,0,0,0" VerticalAlignment="Center" IsVisible="{TemplateBinding ShowProgressText}">
+            <TextBlock x:Name="ProgressText" Foreground="{DynamicResource TextFillColorPrimaryBrush}">
+              <TextBlock.Text>
+                <MultiBinding Converter="{StaticResource ProgressBarTextFormatConverter}">
+                  <TemplateBinding Property="ProgressTextFormat"/>
+                  <Binding Path="Value" RelativeSource="{RelativeSource TemplatedParent}"/>
+                  <TemplateBinding Property="Percentage"/>
+                  <TemplateBinding Property="Minimum"/>
+                  <TemplateBinding Property="Maximum"/>
+                </MultiBinding>
+              </TextBlock.Text>
+            </TextBlock>
+          </LayoutTransformControl>
+        </Grid>
+      </ControlTemplate>
+    </Setter>
+    <Style Selector="^:horizontal">
+      <Style Selector="^ /template/ Grid#ProgressBarGrid">
+        <Setter Property="Height" Value="{TemplateBinding MinHeight}"/>
+      </Style>
+      <Style Selector="^ /template/ Border#ProgressBarTrack">
+        <Setter Property="Opacity" Value="1"/>
+        <Setter Property="Height" Value="{StaticResource ProgressBarTrackHeight}"/>
+        <Setter Property="VerticalAlignment" Value="Center"/>
+      </Style>
+      <Style Selector="^ /template/ Border#PART_Indicator">
+        <Setter Property="HorizontalAlignment" Value="Left"/>
+      </Style>
+    </Style>
+    <Style Selector="^:vertical">
+      <Setter Property="MinWidth" Value="{StaticResource ProgressBarMinHeight}"/>
+      <Setter Property="HorizontalAlignment" Value="Center"/>
+      <Setter Property="VerticalAlignment" Value="Stretch"/>
+      <Style Selector="^ /template/ Grid#ProgressBarGrid">
+        <Setter Property="Width" Value="{TemplateBinding MinWidth}"/>
+      </Style>
+      <Style Selector="^ /template/ Border#ProgressBarTrack">
+        <Setter Property="Opacity" Value="1"/>
+        <Setter Property="Width" Value="{StaticResource ProgressBarTrackHeight}"/>
+        <Setter Property="HorizontalAlignment" Value="Center"/>
+      </Style>
+      <Style Selector="^ /template/ Border#PART_Indicator">
+        <Setter Property="VerticalAlignment" Value="Bottom"/>
+      </Style>
+      <Style Selector="^ /template/ LayoutTransformControl#ProgressTextRoot">
+        <Setter Property="Grid.Column" Value="0"/>
+        <Setter Property="Grid.Row" Value="1"/>
+        <Setter Property="Margin" Value="0,8,0,0"/>
+        <Setter Property="HorizontalAlignment" Value="Center"/>
+      </Style>
+    </Style>
+    <Style Selector="^:indeterminate">
+      <Style Selector="^ /template/ Border#ProgressBarTrack">
+        <Setter Property="Opacity" Value="1"/>
+      </Style>
+      <Style Selector="^ /template/ Border#PART_Indicator">
+        <Setter Property="Opacity" Value="0"/>
+      </Style>
+    </Style>
+    <!-- Resolve the nonzero pulse period eagerly: Animation is not a resource host,
+         and its keyframes are interpreted when the style attaches, before its
+         activation is evaluated. Normalized cues do not divide by Duration.
+         Accessibility gates activation, never a zero-duration infinite loop.
+         Deactivating the style disposes its running animation. Restoring motion creates a
+         fresh clock, so there is no completed zero-iteration animation left to restart. -->
+    <Style Selector="^:indeterminate /template/ Border#MacOSIndeterminateFill[IsVisible=true]">
+      <Setter Property="Opacity" Value="1"/>
+      <Style.Animations>
+        <Animation IterationCount="Infinite" Duration="{StaticResource MacOSProgressPulseDuration}">
+          <KeyFrame Cue="0%">
+            <Setter Property="Opacity" Value="0.45"/>
+          </KeyFrame>
+          <KeyFrame Cue="50%">
+            <Setter Property="Opacity" Value="1"/>
+          </KeyFrame>
+          <KeyFrame Cue="100%">
+            <Setter Property="Opacity" Value="0.45"/>
+          </KeyFrame>
+        </Animation>
+      </Style.Animations>
+    </Style>
+    <Style Selector="^:indeterminate /template/ Border#MacOSIndeterminateStaticFill">
+      <Setter Property="Opacity" Value="0.65"/>
+    </Style>
+  </ControlTheme>
+  <ControlTheme x:Key="{x:Type ProgressBar}" TargetType="ProgressBar" BasedOn="{StaticResource DefaultProgressBarStyle}"/>
+</ResourceDictionary>

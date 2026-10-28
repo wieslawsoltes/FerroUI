@@ -159,6 +159,18 @@ mapping that produced its current view. Secondary previews use an isolated nativ
 with the original resource base URI, so several stages can render one file without
 registering competing hot-reload owners for that file.
 
+Each accepted graph retains an immutable loader source snapshot. Native `ResourceInclude`,
+`StyleInclude` and requests made by deferred templates record their actual dependencies
+against that snapshot. Changing an included document already open in the workspace
+refreshes its automatically updating dependent stages; unrelated document edits preserve
+existing Live graphs. A pending or invalid dependency retains the previous frame without
+current source-selection authority until a valid refresh succeeds. These updates follow
+the workspace's supplied open-document snapshots.
+
+The designer explicitly enables the loader's `source-overlays` feature in both debug and
+release builds. Global hot-reload registration remains development-only; these snapshots
+do not register additional reload owners.
+
 Definition and state-owner references use namespace-qualified source paths with authored
 names or resource keys. Named and keyed targets survive sibling insertion or reordering.
 Removing, moving, renaming or making a path ambiguous produces a diagnostic. Give repeated
@@ -169,8 +181,8 @@ board does not guess from an unstable numeric position.
 | --- | --- |
 | Ready | The native stage accepted the indicated source revision and configuration. |
 | Paused | Automatic source updates are suspended; an explicit Refresh can accept a newer revision. |
-| Pending source | The workspace has a source draft that has not yet entered its accepted preview path. |
-| Invalid source | The current authored buffer has syntax diagnostics. The prior accepted native result can remain visible. |
+| Pending source | The stage source or an included open document has a draft that has not yet entered its accepted preview path. |
+| Invalid source | The stage source or an included open document has syntax diagnostics. The prior accepted native result can remain visible. |
 | Missing document | The referenced source is unavailable in the workspace. |
 | Failed | Native loading, target resolution or scenario evaluation failed; the diagnostic identifies the failure. |
 
@@ -190,7 +202,8 @@ The public components can be embedded independently:
   from its host and does not own document or runtime state.
 - `PreviewStageEditor` edits a detached configuration and validates it on Apply.
 - `PreviewStageManifest` validates and serializes a version-1 stage set. JSON parsing
-  rejects unknown fields, invalid dimensions/targets and manifests larger than 1 MiB.
+  rejects unknown fields, invalid dimensions, malformed source paths and manifests
+  larger than 1 MiB.
 
 `DesignerWorkspace` exposes `add_preview_stage`, `update_preview_stage`,
 `duplicate_preview_stage`, `remove_preview_stage`, `move_preview_stage`,
@@ -252,8 +265,9 @@ Mutation actions are `add`, `update`, `duplicate`, `remove`, `move`, `pause`, `r
 `refresh_all`, `focus`, `select`, `show`, `restore` and `compare`. Add/update accept the
 complete `PreviewStageConfiguration`; compare accepts named environments based on an
 existing stage. Restore accepts the validated versioned manifest. Referenced source
-documents must already be open: these actions do not open filesystem paths or load
-arbitrary source documents.
+documents must be open to render or focus their stages. Unavailable sources remain
+references with a **Missing document** diagnostic; these actions do not open filesystem
+paths or load arbitrary source documents.
 
 Every mutation requires the MCP host's `allow_property_writes` permission and the current
 model token. Operations that create, resume, focus or refresh Live previews also require

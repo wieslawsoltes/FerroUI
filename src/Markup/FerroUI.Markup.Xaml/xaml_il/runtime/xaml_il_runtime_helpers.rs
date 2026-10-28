@@ -115,6 +115,8 @@ pub struct DeferredContent {
     parent_resource_nodes: Rc<CapturedResourceNodes>,
     builder: DeferredContentBuilder,
     result_type: ValueType,
+    #[cfg(feature = "source-overlays")]
+    source_snapshot: Option<crate::source_overlay::SourceSnapshot>,
     #[cfg(all(feature = "hot-reload", debug_assertions))]
     reload_context: RefCell<Option<Rc<reload::Context>>>,
     #[cfg(all(feature = "hot-reload", debug_assertions))]
@@ -161,6 +163,8 @@ impl DeferredContent {
             parent_resource_nodes,
             builder,
             result_type,
+            #[cfg(feature = "source-overlays")]
+            source_snapshot: crate::source_overlay::capture_snapshot(),
             #[cfg(all(feature = "hot-reload", debug_assertions))]
             reload_context: RefCell::new(None),
             #[cfg(all(feature = "hot-reload", debug_assertions))]
@@ -229,7 +233,11 @@ impl DeferredContent {
             #[cfg(all(feature = "hot-reload", debug_assertions))]
             self.event_context.clone(),
         );
-        let obj = self.builder.invoke(&provider)?;
+        let invoke = || self.builder.invoke(&provider);
+        #[cfg(feature = "source-overlays")]
+        let obj = if let Some(snapshot) = &self.source_snapshot { snapshot.run(invoke) } else { invoke() }?;
+        #[cfg(not(feature = "source-overlays"))]
+        let obj = invoke()?;
         scope.complete();
 
         if let Some(obj) = &obj {

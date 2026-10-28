@@ -7,10 +7,12 @@ use crate::{
 };
 use ferroui_base::media::{FlowDirection, SolidColorBrush};
 use ferroui_base::styling::ThemeVariant;
+use ferroui_base::utilities::{Uri, UriKind};
 use ferroui_base::{Point, Ref, Visual, WeakRef};
 use ferroui_controls::{Border, ContentControl, Control, Grid, ThemeVariantScope};
 use ferroui_designer_core::{Ast, Document, Node, NodeId};
 use ferroui_inspect::{Inspector, TreeKind};
+use ferroui_markup_xaml::source_overlay::SourceSnapshot;
 use serde::{Deserialize, Serialize};
 use std::collections::{BTreeMap, BTreeSet};
 use std::rc::Rc;
@@ -423,6 +425,8 @@ struct RenderedStage {
     document: Document,
     configuration: PreviewStageConfiguration,
     options_epoch: u64,
+    source_snapshot: SourceSnapshot,
+    source_catalog: Rc<BTreeMap<String, SourceStamp>>,
 }
 
 impl Drop for RenderedStage {
@@ -439,6 +443,7 @@ struct Stage {
     status: PreviewStageStatus,
     rendered: Option<RenderedStage>,
     observed: Option<SourceStamp>,
+    observed_dependencies: BTreeMap<String, Option<SourceStamp>>,
 }
 
 #[derive(Clone)]
@@ -470,6 +475,20 @@ impl SourceStamp {
             && self.source == source.document.source()
             && Arc::ptr_eq(&self.ast, &source.document.ast_snapshot())
     }
+
+    fn same_buffer(&self, other: &Self) -> bool {
+        self.pending == other.pending
+            && self.valid == other.valid
+            && self.source == other.source
+            && Arc::ptr_eq(&self.ast, &other.ast)
+    }
+
+    fn matches_buffer(&self, source: &PreviewStageSource) -> bool {
+        self.pending == source.pending
+            && self.valid == source.document.is_valid()
+            && self.source == source.document.source()
+            && Arc::ptr_eq(&self.ast, &source.document.ast_snapshot())
+    }
 }
 
 /// One UI-thread collection of native comparison stages across the host's open
@@ -479,6 +498,7 @@ pub struct PreviewStageBoard {
     active: Option<PreviewStageId>,
     active_uri: String,
     sources: BTreeMap<String, PreviewStageSource>,
+    source_catalog: Rc<BTreeMap<String, SourceStamp>>,
     options: PreviewHostOptions,
     options_epoch: u64,
     epoch: u64,
@@ -497,6 +517,7 @@ impl PreviewStageBoard {
             active: None,
             active_uri: String::new(),
             sources: BTreeMap::new(),
+            source_catalog: Rc::new(BTreeMap::new()),
             options: PreviewHostOptions::default(),
             options_epoch: 0,
             epoch: 1,
@@ -565,6 +586,16 @@ impl PreviewStageBoard {
                 return Err("Duplicate preview source URI".into());
             }
         }
+        let mut catalog = BTreeMap::new();
+        for source in next.values() {
+            let key = native_source_uri(&source.uri)?;
+            if catalog
+                .insert(key, SourceStamp::new(source, options_epoch))
+                .is_some()
+            {
+                return Err("Preview source URIs resolve to the same native document".into());
+            }
+        }
         let active_changed = self.active_uri != active_uri;
         let sources_changed = self.sources.len() != next.len()
             || next.iter().any(|(uri, source)| {
@@ -581,6 +612,7 @@ impl PreviewStageBoard {
             });
         let options_changed = self.options_epoch != options_epoch;
         self.sources = next;
+        self.source_catalog = Rc::new(catalog);
         self.options = options;
         self.options_epoch = options_epoch;
         self.active_uri = active_uri.into();
@@ -597,7 +629,8 @@ impl PreviewStageBoard {
                     (None, None) => !matches!(stage.status, PreviewStageStatus::MissingDocument),
                     _ => true,
                 };
-                changed.then_some(stage.id)
+                (changed || observed_dependencies_changed(stage, &self.source_catalog))
+                    .then_some(stage.id)
             })
             .collect::<Vec<_>>();
         for id in ids {
@@ -629,6 +662,7 @@ impl PreviewStageBoard {
             status: PreviewStageStatus::MissingDocument,
             rendered: None,
             observed: None,
+            observed_dependencies: BTreeMap::new(),
         });
         self.active = Some(id);
         self.bump();
@@ -780,6 +814,7 @@ impl PreviewStageBoard {
         manifest.validate()?;
         let mut candidate = Self::new();
         candidate.sources = self.sources.clone();
+        candidate.source_catalog = self.source_catalog.clone();
         candidate.options = self.options.clone();
         candidate.options_epoch = self.options_epoch;
         candidate.active_uri = self.active_uri.clone();
@@ -888,6 +923,38 @@ impl PreviewStageBoard {
             && Arc::ptr_eq(&rendered.document.ast_snapshot(), &document.ast_snapshot())
             && rendered.options_epoch == options_epoch
             && rendered.configuration.same_rendering(&stage.configuration)
+            && rendered_dependencies_current(rendered, &self.source_catalog)
+    }
+
+    /// Read-only validation against all current host buffers, including native
+    /// include dependencies changed before the board's next synchronization.
+    pub fn dependencies_are_current(
+        &self,
+        id: PreviewStageId,
+        sources: &[PreviewStageSource],
+    ) -> bool {
+        let Some(stage) = self.stages.iter().find(|stage| stage.id == id) else {
+            return false;
+        };
+        let Some(rendered) = &stage.rendered else {
+            return false;
+        };
+        let mut current = BTreeMap::new();
+        for source in sources {
+            let Ok(uri) = native_source_uri(&source.uri) else {
+                return false;
+            };
+            if current.insert(uri, source).is_some() {
+                return false;
+            }
+        }
+        rendered.source_snapshot.requested_uris().iter().all(|uri| {
+            match (rendered.source_catalog.get(uri), current.get(uri)) {
+                (Some(accepted), Some(current)) => accepted.matches_buffer(current),
+                (None, None) => true,
+                _ => false,
+            }
+        })
     }
 
     /// Refresh identities after native attachment or template/item realization.
@@ -908,6 +975,7 @@ impl PreviewStageBoard {
                         &source.document.ast_snapshot(),
                         &rendered.document.ast_snapshot(),
                     )
+                    && rendered_dependencies_current(rendered, &self.source_catalog)
                 {
                     rendered.preview.rebuild_map(&rendered.document);
                 }
@@ -1041,6 +1109,7 @@ impl PreviewStageBoard {
             )
             || rendered.options_epoch != self.options_epoch
             || !rendered.configuration.same_rendering(&stage.configuration)
+            || !rendered_dependencies_current(rendered, &self.source_catalog)
         {
             return Err("The stage source or construction services changed".into());
         }
@@ -1058,6 +1127,9 @@ impl PreviewStageBoard {
             return Err("The stage's source document is not open".into());
         };
         self.stages[index].observed = Some(SourceStamp::new(&source, self.options_epoch));
+        let dependency_keys = observed_dependency_keys(&self.stages[index]);
+        self.stages[index].observed_dependencies =
+            dependency_stamps(&dependency_keys, &self.source_catalog);
         if !source.document.is_valid() {
             self.stages[index].status = PreviewStageStatus::InvalidSource {
                 revision: source.document.revision(),
@@ -1097,6 +1169,7 @@ impl PreviewStageBoard {
                         &rendered.document.ast_snapshot(),
                         &source.document.ast_snapshot(),
                     )
+                    && rendered_dependencies_current(rendered, &self.source_catalog)
                 {
                     rendered.document = source.document;
                     rendered.preview.status = PreviewStatus::Ready {
@@ -1111,7 +1184,15 @@ impl PreviewStageBoard {
                 }
             }
         }
-        let candidate = self.build_candidate(index, &source.document);
+        let source_snapshot = self.new_source_snapshot();
+        let candidate = self.build_candidate(index, &source.document, &source_snapshot);
+        let attempted = source_snapshot.requested_uris();
+        let mut requested = attempted.clone();
+        if candidate.is_err() {
+            requested.extend(dependency_keys);
+        }
+        self.stages[index].observed_dependencies =
+            dependency_stamps(&requested, &self.source_catalog);
         match candidate {
             Ok(candidate) => {
                 let stage = &mut self.stages[index];
@@ -1144,10 +1225,13 @@ impl PreviewStageBoard {
                 Ok(())
             }
             Err(message) => {
-                self.stages[index].status = PreviewStageStatus::Failed {
-                    revision: Some(source.document.revision()),
-                    message: message.clone(),
-                };
+                self.stages[index].status = self
+                    .blocked_dependencies(&attempted, source.document.revision())
+                    .map(|(status, _)| status)
+                    .unwrap_or_else(|| PreviewStageStatus::Failed {
+                        revision: Some(source.document.revision()),
+                        message: message.clone(),
+                    });
                 self.touch(index);
                 self.apply_mode(index);
                 Err(message)
@@ -1155,7 +1239,58 @@ impl PreviewStageBoard {
         }
     }
 
-    fn build_candidate(&self, index: usize, document: &Document) -> Result<RenderedStage, String> {
+    fn new_source_snapshot(&self) -> SourceSnapshot {
+        let mut sources = BTreeMap::new();
+        let mut unavailable = BTreeMap::new();
+        for (uri, source) in self.source_catalog.iter() {
+            if source.pending {
+                unavailable.insert(
+                    uri.clone(),
+                    format!("Apply the pending included source before refreshing: {uri}"),
+                );
+            } else if !source.valid {
+                unavailable.insert(
+                    uri.clone(),
+                    format!("Repair the included XAML before refreshing: {uri}"),
+                );
+            } else {
+                sources.insert(uri.clone(), source.source.clone());
+            }
+        }
+        SourceSnapshot::new(sources, unavailable)
+    }
+
+    fn blocked_dependencies(
+        &self,
+        dependencies: &BTreeSet<String>,
+        revision: u64,
+    ) -> Option<(PreviewStageStatus, String)> {
+        for uri in dependencies {
+            let Some(source) = self.source_catalog.get(uri) else {
+                continue;
+            };
+            if source.pending {
+                return Some((
+                    PreviewStageStatus::PendingSource { revision },
+                    format!("Apply the pending included source before refreshing: {uri}"),
+                ));
+            }
+            if !source.valid {
+                return Some((
+                    PreviewStageStatus::InvalidSource { revision },
+                    format!("Repair the included XAML before refreshing: {uri}"),
+                ));
+            }
+        }
+        None
+    }
+
+    fn build_candidate(
+        &self,
+        index: usize,
+        document: &Document,
+        source_snapshot: &SourceSnapshot,
+    ) -> Result<RenderedStage, String> {
         let stage = &self.stages[index];
         let config = &stage.configuration;
         let definition_scope = match &config.target {
@@ -1227,49 +1362,52 @@ impl PreviewStageBoard {
         // Match the main development reload driver's panic containment so a bad
         // candidate cannot strand its hidden host or tear down the entire board.
         let result = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
-            let sources = self
-                .sources
-                .values()
-                .filter(|source| !source.pending && source.document.is_valid())
-                .map(|source| (source.uri.clone(), source.document.source().to_owned()))
-                .collect();
-            let mut options = self.options.clone();
-            options.design_time_data = config.design_time_data;
-            let mut preview =
-                ferroui_markup_xaml::source_overlay::with_sources(Rc::new(sources), || {
-                    RuntimePreview::new_isolated(
-                        host,
-                        config.source_uri.clone(),
-                        document,
-                        options,
-                        definition_scope,
-                    )
-                })?;
-            match &preview.status {
-                PreviewStatus::Ready { revision } if *revision == document.revision() => {}
-                PreviewStatus::Failed { message, .. } => return Err(message.clone()),
-                _ => return Err("The candidate preview did not accept the current source".into()),
-            }
-            preview.set_interactive(config.mode == PreviewStageMode::Live && config.auto_update);
-            stage.control.update_layout();
-            preview.rebuild_map(document);
-            let scenario = if resolved_states.is_empty() {
-                None
-            } else {
-                Some(crate::preview_stage_scenarios::apply_stage_states(
+            source_snapshot.run(|| {
+                let mut options = self.options.clone();
+                options.design_time_data = config.design_time_data;
+                let mut preview = RuntimePreview::new_isolated(
+                    host,
+                    config.source_uri.clone(),
                     document,
-                    &mut preview,
-                    &resolved_states,
-                )?)
-            };
-            Ok(RenderedStage {
-                _scenario: scenario,
-                background_subscription: background_subscription.clone(),
-                preview,
-                scope: scope.clone(),
-                document: document.clone(),
-                configuration: config.clone(),
-                options_epoch: self.options_epoch,
+                    options,
+                    definition_scope,
+                )?;
+                match &preview.status {
+                    PreviewStatus::Ready { revision } if *revision == document.revision() => {}
+                    PreviewStatus::Failed { message, .. } => return Err(message.clone()),
+                    _ => {
+                        return Err("The candidate preview did not accept the current source".into())
+                    }
+                }
+                preview
+                    .set_interactive(config.mode == PreviewStageMode::Live && config.auto_update);
+                stage.control.update_layout();
+                preview.rebuild_map(document);
+                let scenario = if resolved_states.is_empty() {
+                    None
+                } else {
+                    Some(crate::preview_stage_scenarios::apply_stage_states(
+                        document,
+                        &mut preview,
+                        &resolved_states,
+                    )?)
+                };
+                if let Some((_, message)) = self
+                    .blocked_dependencies(&source_snapshot.requested_uris(), document.revision())
+                {
+                    return Err(message);
+                }
+                Ok(RenderedStage {
+                    _scenario: scenario,
+                    background_subscription: background_subscription.clone(),
+                    preview,
+                    scope: scope.clone(),
+                    document: document.clone(),
+                    configuration: config.clone(),
+                    options_epoch: self.options_epoch,
+                    source_snapshot: source_snapshot.clone(),
+                    source_catalog: self.source_catalog.clone(),
+                })
             })
         }))
         .unwrap_or_else(|payload| {
@@ -1331,6 +1469,68 @@ impl Drop for PreviewStageBoard {
             stage.control.children().clear();
         }
     }
+}
+
+fn native_source_uri(uri: &str) -> Result<String, String> {
+    Uri::try_create(uri, UriKind::Absolute)
+        .map(|uri| uri.absolute_uri().to_owned())
+        .ok_or_else(|| "Preview source URI must be absolute".into())
+}
+
+fn same_dependency(accepted: Option<&SourceStamp>, current: Option<&SourceStamp>) -> bool {
+    match (accepted, current) {
+        (Some(accepted), Some(current)) => accepted.same_buffer(current),
+        (None, None) => true,
+        _ => false,
+    }
+}
+
+fn rendered_dependencies_current(
+    rendered: &RenderedStage,
+    current: &BTreeMap<String, SourceStamp>,
+) -> bool {
+    rendered
+        .source_snapshot
+        .requested_uris()
+        .iter()
+        .all(|uri| same_dependency(rendered.source_catalog.get(uri), current.get(uri)))
+}
+
+fn observed_dependency_keys(stage: &Stage) -> BTreeSet<String> {
+    let mut keys: BTreeSet<String> = stage.observed_dependencies.keys().cloned().collect();
+    if let Some(rendered) = &stage.rendered {
+        keys.extend(rendered.source_snapshot.requested_uris());
+    }
+    keys
+}
+
+fn observed_dependencies_changed(stage: &Stage, current: &BTreeMap<String, SourceStamp>) -> bool {
+    observed_dependency_keys(stage).iter().any(|uri| {
+        // A deferred template can discover an include after the graph is accepted.
+        // Compare it with the complete source view captured at construction, never
+        // adopt the host's newer buffer as the graph's assumed baseline.
+        let accepted = stage
+            .observed_dependencies
+            .get(uri)
+            .map(Option::as_ref)
+            .unwrap_or_else(|| {
+                stage
+                    .rendered
+                    .as_ref()
+                    .and_then(|rendered| rendered.source_catalog.get(uri))
+            });
+        !same_dependency(accepted, current.get(uri))
+    })
+}
+
+fn dependency_stamps(
+    dependencies: &BTreeSet<String>,
+    catalog: &BTreeMap<String, SourceStamp>,
+) -> BTreeMap<String, Option<SourceStamp>> {
+    dependencies
+        .iter()
+        .map(|uri| (uri.clone(), catalog.get(uri).cloned()))
+        .collect()
 }
 
 fn apply_environment(scope: &Ref<ThemeVariantScope>, environment: PreviewEnvironment) {

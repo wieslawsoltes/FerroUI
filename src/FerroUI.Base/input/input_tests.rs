@@ -2014,11 +2014,14 @@ fn hold_should_not_raised_when_pointer_released_before_timer() {
     mouse.down(&tree.border, MouseButton::Left, 1);
     assert!(!raised.get());
 
+    // Cancellation must abort a promoted callback as well as an inactive timer.
+    let timer = single_hold_timer();
+    timer.promote();
+
     mouse.up(&tree.border, MouseButton::Left, None);
     assert!(!raised.get());
-
-    // Verify timer duration, but execute it immediately.
-    let timer = single_hold_timer();
+    assert!(!timer.is_enabled());
+    assert!(crate::threading::Dispatcher::snapshot_timers_for_unit_tests().is_empty());
     force_fire(&timer);
 
     assert!(!raised.get());
@@ -2037,15 +2040,72 @@ fn hold_should_not_raised_when_pointer_is_moved_before_timer() {
 
     mouse.down(&tree.border, MouseButton::Left, 1);
     assert!(!raised.get());
+    let timer = single_hold_timer();
 
     mouse.move_to(&tree.border, HOLD_PRESS + Vector::new(20.0, 20.0));
     assert!(!raised.get());
-
-    // Verify timer duration, but execute it immediately.
-    let timer = single_hold_timer();
+    assert!(!timer.is_enabled());
+    assert!(crate::threading::Dispatcher::snapshot_timers_for_unit_tests().is_empty());
     force_fire(&timer);
 
     assert!(!raised.get());
+}
+
+#[test]
+fn hold_cancellation_releases_detached_event_source_without_waiting_for_timeout() {
+    let _scope = crate::threading::Dispatcher::unit_test_scope();
+
+    for cancel_by_moving in [false, true] {
+        let mouse = MouseTestHelper::new();
+        let tree = hold_tree();
+        let weak = tree.border.downgrade();
+        mouse.down(&tree.border, MouseButton::Left, 1);
+        assert_eq!(crate::threading::Dispatcher::snapshot_timers_for_unit_tests().len(), 1);
+
+        if cancel_by_moving {
+            mouse.move_to(&tree.border, HOLD_PRESS + Vector::new(20.0, 20.0));
+            mouse.pointer.capture(None);
+        } else {
+            mouse.up(&tree.border, MouseButton::Left, None);
+        }
+        assert!(crate::threading::Dispatcher::snapshot_timers_for_unit_tests().is_empty());
+        tree.root.root.remove_child(&tree.border);
+        drop(tree.border);
+
+        // Neither wall time nor dispatcher jobs have advanced. The canceled
+        // event's strong source must already have been released.
+        assert!(weak.upgrade().is_none());
+    }
+}
+
+#[test]
+fn hold_callback_can_start_another_hold_without_cancelling_its_timer() {
+    let _scope = crate::threading::Dispatcher::unit_test_scope();
+    let mouse = MouseTestHelper::new();
+    let next_mouse = Rc::new(MouseTestHelper::new());
+    let tree = hold_tree();
+    let starts = Rc::new(Cell::new(0));
+    let count = starts.clone();
+    let next = next_mouse.clone();
+    let weak = tree.border.downgrade();
+    tree.border.holding(move |_, event| {
+        if event.holding_state() == HoldingState::Started {
+            count.set(count.get() + 1);
+            if count.get() == 1 {
+                next.down(&weak.upgrade().unwrap(), MouseButton::Left, 1);
+            }
+        }
+    });
+
+    mouse.down(&tree.border, MouseButton::Left, 1);
+    force_fire(&single_hold_timer());
+    assert_eq!(starts.get(), 1);
+    force_fire(&single_hold_timer());
+    assert_eq!(starts.get(), 2);
+    assert!(crate::threading::Dispatcher::snapshot_timers_for_unit_tests().is_empty());
+
+    next_mouse.up(&tree.border, MouseButton::Left, None);
+    mouse.pointer.capture(None);
 }
 
 #[test]

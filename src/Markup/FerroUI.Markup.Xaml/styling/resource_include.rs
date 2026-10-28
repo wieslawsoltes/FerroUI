@@ -24,6 +24,8 @@ pub struct ResourceInclude {
     is_loading: Cell<bool>,
     source: RefCell<Option<Uri>>,
     key: RefCell<Option<ThemeVariant>>,
+    #[cfg(feature = "source-overlays")]
+    source_snapshot: Option<crate::source_overlay::SourceSnapshot>,
 }
 
 impl ResourceInclude {
@@ -50,6 +52,8 @@ impl ResourceInclude {
             is_loading: Cell::new(false),
             source: RefCell::new(None),
             key: RefCell::new(None),
+            #[cfg(feature = "source-overlays")]
+            source_snapshot: crate::source_overlay::capture_snapshot(),
         })
     }
 
@@ -81,8 +85,12 @@ impl ResourceInclude {
         let Some(source) = self.source() else {
             return Err(XamlLoadException::with_message("ResourceInclude.Source must be set."));
         };
-        let loaded =
-            FerroXamlLoader::load_with_service_provider(self.service_provider.as_ref(), &source, self.base_uri.as_ref())?;
+        let load = ||
+            FerroXamlLoader::load_with_service_provider(self.service_provider.as_ref(), &source, self.base_uri.as_ref());
+        #[cfg(feature = "source-overlays")]
+        let loaded = if let Some(snapshot) = &self.source_snapshot { snapshot.run(load) } else { load() }?;
+        #[cfg(not(feature = "source-overlays"))]
+        let loaded = load()?;
         let Some(loaded) = <Rc<dyn IResourceDictionary>>::from_xaml_object(&loaded) else {
             return Err(XamlLoadException::with_message(format!(
                 "Unable to cast object of type '{}' to type 'IResourceDictionary'.",
@@ -100,6 +108,17 @@ impl ResourceInclude {
     }
 
     pub fn set_source(&self, value: Option<Uri>) {
+        #[cfg(feature = "source-overlays")]
+        if let (Some(snapshot), Some(source)) = (&self.source_snapshot, &value) {
+            let absolute = if source.is_absolute_uri() {
+                Some(source.clone())
+            } else {
+                self.base_uri.as_ref().map(|base| Uri::combine(base, source))
+            };
+            if let Some(absolute) = absolute {
+                snapshot.record_request(absolute.absolute_uri());
+            }
+        }
         *self.source.borrow_mut() = value;
     }
 

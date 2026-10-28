@@ -46,3 +46,6 @@ mod view_models;
 mod documents {
     include!(concat!(env!("OUT_DIR"), "/document_tests.rs"));
 }
+
+#[cfg(feature = "macos-theme")]
+mod macos_theme_review;

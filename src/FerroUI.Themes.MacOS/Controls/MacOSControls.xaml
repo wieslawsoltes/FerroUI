@@ -1,0 +1,116 @@
+<!--
+  The control themes of the WinUI theme (docs/porting/winui-theme.md): one document per FerroUI
+  control, ported from the styles of microsoft-ui-xaml (https://github.com/microsoft/microsoft-ui-xaml,
+  commit 7e4b0c2096be402f51cc8f7d203ebf67cff183d0) that each document names in its header.
+  A document that is embedded but not ready to be part of the theme is listed in
+  Controls/excluded.txt and not included here.
+-->
+<Styles xmlns="https://github.com/ferroui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        x:ClassModifier="internal">
+  <Styles.Resources>
+    <ResourceDictionary>
+      <ResourceDictionary.MergedDictionaries>
+        <!-- Foundation: hosts of windows and popups, focus visuals. -->
+        <MergeResourceInclude Source="ferres://FerroUI.Themes.MacOS/Controls/AdornerLayer.xaml" />
+        <MergeResourceInclude Source="ferres://FerroUI.Themes.MacOS/Controls/EmbeddableControlRoot.xaml" />
+        <MergeResourceInclude Source="ferres://FerroUI.Themes.MacOS/Controls/OverlayPopupHost.xaml" />
+        <MergeResourceInclude Source="ferres://FerroUI.Themes.MacOS/Controls/PopupRoot.xaml" />
+        <MergeResourceInclude Source="ferres://FerroUI.Themes.MacOS/Controls/ThemeVariantScope.xaml" />
+        <MergeResourceInclude Source="ferres://FerroUI.Themes.MacOS/Controls/Window.xaml" />
+        <!-- Foundation: text, buttons, check box, radio button, text box, scrolling. -->
+        <MergeResourceInclude Source="ferres://FerroUI.Themes.MacOS/Controls/TextBlock.xaml" />
+        <MergeResourceInclude Source="ferres://FerroUI.Themes.MacOS/Controls/Button.xaml" />
+        <MergeResourceInclude Source="ferres://FerroUI.Themes.MacOS/Controls/RepeatButton.xaml" />
+        <MergeResourceInclude Source="ferres://FerroUI.Themes.MacOS/Controls/ToggleButton.xaml" />
+        <MergeResourceInclude Source="ferres://FerroUI.Themes.MacOS/Controls/HyperlinkButton.xaml" />
+        <MergeResourceInclude Source="ferres://FerroUI.Themes.MacOS/Controls/CheckBox.xaml" />
+        <MergeResourceInclude Source="ferres://FerroUI.Themes.MacOS/Controls/RadioButton.xaml" />
+        <MergeResourceInclude Source="ferres://FerroUI.Themes.MacOS/Controls/Thumb.xaml" />
+        <MergeResourceInclude Source="ferres://FerroUI.Themes.MacOS/Controls/ScrollBar.xaml" />
+        <MergeResourceInclude Source="ferres://FerroUI.Themes.MacOS/Controls/ScrollViewer.xaml" />
+        <MergeResourceInclude Source="ferres://FerroUI.Themes.MacOS/Controls/TextBox.xaml" />
+        <!-- B1: primitives and simple content. -->
+        <MergeResourceInclude Source="ferres://FerroUI.Themes.MacOS/Controls/ToolTip.xaml" />
+        <MergeResourceInclude Source="ferres://FerroUI.Themes.MacOS/Controls/ProgressBar.xaml" />
+        <MergeResourceInclude Source="ferres://FerroUI.Themes.MacOS/Controls/Separator.xaml" />
+        <MergeResourceInclude Source="ferres://FerroUI.Themes.MacOS/Controls/PathIcon.xaml" />
+        <MergeResourceInclude Source="ferres://FerroUI.Themes.MacOS/Controls/Label.xaml" />
+        <MergeResourceInclude Source="ferres://FerroUI.Themes.MacOS/Controls/ItemsControl.xaml" />
+        <MergeResourceInclude Source="ferres://FerroUI.Themes.MacOS/Controls/HeaderedContentControl.xaml" />
+        <MergeResourceInclude Source="ferres://FerroUI.Themes.MacOS/Controls/GroupBox.xaml" />
+        <MergeResourceInclude Source="ferres://FerroUI.Themes.MacOS/Controls/SelectableTextBlock.xaml" />
+        <MergeResourceInclude Source="ferres://FerroUI.Themes.MacOS/Controls/TransitioningContentControl.xaml" />
+        <MergeResourceInclude Source="ferres://FerroUI.Themes.MacOS/Controls/TextSelectionHandle.xaml" />
+        <MergeResourceInclude Source="ferres://FerroUI.Themes.MacOS/Controls/DataValidationErrors.xaml" />
+        <MergeResourceInclude Source="ferres://FerroUI.Themes.MacOS/Controls/GridSplitter.xaml" />
+        <!-- B4: calendar, date and time. -->
+        <MergeResourceInclude Source="ferres://FerroUI.Themes.MacOS/Controls/DateTimePickerShared.xaml" />
+        <MergeResourceInclude Source="ferres://FerroUI.Themes.MacOS/Controls/CalendarDayButton.xaml" />
+        <MergeResourceInclude Source="ferres://FerroUI.Themes.MacOS/Controls/CalendarButton.xaml" />
+        <MergeResourceInclude Source="ferres://FerroUI.Themes.MacOS/Controls/CalendarItem.xaml" />
+        <MergeResourceInclude Source="ferres://FerroUI.Themes.MacOS/Controls/Calendar.xaml" />
+        <MergeResourceInclude Source="ferres://FerroUI.Themes.MacOS/Controls/CalendarDatePicker.xaml" />
+        <MergeResourceInclude Source="ferres://FerroUI.Themes.MacOS/Controls/DatePicker.xaml" />
+        <MergeResourceInclude Source="ferres://FerroUI.Themes.MacOS/Controls/TimePicker.xaml" />
+        <!-- B6: window decorations, notifications, tables and dialogs. -->
+        <MergeResourceInclude Source="ferres://FerroUI.Themes.MacOS/Controls/WindowDrawnDecorations.xaml" />
+        <MergeResourceInclude Source="ferres://FerroUI.Themes.MacOS/Controls/NotificationCard.xaml" />
+        <MergeResourceInclude Source="ferres://FerroUI.Themes.MacOS/Controls/WindowNotificationManager.xaml" />
+        <MergeResourceInclude Source="ferres://FerroUI.Themes.MacOS/Controls/TableView.xaml" />
+        <MergeResourceInclude Source="ferres://FerroUI.Themes.MacOS/Controls/TableViewCell.xaml" />
+        <MergeResourceInclude Source="ferres://FerroUI.Themes.MacOS/Controls/TableViewColumnHeader.xaml" />
+        <MergeResourceInclude Source="ferres://FerroUI.Themes.MacOS/Controls/TableViewRow.xaml" />
+        <MergeResourceInclude Source="ferres://FerroUI.Themes.MacOS/Controls/ManagedFileChooser.xaml" />
+        <!-- B5: navigation, pages, tabs and command bar. -->
+        <MergeResourceInclude Source="ferres://FerroUI.Themes.MacOS/Controls/TabStrip.xaml" />
+        <MergeResourceInclude Source="ferres://FerroUI.Themes.MacOS/Controls/TabStripItem.xaml" />
+        <MergeResourceInclude Source="ferres://FerroUI.Themes.MacOS/Controls/TabControl.xaml" />
+        <MergeResourceInclude Source="ferres://FerroUI.Themes.MacOS/Controls/TabItem.xaml" />
+        <MergeResourceInclude Source="ferres://FerroUI.Themes.MacOS/Controls/SplitView.xaml" />
+        <MergeResourceInclude Source="ferres://FerroUI.Themes.MacOS/Controls/ContentPage.xaml" />
+        <MergeResourceInclude Source="ferres://FerroUI.Themes.MacOS/Controls/TabbedPage.xaml" />
+        <MergeResourceInclude Source="ferres://FerroUI.Themes.MacOS/Controls/NavigationPage.xaml" />
+        <MergeResourceInclude Source="ferres://FerroUI.Themes.MacOS/Controls/DrawerPage.xaml" />
+        <MergeResourceInclude Source="ferres://FerroUI.Themes.MacOS/Controls/Carousel.xaml" />
+        <MergeResourceInclude Source="ferres://FerroUI.Themes.MacOS/Controls/CarouselPage.xaml" />
+        <MergeResourceInclude Source="ferres://FerroUI.Themes.MacOS/Controls/CommandBar.xaml" />
+        <!-- B2: buttons, ranges and expanders. -->
+        <MergeResourceInclude Source="ferres://FerroUI.Themes.MacOS/Controls/DropDownButton.xaml" />
+        <MergeResourceInclude Source="ferres://FerroUI.Themes.MacOS/Controls/SplitButton.xaml" />
+        <MergeResourceInclude Source="ferres://FerroUI.Themes.MacOS/Controls/ToggleSwitch.xaml" />
+        <MergeResourceInclude Source="ferres://FerroUI.Themes.MacOS/Controls/Slider.xaml" />
+        <MergeResourceInclude Source="ferres://FerroUI.Themes.MacOS/Controls/NumericUpDown.xaml" />
+        <MergeResourceInclude Source="ferres://FerroUI.Themes.MacOS/Controls/ButtonSpinner.xaml" />
+        <MergeResourceInclude Source="ferres://FerroUI.Themes.MacOS/Controls/Expander.xaml" />
+        <MergeResourceInclude Source="ferres://FerroUI.Themes.MacOS/Controls/PipsPager.xaml" />
+        <MergeResourceInclude Source="ferres://FerroUI.Themes.MacOS/Controls/RefreshContainer.xaml" />
+        <MergeResourceInclude Source="ferres://FerroUI.Themes.MacOS/Controls/RefreshVisualizer.xaml" />
+        <!-- B3: flyouts, menus, lists and selection. -->
+        <MergeResourceInclude Source="ferres://FerroUI.Themes.MacOS/Controls/FlyoutPresenter.xaml" />
+        <MergeResourceInclude Source="ferres://FerroUI.Themes.MacOS/Controls/MenuScrollViewer.xaml" />
+        <MergeResourceInclude Source="ferres://FerroUI.Themes.MacOS/Controls/MenuFlyoutPresenter.xaml" />
+        <MergeResourceInclude Source="ferres://FerroUI.Themes.MacOS/Controls/ContextMenu.xaml" />
+        <MergeResourceInclude Source="ferres://FerroUI.Themes.MacOS/Controls/MenuItem.xaml" />
+        <MergeResourceInclude Source="ferres://FerroUI.Themes.MacOS/Controls/Menu.xaml" />
+        <MergeResourceInclude Source="ferres://FerroUI.Themes.MacOS/Controls/ListBoxItem.xaml" />
+        <MergeResourceInclude Source="ferres://FerroUI.Themes.MacOS/Controls/ListBox.xaml" />
+        <MergeResourceInclude Source="ferres://FerroUI.Themes.MacOS/Controls/ComboBoxItem.xaml" />
+        <MergeResourceInclude Source="ferres://FerroUI.Themes.MacOS/Controls/ComboBox.xaml" />
+        <MergeResourceInclude Source="ferres://FerroUI.Themes.MacOS/Controls/TreeViewItem.xaml" />
+        <MergeResourceInclude Source="ferres://FerroUI.Themes.MacOS/Controls/TreeView.xaml" />
+        <MergeResourceInclude Source="ferres://FerroUI.Themes.MacOS/Controls/AutoCompleteBox.xaml" />
+      </ResourceDictionary.MergedDictionaries>
+    </ResourceDictionary>
+  </Styles.Resources>
+
+  <!-- The icon of a menu item (MenuItem.Icon, a logical child of the item): unscaled, in the
+       IconRoot Viewbox of 16 of the template of MenuFlyoutItem (DEVIATIONS.md, PI-3). A style of
+       the theme rather than of the control theme of PathIcon, whose nested styles cannot name a
+       parent (the selector MenuItem > ^ there matched every path icon). -->
+  <Style Selector="MenuItem > PathIcon">
+    <Setter Property="Width" Value="NaN" />
+    <Setter Property="Height" Value="NaN" />
+    <Setter Property="Template" Value="{StaticResource PathIconUnscaledTemplate}" />
+  </Style>
+</Styles>

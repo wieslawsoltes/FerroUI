@@ -73,6 +73,8 @@ members = [
     "src/FerroUI.Themes.Simple",
     "src/FerroUI.Themes.Fluent",
     "src/FerroUI.Themes.WinUI",
+    "src/FerroUI.Themes.MacOS",
+    "src/FerroUI.Themes.Material",
     "src/FerroUI.OpenGL",
     "src/FerroUI.Metal",
     "src/FerroUI.Remote.Protocol",
@@ -157,6 +159,7 @@ members = [
     "samples/ControlGallery.WinUI",
     "samples/WinUIEmbedSample",
     "samples/WinUIThemeGallery",
+    "samples/MaterialThemeGallery",
     "samples/BehaviorsGallery",
     "samples/SafeAreaDemo",
     "samples/SafeAreaDemo.Desktop",
@@ -271,6 +274,8 @@ ferroui-xaml-interactions-responsive = { version = "=0.4.0", path = "src/Behavio
 ferroui-themes-simple = { version = "=0.4.0", path = "src/FerroUI.Themes.Simple" }
 ferroui-themes-fluent = { version = "=0.4.0", path = "src/FerroUI.Themes.Fluent" }
 ferroui-themes-winui = { version = "=0.4.0", path = "src/FerroUI.Themes.WinUI" }
+ferroui-themes-macos = { version = "=0.4.0", path = "src/FerroUI.Themes.MacOS" }
+ferroui-themes-material = { version = "=0.4.0", path = "src/FerroUI.Themes.Material" }
 ferroui-opengl = { version = "=0.4.0", path = "src/FerroUI.OpenGL" }
 ferroui-metal = { version = "=0.4.0", path = "src/FerroUI.Metal" }
 ferroui-remote-protocol = { version = "=0.4.0", path = "src/FerroUI.Remote.Protocol" }
@@ -380,6 +385,15 @@ getrandom = { version = "0.4" }
 # thin LTO over the default sixteen code generation units, which generates code on all cores.
 [profile.release]
 lto = "thin"
+
+# Optimised code for running an application locally (`cargo run --profile fast-release -p <app>`):
+# the optimisation level of release, without link-time optimisation across crates. The last step
+# of an executable then links the optimised crates instead of optimising the whole program again,
+# which took most of a release build of a large application. Not for measurements or shipping:
+# the benchmarks are measured with release, and what is shipped is built with dist.
+[profile.fast-release]
+inherits = "release"
+lto = false
 
 # The build that is shipped and measured (`cargo build --profile dist`, `scripts/perf-report.py
 # --profile dist`): whole-program optimisation in one code generation unit. The executables are

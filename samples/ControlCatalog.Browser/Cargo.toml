@@ -33,6 +33,8 @@ wasm-bindgen = { workspace = true }
 cdp = ["dep:ferroui-devtools"]
 default = []
 vello = ["ferroui-browser/vello"]
+macos-theme = ["control-catalog/macos-theme"]
+material-theme = ["control-catalog/material-theme"]
 
 # The published site carries the artwork of this project instead of the upstream brand assets of the
 # sample (see `samples/ControlCatalog/PlaceholderAssets`); the feature is a default of the sample and

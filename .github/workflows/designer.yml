@@ -14,6 +14,7 @@ on:
       - 'src/FerroUI.Themes.Simple/**'
       - 'src/FerroUI.Themes.Fluent/**'
       - 'src/FerroUI.Themes.WinUI/**'
+      - 'src/FerroUI.Themes.MacOS/**'
       - 'src/FerroUI.Dialogs/**'
       - 'src/FerroUI.ReactiveUI.Controls/**'
       - 'scripts/generate_view_builders.py'
@@ -102,6 +103,7 @@ jobs:
         run: |
           cargo run --locked -p designer-studio --no-default-features --features headless,mcp -- --headless
           cargo run --locked -p designer-studio --no-default-features --features headless,mcp -- --headless --file docs/designer/samples/DesignWorkflows.xaml
+          cargo run --locked -p designer-studio --no-default-features --features headless,mcp -- --headless --file docs/designer/samples/PreviewStages.xaml
       - name: Optional facade integration
         run: cargo check --locked -p ferroui --no-default-features --features designer-mcp
       - name: Release preview path without development hot reload
@@ -126,7 +128,7 @@ jobs:
       - name: Parser, transforms, runtime providers and generated code
         run: cargo test --locked -p xamlx -p ferroui-markup-xaml -p ferroui-markup-xaml-loader -p ferroui-markup-xaml-tests -- --test-threads=1
       - name: Generated theme references match build-time and runtime emitters
-        run: cargo test --locked -p ferroui-themes-simple -p ferroui-themes-fluent -p ferroui-themes-winui compiled_xaml -- --test-threads=1
+        run: cargo test --locked -p ferroui-themes-simple -p ferroui-themes-fluent -p ferroui-themes-winui -p ferroui-themes-macos compiled_xaml -- --test-threads=1
 
   animation-runtime:
     name: Native animation preview and application semantics

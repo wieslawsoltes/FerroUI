@@ -122,6 +122,9 @@ scans. Scanner execution and rustc compilation are separate measurements.
 
 ### Reuse identical Rust compilation through sccache
 
+Setup, configuration and troubleshooting for everyday use are in
+[Compiler cache (sccache)](compiler-cache.md); this section records the measured scope.
+
 Install an official sccache release, then opt in with:
 
 ```sh

@@ -156,7 +156,7 @@ fn imported_theme_resources_keep_private_view_scopes_and_terminate_cycles() {
         .definitions(URI, view.find("Private").unwrap())
         .unwrap()
         .is_empty());
-    service.replace("untitled:/A.xaml", &format!(
+    service.replace("untitled:/A.xaml", format!(
         "<ResourceDictionary {NS}><ResourceDictionary.ThemeDictionaries><ResourceDictionary x:Key='Default'><ResourceDictionary.MergedDictionaries><ResourceInclude Source='B.xaml'/></ResourceDictionary.MergedDictionaries></ResourceDictionary></ResourceDictionary.ThemeDictionaries></ResourceDictionary>"
     ), 2).unwrap();
     service.open("untitled:/B.xaml", "<ResourceDictionary><ResourceDictionary.MergedDictionaries><ResourceInclude Source='A.xaml'/></ResourceDictionary.MergedDictionaries></ResourceDictionary>", 1).unwrap();

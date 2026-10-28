@@ -40,7 +40,7 @@ ferroui-controls-treedatagrid = { workspace = true, features = ["document-assets
 ferroui-treedatagrid-core.workspace = true
 ferroui-inspect.workspace = true
 ferroui-hot-reload.workspace = true
-ferroui-markup-xaml.workspace = true
+ferroui-markup-xaml = { workspace = true, features = ["source-overlays"] }
 ferroui-markup-xaml-loader = { workspace = true, features = ["runtime"] }
 ferroui-designer-core = { version = "=0.4.0", path = "../FerroUI.Designer.Core" }
 ferroui-designer-animation = { version = "=0.4.0", path = "../FerroUI.Designer.Animation" }

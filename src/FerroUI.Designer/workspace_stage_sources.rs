@@ -97,9 +97,10 @@ impl DesignerWorkspace {
         let (_, epoch) = self.preview_stage_host_options();
         let sources = self.preview_stage_sources();
         let board = self.preview_stages.board.borrow();
-        sources.iter().any(|source| {
-            board.source_is_current(id, &source.uri, &source.document, source.pending, epoch)
-        })
+        board.dependencies_are_current(id, &sources)
+            && sources.iter().any(|source| {
+                board.source_is_current(id, &source.uri, &source.document, source.pending, epoch)
+            })
     }
 
     pub fn select_preview_stage_runtime(
@@ -196,10 +197,18 @@ impl DesignerWorkspace {
         self: &Rc<Self>,
         selection: &PreviewStageSelection,
     ) -> Result<(), String> {
-        let current = self.preview_stage_sources().into_iter().any(|source| {
+        let sources = self.preview_stage_sources();
+        let current = sources.iter().any(|source| {
             !source.pending && selection.matches_source(&source.uri, &source.document)
         });
-        if !current || self.pending_source.get() {
+        if !current
+            || self.pending_source.get()
+            || !self
+                .preview_stages
+                .board
+                .borrow()
+                .dependencies_are_current(selection.stage, &sources)
+        {
             return Err("The source changed after this preview was accepted; refresh the stage and select again".into());
         }
         self.focus_preview_stage_configuration(&selection.configuration)?;

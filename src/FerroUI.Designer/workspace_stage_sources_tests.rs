@@ -57,6 +57,55 @@ fn selection(
 }
 
 #[test]
+fn included_buffer_edits_revoke_readonly_tree_mappings_and_focus_before_board_sync() {
+    let _app = UnitTestApplication::start(TestServices::styled_window());
+    const VALUES: &str = "ferres://FerroUI.Designer.Tests/WorkspaceValues.xaml";
+    const VIEW: &str = "ferres://FerroUI.Designer.Tests/WorkspaceView.xaml";
+    let values = r#"<ResourceDictionary xmlns="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"><x:Double x:Key="width">73</x:Double></ResourceDictionary>"#;
+    let view = r#"<StackPanel xmlns="https://github.com/ferroui"><StackPanel.Resources><ResourceDictionary><ResourceDictionary.MergedDictionaries><ResourceInclude Source="WorkspaceValues.xaml"/></ResourceDictionary.MergedDictionaries></ResourceDictionary></StackPanel.Resources><Button Name="Pick" Width="{StaticResource width}"/></StackPanel>"#;
+    let workspace = DesignerWorkspace::with_uri(values, VALUES.into()).unwrap();
+    workspace.open_document(view.into(), VIEW.into()).unwrap();
+    let node = workspace
+        .session
+        .borrow()
+        .document()
+        .ast()
+        .find_name("Pick")
+        .unwrap();
+    let stage = workspace
+        .add_preview_stage(configuration("Resource consumer", VIEW))
+        .unwrap();
+    let window = attach(&workspace);
+    workspace.set_preview_stages_visible(true).unwrap();
+    window.update_layout();
+    workspace.refresh_preview_stage(stage).unwrap();
+    let accepted = selection(&workspace, stage, node);
+    assert!(workspace.preview_stage_source_is_current(stage));
+    workspace.activate_document(VALUES).unwrap();
+    workspace
+        .session
+        .borrow_mut()
+        .update_source(values.replace(">73<", ">101<"));
+    let epoch = workspace.preview_stages.board.borrow().epoch();
+    let revision = workspace.session.borrow().document().revision();
+    assert!(!workspace.preview_stage_source_is_current(stage));
+    assert!(workspace
+        .preview_stage_runtime_tree(stage, TreeKind::Visual)
+        .unwrap()
+        .iter()
+        .all(|row| row.source_id.is_none()));
+    assert!(workspace.focus_preview_stage_selection(&accepted).is_err());
+    assert_eq!(
+        workspace.preview_stages.board.borrow().epoch(),
+        epoch,
+        "read-only guards cannot construct or synchronize previews"
+    );
+    assert_eq!(workspace.session.borrow().document().revision(), revision);
+    assert_eq!(workspace.session.borrow().document_uri(), VALUES);
+    window.close();
+}
+
+#[test]
 fn pinned_document_stages_focus_the_correct_source_environment_and_inspector_without_losing_history(
 ) {
     let _app = UnitTestApplication::start(TestServices::styled_window());

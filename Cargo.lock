@@ -553,6 +553,8 @@ dependencies = [
  "ferroui-opengl",
  "ferroui-skia",
  "ferroui-themes-fluent",
+ "ferroui-themes-macos",
+ "ferroui-themes-material",
  "ferroui-themes-simple",
  "ferroui-themes-winui",
  "ferroui-vello",
@@ -1149,6 +1151,8 @@ dependencies = [
  "ferroui-splat",
  "ferroui-system",
  "ferroui-themes-fluent",
+ "ferroui-themes-macos",
+ "ferroui-themes-material",
  "ferroui-themes-simple",
  "ferroui-themes-winui",
  "ferroui-treedatagrid-core",
@@ -1974,6 +1978,32 @@ dependencies = [
  "ferroui-dialogs",
  "ferroui-markup-xaml",
  "ferroui-markup-xaml-loader",
+]
+
+[[package]]
+name = "ferroui-themes-macos"
+version = "0.4.0"
+dependencies = [
+ "ferroui-base",
+ "ferroui-build",
+ "ferroui-controls",
+ "ferroui-dialogs",
+ "ferroui-markup-xaml",
+ "ferroui-markup-xaml-loader",
+]
+
+[[package]]
+name = "ferroui-themes-material"
+version = "0.4.0"
+dependencies = [
+ "ferroui-android",
+ "ferroui-base",
+ "ferroui-build",
+ "ferroui-controls",
+ "ferroui-dialogs",
+ "ferroui-markup-xaml",
+ "ferroui-markup-xaml-loader",
+ "material-colors",
 ]
 
 [[package]]
@@ -3358,6 +3388,33 @@ dependencies = [
  "proc-macro2",
  "quote",
  "syn 2.0.119",
+]
+
+[[package]]
+name = "material-colors"
+version = "0.4.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "e226ffda362d5bc26bb8f730d637a0851eedfb05e35d92108c9d8b48d2e47941"
+dependencies = [
+ "ahash",
+ "indexmap",
+ "libm",
+]
+
+[[package]]
+name = "material-theme-gallery"
+version = "0.4.0"
+dependencies = [
+ "ferroui-base",
+ "ferroui-controls",
+ "ferroui-desktop",
+ "ferroui-dialogs",
+ "ferroui-markup",
+ "ferroui-markup-xaml",
+ "ferroui-themes-material",
+ "sample-build",
+ "sample-support",
+ "sample-testing",
 ]
 
 [[package]]

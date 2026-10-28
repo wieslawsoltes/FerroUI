@@ -1,0 +1,52 @@
+<!--
+  Not ported from a style: WinUI's Page has no style and no template in microsoft-ui-xaml
+  (https://github.com/microsoft/microsoft-ui-xaml, commit 7e4b0c2096be402f51cc8f7d203ebf67cff183d0;
+  a Page is a UserControl whose content the application gives). The template is the one
+  FerroUI's ContentPage requires (src/FerroUI.Themes.Fluent/Controls/ContentPage.xaml: the
+  content and the top and bottom command bars, whose visibility the control sets); the values
+  are the resources a WinUI 3 page shows: ApplicationPageBackgroundThemeBrush (the background the
+  page templates of WinUI set on a Page, SolidBackgroundFillColorBase of
+  dxaml/xcp/dxaml/themes/generic.xaml and controls/dev/CommonStyles/Common_themeresources.xaml)
+  and the primary text colour (TextFillColorPrimaryBrush).
+  Copyright (c) Microsoft Corporation. Licensed under the MIT License (see NOTICE.md of the crate).
+-->
+<ResourceDictionary xmlns="https://github.com/ferroui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    x:ClassModifier="internal">
+  <Design.PreviewWith>
+    <ContentPage Header="Sample page" Width="320" Height="200">
+      <TextBlock Text="The content of the page." Margin="12" />
+    </ContentPage>
+  </Design.PreviewWith>
+
+  <ControlTheme x:Key="{x:Type ContentPage}" TargetType="ContentPage">
+    <Setter Property="Background" Value="{DynamicResource ApplicationPageBackgroundThemeBrush}" />
+    <Setter Property="Foreground" Value="{DynamicResource TextFillColorPrimaryBrush}" />
+    <Setter Property="Template">
+      <ControlTemplate>
+        <DockPanel>
+          <!-- The control shows the command bar presenters when it has command bars, and sets the
+               padding of the content presenter (its Padding with the safe area). -->
+          <ContentPresenter Name="PART_TopCommandBar"
+                            DockPanel.Dock="Top"
+                            HorizontalContentAlignment="Stretch"
+                            IsVisible="False" />
+          <ContentPresenter Name="PART_BottomCommandBar"
+                            DockPanel.Dock="Bottom"
+                            HorizontalContentAlignment="Stretch"
+                            IsVisible="False" />
+          <ContentPresenter Name="PART_ContentPresenter"
+                            HorizontalContentAlignment="{TemplateBinding HorizontalContentAlignment}"
+                            VerticalContentAlignment="{TemplateBinding VerticalContentAlignment}"
+                            Background="{TemplateBinding Background}"
+                            BorderBrush="{TemplateBinding BorderBrush}"
+                            BackgroundSizing="InnerBorderEdge"
+                            BorderThickness="{TemplateBinding BorderThickness}"
+                            Content="{TemplateBinding Content}"
+                            ContentTemplate="{TemplateBinding ContentTemplate}"
+                            CornerRadius="{TemplateBinding CornerRadius}" />
+        </DockPanel>
+      </ControlTemplate>
+    </Setter>
+  </ControlTheme>
+</ResourceDictionary>

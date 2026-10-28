@@ -1,0 +1,128 @@
+<!--
+  The control themes of the WinUI theme (docs/porting/winui-theme.md): one document per FerroUI
+  control, ported from the styles of microsoft-ui-xaml (https://github.com/microsoft/microsoft-ui-xaml,
+  commit 7e4b0c2096be402f51cc8f7d203ebf67cff183d0) that each document names in its header.
+  A document that is embedded but not ready to be part of the theme is listed in
+  Controls/excluded.txt and not included here.
+-->
+<Styles xmlns="https://github.com/ferroui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        x:ClassModifier="internal">
+  <Styles.Resources>
+    <ResourceDictionary>
+      <ResourceDictionary.MergedDictionaries>
+        <!-- Foundation: hosts of windows and popups, focus visuals. -->
+        <MergeResourceInclude Source="ferres://FerroUI.Themes.Material/Controls/AdornerLayer.xaml" />
+        <MergeResourceInclude Source="ferres://FerroUI.Themes.Material/Controls/EmbeddableControlRoot.xaml" />
+        <MergeResourceInclude Source="ferres://FerroUI.Themes.Material/Controls/OverlayPopupHost.xaml" />
+        <MergeResourceInclude Source="ferres://FerroUI.Themes.Material/Controls/PopupRoot.xaml" />
+        <MergeResourceInclude Source="ferres://FerroUI.Themes.Material/Controls/ThemeVariantScope.xaml" />
+        <MergeResourceInclude Source="ferres://FerroUI.Themes.Material/Controls/Window.xaml" />
+        <!-- Foundation: text, buttons, check box, radio button, text box, scrolling. -->
+        <MergeResourceInclude Source="ferres://FerroUI.Themes.Material/Controls/TextBlock.xaml" />
+        <MergeResourceInclude Source="ferres://FerroUI.Themes.Material/Controls/Button.xaml" />
+        <MergeResourceInclude Source="ferres://FerroUI.Themes.Material/Controls/RepeatButton.xaml" />
+        <MergeResourceInclude Source="ferres://FerroUI.Themes.Material/Controls/ToggleButton.xaml" />
+        <MergeResourceInclude Source="ferres://FerroUI.Themes.Material/Controls/HyperlinkButton.xaml" />
+        <MergeResourceInclude Source="ferres://FerroUI.Themes.Material/Controls/CheckBox.xaml" />
+        <MergeResourceInclude Source="ferres://FerroUI.Themes.Material/Controls/RadioButton.xaml" />
+        <MergeResourceInclude Source="ferres://FerroUI.Themes.Material/Controls/Thumb.xaml" />
+        <MergeResourceInclude Source="ferres://FerroUI.Themes.Material/Controls/ScrollBar.xaml" />
+        <MergeResourceInclude Source="ferres://FerroUI.Themes.Material/Controls/ScrollViewer.xaml" />
+        <MergeResourceInclude Source="ferres://FerroUI.Themes.Material/Controls/TextBox.xaml" />
+        <!-- B1: primitives and simple content. -->
+        <MergeResourceInclude Source="ferres://FerroUI.Themes.Material/Controls/ToolTip.xaml" />
+        <MergeResourceInclude Source="ferres://FerroUI.Themes.Material/Controls/ProgressBar.xaml" />
+        <MergeResourceInclude Source="ferres://FerroUI.Themes.Material/Controls/Separator.xaml" />
+        <MergeResourceInclude Source="ferres://FerroUI.Themes.Material/Controls/PathIcon.xaml" />
+        <MergeResourceInclude Source="ferres://FerroUI.Themes.Material/Controls/Label.xaml" />
+        <MergeResourceInclude Source="ferres://FerroUI.Themes.Material/Controls/ItemsControl.xaml" />
+        <MergeResourceInclude Source="ferres://FerroUI.Themes.Material/Controls/HeaderedContentControl.xaml" />
+        <MergeResourceInclude Source="ferres://FerroUI.Themes.Material/Controls/GroupBox.xaml" />
+        <MergeResourceInclude Source="ferres://FerroUI.Themes.Material/Controls/SelectableTextBlock.xaml" />
+        <MergeResourceInclude Source="ferres://FerroUI.Themes.Material/Controls/TransitioningContentControl.xaml" />
+        <MergeResourceInclude Source="ferres://FerroUI.Themes.Material/Controls/TextSelectionHandle.xaml" />
+        <MergeResourceInclude Source="ferres://FerroUI.Themes.Material/Controls/DataValidationErrors.xaml" />
+        <MergeResourceInclude Source="ferres://FerroUI.Themes.Material/Controls/GridSplitter.xaml" />
+        <!-- B4: calendar, date and time. -->
+        <MergeResourceInclude Source="ferres://FerroUI.Themes.Material/Controls/DateTimePickerShared.xaml" />
+        <MergeResourceInclude Source="ferres://FerroUI.Themes.Material/Controls/CalendarDayButton.xaml" />
+        <MergeResourceInclude Source="ferres://FerroUI.Themes.Material/Controls/CalendarButton.xaml" />
+        <MergeResourceInclude Source="ferres://FerroUI.Themes.Material/Controls/CalendarItem.xaml" />
+        <MergeResourceInclude Source="ferres://FerroUI.Themes.Material/Controls/Calendar.xaml" />
+        <MergeResourceInclude Source="ferres://FerroUI.Themes.Material/Controls/CalendarDatePicker.xaml" />
+        <MergeResourceInclude Source="ferres://FerroUI.Themes.Material/Controls/DatePicker.xaml" />
+        <MergeResourceInclude Source="ferres://FerroUI.Themes.Material/Controls/TimePicker.xaml" />
+        <!-- B6: window decorations, notifications, tables and dialogs. -->
+        <MergeResourceInclude Source="ferres://FerroUI.Themes.Material/Controls/WindowDrawnDecorations.xaml" />
+        <MergeResourceInclude Source="ferres://FerroUI.Themes.Material/Controls/NotificationCard.xaml" />
+        <MergeResourceInclude Source="ferres://FerroUI.Themes.Material/Controls/WindowNotificationManager.xaml" />
+        <MergeResourceInclude Source="ferres://FerroUI.Themes.Material/Controls/TableView.xaml" />
+        <MergeResourceInclude Source="ferres://FerroUI.Themes.Material/Controls/TableViewCell.xaml" />
+        <MergeResourceInclude Source="ferres://FerroUI.Themes.Material/Controls/TableViewColumnHeader.xaml" />
+        <MergeResourceInclude Source="ferres://FerroUI.Themes.Material/Controls/TableViewRow.xaml" />
+        <MergeResourceInclude Source="ferres://FerroUI.Themes.Material/Controls/ManagedFileChooser.xaml" />
+        <!-- B5: navigation, pages, tabs and command bar. -->
+        <MergeResourceInclude Source="ferres://FerroUI.Themes.Material/Controls/TabStrip.xaml" />
+        <MergeResourceInclude Source="ferres://FerroUI.Themes.Material/Controls/TabStripItem.xaml" />
+        <MergeResourceInclude Source="ferres://FerroUI.Themes.Material/Controls/TabControl.xaml" />
+        <MergeResourceInclude Source="ferres://FerroUI.Themes.Material/Controls/TabItem.xaml" />
+        <MergeResourceInclude Source="ferres://FerroUI.Themes.Material/Controls/SplitView.xaml" />
+        <MergeResourceInclude Source="ferres://FerroUI.Themes.Material/Controls/ContentPage.xaml" />
+        <MergeResourceInclude Source="ferres://FerroUI.Themes.Material/Controls/TabbedPage.xaml" />
+        <MergeResourceInclude Source="ferres://FerroUI.Themes.Material/Controls/NavigationPage.xaml" />
+        <MergeResourceInclude Source="ferres://FerroUI.Themes.Material/Controls/DrawerPage.xaml" />
+        <MergeResourceInclude Source="ferres://FerroUI.Themes.Material/Controls/Carousel.xaml" />
+        <MergeResourceInclude Source="ferres://FerroUI.Themes.Material/Controls/CarouselPage.xaml" />
+        <MergeResourceInclude Source="ferres://FerroUI.Themes.Material/Controls/CommandBar.xaml" />
+        <!-- B2: buttons, ranges and expanders. -->
+        <MergeResourceInclude Source="ferres://FerroUI.Themes.Material/Controls/DropDownButton.xaml" />
+        <MergeResourceInclude Source="ferres://FerroUI.Themes.Material/Controls/SplitButton.xaml" />
+        <MergeResourceInclude Source="ferres://FerroUI.Themes.Material/Controls/ToggleSwitch.xaml" />
+        <MergeResourceInclude Source="ferres://FerroUI.Themes.Material/Controls/Slider.xaml" />
+        <MergeResourceInclude Source="ferres://FerroUI.Themes.Material/Controls/NumericUpDown.xaml" />
+        <MergeResourceInclude Source="ferres://FerroUI.Themes.Material/Controls/ButtonSpinner.xaml" />
+        <MergeResourceInclude Source="ferres://FerroUI.Themes.Material/Controls/Expander.xaml" />
+        <MergeResourceInclude Source="ferres://FerroUI.Themes.Material/Controls/PipsPager.xaml" />
+        <MergeResourceInclude Source="ferres://FerroUI.Themes.Material/Controls/RefreshContainer.xaml" />
+        <MergeResourceInclude Source="ferres://FerroUI.Themes.Material/Controls/RefreshVisualizer.xaml" />
+        <!-- B3: flyouts, menus, lists and selection. -->
+        <MergeResourceInclude Source="ferres://FerroUI.Themes.Material/Controls/FlyoutPresenter.xaml" />
+        <MergeResourceInclude Source="ferres://FerroUI.Themes.Material/Controls/MenuScrollViewer.xaml" />
+        <MergeResourceInclude Source="ferres://FerroUI.Themes.Material/Controls/MenuFlyoutPresenter.xaml" />
+        <MergeResourceInclude Source="ferres://FerroUI.Themes.Material/Controls/ContextMenu.xaml" />
+        <MergeResourceInclude Source="ferres://FerroUI.Themes.Material/Controls/MenuItem.xaml" />
+        <MergeResourceInclude Source="ferres://FerroUI.Themes.Material/Controls/Menu.xaml" />
+        <MergeResourceInclude Source="ferres://FerroUI.Themes.Material/Controls/ListBoxItem.xaml" />
+        <MergeResourceInclude Source="ferres://FerroUI.Themes.Material/Controls/ListBox.xaml" />
+        <MergeResourceInclude Source="ferres://FerroUI.Themes.Material/Controls/ComboBoxItem.xaml" />
+        <MergeResourceInclude Source="ferres://FerroUI.Themes.Material/Controls/ComboBox.xaml" />
+        <MergeResourceInclude Source="ferres://FerroUI.Themes.Material/Controls/TreeViewItem.xaml" />
+        <MergeResourceInclude Source="ferres://FerroUI.Themes.Material/Controls/TreeView.xaml" />
+        <MergeResourceInclude Source="ferres://FerroUI.Themes.Material/Controls/AutoCompleteBox.xaml" />
+        <MergeResourceInclude Source="ferres://FerroUI.Themes.Material/Controls/MaterialComponents.xaml" />
+        <MergeResourceInclude Source="ferres://FerroUI.Themes.Material/Controls/MaterialSegmentedGroup.xaml" />
+        <MergeResourceInclude Source="ferres://FerroUI.Themes.Material/Controls/MaterialIconButtons.xaml" />
+        <MergeResourceInclude Source="ferres://FerroUI.Themes.Material/Controls/MaterialAppBar.xaml" />
+        <MergeResourceInclude Source="ferres://FerroUI.Themes.Material/Controls/MaterialBottomSheet.xaml" />
+        <MergeResourceInclude Source="ferres://FerroUI.Themes.Material/Controls/MaterialSnackbar.xaml" />
+        <MergeResourceInclude Source="ferres://FerroUI.Themes.Material/Controls/MaterialSearchView.xaml" />
+        <MergeResourceInclude Source="ferres://FerroUI.Themes.Material/Controls/MaterialExtendedFab.xaml" />
+        <MergeResourceInclude Source="ferres://FerroUI.Themes.Material/Controls/MaterialRangeSlider.xaml" />
+        <MergeResourceInclude Source="ferres://FerroUI.Themes.Material/Controls/MaterialDatePicker.xaml" />
+        <MergeResourceInclude Source="ferres://FerroUI.Themes.Material/Controls/MaterialTimePicker.xaml" />
+        <MergeResourceInclude Source="ferres://FerroUI.Themes.Material/Controls/MaterialChips.xaml" />
+      </ResourceDictionary.MergedDictionaries>
+    </ResourceDictionary>
+  </Styles.Resources>
+
+  <!-- The icon of a menu item (MenuItem.Icon, a logical child of the item): unscaled, in the
+       IconRoot Viewbox of 16 of the template of MenuFlyoutItem (DEVIATIONS.md, PI-3). A style of
+       the theme rather than of the control theme of PathIcon, whose nested styles cannot name a
+       parent (the selector MenuItem > ^ there matched every path icon). -->
+  <Style Selector="MenuItem > PathIcon">
+    <Setter Property="Width" Value="NaN" />
+    <Setter Property="Height" Value="NaN" />
+    <Setter Property="Template" Value="{StaticResource PathIconUnscaledTemplate}" />
+  </Style>
+</Styles>

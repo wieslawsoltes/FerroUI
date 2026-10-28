@@ -1,0 +1,30 @@
+<!-- macOS 26 adaptation; see docs/porting/macos26-theme.md.
+     Derived from FerroUI WinUI templates and microsoft-ui-xaml commit
+     7e4b0c2096be402f51cc8f7d203ebf67cff183d0. Copyright (c) Microsoft Corporation.
+     Licensed under the MIT License; see NOTICE.md.
+     Acrylic backing is the portable fallback for native Liquid Glass. -->
+<ResourceDictionary xmlns="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" x:ClassModifier="internal">
+  <ControlTheme x:Key="{x:Type Window}" TargetType="Window">
+    <Setter Property="FontWeight" Value="Normal"/>
+    <Setter Property="Background" Value="{DynamicResource SolidBackgroundFillColorBaseBrush}"/>
+    <Setter Property="TransparencyBackgroundFallback" Value="{DynamicResource SolidBackgroundFillColorBaseBrush}"/>
+    <Setter Property="TransparencyLevelHint" Value="{DynamicResource MacOSWindowTransparencyLevels}"/>
+    <Setter Property="TopLevel.SystemBarColor" Value="{DynamicResource SolidBackgroundFillColorBaseBrush}"/>
+    <Setter Property="Foreground" Value="{DynamicResource TextFillColorPrimaryBrush}"/>
+    <Setter Property="FontSize" Value="{DynamicResource ControlContentThemeFontSize}"/>
+    <Setter Property="FontFamily" Value="{DynamicResource ContentControlThemeFontFamily}"/>
+    <Setter Property="TextBlock.LayoutRoundingPlacement" Value="Above"/>
+    <Setter Property="Template">
+      <ControlTemplate>
+        <Panel>
+          <Border Name="PART_TransparencyFallback" IsHitTestVisible="False"/>
+          <Border Background="{TemplateBinding Background}" IsHitTestVisible="False"/>
+          <Panel Background="Transparent" Margin="{TemplateBinding WindowDecorationMargin}"/>
+          <VisualLayerManager Name="PART_VisualLayerManager">
+            <ContentPresenter Name="PART_ContentPresenter" ContentTemplate="{TemplateBinding ContentTemplate}" Content="{TemplateBinding Content}" Margin="{TemplateBinding Padding}" HorizontalContentAlignment="{TemplateBinding HorizontalContentAlignment}" VerticalContentAlignment="{TemplateBinding VerticalContentAlignment}"/>
+          </VisualLayerManager>
+        </Panel>
+      </ControlTemplate>
+    </Setter>
+  </ControlTheme>
+</ResourceDictionary>

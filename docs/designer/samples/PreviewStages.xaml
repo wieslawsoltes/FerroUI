@@ -4,7 +4,7 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              mc:Ignorable="d" x:Name="PreviewScene"
              d:DesignWidth="390" d:DesignHeight="760">
-  <!-- Open Preview stages, duplicate this document, and choose the Screen group's
+  <!-- Open Preview stages, duplicate a stage, and choose the Screen group's
        Loading, Empty, Content and Error endpoints. Each card keeps its own native
        state and environment. The authored default is Content.
        This sample uses ordinary native styles and animations. Encoded comments

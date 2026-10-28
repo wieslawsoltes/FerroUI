@@ -48,6 +48,10 @@ count-allocations = ["ferroui-base/tagged-weak-references"]
 # `ClassicThemes.xaml`, the dictionary of the two themes and of the Simple styles of the colour
 # picker and the TreeDataGrid, which the application merges into its resources.
 classic-themes = ["dep:ferroui-themes-simple", "dep:ferroui-themes-fluent"]
+# The independently compiled macOS 26 theme. Keep the default catalog's binary-size budget.
+macos-theme = ["dep:ferroui-themes-macos"]
+# The independently compiled Android Material 3 Expressive theme, with its bundled Roboto.
+material-theme = ["dep:ferroui-themes-material"]
 hot-reload = ["runtime-markup", "dep:ferroui-hot-reload"]
 runtime-markup = [
     "dep:ferroui-markup-xaml-loader",
@@ -81,6 +85,8 @@ ferroui-themes-simple = { workspace = true, optional = true }
 ferroui-themes-fluent = { workspace = true, optional = true }
 # The WinUI theme of the port, the theme of the catalog (not in the original).
 ferroui-themes-winui = { workspace = true }
+ferroui-themes-macos = { workspace = true, optional = true }
+ferroui-themes-material = { workspace = true, optional = true }
 # The Skia lease of `Pages/TabbedPage/FluidNavBar` (custom drawing on the canvas of the backend).
 ferroui-skia = { workspace = true }
 skia-safe = { workspace = true }

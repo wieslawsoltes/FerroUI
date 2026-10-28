@@ -1,0 +1,35 @@
+<!-- Material surface/selection treatment for FerroUI's desktop table row contract.
+     Structural heritage: Microsoft Corporation, MIT; see NOTICE.md. -->
+<ResourceDictionary xmlns="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" x:ClassModifier="internal">
+  <ControlTheme x:Key="{x:Type TableViewRow}" TargetType="TableViewRow">
+    <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+    <Setter Property="VerticalContentAlignment" Value="Stretch"/>
+    <Setter Property="MinHeight" Value="48"/>
+    <Setter Property="Background" Value="{DynamicResource MaterialSurfaceBrush}"/>
+    <Setter Property="BorderBrush" Value="{DynamicResource MaterialOutlineVariantBrush}"/>
+    <Setter Property="BorderThickness" Value="0,0,0,1"/>
+    <Setter Property="Template">
+      <ControlTemplate>
+        <Panel>
+          <Border x:Name="PART_RootBorder" Background="{TemplateBinding Background}" Padding="{TemplateBinding Padding}">
+            <Panel>
+              <Border x:Name="StateLayer" Background="Transparent" IsHitTestVisible="False"/>
+              <Panel x:Name="PART_CellForegroundPresenter" TextElement.Foreground="{DynamicResource MaterialOnSurfaceBrush}">
+                <TableViewCellsPresenter x:Name="PART_CellsPresenter" HorizontalAlignment="Left"/>
+              </Panel>
+            </Panel>
+          </Border>
+          <Border x:Name="PART_GridLineBorder" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" IsHitTestVisible="False"/>
+        </Panel>
+      </ControlTemplate>
+    </Setter>
+    <Style Selector="^:pointerover /template/ Border#StateLayer"><Setter Property="Background" Value="{DynamicResource MaterialOnSurfaceHoverBrush}"/></Style>
+    <Style Selector="^:pressed /template/ Border#StateLayer"><Setter Property="Background" Value="{DynamicResource MaterialOnSurfacePressedBrush}"/></Style>
+    <Style Selector="^:selected"><Setter Property="Background" Value="{DynamicResource MaterialSecondaryContainerBrush}"/></Style>
+    <Style Selector="^:selected /template/ Panel#PART_CellForegroundPresenter"><Setter Property="TextElement.Foreground" Value="{DynamicResource MaterialOnSecondaryContainerBrush}"/></Style>
+    <Style Selector="^:selected:pointerover /template/ Border#StateLayer"><Setter Property="Background" Value="{DynamicResource MaterialOnSecondaryContainerHoverBrush}"/></Style>
+    <Style Selector="^:selected:pressed /template/ Border#StateLayer"><Setter Property="Background" Value="{DynamicResource MaterialOnSecondaryContainerPressedBrush}"/></Style>
+    <Style Selector="^:disabled /template/ Panel#PART_CellForegroundPresenter"><Setter Property="TextElement.Foreground" Value="{DynamicResource MaterialDisabledOnSurfaceBrush}"/></Style>
+    <Style Selector="^:disabled /template/ Border#StateLayer"><Setter Property="Background" Value="Transparent"/></Style>
+  </ControlTheme>
+</ResourceDictionary>
