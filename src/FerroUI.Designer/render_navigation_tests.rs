@@ -218,6 +218,110 @@ fn native_canvas_navigation_renders_and_preserves_pointer_anchor_and_source_draf
     bitmap.dispose();
     flyout.hide();
 
+    workspace.fit_artboard().unwrap();
+    let mut guide_settings = crate::CanvasGuideSettings {
+        rulers_visible: true,
+        grid_visible: true,
+        snap_to_grid: false,
+        ..Default::default()
+    };
+    guide_settings
+        .add(crate::CanvasGuideAxis::Vertical, 56.5)
+        .unwrap();
+    guide_settings
+        .add(crate::CanvasGuideAxis::Horizontal, 72.25)
+        .unwrap();
+    workspace.set_canvas_guides(guide_settings).unwrap();
+    workspace
+        .add_canvas_guide(crate::CanvasGuideAxis::Vertical, 380.5)
+        .unwrap();
+    window.update_layout();
+    let guide_pixels = capture_current_at(
+        &workspace,
+        &clock,
+        &directory.join("designer-canvas-guides.png"),
+        Size::new(1600.0, 1040.0),
+    );
+    let guide_settings = workspace.canvas_guides();
+    let mut hidden = guide_settings.clone();
+    hidden.guides_visible = false;
+    workspace.set_canvas_guides(hidden).unwrap();
+    let hidden_pixels = capture_current_at(
+        &workspace,
+        &clock,
+        &directory.join("designer-canvas-guides-hidden.png"),
+        Size::new(1600.0, 1040.0),
+    );
+    let origin = viewport
+        .translate_point(Point::new(0.0, 0.0), &workspace.control())
+        .unwrap();
+    let viewport_size = viewport.bounds().size();
+    for guide in &guide_settings.guides {
+        let position = workspace.artboard_to_canvas(Point::new(guide.position, guide.position));
+        let vertical = guide.axis == crate::CanvasGuideAxis::Vertical;
+        let (coordinate, start, length) = if vertical {
+            (
+                origin.x + position.x,
+                origin.y + 30.0,
+                viewport_size.height - 110.0,
+            )
+        } else {
+            (
+                origin.y + position.y,
+                origin.x + 30.0,
+                viewport_size.width - 50.0,
+            )
+        };
+        let mut painted = 0;
+        let samples = 20;
+        for sample in 0..samples {
+            let along = start + length * sample as f64 / samples as f64;
+            let changed = (-2..=2).any(|delta| {
+                let across = coordinate.round() as i32 + delta;
+                let (x, y) = if vertical {
+                    (across, along.round() as i32)
+                } else {
+                    (along.round() as i32, across)
+                };
+                if !(0..1600).contains(&x) || !(0..1040).contains(&y) {
+                    return false;
+                }
+                let index = (y as usize * 1600 + x as usize) * 4;
+                guide_pixels[index..index + 4] != hidden_pixels[index..index + 4]
+            });
+            painted += usize::from(changed);
+        }
+        assert!(
+            painted >= samples * 3 / 4,
+            "Guide {:?} must paint at its native camera projection across varied backgrounds: {painted}/{samples}",
+            guide
+        );
+    }
+    workspace.set_canvas_guides(guide_settings).unwrap();
+    let guides_button = workspace.control().get_control::<Button>("CanvasGuides");
+    let guide_flyout = guides_button.flyout().unwrap().cast::<Flyout>().unwrap();
+    guide_flyout.popup().set_should_use_overlay_layer(true);
+    guide_flyout.show_at(&guides_button);
+    for _ in 0..4 {
+        Dispatcher::ui_thread().run_jobs(None);
+        clock.pulse();
+        window.update_layout();
+    }
+    assert!(guide_flyout.is_open());
+    let bitmap = RenderTargetBitmap::new(PixelSize::new(1600, 1040));
+    bitmap.render(&window.to_ref().upcast());
+    bitmap
+        .save_to_file(
+            directory
+                .join("designer-canvas-guides-editor.png")
+                .to_str()
+                .unwrap(),
+            &PngBitmapEncoderOptions::default().into(),
+        )
+        .unwrap();
+    bitmap.dispose();
+    guide_flyout.hide();
+
     assert_eq!(session.borrow().document().revision(), revision);
     assert_eq!(session.borrow().document().source(), source);
     assert!(std::sync::Arc::ptr_eq(

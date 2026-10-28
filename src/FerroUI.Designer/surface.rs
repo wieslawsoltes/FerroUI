@@ -68,6 +68,7 @@ struct Gesture {
     rectangles: Vec<(NodeId, Rect)>,
     selection_bounds: Option<ferroui_designer_tools::Rect>,
     snap_index: Option<ferroui_designer_tools::SnapIndex>,
+    guide_snap_index: Option<ferroui_designer_tools::SnapIndex>,
     geometry: Option<crate::affine_manipulation::Geometry>,
     initial_selection: Vec<NodeId>,
     selection_modifiers: KeyModifiers,
@@ -140,6 +141,7 @@ pub struct DesignSurface {
     gesture: RefCell<Option<Gesture>>,
     insert: RefCell<Option<String>>,
     grid: Cell<f64>,
+    canvas_guides: RefCell<crate::CanvasGuideSettings>,
     interactive: Cell<bool>,
     gesture_context: RefCell<Option<GestureContext>>,
     releasing_capture: Cell<bool>,
@@ -210,9 +212,36 @@ impl DesignSurface {
         }
         self.invalidate_visual();
     }
+    /// Legacy standalone-host override. Any finite nonnegative spacing remains supported;
+    /// applying bounded CanvasGuideSettings later replaces this override.
     pub fn set_grid(&self, size: f64) {
+        self.clear_pending();
         self.grid
             .set(if size.is_finite() { size.max(0.0) } else { 0.0 });
+    }
+    /// Shared local snapping contract for standalone hosts and DesignerWorkspace.
+    /// Updating it retires pending gestures before their accepted snap index changes.
+    pub fn set_canvas_guides(&self, settings: crate::CanvasGuideSettings) -> Result<(), String> {
+        settings.validate()?;
+        let grid = if settings.snap_to_grid {
+            settings.grid_spacing
+        } else {
+            0.0
+        };
+        if *self.canvas_guides.borrow() != settings || self.grid.get() != grid {
+            self.clear_pending();
+            self.grid.set(if settings.snap_to_grid {
+                settings.grid_spacing
+            } else {
+                0.0
+            });
+            *self.canvas_guides.borrow_mut() = settings;
+            self.invalidate_visual();
+        }
+        Ok(())
+    }
+    pub fn canvas_guides(&self) -> crate::CanvasGuideSettings {
+        self.canvas_guides.borrow().clone()
     }
     pub fn focus_order_visible(&self) -> bool {
         self.focus_order_visible.get()
@@ -325,7 +354,49 @@ impl DesignSurface {
         if modifiers.contains(KeyModifiers::ALT) {
             return position;
         }
-        if matches!(gesture.handle, Handle::Resize(_)) {
+        if let Handle::Resize(handle) = gesture.handle {
+            let side = match handle {
+                1 | 5 => Some(ferroui_designer_tools::Axis::Vertical),
+                3 | 7 => Some(ferroui_designer_tools::Axis::Horizontal),
+                _ => None,
+            };
+            // A rotated/skewed side handle moves on an oblique local axis. Preserve its
+            // existing grid behavior; artboard-axis guide corrections cannot constrain it.
+            let aligned = gesture.geometry.is_some_and(|geometry| {
+                geometry.to_surface.m12.abs() < 1e-10 && geometry.to_surface.m21.abs() < 1e-10
+            });
+            if side.is_none() || aligned {
+                if let Some(index) = &gesture.guide_snap_index {
+                    if let Ok(snapped) = index.snap_with(
+                        ferroui_designer_tools::Rect::new(position.x, position.y, 0.0, 0.0),
+                        None,
+                        self.canvas_guides.borrow().snap_tolerance / self.zoom.get(),
+                    ) {
+                        let guides: Vec<_> = snapped
+                            .guides
+                            .into_iter()
+                            .filter(|guide| side.is_none_or(|axis| guide.axis == axis))
+                            .collect();
+                        if !guides.is_empty() {
+                            *self.snap_guides.borrow_mut() = guides;
+                            return Point::new(
+                                position.x
+                                    + if side == Some(ferroui_designer_tools::Axis::Vertical) {
+                                        0.0
+                                    } else {
+                                        snapped.delta.x
+                                    },
+                                position.y
+                                    + if side == Some(ferroui_designer_tools::Axis::Horizontal) {
+                                        0.0
+                                    } else {
+                                        snapped.delta.y
+                                    },
+                            );
+                        }
+                    }
+                }
+            }
             return self.snapped(position, modifiers);
         }
         if !matches!(gesture.handle, Handle::Move) {
@@ -347,7 +418,7 @@ impl DesignSurface {
         match index.snap_with(
             moving,
             (self.grid.get() > 0.0).then(|| self.grid.get()),
-            6.0 / self.zoom.get(),
+            self.canvas_guides.borrow().snap_tolerance / self.zoom.get(),
         ) {
             Ok(snapped) => {
                 *self.snap_guides.borrow_mut() = snapped
@@ -565,6 +636,7 @@ impl Default for DesignSurface {
             gesture: RefCell::new(None),
             insert: RefCell::new(None),
             grid: Cell::new(8.0),
+            canvas_guides: RefCell::new(crate::CanvasGuideSettings::default()),
             interactive: Cell::new(false),
             gesture_context: RefCell::new(None),
             releasing_capture: Cell::new(false),
@@ -737,8 +809,22 @@ impl InputElementImpl for DesignSurface {
             .iter()
             .map(|(_, r)| ferroui_designer_tools::Rect::new(r.x, r.y, r.width, r.height))
             .reduce(|a, b| a.union(b));
-        let snap_index = ferroui_designer_tools::SnapSettings::default()
-            .prepare(&snap_bounds)
+        let snap_index = {
+            let settings = this.canvas_guides.borrow();
+            settings
+                .snap_settings(this.zoom.get())
+                .prepare(if settings.snap_to_objects {
+                    &snap_bounds
+                } else {
+                    &[]
+                })
+                .ok()
+        };
+        let guide_snap_index = this
+            .canvas_guides
+            .borrow()
+            .snap_settings(this.zoom.get())
+            .prepare(&[])
             .ok();
         let geometry = rectangles
             .first()
@@ -756,6 +842,7 @@ impl InputElementImpl for DesignSurface {
             rectangles,
             selection_bounds,
             snap_index,
+            guide_snap_index,
             geometry,
             initial_selection,
             selection_modifiers: event.key_modifiers(),
@@ -890,11 +977,14 @@ impl InputElementImpl for DesignSurface {
                 }
             }
             let step = if event.key_modifiers.contains(KeyModifiers::SHIFT) {
-                10.0
-            } else if event.key_modifiers.contains(KeyModifiers::CONTROL) {
-                0.1
+                this.canvas_guides.borrow().large_nudge
+            } else if event
+                .key_modifiers
+                .intersects(KeyModifiers::CONTROL | KeyModifiers::META)
+            {
+                this.canvas_guides.borrow().small_nudge / 10.0
             } else {
-                1.0
+                this.canvas_guides.borrow().small_nudge
             };
             let delta = match event.key {
                 Key::Left => Some(Point::new(-step, 0.0)),

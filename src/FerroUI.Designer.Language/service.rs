@@ -631,7 +631,7 @@ impl LanguageService {
                             .unwrap_or("");
                         let extension_namespace =
                             completion_namespace(state, name, open.unwrap(), offset);
-                        if let Some(info) = self.schema.extensions.get(name).or_else(|| {
+                        if let Some(info) = self.schema.extension(name, extension_namespace.as_deref()).or_else(|| {
                             crate::design_support::extension(name, extension_namespace.as_deref())
                         }) {
                             for parameter in &info.parameters {
@@ -1041,8 +1041,7 @@ impl LanguageService {
         let namespace = completion_namespace(state, &name, open, offset);
         let Some(info) = self
             .schema
-            .extensions
-            .get(&name)
+            .extension(&name, namespace.as_deref())
             .or_else(|| crate::design_support::extension(&name, namespace.as_deref()))
         else {
             return Ok(None);

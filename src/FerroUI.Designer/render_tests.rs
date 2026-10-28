@@ -148,6 +148,10 @@ mod design_workflows;
 mod navigation;
 #[path = "render_icon_tests.rs"]
 mod icons;
+#[path = "render_binding_tests.rs"]
+mod bindings;
+#[path = "render_property_inspector_tests.rs"]
+mod property_inspector;
 
 #[test]
 fn native_workspace_renders_design_manipulation_and_animation() {

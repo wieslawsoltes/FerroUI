@@ -594,6 +594,27 @@ fn copied_state_metadata_and_directly_renamed_selectors_keep_target_references_c
         .iter()
         .all(|state| state.setters.iter().all(|setter| setter.target == "Copied")));
 }
+
+#[test]
+fn unrelated_state_rename_preserves_encoded_metadata_spelling() {
+    let model = group(1);
+    let pretty = serde_json::to_string_pretty(&model).unwrap();
+    let source = format!(
+        "<Grid><!--  ferroui-designer-state-group:{}  --></Grid>",
+        crate::programs::encode_text(&pretty)
+    );
+    for renames in [
+        BTreeMap::from([("Unrelated".into(), "Renamed".into())]),
+        BTreeMap::from([("Target".into(), "Target".into())]),
+    ] {
+        assert_eq!(rewrite_design_metadata(&source, &renames).unwrap(), source);
+    }
+    let renamed = rewrite_design_metadata(
+        &source,
+        &BTreeMap::from([("Target".into(), "Renamed".into())]),
+    ).unwrap();
+    assert_ne!(renamed, source);
+}
 #[test]
 fn custom_behavior_text_comments_and_property_payloads_survive_edits() {
     let source = "<Grid xmlns='https://github.com/ferroui' xmlns:p='using:Vendor'><Interaction.Behaviors><p:Behavior Flag='x'>lead<!--keep--><![CDATA[a<b]]><p:Behavior.Value><p:Data/></p:Behavior.Value>tail</p:Behavior></Interaction.Behaviors></Grid>";

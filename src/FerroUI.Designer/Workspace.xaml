@@ -213,6 +213,7 @@
               <PathIcon Classes="designer-icon" Width="16" Height="16" Data="F1 M8,1 Q6,1 6,3 L6,9 5,8 Q3,6 2,8 L6,16 Q7,18 10,18 L14,18 Q17,18 17,15 L17,7 Q17,5 15,6 Q14,3 12,5 Q10,2 9,4 L9,3 Q9,1 8,1 Z" />
             </Button>
             <Button Name="PanTool" Classes="nav" Content="Pan" ToolTip.Tip="Pan the canvas · middle-drag or Space+drag" />
+            <Button Name="CanvasGuides" Classes="nav" Content="Guides" ToolTip.Tip="Rulers, exact guides, grid and snapping · Shift+R rulers · Shift+G guides" />
             <Border Width="1" Height="20" Background="{DynamicResource DesignerBorderBrush}" Margin="5,0" />
             <Button Name="ArrangeSelection" Classes="nav" ToolTip.Tip="Align, distribute, reorder or nest selected elements">
               <StackPanel Orientation="Horizontal" Spacing="7"><PathIcon Classes="designer-icon" Width="14" Height="14" Data="F1 M1,0 L3,0 3,18 1,18 Z M5,3 L17,3 17,7 5,7 Z M5,11 L12,11 12,15 5,15 Z" /><TextBlock Text="Arrange" /></StackPanel>
@@ -288,11 +289,47 @@
             </StackPanel>
           </Grid>
           <ContentControl Name="ComponentInstanceHost" Grid.Row="1" HorizontalContentAlignment="Stretch" Margin="12,0,12,8" IsVisible="False" />
-          <TextBox Name="PropertySearch" Grid.Row="2" PlaceholderText="Search properties" Margin="12,3,12,8" ToolTip.Tip="Filter properties · @modified for authored values">
-            <TextBox.InnerLeftContent><PathIcon Classes="designer-icon" Width="12" Height="12" Margin="7,0,0,0" Foreground="{DynamicResource DesignerMutedBrush}" Data="F1 M8 1A7 7 0 1 1 8 15A7 7 0 1 1 8 1Z M8 3A5 5 0 1 0 8 13A5 5 0 1 0 8 3Z M12 11L19 18L17.6 19.4L10.6 12.4Z" /></TextBox.InnerLeftContent>
-          </TextBox>
+          <Grid Grid.Row="2" ColumnDefinitions="*,Auto" ColumnSpacing="4" Margin="12,3,12,8">
+            <TextBox Name="PropertySearch" PlaceholderText="Search properties" ToolTip.Tip="Filter properties · @modified @binding @resource @object @mixed @default @expression">
+              <TextBox.InnerLeftContent><PathIcon Classes="designer-icon" Width="12" Height="12" Margin="7,0,0,0" Foreground="{DynamicResource DesignerMutedBrush}" Data="F1 M8 1A7 7 0 1 1 8 15A7 7 0 1 1 8 1Z M8 3A5 5 0 1 0 8 13A5 5 0 1 0 8 3Z M12 11L19 18L17.6 19.4L10.6 12.4Z" /></TextBox.InnerLeftContent>
+            </TextBox>
+            <Button Name="PropertyViewOptions" Grid.Column="1" Classes="nav" Content="View" FontSize="11" Padding="7,2" ToolTip.Tip="Arrange and filter properties">
+              <Button.Flyout>
+                <Flyout>
+                  <StackPanel Width="256" Spacing="8">
+                    <TextBlock Text="Property inspector" FontWeight="SemiBold" />
+                    <TextBlock Text="Arrange by" FontSize="11" />
+                    <ComboBox Name="PropertySort" SelectedIndex="0" HorizontalAlignment="Stretch" AutomationProperties.Name="Arrange properties">
+                      <ComboBoxItem Content="Category" />
+                      <ComboBoxItem Content="Name (A–Z)" />
+                      <ComboBoxItem Content="Value source" />
+                    </ComboBox>
+                    <TextBlock Text="Show" FontSize="11" />
+                    <ComboBox Name="PropertyFilter" SelectedIndex="0" HorizontalAlignment="Stretch" AutomationProperties.Name="Filter properties by value source">
+                      <ComboBoxItem Content="All properties" />
+                      <ComboBoxItem Content="Authored values" />
+                      <ComboBoxItem Content="Bindings" />
+                      <ComboBoxItem Content="Resources" />
+                      <ComboBoxItem Content="Object values" />
+                      <ComboBoxItem Content="All expressions" />
+                      <ComboBoxItem Content="Multiple values" />
+                      <ComboBoxItem Content="Inherited / default" />
+                    </ComboBox>
+                    <Button Name="PropertyClearFilters" Content="Clear filters and search" HorizontalAlignment="Stretch" />
+                    <TextBlock Text="Search also accepts @modified, @binding, @resource, @object, @mixed, @default and @expression. Right-click a property name to inspect its XAML or referenced definition." TextWrapping="Wrap" FontSize="11" />
+                  </StackPanel>
+                </Flyout>
+              </Button.Flyout>
+            </Button>
+          </Grid>
           <ContentControl Name="LayoutHost" Grid.Row="3" HorizontalContentAlignment="Stretch" Margin="8,0,8,6" />
-          <ContentControl Name="PropertyHost" Grid.Row="4" HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch" Margin="8,0,8,4" />
+          <Grid Grid.Row="4" Margin="8,0,8,4">
+            <ContentControl Name="PropertyHost" HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch" />
+            <StackPanel Name="PropertyEmptyState" IsVisible="False" Spacing="8" Margin="14,18" VerticalAlignment="Top">
+              <TextBlock Name="PropertyEmptyMessage" Text="No properties match the current filters." TextWrapping="Wrap" Foreground="{DynamicResource DesignerMutedBrush}" />
+              <Button Name="PropertyEmptyClear" Content="Clear filters and search" HorizontalAlignment="Left" />
+            </StackPanel>
+          </Grid>
         </Grid>
         <ScrollViewer Name="AuthoringScroll" Grid.Row="1" IsVisible="False" Margin="12,12,12,8">
           <StackPanel Spacing="12">

@@ -726,14 +726,21 @@ pub fn rewrite_design_metadata(source: &str, renames: &BTreeMap<String, String>)
             let Ok(mut group) = serde_json::from_str::<VisualStateGroup>(&metadata) else {
                 continue;
             };
+            let mut changed = false;
             for setter in group
                 .states
                 .iter_mut()
                 .flat_map(|state| state.setters.iter_mut())
             {
                 if let Some(name) = renames.get(&setter.target) {
-                    setter.target = name.clone();
+                    if setter.target != *name {
+                        setter.target = name.clone();
+                        changed = true;
+                    }
                 }
+            }
+            if !changed {
+                continue;
             }
             Some(format!(
                 "{GROUP_MARKER}{}",
@@ -756,7 +763,12 @@ pub fn rewrite_design_metadata(source: &str, renames: &BTreeMap<String, String>)
                 continue;
             };
             if let Some(name) = renames.get(&target) {
+                if *name == target {
+                    continue;
+                }
                 *parts.last_mut().expect("target") = encode_text(name);
+            } else {
+                continue;
             }
             Some(format!("{marker}{}", parts.join(":")))
         } else {

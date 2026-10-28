@@ -7,6 +7,11 @@ adapters. It does not add a second document model or another rendering stack.
 
 ## Findings
 
+The further [binding, inspector and precision-layout review](authoring-workflows.md) adds
+structured binding sources/options, inspector arrangements and value-source filters, source
+navigation, native ruler guides with configurable snapping, and reference-aware element naming.
+These extend the earlier workflow results below.
+
 | Workflow | Reference behavior | FerroUI before this review | Result of this review |
 | --- | --- | --- | --- |
 | Source/design synchronization | Visual Studio/Blend retain XAML while providing a visual editor | Lossless AST, atomic source edits, native reload, diagnostics and language service | Reused by every new authored command |

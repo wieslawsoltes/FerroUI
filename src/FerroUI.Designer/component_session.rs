@@ -15,13 +15,7 @@ pub(crate) fn property_binding_extension(
     value: Option<&str>,
 ) -> String {
     let namespaces = document.ast().namespaces(node);
-    let qualified = |prefix: &str| {
-        if prefix.is_empty() {
-            "Binding".into()
-        } else {
-            format!("{prefix}:Binding")
-        }
-    };
+    let schema = property_schema();
     if let Some(MarkupValue::Extension(extension)) =
         value.and_then(|value| MarkupValue::parse(value).ok())
     {
@@ -29,18 +23,82 @@ pub(crate) fn property_binding_extension(
             .name
             .split_once(':')
             .unwrap_or(("", &extension.name));
-        if matches!(name, "Binding" | "StaticResource" | "DynamicResource")
-            && namespaces
-                .get(prefix)
-                .is_some_and(|uri| uri == "https://github.com/ferroui")
+        let uri = namespaces.get(prefix).map(String::as_str);
+        if (prefix.is_empty() || uri.is_some())
+            && ((matches!(name, "Binding" | "BindingExtension")
+                && uri.is_none_or(|uri| uri == "https://github.com/ferroui"))
+                || schema.type_info(name, uri).is_some_and(|info| {
+                    info.namespace == "https://github.com/ferroui"
+                        && matches!(
+                            info.name.strip_suffix("Extension").unwrap_or(&info.name),
+                            "Binding" | "ReflectionBinding" | "CompiledBinding"
+                        )
+                }))
         {
-            return qualified(prefix);
+            return extension.name;
         }
+        if (prefix.is_empty() || uri.is_some())
+            && schema.type_info(name, uri).is_some_and(|info| {
+                info.namespace == "https://github.com/ferroui"
+                    && matches!(
+                        info.name.strip_suffix("Extension").unwrap_or(&info.name),
+                        "StaticResource" | "DynamicResource"
+                    )
+            })
+            && uri.is_none_or(|uri| uri == "https://github.com/ferroui")
+        {
+            return if prefix.is_empty() {
+                "Binding".into()
+            } else {
+                format!("{prefix}:Binding")
+            };
+        }
+    }
+    property_framework_extension(document, node, "Binding")
+        .or_else(|| property_framework_extension(document, node, "ReflectionBinding"))
+        .unwrap_or_default()
+}
+
+pub(crate) fn property_relative_source_extension(
+    document: &Document,
+    node: NodeId,
+) -> Option<String> {
+    property_framework_extension(document, node, "RelativeSource")
+}
+
+fn property_framework_extension(document: &Document, node: NodeId, name: &str) -> Option<String> {
+    let namespaces = document.ast().namespaces(node);
+    let schema = property_schema();
+    let resolves = |uri: Option<&str>| {
+        if name == "Binding" {
+            return uri.is_none_or(|uri| uri == "https://github.com/ferroui");
+        }
+        schema
+            .type_info(&format!("{name}Extension"), uri)
+            .is_some_and(|info| {
+                info.namespace == "https://github.com/ferroui"
+                    && info.name.strip_suffix("Extension").unwrap_or(&info.name) == name
+            })
+    };
+    if !namespaces.contains_key("") && resolves(None) {
+        return Some(name.into());
     }
     namespaces
         .iter()
-        .find(|(_, uri)| uri.as_str() == "https://github.com/ferroui")
-        .map_or_else(|| "Binding".into(), |(prefix, _)| qualified(prefix))
+        .find(|(_, uri)| resolves(Some(uri)))
+        .map(|(prefix, _)| {
+            if prefix.is_empty() {
+                name.into()
+            } else {
+                format!("{prefix}:{name}")
+            }
+        })
+}
+
+fn property_schema() -> &'static ferroui_designer_language::Schema {
+    static SCHEMA: std::sync::OnceLock<ferroui_designer_language::Schema> =
+        std::sync::OnceLock::new();
+    SCHEMA.get_or_init(ferroui_designer_language::Schema::ferroui)
 }
 
 #[derive(Clone, Debug)]
@@ -139,6 +197,32 @@ impl DesignerSession {
         action: &ComponentAction,
     ) -> Result<ComponentEditPreview, String> {
         self.ensure_writable().map_err(|error| error.to_string())?;
+        let normalized = match action {
+            ComponentAction::SetProperty {
+                node,
+                property,
+                value: Some(value),
+            } => self
+                .canonical_property_literal(*node, property, value, false)?
+                .map(|value| ComponentAction::SetProperty {
+                    node: *node,
+                    property: property.clone(),
+                    value: Some(value.into()),
+                }),
+            ComponentAction::SetSetter {
+                owner,
+                property,
+                value: Some(value),
+            } => self
+                .canonical_property_literal(*owner, property, value, true)?
+                .map(|value| ComponentAction::SetSetter {
+                    owner: *owner,
+                    property: property.clone(),
+                    value: Some(value.into()),
+                }),
+            _ => None,
+        };
+        let action = normalized.as_ref().unwrap_or(action);
         let edits = if let ComponentAction::ApplyResource {
             resource,
             targets,

@@ -80,6 +80,8 @@ pub struct PropertyEditorMetadata {
     pub named_elements: Vec<String>,
     /// Qualified framework Binding extension in the target's namespace scope.
     pub binding_extension: String,
+    /// Independently resolved QName; a Binding CLR alias need not expose RelativeSource.
+    pub binding_relative_source: Option<String>,
     pub validate_literal: Option<PropertyLiteralValidator>,
     /// The host checks document/selection identity and permissions again on every call.
     pub commit: Option<PropertyValueCommit>,
@@ -97,6 +99,7 @@ impl PropertyEditorMetadata {
             resource_owners: Vec::new(),
             named_elements: Vec::new(),
             binding_extension: "Binding".into(),
+            binding_relative_source: None,
             validate_literal: None,
             commit: None,
         }
@@ -180,14 +183,12 @@ impl PropertyEditorMetadata {
     pub fn apply(
         &self,
         context: &PropertyEditorContext,
-        edit: PropertyValueEdit,
+        mut edit: PropertyValueEdit,
     ) -> Result<(), String> {
-        if let PropertyValueEdit::Literal(value) = &edit {
-            self.validate(value)?;
-            validate_primitive(
-                context.runtime_type.as_deref().unwrap_or(""),
-                value.strip_prefix("{}").unwrap_or(value),
-            )?;
+        if let PropertyValueEdit::Literal(value) = &mut edit {
+            if let Some(canonical) = self.prepare_literal(context, value)? {
+                *value = canonical.into();
+            }
         }
         if let PropertyValueEdit::Expression(value) = &edit {
             if !matches!(
@@ -217,6 +218,30 @@ impl PropertyEditorMetadata {
             }
             Ok(())
         }
+    }
+
+    /// Validate before converting the editor's numeric Auto spelling to the native
+    /// floating-point XAML representation. Text, GridLength and unknown types retain
+    /// their original spelling; opening an editor never calls this commit operation.
+    pub(crate) fn prepare_literal(
+        &self,
+        context: &PropertyEditorContext,
+        value: &str,
+    ) -> Result<Option<&'static str>, String> {
+        self.validate(value)?;
+        let type_name = context.runtime_type.as_deref().unwrap_or("");
+        let decoded = value.strip_prefix("{}").unwrap_or(value);
+        validate_primitive(type_name, decoded)?;
+        if self.kind == PropertyEditorKind::Number
+            && matches!(type_identity(type_name), "f32" | "f64")
+            && decoded.trim() == "Auto"
+        {
+            // Native property validators still decide whether NaN is a legal sentinel.
+            // For example an opacity/range property must not acquire an invalid value.
+            self.validate("NaN")?;
+            return Ok(Some("NaN"));
+        }
+        Ok(None)
     }
 }
 
@@ -409,11 +434,16 @@ pub fn resolve_property_editor_metadata(
     if parse.is_some() || native_property.is_some() {
         result.validate_literal = Some(Rc::new(move |value| {
             let text: ferroui_base::BoxedValue = Rc::new(value.to_owned());
-            let auto = native_property.is_some_and(|property| {
-                matches!(property.name(), "Width" | "Height") && value == "Auto"
+            let auto = native_property.filter(|property| {
+                matches!(type_identity(property.property_type_name()), "f32" | "f64")
+                    && value == "Auto"
             });
-            let parsed = if auto {
-                Some(Rc::new(f64::NAN) as ferroui_base::BoxedValue)
+            let parsed = if let Some(property) = auto {
+                Some(if type_identity(property.property_type_name()) == "f32" {
+                    Rc::new(f32::NAN) as ferroui_base::BoxedValue
+                } else {
+                    Rc::new(f64::NAN) as ferroui_base::BoxedValue
+                })
             } else if let Some(parse) = parse {
                 parse(&[Some(text.clone())]).map_err(|error| error.to_string())?
             } else {

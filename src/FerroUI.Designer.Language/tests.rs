@@ -508,6 +508,34 @@ fn name_rename_rewrites_actual_references_but_not_strings_or_other_namescopes() 
     assert!(renamed.contains("SourceObject='Renamed'"));
     assert!(service.apply_workspace_edit(&edit).is_err());
 }
+
+#[test]
+fn name_rename_resolves_framework_aliases_and_preserves_foreign_extensions() {
+    let source = r##"<u:Grid xmlns:u="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:app="using:Example"><u:Button x:Name="Target"/><u:TextBlock Text="{u:Binding #Target.Content}" Tag="{u:ReflectionBinding ElementName=Target}"/><u:Button Tag="{u:CompiledBinding Path=#Target.Content}"/><u:Border Tag="{x:Reference Target}"/><u:Border Tag="{app:Binding ElementName=Target}"/><u:Border Tag="{app:Reference Target}"/><u:Border app:TargetName="Target"/></u:Grid>"##;
+    let mut language = service(source);
+    let edit = language.rename("untitled:/View.xaml", source.find("x:Name=\"Target\"").unwrap() + 8, "Renamed").unwrap();
+    language.apply_workspace_edit(&edit).unwrap();
+    let changed = language.document("untitled:/View.xaml").unwrap().source();
+    assert!(changed.contains("u:Binding #Renamed.Content"));
+    assert!(changed.contains("u:ReflectionBinding ElementName=Renamed"));
+    assert!(changed.contains("u:CompiledBinding Path=#Renamed.Content"));
+    assert!(changed.contains("x:Reference Renamed"));
+    assert!(changed.contains("app:Binding ElementName=Target"));
+    assert!(changed.contains("app:Reference Target"));
+    assert!(changed.contains("app:TargetName=\"Target\""));
+}
+
+#[test]
+fn name_rename_distinguishes_native_attached_references_from_foreign_property_literals() {
+    let source = r##"<ui:Grid xmlns="using:Application" xmlns:ui="https://github.com/ferroui" xmlns:c="using:FerroUI.Controls" xmlns:m="using:FerroUI.Markup.Xaml.MarkupExtensions" xmlns:app="using:Application"><ui:Button Name="Target"/><app:Custom TargetName="Target" ElementName="Target" Selector="#Target" ui:RelativePanel.Above="Target" RelativePanel.Below="Target"/><c:Button TargetName="Target" c:RelativePanel.RightOf="Target"/><m:ReflectionBinding ElementName="Target"/></ui:Grid>"##;
+    let mut language = service(source);
+    let edit = language.rename("untitled:/View.xaml", source.find("Name=\"Target\"").unwrap() + 6, "Renamed").unwrap();
+    language.apply_workspace_edit(&edit).unwrap();
+    let changed = language.document("untitled:/View.xaml").unwrap().source();
+    assert!(changed.contains("<app:Custom TargetName=\"Target\" ElementName=\"Target\" Selector=\"#Target\" ui:RelativePanel.Above=\"Renamed\" RelativePanel.Below=\"Target\""));
+    assert!(changed.contains("<c:Button TargetName=\"Renamed\" c:RelativePanel.RightOf=\"Renamed\""));
+    assert!(changed.contains("<m:ReflectionBinding ElementName=\"Renamed\""));
+}
 #[test]
 fn copy_reference_rewriter_preserves_external_and_plain_text_values() {
     let source=format!("<Grid {NS}><Button x:Name='Inner'/><TextBlock Text='{{Binding ElementName=Inner}}' Tag='{{x:Reference External}}' Name='Text'/></Grid>");
@@ -589,6 +617,37 @@ fn markup_signature_reports_named_parameter() {
         .parameters
         .contains(&"ElementName".into()));
 }
+
+#[test]
+fn binding_editor_arguments_have_namespace_aware_completion_and_signature_help() {
+    for (extension, namespace, argument, value) in [
+        ("Binding", "https://github.com/ferroui", "ConverterCulture", "en-US"),
+        ("f:BindingExtension", "https://github.com/ferroui", "UpdateSourceTrigger", "LostFocus"),
+        ("f:ReflectionBinding", "using:FerroUI.Markup.Xaml.MarkupExtensions", "Delay", "150"),
+        ("f:CompiledBindingExtension", "clr-namespace:FerroUI.Markup.Xaml.MarkupExtensions;assembly=FerroUI.Markup.Xaml", "FallbackValue", "missing"),
+        ("f:RelativeSource", "https://github.com/ferroui", "Tree", "Logical"),
+    ] {
+        let source = format!("<TextBlock xmlns='https://github.com/ferroui' xmlns:f='{namespace}' Text='{{{extension} {argument}={value}}}'/>");
+        let service = service(&source);
+        let completion_offset = source.rfind(&format!("{argument}=")).unwrap();
+        assert!(service.completions("untitled:/View.xaml", completion_offset).unwrap().iter().any(|item| item.label == argument), "Missing {argument} completion for {extension}");
+        let help = service.signature_help("untitled:/View.xaml", source.rfind(value).unwrap() + value.len()).unwrap().unwrap();
+        assert_eq!(help.signatures[0].parameters[help.active_parameter as usize], argument, "{extension}");
+    }
+    for name in ["Binding", "ReflectionBinding", "CompiledBinding", "RelativeSource"] {
+        let source = format!("<TextBlock xmlns='https://github.com/ferroui' xmlns:app='using:Example' Text='{{app:{name} Delay=1}}'/>");
+        let service = service(&source);
+        assert!(service.signature_help("untitled:/View.xaml", source.find("Delay=1").unwrap() + 7).unwrap().is_none(), "Foreign {name} must not use the native catalog");
+    }
+    let schema = Schema::ferroui();
+    for extension in ["Binding", "CompiledBinding", "ReflectionBinding"] {
+        let info = schema.extension(extension, Some("https://github.com/ferroui")).unwrap();
+        for field in ["Source", "RelativeSource", "Converter", "ConverterParameter", "ConverterCulture", "StringFormat", "FallbackValue", "TargetNullValue", "Mode", "UpdateSourceTrigger", "Delay"] {
+            assert!(info.parameters.iter().any(|parameter| parameter == field), "{extension}.{field}");
+        }
+    }
+}
+
 #[test]
 fn formatting_preserves_quotes_comments_mixed_content_and_xml_space() {
     let source="<Grid><!-- keep --><TextBlock Text = 'x'/><TextBlock>hello <Run Text='world'/> !</TextBlock><Border xml:space='preserve'>  <Button/>  </Border></Grid>";

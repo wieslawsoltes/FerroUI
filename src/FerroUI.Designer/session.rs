@@ -859,7 +859,10 @@ impl DesignerSession {
         name: &str,
         value: &str,
     ) -> Result<(), String> {
-        let edits = self
+        if name == "Name" {
+            return self.change_element_names(nodes, Some(value));
+        }
+        let mut edits = self
             .property_tools
             .plan(
                 &self.document,
@@ -869,6 +872,15 @@ impl DesignerSession {
                 ferroui_designer_tools::ExpressionPolicy::ReplaceExpressions,
             )
             .map_err(|e| e.to_string())?;
+        for edit in &mut edits {
+            if let Edit::SetAttribute { node, name, value } = edit {
+                if let Some(canonical) =
+                    self.canonical_property_literal(*node, name, value, false)?
+                {
+                    *value = canonical.into();
+                }
+            }
+        }
         if self.animation.recording && !value.starts_with('{') {
             return self.apply_visual("Record animation property", edits);
         }
@@ -879,6 +891,9 @@ impl DesignerSession {
 
     /// Explicit reset removes either an attribute or a property element in one undoable edit.
     pub fn reset_property(&mut self, nodes: &[NodeId], name: &str) -> Result<(), String> {
+        if name == "Name" {
+            return self.change_element_names(nodes, None);
+        }
         let mut edits = vec![];
         for id in nodes {
             let element = self

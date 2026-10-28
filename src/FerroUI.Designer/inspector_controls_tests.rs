@@ -514,7 +514,7 @@ fn inspector_property_transactions_preserve_mixed_expression_reset_and_stale_edi
     let content = property(&workspace, "Content");
     (content.context.as_ref().unwrap().apply)(Some("{Binding Title}".into()));
     let expression = property(&workspace, "Content");
-    assert_eq!(expression.origin, "Expression");
+    assert_eq!(expression.origin, "Binding");
     assert_eq!(
         expression.context.as_ref().unwrap().value.as_deref(),
         Some("{Binding Title}")
@@ -1039,7 +1039,23 @@ fn inspector_realized_numeric_editor_commits_then_rebinds_to_the_new_document_re
             .node(id)
             .unwrap()
             .attribute("Width"),
-        Some("Auto")
+        Some("NaN")
+    );
+    assert!(matches!(
+        workspace.session.borrow().preview_status(),
+        crate::PreviewStatus::Ready { .. }
+    ));
+    workspace.session.borrow_mut().undo().unwrap();
+    assert_eq!(
+        workspace
+            .session
+            .borrow()
+            .document()
+            .ast()
+            .node(id)
+            .unwrap()
+            .attribute("Width"),
+        Some("155")
     );
     window.close();
 }

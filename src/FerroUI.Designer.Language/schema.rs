@@ -97,20 +97,55 @@ impl Schema {
                             "Mode",
                             "Converter",
                             "ConverterParameter",
+                            "ConverterCulture",
                             "FallbackValue",
                             "TargetNullValue",
                             "StringFormat",
+                            "UpdateSourceTrigger",
+                            "Delay",
+                            "Priority",
                         ],
                         "Bind a property to a data path, named element or explicit source.",
                     ),
                     (
                         "CompiledBinding",
-                        vec!["Path", "DataType", "Mode", "ElementName"],
+                        vec![
+                            "Path",
+                            "ElementName",
+                            "RelativeSource",
+                            "Source",
+                            "Mode",
+                            "Converter",
+                            "ConverterParameter",
+                            "ConverterCulture",
+                            "FallbackValue",
+                            "TargetNullValue",
+                            "StringFormat",
+                            "UpdateSourceTrigger",
+                            "Delay",
+                            "Priority",
+                            "DataType",
+                        ],
                         "Bind using a statically described data type.",
                     ),
                     (
                         "ReflectionBinding",
-                        vec!["Path", "Mode", "ElementName"],
+                        vec![
+                            "Path",
+                            "ElementName",
+                            "RelativeSource",
+                            "Source",
+                            "Mode",
+                            "Converter",
+                            "ConverterParameter",
+                            "ConverterCulture",
+                            "FallbackValue",
+                            "TargetNullValue",
+                            "StringFormat",
+                            "UpdateSourceTrigger",
+                            "Delay",
+                            "Priority",
+                        ],
                         "Resolve a binding path through runtime metadata.",
                     ),
                     (
@@ -130,7 +165,7 @@ impl Schema {
                     ),
                     (
                         "RelativeSource",
-                        vec!["Mode", "AncestorType", "AncestorLevel"],
+                        vec!["Mode", "AncestorType", "AncestorLevel", "Tree"],
                         "Select a relative binding source.",
                     ),
                     (
@@ -159,6 +194,50 @@ impl Schema {
         self.types
             .insert(format!("{}|{}", info.namespace, info.name), info)
     }
+
+    /// Resolve the parameter catalog through the same lexical namespace as the XAML
+    /// expression. A foreign extension named Binding must not receive native arguments.
+    pub fn extension(&self, name: &str, namespace: Option<&str>) -> Option<&ExtensionInfo> {
+        let (prefix, local) = name.split_once(':').unwrap_or(("", name));
+        let local = local.strip_suffix("Extension").unwrap_or(local);
+        if namespace == Some("http://schemas.microsoft.com/winfx/2006/xaml")
+            || prefix == "x" && namespace.is_none()
+        {
+            return self.extensions.get(&format!("x:{local}"));
+        }
+        if !prefix.is_empty() && namespace.is_none() {
+            return None;
+        }
+        if namespace.is_none_or(|namespace| namespace == FRAMEWORK_NAMESPACE) {
+            return self.extensions.get(local);
+        }
+        if let Some(info) = self
+            .type_info(local, namespace)
+            .filter(|info| info.namespace == FRAMEWORK_NAMESPACE)
+        {
+            return self
+                .extensions
+                .get(info.name.strip_suffix("Extension").unwrap_or(&info.name));
+        }
+        // Application catalogs may register their own qualified extensions. Never use
+        // an unqualified built-in entry for an unrelated application namespace.
+        if !prefix.is_empty() {
+            return self.extensions.get(name);
+        }
+        self.extensions.get(name).filter(|_| {
+            !matches!(
+                local,
+                "Binding"
+                    | "CompiledBinding"
+                    | "ReflectionBinding"
+                    | "RelativeSource"
+                    | "StaticResource"
+                    | "DynamicResource"
+                    | "TemplateBinding"
+            )
+        })
+    }
+
     pub fn type_info(&self, name: &str, namespace: Option<&str>) -> Option<&TypeInfo> {
         let namespace = namespace.unwrap_or(FRAMEWORK_NAMESPACE);
         let namespace = if namespace == crate::design_support::DESIGN_NAMESPACE {

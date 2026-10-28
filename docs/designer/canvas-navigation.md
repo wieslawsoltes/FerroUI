@@ -1,5 +1,8 @@
 # Canvas navigation and designer icons
 
+The [precision-layout workflow guide](authoring-workflows.md#rulers-guides-and-snapping) adds
+native rulers, local guide editing and configurable grid/object/guide snapping on this camera.
+
 The designer keeps canvas navigation separate from application layout and source editing.
 Pan, zoom, fit and wheel preferences change the local view of the artboard. They do not
 author transforms, resize controls, add undo entries or send collaboration edits.
@@ -208,3 +211,10 @@ principles using its existing native geometry and scoped theme system.
 [blend-keys]: https://learn.microsoft.com/en-us/visualstudio/xaml-tools/keyboard-shortcuts-in-blend?view=visualstudio
 [qt-preview]: https://doc.qt.io/qt-6/designer-preview.html
 [vs-icons]: https://learn.microsoft.com/en-us/visualstudio/extensibility/ux-guidelines/images-and-icons-for-visual-studio?view=visualstudio
+
+## Rulers, guides and snapping
+
+The **Guides** canvas control adds native rulers, draggable guides, exact-position editing,
+independent grid/guide/object snapping and configurable keyboard steps. Guide sets are local
+to each retained document and definition canvas. See [canvas guides and snapping](canvas-guides.md)
+for the interaction contract, bounds, embedding APIs and source/history guarantees.

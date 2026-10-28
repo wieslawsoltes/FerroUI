@@ -9,7 +9,10 @@ mod schema;
 mod service;
 pub use formatting::FormattingOptions;
 pub use line_index::{LineIndex, Position, Range, TextChange, TextEdit};
-pub use references::{NameOccurrence, name_occurrences, rewrite_names, scope_of as name_scope};
+pub use references::{
+    NameOccurrence, identifier as is_xaml_identifier, name_occurrences, rewrite_names,
+    scope_of as name_scope,
+};
 pub use schema::{ExtensionInfo, PropertyInfo, Schema, TypeInfo};
 pub use service::*;
 use std::fmt;

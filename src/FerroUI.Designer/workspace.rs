@@ -59,6 +59,7 @@ pub struct DesignerWorkspace {
     outline_mode: Cell<OutlineMode>,
     runtime_selection: Cell<Option<u64>>,
     navigation: navigation::NavigationUi,
+    guides: guides::GuidesUi,
     timer: RefCell<Option<Rc<DispatcherTimer>>>,
     property_editors: RefCell<Vec<Rc<dyn PropertyEditorFactory>>>,
     timeline_lanes: RefCell<Vec<WeakRef<crate::timeline_lane::TimelineLane>>>,
@@ -134,6 +135,7 @@ impl DesignerWorkspace {
             outline_mode: Cell::new(OutlineMode::Source),
             runtime_selection: Cell::new(None),
             navigation: navigation::NavigationUi::default(),
+            guides: guides::GuidesUi::default(),
             timer: RefCell::new(None),
             property_editors: RefCell::new(Vec::new()),
             timeline_lanes: RefCell::new(Vec::new()),
@@ -233,6 +235,7 @@ impl DesignerWorkspace {
     fn connect(self: &Rc<Self>) {
         self.connect_shell();
         self.connect_canvas_navigation();
+        self.connect_canvas_guides();
         self.connect_file_commands();
         self.connect_project();
         self.connect_source_tools();
@@ -592,6 +595,7 @@ impl DesignerWorkspace {
 
     pub fn refresh(self: &Rc<Self>, force: bool) {
         self.refresh_canvas_navigation();
+        self.refresh_canvas_guides();
         let session = self.session.borrow();
         let revision = session.document().revision();
         let generation = session.generation();
@@ -856,6 +860,9 @@ mod layer_commands;
 mod layout;
 #[path = "workspace_navigation.rs"]
 mod navigation;
+#[path = "workspace_guides.rs"]
+mod guides;
+pub use guides::{CanvasGuideEditSnapshot, CanvasGuideViewSnapshot};
 #[path = "workspace_preview_environment.rs"]
 mod preview_environment;
 #[path = "workspace_project.rs"]

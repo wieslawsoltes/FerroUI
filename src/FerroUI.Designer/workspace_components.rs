@@ -1111,6 +1111,7 @@ impl DesignerWorkspace {
             target,
             context.value.as_deref(),
         );
+        metadata.binding_relative_source = crate::component_session::property_relative_source_extension(self.session.borrow().document(), target);
         if metadata.object_source.is_some() {
             metadata.source = PropertyValueSource::Object;
         }

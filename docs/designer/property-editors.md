@@ -4,7 +4,60 @@ The property inspector and the component Definition inspector use the same nativ
 pipeline. Each row carries an immutable source snapshot, type metadata, visible resources,
 and a guarded semantic commit callback. Editors do not receive a runtime object to mutate.
 
+## Find properties and follow their source
+
+The **View** button beside property search arranges rows by **Category**, **Name (A–Z)** or
+**Value source**. Categories and value-source groups retain independent collapse states;
+searching temporarily expands matching groups without changing those preferences.
+The source groups distinguish local literals, bindings, resource references, object values,
+other expressions, mixed selection values and inherited/default values. Runtime-only objects
+remain read-only and identify runtime values and bindings without claiming an authored value.
+Effective runtime priority and binding diagnostics remain available in the row tooltip.
+
+The **Show** selector filters to authored values, bindings, resources, objects, expressions,
+mixed values or inherited/default values. Search text applies in addition to this filter.
+An empty result provides **Clear filters and search**, which keeps the chosen arrangement.
+
+| Search token | Matching rows |
+| --- | --- |
+| `@modified` or `@local` | Properties with an authored attribute or object value; includes authored bindings and resources |
+| `@binding` | Native Binding, ReflectionBinding, CompiledBinding and TemplateBinding expressions |
+| `@resource` | Native StaticResource and DynamicResource expressions |
+| `@object` | Authored property-element values |
+| `@mixed` | Different authored values in the current selection |
+| `@default` or `@inherited` | No authored value on the current selection |
+| `@expression` | All binding, resource and other markup-extension expressions |
+
+Combine a token with property/category words, for example `@resource background` or
+`@modified layout`. Expression classification resolves lexical namespace aliases and the
+framework's registered extension identities; an application extension named `Binding` or
+`StaticResource` remains an application expression. Escaped `{}` literals remain literals.
+
+Right-click an authored property name for **Show authored XAML**. A uniquely resolvable
+resource or named binding source also offers **Go to referenced definition**. Resource
+navigation follows the selected preview's theme and lexical resource scopes; binding navigation
+uses the language service's XAML name scopes. Ambiguous, missing or unindexed external targets
+are not guessed. Source navigation preserves canvas selection and source history, and a menu
+retained across a source, selection or definition-scope change cannot act on the replacement
+document. Pending or invalid source text must be resolved before source navigation.
+
+`PropertyInspectorView`, `PropertyInspectorSort` and `PropertyInspectorFilter` are public host
+preferences. Use `DesignerWorkspace::property_inspector_view`,
+`set_property_inspector_view` and `clear_property_filters` to control the view. Hosts can call
+`reveal_property_source(property)` and `go_to_property_definition(property)` directly.
+Filtering and arrangement are available in read-only sessions and never author XAML or apply
+pending source drafts.
+
+These workflows follow Visual Studio's
+[category/name/source arrangements and property markers](https://learn.microsoft.com/en-us/visualstudio/xaml-tools/creating-a-ui-by-using-xaml-designer-in-visual-studio?view=visualstudio)
+and Qt Designer's
+[modified-property editing and reset conventions](https://doc.qt.io/qt-6/designer-widget-mode.html#the-property-editor).
+
 ## Interaction model
+
+The [binding and inspector workflow guide](authoring-workflows.md) describes the structured
+binding editor, discoverable view/source filters, property-source navigation and semantic
+element-name editing added to this pipeline.
 
 Frequent properties use compact inline fields. The **⋯** value action opens a staged editor
 with four sources: **Value**, **Binding / expression**, **Resource**, and **Object / collection**.
@@ -17,6 +70,14 @@ an explicit key and owner scope. It extracts the accepted authored value and rep
 property with a resource reference in one transaction. An uncommitted field draft is not silently
 used as the resource value. Unsupported scalar conversions, invisible scopes and shadowed keys
 report an error without changing the document.
+
+Inherited floating-point sentinels such as an unset canvas edge or an automatic size stay
+empty in the numeric editor. They do not become an editable `NaN` or infinity draft simply
+because the property is inspected. Explicitly entering **Auto** for a native floating-point
+property validates the property and writes the loader's `NaN` spelling in the same transaction.
+This also applies to direct session/MCP property edits and supported native control-theme
+setters. Grid lengths retain `Auto`, text retains its exact text, and unresolved application
+types retain their existing serialization. Existing source is never normalized on inspection.
 
 | Property family | Native editing experience |
 | --- | --- |
@@ -46,6 +107,47 @@ Binding construction quotes path strings and preserves the qualified Binding nam
 fallback and other non-source arguments. An explicit source change removes conflicting
 `Source`, `RelativeSource` and `ElementName` arguments before writing the selected source.
 Other markup extensions stay as their exact expression text until the user requests a change.
+
+### Structured bindings
+
+The Binding page provides explicit DataContext, named-element, Self, TemplatedParent,
+ancestor and source-value modes. Ancestor editing includes the qualified XAML type,
+one-based level and native visual/logical tree choice. Mode, update-source trigger and
+delay use the values supported by FerroUI's binding engine. The expanded conversion
+section edits Converter, ConverterParameter, ConverterCulture, StringFormat,
+FallbackValue and TargetNullValue. Each optional value distinguishes **Unset**, **Text**
+and **Expression**, so removing an argument, supplying an empty string and using
+`{x:Null}` are separate operations.
+
+Fields are a local draft. **Apply value** validates the complete draft and sends one
+guarded expression commit; **Update binding expression** previews the generated source
+inside the editor. If the expression and its previously loaded fields are both edited,
+the editor requires **Read expression** before rebuilding. This prevents stale fields
+from overwriting a newer expression. Unsupported/custom extensions remain available
+through exact source editing; explicitly building a new framework binding replaces them.
+
+Untouched arguments keep their original whitespace, quotes, aliases and nested extension
+source. An unchanged binding remains byte-identical. Structured source changes remove
+the other mutually exclusive source arguments together. Malformed fields, negative
+delays, ancestor levels below one and conflicting source arguments report errors before
+the host callback runs. Framework names are resolved in the actual XAML namespace scope,
+including registered `using:`/`clr-namespace:` aliases and `Extension` suffixes.
+RelativeSource is resolved independently, because an alias for a binding object need not
+expose its markup extension. If no usable namespace is declared, the editor keeps the
+existing expression and requests a namespace declaration before generating that source.
+
+`PropertyBindingDraft` is a reusable source-only draft with semantic setters;
+`PropertyBindingEditor` is the native control used by property, definition and nested
+object editors. Unscoped constructors preserve expressions but require an explicitly
+resolved RelativeSource identity before generating a relative source. Workspace metadata
+supplies that identity automatically. Standalone hosts use
+`with_relative_source_extension` or `PropertyEditorMetadata::binding_relative_source`,
+rather than assume that two extension types share a prefix. Neither API instantiates an
+application object or writes to a document.
+
+Native validation covers Self, ancestor and named-element bindings, including qualified
+ancestor type conversion, one-step undo and rejection of a retained property popup after
+undo. The rendering fixture captures the actual property workbench and resulting preview.
 
 ## Type resolution and validation
 

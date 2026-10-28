@@ -9,8 +9,8 @@ use ferroui_base::media::{SolidColorBrush, TextWrapping};
 use ferroui_base::{Ref, Thickness};
 use ferroui_controls::automation::AutomationProperties;
 use ferroui_controls::{
-    Button, CheckBox, ColumnDefinitions, ComboBox, Control, Flyout, Grid, ScrollViewer, StackPanel,
-    TextBlock, TextBox, ToolTip,
+    Button, CheckBox, ColumnDefinitions, ComboBox, Control, Flyout, Grid, RowDefinitions,
+    ScrollViewer, StackPanel, TextBlock, TextBox, ToolTip,
 };
 use ferroui_designer_core::{MarkupArgument, MarkupExtension, MarkupValue, NodeId};
 use std::cell::RefCell;
@@ -212,119 +212,15 @@ fn build_with_factories(
             });
         }
     }
-    let binding_body = StackPanel::new();
-    binding_body.set_spacing(6.0);
-    let expression = text(
+    let binding_editor = super::PropertyBindingEditor::with_relative_source_extension(
         context
             .value
             .as_deref()
             .filter(|value| super::metadata::is_expression(value)),
-        "Binding or markup expression",
+        &metadata.binding_extension,
+        metadata.binding_relative_source.as_deref(),
+        &metadata.named_elements,
     );
-    expression.set_name(Some("PropertyExpression".into()));
-    expression.set_accepts_return(true);
-    expression.set_min_height(58.0);
-    row(
-        &binding_body,
-        "Expression",
-        expression.clone().upcast::<Control>(),
-    );
-    let existing = context
-        .value
-        .as_deref()
-        .and_then(|source| MarkupValue::parse(source).ok())
-        .and_then(|value| match value {
-            MarkupValue::Extension(extension) if extension.name == metadata.binding_extension => {
-                Some(extension)
-            }
-            _ => None,
-        });
-    let argument = |name: &str| {
-        existing
-            .as_ref()
-            .and_then(|binding| {
-                binding.arguments.iter().find(|argument| {
-                    argument.name.as_deref() == Some(name)
-                        || name == "Path" && argument.name.is_none()
-                })
-            })
-            .and_then(|argument| match &argument.value {
-                MarkupValue::Literal(value) => Some(value.as_str()),
-                _ => None,
-            })
-    };
-    let path = text(argument("Path"), "Binding property path");
-    row(&binding_body, "Path", path.clone().upcast::<Control>());
-    let source = choices(
-        &std::iter::once("DataContext")
-            .chain(metadata.named_elements.iter().map(String::as_str))
-            .collect::<Vec<_>>(),
-        "Binding source element",
-    );
-    if let Some(name) = argument("ElementName") {
-        if let Some(index) = metadata
-            .named_elements
-            .iter()
-            .position(|value| value == name)
-        {
-            source.set_selected_index(index as i32 + 1);
-        }
-    }
-    row(&binding_body, "Source", source.clone().upcast::<Control>());
-    let modes = ["Default", "OneWay", "TwoWay", "OneTime", "OneWayToSource"];
-    let mode = choices(&modes, "Binding mode");
-    mode.set_selected_index(
-        argument("Mode")
-            .and_then(|mode| modes.iter().position(|value| *value == mode))
-            .unwrap_or(0) as i32,
-    );
-    row(&binding_body, "Mode", mode.clone().upcast::<Control>());
-    let build_binding = action(
-        "Update binding expression",
-        "Update the expression from source, path and mode; retain other binding arguments",
-    );
-    binding_body
-        .children()
-        .add(build_binding.clone().upcast::<Control>());
-    let weak_expression = expression.downgrade();
-    let weak_path = path.downgrade();
-    let weak_source = source.downgrade();
-    let weak_mode = mode.downgrade();
-    let names = metadata.named_elements.clone();
-    let binding_extension = metadata.binding_extension.clone();
-    build_binding.click(move |_, _| {
-        let Some((expression, path)) = weak_expression.upgrade().zip(weak_path.upgrade()) else {
-            return;
-        };
-        let Some((source, mode)) = weak_source.upgrade().zip(weak_mode.upgrade()) else {
-            return;
-        };
-        let existing = expression
-            .text()
-            .and_then(|value| MarkupValue::parse(&value).ok())
-            .and_then(|value| match value {
-                MarkupValue::Extension(value) if value.name == binding_extension => Some(value),
-                _ => None,
-            })
-            .unwrap_or_else(|| MarkupExtension {
-                name: binding_extension.clone(),
-                arguments: Vec::new(),
-            });
-        let source = source
-            .selected_index()
-            .checked_sub(1)
-            .and_then(|index| names.get(index as usize))
-            .map(String::as_str);
-        expression.set_text(Some(&binding_expression(
-            Some(&existing),
-            &path.text().unwrap_or_default(),
-            source,
-            modes
-                .get(mode.selected_index() as usize)
-                .copied()
-                .unwrap_or("Default"),
-        )));
-    });
     let resource_body = StackPanel::new();
     resource_body.set_spacing(6.0);
     let resources = choices(
@@ -439,7 +335,7 @@ fn build_with_factories(
     let (object_body, object_source) = object_editor(metadata, &error, factories);
     let pages = [
         value_body.upcast::<Control>(),
-        binding_body.upcast::<Control>(),
+        binding_editor.control(),
         resource_body.upcast::<Control>(),
         object_body,
     ];
@@ -458,7 +354,10 @@ fn build_with_factories(
             }
         }
     });
-    body.children().add(error.clone().upcast::<Control>());
+    let footer = StackPanel::new();
+    footer.set_width(410.0);
+    footer.set_spacing(6.0);
+    footer.children().add(error.clone().upcast::<Control>());
     let actions = StackPanel::new();
     actions.set_orientation(ferroui_base::layout::Orientation::Horizontal);
     actions.set_spacing(8.0);
@@ -468,10 +367,12 @@ fn build_with_factories(
         "Apply value",
         "Apply the complete value in one undo transaction",
     );
+    apply.set_name(Some("PropertyValueApply".into()));
+    cancel.set_name(Some("PropertyValueCancel".into()));
     apply.classes().add("primary");
     actions.children().add(cancel.clone().upcast::<Control>());
     actions.children().add(apply.clone().upcast::<Control>());
-    body.children().add(actions.upcast::<Control>());
+    footer.children().add(actions.upcast::<Control>());
     let weak_flyout = flyout.downgrade();
     cancel.click(move |_, _| {
         if let Some(flyout) = weak_flyout.upgrade() {
@@ -482,7 +383,6 @@ fn build_with_factories(
     let weak_error = error.downgrade();
     let weak_tabs = tabs.downgrade();
     let weak_value = value.downgrade();
-    let weak_expression = expression.downgrade();
     let weak_resource = resources.downgrade();
     let weak_mode = resource_mode.downgrade();
     let weak_object = object_source.downgrade();
@@ -493,10 +393,7 @@ fn build_with_factories(
             return;
         };
         let edit = match tabs.selected_index() {
-            1 => weak_expression
-                .upgrade()
-                .map(|field| PropertyValueEdit::Expression(field.text().unwrap_or_default()))
-                .ok_or_else(|| "Expression editor was closed".into()),
+            1 => binding_editor.value().map(PropertyValueEdit::Expression),
             2 => weak_resource
                 .upgrade()
                 .and_then(|field| metadata.resources.get(field.selected_index() as usize))
@@ -533,8 +430,12 @@ fn build_with_factories(
             }
         }
     });
+    let root = Grid::new();
+    root.classes().add("designer-chrome");
+    root.set_row_definitions(RowDefinitions::parse("*,Auto").unwrap());
+    root.set_max_height(650.0);
     let weak = flyout.downgrade();
-    body.add_handler(InputElement::key_down_event(), move |_, event| {
+    root.add_handler(InputElement::key_down_event(), move |_, event| {
         if event.key == Key::Escape {
             if let Some(flyout) = weak.upgrade() {
                 flyout.hide();
@@ -543,12 +444,17 @@ fn build_with_factories(
         }
     });
     let scroll = ScrollViewer::new();
-    scroll.set_max_height(650.0);
     scroll.set_content(Some(Control::boxed(&body)));
-    scroll.upcast::<Control>()
+    root.children().add(scroll.upcast::<Control>());
+    Grid::set_row(&footer, 1);
+    root.children().add(footer.upcast::<Control>());
+    root.upcast::<Control>()
 }
 
 fn resource_reference(source: Option<&str>, binding_extension: &str) -> Option<(String, bool)> {
+    if binding_extension.is_empty() {
+        return None;
+    }
     let MarkupValue::Extension(extension) = MarkupValue::parse(source?).ok()? else {
         return None;
     };
@@ -851,38 +757,13 @@ fn object_editor(
             };
             let mut metadata =
                 super::resolve_property_editor_metadata(&context, property_type.property);
-            let namespaces = draft.document().ast().namespaces(id);
-            let prefix = context
-                .value
-                .as_deref()
-                .and_then(|value| MarkupValue::parse(value).ok())
-                .and_then(|value| match value {
-                    MarkupValue::Extension(extension) => {
-                        let (prefix, local) = extension
-                            .name
-                            .rsplit_once(':')
-                            .unwrap_or(("", extension.name.as_str()));
-                        (matches!(local, "Binding" | "StaticResource" | "DynamicResource")
-                            && namespaces
-                                .get(prefix)
-                                .is_some_and(|uri| uri == "https://github.com/ferroui"))
-                        .then(|| prefix.to_owned())
-                    }
-                    _ => None,
-                })
-                .or_else(|| {
-                    namespaces
-                        .iter()
-                        .find(|(_, uri)| uri.as_str() == "https://github.com/ferroui")
-                        .map(|(prefix, _)| prefix.clone())
-                });
-            if let Some(prefix) = prefix {
-                metadata.binding_extension = if prefix.is_empty() {
-                    "Binding".into()
-                } else {
-                    format!("{prefix}:Binding")
-                };
-            }
+            metadata.binding_extension = crate::component_session::property_binding_extension(
+                draft.document(),
+                id,
+                context.value.as_deref(),
+            );
+            metadata.binding_relative_source =
+                crate::component_session::property_relative_source_extension(draft.document(), id);
             metadata.object_source =
                 ferroui_designer_tools::component_property_object(draft.document(), id, &property)
                     .ok()
@@ -1445,5 +1326,41 @@ mod tests {
             named::<ComboBox>(&body, "PropertyResourceLookup").selected_index(),
             1
         );
+    }
+
+    #[test]
+    fn structured_binding_apply_validates_the_whole_draft_before_the_host_commit() {
+        let _app = UnitTestApplication::start(TestServices::styled_window());
+        let context = PropertyEditorContext {
+            property: "Text".into(),
+            targets: vec![1],
+            value: Some("{Binding Name, FallbackValue='keep,raw'}".into()),
+            mixed: false,
+            runtime_type: Some("String".into()),
+            apply: Rc::new(|_| {}),
+        };
+        let commits = Rc::new(RefCell::new(Vec::new()));
+        let seen = commits.clone();
+        let mut metadata = PropertyEditorMetadata::new(PropertyEditorKind::Text);
+        metadata.binding_relative_source = Some("RelativeSource".into());
+        metadata.commit = Some(Rc::new(move |edit| {
+            seen.borrow_mut().push(edit);
+            Ok(())
+        }));
+        let body = build(&context, &metadata, &Flyout::new());
+        named::<ComboBox>(&body, "PropertyBindingSource").set_selected_index(5);
+        named::<TextBox>(&body, "PropertyBindingAncestorType").set_text(Some("Grid"));
+        named::<TextBox>(&body, "PropertyBindingAncestorLevel").set_text(Some("0"));
+        click(&body, "Apply value");
+        assert!(commits.borrow().is_empty());
+        named::<ComboBox>(&body, "PropertyBindingSource").set_selected_index(3);
+        named::<TextBox>(&body, "PropertyBindingPath").set_text(Some("Tag"));
+        click(&body, "Apply value");
+        assert_eq!(commits.borrow().len(), 1);
+        let PropertyValueEdit::Expression(value) = &commits.borrow()[0] else {
+            panic!()
+        };
+        assert!(value.contains("FallbackValue='keep,raw'"));
+        assert!(value.contains("RelativeSource"));
     }
 }

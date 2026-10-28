@@ -1,4 +1,4 @@
-use crate::{require, Result};
+use crate::{Result, require};
 use ferroui_designer_core::{Document, NodeId, SourceSpan};
 use serde::{Deserialize, Serialize};
 use std::collections::BTreeMap;
@@ -16,11 +16,21 @@ pub fn name_occurrences(document: &Document) -> Vec<NameOccurrence> {
         return Vec::new();
     }
     let mut occurrences = Vec::new();
+    static SCHEMA: std::sync::OnceLock<crate::Schema> = std::sync::OnceLock::new();
+    let schema = SCHEMA.get_or_init(crate::Schema::ferroui);
     for (node, scope) in document
         .ast()
         .nodes_with_name_scopes()
         .filter(|(node, _)| node.is_element())
     {
+        let namespaces = document.ast().namespaces(node.id);
+        let native_type = |name: &str, namespace: Option<&str>| {
+            namespace.is_none_or(|namespace| namespace == crate::schema::FRAMEWORK_NAMESPACE)
+                || schema
+                    .type_info(name, namespace)
+                    .is_some_and(|info| info.namespace == crate::schema::FRAMEWORK_NAMESPACE)
+        };
+        let native_owner = native_type(node.local_name(), node.namespace_uri.as_deref());
         for attribute in &node.attributes {
             let raw = &document.source()[attribute.value_span.range()];
             let offset = attribute.value_span.start;
@@ -30,11 +40,32 @@ pub fn name_occurrences(document: &Document) -> Vec<NameOccurrence> {
                     && attribute.namespace_uri.as_deref()
                         == Some("http://schemas.microsoft.com/winfx/2006/xaml"))
                 && !raw.is_empty();
-            let bare_reference = matches!(
-                local,
-                "ElementName" | "TargetName" | "SourceName" | "TargetObject" | "SourceObject"
-            ) || attribute.name.starts_with("RelativePanel.")
-                && !local.ends_with("Panel");
+            let relative_reference =
+                attribute
+                    .name
+                    .rsplit_once('.')
+                    .is_some_and(|(owner, property)| {
+                        let (prefix, name) = owner.split_once(':').unwrap_or(("", owner));
+                        let namespace = namespaces.get(prefix).map(String::as_str);
+                        (prefix.is_empty() || namespace.is_some())
+                            && schema.type_info(name, namespace).is_some_and(|info| {
+                                info.namespace == crate::schema::FRAMEWORK_NAMESPACE
+                                    && info.name == "RelativePanel"
+                                    && info.properties.contains_key(property)
+                                    && !property.ends_with("Panel")
+                            })
+                    });
+            let bare_reference = relative_reference
+                || native_owner
+                    && native_type(node.local_name(), attribute.namespace_uri.as_deref())
+                    && matches!(
+                        local,
+                        "ElementName"
+                            | "TargetName"
+                            | "SourceName"
+                            | "TargetObject"
+                            | "SourceObject"
+                    );
             if declaration || bare_reference && identifier(&attribute.value) {
                 occurrences.push(NameOccurrence {
                     name: attribute.value.clone(),
@@ -48,19 +79,45 @@ pub fn name_occurrences(document: &Document) -> Vec<NameOccurrence> {
                 continue;
             }
             for argument in markup_arguments(raw) {
-                let reference_parameter = argument.name.as_deref().is_some_and(|name| {
-                    matches!(
-                        name.rsplit('.').next().unwrap_or(name),
-                        "ElementName"
-                            | "TargetName"
-                            | "SourceName"
-                            | "TargetObject"
-                            | "SourceObject"
-                    )
-                });
-                let reference_extension = argument.extension.rsplit(':').next()
-                    == Some("Reference")
-                    && argument.name.as_deref().is_none_or(|name| name == "Name");
+                let (prefix, extension_name) = argument
+                    .extension
+                    .split_once(':')
+                    .unwrap_or(("", argument.extension.as_str()));
+                let namespace = namespaces.get(prefix).map(String::as_str);
+                let native = if prefix.is_empty() || namespace.is_some() {
+                    schema
+                        .type_info(extension_name, namespace)
+                        .filter(|info| info.namespace == crate::schema::FRAMEWORK_NAMESPACE)
+                } else {
+                    None
+                };
+                // Binding is the runtime loader's alias for ReflectionBindingExtension,
+                // so it is present in extension completion but not the generated type table.
+                let framework_alias = (prefix.is_empty() && namespace.is_none()
+                    || namespace == Some(crate::schema::FRAMEWORK_NAMESPACE))
+                    && matches!(extension_name, "Binding" | "BindingExtension");
+                let binding = framework_alias
+                    || native.is_some_and(|info| {
+                        matches!(
+                            info.name.strip_suffix("Extension").unwrap_or(&info.name),
+                            "Binding" | "ReflectionBinding" | "CompiledBinding"
+                        )
+                    });
+                let reference_parameter = (binding || native.is_some())
+                    && argument.name.as_deref().is_some_and(|name| {
+                        matches!(
+                            name.rsplit('.').next().unwrap_or(name),
+                            "ElementName"
+                                | "TargetName"
+                                | "SourceName"
+                                | "TargetObject"
+                                | "SourceObject"
+                        )
+                    });
+                let reference_extension =
+                    matches!(extension_name, "Reference" | "ReferenceExtension")
+                        && namespace == Some("http://schemas.microsoft.com/winfx/2006/xaml")
+                        && argument.name.as_deref().is_none_or(|name| name == "Name");
                 if (reference_parameter || reference_extension) && identifier(&argument.value) {
                     occurrences.push(NameOccurrence {
                         name: argument.value.clone(),
@@ -73,11 +130,7 @@ pub fn name_occurrences(document: &Document) -> Vec<NameOccurrence> {
                         declaration: false,
                     });
                 }
-                if matches!(
-                    argument.extension.as_str(),
-                    "Binding" | "CompiledBinding" | "ReflectionBinding"
-                ) && argument.name.as_deref().is_none_or(|name| name == "Path")
-                {
+                if binding && argument.name.as_deref().is_none_or(|name| name == "Path") {
                     push_hash_references(
                         &mut occurrences,
                         raw,
@@ -88,7 +141,7 @@ pub fn name_occurrences(document: &Document) -> Vec<NameOccurrence> {
                     );
                 }
             }
-            if attribute.name == "Selector" {
+            if native_owner && attribute.name == "Selector" {
                 push_hash_references(
                     &mut occurrences,
                     raw,
@@ -157,7 +210,8 @@ fn push_hash_references(
         }
     }
 }
-pub(crate) fn identifier(value: &str) -> bool {
+/// Whether a string is a valid identifier for the designer's XAML name/reference grammar.
+pub fn identifier(value: &str) -> bool {
     let mut chars = value.chars();
     chars.next().is_some_and(|c| c.is_alphabetic() || c == '_')
         && chars.all(|c| c.is_alphanumeric() || matches!(c, '_' | '-'))

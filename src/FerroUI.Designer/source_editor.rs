@@ -171,12 +171,14 @@ impl DesignerWorkspace {
             self.set_view_mode(super::shell::WorkspaceViewMode::Split);
         }
         let source = self.source.text().unwrap_or_default();
+        // Moving the caret collapses TextBox's selection. Position it first, then
+        // select the original source span so definition/property navigation highlights it.
+        self.source
+            .set_caret_index(utf16_from_byte(&source, span.end));
         self.source
             .set_selection_start(utf16_from_byte(&source, span.start));
         self.source
             .set_selection_end(utf16_from_byte(&source, span.end));
-        self.source
-            .set_caret_index(utf16_from_byte(&source, span.end));
         self.source.focus();
     }
     fn source_command(self: &Rc<Self>, command: &str) -> Result<(), String> {
@@ -366,6 +368,7 @@ impl DesignerWorkspace {
                 file: self.file.borrow().clone(),
                 layers: Some(self.session.borrow().layer_view_snapshot()),
                 viewport: self.document_canvas_viewport(),
+                guides: Some(self.canvas_guide_view_snapshot()),
             },
         );
         for change in changes {
@@ -386,6 +389,7 @@ impl DesignerWorkspace {
                     file: None,
                     layers: None,
                     viewport: None,
+                    guides: None,
                 };
                 tabs.insert(change.uri.clone(), tab);
             }

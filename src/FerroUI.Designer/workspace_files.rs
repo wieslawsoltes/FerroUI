@@ -29,6 +29,7 @@ impl DesignerWorkspace {
         self.session
             .borrow_mut()
             .open_document(source.clone(), uri)?;
+        self.reset_canvas_guides();
         *self.file.borrow_mut() = None;
         *self.saved_source.borrow_mut() = source;
         self.runtime_selection.set(None);

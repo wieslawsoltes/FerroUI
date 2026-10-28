@@ -8,6 +8,9 @@ mod animation_runtime;
 mod animation_session;
 mod asset_toolbox;
 mod chrome;
+mod canvas_guides;
+mod canvas_guide_overlay;
+mod canvas_guides_editor;
 mod collaboration;
 mod component_browser;
 mod component_session;
@@ -18,6 +21,7 @@ mod design_time;
 mod native_types;
 mod design_time_samples;
 mod editors;
+mod element_names;
 mod focus_order;
 mod focus_order_editor;
 mod grid_track_editor;
@@ -30,6 +34,8 @@ mod preview_host;
 mod preview_source;
 mod property_color_editor;
 mod property_controls;
+mod property_inspector_view;
+mod property_literals;
 mod resource_editor;
 mod runtime;
 mod session;
@@ -43,6 +49,9 @@ pub use asset_toolbox::{
     AssetIcon, AssetToolbox, AssetViewMode, DesignerAsset, default_designer_assets,
 };
 pub use chrome::designer_chrome_style;
+pub use canvas_guides::{CanvasGuide, CanvasGuideAxis, CanvasGuideSettings};
+pub use canvas_guides_editor::CanvasGuidesEditor;
+pub use workspace::{CanvasGuideEditSnapshot, CanvasGuideViewSnapshot};
 pub use component_browser::{ComponentLibrary, ComponentLibraryFilter, ComponentLibraryItem};
 pub use component_session::ComponentEditPreview;
 pub use definition_projection::{DefinitionPreviewOptions, DefinitionScope};
@@ -51,12 +60,14 @@ pub use design_time::{
     DesignTimeSnapshot, plan_design_time_edits,
 };
 pub use editors::{
+    PropertyBindingDraft, PropertyBindingEditor, PropertyBindingOption, PropertyBindingSource,
     PropertyEditorContext, PropertyEditorFactory, PropertyEditorKind, PropertyEditorMetadata,
     PropertyLiteralValidator, PropertyObjectDraft, PropertyResourceChoice, PropertyValueCommit,
     PropertyValueEdit, PropertyValueSource, PropertyVectorEditor, binding_expression,
     create_property_editor, resolve_property_editor_metadata,
 };
 pub use ferroui_designer_core::{Document, Edit, NodeId};
+pub use element_names::plan_element_names;
 pub use ferroui_designer_tools as tools;
 pub use focus_order::{
     FocusLabelAssociation, FocusLabelTarget, FocusOrderCatalog, FocusOrderEdit, FocusOrderItem,
@@ -76,6 +87,9 @@ pub use property_color_editor::PropertyColorEditor;
 pub use property_controls::{
     PropertyComponentsEditor, PropertyComponentsKind, PropertyNumberOptions,
     PropertyNumberScrubber, property_value_data_format,
+};
+pub use property_inspector_view::{
+    PropertyInspectorFilter, PropertyInspectorSort, PropertyInspectorView,
 };
 pub use resource_editor::{
     DefinitionCreationKind, DefinitionEditorCommand, DefinitionPreviewSettings,
@@ -106,6 +120,8 @@ mod workspace_layout_helpers;
 mod workspace_shell_tests;
 #[cfg(test)]
 mod workspace_navigation_tests;
+#[cfg(test)]
+mod workspace_guides_tests;
 #[cfg(test)]
 mod workspace_navigation_file_tests;
 mod workspace_tools;

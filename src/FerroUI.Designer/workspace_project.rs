@@ -24,6 +24,7 @@ pub(super) struct Tab {
     pub(super) file: Option<Rc<dyn ferroui_base::platform::storage::IStorageFile>>,
     pub(super) layers: Option<crate::LayerViewSnapshot>,
     pub(super) viewport: Option<super::navigation::RetainedCanvasViewport>,
+    pub(super) guides: Option<crate::CanvasGuideViewSnapshot>,
 }
 #[derive(Default)]
 pub(super) struct ProjectUi {
@@ -131,6 +132,7 @@ impl DesignerWorkspace {
                 file: self.file.borrow().clone(),
                 layers: Some(session.layer_view_snapshot()),
                 viewport: self.document_canvas_viewport(),
+                guides: Some(self.canvas_guide_view_snapshot()),
             },
         );
     }
@@ -144,7 +146,7 @@ impl DesignerWorkspace {
             self.apply_source();
         }
         self.capture_tab();
-        let (document, saved, file, layers, viewport) = {
+        let (document, saved, file, layers, viewport, guides) = {
             let mut state = self.project.borrow_mut();
             if !state.tabs.contains_key(uri) {
                 let workspace = state
@@ -158,6 +160,7 @@ impl DesignerWorkspace {
                     file: None,
                     layers: None,
                     viewport: None,
+                    guides: None,
                 };
                 state.tabs.insert(uri.into(), tab);
             }
@@ -168,6 +171,7 @@ impl DesignerWorkspace {
                 tab.file.clone(),
                 tab.layers.clone(),
                 tab.viewport,
+                tab.guides.clone(),
             )
         };
         self.disconnect_sharing();
@@ -188,6 +192,9 @@ impl DesignerWorkspace {
         self.runtime_selection.set(None);
         self.refresh(true);
         self.restore_canvas_viewport(viewport);
+        if let Some(snapshot) = guides {
+            self.restore_tab_canvas_guide_view(&snapshot);
+        }
         self.rebuild_document_tabs();
         Ok(())
     }

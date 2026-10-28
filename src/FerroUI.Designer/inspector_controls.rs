@@ -1,6 +1,8 @@
 //! Virtualized inspectors shared by the source/runtime outline and solution explorer.
 //! Row models contain data and semantic callbacks; controls are created only for realized cells.
 use super::*;
+use crate::property_inspector_view::{InspectorSource, matches_search, property_source};
+use crate::{PropertyInspectorFilter, PropertyInspectorSort, PropertyInspectorView};
 use ferroui_base::data::BindingOperations;
 use ferroui_base::diagnostics::FerroObjectDiagnosticExtensions;
 use ferroui_base::input::{DataTransferExtensions, DragDrop, DragDropEffects, IDataTransfer};
@@ -8,7 +10,9 @@ use ferroui_base::layout::VerticalAlignment;
 use ferroui_base::{BoxedValue, FerroObject};
 use ferroui_controls::automation::AutomationProperties;
 use ferroui_controls::templates::FuncDataTemplate;
-use ferroui_controls::{ColumnDefinitions, GridLength, GridUnitType, ToolTip};
+use ferroui_controls::{
+    ColumnDefinitions, ComboBox, ContextMenu, GridLength, GridUnitType, MenuItem, ToolTip,
+};
 use ferroui_controls_treedatagrid::models::{
     BeginEditGestures, HierarchicalExpanderColumn, TemplateColumn, TemplateColumnOptions,
 };
@@ -21,6 +25,9 @@ use ferroui_treedatagrid_core::{
 };
 use std::collections::BTreeMap;
 use std::sync::Arc;
+
+#[path = "property_inspector_navigation.rs"]
+mod property_navigation;
 
 #[derive(Clone, Default)]
 pub(super) struct TreeEntry {
@@ -510,12 +517,14 @@ pub(super) struct PropertyRow {
     pub display_value: String,
     pub effective: String,
     pub origin: String,
+    source_kind: InspectorSource,
     pub runtime_type: String,
     pub context: Option<PropertyEditorContext>,
     pub factories: Rc<Vec<Rc<dyn PropertyEditorFactory>>>,
     pub metadata: Option<crate::editors::PropertyEditorMetadata>,
     pub can_reset: bool,
     pub reveal: Option<Rc<dyn Fn()>>,
+    source_actions: Vec<(String, Rc<dyn Fn()>)>,
     validate_drop: Option<PropertyDropValidator>,
     // Resolve on hover so animations can update diagnostics without replacing an editor
     // or changing the authored value while the user is typing.
@@ -592,7 +601,9 @@ pub(super) struct InspectorControls {
     pub property_source: Rc<FlatTreeDataGridSource<PropertyRow>>,
     guard: Cell<bool>,
     outline_snapshot: RefCell<Option<OutlineSnapshot>>,
-    property_expansion: RefCell<BTreeMap<&'static str, bool>>,
+    property_expansion: RefCell<BTreeMap<(bool, &'static str), bool>>,
+    property_view: Cell<PropertyInspectorView>,
+    property_view_guard: Cell<bool>,
 }
 
 impl InspectorControls {
@@ -658,6 +669,8 @@ impl InspectorControls {
             guard: Cell::new(false),
             outline_snapshot: RefCell::new(None),
             property_expansion: RefCell::new(BTreeMap::new()),
+            property_view: Cell::new(PropertyInspectorView::default()),
+            property_view_guard: Cell::new(false),
         }
     }
 
@@ -749,12 +762,29 @@ fn property_cell(row: &PropertyRow) -> Ref<Control> {
             .clone()
             .unwrap_or_else(|| crate::editors::resolve_property_editor_metadata(context, None));
         let mut effective_context = context.clone();
+        let unset_number = metadata.kind == crate::editors::PropertyEditorKind::Number
+            && row
+                .effective
+                .parse::<f64>()
+                .is_ok_and(|value| !value.is_finite());
+        let inherited_placeholder = if unset_number {
+            if matches!(row.name.as_str(), "Width" | "Height") && row.effective == "NaN" {
+                "Auto"
+            } else if matches!(row.name.as_str(), "MaxWidth" | "MaxHeight") {
+                "Unbounded"
+            } else {
+                "Inherited / unset"
+            }
+        } else {
+            &row.effective
+        };
         // Materialize inherited values only inside the field draft. Opening an inspector
         // never authors an attribute or erases a binding/property element.
         if context.value.is_none()
             && !context.mixed
             && metadata.object_source.is_none()
             && !row.effective.is_empty()
+            && !unset_number
             && metadata.validate(&row.effective).is_ok()
             && !matches!(
                 metadata.kind,
@@ -769,7 +799,7 @@ fn property_cell(row: &PropertyRow) -> Ref<Control> {
             crate::editors::create_property_editor(&effective_context, &metadata, &row.factories);
         if context.value.is_none() && !context.mixed {
             if let Some(text) = editor.cast::<TextBox>() {
-                text.set_placeholder_text(Some(&row.effective));
+                text.set_placeholder_text(Some(inherited_placeholder));
             }
             if let Some(number) = editor.cast::<ferroui_controls::NumericUpDown>() {
                 if let Ok(effective) = ferroui_base::utilities::Decimal::parse(&row.effective) {
@@ -777,11 +807,7 @@ fn property_cell(row: &PropertyRow) -> Ref<Control> {
                     // initial control value does not author a property; only commit does.
                     number.set_numeric_value(Some(effective));
                 } else {
-                    number.set_placeholder_text(Some(if row.effective == "NaN" {
-                        "Auto"
-                    } else {
-                        &row.effective
-                    }));
+                    number.set_placeholder_text(Some(inherited_placeholder));
                 }
             }
         }
@@ -942,17 +968,23 @@ fn property_label(row: &PropertyRow) -> Ref<Control> {
     root.classes().add("property-name-cell");
     root.set_min_height(28.0);
     root.set_column_definitions(ColumnDefinitions::parse("7,*").unwrap());
+    let expression = matches!(
+        row.source_kind,
+        InspectorSource::Binding | InspectorSource::Resource | InspectorSource::Expression
+    );
     let state = crate::icons::vector_icon(
-        if row.origin == "Expression" {
+        if expression {
             crate::icons::EXPRESSION
         } else {
             crate::icons::LOCAL_VALUE
         },
-        if row.origin == "Expression" { 7.0 } else { 5.0 },
+        if expression { 7.0 } else { 5.0 },
     );
-    state.set_is_visible(row.origin == "Expression" || row.can_reset);
+    state.set_is_visible(expression || row.can_reset);
     state.set_foreground(Some(
-        SolidColorBrush::from_uint32(if row.origin == "Expression" {
+        SolidColorBrush::from_uint32(if row.source_kind == InspectorSource::Resource {
+            0xffa4c5b7
+        } else if expression {
             0xffb6a2f6
         } else {
             0xff79a8ff
@@ -1010,6 +1042,27 @@ fn property_label(row: &PropertyRow) -> Ref<Control> {
     );
     Grid::set_column(&label, 1);
     root.children().add(label);
+    if !row.source_actions.is_empty() {
+        let menu = ContextMenu::new();
+        for (label, invoke) in &row.source_actions {
+            let action = MenuItem::new();
+            action.set_header(Some(Rc::new(label.clone())));
+            let invoke = invoke.clone();
+            action.click(move |_, event| {
+                invoke();
+                event.set_handled(true);
+            });
+            menu.items().add(Some(Control::boxed(&action)));
+        }
+        root.set_context_menu(&menu);
+        AutomationProperties::set_name(
+            &root,
+            Some(&format!(
+                "{} · {} · source actions available",
+                row.name, row.origin
+            )),
+        );
+    }
     root.upcast::<Control>()
 }
 
@@ -1118,12 +1171,31 @@ fn property_element<'a>(
 
 fn property_attribute<'a>(
     document: &'a ferroui_designer_core::Document,
-    node: &ferroui_designer_core::Node,
+    node: &'a ferroui_designer_core::Node,
     property: &str,
 ) -> Option<&'a str> {
+    authored_property_attribute(document, node, property).map(|attribute| attribute.value.as_str())
+}
+
+fn authored_property_attribute<'a>(
+    document: &'a ferroui_designer_core::Document,
+    node: &'a ferroui_designer_core::Node,
+    property: &str,
+) -> Option<&'a ferroui_designer_core::Attribute> {
+    if property == "Name" {
+        return node
+            .attributes
+            .iter()
+            .find(|attribute| {
+                attribute.name.rsplit(':').next() == Some("Name")
+                    && attribute.namespace_uri.as_deref()
+                        == Some("http://schemas.microsoft.com/winfx/2006/xaml")
+            })
+            .or_else(|| node.attribute_info("Name"));
+    }
     ferroui_designer_tools::component_property_attribute(document, node.id, property)
-        .ok()?
-        .map(|attribute| attribute.value.as_str())
+        .ok()
+        .flatten()
 }
 
 fn is_metadata_container(node: &ferroui_designer_core::Node) -> bool {
@@ -1172,11 +1244,95 @@ impl DesignerWorkspace {
         self.inspectors.properties.clone()
     }
 
+    /// Current arrangement and value-source filter. These preferences never author XAML.
+    pub fn property_inspector_view(&self) -> PropertyInspectorView {
+        self.inspectors.property_view.get()
+    }
+
+    pub fn set_property_inspector_view(self: &Rc<Self>, view: PropertyInspectorView) {
+        self.inspectors.property_view.set(view);
+        self.inspectors.property_view_guard.set(true);
+        let sorts = [
+            PropertyInspectorSort::Category,
+            PropertyInspectorSort::Alphabetical,
+            PropertyInspectorSort::ValueSource,
+        ];
+        let filters = property_filter_choices();
+        self.root
+            .get_control::<ComboBox>("PropertySort")
+            .set_selected_index(sorts.iter().position(|sort| *sort == view.sort).unwrap() as i32);
+        self.root
+            .get_control::<ComboBox>("PropertyFilter")
+            .set_selected_index(
+                filters
+                    .iter()
+                    .position(|filter| *filter == view.filter)
+                    .unwrap() as i32,
+            );
+        self.inspectors.property_view_guard.set(false);
+        let button = self.root.get_control::<Button>("PropertyViewOptions");
+        if view == PropertyInspectorView::default() {
+            button.classes().remove("active");
+        } else {
+            button.classes().add("active");
+        }
+        self.rebuild_properties();
+    }
+
+    /// Clear search and source filtering while retaining the selected arrangement.
+    pub fn clear_property_filters(self: &Rc<Self>) {
+        let mut view = self.property_inspector_view();
+        view.filter = PropertyInspectorFilter::All;
+        self.root
+            .get_control::<TextBox>("PropertySearch")
+            .set_text(Some(""));
+        self.set_property_inspector_view(view);
+    }
+
     pub fn project_grid(&self) -> Ref<TreeDataGrid> {
         self.inspectors.project.control.clone()
     }
 
     pub(super) fn connect_inspectors(self: &Rc<Self>) {
+        for name in ["PropertySort", "PropertyFilter"] {
+            let weak = Rc::downgrade(self);
+            self.root
+                .get_control::<ComboBox>(name)
+                .selection_changed(move |_, _| {
+                    let Some(this) = weak.upgrade() else {
+                        return;
+                    };
+                    if this.inspectors.property_view_guard.get() {
+                        return;
+                    }
+                    let sort = match this
+                        .root
+                        .get_control::<ComboBox>("PropertySort")
+                        .selected_index()
+                    {
+                        1 => PropertyInspectorSort::Alphabetical,
+                        2 => PropertyInspectorSort::ValueSource,
+                        _ => PropertyInspectorSort::Category,
+                    };
+                    let index = this
+                        .root
+                        .get_control::<ComboBox>("PropertyFilter")
+                        .selected_index();
+                    let filter = property_filter_choices()
+                        .get(index.max(0) as usize)
+                        .copied()
+                        .unwrap_or_default();
+                    this.set_property_inspector_view(PropertyInspectorView { sort, filter });
+                });
+        }
+        for name in ["PropertyClearFilters", "PropertyEmptyClear"] {
+            let weak = Rc::downgrade(self);
+            self.root.get_control::<Button>(name).click(move |_, _| {
+                if let Some(this) = weak.upgrade() {
+                    this.clear_property_filters();
+                }
+            });
+        }
         let weak = Rc::downgrade(self);
         self.inspectors
             .outline
@@ -1386,6 +1542,20 @@ impl DesignerWorkspace {
     }
 }
 
+fn property_filter_choices() -> [PropertyInspectorFilter; 8] {
+    use PropertyInspectorFilter::*;
+    [
+        All,
+        Authored,
+        Bindings,
+        Resources,
+        Objects,
+        Expressions,
+        Mixed,
+        Inherited,
+    ]
+}
+
 /// Every editor modality enters the same source transaction boundary. Replacing an
 /// existing graph is explicit, validated against a private candidate, and undoable once.
 fn apply_property_value(
@@ -1395,6 +1565,13 @@ fn apply_property_value(
     edit: crate::editors::PropertyValueEdit,
 ) -> Result<(), String> {
     use crate::editors::PropertyValueEdit;
+    if property == "Name" {
+        return match edit {
+            PropertyValueEdit::Literal(value) => session.set_property(targets, property, &value),
+            PropertyValueEdit::Reset => session.reset_property(targets, property),
+            _ => Err("Element names require a literal XAML identifier".into()),
+        };
+    }
     let expression = matches!(&edit, PropertyValueEdit::Expression(_));
     match edit {
         PropertyValueEdit::Reset => {
@@ -1524,6 +1701,7 @@ impl DesignerWorkspace {
             self.inspectors
                 .property_source
                 .set_items(Rc::new(Vec::new()));
+            self.update_property_empty_state(false);
             return;
         };
         self.selection_title.set_text(Some(&if selected.len() == 1 {
@@ -1593,7 +1771,16 @@ impl DesignerWorkspace {
                 .attributes
                 .iter()
                 .filter(|attribute| !attribute.name.starts_with("xmlns"))
-                .map(|attribute| attribute.name.clone()),
+                .map(|attribute| {
+                    if attribute.name.rsplit(':').next() == Some("Name")
+                        && attribute.namespace_uri.as_deref()
+                            == Some("http://schemas.microsoft.com/winfx/2006/xaml")
+                    {
+                        "Name".to_owned()
+                    } else {
+                        attribute.name.clone()
+                    }
+                }),
         );
         if let Some(parent) = first
             .parent
@@ -1702,7 +1889,7 @@ impl DesignerWorkspace {
             .get_control::<TextBox>("PropertySearch")
             .text()
             .unwrap_or_default()
-            .to_ascii_lowercase();
+            .to_lowercase();
         let rows = properties
             .into_iter()
             .filter(|name| {
@@ -1721,18 +1908,6 @@ impl DesignerWorkspace {
                 }) || selected
                     .iter()
                     .all(|id| attached_layout_property_applies(session.document(), *id, name))
-            })
-            .filter(|name| {
-                property_matches_filter(
-                    name,
-                    &filter,
-                    selected.iter().any(|id| {
-                        session.document().ast().node(*id).is_some_and(|node| {
-                            property_attribute(session.document(), node, name).is_some()
-                                || property_element(session.document(), node, name).is_some()
-                        })
-                    }),
-                )
             })
             .map(|name| {
                 let document = session.document();
@@ -1758,6 +1933,13 @@ impl DesignerWorkspace {
                     });
                 (
                     name.clone(),
+                    property_source(
+                        document,
+                        first.id,
+                        first_value.as_deref(),
+                        graph.is_some(),
+                        mixed,
+                    ),
                     if mixed { None } else { first_value },
                     mixed,
                     can_reset,
@@ -1820,26 +2002,22 @@ impl DesignerWorkspace {
         let factories = Rc::new(self.property_editors.borrow().clone());
         let rows = rows
             .into_iter()
-            .map(|(name, value, mixed, can_reset, graph, object_source)| {
+            .map(|(name, source_kind, value, mixed, can_reset, graph, object_source)| {
                 let weak = Rc::downgrade(self);
                 let property = name.clone();
                 let ids = selected.clone();
                 let uri = uri.clone();
                 let ast_snapshot = ast_snapshot.clone();
-                let origin = if mixed {
-                    "Multiple values".to_owned()
-                } else if graph.is_some() {
-                    "Property element".to_owned()
-                } else if value
-                    .as_ref()
-                    .is_some_and(|value| value.starts_with('{') && !value.starts_with("{}"))
-                {
-                    "Expression".to_owned()
-                } else if value.is_some() {
-                    "Local value".to_owned()
-                } else {
-                    "Inherited / default".to_owned()
-                };
+                let origin = match source_kind {
+                    InspectorSource::Mixed => "Multiple values",
+                    InspectorSource::Object => "Property element",
+                    InspectorSource::Binding => "Binding",
+                    InspectorSource::Resource => "Resource reference",
+                    InspectorSource::Expression => "Expression",
+                    InspectorSource::Local => "Local value",
+                    InspectorSource::Inherited => "Inherited / default",
+                    InspectorSource::Runtime => "Runtime value",
+                }.to_owned();
                 let displayed = effective
                     .get(&name)
                     .cloned()
@@ -1984,6 +2162,9 @@ impl DesignerWorkspace {
                     metadata.binding_extension = crate::component_session::property_binding_extension(
                         self.session.borrow().document(), selected[0], context.value.as_deref(),
                     );
+                    metadata.binding_relative_source = crate::component_session::property_relative_source_extension(
+                        self.session.borrow().document(), selected[0],
+                    );
                     if selected.len() == 1 && !mixed && can_reset
                         && matches!(metadata.source, crate::editors::PropertyValueSource::Local | crate::editors::PropertyValueSource::Object)
                     {
@@ -1994,10 +2175,14 @@ impl DesignerWorkspace {
                 });
                 Rc::new(PropertyRow {
                     category: None,
+                    source_actions: if can_reset && selected.len() == 1 {
+                        self.property_source_actions(&name, source_kind)
+                    } else { Vec::new() },
                     name,
                     display_value,
                     effective: displayed,
                     origin,
+                    source_kind,
                     runtime_type: runtime_type.unwrap_or_else(|| "XAML".into()),
                     context,
                     metadata,
@@ -2009,7 +2194,7 @@ impl DesignerWorkspace {
                 })
             })
             .collect::<Vec<_>>();
-        self.set_property_rows(rows, !filter.trim().is_empty());
+        self.set_property_rows(rows, &filter);
     }
 
     fn rebuild_runtime_properties(self: &Rc<Self>, id: u64) -> bool {
@@ -2036,7 +2221,6 @@ impl DesignerWorkspace {
         drop(session);
         let mut rows = Inspector::properties(&object)
             .into_iter()
-            .filter(|info| property_matches_filter(&info.name, &filter, false))
             .map(|info| {
                 let weak = Rc::downgrade(self);
                 let uri = uri.clone();
@@ -2052,12 +2236,14 @@ impl DesignerWorkspace {
                         info.priority_name(),
                         if info.has_binding { " · binding" } else { "" }
                     ),
+                    source_kind: if info.has_binding { InspectorSource::Binding } else { InspectorSource::Runtime },
                     runtime_type: info.property.property_type_name().to_owned(),
                     context: None,
                     metadata: None,
                     factories: factories.clone(),
                     can_reset: false,
                     reveal: None,
+                    source_actions: Vec::new(),
                     validate_drop: None,
                     tooltip: Rc::new(move || {
                         let this = weak.upgrade()?;
@@ -2081,15 +2267,43 @@ impl DesignerWorkspace {
                 .cmp(&property_rank(&b.name))
                 .then(a.name.cmp(&b.name))
         });
-        self.set_property_rows(rows, !filter.trim().is_empty());
+        self.set_property_rows(rows, &filter);
         true
     }
 
-    fn set_property_rows(self: &Rc<Self>, rows: Vec<Rc<PropertyRow>>, filtering: bool) {
+    fn set_property_rows(self: &Rc<Self>, rows: Vec<Rc<PropertyRow>>, query: &str) {
+        let view = self.property_inspector_view();
+        let filtering = !query.trim().is_empty() || view.filter != PropertyInspectorFilter::All;
+        let mut rows = rows
+            .into_iter()
+            .filter(|row| {
+                row.source_kind.matches(view.filter, row.can_reset)
+                    && matches_search(
+                        &row.name,
+                        property_category(&row.name).1,
+                        query,
+                        row.source_kind,
+                        row.can_reset,
+                    )
+            })
+            .collect::<Vec<_>>();
+        self.update_property_empty_state(rows.is_empty());
+        if view.sort != PropertyInspectorSort::Category {
+            rows.sort_by_key(|row| (row.name.to_lowercase(), row.name.clone()));
+        }
+        if view.sort == PropertyInspectorSort::Alphabetical {
+            self.inspectors.property_source.set_items(Rc::new(rows));
+            return;
+        }
+        let by_source = view.sort == PropertyInspectorSort::ValueSource;
         let mut groups = BTreeMap::<(usize, &'static str), Vec<Rc<PropertyRow>>>::new();
         for row in rows {
             groups
-                .entry(property_category(&row.name))
+                .entry(if by_source {
+                    row.source_kind.group()
+                } else {
+                    property_category(&row.name)
+                })
                 .or_default()
                 .push(row);
         }
@@ -2100,7 +2314,7 @@ impl DesignerWorkspace {
                     .inspectors
                     .property_expansion
                     .borrow()
-                    .get(name)
+                    .get(&(by_source, name))
                     .copied()
                     .unwrap_or(name != "Advanced");
             let weak = Rc::downgrade(self);
@@ -2119,19 +2333,21 @@ impl DesignerWorkspace {
                         this.inspectors
                             .property_expansion
                             .borrow_mut()
-                            .insert(name, !expanded);
+                            .insert((by_source, name), !expanded);
                         this.rebuild_properties();
                     }),
                 }),
                 display_value: String::new(),
                 effective: String::new(),
                 origin: String::new(),
+                source_kind: InspectorSource::Inherited,
                 runtime_type: String::new(),
                 context: None,
                 metadata: None,
                 factories: Rc::new(Vec::new()),
                 can_reset: false,
                 reveal: None,
+                source_actions: Vec::new(),
                 validate_drop: None,
                 tooltip: Rc::new(|| None),
             }));
@@ -2140,6 +2356,31 @@ impl DesignerWorkspace {
             }
         }
         self.inspectors.property_source.set_items(Rc::new(visible));
+    }
+
+    fn update_property_empty_state(&self, empty: bool) {
+        self.root
+            .get_control::<StackPanel>("PropertyEmptyState")
+            .set_is_visible(empty);
+        self.root
+            .get_control::<ContentControl>("PropertyHost")
+            .set_is_visible(!empty);
+        let filtered = self.property_inspector_view().filter != PropertyInspectorFilter::All
+            || self
+                .root
+                .get_control::<TextBox>("PropertySearch")
+                .text()
+                .is_some_and(|query| !query.trim().is_empty());
+        self.root
+            .get_control::<TextBlock>("PropertyEmptyMessage")
+            .set_text(Some(if filtered {
+                "No properties match the current filters."
+            } else {
+                "No properties are available for this selection."
+            }));
+        self.root
+            .get_control::<Button>("PropertyEmptyClear")
+            .set_is_visible(filtered);
     }
 }
 
@@ -2185,21 +2426,6 @@ fn property_category(name: &str) -> (usize, &'static str) {
         name if name.starts_with("Font") => (2, "Content & text"),
         _ => (5, "Advanced"),
     }
-}
-
-fn property_matches_filter(name: &str, filter: &str, modified: bool) -> bool {
-    let haystack = format!(
-        "{} {}",
-        name.to_lowercase(),
-        property_category(name).1.to_lowercase()
-    );
-    filter.split_whitespace().all(|term| {
-        if matches!(term, "@modified" | "@local") {
-            modified
-        } else {
-            haystack.contains(term)
-        }
-    })
 }
 
 /// Layout attached values are offered only for their actual parent panel. Authored values
@@ -2351,3 +2577,7 @@ mod tests;
 #[cfg(test)]
 #[path = "inspector_property_editor_tests.rs"]
 mod property_editor_tests;
+
+#[cfg(test)]
+#[path = "property_inspector_view_tests.rs"]
+mod property_view_tests;

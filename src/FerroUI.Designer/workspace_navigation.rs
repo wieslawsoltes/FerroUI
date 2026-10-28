@@ -84,6 +84,7 @@ impl DesignerWorkspace {
 
     /// Restore a host-owned view. This never applies pending source or mutates undo history.
     pub fn set_canvas_viewport(&self, viewport: CanvasViewport) {
+        self.cancel_canvas_guide_drag();
         self.end_canvas_pan(false);
         self.navigation.initialized.set(true);
         self.surface.cancel_for_navigation();
@@ -112,6 +113,7 @@ impl DesignerWorkspace {
     }
 
     pub fn set_canvas_pan_tool(&self, active: bool) {
+        self.cancel_canvas_guide_drag();
         self.end_canvas_pan(false);
         self.navigation.hand.set(active);
         self.navigation.space.set(false);
@@ -219,6 +221,7 @@ impl DesignerWorkspace {
     }
 
     fn apply_canvas_viewport(&self, viewport: CanvasViewport) {
+        self.cancel_canvas_guide_drag();
         self.navigation.viewport.set(viewport);
         self.surface.set_zoom(viewport.zoom());
         self.artboard_transform.set_render_transform(Some(
@@ -237,6 +240,7 @@ impl DesignerWorkspace {
             field.set_text(Some(percent));
         }
         self.surface.invalidate_visual();
+        self.refresh_canvas_guide_overlay();
     }
 
     fn retain_canvas_viewport(&self) -> Option<RetainedCanvasViewport> {
@@ -291,6 +295,7 @@ impl DesignerWorkspace {
     /// Successful Save As changes document identity while retaining its current camera.
     /// This is explicit so opening another document with identical source still resets it.
     pub(super) fn rebind_canvas_document_uri(&self) {
+        self.rebind_canvas_guide_uri();
         self.cancel_canvas_navigation();
         *self.navigation.uri.borrow_mut() = Some(self.session.borrow().document_uri().to_owned());
     }
@@ -362,6 +367,10 @@ impl DesignerWorkspace {
         }
     }
 
+    pub(super) fn canvas_space_pan_active(&self) -> bool {
+        self.navigation.space.get()
+    }
+
     fn refresh_canvas_cursor(&self) {
         let canvas = self.root.get_control::<Control>("ArtboardScroll");
         canvas.set_cursor(if self.navigation.pan.borrow().is_some() {
@@ -393,6 +402,7 @@ impl DesignerWorkspace {
     }
 
     pub(super) fn cancel_canvas_navigation(&self) {
+        self.cancel_canvas_guide_drag();
         self.navigation.space.set(false);
         self.end_canvas_pan(false);
         self.surface.cancel_for_navigation();
@@ -468,6 +478,7 @@ impl DesignerWorkspace {
                 } else {
                     return;
                 };
+                this.cancel_canvas_guide_drag();
                 this.end_canvas_pan(false);
                 this.surface.cancel_for_navigation();
                 let canvas = this.root.get_control::<Control>("ArtboardScroll");

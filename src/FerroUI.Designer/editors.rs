@@ -10,6 +10,10 @@ use ferroui_controls::{
 use ferroui_designer_core::NodeId;
 use std::rc::Rc;
 
+#[path = "property_binding_draft.rs"]
+mod binding_draft;
+#[path = "property_binding_editor.rs"]
+mod binding_editor;
 #[path = "property_editor_metadata.rs"]
 mod metadata;
 #[path = "property_object_draft.rs"]
@@ -24,6 +28,8 @@ pub use metadata::{
     PropertyValueCommit, PropertyValueEdit, PropertyValueSource, resolve_property_editor_metadata,
 };
 pub use object_draft::PropertyObjectDraft;
+pub use binding_draft::{PropertyBindingDraft, PropertyBindingOption, PropertyBindingSource};
+pub use binding_editor::PropertyBindingEditor;
 pub use typed::PropertyVectorEditor;
 pub use workbench::binding_expression;
 
