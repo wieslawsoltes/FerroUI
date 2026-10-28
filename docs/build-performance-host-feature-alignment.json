@@ -1,0 +1,699 @@
+{
+  "schema_version": 1,
+  "scenario": "native-winui-host-base-feature-alignment",
+  "decision": "decline feature alignment change: no demonstrated cold wall-time improvement",
+  "scope": "one local native WinUI cold-build pair; not CI, not workspace, not a statistical regression finding",
+  "measurement": {
+    "completed_pairs": 1,
+    "order": [
+      "candidate",
+      "baseline"
+    ],
+    "extra_pair": "second baseline was automatically started, then deliberately interrupted after first-pair review; excluded from all measurements",
+    "target_directories": "new empty owned directory per measured build",
+    "warm_caches": "filesystem and dependency-download caches reused; Cargo target and compiler cache not reused"
+  },
+  "provenance": {
+    "source_revision": "34676fe53c165cd305b7f26f62e7ff1d87427669",
+    "baseline_git_diff_empty": true,
+    "candidate_revision": "34676fe53c165cd305b7f26f62e7ff1d87427669",
+    "candidate_manifest_patch": "diff --git a/src/FerroUI.Build.Tasks/Cargo.toml b/src/FerroUI.Build.Tasks/Cargo.toml\nindex f4b50eda..87f1bfef 100644\n--- a/src/FerroUI.Build.Tasks/Cargo.toml\n+++ b/src/FerroUI.Build.Tasks/Cargo.toml\n@@ -28,7 +28,7 @@ runtime-host = [\"dep:ferroui-markup-xaml\", \"ferroui-markup-xaml-loader/emitter\"]\n serde_json = \"1\"\n roxmltree.workspace = true\n # `MarkupAssembly`, and the attributes of the type model the build-time type system projects.\n-ferroui-base = { workspace = true }\n+ferroui-base = { workspace = true, features = [\"markup-functions\"] }\n # The configuration of the run-time loader and the registration of the runtime library: the run-time host\n # only.\n ferroui-markup-xaml = { workspace = true, optional = true }",
+    "cargo_lock_sha256": "c818c68a6ad9435caf9f1f648fd9404021d07b21587f72a5dd340b447e9ee3b1",
+    "candidate_cargo_lock_equal": true,
+    "config_sha256": "033ee85cf1e2ee675dacadfea758ec409a17f330464a5425e493738606017e0c",
+    "config_text": "[profile.dev.package.ferroui-build-scan]\nopt-level = 2\n\n[profile.dev.package.proc-macro2]\nopt-level = 2\n\n[profile.dev.package.quote]\nopt-level = 2\n\n[profile.dev.package.syn]\nopt-level = 2\n",
+    "compiler": "rustc 1.99.1 (58cf8f9c3 2026-10-13)\nbinary: rustc\ncommit-hash: 58cf8f9c35b355199727627d07ae34a4e2846d67\ncommit-date: 2026-10-13\nhost: x86_64-unknown-linux-gnu\nrelease: 1.99.1\nLLVM version: 23.1.1",
+    "cargo": "cargo 1.99.1 (5f94df478 2026-08-27)",
+    "comparison_helper_sha256": "89ce942a0bde699c78210f36399e0e95f640bc6444fe9ff5f63684a788db1e2c",
+    "diagnostic_driver_sha256": "bbb1f07ec98019e83a6b0d4fec43ea450df91459fc63c71fdab17b9b93c8fe23"
+  },
+  "environment": {
+    "host": "x86_64-unknown-linux-gnu",
+    "jobs": 4,
+    "profile": "dev",
+    "debug": 0,
+    "incremental": false,
+    "rustflags": null,
+    "compiler_wrapper": null,
+    "rustc_workspace_wrapper": null,
+    "target_argument": null,
+    "locked": true,
+    "offline": true,
+    "runtime_opt_level": "0",
+    "debug_assertions": true,
+    "overflow_checks": true,
+    "configured_opt_level_2_packages": [
+      "ferroui-build-scan",
+      "proc-macro2",
+      "quote",
+      "syn"
+    ]
+  },
+  "command": [
+    "cargo",
+    "--config",
+    "$CONFIG",
+    "build",
+    "--locked",
+    "--offline",
+    "--timings",
+    "--message-format=json-render-diagnostics",
+    "--profile",
+    "dev",
+    "-p",
+    "ferroui-themes-winui",
+    "--jobs",
+    "4"
+  ],
+  "samples": {
+    "candidate": {
+      "seconds": 141.26568829499956,
+      "exit_code": 0,
+      "cold_compiler_units": 51,
+      "all_units_cold": true,
+      "generated_file_count": 11,
+      "load_before": [
+        0.09228515625,
+        0.0986328125,
+        0.04541015625
+      ]
+    },
+    "baseline": {
+      "seconds": 139.38162141200155,
+      "exit_code": 0,
+      "cold_compiler_units": 54,
+      "all_units_cold": true,
+      "generated_file_count": 12,
+      "load_before": [
+        1.9013671875,
+        0.85400390625,
+        0.34130859375
+      ]
+    }
+  },
+  "comparison": {
+    "baseline_over_candidate_wall_ratio": 0.9866629547079855,
+    "candidate_wall_change_percent": 1.351732648760673,
+    "normal_runtime_dependency_tree_equal": true,
+    "repeat": 1,
+    "only_expected_removed_units": true,
+    "removed_units": [
+      {
+        "features": [],
+        "fresh": false,
+        "kind": [
+          "custom-build"
+        ],
+        "name": "build-script-build",
+        "package": "path+file://$SOURCE/src/FerroUI.Base#ferroui-base@0.4.0",
+        "profile": {
+          "debug_assertions": true,
+          "debuginfo": 0,
+          "opt_level": "0",
+          "overflow_checks": true,
+          "test": false
+        }
+      },
+      {
+        "features": [],
+        "fresh": false,
+        "kind": [
+          "lib"
+        ],
+        "name": "ferroui_base",
+        "package": "path+file://$SOURCE/src/FerroUI.Base#ferroui-base@0.4.0",
+        "profile": {
+          "debug_assertions": true,
+          "debuginfo": 0,
+          "opt_level": "0",
+          "overflow_checks": true,
+          "test": false
+        }
+      },
+      {
+        "features": [],
+        "fresh": false,
+        "kind": [
+          "lib"
+        ],
+        "name": "ferroui_markup",
+        "package": "path+file://$SOURCE/src/Markup/FerroUI.Markup#ferroui-markup@0.4.0",
+        "profile": {
+          "debug_assertions": true,
+          "debuginfo": 0,
+          "opt_level": "0",
+          "overflow_checks": true,
+          "test": false
+        }
+      }
+    ],
+    "added_units": [],
+    "generated_outputs_unchanged_except_duplicate_base_model": true,
+    "removed_generated_duplicates": {
+      "path+file://$SOURCE/src/FerroUI.Base#ferroui-base@0.4.0/ferroui_base.xamlmeta": {
+        "before": 2,
+        "after": 1,
+        "identical_content": true
+      }
+    },
+    "generated_hashes": {
+      "candidate": {
+        "path+file://$SOURCE/src/FerroUI.Base#ferroui-base@0.4.0/ferroui_base.xamlmeta": [
+          "4b74bdb1ee9230e6eab3f70a52c1b438906f84849bf27c577f408ca170500562"
+        ],
+        "path+file://$SOURCE/src/FerroUI.Controls#ferroui-controls@0.4.0/ferroui_controls.xamlmeta": [
+          "b73faf44d689e6d2037e98b893e186c34535ae42b7ede9ebccc92b48ca96ec38"
+        ],
+        "path+file://$SOURCE/src/FerroUI.Dialogs#ferroui-dialogs@0.4.0/ferroui_dialogs.xamlmeta": [
+          "251da9050a09b59126f76a19e9739d863bac51970799a4e5a33370a97b1be63d"
+        ],
+        "path+file://$SOURCE/src/FerroUI.Dialogs#ferroui-dialogs@0.4.0/xaml/compiled_about_ferro_dialog.rs": [
+          "1d7b7caed8505deec1f2f8f3ef9d9a0ed44e5c480a4717e4032d28cb1e2a3f42"
+        ],
+        "path+file://$SOURCE/src/FerroUI.Dialogs#ferroui-dialogs@0.4.0/xaml/mod.rs": [
+          "ccaaddc3a710f42758a68f335034ae7464b3aec19c787b48b64fe8392038f3fa"
+        ],
+        "path+file://$SOURCE/src/FerroUI.Themes.WinUI#ferroui-themes-winui@0.4.0/assets.rs": [
+          "cbdf9142b7d60f10733c4f81e3a545734be73d84c0cd9c0bc74037993cfd33a4"
+        ],
+        "path+file://$SOURCE/src/FerroUI.Themes.WinUI#ferroui-themes-winui@0.4.0/ferroui_themes_winui.xamlmeta": [
+          "01e379f0392e18e05f76a8e91dfd6a4abeaab2397714c0a3f1313e0f8b0e26fd"
+        ],
+        "path+file://$SOURCE/src/FerroUI.Themes.WinUI#ferroui-themes-winui@0.4.0/xaml/compiled_xaml.rs": [
+          "d04a6b90523ec9c7d0aad34076af136b3ad088637cf74fa18a947822677a99d0"
+        ],
+        "path+file://$SOURCE/src/FerroUI.Themes.WinUI#ferroui-themes-winui@0.4.0/xaml/mod.rs": [
+          "2b01fe7be0a95092cde59e21ed22590a7b5cea1e18f2da858cf2e7738035d471"
+        ],
+        "path+file://$SOURCE/src/Markup/FerroUI.Markup.Xaml#ferroui-markup-xaml@0.4.0/ferroui_markup_xaml.xamlmeta": [
+          "e9d5e53cf4016ea6b8462f35608a7cbcce0c23d96891b446f33d004168a94658"
+        ],
+        "registry+https://github.com/rust-lang/crates.io-index#serde_core@1.0.229/private.rs": [
+          "899563ce84b59b13cd7036e25f7897c1e730906f62a43aff14472d11c4229f34"
+        ]
+      },
+      "baseline": {
+        "path+file://$SOURCE/src/FerroUI.Base#ferroui-base@0.4.0/ferroui_base.xamlmeta": [
+          "4b74bdb1ee9230e6eab3f70a52c1b438906f84849bf27c577f408ca170500562",
+          "4b74bdb1ee9230e6eab3f70a52c1b438906f84849bf27c577f408ca170500562"
+        ],
+        "path+file://$SOURCE/src/FerroUI.Controls#ferroui-controls@0.4.0/ferroui_controls.xamlmeta": [
+          "b73faf44d689e6d2037e98b893e186c34535ae42b7ede9ebccc92b48ca96ec38"
+        ],
+        "path+file://$SOURCE/src/FerroUI.Dialogs#ferroui-dialogs@0.4.0/ferroui_dialogs.xamlmeta": [
+          "251da9050a09b59126f76a19e9739d863bac51970799a4e5a33370a97b1be63d"
+        ],
+        "path+file://$SOURCE/src/FerroUI.Dialogs#ferroui-dialogs@0.4.0/xaml/compiled_about_ferro_dialog.rs": [
+          "1d7b7caed8505deec1f2f8f3ef9d9a0ed44e5c480a4717e4032d28cb1e2a3f42"
+        ],
+        "path+file://$SOURCE/src/FerroUI.Dialogs#ferroui-dialogs@0.4.0/xaml/mod.rs": [
+          "ccaaddc3a710f42758a68f335034ae7464b3aec19c787b48b64fe8392038f3fa"
+        ],
+        "path+file://$SOURCE/src/FerroUI.Themes.WinUI#ferroui-themes-winui@0.4.0/assets.rs": [
+          "cbdf9142b7d60f10733c4f81e3a545734be73d84c0cd9c0bc74037993cfd33a4"
+        ],
+        "path+file://$SOURCE/src/FerroUI.Themes.WinUI#ferroui-themes-winui@0.4.0/ferroui_themes_winui.xamlmeta": [
+          "01e379f0392e18e05f76a8e91dfd6a4abeaab2397714c0a3f1313e0f8b0e26fd"
+        ],
+        "path+file://$SOURCE/src/FerroUI.Themes.WinUI#ferroui-themes-winui@0.4.0/xaml/compiled_xaml.rs": [
+          "d04a6b90523ec9c7d0aad34076af136b3ad088637cf74fa18a947822677a99d0"
+        ],
+        "path+file://$SOURCE/src/FerroUI.Themes.WinUI#ferroui-themes-winui@0.4.0/xaml/mod.rs": [
+          "2b01fe7be0a95092cde59e21ed22590a7b5cea1e18f2da858cf2e7738035d471"
+        ],
+        "path+file://$SOURCE/src/Markup/FerroUI.Markup.Xaml#ferroui-markup-xaml@0.4.0/ferroui_markup_xaml.xamlmeta": [
+          "e9d5e53cf4016ea6b8462f35608a7cbcce0c23d96891b446f33d004168a94658"
+        ],
+        "registry+https://github.com/rust-lang/crates.io-index#serde_core@1.0.229/private.rs": [
+          "899563ce84b59b13cd7036e25f7897c1e730906f62a43aff14472d11c4229f34"
+        ]
+      }
+    },
+    "remaining_unit_features_and_profiles_equal": true
+  },
+  "selected_cargo_timing_seconds": {
+    "candidate": [
+      {
+        "name": "ferroui-base",
+        "target": " build-script",
+        "features": [
+          "markup-functions"
+        ],
+        "start": 18.64,
+        "duration": 0.11,
+        "end": 18.75
+      },
+      {
+        "name": "ferroui-controls",
+        "target": " build-script",
+        "features": [],
+        "start": 18.64,
+        "duration": 0.1,
+        "end": 18.74
+      },
+      {
+        "name": "ferroui-base",
+        "target": " build-script (run)",
+        "features": [
+          "markup-functions"
+        ],
+        "start": 18.75,
+        "duration": 1.73,
+        "end": 20.48
+      },
+      {
+        "name": "ferroui-controls",
+        "target": " build-script (run)",
+        "features": [],
+        "start": 20.48,
+        "duration": 1.04,
+        "end": 21.52
+      },
+      {
+        "name": "ferroui-base",
+        "target": "",
+        "features": [
+          "markup-functions"
+        ],
+        "start": 20.48,
+        "duration": 65.64,
+        "end": 86.12,
+        "metadata_ready": 68.13
+      },
+      {
+        "name": "ferroui-markup",
+        "target": "",
+        "features": [],
+        "start": 68.13,
+        "duration": 0.42,
+        "end": 68.55,
+        "metadata_ready": 68.45
+      },
+      {
+        "name": "ferroui-controls",
+        "target": "",
+        "features": [],
+        "start": 68.13,
+        "duration": 58.39,
+        "end": 126.52,
+        "metadata_ready": 108.8
+      },
+      {
+        "name": "ferroui-markup-xaml-loader",
+        "target": "",
+        "features": [
+          "compiler"
+        ],
+        "start": 68.45,
+        "duration": 6.68,
+        "end": 75.13,
+        "metadata_ready": 72.81
+      },
+      {
+        "name": "ferroui-build",
+        "target": "",
+        "features": [],
+        "start": 75.13,
+        "duration": 2.2,
+        "end": 77.33,
+        "metadata_ready": 76.39
+      },
+      {
+        "name": "ferroui-themes-winui",
+        "target": " build-script",
+        "features": [],
+        "start": 86.12,
+        "duration": 0.87,
+        "end": 86.99
+      },
+      {
+        "name": "ferroui-dialogs",
+        "target": " build-script",
+        "features": [],
+        "start": 86.12,
+        "duration": 0.72,
+        "end": 86.84
+      },
+      {
+        "name": "ferroui-dialogs",
+        "target": " build-script (run)",
+        "features": [],
+        "start": 86.83,
+        "duration": 0.28,
+        "end": 87.11
+      },
+      {
+        "name": "ferroui-themes-winui",
+        "target": " build-script (run)",
+        "features": [],
+        "start": 87.11,
+        "duration": 14.04,
+        "end": 101.15
+      },
+      {
+        "name": "ferroui-dialogs",
+        "target": "",
+        "features": [],
+        "start": 112.52,
+        "duration": 2.84,
+        "end": 115.36,
+        "metadata_ready": 113.94
+      },
+      {
+        "name": "ferroui-themes-winui",
+        "target": "",
+        "features": [],
+        "start": 115.11,
+        "duration": 26.12,
+        "end": 141.23,
+        "metadata_ready": 133.77
+      }
+    ],
+    "baseline": [
+      {
+        "name": "ferroui-controls",
+        "target": " build-script",
+        "features": [],
+        "start": 16.64,
+        "duration": 0.09,
+        "end": 16.73
+      },
+      {
+        "name": "ferroui-base",
+        "target": " build-script",
+        "features": [
+          "markup-functions"
+        ],
+        "start": 16.64,
+        "duration": 0.11,
+        "end": 16.75
+      },
+      {
+        "name": "ferroui-base",
+        "target": " build-script",
+        "features": [],
+        "start": 16.64,
+        "duration": 0.1,
+        "end": 16.74
+      },
+      {
+        "name": "ferroui-base",
+        "target": " build-script (run)",
+        "features": [],
+        "start": 16.74,
+        "duration": 1.93,
+        "end": 18.67
+      },
+      {
+        "name": "ferroui-base",
+        "target": " build-script (run)",
+        "features": [
+          "markup-functions"
+        ],
+        "start": 16.75,
+        "duration": 1.93,
+        "end": 18.68
+      },
+      {
+        "name": "ferroui-base",
+        "target": "",
+        "features": [],
+        "start": 18.67,
+        "duration": 76.73,
+        "end": 95.4,
+        "metadata_ready": 65.72
+      },
+      {
+        "name": "ferroui-controls",
+        "target": " build-script (run)",
+        "features": [],
+        "start": 18.68,
+        "duration": 0.97,
+        "end": 19.65
+      },
+      {
+        "name": "ferroui-base",
+        "target": "",
+        "features": [
+          "markup-functions"
+        ],
+        "start": 18.68,
+        "duration": 72.83,
+        "end": 91.51,
+        "metadata_ready": 66.1
+      },
+      {
+        "name": "ferroui-markup",
+        "target": "",
+        "features": [],
+        "start": 65.73,
+        "duration": 0.42,
+        "end": 66.15,
+        "metadata_ready": 66.05
+      },
+      {
+        "name": "ferroui-markup-xaml-loader",
+        "target": "",
+        "features": [
+          "compiler"
+        ],
+        "start": 66.04,
+        "duration": 6.23,
+        "end": 72.27,
+        "metadata_ready": 69.96
+      },
+      {
+        "name": "ferroui-controls",
+        "target": "",
+        "features": [],
+        "start": 66.14,
+        "duration": 58.93,
+        "end": 125.07,
+        "metadata_ready": 109.02
+      },
+      {
+        "name": "ferroui-build",
+        "target": "",
+        "features": [],
+        "start": 72.27,
+        "duration": 1.93,
+        "end": 74.2,
+        "metadata_ready": 73.37
+      },
+      {
+        "name": "ferroui-markup",
+        "target": "",
+        "features": [],
+        "start": 74.2,
+        "duration": 0.34,
+        "end": 74.54,
+        "metadata_ready": 74.45
+      },
+      {
+        "name": "ferroui-dialogs",
+        "target": " build-script",
+        "features": [],
+        "start": 95.4,
+        "duration": 0.8,
+        "end": 96.2
+      },
+      {
+        "name": "ferroui-themes-winui",
+        "target": " build-script",
+        "features": [],
+        "start": 95.41,
+        "duration": 1.02,
+        "end": 96.43
+      },
+      {
+        "name": "ferroui-dialogs",
+        "target": " build-script (run)",
+        "features": [],
+        "start": 96.2,
+        "duration": 0.31,
+        "end": 96.51
+      },
+      {
+        "name": "ferroui-themes-winui",
+        "target": " build-script (run)",
+        "features": [],
+        "start": 96.51,
+        "duration": 12.68,
+        "end": 109.19
+      },
+      {
+        "name": "ferroui-dialogs",
+        "target": "",
+        "features": [],
+        "start": 112.83,
+        "duration": 2.74,
+        "end": 115.57,
+        "metadata_ready": 114.11
+      },
+      {
+        "name": "ferroui-themes-winui",
+        "target": "",
+        "features": [],
+        "start": 115.08,
+        "duration": 24.25,
+        "end": 139.33,
+        "metadata_ready": 132.17
+      }
+    ]
+  },
+  "timing_interpretation": [
+    "Stock Cargo coalesced host and target Base without a Cargo fork, eliminating three compiler units and one duplicate Base metadata output.",
+    "The candidate WinUI build-script run finished earlier (101.15 vs 109.19 seconds), but Controls and downstream library work set the final path.",
+    "Controls metadata became ready at 108.80 candidate vs 109.02 baseline seconds. The final WinUI library started at 115.11 vs 115.08 seconds.",
+    "Final WinUI library duration was 26.12 vs 24.25 seconds, accounting for most of the observed final wall-time difference.",
+    "This one pair cannot establish a regression or robust gain; fewer compiled units did not demonstrate shorter elapsed time."
+  ],
+  "optin_prototype": {
+    "status": "manifest resolution only; not compiled or adopted",
+    "manifest_patch": "diff --git a/src/FerroUI.Build.Tasks/Cargo.toml b/src/FerroUI.Build.Tasks/Cargo.toml\nindex f4b50eda..d5516b9e 100644\n--- a/src/FerroUI.Build.Tasks/Cargo.toml\n+++ b/src/FerroUI.Build.Tasks/Cargo.toml\n@@ -18,6 +18,7 @@ autoexamples = false\n path = \"lib.rs\"\n \n [features]\n+markup-functions = [\"ferroui-base/markup-functions\"]\n # The run-time host of `Build` (`TypeSystem::Runtime`, with `Build::assembly`): the documents are compiled\n # against the types the build script registered in its process. It links the XAML runtime library and,\n # through it, the controls, which a build script then builds for the host. No crate of the repository",
+    "enable_arguments": [
+      "--features",
+      "ferroui-build/markup-functions"
+    ],
+    "default_and_enabled_native_target_runtime_tree_equal": {
+      "default-runtime": {
+        "returncode": 0,
+        "stderr": ""
+      },
+      "default-host": {
+        "returncode": 0,
+        "stderr": ""
+      },
+      "enabled-runtime": {
+        "returncode": 0,
+        "stderr": ""
+      },
+      "enabled-host": {
+        "returncode": 0,
+        "stderr": ""
+      },
+      "default_runtime_tree_equal": true,
+      "enabled_runtime_tree_equal": true
+    },
+    "default_full_tree_parity": [
+      {
+        "scenario": "standalone-build",
+        "command": [
+          "cargo",
+          "tree",
+          "--locked",
+          "--offline",
+          "--edges",
+          "normal,build,features",
+          "--prefix",
+          "none",
+          "--format",
+          "{p} features:[{f}]",
+          "-p",
+          "ferroui-build"
+        ],
+        "default_full_dependency_tree_equal": true,
+        "baseline_tree_sha256": "99d89248a85084e707c9d3a0ebbf4451d1e13de03b62e3123f558a673f7f2f5c",
+        "optin_tree_sha256": "99d89248a85084e707c9d3a0ebbf4451d1e13de03b62e3123f558a673f7f2f5c"
+      },
+      {
+        "scenario": "standalone-loader",
+        "command": [
+          "cargo",
+          "tree",
+          "--locked",
+          "--offline",
+          "--edges",
+          "normal,build,features",
+          "--prefix",
+          "none",
+          "--format",
+          "{p} features:[{f}]",
+          "-p",
+          "ferroui-markup-xaml-loader",
+          "--no-default-features",
+          "--features",
+          "compiler"
+        ],
+        "default_full_dependency_tree_equal": true,
+        "baseline_tree_sha256": "1abcd7746478fe68ae4536fed696fb8b01b55c0b65f6c97d1545e5509a15ade0",
+        "optin_tree_sha256": "1abcd7746478fe68ae4536fed696fb8b01b55c0b65f6c97d1545e5509a15ade0"
+      },
+      {
+        "scenario": "native-winui",
+        "command": [
+          "cargo",
+          "tree",
+          "--locked",
+          "--offline",
+          "--edges",
+          "normal,build,features",
+          "--prefix",
+          "none",
+          "--format",
+          "{p} features:[{f}]",
+          "-p",
+          "ferroui-themes-winui"
+        ],
+        "default_full_dependency_tree_equal": true,
+        "baseline_tree_sha256": "81c0792f501f0a91fb21b307c120626fda16a18b79bb637bb2f954f67d2c6ea6",
+        "optin_tree_sha256": "81c0792f501f0a91fb21b307c120626fda16a18b79bb637bb2f954f67d2c6ea6"
+      },
+      {
+        "scenario": "aarch64-winui",
+        "command": [
+          "cargo",
+          "tree",
+          "--locked",
+          "--offline",
+          "--edges",
+          "normal,build,features",
+          "--prefix",
+          "none",
+          "--format",
+          "{p} features:[{f}]",
+          "-p",
+          "ferroui-themes-winui",
+          "--target",
+          "aarch64-unknown-linux-gnu"
+        ],
+        "default_full_dependency_tree_equal": true,
+        "baseline_tree_sha256": "f726cfeced9114d756f52639a187d2aa7677eb1aa66486dd2579861355b7938a",
+        "optin_tree_sha256": "f726cfeced9114d756f52639a187d2aa7677eb1aa66486dd2579861355b7938a"
+      },
+      {
+        "scenario": "wasm-winui",
+        "command": [
+          "cargo",
+          "tree",
+          "--locked",
+          "--offline",
+          "--edges",
+          "normal,build,features",
+          "--prefix",
+          "none",
+          "--format",
+          "{p} features:[{f}]",
+          "-p",
+          "ferroui-themes-winui",
+          "--target",
+          "wasm32-unknown-unknown"
+        ],
+        "default_full_dependency_tree_equal": true,
+        "baseline_tree_sha256": "4b6cb6afef173e14a1130ea927465e4afc89788d5c9637beaf76afecc9d06c01",
+        "optin_tree_sha256": "4b6cb6afef173e14a1130ea927465e4afc89788d5c9637beaf76afecc9d06c01"
+      }
+    ],
+    "limitations": [
+      "An unconditional host feature can add unnecessary typed helper compilation to standalone ferroui-build and cross-target builds.",
+      "An optional feature leaves default graphs unchanged; enabling it is still a changed host feature graph, not semantically identical compile work.",
+      "Cross-target default trees were resolved only; no cross-target build correctness or performance claim was measured.",
+      "No additional test suite was run because the candidate was declined after the benchmark."
+    ]
+  },
+  "references": [
+    "https://doc.rust-lang.org/cargo/reference/build-cache.html",
+    "https://doc.rust-lang.org/cargo/reference/features.html",
+    "https://doc.rust-lang.org/cargo/reference/resolver.html"
+  ]
+}

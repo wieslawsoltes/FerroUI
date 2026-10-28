@@ -1,0 +1,1648 @@
+{
+  "schema_version": 1,
+  "observed_at": "2026-10-25",
+  "repository": "wieslawsoltes/FerroUI",
+  "baseline_commit": "98a56f09459c8ae02f07a2bcd235c0e87b4d44b3",
+  "methodology": {
+    "source": "GitHub REST workflow run/job timestamps and decoded job logs",
+    "notes": [
+      "Historical observational data, not a controlled before/after benchmark.",
+      "Job duration excludes runner queue wait; run duration can include queues and downstream jobs.",
+      "Cargo Finished durations measure each Cargo command, including its build scripts and linker, not rustc-exclusive time.",
+      "Compile durations are rounded by Cargo's human-readable logger.",
+      "Only selected nightly logs were parsed; repeated Compiling lines establish repeated crate compilation, not its cause.",
+      "No test, target, feature, check or correctness gate is proposed for removal.",
+      "Only steps longer than 60 seconds are retained; complete step lists remain available from linked job pages."
+    ]
+  },
+  "runs": [
+    {
+      "id": 40155345452,
+      "url": "https://github.com/wieslawsoltes/FerroUI/actions/runs/40155345452",
+      "name": "CI",
+      "event": "schedule",
+      "commit": "98a56f09459c8ae02f07a2bcd235c0e87b4d44b3",
+      "started_at": "2026-10-25T02:40:24Z",
+      "updated_at": "2026-10-25T03:32:12Z",
+      "conclusion": "success",
+      "jobs": [
+        {
+          "id": 121055454733,
+          "url": "https://github.com/wieslawsoltes/FerroUI/actions/runs/40155345452/job/121055454733",
+          "name": "Build and test (macOS)",
+          "duration_seconds": 1775,
+          "conclusion": "success",
+          "steps_over_60_seconds": [
+            {
+              "name": "Test",
+              "conclusion": "success",
+              "duration_seconds": 1721
+            }
+          ]
+        },
+        {
+          "id": 121055454739,
+          "url": "https://github.com/wieslawsoltes/FerroUI/actions/runs/40155345452/job/121055454739",
+          "name": "Build, test and smoke run (Windows platform backend)",
+          "duration_seconds": 3103,
+          "conclusion": "success",
+          "steps_over_60_seconds": [
+            {
+              "name": "Build the backend and its example (without ANGLE)",
+              "conclusion": "success",
+              "duration_seconds": 179
+            },
+            {
+              "name": "Build with ANGLE (the default features; the time of the mozangle build)",
+              "conclusion": "success",
+              "duration_seconds": 189
+            },
+            {
+              "name": "Build and test the desktop entry point",
+              "conclusion": "success",
+              "duration_seconds": 160
+            },
+            {
+              "name": "The HelloWorld samples for two seconds each",
+              "conclusion": "success",
+              "duration_seconds": 643
+            },
+            {
+              "name": "Integration tests of windows on the desktop",
+              "conclusion": "success",
+              "duration_seconds": 208
+            },
+            {
+              "name": "Automation tests of the IntegrationTestApp sample",
+              "conclusion": "success",
+              "duration_seconds": 654
+            },
+            {
+              "name": "Pictures of the catalog (software rendering and ANGLE)",
+              "conclusion": "success",
+              "duration_seconds": 292
+            },
+            {
+              "name": "The accessibility tree of the catalog",
+              "conclusion": "success",
+              "duration_seconds": 149
+            },
+            {
+              "name": "WinUI integration (tests, the Windows App Runtime, the smoke runs of the samples)",
+              "conclusion": "success",
+              "duration_seconds": 194
+            },
+            {
+              "name": "WinUI theme gallery (capture, comparison with native WinUI 3; informative)",
+              "conclusion": "success",
+              "duration_seconds": 138
+            },
+            {
+              "name": "Post Run Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6",
+              "conclusion": "success",
+              "duration_seconds": 118
+            }
+          ]
+        },
+        {
+          "id": 121055454743,
+          "url": "https://github.com/wieslawsoltes/FerroUI/actions/runs/40155345452/job/121055454743",
+          "name": "Packages of the published crates",
+          "duration_seconds": 42,
+          "conclusion": "success",
+          "steps_over_60_seconds": []
+        },
+        {
+          "id": 121055454748,
+          "url": "https://github.com/wieslawsoltes/FerroUI/actions/runs/40155345452/job/121055454748",
+          "name": "Check (browser, wasm32-unknown-emscripten)",
+          "duration_seconds": 1988,
+          "conclusion": "success",
+          "steps_over_60_seconds": [
+            {
+              "name": "Check",
+              "conclusion": "success",
+              "duration_seconds": 156
+            },
+            {
+              "name": "Check the browser crate and the catalog host with the Vello backend",
+              "conclusion": "success",
+              "duration_seconds": 161
+            },
+            {
+              "name": "Build the themed view site",
+              "conclusion": "success",
+              "duration_seconds": 496
+            },
+            {
+              "name": "Behaviour tests in headless Chrome",
+              "conclusion": "success",
+              "duration_seconds": 99
+            },
+            {
+              "name": "Build the storage view site",
+              "conclusion": "success",
+              "duration_seconds": 134
+            },
+            {
+              "name": "Build the ControlCatalog site",
+              "conclusion": "success",
+              "duration_seconds": 534
+            },
+            {
+              "name": "ControlCatalog tests in headless Chrome (rendering, resize, console, drawer, navigation, click, typing)",
+              "conclusion": "success",
+              "duration_seconds": 115
+            },
+            {
+              "name": "Sizes of the published modules",
+              "conclusion": "success",
+              "duration_seconds": 123
+            }
+          ]
+        },
+        {
+          "id": 121055454749,
+          "url": "https://github.com/wieslawsoltes/FerroUI/actions/runs/40155345452/job/121055454749",
+          "name": "Build, test and smoke run (Windows platform backend, ARM64; informative)",
+          "duration_seconds": 745,
+          "conclusion": "success",
+          "steps_over_60_seconds": [
+            {
+              "name": "Build the backend and its example (without ANGLE)",
+              "conclusion": "success",
+              "duration_seconds": 200
+            },
+            {
+              "name": "Build with ANGLE (the time of the mozangle build)",
+              "conclusion": "success",
+              "duration_seconds": 390
+            }
+          ]
+        },
+        {
+          "id": 121055454769,
+          "url": "https://github.com/wieslawsoltes/FerroUI/actions/runs/40155345452/job/121055454769",
+          "name": "Source conventions",
+          "duration_seconds": 17,
+          "conclusion": "success",
+          "steps_over_60_seconds": []
+        },
+        {
+          "id": 121055454779,
+          "url": "https://github.com/wieslawsoltes/FerroUI/actions/runs/40155345452/job/121055454779",
+          "name": "Build and test (Linux framebuffer, virtual devices)",
+          "duration_seconds": 448,
+          "conclusion": "success",
+          "steps_over_60_seconds": [
+            {
+              "name": "Tests of the crate",
+              "conclusion": "success",
+              "duration_seconds": 72
+            },
+            {
+              "name": "Build the example",
+              "conclusion": "success",
+              "duration_seconds": 84
+            },
+            {
+              "name": "Build the ControlCatalog",
+              "conclusion": "success",
+              "duration_seconds": 169
+            }
+          ]
+        },
+        {
+          "id": 121055454780,
+          "url": "https://github.com/wieslawsoltes/FerroUI/actions/runs/40155345452/job/121055454780",
+          "name": "Build and test (macOS, the ControlCatalog with classic themes, Vello)",
+          "duration_seconds": 736,
+          "conclusion": "success",
+          "steps_over_60_seconds": [
+            {
+              "name": "Test (the ControlCatalog with its feature classic-themes)",
+              "conclusion": "success",
+              "duration_seconds": 407
+            },
+            {
+              "name": "Test (the Vello backend and the render backends compared)",
+              "conclusion": "success",
+              "duration_seconds": 274
+            }
+          ]
+        },
+        {
+          "id": 121055454798,
+          "url": "https://github.com/wieslawsoltes/FerroUI/actions/runs/40155345452/job/121055454798",
+          "name": "Check (browser with threads, wasm32-unknown-emscripten)",
+          "duration_seconds": 2354,
+          "conclusion": "success",
+          "steps_over_60_seconds": [
+            {
+              "name": "Build the thread spawn site",
+              "conclusion": "success",
+              "duration_seconds": 599
+            },
+            {
+              "name": "Build the render worker site",
+              "conclusion": "success",
+              "duration_seconds": 92
+            },
+            {
+              "name": "Build the themed view site with threads",
+              "conclusion": "success",
+              "duration_seconds": 223
+            },
+            {
+              "name": "Behaviour tests on the render thread and on one thread, in headless Chrome",
+              "conclusion": "success",
+              "duration_seconds": 272
+            },
+            {
+              "name": "Build the storage view site with threads",
+              "conclusion": "success",
+              "duration_seconds": 142
+            },
+            {
+              "name": "Build the ControlCatalog site with threads",
+              "conclusion": "success",
+              "duration_seconds": 682
+            },
+            {
+              "name": "ControlCatalog tests on the render thread, in headless Chrome",
+              "conclusion": "success",
+              "duration_seconds": 123
+            },
+            {
+              "name": "Sizes of the modules built with threads",
+              "conclusion": "success",
+              "duration_seconds": 120
+            }
+          ]
+        },
+        {
+          "id": 121055454809,
+          "url": "https://github.com/wieslawsoltes/FerroUI/actions/runs/40155345452/job/121055454809",
+          "name": "Build and test (Linux, X11 under Xvfb)",
+          "duration_seconds": 725,
+          "conclusion": "success",
+          "steps_over_60_seconds": [
+            {
+              "name": "Tests of the X11 crate (no server needed)",
+              "conclusion": "success",
+              "duration_seconds": 92
+            },
+            {
+              "name": "The Vulkan GPU of the Skia backend against lavapipe",
+              "conclusion": "success",
+              "duration_seconds": 78
+            },
+            {
+              "name": "Tests of the FreeDesktop crate (no bus needed)",
+              "conclusion": "success",
+              "duration_seconds": 83
+            },
+            {
+              "name": "The desktop entry point selects X11 on Linux",
+              "conclusion": "success",
+              "duration_seconds": 92
+            },
+            {
+              "name": "Build the window example",
+              "conclusion": "success",
+              "duration_seconds": 87
+            },
+            {
+              "name": "The ControlCatalog host with the native control demo compiles",
+              "conclusion": "success",
+              "duration_seconds": 80
+            }
+          ]
+        },
+        {
+          "id": 121055454811,
+          "url": "https://github.com/wieslawsoltes/FerroUI/actions/runs/40155345452/job/121055454811",
+          "name": "Build and package (Android, arm64)",
+          "duration_seconds": 440,
+          "conclusion": "success",
+          "steps_over_60_seconds": [
+            {
+              "name": "Tests of the Android crate (the logic, on the host)",
+              "conclusion": "success",
+              "duration_seconds": 86
+            },
+            {
+              "name": "Tests of the base crate against the table of thread-local variables",
+              "conclusion": "success",
+              "duration_seconds": 83
+            },
+            {
+              "name": "The package of the smoke application",
+              "conclusion": "success",
+              "duration_seconds": 107
+            },
+            {
+              "name": "The ControlCatalog host compiles for the target",
+              "conclusion": "success",
+              "duration_seconds": 119
+            }
+          ]
+        },
+        {
+          "id": 121055454829,
+          "url": "https://github.com/wieslawsoltes/FerroUI/actions/runs/40155345452/job/121055454829",
+          "name": "Build and test (iOS, simulator target)",
+          "duration_seconds": 657,
+          "conclusion": "success",
+          "steps_over_60_seconds": [
+            {
+              "name": "Tests of the iOS crate on the host (no UIKit needed)",
+              "conclusion": "success",
+              "duration_seconds": 148
+            },
+            {
+              "name": "Build the crate and the example for the simulator",
+              "conclusion": "success",
+              "duration_seconds": 212
+            },
+            {
+              "name": "Check the crate and the example for the device",
+              "conclusion": "success",
+              "duration_seconds": 80
+            },
+            {
+              "name": "The catalog host (the native control demo calls UIKit directly)",
+              "conclusion": "success",
+              "duration_seconds": 135
+            }
+          ]
+        },
+        {
+          "id": 121055454834,
+          "url": "https://github.com/wieslawsoltes/FerroUI/actions/runs/40155345452/job/121055454834",
+          "name": "Informational (Linux, Wayland under the sway of Debian 13)",
+          "duration_seconds": 216,
+          "conclusion": "success",
+          "steps_over_60_seconds": [
+            {
+              "name": "Build the window example",
+              "conclusion": "success",
+              "duration_seconds": 85
+            }
+          ]
+        },
+        {
+          "id": 121055454893,
+          "url": "https://github.com/wieslawsoltes/FerroUI/actions/runs/40155345452/job/121055454893",
+          "name": "Build and test (Linux, Wayland under headless sway)",
+          "duration_seconds": 662,
+          "conclusion": "success",
+          "steps_over_60_seconds": [
+            {
+              "name": "Tests of the Wayland crate (no compositor needed)",
+              "conclusion": "success",
+              "duration_seconds": 117
+            },
+            {
+              "name": "Build the window example",
+              "conclusion": "success",
+              "duration_seconds": 117
+            },
+            {
+              "name": "Build the ControlCatalog",
+              "conclusion": "success",
+              "duration_seconds": 105
+            }
+          ]
+        },
+        {
+          "id": 121062788138,
+          "url": "https://github.com/wieslawsoltes/FerroUI/actions/runs/40155345452/job/121062788138",
+          "name": "Check (browser, the site with both modules)",
+          "duration_seconds": 165,
+          "conclusion": "success",
+          "steps_over_60_seconds": [
+            {
+              "name": "Sizes of the site with both modules",
+              "conclusion": "success",
+              "duration_seconds": 105
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": 40096131912,
+      "url": "https://github.com/wieslawsoltes/FerroUI/actions/runs/40096131912",
+      "name": "CI",
+      "event": "push",
+      "commit": "98a56f09459c8ae02f07a2bcd235c0e87b4d44b3",
+      "started_at": "2026-10-24T12:58:13Z",
+      "updated_at": "2026-10-24T13:41:51Z",
+      "conclusion": "success",
+      "jobs": [
+        {
+          "id": 120878876736,
+          "url": "https://github.com/wieslawsoltes/FerroUI/actions/runs/40096131912/job/120878876736",
+          "name": "Packages of the published crates",
+          "duration_seconds": 39,
+          "conclusion": "success",
+          "steps_over_60_seconds": []
+        },
+        {
+          "id": 120878876918,
+          "url": "https://github.com/wieslawsoltes/FerroUI/actions/runs/40096131912/job/120878876918",
+          "name": "Informational (Linux, Wayland under the sway of Debian 13)",
+          "duration_seconds": 249,
+          "conclusion": "success",
+          "steps_over_60_seconds": [
+            {
+              "name": "Build the window example",
+              "conclusion": "success",
+              "duration_seconds": 101
+            }
+          ]
+        },
+        {
+          "id": 120878876924,
+          "url": "https://github.com/wieslawsoltes/FerroUI/actions/runs/40096131912/job/120878876924",
+          "name": "Build and package (Android, arm64)",
+          "duration_seconds": 428,
+          "conclusion": "success",
+          "steps_over_60_seconds": [
+            {
+              "name": "Tests of the Android crate (the logic, on the host)",
+              "conclusion": "success",
+              "duration_seconds": 84
+            },
+            {
+              "name": "Tests of the base crate against the table of thread-local variables",
+              "conclusion": "success",
+              "duration_seconds": 80
+            },
+            {
+              "name": "The package of the smoke application",
+              "conclusion": "success",
+              "duration_seconds": 105
+            },
+            {
+              "name": "The ControlCatalog host compiles for the target",
+              "conclusion": "success",
+              "duration_seconds": 114
+            }
+          ]
+        },
+        {
+          "id": 120878876970,
+          "url": "https://github.com/wieslawsoltes/FerroUI/actions/runs/40096131912/job/120878876970",
+          "name": "Build and test (Linux, X11 under Xvfb)",
+          "duration_seconds": 668,
+          "conclusion": "success",
+          "steps_over_60_seconds": [
+            {
+              "name": "Tests of the X11 crate (no server needed)",
+              "conclusion": "success",
+              "duration_seconds": 88
+            },
+            {
+              "name": "The Vulkan GPU of the Skia backend against lavapipe",
+              "conclusion": "success",
+              "duration_seconds": 70
+            },
+            {
+              "name": "Tests of the FreeDesktop crate (no bus needed)",
+              "conclusion": "success",
+              "duration_seconds": 76
+            },
+            {
+              "name": "The desktop entry point selects X11 on Linux",
+              "conclusion": "success",
+              "duration_seconds": 83
+            },
+            {
+              "name": "Build the window example",
+              "conclusion": "success",
+              "duration_seconds": 79
+            },
+            {
+              "name": "The ControlCatalog host with the native control demo compiles",
+              "conclusion": "success",
+              "duration_seconds": 71
+            }
+          ]
+        },
+        {
+          "id": 120878876978,
+          "url": "https://github.com/wieslawsoltes/FerroUI/actions/runs/40096131912/job/120878876978",
+          "name": "Source conventions",
+          "duration_seconds": 13,
+          "conclusion": "success",
+          "steps_over_60_seconds": []
+        },
+        {
+          "id": 120878876987,
+          "url": "https://github.com/wieslawsoltes/FerroUI/actions/runs/40096131912/job/120878876987",
+          "name": "Build and test (Linux framebuffer, virtual devices)",
+          "duration_seconds": 518,
+          "conclusion": "success",
+          "steps_over_60_seconds": [
+            {
+              "name": "Tests of the crate",
+              "conclusion": "success",
+              "duration_seconds": 89
+            },
+            {
+              "name": "Build the example",
+              "conclusion": "success",
+              "duration_seconds": 111
+            },
+            {
+              "name": "Build the ControlCatalog",
+              "conclusion": "success",
+              "duration_seconds": 212
+            }
+          ]
+        },
+        {
+          "id": 120878876994,
+          "url": "https://github.com/wieslawsoltes/FerroUI/actions/runs/40096131912/job/120878876994",
+          "name": "Check (browser, wasm32-unknown-emscripten)",
+          "duration_seconds": 1959,
+          "conclusion": "success",
+          "steps_over_60_seconds": [
+            {
+              "name": "Check",
+              "conclusion": "success",
+              "duration_seconds": 156
+            },
+            {
+              "name": "Check the browser crate and the catalog host with the Vello backend",
+              "conclusion": "success",
+              "duration_seconds": 163
+            },
+            {
+              "name": "Build the themed view site",
+              "conclusion": "success",
+              "duration_seconds": 484
+            },
+            {
+              "name": "Behaviour tests in headless Chrome",
+              "conclusion": "success",
+              "duration_seconds": 97
+            },
+            {
+              "name": "Build the storage view site",
+              "conclusion": "success",
+              "duration_seconds": 132
+            },
+            {
+              "name": "Build the ControlCatalog site",
+              "conclusion": "success",
+              "duration_seconds": 528
+            },
+            {
+              "name": "ControlCatalog tests in headless Chrome (rendering, resize, console, drawer, navigation, click, typing)",
+              "conclusion": "success",
+              "duration_seconds": 112
+            },
+            {
+              "name": "Sizes of the published modules",
+              "conclusion": "success",
+              "duration_seconds": 122
+            }
+          ]
+        },
+        {
+          "id": 120878877025,
+          "url": "https://github.com/wieslawsoltes/FerroUI/actions/runs/40096131912/job/120878877025",
+          "name": "Check (browser with threads, wasm32-unknown-emscripten)",
+          "duration_seconds": 2342,
+          "conclusion": "success",
+          "steps_over_60_seconds": [
+            {
+              "name": "Build the thread spawn site",
+              "conclusion": "success",
+              "duration_seconds": 594
+            },
+            {
+              "name": "Build the render worker site",
+              "conclusion": "success",
+              "duration_seconds": 89
+            },
+            {
+              "name": "Build the themed view site with threads",
+              "conclusion": "success",
+              "duration_seconds": 216
+            },
+            {
+              "name": "Behaviour tests on the render thread and on one thread, in headless Chrome",
+              "conclusion": "success",
+              "duration_seconds": 269
+            },
+            {
+              "name": "Build the storage view site with threads",
+              "conclusion": "success",
+              "duration_seconds": 138
+            },
+            {
+              "name": "Build the ControlCatalog site with threads",
+              "conclusion": "success",
+              "duration_seconds": 663
+            },
+            {
+              "name": "ControlCatalog tests on the render thread, in headless Chrome",
+              "conclusion": "success",
+              "duration_seconds": 124
+            },
+            {
+              "name": "Sizes of the modules built with threads",
+              "conclusion": "success",
+              "duration_seconds": 122
+            }
+          ]
+        },
+        {
+          "id": 120878877101,
+          "url": "https://github.com/wieslawsoltes/FerroUI/actions/runs/40096131912/job/120878877101",
+          "name": "Build and test (Linux, Wayland under headless sway)",
+          "duration_seconds": 653,
+          "conclusion": "success",
+          "steps_over_60_seconds": [
+            {
+              "name": "Tests of the Wayland crate (no compositor needed)",
+              "conclusion": "success",
+              "duration_seconds": 110
+            },
+            {
+              "name": "Build the window example",
+              "conclusion": "success",
+              "duration_seconds": 111
+            },
+            {
+              "name": "Build the ControlCatalog",
+              "conclusion": "success",
+              "duration_seconds": 107
+            }
+          ]
+        },
+        {
+          "id": 120887132709,
+          "url": "https://github.com/wieslawsoltes/FerroUI/actions/runs/40096131912/job/120887132709",
+          "name": "Check (browser, the site with both modules)",
+          "duration_seconds": 194,
+          "conclusion": "success",
+          "steps_over_60_seconds": [
+            {
+              "name": "Sizes of the site with both modules",
+              "conclusion": "success",
+              "duration_seconds": 133
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": 40096131906,
+      "url": "https://github.com/wieslawsoltes/FerroUI/actions/runs/40096131906",
+      "name": "Pages",
+      "event": "push",
+      "commit": "98a56f09459c8ae02f07a2bcd235c0e87b4d44b3",
+      "started_at": "2026-10-24T12:58:13Z",
+      "updated_at": "2026-10-24T13:36:55Z",
+      "conclusion": "success",
+      "jobs": [
+        {
+          "id": 120880245222,
+          "url": "https://github.com/wieslawsoltes/FerroUI/actions/runs/40096131906/job/120880245222",
+          "name": "Build the site",
+          "duration_seconds": 1852,
+          "conclusion": "success",
+          "steps_over_60_seconds": [
+            {
+              "name": "Build the site",
+              "conclusion": "success",
+              "duration_seconds": 1333
+            },
+            {
+              "name": "Test the module without threads before publishing it",
+              "conclusion": "success",
+              "duration_seconds": 99
+            },
+            {
+              "name": "Test the module with threads before publishing it",
+              "conclusion": "success",
+              "duration_seconds": 99
+            },
+            {
+              "name": "Sizes of the module without threads",
+              "conclusion": "success",
+              "duration_seconds": 82
+            },
+            {
+              "name": "Sizes of the module with threads",
+              "conclusion": "success",
+              "duration_seconds": 79
+            },
+            {
+              "name": "Sizes of the published site",
+              "conclusion": "success",
+              "duration_seconds": 85
+            }
+          ]
+        },
+        {
+          "id": 120886736164,
+          "url": "https://github.com/wieslawsoltes/FerroUI/actions/runs/40096131906/job/120886736164",
+          "name": "Deploy",
+          "duration_seconds": 11,
+          "conclusion": "success",
+          "steps_over_60_seconds": []
+        }
+      ]
+    },
+    {
+      "id": 40054999113,
+      "url": "https://github.com/wieslawsoltes/FerroUI/actions/runs/40054999113",
+      "name": "CI",
+      "event": "schedule",
+      "commit": "a0ad7d20bb03b9ea865b70db81269ccba38e6141",
+      "started_at": "2026-10-24T02:38:16Z",
+      "updated_at": "2026-10-24T03:27:46Z",
+      "conclusion": "success",
+      "jobs": [
+        {
+          "id": 120755927953,
+          "url": "https://github.com/wieslawsoltes/FerroUI/actions/runs/40054999113/job/120755927953",
+          "name": "Packages of the published crates",
+          "duration_seconds": 43,
+          "conclusion": "success",
+          "steps_over_60_seconds": []
+        },
+        {
+          "id": 120755927979,
+          "url": "https://github.com/wieslawsoltes/FerroUI/actions/runs/40054999113/job/120755927979",
+          "name": "Check (browser with threads, wasm32-unknown-emscripten)",
+          "duration_seconds": 1992,
+          "conclusion": "success",
+          "steps_over_60_seconds": [
+            {
+              "name": "Run ./.github/actions/browser-toolchain",
+              "conclusion": "success",
+              "duration_seconds": 63
+            },
+            {
+              "name": "Build the thread spawn site",
+              "conclusion": "success",
+              "duration_seconds": 494
+            },
+            {
+              "name": "Build the render worker site",
+              "conclusion": "success",
+              "duration_seconds": 75
+            },
+            {
+              "name": "Build the themed view site with threads",
+              "conclusion": "success",
+              "duration_seconds": 179
+            },
+            {
+              "name": "Behaviour tests on the render thread and on one thread, in headless Chrome",
+              "conclusion": "success",
+              "duration_seconds": 255
+            },
+            {
+              "name": "Build the storage view site with threads",
+              "conclusion": "success",
+              "duration_seconds": 114
+            },
+            {
+              "name": "Build the ControlCatalog site with threads",
+              "conclusion": "success",
+              "duration_seconds": 544
+            },
+            {
+              "name": "ControlCatalog tests on the render thread, in headless Chrome",
+              "conclusion": "success",
+              "duration_seconds": 109
+            },
+            {
+              "name": "Sizes of the modules built with threads",
+              "conclusion": "success",
+              "duration_seconds": 101
+            }
+          ]
+        },
+        {
+          "id": 120755928004,
+          "url": "https://github.com/wieslawsoltes/FerroUI/actions/runs/40054999113/job/120755928004",
+          "name": "Build, test and smoke run (Windows platform backend)",
+          "duration_seconds": 2966,
+          "conclusion": "success",
+          "steps_over_60_seconds": [
+            {
+              "name": "Build the backend and its example (without ANGLE)",
+              "conclusion": "success",
+              "duration_seconds": 197
+            },
+            {
+              "name": "Build with ANGLE (the default features; the time of the mozangle build)",
+              "conclusion": "success",
+              "duration_seconds": 540
+            },
+            {
+              "name": "Build and test the desktop entry point",
+              "conclusion": "success",
+              "duration_seconds": 418
+            },
+            {
+              "name": "Integration tests of windows on the desktop",
+              "conclusion": "success",
+              "duration_seconds": 195
+            },
+            {
+              "name": "Automation tests of the IntegrationTestApp sample",
+              "conclusion": "success",
+              "duration_seconds": 655
+            },
+            {
+              "name": "Pictures of the catalog (software rendering and ANGLE)",
+              "conclusion": "success",
+              "duration_seconds": 286
+            },
+            {
+              "name": "The accessibility tree of the catalog",
+              "conclusion": "success",
+              "duration_seconds": 132
+            },
+            {
+              "name": "WinUI integration (tests, the Windows App Runtime, the smoke runs of the samples)",
+              "conclusion": "success",
+              "duration_seconds": 188
+            },
+            {
+              "name": "WinUI theme gallery (capture, comparison with native WinUI 3; informative)",
+              "conclusion": "success",
+              "duration_seconds": 135
+            },
+            {
+              "name": "Post Run Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6",
+              "conclusion": "success",
+              "duration_seconds": 66
+            }
+          ]
+        },
+        {
+          "id": 120755928009,
+          "url": "https://github.com/wieslawsoltes/FerroUI/actions/runs/40054999113/job/120755928009",
+          "name": "Build and package (Android, arm64)",
+          "duration_seconds": 418,
+          "conclusion": "success",
+          "steps_over_60_seconds": [
+            {
+              "name": "Tests of the Android crate (the logic, on the host)",
+              "conclusion": "success",
+              "duration_seconds": 81
+            },
+            {
+              "name": "Tests of the base crate against the table of thread-local variables",
+              "conclusion": "success",
+              "duration_seconds": 79
+            },
+            {
+              "name": "The package of the smoke application",
+              "conclusion": "success",
+              "duration_seconds": 98
+            },
+            {
+              "name": "The ControlCatalog host compiles for the target",
+              "conclusion": "success",
+              "duration_seconds": 111
+            }
+          ]
+        },
+        {
+          "id": 120755928022,
+          "url": "https://github.com/wieslawsoltes/FerroUI/actions/runs/40054999113/job/120755928022",
+          "name": "Build and test (macOS, the ControlCatalog with classic themes, Vello)",
+          "duration_seconds": 639,
+          "conclusion": "success",
+          "steps_over_60_seconds": [
+            {
+              "name": "Test (the ControlCatalog with its feature classic-themes)",
+              "conclusion": "success",
+              "duration_seconds": 391
+            },
+            {
+              "name": "Test (the Vello backend and the render backends compared)",
+              "conclusion": "success",
+              "duration_seconds": 201
+            }
+          ]
+        },
+        {
+          "id": 120755928034,
+          "url": "https://github.com/wieslawsoltes/FerroUI/actions/runs/40054999113/job/120755928034",
+          "name": "Source conventions",
+          "duration_seconds": 15,
+          "conclusion": "success",
+          "steps_over_60_seconds": []
+        },
+        {
+          "id": 120755928039,
+          "url": "https://github.com/wieslawsoltes/FerroUI/actions/runs/40054999113/job/120755928039",
+          "name": "Check (browser, wasm32-unknown-emscripten)",
+          "duration_seconds": 1594,
+          "conclusion": "success",
+          "steps_over_60_seconds": [
+            {
+              "name": "Check",
+              "conclusion": "success",
+              "duration_seconds": 121
+            },
+            {
+              "name": "Check the browser crate and the catalog host with the Vello backend",
+              "conclusion": "success",
+              "duration_seconds": 134
+            },
+            {
+              "name": "Build the themed view site",
+              "conclusion": "success",
+              "duration_seconds": 376
+            },
+            {
+              "name": "Behaviour tests in headless Chrome",
+              "conclusion": "success",
+              "duration_seconds": 89
+            },
+            {
+              "name": "Build the storage view site",
+              "conclusion": "success",
+              "duration_seconds": 105
+            },
+            {
+              "name": "Build the ControlCatalog site",
+              "conclusion": "success",
+              "duration_seconds": 412
+            },
+            {
+              "name": "ControlCatalog tests in headless Chrome (rendering, resize, console, drawer, navigation, click, typing)",
+              "conclusion": "success",
+              "duration_seconds": 100
+            },
+            {
+              "name": "Sizes of the published modules",
+              "conclusion": "success",
+              "duration_seconds": 99
+            }
+          ]
+        },
+        {
+          "id": 120755928043,
+          "url": "https://github.com/wieslawsoltes/FerroUI/actions/runs/40054999113/job/120755928043",
+          "name": "Build and test (macOS)",
+          "duration_seconds": 2384,
+          "conclusion": "success",
+          "steps_over_60_seconds": [
+            {
+              "name": "Test",
+              "conclusion": "success",
+              "duration_seconds": 2330
+            }
+          ]
+        },
+        {
+          "id": 120755928075,
+          "url": "https://github.com/wieslawsoltes/FerroUI/actions/runs/40054999113/job/120755928075",
+          "name": "Build and test (Linux, X11 under Xvfb)",
+          "duration_seconds": 798,
+          "conclusion": "success",
+          "steps_over_60_seconds": [
+            {
+              "name": "Tests of the X11 crate (no server needed)",
+              "conclusion": "success",
+              "duration_seconds": 109
+            },
+            {
+              "name": "The Vulkan GPU of the Skia backend against lavapipe",
+              "conclusion": "success",
+              "duration_seconds": 87
+            },
+            {
+              "name": "Tests of the FreeDesktop crate (no bus needed)",
+              "conclusion": "success",
+              "duration_seconds": 93
+            },
+            {
+              "name": "The desktop entry point selects X11 on Linux",
+              "conclusion": "success",
+              "duration_seconds": 108
+            },
+            {
+              "name": "Build the window example",
+              "conclusion": "success",
+              "duration_seconds": 97
+            },
+            {
+              "name": "The ControlCatalog host with the native control demo compiles",
+              "conclusion": "success",
+              "duration_seconds": 85
+            }
+          ]
+        },
+        {
+          "id": 120755928103,
+          "url": "https://github.com/wieslawsoltes/FerroUI/actions/runs/40054999113/job/120755928103",
+          "name": "Build and test (Linux, Wayland under headless sway)",
+          "duration_seconds": 595,
+          "conclusion": "success",
+          "steps_over_60_seconds": [
+            {
+              "name": "Tests of the Wayland crate (no compositor needed)",
+              "conclusion": "success",
+              "duration_seconds": 93
+            },
+            {
+              "name": "Build the window example",
+              "conclusion": "success",
+              "duration_seconds": 90
+            },
+            {
+              "name": "Build the ControlCatalog",
+              "conclusion": "success",
+              "duration_seconds": 83
+            }
+          ]
+        },
+        {
+          "id": 120755928114,
+          "url": "https://github.com/wieslawsoltes/FerroUI/actions/runs/40054999113/job/120755928114",
+          "name": "Build and test (Linux framebuffer, virtual devices)",
+          "duration_seconds": 522,
+          "conclusion": "success",
+          "steps_over_60_seconds": [
+            {
+              "name": "Tests of the crate",
+              "conclusion": "success",
+              "duration_seconds": 82
+            },
+            {
+              "name": "Build the example",
+              "conclusion": "success",
+              "duration_seconds": 103
+            },
+            {
+              "name": "Build the ControlCatalog",
+              "conclusion": "success",
+              "duration_seconds": 204
+            }
+          ]
+        },
+        {
+          "id": 120755928130,
+          "url": "https://github.com/wieslawsoltes/FerroUI/actions/runs/40054999113/job/120755928130",
+          "name": "Build, test and smoke run (Windows platform backend, ARM64; informative)",
+          "duration_seconds": 754,
+          "conclusion": "success",
+          "steps_over_60_seconds": [
+            {
+              "name": "Build the backend and its example (without ANGLE)",
+              "conclusion": "success",
+              "duration_seconds": 200
+            },
+            {
+              "name": "Build with ANGLE (the time of the mozangle build)",
+              "conclusion": "success",
+              "duration_seconds": 397
+            }
+          ]
+        },
+        {
+          "id": 120755928143,
+          "url": "https://github.com/wieslawsoltes/FerroUI/actions/runs/40054999113/job/120755928143",
+          "name": "Build and test (iOS, simulator target)",
+          "duration_seconds": 647,
+          "conclusion": "success",
+          "steps_over_60_seconds": [
+            {
+              "name": "Tests of the iOS crate on the host (no UIKit needed)",
+              "conclusion": "success",
+              "duration_seconds": 167
+            },
+            {
+              "name": "Build the crate and the example for the simulator",
+              "conclusion": "success",
+              "duration_seconds": 229
+            },
+            {
+              "name": "Check the crate and the example for the device",
+              "conclusion": "success",
+              "duration_seconds": 69
+            },
+            {
+              "name": "The catalog host (the native control demo calls UIKit directly)",
+              "conclusion": "success",
+              "duration_seconds": 113
+            }
+          ]
+        },
+        {
+          "id": 120755928179,
+          "url": "https://github.com/wieslawsoltes/FerroUI/actions/runs/40054999113/job/120755928179",
+          "name": "Informational (Linux, Wayland under the sway of Debian 13)",
+          "duration_seconds": 244,
+          "conclusion": "success",
+          "steps_over_60_seconds": [
+            {
+              "name": "Build the window example",
+              "conclusion": "success",
+              "duration_seconds": 108
+            }
+          ]
+        },
+        {
+          "id": 120762964768,
+          "url": "https://github.com/wieslawsoltes/FerroUI/actions/runs/40054999113/job/120762964768",
+          "name": "Check (browser, the site with both modules)",
+          "duration_seconds": 131,
+          "conclusion": "success",
+          "steps_over_60_seconds": [
+            {
+              "name": "Sizes of the site with both modules",
+              "conclusion": "success",
+              "duration_seconds": 86
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "selected_log_analysis": [
+    {
+      "job_id": 121055454733,
+      "url": "https://github.com/wieslawsoltes/FerroUI/actions/runs/40155345452/job/121055454733",
+      "cargo_compilation_invocations": [
+        {
+          "timestamp": "2026-10-25T02:58:10.9900970Z",
+          "profile": "test",
+          "elapsed_text": "17m 15s",
+          "seconds": 1035
+        }
+      ],
+      "cargo_compilation_seconds_sum": 1035,
+      "core_compilations": [
+        {
+          "timestamp": "2026-10-25T02:40:59.1919440Z",
+          "package": "ferroui-build-scan"
+        },
+        {
+          "timestamp": "2026-10-25T02:41:01.8772910Z",
+          "package": "ferroui-base"
+        },
+        {
+          "timestamp": "2026-10-25T02:41:03.9087180Z",
+          "package": "ferroui-controls"
+        }
+      ],
+      "cache_log_lines": [
+        "2026-10-25T02:40:47.4728020Z Cache hit for restore-key: v0-rust-macos-Darwin-arm64-3f42f1da-82b68e59",
+        "2026-10-25T02:40:49.9515870Z Cache Size: ~440 MB (461266682 B)",
+        "2026-10-25T02:40:55.0078720Z Cache restored successfully"
+      ],
+      "test_harness_summary_count": 189,
+      "test_harness_runtime_seconds_sum": 673.6,
+      "core_compile_counts": {
+        "ferroui-base": 1,
+        "ferroui-controls": 1,
+        "ferroui-build-scan": 1
+      }
+    },
+    {
+      "job_id": 121055454739,
+      "url": "https://github.com/wieslawsoltes/FerroUI/actions/runs/40155345452/job/121055454739",
+      "cargo_compilation_invocations": [
+        {
+          "timestamp": "2026-10-25T02:44:14.8506404Z",
+          "profile": "dev",
+          "elapsed_text": "2m 59s",
+          "seconds": 179
+        },
+        {
+          "timestamp": "2026-10-25T02:44:28.8388178Z",
+          "profile": "test",
+          "elapsed_text": "13.80s",
+          "seconds": 13.8
+        },
+        {
+          "timestamp": "2026-10-25T02:44:32.4907723Z",
+          "profile": "dev",
+          "elapsed_text": "0.41s",
+          "seconds": 0.41
+        },
+        {
+          "timestamp": "2026-10-25T02:44:36.4135106Z",
+          "profile": "dev",
+          "elapsed_text": "0.40s",
+          "seconds": 0.4
+        },
+        {
+          "timestamp": "2026-10-25T02:44:40.5394707Z",
+          "profile": "dev",
+          "elapsed_text": "0.38s",
+          "seconds": 0.38
+        },
+        {
+          "timestamp": "2026-10-25T02:47:49.9363704Z",
+          "profile": "dev",
+          "elapsed_text": "3m 05s",
+          "seconds": 185
+        },
+        {
+          "timestamp": "2026-10-25T02:47:50.6634656Z",
+          "profile": "dev",
+          "elapsed_text": "0.47s",
+          "seconds": 0.47
+        },
+        {
+          "timestamp": "2026-10-25T02:47:53.0453085Z",
+          "profile": "dev",
+          "elapsed_text": "0.42s",
+          "seconds": 0.42
+        },
+        {
+          "timestamp": "2026-10-25T02:48:14.8878972Z",
+          "profile": "dev",
+          "elapsed_text": "0.42s",
+          "seconds": 0.42
+        },
+        {
+          "timestamp": "2026-10-25T02:48:35.3796279Z",
+          "profile": "dev",
+          "elapsed_text": "0.41s",
+          "seconds": 0.41
+        },
+        {
+          "timestamp": "2026-10-25T02:51:33.1742611Z",
+          "profile": "test",
+          "elapsed_text": "2m 39s",
+          "seconds": 159
+        },
+        {
+          "timestamp": "2026-10-25T02:51:38.7850172Z",
+          "profile": "dev",
+          "elapsed_text": "5.36s",
+          "seconds": 5.36
+        },
+        {
+          "timestamp": "2026-10-25T03:02:12.1344257Z",
+          "profile": "dev",
+          "elapsed_text": "10m 30s",
+          "seconds": 630
+        },
+        {
+          "timestamp": "2026-10-25T03:05:41.2211648Z",
+          "profile": "test",
+          "elapsed_text": "3m 17s",
+          "seconds": 197
+        },
+        {
+          "timestamp": "2026-10-25T03:05:52.9305014Z",
+          "profile": "test",
+          "elapsed_text": "0.43s",
+          "seconds": 0.43
+        },
+        {
+          "timestamp": "2026-10-25T03:05:54.0953824Z",
+          "profile": "test",
+          "elapsed_text": "0.41s",
+          "seconds": 0.41
+        },
+        {
+          "timestamp": "2026-10-25T03:05:55.3228925Z",
+          "profile": "test",
+          "elapsed_text": "0.41s",
+          "seconds": 0.41
+        },
+        {
+          "timestamp": "2026-10-25T03:05:56.5337168Z",
+          "profile": "test",
+          "elapsed_text": "0.41s",
+          "seconds": 0.41
+        },
+        {
+          "timestamp": "2026-10-25T03:05:57.7709209Z",
+          "profile": "test",
+          "elapsed_text": "0.42s",
+          "seconds": 0.42
+        },
+        {
+          "timestamp": "2026-10-25T03:05:59.0403316Z",
+          "profile": "test",
+          "elapsed_text": "0.41s",
+          "seconds": 0.41
+        },
+        {
+          "timestamp": "2026-10-25T03:06:15.4766422Z",
+          "profile": "dev",
+          "elapsed_text": "15.52s",
+          "seconds": 15.52
+        },
+        {
+          "timestamp": "2026-10-25T03:08:45.2888558Z",
+          "profile": "test",
+          "elapsed_text": "2m 29s",
+          "seconds": 149
+        },
+        {
+          "timestamp": "2026-10-25T03:17:04.4725704Z",
+          "profile": "dev",
+          "elapsed_text": "10.88s",
+          "seconds": 10.88
+        },
+        {
+          "timestamp": "2026-10-25T03:20:04.9360578Z",
+          "profile": "dev",
+          "elapsed_text": "2m 55s",
+          "seconds": 175
+        },
+        {
+          "timestamp": "2026-10-25T03:24:16.9497658Z",
+          "profile": "dev",
+          "elapsed_text": "2m 15s",
+          "seconds": 135
+        },
+        {
+          "timestamp": "2026-10-25T03:24:48.8956664Z",
+          "profile": "test",
+          "elapsed_text": "18.51s",
+          "seconds": 18.51
+        },
+        {
+          "timestamp": "2026-10-25T03:27:03.3096194Z",
+          "profile": "dev",
+          "elapsed_text": "2m 13s",
+          "seconds": 133
+        },
+        {
+          "timestamp": "2026-10-25T03:28:04.2103541Z",
+          "profile": "dev",
+          "elapsed_text": "15.91s",
+          "seconds": 15.91
+        }
+      ],
+      "cargo_compilation_seconds_sum": 2027.38,
+      "core_compilations": [
+        {
+          "timestamp": "2026-10-25T02:41:24.7706933Z",
+          "package": "ferroui-build-scan"
+        },
+        {
+          "timestamp": "2026-10-25T02:41:39.3594929Z",
+          "package": "ferroui-base"
+        },
+        {
+          "timestamp": "2026-10-25T02:41:39.3596565Z",
+          "package": "ferroui-controls"
+        },
+        {
+          "timestamp": "2026-10-25T02:44:52.6656640Z",
+          "package": "ferroui-build-scan"
+        },
+        {
+          "timestamp": "2026-10-25T02:44:56.0049603Z",
+          "package": "ferroui-base"
+        },
+        {
+          "timestamp": "2026-10-25T02:44:56.0051249Z",
+          "package": "ferroui-controls"
+        },
+        {
+          "timestamp": "2026-10-25T02:48:54.2196922Z",
+          "package": "ferroui-build-scan"
+        },
+        {
+          "timestamp": "2026-10-25T02:48:57.7688608Z",
+          "package": "ferroui-base"
+        },
+        {
+          "timestamp": "2026-10-25T02:48:57.7690825Z",
+          "package": "ferroui-controls"
+        },
+        {
+          "timestamp": "2026-10-25T02:51:41.8499604Z",
+          "package": "ferroui-base"
+        },
+        {
+          "timestamp": "2026-10-25T02:51:41.8509955Z",
+          "package": "ferroui-controls"
+        },
+        {
+          "timestamp": "2026-10-25T03:02:24.9107881Z",
+          "package": "ferroui-base"
+        },
+        {
+          "timestamp": "2026-10-25T03:02:24.9116117Z",
+          "package": "ferroui-controls"
+        },
+        {
+          "timestamp": "2026-10-25T03:06:16.0432411Z",
+          "package": "ferroui-build-scan"
+        },
+        {
+          "timestamp": "2026-10-25T03:06:19.2539919Z",
+          "package": "ferroui-base"
+        },
+        {
+          "timestamp": "2026-10-25T03:06:19.2541516Z",
+          "package": "ferroui-controls"
+        }
+      ],
+      "cache_log_lines": [
+        "2026-10-25T02:40:56.1142535Z Cache hit for restore-key: v0-rust-windows-Windows_NT-x64-4ea297e7-18ca7477",
+        "2026-10-25T02:41:01.2251850Z Cache Size: ~412 MB (431832543 B)",
+        "2026-10-25T02:41:15.1232740Z Cache restored successfully"
+      ],
+      "core_compile_counts": {
+        "ferroui-base": 6,
+        "ferroui-controls": 6,
+        "ferroui-build-scan": 4
+      }
+    },
+    {
+      "job_id": 121055454748,
+      "url": "https://github.com/wieslawsoltes/FerroUI/actions/runs/40155345452/job/121055454748",
+      "cargo_compilation_invocations": [
+        {
+          "timestamp": "2026-10-25T02:44:05.0283777Z",
+          "profile": "dev",
+          "elapsed_text": "2m 35s",
+          "seconds": 155
+        },
+        {
+          "timestamp": "2026-10-25T02:44:17.4203136Z",
+          "profile": "dev",
+          "elapsed_text": "12.14s",
+          "seconds": 12.14
+        },
+        {
+          "timestamp": "2026-10-25T02:45:36.3026722Z",
+          "profile": "dev",
+          "elapsed_text": "1m 18s",
+          "seconds": 78
+        },
+        {
+          "timestamp": "2026-10-25T02:46:58.1411222Z",
+          "profile": "dev",
+          "elapsed_text": "1m 21s",
+          "seconds": 81
+        },
+        {
+          "timestamp": "2026-10-25T02:47:57.6848458Z",
+          "profile": "dev",
+          "elapsed_text": "59.45s",
+          "seconds": 59.45
+        },
+        {
+          "timestamp": "2026-10-25T02:56:13.5155651Z",
+          "profile": "browser",
+          "elapsed_text": "8m 05s",
+          "seconds": 485
+        },
+        {
+          "timestamp": "2026-10-25T03:00:06.5590754Z",
+          "profile": "browser",
+          "elapsed_text": "2m 03s",
+          "seconds": 123
+        },
+        {
+          "timestamp": "2026-10-25T03:09:30.2922225Z",
+          "profile": "browser",
+          "elapsed_text": "8m 43s",
+          "seconds": 523
+        }
+      ],
+      "cargo_compilation_seconds_sum": 1516.59,
+      "core_compilations": [
+        {
+          "timestamp": "2026-10-25T02:41:29.6782904Z",
+          "package": "ferroui-build-scan"
+        },
+        {
+          "timestamp": "2026-10-25T02:41:33.9704519Z",
+          "package": "ferroui-base"
+        },
+        {
+          "timestamp": "2026-10-25T02:41:33.9706501Z",
+          "package": "ferroui-controls"
+        },
+        {
+          "timestamp": "2026-10-25T02:44:18.1920026Z",
+          "package": "ferroui-base"
+        },
+        {
+          "timestamp": "2026-10-25T02:48:08.0502284Z",
+          "package": "ferroui-build-scan"
+        },
+        {
+          "timestamp": "2026-10-25T02:48:10.6604057Z",
+          "package": "ferroui-base"
+        },
+        {
+          "timestamp": "2026-10-25T02:48:10.6606300Z",
+          "package": "ferroui-controls"
+        }
+      ],
+      "cache_log_lines": [
+        "2026-10-25T02:40:34.5307949Z Cache hit for: emsdk-Linux-6.0.10",
+        "2026-10-25T02:40:36.6296113Z Cache Size: ~455 MB (477038549 B)",
+        "2026-10-25T02:40:39.8860089Z Cache restored successfully",
+        "2026-10-25T02:40:40.1291407Z Cache hit for: wasm-bindgen-cli-Linux-0.2.129-rust-1.99.0",
+        "2026-10-25T02:40:40.3736027Z Cache Size: ~8 MB (8716239 B)",
+        "2026-10-25T02:40:40.4268809Z Cache restored successfully",
+        "2026-10-25T02:40:54.2980738Z Cache hit for: v0-rust-browser-browser-Linux-x64-801609ac-57a8c09c",
+        "2026-10-25T02:40:56.9984904Z Cache Size: ~617 MB (646623845 B)",
+        "2026-10-25T02:41:02.0919865Z Cache restored successfully",
+        "2026-10-25T02:41:06.3260352Z Cache hit for: node-cache-Linux-x64-npm-f7a8f7c60214e33e2206102d670ebd9ae7a29a619b71049c46e9104e35ff02c5",
+        "2026-10-25T02:41:06.6913418Z Cache Size: ~34 MB (35199622 B)",
+        "2026-10-25T02:41:06.8291743Z Cache restored successfully"
+      ],
+      "core_compile_counts": {
+        "ferroui-base": 3,
+        "ferroui-controls": 2,
+        "ferroui-build-scan": 2
+      }
+    },
+    {
+      "job_id": 121055454798,
+      "url": "https://github.com/wieslawsoltes/FerroUI/actions/runs/40155345452/job/121055454798",
+      "cargo_compilation_invocations": [
+        {
+          "timestamp": "2026-10-25T02:51:13.4405619Z",
+          "profile": "browser",
+          "elapsed_text": "9m 48s",
+          "seconds": 588
+        },
+        {
+          "timestamp": "2026-10-25T02:52:48.1491932Z",
+          "profile": "browser",
+          "elapsed_text": "1m 20s",
+          "seconds": 80
+        },
+        {
+          "timestamp": "2026-10-25T02:56:43.2131870Z",
+          "profile": "browser",
+          "elapsed_text": "3m 32s",
+          "seconds": 212
+        },
+        {
+          "timestamp": "2026-10-25T03:03:37.7228458Z",
+          "profile": "browser",
+          "elapsed_text": "2m 11s",
+          "seconds": 131
+        },
+        {
+          "timestamp": "2026-10-25T03:15:31.6575547Z",
+          "profile": "browser",
+          "elapsed_text": "11m 11s",
+          "seconds": 671
+        }
+      ],
+      "cargo_compilation_seconds_sum": 1682,
+      "core_compilations": [
+        {
+          "timestamp": "2026-10-25T02:41:25.8489337Z",
+          "package": "ferroui-build-scan"
+        },
+        {
+          "timestamp": "2026-10-25T02:41:30.5546665Z",
+          "package": "ferroui-base"
+        },
+        {
+          "timestamp": "2026-10-25T02:41:48.5881759Z",
+          "package": "ferroui-controls"
+        }
+      ],
+      "cache_log_lines": [
+        "2026-10-25T02:40:34.1351323Z Cache hit for: emsdk-Linux-6.0.10",
+        "2026-10-25T02:40:36.5162089Z Cache Size: ~455 MB (477038549 B)",
+        "2026-10-25T02:40:40.3267466Z Cache restored successfully",
+        "2026-10-25T02:40:40.7099688Z Cache hit for: wasm-bindgen-cli-Linux-0.2.129-rust-1.99.0",
+        "2026-10-25T02:40:40.9787093Z Cache Size: ~8 MB (8716239 B)",
+        "2026-10-25T02:40:41.0373653Z Cache restored successfully",
+        "2026-10-25T02:40:41.2396326Z Cache hit for: rust-nightly-Linux-X64-nightly-2026-07-01-rust-src-wasm32-unknown-emscripten",
+        "2026-10-25T02:40:42.3192768Z Cache Size: ~223 MB (234270934 B)",
+        "2026-10-25T02:40:43.7903201Z Cache restored successfully",
+        "2026-10-25T02:41:10.3692053Z Cache hit for: v0-rust-browser-threads-nightly-2026-07-01-browser-threads-Linux-x64-632f475c-57a8c09c",
+        "2026-10-25T02:41:11.5403097Z Cache Size: ~212 MB (222208108 B)",
+        "2026-10-25T02:41:12.8319060Z Cache restored successfully",
+        "2026-10-25T02:41:13.7021473Z Cache hit for: node-cache-Linux-x64-npm-f7a8f7c60214e33e2206102d670ebd9ae7a29a619b71049c46e9104e35ff02c5",
+        "2026-10-25T02:41:14.0375602Z Cache Size: ~34 MB (35199622 B)",
+        "2026-10-25T02:41:14.1868723Z Cache restored successfully"
+      ],
+      "core_compile_counts": {
+        "ferroui-base": 1,
+        "ferroui-controls": 1,
+        "ferroui-build-scan": 1
+      }
+    }
+  ]
+}

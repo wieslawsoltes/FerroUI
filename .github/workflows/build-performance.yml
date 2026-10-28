@@ -1,0 +1,277 @@
+name: Build performance
+
+on:
+  pull_request:
+    paths:
+      - 'src/FerroUI.Build.Scan/**'
+      - 'src/FerroUI.Build.Tasks/**'
+      - 'src/Markup/FerroUI.Markup.Xaml.Loader/**'
+      - 'samples/SampleBuild/**'
+      - 'samples/ControlCatalog/build.rs'
+      - 'samples/ControlCatalog/build/placeholder_geometry.rs'
+      - 'scripts/build-perf/**'
+      - 'scripts/build-browser.sh'
+      - 'scripts/browser/build-webapp.mjs'
+      - 'scripts/browser/compression-cache.mjs'
+      - 'scripts/browser/module-sizes.mjs'
+      - 'scripts/browser/tests/build_tooling.test.mjs'
+      - '.cargo/build-tools.toml'
+      - '.cargo/compiler-cache.toml'
+      - '.github/workflows/build-performance.yml'
+  workflow_dispatch:
+    inputs:
+      baseline:
+        description: 'Baseline commit or branch (same benchmark command/toolchain)'
+        default: 'main'
+        required: true
+      repetitions:
+        description: 'Independent cold builds per revision'
+        default: '3'
+        required: true
+
+permissions:
+  contents: read
+
+concurrency:
+  group: build-performance-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  CARGO_TERM_COLOR: never
+  CARGO_INCREMENTAL: 0
+  CARGO_PROFILE_DEV_DEBUG: 0
+  CARGO_PROFILE_TEST_DEBUG: 0
+  RUST_BACKTRACE: 1
+
+jobs:
+  catalog-freshness:
+    name: Catalog first repeat and generated asset bytes
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          path: candidate
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          path: baseline
+          ref: ${{ github.event.pull_request.base.sha || inputs.baseline || 'main' }}
+      - uses: dtolnay/rust-toolchain@89b12181fb390509a0842a86cc55eeb8eb928c1d # stable action
+        with:
+          toolchain: '1.99.1'
+      - name: Native catalog build dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y pkg-config libfontconfig1-dev libfreetype6-dev
+      - name: Source, geometry, asset and generated-intermediate regression controls
+        run: >-
+          python3 candidate/scripts/build-perf/catalog-inputs.py
+          --baseline baseline --candidate candidate --output results/catalog-inputs
+      - name: Three population and immediate-repeat pairs of the real catalog
+        run: >-
+          python3 candidate/scripts/build-perf/catalog-freshness.py
+          --baseline baseline --candidate candidate --output results/catalog-freshness
+          --repetitions 3 --jobs 4
+      - name: Publish first-repeat timings, generated content and input controls
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: catalog-first-repeat-evidence
+          path: results
+          if-no-files-found: error
+
+  sample-freshness:
+    name: Cargo sample freshness and input invalidation
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          path: candidate
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          path: baseline
+          ref: ${{ github.event.pull_request.base.sha || inputs.baseline || 'main' }}
+      - uses: dtolnay/rust-toolchain@89b12181fb390509a0842a86cc55eeb8eb928c1d # stable action
+        with:
+          toolchain: '1.99.1'
+      - name: Compare unchanged real sample builds and check optional input transitions
+        run: >-
+          python3 candidate/scripts/build-perf/sample-freshness.py
+          --baseline baseline --candidate candidate --output results/sample-freshness
+          --repetitions 3 --jobs 4
+      - name: Publish first-build costs, repeated-build samples and input-change controls
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: sample-freshness-evidence
+          path: results/sample-freshness
+          if-no-files-found: error
+
+  compiler:
+    name: Cold XAML build (${{ matrix.mode }})
+    strategy:
+      fail-fast: false
+      matrix:
+        mode: [source, optimized-build-tools]
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          path: candidate
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          path: baseline
+          ref: ${{ github.event.pull_request.base.sha || inputs.baseline || 'main' }}
+      - uses: dtolnay/rust-toolchain@89b12181fb390509a0842a86cc55eeb8eb928c1d # stable action
+        with:
+          toolchain: '1.99.1'
+      - name: Benchmark evidence checks
+        run: python3 -m unittest discover -s candidate/scripts/build-perf -p 'test_*.py'
+      - name: Alternating cold builds of the full WinUI theme dependency graph
+        env:
+          REPETITIONS: ${{ inputs.repetitions || '3' }}
+          MODE: ${{ matrix.mode }}
+        run: |
+          OPTIONS=()
+          if [ "$MODE" = optimized-build-tools ]; then OPTIONS+=(--candidate-build-tools); fi
+          python3 candidate/scripts/build-perf/compare.py \
+            --baseline baseline --candidate candidate --output results/compile \
+            --package ferroui-themes-winui --repetitions "$REPETITIONS" --jobs 4 "${OPTIONS[@]}"
+      - name: Publish raw logs, unit graph, generated-output hashes and Cargo timings
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: cold-build-evidence-${{ matrix.mode }}
+          path: results
+          if-no-files-found: error
+
+  correctness:
+    name: Build tools and native core correctness
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - uses: dtolnay/rust-toolchain@89b12181fb390509a0842a86cc55eeb8eb928c1d # stable action
+        with:
+          toolchain: '1.99.1'
+      - name: Scanner, compiler, property system, controls and WinUI theme suites
+        run: >-
+          cargo test --locked --lib --no-fail-fast --timings
+          -p ferroui-build-scan -p ferroui-build -p xamlx
+          -p ferroui-base -p ferroui-controls -p ferroui-markup-xaml-loader
+          -p ferroui-themes-winui
+      - name: Publish correctness build timings
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: correctness-build-timings
+          path: target/cargo-timings
+
+  scanner:
+    name: Scanner speed and exact semantic output (${{ matrix.mode }})
+    strategy:
+      fail-fast: false
+      matrix:
+        mode: [source, optimized-build-tools]
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          path: candidate
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          path: baseline
+          ref: ${{ github.event.pull_request.base.sha || inputs.baseline || 'main' }}
+      - uses: dtolnay/rust-toolchain@89b12181fb390509a0842a86cc55eeb8eb928c1d # stable action
+        with:
+          toolchain: '1.99.1'
+      - name: Compare models, diagnostics, inputs, functions and statistics over five scans
+        env:
+          MODE: ${{ matrix.mode }}
+        run: |
+          OPTIONS=()
+          if [ "$MODE" = optimized-build-tools ]; then OPTIONS+=(--candidate-build-tools); fi
+          python3 candidate/scripts/build-perf/scanner.py \
+            --baseline baseline --candidate candidate --output results/scanner --repetitions 5 "${OPTIONS[@]}"
+      - name: Publish scanner evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: scanner-evidence-${{ matrix.mode }}
+          path: results/scanner
+          if-no-files-found: error
+
+  compiler-cache:
+    name: Same-profile compiler cache (${{ matrix.profile }}, ${{ matrix.mode }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - profile: dev
+            mode: default
+          - profile: release
+            mode: default
+          - profile: dev
+            mode: optimized-build-tools
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - uses: dtolnay/rust-toolchain@89b12181fb390509a0842a86cc55eeb8eb928c1d # stable action
+        with:
+          toolchain: '1.99.1'
+      - uses: Mozilla-Actions/sccache-action@fc920bf0ec8de6ee65d409111f7ec508035751ba # v0.0.11
+        with:
+          version: 'v0.19.0'
+      - name: Cold compilation, cache population, replay and stale-output negative controls
+        env:
+          PROFILE: ${{ matrix.profile }}
+          MODE: ${{ matrix.mode }}
+        run: |
+          OPTIONS=()
+          if [ "$MODE" = optimized-build-tools ]; then
+            OPTIONS+=(--cargo-config .cargo/build-tools.toml --minimum-speedup 10)
+          fi
+          python3 scripts/build-perf/cache.py --source . --output results/cache \
+            --package ferroui-controls --profile "$PROFILE" --repetitions 3 --jobs 4 "${OPTIONS[@]}"
+      - name: Publish cache statistics, exact workload and invalidation evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: compiler-cache-evidence-${{ matrix.profile }}-${{ matrix.mode }}
+          path: results/cache
+          if-no-files-found: error
+
+  browser-tooling:
+    name: Browser build reuse and exact compression
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: 24
+      - name: Browser build input and output invalidation tests
+        run: node scripts/browser/tests/build_tooling.test.mjs
+      - name: Measure repeated full validation and verified bundle/compression reuse
+        run: node scripts/build-perf/browser.mjs --output results/browser-tooling/report.json --samples 3 --site samples/ControlCatalog/Assets
+      - name: Publish browser tooling performance and equivalence evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: browser-tooling-evidence
+          path: results/browser-tooling
+          if-no-files-found: error
