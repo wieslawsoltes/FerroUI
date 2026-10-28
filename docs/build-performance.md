@@ -7,8 +7,7 @@ execution separately. A speedup in one row is not a speedup of the entire worksp
 ## Evidence and decision
 
 The starting point is main commit `98a56f09459c8ae02f07a2bcd235c0e87b4d44b3`.
-The [historical CI audit](build-performance-ci-audit.md) and
-[machine-readable baseline](build-performance-baseline.json) identify the actual runs,
+The [historical CI audit](build-performance-ci-audit.md) identifies the actual runs,
 job steps and compilation messages. The successful October 25 nightly CI run took about
 52 minutes. Dependency caches were already hitting. Windows compiled Base and Controls
 in six command/feature contexts; macOS spent substantial time executing tests after
@@ -142,10 +141,12 @@ This also accelerates scanner execution that still happens when a newly empty
 target directory requires build scripts to run. The combined CI experiment uses
 the build-tool configuration for its uncached, cache-population and cache-replay
 legs alike, so its ratio compares identical selected profiles.
-That CI lane explicitly requires at least 10× for this populated-local-cache
-workload, alongside the generated-output, invalidation and test gates. The
-threshold is an acceptance check; a passing measurement must still be reported
-separately from first compilation and complete CI wall time.
+A manual run of that CI lane (`workflow_dispatch`) requires at least 10× for this
+populated-local-cache workload, alongside the generated-output, invalidation and test
+gates. On a pull request the ratio is only reported: the timing of a shared runner is
+too noisy for a hard gate with a 12.5× measured margin, so there only the correctness
+gates fail the job. A passing measurement must still be reported separately from first
+compilation and complete CI wall time.
 
 The native core graph is the initial audited/benchmarked scope. Stock Cargo still resolves
 features, tracks inputs, runs build scripts and invokes rustc. The wrapper can reuse

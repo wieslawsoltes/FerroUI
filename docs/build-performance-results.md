@@ -15,8 +15,7 @@ passed: the platform workflow contains existing `continue-on-error` checks. The
 [later platform audit](build-performance-follow-up.md) documents the Windows
 automation failures and their exact agreement with the main baseline.
 
-The [machine-readable audit](build-performance-results.json) retains all individual
-samples, job/artifact links and SHA-256 identities. All nine downloaded benchmark
+The individual samples are in the artifacts of the [build-performance runs](https://github.com/wieslawsoltes/FerroUI/actions/workflows/build-performance.yml). All nine downloaded benchmark
 archives matched their GitHub artifact digests. This document identifies its
 measured source explicitly; a subsequent source change requires its own CI run.
 The [level-2 and browser-invalidation follow-up](build-performance-follow-up.md)

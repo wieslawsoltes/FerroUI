@@ -1,8 +1,8 @@
 # Build-time audit of the existing CI
 
 Observed on 2026-10-25 at main commit
-`98a56f09459c8ae02f07a2bcd235c0e87b4d44b3`. The normalized observations and their
-source URLs are in [build-performance-baseline.json](build-performance-baseline.json).
+`98a56f09459c8ae02f07a2bcd235c0e87b4d44b3`. The observations come from the CI runs of that commit; the raw data is not kept in the
+repository.
 These historical runs identify where to measure; they do not establish the speedup
 of a later change. Queue time, compilation, test execution and reporting are different
 quantities.

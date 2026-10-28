@@ -156,9 +156,9 @@ source-only CI comparison is therefore intentionally a control measurement.
 
 An October 26 follow-up tested whether enabling Base's existing `markup-functions`
 feature on the build tool's dependency edge would let stock Cargo share native
-host and target units. The [complete experiment record](build-performance-host-feature-alignment.json)
-preserves the exact one-line manifest patch, command, compiler/profile identities,
-unit differences, generated-output hashes and selected Cargo timing observations.
+host and target units. The experiment recorded the exact one-line manifest patch, command, compiler/profile identities,
+unit differences, generated-output hashes and selected Cargo timing observations (raw data not
+kept in the repository).
 Its source is `34676fe53c165cd305b7f26f62e7ff1d87427669`, with the same explicit
 level-2 tool configuration on both sides, four jobs, no incremental/compiler cache,
 and new empty targets. This is a different experiment from the scanner rows above.

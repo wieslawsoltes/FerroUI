@@ -25,10 +25,9 @@ attributed to this configuration.
 
 ## Source and method
 
-The [complete machine-readable report](build-performance-profile-tuning.json)
-records source commit `34676fe53c165cd305b7f26f62e7ff1d87427669`, exact
-Rust/Cargo 1.99.1 identities, the lockfile/manifests/configuration/driver hashes,
-every sample, execution order and equivalence checks. These are **local Linux
+The measurements used source commit `34676fe53c165cd305b7f26f62e7ff1d87427669` and
+Rust/Cargo 1.99.1, with the lockfile/manifests/configuration/driver hashes, execution
+order and equivalence checks recorded. These are **local Linux
 container measurements**, with nine visible processors and four Cargo jobs,
 rather than GitHub Actions results. No result from a different runner is used as
 the denominator of a local ratio.

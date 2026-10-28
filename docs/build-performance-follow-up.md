@@ -10,9 +10,8 @@ The source comparisons use baseline
 and all fifteen job conclusions in
 [platform run 40332610557](https://github.com/wieslawsoltes/FerroUI/actions/runs/40332610557)
 are successful, subject to the existing optional-test qualifications below.
-The [complete evidence JSON](build-performance-follow-up.json) preserves all
-individual samples, medians, source/toolchain identities, correctness controls,
-job/artifact links and the ten independently verified archive SHA-256 digests.
+The individual samples, medians, source/toolchain identities and correctness controls are in
+the artifacts of those runs; a new [build-performance run](https://github.com/wieslawsoltes/FerroUI/actions/workflows/build-performance.yml) reproduces them.
 
 This revision follows the [historical level-3 results](build-performance-results.md)
 and the [controlled level-3 versus level-2 experiment](build-performance-profile-tuning.md).
