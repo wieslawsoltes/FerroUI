@@ -170,12 +170,12 @@ fn native_designer_icon_atlas_preserves_all_geometry_and_compact_presenter_bound
     heading.set_font_size(18.0);
     heading.set_font_weight(FontWeight::SemiBold);
     heading.set_margin(Thickness::new(16.0, 18.0, 0.0, 0.0));
-    panel.children().add(heading.upcast());
+    panel.children().add(heading.upcast::<Control>());
     let grid = UniformGrid::new();
     grid.set_columns(8);
     grid.set_margin(Thickness::uniform(8.0));
     Grid::set_row(&grid, 1);
-    panel.children().add(grid.clone().upcast());
+    panel.children().add(grid.clone().upcast::<Control>());
     let mut icons: Vec<Ref<PathIcon>> = Vec::new();
     for (name, data) in &paths {
         let card = StackPanel::new();
@@ -184,7 +184,7 @@ fn native_designer_icon_atlas_preserves_all_geometry_and_compact_presenter_bound
         let label = TextBlock::new();
         label.set_text(Some(name));
         label.set_font_size(10.0);
-        card.children().add(label.upcast());
+        card.children().add(label.upcast::<Control>());
         let row = StackPanel::new();
         row.set_orientation(Orientation::Horizontal);
         row.set_spacing(8.0);
@@ -203,14 +203,14 @@ fn native_designer_icon_atlas_preserves_all_geometry_and_compact_presenter_bound
                     SolidColorBrush::from_uint32(if light { 0xff202126 } else { 0xfff2f3f5 })
                         .into(),
                 ));
-                examples.children().add(icon.clone().upcast());
+                examples.children().add(icon.clone().upcast::<Control>());
                 icons.push(icon);
             }
-            background.set_child(Some(examples.upcast()));
-            row.children().add(background.upcast());
+            background.set_child(Some(examples.upcast::<Control>()));
+            row.children().add(background.upcast::<Control>());
         }
-        card.children().add(row.upcast());
-        grid.children().add(card.upcast());
+        card.children().add(row.upcast::<Control>());
+        grid.children().add(card.upcast::<Control>());
     }
     let size = Size::new(1152.0, 74.0 + paths.len().div_ceil(8) as f64 * 62.0);
     let window = Window::new();
@@ -233,7 +233,7 @@ fn native_designer_icon_atlas_preserves_all_geometry_and_compact_presenter_bound
             PixelSize::new(width, height),
             Vector::new(96.0 * scale, 96.0 * scale),
         );
-        bitmap.render(&panel.clone().upcast());
+        bitmap.render(&panel.clone().upcast::<ferroui_base::Visual>());
         let mut pixels = vec![0; width as usize * height as usize * 4];
         bitmap.copy_pixels(PixelRect::new(0, 0, width, height), &mut pixels, width * 4);
         for icon in &icons {
