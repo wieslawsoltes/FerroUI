@@ -141,6 +141,12 @@ it and reserves one logical pixel of padding. Its fill follows the icon's foregr
 This handles paths whose authored coordinates are larger than the compact toolbar box
 without depending on an installed symbol font.
 
+Layout rounding is disabled on the template's inner `Border` and `Path`. Uniform fitting
+can produce fractional geometry dimensions; rounding the inner desired size before
+centering can shift the rendered geometry away from the center of its frame. Using the
+true fractional dimensions keeps the geometry centered. The outer icon and button frames
+retain their normal layout rounding and stay aligned.
+
 Compact icon buttons also use centered content, a two-pixel padding budget and explicit
 minimum-size overrides. Previously, the shared six-pixel button padding could leave too
 little space for an icon inside a small action button. Correct path fitting and sufficient
@@ -158,9 +164,14 @@ buttons, menus and rows remain the command targets.
 
 The shared `vector_icon` and `geometry_icon` helpers are internal implementation details.
 Hosts continue to supply custom asset geometry through `AssetIcon::CustomPath`; this change
-does not introduce a second public icon ABI. The native icon fixture inventories production
-paths and checks offset/negative-coordinate custom paths, normalized bounds, compact button
-and command-bar constraints, and separation from preview-owned templates.
+does not introduce a second public icon ABI.
+
+The native icon audit covers **103 unique production paths** and **two custom paths** with
+offset and negative-coordinate origins. Each path is exercised at **14 and 24 logical
+pixels**, on both **dark and light backgrounds**. Geometry assertions verify complete
+bounds, the one-pixel gutter and centering; native raster checks at **1×, 1.25× and 2×**
+verify visible output at each display scale. The fixture also checks the actual workspace's
+compact button and command-bar constraints and separation from preview-owned templates.
 
 ## Why these conventions
 
