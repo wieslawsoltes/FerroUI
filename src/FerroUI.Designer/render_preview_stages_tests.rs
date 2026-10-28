@@ -3,11 +3,11 @@
 use super::*;
 use crate::{
     DefinitionPreviewOptions, PreviewEnvironment, PreviewFlowDirection, PreviewSourceAnchor,
-    PreviewStageConfiguration, PreviewStageState, PreviewStageStatus, PreviewStageTarget,
-    PreviewTheme,
+    PreviewStageConfiguration, PreviewStageExportOptions, PreviewStageLayout, PreviewStageMode,
+    PreviewStageState, PreviewStageStatus, PreviewStageTarget, PreviewTheme,
 };
 use ferroui_base::{Point, Ref};
-use ferroui_controls::{Border, TextBox};
+use ferroui_controls::{Border, CheckBox, ComboBox, ScrollViewer, TextBlock, TextBox};
 use ferroui_designer_tools::ComponentCatalog;
 
 const SOURCE: &str = include_str!("../../docs/designer/samples/PreviewStages.xaml");
@@ -256,12 +256,178 @@ fn native_preview_stages_render_desktop_phone_state_template_and_staged_editor()
         &directory.join("designer-preview-stage-editor.png"),
     );
     editor.cancel();
+
+    // The next capture exercises the new fitting policy and display-only zoom on
+    // the same accepted native graphs, with live text surviving logical resizing.
+    workspace.set_canvas_focused(true);
+    workspace.remove_preview_stage(stages[2]).unwrap();
+    let mut desktop = workspace.preview_stage(stages[0]).unwrap().configuration;
+    desktop.name = "Desktop · resized / Live".into();
+    desktop.mode = PreviewStageMode::Live;
+    workspace
+        .update_preview_stage(stages[0], desktop.clone())
+        .unwrap();
+    settle(&window, &clock);
+    let input = named::<TextBox>(
+        &workspace.preview_stage_control(stages[0]).unwrap(),
+        "SearchInput",
+    );
+    input.set_text(Some("Live text survives layout changes"));
+    desktop.environment.width = 720.0;
+    desktop.environment.height = 500.0;
+    workspace.update_preview_stage(stages[0], desktop).unwrap();
+    let mut phone = workspace.preview_stage(stages[1]).unwrap().configuration;
+    phone.name = "Phone · fit height / Loading".into();
+    phone.layout = PreviewStageLayout::FixedWidth;
+    workspace.update_preview_stage(stages[1], phone).unwrap();
+    let mut component = workspace.preview_stage(stages[3]).unwrap().configuration;
+    component.name = "Action · fit content / 100%".into();
+    component.layout = PreviewStageLayout::SizeThatFits;
+    workspace
+        .update_preview_stage(stages[3], component)
+        .unwrap();
+    settle(&window, &clock);
+    named::<ComboBox>(&view.control(), &format!("Stage{}Zoom", stages[0])).set_selected_index(2);
+    named::<ComboBox>(&view.control(), &format!("Stage{}Zoom", stages[3])).set_selected_index(4);
+    settle(&window, &clock);
+    assert_eq!(
+        named::<TextBox>(
+            &workspace.preview_stage_control(stages[0]).unwrap(),
+            "SearchInput"
+        ),
+        input,
+        "Changing logical constraints must retain the original native input"
+    );
+    assert_eq!(
+        input.text().as_deref(),
+        Some("Live text survives layout changes")
+    );
+    let fitted = workspace.preview_stage(stages[3]).unwrap();
+    assert_eq!(
+        fitted.layout_size,
+        crate::PreviewStageSize {
+            width: 368.0,
+            height: 120.0
+        },
+        "Native definition fitting includes the projection's existing 24-unit padding"
+    );
+    capture(
+        &workspace,
+        &clock,
+        &directory.join("designer-preview-fitting.png"),
+    );
+    let exported = workspace
+        .preview_stage_image(stages[1], PreviewStageExportOptions::default())
+        .unwrap();
+    let phone = workspace.preview_stage(stages[1]).unwrap();
+    assert_eq!(exported.pixel_width, phone.layout_size.width.ceil() as u32);
+    assert_eq!(
+        exported.pixel_height,
+        phone.layout_size.height.ceil() as u32
+    );
+    #[cfg(feature = "mcp")]
+    {
+        use base64::Engine;
+        use ferroui_mcp::{Permissions, UiToolProvider};
+        use serde_json::json;
+
+        let provider = crate::mcp::DesignerMcp::with_workspace(&workspace);
+        let permissions = Permissions {
+            allow_property_writes: false,
+            allow_input: false,
+        };
+        let before = provider
+            .call("designer_preview_stages", &json!({}), permissions)
+            .unwrap();
+        let image = provider
+            .call(
+                "designer_preview_image",
+                &json!({"stage":stages[1],"expected_model":before["model"],"scale":1.0}),
+                permissions,
+            )
+            .unwrap();
+        assert_eq!(image["mimeType"], "image/png");
+        assert_eq!(image["stage"], stages[1]);
+        assert_eq!(image["source_uri"], uri);
+        assert_eq!(image["rendered_revision"], 0);
+        assert_eq!(image["width"], exported.pixel_width);
+        assert_eq!(image["height"], exported.pixel_height);
+        assert_eq!(image["logical_width"], phone.layout_size.width);
+        assert_eq!(image["logical_height"], phone.layout_size.height);
+        assert_eq!(image["model"], before["model"]);
+        assert_eq!(
+            base64::engine::general_purpose::STANDARD
+                .decode(image["data"].as_str().unwrap())
+                .unwrap(),
+            exported.png
+        );
+        assert_eq!(
+            provider
+                .call("designer_preview_stages", &json!({}), permissions)
+                .unwrap(),
+            before,
+            "Reading a preview image cannot rebuild, mutate or synchronize the board"
+        );
+    }
+    std::fs::write(directory.join("designer-preview-export.png"), exported.png).unwrap();
+
+    let anchor = named::<Button>(&view.control(), &format!("Stage{}Options", stages[0]));
+    workspace
+        .show_preview_stage_matrix_editor(stages[0], &anchor)
+        .unwrap();
+    let matrix = workspace.preview_stage_matrix_editor().unwrap();
+    for name in [
+        "MatrixSize0",
+        "MatrixSize2",
+        "MatrixTheme0",
+        "MatrixTheme1",
+        "MatrixState0_1",
+        "MatrixState0_2",
+    ] {
+        named::<CheckBox>(&matrix.control(), name).set_is_checked(Some(true));
+    }
+    settle(&window, &clock);
+    assert_eq!(matrix.draft().count().unwrap(), 8);
+    assert!(named::<TextBlock>(&matrix.control(), "MatrixSummary")
+        .text()
+        .unwrap_or_default()
+        .starts_with("8 new stages"));
+    let matrix_apply = named::<Button>(&matrix.control(), "MatrixApply");
+    assert!(matrix_apply.is_enabled());
+    let point = matrix_apply
+        .translate_point(Point::default(), &window)
+        .unwrap();
+    assert!(point.x >= 0.0 && point.x + matrix_apply.bounds().width <= window.bounds().width + 0.5);
+    assert!(
+        point.y >= 0.0 && point.y + matrix_apply.bounds().height <= window.bounds().height + 0.5
+    );
+    let matrix_scroll = named::<ScrollViewer>(&matrix.control(), "MatrixScroll");
+    let data_heading = matrix
+        .control()
+        .get_logical_descendants()
+        .filter_map(|control| control.cast::<TextBlock>())
+        .find(|control| control.text().as_deref() == Some("Data projection"))
+        .unwrap();
+    let offset = data_heading
+        .translate_point(Point::default(), &matrix_scroll)
+        .unwrap()
+        .y
+        + matrix_scroll.offset().y
+        - 4.0;
+    matrix_scroll.set_offset(ferroui_base::Vector::new(0.0, offset.max(0.0)));
+    capture_window(
+        &window,
+        &clock,
+        &directory.join("designer-preview-matrix.png"),
+    );
+    matrix.cancel();
     assert_eq!(workspace.session().borrow().document().source(), SOURCE);
     assert_eq!(workspace.session().borrow().document().revision(), 0);
     assert!(!workspace.session().borrow().can_undo());
     window.close();
     drop(apply);
     drop(editor);
+    drop(matrix);
     drop(view);
     drop(window);
     drop(workspace);

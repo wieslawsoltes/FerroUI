@@ -18,6 +18,7 @@ pub(super) struct PreviewStagesUi {
     attached: RefCell<BTreeSet<PreviewStageId>>,
     mapped_epoch: Cell<u64>,
     editor: RefCell<Option<Rc<PreviewStageEditor>>>,
+    matrix_editor: RefCell<Option<Rc<crate::PreviewStageMatrixEditor>>>,
     editor_epoch: Cell<Option<u64>>,
     flyout: RefCell<Option<Ref<Flyout>>>,
 }
@@ -36,6 +37,7 @@ impl Default for PreviewStagesUi {
             attached: RefCell::new(BTreeSet::new()),
             mapped_epoch: Cell::new(0),
             editor: RefCell::new(None),
+            matrix_editor: RefCell::new(None),
             editor_epoch: Cell::new(None),
             flyout: RefCell::new(None),
         }
@@ -66,6 +68,87 @@ impl DesignerWorkspace {
     }
     pub fn preview_stage_view(&self) -> Option<Rc<PreviewStageView>> {
         self.preview_stages.view.borrow().clone()
+    }
+    pub fn preview_stage_matrix_editor(&self) -> Option<Rc<crate::PreviewStageMatrixEditor>> {
+        self.preview_stages.matrix_editor.borrow().clone()
+    }
+
+    /// Observe the exact bounded product before creating any native controls.
+    pub fn plan_preview_stage_matrix(
+        &self,
+        id: PreviewStageId,
+        matrix: &crate::PreviewStageMatrix,
+    ) -> Result<Vec<PreviewStageConfiguration>, String> {
+        let stage = self
+            .preview_stage(id)
+            .ok_or("The base preview stage was removed")?;
+        let source = self
+            .preview_stage_sources()
+            .into_iter()
+            .find(|source| source.uri == stage.configuration.source_uri)
+            .ok_or("Open the base stage's source document before comparing its views")?;
+        if source.pending {
+            return Err(
+                "Apply or repair the pending source draft before creating a comparison".into(),
+            );
+        }
+        matrix.expand(
+            &stage.configuration,
+            &source.document,
+            crate::MAX_PREVIEW_STAGES.saturating_sub(self.preview_stages().len()),
+        )
+    }
+
+    pub fn compare_preview_stage_matrix(
+        self: &Rc<Self>,
+        id: PreviewStageId,
+        matrix: crate::PreviewStageMatrix,
+    ) -> Result<Vec<PreviewStageId>, String> {
+        let configurations = self.plan_preview_stage_matrix(id, &matrix)?;
+        self.sync_preview_stage_sources()?;
+        let result = self
+            .preview_stages
+            .board
+            .borrow_mut()
+            .add_configurations(configurations);
+        self.refresh_preview_stages();
+        result
+    }
+
+    /// Capture the current accepted native view without refreshing, arranging or
+    /// advancing it. Pending/stale/failed views cannot be exported as current source.
+    pub fn preview_stage_image(
+        &self,
+        id: PreviewStageId,
+        options: crate::PreviewStageExportOptions,
+    ) -> Result<crate::PreviewStageImage, String> {
+        let info = self
+            .preview_stage(id)
+            .ok_or("The preview stage was removed")?;
+        if !matches!(
+            info.status,
+            PreviewStageStatus::Ready { .. } | PreviewStageStatus::Paused { .. }
+        ) || !self.preview_stage_image_source_is_current(id)
+        {
+            return Err(
+                "Refresh this stage from accepted current source before taking a screenshot".into(),
+            );
+        }
+        let model = self.preview_stage_model();
+        let control = self
+            .preview_stage_control(id)
+            .ok_or("The preview stage has no native view")?;
+        let image = crate::capture_preview_stage_png(&control, options)?;
+        if model != self.preview_stage_model()
+            || !self.preview_stage_image_source_is_current(id)
+            || !control.is_measure_valid()
+            || !control.is_arrange_valid()
+            || control.bounds().width != image.logical_width
+            || control.bounds().height != image.logical_height
+        {
+            return Err("The preview changed during capture; take the screenshot again".into());
+        }
+        Ok(image)
     }
 
     pub fn add_preview_stage(
@@ -214,6 +297,11 @@ impl DesignerWorkspace {
     pub(super) fn refresh_preview_stage_visibility(&self) {
         let canvas = self.view_mode() != super::shell::WorkspaceViewMode::Xaml;
         let board = canvas && self.preview_stages_visible();
+        if !board {
+            if let Some(view) = self.preview_stage_view() {
+                view.cancel_interaction();
+            }
+        }
         self.root
             .get_control::<Control>("PreviewStagesHost")
             .set_is_visible(board);
@@ -351,6 +439,10 @@ impl DesignerWorkspace {
                     editor.retire();
                     editor.show_error("The sources or preview stages changed. Close and reopen this editor to apply a new stage configuration.");
                 }
+                if let Some(editor) = self.preview_stages.matrix_editor.borrow().as_ref() {
+                    editor.retire();
+                    editor.show_error("The sources or preview stages changed. Close and reopen this comparison to use current values.");
+                }
             }
             Ok(())
         })();
@@ -470,6 +562,41 @@ impl DesignerWorkspace {
             }
             PreviewStageAction::Compare(comparison) => {
                 self.add_preview_stage_comparison(comparison)
+            }
+            PreviewStageAction::CompareMatrix => {
+                let uri = self.session.borrow().document_uri().to_owned();
+                let stages = self.preview_stages();
+                let active = self.preview_stages.board.borrow().active();
+                let stage = stages
+                    .iter()
+                    .find(|stage| {
+                        Some(stage.id) == active
+                            && (stage.configuration.pinned || stage.configuration.source_uri == uri)
+                    })
+                    .or_else(|| {
+                        stages.iter().find(|stage| {
+                            stage.configuration.pinned || stage.configuration.source_uri == uri
+                        })
+                    })
+                    .ok_or("Add a visible stage before comparing views")?;
+                self.show_preview_stage_matrix_editor(stage.id, anchor)
+            }
+            PreviewStageAction::Resize {
+                stage,
+                epoch,
+                width,
+                height,
+            } => {
+                let mut info = self.accepted_preview_stage(stage, epoch)?;
+                info.configuration.layout = crate::PreviewStageLayout::Fixed;
+                info.configuration.environment.width = width;
+                info.configuration.environment.height = height;
+                self.update_preview_stage(stage, info.configuration)
+            }
+            PreviewStageAction::Export { stage, epoch } => {
+                self.accepted_preview_stage(stage, epoch)?;
+                self.request_save_preview_stage_image(stage);
+                Ok(())
             }
             PreviewStageAction::RefreshAll => {
                 let errors = self.refresh_all_preview_stages();
@@ -642,6 +769,9 @@ impl DesignerWorkspace {
         if let Some(editor) = self.preview_stages.editor.borrow().as_ref() {
             editor.retire();
         }
+        if let Some(editor) = self.preview_stages.matrix_editor.borrow().as_ref() {
+            editor.retire();
+        }
         if let Some(flyout) = self.preview_stages.flyout.borrow().as_ref() {
             flyout.hide();
         }
@@ -680,6 +810,75 @@ impl DesignerWorkspace {
         });
         *self.preview_stages.editor.borrow_mut() = Some(editor);
         self.preview_stages.editor_epoch.set(Some(epoch));
+        *self.preview_stages.flyout.borrow_mut() = Some(flyout.clone());
+        flyout.show_at(anchor);
+        Ok(())
+    }
+
+    pub fn show_preview_stage_matrix_editor(
+        self: &Rc<Self>,
+        id: PreviewStageId,
+        anchor: &Control,
+    ) -> Result<(), String> {
+        self.sync_preview_stage_sources()?;
+        let stage = self
+            .preview_stage(id)
+            .ok_or("The base preview stage was removed")?;
+        let source = self
+            .preview_stage_sources()
+            .into_iter()
+            .find(|source| source.uri == stage.configuration.source_uri)
+            .ok_or("Open this source document before comparing its views")?;
+        if source.pending || !source.document.is_valid() {
+            return Err("Apply or repair the source draft before comparing its views".into());
+        }
+        if let Some(editor) = self.preview_stages.editor.borrow().as_ref() {
+            editor.retire();
+        }
+        if let Some(editor) = self.preview_stages.matrix_editor.borrow().as_ref() {
+            editor.retire();
+        }
+        if let Some(flyout) = self.preview_stages.flyout.borrow().as_ref() {
+            flyout.hide();
+        }
+        let editor = crate::PreviewStageMatrixEditor::new(
+            stage.configuration,
+            source.document,
+            crate::MAX_PREVIEW_STAGES.saturating_sub(self.preview_stages().len()),
+        );
+        let flyout = Flyout::new();
+        flyout.flyout_presenter_classes().add("designer-chrome");
+        flyout
+            .flyout_presenter_classes()
+            .add("designer-stage-editor-flyout");
+        flyout.set_content(Some(Control::boxed(editor.control())));
+        let model = self.preview_stage_model();
+        let weak = Rc::downgrade(self);
+        editor.on_apply(move |matrix| {
+            let workspace = weak.upgrade().ok_or("The workspace was closed")?;
+            if workspace.preview_stage_model() != model {
+                return Err("The documents or stage board changed; reopen this comparison".into());
+            }
+            workspace
+                .compare_preview_stage_matrix(id, matrix)
+                .map(|_| ())
+        });
+        let close = flyout.downgrade();
+        editor.on_close(move || {
+            if let Some(flyout) = close.upgrade() {
+                flyout.hide();
+            }
+        });
+        let weak = Rc::downgrade(&editor);
+        flyout.closed(move || {
+            if let Some(editor) = weak.upgrade() {
+                editor.retire();
+            }
+        });
+        *self.preview_stages.matrix_editor.borrow_mut() = Some(editor);
+        self.preview_stages
+            .editor_epoch
+            .set(Some(self.preview_stage_epoch()));
         *self.preview_stages.flyout.borrow_mut() = Some(flyout.clone());
         flyout.show_at(anchor);
         Ok(())

@@ -231,6 +231,11 @@ impl Session {
                             json!({"contents":[{"uri":uri,"mimeType":"application/json","text":value.to_string()}]})
                         } else if tool == "screenshot" && client.service.is_none() {
                             json!({"content":[{"type":"image","mimeType":"image/png","data":value["data"]}],"isError":false})
+                        } else if client.service.is_none()
+                            && value["mimeType"] == "image/png"
+                            && value["data"].is_string()
+                        {
+                            native_image_result(value)
                         } else {
                             json!({"content":[{"type":"text","text":value.to_string()}],"isError":false})
                         }
@@ -280,6 +285,39 @@ impl Session {
             .collect()
     }
 }
+
+/// Native extension screenshots share the inspector's byte envelope while
+/// retaining source and layout metadata beside the MCP image content block.
+fn native_image_result(mut value: Value) -> Value {
+    let data = value.as_object_mut().unwrap().remove("data").unwrap();
+    json!({
+        "content":[
+            {"type":"image","mimeType":"image/png","data":data},
+            {"type":"text","text":value.to_string()}
+        ],
+        "structuredContent":value,
+        "isError":false
+    })
+}
+
 pub fn error(id: Value, code: i32, message: &str) -> Value {
     json!({"jsonrpc":"2.0","id":id,"error":{"code":code,"message":message}})
+}
+
+#[cfg(test)]
+mod image_result_tests {
+    use super::*;
+    #[test]
+    fn native_extension_image_preserves_metadata_without_repeating_base64() {
+        let result = native_image_result(
+            json!({"mimeType":"image/png","data":"cG5n","stage":3,"width":390,"height":844,"source_uri":"memory://image/View.xaml"}),
+        );
+        assert_eq!(result["content"][0]["type"], "image");
+        assert_eq!(result["content"][0]["data"], "cG5n");
+        assert_eq!(result["structuredContent"]["stage"], 3);
+        assert!(result["structuredContent"].get("data").is_none());
+        let text: Value =
+            serde_json::from_str(result["content"][1]["text"].as_str().unwrap()).unwrap();
+        assert_eq!(text, result["structuredContent"]);
+    }
 }

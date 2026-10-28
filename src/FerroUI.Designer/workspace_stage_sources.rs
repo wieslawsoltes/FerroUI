@@ -103,6 +103,18 @@ impl DesignerWorkspace {
             })
     }
 
+    /// Image capture may use a paused frame while its accepted source and all
+    /// native include dependencies remain exact. This never enables selection/input.
+    pub fn preview_stage_image_source_is_current(&self, id: PreviewStageId) -> bool {
+        let (_, epoch) = self.preview_stage_host_options();
+        let sources = self.preview_stage_sources();
+        let board = self.preview_stages.board.borrow();
+        board.dependencies_are_current(id, &sources)
+            && sources.iter().any(|source| {
+                board.frame_is_current(id, &source.uri, &source.document, source.pending, epoch)
+            })
+    }
+
     pub fn select_preview_stage_runtime(
         self: &Rc<Self>,
         id: PreviewStageId,

@@ -223,3 +223,127 @@ fn compare_and_manifest_restore_share_native_validation_and_preserve_source_hist
         )
         .is_err());
 }
+
+#[test]
+fn matrix_planning_is_observational_and_apply_is_bounded_atomic_and_guarded() {
+    let _app = UnitTestApplication::start(TestServices::styled_window());
+    let (workspace, provider) = fixture();
+    let id = command(
+        &provider,
+        json!({"action":"add","configuration":config("Screen")}),
+    )
+    .unwrap()["created_stage"]
+        .as_u64()
+        .unwrap();
+    let matrix = json!({"sizes":[{"name":"Phone","width":390,"height":844},{"name":"Desktop","width":1280,"height":800}],"themes":["light","dark"],"directions":["left_to_right","right_to_left"]});
+    let before = read(&provider);
+    let plan = provider
+        .call(
+            "designer_preview_matrix",
+            &json!({"stage":id,"matrix":matrix}),
+            permissions(false, false),
+        )
+        .unwrap();
+    assert_eq!(plan["stage_count"], 8);
+    assert_eq!(plan["available"], 15);
+    assert_eq!(before, read(&provider));
+    let overlarge = json!({"sizes":[{"name":"Phone","width":390,"height":844},{"name":"Desktop","width":1280,"height":800}],"themes":["light","dark"],"directions":["left_to_right","right_to_left"],"design_time_data":[true,false]});
+    let error = command(
+        &provider,
+        json!({"action":"compare_matrix","stage":id,"matrix":overlarge}),
+    )
+    .unwrap_err();
+    assert!(error.contains("16 stages"), "{error}");
+    assert_eq!(before, read(&provider));
+    let result = command(
+        &provider,
+        json!({"action":"compare_matrix","stage":id,"matrix":matrix}),
+    )
+    .unwrap();
+    assert_eq!(result["created_stages"].as_array().unwrap().len(), 8);
+    assert_eq!(workspace.preview_stages().len(), 9);
+    assert_eq!(workspace.session().borrow().document().source(), SOURCE);
+    assert!(!workspace.session().borrow().can_undo());
+    assert!(provider.call("designer_preview_stage",&json!({"action":"compare_matrix","stage":id,"matrix":{},"expected_model":plan["model"]}),permissions(true,false)).unwrap_err().contains("changed"));
+}
+
+#[test]
+fn matrix_plan_preserves_live_input_permissions_and_old_fixed_configuration_schema() {
+    let _app = UnitTestApplication::start(TestServices::styled_window());
+    let (workspace, provider) = fixture();
+    let mut configuration = serde_json::to_value(config("Legacy fixed")).unwrap();
+    configuration.as_object_mut().unwrap().remove("layout");
+    let id = command(
+        &provider,
+        json!({"action":"add","configuration":configuration}),
+    )
+    .unwrap()["created_stage"]
+        .as_u64()
+        .unwrap();
+    assert_eq!(
+        workspace.preview_stage(id).unwrap().configuration.layout,
+        crate::PreviewStageLayout::Fixed
+    );
+    let mut live = workspace.preview_stage(id).unwrap().configuration;
+    live.mode = PreviewStageMode::Live;
+    workspace.update_preview_stage(id, live).unwrap();
+    provider
+        .call(
+            "designer_preview_matrix",
+            &json!({"stage":id,"matrix":{"themes":["light","dark"]}}),
+            permissions(false, false),
+        )
+        .unwrap();
+    assert!(command(
+        &provider,
+        json!({"action":"compare_matrix","stage":id,"matrix":{"themes":["light","dark"]}})
+    )
+    .unwrap_err()
+    .contains("allow_input"));
+    assert_eq!(workspace.preview_stages().len(), 1);
+    for args in [
+        json!({"stage":id,"matrix":{"themes":["unknown"]}}),
+        json!({"stage":id,"matrix":{"sizes":[{"name":"bad","width":0,"height":20}]}}),
+        json!({"stage":id,"matrix":{"arbitrary":[]}}),
+    ] {
+        assert!(provider.validate("designer_preview_matrix", &args).is_err());
+    }
+}
+
+#[test]
+fn preview_image_reads_reject_stale_source_and_bad_scale_without_refreshing() {
+    let _app = UnitTestApplication::start(TestServices::styled_window());
+    let (workspace, provider) = fixture();
+    let id = command(
+        &provider,
+        json!({"action":"add","configuration":config("Capture")}),
+    )
+    .unwrap()["created_stage"]
+        .as_u64()
+        .unwrap();
+    let first = read(&provider);
+    assert!(provider
+        .validate(
+            "designer_preview_image",
+            &json!({"stage":id,"expected_model":first["model"],"scale":5})
+        )
+        .is_err());
+    workspace
+        .session()
+        .borrow_mut()
+        .update_source(SOURCE.replace("Preview", "Changed"));
+    let model = read(&provider)["model"].clone();
+    let error = provider
+        .call(
+            "designer_preview_image",
+            &json!({"stage":id,"expected_model":model}),
+            permissions(false, false),
+        )
+        .unwrap_err();
+    assert!(error.contains("accepted current source"), "{error}");
+    assert_eq!(
+        workspace.preview_stage(id).unwrap().rendered_revision,
+        Some(0)
+    );
+    assert_eq!(workspace.preview_stages().len(), 1);
+}

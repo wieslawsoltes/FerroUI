@@ -393,6 +393,64 @@ fn save_picker_writes_its_captured_manifest_without_saving_or_editing_xaml() {
     assert!(!workspace.session.borrow().can_undo());
 }
 
+#[cfg(feature = "render-smoke")]
+#[test]
+fn image_save_picker_keeps_captured_native_png_when_the_stage_changes_or_is_removed() {
+    use crate::PreviewStageExportOptions;
+    use ferroui_base::platform::{IFontManagerImpl, IPlatformRenderInterface, ITextShaperImpl};
+    use ferroui_base::{FerroLocator, LocatorExtensions};
+    use ferroui_harfbuzz::HarfBuzzTextShaper;
+    use ferroui_vello::{VelloOptions, VelloPlatform, VelloRenderingMode};
+
+    let _locator = FerroLocator::enter_scope();
+    VelloPlatform::initialize_with_options(VelloOptions::with_rendering_mode(
+        VelloRenderingMode::Cpu,
+    ));
+    let mut services = TestServices::styled_window();
+    services.render_interface =
+        FerroLocator::current().get_service::<dyn IPlatformRenderInterface>();
+    services.font_manager_impl = FerroLocator::current().get_service::<dyn IFontManagerImpl>();
+    services.text_shaper_impl = Some(Rc::new(HarfBuzzTextShaper::new()) as Rc<dyn ITextShaperImpl>);
+    let _app = UnitTestApplication::start(services);
+    let fixture = Fixture::new();
+    let workspace = &fixture.workspace;
+    workspace.set_preview_stages_visible(true).unwrap();
+    for _ in 0..3 {
+        Dispatcher::ui_thread().run_jobs(None);
+        fixture.window.update_layout();
+    }
+    let stage = fixture.ids()[0];
+    let authored = Authored::capture(workspace);
+    let captured = workspace
+        .preview_stage_image(stage, PreviewStageExportOptions::default())
+        .unwrap();
+    assert_eq!(&captured.png[..8], b"\x89PNG\r\n\x1a\n");
+    fixture.provider.save_gate.set(false);
+    let mut operation = Box::pin(
+        workspace.save_preview_stage_image_file(stage, PreviewStageExportOptions::default()),
+    );
+    assert!(poll(operation.as_mut()).is_pending());
+    assert_eq!(fixture.provider.save_requests.get(), 1);
+    assert_eq!(fixture.file.writes.get(), 0);
+    let mut changed = workspace.preview_stage(stage).unwrap().configuration;
+    changed.environment.width = 280.0;
+    changed.environment.height = 180.0;
+    workspace.update_preview_stage(stage, changed).unwrap();
+    fixture.window.update_layout();
+    let newer = workspace
+        .preview_stage_image(stage, PreviewStageExportOptions::default())
+        .unwrap();
+    assert_ne!(captured.png, newer.png);
+    workspace.remove_preview_stage(stage).unwrap();
+    fixture.provider.save_gate.set(true);
+    assert!(complete(operation).unwrap());
+    assert_eq!(*fixture.file.bytes.borrow(), captured.png);
+    assert_eq!(fixture.file.writes.get(), 1);
+    assert!(workspace.preview_stage(stage).is_none());
+    assert_eq!(fixture.provider.path_requests.get(), 0);
+    authored.assert_unchanged(workspace);
+}
+
 #[test]
 fn load_picker_restores_fresh_stage_ids_and_keeps_missing_source_as_a_reference() {
     let _app = UnitTestApplication::start(TestServices::styled_window());

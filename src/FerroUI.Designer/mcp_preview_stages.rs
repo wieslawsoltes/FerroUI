@@ -5,12 +5,19 @@ use crate::{
     DesignerWorkspace, PreviewEnvironment, PreviewStageConfiguration, PreviewStageManifest,
     PreviewStageMode,
 };
+use base64::Engine;
 use ferroui_inspect::TreeKind;
 use serde_json::{json, Value};
 use std::rc::Rc;
 
 pub(super) fn handles(name: &str) -> bool {
-    matches!(name, "designer_preview_stages" | "designer_preview_stage")
+    matches!(
+        name,
+        "designer_preview_stages"
+            | "designer_preview_stage"
+            | "designer_preview_matrix"
+            | "designer_preview_image"
+    )
 }
 
 fn bounded_string(maximum: usize) -> Value {
@@ -26,13 +33,17 @@ fn environment_schema() -> Value {
     )
 }
 
-fn configuration_schema() -> Value {
+fn anchor_schema() -> Value {
     let segment = s::object(
         json!({"namespace":bounded_string(4096),"type_name":bounded_string(512),
         "name":s::nullable(bounded_string(512)),"key":s::nullable(bounded_string(512))}),
         &["namespace", "type_name", "name", "key"],
     );
-    let anchor = s::object(json!({"path":s::array(segment,128)}), &["path"]);
+    s::object(json!({"path":s::array(segment,128)}), &["path"])
+}
+
+fn configuration_schema() -> Value {
+    let anchor = anchor_schema();
     let options = s::object(
         json!({"target_type":s::nullable(bounded_string(512)),"sample_content":bounded_string(65536),
         "width":{"type":"number","minimum":1,"maximum":8192},"height":{"type":"number","minimum":1,"maximum":8192}}),
@@ -46,7 +57,7 @@ fn configuration_schema() -> Value {
     );
     s::object(
         json!({"name":bounded_string(128),"source_uri":bounded_string(8192),"target":target,
-        "environment":environment_schema(),"design_time_data":{"type":"boolean"},"states":s::array(state,32),
+        "environment":environment_schema(),"layout":{"enum":["fixed","size_that_fits","fixed_width","fixed_height"]},"design_time_data":{"type":"boolean"},"states":s::array(state,32),
         "pinned":{"type":"boolean"},"auto_update":{"type":"boolean"},"mode":{"enum":["select","live"]}}),
         &[
             "name",
@@ -59,6 +70,20 @@ fn configuration_schema() -> Value {
             "auto_update",
             "mode",
         ],
+    )
+}
+
+fn matrix_schema() -> Value {
+    let dimension = json!({"type":"number","minimum":1,"maximum":16384});
+    s::object(
+        json!({
+            "sizes":s::array(s::object(json!({"name":bounded_string(64),"width":dimension,"height":dimension}), &["name","width","height"]),16),
+            "themes":s::array(json!({"enum":["light","dark","inherit"]}),3),
+            "directions":s::array(json!({"enum":["inherit","left_to_right","right_to_left"]}),3),
+            "design_time_data":s::array(json!({"type":"boolean"}),2),
+            "state_groups":s::array(s::object(json!({"owner":anchor_schema(),"group":bounded_string(256),"states":s::array(bounded_string(256),16)}), &["owner","group","states"]),32)
+        }),
+        &[],
     )
 }
 
@@ -123,6 +148,7 @@ pub(super) fn tools() -> Vec<Value> {
                 json!({"stage":s::id(),"variants":s::array(s::object(json!({"name":bounded_string(128),"environment":environment_schema()}), &["name", "environment"]),crate::MAX_PREVIEW_STAGES)}),
                 &["stage", "variants"],
             ),
+            action("compare_matrix", json!({"stage":s::id(),"matrix":matrix_schema()}), &["stage","matrix"]),
         ],
         false,
     );
@@ -139,6 +165,16 @@ pub(super) fn tools() -> Vec<Value> {
             ),
             false,
         ),
+        s::tool(
+            "designer_preview_matrix",
+            "Plan a bounded Cartesian set of sizes, themes, reading directions, design-data modes and authored state groups. Empty axes keep the base values; selected groups override only those states. Returns exact configurations and the optimistic model without constructing views or changing source. Apply through designer_preview_stage compare_matrix with the same model.",
+            s::object(json!({"stage":s::id(),"matrix":matrix_schema()}), &["stage","matrix"]), false,
+        ),
+        s::tool(
+            "designer_preview_image",
+            "Capture an accepted, current, already-arranged native preview as PNG without card chrome, source updates, layout changes or input. Returns an image and stage/source/dimension metadata. Scale changes raster density only (0.25..4); maximum 16777216 pixels. Paused previews are accepted only while their source is still current. No filesystem paths are opened.",
+            s::object(json!({"stage":s::id(),"expected_model":bounded_string(16),"scale":{"type":"number","minimum":0.25,"maximum":4}}), &["stage","expected_model"]), false,
+        ),
         edit,
     ]
 }
@@ -151,6 +187,8 @@ fn report(workspace: &DesignerWorkspace, args: &Value) -> Result<Value, String> 
             let current = workspace.preview_stage_source_is_current(stage.id);
             let mut value = json!(stage);
             value["current_source"] = json!(current);
+            value["current_image_source"] =
+                json!(workspace.preview_stage_image_source_is_current(stage.id));
             value
         })
         .collect::<Vec<_>>();
@@ -221,9 +259,35 @@ pub(super) fn call(
     if name == "designer_preview_stages" {
         return report(workspace, args);
     }
+    if name == "designer_preview_matrix" {
+        let configurations = workspace
+            .plan_preview_stage_matrix(integer(args, "stage")?, &decode(args, "matrix")?)?;
+        return Ok(
+            json!({"model":workspace.preview_stage_model(),"stage":args["stage"],"stage_count":configurations.len(),"available":crate::MAX_PREVIEW_STAGES.saturating_sub(workspace.preview_stages().len()),"configurations":configurations}),
+        );
+    }
     if text(args, "expected_model")? != workspace.preview_stage_model() {
         return Err(
             "The documents or stage board changed; read designer_preview_stages again".into(),
+        );
+    }
+    if name == "designer_preview_image" {
+        let id = integer(args, "stage")?;
+        let image = workspace.preview_stage_image(
+            id,
+            crate::PreviewStageExportOptions {
+                scale: args["scale"].as_f64().unwrap_or(1.0),
+            },
+        )?;
+        let stage = workspace
+            .preview_stage(id)
+            .ok_or("The stage was removed during capture")?;
+        return Ok(
+            json!({"mimeType":"image/png","data":base64::engine::general_purpose::STANDARD.encode(image.png),
+            "stage":id,"name":stage.configuration.name,"source_uri":stage.configuration.source_uri,
+            "rendered_revision":stage.rendered_revision,"epoch":stage.epoch,"model":workspace.preview_stage_model(),
+            "logical_width":image.logical_width,"logical_height":image.logical_height,
+            "width":image.pixel_width,"height":image.pixel_height,"scale":image.scale}),
         );
     }
     let action = text(args, "action")?;
@@ -274,6 +338,10 @@ pub(super) fn call(
                 .collect::<Result<Vec<_>, String>>()?;
             result["created_stages"] =
                 json!(workspace.compare_preview_stage(integer(args, "stage")?, variants)?);
+        }
+        "compare_matrix" => {
+            result["created_stages"] = json!(workspace
+                .compare_preview_stage_matrix(integer(args, "stage")?, decode(args, "matrix")?)?);
         }
         _ => return Err("Unknown preview-stage action".into()),
     }

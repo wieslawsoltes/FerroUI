@@ -32,6 +32,11 @@ mod layout_helper_renderer;
 mod preview_environment;
 mod preview_host;
 mod preview_stages;
+mod preview_stage_export;
+mod preview_stage_matrix;
+mod preview_stage_matrix_editor;
+#[cfg(test)]
+mod preview_stage_matrix_ui_tests;
 mod preview_stage_scenarios;
 mod preview_stage_editor;
 mod preview_stage_view;
@@ -93,10 +98,16 @@ pub use preview_host::{
 pub use preview_stages::{
     MAX_PREVIEW_STAGES, PreviewSourceAnchor, PreviewSourceSegment, PreviewStageBoard,
     PreviewStageConfiguration, PreviewStageId, PreviewStageInfo, PreviewStageManifest,
-    PreviewStageMode, PreviewStageSelection, PreviewStageSelectionToken, PreviewStageSnapshot,
+    PreviewStageLayout, PreviewStageSize, PreviewStageMode, PreviewStageSelection, PreviewStageSelectionToken, PreviewStageSnapshot,
     PreviewStageSource, PreviewStageState, PreviewStageStatus, PreviewStageTarget,
 };
 pub use preview_stage_editor::PreviewStageEditor;
+pub use preview_stage_export::{
+    capture_preview_stage_png, PreviewStageExportOptions, PreviewStageImage,
+    MAX_PREVIEW_STAGE_EXPORT_BYTES, MAX_PREVIEW_STAGE_EXPORT_PIXELS,
+};
+pub use preview_stage_matrix::{PreviewStageMatrix, PreviewStageMatrixSize, PreviewStageStateAxis};
+pub use preview_stage_matrix_editor::PreviewStageMatrixEditor;
 pub use preview_stage_view::{PreviewStageAction, PreviewStageComparison, PreviewStageView};
 pub use property_color_editor::PropertyColorEditor;
 pub use property_controls::{

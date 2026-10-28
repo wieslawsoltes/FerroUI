@@ -7,6 +7,9 @@
   <!-- Open Preview stages, duplicate a stage, and choose the Screen group's
        Loading, Empty, Content and Error endpoints. Each card keeps its own native
        state and environment. The authored default is Content.
+       Compare matrix can combine Screen states with sizes and themes. Try Fit
+       content on ActionPreviewTemplate, drag a card's resize grip, and use Save
+       preview image to export its native frame without designer chrome.
        This sample uses ordinary native styles and animations. Encoded comments
        retain the designer's state-group identity; they have no runtime behavior. -->
   <UserControl.Resources>

@@ -16,10 +16,11 @@ path = "lib.rs"
 
 [features]
 default = []
-mcp = ["dep:ferroui-mcp"]
+mcp = ["dep:ferroui-mcp", "dep:base64"]
 render-smoke = ["dep:ferroui-vello", "dep:ferroui-harfbuzz", "dep:ferroui-themes-winui"]
 
 [dependencies]
+base64 = { version = "0.22", optional = true }
 ferroui-designer-project.workspace = true
 ferroui-designer-language.workspace = true
 ferroui-designer-collaboration-host = { workspace = true, features = ["client", "server"] }

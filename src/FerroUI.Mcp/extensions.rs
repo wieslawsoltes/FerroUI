@@ -22,6 +22,10 @@ pub trait UiToolProvider {
     fn tools(&self) -> Vec<Value>;
     /// Validate typed arguments before reading or changing application state.
     fn validate(&self, name: &str, arguments: &Value) -> Result<(), String>;
+    /// Return JSON data, or a PNG image using the inspector's existing envelope:
+    /// `{ "mimeType": "image/png", "data": "<base64>", ...metadata }`.
+    /// Native transports emit that envelope as an MCP image content block and
+    /// preserve any additional fields as structured/text metadata. No file is saved.
     fn call(
         &self,
         name: &str,

@@ -10,7 +10,9 @@ adapters. It does not add a second document model or another rendering stack.
 The [Xcode preview review](xcode-previews.md) adds a native board of independent named
 document and definition stages, size/theme/orientation/direction comparisons, pinning across
 source tabs, per-stage Live/Select and pause/refresh, native visual-state scenarios and saved
-stage sets. These extend the existing preview environment and host contracts. Phone sizes
+stage sets. The next set adds native content-fitting policies, direct resizing that retains
+Live controls, per-card zoom, bounded comparison matrices and PNG capture from accepted
+native views. These extend the existing preview environment and host contracts. Phone sizes
 are logical layout constraints; platform simulators and Dynamic Type need separate native
 runtime support. The [preview-stage sample](samples/PreviewStages.xaml) exercises four screen
 states, theme dictionaries, design-time rows and a reusable template.
@@ -42,6 +44,9 @@ These extend the earlier workflow results below.
 | Label/input associations | Qt buddy connections | Native `Label.Target` existed without designer authoring | Added namescope-correct target picker, connection overlay and atomic target-name/binding creation |
 | Preview environment | Figma device sizes/orientation; Qt form previews; native theme scopes | Artboard-size API and a binary theme toggle | Added staged size presets, custom dimensions, orientation, inherited/light/dark theme and reading direction |
 | Multiple named preview views | Xcode named previews, side-by-side variants and pinned preview tabs | One editing preview, environment settings, definition scopes, native states and registered factories | Added independent native document/definition stages with variant sets, state endpoints, source identity, pin/pause controls and versioned persistence |
+| Preview layout and resizing | Xcode size-that-fits traits and arbitrarily resizable canvas | Fixed-size stages with an environment editor | Added native finite-proposal fitting on either axis, direct resize drafts, measured size reporting and per-card display zoom while retaining Live control graphs |
+| Preview argument combinations | Xcode parameterized argument groups | One-axis environment comparisons and manually selected native states | Added bounded combinations of size, theme, direction, design-data and authored state axes, with complete validation before stage creation |
+| Preview screenshot export | Xcode canvas screenshot and save sheet | Native RenderTargetBitmap rendering existed only in test captures | Added source-guarded PNG stage capture, native save picker and read-only automation, with pixel/byte bounds and independent raster density |
 | Canvas navigation and framing | Figma pointer-anchored zoom, fit selection and file-local views; Blend wheel zoom and Space panning | Zoom buttons and a centered scroll container; no independent camera or fit-selection command | Added a finite native viewport, wheel-mode choice, middle/Space/hand-tool panning, percentage editing, selection framing and retained tab cameras |
 | Compact command icons | Visual Studio's centered, padded and consistently weighted icon frames | Mixed compact paths and symbol-font glyphs under application command templates | Designer-scoped vector normalization fits complete geometry, reserves padding and follows themed foreground |
 
@@ -288,6 +293,9 @@ Additional views: [Design Data editor](images/designer-design-data-editor.png),
 - [Xcode canvas modes and preview variants](https://developer.apple.com/documentation/xcode/interacting-with-previews-in-the-canvas)
 - [Xcode named previews and sample context](https://developer.apple.com/documentation/xcode/adding-previews-to-your-interface-files)
 - [Xcode 27 preview groups and independent pinning](https://developer.apple.com/documentation/xcode-release-notes/xcode-27-release-notes)
+- [Xcode content-fitting preview traits](https://developer.apple.com/documentation/developertoolssupport/previewtrait/sizethatfitslayout)
+- [SwiftUI parameterized preview arguments](https://developer.apple.com/documentation/swiftui/preview(_:traits:arguments:body:))
+- [Xcode 15.3 preview screenshot export](https://developer.apple.com/documentation/xcode-release-notes/xcode-15_3-release-notes)
 - [Visual Studio design-time data](https://learn.microsoft.com/en-us/visualstudio/xaml-tools/xaml-designtime-data?view=visualstudio)
 - [Visual Studio generated sample data](https://learn.microsoft.com/en-us/visualstudio/xaml-tools/xaml-design-time-sample-data?view=visualstudio)
 - [Blend styles, templates and resource scopes](https://learn.microsoft.com/en-us/visualstudio/xaml-tools/modify-the-style-of-objects-in-blend?view=visualstudio)

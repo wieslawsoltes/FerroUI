@@ -2,8 +2,8 @@
 //! detached configuration; the host validates the accepted board/source epoch on Apply.
 use crate::{
     DefinitionPreviewOptions, PreviewEnvironment, PreviewFlowDirection, PreviewSourceAnchor,
-    PreviewStageConfiguration, PreviewStageMode, PreviewStageSource, PreviewStageState,
-    PreviewStageTarget, PreviewTheme, PREVIEW_SIZE_PRESETS,
+    PreviewStageConfiguration, PreviewStageLayout, PreviewStageMode, PreviewStageSource,
+    PreviewStageState, PreviewStageTarget, PreviewTheme, PREVIEW_SIZE_PRESETS,
 };
 use ferroui_base::input::{InputElement, Key};
 use ferroui_base::layout::{HorizontalAlignment, Orientation};
@@ -44,6 +44,10 @@ pub struct PreviewStageEditor {
     sample_content: Ref<TextBox>,
     sample_width: Ref<TextBox>,
     sample_height: Ref<TextBox>,
+    layout: Ref<ComboBox>,
+    width_caption: Ref<TextBlock>,
+    height_caption: Ref<TextBlock>,
+    layout_note: Ref<TextBlock>,
     width: Ref<TextBox>,
     height: Ref<TextBox>,
     theme: Ref<ComboBox>,
@@ -151,6 +155,26 @@ impl PreviewStageEditor {
         body.children()
             .add(definition_fields.clone().upcast::<Control>());
 
+        let layout = picker("StageLayout", "Preview layout sizing");
+        for value in [
+            "Fixed size",
+            "Fit content",
+            "Fixed width · fit height",
+            "Fit width · fixed height",
+        ] {
+            item(&layout, value);
+        }
+        layout.set_selected_index(match initial.layout {
+            PreviewStageLayout::Fixed => 0,
+            PreviewStageLayout::SizeThatFits => 1,
+            PreviewStageLayout::FixedWidth => 2,
+            PreviewStageLayout::FixedHeight => 3,
+        });
+        row(&body, "Layout", &layout);
+        let layout_note = label("");
+        layout_note.set_name(Some("StageLayoutNote".into()));
+        layout_note.classes().add("designer-muted");
+        body.children().add(layout_note.clone().upcast::<Control>());
         let preset = picker("StageSizePreset", "Logical preview size preset");
         item(&preset, "Custom size");
         for value in PREVIEW_SIZE_PRESETS {
@@ -168,8 +192,10 @@ impl PreviewStageEditor {
             "StageHeight",
             "Stage logical height",
         );
-        row(&body, "Width", &width);
-        row(&body, "Height", &height);
+        let width_caption = captioned_row(&body, "Width", &width);
+        let height_caption = captioned_row(&body, "Height", &height);
+        width_caption.set_name(Some("StageWidthCaption".into()));
+        height_caption.set_name(Some("StageHeightCaption".into()));
         let rotate = action("Swap width and height", "StageRotate");
         row(&body, "Orientation", &rotate);
         let theme = picker("StageTheme", "Stage theme");
@@ -272,6 +298,10 @@ impl PreviewStageEditor {
             sample_content,
             sample_width,
             sample_height,
+            layout,
+            width_caption,
+            height_caption,
+            layout_note,
             width,
             height,
             theme,
@@ -292,7 +322,14 @@ impl PreviewStageEditor {
         });
         editor.rebuild_targets(Some(&initial.target));
         editor.rebuild_states(&initial.states);
+        editor.refresh_layout_captions();
         editor.guard.set(false);
+        let weak = Rc::downgrade(&editor);
+        editor.layout.selection_changed(move |_, _| {
+            if let Some(editor) = weak.upgrade() {
+                editor.refresh_layout_captions();
+            }
+        });
         let weak = Rc::downgrade(&editor);
         editor.source.selection_changed(move |_, _| {
             if let Some(editor) = weak.upgrade() {
@@ -339,6 +376,11 @@ impl PreviewStageEditor {
                 let height = editor.height.text();
                 editor.width.set_text(height.as_deref());
                 editor.height.set_text(width.as_deref());
+                match editor.layout.selected_index() {
+                    2 => editor.layout.set_selected_index(3),
+                    3 => editor.layout.set_selected_index(2),
+                    _ => {}
+                }
                 if let Some(preset) = weak_preset.upgrade() {
                     preset.set_selected_index(0);
                 }
@@ -375,6 +417,25 @@ impl PreviewStageEditor {
 
     pub fn control(&self) -> Ref<Control> {
         self.root.clone().upcast()
+    }
+
+    fn refresh_layout_captions(&self) {
+        let mode = self.layout.selected_index();
+        self.width_caption.set_text(Some(if matches!(mode, 1 | 3) {
+            "Maximum width"
+        } else {
+            "Width"
+        }));
+        self.height_caption.set_text(Some(if matches!(mode, 1 | 2) {
+            "Maximum height"
+        } else {
+            "Height"
+        }));
+        self.layout_note.set_text(Some(if mode == 0 {
+            "The preview uses this logical size. The card zoom changes only its presentation."
+        } else {
+            "Native layout measures the content within these finite limits. Fitted axes use its desired size; authored sizes remain in effect."
+        }));
     }
 
     fn selected_source(&self) -> Option<&PreviewStageSource> {
@@ -592,6 +653,13 @@ impl PreviewStageEditor {
             name: self.name.text().unwrap_or_default().trim().to_owned(),
             source_uri,
             target,
+            layout: match self.layout.selected_index() {
+                0 => PreviewStageLayout::Fixed,
+                1 => PreviewStageLayout::SizeThatFits,
+                2 => PreviewStageLayout::FixedWidth,
+                3 => PreviewStageLayout::FixedHeight,
+                _ => return Err("Choose a preview layout".into()),
+            },
             environment: PreviewEnvironment {
                 width: number(&self.width, "width")?,
                 height: number(&self.height, "height")?,
@@ -711,15 +779,19 @@ fn check(text: &str, name: &str, value: bool) -> Ref<CheckBox> {
     control
 }
 fn row(panel: &StackPanel, text: &str, control: &Control) {
+    captioned_row(panel, text, control);
+}
+fn captioned_row(panel: &StackPanel, text: &str, control: &Control) -> Ref<TextBlock> {
     let row = Grid::new();
     row.set_column_definitions(ColumnDefinitions::parse("112,*").unwrap());
     row.set_column_spacing(10.0);
     let caption = label(text);
     caption.classes().add("designer-muted");
-    row.children().add(caption.upcast::<Control>());
+    row.children().add(caption.clone().upcast::<Control>());
     Grid::set_column(control, 1);
     row.children().add(control.to_ref());
     panel.children().add(row.upcast::<Control>());
+    caption
 }
 fn short_uri(uri: &str) -> &str {
     uri.rsplit('/')

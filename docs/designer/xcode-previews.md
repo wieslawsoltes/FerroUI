@@ -1,8 +1,9 @@
 # Preview stages and the Xcode comparison
 
 **Stages** opens a board of named, independent native previews. Each stage combines an
-authored document or definition with a logical size, theme, reading direction, design-time
-data setting and optional visual-state scenario. A desktop layout, a narrow phone layout,
+authored document or definition with a logical size or content-fitting constraint, theme,
+reading direction, design-time data setting and optional visual-state scenario. A desktop
+layout, a narrow phone layout,
 and Loading, Empty, Content and Error screens can remain visible together while the same
 XAML is edited.
 
@@ -53,6 +54,14 @@ cargo run -p designer-studio -- --file docs/designer/samples/PreviewStages.xaml
    manifest. Keep the referenced source documents available in the workspace. The
    manifest contains source identities and settings; it does not embed document text,
    native objects or session-local node IDs.
+9. Open **Compare matrix** to combine several sizes, themes, reading directions, design-data
+   settings and authored states. Review the combination count before creating the stages;
+   the board's 16-stage capacity includes the stages already present.
+10. In a stage editor, choose **Fit content** or fit just one axis. The card shows the native
+    measured size. Drag the card's resize grip to choose a fixed logical size, or use its
+    zoom control to inspect the same layout at a different display scale.
+11. Choose **… → Save preview image…** to save that stage's accepted native frame as a PNG.
+    The image contains the application preview, without the card's designer commands.
 
 The sample also contains **ActionPreviewTemplate**. Add a stage, choose that authored
 definition in **View**, and configure its sample content and sample size. This gives a
@@ -73,10 +82,14 @@ version with FerroUI.
 | --- | --- | --- |
 | Named preview declarations and configured sample views | Named stages for a complete document or an authored template, theme or other supported definition | Existing native preview factories and definition scopes; new stage descriptors and independent native graphs. See [Adding previews](https://developer.apple.com/documentation/xcode/adding-previews-to-your-interface-files). |
 | Live and selectable canvas modes | Per-stage Live input or source-backed Select mode, with Focus returning to the editing canvas | Existing native interaction and source maps; each stage has its own accepted graph identity. See [Interacting with previews](https://developer.apple.com/documentation/xcode/interacting-with-previews-in-the-canvas). |
-| Multiple preview variants and parameterized argument grids | Side-by-side size, theme, orientation and reading-direction comparisons; named native state scenarios | Existing environment model and visual-state authoring; new board ownership and variant creation. See [Xcode 27 release notes](https://developer.apple.com/documentation/xcode-release-notes/xcode-27-release-notes) and [parameterized preview groups](https://developer.apple.com/documentation/swiftui/preview(_:traits:arguments:body:)). |
+| Preview variants | Side-by-side size, theme, orientation and reading-direction comparisons; named native state scenarios | Existing environment model and visual-state authoring; new board ownership and variant creation. See [Interacting with previews](https://developer.apple.com/documentation/xcode/interacting-with-previews-in-the-canvas). |
 | Pinning a preview while navigating source | Pin a stage's source identity across document tabs while continuing to follow accepted changes | Pinning changes visibility; Pause controls automatic updating. See [Build programmatic UI with Xcode Previews](https://developer.apple.com/videos/play/wwdc2023/10252/) and the Xcode 27 notes above. |
 | Preview-specific state and sample context | Independently selected VisualStateGroup endpoints, existing design-time values/sample items, and registered native factories | Preview-only classes, clocks and property layers belong to each stage; authored values and bindings remain intact. See [Adding previews](https://developer.apple.com/documentation/xcode/adding-previews-to-your-interface-files). |
 | Device and environment overrides | Logical dimensions, rotation, Light/Dark/application theme and inherited/LTR/RTL flow | Native ThemeVariantScope and FlowDirection provide per-stage inheritance. A layout size does not supply another platform runtime. See [Interacting with previews](https://developer.apple.com/documentation/xcode/interacting-with-previews-in-the-canvas). |
+| Content-fitting preview traits | Fixed layout, fitting both axes, or fitting one axis within a finite width/height proposal | The native stage host measures and arranges the actual preview. It preserves authored constraints and reports the measured size. See [sizeThatFitsLayout](https://developer.apple.com/documentation/developertoolssupport/previewtrait/sizethatfitslayout). |
+| Resizable canvas and canvas magnification | A direct resize grip plus per-card display zoom | Resize changes the native layout proposal; zoom changes only its visual presentation. Existing Live controls survive both. See [Interacting with previews](https://developer.apple.com/documentation/xcode/interacting-with-previews-in-the-canvas). |
+| Parameterized preview groups | Bounded combinations of sizes, themes, reading directions, design-data settings and selected native states | A comparison matrix validates every combination and capacity before adding the set. See [parameterized preview groups](https://developer.apple.com/documentation/swiftui/preview(_:traits:arguments:body:)). |
+| Preview screenshots | PNG export from the accepted native stage, through the save picker or an embedding API | The existing platform renderer captures the stage at its own logical size, independent of card zoom. See [canvas screenshots](https://developer.apple.com/documentation/xcode/interacting-with-previews-in-the-canvas) and [Xcode 15.3 release notes](https://developer.apple.com/documentation/xcode-release-notes/xcode-15_3-release-notes). |
 
 Xcode's separate scene APIs, widget timelines, device simulators and Apple frameworks do
 not map directly to XAML. FerroUI stages therefore describe views and native state
@@ -102,6 +115,110 @@ for each stage. Turning it off exposes the ordinary runtime values and bindings.
 [design-time data](design-time-data.md) for supported namespace aliases, scalar/object
 overrides, sample item generation and source-mapping rules.
 
+### Content-fitting layouts
+
+**Layout** in the stage editor offers four native sizing policies:
+
+| Editor choice | `PreviewStageLayout` | Native layout behavior |
+| --- | --- | --- |
+| Fixed size | `Fixed` | Arrange at the configured width and height. |
+| Fit content | `SizeThatFits` | Measure with the configured maximum width and height, then fit both axes to the native desired size. |
+| Fixed width · fit height | `FixedWidth` | Keep the configured width and fit the measured height within the configured maximum height. |
+| Fit width · fixed height | `FixedHeight` | Fit the measured width within the configured maximum width and keep the configured height. |
+
+Fitted axes are bounded between 1 and the supplied maximum, in logical units. The host
+uses a finite proposal, so wrapping text, responsive panels and native minimum/maximum
+constraints participate in measurement. It does not approximate the content bounds by
+counting controls or measuring a screenshot. An authored fixed size or minimum may still
+overflow the offered space; the stage clips at its accepted viewport.
+
+The card reports the actual layout size separately from the proposal. Native content
+changes can update that measured size without constructing another view or changing the
+XAML. Layout policies belong to the saved stage configuration. Older version-1 manifests
+that omit the policy keep the original **Fixed size** behavior.
+**Focus** opens the ordinary editing canvas at the configured width and height proposal;
+the content-fitting policy remains local to the comparison stage.
+
+For a small component, choose the sample's **ActionPreviewTemplate**, set its sample size,
+and use **Fit content**. The stage then fits the actual template host instead of reserving
+a complete desktop surface. For a scrolling document, **Fixed width · fit height** is
+useful for comparing the height requested by the same content at phone and desktop widths.
+
+### Resize and zoom
+
+Drag a stage's lower-corner grip to preview a new logical size. A draft outline and
+dimensions follow the pointer; releasing applies the size and selects **Fixed size**.
+Escape, lost pointer capture or a conflicting stage/viewport change cancels the draft.
+When the grip has keyboard focus, arrow keys resize by one logical unit and Shift+arrow
+resizes by ten. Dimensions retain the 1–16,384 bounds.
+
+The pointer calculation accounts for the card's display scale, so dragging a reduced
+phone preview changes the intended logical dimensions. Resizing a stage does not rebuild
+its native controls or discard text entered in Live mode. It also leaves the source and
+undo history intact.
+
+Each card can display **Fit**, **25%**, **50%**, **75%**, **100%**, **150%** or **200%** zoom.
+Fit keeps the complete preview visible; fixed magnifications use native scrolling when
+the preview exceeds the card. This zoom is board presentation state. It does not change
+the application's layout constraint, saved stage manifest or screenshot density.
+
+![Native resized Live view, fitted phone height and fitted template](images/designer-preview-fitting.png)
+
+## Comparison matrices
+
+**Compare matrix** starts from an existing stage. Choose sizes, themes, reading directions,
+design-data settings and any available authored state groups. An axis with no selected
+values retains the base stage's setting. A selected state axis replaces that group's
+choice while retaining choices in other groups.
+
+The editor shows the resulting count before Apply. For example, two sizes × two themes
+× two Screen states produce eight independent stages. With the original base stage still
+present, that uses nine of the board's sixteen slots. Adding two directions to that
+example would require sixteen new stages and is rejected until there is enough space.
+
+The matrix validates all names, dimensions, axes, definition eligibility, retained base
+state choices, state anchors and capacity before creating any stage. A descriptor error
+leaves the board intact. A native loading failure
+in an otherwise valid combination remains visible as that card's own diagnostic; the
+other combinations can still render. Names identify each combination, and each resulting
+stage can subsequently be edited, pinned, paused or removed independently.
+
+The matrix keeps the base stage's source, definition, layout policy and unrelated state
+choices. This lets a content-fitting component use the same comparison workflow as a
+complete view. The resulting ordinary configurations are saved by **Save set**; restoring
+a set does not rerun an external generator or require a special matrix runtime.
+
+![Native comparison matrix with eight planned configurations](images/designer-preview-matrix.png)
+
+## Save a native preview image
+
+Choose a card's **… → Save preview image…** to capture its native frame at one pixel per
+logical unit and open the host's PNG save picker. Capture happens before awaiting the
+picker, so later source edits or Live interaction do not change the image already offered
+for saving. Cancel leaves the application and stage unchanged.
+
+The image excludes the card's title, status, zoom and commands. Ancestor Viewbox scaling
+does not change its raster density. The export captures the currently realized controls
+in the stage's visual tree using the already arranged native graph and the
+host's rendering backend; it does not reparent controls, force a source refresh, run
+application input, advance animation clocks or alter layout to obtain a larger image.
+
+The public and automation APIs accept a density from **0.25× to 4×**. Density scales the
+bitmap pixels while preserving logical layout. Fractional pixel extents round upward.
+Each output is limited to **16,777,216 pixels**, at most **16,384 pixels per axis**, and
+**64 MiB of encoded PNG bytes**. Reduce density or stage size when a requested export
+exceeds those bounds.
+
+Only an accepted frame matching the current source and configuration is eligible.
+An unchanged paused stage can be captured; a retained frame with newer pending, invalid,
+missing or failed source cannot be exported as current output. Native layout must already
+be valid. A host without a native rendering backend reports that limitation instead of
+returning an empty image.
+Layout validation examines at most 100,000 visual nodes, skipping subtrees the native
+renderer would not display, and rejects pending visible descendant layout without running it.
+The [sample phone PNG](images/designer-preview-export.png) was captured through this public
+stage export API during the native rendering test.
+
 ## Native state scenarios
 
 The source language service resolves keys in native theme dictionaries and included
@@ -125,6 +242,11 @@ applies their class selections to a fresh native candidate. It validates all gro
 states, namescope targets and literal property conversions before changing the candidate's
 classes. A failed candidate is removed while the previously accepted stage stays visible.
 
+If one authored state owner is realized in several native template instances, the document
+stage reports an ambiguity and directs you to a definition stage. Previewing that template
+as its own definition provides one unambiguous state owner. This keeps state application
+from selecting an arbitrary instance of a shared template.
+
 Literal endpoints use the same disposable native animation-value layer as the main
 designer's state preview. This allows a selected endpoint to preview a property whose
 authored local value would otherwise take precedence over a style setter. Binding and
@@ -145,9 +267,10 @@ text or selecting a scenario in one stage does not reuse another stage's control
 namescope. Registered host factories must also return a fresh view for every invocation;
 their captured application services may be shared intentionally.
 
-Live control state remains in its graph while selecting cards or switching document tabs
-and board visibility. An explicit refresh or a change to the rendered source, view,
-environment, data setting or selected states constructs a new native graph and resets
+Live control state remains in its graph while selecting cards, changing stage size or
+layout policy, zooming, and switching document tabs or board visibility. An explicit
+refresh or a change to the rendered source, view, theme, reading direction, data setting
+or selected states constructs a new native graph and resets
 transient input, selection and scroll state in that stage. The editing canvas retains
 its existing development hot-reload behavior.
 
@@ -204,13 +327,51 @@ The public components can be embedded independently:
 - `PreviewStageManifest` validates and serializes a version-1 stage set. JSON parsing
   rejects unknown fields, invalid dimensions, malformed source paths and manifests
   larger than 1 MiB.
+- `PreviewStageMatrix` validates and expands comparison axes into ordinary stage
+  configurations within a supplied capacity.
+- `PreviewStageExportOptions` and `PreviewStageImage` describe bounded PNG density and
+  captured bytes/dimensions. `capture_preview_stage_png` supports custom hosts which
+  validate their own accepted stage/source lifecycle.
 
 `DesignerWorkspace` exposes `add_preview_stage`, `update_preview_stage`,
 `duplicate_preview_stage`, `remove_preview_stage`, `move_preview_stage`,
 `set_preview_stage_paused`, `refresh_preview_stage`, `refresh_all_preview_stages`,
-`compare_preview_stage`, `set_active_preview_stage` and `set_preview_stages_visible`.
+`compare_preview_stage`, `compare_preview_stage_matrix`, `set_active_preview_stage` and
+`set_preview_stages_visible`.
 `preview_stage_manifest` and `restore_preview_stage_manifest` provide persistence without
 requiring the native file picker.
+`plan_preview_stage_matrix` returns the exact configurations and validates the available
+capacity without constructing controls; `compare_preview_stage_matrix` adds the validated
+set through the same board as the native editor.
+
+`preview_stage_image(id, options)` captures an eligible native stage through the workspace's
+source and configuration guards. Its PNG bytes and dimensions can be stored or displayed
+by an embedding host. `PreviewStageInfo.layout_size` reports native measured width and
+height independently from the configured environment's proposal.
+
+For example, the following creates four ordinary comparison stages while retaining the
+base stage's definition, layout policy, data mode and authored state choices:
+
+```rust
+use ferroui_designer::{
+    DesignerWorkspace, PreviewStageId, PreviewStageMatrix, PreviewStageMatrixSize,
+    PreviewTheme,
+};
+use std::rc::Rc;
+
+fn compare_sizes_and_themes(workspace: &Rc<DesignerWorkspace>, base: PreviewStageId)
+    -> Result<Vec<PreviewStageId>, String>
+{
+    workspace.compare_preview_stage_matrix(base, PreviewStageMatrix {
+        sizes: vec![
+            PreviewStageMatrixSize { name: "Phone".into(), width: 390.0, height: 844.0 },
+            PreviewStageMatrixSize { name: "Desktop".into(), width: 1280.0, height: 800.0 },
+        ],
+        themes: vec![PreviewTheme::Light, PreviewTheme::Dark],
+        ..PreviewStageMatrix::default()
+    })
+}
+```
 
 A scenario descriptor for the supplied sample can be constructed from its authored
 document before passing it to the workspace:
@@ -258,13 +419,16 @@ The MCP tools expose the same workspace board and native graphs:
 
 | Tool | Contract |
 | --- | --- |
-| `designer_preview_stages` | Read `model`, `epoch`, `visible`, stage configurations/statuses, the manifest and active source URI. Optional `stage` and `tree: "visual"` or `"logical"` add native runtime rows. Reading does not rebuild a stage or apply source drafts. |
+| `designer_preview_stages` | Read `model`, `epoch`, `visible`, stage configurations/statuses, measured sizes, `current_source`, `current_image_source`, the manifest and active source URI. Optional `stage` and `tree: "visual"` or `"logical"` add native runtime rows. Reading does not rebuild a stage or apply source drafts. |
 | `designer_preview_stage` | Apply a local stage action against `expected_model` from the latest read. Returns the updated board, plus created IDs or per-stage refresh errors where applicable. |
+| `designer_preview_matrix` | Plan the exact combinations and return their configurations, count, available capacity and current model without adding native stages. |
+| `designer_preview_image` | Read a current accepted native stage as a PNG with source, graph and size metadata, using `expected_model` from the latest read. Accepts bounded pixel density; does not refresh the stage, apply drafts or write files. |
 
 Mutation actions are `add`, `update`, `duplicate`, `remove`, `move`, `pause`, `refresh`,
-`refresh_all`, `focus`, `select`, `show`, `restore` and `compare`. Add/update accept the
+`refresh_all`, `focus`, `select`, `show`, `restore`, `compare` and `compare_matrix`. Add/update accept the
 complete `PreviewStageConfiguration`; compare accepts named environments based on an
-existing stage. Restore accepts the validated versioned manifest. Referenced source
+existing stage. `compare_matrix` accepts the bounded comparison axes described above. Restore accepts
+the validated versioned manifest. Referenced source
 documents must be open to render or focus their stages. Unavailable sources remain
 references with a **Missing document** diagnostic; these actions do not open filesystem
 paths or load arbitrary source documents.
@@ -276,6 +440,18 @@ stage. The model identifies the current documents, pending source text and board
 an optimistic concurrency guard, not an authorization credential. Stage settings remain
 local presentation state and are available to collaboration viewers with the required
 host permissions.
+
+Matrix planning and image capture are read-only tools and do not require those write or
+input permissions. Image capture returns an MCP image content block plus structured
+metadata, including the stage/source identity, rendered revision, logical dimensions and
+pixel dimensions. The transport keeps PNG bytes out of the repeated text metadata.
+
+`current_image_source` reports whether the accepted frame matches current source,
+dependencies and configuration; valid arranged layout is checked when capturing. A paused
+stage with an unchanged accepted source can report `current_image_source: true` while
+`current_source: false`, because pausing removes interactive source-selection authority.
+`DesignerWorkspace::preview_stage_image_source_is_current` exposes the same source guard
+to embedding hosts.
 
 Runtime rows include native `inspector_id` values and clear `source_id` when the retained
 preview no longer represents accepted current source. `select` uses a stage and a current
@@ -307,19 +483,31 @@ constitute an accessibility audit; Apple's
 [Accessibility Inspector](https://developer.apple.com/documentation/accessibility/accessibility-inspector)
 is a separate inspection and auditing workflow.
 
-Other useful follow-ups are content-fitting layout constraints, stage image export,
-host-named sample context providers and explicitly modeled platform scenes. Each should
-extend the native host contracts instead of claiming parity with simulator behavior.
+Other useful follow-ups are host-named sample context providers and explicitly modeled
+platform scenes. Each should extend the native host contracts instead of claiming parity
+with simulator behavior.
 
 ## Implementation and validation
 
 The implementation is organized in `preview_stages`, `preview_stage_scenarios`,
-`preview_stage_view`, `preview_stage_editor` and `workspace_preview_stages`. The existing
-`runtime`, `definition_projection`, `design_time`, `preview_host` and environment modules
-remain shared with the editing canvas.
+`preview_stage_view`, `preview_stage_editor`, `preview_stage_export`,
+`preview_stage_matrix`, `preview_stage_matrix_editor` and `workspace_preview_stages`.
+The existing `runtime`, `definition_projection`, `design_time`, `preview_host` and
+environment modules remain shared with the editing canvas.
 
 Native tests cover independent graphs for the same source URI, source-preserving
 configuration, scenario isolation, native resource/binding endpoints, complete scenario
 validation before class changes, logical-tree attachment, clock ownership and disposal,
 and all four endpoints in the runnable sample. Board/workspace tests cover their own
 source, target, persistence and input contracts.
+
+Additional native tests exercise finite content measurement, retained Live input during
+resizing, zoom/scroll coordinate handling, cancelled and stale resize drafts, bounded
+matrix planning and application, and repeated template-owner diagnostics. PNG tests
+decode the native output and check actual pixel colors and dimensions at several
+densities while an ancestor Viewbox uses another scale. They reject pending layout both
+before capture and when a native renderer invalidates a descendant during rendering.
+The file-picker regression changes and removes a stage while the save sheet is pending,
+then verifies that the original PNG is saved without an authored change. The rendered
+workspace test also verifies read-only MCP image bytes and source/size metadata against
+the same direct native capture.

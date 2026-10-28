@@ -378,9 +378,15 @@ impl DesignerWorkspace {
             project.tabs.insert(saved_uri.clone(), tab);
         }
         if saved_uri != previous_uri {
-            self.preview_stages.board.borrow_mut().retarget_source(&previous_uri, &saved_uri)?;
+            self.preview_stages
+                .board
+                .borrow_mut()
+                .retarget_source(&previous_uri, &saved_uri)?;
             if previous_preview_uri != previous_uri {
-                self.preview_stages.board.borrow_mut().retarget_source(&previous_preview_uri, &saved_uri)?;
+                self.preview_stages
+                    .board
+                    .borrow_mut()
+                    .retarget_source(&previous_preview_uri, &saved_uri)?;
             }
         }
         self.acknowledge_provider_save(&previous_uri, &saved_uri, &source)?;
@@ -405,6 +411,14 @@ pub(super) fn write_local(
     path: &std::path::Path,
     expected: Option<&str>,
     source: &str,
+) -> std::io::Result<()> {
+    write_local_bytes(path, expected.map(str::as_bytes), source.as_bytes())
+}
+
+pub(super) fn write_local_bytes(
+    path: &std::path::Path,
+    expected: Option<&[u8]>,
+    bytes: &[u8],
 ) -> std::io::Result<()> {
     use std::fs::{self, OpenOptions};
     use std::sync::atomic::{AtomicU64, Ordering};
@@ -439,12 +453,12 @@ pub(super) fn write_local(
         if let Ok(metadata) = fs::metadata(&path) {
             file.set_permissions(metadata.permissions())?;
         }
-        file.write_all(source.as_bytes())?;
+        file.write_all(bytes)?;
         file.flush()?;
         file.sync_all()?;
         drop(file);
         if let Some(expected) = expected {
-            if fs::read_to_string(&path)? != expected {
+            if fs::read(&path)? != expected {
                 return Err(std::io::Error::other(
                     "The file changed outside the designer; use Save as or reopen it",
                 ));
@@ -472,6 +486,12 @@ mod tests {
         assert_eq!(std::fs::read_to_string(&path).unwrap(), "edited");
         assert!(write_local(&path, Some("original"), "stale").is_err());
         assert_eq!(std::fs::read_to_string(&path).unwrap(), "edited");
+        assert_eq!(std::fs::read_dir(&dir).unwrap().count(), 1);
+        let binary = [137, 80, 78, 71, 0, 255, 0, 1];
+        write_local_bytes(&path, Some(b"edited"), &binary).unwrap();
+        assert_eq!(std::fs::read(&path).unwrap(), binary);
+        assert!(write_local_bytes(&path, Some(b"edited"), b"stale image").is_err());
+        assert_eq!(std::fs::read(&path).unwrap(), binary);
         assert_eq!(std::fs::read_dir(&dir).unwrap().count(), 1);
         std::fs::remove_file(path).unwrap();
         std::fs::remove_dir(dir).unwrap();

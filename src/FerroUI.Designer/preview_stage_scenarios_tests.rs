@@ -148,6 +148,136 @@ fn error(result: Result<StageScenarioGuard, String>) -> String {
 }
 
 #[test]
+fn repeated_template_state_owners_require_a_definition_stage_before_any_native_changes() {
+    let _app = UnitTestApplication::start(TestServices::styled_window());
+    let mut document = Document::new(
+        r#"<StackPanel xmlns="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+  <StackPanel.Resources>
+    <ControlTemplate x:Key="Repeated" TargetType="Button">
+      <Canvas Name="TemplateOwner" Width="180" Height="60">
+        <Border Name="StateTarget" Width="100" Height="40" Opacity="1"/>
+      </Canvas>
+    </ControlTemplate>
+  </StackPanel.Resources>
+  <Button Name="First" Template="{StaticResource Repeated}"/>
+  <Button Name="Second" Template="{StaticResource Repeated}"/>
+</StackPanel>"#,
+    )
+    .unwrap();
+    let owner = document.ast().find_name("TemplateOwner").unwrap();
+    let states = group(
+        owner,
+        "Appearance",
+        "StateTarget",
+        "Opacity",
+        &[("Muted", "0.25")],
+        &[],
+    );
+    document
+        .apply("Fixture states", states.plan(&document).unwrap())
+        .unwrap();
+    document.mark_saved();
+    let owner = document.ast().find_name("TemplateOwner").unwrap();
+    let target = document.ast().find_name("StateTarget").unwrap();
+    let before = (
+        document.source().to_owned(),
+        document.revision(),
+        document.ast_snapshot(),
+        document.undo_label().map(str::to_owned),
+    );
+    let mut ordinary = preview(&document);
+    let ordinary_window = attach(&mut ordinary, &document);
+    let owners = ordinary
+        .root()
+        .unwrap()
+        .get_visual_descendants()
+        .filter_map(|visual| visual.cast::<StyledElement>())
+        .filter(|element| element.name().as_deref() == Some("TemplateOwner"))
+        .collect::<Vec<_>>();
+    let targets = ordinary
+        .root()
+        .unwrap()
+        .get_visual_descendants()
+        .filter(|visual| ordinary.source_id(visual) == Some(target))
+        .collect::<Vec<_>>();
+    assert_eq!(
+        owners.len(),
+        2,
+        "The source template must have two real native instances"
+    );
+    assert_eq!(targets.len(), 2);
+    assert!(
+        ordinary.visual(owner).is_some(),
+        "The ordinary authoring map still exposes its existing representative"
+    );
+    let prior_classes = owners
+        .iter()
+        .map(|owner| owner.classes().snapshot())
+        .collect::<Vec<_>>();
+    let failure = error(apply_stage_states(
+        &document,
+        &mut ordinary,
+        &[ResolvedStageState {
+            owner,
+            group: "Appearance",
+            state: "Muted",
+        }],
+    ));
+    assert!(failure.contains("multiple native instances"), "{failure}");
+    assert!(failure.contains("definition stage"));
+    for (owner, before) in owners.iter().zip(prior_classes.iter()) {
+        assert_eq!(&owner.classes().snapshot(), before);
+    }
+    assert!(targets.iter().all(|target| target.opacity() == 1.0));
+
+    let template = document
+        .ast()
+        .elements()
+        .find(|node| node.local_name() == "ControlTemplate")
+        .unwrap()
+        .id;
+    let scope = crate::definition_projection::scope_for(
+        &document,
+        template,
+        Default::default(),
+        Vec::new(),
+    )
+    .unwrap();
+    let mut definition = RuntimePreview::new_isolated(
+        ContentControl::new(),
+        "memory://preview-stage-scenarios.xaml".into(),
+        &document,
+        Default::default(),
+        Some(scope),
+    )
+    .unwrap();
+    let definition_window = attach(&mut definition, &document);
+    let guard = apply_stage_states(
+        &document,
+        &mut definition,
+        &[ResolvedStageState {
+            owner,
+            group: "Appearance",
+            state: "Muted",
+        }],
+    )
+    .unwrap();
+    assert_eq!(definition.visual(target).unwrap().opacity(), 0.25);
+    assert!(
+        targets.iter().all(|target| target.opacity() == 1.0),
+        "The definition stage cannot change either document instance"
+    );
+    assert_eq!(document.source(), before.0);
+    assert_eq!(document.revision(), before.1);
+    assert!(Arc::ptr_eq(&document.ast_snapshot(), &before.2));
+    assert_eq!(document.undo_label(), before.3.as_deref());
+    assert!(!document.is_dirty());
+    drop(guard);
+    definition_window.close();
+    ordinary_window.close();
+}
+
+#[test]
 fn native_stages_hold_independent_group_endpoints_without_changing_the_document() {
     let _app = UnitTestApplication::start(TestServices::styled_window());
     let document = fixture();

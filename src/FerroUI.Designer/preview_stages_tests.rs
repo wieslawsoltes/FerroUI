@@ -2,7 +2,7 @@ use super::*;
 use crate::DesignerSession;
 use ferroui_base::layout::Orientation;
 use ferroui_controls::testing::{TestServices, UnitTestApplication};
-use ferroui_controls::{Button, StackPanel, TextBlock, TextBox, Window};
+use ferroui_controls::{Button, Grid, StackPanel, TextBlock, TextBox, Window};
 use ferroui_designer_core::Edit;
 use std::cell::{Cell, RefCell};
 
@@ -30,6 +30,466 @@ fn sync(board: &mut PreviewStageBoard, document: &Document, pending: bool) {
 
 fn config(name: &str) -> PreviewStageConfiguration {
     PreviewStageConfiguration::new(name, URI, PreviewEnvironment::default())
+}
+
+#[test]
+fn fitting_policies_use_native_desired_size_with_finite_logical_proposals() {
+    let _app = UnitTestApplication::start(TestServices::styled_window());
+    let document =
+        Document::new(r#"<Border xmlns="https://github.com/ferroui" Width="120" Height="70"/>"#)
+            .unwrap();
+    let mut board = PreviewStageBoard::new();
+    sync(&mut board, &document, false);
+    let mut ids = Vec::new();
+    for layout in [
+        PreviewStageLayout::Fixed,
+        PreviewStageLayout::SizeThatFits,
+        PreviewStageLayout::FixedWidth,
+        PreviewStageLayout::FixedHeight,
+    ] {
+        let mut config = config(&format!("{layout:?}"));
+        config.layout = layout;
+        config.environment.width = 300.0;
+        config.environment.height = 200.0;
+        ids.push(board.add(config).unwrap());
+    }
+    let window = attach(&board);
+    for (id, (width, height)) in
+        ids.into_iter()
+            .zip([(300.0, 200.0), (120.0, 70.0), (300.0, 70.0), (120.0, 200.0)])
+    {
+        assert_eq!(
+            board.stage(id).unwrap().layout_size,
+            PreviewStageSize { width, height }
+        );
+        let control = board.control(id).unwrap();
+        assert_eq!(control.bounds().width, width);
+        assert_eq!(control.bounds().height, height);
+        let root = visual(&board, id, document.ast().root())
+            .cast::<Border>()
+            .unwrap();
+        assert_eq!(root.width(), 120.0);
+        assert_eq!(root.height(), 70.0);
+        assert_eq!(
+            root.previous_measure(),
+            Some(ferroui_base::Size::new(300.0, 200.0))
+        );
+    }
+    assert_eq!(document.revision(), 0);
+    window.close();
+}
+
+#[test]
+fn fit_clamps_empty_and_oversized_content_without_rewriting_authored_constraints() {
+    let _app = UnitTestApplication::start(TestServices::styled_window());
+    let document =
+        Document::new(r#"<Border xmlns="https://github.com/ferroui" Width="900" Height="300"/>"#)
+            .unwrap();
+    let empty = Document::new(r#"<Border xmlns="https://github.com/ferroui"/>"#).unwrap();
+    let mut board = PreviewStageBoard::new();
+    sync_documents(
+        &mut board,
+        &[(URI, &document, false), (OTHER, &empty, false)],
+    );
+    let mut large = config("Overflow");
+    large.layout = PreviewStageLayout::SizeThatFits;
+    large.environment.width = 160.0;
+    large.environment.height = 200.0;
+    let large_id = board.add(large).unwrap();
+    let mut small = config("Empty");
+    small.source_uri = OTHER.into();
+    small.layout = PreviewStageLayout::SizeThatFits;
+    let small_id = board.add(small).unwrap();
+    let window = attach(&board);
+    assert_eq!(
+        board.stage(large_id).unwrap().layout_size,
+        PreviewStageSize {
+            width: 160.0,
+            height: 200.0
+        }
+    );
+    assert_eq!(
+        board.stage(small_id).unwrap().layout_size,
+        PreviewStageSize {
+            width: 1.0,
+            height: 1.0
+        }
+    );
+    let root = visual(&board, large_id, document.ast().root())
+        .cast::<Border>()
+        .unwrap();
+    assert_eq!(root.width(), 900.0);
+    assert_eq!(root.height(), 300.0);
+    assert!(board.control(large_id).unwrap().clip_to_bounds());
+    window.close();
+}
+
+#[test]
+fn fixed_width_fits_wrapped_text_height_using_the_real_width_proposal() {
+    let _app = UnitTestApplication::start(TestServices::styled_window());
+    let document = Document::new(
+        r#"<TextBlock xmlns="https://github.com/ferroui" FontSize="16" TextWrapping="Wrap" Text="Preview layouts need enough width to place a paragraph. Narrow previews wrap the same native text into more lines."/>"#,
+    )
+    .unwrap();
+    let mut board = PreviewStageBoard::new();
+    sync(&mut board, &document, false);
+    let mut narrow = config("Narrow paragraph");
+    narrow.layout = PreviewStageLayout::FixedWidth;
+    narrow.environment.width = 100.0;
+    narrow.environment.height = 800.0;
+    let narrow_id = board.add(narrow.clone()).unwrap();
+    narrow.name = "Wide paragraph".into();
+    narrow.environment.width = 300.0;
+    let wide_id = board.add(narrow).unwrap();
+    let window = attach(&board);
+    let narrow_size = board.stage(narrow_id).unwrap().layout_size;
+    let wide_size = board.stage(wide_id).unwrap().layout_size;
+    assert_eq!(narrow_size.width, 100.0);
+    assert_eq!(wide_size.width, 300.0);
+    assert!(
+        narrow_size.height > wide_size.height,
+        "narrow={narrow_size:?}, wide={wide_size:?}"
+    );
+    assert!(wide_size.height > 1.0);
+    assert!(narrow_size.height < 800.0);
+    window.close();
+}
+
+#[test]
+fn fitting_tracks_native_content_invalidation_without_rebuilding_graph_or_epoch() {
+    let _app = UnitTestApplication::start(TestServices::styled_window());
+    let document = Document::new(
+        r#"<StackPanel xmlns="https://github.com/ferroui"><Border Width="100" Height="20"/></StackPanel>"#,
+    )
+    .unwrap();
+    let mut board = PreviewStageBoard::new();
+    sync(&mut board, &document, false);
+    let mut configuration = config("Live fitting content");
+    configuration.layout = PreviewStageLayout::SizeThatFits;
+    configuration.mode = PreviewStageMode::Live;
+    let id = board.add(configuration).unwrap();
+    let window = attach(&board);
+    let original = board.stage(id).unwrap();
+    assert_eq!(
+        original.layout_size,
+        PreviewStageSize {
+            width: 100.0,
+            height: 20.0
+        }
+    );
+    let root = visual(&board, id, document.ast().root())
+        .cast::<StackPanel>()
+        .unwrap();
+    let added = Border::new();
+    added.set_width(160.0);
+    added.set_height(40.0);
+    root.children().add(added.upcast::<Control>());
+    window.update_layout();
+    let changed = board.stage(id).unwrap();
+    assert_eq!(
+        changed.layout_size,
+        PreviewStageSize {
+            width: 160.0,
+            height: 60.0
+        }
+    );
+    assert_eq!(changed.epoch, original.epoch);
+    assert_eq!(changed.configuration, original.configuration);
+    assert_eq!(
+        root,
+        visual(&board, id, document.ast().root())
+            .cast::<StackPanel>()
+            .unwrap()
+    );
+    assert_eq!(document.revision(), 0);
+    window.close();
+}
+
+#[test]
+fn logical_resize_and_layout_policy_preserve_live_input_and_retire_old_tokens() {
+    let _app = UnitTestApplication::start(TestServices::styled_window());
+    let document =
+        Document::new(r#"<TextBox xmlns="https://github.com/ferroui" Text="Initial"/>"#).unwrap();
+    let mut board = PreviewStageBoard::new();
+    sync(&mut board, &document, false);
+    let mut configuration = config("Resizable live input");
+    configuration.mode = PreviewStageMode::Live;
+    let id = board.add(configuration.clone()).unwrap();
+    let window = attach(&board);
+    let root = visual(&board, id, document.ast().root())
+        .cast::<TextBox>()
+        .unwrap();
+    root.set_text(Some("Keep this typed text"));
+    let token = board
+        .selection_token(id, runtime_id(&board, id, document.ast().root()))
+        .unwrap();
+    configuration.environment.width = 320.0;
+    configuration.environment.height = 240.0;
+    board.update(id, configuration.clone()).unwrap();
+    assert_eq!(
+        root,
+        visual(&board, id, document.ast().root())
+            .cast::<TextBox>()
+            .unwrap()
+    );
+    assert_eq!(root.text().as_deref(), Some("Keep this typed text"));
+    assert!(board.resolve_selection(&token).is_err());
+    assert_eq!(
+        board.stage(id).unwrap().layout_size,
+        PreviewStageSize {
+            width: 320.0,
+            height: 240.0
+        }
+    );
+    configuration.layout = PreviewStageLayout::FixedWidth;
+    board.update(id, configuration).unwrap();
+    assert_eq!(root.text().as_deref(), Some("Keep this typed text"));
+    assert_eq!(board.stage(id).unwrap().layout_size.width, 320.0);
+    assert!(board.stage(id).unwrap().layout_size.height < 240.0);
+    let fresh = board
+        .selection_token(id, runtime_id(&board, id, document.ast().root()))
+        .unwrap();
+    assert_eq!(
+        board.resolve_selection(&fresh).unwrap().node,
+        document.ast().root()
+    );
+    assert_eq!(document.revision(), 0);
+    window.close();
+}
+
+#[test]
+fn a_panicking_native_resize_hook_keeps_its_graph_without_claiming_the_new_layout() {
+    let _app = UnitTestApplication::start(TestServices::styled_window());
+    let document = Document::new(r#"<Border xmlns="https://github.com/ferroui"/>"#).unwrap();
+    let mut board = PreviewStageBoard::new();
+    sync(&mut board, &document, false);
+    let mut configuration = config("Application layout callback");
+    configuration.mode = PreviewStageMode::Live;
+    let stage = board.add(configuration.clone()).unwrap();
+    let window = attach(&board);
+    let root = visual(&board, stage, document.ast().root());
+    let subscription = root.property_changed(|change| {
+        if change.is_effective_value_change()
+            && change.property() == Visual::bounds_property().as_property()
+        {
+            panic!("Application resize hook failed");
+        }
+    });
+    configuration.environment.width = 220.0;
+    configuration.environment.height = 120.0;
+    board.update(stage, configuration).unwrap();
+    subscription.dispose();
+    assert!(matches!(
+        board.stage(stage).unwrap().status,
+        PreviewStageStatus::Failed { ref message, .. }
+            if message.contains("Application resize hook failed")
+    ));
+    assert_eq!(visual(&board, stage, document.ast().root()), root);
+    assert!(!board.source_is_current(stage, URI, &document, false, 1));
+    assert!(!board.frame_is_current(stage, URI, &document, false, 1));
+    assert!(!board.stages[0]
+        .rendered
+        .as_ref()
+        .unwrap()
+        .scope
+        .is_hit_test_visible());
+    board.set_paused(stage, true).unwrap();
+    assert!(!board.frame_is_current(stage, URI, &document, false, 1));
+    board.set_paused(stage, false).unwrap();
+    assert!(board.frame_is_current(stage, URI, &document, false, 1));
+    assert!(board.source_is_current(stage, URI, &document, false, 1));
+    assert_ne!(visual(&board, stage, document.ast().root()), root);
+    assert_eq!(document.revision(), 0);
+    window.close();
+}
+
+#[test]
+fn layout_changes_keep_pending_and_paused_source_authority_revoked() {
+    let _app = UnitTestApplication::start(TestServices::styled_window());
+    let mut document =
+        Document::new(r#"<Border xmlns="https://github.com/ferroui" Width="120" Height="70"/>"#)
+            .unwrap();
+    let mut board = PreviewStageBoard::new();
+    sync(&mut board, &document, false);
+    let id = board.add(config("Retained result")).unwrap();
+    let window = attach(&board);
+    let original = visual(&board, id, document.ast().root());
+    document.update_source("Draft", document.source().replace("120", "150"));
+    sync(&mut board, &document, true);
+    let mut configuration = board.stage(id).unwrap().configuration;
+    configuration.layout = PreviewStageLayout::SizeThatFits;
+    board.update(id, configuration).unwrap();
+    assert!(matches!(
+        board.stage(id).unwrap().status,
+        PreviewStageStatus::PendingSource { .. }
+    ));
+    assert_eq!(
+        visual(
+            &board,
+            id,
+            board.stages[0]
+                .rendered
+                .as_ref()
+                .unwrap()
+                .document
+                .ast()
+                .root()
+        ),
+        original
+    );
+    assert_eq!(
+        board.stage(id).unwrap().layout_size,
+        PreviewStageSize {
+            width: 120.0,
+            height: 70.0
+        }
+    );
+    assert!(board
+        .selection_token(id, Inspector::shared().borrow_mut().node_id(&original))
+        .is_err());
+    board.set_paused(id, true).unwrap();
+    let mut configuration = board.stage(id).unwrap().configuration;
+    configuration.environment.width = 100.0;
+    board.update(id, configuration).unwrap();
+    assert!(matches!(
+        board.stage(id).unwrap().status,
+        PreviewStageStatus::Paused { .. }
+    ));
+    assert_eq!(board.stage(id).unwrap().layout_size.width, 100.0);
+    assert!(board
+        .selection_token(id, Inspector::shared().borrow_mut().node_id(&original))
+        .is_err());
+    window.close();
+}
+
+#[test]
+fn old_manifests_default_to_fixed_layout_and_new_policies_round_trip() {
+    let mut value = serde_json::to_value(config("Legacy")).unwrap();
+    value.as_object_mut().unwrap().remove("layout");
+    let legacy: PreviewStageConfiguration = serde_json::from_value(value.clone()).unwrap();
+    assert_eq!(legacy.layout, PreviewStageLayout::Fixed);
+    for layout in [
+        PreviewStageLayout::SizeThatFits,
+        PreviewStageLayout::FixedWidth,
+        PreviewStageLayout::FixedHeight,
+    ] {
+        let mut configuration = legacy.clone();
+        configuration.layout = layout;
+        let manifest = PreviewStageManifest {
+            version: 1,
+            stages: vec![configuration],
+            active: Some(0),
+        };
+        assert_eq!(
+            PreviewStageManifest::from_json(&manifest.to_json().unwrap()).unwrap(),
+            manifest
+        );
+    }
+    value["layout"] = serde_json::json!("fit_using_global_font_scale");
+    assert!(serde_json::from_value::<PreviewStageConfiguration>(value).is_err());
+}
+
+#[test]
+fn paused_current_frames_can_be_observed_without_restoring_selection_or_input_authority() {
+    let _app = UnitTestApplication::start(TestServices::styled_window());
+    let mut document =
+        Document::new(r#"<TextBox xmlns="https://github.com/ferroui" Text="Initial"/>"#).unwrap();
+    let mut board = PreviewStageBoard::new();
+    sync(&mut board, &document, false);
+    let mut configuration = config("Paused image");
+    configuration.mode = PreviewStageMode::Live;
+    let stage = board.add(configuration).unwrap();
+    let window = attach(&board);
+    assert!(board.source_is_current(stage, URI, &document, false, 1));
+    assert!(board.frame_is_current(stage, URI, &document, false, 1));
+    board.set_paused(stage, true).unwrap();
+    assert!(!board.source_is_current(stage, URI, &document, false, 1));
+    assert!(board.frame_is_current(stage, URI, &document, false, 1));
+    assert!(!board.stages[0]
+        .rendered
+        .as_ref()
+        .unwrap()
+        .scope
+        .is_hit_test_visible());
+    let node = document.ast().root();
+    assert!(board
+        .selection_token(stage, runtime_id(&board, stage, node))
+        .is_err());
+    assert!(!board.frame_is_current(stage, URI, &document, true, 1));
+    assert!(!board.frame_is_current(stage, OTHER, &document, false, 1));
+    assert!(!board.frame_is_current(stage, URI, &document, false, 2));
+    let replacement = Document::new(document.source()).unwrap();
+    assert!(!board.frame_is_current(stage, URI, &replacement, false, 1));
+    document.update_source(
+        "Change text",
+        document.source().replace("Initial", "Accepted later"),
+    );
+    assert!(!board.frame_is_current(stage, URI, &document, false, 1));
+    sync(&mut board, &document, false);
+    assert!(!board.frame_is_current(stage, URI, &document, false, 1));
+    board.refresh(stage).unwrap();
+    assert!(board.frame_is_current(stage, URI, &document, false, 1));
+    assert!(!board.source_is_current(stage, URI, &document, false, 1));
+    assert!(!board.stages[0]
+        .rendered
+        .as_ref()
+        .unwrap()
+        .scope
+        .is_hit_test_visible());
+    let current = board.stage(stage).unwrap();
+    let mut invalid_target = current.configuration;
+    invalid_target.target = PreviewStageTarget::Definition {
+        anchor: PreviewSourceAnchor::capture(&document, document.ast().root()).unwrap(),
+        options: DefinitionPreviewOptions::default(),
+    };
+    board.update(stage, invalid_target).unwrap();
+    assert!(matches!(
+        board.stage(stage).unwrap().status,
+        PreviewStageStatus::Failed { .. }
+    ));
+    assert!(!board.frame_is_current(stage, URI, &document, false, 1));
+    window.close();
+}
+
+#[test]
+fn comparison_batch_validates_every_descriptor_before_calling_native_factories() {
+    let _app = UnitTestApplication::start(TestServices::styled_window());
+    let document = Document::new(r#"<Border xmlns="https://github.com/ferroui"/>"#).unwrap();
+    let calls = Rc::new(Cell::new(0));
+    let observed = calls.clone();
+    let mut options = PreviewHostOptions::default();
+    options.register_root(
+        "Border",
+        Rc::new(move |request| {
+            observed.set(observed.get() + 1);
+            request.populate(None)
+        }),
+    );
+    let mut board = PreviewStageBoard::new();
+    board
+        .sync_sources(URI, vec![source(&document, URI, false)], options, 1)
+        .unwrap();
+    let mut invalid = config("Invalid last item");
+    invalid.environment.width = f64::NAN;
+    assert!(board
+        .add_configurations(vec![config("First"), invalid])
+        .is_err());
+    assert_eq!(calls.get(), 0);
+    assert!(board.stages().is_empty());
+    assert!(board
+        .add_configurations(vec![config("Too many"); MAX_PREVIEW_STAGES + 1])
+        .is_err());
+    assert!(board.add_configurations(Vec::new()).is_err());
+    assert_eq!(calls.get(), 0);
+    let ids = board
+        .add_configurations(vec![config("One"), config("Two")])
+        .unwrap();
+    assert_eq!(calls.get(), 2);
+    assert_eq!(ids.len(), 2);
+    assert_ne!(
+        visual(&board, ids[0], document.ast().root()),
+        visual(&board, ids[1], document.ast().root())
+    );
 }
 
 fn attach(board: &PreviewStageBoard) -> Ref<Window> {

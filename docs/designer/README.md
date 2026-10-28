@@ -29,7 +29,9 @@ Open the [selection workflow sample](samples/SelectionWorkflows.xaml) to try the
 with a gradient source card, independent destinations and overlapping layers.
 The [Xcode preview comparison and stage guide](xcode-previews.md) covers independent named
 views, size/theme/orientation/direction comparisons, pinned previews, per-stage Live/Select,
-native state scenarios and saved stage sets. Open the [preview-stage sample](samples/PreviewStages.xaml)
+native state scenarios and saved stage sets. Content-fitting layouts, direct resizing,
+per-card zoom, bounded comparison matrices and native PNG export extend the same board.
+Open the [preview-stage sample](samples/PreviewStages.xaml)
 to compare Loading, Empty, Content and Error screens with actual native theme resources and
 design-time sample rows.
 
@@ -104,6 +106,11 @@ visual-state endpoints. Pinning keeps a stage visible across document tabs; Paus
 automatic source updates. **Focus** returns its context to the editing canvas. Stage settings
 remain separate from authored XAML and can be saved as a versioned set. See the
 [preview-stage guide](xcode-previews.md) for exact behavior and platform boundaries.
+The stage editor supports fitting either or both axes using native measurement. A resize
+grip applies fixed logical dimensions while preserving Live control state; card zoom
+changes only display scale. **Compare matrix** combines size, theme, direction, design-data
+and authored-state choices within the board's capacity. **Save preview image…** saves the
+current accepted native stage as PNG, excluding designer commands and display zoom.
 
 The left dock switches between **Layers**, **Assets**, **Library** and **Project**:
 
@@ -595,7 +602,9 @@ The additional tools are:
 | `designer_components` / `designer_component` | Component catalog and transactional resource/template/theme authoring |
 | `designer_component_resources` / `designer_component_references` | Theme-aware visible resources and authored reference analysis |
 | `designer_definition_scope` / `designer_definition` | Native definition preview, sample host options and guarded scope navigation |
-| `designer_preview_stages` / `designer_preview_stage` | Inspect native preview stages; configure views, variants and manifests using the current model token |
+| `designer_preview_stages` / `designer_preview_stage` | Inspect native preview stages and measured sizes; configure views, variants, bounded matrices and manifests using the current model token |
+| `designer_preview_matrix` | Plan exact comparison configurations, count and capacity without creating native stages |
+| `designer_preview_image` | Capture an eligible native stage as PNG with source and size metadata, without refreshing, changing layout or writing files |
 | `designer_project` / `designer_project_edit` | Solution, tab, save and document lifecycle |
 | `designer_build_plan` / `designer_project_task` | Reviewable process plans and explicit build/run/cancel |
 | `designer_language` / `designer_language_apply` | Semantic queries and versioned cross-document refactoring |

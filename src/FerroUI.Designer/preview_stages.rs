@@ -9,7 +9,7 @@ use ferroui_base::media::{FlowDirection, SolidColorBrush};
 use ferroui_base::styling::ThemeVariant;
 use ferroui_base::utilities::{Uri, UriKind};
 use ferroui_base::{Point, Ref, Visual, WeakRef};
-use ferroui_controls::{Border, ContentControl, Control, Grid, ThemeVariantScope};
+use ferroui_controls::{Border, ContentControl, Control, ThemeVariantScope};
 use ferroui_designer_core::{Ast, Document, Node, NodeId};
 use ferroui_inspect::{Inspector, TreeKind};
 use ferroui_markup_xaml::source_overlay::SourceSnapshot;
@@ -18,6 +18,10 @@ use std::collections::{BTreeMap, BTreeSet};
 use std::rc::Rc;
 use std::sync::atomic::{AtomicU64, Ordering};
 use std::sync::Arc;
+
+#[path = "preview_stage_layout.rs"]
+mod layout;
+use layout::StageLayoutHost;
 
 pub type PreviewStageId = u64;
 pub const MAX_PREVIEW_STAGES: usize = 16;
@@ -163,6 +167,38 @@ pub enum PreviewStageMode {
     Live,
 }
 
+/// Native measurement policy for a stage. Environment dimensions are the finite
+/// layout proposal and maximum size; fitting axes use the content's desired size.
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub enum PreviewStageLayout {
+    #[default]
+    Fixed,
+    SizeThatFits,
+    /// Fixed width with a content-fitting height.
+    FixedWidth,
+    /// Content-fitting width with a fixed height.
+    FixedHeight,
+}
+
+impl PreviewStageLayout {
+    pub(crate) fn fits_width(self) -> bool {
+        matches!(self, Self::SizeThatFits | Self::FixedHeight)
+    }
+
+    pub(crate) fn fits_height(self) -> bool {
+        matches!(self, Self::SizeThatFits | Self::FixedWidth)
+    }
+}
+
+/// Resolved native logical dimensions, independent from a card's visual scaling.
+#[derive(Clone, Copy, Debug, PartialEq, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct PreviewStageSize {
+    pub width: f64,
+    pub height: f64,
+}
+
 #[derive(Clone, Debug, Default, PartialEq, Serialize, Deserialize)]
 #[serde(tag = "kind", rename_all = "snake_case", deny_unknown_fields)]
 pub enum PreviewStageTarget {
@@ -189,6 +225,8 @@ pub struct PreviewStageConfiguration {
     pub source_uri: String,
     pub target: PreviewStageTarget,
     pub environment: PreviewEnvironment,
+    #[serde(default)]
+    pub layout: PreviewStageLayout,
     pub design_time_data: bool,
     pub states: Vec<PreviewStageState>,
     pub pinned: bool,
@@ -207,6 +245,7 @@ impl PreviewStageConfiguration {
             source_uri: source_uri.into(),
             target: PreviewStageTarget::Document,
             environment,
+            layout: PreviewStageLayout::Fixed,
             design_time_data: true,
             states: Vec::new(),
             pinned: false,
@@ -270,9 +309,16 @@ impl PreviewStageConfiguration {
     fn same_rendering(&self, other: &Self) -> bool {
         self.source_uri == other.source_uri
             && self.target == other.target
-            && self.environment == other.environment
+            && self.environment.theme == other.environment.theme
+            && self.environment.flow_direction == other.environment.flow_direction
             && self.design_time_data == other.design_time_data
             && self.states == other.states
+    }
+
+    fn same_layout(&self, other: &Self) -> bool {
+        self.layout == other.layout
+            && self.environment.width == other.environment.width
+            && self.environment.height == other.environment.height
     }
 }
 
@@ -304,6 +350,7 @@ pub struct PreviewStageInfo {
     pub configuration: PreviewStageConfiguration,
     pub epoch: u64,
     pub status: PreviewStageStatus,
+    pub layout_size: PreviewStageSize,
     pub rendered_revision: Option<u64>,
     pub source_revision: Option<u64>,
     pub notices: Vec<String>,
@@ -438,7 +485,7 @@ impl Drop for RenderedStage {
 struct Stage {
     id: PreviewStageId,
     configuration: PreviewStageConfiguration,
-    control: Ref<Grid>,
+    control: Ref<StageLayoutHost>,
     epoch: u64,
     status: PreviewStageStatus,
     rendered: Option<RenderedStage>,
@@ -555,6 +602,7 @@ impl PreviewStageBoard {
             configuration: stage.configuration.clone(),
             epoch: stage.epoch,
             status: stage.status.clone(),
+            layout_size: stage.control.layout_size(),
             rendered_revision: stage
                 .rendered
                 .as_ref()
@@ -650,10 +698,7 @@ impl PreviewStageBoard {
             ));
         }
         let id = NEXT_STAGE.fetch_add(1, Ordering::Relaxed);
-        let control = Grid::new();
-        control.set_clip_to_bounds(true);
-        control.set_width(configuration.environment.width);
-        control.set_height(configuration.environment.height);
+        let control = StageLayoutHost::new(configuration.layout, configuration.environment);
         self.stages.push(Stage {
             id,
             configuration,
@@ -684,22 +729,29 @@ impl PreviewStageBoard {
             return Ok(());
         }
         let rendering_changed = !previous.same_rendering(&configuration);
+        let layout_changed = !previous.same_layout(&configuration);
         self.stages[index].configuration = configuration;
         self.touch(index);
         if rendering_changed {
             let _ = self.reload(id, true);
-        } else if !self.stages[index].configuration.auto_update {
-            self.stages[index].status = PreviewStageStatus::Paused {
-                revision: self.stages[index]
-                    .rendered
-                    .as_ref()
-                    .map(|rendered| rendered.document.revision()),
-            };
-            self.apply_mode(index);
-        } else if !previous.auto_update {
-            let _ = self.reload(id, false);
         } else {
-            self.apply_mode(index);
+            if layout_changed && self.apply_layout(index).is_err() {
+                self.apply_mode(index);
+                return Ok(());
+            }
+            if !self.stages[index].configuration.auto_update {
+                self.stages[index].status = PreviewStageStatus::Paused {
+                    revision: self.stages[index]
+                        .rendered
+                        .as_ref()
+                        .map(|rendered| rendered.document.revision()),
+                };
+                self.apply_mode(index);
+            } else if !previous.auto_update {
+                let _ = self.reload(id, false);
+            } else {
+                self.apply_mode(index);
+            }
         }
         Ok(())
     }
@@ -787,7 +839,28 @@ impl PreviewStageBoard {
             configuration.validate()?;
             configs.push(configuration);
         }
-        configs.into_iter().map(|config| self.add(config)).collect()
+        self.add_configurations(configs)
+    }
+
+    /// Add a bounded comparison batch. Descriptor validation and capacity are
+    /// checked for the entire batch before any native factory can be called.
+    /// Individual native loading failures remain visible on their own cards.
+    pub fn add_configurations(
+        &mut self,
+        configurations: Vec<PreviewStageConfiguration>,
+    ) -> Result<Vec<PreviewStageId>, String> {
+        if configurations.is_empty()
+            || configurations.len() > MAX_PREVIEW_STAGES.saturating_sub(self.stages.len())
+        {
+            return Err("Choose configurations within the board's 16-stage capacity".into());
+        }
+        for configuration in &configurations {
+            configuration.validate()?;
+        }
+        configurations
+            .into_iter()
+            .map(|configuration| self.add(configuration))
+            .collect()
     }
 
     pub fn manifest(&self) -> PreviewStageManifest {
@@ -905,11 +978,34 @@ impl PreviewStageBoard {
         pending: bool,
         options_epoch: u64,
     ) -> bool {
+        self.stages
+            .iter()
+            .any(|stage| stage.id == id && matches!(stage.status, PreviewStageStatus::Ready { .. }))
+            && self.frame_is_current(id, uri, document, pending, options_epoch)
+    }
+
+    /// Check whether an accepted native frame represents these exact current
+    /// buffers, including a paused frame explicitly refreshed at this revision.
+    /// This does not grant source-selection or application-input authority.
+    /// Hosts must also validate all their current dependency buffers through
+    /// `dependencies_are_current` before publishing an image of the frame.
+    pub fn frame_is_current(
+        &self,
+        id: PreviewStageId,
+        uri: &str,
+        document: &Document,
+        pending: bool,
+        options_epoch: u64,
+    ) -> bool {
         let Some(stage) = self.stages.iter().find(|stage| stage.id == id) else {
             return false;
         };
-        let PreviewStageStatus::Ready { revision } = stage.status else {
-            return false;
+        let revision = match stage.status {
+            PreviewStageStatus::Ready { revision }
+            | PreviewStageStatus::Paused {
+                revision: Some(revision),
+            } => revision,
+            _ => return false,
         };
         let Some(rendered) = &stage.rendered else {
             return false;
@@ -923,6 +1019,7 @@ impl PreviewStageBoard {
             && Arc::ptr_eq(&rendered.document.ast_snapshot(), &document.ast_snapshot())
             && rendered.options_epoch == options_epoch
             && rendered.configuration.same_rendering(&stage.configuration)
+            && rendered.configuration.same_layout(&stage.configuration)
             && rendered_dependencies_current(rendered, &self.source_catalog)
     }
 
@@ -1109,6 +1206,7 @@ impl PreviewStageBoard {
             )
             || rendered.options_epoch != self.options_epoch
             || !rendered.configuration.same_rendering(&stage.configuration)
+            || !rendered.configuration.same_layout(&stage.configuration)
             || !rendered_dependencies_current(rendered, &self.source_catalog)
         {
             return Err("The stage source or construction services changed".into());
@@ -1164,6 +1262,7 @@ impl PreviewStageBoard {
             if let Some(rendered) = stage.rendered.as_mut() {
                 if rendered.options_epoch == self.options_epoch
                     && rendered.configuration.same_rendering(&config)
+                    && rendered.configuration.same_layout(&config)
                     && rendered.document.source() == source.document.source()
                     && Arc::ptr_eq(
                         &rendered.document.ast_snapshot(),
@@ -1204,8 +1303,7 @@ impl PreviewStageBoard {
                     drop(previous);
                 }
                 candidate.scope.set_opacity(1.0);
-                stage.control.set_width(config.environment.width);
-                stage.control.set_height(config.environment.height);
+                stage.control.configure(config.layout, config.environment);
                 stage.rendered = Some(candidate);
                 stage.status = if config.auto_update {
                     PreviewStageStatus::Ready {
@@ -1317,6 +1415,7 @@ impl PreviewStageBoard {
             .collect::<Result<Vec<_>, String>>()?;
         let scope = ThemeVariantScope::new();
         apply_environment(&scope, config.environment);
+        apply_scope_layout(&scope, config.layout, config.environment);
         scope.set_opacity(0.0);
         scope.set_is_hit_test_visible(false);
         let host = ContentControl::new();
@@ -1442,6 +1541,45 @@ impl PreviewStageBoard {
         }
     }
 
+    fn apply_layout(&mut self, index: usize) -> Result<(), String> {
+        let stage = &mut self.stages[index];
+        let config = &stage.configuration;
+        let result = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
+            stage.control.configure(config.layout, config.environment);
+            if let Some(rendered) = &mut stage.rendered {
+                apply_scope_layout(&rendered.scope, config.layout, config.environment);
+            }
+            stage.control.update_layout();
+            if let Some(rendered) = &mut stage.rendered {
+                rendered.preview.rebuild_map(&rendered.document);
+                rendered.configuration.layout = config.layout;
+                rendered.configuration.environment.width = config.environment.width;
+                rendered.configuration.environment.height = config.environment.height;
+            }
+        }));
+        if let Err(payload) = result {
+            let message = payload
+                .downcast_ref::<String>()
+                .cloned()
+                .or_else(|| {
+                    payload
+                        .downcast_ref::<&str>()
+                        .map(|value| (*value).to_owned())
+                })
+                .unwrap_or_else(|| "A native layout callback panicked".into());
+            let message = format!("Native preview layout failed: {message}");
+            stage.status = PreviewStageStatus::Failed {
+                revision: stage
+                    .rendered
+                    .as_ref()
+                    .map(|rendered| rendered.document.revision()),
+                message: message.clone(),
+            };
+            return Err(message);
+        }
+        Ok(())
+    }
+
     fn index(&self, id: PreviewStageId) -> Result<usize, String> {
         self.stages
             .iter()
@@ -1534,8 +1672,6 @@ fn dependency_stamps(
 }
 
 fn apply_environment(scope: &Ref<ThemeVariantScope>, environment: PreviewEnvironment) {
-    scope.set_width(environment.width);
-    scope.set_height(environment.height);
     scope.set_clip_to_bounds(true);
     scope.set_requested_theme_variant(match environment.theme {
         PreviewTheme::Light => Some(ThemeVariant::light()),
@@ -1547,6 +1683,25 @@ fn apply_environment(scope: &Ref<ThemeVariantScope>, environment: PreviewEnviron
         PreviewFlowDirection::LeftToRight => scope.set_flow_direction(FlowDirection::LeftToRight),
         PreviewFlowDirection::RightToLeft => scope.set_flow_direction(FlowDirection::RightToLeft),
     }
+}
+
+fn apply_scope_layout(
+    scope: &Ref<ThemeVariantScope>,
+    layout: PreviewStageLayout,
+    environment: PreviewEnvironment,
+) {
+    scope.set_width(if layout.fits_width() {
+        f64::NAN
+    } else {
+        environment.width
+    });
+    scope.set_height(if layout.fits_height() {
+        f64::NAN
+    } else {
+        environment.height
+    });
+    scope.set_max_width(environment.width);
+    scope.set_max_height(environment.height);
 }
 
 fn is_in_preview(visual: &Ref<Visual>, preview: &RuntimePreview) -> bool {

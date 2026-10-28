@@ -9,6 +9,78 @@ use ferroui_controls::TopLevel;
 use std::io::{Read, Write};
 
 impl DesignerWorkspace {
+    pub(super) fn request_save_preview_stage_image(self: &Rc<Self>, id: crate::PreviewStageId) {
+        if self.file_busy.replace(true) {
+            return;
+        }
+        let this = self.clone();
+        Dispatcher::ui_thread()
+            .to_task_scheduler()
+            .spawn_local(async move {
+                let result = this
+                    .save_preview_stage_image_file(id, crate::PreviewStageExportOptions::default())
+                    .await
+                    .map(|_| ());
+                this.file_busy.set(false);
+                this.report(result);
+            });
+    }
+
+    /// Freeze the native PNG before opening the save picker. A later source edit or
+    /// removal cannot substitute a newer frame for the image the user chose to save.
+    pub async fn save_preview_stage_image_file(
+        self: &Rc<Self>,
+        id: crate::PreviewStageId,
+        options: crate::PreviewStageExportOptions,
+    ) -> Result<bool, String> {
+        let image = self.preview_stage_image(id, options)?;
+        let top = TopLevel::get_top_level(Some(&self.root))
+            .ok_or("Attach the designer to a window to save a preview image")?;
+        let provider = top.storage_provider();
+        if !provider.can_save() {
+            return Err(
+                "This host has no save picker; use preview_stage_image() to capture PNG bytes"
+                    .into(),
+            );
+        }
+        let mut options = FilePickerSaveOptions::new();
+        options.set_title(Some("Save preview image".into()));
+        options.set_default_extension(Some("png".into()));
+        options.set_suggested_file_name(Some(format!("Preview-{id}.png")));
+        options.set_file_type_choices(Some(vec![
+            FilePickerFileType::new(Some("PNG image")).with_patterns(&["*.png"])
+        ]));
+        options.set_show_overwrite_prompt(Some(true));
+        let Some(file) = provider
+            .save_file_picker_async(options)
+            .await
+            .map_err(|error| error.to_string())?
+        else {
+            return Ok(false);
+        };
+        #[cfg(not(target_arch = "wasm32"))]
+        let local_path = {
+            let item: Rc<dyn ferroui_base::platform::storage::IStorageItem> = file.clone();
+            item.try_get_local_path()
+        };
+        #[cfg(target_arch = "wasm32")]
+        let local_path: Option<String> = None;
+        if let Some(path) = local_path {
+            super::files::write_local_bytes(std::path::Path::new(&path), None, &image.png)
+                .map_err(|error| error.to_string())?;
+            return Ok(true);
+        }
+        let mut output = file
+            .open_write_async()
+            .await
+            .map_err(|error| error.to_string())?;
+        output
+            .write_all(&image.png)
+            .and_then(|_| output.flush())
+            .map_err(|error| error.to_string())?;
+        Ok(true)
+    }
+
     pub(super) fn request_save_preview_stages(self: &Rc<Self>) {
         if self.file_busy.replace(true) {
             return;

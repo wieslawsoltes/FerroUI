@@ -123,7 +123,7 @@ pub(crate) fn apply_stage_states(
                 )
             })?;
         let owner = preview
-            .visual(selection.owner)
+            .unique_scenario_visual(selection.owner)?
             .and_then(|visual| visual.cast::<StyledElement>())
             .ok_or("State owner has no native control in this preview stage")?;
         let expression = state

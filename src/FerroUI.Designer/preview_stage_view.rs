@@ -1,20 +1,26 @@
 //! Native responsive stage cards. Editor chrome is confined to headers and toolbars;
 //! application preview roots retain their own styles, themes and input behavior.
-use crate::{PreviewStageId, PreviewStageInfo, PreviewStageMode, PreviewStageStatus, PreviewTheme};
+use crate::{PreviewStageId, PreviewStageInfo, PreviewStageMode, PreviewStageStatus};
 use ferroui_base::input::InputElement;
 use ferroui_base::interactivity::RoutingStrategies;
 use ferroui_base::layout::{HorizontalAlignment, VerticalAlignment};
-use ferroui_base::media::{FontWeight, SolidColorBrush, Stretch, StretchDirection, TextWrapping};
+use ferroui_base::media::{FontWeight, SolidColorBrush, TextWrapping};
 use ferroui_base::{Point, Ref, Thickness, WeakRef};
 use ferroui_controls::automation::AutomationProperties;
 use ferroui_controls::primitives::ScrollBarVisibility;
 use ferroui_controls::{
     Border, Button, ColumnDefinitions, Control, Grid, MenuFlyout, MenuItem, RowDefinitions,
-    ScrollViewer, StackPanel, TextBlock, ToolTip, Viewbox, WrapPanel,
+    ScrollViewer, StackPanel, TextBlock, ToolTip, WrapPanel,
 };
 use std::cell::{Cell, RefCell};
 use std::collections::{BTreeMap, BTreeSet};
 use std::rc::Rc;
+
+#[path = "preview_stage_presentation.rs"]
+mod presentation;
+#[path = "preview_stage_resize.rs"]
+mod resize;
+use presentation::CardPresentation;
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum PreviewStageComparison {
@@ -30,6 +36,7 @@ pub enum PreviewStageComparison {
 pub enum PreviewStageAction {
     Add,
     Compare(PreviewStageComparison),
+    CompareMatrix,
     RefreshAll,
     Save,
     Load,
@@ -79,13 +86,23 @@ pub enum PreviewStageAction {
         epoch: u64,
         position: Point,
     },
+    Resize {
+        stage: PreviewStageId,
+        epoch: u64,
+        width: f64,
+        height: f64,
+    },
+    Export {
+        stage: PreviewStageId,
+        epoch: u64,
+    },
 }
 
 type ActionHandler = Rc<dyn Fn(PreviewStageAction, Ref<Control>) -> Result<(), String>>;
 
 struct StageCard {
     root: Ref<Border>,
-    viewbox: Ref<Viewbox>,
+    presentation: Rc<CardPresentation>,
     host: Ref<Control>,
     epoch: u64,
     retired: Rc<Cell<bool>>,
@@ -96,8 +113,13 @@ impl StageCard {
     fn retire(&self) {
         self.retired.set(true);
         self.options.hide();
-        self.viewbox.set_child(None::<Ref<Control>>);
+        self.presentation.retire();
     }
+}
+
+struct StageZoom {
+    host: WeakRef<Control>,
+    value: Rc<Cell<Option<f64>>>,
 }
 
 /// The view never owns document or runtime state. A host supplies stable native stage
@@ -105,6 +127,7 @@ impl StageCard {
 pub struct PreviewStageView {
     root: Ref<Grid>,
     cards: RefCell<BTreeMap<PreviewStageId, StageCard>>,
+    zooms: RefCell<BTreeMap<PreviewStageId, StageZoom>>,
     panel: Ref<WrapPanel>,
     empty: Ref<TextBlock>,
     summary: Ref<TextBlock>,
@@ -164,6 +187,7 @@ impl PreviewStageView {
         let view = Rc::new(Self {
             root,
             cards: RefCell::new(BTreeMap::new()),
+            zooms: RefCell::new(BTreeMap::new()),
             panel,
             empty,
             summary,
@@ -173,6 +197,11 @@ impl PreviewStageView {
         });
         for (label, name, action) in [
             ("Add stage", "StageAdd", PreviewStageAction::Add),
+            (
+                "Compare matrix…",
+                "StageCompareMatrix",
+                PreviewStageAction::CompareMatrix,
+            ),
             (
                 "Refresh all",
                 "StageRefreshAll",
@@ -238,6 +267,13 @@ impl PreviewStageView {
         self.error.set_is_visible(!message.is_empty());
     }
 
+    /// Cancel detached corner-grip drafts before hiding or moving the board.
+    pub fn cancel_interaction(&self) {
+        for card in self.cards.borrow().values() {
+            card.presentation.cancel_interaction();
+        }
+    }
+
     fn emit(&self, action: PreviewStageAction, anchor: Ref<Control>) {
         let callback = self.action.borrow().clone();
         let result = callback
@@ -277,7 +313,11 @@ impl PreviewStageView {
         total: usize,
     ) {
         let desired = stages.iter().map(|info| info.id).collect::<BTreeSet<_>>();
+        self.zooms
+            .borrow_mut()
+            .retain(|_, state| state.host.upgrade().is_some());
         let mut cards = self.cards.borrow_mut();
+        let mut restore_focus = None;
         let removed = cards
             .keys()
             .copied()
@@ -298,12 +338,16 @@ impl PreviewStageView {
                 .is_none_or(|card| card.epoch != info.epoch || !std::ptr::eq(&*card.host, &**host));
             if replace {
                 if let Some(card) = cards.remove(&info.id) {
+                    if card.presentation.grip.control().is_focused() {
+                        restore_focus = Some(info.id);
+                    }
                     card.retire();
                     self.panel.children().remove(&card.root);
                 }
                 cards.insert(info.id, self.card(info, host.clone()));
             }
             let card = &cards[&info.id];
+            card.presentation.update_size(info.layout_size);
             card.root.classes().set("active", active == Some(info.id));
             let control = card.root.clone().upcast::<Control>();
             if let Some(existing) = self.panel.children().index_of(&control) {
@@ -320,6 +364,12 @@ impl PreviewStageView {
             short_uri(current_uri),
             stages.len()
         )));
+        let focus = restore_focus
+            .and_then(|id| cards.get(&id).map(|card| card.presentation.grip.control()));
+        drop(cards);
+        if let Some(focus) = focus {
+            focus.focus();
+        }
     }
 
     fn resize_cards(&self, width: f64) {
@@ -364,29 +414,14 @@ impl PreviewStageView {
             .children()
             .add(options_button.clone().upcast::<Control>());
         heading.children().add(title_row.upcast::<Control>());
-        let environment = info.configuration.environment;
-        let details = text(&format!(
-            "{} · {} × {} · {}{}",
-            short_uri(&info.configuration.source_uri),
-            environment.width,
-            environment.height,
-            match environment.theme {
-                PreviewTheme::Light => "Light",
-                PreviewTheme::Dark => "Dark",
-                PreviewTheme::Inherit => "App theme",
-            },
-            if info.configuration.pinned {
-                " · Pinned"
-            } else {
-                ""
-            }
-        ));
+        let details = text("");
+        details.set_name(Some(format!("Stage{}Dimensions", info.id)));
         details.classes().add("designer-muted");
         ToolTip::set_tip(
             &details,
             Some(Rc::new(info.configuration.source_uri.clone())),
         );
-        heading.children().add(details.upcast::<Control>());
+        heading.children().add(details.clone().upcast::<Control>());
         let commands = WrapPanel::new();
         commands.set_item_spacing(4.0);
         commands.set_line_spacing(4.0);
@@ -462,19 +497,36 @@ impl PreviewStageView {
         heading.children().add(commands.upcast::<Control>());
         body.children().add(heading.upcast::<Control>());
 
-        let frame = Grid::new();
-        frame.set_name(Some(format!("Stage{}PreviewFrame", info.id)));
-        frame.set_height(360.0);
-        frame.set_clip_to_bounds(true);
-        frame.set_margin(Thickness::new(10.0, 0.0, 10.0, 0.0));
+        let zoom = self
+            .zooms
+            .borrow_mut()
+            .entry(info.id)
+            .or_insert_with(|| StageZoom {
+                host: host.downgrade(),
+                value: Rc::new(Cell::new(None)),
+            })
+            .value
+            .clone();
+        let presentation = CardPresentation::new(info, host.clone(), details, zoom);
+        let frame = presentation.frame.clone();
         Grid::set_row(&frame, 1);
-        let viewbox = Viewbox::new();
-        viewbox.set_stretch(Stretch::Uniform);
-        viewbox.set_stretch_direction(StretchDirection::DownOnly);
-        viewbox.set_horizontal_alignment(HorizontalAlignment::Center);
-        viewbox.set_vertical_alignment(VerticalAlignment::Center);
-        viewbox.set_child(Some(host.clone()));
-        frame.children().add(viewbox.clone().upcast::<Control>());
+        let weak = Rc::downgrade(self);
+        let anchor = presentation.grip.control().downgrade();
+        let id = info.id;
+        let epoch = info.epoch;
+        presentation.grip.on_commit(move |size| {
+            if let (Some(view), Some(anchor)) = (weak.upgrade(), anchor.upgrade()) {
+                view.emit(
+                    PreviewStageAction::Resize {
+                        stage: id,
+                        epoch,
+                        width: size.width,
+                        height: size.height,
+                    },
+                    anchor,
+                );
+            }
+        });
         if info.configuration.mode == PreviewStageMode::Select {
             let overlay = Border::new();
             overlay.set_name(Some(format!("Stage{}SelectionSurface", info.id)));
@@ -507,7 +559,10 @@ impl PreviewStageView {
                 }
                 event.set_handled(true);
             });
-            frame.children().add(overlay.upcast::<Control>());
+            presentation
+                .content
+                .children()
+                .add(overlay.upcast::<Control>());
         }
         // Native controls handle input first. Unhandled live-app shortcuts must not
         // bubble into the editor's Delete/Undo/selection or authoring commands.
@@ -523,6 +578,9 @@ impl PreviewStageView {
         footer.set_spacing(5.0);
         footer.set_margin(Thickness::uniform(12.0));
         Grid::set_row(&footer, 2);
+        footer
+            .children()
+            .add(presentation.toolbar.clone().upcast::<Control>());
         let status = text(&status_text(info));
         status.set_name(Some(format!("Stage{}Status", info.id)));
         status.classes().add(
@@ -557,6 +615,13 @@ impl PreviewStageView {
             (
                 "Duplicate",
                 PreviewStageAction::Duplicate {
+                    stage: info.id,
+                    epoch: info.epoch,
+                },
+            ),
+            (
+                "Save preview image…",
+                PreviewStageAction::Export {
                     stage: info.id,
                     epoch: info.epoch,
                 },
@@ -618,7 +683,7 @@ impl PreviewStageView {
         options_button.set_flyout(Some(options.clone().upcast()));
         StageCard {
             root,
-            viewbox,
+            presentation,
             host,
             epoch: info.epoch,
             retired,

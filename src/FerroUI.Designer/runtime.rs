@@ -573,6 +573,62 @@ impl RuntimePreview {
         self.objects.get(&id).and_then(WeakRef::upgrade)
     }
 
+    /// Stage scenarios address one authored owner. A template can produce several
+    /// live instances of that source node; choosing the ordinary map's first item
+    /// would apply a scenario to an arbitrary instance. Keep normal authoring map
+    /// behavior unchanged and require a unique current object for this operation.
+    pub(crate) fn unique_scenario_visual(&self, id: NodeId) -> Result<Option<Ref<Visual>>, String> {
+        let Some(root) = self.root() else {
+            return Ok(None);
+        };
+        let root_visual = root.clone().upcast::<Visual>();
+        let root_logical = root.upcast::<StyledElement>();
+        let inspector = Inspector::shared();
+        let inspector = inspector.borrow();
+        let mut found = None;
+        for (inspector_id, source) in &self.reverse_objects {
+            if *source != id {
+                continue;
+            }
+            let Some(visual) = inspector
+                .resolve(*inspector_id)
+                .ok()
+                .and_then(|object| object.cast::<Visual>())
+            else {
+                continue;
+            };
+            // A retained inspector object is not necessarily still part of this
+            // graph. Accept either native tree, matching rebuild_map's traversal.
+            let mut current = Some(visual.clone());
+            let mut belongs = false;
+            while let Some(ancestor) = current {
+                if ancestor == root_visual {
+                    belongs = true;
+                    break;
+                }
+                current = ancestor.visual_parent();
+            }
+            if !belongs {
+                let mut current = Some(visual.clone().upcast::<StyledElement>());
+                while let Some(ancestor) = current {
+                    if ancestor == root_logical {
+                        belongs = true;
+                        break;
+                    }
+                    current = ancestor.parent();
+                }
+            }
+            if !belongs {
+                continue;
+            }
+            if found.is_some() {
+                return Err("The state owner has multiple native instances; open a definition stage to preview its visual state".into());
+            }
+            found = Some(visual);
+        }
+        Ok(found)
+    }
+
     pub fn bounds(&self, id: NodeId, relative_to: &Ref<Visual>) -> Option<Rect> {
         let visual = self.visual(id)?;
         Inspector::box_model(&visual, relative_to)
