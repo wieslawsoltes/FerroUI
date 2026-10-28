@@ -1,8 +1,8 @@
 //! Application-owned design hosts, real class instances and native top-level previews.
-#[cfg(debug_assertions)]
-use ferroui_base::WeakRef;
 use ferroui_base::metadata::from_markup_value;
 use ferroui_base::utilities::Uri;
+#[cfg(debug_assertions)]
+use ferroui_base::WeakRef;
 use ferroui_base::{BoxedValue, FerroObject, Ref};
 #[cfg(debug_assertions)]
 use ferroui_controls::ContentControl;
@@ -207,6 +207,17 @@ impl PreviewHostOptions {
 }
 
 impl crate::DesignerSession {
+    /// Clone construction services for independent preview hosts. Native controls,
+    /// document histories and reload-session ownership are never shared by this value.
+    pub fn preview_host_options(&self) -> PreviewHostOptions {
+        self.preview.options()
+    }
+    /// Changes only after accepted construction-service configuration, not when
+    /// switching documents, focusing design-data variants or selecting authored nodes.
+    pub fn preview_host_options_epoch(&self) -> u64 {
+        self.preview.options_epoch()
+    }
+
     pub fn configure_preview(&mut self, options: PreviewHostOptions) -> Result<(), String> {
         self.animation.native.stop();
         self.preview.clear_animation();

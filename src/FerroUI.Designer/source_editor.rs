@@ -363,6 +363,7 @@ impl DesignerWorkspace {
         tabs.insert(
             active.clone(),
             super::project::Tab {
+                preview_uri: self.session.borrow().document_uri().into(),
                 document: active_document,
                 saved: self.saved_source.borrow().clone(),
                 file: self.file.borrow().clone(),
@@ -384,6 +385,7 @@ impl DesignerWorkspace {
                 )?;
                 let buffer = workspace.open(&change.uri).map_err(|e| e.to_string())?;
                 let tab = super::project::Tab {
+                    preview_uri: change.uri.clone(),
                     document: buffer.document().clone(),
                     saved: buffer.saved_source().unwrap_or("").into(),
                     file: None,

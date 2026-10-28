@@ -27,6 +27,11 @@ The [selection and appearance guide](selection-workflows.md) covers selective pr
 layout resets, size matching, overlapping-layer menus and exact control-type selection.
 Open the [selection workflow sample](samples/SelectionWorkflows.xaml) to try these commands
 with a gradient source card, independent destinations and overlapping layers.
+The [Xcode preview comparison and stage guide](xcode-previews.md) covers independent named
+views, size/theme/orientation/direction comparisons, pinned previews, per-stage Live/Select,
+native state scenarios and saved stage sets. Open the [preview-stage sample](samples/PreviewStages.xaml)
+to compare Loading, Empty, Content and Error screens with actual native theme resources and
+design-time sample rows.
 
 ## Run
 
@@ -37,6 +42,7 @@ cargo run -p designer-studio
 cargo run -p designer-studio -- --file /absolute/path/to/MainWindow.xaml
 cargo run -p designer-studio -- --file docs/designer/samples/DesignWorkflows.xaml
 cargo run -p designer-studio -- --file docs/designer/samples/SelectionWorkflows.xaml
+cargo run -p designer-studio -- --file docs/designer/samples/PreviewStages.xaml
 cargo run -p designer-studio -- --project /absolute/path/to/solution
 ```
 
@@ -92,6 +98,12 @@ state. Use the canvas shelf or Ctrl+Shift+F / Cmd+Shift+F to restore them. `V` s
 and label-target editor with native canvas badges. The **…** action beside the canvas
 dimensions opens size presets, orientation, theme and reading direction. Layers rows and
 their action menu expose local lock/hide/isolation without changing application visibility.
+**Stages** opens a comparison board of independent native views. Each stage can use an open
+document or supported authored definition, its own environment, design data setting and
+visual-state endpoints. Pinning keeps a stage visible across document tabs; Pause suspends
+automatic source updates. **Focus** returns its context to the editing canvas. Stage settings
+remain separate from authored XAML and can be saved as a versioned set. See the
+[preview-stage guide](xcode-previews.md) for exact behavior and platform boundaries.
 
 The left dock switches between **Layers**, **Assets**, **Library** and **Project**:
 

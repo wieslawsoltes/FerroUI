@@ -20,4 +20,6 @@ pub use document::{
 pub use markup::{MarkupArgument, MarkupExtension, MarkupValue};
 
 #[cfg(test)]
+mod preview_snapshot_tests;
+#[cfg(test)]
 mod tests;

@@ -24,6 +24,8 @@ mod design_workflows;
 #[cfg(test)]
 #[path = "mcp_design_workflows_tests.rs"]
 mod design_workflows_tests;
+#[path = "mcp_preview_stages.rs"]
+mod preview_stages;
 #[path = "mcp_schema.rs"]
 mod schema;
 #[path = "mcp_selection_workflows.rs"]
@@ -253,6 +255,7 @@ impl UiToolProvider for DesignerMcp {
         tools.extend(selection_workflows::tools());
         if self.workspace.is_some() {
             tools.extend(workspace_tools::tools());
+            tools.extend(preview_stages::tools());
         }
         tools
     }
@@ -269,6 +272,7 @@ impl UiToolProvider for DesignerMcp {
             || workspace_tools::handles(name)
             || design_workflows::handles(name)
             || selection_workflows::handles(name)
+            || preview_stages::handles(name)
         {
             return schema::validate(&definition["inputSchema"], args);
         }
@@ -427,6 +431,21 @@ impl UiToolProvider for DesignerMcp {
             return Err("Designer authoring requires allow_property_writes".into());
         }
         let owner = self.session()?;
+        if preview_stages::handles(name) {
+            let workspace = self
+                .workspace
+                .as_ref()
+                .and_then(Weak::upgrade)
+                .ok_or("Designer workspace has been closed")?;
+            // Preview presentation remains local for collaboration viewers. It
+            // still needs the MCP write/input permissions for native UI actions.
+            drop(
+                owner
+                    .try_borrow_mut()
+                    .map_err(|_| "Designer is already processing a transaction")?,
+            );
+            return preview_stages::call(&workspace, name, args, permissions);
+        }
         if selection_workflows::handles(name)
             || (name == "designer_layer" && args["action"] == "select_matching_type")
         {

@@ -82,6 +82,7 @@ pub struct DesignerWorkspace {
     sharing_panel: RefCell<Option<Rc<sharing::SharingPanel>>>,
     shell: shell::WorkspaceShell,
     preview_environment: RefCell<preview_environment::PreviewEnvironmentUi>,
+    preview_stages: preview_stages::PreviewStagesUi,
 }
 
 impl DesignerWorkspace {
@@ -159,12 +160,14 @@ impl DesignerWorkspace {
             sharing_panel: RefCell::new(None),
             shell: shell::WorkspaceShell::default(),
             preview_environment: RefCell::new(Default::default()),
+            preview_stages: preview_stages::PreviewStagesUi::default(),
         });
         this.connect();
         this.connect_inspectors();
         this.connect_inspector_drag();
         this.connect_components();
         this.connect_preview_environment();
+        this.connect_preview_stages();
         this.connect_layer_commands();
         this.connect_selection_tools();
         this.connect_selection_layout();
@@ -613,6 +616,7 @@ impl DesignerWorkspace {
     }
 
     pub fn refresh(self: &Rc<Self>, force: bool) {
+        self.refresh_preview_stages();
         self.refresh_canvas_navigation();
         self.refresh_canvas_guides();
         let session = self.session.borrow();
@@ -893,6 +897,12 @@ mod guides;
 pub use guides::{CanvasGuideEditSnapshot, CanvasGuideViewSnapshot};
 #[path = "workspace_preview_environment.rs"]
 mod preview_environment;
+#[path = "workspace_preview_stages.rs"]
+pub(crate) mod preview_stages;
+#[path = "workspace_stage_sources.rs"]
+mod stage_sources;
+#[path = "workspace_stage_files.rs"]
+mod stage_files;
 #[path = "workspace_project.rs"]
 mod project;
 #[path = "workspace_sharing.rs"]

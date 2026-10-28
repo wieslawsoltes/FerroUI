@@ -1,0 +1,287 @@
+<UserControl xmlns="https://github.com/ferroui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d" x:Name="PreviewScene"
+             d:DesignWidth="390" d:DesignHeight="760">
+  <!-- Open Preview stages, duplicate this document, and choose the Screen group's
+       Loading, Empty, Content and Error endpoints. Each card keeps its own native
+       state and environment. The authored default is Content.
+       This sample uses ordinary native styles and animations. Encoded comments
+       retain the designer's state-group identity; they have no runtime behavior. -->
+  <UserControl.Resources>
+    <ResourceDictionary>
+      <SolidColorBrush x:Key="StageAccent" Color="#FF6653D9" />
+      <ResourceDictionary.ThemeDictionaries>
+        <ResourceDictionary x:Key="Light">
+          <SolidColorBrush x:Key="StageBackground" Color="#FFF3F4F8" />
+          <SolidColorBrush x:Key="StageCard" Color="#FFFFFFFF" />
+          <SolidColorBrush x:Key="StageInk" Color="#FF202433" />
+          <SolidColorBrush x:Key="StageMuted" Color="#FF656B7D" />
+          <SolidColorBrush x:Key="StageOutline" Color="#FFE0E3EC" />
+        </ResourceDictionary>
+        <ResourceDictionary x:Key="Dark">
+          <SolidColorBrush x:Key="StageBackground" Color="#FF171923" />
+          <SolidColorBrush x:Key="StageCard" Color="#FF252936" />
+          <SolidColorBrush x:Key="StageInk" Color="#FFF2F3FA" />
+          <SolidColorBrush x:Key="StageMuted" Color="#FFB4BBCE" />
+          <SolidColorBrush x:Key="StageOutline" Color="#FF3A4052" />
+        </ResourceDictionary>
+      </ResourceDictionary.ThemeDictionaries>
+      <ControlTemplate x:Key="ActionPreviewTemplate" TargetType="Button">
+        <Border Name="ActionFrame" Background="{DynamicResource StageAccent}"
+                CornerRadius="8" Padding="16,10">
+          <ContentPresenter Name="ActionContent" Content="{TemplateBinding Content}"
+                            Foreground="White" HorizontalContentAlignment="Center"
+                            VerticalContentAlignment="Center" />
+        </Border>
+      </ControlTemplate>
+    </ResourceDictionary>
+  </UserControl.Resources>
+  <UserControl.Styles>
+    <Style Selector="UserControl#PreviewScene">
+      <!--ferroui-designer-state-group:7b226e616d65223a2253637265656e222c226f776e6572223a312c22737461746573223a5b7b226e616d65223a224c6f6164696e67222c2273657474657273223a5b7b22746172676574223a224c6f6164696e6750616e656c222c2270726f7065727479223a22497356697369626c65222c2276616c7565223a2254727565227d2c7b22746172676574223a22456d70747950616e656c222c2270726f7065727479223a22497356697369626c65222c2276616c7565223a2246616c7365227d2c7b22746172676574223a22436f6e74656e7450616e656c222c2270726f7065727479223a22497356697369626c65222c2276616c7565223a2246616c7365227d2c7b22746172676574223a224572726f7250616e656c222c2270726f7065727479223a22497356697369626c65222c2276616c7565223a2246616c7365227d5d7d2c7b226e616d65223a22456d707479222c2273657474657273223a5b7b22746172676574223a224c6f6164696e6750616e656c222c2270726f7065727479223a22497356697369626c65222c2276616c7565223a2246616c7365227d2c7b22746172676574223a22456d70747950616e656c222c2270726f7065727479223a22497356697369626c65222c2276616c7565223a2254727565227d2c7b22746172676574223a22436f6e74656e7450616e656c222c2270726f7065727479223a22497356697369626c65222c2276616c7565223a2246616c7365227d2c7b22746172676574223a224572726f7250616e656c222c2270726f7065727479223a22497356697369626c65222c2276616c7565223a2246616c7365227d5d7d2c7b226e616d65223a22436f6e74656e74222c2273657474657273223a5b7b22746172676574223a224c6f6164696e6750616e656c222c2270726f7065727479223a22497356697369626c65222c2276616c7565223a2246616c7365227d2c7b22746172676574223a22456d70747950616e656c222c2270726f7065727479223a22497356697369626c65222c2276616c7565223a2246616c7365227d2c7b22746172676574223a22436f6e74656e7450616e656c222c2270726f7065727479223a22497356697369626c65222c2276616c7565223a2254727565227d2c7b22746172676574223a224572726f7250616e656c222c2270726f7065727479223a22497356697369626c65222c2276616c7565223a2246616c7365227d5d7d2c7b226e616d65223a224572726f72222c2273657474657273223a5b7b22746172676574223a224c6f6164696e6750616e656c222c2270726f7065727479223a22497356697369626c65222c2276616c7565223a2246616c7365227d2c7b22746172676574223a22456d70747950616e656c222c2270726f7065727479223a22497356697369626c65222c2276616c7565223a2246616c7365227d2c7b22746172676574223a22436f6e74656e7450616e656c222c2270726f7065727479223a22497356697369626c65222c2276616c7565223a2246616c7365227d2c7b22746172676574223a224572726f7250616e656c222c2270726f7065727479223a22497356697369626c65222c2276616c7565223a2254727565227d5d7d5d2c227472616e736974696f6e73223a5b5d7d-->
+      <Style Selector="^.ds_53637265656e_4c6f6164696e67 Border#LoadingPanel">
+        <!--ferroui-designer-state:4c6f6164696e67:4c6f6164696e6750616e656c-->
+        <Setter Property="IsVisible" Value="True" />
+        <Style.Animations>
+          <Animation Duration="0:0:0.0000001" FillMode="Forward">
+            <!--ferroui-designer-state-program:literal-->
+            <KeyFrame Cue="100%"><Setter Property="IsVisible" Value="True" /></KeyFrame>
+          </Animation>
+        </Style.Animations>
+      </Style>
+      <Style Selector="^.ds_53637265656e_4c6f6164696e67 Border#EmptyPanel">
+        <!--ferroui-designer-state:4c6f6164696e67:456d70747950616e656c-->
+        <Setter Property="IsVisible" Value="False" />
+        <Style.Animations>
+          <Animation Duration="0:0:0.0000001" FillMode="Forward">
+            <!--ferroui-designer-state-program:literal-->
+            <KeyFrame Cue="100%"><Setter Property="IsVisible" Value="False" /></KeyFrame>
+          </Animation>
+        </Style.Animations>
+      </Style>
+      <Style Selector="^.ds_53637265656e_4c6f6164696e67 Border#ContentPanel">
+        <!--ferroui-designer-state:4c6f6164696e67:436f6e74656e7450616e656c-->
+        <Setter Property="IsVisible" Value="False" />
+        <Style.Animations>
+          <Animation Duration="0:0:0.0000001" FillMode="Forward">
+            <!--ferroui-designer-state-program:literal-->
+            <KeyFrame Cue="100%"><Setter Property="IsVisible" Value="False" /></KeyFrame>
+          </Animation>
+        </Style.Animations>
+      </Style>
+      <Style Selector="^.ds_53637265656e_4c6f6164696e67 Border#ErrorPanel">
+        <!--ferroui-designer-state:4c6f6164696e67:4572726f7250616e656c-->
+        <Setter Property="IsVisible" Value="False" />
+        <Style.Animations>
+          <Animation Duration="0:0:0.0000001" FillMode="Forward">
+            <!--ferroui-designer-state-program:literal-->
+            <KeyFrame Cue="100%"><Setter Property="IsVisible" Value="False" /></KeyFrame>
+          </Animation>
+        </Style.Animations>
+      </Style>
+      <Style Selector="^.ds_53637265656e_456d707479 Border#LoadingPanel">
+        <!--ferroui-designer-state:456d707479:4c6f6164696e6750616e656c-->
+        <Setter Property="IsVisible" Value="False" />
+        <Style.Animations>
+          <Animation Duration="0:0:0.0000001" FillMode="Forward">
+            <!--ferroui-designer-state-program:literal-->
+            <KeyFrame Cue="100%"><Setter Property="IsVisible" Value="False" /></KeyFrame>
+          </Animation>
+        </Style.Animations>
+      </Style>
+      <Style Selector="^.ds_53637265656e_456d707479 Border#EmptyPanel">
+        <!--ferroui-designer-state:456d707479:456d70747950616e656c-->
+        <Setter Property="IsVisible" Value="True" />
+        <Style.Animations>
+          <Animation Duration="0:0:0.0000001" FillMode="Forward">
+            <!--ferroui-designer-state-program:literal-->
+            <KeyFrame Cue="100%"><Setter Property="IsVisible" Value="True" /></KeyFrame>
+          </Animation>
+        </Style.Animations>
+      </Style>
+      <Style Selector="^.ds_53637265656e_456d707479 Border#ContentPanel">
+        <!--ferroui-designer-state:456d707479:436f6e74656e7450616e656c-->
+        <Setter Property="IsVisible" Value="False" />
+        <Style.Animations>
+          <Animation Duration="0:0:0.0000001" FillMode="Forward">
+            <!--ferroui-designer-state-program:literal-->
+            <KeyFrame Cue="100%"><Setter Property="IsVisible" Value="False" /></KeyFrame>
+          </Animation>
+        </Style.Animations>
+      </Style>
+      <Style Selector="^.ds_53637265656e_456d707479 Border#ErrorPanel">
+        <!--ferroui-designer-state:456d707479:4572726f7250616e656c-->
+        <Setter Property="IsVisible" Value="False" />
+        <Style.Animations>
+          <Animation Duration="0:0:0.0000001" FillMode="Forward">
+            <!--ferroui-designer-state-program:literal-->
+            <KeyFrame Cue="100%"><Setter Property="IsVisible" Value="False" /></KeyFrame>
+          </Animation>
+        </Style.Animations>
+      </Style>
+      <Style Selector="^.ds_53637265656e_436f6e74656e74 Border#LoadingPanel">
+        <!--ferroui-designer-state:436f6e74656e74:4c6f6164696e6750616e656c-->
+        <Setter Property="IsVisible" Value="False" />
+        <Style.Animations>
+          <Animation Duration="0:0:0.0000001" FillMode="Forward">
+            <!--ferroui-designer-state-program:literal-->
+            <KeyFrame Cue="100%"><Setter Property="IsVisible" Value="False" /></KeyFrame>
+          </Animation>
+        </Style.Animations>
+      </Style>
+      <Style Selector="^.ds_53637265656e_436f6e74656e74 Border#EmptyPanel">
+        <!--ferroui-designer-state:436f6e74656e74:456d70747950616e656c-->
+        <Setter Property="IsVisible" Value="False" />
+        <Style.Animations>
+          <Animation Duration="0:0:0.0000001" FillMode="Forward">
+            <!--ferroui-designer-state-program:literal-->
+            <KeyFrame Cue="100%"><Setter Property="IsVisible" Value="False" /></KeyFrame>
+          </Animation>
+        </Style.Animations>
+      </Style>
+      <Style Selector="^.ds_53637265656e_436f6e74656e74 Border#ContentPanel">
+        <!--ferroui-designer-state:436f6e74656e74:436f6e74656e7450616e656c-->
+        <Setter Property="IsVisible" Value="True" />
+        <Style.Animations>
+          <Animation Duration="0:0:0.0000001" FillMode="Forward">
+            <!--ferroui-designer-state-program:literal-->
+            <KeyFrame Cue="100%"><Setter Property="IsVisible" Value="True" /></KeyFrame>
+          </Animation>
+        </Style.Animations>
+      </Style>
+      <Style Selector="^.ds_53637265656e_436f6e74656e74 Border#ErrorPanel">
+        <!--ferroui-designer-state:436f6e74656e74:4572726f7250616e656c-->
+        <Setter Property="IsVisible" Value="False" />
+        <Style.Animations>
+          <Animation Duration="0:0:0.0000001" FillMode="Forward">
+            <!--ferroui-designer-state-program:literal-->
+            <KeyFrame Cue="100%"><Setter Property="IsVisible" Value="False" /></KeyFrame>
+          </Animation>
+        </Style.Animations>
+      </Style>
+      <Style Selector="^.ds_53637265656e_4572726f72 Border#LoadingPanel">
+        <!--ferroui-designer-state:4572726f72:4c6f6164696e6750616e656c-->
+        <Setter Property="IsVisible" Value="False" />
+        <Style.Animations>
+          <Animation Duration="0:0:0.0000001" FillMode="Forward">
+            <!--ferroui-designer-state-program:literal-->
+            <KeyFrame Cue="100%"><Setter Property="IsVisible" Value="False" /></KeyFrame>
+          </Animation>
+        </Style.Animations>
+      </Style>
+      <Style Selector="^.ds_53637265656e_4572726f72 Border#EmptyPanel">
+        <!--ferroui-designer-state:4572726f72:456d70747950616e656c-->
+        <Setter Property="IsVisible" Value="False" />
+        <Style.Animations>
+          <Animation Duration="0:0:0.0000001" FillMode="Forward">
+            <!--ferroui-designer-state-program:literal-->
+            <KeyFrame Cue="100%"><Setter Property="IsVisible" Value="False" /></KeyFrame>
+          </Animation>
+        </Style.Animations>
+      </Style>
+      <Style Selector="^.ds_53637265656e_4572726f72 Border#ContentPanel">
+        <!--ferroui-designer-state:4572726f72:436f6e74656e7450616e656c-->
+        <Setter Property="IsVisible" Value="False" />
+        <Style.Animations>
+          <Animation Duration="0:0:0.0000001" FillMode="Forward">
+            <!--ferroui-designer-state-program:literal-->
+            <KeyFrame Cue="100%"><Setter Property="IsVisible" Value="False" /></KeyFrame>
+          </Animation>
+        </Style.Animations>
+      </Style>
+      <Style Selector="^.ds_53637265656e_4572726f72 Border#ErrorPanel">
+        <!--ferroui-designer-state:4572726f72:4572726f7250616e656c-->
+        <Setter Property="IsVisible" Value="True" />
+        <Style.Animations>
+          <Animation Duration="0:0:0.0000001" FillMode="Forward">
+            <!--ferroui-designer-state-program:literal-->
+            <KeyFrame Cue="100%"><Setter Property="IsVisible" Value="True" /></KeyFrame>
+          </Animation>
+        </Style.Animations>
+      </Style>
+    </Style>
+    <Style Selector="TextBlock"><Setter Property="Foreground" Value="{DynamicResource StageInk}" /></Style>
+    <Style Selector="TextBlock.muted"><Setter Property="Foreground" Value="{DynamicResource StageMuted}" /></Style>
+    <Style Selector="Border.scenario">
+      <Setter Property="Background" Value="{DynamicResource StageCard}" />
+      <Setter Property="BorderBrush" Value="{DynamicResource StageOutline}" />
+      <Setter Property="BorderThickness" Value="1" />
+      <Setter Property="CornerRadius" Value="12" />
+      <Setter Property="Padding" Value="22" />
+    </Style>
+  </UserControl.Styles>
+  <Grid Background="{DynamicResource StageBackground}" RowDefinitions="Auto,*,Auto"
+        RowSpacing="20" Margin="0">
+    <StackPanel Margin="24,24,24,0" Spacing="8">
+      <TextBlock Classes="muted" Text="FERROUI / PREVIEW STAGES" FontSize="11" FontWeight="SemiBold" />
+      <TextBlock Text="Project inbox" FontSize="28" FontWeight="SemiBold" />
+      <TextBlock Classes="muted" Text="One view. Four states. A layout that follows its available space."
+                 TextWrapping="Wrap" />
+      <TextBox Name="SearchInput" PlaceholderText="Find a project" d:Text="Design review" />
+    </StackPanel>
+    <ScrollViewer Grid.Row="1" Margin="24,0" HorizontalScrollBarVisibility="Disabled"
+                  VerticalScrollBarVisibility="Auto">
+      <Grid>
+        <Border Name="LoadingPanel" Classes="scenario" IsVisible="False">
+          <StackPanel Spacing="14">
+            <TextBlock Text="Loading your projects" FontSize="20" FontWeight="SemiBold" TextWrapping="Wrap" />
+            <TextBlock Classes="muted" Text="The loading state keeps the page structure stable."
+                       TextWrapping="Wrap" />
+            <ProgressBar Value="42" Maximum="100" Height="6" />
+            <Border Height="12" CornerRadius="6" Background="{DynamicResource StageOutline}" />
+            <Border Height="12" Width="160" HorizontalAlignment="Left" CornerRadius="6"
+                    Background="{DynamicResource StageOutline}" />
+          </StackPanel>
+        </Border>
+        <Border Name="EmptyPanel" Classes="scenario" IsVisible="False">
+          <StackPanel Spacing="14">
+            <TextBlock Text="A fresh start" FontSize="20" FontWeight="SemiBold" />
+            <TextBlock Classes="muted" Text="There are no projects here yet. Create a workspace when you are ready."
+                       TextWrapping="Wrap" />
+            <Button Content="Create workspace" Template="{StaticResource ActionPreviewTemplate}"
+                    HorizontalAlignment="Left" />
+          </StackPanel>
+        </Border>
+        <Border Name="ContentPanel" Classes="scenario">
+          <StackPanel Spacing="16">
+            <TextBlock Text="Recent work" FontSize="20" FontWeight="SemiBold" />
+            <TextBlock Classes="muted" Text="Design-time data supplies these rows without changing the runtime binding."
+                       TextWrapping="Wrap" />
+            <ItemsControl Name="Results" ItemsSource="{Binding Results}"
+                          d:ItemsSource="{d:SampleData ItemCount=3}">
+              <ItemsControl.ItemTemplate>
+                <DataTemplate>
+                  <Border Padding="12" Margin="0,0,0,10" CornerRadius="8"
+                          BorderBrush="{DynamicResource StageOutline}" BorderThickness="1">
+                    <StackPanel Spacing="5">
+                      <TextBlock Text="{Binding Title}" FontWeight="SemiBold" TextWrapping="Wrap" />
+                      <TextBlock Classes="muted" Text="{Binding Owner.Name}" FontSize="12" />
+                    </StackPanel>
+                  </Border>
+                </DataTemplate>
+              </ItemsControl.ItemTemplate>
+            </ItemsControl>
+            <Button Content="Open workspace" Template="{StaticResource ActionPreviewTemplate}"
+                    HorizontalAlignment="Left" />
+          </StackPanel>
+        </Border>
+        <Border Name="ErrorPanel" Classes="scenario" IsVisible="False">
+          <StackPanel Spacing="14">
+            <TextBlock Text="We could not load your projects" FontSize="20" FontWeight="SemiBold"
+                       TextWrapping="Wrap" />
+            <TextBlock Classes="muted" Text="Check the connection and try again. Your saved work is still available."
+                       TextWrapping="Wrap" />
+            <Button Content="Try again" Template="{StaticResource ActionPreviewTemplate}"
+                    HorizontalAlignment="Left" />
+          </StackPanel>
+        </Border>
+      </Grid>
+    </ScrollViewer>
+    <TextBlock Grid.Row="2" Margin="24,0,24,22" Classes="muted" FontSize="11"
+               Text="Use Select to reveal source. Use Live to try native text entry and controls."
+               TextWrapping="Wrap" />
+  </Grid>
+</UserControl>
+

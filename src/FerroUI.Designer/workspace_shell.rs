@@ -128,6 +128,7 @@ impl DesignerWorkspace {
                 .classes()
                 .set("active", candidate == mode);
         }
+        self.refresh_preview_stage_visibility();
     }
 
     pub fn navigation_pane(&self) -> NavigationPane {

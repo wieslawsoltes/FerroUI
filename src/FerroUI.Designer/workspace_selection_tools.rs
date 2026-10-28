@@ -454,7 +454,7 @@ fn require_current_preview(session: &DesignerSession) -> Result<(), String> {
     }
 }
 
-fn authored_layer_available(session: &DesignerSession, node: NodeId) -> bool {
+pub(super) fn authored_layer_available(session: &DesignerSession, node: NodeId) -> bool {
     if !session.can_canvas_select(node) || !in_authored_selection_scope(session, node) {
         return false;
     }

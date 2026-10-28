@@ -21,6 +21,15 @@ impl DesignerSession {
     pub fn state_groups(&self) -> Vec<VisualStateGroup> {
         VisualStateGroup::read(&self.document)
     }
+    /// The currently previewed native state endpoints. This is local presentation
+    /// state and does not synthesize state declarations or edit the authored source.
+    pub fn active_preview_states(&self) -> Vec<(NodeId, String, String)> {
+        self.interactions
+            .active_states
+            .iter()
+            .map(|((owner, group), state)| (*owner, group.clone(), state.clone()))
+            .collect()
+    }
     pub fn upsert_state_group(&mut self, group: VisualStateGroup) -> Result<(), String> {
         let edits = group
             .plan(&self.document)

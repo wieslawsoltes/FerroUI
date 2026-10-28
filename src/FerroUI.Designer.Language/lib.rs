@@ -10,8 +10,8 @@ mod service;
 pub use formatting::FormattingOptions;
 pub use line_index::{LineIndex, Position, Range, TextChange, TextEdit};
 pub use references::{
-    NameOccurrence, identifier as is_xaml_identifier, name_occurrences, rewrite_names,
-    scope_of as name_scope,
+    identifier as is_xaml_identifier, name_occurrences, rewrite_names, scope_of as name_scope,
+    NameOccurrence,
 };
 pub use schema::{ExtensionInfo, PropertyInfo, Schema, TypeInfo};
 pub use service::*;
@@ -48,3 +48,5 @@ mod component_schema_tests;
 mod design_time_tests;
 #[cfg(test)]
 mod tests;
+#[cfg(test)]
+mod theme_resource_tests;

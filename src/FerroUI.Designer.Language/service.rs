@@ -1,8 +1,8 @@
 use crate::{
-    FormattingOptions, LanguageError, LineIndex, Range, Result, Schema, TextChange, TextEdit,
-    require,
+    require, FormattingOptions, LanguageError, LineIndex, Range, Result, Schema, TextChange,
+    TextEdit,
 };
-use ferroui_designer_core::{Document, NodeKind, SourceSpan};
+use ferroui_designer_core::{Document, MarkupValue, Node, NodeKind, SourceSpan};
 use serde::{Deserialize, Serialize};
 use std::borrow::Cow;
 use std::collections::{BTreeMap, BTreeSet};
@@ -128,6 +128,49 @@ enum SymbolKind {
 struct ResourceEdge {
     node: u64,
     source: Option<String>,
+    // A theme dictionary is an alternative, not a later merged override. The
+    // language service has no active runtime theme and must retain every outcome.
+    kind: ResourceEdgeKind,
+}
+#[derive(Clone, Copy, PartialEq, Eq)]
+enum ResourceEdgeKind {
+    Collection,
+    Theme,
+    DefaultTheme,
+}
+#[derive(Clone)]
+struct ResourceLookup {
+    matches: Vec<(String, Occurrence)>,
+    may_be_missing: bool,
+    themed: bool,
+}
+impl ResourceLookup {
+    fn missing() -> Self {
+        Self {
+            matches: Vec::new(),
+            may_be_missing: true,
+            themed: false,
+        }
+    }
+    fn alternative(&mut self, other: Self) {
+        self.may_be_missing |= other.may_be_missing;
+        self.themed |= other.themed;
+        for candidate in other.matches {
+            if !self
+                .matches
+                .iter()
+                .any(|existing| existing.0 == candidate.0 && existing.1.span == candidate.1.span)
+            {
+                self.matches.push(candidate);
+            }
+        }
+    }
+    fn fallback(&mut self, other: Self) {
+        if self.may_be_missing {
+            self.may_be_missing = false;
+            self.alternative(other);
+        }
+    }
 }
 #[derive(Clone)]
 struct Occurrence {
@@ -631,9 +674,16 @@ impl LanguageService {
                             .unwrap_or("");
                         let extension_namespace =
                             completion_namespace(state, name, open.unwrap(), offset);
-                        if let Some(info) = self.schema.extension(name, extension_namespace.as_deref()).or_else(|| {
-                            crate::design_support::extension(name, extension_namespace.as_deref())
-                        }) {
+                        if let Some(info) = self
+                            .schema
+                            .extension(name, extension_namespace.as_deref())
+                            .or_else(|| {
+                                crate::design_support::extension(
+                                    name,
+                                    extension_namespace.as_deref(),
+                                )
+                            })
+                        {
                             for parameter in &info.parameters {
                                 proposals.insert(
                                     parameter.clone(),
@@ -1140,9 +1190,9 @@ impl LanguageService {
                     continue;
                 }
                 let resolved = self.resolve(candidate, &occurrence);
-                if resolved.len() == 1
-                    && resolved[0].0 == target.0
-                    && resolved[0].1.span == target.1.span
+                if resolved
+                    .iter()
+                    .any(|candidate| candidate.0 == target.0 && candidate.1.span == target.1.span)
                 {
                     result.push(self.location(candidate, occurrence.span)?);
                 }
@@ -1183,7 +1233,17 @@ impl LanguageService {
         let mut grouped = BTreeMap::<String, Vec<TextEdit>>::new();
         for (uri, state) in &self.documents {
             for occurrence in &state.symbols {
-                let resolved = self.resolve(uri, occurrence);
+                let resolution = self.resolve_with_context(uri, occurrence);
+                let resolved = resolution.matches;
+                require(
+                    target.1.kind != SymbolKind::Resource
+                        || !resolution.themed
+                        || resolved.len() <= 1
+                        || !resolved.iter().any(|candidate| {
+                            candidate.0 == target.0 && candidate.1.span == target.1.span
+                        }),
+                    "This resource has references that select different declarations across themes or providers; rename the resource family together in source",
+                )?;
                 if resolved.len() != 1
                     || resolved[0].0 != target.0
                     || resolved[0].1.span != target.1.span
@@ -1566,14 +1626,21 @@ impl LanguageService {
         Ok((targets.len() == 1).then(|| targets[0].clone()))
     }
     fn resolve(&self, uri: &str, reference: &Occurrence) -> Vec<(String, Occurrence)> {
+        self.resolve_with_context(uri, reference).matches
+    }
+    fn resolve_with_context(&self, uri: &str, reference: &Occurrence) -> ResourceLookup {
         let Ok(uri) = self.document_uri(uri) else {
-            return Vec::new();
+            return ResourceLookup::missing();
         };
         let uri = uri.as_ref();
         if reference.declaration {
-            return vec![(uri.into(), reference.clone())];
+            return ResourceLookup {
+                matches: vec![(uri.into(), reference.clone())],
+                may_be_missing: false,
+                themed: false,
+            };
         }
-        let mut found: Vec<_> = self
+        let found: Vec<_> = self
             .declarations
             .get(&reference.name)
             .into_iter()
@@ -1589,13 +1656,14 @@ impl LanguageService {
             .cloned()
             .collect();
         if reference.kind == SymbolKind::Resource {
-            let mut seen = BTreeSet::new();
+            let seen = BTreeSet::new();
+            let mut result = ResourceLookup::missing();
             if let Some(state) = self.documents.get(uri) {
                 let mut current = Some(reference.node);
                 while let Some(scope) = current {
-                    let matches = self.resources_at(uri, scope, &reference.name, &mut seen);
-                    if !matches.is_empty() {
-                        return matches;
+                    result.fallback(self.resources_at(uri, scope, &reference.name, &seen));
+                    if !result.may_be_missing {
+                        return result;
                     }
                     current = state
                         .document
@@ -1619,30 +1687,37 @@ impl LanguageService {
                     .then_some(candidate.clone())
                 })
                 .collect();
-            found.clear();
+            let mut globals = ResourceLookup::missing();
             for candidate in candidates {
                 let root = self.documents[&candidate].document.ast().root();
-                found.extend(self.resources_at(&candidate, root, &reference.name, &mut seen));
+                globals.alternative(self.resources_at(&candidate, root, &reference.name, &seen));
             }
+            result.fallback(globals);
+            return result;
         }
-        found
+        ResourceLookup {
+            may_be_missing: found.is_empty(),
+            matches: found,
+            themed: false,
+        }
     }
     fn resources_at(
         &self,
         uri: &str,
         scope: u64,
         name: &str,
-        seen: &mut BTreeSet<(String, u64)>,
-    ) -> Vec<(String, Occurrence)> {
+        seen: &BTreeSet<(String, u64)>,
+    ) -> ResourceLookup {
+        let mut seen = seen.clone();
         if !seen.insert((uri.into(), scope)) {
-            return Vec::new();
+            return ResourceLookup::missing();
         }
         let Some(state) = self
             .documents
             .get(uri)
             .filter(|state| state.document.is_valid())
         else {
-            return Vec::new();
+            return ResourceLookup::missing();
         };
         let found: Vec<_> = self
             .declarations
@@ -1657,26 +1732,68 @@ impl LanguageService {
             .cloned()
             .collect();
         if !found.is_empty() {
-            return found;
+            return ResourceLookup {
+                matches: found,
+                may_be_missing: false,
+                themed: false,
+            };
         }
-        for edge in state.resource_edges.get(&scope).into_iter().flatten().rev() {
+        let edges = state.resource_edges.get(&scope).into_iter().flatten();
+        let lookup_edge = |edge: &ResourceEdge| {
             let (target, next) = if let Some(source) = &edge.source {
                 let Ok(target) = self.resource_uri(uri, source) else {
-                    continue;
+                    return ResourceLookup::missing();
                 };
                 let Some(imported) = self.documents.get(&target) else {
-                    continue;
+                    return ResourceLookup::missing();
                 };
                 (target, imported.document.ast().root())
             } else {
                 (uri.into(), edge.node)
             };
-            let found = self.resources_at(&target, next, name, seen);
-            if !found.is_empty() {
-                return found;
+            let mut result = self.resources_at(&target, next, name, &seen);
+            if edge.kind != ResourceEdgeKind::Collection && !result.matches.is_empty() {
+                result.themed = true;
+            }
+            result
+        };
+        // Unknown/custom runtime themes may miss every named variant. Default
+        // covers that path, and also the fallback of a named variant without a key.
+        let mut defaults: Option<ResourceLookup> = None;
+        for edge in edges
+            .clone()
+            .filter(|edge| edge.kind == ResourceEdgeKind::DefaultTheme)
+        {
+            let found = lookup_edge(edge);
+            if let Some(defaults) = &mut defaults {
+                defaults.alternative(found);
+            } else {
+                defaults = Some(found);
             }
         }
-        Vec::new()
+        let defaults = defaults.unwrap_or_else(ResourceLookup::missing);
+        let mut result = defaults.clone();
+        for edge in edges
+            .clone()
+            .filter(|edge| edge.kind == ResourceEdgeKind::Theme)
+        {
+            let mut variant = lookup_edge(edge);
+            variant.fallback(defaults.clone());
+            result.alternative(variant);
+        }
+        // The runtime checks local values first, then themes, then merged
+        // dictionaries from last to first. Conditional theme misses retain the
+        // applicable merged/ancestor fallback instead of inventing one winner.
+        for edge in edges
+            .rev()
+            .filter(|edge| edge.kind == ResourceEdgeKind::Collection)
+        {
+            if !result.may_be_missing {
+                break;
+            }
+            result.fallback(lookup_edge(edge));
+        }
+        result
     }
     fn set_state(&mut self, uri: String, state: Option<State>) {
         if let Some(old) = self.documents.remove(&uri) {
@@ -1740,6 +1857,7 @@ fn occurrences(document: &Document) -> Vec<Occurrence> {
             if attribute.name.rsplit(':').next() == Some("Key")
                 && attribute.namespace_uri.as_deref()
                     == Some("http://schemas.microsoft.com/winfx/2006/xaml")
+                && !theme_provider(document, node)
             {
                 out.push(Occurrence {
                     name: attribute.value.clone(),
@@ -1800,26 +1918,43 @@ fn resource_edges(document: &Document) -> BTreeMap<u64, Vec<ResourceEdge>> {
         return edges;
     }
     for node in document.ast().elements() {
-        let source = match node.local_name() {
-            "ResourceInclude" | "StyleInclude" => match node.attribute("Source") {
-                Some(source) => Some(source.to_owned()),
-                None => continue,
-            },
+        let (source, kind) = match node.local_name() {
+            "ResourceDictionary" | "ResourceInclude" if theme_provider(document, node) => (
+                node.attribute("Source").map(str::to_owned),
+                if default_theme_dictionary(document, node) {
+                    ResourceEdgeKind::DefaultTheme
+                } else {
+                    ResourceEdgeKind::Theme
+                },
+            ),
+            "ResourceInclude" | "StyleInclude"
+                if native_resource_type(node.local_name(), node.namespace_uri.as_deref()) =>
+            {
+                match node.attribute("Source") {
+                    Some(source) => (Some(source.to_owned()), ResourceEdgeKind::Collection),
+                    None => continue,
+                }
+            }
             "ResourceDictionary"
                 if node.id != document.ast().root()
-                    && !node
-                        .attributes
-                        .iter()
-                        .any(|attribute| attribute.name.ends_with(":Key"))
+                    && native_resource_type(
+                        "ResourceDictionary",
+                        node.namespace_uri.as_deref(),
+                    )
+                    && !node.attributes.iter().any(|attribute| {
+                        attribute.name.rsplit(':').next() == Some("Key")
+                            && attribute.namespace_uri.as_deref()
+                                == Some("http://schemas.microsoft.com/winfx/2006/xaml")
+                    })
                     && node
                         .parent
                         .and_then(|id| document.ast().node(id))
                         .is_some_and(|parent| {
                             parent.name.ends_with(".Resources")
-                                || parent.name.ends_with(".MergedDictionaries")
+                                || dictionary_property(document, parent, "MergedDictionaries")
                         }) =>
             {
-                None
+                (None, ResourceEdgeKind::Collection)
             }
             _ => continue,
         };
@@ -1829,12 +1964,87 @@ fn resource_edges(document: &Document) -> BTreeMap<u64, Vec<ResourceEdge>> {
             .push(ResourceEdge {
                 node: node.id,
                 source,
+                kind,
             });
     }
     for children in edges.values_mut() {
         children.sort_by_key(|edge| document.ast().node(edge.node).unwrap().span.start);
     }
     edges
+}
+
+fn native_resource_type(name: &str, namespace: Option<&str>) -> bool {
+    static SCHEMA: std::sync::OnceLock<Schema> = std::sync::OnceLock::new();
+    SCHEMA
+        .get_or_init(Schema::ferroui)
+        .type_info(name, namespace)
+        .is_some_and(|info| {
+            info.name == name && info.namespace == crate::schema::FRAMEWORK_NAMESPACE
+        })
+}
+
+fn dictionary_property(document: &Document, node: &Node, property: &str) -> bool {
+    node.kind == NodeKind::PropertyElement
+        && node.local_name().split_once('.') == Some(("ResourceDictionary", property))
+        && native_resource_type("ResourceDictionary", node.namespace_uri.as_deref())
+        && node
+            .parent
+            .and_then(|parent| document.ast().node(parent))
+            .is_some_and(|parent| {
+                parent.local_name() == "ResourceDictionary"
+                    && native_resource_type("ResourceDictionary", parent.namespace_uri.as_deref())
+            })
+}
+
+fn theme_provider(document: &Document, node: &Node) -> bool {
+    matches!(node.local_name(), "ResourceDictionary" | "ResourceInclude")
+        && native_resource_type(node.local_name(), node.namespace_uri.as_deref())
+        && node
+            .parent
+            .and_then(|parent| document.ast().node(parent))
+            .is_some_and(|parent| dictionary_property(document, parent, "ThemeDictionaries"))
+}
+
+fn default_theme_dictionary(document: &Document, node: &Node) -> bool {
+    let Some(attribute) = node.attributes.iter().find(|attribute| {
+        attribute.name.rsplit(':').next() == Some("Key")
+            && attribute.namespace_uri.as_deref()
+                == Some("http://schemas.microsoft.com/winfx/2006/xaml")
+    }) else {
+        return false;
+    };
+    let Ok(value) = attribute.markup() else {
+        return false;
+    };
+    let MarkupValue::Extension(extension) = value else {
+        return attribute.value.trim() == "Default";
+    };
+    let namespaces = document.ast().namespaces(node.id);
+    let (prefix, name) = extension
+        .name
+        .split_once(':')
+        .unwrap_or(("", &extension.name));
+    if namespaces.get(prefix).map(String::as_str)
+        != Some("http://schemas.microsoft.com/winfx/2006/xaml")
+        || name != "Static"
+        || extension.arguments.len() != 1
+    {
+        return false;
+    }
+    let argument = &extension.arguments[0];
+    if !matches!(argument.name.as_deref(), None | Some("Member")) {
+        return false;
+    }
+    let MarkupValue::Literal(member) = &argument.value else {
+        return false;
+    };
+    let Some((owner, "Default")) = member.rsplit_once('.') else {
+        return false;
+    };
+    let (prefix, owner) = owner.split_once(':').unwrap_or(("", owner));
+    owner == "ThemeVariant"
+        && (prefix.is_empty() || namespaces.contains_key(prefix))
+        && native_resource_type(owner, namespaces.get(prefix).map(String::as_str))
 }
 pub fn apply_text_edits(source: &str, edits: &[TextEdit]) -> Result<String> {
     let index = LineIndex::new(source);

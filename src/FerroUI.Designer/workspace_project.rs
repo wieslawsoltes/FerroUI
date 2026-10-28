@@ -19,6 +19,8 @@ pub(super) fn document_identity(uri: &str) -> Result<String, String> {
 
 #[derive(Clone)]
 pub(super) struct Tab {
+    /// Preserve the host's loader base URI beside the canonical file-tab key.
+    pub(super) preview_uri: String,
     pub(super) document: Document,
     pub(super) saved: String,
     pub(super) file: Option<Rc<dyn ferroui_base::platform::storage::IStorageFile>>,
@@ -127,6 +129,7 @@ impl DesignerWorkspace {
         state.tabs.insert(
             uri,
             Tab {
+                preview_uri: session.document_uri().into(),
                 document: session.document().clone(),
                 saved: self.saved_source.borrow().clone(),
                 file: self.file.borrow().clone(),
@@ -146,7 +149,7 @@ impl DesignerWorkspace {
             self.apply_source();
         }
         self.capture_tab();
-        let (document, saved, file, layers, viewport, guides) = {
+        let (document, saved, file, layers, viewport, guides, preview_uri) = {
             let mut state = self.project.borrow_mut();
             if !state.tabs.contains_key(uri) {
                 let workspace = state
@@ -155,6 +158,7 @@ impl DesignerWorkspace {
                     .ok_or("Open a solution before navigating to another document")?;
                 let buffer = workspace.open(uri).map_err(|e| e.to_string())?;
                 let tab = Tab {
+                    preview_uri: uri.into(),
                     document: buffer.document().clone(),
                     saved: buffer.saved_source().unwrap_or("").into(),
                     file: None,
@@ -172,12 +176,13 @@ impl DesignerWorkspace {
                 tab.layers.clone(),
                 tab.viewport,
                 tab.guides.clone(),
+                tab.preview_uri.clone(),
             )
         };
         self.disconnect_sharing();
         self.session
             .borrow_mut()
-            .restore_document(document, uri.to_owned())?;
+            .restore_document(document, preview_uri)?;
         if let Some(snapshot) = layers {
             self.session.borrow_mut().restore_layer_view(&snapshot);
         }

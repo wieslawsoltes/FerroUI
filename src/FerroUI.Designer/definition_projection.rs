@@ -1,13 +1,15 @@
 //! A design-only native host for one authored definition. The projection is never
 //! committed; every copied element retains an explicit identity in the original AST.
 use ferroui_designer_core::{Document, Edit, MarkupValue, Node, NodeId, NodeKind};
-use ferroui_designer_tools::{ComponentCatalog, ComponentKind, component_fragment};
+use ferroui_designer_tools::{component_fragment, ComponentCatalog, ComponentKind};
+use serde::{Deserialize, Serialize};
 use std::collections::{BTreeMap, BTreeSet};
 
 const FRAMEWORK: &str = "https://github.com/ferroui";
 const XAML: &str = "http://schemas.microsoft.com/winfx/2006/xaml";
 
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
 pub struct DefinitionPreviewOptions {
     /// Qualified XAML type, resolved in the selected definition's namespace scope.
     pub target_type: Option<String>,

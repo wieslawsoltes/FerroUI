@@ -256,6 +256,9 @@ impl DesignSurface {
         self.focus_order_visible.set(visible);
         self.invalidate_visual();
     }
+    pub fn interactive(&self) -> bool {
+        self.interactive.get()
+    }
     pub fn set_interactive(&self, value: bool) {
         if let Some(session) = self.session() {
             session.borrow_mut().set_interactive(value);

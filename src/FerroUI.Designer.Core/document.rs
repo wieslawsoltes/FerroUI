@@ -215,6 +215,21 @@ impl Document {
     pub fn revision(&self) -> u64 {
         self.revision
     }
+    /// Capture the exact current buffer, accepted syntax identity and saved state
+    /// without copying its undo/redo history. Preview hosts can retain this cheap
+    /// snapshot without retaining every authoring transaction. Subsequent edits
+    /// to either document are independent; new edits use the same history limit.
+    pub fn snapshot_without_history(&self) -> Self {
+        Self {
+            current: self.current.clone(),
+            revision: self.revision,
+            next_id: self.next_id,
+            undo: VecDeque::new(),
+            redo: VecDeque::new(),
+            history_limit: self.history_limit,
+            saved_source: self.saved_source.clone(),
+        }
+    }
     /// Rebase a restored tab onto its host's monotonic revision sequence without altering
     /// source, stable node IDs, dirty state or history. Reserve the next revision for editing.
     pub fn advance_revision_to(&mut self, minimum: u64) -> Result<(), DesignerError> {

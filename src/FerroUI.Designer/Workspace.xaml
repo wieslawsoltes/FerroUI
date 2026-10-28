@@ -141,11 +141,12 @@
       <Border Name="CanvasToolbar" Classes="designer-chrome" Grid.Row="1" Background="{DynamicResource DesignerPanelBrush}" BorderBrush="{DynamicResource DesignerBorderBrush}" BorderThickness="0,0,0,1" Padding="12,2">
         <Grid ColumnDefinitions="*,Auto">
           <StackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
-            <PathIcon Classes="designer-icon" Width="13" Height="13" Foreground="{DynamicResource DesignerMutedBrush}" Data="F1 M2,0 L4,0 4,2 14,2 14,0 16,0 16,2 18,2 18,4 16,4 16,14 18,14 18,16 16,16 16,18 14,18 14,16 4,16 4,18 2,18 2,16 0,16 0,14 2,14 2,4 0,4 0,2 2,2 Z M4,4 L4,14 14,14 14,4 Z" />
+            <PathIcon Name="CanvasSizeIcon" Classes="designer-icon" Width="13" Height="13" Foreground="{DynamicResource DesignerMutedBrush}" Data="F1 M2,0 L4,0 4,2 14,2 14,0 16,0 16,2 18,2 18,4 16,4 16,14 18,14 18,16 16,16 16,18 14,18 14,16 4,16 4,18 2,18 2,16 0,16 0,14 2,14 2,4 0,4 0,2 2,2 Z M4,4 L4,14 14,14 14,4 Z" />
             <TextBlock Name="CanvasSize" Text="800 × 520" Foreground="{DynamicResource DesignerSecondaryBrush}" FontSize="11" VerticalAlignment="Center" />
             <Button Name="PreviewEnvironment" Classes="icon" Width="24" Height="26" ToolTip.Tip="Preview environment · size presets, orientation, theme and reading direction"><PathIcon Classes="designer-icon" Width="14" Height="14" Data="F1 M2 7A1 1 0 1 1 2 9A1 1 0 1 1 2 7Z M8 7A1 1 0 1 1 8 9A1 1 0 1 1 8 7Z M14 7A1 1 0 1 1 14 9A1 1 0 1 1 14 7Z" /></Button>
+            <Button Name="StagesToggle" Classes="nav" Content="Stages" FontSize="11" Padding="7,3" ToolTip.Tip="Compare named native previews across desktop, tablet and phone layout sizes" />
           </StackPanel>
-          <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="2">
+          <StackPanel Name="CanvasNavigationCommands" Grid.Column="1" Orientation="Horizontal" Spacing="2">
             <Button Name="LayoutHelpersToggle" Classes="nav active" Content="Helpers" FontSize="11" Padding="7,3" ToolTip.Tip="Layout helpers · H. Drag gaps, margins and Grid tracks. F8 cycles handles; arrows adjust. Hold Alt for free movement." />
             <Button Name="PreviewTheme" Classes="nav" Content="Light preview" FontSize="11" Padding="6,3" ToolTip.Tip="Switch only the document preview theme" />
             <Border Width="1" Height="16" Background="{DynamicResource DesignerBorderBrush}" Margin="7,0" />
@@ -205,7 +206,8 @@
               <TextBlock Name="ArtboardTitle" Text="Artboard" IsHitTestVisible="False" Foreground="{DynamicResource DesignerMutedBrush}" FontFamily="Segoe UI, Noto Sans, DejaVu Sans, sans-serif" FontSize="11" />
           </Canvas>
         </Grid>
-        <Border Grid.Row="1" Classes="designer-chrome" Background="{DynamicResource DesignerPanelBrush}" BorderBrush="{DynamicResource DesignerBorderBrush}" BorderThickness="1" CornerRadius="8" Padding="5" BoxShadow="0 4 14 0 #66000000" HorizontalAlignment="Center" VerticalAlignment="Bottom" Margin="12,0,12,14">
+        <ContentControl Name="PreviewStagesHost" Grid.Row="1" IsVisible="False" HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch" />
+        <Border Name="CanvasToolShelf" Grid.Row="1" Classes="designer-chrome" Background="{DynamicResource DesignerPanelBrush}" BorderBrush="{DynamicResource DesignerBorderBrush}" BorderThickness="1" CornerRadius="8" Padding="5" BoxShadow="0 4 14 0 #66000000" HorizontalAlignment="Center" VerticalAlignment="Bottom" Margin="12,0,12,14">
           <StackPanel Orientation="Horizontal" Spacing="3">
             <Button Name="SelectTool" Classes="icon active" Width="32" Height="30" ToolTip.Tip="Move and select · V">
               <PathIcon Classes="designer-icon" Width="16" Height="16" Data="F1 M3,1 L17,12 11,13 8,19 Z M6,5 L9,14 10,11 13,11 Z" />

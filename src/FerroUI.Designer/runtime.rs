@@ -1,6 +1,6 @@
 use ferroui_base::animation::{IClock, PlayState, TimeSpan};
-use ferroui_base::data::BindingPriority;
 use ferroui_base::data::core::{ValueType, ValueTypes};
+use ferroui_base::data::BindingPriority;
 use ferroui_base::reactive::IDisposable;
 use ferroui_base::reactive::{Disposable, IObservable, IObserver};
 use ferroui_base::{BoxedValue, FerroObject, Rect, Ref, StyledElement, Visual, WeakRef};
@@ -8,11 +8,21 @@ use ferroui_controls::{ContentControl, Control};
 use ferroui_designer_animation::Sample;
 use ferroui_designer_core::{Document, NodeId};
 use ferroui_inspect::{Inspector, TreeKind};
-use ferroui_markup_xaml::FromXamlObject;
 use ferroui_markup_xaml::diagnostics::XamlSourceInfo;
+use ferroui_markup_xaml::FromXamlObject;
 use ferroui_markup_xaml_loader::FerroRuntimeXamlLoader;
 use std::collections::{BTreeMap, BTreeSet};
 use std::rc::Rc;
+use std::sync::atomic::{AtomicU64, Ordering};
+
+static NEXT_PREVIEW_OPTIONS: AtomicU64 = AtomicU64::new(1);
+
+#[cfg(debug_assertions)]
+struct ReloadDriver {
+    session: ferroui_hot_reload::HotReloadSession,
+    target: Rc<crate::preview_host::FactoryReloadTarget>,
+    use_factory: Rc<std::cell::Cell<bool>>,
+}
 
 /// The authored document and preview have independent acceptance states.
 #[derive(Clone, Debug, PartialEq, Eq)]
@@ -38,6 +48,8 @@ pub(crate) struct RuntimePreview {
     pub host: Ref<ContentControl>,
     uri: String,
     options: crate::preview_host::PreviewHostOptions,
+    options_epoch: u64,
+    isolated: bool,
     native_window: Option<Ref<ferroui_controls::Window>>,
     window_projection: bool,
     pub(crate) definition_scope: Option<crate::DefinitionScope>,
@@ -50,11 +62,7 @@ pub(crate) struct RuntimePreview {
     reverse_objects: BTreeMap<u64, NodeId>,
     animation_values: Vec<Rc<dyn IDisposable>>,
     #[cfg(debug_assertions)]
-    session: ferroui_hot_reload::HotReloadSession,
-    #[cfg(debug_assertions)]
-    target: Rc<crate::preview_host::FactoryReloadTarget>,
-    #[cfg(debug_assertions)]
-    use_factory: Rc<std::cell::Cell<bool>>,
+    reload_driver: Option<ReloadDriver>,
 }
 
 impl RuntimePreview {
@@ -69,7 +77,31 @@ impl RuntimePreview {
         host: Ref<ContentControl>,
         uri: String,
         document: &Document,
+        options: crate::preview_host::PreviewHostOptions,
+    ) -> Result<Self, String> {
+        Self::construct(host, uri, document, options, None, false)
+    }
+
+    /// Independent secondary previews never publish a competing source overlay for
+    /// the authored URI. They load a complete native candidate with the original
+    /// resource base URI and registered factory request, in both debug and release.
+    pub(crate) fn new_isolated(
+        host: Ref<ContentControl>,
+        uri: String,
+        document: &Document,
+        options: crate::preview_host::PreviewHostOptions,
+        scope: Option<crate::DefinitionScope>,
+    ) -> Result<Self, String> {
+        Self::construct(host, uri, document, options, scope, true)
+    }
+
+    fn construct(
+        host: Ref<ContentControl>,
+        uri: String,
+        document: &Document,
         mut options: crate::preview_host::PreviewHostOptions,
+        scope: Option<crate::DefinitionScope>,
+        isolated: bool,
     ) -> Result<Self, String> {
         FerroRuntimeXamlLoader::register();
         ferroui_markup_xaml::register_types();
@@ -80,7 +112,9 @@ impl RuntimePreview {
         options.configuration.set_create_source_info(true);
         host.set_clock(Some(Rc::new(DesignClock)));
         #[cfg(debug_assertions)]
-        let (session, target, use_factory) = {
+        let reload_driver = if isolated {
+            None
+        } else {
             let mut session = ferroui_hot_reload::HotReloadSession::for_runtime_documents();
             session
                 .register_document(
@@ -99,15 +133,21 @@ impl RuntimePreview {
             )?);
             let registered: Rc<dyn ferroui_hot_reload::ReloadTarget> = target.clone();
             session.register_target(&registered);
-            (session, target, use_factory)
+            Some(ReloadDriver {
+                session,
+                target,
+                use_factory,
+            })
         };
         let mut this = Self {
             host,
             uri,
             options,
+            options_epoch: NEXT_PREVIEW_OPTIONS.fetch_add(1, Ordering::Relaxed),
+            isolated,
             native_window: None,
             window_projection: false,
-            definition_scope: None,
+            definition_scope: scope,
             definition_projection: None,
             design_projection: None,
             design_samples: Default::default(),
@@ -117,11 +157,7 @@ impl RuntimePreview {
             reverse_objects: BTreeMap::new(),
             animation_values: Vec::new(),
             #[cfg(debug_assertions)]
-            session,
-            #[cfg(debug_assertions)]
-            target,
-            #[cfg(debug_assertions)]
-            use_factory,
+            reload_driver,
         };
         this.reload_document(document, true);
         Ok(this)
@@ -140,19 +176,32 @@ impl RuntimePreview {
         options.configuration.design_mode = true;
         options.configuration.set_create_source_info(true);
         #[cfg(debug_assertions)]
-        let previous_target = self
-            .target
-            .replace_configuration(&self.host, options.clone());
+        let previous_target = self.reload_driver.as_ref().map(|driver| {
+            driver
+                .target
+                .replace_configuration(&self.host, options.clone())
+        });
         let previous = std::mem::replace(&mut self.options, options);
         self.reload_document(document, true);
         if let PreviewStatus::Failed { message, .. } = &self.status {
             let error = message.clone();
             self.options = previous;
             #[cfg(debug_assertions)]
-            self.target.restore_configuration(previous_target);
+            if let (Some(driver), Some(previous_target)) = (&self.reload_driver, previous_target) {
+                driver.target.restore_configuration(previous_target);
+            }
             return Err(error);
         }
+        self.options_epoch = NEXT_PREVIEW_OPTIONS.fetch_add(1, Ordering::Relaxed);
         Ok(())
+    }
+
+    pub(crate) fn options(&self) -> crate::PreviewHostOptions {
+        self.options.clone()
+    }
+
+    pub(crate) fn options_epoch(&self) -> u64 {
+        self.options_epoch
     }
 
     pub(crate) fn replace_document(
@@ -171,8 +220,9 @@ impl RuntimePreview {
             self.definition_projection = None;
             self.reload_document(document, true);
         } else {
-            let preview =
+            let mut preview =
                 Self::new_with_options(self.host.clone(), uri, document, self.options.clone())?;
+            preview.options_epoch = self.options_epoch;
             *self = preview;
         }
         Ok(())
@@ -196,6 +246,7 @@ impl RuntimePreview {
         }
         let status = self.status.clone();
         let notices = self.notices.clone();
+        let options_epoch = self.options_epoch;
         let mut options = self.options.clone();
         options.design_time_data = enabled;
         if let Err(error) = self.configure(options, document) {
@@ -203,6 +254,9 @@ impl RuntimePreview {
             self.notices = notices;
             return Err(error);
         }
+        // Each secondary stage owns its design-data choice. Focusing another main
+        // preview is not a change to their shared factory or loader services.
+        self.options_epoch = options_epoch;
         Ok(())
     }
 
@@ -218,7 +272,10 @@ impl RuntimePreview {
         let previous_notices = self.notices.clone();
         let previous_window = self.window_projection;
         #[cfg(debug_assertions)]
-        let previous_factory = self.use_factory.get();
+        let previous_factory = self
+            .reload_driver
+            .as_ref()
+            .map(|driver| driver.use_factory.get());
         self.reload_document(document, true);
         if let PreviewStatus::Failed { message, .. } = &self.status {
             let message = message.clone();
@@ -227,7 +284,10 @@ impl RuntimePreview {
             self.notices = previous_notices;
             self.window_projection = previous_window;
             #[cfg(debug_assertions)]
-            self.use_factory.set(previous_factory);
+            if let (Some(driver), Some(previous_factory)) = (&self.reload_driver, previous_factory)
+            {
+                driver.use_factory.set(previous_factory);
+            }
             return Err(message);
         }
         Ok(())
@@ -281,25 +341,27 @@ impl RuntimePreview {
         let actual_factory =
             !synthetic_scope && self.options.factory(document).is_some() && !self.window_projection;
         #[cfg(debug_assertions)]
-        self.use_factory.set(
-            !synthetic_scope
-                && (actual_factory
-                    || self.options.resource_factory.is_some()
-                    || document
-                        .ast()
-                        .node(document.ast().root())
-                        .is_some_and(|node| {
-                            matches!(
-                                node.local_name(),
-                                "Styles"
-                                    | "Style"
-                                    | "ResourceDictionary"
-                                    | "ControlTheme"
-                                    | "Application"
-                                    | "DataTemplate"
-                            )
-                        })),
-        );
+        if let Some(driver) = &self.reload_driver {
+            driver.use_factory.set(
+                !synthetic_scope
+                    && (actual_factory
+                        || self.options.resource_factory.is_some()
+                        || document
+                            .ast()
+                            .node(document.ast().root())
+                            .is_some_and(|node| {
+                                matches!(
+                                    node.local_name(),
+                                    "Styles"
+                                        | "Style"
+                                        | "ResourceDictionary"
+                                        | "ControlTheme"
+                                        | "Application"
+                                        | "DataTemplate"
+                                )
+                            })),
+            );
+        }
         let mut candidate_definition = None;
         let mut candidate_design = None;
         let result = if let Some(scope) = self.definition_scope.as_ref().filter(|_| synthetic_scope)
@@ -357,7 +419,10 @@ impl RuntimePreview {
                         .map_or(projection.source.as_str(), |design| {
                             design.document.valid_source()
                         }),
-                    true,
+                    // A Window's synthetic Border (or another projection root)
+                    // must not accidentally match a factory registered for that
+                    // different authored type. Actual factories use the branch above.
+                    false,
                 )?;
                 if let Some(design) = &design {
                     self.notices.extend(design.notices.clone());
@@ -408,28 +473,35 @@ impl RuntimePreview {
         }
     }
 
-    #[cfg(debug_assertions)]
-    fn apply_source(&mut self, source: &str, _allow_root_factories: bool) -> Result<(), String> {
-        self.session.submit(self.uri.clone(), source.to_owned());
-        if let Some(outcome) = self.session.apply_pending() {
-            if outcome.status != ferroui_hot_reload::ReloadStatus::Applied {
-                return Err(outcome
-                    .diagnostic
-                    .unwrap_or_else(|| format!("{:?}", outcome.status)));
-            }
-        }
-        Ok(())
-    }
-
-    // The existing hot reload crate is development-only. Release hosts still stage a complete
-    // candidate before replacing content; they do not claim development state restoration.
-    #[cfg(not(debug_assertions))]
     fn apply_source(&mut self, source: &str, allow_root_factories: bool) -> Result<(), String> {
+        #[cfg(debug_assertions)]
+        if let Some(driver) = &mut self.reload_driver {
+            driver.session.submit(self.uri.clone(), source.to_owned());
+            if let Some(outcome) = driver.session.apply_pending() {
+                if outcome.status != ferroui_hot_reload::ReloadStatus::Applied {
+                    return Err(outcome
+                        .diagnostic
+                        .unwrap_or_else(|| format!("{:?}", outcome.status)));
+                }
+            }
+            return Ok(());
+        }
+        // Release previews and isolated comparison stages stage complete graphs.
+        // The designer's sole authoring preview retains development state restoration.
         let mut options = self.options.clone();
         if !allow_root_factories {
             options.root_factories.clear();
         }
         let candidate = options.control(source, &self.uri)?;
+        if self.isolated
+            && (candidate.parent().is_some()
+                || candidate.visual_parent().is_some()
+                || candidate.cast::<ferroui_controls::TopLevel>().is_some())
+        {
+            return Err(
+                "A preview factory must return a fresh, unparented control for each stage".into(),
+            );
+        }
         self.host.set_content(Some(Control::boxed(candidate)));
         Ok(())
     }

@@ -152,6 +152,8 @@ mod icons;
 mod bindings;
 #[path = "render_property_inspector_tests.rs"]
 mod property_inspector;
+#[path = "render_preview_stages_tests.rs"]
+mod preview_stages;
 
 #[test]
 fn native_workspace_renders_design_manipulation_and_animation() {

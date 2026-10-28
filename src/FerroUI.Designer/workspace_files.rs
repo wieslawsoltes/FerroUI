@@ -260,6 +260,7 @@ impl DesignerWorkspace {
     /// The saved snapshot is tracked independently of later editor changes, so a concurrent
     /// change is never mistakenly marked saved. Existing files are checked for external changes.
     pub async fn save_file(self: &Rc<Self>, save_as: bool) -> Result<bool, String> {
+        let previous_preview_uri = self.session.borrow().document_uri().to_owned();
         let previous_uri = super::project::document_identity(self.session.borrow().document_uri())?;
         let top = TopLevel::get_top_level(Some(&self.root))
             .ok_or("The designer must be attached to a window to save files")?;
@@ -373,7 +374,14 @@ impl DesignerWorkspace {
             tab.saved = source.clone();
             tab.file = Some(file);
             tab.document.mark_saved_snapshot(source.clone());
+            tab.preview_uri = saved_uri.clone();
             project.tabs.insert(saved_uri.clone(), tab);
+        }
+        if saved_uri != previous_uri {
+            self.preview_stages.board.borrow_mut().retarget_source(&previous_uri, &saved_uri)?;
+            if previous_preview_uri != previous_uri {
+                self.preview_stages.board.borrow_mut().retarget_source(&previous_preview_uri, &saved_uri)?;
+            }
         }
         self.acknowledge_provider_save(&previous_uri, &saved_uri, &source)?;
         self.refresh(true);

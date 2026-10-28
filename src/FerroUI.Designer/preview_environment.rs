@@ -8,10 +8,12 @@ use ferroui_controls::automation::AutomationProperties;
 use ferroui_controls::{
     Button, ColumnDefinitions, ComboBox, Control, Grid, StackPanel, TextBlock, TextBox,
 };
+use serde::{Deserialize, Serialize};
 use std::cell::{Cell, RefCell};
 use std::rc::Rc;
 
-#[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
 pub enum PreviewTheme {
     #[default]
     Light,
@@ -19,7 +21,8 @@ pub enum PreviewTheme {
     Inherit,
 }
 
-#[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
 pub enum PreviewFlowDirection {
     #[default]
     Inherit,
@@ -27,7 +30,8 @@ pub enum PreviewFlowDirection {
     RightToLeft,
 }
 
-#[derive(Clone, Copy, Debug, PartialEq)]
+#[derive(Clone, Copy, Debug, PartialEq, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
 pub struct PreviewEnvironment {
     pub width: f64,
     pub height: f64,

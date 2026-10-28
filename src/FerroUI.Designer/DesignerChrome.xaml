@@ -444,4 +444,23 @@
     <Setter Property="MaxWidth" Value="476" />
     <Setter Property="ScrollViewer.HorizontalScrollBarVisibility" Value="Disabled" />
   </Style>
+  <Style Selector="Border.designer-stage-card">
+    <Setter Property="Background" Value="{DynamicResource DesignerPanelBrush}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource DesignerBorderBrush}" />
+    <Setter Property="BorderThickness" Value="1" />
+    <Setter Property="CornerRadius" Value="8" />
+  </Style>
+  <Style Selector="Border.designer-stage-card.active">
+    <Setter Property="BorderBrush" Value="{DynamicResource DesignerAccentBrush}" />
+  </Style>
+  <Style Selector="FlyoutPresenter.designer-stage-editor-flyout">
+    <Setter Property="Background" Value="{DynamicResource DesignerPanelBrush}" />
+    <Setter Property="Foreground" Value="{DynamicResource DesignerTextBrush}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource DesignerBorderBrush}" />
+    <Setter Property="BorderThickness" Value="1" />
+    <Setter Property="CornerRadius" Value="8" />
+    <Setter Property="Padding" Value="12" />
+    <Setter Property="MaxWidth" Value="466" />
+    <Setter Property="ScrollViewer.HorizontalScrollBarVisibility" Value="Disabled" />
+  </Style>
 </Styles>

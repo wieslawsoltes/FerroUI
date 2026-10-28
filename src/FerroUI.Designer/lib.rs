@@ -31,6 +31,10 @@ mod layer_state;
 mod layout_helper_renderer;
 mod preview_environment;
 mod preview_host;
+mod preview_stages;
+mod preview_stage_scenarios;
+mod preview_stage_editor;
+mod preview_stage_view;
 mod preview_source;
 mod property_color_editor;
 mod property_controls;
@@ -86,6 +90,14 @@ pub use preview_environment::{
 pub use preview_host::{
     PreviewFactory, PreviewHostOptions, PreviewRequest, ResourcePreviewFactory,
 };
+pub use preview_stages::{
+    MAX_PREVIEW_STAGES, PreviewSourceAnchor, PreviewSourceSegment, PreviewStageBoard,
+    PreviewStageConfiguration, PreviewStageId, PreviewStageInfo, PreviewStageManifest,
+    PreviewStageMode, PreviewStageSelection, PreviewStageSelectionToken, PreviewStageSnapshot,
+    PreviewStageSource, PreviewStageState, PreviewStageStatus, PreviewStageTarget,
+};
+pub use preview_stage_editor::PreviewStageEditor;
+pub use preview_stage_view::{PreviewStageAction, PreviewStageComparison, PreviewStageView};
 pub use property_color_editor::PropertyColorEditor;
 pub use property_controls::{
     PropertyComponentsEditor, PropertyComponentsKind, PropertyNumberOptions,
