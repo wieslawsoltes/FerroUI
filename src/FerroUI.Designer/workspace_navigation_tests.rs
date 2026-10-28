@@ -7,11 +7,32 @@ use ferroui_base::input::{
 };
 use ferroui_base::interactivity::RoutedEventArgs;
 use ferroui_base::{Point, Rect, Ref, Size, Thickness, Vector};
-use ferroui_controls::testing::{TestServices, UnitTestApplication};
+use ferroui_controls::platform::ITopLevelImpl;
+use ferroui_controls::testing::{
+    MockWindowImpl, MockWindowingPlatform, TestServices, UnitTestApplication,
+};
 use ferroui_controls::{Button, Control, TextBox, Window};
 use std::rc::Rc;
 
 const SOURCE: &str = r#"<Canvas xmlns="https://github.com/ferroui"><Button Name="Target" Canvas.Left="120" Canvas.Top="80" Width="100" Height="40" Content="Target"/><TextBox Name="Input" Canvas.Left="250" Canvas.Top="160" Width="120" Height="40"/></Canvas>"#;
+
+fn services() -> TestServices {
+    let mut services = TestServices::styled_window();
+    services.windowing_platform = Some(MockWindowingPlatform::with_window_impl(|| {
+        let native = MockWindowImpl::window(1400.0, 950.0);
+        native.max_auto_size_hint.set(Size::new(2048.0, 2048.0));
+        native.setup_resize(|window, size, reason| {
+            if window.client_size.get() != size {
+                window.client_size.set(size);
+                if let Some(resized) = ITopLevelImpl::resized(window) {
+                    resized(size, reason);
+                }
+            }
+        });
+        native
+    }));
+    services
+}
 
 struct Fixture {
     workspace: Rc<DesignerWorkspace>,
@@ -204,7 +225,7 @@ fn canvas_viewport_round_trips_and_preserves_the_pointer_at_zoom_limits() {
 
 #[test]
 fn canvas_wheel_preserves_fractional_deltas_and_uses_the_selected_mode() {
-    let _app = UnitTestApplication::start(TestServices::styled_window());
+    let _app = UnitTestApplication::start(services());
     let fixture = Fixture::new();
     let workspace = &fixture.workspace;
     let surface = workspace.design_surface().upcast::<Control>();
@@ -264,7 +285,7 @@ fn canvas_wheel_preserves_fractional_deltas_and_uses_the_selected_mode() {
 
 #[test]
 fn canvas_pan_capture_escape_and_source_changes_never_author_geometry() {
-    let _app = UnitTestApplication::start(TestServices::styled_window());
+    let _app = UnitTestApplication::start(services());
     let fixture = Fixture::new();
     let workspace = &fixture.workspace;
     workspace.set_zoom(2.0);
@@ -327,7 +348,7 @@ fn canvas_pan_capture_escape_and_source_changes_never_author_geometry() {
 
 #[test]
 fn canvas_preview_routing_and_zoom_fields_preserve_pending_source() {
-    let _app = UnitTestApplication::start(TestServices::styled_window());
+    let _app = UnitTestApplication::start(services());
     let fixture = Fixture::new();
     let workspace = &fixture.workspace;
     fixture.click("PreviewTool");
@@ -363,6 +384,8 @@ fn canvas_preview_routing_and_zoom_fields_preserve_pending_source() {
     workspace.source_editor().set_text(Some("<Canvas>"));
     let revision = session.borrow().document().revision();
     let generation = session.borrow().generation();
+    let undo = session.borrow().can_undo();
+    let draft = session.borrow().document().source().to_owned();
     let before = workspace.canvas_viewport();
     for invalid in ["0", "1601", "NaN", "inf", "100%%", "", "-3"] {
         assert!(workspace.set_zoom_percent(invalid).is_err());
@@ -370,15 +393,15 @@ fn canvas_preview_routing_and_zoom_fields_preserve_pending_source() {
     }
     workspace.set_zoom_percent(" 137.5 % ").unwrap();
     assert_eq!(workspace.zoom(), 1.375);
-    for name in [
-        "ZoomIn",
-        "ZoomOut",
-        "ZoomReset",
-        "ZoomFit",
-        "PanTool",
-        "SelectTool",
-        "PreviewTool",
-    ] {
+    for name in ["ZoomIn", "ZoomOut", "ZoomReset", "ZoomFit"] {
+        fixture.click(name);
+    }
+    assert_eq!(
+        session.borrow().generation(),
+        generation,
+        "Camera-only commands do not rebuild the application preview"
+    );
+    for name in ["PanTool", "SelectTool", "PreviewTool"] {
         fixture.click(name);
     }
     assert_eq!(
@@ -386,13 +409,17 @@ fn canvas_preview_routing_and_zoom_fields_preserve_pending_source() {
         Some("<Canvas>")
     );
     assert_eq!(session.borrow().document().revision(), revision);
-    assert_eq!(session.borrow().generation(), generation);
-    assert!(!session.borrow().can_undo());
+    assert_eq!(session.borrow().document().source(), draft);
+    assert!(
+        session.borrow().generation() > generation,
+        "Interaction-mode changes must still invalidate accepted native models"
+    );
+    assert_eq!(session.borrow().can_undo(), undo);
 }
 
 #[test]
 fn canvas_resize_and_retained_tabs_keep_their_own_view() {
-    let _app = UnitTestApplication::start(TestServices::styled_window());
+    let _app = UnitTestApplication::start(services());
     let fixture = Fixture::new();
     let workspace = &fixture.workspace;
     workspace.set_canvas_viewport(CanvasViewport::new(2.0, Vector::new(-150.0, 35.0)).unwrap());
@@ -403,6 +430,10 @@ fn canvas_resize_and_retained_tabs_keep_their_own_view() {
     fixture.window.set_height(1020.0);
     fixture.window.update_layout();
     let size = fixture.canvas().bounds().size();
+    assert_ne!(
+        size, old_size,
+        "The mock must deliver a real native resize notification"
+    );
     near(
         workspace.canvas_to_artboard(Point::new(size.width / 2.0, size.height / 2.0)),
         center,
@@ -422,7 +453,7 @@ fn canvas_resize_and_retained_tabs_keep_their_own_view() {
 
 #[test]
 fn resizing_the_canvas_retires_an_authored_drag_before_its_inverse_coordinates_change() {
-    let _app = UnitTestApplication::start(TestServices::styled_window());
+    let _app = UnitTestApplication::start(services());
     let fixture = Fixture::new();
     let workspace = &fixture.workspace;
     let session = workspace.session();
@@ -434,8 +465,14 @@ fn resizing_the_canvas_retires_an_authored_drag_before_its_inverse_coordinates_c
         Some(&workspace.design_surface().upcast::<InputElement>())
     );
     fixture.move_to(point + Vector::new(20.0, 10.0), false);
+    let size_before = fixture.canvas().bounds().size();
     fixture.window.set_width(1560.0);
     fixture.window.update_layout();
+    assert_ne!(
+        fixture.canvas().bounds().size(),
+        size_before,
+        "The authored-drag regression must change the actual viewport coordinate frame"
+    );
     fixture.release(point + Vector::new(20.0, 10.0), false);
     assert_eq!(session.borrow().document().source(), source);
     assert!(

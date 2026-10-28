@@ -194,10 +194,9 @@ impl DesignSurface {
     }
     pub fn set_zoom(&self, zoom: f64) {
         self.zoom.set(if zoom.is_finite() {
-            zoom.clamp(
-                crate::CanvasViewport::MIN_ZOOM,
-                crate::CanvasViewport::MAX_ZOOM,
-            )
+            // Independent hosts may provide a camera beyond the workspace's UI limits.
+            // Handle sizes and snap tolerances must use their actual applied scale.
+            zoom.max(crate::CanvasViewport::MIN_ZOOM)
         } else {
             1.0
         });
