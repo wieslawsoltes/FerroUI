@@ -173,6 +173,16 @@ bounds, the one-pixel gutter and centering; native raster checks at **1Ã—, 1.25Ã
 verify visible output at each display scale. The fixture also checks the actual workspace's
 compact button and command-bar constraints and separation from preview-owned templates.
 
+## Native render captures
+
+These captures are preserved byte-for-byte from the successful
+[Visual designer CI run 40639530207](https://github.com/wieslawsoltes/FerroUI/actions/runs/40639530207):
+
+- [Canvas after pan and zoom](images/designer-canvas-navigation.png), with the native selection overlay.
+- [Fit selection](images/designer-canvas-fit-selection.png), with the selected control framed in the viewport.
+- [Zoom options](images/designer-canvas-zoom-options.png), including percentage entry and wheel preferences.
+- [Icon audit atlas](images/designer-icon-atlas.png), showing all 105 paths at both sizes on dark and light backgrounds.
+
 ## Why these conventions
 
 [Figma's zoom and view controls][figma-zoom] expose custom percentages, fit-all and
