@@ -10,6 +10,11 @@ their length), each the way `cargo test` would: from the directory of its packag
 ends (a group in the log of GitHub Actions); a binary that fails is printed again at the end. It
 ends with 1 when a binary failed, like `cargo test --no-fail-fast`.
 
+A binary with many tests is split: its tests are listed (`--list`) and run in up to `--jobs` parts
+of at least `--split` tests each (`--exact` with the names of the part, dealt out in turn so that a
+slow module is spread over the parts), each part a process of its own. The catalog alone (about a
+thousand tests) took longer than all the other binaries together.
+
     scripts/ci/parallel_tests.py [--jobs N] [-- <arguments of the test binaries>] <cargo test arguments>
 
     scripts/ci/parallel_tests.py --jobs 2 --workspace --locked --lib --tests --exclude ferroui-vello
@@ -64,12 +69,31 @@ def package_environment(binary):
     return directory, environment
 
 
-def run(binary, test_args):
+def list_tests(binary, test_args):
+    directory, environment = package_environment(binary)
+    result = subprocess.run([binary["executable"], "--list", "--format", "terse", *test_args],
+                            cwd=directory, env=environment, capture_output=True, text=True, errors="replace")
+    if result.returncode != 0:
+        return None  # run it whole: its failure is reported by the run
+    return [line[:-len(": test")] for line in result.stdout.splitlines() if line.endswith(": test")]
+
+
+def parts(binary, test_args, jobs, split):
+    """The runs of a binary: (label, arguments), one run or the parts of a large binary."""
+    names = list_tests(binary, test_args) if jobs > 1 else None
+    count = min(jobs, len(names) // split) if names else 0
+    if count < 2:
+        return [(binary["label"], test_args)]
+    return [(f"{binary['label']} [{index + 1}/{count}]", ["--exact", *names[index::count], *test_args])
+            for index in range(count)]
+
+
+def run(binary, label, arguments):
     directory, environment = package_environment(binary)
     started = time.monotonic()
-    result = subprocess.run([binary["executable"], *test_args], cwd=directory, env=environment,
+    result = subprocess.run([binary["executable"], *arguments], cwd=directory, env=environment,
                             stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True, errors="replace")
-    return binary, result.returncode, result.stdout, time.monotonic() - started
+    return label, result.returncode, result.stdout, time.monotonic() - started
 
 
 def main():
@@ -81,34 +105,41 @@ def main():
         arguments, test_args = arguments[:split], arguments[split + 1:]
     parser = argparse.ArgumentParser(add_help=False)
     parser.add_argument("--jobs", type=int, default=os.cpu_count() or 2)
+    parser.add_argument("--split", type=int, default=150)
     options, cargo_args = parser.parse_known_args(arguments)
 
     binaries = build(cargo_args)
     binaries.sort(key=lambda b: os.path.getsize(b["executable"]), reverse=True)
-    print(f"running {len(binaries)} test binaries, {options.jobs} at a time", flush=True)
 
     failed, durations = [], []
     started = time.monotonic()
     with ThreadPoolExecutor(max_workers=options.jobs) as pool:
-        futures = [pool.submit(run, binary, test_args) for binary in binaries]
+        planned = list(pool.map(lambda b: parts(b, test_args, options.jobs, options.split), binaries))
+        runs = [(binary, label, arguments)
+                for binary, binary_parts in zip(binaries, planned) for label, arguments in binary_parts]
+        print(f"running {len(binaries)} test binaries in {len(runs)} processes, {options.jobs} at a time",
+              flush=True)
+        # The parts of the split binaries first: they are the longest runs.
+        runs.sort(key=lambda run_: ("[" not in run_[1], -os.path.getsize(run_[0]["executable"])))
+        futures = [pool.submit(run, binary, label, arguments) for binary, label, arguments in runs]
         for future in as_completed(futures):
-            binary, code, output, seconds = future.result()
-            durations.append((seconds, binary["label"]))
+            label, code, output, seconds = future.result()
+            durations.append((seconds, label))
             status = "ok" if code == 0 else f"FAILED (exit {code})"
-            print(f"::group::{binary['label']}: {status}, {seconds:.0f} s", flush=True)
+            print(f"::group::{label}: {status}, {seconds:.0f} s", flush=True)
             print(output, flush=True)
             print("::endgroup::", flush=True)
             if code != 0:
-                failed.append((binary, output))
+                failed.append((label, output))
 
-    print(f"{len(binaries)} test binaries in {time.monotonic() - started:.0f} s; the longest:")
+    print(f"{len(runs)} test processes in {time.monotonic() - started:.0f} s; the longest:")
     for seconds, label in sorted(durations, reverse=True)[:10]:
         print(f"  {seconds:6.0f} s  {label}")
-    for binary, output in failed:
-        print(f"\n===== {binary['label']} failed =====\n{output}")
+    for label, output in failed:
+        print(f"\n===== {label} failed =====\n{output}")
     if failed:
-        print(f"::error::{len(failed)} of {len(binaries)} test binaries failed: "
-              + ", ".join(b["label"] for b, _ in failed))
+        print(f"::error::{len(failed)} of {len(runs)} test processes failed: "
+              + ", ".join(label for label, _ in failed))
         return 1
     return 0
 
