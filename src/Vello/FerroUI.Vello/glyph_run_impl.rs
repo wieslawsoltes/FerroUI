@@ -6,7 +6,6 @@ use ferroui_base::{Point, Rect, Vector};
 use kurbo::{Affine, BezPath, Line, ParamCurve, ParamCurveExtrema, PathSeg, Shape};
 use skrifa::instance::{LocationRef, Size};
 use skrifa::raw::types::Tag;
-use skrifa::raw::TableProvider;
 use skrifa::MetadataProvider;
 use std::any::Any;
 use std::sync::{Arc, Mutex, OnceLock};
