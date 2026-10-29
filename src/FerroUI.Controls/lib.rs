@@ -304,6 +304,11 @@ mod info_badge_tests;
 mod info_bar_tests;
 #[cfg(test)]
 mod progress_ring_tests;
+// WinUI's title bar (docs/porting/winui-controls.md).
+mod title_bar;
+pub use title_bar::TitleBar;
+#[cfg(test)]
+mod title_bar_tests;
 // WinUI's input controls (docs/porting/winui-controls.md).
 mod auto_suggest_box;
 mod number_box;
