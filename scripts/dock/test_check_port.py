@@ -17,7 +17,7 @@ class EnumInventoryTests(unittest.TestCase):
             port = root / "port"
             (source / "src").mkdir(parents=True)
             (port / "src").mkdir(parents=True)
-            (port / "docs").mkdir()
+            (port / "docs/porting/dock").mkdir(parents=True)
             original = "public enum Example { First, Second }"
             (source / "src/Example.cs").write_text(original)
             (port / "src/example.rs").write_text("pub enum Example { First = 0 }")
@@ -52,16 +52,16 @@ class EnumInventoryTests(unittest.TestCase):
     def test_sample_rust_units_are_audited_for_mapping_names_and_placeholders(self):
         with TemporaryDirectory() as directory:
             root = Path(directory)
-            (root / "docs").mkdir()
+            (root / "docs/porting/dock").mkdir(parents=True)
             fixture = {"source_revision": "fixture", "files": []}
             for name in ["upstream-files.json", "ports.json"]:
-                (root / "docs" / name).write_text(json.dumps(fixture))
-            sample = root / "samples" / "Demo"
+                (root / "docs/porting/dock" / name).write_text(json.dumps(fixture))
+            sample = root / "samples" / "Dock" / "Demo"
             sample.mkdir(parents=True)
             (sample / "unmapped.rs").write_text("struct AvaloniaControl; fn absent() { unimplemented!(); }")
             with patch("check_port.source_paths", return_value=set()):
                 errors, _ = audit(root, root)
-            self.assertTrue(any("source mapping" in error and "samples/Demo/unmapped.rs" in error for error in errors))
+            self.assertTrue(any("source mapping" in error and "samples/Dock/Demo/unmapped.rs" in error for error in errors))
             self.assertTrue(any("upstream UI identifier" in error for error in errors))
             self.assertTrue(any("placeholder implementation" in error for error in errors))
 

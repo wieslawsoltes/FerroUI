@@ -181,7 +181,8 @@ def audit(port_root: Path, source_root: Path, require_complete: bool = False) ->
                 errors.extend(verify_enum(source_text, (port_root / targets[0]).read_text(), record.get("members", [])))
 
     counts["pending"] = len(expected - seen)
-    rust_sources = sorted(path for folder in ("src", "samples") for path in (port_root / folder).rglob("*.rs"))
+    # The Rust sources of the Dock port, not the rest of the repository they are in.
+    rust_sources = sorted(path for folder in ("src/Dock", "samples/Dock") for path in (port_root / folder).rglob("*.rs"))
     for path in rust_sources:
         content = path.read_text()
         if re.search(r"avalonia|avn", str(path.relative_to(port_root)) + content, re.I):

@@ -3564,9 +3564,9 @@
         "src/Dock/FerroDock.Ferro/register_types.rs",
         "tests/Dock/FerroDock.Markup.Tests/OverlayHostConsumer.xaml",
         "tests/Dock/FerroDock.Markup.Tests/lib.rs",
-        "vendor/NOTICE.md",
-        "vendor/ferroui-base-provenance.json",
-        "vendor/ferroui-base-resource-api.patch",
+        "docs/porting/dock/core-patches/NOTICE.md",
+        "docs/porting/dock/core-patches/ferroui-base-provenance.json",
+        "docs/porting/dock/core-patches/ferroui-base-resource-api.patch",
         "scripts/dock/check_framework_patch.py",
         "scripts/dock/test_check_framework_patch.py"
       ],
@@ -13705,8 +13705,8 @@
         "tests/Dock/data/inspector-view-grids.tsv",
         "scripts/dock/check_inspector_views.py",
         "scripts/dock/test_check_inspector_views.py",
-        "vendor/ferroui-markup-xaml-instance-check.patch",
-        "vendor/ferroui-markup-xaml-provenance.json"
+        "docs/porting/dock/core-patches/ferroui-markup-xaml-instance-check.patch",
+        "docs/porting/dock/core-patches/ferroui-markup-xaml-provenance.json"
       ],
       "status": "partial",
       "members": [
