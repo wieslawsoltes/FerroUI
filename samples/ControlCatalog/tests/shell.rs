@@ -1144,6 +1144,54 @@ fn the_shell_stays_usable_with_every_window_decoration() {
     }
 }
 
+/// The search box of the title bar is used while the compact pane stays closed: the sections the
+/// query opens are not expanded in the closed pane (which would show their pages in a flyout of
+/// the strip of icons), only once the pane opens.
+#[test]
+fn the_search_of_the_title_bar_opens_no_flyout_of_the_compact_pane() {
+    use ferroui_controls::platform::IWindowImpl;
+
+    let shell = Shell::start(800.0, 600.0);
+    shell.window_impl.is_client_area_extended_to_decorations.set(true);
+    if let Some(changed) = shell.window_impl.extend_client_area_to_decorations_changed() {
+        changed(true);
+    }
+    shell.settle();
+    let navigation = shell.navigation_view();
+    assert!(shell.main_view.is_title_bar_active(), "the title bar of the shell is shown");
+    assert_eq!(NavigationViewDisplayMode::Compact, navigation.display_mode());
+    assert!(!navigation.is_pane_open(), "the compact pane starts closed");
+
+    let search_box = search_box(&shell);
+    shell.click(&search_box);
+    search_box.set_text(Some("slider"));
+    fire_search(&shell);
+    let section = shell
+        .view_model
+        .home_sections()
+        .iter()
+        .find(|section| items(section).iter().any(|item| item.header() == "Slider"))
+        .cloned()
+        .expect("the section of the Slider page");
+    assert!(section.is_expanded(), "the query opens the section of the Slider page");
+    assert!(!navigation.is_pane_open(), "typing into the title bar leaves the pane closed");
+    // The item of the section, shown or not.
+    let entry = descendants::<NavigationViewItem>(&shell.main_view)
+        .into_iter()
+        .filter(|item| item.find_ancestor_of_type::<Frame>(false).is_none())
+        .find(|item| from_markup_value::<String>(&item.content()) == Some(section.title()))
+        .expect("the item of the section");
+    assert!(!entry.is_expanded(), "the closed compact pane shows no flyout of the section");
+
+    // The list of suggestions covers the pane; closed, the pane below is looked at.
+    let search = descendants::<AutoSuggestBox>(&shell.main_view).into_iter().next().expect("the search box");
+    search.set_is_suggestion_list_open(false);
+    navigation.set_is_pane_open(true);
+    shell.settle();
+    assert!(entry.is_expanded(), "the open pane shows the section open");
+    assert!(pane_texts(&shell).contains(&text("Slider")), "{:?}", pane_texts(&shell));
+}
+
 /// A finger that drags up on a page of a phone-sized shell (the minimal pane) scrolls the page, also
 /// where it lands between the cards (the scroll content presenter is hit there, not the grid of the
 /// template of the scroll viewer), as the browser test of the phone does.

@@ -266,7 +266,13 @@ impl MainView {
                     match name {
                         "IsSectionVisible" => entry.set_is_visible(section.is_section_visible()),
                         "IsExpanded" if !weak.upgrade().is_some_and(|this| this.selecting.get()) => {
-                            entry.set_is_expanded(section.is_expanded())
+                            // A closed compact pane shows the children of an expanded item in a
+                            // flyout: the sections the search of the title bar opens wait for the
+                            // pane to open (`pane_opened`).
+                            let pane_open = weak.upgrade().is_some_and(|this| this.navigation_view().is_pane_open());
+                            if pane_open || !section.is_expanded() {
+                                entry.set_is_expanded(section.is_expanded())
+                            }
                         }
                         _ => {}
                     }
@@ -303,6 +309,10 @@ impl MainView {
             let weak = self.to_ref().downgrade();
             navigation.pane_opened(move || {
                 if let Some(this) = weak.upgrade() {
+                    let sections = this.section_items.borrow().clone();
+                    for (entry, section) in sections {
+                        entry.set_is_expanded(section.is_expanded());
+                    }
                     this.open_current_section();
                 }
             });
