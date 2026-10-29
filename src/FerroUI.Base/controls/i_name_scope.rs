@@ -1,5 +1,6 @@
-use crate::utilities::SynchronousCompletionAsyncResult;
-use crate::{FerroObject, Ref};
+use crate::utilities::{SynchronousCompletionAsyncResult, SynchronousCompletionAsyncResultSource};
+use crate::data::core::ValueTypes;
+use crate::{BoxedValue, FerroObject, Ref};
 use std::ops::Deref;
 use std::rc::Rc;
 
@@ -23,8 +24,75 @@ impl std::fmt::Display for NameScopeError {
 
 impl std::error::Error for NameScopeError {}
 
+/// Why a value could not be registered in a name scope
+/// ([`INameScope::try_register_value`]): the errors of [`NameScopeError`] and
+/// the ones only a value can have.
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub enum NameScopeValueError {
+    /// The name scope is completed: no further registrations are allowed.
+    Completed,
+    /// Another value is registered with the name.
+    DuplicateName(String),
+    /// A custom scope that only implements the registration of objects of the
+    /// object model was given another value.
+    UnsupportedValue,
+    /// The value is null (a boxed nullable that holds no value).
+    NullValue,
+}
+
+impl std::fmt::Display for NameScopeValueError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Self::Completed => NameScopeError::Completed.fmt(f),
+            Self::DuplicateName(name) => NameScopeError::DuplicateName(name.clone()).fmt(f),
+            Self::NullValue => f.write_str("Value cannot be null. (Parameter 'element')"),
+            Self::UnsupportedValue => f.write_str("This custom name scope only supports native objects."),
+        }
+    }
+}
+
+impl std::error::Error for NameScopeValueError {}
+
+impl From<NameScopeError> for NameScopeValueError {
+    fn from(error: NameScopeError) -> Self {
+        match error {
+            NameScopeError::Completed => Self::Completed,
+            NameScopeError::DuplicateName(name) => Self::DuplicateName(name),
+        }
+    }
+}
+
 /// Defines a name scope.
 pub trait INameScope {
+    /// Registers any non-null object, retaining its identity. The value form
+    /// corresponds to the managed `object` parameter. Existing native-only
+    /// custom scopes can override this method to accept plain objects too.
+    fn try_register_value(&self, name: &str, value: BoxedValue) -> Result<(), NameScopeValueError> {
+        if self.is_completed() {
+            return Err(NameScopeValueError::Completed);
+        }
+        let value = ValueTypes::normalize(value).ok_or(NameScopeValueError::NullValue)?;
+        let element = ValueTypes::as_object(&*value).ok_or(NameScopeValueError::UnsupportedValue)?;
+        Ok(self.try_register(name, element)?)
+    }
+
+    /// Registers any object; panics on the same errors as `try_register_value`.
+    fn register_value(&self, name: &str, value: BoxedValue) {
+        if let Err(error) = self.try_register_value(name, value) {
+            panic!("{error}");
+        }
+    }
+
+    /// Finds any named object immediately, without traversing incomplete scopes.
+    fn find_value(&self, name: &str) -> Option<BoxedValue> {
+        self.find(name).map(|element| Rc::new(element) as BoxedValue)
+    }
+
+    /// Finds any named object, completing synchronously on registration or completion.
+    fn find_value_async(&self, name: &str) -> SynchronousCompletionAsyncResult<Option<BoxedValue>> {
+        map_result(self.find_async(name), |element| element.map(|element| Rc::new(element) as BoxedValue))
+    }
+
     /// Registers an element in the name scope. Panics if the scope is
     /// completed or another element is registered with the name: see
     /// [`try_register`](Self::try_register) for the form that reports these
@@ -68,6 +136,21 @@ pub trait INameScope {
     /// The scope is no longer the value of the attached `NameScope`
     /// property of `owner`: it holds the element as every other again.
     fn detached_from(&self, _owner: &Ref<FerroObject>) {}
+}
+
+/// Projects a result without holding a scope borrow across synchronous callbacks.
+pub(crate) fn map_result<T: Clone + 'static, U: Clone + 'static>(
+    result: SynchronousCompletionAsyncResult<T>,
+    map: impl FnOnce(T) -> U + 'static,
+) -> SynchronousCompletionAsyncResult<U> {
+    if result.is_completed() {
+        return SynchronousCompletionAsyncResult::new(map(result.get_result()));
+    }
+    let source = SynchronousCompletionAsyncResultSource::new();
+    let output = source.async_result();
+    let pending = result.clone();
+    result.on_completed(move || source.set_result(map(pending.get_result())));
+    output
 }
 
 /// A shared handle to a name scope, compared by identity so that it can be a
