@@ -1,0 +1,4 @@
+# Control theme documents that are embedded but not merged by MacOSControls.xaml yet:
+# `<file> | <what is missing>` per line (docs/porting/winui-theme.md, section 7). A document
+# listed here is not compiled into the theme; remove its line and add its include to
+# MacOSControls.xaml when it is ready. The tests of the crate load it on its own.

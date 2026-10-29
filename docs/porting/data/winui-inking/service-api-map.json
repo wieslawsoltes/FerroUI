@@ -1,0 +1,2222 @@
+{
+  "schema_version": 1,
+  "commit": "7e4b0c2096be402f51cc8f7d203ebf67cff183d0",
+  "scope": "All public methods in the Windows 0.62.2 Rust projection for the twelve explicitly listed external classes. Getters/setters count separately. The control_role distinguishes methods directly invoked by the pinned WinUI source from additional public dependency APIs, portable engine support, and optional extensions. This is not the entire Windows.UI.Input.Inking namespace.",
+  "projection": {
+    "repository": "microsoft/windows-rs",
+    "commit": "32c3144490c016fe496a0aed769bce60987a2e9d",
+    "crate": "windows",
+    "version": "0.62.2",
+    "path": "crates/libs/windows/src/Windows/UI/Input/Inking/mod.rs",
+    "sha256": "d17cd5a203eb1cdf0f777b8fe100333dca54c9340ef572e5259d0b9d415206b7",
+    "contract_snapshot": "docs/porting/data/winui-inking/upstream/windows-0.62.2-inking-services.txt",
+    "contract_sha256": "358cd1f51721ad240af28f80d4a3a825c757eb1fd3d87c8f1dc716f3184e974c"
+  },
+  "classes": [
+    "InkPoint",
+    "InkDrawingAttributes",
+    "InkDrawingAttributesPencilProperties",
+    "InkModelerAttributes",
+    "InkStroke",
+    "InkStrokeRenderingSegment",
+    "InkStrokeBuilder",
+    "InkStrokeContainer",
+    "InkPresenterRuler",
+    "InkPresenterProtractor",
+    "InkRecognizerContainer",
+    "InkRecognitionResult"
+  ],
+  "outside_scope": [
+    "InkManager legacy independent input engine",
+    "InkAnalyzer and its analysis graph",
+    "CoreInkIndependentInputSource hardware scheduling",
+    "InkDesktopHost/DirectComposition compositor implementation"
+  ],
+  "members": [
+    {
+      "id": "InkPoint.Position",
+      "type": "InkPoint",
+      "name": "Position",
+      "projection_signature": "pub fn Position(&self) -> windows_core::Result<super::super::super::Foundation::Point>",
+      "status": "adapted",
+      "rust_files": [
+        "src/FerroUI.Controls.Inking/ink_point.rs"
+      ],
+      "symbols": [
+        "position"
+      ],
+      "notes": "Windows Runtime member is represented by the mapped portable Rust value/property/method; OS renderer conformance is separately recorded.",
+      "control_role": "portable_engine_support",
+      "upstream_references": []
+    },
+    {
+      "id": "InkPoint.Pressure",
+      "type": "InkPoint",
+      "name": "Pressure",
+      "projection_signature": "pub fn Pressure(&self) -> windows_core::Result<f32>",
+      "status": "adapted",
+      "rust_files": [
+        "src/FerroUI.Controls.Inking/ink_point.rs"
+      ],
+      "symbols": [
+        "pressure"
+      ],
+      "notes": "Windows Runtime member is represented by the mapped portable Rust value/property/method; OS renderer conformance is separately recorded.",
+      "control_role": "portable_engine_support",
+      "upstream_references": []
+    },
+    {
+      "id": "InkPoint.TiltX",
+      "type": "InkPoint",
+      "name": "TiltX",
+      "projection_signature": "pub fn TiltX(&self) -> windows_core::Result<f32>",
+      "status": "adapted",
+      "rust_files": [
+        "src/FerroUI.Controls.Inking/ink_point.rs"
+      ],
+      "symbols": [
+        "tilt_x"
+      ],
+      "notes": "Windows Runtime member is represented by the mapped portable Rust value/property/method; OS renderer conformance is separately recorded.",
+      "control_role": "portable_engine_support",
+      "upstream_references": []
+    },
+    {
+      "id": "InkPoint.TiltY",
+      "type": "InkPoint",
+      "name": "TiltY",
+      "projection_signature": "pub fn TiltY(&self) -> windows_core::Result<f32>",
+      "status": "adapted",
+      "rust_files": [
+        "src/FerroUI.Controls.Inking/ink_point.rs"
+      ],
+      "symbols": [
+        "tilt_y"
+      ],
+      "notes": "Windows Runtime member is represented by the mapped portable Rust value/property/method; OS renderer conformance is separately recorded.",
+      "control_role": "portable_engine_support",
+      "upstream_references": []
+    },
+    {
+      "id": "InkPoint.Timestamp",
+      "type": "InkPoint",
+      "name": "Timestamp",
+      "projection_signature": "pub fn Timestamp(&self) -> windows_core::Result<u64>",
+      "status": "adapted",
+      "rust_files": [
+        "src/FerroUI.Controls.Inking/ink_point.rs"
+      ],
+      "symbols": [
+        "timestamp"
+      ],
+      "notes": "Windows Runtime member is represented by the mapped portable Rust value/property/method; OS renderer conformance is separately recorded.",
+      "control_role": "portable_engine_support",
+      "upstream_references": []
+    },
+    {
+      "id": "InkPoint.CreateInkPoint",
+      "type": "InkPoint",
+      "name": "CreateInkPoint",
+      "projection_signature": "pub fn CreateInkPoint(position: super::super::super::Foundation::Point, pressure: f32) -> windows_core::Result<InkPoint>",
+      "status": "adapted",
+      "rust_files": [
+        "src/FerroUI.Controls.Inking/ink_point.rs"
+      ],
+      "symbols": [
+        "new"
+      ],
+      "notes": "Validated two-field constructor supplies default tilt/twist/time values.",
+      "control_role": "portable_engine_support",
+      "upstream_references": []
+    },
+    {
+      "id": "InkPoint.CreateInkPointWithTiltAndTimestamp",
+      "type": "InkPoint",
+      "name": "CreateInkPointWithTiltAndTimestamp",
+      "projection_signature": "pub fn CreateInkPointWithTiltAndTimestamp(position: super::super::super::Foundation::Point, pressure: f32, tiltx: f32, tilty: f32, timestamp: u64) -> windows_core::Result<InkPoint>",
+      "status": "adapted",
+      "rust_files": [
+        "src/FerroUI.Controls.Inking/ink_point.rs"
+      ],
+      "symbols": [
+        "validate"
+      ],
+      "notes": "Construct an InkPoint value with position/pressure/tilt/timestamp fields and validate it; twist is a FerroUI extension absent from the WinRT InkPoint.",
+      "control_role": "portable_engine_support",
+      "upstream_references": []
+    },
+    {
+      "id": "InkDrawingAttributes.new",
+      "type": "InkDrawingAttributes",
+      "name": "new",
+      "projection_signature": "pub fn new() -> windows_core::Result<Self>",
+      "status": "adapted",
+      "rust_files": [
+        "src/FerroUI.Controls.Inking/ink_drawing_attributes.rs"
+      ],
+      "symbols": [
+        "new"
+      ],
+      "notes": "Windows Runtime member is represented by the mapped portable Rust value/property/method; OS renderer conformance is separately recorded.",
+      "control_role": "required_by_controls",
+      "upstream_references": [
+        "controls/dev/InkCanvas/InkPresenter.cpp",
+        "controls/dev/InkToolbar/InkToolbar.cpp"
+      ]
+    },
+    {
+      "id": "InkDrawingAttributes.Color",
+      "type": "InkDrawingAttributes",
+      "name": "Color",
+      "projection_signature": "pub fn Color(&self) -> windows_core::Result<super::super::Color>",
+      "status": "adapted",
+      "rust_files": [
+        "src/FerroUI.Controls.Inking/ink_drawing_attributes.rs"
+      ],
+      "symbols": [
+        "color"
+      ],
+      "notes": "Windows Runtime member is represented by the mapped portable Rust value/property/method; OS renderer conformance is separately recorded.",
+      "control_role": "required_by_controls",
+      "upstream_references": [
+        "controls/dev/InkCanvas/InkPresenter.cpp",
+        "controls/dev/InkToolbar/InkToolbar.cpp"
+      ]
+    },
+    {
+      "id": "InkDrawingAttributes.SetColor",
+      "type": "InkDrawingAttributes",
+      "name": "SetColor",
+      "projection_signature": "pub fn SetColor(&self, value: super::super::Color) -> windows_core::Result<()>",
+      "status": "adapted",
+      "rust_files": [
+        "src/FerroUI.Controls.Inking/ink_drawing_attributes.rs"
+      ],
+      "symbols": [
+        "color"
+      ],
+      "notes": "Public value field replaces the mutable WinRT property setter; validate before passing attributes to a stroke/presenter.",
+      "control_role": "required_by_controls",
+      "upstream_references": [
+        "controls/dev/InkCanvas/InkPresenter.cpp",
+        "controls/dev/InkToolbar/InkToolbar.cpp"
+      ]
+    },
+    {
+      "id": "InkDrawingAttributes.PenTip",
+      "type": "InkDrawingAttributes",
+      "name": "PenTip",
+      "projection_signature": "pub fn PenTip(&self) -> windows_core::Result<PenTipShape>",
+      "status": "adapted",
+      "rust_files": [
+        "src/FerroUI.Controls.Inking/ink_drawing_attributes.rs"
+      ],
+      "symbols": [
+        "pen_tip"
+      ],
+      "notes": "Windows Runtime member is represented by the mapped portable Rust value/property/method; OS renderer conformance is separately recorded.",
+      "control_role": "required_by_controls",
+      "upstream_references": [
+        "controls/dev/InkCanvas/InkPresenter.cpp",
+        "controls/dev/InkToolbar/InkToolbar.cpp"
+      ]
+    },
+    {
+      "id": "InkDrawingAttributes.SetPenTip",
+      "type": "InkDrawingAttributes",
+      "name": "SetPenTip",
+      "projection_signature": "pub fn SetPenTip(&self, value: PenTipShape) -> windows_core::Result<()>",
+      "status": "adapted",
+      "rust_files": [
+        "src/FerroUI.Controls.Inking/ink_drawing_attributes.rs"
+      ],
+      "symbols": [
+        "pen_tip"
+      ],
+      "notes": "Public value field replaces the mutable WinRT property setter; validate before passing attributes to a stroke/presenter.",
+      "control_role": "required_by_controls",
+      "upstream_references": [
+        "controls/dev/InkCanvas/InkPresenter.cpp",
+        "controls/dev/InkToolbar/InkToolbar.cpp"
+      ]
+    },
+    {
+      "id": "InkDrawingAttributes.Size",
+      "type": "InkDrawingAttributes",
+      "name": "Size",
+      "projection_signature": "pub fn Size(&self) -> windows_core::Result<super::super::super::Foundation::Size>",
+      "status": "adapted",
+      "rust_files": [
+        "src/FerroUI.Controls.Inking/ink_drawing_attributes.rs"
+      ],
+      "symbols": [
+        "size"
+      ],
+      "notes": "Windows Runtime member is represented by the mapped portable Rust value/property/method; OS renderer conformance is separately recorded.",
+      "control_role": "required_by_controls",
+      "upstream_references": [
+        "controls/dev/InkCanvas/InkPresenter.cpp",
+        "controls/dev/InkToolbar/InkToolbar.cpp"
+      ]
+    },
+    {
+      "id": "InkDrawingAttributes.SetSize",
+      "type": "InkDrawingAttributes",
+      "name": "SetSize",
+      "projection_signature": "pub fn SetSize(&self, value: super::super::super::Foundation::Size) -> windows_core::Result<()>",
+      "status": "adapted",
+      "rust_files": [
+        "src/FerroUI.Controls.Inking/ink_drawing_attributes.rs"
+      ],
+      "symbols": [
+        "size"
+      ],
+      "notes": "Public value field replaces the mutable WinRT property setter; validate before passing attributes to a stroke/presenter.",
+      "control_role": "required_by_controls",
+      "upstream_references": [
+        "controls/dev/InkCanvas/InkPresenter.cpp",
+        "controls/dev/InkToolbar/InkToolbar.cpp"
+      ]
+    },
+    {
+      "id": "InkDrawingAttributes.IgnorePressure",
+      "type": "InkDrawingAttributes",
+      "name": "IgnorePressure",
+      "projection_signature": "pub fn IgnorePressure(&self) -> windows_core::Result<bool>",
+      "status": "adapted",
+      "rust_files": [
+        "src/FerroUI.Controls.Inking/ink_drawing_attributes.rs"
+      ],
+      "symbols": [
+        "ignore_pressure"
+      ],
+      "notes": "Windows Runtime member is represented by the mapped portable Rust value/property/method; OS renderer conformance is separately recorded.",
+      "control_role": "required_by_controls",
+      "upstream_references": [
+        "controls/dev/InkCanvas/InkPresenter.cpp",
+        "controls/dev/InkToolbar/InkToolbar.cpp"
+      ]
+    },
+    {
+      "id": "InkDrawingAttributes.SetIgnorePressure",
+      "type": "InkDrawingAttributes",
+      "name": "SetIgnorePressure",
+      "projection_signature": "pub fn SetIgnorePressure(&self, value: bool) -> windows_core::Result<()>",
+      "status": "adapted",
+      "rust_files": [
+        "src/FerroUI.Controls.Inking/ink_drawing_attributes.rs"
+      ],
+      "symbols": [
+        "ignore_pressure"
+      ],
+      "notes": "Public value field replaces the mutable WinRT property setter; validate before passing attributes to a stroke/presenter.",
+      "control_role": "required_by_controls",
+      "upstream_references": [
+        "controls/dev/InkCanvas/InkPresenter.cpp",
+        "controls/dev/InkToolbar/InkToolbar.cpp"
+      ]
+    },
+    {
+      "id": "InkDrawingAttributes.FitToCurve",
+      "type": "InkDrawingAttributes",
+      "name": "FitToCurve",
+      "projection_signature": "pub fn FitToCurve(&self) -> windows_core::Result<bool>",
+      "status": "adapted",
+      "rust_files": [
+        "src/FerroUI.Controls.Inking/ink_drawing_attributes.rs"
+      ],
+      "symbols": [
+        "fit_to_curve"
+      ],
+      "notes": "Windows Runtime member is represented by the mapped portable Rust value/property/method; OS renderer conformance is separately recorded.",
+      "control_role": "required_by_controls",
+      "upstream_references": [
+        "controls/dev/InkCanvas/InkPresenter.cpp",
+        "controls/dev/InkToolbar/InkToolbar.cpp"
+      ]
+    },
+    {
+      "id": "InkDrawingAttributes.SetFitToCurve",
+      "type": "InkDrawingAttributes",
+      "name": "SetFitToCurve",
+      "projection_signature": "pub fn SetFitToCurve(&self, value: bool) -> windows_core::Result<()>",
+      "status": "adapted",
+      "rust_files": [
+        "src/FerroUI.Controls.Inking/ink_drawing_attributes.rs"
+      ],
+      "symbols": [
+        "fit_to_curve"
+      ],
+      "notes": "Public value field replaces the mutable WinRT property setter; validate before passing attributes to a stroke/presenter.",
+      "control_role": "required_by_controls",
+      "upstream_references": [
+        "controls/dev/InkCanvas/InkPresenter.cpp",
+        "controls/dev/InkToolbar/InkToolbar.cpp"
+      ]
+    },
+    {
+      "id": "InkDrawingAttributes.PenTipTransform",
+      "type": "InkDrawingAttributes",
+      "name": "PenTipTransform",
+      "projection_signature": "pub fn PenTipTransform(&self) -> windows_core::Result<windows_numerics::Matrix3x2>",
+      "status": "adapted",
+      "rust_files": [
+        "src/FerroUI.Controls.Inking/ink_drawing_attributes.rs"
+      ],
+      "symbols": [
+        "pen_tip_transform"
+      ],
+      "notes": "Windows Runtime member is represented by the mapped portable Rust value/property/method; OS renderer conformance is separately recorded.",
+      "control_role": "required_by_controls",
+      "upstream_references": [
+        "controls/dev/InkCanvas/InkPresenter.cpp",
+        "controls/dev/InkToolbar/InkToolbar.cpp"
+      ]
+    },
+    {
+      "id": "InkDrawingAttributes.SetPenTipTransform",
+      "type": "InkDrawingAttributes",
+      "name": "SetPenTipTransform",
+      "projection_signature": "pub fn SetPenTipTransform(&self, value: windows_numerics::Matrix3x2) -> windows_core::Result<()>",
+      "status": "adapted",
+      "rust_files": [
+        "src/FerroUI.Controls.Inking/ink_drawing_attributes.rs"
+      ],
+      "symbols": [
+        "pen_tip_transform"
+      ],
+      "notes": "Public value field replaces the mutable WinRT property setter; validate before passing attributes to a stroke/presenter.",
+      "control_role": "required_by_controls",
+      "upstream_references": [
+        "controls/dev/InkCanvas/InkPresenter.cpp",
+        "controls/dev/InkToolbar/InkToolbar.cpp"
+      ]
+    },
+    {
+      "id": "InkDrawingAttributes.DrawAsHighlighter",
+      "type": "InkDrawingAttributes",
+      "name": "DrawAsHighlighter",
+      "projection_signature": "pub fn DrawAsHighlighter(&self) -> windows_core::Result<bool>",
+      "status": "adapted",
+      "rust_files": [
+        "src/FerroUI.Controls.Inking/ink_drawing_attributes.rs"
+      ],
+      "symbols": [
+        "draw_as_highlighter"
+      ],
+      "notes": "Windows Runtime member is represented by the mapped portable Rust value/property/method; OS renderer conformance is separately recorded.",
+      "control_role": "required_by_controls",
+      "upstream_references": [
+        "controls/dev/InkCanvas/InkPresenter.cpp",
+        "controls/dev/InkToolbar/InkToolbar.cpp"
+      ]
+    },
+    {
+      "id": "InkDrawingAttributes.SetDrawAsHighlighter",
+      "type": "InkDrawingAttributes",
+      "name": "SetDrawAsHighlighter",
+      "projection_signature": "pub fn SetDrawAsHighlighter(&self, value: bool) -> windows_core::Result<()>",
+      "status": "adapted",
+      "rust_files": [
+        "src/FerroUI.Controls.Inking/ink_drawing_attributes.rs"
+      ],
+      "symbols": [
+        "draw_as_highlighter"
+      ],
+      "notes": "Public value field replaces the mutable WinRT property setter; validate before passing attributes to a stroke/presenter.",
+      "control_role": "required_by_controls",
+      "upstream_references": [
+        "controls/dev/InkCanvas/InkPresenter.cpp",
+        "controls/dev/InkToolbar/InkToolbar.cpp"
+      ]
+    },
+    {
+      "id": "InkDrawingAttributes.Kind",
+      "type": "InkDrawingAttributes",
+      "name": "Kind",
+      "projection_signature": "pub fn Kind(&self) -> windows_core::Result<InkDrawingAttributesKind>",
+      "status": "adapted",
+      "rust_files": [
+        "src/FerroUI.Controls.Inking/ink_drawing_attributes.rs"
+      ],
+      "symbols": [
+        "kind"
+      ],
+      "notes": "Windows Runtime member is represented by the mapped portable Rust value/property/method; OS renderer conformance is separately recorded.",
+      "control_role": "returned_service_api",
+      "upstream_references": []
+    },
+    {
+      "id": "InkDrawingAttributes.PencilProperties",
+      "type": "InkDrawingAttributes",
+      "name": "PencilProperties",
+      "projection_signature": "pub fn PencilProperties(&self) -> windows_core::Result<InkDrawingAttributesPencilProperties>",
+      "status": "adapted",
+      "rust_files": [
+        "src/FerroUI.Controls.Inking/ink_drawing_attributes.rs"
+      ],
+      "symbols": [
+        "pencil_opacity"
+      ],
+      "notes": "PencilProperties.Opacity is stored directly in the copyable attributes value as pencil_opacity.",
+      "control_role": "returned_service_api",
+      "upstream_references": []
+    },
+    {
+      "id": "InkDrawingAttributes.IgnoreTilt",
+      "type": "InkDrawingAttributes",
+      "name": "IgnoreTilt",
+      "projection_signature": "pub fn IgnoreTilt(&self) -> windows_core::Result<bool>",
+      "status": "adapted",
+      "rust_files": [
+        "src/FerroUI.Controls.Inking/ink_drawing_attributes.rs"
+      ],
+      "symbols": [
+        "ignore_tilt"
+      ],
+      "notes": "Windows Runtime member is represented by the mapped portable Rust value/property/method; OS renderer conformance is separately recorded.",
+      "control_role": "returned_service_api",
+      "upstream_references": []
+    },
+    {
+      "id": "InkDrawingAttributes.SetIgnoreTilt",
+      "type": "InkDrawingAttributes",
+      "name": "SetIgnoreTilt",
+      "projection_signature": "pub fn SetIgnoreTilt(&self, value: bool) -> windows_core::Result<()>",
+      "status": "adapted",
+      "rust_files": [
+        "src/FerroUI.Controls.Inking/ink_drawing_attributes.rs"
+      ],
+      "symbols": [
+        "ignore_tilt"
+      ],
+      "notes": "Public value field replaces the mutable WinRT property setter; validate before passing attributes to a stroke/presenter.",
+      "control_role": "returned_service_api",
+      "upstream_references": []
+    },
+    {
+      "id": "InkDrawingAttributes.ModelerAttributes",
+      "type": "InkDrawingAttributes",
+      "name": "ModelerAttributes",
+      "projection_signature": "pub fn ModelerAttributes(&self) -> windows_core::Result<InkModelerAttributes>",
+      "status": "not_ported",
+      "rust_files": [],
+      "symbols": [],
+      "notes": "No portable InkModelerAttributes API. OS prediction time, modeler scaling and synthesized velocity pressure are not reproduced by bounded Hermite smoothing.",
+      "control_role": "returned_service_api",
+      "upstream_references": []
+    },
+    {
+      "id": "InkDrawingAttributes.CreateForPencil",
+      "type": "InkDrawingAttributes",
+      "name": "CreateForPencil",
+      "projection_signature": "pub fn CreateForPencil() -> windows_core::Result<InkDrawingAttributes>",
+      "status": "adapted",
+      "rust_files": [
+        "src/FerroUI.Controls.Inking/ink_drawing_attributes.rs"
+      ],
+      "symbols": [
+        "create_for_pencil"
+      ],
+      "notes": "Windows Runtime member is represented by the mapped portable Rust value/property/method; OS renderer conformance is separately recorded.",
+      "control_role": "required_by_controls",
+      "upstream_references": [
+        "controls/dev/InkToolbar/InkToolbar.cpp",
+        "controls/dev/InkToolbar/InkToolbarPencilButton.h"
+      ]
+    },
+    {
+      "id": "InkDrawingAttributesPencilProperties.Opacity",
+      "type": "InkDrawingAttributesPencilProperties",
+      "name": "Opacity",
+      "projection_signature": "pub fn Opacity(&self) -> windows_core::Result<f64>",
+      "status": "adapted",
+      "rust_files": [
+        "src/FerroUI.Controls.Inking/ink_drawing_attributes.rs"
+      ],
+      "symbols": [
+        "pencil_opacity"
+      ],
+      "notes": "Opacity getter/setter maps to the validated pencil_opacity scalar on InkDrawingAttributes.",
+      "control_role": "returned_service_api",
+      "upstream_references": []
+    },
+    {
+      "id": "InkDrawingAttributesPencilProperties.SetOpacity",
+      "type": "InkDrawingAttributesPencilProperties",
+      "name": "SetOpacity",
+      "projection_signature": "pub fn SetOpacity(&self, value: f64) -> windows_core::Result<()>",
+      "status": "adapted",
+      "rust_files": [
+        "src/FerroUI.Controls.Inking/ink_drawing_attributes.rs"
+      ],
+      "symbols": [
+        "pencil_opacity"
+      ],
+      "notes": "Opacity getter/setter maps to the validated pencil_opacity scalar on InkDrawingAttributes.",
+      "control_role": "returned_service_api",
+      "upstream_references": []
+    },
+    {
+      "id": "InkModelerAttributes.PredictionTime",
+      "type": "InkModelerAttributes",
+      "name": "PredictionTime",
+      "projection_signature": "pub fn PredictionTime(&self) -> windows_core::Result<super::super::super::Foundation::TimeSpan>",
+      "status": "not_ported",
+      "rust_files": [],
+      "symbols": [],
+      "notes": "The Windows modeler configuration and its predictive/velocity behavior have no equivalent API in the portable engine.",
+      "control_role": "optional_extension",
+      "upstream_references": []
+    },
+    {
+      "id": "InkModelerAttributes.SetPredictionTime",
+      "type": "InkModelerAttributes",
+      "name": "SetPredictionTime",
+      "projection_signature": "pub fn SetPredictionTime(&self, value: super::super::super::Foundation::TimeSpan) -> windows_core::Result<()>",
+      "status": "not_ported",
+      "rust_files": [],
+      "symbols": [],
+      "notes": "The Windows modeler configuration and its predictive/velocity behavior have no equivalent API in the portable engine.",
+      "control_role": "optional_extension",
+      "upstream_references": []
+    },
+    {
+      "id": "InkModelerAttributes.ScalingFactor",
+      "type": "InkModelerAttributes",
+      "name": "ScalingFactor",
+      "projection_signature": "pub fn ScalingFactor(&self) -> windows_core::Result<f32>",
+      "status": "not_ported",
+      "rust_files": [],
+      "symbols": [],
+      "notes": "The Windows modeler configuration and its predictive/velocity behavior have no equivalent API in the portable engine.",
+      "control_role": "optional_extension",
+      "upstream_references": []
+    },
+    {
+      "id": "InkModelerAttributes.SetScalingFactor",
+      "type": "InkModelerAttributes",
+      "name": "SetScalingFactor",
+      "projection_signature": "pub fn SetScalingFactor(&self, value: f32) -> windows_core::Result<()>",
+      "status": "not_ported",
+      "rust_files": [],
+      "symbols": [],
+      "notes": "The Windows modeler configuration and its predictive/velocity behavior have no equivalent API in the portable engine.",
+      "control_role": "optional_extension",
+      "upstream_references": []
+    },
+    {
+      "id": "InkModelerAttributes.UseVelocityBasedPressure",
+      "type": "InkModelerAttributes",
+      "name": "UseVelocityBasedPressure",
+      "projection_signature": "pub fn UseVelocityBasedPressure(&self) -> windows_core::Result<bool>",
+      "status": "not_ported",
+      "rust_files": [],
+      "symbols": [],
+      "notes": "The Windows modeler configuration and its predictive/velocity behavior have no equivalent API in the portable engine.",
+      "control_role": "optional_extension",
+      "upstream_references": []
+    },
+    {
+      "id": "InkModelerAttributes.SetUseVelocityBasedPressure",
+      "type": "InkModelerAttributes",
+      "name": "SetUseVelocityBasedPressure",
+      "projection_signature": "pub fn SetUseVelocityBasedPressure(&self, value: bool) -> windows_core::Result<()>",
+      "status": "not_ported",
+      "rust_files": [],
+      "symbols": [],
+      "notes": "The Windows modeler configuration and its predictive/velocity behavior have no equivalent API in the portable engine.",
+      "control_role": "optional_extension",
+      "upstream_references": []
+    },
+    {
+      "id": "InkStroke.DrawingAttributes",
+      "type": "InkStroke",
+      "name": "DrawingAttributes",
+      "projection_signature": "pub fn DrawingAttributes(&self) -> windows_core::Result<InkDrawingAttributes>",
+      "status": "adapted",
+      "rust_files": [
+        "src/FerroUI.Controls.Inking/ink_stroke.rs"
+      ],
+      "symbols": [
+        "drawing_attributes"
+      ],
+      "notes": "Windows Runtime member is represented by the mapped portable Rust value/property/method; OS renderer conformance is separately recorded.",
+      "control_role": "returned_service_api",
+      "upstream_references": []
+    },
+    {
+      "id": "InkStroke.SetDrawingAttributes",
+      "type": "InkStroke",
+      "name": "SetDrawingAttributes",
+      "projection_signature": "pub fn SetDrawingAttributes<P0>(&self, value: P0) -> windows_core::Result<()>",
+      "status": "adapted",
+      "rust_files": [
+        "src/FerroUI.Controls.Inking/ink_stroke.rs"
+      ],
+      "symbols": [
+        "set_drawing_attributes"
+      ],
+      "notes": "Windows Runtime member is represented by the mapped portable Rust value/property/method; OS renderer conformance is separately recorded.",
+      "control_role": "returned_service_api",
+      "upstream_references": []
+    },
+    {
+      "id": "InkStroke.BoundingRect",
+      "type": "InkStroke",
+      "name": "BoundingRect",
+      "projection_signature": "pub fn BoundingRect(&self) -> windows_core::Result<super::super::super::Foundation::Rect>",
+      "status": "adapted",
+      "rust_files": [
+        "src/FerroUI.Controls.Inking/ink_stroke.rs"
+      ],
+      "symbols": [
+        "bounding_rect"
+      ],
+      "notes": "Windows Runtime member is represented by the mapped portable Rust value/property/method; OS renderer conformance is separately recorded.",
+      "control_role": "returned_service_api",
+      "upstream_references": []
+    },
+    {
+      "id": "InkStroke.Selected",
+      "type": "InkStroke",
+      "name": "Selected",
+      "projection_signature": "pub fn Selected(&self) -> windows_core::Result<bool>",
+      "status": "adapted",
+      "rust_files": [
+        "src/FerroUI.Controls.Inking/ink_stroke.rs"
+      ],
+      "symbols": [
+        "selected"
+      ],
+      "notes": "Windows Runtime member is represented by the mapped portable Rust value/property/method; OS renderer conformance is separately recorded.",
+      "control_role": "returned_service_api",
+      "upstream_references": []
+    },
+    {
+      "id": "InkStroke.SetSelected",
+      "type": "InkStroke",
+      "name": "SetSelected",
+      "projection_signature": "pub fn SetSelected(&self, value: bool) -> windows_core::Result<()>",
+      "status": "adapted",
+      "rust_files": [
+        "src/FerroUI.Controls.Inking/ink_stroke.rs"
+      ],
+      "symbols": [
+        "set_selected"
+      ],
+      "notes": "Windows Runtime member is represented by the mapped portable Rust value/property/method; OS renderer conformance is separately recorded.",
+      "control_role": "returned_service_api",
+      "upstream_references": []
+    },
+    {
+      "id": "InkStroke.Recognized",
+      "type": "InkStroke",
+      "name": "Recognized",
+      "projection_signature": "pub fn Recognized(&self) -> windows_core::Result<bool>",
+      "status": "not_ported",
+      "rust_files": [],
+      "symbols": [],
+      "notes": "Native recognition is exposed as separate optional candidate results; the portable stroke has no recognized-state member.",
+      "control_role": "returned_service_api",
+      "upstream_references": []
+    },
+    {
+      "id": "InkStroke.GetRenderingSegments",
+      "type": "InkStroke",
+      "name": "GetRenderingSegments",
+      "projection_signature": "pub fn GetRenderingSegments(&self) -> windows_core::Result<windows_collections::IVectorView<InkStrokeRenderingSegment>>",
+      "status": "not_ported",
+      "rust_files": [],
+      "symbols": [],
+      "notes": "Portable rendering_points/outlines are not a port of Windows InkStrokeRenderingSegment/B\u00e9zier control-point semantics.",
+      "control_role": "returned_service_api",
+      "upstream_references": []
+    },
+    {
+      "id": "InkStroke.Clone",
+      "type": "InkStroke",
+      "name": "Clone",
+      "projection_signature": "pub fn Clone(&self) -> windows_core::Result<InkStroke>",
+      "status": "adapted",
+      "rust_files": [
+        "src/FerroUI.Controls.Inking/ink_stroke.rs"
+      ],
+      "symbols": [
+        "clone_stroke"
+      ],
+      "notes": "Clones samples/attributes/transform/selection into a newly allocated stroke identity.",
+      "control_role": "returned_service_api",
+      "upstream_references": []
+    },
+    {
+      "id": "InkStroke.PointTransform",
+      "type": "InkStroke",
+      "name": "PointTransform",
+      "projection_signature": "pub fn PointTransform(&self) -> windows_core::Result<windows_numerics::Matrix3x2>",
+      "status": "adapted",
+      "rust_files": [
+        "src/FerroUI.Controls.Inking/ink_stroke.rs"
+      ],
+      "symbols": [
+        "point_transform"
+      ],
+      "notes": "Windows Runtime member is represented by the mapped portable Rust value/property/method; OS renderer conformance is separately recorded.",
+      "control_role": "returned_service_api",
+      "upstream_references": []
+    },
+    {
+      "id": "InkStroke.SetPointTransform",
+      "type": "InkStroke",
+      "name": "SetPointTransform",
+      "projection_signature": "pub fn SetPointTransform(&self, value: windows_numerics::Matrix3x2) -> windows_core::Result<()>",
+      "status": "adapted",
+      "rust_files": [
+        "src/FerroUI.Controls.Inking/ink_stroke.rs"
+      ],
+      "symbols": [
+        "set_point_transform"
+      ],
+      "notes": "Windows Runtime member is represented by the mapped portable Rust value/property/method; OS renderer conformance is separately recorded.",
+      "control_role": "returned_service_api",
+      "upstream_references": []
+    },
+    {
+      "id": "InkStroke.GetInkPoints",
+      "type": "InkStroke",
+      "name": "GetInkPoints",
+      "projection_signature": "pub fn GetInkPoints(&self) -> windows_core::Result<windows_collections::IVectorView<InkPoint>>",
+      "status": "adapted",
+      "rust_files": [
+        "src/FerroUI.Controls.Inking/ink_stroke.rs"
+      ],
+      "symbols": [
+        "get_ink_points"
+      ],
+      "notes": "Windows Runtime member is represented by the mapped portable Rust value/property/method; OS renderer conformance is separately recorded.",
+      "control_role": "returned_service_api",
+      "upstream_references": []
+    },
+    {
+      "id": "InkStroke.Id",
+      "type": "InkStroke",
+      "name": "Id",
+      "projection_signature": "pub fn Id(&self) -> windows_core::Result<u32>",
+      "status": "adapted",
+      "rust_files": [
+        "src/FerroUI.Controls.Inking/ink_stroke.rs"
+      ],
+      "symbols": [
+        "id"
+      ],
+      "notes": "Windows Runtime member is represented by the mapped portable Rust value/property/method; OS renderer conformance is separately recorded.",
+      "control_role": "returned_service_api",
+      "upstream_references": []
+    },
+    {
+      "id": "InkStroke.StrokeStartedTime",
+      "type": "InkStroke",
+      "name": "StrokeStartedTime",
+      "projection_signature": "pub fn StrokeStartedTime(&self) -> windows_core::Result<super::super::super::Foundation::IReference<super::super::super::Foundation::DateTime>>",
+      "status": "not_ported",
+      "rust_files": [],
+      "symbols": [],
+      "notes": "No wall-clock DateTime field is stored on portable strokes; sample timestamps use microseconds on the input time base.",
+      "control_role": "returned_service_api",
+      "upstream_references": []
+    },
+    {
+      "id": "InkStroke.SetStrokeStartedTime",
+      "type": "InkStroke",
+      "name": "SetStrokeStartedTime",
+      "projection_signature": "pub fn SetStrokeStartedTime<P0>(&self, value: P0) -> windows_core::Result<()>",
+      "status": "not_ported",
+      "rust_files": [],
+      "symbols": [],
+      "notes": "No wall-clock DateTime field is stored on portable strokes; sample timestamps use microseconds on the input time base.",
+      "control_role": "returned_service_api",
+      "upstream_references": []
+    },
+    {
+      "id": "InkStroke.StrokeDuration",
+      "type": "InkStroke",
+      "name": "StrokeDuration",
+      "projection_signature": "pub fn StrokeDuration(&self) -> windows_core::Result<super::super::super::Foundation::IReference<super::super::super::Foundation::TimeSpan>>",
+      "status": "not_ported",
+      "rust_files": [],
+      "symbols": [],
+      "notes": "No independently editable TimeSpan duration member; raw sample timestamp differences are available.",
+      "control_role": "returned_service_api",
+      "upstream_references": []
+    },
+    {
+      "id": "InkStroke.SetStrokeDuration",
+      "type": "InkStroke",
+      "name": "SetStrokeDuration",
+      "projection_signature": "pub fn SetStrokeDuration<P0>(&self, value: P0) -> windows_core::Result<()>",
+      "status": "not_ported",
+      "rust_files": [],
+      "symbols": [],
+      "notes": "No independently editable TimeSpan duration member; raw sample timestamp differences are available.",
+      "control_role": "returned_service_api",
+      "upstream_references": []
+    },
+    {
+      "id": "InkStroke.PointerId",
+      "type": "InkStroke",
+      "name": "PointerId",
+      "projection_signature": "pub fn PointerId(&self) -> windows_core::Result<u32>",
+      "status": "not_ported",
+      "rust_files": [],
+      "symbols": [],
+      "notes": "Pointer identity is retained on input event arguments, but no PointerId field is retained on completed portable strokes. The pinned WinUI control implementations do not call this external property.",
+      "control_role": "returned_service_api",
+      "upstream_references": []
+    },
+    {
+      "id": "InkStrokeRenderingSegment.Position",
+      "type": "InkStrokeRenderingSegment",
+      "name": "Position",
+      "projection_signature": "pub fn Position(&self) -> windows_core::Result<super::super::super::Foundation::Point>",
+      "status": "not_ported",
+      "rust_files": [],
+      "symbols": [],
+      "notes": "No standalone Windows rendering-segment value API. The portable renderer exposes its own smoothed samples and polygon outlines instead.",
+      "control_role": "optional_extension",
+      "upstream_references": []
+    },
+    {
+      "id": "InkStrokeRenderingSegment.BezierControlPoint1",
+      "type": "InkStrokeRenderingSegment",
+      "name": "BezierControlPoint1",
+      "projection_signature": "pub fn BezierControlPoint1(&self) -> windows_core::Result<super::super::super::Foundation::Point>",
+      "status": "not_ported",
+      "rust_files": [],
+      "symbols": [],
+      "notes": "No standalone Windows rendering-segment value API. The portable renderer exposes its own smoothed samples and polygon outlines instead.",
+      "control_role": "optional_extension",
+      "upstream_references": []
+    },
+    {
+      "id": "InkStrokeRenderingSegment.BezierControlPoint2",
+      "type": "InkStrokeRenderingSegment",
+      "name": "BezierControlPoint2",
+      "projection_signature": "pub fn BezierControlPoint2(&self) -> windows_core::Result<super::super::super::Foundation::Point>",
+      "status": "not_ported",
+      "rust_files": [],
+      "symbols": [],
+      "notes": "No standalone Windows rendering-segment value API. The portable renderer exposes its own smoothed samples and polygon outlines instead.",
+      "control_role": "optional_extension",
+      "upstream_references": []
+    },
+    {
+      "id": "InkStrokeRenderingSegment.Pressure",
+      "type": "InkStrokeRenderingSegment",
+      "name": "Pressure",
+      "projection_signature": "pub fn Pressure(&self) -> windows_core::Result<f32>",
+      "status": "not_ported",
+      "rust_files": [],
+      "symbols": [],
+      "notes": "No standalone Windows rendering-segment value API. The portable renderer exposes its own smoothed samples and polygon outlines instead.",
+      "control_role": "optional_extension",
+      "upstream_references": []
+    },
+    {
+      "id": "InkStrokeRenderingSegment.TiltX",
+      "type": "InkStrokeRenderingSegment",
+      "name": "TiltX",
+      "projection_signature": "pub fn TiltX(&self) -> windows_core::Result<f32>",
+      "status": "not_ported",
+      "rust_files": [],
+      "symbols": [],
+      "notes": "No standalone Windows rendering-segment value API. The portable renderer exposes its own smoothed samples and polygon outlines instead.",
+      "control_role": "optional_extension",
+      "upstream_references": []
+    },
+    {
+      "id": "InkStrokeRenderingSegment.TiltY",
+      "type": "InkStrokeRenderingSegment",
+      "name": "TiltY",
+      "projection_signature": "pub fn TiltY(&self) -> windows_core::Result<f32>",
+      "status": "not_ported",
+      "rust_files": [],
+      "symbols": [],
+      "notes": "No standalone Windows rendering-segment value API. The portable renderer exposes its own smoothed samples and polygon outlines instead.",
+      "control_role": "optional_extension",
+      "upstream_references": []
+    },
+    {
+      "id": "InkStrokeRenderingSegment.Twist",
+      "type": "InkStrokeRenderingSegment",
+      "name": "Twist",
+      "projection_signature": "pub fn Twist(&self) -> windows_core::Result<f32>",
+      "status": "not_ported",
+      "rust_files": [],
+      "symbols": [],
+      "notes": "No standalone Windows rendering-segment value API. The portable renderer exposes its own smoothed samples and polygon outlines instead.",
+      "control_role": "optional_extension",
+      "upstream_references": []
+    },
+    {
+      "id": "InkStrokeBuilder.new",
+      "type": "InkStrokeBuilder",
+      "name": "new",
+      "projection_signature": "pub fn new() -> windows_core::Result<Self>",
+      "status": "adapted",
+      "rust_files": [
+        "src/FerroUI.Controls.Inking/ink_stroke_builder.rs"
+      ],
+      "symbols": [
+        "new"
+      ],
+      "notes": "Windows Runtime member is represented by the mapped portable Rust value/property/method; OS renderer conformance is separately recorded.",
+      "control_role": "portable_engine_support",
+      "upstream_references": []
+    },
+    {
+      "id": "InkStrokeBuilder.BeginStroke",
+      "type": "InkStrokeBuilder",
+      "name": "BeginStroke",
+      "projection_signature": "pub fn BeginStroke<P0>(&self, pointerpoint: P0) -> windows_core::Result<()>",
+      "status": "adapted",
+      "rust_files": [
+        "src/FerroUI.Controls.Inking/ink_stroke_builder.rs"
+      ],
+      "symbols": [
+        "begin_stroke"
+      ],
+      "notes": "Windows Runtime member is represented by the mapped portable Rust value/property/method; OS renderer conformance is separately recorded.",
+      "control_role": "portable_engine_support",
+      "upstream_references": []
+    },
+    {
+      "id": "InkStrokeBuilder.AppendToStroke",
+      "type": "InkStrokeBuilder",
+      "name": "AppendToStroke",
+      "projection_signature": "pub fn AppendToStroke<P0>(&self, pointerpoint: P0) -> windows_core::Result<super::PointerPoint>",
+      "status": "partial",
+      "rust_files": [
+        "src/FerroUI.Controls.Inking/ink_stroke_builder.rs"
+      ],
+      "symbols": [
+        "append_to_stroke"
+      ],
+      "notes": "Validated append and sample accumulation are implemented. Rust returns Result<()> rather than returning the OS PointerPoint/predicted point object.",
+      "control_role": "portable_engine_support",
+      "upstream_references": []
+    },
+    {
+      "id": "InkStrokeBuilder.EndStroke",
+      "type": "InkStrokeBuilder",
+      "name": "EndStroke",
+      "projection_signature": "pub fn EndStroke<P0>(&self, pointerpoint: P0) -> windows_core::Result<InkStroke>",
+      "status": "adapted",
+      "rust_files": [
+        "src/FerroUI.Controls.Inking/ink_stroke_builder.rs"
+      ],
+      "symbols": [
+        "end_stroke"
+      ],
+      "notes": "Windows Runtime member is represented by the mapped portable Rust value/property/method; OS renderer conformance is separately recorded.",
+      "control_role": "portable_engine_support",
+      "upstream_references": []
+    },
+    {
+      "id": "InkStrokeBuilder.CreateStroke",
+      "type": "InkStrokeBuilder",
+      "name": "CreateStroke",
+      "projection_signature": "pub fn CreateStroke<P0>(&self, points: P0) -> windows_core::Result<InkStroke>",
+      "status": "adapted",
+      "rust_files": [
+        "src/FerroUI.Controls.Inking/ink_stroke_builder.rs"
+      ],
+      "symbols": [
+        "create_stroke"
+      ],
+      "notes": "Windows Runtime member is represented by the mapped portable Rust value/property/method; OS renderer conformance is separately recorded.",
+      "control_role": "portable_engine_support",
+      "upstream_references": []
+    },
+    {
+      "id": "InkStrokeBuilder.SetDefaultDrawingAttributes",
+      "type": "InkStrokeBuilder",
+      "name": "SetDefaultDrawingAttributes",
+      "projection_signature": "pub fn SetDefaultDrawingAttributes<P0>(&self, drawingattributes: P0) -> windows_core::Result<()>",
+      "status": "adapted",
+      "rust_files": [
+        "src/FerroUI.Controls.Inking/ink_stroke_builder.rs"
+      ],
+      "symbols": [
+        "set_default_drawing_attributes"
+      ],
+      "notes": "Windows Runtime member is represented by the mapped portable Rust value/property/method; OS renderer conformance is separately recorded.",
+      "control_role": "portable_engine_support",
+      "upstream_references": []
+    },
+    {
+      "id": "InkStrokeBuilder.CreateStrokeFromInkPoints",
+      "type": "InkStrokeBuilder",
+      "name": "CreateStrokeFromInkPoints",
+      "projection_signature": "pub fn CreateStrokeFromInkPoints<P0>(&self, inkpoints: P0, transform: windows_numerics::Matrix3x2) -> windows_core::Result<InkStroke>",
+      "status": "adapted",
+      "rust_files": [
+        "src/FerroUI.Controls.Inking/ink_stroke_builder.rs"
+      ],
+      "symbols": [
+        "create_stroke_from_ink_points"
+      ],
+      "notes": "Windows Runtime member is represented by the mapped portable Rust value/property/method; OS renderer conformance is separately recorded.",
+      "control_role": "portable_engine_support",
+      "upstream_references": []
+    },
+    {
+      "id": "InkStrokeBuilder.CreateStrokeFromInkPoints2",
+      "type": "InkStrokeBuilder",
+      "name": "CreateStrokeFromInkPoints2",
+      "projection_signature": "pub fn CreateStrokeFromInkPoints2<P0, P2, P3>(&self, inkpoints: P0, transform: windows_numerics::Matrix3x2, strokestartedtime: P2, strokeduration: P3) -> windows_core::Result<InkStroke>",
+      "status": "partial",
+      "rust_files": [
+        "src/FerroUI.Controls.Inking/ink_stroke_builder.rs"
+      ],
+      "symbols": [
+        "create_stroke_from_ink_points"
+      ],
+      "notes": "Points and affine transform are supported; the OS overload wall-clock start time and independent duration have no portable fields.",
+      "control_role": "portable_engine_support",
+      "upstream_references": []
+    },
+    {
+      "id": "InkStrokeContainer.new",
+      "type": "InkStrokeContainer",
+      "name": "new",
+      "projection_signature": "pub fn new() -> windows_core::Result<Self>",
+      "status": "adapted",
+      "rust_files": [
+        "src/FerroUI.Controls.Inking/ink_stroke_container.rs"
+      ],
+      "symbols": [
+        "new"
+      ],
+      "notes": "Windows Runtime member is represented by the mapped portable Rust value/property/method; OS renderer conformance is separately recorded.",
+      "control_role": "returned_service_api",
+      "upstream_references": []
+    },
+    {
+      "id": "InkStrokeContainer.BoundingRect",
+      "type": "InkStrokeContainer",
+      "name": "BoundingRect",
+      "projection_signature": "pub fn BoundingRect(&self) -> windows_core::Result<super::super::super::Foundation::Rect>",
+      "status": "adapted",
+      "rust_files": [
+        "src/FerroUI.Controls.Inking/ink_stroke_container.rs"
+      ],
+      "symbols": [
+        "bounding_rect"
+      ],
+      "notes": "Windows Runtime member is represented by the mapped portable Rust value/property/method; OS renderer conformance is separately recorded.",
+      "control_role": "required_by_controls",
+      "upstream_references": [
+        "controls/dev/InkCanvas/InkPresenter.cpp"
+      ]
+    },
+    {
+      "id": "InkStrokeContainer.AddStroke",
+      "type": "InkStrokeContainer",
+      "name": "AddStroke",
+      "projection_signature": "pub fn AddStroke<P0>(&self, stroke: P0) -> windows_core::Result<()>",
+      "status": "adapted",
+      "rust_files": [
+        "src/FerroUI.Controls.Inking/ink_stroke_container.rs"
+      ],
+      "symbols": [
+        "add_stroke"
+      ],
+      "notes": "Windows Runtime member is represented by the mapped portable Rust value/property/method; OS renderer conformance is separately recorded.",
+      "control_role": "required_by_controls",
+      "upstream_references": [
+        "controls/dev/InkCanvas/InkPresenter.cpp"
+      ]
+    },
+    {
+      "id": "InkStrokeContainer.DeleteSelected",
+      "type": "InkStrokeContainer",
+      "name": "DeleteSelected",
+      "projection_signature": "pub fn DeleteSelected(&self) -> windows_core::Result<super::super::super::Foundation::Rect>",
+      "status": "adapted",
+      "rust_files": [
+        "src/FerroUI.Controls.Inking/ink_stroke_container.rs"
+      ],
+      "symbols": [
+        "delete_selected"
+      ],
+      "notes": "Windows Runtime member is represented by the mapped portable Rust value/property/method; OS renderer conformance is separately recorded.",
+      "control_role": "required_by_controls",
+      "upstream_references": [
+        "controls/dev/InkCanvas/InkPresenter.cpp"
+      ]
+    },
+    {
+      "id": "InkStrokeContainer.MoveSelected",
+      "type": "InkStrokeContainer",
+      "name": "MoveSelected",
+      "projection_signature": "pub fn MoveSelected(&self, translation: super::super::super::Foundation::Point) -> windows_core::Result<super::super::super::Foundation::Rect>",
+      "status": "adapted",
+      "rust_files": [
+        "src/FerroUI.Controls.Inking/ink_stroke_container.rs",
+        "src/FerroUI.Controls.Inking/windows_ink_services.rs"
+      ],
+      "symbols": [
+        "move_selected"
+      ],
+      "notes": "Selected stroke transforms are translated by a relative delta; unselected strokes remain unchanged. The Windows fixture native_move_selected_uses_relative_translation_like_portable_container confirms this contract in run 39602608194, resolving ambiguous Microsoft Learn destination wording.",
+      "control_role": "required_by_controls",
+      "upstream_references": [
+        "controls/dev/InkCanvas/InkPresenter.cpp"
+      ]
+    },
+    {
+      "id": "InkStrokeContainer.SelectWithPolyLine",
+      "type": "InkStrokeContainer",
+      "name": "SelectWithPolyLine",
+      "projection_signature": "pub fn SelectWithPolyLine<P0>(&self, polyline: P0) -> windows_core::Result<super::super::super::Foundation::Rect>",
+      "status": "adapted",
+      "rust_files": [
+        "src/FerroUI.Controls.Inking/ink_stroke_container.rs"
+      ],
+      "symbols": [
+        "select_with_poly_line"
+      ],
+      "notes": "Windows Runtime member is represented by the mapped portable Rust value/property/method; OS renderer conformance is separately recorded.",
+      "control_role": "required_by_controls",
+      "upstream_references": [
+        "controls/dev/InkCanvas/InkPresenter.cpp"
+      ]
+    },
+    {
+      "id": "InkStrokeContainer.SelectWithLine",
+      "type": "InkStrokeContainer",
+      "name": "SelectWithLine",
+      "projection_signature": "pub fn SelectWithLine(&self, from: super::super::super::Foundation::Point, to: super::super::super::Foundation::Point) -> windows_core::Result<super::super::super::Foundation::Rect>",
+      "status": "adapted",
+      "rust_files": [
+        "src/FerroUI.Controls.Inking/ink_stroke_container.rs"
+      ],
+      "symbols": [
+        "select_with_line"
+      ],
+      "notes": "Windows Runtime member is represented by the mapped portable Rust value/property/method; OS renderer conformance is separately recorded.",
+      "control_role": "required_by_controls",
+      "upstream_references": [
+        "controls/dev/InkCanvas/InkPresenter.cpp"
+      ]
+    },
+    {
+      "id": "InkStrokeContainer.CopySelectedToClipboard",
+      "type": "InkStrokeContainer",
+      "name": "CopySelectedToClipboard",
+      "projection_signature": "pub fn CopySelectedToClipboard(&self) -> windows_core::Result<()>",
+      "status": "adapted",
+      "rust_files": [
+        "src/FerroUI.Controls.Inking/ink_stroke_container.rs",
+        "src/FerroUI.Controls.Inking/windows_ink_services.rs"
+      ],
+      "symbols": [
+        "copy_selected_to_clipboard"
+      ],
+      "notes": "Real Windows CI run 39605086703/job119239093640 at 7fbffd0 passes the dedicated STA copy/can-paste/paste fixture, comparing native getter state, attributes, transformed samples and fresh IDs. The adapter preserves OS selection. The public FerroUI container deliberately selects newly pasted clones and clears the old selection, matching the published Learn contract and portable paste; the installed native reference instead retains old=true and returns new=false. STA is required and checked explicitly.",
+      "control_role": "required_by_controls",
+      "upstream_references": [
+        "controls/dev/InkCanvas/InkPresenter.cpp"
+      ]
+    },
+    {
+      "id": "InkStrokeContainer.PasteFromClipboard",
+      "type": "InkStrokeContainer",
+      "name": "PasteFromClipboard",
+      "projection_signature": "pub fn PasteFromClipboard(&self, position: super::super::super::Foundation::Point) -> windows_core::Result<super::super::super::Foundation::Rect>",
+      "status": "adapted",
+      "rust_files": [
+        "src/FerroUI.Controls.Inking/ink_stroke_container.rs",
+        "src/FerroUI.Controls.Inking/windows_ink_services.rs"
+      ],
+      "symbols": [
+        "paste_from_clipboard"
+      ],
+      "notes": "Real Windows CI run 39605086703/job119239093640 at 7fbffd0 passes the dedicated STA copy/can-paste/paste fixture, comparing native getter state, attributes, transformed samples and fresh IDs. The adapter preserves OS selection. The public FerroUI container deliberately selects newly pasted clones and clears the old selection, matching the published Learn contract and portable paste; the installed native reference instead retains old=true and returns new=false. STA is required and checked explicitly.",
+      "control_role": "required_by_controls",
+      "upstream_references": [
+        "controls/dev/InkCanvas/InkPresenter.cpp"
+      ]
+    },
+    {
+      "id": "InkStrokeContainer.CanPasteFromClipboard",
+      "type": "InkStrokeContainer",
+      "name": "CanPasteFromClipboard",
+      "projection_signature": "pub fn CanPasteFromClipboard(&self) -> windows_core::Result<bool>",
+      "status": "adapted",
+      "rust_files": [
+        "src/FerroUI.Controls.Inking/ink_stroke_container.rs",
+        "src/FerroUI.Controls.Inking/windows_ink_services.rs"
+      ],
+      "symbols": [
+        "can_paste_from_clipboard"
+      ],
+      "notes": "Real Windows CI run 39605086703/job119239093640 at 7fbffd0 passes the dedicated STA copy/can-paste/paste fixture, comparing native getter state, attributes, transformed samples and fresh IDs. The adapter preserves OS selection. The public FerroUI container deliberately selects newly pasted clones and clears the old selection, matching the published Learn contract and portable paste; the installed native reference instead retains old=true and returns new=false. STA is required and checked explicitly.",
+      "control_role": "required_by_controls",
+      "upstream_references": [
+        "controls/dev/InkCanvas/InkPresenter.cpp"
+      ]
+    },
+    {
+      "id": "InkStrokeContainer.LoadAsync",
+      "type": "InkStrokeContainer",
+      "name": "LoadAsync",
+      "projection_signature": "pub fn LoadAsync<P0>(&self, inputstream: P0) -> windows_core::Result<windows_future::IAsyncActionWithProgress<u64>>",
+      "status": "adapted",
+      "rust_files": [
+        "src/FerroUI.Controls.Inking/ink_stroke_container.rs",
+        "src/FerroUI.Controls.Inking/windows_ink_services.rs"
+      ],
+      "symbols": [
+        "load_async"
+      ],
+      "notes": "Portable bounded FERROINK futures and optional genuine Windows ISF/GIF calls. Windows CI run39600257242/job119222654079 at353c692 passes native attribute/transform conversion, both format round trips, malformed-load atomicity and explicit twist-loss policy. Native f32/ISF quantization and fresh import IDs are documented adaptations; Rust save_async defaults to Portable, with GifWithEmbeddedIsf requested explicitly.",
+      "control_role": "required_by_controls",
+      "upstream_references": [
+        "controls/dev/InkCanvas/InkPresenter.cpp"
+      ]
+    },
+    {
+      "id": "InkStrokeContainer.SaveAsync",
+      "type": "InkStrokeContainer",
+      "name": "SaveAsync",
+      "projection_signature": "pub fn SaveAsync<P0>(&self, outputstream: P0) -> windows_core::Result<windows_future::IAsyncOperationWithProgress<u32, u32>>",
+      "status": "adapted",
+      "rust_files": [
+        "src/FerroUI.Controls.Inking/ink_stroke_container.rs",
+        "src/FerroUI.Controls.Inking/windows_ink_services.rs"
+      ],
+      "symbols": [
+        "save_async"
+      ],
+      "notes": "Portable bounded FERROINK futures and optional genuine Windows ISF/GIF calls. Windows CI run39600257242/job119222654079 at353c692 passes native attribute/transform conversion, both format round trips, malformed-load atomicity and explicit twist-loss policy. Native f32/ISF quantization and fresh import IDs are documented adaptations; Rust save_async defaults to Portable, with GifWithEmbeddedIsf requested explicitly.",
+      "control_role": "required_by_controls",
+      "upstream_references": [
+        "controls/dev/InkCanvas/InkPresenter.cpp"
+      ]
+    },
+    {
+      "id": "InkStrokeContainer.UpdateRecognitionResults",
+      "type": "InkStrokeContainer",
+      "name": "UpdateRecognitionResults",
+      "projection_signature": "pub fn UpdateRecognitionResults<P0>(&self, recognitionresults: P0) -> windows_core::Result<()>",
+      "status": "not_ported",
+      "rust_files": [],
+      "symbols": [],
+      "notes": "Recognition candidate extension returns independent WindowsInkRecognitionResult values; the portable container does not retain OS recognition-result state.",
+      "control_role": "returned_service_api",
+      "upstream_references": []
+    },
+    {
+      "id": "InkStrokeContainer.GetStrokes",
+      "type": "InkStrokeContainer",
+      "name": "GetStrokes",
+      "projection_signature": "pub fn GetStrokes(&self) -> windows_core::Result<windows_collections::IVectorView<InkStroke>>",
+      "status": "adapted",
+      "rust_files": [
+        "src/FerroUI.Controls.Inking/ink_stroke_container.rs"
+      ],
+      "symbols": [
+        "get_strokes"
+      ],
+      "notes": "Windows Runtime member is represented by the mapped portable Rust value/property/method; OS renderer conformance is separately recorded.",
+      "control_role": "required_by_controls",
+      "upstream_references": [
+        "controls/dev/InkCanvas/InkPresenter.cpp"
+      ]
+    },
+    {
+      "id": "InkStrokeContainer.GetRecognitionResults",
+      "type": "InkStrokeContainer",
+      "name": "GetRecognitionResults",
+      "projection_signature": "pub fn GetRecognitionResults(&self) -> windows_core::Result<windows_collections::IVectorView<InkRecognitionResult>>",
+      "status": "not_ported",
+      "rust_files": [],
+      "symbols": [],
+      "notes": "Recognition candidate extension returns independent WindowsInkRecognitionResult values; the portable container does not retain OS recognition-result state.",
+      "control_role": "returned_service_api",
+      "upstream_references": []
+    },
+    {
+      "id": "InkStrokeContainer.AddStrokes",
+      "type": "InkStrokeContainer",
+      "name": "AddStrokes",
+      "projection_signature": "pub fn AddStrokes<P0>(&self, strokes: P0) -> windows_core::Result<()>",
+      "status": "adapted",
+      "rust_files": [
+        "src/FerroUI.Controls.Inking/ink_stroke_container.rs"
+      ],
+      "symbols": [
+        "add_strokes"
+      ],
+      "notes": "Windows Runtime member is represented by the mapped portable Rust value/property/method; OS renderer conformance is separately recorded.",
+      "control_role": "required_by_controls",
+      "upstream_references": [
+        "controls/dev/InkCanvas/InkPresenter.cpp"
+      ]
+    },
+    {
+      "id": "InkStrokeContainer.Clear",
+      "type": "InkStrokeContainer",
+      "name": "Clear",
+      "projection_signature": "pub fn Clear(&self) -> windows_core::Result<()>",
+      "status": "adapted",
+      "rust_files": [
+        "src/FerroUI.Controls.Inking/ink_stroke_container.rs"
+      ],
+      "symbols": [
+        "clear"
+      ],
+      "notes": "Windows Runtime member is represented by the mapped portable Rust value/property/method; OS renderer conformance is separately recorded.",
+      "control_role": "required_by_controls",
+      "upstream_references": [
+        "controls/dev/InkCanvas/InkPresenter.cpp"
+      ]
+    },
+    {
+      "id": "InkStrokeContainer.SaveWithFormatAsync",
+      "type": "InkStrokeContainer",
+      "name": "SaveWithFormatAsync",
+      "projection_signature": "pub fn SaveWithFormatAsync<P0>(&self, outputstream: P0, inkpersistenceformat: InkPersistenceFormat) -> windows_core::Result<windows_future::IAsyncOperationWithProgress<u32, u32>>",
+      "status": "adapted",
+      "rust_files": [
+        "src/FerroUI.Controls.Inking/ink_stroke_container.rs",
+        "src/FerroUI.Controls.Inking/windows_ink_services.rs"
+      ],
+      "symbols": [
+        "save_with_format_async"
+      ],
+      "notes": "Portable bounded FERROINK futures and optional genuine Windows ISF/GIF calls. Windows CI run39600257242/job119222654079 at353c692 passes native attribute/transform conversion, both format round trips, malformed-load atomicity and explicit twist-loss policy. Native f32/ISF quantization and fresh import IDs are documented adaptations; Rust save_async defaults to Portable, with GifWithEmbeddedIsf requested explicitly.",
+      "control_role": "required_by_controls",
+      "upstream_references": [
+        "controls/dev/InkCanvas/InkPresenter.cpp"
+      ]
+    },
+    {
+      "id": "InkStrokeContainer.GetStrokeById",
+      "type": "InkStrokeContainer",
+      "name": "GetStrokeById",
+      "projection_signature": "pub fn GetStrokeById(&self, id: u32) -> windows_core::Result<InkStroke>",
+      "status": "adapted",
+      "rust_files": [
+        "src/FerroUI.Controls.Inking/ink_stroke_container.rs"
+      ],
+      "symbols": [
+        "get_stroke_by_id"
+      ],
+      "notes": "Windows Runtime member is represented by the mapped portable Rust value/property/method; OS renderer conformance is separately recorded.",
+      "control_role": "required_by_controls",
+      "upstream_references": [
+        "controls/dev/InkCanvas/InkPresenter.cpp"
+      ]
+    },
+    {
+      "id": "InkPresenterRuler.Length",
+      "type": "InkPresenterRuler",
+      "name": "Length",
+      "projection_signature": "pub fn Length(&self) -> windows_core::Result<f64>",
+      "status": "adapted",
+      "rust_files": [
+        "src/FerroUI.Controls.Inking/ink_presenter_stencil.rs"
+      ],
+      "symbols": [
+        "length"
+      ],
+      "notes": "Portable stencil getter/setter drives FerroUI drawing, constraints and manipulation. Affine transforms use the top-left local origin; dimensions are validated and bounded. Windows private pixel/nib masking and exact visual conformance remain separate dependency evidence.",
+      "control_role": "returned_service_api",
+      "upstream_references": []
+    },
+    {
+      "id": "InkPresenterRuler.SetLength",
+      "type": "InkPresenterRuler",
+      "name": "SetLength",
+      "projection_signature": "pub fn SetLength(&self, value: f64) -> windows_core::Result<()>",
+      "status": "adapted",
+      "rust_files": [
+        "src/FerroUI.Controls.Inking/ink_presenter_stencil.rs"
+      ],
+      "symbols": [
+        "set_length"
+      ],
+      "notes": "Portable stencil getter/setter drives FerroUI drawing, constraints and manipulation. Affine transforms use the top-left local origin; dimensions are validated and bounded. Windows private pixel/nib masking and exact visual conformance remain separate dependency evidence.",
+      "control_role": "returned_service_api",
+      "upstream_references": []
+    },
+    {
+      "id": "InkPresenterRuler.Width",
+      "type": "InkPresenterRuler",
+      "name": "Width",
+      "projection_signature": "pub fn Width(&self) -> windows_core::Result<f64>",
+      "status": "adapted",
+      "rust_files": [
+        "src/FerroUI.Controls.Inking/ink_presenter_stencil.rs"
+      ],
+      "symbols": [
+        "width"
+      ],
+      "notes": "Portable stencil getter/setter drives FerroUI drawing, constraints and manipulation. Affine transforms use the top-left local origin; dimensions are validated and bounded. Windows private pixel/nib masking and exact visual conformance remain separate dependency evidence.",
+      "control_role": "returned_service_api",
+      "upstream_references": []
+    },
+    {
+      "id": "InkPresenterRuler.SetWidth",
+      "type": "InkPresenterRuler",
+      "name": "SetWidth",
+      "projection_signature": "pub fn SetWidth(&self, value: f64) -> windows_core::Result<()>",
+      "status": "adapted",
+      "rust_files": [
+        "src/FerroUI.Controls.Inking/ink_presenter_stencil.rs"
+      ],
+      "symbols": [
+        "set_width"
+      ],
+      "notes": "Portable stencil getter/setter drives FerroUI drawing, constraints and manipulation. Affine transforms use the top-left local origin; dimensions are validated and bounded. Windows private pixel/nib masking and exact visual conformance remain separate dependency evidence.",
+      "control_role": "returned_service_api",
+      "upstream_references": []
+    },
+    {
+      "id": "InkPresenterRuler.AreTickMarksVisible",
+      "type": "InkPresenterRuler",
+      "name": "AreTickMarksVisible",
+      "projection_signature": "pub fn AreTickMarksVisible(&self) -> windows_core::Result<bool>",
+      "status": "adapted",
+      "rust_files": [
+        "src/FerroUI.Controls.Inking/ink_presenter_stencil.rs"
+      ],
+      "symbols": [
+        "are_tick_marks_visible"
+      ],
+      "notes": "Portable stencil getter/setter drives FerroUI drawing, constraints and manipulation. Affine transforms use the top-left local origin; dimensions are validated and bounded. Windows private pixel/nib masking and exact visual conformance remain separate dependency evidence.",
+      "control_role": "returned_service_api",
+      "upstream_references": []
+    },
+    {
+      "id": "InkPresenterRuler.SetAreTickMarksVisible",
+      "type": "InkPresenterRuler",
+      "name": "SetAreTickMarksVisible",
+      "projection_signature": "pub fn SetAreTickMarksVisible(&self, value: bool) -> windows_core::Result<()>",
+      "status": "adapted",
+      "rust_files": [
+        "src/FerroUI.Controls.Inking/ink_presenter_stencil.rs"
+      ],
+      "symbols": [
+        "set_are_tick_marks_visible"
+      ],
+      "notes": "Portable stencil getter/setter drives FerroUI drawing, constraints and manipulation. Affine transforms use the top-left local origin; dimensions are validated and bounded. Windows private pixel/nib masking and exact visual conformance remain separate dependency evidence.",
+      "control_role": "returned_service_api",
+      "upstream_references": []
+    },
+    {
+      "id": "InkPresenterRuler.IsCompassVisible",
+      "type": "InkPresenterRuler",
+      "name": "IsCompassVisible",
+      "projection_signature": "pub fn IsCompassVisible(&self) -> windows_core::Result<bool>",
+      "status": "adapted",
+      "rust_files": [
+        "src/FerroUI.Controls.Inking/ink_presenter_stencil.rs"
+      ],
+      "symbols": [
+        "is_compass_visible"
+      ],
+      "notes": "Portable stencil getter/setter drives FerroUI drawing, constraints and manipulation. Affine transforms use the top-left local origin; dimensions are validated and bounded. Windows private pixel/nib masking and exact visual conformance remain separate dependency evidence.",
+      "control_role": "returned_service_api",
+      "upstream_references": []
+    },
+    {
+      "id": "InkPresenterRuler.SetIsCompassVisible",
+      "type": "InkPresenterRuler",
+      "name": "SetIsCompassVisible",
+      "projection_signature": "pub fn SetIsCompassVisible(&self, value: bool) -> windows_core::Result<()>",
+      "status": "adapted",
+      "rust_files": [
+        "src/FerroUI.Controls.Inking/ink_presenter_stencil.rs"
+      ],
+      "symbols": [
+        "set_is_compass_visible"
+      ],
+      "notes": "Portable stencil getter/setter drives FerroUI drawing, constraints and manipulation. Affine transforms use the top-left local origin; dimensions are validated and bounded. Windows private pixel/nib masking and exact visual conformance remain separate dependency evidence.",
+      "control_role": "returned_service_api",
+      "upstream_references": []
+    },
+    {
+      "id": "InkPresenterRuler.Create",
+      "type": "InkPresenterRuler",
+      "name": "Create",
+      "projection_signature": "pub fn Create<P0>(inkpresenter: P0) -> windows_core::Result<InkPresenterRuler>",
+      "status": "adapted",
+      "rust_files": [
+        "src/FerroUI.Controls.Inking/ink_presenter.rs"
+      ],
+      "symbols": [
+        "ruler"
+      ],
+      "notes": "Stable presenter.ruler()/protractor() service replaces independent WinRT activation; portable drawing and manipulation use the existing FerroUI pipeline.",
+      "control_role": "required_by_controls",
+      "upstream_references": [
+        "controls/dev/InkCanvas/InkPresenter.cpp"
+      ]
+    },
+    {
+      "id": "InkPresenterRuler.Kind",
+      "type": "InkPresenterRuler",
+      "name": "Kind",
+      "projection_signature": "pub fn Kind(&self) -> windows_core::Result<InkPresenterStencilKind>",
+      "status": "adapted",
+      "rust_files": [
+        "src/FerroUI.Controls.Inking/ink_presenter_stencil.rs"
+      ],
+      "symbols": [
+        "kind"
+      ],
+      "notes": "Portable stencil getter/setter drives FerroUI drawing, constraints and manipulation. Affine transforms use the top-left local origin; dimensions are validated and bounded. Windows private pixel/nib masking and exact visual conformance remain separate dependency evidence.",
+      "control_role": "returned_service_api",
+      "upstream_references": []
+    },
+    {
+      "id": "InkPresenterRuler.IsVisible",
+      "type": "InkPresenterRuler",
+      "name": "IsVisible",
+      "projection_signature": "pub fn IsVisible(&self) -> windows_core::Result<bool>",
+      "status": "adapted",
+      "rust_files": [
+        "src/FerroUI.Controls.Inking/ink_presenter_stencil.rs"
+      ],
+      "symbols": [
+        "is_visible"
+      ],
+      "notes": "Portable stencil getter/setter drives FerroUI drawing, constraints and manipulation. Affine transforms use the top-left local origin; dimensions are validated and bounded. Windows private pixel/nib masking and exact visual conformance remain separate dependency evidence.",
+      "control_role": "returned_service_api",
+      "upstream_references": []
+    },
+    {
+      "id": "InkPresenterRuler.SetIsVisible",
+      "type": "InkPresenterRuler",
+      "name": "SetIsVisible",
+      "projection_signature": "pub fn SetIsVisible(&self, value: bool) -> windows_core::Result<()>",
+      "status": "adapted",
+      "rust_files": [
+        "src/FerroUI.Controls.Inking/ink_presenter_stencil.rs"
+      ],
+      "symbols": [
+        "set_is_visible"
+      ],
+      "notes": "Portable stencil getter/setter drives FerroUI drawing, constraints and manipulation. Affine transforms use the top-left local origin; dimensions are validated and bounded. Windows private pixel/nib masking and exact visual conformance remain separate dependency evidence.",
+      "control_role": "required_by_controls",
+      "upstream_references": [
+        "controls/dev/InkCanvas/InkPresenter.cpp"
+      ]
+    },
+    {
+      "id": "InkPresenterRuler.BackgroundColor",
+      "type": "InkPresenterRuler",
+      "name": "BackgroundColor",
+      "projection_signature": "pub fn BackgroundColor(&self) -> windows_core::Result<super::super::Color>",
+      "status": "adapted",
+      "rust_files": [
+        "src/FerroUI.Controls.Inking/ink_presenter_stencil.rs"
+      ],
+      "symbols": [
+        "background_color"
+      ],
+      "notes": "Portable stencil getter/setter drives FerroUI drawing, constraints and manipulation. Affine transforms use the top-left local origin; dimensions are validated and bounded. Windows private pixel/nib masking and exact visual conformance remain separate dependency evidence.",
+      "control_role": "returned_service_api",
+      "upstream_references": []
+    },
+    {
+      "id": "InkPresenterRuler.SetBackgroundColor",
+      "type": "InkPresenterRuler",
+      "name": "SetBackgroundColor",
+      "projection_signature": "pub fn SetBackgroundColor(&self, value: super::super::Color) -> windows_core::Result<()>",
+      "status": "adapted",
+      "rust_files": [
+        "src/FerroUI.Controls.Inking/ink_presenter_stencil.rs"
+      ],
+      "symbols": [
+        "set_background_color"
+      ],
+      "notes": "Portable stencil getter/setter drives FerroUI drawing, constraints and manipulation. Affine transforms use the top-left local origin; dimensions are validated and bounded. Windows private pixel/nib masking and exact visual conformance remain separate dependency evidence.",
+      "control_role": "returned_service_api",
+      "upstream_references": []
+    },
+    {
+      "id": "InkPresenterRuler.ForegroundColor",
+      "type": "InkPresenterRuler",
+      "name": "ForegroundColor",
+      "projection_signature": "pub fn ForegroundColor(&self) -> windows_core::Result<super::super::Color>",
+      "status": "adapted",
+      "rust_files": [
+        "src/FerroUI.Controls.Inking/ink_presenter_stencil.rs"
+      ],
+      "symbols": [
+        "foreground_color"
+      ],
+      "notes": "Portable stencil getter/setter drives FerroUI drawing, constraints and manipulation. Affine transforms use the top-left local origin; dimensions are validated and bounded. Windows private pixel/nib masking and exact visual conformance remain separate dependency evidence.",
+      "control_role": "returned_service_api",
+      "upstream_references": []
+    },
+    {
+      "id": "InkPresenterRuler.SetForegroundColor",
+      "type": "InkPresenterRuler",
+      "name": "SetForegroundColor",
+      "projection_signature": "pub fn SetForegroundColor(&self, value: super::super::Color) -> windows_core::Result<()>",
+      "status": "adapted",
+      "rust_files": [
+        "src/FerroUI.Controls.Inking/ink_presenter_stencil.rs"
+      ],
+      "symbols": [
+        "set_foreground_color"
+      ],
+      "notes": "Portable stencil getter/setter drives FerroUI drawing, constraints and manipulation. Affine transforms use the top-left local origin; dimensions are validated and bounded. Windows private pixel/nib masking and exact visual conformance remain separate dependency evidence.",
+      "control_role": "returned_service_api",
+      "upstream_references": []
+    },
+    {
+      "id": "InkPresenterRuler.Transform",
+      "type": "InkPresenterRuler",
+      "name": "Transform",
+      "projection_signature": "pub fn Transform(&self) -> windows_core::Result<windows_numerics::Matrix3x2>",
+      "status": "adapted",
+      "rust_files": [
+        "src/FerroUI.Controls.Inking/ink_presenter_stencil.rs"
+      ],
+      "symbols": [
+        "transform"
+      ],
+      "notes": "Portable stencil getter/setter drives FerroUI drawing, constraints and manipulation. Affine transforms use the top-left local origin; dimensions are validated and bounded. Windows private pixel/nib masking and exact visual conformance remain separate dependency evidence.",
+      "control_role": "returned_service_api",
+      "upstream_references": []
+    },
+    {
+      "id": "InkPresenterRuler.SetTransform",
+      "type": "InkPresenterRuler",
+      "name": "SetTransform",
+      "projection_signature": "pub fn SetTransform(&self, value: windows_numerics::Matrix3x2) -> windows_core::Result<()>",
+      "status": "adapted",
+      "rust_files": [
+        "src/FerroUI.Controls.Inking/ink_presenter_stencil.rs"
+      ],
+      "symbols": [
+        "set_transform"
+      ],
+      "notes": "Portable stencil getter/setter drives FerroUI drawing, constraints and manipulation. Affine transforms use the top-left local origin; dimensions are validated and bounded. Windows private pixel/nib masking and exact visual conformance remain separate dependency evidence.",
+      "control_role": "returned_service_api",
+      "upstream_references": []
+    },
+    {
+      "id": "InkPresenterProtractor.AreTickMarksVisible",
+      "type": "InkPresenterProtractor",
+      "name": "AreTickMarksVisible",
+      "projection_signature": "pub fn AreTickMarksVisible(&self) -> windows_core::Result<bool>",
+      "status": "adapted",
+      "rust_files": [
+        "src/FerroUI.Controls.Inking/ink_presenter_stencil.rs"
+      ],
+      "symbols": [
+        "are_tick_marks_visible"
+      ],
+      "notes": "Portable stencil getter/setter drives FerroUI drawing, constraints and manipulation. Affine transforms use the top-left local origin; dimensions are validated and bounded. Windows private pixel/nib masking and exact visual conformance remain separate dependency evidence.",
+      "control_role": "returned_service_api",
+      "upstream_references": []
+    },
+    {
+      "id": "InkPresenterProtractor.SetAreTickMarksVisible",
+      "type": "InkPresenterProtractor",
+      "name": "SetAreTickMarksVisible",
+      "projection_signature": "pub fn SetAreTickMarksVisible(&self, value: bool) -> windows_core::Result<()>",
+      "status": "adapted",
+      "rust_files": [
+        "src/FerroUI.Controls.Inking/ink_presenter_stencil.rs"
+      ],
+      "symbols": [
+        "set_are_tick_marks_visible"
+      ],
+      "notes": "Portable stencil getter/setter drives FerroUI drawing, constraints and manipulation. Affine transforms use the top-left local origin; dimensions are validated and bounded. Windows private pixel/nib masking and exact visual conformance remain separate dependency evidence.",
+      "control_role": "returned_service_api",
+      "upstream_references": []
+    },
+    {
+      "id": "InkPresenterProtractor.AreRaysVisible",
+      "type": "InkPresenterProtractor",
+      "name": "AreRaysVisible",
+      "projection_signature": "pub fn AreRaysVisible(&self) -> windows_core::Result<bool>",
+      "status": "adapted",
+      "rust_files": [
+        "src/FerroUI.Controls.Inking/ink_presenter_stencil.rs"
+      ],
+      "symbols": [
+        "are_rays_visible"
+      ],
+      "notes": "Portable stencil getter/setter drives FerroUI drawing, constraints and manipulation. Affine transforms use the top-left local origin; dimensions are validated and bounded. Windows private pixel/nib masking and exact visual conformance remain separate dependency evidence.",
+      "control_role": "returned_service_api",
+      "upstream_references": []
+    },
+    {
+      "id": "InkPresenterProtractor.SetAreRaysVisible",
+      "type": "InkPresenterProtractor",
+      "name": "SetAreRaysVisible",
+      "projection_signature": "pub fn SetAreRaysVisible(&self, value: bool) -> windows_core::Result<()>",
+      "status": "adapted",
+      "rust_files": [
+        "src/FerroUI.Controls.Inking/ink_presenter_stencil.rs"
+      ],
+      "symbols": [
+        "set_are_rays_visible"
+      ],
+      "notes": "Portable stencil getter/setter drives FerroUI drawing, constraints and manipulation. Affine transforms use the top-left local origin; dimensions are validated and bounded. Windows private pixel/nib masking and exact visual conformance remain separate dependency evidence.",
+      "control_role": "returned_service_api",
+      "upstream_references": []
+    },
+    {
+      "id": "InkPresenterProtractor.IsCenterMarkerVisible",
+      "type": "InkPresenterProtractor",
+      "name": "IsCenterMarkerVisible",
+      "projection_signature": "pub fn IsCenterMarkerVisible(&self) -> windows_core::Result<bool>",
+      "status": "adapted",
+      "rust_files": [
+        "src/FerroUI.Controls.Inking/ink_presenter_stencil.rs"
+      ],
+      "symbols": [
+        "is_center_marker_visible"
+      ],
+      "notes": "Portable stencil getter/setter drives FerroUI drawing, constraints and manipulation. Affine transforms use the top-left local origin; dimensions are validated and bounded. Windows private pixel/nib masking and exact visual conformance remain separate dependency evidence.",
+      "control_role": "returned_service_api",
+      "upstream_references": []
+    },
+    {
+      "id": "InkPresenterProtractor.SetIsCenterMarkerVisible",
+      "type": "InkPresenterProtractor",
+      "name": "SetIsCenterMarkerVisible",
+      "projection_signature": "pub fn SetIsCenterMarkerVisible(&self, value: bool) -> windows_core::Result<()>",
+      "status": "adapted",
+      "rust_files": [
+        "src/FerroUI.Controls.Inking/ink_presenter_stencil.rs"
+      ],
+      "symbols": [
+        "set_is_center_marker_visible"
+      ],
+      "notes": "Portable stencil getter/setter drives FerroUI drawing, constraints and manipulation. Affine transforms use the top-left local origin; dimensions are validated and bounded. Windows private pixel/nib masking and exact visual conformance remain separate dependency evidence.",
+      "control_role": "returned_service_api",
+      "upstream_references": []
+    },
+    {
+      "id": "InkPresenterProtractor.IsAngleReadoutVisible",
+      "type": "InkPresenterProtractor",
+      "name": "IsAngleReadoutVisible",
+      "projection_signature": "pub fn IsAngleReadoutVisible(&self) -> windows_core::Result<bool>",
+      "status": "adapted",
+      "rust_files": [
+        "src/FerroUI.Controls.Inking/ink_presenter_stencil.rs"
+      ],
+      "symbols": [
+        "is_angle_readout_visible"
+      ],
+      "notes": "Portable stencil getter/setter drives FerroUI drawing, constraints and manipulation. Affine transforms use the top-left local origin; dimensions are validated and bounded. Windows private pixel/nib masking and exact visual conformance remain separate dependency evidence.",
+      "control_role": "returned_service_api",
+      "upstream_references": []
+    },
+    {
+      "id": "InkPresenterProtractor.SetIsAngleReadoutVisible",
+      "type": "InkPresenterProtractor",
+      "name": "SetIsAngleReadoutVisible",
+      "projection_signature": "pub fn SetIsAngleReadoutVisible(&self, value: bool) -> windows_core::Result<()>",
+      "status": "adapted",
+      "rust_files": [
+        "src/FerroUI.Controls.Inking/ink_presenter_stencil.rs"
+      ],
+      "symbols": [
+        "set_is_angle_readout_visible"
+      ],
+      "notes": "Portable stencil getter/setter drives FerroUI drawing, constraints and manipulation. Affine transforms use the top-left local origin; dimensions are validated and bounded. Windows private pixel/nib masking and exact visual conformance remain separate dependency evidence.",
+      "control_role": "returned_service_api",
+      "upstream_references": []
+    },
+    {
+      "id": "InkPresenterProtractor.IsResizable",
+      "type": "InkPresenterProtractor",
+      "name": "IsResizable",
+      "projection_signature": "pub fn IsResizable(&self) -> windows_core::Result<bool>",
+      "status": "adapted",
+      "rust_files": [
+        "src/FerroUI.Controls.Inking/ink_presenter_stencil.rs"
+      ],
+      "symbols": [
+        "is_resizable"
+      ],
+      "notes": "Portable stencil getter/setter drives FerroUI drawing, constraints and manipulation. Affine transforms use the top-left local origin; dimensions are validated and bounded. Windows private pixel/nib masking and exact visual conformance remain separate dependency evidence.",
+      "control_role": "returned_service_api",
+      "upstream_references": []
+    },
+    {
+      "id": "InkPresenterProtractor.SetIsResizable",
+      "type": "InkPresenterProtractor",
+      "name": "SetIsResizable",
+      "projection_signature": "pub fn SetIsResizable(&self, value: bool) -> windows_core::Result<()>",
+      "status": "adapted",
+      "rust_files": [
+        "src/FerroUI.Controls.Inking/ink_presenter_stencil.rs"
+      ],
+      "symbols": [
+        "set_is_resizable"
+      ],
+      "notes": "Portable stencil getter/setter drives FerroUI drawing, constraints and manipulation. Affine transforms use the top-left local origin; dimensions are validated and bounded. Windows private pixel/nib masking and exact visual conformance remain separate dependency evidence.",
+      "control_role": "returned_service_api",
+      "upstream_references": []
+    },
+    {
+      "id": "InkPresenterProtractor.Radius",
+      "type": "InkPresenterProtractor",
+      "name": "Radius",
+      "projection_signature": "pub fn Radius(&self) -> windows_core::Result<f64>",
+      "status": "adapted",
+      "rust_files": [
+        "src/FerroUI.Controls.Inking/ink_presenter_stencil.rs"
+      ],
+      "symbols": [
+        "radius"
+      ],
+      "notes": "Portable stencil getter/setter drives FerroUI drawing, constraints and manipulation. Affine transforms use the top-left local origin; dimensions are validated and bounded. Windows private pixel/nib masking and exact visual conformance remain separate dependency evidence.",
+      "control_role": "returned_service_api",
+      "upstream_references": []
+    },
+    {
+      "id": "InkPresenterProtractor.SetRadius",
+      "type": "InkPresenterProtractor",
+      "name": "SetRadius",
+      "projection_signature": "pub fn SetRadius(&self, value: f64) -> windows_core::Result<()>",
+      "status": "adapted",
+      "rust_files": [
+        "src/FerroUI.Controls.Inking/ink_presenter_stencil.rs"
+      ],
+      "symbols": [
+        "set_radius"
+      ],
+      "notes": "Portable stencil getter/setter drives FerroUI drawing, constraints and manipulation. Affine transforms use the top-left local origin; dimensions are validated and bounded. Windows private pixel/nib masking and exact visual conformance remain separate dependency evidence.",
+      "control_role": "returned_service_api",
+      "upstream_references": []
+    },
+    {
+      "id": "InkPresenterProtractor.AccentColor",
+      "type": "InkPresenterProtractor",
+      "name": "AccentColor",
+      "projection_signature": "pub fn AccentColor(&self) -> windows_core::Result<super::super::Color>",
+      "status": "adapted",
+      "rust_files": [
+        "src/FerroUI.Controls.Inking/ink_presenter_stencil.rs"
+      ],
+      "symbols": [
+        "accent_color"
+      ],
+      "notes": "Portable stencil getter/setter drives FerroUI drawing, constraints and manipulation. Affine transforms use the top-left local origin; dimensions are validated and bounded. Windows private pixel/nib masking and exact visual conformance remain separate dependency evidence.",
+      "control_role": "returned_service_api",
+      "upstream_references": []
+    },
+    {
+      "id": "InkPresenterProtractor.SetAccentColor",
+      "type": "InkPresenterProtractor",
+      "name": "SetAccentColor",
+      "projection_signature": "pub fn SetAccentColor(&self, value: super::super::Color) -> windows_core::Result<()>",
+      "status": "adapted",
+      "rust_files": [
+        "src/FerroUI.Controls.Inking/ink_presenter_stencil.rs"
+      ],
+      "symbols": [
+        "set_accent_color"
+      ],
+      "notes": "Portable stencil getter/setter drives FerroUI drawing, constraints and manipulation. Affine transforms use the top-left local origin; dimensions are validated and bounded. Windows private pixel/nib masking and exact visual conformance remain separate dependency evidence.",
+      "control_role": "returned_service_api",
+      "upstream_references": []
+    },
+    {
+      "id": "InkPresenterProtractor.Create",
+      "type": "InkPresenterProtractor",
+      "name": "Create",
+      "projection_signature": "pub fn Create<P0>(inkpresenter: P0) -> windows_core::Result<InkPresenterProtractor>",
+      "status": "adapted",
+      "rust_files": [
+        "src/FerroUI.Controls.Inking/ink_presenter.rs"
+      ],
+      "symbols": [
+        "protractor"
+      ],
+      "notes": "Stable presenter.ruler()/protractor() service replaces independent WinRT activation; portable drawing and manipulation use the existing FerroUI pipeline.",
+      "control_role": "required_by_controls",
+      "upstream_references": [
+        "controls/dev/InkCanvas/InkPresenter.cpp"
+      ]
+    },
+    {
+      "id": "InkPresenterProtractor.Kind",
+      "type": "InkPresenterProtractor",
+      "name": "Kind",
+      "projection_signature": "pub fn Kind(&self) -> windows_core::Result<InkPresenterStencilKind>",
+      "status": "adapted",
+      "rust_files": [
+        "src/FerroUI.Controls.Inking/ink_presenter_stencil.rs"
+      ],
+      "symbols": [
+        "kind"
+      ],
+      "notes": "Portable stencil getter/setter drives FerroUI drawing, constraints and manipulation. Affine transforms use the top-left local origin; dimensions are validated and bounded. Windows private pixel/nib masking and exact visual conformance remain separate dependency evidence.",
+      "control_role": "returned_service_api",
+      "upstream_references": []
+    },
+    {
+      "id": "InkPresenterProtractor.IsVisible",
+      "type": "InkPresenterProtractor",
+      "name": "IsVisible",
+      "projection_signature": "pub fn IsVisible(&self) -> windows_core::Result<bool>",
+      "status": "adapted",
+      "rust_files": [
+        "src/FerroUI.Controls.Inking/ink_presenter_stencil.rs"
+      ],
+      "symbols": [
+        "is_visible"
+      ],
+      "notes": "Portable stencil getter/setter drives FerroUI drawing, constraints and manipulation. Affine transforms use the top-left local origin; dimensions are validated and bounded. Windows private pixel/nib masking and exact visual conformance remain separate dependency evidence.",
+      "control_role": "returned_service_api",
+      "upstream_references": []
+    },
+    {
+      "id": "InkPresenterProtractor.SetIsVisible",
+      "type": "InkPresenterProtractor",
+      "name": "SetIsVisible",
+      "projection_signature": "pub fn SetIsVisible(&self, value: bool) -> windows_core::Result<()>",
+      "status": "adapted",
+      "rust_files": [
+        "src/FerroUI.Controls.Inking/ink_presenter_stencil.rs"
+      ],
+      "symbols": [
+        "set_is_visible"
+      ],
+      "notes": "Portable stencil getter/setter drives FerroUI drawing, constraints and manipulation. Affine transforms use the top-left local origin; dimensions are validated and bounded. Windows private pixel/nib masking and exact visual conformance remain separate dependency evidence.",
+      "control_role": "required_by_controls",
+      "upstream_references": [
+        "controls/dev/InkCanvas/InkPresenter.cpp"
+      ]
+    },
+    {
+      "id": "InkPresenterProtractor.BackgroundColor",
+      "type": "InkPresenterProtractor",
+      "name": "BackgroundColor",
+      "projection_signature": "pub fn BackgroundColor(&self) -> windows_core::Result<super::super::Color>",
+      "status": "adapted",
+      "rust_files": [
+        "src/FerroUI.Controls.Inking/ink_presenter_stencil.rs"
+      ],
+      "symbols": [
+        "background_color"
+      ],
+      "notes": "Portable stencil getter/setter drives FerroUI drawing, constraints and manipulation. Affine transforms use the top-left local origin; dimensions are validated and bounded. Windows private pixel/nib masking and exact visual conformance remain separate dependency evidence.",
+      "control_role": "returned_service_api",
+      "upstream_references": []
+    },
+    {
+      "id": "InkPresenterProtractor.SetBackgroundColor",
+      "type": "InkPresenterProtractor",
+      "name": "SetBackgroundColor",
+      "projection_signature": "pub fn SetBackgroundColor(&self, value: super::super::Color) -> windows_core::Result<()>",
+      "status": "adapted",
+      "rust_files": [
+        "src/FerroUI.Controls.Inking/ink_presenter_stencil.rs"
+      ],
+      "symbols": [
+        "set_background_color"
+      ],
+      "notes": "Portable stencil getter/setter drives FerroUI drawing, constraints and manipulation. Affine transforms use the top-left local origin; dimensions are validated and bounded. Windows private pixel/nib masking and exact visual conformance remain separate dependency evidence.",
+      "control_role": "returned_service_api",
+      "upstream_references": []
+    },
+    {
+      "id": "InkPresenterProtractor.ForegroundColor",
+      "type": "InkPresenterProtractor",
+      "name": "ForegroundColor",
+      "projection_signature": "pub fn ForegroundColor(&self) -> windows_core::Result<super::super::Color>",
+      "status": "adapted",
+      "rust_files": [
+        "src/FerroUI.Controls.Inking/ink_presenter_stencil.rs"
+      ],
+      "symbols": [
+        "foreground_color"
+      ],
+      "notes": "Portable stencil getter/setter drives FerroUI drawing, constraints and manipulation. Affine transforms use the top-left local origin; dimensions are validated and bounded. Windows private pixel/nib masking and exact visual conformance remain separate dependency evidence.",
+      "control_role": "returned_service_api",
+      "upstream_references": []
+    },
+    {
+      "id": "InkPresenterProtractor.SetForegroundColor",
+      "type": "InkPresenterProtractor",
+      "name": "SetForegroundColor",
+      "projection_signature": "pub fn SetForegroundColor(&self, value: super::super::Color) -> windows_core::Result<()>",
+      "status": "adapted",
+      "rust_files": [
+        "src/FerroUI.Controls.Inking/ink_presenter_stencil.rs"
+      ],
+      "symbols": [
+        "set_foreground_color"
+      ],
+      "notes": "Portable stencil getter/setter drives FerroUI drawing, constraints and manipulation. Affine transforms use the top-left local origin; dimensions are validated and bounded. Windows private pixel/nib masking and exact visual conformance remain separate dependency evidence.",
+      "control_role": "returned_service_api",
+      "upstream_references": []
+    },
+    {
+      "id": "InkPresenterProtractor.Transform",
+      "type": "InkPresenterProtractor",
+      "name": "Transform",
+      "projection_signature": "pub fn Transform(&self) -> windows_core::Result<windows_numerics::Matrix3x2>",
+      "status": "adapted",
+      "rust_files": [
+        "src/FerroUI.Controls.Inking/ink_presenter_stencil.rs"
+      ],
+      "symbols": [
+        "transform"
+      ],
+      "notes": "Portable stencil getter/setter drives FerroUI drawing, constraints and manipulation. Affine transforms use the top-left local origin; dimensions are validated and bounded. Windows private pixel/nib masking and exact visual conformance remain separate dependency evidence.",
+      "control_role": "returned_service_api",
+      "upstream_references": []
+    },
+    {
+      "id": "InkPresenterProtractor.SetTransform",
+      "type": "InkPresenterProtractor",
+      "name": "SetTransform",
+      "projection_signature": "pub fn SetTransform(&self, value: windows_numerics::Matrix3x2) -> windows_core::Result<()>",
+      "status": "adapted",
+      "rust_files": [
+        "src/FerroUI.Controls.Inking/ink_presenter_stencil.rs"
+      ],
+      "symbols": [
+        "set_transform"
+      ],
+      "notes": "Portable stencil getter/setter drives FerroUI drawing, constraints and manipulation. Affine transforms use the top-left local origin; dimensions are validated and bounded. Windows private pixel/nib masking and exact visual conformance remain separate dependency evidence.",
+      "control_role": "returned_service_api",
+      "upstream_references": []
+    },
+    {
+      "id": "InkRecognizerContainer.new",
+      "type": "InkRecognizerContainer",
+      "name": "new",
+      "projection_signature": "pub fn new() -> windows_core::Result<Self>",
+      "status": "partial",
+      "rust_files": [
+        "src/FerroUI.Controls.Inking/windows_ink_services.rs"
+      ],
+      "symbols": [
+        "new"
+      ],
+      "notes": "Optional Windows-only service calls installed native recognizers. The name argument selects an installed recognizer for each operation; results are not stored on portable strokes. Native execution and language availability require Windows evidence.",
+      "control_role": "optional_extension",
+      "upstream_references": []
+    },
+    {
+      "id": "InkRecognizerContainer.SetDefaultRecognizer",
+      "type": "InkRecognizerContainer",
+      "name": "SetDefaultRecognizer",
+      "projection_signature": "pub fn SetDefaultRecognizer<P0>(&self, recognizer: P0) -> windows_core::Result<()>",
+      "status": "partial",
+      "rust_files": [
+        "src/FerroUI.Controls.Inking/windows_ink_services.rs"
+      ],
+      "symbols": [
+        "recognize"
+      ],
+      "notes": "Optional Windows-only service calls installed native recognizers. The name argument selects an installed recognizer for each operation; results are not stored on portable strokes. Native execution and language availability require Windows evidence.",
+      "control_role": "optional_extension",
+      "upstream_references": []
+    },
+    {
+      "id": "InkRecognizerContainer.RecognizeAsync",
+      "type": "InkRecognizerContainer",
+      "name": "RecognizeAsync",
+      "projection_signature": "pub fn RecognizeAsync<P0>(&self, strokecollection: P0, recognitiontarget: InkRecognitionTarget) -> windows_core::Result<windows_future::IAsyncOperation<windows_collections::IVectorView<InkRecognitionResult>>>",
+      "status": "partial",
+      "rust_files": [
+        "src/FerroUI.Controls.Inking/windows_ink_services.rs"
+      ],
+      "symbols": [
+        "recognize"
+      ],
+      "notes": "Optional Windows-only service calls installed native recognizers. The name argument selects an installed recognizer for each operation; results are not stored on portable strokes. Native execution and language availability require Windows evidence.",
+      "control_role": "optional_extension",
+      "upstream_references": []
+    },
+    {
+      "id": "InkRecognizerContainer.GetRecognizers",
+      "type": "InkRecognizerContainer",
+      "name": "GetRecognizers",
+      "projection_signature": "pub fn GetRecognizers(&self) -> windows_core::Result<windows_collections::IVectorView<InkRecognizer>>",
+      "status": "partial",
+      "rust_files": [
+        "src/FerroUI.Controls.Inking/windows_ink_services.rs"
+      ],
+      "symbols": [
+        "recognizers"
+      ],
+      "notes": "Optional Windows-only service calls installed native recognizers. The name argument selects an installed recognizer for each operation; results are not stored on portable strokes. Native execution and language availability require Windows evidence.",
+      "control_role": "optional_extension",
+      "upstream_references": []
+    },
+    {
+      "id": "InkRecognitionResult.BoundingRect",
+      "type": "InkRecognitionResult",
+      "name": "BoundingRect",
+      "projection_signature": "pub fn BoundingRect(&self) -> windows_core::Result<super::super::super::Foundation::Rect>",
+      "status": "partial",
+      "rust_files": [
+        "src/FerroUI.Controls.Inking/windows_ink_services.rs"
+      ],
+      "symbols": [
+        "bounding_rect"
+      ],
+      "notes": "Native result is converted into WindowsInkRecognitionResult with a FerroUI Rect, ordered candidate strings and source FerroUI stroke IDs; no live native result object is exposed.",
+      "control_role": "optional_extension",
+      "upstream_references": []
+    },
+    {
+      "id": "InkRecognitionResult.GetTextCandidates",
+      "type": "InkRecognitionResult",
+      "name": "GetTextCandidates",
+      "projection_signature": "pub fn GetTextCandidates(&self) -> windows_core::Result<windows_collections::IVectorView<windows_core::HSTRING>>",
+      "status": "partial",
+      "rust_files": [
+        "src/FerroUI.Controls.Inking/windows_ink_services.rs"
+      ],
+      "symbols": [
+        "text_candidates"
+      ],
+      "notes": "Native result is converted into WindowsInkRecognitionResult with a FerroUI Rect, ordered candidate strings and source FerroUI stroke IDs; no live native result object is exposed.",
+      "control_role": "optional_extension",
+      "upstream_references": []
+    },
+    {
+      "id": "InkRecognitionResult.GetStrokes",
+      "type": "InkRecognitionResult",
+      "name": "GetStrokes",
+      "projection_signature": "pub fn GetStrokes(&self) -> windows_core::Result<windows_collections::IVectorView<InkStroke>>",
+      "status": "partial",
+      "rust_files": [
+        "src/FerroUI.Controls.Inking/windows_ink_services.rs"
+      ],
+      "symbols": [
+        "stroke_ids"
+      ],
+      "notes": "Native result is converted into WindowsInkRecognitionResult with a FerroUI Rect, ordered candidate strings and source FerroUI stroke IDs; no live native result object is exposed.",
+      "control_role": "optional_extension",
+      "upstream_references": []
+    }
+  ],
+  "control_role_definitions": {
+    "required_by_controls": "An invocation exists in the pinned WinUI control implementation; upstream_references identifies its file. This contributes to the required control completion gate.",
+    "returned_service_api": "Additional method on a Windows object exposed by the WinUI surface, or a nested value type. Missing members limit broader dependency API parity but are not direct control implementation calls.",
+    "portable_engine_support": "Value or builder API used to replace external OS stroke creation in the portable engine, beyond the WinUI wrapper source.",
+    "optional_extension": "Adjacent native capability or nested advanced OS API that the pinned controls neither invoke nor require. Its missing implementation is not a WinUI control completion prerequisite."
+  }
+}

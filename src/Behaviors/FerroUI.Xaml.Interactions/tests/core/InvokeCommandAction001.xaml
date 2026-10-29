@@ -1,0 +1,17 @@
+<Window xmlns="https://github.com/ferroui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="InvokeCommandAction001">
+  <!-- Ported from tests/Xaml.Behaviors.Interactions.UnitTests/Core/InvokeCommandAction001 of Xaml.Behaviors.
+       Adapted: no x:Class (the test loads the window with the run-time loader); the data context, which the code of the window sets, is set by the test. -->
+  <StackPanel>
+    <TextBox Name="TargetTextBox"
+             Text="Initial Text" />
+    <Button Name="TargetButton" Content="Button">
+      <Interaction.Behaviors>
+        <EventTriggerBehavior EventName="Click">
+          <InvokeCommandAction Command="{Binding TestCommand}" />
+        </EventTriggerBehavior>
+      </Interaction.Behaviors>
+    </Button>
+  </StackPanel>
+</Window>

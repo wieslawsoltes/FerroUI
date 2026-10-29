@@ -1,0 +1,76 @@
+<Window xmlns="https://github.com/ferroui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:primitives="using:FerroUI.Controls.Primitives"
+        Title="MultiDataTriggerBehavior002"
+        Width="320">
+  <!-- Ported from tests/Xaml.Behaviors.Interactions.UnitTests/Core/MultiDataTriggerBehavior002 of Xaml.Behaviors.
+       Adapted: no x:Class (the test loads the window with the run-time loader); the namespace of the primitives is the one of the framework. -->
+  <StackPanel Margin="16">
+    <TextBlock Name="TargetTextBlock"
+               Text="">
+      <Interaction.Behaviors>
+        <MultiDataTriggerBehavior>
+          <MultiDataTriggerBehavior.Conditions>
+            <Condition Property="{x:Static primitives:RangeBase.ValueProperty}"
+                       SourceName="TargetSlider"
+                       ComparisonCondition="GreaterThanOrEqual"
+                       Value="50" />
+            <Condition Property="{x:Static primitives:ToggleButton.IsCheckedProperty}"
+                       SourceName="TargetCheckBox"
+                       Value="True" />
+          </MultiDataTriggerBehavior.Conditions>
+          <ChangePropertyAction PropertyName="Text"
+                                Value="Ready" />
+        </MultiDataTriggerBehavior>
+        <MultiDataTriggerBehavior>
+          <MultiDataTriggerBehavior.Conditions>
+            <Condition Property="{x:Static primitives:RangeBase.ValueProperty}"
+                       SourceName="TargetSlider"
+                       ComparisonCondition="GreaterThanOrEqual"
+                       Value="50" />
+            <Condition Property="{x:Static primitives:ToggleButton.IsCheckedProperty}"
+                       SourceName="TargetCheckBox"
+                       Value="False" />
+          </MultiDataTriggerBehavior.Conditions>
+          <ChangePropertyAction PropertyName="Text"
+                                Value="Checkbox unchecked" />
+        </MultiDataTriggerBehavior>
+        <MultiDataTriggerBehavior>
+          <MultiDataTriggerBehavior.Conditions>
+            <Condition Property="{x:Static primitives:RangeBase.ValueProperty}"
+                       SourceName="TargetSlider"
+                       ComparisonCondition="LessThan"
+                       Value="50" />
+            <Condition Property="{x:Static primitives:ToggleButton.IsCheckedProperty}"
+                       SourceName="TargetCheckBox"
+                       Value="True" />
+          </MultiDataTriggerBehavior.Conditions>
+          <ChangePropertyAction PropertyName="Text"
+                                Value="Slider too low" />
+        </MultiDataTriggerBehavior>
+        <MultiDataTriggerBehavior>
+          <MultiDataTriggerBehavior.Conditions>
+            <Condition Property="{x:Static primitives:RangeBase.ValueProperty}"
+                       SourceName="TargetSlider"
+                       ComparisonCondition="LessThan"
+                       Value="50" />
+            <Condition Property="{x:Static primitives:ToggleButton.IsCheckedProperty}"
+                       SourceName="TargetCheckBox"
+                       Value="False" />
+          </MultiDataTriggerBehavior.Conditions>
+          <ChangePropertyAction PropertyName="Text"
+                                Value="Move slider and check" />
+        </MultiDataTriggerBehavior>
+      </Interaction.Behaviors>
+    </TextBlock>
+    <CheckBox Name="TargetCheckBox"
+              Content="Enabled"
+              Margin="0,8,0,0" />
+    <Slider Name="TargetSlider"
+            Minimum="0"
+            Maximum="100"
+            SmallChange="25"
+            Value="0"
+            Margin="0,8,0,0" />
+  </StackPanel>
+</Window>

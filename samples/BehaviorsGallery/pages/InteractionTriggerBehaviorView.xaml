@@ -1,0 +1,29 @@
+<UserControl x:Class="BehaviorsGallery.Views.Pages.InteractionTriggerBehaviorView"
+             xmlns="https://github.com/ferroui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="using:BehaviorsGallery.ViewModels.ReactiveUI"
+             x:DataType="vm:InteractionTriggerBehaviorViewModel"
+             mc:Ignorable="d" d:DesignWidth="600" d:DesignHeight="450">
+  <!-- Ported from Views/ReactiveUI/InteractionTriggerBehaviorView of the reference sample. -->
+  <!-- Deviation (DEVIATIONS.md, Behaviors gallery): the view model is declared in the module of its
+       folder, ViewModels/ReactiveUI, whose namespace is BehaviorsGallery.ViewModels.ReactiveUI. -->
+  <Design.DataContext>
+    <vm:InteractionTriggerBehaviorViewModel />
+  </Design.DataContext>
+  <StackPanel Margin="5" Spacing="5" HorizontalAlignment="Center" VerticalAlignment="Center">
+    <TextBox x:Name="TargetTextBox" Text="Initial Text" />
+    <Button Content="Trigger" Command="{Binding TriggerCommand}">
+      <Interaction.Behaviors>
+        <!-- Deviation (DEVIATIONS.md, Behaviors gallery): the behavior of the port is not generic (the
+             types of the interaction travel with it), so it takes no x:TypeArguments. -->
+        <InteractionTriggerBehavior Interaction="{Binding TestInteraction}">
+          <ChangePropertyAction TargetObject="TargetTextBox"
+                                PropertyName="Text"
+                                Value="Triggered" />
+        </InteractionTriggerBehavior>
+      </Interaction.Behaviors>
+    </Button>
+  </StackPanel>
+</UserControl>

@@ -1,0 +1,45 @@
+<UserControl xmlns="https://github.com/ferroui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:material="using:FerroUI.Themes.Material"
+             x:Class="MaterialThemeGallery.Pages.AppBarsPage">
+  <StackPanel Margin="24" Spacing="16">
+    <StackPanel Spacing="4">
+      <TextBlock Theme="{StaticResource MaterialHeadlineMedium}" Text="Room for what matters"/>
+      <TextBlock Theme="{StaticResource MaterialBodyMedium}" Text="Scroll the library, drag its title, or switch the way it moves." TextWrapping="Wrap"/>
+    </StackPanel>
+    <WrapPanel ItemSpacing="8" LineSpacing="8">
+      <Button x:Name="NextVariant" Content="Large flexible" Theme="{StaticResource MaterialTonalButton}"/>
+      <Button x:Name="NextBehavior" Content="Collapse, then scroll" Theme="{StaticResource MaterialOutlinedButton}"/>
+      <Button x:Name="ToggleSubtitle" Content="Hide subtitle" Theme="{StaticResource MaterialTextButton}"/>
+      <Button x:Name="ToggleDirection" Content="Reverse direction" Theme="{StaticResource MaterialTextButton}"/>
+    </WrapPanel>
+    <Border Height="640" BorderThickness="1" BorderBrush="{DynamicResource MaterialOutlineVariantBrush}" CornerRadius="24" ClipToBounds="True">
+      <Grid x:Name="DemoSurface" RowDefinitions="Auto,*">
+        <material:MaterialAppBar x:Name="DemoBar" Title="Your library" Subtitle="Stories to return to"
+                                SizeVariant="LargeFlexible" ScrollBehavior="ExitUntilCollapsed">
+          <material:MaterialAppBar.Navigation>
+            <Button x:Name="BackToTop" Theme="{StaticResource MaterialIconButton}" AutomationProperties.Name="Back to top" ToolTip.Tip="Back to top">
+              <PathIcon Theme="{StaticResource MaterialSymbolIcon}" Width="24" Height="24" Data="M20,11 L7.8,11 L13.4,5.4 L12,4 L4,12 L12,20 L13.4,18.6 L7.8,13 L20,13 Z"/>
+            </Button>
+          </material:MaterialAppBar.Navigation>
+          <material:MaterialAppBar.Actions>
+            <Button x:Name="ExpandBar" Theme="{StaticResource MaterialIconButton}" AutomationProperties.Name="Expand app bar" ToolTip.Tip="Expand app bar">
+              <PathIcon Theme="{StaticResource MaterialSymbolIcon}" Width="24" Height="24" Data="M6,8 L12,14 L18,8 L19.4,9.4 L12,16.8 L4.6,9.4 Z"/>
+            </Button>
+          </material:MaterialAppBar.Actions>
+        </material:MaterialAppBar>
+        <ScrollViewer x:Name="LibraryScroll" Grid.Row="1" HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto">
+          <StackPanel Margin="16" Spacing="12">
+            <ContentControl Theme="{StaticResource MaterialFilledCard}"><StackPanel Spacing="8"><TextBlock Text="Small discoveries" Theme="{StaticResource MaterialTitleLarge}"/><TextBlock Text="A collection of good ideas found in everyday places." TextWrapping="Wrap" Theme="{StaticResource MaterialBodyLarge}"/><TextBlock Text="8 stories · Updated today" Theme="{StaticResource MaterialLabelMedium}"/></StackPanel></ContentControl>
+            <ContentControl Theme="{StaticResource MaterialOutlinedCard}"><StackPanel Spacing="8"><TextBlock Text="A slower weekend" Theme="{StaticResource MaterialTitleLarge}"/><TextBlock Text="Walks, recipes and places to pause along the way." TextWrapping="Wrap" Theme="{StaticResource MaterialBodyLarge}"/><TextBlock Text="12 stories · Saved for later" Theme="{StaticResource MaterialLabelMedium}"/></StackPanel></ContentControl>
+            <ContentControl Theme="{StaticResource MaterialFilledCard}"><StackPanel Spacing="8"><TextBlock Text="Making things" Theme="{StaticResource MaterialTitleLarge}"/><TextBlock Text="Notes on materials, patient practice and finishing a project." TextWrapping="Wrap" Theme="{StaticResource MaterialBodyLarge}"/><TextBlock Text="6 stories · Your collection" Theme="{StaticResource MaterialLabelMedium}"/></StackPanel></ContentControl>
+            <ContentControl Theme="{StaticResource MaterialOutlinedCard}"><StackPanel Spacing="8"><TextBlock Text="Outside the city" Theme="{StaticResource MaterialTitleLarge}"/><TextBlock Text="Routes through the woods and views worth getting up for." TextWrapping="Wrap" Theme="{StaticResource MaterialBodyLarge}"/><TextBlock Text="9 stories · Your collection" Theme="{StaticResource MaterialLabelMedium}"/></StackPanel></ContentControl>
+            <ContentControl Theme="{StaticResource MaterialFilledCard}"><StackPanel Spacing="8"><TextBlock Text="New perspectives" Theme="{StaticResource MaterialTitleLarge}"/><TextBlock Text="Thoughtful conversations with people who see things differently." TextWrapping="Wrap" Theme="{StaticResource MaterialBodyLarge}"/><TextBlock Text="15 stories · Recently added" Theme="{StaticResource MaterialLabelMedium}"/></StackPanel></ContentControl>
+            <ContentControl Theme="{StaticResource MaterialOutlinedCard}"><StackPanel Spacing="8"><TextBlock Text="Something to learn" Theme="{StaticResource MaterialTitleLarge}"/><TextBlock Text="A little time each day for a skill you have always wanted." TextWrapping="Wrap" Theme="{StaticResource MaterialBodyLarge}"/><TextBlock Text="7 stories · Keep exploring" Theme="{StaticResource MaterialLabelMedium}"/></StackPanel></ContentControl>
+            <ContentControl Theme="{StaticResource MaterialFilledCard}"><StackPanel Spacing="8"><TextBlock Text="From the archive" Theme="{StaticResource MaterialTitleLarge}"/><TextBlock Text="Good stories are worth coming back to." TextWrapping="Wrap" Theme="{StaticResource MaterialBodyLarge}"/><TextBlock Text="21 stories · All your favorites" Theme="{StaticResource MaterialLabelMedium}"/></StackPanel></ContentControl>
+          </StackPanel>
+        </ScrollViewer>
+      </Grid>
+    </Border>
+  </StackPanel>
+</UserControl>

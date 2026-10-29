@@ -112,6 +112,7 @@ pub const FRAMEWORK_EVALUATORS: &[(&str, FrameworkEvaluatorKind)] = {
         ("EnsureCapacityNode", Node),
         ("HandleRootObjectScopeNode", Node),
         ("XamlSourceInfoValueManipulation", Node),
+        ("DevelopmentKeyNode", Node),
         ("NewServiceProviderNode", Node),
         ("XamlIlBindingPathNode", Node),
         ("XamlIlNotPathElementNode", BindingPathElement),

@@ -1,0 +1,62 @@
+[package]
+name = "ferroui-themes-material"
+description = "Android Material 3 Expressive theme for FerroUI with compiled XAML, light and dark color schemes, expressive motion and touch-first control templates"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license = "MIT AND Apache-2.0 AND OFL-1.1"
+repository.workspace = true
+homepage.workspace = true
+readme.workspace = true
+keywords.workspace = true
+categories.workspace = true
+build = "build.rs"
+# The build script hands the path of `compiled_xaml.xamlmeta` to the build scripts of the crates that
+# depend on this one (`DEP_FERROUI_THEMES_MATERIAL_XAML_XAMLMETA`; docs/porting/xaml.md, 9.6.3).
+links = "ferroui_themes_material_xaml"
+
+# Unit tests live next to the code (`tests/` modules of the library), not as
+# integration test targets.
+autotests = false
+autobenches = false
+autoexamples = false
+
+[lib]
+path = "lib.rs"
+
+[features]
+default = []
+# Reads Android 12+ system palettes through the existing platform context.
+android-dynamic-color = ["dep:ferroui-android"]
+
+[target.'cfg(target_os = "android")'.dependencies]
+ferroui-android = { workspace = true, optional = true }
+
+[dependencies]
+# Pinned CAM16/HCT implementation; keeps the workspace Rust 1.89 minimum.
+material-colors = { version = "=0.4.2", default-features = false, features = ["libm"] }
+# The compiled markup of the theme (`compiled_xaml.rs`) calls the typed functions of the declared
+# members, which exist with this feature (docs/porting/xaml-compiler/HANDOVER.md, section 7, "Cost").
+ferroui-base = { workspace = true, features = ["markup-functions"] }
+ferroui-controls = { workspace = true }
+# The managed dialogs, whose control themes are part of the theme (as for the Fluent theme).
+ferroui-dialogs = { workspace = true }
+ferroui-markup-xaml = { workspace = true }
+
+[build-dependencies]
+# The build script compiles the documents of the theme against the type models (`build.rs`): the
+# compiler, which reads the types from the scan of the sources of this crate and from the models the
+# crates it is built on export.
+ferroui-build = { workspace = true }
+
+[dev-dependencies]
+ferroui-base = { workspace = true, features = ["testing"] }
+ferroui-controls = { workspace = true, features = ["testing"] }
+# The theme is loaded from its compiled markup (`compiled_xaml.rs`); the run-time XAML loader and
+# its emitter generate that file and check it (`tests/compiled_xaml_tests.rs`), and the tests load
+# documents at run time.
+ferroui-markup-xaml-loader = { workspace = true, features = ["runtime", "testing", "emitter"] }
+
+# The group of the crate in the table of the README (docs/release.md).
+[package.metadata.release]
+group = "controls"

@@ -18,6 +18,8 @@ mod resource_dictionary;
 mod resource_key;
 mod resource_node_extensions;
 mod resource_provider;
+#[doc(hidden)]
+pub mod resource_preview;
 mod resources_changed_event_args;
 
 pub use child_name_scope::ChildNameScope;
@@ -33,6 +35,8 @@ pub use name_scope::NameScope;
 pub use name_scope_extensions::NameScopeExtensions;
 pub use name_scope_locator::NameScopeLocator;
 pub use resource_dictionary::ResourceDictionary;
+#[cfg(all(debug_assertions, feature = "hot-reload"))]
+pub use resource_dictionary::{ResourceDictionaryChange, ResourceDictionaryOwnership};
 pub use resource_key::{ResourceKey, ResourceKeyObject};
 pub use resource_node_extensions::{get_floating_resource_observable, ResourceConverter};
 pub use resource_provider::{ResourceProvider, ResourceProviderImpl, ResourceProviderImplExt, ResourceProviderVTable};
@@ -40,3 +44,7 @@ pub use resources_changed_event_args::ResourcesChangedEventArgs;
 
 #[cfg(test)]
 mod resource_tests;
+
+#[cfg(all(debug_assertions, feature = "hot-reload"))]
+#[doc(hidden)]
+pub mod resource_provenance;

@@ -1,0 +1,98 @@
+<!-- macOS 26 adaptation; see docs/porting/macos26-theme.md.
+     Derived from FerroUI WinUI templates and microsoft-ui-xaml commit
+     7e4b0c2096be402f51cc8f7d203ebf67cff183d0. Copyright (c) Microsoft Corporation.
+     Licensed under the MIT License; see NOTICE.md.
+     Acrylic backing is the portable fallback for native Liquid Glass. -->
+<ResourceDictionary xmlns="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" x:ClassModifier="internal">
+  <Design.PreviewWith>
+    <Border Padding="20">
+      <Menu>
+        <MenuItem Header="_File">
+          <MenuItem Header="_Open"/>
+        </MenuItem>
+        <MenuItem Header="_Edit"/>
+        <MenuItem Header="Disabled" IsEnabled="False"/>
+      </Menu>
+    </Border>
+  </Design.PreviewWith>
+  <ControlTheme x:Key="DefaultMenuBarItemStyle" TargetType="MenuItem">
+    <Setter Property="MinHeight" Value="24"/>
+    <Setter Property="Foreground" Value="{DynamicResource MenuBarItemForeground}"/>
+    <Setter Property="Background" Value="{DynamicResource MenuBarItemBackground}"/>
+    <Setter Property="BorderThickness" Value="{DynamicResource MenuBarItemBorderThickness}"/>
+    <Setter Property="BorderBrush" Value="{DynamicResource MenuBarItemBorderBrush}"/>
+    <Setter Property="Margin" Value="0"/>
+    <Setter Property="CornerRadius" Value="5"/>
+    <Setter Property="IsTabStop" Value="True"/>
+    <Setter Property="FocusAdorner">
+      <FocusAdornerTemplate>
+        <Border Margin="-3" BorderThickness="3" BorderBrush="{DynamicResource SystemControlFocusVisualPrimaryBrush}" CornerRadius="{DynamicResource ControlCornerRadius}" IsHitTestVisible="False"/>
+      </FocusAdornerTemplate>
+    </Setter>
+    <Setter Property="Template">
+      <ControlTemplate>
+        <Panel>
+          <Border x:Name="ContentRoot" Background="{TemplateBinding Background}" CornerRadius="{TemplateBinding CornerRadius}">
+            <Panel>
+              <Border x:Name="Background" Background="{TemplateBinding Background}" CornerRadius="{TemplateBinding CornerRadius}" BorderThickness="{TemplateBinding BorderThickness}" BorderBrush="{TemplateBinding BorderBrush}" BackgroundSizing="InnerBorderEdge"/>
+              <ContentPresenter x:Name="PART_HeaderPresenter" Content="{TemplateBinding Header}" ContentTemplate="{TemplateBinding HeaderTemplate}" Foreground="{TemplateBinding Foreground}" Background="Transparent" Padding="10,3" CornerRadius="{DynamicResource ControlCornerRadius}" FontFamily="{DynamicResource ContentControlThemeFontFamily}" FontSize="{DynamicResource ControlContentThemeFontSize}" FontWeight="Normal" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" VerticalAlignment="Stretch" RecognizesAccessKey="True"/>
+            </Panel>
+          </Border>
+          <Popup x:Name="PART_Popup" WindowManagerAddShadowHint="False" Placement="BottomEdgeAlignedLeft" IsLightDismissEnabled="True" IsOpen="{TemplateBinding IsSubMenuOpen, Mode=TwoWay}" OverlayInputPassThroughElement="{Binding $parent[Menu]}">
+            <Border x:Name="ThemeShadowWrapper" BoxShadow="{DynamicResource MacOSMenuShadow}" Margin="{StaticResource ThemeShadowFlyoutMargin}" CornerRadius="{DynamicResource OverlayCornerRadius}">
+              <Border Background="Transparent" BorderBrush="{DynamicResource MenuFlyoutPresenterBorderBrush}" BorderThickness="{DynamicResource MenuFlyoutPresenterBorderThemeThickness}" CornerRadius="{DynamicResource OverlayCornerRadius}" MinWidth="{DynamicResource FlyoutThemeMinWidth}" MinHeight="{StaticResource MenuFlyoutThemeMinHeight}" BackgroundSizing="InnerBorderEdge">
+                <Panel>
+                  <ExperimentalAcrylicBorder Material="{DynamicResource MacOSMenuGlassMaterial}" IsHitTestVisible="False" CornerRadius="{DynamicResource OverlayCornerRadius}"/>
+                  <ScrollViewer x:Name="MenuFlyoutPresenterScrollViewer" Theme="{StaticResource MenuFlyoutPresenterScrollViewer}" Margin="{StaticResource MenuFlyoutPresenterThemePadding}">
+                    <ItemsPresenter x:Name="PART_ItemsPresenter" ItemsPanel="{TemplateBinding ItemsPanel}" KeyboardNavigation.TabNavigation="Continue" Grid.IsSharedSizeScope="True"/>
+                  </ScrollViewer>
+                </Panel>
+              </Border>
+            </Border>
+          </Popup>
+        </Panel>
+      </ControlTemplate>
+    </Setter>
+    <Style Selector="^:open /template/ Border#Background">
+      <Setter Property="Background" Value="{DynamicResource MenuBarItemBackgroundSelected}"/>
+      <Setter Property="BorderBrush" Value="{DynamicResource MenuBarItemBorderBrushSelected}"/>
+    </Style>
+    <Style Selector="^:selected:not(MenuItem:open) /template/ Border#Background, ^:open /template/ Border#ContentRoot:pointerover Border#Background">
+      <Setter Property="Background" Value="{DynamicResource MenuBarItemBackgroundPointerOver}"/>
+      <Setter Property="BorderBrush" Value="{DynamicResource MenuBarItemBorderBrushPointerOver}"/>
+    </Style>
+    <Style Selector="^:selected:not(MenuItem:open) /template/ ContentPresenter#PART_HeaderPresenter, ^:open /template/ Border#ContentRoot:pointerover ContentPresenter#PART_HeaderPresenter">
+      <Setter Property="Foreground" Value="{DynamicResource ButtonForegroundPointerOver}"/>
+    </Style>
+    <Style Selector="^:pressed /template/ Border#ContentRoot:pointerover">
+      <Style Selector="^ Border#Background">
+        <Setter Property="Background" Value="{DynamicResource MenuBarItemBackgroundPressed}"/>
+        <Setter Property="BorderBrush" Value="{DynamicResource MenuBarItemBorderBrushPressed}"/>
+      </Style>
+      <Style Selector="^ ContentPresenter#PART_HeaderPresenter">
+        <Setter Property="Foreground" Value="{DynamicResource ButtonForegroundPressed}"/>
+      </Style>
+    </Style>
+    <Style Selector="^:disabled /template/ ContentPresenter#PART_HeaderPresenter">
+      <Setter Property="Foreground" Value="{DynamicResource ButtonForegroundDisabled}"/>
+    </Style>
+  </ControlTheme>
+  <ControlTheme x:Key="DefaultMenuBarStyle" TargetType="Menu">
+    <Setter Property="Background" Value="{DynamicResource MenuBarBackground}"/>
+    <Setter Property="IsTabStop" Value="False"/>
+    <Setter Property="MinHeight" Value="26"/>
+    <Setter Property="KeyboardNavigation.TabNavigation" Value="Once"/>
+    <Setter Property="ItemContainerTheme" Value="{StaticResource DefaultMenuBarItemStyle}"/>
+    <Setter Property="Template">
+      <ControlTemplate>
+        <Border x:Name="LayoutRoot" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BackgroundSizing="InnerBorderEdge" BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="{TemplateBinding CornerRadius}" Padding="{TemplateBinding Padding}" HorizontalAlignment="Stretch">
+          <ItemsPresenter x:Name="PART_ItemsPresenter" ItemsPanel="{TemplateBinding ItemsPanel}" VerticalAlignment="Stretch" HorizontalAlignment="Left" KeyboardNavigation.TabNavigation="Continue"/>
+        </Border>
+      </ControlTemplate>
+    </Setter>
+  </ControlTheme>
+  <ControlTheme x:Key="{x:Type Menu}" TargetType="Menu" BasedOn="{StaticResource DefaultMenuBarStyle}">
+    <Setter Property="Background" Value="Transparent"/>
+    <Setter Property="FontSize" Value="{DynamicResource ControlContentThemeFontSize}"/>
+  </ControlTheme>
+</ResourceDictionary>

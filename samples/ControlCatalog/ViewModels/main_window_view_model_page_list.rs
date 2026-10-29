@@ -125,6 +125,8 @@ pub(super) fn page_sections() -> (Vec<Rc<HomeSection>>, Vec<UnavailablePage>) {
             );
             s.add("/Pages/CustomDrawing.xaml", "Custom Drawing", Icons::BRUSH, "Render custom geometry in code");
             s.add("/Pages/ImagePage.xaml", "Image", Icons::IMAGE, "Display bitmaps with different stretch modes");
+            // Not from upstream: the page of the port of the inking controls of WinUI.
+            s.add("/Pages/InkingPage.xaml", "Inking", Icons::CANVAS, "Pressure-sensitive ink, pens, eraser and stencil guides");
             s.add("/Pages/OpenGlPage.xaml", "OpenGL", Icons::CUBE_3D, "Embed custom OpenGL rendering");
             s.add("/Pages/OpenGl/OpenGlLeasePage.xaml", "OpenGL Lease", Icons::CUBE_3D, "Low-level access to the OpenGL context");
             s.add("/Pages/OpenGl/OpenGlInteropPage.xaml", "OpenGL Interop", Icons::CUBE_3D, "Compositor and OpenGL interop");

@@ -1,0 +1,57 @@
+//! The public Rust paths of the registered types of this crate, by the shortest path another crate
+//! names it by; the emitter of Rust source of the markup compiler reads them.
+
+ferroui_base::ferro_rust_paths! {
+    classes: [
+        crate::DoubleTappedEventBehavior,
+        crate::DoubleTappedEventTrigger,
+        crate::DragEnterEventTrigger,
+        crate::DragLeaveEventTrigger,
+        crate::DragOverEventTrigger,
+        crate::DropEventTrigger,
+        crate::GotFocusEventBehavior,
+        crate::GotFocusEventTrigger,
+        crate::KeyDownEventBehavior,
+        crate::KeyDownEventTrigger,
+        crate::KeyUpEventBehavior,
+        crate::KeyUpEventTrigger,
+        crate::LostFocusEventBehavior,
+        crate::LostFocusEventTrigger,
+        crate::PointerCaptureLostEventBehavior,
+        crate::PointerCaptureLostEventTrigger,
+        crate::PointerEnteredEventBehavior,
+        crate::PointerEnteredEventTrigger,
+        crate::PointerEventsBehavior,
+        crate::PointerEventsTrigger,
+        crate::PointerExitedEventBehavior,
+        crate::PointerExitedEventTrigger,
+        crate::PointerMovedEventBehavior,
+        crate::PointerMovedEventTrigger,
+        crate::PointerPressedEventBehavior,
+        crate::PointerPressedEventTrigger,
+        crate::PointerReleasedEventBehavior,
+        crate::PointerReleasedEventTrigger,
+        crate::PointerWheelChangedEventBehavior,
+        crate::PointerWheelChangedEventTrigger,
+        crate::RightTappedEventBehavior,
+        crate::RightTappedEventTrigger,
+        crate::ScrollGestureEndedEventBehavior,
+        crate::ScrollGestureEndedEventTrigger,
+        crate::ScrollGestureEventBehavior,
+        crate::ScrollGestureEventTrigger,
+        crate::TappedEventBehavior,
+        crate::TappedEventTrigger,
+        crate::TextInputEventBehavior,
+        crate::TextInputEventTrigger,
+        crate::TextInputMethodClientRequestedEventBehavior,
+        crate::TextInputMethodClientRequestedEventTrigger,
+    ],
+    types: [
+    ],
+    contracts: [
+    ],
+    generics: [
+    ],
+    generic_contracts: [
+    ],
+}

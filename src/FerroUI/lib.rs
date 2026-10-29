@@ -26,9 +26,12 @@
 //! | `themes_fluent` | `ferroui-themes-fluent` | `fluent` | yes |
 //! | `themes_simple` | `ferroui-themes-simple` | `simple` | no |
 //! | `themes_winui` | `ferroui-themes-winui` | `winui-theme` | no |
+//! | `themes_macos` | `ferroui-themes-macos` | `macos-theme` | no |
+//! | `themes_material` | `ferroui-themes-material` | `material-theme` | no |
 //! | `markup_xaml`, `markup_xaml_loader` | `ferroui-markup-xaml`, `ferroui-markup-xaml-loader` (run-time loading) | `xaml` | no |
 //! | `controls_color_picker` | `ferroui-controls-color-picker` | `color-picker` | no |
 //! | `controls_charts` | `ferroui-controls-charts` | `charts` | no |
+//! | `controls_inking` | `ferroui-controls-inking` | `inking` | no |
 //! | `controls_treedatagrid`, `treedatagrid_core` | `ferroui-controls-treedatagrid`, `ferroui-treedatagrid-core` | `treedatagrid` | no |
 //! | `dialogs` | `ferroui-dialogs` | `dialogs` | no |
 //! | `diagnostics` | `ferroui-diagnostics` (the developer tools) | `diagnostics` | no |
@@ -147,6 +150,10 @@ pub use ferroui_themes_fluent as themes_fluent;
 pub use ferroui_themes_simple as themes_simple;
 #[cfg(feature = "winui-theme")]
 pub use ferroui_themes_winui as themes_winui;
+#[cfg(feature = "macos-theme")]
+pub use ferroui_themes_macos as themes_macos;
+#[cfg(feature = "material-theme")]
+pub use ferroui_themes_material as themes_material;
 
 #[cfg(feature = "xaml")]
 pub use ferroui_markup_xaml as markup_xaml;
@@ -157,6 +164,8 @@ pub use ferroui_markup_xaml_loader as markup_xaml_loader;
 pub use ferroui_controls_color_picker as controls_color_picker;
 #[cfg(feature = "charts")]
 pub use ferroui_controls_charts as controls_charts;
+#[cfg(feature = "inking")]
+pub use ferroui_controls_inking as controls_inking;
 #[cfg(feature = "treedatagrid")]
 pub use ferroui_controls_treedatagrid as controls_treedatagrid;
 #[cfg(feature = "treedatagrid")]
@@ -210,7 +219,8 @@ pub mod prelude {
     //!   [`HorizontalAlignment`], [`VerticalAlignment`], [`Orientation`] and
     //!   [`Color`].
     //! - The theme of the features that are on: `FluentTheme` (`fluent`),
-    //!   `SimpleTheme` (`simple`) and `WinUITheme` (`winui-theme`).
+    //!   `SimpleTheme` (`simple`), `WinUITheme` (`winui-theme`), and
+    //!   `MaterialTheme` with bundled fonts (`material-theme`).
     //!
     //! Everything else is reached through the modules of the crate
     //! ([`crate::base`], [`crate::controls`], ...).
@@ -231,6 +241,10 @@ pub mod prelude {
     pub use ferroui_themes_simple::SimpleTheme;
     #[cfg(feature = "winui-theme")]
     pub use ferroui_themes_winui::WinUITheme;
+    #[cfg(feature = "macos-theme")]
+    pub use ferroui_themes_macos::MacOSTheme;
+    #[cfg(feature = "material-theme")]
+    pub use ferroui_themes_material::{MaterialTheme, MaterialAppBuilderExtension};
 }
 
 /// Chrome DevTools Protocol inspection and automation.

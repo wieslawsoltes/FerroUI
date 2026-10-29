@@ -1,0 +1,87 @@
+<!-- macOS 26 theme: the control theme of the WinUI theme (src/FerroUI.Themes.WinUI/Controls/ProgressRing.xaml),
+     as docs/porting/macos26-theme.md derives every control theme of the WinUI theme; the resources are this theme's. -->
+<!--
+  Ported from microsoft-ui-xaml (https://github.com/microsoft/microsoft-ui-xaml),
+  commit 7e4b0c2096be402f51cc8f7d203ebf67cff183d0:
+    controls/dev/ProgressRing/ProgressRing.xaml (the implicit ProgressRing style; the resources of
+    ProgressRing_themeresources.xaml are Resources/ProgressRing_themeresources.xaml)
+    controls/dev/ProgressRing/AnimatedVisuals/ProgressRingIndeterminate.cpp (the geometry of the
+    ring)
+  Copyright (c) Microsoft Corporation. Licensed under the MIT License (see NOTICE.md of the crate).
+
+  The template of WinUI's ProgressRing, which FerroUI ports as a control (ferroui-controls,
+  docs/porting/winui-controls.md); the Fluent theme has no document for it.
+  Translation notes (docs/porting/winui-theme.md, section 4):
+  - The AnimatedVisualPlayer LottiePlayer of WinUI plays the Lottie compositions of the control
+    (ProgressRingIndeterminate, ProgressRingDeterminate) with the Foreground and the Background of
+    the ring. FerroUI has no player: LottiePlayer is a Viewbox (Stretch Fill, as the player) of the
+    80 x 80 shape visual of the indeterminate composition, its ellipse of radius 35 drawn with a
+    stroke of 7.5 with round caps: the track, PART_Track, in the Background, and the arc of the
+    progress, PART_Indicator, in the Foreground, whose angles the control moves as WinUI plays the
+    compositions. The determinate composition (a ring of radius 14.16 and stroke 2.655 in 32 x 32)
+    is drawn with the same geometry.
+  - CommonStates are the pseudo-classes the control sets (ProgressRing.cpp calls GoToState):
+    Active is :active, DeterminateActive is :determinate-active, Inactive is :inactive. The
+    AccessibilityView of LottiePlayer in the state Inactive is left out (the control sets the view
+    of the ring).
+  - IsTabStop is IsTabStop.
+-->
+<ResourceDictionary xmlns="https://github.com/ferroui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    x:ClassModifier="internal">
+  <Design.PreviewWith>
+    <Border Padding="20">
+      <StackPanel Orientation="Horizontal" Spacing="20">
+        <ProgressRing />
+        <ProgressRing IsIndeterminate="False" Value="60" />
+        <ProgressRing Width="60" Height="60" />
+      </StackPanel>
+    </Border>
+  </Design.PreviewWith>
+
+  <ControlTheme x:Key="{x:Type ProgressRing}" TargetType="ProgressRing">
+    <Setter Property="Foreground" Value="{DynamicResource ProgressRingForegroundThemeBrush}" />
+    <Setter Property="Background" Value="{DynamicResource ProgressRingBackgroundThemeBrush}" />
+    <Setter Property="IsHitTestVisible" Value="False" />
+    <Setter Property="HorizontalAlignment" Value="Center" />
+    <Setter Property="VerticalAlignment" Value="Center" />
+    <Setter Property="MinHeight" Value="16" />
+    <Setter Property="MinWidth" Value="16" />
+    <Setter Property="IsTabStop" Value="False" />
+    <Setter Property="Width" Value="32" />
+    <Setter Property="Height" Value="32" />
+    <Setter Property="Maximum" Value="100" />
+    <Setter Property="Template">
+      <ControlTemplate>
+        <Grid x:Name="LayoutRoot" Background="Transparent">
+          <!-- The AnimatedVisualPlayer for Lottie. -->
+          <Viewbox x:Name="LottiePlayer" Stretch="Fill">
+            <Grid Width="80" Height="80">
+              <Arc x:Name="PART_Track"
+                   Width="77.5"
+                   Height="77.5"
+                   StartAngle="-90"
+                   SweepAngle="360"
+                   Stroke="{TemplateBinding Background}"
+                   StrokeThickness="7.5"
+                   StrokeLineCap="Round" />
+              <Arc x:Name="PART_Indicator"
+                   Width="77.5"
+                   Height="77.5"
+                   StartAngle="-90"
+                   SweepAngle="0"
+                   Stroke="{TemplateBinding Foreground}"
+                   StrokeThickness="7.5"
+                   StrokeLineCap="Round" />
+            </Grid>
+          </Viewbox>
+        </Grid>
+      </ControlTemplate>
+    </Setter>
+
+    <!-- CommonStates: Inactive (DeterminateActive and Active set nothing). -->
+    <Style Selector="^:inactive /template/ Grid#LayoutRoot">
+      <Setter Property="Opacity" Value="0" />
+    </Style>
+  </ControlTheme>
+</ResourceDictionary>

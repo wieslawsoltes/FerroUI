@@ -96,6 +96,9 @@ GROUPS = [
     ("dialogs", "dialogs.rs", [
         ("src/FerroUI.Dialogs", "ferroui_dialogs"),
     ], {}),
+    ("inking", "inking.rs", [
+        ("src/FerroUI.Controls.Inking", "ferroui_controls_inking"),
+    ], {}),
     ("reactiveui", "reactiveui.rs", [
         ("src/FerroUI.ReactiveUI.Controls", "ferroui_reactiveui_controls"),
     ], {

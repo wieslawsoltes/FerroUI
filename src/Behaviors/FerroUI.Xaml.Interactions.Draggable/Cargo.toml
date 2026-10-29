@@ -1,0 +1,61 @@
+[package]
+name = "ferroui-xaml-interactions-draggable"
+description = "Draggable behaviors of FerroUI: moving elements in a canvas, in a grid or by a translation, reordering the items of an items control with an optional placeholder, scrolling a scroll viewer while dragging, and the styles that make tab controls, list boxes, canvases and grids draggable"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+homepage.workspace = true
+readme.workspace = true
+keywords.workspace = true
+categories.workspace = true
+build = "build.rs"
+# The build script compiles the styles document of the crate and exports its type model with it;
+# Cargo hands the path of the file to the build scripts of the crates that depend on this one
+# (`DEP_FERROUI_XAML_INTERACTIONS_DRAGGABLE_XAML_XAMLMETA`; docs/porting/xaml.md, 9.5.13 and
+# 9.6.3): a document that names the behaviors of this crate or includes its styles.
+links = "ferroui_xaml_interactions_draggable_xaml"
+
+# Unit tests live next to the code (the `tests/` module of the library), not as integration test
+# targets.
+autotests = false
+autobenches = false
+autoexamples = false
+
+[lib]
+path = "lib.rs"
+
+[features]
+# The styles document is also embedded as an asset of the assembly, next to its compiled markup: for
+# an application that loads its own markup at run time and includes the styles (the run-time loader
+# leaves an include of a document of another assembly to run time only for a document the asset
+# loader has; docs/porting/xaml.md, 9.5.20 and decision 22).
+document-assets = []
+
+[dependencies]
+# The compiled markup of the crate calls the typed functions of the declared members, which exist
+# with this feature.
+ferroui-base = { workspace = true, features = ["markup-functions"] }
+ferroui-controls = { workspace = true }
+# The runtime library of compiled markup (the styles document).
+ferroui-markup-xaml = { workspace = true }
+# The observable collection an items source can be, whose items a drag reorders.
+ferroui-system = { workspace = true }
+ferroui-xaml-interactivity = { workspace = true }
+
+[build-dependencies]
+# The build script compiles the styles document against the type models (`build.rs`).
+ferroui-build = { workspace = true }
+
+[dev-dependencies]
+ferroui-themes-fluent = { workspace = true }
+ferroui-base = { workspace = true, features = ["testing"] }
+ferroui-controls = { workspace = true, features = ["testing"] }
+# The windows of the ported tests are loaded with the run-time loader, as the template tests of the
+# behaviors do.
+ferroui-markup-xaml-loader = { workspace = true, features = ["runtime", "testing", "emitter"] }
+
+# The group of the crate in the table of the README (docs/release.md).
+[package.metadata.release]
+group = "controls"

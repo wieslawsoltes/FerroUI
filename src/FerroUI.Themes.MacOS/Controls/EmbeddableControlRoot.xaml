@@ -1,0 +1,36 @@
+<!--
+  Not ported from a style: WinUI 3 has no counterpart of FerroUI's EmbeddableControlRoot (the root
+  of FerroUI content hosted in another UI). The template is the one the control requires
+  (src/FerroUI.Themes.Fluent/Controls/EmbeddableControlRoot.xaml); the values are the resources of
+  a window of microsoft-ui-xaml (https://github.com/microsoft/microsoft-ui-xaml, commit
+  7e4b0c2096be402f51cc8f7d203ebf67cff183d0), as Window.xaml (docs/porting/winui-theme.md,
+  section 6), and the placement of the text of text blocks in the height layout rounding adds,
+  as Window.xaml.
+-->
+<ResourceDictionary xmlns="https://github.com/ferroui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    x:ClassModifier="internal">
+  <ControlTheme x:Key="{x:Type EmbeddableControlRoot}" TargetType="EmbeddableControlRoot">
+    <Setter Property="Foreground" Value="{DynamicResource TextFillColorPrimaryBrush}" />
+    <Setter Property="Background" Value="{DynamicResource SolidBackgroundFillColorBaseBrush}" />
+    <Setter Property="TopLevel.SystemBarColor" Value="{DynamicResource SolidBackgroundFillColorBaseBrush}" />
+    <Setter Property="FontSize" Value="{DynamicResource ControlContentThemeFontSize}" />
+    <Setter Property="FontFamily" Value="{DynamicResource ContentControlThemeFontFamily}" />
+    <Setter Property="TextBlock.LayoutRoundingPlacement" Value="Above" />
+    <Setter Property="Template">
+      <ControlTemplate>
+        <Panel>
+          <Border Name="PART_TransparencyFallback" IsHitTestVisible="False" />
+          <Border Background="{TemplateBinding Background}">
+            <VisualLayerManager Name="PART_VisualLayerManager">
+              <ContentPresenter Name="PART_ContentPresenter"
+                                ContentTemplate="{TemplateBinding ContentTemplate}"
+                                Content="{TemplateBinding Content}"
+                                Margin="{TemplateBinding Padding}" />
+            </VisualLayerManager>
+          </Border>
+        </Panel>
+      </ControlTemplate>
+    </Setter>
+  </ControlTheme>
+</ResourceDictionary>

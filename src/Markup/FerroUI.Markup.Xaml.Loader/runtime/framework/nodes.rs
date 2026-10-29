@@ -27,7 +27,7 @@ use crate::compiler_extensions::transformers::{
     XamlIlNthChildSelectorType, XamlIlOrQueryNode, XamlIlOrSelectorNode, XamlIlPropertyEqualsSelector,
     XamlIlQueryInitialNode, XamlIlQueryNode, XamlIlSelectorInitialNode, XamlIlSelectorNode, XamlIlStringQuery,
     XamlIlStringSelector, XamlIlStringSelectorType, XamlIlTypeQuery, XamlIlTypeSelector, XamlIlWidthQuery,
-    XamlSourceInfoValueManipulation,
+    XamlSourceInfoValueManipulation, DevelopmentKeyNode,
 };
 use crate::compiler_extensions::{
     XamlIlBindingPathNode, XamlIlFerroClassProperty, XamlIlFerroPropertyFieldNode, XamlIlFerroPropertyHelper,
@@ -95,6 +95,12 @@ impl IXamlNodeEvaluator for FrameworkNodeEvaluator {
             }));
         }
         // Manipulations.
+        if let Some(n) = node.cast::<DevelopmentKeyNode>() {
+            return Some((|| {
+                ferroui_markup_xaml::xaml_il::runtime::compiled::set_development_key(&context.target()?, &n.key);
+                Ok(EvalResult::void())
+            })());
+        }
         if let Some(n) = node.cast::<FerroNameScopeRegistrationXamlIlNode>() {
             return Some(name_scope_registration(&n, context));
         }

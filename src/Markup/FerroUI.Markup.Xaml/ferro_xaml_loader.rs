@@ -97,6 +97,11 @@ impl FerroXamlLoader {
         sp: Option<&Rc<dyn IServiceProvider>>,
         obj: &BoxedValue,
     ) -> Result<(), XamlLoadException> {
+        if let Some(object) = crate::object_casts::as_object(obj) {
+            if let Some(populate) = Self::populate_override(object.get_type()) {
+                return populate(sp, obj);
+            }
+        }
         // Without compiled markup for the class the registered run-time loader
         // populates the object, as it loads documents by URI.
         match FerroLocator::current().get_service::<dyn IRuntimeXamlLoader>() {
@@ -164,6 +169,24 @@ impl FerroXamlLoader {
                 None => return Err(XamlLoadException::with_message(RELATIVE_WITHOUT_BASE)),
             }
         };
+
+        // A development revision must win over compiled assets, including lazy includes.
+        // An invalid draft is an error, never permission to fall back to the old document.
+        #[cfg(all(feature = "hot-reload", debug_assertions))]
+        if let Some(source) = crate::source_overlay::source(absolute_uri.absolute_uri()) {
+            let runtime = FerroLocator::current().get_service::<dyn IRuntimeXamlLoader>()
+                .ok_or_else(|| XamlLoadException::with_message("A source overlay requires the runtime XAML loader"))?;
+            let mut document = RuntimeXamlLoaderDocument::with_base_uri(Some(absolute_uri), &source);
+            document.service_provider = sp.cloned();
+            let mut configuration = RuntimeXamlLoaderConfiguration::default();
+            configuration.local_assembly = asset_locator.get_assembly(uri, base_uri)
+                .and_then(|assembly| MarkupAssembly::find(assembly.name()).or_else(|| {
+                    // URI authorities are case-insensitive; metadata assembly names retain case.
+                    MarkupAssembly::registered_assemblies().into_iter()
+                        .find(|registered| registered.name.eq_ignore_ascii_case(assembly.name()))
+                }));
+            return runtime.load(document, configuration);
+        }
 
         let compiled_loader =
             asset_locator.get_assembly(uri, base_uri).and_then(|assembly| Self::compiled_loader(assembly.name()));

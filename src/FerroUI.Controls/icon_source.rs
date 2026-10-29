@@ -74,7 +74,9 @@ impl FerroObjectImpl for IconSource {
                 // A source property of a nullable type for a property of the element that is not
                 // (FontIconSource.FontFamily): no value leaves the element's own.
                 match ValueTypes::normalize(value) {
-                    Some(value) => element.set_value_untyped(target, value.as_any(), BindingPriority::LocalValue),
+                    Some(value) => {
+                        element.set_value_untyped(target, value.as_any(), BindingPriority::LocalValue);
+                    }
                     None => element.clear_value_untyped(target),
                 }
             }

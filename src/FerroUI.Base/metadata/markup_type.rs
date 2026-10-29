@@ -27,6 +27,7 @@
 //! are the caller's business.
 
 use crate::data::core::{ValueType, ValueTypes, WeakValue};
+use crate::reactive::IDisposable;
 use crate::{BoxedValue, TypeInfo};
 use std::any::{Any, TypeId};
 use std::collections::HashMap;
@@ -684,7 +685,7 @@ pub struct MarkupField {
 }
 
 /// An event that is not a routed event: handlers are attached through
-/// `add`.
+/// `add` (or [`subscribe`](Self::subscribe)).
 #[derive(Clone, Copy)]
 pub struct MarkupEvent {
     pub name: &'static str,
@@ -693,7 +694,78 @@ pub struct MarkupEvent {
     pub arguments: &'static [TypeOf],
     /// Subscribes a handler: `(instance, handler)`, where the handler is a
     /// [`MarkupDelegate`] called with the event arguments in untyped form.
+    /// Returns the subscription as an untyped `Rc<dyn IDisposable>`
+    /// ([`subscription_of`](Self::subscription_of)), or null when the event
+    /// offers no way to remove the handler.
     pub add: MarkupInvoke,
+}
+
+impl MarkupEvent {
+    /// Attaches `handler` to the event of `target` (the `add` accessor of the
+    /// managed event, `EventInfo.AddEventHandler`) and returns the
+    /// subscription: disposing it removes the handler (the `remove`
+    /// accessor, `EventInfo.RemoveEventHandler`). `Ok(None)` when the event
+    /// declares no way to remove a handler.
+    ///
+    /// `target` is the instance in untyped form, as for every member
+    /// invoker. The error is the one of `add`: a target that is not an
+    /// instance of the declaring type, or the failure of a fallible
+    /// subscription.
+    pub fn subscribe(
+        &self,
+        target: MarkupValue,
+        handler: MarkupDelegate,
+    ) -> Result<Option<Rc<dyn IDisposable>>, MarkupInvokeError> {
+        let handler: BoxedValue = Rc::new(handler);
+        let result = (self.add)(&[target, Some(handler)])?;
+        Ok(Self::subscription_of(&result))
+    }
+
+    /// The subscription in the result of `add`: the untyped
+    /// `Rc<dyn IDisposable>` the declaration boxed, `None` for null.
+    pub fn subscription_of(value: &MarkupValue) -> Option<Rc<dyn IDisposable>> {
+        value.as_ref()?.downcast_ref::<Rc<dyn IDisposable>>().cloned()
+    }
+
+    /// The result of `add` for what a subscription function returned: the
+    /// disposable boxed as an untyped value, null for none. Used by the
+    /// `events:` declarations of the metadata macros, and by a hand-written
+    /// `add`.
+    pub fn subscription_value(subscription: impl IntoMarkupSubscription) -> MarkupValue {
+        subscription.into_markup_subscription().map(|subscription| Rc::new(subscription) as BoxedValue)
+    }
+}
+
+/// What the subscription function of an event declaration may return: a
+/// disposable that removes the handler, or nothing (`()`) for an event that
+/// offers no way to remove a handler.
+pub trait IntoMarkupSubscription {
+    /// The subscription as a shared disposable, if there is one.
+    fn into_markup_subscription(self) -> Option<Rc<dyn IDisposable>>;
+}
+
+impl IntoMarkupSubscription for () {
+    fn into_markup_subscription(self) -> Option<Rc<dyn IDisposable>> {
+        None
+    }
+}
+
+impl IntoMarkupSubscription for Rc<dyn IDisposable> {
+    fn into_markup_subscription(self) -> Option<Rc<dyn IDisposable>> {
+        Some(self)
+    }
+}
+
+impl<T: IDisposable + 'static> IntoMarkupSubscription for Rc<T> {
+    fn into_markup_subscription(self) -> Option<Rc<dyn IDisposable>> {
+        Some(self)
+    }
+}
+
+impl IntoMarkupSubscription for Option<Rc<dyn IDisposable>> {
+    fn into_markup_subscription(self) -> Option<Rc<dyn IDisposable>> {
+        self
+    }
 }
 
 /// A member of an enumeration.

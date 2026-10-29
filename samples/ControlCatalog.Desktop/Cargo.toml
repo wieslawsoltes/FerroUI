@@ -49,6 +49,9 @@ ferroui-linuxframebuffer = { workspace = true }
 # The Simple and Fluent themes of the original beside the WinUI theme (`FERROUI_CATALOG_THEME`, the
 # settings page); off by default (docs/binary-size.md).
 classic-themes = ["control-catalog/classic-themes"]
+macos-theme = ["control-catalog/macos-theme"]
+material-theme = ["control-catalog/material-theme"]
+hot-reload = ["control-catalog/hot-reload"]
 mcp = ["dep:ferroui-mcp", "dep:ferroui-headless"]
 # Explicit opt-in to the local CDP endpoint; FERROUI_CDP_PORT starts it.
 cdp = ["dep:ferroui-devtools"]

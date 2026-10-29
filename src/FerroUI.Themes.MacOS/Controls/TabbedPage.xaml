@@ -1,0 +1,285 @@
+<!--
+  Ported from microsoft-ui-xaml (https://github.com/microsoft/microsoft-ui-xaml),
+  commit 7e4b0c2096be402f51cc8f7d203ebf67cff183d0:
+    controls/dev/NavigationView/NavigationView.xaml (the top pane of the implicit style of
+    NavigationView: TopNavArea, TopNavGrid and the content grid in the TopNavigationMinimal
+    state; the implicit style of NavigationViewItem for the font and the corner radius)
+    controls/dev/NavigationView/NavigationView_themeresources.xaml
+    (MUX_NavigationViewItemPresenterStyleWhenOnTopPane, the items of the top pane; the resources
+    are Resources/NavigationView_themeresources.xaml)
+  Copyright (c) Microsoft Corporation. Licensed under the MIT License (see NOTICE.md of the crate).
+
+  WinUI has no page of tabbed pages: an application navigates between pages with a NavigationView
+  whose pane is at the top (PaneDisplayMode="Top"). FerroUI's TabbedPage is drawn as that
+  NavigationView: the TabControl PART_TabControl it requires has the keyed theme
+  TabbedPageTabControlTheme (the top pane over the content grid) and its tabs the keyed theme
+  TabbedPageTabItemTheme (the items of the top pane). The page background is
+  ApplicationPageBackgroundThemeBrush (as Controls/ContentPage.xaml).
+
+  Translation notes (docs/porting/winui-theme.md, section 4):
+  - The ItemsRepeater TopNavMenuItemsHost with a horizontal StackLayout is the ItemsPresenter of
+    the TabControl with a horizontal StackPanel. The back button placeholder, the pane header,
+    title, custom content and footer, the overflow button (NavigationViewOverflowButtonStyleWhenPaneOnTop
+    and its flyout), the auto suggest box, the footer items and the settings item of the top pane
+    are left out: FerroUI's TabbedPage has none of them.
+  - The selection indicator of a top pane item (the Rectangle SelectionIndicator, 16 x 3, whose
+    opacity NavigationView animates to the selected item) is the content presenter of the
+    IndicatorTemplate of FerroUI's TabItem, whose default (set by the theme) is that rectangle;
+    an IndicatorTemplate of the TabbedPage replaces it. It is shown on the selected item.
+  - The icon states (IconOnLeft, IconOnly, ContentOnly) are the visibility of the icon: the margins
+    of the header (TopNavigationViewItemContentPresenterMargin with an icon,
+    TopNavigationViewItemContentOnlyContentPresenterMargin without) are the 12 px left of the
+    icon box and the 8 px after it, which show with the icon; the margin of the selection
+    indicator is the one of ContentOnly. IconOnly (an item without content) is left out.
+  - The Rectangle PointerRectangle (collapsed in every state of the top pane style) is left out.
+  - The placements of FerroUI that the top pane has not: at the bottom the pane is under the
+    content (the border of the content grid on its bottom edge, the indicator at the top of the
+    item); at the left and at the right the pane is the left pane of NavigationView, with the
+    items of Controls/TabItem.xaml for those placements and the content grid of the left pane
+    (NavigationViewContentGridBorderThickness, NavigationViewContentGridCornerRadius, mirrored
+    at the right).
+-->
+<ResourceDictionary xmlns="https://github.com/ferroui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    x:ClassModifier="internal">
+  <Design.PreviewWith>
+    <Border Width="400" Height="300">
+      <TabbedPage>
+        <ContentPage Header="Home">
+          <TextBlock Text="The home page" Margin="12" />
+        </ContentPage>
+        <ContentPage Header="Search">
+          <TextBlock Text="The search page" Margin="12" />
+        </ContentPage>
+      </TabbedPage>
+    </Border>
+  </Design.PreviewWith>
+
+  <!-- The NavigationView with its pane at the top. -->
+  <ControlTheme x:Key="TabbedPageTabControlTheme" TargetType="TabControl" BasedOn="{StaticResource {x:Type TabControl}}">
+    <Setter Property="Background" Value="{DynamicResource NavigationViewTopPaneBackground}" />
+    <Setter Property="Padding" Value="0" />
+    <Setter Property="VerticalAlignment" Value="Stretch" />
+    <!-- The items of the top pane are as wide as their content (the horizontal StackLayout of
+         TopNavMenuItemsHost), not as wide as each other as the tabs of the base theme; at the left
+         and at the right the base theme stacks them vertically. -->
+    <Setter Property="ItemsPanel">
+      <ItemsPanelTemplate>
+        <StackPanel Orientation="Horizontal" />
+      </ItemsPanelTemplate>
+    </Setter>
+    <Setter Property="Template">
+      <ControlTemplate>
+        <DockPanel>
+          <Border x:Name="TopNavArea"
+                  DockPanel.Dock="{TemplateBinding TabStripPlacement}"
+                  Background="{TemplateBinding Background}">
+            <Border x:Name="TopNavGrid"
+                    MinHeight="{DynamicResource NavigationViewTopPaneHeight}"
+                    Margin="{DynamicResource TopNavigationViewTopNavGridMargin}"
+                    Padding="{TemplateBinding Padding}">
+              <ItemsPresenter Name="PART_ItemsPresenter"
+                              ItemsPanel="{TemplateBinding ItemsPanel}"
+                              VerticalAlignment="Stretch" />
+            </Border>
+          </Border>
+          <Border x:Name="ContentGrid"
+                  BorderBrush="{DynamicResource NavigationViewContentGridBorderBrush}"
+                  BackgroundSizing="InnerBorderEdge"
+                  BorderThickness="{DynamicResource TopNavigationViewContentGridBorderThickness}"
+                  Background="{DynamicResource NavigationViewContentBackground}"
+                  CornerRadius="{DynamicResource TopNavigationViewContentGridCornerRadius}"
+                  Margin="{DynamicResource TopNavigationViewContentMargin}"
+                  ClipToBounds="True">
+            <Panel>
+              <ContentPresenter Name="PART_SelectedContentHost2"
+                                HorizontalContentAlignment="Stretch"
+                                VerticalContentAlignment="Stretch"
+                                IsVisible="False" />
+              <ContentPresenter Name="PART_SelectedContentHost"
+                                HorizontalContentAlignment="Stretch"
+                                VerticalContentAlignment="Stretch" />
+            </Panel>
+          </Border>
+        </DockPanel>
+      </ControlTemplate>
+    </Setter>
+
+    <!-- The pane under the content. -->
+    <Style Selector="^[TabStripPlacement=Bottom] /template/ Border#ContentGrid">
+      <Setter Property="BorderThickness" Value="0,0,0,1" />
+    </Style>
+    <!-- The left pane of NavigationView (PaneNotOverlaying: NavigationViewExpandedPaneBackground). -->
+    <Style Selector="^[TabStripPlacement=Left]">
+      <Setter Property="Background" Value="{DynamicResource NavigationViewExpandedPaneBackground}" />
+      <Style Selector="^ /template/ Border#TopNavGrid">
+        <Setter Property="Margin" Value="{DynamicResource NavigationViewPaneContentGridMargin}" />
+      </Style>
+      <Style Selector="^ /template/ Border#ContentGrid">
+        <Setter Property="BorderThickness" Value="{DynamicResource NavigationViewContentGridBorderThickness}" />
+        <Setter Property="CornerRadius" Value="{DynamicResource NavigationViewContentGridCornerRadius}" />
+        <Setter Property="Margin" Value="{DynamicResource NavigationViewContentMargin}" />
+      </Style>
+    </Style>
+    <!-- The same pane at the right, its content grid mirrored. -->
+    <Style Selector="^[TabStripPlacement=Right]">
+      <Setter Property="Background" Value="{DynamicResource NavigationViewExpandedPaneBackground}" />
+      <Style Selector="^ /template/ Border#TopNavGrid">
+        <Setter Property="Margin" Value="{DynamicResource NavigationViewPaneContentGridMargin}" />
+      </Style>
+      <Style Selector="^ /template/ Border#ContentGrid">
+        <Setter Property="BorderThickness" Value="0,1,1,0" />
+        <Setter Property="CornerRadius" Value="0,8,0,0" />
+        <Setter Property="Margin" Value="{DynamicResource NavigationViewContentMargin}" />
+      </Style>
+    </Style>
+  </ControlTheme>
+
+  <!-- The items of the top pane (MUX_NavigationViewItemPresenterStyleWhenOnTopPane); at the left
+       and at the right the tabs of the base theme draw the items of the left pane. -->
+  <ControlTheme x:Key="TabbedPageTabItemTheme" TargetType="TabItem" BasedOn="{StaticResource {x:Type TabItem}}">
+    <Setter Property="Foreground" Value="{DynamicResource TopNavigationViewItemForeground}" />
+    <Setter Property="Background" Value="{DynamicResource NavigationViewItemBackground}" />
+    <Setter Property="FontFamily" Value="{DynamicResource ContentControlThemeFontFamily}" />
+    <Setter Property="FontWeight" Value="Normal" />
+    <Setter Property="FontSize" Value="{DynamicResource ControlContentThemeFontSize}" />
+    <Setter Property="CornerRadius" Value="{DynamicResource ControlCornerRadius}" />
+    <Setter Property="IndicatorTemplate">
+      <DataTemplate>
+        <Rectangle Height="3"
+                   Width="16"
+                   Fill="{DynamicResource NavigationViewSelectionIndicatorForeground}"
+                   RadiusX="2"
+                   RadiusY="2" />
+      </DataTemplate>
+    </Setter>
+    <Setter Property="Template">
+      <ControlTemplate>
+        <Border x:Name="LayoutRoot"
+                Margin="{StaticResource NavigationViewItemButtonMargin}"
+                Background="{TemplateBinding Background}"
+                CornerRadius="{TemplateBinding CornerRadius}">
+          <Panel>
+            <Grid x:Name="ContentGrid" ColumnDefinitions="Auto,*">
+              <StackPanel Orientation="Horizontal" Margin="12,0,0,0">
+                <Viewbox x:Name="IconBox"
+                         Height="16"
+                         Width="16"
+                         VerticalAlignment="Center"
+                         HorizontalAlignment="Center"
+                         IsVisible="{TemplateBinding Icon, Converter={x:Static ObjectConverters.IsNotNull}}">
+                  <ContentPresenter x:Name="Icon"
+                                    Content="{TemplateBinding Icon}"
+                                    ContentTemplate="{TemplateBinding IconTemplate}"
+                                    Foreground="{TemplateBinding Foreground}">
+                    <ContentPresenter.Styles>
+                      <!-- A path icon as WinUI's, unscaled, so that the Viewbox scales its geometry as WinUI's does (PI-3). -->
+                      <Style Selector="PathIcon">
+                        <Setter Property="Width" Value="NaN" />
+                        <Setter Property="Height" Value="NaN" />
+                        <Setter Property="Template" Value="{StaticResource PathIconUnscaledTemplate}" />
+                      </Style>
+                    </ContentPresenter.Styles>
+                  </ContentPresenter>
+                </Viewbox>
+                <Border Width="8"
+                        IsVisible="{TemplateBinding Icon, Converter={x:Static ObjectConverters.IsNotNull}}" />
+              </StackPanel>
+              <ContentPresenter x:Name="PART_ContentPresenter"
+                                Grid.Column="1"
+                                Margin="0,0,12,0"
+                                TextWrapping="NoWrap"
+                                Foreground="{TemplateBinding Foreground}"
+                                Content="{TemplateBinding Header}"
+                                ContentTemplate="{TemplateBinding HeaderTemplate}"
+                                HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                VerticalAlignment="Center"
+                                RecognizesAccessKey="True" />
+            </Grid>
+            <ContentPresenter x:Name="SelectionIndicator"
+                              Margin="12,0,12,4"
+                              VerticalAlignment="Bottom"
+                              HorizontalAlignment="Center"
+                              Opacity="0"
+                              Content="{TemplateBinding DataContext}"
+                              ContentTemplate="{TemplateBinding IndicatorTemplate}" />
+          </Panel>
+        </Border>
+      </ControlTemplate>
+    </Setter>
+
+    <!-- PointerStates: PointerOver -->
+    <Style Selector="^:pointerover">
+      <Style Selector="^ /template/ Border#LayoutRoot">
+        <Setter Property="Background" Value="{DynamicResource TopNavigationViewItemBackgroundPointerOver}" />
+      </Style>
+      <Style Selector="^ /template/ ContentPresenter#Icon, ^ /template/ ContentPresenter#PART_ContentPresenter">
+        <Setter Property="Foreground" Value="{DynamicResource TopNavigationViewItemForegroundPointerOver}" />
+      </Style>
+    </Style>
+    <!-- Pressed -->
+    <Style Selector="^:pressed">
+      <Style Selector="^ /template/ Border#LayoutRoot">
+        <Setter Property="Background" Value="{DynamicResource TopNavigationViewItemBackgroundPressed}" />
+      </Style>
+      <Style Selector="^ /template/ ContentPresenter#Icon, ^ /template/ ContentPresenter#PART_ContentPresenter">
+        <Setter Property="Foreground" Value="{DynamicResource TopNavigationViewItemForegroundPressed}" />
+      </Style>
+    </Style>
+    <!-- Selected -->
+    <Style Selector="^:selected">
+      <Style Selector="^ /template/ Border#LayoutRoot">
+        <Setter Property="Background" Value="{DynamicResource TopNavigationViewItemBackgroundSelected}" />
+      </Style>
+      <Style Selector="^ /template/ ContentPresenter#Icon, ^ /template/ ContentPresenter#PART_ContentPresenter">
+        <Setter Property="Foreground" Value="{DynamicResource TopNavigationViewItemForegroundSelected}" />
+      </Style>
+      <Style Selector="^ /template/ ContentPresenter#SelectionIndicator">
+        <Setter Property="Opacity" Value="1" />
+      </Style>
+    </Style>
+    <!-- PointerOverSelected -->
+    <Style Selector="^:selected:pointerover">
+      <Style Selector="^ /template/ Border#LayoutRoot">
+        <Setter Property="Background" Value="{DynamicResource TopNavigationViewItemBackgroundSelectedPointerOver}" />
+      </Style>
+      <Style Selector="^ /template/ ContentPresenter#Icon, ^ /template/ ContentPresenter#PART_ContentPresenter">
+        <Setter Property="Foreground" Value="{DynamicResource TopNavigationViewItemForegroundSelectedPointerOver}" />
+      </Style>
+    </Style>
+    <!-- PressedSelected -->
+    <Style Selector="^:selected:pressed">
+      <Style Selector="^ /template/ Border#LayoutRoot">
+        <Setter Property="Background" Value="{DynamicResource TopNavigationViewItemBackgroundSelectedPressed}" />
+      </Style>
+      <Style Selector="^ /template/ ContentPresenter#Icon, ^ /template/ ContentPresenter#PART_ContentPresenter">
+        <Setter Property="Foreground" Value="{DynamicResource TopNavigationViewItemForegroundSelectedPressed}" />
+      </Style>
+    </Style>
+    <!-- DisabledStates: Disabled -->
+    <Style Selector="^:disabled /template/ ContentPresenter#Icon, ^:disabled /template/ ContentPresenter#PART_ContentPresenter">
+      <Setter Property="Foreground" Value="{DynamicResource TopNavigationViewItemForegroundDisabled}" />
+    </Style>
+
+    <!-- The pane under the content: the indicator at the top of the item. -->
+    <Style Selector="^[TabStripPlacement=Bottom] /template/ ContentPresenter#SelectionIndicator">
+      <Setter Property="VerticalAlignment" Value="Top" />
+      <Setter Property="Margin" Value="12,4,12,0" />
+    </Style>
+  </ControlTheme>
+
+  <ControlTheme x:Key="{x:Type TabbedPage}" TargetType="TabbedPage">
+    <Setter Property="Background" Value="{DynamicResource ApplicationPageBackgroundThemeBrush}" />
+    <Setter Property="Template">
+      <ControlTemplate>
+        <Panel Background="{TemplateBinding Background}">
+          <TabControl Name="PART_TabControl"
+                      Theme="{StaticResource TabbedPageTabControlTheme}"
+                      ItemContainerTheme="{StaticResource TabbedPageTabItemTheme}"
+                      HorizontalAlignment="Stretch"
+                      VerticalAlignment="Stretch" />
+        </Panel>
+      </ControlTemplate>
+    </Setter>
+  </ControlTheme>
+</ResourceDictionary>

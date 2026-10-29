@@ -1,0 +1,131 @@
+name: Hot reload acceptance
+
+# Keep this explicit until both native paths pass on all three platforms.
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  native-patch:
+    name: Native patch (${{ matrix.os }})
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [macos-15, ubuntu-24.04, windows-2022]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 120
+    env:
+      CARGO_TERM_COLOR: always
+      CARGO_INCREMENTAL: '0'
+      RUST_BACKTRACE: 1
+      PYTHONUTF8: '1'
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: dtolnay/rust-toolchain@89b12181fb390509a0842a86cc55eeb8eb928c1d # stable
+        with:
+          toolchain: 1.93.0
+      - name: Linux build prerequisites
+        if: runner.os == 'Linux'
+        run: sudo apt-get update && sudo apt-get install -y pkg-config libssl-dev clang lld xvfb libfontconfig1-dev libx11-dev libx11-xcb-dev libxi-dev libxrandr-dev libxcursor-dev libxfixes-dev libxext-dev libxkbcommon-dev libgl1-mesa-dev
+      - name: macOS build prerequisites
+        if: runner.os == 'macOS'
+        run: |
+          brew install openssl@3 pkg-config
+          echo "OPENSSL_DIR=$(brew --prefix openssl@3)" >> "$GITHUB_ENV"
+      - name: Install pinned patch compiler
+        run: cargo install dioxus-cli --version 0.7.10 --locked
+      - name: Session and admission tests
+        run: cargo test --locked -p ferroui-hot-reload -p ferroui-hot-patch --lib
+      - name: Compiler replay and owning supervisor tests
+        run: python -m unittest discover -s scripts/hot-reload -p 'test_*.py'
+      - name: Native callback, state and framework identity
+        run: python scripts/hot-reload/probe.py
+      - name: Desktop callback patch through the existing UI subscription
+        if: runner.os != 'Linux'
+        run: python scripts/hot-reload/desktop_patch_probe.py
+      - name: Desktop callback patch under Xvfb
+        if: runner.os == 'Linux'
+        run: xvfb-run -a python scripts/hot-reload/desktop_patch_probe.py
+      - name: Owning supervisor patch and restart acceptance
+        if: runner.os != 'Linux'
+        run: python scripts/hot-reload/supervisor_probe.py
+      - name: Owning supervisor patch and restart under Xvfb
+        if: runner.os == 'Linux'
+        run: xvfb-run -a python scripts/hot-reload/supervisor_probe.py
+
+  catalog:
+    name: Catalog XAML (${{ matrix.os }})
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [macos-15, ubuntu-24.04, windows-2022]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 120
+    env:
+      CARGO_TERM_COLOR: always
+      CARGO_INCREMENTAL: '0'
+      RUST_BACKTRACE: 1
+      PYTHONUTF8: '1'
+      FERROUI_CATALOG_WAYLAND: '0'
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: dtolnay/rust-toolchain@89b12181fb390509a0842a86cc55eeb8eb928c1d # stable
+        with:
+          toolchain: 1.93.0
+      - name: Linux catalog prerequisites
+        if: runner.os == 'Linux'
+        run: sudo apt-get update && sudo apt-get install -y pkg-config clang lld xvfb xauth libfontconfig1-dev libfreetype6-dev fonts-dejavu-core libx11-dev libx11-xcb-dev libxi-dev libxrandr-dev libxcursor-dev libxfixes-dev libxext-dev libxkbcommon-dev libgl1-mesa-dev libegl1 libgl1-mesa-dri libgtk-3-0
+      - name: Manifest tests
+        run: cargo test --locked -p ferroui-build --lib
+      - name: Property ownership and binding transaction regressions
+        run: cargo test --locked -p ferroui-base --features hot-reload --lib
+      - name: Development manifest profile boundaries
+        run: python scripts/hot-reload/profile_probe.py
+      - name: Runtime markup, resources and populate hooks
+        run: cargo test --locked -p ferroui-markup -p ferroui-markup-xaml -p ferroui-markup-xaml-tests --features ferroui-markup-xaml-loader/hot-reload --lib
+      - name: Runtime compiler and prepared-document cache
+        run: cargo test --locked -p ferroui-markup-xaml-loader --features hot-reload --lib
+      # This must be a separate invocation without runtime-markup: that feature
+      # deliberately excludes compiled_markup tests and would silently skip parity.
+      - name: Compiled and runtime catalog parity
+        run: cargo test --locked -p control-catalog --lib tests::compiled_markup
+      - name: Cached references and subscription lifecycle
+        run: cargo test --locked -p control-catalog --features hot-reload --lib expander_refresh_releases
+      - name: Shared view-model selection survives reload and rollback
+        run: cargo test --locked -p control-catalog --features hot-reload --lib tests::hot_reload
+      - name: Build runtime-markup catalog and small fixture
+        run: cargo build --locked -p control-catalog-desktop -p hot-reload-demo --features control-catalog-desktop/hot-reload,hot-reload-demo/patch-control
+      - name: Native restart placement and state restoration
+        if: runner.os != 'Linux'
+        run: python scripts/hot-reload/restart_state_probe.py
+      - name: Native restart placement and state under Xvfb
+        if: runner.os == 'Linux'
+        run: xvfb-run -a python scripts/hot-reload/restart_state_probe.py
+      - name: Small fixture save-to-render acceptance
+        if: runner.os != 'Linux'
+        run: python scripts/hot-reload/markup_probe.py
+      - name: Small fixture save-to-render under Xvfb
+        if: runner.os == 'Linux'
+        run: xvfb-run -a python scripts/hot-reload/markup_probe.py
+      - name: Native catalog reload acceptance
+        if: runner.os != 'Linux'
+        run: python scripts/hot-reload/catalog_probe.py
+      - name: Native catalog reload under Xvfb
+        if: runner.os == 'Linux'
+        run: xvfb-run -a python scripts/hot-reload/catalog_probe.py
+      - name: Application resource and static-consumer acceptance
+        if: runner.os != 'Linux'
+        run: python scripts/hot-reload/resource_probe.py
+      - name: Application resource and static-consumer acceptance under Xvfb
+        if: runner.os == 'Linux'
+        run: xvfb-run -a python scripts/hot-reload/resource_probe.py
+      - name: Native preserved-root binding acceptance
+        if: runner.os != 'Linux'
+        run: python scripts/hot-reload/root_binding_probe.py
+      - name: Native preserved-root binding acceptance under Xvfb
+        if: runner.os == 'Linux'
+        run: xvfb-run -a python scripts/hot-reload/root_binding_probe.py
+      - name: Release compilation with development features enabled
+        run: cargo check --locked -p control-catalog -p ferroui-hot-reload -p ferroui-hot-patch --features control-catalog/hot-reload --release

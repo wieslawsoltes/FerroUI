@@ -694,7 +694,12 @@ fn the_settings_page_switches_the_theme_variant_and_the_theme() {
     assert_eq!(vec![text("Settings")], selected_entries(&shell));
     assert!(bar_texts(&shell).contains(&text("Settings")), "the bar shows Settings: {:?}", bar_texts(&shell));
 
-    let combo_boxes = descendants::<ComboBox>(&page);
+    let settings_combos = |page: &ferroui_base::Visual| {
+        descendants::<ComboBox>(page).into_iter()
+            .filter(|control| !control.name().is_some_and(|name| name.starts_with("MacOS")))
+            .collect::<Vec<_>>()
+    };
+    let combo_boxes = settings_combos(&page);
     assert_eq!(6, combo_boxes.len(), "the combo boxes of the settings page");
     for combo_box in &combo_boxes {
         let bounds = combo_box.bounds();
@@ -718,7 +723,7 @@ fn the_settings_page_switches_the_theme_variant_and_the_theme() {
         combo_boxes[1].set_selected_index(theme_index(CatalogTheme::Fluent));
         shell.settle();
         assert_eq!(CatalogTheme::Fluent, App::current_theme(), "the theme the page set");
-        let combo_boxes = descendants::<ComboBox>(&shell.show(&shell.view_model.settings_item()));
+        let combo_boxes = settings_combos(&shell.show(&shell.view_model.settings_item()));
         assert_eq!(theme_index(CatalogTheme::Fluent), combo_boxes[1].selected_index(), "the Fluent theme is selected");
         combo_boxes
     };
@@ -732,7 +737,7 @@ fn the_settings_page_switches_the_theme_variant_and_the_theme() {
         let card = cards(&section_controls[0]).into_iter().next().expect("the first card");
         card.background().and_then(|brush| brush.as_solid_color_brush().map(|brush| brush.color()))
     };
-    let settings_combo_boxes = |shell: &Shell| descendants::<ComboBox>(&shell.show(&shell.view_model.settings_item()));
+    let settings_combo_boxes = |shell: &Shell| settings_combos(&shell.show(&shell.view_model.settings_item()));
 
     // The dark variant.
     combo_boxes[2].set_selected_index(2);
@@ -773,6 +778,58 @@ fn the_settings_page_switches_the_theme_variant_and_the_theme() {
     card_background(&shell);
     let combo_boxes = settings_combo_boxes(&shell);
     assert_eq!(theme_index(CatalogTheme::WinUI), combo_boxes[1].selected_index(), "the settings page shows the theme it set");
+}
+
+/// The optional macOS controls modify the same theme instance that the whole catalog uses.
+#[cfg(feature = "macos-theme")]
+#[test]
+fn the_macos_settings_apply_to_the_live_catalog_theme() {
+    use ferroui_base::controls::ResourceKey;
+    use ferroui_base::media::Color;
+    use ferroui_controls::CheckBox;
+    use ferroui_themes_macos::ControlSize;
+
+    let shell = Shell::start(1400.0, 1100.0);
+    let primary_label_color = || from_markup_value::<Color>(&Application::current().unwrap()
+        .try_get_resource(&ResourceKey::from("TextFillColorPrimary"), Some(&ThemeVariant::light())).flatten())
+        .expect("the current theme's label color");
+    let winui_label = primary_label_color();
+    App::set_catalog_themes(CatalogTheme::MacOS);
+    shell.settle();
+    let page = shell.show(&shell.view_model.settings_item());
+    let theme = App::macos_theme().expect("the macOS theme is retained by the application");
+    let combo = |name: &str| descendants::<ComboBox>(&page).into_iter()
+        .find(|control| control.name().as_deref() == Some(name)).expect("a macOS settings combo");
+    let check = |name: &str| descendants::<CheckBox>(&page).into_iter()
+        .find(|control| control.name().as_deref() == Some(name)).expect("a macOS settings check box");
+
+    assert!(combo("MacOSControlSize").is_effectively_visible());
+    assert_eq!(2, combo("MacOSControlSize").selected_index());
+    combo("MacOSControlSize").set_selected_index(3);
+    combo("MacOSAccent").set_selected_index(2);
+    check("MacOSReduceMotion").set_is_checked(Some(true));
+    check("MacOSReduceTransparency").set_is_checked(Some(true));
+    check("MacOSIncreaseContrast").set_is_checked(Some(true));
+    check("MacOSWindowActive").set_is_checked(Some(false));
+    shell.settle();
+    assert_eq!(ControlSize::Large, theme.control_size());
+    assert_eq!(Some(Color::from_rgb(175, 82, 222)), theme.accent_color());
+    assert!(theme.reduce_motion());
+    assert!(theme.reduce_transparency());
+    assert!(theme.increase_contrast());
+    assert!(!theme.window_active());
+
+    // A theme round trip keeps the preview settings, without contaminating the WinUI theme.
+    App::set_catalog_themes(CatalogTheme::WinUI);
+    assert_eq!(winui_label, primary_label_color(), "macOS contrast settings do not change WinUI colors");
+    assert!(Application::current().unwrap()
+        .try_get_resource(&ResourceKey::from("MacOSControlHeight"), None).flatten().is_none(),
+        "detaching macOS removes its dynamic resources from the application");
+    App::set_catalog_themes(CatalogTheme::MacOS);
+    shell.settle();
+    assert_eq!(ControlSize::Large, App::macos_theme().unwrap().control_size());
+    assert!(App::macos_theme().unwrap().reduce_motion());
+    assert_eq!(Some(Color::from_rgb(175, 82, 222)), App::macos_theme().unwrap().accent_color());
 }
 
 /// Below the wide breakpoint the drawer is compact: closed it shows the icons of its entries

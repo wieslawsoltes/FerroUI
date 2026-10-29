@@ -7,6 +7,7 @@ use crate::{
     FerroObjectImplExt, FerroProperty, FerroPropertyChangedEventArgs, Ref, StyledProperty, StyledPropertyOptions,
     UnsetValueType,
 };
+use std::any::Any;
 use std::cell::{Cell, RefCell};
 use std::rc::Rc;
 
@@ -23,6 +24,9 @@ pub struct Animatable {
     /// The progress of the transition that is being applied right now, as
     /// reported by the transition while it binds its values.
     applying_transition_instance: RefCell<Option<Rc<TransitionInstance>>>,
+    /// Per-application context, kept separate from the shared transition definition.
+    /// A scoped guard permits nested transition applications without heap allocation.
+    transition_context: RefCell<TransitionContextState>,
 }
 
 struct TransitionState {
@@ -30,6 +34,38 @@ struct TransitionState {
     /// The progress behind `instance`, when the transition reported one.
     progress: RefCell<Option<Rc<TransitionInstance>>>,
     base_value: RefCell<BoxedValue>,
+    interruption_state: RefCell<Option<Rc<dyn Any>>>,
+}
+
+#[derive(Default)]
+struct TransitionContextState {
+    applying: bool,
+    interruption: Option<Rc<dyn Any>>,
+}
+
+/// Restores the surrounding application even if user transition code unwinds.
+struct TransitionContext<'a> {
+    context: &'a RefCell<TransitionContextState>,
+    previous: Option<TransitionContextState>,
+}
+
+impl<'a> TransitionContext<'a> {
+    fn enter(context: &'a RefCell<TransitionContextState>, state: Option<Rc<dyn Any>>) -> Self {
+        let previous = context.replace(TransitionContextState { applying: true, interruption: state });
+        Self { context, previous: Some(previous) }
+    }
+
+    fn finish(mut self) -> Option<Rc<dyn Any>> {
+        self.context.replace(self.previous.take().expect("active transition context")).interruption
+    }
+}
+
+impl Drop for TransitionContext<'_> {
+    fn drop(&mut self) {
+        if let Some(previous) = self.previous.take() {
+            self.context.replace(previous);
+        }
+    }
 }
 
 ferro_class!(Animatable: FerroObject);
@@ -110,13 +146,16 @@ crate::ferro_overrides! { impl FerroObjectImpl for Animatable {
                         }
 
                         let clock = this.clock().unwrap_or_else(Clock::global_clock);
+                        let interruption_state = state.interruption_state.borrow_mut().take();
                         let instance = state.instance.borrow_mut().take();
                         *state.progress.borrow_mut() = None;
                         if let Some(instance) = instance {
                             instance.dispose();
                         }
                         *this.applying_transition_instance.borrow_mut() = None;
+                        let context = TransitionContext::enter(&this.transition_context, interruption_state);
                         let instance = transition.apply(this, clock, &old_value, &new_value);
+                        *state.interruption_state.borrow_mut() = context.finish();
                         *state.progress.borrow_mut() = this.applying_transition_instance.borrow_mut().take();
                         *state.instance.borrow_mut() = Some(instance);
                         return;
@@ -155,6 +194,7 @@ impl Animatable {
             transition_state: RefCell::new(None),
             collection_subscriptions: RefCell::new(Vec::new()),
             applying_transition_instance: RefCell::new(None),
+            transition_context: RefCell::new(TransitionContextState::default()),
         }
     }
 
@@ -289,6 +329,7 @@ impl Animatable {
                     instance: RefCell::new(None),
                     progress: RefCell::new(None),
                     base_value: RefCell::new(base_value),
+                    interruption_state: RefCell::new(None),
                 }),
             ));
         }
@@ -306,6 +347,7 @@ impl Animatable {
             let Some(state) = self.try_get_state(t) else { continue };
             let instance = state.instance.borrow_mut().take();
             *state.progress.borrow_mut() = None;
+            *state.interruption_state.borrow_mut() = None;
             if let Some(instance) = instance {
                 instance.dispose();
             }
@@ -327,6 +369,28 @@ impl Animatable {
     /// that drives the values it binds.
     pub(crate) fn report_transition_instance(&self, instance: &Rc<TransitionInstance>) {
         *self.applying_transition_instance.borrow_mut() = Some(instance.clone());
+    }
+
+    /// Takes state left by the preceding application of the same transition on this object.
+    ///
+    /// This is only available synchronously inside [`ITransition::apply`]. A spring transition
+    /// can retain its last sampled velocity here, without storing mutable animation state in
+    /// a transition definition that may be shared by several controls. Removal or visual-tree
+    /// detachment discards the state. Normal duration-based transitions do not use this hook.
+    pub fn take_transition_interruption_state<T: Any>(&self) -> Option<Rc<T>> {
+        self.transition_context.borrow_mut().interruption.take()?.downcast().ok()
+    }
+
+    /// Reports state to carry into the next application of this transition on this object.
+    ///
+    /// Call only from [`ITransition::apply`]. The state may be updated by the running animation,
+    /// but must not strongly own the target object. Outside a transition application this has
+    /// no effect. Store zero velocity when an animation completes or is accessibility-canceled.
+    pub fn report_transition_interruption_state<T: Any>(&self, state: Rc<T>) {
+        let mut context = self.transition_context.borrow_mut();
+        if context.applying {
+            context.interruption = Some(state);
+        }
     }
 
     fn try_get_state(&self, transition: &Rc<dyn ITransition>) -> Option<Rc<TransitionState>> {

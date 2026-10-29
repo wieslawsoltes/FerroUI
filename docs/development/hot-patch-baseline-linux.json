@@ -1,0 +1,59 @@
+{
+  "schema_version": 1,
+  "measured_on": "2026-10-19",
+  "platform": {
+    "os": "Linux",
+    "distribution": "Ubuntu 24.04",
+    "architecture": "aarch64",
+    "environment": "Docker in a dedicated Colima VZ virtual machine on macOS arm64",
+    "vm_cpus": 2,
+    "vm_memory_gib": 8,
+    "container_memory_gib": 7,
+    "display": "Xvfb"
+  },
+  "profile": "debug-fat-binary",
+  "patch_ordinal": 1,
+  "limitations": [
+    "One patch observation, not a latency guarantee or percentile estimate.",
+    "Measured inside a virtual machine with a host-mounted source/build directory, not a bare-metal Linux desktop.",
+    "Initial application build excluded.",
+    "Source capture included; watcher polling and debounce excluded because the acceptance probe invokes the supervisor directly.",
+    "Compiler invocation includes dx launch, Rust compilation/linking and captured input/output transport.",
+    "Application acknowledgement includes protocol transport and UI dispatch.",
+    "Compositor completion under Xvfb is not physical display scan-out.",
+    "This record covers the successful combined patch; it does not attest to the subsequent restart acceptance steps."
+  ],
+  "measurements": [
+    {
+      "scope": "combined-rust-xaml-save-to-render",
+      "source_capture_us": 3053934.247,
+      "patch_timing": {
+        "stages_us": {
+          "input_preparation_us": 76109.442,
+          "admission_us": 139375.56,
+          "staging_us": 1947.398,
+          "compiler_invocation_us": 2543691.871,
+          "source_revalidation_us": 3300322.045,
+          "artifact_decode_us": 185.635,
+          "application_ack_us": 107987.864
+        },
+        "update_to_ack_us": 6169622.857
+      },
+      "frame": {
+        "application_us": 7400,
+        "batch": 13,
+        "commit_to_render_us": 16951,
+        "documents": [
+          "ferres://hot_reload_demo/Colors.xaml",
+          "ferres://hot_reload_demo/View.xaml"
+        ],
+        "preparation_us": 11980,
+        "rendered_unix_ns": "1792433119536520433",
+        "revision": 7
+      },
+      "save_to_render_us": 9236706.125,
+      "watch_debounce_included": false,
+      "compiler": "rust-1.93.0-dx-0.7.10"
+    }
+  ]
+}

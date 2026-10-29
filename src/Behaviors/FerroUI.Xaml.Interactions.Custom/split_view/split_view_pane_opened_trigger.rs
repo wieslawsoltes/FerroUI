@@ -1,0 +1,84 @@
+//! Port of `SplitView/SplitViewPaneOpenedTrigger.cs`.
+
+use ferroui_base::interactivity::{RoutedEventArgs, IRoutedEventArgs, Interactive, RoutedEventHandlerToken};
+use ferroui_base::{
+    ferro_class, ferro_class_info, instantiate, BoxedValue, FerroObjectImpl, Ref, StaticType, StyledElementImpl,
+};
+use ferroui_controls::SplitView;
+use ferroui_xaml_interactivity::{Interaction, StyledElementBehaviorImpl, StyledElementTriggerOfT};
+use std::cell::Cell;
+use std::rc::Rc;
+
+/// Executes actions when the [`PaneOpened`](SplitView::pane_opened_event) event is raised.
+///
+/// The args of the event are the parameter of the actions.
+#[repr(C)]
+pub struct SplitViewPaneOpenedTrigger {
+    base: StyledElementTriggerOfT,
+    handler: Cell<Option<RoutedEventHandlerToken>>,
+}
+
+ferro_class!(SplitViewPaneOpenedTrigger: StyledElementTriggerOfT);
+ferro_class_info!(SplitViewPaneOpenedTrigger { new: SplitViewPaneOpenedTrigger::new });
+ferroui_base::ferro_impl_classes!(SplitViewPaneOpenedTrigger: FerroObjectImpl, StyledElementImpl);
+
+ferroui_base::ferro_overrides! {
+    impl StyledElementBehaviorImpl for SplitViewPaneOpenedTrigger {
+        fn on_attached_to_visual_tree(this: &Self) {
+            if let Some(associated_object) = this.associated_object_as::<SplitView>() {
+                let trigger = this.to_ref().downgrade();
+                let token = associated_object.pane_opened(move |_sender: &Interactive, e: &RoutedEventArgs| {
+                    if let Some(trigger) = trigger.upgrade() {
+                        trigger.on_pane_opened(e);
+                    }
+                });
+                this.remove_handler();
+                this.handler.set(Some(token));
+            }
+        }
+
+        fn on_detached_from_visual_tree(this: &Self) {
+            this.remove_handler();
+        }
+    }
+}
+
+impl SplitViewPaneOpenedTrigger {
+    /// Creates the class data; see [`ferroui_base::FerroObject::construct`].
+    pub fn construct() -> Self {
+        Self { base: StyledElementTriggerOfT::construct(<SplitView as StaticType>::TYPE), handler: Cell::new(None) }
+    }
+
+    /// Creates a trigger.
+    pub fn new() -> Ref<Self> {
+        instantiate(Self::construct())
+    }
+
+    // The handler is removed by its token (a closure has no identity to remove it by, as the
+    // reference removes its method).
+    fn remove_handler(&self) {
+        let Some(token) = self.handler.take() else {
+            return;
+        };
+        if let Some(associated_object) = self.associated_object_as::<SplitView>() {
+            associated_object.remove_handler(SplitView::pane_opened_event(), token);
+        }
+    }
+
+    fn on_pane_opened(&self, e: &RoutedEventArgs) {
+        // The args are the parameter of the actions (a shared handle to the live args).
+        let parameter: BoxedValue = Rc::new(IRoutedEventArgs::share(e));
+        self.execute(Some(&parameter));
+    }
+
+    fn execute(&self, parameter: Option<&BoxedValue>) {
+        if !self.is_enabled() {
+            return;
+        }
+
+        if let Some(associated_object) = self.associated_object() {
+            let sender: BoxedValue = Rc::new(associated_object);
+            Interaction::execute_actions(Some(&sender), self.actions().as_ref(), parameter);
+        }
+    }
+}

@@ -1,0 +1,146 @@
+{
+  "//": "Project list of the Xaml.Behaviors reference (scripts/port-status/references.toml, `behaviors`): the projects of Xaml.Behaviors at 45387e32 (master, MIT) and the crates of src/Behaviors that port them (docs/porting/behaviors.md). Interactions.DragAndDrop.DataGrid, Interactions.Scripting and SourceGenerators are waived (member-waivers.toml). The keys are those of projects.json.",
+  "preprocessorSymbols": [
+    "NET",
+    "NETCOREAPP",
+    "NET10_0",
+    "NET10_0_OR_GREATER",
+    "NET9_0_OR_GREATER",
+    "NET8_0_OR_GREATER",
+    "NET7_0_OR_GREATER",
+    "NET6_0_OR_GREATER",
+    "NET5_0_OR_GREATER",
+    "NETCOREAPP3_0_OR_GREATER",
+    "NETCOREAPP3_1_OR_GREATER"
+  ],
+  "excludeDirs": [
+    "bin",
+    "obj"
+  ],
+  "excludeFiles": [
+    "*.g.cs",
+    "*.Designer.cs",
+    "*.designer.cs",
+    "*.AssemblyAttributes.cs"
+  ],
+  "projects": [
+    {
+      "path": "src/Xaml.Behaviors.Interactivity",
+      "name": "Xaml.Behaviors.Interactivity",
+      "detail": "full",
+      "rust": "src/Behaviors/FerroUI.Xaml.Interactivity",
+      "crate": "ferroui-xaml-interactivity",
+      "phase": "281 - Behaviors",
+      "priority": "P1"
+    },
+    {
+      "path": "src/Xaml.Behaviors.Interactions",
+      "name": "Xaml.Behaviors.Interactions",
+      "detail": "full",
+      "rust": "src/Behaviors/FerroUI.Xaml.Interactions",
+      "crate": "ferroui-xaml-interactions",
+      "phase": "281 - Behaviors",
+      "priority": "P1"
+    },
+    {
+      "path": "src/Xaml.Behaviors.Interactions.Custom",
+      "name": "Xaml.Behaviors.Interactions.Custom",
+      "detail": "full",
+      "rust": "src/Behaviors/FerroUI.Xaml.Interactions.Custom",
+      "crate": "ferroui-xaml-interactions-custom",
+      "phase": "281 - Behaviors",
+      "priority": "P1"
+    },
+    {
+      "path": "src/Xaml.Behaviors.Animations",
+      "name": "Xaml.Behaviors.Animations",
+      "detail": "full",
+      "rust": "src/Behaviors/FerroUI.Xaml.Behaviors.Animations",
+      "crate": "ferroui-xaml-behaviors-animations",
+      "phase": "281 - Behaviors",
+      "priority": "P1"
+    },
+    {
+      "path": "src/Xaml.Behaviors.Interactions.Events",
+      "name": "Xaml.Behaviors.Interactions.Events",
+      "detail": "full",
+      "rust": "src/Behaviors/FerroUI.Xaml.Interactions.Events",
+      "crate": "ferroui-xaml-interactions-events",
+      "phase": "281 - Behaviors",
+      "priority": "P1"
+    },
+    {
+      "path": "src/Xaml.Behaviors.Interactions.Draggable",
+      "name": "Xaml.Behaviors.Interactions.Draggable",
+      "detail": "full",
+      "rust": "src/Behaviors/FerroUI.Xaml.Interactions.Draggable",
+      "crate": "ferroui-xaml-interactions-draggable",
+      "phase": "281 - Behaviors",
+      "priority": "P1"
+    },
+    {
+      "path": "src/Xaml.Behaviors.Interactions.DragAndDrop",
+      "name": "Xaml.Behaviors.Interactions.DragAndDrop",
+      "detail": "full",
+      "rust": "src/Behaviors/FerroUI.Xaml.Interactions.DragAndDrop",
+      "crate": "ferroui-xaml-interactions-draganddrop",
+      "phase": "281 - Behaviors",
+      "priority": "P1"
+    },
+    {
+      "path": "src/Xaml.Behaviors.Interactions.Responsive",
+      "name": "Xaml.Behaviors.Interactions.Responsive",
+      "detail": "full",
+      "rust": "src/Behaviors/FerroUI.Xaml.Interactions.Responsive",
+      "crate": "ferroui-xaml-interactions-responsive",
+      "phase": "281 - Behaviors",
+      "priority": "P1"
+    },
+    {
+      "path": "src/Xaml.Behaviors.Interactions.ReactiveUI",
+      "name": "Xaml.Behaviors.Interactions.ReactiveUI",
+      "detail": "full",
+      "rust": "src/Behaviors/FerroUI.Xaml.Interactions.ReactiveUI",
+      "crate": "ferroui-xaml-interactions-reactiveui",
+      "phase": "281 - Behaviors",
+      "priority": "P1"
+    },
+    {
+      "path": "src/Xaml.Behaviors",
+      "name": "Xaml.Behaviors",
+      "detail": "full",
+      "rust": "src/Behaviors/FerroUI.Xaml.Behaviors",
+      "crate": "ferroui-xaml-behaviors",
+      "phase": "281 - Behaviors",
+      "priority": "P1"
+    },
+    {
+      "path": "src/Xaml.Behaviors.Interactions.DragAndDrop.DataGrid",
+      "name": "Xaml.Behaviors.Interactions.DragAndDrop.DataGrid",
+      "detail": "full",
+      "rust": "-",
+      "crate": "-",
+      "phase": "281 - Behaviors",
+      "priority": "P1"
+    },
+    {
+      "path": "src/Xaml.Behaviors.Interactions.Scripting",
+      "name": "Xaml.Behaviors.Interactions.Scripting",
+      "detail": "full",
+      "rust": "-",
+      "crate": "-",
+      "phase": "281 - Behaviors",
+      "priority": "P1"
+    },
+    {
+      "path": "src/Xaml.Behaviors.SourceGenerators",
+      "name": "Xaml.Behaviors.SourceGenerators",
+      "detail": "full",
+      "rust": "-",
+      "crate": "-",
+      "phase": "281 - Behaviors",
+      "priority": "P1"
+    }
+  ],
+  "expanded": []
+}

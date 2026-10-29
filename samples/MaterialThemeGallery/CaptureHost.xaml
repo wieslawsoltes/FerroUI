@@ -1,0 +1,14 @@
+<UserControl xmlns="https://github.com/ferroui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             x:Class="MaterialThemeGallery.CaptureHost">
+  <!-- The host of a page: the page in a theme variant scope (the variant of the page, which the
+       window and the capture set) on the page background of the theme. The window shows a page
+       in it, and the capture mode and the comparison host draw it, at a fixed size, into the
+       pictures: what the window shows is what is captured. The native counterpart is the
+       wrapper the comparison host puts around a native page (compare/native_pages.rs): a grid
+       with the requested theme and the same background. -->
+  <ThemeVariantScope x:Name="Scope">
+    <Border x:Name="Surface"
+            Background="{DynamicResource ApplicationPageBackgroundThemeBrush}" />
+  </ThemeVariantScope>
+</UserControl>

@@ -19,6 +19,10 @@ pub fn populate(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
     root: &::ferroui_base::Ref<crate::support::xaml::event_tests::MyButton>,
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadException> {
+    ::ferroui_markup_xaml::FerroXamlLoader::track_instance(<crate::support::xaml::event_tests::MyButton as ::ferroui_base::StaticType>::TYPE, root);
+    if let Some(populate) = ::ferroui_markup_xaml::FerroXamlLoader::populate_override(<crate::support::xaml::event_tests::MyButton as ::ferroui_base::StaticType>::TYPE) {
+        return populate(service_provider.as_ref(), &(::std::rc::Rc::new(root.clone()) as ::ferroui_base::BoxedValue));
+    }
     let service_provider =
         ::ferroui_markup_xaml::xaml_il::runtime::XamlIlRuntimeHelpers::create_root_service_provider_v3(service_provider);
     populate_handlers_routedevent_xaml(::core::option::Option::Some(service_provider), root)
@@ -37,9 +41,9 @@ pub fn populate_handlers_routedevent_xaml(
     let name_scope = context.name_scope_field();
     root.begin_init();
     // Handlers/RoutedEvent.xaml(1,2) Click
-    rt::add_handler(&root, &::ferroui_controls::Button::__markup_field_ClickEvent(), rt::method_delegate(&context, 2, |this, arguments| { crate::support::xaml::event_tests::MyButton::__markup_OnClick_0(this, arguments.next()?, arguments.next()?); ::core::result::Result::Ok(::core::option::Option::None) }));
+    rt::add_handler_with_context(&context, &root, &::ferroui_controls::Button::__markup_field_ClickEvent(), rt::method_delegate(&context, 2, |this, arguments| { crate::support::xaml::event_tests::MyButton::__markup_OnClick_0(this, arguments.next()?, arguments.next()?); ::core::result::Result::Ok(::core::option::Option::None) }));
     // Handlers/RoutedEvent.xaml(1,2) Tapped
-    rt::add_handler(&root, &::ferroui_base::input::InputElement::__markup_field_TappedEvent(), rt::method_delegate(&context, 2, |this, arguments| { crate::support::xaml::event_tests::MyButton::__markup_OnTapped_1(this, arguments.next()?, arguments.next()?); ::core::result::Result::Ok(::core::option::Option::None) }));
+    rt::add_handler_with_context(&context, &root, &::ferroui_base::input::InputElement::__markup_field_TappedEvent(), rt::method_delegate(&context, 2, |this, arguments| { crate::support::xaml::event_tests::MyButton::__markup_OnTapped_1(this, arguments.next()?, arguments.next()?); ::core::result::Result::Ok(::core::option::Option::None) }));
     rt::invoked(root.try_end_init(), 1, 2)?;
     rt::complete_root_name_scope(::core::option::Option::Some(&root), name_scope.as_ref(), 1, 2)?;
     ::core::result::Result::Ok(())

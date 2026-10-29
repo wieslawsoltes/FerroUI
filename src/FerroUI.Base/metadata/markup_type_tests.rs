@@ -872,6 +872,213 @@ fn events_without_arguments_invoke_the_handler_with_none() {
         (closed.add)(&[boxed(ping.clone()), boxed(handler)]),
         Err(MarkupInvokeError::Failed("Already closed.".to_string()))
     );
+
+    // An event whose subscription returns nothing cannot be unsubscribed.
+    assert!(event.subscribe(boxed(ping.clone()), MarkupDelegate::new(|_| None)).unwrap().is_none());
+    assert_eq!(
+        closed.subscribe(boxed(ping), MarkupDelegate::new(|_| None)).err(),
+        Some(MarkupInvokeError::Failed("Already closed.".to_string()))
+    );
+}
+
+#[test]
+fn events_return_their_subscription() {
+    use crate::reactive::{Disposable, IDisposable};
+
+    struct Bell {
+        handlers: Rc<RefCell<Vec<(usize, MarkupDelegate)>>>,
+        next: Cell<usize>,
+    }
+    impl PartialEq for Bell {
+        fn eq(&self, other: &Self) -> bool {
+            std::ptr::eq(self, other)
+        }
+    }
+    impl Bell {
+        fn rung(&self, handler: MarkupDelegate) -> Rc<dyn IDisposable> {
+            let id = self.next.get();
+            self.next.set(id + 1);
+            self.handlers.borrow_mut().push((id, handler));
+            let handlers = self.handlers.clone();
+            Disposable::create(move || handlers.borrow_mut().retain(|(known, _)| *known != id))
+        }
+
+        fn ring(&self) {
+            let handlers: Vec<MarkupDelegate> = self.handlers.borrow().iter().map(|(_, h)| h.clone()).collect();
+            for handler in handlers {
+                handler.invoke(&[]);
+            }
+        }
+    }
+    ferro_markup_type!(class Bell {
+        handles: [Rc<Bell>],
+        this: Rc<Bell>,
+        events: [
+            Rung() => Bell::rung,
+            try Chimed() => |bell: &Rc<Bell>, handler: MarkupDelegate| Ok::<_, String>(bell.rung(handler)),
+        ],
+    });
+
+    let bell = Rc::new(Bell { handlers: Rc::new(RefCell::new(Vec::new())), next: Cell::new(0) });
+    let count = Rc::new(Cell::new(0));
+    let handler = || {
+        let count = count.clone();
+        MarkupDelegate::new(move |_| {
+            count.set(count.get() + 1);
+            None
+        })
+    };
+
+    // `subscribe` returns the subscription; disposing it removes the handler.
+    let rung = <Bell as MarkupTyped>::MARKUP.find_event("Rung").unwrap();
+    let subscription = rung.subscribe(boxed(bell.clone()), handler()).unwrap().expect("the subscription");
+    bell.ring();
+    assert_eq!(count.get(), 1);
+    subscription.dispose();
+    bell.ring();
+    assert_eq!(count.get(), 1);
+
+    // `add` returns the same subscription as an untyped value, for the fallible form too.
+    let chimed = <Bell as MarkupTyped>::MARKUP.find_event("Chimed").unwrap();
+    let result = (chimed.add)(&[boxed(bell.clone()), boxed(handler())]).unwrap();
+    let subscription = MarkupEvent::subscription_of(&result).expect("the untyped subscription");
+    bell.ring();
+    assert_eq!(count.get(), 2);
+    subscription.dispose();
+    bell.ring();
+    assert_eq!(count.get(), 2);
+    assert!(MarkupEvent::subscription_of(&None).is_none());
+}
+
+// Member lookup on values (`members`).
+
+#[repr(C)]
+pub struct MetaMembersPanel {
+    base: MetaPanel,
+}
+
+ferro_class!(MetaMembersPanel: MetaPanel);
+ferro_impl_classes!(MetaMembersPanel: FerroObjectImpl);
+
+impl MetaMembersPanel {
+    pub fn construct() -> Self {
+        Self { base: MetaPanel::construct() }
+    }
+
+    pub fn new() -> Ref<Self> {
+        instantiate(Self::construct())
+    }
+
+    fn create() -> Ref<MetaMembersPanel> {
+        Self::new()
+    }
+}
+
+ferro_class_info!(MetaMembersPanel {
+    markup: {
+        properties: [
+            Title: String { get: |p: &Ref<MetaMembersPanel>| format!("members {}", p.title()) },
+        ],
+        methods: [
+            fn OnClick(i32) -> i32 => |p: &Ref<MetaMembersPanel>, amount: i32| p.on_click(amount * 10),
+            fn OnClick(String) -> i32 => |p: &Ref<MetaMembersPanel>, amount: String| p.on_click(amount.len() as i32),
+            static fn Create() -> Ref<MetaMembersPanel> => MetaMembersPanel::create,
+        ],
+    },
+    new: MetaMembersPanel::new,
+});
+
+ferro_markup_type!(class MetaMembersBase {
+    handles: [MetaMembersBase, Rc<MetaMembersBase>],
+    this: Rc<MetaMembersBase>,
+    methods: [
+        static fn Make() -> i32 => || 1,
+        fn Describe() -> String => |_: &Rc<MetaMembersBase>| "base".to_string(),
+    ],
+    events: [
+        Changed() => |_: &Rc<MetaMembersBase>, _: MarkupDelegate| {},
+    ],
+});
+
+impl PartialEq for MetaMembersBase {
+    fn eq(&self, other: &Self) -> bool {
+        std::ptr::eq(self, other)
+    }
+}
+
+pub struct MetaMembersBase;
+
+#[test]
+fn members_of_an_object_are_found_on_its_class_and_base_classes() {
+    let panel = MetaMembersPanel::new();
+    panel.set_title("t".to_string());
+    let value: BoxedValue = Rc::new(FerroObject::to_ref(&panel));
+    let own = MetaMembersPanel::TYPE.markup().unwrap();
+    let base = MetaPanel::TYPE.markup().unwrap();
+
+    let types = markup_types_of(&*value);
+    assert!(types.len() >= 2);
+    assert!(std::ptr::eq(types[0], own));
+    assert!(std::ptr::eq(types[1], base));
+    // The same list for the handle of the class itself.
+    let handle: BoxedValue = Rc::new(panel.clone());
+    assert!(std::ptr::eq(markup_types_of(&*handle)[0], own));
+
+    // The property of the class hides the one of the base class.
+    let title = find_markup_property(&*value, "Title").unwrap();
+    assert!(std::ptr::eq(title, own.find_property("Title").unwrap()));
+    assert_eq!(unbox::<String>(&(title.get.unwrap())(&[Some(value.clone())]).unwrap()), "members t");
+    let child_count = find_markup_property(&*value, "ChildCount").unwrap();
+    assert!(std::ptr::eq(child_count, base.find_property("ChildCount").unwrap()));
+    assert!(find_markup_property(&*value, "Missing").is_none());
+
+    // Every overload, most derived first; the override of the base method counts once.
+    let on_click = find_markup_methods(&*value, "OnClick");
+    assert_eq!(on_click.len(), 2);
+    assert!(on_click.iter().all(|method| own.find_methods("OnClick").any(|m| std::ptr::eq(m, *method))));
+    assert_eq!(unbox::<i32>(&(on_click[0].invoke)(&[Some(value.clone()), boxed(2i32)]).unwrap()), 20);
+    assert_eq!(find_markup_methods(&*value, "Add").len(), 1);
+    assert_eq!(find_markup_methods(&*value, "Create").len(), 1);
+    assert!(find_markup_methods(&*value, "Missing").is_empty());
+
+    // A class without markup of its own: the members of its base class.
+    let derived: BoxedValue = Rc::new(FerroObject::to_ref(&MetaDerivedPanel::new()));
+    let on_click = find_markup_methods(&*derived, "OnClick");
+    assert_eq!(on_click.len(), 1);
+    assert!(std::ptr::eq(on_click[0], base.find_methods("OnClick").next().unwrap()));
+
+    // Events of the class and of the root class.
+    let clicked = find_markup_event(&*value, "Clicked").unwrap();
+    assert!(std::ptr::eq(clicked, base.find_event("Clicked").unwrap()));
+    assert!(find_markup_event(&*value, "PropertyChanged").is_some());
+    assert!(find_markup_event(&*value, "Missing").is_none());
+}
+
+#[test]
+fn members_of_a_value_are_found_on_its_registered_type_and_base_types() {
+    MarkupType::register_all(&[<MetaTableBase as MarkupTyped>::MARKUP, <MetaTableDerived as MarkupTyped>::MARKUP]);
+    let derived: BoxedValue = Rc::new(MetaTableDerived);
+    let types = markup_types_of(&*derived);
+    assert_eq!(types.len(), 2);
+    assert!(std::ptr::eq(types[0], <MetaTableDerived as MarkupTyped>::MARKUP));
+    assert!(std::ptr::eq(types[1], <MetaTableBase as MarkupTyped>::MARKUP));
+
+    // A type that declares members: the static methods are its own.
+    MarkupType::register(<MetaMembersBase as MarkupTyped>::MARKUP);
+    let value: BoxedValue = Rc::new(Rc::new(MetaMembersBase));
+    assert_eq!(find_markup_methods(&*value, "Make").len(), 1);
+    let describe = find_markup_methods(&*value, "Describe");
+    assert_eq!(unbox::<String>(&(describe[0].invoke)(&[Some(value.clone())]).unwrap()), "base");
+    assert!(find_markup_event(&*value, "Changed").is_some());
+    assert!(find_markup_property(&*value, "Changed").is_none());
+
+    // A value nothing is known about has no members.
+    #[derive(PartialEq)]
+    struct Unknown;
+    let unknown: BoxedValue = Rc::new(Unknown);
+    assert!(markup_types_of(&*unknown).is_empty());
+    assert!(find_markup_methods(&*unknown, "Describe").is_empty());
+    assert!(find_markup_event(&*unknown, "Changed").is_none());
 }
 
 #[test]

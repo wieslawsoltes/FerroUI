@@ -1,0 +1,86 @@
+name: Material theme
+
+on:
+  pull_request:
+    paths:
+      - 'src/FerroUI.Themes.Material/**'
+      - 'src/FerroUI.Base/animation/**'
+      - 'src/FerroUI.Base/input/gestures.rs'
+      - 'src/FerroUI.Base/input/input_tests.rs'
+      - 'src/FerroUI.Controls/text_box.rs'
+      - 'src/FerroUI.Controls/text_box_tests.rs'
+      - 'samples/MaterialThemeGallery/**'
+      - 'samples/ControlCatalog/**'
+      - 'samples/ControlCatalog.Desktop/**'
+      - 'scripts/material-theme/**'
+      - 'scripts/themes/**'
+      - 'src/FerroUI/Cargo.toml'
+      - 'src/FerroUI/lib.rs'
+      - 'Cargo.toml'
+      - 'Cargo.lock'
+      - '.github/workflows/material-theme.yml'
+  workflow_dispatch:
+
+concurrency:
+  group: material-theme-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+env:
+  CARGO_INCREMENTAL: 0
+  CARGO_PROFILE_DEV_DEBUG: 0
+  CARGO_PROFILE_TEST_DEBUG: 0
+  CARGO_BUILD_JOBS: 1
+  RUST_BACKTRACE: 1
+
+jobs:
+  material:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: dtolnay/rust-toolchain@89b12181fb390509a0842a86cc55eeb8eb928c1d # stable
+      - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2
+        with:
+          key: material-theme
+      - name: Render dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends libfontconfig1-dev libfreetype6-dev libgl1-mesa-dev libx11-dev fonts-dejavu-core xvfb xauth
+      - name: Pinned token generation
+        run: python3 scripts/material-theme/generate.py --check
+      - name: Resource keys resolve for Light, Dark and HighContrast
+        run: python3 scripts/themes/resource_keys.py material
+      - name: Motion, palette, template and input contracts
+        run: cargo test --locked -p ferroui-themes-material --lib
+      - name: Interrupted transition and IME regression contracts
+        run: |
+          cargo test --locked -p ferroui-base --lib animation::tests::animatable_tests
+          cargo test --locked -p ferroui-base --lib input::input_tests::hold_
+          cargo test --locked -p ferroui-controls --lib canceling_preedit_restores_empty_state_without_committing_text
+      - name: Facade integration
+        run: cargo check --locked -p ferroui --no-default-features --features material-theme
+      - name: Catalog integration beside the macOS theme
+        run: cargo check --locked -p control-catalog --features material-theme,macos-theme --lib
+      - name: Gallery compiled and runtime markup contracts
+        run: cargo test --locked -p material-theme-gallery --lib
+      - name: Gallery compilation
+        run: cargo build --locked -p material-theme-gallery --bin material-theme-gallery
+      - name: Every gallery page in light, dark, high contrast and RTL
+        env:
+          FERROUI_MATERIAL_GALLERY_CAPTURE: material-captures
+          FERROUI_MATERIAL_GALLERY_VARIANTS: Light,Dark,HighContrast
+          FERROUI_MATERIAL_GALLERY_DENSITIES: normal
+          FERROUI_MATERIAL_GALLERY_FLOWS: ltr,rtl
+          FERROUI_MATERIAL_GALLERY_TIMEOUT_S: 600
+          LIBGL_ALWAYS_SOFTWARE: 1
+        run: xvfb-run -a target/debug/material-theme-gallery
+      - name: Render evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: material-theme-renders
+          path: material-captures
+          if-no-files-found: warn
