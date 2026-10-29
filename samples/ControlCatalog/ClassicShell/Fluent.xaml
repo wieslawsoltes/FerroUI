@@ -1,20 +1,22 @@
 <!--
   Not in upstream: the port's own document. The shell of the catalog is a NavigationView whose
   content is a Frame (MainView.xaml, main_view.rs), and the Fluent theme has no control themes for
-  NavigationView, its items, item headers and separators, or Frame (an owner decision: the theme
-  crate keeps the controls of the original only; docs/porting/winui-controls.md, "The ControlCatalog
-  shell"). The catalog ships them itself, for the Fluent theme of the feature `classic-themes`
+  NavigationView, its items, item headers and separators, Frame, or the AutoSuggestBox of the search
+  box of the pane (an owner decision: the theme crate keeps the controls of the original only;
+  docs/porting/winui-controls.md, "The ControlCatalog shell"). The catalog ships them itself, for the Fluent theme of the feature `classic-themes`
   only: app.rs puts the document into the sixth slot of the theme styles while the Fluent theme is
   active (ClassicThemes.xaml, key ClassicShellFluent).
 
   The templates are the ones of the WinUI theme of the port
   (src/FerroUI.Themes.WinUI/Controls/NavigationView.xaml and Controls/Frame.xaml, with
   PaneToggleButtonStyle and the two text styles of Controls/DrawerPage.xaml, the back button styles
-  of Controls/NavigationPage.xaml and PathIconUnscaledTemplate of Controls/PathIcon.xaml), which
-  are derived from microsoft-ui-xaml (https://github.com/microsoft/microsoft-ui-xaml),
-  Copyright (c) Microsoft Corporation, licensed under the MIT License. The named parts and the
+  of Controls/NavigationPage.xaml, PathIconUnscaledTemplate of Controls/PathIcon.xaml, and
+  Controls/AutoSuggestBox.xaml), which are derived from microsoft-ui-xaml
+  (https://github.com/microsoft/microsoft-ui-xaml), Copyright (c) Microsoft Corporation, licensed
+  under the MIT License. The named parts and the
   pseudo-classes are the ones the controls look up and set (ferroui-controls: navigation_view.rs,
-  navigation_view_item.rs, frame.rs); the translation notes of those documents apply here.
+  navigation_view_item.rs, frame.rs, auto_suggest_box.rs); the translation notes of those documents
+  apply here.
 
   What differs from the WinUI documents:
   - The resources the templates use and the Fluent theme does not define are defined below, with
@@ -36,6 +38,17 @@
     its Resources/Glyphs.xaml.
   - The icon presenter of an item gives SymbolIcon and FontIcon the templates of the WinUI theme
     (the icon of the settings item is a SymbolIcon, and the theme has no template for either).
+  - AutoSuggestBox: the text box has the Fluent TextBox theme (with the brushes, the corner radius
+    and the font of the box, as the Fluent AutoCompleteBox gives its text box) in place of WinUI's
+    AutoSuggestBoxTextBoxStyle, the query button is its InnerRightContent with the TextControlButton
+    brushes of the Fluent theme, and the suggestions are a ListBox with the Fluent ListBox and
+    ListBoxItem themes (no DefaultListViewItemStyle) in a container with the AutoCompleteBox
+    suggestion list resources of the Fluent theme (AutoCompleteBoxSuggestionsListBackground and
+    BorderBrush, AutoCompleteListMargin, Padding, BorderThemeThickness and MaxHeight). The header is
+    SystemControlForegroundBaseHighBrush, the description SystemControlDescriptionTextForegroundBrush.
+    The shadow of the suggestion list (ThemeShadowFlyoutBoxShadow, ThemeShadowFlyoutMargin) is left
+    out: the Fluent theme draws its drop-downs without one. A PathIcon query icon is 12 by 12
+    (AutoSuggestBoxIconFontSize).
   - NavigationViewItemHeaderTextStyle and NavigationViewTitleHeaderContentControlTextStyle are not
     based on WinUI's text styles; the title style has a template of its own. The fonts are
     ContentControlThemeFontFamily and ControlContentThemeFontSize of the Fluent theme.
@@ -1243,6 +1256,160 @@
           <Setter Property="Margin" Value="{DynamicResource TopNavigationViewItemSeparatorMargin}" />
           <Setter Property="VerticalAlignment" Value="Center" />
           <Setter Property="Fill" Value="{DynamicResource TopNavigationViewItemSeparatorForeground}" />
+        </Style>
+      </ControlTheme>
+
+      <!-- The sizes of the AutoSuggestBox of the WinUI theme
+           (Resources/AutoSuggestBox_themeresources.xaml). -->
+      <Thickness x:Key="AutoSuggestBoxTopHeaderMargin">0,0,0,8</Thickness>
+      <Thickness x:Key="AutoSuggestBoxInnerButtonMargin">1,3</Thickness>
+      <x:Double x:Key="AutoSuggestBoxIconFontSize">12</x:Double>
+
+      <!-- The query button (QueryButtonStyle of the WinUI theme), with the TextControlButton
+           brushes of the Fluent theme, which its own text box buttons have. -->
+      <ControlTheme x:Key="AutoSuggestBoxQueryButtonStyle" TargetType="Button">
+        <Setter Property="Template">
+          <ControlTemplate>
+            <ContentPresenter x:Name="PART_ContentPresenter"
+                              Background="{DynamicResource TextControlButtonBackground}"
+                              BorderBrush="{DynamicResource TextControlButtonBorderBrush}"
+                              BorderThickness="{TemplateBinding BorderThickness}"
+                              Content="{TemplateBinding Content}"
+                              CornerRadius="{TemplateBinding CornerRadius}"
+                              ContentTemplate="{TemplateBinding ContentTemplate}"
+                              Foreground="{DynamicResource TextControlButtonForeground}"
+                              FontSize="{DynamicResource AutoSuggestBoxIconFontSize}"
+                              Margin="{DynamicResource AutoSuggestBoxInnerButtonMargin}"
+                              Padding="{TemplateBinding Padding}"
+                              HorizontalContentAlignment="Center"
+                              VerticalContentAlignment="Center" />
+          </ControlTemplate>
+        </Setter>
+        <Style Selector="^:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+          <Setter Property="Background" Value="{DynamicResource TextControlButtonBackgroundPointerOver}" />
+          <Setter Property="BorderBrush" Value="{DynamicResource TextControlButtonBorderBrushPointerOver}" />
+          <Setter Property="Foreground" Value="{DynamicResource TextControlButtonForegroundPointerOver}" />
+        </Style>
+        <Style Selector="^:pressed /template/ ContentPresenter#PART_ContentPresenter">
+          <Setter Property="Background" Value="{DynamicResource TextControlButtonBackgroundPressed}" />
+          <Setter Property="BorderBrush" Value="{DynamicResource TextControlButtonBorderBrushPressed}" />
+          <Setter Property="Foreground" Value="{DynamicResource TextControlButtonForegroundPressed}" />
+        </Style>
+        <Style Selector="^:disabled /template/ ContentPresenter#PART_ContentPresenter">
+          <Setter Property="Opacity" Value="0" />
+        </Style>
+      </ControlTheme>
+
+      <!-- The template of SymbolIcon (Controls/SymbolIcon.xaml of the WinUI theme) with the glyph at
+           AutoSuggestBoxIconFontSize, for a SymbolIcon query icon. -->
+      <ControlTemplate x:Key="AutoSuggestBoxQuerySymbolIconTemplate" TargetType="SymbolIcon">
+        <TextBlock x:Name="PART_Text"
+                   HorizontalAlignment="Stretch"
+                   VerticalAlignment="Center"
+                   TextAlignment="Center"
+                   FontFamily="{DynamicResource SymbolThemeFontFamily}"
+                   FontSize="{DynamicResource AutoSuggestBoxIconFontSize}"
+                   FontStyle="Normal"
+                   FontWeight="Normal"
+                   AutomationProperties.AccessibilityView="Raw" />
+      </ControlTemplate>
+
+      <!-- The implicit theme of AutoSuggestBox (DefaultAutoSuggestBoxStyle of the WinUI theme,
+           Controls/AutoSuggestBox.xaml): the parts TextBox, QueryButton, SuggestionsPopup,
+           SuggestionsContainer and SuggestionsList (a ListBox, as the control requires) keep their
+           names. The text box has the TextBox theme of the Fluent theme, with the query button as its
+           InnerRightContent; the list has the ListBox and ListBoxItem themes of the Fluent theme. -->
+      <ControlTheme x:Key="{x:Type AutoSuggestBox}" TargetType="AutoSuggestBox">
+        <Setter Property="VerticalAlignment" Value="Stretch" />
+        <Setter Property="IsTabStop" Value="False" />
+        <Setter Property="Foreground" Value="{DynamicResource TextControlForeground}" />
+        <Setter Property="Background" Value="{DynamicResource TextControlBackground}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource TextControlBorderBrush}" />
+        <Setter Property="BorderThickness" Value="{DynamicResource TextControlBorderThemeThickness}" />
+        <Setter Property="FontFamily" Value="{DynamicResource ContentControlThemeFontFamily}" />
+        <Setter Property="FontSize" Value="{DynamicResource ControlContentThemeFontSize}" />
+        <Setter Property="CornerRadius" Value="{DynamicResource ControlCornerRadius}" />
+        <Setter Property="FocusAdorner" Value="{x:Null}" />
+        <Setter Property="Template">
+          <ControlTemplate>
+            <Grid x:Name="LayoutRoot" RowDefinitions="Auto,*,Auto">
+              <ContentPresenter x:Name="PART_HeaderPresenter"
+                                Grid.Row="0"
+                                Content="{TemplateBinding Header}"
+                                ContentTemplate="{TemplateBinding HeaderTemplate}"
+                                IsVisible="{TemplateBinding Header, Converter={x:Static ObjectConverters.IsNotNull}}"
+                                Foreground="{DynamicResource SystemControlForegroundBaseHighBrush}"
+                                Margin="{DynamicResource AutoSuggestBoxTopHeaderMargin}"
+                                FontWeight="Normal"
+                                TextWrapping="Wrap" />
+              <TextBox x:Name="TextBox"
+                       Grid.Row="1"
+                       PlaceholderText="{TemplateBinding PlaceholderText}"
+                       Width="{TemplateBinding Width}"
+                       Foreground="{TemplateBinding Foreground}"
+                       Background="{TemplateBinding Background}"
+                       BorderBrush="{TemplateBinding BorderBrush}"
+                       BorderThickness="{TemplateBinding BorderThickness}"
+                       FontSize="{TemplateBinding FontSize}"
+                       FontFamily="{TemplateBinding FontFamily}"
+                       FontWeight="{TemplateBinding FontWeight}"
+                       FontStretch="{TemplateBinding FontStretch}"
+                       ScrollViewer.BringIntoViewOnFocusChange="False"
+                       Margin="0"
+                       CornerRadius="{TemplateBinding CornerRadius}">
+                <TextBox.InnerRightContent>
+                  <Button x:Name="QueryButton"
+                          Theme="{StaticResource AutoSuggestBoxQueryButtonStyle}"
+                          Focusable="False"
+                          IsTabStop="False"
+                          IsVisible="False"
+                          CornerRadius="{TemplateBinding CornerRadius}"
+                          BorderThickness="0"
+                          Margin="0,0,2,0"
+                          Width="32"
+                          Height="28"
+                          VerticalAlignment="Center" />
+                </TextBox.InnerRightContent>
+              </TextBox>
+              <Popup x:Name="SuggestionsPopup"
+                     WindowManagerAddShadowHint="False"
+                     IsLightDismissEnabled="True"
+                     PlacementTarget="{Binding #TextBox}"
+                     Placement="Bottom">
+                <Border x:Name="SuggestionsContainer"
+                        Padding="{DynamicResource AutoCompleteListMargin}"
+                        BorderThickness="{DynamicResource AutoCompleteListBorderThemeThickness}"
+                        BorderBrush="{DynamicResource AutoCompleteBoxSuggestionsListBorderBrush}"
+                        Background="{DynamicResource AutoCompleteBoxSuggestionsListBackground}"
+                        CornerRadius="{DynamicResource OverlayCornerRadius}">
+                  <ListBox x:Name="SuggestionsList"
+                           ItemTemplate="{TemplateBinding ItemTemplate}"
+                           MaxHeight="{DynamicResource AutoCompleteListMaxHeight}"
+                           Margin="{DynamicResource AutoCompleteListPadding}"
+                           Focusable="False"
+                           Background="Transparent"
+                           BorderThickness="0"
+                           ScrollViewer.IsScrollChainingEnabled="False" />
+                </Border>
+              </Popup>
+              <ContentPresenter x:Name="DescriptionPresenter"
+                                Grid.Row="2"
+                                Content="{TemplateBinding Description}"
+                                IsVisible="{TemplateBinding Description, Converter={x:Static ObjectConverters.IsNotNull}}"
+                                Foreground="{DynamicResource SystemControlDescriptionTextForegroundBrush}" />
+            </Grid>
+          </ControlTemplate>
+        </Setter>
+
+        <!-- The query icon: a SymbolIcon gets its glyph at AutoSuggestBoxIconFontSize, a PathIcon
+             (the icon of the search box of the shell) that size instead of the 20 by 20 of the
+             Fluent theme. -->
+        <Style Selector="^ /template/ Button#QueryButton SymbolIcon">
+          <Setter Property="Template" Value="{StaticResource AutoSuggestBoxQuerySymbolIconTemplate}" />
+        </Style>
+        <Style Selector="^ /template/ Button#QueryButton PathIcon">
+          <Setter Property="Width" Value="{DynamicResource AutoSuggestBoxIconFontSize}" />
+          <Setter Property="Height" Value="{DynamicResource AutoSuggestBoxIconFontSize}" />
         </Style>
       </ControlTheme>
 
