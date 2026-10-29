@@ -124,11 +124,11 @@ pub(super) fn page_sections() -> (Vec<Rc<HomeSection>>, Vec<UnavailablePage>) {
                 "Connected animations and ElementCompositionPreview",
             );
             s.add("/Pages/CustomDrawing.xaml", "Custom Drawing", Icons::BRUSH, "Render custom geometry in code");
+            // Not from upstream: SymbolIcon and FontIcon of WinUI (docs/porting/winui-controls.md) and PathIcon.
+            s.add("/Pages/IconElementPage.xaml", "IconElement", Icons::SPARKLE, "Symbol, font and path icons");
             s.add("/Pages/ImagePage.xaml", "Image", Icons::IMAGE, "Display bitmaps with different stretch modes");
             // Not from upstream: the page of the port of the inking controls of WinUI.
             s.add("/Pages/InkingPage.xaml", "Inking", Icons::CANVAS, "Pressure-sensitive ink, pens, eraser and stencil guides");
-            // Not from upstream: the WinUI controls of ferroui-controls (docs/porting/winui-controls.md).
-            s.add("/Pages/WinUIControlsPage.xaml", "WinUI controls", Icons::SPARKLE, "Icons, status, input and navigation controls of WinUI");
             s.add("/Pages/OpenGlPage.xaml", "OpenGL", Icons::CUBE_3D, "Embed custom OpenGL rendering");
             s.add("/Pages/OpenGl/OpenGlLeasePage.xaml", "OpenGL Lease", Icons::CUBE_3D, "Low-level access to the OpenGL context");
             s.add("/Pages/OpenGl/OpenGlInteropPage.xaml", "OpenGL Interop", Icons::CUBE_3D, "Compositor and OpenGL interop");
@@ -138,8 +138,13 @@ pub(super) fn page_sections() -> (Vec<Rc<HomeSection>>, Vec<UnavailablePage>) {
             s.add("/Pages/AdornerLayerPage.xaml", "AdornerLayer", Icons::SPARKLE, "Overlay visuals on top of other controls");
             s.add("/Pages/DataValidationPage.xaml", "Data Validation", Icons::SHIELD, "Display validation errors from bindings");
             s.add("/Pages/DialogsPage.xaml", "Dialogs", Icons::DIALOG, "File pickers and modal dialog windows");
+            // Not from upstream: InfoBadge and InfoBar of WinUI (docs/porting/winui-controls.md).
+            s.add("/Pages/InfoBadgePage.xaml", "InfoBadge", Icons::DOTS, "A dot, number or icon that draws attention");
+            s.add("/Pages/InfoBarPage.xaml", "InfoBar", Icons::INFO, "Inline app-wide messages by severity");
             s.add("/Pages/NotificationsPage.xaml", "Notifications", Icons::BELL, "Toast-style in-app notifications");
             s.add("/Pages/ProgressBarPage.xaml", "ProgressBar", Icons::PROGRESS, "Determinate and indeterminate progress");
+            // Not from upstream: ProgressRing of WinUI (docs/porting/winui-controls.md).
+            s.add("/Pages/ProgressRingPage.xaml", "ProgressRing", Icons::REFRESH, "Circular indeterminate and determinate progress");
             s.add("/Pages/ToolTipPage.xaml", "ToolTip", Icons::TOOLTIP, "Hover hints for any control");
         }),
         section("Interaction", Icons::KEYBOARD_FLOAT, &mut unavailable, |s| {
