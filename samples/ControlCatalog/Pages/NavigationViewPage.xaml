@@ -1,0 +1,123 @@
+<ContentPage Theme="{StaticResource ScrollPage}" xmlns="https://github.com/ferroui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             Header="NavigationView"
+             x:Class="ControlCatalog.Pages.NavigationViewPage">
+  <!-- Not from upstream: WinUI's NavigationView (docs/porting/winui-controls.md). Its template is in
+       the WinUI theme and the macOS and Material themes derived from it. The class of this page
+       shows the selected item in the content of each navigation view. -->
+  <StackPanel Orientation="Vertical" Spacing="4" MaxWidth="900">
+    <TextBlock Margin="2" Classes="h2" TextWrapping="Wrap">A NavigationView is the top-level navigation of an app: a pane of items on the left, collapsed to icons, or across the top, with the content of the selected item beside it.</TextBlock>
+
+    <TextBlock Margin="2,12,2,2" FontSize="14" FontWeight="Bold">Left pane with a Frame: each item navigates, the back button goes back through the journal</TextBlock>
+    <Border Margin="2" Height="320" BorderThickness="1" BorderBrush="{DynamicResource CardStrokeColorDefaultBrush}" CornerRadius="8" ClipToBounds="True">
+      <NavigationView x:Name="LeftNav" PaneDisplayMode="Left" IsSettingsVisible="True" IsBackButtonVisible="Visible" PaneTitle="Mail app">
+        <NavigationView.MenuItems>
+          <NavigationViewItemHeader Content="Pages" />
+          <NavigationViewItem x:Name="LeftNavHome" Content="Home" IsSelected="True">
+            <NavigationViewItem.Icon>
+              <SymbolIcon Symbol="Home" />
+            </NavigationViewItem.Icon>
+          </NavigationViewItem>
+          <NavigationViewItem x:Name="LeftNavMail" Content="Mail">
+            <NavigationViewItem.Icon>
+              <SymbolIcon Symbol="Mail" />
+            </NavigationViewItem.Icon>
+          </NavigationViewItem>
+          <NavigationViewItem x:Name="LeftNavCalendar" Content="Calendar">
+            <NavigationViewItem.Icon>
+              <SymbolIcon Symbol="Calendar" />
+            </NavigationViewItem.Icon>
+          </NavigationViewItem>
+          <NavigationViewItemSeparator />
+          <NavigationViewItem x:Name="LeftNavFolder" Content="Folder">
+            <NavigationViewItem.Icon>
+              <SymbolIcon Symbol="Folder" />
+            </NavigationViewItem.Icon>
+          </NavigationViewItem>
+          <NavigationViewItem x:Name="LeftNavFavorites" Content="Favorites">
+            <NavigationViewItem.Icon>
+              <SymbolIcon Symbol="Favorite" />
+            </NavigationViewItem.Icon>
+          </NavigationViewItem>
+        </NavigationView.MenuItems>
+        <Frame x:Name="LeftFrame" />
+      </NavigationView>
+    </Border>
+
+    <TextBlock Margin="2,12,2,2" FontSize="14" FontWeight="Bold">Top pane</TextBlock>
+    <Border Margin="2" Height="320" BorderThickness="1" BorderBrush="{DynamicResource CardStrokeColorDefaultBrush}" CornerRadius="8" ClipToBounds="True">
+      <NavigationView x:Name="TopNav" PaneDisplayMode="Top" IsSettingsVisible="True" IsBackButtonVisible="Collapsed">
+        <NavigationView.MenuItems>
+          <NavigationViewItem Content="Home" IsSelected="True">
+            <NavigationViewItem.Icon>
+              <SymbolIcon Symbol="Home" />
+            </NavigationViewItem.Icon>
+          </NavigationViewItem>
+          <NavigationViewItem Content="Mail">
+            <NavigationViewItem.Icon>
+              <SymbolIcon Symbol="Mail" />
+            </NavigationViewItem.Icon>
+          </NavigationViewItem>
+          <NavigationViewItem Content="Calendar">
+            <NavigationViewItem.Icon>
+              <SymbolIcon Symbol="Calendar" />
+            </NavigationViewItem.Icon>
+          </NavigationViewItem>
+          <NavigationViewItemSeparator />
+          <NavigationViewItem Content="Folder">
+            <NavigationViewItem.Icon>
+              <SymbolIcon Symbol="Folder" />
+            </NavigationViewItem.Icon>
+          </NavigationViewItem>
+          <NavigationViewItem Content="Favorites">
+            <NavigationViewItem.Icon>
+              <SymbolIcon Symbol="Favorite" />
+            </NavigationViewItem.Icon>
+          </NavigationViewItem>
+        </NavigationView.MenuItems>
+        <StackPanel Margin="24" Spacing="8">
+          <TextBlock x:Name="TopNavTitle" FontSize="24" FontWeight="SemiBold" />
+          <TextBlock x:Name="TopNavBody" TextWrapping="Wrap" />
+        </StackPanel>
+      </NavigationView>
+    </Border>
+
+    <TextBlock Margin="2,12,2,2" FontSize="14" FontWeight="Bold">Compact pane (icons; the menu button opens it)</TextBlock>
+    <Border Margin="2" Height="320" BorderThickness="1" BorderBrush="{DynamicResource CardStrokeColorDefaultBrush}" CornerRadius="8" ClipToBounds="True">
+      <NavigationView x:Name="CompactNav" PaneDisplayMode="LeftCompact" IsSettingsVisible="True" IsBackButtonVisible="Collapsed">
+        <NavigationView.MenuItems>
+          <NavigationViewItem Content="Home" IsSelected="True">
+            <NavigationViewItem.Icon>
+              <SymbolIcon Symbol="Home" />
+            </NavigationViewItem.Icon>
+          </NavigationViewItem>
+          <NavigationViewItem Content="Mail">
+            <NavigationViewItem.Icon>
+              <SymbolIcon Symbol="Mail" />
+            </NavigationViewItem.Icon>
+          </NavigationViewItem>
+          <NavigationViewItem Content="Calendar">
+            <NavigationViewItem.Icon>
+              <SymbolIcon Symbol="Calendar" />
+            </NavigationViewItem.Icon>
+          </NavigationViewItem>
+          <NavigationViewItemSeparator />
+          <NavigationViewItem Content="Folder">
+            <NavigationViewItem.Icon>
+              <SymbolIcon Symbol="Folder" />
+            </NavigationViewItem.Icon>
+          </NavigationViewItem>
+          <NavigationViewItem Content="Favorites">
+            <NavigationViewItem.Icon>
+              <SymbolIcon Symbol="Favorite" />
+            </NavigationViewItem.Icon>
+          </NavigationViewItem>
+        </NavigationView.MenuItems>
+        <StackPanel Margin="24" Spacing="8">
+          <TextBlock x:Name="CompactNavTitle" FontSize="24" FontWeight="SemiBold" />
+          <TextBlock x:Name="CompactNavBody" TextWrapping="Wrap" />
+        </StackPanel>
+      </NavigationView>
+    </Border>
+  </StackPanel>
+</ContentPage>
