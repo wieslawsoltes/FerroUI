@@ -1110,3 +1110,36 @@ fn the_title_bar_follows_the_window_chrome() {
     assert_eq!(NavigationViewBackButtonVisible::Visible, navigation.is_back_button_visible());
     assert!(navigation.is_pane_toggle_button_visible());
 }
+
+/// Every decoration of the window leaves a usable shell: either the title bar of the shell with
+/// its back and toggle buttons and the search box, or the navigation view with its own.
+#[test]
+fn the_shell_stays_usable_with_every_window_decoration() {
+    use ferroui_controls::platform::IWindowImpl;
+    use ferroui_controls::{NavigationViewBackButtonVisible, WindowDecorations};
+
+    let shell = Shell::start(1400.0, 900.0);
+    let navigation = shell.navigation_view();
+    let title_bar = shell.main_view.title_bar();
+    let usable = |context: &str| {
+        let search_in_title_bar = title_bar.content().is_some();
+        if shell.main_view.is_title_bar_active() {
+            assert!(title_bar.is_visible() && search_in_title_bar && title_bar.is_pane_toggle_button_visible(), "{context}: the title bar");
+        } else {
+            assert!(!title_bar.is_visible() && navigation.auto_suggest_box().is_some(), "{context}: the search box in the pane");
+            assert_eq!(NavigationViewBackButtonVisible::Visible, navigation.is_back_button_visible(), "{context}");
+            assert!(navigation.is_pane_toggle_button_visible(), "{context}: the toggle button of the pane");
+        }
+    };
+    for extended in [false, true] {
+        shell.window_impl.is_client_area_extended_to_decorations.set(extended);
+        if let Some(changed) = shell.window_impl.extend_client_area_to_decorations_changed() {
+            changed(extended);
+        }
+        for decorations in [WindowDecorations::None, WindowDecorations::BorderOnly, WindowDecorations::Full] {
+            shell.window.set_window_decorations(decorations);
+            shell.settle();
+            usable(&format!("extended {extended}, decorations {decorations:?}"));
+        }
+    }
+}
