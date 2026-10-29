@@ -151,3 +151,47 @@ pub(crate) static EXCLUDED: &[ExcludedDocument] = &[ExcludedDocument { path: "/A
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class AcknowledgedOutputChangeTests(unittest.TestCase):
+    """With output changes acknowledged (label build-output-changes) the outputs are compared within a
+    revision and the graph across revisions; the changes against the baseline are reported."""
+
+    def pair(self, directory, label, generated, units=None):
+        probe = Path(directory) / f"{label}-{len(generated)}-{id(generated)}.bin"
+        probe.write_bytes(json.dumps(generated, sort_keys=True).encode())
+        population = units or record()
+        return {"label": label, "population": population, "repeat": population,
+                "outputs": {"generated_rust_and_metadata": generated, "first_party_semantic_files": generated},
+                "asset_probe": {"binary_file": str(probe)}}
+
+    def test_changed_outputs_are_compared_per_revision_and_reported(self):
+        with tempfile.TemporaryDirectory() as directory:
+            base = self.pair(directory, "baseline", {"a.rs": ["1"], "b.rs": ["2"]})
+            cand = self.pair(directory, "candidate", {"a.rs": ["1"], "b.rs": ["3"]})
+            again = self.pair(directory, "candidate", {"a.rs": ["1"], "b.rs": ["3"]})
+            strict = catalog.compare_evidence(base, cand)
+            self.assertFalse(strict["same_generated_rust_and_metadata"])
+            self.assertTrue(strict["same_units_features_profiles"])
+            acknowledged = catalog.compare_evidence(base, again, catalog.first_of_revision([base, cand, again], "candidate"))
+            self.assertTrue(all(acknowledged.values()), acknowledged)
+            changes = catalog.output_changes(base, cand)
+            self.assertEqual(changes["generated_rust_and_metadata"], ["b.rs"])
+            self.assertTrue(changes["asset_table_bytes_differ"])
+
+    def test_a_revision_that_is_not_deterministic_still_fails(self):
+        with tempfile.TemporaryDirectory() as directory:
+            base = self.pair(directory, "baseline", {"a.rs": ["1"]})
+            cand = self.pair(directory, "candidate", {"a.rs": ["2"]})
+            drift = self.pair(directory, "candidate", {"a.rs": ["3"]})
+            result = catalog.compare_evidence(base, drift, catalog.first_of_revision([base, cand, drift], "candidate"))
+            self.assertFalse(result["same_generated_rust_and_metadata"])
+
+    def test_a_changed_graph_still_fails(self):
+        with tempfile.TemporaryDirectory() as directory:
+            base = self.pair(directory, "baseline", {"a.rs": ["1"]})
+            other = record()
+            other["units"][1]["features"] = ["extra"]
+            cand = self.pair(directory, "candidate", {"a.rs": ["1"]}, other)
+            result = catalog.compare_evidence(base, cand, catalog.first_of_revision([base, cand], "candidate"))
+            self.assertFalse(result["same_units_features_profiles"])

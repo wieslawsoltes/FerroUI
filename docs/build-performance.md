@@ -279,3 +279,29 @@ daemon setup/shutdown, target cleanup and cache storage are separately recorded.
 A `--minimum-speedup` option makes a performance target explicit; its default records
 honest evidence without substituting a chosen target for an observation. Measurement
 results and source revisions are recorded with the PR's CI evidence.
+
+## Intended output changes
+
+The comparisons of the workflow require the candidate to generate exactly the baseline's
+Rust and `.xamlmeta` output: a pull request that only makes the build faster must not change
+what it builds. A pull request that changes the scanner, the compiler or the generated code on
+purpose acknowledges it with the label `build-output-changes`. With the label:
+
+- `catalog-freshness.py`, `sample-freshness.py`, `compare.py` (source mode) and `scanner.py`
+  (source mode) run with `--accept-output-changes`. They compare the outputs of each revision
+  with its own first sample, which keeps every build deterministic. They still compare the
+  dependency graph, features and profiles across revisions, and the runtime results of the
+  sample fixture with the baseline's. The generated files that differ from the baseline are
+  listed in the summary of the job instead of failing it.
+- The optimized-build-tools legs of `compare.py` and `scanner.py` compare the candidate built
+  with optimized build tools with the candidate built from source (both checkouts are the head
+  of the pull request), strictly. The equivalence of the two modes is checked as before; the
+  speedup is that of the build tools on the candidate.
+- The compiler cache (replay, invalidation and stale-output controls), the browser tooling and
+  the correctness suites do not compare revisions and are unchanged. The timings of every job
+  are recorded as before.
+
+The label is read from the pull request when a run starts (job `acknowledgment`), not from the
+event. Adding or removing it runs the Build performance run of the head again
+([build-output-label.yml](../.github/workflows/build-output-label.yml)); Build performance
+itself does not run on label events, so another label cannot start, cancel or skip it.

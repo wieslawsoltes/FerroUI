@@ -128,6 +128,14 @@ export class FerroExports {
         });
     }
 
+    // Not in the original: the accessibility tree of the views (accessibility.ts).
+    public static get AccessibilityHelper() {
+        return FerroExports.group("AccessibilityHelper", {
+            OnFrame: "AccessibilityHelper_OnFrame",
+            OnAction: "AccessibilityHelper_OnAction"
+        });
+    }
+
     public static get DomHelper() {
         return FerroExports.group("DomHelper", {
             DarkModeChanged: "DomHelper_DarkModeChanged",
