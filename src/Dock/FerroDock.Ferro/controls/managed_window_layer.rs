@@ -45,7 +45,7 @@ impl ManagedDockableBaseImpl for OffsetProbeDockable {}
 crate::impl_managed_dockable!(OffsetProbeDockable);
 impl OffsetProbeDockable {
     fn new() -> Rc<Self> {
-        Rc::new_cyclic(|runtime| Self {
+        Rc::new_cyclic(|runtime: &std::rc::Weak<Self>| Self {
             base: ManagedDockableBase::construct(runtime.clone()),
         })
     }

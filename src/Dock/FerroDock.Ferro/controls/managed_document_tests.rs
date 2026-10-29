@@ -844,7 +844,7 @@ impl IRecyclingDataTemplate for ApplicationTemplateModel {
 #[test]
 fn application_owned_recycling_template_works_through_original_dockable_interface() {
     run(|| {
-        let model = Rc::new_cyclic(|runtime| ApplicationTemplateModel {
+        let model = Rc::new_cyclic(|runtime: &std::rc::Weak<ApplicationTemplateModel>| ApplicationTemplateModel {
             base: ManagedDockableBase::construct(runtime.clone()),
             calls: Cell::new(0),
         });

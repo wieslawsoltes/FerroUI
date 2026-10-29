@@ -5,7 +5,6 @@ version.workspace = true
 edition.workspace = true
 rust-version.workspace = true
 license.workspace = true
-authors.workspace = true
 publish = false
 build = "build.rs"
 links = "ferrodock_reactiveui_sample_metadata"
@@ -19,20 +18,20 @@ required-features = ["desktop"]
 [lib]
 path = "lib.rs"
 [dependencies]
-ferrodock-serializer-system-text-json-reactiveui = { path = "../../../src/Dock/FerroDock.Serializer.SystemTextJson.ReactiveUI", version = "0.1.0" }
-ferrodock-serializer-system-text-json = { path = "../../../src/Dock/FerroDock.Serializer.SystemTextJson", version = "0.1.0" }
+ferrodock-serializer-system-text-json-reactiveui = { path = "../../../src/Dock/FerroDock.Serializer.SystemTextJson.ReactiveUI" }
+ferrodock-serializer-system-text-json = { path = "../../../src/Dock/FerroDock.Serializer.SystemTextJson" }
 ferrodock-model-ferro.workspace = true
-ferrodock-model-reactiveui-ferro = { path = "../../../src/Dock/FerroDock.Model.ReactiveUI.Ferro", version = "0.1.0" }
+ferrodock-model-reactiveui-ferro = { path = "../../../src/Dock/FerroDock.Model.ReactiveUI.Ferro" }
 ferroui-desktop = { workspace = true, optional = true }
-ferrodock-ferro-themes-fluent = { path = "../../../src/Dock/FerroDock.Ferro.Themes.Fluent", version = "0.1.0" }
-ferrodock-ferro-themes-browser = { path = "../../../src/Dock/FerroDock.Ferro.Themes.Browser", version = "0.1.0" }
+ferrodock-ferro-themes-fluent = { path = "../../../src/Dock/FerroDock.Ferro.Themes.Fluent" }
+ferrodock-ferro-themes-browser = { path = "../../../src/Dock/FerroDock.Ferro.Themes.Browser" }
 ferroui-themes-fluent.workspace = true
 ferroui-reactiveui-controls.workspace = true
 ferrodock-model.workspace = true
-ferrodock-controls-recycling = { path = "../../../src/Dock/FerroDock.Controls.Recycling", version = "0.1.0" }
-ferrodock-model-reactiveui = { path = "../../../src/Dock/FerroDock.Model.ReactiveUI", version = "0.1.0" }
-ferrodock-ferro = { path = "../../../src/Dock/FerroDock.Ferro", version = "0.1.0" }
-ferrodock-ferro-diagnostics = { path = "../../../src/Dock/FerroDock.Ferro.Diagnostics", version = "0.1.0" }
+ferrodock-controls-recycling = { path = "../../../src/Dock/FerroDock.Controls.Recycling" }
+ferrodock-model-reactiveui = { path = "../../../src/Dock/FerroDock.Model.ReactiveUI" }
+ferrodock-ferro = { path = "../../../src/Dock/FerroDock.Ferro" }
+ferrodock-ferro-diagnostics = { path = "../../../src/Dock/FerroDock.Ferro.Diagnostics" }
 ferrodock-settings.workspace = true
 ferroui-base.workspace = true
 ferroui-fonts-inter.workspace = true
@@ -41,8 +40,9 @@ ferroui-markup-xaml.workspace = true
 ferroui-system.workspace = true
 ferroui-reactive.workspace = true
 ferroui-reactiveui.workspace = true
-[lints]
-workspace = true
+[lints.rust]
+unsafe_code = "forbid"
+missing_docs = "deny"
 [build-dependencies]
 ferroui-build.workspace = true
 [dev-dependencies]

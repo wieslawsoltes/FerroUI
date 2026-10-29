@@ -55,7 +55,7 @@ impl ManagedDockableBaseImpl for ManagedWindowDock {}
 impl ManagedWindowDock {
     /// Creates the original observable empty dock with IsCollapsable=false.
     pub fn new() -> Rc<Self> {
-        let this = Rc::new_cyclic(|runtime| Self {
+        let this = Rc::new_cyclic(|runtime: &std::rc::Weak<Self>| Self {
             base: ManagedDockableBase::construct(runtime.clone()),
             runtime: runtime.clone(),
             visible: RefCell::new(Some(ListHandle::new())),

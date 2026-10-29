@@ -14,7 +14,7 @@ impl ManagedDockableBaseImpl for Plain {}
 impl_managed_dockable!(Plain);
 impl Plain {
     fn new() -> Rc<Self> {
-        Rc::new_cyclic(|runtime| Self {
+        Rc::new_cyclic(|runtime: &std::rc::Weak<Self>| Self {
             base: ManagedDockableBase::construct(runtime.clone()),
         })
     }
@@ -65,7 +65,7 @@ impl ManagedDockableBaseImpl for Derived {
 }
 impl Derived {
     fn new() -> Rc<Self> {
-        Rc::new_cyclic(|runtime| Self {
+        Rc::new_cyclic(|runtime: &std::rc::Weak<Self>| Self {
             base: ManagedDockableBase::construct(runtime.clone()),
             calls: RefCell::new(Vec::new()),
         })

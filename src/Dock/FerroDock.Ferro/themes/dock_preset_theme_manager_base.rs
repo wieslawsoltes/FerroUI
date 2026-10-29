@@ -12,7 +12,7 @@ use ferroui_base::{
 };
 use ferroui_controls::Application;
 use ferroui_markup_xaml::styling::ResourceInclude;
-use std::{any::Any, fmt, rc::Rc};
+use std::{fmt, rc::Rc};
 /// The source abstract override, implemented by each concrete preset manager.
 /// The composed base is the original base-class storage; this hook is required.
 pub trait DockPresetThemeManagerHooks {
@@ -202,7 +202,7 @@ impl DockPresetThemeManagerBase {
     }
     fn try_find_preset_uri(&self, dictionary: &dyn IResourceDictionary) -> Option<Uri> {
         for provider in dictionary.merged_dictionaries().snapshot().iter() {
-            if let Some(include) = (&**provider as &dyn Any).downcast_ref::<ResourceInclude>() {
+            if let Some(include) = provider.as_any().and_then(|provider| provider.downcast_ref::<ResourceInclude>()) {
                 if let Some(source) = include.source().filter(|source| self.is_preset_uri(source)) {
                     return Some(source);
                 }
@@ -219,7 +219,7 @@ impl DockPresetThemeManagerBase {
         let merged = dictionary.merged_dictionaries();
         for index in (0..merged.count()).rev() {
             let provider = merged.get(index);
-            if let Some(include) = (&*provider as &dyn Any).downcast_ref::<ResourceInclude>() {
+            if let Some(include) = provider.as_any().and_then(|provider| provider.downcast_ref::<ResourceInclude>()) {
                 if include
                     .source()
                     .is_some_and(|source| self.is_preset_uri(&source))

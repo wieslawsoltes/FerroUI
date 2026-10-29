@@ -52,7 +52,7 @@ impl_dockable!(
 );
 impl ContentModel {
     fn new() -> Rc<Self> {
-        Rc::new_cyclic(|weak| Self {
+        Rc::new_cyclic(|weak: &std::rc::Weak<Self>| Self {
             base: DockableBase::construct(weak.clone()),
             content: RefCell::new(None),
         })

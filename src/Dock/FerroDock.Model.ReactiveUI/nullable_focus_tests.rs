@@ -137,7 +137,7 @@ impl DockableBaseImpl for SelectedItem {
 impl_dockable!(SelectedItem);
 impl SelectedItem {
     fn new(trace: Trace, action: Option<Action>) -> Rc<Self> {
-        let item = Rc::new_cyclic(|weak| Self {
+        let item = Rc::new_cyclic(|weak: &std::rc::Weak<Self>| Self {
             base: DockableBase::construct(weak.clone()),
             trace,
             action,

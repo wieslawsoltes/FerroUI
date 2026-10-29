@@ -18,7 +18,7 @@ use ferroui_headless::{
     FerroTestAssembly, HeadlessUnitTestSession,
 };
 use ferroui_markup_xaml::styling::ResourceInclude;
-use std::{any::Any, cell::Cell, rc::Rc};
+use std::{cell::Cell, rc::Rc};
 
 fn build() -> AppBuilder {
     AppBuilder::configure::<Application>().use_headless(FerroHeadlessPlatformOptions::default())
@@ -69,8 +69,7 @@ fn preset_sources(dictionary: &ResourceDictionary) -> Vec<String> {
         .snapshot()
         .iter()
         .filter_map(|provider| {
-            (&**provider as &dyn Any)
-                .downcast_ref::<ResourceInclude>()
+            provider.as_any().and_then(|provider| provider.downcast_ref::<ResourceInclude>())
                 .and_then(ResourceInclude::source)
                 .map(|uri| uri.to_string())
         })

@@ -5,7 +5,7 @@ version.workspace = true
 edition.workspace = true
 rust-version.workspace = true
 license.workspace = true
-authors.workspace = true
+publish = false
 build = "build.rs"
 links = "ferrodock_controls_recycling_model_ferro_metadata"
 [lib]
@@ -16,5 +16,6 @@ ferrodock-controls-recycling-model.workspace = true
 ferroui-base.workspace = true
 [build-dependencies]
 ferroui-build-scan.workspace = true
-[lints]
-workspace = true
+[lints.rust]
+unsafe_code = "forbid"
+missing_docs = "deny"

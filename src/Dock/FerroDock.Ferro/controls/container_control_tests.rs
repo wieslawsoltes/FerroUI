@@ -102,7 +102,7 @@ crate::impl_managed_dockable!(
 impl ManagedDockableBaseImpl for Generated {}
 impl Generated {
     fn new() -> Rc<Self> {
-        Rc::new_cyclic(|runtime| Self {
+        Rc::new_cyclic(|runtime: &std::rc::Weak<Self>| Self {
             base: ManagedDockableBase::construct(runtime.clone()),
             metadata: Metadata::default(),
         })

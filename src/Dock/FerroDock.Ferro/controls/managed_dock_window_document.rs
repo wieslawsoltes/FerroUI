@@ -111,7 +111,7 @@ impl ManagedDockableBaseImpl for ManagedDockWindowDocument {
 impl ManagedDockWindowDocument {
     /// Creates the original model and attaches its optional source notifications.
     pub fn new(window: Rc<dyn IDockWindow>) -> Rc<Self> {
-        let this = Rc::new_cyclic(|runtime| Self {
+        let this = Rc::new_cyclic(|runtime: &std::rc::Weak<Self>| Self {
             base: ManagedDockableBase::construct(runtime.clone()),
             runtime: runtime.clone(),
             mdi_bounds: RefCell::new(DockRect::default()),

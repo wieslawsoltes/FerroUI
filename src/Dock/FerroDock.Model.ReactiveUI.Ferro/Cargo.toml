@@ -5,7 +5,7 @@ version.workspace = true
 edition.workspace = true
 rust-version.workspace = true
 license.workspace = true
-authors.workspace = true
+publish = false
 build = "build.rs"
 links = "ferrodock_model_reactiveui_ferro_metadata"
 
@@ -13,10 +13,10 @@ links = "ferrodock_model_reactiveui_ferro_metadata"
 path = "lib.rs"
 
 [dependencies]
-ferrodock-model-ferro = { path = "../FerroDock.Model.Ferro", version = "0.1.0" }
+ferrodock-model-ferro = { path = "../FerroDock.Model.Ferro" }
 ferrodock-model.workspace = true
-ferrodock-model-reactiveui = { path = "../FerroDock.Model.ReactiveUI", version = "0.1.0" }
-ferrodock-controls-recycling = { path = "../FerroDock.Controls.Recycling", version = "0.1.0" }
+ferrodock-model-reactiveui = { path = "../FerroDock.Model.ReactiveUI" }
+ferrodock-controls-recycling = { path = "../FerroDock.Controls.Recycling" }
 ferroui-base.workspace = true
 ferroui-reactiveui.workspace = true
 ferroui-system.workspace = true
@@ -24,5 +24,6 @@ ferroui-system.workspace = true
 [build-dependencies]
 ferroui-build-scan.workspace = true
 
-[lints]
-workspace = true
+[lints.rust]
+unsafe_code = "forbid"
+missing_docs = "deny"

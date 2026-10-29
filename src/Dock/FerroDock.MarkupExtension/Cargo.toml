@@ -5,7 +5,7 @@ version.workspace = true
 edition.workspace = true
 rust-version.workspace = true
 license.workspace = true
-authors.workspace = true
+publish = false
 build = "build.rs"
 links = "ferrodock_markup_extension_metadata"
 
@@ -19,5 +19,6 @@ ferroui-markup-xaml.workspace = true
 [build-dependencies]
 ferroui-build-scan.workspace = true
 
-[lints]
-workspace = true
+[lints.rust]
+unsafe_code = "forbid"
+missing_docs = "deny"

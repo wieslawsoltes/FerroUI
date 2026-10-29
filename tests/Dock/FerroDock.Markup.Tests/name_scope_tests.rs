@@ -9,7 +9,7 @@ use ferrodock_markup_extension::ReferenceExtension;
 use ferrodock_model::core::IDockable;
 use ferrodock_model_reactiveui::controls::Document;
 use ferroui_base::{
-    controls::{ChildNameScope, INameScope, NameScope, NameScopeError, NameScopeRef},
+    controls::{ChildNameScope, INameScope, NameScope, NameScopeError, NameScopeRef, NameScopeValueError},
     data::core::ValueTypes,
     metadata::{into_markup_value, MarkupType, MarkupTyped},
     threading::Dispatcher,
@@ -29,7 +29,7 @@ fn plain_values_preserve_reference_identity_and_share_native_name_collisions() {
         assert!(Rc::ptr_eq(&scope.find_value("model").unwrap(), &value));
         assert_eq!(
             scope.try_register_value("model", Rc::new("same text".to_owned())),
-            Err(NameScopeError::DuplicateName("model".into()))
+            Err(NameScopeValueError::DuplicateName("model".into()))
         );
         assert!(scope.find("model").is_none());
         assert_eq!(
@@ -46,7 +46,7 @@ fn plain_values_preserve_reference_identity_and_share_native_name_collisions() {
         scope.complete();
         assert_eq!(
             scope.try_register_value("later", Rc::new(1i32)),
-            Err(NameScopeError::Completed)
+            Err(NameScopeValueError::Completed)
         );
     });
 }
@@ -257,7 +257,7 @@ fn existing_custom_native_scopes_keep_their_contract_and_report_unsupported_plai
         );
         assert_eq!(
             scope.try_register_value("plain", Rc::new(42i32)),
-            Err(NameScopeError::UnsupportedValue)
+            Err(NameScopeValueError::UnsupportedValue)
         );
     });
 }
@@ -268,13 +268,13 @@ fn registered_nullable_null_is_rejected_after_the_completion_guard() {
     let null: BoxedValue = Rc::new(None::<BoxedValue>);
     assert_eq!(
         scope.try_register_value("null", null.clone()),
-        Err(NameScopeError::NullValue)
+        Err(NameScopeValueError::NullValue)
     );
     assert!(scope.find_value("null").is_none());
     scope.complete();
     assert_eq!(
         scope.try_register_value("null", null),
-        Err(NameScopeError::Completed)
+        Err(NameScopeValueError::Completed)
     );
 }
 #[test]
@@ -293,7 +293,7 @@ fn scope_keeps_plain_values_alive_and_preserves_native_attached_owner_lifetime()
         assert!(scope.find_value("owner").is_none());
         assert_eq!(
             scope.try_register_value("owner", Rc::new(42i32)),
-            Err(NameScopeError::DuplicateName("owner".into()))
+            Err(NameScopeValueError::DuplicateName("owner".into()))
         );
         assert!(weak_value.upgrade().is_some());
         drop(scope);
@@ -466,7 +466,7 @@ fn shared_identity_callbacks_allow_metadata_and_scope_reentry_without_value_equa
     assert!(scope.find_value("callback").is_some());
     assert!(matches!(
         scope.try_register_value("object", different),
-        Err(NameScopeError::DuplicateName(_))
+        Err(NameScopeValueError::DuplicateName(_))
     ));
     let a: BoxedValue = Rc::new(42_i32);
     let b: BoxedValue = Rc::new(42_i32);

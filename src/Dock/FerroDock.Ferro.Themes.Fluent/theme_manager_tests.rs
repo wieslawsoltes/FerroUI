@@ -21,7 +21,7 @@ use ferroui_headless::{
     FerroTestAssembly, HeadlessUnitTestSession,
 };
 use ferroui_markup_xaml::styling::ResourceInclude;
-use std::{any::Any, rc::Rc};
+use std::rc::Rc;
 fn build() -> AppBuilder {
     AppBuilder::configure::<Application>().use_headless(FerroHeadlessPlatformOptions::default())
 }
@@ -64,8 +64,7 @@ fn sources(dictionary: &dyn IResourceDictionary) -> Vec<String> {
         .snapshot()
         .iter()
         .filter_map(|provider| {
-            (&**provider as &dyn Any)
-                .downcast_ref::<ResourceInclude>()
+            provider.as_any().and_then(|provider| provider.downcast_ref::<ResourceInclude>())
                 .and_then(ResourceInclude::source)
                 .map(|uri| uri.to_string())
         })
@@ -295,8 +294,7 @@ fn source_switch_removes_every_matching_include_through_styles_and_custom_dictio
             .merged_dictionaries()
             .snapshot()
             .iter()
-            .any(|provider| (&**provider as &dyn Any)
-                .downcast_ref::<ResourceInclude>()
+            .any(|provider| provider.as_any().and_then(|provider| provider.downcast_ref::<ResourceInclude>())
                 .is_some_and(|include| std::ptr::eq(include, &*unrelated))));
         let stable = root.merged_dictionaries_snapshot();
         let theme_stable = theme_dictionary.merged_dictionaries_snapshot();

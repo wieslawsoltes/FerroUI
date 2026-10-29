@@ -187,13 +187,11 @@ pub(super) fn compilation_with_enum_ids(
 ) -> Compilation {
     let mut source = read_source_declarations(scan).unwrap();
     let sdk_root = scan.files[0].path.canonicalize().unwrap();
+    // The root of the workspace: the nearest directory of the source with its lock file.
     let workspace = sdk_root
-        .parent()
-        .unwrap()
-        .parent()
-        .unwrap()
-        .parent()
-        .unwrap();
+        .ancestors()
+        .find(|directory| directory.join("Cargo.lock").is_file())
+        .expect("the workspace of the scanned source");
     let command = published_command::read(workspace);
     let enums = native_enums::read(workspace);
     source.types.extend(enums.iter().map(|e| e.source.clone()));

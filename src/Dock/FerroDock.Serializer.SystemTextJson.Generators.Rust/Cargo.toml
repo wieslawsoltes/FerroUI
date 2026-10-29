@@ -5,16 +5,17 @@ version.workspace = true
 edition.workspace = true
 rust-version.workspace = true
 license.workspace = true
-authors.workspace = true
+publish = false
 [lib]
 path = "lib.rs"
 [dependencies]
-ferrodock-serializer-system-text-json-generators = { path = "../FerroDock.Serializer.SystemTextJson.Generators", version = "0.1.0" }
+ferrodock-serializer-system-text-json-generators = { path = "../FerroDock.Serializer.SystemTextJson.Generators" }
 ferroui-build-scan.workspace = true
 quote = { version = "1", default-features = false }
 proc-macro2 = { version = "1", default-features = false, features = ["span-locations"] }
 syn = { version = "2", default-features = false, features = ["full", "parsing", "printing", "visit"] }
 [dev-dependencies]
 serde_json.workspace = true
-[lints]
-workspace = true
+[lints.rust]
+unsafe_code = "forbid"
+missing_docs = "deny"

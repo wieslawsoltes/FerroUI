@@ -5,7 +5,7 @@ version.workspace = true
 edition.workspace = true
 rust-version.workspace = true
 license.workspace = true
-authors.workspace = true
+publish = false
 build = "build.rs"
 links = "ferrodock_model_reactiveui_services_ferro_xaml"
 
@@ -13,7 +13,7 @@ links = "ferrodock_model_reactiveui_services_ferro_xaml"
 path = "lib.rs"
 
 [dependencies]
-ferrodock-model-reactiveui-services = { path = "../FerroDock.Model.ReactiveUI.Services", version = "0.1.0" }
+ferrodock-model-reactiveui-services = { path = "../FerroDock.Model.ReactiveUI.Services" }
 ferroui-base.workspace = true
 ferroui-controls.workspace = true
 ferroui-reactiveui-controls.workspace = true
@@ -28,5 +28,6 @@ ferroui-build-scan.workspace = true
 [dev-dependencies]
 ferroui-headless.workspace = true
 
-[lints]
-workspace = true
+[lints.rust]
+unsafe_code = "forbid"
+missing_docs = "deny"

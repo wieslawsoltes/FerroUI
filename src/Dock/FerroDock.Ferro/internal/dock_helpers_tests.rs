@@ -228,7 +228,7 @@ impl DockableBaseImpl for OwnerProbe {}
 ferrodock_model_reactiveui::impl_dockable!(@base OwnerProbe,OwnerBase);
 impl OwnerProbe {
     fn new() -> Rc<Self> {
-        Rc::new_cyclic(|runtime| Self {
+        Rc::new_cyclic(|runtime: &std::rc::Weak<Self>| Self {
             base: OwnerBase {
                 inner: DockableBase::construct(runtime.clone()),
                 reads: Cell::new(0),

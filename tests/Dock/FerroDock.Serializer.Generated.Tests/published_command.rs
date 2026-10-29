@@ -33,8 +33,13 @@ pub(super) fn read(workspace: &std::path::Path) -> Command {
         "Command source requires one resolved ReactiveUI version"
     );
     let version = entry(package, "version").unwrap();
+    // A member of the workspace (no source in the lock file) is read where it is.
+    let source = entry(package, "source");
+    if source.is_none() {
+        return scan_command(&workspace.join("src/FerroUI.ReactiveUI"), version);
+    }
     assert_eq!(
-        entry(package, "source").as_deref(),
+        source.as_deref(),
         Some("registry+https://github.com/rust-lang/crates.io-index"),
         "Resolve non-registry command sources explicitly"
     );
@@ -81,7 +86,11 @@ pub(super) fn read(workspace: &std::path::Path) -> Command {
         1,
         "Resolve the locked published command source explicitly"
     );
-    let manifest = &candidates[0];
+    scan_command(&candidates[0], version)
+}
+
+/// Scans the command contract of the ReactiveUI crate in the directory `manifest`.
+fn scan_command(manifest: &std::path::Path, version: String) -> Command {
     let root = ferroui_build_scan::export::source_root(manifest, None).unwrap();
     let mut options = ScanOptions::new("ferroui_reactiveui", root);
     options.extern_crates = ["ferroui_system", "ferroui_reactive", "ferroui_splat"]

@@ -5,18 +5,19 @@ version.workspace = true
 edition.workspace = true
 rust-version.workspace = true
 license.workspace = true
-authors.workspace = true
+publish = false
 build = "build.rs"
 [lib]
 path = "lib.rs"
 [dependencies]
 ferrodock-model.workspace = true
-ferrodock-model-reactiveui = { path="../../../src/Dock/FerroDock.Model.ReactiveUI",version="0.1.0" }
-ferrodock-serializer-system-text-json = { path="../../../src/Dock/FerroDock.Serializer.SystemTextJson",version="0.1.0" }
+ferrodock-model-reactiveui = { path="../../../src/Dock/FerroDock.Model.ReactiveUI" }
+ferrodock-serializer-system-text-json = { path="../../../src/Dock/FerroDock.Serializer.SystemTextJson" }
 [build-dependencies]
-ferrodock-serializer-system-text-json-generators-rust = { path="../../../src/Dock/FerroDock.Serializer.SystemTextJson.Generators.Rust",version="0.1.0" }
+ferrodock-serializer-system-text-json-generators-rust = { path="../../../src/Dock/FerroDock.Serializer.SystemTextJson.Generators.Rust" }
 ferroui-build-scan.workspace = true
-ferrodock-serializer-system-text-json-generators = { path="../../../src/Dock/FerroDock.Serializer.SystemTextJson.Generators",version="0.1.0" }
+ferrodock-serializer-system-text-json-generators = { path="../../../src/Dock/FerroDock.Serializer.SystemTextJson.Generators" }
 serde_json.workspace = true
-[lints]
-workspace = true
+[lints.rust]
+unsafe_code = "forbid"
+missing_docs = "deny"

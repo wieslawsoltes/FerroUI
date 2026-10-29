@@ -5,7 +5,6 @@ version.workspace = true
 edition.workspace = true
 rust-version.workspace = true
 license.workspace = true
-authors.workspace = true
 publish = false
 build = "build.rs"
 
@@ -15,35 +14,35 @@ path = "lib.rs"
 [dependencies]
 ferrodock-controls-recycling-model-ferro.workspace = true
 ferrodock-model-ferro.workspace = true
-ferrodock-model-reactiveui-ferro = { path = "../../../src/Dock/FerroDock.Model.ReactiveUI.Ferro", version = "0.1.0" }
-ferrodock-markup-extension = { path = "../../../src/Dock/FerroDock.MarkupExtension", version = "0.1.0" }
-ferrodock-ferro-diagnostics = { path = "../../../src/Dock/FerroDock.Ferro.Diagnostics", version = "0.1.0" }
-ferrodock-ferro-themes-browser = { path = "../../../src/Dock/FerroDock.Ferro.Themes.Browser", version = "0.1.0" }
-ferrodock-ferro-themes-simple = { path = "../../../src/Dock/FerroDock.Ferro.Themes.Simple", version = "0.1.0" }
+ferrodock-model-reactiveui-ferro = { path = "../../../src/Dock/FerroDock.Model.ReactiveUI.Ferro" }
+ferrodock-markup-extension = { path = "../../../src/Dock/FerroDock.MarkupExtension" }
+ferrodock-ferro-diagnostics = { path = "../../../src/Dock/FerroDock.Ferro.Diagnostics" }
+ferrodock-ferro-themes-browser = { path = "../../../src/Dock/FerroDock.Ferro.Themes.Browser" }
+ferrodock-ferro-themes-simple = { path = "../../../src/Dock/FerroDock.Ferro.Themes.Simple" }
 ferrodock-settings.workspace = true
-ferrodock-controls-deferred-content-control = { path = "../../../src/Dock/FerroDock.Controls.DeferredContentControl", version = "0.1.0" }
-ferrodock-ferro-themes-fluent = { path = "../../../src/Dock/FerroDock.Ferro.Themes.Fluent", version = "0.1.0" }
-ferrodock-ferro = { path = "../../../src/Dock/FerroDock.Ferro", version = "0.1.0" }
-ferrodock-controls-recycling = { path = "../../../src/Dock/FerroDock.Controls.Recycling", version = "0.1.0" }
-ferrodock-controls-proportional-stack-panel = { path = "../../../src/Dock/FerroDock.Controls.ProportionalStackPanel", version = "0.1.0" }
+ferrodock-controls-deferred-content-control = { path = "../../../src/Dock/FerroDock.Controls.DeferredContentControl" }
+ferrodock-ferro-themes-fluent = { path = "../../../src/Dock/FerroDock.Ferro.Themes.Fluent" }
+ferrodock-ferro = { path = "../../../src/Dock/FerroDock.Ferro" }
+ferrodock-controls-recycling = { path = "../../../src/Dock/FerroDock.Controls.Recycling" }
+ferrodock-controls-proportional-stack-panel = { path = "../../../src/Dock/FerroDock.Controls.ProportionalStackPanel" }
 ferroui-base.workspace = true
 ferroui-controls.workspace = true
 ferroui-markup-xaml.workspace = true
-ferrodock-model-reactiveui = { path = "../../../src/Dock/FerroDock.Model.ReactiveUI", version = "0.1.0" }
+ferrodock-model-reactiveui = { path = "../../../src/Dock/FerroDock.Model.ReactiveUI" }
 ferrodock-model.workspace = true
 ferroui-system.workspace = true
 
 [build-dependencies]
 serde_json.workspace = true
-ferrodock-serializer-system-text-json-generators = { path = "../../../src/Dock/FerroDock.Serializer.SystemTextJson.Generators", version = "0.1.0" }
-ferrodock-serializer-system-text-json-generators-rust = { path = "../../../src/Dock/FerroDock.Serializer.SystemTextJson.Generators.Rust", version = "0.1.0" }
+ferrodock-serializer-system-text-json-generators = { path = "../../../src/Dock/FerroDock.Serializer.SystemTextJson.Generators" }
+ferrodock-serializer-system-text-json-generators-rust = { path = "../../../src/Dock/FerroDock.Serializer.SystemTextJson.Generators.Rust" }
 ferroui-build-scan.workspace = true
 ferroui-build.workspace = true
 
 [dev-dependencies]
-ferrodock-serializer-system-text-json-reactiveui = { path = "../../../src/Dock/FerroDock.Serializer.SystemTextJson.ReactiveUI", version = "0.1.0" }
-ferrodock-serializer-system-text-json = { path = "../../../src/Dock/FerroDock.Serializer.SystemTextJson", version = "0.1.0" }
-ferroui-markup-xaml-loader = { version = "=0.3.0", features = ["emitter"] }
+ferrodock-serializer-system-text-json-reactiveui = { path = "../../../src/Dock/FerroDock.Serializer.SystemTextJson.ReactiveUI" }
+ferrodock-serializer-system-text-json = { path = "../../../src/Dock/FerroDock.Serializer.SystemTextJson" }
+ferroui-markup-xaml-loader = { workspace = true, features = ["emitter"] }
 ferroui-themes-simple.workspace = true
 ferroui-themes-fluent.workspace = true
 ferrodock-model-reactiveui-services = { path = "../../../src/Dock/FerroDock.Model.ReactiveUI.Services" }
@@ -51,5 +50,6 @@ ferroui-reactive.workspace = true
 ferroui-reactiveui.workspace = true
 ferroui-headless = { workspace = true, features = ["testing"] }
 
-[lints]
-workspace = true
+[lints.rust]
+unsafe_code = "forbid"
+missing_docs = "deny"

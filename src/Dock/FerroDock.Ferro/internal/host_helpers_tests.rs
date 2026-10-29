@@ -269,7 +269,7 @@ impl LogicalModel {
             base: StyledElement::construct(),
             model: RefCell::new(Weak::new()),
         });
-        let model = Rc::new_cyclic(|runtime| Self {
+        let model = Rc::new_cyclic(|runtime: &std::rc::Weak<Self>| Self {
             base: ManagedDockableBase::construct(runtime.clone()),
             element: element.clone(),
         });

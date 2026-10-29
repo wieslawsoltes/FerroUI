@@ -5,14 +5,15 @@ version.workspace = true
 edition.workspace = true
 rust-version.workspace = true
 license.workspace = true
-authors.workspace = true
+publish = false
 [lib]
 path = "lib.rs"
 [dependencies]
 ferrodock-model.workspace = true
-ferrodock-model-reactiveui = { path = "../FerroDock.Model.ReactiveUI", version = "0.1.0" }
-ferrodock-serializer-system-text-json = { path = "../FerroDock.Serializer.SystemTextJson", version = "0.1.0" }
-[lints]
-workspace = true
+ferrodock-model-reactiveui = { path = "../FerroDock.Model.ReactiveUI" }
+ferrodock-serializer-system-text-json = { path = "../FerroDock.Serializer.SystemTextJson" }
+[lints.rust]
+unsafe_code = "forbid"
+missing_docs = "deny"
 [dev-dependencies]
 ferroui-reactiveui.workspace = true

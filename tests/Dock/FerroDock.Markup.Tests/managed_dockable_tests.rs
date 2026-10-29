@@ -24,7 +24,7 @@ impl_managed_dockable!(ConsumerModel);
 impl ManagedDockableBaseImpl for ConsumerModel {}
 impl ConsumerModel {
     fn new() -> Rc<Self> {
-        Rc::new_cyclic(|runtime| Self {
+        Rc::new_cyclic(|runtime: &std::rc::Weak<Self>| Self {
             base: ManagedDockableBase::construct(runtime.clone()),
         })
     }
