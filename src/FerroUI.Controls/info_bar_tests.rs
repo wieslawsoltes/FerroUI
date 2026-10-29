@@ -15,7 +15,6 @@ use crate::{
 };
 use ferroui_base::data::BindingPriority;
 use ferroui_base::media::{Brushes, IBrush};
-use ferroui_base::reactive::IDisposable;
 use ferroui_base::{ObjectType, Ref};
 use std::cell::{Cell, RefCell};
 use std::rc::Rc;

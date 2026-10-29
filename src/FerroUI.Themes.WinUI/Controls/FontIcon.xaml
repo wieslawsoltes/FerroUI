@@ -25,6 +25,10 @@
 
   <ControlTheme x:Key="{x:Type FontIcon}" TargetType="FontIcon">
     <Setter Property="FontFamily" Value="{DynamicResource SymbolThemeFontFamily}" />
+    <!-- FontIcon.FontSize is a property of its own in WinUI, 20 by default and not inherited;
+         FerroUI's is the inherited font size of the templated control, so the theme sets 20 over
+         the inherited value (FI-3). -->
+    <Setter Property="FontSize" Value="20" />
     <Setter Property="Template">
       <ControlTemplate>
         <TextBlock x:Name="PART_Text"
