@@ -8,16 +8,13 @@ on:
       - 'src/FerroUI.Native/**'
       - 'native/FerroUI.Native/**'
       - 'src/tools/MicroCom.CodeGenerator/**'
-      - 'src/FerroUI/Cargo.toml'
-      - 'src/FerroUI/lib.rs'
-      - 'samples/ControlCatalog/**'
-      - 'samples/ControlCatalog.Desktop/**'
-      - 'samples/ControlCatalog.Browser/**'
       - 'scripts/macos-theme/**'
       - 'scripts/themes/**'
-      - 'Cargo.toml'
-      - 'Cargo.lock'
       - '.github/workflows/macos-theme.yml'
+  # Changes of the catalog, the facade crate or the dependencies do not start this workflow on a
+  # pull request (the CI workflow tests those); the nightly run of main covers them.
+  schedule:
+    - cron: '47 2 * * *'
   workflow_dispatch:
     inputs:
       build_catalogue:

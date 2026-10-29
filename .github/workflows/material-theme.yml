@@ -10,15 +10,13 @@ on:
       - 'src/FerroUI.Controls/text_box.rs'
       - 'src/FerroUI.Controls/text_box_tests.rs'
       - 'samples/MaterialThemeGallery/**'
-      - 'samples/ControlCatalog/**'
-      - 'samples/ControlCatalog.Desktop/**'
       - 'scripts/material-theme/**'
       - 'scripts/themes/**'
-      - 'src/FerroUI/Cargo.toml'
-      - 'src/FerroUI/lib.rs'
-      - 'Cargo.toml'
-      - 'Cargo.lock'
       - '.github/workflows/material-theme.yml'
+  # Changes of the catalog, the facade crate or the dependencies do not start this workflow on a
+  # pull request (the CI workflow tests those); the nightly run of main covers them.
+  schedule:
+    - cron: '53 2 * * *'
   workflow_dispatch:
 
 concurrency:
