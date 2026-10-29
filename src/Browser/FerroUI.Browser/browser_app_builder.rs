@@ -108,6 +108,25 @@ impl BrowserRenderer {
     }
 }
 
+/// When the views of a page mirror their automation tree into the page,
+/// for screen readers, the element picker of the developer tools and
+/// automation by role (docs/porting/browser-accessibility.md).
+///
+/// Not in the original, whose browser backend has no accessibility tree.
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
+pub enum BrowserAccessibilityMode {
+    /// Built when asked for: a visually hidden "Enable accessibility" button,
+    /// which a screen reader finds first, builds it (as Flutter and Uno
+    /// Platform do on the web, since a page cannot tell whether a screen
+    /// reader runs). Nothing is followed until then.
+    #[default]
+    OnDemand,
+    /// Built when the view is made and kept up to date.
+    Enabled,
+    /// Never built, and no enable button.
+    Disabled,
+}
+
 /// Options of the browser backend.
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct BrowserPlatformOptions {
@@ -154,6 +173,13 @@ pub struct BrowserPlatformOptions {
     /// Not in the original, where a build with threads always renders on
     /// its render worker.
     pub render_thread: bool,
+
+    /// When the views mirror their automation tree into the page (on demand
+    /// by default). [`FerroView::set_accessibility_enabled`](crate::FerroView::set_accessibility_enabled)
+    /// turns it on or off for one view at any time.
+    ///
+    /// Not in the original.
+    pub accessibility: BrowserAccessibilityMode,
 }
 
 impl Default for BrowserPlatformOptions {
@@ -169,6 +195,7 @@ impl Default for BrowserPlatformOptions {
             ferro_service_worker_scope: None,
             prefer_file_dialog_polyfill: false,
             render_thread: true,
+            accessibility: BrowserAccessibilityMode::default(),
         }
     }
 }
