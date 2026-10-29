@@ -473,6 +473,9 @@
   </ControlTheme>
 
   <ControlTheme x:Key="{x:Type NavigationViewItem}" TargetType="NavigationViewItem">
+    <!-- The content alignment of a WinUI control (Control.VerticalContentAlignment, Center), where a
+         FerroUI content control is at the top: the text of an item is centred on its icon (NVI-12). -->
+    <Setter Property="VerticalContentAlignment" Value="Center" />
     <Setter Property="Foreground" Value="{DynamicResource NavigationViewItemForeground}" />
     <Setter Property="Background" Value="{DynamicResource NavigationViewItemBackground}" />
     <Setter Property="BorderBrush" Value="{DynamicResource NavigationViewItemBorderBrush}" />
