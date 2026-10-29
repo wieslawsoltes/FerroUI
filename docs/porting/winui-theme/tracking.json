@@ -90759,7 +90759,7 @@
    "batch": "B1",
    "winui": "No WinUI style (IconElement has no template): the TextBlock that WinUI's FontIcon builds in code (CFontIcon::ApplyTemplate, icon.cpp), in the font SymbolThemeFontFamily. A WinUI control in ferroui-controls (docs/porting/winui-controls.md); the Fluent theme has no document for it.",
    "status": "ported",
-   "deviations": 2,
+   "deviations": 3,
    "date": "2026-10-24"
   },
   {
@@ -90781,7 +90781,7 @@
    "batch": "B3",
    "winui": "AutoSuggestBox: the implicit style and DefaultAutoSuggestBoxStyle, with AutoSuggestBoxTextBoxStyle, QueryButtonStyle and the resources of AutoSuggestBox_themeresources.xaml (DefaultAutoSuggestBoxStyle and AutoSuggestBoxTextBoxStyle are ported in AutoCompleteBox.xaml). A WinUI control in ferroui-controls (docs/porting/winui-controls.md); the Fluent theme has no document for it.",
    "status": "ported",
-   "deviations": 7,
+   "deviations": 8,
    "date": "2026-10-24"
   },
   {
@@ -91586,7 +91586,7 @@
   "Resources": 9,
   "AdornerLayer": 1,
   "AutoCompleteBox": 9,
-  "AutoSuggestBox": 7,
+  "AutoSuggestBox": 8,
   "Button": 8,
   "Calendar": 4,
   "CalendarButton": 7,
@@ -91616,7 +91616,7 @@
   "MenuScrollViewer": 2,
   "OverlayPopupHost": 1,
   "PathIcon": 3,
-  "FontIcon": 2,
+  "FontIcon": 3,
   "SymbolIcon": 2,
   "PopupRoot": 1,
   "ProgressBar": 10,

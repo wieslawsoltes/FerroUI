@@ -102,12 +102,27 @@
     </Style>
   </ControlTheme>
 
+  <!-- The template of SymbolIcon (Controls/SymbolIcon.xaml) with the glyph at
+       AutoSuggestBoxIconFontSize, for the query icon (ASB-3). -->
+  <ControlTemplate x:Key="AutoSuggestBoxQuerySymbolIconTemplate" TargetType="SymbolIcon">
+    <TextBlock x:Name="PART_Text"
+               HorizontalAlignment="Stretch"
+               VerticalAlignment="Center"
+               TextAlignment="Center"
+               FontFamily="{DynamicResource SymbolThemeFontFamily}"
+               FontSize="{DynamicResource AutoSuggestBoxIconFontSize}"
+               FontStyle="Normal"
+               FontWeight="Normal"
+               AutomationProperties.AccessibilityView="Raw" />
+  </ControlTemplate>
+
   <!-- The implicit style of AutoSuggestBox, with the setters and the template of
        DefaultAutoSuggestBoxStyle. -->
   <ControlTheme x:Key="{x:Type AutoSuggestBox}" TargetType="AutoSuggestBox">
     <Setter Property="VerticalAlignment" Value="Stretch" />
-    <Setter Property="VerticalContentAlignment" Value="Stretch" />
-    <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+    <!-- VerticalContentAlignment and HorizontalContentAlignment (Stretch) of the source are left out:
+         FerroUI's AutoSuggestBox is a headered items control, which has neither (ASB-8); the text box
+         of the template stretches by its own defaults. -->
     <Setter Property="IsTabStop" Value="False" />
     <Setter Property="Foreground" Value="{DynamicResource TextControlForeground}" />
     <Setter Property="Background" Value="{DynamicResource TextControlBackground}" />
@@ -142,8 +157,6 @@
                    FontFamily="{TemplateBinding FontFamily}"
                    FontWeight="{TemplateBinding FontWeight}"
                    FontStretch="{TemplateBinding FontStretch}"
-                   VerticalContentAlignment="{TemplateBinding VerticalContentAlignment}"
-                   HorizontalContentAlignment="{TemplateBinding HorizontalContentAlignment}"
                    ScrollViewer.BringIntoViewOnFocusChange="False"
                    Margin="0"
                    CornerRadius="{TemplateBinding CornerRadius}">
@@ -196,9 +209,11 @@
       </ControlTemplate>
     </Setter>
 
-    <!-- The glyph of a SymbolIcon query icon at AutoSuggestBoxIconFontSize. -->
-    <Style Selector="^ /template/ Button#QueryButton SymbolIcon /template/ TextBlock#PART_Text">
-      <Setter Property="FontSize" Value="{DynamicResource AutoSuggestBoxIconFontSize}" />
+    <!-- The glyph of a SymbolIcon query icon at AutoSuggestBoxIconFontSize (ASB-3): the icon gets the
+         template of SymbolIcon with that size, since a style cannot reach into the template of a
+         part of the template (one /template/ per selector). -->
+    <Style Selector="^ /template/ Button#QueryButton SymbolIcon">
+      <Setter Property="Template" Value="{StaticResource AutoSuggestBoxQuerySymbolIconTemplate}" />
     </Style>
   </ControlTheme>
 </ResourceDictionary>
