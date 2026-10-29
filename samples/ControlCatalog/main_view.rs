@@ -30,6 +30,10 @@ use std::cell::{Cell, RefCell};
 use std::rc::Rc;
 use std::time::Duration;
 
+/// The greatest width of the search box in the title bar of the shell, and its greatest height there.
+const SEARCH_BOX_WIDTH: f64 = 500.0;
+const SEARCH_BOX_MAX_HEIGHT: f64 = 40.0;
+
 /// The height of the row of the toggle and back buttons of a minimal pane, above the content.
 const MINIMAL_CONTENT_TOP: f64 = 48.0;
 
@@ -59,6 +63,9 @@ pub struct MainView {
     /// the window, to give them back.
     saved_title_bar_decorations: Cell<Option<TitleBarDecorations>>,
     window_subscription: RefCell<Option<Rc<dyn IDisposable>>>,
+    /// The logo of the pane header, shown only while the title bar of the shell is not (it has the
+    /// logo and the title itself, and WinUI Gallery has no pane header).
+    pane_logo: RefCell<Option<Ref<Control>>>,
 }
 
 ferro_class!(MainView: ContentPage);
@@ -157,6 +164,7 @@ impl MainView {
             title_bar_active: Cell::new(false),
             saved_title_bar_decorations: Cell::new(None),
             window_subscription: RefCell::new(None),
+            pane_logo: RefCell::new(None),
         }
     }
 
@@ -569,15 +577,26 @@ impl MainView {
         let navigation = self.navigation_view();
         let title_bar = self.title_bar();
         let search = self.get_control::<AutoSuggestBox>("SearchBox");
+        if self.pane_logo.borrow().is_none() {
+            *self.pane_logo.borrow_mut() = navigation.pane_header();
+        }
         let changed = self.title_bar_active.replace(active) != active;
         if changed || title_bar.is_visible() != active {
             if active {
                 navigation.set_auto_suggest_box(None);
+                navigation.set_pane_header(None);
+                // As wide as the title bar leaves it, 500 at most (WinUI Gallery), and no higher than
+                // the title bar.
+                search.set_max_width(SEARCH_BOX_WIDTH);
+                search.set_max_height(SEARCH_BOX_MAX_HEIGHT);
                 title_bar.set_content(Some(search.upcast::<Control>()));
                 navigation.set_is_back_button_visible(NavigationViewBackButtonVisible::Collapsed);
                 navigation.set_is_pane_toggle_button_visible(false);
             } else {
                 title_bar.set_content(None);
+                search.set_max_width(f64::INFINITY);
+                search.set_max_height(f64::INFINITY);
+                navigation.set_pane_header(self.pane_logo.borrow().clone());
                 navigation.set_auto_suggest_box(Some(search));
                 navigation.set_is_back_button_visible(NavigationViewBackButtonVisible::Visible);
                 navigation.set_is_pane_toggle_button_visible(true);

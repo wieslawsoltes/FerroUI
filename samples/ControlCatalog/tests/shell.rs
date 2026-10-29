@@ -1068,11 +1068,13 @@ fn the_title_bar_follows_the_window_chrome() {
 
     assert!(!shell.main_view.is_title_bar_active(), "the mock window has its own title bar");
     assert!(!title_bar.is_visible() && navigation.auto_suggest_box().is_some());
+    assert!(navigation.pane_header().is_some(), "the logo is the pane header without the title bar");
 
     extend(true);
     assert!(shell.main_view.is_title_bar_active() && title_bar.is_visible(), "the title bar of the shell is shown");
     assert!(search_in_title_bar(&shell), "the search box is in the title bar");
     assert!(navigation.auto_suggest_box().is_none());
+    assert!(navigation.pane_header().is_none(), "the title bar has the logo, the pane no header");
     assert_eq!(NavigationViewBackButtonVisible::Collapsed, navigation.is_back_button_visible());
     assert!(!navigation.is_pane_toggle_button_visible());
     assert!(title_bar.is_pane_toggle_button_visible());
@@ -1104,6 +1106,7 @@ fn the_title_bar_follows_the_window_chrome() {
     extend(false);
     assert!(!shell.main_view.is_title_bar_active() && !title_bar.is_visible());
     assert!(navigation.auto_suggest_box().is_some(), "the search box is back in the pane");
+    assert!(navigation.pane_header().is_some(), "the logo is back in the pane header");
     assert_eq!(NavigationViewBackButtonVisible::Visible, navigation.is_back_button_visible());
     assert!(navigation.is_pane_toggle_button_visible());
 }
