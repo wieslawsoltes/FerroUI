@@ -24,9 +24,11 @@
 #
 # An application in a repository of its own, with this repository as a submodule: set
 # FERROUI_BROWSER_WORKSPACE to the directory of its cargo workspace. The binary package is looked
-# up and built there (with the cargo configuration of the browser target of this repository), the
-# target directory defaults to its target/, and the site can be written below it. The workspace
-# defines the `browser` profile itself (a profile is not inherited from another workspace).
+# up and built there (with the cargo configuration of the browser target of this repository, which
+# the workspace includes from its .cargo/config.toml or which is passed with --config), the target
+# directory defaults to its target/, and the site can be written below it. The workspace defines the
+# `browser` profile itself (a profile is not inherited from another workspace):
+# scripts/apps/sync-workspace.py copies it there (docs/apps.md).
 #
 # The module is built with the `browser` profile of the workspace (optimised for size, see
 # docs/porting/browser-platform.md, section 18), or with the `dev` profile with --debug.
@@ -318,8 +320,13 @@ fi
 # The messages of the build name the output directories of the build scripts.
 MESSAGES="$(mktemp)"
 trap 'rm -f -- "$MESSAGES"' EXIT
-# Outside this repository the configuration of the browser target is not found by cargo: give it.
-[ "$WORKSPACE" != "$ROOT" ] && FLAGS+=(--config "$ROOT/.cargo/config.toml")
+# Outside this repository cargo finds the configuration of the browser target only when the
+# configuration of the application includes it (docs/apps.md); otherwise it is given here. Given
+# twice, its link arguments would be repeated.
+if [ "$WORKSPACE" != "$ROOT" ] \
+    && ! grep -qsF "${ROOT_REAL#"$WORKSPACE_REAL"/}/.cargo/config.toml" "$WORKSPACE/.cargo/config.toml"; then
+  FLAGS+=(--config "$ROOT/.cargo/config.toml")
+fi
 (cd "$WORKSPACE" && cargo build --locked --target wasm32-unknown-emscripten "${CARGO_SELECTION[@]}" "${FLAGS[@]}" \
   --message-format=json-render-diagnostics > "$MESSAGES")
 
