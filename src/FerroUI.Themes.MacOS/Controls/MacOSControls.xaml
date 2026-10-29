@@ -103,6 +103,9 @@
         <MergeResourceInclude Source="ferres://FerroUI.Themes.MacOS/Controls/TreeViewItem.xaml" />
         <MergeResourceInclude Source="ferres://FerroUI.Themes.MacOS/Controls/TreeView.xaml" />
         <MergeResourceInclude Source="ferres://FerroUI.Themes.MacOS/Controls/AutoCompleteBox.xaml" />
+        <MergeResourceInclude Source="ferres://FerroUI.Themes.MacOS/Controls/InfoBar.xaml" />
+        <MergeResourceInclude Source="ferres://FerroUI.Themes.MacOS/Controls/InfoBadge.xaml" />
+        <MergeResourceInclude Source="ferres://FerroUI.Themes.MacOS/Controls/ProgressRing.xaml" />
       </ResourceDictionary.MergedDictionaries>
     </ResourceDictionary>
   </Styles.Resources>

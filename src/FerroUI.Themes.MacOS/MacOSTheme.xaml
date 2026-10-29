@@ -86,6 +86,8 @@
         <MergeResourceInclude Source="/Resources/Glyphs.xaml" />
         <!-- resources:end -->
         <MergeResourceInclude Source="/Resources/MacOSMaterials.xaml" />
+        <MergeResourceInclude Source="/Resources/InfoBadge_themeresources.xaml" />
+        <MergeResourceInclude Source="/Resources/ProgressRing_themeresources.xaml" />
 
         <!-- The labels of the commands of the context flyout of the text controls (not part of the
              WinUI theme: WinUI takes them from the resources of the framework). -->
