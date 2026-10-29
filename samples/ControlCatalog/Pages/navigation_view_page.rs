@@ -123,7 +123,7 @@ impl NavigationViewPage {
                 return;
             }
             if let Some(header) = selected_header(args) {
-                let _ = frame.navigate(FramePage::TYPE, Some(box_item(&header)));
+                let _ = frame.navigate(FramePage::TYPE, box_item(&header));
             }
         });
         let weak_frame = frame.downgrade();
@@ -132,7 +132,7 @@ impl NavigationViewPage {
                 let _ = frame.go_back();
             }
         });
-        let _ = frame.navigate(FramePage::TYPE, Some(box_item(&"Home".to_string())));
+        let _ = frame.navigate(FramePage::TYPE, box_item(&"Home".to_string()));
     }
 
     /// Selects the item of the left navigation view for `header` without navigating again.
