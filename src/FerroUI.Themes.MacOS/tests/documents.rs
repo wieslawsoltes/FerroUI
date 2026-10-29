@@ -127,6 +127,8 @@ document_tests! {
     controls_menu_scroll_viewer => "/Controls/MenuScrollViewer.xaml";
     controls_overlay_popup_host => "/Controls/OverlayPopupHost.xaml";
     controls_path_icon => "/Controls/PathIcon.xaml";
+    controls_font_icon => "/Controls/FontIcon.xaml";
+    controls_symbol_icon => "/Controls/SymbolIcon.xaml";
     controls_popup_root => "/Controls/PopupRoot.xaml";
     controls_progress_bar => "/Controls/ProgressBar.xaml";
     controls_radio_button => "/Controls/RadioButton.xaml";

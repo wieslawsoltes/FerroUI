@@ -150,6 +150,7 @@ PORT_DOCUMENTS = [
     ("ClassicThemes.xaml", "the Fluent and Simple themes of the original, with the feature classic-themes only"),
     ("Pages/TreeDataGridPage.xaml", "the page of the TreeDataGrid demo of the port"),
     ("Pages/InkingPage.xaml", "the page of the inking controls of the port"),
+    ("Pages/IconElementPage.xaml", "the page of the icons of WinUI (SymbolIcon, FontIcon; docs/porting/winui-controls.md)"),
 ]
 
 

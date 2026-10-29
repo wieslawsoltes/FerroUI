@@ -124,6 +124,8 @@ pub(super) fn page_sections() -> (Vec<Rc<HomeSection>>, Vec<UnavailablePage>) {
                 "Connected animations and ElementCompositionPreview",
             );
             s.add("/Pages/CustomDrawing.xaml", "Custom Drawing", Icons::BRUSH, "Render custom geometry in code");
+            // Not from upstream: SymbolIcon and FontIcon of WinUI (docs/porting/winui-controls.md) and PathIcon.
+            s.add("/Pages/IconElementPage.xaml", "IconElement", Icons::SPARKLE, "Symbol, font and path icons");
             s.add("/Pages/ImagePage.xaml", "Image", Icons::IMAGE, "Display bitmaps with different stretch modes");
             // Not from upstream: the page of the port of the inking controls of WinUI.
             s.add("/Pages/InkingPage.xaml", "Inking", Icons::CANVAS, "Pressure-sensitive ink, pens, eraser and stencil guides");
