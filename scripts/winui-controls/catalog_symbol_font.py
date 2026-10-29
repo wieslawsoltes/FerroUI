@@ -299,8 +299,10 @@ def glyph_outline(code, data):
     extent = max(max(abs(v) for v in xs), max(abs(v) for v in ys))
     design = next((d for d in (16, 20, 24) if extent <= d + 0.5), 2048 if extent > 100 else math.ceil(extent))
     scale = UPEM / design * SCALE.get(code, 1.0)
-    # 2048-unit outlines are font outlines, y up already; the others are y down.
-    y_up = extent > 100 and design == 2048
+    # Every outline is path data, y down (the templates draw them as Paths): the font turns them
+    # over. (The 2048-unit outlines were taken for y-up font outlines, which drew the chevrons of
+    # NavigationView upside down.)
+    y_up = False
     cx, cy = (min(xs) + max(xs)) / 2, (min(ys) + max(ys)) / 2
     out = []
     for q in quads:
