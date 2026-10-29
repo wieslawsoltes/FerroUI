@@ -24,6 +24,22 @@
           <PathIcon Data="M12,2L15,9L22,9L16.5,13.5L18.5,21L12,16.5L5.5,21L7.5,13.5L2,9L9,9Z" />
         </StackPanel>
       </StackPanel>
+
+      <!-- Status (W5) -->
+      <StackPanel x:Name="Status" Spacing="8">
+        <TextBlock Classes="h3" Text="Status" />
+        <InfoBar IsOpen="True" Severity="Informational" Title="Informational" Message="An InfoBar shows an essential app-wide message." />
+        <InfoBar IsOpen="True" Severity="Success" Title="Success" Message="The operation completed." />
+        <InfoBar IsOpen="True" Severity="Warning" Title="Warning" Message="Something needs attention." />
+        <InfoBar IsOpen="True" Severity="Error" Title="Error" Message="The operation failed." IsClosable="False" />
+        <StackPanel Orientation="Horizontal" Spacing="24">
+          <InfoBadge />
+          <InfoBadge Value="7" />
+          <InfoBadge Value="42" />
+          <ProgressRing IsIndeterminate="True" />
+          <ProgressRing IsIndeterminate="False" Value="60" />
+        </StackPanel>
+      </StackPanel>
     </StackPanel>
   </ScrollViewer>
 </ContentPage>
