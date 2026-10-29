@@ -147,8 +147,9 @@ Use the upstream pages for an application written against upstream's model, and 
 ## 8. API stability
 
 - The controls of this page are additions to `ferroui-controls`: no existing member changes. Within 0.4 the public API only grows.
-- W11 adds a repository-wide gate to `ci.yml`: `cargo semver-checks check-release` of the published crates against 0.4.0 from crates.io, and a snapshot test of the default values of the registered properties (owner, name, value type, default for the owner, default binding mode, inheritance) compared with a checked-in snapshot.
+- The repository-wide API gate (W11, `docs/release.md` section 3.1): cargo-semver-checks of the published crates against the sources of 0.4.0 (0.4.0 is not published, no tag and not on crates.io, and main is still at 0.4.0, so the baseline is the commit of main the gate was merged on, `80e50ba2`; it moves to the tag `v0.4.0` once the release is published; the `*VTable` structs of the class model are not counted for added or reordered fields), and the snapshot `src/FerroUI.Controls/property_defaults.snapshot` of the defaults of the styled and attached properties of `ferroui-base` and `ferroui-controls` (owner, name, value type, default, default binding mode, inheritance, and the overrides of each type). Each control pull request regenerates the snapshot with its new properties.
 - The controls of this page override no metadata of other types.
+- **Follow-up (not in W11): the virtual tables of the class model.** The `*VTable` structs that `ferro_class!` writes (`InputElementVTable`, `AutomationPeerVTable`, ...) are public, with public fields, so cargo-semver-checks takes every new virtual member as a breaking change of an exhaustively constructible struct (and a reordering of a `repr(C)` struct); the gate leaves those two lints out for `*VTable` items. A later change (0.5) could make the tables `#[doc(hidden)]` or seal them (private fields and a constructor only `ferro_class!` reaches), so that the class model's dispatch is no longer part of the semver surface and the filter can go.
 
 ### 5.3 TitleBar and the window (W8c)
 
