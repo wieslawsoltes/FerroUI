@@ -1,20 +1,20 @@
-//! Not from upstream: the page of the WinUI controls of `ferroui-controls`
-//! (docs/porting/winui-controls.md), the class of `Pages/WinUIControlsPage.xaml`.
+//! Not from upstream: the page of the icons of WinUI (SymbolIcon, FontIcon) and PathIcon
+//! (docs/porting/winui-controls.md), the class of `Pages/IconElementPage.xaml`.
 
 use crate::markup::{content_page_class, xaml_class};
 use ferroui_base::{ferro_class_info, instantiate, Ref};
 use ferroui_controls::ContentPage;
 
 #[repr(C)]
-pub struct WinUIControlsPage {
+pub struct IconElementPage {
     base: ContentPage,
 }
 
-content_page_class!(WinUIControlsPage);
-ferro_class_info!(WinUIControlsPage { new: WinUIControlsPage::new });
-xaml_class!(WinUIControlsPage, "/Pages/WinUIControlsPage.xaml");
+content_page_class!(IconElementPage);
+ferro_class_info!(IconElementPage { new: IconElementPage::new });
+xaml_class!(IconElementPage, "/Pages/IconElementPage.xaml");
 
-impl WinUIControlsPage {
+impl IconElementPage {
     pub fn construct() -> Self {
         Self { base: ContentPage::construct() }
     }
