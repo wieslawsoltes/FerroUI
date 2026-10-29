@@ -37,6 +37,9 @@ pub struct MainWindowViewModel {
     unavailable_pages: Vec<UnavailablePage>,
     home_sections: OnceCell<Rc<Vec<Rc<HomeSection>>>>,
     navigator: RefCell<Option<Rc<dyn INavigation>>>,
+    /// Shows a page in the shell (not in upstream): the main view navigates its frame to it. Without
+    /// one, the page replaces the root of the navigator, as upstream does.
+    page_host: RefCell<Option<PageHost>>,
     is_searching: Cell<bool>,
     extend_client_area_enabled: Cell<bool>,
     title_bar_height: Cell<f64>,
@@ -165,6 +168,7 @@ impl MainWindowViewModel {
                 unavailable_pages,
                 home_sections: OnceCell::new(),
                 navigator: RefCell::new(None),
+                page_host: RefCell::new(None),
                 is_searching: Cell::new(false),
                 extend_client_area_enabled: Cell::new(false),
                 title_bar_height: Cell::new(-1.0),
@@ -350,6 +354,26 @@ impl MainWindowViewModel {
         self.set_title_bar_decoration(TitleBarDecorations::CLOSE_BUTTON, value, "ShowCloseButton");
     }
 
+    /// Sets how the shell shows a page (`MainView`, not in upstream).
+    pub(crate) fn set_page_host(&self, value: Option<PageHost>) {
+        *self.page_host.borrow_mut() = value;
+    }
+
+    /// Makes `item` the current page and opens its section, without creating its page: the shell
+    /// calls it for a page it shows again from its journal (not in upstream).
+    pub(crate) fn note_current_page(&self, item: &Rc<PageItem>) {
+        self.set_current_page_item(Some(item.clone()));
+        for section in &self.page_sections {
+            // A section's own page counts too, so the section stays open when the pane comes back.
+            let is_of_section = Rc::ptr_eq(&section.page_item(), item) || section.title() == item.section();
+            section.set_current_page(if is_of_section { Some(item.clone()) } else { None });
+
+            if section.is_current() && self.is_drawer_opened() {
+                section.set_is_expanded(true);
+            }
+        }
+    }
+
     pub fn current_page_item(&self) -> Option<Rc<PageItem>> {
         self.current_page_item.borrow().clone()
     }
@@ -465,15 +489,23 @@ impl MainWindowViewModel {
     }
 
     async fn navigate_to_async(this: Rc<MainWindowViewModel>, item: Option<Rc<PageItem>>) {
-        let (Some(item), Some(navigator)) = (item, this.navigator()) else { return };
+        let Some(item) = item else { return };
+        let host = this.page_host.borrow().clone();
+        let navigator = this.navigator();
+        if host.is_none() && navigator.is_none() {
+            return;
+        }
         let request = this.navigation_request.get().wrapping_add(1);
         this.navigation_request.set(request);
 
         // A gallery may have pushed a sample on top of its page. Drop it first: replacing the top page
         // would leave the previous page below the new one, and the shell would show a back button that
-        // leads to a page the drawer no longer selects.
-        if navigator.stack_depth() > 1 {
-            let _ = navigator.pop_to_root_async_with_transition(None).await;
+        // leads to a page the drawer no longer selects. (With a page host each page has a navigation
+        // page of its own, kept in the journal of the shell.)
+        if let (None, Some(navigator)) = (&host, &navigator) {
+            if navigator.stack_depth() > 1 {
+                let _ = navigator.pop_to_root_async_with_transition(None).await;
+            }
         }
 
         if !this.is_current_page_item(&item) {
@@ -491,19 +523,15 @@ impl MainWindowViewModel {
             }
 
             let page = item.create_page();
-            this.set_current_page_item(Some(item.clone()));
+            this.note_current_page(&item);
 
-            for section in &this.page_sections {
-                // A section's own page counts too, so the section stays open when the drawer comes back.
-                let is_of_section = Rc::ptr_eq(&section.page_item(), &item) || section.title() == item.section();
-                section.set_current_page(if is_of_section { Some(item.clone()) } else { None });
-
-                if section.is_current() && this.is_drawer_opened() {
-                    section.set_is_expanded(true);
+            match (host, navigator) {
+                (Some(host), _) => host(&item, page),
+                (None, Some(navigator)) => {
+                    let _ = navigator.replace_async(page).await;
                 }
+                (None, None) => {}
             }
-
-            let _ = navigator.replace_async(page).await;
 
             if matches!(this.display_mode(), SplitViewDisplayMode::CompactOverlay | SplitViewDisplayMode::Overlay) {
                 this.set_is_drawer_opened(false);
@@ -556,6 +584,9 @@ const WIN32_WINDOW_CORNER_PREFERENCES: [WindowCornerPreference; 4] = [
 ];
 
 type Vm = Rc<MainWindowViewModel>;
+
+/// How the shell shows a page: the page item and its new page.
+pub(crate) type PageHost = Rc<dyn Fn(&Rc<PageItem>, Ref<ferroui_controls::Page>)>;
 
 ferro_markup_type!(class MainWindowViewModel {
     this: Rc<MainWindowViewModel>,
