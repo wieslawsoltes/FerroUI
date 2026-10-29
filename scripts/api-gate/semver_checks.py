@@ -30,7 +30,10 @@ not have (one that joined after it) is not checked.
 The lints `constructible_struct_adds_field` and `repr_c_plain_struct_fields_reordered` are not
 counted for the virtual tables of the classes (`*VTable` structs, which `ferro_class!` writes):
 they are the dispatch machinery of the class model, every new virtual member adds a field to them,
-and no application constructs one. Every other result counts. The defaults of properties, which no signature shows, are
+and no application constructs one. The lint `constructible_struct_adds_field` is not counted
+either for the metadata structs `MarkupType` (ferroui-base) and `TypeModel` (ferroui-build-scan):
+they are built only through `MarkupType::new` and `TypeModel::new` with the struct update syntax,
+and the compiler metadata grows with the markup compiler. Every other result counts. The defaults of properties, which no signature shows, are
 guarded by the snapshot test `property_defaults_tests` of `ferroui-controls`.
 
 Only the standard library, `git`, and the `cargo` and `cargo-semver-checks` on PATH.
@@ -57,6 +60,10 @@ BASELINE_COMMIT = "80e50ba2238ac2548b437122b39b11257fb4c1c9"
 # `ferro_class!`): a new virtual member adds a field to the table and may move the others.
 VTABLE_LINTS = {"constructible_struct_adds_field", "repr_c_plain_struct_fields_reordered"}
 VTABLE_ITEM = re.compile(r"\b\w+VTable\.")
+# The metadata structs that are built only through their constructor and the struct update syntax
+# (`MarkupType { .., ..MarkupType::new(..) }`, `TypeModel::new`): a new field of one is not
+# counted (docs/porting/winui-theme/DEVIATIONS.md, "API gate"). By crate, the struct.
+METADATA_STRUCTS = {"ferroui-base": "MarkupType", "ferroui-build-scan": "TypeModel"}
 # The rustdoc JSON of the pull request and of the baseline, and the worktree of the baseline.
 GATE_DIR = os.path.join(ROOT, "target", "api-gate")
 BASELINE_DOCS = os.path.join(GATE_DIR, "baseline")
@@ -64,6 +71,12 @@ CURRENT_DOCS = os.path.join(GATE_DIR, "current")
 BASELINE_TREE = os.path.join(GATE_DIR, "baseline-tree")
 FAILURE = re.compile(r"^--- (failure|warning) (\S+):")
 PROGRESS = re.compile(r"^(Building|Built|Parsing|Parsed|Checking|Checked|Finished|Summary|Warning|Compiling|Updating|Downloading|Downloaded|Cloning|Resolving)\b")
+
+
+def is_metadata_struct(crate, item):
+    """Whether `item` (a field of the listing) is a field of a metadata struct of `crate`."""
+    struct = METADATA_STRUCTS.get(crate)
+    return struct is not None and re.search(r"\b" + struct + r"\.", item) is not None
 
 
 def counted_failures(output, crate=None):
@@ -92,6 +105,8 @@ def counted_failures(output, crate=None):
             if kind != "failure":
                 continue
             if lint in VTABLE_LINTS and VTABLE_ITEM.search(item):
+                continue
+            if lint == "constructible_struct_adds_field" and is_metadata_struct(crate, item):
                 continue
             failures.append((crate, lint, item))
     return failures
