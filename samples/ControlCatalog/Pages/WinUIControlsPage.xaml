@@ -40,6 +40,19 @@
           <ProgressRing IsIndeterminate="False" Value="60" />
         </StackPanel>
       </StackPanel>
+
+      <!-- Input (W6) -->
+      <StackPanel x:Name="Input" Spacing="8" MaxWidth="480" HorizontalAlignment="Left">
+        <TextBlock Classes="h3" Text="Input" />
+        <NumberBox Header="NumberBox (inline spin buttons, expressions)" Value="42" SpinButtonPlacementMode="Inline" AcceptsExpression="True" />
+        <AutoSuggestBox Header="AutoSuggestBox" PlaceholderText="Search" />
+        <RadioButtons Header="RadioButtons" MaxColumns="3">
+          <RadioButton Content="Red" />
+          <RadioButton Content="Green" IsChecked="True" />
+          <RadioButton Content="Blue" />
+        </RadioButtons>
+        <RatingControl Caption="RatingControl" Value="3.5" />
+      </StackPanel>
     </StackPanel>
   </ScrollViewer>
 </ContentPage>
