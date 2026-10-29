@@ -2,7 +2,8 @@
 // the site, opens it in headless Chrome (scripts/browser/harness.mjs) and waits until the view has
 // drawn its first frame (the canvas is there and the splash is closed). Fails when that does not
 // happen, when a request of the page fails or answers with an error status (a file missing from the
-// site), or when the page logs an error or throws.
+// site), when the page logs an error or throws, or when the splash screen is not closed and hidden
+// after the first frame.
 //
 //   node scripts/apps/smoke-site.mjs <site> [--query ?a=b] [--screenshot file.png]
 //        [--ignore <regular expression>]... [--timeout seconds]
@@ -46,10 +47,25 @@ try {
     await sleep(1500);
 } catch (error) {
     drawn = false;
-    failures.push(`[view] the view did not draw within ${timeout} s: ${String(error.message).split("\n")[0]}`);
+    failures.push(`[view] within ${timeout} s the page has no canvas, or the splash screen was not closed (the view drew no frame,`
+        + " or the framework did not find the splash screen in the host element of the view)");
 }
 // Late errors of the first frames and of what the page loads after them.
 await sleep(3000);
+// The splash screen (`.ferroui-splash` in the host element, or `#ferroui-splash`) is closed by the
+// framework at the first frame of the view (class `splash-close`); the stylesheet of the page then
+// has to take it out of the view and of the accessibility tree (not displayed or not visible).
+const splash = await page.evaluate(`(() => {
+    const splash = document.querySelector(".ferroui-splash") ?? document.getElementById("ferroui-splash");
+    if (!splash) { return null; }
+    const style = getComputedStyle(splash);
+    return { closed: splash.classList.contains("splash-close"), display: style.display, visibility: style.visibility };
+})()`);
+if (drawn && splash && !splash.closed) {
+    failures.push("[splash] the view drew its first frame and the splash screen is not closed (no class splash-close)");
+} else if (splash && splash.closed && splash.display !== "none" && splash.visibility !== "hidden") {
+    failures.push(`[splash] the closed splash screen is still shown (display: ${splash.display}, visibility: ${splash.visibility})`);
+}
 if (screenshot) { await page.screenshot(screenshot); }
 const problems = [...failures, ...page.errors].filter((line) => !ignore.some((pattern) => pattern.test(line)));
 console.log(`requests: ${page.requests.length}, view drawn: ${drawn}`);
