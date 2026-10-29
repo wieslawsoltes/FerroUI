@@ -56,8 +56,28 @@ def build(cargo_args):
     return binaries
 
 
+def library_directories():
+    """Where `cargo test` lets a test binary find shared libraries: the standard library of the
+    toolchain (a proc-macro crate's tests link it dynamically) and the dependencies of the build."""
+    sysroot = subprocess.run(["rustc", "--print", "sysroot"], capture_output=True, text=True).stdout.strip()
+    host = next((line.split(": ", 1)[1] for line in
+                 subprocess.run(["rustc", "-vV"], capture_output=True, text=True).stdout.splitlines()
+                 if line.startswith("host: ")), "")
+    return [os.path.join(sysroot, "lib"), os.path.join(sysroot, "lib", "rustlib", host, "lib")]
+
+
+LIBRARIES = None
+
+
 def package_environment(binary):
+    global LIBRARIES
+    if LIBRARIES is None:
+        LIBRARIES = library_directories()
     environment = dict(os.environ)
+    directories = [os.path.dirname(binary["executable"]), *LIBRARIES]
+    for variable in ("LD_LIBRARY_PATH", "DYLD_FALLBACK_LIBRARY_PATH"):
+        environment[variable] = os.pathsep.join(
+            directories + ([environment[variable]] if environment.get(variable) else []))
     directory = os.path.dirname(binary["manifest"])
     environment["CARGO_MANIFEST_DIR"] = directory
     # A package id is `path+file:///dir#name@version` or `...#version` when the name is the

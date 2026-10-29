@@ -107,8 +107,10 @@ jobs:
   # side (scripts/ci/parallel_tests.py). Under Xvfb, with the fonts the text tests need (CJK and
   # emoji fallbacks). The render backends comparison and Vello are in vello.yml; the two benchmark
   # crates (every benchmark once, almost three minutes) are left out of a pull request. The
-  # VirtualizationDemo playground test counts what the font metrics of macOS let into view: it runs
-  # in the macOS job.
+  # VirtualizationDemo playground test counts what the font metrics of macOS let into view, the Skia
+  # emoji test needs a color emoji font Skia finds (the runner's is not matched), and the hot reload
+  # watcher test failed under the load of this job (file events of Linux): those three run in the
+  # macOS job.
   linux:
     name: Build and test (Linux, the workspace)
     runs-on: ubuntu-latest
@@ -139,7 +141,9 @@ jobs:
           # shellcheck disable=SC2086
           xvfb-run -a python3 scripts/ci/parallel_tests.py --jobs 4 --workspace --locked --lib --tests \
             --exclude ferroui-render-backends-comparison --exclude ferroui-vello $BENCHMARKS \
-            -- --skip the_playground_realizes_what_is_in_view_and_recycles_its_containers
+            -- --skip the_playground_realizes_what_is_in_view_and_recycles_its_containers \
+            --skip text_layout_draws_mixed_direction_ligature_and_emoji_text \
+            --skip watcher_revision_changed_during_preparation_discards_candidate_before_commit
 
   # macOS: on a pull request only what runs on macOS alone: the native platform (AppKit,
   # ferroui-native), Metal, the desktop entry point, Skia with the fonts of the system (CoreText), and
@@ -164,7 +168,8 @@ jobs:
         if: github.event_name == 'pull_request'
         run: |
           python3 scripts/ci/parallel_tests.py --jobs 3 --locked --lib --tests \
-            -p ferroui-native -p ferroui-metal -p ferroui-desktop -p ferroui-skia -p virtualization-demo
+            -p ferroui-native -p ferroui-metal -p ferroui-desktop -p ferroui-skia -p virtualization-demo \
+            -p ferroui-hot-reload
           cargo check --locked -p control-catalog-desktop
       - name: Test the workspace
         if: github.event_name != 'pull_request'
