@@ -236,6 +236,7 @@ control_tests! {
     items_control => "ItemsControl";
     label => "Label";
     path_icon => "PathIcon";
+    title_bar => "TitleBar";
     navigation_view_item_separator => "NavigationViewItemSeparator";
     navigation_view_item_header => "NavigationViewItemHeader";
     navigation_view_item => "NavigationViewItem";

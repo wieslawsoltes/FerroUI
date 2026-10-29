@@ -263,6 +263,7 @@ document_tests! {
     controls_rating_control => "/Controls/RatingControl.xaml";
     controls_frame => "/Controls/Frame.xaml";
     controls_navigation_view => "/Controls/NavigationView.xaml";
+    controls_title_bar => "/Controls/TitleBar.xaml";
 }
 
 #[test]

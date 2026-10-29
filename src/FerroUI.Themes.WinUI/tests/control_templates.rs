@@ -271,6 +271,7 @@ control_tests! {
     drawer_page => "DrawerPage";
     frame => "Frame";
     navigation_view => "NavigationView";
+    title_bar => "TitleBar";
     navigation_view_item => "NavigationViewItem";
     navigation_view_item_header => "NavigationViewItemHeader";
     navigation_view_item_separator => "NavigationViewItemSeparator";

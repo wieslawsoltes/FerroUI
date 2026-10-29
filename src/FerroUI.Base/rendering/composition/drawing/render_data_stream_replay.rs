@@ -1,5 +1,6 @@
 use super::{IRenderDataVisitor, RenderDataStream};
 use crate::media::{BoxShadows, IBrush, IPen, ImmediateDrawingContext, RenderOptions, TextOptions};
+use crate::media::imaging::BitmapBlendingMode;
 use crate::platform::{IDrawingContextImpl, IGeometryImpl, IGlyphRunImpl};
 use crate::rendering::scene_graph::ICustomDrawOperation;
 use crate::{Matrix, Point, Rect, RoundedRect};
@@ -15,6 +16,7 @@ enum ReplayScopeKind {
     RenderOptions,
     TextOptions,
     Effect,
+    CompositingLayer,
 }
 
 /// What a replayed push has to undo.
@@ -125,6 +127,16 @@ impl IRenderDataVisitor for ReplayVisitor<'_> {
         ReplayScope::new(ReplayScopeKind::Opacity, opacity != 1.0)
     }
 
+    fn on_push_compositing_layer(&mut self, blend: BitmapBlendingMode, opacity: f64, bounds: Rect) -> ReplayScope {
+        // Recording accepts this opcode only for a backend with compositing layers. A stream
+        // replayed into a context without them is drawn with the opacity of the layer and
+        // without its blend, as a frame is never left unpainted.
+        if self.context.try_push_compositing_layer(blend, opacity, bounds) {
+            return ReplayScope::new(ReplayScopeKind::CompositingLayer, true);
+        }
+        self.on_push_opacity(opacity)
+    }
+
     fn on_push_opacity_mask(&mut self, brush: Option<&dyn IBrush>, bounds: Rect) -> ReplayScope {
         if let Some(brush) = brush {
             self.context.push_opacity_mask(brush, bounds);
@@ -167,6 +179,7 @@ impl IRenderDataVisitor for ReplayVisitor<'_> {
             ReplayScopeKind::Clip => self.context.pop_clip(),
             ReplayScopeKind::GeometryClip => self.context.pop_geometry_clip(),
             ReplayScopeKind::Opacity => self.context.pop_opacity(),
+            ReplayScopeKind::CompositingLayer => self.context.pop_compositing_layer(),
             ReplayScopeKind::OpacityMask => self.context.pop_opacity_mask(),
             ReplayScopeKind::Transform => self.context.set_transform(scope.saved_transform),
             ReplayScopeKind::RenderOptions => self.context.pop_render_options(),

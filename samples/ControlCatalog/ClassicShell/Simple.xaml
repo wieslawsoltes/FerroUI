@@ -1411,6 +1411,88 @@
           </ControlTemplate>
         </Setter>
       </ControlTheme>
+
+      <!-- TitleBar (W8c): the title bar of the shell, after the WinUI document of the control
+           (src/FerroUI.Themes.WinUI/Controls/TitleBar.xaml) with the brushes of this document and
+           the glyphs E72B and E700 of SymbolThemeFontFamily. -->
+      <ControlTheme x:Key="ClassicTitleBarButton" TargetType="Button">
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="Foreground" Value="{DynamicResource NavigationViewItemForeground}" />
+        <Setter Property="FontFamily" Value="{DynamicResource SymbolThemeFontFamily}" />
+        <Setter Property="FontSize" Value="16" />
+        <Setter Property="Width" Value="40" />
+        <Setter Property="Margin" Value="2" />
+        <Setter Property="VerticalAlignment" Value="Stretch" />
+        <Setter Property="Template">
+          <ControlTemplate>
+            <Border x:Name="RootGrid" Background="{TemplateBinding Background}" CornerRadius="4">
+              <TextBlock Text="{TemplateBinding Content}" Foreground="{TemplateBinding Foreground}"
+                         FontFamily="{TemplateBinding FontFamily}" FontSize="{TemplateBinding FontSize}"
+                         HorizontalAlignment="Center" VerticalAlignment="Center" />
+            </Border>
+          </ControlTemplate>
+        </Setter>
+        <Style Selector="^:pointerover /template/ Border#RootGrid">
+          <Setter Property="Background" Value="{DynamicResource NavigationViewButtonBackgroundPointerOver}" />
+        </Style>
+        <Style Selector="^:pressed /template/ Border#RootGrid">
+          <Setter Property="Background" Value="{DynamicResource NavigationViewButtonBackgroundPressed}" />
+        </Style>
+        <Style Selector="^:disabled">
+          <Setter Property="Foreground" Value="{DynamicResource NavigationViewItemForegroundDisabled}" />
+        </Style>
+      </ControlTheme>
+      <ControlTheme x:Key="{x:Type TitleBar}" TargetType="TitleBar">
+        <Setter Property="HorizontalAlignment" Value="Stretch" />
+        <Setter Property="Foreground" Value="{DynamicResource NavigationViewItemForeground}" />
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="Template">
+          <ControlTemplate>
+            <Grid x:Name="PART_LayoutRoot" Height="32" Background="{TemplateBinding Background}"
+                  ColumnDefinitions="Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,*,Auto,Auto,Auto">
+              <Border x:Name="LeftPaddingColumn" Grid.Column="0" Width="0" />
+              <Button x:Name="PART_BackButton" Grid.Column="1" IsVisible="False" Content="&#xE72B;"
+                      Theme="{StaticResource ClassicTitleBarButton}" IsEnabled="{TemplateBinding IsBackButtonEnabled}" />
+              <Button x:Name="PART_PaneToggleButton" Grid.Column="2" IsVisible="False" Content="&#xE700;"
+                      Theme="{StaticResource ClassicTitleBarButton}" />
+              <ContentPresenter x:Name="PART_LeftHeaderPresenter" Grid.Column="3" IsVisible="False"
+                                Content="{TemplateBinding LeftHeader}" VerticalAlignment="Center" />
+              <Border x:Name="LeftHeaderPaddingColumn" Grid.Column="4" Width="16" />
+              <Viewbox x:Name="PART_Icon" Grid.Column="5" IsVisible="False" VerticalAlignment="Center"
+                       MaxWidth="16" MaxHeight="16" Margin="0,0,16,0"
+                       Child="{Binding TemplateSettings.IconElement, RelativeSource={RelativeSource TemplatedParent}}" />
+              <TextBlock x:Name="PART_TitleText" Grid.Column="6" IsVisible="False" Text="{TemplateBinding Title}"
+                         Foreground="{TemplateBinding Foreground}" FontSize="12" Margin="0,0,16,0"
+                         TextTrimming="CharacterEllipsis" TextWrapping="NoWrap" VerticalAlignment="Center" MinWidth="48" />
+              <TextBlock x:Name="PART_SubtitleText" Grid.Column="7" IsVisible="False" Text="{TemplateBinding Subtitle}"
+                         Foreground="{DynamicResource NavigationViewItemForegroundDisabled}" FontSize="12" Margin="0,0,16,0"
+                         TextTrimming="CharacterEllipsis" TextWrapping="NoWrap" VerticalAlignment="Center" MinWidth="48" />
+              <Grid x:Name="PART_ContentPresenterGrid" Grid.Column="8" IsVisible="False">
+                <ContentPresenter x:Name="PART_ContentPresenter" Content="{TemplateBinding Content}"
+                                  HorizontalAlignment="{DynamicResource TitleBarContentHorizontalAlignment}"
+                                  VerticalAlignment="Center" />
+              </Grid>
+              <ContentPresenter x:Name="PART_RightHeaderPresenter" Grid.Column="9" IsVisible="False"
+                                Content="{TemplateBinding RightHeader}" VerticalAlignment="Center" />
+              <Border Grid.Column="10" Width="48" />
+              <Border x:Name="RightPaddingColumn" Grid.Column="11" Width="0" />
+            </Grid>
+          </ControlTemplate>
+        </Setter>
+        <Style Selector="^:back-button-visible /template/ Button#PART_BackButton"><Setter Property="IsVisible" Value="True" /></Style>
+        <Style Selector="^:pane-toggle-button-visible /template/ Button#PART_PaneToggleButton"><Setter Property="IsVisible" Value="True" /></Style>
+        <Style Selector="^:left-header-visible /template/ ContentPresenter#PART_LeftHeaderPresenter"><Setter Property="IsVisible" Value="True" /></Style>
+        <Style Selector="^:icon-visible /template/ Viewbox#PART_Icon"><Setter Property="IsVisible" Value="True" /></Style>
+        <Style Selector="^:title-text-visible /template/ TextBlock#PART_TitleText"><Setter Property="IsVisible" Value="True" /></Style>
+        <Style Selector="^:subtitle-text-visible /template/ TextBlock#PART_SubtitleText"><Setter Property="IsVisible" Value="True" /></Style>
+        <Style Selector="^:content-visible /template/ Grid#PART_ContentPresenterGrid"><Setter Property="IsVisible" Value="True" /></Style>
+        <Style Selector="^:right-header-visible /template/ ContentPresenter#PART_RightHeaderPresenter"><Setter Property="IsVisible" Value="True" /></Style>
+        <Style Selector="^:deactivated /template/ Grid#PART_LayoutRoot"><Setter Property="Opacity" Value="0.6" /></Style>
+        <Style Selector="^:expanded-height /template/ Grid#PART_LayoutRoot"><Setter Property="Height" Value="48" /></Style>
+        <Style Selector="^:compact /template/ TextBlock#PART_TitleText"><Setter Property="IsVisible" Value="False" /></Style>
+        <Style Selector="^:compact /template/ TextBlock#PART_SubtitleText"><Setter Property="IsVisible" Value="False" /></Style>
+        <Style Selector="^:compact /template/ ContentPresenter#PART_ContentPresenter"><Setter Property="HorizontalAlignment" Value="Left" /></Style>
+      </ControlTheme>
     </ResourceDictionary>
   </Styles.Resources>
 </Styles>

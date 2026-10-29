@@ -141,8 +141,7 @@ struct FragmentRecording {
     /// How many clips and layers were open when it started.
     open: usize,
     /// Whether what was recorded cannot be recorded again from the
-    /// fragment: it paints with an image, or it is blended with what lies
-    /// outside it.
+    /// fragment: it paints with an image.
     spoiled: bool,
 }
 
@@ -882,6 +881,17 @@ impl IVelloSceneSink for VelloGpuSceneSink {
         self.place_counts.clear();
     }
 
+    fn fill_glyph_outline(
+        &mut self,
+        path: &BezPath,
+        transform: Affine,
+        paint: &VelloScenePaint,
+        anti_alias: bool,
+        prepare: &dyn Fn(Affine) -> Option<(std::sync::Arc<BezPath>, Affine)>,
+    ) {
+        super::fill_cached_glyph_outline(self, path, transform, paint, anti_alias, prepare);
+    }
+
     fn fill(
         &mut self,
         path: &BezPath,
@@ -931,8 +941,10 @@ impl IVelloSceneSink for VelloGpuSceneSink {
             return;
         }
 
-        // Closes and opens again clips that may lie outside a fragment.
-        self.spoil_fragment();
+        // These clips may have been opened before the fragment began.
+        // Rejoin its outer scene before closing them: an empty fragment's
+        // encoding cannot pop the clips that only the outer scene holds.
+        self.abandon_fragment();
         let clips = self.local_clips();
         self.close_clips(&clips);
 
@@ -1112,6 +1124,11 @@ impl IVelloSceneSink for VelloGpuSceneSink {
 
     fn push_layer(&mut self, blend_mode: BlendMode, opacity: f32) {
         self.drawing();
+        // Every layer encodes the current target rectangle as its clip.
+        // That clip must not move with a reused fragment or outlive a
+        // target resize. Rejoin before recording it; blended layers also
+        // need the outer scene's clips to be present when they close them.
+        self.abandon_fragment();
         let target = self.target_rect();
 
         if blend_mode == BlendMode::default() {
@@ -1122,7 +1139,6 @@ impl IVelloSceneSink for VelloGpuSceneSink {
 
         // A layer that is blended does not see what is below the clips
         // around it: it is opened outside them, and they inside it.
-        self.spoil_fragment();
         let clips = self.local_clips();
         self.close_clips(&clips);
         self.scene.push_layer(Fill::NonZero, blend_mode, opacity, Affine::IDENTITY, &target);

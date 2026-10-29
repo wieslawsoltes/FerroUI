@@ -237,6 +237,7 @@ document_tests! {
     controls_notification_card => "/Controls/NotificationCard.xaml";
     controls_info_bar => "/Controls/InfoBar.xaml";
     controls_info_badge => "/Controls/InfoBadge.xaml";
+    controls_title_bar => "/Controls/TitleBar.xaml";
     controls_progress_ring => "/Controls/ProgressRing.xaml";
     controls_table_view => "/Controls/TableView.xaml";
     controls_table_view_cell => "/Controls/TableViewCell.xaml";

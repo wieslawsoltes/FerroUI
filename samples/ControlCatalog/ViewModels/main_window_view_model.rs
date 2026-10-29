@@ -170,7 +170,9 @@ impl MainWindowViewModel {
                 navigator: RefCell::new(None),
                 page_host: RefCell::new(None),
                 is_searching: Cell::new(false),
-                extend_client_area_enabled: Cell::new(false),
+                // Not as upstream (false): the shell draws its title bar in the title bar of the
+                // window, as WinUI Gallery does (`MainView.xaml`).
+                extend_client_area_enabled: Cell::new(true),
                 title_bar_height: Cell::new(-1.0),
                 is_system_bar_visible: Cell::new(false),
                 display_edge_to_edge: Cell::new(false),
