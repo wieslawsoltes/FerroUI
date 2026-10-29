@@ -102,6 +102,77 @@ jobs:
       - name: Package the published crates without building
         run: scripts/release/publish.sh --dry-run --no-verify
 
+  # The API gate (docs/release.md, "API stability"): within 0.4 the public API of the published
+  # crates only grows. cargo-semver-checks compares the rustdoc JSON of each published crate with
+  # that of the sources of 0.4.0 (scripts/api-gate/semver_checks.py: the tag, or the commit of the
+  # release while there is no tag), with the release type `minor`. The script documents all the
+  # crates in one `cargo doc` for each side, so the dependencies are checked once and not once per
+  # crate, and the documentation of the baseline is cached under the baseline commit and the rustc
+  # version: a run documents the pull request only. It runs when a pull request changes the sources
+  # or a manifest of the workspace (src/, Cargo.toml, Cargo.lock, the script); otherwise it passes
+  # without building. The defaults of the properties, which no signature shows, are guarded by the
+  # snapshot test `property_defaults_tests` of ferroui-controls, which the Linux job runs. On macOS,
+  # where the whole workspace builds: the API of a platform crate is the one it has when built for
+  # macOS. Like the macOS job, it does not run for a push to main.
+  api-gate:
+    name: API gate (cargo-semver-checks)
+    if: (github.event_name != 'push')
+    runs-on: macos-15
+    timeout-minutes: 45
+    env:
+      CARGO_PROFILE_DEV_DEBUG: 0
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - name: Whether the published sources changed
+        id: changes
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+        run: |
+          if [ -z "$BASE_SHA" ]; then echo "run=true" >> "$GITHUB_OUTPUT"; exit 0; fi
+          git fetch --no-tags --depth=1 origin "$BASE_SHA"
+          if git diff --name-only "$BASE_SHA" HEAD | grep -qE '^(src/|Cargo\.toml$|Cargo\.lock$|scripts/api-gate/)'; then
+            echo "run=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "No published source changed: the gate has nothing to compare."
+            echo "run=false" >> "$GITHUB_OUTPUT"
+          fi
+      - uses: dtolnay/rust-toolchain@89b12181fb390509a0842a86cc55eeb8eb928c1d # stable
+        if: steps.changes.outputs.run == 'true'
+      - uses: taiki-e/install-action@1e29709c0ec63babbe8f266397a465f29a825f91 # v2.87.31
+        if: steps.changes.outputs.run == 'true'
+        with:
+          tool: cargo-semver-checks@0.51.0
+      - name: Key of the baseline documentation
+        id: baseline
+        if: steps.changes.outputs.run == 'true'
+        run: echo "key=$(python3 scripts/api-gate/semver_checks.py --baseline-key)" >> "$GITHUB_OUTPUT"
+      # The documentation of the baseline is saved as soon as it is made, also when the gate then
+      # fails; a cache saved by the nightly run of main is seen by every pull request.
+      - uses: actions/cache/restore@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
+        id: baseline-cache
+        if: steps.changes.outputs.run == 'true'
+        with:
+          path: target/api-gate/baseline
+          key: ${{ steps.baseline.outputs.key }}
+      - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2
+        if: steps.changes.outputs.run == 'true'
+        with:
+          key: api-gate
+          workspaces: ". -> target/api-gate/target-current"
+          save-if: ${{ github.ref == 'refs/heads/main' }}
+          cache-on-failure: true
+      - name: Documentation of 0.4.0
+        if: steps.changes.outputs.run == 'true' && steps.baseline-cache.outputs.cache-hit != 'true'
+        run: python3 scripts/api-gate/semver_checks.py --fetch --baseline-only
+      - uses: actions/cache/save@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
+        if: steps.changes.outputs.run == 'true' && steps.baseline-cache.outputs.cache-hit != 'true'
+        with:
+          path: target/api-gate/baseline
+          key: ${{ steps.baseline.outputs.key }}
+      - name: Signatures against 0.4.0
+        if: steps.changes.outputs.run == 'true'
+        run: python3 scripts/api-gate/semver_checks.py --fetch
+
   # The tests of the workspace, on Linux: the 4-core Linux runner compiles the workspace in 16
   # minutes where the 3-core macOS runner took 40 (October 2026), and the test binaries run side by
   # side (scripts/ci/parallel_tests.py). Under Xvfb, with the fonts the text tests need (CJK and
