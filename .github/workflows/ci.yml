@@ -116,7 +116,7 @@ jobs:
   # macOS. Like the macOS job, it does not run for a push to main.
   api-gate:
     name: API gate (cargo-semver-checks)
-    if: (github.event.action != 'edited' || github.event.changes.base != null) && (github.event_name != 'push')
+    if: (github.event_name != 'push')
     runs-on: macos-15
     timeout-minutes: 45
     env:
