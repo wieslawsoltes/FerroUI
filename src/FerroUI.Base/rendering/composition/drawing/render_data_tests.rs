@@ -6,6 +6,7 @@
 
 use super::*;
 use crate::media::immutable::ImmutableSolidColorBrush;
+use crate::media::imaging::BitmapBlendingMode;
 use crate::media::{
     BoxShadows, Colors, DrawingContext, IBrush, ImmediateDrawingContext, IntersectionResult,
     MediaContext, RectangleGeometry,
@@ -221,6 +222,90 @@ fn round_trip(stream: &RenderDataStream) -> RenderDataStream {
     result.deserialize_from(&mut reader, &|_| None);
     assert!(reader.is_object_eof() && reader.is_struct_eof());
     result
+}
+
+#[test]
+fn compositing_layer_public_recording_round_trip_preserves_blend_opacity_bounds_and_order() {
+    let (scope, render_interface) = MockPlatformRenderInterface::install();
+    render_interface.set_supports_compositing_layers(true);
+    let mut recorder = RenderDataDrawingContext::new(None);
+    {
+        let mut context = DrawingContext::new(&mut recorder);
+        let empty = context.try_push_compositing_layer(
+            BitmapBlendingMode::Multiply, 0.5, Rect::new(0.0, 0.0, 1.0, 1.0),
+        ).unwrap();
+        context.pop(empty);
+        // The hint deliberately does not cover the drawing: it is not a clip.
+        let _outer = context.try_push_compositing_layer(
+            BitmapBlendingMode::Multiply, 0.5, Rect::new(50.0, 60.0, 1.0, 1.0),
+        ).unwrap();
+        let _clip = context.push_clip(Rect::new(0.0, 0.0, 10.0, 10.0));
+        let _inner = context.try_push_compositing_layer(
+            BitmapBlendingMode::Screen, 0.25, Rect::new(1.0, 2.0, 30.0, 4.0),
+        ).unwrap();
+        context.fill_rectangle(&brush(), Rect::new(1.0, 2.0, 30.0, 4.0), 0.0);
+        // Dropping the public context closes all three recorded states.
+    }
+    let content = recorder.get_immediate_scene_brush_content(tile_brush(), None, true).unwrap();
+    let copy = content.with_stream(round_trip).unwrap();
+    assert_eq!(copy.depth(), 0);
+    assert_eq!(copy.max_depth(), 3);
+    assert_eq!(recorded_opcodes(&copy), [
+        RenderDataOpcode::PushCompositingLayer, RenderDataOpcode::PushClip,
+        RenderDataOpcode::PushCompositingLayer, RenderDataOpcode::DrawRectangle,
+        RenderDataOpcode::Pop, RenderDataOpcode::Pop, RenderDataOpcode::Pop,
+    ]);
+    let log = DrawingLog::new();
+    let mut context = MockDrawingContextImpl::new(log.clone());
+    context.log_transforms = false;
+    context.supports_compositing_layers = true;
+    copy.replay(&mut context);
+    assert_eq!(log.entries(), [
+        "PushCompositingLayer Multiply 0.5 50, 60, 1, 1",
+        "PushRoundedClip 0, 0, 10, 10",
+        "PushCompositingLayer Screen 0.25 1, 2, 30, 4",
+        "DrawRectangle Red none 1, 2, 30, 4 shadows=0",
+        "PopCompositingLayer", "PopClip", "PopCompositingLayer",
+    ]);
+    // Render data reports conservative draw bounds; clipping is considered
+    // by hit testing, not by the bounds visitor.
+    assert_eq!(copy.calculate_bounds(), Some(Rect::new(1.0, 2.0, 30.0, 4.0)));
+    assert!(copy.hit_test(Point::new(5.0, 3.0)));
+    assert!(!copy.hit_test(Point::new(15.0, 3.0)));
+    scope.dispose();
+}
+
+#[test]
+fn compositing_layer_recording_declines_unsupported_backend_without_a_scope() {
+    let (scope, _render_interface) = MockPlatformRenderInterface::install();
+    let mut recorder = RenderDataDrawingContext::new(None);
+    {
+        let mut context = DrawingContext::new(&mut recorder);
+        let clip = context.push_clip(Rect::new(0.0, 0.0, 10.0, 10.0));
+        assert!(context.try_push_compositing_layer(
+            BitmapBlendingMode::Multiply, 0.5, Rect::new(0.0, 0.0, 10.0, 10.0),
+        ).is_none());
+        context.fill_rectangle(&brush(), Rect::new(1.0, 1.0, 2.0, 2.0), 0.0);
+        context.pop(clip);
+    }
+    let content = recorder.get_immediate_scene_brush_content(tile_brush(), None, true).unwrap();
+    assert_eq!(content.with_stream(recorded_opcodes), Some(vec![
+        RenderDataOpcode::PushClip, RenderDataOpcode::DrawRectangle, RenderDataOpcode::Pop,
+    ]));
+    assert_eq!(content.with_stream(replay).unwrap(), [
+        "PushRoundedClip 0, 0, 10, 10", "DrawRectangle Red none 1, 1, 2, 2 shadows=0", "PopClip",
+    ]);
+    scope.dispose();
+}
+
+#[test]
+#[should_panic(expected = "The replay backend does not support the recorded compositing layer")]
+fn compositing_layer_replay_on_another_unsupported_backend_fails_explicitly() {
+    let mut stream = RenderDataStream::new();
+    stream.push_compositing_layer(BitmapBlendingMode::Multiply, 0.5, Rect::new(0.0, 0.0, 2.0, 2.0));
+    stream.draw_rectangle(b(&brush()), None, None, rect(0.0, 0.0, 2.0, 2.0), &BoxShadows::default());
+    stream.pop();
+    replay(&stream);
 }
 
 #[test]

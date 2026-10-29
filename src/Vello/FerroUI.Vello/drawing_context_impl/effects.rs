@@ -38,6 +38,7 @@ pub(super) struct EffectFrame {
     /// The scene the effect was pushed in, when what is drawn inside the
     /// effect is recorded into a scene of its own.
     outer: Option<OuterScene>,
+    luminance_to_alpha: bool,
 }
 
 /// The scene of the context while an effect is recorded into another.
@@ -57,18 +58,28 @@ impl DrawingContextImpl {
             if blur.radius() <= 0.0 {
                 return None;
             }
-            return Some(VelloSceneFilter::Blur { std_deviation: blur_radius_to_sigma(blur.radius()) });
+            return Some(VelloSceneFilter::Blur {
+                std_deviation: blur_radius_to_sigma(blur.radius()),
+            });
         }
 
         if let Some(drop) = effect.as_drop_shadow_effect() {
-            let std_deviation = if drop.blur_radius() > 0.0 { blur_radius_to_sigma(drop.blur_radius()) } else { 0.0 };
+            let std_deviation = if drop.blur_radius() > 0.0 {
+                blur_radius_to_sigma(drop.blur_radius())
+            } else {
+                0.0
+            };
             let drop_color = drop.color();
             let mut alpha = drop_color.a as f64 * drop.opacity();
             if !self.use_opacity_save_layer {
                 alpha *= self.current_opacity;
             }
-            let color =
-                AlphaColor::from_rgba8(drop_color.r, drop_color.g, drop_color.b, alpha.clamp(0.0, 255.0) as u8);
+            let color = AlphaColor::from_rgba8(
+                drop_color.r,
+                drop_color.g,
+                drop_color.b,
+                alpha.clamp(0.0, 255.0) as u8,
+            );
 
             return Some(VelloSceneFilter::DropShadow {
                 dx: drop.offset_x() as f32,
@@ -96,7 +107,12 @@ impl DrawingContextImpl {
     /// filter makes of it: a blur of content that is cut spreads beyond the
     /// cut, as far as a blur reaches, and a shadow lies where its offset
     /// puts it.
-    fn begin_effect_scene(&mut self, clip_rect: Option<Rect>, filter: &VelloSceneFilter) -> OuterScene {
+    fn begin_effect_scene(
+        &mut self,
+        clip_rect: Option<Rect>,
+        filter: &VelloSceneFilter,
+        force_cpu: bool,
+    ) -> OuterScene {
         let (width, height) = (self.sink().width(), self.sink().height());
         let whole = kurbo::Rect::new(0.0, 0.0, width as f64, height as f64);
 
@@ -106,30 +122,54 @@ impl DrawingContextImpl {
                 let scale = super::box_shadows::largest_scale(transform);
                 let (std_deviation, offset) = match *filter {
                     VelloSceneFilter::Blur { std_deviation } => (f64::from(std_deviation), 0.0),
-                    VelloSceneFilter::DropShadow { dx, dy, std_deviation, .. } => {
-                        (f64::from(std_deviation), f64::from(dx.abs().max(dy.abs())))
-                    }
+                    VelloSceneFilter::DropShadow {
+                        dx,
+                        dy,
+                        std_deviation,
+                        ..
+                    } => (f64::from(std_deviation), f64::from(dx.abs().max(dy.abs()))),
                 };
-                let reach = ((super::box_shadows::BLUR_REACH * std_deviation + offset) * scale).ceil() + 1.0;
+                let reach = ((super::box_shadows::BLUR_REACH * std_deviation + offset) * scale)
+                    .ceil()
+                    + 1.0;
                 let bounds = (transform * rect_path(clip_rect))
                     .bounding_box()
                     .inflate(reach, reach)
                     .expand()
                     .intersect(whole);
                 // A scene has at least a pixel.
-                let (x0, y0) = (bounds.x0.clamp(0.0, whole.x1 - 1.0), bounds.y0.clamp(0.0, whole.y1 - 1.0));
-                kurbo::Rect::new(x0, y0, bounds.x1.clamp(x0 + 1.0, whole.x1), bounds.y1.clamp(y0 + 1.0, whole.y1))
+                let (x0, y0) = (
+                    bounds.x0.clamp(0.0, whole.x1 - 1.0),
+                    bounds.y0.clamp(0.0, whole.y1 - 1.0),
+                );
+                kurbo::Rect::new(
+                    x0,
+                    y0,
+                    bounds.x1.clamp(x0 + 1.0, whole.x1),
+                    bounds.y1.clamp(y0 + 1.0, whole.y1),
+                )
             }
             None => whole,
         };
 
-        let scene = self.create_filter_scene(bounds.width() as u16, bounds.height() as u16);
+        let scene: Box<dyn IVelloSceneSink> = if force_cpu {
+            Box::new(VelloCpuSceneSink::new(
+                bounds.width() as u16,
+                bounds.height() as u16,
+            ))
+        } else {
+            self.create_filter_scene(bounds.width() as u16, bounds.height() as u16)
+        };
         let sink = match self.sink.replace(scene) {
             Some(sink) => sink,
             None => panic!("The drawing context has been disposed"),
         };
 
-        let outer = OuterScene { sink, origin: self.sink_origin, open_clips: self.open_clips };
+        let outer = OuterScene {
+            sink,
+            origin: self.sink_origin,
+            open_clips: self.open_clips,
+        };
         self.sink_origin += Vec2::new(bounds.x0, bounds.y0);
         self.open_clips = 0;
         outer
@@ -139,7 +179,10 @@ impl DrawingContextImpl {
     /// a scene of its own, that scene, which is rendered and composed into
     /// the scene the effect was pushed in.
     pub(super) fn end_effect(&mut self) {
-        let frame = self.effect_stack.pop().unwrap_or_else(|| panic!("The effect stack is empty"));
+        let frame = self
+            .effect_stack
+            .pop()
+            .unwrap_or_else(|| panic!("The effect stack is empty"));
 
         self.sink().pop_layer();
 
@@ -155,7 +198,37 @@ impl DrawingContextImpl {
         self.sink_origin = outer.origin;
         self.open_clips = outer.open_clips;
 
-        self.draw_filter_scene(&mut *scene, position.x, position.y, crate::perf::Phase::EffectAsImage);
+        if frame.luminance_to_alpha {
+            let (width, height) = (scene.width(), scene.height());
+            crate::perf::count(
+                crate::perf::Phase::EffectAsImage,
+                u64::from(width) * u64::from(height) * 4,
+            );
+            let mut rgba = vec![0u8; width as usize * height as usize * 4];
+            scene.render_to_pixels(&mut rgba);
+            for pixel in rgba.chunks_exact_mut(4) {
+                // Input is premultiplied: multiplying by alpha again would
+                // incorrectly darken translucent luminance masks.
+                let alpha = (0.2126 * f64::from(pixel[0])
+                    + 0.7152 * f64::from(pixel[1])
+                    + 0.0722 * f64::from(pixel[2]))
+                .round()
+                .clamp(0.0, 255.0) as u8;
+                pixel.copy_from_slice(&[0, 0, 0, alpha]);
+            }
+            self.draw_image_at_pixels(
+                to_image(rgba, PixelSize::new(width as i32, height as i32)),
+                position.x,
+                position.y,
+            );
+        } else {
+            self.draw_filter_scene(
+                &mut *scene,
+                position.x,
+                position.y,
+                crate::perf::Phase::EffectAsImage,
+            );
+        }
     }
 
     /// A scene of its own for something that is drawn through a filter and
@@ -214,7 +287,13 @@ impl DrawingContextImpl {
     /// and draws its picture into the scene of the context, its top left
     /// pixel at (`x`, `y`) of that scene: as a texture of the device when
     /// it was drawn there, as an image otherwise.
-    pub(super) fn draw_filter_scene(&mut self, scene: &mut dyn IVelloSceneSink, x: f64, y: f64, phase: crate::perf::Phase) {
+    pub(super) fn draw_filter_scene(
+        &mut self,
+        scene: &mut dyn IVelloSceneSink,
+        x: f64,
+        y: f64,
+        phase: crate::perf::Phase,
+    ) {
         let (width, height) = (scene.width(), scene.height());
         crate::perf::count(phase, u64::from(width) * u64::from(height) * 4);
 
@@ -227,15 +306,19 @@ impl DrawingContextImpl {
                     u32::from(height),
                     crate::gpu::VelloTextureAlpha::Premultiplied,
                 );
-                match scene.render_to_texture(&crate::gpu::VelloGpuTexture { texture: texture.texture() }) {
+                match scene.render_to_texture(&crate::gpu::VelloGpuTexture {
+                    texture: texture.texture(),
+                }) {
                     Ok(()) => {
-                        let brush = crate::scene::VelloSceneBrush::Texture(crate::scene::VelloSceneTexture {
-                            texture,
-                            x_extend: peniko::Extend::Pad,
-                            y_extend: peniko::Extend::Pad,
-                            quality: peniko::ImageQuality::Low,
-                            alpha: 1.0,
-                        });
+                        let brush = crate::scene::VelloSceneBrush::Texture(
+                            crate::scene::VelloSceneTexture {
+                                texture,
+                                x_extend: peniko::Extend::Pad,
+                                y_extend: peniko::Extend::Pad,
+                                quality: peniko::ImageQuality::Low,
+                                alpha: 1.0,
+                            },
+                        );
                         self.draw_brush_at_pixels(brush, x, y, f64::from(width), f64::from(height));
                     }
                     Err(error) => crate::gpu::log_render_failure("hybrid", &error),
@@ -253,20 +336,52 @@ impl DrawingContextImpl {
 
 impl IDrawingContextImplWithEffects for DrawingContextImpl {
     fn push_effect(&mut self, clip_rect: Option<Rect>, effect: &dyn IEffect) {
+        if effect
+            .as_any()
+            .is::<ferroui_base::media::ImmutableLuminanceToAlphaEffect>()
+        {
+            let outer = self.begin_effect_scene(
+                clip_rect,
+                &VelloSceneFilter::Blur { std_deviation: 0.0 },
+                true,
+            );
+            self.sink().push_layer(BlendMode::default(), 1.0);
+            self.effect_stack.push(EffectFrame {
+                cropped: clip_rect.is_some(),
+                outer: Some(outer),
+                luminance_to_alpha: true,
+            });
+            self.save(SavedKind::Effect);
+            if let Some(rect) = clip_rect {
+                self.push_clip(rect);
+            }
+            return;
+        }
         let Some(filter) = self.create_effect(effect) else {
             // An effect that changes nothing is a layer.
             self.sink().push_layer(BlendMode::default(), 1.0);
-            self.effect_stack.push(EffectFrame { cropped: false, outer: None });
+            self.effect_stack.push(EffectFrame {
+                cropped: false,
+                outer: None,
+                luminance_to_alpha: false,
+            });
             self.save(SavedKind::Effect);
             return;
         };
 
-        let outer =
-            if self.draws_effects_in_the_scene() { None } else { Some(self.begin_effect_scene(clip_rect, &filter)) };
+        let outer = if self.draws_effects_in_the_scene() {
+            None
+        } else {
+            Some(self.begin_effect_scene(clip_rect, &filter, false))
+        };
 
         let transform = self.device_transform();
         self.sink().push_filter_layer(&filter, transform);
-        self.effect_stack.push(EffectFrame { cropped: clip_rect.is_some(), outer });
+        self.effect_stack.push(EffectFrame {
+            cropped: clip_rect.is_some(),
+            outer,
+            luminance_to_alpha: false,
+        });
         self.save(SavedKind::Effect);
 
         // The clip rectangle bounds the layer of the effect: Skia draws no
@@ -278,7 +393,11 @@ impl IDrawingContextImplWithEffects for DrawingContextImpl {
     }
 
     fn pop_effect(&mut self) {
-        let cropped = self.effect_stack.last().unwrap_or_else(|| panic!("The effect stack is empty")).cropped;
+        let cropped = self
+            .effect_stack
+            .last()
+            .unwrap_or_else(|| panic!("The effect stack is empty"))
+            .cropped;
 
         if cropped {
             self.restore();

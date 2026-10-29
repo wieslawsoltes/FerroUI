@@ -201,18 +201,49 @@ impl BrowserTextInputMethod {
         }
     }
 
+    /// Inserts text that arrived without a keydown. The native client's
+    /// selection is authoritative: the hidden input may still contain the
+    /// surrounding text from before a native selection change.
+    pub fn on_text_input(&self, data: Option<&str>) -> bool {
+        if self.is_composing() || self.client().is_none() {
+            return false;
+        }
+        let Some(data) = data.filter(|data| !data.is_empty()) else {
+            return false;
+        };
+        let handled = self.input_handler.upgrade().is_some_and(|input_handler| input_handler.raw_text_event(data));
+        // A TextBox raises its text notification before it finishes moving the
+        // caret. Mirror again after dispatch so the DOM also gets the final
+        // selection (and any filtering performed by the native control).
+        self.surrounding_text_changed();
+        handled
+    }
+
+    /// A native focus change or reset ends the old client's composition even
+    /// when the browser delivers its compositionend later, or not at all.
+    fn cancel_composition(&self) {
+        if self.is_composing.replace(false) {
+            if let Some(client) = self.client() {
+                client.set_preedit_text(None);
+            }
+        }
+    }
+
     /// The input method of the browser started composing.
     pub fn on_composition_start(&self) {
         let Some(client) = self.client() else {
             return;
         };
 
-        client.set_preedit_text(None);
         self.is_composing.set(true);
+        client.set_preedit_text(None);
     }
 
     /// The text being composed changed.
     pub fn on_composition_update(&self, data: Option<&str>) {
+        if !self.is_composing() {
+            return;
+        }
         let Some(client) = self.client() else {
             return;
         };
@@ -223,14 +254,22 @@ impl BrowserTextInputMethod {
     /// The input method of the browser finished composing; `data` is the
     /// text it committed.
     pub fn on_composition_end(&self, data: Option<&str>) {
+        // Always leave composing before looking up the client. A delayed end
+        // after reset/client replacement belongs to the canceled composition.
+        if !self.is_composing.replace(false) {
+            return;
+        }
         let Some(client) = self.client() else {
             return;
         };
 
-        self.is_composing.set(false);
-
         client.set_preedit_text(None);
 
+        // Clearing preedit can raise native callbacks that move focus. Never
+        // deliver the old client's commit to the newly focused control.
+        if !self.client().is_some_and(|current| Rc::ptr_eq(&current, &client)) {
+            return;
+        }
         if let Some(data) = data {
             if let Some(input_handler) = self.input_handler.upgrade() {
                 input_handler.raw_text_event(data);
@@ -241,6 +280,7 @@ impl BrowserTextInputMethod {
 
 impl ITextInputMethodImpl for BrowserTextInputMethod {
     fn set_client(&self, client: Option<Rc<dyn TextInputMethodClient>>) {
+        self.cancel_composition();
         if self.client().is_some() {
             let subscriptions = std::mem::take(&mut *self.subscriptions.borrow_mut());
             for subscription in subscriptions {
@@ -283,6 +323,7 @@ impl ITextInputMethodImpl for BrowserTextInputMethod {
     fn set_options(&self, _options: &TextInputOptions) {}
 
     fn reset(&self) {
+        self.cancel_composition();
         self.page.clear_input_element();
         self.page.set_surrounding_text("", 0, 0);
     }
@@ -637,19 +678,67 @@ mod tests {
     }
 
     #[test]
-    fn a_composition_that_loses_its_client_stays_composing_until_a_client_ends_one() {
-        // As in the original: the end of a composition is only seen with a client.
+    fn losing_the_client_cancels_composition_before_its_delayed_end() {
         let fixture = Fixture::new();
         let client = TestClient::new("", 0, 0);
         fixture.set_client(&client);
         fixture.method.on_composition_start();
+        fixture.method.on_composition_update(Some("ka"));
 
         fixture.method.set_client(None);
-        fixture.method.on_composition_end(None);
-        assert!(fixture.method.is_composing());
+        assert!(!fixture.method.is_composing());
+        assert_eq!(vec![None, Some("ka".to_string()), None], *client.preedit.borrow());
 
-        fixture.set_client(&client);
         fixture.method.on_composition_end(None);
         assert!(!fixture.method.is_composing());
+
+        fixture.set_client(&client);
+        assert!(!fixture.method.is_composing());
+        fixture.method.on_composition_update(Some("late"));
+        fixture.method.on_composition_end(Some("late"));
+        assert_eq!(vec![None, Some("ka".to_string()), None], *client.preedit.borrow());
+    }
+
+    #[test]
+    fn replacing_the_client_does_not_transfer_canceled_preedit_or_commit() {
+        let fixture = Fixture::new();
+        let first = TestClient::new("first", 0, 0);
+        let second = TestClient::new("second", 2, 2);
+        fixture.set_client(&first);
+        fixture.method.on_composition_start();
+        fixture.method.on_composition_update(Some("old"));
+
+        fixture.set_client(&second);
+        assert!(!fixture.method.is_composing());
+        assert_eq!(vec![None, Some("old".to_string()), None], *first.preedit.borrow());
+        fixture.method.on_composition_update(Some("late"));
+        fixture.method.on_composition_end(Some("late"));
+        assert!(second.preedit.borrow().is_empty());
+
+        fixture.method.on_composition_start();
+        fixture.method.on_composition_update(Some("new"));
+        fixture.method.on_composition_end(Some("new"));
+        assert!(!fixture.method.is_composing());
+        assert_eq!(vec![None, Some("new".to_string()), None], *second.preedit.borrow());
+    }
+
+    #[test]
+    fn resetting_the_client_cancels_preedit_and_rejects_late_composition_events() {
+        let fixture = Fixture::new();
+        let client = TestClient::new("hello", 1, 3);
+        fixture.set_client(&client);
+        fixture.method.on_composition_start();
+        fixture.method.on_composition_update(Some("old"));
+
+        fixture.method.reset();
+        assert!(!fixture.method.is_composing());
+        fixture.method.on_composition_update(Some("late"));
+        fixture.method.on_composition_end(Some("late"));
+        assert_eq!(vec![None, Some("old".to_string()), None], *client.preedit.borrow());
+
+        fixture.method.on_composition_start();
+        fixture.method.on_composition_end(Some("new"));
+        assert!(!fixture.method.is_composing());
+        assert_eq!(vec![None, Some("old".to_string()), None, None, None], *client.preedit.borrow());
     }
 }

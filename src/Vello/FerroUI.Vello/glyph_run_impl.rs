@@ -3,12 +3,17 @@ use ferroui_base::media::text_formatting::GlyphInfo;
 use ferroui_base::media::GlyphTypeface;
 use ferroui_base::platform::IGlyphRunImpl;
 use ferroui_base::{Point, Rect, Vector};
-use kurbo::{BezPath, Line, ParamCurve, ParamCurveExtrema, PathSeg, Shape};
+use kurbo::{Affine, BezPath, Line, ParamCurve, ParamCurveExtrema, PathSeg, Shape};
 use skrifa::instance::{LocationRef, Size};
 use skrifa::raw::types::Tag;
+use skrifa::raw::TableProvider;
 use skrifa::MetadataProvider;
 use std::any::Any;
-use std::sync::{Arc, OnceLock};
+use std::sync::{Arc, Mutex, OnceLock};
+
+#[path = "glyph_outline_cache.rs"]
+mod outline_cache;
+use outline_cache::GlyphOutlineCache;
 
 /// The Vello implementation of a glyph run: glyph indices and positions
 /// that a scene draws with the font of the run.
@@ -21,9 +26,15 @@ pub struct GlyphRunImpl {
     glyph_indices: Vec<u16>,
     /// The origin of each glyph relative to the baseline origin of the run.
     glyph_positions: Vec<(f32, f32)>,
+    /// The original shaped positions, before the native glyph renderer's
+    /// single-precision conversion. Scalable drawing and public outlines use
+    /// these same positions, including fractional mark offsets and advances.
+    outline_positions: Vec<(f64, f64)>,
     /// The outlines of the glyphs at the em size of the run, each at its
     /// origin: what the intersections are computed from.
     glyph_paths: OnceLock<Vec<Option<BezPath>>>,
+    complete_monochrome_outlines: OnceLock<bool>,
+    flattened_outlines: Mutex<GlyphOutlineCache>,
     font_rendering_em_size: f64,
     baseline_origin: Point,
     bounds: Rect,
@@ -60,6 +71,7 @@ impl GlyphRunImpl {
 
         let glyph_indices: Vec<u16> = glyphs.iter().map(|glyph| glyph.glyph_index).collect();
         let mut glyph_positions = Vec::with_capacity(count);
+        let mut outline_positions = Vec::with_capacity(count);
 
         // What a glyph without an outline covers (a bitmap glyph of a
         // colour font): its advance, from the ascent to the descent.
@@ -74,6 +86,7 @@ impl GlyphRunImpl {
             let offset = glyph.glyph_offset;
 
             glyph_positions.push(((current_x + offset.x) as f32, offset.y as f32));
+            outline_positions.push((current_x + offset.x, offset.y));
 
             let glyph_bounds = match face.glyph_path_bounds(glyph.glyph_index, font_rendering_em_size) {
                 Some(Some(bounds)) => Some(pixel_bounds(bounds)),
@@ -105,7 +118,10 @@ impl GlyphRunImpl {
             face,
             glyph_indices,
             glyph_positions,
+            outline_positions,
             glyph_paths: OnceLock::new(),
+            complete_monochrome_outlines: OnceLock::new(),
+            flattened_outlines: Mutex::new(GlyphOutlineCache::default()),
             font_rendering_em_size,
             baseline_origin,
             bounds: run_bounds.translate(Vector::new(baseline_origin.x, baseline_origin.y)),
@@ -127,18 +143,56 @@ impl GlyphRunImpl {
         &self.glyph_positions
     }
 
-    fn glyph_paths(&self) -> &[Option<BezPath>] {
+    /// The exact shaped positions used by scalable drawing and extraction.
+    pub(crate) fn outline_positions(&self) -> &[(f64, f64)] {
+        &self.outline_positions
+    }
+
+    /// Cached unhinted contours, positioned relative to the run's baseline.
+    /// Font variations and synthetic bold/oblique are already applied.
+    pub(crate) fn outline_paths(&self) -> &[Option<BezPath>] {
         self.glyph_paths.get_or_init(|| {
             self.glyph_indices
                 .iter()
-                .zip(&self.glyph_positions)
+                .zip(&self.outline_positions)
                 .map(|(glyph_index, (x, y))| {
                     let path = self.face.glyph_path(*glyph_index, self.font_rendering_em_size)?;
 
-                    Some(kurbo::Affine::translate((*x as f64, *y as f64)) * path)
+                    Some(kurbo::Affine::translate((*x, *y)) * path)
                 })
                 .collect()
         })
+    }
+
+    /// A complete monochrome run can be drawn through the same curve path as
+    /// its exported geometry. Keep the native glyph pipeline for typefaces
+    /// with colour/bitmap artwork or any unavailable outline, so this never
+    /// substitutes a partial monochrome fallback for the intended artwork.
+    pub(crate) fn try_outline_paths(&self) -> Option<&[Option<BezPath>]> {
+        let complete = *self.complete_monochrome_outlines.get_or_init(|| {
+            let font = self.face.font_ref();
+            self.face.is_drawable()
+                && ![b"sbix", b"CBDT", b"EBDT", b"COLR", b"SVG ", b"bdat"]
+                    .iter()
+                    .any(|tag| font.table_data(Tag::new(tag)).is_some())
+                && self.outline_paths().iter().all(Option::is_some)
+        });
+        complete.then(|| self.outline_paths())
+    }
+
+    /// Reuse the same device-tolerance lines while only the camera translation
+    /// changes. The immutable run owns this bounded cache, so replacing its
+    /// text, font, variations, em size or precise shaped positions replaces it.
+    /// The public geometry and canonical recording paths stay untouched.
+    pub(crate) fn prepared_outline(&self, index: usize, transform: Affine) -> Option<(Arc<BezPath>, Affine)> {
+        let path = self.try_outline_paths()?.get(index)?.as_ref()?;
+        self.flattened_outlines.lock().unwrap_or_else(|error| error.into_inner())
+            .prepare(index, path, transform)
+    }
+
+    #[cfg(test)]
+    pub(crate) fn outline_cache_stats(&self) -> (usize, usize, u64, u64) {
+        self.flattened_outlines.lock().unwrap_or_else(|error| error.into_inner()).stats()
     }
 }
 
@@ -238,7 +292,7 @@ impl IGlyphRunImpl for GlyphRunImpl {
         let (lower, upper) = (lower_limit.min(upper_limit) as f64, lower_limit.max(upper_limit) as f64);
         let mut intersections = Vec::new();
 
-        for path in self.glyph_paths().iter().flatten() {
+        for path in self.outline_paths().iter().flatten() {
             let mut interval = None;
 
             for segment in path.segments() {

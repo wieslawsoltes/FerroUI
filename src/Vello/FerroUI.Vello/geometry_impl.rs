@@ -248,6 +248,24 @@ fn with_path_measure<R>(geometry: &dyn GeometryImpl, f: impl FnOnce(&PathMeasure
     Some(f(measure))
 }
 
+pub(crate) fn path_data(geometry: &dyn GeometryImpl) -> ferroui_base::media::GeometryPathData {
+    use ferroui_base::media::{GeometryPath, GeometryPathData, GeometryPathSegment};
+    let export = |path: VelloPath| GeometryPath {
+        fill_rule: path.fill_rule(),
+        segments: path.path().elements().iter().map(|element| match *element {
+            kurbo::PathEl::MoveTo(p) => GeometryPathSegment::MoveTo(to_point(p)),
+            kurbo::PathEl::LineTo(p) => GeometryPathSegment::LineTo(to_point(p)),
+            kurbo::PathEl::QuadTo(c, p) => GeometryPathSegment::QuadraticTo { control: to_point(c), point: to_point(p) },
+            kurbo::PathEl::CurveTo(a, b, p) => GeometryPathSegment::CubicTo { control1: to_point(a), control2: to_point(b), point: to_point(p) },
+            kurbo::PathEl::ClosePath => GeometryPathSegment::Close,
+        }).collect(),
+    };
+    GeometryPathData {
+        fill: geometry.fill_path().map(export),
+        stroke: geometry.stroke_path().map(export),
+    }
+}
+
 pub(crate) fn contour_length(geometry: &dyn GeometryImpl) -> f64 {
     with_path_measure(geometry, |measure| measure.length()).unwrap_or(0.0)
 }
@@ -442,6 +460,10 @@ macro_rules! impl_geometry_impl {
         impl ferroui_base::platform::IGeometryImpl for $ty {
             fn bounds(&self) -> ferroui_base::Rect {
                 self.geometry_bounds()
+            }
+
+            fn try_get_path_data(&self) -> Option<ferroui_base::media::GeometryPathData> {
+                Some($crate::geometry_impl::path_data(self))
             }
 
             fn as_any(&self) -> &dyn std::any::Any {

@@ -164,6 +164,8 @@
 
                       <TextPresenter Name="PART_TextPresenter"
                                      Text="{TemplateBinding Text, Mode=TwoWay}"
+                                     TextStyleOverrides="{TemplateBinding TextStyleOverrides}"
+                                     TextParagraphStyles="{TemplateBinding TextParagraphStyles}"
                                      CaretBlinkInterval="{TemplateBinding CaretBlinkInterval}"
                                      CaretIndex="{TemplateBinding CaretIndex}"
                                      SelectionStart="{TemplateBinding SelectionStart}"

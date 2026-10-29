@@ -54,7 +54,32 @@ impl Default for PlatformRenderInterface {
     }
 }
 
+fn glyph_run_geometry(glyph_run: &GlyphRun, require_complete: bool) -> Option<Arc<dyn IGeometryImpl>> {
+    match VelloTypeface::try_get(&**glyph_run.glyph_typeface().platform_typeface()) {
+        Some(_) => {}
+        None if require_complete => return None,
+        None => panic!("PlatformImpl can't be null."),
+    }
+    let platform = glyph_run.platform_impl();
+    let run = platform.as_any().downcast_ref::<GlyphRunImpl>()?;
+    let paths = if require_complete { run.try_outline_paths()? } else { run.outline_paths() };
+    let mut path = BezPath::new();
+    let origin = glyph_run.baseline_origin();
+    let placement = kurbo::Affine::translate((origin.x, origin.y));
+    // Drawing and extraction share the cached, exact f64 shaped contours.
+    // GlyphRun's glyph-info, font-size and baseline setters invalidate its
+    // platform implementation, keeping drawing and extraction on one snapshot.
+    for glyph_path in paths.iter().flatten() {
+        path.extend(glyph_path.iter().map(|element| placement * element));
+    }
+    Some(SimpleGeometryImpl::new(VelloPath::new(path, FillRule::NonZero), FillPath::SameAsStroke, None))
+}
+
 impl IPlatformRenderInterface for PlatformRenderInterface {
+    fn supports_compositing_layers(&self) -> bool {
+        true
+    }
+
     fn create_ellipse_geometry(&self, rect: Rect) -> Arc<dyn IGeometryImpl> {
         EllipseGeometryImpl::new(rect)
     }
@@ -85,31 +110,11 @@ impl IPlatformRenderInterface for PlatformRenderInterface {
     }
 
     fn build_glyph_run_geometry(&self, glyph_run: &GlyphRun) -> Arc<dyn IGeometryImpl> {
-        let glyph_typeface = VelloTypeface::try_get(&**glyph_run.glyph_typeface().platform_typeface())
-            .unwrap_or_else(|| panic!("PlatformImpl can't be null."));
+        glyph_run_geometry(glyph_run, false).expect("Partial glyph outlines are always available")
+    }
 
-        let font_rendering_em_size = glyph_run.font_rendering_em_size();
-
-        let mut path = BezPath::new();
-
-        let baseline_origin = glyph_run.baseline_origin();
-        let (mut current_x, current_y) = (baseline_origin.x, baseline_origin.y);
-
-        let glyph_infos = glyph_run.glyph_infos();
-
-        // As the Skia backend builds it: the outline of every glyph without
-        // hinting at its pen position on the baseline.
-        for glyph_info in glyph_infos.borrow().iter() {
-            if let Some(glyph_path) = glyph_typeface.face().glyph_path(glyph_info.glyph_index, font_rendering_em_size) {
-                if !glyph_path.elements().is_empty() {
-                    path.extend(kurbo::Affine::translate((current_x, current_y)) * glyph_path);
-                }
-            }
-
-            current_x += glyph_info.glyph_advance;
-        }
-
-        SimpleGeometryImpl::new(VelloPath::new(path, FillRule::NonZero), FillPath::SameAsStroke, None)
+    fn try_build_glyph_run_geometry(&self, glyph_run: &GlyphRun) -> Option<Arc<dyn IGeometryImpl>> {
+        glyph_run_geometry(glyph_run, true)
     }
 
     fn create_glyph_run(
