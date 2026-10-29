@@ -1142,6 +1142,7 @@ fn the_shell_stays_usable_with_every_window_decoration() {
             usable(&format!("extended {extended}, decorations {decorations:?}"));
         }
     }
+}
 
 /// A finger that drags up on a page of a phone-sized shell (the minimal pane) scrolls the page, also
 /// where it lands between the cards (the scroll content presenter is hit there, not the grid of the
