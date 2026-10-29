@@ -1,0 +1,30 @@
+<UserControl x:Class="BehaviorsGallery.Views.Pages.ComboBoxValidationBehaviorView"
+             xmlns="https://github.com/ferroui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="using:BehaviorsGallery.ViewModels"
+             xmlns:system="using:System"
+             x:DataType="vm:MainWindowViewModel"
+             mc:Ignorable="d" d:DesignWidth="300" d:DesignHeight="150">
+  <!-- Ported from Views/Pages/ComboBoxValidationBehaviorView of the reference sample. -->
+  <Design.DataContext>
+    <vm:MainWindowViewModel />
+  </Design.DataContext>
+  <StackPanel Spacing="4">
+    <ComboBox Width="200"
+              ItemsSource="{Binding Items}"
+              SelectedItem="{Binding ValidatedItem}">
+      <Interaction.Behaviors>
+        <ComboBoxValidationBehavior IsValid="{Binding IsItemValid, Mode=OneWayToSource}">
+          <!-- Deviation (DEVIATIONS.md, Behaviors gallery): the rule of the port is not generic (its values are untyped), so the type argument of the reference (x:TypeArguments) is left out. -->
+          <NotNullValidationRule ErrorMessage="Selection is required." />
+        </ComboBoxValidationBehavior>
+      </Interaction.Behaviors>
+    </ComboBox>
+    <CheckBox IsEnabled="False"
+              Content="IsItemValid "
+              IsChecked="{Binding IsItemValid}" />
+    <TextBlock Text="{Binding ValidatedItem.Value}" />
+  </StackPanel>
+</UserControl>

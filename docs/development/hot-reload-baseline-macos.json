@@ -1,0 +1,193 @@
+{
+  "schema_version": 1,
+  "measured_on": "2026-10-19",
+  "scope": "runtime-xaml-save-to-compositor-render-completion",
+  "platform": {
+    "os": "macOS",
+    "version": "27.0.1",
+    "architecture": "arm64"
+  },
+  "compiler": "rustc 1.99.1 (58cf8f9c3 2026-10-13)",
+  "profile": "debug",
+  "concurrent_builds": false,
+  "watch_intervals_ms": {
+    "small_fixture": 40,
+    "catalog": 60
+  },
+  "limitations": [
+    "Small sample counts; not percentile estimates or latency guarantees.",
+    "Render completion is not physical display scan-out or screenshot correctness.",
+    "Cross-process timestamps use the wall clock; probe rejects detected clock changes.",
+    "Rust compilation and patch latency are not measured by this run."
+  ],
+  "measurements": [
+    {
+      "application_us": 1479,
+      "batch": 5,
+      "commit_to_render_us": 6157,
+      "documents": [
+        "ferres://hot_reload_demo/View.xaml"
+      ],
+      "preparation_us": 5225,
+      "rendered_unix_ns": "1792424576456141000",
+      "revision": 2,
+      "page": "View",
+      "save_to_render_us": 106743.0,
+      "atomic_save": false
+    },
+    {
+      "application_us": 1232,
+      "batch": 6,
+      "commit_to_render_us": 29855,
+      "documents": [
+        "ferres://hot_reload_demo/View.xaml"
+      ],
+      "preparation_us": 5211,
+      "rendered_unix_ns": "1792424576689523000",
+      "revision": 4,
+      "page": "View",
+      "save_to_render_us": 139267.0,
+      "atomic_save": true
+    },
+    {
+      "application_us": 1422,
+      "batch": 7,
+      "commit_to_render_us": 15436,
+      "documents": [
+        "ferres://hot_reload_demo/Colors.xaml"
+      ],
+      "preparation_us": 6786,
+      "rendered_unix_ns": "1792424576806320000",
+      "revision": 5,
+      "page": "Colors",
+      "save_to_render_us": 106281.0,
+      "atomic_save": false
+    },
+    {
+      "application_us": 1925,
+      "batch": 885,
+      "commit_to_render_us": 9643,
+      "documents": [
+        "ferres://controlcatalog/Pages/BorderPage.xaml"
+      ],
+      "preparation_us": 17678,
+      "rendered_unix_ns": "1792424592874333000",
+      "revision": 1,
+      "page": "BorderPage",
+      "save_to_render_us": 137662.0,
+      "atomic_save": false
+    },
+    {
+      "application_us": 2066,
+      "batch": 897,
+      "commit_to_render_us": 9663,
+      "documents": [
+        "ferres://controlcatalog/Pages/BorderPage.xaml"
+      ],
+      "preparation_us": 19906,
+      "rendered_unix_ns": "1792424593174099000",
+      "revision": 3,
+      "page": "BorderPage",
+      "save_to_render_us": 165403.0,
+      "atomic_save": true
+    },
+    {
+      "application_us": 2846,
+      "batch": 898,
+      "commit_to_render_us": 33965,
+      "documents": [
+        "ferres://controlcatalog/Pages/BorderPage.xaml"
+      ],
+      "preparation_us": 33751,
+      "rendered_unix_ns": "1792424593424614000",
+      "revision": 4,
+      "page": "BorderPage",
+      "save_to_render_us": 243329.0,
+      "atomic_save": false
+    },
+    {
+      "application_us": 4177,
+      "batch": 884,
+      "commit_to_render_us": 9394,
+      "documents": [
+        "ferres://controlcatalog/Pages/TextBlockPage.xaml"
+      ],
+      "preparation_us": 35832,
+      "rendered_unix_ns": "1792424609525092000",
+      "revision": 1,
+      "page": "TextBlockPage",
+      "save_to_render_us": 168565.0,
+      "atomic_save": false
+    },
+    {
+      "application_us": 4553,
+      "batch": 895,
+      "commit_to_render_us": 23486,
+      "documents": [
+        "ferres://controlcatalog/Pages/TextBlockPage.xaml"
+      ],
+      "preparation_us": 50888,
+      "rendered_unix_ns": "1792424609974830000",
+      "revision": 3,
+      "page": "TextBlockPage",
+      "save_to_render_us": 237863.0,
+      "atomic_save": true
+    },
+    {
+      "application_us": 4717,
+      "batch": 896,
+      "commit_to_render_us": 26833,
+      "documents": [
+        "ferres://controlcatalog/Pages/TextBlockPage.xaml"
+      ],
+      "preparation_us": 58061,
+      "rendered_unix_ns": "1792424610291451000",
+      "revision": 4,
+      "page": "TextBlockPage",
+      "save_to_render_us": 290941.0,
+      "atomic_save": false
+    },
+    {
+      "application_us": 6552,
+      "batch": 882,
+      "commit_to_render_us": 28978,
+      "documents": [
+        "ferres://controlcatalog/Pages/ExpanderPage.xaml"
+      ],
+      "preparation_us": 17333,
+      "rendered_unix_ns": "1792424626392232000",
+      "revision": 1,
+      "page": "ExpanderPage",
+      "save_to_render_us": 168756.0,
+      "atomic_save": false
+    },
+    {
+      "application_us": 8009,
+      "batch": 893,
+      "commit_to_render_us": 40603,
+      "documents": [
+        "ferres://controlcatalog/Pages/ExpanderPage.xaml"
+      ],
+      "preparation_us": 25498,
+      "rendered_unix_ns": "1792424626775101000",
+      "revision": 3,
+      "page": "ExpanderPage",
+      "save_to_render_us": 177433.0,
+      "atomic_save": true
+    },
+    {
+      "application_us": 8460,
+      "batch": 894,
+      "commit_to_render_us": 49309,
+      "documents": [
+        "ferres://controlcatalog/Pages/ExpanderPage.xaml"
+      ],
+      "preparation_us": 28631,
+      "rendered_unix_ns": "1792424627008638000",
+      "revision": 4,
+      "page": "ExpanderPage",
+      "save_to_render_us": 209014.0,
+      "atomic_save": false
+    }
+  ]
+}

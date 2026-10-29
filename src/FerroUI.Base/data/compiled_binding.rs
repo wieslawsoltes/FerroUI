@@ -77,6 +77,15 @@ macro_rules! binding_properties {
         }
 
         impl $name {
+            /// An independent description for a development transaction. Keep it
+            /// only through preparation: explicit sources can own application objects.
+            #[cfg(all(debug_assertions, feature = "hot-reload"))]
+            pub fn snapshot_for_reload(&self) -> ::std::rc::Rc<Self> {
+                ::std::rc::Rc::new(Self {
+                    $($field: ::std::cell::RefCell::new(self.$field()),)*
+                })
+            }
+
             $(
                 $(#[$meta])*
                 pub fn $field(&self) -> $ty {

@@ -1,0 +1,50 @@
+<!--
+  Ported from microsoft-ui-xaml (https://github.com/microsoft/microsoft-ui-xaml),
+  commit 7e4b0c2096be402f51cc8f7d203ebf67cff183d0:
+    controls/dev/PullToRefresh/RefreshVisualizer/RefreshVisualizer.xaml (the implicit style; the
+    resources of controls/dev/PullToRefresh/RefreshVisualizer/RefreshVisualizer_themeresources.xaml
+    are Resources/RefreshVisualizer_themeresources.xaml)
+    controls/dev/PullToRefresh/RefreshVisualizer/RefreshVisualizer.cpp (the default content)
+  Copyright (c) Microsoft Corporation. Licensed under the MIT License (see NOTICE.md of the crate).
+
+  Translation notes (docs/porting/winui-theme.md, section 4):
+  - Root is PART_Root, the grid into which FerroUI's RefreshVisualizer puts its content, as
+    WinUI's.
+  - The default content: WinUI's control creates a SymbolIcon of Symbol.Refresh (the glyph E72C
+    of the symbol font at the 20 px of a SymbolIcon) of 30 x 30 when it has no content. FerroUI's
+    control creates none; the theme sets it, as the Fluent theme does: a Grid of 30 x 30 with a
+    Path of GlyphGeometryE72C, 16 px wide, filled with the foreground of the visualizer (which a
+    SymbolIcon inherits).
+  - The FerroUI contract: the visualizer is not hit-testable (IsHitTestVisible="False"), as in the
+    Fluent theme, so that it does not take the input of the content it lies over.
+-->
+<ResourceDictionary xmlns="https://github.com/ferroui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    x:ClassModifier="internal">
+  <ControlTheme x:Key="{x:Type RefreshVisualizer}" TargetType="RefreshVisualizer">
+    <Setter Property="Background" Value="{DynamicResource RefreshVisualizerBackground}" />
+    <Setter Property="Foreground" Value="{DynamicResource RefreshVisualizerForeground}" />
+    <Setter Property="IsTabStop" Value="False" />
+    <Setter Property="IsHitTestVisible" Value="False" />
+    <Setter Property="Height" Value="100" />
+    <!-- The SymbolIcon(Symbol.Refresh) of 30 x 30 the control of WinUI creates. -->
+    <Setter Property="Content">
+      <Template>
+        <Grid Width="30" Height="30">
+          <Path Data="{StaticResource GlyphGeometryE72C}"
+                Fill="{Binding $parent[RefreshVisualizer].Foreground}"
+                Stretch="Uniform"
+                Width="16"
+                Height="16"
+                HorizontalAlignment="Center"
+                VerticalAlignment="Center" />
+        </Grid>
+      </Template>
+    </Setter>
+    <Setter Property="Template">
+      <ControlTemplate>
+        <Grid x:Name="PART_Root" MinHeight="80" Background="{TemplateBinding Background}" />
+      </ControlTemplate>
+    </Setter>
+  </ControlTheme>
+</ResourceDictionary>

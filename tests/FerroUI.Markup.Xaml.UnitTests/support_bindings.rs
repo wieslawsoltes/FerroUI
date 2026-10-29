@@ -135,6 +135,7 @@ impl ILogSink for TestLogSink {
 const MODULES: &[&crate::support::TypeModule] = &[
     // FerroUI.Markup.Xaml.UnitTests.Xaml
     &crate::xaml::assign_binding_tests::MODULE,
+    &crate::xaml::attached_collection_property_tests::MODULE,
     &crate::xaml::binding_tests::MODULE,
     &crate::xaml::binding_tests_relative_source::MODULE,
     &crate::xaml::control_binding_tests::MODULE,

@@ -1,0 +1,747 @@
+<!--
+  Adapted from controls/dev/InkToolbar/InkToolbar.xaml, microsoft-ui-xaml
+  commit 7e4b0c2096be402f51cc8f7d203ebf67cff183d0.
+  Copyright (c) Microsoft Corporation. MIT license; see NOTICE.md.
+  Visual states become FerroUI pseudo-class styles. Tool geometry replaces Windows-only
+  symbol glyphs, and palette/layout/preview use the shared FerroUI control implementation.
+  Built-in icon grids are genuine PART_ContentPresenter content: their bindings and scoped
+  styles use the logical button ancestor instead of crossing a control-template boundary.
+  The resources are Themes/WinUI/InkToolbarResources.xaml (written by convert.py) and the
+  outlines of the icons Themes/WinUI/InkToolbarGlyphs.xaml.
+-->
+<ResourceDictionary xmlns="https://github.com/ferroui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    x:ClassModifier="internal">
+  <!-- InkToolbarFlyoutStyle of WinUI: the presenter of every flyout of the toolbar's buttons,
+       based on the presenter's own control theme for its template. -->
+  <ControlTheme x:Key="InkToolbarFlyoutStyle" TargetType="FlyoutPresenter" BasedOn="{StaticResource {x:Type FlyoutPresenter}}">
+    <Setter Property="Padding" Value="0,0,0,0" />
+    <Setter Property="Background" Value="{DynamicResource AcrylicBackgroundFillColorDefaultBrush}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource SurfaceStrokeColorDefaultBrush}" />
+    <Setter Property="BorderThickness" Value="1" />
+    <Setter Property="MinWidth" Value="0" />
+    <Setter Property="MinHeight" Value="0" />
+    <Setter Property="CornerRadius" Value="{DynamicResource ControlCornerRadius}" />
+  </ControlTheme>
+  <ControlTheme x:Key="InkToolbarCommonButtonStyle" TargetType="ToggleButton">
+    <Setter Property="MinWidth" Value="{StaticResource InkToolbarButtonWidth}" />
+    <Setter Property="MinHeight" Value="{StaticResource InkToolbarButtonHeight}" />
+    <Setter Property="MaxWidth" Value="{StaticResource InkToolbarButtonWidth}" />
+    <Setter Property="MaxHeight" Value="{StaticResource InkToolbarButtonHeight}" />
+    <Setter Property="Padding" Value="2" />
+    <Setter Property="Margin" Value="2" />
+    <Setter Property="Background" Value="{DynamicResource InkToolbarButtonBackground}" />
+    <Setter Property="Foreground" Value="{DynamicResource InkToolbarButtonForeground}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource InkToolbarButtonBorderBrush}" />
+    <Setter Property="BorderThickness" Value="{DynamicResource InkToolbarButtonBorderThemeThickness}" />
+    <Setter Property="CornerRadius" Value="{DynamicResource ControlCornerRadius}" />
+    <Setter Property="HorizontalContentAlignment" Value="Center" />
+    <Setter Property="VerticalContentAlignment" Value="Center" />
+    <Setter Property="FocusAdorner">
+      <FocusAdornerTemplate>
+        <Border Margin="-3" BorderThickness="2" CornerRadius="{DynamicResource ControlCornerRadius}"
+                BorderBrush="{DynamicResource SystemControlFocusVisualPrimaryBrush}">
+          <Border BorderThickness="1" CornerRadius="{DynamicResource ControlCornerRadius}"
+                  BorderBrush="{DynamicResource SystemControlFocusVisualSecondaryBrush}" />
+        </Border>
+      </FocusAdornerTemplate>
+    </Setter>
+    <Style Selector="^:pointerover">
+      <Setter Property="Background" Value="{DynamicResource InkToolbarButtonBackgroundPointerOver}" />
+      <Setter Property="Foreground" Value="{DynamicResource InkToolbarButtonForegroundPointerOver}" />
+      <Setter Property="BorderBrush" Value="{DynamicResource InkToolbarButtonBorderBrushPointerOver}" />
+    </Style>
+    <Style Selector="^:pressed">
+      <Setter Property="Background" Value="{DynamicResource InkToolbarButtonBackgroundPressed}" />
+      <Setter Property="Foreground" Value="{DynamicResource InkToolbarButtonForegroundPressed}" />
+      <Setter Property="BorderBrush" Value="{DynamicResource InkToolbarButtonBorderBrushPressed}" />
+    </Style>
+    <Style Selector="^:disabled">
+      <Setter Property="Background" Value="{DynamicResource InkToolbarButtonBackgroundDisabled}" />
+      <Setter Property="Foreground" Value="{DynamicResource InkToolbarButtonForegroundDisabled}" />
+      <Setter Property="BorderBrush" Value="{DynamicResource InkToolbarButtonBorderBrushDisabled}" />
+    </Style>
+    <Style Selector="^:checked">
+      <Setter Property="Background" Value="{DynamicResource InkToolbarButtonSelectedBackground}" />
+      <Setter Property="Foreground" Value="{DynamicResource InkToolbarButtonSelectedForeground}" />
+      <Setter Property="BorderBrush" Value="{DynamicResource InkToolbarButtonSelectedBorderBrush}" />
+    </Style>
+    <Style Selector="^:checked:pointerover">
+      <Setter Property="Background" Value="{DynamicResource InkToolbarButtonSelectedBackgroundPointerOver}" />
+      <Setter Property="Foreground" Value="{DynamicResource InkToolbarButtonSelectedForegroundPointerOver}" />
+      <Setter Property="BorderBrush" Value="{DynamicResource InkToolbarButtonSelectedBorderBrushPointerOver}" />
+    </Style>
+    <Style Selector="^:checked:pressed">
+      <Setter Property="Background" Value="{DynamicResource InkToolbarButtonSelectedBackgroundPressed}" />
+      <Setter Property="Foreground" Value="{DynamicResource InkToolbarButtonSelectedForegroundPressed}" />
+      <Setter Property="BorderBrush" Value="{DynamicResource InkToolbarButtonSelectedBorderBrushPressed}" />
+    </Style>
+    <Style Selector="^:checked:disabled">
+      <Setter Property="Background" Value="{DynamicResource InkToolbarButtonSelectedBackgroundDisabled}" />
+      <Setter Property="Foreground" Value="{DynamicResource InkToolbarButtonSelectedForegroundDisabled}" />
+      <Setter Property="BorderBrush" Value="{DynamicResource InkToolbarButtonSelectedBorderBrushDisabled}" />
+    </Style>
+    <Style Selector="^ /template/ Path#ExtensionGlyph">
+      <Setter Property="Data" Value="{DynamicResource InkToolbarArrowDown}" />
+      <Setter Property="HorizontalAlignment" Value="Center" />
+      <Setter Property="VerticalAlignment" Value="Bottom" />
+      <Setter Property="Width" Value="8" />
+      <Setter Property="Height" Value="5" />
+      <Setter Property="Opacity" Value="0" />
+    </Style>
+    <Style Selector="^:checked /template/ Path#ExtensionGlyph">
+      <Setter Property="Opacity" Value="1" />
+    </Style>
+    <Style Selector="^:flyout-open /template/ Path#ExtensionGlyph">
+      <Setter Property="Opacity" Value="0" />
+    </Style>
+    <Style Selector="^:flyout-top /template/ Path#ExtensionGlyph">
+      <Setter Property="Data" Value="{DynamicResource InkToolbarArrowUp}" />
+      <Setter Property="HorizontalAlignment" Value="Center" />
+      <Setter Property="VerticalAlignment" Value="Top" />
+      <Setter Property="Width" Value="8" />
+      <Setter Property="Height" Value="5" />
+    </Style>
+    <Style Selector="^:flyout-bottom /template/ Path#ExtensionGlyph">
+      <Setter Property="Data" Value="{DynamicResource InkToolbarArrowDown}" />
+      <Setter Property="HorizontalAlignment" Value="Center" />
+      <Setter Property="VerticalAlignment" Value="Bottom" />
+      <Setter Property="Width" Value="8" />
+      <Setter Property="Height" Value="5" />
+    </Style>
+    <Style Selector="^:flyout-left /template/ Path#ExtensionGlyph">
+      <Setter Property="Data" Value="{DynamicResource InkToolbarArrowLeft}" />
+      <Setter Property="HorizontalAlignment" Value="Left" />
+      <Setter Property="VerticalAlignment" Value="Center" />
+      <Setter Property="Width" Value="5" />
+      <Setter Property="Height" Value="8" />
+    </Style>
+    <Style Selector="^:flyout-right /template/ Path#ExtensionGlyph">
+      <Setter Property="Data" Value="{DynamicResource InkToolbarArrowRight}" />
+      <Setter Property="HorizontalAlignment" Value="Right" />
+      <Setter Property="VerticalAlignment" Value="Center" />
+      <Setter Property="Width" Value="5" />
+      <Setter Property="Height" Value="8" />
+    </Style>
+  </ControlTheme>
+  <ControlTheme x:Key="{x:Type InkToolbarToolButton}" TargetType="InkToolbarToolButton" BasedOn="{StaticResource InkToolbarCommonButtonStyle}">
+    <Setter Property="Template">
+      <ControlTemplate TargetType="InkToolbarToolButton">
+        <Border x:Name="RootElement" Background="{TemplateBinding Background}"
+                BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}"
+                CornerRadius="{TemplateBinding CornerRadius}" Padding="{TemplateBinding Padding}">
+          <Grid>
+            <ContentPresenter x:Name="PART_ContentPresenter" Content="{TemplateBinding Content}"
+                              ContentTemplate="{TemplateBinding ContentTemplate}" Foreground="{TemplateBinding Foreground}"
+                              HorizontalContentAlignment="{TemplateBinding HorizontalContentAlignment}"
+                              VerticalContentAlignment="{TemplateBinding VerticalContentAlignment}"
+                              RecognizesAccessKey="True" />
+            <Path x:Name="ExtensionGlyph" Stretch="Uniform"
+                  Fill="{DynamicResource InkToolbarAccentColorForegroundThemeBrush}"
+                  IsVisible="{TemplateBinding IsExtensionGlyphShown}" IsHitTestVisible="False" />
+          </Grid>
+        </Border>
+      </ControlTemplate>
+    </Setter>
+  </ControlTheme>
+  <ControlTheme x:Key="{x:Type InkToolbarPenButton}" TargetType="InkToolbarPenButton" BasedOn="{StaticResource InkToolbarCommonButtonStyle}">
+    <Setter Property="Template">
+      <ControlTemplate TargetType="InkToolbarPenButton">
+        <Border x:Name="RootElement" Background="{TemplateBinding Background}"
+                BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}"
+                CornerRadius="{TemplateBinding CornerRadius}" Padding="{TemplateBinding Padding}">
+          <Grid>
+            <ContentPresenter x:Name="PART_ContentPresenter" Content="{TemplateBinding Content}"
+                              ContentTemplate="{TemplateBinding ContentTemplate}" Foreground="{TemplateBinding Foreground}"
+                              HorizontalContentAlignment="{TemplateBinding HorizontalContentAlignment}"
+                              VerticalContentAlignment="{TemplateBinding VerticalContentAlignment}"
+                              RecognizesAccessKey="True" />
+            <Path x:Name="ExtensionGlyph" Stretch="Uniform"
+                  Fill="{DynamicResource InkToolbarAccentColorForegroundThemeBrush}"
+                  IsVisible="{TemplateBinding IsExtensionGlyphShown}" IsHitTestVisible="False" />
+          </Grid>
+        </Border>
+      </ControlTemplate>
+    </Setter>
+  </ControlTheme>
+  <ControlTheme x:Key="{x:Type InkToolbarBallpointPenButton}" TargetType="InkToolbarBallpointPenButton" BasedOn="{StaticResource InkToolbarCommonButtonStyle}">
+    <Setter Property="AutomationProperties.AutomationId" Value="InkToolbarBallpointPenButton" />
+    <Setter Property="MinStrokeWidth" Value="1" />
+    <Setter Property="MaxStrokeWidth" Value="24" />
+    <Setter Property="SelectedStrokeWidth" Value="2" />
+    <Setter Property="Template">
+      <ControlTemplate TargetType="InkToolbarBallpointPenButton">
+        <Border x:Name="RootElement" Background="{TemplateBinding Background}"
+                BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}"
+                CornerRadius="{TemplateBinding CornerRadius}" Padding="{TemplateBinding Padding}">
+          <ContentPresenter x:Name="PART_ContentPresenter"
+                            HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch">
+          <Grid>
+            <Grid.Styles>
+              <Style Selector=":is(ToggleButton) Path#ExtensionGlyph">
+                <Setter Property="Data" Value="{DynamicResource InkToolbarArrowDown}" />
+                <Setter Property="HorizontalAlignment" Value="Center" />
+                <Setter Property="VerticalAlignment" Value="Bottom" />
+                <Setter Property="Width" Value="8" />
+                <Setter Property="Height" Value="5" />
+                <Setter Property="Opacity" Value="0" />
+              </Style>
+              <Style Selector=":is(ToggleButton):checked Path#ExtensionGlyph">
+                <Setter Property="Opacity" Value="1" />
+              </Style>
+              <Style Selector=":is(ToggleButton):flyout-open Path#ExtensionGlyph">
+                <Setter Property="Opacity" Value="0" />
+              </Style>
+              <Style Selector=":is(ToggleButton):flyout-top Path#ExtensionGlyph">
+                <Setter Property="Data" Value="{DynamicResource InkToolbarArrowUp}" />
+                <Setter Property="HorizontalAlignment" Value="Center" />
+                <Setter Property="VerticalAlignment" Value="Top" />
+                <Setter Property="Width" Value="8" />
+                <Setter Property="Height" Value="5" />
+              </Style>
+              <Style Selector=":is(ToggleButton):flyout-bottom Path#ExtensionGlyph">
+                <Setter Property="Data" Value="{DynamicResource InkToolbarArrowDown}" />
+                <Setter Property="HorizontalAlignment" Value="Center" />
+                <Setter Property="VerticalAlignment" Value="Bottom" />
+                <Setter Property="Width" Value="8" />
+                <Setter Property="Height" Value="5" />
+              </Style>
+              <Style Selector=":is(ToggleButton):flyout-left Path#ExtensionGlyph">
+                <Setter Property="Data" Value="{DynamicResource InkToolbarArrowLeft}" />
+                <Setter Property="HorizontalAlignment" Value="Left" />
+                <Setter Property="VerticalAlignment" Value="Center" />
+                <Setter Property="Width" Value="5" />
+                <Setter Property="Height" Value="8" />
+              </Style>
+              <Style Selector=":is(ToggleButton):flyout-right Path#ExtensionGlyph">
+                <Setter Property="Data" Value="{DynamicResource InkToolbarArrowRight}" />
+                <Setter Property="HorizontalAlignment" Value="Right" />
+                <Setter Property="VerticalAlignment" Value="Center" />
+                <Setter Property="Width" Value="5" />
+                <Setter Property="Height" Value="8" />
+              </Style>
+            </Grid.Styles>
+            <Path x:Name="ContentFillGlyph" Width="16" Height="16" Stretch="Uniform"
+                  Data="{StaticResource InkToolbarBallpointFill}" Fill="{Binding $parent[InkToolbarBallpointPenButton].SelectedBrush}"
+                  HorizontalAlignment="Center" VerticalAlignment="Center" IsHitTestVisible="False" />
+            <Path x:Name="ContentGlyph" Width="16" Height="16" Stretch="Uniform"
+                  Data="{StaticResource InkToolbarBallpointOutline}" Fill="{Binding $parent[InkToolbarBallpointPenButton].Foreground}"
+                  HorizontalAlignment="Center" VerticalAlignment="Center" IsHitTestVisible="False" />
+            <Path x:Name="ExtensionGlyph" Stretch="Uniform"
+                  Fill="{DynamicResource InkToolbarAccentColorForegroundThemeBrush}"
+                  IsVisible="{Binding $parent[InkToolbarBallpointPenButton].IsExtensionGlyphShown}" IsHitTestVisible="False" />
+          </Grid>
+          </ContentPresenter>
+        </Border>
+      </ControlTemplate>
+    </Setter>
+  </ControlTheme>
+  <ControlTheme x:Key="{x:Type InkToolbarPencilButton}" TargetType="InkToolbarPencilButton" BasedOn="{StaticResource InkToolbarCommonButtonStyle}">
+    <Setter Property="AutomationProperties.AutomationId" Value="InkToolbarPencilButton" />
+    <Setter Property="MinStrokeWidth" Value="1" />
+    <Setter Property="MaxStrokeWidth" Value="24" />
+    <Setter Property="SelectedStrokeWidth" Value="4" />
+    <Setter Property="Template">
+      <ControlTemplate TargetType="InkToolbarPencilButton">
+        <Border x:Name="RootElement" Background="{TemplateBinding Background}"
+                BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}"
+                CornerRadius="{TemplateBinding CornerRadius}" Padding="{TemplateBinding Padding}">
+          <ContentPresenter x:Name="PART_ContentPresenter"
+                            HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch">
+          <Grid>
+            <Grid.Styles>
+              <Style Selector=":is(ToggleButton) Path#ExtensionGlyph">
+                <Setter Property="Data" Value="{DynamicResource InkToolbarArrowDown}" />
+                <Setter Property="HorizontalAlignment" Value="Center" />
+                <Setter Property="VerticalAlignment" Value="Bottom" />
+                <Setter Property="Width" Value="8" />
+                <Setter Property="Height" Value="5" />
+                <Setter Property="Opacity" Value="0" />
+              </Style>
+              <Style Selector=":is(ToggleButton):checked Path#ExtensionGlyph">
+                <Setter Property="Opacity" Value="1" />
+              </Style>
+              <Style Selector=":is(ToggleButton):flyout-open Path#ExtensionGlyph">
+                <Setter Property="Opacity" Value="0" />
+              </Style>
+              <Style Selector=":is(ToggleButton):flyout-top Path#ExtensionGlyph">
+                <Setter Property="Data" Value="{DynamicResource InkToolbarArrowUp}" />
+                <Setter Property="HorizontalAlignment" Value="Center" />
+                <Setter Property="VerticalAlignment" Value="Top" />
+                <Setter Property="Width" Value="8" />
+                <Setter Property="Height" Value="5" />
+              </Style>
+              <Style Selector=":is(ToggleButton):flyout-bottom Path#ExtensionGlyph">
+                <Setter Property="Data" Value="{DynamicResource InkToolbarArrowDown}" />
+                <Setter Property="HorizontalAlignment" Value="Center" />
+                <Setter Property="VerticalAlignment" Value="Bottom" />
+                <Setter Property="Width" Value="8" />
+                <Setter Property="Height" Value="5" />
+              </Style>
+              <Style Selector=":is(ToggleButton):flyout-left Path#ExtensionGlyph">
+                <Setter Property="Data" Value="{DynamicResource InkToolbarArrowLeft}" />
+                <Setter Property="HorizontalAlignment" Value="Left" />
+                <Setter Property="VerticalAlignment" Value="Center" />
+                <Setter Property="Width" Value="5" />
+                <Setter Property="Height" Value="8" />
+              </Style>
+              <Style Selector=":is(ToggleButton):flyout-right Path#ExtensionGlyph">
+                <Setter Property="Data" Value="{DynamicResource InkToolbarArrowRight}" />
+                <Setter Property="HorizontalAlignment" Value="Right" />
+                <Setter Property="VerticalAlignment" Value="Center" />
+                <Setter Property="Width" Value="5" />
+                <Setter Property="Height" Value="8" />
+              </Style>
+            </Grid.Styles>
+            <Path x:Name="ContentFillGlyph" Width="16" Height="16" Stretch="Uniform"
+                  Data="{StaticResource InkToolbarPencilFill}" Fill="{Binding $parent[InkToolbarPencilButton].SelectedBrush}"
+                  HorizontalAlignment="Center" VerticalAlignment="Center" IsHitTestVisible="False" />
+            <Path x:Name="ContentGlyph" Width="16" Height="16" Stretch="Uniform"
+                  Data="{StaticResource InkToolbarPencilOutline}" Fill="{Binding $parent[InkToolbarPencilButton].Foreground}"
+                  HorizontalAlignment="Center" VerticalAlignment="Center" IsHitTestVisible="False" />
+            <Path x:Name="ExtensionGlyph" Stretch="Uniform"
+                  Fill="{DynamicResource InkToolbarAccentColorForegroundThemeBrush}"
+                  IsVisible="{Binding $parent[InkToolbarPencilButton].IsExtensionGlyphShown}" IsHitTestVisible="False" />
+          </Grid>
+          </ContentPresenter>
+        </Border>
+      </ControlTemplate>
+    </Setter>
+  </ControlTheme>
+  <ControlTheme x:Key="{x:Type InkToolbarHighlighterButton}" TargetType="InkToolbarHighlighterButton" BasedOn="{StaticResource InkToolbarCommonButtonStyle}">
+    <Setter Property="AutomationProperties.AutomationId" Value="InkToolbarHighlighterButton" />
+    <Setter Property="MinStrokeWidth" Value="12" />
+    <Setter Property="MaxStrokeWidth" Value="64" />
+    <Setter Property="SelectedStrokeWidth" Value="36" />
+    <Setter Property="Template">
+      <ControlTemplate TargetType="InkToolbarHighlighterButton">
+        <Border x:Name="RootElement" Background="{TemplateBinding Background}"
+                BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}"
+                CornerRadius="{TemplateBinding CornerRadius}" Padding="{TemplateBinding Padding}">
+          <ContentPresenter x:Name="PART_ContentPresenter"
+                            HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch">
+          <Grid>
+            <Grid.Styles>
+              <Style Selector=":is(ToggleButton) Path#ExtensionGlyph">
+                <Setter Property="Data" Value="{DynamicResource InkToolbarArrowDown}" />
+                <Setter Property="HorizontalAlignment" Value="Center" />
+                <Setter Property="VerticalAlignment" Value="Bottom" />
+                <Setter Property="Width" Value="8" />
+                <Setter Property="Height" Value="5" />
+                <Setter Property="Opacity" Value="0" />
+              </Style>
+              <Style Selector=":is(ToggleButton):checked Path#ExtensionGlyph">
+                <Setter Property="Opacity" Value="1" />
+              </Style>
+              <Style Selector=":is(ToggleButton):flyout-open Path#ExtensionGlyph">
+                <Setter Property="Opacity" Value="0" />
+              </Style>
+              <Style Selector=":is(ToggleButton):flyout-top Path#ExtensionGlyph">
+                <Setter Property="Data" Value="{DynamicResource InkToolbarArrowUp}" />
+                <Setter Property="HorizontalAlignment" Value="Center" />
+                <Setter Property="VerticalAlignment" Value="Top" />
+                <Setter Property="Width" Value="8" />
+                <Setter Property="Height" Value="5" />
+              </Style>
+              <Style Selector=":is(ToggleButton):flyout-bottom Path#ExtensionGlyph">
+                <Setter Property="Data" Value="{DynamicResource InkToolbarArrowDown}" />
+                <Setter Property="HorizontalAlignment" Value="Center" />
+                <Setter Property="VerticalAlignment" Value="Bottom" />
+                <Setter Property="Width" Value="8" />
+                <Setter Property="Height" Value="5" />
+              </Style>
+              <Style Selector=":is(ToggleButton):flyout-left Path#ExtensionGlyph">
+                <Setter Property="Data" Value="{DynamicResource InkToolbarArrowLeft}" />
+                <Setter Property="HorizontalAlignment" Value="Left" />
+                <Setter Property="VerticalAlignment" Value="Center" />
+                <Setter Property="Width" Value="5" />
+                <Setter Property="Height" Value="8" />
+              </Style>
+              <Style Selector=":is(ToggleButton):flyout-right Path#ExtensionGlyph">
+                <Setter Property="Data" Value="{DynamicResource InkToolbarArrowRight}" />
+                <Setter Property="HorizontalAlignment" Value="Right" />
+                <Setter Property="VerticalAlignment" Value="Center" />
+                <Setter Property="Width" Value="5" />
+                <Setter Property="Height" Value="8" />
+              </Style>
+            </Grid.Styles>
+            <Path x:Name="ContentFillGlyph" Width="16" Height="16" Stretch="Uniform"
+                  Data="{StaticResource InkToolbarHighlighterFill}" Fill="{Binding $parent[InkToolbarHighlighterButton].SelectedBrush}"
+                  HorizontalAlignment="Center" VerticalAlignment="Center" IsHitTestVisible="False" />
+            <Path x:Name="ContentGlyph" Width="16" Height="16" Stretch="Uniform"
+                  Data="{StaticResource InkToolbarHighlighterOutline}" Fill="{Binding $parent[InkToolbarHighlighterButton].Foreground}"
+                  HorizontalAlignment="Center" VerticalAlignment="Center" IsHitTestVisible="False" />
+            <Path x:Name="ExtensionGlyph" Stretch="Uniform"
+                  Fill="{DynamicResource InkToolbarAccentColorForegroundThemeBrush}"
+                  IsVisible="{Binding $parent[InkToolbarHighlighterButton].IsExtensionGlyphShown}" IsHitTestVisible="False" />
+          </Grid>
+          </ContentPresenter>
+        </Border>
+      </ControlTemplate>
+    </Setter>
+  </ControlTheme>
+  <ControlTheme x:Key="{x:Type InkToolbarCustomPenButton}" TargetType="InkToolbarCustomPenButton" BasedOn="{StaticResource InkToolbarCommonButtonStyle}">
+    <Setter Property="MinStrokeWidth" Value="1" />
+    <Setter Property="MaxStrokeWidth" Value="10" />
+    <Setter Property="SelectedStrokeWidth" Value="5" />
+    <Setter Property="Template">
+      <ControlTemplate TargetType="InkToolbarCustomPenButton">
+        <Border x:Name="RootElement" Background="{TemplateBinding Background}"
+                BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}"
+                CornerRadius="{TemplateBinding CornerRadius}" Padding="{TemplateBinding Padding}">
+          <Grid>
+            <ContentPresenter x:Name="PART_ContentPresenter" Content="{TemplateBinding Content}"
+                              ContentTemplate="{TemplateBinding ContentTemplate}" Foreground="{TemplateBinding Foreground}"
+                              HorizontalContentAlignment="{TemplateBinding HorizontalContentAlignment}"
+                              VerticalContentAlignment="{TemplateBinding VerticalContentAlignment}"
+                              RecognizesAccessKey="True" />
+            <Path x:Name="ExtensionGlyph" Stretch="Uniform"
+                  Fill="{DynamicResource InkToolbarAccentColorForegroundThemeBrush}"
+                  IsVisible="{TemplateBinding IsExtensionGlyphShown}" IsHitTestVisible="False" />
+          </Grid>
+        </Border>
+      </ControlTemplate>
+    </Setter>
+  </ControlTheme>
+  <ControlTheme x:Key="{x:Type InkToolbarEraserButton}" TargetType="InkToolbarEraserButton" BasedOn="{StaticResource InkToolbarCommonButtonStyle}">
+    <Setter Property="AutomationProperties.AutomationId" Value="InkToolbarEraserButton" />
+    <Setter Property="Template">
+      <ControlTemplate TargetType="InkToolbarEraserButton">
+        <Border x:Name="RootElement" Background="{TemplateBinding Background}"
+                BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}"
+                CornerRadius="{TemplateBinding CornerRadius}" Padding="{TemplateBinding Padding}">
+          <ContentPresenter x:Name="PART_ContentPresenter"
+                            HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch">
+          <Grid>
+            <Grid.Styles>
+              <Style Selector=":is(ToggleButton) Path#ExtensionGlyph">
+                <Setter Property="Data" Value="{DynamicResource InkToolbarArrowDown}" />
+                <Setter Property="HorizontalAlignment" Value="Center" />
+                <Setter Property="VerticalAlignment" Value="Bottom" />
+                <Setter Property="Width" Value="8" />
+                <Setter Property="Height" Value="5" />
+                <Setter Property="Opacity" Value="0" />
+              </Style>
+              <Style Selector=":is(ToggleButton):checked Path#ExtensionGlyph">
+                <Setter Property="Opacity" Value="1" />
+              </Style>
+              <Style Selector=":is(ToggleButton):flyout-open Path#ExtensionGlyph">
+                <Setter Property="Opacity" Value="0" />
+              </Style>
+              <Style Selector=":is(ToggleButton):flyout-top Path#ExtensionGlyph">
+                <Setter Property="Data" Value="{DynamicResource InkToolbarArrowUp}" />
+                <Setter Property="HorizontalAlignment" Value="Center" />
+                <Setter Property="VerticalAlignment" Value="Top" />
+                <Setter Property="Width" Value="8" />
+                <Setter Property="Height" Value="5" />
+              </Style>
+              <Style Selector=":is(ToggleButton):flyout-bottom Path#ExtensionGlyph">
+                <Setter Property="Data" Value="{DynamicResource InkToolbarArrowDown}" />
+                <Setter Property="HorizontalAlignment" Value="Center" />
+                <Setter Property="VerticalAlignment" Value="Bottom" />
+                <Setter Property="Width" Value="8" />
+                <Setter Property="Height" Value="5" />
+              </Style>
+              <Style Selector=":is(ToggleButton):flyout-left Path#ExtensionGlyph">
+                <Setter Property="Data" Value="{DynamicResource InkToolbarArrowLeft}" />
+                <Setter Property="HorizontalAlignment" Value="Left" />
+                <Setter Property="VerticalAlignment" Value="Center" />
+                <Setter Property="Width" Value="5" />
+                <Setter Property="Height" Value="8" />
+              </Style>
+              <Style Selector=":is(ToggleButton):flyout-right Path#ExtensionGlyph">
+                <Setter Property="Data" Value="{DynamicResource InkToolbarArrowRight}" />
+                <Setter Property="HorizontalAlignment" Value="Right" />
+                <Setter Property="VerticalAlignment" Value="Center" />
+                <Setter Property="Width" Value="5" />
+                <Setter Property="Height" Value="8" />
+              </Style>
+            </Grid.Styles>
+            <Path x:Name="ContentGlyph" Width="16" Height="16" Stretch="Uniform"
+                  Data="{StaticResource InkToolbarEraserOutline}" Fill="{Binding $parent[InkToolbarEraserButton].Foreground}"
+                  HorizontalAlignment="Center" VerticalAlignment="Center" IsHitTestVisible="False" />
+            <Path x:Name="ExtensionGlyph" Stretch="Uniform"
+                  Fill="{DynamicResource InkToolbarAccentColorForegroundThemeBrush}"
+                  IsVisible="{Binding $parent[InkToolbarEraserButton].IsExtensionGlyphShown}" IsHitTestVisible="False" />
+          </Grid>
+          </ContentPresenter>
+        </Border>
+      </ControlTemplate>
+    </Setter>
+  </ControlTheme>
+  <ControlTheme x:Key="{x:Type InkToolbarCustomToolButton}" TargetType="InkToolbarCustomToolButton" BasedOn="{StaticResource InkToolbarCommonButtonStyle}">
+    <Setter Property="Template">
+      <ControlTemplate TargetType="InkToolbarCustomToolButton">
+        <Border x:Name="RootElement" Background="{TemplateBinding Background}"
+                BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}"
+                CornerRadius="{TemplateBinding CornerRadius}" Padding="{TemplateBinding Padding}">
+          <Grid>
+            <ContentPresenter x:Name="PART_ContentPresenter" Content="{TemplateBinding Content}"
+                              ContentTemplate="{TemplateBinding ContentTemplate}" Foreground="{TemplateBinding Foreground}"
+                              HorizontalContentAlignment="{TemplateBinding HorizontalContentAlignment}"
+                              VerticalContentAlignment="{TemplateBinding VerticalContentAlignment}"
+                              RecognizesAccessKey="True" />
+            <Path x:Name="ExtensionGlyph" Stretch="Uniform"
+                  Fill="{DynamicResource InkToolbarAccentColorForegroundThemeBrush}"
+                  IsVisible="{TemplateBinding IsExtensionGlyphShown}" IsHitTestVisible="False" />
+          </Grid>
+        </Border>
+      </ControlTemplate>
+    </Setter>
+  </ControlTheme>
+  <ControlTheme x:Key="{x:Type InkToolbarToggleButton}" TargetType="InkToolbarToggleButton" BasedOn="{StaticResource InkToolbarCommonButtonStyle}">
+    <Setter Property="Template">
+      <ControlTemplate TargetType="InkToolbarToggleButton">
+        <Border x:Name="RootElement" Background="{TemplateBinding Background}"
+                BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}"
+                CornerRadius="{TemplateBinding CornerRadius}" Padding="{TemplateBinding Padding}">
+          <Grid>
+            <ContentPresenter x:Name="PART_ContentPresenter" Content="{TemplateBinding Content}"
+                              ContentTemplate="{TemplateBinding ContentTemplate}" Foreground="{TemplateBinding Foreground}"
+                              HorizontalContentAlignment="{TemplateBinding HorizontalContentAlignment}"
+                              VerticalContentAlignment="{TemplateBinding VerticalContentAlignment}"
+                              RecognizesAccessKey="True" />
+          </Grid>
+        </Border>
+      </ControlTemplate>
+    </Setter>
+    <Style Selector="^:checked">
+      <Setter Property="Background" Value="{DynamicResource InkToolbarToggleButtonBackgroundChecked}" />
+      <Setter Property="Foreground" Value="{DynamicResource InkToolbarToggleButtonForegroundChecked}" />
+      <Setter Property="BorderBrush" Value="{DynamicResource InkToolbarToggleButtonBorderBrushChecked}" />
+    </Style>
+    <Style Selector="^:checked:pointerover">
+      <Setter Property="Background" Value="{DynamicResource InkToolbarToggleButtonBackgroundCheckedPointerOver}" />
+      <Setter Property="Foreground" Value="{DynamicResource InkToolbarToggleButtonForegroundCheckedPointerOver}" />
+      <Setter Property="BorderBrush" Value="{DynamicResource InkToolbarToggleButtonBorderBrushCheckedPointerOver}" />
+    </Style>
+    <Style Selector="^:checked:pressed">
+      <Setter Property="Background" Value="{DynamicResource InkToolbarToggleButtonBackgroundCheckedPressed}" />
+      <Setter Property="Foreground" Value="{DynamicResource InkToolbarToggleButtonForegroundCheckedPressed}" />
+      <Setter Property="BorderBrush" Value="{DynamicResource InkToolbarToggleButtonBorderBrushCheckedPressed}" />
+    </Style>
+    <Style Selector="^:checked:disabled">
+      <Setter Property="Background" Value="{DynamicResource InkToolbarToggleButtonBackgroundCheckedDisabled}" />
+      <Setter Property="Foreground" Value="{DynamicResource InkToolbarToggleButtonForegroundCheckedDisabled}" />
+      <Setter Property="BorderBrush" Value="{DynamicResource InkToolbarToggleButtonBorderBrushCheckedDisabled}" />
+    </Style>
+  </ControlTheme>
+  <ControlTheme x:Key="{x:Type InkToolbarCustomToggleButton}" TargetType="InkToolbarCustomToggleButton" BasedOn="{StaticResource InkToolbarCommonButtonStyle}">
+    <Setter Property="Template">
+      <ControlTemplate TargetType="InkToolbarCustomToggleButton">
+        <Border x:Name="RootElement" Background="{TemplateBinding Background}"
+                BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}"
+                CornerRadius="{TemplateBinding CornerRadius}" Padding="{TemplateBinding Padding}">
+          <Grid>
+            <ContentPresenter x:Name="PART_ContentPresenter" Content="{TemplateBinding Content}"
+                              ContentTemplate="{TemplateBinding ContentTemplate}" Foreground="{TemplateBinding Foreground}"
+                              HorizontalContentAlignment="{TemplateBinding HorizontalContentAlignment}"
+                              VerticalContentAlignment="{TemplateBinding VerticalContentAlignment}"
+                              RecognizesAccessKey="True" />
+          </Grid>
+        </Border>
+      </ControlTemplate>
+    </Setter>
+    <Style Selector="^:checked">
+      <Setter Property="Background" Value="{DynamicResource InkToolbarToggleButtonBackgroundChecked}" />
+      <Setter Property="Foreground" Value="{DynamicResource InkToolbarToggleButtonForegroundChecked}" />
+      <Setter Property="BorderBrush" Value="{DynamicResource InkToolbarToggleButtonBorderBrushChecked}" />
+    </Style>
+    <Style Selector="^:checked:pointerover">
+      <Setter Property="Background" Value="{DynamicResource InkToolbarToggleButtonBackgroundCheckedPointerOver}" />
+      <Setter Property="Foreground" Value="{DynamicResource InkToolbarToggleButtonForegroundCheckedPointerOver}" />
+      <Setter Property="BorderBrush" Value="{DynamicResource InkToolbarToggleButtonBorderBrushCheckedPointerOver}" />
+    </Style>
+    <Style Selector="^:checked:pressed">
+      <Setter Property="Background" Value="{DynamicResource InkToolbarToggleButtonBackgroundCheckedPressed}" />
+      <Setter Property="Foreground" Value="{DynamicResource InkToolbarToggleButtonForegroundCheckedPressed}" />
+      <Setter Property="BorderBrush" Value="{DynamicResource InkToolbarToggleButtonBorderBrushCheckedPressed}" />
+    </Style>
+    <Style Selector="^:checked:disabled">
+      <Setter Property="Background" Value="{DynamicResource InkToolbarToggleButtonBackgroundCheckedDisabled}" />
+      <Setter Property="Foreground" Value="{DynamicResource InkToolbarToggleButtonForegroundCheckedDisabled}" />
+      <Setter Property="BorderBrush" Value="{DynamicResource InkToolbarToggleButtonBorderBrushCheckedDisabled}" />
+    </Style>
+  </ControlTheme>
+  <ControlTheme x:Key="{x:Type InkToolbarRulerButton}" TargetType="InkToolbarRulerButton" BasedOn="{StaticResource InkToolbarCommonButtonStyle}">
+    <Setter Property="AutomationProperties.AutomationId" Value="InkToolbarRulerButton" />
+    <Setter Property="Template">
+      <ControlTemplate TargetType="InkToolbarRulerButton">
+        <Border x:Name="RootElement" Background="{TemplateBinding Background}"
+                BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}"
+                CornerRadius="{TemplateBinding CornerRadius}" Padding="{TemplateBinding Padding}">
+          <ContentPresenter x:Name="PART_ContentPresenter"
+                            HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch">
+          <Grid>
+            <Path x:Name="ContentGlyph" Width="16" Height="16" Stretch="Uniform"
+                  Data="{StaticResource InkToolbarRulerOutline}" Fill="{Binding $parent[InkToolbarRulerButton].Foreground}"
+                  HorizontalAlignment="Center" VerticalAlignment="Center" IsHitTestVisible="False" />
+          </Grid>
+          </ContentPresenter>
+        </Border>
+      </ControlTemplate>
+    </Setter>
+    <!-- As WinUI (InkToolBar.xaml, the Checked states of the ruler): a checked ruler takes the
+         subtle selected fills of InkToolbarCommonButtonStyle, not the accent fills of the custom
+         toggle. -->
+  </ControlTheme>
+  <ControlTheme x:Key="{x:Type InkToolbarMenuButton}" TargetType="InkToolbarMenuButton" BasedOn="{StaticResource InkToolbarCommonButtonStyle}">
+    <Setter Property="Template">
+      <ControlTemplate TargetType="InkToolbarMenuButton">
+        <Border x:Name="RootElement" Background="{TemplateBinding Background}"
+                BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}"
+                CornerRadius="{TemplateBinding CornerRadius}" Padding="{TemplateBinding Padding}">
+          <Grid>
+            <ContentPresenter x:Name="PART_ContentPresenter" Content="{TemplateBinding Content}"
+                              ContentTemplate="{TemplateBinding ContentTemplate}" Foreground="{TemplateBinding Foreground}"
+                              HorizontalContentAlignment="{TemplateBinding HorizontalContentAlignment}"
+                              VerticalContentAlignment="{TemplateBinding VerticalContentAlignment}"
+                              RecognizesAccessKey="True" />
+            <Path x:Name="ExtensionGlyph" Stretch="Uniform"
+                  Fill="{DynamicResource InkToolbarAccentColorForegroundThemeBrush}"
+                  IsVisible="{TemplateBinding IsExtensionGlyphShown}" IsHitTestVisible="False" />
+          </Grid>
+        </Border>
+      </ControlTemplate>
+    </Setter>
+  </ControlTheme>
+  <ControlTheme x:Key="{x:Type InkToolbarStencilButton}" TargetType="InkToolbarStencilButton" BasedOn="{StaticResource InkToolbarCommonButtonStyle}">
+    <Setter Property="AutomationProperties.AutomationId" Value="InkToolbarStencilButton" />
+    <Setter Property="Template">
+      <ControlTemplate TargetType="InkToolbarStencilButton">
+        <Border x:Name="RootElement" Background="{TemplateBinding Background}"
+                BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}"
+                CornerRadius="{TemplateBinding CornerRadius}" Padding="{TemplateBinding Padding}">
+          <ContentPresenter x:Name="PART_ContentPresenter"
+                            HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch">
+          <Grid>
+            <Grid.Styles>
+              <Style Selector=":is(ToggleButton) Path#ExtensionGlyph">
+                <Setter Property="Data" Value="{DynamicResource InkToolbarArrowDown}" />
+                <Setter Property="HorizontalAlignment" Value="Center" />
+                <Setter Property="VerticalAlignment" Value="Bottom" />
+                <Setter Property="Width" Value="8" />
+                <Setter Property="Height" Value="5" />
+                <Setter Property="Opacity" Value="0" />
+              </Style>
+              <Style Selector=":is(ToggleButton):checked Path#ExtensionGlyph">
+                <Setter Property="Opacity" Value="1" />
+              </Style>
+              <Style Selector=":is(ToggleButton):flyout-open Path#ExtensionGlyph">
+                <Setter Property="Opacity" Value="0" />
+              </Style>
+              <Style Selector=":is(ToggleButton):flyout-top Path#ExtensionGlyph">
+                <Setter Property="Data" Value="{DynamicResource InkToolbarArrowUp}" />
+                <Setter Property="HorizontalAlignment" Value="Center" />
+                <Setter Property="VerticalAlignment" Value="Top" />
+                <Setter Property="Width" Value="8" />
+                <Setter Property="Height" Value="5" />
+              </Style>
+              <Style Selector=":is(ToggleButton):flyout-bottom Path#ExtensionGlyph">
+                <Setter Property="Data" Value="{DynamicResource InkToolbarArrowDown}" />
+                <Setter Property="HorizontalAlignment" Value="Center" />
+                <Setter Property="VerticalAlignment" Value="Bottom" />
+                <Setter Property="Width" Value="8" />
+                <Setter Property="Height" Value="5" />
+              </Style>
+              <Style Selector=":is(ToggleButton):flyout-left Path#ExtensionGlyph">
+                <Setter Property="Data" Value="{DynamicResource InkToolbarArrowLeft}" />
+                <Setter Property="HorizontalAlignment" Value="Left" />
+                <Setter Property="VerticalAlignment" Value="Center" />
+                <Setter Property="Width" Value="5" />
+                <Setter Property="Height" Value="8" />
+              </Style>
+              <Style Selector=":is(ToggleButton):flyout-right Path#ExtensionGlyph">
+                <Setter Property="Data" Value="{DynamicResource InkToolbarArrowRight}" />
+                <Setter Property="HorizontalAlignment" Value="Right" />
+                <Setter Property="VerticalAlignment" Value="Center" />
+                <Setter Property="Width" Value="5" />
+                <Setter Property="Height" Value="8" />
+              </Style>
+              <Style Selector="Path#ContentGlyph">
+                <Setter Property="Data" Value="{DynamicResource InkToolbarRulerOutline}" />
+              </Style>
+              <Style Selector=":is(InkToolbarStencilButton)[SelectedStencil=Protractor] Path#ContentGlyph">
+                <Setter Property="Data" Value="{DynamicResource InkToolbarProtractorOutline}" />
+              </Style>
+            </Grid.Styles>
+            <Path x:Name="ContentGlyph" Width="16" Height="16" Stretch="Uniform"
+                  Fill="{Binding $parent[InkToolbarStencilButton].Foreground}"
+                  HorizontalAlignment="Center" VerticalAlignment="Center" IsHitTestVisible="False" />
+            <Path x:Name="ExtensionGlyph" Stretch="Uniform"
+                  Fill="{DynamicResource InkToolbarAccentColorForegroundThemeBrush}"
+                  IsVisible="{Binding $parent[InkToolbarStencilButton].IsExtensionGlyphShown}" IsHitTestVisible="False" />
+          </Grid>
+          </ContentPresenter>
+        </Border>
+      </ControlTemplate>
+    </Setter>
+  </ControlTheme>
+
+  <ControlTheme x:Key="{x:Type InkToolbarFlyoutItem}" TargetType="InkToolbarFlyoutItem">
+    <Setter Property="MinHeight" Value="40" />
+    <Setter Property="Padding" Value="12,8" />
+    <Setter Property="Background" Value="{DynamicResource InkToolbarFlyoutItemBackgroundThemeBrush}" />
+    <Setter Property="Foreground" Value="{DynamicResource InkToolbarFlyoutItemForegroundThemeBrush}" />
+    <Setter Property="BorderBrush" Value="Transparent" />
+    <Setter Property="BorderThickness" Value="2" />
+    <Setter Property="CornerRadius" Value="{DynamicResource ControlCornerRadius}" />
+    <Setter Property="HorizontalContentAlignment" Value="Left" />
+    <Setter Property="VerticalContentAlignment" Value="Center" />
+    <Setter Property="Template">
+      <ControlTemplate TargetType="InkToolbarFlyoutItem">
+        <Border x:Name="RootElement" Background="{TemplateBinding Background}"
+                BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}"
+                CornerRadius="{TemplateBinding CornerRadius}" Padding="{TemplateBinding Padding}">
+          <Grid>
+            <ContentPresenter x:Name="PART_ContentPresenter" Content="{TemplateBinding Content}"
+                              ContentTemplate="{TemplateBinding ContentTemplate}" Foreground="{TemplateBinding Foreground}"
+                              HorizontalContentAlignment="{TemplateBinding HorizontalContentAlignment}"
+                              VerticalContentAlignment="{TemplateBinding VerticalContentAlignment}"
+                              RecognizesAccessKey="True" />
+          </Grid>
+        </Border>
+      </ControlTemplate>
+    </Setter>
+    <Style Selector="^:pointerover">
+      <Setter Property="Background" Value="{DynamicResource InkToolbarFlyoutItemHoverBackgroundThemeBrush}" />
+    </Style>
+    <Style Selector="^:pressed">
+      <Setter Property="Background" Value="{DynamicResource InkToolbarFlyoutItemPressedBackgroundThemeBrush}" />
+    </Style>
+    <Style Selector="^:checked">
+      <Setter Property="Background" Value="{DynamicResource InkToolbarFlyoutItemSelectedBackgroundThemeBrush}" />
+    </Style>
+    <Style Selector="^:checked:pointerover">
+      <Setter Property="Background" Value="{DynamicResource InkToolbarFlyoutItemHoverSelectedBackgroundThemeBrush}" />
+    </Style>
+    <Style Selector="^:checked:pressed">
+      <Setter Property="Background" Value="{DynamicResource InkToolbarFlyoutItemPressedSelectedBackgroundThemeBrush}" />
+    </Style>
+    <Style Selector="^:checked">
+      <Setter Property="BorderBrush" Value="{DynamicResource InkToolbarFlyoutItemBorderSelectedThemeBrush}" />
+    </Style>
+    <Style Selector="^:disabled">
+      <Setter Property="Foreground" Value="{DynamicResource InkToolbarDisabledForegroundThemeBrush}" />
+      <Setter Property="Opacity" Value="0.5" />
+    </Style>
+    <Style Selector="^.ink-palette-item">
+      <Setter Property="Padding" Value="6" />
+      <Setter Property="CornerRadius" Value="26" />
+      <Setter Property="HorizontalContentAlignment" Value="Center" />
+    </Style>
+  </ControlTheme>
+
+  <ControlTheme x:Key="{x:Type InkToolbarStrokeWidthSlider}" TargetType="InkToolbarStrokeWidthSlider"
+                BasedOn="{StaticResource {x:Type Slider}}">
+    <Setter Property="MinHeight" Value="44" />
+  </ControlTheme>
+  <ControlTheme x:Key="{x:Type InkToolbar}" TargetType="InkToolbar">
+    <Setter Property="Spacing" Value="0" />
+    <Setter Property="Margin" Value="2" />
+  </ControlTheme>
+  <ControlTheme x:Key="{x:Type InkToolbarPenConfigurationControl}" TargetType="InkToolbarPenConfigurationControl">
+    <Setter Property="MinWidth" Value="320" />
+    <Setter Property="Margin" Value="0,8,0,12" />
+  </ControlTheme>
+</ResourceDictionary>

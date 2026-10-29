@@ -1,0 +1,12 @@
+<rxui:ReactiveUserControlBase x:Class="BehaviorsGallery.Views.Pages.DetailPageView"
+                              xmlns="https://github.com/ferroui"
+                              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                              xmlns:rxui="using:ReactiveUI.FerroUI"
+                              xmlns:vm="using:BehaviorsGallery.ViewModels.ReactiveUI"
+                              x:DataType="vm:DetailPageViewModel">
+  <!-- Ported from Views/ReactiveUI/DetailPageView of the reference sample. -->
+  <TextBlock Text="Detail Page"
+             FontSize="20"
+             HorizontalAlignment="Center"
+             VerticalAlignment="Center" />
+</rxui:ReactiveUserControlBase>

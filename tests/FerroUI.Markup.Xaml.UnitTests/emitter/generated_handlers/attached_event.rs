@@ -19,6 +19,10 @@ pub fn populate(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
     root: &::ferroui_base::Ref<crate::support::xaml::event_tests::MyPanel>,
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadException> {
+    ::ferroui_markup_xaml::FerroXamlLoader::track_instance(<crate::support::xaml::event_tests::MyPanel as ::ferroui_base::StaticType>::TYPE, root);
+    if let Some(populate) = ::ferroui_markup_xaml::FerroXamlLoader::populate_override(<crate::support::xaml::event_tests::MyPanel as ::ferroui_base::StaticType>::TYPE) {
+        return populate(service_provider.as_ref(), &(::std::rc::Rc::new(root.clone()) as ::ferroui_base::BoxedValue));
+    }
     let service_provider =
         ::ferroui_markup_xaml::xaml_il::runtime::XamlIlRuntimeHelpers::create_root_service_provider_v3(service_provider);
     populate_handlers_attachedevent_xaml(::core::option::Option::Some(service_provider), root)
@@ -37,7 +41,7 @@ pub fn populate_handlers_attachedevent_xaml(
     let name_scope = context.name_scope_field();
     root.begin_init();
     // Handlers/AttachedEvent.xaml(1,2) Click
-    rt::add_handler(&root, &::ferroui_controls::Button::__markup_field_ClickEvent(), rt::method_delegate(&context, 2, |this, arguments| { crate::support::xaml::event_tests::MyPanel::__markup_OnClick_0(this, arguments.next()?, arguments.next()?); ::core::result::Result::Ok(::core::option::Option::None) }));
+    rt::add_handler_with_context(&context, &root, &::ferroui_controls::Button::__markup_field_ClickEvent(), rt::method_delegate(&context, 2, |this, arguments| { crate::support::xaml::event_tests::MyPanel::__markup_OnClick_0(this, arguments.next()?, arguments.next()?); ::core::result::Result::Ok(::core::option::Option::None) }));
     // Handlers/AttachedEvent.xaml(1,175) Children
     let children_collection_0 = ::ferroui_controls::Panel::__markup_get_Children(root.upcast_ref::<::ferroui_controls::Panel>());
     // Handlers/AttachedEvent.xaml(1,175) Grid
@@ -45,7 +49,7 @@ pub fn populate_handlers_attachedevent_xaml(
     grid_0.begin_init();
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_0, ::core::clone::Clone::clone(&grid_0).upcast::<::ferroui_controls::Control>());
     // Handlers/AttachedEvent.xaml(1,175) DoubleTapped
-    rt::add_handler(&grid_0, &::ferroui_base::input::InputElement::__markup_field_DoubleTappedEvent(), rt::method_delegate(&context, 2, |this, arguments| { crate::support::xaml::event_tests::MyPanel::__markup_OnTapped_1(this, arguments.next()?, arguments.next()?); ::core::result::Result::Ok(::core::option::Option::None) }));
+    rt::add_handler_with_context(&context, &grid_0, &::ferroui_base::input::InputElement::__markup_field_DoubleTappedEvent(), rt::method_delegate(&context, 2, |this, arguments| { crate::support::xaml::event_tests::MyPanel::__markup_OnTapped_1(this, arguments.next()?, arguments.next()?); ::core::result::Result::Ok(::core::option::Option::None) }));
     // Handlers/AttachedEvent.xaml(1,205) Children
     let children_collection_1 = ::ferroui_controls::Panel::__markup_get_Children(grid_0.upcast_ref::<::ferroui_controls::Panel>());
     // Handlers/AttachedEvent.xaml(1,205) Button

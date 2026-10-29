@@ -1,0 +1,29 @@
+[package]
+name = "hot-reload-demo"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+publish = false
+[lib]
+path = "lib.rs"
+[[bin]]
+name = "hot-reload-demo"
+path = "program.rs"
+[dependencies]
+serde_json = "1"
+ferroui-base.workspace = true
+ferroui-controls.workspace = true
+ferroui-themes-simple.workspace = true
+ferroui-markup-xaml.workspace = true
+ferroui-hot-reload.workspace = true
+ferroui-hot-patch.workspace = true
+ferroui-desktop = { workspace = true, optional = true }
+[features]
+default = ["desktop"]
+desktop = ["dep:ferroui-desktop"]
+# Internal trusted-supervisor protocol, separate from ordinary markup-only runs.
+patch-control = []
+
+[build-dependencies]
+ferroui-build.workspace = true

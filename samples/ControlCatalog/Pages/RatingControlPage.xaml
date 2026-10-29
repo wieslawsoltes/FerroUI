@@ -1,0 +1,31 @@
+<ContentPage Theme="{StaticResource ScrollPage}" xmlns="https://github.com/ferroui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             Header="RatingControl"
+             x:Class="ControlCatalog.Pages.RatingControlPage">
+  <!-- Not from upstream: WinUI's RatingControl (docs/porting/winui-controls.md). Its template is in
+       the WinUI theme and the macOS and Material themes derived from it; the stars are glyphs of the
+       symbol font (E734, E735). -->
+  <StackPanel Orientation="Vertical" Spacing="4" MaxWidth="800">
+    <TextBlock Margin="2" Classes="h2" TextWrapping="Wrap">A RatingControl lets the user rate with stars; it can show a placeholder (an average) until the user rates, be read-only, and be cleared by setting the same rating again.</TextBlock>
+
+    <TextBlock Margin="2,12,2,2" FontSize="14" FontWeight="Bold">Options</TextBlock>
+    <Grid Margin="2" ColumnDefinitions="Auto,200" RowDefinitions="Auto,Auto,Auto">
+      <TextBlock Grid.Row="0" VerticalAlignment="Center" Margin="2">IsClearEnabled:</TextBlock>
+      <CheckBox Grid.Row="0" Grid.Column="1" x:Name="Clearable" IsChecked="True" Margin="2" />
+      <TextBlock Grid.Row="1" VerticalAlignment="Center" Margin="2">IsReadOnly:</TextBlock>
+      <CheckBox Grid.Row="1" Grid.Column="1" x:Name="ReadOnly" Margin="2" />
+      <TextBlock Grid.Row="2" VerticalAlignment="Center" Margin="2">MaxRating:</TextBlock>
+      <Slider Grid.Row="2" Grid.Column="1" x:Name="Max" Minimum="1" Maximum="10" Value="5" IsSnapToTickEnabled="True" TickFrequency="1" Margin="2" />
+    </Grid>
+    <RatingControl x:Name="Configurable" Margin="2" HorizontalAlignment="Left" Caption="Your rating" Value="3"
+                   IsClearEnabled="{Binding #Clearable.IsChecked}" IsReadOnly="{Binding #ReadOnly.IsChecked}"
+                   MaxRating="{Binding #Max.Value}" />
+    <TextBlock Margin="2" Text="{Binding #Configurable.Value, StringFormat='Value: {0} (-1 when not rated)'}" />
+
+    <TextBlock Margin="2,12,2,2" FontSize="14" FontWeight="Bold">Placeholder and read-only</TextBlock>
+    <StackPanel Margin="2" Spacing="8">
+      <RatingControl HorizontalAlignment="Left" PlaceholderValue="3.5" Caption="Average 3.5 (placeholder)" />
+      <RatingControl HorizontalAlignment="Left" Value="4" IsReadOnly="True" Caption="Read-only 4" />
+    </StackPanel>
+  </StackPanel>
+</ContentPage>

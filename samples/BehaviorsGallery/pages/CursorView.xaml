@@ -1,0 +1,51 @@
+<UserControl x:Class="BehaviorsGallery.Views.Pages.CursorView"
+             xmlns="https://github.com/ferroui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:viewModels="using:BehaviorsGallery.ViewModels"
+             x:DataType="viewModels:CursorViewModel"
+             mc:Ignorable="d" d:DesignWidth="600" d:DesignHeight="450">
+  <!-- Ported from Views/Pages/CursorView of the reference sample. -->
+  <Design.DataContext>
+    <viewModels:CursorViewModel />
+  </Design.DataContext>
+  <Grid ColumnDefinitions="*,*" RowDefinitions="Auto,*">
+    <StackPanel Grid.ColumnSpan="2" Orientation="Vertical" Spacing="4">
+      <TextBlock>Defines a cursor (mouse pointer)</TextBlock>
+    </StackPanel>
+    
+    <ListBox Grid.Column="0" Grid.Row="1" ItemsSource="{Binding StandardCursors}" Margin="0 8 8 8">
+      <ListBox.Styles>
+        <Style Selector="ListBoxItem">
+          <Setter Property="Cursor" Value="{Binding Cursor}" x:DataType="viewModels:StandardCursorModel"/>
+        </Style>
+      </ListBox.Styles>
+      <ListBox.ItemTemplate>
+        <!-- Deviation (DEVIATIONS.md, Behaviors gallery): the compiled bindings of the port need the
+             data type of the template, which the reference infers. -->
+        <DataTemplate x:DataType="viewModels:StandardCursorModel">
+          <TextBlock Text="{Binding Type}"/>
+        </DataTemplate>
+      </ListBox.ItemTemplate>
+    </ListBox>
+
+    <StackPanel Grid.Column="1" Grid.Row="1" Margin="8 8 0 8">
+      <Button Cursor="{Binding CustomCursor}" Margin="0 8" Padding="16">
+        <TextBlock>Custom Cursor</TextBlock>
+      </Button>
+      <Border Margin="0 8" Background="{DynamicResource GrayBrush}" Padding="16">
+        <Interaction.Behaviors>
+          <SetCursorBehavior Cursor="{Binding CustomCursor}" />
+        </Interaction.Behaviors>
+        <TextBlock>Behavior Cursor</TextBlock>
+      </Border>
+      <Border Margin="0 8" Background="{DynamicResource GrayBrush}" Padding="16">
+        <Interaction.Behaviors>
+          <PointerOverCursorBehavior Cursor="Wait" />
+        </Interaction.Behaviors>
+        <TextBlock>Pointer Over Cursor</TextBlock>
+      </Border>
+    </StackPanel>
+  </Grid>
+</UserControl>

@@ -1,0 +1,129 @@
+# Member waivers and aliases of the Xaml.Behaviors reference (scripts/port-status/references.toml, `behaviors`).
+# See scripts/port-status/README.md, "Files you edit", and docs/porting/behaviors.md, section 3.
+
+# ---------------------------------------------------------------------------------------------------------------
+# Waived projects (docs/porting/behaviors.md, section 3; DEVIATIONS.md, section Behaviors)
+# ---------------------------------------------------------------------------------------------------------------
+
+[[waive]]
+project = "Xaml.Behaviors.Interactions.Scripting"
+type = "*"
+reason = "Interactions.Scripting runs C# source with Roslyn scripting; there is no C# run time in a Rust application"
+
+[[waive]]
+project = "Xaml.Behaviors.Interactions.DragAndDrop.DataGrid"
+type = "*"
+reason = "Interactions.DragAndDrop.DataGrid reorders the rows of a DataGrid; FerroUI has no DataGrid (only the TreeDataGrid)"
+
+[[waive]]
+project = "Xaml.Behaviors.SourceGenerators"
+type = "*"
+reason = "SourceGenerators is compile-time C# tooling (a Roslyn incremental generator); typed actions and triggers are written directly in Rust"
+
+# ---------------------------------------------------------------------------------------------------------------
+# Generic classes: `new T? AssociatedObject` of the generic bases is the typed accessor `associated_object_as::<T>()`
+# of the non-generic `<Name>OfT` classes (path-overrides.toml maps the types).
+# ---------------------------------------------------------------------------------------------------------------
+
+[[alias]]
+project = "Xaml.Behaviors.Interactivity"
+type = "Avalonia.Xaml.Interactivity.Behavior<T>"
+member = "AssociatedObject"
+rust = ["associated_object_as"]
+reason = "FerroUI classes are not generic: the associated object as `T` is `associated_object_as::<T>()`"
+
+[[alias]]
+project = "Xaml.Behaviors.Interactivity"
+type = "Avalonia.Xaml.Interactivity.Trigger<T>"
+member = "AssociatedObject"
+rust = ["associated_object_as"]
+reason = "FerroUI classes are not generic: the associated object as `T` is `associated_object_as::<T>()`"
+
+[[alias]]
+project = "Xaml.Behaviors.Interactivity"
+type = "Avalonia.Xaml.Interactivity.StyledElementBehavior<T>"
+member = "AssociatedObject"
+rust = ["associated_object_as"]
+reason = "FerroUI classes are not generic: the associated object as `T` is `associated_object_as::<T>()`"
+
+[[alias]]
+project = "Xaml.Behaviors.Interactivity"
+type = "Avalonia.Xaml.Interactivity.StyledElementTrigger<T>"
+member = "AssociatedObject"
+rust = ["associated_object_as"]
+reason = "FerroUI classes are not generic: the associated object as `T` is `associated_object_as::<T>()`"
+
+# ---------------------------------------------------------------------------------------------------------------
+# `Value` properties: the setter is named after the class (`set_condition_value`, `set_trigger_value`, ...), since
+# `set_value(property, value)` of `FerroObject` is the setter of any property of the object.
+# ---------------------------------------------------------------------------------------------------------------
+
+[[alias]]
+project = "Xaml.Behaviors.Interactivity"
+type = "Avalonia.Xaml.Interactivity.Condition"
+member = "Value"
+rust = ["set_condition_value"]
+reason = "`set_value` is the property setter of `FerroObject`; the getter is `value`"
+
+[[alias]]
+project = "Xaml.Behaviors.Interactions"
+type = "Avalonia.Xaml.Interactions.Core.ChangePropertyAction"
+member = "Value"
+rust = ["set_action_value"]
+reason = "`set_value` is the property setter of `FerroObject`; the getter is `value`"
+
+[[alias]]
+project = "Xaml.Behaviors.Interactions"
+type = "Avalonia.Xaml.Interactions.Core.DataTriggerBehavior"
+member = "Value"
+rust = ["set_trigger_value"]
+reason = "`set_value` is the property setter of `FerroObject`; the getter is `value`"
+
+[[alias]]
+project = "Xaml.Behaviors.Interactions.Custom"
+type = "Avalonia.Xaml.Interactions.Custom.ChangeAvaloniaPropertyAction"
+member = "Value"
+rust = ["set_action_value"]
+reason = "`set_value` is the property setter of `FerroObject`; the getter is `value`"
+
+[[alias]]
+project = "Xaml.Behaviors.Interactions.Custom"
+type = "Avalonia.Xaml.Interactions.Custom.BindingTriggerBehavior"
+member = "Value"
+rust = ["set_trigger_value"]
+reason = "`set_value` is the property setter of `FerroObject`; the getter is `value`"
+
+[[alias]]
+project = "Xaml.Behaviors.Interactions.Custom"
+type = "Avalonia.Xaml.Interactions.Custom.Case"
+member = "Value"
+rust = ["set_case_value"]
+reason = "`set_value` is the property setter of `FerroObject`; the getter is `value`"
+
+[[alias]]
+project = "Xaml.Behaviors.Interactions.Custom"
+type = "Avalonia.Xaml.Interactions.Custom.SwitchCaseAction"
+member = "Value"
+rust = ["set_switch_value"]
+reason = "`set_value` is the property setter of `FerroObject`; the getter is `value`"
+
+[[alias]]
+project = "Xaml.Behaviors.Interactions.Custom"
+type = "Avalonia.Xaml.Interactions.Custom.SwitchCaseBehavior"
+member = "Value"
+rust = ["set_switch_value"]
+reason = "`set_value` is the property setter of `FerroObject`; the getter is `value`"
+
+[[alias]]
+project = "Xaml.Behaviors.Interactions.Custom"
+type = "Avalonia.Xaml.Interactions.Custom.SetViewModelPropertyAction"
+member = "Value"
+rust = ["set_action_value"]
+reason = "`set_value` is the property setter of `FerroObject`; the getter is `value`"
+
+[[alias]]
+project = "Xaml.Behaviors.Interactions.Custom"
+type = "Avalonia.Xaml.Interactions.Custom.SetViewModelPropertyOnLoadBehavior"
+member = "Value"
+rust = ["set_behavior_value"]
+reason = "`set_value` is the property setter of `FerroObject`; the getter is `value`"

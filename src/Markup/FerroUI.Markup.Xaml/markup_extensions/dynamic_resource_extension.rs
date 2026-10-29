@@ -80,12 +80,25 @@ impl DynamicResourceExtension {
             service_provider.get_service_of::<Rc<dyn IFerroXamlIlParentStackProvider>>().as_ref(),
         );
 
-        self.this.upgrade().expect("the extension is alive while it is used")
+        let this = self.this.upgrade().expect("the extension is alive while it is used");
+        #[cfg(all(feature = "hot-reload", debug_assertions))]
+        crate::reload_resources::record(this.clone());
+        this
     }
 
     /// The extension as the binding contract.
     pub fn as_binding(&self) -> Rc<dyn BindingBase> {
         self.this.upgrade().expect("the extension is alive while it is used")
+    }
+}
+
+#[cfg(all(feature = "hot-reload", debug_assertions))]
+impl crate::reload_resources::AnchorOwner for DynamicResourceExtension {
+    fn anchor(&self) -> Option<HeldAnchor> {
+        self.anchor.borrow().clone()
+    }
+    fn replace_anchor(&self, anchor: Option<HeldAnchor>) {
+        *self.anchor.borrow_mut() = anchor;
     }
 }
 

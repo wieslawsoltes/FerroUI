@@ -49,6 +49,8 @@ impl TemplateContent {
         };
 
         let built = deferred.try_build_with(None)?;
+        #[cfg(all(feature = "hot-reload", debug_assertions))]
+        if let Some(value) = &built.result { deferred.record_template(value); }
         if built.result.is_none() {
             return Ok(None);
         }

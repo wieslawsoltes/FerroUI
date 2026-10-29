@@ -64,3 +64,41 @@ impl AdornerLayerPage {
         }
     }
 }
+
+#[cfg(all(feature = "hot-reload", debug_assertions))]
+mod reload {
+    use super::*;
+    use ferroui_base::{controls::NameScopeRef, StyledElement, WeakRef};
+    use ferroui_hot_reload::{ComponentRefresh, PreparedReload, ReloadError};
+
+    struct Refresh(WeakRef<AdornerLayerPage>);
+    struct Change {
+        page: Ref<AdornerLayerPage>,
+        before: Option<Ref<Control>>,
+    }
+    impl ComponentRefresh for Refresh {
+        fn prepare(&self, _: &Ref<StyledElement>, scope: Option<&NameScopeRef>) -> Result<Box<dyn PreparedReload>, ReloadError> {
+            let page = self.0.upgrade().ok_or_else(|| ReloadError::Failed("AdornerLayerPage closed".into()))?;
+            if scope.and_then(|scope| scope.find("AdornerButton")).and_then(|control| control.cast::<Button>()).is_none() {
+                return Err(ReloadError::Failed("AdornerButton must remain a Button".into()));
+            }
+            let before = page.adorner.borrow().clone();
+            Ok(Box::new(Change { page, before }))
+        }
+    }
+    impl PreparedReload for Change {
+        fn commit(&mut self) -> Result<(), ReloadError> {
+            // The new markup owns the new adorner; a previously removed adorner
+            // belongs to the retired child graph and must not be attached to it.
+            self.page.adorner.borrow_mut().take();
+            Ok(())
+        }
+        fn rollback(&mut self) { *self.page.adorner.borrow_mut() = self.before.clone(); }
+        fn finish(&mut self) { self.before.take(); }
+    }
+    impl AdornerLayerPage {
+        pub(crate) fn reload_refresh(&self) -> Rc<dyn ComponentRefresh> {
+            Rc::new(Refresh(self.to_ref().downgrade()))
+        }
+    }
+}

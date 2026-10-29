@@ -27,6 +27,10 @@ pub fn populate(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
     root: &::ferroui_base::Ref<crate::FluentTheme>,
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadException> {
+    ::ferroui_markup_xaml::FerroXamlLoader::track_instance(<crate::FluentTheme as ::ferroui_base::StaticType>::TYPE, root);
+    if let Some(populate) = ::ferroui_markup_xaml::FerroXamlLoader::populate_override(<crate::FluentTheme as ::ferroui_base::StaticType>::TYPE) {
+        return populate(service_provider.as_ref(), &(::std::rc::Rc::new(root.clone()) as ::ferroui_base::BoxedValue));
+    }
     let service_provider =
         ::ferroui_markup_xaml::xaml_il::runtime::XamlIlRuntimeHelpers::create_root_service_provider_v3(service_provider);
     populate_fluenttheme_xaml(::core::option::Option::Some(service_provider), root)
@@ -45711,153 +45715,153 @@ fn build_controls_fluentcontrols_xaml_deferred_319(
     ::ferroui_markup_xaml::templates::ControlTemplate::__markup_set_Content(&control_template_0, rt::to_object(::core::clone::Clone::clone(&deferred_0)));
     context.pop_parent();
     rt::add_setter_value_with_parent(&context, control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_14, rt::to_object(::core::clone::Clone::clone(&control_template_0)));
-    // Controls/FluentControls.xaml(201,6) Content
-    // Controls/FluentControls.xaml(201,6) Style
+    // Controls/FluentControls.xaml(203,6) Content
+    // Controls/FluentControls.xaml(203,6) Style
     let style_0 = ::ferroui_base::styling::Style::new();
     context.push_parent(rt::to_value(style_0.clone()));
-    // Controls/FluentControls.xaml(201,6) Selector
+    // Controls/FluentControls.xaml(203,6) Selector
     let selector_0 = ::ferroui_base::styling::Selectors::nesting(::core::option::Option::None);
     let selector_1 = ::ferroui_base::styling::Selectors::class(::core::option::Option::Some(selector_0), ":touch-mode");
     ::ferroui_base::styling::Style::__markup_set_Selector(&style_0, ::core::option::Option::Some(selector_1.clone()));
-    // Controls/FluentControls.xaml(202,8) Content
+    // Controls/FluentControls.xaml(204,8) Content
     let setter_15 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::Control::context_flyout_property()));
-    // Controls/FluentControls.xaml(202,40) Value
+    // Controls/FluentControls.xaml(204,40) Value
     let static_resource_extension_2 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("HorizontalTextBoxContextFlyout"));
-    let provided_14 = rt::provide_value_invoked(&context, rt::setter_value_property(), &static_resource_extension_2, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 202, 40)?;
+    let provided_14 = rt::provide_value_invoked(&context, rt::setter_value_property(), &static_resource_extension_2, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 204, 40)?;
     rt::add_setter_value_with_parent(&context, style_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_15, ::core::clone::Clone::clone(&provided_14));
     context.pop_parent();
-    ::ferroui_base::styling::StyleBase::__markup_Add_1(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(style_0.clone(), 201, 6)?);
-    // Controls/FluentControls.xaml(206,6) Content
-    // Controls/FluentControls.xaml(206,6) Style
+    ::ferroui_base::styling::StyleBase::__markup_Add_1(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(style_0.clone(), 203, 6)?);
+    // Controls/FluentControls.xaml(208,6) Content
+    // Controls/FluentControls.xaml(208,6) Style
     let style_1 = ::ferroui_base::styling::Style::new();
     context.push_parent(rt::to_value(style_1.clone()));
-    // Controls/FluentControls.xaml(206,6) Selector
+    // Controls/FluentControls.xaml(208,6) Selector
     let selector_2 = ::ferroui_base::styling::Selectors::nesting(::core::option::Option::None);
     let selector_3 = ::ferroui_base::styling::Selectors::class(::core::option::Option::Some(selector_2), ":disabled");
     ::ferroui_base::styling::Style::__markup_set_Selector(&style_1, ::core::option::Option::Some(selector_3.clone()));
-    // Controls/FluentControls.xaml(207,8) Content
-    // Controls/FluentControls.xaml(207,37) Value
-    rt::add_dynamic_resource_setter_with_parent(&context, style_1.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::property(::ferroui_controls::primitives::TemplatedControl::foreground_property()), "TextControlForegroundDisabled");
     // Controls/FluentControls.xaml(209,8) Content
-    // Controls/FluentControls.xaml(209,8) Style
+    // Controls/FluentControls.xaml(209,37) Value
+    rt::add_dynamic_resource_setter_with_parent(&context, style_1.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::property(::ferroui_controls::primitives::TemplatedControl::foreground_property()), "TextControlForegroundDisabled");
+    // Controls/FluentControls.xaml(211,8) Content
+    // Controls/FluentControls.xaml(211,8) Style
     let style_2 = ::ferroui_base::styling::Style::new();
     context.push_parent(rt::to_value(style_2.clone()));
-    // Controls/FluentControls.xaml(209,8) Selector
+    // Controls/FluentControls.xaml(211,8) Selector
     let selector_4 = ::ferroui_base::styling::Selectors::nesting(::core::option::Option::None);
     let selector_5 = ::ferroui_base::styling::Selectors::template(::core::option::Option::Some(selector_4));
     let selector_6 = ::ferroui_base::styling::Selectors::of_type_info(::core::option::Option::Some(selector_5), <::ferroui_controls::Border as ::ferroui_base::StaticType>::TYPE);
     let selector_7 = ::ferroui_base::styling::Selectors::name(::core::option::Option::Some(selector_6), "PART_BorderElement");
     ::ferroui_base::styling::Style::__markup_set_Selector(&style_2, ::core::option::Option::Some(selector_7.clone()));
-    // Controls/FluentControls.xaml(210,10) Content
-    // Controls/FluentControls.xaml(210,39) Value
+    // Controls/FluentControls.xaml(212,10) Content
+    // Controls/FluentControls.xaml(212,39) Value
     rt::add_dynamic_resource_setter_with_parent(&context, style_2.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::property(::ferroui_controls::Border::background_property()), "TextControlBackgroundDisabled");
-    // Controls/FluentControls.xaml(211,10) Content
-    // Controls/FluentControls.xaml(211,40) Value
+    // Controls/FluentControls.xaml(213,10) Content
+    // Controls/FluentControls.xaml(213,40) Value
     rt::add_dynamic_resource_setter_with_parent(&context, style_2.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::property(::ferroui_controls::Border::border_brush_property()), "TextControlBorderBrushDisabled");
     context.pop_parent();
-    ::ferroui_base::styling::StyleBase::__markup_Add_1(style_1.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(style_2.clone(), 209, 8)?);
+    ::ferroui_base::styling::StyleBase::__markup_Add_1(style_1.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(style_2.clone(), 211, 8)?);
     context.pop_parent();
-    ::ferroui_base::styling::StyleBase::__markup_Add_1(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(style_1.clone(), 206, 6)?);
-    // Controls/FluentControls.xaml(217,6) Content
-    // Controls/FluentControls.xaml(217,6) Style
+    ::ferroui_base::styling::StyleBase::__markup_Add_1(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(style_1.clone(), 208, 6)?);
+    // Controls/FluentControls.xaml(219,6) Content
+    // Controls/FluentControls.xaml(219,6) Style
     let style_3 = ::ferroui_base::styling::Style::new();
     context.push_parent(rt::to_value(style_3.clone()));
-    // Controls/FluentControls.xaml(217,6) Selector
+    // Controls/FluentControls.xaml(219,6) Selector
     let selector_8 = ::ferroui_base::styling::Selectors::nesting(::core::option::Option::None);
     let selector_9 = ::ferroui_base::styling::Selectors::class(::core::option::Option::Some(selector_8), ":pointerover");
     ::ferroui_base::styling::Style::__markup_set_Selector(&style_3, ::core::option::Option::Some(selector_9.clone()));
-    // Controls/FluentControls.xaml(218,8) Content
-    // Controls/FluentControls.xaml(218,37) Value
-    rt::add_dynamic_resource_setter_with_parent(&context, style_3.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::property(::ferroui_controls::primitives::TemplatedControl::foreground_property()), "TextControlForegroundPointerOver");
     // Controls/FluentControls.xaml(220,8) Content
-    // Controls/FluentControls.xaml(220,8) Style
+    // Controls/FluentControls.xaml(220,37) Value
+    rt::add_dynamic_resource_setter_with_parent(&context, style_3.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::property(::ferroui_controls::primitives::TemplatedControl::foreground_property()), "TextControlForegroundPointerOver");
+    // Controls/FluentControls.xaml(222,8) Content
+    // Controls/FluentControls.xaml(222,8) Style
     let style_4 = ::ferroui_base::styling::Style::new();
     context.push_parent(rt::to_value(style_4.clone()));
-    // Controls/FluentControls.xaml(220,8) Selector
+    // Controls/FluentControls.xaml(222,8) Selector
     let selector_10 = ::ferroui_base::styling::Selectors::nesting(::core::option::Option::None);
     let selector_11 = ::ferroui_base::styling::Selectors::template(::core::option::Option::Some(selector_10));
     let selector_12 = ::ferroui_base::styling::Selectors::of_type_info(::core::option::Option::Some(selector_11), <::ferroui_controls::Border as ::ferroui_base::StaticType>::TYPE);
     let selector_13 = ::ferroui_base::styling::Selectors::name(::core::option::Option::Some(selector_12), "PART_BorderElement");
     ::ferroui_base::styling::Style::__markup_set_Selector(&style_4, ::core::option::Option::Some(selector_13.clone()));
-    // Controls/FluentControls.xaml(221,10) Content
-    // Controls/FluentControls.xaml(221,40) Value
+    // Controls/FluentControls.xaml(223,10) Content
+    // Controls/FluentControls.xaml(223,40) Value
     rt::add_dynamic_resource_setter_with_parent(&context, style_4.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::property(::ferroui_controls::Border::border_brush_property()), "TextControlBorderBrushPointerOver");
-    // Controls/FluentControls.xaml(222,10) Content
-    // Controls/FluentControls.xaml(222,39) Value
+    // Controls/FluentControls.xaml(224,10) Content
+    // Controls/FluentControls.xaml(224,39) Value
     rt::add_dynamic_resource_setter_with_parent(&context, style_4.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::property(::ferroui_controls::Border::background_property()), "TextControlBackgroundPointerOver");
     context.pop_parent();
-    ::ferroui_base::styling::StyleBase::__markup_Add_1(style_3.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(style_4.clone(), 220, 8)?);
+    ::ferroui_base::styling::StyleBase::__markup_Add_1(style_3.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(style_4.clone(), 222, 8)?);
     context.pop_parent();
-    ::ferroui_base::styling::StyleBase::__markup_Add_1(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(style_3.clone(), 217, 6)?);
-    // Controls/FluentControls.xaml(228,6) Content
-    // Controls/FluentControls.xaml(228,6) Style
+    ::ferroui_base::styling::StyleBase::__markup_Add_1(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(style_3.clone(), 219, 6)?);
+    // Controls/FluentControls.xaml(230,6) Content
+    // Controls/FluentControls.xaml(230,6) Style
     let style_5 = ::ferroui_base::styling::Style::new();
     context.push_parent(rt::to_value(style_5.clone()));
-    // Controls/FluentControls.xaml(228,6) Selector
+    // Controls/FluentControls.xaml(230,6) Selector
     let selector_14 = ::ferroui_base::styling::Selectors::nesting(::core::option::Option::None);
     let selector_15 = ::ferroui_base::styling::Selectors::class(::core::option::Option::Some(selector_14), ":focus");
     ::ferroui_base::styling::Style::__markup_set_Selector(&style_5, ::core::option::Option::Some(selector_15.clone()));
-    // Controls/FluentControls.xaml(229,8) Content
-    // Controls/FluentControls.xaml(229,37) Value
-    rt::add_dynamic_resource_setter_with_parent(&context, style_5.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::property(::ferroui_controls::primitives::TemplatedControl::foreground_property()), "TextControlForegroundFocused");
     // Controls/FluentControls.xaml(231,8) Content
-    // Controls/FluentControls.xaml(231,8) Style
+    // Controls/FluentControls.xaml(231,37) Value
+    rt::add_dynamic_resource_setter_with_parent(&context, style_5.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::property(::ferroui_controls::primitives::TemplatedControl::foreground_property()), "TextControlForegroundFocused");
+    // Controls/FluentControls.xaml(233,8) Content
+    // Controls/FluentControls.xaml(233,8) Style
     let style_6 = ::ferroui_base::styling::Style::new();
     context.push_parent(rt::to_value(style_6.clone()));
-    // Controls/FluentControls.xaml(231,8) Selector
+    // Controls/FluentControls.xaml(233,8) Selector
     let selector_16 = ::ferroui_base::styling::Selectors::nesting(::core::option::Option::None);
     let selector_17 = ::ferroui_base::styling::Selectors::template(::core::option::Option::Some(selector_16));
     let selector_18 = ::ferroui_base::styling::Selectors::of_type_info(::core::option::Option::Some(selector_17), <::ferroui_controls::Border as ::ferroui_base::StaticType>::TYPE);
     let selector_19 = ::ferroui_base::styling::Selectors::name(::core::option::Option::Some(selector_18), "PART_BorderElement");
     ::ferroui_base::styling::Style::__markup_set_Selector(&style_6, ::core::option::Option::Some(selector_19.clone()));
-    // Controls/FluentControls.xaml(232,10) Content
-    // Controls/FluentControls.xaml(232,39) Value
-    rt::add_dynamic_resource_setter_with_parent(&context, style_6.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::property(::ferroui_controls::Border::background_property()), "TextControlBackgroundFocused");
-    // Controls/FluentControls.xaml(233,10) Content
-    // Controls/FluentControls.xaml(233,40) Value
-    rt::add_dynamic_resource_setter_with_parent(&context, style_6.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::property(::ferroui_controls::Border::border_brush_property()), "TextControlBorderBrushFocused");
     // Controls/FluentControls.xaml(234,10) Content
-    // Controls/FluentControls.xaml(234,44) Value
+    // Controls/FluentControls.xaml(234,39) Value
+    rt::add_dynamic_resource_setter_with_parent(&context, style_6.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::property(::ferroui_controls::Border::background_property()), "TextControlBackgroundFocused");
+    // Controls/FluentControls.xaml(235,10) Content
+    // Controls/FluentControls.xaml(235,40) Value
+    rt::add_dynamic_resource_setter_with_parent(&context, style_6.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::property(::ferroui_controls::Border::border_brush_property()), "TextControlBorderBrushFocused");
+    // Controls/FluentControls.xaml(236,10) Content
+    // Controls/FluentControls.xaml(236,44) Value
     rt::add_dynamic_resource_setter_with_parent(&context, style_6.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::property(::ferroui_controls::Border::border_thickness_property()), "TextControlBorderThemeThicknessFocused");
     context.pop_parent();
-    ::ferroui_base::styling::StyleBase::__markup_Add_1(style_5.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(style_6.clone(), 231, 8)?);
+    ::ferroui_base::styling::StyleBase::__markup_Add_1(style_5.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(style_6.clone(), 233, 8)?);
     context.pop_parent();
-    ::ferroui_base::styling::StyleBase::__markup_Add_1(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(style_5.clone(), 228, 6)?);
-    // Controls/FluentControls.xaml(238,6) Content
-    // Controls/FluentControls.xaml(238,6) Style
+    ::ferroui_base::styling::StyleBase::__markup_Add_1(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(style_5.clone(), 230, 6)?);
+    // Controls/FluentControls.xaml(240,6) Content
+    // Controls/FluentControls.xaml(240,6) Style
     let style_7 = ::ferroui_base::styling::Style::new();
     context.push_parent(rt::to_value(style_7.clone()));
-    // Controls/FluentControls.xaml(238,6) Selector
+    // Controls/FluentControls.xaml(240,6) Selector
     let selector_20 = ::ferroui_base::styling::Selectors::nesting(::core::option::Option::None);
     let selector_21 = ::ferroui_base::styling::Selectors::class(::core::option::Option::Some(selector_20), ":error");
     let selector_22 = ::ferroui_base::styling::Selectors::template(::core::option::Option::Some(selector_21));
     let selector_23 = ::ferroui_base::styling::Selectors::of_type_info(::core::option::Option::Some(selector_22), <::ferroui_controls::Border as ::ferroui_base::StaticType>::TYPE);
     let selector_24 = ::ferroui_base::styling::Selectors::name(::core::option::Option::Some(selector_23), "PART_BorderElement");
     ::ferroui_base::styling::Style::__markup_set_Selector(&style_7, ::core::option::Option::Some(selector_24.clone()));
-    // Controls/FluentControls.xaml(239,8) Content
-    // Controls/FluentControls.xaml(239,38) Value
+    // Controls/FluentControls.xaml(241,8) Content
+    // Controls/FluentControls.xaml(241,38) Value
     rt::add_dynamic_resource_setter_with_parent(&context, style_7.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::property(::ferroui_controls::Border::border_brush_property()), "SystemControlErrorTextForegroundBrush");
     context.pop_parent();
-    ::ferroui_base::styling::StyleBase::__markup_Add_1(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(style_7.clone(), 238, 6)?);
-    // Controls/FluentControls.xaml(242,6) Content
-    // Controls/FluentControls.xaml(242,6) Style
+    ::ferroui_base::styling::StyleBase::__markup_Add_1(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(style_7.clone(), 240, 6)?);
+    // Controls/FluentControls.xaml(244,6) Content
+    // Controls/FluentControls.xaml(244,6) Style
     let style_8 = ::ferroui_base::styling::Style::new();
-    // Controls/FluentControls.xaml(242,6) Selector
+    // Controls/FluentControls.xaml(244,6) Selector
     let selector_25 = ::ferroui_base::styling::Selectors::nesting(::core::option::Option::None);
     let selector_26 = ::ferroui_base::styling::Selectors::template(::core::option::Option::Some(selector_25));
     let selector_27 = ::ferroui_base::styling::Selectors::of_type_info(::core::option::Option::Some(selector_26), <::ferroui_controls::TextBlock as ::ferroui_base::StaticType>::TYPE);
     let selector_28 = ::ferroui_base::styling::Selectors::name(::core::option::Option::Some(selector_27), "PART_FloatingPlaceholder");
     ::ferroui_base::styling::Style::__markup_set_Selector(&style_8, ::core::option::Option::Some(selector_28.clone()));
-    // Controls/FluentControls.xaml(243,8) Content
+    // Controls/FluentControls.xaml(245,8) Content
     let setter_27 = rt::new_setter(rt::property(::ferroui_base::input::InputElement::cursor_property()));
-    // Controls/FluentControls.xaml(243,8) Value
-    let value_0 = rt::invoked(::ferroui_base::input::Cursor::__markup_parse(::std::string::String::from("IBeam")), 243, 33)?;
+    // Controls/FluentControls.xaml(245,8) Value
+    let value_0 = rt::invoked(::ferroui_base::input::Cursor::__markup_parse(::std::string::String::from("IBeam")), 245, 33)?;
     rt::add_setter_value(style_8.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_27, rt::to_object(::core::clone::Clone::clone(&value_0)));
-    ::ferroui_base::styling::StyleBase::__markup_Add_1(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(style_8.clone(), 242, 6)?);
-    // Controls/FluentControls.xaml(246,6) Content
-    // Controls/FluentControls.xaml(246,6) Style
+    ::ferroui_base::styling::StyleBase::__markup_Add_1(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(style_8.clone(), 244, 6)?);
+    // Controls/FluentControls.xaml(248,6) Content
+    // Controls/FluentControls.xaml(248,6) Style
     let style_9 = ::ferroui_base::styling::Style::new();
-    // Controls/FluentControls.xaml(246,6) Selector
+    // Controls/FluentControls.xaml(248,6) Selector
     let selector_29 = ::ferroui_base::styling::Selectors::nesting(::core::option::Option::None);
     let selector_30 = ::ferroui_base::styling::Selectors::property_equals_untyped(::core::option::Option::Some(selector_29), rt::property(::ferroui_controls::TextBox::use_floating_placeholder_property()), ::std::rc::Rc::new(::core::clone::Clone::clone(&true)));
     let selector_31 = ::ferroui_base::styling::Selectors::class(::core::option::Option::None, ":empty");
@@ -45866,14 +45870,14 @@ fn build_controls_fluentcontrols_xaml_deferred_319(
     let selector_34 = ::ferroui_base::styling::Selectors::of_type_info(::core::option::Option::Some(selector_33), <::ferroui_controls::TextBlock as ::ferroui_base::StaticType>::TYPE);
     let selector_35 = ::ferroui_base::styling::Selectors::name(::core::option::Option::Some(selector_34), "PART_FloatingPlaceholder");
     ::ferroui_base::styling::Style::__markup_set_Selector(&style_9, ::core::option::Option::Some(selector_35.clone()));
-    // Controls/FluentControls.xaml(247,8) Content
+    // Controls/FluentControls.xaml(249,8) Content
     rt::add_setter(style_9.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::property(::ferroui_base::Visual::is_visible_property()), rt::to_object(::core::clone::Clone::clone(&true)));
-    ::ferroui_base::styling::StyleBase::__markup_Add_1(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(style_9.clone(), 246, 6)?);
-    // Controls/FluentControls.xaml(251,6) Content
-    // Controls/FluentControls.xaml(251,6) Style
+    ::ferroui_base::styling::StyleBase::__markup_Add_1(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(style_9.clone(), 248, 6)?);
+    // Controls/FluentControls.xaml(253,6) Content
+    // Controls/FluentControls.xaml(253,6) Style
     let style_10 = ::ferroui_base::styling::Style::new();
     context.push_parent(rt::to_value(style_10.clone()));
-    // Controls/FluentControls.xaml(251,6) Selector
+    // Controls/FluentControls.xaml(253,6) Selector
     let selector_36 = ::ferroui_base::styling::Selectors::nesting(::core::option::Option::None);
     let selector_37 = ::ferroui_base::styling::Selectors::class(::core::option::Option::Some(selector_36), "revealPasswordButton");
     let selector_38 = ::ferroui_base::styling::Selectors::property_equals_untyped(::core::option::Option::Some(selector_37), rt::property(::ferroui_controls::TextBox::accepts_return_property()), ::std::rc::Rc::new(::core::clone::Clone::clone(&false)));
@@ -45882,23 +45886,23 @@ fn build_controls_fluentcontrols_xaml_deferred_319(
     let selector_41 = ::ferroui_base::styling::Selectors::class(::core::option::Option::Some(selector_40), ":empty");
     let selector_42 = ::ferroui_base::styling::Selectors::not(::core::option::Option::Some(selector_39), selector_41);
     ::ferroui_base::styling::Style::__markup_set_Selector(&style_10, ::core::option::Option::Some(selector_42.clone()));
-    // Controls/FluentControls.xaml(252,8) Content
+    // Controls/FluentControls.xaml(254,8) Content
     let setter_29 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::TextBox::inner_right_content_property()));
-    // Controls/FluentControls.xaml(253,10) Value
+    // Controls/FluentControls.xaml(255,10) Value
     let template_0 = ::ferroui_markup_xaml::templates::Template::__markup_new_0();
     context.push_parent(rt::to_value(template_0.clone()));
-    // Controls/FluentControls.xaml(254,12) Content
-    let deferred_1 = rt::defer(rt::class_handle(<::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE), &context, build_controls_fluentcontrols_xaml_deferred_321, 254, 12)?;
+    // Controls/FluentControls.xaml(256,12) Content
+    let deferred_1 = rt::defer(rt::class_handle(<::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE), &context, build_controls_fluentcontrols_xaml_deferred_321, 256, 12)?;
     ::ferroui_markup_xaml::templates::Template::__markup_set_Content(&template_0, rt::to_object(::core::clone::Clone::clone(&deferred_1)));
     context.pop_parent();
     rt::add_setter_value_with_parent(&context, style_10.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_29, rt::to_object(::core::clone::Clone::clone(&template_0)));
     context.pop_parent();
-    ::ferroui_base::styling::StyleBase::__markup_Add_1(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(style_10.clone(), 251, 6)?);
-    // Controls/FluentControls.xaml(270,6) Content
-    // Controls/FluentControls.xaml(270,6) Style
+    ::ferroui_base::styling::StyleBase::__markup_Add_1(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(style_10.clone(), 253, 6)?);
+    // Controls/FluentControls.xaml(272,6) Content
+    // Controls/FluentControls.xaml(272,6) Style
     let style_11 = ::ferroui_base::styling::Style::new();
     context.push_parent(rt::to_value(style_11.clone()));
-    // Controls/FluentControls.xaml(270,6) Selector
+    // Controls/FluentControls.xaml(272,6) Selector
     let selector_43 = ::ferroui_base::styling::Selectors::nesting(::core::option::Option::None);
     let selector_44 = ::ferroui_base::styling::Selectors::class(::core::option::Option::Some(selector_43), "clearButton");
     let selector_45 = ::ferroui_base::styling::Selectors::property_equals_untyped(::core::option::Option::Some(selector_44), rt::property(::ferroui_controls::TextBox::accepts_return_property()), ::std::rc::Rc::new(::core::clone::Clone::clone(&false)));
@@ -45908,18 +45912,18 @@ fn build_controls_fluentcontrols_xaml_deferred_319(
     let selector_49 = ::ferroui_base::styling::Selectors::class(::core::option::Option::Some(selector_48), ":empty");
     let selector_50 = ::ferroui_base::styling::Selectors::not(::core::option::Option::Some(selector_47), selector_49);
     ::ferroui_base::styling::Style::__markup_set_Selector(&style_11, ::core::option::Option::Some(selector_50.clone()));
-    // Controls/FluentControls.xaml(271,8) Content
+    // Controls/FluentControls.xaml(273,8) Content
     let setter_30 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::TextBox::inner_right_content_property()));
-    // Controls/FluentControls.xaml(272,10) Value
+    // Controls/FluentControls.xaml(274,10) Value
     let template_1 = ::ferroui_markup_xaml::templates::Template::__markup_new_0();
     context.push_parent(rt::to_value(template_1.clone()));
-    // Controls/FluentControls.xaml(273,12) Content
-    let deferred_2 = rt::defer(rt::class_handle(<::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE), &context, build_controls_fluentcontrols_xaml_deferred_322, 273, 12)?;
+    // Controls/FluentControls.xaml(275,12) Content
+    let deferred_2 = rt::defer(rt::class_handle(<::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE), &context, build_controls_fluentcontrols_xaml_deferred_322, 275, 12)?;
     ::ferroui_markup_xaml::templates::Template::__markup_set_Content(&template_1, rt::to_object(::core::clone::Clone::clone(&deferred_2)));
     context.pop_parent();
     rt::add_setter_value_with_parent(&context, style_11.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_30, rt::to_object(::core::clone::Clone::clone(&template_1)));
     context.pop_parent();
-    ::ferroui_base::styling::StyleBase::__markup_Add_1(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(style_11.clone(), 270, 6)?);
+    ::ferroui_base::styling::StyleBase::__markup_Add_1(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(style_11.clone(), 272, 6)?);
     context.pop_parent();
     ::core::result::Result::Ok(rt::to_value(control_theme_0.clone()))
 }
@@ -46074,20 +46078,20 @@ fn build_controls_fluentcontrols_xaml_deferred_320(
     rt::bind_template_binding(scroll_viewer_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::ScrollViewer::allow_auto_hide_property(), rt::property(::ferroui_controls::ScrollViewer::allow_auto_hide_property()), 146, 33)?;
     // Controls/FluentControls.xaml(147,33) BringIntoViewOnFocusChange
     rt::bind_template_binding(scroll_viewer_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::ScrollViewer::bring_into_view_on_focus_change_property(), rt::property(::ferroui_controls::ScrollViewer::bring_into_view_on_focus_change_property()), 147, 33)?;
-    // Controls/FluentControls.xaml(184,24) Styles
+    // Controls/FluentControls.xaml(186,24) Styles
     let styles_collection_0 = ::ferroui_base::StyledElement::__markup_get_Styles(scroll_viewer_0.upcast_ref::<::ferroui_base::StyledElement>());
-    // Controls/FluentControls.xaml(184,24) Style
+    // Controls/FluentControls.xaml(186,24) Style
     let style_0 = ::ferroui_base::styling::Style::new();
-    // Controls/FluentControls.xaml(184,24) Selector
+    // Controls/FluentControls.xaml(186,24) Selector
     let selector_0 = ::ferroui_base::styling::Selectors::of_type_info(::core::option::Option::None, <::ferroui_controls::presenters::ScrollContentPresenter as ::ferroui_base::StaticType>::TYPE);
     let selector_1 = ::ferroui_base::styling::Selectors::name(::core::option::Option::Some(selector_0), "PART_ContentPresenter");
     ::ferroui_base::styling::Style::__markup_set_Selector(&style_0, ::core::option::Option::Some(selector_1.clone()));
-    // Controls/FluentControls.xaml(185,26) Content
+    // Controls/FluentControls.xaml(187,26) Content
     let setter_0 = rt::new_setter(rt::property(::ferroui_base::input::InputElement::cursor_property()));
-    // Controls/FluentControls.xaml(185,26) Value
-    let value_1 = rt::invoked(::ferroui_base::input::Cursor::__markup_parse(::std::string::String::from("IBeam")), 185, 51)?;
+    // Controls/FluentControls.xaml(187,26) Value
+    let value_1 = rt::invoked(::ferroui_base::input::Cursor::__markup_parse(::std::string::String::from("IBeam")), 187, 51)?;
     rt::add_setter_value(style_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_0, rt::to_object(::core::clone::Clone::clone(&value_1)));
-    rt::invoked(::ferroui_base::styling::Styles::__markup_Add_0(&styles_collection_0, rt::cast(style_0.clone(), 184, 24)?), 184, 24)?;
+    rt::invoked(::ferroui_base::styling::Styles::__markup_Add_0(&styles_collection_0, rt::cast(style_0.clone(), 186, 24)?), 186, 24)?;
     // Controls/FluentControls.xaml(148,22) Content
     // Controls/FluentControls.xaml(148,22) Panel
     let panel_1 = ::ferroui_controls::Panel::new();
@@ -46171,36 +46175,40 @@ fn build_controls_fluentcontrols_xaml_deferred_320(
     ::ferroui_base::data::TemplateBinding::__markup_set_Mode(&template_binding_23, ::ferroui_base::data::BindingMode::TwoWay);
     let provided_27 = ::ferroui_base::data::TemplateBinding::__markup_ProvideValue_0(&template_binding_23);
     rt::bind(text_presenter_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::presenters::TextPresenter::text_property(), provided_27, 166, 38)?;
-    // Controls/FluentControls.xaml(167,38) CaretBlinkInterval
-    rt::bind_template_binding(text_presenter_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::presenters::TextPresenter::caret_blink_interval_property(), rt::property(::ferroui_controls::TextBox::caret_blink_interval_property()), 167, 38)?;
-    // Controls/FluentControls.xaml(168,38) CaretIndex
-    rt::bind_template_binding(text_presenter_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::presenters::TextPresenter::caret_index_property(), rt::property(::ferroui_controls::TextBox::caret_index_property()), 168, 38)?;
-    // Controls/FluentControls.xaml(169,38) SelectionStart
-    rt::bind_template_binding(text_presenter_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::presenters::TextPresenter::selection_start_property(), rt::property(::ferroui_controls::TextBox::selection_start_property()), 169, 38)?;
-    // Controls/FluentControls.xaml(170,38) SelectionEnd
-    rt::bind_template_binding(text_presenter_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::presenters::TextPresenter::selection_end_property(), rt::property(::ferroui_controls::TextBox::selection_end_property()), 170, 38)?;
-    // Controls/FluentControls.xaml(171,38) TextAlignment
-    rt::bind_template_binding(text_presenter_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::presenters::TextPresenter::text_alignment_property(), rt::property(::ferroui_controls::TextBox::text_alignment_property()), 171, 38)?;
-    // Controls/FluentControls.xaml(172,38) TextWrapping
-    rt::bind_template_binding(text_presenter_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::presenters::TextPresenter::text_wrapping_property(), rt::property(::ferroui_controls::TextBox::text_wrapping_property()), 172, 38)?;
-    // Controls/FluentControls.xaml(173,38) LineHeight
-    rt::bind_template_binding(text_presenter_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::presenters::TextPresenter::line_height_property(), rt::property(::ferroui_controls::TextBox::line_height_property()), 173, 38)?;
-    // Controls/FluentControls.xaml(174,38) LetterSpacing
-    rt::bind_template_binding(text_presenter_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::presenters::TextPresenter::letter_spacing_property(), rt::property(::ferroui_controls::primitives::TemplatedControl::letter_spacing_property()), 174, 38)?;
-    // Controls/FluentControls.xaml(175,38) PasswordChar
-    rt::bind_template_binding(text_presenter_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::presenters::TextPresenter::password_char_property(), rt::property(::ferroui_controls::TextBox::password_char_property()), 175, 38)?;
-    // Controls/FluentControls.xaml(176,38) RevealPassword
-    rt::bind_template_binding(text_presenter_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::presenters::TextPresenter::reveal_password_property(), rt::property(::ferroui_controls::TextBox::reveal_password_property()), 176, 38)?;
-    // Controls/FluentControls.xaml(177,38) SelectionBrush
-    rt::bind_template_binding(text_presenter_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::presenters::TextPresenter::selection_brush_property(), rt::property(::ferroui_controls::TextBox::selection_brush_property()), 177, 38)?;
-    // Controls/FluentControls.xaml(178,38) SelectionForegroundBrush
-    rt::bind_template_binding(text_presenter_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::presenters::TextPresenter::selection_foreground_brush_property(), rt::property(::ferroui_controls::TextBox::selection_foreground_brush_property()), 178, 38)?;
-    // Controls/FluentControls.xaml(179,38) CaretBrush
-    rt::bind_template_binding(text_presenter_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::presenters::TextPresenter::caret_brush_property(), rt::property(::ferroui_controls::TextBox::caret_brush_property()), 179, 38)?;
-    // Controls/FluentControls.xaml(180,38) HorizontalAlignment
-    rt::bind_template_binding(text_presenter_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::layout::Layoutable::horizontal_alignment_property(), rt::property(::ferroui_controls::TextBox::horizontal_content_alignment_property()), 180, 38)?;
-    // Controls/FluentControls.xaml(181,38) VerticalAlignment
-    rt::bind_template_binding(text_presenter_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::layout::Layoutable::vertical_alignment_property(), rt::property(::ferroui_controls::TextBox::vertical_content_alignment_property()), 181, 38)?;
+    // Controls/FluentControls.xaml(167,38) TextStyleOverrides
+    rt::bind_template_binding(text_presenter_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::presenters::TextPresenter::text_style_overrides_property(), rt::property(::ferroui_controls::TextBox::text_style_overrides_property()), 167, 38)?;
+    // Controls/FluentControls.xaml(168,38) TextParagraphStyles
+    rt::bind_template_binding(text_presenter_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::presenters::TextPresenter::text_paragraph_styles_property(), rt::property(::ferroui_controls::TextBox::text_paragraph_styles_property()), 168, 38)?;
+    // Controls/FluentControls.xaml(169,38) CaretBlinkInterval
+    rt::bind_template_binding(text_presenter_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::presenters::TextPresenter::caret_blink_interval_property(), rt::property(::ferroui_controls::TextBox::caret_blink_interval_property()), 169, 38)?;
+    // Controls/FluentControls.xaml(170,38) CaretIndex
+    rt::bind_template_binding(text_presenter_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::presenters::TextPresenter::caret_index_property(), rt::property(::ferroui_controls::TextBox::caret_index_property()), 170, 38)?;
+    // Controls/FluentControls.xaml(171,38) SelectionStart
+    rt::bind_template_binding(text_presenter_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::presenters::TextPresenter::selection_start_property(), rt::property(::ferroui_controls::TextBox::selection_start_property()), 171, 38)?;
+    // Controls/FluentControls.xaml(172,38) SelectionEnd
+    rt::bind_template_binding(text_presenter_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::presenters::TextPresenter::selection_end_property(), rt::property(::ferroui_controls::TextBox::selection_end_property()), 172, 38)?;
+    // Controls/FluentControls.xaml(173,38) TextAlignment
+    rt::bind_template_binding(text_presenter_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::presenters::TextPresenter::text_alignment_property(), rt::property(::ferroui_controls::TextBox::text_alignment_property()), 173, 38)?;
+    // Controls/FluentControls.xaml(174,38) TextWrapping
+    rt::bind_template_binding(text_presenter_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::presenters::TextPresenter::text_wrapping_property(), rt::property(::ferroui_controls::TextBox::text_wrapping_property()), 174, 38)?;
+    // Controls/FluentControls.xaml(175,38) LineHeight
+    rt::bind_template_binding(text_presenter_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::presenters::TextPresenter::line_height_property(), rt::property(::ferroui_controls::TextBox::line_height_property()), 175, 38)?;
+    // Controls/FluentControls.xaml(176,38) LetterSpacing
+    rt::bind_template_binding(text_presenter_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::presenters::TextPresenter::letter_spacing_property(), rt::property(::ferroui_controls::primitives::TemplatedControl::letter_spacing_property()), 176, 38)?;
+    // Controls/FluentControls.xaml(177,38) PasswordChar
+    rt::bind_template_binding(text_presenter_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::presenters::TextPresenter::password_char_property(), rt::property(::ferroui_controls::TextBox::password_char_property()), 177, 38)?;
+    // Controls/FluentControls.xaml(178,38) RevealPassword
+    rt::bind_template_binding(text_presenter_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::presenters::TextPresenter::reveal_password_property(), rt::property(::ferroui_controls::TextBox::reveal_password_property()), 178, 38)?;
+    // Controls/FluentControls.xaml(179,38) SelectionBrush
+    rt::bind_template_binding(text_presenter_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::presenters::TextPresenter::selection_brush_property(), rt::property(::ferroui_controls::TextBox::selection_brush_property()), 179, 38)?;
+    // Controls/FluentControls.xaml(180,38) SelectionForegroundBrush
+    rt::bind_template_binding(text_presenter_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::presenters::TextPresenter::selection_foreground_brush_property(), rt::property(::ferroui_controls::TextBox::selection_foreground_brush_property()), 180, 38)?;
+    // Controls/FluentControls.xaml(181,38) CaretBrush
+    rt::bind_template_binding(text_presenter_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::presenters::TextPresenter::caret_brush_property(), rt::property(::ferroui_controls::TextBox::caret_brush_property()), 181, 38)?;
+    // Controls/FluentControls.xaml(182,38) HorizontalAlignment
+    rt::bind_template_binding(text_presenter_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::layout::Layoutable::horizontal_alignment_property(), rt::property(::ferroui_controls::TextBox::horizontal_content_alignment_property()), 182, 38)?;
+    // Controls/FluentControls.xaml(183,38) VerticalAlignment
+    rt::bind_template_binding(text_presenter_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::layout::Layoutable::vertical_alignment_property(), rt::property(::ferroui_controls::TextBox::vertical_content_alignment_property()), 183, 38)?;
     rt::invoked(text_presenter_0.try_end_init(), 165, 24)?;
     context.pop_parent();
     rt::invoked(panel_1.try_end_init(), 148, 22)?;
@@ -46208,31 +46216,31 @@ fn build_controls_fluentcontrols_xaml_deferred_320(
     rt::invoked(scroll_viewer_0.try_end_init(), 142, 20)?;
     context.pop_parent();
     rt::invoked(dock_panel_0.try_end_init(), 132, 18)?;
-    // Controls/FluentControls.xaml(190,18) Children
+    // Controls/FluentControls.xaml(192,18) Children
     let children_collection_8 = ::ferroui_controls::Panel::__markup_get_Children(grid_0.upcast_ref::<::ferroui_controls::Panel>());
-    // Controls/FluentControls.xaml(190,18) ContentPresenter
+    // Controls/FluentControls.xaml(192,18) ContentPresenter
     let content_presenter_1 = ::ferroui_controls::presenters::ContentPresenter::new();
     content_presenter_1.begin_init();
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_8, ::core::clone::Clone::clone(&content_presenter_1).upcast::<::ferroui_controls::Control>());
-    // Controls/FluentControls.xaml(190,18) Column
+    // Controls/FluentControls.xaml(192,18) Column
     let priority_7 = ::ferroui_base::data::BindingPriority::Template;
     content_presenter_1.set_value_with_priority(::ferroui_controls::Grid::column_property(), 2_i32, priority_7);
-    // Controls/FluentControls.xaml(190,18) ColumnSpan
+    // Controls/FluentControls.xaml(192,18) ColumnSpan
     let priority_8 = ::ferroui_base::data::BindingPriority::Template;
     content_presenter_1.set_value_with_priority(::ferroui_controls::Grid::column_span_property(), 1_i32, priority_8);
-    // Controls/FluentControls.xaml(192,35) VerticalContentAlignment
-    rt::bind_template_binding(content_presenter_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::presenters::ContentPresenter::vertical_content_alignment_property(), rt::property(::ferroui_controls::TextBox::vertical_content_alignment_property()), 192, 35)?;
-    // Controls/FluentControls.xaml(193,35) Content (setter chosen at run time)
+    // Controls/FluentControls.xaml(194,35) VerticalContentAlignment
+    rt::bind_template_binding(content_presenter_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::presenters::ContentPresenter::vertical_content_alignment_property(), rt::property(::ferroui_controls::TextBox::vertical_content_alignment_property()), 194, 35)?;
+    // Controls/FluentControls.xaml(195,35) Content (setter chosen at run time)
     let priority_9 = ::ferroui_base::data::BindingPriority::Template;
-    let template_binding_40 = ::ferroui_base::data::TemplateBinding::__markup_new_1(rt::property(::ferroui_controls::TextBox::inner_right_content_property()));
-    let provided_44 = ::ferroui_base::data::TemplateBinding::__markup_ProvideValue_0(&template_binding_40);
-    let value_5: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_44);
+    let template_binding_42 = ::ferroui_base::data::TemplateBinding::__markup_new_1(rt::property(::ferroui_controls::TextBox::inner_right_content_property()));
+    let provided_46 = ::ferroui_base::data::TemplateBinding::__markup_ProvideValue_0(&template_binding_42);
+    let value_5: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_46);
     if value_5.is_some() {
-        rt::bind(content_presenter_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::presenters::ContentPresenter::content_property(), value_5.clone(), 193, 35)?;
+        rt::bind(content_presenter_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::presenters::ContentPresenter::content_property(), value_5.clone(), 195, 35)?;
     } else {
-        content_presenter_1.set_value_with_priority(::ferroui_controls::presenters::ContentPresenter::content_property(), rt::exact(value_5.clone(), "ContentControl.Content", 1, 193, 35)?, priority_9);
+        content_presenter_1.set_value_with_priority(::ferroui_controls::presenters::ContentPresenter::content_property(), rt::exact(value_5.clone(), "ContentControl.Content", 1, 195, 35)?, priority_9);
     }
-    rt::invoked(content_presenter_1.try_end_init(), 190, 18)?;
+    rt::invoked(content_presenter_1.try_end_init(), 192, 18)?;
     context.pop_parent();
     rt::invoked(grid_0.try_end_init(), 127, 16)?;
     context.pop_parent();
@@ -46244,179 +46252,179 @@ fn build_controls_fluentcontrols_xaml_deferred_320(
     ::core::result::Result::Ok(rt::to_value(data_validation_errors_0.clone()))
 }
 
-/// Builds the deferred content at `Controls/FluentControls.xaml(254,12)` (a template or a deferred resource).
+/// Builds the deferred content at `Controls/FluentControls.xaml(256,12)` (a template or a deferred resource).
 fn build_controls_fluentcontrols_xaml_deferred_321(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_DOCUMENT);
-    // Controls/FluentControls.xaml(254,12) ToggleButton
+    // Controls/FluentControls.xaml(256,12) ToggleButton
     let toggle_button_0 = ::ferroui_controls::primitives::ToggleButton::new();
     context.set_intermediate_root_object(rt::to_value(toggle_button_0.clone()));
     toggle_button_0.begin_init();
     context.push_parent(rt::to_value(toggle_button_0.clone()));
-    // Controls/FluentControls.xaml(254,25) Theme (setter chosen at run time)
+    // Controls/FluentControls.xaml(256,25) Theme (setter chosen at run time)
     let priority_0 = ::ferroui_base::data::BindingPriority::Template;
     let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("FluentTextBoxToggleButton"));
-    let provided_0 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::StyledElement::theme_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 254, 25)?;
+    let provided_0 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::StyledElement::theme_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 256, 25)?;
     let value_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_0);
     if rt::is_instance(&value_0, rt::markup_handle(<dyn ::ferroui_base::data::BindingBase as ::ferroui_base::metadata::MarkupTyped>::MARKUP)) {
-        rt::bind(toggle_button_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::StyledElement::theme_property(), value_0.clone(), 254, 25)?;
+        rt::bind(toggle_button_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::StyledElement::theme_property(), value_0.clone(), 256, 25)?;
     } else if rt::is_instance(&value_0, rt::class_handle(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE)) {
-        toggle_button_0.set_value_with_priority(::ferroui_base::StyledElement::theme_property(), rt::exact(value_0.clone(), "StyledElement.Theme", 1, 254, 25)?, priority_0);
+        toggle_button_0.set_value_with_priority(::ferroui_base::StyledElement::theme_property(), rt::exact(value_0.clone(), "StyledElement.Theme", 1, 256, 25)?, priority_0);
     } else if value_0.is_none() {
-        toggle_button_0.set_value_with_priority(::ferroui_base::StyledElement::theme_property(), rt::exact(value_0.clone(), "StyledElement.Theme", 1, 254, 25)?, priority_0);
+        toggle_button_0.set_value_with_priority(::ferroui_base::StyledElement::theme_property(), rt::exact(value_0.clone(), "StyledElement.Theme", 1, 256, 25)?, priority_0);
     } else {
-        return ::core::result::Result::Err(rt::no_setter("Theme", &value_0, 254, 25));
+        return ::core::result::Result::Err(rt::no_setter("Theme", &value_0, 256, 25));
     }
-    // Controls/FluentControls.xaml(255,25) IsChecked
+    // Controls/FluentControls.xaml(257,25) IsChecked
     let reflection_binding_extension_0 = ::ferroui_markup_xaml::markup_extensions::ReflectionBindingExtension::__markup_new_1(::std::string::String::from("$parent[TextBox].RevealPassword"));
-    // Controls/FluentControls.xaml(255,25) Mode
-    ::ferroui_base::data::ReflectionBinding::__markup_set_Mode(&rt::cast(::core::clone::Clone::clone(&reflection_binding_extension_0), 255, 25)?, ::ferroui_base::data::BindingMode::TwoWay);
+    // Controls/FluentControls.xaml(257,25) Mode
+    ::ferroui_base::data::ReflectionBinding::__markup_set_Mode(&rt::cast(::core::clone::Clone::clone(&reflection_binding_extension_0), 257, 25)?, ::ferroui_base::data::BindingMode::TwoWay);
     let provided_1 = rt::provide_value(&context, rt::property_value(::ferroui_controls::primitives::ToggleButton::is_checked_property()), &reflection_binding_extension_0, ::ferroui_markup_xaml::markup_extensions::ReflectionBindingExtension::__markup_ProvideValue_0);
-    rt::bind(toggle_button_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::primitives::ToggleButton::is_checked_property(), provided_1, 255, 25)?;
-    // Controls/FluentControls.xaml(254,12) ClipToBounds
+    rt::bind(toggle_button_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::primitives::ToggleButton::is_checked_property(), provided_1, 257, 25)?;
+    // Controls/FluentControls.xaml(256,12) ClipToBounds
     let priority_1 = ::ferroui_base::data::BindingPriority::Template;
     toggle_button_0.set_value_with_priority(::ferroui_base::Visual::clip_to_bounds_property(), ::core::clone::Clone::clone(&true), priority_1);
-    // Controls/FluentControls.xaml(257,14) Content
-    // Controls/FluentControls.xaml(257,14) Panel
+    // Controls/FluentControls.xaml(259,14) Content
+    // Controls/FluentControls.xaml(259,14) Panel
     let panel_0 = ::ferroui_controls::Panel::new();
     panel_0.begin_init();
     toggle_button_0.set_value(::ferroui_controls::ContentControl::content_property(), rt::to_object(::core::clone::Clone::clone(&panel_0)));
     context.push_parent(rt::to_value(panel_0.clone()));
-    // Controls/FluentControls.xaml(258,16) Children
+    // Controls/FluentControls.xaml(260,16) Children
     let children_collection_0 = ::ferroui_controls::Panel::__markup_get_Children(&panel_0);
-    // Controls/FluentControls.xaml(258,16) PathIcon
+    // Controls/FluentControls.xaml(260,16) PathIcon
     let path_icon_0 = ::ferroui_controls::PathIcon::new();
     path_icon_0.begin_init();
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_0, ::core::clone::Clone::clone(&path_icon_0).upcast::<::ferroui_controls::Control>());
     context.push_parent(rt::to_value(path_icon_0.clone()));
-    // Controls/FluentControls.xaml(258,25) Data (setter chosen at run time)
+    // Controls/FluentControls.xaml(260,25) Data (setter chosen at run time)
     let priority_2 = ::ferroui_base::data::BindingPriority::Template;
     let static_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("PasswordBoxRevealButtonData"));
-    let provided_2 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::PathIcon::data_property()), &static_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 258, 25)?;
+    let provided_2 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::PathIcon::data_property()), &static_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 260, 25)?;
     let value_1: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_2);
     if rt::is_instance(&value_1, rt::markup_handle(<dyn ::ferroui_base::data::BindingBase as ::ferroui_base::metadata::MarkupTyped>::MARKUP)) {
-        rt::bind(path_icon_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::PathIcon::data_property(), value_1.clone(), 258, 25)?;
+        rt::bind(path_icon_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::PathIcon::data_property(), value_1.clone(), 260, 25)?;
     } else if rt::is_instance(&value_1, rt::class_handle(<::ferroui_base::media::Geometry as ::ferroui_base::StaticType>::TYPE)) {
-        path_icon_0.set_value_with_priority(::ferroui_controls::PathIcon::data_property(), rt::exact(value_1.clone(), "PathIcon.Data", 1, 258, 25)?, priority_2);
+        path_icon_0.set_value_with_priority(::ferroui_controls::PathIcon::data_property(), rt::exact(value_1.clone(), "PathIcon.Data", 1, 260, 25)?, priority_2);
     } else if value_1.is_none() {
-        path_icon_0.set_value_with_priority(::ferroui_controls::PathIcon::data_property(), rt::exact(value_1.clone(), "PathIcon.Data", 1, 258, 25)?, priority_2);
+        path_icon_0.set_value_with_priority(::ferroui_controls::PathIcon::data_property(), rt::exact(value_1.clone(), "PathIcon.Data", 1, 260, 25)?, priority_2);
     } else {
-        return ::core::result::Result::Err(rt::no_setter("Data", &value_1, 258, 25));
+        return ::core::result::Result::Err(rt::no_setter("Data", &value_1, 260, 25));
     }
-    // Controls/FluentControls.xaml(258,16) Height
+    // Controls/FluentControls.xaml(260,16) Height
     let priority_3 = ::ferroui_base::data::BindingPriority::Template;
     path_icon_0.set_value_with_priority(::ferroui_base::layout::Layoutable::height_property(), 8.0_f64, priority_3);
-    // Controls/FluentControls.xaml(258,16) Width
+    // Controls/FluentControls.xaml(260,16) Width
     let priority_4 = ::ferroui_base::data::BindingPriority::Template;
     path_icon_0.set_value_with_priority(::ferroui_base::layout::Layoutable::width_property(), 12.0_f64, priority_4);
-    // Controls/FluentControls.xaml(260,25) IsVisible
+    // Controls/FluentControls.xaml(262,25) IsVisible
     let reflection_binding_extension_1 = ::ferroui_markup_xaml::markup_extensions::ReflectionBindingExtension::__markup_new_1(::std::string::String::from("!$parent[ToggleButton].IsChecked"));
     let provided_3 = rt::provide_value(&context, rt::property_value(::ferroui_base::Visual::is_visible_property()), &reflection_binding_extension_1, ::ferroui_markup_xaml::markup_extensions::ReflectionBindingExtension::__markup_ProvideValue_0);
-    rt::bind(path_icon_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::Visual::is_visible_property(), provided_3, 260, 25)?;
+    rt::bind(path_icon_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::Visual::is_visible_property(), provided_3, 262, 25)?;
     context.pop_parent();
-    rt::invoked(path_icon_0.try_end_init(), 258, 16)?;
-    // Controls/FluentControls.xaml(261,16) Children
+    rt::invoked(path_icon_0.try_end_init(), 260, 16)?;
+    // Controls/FluentControls.xaml(263,16) Children
     let children_collection_1 = ::ferroui_controls::Panel::__markup_get_Children(&panel_0);
-    // Controls/FluentControls.xaml(261,16) PathIcon
+    // Controls/FluentControls.xaml(263,16) PathIcon
     let path_icon_1 = ::ferroui_controls::PathIcon::new();
     path_icon_1.begin_init();
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_1, ::core::clone::Clone::clone(&path_icon_1).upcast::<::ferroui_controls::Control>());
     context.push_parent(rt::to_value(path_icon_1.clone()));
-    // Controls/FluentControls.xaml(261,25) Data (setter chosen at run time)
+    // Controls/FluentControls.xaml(263,25) Data (setter chosen at run time)
     let priority_5 = ::ferroui_base::data::BindingPriority::Template;
     let static_resource_extension_2 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("PasswordBoxHideButtonData"));
-    let provided_4 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::PathIcon::data_property()), &static_resource_extension_2, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 261, 25)?;
+    let provided_4 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::PathIcon::data_property()), &static_resource_extension_2, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 263, 25)?;
     let value_2: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_4);
     if rt::is_instance(&value_2, rt::markup_handle(<dyn ::ferroui_base::data::BindingBase as ::ferroui_base::metadata::MarkupTyped>::MARKUP)) {
-        rt::bind(path_icon_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::PathIcon::data_property(), value_2.clone(), 261, 25)?;
+        rt::bind(path_icon_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::PathIcon::data_property(), value_2.clone(), 263, 25)?;
     } else if rt::is_instance(&value_2, rt::class_handle(<::ferroui_base::media::Geometry as ::ferroui_base::StaticType>::TYPE)) {
-        path_icon_1.set_value_with_priority(::ferroui_controls::PathIcon::data_property(), rt::exact(value_2.clone(), "PathIcon.Data", 1, 261, 25)?, priority_5);
+        path_icon_1.set_value_with_priority(::ferroui_controls::PathIcon::data_property(), rt::exact(value_2.clone(), "PathIcon.Data", 1, 263, 25)?, priority_5);
     } else if value_2.is_none() {
-        path_icon_1.set_value_with_priority(::ferroui_controls::PathIcon::data_property(), rt::exact(value_2.clone(), "PathIcon.Data", 1, 261, 25)?, priority_5);
+        path_icon_1.set_value_with_priority(::ferroui_controls::PathIcon::data_property(), rt::exact(value_2.clone(), "PathIcon.Data", 1, 263, 25)?, priority_5);
     } else {
-        return ::core::result::Result::Err(rt::no_setter("Data", &value_2, 261, 25));
+        return ::core::result::Result::Err(rt::no_setter("Data", &value_2, 263, 25));
     }
-    // Controls/FluentControls.xaml(261,16) Height
+    // Controls/FluentControls.xaml(263,16) Height
     let priority_6 = ::ferroui_base::data::BindingPriority::Template;
     path_icon_1.set_value_with_priority(::ferroui_base::layout::Layoutable::height_property(), 12.0_f64, priority_6);
-    // Controls/FluentControls.xaml(261,16) Width
+    // Controls/FluentControls.xaml(263,16) Width
     let priority_7 = ::ferroui_base::data::BindingPriority::Template;
     path_icon_1.set_value_with_priority(::ferroui_base::layout::Layoutable::width_property(), 12.0_f64, priority_7);
-    // Controls/FluentControls.xaml(263,25) IsVisible
+    // Controls/FluentControls.xaml(265,25) IsVisible
     let reflection_binding_extension_2 = ::ferroui_markup_xaml::markup_extensions::ReflectionBindingExtension::__markup_new_1(::std::string::String::from("$parent[ToggleButton].IsChecked"));
     let provided_5 = rt::provide_value(&context, rt::property_value(::ferroui_base::Visual::is_visible_property()), &reflection_binding_extension_2, ::ferroui_markup_xaml::markup_extensions::ReflectionBindingExtension::__markup_ProvideValue_0);
-    rt::bind(path_icon_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::Visual::is_visible_property(), provided_5, 263, 25)?;
+    rt::bind(path_icon_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::Visual::is_visible_property(), provided_5, 265, 25)?;
     context.pop_parent();
-    rt::invoked(path_icon_1.try_end_init(), 261, 16)?;
+    rt::invoked(path_icon_1.try_end_init(), 263, 16)?;
     context.pop_parent();
-    rt::invoked(panel_0.try_end_init(), 257, 14)?;
+    rt::invoked(panel_0.try_end_init(), 259, 14)?;
     context.pop_parent();
-    rt::invoked(toggle_button_0.try_end_init(), 254, 12)?;
+    rt::invoked(toggle_button_0.try_end_init(), 256, 12)?;
     ::core::result::Result::Ok(rt::to_value(toggle_button_0.clone()))
 }
 
-/// Builds the deferred content at `Controls/FluentControls.xaml(273,12)` (a template or a deferred resource).
+/// Builds the deferred content at `Controls/FluentControls.xaml(275,12)` (a template or a deferred resource).
 fn build_controls_fluentcontrols_xaml_deferred_322(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_DOCUMENT);
-    // Controls/FluentControls.xaml(273,12) Button
+    // Controls/FluentControls.xaml(275,12) Button
     let button_0 = ::ferroui_controls::Button::new();
     context.set_intermediate_root_object(rt::to_value(button_0.clone()));
     button_0.begin_init();
     context.push_parent(rt::to_value(button_0.clone()));
-    // Controls/FluentControls.xaml(273,19) Theme (setter chosen at run time)
+    // Controls/FluentControls.xaml(275,19) Theme (setter chosen at run time)
     let priority_0 = ::ferroui_base::data::BindingPriority::Template;
     let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("FluentTextBoxButton"));
-    let provided_0 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::StyledElement::theme_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 273, 19)?;
+    let provided_0 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::StyledElement::theme_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 275, 19)?;
     let value_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_0);
     if rt::is_instance(&value_0, rt::markup_handle(<dyn ::ferroui_base::data::BindingBase as ::ferroui_base::metadata::MarkupTyped>::MARKUP)) {
-        rt::bind(button_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::StyledElement::theme_property(), value_0.clone(), 273, 19)?;
+        rt::bind(button_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::StyledElement::theme_property(), value_0.clone(), 275, 19)?;
     } else if rt::is_instance(&value_0, rt::class_handle(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE)) {
-        button_0.set_value_with_priority(::ferroui_base::StyledElement::theme_property(), rt::exact(value_0.clone(), "StyledElement.Theme", 1, 273, 19)?, priority_0);
+        button_0.set_value_with_priority(::ferroui_base::StyledElement::theme_property(), rt::exact(value_0.clone(), "StyledElement.Theme", 1, 275, 19)?, priority_0);
     } else if value_0.is_none() {
-        button_0.set_value_with_priority(::ferroui_base::StyledElement::theme_property(), rt::exact(value_0.clone(), "StyledElement.Theme", 1, 273, 19)?, priority_0);
+        button_0.set_value_with_priority(::ferroui_base::StyledElement::theme_property(), rt::exact(value_0.clone(), "StyledElement.Theme", 1, 275, 19)?, priority_0);
     } else {
-        return ::core::result::Result::Err(rt::no_setter("Theme", &value_0, 273, 19));
+        return ::core::result::Result::Err(rt::no_setter("Theme", &value_0, 275, 19));
     }
-    // Controls/FluentControls.xaml(274,19) Command
+    // Controls/FluentControls.xaml(276,19) Command
     let reflection_binding_extension_0 = ::ferroui_markup_xaml::markup_extensions::ReflectionBindingExtension::__markup_new_1(::std::string::String::from("$parent[TextBox].Clear"));
     let provided_1 = rt::provide_value(&context, rt::property_value(::ferroui_controls::Button::command_property()), &reflection_binding_extension_0, ::ferroui_markup_xaml::markup_extensions::ReflectionBindingExtension::__markup_ProvideValue_0);
-    rt::bind(button_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::Button::command_property(), provided_1, 274, 19)?;
-    // Controls/FluentControls.xaml(273,12) ClipToBounds
+    rt::bind(button_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::Button::command_property(), provided_1, 276, 19)?;
+    // Controls/FluentControls.xaml(275,12) ClipToBounds
     let priority_1 = ::ferroui_base::data::BindingPriority::Template;
     button_0.set_value_with_priority(::ferroui_base::Visual::clip_to_bounds_property(), ::core::clone::Clone::clone(&true), priority_1);
-    // Controls/FluentControls.xaml(276,14) Content
-    // Controls/FluentControls.xaml(276,14) PathIcon
+    // Controls/FluentControls.xaml(278,14) Content
+    // Controls/FluentControls.xaml(278,14) PathIcon
     let path_icon_0 = ::ferroui_controls::PathIcon::new();
     path_icon_0.begin_init();
     button_0.set_value(::ferroui_controls::ContentControl::content_property(), rt::to_object(::core::clone::Clone::clone(&path_icon_0)));
     context.push_parent(rt::to_value(path_icon_0.clone()));
-    // Controls/FluentControls.xaml(276,23) Data (setter chosen at run time)
+    // Controls/FluentControls.xaml(278,23) Data (setter chosen at run time)
     let priority_2 = ::ferroui_base::data::BindingPriority::Template;
     let static_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("TextBoxClearButtonData"));
-    let provided_2 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::PathIcon::data_property()), &static_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 276, 23)?;
+    let provided_2 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::PathIcon::data_property()), &static_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 278, 23)?;
     let value_1: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_2);
     if rt::is_instance(&value_1, rt::markup_handle(<dyn ::ferroui_base::data::BindingBase as ::ferroui_base::metadata::MarkupTyped>::MARKUP)) {
-        rt::bind(path_icon_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::PathIcon::data_property(), value_1.clone(), 276, 23)?;
+        rt::bind(path_icon_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::PathIcon::data_property(), value_1.clone(), 278, 23)?;
     } else if rt::is_instance(&value_1, rt::class_handle(<::ferroui_base::media::Geometry as ::ferroui_base::StaticType>::TYPE)) {
-        path_icon_0.set_value_with_priority(::ferroui_controls::PathIcon::data_property(), rt::exact(value_1.clone(), "PathIcon.Data", 1, 276, 23)?, priority_2);
+        path_icon_0.set_value_with_priority(::ferroui_controls::PathIcon::data_property(), rt::exact(value_1.clone(), "PathIcon.Data", 1, 278, 23)?, priority_2);
     } else if value_1.is_none() {
-        path_icon_0.set_value_with_priority(::ferroui_controls::PathIcon::data_property(), rt::exact(value_1.clone(), "PathIcon.Data", 1, 276, 23)?, priority_2);
+        path_icon_0.set_value_with_priority(::ferroui_controls::PathIcon::data_property(), rt::exact(value_1.clone(), "PathIcon.Data", 1, 278, 23)?, priority_2);
     } else {
-        return ::core::result::Result::Err(rt::no_setter("Data", &value_1, 276, 23));
+        return ::core::result::Result::Err(rt::no_setter("Data", &value_1, 278, 23));
     }
-    // Controls/FluentControls.xaml(276,14) Height
+    // Controls/FluentControls.xaml(278,14) Height
     let priority_3 = ::ferroui_base::data::BindingPriority::Template;
     path_icon_0.set_value_with_priority(::ferroui_base::layout::Layoutable::height_property(), 10.0_f64, priority_3);
-    // Controls/FluentControls.xaml(276,14) Width
+    // Controls/FluentControls.xaml(278,14) Width
     let priority_4 = ::ferroui_base::data::BindingPriority::Template;
     path_icon_0.set_value_with_priority(::ferroui_base::layout::Layoutable::width_property(), 10.0_f64, priority_4);
     context.pop_parent();
-    rt::invoked(path_icon_0.try_end_init(), 276, 14)?;
+    rt::invoked(path_icon_0.try_end_init(), 278, 14)?;
     context.pop_parent();
-    rt::invoked(button_0.try_end_init(), 273, 12)?;
+    rt::invoked(button_0.try_end_init(), 275, 12)?;
     ::core::result::Result::Ok(rt::to_value(button_0.clone()))
 }
 

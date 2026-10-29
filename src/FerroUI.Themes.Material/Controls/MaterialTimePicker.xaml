@@ -1,0 +1,129 @@
+<!-- AndroidX Material3 1.5.0-beta02 TimePicker.kt, e4d933c98df7baa7ea2b83eea6e086915961e0ff.
+     Core content only. Dialog titles, mode toggle, cancel and confirm actions belong to the host. -->
+<ResourceDictionary xmlns="https://github.com/ferroui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:material="using:FerroUI.Themes.Material">
+  <ControlTheme x:Key="MaterialTimeSelector" TargetType="RadioButton">
+    <Setter Property="MinWidth" Value="0" /><Setter Property="MinHeight" Value="0" />
+    <Setter Property="Padding" Value="0" /><Setter Property="CornerRadius" Value="8" />
+    <Setter Property="HorizontalContentAlignment" Value="Center" /><Setter Property="VerticalContentAlignment" Value="Center" />
+    <Setter Property="FontFamily" Value="{DynamicResource ContentControlThemeFontFamily}" />
+    <Setter Property="FontSize" Value="57" /><Setter Property="FontWeight" Value="Normal" />
+    <Setter Property="Foreground" Value="{DynamicResource MaterialOnSurfaceBrush}" />
+    <Setter Property="Background" Value="{DynamicResource MaterialSurfaceContainerHighestBrush}" />
+    <Setter Property="BorderBrush" Value="Transparent" /><Setter Property="BorderThickness" Value="2" />
+    <Setter Property="FocusAdorner">
+      <FocusAdornerTemplate><Border BorderBrush="{DynamicResource MaterialSecondaryBrush}" BorderThickness="3" CornerRadius="12" Margin="-4" /></FocusAdornerTemplate>
+    </Setter>
+    <Setter Property="Template">
+      <ControlTemplate>
+        <Border Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}"
+                BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="{TemplateBinding CornerRadius}">
+          <Grid>
+            <Border Name="StateLayer" Background="{TemplateBinding Foreground}" CornerRadius="{TemplateBinding CornerRadius}" Opacity="0" IsHitTestVisible="False" />
+            <material:MaterialRipple Fill="{TemplateBinding Foreground}" CornerRadius="{TemplateBinding CornerRadius}" ReducedMotion="{DynamicResource MaterialReducedMotion}" />
+            <ContentPresenter Name="PART_ContentPresenter" Content="{TemplateBinding Content}"
+                              Foreground="{TemplateBinding Foreground}" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" />
+          </Grid>
+        </Border>
+      </ControlTemplate>
+    </Setter>
+    <Style Selector="^:checked"><Setter Property="Background" Value="{DynamicResource MaterialPrimaryContainerBrush}" /><Setter Property="Foreground" Value="{DynamicResource MaterialOnPrimaryContainerBrush}" /></Style>
+    <Style Selector="^:input"><Setter Property="FontSize" Value="45" /></Style>
+    <Style Selector="^:vibrant"><Setter Property="CornerRadius" Value="16" /><Setter Property="Background" Value="{DynamicResource MaterialSurfaceContainerLowestBrush}" /></Style>
+    <Style Selector="^:vibrant:input"><Setter Property="FontSize" Value="57" /></Style>
+    <Style Selector="^:vibrant:checked"><Setter Property="Foreground" Value="{DynamicResource MaterialPrimaryBrush}" /><Setter Property="BorderBrush" Value="{DynamicResource MaterialPrimaryBrush}" /></Style>
+    <Style Selector="^:invalid"><Setter Property="Background" Value="{DynamicResource MaterialErrorContainerBrush}" /><Setter Property="Foreground" Value="{DynamicResource MaterialOnErrorContainerBrush}" /></Style>
+    <Style Selector="^:pointerover /template/ Border#StateLayer"><Setter Property="Opacity" Value="0.08" /></Style>
+    <Style Selector="^:focus-visible /template/ Border#StateLayer"><Setter Property="Opacity" Value="0.10" /></Style>
+  </ControlTheme>
+
+  <ControlTheme x:Key="MaterialTimePeriod" TargetType="RadioButton" BasedOn="{StaticResource MaterialTimeSelector}">
+    <Setter Property="CornerRadius" Value="19" /><Setter Property="FontSize" Value="16" /><Setter Property="FontWeight" Value="Medium" />
+    <Setter Property="BorderThickness" Value="0" /><Setter Property="Background" Value="{DynamicResource MaterialSurfaceContainerLowestBrush}" />
+    <Setter Property="Foreground" Value="{DynamicResource MaterialOnSurfaceVariantBrush}" />
+    <Setter Property="Transitions"><Transitions><material:MaterialCornerRadiusTransition Property="CornerRadius"
+      Duration="{DynamicResource MaterialMotionFastSpatialDuration}" Easing="{DynamicResource MaterialMotionFastSpatialEasing}" /></Transitions></Setter>
+    <Style Selector="^:input"><Setter Property="CornerRadius" Value="17" /><Setter Property="FontSize" Value="16" /></Style>
+    <Style Selector="^:vibrant"><Setter Property="CornerRadius" Value="28" /></Style>
+    <Style Selector="^:vibrant:input"><Setter Property="FontSize" Value="16" /></Style>
+    <Style Selector="^:vibrant:horizontal"><Setter Property="CornerRadius" Value="20" /></Style>
+    <Style Selector="^:checked"><Setter Property="FontWeight" Value="Bold" /></Style>
+    <Style Selector="^:checked, ^:pressed, ^:input:checked, ^:input:pressed, ^:vibrant:checked, ^:vibrant:pressed, ^:vibrant:horizontal:checked, ^:vibrant:horizontal:pressed, ^:vibrant:input:checked, ^:vibrant:input:pressed"><Setter Property="CornerRadius" Value="12" /></Style>
+    <Style Selector="^:vibrant:checked"><Setter Property="Background" Value="{DynamicResource MaterialPrimaryContainerBrush}" /><Setter Property="Foreground" Value="{DynamicResource MaterialOnPrimaryContainerBrush}" /></Style>
+  </ControlTheme>
+
+  <ControlTheme x:Key="{x:Type material:MaterialTimePickerNumber}" TargetType="material:MaterialTimePickerNumber">
+    <Setter Property="Width" Value="48" /><Setter Property="Height" Value="48" />
+    <Setter Property="MinWidth" Value="48" /><Setter Property="MinHeight" Value="48" />
+    <Setter Property="FontFamily" Value="{DynamicResource ContentControlThemeFontFamily}" /><Setter Property="FontSize" Value="16" />
+    <Setter Property="FontWeight" Value="Normal" /><Setter Property="Padding" Value="0" />
+    <Setter Property="FocusAdorner"><FocusAdornerTemplate><Border BorderBrush="{DynamicResource MaterialSecondaryBrush}" BorderThickness="3" CornerRadius="24" Margin="-3" /></FocusAdornerTemplate></Setter>
+    <Setter Property="Template"><ControlTemplate><Grid Background="Transparent" /></ControlTemplate></Setter>
+  </ControlTheme>
+
+  <ControlTheme x:Key="{x:Type material:MaterialTimePickerField}" TargetType="material:MaterialTimePickerField">
+    <Setter Property="MinHeight" Value="0" /><Setter Property="MinWidth" Value="0" /><Setter Property="Padding" Value="0" />
+    <Setter Property="FontFamily" Value="{DynamicResource ContentControlThemeFontFamily}" /><Setter Property="FontSize" Value="45" />
+    <Setter Property="FontWeight" Value="Normal" /><Setter Property="TextAlignment" Value="Center" />
+    <Setter Property="HorizontalContentAlignment" Value="Stretch" /><Setter Property="VerticalContentAlignment" Value="Center" />
+    <Setter Property="Foreground" Value="{DynamicResource MaterialOnSurfaceBrush}" />
+    <Setter Property="Background" Value="{DynamicResource MaterialSurfaceContainerHighestBrush}" />
+    <Setter Property="SelectionBrush" Value="{DynamicResource MaterialPrimaryContainerBrush}" />
+    <Setter Property="SelectionForegroundBrush" Value="{DynamicResource MaterialOnPrimaryContainerBrush}" />
+    <Setter Property="CaretBrush" Value="{DynamicResource MaterialPrimaryBrush}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource MaterialOutlineBrush}" /><Setter Property="BorderThickness" Value="1" /><Setter Property="CornerRadius" Value="8" />
+    <Setter Property="FocusAdorner" Value="{x:Null}" /><Setter Property="ContextFlyout" Value="{StaticResource TextBoxContextFlyout}" />
+    <Setter Property="Template">
+      <ControlTemplate>
+        <Border Name="InputContainer" Background="{TemplateBinding Background}" CornerRadius="{TemplateBinding CornerRadius}"
+                BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}">
+          <ScrollViewer Name="PART_ScrollViewer" HorizontalScrollBarVisibility="Hidden" VerticalScrollBarVisibility="Hidden"
+                        Focusable="False" Padding="0" Foreground="{TemplateBinding Foreground}">
+            <TextPresenter Name="PART_TextPresenter" Text="{TemplateBinding Text, Mode=TwoWay}"
+              CaretBlinkInterval="{TemplateBinding CaretBlinkInterval}" CaretIndex="{TemplateBinding CaretIndex}"
+              SelectionStart="{TemplateBinding SelectionStart}" SelectionEnd="{TemplateBinding SelectionEnd}"
+              SelectionBrush="{TemplateBinding SelectionBrush}" SelectionForegroundBrush="{TemplateBinding SelectionForegroundBrush}"
+              CaretBrush="{TemplateBinding CaretBrush}" TextAlignment="{TemplateBinding TextAlignment}"
+              HorizontalAlignment="Stretch" VerticalAlignment="Center" />
+          </ScrollViewer>
+        </Border>
+      </ControlTemplate>
+    </Setter>
+    <Style Selector="^:focus"><Setter Property="Background" Value="{DynamicResource MaterialPrimaryContainerBrush}" /><Setter Property="Foreground" Value="{DynamicResource MaterialOnPrimaryContainerBrush}" /><Setter Property="BorderBrush" Value="{DynamicResource MaterialOutlineBrush}" /><Setter Property="BorderThickness" Value="2" /></Style>
+    <Style Selector="^:vibrant"><Setter Property="CornerRadius" Value="16" /><Setter Property="FontSize" Value="57" /><Setter Property="Background" Value="{DynamicResource MaterialSurfaceContainerLowestBrush}" /><Setter Property="BorderBrush" Value="Transparent" /></Style>
+    <Style Selector="^:vibrant:focus"><Setter Property="Foreground" Value="{DynamicResource MaterialPrimaryBrush}" /><Setter Property="BorderBrush" Value="{DynamicResource MaterialPrimaryBrush}" /></Style>
+    <Style Selector="^:invalid"><Setter Property="Background" Value="{DynamicResource MaterialErrorContainerBrush}" /><Setter Property="Foreground" Value="{DynamicResource MaterialErrorBrush}" /><Setter Property="BorderBrush" Value="{DynamicResource MaterialErrorBrush}" /><Setter Property="CaretBrush" Value="{DynamicResource MaterialErrorBrush}" /></Style>
+  </ControlTheme>
+
+  <ControlTheme x:Key="{x:Type material:MaterialTimePicker}" TargetType="material:MaterialTimePicker">
+    <Setter Property="FontFamily" Value="{DynamicResource ContentControlThemeFontFamily}" />
+    <Setter Property="HorizontalAlignment" Value="Center" /><Setter Property="VerticalAlignment" Value="Center" />
+    <Setter Property="ReducedMotion" Value="{DynamicResource MaterialReducedMotion}" />
+    <Setter Property="MotionScheme" Value="{DynamicResource MaterialMotionScheme}" />
+    <Setter Property="Template">
+      <ControlTemplate>
+        <material:MaterialTimePickerLayout Name="PART_Layout">
+          <RadioButton Name="PART_Hour" Theme="{StaticResource MaterialTimeSelector}" FlowDirection="LeftToRight" />
+          <RadioButton Name="PART_Minute" Theme="{StaticResource MaterialTimeSelector}" FlowDirection="LeftToRight" />
+          <material:MaterialTimePickerField Name="PART_HourField" FlowDirection="LeftToRight" IsVisible="False" />
+          <material:MaterialTimePickerField Name="PART_MinuteField" FlowDirection="LeftToRight" IsVisible="False" />
+          <TextBlock Name="PART_Separator" Text=":" FontSize="57" Foreground="{DynamicResource MaterialOnSurfaceBrush}"
+                     TextAlignment="Center" VerticalAlignment="Center" IsHitTestVisible="False" AutomationProperties.AccessibilityView="Raw" />
+          <RadioButton Name="PART_Am" Theme="{StaticResource MaterialTimePeriod}" />
+          <RadioButton Name="PART_Pm" Theme="{StaticResource MaterialTimePeriod}" />
+          <TextBlock Name="PART_HourLabel" FontSize="12" LineHeight="16" TextWrapping="Wrap" Foreground="{DynamicResource MaterialOnSurfaceVariantBrush}" IsVisible="False" />
+          <TextBlock Name="PART_MinuteLabel" FontSize="12" LineHeight="16" TextWrapping="Wrap" Foreground="{DynamicResource MaterialOnSurfaceVariantBrush}" IsVisible="False" />
+          <material:MaterialTimePickerDial Name="PART_Dial" FlowDirection="LeftToRight"
+             Background="{DynamicResource MaterialSurfaceContainerHighestBrush}" HandBrush="{DynamicResource MaterialPrimaryBrush}"
+             NumberBrush="{DynamicResource MaterialOnSurfaceBrush}" SelectedNumberBrush="{DynamicResource MaterialOnPrimaryBrush}" />
+        </material:MaterialTimePickerLayout>
+      </ControlTemplate>
+    </Setter>
+    <Style Selector="^:vibrant /template/ material|MaterialTimePickerDial#PART_Dial"><Setter Property="Background" Value="{DynamicResource MaterialSurfaceContainerLowestBrush}" /></Style>
+    <Style Selector="^:input /template/ TextBlock#PART_Separator"><Setter Property="FontSize" Value="45" /></Style>
+    <Style Selector="^:vibrant:input /template/ TextBlock#PART_Separator"><Setter Property="FontSize" Value="57" /></Style>
+    <Style Selector="^ /template/ TextBlock:invalid"><Setter Property="Foreground" Value="{DynamicResource MaterialErrorBrush}" /></Style>
+    <Style Selector="^:disabled"><Setter Property="Opacity" Value="0.38" /></Style>
+  </ControlTheme>
+</ResourceDictionary>

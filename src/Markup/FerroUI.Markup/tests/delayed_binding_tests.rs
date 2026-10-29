@@ -77,3 +77,43 @@ fn value_is_set_when_element_is_initialized() {
     DelayedBinding::add_value(&target, property, |_| bs("immediate")).unwrap();
     assert_eq!(target.text().as_deref(), Some("immediate"));
 }
+
+#[cfg(all(feature = "hot-reload", debug_assertions))]
+#[test]
+fn candidate_values_do_not_activate_bindings_or_repeat_at_initialization() {
+    let target = TextBlock::new();
+    let calls = Rc::new(std::cell::Cell::new(0));
+    let count = calls.clone();
+    let property = Rc::new(ClrPropertyInfo::read_write::<Ref<FerroObject>, Maybe<String>>(
+        "Tag",
+        |_| None,
+        move |o, value| {
+            count.set(count.get() + 1);
+            o.cast::<TextBlock>().unwrap().set_tag(value.map(|v| Rc::new(v) as BoxedValue));
+        },
+    ));
+    DelayedBinding::add(&target, TextBlock::text_property().as_property(), tag_binding());
+    DelayedBinding::add_value(&target, property, |_| bs("candidate")).unwrap();
+    DelayedBinding::prepare_values(&target).unwrap();
+    assert!(!target.is_initialized());
+    assert!(target.text().is_none());
+    assert_eq!(calls.get(), 1);
+    target.initialize_if_needed();
+    assert_eq!(target.text().as_deref(), Some("candidate"));
+    assert_eq!(calls.get(), 1);
+}
+
+#[cfg(all(feature = "hot-reload", debug_assertions))]
+#[test]
+fn candidate_value_setter_errors_abort_preparation() {
+    let target = TextBlock::new();
+    let property = Rc::new(ClrPropertyInfo::read_write::<Ref<FerroObject>, ferroui_base::data::core::Value<f64>>(
+        "Width",
+        |o| o.cast::<TextBlock>().unwrap().width(),
+        |o, value| o.cast::<TextBlock>().unwrap().set_width(value),
+    ));
+    DelayedBinding::add_value(&target, property, |_| bs("not a number")).unwrap();
+    assert!(DelayedBinding::prepare_values(&target).is_err());
+    assert!(target.width().is_nan());
+    assert!(!target.is_initialized());
+}

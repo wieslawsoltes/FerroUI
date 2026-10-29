@@ -126,6 +126,41 @@ impl DelayedBinding {
         }
     }
 
+    /// Resolves deferred markup values on a detached reload candidate without
+    /// activating its data bindings or raising Initialized. Unlike ordinary
+    /// initialization, setter errors abort preparation instead of being logged.
+    #[cfg(all(feature = "hot-reload", debug_assertions))]
+    pub fn prepare_values(control: &StyledElement) -> Result<(), BindingError> {
+        let control_ref = control.to_ref();
+        let (values, subscription) = ENTRIES.with(|entries| {
+            let mut entries = entries.borrow_mut();
+            let Some(index) = entries.iter().position(|p| p.target.points_to(&control_ref)) else {
+                return (Vec::new(), None);
+            };
+            let pending = &mut entries[index];
+            let (values, bindings): (Vec<_>, Vec<_>) = std::mem::take(&mut pending.entries)
+                .into_iter()
+                .partition(|entry| matches!(entry, Entry::ClrPropertyValue { .. }));
+            pending.entries = bindings;
+            let subscription = if pending.entries.is_empty() {
+                entries.remove(index).subscription
+            } else {
+                None
+            };
+            (values, subscription)
+        });
+        if let Some(subscription) = subscription {
+            subscription.dispose();
+        }
+        let target: Ref<FerroObject> = control_ref.upcast();
+        for entry in values {
+            if let Entry::ClrPropertyValue { property, value } = entry {
+                property.set(&target, value(control).as_ref())?;
+            }
+        }
+        Ok(())
+    }
+
     /// Applies any delayed bindings to an element.
     pub fn apply_bindings(control: &StyledElement) {
         let control_ref = control.to_ref();

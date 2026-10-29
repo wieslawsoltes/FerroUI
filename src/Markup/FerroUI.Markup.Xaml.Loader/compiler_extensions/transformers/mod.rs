@@ -108,3 +108,6 @@ mod ferro_xaml_il_control_theme_transformer_tests;
 
 #[cfg(test)]
 mod compiled_bindings_tests;
+
+mod development_key_transformer;
+pub use development_key_transformer::*;

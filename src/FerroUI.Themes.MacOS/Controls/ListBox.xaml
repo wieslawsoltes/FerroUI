@@ -1,0 +1,78 @@
+<!--
+  Ported from microsoft-ui-xaml (https://github.com/microsoft/microsoft-ui-xaml),
+  commit 7e4b0c2096be402f51cc8f7d203ebf67cff183d0:
+    controls/dev/CommonStyles/ListBox_themeresources.xaml (the style DefaultListBoxStyle; the
+    resources of the document are Resources/ListBox_themeresources.xaml)
+  Copyright (c) Microsoft Corporation. Licensed under the MIT License (see NOTICE.md of the crate).
+
+  Translation notes (docs/porting/winui-theme.md, section 4):
+  - Template parts: the ScrollViewer of the source is FerroUI's PART_ScrollViewer, the
+    ItemsPresenter PART_ItemsPresenter.
+  - The scroll bar visibilities, IsDeferredScrollingEnabled and BringIntoViewOnFocusChange are
+    bound as in the source; the scroll, rail and zoom modes have no counterpart. The scroll
+    chaining, inertia, snap points and automatic hiding of the bars, which FerroUI's list box
+    passes to its scroll viewer (as its other themes do), are bound as well.
+  - TabNavigation="Once" is KeyboardNavigation.TabNavigation; UseSystemFocusVisuals is the
+    default focus adorner.
+-->
+<ResourceDictionary xmlns="https://github.com/ferroui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    x:ClassModifier="internal">
+  <Design.PreviewWith>
+    <Border Padding="20">
+      <ListBox Width="200">
+        <ListBoxItem>Item 1</ListBoxItem>
+        <ListBoxItem IsSelected="True">Item 2</ListBoxItem>
+        <ListBoxItem>Item 3</ListBoxItem>
+      </ListBox>
+    </Border>
+  </Design.PreviewWith>
+
+  <ControlTheme x:Key="DefaultListBoxStyle" TargetType="ListBox">
+    <Setter Property="Foreground" Value="{DynamicResource ListBoxForeground}" />
+    <Setter Property="Background" Value="{DynamicResource ListBoxBackground}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource ListBoxBorder}" />
+    <Setter Property="BorderThickness" Value="{DynamicResource ListBoxBorderThemeThickness}" />
+    <Setter Property="ScrollViewer.HorizontalScrollBarVisibility" Value="Disabled" />
+    <Setter Property="ScrollViewer.VerticalScrollBarVisibility" Value="Auto" />
+    <Setter Property="ScrollViewer.IsDeferredScrollingEnabled" Value="False" />
+    <Setter Property="ScrollViewer.BringIntoViewOnFocusChange" Value="True" />
+    <Setter Property="IsTabStop" Value="False" />
+    <Setter Property="KeyboardNavigation.TabNavigation" Value="Once" />
+    <Setter Property="FontFamily" Value="{DynamicResource ContentControlThemeFontFamily}" />
+    <Setter Property="FontSize" Value="{DynamicResource ControlContentThemeFontSize}" />
+    <Setter Property="ItemsPanel">
+      <ItemsPanelTemplate>
+        <VirtualizingStackPanel />
+      </ItemsPanelTemplate>
+    </Setter>
+    <Setter Property="Template">
+      <ControlTemplate>
+        <Border x:Name="LayoutRoot"
+                Background="{TemplateBinding Background}"
+                BorderBrush="{TemplateBinding BorderBrush}"
+                BackgroundSizing="InnerBorderEdge"
+                BorderThickness="{TemplateBinding BorderThickness}"
+                CornerRadius="{TemplateBinding CornerRadius}"
+                ClipToBounds="{TemplateBinding ClipToBounds}">
+          <ScrollViewer x:Name="PART_ScrollViewer"
+                        Padding="{TemplateBinding Padding}"
+                        HorizontalScrollBarVisibility="{TemplateBinding (ScrollViewer.HorizontalScrollBarVisibility)}"
+                        VerticalScrollBarVisibility="{TemplateBinding (ScrollViewer.VerticalScrollBarVisibility)}"
+                        IsDeferredScrollingEnabled="{TemplateBinding (ScrollViewer.IsDeferredScrollingEnabled)}"
+                        BringIntoViewOnFocusChange="{TemplateBinding (ScrollViewer.BringIntoViewOnFocusChange)}"
+                        IsScrollChainingEnabled="{TemplateBinding (ScrollViewer.IsScrollChainingEnabled)}"
+                        IsScrollInertiaEnabled="{TemplateBinding (ScrollViewer.IsScrollInertiaEnabled)}"
+                        VerticalSnapPointsType="{TemplateBinding (ScrollViewer.VerticalSnapPointsType)}"
+                        HorizontalSnapPointsType="{TemplateBinding (ScrollViewer.HorizontalSnapPointsType)}"
+                        AllowAutoHide="{TemplateBinding (ScrollViewer.AllowAutoHide)}">
+            <ItemsPresenter x:Name="PART_ItemsPresenter"
+                            ItemsPanel="{TemplateBinding ItemsPanel}" />
+          </ScrollViewer>
+        </Border>
+      </ControlTemplate>
+    </Setter>
+  </ControlTheme>
+
+  <ControlTheme x:Key="{x:Type ListBox}" TargetType="ListBox" BasedOn="{StaticResource DefaultListBoxStyle}" />
+</ResourceDictionary>

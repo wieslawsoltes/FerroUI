@@ -29,6 +29,9 @@ use std::cell::RefCell;
 use std::io::Read;
 use std::rc::Rc;
 
+#[path = "text_outline_tests.rs"]
+mod outline_tests;
+
 const FONTS: &str = "resm:FerroUI.Vello.UnitTests.Fonts?assembly=ferroui-vello";
 const ASSETS: &str = "resm:FerroUI.Vello.UnitTests.Assets?assembly=ferroui-vello";
 
@@ -176,8 +179,12 @@ fn font_manager_creates_typefaces_from_streams() {
     let plain = outline_bounds(FontSimulations::None);
     let bold = outline_bounds(FontSimulations::Bold);
     let oblique = outline_bounds(FontSimulations::Oblique);
-    let added = bold_simulation_outline_width(20.0);
-    assert!((added - 20.0 * (1.0 / 24.0 + (1.0 / 32.0 - 1.0 / 24.0) * 11.0 / 27.0)).abs() < 1e-12);
+    // Public paths expand at the canonical size of 64, where fake bold is
+    // 1/32 em, then scale. Native raster glyphs retain their size-dependent
+    // expansion; these are distinct contracts even at a small requested size.
+    let added = 20.0 / 32.0;
+    let native_added = bold_simulation_outline_width(20.0);
+    assert!((native_added - 20.0 * (1.0 / 24.0 + (1.0 / 32.0 - 1.0 / 24.0) * 11.0 / 27.0)).abs() < 1e-12);
     assert!((bold.width() - plain.width() - added).abs() < 0.02, "{bold:?} {plain:?}");
     assert!((bold.height() - plain.height() - added).abs() < 0.02, "{bold:?} {plain:?}");
     assert!((oblique.width() - plain.width() - 0.3 * plain.height()).abs() < 1e-9, "{oblique:?} {plain:?}");
@@ -893,6 +900,69 @@ fn glyph_run_of(platform_typeface: Rc<VelloTypeface>, text: &str, em_size: f64, 
     GlyphRun::new(glyph_typeface, em_size, utf16(text), GlyphInfoList::from(glyph_infos), Some(origin), 0)
 }
 
+#[test]
+fn glyph_run_complete_geometry_preserves_shaped_offsets_exactly() {
+    let scope = start();
+    let face = VelloTypeface::from_bytes(INTER.to_vec(), FontSimulations::None).unwrap();
+    let run = glyph_run_of(face, "o", 40.0, Point::new(11.0, 65.0));
+    let original = run.try_build_geometry().expect("a monochrome outline").bounds();
+    let mut infos = run.glyph_infos().borrow().to_vec();
+    assert_eq!(infos.len(), 1);
+    let displacement = Vector::new(19.25, -13.75);
+    infos[0].glyph_offset = displacement;
+    run.set_glyph_infos(GlyphInfoList::from(infos));
+    for geometry in [run.build_geometry(), run.try_build_geometry().unwrap()] {
+        let displaced = geometry.bounds();
+        assert!((displaced.x - original.x - displacement.x).abs() < 1e-9);
+        assert!((displaced.y - original.y - displacement.y).abs() < 1e-9);
+        assert!((displaced.width - original.width).abs() < 1e-9);
+        assert!((displaced.height - original.height).abs() < 1e-9);
+    }
+    // Compare this one displaced glyph's actual ink, so a misplaced small mark
+    // cannot disappear inside a whole-layout percentage tolerance.
+    let foreground = ImmutableSolidColorBrush::new(Colors::BLACK);
+    let drawn = TextTarget::new(100, 90);
+    drawn.draw(|context| {
+        context.push_text_options(TextOptions {
+            text_hinting_mode: TextHintingMode::None,
+            baseline_pixel_alignment: BaselinePixelAlignment::Unaligned,
+            ..TextOptions::default()
+        });
+        context.draw_glyph_run(Some(&foreground), &*run.platform_impl());
+        context.pop_text_options();
+    });
+    let outlined = TextTarget::new(100, 90);
+    let geometry = run.try_build_geometry().unwrap();
+    outlined.draw(|context| context.draw_geometry(Some(&foreground), None, &*geometry.platform_impl().unwrap()));
+    assert_eq!(drawn.ink(is_dark).0, outlined.ink(is_dark).0);
+    assert!(drawn.ink(is_dark).1 > 100);
+    assert!(difference_of_ink(&drawn, &outlined) < 2.0);
+    scope.dispose();
+}
+
+#[test]
+fn glyph_run_complete_geometry_rejects_missing_and_colour_outlines() {
+    let scope = start();
+    let face = VelloTypeface::from_bytes(INTER.to_vec(), FontSimulations::None).unwrap();
+    let run = glyph_run_of(face.clone(), "a ", 30.0, Point::default());
+    assert!(run.try_build_geometry().is_some(), "whitespace is a complete empty contour");
+    let mut infos = run.glyph_infos().borrow().to_vec();
+    infos[1].glyph_index = u16::MAX;
+    run.set_glyph_infos(GlyphInfoList::from(infos));
+    assert!(run.build_geometry().bounds().width > 0.0, "the legacy outline is only the a");
+    assert!(run.try_build_geometry().is_none(), "a partial outline must never count as complete");
+
+    let colour: &[u8] = include_bytes!("../../Skia/FerroUI.Skia/test_assets/assets/TwitterColorEmoji-SVGinOT.ttf");
+    let face = VelloTypeface::from_bytes(colour.to_vec(), FontSimulations::None).unwrap();
+    let run = glyph_run_of(face, "😀", 30.0, Point::default());
+    assert!(run.try_build_geometry().is_none(), "colour artwork is not a monochrome path");
+    let bitmap: &[u8] = include_bytes!("../../Skia/FerroUI.Skia/test_assets/assets/NISC18030.ttf");
+    let face = VelloTypeface::from_bytes(bitmap.to_vec(), FontSimulations::None).unwrap();
+    let run = glyph_run_of(face, "中", 30.0, Point::default());
+    assert!(run.try_build_geometry().is_none(), "bitmap glyphs have no outline");
+    scope.dispose();
+}
+
 /// The share of the pixels of two renderings that differ by more than a
 /// quarter of the range, in percent of the pixels with ink in the first.
 fn difference_of_ink(first: &TextTarget, second: &TextTarget) -> f64 {
@@ -1169,4 +1239,107 @@ fn font_manager_lists_each_family_once_and_makes_the_default_typeface() {
     assert!(font_manager
         .try_match_family_style("No Such Family 4f1c", FontStyle::Normal, FontWeight::Normal, FontStretch::Normal)
         .is_none());
+}
+
+// The public outline API follows the very same shaped lines as drawing. Its
+// contours are not hinted: disable hinting and baseline snapping for the pixel
+// comparison, while still exercising the actual font manager and shaper.
+fn assert_layout_geometry_matches_ink(layout: &TextLayout, origin: Point) {
+    let foreground = ImmutableSolidColorBrush::new(Colors::BLACK);
+    let geometry = layout.build_geometry(origin);
+    let platform = geometry.platform_impl().expect("The text has contours");
+    let filled = TextTarget::new(420, 250);
+    filled.draw(|context| context.draw_geometry(Some(&foreground), None, &*platform));
+
+    let drawn = TextTarget::new(420, 250);
+    let mut context = drawn.bitmap.create_drawing_context();
+    context.clear(Colors::WHITE);
+    context.push_text_options(TextOptions {
+        text_hinting_mode: TextHintingMode::None,
+        baseline_pixel_alignment: BaselinePixelAlignment::Unaligned,
+        ..TextOptions::default()
+    });
+    let mut sink = ContextSink::new(context);
+    layout.draw(&mut sink, origin);
+    assert!(sink.transforms.borrow().is_empty());
+    sink.context.borrow_mut().pop_text_options();
+    sink.context.borrow_mut().dispose();
+
+    let (drawn_bounds, drawn_count) = drawn.ink(is_dark);
+    let (filled_bounds, filled_count) = filled.ink(is_dark);
+    assert!(drawn_count > 300 && filled_count > 300, "There is measurable text ink");
+    assert!(drawn_bounds.inflate(1.0).contains_rect(filled_bounds), "{filled_bounds} in {drawn_bounds}");
+    assert!(filled_bounds.inflate(1.0).contains_rect(drawn_bounds), "{drawn_bounds} in {filled_bounds}");
+    let difference = difference_of_ink(&drawn, &filled);
+    assert!(difference < 2.0, "{difference}% of glyph/decorations ink differs from its public outline");
+}
+
+#[test]
+fn text_layout_build_geometry_preserves_styled_multiline_positions_and_decorations() {
+    use ferroui_base::media::text_formatting::{GenericTextRunProperties, TextRunProperties};
+    use ferroui_base::media::{BaselineAlignment, TextAlignment, TextDecorations};
+    use ferroui_base::utilities::ValueSpan;
+
+    let scope = start();
+    let foreground: Rc<dyn IBrush> = Rc::new(ImmutableSolidColorBrush::new(Colors::BLACK));
+    let emphasized: Rc<dyn TextRunProperties> = Rc::new(GenericTextRunProperties::with_all(
+        test_typeface("Inter"), 44.0, Some(TextDecorations::strikethrough()),
+        Some(foreground.clone()), None, BaselineAlignment::Baseline, None, None,
+    ));
+    let layout = TextLayout::new(
+        "Ho ffi\nAV Ω",
+        test_typeface("Inter"),
+        TextLayoutOptions {
+            font_size: 30.0,
+            foreground: Some(foreground),
+            text_alignment: TextAlignment::Center,
+            max_width: 320.0,
+            line_height: 68.0,
+            letter_spacing: 0.75,
+            text_decorations: Some(TextDecorations::underline()),
+            text_style_overrides: Some(Rc::from(vec![ValueSpan::new(3, 3, emphasized)])),
+            ..TextLayoutOptions::default()
+        },
+    );
+    assert_eq!(layout.text_lines().len(), 2);
+    let origin = Point::new(33.25, 27.5);
+    let zero = layout.build_geometry(Point::new(0.0, 0.0)).bounds();
+    let offset = layout.build_geometry(origin).bounds();
+    assert!((offset.x - zero.x - origin.x).abs() < 1e-8);
+    assert!((offset.y - zero.y - origin.y).abs() < 1e-8);
+    assert!((offset.width - zero.width).abs() < 1e-8);
+    assert!((offset.height - zero.height).abs() < 1e-8);
+    assert_layout_geometry_matches_ink(&layout, origin);
+    scope.dispose();
+}
+
+#[test]
+fn text_layout_build_geometry_preserves_rtl_runs_and_holes() {
+    let scope = start();
+    let foreground: Rc<dyn IBrush> = Rc::new(ImmutableSolidColorBrush::new(Colors::BLACK));
+    let layout = TextLayout::new(
+        "سلام Oo",
+        test_typeface("Noto Sans Arabic"),
+        TextLayoutOptions {
+            font_size: 40.0,
+            foreground: Some(foreground),
+            flow_direction: FlowDirection::RightToLeft,
+            text_alignment: ferroui_base::media::TextAlignment::Start,
+            max_width: 320.0,
+            ..TextLayoutOptions::default()
+        },
+    );
+    assert_layout_geometry_matches_ink(&layout, Point::new(29.5, 32.25));
+    scope.dispose();
+}
+
+#[test]
+fn text_layout_build_geometry_of_empty_text_has_no_ink() {
+    let scope = start();
+    let layout = TextLayout::new("", test_typeface("Inter"), TextLayoutOptions::default());
+    let geometry = layout.build_geometry(Point::new(91.0, 73.0));
+    assert_eq!(geometry.bounds().width, 0.0);
+    assert_eq!(geometry.bounds().height, 0.0);
+    assert!(!geometry.fill_contains(Point::new(91.0, 73.0)));
+    scope.dispose();
 }
