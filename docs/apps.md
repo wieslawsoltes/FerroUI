@@ -142,7 +142,8 @@ FERROUI_BROWSER_WORKSPACE=$PWD FerroUI/scripts/build-browser.sh my-app-browser
 ```
 
 The site is written to `target/browser/my-app-browser`; serve that directory with any static web
-server.
+server. `node FerroUI/scripts/apps/smoke-site.mjs target/browser/my-app-browser` runs the smoke test of
+CI against it (Chrome is found on the system, or set `CHROME`).
 
 ## 6. CI and GitHub Pages
 
@@ -183,11 +184,12 @@ All jobs run on `ubuntu-latest`:
 |---|---|
 | Conventions | the upstream name, `ferro_thread_local!`, the FerroUI blocks of `Cargo.toml` against the submodule |
 | Build and test | the stable toolchain, the Rust build cache (saved by runs of main only), mold as linker, the system packages for fonts and an X server; each line of `check` is a `cargo check --locked`, each line of `test` a `cargo test --locked` under `xvfb-run`, then `script` |
-| Browser site | the pinned browser toolchain (FerroUI's `browser-toolchain` action), `build-browser.sh` with `FERROUI_BROWSER_WORKSPACE`, then `browser-script` (with `SITE`), the module sizes and the Pages artifact |
+| Browser site | the pinned browser toolchain (FerroUI's `browser-toolchain` action), `build-browser.sh` with `FERROUI_BROWSER_WORKSPACE`, then `browser-script` (with `SITE`), a smoke run of the site in headless Chrome (`scripts/apps/smoke-site.mjs`: it fails on a failed request, a 4xx or 5xx response, an error the page logs or throws, or a view that does not draw; its screenshot is the artifact `site-screenshot`), the module sizes and the Pages artifact |
 | Deploy to GitHub Pages | runs of main only, after the other jobs passed |
 
 Inputs: `test`, `check`, `apt-packages` (extra Ubuntu packages), `script`, `browser-package`,
-`browser-features`, `browser-script`, `pages` (default `true`). The actions are pinned by commit, as
+`browser-features`, `browser-script`, `smoke` (default `true`), `smoke-ignore` (regular expressions,
+one per line, of smoke errors to leave out), `pages` (default `true`). The actions are pinned by commit, as
 in the workflows of this repository.
 
 GitHub Pages is enabled once, with GitHub Actions as its source:

@@ -56,6 +56,17 @@ on:
           repository); SITE is the directory of the site.
         type: string
         default: ''
+      smoke:
+        description: >
+          Open the built site in headless Chrome and fail on a request that fails or answers with an
+          error status, an error the page logs or throws, or a view that does not draw
+          (FerroUI/scripts/apps/smoke-site.mjs).
+        type: boolean
+        default: true
+      smoke-ignore:
+        description: Regular expressions, one per line, of smoke run errors to leave out.
+        type: string
+        default: ''
       pages:
         description: Deploy the browser site to GitHub Pages from runs of main (not from pull requests).
         type: boolean
@@ -192,6 +203,25 @@ jobs:
           SITE: ${{ steps.site.outputs.dir }}
           SCRIPT: ${{ inputs.browser-script }}
         run: bash -euo pipefail -c "$SCRIPT"
+      - name: Smoke run of the site in headless Chrome
+        if: inputs.smoke
+        env:
+          SITE: ${{ steps.site.outputs.dir }}
+          IGNORE: ${{ inputs.smoke-ignore }}
+        run: |
+          args=()
+          while IFS= read -r pattern; do
+            [ -n "$pattern" ] && args+=(--ignore "$pattern")
+          done <<< "$IGNORE"
+          node FerroUI/scripts/apps/smoke-site.mjs "$SITE" --screenshot "$RUNNER_TEMP/smoke/site.png" "${args[@]}"
+      - name: Upload the screenshot of the smoke run
+        if: always() && inputs.smoke
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: site-screenshot
+          path: ${{ runner.temp }}/smoke
+          if-no-files-found: ignore
+          retention-days: 7
       - name: Sizes of the module
         run: node FerroUI/scripts/browser/module-sizes.mjs "${{ steps.site.outputs.dir }}" | tee -a "$GITHUB_STEP_SUMMARY"
       - uses: actions/upload-pages-artifact@56afc609e74202658d3ffba0e8f6dda462b719fa # v3
