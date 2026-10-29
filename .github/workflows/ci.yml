@@ -605,17 +605,24 @@ jobs:
         run: >
           cargo check --locked --target wasm32-unknown-emscripten
           -p ferroui-browser --features vello --examples
+          && cargo check --locked --target wasm32-unknown-emscripten
+          -p control-catalog-browser --features vello
+      # The JavaScript bridge of the CDP developer tools (docs/devtools-cdp.md), also behind a feature.
+      - name: Check the catalog host with the CDP bridge
+        run: cargo check --locked --target wasm32-unknown-emscripten -p control-catalog-browser --features cdp
       - name: Build the ControlCatalog site
         run: scripts/build-browser.sh control-catalog-browser --webapp-prebuilt
       - name: ControlCatalog tests in headless Chrome (rendering, resize, console, drawer, navigation, click, typing)
         run: node scripts/browser/tests/control_catalog.test.mjs --screenshot target/browser/screenshots/control-catalog.png
       - name: Sizes of the published modules
+        run: node scripts/browser/module-sizes.mjs target/browser/control-catalog-browser >> "$GITHUB_STEP_SUMMARY"
       - name: Keep the screenshot
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: control-catalog-browser-screenshot
           path: target/browser/screenshots
+          if-no-files-found: ignore
 
   # The Linux desktop platform on a real X server (docs/porting/x11-platform.md, section 13). The
   # crate is developed on a Mac, where it is compiled for Linux and its tests run without a server;
