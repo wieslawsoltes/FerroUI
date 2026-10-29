@@ -28,13 +28,29 @@ forbidden, missing documentation denied), and are not published (`publish = fals
 on hold, and publishing the Dock crates with FerroUI is a separate decision. Until it is made,
 `scripts/release/publish.sh`, `crates.py check` and the crates table of the README leave them out.
 
-## Remaining steps
+## Integration steps
 
-1. Make the changes of `core-patches/` in the crates of this repository (ferroui-base,
-   ferroui-controls, ferroui-native, ferroui-markup-xaml, ferroui-markup-xaml-loader,
-   ferroui-build, ferroui-build-scan), against main rather than 0.3.0, each with its tests.
-2. Move the dependencies of `standalone-workspace.toml` into the workspace manifest (path
-   dependencies on the crates here, at the version of the workspace), make the Dock crates
-   members and remove the `exclude` entries.
-3. Bring the Dock crates to the current API of main and run their tests on macOS, then the sample.
-4. Add the Dock CI workflow (path-filtered, like the other areas).
+The integration is a stack of three pull requests: the core changes (#365), the import with the
+workspace membership and the API of main (#354), and the CI workflow.
+
+1. Done (#365): the changes of `core-patches/` are made in the crates of this repository
+   (ferroui-base, ferroui-controls, ferroui-native, ferroui-markup-xaml,
+   ferroui-markup-xaml-loader, ferroui-build, ferroui-build-scan), against main, with their tests.
+   For 0.4, which allows additions only, they are additive: provided trait methods
+   (`IResourceDictionary::merged_dictionaries`, `IResourceProvider::as_any` instead of an `Any`
+   supertrait), the value registration of name scopes with its own `NameScopeValueError`, and
+   the fields of the metadata structs `MarkupType` and `TypeModel`, which the API gate does not
+   count. `scripts/dock/check_framework_patch.py` verified the vendored copies of the standalone
+   workspace against these patches; the copies are gone, and the patches stay as the record of
+   the changes.
+2. Done (#354): the dependencies of `standalone-workspace.toml` are in the workspace manifest and
+   the Dock crates are members (see "Workspace membership").
+3. Done (#354): the Dock crates are on the API of main. On macOS their 1967 tests pass and the
+   sample runs. What changed: providers are downcast through `IResourceProvider::as_any`, the
+   value registrations report `NameScopeValueError`, event-add metadata returns the subscription
+   (`MarkupEvent::add`), the generated serializer tests read the ReactiveUI command contract from
+   the workspace, and the inventory scripts audit `src/Dock` and `samples/Dock` only.
+4. Done: `.github/workflows/dock.yml`, for a pull request that changes the Dock sources, tests,
+   sample, scripts or records. On Linux it runs the inventory of the port against the original
+   at the recorded revision (`check_port.py`, `check_inspector_views.py`, `check_theme_links.py`
+   and the tests of the scripts) and builds and tests every Dock crate.
