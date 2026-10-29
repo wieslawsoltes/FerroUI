@@ -164,6 +164,65 @@ impl MaterialColorRole {
     } }
 }
 
+/// The status colors the theme adds to the Material roles, which have no success or warning
+/// colors: tonal green and amber, for the severities of InfoBar and InfoBadge.
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
+#[repr(usize)]
+pub enum MaterialStatusColor {
+    Success,
+    OnSuccess,
+    SuccessContainer,
+    OnSuccessContainer,
+    Warning,
+    OnWarning,
+    WarningContainer,
+    OnWarningContainer,
+}
+
+impl MaterialStatusColor {
+    pub const ALL: [Self; 8] = [
+        Self::Success,
+        Self::OnSuccess,
+        Self::SuccessContainer,
+        Self::OnSuccessContainer,
+        Self::Warning,
+        Self::OnWarning,
+        Self::WarningContainer,
+        Self::OnWarningContainer,
+    ];
+    pub const fn name(self) -> &'static str { match self {
+        Self::Success => "Success",
+        Self::OnSuccess => "OnSuccess",
+        Self::SuccessContainer => "SuccessContainer",
+        Self::OnSuccessContainer => "OnSuccessContainer",
+        Self::Warning => "Warning",
+        Self::OnWarning => "OnWarning",
+        Self::WarningContainer => "WarningContainer",
+        Self::OnWarningContainer => "OnWarningContainer",
+    } }
+}
+
+const STATUS_LIGHT: [Color; 8] = [
+    Color::from_uint32(0xFF2E6B30), // Success
+    Color::from_uint32(0xFFFFFFFF), // OnSuccess
+    Color::from_uint32(0xFFB1F2A9), // SuccessContainer
+    Color::from_uint32(0xFF002204), // OnSuccessContainer
+    Color::from_uint32(0xFF7A5900), // Warning
+    Color::from_uint32(0xFFFFFFFF), // OnWarning
+    Color::from_uint32(0xFFFFDEA6), // WarningContainer
+    Color::from_uint32(0xFF261900), // OnWarningContainer
+];
+const STATUS_DARK: [Color; 8] = [
+    Color::from_uint32(0xFF95D68F), // Success
+    Color::from_uint32(0xFF00390A), // OnSuccess
+    Color::from_uint32(0xFF145219), // SuccessContainer
+    Color::from_uint32(0xFFB1F2A9), // OnSuccessContainer
+    Color::from_uint32(0xFFF6BE3B), // Warning
+    Color::from_uint32(0xFF402D00), // OnWarning
+    Color::from_uint32(0xFF5C4200), // WarningContainer
+    Color::from_uint32(0xFFFFDEA6), // OnWarningContainer
+];
+
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct MaterialColorScheme {
     colors: [Color; 48],
@@ -284,6 +343,12 @@ impl MaterialColorScheme {
         scheme.colors[MaterialColorRole::OnErrorContainer as usize] = Color::from_uint32(0xFF8C1D18);
         scheme
     }
+    /// A status color: of the light palette for a light surface, of the dark one for a dark surface.
+    pub fn status_color(&self, status: MaterialStatusColor) -> Color {
+        let surface = self.color(MaterialColorRole::Surface);
+        let luminance = 299 * surface.r as u32 + 587 * surface.g as u32 + 114 * surface.b as u32;
+        if luminance < 127_500 { STATUS_DARK[status as usize] } else { STATUS_LIGHT[status as usize] }
+    }
     /// A fresh dictionary permits atomic replacement: no frame observes half a palette.
     pub fn resources(&self) -> Ref<ResourceDictionary> {
         let dictionary = ResourceDictionary::new();
@@ -307,11 +372,19 @@ impl MaterialColorScheme {
             ("MaterialTextFieldDisabledContainerBrush", MaterialColorRole::OnSurface, 0.04),
             ("MaterialModalScrimBrush", MaterialColorRole::Scrim, 0.32),
         ] { self.add_brush(&dictionary, key, role, opacity); }
+        for status in MaterialStatusColor::ALL {
+            dictionary.set(format!("Material{}Color", status.name()), into_markup_value(self.status_color(status)));
+            self.add_status_brush(&dictionary, &format!("Material{}Brush", status.name()), status, 1.0);
+        }
         install_compatibility(self, &dictionary);
         dictionary
     }
     fn add_brush(&self, dictionary: &Ref<ResourceDictionary>, key: &str, role: MaterialColorRole, opacity: f64) {
         let brush: Rc<dyn IBrush> = Rc::new(ImmutableSolidColorBrush::with_opacity(self.color(role), opacity));
+        dictionary.set(key, into_markup_value(brush));
+    }
+    fn add_status_brush(&self, dictionary: &Ref<ResourceDictionary>, key: &str, status: MaterialStatusColor, opacity: f64) {
+        let brush: Rc<dyn IBrush> = Rc::new(ImmutableSolidColorBrush::with_opacity(self.status_color(status), opacity));
         dictionary.set(key, into_markup_value(brush));
     }
 }
@@ -1002,21 +1075,21 @@ fn install_compatibility(scheme: &MaterialColorScheme, dictionary: &Ref<Resource
     scheme.add_brush(dictionary, "HyperlinkPointerOverForegroundThemeBrush", MaterialColorRole::OnSurface, 1.0);
     scheme.add_brush(dictionary, "HyperlinkPressedForegroundThemeBrush", MaterialColorRole::OnSurface, 1.0);
     scheme.add_brush(dictionary, "InfoBarBorderBrush", MaterialColorRole::Outline, 1.0);
-    scheme.add_brush(dictionary, "InfoBarErrorSeverityBackgroundBrush", MaterialColorRole::Surface, 1.0);
-    scheme.add_brush(dictionary, "InfoBarErrorSeverityIconBackground", MaterialColorRole::Primary, 1.0);
-    scheme.add_brush(dictionary, "InfoBarErrorSeverityIconForeground", MaterialColorRole::Primary, 1.0);
+    scheme.add_brush(dictionary, "InfoBarErrorSeverityBackgroundBrush", MaterialColorRole::ErrorContainer, 1.0);
+    scheme.add_brush(dictionary, "InfoBarErrorSeverityIconBackground", MaterialColorRole::Error, 1.0);
+    scheme.add_brush(dictionary, "InfoBarErrorSeverityIconForeground", MaterialColorRole::OnError, 1.0);
     scheme.add_brush(dictionary, "InfoBarHyperlinkButtonForeground", MaterialColorRole::OnSurfaceVariant, 1.0);
-    scheme.add_brush(dictionary, "InfoBarInformationalSeverityBackgroundBrush", MaterialColorRole::Surface, 1.0);
+    scheme.add_brush(dictionary, "InfoBarInformationalSeverityBackgroundBrush", MaterialColorRole::SurfaceContainer, 1.0);
     scheme.add_brush(dictionary, "InfoBarInformationalSeverityIconBackground", MaterialColorRole::Primary, 1.0);
-    scheme.add_brush(dictionary, "InfoBarInformationalSeverityIconForeground", MaterialColorRole::Primary, 1.0);
+    scheme.add_brush(dictionary, "InfoBarInformationalSeverityIconForeground", MaterialColorRole::OnPrimary, 1.0);
     scheme.add_brush(dictionary, "InfoBarMessageForeground", MaterialColorRole::OnSurface, 1.0);
-    scheme.add_brush(dictionary, "InfoBarSuccessSeverityBackgroundBrush", MaterialColorRole::Surface, 1.0);
-    scheme.add_brush(dictionary, "InfoBarSuccessSeverityIconBackground", MaterialColorRole::Primary, 1.0);
-    scheme.add_brush(dictionary, "InfoBarSuccessSeverityIconForeground", MaterialColorRole::Primary, 1.0);
+    scheme.add_status_brush(dictionary, "InfoBarSuccessSeverityBackgroundBrush", MaterialStatusColor::SuccessContainer, 1.0);
+    scheme.add_status_brush(dictionary, "InfoBarSuccessSeverityIconBackground", MaterialStatusColor::Success, 1.0);
+    scheme.add_status_brush(dictionary, "InfoBarSuccessSeverityIconForeground", MaterialStatusColor::OnSuccess, 1.0);
     scheme.add_brush(dictionary, "InfoBarTitleForeground", MaterialColorRole::OnSurface, 1.0);
-    scheme.add_brush(dictionary, "InfoBarWarningSeverityBackgroundBrush", MaterialColorRole::Surface, 1.0);
-    scheme.add_brush(dictionary, "InfoBarWarningSeverityIconBackground", MaterialColorRole::Primary, 1.0);
-    scheme.add_brush(dictionary, "InfoBarWarningSeverityIconForeground", MaterialColorRole::Primary, 1.0);
+    scheme.add_status_brush(dictionary, "InfoBarWarningSeverityBackgroundBrush", MaterialStatusColor::WarningContainer, 1.0);
+    scheme.add_status_brush(dictionary, "InfoBarWarningSeverityIconBackground", MaterialStatusColor::Warning, 1.0);
+    scheme.add_status_brush(dictionary, "InfoBarWarningSeverityIconForeground", MaterialStatusColor::OnWarning, 1.0);
     scheme.add_brush(dictionary, "JumpListDefaultDisabledBackground", MaterialColorRole::OnSurface, 0.1);
     scheme.add_brush(dictionary, "JumpListDefaultDisabledForeground", MaterialColorRole::OnSurfaceVariant, 0.38);
     scheme.add_brush(dictionary, "JumpListDefaultEnabledBackground", MaterialColorRole::Primary, 1.0);
@@ -1775,10 +1848,10 @@ fn install_compatibility(scheme: &MaterialColorScheme, dictionary: &Ref<Resource
     { let c = scheme.color(MaterialColorRole::Surface); dictionary.set("SystemFillColorAttentionBackground", into_markup_value(Color::from_argb((c.a as f64 * 1.0).round() as u8, c.r, c.g, c.b))); }
     scheme.add_brush(dictionary, "SystemFillColorAttentionBackgroundBrush", MaterialColorRole::Surface, 1.0);
     scheme.add_brush(dictionary, "SystemFillColorAttentionBrush", MaterialColorRole::Primary, 1.0);
-    { let c = scheme.color(MaterialColorRole::Tertiary); dictionary.set("SystemFillColorCaution", into_markup_value(Color::from_argb((c.a as f64 * 1.0).round() as u8, c.r, c.g, c.b))); }
-    { let c = scheme.color(MaterialColorRole::TertiaryContainer); dictionary.set("SystemFillColorCautionBackground", into_markup_value(Color::from_argb((c.a as f64 * 1.0).round() as u8, c.r, c.g, c.b))); }
-    scheme.add_brush(dictionary, "SystemFillColorCautionBackgroundBrush", MaterialColorRole::TertiaryContainer, 1.0);
-    scheme.add_brush(dictionary, "SystemFillColorCautionBrush", MaterialColorRole::Tertiary, 1.0);
+    { let c = scheme.status_color(MaterialStatusColor::Warning); dictionary.set("SystemFillColorCaution", into_markup_value(Color::from_argb((c.a as f64 * 1.0).round() as u8, c.r, c.g, c.b))); }
+    { let c = scheme.status_color(MaterialStatusColor::WarningContainer); dictionary.set("SystemFillColorCautionBackground", into_markup_value(Color::from_argb((c.a as f64 * 1.0).round() as u8, c.r, c.g, c.b))); }
+    scheme.add_status_brush(dictionary, "SystemFillColorCautionBackgroundBrush", MaterialStatusColor::WarningContainer, 1.0);
+    scheme.add_status_brush(dictionary, "SystemFillColorCautionBrush", MaterialStatusColor::Warning, 1.0);
     { let c = scheme.color(MaterialColorRole::Error); dictionary.set("SystemFillColorCritical", into_markup_value(Color::from_argb((c.a as f64 * 1.0).round() as u8, c.r, c.g, c.b))); }
     { let c = scheme.color(MaterialColorRole::ErrorContainer); dictionary.set("SystemFillColorCriticalBackground", into_markup_value(Color::from_argb((c.a as f64 * 1.0).round() as u8, c.r, c.g, c.b))); }
     scheme.add_brush(dictionary, "SystemFillColorCriticalBackgroundBrush", MaterialColorRole::ErrorContainer, 1.0);
@@ -1793,10 +1866,10 @@ fn install_compatibility(scheme: &MaterialColorScheme, dictionary: &Ref<Resource
     { let c = scheme.color(MaterialColorRole::Surface); dictionary.set("SystemFillColorSolidNeutralBackground", into_markup_value(Color::from_argb((c.a as f64 * 1.0).round() as u8, c.r, c.g, c.b))); }
     scheme.add_brush(dictionary, "SystemFillColorSolidNeutralBackgroundBrush", MaterialColorRole::Surface, 1.0);
     scheme.add_brush(dictionary, "SystemFillColorSolidNeutralBrush", MaterialColorRole::Outline, 1.0);
-    { let c = scheme.color(MaterialColorRole::Secondary); dictionary.set("SystemFillColorSuccess", into_markup_value(Color::from_argb((c.a as f64 * 1.0).round() as u8, c.r, c.g, c.b))); }
-    { let c = scheme.color(MaterialColorRole::SecondaryContainer); dictionary.set("SystemFillColorSuccessBackground", into_markup_value(Color::from_argb((c.a as f64 * 1.0).round() as u8, c.r, c.g, c.b))); }
-    scheme.add_brush(dictionary, "SystemFillColorSuccessBackgroundBrush", MaterialColorRole::SecondaryContainer, 1.0);
-    scheme.add_brush(dictionary, "SystemFillColorSuccessBrush", MaterialColorRole::Secondary, 1.0);
+    { let c = scheme.status_color(MaterialStatusColor::Success); dictionary.set("SystemFillColorSuccess", into_markup_value(Color::from_argb((c.a as f64 * 1.0).round() as u8, c.r, c.g, c.b))); }
+    { let c = scheme.status_color(MaterialStatusColor::SuccessContainer); dictionary.set("SystemFillColorSuccessBackground", into_markup_value(Color::from_argb((c.a as f64 * 1.0).round() as u8, c.r, c.g, c.b))); }
+    scheme.add_status_brush(dictionary, "SystemFillColorSuccessBackgroundBrush", MaterialStatusColor::SuccessContainer, 1.0);
+    scheme.add_status_brush(dictionary, "SystemFillColorSuccessBrush", MaterialStatusColor::Success, 1.0);
     { let c = scheme.color(MaterialColorRole::OnSurfaceVariant); dictionary.set("SystemListLowColor", into_markup_value(Color::from_argb((c.a as f64 * 1.0).round() as u8, c.r, c.g, c.b))); }
     { let c = scheme.color(MaterialColorRole::OnSurfaceVariant); dictionary.set("SystemListMediumColor", into_markup_value(Color::from_argb((c.a as f64 * 1.0).round() as u8, c.r, c.g, c.b))); }
     scheme.add_brush(dictionary, "TabViewBackground", MaterialColorRole::Surface, 1.0);

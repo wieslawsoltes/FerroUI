@@ -3421,17 +3421,17 @@
   },
   "InfoBarErrorSeverityBackgroundBrush": {
     "kind": "Brush",
-    "role": "Surface",
+    "role": "ErrorContainer",
     "opacity": 1
   },
   "InfoBarErrorSeverityIconBackground": {
     "kind": "Brush",
-    "role": "Primary",
+    "role": "Error",
     "opacity": 1
   },
   "InfoBarErrorSeverityIconForeground": {
     "kind": "Brush",
-    "role": "Primary",
+    "role": "OnError",
     "opacity": 1
   },
   "InfoBarHyperlinkButtonForeground": {
@@ -3441,7 +3441,7 @@
   },
   "InfoBarInformationalSeverityBackgroundBrush": {
     "kind": "Brush",
-    "role": "Surface",
+    "role": "SurfaceContainer",
     "opacity": 1
   },
   "InfoBarInformationalSeverityIconBackground": {
@@ -3451,7 +3451,7 @@
   },
   "InfoBarInformationalSeverityIconForeground": {
     "kind": "Brush",
-    "role": "Primary",
+    "role": "OnPrimary",
     "opacity": 1
   },
   "InfoBarMessageForeground": {
@@ -3461,17 +3461,17 @@
   },
   "InfoBarSuccessSeverityBackgroundBrush": {
     "kind": "Brush",
-    "role": "Surface",
+    "status": "SuccessContainer",
     "opacity": 1
   },
   "InfoBarSuccessSeverityIconBackground": {
     "kind": "Brush",
-    "role": "Primary",
+    "status": "Success",
     "opacity": 1
   },
   "InfoBarSuccessSeverityIconForeground": {
     "kind": "Brush",
-    "role": "Primary",
+    "status": "OnSuccess",
     "opacity": 1
   },
   "InfoBarTitleForeground": {
@@ -3481,17 +3481,17 @@
   },
   "InfoBarWarningSeverityBackgroundBrush": {
     "kind": "Brush",
-    "role": "Surface",
+    "status": "WarningContainer",
     "opacity": 1
   },
   "InfoBarWarningSeverityIconBackground": {
     "kind": "Brush",
-    "role": "Primary",
+    "status": "Warning",
     "opacity": 1
   },
   "InfoBarWarningSeverityIconForeground": {
     "kind": "Brush",
-    "role": "Primary",
+    "status": "OnWarning",
     "opacity": 1
   },
   "JumpListDefaultDisabledBackground": {
@@ -7286,22 +7286,22 @@
   },
   "SystemFillColorCaution": {
     "kind": "Color",
-    "role": "Tertiary",
+    "status": "Warning",
     "opacity": 1
   },
   "SystemFillColorCautionBackground": {
     "kind": "Color",
-    "role": "TertiaryContainer",
+    "status": "WarningContainer",
     "opacity": 1
   },
   "SystemFillColorCautionBackgroundBrush": {
     "kind": "Brush",
-    "role": "TertiaryContainer",
+    "status": "WarningContainer",
     "opacity": 1
   },
   "SystemFillColorCautionBrush": {
     "kind": "Brush",
-    "role": "Tertiary",
+    "status": "Warning",
     "opacity": 1
   },
   "SystemFillColorCritical": {
@@ -7376,22 +7376,22 @@
   },
   "SystemFillColorSuccess": {
     "kind": "Color",
-    "role": "Secondary",
+    "status": "Success",
     "opacity": 1
   },
   "SystemFillColorSuccessBackground": {
     "kind": "Color",
-    "role": "SecondaryContainer",
+    "status": "SuccessContainer",
     "opacity": 1
   },
   "SystemFillColorSuccessBackgroundBrush": {
     "kind": "Brush",
-    "role": "SecondaryContainer",
+    "status": "SuccessContainer",
     "opacity": 1
   },
   "SystemFillColorSuccessBrush": {
     "kind": "Brush",
-    "role": "Secondary",
+    "status": "Success",
     "opacity": 1
   },
   "SystemListLowColor": {
