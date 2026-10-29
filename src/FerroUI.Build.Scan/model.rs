@@ -640,6 +640,11 @@ pub struct GenericModel {
 }
 
 /// A type of a crate (`TypeModel`).
+///
+/// A `TypeModel` is built only through [`TypeModel::new`] (then its fields are
+/// set, or the struct update syntax is used): its fields grow with the export
+/// format of the scanner, and an added field is not a breaking change of the
+/// API (docs/release.md, "API stability").
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct TypeModel {
     /// The dotted namespace: the explicit one, else the one the namespace table of the

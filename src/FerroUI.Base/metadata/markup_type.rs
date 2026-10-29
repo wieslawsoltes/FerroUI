@@ -795,6 +795,12 @@ pub struct MarkupGeneric {
 
 /// The markup metadata of a type. Built by the declaration macros as
 /// constant data; see the [module documentation](self).
+///
+/// A `MarkupType` is built only through [`MarkupType::new`] and the struct
+/// update syntax (`MarkupType { events: .., ..MarkupType::new(name, kind, module_path!()) }`):
+/// its fields grow with the compiler metadata of the markup compiler, and an
+/// added field is not a breaking change of the API (docs/release.md, "API
+/// stability").
 #[derive(Clone, Copy)]
 pub struct MarkupType {
     /// The type name, without namespace, as markup spells it.
