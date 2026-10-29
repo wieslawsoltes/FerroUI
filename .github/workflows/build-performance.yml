@@ -31,6 +31,8 @@ on:
 
 permissions:
   contents: read
+  # The labels of the pull request (build-output-changes), read when the run starts.
+  pull-requests: read
 
 concurrency:
   group: build-performance-${{ github.ref }}
@@ -44,7 +46,35 @@ env:
   RUST_BACKTRACE: 1
 
 jobs:
+  # A pull request that changes generated output on purpose says so with the label
+  # `build-output-changes` (docs/build-performance.md, "Intended output changes"). The label is read
+  # from the pull request when the run starts, not from the event, so a run started again after the
+  # label changed (build-output-label.yml) sees it. With it, the comparisons of the outputs of the
+  # baseline and the candidate report the changes instead of failing; every check of the candidate
+  # against itself (determinism, the source and optimized build tools, cache replay and
+  # invalidation) and the timings stay.
+  acknowledgment:
+    name: Acknowledged output changes
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    outputs:
+      accept: ${{ steps.label.outputs.accept }}
+    steps:
+      - name: The label build-output-changes of the pull request
+        id: label
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR: ${{ github.event.pull_request.number }}
+        run: |
+          accept=false
+          if [ -n "$PR" ] && gh pr view "$PR" -R "$GITHUB_REPOSITORY" --json labels -q '.labels[].name' | grep -qx 'build-output-changes'; then
+            accept=true
+            echo "::notice::build-output-changes: the changes of the generated output against the baseline are reported, not failed"
+            printf '## Output changes acknowledged\n\nThe pull request has the label `build-output-changes`: the comparisons with the baseline report the changed outputs in the summaries of the jobs.\n' >> "$GITHUB_STEP_SUMMARY"
+          fi
+          echo "accept=$accept" >> "$GITHUB_OUTPUT"
   catalog-freshness:
+    needs: acknowledgment
     name: Catalog first repeat and generated asset bytes
     runs-on: ubuntu-latest
     timeout-minutes: 60
@@ -73,6 +103,7 @@ jobs:
           python3 candidate/scripts/build-perf/catalog-freshness.py
           --baseline baseline --candidate candidate --output results/catalog-freshness
           --repetitions 3 --jobs 4
+          ${{ needs.acknowledgment.outputs.accept == 'true' && '--accept-output-changes' || '' }}
       - name: Publish first-repeat timings, generated content and input controls
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
@@ -82,6 +113,7 @@ jobs:
           if-no-files-found: error
 
   sample-freshness:
+    needs: acknowledgment
     name: Cargo sample freshness and input invalidation
     runs-on: ubuntu-latest
     timeout-minutes: 40
@@ -102,6 +134,7 @@ jobs:
           python3 candidate/scripts/build-perf/sample-freshness.py
           --baseline baseline --candidate candidate --output results/sample-freshness
           --repetitions 3 --jobs 4
+          ${{ needs.acknowledgment.outputs.accept == 'true' && '--accept-output-changes' || '' }}
       - name: Publish first-build costs, repeated-build samples and input-change controls
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
@@ -111,6 +144,7 @@ jobs:
           if-no-files-found: error
 
   compiler:
+    needs: acknowledgment
     name: Cold XAML build (${{ matrix.mode }})
     strategy:
       fail-fast: false
@@ -126,7 +160,9 @@ jobs:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
           path: baseline
-          ref: ${{ github.event.pull_request.base.sha || inputs.baseline || 'main' }}
+          # With acknowledged output changes the optimized build tools are compared with the
+          # candidate's own source build (the equivalence of the two modes, strictly); else with main.
+          ref: ${{ (matrix.mode == 'optimized-build-tools' && needs.acknowledgment.outputs.accept == 'true') && (github.event.pull_request.head.sha || github.sha) || (github.event.pull_request.base.sha || inputs.baseline || 'main') }}
       - uses: dtolnay/rust-toolchain@89b12181fb390509a0842a86cc55eeb8eb928c1d # stable action
         with:
           toolchain: '1.99.1'
@@ -136,9 +172,12 @@ jobs:
         env:
           REPETITIONS: ${{ inputs.repetitions || '3' }}
           MODE: ${{ matrix.mode }}
+          ACCEPT: ${{ needs.acknowledgment.outputs.accept }}
         run: |
           OPTIONS=()
           if [ "$MODE" = optimized-build-tools ]; then OPTIONS+=(--candidate-build-tools); fi
+          # The source mode compares with main; the optimized mode then compares with the candidate.
+          if [ "$ACCEPT" = true ] && [ "$MODE" = source ]; then OPTIONS+=(--accept-output-changes); fi
           python3 candidate/scripts/build-perf/compare.py \
             --baseline baseline --candidate candidate --output results/compile \
             --package ferroui-themes-winui --repetitions "$REPETITIONS" --jobs 4 "${OPTIONS[@]}"
@@ -175,6 +214,7 @@ jobs:
           path: target/cargo-timings
 
   scanner:
+    needs: acknowledgment
     name: Scanner speed and exact semantic output (${{ matrix.mode }})
     strategy:
       fail-fast: false
@@ -190,16 +230,20 @@ jobs:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
           path: baseline
-          ref: ${{ github.event.pull_request.base.sha || inputs.baseline || 'main' }}
+          # With acknowledged output changes the optimized build tools are compared with the
+          # candidate's own source build (the equivalence of the two modes, strictly); else with main.
+          ref: ${{ (matrix.mode == 'optimized-build-tools' && needs.acknowledgment.outputs.accept == 'true') && (github.event.pull_request.head.sha || github.sha) || (github.event.pull_request.base.sha || inputs.baseline || 'main') }}
       - uses: dtolnay/rust-toolchain@89b12181fb390509a0842a86cc55eeb8eb928c1d # stable action
         with:
           toolchain: '1.99.1'
       - name: Compare models, diagnostics, inputs, functions and statistics over five scans
         env:
           MODE: ${{ matrix.mode }}
+          ACCEPT: ${{ needs.acknowledgment.outputs.accept }}
         run: |
           OPTIONS=()
           if [ "$MODE" = optimized-build-tools ]; then OPTIONS+=(--candidate-build-tools); fi
+          if [ "$ACCEPT" = true ] && [ "$MODE" = source ]; then OPTIONS+=(--accept-output-changes); fi
           python3 candidate/scripts/build-perf/scanner.py \
             --baseline baseline --candidate candidate --output results/scanner --repetitions 5 "${OPTIONS[@]}"
       - name: Publish scanner evidence
