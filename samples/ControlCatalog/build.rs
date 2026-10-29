@@ -144,6 +144,10 @@ fn remove_stale(directory: &Path, keep: &BTreeSet<PathBuf>) {
 /// only.
 const CLASSIC_THEMES_DOCUMENT: &str = "/ClassicThemes.xaml";
 
+/// The directory of the control themes of the NavigationView shell for the Simple and Fluent
+/// themes (`ClassicThemes.xaml` includes them), compiled with the feature `classic-themes` only.
+const CLASSIC_SHELL_DIRECTORY: &str = "/ClassicShell/";
+
 /// Files that are assets whatever their directory.
 const ASSET_FILES: &[&str] = &["Pages/teapot.bin"];
 
@@ -391,9 +395,9 @@ fn main() {
     assets.sort();
     // The dictionary of the themes of the original names their types: without the feature
     // `classic-themes` the crate does not depend on them, and the document is neither compiled
-    // nor embedded (docs/binary-size.md).
+    // nor embedded (docs/binary-size.md), nor are the shell documents it includes (ClassicShell/).
     if env::var_os("CARGO_FEATURE_CLASSIC_THEMES").is_none() {
-        assets.retain(|(path, _)| path != CLASSIC_THEMES_DOCUMENT);
+        assets.retain(|(path, _)| path != CLASSIC_THEMES_DOCUMENT && !path.starts_with(CLASSIC_SHELL_DIRECTORY));
     }
 
     let substituted_documents = if env::var_os("CARGO_FEATURE_PLACEHOLDER_BRANDING").is_some() {

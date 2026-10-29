@@ -182,6 +182,8 @@ REPLACED_DOCUMENTS = [
 # The markup files of the catalog that are the port's own: (path relative to the sample, why).
 PORT_DOCUMENTS = [
     ("ClassicThemes.xaml", "the Fluent and Simple themes of the original, with the feature classic-themes only"),
+    ("ClassicShell/Fluent.xaml", "the control themes of the NavigationView shell and its Frame for the Fluent theme, which has none (docs/porting/winui-controls.md, \"The ControlCatalog shell\")"),
+    ("ClassicShell/Simple.xaml", "the control themes of the NavigationView shell and its Frame for the Simple theme, which has none (docs/porting/winui-controls.md, \"The ControlCatalog shell\")"),
     ("Pages/TreeDataGridPage.xaml", "the page of the TreeDataGrid demo of the port"),
     ("Pages/InkingPage.xaml", "the page of the inking controls of the port"),
     ("Pages/InfoBadgePage.xaml", "the page of WinUI's InfoBadge (docs/porting/winui-controls.md)"),
