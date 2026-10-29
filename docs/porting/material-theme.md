@@ -119,6 +119,22 @@ are notified without reconstructing controls. The old resource names remain
 available for inherited templates and application styles; their explicit role
 mapping lives in `scripts/material-theme/compatibility-map.json`.
 
+Status colors (a deviation from Material 3, which has error roles but no success
+or warning roles): the theme adds `MaterialSuccess`, `MaterialOnSuccess`,
+`MaterialSuccessContainer`, `MaterialOnSuccessContainer` and the same four for
+`Warning`, as `Material<Name>Color` and `Material<Name>Brush` resources and as
+`MaterialStatusColor` in Rust (`MaterialColorScheme::status_color`). They are
+fixed tonal green and amber palettes at the tones of the Material roles (40, 100,
+90 and 10 in light; 80, 20, 30 and 90 in dark; `STATUS` in
+`scripts/material-theme/generate.py`), chosen by the lightness of the scheme's
+surface, so a seed scheme keeps them. The severities of InfoBar and InfoBadge
+use them: Error the `Error`/`OnError`/`ErrorContainer` roles, Warning and
+Success the status colors, Informational `Primary`/`OnPrimary` on
+`SurfaceContainer`; the severity glyph is drawn in the `On...` color on the
+filled circle, as in WinUI (`InfoBar*SeverityIcon*`, `SystemFillColorSuccess*`,
+`SystemFillColorCaution*` in the compatibility map). A compatibility key maps to
+a status color with `"status"` in place of `"role"`.
+
 ```rust
 use ferroui_base::media::Color;
 use ferroui_base::styling::ThemeVariant;

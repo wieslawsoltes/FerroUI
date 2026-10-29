@@ -82,16 +82,6 @@
       "reason": "RatingControl: no FerroUI control."
     },
     {
-      "document": "controls/dev/InfoBadge/InfoBadge.xaml",
-      "key": "*",
-      "reason": "InfoBadge: no FerroUI control."
-    },
-    {
-      "document": "controls/dev/InfoBadge/InfoBadge_themeresources.xaml",
-      "key": "*",
-      "reason": "InfoBadge: no FerroUI control."
-    },
-    {
       "document": "controls/dev/PersonPicture/PersonPicture.xaml",
       "key": "*",
       "reason": "PersonPicture: no FerroUI control."
@@ -220,16 +210,6 @@
       "document": "dxaml/xcp/dxaml/themes/generic.xaml",
       "key": "RadioButtonsItemStyle",
       "reason": "RadioButtons (the group control): no FerroUI control."
-    },
-    {
-      "document": "controls/dev/ProgressRing/ProgressRing.xaml",
-      "key": "*",
-      "reason": "ProgressRing: no FerroUI control (its animation is an animated visual, a Lottie composition)."
-    },
-    {
-      "document": "controls/dev/ProgressRing/ProgressRing_themeresources.xaml",
-      "key": "*",
-      "reason": "ProgressRing: no FerroUI control (its animation is an animated visual, a Lottie composition)."
     },
     {
       "document": "controls/dev/ImageIcon/ImageIcon.xaml",

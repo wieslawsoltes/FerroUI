@@ -1,0 +1,45 @@
+<ContentPage Theme="{StaticResource ScrollPage}" xmlns="https://github.com/ferroui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             Header="InfoBar"
+             x:Class="ControlCatalog.Pages.InfoBarPage">
+  <!-- Not from upstream: WinUI's InfoBar (docs/porting/winui-controls.md). Its template is in the
+       WinUI theme and the macOS and Material themes derived from it. -->
+  <StackPanel Orientation="Vertical" Spacing="4" MaxWidth="800">
+    <TextBlock Margin="2" Classes="h2" TextWrapping="Wrap">An InfoBar shows an essential app-wide message inline, in the colour and icon of its severity, with an optional action and a close button.</TextBlock>
+
+    <TextBlock Margin="2,12,2,2" FontSize="14" FontWeight="Bold">Severities</TextBlock>
+    <InfoBar Margin="2" IsOpen="True" Severity="Informational" Title="Informational" Message="Essential app message for your users to be informed of, acknowledge, or take action on." />
+    <InfoBar Margin="2" IsOpen="True" Severity="Success" Title="Success" Message="The document was saved." />
+    <InfoBar Margin="2" IsOpen="True" Severity="Warning" Title="Warning" Message="The connection is slow; changes may take a while to sync." />
+    <InfoBar Margin="2" IsOpen="True" Severity="Error" Title="Error" Message="The file could not be opened." />
+
+    <TextBlock Margin="2,12,2,2" FontSize="14" FontWeight="Bold">Options</TextBlock>
+    <Grid Margin="2" ColumnDefinitions="Auto,240" RowDefinitions="Auto,Auto,Auto,Auto,Auto">
+      <TextBlock Grid.Row="0" VerticalAlignment="Center" Margin="2">IsOpen:</TextBlock>
+      <CheckBox Grid.Row="0" Grid.Column="1" IsChecked="{Binding #Configurable.IsOpen}" Margin="2" />
+      <TextBlock Grid.Row="1" VerticalAlignment="Center" Margin="2">IsClosable:</TextBlock>
+      <CheckBox Grid.Row="1" Grid.Column="1" IsChecked="{Binding #Configurable.IsClosable}" Margin="2" />
+      <TextBlock Grid.Row="2" VerticalAlignment="Center" Margin="2">IsIconVisible:</TextBlock>
+      <CheckBox Grid.Row="2" Grid.Column="1" IsChecked="{Binding #Configurable.IsIconVisible}" Margin="2" />
+      <TextBlock Grid.Row="3" VerticalAlignment="Center" Margin="2">Title:</TextBlock>
+      <TextBox Grid.Row="3" Grid.Column="1" Text="{Binding #Configurable.Title}" Margin="2" />
+      <TextBlock Grid.Row="4" VerticalAlignment="Center" Margin="2">Message:</TextBlock>
+      <TextBox Grid.Row="4" Grid.Column="1" Text="{Binding #Configurable.Message}" Margin="2" />
+    </Grid>
+    <InfoBar x:Name="Configurable" Margin="2" IsOpen="True" Severity="Informational"
+             Title="Title" Message="Close it with its button, then open it again with IsOpen.">
+      <InfoBar.ActionButton>
+        <Button Content="Action" />
+      </InfoBar.ActionButton>
+    </InfoBar>
+
+    <TextBlock Margin="2,12,2,2" FontSize="14" FontWeight="Bold">Custom icon and content</TextBlock>
+    <InfoBar Margin="2" IsOpen="True" IsClosable="False" Severity="Informational" Title="Update available"
+             Message="A new version is ready to install.">
+      <InfoBar.IconSource>
+        <SymbolIconSource Symbol="Refresh" />
+      </InfoBar.IconSource>
+      <ProgressBar IsIndeterminate="True" Margin="0,0,0,6" />
+    </InfoBar>
+  </StackPanel>
+</ContentPage>

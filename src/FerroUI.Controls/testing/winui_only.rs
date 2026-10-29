@@ -5,13 +5,16 @@
 //! tests check that they have none; the table of section 5.1 lists the same controls
 //! (`winui_only_tests`).
 
-use crate::{FontIcon, SymbolIcon};
+use crate::{FontIcon, InfoBadge, InfoBar, ProgressRing, SymbolIcon};
 use ferroui_base::TypeInfo;
 
 /// The controls only the WinUI theme and the themes derived from it style, each with the reason.
 pub const WINUI_ONLY_CONTROLS: &[(&TypeInfo, &str)] = &[
     (FontIcon::TYPE, "WinUI's FontIcon: its text part is in the WinUI-derived themes only"),
     (SymbolIcon::TYPE, "WinUI's SymbolIcon: its text part is in the WinUI-derived themes only"),
+    (InfoBar::TYPE, "WinUI's InfoBar: its template is converted from InfoBar.xaml into the WinUI theme and its derived themes"),
+    (InfoBadge::TYPE, "WinUI's InfoBadge: its template is converted from InfoBadge_themeresources.xaml into the WinUI theme and its derived themes"),
+    (ProgressRing::TYPE, "WinUI's ProgressRing: its template (arcs for the Lottie player) is in the WinUI-derived themes only"),
 ];
 
 /// Whether only the WinUI theme and the themes derived from it style `control`.

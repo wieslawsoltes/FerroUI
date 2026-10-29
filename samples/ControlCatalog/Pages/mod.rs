@@ -43,6 +43,8 @@ mod image_page;
 mod ink_canvas_page;
 mod ink_toolbar_page;
 mod icon_element_page;
+mod info_badge_page;
+mod info_bar_page;
 mod labels_page;
 mod layout_transform_control_page;
 mod list_box_page;
@@ -54,6 +56,7 @@ mod navigation_demo_page;
 mod numeric_up_down_page;
 mod open_gl_page;
 mod platform_info_page;
+mod progress_ring_page;
 mod platform_settings_page;
 mod pointer_canvas;
 mod progress_bar_page;
@@ -179,6 +182,9 @@ pub use image_page::ImagePage;
 pub use ink_canvas_page::InkCanvasPage;
 pub use ink_toolbar_page::InkToolbarPage;
 pub use icon_element_page::IconElementPage;
+pub use info_badge_page::InfoBadgePage;
+pub use info_bar_page::InfoBarPage;
+pub use progress_ring_page::ProgressRingPage;
 pub use labels_page::LabelsPage;
 pub use layout_transform_control_page::LayoutTransformControlPage;
 pub use list_box_page::ListBoxPage;
@@ -275,6 +281,9 @@ const ROOT_TYPES: &[&TypeInfo] = &[
     InkCanvasPage::TYPE,
     InkToolbarPage::TYPE,
     IconElementPage::TYPE,
+    InfoBadgePage::TYPE,
+    InfoBarPage::TYPE,
+    ProgressRingPage::TYPE,
     ScrollViewerPage::TYPE,
     PointersPage::TYPE,
     CompositionPage::TYPE,
@@ -363,6 +372,9 @@ const ROOT_CLASSES: &[&XamlClass] = &[
     &InkCanvasPage::XAML_CLASS,
     &InkToolbarPage::XAML_CLASS,
     &IconElementPage::XAML_CLASS,
+    &InfoBadgePage::XAML_CLASS,
+    &InfoBarPage::XAML_CLASS,
+    &ProgressRingPage::XAML_CLASS,
     &ScrollViewerPage::XAML_CLASS,
     &PointersPage::XAML_CLASS,
     &CompositionPage::XAML_CLASS,
