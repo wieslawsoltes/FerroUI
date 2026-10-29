@@ -9,8 +9,8 @@
     <TextBlock Margin="2" Classes="h2" TextWrapping="Wrap">A NavigationView is the top-level navigation of an app: a pane of items on the left, collapsed to icons, or across the top, with the content of the selected item beside it.</TextBlock>
 
     <TextBlock Margin="2,12,2,2" FontSize="14" FontWeight="Bold">Left pane with a Frame: each item navigates, the back button goes back through the journal</TextBlock>
-    <Border Margin="2" Height="320" BorderThickness="1" BorderBrush="{DynamicResource CardStrokeColorDefaultBrush}" CornerRadius="8" ClipToBounds="True">
-      <NavigationView x:Name="LeftNav" PaneDisplayMode="Left" IsSettingsVisible="True" IsBackButtonVisible="Visible" PaneTitle="Mail app">
+    <Border Margin="2" Height="380" BorderThickness="1" BorderBrush="{DynamicResource CardStrokeColorDefaultBrush}" CornerRadius="8" ClipToBounds="True">
+      <NavigationView x:Name="LeftNav" PaneDisplayMode="Left" IsSettingsVisible="True" IsBackButtonVisible="Visible" PaneTitle="Mail app" OpenPaneLength="240">
         <NavigationView.MenuItems>
           <NavigationViewItemHeader Content="Pages" />
           <NavigationViewItem x:Name="LeftNavHome" Content="Home" IsSelected="True">
@@ -45,7 +45,7 @@
     </Border>
 
     <TextBlock Margin="2,12,2,2" FontSize="14" FontWeight="Bold">Top pane</TextBlock>
-    <Border Margin="2" Height="320" BorderThickness="1" BorderBrush="{DynamicResource CardStrokeColorDefaultBrush}" CornerRadius="8" ClipToBounds="True">
+    <Border Margin="2" Height="380" BorderThickness="1" BorderBrush="{DynamicResource CardStrokeColorDefaultBrush}" CornerRadius="8" ClipToBounds="True">
       <NavigationView x:Name="TopNav" PaneDisplayMode="Top" IsSettingsVisible="True" IsBackButtonVisible="Collapsed">
         <NavigationView.MenuItems>
           <NavigationViewItem Content="Home" IsSelected="True">
@@ -83,7 +83,7 @@
     </Border>
 
     <TextBlock Margin="2,12,2,2" FontSize="14" FontWeight="Bold">Compact pane (icons; the menu button opens it)</TextBlock>
-    <Border Margin="2" Height="320" BorderThickness="1" BorderBrush="{DynamicResource CardStrokeColorDefaultBrush}" CornerRadius="8" ClipToBounds="True">
+    <Border Margin="2" Height="380" BorderThickness="1" BorderBrush="{DynamicResource CardStrokeColorDefaultBrush}" CornerRadius="8" ClipToBounds="True">
       <NavigationView x:Name="CompactNav" PaneDisplayMode="LeftCompact" IsSettingsVisible="True" IsBackButtonVisible="Collapsed">
         <NavigationView.MenuItems>
           <NavigationViewItem Content="Home" IsSelected="True">
