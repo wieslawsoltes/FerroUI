@@ -1042,3 +1042,68 @@ fn the_icons_of_the_pane_are_scaled_into_their_boxes() {
         );
     }
 }
+
+/// The title bar of the shell (as WinUI Gallery): shown in the title bar of the window while its
+/// client area extends into it, with the search box and the back and toggle buttons the navigation
+/// view then hides; collapsed when the client area no longer extends into the title bar and in
+/// full screen, where the navigation view shows its own buttons and the search box again.
+#[test]
+fn the_title_bar_follows_the_window_chrome() {
+    use ferroui_controls::platform::IWindowImpl;
+    use ferroui_controls::{NavigationViewBackButtonVisible, WindowState};
+
+    let shell = Shell::start(1400.0, 900.0);
+    let navigation = shell.navigation_view();
+    let title_bar = shell.main_view.title_bar();
+    let extend = |extended: bool| {
+        shell.window_impl.is_client_area_extended_to_decorations.set(extended);
+        if let Some(changed) = shell.window_impl.extend_client_area_to_decorations_changed() {
+            changed(extended);
+        }
+        shell.settle();
+    };
+    let search_in_title_bar = |shell: &Shell| {
+        title_bar.content().is_some_and(|content| content.name().as_deref() == Some("SearchBox"))
+    };
+
+    assert!(!shell.main_view.is_title_bar_active(), "the mock window has its own title bar");
+    assert!(!title_bar.is_visible() && navigation.auto_suggest_box().is_some());
+
+    extend(true);
+    assert!(shell.main_view.is_title_bar_active() && title_bar.is_visible(), "the title bar of the shell is shown");
+    assert!(search_in_title_bar(&shell), "the search box is in the title bar");
+    assert!(navigation.auto_suggest_box().is_none());
+    assert_eq!(NavigationViewBackButtonVisible::Collapsed, navigation.is_back_button_visible());
+    assert!(!navigation.is_pane_toggle_button_visible());
+    assert!(title_bar.is_pane_toggle_button_visible());
+    assert_eq!("FerroUI Control Gallery", title_bar.title());
+
+    // Its toggle button opens and closes the pane, its back button follows the journal.
+    let open = navigation.is_pane_open();
+    let toggle = descendants::<Button>(&title_bar)
+        .into_iter()
+        .find(|button| button.name().as_deref() == Some("PART_PaneToggleButton"))
+        .expect("the toggle button of the title bar");
+    shell.click(&toggle);
+    assert_eq!(!open, navigation.is_pane_open(), "the toggle button of the title bar toggles the pane");
+    assert!(!title_bar.is_back_button_visible(), "nothing to go back to");
+    let item = items(&shell.view_model.home_sections()[0])[0].clone();
+    shell.show(&item);
+    assert!(title_bar.is_back_button_visible(), "the frame can go back");
+
+    // Full screen hides it; leaving full screen shows it again.
+    shell.window.set_window_state(WindowState::FullScreen);
+    shell.settle();
+    assert!(!shell.main_view.is_title_bar_active() && !title_bar.is_visible(), "full screen hides the title bar");
+    assert_eq!(NavigationViewBackButtonVisible::Visible, navigation.is_back_button_visible());
+    shell.window.set_window_state(WindowState::Normal);
+    shell.settle();
+    assert!(shell.main_view.is_title_bar_active(), "the title bar is back after full screen");
+
+    // A title bar of the window's own again: the navigation view has its buttons and the search box.
+    extend(false);
+    assert!(!shell.main_view.is_title_bar_active() && !title_bar.is_visible());
+    assert!(navigation.auto_suggest_box().is_some(), "the search box is back in the pane");
+    assert_eq!(NavigationViewBackButtonVisible::Visible, navigation.is_back_button_visible());
+    assert!(navigation.is_pane_toggle_button_visible());
+}

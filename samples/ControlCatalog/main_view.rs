@@ -20,9 +20,11 @@ use ferroui_controls::primitives::TemplatedControlImpl;
 use ferroui_controls::{
     box_item, unbox_item, Application, AutoSuggestBox, AutoSuggestionBoxTextChangeReason, ContentPage, Control,
     ControlImpl, Frame, FramePage, IconElement, ItemsSource, NavigationPage, NavigationView, NavigationViewDisplayMode,
-    NavigationViewItem, Page,
-    PageImpl, PathIcon, TopLevel,
+    NavigationViewBackButtonVisible, NavigationViewItem, Page, PageImpl, PathIcon, TitleBar, TopLevel, Window,
+    WindowState,
 };
+use ferroui_controls::chrome::TitleBarDecorations;
+use ferroui_base::reactive::IDisposable;
 use mini_mvvm::{delay, start_async};
 use std::cell::{Cell, RefCell};
 use std::rc::Rc;
@@ -51,6 +53,12 @@ pub struct MainView {
     /// the item after the selection, so the section is not opened for it first.
     selecting: Cell<bool>,
     built: Cell<bool>,
+    /// Whether the title bar of the shell is shown (not in upstream, see `MainView.xaml`).
+    title_bar_active: Cell<bool>,
+    /// The title bar decorations of the window before the title bar of the shell hid the title of
+    /// the window, to give them back.
+    saved_title_bar_decorations: Cell<Option<TitleBarDecorations>>,
+    window_subscription: RefCell<Option<Rc<dyn IDisposable>>>,
 }
 
 ferro_class!(MainView: ContentPage);
@@ -97,6 +105,7 @@ impl VisualImpl for MainView {
         }
 
         let top_level = TopLevel::get_top_level(Some(this)).expect("the view is attached to a top level");
+        this.follow_window(&top_level);
 
         let insets = top_level.insets_manager();
         if let Some(insets) = insets {
@@ -145,6 +154,9 @@ impl MainView {
             following: Cell::new(false),
             selecting: Cell::new(false),
             built: Cell::new(false),
+            title_bar_active: Cell::new(false),
+            saved_title_bar_decorations: Cell::new(None),
+            window_subscription: RefCell::new(None),
         }
     }
 
@@ -325,6 +337,37 @@ impl MainView {
                     let _ = this.content_frame().go_back();
                 }
             });
+            // The title bar of the shell, as in WinUI Gallery: its back button goes back as the back
+            // button of the navigation view does, its toggle button opens and closes the pane.
+            let title_bar = self.title_bar();
+            // The icon is the logo of the catalog (the resource AppIcon of App.xaml).
+            if let Some(geometry) = self
+                .try_find_resource(&ferroui_base::controls::ResourceKey::from("AppIcon"), None)
+                .and_then(|value| from_markup_value::<Ref<ferroui_base::media::Geometry>>(&value))
+            {
+                let icon = ferroui_controls::PathIconSource::new();
+                icon.set_data(Some(geometry));
+                icon.set_foreground(Some(Rc::new(ferroui_base::media::immutable::ImmutableSolidColorBrush::new(
+                    ferroui_base::media::Color::from_uint32(0xFF007DF9),
+                )) as Rc<dyn ferroui_base::media::IBrush>));
+                title_bar.set_icon_source(Some(icon.upcast()));
+            }
+            let weak = self.to_ref().downgrade();
+            title_bar.back_requested(move |_| {
+                let Some(this) = weak.upgrade() else { return };
+                if let Some(page) = this.current_navigation_page().filter(|page| page.stack_depth() > 1) {
+                    drop(page.pop_async());
+                } else {
+                    let _ = this.content_frame().go_back();
+                }
+            });
+            let weak = self.to_ref().downgrade();
+            title_bar.pane_toggle_requested(move |_| {
+                if let Some(this) = weak.upgrade() {
+                    let navigation = this.navigation_view();
+                    navigation.set_is_pane_open(!navigation.is_pane_open());
+                }
+            });
             // The search box filters the pages and opens the one chosen.
             let search = self.get_control::<AutoSuggestBox>("SearchBox");
             let weak = self.to_ref().downgrade();
@@ -464,14 +507,103 @@ impl MainView {
     /// The minimal pane leaves the toggle and back buttons over the top left of the content (the shell
     /// shows no header of the navigation view): the frame starts below them.
     fn update_content_margin(&self) {
-        let minimal = self.navigation_view().display_mode() == NavigationViewDisplayMode::Minimal;
+        let minimal = self.navigation_view().display_mode() == NavigationViewDisplayMode::Minimal && !self.title_bar_active.get();
         let top = if minimal { MINIMAL_CONTENT_TOP } else { 0.0 };
         self.content_frame().set_margin(Thickness::new(0.0, top, 0.0, 0.0));
     }
 
     fn update_back_button(&self) {
         let pushed = self.current_navigation_page().is_some_and(|page| page.stack_depth() > 1);
-        self.navigation_view().set_is_back_enabled(pushed || self.content_frame().can_go_back());
+        let can_go_back = pushed || self.content_frame().can_go_back();
+        self.navigation_view().set_is_back_enabled(can_go_back);
+        // WinUI Gallery shows the back button of the title bar while the frame can go back.
+        self.title_bar().set_is_back_button_visible(can_go_back);
+    }
+
+    /// The title bar of the shell.
+    pub fn title_bar(&self) -> Ref<TitleBar> {
+        self.get_control::<TitleBar>("AppTitleBar")
+    }
+
+    /// Whether the title bar of the shell is shown.
+    pub fn is_title_bar_active(&self) -> bool {
+        self.title_bar_active.get()
+    }
+
+    /// Follows the window of the view: whether its client area extends into the title bar, its
+    /// decoration margin and its state decide where the title bar of the shell is.
+    fn follow_window(&self, top_level: &Ref<TopLevel>) {
+        if let Some(subscription) = self.window_subscription.borrow_mut().take() {
+            subscription.dispose();
+        }
+        if let Some(window) = top_level.cast::<Window>() {
+            let weak = self.to_ref().downgrade();
+            let subscription = window.property_changed(move |change| {
+                let property = change.property();
+                if property == Window::is_extended_into_window_decorations_property().as_property()
+                    || property == Window::window_decoration_margin_property().as_property()
+                    || property == Window::window_state_property().as_property()
+                {
+                    if let Some(this) = weak.upgrade() {
+                        this.update_title_bar_mode();
+                    }
+                }
+            });
+            *self.window_subscription.borrow_mut() = Some(subscription);
+        }
+        self.update_title_bar_mode();
+    }
+
+    /// Where the title bar of the shell is (not in upstream): in the title bar of a window whose
+    /// client area extends into it, as WinUI Gallery has it; a plain top row where there is no
+    /// window chrome (mobile and browser hosts); collapsed in a window with a title bar of its own
+    /// and in full screen, where the navigation view shows its own back and toggle buttons and the
+    /// search box is in its pane.
+    pub(crate) fn update_title_bar_mode(&self) {
+        let top_level = TopLevel::get_top_level(Some(self));
+        let window = top_level.as_ref().and_then(|top_level| top_level.cast::<Window>());
+        let active = match &window {
+            Some(window) => window.is_extended_into_window_decorations() && window.window_state() != WindowState::FullScreen,
+            None => top_level.is_some(),
+        };
+        let navigation = self.navigation_view();
+        let title_bar = self.title_bar();
+        let search = self.get_control::<AutoSuggestBox>("SearchBox");
+        let changed = self.title_bar_active.replace(active) != active;
+        if changed || title_bar.is_visible() != active {
+            if active {
+                navigation.set_auto_suggest_box(None);
+                title_bar.set_content(Some(search.upcast::<Control>()));
+                navigation.set_is_back_button_visible(NavigationViewBackButtonVisible::Collapsed);
+                navigation.set_is_pane_toggle_button_visible(false);
+            } else {
+                title_bar.set_content(None);
+                navigation.set_auto_suggest_box(Some(search));
+                navigation.set_is_back_button_visible(NavigationViewBackButtonVisible::Visible);
+                navigation.set_is_pane_toggle_button_visible(true);
+            }
+            title_bar.set_is_visible(active);
+        }
+        // The title of the window is in the title bar of the shell: the decorations the toolkit draws
+        // leave theirs out while it is shown, and get it back after.
+        if let Some(window) = &window {
+            use ferroui_controls::chrome::WindowDrawnDecorations;
+            let decorations = WindowDrawnDecorations::get_title_bar_decorations(window);
+            if active && decorations.contains(TitleBarDecorations::TITLE) {
+                self.saved_title_bar_decorations.set(Some(decorations));
+                WindowDrawnDecorations::set_title_bar_decorations(window, decorations & !TitleBarDecorations::TITLE);
+            } else if !active {
+                if let Some(saved) = self.saved_title_bar_decorations.take() {
+                    WindowDrawnDecorations::set_title_bar_decorations(window, saved);
+                }
+            }
+            // The view takes the decoration margin of the window but its top while the title bar of
+            // the shell is in the title bar of the window, which it then fills.
+            let margin = window.window_decoration_margin();
+            self.set_margin(if active { Thickness::new(margin.left, 0.0, margin.right, margin.bottom) } else { margin });
+            title_bar.set_min_height(if active { margin.top } else { 0.0 });
+        }
+        self.update_content_margin();
     }
 
     fn main_view_loaded(&self) {

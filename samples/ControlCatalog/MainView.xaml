@@ -33,7 +33,22 @@
     </Style>
   </ContentPage.Styles>
 
+  <Grid RowDefinitions="Auto,*">
+  <!-- The title bar of the shell, as in WinUI Gallery: drawn in the title bar of the window while
+       its client area extends into it (desktop), a plain top row where there is no window chrome
+       (mobile, browser), collapsed otherwise; the class moves the search box into it and hides
+       the back and toggle buttons of the navigation view while it is shown. -->
+  <TitleBar x:Name="AppTitleBar"
+            Title="FerroUI Control Gallery"
+            IsPaneToggleButtonVisible="True"
+            IsVisible="False">
+    <TitleBar.Resources>
+      <!-- As WinUI Gallery: the search box stretches up to its maximum width, centred. -->
+      <HorizontalAlignment x:Key="TitleBarContentHorizontalAlignment">Stretch</HorizontalAlignment>
+    </TitleBar.Resources>
+  </TitleBar>
   <NavigationView x:Name="Navigation"
+                  Grid.Row="1"
                   PaneDisplayMode="Auto"
                   CompactModeThresholdWidth="640"
                   ExpandedModeThresholdWidth="1008"
@@ -58,7 +73,7 @@
       </Border>
     </NavigationView.PaneHeader>
     <NavigationView.AutoSuggestBox>
-      <AutoSuggestBox x:Name="SearchBox" PlaceholderText="Search...">
+      <AutoSuggestBox x:Name="SearchBox" PlaceholderText="Search..." MaxWidth="500" VerticalAlignment="Center">
         <AutoSuggestBox.QueryIcon>
           <PathIcon Data="{StaticResource SearchIcon}" />
         </AutoSuggestBox.QueryIcon>
@@ -66,4 +81,5 @@
     </NavigationView.AutoSuggestBox>
     <Frame x:Name="ContentFrame" />
   </NavigationView>
+  </Grid>
 </ContentPage>
