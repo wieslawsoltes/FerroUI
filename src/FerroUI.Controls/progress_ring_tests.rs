@@ -13,7 +13,7 @@ use crate::{Border, Control, Grid, ProgressBar, ProgressRing, Window};
 use ferroui_base::animation::{IClock, PlayState, TimeSpan};
 use ferroui_base::layout::ILayoutManager;
 use ferroui_base::reactive::{Disposable, IDisposable, IObservable, IObserver, LightweightSubject};
-use ferroui_base::{FerroObject, Rect, Ref, Size, StaticType, Thickness};
+use ferroui_base::{FerroObject, Rect, Ref, Size, Thickness};
 use std::cell::Cell;
 use std::rc::Rc;
 

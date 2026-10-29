@@ -198,7 +198,15 @@ fn template_parts_name_classes() {
 /// The types of this crate that declare their markup metadata next to the type rather than in
 /// this module, and are listed in the `TYPES` of `values.rs`: FerroUI additions, and the WinUI
 /// controls (docs/porting/winui-controls.md).
-const DECLARED_NEXT_TO_THE_TYPE: &[&str] = &["TextLayoutRoundingPlacement", "Symbol"];
+const DECLARED_NEXT_TO_THE_TYPE: &[&str] = &[
+    "TextLayoutRoundingPlacement",
+    "Symbol",
+    "InfoBarSeverity",
+    "InfoBarCloseReason",
+    "InfoBarClosingEventArgs",
+    "InfoBarClosedEventArgs",
+    "InfoBarOpenedEventArgs",
+];
 
 #[test]
 fn enumeration_members_are_found_by_name() {
