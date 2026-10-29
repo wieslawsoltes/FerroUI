@@ -63,6 +63,7 @@
              InfoBar uses InfoBarCloseButtonStyle of NotificationCard.xaml. -->
         <MergeResourceInclude Source="ferres://FerroUI.Themes.WinUI/Controls/InfoBar.xaml" />
         <MergeResourceInclude Source="ferres://FerroUI.Themes.WinUI/Controls/InfoBadge.xaml" />
+        <MergeResourceInclude Source="ferres://FerroUI.Themes.WinUI/Controls/TitleBar.xaml" />
         <MergeResourceInclude Source="ferres://FerroUI.Themes.WinUI/Controls/ProgressRing.xaml" />
         <MergeResourceInclude Source="ferres://FerroUI.Themes.WinUI/Controls/WindowNotificationManager.xaml" />
         <MergeResourceInclude Source="ferres://FerroUI.Themes.WinUI/Controls/TableView.xaml" />
@@ -80,6 +81,11 @@
         <MergeResourceInclude Source="ferres://FerroUI.Themes.WinUI/Controls/TabbedPage.xaml" />
         <MergeResourceInclude Source="ferres://FerroUI.Themes.WinUI/Controls/NavigationPage.xaml" />
         <MergeResourceInclude Source="ferres://FerroUI.Themes.WinUI/Controls/DrawerPage.xaml" />
+        <!-- The navigation of WinUI that FerroUI ports as controls (docs/porting/winui-controls.md):
+             Frame, NavigationView and its items; NavigationView uses the styles of DrawerPage.xaml
+             and NavigationPage.xaml. -->
+        <MergeResourceInclude Source="ferres://FerroUI.Themes.WinUI/Controls/Frame.xaml" />
+        <MergeResourceInclude Source="ferres://FerroUI.Themes.WinUI/Controls/NavigationView.xaml" />
         <MergeResourceInclude Source="ferres://FerroUI.Themes.WinUI/Controls/Carousel.xaml" />
         <MergeResourceInclude Source="ferres://FerroUI.Themes.WinUI/Controls/CarouselPage.xaml" />
         <MergeResourceInclude Source="ferres://FerroUI.Themes.WinUI/Controls/CommandBar.xaml" />

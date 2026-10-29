@@ -45,6 +45,7 @@ mod ink_toolbar_page;
 mod icon_element_page;
 mod info_badge_page;
 mod info_bar_page;
+mod navigation_view_page;
 mod auto_suggest_box_page;
 mod number_box_page;
 mod radio_buttons_page;
@@ -189,6 +190,7 @@ pub use icon_element_page::IconElementPage;
 pub use info_badge_page::InfoBadgePage;
 pub use info_bar_page::InfoBarPage;
 pub use progress_ring_page::ProgressRingPage;
+pub use navigation_view_page::NavigationViewPage;
 pub use auto_suggest_box_page::AutoSuggestBoxPage;
 pub use number_box_page::NumberBoxPage;
 pub use radio_buttons_page::RadioButtonsPage;
@@ -292,6 +294,7 @@ const ROOT_TYPES: &[&TypeInfo] = &[
     InfoBadgePage::TYPE,
     InfoBarPage::TYPE,
     ProgressRingPage::TYPE,
+    NavigationViewPage::TYPE,
     AutoSuggestBoxPage::TYPE,
     NumberBoxPage::TYPE,
     RadioButtonsPage::TYPE,
@@ -387,6 +390,7 @@ const ROOT_CLASSES: &[&XamlClass] = &[
     &InfoBadgePage::XAML_CLASS,
     &InfoBarPage::XAML_CLASS,
     &ProgressRingPage::XAML_CLASS,
+    &NavigationViewPage::XAML_CLASS,
     &AutoSuggestBoxPage::XAML_CLASS,
     &NumberBoxPage::XAML_CLASS,
     &RadioButtonsPage::XAML_CLASS,

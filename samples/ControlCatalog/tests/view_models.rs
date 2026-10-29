@@ -84,7 +84,7 @@ fn the_view_model_lists_every_upstream_page_as_available_or_unavailable() {
     let available: usize = view_model.home_sections().iter().map(|s| s.items().map_or(0, |items| items.len())).sum();
     // The upstream list has 74 entries. The native catalog also offers these
     // pages, each exactly once and available through its page factory.
-    let additional_pages = ["TreeDataGrid", "Composition (WinUI)", "InkCanvas", "InkToolbar", "IconElement", "InfoBadge", "InfoBar", "ProgressRing", "NumberBox", "RadioButtons", "RatingControl", "AutoSuggestBox"];
+    let additional_pages = ["TreeDataGrid", "Composition (WinUI)", "InkCanvas", "InkToolbar", "IconElement", "InfoBadge", "InfoBar", "ProgressRing", "NumberBox", "RadioButtons", "RatingControl", "AutoSuggestBox", "NavigationView"];
     assert_eq!(74 + additional_pages.len(), available + view_model.unavailable_pages().len());
     for header in additional_pages {
         let matches: usize = view_model.home_sections().iter().map(|section| {
@@ -167,7 +167,7 @@ fn navigating_to_an_item_replaces_the_page_and_marks_its_section() {
     assert_eq!(1, view_model.navigator().unwrap().stack_depth());
     let section = view_model.home_sections().iter().find(|s| s.title() == item.section()).cloned().unwrap();
     assert!(section.is_current());
-    assert!(section.is_expanded());
+    // The open pane of the shell opens the section too (tests/shell.rs).
     window.close();
 }
 

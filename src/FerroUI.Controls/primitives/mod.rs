@@ -43,12 +43,16 @@ pub use templated_control::{TemplatedControl, TemplatedControlImpl, TemplatedCon
 pub use uniform_grid::UniformGrid;
 // The primitives of WinUI's status controls (docs/porting/winui-controls.md).
 mod info_badge_template_settings;
+mod title_bar_template_settings;
 mod info_bar_panel;
 mod info_bar_template_settings;
+mod navigation_view_template_settings;
 mod progress_ring_template_settings;
 pub use info_badge_template_settings::InfoBadgeTemplateSettings;
+pub use title_bar_template_settings::TitleBarTemplateSettings;
 pub use info_bar_panel::InfoBarPanel;
 pub use info_bar_template_settings::InfoBarTemplateSettings;
+pub use navigation_view_template_settings::NavigationViewTemplateSettings;
 pub use progress_ring_template_settings::ProgressRingTemplateSettings;
 #[cfg(test)]
 mod info_bar_panel_tests;
