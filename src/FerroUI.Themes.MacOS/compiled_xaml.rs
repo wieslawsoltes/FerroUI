@@ -71229,44 +71229,46 @@ fn build_controls_macoscontrols_xaml_deferred_15(
     // Controls/MacOSControls.xaml(32,6) Content
     // Controls/MacOSControls.xaml(32,35) Value
     rt::add_dynamic_resource_setter_with_parent(&context, control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::property(::ferroui_controls::primitives::TemplatedControl::font_family_property()), "SymbolThemeFontFamily");
-    // Controls/MacOSControls.xaml(33,6) Content
-    let setter_1 = rt::new_setter(rt::property(::ferroui_controls::primitives::TemplatedControl::template_property()));
-    // Controls/MacOSControls.xaml(34,8) Value
+    // Controls/MacOSControls.xaml(36,6) Content
+    rt::add_setter(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::property(::ferroui_controls::primitives::TemplatedControl::font_size_property()), rt::to_object(20.0_f64));
+    // Controls/MacOSControls.xaml(37,6) Content
+    let setter_2 = rt::new_setter(rt::property(::ferroui_controls::primitives::TemplatedControl::template_property()));
+    // Controls/MacOSControls.xaml(38,8) Value
     let control_template_0 = ::ferroui_markup_xaml::templates::ControlTemplate::__markup_new_0();
-    // Controls/MacOSControls.xaml(35,10) Content
-    let deferred_0 = rt::defer(rt::class_handle(<::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE), &context, build_controls_macoscontrols_xaml_deferred_16, 35, 10)?;
+    // Controls/MacOSControls.xaml(39,10) Content
+    let deferred_0 = rt::defer(rt::class_handle(<::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE), &context, build_controls_macoscontrols_xaml_deferred_16, 39, 10)?;
     ::ferroui_markup_xaml::templates::ControlTemplate::__markup_set_Content(&control_template_0, rt::to_object(::core::clone::Clone::clone(&deferred_0)));
-    rt::add_setter_value(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_1, rt::to_object(::core::clone::Clone::clone(&control_template_0)));
+    rt::add_setter_value(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_2, rt::to_object(::core::clone::Clone::clone(&control_template_0)));
     context.pop_parent();
     ::core::result::Result::Ok(rt::to_value(control_theme_0.clone()))
 }
 
-/// Builds the deferred content at `Controls/MacOSControls.xaml(35,10)` (a template or a deferred resource).
+/// Builds the deferred content at `Controls/MacOSControls.xaml(39,10)` (a template or a deferred resource).
 fn build_controls_macoscontrols_xaml_deferred_16(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
     let name_scope = context.name_scope_field();
-    // Controls/MacOSControls.xaml(35,10) TextBlock
+    // Controls/MacOSControls.xaml(39,10) TextBlock
     let text_block_0 = ::ferroui_controls::TextBlock::new();
     context.set_intermediate_root_object(rt::to_value(text_block_0.clone()));
     text_block_0.begin_init();
-    // Controls/MacOSControls.xaml(35,20) Name
+    // Controls/MacOSControls.xaml(39,20) Name
     text_block_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_Text")));
-    rt::register_name(name_scope.as_ref(), "PART_Text", ::core::clone::Clone::clone(&text_block_0).upcast::<::ferroui_base::FerroObject>(), 35, 20)?;
-    // Controls/MacOSControls.xaml(35,10) HorizontalAlignment
+    rt::register_name(name_scope.as_ref(), "PART_Text", ::core::clone::Clone::clone(&text_block_0).upcast::<::ferroui_base::FerroObject>(), 39, 20)?;
+    // Controls/MacOSControls.xaml(39,10) HorizontalAlignment
     let priority_0 = ::ferroui_base::data::BindingPriority::Template;
     text_block_0.set_value_with_priority(::ferroui_base::layout::Layoutable::horizontal_alignment_property(), ::ferroui_base::layout::HorizontalAlignment::Stretch, priority_0);
-    // Controls/MacOSControls.xaml(35,10) VerticalAlignment
+    // Controls/MacOSControls.xaml(39,10) VerticalAlignment
     let priority_1 = ::ferroui_base::data::BindingPriority::Template;
     text_block_0.set_value_with_priority(::ferroui_base::layout::Layoutable::vertical_alignment_property(), ::ferroui_base::layout::VerticalAlignment::Center, priority_1);
-    // Controls/MacOSControls.xaml(35,10) TextAlignment
+    // Controls/MacOSControls.xaml(39,10) TextAlignment
     let priority_2 = ::ferroui_base::data::BindingPriority::Template;
     text_block_0.set_value_with_priority(::ferroui_controls::TextBlock::text_alignment_property(), ::ferroui_base::media::TextAlignment::Center, priority_2);
-    // Controls/MacOSControls.xaml(35,10) AccessibilityView
+    // Controls/MacOSControls.xaml(39,10) AccessibilityView
     let priority_3 = ::ferroui_base::data::BindingPriority::Template;
     text_block_0.set_value_with_priority(::ferroui_controls::automation::AutomationProperties::accessibility_view_property(), ::ferroui_controls::automation::AccessibilityView::Raw, priority_3);
-    rt::invoked(text_block_0.try_end_init(), 35, 10)?;
+    rt::invoked(text_block_0.try_end_init(), 39, 10)?;
     ::core::result::Result::Ok(rt::to_value(text_block_0.clone()))
 }
 

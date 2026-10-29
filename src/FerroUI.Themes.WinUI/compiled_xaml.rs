@@ -75723,44 +75723,46 @@ fn build_controls_winuicontrols_xaml_deferred_15(
     // Controls/WinUIControls.xaml(27,6) Content
     // Controls/WinUIControls.xaml(27,35) Value
     rt::add_dynamic_resource_setter_with_parent(&context, control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::property(::ferroui_controls::primitives::TemplatedControl::font_family_property()), "SymbolThemeFontFamily");
-    // Controls/WinUIControls.xaml(28,6) Content
-    let setter_1 = rt::new_setter(rt::property(::ferroui_controls::primitives::TemplatedControl::template_property()));
-    // Controls/WinUIControls.xaml(29,8) Value
+    // Controls/WinUIControls.xaml(31,6) Content
+    rt::add_setter(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::property(::ferroui_controls::primitives::TemplatedControl::font_size_property()), rt::to_object(20.0_f64));
+    // Controls/WinUIControls.xaml(32,6) Content
+    let setter_2 = rt::new_setter(rt::property(::ferroui_controls::primitives::TemplatedControl::template_property()));
+    // Controls/WinUIControls.xaml(33,8) Value
     let control_template_0 = ::ferroui_markup_xaml::templates::ControlTemplate::__markup_new_0();
-    // Controls/WinUIControls.xaml(30,10) Content
-    let deferred_0 = rt::defer(rt::class_handle(<::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE), &context, build_controls_winuicontrols_xaml_deferred_16, 30, 10)?;
+    // Controls/WinUIControls.xaml(34,10) Content
+    let deferred_0 = rt::defer(rt::class_handle(<::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE), &context, build_controls_winuicontrols_xaml_deferred_16, 34, 10)?;
     ::ferroui_markup_xaml::templates::ControlTemplate::__markup_set_Content(&control_template_0, rt::to_object(::core::clone::Clone::clone(&deferred_0)));
-    rt::add_setter_value(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_1, rt::to_object(::core::clone::Clone::clone(&control_template_0)));
+    rt::add_setter_value(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_2, rt::to_object(::core::clone::Clone::clone(&control_template_0)));
     context.pop_parent();
     ::core::result::Result::Ok(rt::to_value(control_theme_0.clone()))
 }
 
-/// Builds the deferred content at `Controls/WinUIControls.xaml(30,10)` (a template or a deferred resource).
+/// Builds the deferred content at `Controls/WinUIControls.xaml(34,10)` (a template or a deferred resource).
 fn build_controls_winuicontrols_xaml_deferred_16(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT);
     let name_scope = context.name_scope_field();
-    // Controls/WinUIControls.xaml(30,10) TextBlock
+    // Controls/WinUIControls.xaml(34,10) TextBlock
     let text_block_0 = ::ferroui_controls::TextBlock::new();
     context.set_intermediate_root_object(rt::to_value(text_block_0.clone()));
     text_block_0.begin_init();
-    // Controls/WinUIControls.xaml(30,20) Name
+    // Controls/WinUIControls.xaml(34,20) Name
     text_block_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_Text")));
-    rt::register_name(name_scope.as_ref(), "PART_Text", ::core::clone::Clone::clone(&text_block_0).upcast::<::ferroui_base::FerroObject>(), 30, 20)?;
-    // Controls/WinUIControls.xaml(30,10) HorizontalAlignment
+    rt::register_name(name_scope.as_ref(), "PART_Text", ::core::clone::Clone::clone(&text_block_0).upcast::<::ferroui_base::FerroObject>(), 34, 20)?;
+    // Controls/WinUIControls.xaml(34,10) HorizontalAlignment
     let priority_0 = ::ferroui_base::data::BindingPriority::Template;
     text_block_0.set_value_with_priority(::ferroui_base::layout::Layoutable::horizontal_alignment_property(), ::ferroui_base::layout::HorizontalAlignment::Stretch, priority_0);
-    // Controls/WinUIControls.xaml(30,10) VerticalAlignment
+    // Controls/WinUIControls.xaml(34,10) VerticalAlignment
     let priority_1 = ::ferroui_base::data::BindingPriority::Template;
     text_block_0.set_value_with_priority(::ferroui_base::layout::Layoutable::vertical_alignment_property(), ::ferroui_base::layout::VerticalAlignment::Center, priority_1);
-    // Controls/WinUIControls.xaml(30,10) TextAlignment
+    // Controls/WinUIControls.xaml(34,10) TextAlignment
     let priority_2 = ::ferroui_base::data::BindingPriority::Template;
     text_block_0.set_value_with_priority(::ferroui_controls::TextBlock::text_alignment_property(), ::ferroui_base::media::TextAlignment::Center, priority_2);
-    // Controls/WinUIControls.xaml(30,10) AccessibilityView
+    // Controls/WinUIControls.xaml(34,10) AccessibilityView
     let priority_3 = ::ferroui_base::data::BindingPriority::Template;
     text_block_0.set_value_with_priority(::ferroui_controls::automation::AutomationProperties::accessibility_view_property(), ::ferroui_controls::automation::AccessibilityView::Raw, priority_3);
-    rt::invoked(text_block_0.try_end_init(), 30, 10)?;
+    rt::invoked(text_block_0.try_end_init(), 34, 10)?;
     ::core::result::Result::Ok(rt::to_value(text_block_0.clone()))
 }
 

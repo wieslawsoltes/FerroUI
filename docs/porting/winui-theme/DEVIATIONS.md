@@ -415,6 +415,7 @@ it. Abbreviations: CS = `controls/dev/CommonStyles/`, GX = `dxaml/xcp/dxaml/them
 |---|---|---|---|---|
 | FI-1 | `dxaml/xcp/core/core/elements/icon.cpp` `CFontIcon::ApplyTemplate` | The control creates a TextBlock in code: stretched horizontally, centred vertically, text centred, accessibility view Raw, the glyph and the text properties of the icon. | The same TextBlock as the template part `PART_Text`; the control gives it the glyph, font family, size, style, weight, foreground and the mirroring transform. | FerroUI's FontIcon is a templated control (IconElement). |
 | FI-2 | `CDependencyProperty::GetDefaultFontIconFontFamily` | The default font family of a font icon is the symbol font of the system. | The control theme sets `FontFamily` to `{DynamicResource SymbolThemeFontFamily}` (`Segoe Fluent Icons,Segoe MDL2 Assets`). | The font is not bundled; an application off Windows replaces the resource (`docs/porting/winui-controls.md`, section 5.2). |
+| FI-3 | `FontIcon.FontSize` (`g_ClientCoreFontSize`, 20) | A property of the font icon, 20 by default, not inherited from the parent. | The control theme sets `FontSize` to 20; the control's default is 20 too, and a local value wins. | FerroUI's `FontSize` of a templated control inherits: without the setter a font icon in a window of 14 px text would be 14. |
 
 ## SymbolIcon
 
